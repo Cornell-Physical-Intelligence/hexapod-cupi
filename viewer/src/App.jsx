@@ -6,11 +6,44 @@ import URDFLoader from 'urdf-loader';
 
 const URDF_PATH = '/hexapod_mkii_mock_assy/urdf/hexapod_mkii_mock_assy.urdf';
 
+// Tripod gait definition. Each leg is (coxa, femur, tibia) joint names from the
+// URDF; `group` 0/1 are the two alternating tripods (R-front, L-mid, R-rear vs
+// L-front, R-mid, L-rear); `sign` mirrors the coxa sweep so both sides propel
+// the same world direction.
+const LEGS = [
+  { name: 'R-front', coxa: 'revolute_1_1', femur: 'revolute_1', tibia: 'revolute_2', group: 0, sign: -1 },
+  { name: 'R-mid', coxa: 'revolute_2_5', femur: 'revolute_1_5', tibia: 'revolute_2_4', group: 1, sign: -1 },
+  { name: 'R-rear', coxa: 'revolute_1_7', femur: 'revolute_1_6', tibia: 'revolute_2_6', group: 0, sign: -1 },
+  { name: 'L-front', coxa: 'revolute_4', femur: 'revolute_1_4', tibia: 'revolute_2_3', group: 1, sign: 1 },
+  { name: 'L-mid', coxa: 'revolute_5', femur: 'revolute_1_2', tibia: 'revolute_2_1', group: 0, sign: 1 },
+  { name: 'L-rear', coxa: 'revolute_3', femur: 'revolute_1_3', tibia: 'revolute_2_2', group: 1, sign: 1 },
+];
+
+// Stance pose and gait amplitudes (rad), within the URDF joint limits.
+const GAIT = { standFemur: 0.7, standTibia: 1.5, coxaSweep: 0.35, femurLift: 0.45, tibiaFold: 0.55 };
+
+// Set all 18 joints for gait phase t (in cycles). Swing = half-cycle with the
+// leg lifted while the coxa recovers; stance = foot down, coxa sweeping back.
+function applyGait(robot, t) {
+  for (const leg of LEGS) {
+    const phi = 2 * Math.PI * (t + (leg.group ? 0.5 : 0));
+    const lift = Math.max(0, Math.sin(phi));
+    robot.setJointValue(leg.coxa, leg.sign * GAIT.coxaSweep * Math.cos(phi));
+    robot.setJointValue(leg.femur, GAIT.standFemur - GAIT.femurLift * lift);
+    robot.setJointValue(leg.tibia, GAIT.standTibia - GAIT.tibiaFold * lift);
+  }
+}
+
 export default function App() {
   const mountRef = useRef(null);
   const robotRef = useRef(null);
   const [joints, setJoints] = useState([]);
   const [error, setError] = useState(null);
+  const [walking, setWalking] = useState(false);
+  const [speed, setSpeed] = useState(1.0);
+  const walkRef = useRef({ walking: false, speed: 1.0, t: 0 });
+  walkRef.current.walking = walking;
+  walkRef.current.speed = speed;
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -82,8 +115,17 @@ export default function App() {
     );
 
     let raf;
+    const clock = new THREE.Clock();
     const animate = () => {
       raf = requestAnimationFrame(animate);
+      const dt = clock.getDelta();
+      const w = walkRef.current;
+      if (w.walking && robotRef.current) {
+        w.t += dt * w.speed; // speed = gait cycles per second
+        applyGait(robotRef.current, w.t);
+        // slight body bob so it reads as weight transfer
+        robotRef.current.position.y = 0.12 + 0.002 * Math.sin(4 * Math.PI * w.t);
+      }
       controls.update();
       renderer.render(scene, camera);
     };
@@ -117,6 +159,38 @@ export default function App() {
         <p style={{ margin: '0 0 12px', color: '#89a' }}>
           {error ? `Load error: ${error}` : `${joints.length} revolute joints`}
         </p>
+        <div style={{ marginBottom: 16, padding: 10, background: '#232733', borderRadius: 6 }}>
+          <button
+            onClick={() => setWalking((w) => !w)}
+            style={{
+              width: '100%',
+              padding: '8px 0',
+              border: 'none',
+              borderRadius: 4,
+              cursor: 'pointer',
+              fontWeight: 600,
+              background: walking ? '#c84b4b' : '#3d7bd9',
+              color: '#fff',
+            }}
+          >
+            {walking ? 'Stop walking' : 'Walk (tripod gait)'}
+          </button>
+          <label style={{ display: 'block', marginTop: 8 }}>
+            <span style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span>speed</span>
+              <span style={{ color: '#89a' }}>{speed.toFixed(1)} Hz</span>
+            </span>
+            <input
+              type="range"
+              min={0.2}
+              max={3}
+              step={0.1}
+              value={speed}
+              onChange={(e) => setSpeed(parseFloat(e.target.value))}
+              style={{ width: '100%' }}
+            />
+          </label>
+        </div>
         {joints.map((j) => (
           <label key={j.name} style={{ display: 'block', marginBottom: 10 }}>
             <span style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -129,8 +203,9 @@ export default function App() {
               max={j.upper}
               step={0.01}
               value={j.value}
+              disabled={walking}
               onChange={(e) => setJoint(j.name, parseFloat(e.target.value))}
-              style={{ width: '100%' }}
+              style={{ width: '100%', opacity: walking ? 0.4 : 1 }}
             />
           </label>
         ))}
