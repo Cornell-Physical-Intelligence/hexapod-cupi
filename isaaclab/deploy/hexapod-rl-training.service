@@ -1,0 +1,17 @@
+[Unit]
+Description=RobStride RS05 hexapod Stage-2 signed joystick-axis training
+After=docker.service network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/orionh/IsaacLab
+ExecStartPre=-/usr/bin/docker rm -f hexapod-rl-training
+ExecStart=/usr/bin/docker compose --env-file docker/.env.base -f docker/docker-compose.yaml --profile base run --rm --name hexapod-rl-training -w /workspace/hexapod/isaaclab -e PYTHONPATH=/workspace/hexapod/isaaclab -e PYTHONDONTWRITEBYTECODE=1 -v /home/orionh/HEXAPOD:/workspace/hexapod:rw --entrypoint /workspace/isaaclab/_isaac_sim/python.sh isaac-lab-base /workspace/hexapod/isaaclab/train_model_only_resume.py --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" --std-min 0.08 --std-max 0.16 --task Isaac-Velocity-Omni-Recovery-Stage2-Hexapod-RobStride-Direct-v0 --external_callback hexapod_rl.register.register_envs --num_envs 4096 --max_iterations 150 --run_name phase2_recovery_stage2_signed_axes_from_stage1_model25_seed57 --seed 57 --resume --load_run seed_from_stage1_model25 --checkpoint model_25_stage1_seed[.]pt$
+ExecStop=-/usr/bin/docker stop -t 30 hexapod-rl-training
+TimeoutStopSec=45
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

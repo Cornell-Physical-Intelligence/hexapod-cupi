@@ -2,3 +2,30 @@ node_modules/
 dist/
 .DS_Store
 *.log
+
+# Generated outputs in isaaclab/logs remain excluded so the Spark's complete
+# checkpoint fleet cannot be committed accidentally.  Artifacts copied into
+# artifacts/ are intentional repository deliverables, including models/video.
+*.pt
+*.mp4
+*.mov
+*.webm
+isaaclab/logs/
+!artifacts/**/*.pt
+!artifacts/**/*.mp4
+!artifacts/**/*.mov
+!artifacts/**/*.webm
+
+# Local Python/tooling caches are reproducible and must not become experiment data.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+
+# Scratch/reference renders and redundant handoff bundles stay outside Git. The
+# source, curated checkpoints, metrics, logs, and videos they package live below.
+tmp/
+HEXAPOD_CHATGPT_PRO_HANDOFF*.zip
+claude_hexapod_handoff_*.tar.gz

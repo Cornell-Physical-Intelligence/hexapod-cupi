@@ -1,0 +1,4126 @@
+{
+  "admission_contract": [
+    {
+      "command": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "label": "stand"
+    },
+    {
+      "command": [
+        0.16,
+        0.0,
+        0.0
+      ],
+      "label": "forward_0p16"
+    },
+    {
+      "command": [
+        0.2,
+        0.0,
+        0.0
+      ],
+      "label": "forward_0p20"
+    },
+    {
+      "command": [
+        0.3,
+        0.0,
+        0.0
+      ],
+      "label": "forward_0p30"
+    }
+  ],
+  "analysis_kind": "stage2c_diagnostic_short_duration_probe_screen",
+  "baseline_checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-25_23-44-14_accel_scale4_yaw160_trackguard_20260825T234500Z_seed86/model_2.pt",
+  "candidate_count": 9,
+  "diagnostic_contract": [
+    {
+      "command": [
+        0.23,
+        0.0,
+        0.0
+      ],
+      "label": "forward_0p23_diagnostic"
+    },
+    {
+      "command": [
+        0.24,
+        0.0,
+        0.0
+      ],
+      "label": "forward_0p24_diagnostic"
+    },
+    {
+      "command": [
+        0.25,
+        0.0,
+        0.0
+      ],
+      "label": "forward_0p25_diagnostic"
+    }
+  ],
+  "evaluations": [
+    {
+      "absolute_stability_safe": false,
+      "admission_results": [
+        {
+          "absolute_stability_rejection_reasons": [],
+          "absolute_stability_safe": true,
+          "command": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "label": "stand",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [],
+            "absolute_stability_targets_met": true,
+            "absolute_stability_threshold_profile": "stand",
+            "achieved_command_frame_velocity": [
+              0.0002694393624551594,
+              4.083009480382316e-05,
+              0.00019086092652287334
+            ],
+            "achieved_planar_speed_mps": 0.00027251544301549585,
+            "base_height_peak_to_peak_m": 7.152557373046875e-07,
+            "base_height_std_m": 0.0,
+            "computed_demand_over_rating_fraction": 0.0,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 0.7109940648078918,
+            "maximum_computed_over_rating_burst_s": 0.0,
+            "maximum_tilt_degrees": 0.05233915522694588,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.1674045946497422,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.0,
+              "roll_pitch_angular_velocity_rms_radps": 0.0008436163625447078,
+              "tilt_rms_degrees": 0.04947028226322598,
+              "vertical_velocity_rms_mps": 0.00036925251021914713
+            },
+            "normalized_stability_composite": 0.012670787783997458,
+            "normalized_tracking_score": 0.0027380359824746847,
+            "peak_abs_computed_nm": 0.7117680907249451,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.00027380359824746847,
+            "rms_applied_nm": 0.44956880807876587,
+            "roll_pitch_angular_velocity_p95_radps": 0.0003334552457090467,
+            "roll_pitch_angular_velocity_rms_radps": 0.00023621258151251823,
+            "samples": 275,
+            "tail_stability_targets_met": true,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": true
+            },
+            "tilt_p95_degrees": 0.04845663905143738,
+            "tilt_rms_degrees": 0.04452325403690338,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 3.8833135477034375e-05,
+            "vertical_velocity_rms_mps": 2.58476757153403e-05,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.0,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_1",
+            "yaw_rate_rmse_radps": 0.00019785315089393407
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.10673 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.16,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p16",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.10673 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.1593686193227768,
+              -0.0030284749809652567,
+              -0.021681057289242744
+            ],
+            "achieved_planar_speed_mps": 0.1593973917150418,
+            "base_height_peak_to_peak_m": 0.007646530866622925,
+            "base_height_std_m": 0.002635135781019926,
+            "computed_demand_over_rating_fraction": 0.04545454680919647,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.0820190906524658,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 0.9159982800483704,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.56193053896551,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.7528959374342645,
+              "roll_pitch_angular_velocity_rms_radps": 0.8121161056416375,
+              "tilt_rms_degrees": 0.6475362512800429,
+              "vertical_velocity_rms_mps": 0.8393886366060801
+            },
+            "normalized_stability_composite": 0.7629842327405063,
+            "normalized_tracking_score": 0.23271096870303154,
+            "peak_abs_computed_nm": 2.6417269706726074,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.023271096870303154,
+            "rms_applied_nm": 0.7786888480186462,
+            "roll_pitch_angular_velocity_p95_radps": 0.3432486951351166,
+            "roll_pitch_angular_velocity_rms_radps": 0.2273925095796585,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 0.8695091605186462,
+            "tilt_rms_degrees": 0.5827826261520386,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.08719570934772491,
+            "vertical_velocity_rms_mps": 0.05875720456242561,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.20000000298023224,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.10673154145479202
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.11134 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.11134 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.19600926339626312,
+              0.0007884457008913159,
+              -0.026477474719285965
+            ],
+            "achieved_planar_speed_mps": 0.19601084914812472,
+            "base_height_peak_to_peak_m": 0.008930578827857971,
+            "base_height_std_m": 0.0030548081267625093,
+            "computed_demand_over_rating_fraction": 0.057575758546590805,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1629067659378052,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.05034339427948,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5858634880449607,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.8728023219321455,
+              "roll_pitch_angular_velocity_rms_radps": 0.8772234831537519,
+              "tilt_rms_degrees": 0.7475871509975857,
+              "vertical_velocity_rms_mps": 0.9547055831977298
+            },
+            "normalized_stability_composite": 0.8630796348203033,
+            "normalized_tracking_score": 0.225886981934309,
+            "peak_abs_computed_nm": 2.4531729221343994,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.0225886981934309,
+            "rms_applied_nm": 0.8244997262954712,
+            "roll_pitch_angular_velocity_p95_radps": 0.4065958559513092,
+            "roll_pitch_angular_velocity_rms_radps": 0.24562257528305054,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.0109467506408691,
+            "tilt_rms_degrees": 0.6728284358978271,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.09542380273342133,
+            "vertical_velocity_rms_mps": 0.0668293908238411,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.23636363446712494,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.11134351789951324
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "roll/pitch-rate RMS 0.32326 rad/s exceeds absolute target 0.28000 rad/s",
+            "tilt RMS 0.90812 deg exceeds absolute target 0.90000 deg",
+            "base-height peak-to-peak 0.01071 m exceeds absolute target 0.01050 m",
+            "roll/pitch-rate p95 0.52532 rad/s exceeds absolute target 0.45000 rad/s",
+            "yaw-rate RMSE 0.13871 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": false,
+              "tilt_rms_degrees": false,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": false,
+            "absolute_stability_target_reasons": [
+              "roll/pitch-rate RMS 0.32326 rad/s exceeds absolute target 0.28000 rad/s",
+              "tilt RMS 0.90812 deg exceeds absolute target 0.90000 deg",
+              "base-height peak-to-peak 0.01071 m exceeds absolute target 0.01050 m",
+              "roll/pitch-rate p95 0.52532 rad/s exceeds absolute target 0.45000 rad/s",
+              "yaw-rate RMSE 0.13871 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.24129724502563477,
+              0.015330666676163673,
+              0.00893004983663559
+            ],
+            "achieved_planar_speed_mps": 0.24178376661326306,
+            "base_height_peak_to_peak_m": 0.010709196329116821,
+            "base_height_std_m": 0.00344023946672678,
+            "computed_demand_over_rating_fraction": 0.08969696611166,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1725108623504639,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.547375202178955,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": false,
+            "normalized_load_score": 0.6546372374866432,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.9829255619219371,
+              "roll_pitch_angular_velocity_rms_radps": 1.1544854513236453,
+              "tilt_rms_degrees": 1.0090272956424289,
+              "vertical_velocity_rms_mps": 0.9879341082913534
+            },
+            "normalized_stability_composite": 1.0335931042948412,
+            "normalized_tracking_score": 0.6993205845355988,
+            "peak_abs_computed_nm": 2.6911845207214355,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.06993205845355988,
+            "rms_applied_nm": 0.8965870141983032,
+            "roll_pitch_angular_velocity_p95_radps": 0.5253158807754517,
+            "roll_pitch_angular_velocity_rms_radps": 0.3232559263706207,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": false,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": false,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.3775150775909424,
+            "tilt_rms_degrees": 0.908124566078186,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.10252587497234344,
+            "vertical_velocity_rms_mps": 0.06915538758039474,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.22181817889213562,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.13871453702449799
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        }
+      ],
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-25_23-44-14_accel_scale4_yaw160_trackguard_20260825T234500Z_seed86/model_2.pt",
+      "diagnostic_results": [],
+      "failed_absolute_stability_command_count": 3,
+      "failed_operational_command_count": 0,
+      "formal_admission_eligible": false,
+      "four_command_contract_safe": false,
+      "input_report_index": 0,
+      "input_result_row_count": 4,
+      "label": "accel_scale4_yaw160_trackguard_20260825T234500Z_seed86/model_2.pt",
+      "maximum_moving_normalized_stability_composite": 1.0335931042948412,
+      "maximum_torque_burst_s": 0.08,
+      "maximum_torque_duty_fraction": 0.08969696611166,
+      "maximum_torque_peak_nm": 2.6911845207214355,
+      "maximum_worst_per_joint_torque_duty_fraction": 0.23636363446712494,
+      "mean_moving_normalized_stability_composite": 0.8865523239518837,
+      "mean_moving_normalized_tracking_score": 0.38597284505764645,
+      "mean_moving_planar_velocity_rmse_mps": 0.03859728450576464,
+      "operational_safe": true,
+      "relative_to_baseline": {
+        "moving_stability_improvement_fraction": 0.0,
+        "moving_tracking_rmse_improvement_fraction": 0.0
+      },
+      "sample_contract_mode": "diagnostic_short_duration",
+      "selected_admission_row_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "selected_diagnostic_row_indices": [],
+      "stand_normalized_stability_composite": 0.012670787783997458,
+      "threshold_diagnostics": {
+        "adjacent_jumps": [
+          {
+            "achieved_vx_gain_per_command_delta": 0.45287981629371654,
+            "command_delta_mps": 0.09999999999999998,
+            "falls_delta": 0,
+            "from_command_vx_mps": 0.2,
+            "largest_normalized_jump": 0.47343360260128975,
+            "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+            "metric_deltas": {
+              "achieved_vx_mps": 0.04528798162937164,
+              "normalized_stability_composite": 0.17051346947453794,
+              "planar_velocity_rmse_mps": 0.047343360260128975,
+              "torque_burst_s": 0.0,
+              "torque_duty_fraction": 0.0321212075650692,
+              "torque_peak_nm": 0.23801159858703613,
+              "worst_per_joint_torque_duty_fraction": -0.014545455574989319
+            },
+            "normalized_metric_deltas": {
+              "achieved_vx_mps": 0.15095993876457214,
+              "normalized_stability_composite": 0.17051346947453794,
+              "planar_velocity_rmse_mps": 0.47343360260128975,
+              "torque_burst_s": 0.0,
+              "torque_duty_fraction": 0.214141383767128,
+              "torque_peak_nm": 0.0540935451334173,
+              "worst_per_joint_torque_duty_fraction": -0.058181822299957275
+            },
+            "timeouts_delta": 0,
+            "to_command_vx_mps": 0.3
+          }
+        ],
+        "complete": false,
+        "largest_adjacent_normalized_jump": {
+          "achieved_vx_gain_per_command_delta": 0.45287981629371654,
+          "command_delta_mps": 0.09999999999999998,
+          "falls_delta": 0,
+          "from_command_vx_mps": 0.2,
+          "largest_normalized_jump": 0.47343360260128975,
+          "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+          "metric_deltas": {
+            "achieved_vx_mps": 0.04528798162937164,
+            "normalized_stability_composite": 0.17051346947453794,
+            "planar_velocity_rmse_mps": 0.047343360260128975,
+            "torque_burst_s": 0.0,
+            "torque_duty_fraction": 0.0321212075650692,
+            "torque_peak_nm": 0.23801159858703613,
+            "worst_per_joint_torque_duty_fraction": -0.014545455574989319
+          },
+          "normalized_metric_deltas": {
+            "achieved_vx_mps": 0.15095993876457214,
+            "normalized_stability_composite": 0.17051346947453794,
+            "planar_velocity_rmse_mps": 0.47343360260128975,
+            "torque_burst_s": 0.0,
+            "torque_duty_fraction": 0.214141383767128,
+            "torque_peak_nm": 0.0540935451334173,
+            "worst_per_joint_torque_duty_fraction": -0.058181822299957275
+          },
+          "timeouts_delta": 0,
+          "to_command_vx_mps": 0.3
+        },
+        "missing_command_vx_mps": [
+          0.23,
+          0.24,
+          0.25
+        ],
+        "points": [
+          {
+            "achieved_vx_mps": 0.19600926339626312,
+            "command_vx_mps": 0.2,
+            "falls": 0,
+            "normalized_stability_composite": 0.8630796348203033,
+            "planar_velocity_rmse_mps": 0.0225886981934309,
+            "timeouts": 0,
+            "torque_burst_s": 0.08,
+            "torque_duty_fraction": 0.057575758546590805,
+            "torque_peak_nm": 2.4531729221343994,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.23636363446712494
+          },
+          {
+            "achieved_vx_mps": 0.24129724502563477,
+            "command_vx_mps": 0.3,
+            "falls": 0,
+            "normalized_stability_composite": 1.0335931042948412,
+            "planar_velocity_rmse_mps": 0.06993205845355988,
+            "timeouts": 0,
+            "torque_burst_s": 0.08,
+            "torque_duty_fraction": 0.08969696611166,
+            "torque_peak_nm": 2.6911845207214355,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.22181817889213562
+          }
+        ],
+        "threshold_boundary_0p23_to_0p24": null
+      },
+      "total_falls": 0,
+      "total_timeouts": 0,
+      "worst_normalized_gate": {
+        "command": "forward_0p30",
+        "metric": "tail_yaw_rate_rmse_radps",
+        "normalized_violation": 0.7339317128062248,
+        "ratio_to_limit": 1.7339317128062248
+      }
+    },
+    {
+      "absolute_stability_safe": false,
+      "admission_results": [
+        {
+          "absolute_stability_rejection_reasons": [],
+          "absolute_stability_safe": true,
+          "command": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "label": "stand",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [],
+            "absolute_stability_targets_met": true,
+            "absolute_stability_threshold_profile": "stand",
+            "achieved_command_frame_velocity": [
+              0.0002694393624551594,
+              4.083009480382316e-05,
+              0.00019086092652287334
+            ],
+            "achieved_planar_speed_mps": 0.00027251544301549585,
+            "base_height_peak_to_peak_m": 7.152557373046875e-07,
+            "base_height_std_m": 0.0,
+            "computed_demand_over_rating_fraction": 0.0,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 0.7109940648078918,
+            "maximum_computed_over_rating_burst_s": 0.0,
+            "maximum_tilt_degrees": 0.05233915522694588,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.1674045946497422,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.0,
+              "roll_pitch_angular_velocity_rms_radps": 0.0008436163625447078,
+              "tilt_rms_degrees": 0.04947028226322598,
+              "vertical_velocity_rms_mps": 0.00036925251021914713
+            },
+            "normalized_stability_composite": 0.012670787783997458,
+            "normalized_tracking_score": 0.0027380359824746847,
+            "peak_abs_computed_nm": 0.7117680907249451,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.00027380359824746847,
+            "rms_applied_nm": 0.44956880807876587,
+            "roll_pitch_angular_velocity_p95_radps": 0.0003334552457090467,
+            "roll_pitch_angular_velocity_rms_radps": 0.00023621258151251823,
+            "samples": 275,
+            "tail_stability_targets_met": true,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": true
+            },
+            "tilt_p95_degrees": 0.04845663905143738,
+            "tilt_rms_degrees": 0.04452325403690338,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 3.8833135477034375e-05,
+            "vertical_velocity_rms_mps": 2.58476757153403e-05,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.0,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_1",
+            "yaw_rate_rmse_radps": 0.00019785315089393407
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.10514 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.16,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p16",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.10514 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.16045108437538147,
+              -0.0033862448763102293,
+              -0.018352186307311058
+            ],
+            "achieved_planar_speed_mps": 0.1604868129523361,
+            "base_height_peak_to_peak_m": 0.007629454135894775,
+            "base_height_std_m": 0.0026379618793725967,
+            "computed_demand_over_rating_fraction": 0.04424242302775383,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.08896005153656,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 0.9257727861404419,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5554811850480446,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.7537033941064561,
+              "roll_pitch_angular_velocity_rms_radps": 0.8067816495895385,
+              "tilt_rms_degrees": 0.6403428316116333,
+              "vertical_velocity_rms_mps": 0.8424884506634303
+            },
+            "normalized_stability_composite": 0.7608290814927645,
+            "normalized_tracking_score": 0.2384084090590477,
+            "peak_abs_computed_nm": 2.541959524154663,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.02384084090590477,
+            "rms_applied_nm": 0.7754839062690735,
+            "roll_pitch_angular_velocity_p95_radps": 0.346630722284317,
+            "roll_pitch_angular_velocity_rms_radps": 0.2258988618850708,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 0.8504643440246582,
+            "tilt_rms_degrees": 0.57630854845047,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.08998828381299973,
+            "vertical_velocity_rms_mps": 0.058974191546440125,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.2181818187236786,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.10514423251152039
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.11091 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.11091 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.19676995277404785,
+              0.0006450022337958217,
+              -0.02578456699848175
+            ],
+            "achieved_planar_speed_mps": 0.19677100991401814,
+            "base_height_peak_to_peak_m": 0.008873671293258667,
+            "base_height_std_m": 0.0030517578125,
+            "computed_demand_over_rating_fraction": 0.05858585983514786,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1532188653945923,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.0842617750167847,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5877621513489005,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.8719308035714286,
+              "roll_pitch_angular_velocity_rms_radps": 0.8789964020252227,
+              "tilt_rms_degrees": 0.7509145471784804,
+              "vertical_velocity_rms_mps": 0.9473337658814021
+            },
+            "normalized_stability_composite": 0.8622938796641335,
+            "normalized_tracking_score": 0.22775156423449516,
+            "peak_abs_computed_nm": 2.4874074459075928,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.022775156423449516,
+            "rms_applied_nm": 0.8243569731712341,
+            "roll_pitch_angular_velocity_p95_radps": 0.40709641575813293,
+            "roll_pitch_angular_velocity_rms_radps": 0.24611899256706238,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.0130351781845093,
+            "tilt_rms_degrees": 0.6758230924606323,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.09500988572835922,
+            "vertical_velocity_rms_mps": 0.06631336361169815,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.2327272742986679,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.11091388761997223
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "roll/pitch-rate RMS 0.33120 rad/s exceeds absolute target 0.28000 rad/s",
+            "tilt RMS 0.91180 deg exceeds absolute target 0.90000 deg",
+            "roll/pitch-rate p95 0.52463 rad/s exceeds absolute target 0.45000 rad/s",
+            "yaw-rate RMSE 0.14357 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": false,
+              "tilt_rms_degrees": false,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": false,
+            "absolute_stability_target_reasons": [
+              "roll/pitch-rate RMS 0.33120 rad/s exceeds absolute target 0.28000 rad/s",
+              "tilt RMS 0.91180 deg exceeds absolute target 0.90000 deg",
+              "roll/pitch-rate p95 0.52463 rad/s exceeds absolute target 0.45000 rad/s",
+              "yaw-rate RMSE 0.14357 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.2415034919977188,
+              0.014950770884752274,
+              0.01323919091373682
+            ],
+            "achieved_planar_speed_mps": 0.24196582857325247,
+            "base_height_peak_to_peak_m": 0.010348215699195862,
+            "base_height_std_m": 0.0033928081393241882,
+            "computed_demand_over_rating_fraction": 0.09171716868877411,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.134798526763916,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.6657741069793701,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": false,
+            "normalized_load_score": 0.6682231910688021,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.9693737540926252,
+              "roll_pitch_angular_velocity_rms_radps": 1.1828687574182237,
+              "tilt_rms_degrees": 1.0131061739391751,
+              "vertical_velocity_rms_mps": 0.9549680565084729
+            },
+            "normalized_stability_composite": 1.0300791854896243,
+            "normalized_tracking_score": 0.6952428817749023,
+            "peak_abs_computed_nm": 2.989562511444092,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.06952428817749023,
+            "rms_applied_nm": 0.9015786647796631,
+            "roll_pitch_angular_velocity_p95_radps": 0.5246286988258362,
+            "roll_pitch_angular_velocity_rms_radps": 0.33120325207710266,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": false,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.38498055934906,
+            "tilt_rms_degrees": 0.9117955565452576,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.10070326924324036,
+            "vertical_velocity_rms_mps": 0.06684776395559311,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.2436363697052002,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.1435670703649521
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        }
+      ],
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_0.pt",
+      "diagnostic_results": [],
+      "failed_absolute_stability_command_count": 3,
+      "failed_operational_command_count": 0,
+      "formal_admission_eligible": false,
+      "four_command_contract_safe": false,
+      "input_report_index": 1,
+      "input_result_row_count": 4,
+      "label": "accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_0.pt",
+      "maximum_moving_normalized_stability_composite": 1.0300791854896243,
+      "maximum_torque_burst_s": 0.08,
+      "maximum_torque_duty_fraction": 0.09171716868877411,
+      "maximum_torque_peak_nm": 2.989562511444092,
+      "maximum_worst_per_joint_torque_duty_fraction": 0.2436363697052002,
+      "mean_moving_normalized_stability_composite": 0.8844007155488408,
+      "mean_moving_normalized_tracking_score": 0.38713428502281505,
+      "mean_moving_planar_velocity_rmse_mps": 0.03871342850228151,
+      "operational_safe": true,
+      "relative_to_baseline": {
+        "moving_stability_improvement_fraction": 0.002426938991544114,
+        "moving_tracking_rmse_improvement_fraction": -0.0030091235174722897
+      },
+      "sample_contract_mode": "diagnostic_short_duration",
+      "selected_admission_row_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "selected_diagnostic_row_indices": [],
+      "stand_normalized_stability_composite": 0.012670787783997458,
+      "threshold_diagnostics": {
+        "adjacent_jumps": [
+          {
+            "achieved_vx_gain_per_command_delta": 0.4473353922367097,
+            "command_delta_mps": 0.09999999999999998,
+            "falls_delta": 0,
+            "from_command_vx_mps": 0.2,
+            "largest_normalized_jump": 0.4674913175404072,
+            "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+            "metric_deltas": {
+              "achieved_vx_mps": 0.04473353922367096,
+              "normalized_stability_composite": 0.16778530582549078,
+              "planar_velocity_rmse_mps": 0.04674913175404072,
+              "torque_burst_s": 0.0,
+              "torque_duty_fraction": 0.03313130885362625,
+              "torque_peak_nm": 0.502155065536499,
+              "worst_per_joint_torque_duty_fraction": 0.010909095406532288
+            },
+            "normalized_metric_deltas": {
+              "achieved_vx_mps": 0.14911179741223654,
+              "normalized_stability_composite": 0.16778530582549078,
+              "planar_velocity_rmse_mps": 0.4674913175404072,
+              "torque_burst_s": 0.0,
+              "torque_duty_fraction": 0.22087539235750836,
+              "torque_peak_nm": 0.11412615125829523,
+              "worst_per_joint_torque_duty_fraction": 0.04363638162612915
+            },
+            "timeouts_delta": 0,
+            "to_command_vx_mps": 0.3
+          }
+        ],
+        "complete": false,
+        "largest_adjacent_normalized_jump": {
+          "achieved_vx_gain_per_command_delta": 0.4473353922367097,
+          "command_delta_mps": 0.09999999999999998,
+          "falls_delta": 0,
+          "from_command_vx_mps": 0.2,
+          "largest_normalized_jump": 0.4674913175404072,
+          "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+          "metric_deltas": {
+            "achieved_vx_mps": 0.04473353922367096,
+            "normalized_stability_composite": 0.16778530582549078,
+            "planar_velocity_rmse_mps": 0.04674913175404072,
+            "torque_burst_s": 0.0,
+            "torque_duty_fraction": 0.03313130885362625,
+            "torque_peak_nm": 0.502155065536499,
+            "worst_per_joint_torque_duty_fraction": 0.010909095406532288
+          },
+          "normalized_metric_deltas": {
+            "achieved_vx_mps": 0.14911179741223654,
+            "normalized_stability_composite": 0.16778530582549078,
+            "planar_velocity_rmse_mps": 0.4674913175404072,
+            "torque_burst_s": 0.0,
+            "torque_duty_fraction": 0.22087539235750836,
+            "torque_peak_nm": 0.11412615125829523,
+            "worst_per_joint_torque_duty_fraction": 0.04363638162612915
+          },
+          "timeouts_delta": 0,
+          "to_command_vx_mps": 0.3
+        },
+        "missing_command_vx_mps": [
+          0.23,
+          0.24,
+          0.25
+        ],
+        "points": [
+          {
+            "achieved_vx_mps": 0.19676995277404785,
+            "command_vx_mps": 0.2,
+            "falls": 0,
+            "normalized_stability_composite": 0.8622938796641335,
+            "planar_velocity_rmse_mps": 0.022775156423449516,
+            "timeouts": 0,
+            "torque_burst_s": 0.08,
+            "torque_duty_fraction": 0.05858585983514786,
+            "torque_peak_nm": 2.4874074459075928,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.2327272742986679
+          },
+          {
+            "achieved_vx_mps": 0.2415034919977188,
+            "command_vx_mps": 0.3,
+            "falls": 0,
+            "normalized_stability_composite": 1.0300791854896243,
+            "planar_velocity_rmse_mps": 0.06952428817749023,
+            "timeouts": 0,
+            "torque_burst_s": 0.08,
+            "torque_duty_fraction": 0.09171716868877411,
+            "torque_peak_nm": 2.989562511444092,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.2436363697052002
+          }
+        ],
+        "threshold_boundary_0p23_to_0p24": null
+      },
+      "total_falls": 0,
+      "total_timeouts": 0,
+      "worst_normalized_gate": {
+        "command": "forward_0p30",
+        "metric": "tail_yaw_rate_rmse_radps",
+        "normalized_violation": 0.7945883795619011,
+        "ratio_to_limit": 1.794588379561901
+      }
+    },
+    {
+      "absolute_stability_safe": false,
+      "admission_results": [
+        {
+          "absolute_stability_rejection_reasons": [],
+          "absolute_stability_safe": true,
+          "command": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "label": "stand",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [],
+            "absolute_stability_targets_met": true,
+            "absolute_stability_threshold_profile": "stand",
+            "achieved_command_frame_velocity": [
+              0.0002694393624551594,
+              4.083009480382316e-05,
+              0.00019086092652287334
+            ],
+            "achieved_planar_speed_mps": 0.00027251544301549585,
+            "base_height_peak_to_peak_m": 7.152557373046875e-07,
+            "base_height_std_m": 0.0,
+            "computed_demand_over_rating_fraction": 0.0,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 0.7109940648078918,
+            "maximum_computed_over_rating_burst_s": 0.0,
+            "maximum_tilt_degrees": 0.05233915522694588,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.1674045946497422,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.0,
+              "roll_pitch_angular_velocity_rms_radps": 0.0008436163625447078,
+              "tilt_rms_degrees": 0.04947028226322598,
+              "vertical_velocity_rms_mps": 0.00036925251021914713
+            },
+            "normalized_stability_composite": 0.012670787783997458,
+            "normalized_tracking_score": 0.0027380359824746847,
+            "peak_abs_computed_nm": 0.7117680907249451,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.00027380359824746847,
+            "rms_applied_nm": 0.44956880807876587,
+            "roll_pitch_angular_velocity_p95_radps": 0.0003334552457090467,
+            "roll_pitch_angular_velocity_rms_radps": 0.00023621258151251823,
+            "samples": 275,
+            "tail_stability_targets_met": true,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": true
+            },
+            "tilt_p95_degrees": 0.04845663905143738,
+            "tilt_rms_degrees": 0.04452325403690338,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 3.8833135477034375e-05,
+            "vertical_velocity_rms_mps": 2.58476757153403e-05,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.0,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_1",
+            "yaw_rate_rmse_radps": 0.00019785315089393407
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.10690 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.16,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p16",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.10690 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.15880055725574493,
+              -0.003225704887881875,
+              -0.019809184595942497
+            ],
+            "achieved_planar_speed_mps": 0.1588333156386242,
+            "base_height_peak_to_peak_m": 0.007628023624420166,
+            "base_height_std_m": 0.0026238018181174994,
+            "computed_demand_over_rating_fraction": 0.04464646428823471,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.0843334197998047,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 0.8983104228973389,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.552972122930087,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.7496576623192855,
+              "roll_pitch_angular_velocity_rms_radps": 0.8231598351682935,
+              "tilt_rms_degrees": 0.6407337718539767,
+              "vertical_velocity_rms_mps": 0.8408845003162111
+            },
+            "normalized_stability_composite": 0.7636089424144418,
+            "normalized_tracking_score": 0.24598434567451477,
+            "peak_abs_computed_nm": 2.5004889965057373,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.024598434567451477,
+            "rms_applied_nm": 0.7757065892219543,
+            "roll_pitch_angular_velocity_p95_radps": 0.3479100465774536,
+            "roll_pitch_angular_velocity_rms_radps": 0.2304847538471222,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 0.8607786297798157,
+            "tilt_rms_degrees": 0.5766603946685791,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.09027222543954849,
+            "vertical_velocity_rms_mps": 0.05886191502213478,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.20000000298023224,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.10690038651227951
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.11143 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.11143 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.19589556753635406,
+              0.0007123356335796416,
+              -0.027175476774573326
+            ],
+            "achieved_planar_speed_mps": 0.195896862666162,
+            "base_height_peak_to_peak_m": 0.008862614631652832,
+            "base_height_std_m": 0.0030389134772121906,
+            "computed_demand_over_rating_fraction": 0.056767676025629044,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.167831301689148,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.0413624048233032,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5890403067556036,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.8682609934891973,
+              "roll_pitch_angular_velocity_rms_radps": 0.8763970541102545,
+              "tilt_rms_degrees": 0.7483224074045817,
+              "vertical_velocity_rms_mps": 0.9521030953952243
+            },
+            "normalized_stability_composite": 0.8612708875998144,
+            "normalized_tracking_score": 0.22829890251159668,
+            "peak_abs_computed_nm": 2.5173115730285645,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.022829890251159668,
+            "rms_applied_nm": 0.8245428204536438,
+            "roll_pitch_angular_velocity_p95_radps": 0.4081766605377197,
+            "roll_pitch_angular_velocity_rms_radps": 0.24539117515087128,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.0147720575332642,
+            "tilt_rms_degrees": 0.6734901666641235,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.0953017845749855,
+            "vertical_velocity_rms_mps": 0.06664721667766571,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.23636363446712494,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_5",
+            "yaw_rate_rmse_radps": 0.11142599582672119
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "roll/pitch-rate RMS 0.32541 rad/s exceeds absolute target 0.28000 rad/s",
+            "tilt RMS 0.91242 deg exceeds absolute target 0.90000 deg",
+            "base-height peak-to-peak 0.01055 m exceeds absolute target 0.01050 m",
+            "roll/pitch-rate p95 0.52838 rad/s exceeds absolute target 0.45000 rad/s",
+            "yaw-rate RMSE 0.14383 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": false,
+              "tilt_rms_degrees": false,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": false,
+            "absolute_stability_target_reasons": [
+              "roll/pitch-rate RMS 0.32541 rad/s exceeds absolute target 0.28000 rad/s",
+              "tilt RMS 0.91242 deg exceeds absolute target 0.90000 deg",
+              "base-height peak-to-peak 0.01055 m exceeds absolute target 0.01050 m",
+              "roll/pitch-rate p95 0.52838 rad/s exceeds absolute target 0.45000 rad/s",
+              "yaw-rate RMSE 0.14383 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.2398129254579544,
+              0.015199689194560051,
+              0.004525453317910433
+            ],
+            "achieved_planar_speed_mps": 0.24029413178085232,
+            "base_height_peak_to_peak_m": 0.010553419589996338,
+            "base_height_std_m": 0.003397745545953512,
+            "computed_demand_over_rating_fraction": 0.09353535622358322,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1385148763656616,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.5652307271957397,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": false,
+            "normalized_load_score": 0.6465140713693259,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.9707844417010034,
+              "roll_pitch_angular_velocity_rms_radps": 1.162192438329969,
+              "tilt_rms_degrees": 1.0137969255447388,
+              "vertical_velocity_rms_mps": 0.968239882162639
+            },
+            "normalized_stability_composite": 1.0287534219345875,
+            "normalized_tracking_score": 0.7113438099622726,
+            "peak_abs_computed_nm": 2.542468547821045,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.07113438099622726,
+            "rms_applied_nm": 0.9004420042037964,
+            "roll_pitch_angular_velocity_p95_radps": 0.528380274772644,
+            "roll_pitch_angular_velocity_rms_radps": 0.32541388273239136,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": false,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": false,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.3822357654571533,
+            "tilt_rms_degrees": 0.9124172329902649,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.10067423433065414,
+            "vertical_velocity_rms_mps": 0.06777679175138474,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.2327272742986679,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.14382968842983246
+          },
+          "operational_rejection_reasons": [
+            "achieved forward velocity 0.2398 m/s is below 0.2400 m/s"
+          ],
+          "operational_safe": false
+        }
+      ],
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_1.pt",
+      "diagnostic_results": [],
+      "failed_absolute_stability_command_count": 3,
+      "failed_operational_command_count": 1,
+      "formal_admission_eligible": false,
+      "four_command_contract_safe": false,
+      "input_report_index": 2,
+      "input_result_row_count": 4,
+      "label": "accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_1.pt",
+      "maximum_moving_normalized_stability_composite": 1.0287534219345875,
+      "maximum_torque_burst_s": 0.08,
+      "maximum_torque_duty_fraction": 0.09353535622358322,
+      "maximum_torque_peak_nm": 2.542468547821045,
+      "maximum_worst_per_joint_torque_duty_fraction": 0.23636363446712494,
+      "mean_moving_normalized_stability_composite": 0.8845444173162812,
+      "mean_moving_normalized_tracking_score": 0.3952090193827947,
+      "mean_moving_planar_velocity_rmse_mps": 0.03952090193827947,
+      "operational_safe": false,
+      "relative_to_baseline": {
+        "moving_stability_improvement_fraction": 0.0022648484261504898,
+        "moving_tracking_rmse_improvement_fraction": -0.02392959619677093
+      },
+      "sample_contract_mode": "diagnostic_short_duration",
+      "selected_admission_row_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "selected_diagnostic_row_indices": [],
+      "stand_normalized_stability_composite": 0.012670787783997458,
+      "threshold_diagnostics": {
+        "adjacent_jumps": [
+          {
+            "achieved_vx_gain_per_command_delta": 0.43917357921600353,
+            "command_delta_mps": 0.09999999999999998,
+            "falls_delta": 0,
+            "from_command_vx_mps": 0.2,
+            "largest_normalized_jump": 0.48304490745067596,
+            "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+            "metric_deltas": {
+              "achieved_vx_mps": 0.04391735792160034,
+              "normalized_stability_composite": 0.16748253433477311,
+              "planar_velocity_rmse_mps": 0.048304490745067596,
+              "torque_burst_s": 0.0,
+              "torque_duty_fraction": 0.03676768019795418,
+              "torque_peak_nm": 0.02515697479248047,
+              "worst_per_joint_torque_duty_fraction": -0.0036363601684570312
+            },
+            "normalized_metric_deltas": {
+              "achieved_vx_mps": 0.14639119307200116,
+              "normalized_stability_composite": 0.16748253433477311,
+              "planar_velocity_rmse_mps": 0.48304490745067596,
+              "torque_burst_s": 0.0,
+              "torque_duty_fraction": 0.2451178679863612,
+              "torque_peak_nm": 0.005717494271018288,
+              "worst_per_joint_torque_duty_fraction": -0.014545440673828125
+            },
+            "timeouts_delta": 0,
+            "to_command_vx_mps": 0.3
+          }
+        ],
+        "complete": false,
+        "largest_adjacent_normalized_jump": {
+          "achieved_vx_gain_per_command_delta": 0.43917357921600353,
+          "command_delta_mps": 0.09999999999999998,
+          "falls_delta": 0,
+          "from_command_vx_mps": 0.2,
+          "largest_normalized_jump": 0.48304490745067596,
+          "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+          "metric_deltas": {
+            "achieved_vx_mps": 0.04391735792160034,
+            "normalized_stability_composite": 0.16748253433477311,
+            "planar_velocity_rmse_mps": 0.048304490745067596,
+            "torque_burst_s": 0.0,
+            "torque_duty_fraction": 0.03676768019795418,
+            "torque_peak_nm": 0.02515697479248047,
+            "worst_per_joint_torque_duty_fraction": -0.0036363601684570312
+          },
+          "normalized_metric_deltas": {
+            "achieved_vx_mps": 0.14639119307200116,
+            "normalized_stability_composite": 0.16748253433477311,
+            "planar_velocity_rmse_mps": 0.48304490745067596,
+            "torque_burst_s": 0.0,
+            "torque_duty_fraction": 0.2451178679863612,
+            "torque_peak_nm": 0.005717494271018288,
+            "worst_per_joint_torque_duty_fraction": -0.014545440673828125
+          },
+          "timeouts_delta": 0,
+          "to_command_vx_mps": 0.3
+        },
+        "missing_command_vx_mps": [
+          0.23,
+          0.24,
+          0.25
+        ],
+        "points": [
+          {
+            "achieved_vx_mps": 0.19589556753635406,
+            "command_vx_mps": 0.2,
+            "falls": 0,
+            "normalized_stability_composite": 0.8612708875998144,
+            "planar_velocity_rmse_mps": 0.022829890251159668,
+            "timeouts": 0,
+            "torque_burst_s": 0.08,
+            "torque_duty_fraction": 0.056767676025629044,
+            "torque_peak_nm": 2.5173115730285645,
+            "worst_per_joint_name": "revolute_1_5",
+            "worst_per_joint_torque_duty_fraction": 0.23636363446712494
+          },
+          {
+            "achieved_vx_mps": 0.2398129254579544,
+            "command_vx_mps": 0.3,
+            "falls": 0,
+            "normalized_stability_composite": 1.0287534219345875,
+            "planar_velocity_rmse_mps": 0.07113438099622726,
+            "timeouts": 0,
+            "torque_burst_s": 0.08,
+            "torque_duty_fraction": 0.09353535622358322,
+            "torque_peak_nm": 2.542468547821045,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.2327272742986679
+          }
+        ],
+        "threshold_boundary_0p23_to_0p24": null
+      },
+      "total_falls": 0,
+      "total_timeouts": 0,
+      "worst_normalized_gate": {
+        "command": "forward_0p30",
+        "metric": "tail_yaw_rate_rmse_radps",
+        "normalized_violation": 0.7978711053729057,
+        "ratio_to_limit": 1.7978711053729057
+      }
+    },
+    {
+      "absolute_stability_safe": false,
+      "admission_results": [
+        {
+          "absolute_stability_rejection_reasons": [],
+          "absolute_stability_safe": true,
+          "command": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "label": "stand",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [],
+            "absolute_stability_targets_met": true,
+            "absolute_stability_threshold_profile": "stand",
+            "achieved_command_frame_velocity": [
+              0.0002694393624551594,
+              4.083009480382316e-05,
+              0.00019086092652287334
+            ],
+            "achieved_planar_speed_mps": 0.00027251544301549585,
+            "base_height_peak_to_peak_m": 7.152557373046875e-07,
+            "base_height_std_m": 0.0,
+            "computed_demand_over_rating_fraction": 0.0,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 0.7109940648078918,
+            "maximum_computed_over_rating_burst_s": 0.0,
+            "maximum_tilt_degrees": 0.05233915522694588,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.1674045946497422,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.0,
+              "roll_pitch_angular_velocity_rms_radps": 0.0008436163625447078,
+              "tilt_rms_degrees": 0.04947028226322598,
+              "vertical_velocity_rms_mps": 0.00036925251021914713
+            },
+            "normalized_stability_composite": 0.012670787783997458,
+            "normalized_tracking_score": 0.0027380359824746847,
+            "peak_abs_computed_nm": 0.7117680907249451,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.00027380359824746847,
+            "rms_applied_nm": 0.44956880807876587,
+            "roll_pitch_angular_velocity_p95_radps": 0.0003334552457090467,
+            "roll_pitch_angular_velocity_rms_radps": 0.00023621258151251823,
+            "samples": 275,
+            "tail_stability_targets_met": true,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": true
+            },
+            "tilt_p95_degrees": 0.04845663905143738,
+            "tilt_rms_degrees": 0.04452325403690338,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 3.8833135477034375e-05,
+            "vertical_velocity_rms_mps": 2.58476757153403e-05,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.0,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_1",
+            "yaw_rate_rmse_radps": 0.00019785315089393407
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.10838 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.16,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p16",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.10838 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.15919016301631927,
+              -0.004049031529575586,
+              -0.019922321662306786
+            ],
+            "achieved_planar_speed_mps": 0.15924164862714088,
+            "base_height_peak_to_peak_m": 0.007606968283653259,
+            "base_height_std_m": 0.0026202499866485596,
+            "computed_demand_over_rating_fraction": 0.04525252431631088,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1010243892669678,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 0.8965661525726318,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5712273368265206,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.7486428533281598,
+              "roll_pitch_angular_velocity_rms_radps": 0.8224522961037499,
+              "tilt_rms_degrees": 0.6375008821487427,
+              "vertical_velocity_rms_mps": 0.8470004690544946
+            },
+            "normalized_stability_composite": 0.7638991251587868,
+            "normalized_tracking_score": 0.24136755615472794,
+            "peak_abs_computed_nm": 2.7515456676483154,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.024136755615472794,
+            "rms_applied_nm": 0.7783998250961304,
+            "roll_pitch_angular_velocity_p95_radps": 0.3400149345397949,
+            "roll_pitch_angular_velocity_rms_radps": 0.23028664290905,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 0.8512232303619385,
+            "tilt_rms_degrees": 0.5737507939338684,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.0904390811920166,
+            "vertical_velocity_rms_mps": 0.05929003283381462,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.22181817889213562,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.10838482528924942
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.11068 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.11068 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.19605512917041779,
+              0.0009409236954525113,
+              -0.026418378576636314
+            ],
+            "achieved_planar_speed_mps": 0.19605738703611722,
+            "base_height_peak_to_peak_m": 0.008874207735061646,
+            "base_height_std_m": 0.0030578551813960075,
+            "computed_demand_over_rating_fraction": 0.05858585983514786,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1634197235107422,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.0605405569076538,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5882412062643411,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.8736729089702878,
+              "roll_pitch_angular_velocity_rms_radps": 0.8747095508234841,
+              "tilt_rms_degrees": 0.7458354367150201,
+              "vertical_velocity_rms_mps": 0.9537824562617709
+            },
+            "normalized_stability_composite": 0.8620000881926408,
+            "normalized_tracking_score": 0.22341445088386536,
+            "peak_abs_computed_nm": 2.4637789726257324,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.022341445088386536,
+            "rms_applied_nm": 0.8242432475090027,
+            "roll_pitch_angular_velocity_p95_radps": 0.40418076515197754,
+            "roll_pitch_angular_velocity_rms_radps": 0.24491867423057556,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.0101330280303955,
+            "tilt_rms_degrees": 0.6712518930435181,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.09576880931854248,
+            "vertical_velocity_rms_mps": 0.06676477193832397,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.2327272742986679,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.11068371683359146
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "roll/pitch-rate RMS 0.33645 rad/s exceeds absolute target 0.28000 rad/s",
+            "tilt RMS 0.94240 deg exceeds absolute target 0.90000 deg",
+            "base-height peak-to-peak 0.01116 m exceeds absolute target 0.01050 m",
+            "roll/pitch-rate p95 0.52900 rad/s exceeds absolute target 0.45000 rad/s",
+            "tilt p95 1.44600 deg exceeds absolute target 1.40000 deg",
+            "maximum tilt 1.82231 deg exceeds absolute target 1.70000 deg",
+            "yaw-rate RMSE 0.14251 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": false,
+              "tilt_rms_degrees": false,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": false,
+            "absolute_stability_target_reasons": [
+              "roll/pitch-rate RMS 0.33645 rad/s exceeds absolute target 0.28000 rad/s",
+              "tilt RMS 0.94240 deg exceeds absolute target 0.90000 deg",
+              "base-height peak-to-peak 0.01116 m exceeds absolute target 0.01050 m",
+              "roll/pitch-rate p95 0.52900 rad/s exceeds absolute target 0.45000 rad/s",
+              "tilt p95 1.44600 deg exceeds absolute target 1.40000 deg",
+              "maximum tilt 1.82231 deg exceeds absolute target 1.70000 deg",
+              "yaw-rate RMSE 0.14251 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.24060294032096863,
+              0.018854891881346703,
+              0.015219016000628471
+            ],
+            "achieved_planar_speed_mps": 0.2413405930193942,
+            "base_height_peak_to_peak_m": 0.011156588792800903,
+            "base_height_std_m": 0.003393357153981924,
+            "computed_demand_over_rating_fraction": 0.09656565636396408,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1437548398971558,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8223085403442383,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": false,
+            "normalized_load_score": 0.7451180899233529,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.9695306154234069,
+              "roll_pitch_angular_velocity_rms_radps": 1.2016217623438152,
+              "tilt_rms_degrees": 1.0471076435512967,
+              "vertical_velocity_rms_mps": 0.9611011615821292
+            },
+            "normalized_stability_composite": 1.044840295725162,
+            "normalized_tracking_score": 0.7201799750328064,
+            "peak_abs_computed_nm": 3.5439705848693848,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.07201799750328064,
+            "rms_applied_nm": 0.9099950194358826,
+            "roll_pitch_angular_velocity_p95_radps": 0.5289961695671082,
+            "roll_pitch_angular_velocity_rms_radps": 0.3364540934562683,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": false,
+              "maximum_tilt_degrees": false,
+              "roll_pitch_angular_velocity_p95_radps": false,
+              "tilt_p95_degrees": false,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.4459997415542603,
+            "tilt_rms_degrees": 0.942396879196167,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.10202380269765854,
+            "vertical_velocity_rms_mps": 0.06727708131074905,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.2072727233171463,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.14251470565795898
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        }
+      ],
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_2.pt",
+      "diagnostic_results": [],
+      "failed_absolute_stability_command_count": 3,
+      "failed_operational_command_count": 0,
+      "formal_admission_eligible": false,
+      "four_command_contract_safe": false,
+      "input_report_index": 3,
+      "input_result_row_count": 4,
+      "label": "accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_2.pt",
+      "maximum_moving_normalized_stability_composite": 1.044840295725162,
+      "maximum_torque_burst_s": 0.1,
+      "maximum_torque_duty_fraction": 0.09656565636396408,
+      "maximum_torque_peak_nm": 3.5439705848693848,
+      "maximum_worst_per_joint_torque_duty_fraction": 0.2327272742986679,
+      "mean_moving_normalized_stability_composite": 0.8902465030255299,
+      "mean_moving_normalized_tracking_score": 0.3949873273571332,
+      "mean_moving_planar_velocity_rmse_mps": 0.039498732735713325,
+      "operational_safe": true,
+      "relative_to_baseline": {
+        "moving_stability_improvement_fraction": -0.004166904731780718,
+        "moving_tracking_rmse_improvement_fraction": -0.023355224117231677
+      },
+      "sample_contract_mode": "diagnostic_short_duration",
+      "selected_admission_row_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "selected_diagnostic_row_indices": [],
+      "stand_normalized_stability_composite": 0.012670787783997458,
+      "threshold_diagnostics": {
+        "adjacent_jumps": [
+          {
+            "achieved_vx_gain_per_command_delta": 0.44547811150550853,
+            "command_delta_mps": 0.09999999999999998,
+            "falls_delta": 0,
+            "from_command_vx_mps": 0.2,
+            "largest_normalized_jump": 0.49676552414894104,
+            "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+            "metric_deltas": {
+              "achieved_vx_mps": 0.04454781115055084,
+              "normalized_stability_composite": 0.18284020753252106,
+              "planar_velocity_rmse_mps": 0.049676552414894104,
+              "torque_burst_s": 0.020000000000000004,
+              "torque_duty_fraction": 0.03797979652881622,
+              "torque_peak_nm": 1.0801916122436523,
+              "worst_per_joint_torque_duty_fraction": -0.025454550981521606
+            },
+            "normalized_metric_deltas": {
+              "achieved_vx_mps": 0.1484927038351695,
+              "normalized_stability_composite": 0.18284020753252106,
+              "planar_velocity_rmse_mps": 0.49676552414894104,
+              "torque_burst_s": 0.14285714285714288,
+              "torque_duty_fraction": 0.2531986435254415,
+              "torque_peak_nm": 0.24549809369173914,
+              "worst_per_joint_torque_duty_fraction": -0.10181820392608643
+            },
+            "timeouts_delta": 0,
+            "to_command_vx_mps": 0.3
+          }
+        ],
+        "complete": false,
+        "largest_adjacent_normalized_jump": {
+          "achieved_vx_gain_per_command_delta": 0.44547811150550853,
+          "command_delta_mps": 0.09999999999999998,
+          "falls_delta": 0,
+          "from_command_vx_mps": 0.2,
+          "largest_normalized_jump": 0.49676552414894104,
+          "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+          "metric_deltas": {
+            "achieved_vx_mps": 0.04454781115055084,
+            "normalized_stability_composite": 0.18284020753252106,
+            "planar_velocity_rmse_mps": 0.049676552414894104,
+            "torque_burst_s": 0.020000000000000004,
+            "torque_duty_fraction": 0.03797979652881622,
+            "torque_peak_nm": 1.0801916122436523,
+            "worst_per_joint_torque_duty_fraction": -0.025454550981521606
+          },
+          "normalized_metric_deltas": {
+            "achieved_vx_mps": 0.1484927038351695,
+            "normalized_stability_composite": 0.18284020753252106,
+            "planar_velocity_rmse_mps": 0.49676552414894104,
+            "torque_burst_s": 0.14285714285714288,
+            "torque_duty_fraction": 0.2531986435254415,
+            "torque_peak_nm": 0.24549809369173914,
+            "worst_per_joint_torque_duty_fraction": -0.10181820392608643
+          },
+          "timeouts_delta": 0,
+          "to_command_vx_mps": 0.3
+        },
+        "missing_command_vx_mps": [
+          0.23,
+          0.24,
+          0.25
+        ],
+        "points": [
+          {
+            "achieved_vx_mps": 0.19605512917041779,
+            "command_vx_mps": 0.2,
+            "falls": 0,
+            "normalized_stability_composite": 0.8620000881926408,
+            "planar_velocity_rmse_mps": 0.022341445088386536,
+            "timeouts": 0,
+            "torque_burst_s": 0.08,
+            "torque_duty_fraction": 0.05858585983514786,
+            "torque_peak_nm": 2.4637789726257324,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.2327272742986679
+          },
+          {
+            "achieved_vx_mps": 0.24060294032096863,
+            "command_vx_mps": 0.3,
+            "falls": 0,
+            "normalized_stability_composite": 1.044840295725162,
+            "planar_velocity_rmse_mps": 0.07201799750328064,
+            "timeouts": 0,
+            "torque_burst_s": 0.1,
+            "torque_duty_fraction": 0.09656565636396408,
+            "torque_peak_nm": 3.5439705848693848,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.2072727233171463
+          }
+        ],
+        "threshold_boundary_0p23_to_0p24": null
+      },
+      "total_falls": 0,
+      "total_timeouts": 0,
+      "worst_normalized_gate": {
+        "command": "forward_0p30",
+        "metric": "tail_yaw_rate_rmse_radps",
+        "normalized_violation": 0.7814338207244873,
+        "ratio_to_limit": 1.7814338207244873
+      }
+    },
+    {
+      "absolute_stability_safe": false,
+      "admission_results": [
+        {
+          "absolute_stability_rejection_reasons": [],
+          "absolute_stability_safe": true,
+          "command": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "label": "stand",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [],
+            "absolute_stability_targets_met": true,
+            "absolute_stability_threshold_profile": "stand",
+            "achieved_command_frame_velocity": [
+              0.0002694393624551594,
+              4.083009480382316e-05,
+              0.00019086092652287334
+            ],
+            "achieved_planar_speed_mps": 0.00027251544301549585,
+            "base_height_peak_to_peak_m": 7.152557373046875e-07,
+            "base_height_std_m": 0.0,
+            "computed_demand_over_rating_fraction": 0.0,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 0.7109940648078918,
+            "maximum_computed_over_rating_burst_s": 0.0,
+            "maximum_tilt_degrees": 0.05233915522694588,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.1674045946497422,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.0,
+              "roll_pitch_angular_velocity_rms_radps": 0.0008436163625447078,
+              "tilt_rms_degrees": 0.04947028226322598,
+              "vertical_velocity_rms_mps": 0.00036925251021914713
+            },
+            "normalized_stability_composite": 0.012670787783997458,
+            "normalized_tracking_score": 0.0027380359824746847,
+            "peak_abs_computed_nm": 0.7117680907249451,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.00027380359824746847,
+            "rms_applied_nm": 0.44956880807876587,
+            "roll_pitch_angular_velocity_p95_radps": 0.0003334552457090467,
+            "roll_pitch_angular_velocity_rms_radps": 0.00023621258151251823,
+            "samples": 275,
+            "tail_stability_targets_met": true,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": true
+            },
+            "tilt_p95_degrees": 0.04845663905143738,
+            "tilt_rms_degrees": 0.04452325403690338,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 3.8833135477034375e-05,
+            "vertical_velocity_rms_mps": 2.58476757153403e-05,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.0,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_1",
+            "yaw_rate_rmse_radps": 0.00019785315089393407
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.10520 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.16,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p16",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.10520 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.15923143923282623,
+              -0.0030945201870054007,
+              -0.020340537652373314
+            ],
+            "achieved_planar_speed_mps": 0.15926150600614394,
+            "base_height_peak_to_peak_m": 0.007568836212158203,
+            "base_height_std_m": 0.0026230919174849987,
+            "computed_demand_over_rating_fraction": 0.04484848305583,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.0779486894607544,
+            "maximum_computed_over_rating_burst_s": 0.06,
+            "maximum_tilt_degrees": 0.9093518853187561,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5162133987815607,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.7494548335671425,
+              "roll_pitch_angular_velocity_rms_radps": 0.8102641041789735,
+              "tilt_rms_degrees": 0.6446782085630629,
+              "vertical_velocity_rms_mps": 0.8353472288165773
+            },
+            "normalized_stability_composite": 0.759936093781439,
+            "normalized_tracking_score": 0.23821193724870682,
+            "peak_abs_computed_nm": 2.4962472915649414,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.023821193724870682,
+            "rms_applied_nm": 0.7790066003799438,
+            "roll_pitch_angular_velocity_p95_radps": 0.35012105107307434,
+            "roll_pitch_angular_velocity_rms_radps": 0.2268739491701126,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 0.863706111907959,
+            "tilt_rms_degrees": 0.5802103877067566,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.08706662058830261,
+            "vertical_velocity_rms_mps": 0.058474306017160416,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.21454545855522156,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.10519685596227646
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.10987 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.10987 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.196548193693161,
+              0.0007431134581565857,
+              -0.02671477384865284
+            ],
+            "achieved_planar_speed_mps": 0.19654959847747344,
+            "base_height_peak_to_peak_m": 0.00899234414100647,
+            "base_height_std_m": 0.003065156051889062,
+            "computed_demand_over_rating_fraction": 0.057575758546590805,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1531873941421509,
+            "maximum_computed_over_rating_burst_s": 0.06,
+            "maximum_tilt_degrees": 1.0781080722808838,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5471373699540958,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.8757588719683034,
+              "roll_pitch_angular_velocity_rms_radps": 0.8806422352790831,
+              "tilt_rms_degrees": 0.7526555326249864,
+              "vertical_velocity_rms_mps": 0.9506077638694217
+            },
+            "normalized_stability_composite": 0.8649161009354487,
+            "normalized_tracking_score": 0.22542471066117287,
+            "peak_abs_computed_nm": 2.430711269378662,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.022542471066117287,
+            "rms_applied_nm": 0.8236238956451416,
+            "roll_pitch_angular_velocity_p95_radps": 0.40512615442276,
+            "roll_pitch_angular_velocity_rms_radps": 0.2465798258781433,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.0176604986190796,
+            "tilt_rms_degrees": 0.6773899793624878,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.09511074423789978,
+            "vertical_velocity_rms_mps": 0.06654254347085953,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.23636363446712494,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_5",
+            "yaw_rate_rmse_radps": 0.10986758023500443
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "roll/pitch-rate RMS 0.33514 rad/s exceeds absolute target 0.28000 rad/s",
+            "tilt RMS 0.95046 deg exceeds absolute target 0.90000 deg",
+            "roll/pitch-rate p95 0.52979 rad/s exceeds absolute target 0.45000 rad/s",
+            "tilt p95 1.44099 deg exceeds absolute target 1.40000 deg",
+            "maximum tilt 1.80027 deg exceeds absolute target 1.70000 deg",
+            "yaw-rate RMSE 0.14343 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": false,
+              "tilt_rms_degrees": false,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": false,
+            "absolute_stability_target_reasons": [
+              "roll/pitch-rate RMS 0.33514 rad/s exceeds absolute target 0.28000 rad/s",
+              "tilt RMS 0.95046 deg exceeds absolute target 0.90000 deg",
+              "roll/pitch-rate p95 0.52979 rad/s exceeds absolute target 0.45000 rad/s",
+              "tilt p95 1.44099 deg exceeds absolute target 1.40000 deg",
+              "maximum tilt 1.80027 deg exceeds absolute target 1.70000 deg",
+              "yaw-rate RMSE 0.14343 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.24127152562141418,
+              0.018185652792453766,
+              0.009203474037349224
+            ],
+            "achieved_planar_speed_mps": 0.2419559196282918,
+            "base_height_peak_to_peak_m": 0.01045200228691101,
+            "base_height_std_m": 0.0033413611818104982,
+            "computed_demand_over_rating_fraction": 0.09515151381492615,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1360092163085938,
+            "maximum_computed_over_rating_burst_s": 0.12,
+            "maximum_tilt_degrees": 1.8002671003341675,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": false,
+            "normalized_load_score": 0.7694497761272249,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.9546746233744281,
+              "roll_pitch_angular_velocity_rms_radps": 1.196942797728947,
+              "tilt_rms_degrees": 1.056067943572998,
+              "vertical_velocity_rms_mps": 0.9461953171661921
+            },
+            "normalized_stability_composite": 1.0384701704606414,
+            "normalized_tracking_score": 0.7136309891939163,
+            "peak_abs_computed_nm": 3.409461736679077,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.07136309891939163,
+            "rms_applied_nm": 0.9092158079147339,
+            "roll_pitch_angular_velocity_p95_radps": 0.5297876596450806,
+            "roll_pitch_angular_velocity_rms_radps": 0.3351439833641052,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": false,
+              "roll_pitch_angular_velocity_p95_radps": false,
+              "tilt_p95_degrees": false,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.440988302230835,
+            "tilt_rms_degrees": 0.9504611492156982,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.09887989610433578,
+            "vertical_velocity_rms_mps": 0.06623367220163345,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.22181817889213562,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_5",
+            "yaw_rate_rmse_radps": 0.1434263288974762
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        }
+      ],
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_3.pt",
+      "diagnostic_results": [],
+      "failed_absolute_stability_command_count": 3,
+      "failed_operational_command_count": 0,
+      "formal_admission_eligible": false,
+      "four_command_contract_safe": false,
+      "input_report_index": 4,
+      "input_result_row_count": 4,
+      "label": "accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_3.pt",
+      "maximum_moving_normalized_stability_composite": 1.0384701704606414,
+      "maximum_torque_burst_s": 0.12,
+      "maximum_torque_duty_fraction": 0.09515151381492615,
+      "maximum_torque_peak_nm": 3.409461736679077,
+      "maximum_worst_per_joint_torque_duty_fraction": 0.23636363446712494,
+      "mean_moving_normalized_stability_composite": 0.887774121725843,
+      "mean_moving_normalized_tracking_score": 0.39242254570126534,
+      "mean_moving_planar_velocity_rmse_mps": 0.039242254570126534,
+      "operational_safe": true,
+      "relative_to_baseline": {
+        "moving_stability_improvement_fraction": -0.0013781451370102893,
+        "moving_tracking_rmse_improvement_fraction": -0.016710244583801437
+      },
+      "sample_contract_mode": "diagnostic_short_duration",
+      "selected_admission_row_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "selected_diagnostic_row_indices": [],
+      "stand_normalized_stability_composite": 0.012670787783997458,
+      "threshold_diagnostics": {
+        "adjacent_jumps": [
+          {
+            "achieved_vx_gain_per_command_delta": 0.44723331928253185,
+            "command_delta_mps": 0.09999999999999998,
+            "falls_delta": 0,
+            "from_command_vx_mps": 0.2,
+            "largest_normalized_jump": 0.48820627853274345,
+            "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+            "metric_deltas": {
+              "achieved_vx_mps": 0.044723331928253174,
+              "normalized_stability_composite": 0.1735540695251927,
+              "planar_velocity_rmse_mps": 0.048820627853274345,
+              "torque_burst_s": 0.06,
+              "torque_duty_fraction": 0.03757575526833534,
+              "torque_peak_nm": 0.978750467300415,
+              "worst_per_joint_torque_duty_fraction": -0.014545455574989319
+            },
+            "normalized_metric_deltas": {
+              "achieved_vx_mps": 0.14907777309417725,
+              "normalized_stability_composite": 0.1735540695251927,
+              "planar_velocity_rmse_mps": 0.48820627853274345,
+              "torque_burst_s": 0.4285714285714285,
+              "torque_duty_fraction": 0.25050503512223565,
+              "torque_peak_nm": 0.2224432880228216,
+              "worst_per_joint_torque_duty_fraction": -0.058181822299957275
+            },
+            "timeouts_delta": 0,
+            "to_command_vx_mps": 0.3
+          }
+        ],
+        "complete": false,
+        "largest_adjacent_normalized_jump": {
+          "achieved_vx_gain_per_command_delta": 0.44723331928253185,
+          "command_delta_mps": 0.09999999999999998,
+          "falls_delta": 0,
+          "from_command_vx_mps": 0.2,
+          "largest_normalized_jump": 0.48820627853274345,
+          "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+          "metric_deltas": {
+            "achieved_vx_mps": 0.044723331928253174,
+            "normalized_stability_composite": 0.1735540695251927,
+            "planar_velocity_rmse_mps": 0.048820627853274345,
+            "torque_burst_s": 0.06,
+            "torque_duty_fraction": 0.03757575526833534,
+            "torque_peak_nm": 0.978750467300415,
+            "worst_per_joint_torque_duty_fraction": -0.014545455574989319
+          },
+          "normalized_metric_deltas": {
+            "achieved_vx_mps": 0.14907777309417725,
+            "normalized_stability_composite": 0.1735540695251927,
+            "planar_velocity_rmse_mps": 0.48820627853274345,
+            "torque_burst_s": 0.4285714285714285,
+            "torque_duty_fraction": 0.25050503512223565,
+            "torque_peak_nm": 0.2224432880228216,
+            "worst_per_joint_torque_duty_fraction": -0.058181822299957275
+          },
+          "timeouts_delta": 0,
+          "to_command_vx_mps": 0.3
+        },
+        "missing_command_vx_mps": [
+          0.23,
+          0.24,
+          0.25
+        ],
+        "points": [
+          {
+            "achieved_vx_mps": 0.196548193693161,
+            "command_vx_mps": 0.2,
+            "falls": 0,
+            "normalized_stability_composite": 0.8649161009354487,
+            "planar_velocity_rmse_mps": 0.022542471066117287,
+            "timeouts": 0,
+            "torque_burst_s": 0.06,
+            "torque_duty_fraction": 0.057575758546590805,
+            "torque_peak_nm": 2.430711269378662,
+            "worst_per_joint_name": "revolute_1_5",
+            "worst_per_joint_torque_duty_fraction": 0.23636363446712494
+          },
+          {
+            "achieved_vx_mps": 0.24127152562141418,
+            "command_vx_mps": 0.3,
+            "falls": 0,
+            "normalized_stability_composite": 1.0384701704606414,
+            "planar_velocity_rmse_mps": 0.07136309891939163,
+            "timeouts": 0,
+            "torque_burst_s": 0.12,
+            "torque_duty_fraction": 0.09515151381492615,
+            "torque_peak_nm": 3.409461736679077,
+            "worst_per_joint_name": "revolute_1_5",
+            "worst_per_joint_torque_duty_fraction": 0.22181817889213562
+          }
+        ],
+        "threshold_boundary_0p23_to_0p24": null
+      },
+      "total_falls": 0,
+      "total_timeouts": 0,
+      "worst_normalized_gate": {
+        "command": "forward_0p30",
+        "metric": "tail_yaw_rate_rmse_radps",
+        "normalized_violation": 0.7928291112184525,
+        "ratio_to_limit": 1.7928291112184525
+      }
+    },
+    {
+      "absolute_stability_safe": false,
+      "admission_results": [
+        {
+          "absolute_stability_rejection_reasons": [],
+          "absolute_stability_safe": true,
+          "command": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "label": "stand",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [],
+            "absolute_stability_targets_met": true,
+            "absolute_stability_threshold_profile": "stand",
+            "achieved_command_frame_velocity": [
+              0.0002694393624551594,
+              4.083009480382316e-05,
+              0.00019086092652287334
+            ],
+            "achieved_planar_speed_mps": 0.00027251544301549585,
+            "base_height_peak_to_peak_m": 7.152557373046875e-07,
+            "base_height_std_m": 0.0,
+            "computed_demand_over_rating_fraction": 0.0,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 0.7109940648078918,
+            "maximum_computed_over_rating_burst_s": 0.0,
+            "maximum_tilt_degrees": 0.05233915522694588,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.1674045946497422,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.0,
+              "roll_pitch_angular_velocity_rms_radps": 0.0008436163625447078,
+              "tilt_rms_degrees": 0.04947028226322598,
+              "vertical_velocity_rms_mps": 0.00036925251021914713
+            },
+            "normalized_stability_composite": 0.012670787783997458,
+            "normalized_tracking_score": 0.0027380359824746847,
+            "peak_abs_computed_nm": 0.7117680907249451,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.00027380359824746847,
+            "rms_applied_nm": 0.44956880807876587,
+            "roll_pitch_angular_velocity_p95_radps": 0.0003334552457090467,
+            "roll_pitch_angular_velocity_rms_radps": 0.00023621258151251823,
+            "samples": 275,
+            "tail_stability_targets_met": true,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": true
+            },
+            "tilt_p95_degrees": 0.04845663905143738,
+            "tilt_rms_degrees": 0.04452325403690338,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 3.8833135477034375e-05,
+            "vertical_velocity_rms_mps": 2.58476757153403e-05,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.0,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_1",
+            "yaw_rate_rmse_radps": 0.00019785315089393407
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.10174 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.16,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p16",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.10174 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.15930169820785522,
+              -0.0030784811824560165,
+              -0.02078651264309883
+            ],
+            "achieved_planar_speed_mps": 0.15933144102247154,
+            "base_height_peak_to_peak_m": 0.007558897137641907,
+            "base_height_std_m": 0.002628766465932131,
+            "computed_demand_over_rating_fraction": 0.03797979652881622,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.0793615579605103,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 0.9151434302330017,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5351238757113874,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.7510761331234659,
+              "roll_pitch_angular_velocity_rms_radps": 0.8104992764336721,
+              "tilt_rms_degrees": 0.6453960471683078,
+              "vertical_velocity_rms_mps": 0.8296208190066473
+            },
+            "normalized_stability_composite": 0.7591480689330232,
+            "normalized_tracking_score": 0.24138988927006721,
+            "peak_abs_computed_nm": 2.3975412845611572,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.02413898892700672,
+            "rms_applied_nm": 0.7782939672470093,
+            "roll_pitch_angular_velocity_p95_radps": 0.3506605923175812,
+            "roll_pitch_angular_velocity_rms_radps": 0.22693979740142822,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 0.8737292289733887,
+            "tilt_rms_degrees": 0.580856442451477,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.0876576378941536,
+            "vertical_velocity_rms_mps": 0.05807345733046532,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.17818181216716766,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.10174106806516647
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.10987 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.10987 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.1961374431848526,
+              0.0004304096510168165,
+              -0.026152605190873146
+            ],
+            "achieved_planar_speed_mps": 0.1961379154359477,
+            "base_height_peak_to_peak_m": 0.00889497995376587,
+            "base_height_std_m": 0.003052368061617017,
+            "computed_demand_over_rating_fraction": 0.057979799807071686,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1606470346450806,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.0338188409805298,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5868047588379868,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.8721051604620048,
+              "roll_pitch_angular_velocity_rms_radps": 0.8802183504615511,
+              "tilt_rms_degrees": 0.7499265670776367,
+              "vertical_velocity_rms_mps": 0.9534358978271483
+            },
+            "normalized_stability_composite": 0.8639214939570852,
+            "normalized_tracking_score": 0.2257956750690937,
+            "peak_abs_computed_nm": 2.464989423751831,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.02257956750690937,
+            "rms_applied_nm": 0.8227324485778809,
+            "roll_pitch_angular_velocity_p95_radps": 0.4089852571487427,
+            "roll_pitch_angular_velocity_rms_radps": 0.24646113812923431,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.0148299932479858,
+            "tilt_rms_degrees": 0.674933910369873,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.09561542421579361,
+            "vertical_velocity_rms_mps": 0.06674051284790039,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.2327272742986679,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.10986851900815964
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "roll/pitch-rate RMS 0.32878 rad/s exceeds absolute target 0.28000 rad/s",
+            "tilt RMS 0.92048 deg exceeds absolute target 0.90000 deg",
+            "base-height peak-to-peak 0.01082 m exceeds absolute target 0.01050 m",
+            "roll/pitch-rate p95 0.52517 rad/s exceeds absolute target 0.45000 rad/s",
+            "maximum tilt 1.72283 deg exceeds absolute target 1.70000 deg",
+            "yaw-rate RMSE 0.14784 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": false,
+              "tilt_rms_degrees": false,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": false,
+            "absolute_stability_target_reasons": [
+              "roll/pitch-rate RMS 0.32878 rad/s exceeds absolute target 0.28000 rad/s",
+              "tilt RMS 0.92048 deg exceeds absolute target 0.90000 deg",
+              "base-height peak-to-peak 0.01082 m exceeds absolute target 0.01050 m",
+              "roll/pitch-rate p95 0.52517 rad/s exceeds absolute target 0.45000 rad/s",
+              "maximum tilt 1.72283 deg exceeds absolute target 1.70000 deg",
+              "yaw-rate RMSE 0.14784 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.24182847142219543,
+              0.016243038699030876,
+              0.00515091884881258
+            ],
+            "achieved_planar_speed_mps": 0.24237336053406078,
+            "base_height_peak_to_peak_m": 0.010816976428031921,
+            "base_height_std_m": 0.0034081453923135996,
+            "computed_demand_over_rating_fraction": 0.09717171639204025,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1311674118041992,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.7228330373764038,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": false,
+            "normalized_load_score": 0.7119337812840164,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.9737558263753141,
+              "roll_pitch_angular_velocity_rms_radps": 1.1742019227572849,
+              "tilt_rms_degrees": 1.0227596759796143,
+              "vertical_velocity_rms_mps": 0.9623312524386813
+            },
+            "normalized_stability_composite": 1.0332621693877235,
+            "normalized_tracking_score": 0.6956566125154495,
+            "peak_abs_computed_nm": 2.9817094802856445,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.06956566125154495,
+            "rms_applied_nm": 0.905620276927948,
+            "roll_pitch_angular_velocity_p95_radps": 0.5251721739768982,
+            "roll_pitch_angular_velocity_rms_radps": 0.3287765383720398,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": false,
+              "maximum_tilt_degrees": false,
+              "roll_pitch_angular_velocity_p95_radps": false,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.3849668502807617,
+            "tilt_rms_degrees": 0.9204837083816528,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.10052699595689774,
+            "vertical_velocity_rms_mps": 0.0673631876707077,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.23636363446712494,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.14784052968025208
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        }
+      ],
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_4.pt",
+      "diagnostic_results": [],
+      "failed_absolute_stability_command_count": 3,
+      "failed_operational_command_count": 0,
+      "formal_admission_eligible": false,
+      "four_command_contract_safe": false,
+      "input_report_index": 5,
+      "input_result_row_count": 4,
+      "label": "accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_4.pt",
+      "maximum_moving_normalized_stability_composite": 1.0332621693877235,
+      "maximum_torque_burst_s": 0.1,
+      "maximum_torque_duty_fraction": 0.09717171639204025,
+      "maximum_torque_peak_nm": 2.9817094802856445,
+      "maximum_worst_per_joint_torque_duty_fraction": 0.23636363446712494,
+      "mean_moving_normalized_stability_composite": 0.8854439107592773,
+      "mean_moving_normalized_tracking_score": 0.38761405895153683,
+      "mean_moving_planar_velocity_rmse_mps": 0.03876140589515368,
+      "operational_safe": true,
+      "relative_to_baseline": {
+        "moving_stability_improvement_fraction": 0.0012502512966922064,
+        "moving_tracking_rmse_improvement_fraction": -0.004252148602954753
+      },
+      "sample_contract_mode": "diagnostic_short_duration",
+      "selected_admission_row_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "selected_diagnostic_row_indices": [],
+      "stand_normalized_stability_composite": 0.012670787783997458,
+      "threshold_diagnostics": {
+        "adjacent_jumps": [
+          {
+            "achieved_vx_gain_per_command_delta": 0.45691028237342846,
+            "command_delta_mps": 0.09999999999999998,
+            "falls_delta": 0,
+            "from_command_vx_mps": 0.2,
+            "largest_normalized_jump": 0.4698609374463558,
+            "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+            "metric_deltas": {
+              "achieved_vx_mps": 0.045691028237342834,
+              "normalized_stability_composite": 0.16934067543063835,
+              "planar_velocity_rmse_mps": 0.04698609374463558,
+              "torque_burst_s": 0.020000000000000004,
+              "torque_duty_fraction": 0.03919191658496857,
+              "torque_peak_nm": 0.5167200565338135,
+              "worst_per_joint_torque_duty_fraction": 0.0036363601684570312
+            },
+            "normalized_metric_deltas": {
+              "achieved_vx_mps": 0.15230342745780945,
+              "normalized_stability_composite": 0.16934067543063835,
+              "planar_velocity_rmse_mps": 0.4698609374463558,
+              "torque_burst_s": 0.14285714285714288,
+              "torque_duty_fraction": 0.26127944389979046,
+              "torque_peak_nm": 0.1174363764849576,
+              "worst_per_joint_torque_duty_fraction": 0.014545440673828125
+            },
+            "timeouts_delta": 0,
+            "to_command_vx_mps": 0.3
+          }
+        ],
+        "complete": false,
+        "largest_adjacent_normalized_jump": {
+          "achieved_vx_gain_per_command_delta": 0.45691028237342846,
+          "command_delta_mps": 0.09999999999999998,
+          "falls_delta": 0,
+          "from_command_vx_mps": 0.2,
+          "largest_normalized_jump": 0.4698609374463558,
+          "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+          "metric_deltas": {
+            "achieved_vx_mps": 0.045691028237342834,
+            "normalized_stability_composite": 0.16934067543063835,
+            "planar_velocity_rmse_mps": 0.04698609374463558,
+            "torque_burst_s": 0.020000000000000004,
+            "torque_duty_fraction": 0.03919191658496857,
+            "torque_peak_nm": 0.5167200565338135,
+            "worst_per_joint_torque_duty_fraction": 0.0036363601684570312
+          },
+          "normalized_metric_deltas": {
+            "achieved_vx_mps": 0.15230342745780945,
+            "normalized_stability_composite": 0.16934067543063835,
+            "planar_velocity_rmse_mps": 0.4698609374463558,
+            "torque_burst_s": 0.14285714285714288,
+            "torque_duty_fraction": 0.26127944389979046,
+            "torque_peak_nm": 0.1174363764849576,
+            "worst_per_joint_torque_duty_fraction": 0.014545440673828125
+          },
+          "timeouts_delta": 0,
+          "to_command_vx_mps": 0.3
+        },
+        "missing_command_vx_mps": [
+          0.23,
+          0.24,
+          0.25
+        ],
+        "points": [
+          {
+            "achieved_vx_mps": 0.1961374431848526,
+            "command_vx_mps": 0.2,
+            "falls": 0,
+            "normalized_stability_composite": 0.8639214939570852,
+            "planar_velocity_rmse_mps": 0.02257956750690937,
+            "timeouts": 0,
+            "torque_burst_s": 0.08,
+            "torque_duty_fraction": 0.057979799807071686,
+            "torque_peak_nm": 2.464989423751831,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.2327272742986679
+          },
+          {
+            "achieved_vx_mps": 0.24182847142219543,
+            "command_vx_mps": 0.3,
+            "falls": 0,
+            "normalized_stability_composite": 1.0332621693877235,
+            "planar_velocity_rmse_mps": 0.06956566125154495,
+            "timeouts": 0,
+            "torque_burst_s": 0.1,
+            "torque_duty_fraction": 0.09717171639204025,
+            "torque_peak_nm": 2.9817094802856445,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.23636363446712494
+          }
+        ],
+        "threshold_boundary_0p23_to_0p24": null
+      },
+      "total_falls": 0,
+      "total_timeouts": 0,
+      "worst_normalized_gate": {
+        "command": "forward_0p30",
+        "metric": "tail_yaw_rate_rmse_radps",
+        "normalized_violation": 0.8480066210031509,
+        "ratio_to_limit": 1.848006621003151
+      }
+    },
+    {
+      "absolute_stability_safe": false,
+      "admission_results": [
+        {
+          "absolute_stability_rejection_reasons": [],
+          "absolute_stability_safe": true,
+          "command": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "label": "stand",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [],
+            "absolute_stability_targets_met": true,
+            "absolute_stability_threshold_profile": "stand",
+            "achieved_command_frame_velocity": [
+              0.0002694393624551594,
+              4.083009480382316e-05,
+              0.00019086092652287334
+            ],
+            "achieved_planar_speed_mps": 0.00027251544301549585,
+            "base_height_peak_to_peak_m": 7.152557373046875e-07,
+            "base_height_std_m": 0.0,
+            "computed_demand_over_rating_fraction": 0.0,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 0.7109940648078918,
+            "maximum_computed_over_rating_burst_s": 0.0,
+            "maximum_tilt_degrees": 0.05233915522694588,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.1674045946497422,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.0,
+              "roll_pitch_angular_velocity_rms_radps": 0.0008436163625447078,
+              "tilt_rms_degrees": 0.04947028226322598,
+              "vertical_velocity_rms_mps": 0.00036925251021914713
+            },
+            "normalized_stability_composite": 0.012670787783997458,
+            "normalized_tracking_score": 0.0027380359824746847,
+            "peak_abs_computed_nm": 0.7117680907249451,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.00027380359824746847,
+            "rms_applied_nm": 0.44956880807876587,
+            "roll_pitch_angular_velocity_p95_radps": 0.0003334552457090467,
+            "roll_pitch_angular_velocity_rms_radps": 0.00023621258151251823,
+            "samples": 275,
+            "tail_stability_targets_met": true,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": true
+            },
+            "tilt_p95_degrees": 0.04845663905143738,
+            "tilt_rms_degrees": 0.04452325403690338,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 3.8833135477034375e-05,
+            "vertical_velocity_rms_mps": 2.58476757153403e-05,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.0,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_1",
+            "yaw_rate_rmse_radps": 0.00019785315089393407
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.10225 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.16,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p16",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.10225 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.15961576998233795,
+              -0.003371439641341567,
+              -0.019941728562116623
+            ],
+            "achieved_planar_speed_mps": 0.1596513721591826,
+            "base_height_peak_to_peak_m": 0.00764213502407074,
+            "base_height_std_m": 0.002633721800521016,
+            "computed_demand_over_rating_fraction": 0.04363636299967766,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.0826019048690796,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 0.9117158651351929,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5450296995927504,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.7524919430060046,
+              "roll_pitch_angular_velocity_rms_radps": 0.8071121360574449,
+              "tilt_rms_degrees": 0.645017491446601,
+              "vertical_velocity_rms_mps": 0.838206974523408
+            },
+            "normalized_stability_composite": 0.7607071362583646,
+            "normalized_tracking_score": 0.2386000007390976,
+            "peak_abs_computed_nm": 2.3957738876342773,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.02386000007390976,
+            "rms_applied_nm": 0.7775775194168091,
+            "roll_pitch_angular_velocity_p95_radps": 0.3422202169895172,
+            "roll_pitch_angular_velocity_rms_radps": 0.2259913980960846,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 0.8662623167037964,
+            "tilt_rms_degrees": 0.5805157423019409,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.08774223923683167,
+            "vertical_velocity_rms_mps": 0.058674488216638565,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.22181817889213562,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.10224750638008118
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.11062 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.11062 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.19724753499031067,
+              0.0006458234856836498,
+              -0.02469339407980442
+            ],
+            "achieved_planar_speed_mps": 0.1972485922579132,
+            "base_height_peak_to_peak_m": 0.008849412202835083,
+            "base_height_std_m": 0.0030657637398689985,
+            "computed_demand_over_rating_fraction": 0.057373736053705215,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.140061378479004,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.073743224143982,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5866227488142329,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.8759324971054281,
+              "roll_pitch_angular_velocity_rms_radps": 0.8877909077065331,
+              "tilt_rms_degrees": 0.7531936963399251,
+              "vertical_velocity_rms_mps": 0.9488334613186972
+            },
+            "normalized_stability_composite": 0.8664376406176457,
+            "normalized_tracking_score": 0.22875256836414337,
+            "peak_abs_computed_nm": 2.5442616939544678,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.022875256836414337,
+            "rms_applied_nm": 0.8258398175239563,
+            "roll_pitch_angular_velocity_p95_radps": 0.40656426548957825,
+            "roll_pitch_angular_velocity_rms_radps": 0.24858145415782928,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.0179282426834106,
+            "tilt_rms_degrees": 0.6778743267059326,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.09509660303592682,
+            "vertical_velocity_rms_mps": 0.06641834229230881,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.22545453906059265,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.11062172800302505
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "roll/pitch-rate RMS 0.33435 rad/s exceeds absolute target 0.28000 rad/s",
+            "tilt RMS 0.93636 deg exceeds absolute target 0.90000 deg",
+            "base-height peak-to-peak 0.01056 m exceeds absolute target 0.01050 m",
+            "roll/pitch-rate p95 0.54552 rad/s exceeds absolute target 0.45000 rad/s",
+            "maximum tilt 1.85277 deg exceeds absolute target 1.70000 deg",
+            "yaw-rate RMSE 0.14498 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": false,
+              "tilt_rms_degrees": false,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": false,
+            "absolute_stability_target_reasons": [
+              "roll/pitch-rate RMS 0.33435 rad/s exceeds absolute target 0.28000 rad/s",
+              "tilt RMS 0.93636 deg exceeds absolute target 0.90000 deg",
+              "base-height peak-to-peak 0.01056 m exceeds absolute target 0.01050 m",
+              "roll/pitch-rate p95 0.54552 rad/s exceeds absolute target 0.45000 rad/s",
+              "maximum tilt 1.85277 deg exceeds absolute target 1.70000 deg",
+              "yaw-rate RMSE 0.14498 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.24225866794586182,
+              0.016567686572670937,
+              0.013278048485517502
+            ],
+            "achieved_planar_speed_mps": 0.24282452601266125,
+            "base_height_peak_to_peak_m": 0.010556280612945557,
+            "base_height_std_m": 0.0033862136770039797,
+            "computed_demand_over_rating_fraction": 0.09434343129396439,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1537216901779175,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8527684211730957,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": false,
+            "normalized_load_score": 0.7467054993365752,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.9674896220011371,
+              "roll_pitch_angular_velocity_rms_radps": 1.1940961437565938,
+              "tilt_rms_degrees": 1.0403984785079956,
+              "vertical_velocity_rms_mps": 0.9600763874394552
+            },
+            "normalized_stability_composite": 1.0405151579262955,
+            "normalized_tracking_score": 0.6972797960042953,
+            "peak_abs_computed_nm": 3.6057698726654053,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.06972797960042953,
+            "rms_applied_nm": 0.9030181765556335,
+            "roll_pitch_angular_velocity_p95_radps": 0.54551762342453,
+            "roll_pitch_angular_velocity_rms_radps": 0.3343469202518463,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": false,
+              "maximum_tilt_degrees": false,
+              "roll_pitch_angular_velocity_p95_radps": false,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.39686918258667,
+            "tilt_rms_degrees": 0.936358630657196,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.10239749401807785,
+            "vertical_velocity_rms_mps": 0.06720534712076187,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.21090908348560333,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.1449761837720871
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        }
+      ],
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_5.pt",
+      "diagnostic_results": [],
+      "failed_absolute_stability_command_count": 3,
+      "failed_operational_command_count": 0,
+      "formal_admission_eligible": false,
+      "four_command_contract_safe": false,
+      "input_report_index": 6,
+      "input_result_row_count": 4,
+      "label": "accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_5.pt",
+      "maximum_moving_normalized_stability_composite": 1.0405151579262955,
+      "maximum_torque_burst_s": 0.1,
+      "maximum_torque_duty_fraction": 0.09434343129396439,
+      "maximum_torque_peak_nm": 3.6057698726654053,
+      "maximum_worst_per_joint_torque_duty_fraction": 0.22545453906059265,
+      "mean_moving_normalized_stability_composite": 0.8892199782674353,
+      "mean_moving_normalized_tracking_score": 0.38821078836917877,
+      "mean_moving_planar_velocity_rmse_mps": 0.03882107883691788,
+      "operational_safe": true,
+      "relative_to_baseline": {
+        "moving_stability_improvement_fraction": -0.0030090207238533395,
+        "moving_tracking_rmse_improvement_fraction": -0.005798188500017787
+      },
+      "sample_contract_mode": "diagnostic_short_duration",
+      "selected_admission_row_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "selected_diagnostic_row_indices": [],
+      "stand_normalized_stability_composite": 0.012670787783997458,
+      "threshold_diagnostics": {
+        "adjacent_jumps": [
+          {
+            "achieved_vx_gain_per_command_delta": 0.4501113295555116,
+            "command_delta_mps": 0.09999999999999998,
+            "falls_delta": 0,
+            "from_command_vx_mps": 0.2,
+            "largest_normalized_jump": 0.468527227640152,
+            "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+            "metric_deltas": {
+              "achieved_vx_mps": 0.04501113295555115,
+              "normalized_stability_composite": 0.17407751730864973,
+              "planar_velocity_rmse_mps": 0.0468527227640152,
+              "torque_burst_s": 0.020000000000000004,
+              "torque_duty_fraction": 0.03696969524025917,
+              "torque_peak_nm": 1.0615081787109375,
+              "worst_per_joint_torque_duty_fraction": -0.014545455574989319
+            },
+            "normalized_metric_deltas": {
+              "achieved_vx_mps": 0.15003710985183716,
+              "normalized_stability_composite": 0.17407751730864973,
+              "planar_velocity_rmse_mps": 0.468527227640152,
+              "torque_burst_s": 0.14285714285714288,
+              "torque_duty_fraction": 0.24646463493506116,
+              "torque_peak_nm": 0.2412518587979403,
+              "worst_per_joint_torque_duty_fraction": -0.058181822299957275
+            },
+            "timeouts_delta": 0,
+            "to_command_vx_mps": 0.3
+          }
+        ],
+        "complete": false,
+        "largest_adjacent_normalized_jump": {
+          "achieved_vx_gain_per_command_delta": 0.4501113295555116,
+          "command_delta_mps": 0.09999999999999998,
+          "falls_delta": 0,
+          "from_command_vx_mps": 0.2,
+          "largest_normalized_jump": 0.468527227640152,
+          "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+          "metric_deltas": {
+            "achieved_vx_mps": 0.04501113295555115,
+            "normalized_stability_composite": 0.17407751730864973,
+            "planar_velocity_rmse_mps": 0.0468527227640152,
+            "torque_burst_s": 0.020000000000000004,
+            "torque_duty_fraction": 0.03696969524025917,
+            "torque_peak_nm": 1.0615081787109375,
+            "worst_per_joint_torque_duty_fraction": -0.014545455574989319
+          },
+          "normalized_metric_deltas": {
+            "achieved_vx_mps": 0.15003710985183716,
+            "normalized_stability_composite": 0.17407751730864973,
+            "planar_velocity_rmse_mps": 0.468527227640152,
+            "torque_burst_s": 0.14285714285714288,
+            "torque_duty_fraction": 0.24646463493506116,
+            "torque_peak_nm": 0.2412518587979403,
+            "worst_per_joint_torque_duty_fraction": -0.058181822299957275
+          },
+          "timeouts_delta": 0,
+          "to_command_vx_mps": 0.3
+        },
+        "missing_command_vx_mps": [
+          0.23,
+          0.24,
+          0.25
+        ],
+        "points": [
+          {
+            "achieved_vx_mps": 0.19724753499031067,
+            "command_vx_mps": 0.2,
+            "falls": 0,
+            "normalized_stability_composite": 0.8664376406176457,
+            "planar_velocity_rmse_mps": 0.022875256836414337,
+            "timeouts": 0,
+            "torque_burst_s": 0.08,
+            "torque_duty_fraction": 0.057373736053705215,
+            "torque_peak_nm": 2.5442616939544678,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.22545453906059265
+          },
+          {
+            "achieved_vx_mps": 0.24225866794586182,
+            "command_vx_mps": 0.3,
+            "falls": 0,
+            "normalized_stability_composite": 1.0405151579262955,
+            "planar_velocity_rmse_mps": 0.06972797960042953,
+            "timeouts": 0,
+            "torque_burst_s": 0.1,
+            "torque_duty_fraction": 0.09434343129396439,
+            "torque_peak_nm": 3.6057698726654053,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.21090908348560333
+          }
+        ],
+        "threshold_boundary_0p23_to_0p24": null
+      },
+      "total_falls": 0,
+      "total_timeouts": 0,
+      "worst_normalized_gate": {
+        "command": "forward_0p30",
+        "metric": "tail_yaw_rate_rmse_radps",
+        "normalized_violation": 0.8122022971510887,
+        "ratio_to_limit": 1.8122022971510887
+      }
+    },
+    {
+      "absolute_stability_safe": false,
+      "admission_results": [
+        {
+          "absolute_stability_rejection_reasons": [],
+          "absolute_stability_safe": true,
+          "command": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "label": "stand",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [],
+            "absolute_stability_targets_met": true,
+            "absolute_stability_threshold_profile": "stand",
+            "achieved_command_frame_velocity": [
+              0.0002694393624551594,
+              4.083009480382316e-05,
+              0.00019086092652287334
+            ],
+            "achieved_planar_speed_mps": 0.00027251544301549585,
+            "base_height_peak_to_peak_m": 7.152557373046875e-07,
+            "base_height_std_m": 0.0,
+            "computed_demand_over_rating_fraction": 0.0,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 0.7109940648078918,
+            "maximum_computed_over_rating_burst_s": 0.0,
+            "maximum_tilt_degrees": 0.05233915522694588,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.1674045946497422,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.0,
+              "roll_pitch_angular_velocity_rms_radps": 0.0008436163625447078,
+              "tilt_rms_degrees": 0.04947028226322598,
+              "vertical_velocity_rms_mps": 0.00036925251021914713
+            },
+            "normalized_stability_composite": 0.012670787783997458,
+            "normalized_tracking_score": 0.0027380359824746847,
+            "peak_abs_computed_nm": 0.7117680907249451,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.00027380359824746847,
+            "rms_applied_nm": 0.44956880807876587,
+            "roll_pitch_angular_velocity_p95_radps": 0.0003334552457090467,
+            "roll_pitch_angular_velocity_rms_radps": 0.00023621258151251823,
+            "samples": 275,
+            "tail_stability_targets_met": true,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": true
+            },
+            "tilt_p95_degrees": 0.04845663905143738,
+            "tilt_rms_degrees": 0.04452325403690338,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 3.8833135477034375e-05,
+            "vertical_velocity_rms_mps": 2.58476757153403e-05,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.0,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_1",
+            "yaw_rate_rmse_radps": 0.00019785315089393407
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.10581 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.16,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p16",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.10581 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.1590103805065155,
+              -0.003995212726294994,
+              -0.02038596197962761
+            ],
+            "achieved_planar_speed_mps": 0.1590605634139248,
+            "base_height_peak_to_peak_m": 0.00757230818271637,
+            "base_height_std_m": 0.002610992407426238,
+            "computed_demand_over_rating_fraction": 0.042222220450639725,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.0958729982376099,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 0.9082753658294678,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5540179279491757,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.7459978306932109,
+              "roll_pitch_angular_velocity_rms_radps": 0.821608624288014,
+              "tilt_rms_degrees": 0.6395192941029867,
+              "vertical_velocity_rms_mps": 0.8405719484601701
+            },
+            "normalized_stability_composite": 0.7619244243860954,
+            "normalized_tracking_score": 0.24500079452991486,
+            "peak_abs_computed_nm": 2.553739070892334,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.024500079452991486,
+            "rms_applied_nm": 0.7781179547309875,
+            "roll_pitch_angular_velocity_p95_radps": 0.3423844873905182,
+            "roll_pitch_angular_velocity_rms_radps": 0.23005041480064392,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 0.8488979935646057,
+            "tilt_rms_degrees": 0.575567364692688,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.09075750410556793,
+            "vertical_velocity_rms_mps": 0.058840036392211914,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.2072727233171463,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.10580576956272125
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.11025 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.11025 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.19613760709762573,
+              0.0005163457826711237,
+              -0.02571708895266056
+            ],
+            "achieved_planar_speed_mps": 0.1961382867543965,
+            "base_height_peak_to_peak_m": 0.009001404047012329,
+            "base_height_std_m": 0.0030578551813960075,
+            "computed_demand_over_rating_fraction": 0.05838383734226227,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1607019901275635,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.0462366342544556,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5895899260069901,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.8736729089702878,
+              "roll_pitch_angular_velocity_rms_radps": 0.8816466799804141,
+              "tilt_rms_degrees": 0.7517913315031264,
+              "vertical_velocity_rms_mps": 0.9579143353870936
+            },
+            "normalized_stability_composite": 0.8662563139602304,
+            "normalized_tracking_score": 0.22675007581710815,
+            "peak_abs_computed_nm": 2.501983880996704,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.022675007581710815,
+            "rms_applied_nm": 0.823394238948822,
+            "roll_pitch_angular_velocity_p95_radps": 0.41324320435523987,
+            "roll_pitch_angular_velocity_rms_radps": 0.246861070394516,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.0168333053588867,
+            "tilt_rms_degrees": 0.6766121983528137,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.0955740213394165,
+            "vertical_velocity_rms_mps": 0.06705400347709656,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.23999999463558197,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_5",
+            "yaw_rate_rmse_radps": 0.11024795472621918
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "roll/pitch-rate RMS 0.32582 rad/s exceeds absolute target 0.28000 rad/s",
+            "tilt RMS 0.90578 deg exceeds absolute target 0.90000 deg",
+            "roll/pitch-rate p95 0.52832 rad/s exceeds absolute target 0.45000 rad/s",
+            "yaw-rate RMSE 0.14364 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": false,
+              "tilt_rms_degrees": false,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": false,
+            "absolute_stability_target_reasons": [
+              "roll/pitch-rate RMS 0.32582 rad/s exceeds absolute target 0.28000 rad/s",
+              "tilt RMS 0.90578 deg exceeds absolute target 0.90000 deg",
+              "roll/pitch-rate p95 0.52832 rad/s exceeds absolute target 0.45000 rad/s",
+              "yaw-rate RMSE 0.14364 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.2413633018732071,
+              0.014442361891269684,
+              0.0035405470989644527
+            ],
+            "achieved_planar_speed_mps": 0.24179500678908836,
+            "base_height_peak_to_peak_m": 0.01045750081539154,
+            "base_height_std_m": 0.003401033114641905,
+            "computed_demand_over_rating_fraction": 0.09373737126588821,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1297837495803833,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.5894240140914917,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": false,
+            "normalized_load_score": 0.701127512404671,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.9717237470405442,
+              "roll_pitch_angular_velocity_rms_radps": 1.1636361479759216,
+              "tilt_rms_degrees": 1.0064225726657443,
+              "vertical_velocity_rms_mps": 0.9632148912974765
+            },
+            "normalized_stability_composite": 1.0262493397449215,
+            "normalized_tracking_score": 0.692128911614418,
+            "peak_abs_computed_nm": 2.896608591079712,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.0692128911614418,
+            "rms_applied_nm": 0.903576135635376,
+            "roll_pitch_angular_velocity_p95_radps": 0.5283243656158447,
+            "roll_pitch_angular_velocity_rms_radps": 0.32581812143325806,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": false,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.3663448095321655,
+            "tilt_rms_degrees": 0.9057803153991699,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.10086510330438614,
+            "vertical_velocity_rms_mps": 0.06742504239082336,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.22545453906059265,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.1436355710029602
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        }
+      ],
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_6.pt",
+      "diagnostic_results": [],
+      "failed_absolute_stability_command_count": 3,
+      "failed_operational_command_count": 0,
+      "formal_admission_eligible": false,
+      "four_command_contract_safe": false,
+      "input_report_index": 7,
+      "input_result_row_count": 4,
+      "label": "accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_6.pt",
+      "maximum_moving_normalized_stability_composite": 1.0262493397449215,
+      "maximum_torque_burst_s": 0.1,
+      "maximum_torque_duty_fraction": 0.09373737126588821,
+      "maximum_torque_peak_nm": 2.896608591079712,
+      "maximum_worst_per_joint_torque_duty_fraction": 0.23999999463558197,
+      "mean_moving_normalized_stability_composite": 0.8848100260304158,
+      "mean_moving_normalized_tracking_score": 0.38795992732048035,
+      "mean_moving_planar_velocity_rmse_mps": 0.038795992732048035,
+      "operational_safe": true,
+      "relative_to_baseline": {
+        "moving_stability_improvement_fraction": 0.0019652510905406873,
+        "moving_tracking_rmse_improvement_fraction": -0.005148243686773135
+      },
+      "sample_contract_mode": "diagnostic_short_duration",
+      "selected_admission_row_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "selected_diagnostic_row_indices": [],
+      "stand_normalized_stability_composite": 0.012670787783997458,
+      "threshold_diagnostics": {
+        "adjacent_jumps": [
+          {
+            "achieved_vx_gain_per_command_delta": 0.4522569477558137,
+            "command_delta_mps": 0.09999999999999998,
+            "falls_delta": 0,
+            "from_command_vx_mps": 0.2,
+            "largest_normalized_jump": 0.4653788357973099,
+            "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+            "metric_deltas": {
+              "achieved_vx_mps": 0.04522569477558136,
+              "normalized_stability_composite": 0.1599930257846911,
+              "planar_velocity_rmse_mps": 0.04653788357973099,
+              "torque_burst_s": 0.020000000000000004,
+              "torque_duty_fraction": 0.035353533923625946,
+              "torque_peak_nm": 0.3946247100830078,
+              "worst_per_joint_torque_duty_fraction": -0.014545455574989319
+            },
+            "normalized_metric_deltas": {
+              "achieved_vx_mps": 0.15075231591860455,
+              "normalized_stability_composite": 0.1599930257846911,
+              "planar_velocity_rmse_mps": 0.4653788357973099,
+              "torque_burst_s": 0.14285714285714288,
+              "torque_duty_fraction": 0.23569022615750632,
+              "torque_peak_nm": 0.08968743410977449,
+              "worst_per_joint_torque_duty_fraction": -0.058181822299957275
+            },
+            "timeouts_delta": 0,
+            "to_command_vx_mps": 0.3
+          }
+        ],
+        "complete": false,
+        "largest_adjacent_normalized_jump": {
+          "achieved_vx_gain_per_command_delta": 0.4522569477558137,
+          "command_delta_mps": 0.09999999999999998,
+          "falls_delta": 0,
+          "from_command_vx_mps": 0.2,
+          "largest_normalized_jump": 0.4653788357973099,
+          "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+          "metric_deltas": {
+            "achieved_vx_mps": 0.04522569477558136,
+            "normalized_stability_composite": 0.1599930257846911,
+            "planar_velocity_rmse_mps": 0.04653788357973099,
+            "torque_burst_s": 0.020000000000000004,
+            "torque_duty_fraction": 0.035353533923625946,
+            "torque_peak_nm": 0.3946247100830078,
+            "worst_per_joint_torque_duty_fraction": -0.014545455574989319
+          },
+          "normalized_metric_deltas": {
+            "achieved_vx_mps": 0.15075231591860455,
+            "normalized_stability_composite": 0.1599930257846911,
+            "planar_velocity_rmse_mps": 0.4653788357973099,
+            "torque_burst_s": 0.14285714285714288,
+            "torque_duty_fraction": 0.23569022615750632,
+            "torque_peak_nm": 0.08968743410977449,
+            "worst_per_joint_torque_duty_fraction": -0.058181822299957275
+          },
+          "timeouts_delta": 0,
+          "to_command_vx_mps": 0.3
+        },
+        "missing_command_vx_mps": [
+          0.23,
+          0.24,
+          0.25
+        ],
+        "points": [
+          {
+            "achieved_vx_mps": 0.19613760709762573,
+            "command_vx_mps": 0.2,
+            "falls": 0,
+            "normalized_stability_composite": 0.8662563139602304,
+            "planar_velocity_rmse_mps": 0.022675007581710815,
+            "timeouts": 0,
+            "torque_burst_s": 0.08,
+            "torque_duty_fraction": 0.05838383734226227,
+            "torque_peak_nm": 2.501983880996704,
+            "worst_per_joint_name": "revolute_1_5",
+            "worst_per_joint_torque_duty_fraction": 0.23999999463558197
+          },
+          {
+            "achieved_vx_mps": 0.2413633018732071,
+            "command_vx_mps": 0.3,
+            "falls": 0,
+            "normalized_stability_composite": 1.0262493397449215,
+            "planar_velocity_rmse_mps": 0.0692128911614418,
+            "timeouts": 0,
+            "torque_burst_s": 0.1,
+            "torque_duty_fraction": 0.09373737126588821,
+            "torque_peak_nm": 2.896608591079712,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.22545453906059265
+          }
+        ],
+        "threshold_boundary_0p23_to_0p24": null
+      },
+      "total_falls": 0,
+      "total_timeouts": 0,
+      "worst_normalized_gate": {
+        "command": "forward_0p30",
+        "metric": "tail_yaw_rate_rmse_radps",
+        "normalized_violation": 0.7954446375370026,
+        "ratio_to_limit": 1.7954446375370026
+      }
+    },
+    {
+      "absolute_stability_safe": false,
+      "admission_results": [
+        {
+          "absolute_stability_rejection_reasons": [],
+          "absolute_stability_safe": true,
+          "command": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "label": "stand",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [],
+            "absolute_stability_targets_met": true,
+            "absolute_stability_threshold_profile": "stand",
+            "achieved_command_frame_velocity": [
+              0.0002694393624551594,
+              4.083009480382316e-05,
+              0.00019086092652287334
+            ],
+            "achieved_planar_speed_mps": 0.00027251544301549585,
+            "base_height_peak_to_peak_m": 7.152557373046875e-07,
+            "base_height_std_m": 0.0,
+            "computed_demand_over_rating_fraction": 0.0,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 0.7109940648078918,
+            "maximum_computed_over_rating_burst_s": 0.0,
+            "maximum_tilt_degrees": 0.05233915522694588,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.1674045946497422,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.0,
+              "roll_pitch_angular_velocity_rms_radps": 0.0008436163625447078,
+              "tilt_rms_degrees": 0.04947028226322598,
+              "vertical_velocity_rms_mps": 0.00036925251021914713
+            },
+            "normalized_stability_composite": 0.012670787783997458,
+            "normalized_tracking_score": 0.0027380359824746847,
+            "peak_abs_computed_nm": 0.7117680907249451,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.00027380359824746847,
+            "rms_applied_nm": 0.44956880807876587,
+            "roll_pitch_angular_velocity_p95_radps": 0.0003334552457090467,
+            "roll_pitch_angular_velocity_rms_radps": 0.00023621258151251823,
+            "samples": 275,
+            "tail_stability_targets_met": true,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": true
+            },
+            "tilt_p95_degrees": 0.04845663905143738,
+            "tilt_rms_degrees": 0.04452325403690338,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 3.8833135477034375e-05,
+            "vertical_velocity_rms_mps": 2.58476757153403e-05,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.0,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_1",
+            "yaw_rate_rmse_radps": 0.00019785315089393407
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.10407 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.16,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p16",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.10407 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.15978176891803741,
+              -0.0034342750441282988,
+              -0.020419515669345856
+            ],
+            "achieved_planar_speed_mps": 0.1598186720119268,
+            "base_height_peak_to_peak_m": 0.007754415273666382,
+            "base_height_std_m": 0.0026223817840218544,
+            "computed_demand_over_rating_fraction": 0.045858584344387054,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.0833733081817627,
+            "maximum_computed_over_rating_burst_s": 0.06,
+            "maximum_tilt_degrees": 0.9007034301757812,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.5133370352965413,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.7492519382919584,
+              "roll_pitch_angular_velocity_rms_radps": 0.8094453918082373,
+              "tilt_rms_degrees": 0.6459497080908881,
+              "vertical_velocity_rms_mps": 0.8346572518348693
+            },
+            "normalized_stability_composite": 0.7598260725064883,
+            "normalized_tracking_score": 0.2326800860464573,
+            "peak_abs_computed_nm": 2.398944854736328,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.02326800860464573,
+            "rms_applied_nm": 0.7797788381576538,
+            "roll_pitch_angular_velocity_p95_radps": 0.34868013858795166,
+            "roll_pitch_angular_velocity_rms_radps": 0.22664470970630646,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 0.8660591244697571,
+            "tilt_rms_degrees": 0.5813547372817993,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.08770912140607834,
+            "vertical_velocity_rms_mps": 0.05842600762844086,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.1963636428117752,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.10406894981861115
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "yaw-rate RMSE 0.11058 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": true,
+              "tilt_rms_degrees": true,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": true,
+            "absolute_stability_target_reasons": [
+              "yaw-rate RMSE 0.11058 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.19611647725105286,
+              0.0005163257010281086,
+              -0.029328079894185066
+            ],
+            "achieved_planar_speed_mps": 0.19611715692817971,
+            "base_height_peak_to_peak_m": 0.008916348218917847,
+            "base_height_std_m": 0.003041976597160101,
+            "computed_demand_over_rating_fraction": 0.056767676025629044,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1660594940185547,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.0522047281265259,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": true,
+            "normalized_load_score": 0.6221409404077829,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.8691361706171716,
+              "roll_pitch_angular_velocity_rms_radps": 0.8775240608624049,
+              "tilt_rms_degrees": 0.7487307654486762,
+              "vertical_velocity_rms_mps": 0.9502163955143519
+            },
+            "normalized_stability_composite": 0.8614018481106511,
+            "normalized_tracking_score": 0.22573865950107574,
+            "peak_abs_computed_nm": 2.476879835128784,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.022573865950107574,
+            "rms_applied_nm": 0.8249773979187012,
+            "roll_pitch_angular_velocity_p95_radps": 0.40714406967163086,
+            "roll_pitch_angular_velocity_rms_radps": 0.2457067370414734,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": true,
+              "maximum_tilt_degrees": true,
+              "roll_pitch_angular_velocity_p95_radps": true,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.01255202293396,
+            "tilt_rms_degrees": 0.6738576889038086,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.09447448700666428,
+            "vertical_velocity_rms_mps": 0.06651514768600464,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.2327272742986679,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_5",
+            "yaw_rate_rmse_radps": 0.11057782918214798
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        },
+        {
+          "absolute_stability_rejection_reasons": [
+            "roll/pitch-rate RMS 0.33036 rad/s exceeds absolute target 0.28000 rad/s",
+            "tilt RMS 0.92931 deg exceeds absolute target 0.90000 deg",
+            "base-height peak-to-peak 0.01083 m exceeds absolute target 0.01050 m",
+            "roll/pitch-rate p95 0.53594 rad/s exceeds absolute target 0.45000 rad/s",
+            "maximum tilt 1.84441 deg exceeds absolute target 1.70000 deg",
+            "yaw-rate RMSE 0.14366 rad/s exceeds absolute target 0.08000 rad/s"
+          ],
+          "absolute_stability_safe": false,
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "absolute_stability_component_targets_met": {
+              "base_height_std_m": true,
+              "roll_pitch_angular_velocity_rms_radps": false,
+              "tilt_rms_degrees": false,
+              "vertical_velocity_rms_mps": true
+            },
+            "absolute_stability_rms_targets_met": false,
+            "absolute_stability_target_reasons": [
+              "roll/pitch-rate RMS 0.33036 rad/s exceeds absolute target 0.28000 rad/s",
+              "tilt RMS 0.92931 deg exceeds absolute target 0.90000 deg",
+              "base-height peak-to-peak 0.01083 m exceeds absolute target 0.01050 m",
+              "roll/pitch-rate p95 0.53594 rad/s exceeds absolute target 0.45000 rad/s",
+              "maximum tilt 1.84441 deg exceeds absolute target 1.70000 deg",
+              "yaw-rate RMSE 0.14366 rad/s exceeds absolute target 0.08000 rad/s"
+            ],
+            "absolute_stability_targets_met": false,
+            "absolute_stability_threshold_profile": "moving",
+            "achieved_command_frame_velocity": [
+              0.2410440593957901,
+              0.016682540997862816,
+              0.00721456203609705
+            ],
+            "achieved_planar_speed_mps": 0.24162066497745296,
+            "base_height_peak_to_peak_m": 0.010825961828231812,
+            "base_height_std_m": 0.00341796875,
+            "computed_demand_over_rating_fraction": 0.09575757384300232,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1522217988967896,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8444050550460815,
+            "measured_seconds": 5.5,
+            "moving_normalized_stability_composite_at_or_below_one": false,
+            "normalized_load_score": 0.7275277234259105,
+            "normalized_stability_components": {
+              "base_height_std_m": 0.9765625,
+              "roll_pitch_angular_velocity_rms_radps": 1.1798635125160215,
+              "tilt_rms_degrees": 1.0325653685463798,
+              "vertical_velocity_rms_mps": 0.9659586208207266
+            },
+            "normalized_stability_composite": 1.038737500470782,
+            "normalized_tracking_score": 0.7075930386781693,
+            "peak_abs_computed_nm": 3.231473445892334,
+            "per_joint_torque_row_count": 18,
+            "planar_velocity_rmse_mps": 0.07075930386781693,
+            "rms_applied_nm": 0.9077527523040771,
+            "roll_pitch_angular_velocity_p95_radps": 0.5359411835670471,
+            "roll_pitch_angular_velocity_rms_radps": 0.3303617835044861,
+            "samples": 275,
+            "tail_stability_targets_met": false,
+            "tail_stability_targets_met_by_component": {
+              "base_height_peak_to_peak_m": false,
+              "maximum_tilt_degrees": false,
+              "roll_pitch_angular_velocity_p95_radps": false,
+              "tilt_p95_degrees": true,
+              "vertical_velocity_abs_p95_mps": true,
+              "yaw_rate_rmse_radps": false
+            },
+            "tilt_p95_degrees": 1.3881282806396484,
+            "tilt_rms_degrees": 0.9293088316917419,
+            "timeouts": 0,
+            "vertical_velocity_abs_p95_mps": 0.10186188668012619,
+            "vertical_velocity_rms_mps": 0.06761710345745087,
+            "worst_per_joint_computed_demand_over_rating_fraction": 0.2327272742986679,
+            "worst_per_joint_computed_demand_over_rating_name": "revolute_1_4",
+            "yaw_rate_rmse_radps": 0.14365768432617188
+          },
+          "operational_rejection_reasons": [],
+          "operational_safe": true
+        }
+      ],
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_7.pt",
+      "diagnostic_results": [],
+      "failed_absolute_stability_command_count": 3,
+      "failed_operational_command_count": 0,
+      "formal_admission_eligible": false,
+      "four_command_contract_safe": false,
+      "input_report_index": 8,
+      "input_result_row_count": 4,
+      "label": "accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_7.pt",
+      "maximum_moving_normalized_stability_composite": 1.038737500470782,
+      "maximum_torque_burst_s": 0.1,
+      "maximum_torque_duty_fraction": 0.09575757384300232,
+      "maximum_torque_peak_nm": 3.231473445892334,
+      "maximum_worst_per_joint_torque_duty_fraction": 0.2327272742986679,
+      "mean_moving_normalized_stability_composite": 0.8866551403626405,
+      "mean_moving_normalized_tracking_score": 0.38867059474190074,
+      "mean_moving_planar_velocity_rmse_mps": 0.03886705947419008,
+      "operational_safe": true,
+      "relative_to_baseline": {
+        "moving_stability_improvement_fraction": -0.00011597331367707575,
+        "moving_tracking_rmse_improvement_fraction": -0.0069894805264123505
+      },
+      "sample_contract_mode": "diagnostic_short_duration",
+      "selected_admission_row_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "selected_diagnostic_row_indices": [],
+      "stand_normalized_stability_composite": 0.012670787783997458,
+      "threshold_diagnostics": {
+        "adjacent_jumps": [
+          {
+            "achieved_vx_gain_per_command_delta": 0.44927582144737255,
+            "command_delta_mps": 0.09999999999999998,
+            "falls_delta": 0,
+            "from_command_vx_mps": 0.2,
+            "largest_normalized_jump": 0.4818543791770935,
+            "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+            "metric_deltas": {
+              "achieved_vx_mps": 0.044927582144737244,
+              "normalized_stability_composite": 0.17733565236013082,
+              "planar_velocity_rmse_mps": 0.04818543791770935,
+              "torque_burst_s": 0.0,
+              "torque_duty_fraction": 0.038989897817373276,
+              "torque_peak_nm": 0.7545936107635498,
+              "worst_per_joint_torque_duty_fraction": 0.0
+            },
+            "normalized_metric_deltas": {
+              "achieved_vx_mps": 0.14975860714912415,
+              "normalized_stability_composite": 0.17733565236013082,
+              "planar_velocity_rmse_mps": 0.4818543791770935,
+              "torque_burst_s": 0.0,
+              "torque_duty_fraction": 0.25993265211582184,
+              "torque_peak_nm": 0.17149854790080676,
+              "worst_per_joint_torque_duty_fraction": 0.0
+            },
+            "timeouts_delta": 0,
+            "to_command_vx_mps": 0.3
+          }
+        ],
+        "complete": false,
+        "largest_adjacent_normalized_jump": {
+          "achieved_vx_gain_per_command_delta": 0.44927582144737255,
+          "command_delta_mps": 0.09999999999999998,
+          "falls_delta": 0,
+          "from_command_vx_mps": 0.2,
+          "largest_normalized_jump": 0.4818543791770935,
+          "largest_normalized_jump_metric": "planar_velocity_rmse_mps",
+          "metric_deltas": {
+            "achieved_vx_mps": 0.044927582144737244,
+            "normalized_stability_composite": 0.17733565236013082,
+            "planar_velocity_rmse_mps": 0.04818543791770935,
+            "torque_burst_s": 0.0,
+            "torque_duty_fraction": 0.038989897817373276,
+            "torque_peak_nm": 0.7545936107635498,
+            "worst_per_joint_torque_duty_fraction": 0.0
+          },
+          "normalized_metric_deltas": {
+            "achieved_vx_mps": 0.14975860714912415,
+            "normalized_stability_composite": 0.17733565236013082,
+            "planar_velocity_rmse_mps": 0.4818543791770935,
+            "torque_burst_s": 0.0,
+            "torque_duty_fraction": 0.25993265211582184,
+            "torque_peak_nm": 0.17149854790080676,
+            "worst_per_joint_torque_duty_fraction": 0.0
+          },
+          "timeouts_delta": 0,
+          "to_command_vx_mps": 0.3
+        },
+        "missing_command_vx_mps": [
+          0.23,
+          0.24,
+          0.25
+        ],
+        "points": [
+          {
+            "achieved_vx_mps": 0.19611647725105286,
+            "command_vx_mps": 0.2,
+            "falls": 0,
+            "normalized_stability_composite": 0.8614018481106511,
+            "planar_velocity_rmse_mps": 0.022573865950107574,
+            "timeouts": 0,
+            "torque_burst_s": 0.1,
+            "torque_duty_fraction": 0.056767676025629044,
+            "torque_peak_nm": 2.476879835128784,
+            "worst_per_joint_name": "revolute_1_5",
+            "worst_per_joint_torque_duty_fraction": 0.2327272742986679
+          },
+          {
+            "achieved_vx_mps": 0.2410440593957901,
+            "command_vx_mps": 0.3,
+            "falls": 0,
+            "normalized_stability_composite": 1.038737500470782,
+            "planar_velocity_rmse_mps": 0.07075930386781693,
+            "timeouts": 0,
+            "torque_burst_s": 0.1,
+            "torque_duty_fraction": 0.09575757384300232,
+            "torque_peak_nm": 3.231473445892334,
+            "worst_per_joint_name": "revolute_1_4",
+            "worst_per_joint_torque_duty_fraction": 0.2327272742986679
+          }
+        ],
+        "threshold_boundary_0p23_to_0p24": null
+      },
+      "total_falls": 0,
+      "total_timeouts": 0,
+      "worst_normalized_gate": {
+        "command": "forward_0p30",
+        "metric": "tail_yaw_rate_rmse_radps",
+        "normalized_violation": 0.7957210540771484,
+        "ratio_to_limit": 1.7957210540771484
+      }
+    }
+  ],
+  "formal_admission_eligible": false,
+  "four_command_contract_safe_count": 0,
+  "ranked_checkpoints": [
+    "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-25_23-44-14_accel_scale4_yaw160_trackguard_20260825T234500Z_seed86/model_2.pt",
+    "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_2.pt",
+    "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_3.pt",
+    "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_0.pt",
+    "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_6.pt",
+    "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_7.pt",
+    "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_5.pt",
+    "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_4.pt",
+    "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-26_03-20-25_accel_probe15_friction_yaw_ref2_slew040_retry1_20260826T032000Z/model_1.pt"
+  ],
+  "sample_contract": {
+    "expected_measured_seconds": 5.5,
+    "expected_samples": 275,
+    "formal_admission_eligible": false,
+    "formal_expected_measured_seconds": 9.5,
+    "formal_expected_samples": 475,
+    "mode": "diagnostic_short_duration",
+    "policy_step_seconds": 0.02,
+    "requested_steps": 300,
+    "warmup_steps": 25
+  },
+  "schema_version": 1,
+  "task": "Isaac-Velocity-Omni-Recovery-Stage2C-Stabilized-Forward-Hexapod-RobStride-Direct-v0"
+}

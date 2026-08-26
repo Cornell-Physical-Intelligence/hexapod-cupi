@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+# The workspace's top-level artifacts directory is intentionally root-owned on
+# Spark, while this Phase-2 subtree is owned by the deployment user.
+artifact_root=${workspace_host}/artifacts/phase2_recovery_stage1/stance_validation
+steps=250
+num_envs=32
+timeout_seconds=180
+training_unit=hexapod-rl-training.service
+
+if (( $# > 1 )); then
+  echo "usage: $0 [run-name]" >&2
+  exit 64
+fi
+
+if (( $# == 1 )); then
+  run_name=$1
+  if [[ ! "${run_name}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+    || [[ "${run_name}" == "." || "${run_name}" == ".." ]]; then
+    echo "run name must be one safe directory name: ${run_name@Q}" >&2
+    exit 64
+  fi
+else
+  run_name=$(date -u +%Y%m%dT%H%M%SZ)_zero_action_stance_sweep
+fi
+
+for required_command in docker timeout python3 flock; do
+  if ! command -v "${required_command}" >/dev/null 2>&1; then
+    echo "required command is unavailable: ${required_command}" >&2
+    exit 69
+  fi
+done
+if [[ ! -d "${isaac_lab_dir}" || ! -d "${workspace_host}/isaaclab" ]]; then
+  echo "Spark workspace or Isaac Lab checkout is missing" >&2
+  exit 66
+fi
+if command -v systemctl >/dev/null 2>&1 \
+  && systemctl is-active --quiet "${training_unit}"; then
+  echo "refusing to contend with active training unit ${training_unit}" >&2
+  exit 75
+fi
+
+exec 9>/tmp/hexapod-stance-validation.lock
+if ! flock -n 9; then
+  echo "another stance validation sweep is already active" >&2
+  exit 75
+fi
+
+artifact_dir=${artifact_root}/${run_name}
+if [[ -e "${artifact_dir}" ]]; then
+  echo "refusing to overwrite existing artifact directory: ${artifact_dir}" >&2
+  exit 73
+fi
+if ! mkdir -p "${artifact_dir}"; then
+  echo "could not create artifact directory: ${artifact_dir}" >&2
+  exit 73
+fi
+
+candidate_names=(current halfway recommended)
+root_heights=(0.210 0.198 0.185)
+femur_angles=(0.4000 0.5000 0.6000)
+tibia_angles=(2.1000 2.1700 2.2335)
+candidate_statuses=()
+
+if ! cd "${isaac_lab_dir}"; then
+  echo "could not enter Isaac Lab checkout: ${isaac_lab_dir}" >&2
+  exit 66
+fi
+for index in "${!candidate_names[@]}"; do
+  name=${candidate_names[index]}
+  root_height=${root_heights[index]}
+  femur_angle=${femur_angles[index]}
+  tibia_angle=${tibia_angles[index]}
+  log_path=${artifact_dir}/${name}.log
+  container_name=hexapod-stance-${name}-$$
+
+  printf 'candidate=%s\nroot_height_m=%s\nfemur_angle_rad=%s\ntibia_angle_rad=%s\n' \
+    "${name}" "${root_height}" "${femur_angle}" "${tibia_angle}" >"${log_path}"
+  printf 'running %-11s root=%s femur=%s tibia=%s\n' \
+    "${name}" "${root_height}" "${femur_angle}" "${tibia_angle}"
+
+  timeout \
+    --signal=INT \
+    --kill-after=30s \
+    "${timeout_seconds}s" \
+    docker compose \
+      --env-file docker/.env.base \
+      -f docker/docker-compose.yaml \
+      --profile base \
+      run \
+      --rm \
+      --name "${container_name}" \
+      -w "${workspace_container}/isaaclab" \
+      -e PYTHONPATH="${workspace_container}/isaaclab" \
+      -e PYTHONDONTWRITEBYTECODE=1 \
+      -v "${workspace_host}:${workspace_container}:rw" \
+      --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+      isaac-lab-base \
+      "${workspace_container}/isaaclab/validate.py" \
+      --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+      --steps "${steps}" \
+      --num_envs "${num_envs}" \
+      --root-height-m "${root_height}" \
+      --femur-angle-rad "${femur_angle}" \
+      --tibia-angle-rad "${tibia_angle}" \
+      --device cuda:0 \
+      >>"${log_path}" 2>&1
+  status=$?
+  candidate_statuses+=("${status}")
+  printf 'launcher_exit_code=%s\n' "${status}" >>"${log_path}"
+
+  # The exact per-process name makes cleanup safe even if Docker did not honor
+  # --rm after timeout. A failed candidate never prevents the next candidate.
+  docker rm -f "${container_name}" >/dev/null 2>&1 || true
+  if (( status == 0 )); then
+    printf 'completed %-11s PASS\n' "${name}"
+  elif (( status == 124 )); then
+    printf 'completed %-11s TIMEOUT (continuing)\n' "${name}" >&2
+  else
+    printf 'completed %-11s FAIL=%d (continuing)\n' "${name}" "${status}" >&2
+  fi
+done
+
+summary_args=()
+for index in "${!candidate_names[@]}"; do
+  name=${candidate_names[index]}
+  summary_args+=(
+    --candidate
+    "${name}"
+    "${root_heights[index]}"
+    "${femur_angles[index]}"
+    "${tibia_angles[index]}"
+    "${artifact_dir}/${name}.log"
+    "${candidate_statuses[index]}"
+  )
+done
+
+python3 "${workspace_host}/isaaclab/summarize_stance_validation.py" \
+  --json "${artifact_dir}/comparison.json" \
+  --steps "${steps}" \
+  --num-envs "${num_envs}" \
+  --timeout-seconds "${timeout_seconds}" \
+  "${summary_args[@]}" \
+  2>&1 | tee "${artifact_dir}/comparison.log"
+summary_status=${PIPESTATUS[0]}
+
+printf 'stance sweep artifacts: %s\n' "${artifact_dir}"
+exit "${summary_status}"

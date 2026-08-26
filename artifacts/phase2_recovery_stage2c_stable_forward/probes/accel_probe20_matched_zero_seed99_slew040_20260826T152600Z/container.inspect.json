@@ -1,0 +1,577 @@
+[
+    {
+        "Id": "bf779a230a4b20254415b8592afd80bc0ab7d8a462546ad2ba04a47852bd781e",
+        "Created": "2026-08-26T15:29:40.706049842Z",
+        "Path": "/workspace/isaaclab/_isaac_sim/python.sh",
+        "Args": [
+            "/workspace/hexapod/isaaclab/train_model_only_resume.py",
+            "--kit_args=--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry",
+            "--std-min",
+            "0.06",
+            "--std-max",
+            "0.08",
+            "--task",
+            "Isaac-Velocity-Omni-Recovery-Stage2C-Stabilized-Forward-Hexapod-RobStride-Direct-v0",
+            "--external_callback",
+            "hexapod_rl.register.register_envs",
+            "--num_envs",
+            "12288",
+            "--max_iterations",
+            "12",
+            "--run_name",
+            "accel_probe20_matched_zero_seed99_slew040_20260826T152600Z",
+            "--seed",
+            "99",
+            "--resume",
+            "--load_run",
+            "^2026-08-25_23-44-14_accel_scale4_yaw160_trackguard_20260825T234500Z_seed86$",
+            "--checkpoint",
+            "^model_2[.]pt$",
+            "agent.save_interval=1",
+            "agent.algorithm.learning_rate=2.0e-5",
+            "agent.algorithm.clip_param=0.06",
+            "env.gate_longitudinal_reward_by_command=false",
+            "env.longitudinal_signed_progress_reward_scale=2.0",
+            "env.longitudinal_normalized_error_penalty_scale=1.0",
+            "env.inactive_yaw_rate_reward_scale=-160.0",
+            "env.inactive_yaw_rate_slew_reward_scale=0.0",
+            "env.inactive_yaw_rate_slew_reference_rad_s_per_step=0.04",
+            "env.inactive_ground_contact_yaw_moment_reward_scale=0.0",
+            "env.inactive_ground_contact_yaw_moment_reference_nm=0.5",
+            "env.inactive_bilateral_longitudinal_contact_moment_reward_scale=0.0",
+            "env.inactive_bilateral_longitudinal_contact_moment_reference_nm=0.5",
+            "env.support_contact_low_speed_threshold_mps=0.18",
+            "env.support_contact_target_high_speed=4.0",
+            "env.support_shortfall_reward_scale=-0.90",
+            "env.rated_torque_excess_reward_scale=-0.65",
+            "env.max_joint_rated_torque_excess_l1_reward_scale=-0.50",
+            "env.torque_saturation_reward_scale=-1.50",
+            "env.joint_torque_slew_reward_scale=-0.01",
+            "env.processed_joint_target_slew_limit_rad_per_20ms=0.040",
+            "env.foot_slip_reward_scale=-0.50"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 195388,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2026-08-26T15:29:40.802345944Z",
+            "FinishedAt": "0001-01-01T00:00:00Z",
+            "Health": {
+                "Status": "unhealthy",
+                "FailingStreak": 14,
+                "Log": [
+                    {
+                        "Start": "2026-08-26T10:37:13.072402353-05:00",
+                        "End": "2026-08-26T10:37:13.111855787-05:00",
+                        "ExitCode": 1,
+                        "Output": ""
+                    },
+                    {
+                        "Start": "2026-08-26T10:37:43.115902924-05:00",
+                        "End": "2026-08-26T10:37:43.153494616-05:00",
+                        "ExitCode": 1,
+                        "Output": ""
+                    },
+                    {
+                        "Start": "2026-08-26T10:38:13.15864803-05:00",
+                        "End": "2026-08-26T10:38:13.201754412-05:00",
+                        "ExitCode": 1,
+                        "Output": ""
+                    },
+                    {
+                        "Start": "2026-08-26T10:38:43.206225734-05:00",
+                        "End": "2026-08-26T10:38:43.241130546-05:00",
+                        "ExitCode": 1,
+                        "Output": ""
+                    },
+                    {
+                        "Start": "2026-08-26T10:39:13.245503063-05:00",
+                        "End": "2026-08-26T10:39:13.281218045-05:00",
+                        "ExitCode": 1,
+                        "Output": ""
+                    }
+                ]
+            }
+        },
+        "Image": "sha256:8ddc1623d70d5dd622fd728ce4eb3f59dea6ce1ea5cfbe858353dab15e8d0ef8",
+        "ResolvConfPath": "/var/lib/docker/containers/bf779a230a4b20254415b8592afd80bc0ab7d8a462546ad2ba04a47852bd781e/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/bf779a230a4b20254415b8592afd80bc0ab7d8a462546ad2ba04a47852bd781e/hostname",
+        "HostsPath": "/var/lib/docker/containers/bf779a230a4b20254415b8592afd80bc0ab7d8a462546ad2ba04a47852bd781e/hosts",
+        "LogPath": "/var/lib/docker/containers/bf779a230a4b20254415b8592afd80bc0ab7d8a462546ad2ba04a47852bd781e/bf779a230a4b20254415b8592afd80bc0ab7d8a462546ad2ba04a47852bd781e-json.log",
+        "Name": "/hexapod-stage2c-single-accel_probe20_matched_zero_seed99_slew040_20260826T152600Z-195237",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "docker-default",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": [
+                "/home/orionh/IsaacLab/tools:/workspace/isaaclab/tools:rw",
+                "docker_isaac-cache-pip:/root/.cache/pip:rw",
+                "docker_isaac-logs:/root/.nvidia-omniverse/logs:rw",
+                "docker_isaac-carb-logs:/isaac-sim/kit/logs/Kit/Isaac-Sim:rw",
+                "docker_isaac-lab-docs:/workspace/isaaclab/docs/_build:rw",
+                "/home/orionh/HEXAPOD:/workspace/hexapod:rw",
+                "docker_isaac-cache-kit:/isaac-sim/kit/cache:rw",
+                "/home/orionh/IsaacLab/scripts:/workspace/isaaclab/scripts:rw",
+                "/home/orionh/IsaacLab/docs:/workspace/isaaclab/docs:rw",
+                "docker_isaac-cache-ov:/root/.cache/ov:rw",
+                "docker_isaac-cache-gl:/root/.cache/nvidia/GLCache:rw",
+                "docker_isaac-cache-compute:/root/.nv/ComputeCache:rw",
+                "docker_isaac-docs:/root/Documents:rw",
+                "/home/orionh/IsaacLab/source:/workspace/isaaclab/source:rw",
+                "docker_isaac-lab-logs:/workspace/isaaclab/logs:rw",
+                "docker_isaac-lab-data:/workspace/isaaclab/data_storage:rw",
+                "docker_isaac-data-kit:/isaac-sim/kit/data:rw",
+                "docker_isaac-data:/root/.local/share/ov/data:rw",
+                "/home/orionh/IsaacLab/docker/.isaac-lab-docker-history:/root/.bash_history:rw"
+            ],
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "host",
+            "PortBindings": {},
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": true,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": null,
+            "DnsOptions": null,
+            "DnsSearch": null,
+            "ExtraHosts": [],
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": null,
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": null,
+            "DeviceCgroupRules": null,
+            "DeviceRequests": [
+                {
+                    "Driver": "nvidia",
+                    "Count": -1,
+                    "DeviceIDs": null,
+                    "Capabilities": [
+                        [
+                            "gpu"
+                        ]
+                    ],
+                    "Options": null
+                }
+            ],
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/acpi",
+                "/proc/asound",
+                "/proc/interrupts",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/sys/devices/virtual/powercap",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "Storage": {
+            "RootFS": {
+                "Snapshot": {
+                    "Name": "overlayfs"
+                }
+            }
+        },
+        "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/home/orionh/HEXAPOD",
+                "Destination": "/workspace/hexapod",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/home/orionh/IsaacLab/docs",
+                "Destination": "/workspace/isaaclab/docs",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-docs",
+                "Source": "/var/lib/docker/volumes/docker_isaac-docs/_data",
+                "Destination": "/root/Documents",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-lab-logs",
+                "Source": "/var/lib/docker/volumes/docker_isaac-lab-logs/_data",
+                "Destination": "/workspace/isaaclab/logs",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-cache-kit",
+                "Source": "/var/lib/docker/volumes/docker_isaac-cache-kit/_data",
+                "Destination": "/isaac-sim/kit/cache",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-cache-gl",
+                "Source": "/var/lib/docker/volumes/docker_isaac-cache-gl/_data",
+                "Destination": "/root/.cache/nvidia/GLCache",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-cache-compute",
+                "Source": "/var/lib/docker/volumes/docker_isaac-cache-compute/_data",
+                "Destination": "/root/.nv/ComputeCache",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "bind",
+                "Source": "/home/orionh/IsaacLab/docker/.isaac-lab-docker-history",
+                "Destination": "/root/.bash_history",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/home/orionh/IsaacLab/tools",
+                "Destination": "/workspace/isaaclab/tools",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-lab-docs",
+                "Source": "/var/lib/docker/volumes/docker_isaac-lab-docs/_data",
+                "Destination": "/workspace/isaaclab/docs/_build",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "bind",
+                "Source": "/home/orionh/IsaacLab/source",
+                "Destination": "/workspace/isaaclab/source",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-lab-data",
+                "Source": "/var/lib/docker/volumes/docker_isaac-lab-data/_data",
+                "Destination": "/workspace/isaaclab/data_storage",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-data-kit",
+                "Source": "/var/lib/docker/volumes/docker_isaac-data-kit/_data",
+                "Destination": "/isaac-sim/kit/data",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-cache-pip",
+                "Source": "/var/lib/docker/volumes/docker_isaac-cache-pip/_data",
+                "Destination": "/root/.cache/pip",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-logs",
+                "Source": "/var/lib/docker/volumes/docker_isaac-logs/_data",
+                "Destination": "/root/.nvidia-omniverse/logs",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "bind",
+                "Source": "/home/orionh/IsaacLab/scripts",
+                "Destination": "/workspace/isaaclab/scripts",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-cache-ov",
+                "Source": "/var/lib/docker/volumes/docker_isaac-cache-ov/_data",
+                "Destination": "/root/.cache/ov",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-data",
+                "Source": "/var/lib/docker/volumes/docker_isaac-data/_data",
+                "Destination": "/root/.local/share/ov/data",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "docker_isaac-carb-logs",
+                "Source": "/var/lib/docker/volumes/docker_isaac-carb-logs/_data",
+                "Destination": "/isaac-sim/kit/logs/Kit/Isaac-Sim",
+                "Driver": "local",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": ""
+            }
+        ],
+        "Config": {
+            "Hostname": "spark-e26c",
+            "Domainname": "",
+            "User": "isaaclab",
+            "AttachStdin": true,
+            "AttachStdout": true,
+            "AttachStderr": true,
+            "Tty": false,
+            "OpenStdin": true,
+            "StdinOnce": true,
+            "Env": [
+                "ISAACSIM_VERSION=6.0.1",
+                "PYTHONDONTWRITEBYTECODE=1",
+                "ISAACSIM_PATH=/workspace/isaaclab/_isaac_sim",
+                "DOCKER_USER_HOME=/root",
+                "ISAACSIM_BASE_IMAGE=nvcr.io/nvidia/isaac-sim",
+                "DOCKER_ISAACLAB_PATH=/workspace/isaaclab",
+                "DOCKER_NAME_SUFFIX=",
+                "ACCEPT_EULA=Y",
+                "PYTHONPATH=/workspace/hexapod/isaaclab",
+                "DOCKER_ISAACSIM_ROOT_PATH=/isaac-sim",
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "NVIDIA_VISIBLE_DEVICES=all",
+                "NVIDIA_DRIVER_CAPABILITIES=all",
+                "VK_DRIVER_FILES=/etc/vulkan/icd.d/nvidia_icd.json",
+                "MIN_DRIVER_VERSION=570.169",
+                "HUB__CACHE__PATH=/var/cache/hub",
+                "HUB__ARGS__DETECT_ONLY=true",
+                "OMNICLIENT_HUB_EXE=/usr/local/bin/hub",
+                "ISAACSIM_ROOT_PATH=/isaac-sim",
+                "ISAACLAB_PATH=/workspace/isaaclab",
+                "HOME=/root",
+                "LANG=C.UTF-8",
+                "DEBIAN_FRONTEND=noninteractive"
+            ],
+            "Cmd": [
+                "/workspace/hexapod/isaaclab/train_model_only_resume.py",
+                "--kit_args=--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry",
+                "--std-min",
+                "0.06",
+                "--std-max",
+                "0.08",
+                "--task",
+                "Isaac-Velocity-Omni-Recovery-Stage2C-Stabilized-Forward-Hexapod-RobStride-Direct-v0",
+                "--external_callback",
+                "hexapod_rl.register.register_envs",
+                "--num_envs",
+                "12288",
+                "--max_iterations",
+                "12",
+                "--run_name",
+                "accel_probe20_matched_zero_seed99_slew040_20260826T152600Z",
+                "--seed",
+                "99",
+                "--resume",
+                "--load_run",
+                "^2026-08-25_23-44-14_accel_scale4_yaw160_trackguard_20260825T234500Z_seed86$",
+                "--checkpoint",
+                "^model_2[.]pt$",
+                "agent.save_interval=1",
+                "agent.algorithm.learning_rate=2.0e-5",
+                "agent.algorithm.clip_param=0.06",
+                "env.gate_longitudinal_reward_by_command=false",
+                "env.longitudinal_signed_progress_reward_scale=2.0",
+                "env.longitudinal_normalized_error_penalty_scale=1.0",
+                "env.inactive_yaw_rate_reward_scale=-160.0",
+                "env.inactive_yaw_rate_slew_reward_scale=0.0",
+                "env.inactive_yaw_rate_slew_reference_rad_s_per_step=0.04",
+                "env.inactive_ground_contact_yaw_moment_reward_scale=0.0",
+                "env.inactive_ground_contact_yaw_moment_reference_nm=0.5",
+                "env.inactive_bilateral_longitudinal_contact_moment_reward_scale=0.0",
+                "env.inactive_bilateral_longitudinal_contact_moment_reference_nm=0.5",
+                "env.support_contact_low_speed_threshold_mps=0.18",
+                "env.support_contact_target_high_speed=4.0",
+                "env.support_shortfall_reward_scale=-0.90",
+                "env.rated_torque_excess_reward_scale=-0.65",
+                "env.max_joint_rated_torque_excess_l1_reward_scale=-0.50",
+                "env.torque_saturation_reward_scale=-1.50",
+                "env.joint_torque_slew_reward_scale=-0.01",
+                "env.processed_joint_target_slew_limit_rad_per_20ms=0.040",
+                "env.foot_slip_reward_scale=-0.50"
+            ],
+            "Healthcheck": {
+                "Test": [
+                    "CMD-SHELL",
+                    "bash -c 'logdir=\"/isaac-sim/.nvidia-omniverse/logs/Kit\"; [ -d \"$logdir\" ] && latest=$(ls -t \"$logdir\"/*/*/kit_*.log 2>/dev/null | head -1) && [ -n \"$latest\" ] && grep -q \"AppReady\" \"$latest\" && exit 0; exit 1'"
+                ],
+                "Interval": 30000000000,
+                "Timeout": 10000000000,
+                "StartPeriod": 180000000000,
+                "Retries": 3
+            },
+            "Image": "isaac-lab-base",
+            "Volumes": null,
+            "WorkingDir": "/workspace/hexapod/isaaclab",
+            "Entrypoint": [
+                "/workspace/isaaclab/_isaac_sim/python.sh"
+            ],
+            "Labels": {
+                "com.docker.compose.config-hash": "7c7d1fc1b710fe9a45e8a7ed1b00ba7d7142c1c7e82e7bf1159a887c2b2de8ea",
+                "com.docker.compose.depends_on": "",
+                "com.docker.compose.image": "sha256:8ddc1623d70d5dd622fd728ce4eb3f59dea6ce1ea5cfbe858353dab15e8d0ef8",
+                "com.docker.compose.oneoff": "True",
+                "com.docker.compose.project": "docker",
+                "com.docker.compose.project.config_files": "/home/orionh/IsaacLab/docker/docker-compose.yaml",
+                "com.docker.compose.project.environment_file": "/home/orionh/IsaacLab/docker/.env.base",
+                "com.docker.compose.project.working_dir": "/home/orionh/IsaacLab/docker",
+                "com.docker.compose.service": "isaac-lab-base",
+                "com.docker.compose.slug": "762b78653abb905d3531486f1076b7404ff51ff84fef3ffb344eef1f0250513f",
+                "com.docker.compose.version": "5.0.1",
+                "description": "Dockerfile for building and running the Isaac Lab framework inside Isaac Sim container image.",
+                "org.opencontainers.image.ref.name": "ubuntu",
+                "org.opencontainers.image.version": "24.04",
+                "version": "2.1.1"
+            }
+        },
+        "NetworkSettings": {
+            "SandboxID": "5c0b7c7aa8043b160315808e89dfad71b020d71f190dc45cd5e4ac9035cf695b",
+            "SandboxKey": "/var/run/docker/netns/default",
+            "Ports": {},
+            "Networks": {
+                "host": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "9dc24c9ed96c6636c6f628674b85631738b86fee6599cfb93f0d52863508075d",
+                    "EndpointID": "5e435b06eee69acca9c017a99229effcb76099ac5158b7bac83c131c9c9f69d3",
+                    "Gateway": "",
+                    "IPAddress": "",
+                    "MacAddress": "",
+                    "IPPrefixLen": 0,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": null
+                }
+            }
+        },
+        "ImageManifestDescriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:5088fd980ec51f1655a75f7ae89a75d2409f7b2ae3e21dc25bb546336814aaf1",
+            "size": 7868,
+            "platform": {
+                "architecture": "arm64",
+                "os": "linux"
+            }
+        }
+    }
+]

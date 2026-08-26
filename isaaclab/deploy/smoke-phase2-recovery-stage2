@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+experiment=hexapod_robstride_phase2_recovery_stage2_direct
+task_id=Isaac-Velocity-Omni-Recovery-Stage2-Hexapod-RobStride-Direct-v0
+seed_host=${workspace_host}/isaaclab/logs/rsl_rl/${experiment}/seed_from_stage1_model25/model_25_stage1_seed.pt
+expected_sha256=f9f474ae10c4091b0efd2392bd9f0c31f63d4739ebb7428df3bb0827587d5b27
+smoke_dir=${workspace_host}/artifacts/phase2_recovery_stage2/smoke
+
+if (( $# != 0 )); then
+  echo "usage: $0" >&2
+  exit 64
+fi
+if systemctl is-active --quiet hexapod-rl-training.service; then
+  echo "refusing to contend with active hexapod training" >&2
+  exit 75
+fi
+printf '%s  %s\n' "${expected_sha256}" "${seed_host}" | sha256sum -c -
+
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+label=phase2_recovery_stage2_smoke_seed57_${stamp}
+container_name=hexapod-phase2-stage2-smoke-${stamp}
+mkdir -p "${smoke_dir}"
+log_path=${smoke_dir}/${label}.log
+
+cleanup() {
+  docker rm -f "${container_name}" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
+cd "${isaac_lab_dir}"
+timeout --signal=INT --kill-after=30s 180s \
+  docker compose \
+    --env-file docker/.env.base \
+    -f docker/docker-compose.yaml \
+    --profile base \
+    run \
+    --rm \
+    --name "${container_name}" \
+    -w "${workspace_container}/isaaclab" \
+    -e PYTHONPATH="${workspace_container}/isaaclab" \
+    -e PYTHONDONTWRITEBYTECODE=1 \
+    -v "${workspace_host}:${workspace_container}:rw" \
+    --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+    isaac-lab-base \
+    "${workspace_container}/isaaclab/train_model_only_resume.py" \
+    --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+    --std-min 0.08 \
+    --std-max 0.16 \
+    --task "${task_id}" \
+    --external_callback hexapod_rl.register.register_envs \
+    --num_envs 64 \
+    --max_iterations 1 \
+    --run_name "${label}" \
+    --seed 57 \
+    --resume \
+    --load_run seed_from_stage1_model25 \
+    --checkpoint 'model_25_stage1_seed[.]pt$' \
+  2>&1 | tee "${log_path}"
+
+grep -F '[RECOVERY] Loaded actor+critic only' "${log_path}" >/dev/null
+mapfile -t runs < <(
+  find "${workspace_host}/isaaclab/logs/rsl_rl/${experiment}" \
+    -mindepth 1 \
+    -maxdepth 1 \
+    -type d \
+    -name "*_${label}"
+)
+if (( ${#runs[@]} != 1 )); then
+  echo "expected one smoke run directory, found ${#runs[@]}" >&2
+  exit 1
+fi
+run_dir=${runs[0]}
+test -s "${run_dir}/model_0.pt"
+grep -F 'sampling_mode: stage2_recovery' "${run_dir}/params/env.yaml" >/dev/null
+grep -F 'nominal_height_m: 0.189' "${run_dir}/params/env.yaml" >/dev/null
+grep -F 'schedule: fixed' "${run_dir}/params/agent.yaml" >/dev/null
+printf '%s  %s\n' "${expected_sha256}" "${seed_host}" | sha256sum -c -
+
+printf 'SMOKE_PASS run=%s checkpoint=%s\n' "${run_dir}" "${run_dir}/model_0.pt"

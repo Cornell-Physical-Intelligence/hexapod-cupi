@@ -1,0 +1,244 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Train exactly one Stage2D homotopy stage from an already-staged immutable
+# model-only seed.  This script deliberately has no staging, repair, restart,
+# container-removal, or run-selection behavior.
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+training_container=hexapod-rl-training
+training_lock=/tmp/hexapod-stage2d-homotopy-training.lock
+
+usage() {
+  echo "usage: $0 C0|C1|C2|C3|C4|C5 exact-run-name /absolute/staged/seed.pt seed-sha256" >&2
+  exit 64
+}
+
+(( $# == 4 )) || usage
+stage=${1^^}
+run_name=$2
+seed_host=$3
+expected_seed_sha256=${4,,}
+
+case "${stage}" in
+  C0)
+    task_id=Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C0-Hexapod-RobStride-Direct-v0
+    experiment=hexapod_robstride_phase2_recovery_stage2d_c0_direct
+    max_iterations=25
+    training_seed=61
+    expected_checkpoints=(0 5 10 15 20 24)
+    ;;
+  C1)
+    task_id=Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C1-Hexapod-RobStride-Direct-v0
+    experiment=hexapod_robstride_phase2_recovery_stage2d_c1_direct
+    max_iterations=25
+    training_seed=62
+    expected_checkpoints=(0 5 10 15 20 24)
+    ;;
+  C2)
+    task_id=Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C2-Hexapod-RobStride-Direct-v0
+    experiment=hexapod_robstride_phase2_recovery_stage2d_c2_direct
+    max_iterations=25
+    training_seed=63
+    expected_checkpoints=(0 5 10 15 20 24)
+    ;;
+  C3)
+    task_id=Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C3-Hexapod-RobStride-Direct-v0
+    experiment=hexapod_robstride_phase2_recovery_stage2d_c3_direct
+    max_iterations=25
+    training_seed=64
+    expected_checkpoints=(0 5 10 15 20 24)
+    ;;
+  C4)
+    task_id=Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C4-Hexapod-RobStride-Direct-v0
+    experiment=hexapod_robstride_phase2_recovery_stage2d_c4_direct
+    max_iterations=25
+    training_seed=65
+    expected_checkpoints=(0 5 10 15 20 24)
+    ;;
+  C5)
+    task_id=Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C5-Hexapod-RobStride-Direct-v0
+    experiment=hexapod_robstride_phase2_recovery_stage2d_c5_pure_y_direct
+    max_iterations=40
+    training_seed=66
+    expected_checkpoints=(0 5 10 15 20 25 30 35 39)
+    ;;
+  *) usage ;;
+esac
+
+if [[ ! "${run_name}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+  || [[ "${run_name}" == "." || "${run_name}" == ".." ]] \
+  || [[ "${run_name,,}" != *"stage2d_c${stage#C}"* ]]; then
+  echo "exact run name must be safe and identify stage2d_c${stage#C}: ${run_name@Q}" >&2
+  exit 64
+fi
+if [[ ! "${expected_seed_sha256}" =~ ^[0-9a-f]{64}$ ]]; then
+  echo "seed SHA-256 must be exactly 64 hexadecimal characters" >&2
+  exit 64
+fi
+if [[ "${seed_host}" != /* || "${seed_host}" == *"/../"* \
+  || "${seed_host}" == */.. || "${seed_host}" != *.pt ]]; then
+  echo "seed must be an explicit absolute .pt path without traversal" >&2
+  exit 64
+fi
+
+for required_command in docker sha256sum flock find grep realpath; do
+  if ! command -v "${required_command}" >/dev/null 2>&1; then
+    echo "required command is unavailable: ${required_command}" >&2
+    exit 69
+  fi
+done
+if [[ ! -d "${isaac_lab_dir}" || ! -d "${workspace_host}/isaaclab" ]]; then
+  echo "Spark workspace or Isaac Lab checkout is missing" >&2
+  exit 66
+fi
+
+experiment_host=${workspace_host}/isaaclab/logs/rsl_rl/${experiment}
+experiment_container=${workspace_container}/isaaclab/logs/rsl_rl/${experiment}
+if [[ ! -d "${experiment_host}" ]]; then
+  echo "target experiment directory is missing: ${experiment_host}" >&2
+  exit 66
+fi
+if [[ ! -f "${seed_host}" || -L "${seed_host}" ]]; then
+  echo "immutable staged seed must be a regular non-symlink file: ${seed_host}" >&2
+  exit 66
+fi
+if [[ "$(realpath -e -- "${seed_host}")" != "${seed_host}" ]]; then
+  echo "seed path must already be canonical: ${seed_host}" >&2
+  exit 64
+fi
+seed_parent=${seed_host%/*}
+seed_directory=${seed_parent##*/}
+seed_filename=${seed_host##*/}
+if [[ "${seed_parent%/*}" != "${experiment_host}" ]] \
+  || [[ ! "${seed_directory}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+  || [[ ! "${seed_filename}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*[.]pt$ ]]; then
+  echo "seed must be one safe staged child of ${experiment_host}" >&2
+  exit 64
+fi
+seed_container=${experiment_container}/${seed_directory}/${seed_filename}
+
+verify_seed() {
+  local label=$1
+  local actual_sha256
+  if [[ ! -f "${seed_host}" || -L "${seed_host}" ]]; then
+    echo "${label}: immutable seed is missing or became a symlink: ${seed_host}" >&2
+    exit 65
+  fi
+  actual_sha256=$(sha256sum -- "${seed_host}")
+  actual_sha256=${actual_sha256%% *}
+  if [[ "${actual_sha256}" != "${expected_seed_sha256}" ]]; then
+    echo "${label}: immutable seed hash mismatch" >&2
+    echo "expected ${expected_seed_sha256}" >&2
+    echo "actual   ${actual_sha256}" >&2
+    exit 65
+  fi
+}
+
+active_training_unit() {
+  command -v systemctl >/dev/null 2>&1 \
+    && systemctl list-units --type=service --state=active --no-legend \
+      | grep -Eq '^[[:space:]]*hexapod-rl-training[^[:space:]]*[.]service[[:space:]]'
+}
+
+if active_training_unit; then
+  echo "refusing to contend with an active generic hexapod training service" >&2
+  exit 75
+fi
+if docker ps --format '{{.Names}}' \
+  | grep -Eq '^(hexapod-rl-training|hexapod-stage2d-homotopy-)'; then
+  echo "refusing to contend with an active generic training/screen container" >&2
+  exit 75
+fi
+if docker ps -a --format '{{.Names}}' | grep -Fxq "${training_container}"; then
+  echo "refusing existing container name; inspect it manually: ${training_container}" >&2
+  exit 75
+fi
+
+exec 9>"${training_lock}"
+if ! flock -n 9; then
+  echo "another Stage2D training launcher holds ${training_lock}" >&2
+  exit 75
+fi
+
+existing_runs=()
+if [[ -e "${experiment_host}/${run_name}" ]]; then
+  existing_runs+=("${experiment_host}/${run_name}")
+fi
+shopt -s nullglob
+prefixed_runs=("${experiment_host}"/*_"${run_name}")
+shopt -u nullglob
+existing_runs+=("${prefixed_runs[@]}")
+if (( ${#existing_runs[@]} != 0 )); then
+  echo "refusing to overwrite/reuse exact Stage2D run name ${run_name@Q}" >&2
+  printf '  %s\n' "${existing_runs[@]}" >&2
+  exit 73
+fi
+verify_seed "before training"
+
+# Isaac Lab interprets both selectors as regular expressions.  The safe-name
+# grammar above excludes every regex metacharacter except '.', so escape every
+# dot and anchor both ends to make selection literal and unique.
+load_run_regex=${seed_directory//./[.]}
+load_run_regex='^'${load_run_regex}'$'
+checkpoint_regex=${seed_filename//./[.]}
+checkpoint_regex='^'${checkpoint_regex}'$'
+cd "${isaac_lab_dir}"
+training_status=0
+docker compose \
+  --env-file docker/.env.base \
+  -f docker/docker-compose.yaml \
+  --profile base \
+  run \
+  --rm \
+  --name "${training_container}" \
+  -w /workspace/hexapod/isaaclab \
+  -e PYTHONPATH=/workspace/hexapod/isaaclab \
+  -e PYTHONDONTWRITEBYTECODE=1 \
+  -v /home/orionh/HEXAPOD:/workspace/hexapod:rw \
+  --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+  isaac-lab-base \
+  "${workspace_container}/isaaclab/train_model_only_resume.py" \
+  --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+  --std-min 0.08 \
+  --std-max 0.18 \
+  --task "${task_id}" \
+  --external_callback hexapod_rl.register.register_envs \
+  --num_envs 4096 \
+  --max_iterations "${max_iterations}" \
+  --run_name "${run_name}" \
+  --seed "${training_seed}" \
+  --resume \
+  --load_run "${load_run_regex}" \
+  --checkpoint "${checkpoint_regex}" || training_status=$?
+
+# The hash audit runs even when training fails.  Nothing here stages or repairs
+# the seed, removes a container, or restarts the job.
+verify_seed "after training"
+if (( training_status != 0 )); then
+  echo "Stage2D ${stage} training failed with status ${training_status}" >&2
+  exit "${training_status}"
+fi
+
+shopt -s nullglob
+completed_runs=("${experiment_host}"/*_"${run_name}")
+shopt -u nullglob
+if (( ${#completed_runs[@]} != 1 )) || [[ ! -d "${completed_runs[0]}" ]]; then
+  echo "expected exactly one completed run matching *_${run_name}; found ${#completed_runs[@]}" >&2
+  exit 65
+fi
+completed_run=${completed_runs[0]}
+for iteration in "${expected_checkpoints[@]}"; do
+  checkpoint=${completed_run}/model_${iteration}.pt
+  if [[ ! -s "${checkpoint}" ]]; then
+    echo "training completed without required dense checkpoint: ${checkpoint}" >&2
+    exit 65
+  fi
+done
+
+echo "stage=${stage}"
+echo "experiment=${experiment}"
+echo "exact_run_name=${completed_run##*/}"
+echo "immutable_seed_sha256=${expected_seed_sha256}"

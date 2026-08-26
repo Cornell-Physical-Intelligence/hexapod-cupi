@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+isaac_lab_dir=/home/orionh/IsaacLab
+run_name=2026-08-25_03-43-53_phase2_omni_warmup_from_phase1_v5_model200_seed54
+experiment_name=hexapod_robstride_phase2_omni_warmup_direct
+run_host_dir=/home/orionh/HEXAPOD/isaaclab/logs/rsl_rl/${experiment_name}/${run_name}
+run_container_dir=/workspace/hexapod/isaaclab/logs/rsl_rl/${experiment_name}/${run_name}
+artifact_host_dir=/home/orionh/HEXAPOD/artifacts/phase2_warmup/evaluation
+artifact_container_dir=/workspace/hexapod/artifacts/phase2_warmup/evaluation
+task_id=Isaac-Velocity-Omni-Warmup-Hexapod-RobStride-Direct-v0
+
+# The run resumes at iteration 200 and trains for 500 additional iterations.
+# Screen at 50-iteration intervals, retain the penultimate saved checkpoint,
+# and include RSL-RL's final max_iterations-1 checkpoint.
+checkpoint_numbers=(250 300 350 400 450 500 550 600 650 675 699)
+checkpoint_args=()
+
+for checkpoint_number in "${checkpoint_numbers[@]}"; do
+  checkpoint_name=model_${checkpoint_number}.pt
+  if [[ ! -f "${run_host_dir}/${checkpoint_name}" ]]; then
+    echo "missing checkpoint: ${run_host_dir}/${checkpoint_name}" >&2
+    exit 1
+  fi
+  checkpoint_args+=(--checkpoint "${run_container_dir}/${checkpoint_name}")
+done
+
+mkdir -p "${artifact_host_dir}"
+chmod 0777 "${artifact_host_dir}"
+cd "${isaac_lab_dir}"
+
+docker compose \
+  --env-file docker/.env.base \
+  -f docker/docker-compose.yaml \
+  --profile base \
+  run \
+  --rm \
+  --name hexapod-phase2-warmup-batch-eval \
+  -w /workspace/hexapod/isaaclab \
+  -e PYTHONPATH=/workspace/hexapod/isaaclab \
+  -e PYTHONDONTWRITEBYTECODE=1 \
+  -v /home/orionh/HEXAPOD:/workspace/hexapod:rw \
+  --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+  isaac-lab-base \
+  /workspace/hexapod/isaaclab/evaluate_checkpoint.py \
+  --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+  --task "${task_id}" \
+  "${checkpoint_args[@]}" \
+  --command 0.00 0.00 0.00 \
+  --command 0.30 0.00 0.00 \
+  --command -0.15 0.00 0.00 \
+  --command 0.00 0.15 0.00 \
+  --command 0.00 -0.15 0.00 \
+  --command 0.00 0.00 0.35 \
+  --command 0.00 0.00 -0.35 \
+  --command 0.25 0.12 0.25 \
+  --command 0.25 -0.12 -0.25 \
+  --seconds 10 \
+  --warmup-steps 25 \
+  --seed 54 \
+  --disable-randomization \
+  --json "${artifact_container_dir}/eval_batch_nominal.json" \
+  >"${artifact_host_dir}/eval_batch_nominal.log" 2>&1

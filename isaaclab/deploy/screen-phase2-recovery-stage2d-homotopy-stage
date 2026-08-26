@@ -1,0 +1,305 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Evaluate one immutable seed and one complete Stage2D run in a single Kit
+# process, then grade the exact batch.  No checkpoint discovery, fallback, or
+# artifact overwrite is allowed.
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+screen_container=hexapod-stage2d-homotopy-screen
+screen_lock=/tmp/hexapod-stage2d-homotopy-screen.lock
+
+usage() {
+  echo "usage: $0 C0|C1|C2|C3|C4|C5 exact-run-directory /absolute/staged/seed.pt seed-sha256" >&2
+  exit 64
+}
+
+(( $# == 4 )) || usage
+stage=${1^^}
+run_name=$2
+seed_host=$3
+expected_seed_sha256=${4,,}
+
+case "${stage}" in
+  C0)
+    task_id=Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C0-Hexapod-RobStride-Direct-v0
+    experiment=hexapod_robstride_phase2_recovery_stage2d_c0_direct
+    evaluation_seed=61
+    checkpoint_numbers=(0 5 10 15 20 24)
+    oblique_mid=(0.24 0.03)
+    oblique_low=(0.22 0.02)
+    oblique_high=(0.26 0.04)
+    ;;
+  C1)
+    task_id=Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C1-Hexapod-RobStride-Direct-v0
+    experiment=hexapod_robstride_phase2_recovery_stage2d_c1_direct
+    evaluation_seed=62
+    checkpoint_numbers=(0 5 10 15 20 24)
+    oblique_mid=(0.22 0.05)
+    oblique_low=(0.20 0.04)
+    oblique_high=(0.24 0.06)
+    ;;
+  C2)
+    task_id=Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C2-Hexapod-RobStride-Direct-v0
+    experiment=hexapod_robstride_phase2_recovery_stage2d_c2_direct
+    evaluation_seed=63
+    checkpoint_numbers=(0 5 10 15 20 24)
+    oblique_mid=(0.16 0.07)
+    oblique_low=(0.14 0.06)
+    oblique_high=(0.18 0.08)
+    ;;
+  C3)
+    task_id=Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C3-Hexapod-RobStride-Direct-v0
+    experiment=hexapod_robstride_phase2_recovery_stage2d_c3_direct
+    evaluation_seed=64
+    checkpoint_numbers=(0 5 10 15 20 24)
+    oblique_mid=(0.10 0.09)
+    oblique_low=(0.08 0.08)
+    oblique_high=(0.12 0.10)
+    ;;
+  C4)
+    task_id=Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C4-Hexapod-RobStride-Direct-v0
+    experiment=hexapod_robstride_phase2_recovery_stage2d_c4_direct
+    evaluation_seed=65
+    checkpoint_numbers=(0 5 10 15 20 24)
+    oblique_mid=(0.045 0.09)
+    oblique_low=(0.03 0.08)
+    oblique_high=(0.06 0.10)
+    ;;
+  C5)
+    task_id=Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C5-Hexapod-RobStride-Direct-v0
+    experiment=hexapod_robstride_phase2_recovery_stage2d_c5_pure_y_direct
+    evaluation_seed=66
+    checkpoint_numbers=(0 5 10 15 20 25 30 35 39)
+    oblique_mid=(0.00 0.09)
+    oblique_low=(0.00 0.08)
+    oblique_high=(0.00 0.10)
+    ;;
+  *) usage ;;
+esac
+
+if [[ ! "${run_name}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+  || [[ "${run_name}" == "." || "${run_name}" == ".." ]] \
+  || [[ "${run_name,,}" != *"stage2d_c${stage#C}"* ]]; then
+  echo "exact run name must be safe and identify stage2d_c${stage#C}: ${run_name@Q}" >&2
+  exit 64
+fi
+if [[ ! "${expected_seed_sha256}" =~ ^[0-9a-f]{64}$ ]]; then
+  echo "seed SHA-256 must be exactly 64 hexadecimal characters" >&2
+  exit 64
+fi
+if [[ "${seed_host}" != /* || "${seed_host}" == *"/../"* \
+  || "${seed_host}" == */.. || "${seed_host}" != *.pt ]]; then
+  echo "seed must be an explicit absolute .pt path without traversal" >&2
+  exit 64
+fi
+
+for required_command in docker python3 sha256sum flock grep realpath tee; do
+  if ! command -v "${required_command}" >/dev/null 2>&1; then
+    echo "required command is unavailable: ${required_command}" >&2
+    exit 69
+  fi
+done
+if [[ ! -d "${isaac_lab_dir}" || ! -d "${workspace_host}/isaaclab" ]]; then
+  echo "Spark workspace or Isaac Lab checkout is missing" >&2
+  exit 66
+fi
+
+experiment_host=${workspace_host}/isaaclab/logs/rsl_rl/${experiment}
+experiment_container=${workspace_container}/isaaclab/logs/rsl_rl/${experiment}
+run_host=${experiment_host}/${run_name}
+run_container=${experiment_container}/${run_name}
+if [[ ! -d "${run_host}" || -L "${run_host}" ]]; then
+  echo "exact Stage2D run directory is missing or is a symlink: ${run_host}" >&2
+  exit 66
+fi
+if [[ "$(realpath -e -- "${run_host}")" != "${run_host}" ]]; then
+  echo "run directory path must already be canonical: ${run_host}" >&2
+  exit 64
+fi
+
+if [[ ! -f "${seed_host}" || -L "${seed_host}" ]] \
+  || [[ "$(realpath -e -- "${seed_host}")" != "${seed_host}" ]]; then
+  echo "immutable staged seed must be a canonical regular non-symlink file: ${seed_host}" >&2
+  exit 66
+fi
+seed_parent=${seed_host%/*}
+seed_directory=${seed_parent##*/}
+seed_filename=${seed_host##*/}
+if [[ "${seed_parent%/*}" != "${experiment_host}" ]] \
+  || [[ ! "${seed_directory}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+  || [[ ! "${seed_filename}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*[.]pt$ ]]; then
+  echo "seed must be one safe staged child of ${experiment_host}" >&2
+  exit 64
+fi
+seed_container=${experiment_container}/${seed_directory}/${seed_filename}
+
+verify_seed() {
+  local label=$1
+  local actual_sha256
+  if [[ ! -f "${seed_host}" || -L "${seed_host}" ]]; then
+    echo "${label}: immutable seed is missing or became a symlink" >&2
+    exit 65
+  fi
+  actual_sha256=$(sha256sum -- "${seed_host}")
+  actual_sha256=${actual_sha256%% *}
+  if [[ "${actual_sha256}" != "${expected_seed_sha256}" ]]; then
+    echo "${label}: immutable seed hash mismatch" >&2
+    echo "expected ${expected_seed_sha256}" >&2
+    echo "actual   ${actual_sha256}" >&2
+    exit 65
+  fi
+}
+
+active_training_unit() {
+  command -v systemctl >/dev/null 2>&1 \
+    && systemctl list-units --type=service --state=active --no-legend \
+      | grep -Eq '^[[:space:]]*hexapod-rl-training[^[:space:]]*[.]service[[:space:]]'
+}
+
+if active_training_unit; then
+  echo "refusing to screen while a generic hexapod training service is active" >&2
+  exit 75
+fi
+if docker ps --format '{{.Names}}' \
+  | grep -Eq '^(hexapod-rl-training|hexapod-stage2d-homotopy-)'; then
+  echo "refusing to contend with an active training/screen container" >&2
+  exit 75
+fi
+if docker ps -a --format '{{.Names}}' | grep -Fxq "${screen_container}"; then
+  echo "refusing existing screen container; inspect it manually: ${screen_container}" >&2
+  exit 75
+fi
+
+exec 9>"${screen_lock}"
+if ! flock -n 9; then
+  echo "another Stage2D screen holds ${screen_lock}" >&2
+  exit 75
+fi
+
+checkpoint_args=(--checkpoint "${seed_container}")
+checkpoint_host_paths=()
+checkpoint_hashes=()
+for iteration in "${checkpoint_numbers[@]}"; do
+  checkpoint_host=${run_host}/model_${iteration}.pt
+  if [[ ! -s "${checkpoint_host}" || -L "${checkpoint_host}" ]]; then
+    echo "required dense checkpoint is missing, empty, or a symlink: ${checkpoint_host}" >&2
+    exit 66
+  fi
+  checkpoint_host_paths+=("${checkpoint_host}")
+  checkpoint_hash=$(sha256sum -- "${checkpoint_host}")
+  checkpoint_hashes+=("${checkpoint_hash%% *}")
+  checkpoint_args+=(--checkpoint "${run_container}/model_${iteration}.pt")
+done
+shopt -s nullglob
+all_model_files=("${run_host}"/model_*.pt)
+shopt -u nullglob
+if (( ${#all_model_files[@]} != ${#checkpoint_numbers[@]} )); then
+  echo "exact run must contain only the complete expected checkpoint set" >&2
+  printf '  %s\n' "${all_model_files[@]}" >&2
+  exit 65
+fi
+
+verify_run() {
+  local label=$1
+  local index actual_sha256
+  for index in "${!checkpoint_host_paths[@]}"; do
+    if [[ ! -f "${checkpoint_host_paths[index]}" || -L "${checkpoint_host_paths[index]}" ]]; then
+      echo "${label}: candidate checkpoint disappeared or became a symlink" >&2
+      exit 65
+    fi
+    actual_sha256=$(sha256sum -- "${checkpoint_host_paths[index]}")
+    actual_sha256=${actual_sha256%% *}
+    if [[ "${actual_sha256}" != "${checkpoint_hashes[index]}" ]]; then
+      echo "${label}: candidate checkpoint changed: ${checkpoint_host_paths[index]}" >&2
+      exit 65
+    fi
+  done
+}
+
+command_args=(
+  --command 0.25 0.00 0.00
+  --command 0.23 0.00 0.24
+  --command 0.23 0.00 -0.24
+  --command "${oblique_mid[0]}" "${oblique_mid[1]}" 0.00
+  --command "${oblique_mid[0]}" "-${oblique_mid[1]}" 0.00
+  --command "${oblique_low[0]}" "${oblique_low[1]}" 0.00
+  --command "${oblique_low[0]}" "-${oblique_low[1]}" 0.00
+  --command "${oblique_high[0]}" "${oblique_high[1]}" 0.00
+  --command "${oblique_high[0]}" "-${oblique_high[1]}" 0.00
+)
+
+stage_lower=${stage,,}
+artifact_host=${workspace_host}/artifacts/phase2_recovery_stage2d_homotopy/${stage_lower}/evaluation/${run_name}
+artifact_container=${workspace_container}/artifacts/phase2_recovery_stage2d_homotopy/${stage_lower}/evaluation/${run_name}
+eval_json=${artifact_host}/eval_batch.json
+eval_log=${artifact_host}/eval_batch.log
+grade_json=${artifact_host}/grade_batch.json
+grade_log=${artifact_host}/grade_batch.log
+if [[ -e "${artifact_host}" ]]; then
+  echo "refusing to overwrite/reuse artifact directory: ${artifact_host}" >&2
+  exit 73
+fi
+if ! mkdir -p "${artifact_host}"; then
+  echo "artifact directory is not writable; create its parent once as orionh" >&2
+  exit 73
+fi
+chmod 0777 "${artifact_host}"
+
+verify_seed "before evaluation"
+verify_run "before evaluation"
+cd "${isaac_lab_dir}"
+evaluation_status=0
+docker compose \
+  --env-file docker/.env.base \
+  -f docker/docker-compose.yaml \
+  --profile base \
+  run \
+  --rm \
+  --name "${screen_container}" \
+  -w /workspace/hexapod/isaaclab \
+  -e PYTHONPATH=/workspace/hexapod/isaaclab \
+  -e PYTHONDONTWRITEBYTECODE=1 \
+  -v /home/orionh/HEXAPOD:/workspace/hexapod:rw \
+  --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+  isaac-lab-base \
+  "${workspace_container}/isaaclab/evaluate_checkpoint.py" \
+  --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+  --task "${task_id}" \
+  "${checkpoint_args[@]}" \
+  "${command_args[@]}" \
+  --env-spacing 8.0 \
+  --steps 500 \
+  --warmup-steps 25 \
+  --seed "${evaluation_seed}" \
+  --disable-randomization \
+  --json "${artifact_container}/eval_batch.json" \
+  >"${eval_log}" 2>&1 || evaluation_status=$?
+
+verify_seed "after evaluation"
+verify_run "after evaluation"
+if (( evaluation_status != 0 )); then
+  echo "Stage2D ${stage} evaluator failed with status ${evaluation_status}; grading skipped" >&2
+  exit "${evaluation_status}"
+fi
+if [[ ! -s "${eval_json}" ]]; then
+  echo "evaluator did not produce a non-empty exact-batch report: ${eval_json}" >&2
+  exit 65
+fi
+
+grade_status=0
+python3 "${workspace_host}/isaaclab/grade_stage2d_homotopy.py" \
+  "${eval_json}" \
+  --stage "${stage}" \
+  --run-name "${run_name}" \
+  --seed-file "${seed_host}" \
+  --seed-checkpoint "${seed_container}" \
+  --seed-sha256 "${expected_seed_sha256}" \
+  --json "${grade_json}" \
+  2>&1 | tee "${grade_log}" || grade_status=$?
+
+verify_seed "after grading"
+verify_run "after grading"
+exit "${grade_status}"

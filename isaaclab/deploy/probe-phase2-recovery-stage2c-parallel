@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Run three independent, checkpoint-dense Stage2C continuations concurrently.
+# All branches share one immutable parent. The parent itself is the no-update
+# corrected-runtime control; these branches test the three measured blockers.
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+experiment=hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct
+task_id=Isaac-Velocity-Omni-Recovery-Stage2C-Stabilized-Forward-Hexapod-RobStride-Direct-v0
+parent_run=2026-08-25_18-09-38_phase2_recovery_stage2c_lower_stable_forward_from_stage2_model25_seed60
+parent_checkpoint=model_119.pt
+parent_sha256=e5085278b03b11fc032d965b0809082664a9b4cb80b29be55fdba67e7f645f16
+num_envs=2048
+max_iterations=40
+
+usage() {
+  echo "usage: $0 safe-batch-label" >&2
+  exit 64
+}
+
+(( $# == 1 )) || usage
+batch_label=$1
+if [[ ! "${batch_label}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+  || [[ "${batch_label}" == "." || "${batch_label}" == ".." ]]; then
+  usage
+fi
+
+experiment_host=${workspace_host}/isaaclab/logs/rsl_rl/${experiment}
+parent_host=${experiment_host}/${parent_run}/${parent_checkpoint}
+artifact_dir=${workspace_host}/isaaclab/logs/probe_batches/stage2c/${batch_label}
+
+if systemctl is-active --quiet hexapod-rl-training.service; then
+  echo "refusing to contend with the active training service" >&2
+  exit 75
+fi
+if docker ps --format '{{.Names}}' | grep -Eq '^hexapod-stage2c-probe-'; then
+  echo "a Stage2C probe container is already active" >&2
+  exit 75
+fi
+if [[ ! -f "${parent_host}" || -L "${parent_host}" ]]; then
+  echo "immutable parent checkpoint is missing or is a symlink: ${parent_host}" >&2
+  exit 66
+fi
+printf '%s  %s\n' "${parent_sha256}" "${parent_host}" | sha256sum -c -
+if [[ -e "${artifact_dir}" ]]; then
+  echo "refusing to reuse probe artifact directory: ${artifact_dir}" >&2
+  exit 73
+fi
+mkdir -p "${artifact_dir}"
+
+load_run_regex='^'${parent_run}'$'
+checkpoint_regex='^'${parent_checkpoint//./[.]}'$'
+cd "${isaac_lab_dir}"
+
+probe_names=()
+probe_pids=()
+
+launch_probe() {
+  local probe_name=$1
+  local training_seed=$2
+  shift 2
+  local run_name=${batch_label}_${probe_name}_seed${training_seed}
+  local container_name=hexapod-stage2c-probe-${probe_name}-${batch_label}
+  local log_path=${artifact_dir}/${probe_name}.log
+  local status_path=${artifact_dir}/${probe_name}.status
+
+  if docker ps -a --format '{{.Names}}' | grep -Fxq "${container_name}"; then
+    echo "refusing existing probe container name: ${container_name}" >&2
+    exit 73
+  fi
+
+  (
+    status=0
+    docker compose \
+      --env-file docker/.env.base \
+      -f docker/docker-compose.yaml \
+      --profile base \
+      run \
+      --rm \
+      --name "${container_name}" \
+      -w "${workspace_container}/isaaclab" \
+      -e PYTHONPATH="${workspace_container}/isaaclab" \
+      -e PYTHONDONTWRITEBYTECODE=1 \
+      -v "${workspace_host}:${workspace_container}:rw" \
+      --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+      isaac-lab-base \
+      "${workspace_container}/isaaclab/train_model_only_resume.py" \
+      --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+      --std-min 0.06 \
+      --std-max 0.08 \
+      --task "${task_id}" \
+      --external_callback hexapod_rl.register.register_envs \
+      --num_envs "${num_envs}" \
+      --max_iterations "${max_iterations}" \
+      --run_name "${run_name}" \
+      --seed "${training_seed}" \
+      --resume \
+      --load_run "${load_run_regex}" \
+      --checkpoint "${checkpoint_regex}" \
+      agent.save_interval=10 \
+      agent.algorithm.learning_rate=2.0e-5 \
+      agent.algorithm.clip_param=0.06 \
+      "$@" || status=$?
+    printf '%s\n' "${status}" >"${status_path}"
+    exit "${status}"
+  ) >"${log_path}" 2>&1 &
+
+  probe_names+=("${probe_name}")
+  probe_pids+=("$!")
+  echo "launched probe=${probe_name} pid=$! log=${log_path}"
+}
+
+# A: close the measured objective loophole. Moving commands gain a bounded,
+# command-normalized signal while stand commands receive neither term.
+launch_probe tracking_objective 70 \
+  env.longitudinal_signed_progress_reward_scale=2.0 \
+  env.longitudinal_normalized_error_penalty_scale=1.0
+
+# B: target the only sustained hardware gate failure: repeated RS05 over-rating
+# on one tibia plus long applied-torque bursts.
+launch_probe torque_support 71 \
+  env.support_contact_low_speed_threshold_mps=0.18 \
+  env.support_shortfall_reward_scale=-0.75 \
+  env.rated_torque_excess_reward_scale=-0.22 \
+  env.torque_saturation_reward_scale=-0.60 \
+  env.processed_joint_target_slew_limit_rad_per_20ms=0.032
+
+# C: target the remaining high-speed deck-motion and uncommanded-yaw gates.
+launch_probe deck_yaw 72 \
+  env.deck_stability_reward_scale=4.5 \
+  env.deck_stability_vertical_velocity_scale_mps=0.07 \
+  env.deck_stability_roll_pitch_rate_scale_rad_s=0.30 \
+  env.deck_stability_projected_gravity_xy_scale=0.020 \
+  env.deck_stability_height_error_scale_m=0.006 \
+  env.z_vel_reward_scale=-16.0 \
+  env.ang_vel_reward_scale=-2.25 \
+  env.flat_orientation_reward_scale=-45.0 \
+  env.base_height_reward_scale=-1100.0 \
+  env.inactive_yaw_rate_reward_scale=-2.0
+
+batch_status=0
+for index in "${!probe_pids[@]}"; do
+  if ! wait "${probe_pids[$index]}"; then
+    echo "probe failed: ${probe_names[$index]}" >&2
+    batch_status=1
+  fi
+done
+
+printf '%s  %s\n' "${parent_sha256}" "${parent_host}" | sha256sum -c -
+
+for probe_name in "${probe_names[@]}"; do
+  status_path=${artifact_dir}/${probe_name}.status
+  if [[ ! -s "${status_path}" ]] || [[ "$(<"${status_path}")" != 0 ]]; then
+    echo "probe did not report success: ${probe_name}" >&2
+    batch_status=1
+    continue
+  fi
+  shopt -s nullglob
+  matches=("${experiment_host}"/*_"${batch_label}_${probe_name}_"*)
+  shopt -u nullglob
+  if (( ${#matches[@]} != 1 )) || [[ ! -s "${matches[0]}/model_39.pt" ]]; then
+    echo "probe has no unique final checkpoint: ${probe_name}" >&2
+    batch_status=1
+    continue
+  fi
+  echo "completed probe=${probe_name} run=${matches[0]} checkpoint=${matches[0]}/model_39.pt"
+done
+
+exit "${batch_status}"

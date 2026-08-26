@@ -1,0 +1,305 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+stage2_experiment=hexapod_robstride_phase2_recovery_stage2_direct
+stage2_source_run=2026-08-25_05-43-11_phase2_recovery_stage2_signed_axes_from_stage1_model25_seed57
+stage2c_experiment=hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct
+run_label=phase2_recovery_stage2c_lower_stable_forward_from_stage2_model25_seed60
+task_id=Isaac-Velocity-Omni-Recovery-Stage2C-Stabilized-Forward-Hexapod-RobStride-Direct-v0
+expected_seed_sha256=2cb28a0f4f4388e709111a09568c72d0770390d2ba72e08ee17eaaf0f27b6893
+
+source_seed_host=${workspace_host}/isaaclab/logs/rsl_rl/${stage2_experiment}/${stage2_source_run}/model_25.pt
+stage2c_experiment_host=${workspace_host}/isaaclab/logs/rsl_rl/${stage2c_experiment}
+stage2c_experiment_container=${workspace_container}/isaaclab/logs/rsl_rl/${stage2c_experiment}
+staged_seed_host=${stage2c_experiment_host}/seed_from_stage2_model25/model_25_stage2_seed.pt
+training_unit=hexapod-rl-training.service
+
+if (( $# > 1 )); then
+  echo "usage: $0 [exact-run-directory-name]" >&2
+  exit 64
+fi
+for required_command in cat docker flock ln mktemp python3 rm sha256sum; do
+  if ! command -v "${required_command}" >/dev/null 2>&1; then
+    echo "required command is unavailable: ${required_command}" >&2
+    exit 69
+  fi
+done
+if [[ ! -d "${isaac_lab_dir}" || ! -d "${workspace_host}/isaaclab" ]]; then
+  echo "Spark workspace or Isaac Lab checkout is missing" >&2
+  exit 66
+fi
+
+verify_training_inactive() {
+  if command -v systemctl >/dev/null 2>&1 \
+    && systemctl is-active --quiet "${training_unit}"; then
+    echo "refusing to contend with active training unit ${training_unit}" >&2
+    exit 75
+  fi
+}
+verify_training_inactive
+
+exec 9>/tmp/hexapod-stage2c-robust-best-screen.lock
+if ! flock -n 9; then
+  echo "another Stage-2C robust-best screen is already active" >&2
+  exit 75
+fi
+
+if (( $# == 1 )); then
+  run_name=$1
+  if [[ ! "${run_name}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+    || [[ "${run_name}" == "." || "${run_name}" == ".." ]]; then
+    echo "run name must be one safe directory name: ${run_name@Q}" >&2
+    exit 64
+  fi
+  if [[ "${run_name}" != "${run_label}" \
+    && "${run_name}" != *_"${run_label}" ]]; then
+    echo "run name does not match required Stage-2C label: ${run_name@Q}" >&2
+    exit 64
+  fi
+  run_host_dir=${stage2c_experiment_host}/${run_name}
+else
+  shopt -s nullglob
+  run_candidates=("${stage2c_experiment_host}"/*_"${run_label}")
+  shopt -u nullglob
+  if (( ${#run_candidates[@]} != 1 )); then
+    echo "expected exactly one Stage-2C run matching ${stage2c_experiment_host}/*_${run_label}" >&2
+    echo "found ${#run_candidates[@]}; pass the exact run directory name explicitly" >&2
+    if (( ${#run_candidates[@]} > 0 )); then
+      printf '  %s\n' "${run_candidates[@]}" >&2
+    fi
+    exit 1
+  fi
+  run_host_dir=${run_candidates[0]}
+  run_name=${run_host_dir##*/}
+fi
+if [[ ! -d "${run_host_dir}" ]]; then
+  echo "Stage-2C run directory does not exist: ${run_host_dir}" >&2
+  exit 1
+fi
+
+verify_seed() {
+  local path=$1
+  local label=$2
+  if [[ ! -f "${path}" ]]; then
+    echo "${label} is missing: ${path}" >&2
+    exit 1
+  fi
+  local actual_sha256
+  actual_sha256=$(sha256sum -- "${path}")
+  actual_sha256=${actual_sha256%% *}
+  if [[ "${actual_sha256}" != "${expected_seed_sha256}" ]]; then
+    echo "${label} hash mismatch: ${path}" >&2
+    echo "expected ${expected_seed_sha256}" >&2
+    echo "actual   ${actual_sha256}" >&2
+    exit 1
+  fi
+}
+
+verify_hash() {
+  local path=$1
+  local expected=$2
+  local label=$3
+  if [[ ! -f "${path}" ]]; then
+    echo "${label} is missing: ${path}" >&2
+    exit 1
+  fi
+  local actual
+  actual=$(sha256sum -- "${path}")
+  actual=${actual%% *}
+  if [[ "${actual}" != "${expected}" ]]; then
+    echo "${label} changed during the robust screen: ${path}" >&2
+    echo "expected ${expected}" >&2
+    echo "actual   ${actual}" >&2
+    exit 1
+  fi
+}
+
+# The source and staged seed are immutable provenance inputs even though this
+# second pass evaluates only the checkpoint selected by the nominal grade.
+verify_seed "${source_seed_host}" "immutable Stage-2 model25 source"
+verify_seed "${staged_seed_host}" "staged Stage-2C seed"
+
+run_container_dir=${stage2c_experiment_container}/${run_name}
+artifact_host_dir=${workspace_host}/artifacts/phase2_recovery_stage2c_stable_forward/evaluation/${run_name}
+artifact_container_dir=${workspace_container}/artifacts/phase2_recovery_stage2c_stable_forward/evaluation/${run_name}
+nominal_grade_json=${artifact_host_dir}/grade_batch_nominal.json
+if [[ ! -s "${nominal_grade_json}" ]]; then
+  echo "nominal Stage-2C grade is missing or empty: ${nominal_grade_json}" >&2
+  exit 65
+fi
+
+# Parse the nominal grade without evaluating any shell text.  It must identify
+# one scalar best checkpoint, and that checkpoint must appear exactly once as
+# the first accepted result from this exact run.
+if ! selected_checkpoint_container=$(
+  python3 - "${nominal_grade_json}" "${run_container_dir}" "${task_id}" <<'PY'
+import json
+from pathlib import Path, PurePosixPath
+import re
+import sys
+
+grade_path = Path(sys.argv[1])
+expected_run = PurePosixPath(sys.argv[2])
+expected_task = sys.argv[3]
+allowed_iterations = {*range(0, 120, 10), 119}
+try:
+    grade = json.loads(grade_path.read_text(encoding="utf-8"))
+except (OSError, json.JSONDecodeError) as exc:
+    raise SystemExit(f"cannot parse nominal grade: {exc}")
+if not isinstance(grade, dict):
+    raise SystemExit("nominal grade must be an object")
+if grade.get("task") != expected_task:
+    raise SystemExit("nominal grade task does not match Stage-2C")
+if grade.get("candidate_run_directory") != str(expected_run):
+    raise SystemExit("nominal grade candidate_run_directory is not the exact run")
+if grade.get("absolute_targets_are_admission_gates") is not True:
+    raise SystemExit("nominal grade did not use hard absolute stability gates")
+playback = grade.get("playback_contract")
+if not isinstance(playback, dict) or playback.get("seed") != 60:
+    raise SystemExit("nominal grade playback contract is invalid")
+best = grade.get("best_accepted_checkpoint")
+if not isinstance(best, str) or not best or "\n" in best or "\t" in best:
+    raise SystemExit("nominal grade must select one non-empty best checkpoint")
+best_path = PurePosixPath(best)
+match = re.fullmatch(r"model_(\d+)\.pt", best_path.name)
+if best_path.parent != expected_run or match is None:
+    raise SystemExit("best accepted checkpoint is not inside the exact run")
+if int(match.group(1)) not in allowed_iterations:
+    raise SystemExit("best accepted checkpoint is outside the nominal batch")
+ranked = grade.get("accepted_checkpoints_ranked")
+count = grade.get("accepted_checkpoint_count")
+if isinstance(count, bool) or not isinstance(count, int) or count < 1:
+    raise SystemExit("nominal grade accepted_checkpoint_count is invalid")
+if not isinstance(ranked, list) or len(ranked) != count or len(set(ranked)) != len(ranked):
+    raise SystemExit("nominal accepted checkpoint list/count is invalid")
+if ranked[0] != best or ranked.count(best) != 1:
+    raise SystemExit("nominal grade does not have exactly one ranked best checkpoint")
+evaluations = grade.get("evaluations")
+if not isinstance(evaluations, list):
+    raise SystemExit("nominal grade evaluations are missing")
+matches = [
+    item for item in evaluations
+    if isinstance(item, dict) and item.get("checkpoint") == best
+]
+if len(matches) != 1 or matches[0].get("accepted") is not True:
+    raise SystemExit("selected checkpoint is not exactly one accepted evaluation")
+print(best)
+PY
+); then
+  echo "refusing robust playback: nominal grade selection validation failed" >&2
+  exit 65
+fi
+
+selected_name=${selected_checkpoint_container##*/}
+selected_checkpoint_host=${run_host_dir}/${selected_name}
+if [[ ! -f "${selected_checkpoint_host}" ]]; then
+  echo "selected Stage-2C checkpoint is missing: ${selected_checkpoint_host}" >&2
+  exit 1
+fi
+selected_checkpoint_sha256=$(sha256sum -- "${selected_checkpoint_host}")
+selected_checkpoint_sha256=${selected_checkpoint_sha256%% *}
+nominal_grade_sha256=$(sha256sum -- "${nominal_grade_json}")
+nominal_grade_sha256=${nominal_grade_sha256%% *}
+
+eval_json=${artifact_host_dir}/eval_best_robust_seed61.json
+eval_log=${artifact_host_dir}/eval_best_robust_seed61.log
+grade_json=${artifact_host_dir}/grade_best_robust_seed61.json
+grade_log=${artifact_host_dir}/grade_best_robust_seed61.log
+for output_path in "${eval_json}" "${eval_log}" "${grade_json}" "${grade_log}"; do
+  if [[ -e "${output_path}" ]]; then
+    echo "refusing to overwrite existing artifact: ${output_path}" >&2
+    exit 73
+  fi
+done
+if ! mkdir -p "${artifact_host_dir}"; then
+  echo "artifact directory is not writable; create it once as orionh:" >&2
+  echo "  sudo install -d -o orionh -g orionh -m 0777 ${artifact_host_dir}" >&2
+  exit 73
+fi
+chmod 0777 "${artifact_host_dir}"
+
+# The evaluator currently writes its JSON path directly.  Give it a private
+# same-filesystem temporary file and hard-link that file into the final name;
+# link(2) makes publication non-overwriting even under a race.
+eval_partial_host=$(mktemp -p "${artifact_host_dir}" .eval_best_robust_seed61.partial.XXXXXX)
+eval_partial_name=${eval_partial_host##*/}
+eval_partial_container=${artifact_container_dir}/${eval_partial_name}
+cleanup_partial() {
+  if [[ -n "${eval_partial_host:-}" && -f "${eval_partial_host}" ]]; then
+    rm -- "${eval_partial_host}"
+  fi
+}
+trap cleanup_partial EXIT
+
+verify_training_inactive
+set -o noclobber
+cd "${isaac_lab_dir}"
+evaluation_status=0
+docker compose \
+  --env-file docker/.env.base \
+  -f docker/docker-compose.yaml \
+  --profile base \
+  run \
+  --rm \
+  --name hexapod-phase2-recovery-stage2c-robust-best-eval \
+  -w /workspace/hexapod/isaaclab \
+  -e PYTHONPATH=/workspace/hexapod/isaaclab \
+  -e PYTHONDONTWRITEBYTECODE=1 \
+  -v /home/orionh/HEXAPOD:/workspace/hexapod:rw \
+  --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+  isaac-lab-base \
+  /workspace/hexapod/isaaclab/evaluate_checkpoint.py \
+  --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+  --task "${task_id}" \
+  --checkpoint "${selected_checkpoint_container}" \
+  --command 0.00 0.00 0.00 \
+  --command 0.16 0.00 0.00 \
+  --command 0.20 0.00 0.00 \
+  --command 0.30 0.00 0.00 \
+  --copies 8 \
+  --env-spacing 8.0 \
+  --seconds 10 \
+  --warmup-steps 25 \
+  --seed 61 \
+  --json "${eval_partial_container}" \
+  >"${eval_log}" 2>&1 || evaluation_status=$?
+
+verify_seed "${source_seed_host}" "immutable Stage-2 model25 source after evaluation"
+verify_seed "${staged_seed_host}" "staged Stage-2C seed after evaluation"
+verify_hash "${selected_checkpoint_host}" "${selected_checkpoint_sha256}" \
+  "selected Stage-2C checkpoint"
+verify_hash "${nominal_grade_json}" "${nominal_grade_sha256}" \
+  "nominal Stage-2C grade"
+if (( evaluation_status != 0 )); then
+  echo "Stage-2C robust evaluator failed with status ${evaluation_status}; grading skipped" >&2
+  exit "${evaluation_status}"
+fi
+if [[ ! -s "${eval_partial_host}" ]]; then
+  echo "Stage-2C evaluator did not produce a non-empty JSON report" >&2
+  exit 65
+fi
+if ! ln -- "${eval_partial_host}" "${eval_json}"; then
+  echo "refusing to overwrite raced evaluator artifact: ${eval_json}" >&2
+  exit 73
+fi
+rm -- "${eval_partial_host}"
+eval_partial_host=
+
+grade_status=0
+python3 "${workspace_host}/isaaclab/grade_stage2c_robustness.py" \
+  "${eval_json}" \
+  --json "${grade_json}" \
+  >"${grade_log}" 2>&1 || grade_status=$?
+cat -- "${grade_log}"
+
+verify_seed "${source_seed_host}" "immutable Stage-2 model25 source after grading"
+verify_seed "${staged_seed_host}" "staged Stage-2C seed after grading"
+verify_hash "${selected_checkpoint_host}" "${selected_checkpoint_sha256}" \
+  "selected Stage-2C checkpoint"
+verify_hash "${nominal_grade_json}" "${nominal_grade_sha256}" \
+  "nominal Stage-2C grade"
+
+exit "${grade_status}"

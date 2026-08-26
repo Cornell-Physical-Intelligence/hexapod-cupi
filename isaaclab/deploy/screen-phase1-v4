@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+isaac_lab_dir=/home/orionh/IsaacLab
+run_name=2026-08-25_01-52-48_phase1_v4_heading_only_from_v2_model350_seed45
+run_dir=/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase1_forward_v4_direct/${run_name}
+artifact_host_dir=/home/orionh/HEXAPOD/artifacts/phase1_v4/evaluation
+artifact_container_dir=/workspace/hexapod/artifacts/phase1_v4/evaluation
+task_id=Isaac-Velocity-Flat-Hexapod-RobStride-Phase1-V4-Direct-v0
+
+mkdir -p "${artifact_host_dir}"
+chmod 0777 "${artifact_host_dir}"
+cd "${isaac_lab_dir}"
+
+if (( $# > 0 )); then
+  checkpoint_numbers=("$@")
+else
+  checkpoint_numbers=(360 375 390 405 424)
+fi
+
+for checkpoint_number in "${checkpoint_numbers[@]}"; do
+  checkpoint=${run_dir}/model_${checkpoint_number}.pt
+  json_path=${artifact_container_dir}/eval_model_${checkpoint_number}_nominal.json
+  log_path=${artifact_host_dir}/eval_model_${checkpoint_number}_nominal.log
+
+  docker compose \
+    --env-file docker/.env.base \
+    -f docker/docker-compose.yaml \
+    --profile base \
+    run \
+    --rm \
+    --name "hexapod-phase1-v4-eval-${checkpoint_number}" \
+    -w /workspace/hexapod/isaaclab \
+    -e PYTHONPATH=/workspace/hexapod/isaaclab \
+    -e PYTHONDONTWRITEBYTECODE=1 \
+    -v /home/orionh/HEXAPOD:/workspace/hexapod:rw \
+    --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+    isaac-lab-base \
+    /workspace/hexapod/isaaclab/evaluate_checkpoint.py \
+    --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+    --task "${task_id}" \
+    --checkpoint "${checkpoint}" \
+    --command 0.15 0 0 \
+    --command 0.25 0 0 \
+    --command 0.30 0 0 \
+    --seconds 10 \
+    --warmup-steps 25 \
+    --seed 42 \
+    --disable-randomization \
+    --json "${json_path}" \
+    >"${log_path}" 2>&1
+
+  sleep 12
+done

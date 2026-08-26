@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-08-25T05:18:50.171516+00:00",
+  "validation_contract": {
+    "zero_action": true,
+    "steps": 250,
+    "policy_rate_hz": 50,
+    "simulated_seconds": 5.0,
+    "num_envs": 32,
+    "per_candidate_wall_timeout_seconds": 180,
+    "applied_torque_limit_nm": 1.61,
+    "computed_torque_peak_limit_nm": 5.5,
+    "post_settle_saturation_fraction_limit": 0.005
+  },
+  "candidate_count": 3,
+  "safe_candidate_count": 3,
+  "all_candidates_safe": true,
+  "safe_candidates": [
+    "current",
+    "halfway",
+    "recommended"
+  ],
+  "candidates": [
+    {
+      "name": "current",
+      "requested_stance": {
+        "root_height_m": 0.21,
+        "femur_angle_rad": 0.4,
+        "tibia_angle_rad": 2.1
+      },
+      "status": "pass",
+      "safe": true,
+      "validator_exit_code": 0,
+      "validation_pass_marker": true,
+      "unsafe_reasons": [],
+      "error_reasons": [],
+      "metrics": {
+        "stance_root_height_m": 0.21,
+        "stance_femur_angle_rad": 0.4,
+        "stance_tibia_angle_rad": 2.1,
+        "min_base_height_m": 0.199523,
+        "mean_base_height_m": 0.201281,
+        "post_settle_mean_base_height_m": 0.201281,
+        "post_settle_mean_height_std_m": 8e-05,
+        "post_settle_max_height_std_m": 0.000423,
+        "post_settle_mean_vertical_velocity_rms_mps": 0.000101,
+        "post_settle_mean_roll_pitch_rate_rms_radps": 0.000471,
+        "post_settle_mean_tilt_rms_deg": 0.098293,
+        "post_settle_non_foot_contact_fraction": 0.0,
+        "max_abs_torque_nm": 1.6,
+        "max_abs_computed_torque_nm": 2.107651,
+        "post_settle_mean_abs_computed_torque_nm": 0.399613,
+        "post_settle_torque_saturation_fraction": 0.0,
+        "joint_count": 18,
+        "body_count": 19,
+        "foot_count": 6,
+        "unexpected_terminations": 0,
+        "unexpected_truncations": 0
+      },
+      "log_file": "artifacts/phase2_recovery_stage1/stance_ab/current/validate.log"
+    },
+    {
+      "name": "halfway",
+      "requested_stance": {
+        "root_height_m": 0.198,
+        "femur_angle_rad": 0.5,
+        "tibia_angle_rad": 2.17
+      },
+      "status": "pass",
+      "safe": true,
+      "validator_exit_code": 0,
+      "validation_pass_marker": true,
+      "unsafe_reasons": [],
+      "error_reasons": [],
+      "metrics": {
+        "stance_root_height_m": 0.198,
+        "stance_femur_angle_rad": 0.5,
+        "stance_tibia_angle_rad": 2.17,
+        "min_base_height_m": 0.186775,
+        "mean_base_height_m": 0.188777,
+        "post_settle_mean_base_height_m": 0.188777,
+        "post_settle_mean_height_std_m": 9.3e-05,
+        "post_settle_max_height_std_m": 0.000381,
+        "post_settle_mean_vertical_velocity_rms_mps": 0.000103,
+        "post_settle_mean_roll_pitch_rate_rms_radps": 0.000673,
+        "post_settle_mean_tilt_rms_deg": 0.083561,
+        "post_settle_non_foot_contact_fraction": 0.0,
+        "max_abs_torque_nm": 1.6,
+        "max_abs_computed_torque_nm": 2.494552,
+        "post_settle_mean_abs_computed_torque_nm": 0.386047,
+        "post_settle_torque_saturation_fraction": 0.0,
+        "joint_count": 18,
+        "body_count": 19,
+        "foot_count": 6,
+        "unexpected_terminations": 0,
+        "unexpected_truncations": 0
+      },
+      "log_file": "artifacts/phase2_recovery_stage1/stance_ab/halfway/validate.log"
+    },
+    {
+      "name": "recommended",
+      "requested_stance": {
+        "root_height_m": 0.185,
+        "femur_angle_rad": 0.6,
+        "tibia_angle_rad": 2.2335
+      },
+      "status": "pass",
+      "safe": true,
+      "validator_exit_code": 0,
+      "validation_pass_marker": true,
+      "unsafe_reasons": [],
+      "error_reasons": [],
+      "metrics": {
+        "stance_root_height_m": 0.185,
+        "stance_femur_angle_rad": 0.6,
+        "stance_tibia_angle_rad": 2.2335,
+        "min_base_height_m": 0.174757,
+        "mean_base_height_m": 0.176853,
+        "post_settle_mean_base_height_m": 0.176853,
+        "post_settle_mean_height_std_m": 0.000126,
+        "post_settle_max_height_std_m": 0.000391,
+        "post_settle_mean_vertical_velocity_rms_mps": 0.000113,
+        "post_settle_mean_roll_pitch_rate_rms_radps": 0.001048,
+        "post_settle_mean_tilt_rms_deg": 0.08511,
+        "post_settle_non_foot_contact_fraction": 0.0,
+        "max_abs_torque_nm": 1.6,
+        "max_abs_computed_torque_nm": 2.915375,
+        "post_settle_mean_abs_computed_torque_nm": 0.391005,
+        "post_settle_torque_saturation_fraction": 0.0,
+        "joint_count": 18,
+        "body_count": 19,
+        "foot_count": 6,
+        "unexpected_terminations": 0,
+        "unexpected_truncations": 0
+      },
+      "log_file": "artifacts/phase2_recovery_stage1/stance_ab/lower/validate.log"
+    }
+  ]
+}

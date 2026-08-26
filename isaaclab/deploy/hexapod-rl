@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+unit=hexapod-rl-training.service
+logs=/home/orionh/HEXAPOD/isaaclab/logs/rsl_rl/hexapod_robstride_flat_direct
+
+case "${1:-status}" in
+  start)
+    sudo systemctl start "$unit"
+    ;;
+  stop)
+    sudo systemctl stop "$unit"
+    ;;
+  restart)
+    sudo systemctl restart "$unit"
+    ;;
+  status)
+    systemctl status "$unit" --no-pager
+    ;;
+  logs)
+    journalctl -fu "$unit"
+    ;;
+  latest)
+    find "$logs" -type f -name 'model_*.pt' -printf '%T@ %p\n' 2>/dev/null \
+      | sort -nr | head -n 1 | cut -d' ' -f2-
+    ;;
+  runs)
+    find "$logs" -mindepth 1 -maxdepth 1 -type d -printf '%TY-%Tm-%Td %TH:%TM %p\n' \
+      | sort -r
+    ;;
+  *)
+    echo "usage: hexapod-rl {start|stop|restart|status|logs|latest|runs}" >&2
+    exit 2
+    ;;
+esac
