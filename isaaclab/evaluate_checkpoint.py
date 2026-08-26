@@ -47,6 +47,12 @@ from hexapod_rl.phase2_cfg import (
     HexapodPhase2WarmupEnvCfg,
     HexapodPhase2WarmupPPORunnerCfg,
 )
+from hexapod_rl.phase2g_cfg import (
+    HexapodStage2GInsectGaitAdaptEnvCfg,
+    HexapodStage2GInsectGaitAdaptPPORunnerCfg,
+    HexapodStage2GInsectGaitEnvCfg,
+    HexapodStage2GInsectGaitPPORunnerCfg,
+)
 from hexapod_rl.phase2d_cfg import (
     HexapodPhase2RecoveryStage2DC0EnvCfg,
     HexapodPhase2RecoveryStage2DC0PPORunnerCfg,
@@ -71,6 +77,8 @@ from hexapod_rl.phase2e_cfg import (
 )
 from hexapod_rl.ppo_cfg import HexapodPPORunnerCfg
 from hexapod_rl.register import (
+    STAGE2G_INSECT_GAIT_TASK_ID,
+    STAGE2G_INSECT_GAIT_ADAPT_TASK_ID,
     PHASE1_V2_TASK_ID,
     PHASE1_V3_TASK_ID,
     PHASE1_V4_TASK_ID,
@@ -122,6 +130,14 @@ TASK_CONFIGS = {
     PHASE2_RECOVERY_STAGE2C_STABILIZED_FORWARD_TASK_ID: (
         HexapodPhase2RecoveryStage2CStabilizedForwardEnvCfg,
         HexapodPhase2RecoveryStage2CStabilizedForwardPPORunnerCfg,
+    ),
+    STAGE2G_INSECT_GAIT_TASK_ID: (
+        HexapodStage2GInsectGaitEnvCfg,
+        HexapodStage2GInsectGaitPPORunnerCfg,
+    ),
+    STAGE2G_INSECT_GAIT_ADAPT_TASK_ID: (
+        HexapodStage2GInsectGaitAdaptEnvCfg,
+        HexapodStage2GInsectGaitAdaptPPORunnerCfg,
     ),
     PHASE2_RECOVERY_STAGE2D_C0_TASK_ID: (
         HexapodPhase2RecoveryStage2DC0EnvCfg,

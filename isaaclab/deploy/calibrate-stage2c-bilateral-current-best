@@ -1,0 +1,579 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export LC_ALL=C
+umask 022
+
+# Collect exactly one rollout/update from the immutable Stage2C parent with a
+# zero learning rate.  The bilateral longitudinal contact-moment term is the
+# sole environment intervention.  A caller controls only the artifact/run
+# label; every simulation and optimizer setting is pinned below.  The 1.80
+# N*m reference is the measured raw p50 from the seed-99 ref-0.50 calibration.
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+experiment=hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct
+task_id=Isaac-Velocity-Omni-Recovery-Stage2C-Stabilized-Forward-Hexapod-RobStride-Direct-v0
+parent_run=2026-08-25_23-44-14_accel_scale4_yaw160_trackguard_20260825T234500Z_seed86
+parent_checkpoint=model_2.pt
+parent_sha256=a66a1c83e5b0675ade73d05538ae57d81451568ab45d9e8bcfd2edc67bb2e69a
+training_seed=99
+num_envs=12288
+rollout_steps_per_env=24
+max_iterations=1
+gpu_lock=/tmp/hexapod-isaac-gpu.lock
+
+# This list is the complete effective override surface.  In particular,
+# num_steps_per_env is intentionally absent: the registered PPO config owns
+# the audited 24-step rollout horizon.
+fixed_hydra_overrides=(
+  agent.save_interval=1
+  agent.algorithm.learning_rate=0.0
+  agent.algorithm.clip_param=0.06
+  env.gate_longitudinal_reward_by_command=false
+  env.longitudinal_signed_progress_reward_scale=2.0
+  env.longitudinal_normalized_error_penalty_scale=1.0
+  env.inactive_yaw_rate_reward_scale=-160.0
+  env.inactive_yaw_rate_slew_reward_scale=0.0
+  env.inactive_yaw_rate_slew_reference_rad_s_per_step=0.04
+  env.inactive_ground_contact_yaw_moment_reward_scale=0.0
+  env.inactive_ground_contact_yaw_moment_reference_nm=0.5
+  env.inactive_bilateral_longitudinal_contact_moment_reward_scale=-1.0
+  env.inactive_bilateral_longitudinal_contact_moment_reference_nm=1.8
+  env.support_contact_low_speed_threshold_mps=0.18
+  env.support_contact_target_high_speed=4.0
+  env.support_shortfall_reward_scale=-0.90
+  env.rated_torque_excess_reward_scale=-0.65
+  env.max_joint_rated_torque_excess_l1_reward_scale=-0.50
+  env.torque_saturation_reward_scale=-1.50
+  env.joint_torque_slew_reward_scale=-0.01
+  env.processed_joint_target_slew_limit_rad_per_20ms=0.040
+  env.foot_slip_reward_scale=-0.50
+)
+
+usage() {
+  echo "usage: $0 safe-calibration-label" >&2
+  exit 64
+}
+
+invocation_argv=("$0" "$@")
+(( $# == 1 )) || usage
+batch_label=$1
+if [[ ! "${batch_label}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+  || [[ "${batch_label}" == "." || "${batch_label}" == ".." ]] \
+  || (( ${#batch_label} > 80 )); then
+  echo "calibration label must be one safe directory component of at most 80 characters" >&2
+  usage
+fi
+
+for required_command in date docker flock grep mkdir mktemp mv python3 realpath rm sha256sum systemctl timeout; do
+  command -v "${required_command}" >/dev/null 2>&1 || {
+    echo "required command is unavailable: ${required_command}" >&2
+    exit 69
+  }
+done
+
+experiment_host=${workspace_host}/isaaclab/logs/rsl_rl/${experiment}
+parent_run_host=${experiment_host}/${parent_run}
+parent_host=${parent_run_host}/${parent_checkpoint}
+artifact_root=${workspace_host}/isaaclab/logs/probe_batches/stage2c
+artifact_dir=${artifact_root}/${batch_label}
+load_run_regex='^'${parent_run//./[.]}'$'
+checkpoint_regex='^'${parent_checkpoint//./[.]}'$'
+container_name=hexapod-stage2c-bilateral-cal-${batch_label}-$$
+
+require_canonical_directory() {
+  local path=$1 label=$2 resolved
+  if [[ ! -d "${path}" || -L "${path}" ]]; then
+    echo "${label} must be a real non-symlink directory: ${path}" >&2
+    return 1
+  fi
+  resolved=$(realpath -e -- "${path}") || return 1
+  if [[ "${resolved}" != "${path}" ]]; then
+    echo "${label} has a symlink/non-canonical ancestor: ${path} -> ${resolved}" >&2
+    return 1
+  fi
+}
+
+require_canonical_file() {
+  local path=$1 label=$2 resolved
+  if [[ ! -f "${path}" || ! -s "${path}" || -L "${path}" ]]; then
+    echo "${label} must be a non-empty regular non-symlink file: ${path}" >&2
+    return 1
+  fi
+  resolved=$(realpath -e -- "${path}") || return 1
+  if [[ "${resolved}" != "${path}" ]]; then
+    echo "${label} has a symlink/non-canonical ancestor: ${path} -> ${resolved}" >&2
+    return 1
+  fi
+}
+
+verify_parent() {
+  local actual
+  require_canonical_file "${parent_host}" "immutable parent checkpoint" || return 1
+  actual=$(sha256sum -- "${parent_host}")
+  actual=${actual%% *}
+  if [[ "${actual}" != "${parent_sha256}" ]]; then
+    echo "immutable parent checkpoint hash mismatch" >&2
+    echo "expected ${parent_sha256}" >&2
+    echo "actual   ${actual}" >&2
+    return 1
+  fi
+}
+
+collect_matching_runs() {
+  run_matches=()
+  local direct=${experiment_host}/${batch_label} candidate
+  if [[ -e "${direct}" || -L "${direct}" ]]; then
+    run_matches+=("${direct}")
+  fi
+  shopt -s nullglob
+  local suffix_matches=("${experiment_host}"/*_"${batch_label}")
+  shopt -u nullglob
+  for candidate in "${suffix_matches[@]}"; do
+    [[ "${candidate}" == "${direct}" ]] || run_matches+=("${candidate}")
+  done
+}
+
+# Every cooperating Isaac launcher uses this advisory lock.  The subsequent
+# service and Docker checks fail closed against non-cooperating workloads.
+exec 9>>"${gpu_lock}"
+if ! flock -n 9; then
+  echo "another Isaac GPU launcher holds ${gpu_lock}" >&2
+  exit 75
+fi
+
+require_canonical_directory "${isaac_lab_dir}" "Isaac Lab checkout" || exit 66
+require_canonical_directory "${workspace_host}" "workspace" || exit 66
+require_canonical_directory "${workspace_host}/isaaclab" "workspace IsaacLab project" || exit 66
+require_canonical_directory "${workspace_host}/isaaclab/logs" "workspace log root" || exit 66
+require_canonical_directory "${workspace_host}/isaaclab/logs/rsl_rl" "RSL-RL log root" || exit 66
+require_canonical_directory "${experiment_host}" "Stage2C experiment root" || exit 66
+require_canonical_directory "${parent_run_host}" "immutable parent run" || exit 66
+require_canonical_directory "${workspace_host}/isaaclab/logs/probe_batches" "probe-batch root" || exit 66
+require_canonical_directory "${artifact_root}" "Stage2C probe artifact root" || exit 66
+for source_path in \
+  "${workspace_host}/isaaclab/hexapod_rl/env.py" \
+  "${workspace_host}/isaaclab/hexapod_rl/env_cfg.py" \
+  "${workspace_host}/isaaclab/hexapod_rl/phase2_cfg.py" \
+  "${workspace_host}/isaaclab/hexapod_rl/ppo_cfg.py" \
+  "${workspace_host}/isaaclab/train_model_only_resume.py"; do
+  require_canonical_file "${source_path}" "calibration source" || exit 66
+done
+verify_parent || exit 65
+
+service_status=0
+systemctl is-active --quiet hexapod-rl-training.service || service_status=$?
+if (( service_status == 0 )); then
+  echo "refusing to contend with the active training service" >&2
+  exit 75
+fi
+if (( service_status != 3 )); then
+  echo "unable to prove the training service is inactive (systemctl status ${service_status})" >&2
+  exit 69
+fi
+if ! active_containers=$(docker ps --format '{{.Names}}'); then
+  echo "cannot inspect active Docker containers" >&2
+  exit 69
+fi
+if [[ -n "${active_containers}" ]]; then
+  echo "refusing to contend with active Docker containers" >&2
+  printf '%s\n' "${active_containers}" >&2
+  exit 75
+fi
+
+collect_matching_runs
+if (( ${#run_matches[@]} != 0 )); then
+  echo "refusing stale run(s) matching calibration label ${batch_label}:" >&2
+  printf '  %s\n' "${run_matches[@]}" >&2
+  exit 73
+fi
+if [[ -e "${artifact_dir}" || -L "${artifact_dir}" ]]; then
+  echo "refusing to reuse artifact leaf: ${artifact_dir}" >&2
+  exit 73
+fi
+
+artifact_ready=0
+completed=0
+docker_status=not-started
+child_pid=
+received_signal=
+signal_exit_status=
+cleanup_performed=0
+cleanup_status=not-required
+cleanup_trigger_docker_status=not-applicable
+cleanup_inspect_status=not-run
+cleanup_container_id=not-observed
+cleanup_container_name=not-observed
+cleanup_container_running=unknown
+cleanup_container_state=unknown
+cleanup_stop_status=not-run
+cleanup_postcheck_status=not-run
+cleanup_started_at_utc=not-started
+cleanup_finished_at_utc=not-finished
+
+write_lines_atomic() {
+  local name=$1 temporary
+  shift
+  temporary=$(mktemp -p "${artifact_dir}" ".${name}.partial.XXXXXX") || return 1
+  if ! printf '%s\n' "$@" >"${temporary}" \
+    || ! mv -fT -- "${temporary}" "${artifact_dir}/${name}"; then
+    rm -f -- "${temporary}"
+    return 1
+  fi
+}
+
+write_cleanup_provenance() {
+  write_lines_atomic cleanup.status "${cleanup_status}" || return 1
+  write_lines_atomic cleanup.provenance \
+    "schema_version=1" \
+    "target_container_name=${container_name}" \
+    "trigger_docker_status=${cleanup_trigger_docker_status}" \
+    "inspect_status=${cleanup_inspect_status}" \
+    "observed_container_id=${cleanup_container_id}" \
+    "observed_container_name=${cleanup_container_name}" \
+    "observed_container_running=${cleanup_container_running}" \
+    "observed_container_state=${cleanup_container_state}" \
+    "stop_status=${cleanup_stop_status}" \
+    "postcheck_status=${cleanup_postcheck_status}" \
+    "started_at_utc=${cleanup_started_at_utc}" \
+    "finished_at_utc=${cleanup_finished_at_utc}"
+}
+
+docker_reports_absent() {
+  local message=$1 identifier=$2
+  [[ "${message}" == *"No such container: ${identifier}"* \
+    || "${message}" == *"No such object: ${identifier}"* ]]
+}
+
+cleanup_exact_container() {
+  local inspect_output inspect_rc=0 stop_rc=0 post_output post_rc=0
+  local observed_id observed_name observed_running observed_state extra
+
+  (( artifact_ready )) || return 1
+  if (( cleanup_performed )); then
+    [[ "${cleanup_status}" == stopped \
+      || "${cleanup_status}" == container-absent \
+      || "${cleanup_status}" == already-stopped ]]
+    return
+  fi
+  cleanup_performed=1
+  cleanup_status=checking
+  cleanup_trigger_docker_status=${docker_status}
+  cleanup_started_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  write_cleanup_provenance || true
+
+  # Docker's Go template formatter emits `\t` literally on this host.  Use a
+  # delimiter that Docker returns verbatim and that cannot occur in any of the
+  # validated fields, otherwise cleanup falsely reports an identity mismatch.
+  if inspect_output=$(docker container inspect \
+      --format '{{.Id}}|{{.Name}}|{{.State.Running}}|{{.State.Status}}' \
+      "${container_name}" 2>&1); then
+    cleanup_inspect_status=0
+  else
+    inspect_rc=$?
+    cleanup_inspect_status=${inspect_rc}
+    if docker_reports_absent "${inspect_output}" "${container_name}"; then
+      cleanup_status=container-absent
+      cleanup_postcheck_status=absent
+      cleanup_finished_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+      write_cleanup_provenance || true
+      return 0
+    fi
+    cleanup_status=inspect-failed
+    cleanup_finished_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    write_cleanup_provenance || true
+    return 1
+  fi
+
+  IFS='|' read -r observed_id observed_name observed_running observed_state extra \
+    <<<"${inspect_output}"
+  cleanup_container_id=${observed_id:-invalid}
+  cleanup_container_name=${observed_name:-invalid}
+  cleanup_container_running=${observed_running:-invalid}
+  cleanup_container_state=${observed_state:-invalid}
+  if [[ -n "${extra:-}" \
+    || ! "${observed_id:-}" =~ ^[0-9a-f]{64}$ \
+    || "${observed_name:-}" != "/${container_name}" \
+    || ( "${observed_running:-}" != true && "${observed_running:-}" != false ) ]]; then
+    cleanup_status=identity-mismatch
+    cleanup_finished_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    write_cleanup_provenance || true
+    return 1
+  fi
+
+  if [[ "${observed_running}" == false ]]; then
+    cleanup_status=already-stopped
+    cleanup_postcheck_status=not-running
+    cleanup_finished_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    write_cleanup_provenance || true
+    return 0
+  fi
+
+  if docker container stop --timeout 30 "${observed_id}" >/dev/null 2>&1; then
+    cleanup_stop_status=0
+  else
+    stop_rc=$?
+    cleanup_stop_status=${stop_rc}
+  fi
+
+  if post_output=$(docker container inspect \
+      --format '{{.Id}}|{{.Name}}|{{.State.Running}}|{{.State.Status}}' \
+      "${observed_id}" 2>&1); then
+    cleanup_postcheck_status=0
+    IFS='|' read -r observed_id observed_name observed_running observed_state extra \
+      <<<"${post_output}"
+    if [[ -z "${extra:-}" \
+      && "${observed_id:-}" == "${cleanup_container_id}" \
+      && "${observed_running:-}" == false ]]; then
+      cleanup_status=stopped
+    else
+      cleanup_status=still-running-or-identity-mismatch
+    fi
+  else
+    post_rc=$?
+    cleanup_postcheck_status=${post_rc}
+    if docker_reports_absent "${post_output}" "${cleanup_container_id}"; then
+      cleanup_status=stopped
+      cleanup_postcheck_status=absent
+    else
+      cleanup_status=postcheck-failed
+    fi
+  fi
+  cleanup_finished_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  write_cleanup_provenance || true
+  [[ "${cleanup_status}" == stopped ]]
+}
+
+handle_signal() {
+  local signal_name=$1 signal_status=$2
+  [[ -z "${received_signal}" ]] || return 0
+  received_signal=${signal_name}
+  signal_exit_status=${signal_status}
+  if (( artifact_ready )); then
+    write_lines_atomic signal.received \
+      "signal=${signal_name}" \
+      "received_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)" || true
+  fi
+  if [[ -n "${child_pid}" ]] && kill -0 "${child_pid}" 2>/dev/null; then
+    kill -s "${signal_name}" -- "${child_pid}" 2>/dev/null || true
+  fi
+}
+
+exit_if_signaled() {
+  if [[ -n "${received_signal}" ]]; then
+    exit "${signal_exit_status}"
+  fi
+}
+
+finalize() {
+  local shell_status=$? final_status
+  trap - EXIT
+  trap '' HUP INT QUIT TERM
+  set +e
+  final_status=${shell_status}
+  if [[ -n "${signal_exit_status}" ]]; then
+    final_status=${signal_exit_status}
+  elif (( ! completed && final_status == 0 )); then
+    final_status=70
+  fi
+  if [[ -n "${child_pid}" ]] && kill -0 "${child_pid}" 2>/dev/null; then
+    kill -s TERM -- "${child_pid}" 2>/dev/null
+    wait "${child_pid}" 2>/dev/null
+    docker_status=launcher-aborted
+  fi
+  child_pid=
+  if (( artifact_ready )) \
+    && [[ "${docker_status}" != 0 && "${docker_status}" != not-started ]] \
+    && (( ! cleanup_performed )); then
+    cleanup_exact_container || true
+  fi
+  if (( artifact_ready )); then
+    write_lines_atomic docker.status "${docker_status}"
+    write_lines_atomic train.status "${docker_status}"
+    write_lines_atomic overall.status "${final_status}"
+    write_lines_atomic finished_at_utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  fi
+  exit "${final_status}"
+}
+
+trap finalize EXIT
+trap 'handle_signal HUP 129' HUP
+trap 'handle_signal INT 130' INT
+trap 'handle_signal QUIT 131' QUIT
+trap 'handle_signal TERM 143' TERM
+
+if ! mkdir -- "${artifact_dir}"; then
+  echo "could not atomically create artifact leaf: ${artifact_dir}" >&2
+  exit 73
+fi
+artifact_ready=1
+require_canonical_directory "${artifact_dir}" "new calibration artifact leaf" || exit 73
+write_lines_atomic docker.status "${docker_status}"
+write_lines_atomic train.status "${docker_status}"
+write_lines_atomic overall.status running
+write_lines_atomic status.schema \
+  "docker.status=timeout-wrapped docker-compose exit status, or not-started" \
+  "train.status=legacy alias of docker.status" \
+  "overall.status=final launcher status including provenance and inventory checks" \
+  "cleanup.status=exact-container cleanup outcome after a nonzero Docker status" \
+  "cleanup.provenance=exact target identity, trigger, stop, and postcheck audit"
+write_cleanup_provenance
+write_lines_atomic started_at_utc "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+invocation_lines=("cwd=${PWD}")
+for index in "${!invocation_argv[@]}"; do
+  printf -v escaped_argument '%q' "${invocation_argv[${index}]}"
+  invocation_lines+=("argv[${index}]=${escaped_argument}")
+done
+write_lines_atomic invocation.argv "${invocation_lines[@]}"
+
+effective_lines=(
+  "collection_kind=stage2c_bilateral_signal_calibration"
+  "policy_learning=false"
+  "batch_label=${batch_label}"
+  "training_seed=${training_seed}"
+  "task_id=${task_id}"
+  "experiment=${experiment}"
+  "parent_run=${parent_run}"
+  "parent_checkpoint=${parent_checkpoint}"
+  "parent_sha256=${parent_sha256}"
+  "num_envs=${num_envs}"
+  "rollout_steps_per_env=${rollout_steps_per_env}"
+  "rollout_steps_source=inherited_registered_ppo_config"
+  "expected_transitions=294912"
+  "max_iterations=${max_iterations}"
+  "expected_checkpoint_count=1"
+  "expected_checkpoint=model_0.pt"
+  "std_min=0.06"
+  "std_max=0.08"
+  "container_name=${container_name}"
+  "gpu_lock=${gpu_lock}"
+  "load_run_regex=${load_run_regex}"
+  "checkpoint_regex=${checkpoint_regex}"
+  "timeout_seconds=240"
+)
+for index in "${!fixed_hydra_overrides[@]}"; do
+  effective_lines+=("hydra_override[${index}]=${fixed_hydra_overrides[${index}]}")
+done
+write_lines_atomic effective.params "${effective_lines[@]}"
+write_lines_atomic parent.checkpoint.sha256 "${parent_sha256}  ${parent_host}"
+write_lines_atomic launcher.pid "$$"
+if launcher_path=$(realpath -e -- "$0" 2>/dev/null); then
+  launcher_hash=$(sha256sum -- "${launcher_path}")
+  write_lines_atomic launcher.sha256 "${launcher_hash}"
+fi
+
+source_hash_partial=$(mktemp -p "${artifact_dir}" .workspace.source.sha256.partial.XXXXXX)
+if ! sha256sum -- \
+    "${workspace_host}/isaaclab/hexapod_rl/env.py" \
+    "${workspace_host}/isaaclab/hexapod_rl/env_cfg.py" \
+    "${workspace_host}/isaaclab/hexapod_rl/phase2_cfg.py" \
+    "${workspace_host}/isaaclab/hexapod_rl/ppo_cfg.py" \
+    "${workspace_host}/isaaclab/train_model_only_resume.py" \
+    >"${source_hash_partial}" \
+  || ! mv -fT -- "${source_hash_partial}" "${artifact_dir}/workspace.source.sha256"; then
+  rm -f -- "${source_hash_partial}"
+  echo "could not publish workspace source hashes" >&2
+  exit 74
+fi
+
+exit_if_signaled
+cd "${isaac_lab_dir}"
+timeout --signal=INT --kill-after=30s 240s docker compose \
+  --env-file docker/.env.base \
+  -f docker/docker-compose.yaml \
+  --profile base \
+  run \
+  --rm \
+  --name "${container_name}" \
+  -w "${workspace_container}/isaaclab" \
+  -e PYTHONPATH="${workspace_container}/isaaclab" \
+  -e PYTHONDONTWRITEBYTECODE=1 \
+  -v "${workspace_host}:${workspace_container}:rw" \
+  --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+  isaac-lab-base \
+  "${workspace_container}/isaaclab/train_model_only_resume.py" \
+  --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+  --std-min 0.06 \
+  --std-max 0.08 \
+  --task "${task_id}" \
+  --external_callback hexapod_rl.register.register_envs \
+  --num_envs "${num_envs}" \
+  --max_iterations "${max_iterations}" \
+  --run_name "${batch_label}" \
+  --seed "${training_seed}" \
+  --resume \
+  --load_run "${load_run_regex}" \
+  --checkpoint "${checkpoint_regex}" \
+  "${fixed_hydra_overrides[@]}" \
+  >"${artifact_dir}/train.log" 2>&1 &
+child_pid=$!
+write_lines_atomic docker.pid "${child_pid}"
+if [[ -n "${received_signal}" ]] && kill -0 "${child_pid}" 2>/dev/null; then
+  kill -s "${received_signal}" -- "${child_pid}" 2>/dev/null || true
+fi
+
+docker_status=0
+while true; do
+  if wait "${child_pid}"; then
+    docker_status=0
+  else
+    docker_status=$?
+  fi
+  if [[ -n "${received_signal}" ]] && kill -0 "${child_pid}" 2>/dev/null; then
+    continue
+  fi
+  break
+done
+child_pid=
+write_lines_atomic docker.status "${docker_status}"
+write_lines_atomic train.status "${docker_status}"
+
+if (( docker_status != 0 )); then
+  cleanup_exact_container || true
+fi
+verify_parent || exit 65
+exit_if_signaled
+if (( docker_status != 0 )); then
+  echo "calibration Docker command failed with status ${docker_status}" >&2
+  exit "${docker_status}"
+fi
+
+collect_matching_runs
+exit_if_signaled
+if (( ${#run_matches[@]} != 1 )); then
+  echo "expected exactly one newly resolved calibration run; found ${#run_matches[@]}" >&2
+  if (( ${#run_matches[@]} > 0 )); then
+    printf '  %s\n' "${run_matches[@]}" >&2
+  fi
+  exit 65
+fi
+run_path=${run_matches[0]}
+require_canonical_directory "${run_path}" "resolved calibration run" || exit 65
+
+shopt -s nullglob
+checkpoint_inventory=("${run_path}"/model_*.pt)
+shopt -u nullglob
+if (( ${#checkpoint_inventory[@]} != 1 )); then
+  echo "expected an exact one-checkpoint inventory; found ${#checkpoint_inventory[@]}" >&2
+  if (( ${#checkpoint_inventory[@]} > 0 )); then
+    printf '  %s\n' "${checkpoint_inventory[@]}" >&2
+  fi
+  exit 65
+fi
+checkpoint_path=${run_path}/model_0.pt
+require_canonical_file "${checkpoint_path}" "calibration checkpoint model_0.pt" || exit 65
+if [[ "${checkpoint_inventory[0]}" != "${checkpoint_path}" ]]; then
+  echo "unexpected checkpoint inventory member: ${checkpoint_inventory[0]}" >&2
+  exit 65
+fi
+
+write_lines_atomic child.run_path "${run_path}"
+checkpoint_hash=$(sha256sum -- "${checkpoint_path}")
+write_lines_atomic child.checkpoint.sha256 "${checkpoint_hash}"
+verify_parent || exit 65
+exit_if_signaled
+
+completed=1
+echo "bilateral calibration complete: ${run_path}"

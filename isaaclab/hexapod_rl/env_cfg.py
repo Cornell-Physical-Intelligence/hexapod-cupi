@@ -228,6 +228,37 @@ class HexapodFlatEnvCfg(DirectRLEnvCfg):
     inactive_bilateral_longitudinal_contact_moment_reward_scale = 0.0
     inactive_bilateral_longitudinal_contact_moment_reference_nm = 0.50
 
+    # --- Biomechanical insect-gait shaping (Stage2G). All terms are dormant
+    # at zero scale and preserve every legacy reward tensor exactly. ---
+    # Alternating-tripod phase reward: a per-environment gait clock advances at
+    # a commanded-speed-proportional stride frequency; tripod A (front-left,
+    # mid-right, hind-left, resolved geometrically at runtime) is expected in
+    # stance during the first half-cycle and tripod B during the second half.
+    # Feet matching their expected stance/swing state earn the reward.
+    gait_phase_contact_reward_scale = 0.0
+    # Duty factor: stance fraction of the cycle per leg. Insects run tripod at
+    # ~0.5; values above 0.5 overlap the tripods (tetrapod-like) for slower,
+    # more conservative stepping.
+    gait_duty_factor = 0.5
+    # Stride frequency model: f = clamp(cycles_per_meter * |v_cmd|, min, max).
+    # 8 cycles/m is a 0.125 m stride: 1.28 Hz at 0.16 m/s, 2.4 Hz at 0.30 m/s.
+    gait_cycles_per_meter = 8.0
+    gait_min_frequency_hz = 1.2
+    gait_max_frequency_hz = 3.0
+    # Sigmoid steepness of the smooth stance-window indicator in phase units.
+    gait_phase_transition_sharpness = 30.0
+    # Swing-clearance reward: feet in their expected swing window earn a
+    # Gaussian bump for lifting the distal pad toward the target apex height,
+    # which suppresses dragging, shuffling swings.
+    swing_clearance_reward_scale = 0.0
+    swing_clearance_target_m = 0.030
+    swing_clearance_tolerance_m = 0.015
+    # Distal pad offset along tibia-link +Y used to estimate pad height.
+    swing_clearance_pad_offset_y_m = 0.21
+    # Append [sin(2*pi*phase), cos(2*pi*phase)] to the policy observation.
+    # Tasks enabling this must also widen ``observation_space`` by two.
+    include_gait_phase_observation = False
+
     lin_vel_reward_scale = 3.0
     yaw_rate_reward_scale = 0.5
     alive_reward_scale = 0.10

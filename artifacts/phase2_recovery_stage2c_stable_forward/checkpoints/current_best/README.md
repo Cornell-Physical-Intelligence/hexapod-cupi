@@ -1,7 +1,7 @@
 # Current Stage 2C checkpoint
 
 This directory preserves the strongest formally screened forward-walking policy
-as of 2026-08-25. It is a candidate for continued simulation research, not a
+as of 2026-08-26. It is a candidate for continued simulation research, not a
 hardware-ready policy.
 
 - Checkpoint: `model_2.pt`
@@ -26,6 +26,10 @@ yaw RMSE must be at most 0.08 rad/s, and the moving deck composite must be at mo
 1.0. The associated full report is under
 `../../probes/accel_probe14_contact_yaw_moment1_slew040_20260826T022500Z/evaluation/`;
 that experiment re-screened this parent alongside eight rejected children.
+The Aug-26 torque-slew, foot-slip, and corrected ground-wrench probes also
+re-screened the parent and all of their children at the same playback limiter;
+none cleared the combined yaw, deck, and RS05 gates. Their measurements and
+retained best children are summarized in `../../probes/README.md`.
 
 `params/env.yaml` and `params/agent.yaml` are the resolved training configuration
 captured by Isaac Lab/RSL-RL. Load the checkpoint with the matching task and policy

@@ -1,0 +1,303 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Evaluate a checkpoint-dense Stage2C probe in two Isaac processes.  The
+# immutable parent is repeated in both shards; a dedicated fail-closed merger
+# proves exact parent equivalence and the complete playback contract before any
+# result is analyzed or called complete.
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+experiment=hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct
+task_id=Isaac-Velocity-Omni-Recovery-Stage2C-Stabilized-Forward-Hexapod-RobStride-Direct-v0
+probe_batches_dir=${workspace_host}/isaaclab/logs/probe_batches/stage2c
+gpu_lock=/tmp/hexapod-isaac-gpu.lock
+merger_host=${workspace_host}/isaaclab/merge_stage2c_probe_shards.py
+analyzer_host=${workspace_host}/isaaclab/analyze_stage2c_probe_sweep.py
+
+usage() {
+  echo "usage: $0 batch-label run-name parent-run parent-checkpoint parent-sha256 output-label checkpoint-number [...]" >&2
+  exit 64
+}
+
+(( $# >= 8 )) || usage
+batch_label=$1
+run_name=$2
+parent_run=$3
+parent_checkpoint=$4
+parent_sha256=$5
+output_label=$6
+shift 6
+checkpoint_numbers=("$@")
+
+for safe_name in "${batch_label}" "${run_name}" "${parent_run}" "${parent_checkpoint}" "${output_label}"; do
+  if [[ ! "${safe_name}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+    || [[ "${safe_name}" == "." || "${safe_name}" == ".." ]]; then
+    usage
+  fi
+done
+[[ "${parent_sha256}" =~ ^[0-9a-f]{64}$ ]] || usage
+declare -A seen_checkpoint_numbers=()
+for checkpoint_number in "${checkpoint_numbers[@]}"; do
+  [[ "${checkpoint_number}" =~ ^(0|[1-9][0-9]*)$ ]] || usage
+  checkpoint_key=n${checkpoint_number}
+  if [[ -n "${seen_checkpoint_numbers[${checkpoint_key}]+present}" ]]; then
+    echo "duplicate checkpoint number: ${checkpoint_number}" >&2
+    exit 64
+  fi
+  seen_checkpoint_numbers[${checkpoint_key}]=1
+done
+
+experiment_host=${workspace_host}/isaaclab/logs/rsl_rl/${experiment}
+experiment_container=${workspace_container}/isaaclab/logs/rsl_rl/${experiment}
+run_host=${experiment_host}/${run_name}
+run_container=${experiment_container}/${run_name}
+parent_host=${experiment_host}/${parent_run}/${parent_checkpoint}
+parent_container=${experiment_container}/${parent_run}/${parent_checkpoint}
+artifact_dir=${probe_batches_dir}/${batch_label}
+evaluation_dir=${artifact_dir}/evaluation/${output_label}
+evaluation_container_dir=${workspace_container}/isaaclab/logs/probe_batches/stage2c/${batch_label}/evaluation/${output_label}
+
+for required_command in docker flock python3 sha256sum systemctl tee timeout; do
+  command -v "${required_command}" >/dev/null 2>&1 || {
+    echo "required command is unavailable: ${required_command}" >&2
+    exit 69
+  }
+done
+if [[ ! -d "${probe_batches_dir}" || -L "${probe_batches_dir}" ]]; then
+  echo "probe-batch directory is missing or is a symlink: ${probe_batches_dir}" >&2
+  exit 66
+fi
+exec 9>>"${gpu_lock}"
+if ! flock -n 9; then
+  echo "refusing to contend for the shared hexapod GPU lock: ${gpu_lock}" >&2
+  exit 75
+fi
+
+service_status=0
+systemctl is-active --quiet hexapod-rl-training.service || service_status=$?
+if (( service_status == 0 )); then
+  echo "refusing to contend with the active training service" >&2
+  exit 75
+fi
+if (( service_status != 3 )); then
+  echo "unable to prove training service is inactive (systemctl status ${service_status})" >&2
+  exit 69
+fi
+active_containers=
+if ! active_containers=$(docker ps --format '{{.Names}}'); then
+  echo "unable to query active Docker containers" >&2
+  exit 69
+fi
+if [[ -n "${active_containers}" ]]; then
+  echo "refusing to contend with active Docker containers" >&2
+  printf '%s\n' "${active_containers}" >&2
+  exit 75
+fi
+for source_file in "${merger_host}" "${analyzer_host}"; do
+  if [[ ! -f "${source_file}" || -L "${source_file}" ]]; then
+    echo "required analysis source is missing or is a symlink: ${source_file}" >&2
+    exit 66
+  fi
+done
+if [[ ! -f "${parent_host}" || -L "${parent_host}" ]]; then
+  echo "immutable parent is missing or is a symlink: ${parent_host}" >&2
+  exit 66
+fi
+printf '%s  %s\n' "${parent_sha256}" "${parent_host}" | sha256sum -c -
+if [[ ! -d "${run_host}" || -L "${run_host}" \
+  || ! -d "${artifact_dir}" || -L "${artifact_dir}" ]]; then
+  echo "probe run or artifact directory is missing" >&2
+  exit 66
+fi
+if [[ -e "${evaluation_dir}" ]]; then
+  echo "refusing to overwrite evaluation directory: ${evaluation_dir}" >&2
+  exit 73
+fi
+
+shard_a=("${parent_container}")
+shard_b=("${parent_container}")
+candidate_hosts=()
+candidate_containers=()
+for index in "${!checkpoint_numbers[@]}"; do
+  checkpoint_number=${checkpoint_numbers[${index}]}
+  checkpoint_name=model_${checkpoint_number}.pt
+  checkpoint_host=${run_host}/${checkpoint_name}
+  checkpoint_container=${run_container}/${checkpoint_name}
+  if [[ ! -f "${checkpoint_host}" || -L "${checkpoint_host}" ]]; then
+    echo "candidate is missing or is a symlink: ${checkpoint_host}" >&2
+    exit 66
+  fi
+  candidate_hosts+=("${checkpoint_host}")
+  candidate_containers+=("${checkpoint_container}")
+  if (( index % 2 == 0 )); then
+    shard_a+=("${checkpoint_container}")
+  else
+    shard_b+=("${checkpoint_container}")
+  fi
+done
+
+if [[ "${run_host}" == "${experiment_host}/${parent_run}" ]]; then
+  for checkpoint_number in "${checkpoint_numbers[@]}"; do
+    if [[ "model_${checkpoint_number}.pt" == "${parent_checkpoint}" ]]; then
+      echo "immutable parent must not also appear as a candidate" >&2
+      exit 64
+    fi
+  done
+fi
+
+mkdir -p "${artifact_dir}/evaluation"
+if [[ -L "${artifact_dir}/evaluation" ]] || ! mkdir "${evaluation_dir}"; then
+  echo "refusing to create or overwrite evaluation directory: ${evaluation_dir}" >&2
+  exit 73
+fi
+mkdir "${evaluation_dir}/shard_a" "${evaluation_dir}/shard_b"
+sha256sum "${parent_host}" "${candidate_hosts[@]}" >"${evaluation_dir}/inputs.sha256"
+sha256sum -c "${evaluation_dir}/inputs.sha256"
+cd "${isaac_lab_dir}"
+
+pid_a=
+pid_b=
+children_started=0
+children_completed=0
+container_a=hexapod-s2c-shard_a-$$
+container_b=hexapod-s2c-shard_b-$$
+
+cleanup_on_exit() {
+  local status=$?
+  trap - EXIT HUP INT TERM
+  set +e
+  if (( children_started != 0 && children_completed == 0 )); then
+    for child_pid in "${pid_a}" "${pid_b}"; do
+      if [[ -n "${child_pid}" ]] && kill -0 "${child_pid}" 2>/dev/null; then
+        kill -INT "${child_pid}" 2>/dev/null
+      fi
+    done
+    docker stop --time 10 "${container_a}" >/dev/null 2>&1
+    docker stop --time 10 "${container_b}" >/dev/null 2>&1
+    for child_pid in "${pid_a}" "${pid_b}"; do
+      if [[ -n "${child_pid}" ]]; then wait "${child_pid}" 2>/dev/null; fi
+    done
+  fi
+  exit "${status}"
+}
+trap cleanup_on_exit EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+run_shard() {
+  trap - EXIT HUP INT TERM
+  local shard=$1
+  shift
+  local log_path=${evaluation_dir}/${shard}.log
+  local status_path=${evaluation_dir}/${shard}.status
+  local output_host=${evaluation_dir}/${shard}
+  local output_container=${evaluation_container_dir}/${shard}
+  local json_container=${output_container}/report.json
+  local checkpoint_args=()
+  local checkpoint
+  for checkpoint in "$@"; do
+    checkpoint_args+=(--checkpoint "${checkpoint}")
+  done
+
+  local status=0
+  timeout --signal=INT --kill-after=30s 600s docker compose \
+    --env-file docker/.env.base \
+    -f docker/docker-compose.yaml \
+    --profile base \
+    run \
+    --rm \
+    --name "hexapod-s2c-${shard}-$$" \
+    -w "${workspace_container}/isaaclab" \
+    -e PYTHONPATH="${workspace_container}/isaaclab" \
+    -e PYTHONDONTWRITEBYTECODE=1 \
+    -v "${workspace_host}:${workspace_container}:ro" \
+    -v "${output_host}:${output_container}:rw" \
+    --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+    isaac-lab-base \
+    "${workspace_container}/isaaclab/evaluate_checkpoint.py" \
+    --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+    --task "${task_id}" \
+    "${checkpoint_args[@]}" \
+    --command 0.00 0.00 0.00 \
+    --command 0.16 0.00 0.00 \
+    --command 0.20 0.00 0.00 \
+    --command 0.30 0.00 0.00 \
+    --env-spacing 8.0 \
+    --processed-joint-target-slew-limit-rad-per-20ms 0.040 \
+    --seconds 10 \
+    --warmup-steps 25 \
+    --seed 60 \
+    --disable-randomization \
+    --json "${json_container}" \
+    >"${log_path}" 2>&1 || status=$?
+  printf '%s\n' "${status}" >"${status_path}"
+  exit "${status}"
+}
+
+run_shard shard_a "${shard_a[@]}" &
+pid_a=$!
+children_started=1
+run_shard shard_b "${shard_b[@]}" &
+pid_b=$!
+printf 'launched shard_a pid=%s shard_b pid=%s\n' "${pid_a}" "${pid_b}"
+
+wait_status_a=0
+wait_status_b=0
+wait "${pid_a}" || wait_status_a=$?
+wait "${pid_b}" || wait_status_b=$?
+sha256sum -c "${evaluation_dir}/inputs.sha256"
+
+read_shard_status() {
+  local shard=$1
+  local status_path=${evaluation_dir}/${shard}.status
+  local status
+  if [[ ! -f "${status_path}" || -L "${status_path}" ]] \
+    || ! IFS= read -r status <"${status_path}" \
+    || [[ ! "${status}" =~ ^[0-9]+$ ]] \
+    || (( status > 255 )); then
+    echo "missing or invalid shard status: ${status_path}" >&2
+    return 65
+  fi
+  printf '%s\n' "${status}"
+}
+status_a=$(read_shard_status shard_a)
+status_b=$(read_shard_status shard_b)
+printf 'shard_a_status=%s shard_b_status=%s\n' "${status_a}" "${status_b}"
+if (( status_a != wait_status_a || status_b != wait_status_b )); then
+  echo "shard status files disagree with wait results: " \
+    "files=${status_a},${status_b} waits=${wait_status_a},${wait_status_b}" >&2
+  exit 65
+fi
+if (( status_a != 0 )); then exit "${status_a}"; fi
+if (( status_b != 0 )); then exit "${status_b}"; fi
+for report in "${evaluation_dir}/shard_a/report.json" "${evaluation_dir}/shard_b/report.json"; do
+  [[ -s "${report}" && ! -L "${report}" ]] \
+    || { echo "missing or symlinked report: ${report}" >&2; exit 65; }
+done
+children_completed=1
+pid_a=
+pid_b=
+
+merge_candidate_args=()
+for checkpoint in "${candidate_containers[@]}"; do
+  merge_candidate_args+=(--candidate-checkpoint "${checkpoint}")
+done
+python3 "${merger_host}" \
+  --shard-a "${evaluation_dir}/shard_a/report.json" \
+  --shard-b "${evaluation_dir}/shard_b/report.json" \
+  --parent-checkpoint "${parent_container}" \
+  "${merge_candidate_args[@]}" \
+  --json "${evaluation_dir}/merged.json" \
+  2>&1 | tee "${evaluation_dir}/merge.log"
+python3 "${analyzer_host}" \
+  "${evaluation_dir}/merged.json" \
+  --baseline "${parent_container}" \
+  --json "${evaluation_dir}/analysis.json" \
+  2>&1 | tee "${evaluation_dir}/analysis.log"
+[[ -s "${evaluation_dir}/merged.json" && -s "${evaluation_dir}/analysis.json" ]] \
+  || { echo "merged report or analysis is missing" >&2; exit 65; }
+trap - EXIT HUP INT TERM
+echo "formal sharded Stage2C probe screen complete: ${evaluation_dir}"

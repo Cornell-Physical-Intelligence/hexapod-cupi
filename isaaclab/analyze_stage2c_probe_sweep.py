@@ -32,6 +32,104 @@ DIAGNOSTIC_COMMANDS: tuple[tuple[str, tuple[float, float, float]], ...] = (
 SWEEP_SPEEDS = (0.20, 0.23, 0.24, 0.25, 0.30)
 
 
+def _sample_contract(
+    diagnostic_expected_samples: int | None,
+) -> dict[str, Any]:
+    """Build an explicit formal or short-duration evaluator contract."""
+
+    formal_samples = admission.EXPECTED_SAMPLES
+    formal_seconds = admission.EXPECTED_MEASURED_SECONDS
+    if diagnostic_expected_samples is None:
+        return {
+            "mode": "formal_admission",
+            "expected_samples": formal_samples,
+            "expected_measured_seconds": formal_seconds,
+            "warmup_steps": admission.EXPECTED_WARMUP_STEPS,
+            "requested_steps": admission.EXPECTED_REQUESTED_STEPS,
+            "policy_step_seconds": admission.EXPECTED_POLICY_STEP_SECONDS,
+            "formal_expected_samples": formal_samples,
+            "formal_expected_measured_seconds": formal_seconds,
+            "formal_admission_eligible": True,
+        }
+    if (
+        isinstance(diagnostic_expected_samples, bool)
+        or not isinstance(diagnostic_expected_samples, int)
+        or diagnostic_expected_samples <= 0
+        or diagnostic_expected_samples >= formal_samples
+    ):
+        raise admission.ReportError(
+            "diagnostic_expected_samples must be a positive integer below the "
+            f"formal {formal_samples}-sample contract, got "
+            f"{diagnostic_expected_samples!r}"
+        )
+    measured_seconds = (
+        diagnostic_expected_samples * admission.EXPECTED_POLICY_STEP_SECONDS
+    )
+    return {
+        "mode": "diagnostic_short_duration",
+        "expected_samples": diagnostic_expected_samples,
+        "expected_measured_seconds": measured_seconds,
+        "warmup_steps": admission.EXPECTED_WARMUP_STEPS,
+        "requested_steps": (
+            diagnostic_expected_samples + admission.EXPECTED_WARMUP_STEPS
+        ),
+        "policy_step_seconds": admission.EXPECTED_POLICY_STEP_SECONDS,
+        "formal_expected_samples": formal_samples,
+        "formal_expected_measured_seconds": formal_seconds,
+        "formal_admission_eligible": False,
+    }
+
+
+def _grade_row_for_sample_contract(
+    row: dict[str, Any],
+    *,
+    label: str,
+    command: tuple[float, float, float],
+    sample_contract: dict[str, Any],
+) -> dict[str, Any]:
+    """Grade one row after fail-closed validation of its sample contract.
+
+    The canonical grader remains untouched and fail-closed at 475 samples.
+    Diagnostic rows are copied and adapted only for reuse of its metric/gate
+    calculations, then their true duration is restored in the returned data.
+    """
+
+    samples = admission._nonnegative_int(row.get("samples"), f"{label}.samples")
+    expected_samples = int(sample_contract["expected_samples"])
+    if samples != expected_samples:
+        raise admission.ReportError(
+            f"{label}.samples must be {expected_samples} for "
+            f"{sample_contract['mode']}, got {samples}"
+        )
+    measured_seconds = admission._nonnegative_float(
+        row.get("measured_seconds"), f"{label}.measured_seconds"
+    )
+    expected_seconds = float(sample_contract["expected_measured_seconds"])
+    if not math.isclose(
+        measured_seconds,
+        expected_seconds,
+        abs_tol=admission.COMMAND_TOLERANCE,
+    ):
+        raise admission.ReportError(
+            f"{label}.measured_seconds must be {expected_seconds} for "
+            f"{sample_contract['mode']}, got {measured_seconds}"
+        )
+    if sample_contract["formal_admission_eligible"]:
+        return admission._grade_operational_row(
+            row, label=label, command=command
+        )
+
+    canonical_row = dict(row)
+    canonical_row["samples"] = admission.EXPECTED_SAMPLES
+    canonical_row["measured_seconds"] = admission.EXPECTED_MEASURED_SECONDS
+    result = admission._grade_operational_row(
+        canonical_row, label=label, command=command
+    )
+    result["metrics"]["samples"] = samples
+    result["metrics"]["measured_seconds"] = measured_seconds
+    return result
+
+
 def _reports(payload: Any) -> list[dict[str, Any]]:
     if not isinstance(payload, dict):
         raise admission.ReportError("top-level JSON value must be an object")
@@ -338,7 +436,12 @@ def _threshold_diagnostics(
     }
 
 
-def _analyze_report(report: dict[str, Any], report_index: int) -> dict[str, Any]:
+def _analyze_report(
+    report: dict[str, Any],
+    report_index: int,
+    *,
+    sample_contract: dict[str, Any],
+) -> dict[str, Any]:
     checkpoint = report.get("checkpoint")
     if not isinstance(checkpoint, str) or not checkpoint:
         raise admission.ReportError(
@@ -358,11 +461,21 @@ def _analyze_report(report: dict[str, Any], report_index: int) -> dict[str, Any]
         required=False,
     )
     admission_results = [
-        admission._grade_operational_row(row, label=label, command=command)
+        _grade_row_for_sample_contract(
+            row,
+            label=label,
+            command=command,
+            sample_contract=sample_contract,
+        )
         for label, command, _, row in admission_rows
     ]
     diagnostic_results = [
-        admission._grade_operational_row(row, label=label, command=command)
+        _grade_row_for_sample_contract(
+            row,
+            label=label,
+            command=command,
+            sample_contract=sample_contract,
+        )
         for label, command, _, row in diagnostics
     ]
     moving_results = [
@@ -378,6 +491,10 @@ def _analyze_report(report: dict[str, Any], report_index: int) -> dict[str, Any]
         "label": _checkpoint_label(checkpoint),
         "input_report_index": report_index,
         "input_result_row_count": len(rows),
+        "formal_admission_eligible": sample_contract[
+            "formal_admission_eligible"
+        ],
+        "sample_contract_mode": sample_contract["mode"],
         "selected_admission_row_indices": [item[2] for item in admission_rows],
         "selected_diagnostic_row_indices": [item[2] for item in diagnostics],
         "four_command_contract_safe": operational_safe and absolute_stability_safe,
@@ -460,11 +577,21 @@ def _baseline_index(evaluations: list[dict[str, Any]], selector: str | None) -> 
     return partial[0]
 
 
-def analyze_payload(payload: Any, *, baseline: str | None = None) -> dict[str, Any]:
+def analyze_payload(
+    payload: Any,
+    *,
+    baseline: str | None = None,
+    diagnostic_expected_samples: int | None = None,
+) -> dict[str, Any]:
     """Analyze arbitrary Stage-2C checkpoints with admission plus probe rows."""
 
+    sample_contract = _sample_contract(diagnostic_expected_samples)
     evaluations = [
-        _analyze_report(report, report_index)
+        _analyze_report(
+            report,
+            report_index,
+            sample_contract=sample_contract,
+        )
         for report_index, report in enumerate(_reports(payload))
     ]
     baseline_index = _baseline_index(evaluations, baseline)
@@ -503,10 +630,19 @@ def analyze_payload(payload: Any, *, baseline: str | None = None) -> dict[str, A
         )
 
     ranked = sorted(evaluations, key=rank_key)
+    formal_admission_eligible = bool(
+        sample_contract["formal_admission_eligible"]
+    )
     return {
         "schema_version": 1,
         "task": admission.TASK_ID,
-        "analysis_kind": "stage2c_admission_plus_threshold_probe",
+        "analysis_kind": (
+            "stage2c_admission_plus_threshold_probe"
+            if formal_admission_eligible
+            else "stage2c_diagnostic_short_duration_probe_screen"
+        ),
+        "formal_admission_eligible": formal_admission_eligible,
+        "sample_contract": sample_contract,
         "admission_contract": [
             {"label": label, "command": list(command)}
             for label, command in admission.COMMAND_CONTRACT
@@ -537,6 +673,13 @@ def _print_summary(analysis: dict[str, Any]) -> None:
     by_checkpoint = {
         evaluation["checkpoint"]: evaluation for evaluation in analysis["evaluations"]
     }
+    contract = analysis["sample_contract"]
+    print(
+        f"mode={contract['mode']} samples={contract['expected_samples']} "
+        f"measured_seconds={contract['expected_measured_seconds']:.3f} "
+        "formal_admission_eligible="
+        f"{str(analysis['formal_admission_eligible']).lower()}"
+    )
     print(f"baseline={analysis['baseline_checkpoint']}")
     print(
         "rank status falls track_rmse deck_mean deck_worst duty burst peak "
@@ -545,9 +688,16 @@ def _print_summary(analysis: dict[str, Any]) -> None:
     for rank, checkpoint in enumerate(analysis["ranked_checkpoints"], start=1):
         evaluation = by_checkpoint[checkpoint]
         worst = evaluation["worst_normalized_gate"]
-        status = "PASS" if evaluation["four_command_contract_safe"] else "FAIL"
+        if analysis["formal_admission_eligible"]:
+            status = "PASS" if evaluation["four_command_contract_safe"] else "FAIL"
+        else:
+            status = (
+                "DIAG-PASS"
+                if evaluation["four_command_contract_safe"]
+                else "DIAG-FAIL"
+            )
         print(
-            f"{rank:>4} {status:>6} {evaluation['total_falls']:>5} "
+            f"{rank:>4} {status:>9} {evaluation['total_falls']:>5} "
             f"{evaluation['mean_moving_planar_velocity_rmse_mps']:.4f} "
             f"{evaluation['mean_moving_normalized_stability_composite']:.3f} "
             f"{evaluation['maximum_moving_normalized_stability_composite']:.3f} "
@@ -595,6 +745,15 @@ def _parse_args() -> argparse.Namespace:
             "(default: first evaluation)"
         ),
     )
+    parser.add_argument(
+        "--diagnostic-expected-samples",
+        type=int,
+        help=(
+            "Explicitly analyze a shorter post-warmup screen (for example "
+            "275 samples from a 6 s run). This mode is never formal-admission "
+            "eligible; the default remains the canonical 475 samples."
+        ),
+    )
     parser.add_argument("--json", dest="json_path", help="Write analysis JSON here")
     return parser.parse_args()
 
@@ -604,7 +763,11 @@ def main() -> int:
     try:
         input_path = Path(args.input).expanduser().resolve()
         payload = json.loads(input_path.read_text(encoding="utf-8"))
-        analysis = analyze_payload(payload, baseline=args.baseline)
+        analysis = analyze_payload(
+            payload,
+            baseline=args.baseline,
+            diagnostic_expected_samples=args.diagnostic_expected_samples,
+        )
     except (OSError, json.JSONDecodeError, admission.ReportError) as exc:
         print(f"analysis error: {exc}", file=sys.stderr)
         return 65

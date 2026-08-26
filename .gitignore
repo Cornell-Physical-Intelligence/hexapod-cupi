@@ -3,16 +3,18 @@ dist/
 .DS_Store
 *.log
 
-# Large generated training outputs are curated explicitly below. This prevents
-# an accidental commit of the Spark's complete checkpoint fleet.
+# Generated outputs in isaaclab/logs remain excluded so the Spark's complete
+# checkpoint fleet cannot be committed accidentally.  Artifacts copied into
+# artifacts/ are intentional repository deliverables, including models/video.
 *.pt
 *.mp4
 *.mov
 *.webm
 isaaclab/logs/
-!artifacts/phase1_v5/checkpoint/model_200.pt
-!artifacts/phase1_v5/video/**/*.mp4
-!artifacts/phase2_recovery_stage2c_stable_forward/checkpoints/current_best/model_2.pt
+!artifacts/**/*.pt
+!artifacts/**/*.mp4
+!artifacts/**/*.mov
+!artifacts/**/*.webm
 
 # Local Python/tooling caches are reproducible and must not become experiment data.
 __pycache__/
@@ -26,3 +28,4 @@ __pycache__/
 # source, curated checkpoints, metrics, logs, and videos they package live below.
 tmp/
 HEXAPOD_CHATGPT_PRO_HANDOFF*.zip
+claude_hexapod_handoff_*.tar.gz

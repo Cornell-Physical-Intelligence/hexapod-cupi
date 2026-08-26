@@ -502,6 +502,43 @@ def bounded_inactive_bilateral_longitudinal_contact_moment_cost(
     )
 
 
+def reset_batch_time_mean_and_p50(
+    integrated_values: torch.Tensor,
+    episode_elapsed_s: torch.Tensor,
+    *,
+    min_elapsed_s: float,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Summarize per-episode time means over the current reset batch.
+
+    Episode metrics are accumulated as time integrals.  Reduce each selected
+    environment to its own time mean first, then report the reset-batch mean
+    and interpolated 50th percentile.  This keeps the percentile comparable to
+    the existing ``Episode_Metric`` mean instead of weighting long episodes
+    more heavily than short ones.
+    """
+
+    if (
+        integrated_values.ndim != 1
+        or episode_elapsed_s.shape != integrated_values.shape
+    ):
+        raise ValueError(
+            "integrated_values and episode_elapsed_s must be matching 1-D tensors"
+        )
+    if integrated_values.numel() == 0:
+        raise ValueError("reset-batch tensors must be non-empty")
+    if not math.isfinite(float(min_elapsed_s)) or float(min_elapsed_s) <= 0.0:
+        raise ValueError(
+            f"min_elapsed_s must be finite and positive, got {min_elapsed_s!r}"
+        )
+
+    elapsed = torch.clamp(episode_elapsed_s, min=float(min_elapsed_s))
+    per_episode_time_mean = integrated_values / elapsed
+    return (
+        torch.mean(per_episode_time_mean),
+        torch.quantile(per_episode_time_mean, 0.5),
+    )
+
+
 def max_joint_rated_torque_excess_l2(
     computed_torque: torch.Tensor,
     *,
@@ -708,6 +745,174 @@ def limit_processed_joint_target_slew(
     return limited_target, limited_fraction
 
 
+def assign_tripod_pairs_from_foot_offsets(
+    foot_offsets_b: torch.Tensor,
+    *,
+    lateral_axis_index: int = 0,
+    forward_axis_index: int = 1,
+    forward_sign: float = -1.0,
+) -> torch.Tensor:
+    """Split six feet into alternating tripods from base-frame geometry.
+
+    Leg names in this robot do not encode physical sides, so the grouping is
+    resolved from the default stance: feet are split by lateral sign, ranked
+    fore-to-aft per side, and paired as tripod A = {left front, left hind,
+    right mid} with tripod B as the complement.  Returns a boolean (6,) mask
+    that is ``True`` for tripod A members, in input foot order.
+    """
+
+    if foot_offsets_b.ndim != 2 or foot_offsets_b.shape[0] != 6:
+        raise ValueError(
+            f"foot_offsets_b must have shape (6, 3), got {tuple(foot_offsets_b.shape)}"
+        )
+    if not torch.isfinite(foot_offsets_b).all():
+        raise ValueError("foot_offsets_b must be finite")
+    if forward_sign not in (-1.0, 1.0):
+        raise ValueError(f"forward_sign must be -1.0 or 1.0, got {forward_sign!r}")
+    lateral = foot_offsets_b[:, lateral_axis_index]
+    forward = foot_offsets_b[:, forward_axis_index] * forward_sign
+    left_side = lateral > 0.0
+    if int(left_side.sum().item()) != 3:
+        raise ValueError(
+            "expected exactly three feet on each lateral side, got "
+            f"{int(left_side.sum().item())} with positive lateral offset"
+        )
+    tripod_a = torch.zeros(6, dtype=torch.bool, device=foot_offsets_b.device)
+    for side_mask, ranks_in_a in ((left_side, (0, 2)), (~left_side, (1,))):
+        side_indices = torch.nonzero(side_mask, as_tuple=False).squeeze(-1)
+        order = torch.argsort(forward[side_indices], descending=True)
+        for rank in ranks_in_a:
+            tripod_a[side_indices[order[rank]]] = True
+    if int(tripod_a.sum().item()) != 3:
+        raise ValueError("tripod assignment must select exactly three feet")
+    return tripod_a
+
+
+def tripod_expected_stance(
+    gait_phase: torch.Tensor,
+    tripod_a_mask: torch.Tensor,
+    *,
+    duty_factor: float,
+    sharpness: float,
+) -> torch.Tensor:
+    """Smooth per-foot expected-stance weights in [0, 1] for a tripod clock.
+
+    Tripod A's stance window starts at phase 0 and tripod B's at phase 0.5,
+    each spanning ``duty_factor`` of the cycle.  The indicator is a sigmoid of
+    circular distance from the window center, so the phase reward stays
+    differentiable at the touchdown/liftoff transitions.
+    """
+
+    if gait_phase.ndim != 1:
+        raise ValueError(f"gait_phase must be 1-D, got shape {tuple(gait_phase.shape)}")
+    if tripod_a_mask.shape != (6,) or tripod_a_mask.dtype != torch.bool:
+        raise ValueError("tripod_a_mask must be a boolean tensor of shape (6,)")
+    if not 0.0 < duty_factor < 1.0:
+        raise ValueError(f"duty_factor must be in (0, 1), got {duty_factor!r}")
+    if not math.isfinite(sharpness) or sharpness <= 0.0:
+        raise ValueError(f"sharpness must be finite and positive, got {sharpness!r}")
+    offsets = torch.where(
+        tripod_a_mask,
+        torch.zeros(6, dtype=gait_phase.dtype, device=gait_phase.device),
+        torch.full((6,), 0.5, dtype=gait_phase.dtype, device=gait_phase.device),
+    )
+    half_window = 0.5 * float(duty_factor)
+    local_phase = torch.remainder(gait_phase.unsqueeze(-1) - offsets, 1.0)
+    center_distance = torch.abs(local_phase - half_window)
+    circular_distance = torch.minimum(center_distance, 1.0 - center_distance)
+    return torch.sigmoid(float(sharpness) * (half_window - circular_distance))
+
+
+def gait_phase_contact_reward(
+    foot_contact: torch.Tensor,
+    expected_stance: torch.Tensor,
+) -> torch.Tensor:
+    """Mean per-foot agreement between actual and expected contact, in [0, 1]."""
+
+    if foot_contact.dtype != torch.bool:
+        raise ValueError(f"foot_contact must be boolean, got {foot_contact.dtype}")
+    if foot_contact.shape != expected_stance.shape:
+        raise ValueError(
+            "foot_contact and expected_stance must have matching shapes, got "
+            f"{tuple(foot_contact.shape)} and {tuple(expected_stance.shape)}"
+        )
+    contact = foot_contact.to(expected_stance.dtype)
+    agreement = expected_stance * contact + (1.0 - expected_stance) * (1.0 - contact)
+    return torch.mean(agreement, dim=-1)
+
+
+def swing_clearance_reward(
+    foot_pad_heights_m: torch.Tensor,
+    expected_stance: torch.Tensor,
+    *,
+    target_m: float,
+    tolerance_m: float,
+) -> torch.Tensor:
+    """Swing-weighted Gaussian reward for lifting pads toward the apex target.
+
+    Feet are weighted by their expected-swing probability so stance feet earn
+    nothing; a foot dragged along the ground through its swing window scores
+    near zero while a foot lifted to the target apex scores near one.
+    """
+
+    if foot_pad_heights_m.shape != expected_stance.shape:
+        raise ValueError(
+            "foot_pad_heights_m and expected_stance must have matching shapes, "
+            f"got {tuple(foot_pad_heights_m.shape)} and {tuple(expected_stance.shape)}"
+        )
+    if not math.isfinite(target_m) or target_m <= 0.0:
+        raise ValueError(f"target_m must be finite and positive, got {target_m!r}")
+    if not math.isfinite(tolerance_m) or tolerance_m <= 0.0:
+        raise ValueError(f"tolerance_m must be finite and positive, got {tolerance_m!r}")
+    swing_weight = 1.0 - expected_stance
+    normalized_error = (foot_pad_heights_m - float(target_m)) / float(tolerance_m)
+    clearance_score = torch.exp(-torch.square(normalized_error))
+    weighted = torch.sum(swing_weight * clearance_score, dim=-1)
+    return weighted / torch.clamp(torch.sum(swing_weight, dim=-1), min=1.0e-6)
+
+
+def advance_gait_phase(
+    gait_phase: torch.Tensor,
+    commanded_planar_speed: torch.Tensor,
+    moving: torch.Tensor,
+    *,
+    step_dt: float,
+    cycles_per_meter: float,
+    min_frequency_hz: float,
+    max_frequency_hz: float,
+) -> torch.Tensor:
+    """Advance and wrap the per-environment gait clock for moving commands.
+
+    Frequency scales with commanded speed the way insect stride frequency
+    does, bounded to a plausible band; standing environments hold phase so a
+    later command resumes from a valid clock state.
+    """
+
+    if gait_phase.shape != commanded_planar_speed.shape or gait_phase.shape != moving.shape:
+        raise ValueError("gait_phase, commanded_planar_speed, and moving must match shapes")
+    if moving.dtype != torch.bool:
+        raise ValueError(f"moving must be boolean, got {moving.dtype}")
+    if not math.isfinite(step_dt) or step_dt <= 0.0:
+        raise ValueError(f"step_dt must be finite and positive, got {step_dt!r}")
+    if not math.isfinite(cycles_per_meter) or cycles_per_meter <= 0.0:
+        raise ValueError(f"cycles_per_meter must be finite and positive, got {cycles_per_meter!r}")
+    if not (
+        math.isfinite(min_frequency_hz)
+        and math.isfinite(max_frequency_hz)
+        and 0.0 < min_frequency_hz <= max_frequency_hz
+    ):
+        raise ValueError(
+            f"invalid frequency band [{min_frequency_hz!r}, {max_frequency_hz!r}]"
+        )
+    frequency = torch.clamp(
+        float(cycles_per_meter) * commanded_planar_speed,
+        min=float(min_frequency_hz),
+        max=float(max_frequency_hz),
+    )
+    advanced = gait_phase + float(step_dt) * frequency * moving.to(gait_phase.dtype)
+    return torch.remainder(advanced, 1.0)
+
+
 class HexapodEnv(DirectRLEnv):
     cfg: HexapodFlatEnvCfg
 
@@ -760,6 +965,15 @@ class HexapodEnv(DirectRLEnv):
             self.num_envs, dtype=torch.bool, device=self.device
         )
         self._commands = torch.zeros(self.num_envs, 3, device=self.device)
+        # Insect-gait clock state.  The tripod split is resolved lazily from
+        # the first reward step's base-frame foot geometry because leg names
+        # do not encode physical sides on this robot.
+        self._gait_phase = torch.zeros(self.num_envs, device=self.device)
+        self._tripod_a_mask: torch.Tensor | None = None
+        self._gait_shaping_enabled = (
+            self.cfg.gait_phase_contact_reward_scale != 0.0
+            or self.cfg.swing_clearance_reward_scale != 0.0
+        )
         self._velocity_command_cfg = getattr(self.cfg, "velocity_command", None)
         self._command_frame = getattr(self.cfg, "command_frame", "body")
         if self._command_frame not in {"body", "navigation"}:
@@ -860,6 +1074,8 @@ class HexapodEnv(DirectRLEnv):
                 "joint_limits_l2",
                 "support_shortfall",
                 "deck_stability",
+                "gait_phase_contact",
+                "swing_clearance",
                 "fall_penalty",
                 "torque_saturation_fraction",
                 "navigation_lateral_velocity_ema_mps",
@@ -988,18 +1204,21 @@ class HexapodEnv(DirectRLEnv):
         projected_gravity = self._vector_in_command_frame(
             self._robot.data.projected_gravity_b.torch
         )
-        observations = torch.cat(
-            (
-                root_lin_vel,
-                root_ang_vel,
-                projected_gravity,
-                self._commands,
-                self._robot.data.joint_pos.torch - self._robot.data.default_joint_pos.torch,
-                self._robot.data.joint_vel.torch,
-                self._actions,
-            ),
-            dim=-1,
-        )
+        observation_terms = [
+            root_lin_vel,
+            root_ang_vel,
+            projected_gravity,
+            self._commands,
+            self._robot.data.joint_pos.torch - self._robot.data.default_joint_pos.torch,
+            self._robot.data.joint_vel.torch,
+            self._actions,
+        ]
+        if self.cfg.include_gait_phase_observation:
+            gait_angle = 2.0 * math.pi * self._gait_phase
+            observation_terms.append(
+                torch.stack((torch.sin(gait_angle), torch.cos(gait_angle)), dim=-1)
+            )
+        observations = torch.cat(observation_terms, dim=-1)
         self._previous_actions = self._actions.clone()
         return {"policy": observations}
 
@@ -1184,6 +1403,66 @@ class HexapodEnv(DirectRLEnv):
         support_shortfall = torch.relu(
             support_contact_target - torch.sum(foot_contact.float(), dim=1)
         )
+
+        gait_phase_contact = None
+        swing_clearance = None
+        if self._gait_shaping_enabled:
+            if self._tripod_a_mask is None:
+                root_pos_w = self._robot.data.root_pos_w.torch[0]
+                root_quat_w = self._robot.data.root_quat_w.torch[0]
+                foot_pos_w = self._robot.data.body_link_pos_w.torch[
+                    0, self._feet_body_ids
+                ]
+                foot_offsets_b = math_utils.quat_apply_inverse(
+                    root_quat_w.unsqueeze(0).expand(6, 4),
+                    foot_pos_w - root_pos_w.unsqueeze(0),
+                )
+                self._tripod_a_mask = assign_tripod_pairs_from_foot_offsets(
+                    foot_offsets_b
+                )
+            gait_moving = (
+                commanded_planar_speed > self.cfg.moving_command_threshold_mps
+            )
+            self._gait_phase = advance_gait_phase(
+                self._gait_phase,
+                commanded_planar_speed,
+                gait_moving,
+                step_dt=self.step_dt,
+                cycles_per_meter=self.cfg.gait_cycles_per_meter,
+                min_frequency_hz=self.cfg.gait_min_frequency_hz,
+                max_frequency_hz=self.cfg.gait_max_frequency_hz,
+            )
+            expected_stance = tripod_expected_stance(
+                self._gait_phase,
+                self._tripod_a_mask,
+                duty_factor=self.cfg.gait_duty_factor,
+                sharpness=self.cfg.gait_phase_transition_sharpness,
+            )
+            gait_moving_weight = gait_moving.to(expected_stance.dtype)
+            gait_phase_contact = (
+                gait_phase_contact_reward(foot_contact, expected_stance)
+                * gait_moving_weight
+            )
+            foot_link_pos_w = self._robot.data.body_link_pos_w.torch[
+                :, self._feet_body_ids
+            ]
+            foot_link_quat_w = self._robot.data.body_link_quat_w.torch[
+                :, self._feet_body_ids
+            ]
+            pad_offset_l = torch.zeros_like(foot_link_pos_w)
+            pad_offset_l[:, :, 1] = self.cfg.swing_clearance_pad_offset_y_m
+            pad_pos_w = foot_link_pos_w + math_utils.quat_apply(
+                foot_link_quat_w, pad_offset_l
+            )
+            swing_clearance = (
+                swing_clearance_reward(
+                    pad_pos_w[:, :, 2],
+                    expected_stance,
+                    target_m=self.cfg.swing_clearance_target_m,
+                    tolerance_m=self.cfg.swing_clearance_tolerance_m,
+                )
+                * gait_moving_weight
+            )
 
         joint_torque_slew = applied_torque_slew_l2(
             joint_torque,
@@ -1475,6 +1754,16 @@ class HexapodEnv(DirectRLEnv):
         }
         # Keep the default reward tensor exactly unchanged: unlike a
         # multiply-by-zero path, this also stays dormant for non-finite input.
+        if self.cfg.gait_phase_contact_reward_scale != 0.0:
+            assert gait_phase_contact is not None
+            rewards["gait_phase_contact"] = (
+                gait_phase_contact * self.cfg.gait_phase_contact_reward_scale
+            )
+        if self.cfg.swing_clearance_reward_scale != 0.0:
+            assert swing_clearance is not None
+            rewards["swing_clearance"] = (
+                swing_clearance * self.cfg.swing_clearance_reward_scale
+            )
         if self.cfg.max_joint_rated_torque_excess_reward_scale != 0.0:
             rewards["max_joint_rated_torque_excess_l2"] = (
                 max_joint_rated_torque_excess_l2(
@@ -1798,6 +2087,12 @@ class HexapodEnv(DirectRLEnv):
         self._has_navigation_lateral_velocity_ema[env_ids] = False
         self._torque_demand_excess_duration_s[env_ids] = 0.0
         self._command_resample_epoch[env_ids] = 0
+        if self._gait_shaping_enabled:
+            # Randomized initial phase decorrelates the fleet's gait clocks;
+            # the seeded evaluator makes playback reproducible regardless.
+            self._gait_phase[env_ids] = torch.rand(
+                len(env_ids), device=self.device
+            )
 
         self._sample_commands(env_ids)
         self._reset_command_resampling_timers(env_ids)
@@ -1820,6 +2115,41 @@ class HexapodEnv(DirectRLEnv):
         self._robot.write_joint_velocity_to_sim_index(velocity=joint_vel, env_ids=env_ids)
 
         self.extras["log"] = {}
+        bilateral_reward_scale = float(
+            self.cfg.inactive_bilateral_longitudinal_contact_moment_reward_scale
+        )
+        if bilateral_reward_scale != 0.0:
+            # The raw metric is already integrated independently above.  The
+            # bounded Cauchy cost is recovered from its existing scaled reward
+            # integral, so telemetry cannot perturb the reward tensor or
+            # dynamics.  Percentiles are over per-environment episode means in
+            # this reset batch, matching the existing Episode_Metric mean.
+            _, bilateral_moment_p50 = reset_batch_time_mean_and_p50(
+                self._episode_sums[
+                    "bilateral_longitudinal_contact_moment_nm"
+                ][env_ids],
+                episode_elapsed_s,
+                min_elapsed_s=self.step_dt,
+            )
+            bilateral_cost_mean, bilateral_cost_p50 = reset_batch_time_mean_and_p50(
+                self._episode_sums[
+                    "inactive_bilateral_longitudinal_contact_moment"
+                ][env_ids]
+                / bilateral_reward_scale,
+                episode_elapsed_s,
+                min_elapsed_s=self.step_dt,
+            )
+            self.extras["log"][
+                "Episode_Metric/bilateral_longitudinal_contact_moment_nm_p50"
+            ] = bilateral_moment_p50
+            self.extras["log"][
+                "Episode_Metric/"
+                "bilateral_longitudinal_contact_moment_cauchy_cost_mean"
+            ] = bilateral_cost_mean
+            self.extras["log"][
+                "Episode_Metric/"
+                "bilateral_longitudinal_contact_moment_cauchy_cost_p50"
+            ] = bilateral_cost_p50
         for name, values in self._episode_sums.items():
             category = (
                 "Episode_Metric"

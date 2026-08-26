@@ -1,10 +1,12 @@
 # Training artifacts
 
-This directory keeps the compact evidence needed to reproduce and audit the
-hexapod training work. Raw checkpoint fleets, simulator caches, and duplicate
-handoff archives are intentionally excluded.
+This directory keeps the local evidence needed to reproduce, inspect, and audit
+the hexapod training work. Models and videos copied into `artifacts/` are
+repository deliverables. The Spark's much larger raw checkpoint fleet remains
+under `isaaclab/logs/` and is intentionally excluded, as are simulator caches
+and duplicate handoff archives.
 
-## Curated binary artifacts
+## Key binary artifacts
 
 | Role | Path | SHA-256 |
 | --- | --- | --- |
@@ -18,5 +20,21 @@ not evidence that the current Stage 2C stability gate passes. There is not yet
 a Stage 2C showcase video because the current candidate still misses yaw and
 high-speed deck-stability thresholds; its README records the exact measurements.
 
-Evaluation JSON, resolved YAML, checksums, and compact analysis files stay in Git.
-Large raw logs remain on the Spark and in the local ignored artifact mirror.
+The repository also carries the full set of models and videos that were already
+present in this local artifact mirror: the baseline policy/demos, the Phase 1 v4
+demo, Phase 2 warmup checkpoints, Stage 1 recovery checkpoints, and Stage 2 seed
+and continuation checkpoints. This preserves the local training lineage without
+copying the Spark's hundreds of rejected intermediate probe checkpoints.
+
+Recent probe directories also retain one `checkpoints/best_child/` model per
+completed experiment. "Best child" means highest-ranked within that individual
+probe, not admitted or hardware-ready; the probe README records why each one was
+rejected. Only `checkpoints/current_best/` names the active research baseline.
+
+Evaluation JSON, resolved YAML, checksums, compact analysis files, locally
+curated checkpoints, and videos stay in Git. Large raw logs remain on the Spark.
+
+Short 6-second probe screens contain 275 post-warmup samples and are explicitly
+diagnostic-only (`formal_admission_eligible=false`). They can rank candidates
+for triage, but a candidate must pass the canonical 10-second/475-sample formal
+evaluation before it can replace the current-best checkpoint.

@@ -28,6 +28,14 @@ PHASE2_RECOVERY_STAGE2C_STABILIZED_FORWARD_TASK_ID = (
     "Isaac-Velocity-Omni-Recovery-Stage2C-Stabilized-Forward-"
     "Hexapod-RobStride-Direct-v0"
 )
+STAGE2G_INSECT_GAIT_TASK_ID = (
+    "Isaac-Velocity-Omni-Stage2G-Insect-Gait-"
+    "Hexapod-RobStride-Direct-v0"
+)
+STAGE2G_INSECT_GAIT_ADAPT_TASK_ID = (
+    "Isaac-Velocity-Omni-Stage2G-Insect-Gait-Adapt-"
+    "Hexapod-RobStride-Direct-v0"
+)
 PHASE2_RECOVERY_STAGE2D_C0_TASK_ID = (
     "Isaac-Velocity-Omni-Recovery-Stage2D-Homotopy-C0-"
     "Hexapod-RobStride-Direct-v0"
@@ -197,6 +205,35 @@ def register_envs() -> list[str]:
                 "rsl_rl_cfg_entry_point": (
                     "hexapod_rl.phase2_cfg:"
                     "HexapodPhase2RecoveryStage2CStabilizedForwardPPORunnerCfg"
+                ),
+            },
+        )
+    if STAGE2G_INSECT_GAIT_TASK_ID not in gym.registry:
+        gym.register(
+            id=STAGE2G_INSECT_GAIT_TASK_ID,
+            entry_point="hexapod_rl.env:HexapodEnv",
+            disable_env_checker=True,
+            kwargs={
+                "env_cfg_entry_point": (
+                    "hexapod_rl.phase2g_cfg:HexapodStage2GInsectGaitEnvCfg"
+                ),
+                "rsl_rl_cfg_entry_point": (
+                    "hexapod_rl.phase2g_cfg:HexapodStage2GInsectGaitPPORunnerCfg"
+                ),
+            },
+        )
+    if STAGE2G_INSECT_GAIT_ADAPT_TASK_ID not in gym.registry:
+        gym.register(
+            id=STAGE2G_INSECT_GAIT_ADAPT_TASK_ID,
+            entry_point="hexapod_rl.env:HexapodEnv",
+            disable_env_checker=True,
+            kwargs={
+                "env_cfg_entry_point": (
+                    "hexapod_rl.phase2g_cfg:HexapodStage2GInsectGaitAdaptEnvCfg"
+                ),
+                "rsl_rl_cfg_entry_point": (
+                    "hexapod_rl.phase2g_cfg:"
+                    "HexapodStage2GInsectGaitAdaptPPORunnerCfg"
                 ),
             },
         )

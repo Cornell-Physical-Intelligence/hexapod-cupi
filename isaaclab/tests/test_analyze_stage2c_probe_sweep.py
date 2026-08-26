@@ -103,6 +103,19 @@ def _report(checkpoint: str, *, duty_at_0p24: float = 0.14) -> dict[str, object]
     }
 
 
+def _short_report(
+    checkpoint: str, *, expected_samples: int = 275
+) -> dict[str, object]:
+    report = _report(checkpoint)
+    measured_seconds = (
+        expected_samples * analyzer.admission.EXPECTED_POLICY_STEP_SECONDS
+    )
+    for row in report["results"]:
+        row["samples"] = expected_samples
+        row["measured_seconds"] = measured_seconds
+    return report
+
+
 class AnalyzeStage2CProbeSweepTest(unittest.TestCase):
     def test_extra_shuffled_rows_are_selected_by_command(self):
         payload = {
@@ -113,6 +126,12 @@ class AnalyzeStage2CProbeSweepTest(unittest.TestCase):
         }
         result = analyzer.analyze_payload(payload)
 
+        self.assertTrue(result["formal_admission_eligible"])
+        self.assertEqual(result["sample_contract"]["mode"], "formal_admission")
+        self.assertEqual(
+            result["sample_contract"]["expected_samples"],
+            analyzer.admission.EXPECTED_SAMPLES,
+        )
         self.assertEqual(result["candidate_count"], 2)
         self.assertEqual(result["four_command_contract_safe_count"], 2)
         evaluation = result["evaluations"][0]
@@ -183,6 +202,78 @@ class AnalyzeStage2CProbeSweepTest(unittest.TestCase):
         self.assertTrue(evaluation["four_command_contract_safe"])
         self.assertFalse(evaluation["threshold_diagnostics"]["complete"])
         self.assertEqual(len(evaluation["diagnostic_results"]), 0)
+
+    def test_short_screen_requires_explicit_diagnostic_mode(self):
+        report = _short_report("/logs/probe/model_7.pt")
+        with self.assertRaisesRegex(
+            analyzer.admission.ReportError, "samples must be 475"
+        ):
+            analyzer.analyze_payload({"evaluations": [report]})
+
+    def test_explicit_short_screen_ranks_but_is_never_formal_admission(self):
+        payload = {
+            "evaluations": [
+                _short_report("/logs/control/model_2.pt"),
+                _short_report("/logs/probe/model_7.pt"),
+            ]
+        }
+        result = analyzer.analyze_payload(
+            payload, diagnostic_expected_samples=275
+        )
+
+        self.assertFalse(result["formal_admission_eligible"])
+        self.assertEqual(
+            result["analysis_kind"],
+            "stage2c_diagnostic_short_duration_probe_screen",
+        )
+        self.assertEqual(
+            result["sample_contract"],
+            {
+                "mode": "diagnostic_short_duration",
+                "expected_samples": 275,
+                "expected_measured_seconds": 5.5,
+                "warmup_steps": 25,
+                "requested_steps": 300,
+                "policy_step_seconds": 0.02,
+                "formal_expected_samples": 475,
+                "formal_expected_measured_seconds": 9.5,
+                "formal_admission_eligible": False,
+            },
+        )
+        self.assertEqual(len(result["ranked_checkpoints"]), 2)
+        for evaluation in result["evaluations"]:
+            self.assertFalse(evaluation["formal_admission_eligible"])
+            self.assertEqual(
+                evaluation["sample_contract_mode"],
+                "diagnostic_short_duration",
+            )
+            for row in (
+                *evaluation["admission_results"],
+                *evaluation["diagnostic_results"],
+            ):
+                self.assertEqual(row["metrics"]["samples"], 275)
+                self.assertEqual(row["metrics"]["measured_seconds"], 5.5)
+
+    def test_diagnostic_mode_rejects_wrong_duration_and_non_short_contracts(self):
+        report = _short_report("/logs/probe/model_7.pt")
+        report["results"][0]["measured_seconds"] = 6.0
+        with self.assertRaisesRegex(
+            analyzer.admission.ReportError, "measured_seconds must be 5.5"
+        ):
+            analyzer.analyze_payload(
+                {"evaluations": [report]}, diagnostic_expected_samples=275
+            )
+
+        formal_payload = {"evaluations": [_report("/logs/probe/model_7.pt")]}
+        for invalid in (0, 475, 500, True):
+            with self.subTest(invalid=invalid), self.assertRaisesRegex(
+                analyzer.admission.ReportError,
+                "positive integer below",
+            ):
+                analyzer.analyze_payload(
+                    formal_payload,
+                    diagnostic_expected_samples=invalid,
+                )
 
 
 if __name__ == "__main__":

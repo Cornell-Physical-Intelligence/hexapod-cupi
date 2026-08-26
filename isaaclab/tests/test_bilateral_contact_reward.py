@@ -46,6 +46,7 @@ def _literal(class_node: ast.ClassDef, name: str):
 
 
 cost = _function("bounded_inactive_bilateral_longitudinal_contact_moment_cost")
+reset_batch_summary = _function("reset_batch_time_mean_and_p50")
 
 
 class BilateralLongitudinalContactMomentTest(unittest.TestCase):
@@ -107,6 +108,51 @@ class BilateralLongitudinalContactMomentTest(unittest.TestCase):
             cost(offsets, forces, contacts.float(), longitudinal, yaw, reference_nm=1.0)
 
 
+class ResetBatchTelemetryTest(unittest.TestCase):
+    def test_reports_mean_and_interpolated_p50_of_episode_time_means(self):
+        # Per-episode means for envs 0, 2, and 3 are 1, 5, and 3.  The
+        # unrelated env 1 must not affect either reset-batch statistic.  This
+        # mirrors _reset_idx selecting non-contiguous full-space env IDs before
+        # passing its already-aligned elapsed-time clone to the helper.
+        integrated = torch.tensor([2.0, 1000.0, 5.0, 12.0])
+        elapsed = torch.tensor([2.0, 1.0, 1.0, 4.0])
+        env_ids = torch.tensor([0, 2, 3])
+        mean, p50 = reset_batch_summary(
+            integrated[env_ids],
+            elapsed[env_ids],
+            min_elapsed_s=0.02,
+        )
+        torch.testing.assert_close(mean, torch.tensor(3.0))
+        torch.testing.assert_close(p50, torch.tensor(3.0))
+
+    def test_clamps_zero_duration_and_rejects_invalid_inputs(self):
+        mean, p50 = reset_batch_summary(
+            torch.tensor([0.02, 0.06]),
+            torch.tensor([0.0, 0.02]),
+            min_elapsed_s=0.02,
+        )
+        torch.testing.assert_close(mean, torch.tensor(2.0))
+        torch.testing.assert_close(p50, torch.tensor(2.0))
+        with self.assertRaisesRegex(ValueError, "matching 1-D"):
+            reset_batch_summary(
+                torch.zeros(2, 1),
+                torch.zeros(2),
+                min_elapsed_s=0.02,
+            )
+        with self.assertRaisesRegex(ValueError, "non-empty"):
+            reset_batch_summary(
+                torch.tensor([]),
+                torch.tensor([]),
+                min_elapsed_s=0.02,
+            )
+        with self.assertRaisesRegex(ValueError, "finite and positive"):
+            reset_batch_summary(
+                torch.zeros(2),
+                torch.zeros(2),
+                min_elapsed_s=0.0,
+            )
+
+
 class BilateralContactStaticIntegrationTest(unittest.TestCase):
     def test_default_off_conditional_reward_and_raw_metric_are_wired(self):
         cfg = _class(CFG_TREE, "HexapodFlatEnvCfg")
@@ -137,6 +183,36 @@ class BilateralContactStaticIntegrationTest(unittest.TestCase):
         self.assertIn('rewards["inactive_bilateral_longitudinal_contact_moment"]', source)
         self.assertIn('"bilateral_longitudinal_contact_moment_nm"', source)
         self.assertIn("self._vector_in_command_frame", source)
+
+    def test_reset_telemetry_is_enabled_only_with_the_bilateral_reward_path(self):
+        env = _class(ENV_TREE, "HexapodEnv")
+        reset = next(
+            node
+            for node in env.body
+            if isinstance(node, ast.FunctionDef) and node.name == "_reset_idx"
+        )
+        source = ast.get_source_segment(ENV_SOURCE, reset)
+        assert source is not None
+        gate = "if bilateral_reward_scale != 0.0:"
+        gate_index = source.index(gate)
+        loop_index = source.index("for name, values in self._episode_sums.items()")
+        telemetry_source = source[gate_index:loop_index]
+        self.assertIn(
+            '"Episode_Metric/bilateral_longitudinal_contact_moment_nm_p50"',
+            telemetry_source,
+        )
+        self.assertIn(
+            '"bilateral_longitudinal_contact_moment_cauchy_cost_mean"',
+            telemetry_source,
+        )
+        self.assertIn(
+            '"bilateral_longitudinal_contact_moment_cauchy_cost_p50"',
+            telemetry_source,
+        )
+        self.assertIn(
+            '"inactive_bilateral_longitudinal_contact_moment"', telemetry_source
+        )
+        self.assertIn("/ bilateral_reward_scale", telemetry_source)
 
 
 if __name__ == "__main__":
