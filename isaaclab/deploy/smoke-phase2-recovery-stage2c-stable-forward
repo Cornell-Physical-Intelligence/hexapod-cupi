@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+experiment=hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct
+task_id=Isaac-Velocity-Omni-Recovery-Stage2C-Stabilized-Forward-Hexapod-RobStride-Direct-v0
+seed_host=${workspace_host}/isaaclab/logs/rsl_rl/${experiment}/seed_from_stage2_model25/model_25_stage2_seed.pt
+expected_sha256=2cb28a0f4f4388e709111a09568c72d0770390d2ba72e08ee17eaaf0f27b6893
+# These whole-file hashes include the dormant Stage2E command/reward controls;
+# their zero-valued defaults preserve the Stage2C behavior exercised below.
+expected_env_sha256=af5a339d063f50f56bb555c54898ee08604dcef4a2e49bc6c431d84a196b5979
+expected_env_cfg_sha256=8c1ec720cf718886dc2c7d0506d4ac688b7b9e388543550013ef202e609697d5
+expected_command_sampling_sha256=4e88c8487c5bdf4377d5a66ff11f1c8c4767750350e9bb1297450dbb2858f7f2
+expected_phase2_cfg_sha256=32d90902c914b86c55c8db41451913efdc10e0196764844149e014dc172a938d
+smoke_dir=${workspace_host}/artifacts/phase2_recovery_stage2c_stable_forward/smoke
+
+if (( $# != 0 )); then
+  echo "usage: $0" >&2
+  exit 64
+fi
+if systemctl is-active --quiet hexapod-rl-training.service; then
+  echo "refusing to contend with active hexapod training" >&2
+  exit 75
+fi
+printf '%s  %s\n' "${expected_sha256}" "${seed_host}" | sha256sum -c -
+printf '%s  %s\n' \
+  "${expected_env_sha256}" "${workspace_host}/isaaclab/hexapod_rl/env.py" \
+  "${expected_env_cfg_sha256}" "${workspace_host}/isaaclab/hexapod_rl/env_cfg.py" \
+  "${expected_command_sampling_sha256}" "${workspace_host}/isaaclab/hexapod_rl/command_sampling.py" \
+  "${expected_phase2_cfg_sha256}" "${workspace_host}/isaaclab/hexapod_rl/phase2_cfg.py" \
+  | sha256sum -c -
+
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+label=phase2_recovery_stage2c_stable_forward_smoke_seed60_${stamp}
+container_name=hexapod-phase2-stage2c-stable-forward-smoke-${stamp}
+mkdir -p "${smoke_dir}"
+log_path=${smoke_dir}/${label}.log
+
+cleanup() {
+  docker rm -f "${container_name}" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
+cd "${isaac_lab_dir}"
+timeout --signal=INT --kill-after=30s 180s \
+  docker compose \
+    --env-file docker/.env.base \
+    -f docker/docker-compose.yaml \
+    --profile base \
+    run \
+    --rm \
+    --name "${container_name}" \
+    -w "${workspace_container}/isaaclab" \
+    -e PYTHONPATH="${workspace_container}/isaaclab" \
+    -e PYTHONDONTWRITEBYTECODE=1 \
+    -v "${workspace_host}:${workspace_container}:rw" \
+    --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+    isaac-lab-base \
+    "${workspace_container}/isaaclab/train_model_only_resume.py" \
+    --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+    --std-min 0.08 \
+    --std-max 0.10 \
+    --task "${task_id}" \
+    --external_callback hexapod_rl.register.register_envs \
+    --num_envs 64 \
+    --max_iterations 1 \
+    --run_name "${label}" \
+    --seed 60 \
+    --resume \
+    --load_run seed_from_stage2_model25 \
+    --checkpoint 'model_25_stage2_seed[.]pt$' \
+  2>&1 | tee "${log_path}"
+
+grep -F '[RECOVERY] Loaded actor+critic only' "${log_path}" >/dev/null
+mapfile -t runs < <(
+  find "${workspace_host}/isaaclab/logs/rsl_rl/${experiment}" \
+    -mindepth 1 \
+    -maxdepth 1 \
+    -type d \
+    -name "*_${label}"
+)
+if (( ${#runs[@]} != 1 )); then
+  echo "expected one smoke run directory, found ${#runs[@]}" >&2
+  exit 1
+fi
+run_dir=${runs[0]}
+test -s "${run_dir}/model_0.pt"
+grep -F 'sampling_mode: mixture' "${run_dir}/params/env.yaml" >/dev/null
+grep -F 'nominal_height_m: 0.181' "${run_dir}/params/env.yaml" >/dev/null
+grep -F 'stand_nominal_height_m: 0.177' "${run_dir}/params/env.yaml" >/dev/null
+grep -F 'processed_joint_target_slew_limit_rad_per_20ms: 0.04' \
+  "${run_dir}/params/env.yaml" >/dev/null
+grep -F 'gate_longitudinal_reward_by_command: true' \
+  "${run_dir}/params/env.yaml" >/dev/null
+grep -F 'deck_stability_reward_scale: 3.0' "${run_dir}/params/env.yaml" >/dev/null
+grep -F 'joint_torque_slew_reward_scale: -0.01' "${run_dir}/params/env.yaml" >/dev/null
+grep -F 'speed_conditioned_support_targets: true' "${run_dir}/params/env.yaml" >/dev/null
+grep -F 'learning_rate: 4.0e-05' "${run_dir}/params/agent.yaml" >/dev/null
+grep -F 'schedule: fixed' "${run_dir}/params/agent.yaml" >/dev/null
+printf '%s  %s\n' "${expected_sha256}" "${seed_host}" | sha256sum -c -
+printf '%s  %s\n' \
+  "${expected_env_sha256}" "${workspace_host}/isaaclab/hexapod_rl/env.py" \
+  "${expected_env_cfg_sha256}" "${workspace_host}/isaaclab/hexapod_rl/env_cfg.py" \
+  "${expected_command_sampling_sha256}" "${workspace_host}/isaaclab/hexapod_rl/command_sampling.py" \
+  "${expected_phase2_cfg_sha256}" "${workspace_host}/isaaclab/hexapod_rl/phase2_cfg.py" \
+  | sha256sum -c -
+
+printf 'SMOKE_PASS run=%s checkpoint=%s\n' "${run_dir}" "${run_dir}/model_0.pt"

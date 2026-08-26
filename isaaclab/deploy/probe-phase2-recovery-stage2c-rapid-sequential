@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Run short, single-GPU causal probes sequentially from the strongest screened
+# Stage2C torque/support endpoint. A 4096-environment job saturates the Spark
+# more efficiently than multiple contending Isaac processes, while dense
+# checkpoints make each 15-update probe cheap to reject.
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+experiment=hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct
+task_id=Isaac-Velocity-Omni-Recovery-Stage2C-Stabilized-Forward-Hexapod-RobStride-Direct-v0
+parent_run=2026-08-25_19-06-27_accel_probe1_20260825T1905Z_torque_support_seed71
+parent_checkpoint=model_39.pt
+parent_sha256=fd0897725a2d06488ef4aa0a1df405386add00670fa5a2f7490d3aac14622378
+num_envs=4096
+max_iterations=15
+
+usage() {
+  echo "usage: $0 safe-batch-label" >&2
+  exit 64
+}
+
+(( $# == 1 )) || usage
+batch_label=$1
+if [[ ! "${batch_label}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+  || [[ "${batch_label}" == "." || "${batch_label}" == ".." ]]; then
+  usage
+fi
+
+experiment_host=${workspace_host}/isaaclab/logs/rsl_rl/${experiment}
+parent_host=${experiment_host}/${parent_run}/${parent_checkpoint}
+artifact_dir=${workspace_host}/isaaclab/logs/probe_batches/stage2c/${batch_label}
+
+if systemctl is-active --quiet hexapod-rl-training.service; then
+  echo "refusing to contend with the active training service" >&2
+  exit 75
+fi
+if docker ps --format '{{.Names}}' | grep -Eq '^hexapod-stage2c-(probe|rapid)-'; then
+  echo "a Stage2C probe container is already active" >&2
+  exit 75
+fi
+if [[ ! -f "${parent_host}" || -L "${parent_host}" ]]; then
+  echo "immutable parent checkpoint is missing or is a symlink: ${parent_host}" >&2
+  exit 66
+fi
+printf '%s  %s\n' "${parent_sha256}" "${parent_host}" | sha256sum -c -
+if [[ -e "${artifact_dir}" ]]; then
+  echo "refusing to reuse probe artifact directory: ${artifact_dir}" >&2
+  exit 73
+fi
+mkdir -p "${artifact_dir}"
+
+load_run_regex='^'${parent_run}'$'
+checkpoint_regex='^'${parent_checkpoint//./[.]}'$'
+cd "${isaac_lab_dir}"
+
+run_probe() {
+  local probe_name=$1
+  local training_seed=$2
+  shift 2
+  local run_name=${batch_label}_${probe_name}_seed${training_seed}
+  local container_name=hexapod-stage2c-rapid-${probe_name}-${batch_label}
+  local log_path=${artifact_dir}/${probe_name}.log
+  local status_path=${artifact_dir}/${probe_name}.status
+  local status=0
+
+  if docker ps -a --format '{{.Names}}' | grep -Fxq "${container_name}"; then
+    echo "refusing existing probe container name: ${container_name}" >&2
+    exit 73
+  fi
+
+  echo "starting probe=${probe_name} seed=${training_seed} log=${log_path}"
+  timeout --signal=INT --kill-after=30s 300s docker compose \
+    --env-file docker/.env.base \
+    -f docker/docker-compose.yaml \
+    --profile base \
+    run \
+    --rm \
+    --name "${container_name}" \
+    -w "${workspace_container}/isaaclab" \
+    -e PYTHONPATH="${workspace_container}/isaaclab" \
+    -e PYTHONDONTWRITEBYTECODE=1 \
+    -v "${workspace_host}:${workspace_container}:rw" \
+    --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+    isaac-lab-base \
+    "${workspace_container}/isaaclab/train_model_only_resume.py" \
+    --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+    --std-min 0.06 \
+    --std-max 0.08 \
+    --task "${task_id}" \
+    --external_callback hexapod_rl.register.register_envs \
+    --num_envs "${num_envs}" \
+    --max_iterations "${max_iterations}" \
+    --run_name "${run_name}" \
+    --seed "${training_seed}" \
+    --resume \
+    --load_run "${load_run_regex}" \
+    --checkpoint "${checkpoint_regex}" \
+    agent.save_interval=5 \
+    agent.algorithm.learning_rate=2.0e-5 \
+    agent.algorithm.clip_param=0.06 \
+    env.gate_longitudinal_reward_by_command=false \
+    env.support_contact_low_speed_threshold_mps=0.18 \
+    env.support_shortfall_reward_scale=-0.75 \
+    env.rated_torque_excess_reward_scale=-0.22 \
+    env.torque_saturation_reward_scale=-0.60 \
+    env.processed_joint_target_slew_limit_rad_per_20ms=0.032 \
+    "$@" >"${log_path}" 2>&1 || status=$?
+
+  printf '%s\n' "${status}" >"${status_path}"
+  if (( status != 0 )); then
+    echo "probe failed: ${probe_name} status=${status}" >&2
+    return "${status}"
+  fi
+
+  shopt -s nullglob
+  local matches=("${experiment_host}"/*_"${run_name}")
+  shopt -u nullglob
+  if (( ${#matches[@]} != 1 )) || [[ ! -s "${matches[0]}/model_14.pt" ]]; then
+    echo "probe has no unique final checkpoint: ${probe_name}" >&2
+    return 1
+  fi
+  sha256sum "${matches[0]}/model_14.pt" >"${artifact_dir}/${probe_name}.checkpoint.sha256"
+  printf '%s\n' "${matches[0]}" >"${artifact_dir}/${probe_name}.run_path"
+  echo "completed probe=${probe_name} checkpoint=${matches[0]}/model_14.pt"
+}
+
+# Causal arm 1: eliminate the three-contact high-speed incentive and make
+# sustained RS05 over-rating materially expensive.
+run_probe duty_support4 76 \
+  env.support_contact_target_high_speed=4.0 \
+  env.support_shortfall_reward_scale=-0.90 \
+  env.rated_torque_excess_reward_scale=-0.65 \
+  env.torque_saturation_reward_scale=-1.50 \
+  env.processed_joint_target_slew_limit_rad_per_20ms=0.028
+
+# Causal arm 2: the measured 0.12--0.17 rad/s uncommanded yaw needs a reward
+# on the same order as the tracking and deck objectives, not the old -0.10.
+run_probe yaw_hard 77 \
+  env.inactive_yaw_rate_reward_scale=-20.0
+
+# Causal arm 3: recover the small 0.30 m/s tracking deficit without weakening
+# the torque/support protections inherited from the screened parent.
+run_probe tracking_margin 78 \
+  env.longitudinal_signed_progress_reward_scale=1.5 \
+  env.longitudinal_normalized_error_penalty_scale=0.75
+
+printf '%s  %s\n' "${parent_sha256}" "${parent_host}" | sha256sum -c -
+echo "all rapid Stage2C probes completed: ${artifact_dir}"

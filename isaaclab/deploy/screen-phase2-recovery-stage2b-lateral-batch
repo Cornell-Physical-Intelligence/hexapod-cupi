@@ -1,0 +1,180 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+stage2_experiment=hexapod_robstride_phase2_recovery_stage2_direct
+stage2_source_run=2026-08-25_05-43-11_phase2_recovery_stage2_signed_axes_from_stage1_model25_seed57
+stage2b_experiment=hexapod_robstride_phase2_recovery_stage2b_lateral_direct
+run_label=phase2_recovery_stage2b_true_lateral_from_stage2_model25_seed58
+task_id=Isaac-Velocity-Omni-Recovery-Stage2B-Lateral-Hexapod-RobStride-Direct-v0
+expected_seed_sha256=2cb28a0f4f4388e709111a09568c72d0770390d2ba72e08ee17eaaf0f27b6893
+
+source_seed_host=${workspace_host}/isaaclab/logs/rsl_rl/${stage2_experiment}/${stage2_source_run}/model_25.pt
+stage2b_experiment_host=${workspace_host}/isaaclab/logs/rsl_rl/${stage2b_experiment}
+stage2b_experiment_container=${workspace_container}/isaaclab/logs/rsl_rl/${stage2b_experiment}
+staged_seed_name=seed_from_stage2_model25/model_25_stage2_seed.pt
+staged_seed_host=${stage2b_experiment_host}/${staged_seed_name}
+staged_seed_container=${stage2b_experiment_container}/${staged_seed_name}
+training_unit=hexapod-rl-training.service
+
+if (( $# > 1 )); then
+  echo "usage: $0 [exact-run-directory-name]" >&2
+  exit 64
+fi
+for required_command in docker python3 sha256sum flock tee; do
+  if ! command -v "${required_command}" >/dev/null 2>&1; then
+    echo "required command is unavailable: ${required_command}" >&2
+    exit 69
+  fi
+done
+if [[ ! -d "${isaac_lab_dir}" || ! -d "${workspace_host}/isaaclab" ]]; then
+  echo "Spark workspace or Isaac Lab checkout is missing" >&2
+  exit 66
+fi
+if command -v systemctl >/dev/null 2>&1 \
+  && systemctl is-active --quiet "${training_unit}"; then
+  echo "refusing to contend with active training unit ${training_unit}" >&2
+  exit 75
+fi
+
+exec 9>/tmp/hexapod-stage2b-lateral-screen.lock
+if ! flock -n 9; then
+  echo "another Stage-2B lateral screen is already active" >&2
+  exit 75
+fi
+
+if (( $# == 1 )); then
+  run_name=$1
+  if [[ ! "${run_name}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+    || [[ "${run_name}" == "." || "${run_name}" == ".." ]]; then
+    echo "run name must be one safe directory name: ${run_name@Q}" >&2
+    exit 64
+  fi
+  run_host_dir=${stage2b_experiment_host}/${run_name}
+else
+  shopt -s nullglob
+  run_candidates=("${stage2b_experiment_host}"/*_"${run_label}")
+  shopt -u nullglob
+  if (( ${#run_candidates[@]} != 1 )); then
+    echo "expected exactly one Stage-2B run matching ${stage2b_experiment_host}/*_${run_label}" >&2
+    echo "found ${#run_candidates[@]}; pass the exact run directory name explicitly" >&2
+    if (( ${#run_candidates[@]} > 0 )); then
+      printf '  %s\n' "${run_candidates[@]}" >&2
+    fi
+    exit 1
+  fi
+  run_host_dir=${run_candidates[0]}
+  run_name=${run_host_dir##*/}
+fi
+
+if [[ ! -d "${run_host_dir}" ]]; then
+  echo "Stage-2B run directory does not exist: ${run_host_dir}" >&2
+  exit 1
+fi
+
+verify_seed() {
+  local path=$1
+  local label=$2
+  if [[ ! -f "${path}" ]]; then
+    echo "${label} is missing: ${path}" >&2
+    exit 1
+  fi
+  local actual_sha256
+  actual_sha256=$(sha256sum -- "${path}")
+  actual_sha256=${actual_sha256%% *}
+  if [[ "${actual_sha256}" != "${expected_seed_sha256}" ]]; then
+    echo "${label} hash mismatch: ${path}" >&2
+    echo "expected ${expected_seed_sha256}" >&2
+    echo "actual   ${actual_sha256}" >&2
+    exit 1
+  fi
+}
+
+# Both the source model and model-only staged copy are immutable inputs.  The
+# screen neither creates nor repairs them, and verifies them on both sides of
+# evaluator playback.
+verify_seed "${source_seed_host}" "immutable Stage-2 model25 source"
+verify_seed "${staged_seed_host}" "staged Stage-2B seed"
+
+run_container_dir=${stage2b_experiment_container}/${run_name}
+checkpoint_args=(--checkpoint "${staged_seed_container}")
+checkpoint_numbers=(0 10 20 30 40 50 60 70 80 90 99)
+for checkpoint_number in "${checkpoint_numbers[@]}"; do
+  checkpoint_name=model_${checkpoint_number}.pt
+  checkpoint_host=${run_host_dir}/${checkpoint_name}
+  if [[ ! -f "${checkpoint_host}" ]]; then
+    echo "missing Stage-2B checkpoint: ${checkpoint_host}" >&2
+    exit 1
+  fi
+  checkpoint_args+=(--checkpoint "${run_container_dir}/${checkpoint_name}")
+done
+
+artifact_host_dir=${workspace_host}/artifacts/phase2_recovery_stage2b_lateral/evaluation/${run_name}
+artifact_container_dir=${workspace_container}/artifacts/phase2_recovery_stage2b_lateral/evaluation/${run_name}
+for output_name in \
+  eval_batch_nominal.json \
+  eval_batch_nominal.log \
+  grade_batch_nominal.json \
+  grade_batch_nominal.log; do
+  if [[ -e "${artifact_host_dir}/${output_name}" ]]; then
+    echo "refusing to overwrite existing artifact: ${artifact_host_dir}/${output_name}" >&2
+    exit 73
+  fi
+done
+if ! mkdir -p "${artifact_host_dir}"; then
+  echo "artifact directory is not writable; create it once as orionh:" >&2
+  echo "  sudo install -d -o orionh -g orionh -m 0777 ${artifact_host_dir}" >&2
+  exit 73
+fi
+chmod 0777 "${artifact_host_dir}"
+
+cd "${isaac_lab_dir}"
+docker compose \
+  --env-file docker/.env.base \
+  -f docker/docker-compose.yaml \
+  --profile base \
+  run \
+  --rm \
+  --name hexapod-phase2-recovery-stage2b-lateral-batch-eval \
+  -w /workspace/hexapod/isaaclab \
+  -e PYTHONPATH=/workspace/hexapod/isaaclab \
+  -e PYTHONDONTWRITEBYTECODE=1 \
+  -v /home/orionh/HEXAPOD:/workspace/hexapod:rw \
+  --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+  isaac-lab-base \
+  /workspace/hexapod/isaaclab/evaluate_checkpoint.py \
+  --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+  --task "${task_id}" \
+  "${checkpoint_args[@]}" \
+  --command 0.20 0.00 0.00 \
+  --command 0.30 0.00 0.00 \
+  --command 0.00 0.10 0.00 \
+  --command 0.00 -0.10 0.00 \
+  --command 0.22 0.08 0.00 \
+  --command 0.22 -0.08 0.00 \
+  --command 0.23 0.00 0.25 \
+  --command 0.23 0.00 -0.25 \
+  --seconds 10 \
+  --warmup-steps 25 \
+  --seed 58 \
+  --disable-randomization \
+  --json "${artifact_container_dir}/eval_batch_nominal.json" \
+  >"${artifact_host_dir}/eval_batch_nominal.log" 2>&1
+
+verify_seed "${source_seed_host}" "immutable Stage-2 model25 source after evaluation"
+verify_seed "${staged_seed_host}" "staged Stage-2B seed after evaluation"
+
+grade_status=0
+python3 "${workspace_host}/isaaclab/grade_stage2b_lateral_acquisition.py" \
+  "${artifact_host_dir}/eval_batch_nominal.json" \
+  --json "${artifact_host_dir}/grade_batch_nominal.json" \
+  2>&1 | tee "${artifact_host_dir}/grade_batch_nominal.log" || grade_status=$?
+
+# Keep the immutable-input audit fail-closed across the complete launcher, not
+# only the simulator subprocess.
+verify_seed "${source_seed_host}" "immutable Stage-2 model25 source after grading"
+verify_seed "${staged_seed_host}" "staged Stage-2B seed after grading"
+
+exit "${grade_status}"

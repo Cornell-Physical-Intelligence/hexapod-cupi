@@ -1,0 +1,2686 @@
+{
+  "accepted_checkpoint_count": 0,
+  "accepted_checkpoints_ranked": [],
+  "all_checkpoints_accepted": false,
+  "best_accepted_checkpoint": null,
+  "contract": [
+    {
+      "command": [
+        0.2,
+        0.0,
+        0.0
+      ],
+      "label": "forward_0p20"
+    },
+    {
+      "command": [
+        0.3,
+        0.0,
+        0.0
+      ],
+      "label": "forward_0p30"
+    },
+    {
+      "command": [
+        0.25,
+        0.0,
+        0.15
+      ],
+      "label": "forward_yaw_left"
+    },
+    {
+      "command": [
+        0.25,
+        0.0,
+        -0.15
+      ],
+      "label": "forward_yaw_right"
+    },
+    {
+      "command": [
+        0.25,
+        0.06,
+        0.0
+      ],
+      "label": "forward_lateral_left"
+    },
+    {
+      "command": [
+        0.25,
+        -0.06,
+        0.0
+      ],
+      "label": "forward_lateral_right"
+    },
+    {
+      "command": [
+        0.25,
+        0.05,
+        0.12
+      ],
+      "label": "gentle_three_axis_left"
+    },
+    {
+      "command": [
+        0.25,
+        -0.05,
+        -0.12
+      ],
+      "label": "gentle_three_axis_right"
+    }
+  ],
+  "evaluations": [
+    {
+      "accepted": false,
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage1_direct/bootstrap_from_phase1_v5_model200_rebased/model_200_rebased.pt",
+      "failed_command_count": 6,
+      "maximum_computed_demand_over_rating_fraction": 0.15169590711593628,
+      "maximum_peak_abs_computed_nm": 4.508053302764893,
+      "maximum_tilt_degrees": 2.1949045658111572,
+      "mean_normalized_stability_score": 0.7243677569370318,
+      "mean_normalized_tracking_score": 0.6530353146243013,
+      "results": [
+        {
+          "accepted": true,
+          "advisories": [
+            "roll/pitch-rate RMS 0.3862 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.24323245882987976,
+              0.0067488206550478935,
+              0.023642292246222496
+            ],
+            "base_height_std_m": 0.004526899661868811,
+            "computed_demand_over_rating_fraction": 0.08877193182706833,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.2201088666915894,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.5232850313186646,
+            "normalized_stability_score": 0.6514408157805779,
+            "normalized_tracking_score": 0.3807468650241693,
+            "peak_abs_computed_nm": 2.7020986080169678,
+            "planar_velocity_rmse_mps": 0.047246381640434265,
+            "rms_applied_nm": 0.8929997682571411,
+            "rmse_command_error": [
+              0.045689623802900314,
+              0.01202826201915741,
+              0.09767486900091171
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.38623887300491333,
+            "tilt_rms_degrees": 1.0015579462051392,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.0924670398235321,
+            "yaw_rate_rmse_radps": 0.09767486900091171
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": true,
+          "advisories": [
+            "vertical-velocity RMS 0.1081 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.5132 rad/s exceeds preferred 0.3500 rad/s",
+            "computed demand over rating fraction 0.1517 exceeds preferred 0.15"
+          ],
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.34049123525619507,
+              0.0055521512404084206,
+              -0.017871815711259842
+            ],
+            "base_height_std_m": 0.005318120121955872,
+            "computed_demand_over_rating_fraction": 0.15169590711593628,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.475274920463562,
+            "maximum_computed_over_rating_burst_s": 0.18,
+            "maximum_tilt_degrees": 2.1949045658111572,
+            "normalized_stability_score": 0.8136003754678226,
+            "normalized_tracking_score": 0.36131705467899644,
+            "peak_abs_computed_nm": 4.508053302764893,
+            "planar_velocity_rmse_mps": 0.04576917365193367,
+            "rms_applied_nm": 0.9844796657562256,
+            "rmse_command_error": [
+              0.04335804656147957,
+              0.014659358188509941,
+              0.0720684677362442
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.5131539702415466,
+            "tilt_rms_degrees": 1.3188035488128662,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10813099145889282,
+            "yaw_rate_rmse_radps": 0.0720684677362442
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4401 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            0.15
+          ],
+          "label": "forward_yaw_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.29372918605804443,
+              0.004894603975117207,
+              -0.0029650579672306776
+            ],
+            "base_height_std_m": 0.004867912270128727,
+            "computed_demand_over_rating_fraction": 0.12432748824357986,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.368341326713562,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8141283988952637,
+            "normalized_stability_score": 0.7201318455549579,
+            "normalized_tracking_score": 0.924681577210625,
+            "peak_abs_computed_nm": 3.098607063293457,
+            "planar_velocity_rmse_mps": 0.047629158943891525,
+            "rms_applied_nm": 0.9423937201499939,
+            "rmse_command_error": [
+              0.046168480068445206,
+              0.011705064214766026,
+              0.1757550984621048
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.440069317817688,
+            "tilt_rms_degrees": 1.136997103691101,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09901276975870132,
+            "yaw_rate_rmse_radps": 0.1757550984621048
+          },
+          "rejection_reasons": [
+            "yaw sign is wrong: command=+0.1500, achieved=-0.0030",
+            "yaw magnitude 0.0030 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1758 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4423 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            -0.15
+          ],
+          "label": "forward_yaw_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2936539351940155,
+              0.0052741775289177895,
+              -0.002968540880829096
+            ],
+            "base_height_std_m": 0.004858336877077818,
+            "computed_demand_over_rating_fraction": 0.12561403214931488,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.368239164352417,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8331230878829956,
+            "normalized_stability_score": 0.7213670867029578,
+            "normalized_tracking_score": 0.9037708242734274,
+            "peak_abs_computed_nm": 3.0925726890563965,
+            "planar_velocity_rmse_mps": 0.047690775245428085,
+            "rms_applied_nm": 0.9426666498184204,
+            "rmse_command_error": [
+              0.04622146487236023,
+              0.01174675952643156,
+              0.17068353295326233
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.44226375222206116,
+            "tilt_rms_degrees": 1.1380276679992676,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09893906861543655,
+            "yaw_rate_rmse_radps": 0.17068353295326233
+          },
+          "rejection_reasons": [
+            "yaw magnitude 0.0030 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1707 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4407 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.06,
+            0.0
+          ],
+          "label": "forward_lateral_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.29374831914901733,
+              0.005057278089225292,
+              -0.002414551330730319
+            ],
+            "base_height_std_m": 0.00486714718863368,
+            "computed_demand_over_rating_fraction": 0.1246783658862114,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3693208694458008,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8078606128692627,
+            "normalized_stability_score": 0.7219398950204431,
+            "normalized_tracking_score": 0.5422644782811403,
+            "peak_abs_computed_nm": 3.4393599033355713,
+            "planar_velocity_rmse_mps": 0.07256564497947693,
+            "rms_applied_nm": 0.9401536583900452,
+            "rmse_command_error": [
+              0.04617474228143692,
+              0.055979155004024506,
+              0.08532021194696426
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.44068291783332825,
+            "tilt_rms_degrees": 1.1427338123321533,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09945231676101685,
+            "yaw_rate_rmse_radps": 0.08532021194696426
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0051 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4417 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.06,
+            0.0
+          ],
+          "label": "forward_lateral_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2937586009502411,
+              0.0050425841473042965,
+              -0.0030429228208959103
+            ],
+            "base_height_std_m": 0.004881667904555798,
+            "computed_demand_over_rating_fraction": 0.12444444745779037,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3664747476577759,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8141283988952637,
+            "normalized_stability_score": 0.7240066882622029,
+            "normalized_tracking_score": 0.6045790544400613,
+            "peak_abs_computed_nm": 3.354243755340576,
+            "planar_velocity_rmse_mps": 0.0805092304944992,
+            "rms_applied_nm": 0.940946102142334,
+            "rmse_command_error": [
+              0.04624001309275627,
+              0.06590597331523895,
+              0.08560291677713394
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4417104721069336,
+            "tilt_rms_degrees": 1.1434603929519653,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09984990954399109,
+            "yaw_rate_rmse_radps": 0.08560291677713394
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0600, achieved=+0.0050",
+            "lateral magnitude 0.0050 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4412 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.05,
+            0.12
+          ],
+          "label": "gentle_three_axis_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2937141954898834,
+              0.005085073411464691,
+              -0.0032861512154340744
+            ],
+            "base_height_std_m": 0.004872884135693312,
+            "computed_demand_over_rating_fraction": 0.12292397767305374,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3669161796569824,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8133732080459595,
+            "normalized_stability_score": 0.721266923634158,
+            "normalized_tracking_score": 0.7376763090077375,
+            "peak_abs_computed_nm": 3.266308069229126,
+            "planar_velocity_rmse_mps": 0.06530467420816422,
+            "rms_applied_nm": 0.9402787685394287,
+            "rmse_command_error": [
+              0.046188052743673325,
+              0.04616669937968254,
+              0.15012536942958832
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.44120901823043823,
+            "tilt_rms_degrees": 1.1378527879714966,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09908262640237808,
+            "yaw_rate_rmse_radps": 0.15012536942958832
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0051 is below acquisition floor 0.0200",
+            "yaw sign is wrong: command=+0.1200, achieved=-0.0033",
+            "yaw magnitude 0.0033 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1501 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4411 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.05,
+            -0.12
+          ],
+          "label": "gentle_three_axis_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2937011122703552,
+              0.005209458526223898,
+              -0.002021125052124262
+            ],
+            "base_height_std_m": 0.004886244423687458,
+            "computed_demand_over_rating_fraction": 0.12409356981515884,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.368255853652954,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.79493248462677,
+            "normalized_stability_score": 0.7211884250731342,
+            "normalized_tracking_score": 0.7692463540782531,
+            "peak_abs_computed_nm": 3.2056405544281006,
+            "planar_velocity_rmse_mps": 0.07275870442390442,
+            "rms_applied_nm": 0.9417282938957214,
+            "rmse_command_error": [
+              0.04620596766471863,
+              0.05620354041457176,
+              0.14641740918159485
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4411434233188629,
+            "tilt_rms_degrees": 1.1366859674453735,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09898196905851364,
+            "yaw_rate_rmse_radps": 0.14641740918159485
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0500, achieved=+0.0052",
+            "lateral magnitude 0.0052 is below acquisition floor 0.0200",
+            "yaw magnitude 0.0020 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1464 rad/s exceeds 0.1200 rad/s"
+          ]
+        }
+      ],
+      "total_falls": 0,
+      "total_timeouts": 0
+    },
+    {
+      "accepted": false,
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage1_direct/2026-08-25_04-55-23_phase2_recovery_stage1_stabilized_from_rebased_v5_model200_seed56/model_0.pt",
+      "failed_command_count": 6,
+      "maximum_computed_demand_over_rating_fraction": 0.14923976361751556,
+      "maximum_peak_abs_computed_nm": 4.546438217163086,
+      "maximum_tilt_degrees": 2.26408052444458,
+      "mean_normalized_stability_score": 0.7225082609896726,
+      "mean_normalized_tracking_score": 0.6481215280170243,
+      "results": [
+        {
+          "accepted": true,
+          "advisories": [
+            "roll/pitch-rate RMS 0.3845 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.24306732416152954,
+              0.006964907515794039,
+              0.02450806461274624
+            ],
+            "base_height_std_m": 0.0045120627619326115,
+            "computed_demand_over_rating_fraction": 0.08994152396917343,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.2133307456970215,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.497632384300232,
+            "normalized_stability_score": 0.6476672033003221,
+            "normalized_tracking_score": 0.3784940578043461,
+            "peak_abs_computed_nm": 2.6959762573242188,
+            "planar_velocity_rmse_mps": 0.04699099808931351,
+            "rms_applied_nm": 0.8918401598930359,
+            "rmse_command_error": [
+              0.04541928693652153,
+              0.012051654048264027,
+              0.09630707651376724
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.384509801864624,
+            "tilt_rms_degrees": 0.998765766620636,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09163109958171844,
+            "yaw_rate_rmse_radps": 0.09630707651376724
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": true,
+          "advisories": [
+            "vertical-velocity RMS 0.1070 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.5106 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.34028875827789307,
+              0.005188841372728348,
+              -0.018292667344212532
+            ],
+            "base_height_std_m": 0.005253634415566921,
+            "computed_demand_over_rating_fraction": 0.14923976361751556,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.4722516536712646,
+            "maximum_computed_over_rating_burst_s": 0.12,
+            "maximum_tilt_degrees": 2.26408052444458,
+            "normalized_stability_score": 0.8079531978682749,
+            "normalized_tracking_score": 0.3583475636939208,
+            "peak_abs_computed_nm": 4.546438217163086,
+            "planar_velocity_rmse_mps": 0.0454094372689724,
+            "rms_applied_nm": 0.9832432270050049,
+            "rmse_command_error": [
+              0.04300170764327049,
+              0.014590060338377953,
+              0.0688912495970726
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.5105644464492798,
+            "tilt_rms_degrees": 1.325464129447937,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10701615363359451,
+            "yaw_rate_rmse_radps": 0.0688912495970726
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4405 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            0.15
+          ],
+          "label": "forward_yaw_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.293327271938324,
+              0.005016040988266468,
+              -0.0021441741846501827
+            ],
+            "base_height_std_m": 0.0048491270281374454,
+            "computed_demand_over_rating_fraction": 0.1247953251004219,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.364776372909546,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8183306455612183,
+            "normalized_stability_score": 0.7194838700439071,
+            "normalized_tracking_score": 0.916215591132641,
+            "peak_abs_computed_nm": 3.08237361907959,
+            "planar_velocity_rmse_mps": 0.0472063310444355,
+            "rms_applied_nm": 0.9403548240661621,
+            "rmse_command_error": [
+              0.04571528732776642,
+              0.011770734563469887,
+              0.17417645454406738
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.44054514169692993,
+            "tilt_rms_degrees": 1.1419130563735962,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09867585450410843,
+            "yaw_rate_rmse_radps": 0.17417645454406738
+          },
+          "rejection_reasons": [
+            "yaw sign is wrong: command=+0.1500, achieved=-0.0021",
+            "yaw magnitude 0.0021 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1742 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4416 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            -0.15
+          ],
+          "label": "forward_yaw_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.29335856437683105,
+              0.004965079016983509,
+              -0.0026561077684164047
+            ],
+            "base_height_std_m": 0.0048437463119626045,
+            "computed_demand_over_rating_fraction": 0.1246783658862114,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3636614084243774,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8509719371795654,
+            "normalized_stability_score": 0.7199871349325847,
+            "normalized_tracking_score": 0.8987078287949166,
+            "peak_abs_computed_nm": 3.54042649269104,
+            "planar_velocity_rmse_mps": 0.04724952578544617,
+            "rms_applied_nm": 0.9394828677177429,
+            "rmse_command_error": [
+              0.04577764496207237,
+              0.011701488867402077,
+              0.16991223394870758
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4415794312953949,
+            "tilt_rms_degrees": 1.1416460275650024,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.0986318290233612,
+            "yaw_rate_rmse_radps": 0.16991223394870758
+          },
+          "rejection_reasons": [
+            "yaw magnitude 0.0027 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1699 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4416 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.06,
+            0.0
+          ],
+          "label": "forward_lateral_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.29326435923576355,
+              0.005025884602218866,
+              -0.0025374540127813816
+            ],
+            "base_height_std_m": 0.004850279074162245,
+            "computed_demand_over_rating_fraction": 0.12456140667200089,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3620948791503906,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.820589542388916,
+            "normalized_stability_score": 0.7211582537940038,
+            "normalized_tracking_score": 0.5399876429388921,
+            "peak_abs_computed_nm": 3.046837329864502,
+            "planar_velocity_rmse_mps": 0.07221924513578415,
+            "rms_applied_nm": 0.9387816190719604,
+            "rmse_command_error": [
+              0.04562901705503464,
+              0.0559786781668663,
+              0.08443845808506012
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4416196346282959,
+            "tilt_rms_degrees": 1.1444401741027832,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09897846728563309,
+            "yaw_rate_rmse_radps": 0.08443845808506012
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0050 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4419 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.06,
+            0.0
+          ],
+          "label": "forward_lateral_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2933531701564789,
+              0.004838725086301565,
+              -0.002933157840743661
+            ],
+            "base_height_std_m": 0.004840668756514788,
+            "computed_demand_over_rating_fraction": 0.12374269217252731,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3627928495407104,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.825849175453186,
+            "normalized_stability_score": 0.7200245231367826,
+            "normalized_tracking_score": 0.601342273876071,
+            "peak_abs_computed_nm": 3.0727667808532715,
+            "planar_velocity_rmse_mps": 0.08007277548313141,
+            "rms_applied_nm": 0.9396867752075195,
+            "rmse_command_error": [
+              0.04578978940844536,
+              0.06568823754787445,
+              0.08555135875940323
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.44187474250793457,
+            "tilt_rms_degrees": 1.144806146621704,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09852485358715057,
+            "yaw_rate_rmse_radps": 0.08555135875940323
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0600, achieved=+0.0048",
+            "lateral magnitude 0.0048 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4423 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.05,
+            0.12
+          ],
+          "label": "gentle_three_axis_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.29334619641304016,
+              0.00510568730533123,
+              -0.0020223113242536783
+            ],
+            "base_height_std_m": 0.004866764415055513,
+            "computed_demand_over_rating_fraction": 0.12339181452989578,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3659597635269165,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.825849175453186,
+            "normalized_stability_score": 0.7237606842048644,
+            "normalized_tracking_score": 0.729582350080212,
+            "peak_abs_computed_nm": 3.0520894527435303,
+            "planar_velocity_rmse_mps": 0.06492866575717926,
+            "rms_applied_nm": 0.9392985701560974,
+            "rmse_command_error": [
+              0.04566381126642227,
+              0.04615785554051399,
+              0.14774905145168304
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4422592222690582,
+            "tilt_rms_degrees": 1.1488045454025269,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.0996120348572731,
+            "yaw_rate_rmse_radps": 0.14774905145168304
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0051 is below acquisition floor 0.0200",
+            "yaw sign is wrong: command=+0.1200, achieved=-0.0020",
+            "yaw magnitude 0.0020 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1477 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4411 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.05,
+            -0.12
+          ],
+          "label": "gentle_three_axis_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2933800518512726,
+              0.005007566884160042,
+              -0.0030396939255297184
+            ],
+            "base_height_std_m": 0.004855652805417776,
+            "computed_demand_over_rating_fraction": 0.12397661060094833,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3614500761032104,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8226306438446045,
+            "normalized_stability_score": 0.7200312206366409,
+            "normalized_tracking_score": 0.7622949158151945,
+            "peak_abs_computed_nm": 3.0839715003967285,
+            "planar_velocity_rmse_mps": 0.0723399966955185,
+            "rms_applied_nm": 0.9391537308692932,
+            "rmse_command_error": [
+              0.04575555399060249,
+              0.056031279265880585,
+              0.14462369680404663
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.44106003642082214,
+            "tilt_rms_degrees": 1.1393033266067505,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09874549508094788,
+            "yaw_rate_rmse_radps": 0.14462369680404663
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0500, achieved=+0.0050",
+            "lateral magnitude 0.0050 is below acquisition floor 0.0200",
+            "yaw magnitude 0.0030 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1446 rad/s exceeds 0.1200 rad/s"
+          ]
+        }
+      ],
+      "total_falls": 0,
+      "total_timeouts": 0
+    },
+    {
+      "accepted": false,
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage1_direct/2026-08-25_04-55-23_phase2_recovery_stage1_stabilized_from_rebased_v5_model200_seed56/model_25.pt",
+      "failed_command_count": 6,
+      "maximum_computed_demand_over_rating_fraction": 0.15111111104488373,
+      "maximum_peak_abs_computed_nm": 4.499443054199219,
+      "maximum_tilt_degrees": 2.1887433528900146,
+      "mean_normalized_stability_score": 0.7420480031323331,
+      "mean_normalized_tracking_score": 0.6300740487252673,
+      "results": [
+        {
+          "accepted": true,
+          "advisories": [
+            "roll/pitch-rate RMS 0.3892 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2422122061252594,
+              0.006427396554499865,
+              0.01999901980161667
+            ],
+            "base_height_std_m": 0.004570714198052883,
+            "computed_demand_over_rating_fraction": 0.08035087585449219,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.1818159818649292,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.5042818784713745,
+            "normalized_stability_score": 0.6546676114245894,
+            "normalized_tracking_score": 0.36692212646206224,
+            "peak_abs_computed_nm": 2.439695358276367,
+            "planar_velocity_rmse_mps": 0.04569351300597191,
+            "rms_applied_nm": 0.8928548693656921,
+            "rmse_command_error": [
+              0.044030655175447464,
+              0.01221468299627304,
+              0.08395561575889587
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.38924944400787354,
+            "tilt_rms_degrees": 1.0251727104187012,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09206017851829529,
+            "yaw_rate_rmse_radps": 0.08395561575889587
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": true,
+          "advisories": [
+            "vertical-velocity RMS 0.1092 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.5166 rad/s exceeds preferred 0.3500 rad/s",
+            "computed demand over rating fraction 0.1511 exceeds preferred 0.15"
+          ],
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.34000450372695923,
+              0.005663634743541479,
+              -0.015052437782287598
+            ],
+            "base_height_std_m": 0.005402214825153351,
+            "computed_demand_over_rating_fraction": 0.15111111104488373,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.4663734436035156,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 2.1887433528900146,
+            "normalized_stability_score": 0.8217691077717714,
+            "normalized_tracking_score": 0.3517787903547287,
+            "peak_abs_computed_nm": 4.499443054199219,
+            "planar_velocity_rmse_mps": 0.04502732679247856,
+            "rms_applied_nm": 0.9855896234512329,
+            "rmse_command_error": [
+              0.042213454842567444,
+              0.01566794514656067,
+              0.060930706560611725
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.5166297554969788,
+            "tilt_rms_degrees": 1.3449848890304565,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.1091809868812561,
+            "yaw_rate_rmse_radps": 0.060930706560611725
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1029 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4493 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            0.15
+          ],
+          "label": "forward_yaw_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.293647825717926,
+              0.005939357448369265,
+              0.0007944326498545706
+            ],
+            "base_height_std_m": 0.005060767754912376,
+            "computed_demand_over_rating_fraction": 0.11964911967515945,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3645678758621216,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8376015424728394,
+            "normalized_stability_score": 0.7422763641834969,
+            "normalized_tracking_score": 0.8745525808384021,
+            "peak_abs_computed_nm": 3.310121536254883,
+            "planar_velocity_rmse_mps": 0.04746732860803604,
+            "rms_applied_nm": 0.9470343589782715,
+            "rmse_command_error": [
+              0.04557344689965248,
+              0.01327434927225113,
+              0.16431917250156403
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4493168890476227,
+            "tilt_rms_degrees": 1.1736440658569336,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10288834571838379,
+            "yaw_rate_rmse_radps": 0.16431917250156403
+          },
+          "rejection_reasons": [
+            "yaw magnitude 0.0008 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1643 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1034 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4511 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            -0.15
+          ],
+          "label": "forward_yaw_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2938087284564972,
+              0.006134159862995148,
+              -0.0027972939424216747
+            ],
+            "base_height_std_m": 0.005079137161374092,
+            "computed_demand_over_rating_fraction": 0.11918129026889801,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3608667850494385,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8381341695785522,
+            "normalized_stability_score": 0.7454625487593668,
+            "normalized_tracking_score": 0.86398646235466,
+            "peak_abs_computed_nm": 3.3103559017181396,
+            "planar_velocity_rmse_mps": 0.04765753075480461,
+            "rms_applied_nm": 0.9459121823310852,
+            "rmse_command_error": [
+              0.04571227729320526,
+              0.013476943597197533,
+              0.16164447367191315
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.45114654302597046,
+            "tilt_rms_degrees": 1.1772466897964478,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10341493040323257,
+            "yaw_rate_rmse_radps": 0.16164447367191315
+          },
+          "rejection_reasons": [
+            "yaw magnitude 0.0028 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1616 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1031 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4490 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.06,
+            0.0
+          ],
+          "label": "forward_lateral_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2942293882369995,
+              0.006607772782444954,
+              -0.0013941130600869656
+            ],
+            "base_height_std_m": 0.005062239710241556,
+            "computed_demand_over_rating_fraction": 0.11590643227100372,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3598495721817017,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8381341695785522,
+            "normalized_stability_score": 0.7424245759201724,
+            "normalized_tracking_score": 0.5347279055664937,
+            "peak_abs_computed_nm": 3.328714370727539,
+            "planar_velocity_rmse_mps": 0.0716443881392479,
+            "rms_applied_nm": 0.9429758191108704,
+            "rmse_command_error": [
+              0.04621073231101036,
+              0.05474931001663208,
+              0.06686960905790329
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.44904592633247375,
+            "tilt_rms_degrees": 1.171433687210083,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10305698961019516,
+            "yaw_rate_rmse_radps": 0.06686960905790329
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0066 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1027 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4500 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.06,
+            0.0
+          ],
+          "label": "forward_lateral_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2931484282016754,
+              0.00572466803714633,
+              -0.0005885360296815634
+            ],
+            "base_height_std_m": 0.005063711199909449,
+            "computed_demand_over_rating_fraction": 0.1190643310546875,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3677572011947632,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8515006303787231,
+            "normalized_stability_score": 0.7426059609256863,
+            "normalized_tracking_score": 0.6052320978293817,
+            "peak_abs_computed_nm": 3.6134305000305176,
+            "planar_velocity_rmse_mps": 0.08057486265897751,
+            "rms_applied_nm": 0.9470075964927673,
+            "rmse_command_error": [
+              0.045102689415216446,
+              0.06676867604255676,
+              0.06857769936323166
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4500381052494049,
+            "tilt_rms_degrees": 1.1770943403244019,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10272058844566345,
+            "yaw_rate_rmse_radps": 0.06857769936323166
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0600, achieved=+0.0057",
+            "lateral magnitude 0.0057 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1030 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4504 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.05,
+            0.12
+          ],
+          "label": "gentle_three_axis_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.29368746280670166,
+              0.006163042038679123,
+              -0.00048397560021840036
+            ],
+            "base_height_std_m": 0.0050740004517138,
+            "computed_demand_over_rating_fraction": 0.11953216046094894,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3604445457458496,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8406875133514404,
+            "normalized_stability_score": 0.7436286081759524,
+            "normalized_tracking_score": 0.7008864389111599,
+            "peak_abs_computed_nm": 3.2702677249908447,
+            "planar_velocity_rmse_mps": 0.06438170373439789,
+            "rms_applied_nm": 0.9452478885650635,
+            "rmse_command_error": [
+              0.045602113008499146,
+              0.04544723406434059,
+              0.1385461539030075
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.45040321350097656,
+            "tilt_rms_degrees": 1.173677682876587,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10300792008638382,
+            "yaw_rate_rmse_radps": 0.1385461539030075
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0062 is below acquisition floor 0.0200",
+            "yaw sign is wrong: command=+0.1200, achieved=-0.0005",
+            "yaw magnitude 0.0005 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1385 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1030 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4498 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.05,
+            -0.12
+          ],
+          "label": "gentle_three_axis_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.29359859228134155,
+              0.005756422411650419,
+              -0.001754274475388229
+            ],
+            "base_height_std_m": 0.0050806039944291115,
+            "computed_demand_over_rating_fraction": 0.11894737184047699,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3676221370697021,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8444050550460815,
+            "normalized_stability_score": 0.7435492478976292,
+            "normalized_tracking_score": 0.7425059874852499,
+            "peak_abs_computed_nm": 3.5380074977874756,
+            "planar_velocity_rmse_mps": 0.07295263558626175,
+            "rms_applied_nm": 0.9478139877319336,
+            "rmse_command_error": [
+              0.04557400196790695,
+              0.05696575343608856,
+              0.13627952337265015
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4497523307800293,
+            "tilt_rms_degrees": 1.1772232055664062,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10303620249032974,
+            "yaw_rate_rmse_radps": 0.13627952337265015
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0500, achieved=+0.0058",
+            "lateral magnitude 0.0058 is below acquisition floor 0.0200",
+            "yaw magnitude 0.0018 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1363 rad/s exceeds 0.1200 rad/s"
+          ]
+        }
+      ],
+      "total_falls": 0,
+      "total_timeouts": 0
+    },
+    {
+      "accepted": false,
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage1_direct/2026-08-25_04-55-23_phase2_recovery_stage1_stabilized_from_rebased_v5_model200_seed56/model_50.pt",
+      "failed_command_count": 6,
+      "maximum_computed_demand_over_rating_fraction": 0.17520467936992645,
+      "maximum_peak_abs_computed_nm": 4.152224063873291,
+      "maximum_tilt_degrees": 2.1214487552642822,
+      "mean_normalized_stability_score": 0.7755144935630683,
+      "mean_normalized_tracking_score": 0.6407248752010573,
+      "results": [
+        {
+          "accepted": true,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4014 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2501167058944702,
+              0.005105921998620033,
+              0.021972401067614555
+            ],
+            "base_height_std_m": 0.004923838656395674,
+            "computed_demand_over_rating_fraction": 0.08807017654180527,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.2955386638641357,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.4731277227401733,
+            "normalized_stability_score": 0.6882103815342167,
+            "normalized_tracking_score": 0.4305046672622363,
+            "peak_abs_computed_nm": 2.7536792755126953,
+            "planar_velocity_rmse_mps": 0.053314194083213806,
+            "rms_applied_nm": 0.9339929223060608,
+            "rmse_command_error": [
+              0.05166056007146835,
+              0.013175351545214653,
+              0.07789913564920425
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.40144866704940796,
+            "tilt_rms_degrees": 1.0936088562011719,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09768036752939224,
+            "yaw_rate_rmse_radps": 0.07789913564920425
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": true,
+          "advisories": [
+            "vertical-velocity RMS 0.1150 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.5292 rad/s exceeds preferred 0.3500 rad/s",
+            "computed demand over rating fraction 0.1752 exceeds preferred 0.15"
+          ],
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.34236347675323486,
+              0.006142687518149614,
+              -0.008488912135362625
+            ],
+            "base_height_std_m": 0.005836122669279575,
+            "computed_demand_over_rating_fraction": 0.17520467936992645,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.4797160625457764,
+            "maximum_computed_over_rating_burst_s": 0.14,
+            "maximum_tilt_degrees": 2.1214487552642822,
+            "normalized_stability_score": 0.8557863879372322,
+            "normalized_tracking_score": 0.3709415284295877,
+            "peak_abs_computed_nm": 4.152224063873291,
+            "planar_velocity_rmse_mps": 0.04739875718951225,
+            "rms_applied_nm": 1.0020060539245605,
+            "rmse_command_error": [
+              0.04451298341155052,
+              0.016286076977849007,
+              0.0571630485355854
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.5291646122932434,
+            "tilt_rms_degrees": 1.3737196922302246,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.1150159165263176,
+            "yaw_rate_rmse_radps": 0.0571630485355854
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1052 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4768 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            0.15
+          ],
+          "label": "forward_yaw_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2961714267730713,
+              0.006206316873431206,
+              0.0036544790491461754
+            ],
+            "base_height_std_m": 0.005330364685505629,
+            "computed_demand_over_rating_fraction": 0.12888889014720917,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.4345035552978516,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.846207857131958,
+            "normalized_stability_score": 0.7773284242998454,
+            "normalized_tracking_score": 0.856357098867496,
+            "peak_abs_computed_nm": 3.65785551071167,
+            "planar_velocity_rmse_mps": 0.04966537654399872,
+            "rms_applied_nm": 0.9535094499588013,
+            "rmse_command_error": [
+              0.04729672521352768,
+              0.015154852531850338,
+              0.15822897851467133
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4768240451812744,
+            "tilt_rms_degrees": 1.2526369094848633,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10522348433732986,
+            "yaw_rate_rmse_radps": 0.15822897851467133
+          },
+          "rejection_reasons": [
+            "yaw magnitude 0.0037 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1582 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1053 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4746 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            -0.15
+          ],
+          "label": "forward_yaw_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2974510192871094,
+              0.005374878644943237,
+              -0.0016336353728547692
+            ],
+            "base_height_std_m": 0.00534432427957654,
+            "computed_demand_over_rating_fraction": 0.12444444745779037,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.4228007793426514,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8316279649734497,
+            "normalized_stability_score": 0.7761189382146334,
+            "normalized_tracking_score": 0.8681083408494791,
+            "peak_abs_computed_nm": 3.6462550163269043,
+            "planar_velocity_rmse_mps": 0.050785914063453674,
+            "rms_applied_nm": 0.9567683339118958,
+            "rmse_command_error": [
+              0.04861327260732651,
+              0.014695540070533752,
+              0.15973272919654846
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4746344983577728,
+            "tilt_rms_degrees": 1.251216173171997,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10527735948562622,
+            "yaw_rate_rmse_radps": 0.15973272919654846
+          },
+          "rejection_reasons": [
+            "yaw magnitude 0.0016 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1597 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1058 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4734 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.06,
+            0.0
+          ],
+          "label": "forward_lateral_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2976374328136444,
+              0.0058498806320130825,
+              0.0012352389749139547
+            ],
+            "base_height_std_m": 0.005331762600690126,
+            "computed_demand_over_rating_fraction": 0.127017542719841,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.428322672843933,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.835577130317688,
+            "normalized_stability_score": 0.7761525779053392,
+            "normalized_tracking_score": 0.5526510144894322,
+            "peak_abs_computed_nm": 3.6412134170532227,
+            "planar_velocity_rmse_mps": 0.07419348508119583,
+            "rms_applied_nm": 0.9562140107154846,
+            "rmse_command_error": [
+              0.04877606779336929,
+              0.055906783789396286,
+              0.06011049076914787
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.47341176867485046,
+            "tilt_rms_degrees": 1.2482047080993652,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10580507665872574,
+            "yaw_rate_rmse_radps": 0.06011049076914787
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0058 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1050 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4758 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.06,
+            0.0
+          ],
+          "label": "forward_lateral_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2958923876285553,
+              0.005757209844887257,
+              0.0016887320671230555
+            ],
+            "base_height_std_m": 0.005304092075675726,
+            "computed_demand_over_rating_fraction": 0.12970760464668274,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.4314916133880615,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8383469581604004,
+            "normalized_stability_score": 0.7756967056476113,
+            "normalized_tracking_score": 0.6156758715709051,
+            "peak_abs_computed_nm": 3.668774366378784,
+            "planar_velocity_rmse_mps": 0.0819835364818573,
+            "rms_applied_nm": 0.953438937664032,
+            "rmse_command_error": [
+              0.04696476086974144,
+              0.06719829887151718,
+              0.05936287343502045
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.47576791048049927,
+            "tilt_rms_degrees": 1.255035161972046,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10504352301359177,
+            "yaw_rate_rmse_radps": 0.05936287343502045
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0600, achieved=+0.0058",
+            "lateral magnitude 0.0058 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1064 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4744 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.05,
+            0.12
+          ],
+          "label": "gentle_three_axis_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.297477662563324,
+              0.006155076902359724,
+              0.003227097215130925
+            ],
+            "base_height_std_m": 0.005345369689166546,
+            "computed_demand_over_rating_fraction": 0.12877193093299866,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.4303966760635376,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8422818183898926,
+            "normalized_stability_score": 0.7787344578697922,
+            "normalized_tracking_score": 0.6923375392539635,
+            "peak_abs_computed_nm": 3.647587776184082,
+            "planar_velocity_rmse_mps": 0.06701824814081192,
+            "rms_applied_nm": 0.9562287330627441,
+            "rmse_command_error": [
+              0.04872306436300278,
+              0.046016398817300797,
+              0.13149385154247284
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4743734300136566,
+            "tilt_rms_degrees": 1.2495043277740479,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10642368346452713,
+            "yaw_rate_rmse_radps": 0.13149385154247284
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0062 is below acquisition floor 0.0200",
+            "yaw magnitude 0.0032 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1315 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1054 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4749 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.05,
+            -0.12
+          ],
+          "label": "gentle_three_axis_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2967321276664734,
+              0.005426236428320408,
+              -0.0008720089681446552
+            ],
+            "base_height_std_m": 0.005315667949616909,
+            "computed_demand_over_rating_fraction": 0.12315789610147476,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.4273943901062012,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.817038893699646,
+            "normalized_stability_score": 0.7760880750958764,
+            "normalized_tracking_score": 0.7392229408853583,
+            "peak_abs_computed_nm": 3.6369738578796387,
+            "planar_velocity_rmse_mps": 0.07447274029254913,
+            "rms_applied_nm": 0.9541608095169067,
+            "rmse_command_error": [
+              0.047779381275177,
+              0.05712547153234482,
+              0.1326526701450348
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.47493502497673035,
+            "tilt_rms_degrees": 1.254351019859314,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10535525530576706,
+            "yaw_rate_rmse_radps": 0.1326526701450348
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0500, achieved=+0.0054",
+            "lateral magnitude 0.0054 is below acquisition floor 0.0200",
+            "yaw magnitude 0.0009 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1327 rad/s exceeds 0.1200 rad/s"
+          ]
+        }
+      ],
+      "total_falls": 0,
+      "total_timeouts": 0
+    },
+    {
+      "accepted": false,
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage1_direct/2026-08-25_04-55-23_phase2_recovery_stage1_stabilized_from_rebased_v5_model200_seed56/model_75.pt",
+      "failed_command_count": 6,
+      "maximum_computed_demand_over_rating_fraction": 0.17497076094150543,
+      "maximum_peak_abs_computed_nm": 3.9291694164276123,
+      "maximum_tilt_degrees": 2.0619397163391113,
+      "mean_normalized_stability_score": 0.7905865244955446,
+      "mean_normalized_tracking_score": 0.6716620303147163,
+      "results": [
+        {
+          "accepted": true,
+          "advisories": [
+            "roll/pitch-rate RMS 0.4234 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.255323588848114,
+              0.0048466636799275875,
+              0.025487056002020836
+            ],
+            "base_height_std_m": 0.005105473101139069,
+            "computed_demand_over_rating_fraction": 0.0997660830616951,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.255419373512268,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.5863428115844727,
+            "normalized_stability_score": 0.7113724338156837,
+            "normalized_tracking_score": 0.4736817441880703,
+            "peak_abs_computed_nm": 2.3674216270446777,
+            "planar_velocity_rmse_mps": 0.05821896716952324,
+            "rms_applied_nm": 0.9384394884109497,
+            "rmse_command_error": [
+              0.056841809302568436,
+              0.01258796826004982,
+              0.08075203746557236
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.42344793677330017,
+            "tilt_rms_degrees": 1.138116478919983,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.09825590997934341,
+            "yaw_rate_rmse_radps": 0.08075203746557236
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": true,
+          "advisories": [
+            "vertical-velocity RMS 0.1162 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.5196 rad/s exceeds preferred 0.3500 rad/s",
+            "computed demand over rating fraction 0.1750 exceeds preferred 0.15"
+          ],
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.34506961703300476,
+              0.00545915262773633,
+              -0.0015051488298922777
+            ],
+            "base_height_std_m": 0.005926384590566158,
+            "computed_demand_over_rating_fraction": 0.17497076094150543,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.484468698501587,
+            "maximum_computed_over_rating_burst_s": 0.16,
+            "maximum_tilt_degrees": 2.0619397163391113,
+            "normalized_stability_score": 0.854110283905729,
+            "normalized_tracking_score": 0.40084604794780415,
+            "peak_abs_computed_nm": 3.9291694164276123,
+            "planar_velocity_rmse_mps": 0.05094107240438461,
+            "rms_applied_nm": 1.0072396993637085,
+            "rmse_command_error": [
+              0.048101525753736496,
+              0.01677009090781212,
+              0.06142017990350723
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.5195903778076172,
+            "tilt_rms_degrees": 1.3794125318527222,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11621493101119995,
+            "yaw_rate_rmse_radps": 0.06142017990350723
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1102 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4699 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            0.15
+          ],
+          "label": "forward_yaw_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.3039707541465759,
+              0.005020467564463615,
+              0.009316915646195412
+            ],
+            "base_height_std_m": 0.0056664166040718555,
+            "computed_demand_over_rating_fraction": 0.13204678893089294,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.399516224861145,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.831200361251831,
+            "normalized_stability_score": 0.793402860027605,
+            "normalized_tracking_score": 0.8730338886380197,
+            "peak_abs_computed_nm": 3.3576149940490723,
+            "planar_velocity_rmse_mps": 0.0581081248819828,
+            "rms_applied_nm": 0.974466860294342,
+            "rmse_command_error": [
+              0.056207507848739624,
+              0.014740083366632462,
+              0.15332062542438507
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4698699116706848,
+            "tilt_rms_degrees": 1.2852535247802734,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11018738895654678,
+            "yaw_rate_rmse_radps": 0.15332062542438507
+          },
+          "rejection_reasons": [
+            "yaw magnitude 0.0093 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1533 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1096 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4701 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            -0.15
+          ],
+          "label": "forward_yaw_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.30450311303138733,
+              0.003919699694961309,
+              0.00045419635716825724
+            ],
+            "base_height_std_m": 0.005657863337546587,
+            "computed_demand_over_rating_fraction": 0.13087719678878784,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3968079090118408,
+            "maximum_computed_over_rating_burst_s": 0.14,
+            "maximum_tilt_degrees": 1.8197293281555176,
+            "normalized_stability_score": 0.7920278396612653,
+            "normalized_tracking_score": 0.9133062635858854,
+            "peak_abs_computed_nm": 3.4186768531799316,
+            "planar_velocity_rmse_mps": 0.05833255872130394,
+            "rms_applied_nm": 0.9736966490745544,
+            "rmse_command_error": [
+              0.0565580278635025,
+              0.014278540387749672,
+              0.16263547539710999
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.47009357810020447,
+            "tilt_rms_degrees": 1.2881561517715454,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.109586700797081,
+            "yaw_rate_rmse_radps": 0.16263547539710999
+          },
+          "rejection_reasons": [
+            "yaw sign is wrong: command=-0.1500, achieved=+0.0005",
+            "yaw magnitude 0.0005 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1626 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1102 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4723 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.06,
+            0.0
+          ],
+          "label": "forward_lateral_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.3047735393047333,
+              0.0045875138603150845,
+              0.004999181255698204
+            ],
+            "base_height_std_m": 0.0056651015765964985,
+            "computed_demand_over_rating_fraction": 0.1316959112882614,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3990464210510254,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.851606011390686,
+            "normalized_stability_score": 0.7950843203790664,
+            "normalized_tracking_score": 0.5939872547363242,
+            "peak_abs_computed_nm": 3.3840060234069824,
+            "planar_velocity_rmse_mps": 0.08061187714338303,
+            "rms_applied_nm": 0.9745900630950928,
+            "rmse_command_error": [
+              0.056892745196819305,
+              0.05710946395993233,
+              0.06132301688194275
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.47229433059692383,
+            "tilt_rms_degrees": 1.2861614227294922,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11016008257865906,
+            "yaw_rate_rmse_radps": 0.06132301688194275
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0046 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1096 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4688 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.06,
+            0.0
+          ],
+          "label": "forward_lateral_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.30368003249168396,
+              0.003897577291354537,
+              0.006125214509665966
+            ],
+            "base_height_std_m": 0.005642699543386698,
+            "computed_demand_over_rating_fraction": 0.12947368621826172,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3944143056869507,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8118616342544556,
+            "normalized_stability_score": 0.7905952489513549,
+            "normalized_tracking_score": 0.6408344954252243,
+            "peak_abs_computed_nm": 3.366727113723755,
+            "planar_velocity_rmse_mps": 0.08592061698436737,
+            "rms_applied_nm": 0.9729451537132263,
+            "rmse_command_error": [
+              0.05580994114279747,
+              0.06532689183950424,
+              0.06230920925736427
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4687712490558624,
+            "tilt_rms_degrees": 1.282120943069458,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10963854193687439,
+            "yaw_rate_rmse_radps": 0.06230920925736427
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0600, achieved=+0.0039",
+            "lateral magnitude 0.0039 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1102 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4705 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.05,
+            0.12
+          ],
+          "label": "gentle_three_axis_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.3046272397041321,
+              0.004647440277040005,
+              0.00842586625367403
+            ],
+            "base_height_std_m": 0.005673643667250872,
+            "computed_demand_over_rating_fraction": 0.1338011622428894,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3965953588485718,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8421754837036133,
+            "normalized_stability_score": 0.7939690199968893,
+            "normalized_tracking_score": 0.7107626491536697,
+            "peak_abs_computed_nm": 3.378530979156494,
+            "planar_velocity_rmse_mps": 0.07398270815610886,
+            "rms_applied_nm": 0.9744662642478943,
+            "rmse_command_error": [
+              0.0568133220076561,
+              0.04738868400454521,
+              0.12797820568084717
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.47045496106147766,
+            "tilt_rms_degrees": 1.2848447561264038,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11019464582204819,
+            "yaw_rate_rmse_radps": 0.12797820568084717
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0046 is below acquisition floor 0.0200",
+            "yaw magnitude 0.0084 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1280 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1099 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4713 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.05,
+            -0.12
+          ],
+          "label": "gentle_three_axis_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.3038348853588104,
+              0.004112446215003729,
+              0.0022554483730345964
+            ],
+            "base_height_std_m": 0.005679550115019083,
+            "computed_demand_over_rating_fraction": 0.13111111521720886,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3982024192810059,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8320552110671997,
+            "normalized_stability_score": 0.7941301892267628,
+            "normalized_tracking_score": 0.7668438988427321,
+            "peak_abs_computed_nm": 3.341032028198242,
+            "planar_velocity_rmse_mps": 0.07901152223348618,
+            "rms_applied_nm": 0.9747491478919983,
+            "rmse_command_error": [
+              0.05594942718744278,
+              0.05578962713479996,
+              0.13642993569374084
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4712889790534973,
+            "tilt_rms_degrees": 1.2894915342330933,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10987866669893265,
+            "yaw_rate_rmse_radps": 0.13642993569374084
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0500, achieved=+0.0041",
+            "lateral magnitude 0.0041 is below acquisition floor 0.0200",
+            "yaw sign is wrong: command=-0.1200, achieved=+0.0023",
+            "yaw magnitude 0.0023 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1364 rad/s exceeds 0.1200 rad/s"
+          ]
+        }
+      ],
+      "total_falls": 0,
+      "total_timeouts": 0
+    },
+    {
+      "accepted": false,
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage1_direct/2026-08-25_04-55-23_phase2_recovery_stage1_stabilized_from_rebased_v5_model200_seed56/model_100.pt",
+      "failed_command_count": 6,
+      "maximum_computed_demand_over_rating_fraction": 0.17099414765834808,
+      "maximum_peak_abs_computed_nm": 3.730203151702881,
+      "maximum_tilt_degrees": 2.035382032394409,
+      "mean_normalized_stability_score": 0.8090046638722664,
+      "mean_normalized_tracking_score": 0.6521109711482294,
+      "results": [
+        {
+          "accepted": true,
+          "advisories": [
+            "vertical-velocity RMS 0.1005 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4198 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2519614100456238,
+              0.005520607810467482,
+              0.015259782783687115
+            ],
+            "base_height_std_m": 0.0053703999146819115,
+            "computed_demand_over_rating_fraction": 0.09625730663537979,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.2101035118103027,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.7350577116012573,
+            "normalized_stability_score": 0.7225669717549213,
+            "normalized_tracking_score": 0.4436689428985119,
+            "peak_abs_computed_nm": 2.835048198699951,
+            "planar_velocity_rmse_mps": 0.05518138036131859,
+            "rms_applied_nm": 0.9353434443473816,
+            "rmse_command_error": [
+              0.053240273147821426,
+              0.014507167972624302,
+              0.06749362498521805
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.41979897022247314,
+            "tilt_rms_degrees": 1.1930406093597412,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10047008097171783,
+            "yaw_rate_rmse_radps": 0.06749362498521805
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": true,
+          "advisories": [
+            "vertical-velocity RMS 0.1165 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.5234 rad/s exceeds preferred 0.3500 rad/s",
+            "computed demand over rating fraction 0.1710 exceeds preferred 0.15"
+          ],
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.341085821390152,
+              0.002090955851599574,
+              -0.0025488059036433697
+            ],
+            "base_height_std_m": 0.006143060512840748,
+            "computed_demand_over_rating_fraction": 0.17099414765834808,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.4663022756576538,
+            "maximum_computed_over_rating_burst_s": 0.14,
+            "maximum_tilt_degrees": 2.035382032394409,
+            "normalized_stability_score": 0.8636302984319627,
+            "normalized_tracking_score": 0.3662944150467714,
+            "peak_abs_computed_nm": 3.730203151702881,
+            "planar_velocity_rmse_mps": 0.04804445430636406,
+            "rms_applied_nm": 1.0142145156860352,
+            "rmse_command_error": [
+              0.043955329805612564,
+              0.019395841285586357,
+              0.06074728071689606
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.5233601927757263,
+            "tilt_rms_degrees": 1.4123554229736328,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11648135632276535,
+            "yaw_rate_rmse_radps": 0.06074728071689606
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1129 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4798 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            0.15
+          ],
+          "label": "forward_yaw_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.30035820603370667,
+              0.0040839905850589275,
+              0.010600661858916283
+            ],
+            "base_height_std_m": 0.006001962814480066,
+            "computed_demand_over_rating_fraction": 0.13345029950141907,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3873530626296997,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8354705572128296,
+            "normalized_stability_score": 0.816470688996127,
+            "normalized_tracking_score": 0.8482171067347131,
+            "peak_abs_computed_nm": 2.971512794494629,
+            "planar_velocity_rmse_mps": 0.05484332516789436,
+            "rms_applied_nm": 0.9815200567245483,
+            "rmse_command_error": [
+              0.05277937278151512,
+              0.014903963543474674,
+              0.15079273283481598
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.47983232140541077,
+            "tilt_rms_degrees": 1.3302981853485107,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11287100613117218,
+            "yaw_rate_rmse_radps": 0.15079273283481598
+          },
+          "rejection_reasons": [
+            "yaw magnitude 0.0106 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1508 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1122 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4771 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            -0.15
+          ],
+          "label": "forward_yaw_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.29997050762176514,
+              0.004602928180247545,
+              0.001889060833491385
+            ],
+            "base_height_std_m": 0.005968039855360985,
+            "computed_demand_over_rating_fraction": 0.13286550343036652,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3710581064224243,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8520290851593018,
+            "normalized_stability_score": 0.8121897234537062,
+            "normalized_tracking_score": 0.8981623531629642,
+            "peak_abs_computed_nm": 3.0975894927978516,
+            "planar_velocity_rmse_mps": 0.054671213030815125,
+            "rms_applied_nm": 0.9803951382637024,
+            "rmse_command_error": [
+              0.05256685987114906,
+              0.015022211708128452,
+              0.16299210488796234
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.47708776593208313,
+            "tilt_rms_degrees": 1.3299798965454102,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11223183572292328,
+            "yaw_rate_rmse_radps": 0.16299210488796234
+          },
+          "rejection_reasons": [
+            "yaw sign is wrong: command=-0.1500, achieved=+0.0019",
+            "yaw magnitude 0.0019 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1630 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1122 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4793 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.06,
+            0.0
+          ],
+          "label": "forward_lateral_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.3011455237865448,
+              0.0041894554160535336,
+              0.0045431205071508884
+            ],
+            "base_height_std_m": 0.005960544571280479,
+            "computed_demand_over_rating_fraction": 0.132748544216156,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3760133981704712,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8485386371612549,
+            "normalized_stability_score": 0.8132953441302692,
+            "normalized_tracking_score": 0.5829437946279844,
+            "peak_abs_computed_nm": 3.0804905891418457,
+            "planar_velocity_rmse_mps": 0.07858814299106598,
+            "rms_applied_nm": 0.9777613282203674,
+            "rmse_command_error": [
+              0.05335278809070587,
+              0.057702481746673584,
+              0.05780646577477455
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4793219566345215,
+            "tilt_rms_degrees": 1.3261802196502686,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11217419803142548,
+            "yaw_rate_rmse_radps": 0.05780646577477455
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0042 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1117 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4779 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.06,
+            0.0
+          ],
+          "label": "forward_lateral_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.30013129115104675,
+              0.004278637934476137,
+              0.005260705016553402
+            ],
+            "base_height_std_m": 0.005947092082351446,
+            "computed_demand_over_rating_fraction": 0.1314619928598404,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.38144850730896,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8432374000549316,
+            "normalized_stability_score": 0.8109360116689155,
+            "normalized_tracking_score": 0.6301519305755695,
+            "peak_abs_computed_nm": 3.128434419631958,
+            "planar_velocity_rmse_mps": 0.08418969064950943,
+            "rms_applied_nm": 0.9780598878860474,
+            "rmse_command_error": [
+              0.05243078991770744,
+              0.06587044894695282,
+              0.05706983059644699
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.477868914604187,
+            "tilt_rms_degrees": 1.327201247215271,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11173730343580246,
+            "yaw_rate_rmse_radps": 0.05706983059644699
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0600, achieved=+0.0043",
+            "lateral magnitude 0.0043 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1129 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4809 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.05,
+            0.12
+          ],
+          "label": "gentle_three_axis_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.3007799983024597,
+              0.004442095290869474,
+              0.010474157519638538
+            ],
+            "base_height_std_m": 0.006016221363097429,
+            "computed_demand_over_rating_fraction": 0.1315789520740509,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3888393640518188,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.8569889068603516,
+            "normalized_stability_score": 0.8176646854528892,
+            "normalized_tracking_score": 0.6918438555051883,
+            "peak_abs_computed_nm": 2.9779162406921387,
+            "planar_velocity_rmse_mps": 0.0716281458735466,
+            "rms_applied_nm": 0.9822249412536621,
+            "rmse_command_error": [
+              0.053357258439064026,
+              0.04778696969151497,
+              0.12402607500553131
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.48094674944877625,
+            "tilt_rms_degrees": 1.3303552865982056,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11291023343801498,
+            "yaw_rate_rmse_radps": 0.12402607500553131
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0044 is below acquisition floor 0.0200",
+            "yaw magnitude 0.0105 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1240 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1125 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4807 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.05,
+            -0.12
+          ],
+          "label": "gentle_three_axis_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.299544095993042,
+              0.004311786033213139,
+              0.002407774329185486
+            ],
+            "base_height_std_m": 0.005963356699794531,
+            "computed_demand_over_rating_fraction": 0.132748544216156,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.369850993156433,
+            "maximum_computed_over_rating_burst_s": 0.1,
+            "maximum_tilt_degrees": 1.850760579109192,
+            "normalized_stability_score": 0.8152835870893407,
+            "normalized_tracking_score": 0.755605370634132,
+            "peak_abs_computed_nm": 3.039682388305664,
+            "planar_velocity_rmse_mps": 0.07655222713947296,
+            "rms_applied_nm": 0.9783236980438232,
+            "rmse_command_error": [
+              0.052038323134183884,
+              0.05614496022462845,
+              0.13576216995716095
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.48071685433387756,
+            "tilt_rms_degrees": 1.3305023908615112,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11246107518672943,
+            "yaw_rate_rmse_radps": 0.13576216995716095
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0500, achieved=+0.0043",
+            "lateral magnitude 0.0043 is below acquisition floor 0.0200",
+            "yaw sign is wrong: command=-0.1200, achieved=+0.0024",
+            "yaw magnitude 0.0024 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1358 rad/s exceeds 0.1200 rad/s"
+          ]
+        }
+      ],
+      "total_falls": 0,
+      "total_timeouts": 0
+    },
+    {
+      "accepted": false,
+      "checkpoint": "/workspace/hexapod/isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage1_direct/2026-08-25_04-55-23_phase2_recovery_stage1_stabilized_from_rebased_v5_model200_seed56/model_124.pt",
+      "failed_command_count": 6,
+      "maximum_computed_demand_over_rating_fraction": 0.18058478832244873,
+      "maximum_peak_abs_computed_nm": 3.786262035369873,
+      "maximum_tilt_degrees": 2.076411247253418,
+      "mean_normalized_stability_score": 0.8223707749749467,
+      "mean_normalized_tracking_score": 0.6383321212423552,
+      "results": [
+        {
+          "accepted": true,
+          "advisories": [
+            "vertical-velocity RMS 0.1018 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4388 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.2,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p20",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2519755959510803,
+              0.005941081326454878,
+              0.015098834410309792
+            ],
+            "base_height_std_m": 0.005534377880394459,
+            "computed_demand_over_rating_fraction": 0.10409356653690338,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.2450608015060425,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.806777834892273,
+            "normalized_stability_score": 0.746114423777908,
+            "normalized_tracking_score": 0.4412014037370682,
+            "peak_abs_computed_nm": 2.889810085296631,
+            "planar_velocity_rmse_mps": 0.05454448238015175,
+            "rms_applied_nm": 0.9353888630867004,
+            "rmse_command_error": [
+              0.05294416844844818,
+              0.013115480542182922,
+              0.062049608677625656
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.43878403306007385,
+            "tilt_rms_degrees": 1.257712483406067,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.10180483758449554,
+            "yaw_rate_rmse_radps": 0.062049608677625656
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": true,
+          "advisories": [
+            "vertical-velocity RMS 0.1174 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.5370 rad/s exceeds preferred 0.3500 rad/s",
+            "computed demand over rating fraction 0.1806 exceeds preferred 0.15"
+          ],
+          "command": [
+            0.3,
+            0.0,
+            0.0
+          ],
+          "label": "forward_0p30",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.3378385305404663,
+              0.003718566382303834,
+              0.0019234360661357641
+            ],
+            "base_height_std_m": 0.006247090641409159,
+            "computed_demand_over_rating_fraction": 0.18058478832244873,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.4483758211135864,
+            "maximum_computed_over_rating_burst_s": 0.16,
+            "maximum_tilt_degrees": 2.076411247253418,
+            "normalized_stability_score": 0.879728222609542,
+            "normalized_tracking_score": 0.3427184497316679,
+            "peak_abs_computed_nm": 3.786262035369873,
+            "planar_velocity_rmse_mps": 0.04478716477751732,
+            "rms_applied_nm": 1.0160542726516724,
+            "rmse_command_error": [
+              0.04112621396780014,
+              0.017734846100211143,
+              0.05794698745012283
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.537014901638031,
+            "tilt_rms_degrees": 1.4510512351989746,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.1173783466219902,
+            "yaw_rate_rmse_radps": 0.05794698745012283
+          },
+          "rejection_reasons": []
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1121 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4901 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            0.15
+          ],
+          "label": "forward_yaw_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.299128919839859,
+              0.005564396735280752,
+              0.01233329065144062
+            ],
+            "base_height_std_m": 0.0060190074145793915,
+            "computed_demand_over_rating_fraction": 0.1395321637392044,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3580267429351807,
+            "maximum_computed_over_rating_burst_s": 0.16,
+            "maximum_tilt_degrees": 1.9137684106826782,
+            "normalized_stability_score": 0.8241226936912251,
+            "normalized_tracking_score": 0.8309844260414443,
+            "peak_abs_computed_nm": 2.9732606410980225,
+            "planar_velocity_rmse_mps": 0.05270351842045784,
+            "rms_applied_nm": 0.9759456515312195,
+            "rmse_command_error": [
+              0.05055151879787445,
+              0.014906532131135464,
+              0.14888474345207214
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.49006110429763794,
+            "tilt_rms_degrees": 1.3681777715682983,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11210966855287552,
+            "yaw_rate_rmse_radps": 0.14888474345207214
+          },
+          "rejection_reasons": [
+            "yaw magnitude 0.0123 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1489 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1130 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4905 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.0,
+            -0.15
+          ],
+          "label": "forward_yaw_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2988449037075043,
+              0.005671198479831219,
+              0.0016314570093527436
+            ],
+            "base_height_std_m": 0.006012504920363426,
+            "computed_demand_over_rating_fraction": 0.13649122416973114,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3475797176361084,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.9245778322219849,
+            "normalized_stability_score": 0.8269268094872435,
+            "normalized_tracking_score": 0.881404522806406,
+            "peak_abs_computed_nm": 3.1008777618408203,
+            "planar_velocity_rmse_mps": 0.05259980261325836,
+            "rms_applied_nm": 0.974555492401123,
+            "rmse_command_error": [
+              0.050499044358730316,
+              0.014716845005750656,
+              0.16103804111480713
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4904977083206177,
+            "tilt_rms_degrees": 1.3753254413604736,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11301780492067337,
+            "yaw_rate_rmse_radps": 0.16103804111480713
+          },
+          "rejection_reasons": [
+            "yaw sign is wrong: command=-0.1500, achieved=+0.0016",
+            "yaw magnitude 0.0016 is below acquisition floor 0.0600",
+            "yaw-rate RMSE 0.1610 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1129 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4890 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.06,
+            0.0
+          ],
+          "label": "forward_lateral_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2995058298110962,
+              0.005757101345807314,
+              0.008368220180273056
+            ],
+            "base_height_std_m": 0.006052028853446245,
+            "computed_demand_over_rating_fraction": 0.13766081631183624,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.349972128868103,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.9256961345672607,
+            "normalized_stability_score": 0.8262384070150023,
+            "normalized_tracking_score": 0.5623182514682412,
+            "peak_abs_computed_nm": 3.118394374847412,
+            "planar_velocity_rmse_mps": 0.0757354274392128,
+            "rms_applied_nm": 0.9745085835456848,
+            "rmse_command_error": [
+              0.05107680335640907,
+              0.055919717997312546,
+              0.05719069018959999
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4889936149120331,
+            "tilt_rms_degrees": 1.3707678318023682,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11293397098779678,
+            "yaw_rate_rmse_radps": 0.05719069018959999
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0058 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1128 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4908 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.06,
+            0.0
+          ],
+          "label": "forward_lateral_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.29842430353164673,
+              0.005425165873020887,
+              0.007495214696973562
+            ],
+            "base_height_std_m": 0.0060310643166303635,
+            "computed_demand_over_rating_fraction": 0.1395321637392044,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3525573015213013,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.9186707735061646,
+            "normalized_stability_score": 0.8267372392916255,
+            "normalized_tracking_score": 0.6259684450924397,
+            "peak_abs_computed_nm": 3.042095899581909,
+            "planar_velocity_rmse_mps": 0.08345700800418854,
+            "rms_applied_nm": 0.9747458696365356,
+            "rmse_command_error": [
+              0.04999483376741409,
+              0.06682506203651428,
+              0.055674370378255844
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.49078720808029175,
+            "tilt_rms_degrees": 1.3719534873962402,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11277204006910324,
+            "yaw_rate_rmse_radps": 0.055674370378255844
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0600, achieved=+0.0054",
+            "lateral magnitude 0.0054 is below acquisition floor 0.0240"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1125 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4935 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            0.05,
+            0.12
+          ],
+          "label": "gentle_three_axis_left",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.299405962228775,
+              0.005513992626219988,
+              0.01249130629003048
+            ],
+            "base_height_std_m": 0.0060264295898377895,
+            "computed_demand_over_rating_fraction": 0.1404678374528885,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3518439531326294,
+            "maximum_computed_over_rating_burst_s": 0.08,
+            "maximum_tilt_degrees": 1.9190787076950073,
+            "normalized_stability_score": 0.8277985478374398,
+            "normalized_tracking_score": 0.6716209774216017,
+            "peak_abs_computed_nm": 3.016132354736328,
+            "planar_velocity_rmse_mps": 0.06886391341686249,
+            "rms_applied_nm": 0.9745199084281921,
+            "rmse_command_error": [
+              0.05075519531965256,
+              0.04654189944267273,
+              0.12121550738811493
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.49352699518203735,
+            "tilt_rms_degrees": 1.3689707517623901,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.11251204460859299,
+            "yaw_rate_rmse_radps": 0.12121550738811493
+          },
+          "rejection_reasons": [
+            "lateral magnitude 0.0055 is below acquisition floor 0.0200",
+            "yaw magnitude 0.0125 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1212 rad/s exceeds 0.1200 rad/s"
+          ]
+        },
+        {
+          "accepted": false,
+          "advisories": [
+            "vertical-velocity RMS 0.1118 m/s exceeds preferred 0.1000 m/s",
+            "roll/pitch-rate RMS 0.4871 rad/s exceeds preferred 0.3500 rad/s"
+          ],
+          "command": [
+            0.25,
+            -0.05,
+            -0.12
+          ],
+          "label": "gentle_three_axis_right",
+          "metrics": {
+            "achieved_command_frame_velocity": [
+              0.2989636957645416,
+              0.004931003786623478,
+              0.0016104016685858369
+            ],
+            "base_height_std_m": 0.00601529236882925,
+            "computed_demand_over_rating_fraction": 0.13567250967025757,
+            "falls": 0,
+            "max_per_joint_rms_applied_nm": 1.3535819053649902,
+            "maximum_computed_over_rating_burst_s": 0.12,
+            "maximum_tilt_degrees": 1.9180588722229004,
+            "normalized_stability_score": 0.8212998560895878,
+            "normalized_tracking_score": 0.7504404936399726,
+            "peak_abs_computed_nm": 3.0657176971435547,
+            "planar_velocity_rmse_mps": 0.07592251151800156,
+            "rms_applied_nm": 0.9721561074256897,
+            "rmse_command_error": [
+              0.050627224147319794,
+              0.0565783753991127,
+              0.13466379046440125
+            ],
+            "roll_pitch_angular_velocity_rms_radps": 0.4871380627155304,
+            "tilt_rms_degrees": 1.3687812089920044,
+            "timeouts": 0,
+            "vertical_velocity_rms_mps": 0.1118345782160759,
+            "yaw_rate_rmse_radps": 0.13466379046440125
+          },
+          "rejection_reasons": [
+            "lateral sign is wrong: command=-0.0500, achieved=+0.0049",
+            "lateral magnitude 0.0049 is below acquisition floor 0.0200",
+            "yaw sign is wrong: command=-0.1200, achieved=+0.0016",
+            "yaw magnitude 0.0016 is below acquisition floor 0.0480",
+            "yaw-rate RMSE 0.1347 rad/s exceeds 0.1200 rad/s"
+          ]
+        }
+      ],
+      "total_falls": 0,
+      "total_timeouts": 0
+    }
+  ],
+  "schema_version": 1,
+  "task": "Isaac-Velocity-Omni-Recovery-Stage1-Hexapod-RobStride-Direct-v0",
+  "thresholds": {
+    "computed_demand_over_rating_fraction": 0.2,
+    "max_per_joint_rms_applied_nm": 1.6,
+    "maximum_computed_over_rating_burst_s": 0.2,
+    "maximum_lateral_rmse_mps": 0.08,
+    "maximum_planar_velocity_rmse_mps": 0.12,
+    "maximum_tilt_degrees": 20.0,
+    "maximum_uncommanded_abs_yaw_rate_radps": 0.15,
+    "maximum_yaw_rate_rmse_radps": 0.12,
+    "minimum_forward_command_fraction": 0.8,
+    "minimum_introduced_axis_command_fraction": 0.4,
+    "peak_abs_computed_nm": 5.5,
+    "preferred_base_height_std_m": 0.012,
+    "preferred_computed_demand_over_rating_fraction": 0.15,
+    "preferred_maximum_tilt_degrees": 15.0,
+    "preferred_rms_applied_nm": 1.1,
+    "preferred_roll_pitch_angular_velocity_rms_radps": 0.35,
+    "preferred_tilt_rms_degrees": 5.0,
+    "preferred_vertical_velocity_rms_mps": 0.1
+  }
+}

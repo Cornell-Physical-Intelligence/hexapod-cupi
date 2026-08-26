@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+experiment_name=hexapod_robstride_phase2_recovery_stage1_direct
+run_label=phase2_recovery_stage1_from_rebased_v5_model200_seed56
+task_id=Isaac-Velocity-Omni-Recovery-Stage1-Hexapod-RobStride-Direct-v0
+
+experiment_host_dir=${workspace_host}/isaaclab/logs/rsl_rl/${experiment_name}
+experiment_container_dir=${workspace_container}/isaaclab/logs/rsl_rl/${experiment_name}
+bootstrap_name=bootstrap_from_phase1_v5_model200_rebased/model_200_rebased.pt
+bootstrap_host=${experiment_host_dir}/${bootstrap_name}
+bootstrap_container=${experiment_container_dir}/${bootstrap_name}
+
+if (( $# > 1 )); then
+  echo "usage: $0 [exact-run-directory-name]" >&2
+  exit 64
+fi
+
+if (( $# == 1 )); then
+  run_name=$1
+  if [[ -z "${run_name}" || "${run_name}" == */* ]]; then
+    echo "run name must be one non-empty directory name: ${run_name@Q}" >&2
+    exit 64
+  fi
+  run_host_dir=${experiment_host_dir}/${run_name}
+else
+  shopt -s nullglob
+  run_candidates=("${experiment_host_dir}"/*_"${run_label}")
+  shopt -u nullglob
+  if (( ${#run_candidates[@]} != 1 )); then
+    echo "expected exactly one Stage-1 run matching ${experiment_host_dir}/*_${run_label}" >&2
+    echo "found ${#run_candidates[@]}; pass the exact run directory name explicitly" >&2
+    if (( ${#run_candidates[@]} > 0 )); then
+      printf '  %s\n' "${run_candidates[@]}" >&2
+    fi
+    exit 1
+  fi
+  run_host_dir=${run_candidates[0]}
+  run_name=${run_host_dir##*/}
+fi
+
+if [[ ! -d "${run_host_dir}" ]]; then
+  echo "Stage-1 run directory does not exist: ${run_host_dir}" >&2
+  exit 1
+fi
+if [[ ! -f "${bootstrap_host}" ]]; then
+  echo "transformed recovery bootstrap is missing: ${bootstrap_host}" >&2
+  exit 1
+fi
+
+run_container_dir=${experiment_container_dir}/${run_name}
+artifact_host_dir=${workspace_host}/artifacts/phase2_recovery_stage1/evaluation/${run_name}
+artifact_container_dir=${workspace_container}/artifacts/phase2_recovery_stage1/evaluation/${run_name}
+
+# The pristine v5 model_200 is intentionally absent: although tensor shapes are
+# compatible, its near-zero vy/wz RMS channels make nonzero Stage-1 commands
+# semantically out-of-distribution. The auditable transformed bootstrap is the
+# only valid pre-training baseline for this task.
+checkpoint_args=(--checkpoint "${bootstrap_container}")
+checkpoint_numbers=(0 25 50 75 100 124)
+for checkpoint_number in "${checkpoint_numbers[@]}"; do
+  checkpoint_name=model_${checkpoint_number}.pt
+  checkpoint_host=${run_host_dir}/${checkpoint_name}
+  if [[ ! -f "${checkpoint_host}" ]]; then
+    echo "missing Stage-1 checkpoint: ${checkpoint_host}" >&2
+    exit 1
+  fi
+  checkpoint_args+=(--checkpoint "${run_container_dir}/${checkpoint_name}")
+done
+
+if ! mkdir -p "${artifact_host_dir}"; then
+  echo "artifact directory is not writable; create it once as orionh:" >&2
+  echo "  sudo install -d -o orionh -g orionh -m 0777 ${artifact_host_dir}" >&2
+  exit 1
+fi
+chmod 0777 "${artifact_host_dir}"
+cd "${isaac_lab_dir}"
+
+docker compose \
+  --env-file docker/.env.base \
+  -f docker/docker-compose.yaml \
+  --profile base \
+  run \
+  --rm \
+  --name hexapod-phase2-recovery-stage1-batch-eval \
+  -w /workspace/hexapod/isaaclab \
+  -e PYTHONPATH=/workspace/hexapod/isaaclab \
+  -e PYTHONDONTWRITEBYTECODE=1 \
+  -v /home/orionh/HEXAPOD:/workspace/hexapod:rw \
+  --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+  isaac-lab-base \
+  /workspace/hexapod/isaaclab/evaluate_checkpoint.py \
+  --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+  --task "${task_id}" \
+  "${checkpoint_args[@]}" \
+  --command 0.20 0.00 0.00 \
+  --command 0.30 0.00 0.00 \
+  --command 0.25 0.00 0.15 \
+  --command 0.25 0.00 -0.15 \
+  --command 0.25 0.06 0.00 \
+  --command 0.25 -0.06 0.00 \
+  --command 0.25 0.05 0.12 \
+  --command 0.25 -0.05 -0.12 \
+  --seconds 10 \
+  --warmup-steps 25 \
+  --seed 56 \
+  --disable-randomization \
+  --json "${artifact_container_dir}/eval_batch_nominal.json" \
+  >"${artifact_host_dir}/eval_batch_nominal.log" 2>&1
+
+grade_status=0
+python3 "${workspace_host}/isaaclab/grade_stage1_recovery.py" \
+  "${artifact_host_dir}/eval_batch_nominal.json" \
+  --json "${artifact_host_dir}/grade_batch_nominal.json" \
+  2>&1 | tee "${artifact_host_dir}/grade_batch_nominal.log" || grade_status=$?
+
+exit "${grade_status}"

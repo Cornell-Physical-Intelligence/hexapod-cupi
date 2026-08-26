@@ -1,0 +1,314 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+# Strictly read-only Stage2 deployment preflight for Spark.
+#
+# This script intentionally does not stage files, create directories, acquire
+# locks, change permissions, manage services, manage containers, or launch any
+# training/evaluation process.  A Qwen probe performs only an HTTP GET against
+# the local health endpoint.  Probe failures are reported without preventing
+# later diagnostics; release-integrity failures determine the final status.
+
+readonly workspace_host=/home/orionh/HEXAPOD
+readonly isaac_lab_dir=/home/orionh/IsaacLab
+readonly manifest_rel=isaaclab/deploy/stage2_pipeline.sha256
+readonly manifest_host=${workspace_host}/${manifest_rel}
+readonly logs_root=${workspace_host}/isaaclab/logs/rsl_rl
+readonly qwen_port=8080
+
+release_status=0
+release_state=unverified
+
+section() {
+  printf '\n== %s ==\n' "$1"
+}
+
+unavailable() {
+  printf 'unavailable: %s\n' "$1"
+}
+
+section "Host"
+printf 'timestamp='
+date --iso-8601=seconds 2>/dev/null || date
+printf 'hostname='
+hostname 2>/dev/null || unavailable hostname
+printf 'kernel='
+uname -srmo 2>/dev/null || uname -a
+printf 'uptime='
+uptime 2>/dev/null || unavailable uptime
+printf 'workspace=%s\n' "${workspace_host}"
+printf 'isaac_lab=%s\n' "${isaac_lab_dir}"
+
+section "Stage2 release integrity"
+if [[ ! -d "${workspace_host}" ]]; then
+  printf 'FAIL: Spark workspace is missing: %s\n' "${workspace_host}" >&2
+  release_status=66
+  release_state=failed
+elif [[ ! -f "${manifest_host}" || -L "${manifest_host}" ]]; then
+  printf 'FAIL: release manifest must be a regular non-symlink file: %s\n' \
+    "${manifest_host}" >&2
+  release_status=66
+  release_state=failed
+elif ! command -v sha256sum >/dev/null 2>&1; then
+  printf 'FAIL: sha256sum is unavailable\n' >&2
+  release_status=69
+  release_state=failed
+else
+  manifest_entries=0
+  manifest_line_number=0
+  manifest_invalid=0
+  while IFS= read -r manifest_line || [[ -n "${manifest_line}" ]]; do
+    ((manifest_line_number += 1))
+    if [[ -z "${manifest_line}" || "${manifest_line}" == \#* ]]; then
+      continue
+    fi
+    ((manifest_entries += 1))
+    if [[ ! "${manifest_line}" =~ ^([0-9a-f]{64})[[:space:]][[:space:]]([A-Za-z0-9._/-]+)$ ]]; then
+      printf 'FAIL: malformed manifest line %d\n' "${manifest_line_number}" >&2
+      manifest_invalid=1
+      continue
+    fi
+    manifest_path=${BASH_REMATCH[2]}
+    case "${manifest_path}" in
+      README.md | robot/* | isaaclab/*) ;;
+      *)
+        printf 'FAIL: manifest line %d is outside approved release roots: %s\n' \
+          "${manifest_line_number}" "${manifest_path}" >&2
+        manifest_invalid=1
+        continue
+        ;;
+    esac
+    if [[ "${manifest_path}" == /* \
+      || "${manifest_path}" == ./* \
+      || "${manifest_path}" == *//* \
+      || "/${manifest_path}/" == */../* \
+      || "${manifest_path}" == "${manifest_rel}" ]]; then
+      printf 'FAIL: unsafe or self-referential manifest path on line %d: %s\n' \
+        "${manifest_line_number}" "${manifest_path}" >&2
+      manifest_invalid=1
+      continue
+    fi
+    if [[ ! -f "${workspace_host}/${manifest_path}" \
+      || -L "${workspace_host}/${manifest_path}" ]]; then
+      printf 'FAIL: manifest target must be a regular non-symlink file: %s\n' \
+        "${manifest_path}" >&2
+      manifest_invalid=1
+    fi
+  done < "${manifest_host}"
+
+  if (( manifest_entries == 0 )); then
+    printf 'FAIL: release manifest is empty\n' >&2
+    manifest_invalid=1
+  fi
+
+  if (( manifest_invalid != 0 )); then
+    release_status=65
+    release_state=failed
+  elif (
+    cd "${workspace_host}" \
+      && sha256sum --check < <(
+        grep -E '^[0-9a-f]{64}  [A-Za-z0-9._/-]+$' "${manifest_host}"
+      )
+  ); then
+    printf 'PASS: %d release files match the manifest\n' "${manifest_entries}"
+    release_state=verified
+  else
+    printf 'FAIL: one or more release hashes do not match\n' >&2
+    release_status=65
+    release_state=failed
+  fi
+fi
+
+if [[ "${release_state}" == verified ]]; then
+  required_executables=(
+    isaaclab/deploy/preflight-stage2-spark
+    isaaclab/deploy/smoke-phase2-recovery-stage2c-stable-forward
+    isaaclab/deploy/screen-phase2-recovery-stage2c-stable-forward-batch
+    isaaclab/deploy/screen-phase2-recovery-stage2c-robust-best
+    isaaclab/deploy/train-phase2-recovery-stage2d-homotopy-stage
+    isaaclab/deploy/screen-phase2-recovery-stage2d-homotopy-stage
+    isaaclab/deploy/train-phase2-recovery-stage2e-joystick-stage
+    isaaclab/deploy/screen-phase2-recovery-stage2e-joystick-static
+    isaaclab/deploy/screen-phase2-command-transitions
+    isaaclab/deploy/record-phase2-showcase
+  )
+  executable_invalid=0
+  for executable_path in "${required_executables[@]}"; do
+    if [[ ! -f "${workspace_host}/${executable_path}" \
+      || -L "${workspace_host}/${executable_path}" \
+      || ! -x "${workspace_host}/${executable_path}" ]]; then
+      printf 'FAIL: required launcher is missing, symlinked, or non-executable: %s\n' \
+        "${executable_path}" >&2
+      executable_invalid=1
+    fi
+  done
+  if (( executable_invalid != 0 )); then
+    release_status=65
+    release_state=failed
+  else
+    printf 'PASS: %d required launchers are executable\n' \
+      "${#required_executables[@]}"
+  fi
+fi
+
+section "CPU and memory"
+if command -v free >/dev/null 2>&1; then
+  free -h || unavailable "free failed"
+else
+  unavailable free
+fi
+if [[ -r /proc/loadavg ]]; then
+  printf 'loadavg='
+  tr '\n' ' ' < /proc/loadavg
+  printf '\n'
+fi
+
+section "Disk"
+disk_targets=(/ "${workspace_host}" "${isaac_lab_dir}")
+existing_disk_targets=()
+for disk_target in "${disk_targets[@]}"; do
+  if [[ -e "${disk_target}" ]]; then
+    existing_disk_targets+=("${disk_target}")
+  else
+    printf 'missing path: %s\n' "${disk_target}"
+  fi
+done
+if (( ${#existing_disk_targets[@]} != 0 )); then
+  df -hT -- "${existing_disk_targets[@]}" || unavailable "df failed"
+fi
+for usage_path in "${logs_root}" "${workspace_host}/artifacts"; do
+  if [[ -d "${usage_path}" ]]; then
+    du -sh -- "${usage_path}" 2>/dev/null || unavailable "disk usage for ${usage_path}"
+  fi
+done
+
+section "GPU"
+if command -v nvidia-smi >/dev/null 2>&1; then
+  nvidia-smi \
+    --query-gpu=index,name,driver_version,pstate,temperature.gpu,power.draw,power.limit,memory.used,memory.total,utilization.gpu,utilization.memory \
+    --format=csv,noheader,nounits \
+    || unavailable "nvidia-smi GPU query failed"
+  printf '%s\n' '-- active GPU processes --'
+  nvidia-smi \
+    --query-compute-apps=gpu_uuid,pid,process_name,used_memory \
+    --format=csv,noheader,nounits 2>/dev/null \
+    || unavailable "nvidia-smi process query failed"
+else
+  unavailable nvidia-smi
+fi
+
+section "Training and inference services"
+if command -v systemctl >/dev/null 2>&1; then
+  printf '%s\n' '-- installed matching unit files --'
+  systemctl list-unit-files --no-pager --no-legend 2>/dev/null \
+    | grep -Ei '(^|/)(hexapod-rl-training[^[:space:]]*[.]service|[^[:space:]]*(qwen|llama|ollama|vllm)[^[:space:]]*[.]service)' \
+    || printf '%s\n' '(no matching installed unit files)'
+
+  printf '%s\n' '-- loaded matching units --'
+  systemctl list-units --all --type=service --plain --no-pager --no-legend 2>/dev/null \
+    | grep -Ei '^[[:space:]]*(hexapod-rl-training[^[:space:]]*[.]service|[^[:space:]]*(qwen|llama|ollama|vllm)[^[:space:]]*[.]service)[[:space:]]' \
+    || printf '%s\n' '(no matching loaded units)'
+
+  known_training_units=(
+    hexapod-rl-training.service
+    hexapod-rl-training-stage2b-lateral.service
+    hexapod-rl-training-stage2c-stable-forward.service
+  )
+  printf '%s\n' '-- known training unit state --'
+  for training_unit in "${known_training_units[@]}"; do
+    if systemctl show "${training_unit}" \
+      --no-pager \
+      --property=Id,LoadState,ActiveState,SubState,UnitFileState,ExecMainPID,ExecMainStartTimestamp,ExecMainStatus \
+      2>/dev/null; then
+      printf '\n'
+    else
+      printf '%s: unavailable\n' "${training_unit}"
+    fi
+  done
+else
+  unavailable systemctl
+fi
+
+section "Containers"
+if command -v docker >/dev/null 2>&1; then
+  docker ps -a --no-trunc \
+    --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}' \
+    || unavailable "docker ps failed"
+  printf '%s\n' '-- live container resource use --'
+  docker stats --no-stream \
+    --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}\t{{.PIDs}}' \
+    || unavailable "docker stats failed"
+else
+  unavailable docker
+fi
+
+section "Recent Stage2 runs"
+if [[ -d "${logs_root}" ]]; then
+  find "${logs_root}" \
+    -mindepth 2 -maxdepth 2 -type d \
+    -path '*/hexapod_robstride_phase2*/*' \
+    -printf '%T@\t%TY-%Tm-%TdT%TH:%TM:%TS%z\t%p\n' 2>/dev/null \
+    | sort -rn -k1,1 \
+    | awk -F '\t' 'NR <= 40 { print $2 "\t" $3 }'
+else
+  unavailable "run root ${logs_root}"
+fi
+
+section "Recent Stage2 checkpoints"
+if [[ -d "${logs_root}" ]]; then
+  find "${logs_root}" \
+    -mindepth 3 -maxdepth 3 -type f \
+    -path '*/hexapod_robstride_phase2*/*/model_*.pt' \
+    -printf '%T@\t%TY-%Tm-%TdT%TH:%TM:%TS%z\t%s bytes\t%p\n' 2>/dev/null \
+    | sort -rn -k1,1 \
+    | awk -F '\t' 'NR <= 40 { print $2 "\t" $3 "\t" $4 }'
+else
+  unavailable "checkpoint root ${logs_root}"
+fi
+
+section "Qwen health"
+if command -v ss >/dev/null 2>&1; then
+  ss -ltn "sport = :${qwen_port}" 2>/dev/null \
+    || unavailable "TCP listener query for port ${qwen_port}"
+fi
+
+health_ok=0
+if command -v curl >/dev/null 2>&1; then
+  health_urls=("http://127.0.0.1:${qwen_port}/health")
+  if command -v tailscale >/dev/null 2>&1; then
+    tailscale_ipv4=$(tailscale ip -4 2>/dev/null | sed -n '1p')
+    if [[ "${tailscale_ipv4}" =~ ^[0-9]{1,3}([.][0-9]{1,3}){3}$ ]]; then
+      health_urls+=("http://${tailscale_ipv4}:${qwen_port}/health")
+    fi
+  fi
+  for health_url in "${health_urls[@]}"; do
+    if health_body=$(curl --disable \
+      --noproxy '*' \
+      --silent --show-error --fail \
+      --connect-timeout 2 --max-time 5 --max-filesize 4096 \
+      --request GET \
+      --output - \
+      "${health_url}" 2>/dev/null); then
+      printf 'PASS: %s\n' "${health_url}"
+      printf 'body=%s\n' "${health_body}"
+      health_ok=1
+      break
+    else
+      printf 'no healthy response: %s\n' "${health_url}"
+    fi
+  done
+  if (( health_ok == 0 )); then
+    unavailable "Qwen health endpoint"
+  fi
+else
+  unavailable curl
+fi
+
+section "Preflight result"
+printf 'release_integrity=%s\n' "${release_state}"
+printf 'read_only_diagnostics=complete\n'
+if (( release_status != 0 )); then
+  printf 'FAIL: release is not safe to launch; diagnostics above are informational only\n' >&2
+  exit "${release_status}"
+fi
+printf 'PASS: release hashes are verified; no launch or lifecycle action was taken\n'

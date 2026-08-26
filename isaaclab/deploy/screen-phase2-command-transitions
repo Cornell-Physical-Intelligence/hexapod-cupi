@@ -1,0 +1,259 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Run the terminal Stage2E E2 static screen's exact selected checkpoint through
+# the uninterrupted, randomized joystick-transition admission screen.  This
+# launcher never accepts an independently chosen checkpoint and never reuses an
+# artifact directory.
+
+isaac_lab_dir=/home/orionh/IsaacLab
+workspace_host=/home/orionh/HEXAPOD
+workspace_container=/workspace/hexapod
+task_id=Isaac-Velocity-Omni-Recovery-Stage2E-Joystick-E2-Hexapod-RobStride-Direct-v0
+experiment=hexapod_robstride_phase2_recovery_stage2e_e2_joystick_direct
+screen_container=hexapod-stage2e-command-transition-screen
+screen_lock=/tmp/hexapod-stage2e-command-transition-screen.lock
+robot_usd_host=${workspace_host}/robot/hexapod_mkii_mock_assy/usd/hexapod_mkii_robstride/hexapod_mkii_robstride.usda
+expected_robot_usd_sha256=f0e55f8415e028fcd807cc6bce718916fd7dbb73414f7df7d8aaf4bf370ca5b0
+
+usage() {
+  echo "usage: $0 exact-stage2e-e2-run-directory static-grade-sha256" >&2
+  exit 64
+}
+
+(( $# == 2 )) || usage
+run_name=$1
+expected_static_grade_sha256=${2,,}
+
+if [[ ! "${run_name}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] \
+  || [[ "${run_name}" == "." || "${run_name}" == ".." ]] \
+  || [[ "${run_name,,}" != *stage2e_e2* ]]; then
+  echo "run name must be safe and identify stage2e_e2: ${run_name@Q}" >&2
+  exit 64
+fi
+if [[ ! "${expected_static_grade_sha256}" =~ ^[0-9a-f]{64}$ ]]; then
+  echo "static grade SHA-256 must contain exactly 64 hexadecimal characters" >&2
+  exit 64
+fi
+if [[ -n "${HEXAPOD_USD_PATH+x}" ]]; then
+  echo "refusing HEXAPOD_USD_PATH override for audited transition screening" >&2
+  exit 64
+fi
+
+for required_command in cat docker flock grep python3 realpath sha256sum; do
+  if ! command -v "${required_command}" >/dev/null 2>&1; then
+    echo "required command is unavailable: ${required_command}" >&2
+    exit 69
+  fi
+done
+if [[ ! -d "${isaac_lab_dir}" || ! -d "${workspace_host}/isaaclab" ]]; then
+  echo "Spark workspace or Isaac Lab checkout is missing" >&2
+  exit 66
+fi
+if [[ ! -s "${robot_usd_host}" || -L "${robot_usd_host}" ]] \
+  || [[ "$(realpath -e -- "${robot_usd_host}")" != "${robot_usd_host}" ]]; then
+  echo "audited RobStride USD is missing, empty, or non-canonical: ${robot_usd_host}" >&2
+  exit 66
+fi
+
+experiment_host=${workspace_host}/isaaclab/logs/rsl_rl/${experiment}
+experiment_container=${workspace_container}/isaaclab/logs/rsl_rl/${experiment}
+run_host=${experiment_host}/${run_name}
+run_container=${experiment_container}/${run_name}
+if [[ ! -d "${run_host}" || -L "${run_host}" ]] \
+  || [[ "$(realpath -e -- "${run_host}")" != "${run_host}" ]]; then
+  echo "exact Stage2E E2 run must be a canonical non-symlink directory: ${run_host}" >&2
+  exit 66
+fi
+
+static_grade_host=${workspace_host}/artifacts/phase2_recovery_stage2e_joystick/e2/static/${run_name}/grade_static.json
+if [[ ! -s "${static_grade_host}" || -L "${static_grade_host}" ]] \
+  || [[ "$(realpath -e -- "${static_grade_host}")" != "${static_grade_host}" ]]; then
+  echo "terminal E2 static grade must be the exact canonical artifact: ${static_grade_host}" >&2
+  exit 66
+fi
+
+verify_static_grade() {
+  local label=$1 actual_sha256
+  if [[ ! -s "${static_grade_host}" || -L "${static_grade_host}" ]]; then
+    echo "${label}: terminal E2 static grade disappeared or became a symlink" >&2
+    exit 65
+  fi
+  actual_sha256=$(sha256sum -- "${static_grade_host}")
+  actual_sha256=${actual_sha256%% *}
+  if [[ "${actual_sha256}" != "${expected_static_grade_sha256}" ]]; then
+    echo "${label}: terminal E2 static grade hash mismatch" >&2
+    exit 65
+  fi
+}
+
+verify_static_grade "before selection"
+static_selection=$(PYTHONPATH="${workspace_host}/isaaclab" python3 -c '
+import json
+from pathlib import Path
+import sys
+from grade_stage2_command_transitions import make_provenance, validate_static_admission
+payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+provenance = make_provenance(sys.argv[2], sys.argv[3], sys.argv[4], payload.get("selected_checkpoint_sha256"))
+selection = validate_static_admission(payload, provenance, sys.argv[5], run_dir=sys.argv[6])
+print(f"{Path(selection.selected_checkpoint).name}\t{selection.selected_checkpoint_sha256}")
+' "${static_grade_host}" "${task_id}" "${experiment}" "${run_name}" \
+  "${expected_static_grade_sha256}" "${run_host}") || {
+  echo "terminal E2 static grade did not validate" >&2
+  exit 65
+}
+IFS=$'\t' read -r checkpoint_name expected_checkpoint_sha256 <<< "${static_selection}"
+case "${checkpoint_name}" in
+  model_0.pt|model_5.pt|model_10.pt|model_15.pt|model_20.pt|model_25.pt|model_30.pt|model_35.pt|model_40.pt|model_44.pt) ;;
+  *)
+    echo "static grade selected an unexpected terminal E2 iteration" >&2
+    exit 65
+    ;;
+esac
+if [[ ! "${expected_checkpoint_sha256}" =~ ^[0-9a-f]{64}$ ]]; then
+  echo "static grade selected checkpoint SHA-256 is malformed" >&2
+  exit 65
+fi
+checkpoint_host=${run_host}/${checkpoint_name}
+checkpoint_container=${run_container}/${checkpoint_name}
+if [[ ! -s "${checkpoint_host}" || -L "${checkpoint_host}" ]] \
+  || [[ "$(realpath -e -- "${checkpoint_host}")" != "${checkpoint_host}" ]]; then
+  echo "selected checkpoint must be a non-empty canonical regular file: ${checkpoint_host}" >&2
+  exit 66
+fi
+
+verify_checkpoint() {
+  local label=$1
+  if [[ ! -s "${checkpoint_host}" || -L "${checkpoint_host}" ]]; then
+    echo "${label}: checkpoint disappeared, emptied, or became a symlink" >&2
+    exit 65
+  fi
+  local actual_sha256
+  actual_sha256=$(sha256sum -- "${checkpoint_host}")
+  actual_sha256=${actual_sha256%% *}
+  if [[ "${actual_sha256}" != "${expected_checkpoint_sha256}" ]]; then
+    echo "${label}: checkpoint hash mismatch" >&2
+    echo "expected ${expected_checkpoint_sha256}" >&2
+    echo "actual   ${actual_sha256}" >&2
+    exit 65
+  fi
+}
+
+verify_robot_usd() {
+  local label=$1 actual_sha256
+  if [[ ! -s "${robot_usd_host}" || -L "${robot_usd_host}" ]]; then
+    echo "${label}: audited RobStride USD disappeared or became a symlink" >&2
+    exit 65
+  fi
+  actual_sha256=$(sha256sum -- "${robot_usd_host}")
+  actual_sha256=${actual_sha256%% *}
+  if [[ "${actual_sha256}" != "${expected_robot_usd_sha256}" ]]; then
+    echo "${label}: audited RobStride USD hash mismatch" >&2
+    exit 65
+  fi
+}
+
+verify_inputs() {
+  local label=$1
+  verify_static_grade "${label} static grade"
+  verify_checkpoint "${label} checkpoint"
+  verify_robot_usd "${label} robot USD"
+}
+
+active_training_unit() {
+  command -v systemctl >/dev/null 2>&1 \
+    && systemctl list-units --type=service --state=active --no-legend \
+      | grep -Eq '^[[:space:]]*hexapod-rl-training[^[:space:]]*[.]service[[:space:]]'
+}
+
+if active_training_unit; then
+  echo "refusing to screen while a hexapod training service is active" >&2
+  exit 75
+fi
+if docker ps --format '{{.Names}}' \
+  | grep -Eq '^(hexapod-rl-training|hexapod-stage2[de]-)'; then
+  echo "refusing to contend with an active training/screen container" >&2
+  exit 75
+fi
+if docker ps -a --format '{{.Names}}' | grep -Fxq "${screen_container}"; then
+  echo "refusing existing screen container; inspect it manually: ${screen_container}" >&2
+  exit 75
+fi
+
+exec 9>"${screen_lock}"
+if ! flock -n 9; then
+  echo "another command-transition screen holds ${screen_lock}" >&2
+  exit 75
+fi
+
+artifact_parent=${workspace_host}/artifacts/phase2_command_transitions/e2/${run_name}
+checkpoint_stem=${checkpoint_name%.pt}
+artifact_host=${artifact_parent}/${checkpoint_stem}_seed71
+artifact_container=${workspace_container}/artifacts/phase2_command_transitions/e2/${run_name}/${checkpoint_stem}_seed71
+if ! mkdir -p "${artifact_parent}"; then
+  echo "cannot create artifact parent: ${artifact_parent}" >&2
+  exit 73
+fi
+if ! mkdir "${artifact_host}"; then
+  echo "refusing to overwrite/reuse artifact directory: ${artifact_host}" >&2
+  exit 73
+fi
+chmod 0777 "${artifact_host}"
+eval_json=${artifact_host}/eval_transitions.json
+eval_log=${artifact_host}/eval_transitions.log
+grade_json=${artifact_host}/grade_transitions.json
+grade_log=${artifact_host}/grade_transitions.log
+
+verify_inputs "before evaluation"
+set -o noclobber
+cd "${isaac_lab_dir}"
+evaluation_status=0
+docker compose \
+  --env-file docker/.env.base \
+  -f docker/docker-compose.yaml \
+  --profile base \
+  run \
+  --rm \
+  --name "${screen_container}" \
+  -w /workspace/hexapod/isaaclab \
+  -e PYTHONPATH=/workspace/hexapod/isaaclab \
+  -e PYTHONDONTWRITEBYTECODE=1 \
+  -v /home/orionh/HEXAPOD:/workspace/hexapod:rw \
+  --entrypoint /workspace/isaaclab/_isaac_sim/python.sh \
+  isaac-lab-base \
+  "${workspace_container}/isaaclab/evaluate_stage2_command_transitions.py" \
+  --kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry" \
+  --task "${task_id}" \
+  --checkpoint "${checkpoint_container}" \
+  --copies 4 \
+  --seed 71 \
+  --json "${artifact_container}/eval_transitions.json" \
+  >"${eval_log}" 2>&1 || evaluation_status=$?
+
+verify_inputs "after evaluation"
+if (( evaluation_status != 0 )); then
+  echo "command-transition evaluator failed with status ${evaluation_status}" >&2
+  exit "${evaluation_status}"
+fi
+if [[ ! -s "${eval_json}" ]]; then
+  echo "evaluator did not produce a non-empty report: ${eval_json}" >&2
+  exit 65
+fi
+
+grade_status=0
+python3 "${workspace_host}/isaaclab/grade_stage2_command_transitions.py" \
+  "${eval_json}" \
+  --task "${task_id}" \
+  --experiment "${experiment}" \
+  --run-name "${run_name}" \
+  --run-dir "${run_host}" \
+  --static-grade "${static_grade_host}" \
+  --static-grade-sha256 "${expected_static_grade_sha256}" \
+  --json "${grade_json}" \
+  >"${grade_log}" 2>&1 || grade_status=$?
+
+verify_inputs "after grading"
+if [[ -f "${grade_log}" ]]; then
+  command cat -- "${grade_log}"
+fi
+exit "${grade_status}"
