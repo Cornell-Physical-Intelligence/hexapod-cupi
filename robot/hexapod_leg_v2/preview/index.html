@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Hexapod Leg v2 Preview</title>
+<style>
+  html,body{margin:0;height:100%;background:#14161a;color:#dfe3ea;font:13px/1.4 -apple-system,system-ui,sans-serif;overflow:hidden}
+  #hud{position:fixed;top:10px;left:12px;background:rgba(20,22,26,.82);border:1px solid #2a2e36;border-radius:8px;padding:10px 12px;min-width:230px}
+  #hud h1{font-size:13px;margin:0 0 6px;font-weight:600}
+  #hud .row{display:flex;justify-content:space-between;gap:12px}
+  #hud .val{font-variant-numeric:tabular-nums;color:#8fd3a6}
+  #phase{margin-top:6px;color:#e8b45f}
+  #mode{position:fixed;top:10px;right:12px;background:rgba(20,22,26,.82);border:1px solid #2a2e36;border-radius:8px;padding:8px 10px;cursor:pointer;user-select:none}
+  #err{position:fixed;bottom:10px;left:12px;color:#ff7b72;white-space:pre-wrap;max-width:70vw}
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/examples/":"https://unpkg.com/three@0.160.0/examples/",
+  "urdf-loader":"https://unpkg.com/urdf-loader@0.12.6/src/URDFLoader.js"
+}}
+</script>
+</head>
+<body>
+<div id="hud">
+  <h1>Hexapod Leg v2 — linkage model</h1>
+  <div class="row"><span>coxa_yaw</span><span class="val" id="v0">0.000</span></div>
+  <div class="row"><span>femur_pitch</span><span class="val" id="v1">0.000</span></div>
+  <div class="row"><span>tibia_pitch</span><span class="val" id="v2">0.000</span></div>
+  <div class="row"><span>lever / rod (mimic)</span><span class="val" id="v3">0.000 / 0.000</span></div>
+  <div id="phase">phase: —</div>
+</div>
+<div id="mode" title="toggle model">model: linkage ▸ click to switch</div>
+<div id="tintbtn" style="position:fixed;top:52px;right:12px;background:rgba(20,22,26,.82);border:1px solid #2a2e36;border-radius:8px;padding:8px 10px;cursor:pointer;user-select:none">colors: CAD ▸ click for body tints</div>
+<div id="pick" style="position:fixed;bottom:10px;left:12px;background:rgba(20,22,26,.85);border:1px solid #2a2e36;border-radius:8px;padding:8px 10px;color:#8fd3a6;max-width:80vw">click a part to identify it</div>
+<div id="err"></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
+import URDFLoader from 'urdf-loader';
+
+const err = m => document.getElementById('err').textContent += m + "\n";
+window.addEventListener('error', e => err(e.message));
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x14161a);
+const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.005, 20);
+camera.position.set(0.55, -0.62, 0.38);
+camera.up.set(0, 0, 1);
+const renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(-0.06, 0, 0.10);
+
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+const key = new THREE.DirectionalLight(0xffffff, 1.4); key.position.set(0.6, -0.8, 1.0); scene.add(key);
+const rim = new THREE.DirectionalLight(0x88aaff, 0.5); rim.position.set(-0.7, 0.6, 0.4); scene.add(rim);
+const grid = new THREE.GridHelper(1.2, 24, 0x3a4150, 0x232833);
+grid.rotation.x = Math.PI/2; grid.position.z = -0.12; scene.add(grid);
+
+const loader = new URDFLoader();
+loader.packages = { hexapod_leg_v2: '/robot/hexapod_leg_v2', hexapod_leg_v3: '/robot/hexapod_leg_v3' };
+loader.loadMeshCb = (path, manager, done) => {
+  new STLLoader(manager).load(path, geom => {
+    geom.computeVertexNormals();
+    const mesh = new THREE.Mesh(geom, new THREE.MeshStandardMaterial({
+      color: 0x9aa3b2, metalness: 0.35, roughness: 0.5,
+    }));
+    mesh.userData.file = path.split('/').pop();
+    const c = colorMap[mesh.userData.file];
+    if (c) { mesh.material.color.setRGB(c[0], c[1], c[2]); mesh.userData.cad = c; }
+    done(mesh);
+  }, undefined, e => { err('mesh fail: ' + path.split('/').pop()); done(null); });
+};
+
+let robot = null;
+let modelName = 'linkage';
+const urls = {
+  linkage: '/robot/hexapod_leg_v3/urdf/leg_v3_linkage.urdf',
+  serial: '/robot/hexapod_leg_v3/urdf/leg_v3_serial.urdf',
+};
+let colorMap = {};   // mesh filename -> [r,g,b]
+let useTints = false;
+async function loadColors(name) {
+  const txt = await (await fetch(urls[name])).text();
+  colorMap = {};
+  const re = /<mesh filename="[^"]*\/([^"\/]+)"[^>]*\/>[\s\S]*?(?:<color rgba="([^"]+)"|<\/visual>)/g;
+  let m;
+  while ((m = re.exec(txt)) !== null) {
+    if (m[2] && !(m[1] in colorMap)) colorMap[m[1]] = m[2].split(' ').map(Number);
+  }
+}
+function tint(r) {
+  // root-to-leaf order: descendants repaint over ancestors
+  const tints = [['coxa',0xb490d9],['femur',0x7fa8d9],['tibia',0x8fd3a6],['tibia_push_lever',0xe8b45f],['tibia_pushrod',0xe8845f]];
+  for (const [ln, col] of tints) {
+    const link = r.links[ln];
+    if (link) link.traverse(o => { if (o.isMesh) o.material = o.material.clone(), o.material.color.setHex(col); });
+  }
+}
+function applyColors(r) {
+  r.traverse(o => { if (o.isMesh) {
+    const c = o.userData.cad;
+    o.material.color.setRGB(...(c || [0.6, 0.64, 0.7]));
+  }});
+}
+function load(name) {
+  if (robot) { scene.remove(robot); robot = null; }
+  loadColors(name).then(() => loader.load(urls[name], r => {
+    robot = r; if (useTints) tint(r); scene.add(r);
+    document.getElementById('mode').textContent = `model: ${name} ▸ click to switch`;
+    document.querySelector('#hud h1').textContent = `Hexapod Leg v3 — ${name} model`;
+  }, undefined, e => err('urdf fail: ' + e)));
+}
+document.getElementById('mode').onclick = () => { modelName = modelName === 'linkage' ? 'serial' : 'linkage'; load(modelName); };
+document.getElementById('tintbtn').onclick = () => {
+  useTints = !useTints;
+  document.getElementById('tintbtn').textContent = useTints ? 'colors: body tints ▸ click for CAD' : 'colors: CAD ▸ click for body tints';
+  if (robot) { if (useTints) tint(robot); else applyColors(robot); }
+};
+load(modelName);
+
+// Motion program: sweep each DOF through its plausible range, then a
+// combined stepping cycle. Limits mirror the RS05 pipeline URDF.
+const LIM = { yaw: [-0.8727, 0.8727], femur: [0, 1.745], tibia: [0, 2.531] };
+const mid = ([a,b]) => (a+b)/2, amp = ([a,b]) => (b-a)/2;
+const seg = [
+  { name: 'coxa yaw sweep',    dur: 5, f: t => [Math.sin(t*2*Math.PI)*LIM.yaw[1], 0.55, 1.35] },
+  { name: 'femur pitch sweep', dur: 5, f: t => [0, mid(LIM.femur)+amp(LIM.femur)*Math.sin(t*2*Math.PI), 1.35] },
+  { name: 'knee sweep (watch the pushrod)', dur: 6, f: t => [0, 0.55, mid(LIM.tibia)+amp(LIM.tibia)*Math.sin(t*2*Math.PI)] },
+  { name: 'combined step cycle', dur: 9, f: t => {
+      const w = t*2*Math.PI*1.5;
+      return [0.5*Math.sin(w), 0.85+0.5*Math.sin(w+Math.PI/2), 1.45+0.75*Math.sin(w+Math.PI)];
+  }},
+];
+const total = seg.reduce((s,x)=>s+x.dur,0);
+const clock = new THREE.Clock();
+let frameCount = 0;
+function setJ(n, v) { const j = robot.joints[n]; if (j) j.setJointValue(v); return v; }
+window.__dbg = { scene, camera, controls, THREE, robot: () => robot };
+const ray = new THREE.Raycaster();
+renderer.domElement.addEventListener('pointerdown', ev => {
+  if (!robot) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  const xy = new THREE.Vector2(((ev.clientX-r.left)/r.width)*2-1, -((ev.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(xy, camera);
+  const hits = ray.intersectObject(robot, true).filter(h => h.object.isMesh);
+  if (!hits.length) return;
+  const m = hits[0].object;
+  let link = m.parent;
+  while (link && !link.isURDFLink) link = link.parent;
+  const txt = `part: ${m.userData.file || '?'}  |  body: ${link ? link.name : '?'}`;
+  document.getElementById('pick').textContent = txt;
+  m.material.emissive = new THREE.Color(0xff2255);
+  setTimeout(() => m.material.emissive = new THREE.Color(0x000000), 1200);
+});
+renderer.setAnimationLoop(() => {
+  const T = clock.getElapsedTime() % total;
+  let acc = 0, cur = seg[0], lt = 0;
+  for (const s of seg) { if (T < acc + s.dur) { cur = s; lt = (T-acc)/s.dur; break; } acc += s.dur; }
+  if (robot) {
+    const [y, f, k] = cur.f(lt);
+    setJ('coxa_yaw', y); setJ('femur_pitch', f); setJ('tibia_pitch', k);
+    // parallelogram closure (also covers viewers without mimic support)
+    setJ('tibia_lever_pivot', k); setJ('tibia_rod_pivot', -k);
+    document.getElementById('v0').textContent = y.toFixed(3);
+    document.getElementById('v1').textContent = f.toFixed(3);
+    document.getElementById('v2').textContent = k.toFixed(3);
+    document.getElementById('v3').textContent = `${k.toFixed(2)} / ${(-k).toFixed(2)}`;
+    document.getElementById('phase').textContent = 'phase: ' + cur.name;
+  }
+  if (robot && useTints && clock.elapsedTime < 6 && (frameCount++ % 30) === 0) tint(robot);
+  controls.update();
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>
