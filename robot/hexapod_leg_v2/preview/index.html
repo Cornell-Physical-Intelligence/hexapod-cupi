@@ -31,7 +31,13 @@
   <div id="phase">phase: —</div>
 </div>
 <div id="mode" title="toggle model">model: linkage ▸ click to switch</div>
-<div id="tintbtn" style="position:fixed;top:52px;right:12px;background:rgba(20,22,26,.82);border:1px solid #2a2e36;border-radius:8px;padding:8px 10px;cursor:pointer;user-select:none">colors: CAD ▸ click for body tints</div>
+<div id="animbtn" style="position:fixed;top:94px;right:12px;background:rgba(20,22,26,.82);border:1px solid #2a2e36;border-radius:8px;padding:8px 10px;cursor:pointer;user-select:none">mode: auto sweep ▸ click for manual</div>
+<div id="tintbtn" style="top:136px !important;" "position:fixed;top:52px;right:12px;background:rgba(20,22,26,.82);border:1px solid #2a2e36;border-radius:8px;padding:8px 10px;cursor:pointer;user-select:none">colors: CAD ▸ click for body tints</div>
+<div id="ctrl" style="display:none;position:fixed;top:110px;right:12px;background:rgba(20,22,26,.9);border:1px solid #2a2e36;border-radius:8px;padding:10px 12px;min-width:280px">
+  <div style="font-weight:600;margin-bottom:6px">manual joint control</div>
+  <div id="sliders"></div>
+  <div style="margin-top:6px;color:#8a93a6;font-size:12px">drive each joint to its physical stop and note the endpoint</div>
+</div>
 <div id="pick" style="position:fixed;bottom:10px;left:12px;background:rgba(20,22,26,.85);border:1px solid #2a2e36;border-radius:8px;padding:8px 10px;color:#8fd3a6;max-width:80vw">click a part to identify it</div>
 <div id="err"></div>
 <script type="module">
@@ -145,6 +151,47 @@ const clock = new THREE.Clock();
 let frameCount = 0;
 function setJ(n, v) { const j = robot.joints[n]; if (j) j.setJointValue(v); return v; }
 window.__dbg = { scene, camera, controls, THREE, robot: () => robot };
+let manual = false;
+const manualVals = { coxa_yaw: 0, femur_pitch: 0.55, tibia_pitch: 1.2 };
+// Sliders command MOTOR positions. Motors 1-2 are direct drive; motor 3
+// drives the push lever, and the parallelogram carries its delta 1:1 to
+// the knee, so motor angle == knee angle with a shared CAD zero.
+const MOTORS = [
+  ['coxa_yaw',   'motor 1 · coxa yaw'],
+  ['femur_pitch','motor 2 · femur pitch'],
+  ['tibia_pitch','motor 3 · tibia (via linkage)'],
+];
+function buildSliders() {
+  const box = document.getElementById('sliders');
+  box.innerHTML = '';
+  // exploration ranges deliberately exceed the inherited URDF limits so the
+  // true physical stops can be found; the chosen endpoints become the limits.
+  const RANGE = { coxa_yaw: [-3.14, 3.14], femur_pitch: [-1.6, 2.9], tibia_pitch: [-1.6, 3.2] };
+  for (const [j, label] of MOTORS) {
+    const jl = { lower: RANGE[j][0], upper: RANGE[j][1] };
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;margin:4px 0';
+    row.innerHTML = `<span style="width:150px;font-size:12px">${label}</span>
+      <input type="range" min="${jl.lower}" max="${jl.upper}" step="0.001" value="${manualVals[j]}" style="flex:1" id="sl_${j}">
+      <span style="width:118px;text-align:right;font-variant-numeric:tabular-nums;font-size:12px" id="sv_${j}"></span>`;
+    box.appendChild(row);
+    const inp = row.querySelector('input');
+    const lab = row.querySelector(`#sv_${j}`);
+    const upd = () => { manualVals[j] = parseFloat(inp.value);
+      lab.textContent = `${manualVals[j].toFixed(3)} rad / ${(manualVals[j]*57.2958).toFixed(1)}°`; };
+    inp.addEventListener('input', upd); upd();
+  }
+  const note = document.createElement('div');
+  note.style.cssText = 'margin-top:4px;color:#e8b45f;font-size:12px';
+  note.id = 'kneeout';
+  box.appendChild(note);
+}
+document.getElementById('animbtn').onclick = () => {
+  manual = !manual;
+  document.getElementById('animbtn').textContent = manual ? 'mode: manual ▸ click for auto sweep' : 'mode: auto sweep ▸ click for manual';
+  document.getElementById('ctrl').style.display = manual ? 'block' : 'none';
+  if (manual) buildSliders();
+};
 const ray = new THREE.Raycaster();
 renderer.domElement.addEventListener('pointerdown', ev => {
   if (!robot) return;
@@ -166,7 +213,9 @@ renderer.setAnimationLoop(() => {
   let acc = 0, cur = seg[0], lt = 0;
   for (const s of seg) { if (T < acc + s.dur) { cur = s; lt = (T-acc)/s.dur; break; } acc += s.dur; }
   if (robot) {
-    const [y, f, k] = cur.f(lt);
+    const [y, f, k] = manual
+      ? [manualVals.coxa_yaw, manualVals.femur_pitch, manualVals.tibia_pitch]
+      : cur.f(lt);
     setJ('coxa_yaw', y); setJ('femur_pitch', f); setJ('tibia_pitch', k);
     // parallelogram closure (also covers viewers without mimic support)
     setJ('tibia_lever_pivot', k); setJ('tibia_rod_pivot', -k);
@@ -174,7 +223,9 @@ renderer.setAnimationLoop(() => {
     document.getElementById('v1').textContent = f.toFixed(3);
     document.getElementById('v2').textContent = k.toFixed(3);
     document.getElementById('v3').textContent = `${k.toFixed(2)} / ${(-k).toFixed(2)}`;
-    document.getElementById('phase').textContent = 'phase: ' + cur.name;
+    document.getElementById('phase').textContent = manual ? 'phase: manual control' : 'phase: ' + cur.name;
+    const ko = document.getElementById('kneeout');
+    if (manual && ko) ko.textContent = `knee output: ${k.toFixed(3)} rad · lever ${k.toFixed(2)} / rod ${(-k).toFixed(2)} (parallelogram 1:1)`;
   }
   if (robot && useTints && clock.elapsedTime < 6 && (frameCount++ % 30) === 0) tint(robot);
   controls.update();
