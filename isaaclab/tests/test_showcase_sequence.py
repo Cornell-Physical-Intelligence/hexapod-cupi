@@ -10,7 +10,10 @@ import unittest
 import numpy as np
 
 
-MODULE_PATH = Path(__file__).parents[1] / "hexapod_rl" / "showcase_sequence.py"
+PACKAGE_ROOT = (
+    Path(__file__).parents[2] / "packages" / "hexapod_env" / "hexapod_env"
+)
+MODULE_PATH = PACKAGE_ROOT / "showcase_sequence.py"
 SPEC = importlib.util.spec_from_file_location("hexapod_showcase_sequence", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 showcase = importlib.util.module_from_spec(SPEC)

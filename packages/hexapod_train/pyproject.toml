@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hexapod-train"
+version = "0.1.0"
+description = "Run composition, run contract, and the attempt-aware startup supervisor that wraps the hardened Spark launchers."
+requires-python = ">=3.10"
+
+# Deliberately empty. This package composes argv for, and supervises, the bash
+# launchers in isaaclab/deploy; it never imports torch, Isaac Lab, gymnasium, or
+# any other simulator dependency, so it runs under a bare system interpreter on
+# an operator's laptop as well as inside the Spark container.
+dependencies = []
+
+[tool.setuptools]
+packages = ["hexapod_train"]

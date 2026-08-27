@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hexapod-runtime"
+version = "0.1.0"
+description = "Deployable policy runtime: the sim/real-shared observation builder and action pipeline, in pure Python."
+requires-python = ">=3.10"
+
+# ``hexapod_core`` is the only dependency, and it is stdlib-only itself. The
+# runtime deliberately does not depend on torch, Isaac Lab, or gymnasium: it
+# has to run on the robot's companion computer, where none of them exist. A
+# policy backend (ONNX, TorchScript, or otherwise) plugs in above this package
+# rather than being pulled in here.
+dependencies = ["hexapod-core"]
+
+[tool.setuptools]
+packages = ["hexapod_runtime"]

@@ -11,24 +11,31 @@ import torch
 
 
 ROOT = Path(__file__).parents[1]
-ENV_PATH = ROOT / "hexapod_rl" / "env.py"
-CFG_PATH = ROOT / "hexapod_rl" / "phase2g_cfg.py"
-BASE_CFG_PATH = ROOT / "hexapod_rl" / "env_cfg.py"
+PACKAGE_ROOT = ROOT.parent / "packages" / "hexapod_env" / "hexapod_env"
+ENV_PATH = PACKAGE_ROOT / "env.py"
+CFG_PATH = PACKAGE_ROOT / "phase2g_cfg.py"
+BASE_CFG_PATH = PACKAGE_ROOT / "env_cfg.py"
+REWARDS_MODULES = tuple(
+    (path, ast.parse(path.read_text()))
+    for path in sorted((PACKAGE_ROOT / "rewards").glob("*.py"))
+    if path.name != "__init__.py"
+)
 ENV_TREE = ast.parse(ENV_PATH.read_text())
 CFG_TREE = ast.parse(CFG_PATH.read_text())
 BASE_CFG_TREE = ast.parse(BASE_CFG_PATH.read_text())
 
 
 def _function(name: str):
-    node = next(
-        item
-        for item in ENV_TREE.body
+    path, node = next(
+        (module_path, item)
+        for module_path, tree in REWARDS_MODULES
+        for item in tree.body
         if isinstance(item, ast.FunctionDef) and item.name == name
     )
     module = ast.Module(body=[node], type_ignores=[])
     ast.fix_missing_locations(module)
     namespace = {"math": math, "torch": torch}
-    exec(compile(module, ENV_PATH, "exec"), namespace)
+    exec(compile(module, path, "exec"), namespace)
     return namespace[name]
 
 

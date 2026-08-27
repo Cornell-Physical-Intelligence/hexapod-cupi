@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""hexctl — the operator entry point for composing and supervising a run.
+
+This is a stub. It resolves the repository root from its own location, puts the
+workspace packages on ``sys.path``, and calls ``hexapod_train.cli.main``. It
+deliberately contains no logic of its own: nothing here should ever need to be
+kept in sync with the package.
+
+No installation step is required, and no dependency beyond the standard library
+is used, so this works on an operator laptop and inside the Spark container
+alike.
+
+Implemented to spec; not yet validated in vivo on the Spark.
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+
+def _bootstrap() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    packages = repo_root / "packages"
+    # ``packages/<name>`` is each distribution's import root; ``packages`` itself
+    # is the workspace root. Both are added, mirroring the bootstrap in
+    # isaaclab/hexapod_rl/__init__.py, and each is added at most once.
+    roots = [
+        str(packages / "hexapod_train"),
+        str(packages / "hexapod_env"),
+        str(packages),
+    ]
+    sys.path[:0] = [root for root in roots if root not in sys.path]
+
+
+def main() -> int:
+    _bootstrap()
+    from hexapod_train.cli import main as cli_main
+
+    return cli_main()
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

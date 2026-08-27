@@ -8,8 +8,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).parents[1]
-PHASE2_CFG_PATH = ROOT / "hexapod_rl" / "phase2_cfg.py"
-REGISTER_PATH = ROOT / "hexapod_rl" / "register.py"
+PACKAGE_ROOT = ROOT.parent / "packages" / "hexapod_env" / "hexapod_env"
+PHASE2_CFG_PATH = PACKAGE_ROOT / "phase2_cfg.py"
+REGISTER_PATH = PACKAGE_ROOT / "register.py"
 EVALUATOR_PATH = ROOT / "evaluate_checkpoint.py"
 PHASE2_TREE = ast.parse(PHASE2_CFG_PATH.read_text())
 

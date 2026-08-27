@@ -11,8 +11,14 @@ import torch
 
 
 ROOT = Path(__file__).parents[1]
-ENV_PATH = ROOT / "hexapod_rl" / "env.py"
-CFG_PATH = ROOT / "hexapod_rl" / "env_cfg.py"
+PACKAGE_ROOT = ROOT.parent / "packages" / "hexapod_env" / "hexapod_env"
+ENV_PATH = PACKAGE_ROOT / "env.py"
+CFG_PATH = PACKAGE_ROOT / "env_cfg.py"
+REWARDS_MODULES = tuple(
+    (path, ast.parse(path.read_text()))
+    for path in sorted((PACKAGE_ROOT / "rewards").glob("*.py"))
+    if path.name != "__init__.py"
+)
 ENV_SOURCE = ENV_PATH.read_text()
 CFG_SOURCE = CFG_PATH.read_text()
 ENV_TREE = ast.parse(ENV_SOURCE)
@@ -20,13 +26,14 @@ CFG_TREE = ast.parse(CFG_SOURCE)
 
 
 def _function(name: str):
-    for node in ENV_TREE.body:
-        if isinstance(node, ast.FunctionDef) and node.name == name:
-            module = ast.Module(body=[node], type_ignores=[])
-            ast.fix_missing_locations(module)
-            namespace = {"math": math, "torch": torch}
-            exec(compile(module, ENV_PATH, "exec"), namespace)
-            return namespace[name]
+    for path, tree in REWARDS_MODULES:
+        for node in tree.body:
+            if isinstance(node, ast.FunctionDef) and node.name == name:
+                module = ast.Module(body=[node], type_ignores=[])
+                ast.fix_missing_locations(module)
+                namespace = {"math": math, "torch": torch}
+                exec(compile(module, path, "exec"), namespace)
+                return namespace[name]
     raise AssertionError(f"Missing function {name}")
 
 
