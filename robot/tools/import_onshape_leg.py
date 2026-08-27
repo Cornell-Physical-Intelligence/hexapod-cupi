@@ -359,17 +359,17 @@ def build(args):
             for inst in insts:
                 v = inst["centroid"] - ap
                 if np.linalg.norm(v - np.dot(v, ad) * ad) < radius:
-                    rows.append((inst["file"], body))
+                    rows.append((f"{inst['file'][:44]:46s} c={np.round(inst['centroid']*1000,1)}", body))
         return rows
 
     # axes are needed for the audit before the full axis pass below
     new_axes_pre = {}
-    for jname in ("tibia_pitch", "tibia_lever_pivot", "tibia_rod_pivot"):
+    for jname in ("femur_pitch", "tibia_pitch", "tibia_lever_pivot", "tibia_rod_pivot"):
         pb, _cb = topology[jname]
         spec = body_map["axes"][jname]
         Rp, tp = registrations[pb]
         new_axes_pre[jname] = (Rp @ np.array(spec["point"]) + tp, Rp @ np.array(spec["dir"]))
-    for jname in ("tibia_pitch", "tibia_lever_pivot"):
+    for jname in ("femur_pitch", "tibia_pitch", "tibia_lever_pivot"):
         print(f"  -- parts near {jname} axis --")
         for f, b in sorted(audit(jname)):
             print(f"     {f[:56]:58s} -> {b}")
