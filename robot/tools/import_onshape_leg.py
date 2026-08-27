@@ -124,6 +124,10 @@ def build(args):
     new_src = Path(args.new_source)
     out = Path(args.out)
     body_map = json.loads(Path(args.body_map).read_text())
+    limits = dict(LIMITS)
+    if args.limits and Path(args.limits).exists():
+        for k, v in json.loads(Path(args.limits).read_text()).items():
+            limits[k] = (float(v["lower"]), float(v["upper"]))
     old = Model(old_src / "urdf" / "leg_subassy.urdf")
 
     # ---- old side: per-part global centroid + mesh stem + inertial ----
@@ -587,13 +591,13 @@ def build(args):
             lines.append(f'    <parent link="{pb}" />')
             lines.append(f'    <child link="{cb}" />')
             if limkey:
-                lo_, hi_ = LIMITS[limkey]
+                lo_, hi_ = limits[limkey]
                 lines.append(
                     f'    <limit effort="{RS05_EFFORT_NM}" velocity="{RS05_VELOCITY_RAD_S}" '
                     f'lower="{lo_}" upper="{hi_}" />'
                 )
             else:
-                span = max(abs(x) for x in LIMITS["tibia_pitch"])
+                span = max(abs(x) for x in limits["tibia_pitch"])
                 lines.append(
                     f'    <limit effort="0.5" velocity="{RS05_VELOCITY_RAD_S}" '
                     f'lower="{-span}" upper="{span}" />'
@@ -615,6 +619,34 @@ def build(args):
 
     emit(out / "urdf" / "leg_v3_serial.urdf", include_linkage=False)
     emit(out / "urdf" / "leg_v3_linkage.urdf", include_linkage=True)
+
+    # canonical single-leg reference for the future six-leg assembly import
+    reference = {
+        "source_document": "https://cad.onshape.com/documents/881b01051a1ec5c958bf7768",
+        "frame": "leg_base (identity = onshape-to-robot export frame of this leg)",
+        "joints": {
+            j: {
+                "parent": topology[j][0],
+                "child": topology[j][1],
+                "axis_point_m": [round(float(x), 8) for x in new_axes[j][0]],
+                "axis_dir": [round(float(x), 8) for x in new_axes[j][1]],
+                "limits": (list(limits[j]) if j in limits else None),
+                "mimic": ({"joint": "tibia_pitch", "multiplier": 1.0} if j == "tibia_lever_pivot"
+                          else {"joint": "tibia_pitch", "multiplier": -1.0} if j == "tibia_rod_pivot"
+                          else None),
+            }
+            for j in ("coxa_yaw", "femur_pitch", "tibia_pitch", "tibia_lever_pivot", "tibia_rod_pivot")
+        },
+        "loop_closure": {
+            "cut_point_m": [round(float(x), 8) for x in new_axes["loop_cut"][0]],
+            "cut_axis_dir": [round(float(x), 8) for x in new_axes["loop_cut"][1]],
+            "note": "parallelogram four-bar; mimics close it exactly in kinematics",
+        },
+        "bodies": {b: {"mass_kg": round(float(body_dyn[b][0]), 6)} for b in body_dyn},
+        "total_mass_kg": round(float(total_mass), 6),
+        "rs05": {"effort_nm": RS05_EFFORT_NM, "velocity_rad_s": RS05_VELOCITY_RAD_S},
+    }
+    (out / "leg_reference.json").write_text(json.dumps(reference, indent=1))
 
     # parallelogram check in the NEW geometry
     A = new_axes["tibia_lever_pivot"][0]
@@ -641,5 +673,6 @@ if __name__ == "__main__":
     ap.add_argument("--v2-urdf", default="robot/hexapod_leg_v2/urdf/leg_v2_linkage.urdf")
     ap.add_argument("--v2-frames", default="robot/hexapod_leg_v2/frames.json")
     ap.add_argument("--overrides", default="robot/hexapod_leg_v3/part_overrides.json")
+    ap.add_argument("--limits", default="robot/hexapod_leg_v3/joint_limits.json")
     ap.add_argument("--out", default="robot/hexapod_leg_v3")
     sys.exit(build(ap.parse_args()))

@@ -1,0 +1,139 @@
+{
+ "source_document": "https://cad.onshape.com/documents/881b01051a1ec5c958bf7768",
+ "frame": "leg_base (identity = onshape-to-robot export frame of this leg)",
+ "joints": {
+  "coxa_yaw": {
+   "parent": "leg_base",
+   "child": "coxa",
+   "axis_point_m": [
+    0.035318,
+    -3.7e-07,
+    0.0506052
+   ],
+   "axis_dir": [
+    -6.59e-05,
+    -3.22e-06,
+    1.0
+   ],
+   "limits": [
+    -0.872665,
+    0.872665
+   ],
+   "mimic": null
+  },
+  "femur_pitch": {
+   "parent": "coxa",
+   "child": "femur",
+   "axis_point_m": [
+    -0.01367947,
+    0.02500138,
+    0.02510202
+   ],
+   "axis_dir": [
+    3.419e-05,
+    1.0,
+    -6.22e-06
+   ],
+   "limits": [
+    0.0,
+    1.74533
+   ],
+   "mimic": null
+  },
+  "tibia_pitch": {
+   "parent": "femur",
+   "child": "tibia",
+   "axis_point_m": [
+    -0.11429415,
+    0.01775005,
+    0.12951328
+   ],
+   "axis_dir": [
+    4.759e-05,
+    1.0,
+    3.592e-05
+   ],
+   "limits": [
+    0.0,
+    2.53073
+   ],
+   "mimic": null
+  },
+  "tibia_lever_pivot": {
+   "parent": "femur",
+   "child": "tibia_push_lever",
+   "axis_point_m": [
+    -0.06051283,
+    0.01949984,
+    0.07371168
+   ],
+   "axis_dir": [
+    4.418e-05,
+    1.0,
+    3.287e-05
+   ],
+   "limits": null,
+   "mimic": {
+    "joint": "tibia_pitch",
+    "multiplier": 1.0
+   }
+  },
+  "tibia_rod_pivot": {
+   "parent": "tibia_push_lever",
+   "child": "tibia_pushrod",
+   "axis_point_m": [
+    -0.05032458,
+    0.02279982,
+    0.10192318
+   ],
+   "axis_dir": [
+    -0.00010225,
+    0.99999999,
+    4e-07
+   ],
+   "limits": null,
+   "mimic": {
+    "joint": "tibia_pitch",
+    "multiplier": -1.0
+   }
+  }
+ },
+ "loop_closure": {
+  "cut_point_m": [
+   -0.10409664,
+   0.01224931,
+   0.15773254
+  ],
+  "cut_axis_dir": [
+   0.00227121,
+   0.99999404,
+   0.00259918
+  ],
+  "note": "parallelogram four-bar; mimics close it exactly in kinematics"
+ },
+ "bodies": {
+  "leg_base": {
+   "mass_kg": 0.096654
+  },
+  "coxa": {
+   "mass_kg": 0.119898
+  },
+  "femur": {
+   "mass_kg": 0.210974
+  },
+  "tibia": {
+   "mass_kg": 0.284867
+  },
+  "tibia_push_lever": {
+   "mass_kg": 0.04312
+  },
+  "tibia_pushrod": {
+   "mass_kg": 0.033238
+  }
+ },
+ "total_mass_kg": 0.788751,
+ "rs05": {
+  "effort_nm": 5.5,
+  "velocity_rad_s": 50.26548246
+ }
+}
