@@ -24,7 +24,6 @@
 <body>
 <div id="hud">
   <h1>Hexapod Leg v2 — linkage model</h1>
-  <div class="row"><span>coxa_yaw</span><span class="val" id="v0">0.000</span></div>
   <div class="row"><span>femur_pitch</span><span class="val" id="v1">0.000</span></div>
   <div class="row"><span>tibia_pitch</span><span class="val" id="v2">0.000</span></div>
   <div class="row"><span>lever / rod (mimic)</span><span class="val" id="v3">0.000 / 0.000</span></div>
@@ -120,7 +119,7 @@ function applyColors(r) {
 function load(name) {
   if (robot) { scene.remove(robot); robot = null; }
   loadColors(name).then(() => loader.load(urls[name], r => {
-    robot = r; if (useTints) tint(r); scene.add(r);
+    robot = r; if (useTints) tint(r); scene.add(r); syncManualUi();
     document.getElementById('mode').textContent = `model: ${name} ▸ click to switch`;
     document.querySelector('#hud h1').textContent = `Hexapod Leg v3 — ${name} model`;
   }, undefined, e => err('urdf fail: ' + e)));
@@ -138,12 +137,11 @@ load(modelName);
 const LIM = { yaw: [-0.8727, 0.8727], femur: [0, 1.745], tibia: [0, 2.531] };
 const mid = ([a,b]) => (a+b)/2, amp = ([a,b]) => (b-a)/2;
 const seg = [
-  { name: 'coxa yaw sweep',    dur: 5, f: t => [Math.sin(t*2*Math.PI)*LIM.yaw[1], 0.55, 1.35] },
   { name: 'femur pitch sweep', dur: 5, f: t => [0, mid(LIM.femur)+amp(LIM.femur)*Math.sin(t*2*Math.PI), 1.35] },
   { name: 'knee sweep (watch the pushrod)', dur: 6, f: t => [0, 0.55, mid(LIM.tibia)+amp(LIM.tibia)*Math.sin(t*2*Math.PI)] },
   { name: 'combined step cycle', dur: 9, f: t => {
       const w = t*2*Math.PI*1.5;
-      return [0.5*Math.sin(w), 0.85+0.5*Math.sin(w+Math.PI/2), 1.45+0.75*Math.sin(w+Math.PI)];
+      return [0, 0.85+0.5*Math.sin(w+Math.PI/2), 1.45+0.75*Math.sin(w+Math.PI)];
   }},
 ];
 const total = seg.reduce((s,x)=>s+x.dur,0);
@@ -151,13 +149,12 @@ const clock = new THREE.Clock();
 let frameCount = 0;
 function setJ(n, v) { const j = robot.joints[n]; if (j) j.setJointValue(v); return v; }
 window.__dbg = { scene, camera, controls, THREE, robot: () => robot };
-let manual = false;
+let manual = true;
 const manualVals = { coxa_yaw: 0, femur_pitch: 0.55, tibia_pitch: 1.2 };
 // Sliders command MOTOR positions. Motors 1-2 are direct drive; motor 3
 // drives the push lever, and the parallelogram carries its delta 1:1 to
 // the knee, so motor angle == knee angle with a shared CAD zero.
 const MOTORS = [
-  ['coxa_yaw',   'motor 1 · coxa yaw'],
   ['femur_pitch','motor 2 · femur pitch'],
   ['tibia_pitch','motor 3 · tibia (via linkage)'],
 ];
@@ -186,11 +183,14 @@ function buildSliders() {
   note.id = 'kneeout';
   box.appendChild(note);
 }
-document.getElementById('animbtn').onclick = () => {
-  manual = !manual;
+function syncManualUi() {
   document.getElementById('animbtn').textContent = manual ? 'mode: manual ▸ click for auto sweep' : 'mode: auto sweep ▸ click for manual';
   document.getElementById('ctrl').style.display = manual ? 'block' : 'none';
   if (manual) buildSliders();
+}
+document.getElementById('animbtn').onclick = () => {
+  manual = !manual;
+  syncManualUi();
 };
 const ray = new THREE.Raycaster();
 renderer.domElement.addEventListener('pointerdown', ev => {
@@ -214,12 +214,11 @@ renderer.setAnimationLoop(() => {
   for (const s of seg) { if (T < acc + s.dur) { cur = s; lt = (T-acc)/s.dur; break; } acc += s.dur; }
   if (robot) {
     const [y, f, k] = manual
-      ? [manualVals.coxa_yaw, manualVals.femur_pitch, manualVals.tibia_pitch]
+      ? [0, manualVals.femur_pitch, manualVals.tibia_pitch]
       : cur.f(lt);
     setJ('coxa_yaw', y); setJ('femur_pitch', f); setJ('tibia_pitch', k);
     // parallelogram closure (also covers viewers without mimic support)
     setJ('tibia_lever_pivot', k); setJ('tibia_rod_pivot', -k);
-    document.getElementById('v0').textContent = y.toFixed(3);
     document.getElementById('v1').textContent = f.toFixed(3);
     document.getElementById('v2').textContent = k.toFixed(3);
     document.getElementById('v3').textContent = `${k.toFixed(2)} / ${(-k).toFixed(2)}`;
