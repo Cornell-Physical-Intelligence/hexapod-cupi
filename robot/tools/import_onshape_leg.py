@@ -125,9 +125,14 @@ def build(args):
     out = Path(args.out)
     body_map = json.loads(Path(args.body_map).read_text())
     limits = dict(LIMITS)
+    inverted = set()
     if args.limits and Path(args.limits).exists():
         for k, v in json.loads(Path(args.limits).read_text()).items():
+            if not isinstance(v, dict):
+                continue
             limits[k] = (float(v["lower"]), float(v["upper"]))
+            if v.get("invert"):
+                inverted.add(k)
     old = Model(old_src / "urdf" / "leg_subassy.urdf")
 
     # ---- old side: per-part global centroid + mesh stem + inertial ----
@@ -440,7 +445,10 @@ def build(args):
     for jname, (pb, cb) in topology.items():
         if jname == "loop_cut":
             continue
-        frames[cb] = frame_on_axis(*new_axes[jname])
+        pnt, dr = new_axes[jname]
+        if jname in inverted:
+            dr = -dr
+        frames[cb] = frame_on_axis(pnt, dr)
 
     # ---- dynamics: transform v2 body inertials, add new-part shares ----
     v2 = ET.parse(Path(args.v2_urdf)).getroot()
@@ -512,7 +520,6 @@ def build(args):
         shutil.copy2(f, out / "meshes" / f.name)
 
     joint_specs = [
-        ("coxa_yaw", "coxa_yaw", None),
         ("femur_pitch", "femur_pitch", None),
         ("tibia_pitch", "tibia_pitch", None),
         ("tibia_lever_pivot", None, ("tibia_pitch", 1.0)),
@@ -521,16 +528,19 @@ def build(args):
 
     def emit(path, include_linkage):
         lines = ['<?xml version="1.0" ?>', f'<robot name="{path.stem}">']
-        order = ["leg_base", "coxa", "femur", "tibia"] + (
+        order = ["coxa", "femur", "tibia"] + (
             ["tibia_push_lever", "tibia_pushrod"] if include_linkage else []
         )
+        merged_into = {"coxa": ["leg_base"]}
+        if not include_linkage:
+            merged_into["femur"] = ["tibia_push_lever", "tibia_pushrod"]
         for body in order:
             insts = list(assignment[body])
-            if not include_linkage and body == "femur":
-                insts += assignment["tibia_push_lever"] + assignment["tibia_pushrod"]
+            for extra in merged_into.get(body, []):
+                insts += assignment[extra]
             mass, com, I = body_dyn[body]
-            if not include_linkage and body == "femur":
-                for extra in ("tibia_push_lever", "tibia_pushrod"):
+            if body in merged_into:
+                for extra in merged_into[body]:
                     me, ce, Ie = body_dyn[extra]
                     Te = np.linalg.inv(frames[body]) @ frames[extra]
                     ce2 = Te[:3, :3] @ ce + Te[:3, 3]
@@ -624,6 +634,11 @@ def build(args):
     reference = {
         "source_document": "https://cad.onshape.com/documents/881b01051a1ec5c958bf7768",
         "frame": "leg_base (identity = onshape-to-robot export frame of this leg)",
+        "body_interface": {
+            "yaw_axis_point_m": [round(float(x), 8) for x in new_axes["coxa_yaw"][0]],
+            "yaw_axis_dir": [round(float(x), 8) for x in (-new_axes["coxa_yaw"][1] if "coxa_yaw" in inverted else new_axes["coxa_yaw"][1])],
+            "note": "yaw DOF exists between chassis and leg; fixed inside the single-leg reference",
+        },
         "joints": {
             j: {
                 "parent": topology[j][0],
@@ -635,7 +650,7 @@ def build(args):
                           else {"joint": "tibia_pitch", "multiplier": -1.0} if j == "tibia_rod_pivot"
                           else None),
             }
-            for j in ("coxa_yaw", "femur_pitch", "tibia_pitch", "tibia_lever_pivot", "tibia_rod_pivot")
+            for j in ("femur_pitch", "tibia_pitch", "tibia_lever_pivot", "tibia_rod_pivot")
         },
         "loop_closure": {
             "cut_point_m": [round(float(x), 8) for x in new_axes["loop_cut"][0]],
