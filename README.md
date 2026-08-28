@@ -7,8 +7,9 @@ The original URDF in `robot/hexapod_mkii_mock_assy/` is an Onshape export; the
 assets.
 
 **Start with [`STATUS.md`](STATUS.md)** for the current best checkpoint, the
-current target, open contradictions, and next actions. This README is a map,
-not a status page.
+current target, open contradictions, and next actions, and with
+[`docs/ROADMAP.md`](docs/ROADMAP.md) for where the program is going. This
+README is a map, not a status page.
 
 ## Repository map
 
@@ -16,6 +17,10 @@ not a status page.
 STATUS.md                       Current state. Rewritten in place, never appended
 CLAUDE.md                       Agent/contributor guide and project invariants
 HANDOFF.md                      Stub pointing at the split documentation
+docs/ROADMAP.md                 Program direction: workstreams, milestones, gates
+docs/ARCHITECTURE.md            Autonomy layers and contracts (locomotion / perception / navigation)
+docs/decisions/                 Architecture decision records
+docs/ONBOARDING.md              New-member read order and setup
 docs/TRAINING.md                Task and training design, curriculum, acceptance gates
 docs/OPERATIONS.md              Spark runbook, GPU protocol, launchers, screens
 docs/incidents/                 Frozen forensic records of specific failures

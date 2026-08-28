@@ -14,6 +14,10 @@ by explicit numeric acceptance criteria, not by how a gait looks.
 
 ```text
 STATUS.md                       Current state; rewritten in place, never appended
+docs/ROADMAP.md                 Program direction: workstreams, milestones, gates, Spark sharing
+docs/ARCHITECTURE.md            Autonomy layers and the contracts between them (C1-C4, O1, A1)
+docs/decisions/                 Architecture decision records; numbered, never edited once accepted
+docs/ONBOARDING.md              Read order, local setup, Spark access, working rules
 docs/TRAINING.md                Task/training design, curriculum, acceptance gates
 docs/OPERATIONS.md              Spark runbook, GPU protocol, launchers, screens
 docs/incidents/                 Frozen forensic records; append-only
@@ -39,7 +43,11 @@ Where things live:
 
 - **Current state** — `STATUS.md`. One page, rewritten in place. If a fact is
   about right now, it goes there and nowhere else.
+- **Direction** — `docs/ROADMAP.md` and `docs/decisions/`. Where the program
+  is going and why; a plan change is a roadmap rewrite plus an ADR.
 - **Design** — `docs/`. Durable contracts and procedure that outlive any run.
+  `docs/ARCHITECTURE.md` defines the locomotion / perception / navigation
+  layers and the contracts between them.
 - **Evidence** — `artifacts/`. Checkpoints, evaluation JSON, resolved configs,
   hashes, videos, and the probe ledger.
 
