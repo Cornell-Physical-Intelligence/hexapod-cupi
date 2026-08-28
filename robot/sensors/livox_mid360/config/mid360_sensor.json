@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "model": "Livox Mid-360",
+  "provenance": {
+    "manual": "robot/sensors/livox_mid360/source/Livox_Mid-360_User_Manual_EN.pdf",
+    "device_step": "robot/sensors/livox_mid360/source/mid-360-asm.stp",
+    "fov_step": "robot/sensors/livox_mid360/source/mid-360-fov-asm.stp",
+    "note": "Optical-centre offset and FOV limits were measured from the Livox STEP models; every other field is quoted from the manual's Specifications table (p. 20) or the Dimensions appendix (p. 19)."
+  },
+
+  "fov": {
+    "azimuth_deg": [-180.0, 180.0],
+    "elevation_deg": [-7.0, 52.0],
+    "manual_quote": "FOV: Horizontal: 360 deg, Vertical: -7 deg ~ 52 deg",
+    "step_measured_elevation_deg": [-7.0, 54.0],
+    "step_note": "Shell vertices in mid-360-fov-asm.stp span -7.0 to +54.0 deg about the STEP origin; the extra 2 deg at the top edge is cap geometry, so the manual's +52 is used as the working limit."
+  },
+
+  "geometry": {
+    "body_size_m": [0.065, 0.065, 0.060],
+    "body_size_with_connector_m": [0.073, 0.065, 0.060],
+    "mass_kg": 0.265,
+    "optical_centre_above_mount_plate_m": 0.02592,
+    "optical_centre_note": "mid-360-asm.stp places the device between y=-25.92 mm and y=+34.18 mm about the STEP origin (60.10 mm total, matching the 60.0 mm datasheet height). The FOV shell in mid-360-fov-asm.stp is centred on that same origin, so the origin is the optical centre and it sits 25.92 mm above the bottom mounting face.",
+    "mount_pattern": "4 x M3, 5 mm deep, on a 48.0 x 36.0 mm rectangle in the bottom face; two 3.0 mm locating holes"
+  },
+
+  "ranging": {
+    "close_proximity_blind_zone_m": 0.1,
+    "range_10pct_reflectivity_m": 40.0,
+    "range_80pct_reflectivity_m": 70.0,
+    "range_note": "Detection range is quoted at 100 klx. Effective range varies inside the FOV: longest near the lower (-7 deg) edge, shortest near the upper edge.",
+    "distance_random_error_1sigma_m": 0.02,
+    "angular_random_error_1sigma_deg": 0.15
+  },
+
+  "sampling": {
+    "point_rate_hz": 200000,
+    "frame_rate_hz": 10,
+    "scan_type": "non-repetitive",
+    "fov_coverage_note": "Coverage grows with integration time: about a 32-line mechanical lidar at 0.1 s, about 70 percent of the FOV at 0.5 s."
+  },
+
+  "electrical": {
+    "laser_wavelength_nm": 905,
+    "laser_class": "Class 1 (IEC 60825-1:2014)",
+    "power_w_typical": 6.5,
+    "power_w_self_heating_peak": 14.0,
+    "supply_voltage_v": [9.0, 27.0],
+    "data_port": "100BASE-TX Ethernet",
+    "imu": "ICM40609, 200 Hz"
+  },
+
+  "installation_constraints": [
+    {
+      "id": "inverted_ground_clearance",
+      "quote": "If mounting the Mid-360 upside down, allow a space of no less than 0.5 m between the mounting surface and the ground.",
+      "source": "manual p. 9, Mounting Notice item 3",
+      "hexapod_impact": "The deck sits at 0.185-0.205 m. Every inverted mount on this robot violates this requirement unless the sensor is carried on a mast of at least 0.5 m."
+    },
+    {
+      "id": "no_payload",
+      "quote": "The Mid-360 cannot bear any extra payload. Otherwise, the reliability of the product cannot be guaranteed.",
+      "source": "manual p. 9, Mounting Notice item 4"
+    },
+    {
+      "id": "airflow",
+      "quote": "When mounting the Mid-360, allow a space of at least 10 mm around the device to prevent poor airflow which can affect heat dissipation.",
+      "source": "manual p. 9, Mounting Notice item 5"
+    },
+    {
+      "id": "heat_sink_plate",
+      "quote": "It is recommended to mount the Mid-360 on a flat metal surface. The metal base plate should have a thickness of no less than 3 mm, and an area of no less than 10000 mm2 on the metal plate should be exposed to the air for heat dissipation.",
+      "source": "manual p. 9, Mounting Notice item 6",
+      "hexapod_impact": "10000 mm2 is a 100 x 100 mm plate, larger than the 65 x 65 mm sensor footprint and larger than any mast cap. Budget deck area for it."
+    },
+    {
+      "id": "fov_unobstructed",
+      "quote": "When mounting the Mid-360, the FOV must not be blocked by any object, including glass.",
+      "source": "manual p. 9, Mounting Notice item 2"
+    }
+  ]
+}

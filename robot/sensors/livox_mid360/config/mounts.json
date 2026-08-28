@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "frame": {
+    "description": "Poses of the Mid-360 mounting plate (its bottom face) in the imported body frame of body_mock. The deck top face is z = 0; the deck occupies z in [-0.023, 0], x in [-0.143, 0.143], y in [-0.223, 0.223]. Per packages/hexapod_core/hexapod_core/frames.py the anatomical forward direction is body -Y, lateral is body +X and up is body +Z, so a rotation about body X is the anatomical pitch.",
+    "sensor_axes": "Sensor local +Z points out of the mounting plate, through the optical window. The optical centre lies 25.92 mm along +Z from the plate.",
+    "rpy_deg": "Extrinsic roll-pitch-yaw about body X, Y, Z applied in that order."
+  },
+  "mounts": [
+    {"name": "deck_center_upright",        "xyz": [0.0,  0.000,  0.000], "rpy_deg": [0,   0, 0], "note": "Bolted flat to the deck top at the geometric centre. The reference case."},
+    {"name": "deck_center_mast_060",       "xyz": [0.0,  0.000,  0.060], "rpy_deg": [0,   0, 0], "note": "Upright on a 60 mm mast."},
+    {"name": "phase3_current_assumption",  "xyz": [0.0,  0.000,  0.0491], "rpy_deg": [0,  0, 0], "note": "The mount already assumed by isaaclab/hexapod_phase3/sensor_cfg.py, whose lidar_pos_b_m places the optical centre 75 mm above the deck top. Plate height is that minus the 25.9 mm optical-centre offset."},
+    {"name": "deck_center_mast_075",       "xyz": [0.0,  0.000,  0.075], "rpy_deg": [0,   0, 0], "note": "Lowest upright mast at which the legs and frame block none of the below-horizon band at the Stage2C stance."},
+    {"name": "deck_center_mast_120",       "xyz": [0.0,  0.000,  0.120], "rpy_deg": [0,   0, 0], "note": "Upright on a 120 mm mast."},
+    {"name": "deck_center_mast_200",       "xyz": [0.0,  0.000,  0.200], "rpy_deg": [0,   0, 0], "note": "Upright on a 200 mm mast."},
+    {"name": "deck_front_upright",         "xyz": [0.0, -0.170,  0.000], "rpy_deg": [0,   0, 0], "note": "Flat on the deck, as far forward as the 65 mm footprint allows."},
+    {"name": "deck_front_overhang",        "xyz": [0.0, -0.258, -0.030], "rpy_deg": [0,   0, 0], "note": "On a bracket ahead of the front deck edge, plate 30 mm below deck top."},
+    {"name": "deck_center_pitch20_m060",   "xyz": [0.0,  0.000,  0.060], "rpy_deg": [20,  0, 0], "note": "60 mm mast, optical axis pitched 20 deg forward-down."},
+    {"name": "deck_center_pitch40_m060",   "xyz": [0.0,  0.000,  0.060], "rpy_deg": [40,  0, 0], "note": "60 mm mast, optical axis pitched 40 deg forward-down."},
+    {"name": "deck_center_pitch60_m060",   "xyz": [0.0,  0.000,  0.060], "rpy_deg": [60,  0, 0], "note": "60 mm mast, optical axis pitched 60 deg forward-down."},
+    {"name": "deck_center_inverted_m120",  "xyz": [0.0,  0.000,  0.120], "rpy_deg": [180, 0, 0], "note": "Inverted on a 120 mm mast. Violates the Livox 0.5 m inverted ground-clearance notice on this robot; evaluated for reference only."},
+    {"name": "deck_front_inverted_over",   "xyz": [0.0, -0.258,  0.030], "rpy_deg": [180, 0, 0], "note": "Inverted on a bracket ahead of the front deck edge. Same Livox notice applies."}
+  ]
+}
