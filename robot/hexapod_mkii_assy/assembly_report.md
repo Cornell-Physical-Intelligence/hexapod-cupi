@@ -111,12 +111,12 @@ Parts whose CAD position differs from the leg record by more than 0.5 mm (assign
 
 | leg | yaw output side (body) | coxa | femur | tibia | push lever | pushrod | worst residual (excl. free motor internals) | free motor internals |
 |---|---|---|---|---|---|---|---|---|
-| lf | 2 | 122 | 109 | 46 | 10 | 7 | 1.624 mm | 3 |
-| lm | 2 | 122 | 109 | 46 | 10 | 7 | 4.959 mm | 2 |
-| lr | 2 | 122 | 109 | 46 | 10 | 7 | 2.426 mm | 2 |
-| rf | 2 | 122 | 109 | 46 | 10 | 7 | 1.623 mm | 3 |
-| rm | 2 | 122 | 109 | 46 | 10 | 7 | 4.964 mm | 0 |
-| rr | 2 | 122 | 109 | 46 | 10 | 7 | 1.624 mm | 0 |
+| lf | 2 | 122 | 109 | 46 | 11 | 6 | 1.624 mm | 3 |
+| lm | 2 | 122 | 109 | 46 | 11 | 6 | 4.959 mm | 2 |
+| lr | 2 | 122 | 109 | 46 | 11 | 6 | 2.426 mm | 2 |
+| rf | 2 | 122 | 109 | 46 | 11 | 6 | 1.623 mm | 3 |
+| rm | 2 | 122 | 109 | 46 | 11 | 6 | 4.964 mm | 0 |
+| rr | 2 | 122 | 109 | 46 | 11 | 6 | 1.624 mm | 0 |
 
 Matched 1746 instances (354 fasteners matched by size class because the catalogue part changed), 151 chassis parts, 18 new leg parts adopted by keyword, 0 leg-record parts missing from the assembly, 0 chassis parts within 5 mm of a leg part (review).
 
@@ -163,8 +163,8 @@ Leg record (v3, derived from the older v2 per-part export) versus this assembly'
 | coxa | 0.1199 | 0.3709 | +251.0 | 21.63 | 2.41 |
 | femur | 0.2110 | 0.4592 | +248.2 | 2.24 | 2.15 |
 | tibia | 0.2849 | 0.1520 | -132.9 | 3.57 | 0.62 |
-| tibia_push_lever | 0.0431 | 0.0513 | +8.1 | 1.20 | 1.17 |
-| tibia_pushrod | 0.0332 | 0.0364 | +3.1 | 6.21 | 1.46 |
+| tibia_push_lever | 0.0431 | 0.0547 | +11.6 | 0.81 | 1.26 |
+| tibia_pushrod | 0.0332 | 0.0329 | -0.4 | 0.35 | 0.99 |
 
 Actuators: the RS05 vendor CAD is a hollow shell weighing 62.2 g (min 62.2, max 62.2); each of the 18 motors is overridden to 191 g, the difference placed on the link that carries its housing as a solid cylinder the size of the housing (+2.318 kg in total). Everything else keeps its CAD mass, so the assembled mass exceeds Onshape's fused value by exactly that amount; `--motor-mass 0` reproduces the CAD masses.
 
@@ -176,38 +176,38 @@ Assembled: 8.26081 kg vs Onshape fused 5.94233 kg; COM error 0.430 mm; worst ine
 | lf_coxa | 0.37089 |
 | lf_femur | 0.45918 |
 | lf_tibia | 0.15196 |
-| lf_tibia_push_lever | 0.05127 |
-| lf_tibia_pushrod | 0.03636 |
+| lf_tibia_push_lever | 0.05474 |
+| lf_tibia_pushrod | 0.03288 |
 | lm yaw output side (in body) | 0.01438 |
 | lm_coxa | 0.37089 |
 | lm_femur | 0.45918 |
 | lm_tibia | 0.15196 |
-| lm_tibia_push_lever | 0.05127 |
-| lm_tibia_pushrod | 0.03636 |
+| lm_tibia_push_lever | 0.05474 |
+| lm_tibia_pushrod | 0.03288 |
 | lr yaw output side (in body) | 0.01438 |
 | lr_coxa | 0.37089 |
 | lr_femur | 0.45918 |
 | lr_tibia | 0.15196 |
-| lr_tibia_push_lever | 0.05127 |
-| lr_tibia_pushrod | 0.03636 |
+| lr_tibia_push_lever | 0.05474 |
+| lr_tibia_pushrod | 0.03288 |
 | rf yaw output side (in body) | 0.01438 |
 | rf_coxa | 0.37089 |
 | rf_femur | 0.45918 |
 | rf_tibia | 0.15196 |
-| rf_tibia_push_lever | 0.05127 |
-| rf_tibia_pushrod | 0.03636 |
+| rf_tibia_push_lever | 0.05474 |
+| rf_tibia_pushrod | 0.03288 |
 | rm yaw output side (in body) | 0.01438 |
 | rm_coxa | 0.37089 |
 | rm_femur | 0.45918 |
 | rm_tibia | 0.15196 |
-| rm_tibia_push_lever | 0.05127 |
-| rm_tibia_pushrod | 0.03636 |
+| rm_tibia_push_lever | 0.05474 |
+| rm_tibia_pushrod | 0.03288 |
 | rr yaw output side (in body) | 0.01438 |
 | rr_coxa | 0.37089 |
 | rr_femur | 0.45918 |
 | rr_tibia | 0.15196 |
-| rr_tibia_push_lever | 0.05127 |
-| rr_tibia_pushrod | 0.03636 |
+| rr_tibia_push_lever | 0.05474 |
+| rr_tibia_pushrod | 0.03288 |
 | body | 1.84287 |
 
 ## Leg-internal joint transforms (measured from the assembly, mean of six legs)
