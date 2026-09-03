@@ -1,0 +1,355 @@
+<title>Hexapod MKII Assembly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#0f1318; --panel:rgba(22,27,34,.92); --panel-solid:#161b22; --raised:#1d232c;
+  --line:#2b333f; --line-2:#3d4756;
+  --ink:#e2e7ee; --ink-2:#9aa5b5; --ink-3:#6b7684;
+  --accent:#f2b544; --accent-ink:#1b1305; --accent-dim:rgba(242,181,68,.16);
+  --t-body:#c9ced6; --t-coxa:#b48ee6; --t-femur:#5aa9e6; --t-tibia:#6fd39a; --t-lever:#f2b544; --t-rod:#f07c5a;
+  --display:"Chakra Petch",system-ui,sans-serif;
+  --ui:"Barlow","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--ground);color:var(--ink);font:14px/1.4 var(--ui)}
+*{box-sizing:border-box}
+#stage{position:fixed;inset:0}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none}
+.panel{position:fixed;background:var(--panel);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(6px)}
+#plate{top:14px;left:14px;padding:12px 14px 10px;min-width:250px;max-width:320px}
+#plate h1{font:600 19px/1.1 var(--display);margin:0;letter-spacing:.01em;text-wrap:balance}
+#plate h1 span{color:var(--accent)}
+#plate .sub{color:var(--ink-2);margin:4px 0 8px;font-size:13px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font-size:12.5px}
+.kv dt{color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;font-size:11px;padding-top:2px}
+.kv dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink);font-size:12.5px}
+#status{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);color:var(--ink-2);font-size:12.5px;min-height:18px}
+#status b{color:var(--accent);font-weight:600}
+#dock{top:14px;right:14px;bottom:14px;width:344px;display:flex;flex-direction:column;overflow:hidden}
+#dock .head{display:flex;align-items:center;justify-content:space-between;padding:10px 12px 8px;border-bottom:1px solid var(--line)}
+#dock .head span{font:600 12px var(--display);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+#dock .scroll{overflow:auto;padding:10px 12px 14px;flex:1}
+.group{margin-bottom:12px}
+.group .lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.btn{font:500 13px var(--ui);color:var(--ink);background:var(--raised);border:1px solid var(--line-2);border-radius:4px;padding:6px 10px;cursor:pointer;user-select:none;line-height:1.1}
+.btn:hover{border-color:var(--ink-3)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.leg{border-top:1px solid var(--line);padding-top:8px;margin-top:10px}
+.leg h2{font:600 13px var(--display);margin:0 0 4px;color:var(--ink);display:flex;justify-content:space-between;align-items:baseline}
+.leg h2 small{font:400 11.5px var(--ui);color:var(--ink-3);letter-spacing:.04em}
+.srow{display:grid;grid-template-columns:78px 1fr 84px;align-items:center;gap:8px;margin:3px 0}
+.srow label{font-size:12px;color:var(--ink-2)}
+.srow output{font-family:var(--mono);font-size:12px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+input[type=range]{width:100%;margin:0;accent-color:var(--accent);height:22px}
+input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#readout{left:14px;bottom:14px;padding:10px 12px;max-width:min(560px,calc(100vw - 28px))}
+#readout .hint{color:var(--ink-3);font-size:12.5px}
+#readout .part{font-family:var(--mono);font-size:12.5px;word-break:break-all}
+#readout .part b{color:var(--accent);font-weight:500}
+#legend{display:none;flex-wrap:wrap;gap:6px 12px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-2)}
+#legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+#dockToggle,#dockClose{display:none}
+#dockToggle{position:fixed;right:14px;bottom:14px;z-index:3}
+#loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--ground);z-index:5;font:500 14px var(--ui);color:var(--ink-2)}
+#loading .bar{width:220px;height:3px;background:var(--line);margin-top:10px;overflow:hidden;border-radius:2px}
+#loading .bar i{display:block;height:100%;width:30%;background:var(--accent);animation:slide 1.1s infinite ease-in-out}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
+@media (prefers-reduced-motion:reduce){#loading .bar i{animation:none;width:100%}}
+@media (max-width:760px){
+  #plate{max-width:calc(100vw - 28px);min-width:0}
+  #dock{top:auto;left:14px;right:14px;bottom:14px;width:auto;max-height:46vh;transform:translateY(calc(100% + 20px));transition:transform .25s}
+  #dock.open{transform:none}
+  #dockToggle,#dockClose{display:block}
+  #dock.open ~ #dockToggle{bottom:calc(46vh + 22px)}
+  #readout{bottom:auto;top:calc(14px + 118px);max-width:calc(100vw - 28px)}
+}
+</style>
+
+<div id="stage"></div>
+<div id="loading"><div>Unpacking the assembly<div class="bar"><i></i></div></div></div>
+
+<section id="plate" class="panel" aria-label="model summary">
+  <h1>Hexapod <span>MKII</span> assembly</h1>
+  <div class="sub">Body plus six legs from the Onshape export, one link per moving body.</div>
+  <dl class="kv">
+    <dt>links</dt><dd id="kLinks">—</dd>
+    <dt>joints</dt><dd id="kJoints">—</dd>
+    <dt>mass</dt><dd id="kMass">—</dd>
+    <dt>parts</dt><dd id="kParts">—</dd>
+  </dl>
+  <div id="status">drag to orbit · scroll to zoom · right-drag to pan</div>
+</section>
+
+<aside id="dock" class="panel" aria-label="controls">
+  <div class="head"><span>Controls</span><button class="btn" id="dockClose">Close</button></div>
+  <div class="scroll">
+    <div class="group"><p class="lbl">Colour</p><div class="seg" role="group">
+      <button class="btn on" data-mode="cad">CAD colours</button>
+      <button class="btn" data-mode="tint">Tint by link</button>
+    </div></div>
+    <div class="group"><p class="lbl">Show</p><div class="seg">
+      <button class="btn on" id="bFast">Fasteners</button>
+      <button class="btn" id="bColl">Collision shapes</button>
+      <button class="btn" id="bAxes">Joint axes</button>
+      <button class="btn" id="bEdges">Edges</button>
+    </div></div>
+    <div class="group"><p class="lbl">Pose</p><div class="seg">
+      <button class="btn on" data-pose="zero">Zero</button>
+      <button class="btn" data-pose="cad">As exported</button>
+      <button class="btn" data-pose="walk">Tripod gait</button>
+    </div></div>
+    <div id="legs"></div>
+  </div>
+</aside>
+<button class="btn" id="dockToggle">Controls</button>
+
+<section id="readout" class="panel" aria-live="polite">
+  <div class="hint" id="pickHint">Tap any part to see its name and which link owns it.</div>
+  <div class="part" id="pick"></div>
+  <div id="legend"></div>
+</section>
+
+<script id="model" type="application/json">__MODEL__</script>
+<script id="blob" type="text/plain">__BLOB__</script>
+<script type="module">
+import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.min.js";
+
+const MODEL = JSON.parse(document.getElementById("model").textContent);
+const B64 = document.getElementById("blob").textContent.trim();
+const $ = id => document.getElementById(id);
+const LEGS = ["lf","lm","lr","rf","rm","rr"];
+const LEG_NAMES = {lf:"left front",lm:"left middle",lr:"left rear",rf:"right front",rm:"right middle",rr:"right rear"};
+const JOINTS = ["coxa_yaw","femur_pitch","tibia_pitch"];
+const CLASS_TINT = {body:"--t-body",coxa:"--t-coxa",femur:"--t-femur",tibia:"--t-tibia",tibia_push_lever:"--t-lever",tibia_pushrod:"--t-rod"};
+const FASTENER = /screw|nut|washer|standoff__|cirpattern|revolve|mirror1|pem_|cut_extrude|bearing_insert/i;
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const linkClass = n => n === "body" ? "body" : n.replace(/^(lf|lm|lr|rf|rm|rr)_/, "");
+
+// ---------- unpack meshes
+function decode(b64){
+  const bin = atob(b64); const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out.buffer;
+}
+const buf = decode(B64);
+const geoms = MODEL.meshes.map(m => {
+  const q = new Int16Array(buf, m.op, m.nv * 3);
+  const pos = new Float32Array(m.nv * 3);
+  for (let i = 0; i < m.nv; i++) for (let k = 0; k < 3; k++) pos[i*3+k] = m.min[k] + (q[i*3+k] + 32768) / 65535 * m.span[k];
+  const idx = m.i32 ? new Uint32Array(buf, m.oi, m.nt * 3) : new Uint16Array(buf, m.oi, m.nt * 3);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+  g.setIndex(new THREE.BufferAttribute(idx.slice(), 1));
+  g.computeVertexNormals();
+  g.computeBoundingSphere();
+  const eIdx = m.i32 ? new Uint32Array(buf, m.oe, m.ne * 2) : new Uint16Array(buf, m.oe, m.ne * 2);
+  const eg = new THREE.BufferGeometry();
+  eg.setAttribute("position", g.getAttribute("position"));
+  eg.setIndex(new THREE.BufferAttribute(eIdx.slice(), 1));
+  g.userData.edges = eg;
+  return g;
+});
+
+// ---------- scene
+const stage = $("stage");
+const renderer = new THREE.WebGLRenderer({antialias:true, powerPreference:"high-performance"});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(stage.clientWidth, stage.clientHeight);
+stage.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(css("--ground"));
+const camera = new THREE.PerspectiveCamera(38, stage.clientWidth / stage.clientHeight, 0.01, 60);
+camera.up.set(0,0,1);
+scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x2a2622, 0.85));
+const key = new THREE.DirectionalLight(0xffffff, 1.7); key.position.set(1.0, -1.3, 1.9); scene.add(key);
+const fill = new THREE.DirectionalLight(0x8fb7ff, 0.45); fill.position.set(-1.1, 0.9, 0.6); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffd9a0, 0.35); rim.position.set(0.3, 1.2, -0.4); scene.add(rim);
+
+// materials: one per CAD colour, plus one per link class for tint mode
+const PO = {polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1};
+const cadMats = MODEL.colors.map(c => new THREE.MeshStandardMaterial({color:new THREE.Color(c), metalness:0.28, roughness:0.58, flatShading:true, ...PO}));
+const tintMats = Object.fromEntries(Object.entries(CLASS_TINT).map(([k,v]) => [k, new THREE.MeshStandardMaterial({color:new THREE.Color(css(v)), metalness:0.15, roughness:0.65, flatShading:true, ...PO})]));
+// CAD-style feature edges (the STEP solid's hard edges), drawn over the shaded faces
+const edgeMat = new THREE.LineBasicMaterial({color:0xe3e9f2, transparent:true, opacity:0.8});
+const collMat = new THREE.MeshBasicMaterial({color:0xf2b544, wireframe:true, transparent:true, opacity:0.55, depthTest:false});
+const hiMat = new THREE.MeshStandardMaterial({color:0xffffff, emissive:new THREE.Color(0xff3b6b), emissiveIntensity:0.9, flatShading:true, ...PO});
+
+// ---------- kinematic tree
+const linkObj = {}, jointObj = {}, meshes = [], collObjs = [], axisObjs = [];
+const robot = new THREE.Group(); scene.add(robot);
+for (const [name, L] of Object.entries(MODEL.links)) {
+  const g = new THREE.Group(); g.name = name; linkObj[name] = g;
+  const cls = linkClass(name);
+  for (const [mi, p, q, ci] of L.v) {
+    const m = new THREE.Mesh(geoms[mi], cadMats[ci]);
+    m.position.set(...p); m.quaternion.set(...q);
+    const e = new THREE.LineSegments(geoms[mi].userData.edges, edgeMat);
+    e.position.copy(m.position); e.quaternion.copy(m.quaternion); e.visible = false;
+    m.userData = {part: MODEL.meshes[mi].n, link: name, cls, cad: cadMats[ci], ci, fastener: FASTENER.test(MODEL.meshes[mi].n), edge: e};
+    g.add(m); g.add(e); meshes.push(m);
+  }
+  for (const [t, p, q, s] of L.c) {
+    let geo;
+    if (t === "box") geo = new THREE.BoxGeometry(s[0], s[1], s[2]);
+    else if (t === "cyl") { geo = new THREE.CylinderGeometry(s[0], s[0], s[1], 28, 1, true); geo.rotateX(Math.PI/2); }
+    else geo = new THREE.SphereGeometry(s[0], 14, 10);
+    const c = new THREE.Mesh(geo, collMat); c.position.set(...p); c.quaternion.set(...q); c.visible = false; c.userData.coll = true;
+    g.add(c); collObjs.push(c);
+  }
+}
+const jointVal = {};
+for (const J of MODEL.joints) {
+  const jg = new THREE.Group(); jg.name = J.n;
+  jg.position.set(...J.p); jg.quaternion.set(...J.q);
+  jg.userData = {base: jg.quaternion.clone(), axis: new THREE.Vector3(...J.axis).normalize(), spec: J};
+  linkObj[J.parent].add(jg); jg.add(linkObj[J.child]); jointObj[J.n] = jg;
+  jointVal[J.n] = 0;
+  const ax = new THREE.ArrowHelper(jg.userData.axis, new THREE.Vector3(), 0.05, 0xf2b544, 0.014, 0.008);
+  ax.visible = false; jg.add(ax); axisObjs.push(ax);
+}
+robot.add(linkObj.body);
+function applyJoints(){
+  for (const J of MODEL.joints) {
+    let v = jointVal[J.n];
+    if (J.mimic) v = jointVal[J.mimic.j] * J.mimic.k + J.mimic.o, jointVal[J.n] = v;
+    const jg = jointObj[J.n];
+    jg.quaternion.copy(jg.userData.base).multiply(new THREE.Quaternion().setFromAxisAngle(jg.userData.axis, v));
+  }
+}
+applyJoints();
+robot.updateMatrixWorld(true);
+
+// frame the robot and put the floor grid at the lowest foot point
+const box = new THREE.Box3().setFromObject(robot);
+const centre = box.getCenter(new THREE.Vector3());
+const radius = box.getSize(new THREE.Vector3()).length() / 2;
+const grid = new THREE.GridHelper(3.0, 30, 0x3a4352, 0x232a35);
+grid.rotation.x = Math.PI/2; grid.position.set(0, 0, box.min.z - 0.002); scene.add(grid);
+const axes = new THREE.AxesHelper(0.12); axes.position.z = box.min.z; scene.add(axes);
+
+// ---------- orbit controls (z-up)
+function fitDistance(){ // distance at which the bounding sphere fits the narrower field of view
+  const vHalf = THREE.MathUtils.degToRad(camera.fov) / 2, hHalf = Math.atan(Math.tan(vHalf) * camera.aspect);
+  return radius / Math.sin(Math.min(vHalf, hHalf)) * 1.08;
+}
+const view = {target: centre.clone(), theta: -1.15, phi: 1.08, r: fitDistance()};
+function updateCamera(){
+  const sp = Math.sin(view.phi), cp = Math.cos(view.phi);
+  camera.position.set(view.target.x + view.r*sp*Math.cos(view.theta), view.target.y + view.r*sp*Math.sin(view.theta), view.target.z + view.r*cp);
+  camera.lookAt(view.target);
+}
+const ptrs = new Map(); let pinch0 = 0, r0 = 0, moved = false;
+const el = renderer.domElement;
+el.addEventListener("pointerdown", e => { ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY, b:e.button}); moved = false; el.setPointerCapture(e.pointerId);
+  if (ptrs.size === 2) { const [a,b] = [...ptrs.values()]; pinch0 = Math.hypot(a.x-b.x, a.y-b.y); r0 = view.r; } });
+el.addEventListener("pointermove", e => {
+  const p = ptrs.get(e.pointerId); if (!p) return;
+  const dx = e.clientX - p.x, dy = e.clientY - p.y;
+  if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+  if (ptrs.size === 2) { p.x = e.clientX; p.y = e.clientY; const [a,b] = [...ptrs.values()]; const d = Math.hypot(a.x-b.x, a.y-b.y); if (pinch0 > 0) { userZoomed = true; view.r = THREE.MathUtils.clamp(r0 * pinch0 / d, radius*0.3, radius*12); } }
+  else if (p.b === 2 || p.b === 1 || e.shiftKey) { // pan
+    const right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0), up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
+    const k = view.r * 0.0016; view.target.addScaledVector(right, -dx*k).addScaledVector(up, dy*k); p.x = e.clientX; p.y = e.clientY;
+  } else { view.theta -= dx * 0.006; view.phi = THREE.MathUtils.clamp(view.phi - dy * 0.006, 0.05, Math.PI - 0.05); p.x = e.clientX; p.y = e.clientY; }
+});
+const endPtr = e => { ptrs.delete(e.pointerId); };
+el.addEventListener("pointerup", endPtr); el.addEventListener("pointercancel", endPtr);
+el.addEventListener("wheel", e => { e.preventDefault(); userZoomed = true; view.r = THREE.MathUtils.clamp(view.r * Math.exp(e.deltaY * 0.0012), radius*0.3, radius*12); }, {passive:false});
+el.addEventListener("contextmenu", e => e.preventDefault());
+let userZoomed = false;
+addEventListener("resize", () => { renderer.setSize(stage.clientWidth, stage.clientHeight); camera.aspect = stage.clientWidth/stage.clientHeight; camera.updateProjectionMatrix(); if (!userZoomed) view.r = fitDistance(); });
+
+// ---------- identify
+const ray = new THREE.Raycaster(); let hiMesh = null, hiTimer = 0;
+el.addEventListener("pointerup", e => {
+  if (moved || ptrs.size) return;
+  const r = el.getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1, -((e.clientY-r.top)/r.height)*2+1), camera);
+  const hit = ray.intersectObjects(meshes.filter(m => m.visible), false)[0];
+  if (!hit) return;
+  if (hiMesh) hiMesh.material = currentMat(hiMesh);
+  hiMesh = hit.object; hiMesh.material = hiMat; clearTimeout(hiTimer);
+  hiTimer = setTimeout(() => { if (hiMesh) hiMesh.material = currentMat(hiMesh); hiMesh = null; }, 1500);
+  const u = hiMesh.userData;
+  $("pickHint").textContent = "Selected part";
+  $("pick").innerHTML = `${u.part} &nbsp;→&nbsp; link <b>${u.link}</b> (${u.cls.replace(/_/g," ")}, ${(MODEL.links[u.link].m*1000).toFixed(0)} g)`;
+});
+
+// ---------- modes
+let mode = "cad", showFast = true, pose = "zero", edgesOn = false;
+const currentMat = m => mode === "tint" ? tintMats[m.userData.cls] : m.userData.cad;
+function applyMode(){
+  for (const m of meshes) { if (m !== hiMesh) m.material = currentMat(m); m.visible = showFast || !m.userData.fastener; m.userData.edge.visible = edgesOn && m.visible; }
+  $("legend").style.display = mode === "tint" ? "flex" : "none";
+  document.querySelectorAll("[data-mode]").forEach(b => b.classList.toggle("on", b.dataset.mode === mode));
+  $("bFast").classList.toggle("on", showFast);
+  const shown = meshes.filter(m => m.visible).length;
+  $("kParts").textContent = `${shown} shown` + (MODEL.dropped_visuals ? ` · ${MODEL.dropped_visuals + meshes.length - shown} hidden` : "");
+}
+$("legend").innerHTML = Object.entries(CLASS_TINT).map(([k,v]) => `<span><i style="background:${css(v)}"></i>${k.replace(/_/g," ")}</span>`).join("");
+document.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => { mode = b.dataset.mode; applyMode(); });
+$("bFast").onclick = () => { showFast = !showFast; applyMode(); };
+$("bColl").onclick = () => { const on = !$("bColl").classList.contains("on"); $("bColl").classList.toggle("on", on); collObjs.forEach(c => c.visible = on); };
+$("bEdges").onclick = () => { edgesOn = !edgesOn; $("bEdges").classList.toggle("on", edgesOn); applyMode(); };
+$("bAxes").onclick = () => { const on = !$("bAxes").classList.contains("on"); $("bAxes").classList.toggle("on", on); axisObjs.forEach(a => a.visible = on); };
+
+// ---------- sliders
+const sliders = {};
+for (const leg of LEGS) {
+  const d = document.createElement("div"); d.className = "leg";
+  d.innerHTML = `<h2>${leg}<small>${LEG_NAMES[leg]}</small></h2>`;
+  for (const jn of JOINTS) {
+    const name = `${leg}_${jn}`, J = MODEL.joints.find(j => j.n === name); if (!J) continue;
+    const row = document.createElement("div"); row.className = "srow";
+    row.innerHTML = `<label for="s_${name}">${jn.replace("_pitch","").replace("_yaw"," yaw")}</label><input type="range" id="s_${name}" min="${J.lo}" max="${J.hi}" step="0.001" value="0"><output for="s_${name}"></output>`;
+    d.appendChild(row);
+    const inp = row.querySelector("input"), out = row.querySelector("output");
+    sliders[name] = {inp, out};
+    inp.addEventListener("input", () => { setPose("manual"); jointVal[name] = parseFloat(inp.value); out.value = fmt(jointVal[name]); });
+    out.value = fmt(0);
+  }
+  $("legs").appendChild(d);
+}
+function fmt(v){ return `${v.toFixed(3)} rad`; }
+function setAll(src){ for (const n in sliders) { jointVal[n] = src[n] ?? 0; sliders[n].inp.value = jointVal[n]; sliders[n].out.value = fmt(jointVal[n]); } }
+function setPose(p){
+  pose = p;
+  document.querySelectorAll("[data-pose]").forEach(b => b.classList.toggle("on", b.dataset.pose === p));
+  $("status").innerHTML = p === "walk" ? "<b>Tripod gait</b> — lf, lr, rm alternate with rf, rm, lr" : p === "cad" ? "<b>As exported</b> — the pose the CAD holds each leg in" : p === "zero" ? "<b>Zero pose</b> — every leg points straight out; femur and tibia at the leg-reference zero" : "<b>Manual</b> — sliders";
+  if (p === "zero") setAll({});
+  if (p === "cad") setAll(MODEL.cad_pose || {});
+}
+document.querySelectorAll("[data-pose]").forEach(b => b.onclick = () => setPose(b.dataset.pose));
+const TRIPOD_A = new Set(["lf","lr","rm"]);
+function gait(t){
+  const w = t * 2 * Math.PI * 0.7, out = {};
+  for (const leg of LEGS) {
+    const ph = TRIPOD_A.has(leg) ? w : w + Math.PI, swing = Math.max(0, Math.sin(ph));
+    out[`${leg}_coxa_yaw`] = 0.22 * Math.cos(ph) * (leg[0] === "l" ? 1 : -1);
+    out[`${leg}_femur_pitch`] = 0.10 + 0.42 * swing;
+    out[`${leg}_tibia_pitch`] = 0.25 + 0.35 * swing;
+  }
+  return out;
+}
+
+// ---------- dock on phones
+$("dockToggle").onclick = () => { $("dock").classList.toggle("open"); };
+$("dockClose").onclick = () => $("dock").classList.remove("open");
+
+// ---------- summary
+$("kLinks").textContent = Object.keys(MODEL.links).length;
+$("kJoints").textContent = `${MODEL.joints.length} (${MODEL.joints.filter(j => !j.mimic).length} actuated)`;
+$("kMass").textContent = `${Object.values(MODEL.links).reduce((s,l) => s + l.m, 0).toFixed(3)} kg`;
+applyMode(); setPose("zero");
+$("loading").remove();
+
+const clock = new THREE.Clock();
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+renderer.setAnimationLoop(() => {
+  if (pose === "walk") { const g = gait(reduce ? 0.25 : clock.getElapsedTime()); for (const n in sliders) { jointVal[n] = g[n]; sliders[n].inp.value = g[n]; sliders[n].out.value = fmt(g[n]); } }
+  applyJoints(); updateCamera(); renderer.render(scene, camera);
+});
+</script>

@@ -19,7 +19,9 @@ registering each v2 body onto the new geometry:
    assembled totals validated against Onshape's exact fused mass/COM.
 
 Outputs ``leg_v3_serial.urdf`` and ``leg_v3_linkage.urdf`` (parallelogram
-mimic closure) with per-part CAD colors and primitive collisions.
+mimic closure) with per-part CAD colors and primitive collisions, plus
+``leg_reference.json`` / ``leg_parts.json`` consumed by
+``import_onshape_hexapod.py`` for the six-leg assembly.
 """
 
 from __future__ import annotations
@@ -662,6 +664,33 @@ def build(args):
         "rs05": {"effort_nm": RS05_EFFORT_NM, "velocity_rad_s": RS05_VELOCITY_RAD_S},
     }
     (out / "leg_reference.json").write_text(json.dumps(reference, indent=1))
+
+    # complete per-body record (frames, dynamics, every part instance in the
+    # export frame) so the six-leg assembly importer can register each body
+    # of every leg without touching the v2 sources again
+    parts_record = {
+        "frame": "onshape-to-robot export frame of this leg (leg_base = identity)",
+        "bodies": {},
+    }
+    for body in body_map["bodies"]:
+        mass, com, I = body_dyn[body]
+        parts_record["bodies"][body] = {
+            "frame_in_export": [[float(x) for x in row] for row in frames[body]],
+            "mass_kg": float(mass),
+            "com_in_frame": [float(x) for x in com],
+            "inertia_in_frame": [[float(x) for x in row] for row in I],
+            "parts": [
+                {
+                    "file": inst["file"],
+                    "xyz": [float(x) for x in inst["xyz"]],
+                    "rpy": [float(x) for x in inst["rpy"]],
+                    "rgba": inst["rgba"],
+                    "volume_m3": float(inst["volume"]),
+                }
+                for inst in assignment[body]
+            ],
+        }
+    (out / "leg_parts.json").write_text(json.dumps(parts_record, indent=1))
 
     # parallelogram check in the NEW geometry
     A = new_axes["tibia_lever_pivot"][0]

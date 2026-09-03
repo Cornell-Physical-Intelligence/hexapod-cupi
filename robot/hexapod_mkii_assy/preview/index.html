@@ -1,0 +1,249 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Hexapod MKII Assembly Preview</title>
+<style>
+  html,body{margin:0;height:100%;background:#14161a;color:#dfe3ea;font:13px/1.4 -apple-system,system-ui,sans-serif;overflow:hidden}
+  .panel{position:fixed;background:rgba(20,22,26,.86);border:1px solid #2a2e36;border-radius:8px;padding:10px 12px}
+  #hud{top:10px;left:12px;min-width:260px}
+  #hud h1{font-size:13px;margin:0 0 6px;font-weight:600}
+  #hud .row{display:flex;justify-content:space-between;gap:12px}
+  #hud .val{font-variant-numeric:tabular-nums;color:#8fd3a6}
+  #ctrl{top:10px;right:12px;width:340px;max-height:calc(100vh - 40px);overflow:auto}
+  .btn{display:inline-block;margin:0 6px 6px 0;padding:5px 9px;border:1px solid #2a2e36;border-radius:6px;cursor:pointer;user-select:none;background:#1b1e24}
+  .btn.on{background:#274a3a;border-color:#3f7a5c}
+  .leg{margin-top:8px;border-top:1px solid #2a2e36;padding-top:6px}
+  .leg h2{font-size:12px;margin:0 0 4px;color:#e8b45f}
+  .srow{display:flex;align-items:center;gap:6px;margin:2px 0}
+  .srow span.l{width:70px;font-size:11px;color:#aab}
+  .srow input{flex:1}
+  .srow span.v{width:70px;text-align:right;font-variant-numeric:tabular-nums;font-size:11px}
+  #pick{bottom:10px;left:12px;color:#8fd3a6;max-width:70vw}
+  #err{position:fixed;bottom:40px;left:12px;color:#ff7b72;white-space:pre-wrap;max-width:70vw}
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/examples/":"https://unpkg.com/three@0.160.0/examples/",
+  "urdf-loader":"https://unpkg.com/urdf-loader@0.12.6/src/URDFLoader.js"
+}}
+</script>
+</head>
+<body>
+<div id="hud" class="panel">
+  <h1>Hexapod MKII — full assembly (linkage model)</h1>
+  <div class="row"><span>links / joints</span><span class="val" id="counts">—</span></div>
+  <div class="row"><span>mass (URDF)</span><span class="val" id="mass">—</span></div>
+  <div class="row"><span>mode</span><span class="val" id="phase">—</span></div>
+  <div style="margin-top:6px;color:#8a93a6;font-size:12px">drag to orbit · scroll to zoom · click a part to identify it</div>
+</div>
+<div id="ctrl" class="panel">
+  <div>
+    <span class="btn" id="b_model">model: linkage</span>
+    <span class="btn" id="b_tint">colors: CAD</span>
+    <span class="btn" id="b_coll">collisions: off</span>
+  </div>
+  <div>
+    <span class="btn" id="b_zero">pose: zero</span>
+    <span class="btn" id="b_cad">pose: CAD</span>
+    <span class="btn" id="b_stand">pose: stand</span>
+    <span class="btn" id="b_walk">animate: tripod gait</span>
+  </div>
+  <div id="sliders"></div>
+</div>
+<div id="pick" class="panel">click a part to identify it</div>
+<div id="err"></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
+import URDFLoader from 'urdf-loader';
+
+const err = m => document.getElementById('err').textContent += m + "\n";
+window.addEventListener('error', e => err(e.message));
+const $ = id => document.getElementById(id);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x14161a);
+const camera = new THREE.PerspectiveCamera(40, innerWidth/innerHeight, 0.01, 50);
+camera.position.set(1.1, -1.3, 0.75);
+camera.up.set(0, 0, 1);
+const renderer = new THREE.WebGLRenderer({antialias: true});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+addEventListener('resize', () => { camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, 0.0);
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+const key = new THREE.DirectionalLight(0xffffff, 1.3); key.position.set(0.8, -1.0, 1.4); scene.add(key);
+const rim = new THREE.DirectionalLight(0x88aaff, 0.5); rim.position.set(-0.9, 0.7, 0.5); scene.add(rim);
+const fill = new THREE.DirectionalLight(0xffffff, 0.35); fill.position.set(0.2, 0.9, -0.6); scene.add(fill);
+const grid = new THREE.GridHelper(2.0, 40, 0x3a4150, 0x232833);
+grid.rotation.x = Math.PI/2; grid.position.z = -0.092; scene.add(grid);
+const axes = new THREE.AxesHelper(0.15); scene.add(axes);
+
+const LEGS = ['lf','lm','lr','rf','rm','rr'];
+const JOINTS = ['coxa_yaw','femur_pitch','tibia_pitch'];
+const LIM = { coxa_yaw: [-0.872665, 0.872665], femur_pitch: [0, 1.74533], tibia_pitch: [0, 2.53073] };
+const urls = { linkage: '/robot/hexapod_mkii_assy/urdf/hexapod_mkii_linkage.urdf', serial: '/robot/hexapod_mkii_assy/urdf/hexapod_mkii_serial.urdf' };
+let modelName = 'linkage', robot = null, useTints = false, showColl = false, animate = false;
+let colorMap = {}, cadPose = {};
+const q = {}; for (const L of LEGS) for (const J of JOINTS) q[`${L}_${J}`] = 0;
+
+const loader = new URDFLoader();
+loader.packages = { hexapod_mkii_assy: '/robot/hexapod_mkii_assy' };
+loader.parseCollision = true;
+// 1927 visuals share 77 STL files: fetch each file once and share the geometry
+const geomCache = new Map();
+let pendingMeshes = 0;
+loader.loadMeshCb = (path, manager, done) => {
+  if (!geomCache.has(path)) {
+    geomCache.set(path, new Promise((res, rej) => new STLLoader(manager).load(path, g => { g.computeVertexNormals(); res(g); }, undefined, rej)));
+  }
+  pendingMeshes++;
+  geomCache.get(path).then(geom => {
+    const mesh = new THREE.Mesh(geom, new THREE.MeshStandardMaterial({ color: 0x9aa3b2, metalness: 0.3, roughness: 0.55 }));
+    mesh.userData.file = path.split('/').pop();
+    done(mesh);
+  }).catch(() => { err('mesh fail: ' + path.split('/').pop()); done(null); }).finally(() => { pendingMeshes--; });
+};
+async function loadMeta(name) {
+  const txt = await (await fetch(urls[name])).text();
+  colorMap = {};
+  const mats = {};
+  for (const m of txt.matchAll(/<material name="([^"]+)"><color rgba="([^"]+)"/g)) mats[m[1]] = m[2].split(' ').map(Number);
+  const nL = (txt.match(/<link name=/g) || []).length, nJ = (txt.match(/<joint name=/g) || []).length;
+  let mass = 0; for (const m of txt.matchAll(/<mass value="([^"]+)"/g)) mass += parseFloat(m[1]);
+  $('counts').textContent = `${nL} / ${nJ}`; $('mass').textContent = mass.toFixed(3) + ' kg';
+  return mats;
+}
+function applyColors(r, mats) {
+  r.traverse(o => {
+    if (!o.isMesh) return;
+    if (o.isURDFCollider || (o.parent && o.parent.isURDFCollider)) return;
+    // urdf-loader assigns the URDF material to o.material when the material has a color; keep CAD color in userData
+    let c = null;
+    if (o.material && o.material.color) c = o.material.color.clone();
+    o.userData.cad = c;
+  });
+}
+const TINT = { body: 0xd9d9d9, coxa: 0xb490d9, femur: 0x7fa8d9, tibia: 0x8fd3a6, tibia_push_lever: 0xe8b45f, tibia_pushrod: 0xe8845f };
+function paint(r) {
+  for (const [ln, link] of Object.entries(r.links)) {
+    const kind = ln === 'body' ? 'body' : ln.replace(/^(lf|lm|lr|rf|rm|rr)_/, '');
+    link.traverse(o => {
+      if (!o.isMesh) return;
+      const coll = o.isURDFCollider || (o.parent && o.parent.isURDFCollider) || (o.parent && o.parent.parent && o.parent.parent.isURDFCollider);
+      if (coll) { o.visible = showColl; o.material = new THREE.MeshBasicMaterial({ color: 0xff5577, wireframe: true, transparent: true, opacity: 0.6 }); return; }
+      if (o.userData.painted !== true) { o.material = o.material.clone(); o.userData.painted = true; }
+      if (useTints && kind in TINT) o.material.color.setHex(TINT[kind]);
+      else if (o.userData.cad) o.material.color.copy(o.userData.cad);
+    });
+  }
+}
+function load(name) {
+  if (robot) { scene.remove(robot); robot = null; }
+  loadMeta(name).then(mats => loader.load(urls[name], r => {
+    robot = r;
+    r.traverse(o => { if (o.isMesh && o.material && o.material.color) o.userData.cad = o.material.color.clone(); });
+    // collision meshes: mark their subtree
+    r.traverse(o => { if (o.isURDFCollider) o.traverse(m => { if (m.isMesh) m.userData.isColl = true; }); });
+    paint(r); scene.add(r); buildSliders(); paintFrames = 0;
+    $('b_model').textContent = `model: ${name}`;
+    document.querySelector('#hud h1').textContent = `Hexapod MKII — full assembly (${name} model)`;
+  }, undefined, e => err('urdf fail: ' + e)));
+}
+fetch('/robot/hexapod_mkii_assy/assembly_report.json').then(r => r.json()).then(rep => {
+  for (const L of LEGS) { const a = rep.legs[L].cad_pose_joint_angles_rad; for (const J of JOINTS) cadPose[`${L}_${J}`] = a[J]; }
+}).catch(() => {});
+
+function buildSliders() {
+  const box = $('sliders'); box.innerHTML = '';
+  for (const L of LEGS) {
+    const d = document.createElement('div'); d.className = 'leg';
+    d.innerHTML = `<h2>${L} — ${({lf:'left front',lm:'left middle',lr:'left rear',rf:'right front',rm:'right middle',rr:'right rear'})[L]}</h2>`;
+    for (const J of JOINTS) {
+      const k = `${L}_${J}`; const [lo, hi] = LIM[J];
+      const row = document.createElement('div'); row.className = 'srow';
+      row.innerHTML = `<span class="l">${J}</span><input type="range" min="${lo}" max="${hi}" step="0.001" value="${q[k]}" id="s_${k}"><span class="v" id="v_${k}"></span>`;
+      d.appendChild(row);
+      const inp = row.querySelector('input'), lab = row.querySelector('.v');
+      const upd = () => { q[k] = parseFloat(inp.value); lab.textContent = `${q[k].toFixed(3)} rad`; };
+      inp.addEventListener('input', () => { animate = false; syncButtons(); upd(); }); upd();
+    }
+    box.appendChild(d);
+  }
+}
+function setPose(src) { for (const k in q) { q[k] = src[k] ?? 0; const s = $('s_' + k); if (s) { s.value = q[k]; $('v_' + k).textContent = `${q[k].toFixed(3)} rad`; } } }
+function syncButtons() {
+  $('b_tint').textContent = useTints ? 'colors: body tints' : 'colors: CAD';
+  $('b_coll').textContent = showColl ? 'collisions: on' : 'collisions: off';
+  $('b_walk').className = 'btn' + (animate ? ' on' : '');
+  $('phase').textContent = animate ? 'tripod gait animation' : 'manual sliders';
+}
+$('b_model').onclick = () => { modelName = modelName === 'linkage' ? 'serial' : 'linkage'; load(modelName); };
+$('b_tint').onclick = () => { useTints = !useTints; if (robot) paint(robot); syncButtons(); };
+$('b_coll').onclick = () => { showColl = !showColl; if (robot) paint(robot); syncButtons(); };
+$('b_zero').onclick = () => { animate = false; setPose({}); syncButtons(); };
+$('b_cad').onclick = () => { animate = false; setPose(cadPose); syncButtons(); };
+$('b_stand').onclick = () => { animate = false; const p = {}; for (const L of LEGS) { p[`${L}_coxa_yaw`] = 0; p[`${L}_femur_pitch`] = 0.6; p[`${L}_tibia_pitch`] = 2.23; } setPose(p); syncButtons(); };
+$('b_walk').onclick = () => { animate = !animate; syncButtons(); };
+syncButtons();
+load(modelName);
+
+const ray = new THREE.Raycaster();
+renderer.domElement.addEventListener('pointerdown', ev => {
+  if (!robot) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  const xy = new THREE.Vector2(((ev.clientX-r.left)/r.width)*2-1, -((ev.clientY-r.top)/r.height)*2+1);
+  ray.setFromCamera(xy, camera);
+  const hits = ray.intersectObject(robot, true).filter(h => h.object.isMesh && h.object.visible && !h.object.userData.isColl);
+  if (!hits.length) return;
+  const m = hits[0].object;
+  let link = m.parent; while (link && !link.isURDFLink) link = link.parent;
+  $('pick').textContent = `part: ${m.userData.file || '?'}  |  link: ${link ? link.name : '?'}`;
+  m.material.emissive = new THREE.Color(0xff2255);
+  setTimeout(() => m.material.emissive = new THREE.Color(0x000000), 1200);
+});
+
+const clock = new THREE.Clock();
+const TRIPOD_A = new Set(['lf','lr','rm']);
+function gait(t) {
+  const w = t * 2 * Math.PI * 0.8; // 0.8 Hz
+  const out = {};
+  for (const L of LEGS) {
+    const ph = TRIPOD_A.has(L) ? w : w + Math.PI;
+    const swing = Math.max(0, Math.sin(ph));           // >0 during swing
+    const yawSign = L.startsWith('l') ? 1 : -1;
+    out[`${L}_coxa_yaw`] = 0.25 * Math.cos(ph) * yawSign;
+    out[`${L}_femur_pitch`] = 0.6 + 0.45 * swing;
+    out[`${L}_tibia_pitch`] = 2.23 - 0.5 * swing;
+  }
+  return out;
+}
+let paintFrames = 0;
+renderer.setAnimationLoop(() => {
+  if (robot && (pendingMeshes > 0 || paintFrames < 240)) {
+    if ((paintFrames++ % 15) === 0) {
+      robot.traverse(o => { if (o.isMesh && !o.userData.painted && !o.userData.isColl && o.material && o.material.color) o.userData.cad = o.material.color.clone(); });
+      paint(robot);
+    }
+  }
+  if (robot) {
+    if (animate) setPose(gait(clock.getElapsedTime()));
+    for (const L of LEGS) {
+      for (const J of JOINTS) { const j = robot.joints[`${L}_${J}`]; if (j) j.setJointValue(q[`${L}_${J}`]); }
+      const k = q[`${L}_tibia_pitch`];
+      const jl = robot.joints[`${L}_tibia_lever_pivot`], jr = robot.joints[`${L}_tibia_rod_pivot`];
+      if (jl) jl.setJointValue(k); if (jr) jr.setJointValue(-k);
+    }
+  }
+  controls.update();
+  renderer.render(scene, camera);
+});
+window.__dbg = { scene, camera, controls, THREE, robot: () => robot, q };
+</script>
+</body>
+</html>

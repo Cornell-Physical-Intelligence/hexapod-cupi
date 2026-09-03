@@ -13,6 +13,9 @@ via the 1-DOF hinge constraint).
 - `part_overrides.json` — user-verified rigid attachments the bore geometry
   cannot decide (knee mount rings + their four +y M3 screws -> femur, RS05
   output hub -> push lever). Survives re-exports.
+- `leg_parts.json` — the complete per-body record (frames, inertials, every
+  part instance in the export frame) consumed by `robot/tools/import_onshape_hexapod.py`
+  to build the six-leg assembly (`robot/hexapod_mkii_assy`).
 - Mass 0.7888 kg to Onshape's exact fused value; assembled COM within 0.4 mm.
 - Preview: `robot/hexapod_leg_v2/preview/index.html` (serves both models,
   CAD colors, body-tint debug toggle, click-to-identify).
