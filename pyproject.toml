@@ -1,0 +1,62 @@
+# Workspace root for the hexapod-cupi repository, managed with uv.
+#
+# What this covers: the local developer environment and CI. `uv sync` creates
+# `.venv/` with the six workspace packages installed editable plus the test
+# dependencies below, and `uv run ...` executes inside it. `uv.lock` pins the
+# exact versions for everyone.
+#
+# What this does not cover: training. Isaac Sim / Isaac Lab / RSL-RL run in the
+# Spark's Docker image through `/workspace/isaaclab/_isaac_sim/python.sh` with
+# `PYTHONPATH=/workspace/hexapod/isaaclab` (docs/OPERATIONS.md). Nothing here is
+# installed in that container; the packages keep empty install requirements for
+# exactly that reason. ROS 2 packages under `ros2_ws/` are built with colcon, not
+# uv.
+
+[project]
+name = "hexapod-cupi"
+version = "0.1.0"
+description = "Hexapod MKII autonomy: locomotion training, contracts, runtime, navigation seam, and evidence."
+requires-python = ">=3.10"
+dependencies = [
+    "hexapod-core",
+    "hexapod-env",
+    "hexapod-eval",
+    "hexapod-nav",
+    "hexapod-runtime",
+    "hexapod-train",
+]
+
+[dependency-groups]
+# Everything `python -m unittest discover -s isaaclab/tests` needs beyond the
+# standard library. Installed by default with `uv sync`.
+dev = [
+    "torch>=2.4",
+    "numpy>=1.26",
+    "pyyaml>=6.0",
+    "opencv-python-headless>=4.9",
+]
+
+[tool.uv]
+# The root is a virtual project: it groups the packages and holds the lockfile
+# but is never built or installed itself.
+package = false
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+hexapod-core = { workspace = true }
+hexapod-env = { workspace = true }
+hexapod-eval = { workspace = true }
+hexapod-nav = { workspace = true }
+hexapod-runtime = { workspace = true }
+hexapod-train = { workspace = true }
+# Tests only need CPU torch. On Linux the PyPI wheel drags in the CUDA stack
+# (several GB); the CPU index keeps laptops and CI light. macOS wheels on PyPI
+# are already CPU-only.
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

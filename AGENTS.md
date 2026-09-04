@@ -131,7 +131,7 @@ Troubleshooting:
 
 - From a new Onshape export (`onshape-to-robot`, single merged link):
   `python3 robot/tools/import_onshape_hexapod.py --source "<export dir>"`
-  (numpy + scipy; reads the leg record `robot/hexapod_leg_v3/leg_parts.json`,
+  (numpy, in the uv environment; reads the leg record `robot/hexapod_leg_v3/leg_parts.json`,
   `part_overrides.json`, `joint_limits.json`; writes both URDFs and
   `assembly_report.md`). Read the report: every leg body must register at
   sub-0.1 mm, no leg part may be missing, and the mass totals must match.
@@ -148,10 +148,10 @@ Troubleshooting:
 
 ## Checks that must stay green
 
-- `python3 -m unittest discover -s isaaclab/tests` from the repo root (no
-  Isaac Sim needed; without `torch`/`numpy` the dependent modules surface as
-  import errors and the rest runs; read the total off the run, it grows with
-  every test). `test_mkii_v1_asset_contract.py` covers this asset.
+- `uv sync` once, then `uv run python -m unittest discover -s isaaclab/tests`
+  from the repo root (no Isaac Sim needed; the lockfile carries torch, numpy,
+  pyyaml, and opencv; read the total off the run, it grows with every test).
+  `test_mkii_v1_asset_contract.py` covers this asset.
 - `python3 -c "import xml.etree.ElementTree as ET; ET.parse('robot/hexapod_mkii_assy/urdf/hexapod_mkii_serial.urdf')"`
   plus the structural checks in `robot/hexapod_mkii_assy/README.md`
   (unique names, all meshes present, positive-definite inertia, lower < upper).
