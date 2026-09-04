@@ -194,6 +194,9 @@ def build(args):
              "dropped_visuals": dropped, **extra}
     b64 = base64.b64encode(bytes(blob)).decode("ascii")
     html = Path(args.template).read_text()
+    core = Path(args.template).parent / "hexapod_core.js"
+    if "__CORE_JS__" in html:
+        html = html.replace("__CORE_JS__", core.read_text())
     html = html.replace("__MODEL__", json.dumps(model, separators=(",", ":"))).replace("__BLOB__", b64)
     Path(args.out).write_text(html)
     print(f"{len(meshes)} meshes, {sum(m['nt'] for m in meshes)} triangles, {sum(len(l['v']) for l in links.values())} visuals "

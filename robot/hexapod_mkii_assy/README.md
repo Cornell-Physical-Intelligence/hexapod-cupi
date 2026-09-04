@@ -26,21 +26,33 @@ python3 robot/tools/import_onshape_hexapod.py \
   know (the screw head caps are hard-attached to the first joint bottom plate).
   The yaw motor split (output flange + hub fixed to the frame, everything else
   rotating with the coxa) is the importer's `--yaw-output-side` rule.
-- `preview/standalone_template.html` + `robot/tools/pack_urdf_viewer.py` —
-  build the single-file viewer (meshes embedded, CAD feature edges
-  precomputed from the 22 deg dihedral threshold) that is published as the
-  shareable web preview. Styles: CAD colours, tint by link, tint by leg,
-  white + edges, white shaded, hidden line, ghost (x-ray), blueprint.
-  Two-level explode (assemblies away from the body, parts away from their
-  link) with an animated showcase, section cut on any axis, isolate by part,
-  link, leg, class or name search, in-canvas labels, ground shadows, centre
-  of mass marker, two-point measure, joint sliders and poses (zero, stance,
-  as exported, tripod gait), snapshot lightbox. Headless renders: open the
-  page with `?capture=<name>&post=http://localhost:8322/save&w=2400&h=1600`
+- `preview/hexapod_core.js` — the shared engine (mesh unpacking with CAD
+  feature edges, kinematic tree, styles, explode, section cut, labels,
+  shadows, capture) inlined into both pages by `robot/tools/pack_urdf_viewer.py`.
+- `preview/standalone_template.html` — the interactive viewer (published as
+  the shareable web preview). Styles: CAD colours, tint by link, tint by leg,
+  white + edges, white shaded, hidden line, ghost (x-ray), blueprint; face,
+  edge and background colour pickers, background "none" for transparent PNG
+  export. Two-level explode (assemblies away from the body, parts away from
+  their link; fasteners travel along their own axis, screws toward the head)
+  with an animated showcase, section cut on any axis, isolate by part, link,
+  leg, class or name search, in-canvas labels, ground shadows, centre of mass
+  marker, two-point measure, joint sliders and poses (zero, stance, as
+  exported, tripod gait), snapshot lightbox (opaque or transparent).
+  Headless renders: `?capture=<name>&post=http://localhost:8322/save&w=2400&h=1600`
   plus `style=`, `view=iso|top|front|side` or `theta=&phi=`, `explode=`,
   `parts=`, `isolate=lf,body`, `hide=fastener`, `labels=1`, `shadows=1`,
-  `section=y&sectionAt=0`, `pose=stance`; the page posts a PNG to the
-  `post` URL (a 20-line `http.server` that decodes base64 into a file).
+  `section=y&sectionAt=0`, `pose=stance`, `bg=hex|none`, `face=hex`,
+  `edge=hex`, `grid=0`, `transparent=1`; the page posts a PNG to the `post`
+  URL (a 20-line `http.server` that decodes base64 into a file).
+- `preview/showcase_template.html` — a clean auto-playing tour for a website
+  (no controls): reveal, leg fly-through, exploded views, blueprint, x-ray,
+  section sweep, tripod gait, plan view, looping with fades and captions.
+  Query options: `bg=hex`, `face=hex`, `edge=hex`, `captions=0`, `speed=`,
+  `shots=reveal,explode,...`; click pauses. Pack with
+  `python3 robot/tools/pack_urdf_viewer.py --template robot/hexapod_mkii_assy/preview/showcase_template.html --out tmp/hexapod_mkii_showcase.html`
+  and drop the single HTML file into the site (it loads three.js from cdnjs
+  and fonts from Google Fonts).
 - `preview/index.html` — three.js viewer: 18 sliders, zero / CAD / stand
   poses, tripod-gait animation, CAD colours or body tints, collision shapes,
   click-to-identify. Serve the repo root (`.claude/launch.json` →

@@ -26,7 +26,7 @@
 }
 html,body{margin:0;height:100%;overflow:hidden;background:var(--ground);color:var(--ink);font:14px/1.4 var(--ui)}
 *{box-sizing:border-box}
-#stage{position:fixed;inset:0}
+#stage{position:fixed;inset:0;background:var(--ground)}
 #stage canvas{display:block;width:100%;height:100%;touch-action:none}
 .panel{position:fixed;background:var(--panel);border:1px solid var(--line);border-radius:6px;backdrop-filter:blur(6px)}
 #plate{top:14px;left:14px;padding:12px 14px 10px;min-width:250px;max-width:330px}
@@ -45,13 +45,15 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--ground);color:va
 .group{margin-bottom:12px}
 .group .lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:0 0 6px;display:flex;justify-content:space-between}
 .group .lbl output{font-family:var(--mono);text-transform:none;letter-spacing:0;color:var(--ink-2)}
-.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .btn{font:500 13px var(--ui);color:var(--ink);background:var(--raised);border:1px solid var(--line-2);border-radius:4px;padding:6px 10px;cursor:pointer;user-select:none;line-height:1.1}
 .btn:hover{border-color:var(--ink-3)}
 .btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .btn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
 .btn.sm{padding:3px 7px;font-size:12px}
 .btn.off{opacity:.45;text-decoration:line-through}
+.swatch{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--ink-2)}
+.swatch input[type=color]{width:26px;height:22px;padding:0;border:1px solid var(--line-2);border-radius:4px;background:none;cursor:pointer}
 .chips{display:grid;grid-template-columns:34px repeat(5,1fr);gap:4px;align-items:center;margin:3px 0}
 .chips .legname{font:600 12px var(--display);color:var(--ink-2)}
 .leg{border-top:1px solid var(--line);padding-top:8px;margin-top:10px}
@@ -69,14 +71,14 @@ input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:2
 #selActions{display:none;gap:6px;flex-wrap:wrap}
 #legend{display:none;flex-wrap:wrap;gap:6px 12px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-2)}
 #legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
-#dockToggle,#dockClose{display:none}
 #search{display:flex;gap:6px}
 #search input{flex:1;font:13px var(--ui);color:var(--ink);background:var(--raised);border:1px solid var(--line-2);border-radius:4px;padding:6px 8px}
 #search input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 #lightbox{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;place-items:center;z-index:6;padding:24px}
-#lightbox img{max-width:100%;max-height:calc(100% - 40px);border:1px solid var(--line-2);background:#fff}
+#lightbox img{max-width:100%;max-height:calc(100% - 40px);border:1px solid var(--line-2);background:repeating-conic-gradient(#d9dde3 0 25%,#f2f4f7 0 50%) 0 0/16px 16px}
 #lightbox .cap{color:#e2e7ee;font:13px var(--ui);margin-top:8px;text-align:center}
 #measureOut{font-family:var(--mono);font-size:12.5px;color:var(--accent);margin-top:6px;display:none}
+#dockToggle,#dockClose{display:none}
 #dockToggle{position:fixed;right:14px;bottom:14px;z-index:3}
 #loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--ground);z-index:5;font:500 14px var(--ui);color:var(--ink-2)}
 #loading .bar{width:220px;height:3px;background:var(--line);margin-top:10px;overflow:hidden;border-radius:2px}
@@ -114,12 +116,22 @@ body.capture .panel,body.capture #dockToggle{display:none !important}
   <div class="head"><span>Controls</span><button class="btn" id="dockClose">Close</button></div>
   <div class="scroll">
     <div class="group"><p class="lbl">Style</p><div class="seg" id="styles"></div></div>
+    <div class="group"><p class="lbl">Colours</p><div class="seg">
+      <label class="swatch"><input type="color" id="cFace" value="#f4f6f8">faces</label>
+      <label class="swatch"><input type="color" id="cEdge" value="#141a21">edges</label>
+      <button class="btn sm" id="bEdgeAuto" title="edge colour follows the style">auto</button>
+      <label class="swatch"><input type="color" id="cBg" value="#fafbfc">background</label>
+      <button class="btn sm on" id="bBgAuto" title="background follows the style">auto</button>
+      <button class="btn sm" id="bBgNone" title="transparent canvas and transparent PNG exports">none</button>
+    </div></div>
     <div class="group"><p class="lbl">Overlays</p><div class="seg">
+      <button class="btn sm on" id="bGrid">Grid</button>
       <button class="btn sm" id="bLabels">Labels</button>
       <button class="btn sm" id="bShadow">Shadows</button>
       <button class="btn sm" id="bCom">Centre of mass</button>
       <button class="btn sm" id="bMeasure">Measure</button>
       <button class="btn sm" id="bSnap">Snapshot</button>
+      <button class="btn sm" id="bSnapT">Snapshot (transparent)</button>
     </div><div id="measureOut"></div></div>
     <div class="group"><p class="lbl">View</p><div class="seg">
       <button class="btn sm" data-view="iso">Iso</button>
@@ -188,295 +200,30 @@ body.capture .panel,body.capture #dockToggle{display:none !important}
 <script id="blob" type="text/plain">__BLOB__</script>
 <script type="module">
 import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.min.js";
-
+__CORE_JS__
 window.__lastError = null;
 addEventListener("error", e => { window.__lastError = `${e.message} @${e.lineno}:${e.colno}`; const st = document.getElementById("status"); if (st) st.textContent = "error: " + window.__lastError; });
 addEventListener("unhandledrejection", e => { window.__lastError = "rejection: " + (e.reason && e.reason.message || e.reason); });
 const MODEL = JSON.parse(document.getElementById("model").textContent);
-const B64 = document.getElementById("blob").textContent.trim();
+const BLOB = document.getElementById("blob").textContent.trim();
 const $ = id => document.getElementById(id);
 const PARAMS = new URLSearchParams(location.search);
 const CAPTURE = PARAMS.get("capture");
 if (CAPTURE) document.body.classList.add("capture");
-const LEGS = ["lf","lm","lr","rf","rm","rr"];
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const V = createHexapodCore(THREE, MODEL, BLOB, $("stage"), {preserveDrawingBuffer: !!CAPTURE, onLook: look => { document.documentElement.dataset.look = look; }});
+const {LEGS, JOINTS, BODIES, STYLES, meshes, jointVal, state, view, renderer, camera, scene} = V;
 const LEG_NAMES = {lf:"left front",lm:"left middle",lr:"left rear",rf:"right front",rm:"right middle",rr:"right rear"};
-const JOINTS = ["coxa_yaw","femur_pitch","tibia_pitch"];
-const BODIES = ["coxa","femur","tibia","tibia_push_lever","tibia_pushrod"];
 const BODY_SHORT = {coxa:"coxa",femur:"femur",tibia:"tibia",tibia_push_lever:"lever",tibia_pushrod:"rod"};
 const CLASS_TINT = {body:"--t-body",coxa:"--t-coxa",femur:"--t-femur",tibia:"--t-tibia",tibia_push_lever:"--t-lever",tibia_pushrod:"--t-rod"};
-const FASTENER = /screw|nut|washer|standoff__|cirpattern|revolve|mirror1|pem_|cut_extrude|bearing_insert/i;
-const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const linkClass = n => n === "body" ? "body" : n.replace(/^(lf|lm|lr|rf|rm|rr)_/, "");
-const legOf = n => n === "body" ? null : n.slice(0, 2);
-const partClass = n => FASTENER.test(n) ? "fastener" : /^motor_/.test(n) ? "motor" : /cover|screw_head_cap/.test(n) ? "cover" : "structure";
-
-// ---------- unpack meshes (positions quantised to 16 bit, indexed triangles, feature edges)
-function decode(b64){ const bin = atob(b64); const out = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i); return out.buffer; }
-const buf = decode(B64);
-const geoms = MODEL.meshes.map(m => {
-  const q = new Int16Array(buf, m.op, m.nv * 3);
-  const pos = new Float32Array(m.nv * 3);
-  for (let i = 0; i < m.nv; i++) for (let k = 0; k < 3; k++) pos[i*3+k] = m.min[k] + (q[i*3+k] + 32768) / 65535 * m.span[k];
-  const idx = m.i32 ? new Uint32Array(buf, m.oi, m.nt * 3) : new Uint16Array(buf, m.oi, m.nt * 3);
-  const g = new THREE.BufferGeometry();
-  g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-  g.setIndex(new THREE.BufferAttribute(idx.slice(), 1));
-  g.computeVertexNormals(); g.computeBoundingSphere();
-  const eIdx = m.i32 ? new Uint32Array(buf, m.oe, m.ne * 2) : new Uint16Array(buf, m.oe, m.ne * 2);
-  const eg = new THREE.BufferGeometry();
-  eg.setAttribute("position", g.getAttribute("position"));
-  eg.setIndex(new THREE.BufferAttribute(eIdx.slice(), 1));
-  g.userData.edges = eg;
-  return g;
-});
-
-// ---------- scene
-const stage = $("stage");
-const renderer = new THREE.WebGLRenderer({antialias:true, powerPreference:"high-performance", preserveDrawingBuffer:!!CAPTURE});
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setSize(stage.clientWidth, stage.clientHeight);
-stage.appendChild(renderer.domElement);
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(38, stage.clientWidth / stage.clientHeight, 0.01, 60);
-camera.up.set(0,0,1);
-const hemi = new THREE.HemisphereLight(0xdfe8ff, 0x2a2622, 0.85); scene.add(hemi);
-const key = new THREE.DirectionalLight(0xffffff, 1.7); key.position.set(1.0, -1.3, 1.9); scene.add(key);
-const fill = new THREE.DirectionalLight(0x8fb7ff, 0.45); fill.position.set(-1.1, 0.9, 0.6); scene.add(fill);
-const rim = new THREE.DirectionalLight(0xffd9a0, 0.35); rim.position.set(0.3, 1.2, -0.4); scene.add(rim);
-
-// materials: polygon offset lets the edge lines sit cleanly on the faces
-const PO = {polygonOffset:true, polygonOffsetFactor:1, polygonOffsetUnits:1};
-const cadMats = MODEL.colors.map(c => new THREE.MeshStandardMaterial({color:new THREE.Color(c), metalness:0.28, roughness:0.58, flatShading:true, ...PO}));
-const tintMats = Object.fromEntries(Object.entries(CLASS_TINT).map(([k,v]) => [k, new THREE.MeshStandardMaterial({color:new THREE.Color(css(v)), metalness:0.15, roughness:0.65, flatShading:true, ...PO})]));
-const whiteFlat = new THREE.MeshBasicMaterial({color:0xffffff, ...PO});
-const whiteShaded = new THREE.MeshStandardMaterial({color:0xf4f6f8, metalness:0.0, roughness:0.9, flatShading:true, ...PO});
-const hiddenMat = new THREE.MeshBasicMaterial({colorWrite:false, ...PO});
-const edgeMat = new THREE.LineBasicMaterial({color:0xe3e9f2, transparent:true, opacity:0.8});
-const collMat = new THREE.MeshBasicMaterial({color:0xf2b544, wireframe:true, transparent:true, opacity:0.55, depthTest:false});
-const hiMat = new THREE.MeshStandardMaterial({color:0xffffff, emissive:new THREE.Color(0xff3b6b), emissiveIntensity:0.9, flatShading:true, ...PO});
-const ghostMat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.10, depthWrite:false, ...PO});
-const LEG_TINTS = {body:0xc9ced6, lf:0xf07c5a, lm:0xf2b544, lr:0x8fd35a, rf:0x5aa9e6, rm:0xb48ee6, rr:0x5ad3c9};
-const legMats = Object.fromEntries(Object.entries(LEG_TINTS).map(([k, c]) => [k, new THREE.MeshStandardMaterial({color:new THREE.Color(c), metalness:0.15, roughness:0.65, flatShading:true, ...PO})]));
-const STYLES = {
-  cad:      {label:"CAD colours",   look:"dark",      edges:false, mat:m => m.userData.cad},
-  tint:     {label:"Tint by link",  look:"dark",      edges:false, mat:m => tintMats[m.userData.cls]},
-  tintLeg:  {label:"Tint by leg",   look:"dark",      edges:false, mat:m => legMats[m.userData.leg || "body"]},
-  white:    {label:"White + edges", look:"light",     edges:true,  mat:() => whiteFlat},
-  shaded:   {label:"White shaded",  look:"light",     edges:true,  mat:() => whiteShaded},
-  hidden:   {label:"Hidden line",   look:"light",     edges:true,  mat:() => hiddenMat},
-  ghost:    {label:"Ghost",         look:"light",     edges:true,  mat:() => ghostMat},
-  blueprint:{label:"Blueprint",     look:"blueprint", edges:true,  mat:() => hiddenMat},
-};
-
-// ---------- kinematic tree
-const linkObj = {}, jointObj = {}, meshes = [], collObjs = [], axisObjs = [];
-const robot = new THREE.Group(); scene.add(robot);
-for (const [name, L] of Object.entries(MODEL.links)) {
-  const g = new THREE.Group(); g.name = name; linkObj[name] = g;
-  const cls = linkClass(name);
-  for (const [mi, p, q, ci] of L.v) {
-    const m = new THREE.Mesh(geoms[mi], cadMats[ci]);
-    m.position.set(...p); m.quaternion.set(...q);
-    const e = new THREE.LineSegments(geoms[mi].userData.edges, edgeMat);
-    e.position.copy(m.position); e.quaternion.copy(m.quaternion); e.visible = false;
-    const pn = MODEL.meshes[mi].n;
-    m.userData = {part: pn, link: name, cls, leg: legOf(name), cad: cadMats[ci], ci, fastener: FASTENER.test(pn), pclass: partClass(pn), edge: e, rest: m.position.clone(), hidden: false};
-    g.add(m); g.add(e); meshes.push(m);
-  }
-  for (const [t, p, q, s] of L.c) {
-    let geo;
-    if (t === "box") geo = new THREE.BoxGeometry(s[0], s[1], s[2]);
-    else if (t === "cyl") { geo = new THREE.CylinderGeometry(s[0], s[0], s[1], 28, 1, true); geo.rotateX(Math.PI/2); }
-    else geo = new THREE.SphereGeometry(s[0], 14, 10);
-    const c = new THREE.Mesh(geo, collMat); c.position.set(...p); c.quaternion.set(...q); c.visible = false; c.userData.coll = true;
-    g.add(c); collObjs.push(c);
-  }
-}
-const jointVal = {};
-for (const J of MODEL.joints) {
-  const jg = new THREE.Group(); jg.name = J.n;
-  jg.position.set(...J.p); jg.quaternion.set(...J.q);
-  jg.userData = {base: jg.quaternion.clone(), axis: new THREE.Vector3(...J.axis).normalize(), spec: J};
-  linkObj[J.parent].add(jg); jg.add(linkObj[J.child]); jointObj[J.n] = jg;
-  jointVal[J.n] = 0;
-  const ax = new THREE.ArrowHelper(jg.userData.axis, new THREE.Vector3(), 0.05, 0xf2b544, 0.014, 0.008);
-  ax.visible = false; jg.add(ax); axisObjs.push(ax);
-}
-robot.add(linkObj.body);
-function applyJoints(){
-  for (const J of MODEL.joints) {
-    let v = jointVal[J.n];
-    if (J.mimic) v = jointVal[J.mimic.j] * J.mimic.k + J.mimic.o, jointVal[J.n] = v;
-    const jg = jointObj[J.n];
-    jg.quaternion.copy(jg.userData.base).multiply(new THREE.Quaternion().setFromAxisAngle(jg.userData.axis, v));
-  }
-}
-applyJoints();
-robot.updateMatrixWorld(true);
-
-// rest geometry for the explode: link centroids (world, zero pose) and part offsets from their link centroid
-const tmpV = new THREE.Vector3(), tmpQ = new THREE.Quaternion();
-const linkRest = {};
-const bodyCentre = new THREE.Vector3();
-{
-  const acc = {};
-  for (const m of meshes) {
-    const c = geoms[MODEL.links[m.userData.link].v[0][0]] ? m.geometry.boundingSphere.center.clone() : new THREE.Vector3();
-    const cLocal = c.clone().applyQuaternion(m.quaternion).add(m.position); // in the link frame
-    m.userData.cLocal = cLocal;
-    (acc[m.userData.link] ??= []).push(cLocal);
-  }
-  for (const [name, list] of Object.entries(acc)) {
-    const centreLocal = list.reduce((s, v) => s.add(v), new THREE.Vector3()).multiplyScalar(1 / list.length);
-    const centreWorld = linkObj[name].localToWorld(centreLocal.clone());
-    linkRest[name] = {centreLocal, centreWorld};
-  }
-  bodyCentre.copy(linkRest.body.centreWorld);
-  for (const [name, r] of Object.entries(linkRest)) {
-    const d = r.centreWorld.clone().sub(bodyCentre); d.z = 0;
-    if (d.lengthSq() < 1e-9) d.set(1, 0, 0);
-    d.normalize(); d.z = 0.28; d.normalize();
-    r.dirWorld = d;
-    r.level = name === "body" ? 0 : ({coxa:1, femur:1, tibia:1, tibia_push_lever:0.55, tibia_pushrod:0.55})[linkClass(name)];
-  }
-  for (const m of meshes) {
-    const off = m.userData.cLocal.clone().sub(linkRest[m.userData.link].centreLocal);
-    const n = off.length() > 1e-6 ? off.clone().normalize() : new THREE.Vector3(0, 0, 1);
-    m.userData.dir = off.multiplyScalar(0.7).addScaledVector(n, 0.05); // damped proportional plus a minimum gap
-  }
-}
-let explodeLinks = 0, explodeParts = 0;
-const LINK_STEP = 0.14;
-function applyExplode(){
-  robot.updateMatrixWorld(true);
-  for (const [name, g] of Object.entries(linkObj)) {
-    if (name === "body") continue;
-    g.parent.getWorldQuaternion(tmpQ);
-    tmpV.copy(linkRest[name].dirWorld).applyQuaternion(tmpQ.invert());
-    g.position.copy(tmpV).multiplyScalar(explodeLinks * LINK_STEP * linkRest[name].level);
-  }
-  for (const m of meshes) {
-    m.position.copy(m.userData.rest).addScaledVector(m.userData.dir, explodeParts);
-    m.userData.edge.position.copy(m.position);
-  }
-}
-
-// frame the robot; floor grid at the lowest foot point of the zero pose
-const box = new THREE.Box3().setFromObject(robot);
-const centre = box.getCenter(new THREE.Vector3());
-const radius = box.getSize(new THREE.Vector3()).length() / 2;
-const grid = new THREE.GridHelper(3.0, 30, 0x3a4352, 0x232a35);
-grid.rotation.x = Math.PI/2; grid.position.set(0, 0, box.min.z - 0.002); scene.add(grid);
-const axes = new THREE.AxesHelper(0.12); axes.position.z = box.min.z; scene.add(axes);
-const size = box.getSize(new THREE.Vector3());
-$("kEnv").textContent = `${(size.y*1000).toFixed(0)} x ${(size.x*1000).toFixed(0)} x ${(size.z*1000).toFixed(0)} mm (L x W x H, zero pose)`;
-// ground shadow (toggle): the key light casts onto a shadow-only plane at the floor
-renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
-Object.assign(key.shadow.camera, {left:-1.2, right:1.2, top:1.2, bottom:-1.2, near:0.1, far:8}); key.shadow.bias = -0.0005; key.shadow.radius = 3;
-const shadowPlane = new THREE.Mesh(new THREE.PlaneGeometry(6, 6), new THREE.ShadowMaterial({opacity:0.22}));
-shadowPlane.position.z = box.min.z - 0.001; shadowPlane.receiveShadow = true; shadowPlane.visible = false; scene.add(shadowPlane);
-let shadows = false;
-function setShadows(on){ shadows = on; shadowPlane.visible = on; meshes.forEach(m => m.castShadow = on); $("bShadow").classList.toggle("on", on); }
-// centre of mass marker
-const comGroup = new THREE.Group(); comGroup.visible = false; scene.add(comGroup);
-comGroup.add(new THREE.Mesh(new THREE.SphereGeometry(0.012, 20, 14), new THREE.MeshBasicMaterial({color:0xff3b6b, depthTest:false})));
-for (const [a, b] of [[[-0.05,0,0],[0.05,0,0]], [[0,-0.05,0],[0,0.05,0]], [[0,0,-0.05],[0,0,0.05]]]) comGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...a), new THREE.Vector3(...b)]), new THREE.LineBasicMaterial({color:0xff3b6b, depthTest:false})));
-comGroup.renderOrder = 999;
-const totalMass = Object.values(MODEL.links).reduce((s, l) => s + l.m, 0);
-function updateCom(){
-  const acc = new THREE.Vector3();
-  for (const [name, L] of Object.entries(MODEL.links)) acc.addScaledVector(linkObj[name].localToWorld(new THREE.Vector3(...(L.com || [0,0,0]))), L.m);
-  comGroup.position.copy(acc.multiplyScalar(1 / totalMass));
-}
-// in-canvas labels (sprites, captured in snapshots)
-function textSprite(text, fg, bg){
-  const c = document.createElement("canvas"); const ctx = c.getContext("2d"); const font = "600 40px Barlow, Helvetica, Arial, sans-serif";
-  ctx.font = font; const w = Math.ceil(ctx.measureText(text).width) + 36; c.width = w; c.height = 60;
-  ctx.font = font; ctx.fillStyle = bg; ctx.beginPath(); ctx.roundRect(0, 0, w, 60, 10); ctx.fill();
-  ctx.fillStyle = fg; ctx.textBaseline = "middle"; ctx.fillText(text, 18, 32);
-  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
-  const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex, depthTest:false, transparent:true, sizeAttenuation:false}));
-  sp.scale.set(w / 2200, 60 / 2200, 1); sp.renderOrder = 998; sp.userData.canvas = c; return sp;
-}
-const labels = {};
-function makeLabels(){
-  const light = document.documentElement.dataset.look !== "dark";
-  for (const sp of Object.values(labels)) scene.remove(sp);
-  for (const name of Object.keys(MODEL.links)) labels[name] = textSprite(name === "body" ? "body" : name.replace("_", " · ").replace("tibia_push_lever", "lever").replace("tibia_pushrod", "rod"), light ? "#f7f8fa" : "#1b2129", light ? "rgba(27,33,41,.88)" : "rgba(242,244,247,.9)");
-  for (const sp of Object.values(labels)) { sp.visible = false; scene.add(sp); }
-}
-let labelsOn = false;
-function updateLabels(){
-  for (const [name, sp] of Object.entries(labels)) {
-    const anyVisible = meshes.some(m => m.userData.link === name && m.visible);
-    sp.visible = labelsOn && anyVisible;
-    if (sp.visible) sp.position.copy(linkObj[name].localToWorld(linkRest[name].centreLocal.clone())).addScaledVector(new THREE.Vector3(0, 0, 1), 0.045);
-  }
-}
-// measure tool: two clicks give a distance
-const measure = {on:false, a:null, line:null, label:null};
-const measureMat = new THREE.LineBasicMaterial({color:0xff3b6b, depthTest:false});
-function clearMeasure(){ if (measure.line) scene.remove(measure.line); if (measure.label) scene.remove(measure.label); measure.a = null; measure.line = null; measure.label = null; $("measureOut").style.display = "none"; }
-function measureClick(pt){
-  if (!measure.a) { clearMeasure(); measure.a = pt.clone(); $("measureOut").style.display = "block"; $("measureOut").textContent = "first point set — click the second point"; return; }
-  const b = pt.clone(), d = measure.a.distanceTo(b);
-  measure.line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([measure.a, b]), measureMat); measure.line.renderOrder = 999; scene.add(measure.line);
-  measure.label = textSprite(`${(d*1000).toFixed(1)} mm`, "#ffffff", "rgba(255,59,107,.92)"); measure.label.position.copy(measure.a).lerp(b, 0.5); scene.add(measure.label);
-  $("measureOut").textContent = `${(d*1000).toFixed(2)} mm  (dx ${((b.x-measure.a.x)*1000).toFixed(1)}, dy ${((b.y-measure.a.y)*1000).toFixed(1)}, dz ${((b.z-measure.a.z)*1000).toFixed(1)})`;
-  measure.a = null;
-}
-// section cut: one global clipping plane
-const section = {axis:"off", flip:1, t:0};
-const plane = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
-function applySection(){
-  if (section.axis === "off") { renderer.clippingPlanes = []; $("oSec").value = "off"; return; }
-  const n = new THREE.Vector3(section.axis === "x" ? 1 : 0, section.axis === "y" ? 1 : 0, section.axis === "z" ? 1 : 0).multiplyScalar(section.flip);
-  const lo = box.min[section.axis] - 0.05, hi = box.max[section.axis] + 0.05, at = lo + (section.t + 1) / 2 * (hi - lo);
-  plane.set(n, -at * section.flip); renderer.clippingPlanes = [plane];
-  $("oSec").value = `${section.axis} = ${(at*1000).toFixed(0)} mm`;
-}
+$("kEnv").textContent = `${(V.size.y*1000).toFixed(0)} x ${(V.size.x*1000).toFixed(0)} x ${(V.size.z*1000).toFixed(0)} mm (L x W x H, zero pose)`;
+$("kLinks").textContent = Object.keys(MODEL.links).length;
+$("kJoints").textContent = `${MODEL.joints.length} (${MODEL.joints.filter(j => !j.mimic).length} actuated)`;
+$("kMass").textContent = `${V.totalMass.toFixed(3)} kg`;
 
 // ---------- orbit controls (z-up)
-function fitDistance(r = radius){
-  const vHalf = THREE.MathUtils.degToRad(camera.fov) / 2, hHalf = Math.atan(Math.tan(vHalf) * camera.aspect);
-  return r / Math.sin(Math.min(vHalf, hHalf)) * 1.08;
-}
 const VIEWS = {iso:{theta:-1.15, phi:1.08}, top:{theta:-Math.PI/2, phi:0.02}, front:{theta:-Math.PI/2, phi:Math.PI/2 - 0.02}, side:{theta:0.0, phi:Math.PI/2 - 0.02}};
-const view = {target: centre.clone(), theta: -1.15, phi: 1.08, r: fitDistance()};
 let userZoomed = false, turntable = false;
-function updateCamera(){
-  const sp = Math.sin(view.phi), cp = Math.cos(view.phi);
-  camera.position.set(view.target.x + view.r*sp*Math.cos(view.theta), view.target.y + view.r*sp*Math.sin(view.theta), view.target.z + view.r*cp);
-  camera.lookAt(view.target);
-}
-function frameVisible(margin = 0.9){
-  const b = new THREE.Box3(); const s = new THREE.Sphere();
-  for (const m of meshes) { if (!m.visible) continue; s.copy(m.geometry.boundingSphere).applyMatrix4(m.matrixWorld); b.expandByPoint(s.center.clone().addScalar(s.radius)); b.expandByPoint(s.center.clone().subScalar(s.radius)); }
-  if (b.isEmpty()) return;
-  view.target.copy(b.getCenter(new THREE.Vector3()));
-  view.r = fitDistance(b.getSize(new THREE.Vector3()).length() / 2);
-  // tighten on the projected extents of the visible parts
-  const v = new THREE.Vector3(), right = new THREE.Vector3(), up = new THREE.Vector3();
-  for (let it = 0; it < 4; it++) {
-    updateCamera(); camera.updateMatrixWorld(true); camera.updateProjectionMatrix();
-    right.setFromMatrixColumn(camera.matrixWorld, 0); up.setFromMatrixColumn(camera.matrixWorld, 1);
-    let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
-    for (const m of meshes) {
-      if (!m.visible) continue;
-      s.copy(m.geometry.boundingSphere).applyMatrix4(m.matrixWorld);
-      for (const [ox, oy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
-        v.copy(s.center).addScaledVector(right, ox * s.radius).addScaledVector(up, oy * s.radius).project(camera);
-        minX = Math.min(minX, v.x); maxX = Math.max(maxX, v.x); minY = Math.min(minY, v.y); maxY = Math.max(maxY, v.y);
-      }
-    }
-    if (minX > maxX) return;
-    const vHalf = THREE.MathUtils.degToRad(camera.fov) / 2, hHalf = Math.atan(Math.tan(vHalf) * camera.aspect);
-    view.target.addScaledVector(right, (minX + maxX) / 2 * view.r * Math.tan(hHalf)).addScaledVector(up, (minY + maxY) / 2 * view.r * Math.tan(vHalf));
-    view.r *= Math.max((maxX - minX) / 2, (maxY - minY) / 2) / margin;
-  }
-  updateCamera();
-}
 const ptrs = new Map(); let pinch0 = 0, r0 = 0, moved = false;
 const el = renderer.domElement;
 el.addEventListener("pointerdown", e => { ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY, b:e.button}); moved = false; el.setPointerCapture(e.pointerId);
@@ -485,7 +232,7 @@ el.addEventListener("pointermove", e => {
   const p = ptrs.get(e.pointerId); if (!p) return;
   const dx = e.clientX - p.x, dy = e.clientY - p.y;
   if (Math.abs(dx) + Math.abs(dy) > 3) moved = true;
-  if (ptrs.size === 2) { p.x = e.clientX; p.y = e.clientY; const [a,b] = [...ptrs.values()]; const d = Math.hypot(a.x-b.x, a.y-b.y); if (pinch0 > 0) { userZoomed = true; view.r = THREE.MathUtils.clamp(r0 * pinch0 / d, radius*0.2, radius*14); } }
+  if (ptrs.size === 2) { p.x = e.clientX; p.y = e.clientY; const [a,b] = [...ptrs.values()]; const d = Math.hypot(a.x-b.x, a.y-b.y); if (pinch0 > 0) { userZoomed = true; view.r = THREE.MathUtils.clamp(r0 * pinch0 / d, V.radius*0.2, V.radius*14); } }
   else if (p.b === 2 || p.b === 1 || e.shiftKey) {
     const right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0), up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
     const k = view.r * 0.0016; view.target.addScaledVector(right, -dx*k).addScaledVector(up, dy*k); p.x = e.clientX; p.y = e.clientY;
@@ -493,76 +240,62 @@ el.addEventListener("pointermove", e => {
 });
 const endPtr = e => { ptrs.delete(e.pointerId); };
 el.addEventListener("pointerup", endPtr); el.addEventListener("pointercancel", endPtr);
-el.addEventListener("wheel", e => { e.preventDefault(); userZoomed = true; view.r = THREE.MathUtils.clamp(view.r * Math.exp(e.deltaY * 0.0012), radius*0.2, radius*14); }, {passive:false});
+el.addEventListener("wheel", e => { e.preventDefault(); userZoomed = true; view.r = THREE.MathUtils.clamp(view.r * Math.exp(e.deltaY * 0.0012), V.radius*0.2, V.radius*14); }, {passive:false});
 el.addEventListener("contextmenu", e => e.preventDefault());
-addEventListener("resize", () => { if (CAPTURE) return; renderer.setSize(stage.clientWidth, stage.clientHeight); camera.aspect = stage.clientWidth/stage.clientHeight; camera.updateProjectionMatrix(); if (!userZoomed) view.r = fitDistance(); });
+addEventListener("resize", () => { if (CAPTURE) return; V.resize($("stage").clientWidth, $("stage").clientHeight); if (!userZoomed) view.r = V.fitDistance(); });
 
-// ---------- visibility, style, selection
-let style = "cad", edgesOn = false, pose = "zero", isolate = null, selected = null, hiTimer = 0;
-const linkVisible = Object.fromEntries(Object.keys(MODEL.links).map(n => [n, true]));
-const classVisible = {fastener:true, motor:true, cover:true, structure:true};
-const currentMat = m => STYLES[style].mat(m);
-function applyLook(look){
-  document.documentElement.dataset.look = look;
-  const light = look === "light", bp = look === "blueprint";
-  scene.background = new THREE.Color(bp ? 0x0b2545 : light ? 0xfafbfc : 0x0f1318);
-  edgeMat.color.set(bp ? 0x9fd3ff : light ? 0x141a21 : 0xe3e9f2); edgeMat.opacity = bp ? 0.95 : light ? 0.95 : 0.8;
-  grid.material.color.set(bp ? 0x1c4a86 : light ? 0xe1e5ea : 0x2e3540); grid.material.opacity = light ? 0.8 : 1; grid.material.transparent = true;
-  hemi.intensity = light ? 1.1 : 0.85; key.intensity = light ? 1.2 : 1.7;
-  axes.visible = !light && !bp;
-  makeLabels();
-}
-function applyMode(){
-  for (const m of meshes) {
-    const u = m.userData;
-    if (m !== selected) m.material = currentMat(m);
-    m.visible = linkVisible[u.link] && classVisible[u.pclass] && !u.hidden && (!isolate || isolate.has(m));
-    u.edge.visible = edgesOn && m.visible;
-  }
-  $("legend").style.display = style === "tint" ? "flex" : "none";
-  document.querySelectorAll("[data-style]").forEach(b => b.classList.toggle("on", b.dataset.style === style));
-  document.querySelectorAll("[data-cls]").forEach(b => { b.classList.toggle("on", classVisible[b.dataset.cls]); });
-  $("bEdges").classList.toggle("on", edgesOn);
+// ---------- style, colours, overlays
+function syncButtons(){
+  document.querySelectorAll("[data-style]").forEach(b => b.classList.toggle("on", b.dataset.style === state.style));
+  document.querySelectorAll("[data-cls]").forEach(b => b.classList.toggle("on", V.classVisible[b.dataset.cls]));
+  document.querySelectorAll("[data-link]").forEach(b => b.classList.toggle("off", !V.linkVisible[b.dataset.link]));
+  $("bEdges").classList.toggle("on", state.edgesOn); $("bGrid").classList.toggle("on", state.gridOn); $("bLabels").classList.toggle("on", state.labelsOn);
+  $("bShadow").classList.toggle("on", state.shadows); $("bCom").classList.toggle("on", state.comOn);
+  $("bBgAuto").classList.toggle("on", state.background === "auto"); $("bBgNone").classList.toggle("on", state.background === "none");
+  $("bEdgeAuto").classList.toggle("on", !state.edgeColor);
+  $("legend").style.display = state.style === "tint" ? "flex" : "none";
   const shown = meshes.filter(m => m.visible).length;
   $("kParts").textContent = `${shown} shown` + (meshes.length - shown + (MODEL.dropped_visuals || 0) ? ` · ${meshes.length - shown + (MODEL.dropped_visuals || 0)} hidden` : "");
-  document.querySelectorAll("[data-link]").forEach(b => b.classList.toggle("off", !linkVisible[b.dataset.link]));
 }
-function setStyle(s){ style = s; edgesOn = STYLES[s].edges; applyLook(STYLES[s].look); applyMode(); }
-$("styles").innerHTML = Object.entries(STYLES).map(([k, v]) => `<button class="btn sm${k === "cad" ? " on" : ""}" data-style="${k}">${v.label}</button>`).join("");
-document.querySelectorAll("[data-style]").forEach(b => b.onclick = () => setStyle(b.dataset.style));
+$("styles").innerHTML = Object.entries(STYLES).map(([k, v]) => `<button class="btn sm" data-style="${k}">${v.label}</button>`).join("");
+document.querySelectorAll("[data-style]").forEach(b => b.onclick = () => { V.setStyle(b.dataset.style); syncButtons(); });
 $("legend").innerHTML = Object.entries(CLASS_TINT).map(([k,v]) => `<span><i style="background:${css(v)}"></i>${k.replace(/_/g," ")}</span>`).join("");
-document.querySelectorAll("[data-cls]").forEach(b => b.onclick = () => { classVisible[b.dataset.cls] = !classVisible[b.dataset.cls]; applyMode(); });
-$("bEdges").onclick = () => { edgesOn = !edgesOn; applyMode(); };
-$("bColl").onclick = () => { const on = !$("bColl").classList.contains("on"); $("bColl").classList.toggle("on", on); collObjs.forEach(c => c.visible = on); };
-$("bAxes").onclick = () => { const on = !$("bAxes").classList.contains("on"); $("bAxes").classList.toggle("on", on); axisObjs.forEach(a => a.visible = on); };
+$("cFace").oninput = e => V.setFaceColor(e.target.value);
+$("cEdge").oninput = e => { V.setEdgeColor(e.target.value); syncButtons(); };
+$("bEdgeAuto").onclick = () => { V.setEdgeColor(null); syncButtons(); };
+$("cBg").oninput = e => { V.setBackground(e.target.value); syncButtons(); };
+$("bBgAuto").onclick = () => { V.setBackground("auto"); syncButtons(); };
+$("bBgNone").onclick = () => { V.setBackground("none"); syncButtons(); };
+$("bGrid").onclick = () => { V.setGrid(!state.gridOn); syncButtons(); };
+$("bEdges").onclick = () => { V.setEdges(!state.edgesOn); syncButtons(); };
+$("bLabels").onclick = () => { V.setLabels(!state.labelsOn); syncButtons(); };
+$("bShadow").onclick = () => { V.setShadows(!state.shadows); syncButtons(); };
+$("bCom").onclick = () => { V.setCom(!state.comOn); syncButtons(); };
+$("bColl").onclick = () => { const on = !$("bColl").classList.contains("on"); $("bColl").classList.toggle("on", on); V.collObjs.forEach(c => c.visible = on); };
+$("bAxes").onclick = () => { const on = !$("bAxes").classList.contains("on"); $("bAxes").classList.toggle("on", on); V.axisObjs.forEach(a => a.visible = on); };
 $("bTurn").onclick = () => { turntable = !turntable; $("bTurn").classList.toggle("on", turntable); };
-$("bLabels").onclick = () => { labelsOn = !labelsOn; $("bLabels").classList.toggle("on", labelsOn); };
-$("bShadow").onclick = () => setShadows(!shadows);
-$("bCom").onclick = () => { comGroup.visible = !comGroup.visible; $("bCom").classList.toggle("on", comGroup.visible); };
-$("bMeasure").onclick = () => { measure.on = !measure.on; $("bMeasure").classList.toggle("on", measure.on); if (!measure.on) clearMeasure(); else { $("measureOut").style.display = "block"; $("measureOut").textContent = "click two points on the model"; } };
-$("bFrame").onclick = () => { robot.updateMatrixWorld(true); frameVisible(); userZoomed = true; };
+document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => { Object.assign(view, VIEWS[b.dataset.view]); });
+document.querySelectorAll("[data-cls]").forEach(b => b.onclick = () => { V.classVisible[b.dataset.cls] = !V.classVisible[b.dataset.cls]; V.applyMode(); syncButtons(); });
+$("bShowAll").onclick = () => { V.showAll(); syncButtons(); };
+$("bFrame").onclick = () => { V.robot.updateMatrixWorld(true); V.frameVisible(); userZoomed = true; };
+$("sLinks").oninput = e => { state.explodeLinks = parseFloat(e.target.value); $("oLinks").value = state.explodeLinks.toFixed(2); };
+$("sParts").oninput = e => { state.explodeParts = parseFloat(e.target.value); $("oParts").value = state.explodeParts.toFixed(2); };
 let animateExplode = false, showcase = false, animT0 = 0;
+const clock = new THREE.Clock();
 $("bAnimate").onclick = () => { animateExplode = !animateExplode; $("bAnimate").classList.toggle("on", animateExplode); animT0 = clock.getElapsedTime(); };
 $("bShowcase").onclick = () => { showcase = !showcase; $("bShowcase").classList.toggle("on", showcase); turntable = showcase; $("bTurn").classList.toggle("on", turntable); animateExplode = showcase; $("bAnimate").classList.toggle("on", animateExplode); animT0 = clock.getElapsedTime(); };
-document.querySelectorAll("[data-sec]").forEach(b => b.onclick = () => { section.axis = b.dataset.sec; document.querySelectorAll("[data-sec]").forEach(x => x.classList.toggle("on", x === b)); applySection(); });
-$("bSecFlip").onclick = () => { section.flip *= -1; applySection(); };
-$("sSec").oninput = e => { section.t = parseFloat(e.target.value); applySection(); };
-$("bFind").onclick = () => { const q = $("q").value.trim().toLowerCase(); if (!q) { isolate = null; applyMode(); return; } isolate = new Set(meshes.filter(m => m.userData.part.toLowerCase().includes(q) || m.userData.link.toLowerCase().includes(q))); applyMode(); $("status").innerHTML = `<b>find</b> "${q}": ${isolate.size} parts`; };
+document.querySelectorAll("[data-sec]").forEach(b => b.onclick = () => { document.querySelectorAll("[data-sec]").forEach(x => x.classList.toggle("on", x === b)); const at = V.setSection(b.dataset.sec); $("oSec").value = at === null ? "off" : `${b.dataset.sec} = ${(at*1000).toFixed(0)} mm`; });
+$("bSecFlip").onclick = () => { const at = V.setSection(state.section.axis, state.section.t, -state.section.flip); if (at !== null) $("oSec").value = `${state.section.axis} = ${(at*1000).toFixed(0)} mm`; };
+$("sSec").oninput = e => { const at = V.setSection(state.section.axis, parseFloat(e.target.value)); if (at !== null) $("oSec").value = `${state.section.axis} = ${(at*1000).toFixed(0)} mm`; };
+$("bFind").onclick = () => { const q = $("q").value.trim().toLowerCase(); if (!q) { V.isolate = null; V.applyMode(); syncButtons(); return; } V.isolate = new Set(meshes.filter(m => m.userData.part.toLowerCase().includes(q) || m.userData.link.toLowerCase().includes(q))); V.applyMode(); syncButtons(); $("status").innerHTML = `<b>find</b> "${q}": ${V.isolate.size} parts`; };
 $("q").addEventListener("keydown", e => { if (e.key === "Enter") $("bFind").onclick(); });
-$("bSnap").onclick = () => {
-  const w = renderer.domElement.width * 2, h = renderer.domElement.height * 2;
-  const pr = renderer.getPixelRatio(); const sz = new THREE.Vector2(); renderer.getSize(sz);
-  renderer.setPixelRatio(1); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.render(scene, camera);
-  $("snapImg").src = renderer.domElement.toDataURL("image/png");
-  renderer.setPixelRatio(pr); renderer.setSize(sz.x, sz.y, false); camera.aspect = sz.x / sz.y; camera.updateProjectionMatrix();
+function snapshot(transparent){
+  $("snapImg").src = V.capture(renderer.domElement.width * 2, renderer.domElement.height * 2, {transparent});
   $("lightbox").style.display = "grid";
-};
+}
+$("bSnap").onclick = () => snapshot(false);
+$("bSnapT").onclick = () => snapshot(true);
 $("lightbox").onclick = e => { if (e.target.id === "lightbox") $("lightbox").style.display = "none"; };
-document.querySelectorAll("[data-view]").forEach(b => b.onclick = () => { Object.assign(view, VIEWS[b.dataset.view]); });
-function showAll(){ isolate = null; Object.keys(linkVisible).forEach(n => linkVisible[n] = true); Object.keys(classVisible).forEach(c => classVisible[c] = true); meshes.forEach(m => m.userData.hidden = false); applyMode(); }
-$("bShowAll").onclick = showAll;
-$("sLinks").oninput = e => { explodeLinks = parseFloat(e.target.value); $("oLinks").value = explodeLinks.toFixed(2); };
-$("sParts").oninput = e => { explodeParts = parseFloat(e.target.value); $("oParts").value = explodeParts.toFixed(2); };
 
 // link chips: body, then one row per leg
 {
@@ -572,18 +305,30 @@ $("sParts").oninput = e => { explodeParts = parseFloat(e.target.value); $("oPart
   for (const leg of LEGS) html += `<div class="chips"><span class="legname">${leg}</span>${BODIES.map(b => mk(`${leg}_${b}`, BODY_SHORT[b])).join("")}</div>`;
   box.innerHTML = html;
   box.querySelectorAll("[data-link]").forEach(b => {
-    b.onclick = () => { linkVisible[b.dataset.link] = !linkVisible[b.dataset.link]; isolate = null; applyMode(); };
-    b.ondblclick = () => { Object.keys(linkVisible).forEach(n => linkVisible[n] = n === b.dataset.link); isolate = null; applyMode(); };
+    b.onclick = () => { V.linkVisible[b.dataset.link] = !V.linkVisible[b.dataset.link]; V.isolate = null; V.applyMode(); syncButtons(); };
+    b.ondblclick = () => { Object.keys(V.linkVisible).forEach(n => V.linkVisible[n] = n === b.dataset.link); V.isolate = null; V.applyMode(); syncButtons(); };
   });
 }
 
-// selection + isolation
-const ray = new THREE.Raycaster();
+// ---------- selection, isolation, measure
+const ray = new THREE.Raycaster(); let hiTimer = 0;
+const measure = {on:false, a:null, line:null, label:null};
+const measureMat = new THREE.LineBasicMaterial({color:0xff3b6b, depthTest:false});
+function clearMeasure(){ if (measure.line) scene.remove(measure.line); if (measure.label) scene.remove(measure.label); measure.a = null; measure.line = null; measure.label = null; $("measureOut").style.display = "none"; }
+function measureClick(pt){
+  if (!measure.a) { clearMeasure(); measure.a = pt.clone(); $("measureOut").style.display = "block"; $("measureOut").textContent = "first point set — click the second point"; return; }
+  const b = pt.clone(), d = measure.a.distanceTo(b);
+  measure.line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([measure.a, b]), measureMat); measure.line.renderOrder = 999; scene.add(measure.line);
+  measure.label = V.textSprite(`${(d*1000).toFixed(1)} mm`, "#ffffff", "rgba(255,59,107,.92)"); measure.label.position.copy(measure.a).lerp(b, 0.5); scene.add(measure.label);
+  $("measureOut").textContent = `${(d*1000).toFixed(2)} mm  (dx ${((b.x-measure.a.x)*1000).toFixed(1)}, dy ${((b.y-measure.a.y)*1000).toFixed(1)}, dz ${((b.z-measure.a.z)*1000).toFixed(1)})`;
+  measure.a = null;
+}
+$("bMeasure").onclick = () => { measure.on = !measure.on; $("bMeasure").classList.toggle("on", measure.on); if (!measure.on) clearMeasure(); else { $("measureOut").style.display = "block"; $("measureOut").textContent = "click two points on the model"; } };
 function select(m){
-  if (selected) selected.material = currentMat(selected);
-  selected = m; clearTimeout(hiTimer);
+  if (V.highlighted) V.highlighted.material = V.currentMat(V.highlighted);
+  V.highlighted = m; clearTimeout(hiTimer);
   if (!m) { $("pickHint").textContent = "Tap any part to see its name and which link owns it."; $("pick").textContent = ""; $("selActions").style.display = "none"; return; }
-  m.material = hiMat; hiTimer = setTimeout(() => { if (selected) selected.material = currentMat(selected); }, 1500);
+  m.material = V.materials.hiMat; hiTimer = setTimeout(() => { if (V.highlighted) V.highlighted.material = V.currentMat(V.highlighted); }, 1500);
   const u = m.userData;
   $("pickHint").textContent = "Selected part";
   $("pick").innerHTML = `${u.part} &nbsp;→&nbsp; link <b>${u.link}</b> (${u.cls.replace(/_/g," ")}, ${(MODEL.links[u.link].m*1000).toFixed(0)} g)`;
@@ -597,12 +342,12 @@ el.addEventListener("pointerup", e => {
   if (measure.on) { if (hit) measureClick(hit.point); return; }
   select(hit ? hit.object : null);
 });
-$("aIsoPart").onclick = () => { if (selected) { isolate = new Set([selected]); applyMode(); } };
-$("aIsoLink").onclick = () => { if (selected) { isolate = new Set(meshes.filter(m => m.userData.link === selected.userData.link)); applyMode(); } };
-$("aIsoLeg").onclick = () => { if (selected) { const leg = selected.userData.leg; isolate = new Set(meshes.filter(m => leg ? m.userData.leg === leg : m.userData.link === "body")); applyMode(); } };
-$("aHide").onclick = () => { if (selected) { selected.userData.hidden = true; select(null); applyMode(); } };
-$("aAll").onclick = showAll;
-addEventListener("keydown", e => { if (e.key === "Escape") { select(null); showAll(); } });
+$("aIsoPart").onclick = () => { if (V.highlighted) { V.isolate = new Set([V.highlighted]); V.applyMode(); syncButtons(); } };
+$("aIsoLink").onclick = () => { if (V.highlighted) { const l = V.highlighted.userData.link; V.isolate = new Set(meshes.filter(m => m.userData.link === l)); V.applyMode(); syncButtons(); } };
+$("aIsoLeg").onclick = () => { if (V.highlighted) { const leg = V.highlighted.userData.leg; V.isolate = new Set(meshes.filter(m => leg ? m.userData.leg === leg : m.userData.link === "body")); V.applyMode(); syncButtons(); } };
+$("aHide").onclick = () => { if (V.highlighted) { V.highlighted.userData.hidden = true; select(null); V.applyMode(); syncButtons(); } };
+$("aAll").onclick = () => { V.showAll(); syncButtons(); };
+addEventListener("keydown", e => { if (e.key === "Escape") { select(null); V.showAll(); syncButtons(); } });
 
 // ---------- joint sliders and poses
 const sliders = {};
@@ -621,6 +366,7 @@ for (const leg of LEGS) {
   }
   $("legs").appendChild(d);
 }
+let pose = "zero";
 function fmt(v){ return `${v.toFixed(3)} rad`; }
 function setAll(src){ for (const n in sliders) { jointVal[n] = src[n] ?? 0; sliders[n].inp.value = jointVal[n]; sliders[n].out.value = fmt(jointVal[n]); } }
 function setPose(p){
@@ -633,71 +379,58 @@ function setPose(p){
   if (p === "stance") setAll(st);
 }
 document.querySelectorAll("[data-pose]").forEach(b => b.onclick = () => setPose(b.dataset.pose));
-const TRIPOD_A = new Set(["lf","lr","rm"]);
-function gait(t){
-  const w = t * 2 * Math.PI * 0.7, out = {}, st = MODEL.stance || {};
-  for (const leg of LEGS) {
-    const ph = TRIPOD_A.has(leg) ? w : w + Math.PI, swing = Math.max(0, Math.sin(ph));
-    out[`${leg}_coxa_yaw`] = 0.22 * Math.cos(ph) * (leg[0] === "l" ? 1 : -1);
-    out[`${leg}_femur_pitch`] = (st[`${leg}_femur_pitch`] ?? 0) + 0.40 * swing;
-    out[`${leg}_tibia_pitch`] = (st[`${leg}_tibia_pitch`] ?? 0) + 0.25 * swing;
-  }
-  return out;
-}
-
-// ---------- dock on phones, summary
 $("dockToggle").onclick = () => { $("dock").classList.toggle("open"); };
 $("dockClose").onclick = () => $("dock").classList.remove("open");
-$("kLinks").textContent = Object.keys(MODEL.links).length;
-$("kJoints").textContent = `${MODEL.joints.length} (${MODEL.joints.filter(j => !j.mimic).length} actuated)`;
-$("kMass").textContent = `${Object.values(MODEL.links).reduce((s,l) => s + l.m, 0).toFixed(3)} kg`;
-applyLook("dark"); applyMode(); setPose("zero");
+setPose("zero"); syncButtons();
 $("loading").remove();
 
-// ---------- capture mode: ?capture=name&style=white&view=iso&explode=0.6&parts=0.3&isolate=lf,body&hide=fastener&pose=zero&w=2400&h=1600&post=http://localhost:8322/save
+// ---------- capture mode: ?capture=name&post=URL&w=&h=&style=&view=|theta=&phi=&explode=&parts=&hide=&isolate=&edges=&labels=1&shadows=1&section=y&sectionAt=0&pose=&bg=hex|none&face=hex&edge=hex&grid=0&transparent=1&zoom=
+let captured = false;
 if (CAPTURE) {
   const g = k => PARAMS.get(k);
-  if (g("style")) setStyle(g("style"));
+  if (g("style")) V.setStyle(g("style"));
+  if (g("face")) V.setFaceColor("#" + g("face").replace("#", ""));
+  if (g("edge")) V.setEdgeColor("#" + g("edge").replace("#", ""));
+  if (g("bg")) V.setBackground(g("bg") === "none" ? "none" : "#" + g("bg").replace("#", ""));
+  if (g("grid") === "0") V.setGrid(false);
   if (g("pose")) setPose(g("pose"));
   if (g("view")) Object.assign(view, VIEWS[g("view")] || {});
   if (g("theta")) view.theta = parseFloat(g("theta"));
   if (g("phi")) view.phi = parseFloat(g("phi"));
-  explodeLinks = parseFloat(g("explode") || 0); explodeParts = parseFloat(g("parts") || 0);
-  if (g("hide")) for (const c of g("hide").split(",")) classVisible[c] = false;
-  if (g("isolate")) { const keys = g("isolate").split(","); isolate = new Set(meshes.filter(m => keys.includes(m.userData.link) || keys.includes(m.userData.leg))); }
-  if (g("edges")) edgesOn = g("edges") !== "0";
-  if (g("labels")) labelsOn = true;
-  if (g("shadows")) setShadows(true);
-  if (g("com")) comGroup.visible = true;
-  if (g("section")) { section.axis = g("section"); section.t = parseFloat(g("sectionAt") || 0); section.flip = g("flip") ? -1 : 1; applySection(); }
-  applyMode();
+  state.explodeLinks = parseFloat(g("explode") || 0); state.explodeParts = parseFloat(g("parts") || 0);
+  if (g("hide")) for (const c of g("hide").split(",")) V.classVisible[c] = false;
+  if (g("isolate")) { const keys = g("isolate").split(","); V.isolate = new Set(meshes.filter(m => keys.includes(m.userData.link) || keys.includes(m.userData.leg))); }
+  if (g("edges")) state.edgesOn = g("edges") !== "0";
+  if (g("labels")) V.setLabels(true);
+  if (g("shadows")) V.setShadows(true);
+  if (g("com")) V.setCom(true);
+  if (g("section")) V.setSection(g("section"), parseFloat(g("sectionAt") || 0), g("flip") ? -1 : 1);
+  V.applyMode(); syncButtons();
+  setTimeout(() => {
+    if (captured) return; captured = true;
+    try {
+      const w = parseInt(g("w") || 2400), h = parseInt(g("h") || 1600);
+      V.update(); V.robot.updateMatrixWorld(true);
+      renderer.setPixelRatio(1); V.resize(w, h, false); V.frameVisible(); if (g("zoom")) view.r *= parseFloat(g("zoom"));
+      const url = V.capture(w, h, {transparent: g("transparent") === "1"});
+      $("status").innerHTML = `<b>captured</b> ${w}x${h}`;
+      const post = g("post");
+      if (post) fetch(`${post}?name=${encodeURIComponent(CAPTURE)}`, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"}, body:url}).then(() => { document.title = "captured:" + CAPTURE; }).catch(err => { document.title = "capture-failed"; window.__lastError = "post: " + err.message; });
+      else document.title = "captured:" + CAPTURE;
+    } catch (err) { window.__lastError = "capture: " + err.message; $("status").textContent = "capture error: " + err.message; }
+  }, 1200);
 }
-const clock = new THREE.Clock();
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-let captured = false;
 renderer.setAnimationLoop(() => {
-  if (pose === "walk") { const gt = gait(reduce ? 0.25 : clock.getElapsedTime()); for (const n in sliders) { jointVal[n] = gt[n]; sliders[n].inp.value = gt[n]; sliders[n].out.value = fmt(gt[n]); } }
+  if (pose === "walk") { const gt = V.gait(reduce ? 0.25 : clock.getElapsedTime()); for (const n in sliders) { jointVal[n] = gt[n]; sliders[n].inp.value = gt[n]; sliders[n].out.value = fmt(gt[n]); } }
   if (turntable) view.theta += 0.004;
   if (animateExplode) {
     const t = (clock.getElapsedTime() - animT0) % 9, ease = x => x < 0.5 ? 2*x*x : 1 - Math.pow(-2*x + 2, 2) / 2;
     const up = t < 4 ? t / 4 : t < 6 ? 1 : 1 - (t - 6) / 3;
-    explodeLinks = ease(Math.min(1, up * 1.4)); explodeParts = 0.55 * ease(Math.max(0, Math.min(1, up * 1.6 - 0.6)));
-    $("sLinks").value = explodeLinks; $("oLinks").value = explodeLinks.toFixed(2); $("sParts").value = explodeParts; $("oParts").value = explodeParts.toFixed(2);
+    state.explodeLinks = ease(Math.min(1, up * 1.4)); state.explodeParts = 0.55 * ease(Math.max(0, Math.min(1, up * 1.6 - 0.6)));
+    $("sLinks").value = state.explodeLinks; $("oLinks").value = state.explodeLinks.toFixed(2); $("sParts").value = state.explodeParts; $("oParts").value = state.explodeParts.toFixed(2);
   }
-  applyJoints(); applyExplode(); updateCom(); updateLabels(); updateCamera(); renderer.render(scene, camera);
+  V.update(); V.render();
 });
-if (CAPTURE) setTimeout(() => { if (captured) return; captured = true; try { doCapture(); } catch (err) { window.__lastError = "capture: " + err.message; $("status").textContent = "capture error: " + err.message; } }, 1200);
-function doCapture(){
-    const w = parseInt(PARAMS.get("w") || 2400), h = parseInt(PARAMS.get("h") || 1600);
-    applyJoints(); applyExplode(); updateCom(); updateLabels();
-    renderer.setPixelRatio(1); renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
-    robot.updateMatrixWorld(true); frameVisible(); if (PARAMS.get("zoom")) view.r *= parseFloat(PARAMS.get("zoom"));
-    updateCamera(); renderer.render(scene, camera);
-    const url = renderer.domElement.toDataURL("image/png");
-    const post = PARAMS.get("post");
-    $("status").innerHTML = `<b>captured</b> ${w}x${h}`;
-    if (post) fetch(`${post}?name=${encodeURIComponent(CAPTURE)}`, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"}, body:url}).then(() => { document.title = "captured:" + CAPTURE; }).catch(err => { document.title = "capture-failed"; window.__lastError = "post: " + err.message; });
-    else document.title = "captured:" + CAPTURE;
-}
-window.__viewer = {scene, camera, view, meshes, linkObj, setStyle, setPose, applyMode, doCapture, get explode(){ return [explodeLinks, explodeParts]; }, set explode(v){ [explodeLinks, explodeParts] = v; }};
+window.__viewer = V;
 </script>
