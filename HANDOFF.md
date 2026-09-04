@@ -1,5 +1,15 @@
 # Hexapod RL handoff for Claude
 
+> **2026-09-03 addendum.** The training asset is now the CAD assembly
+> `robot/hexapod_mkii_assy/` (`urdf/hexapod_mkii_serial.urdf`, 8.261 kg, RS05
+> hard-set to 191 g, joints `<leg>_coxa_yaw|femur_pitch|tibia_pitch`, root link
+> `body`). `isaaclab/hexapod_rl/asset_cfg.py` and `env_cfg.py` already point at
+> it. Section 7 below (mock URDF/USD paths, `revolute_*` joint order, 6.3 kg
+> budget) is historical. Follow `AGENTS.md` for the Isaac Sim import, contact
+> reports and validation runbook; the USD still has to be generated on the
+> Spark with `tools/import_urdf_to_usd.py`, and `phase2_cfg.py` stances must be
+> re-seeded from `robot/hexapod_mkii_assy/stance.json` before training.
+
 Snapshot: `2026-08-26T17:46:47Z` (`2026-08-26 13:46 EDT`)
 
 This document supersedes every earlier handoff. It is based on a fresh audit of
