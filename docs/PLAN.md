@@ -89,9 +89,12 @@ total cost must fit the $6000 in `dar.md` §6.
    75 mm upright mast. Confirm it in Isaac Sim, then design the 100 x 100 mm,
    3 mm metal plate Livox requires.
 3. Measured masses, inertias, and actuator-to-joint mapping on the assembled
-   robot (`docs/TRAINING.md` §7).
-4. GPS receiver class (RTK or standard) from the position-accuracy blank in
-   `dar.md` §2, and the operator link that carries C4.
+   robot (`docs/TRAINING.md` §7). The mechanical team plans a weight
+   reduction, so asset v1 masses change before this measurement.
+4. GPS receiver: standard GNSS, because RTK is out of budget (`dar.md` §2).
+   It anchors the polygon; lidar-inertial odometry carries position inside
+   it. Also the operator link that carries C4. The link is long
+   range: LoRa or cellular (`dar.md` §2).
 5. The data sensor: mass, mount, power, and the deck-steadiness limit it needs
    for a valid record (`dar.md` §2).
 
@@ -205,9 +208,9 @@ tolerance on each observation term.
   C2 producer.
 - C: a bag corpus under a documented naming scheme with ground-truth loops.
 - C: define and validate the C3 message set, including the map-frame pose.
-- C + E: select the GPS receiver against the `dar.md` §2 position-accuracy
-  blank, log it beside LIO on the same walks, and fuse it into the C3 pose.
-  If the team defers GPS, anchor a local frame at the robot's start.
+- C + E: select a standard GNSS receiver (no RTK, `dar.md` §2), log it
+  beside LIO on the same walks, and fuse it into the C3 pose as a coarse
+  anchor. If the team defers GPS, anchor a local frame at the robot's start.
 
 Gate: closed-loop LIO drift below a stated fraction of path length over a
 stated course. Fused map-frame pose error within the `dar.md` §2 blank on a

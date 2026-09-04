@@ -30,25 +30,44 @@ this repo already works on that part.
 ## 2. The numbers the slide does not give
 
 "Steadily" and "steady platform" become testable after the team writes these
-numbers down. Fill in each blank before you set the gates below. Each line
-names the owner of the answer.
+numbers down. The team lead answered on 2026-09-04. Three rows stay open.
 
-| Requirement | Blank to fill | Owner |
-|---|---|---|
-| Area size | Largest polygon to cover in one mission (m x m) | Team lead |
-| Terrain | Mown grass / rough grass / gravel / slope up to __ deg / obstacles yes or no | Team lead |
-| Mission time | Battery must last __ minutes of walking | MechE + EE |
-| Deck steadiness | Roll and pitch within +-__ deg; vertical bounce below __ m/s RMS; yaw wander below __ rad/s | Data-collection sponsor |
-| Sweep spacing | Distance between passes = data sensor footprint = __ m | Data-collection sponsor |
-| Position accuracy | Robot must know where it is to within __ m | Follows from sweep spacing |
-| Payload | Data sensor mass __ kg, size, power, mount | Sponsor + MechE |
-| Speed | Minimum useful walking speed __ m/s (area / time) | Follows from the rows above |
-| Operator | Draws on a phone / laptop; range to robot __ m | Team lead |
+| Requirement | Blank to fill | Answer (2026-09-04) | Status |
+|---|---|---|---|
+| Area size | Largest polygon to cover in one mission | A few dozen feet on a side, about 10 m x 10 m | Set |
+| Terrain | Surface class, slope, obstacles | Start on a path. Aim for forest later; forest is too hard as a first target | Set for M1/M2; forest deferred |
+| Mission time | Minutes of walking per battery | Not a constraint now; optimize later | Deferred |
+| Deck steadiness | Roll and pitch, vertical bounce, yaw wander limits | Minimize. The lead expects software compensation to absorb much of it. Orion is thinking about limits | Open (Orion) |
+| Sweep spacing | Distance between passes, from the data sensor footprint | To find by experiment in sim and in the field. Orion will report back | Open (Orion) |
+| Position accuracy | Localization error the sweep tolerates | Derived from sweep spacing once that row closes. RTK GNSS is out of budget, so a standard GNSS fix (metres) anchors the polygon and lidar-inertial odometry carries position inside it | Derived; RTK excluded |
+| Payload | Data sensor mass, size, power, mount | Under 1 to 2 kg. Mass is not a constraint now because the robot needs a weight reduction anyway | Set (bound only) |
+| Speed | Minimum useful walking speed | Not a constraint now; make it faster later | Deferred |
+| Operator | Medium and range | Medium is open. Range is long, so LoRa (or cellular) for telemetry | Set (long range) |
 
-The repo's locomotion gates (`docs/TRAINING.md` section 6) already measure
-deck steadiness as a composite score, yaw wander, and speed. After the team
-fills the blanks, you re-derive those thresholds from this table through a
-written gate change with a decision record.
+Consequences for the gates:
+
+- The deck-stability composite stays a relative grade. The Stage2C thresholds
+  in `docs/TRAINING.md` §6 stand until Orion sets absolute limits. A written
+  gate change then re-derives them.
+- Speed and mission time carry no gate. The current `0.240 m/s` floor is a
+  Stage2C artifact and does not come from this table.
+- Terrain for M1 is flat ground and for M2 is a packed path with a stated
+  slope. Forest enters the plan only after a field sweep on a path.
+- Position comes from lidar-inertial odometry inside a 10 m square. A
+  standard GNSS fix is good to a few metres and cannot hold sweep lines on
+  its own, so it anchors the drawn polygon to the world and no more. The
+  start-anchored local frame in `docs/PLAN.md` §6 P1 is the fallback.
+- The operator link is a long-range radio. This closes the medium part of
+  hardware decision 4 in `docs/PLAN.md` §2 toward LoRa or cellular.
+- The mechanical team plans a weight reduction. Asset v1 masses (8.26 kg)
+  will change, so the M0 mass gate compares against whichever robot exists at
+  measurement time and says which.
+
+Reference mission the lead pointed to: Rodriguez-Sanchez, Johnsen, and Li,
+"A Ground Mobile Robot for Autonomous Terrestrial Laser Scanning-Based Field
+Phenotyping" (arXiv:2404.04404). It uses RTK-GNSS plus sensor fusion for
+localization and route optimization over crop trials. This robot replaces
+RTK with lidar-inertial odometry.
 
 ## 3. The repo today
 
@@ -128,7 +147,7 @@ talks to the policy only through velocity commands.
 Rough list for the team to price:
 
 - Onboard computer (NVIDIA Jetson class): the largest single item.
-- GPS module (RTK-capable if sweep spacing demands it).
+- GPS module, standard GNSS. RTK is out of budget.
 - Battery, power distribution, emergency-stop hardware.
 - Data sensor: sponsor-provided or budgeted here.
 - The team already owns the Mid-360. Training compute is the shared Spark.
