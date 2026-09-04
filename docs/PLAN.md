@@ -89,9 +89,11 @@ total cost must fit the $6000 in `dar.md` §6.
    75 mm upright mast. Confirm it in Isaac Sim, then design the 100 x 100 mm,
    3 mm metal plate Livox requires.
 3. Measured masses, inertias, and actuator-to-joint mapping on the assembled
-   robot (`docs/TRAINING.md` §7).
-4. GPS receiver class (RTK or standard) from the position-accuracy blank in
-   `dar.md` §2, and the operator link that carries C4.
+   robot (`docs/TRAINING.md` §7). The mechanical team plans a weight
+   reduction, so asset v1 masses change before this measurement.
+4. GPS receiver class (RTK or standard) from the position-accuracy row in
+   `dar.md` §2, and the operator link that carries C4. The link is long
+   range: LoRa or cellular (`dar.md` §2).
 5. The data sensor: mass, mount, power, and the deck-steadiness limit it needs
    for a valid record (`dar.md` §2).
 
