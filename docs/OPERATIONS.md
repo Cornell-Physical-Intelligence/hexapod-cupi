@@ -1,10 +1,10 @@
 # Spark operations runbook
 
-Durable operating procedure for running hexapod training and evaluation on the
-DGX Spark host. It covers the environment, the audit that must precede any
-launch, the GPU lock protocol, launcher and formal-screen usage, and the
-specification for the attempt-aware startup supervisor that is not yet
-implemented.
+Durable operating procedure for hexapod training and evaluation on the DGX
+Spark host. It covers the environment, the audit that precedes each launch,
+the GPU lock protocol, launcher and formal-screen usage, the specification and
+status of the attempt-aware startup supervisor, and the asset import
+procedure.
 
 No password, token, key, or secret-file content belongs in this file or in any
 log or chat message.
@@ -27,9 +27,9 @@ RSL-RL: rsl-rl-lib 5.0.1
 Gymnasium: 1.2.1
 ```
 
-`/home/orionh/HEXAPOD` is a bind-mounted mirror, not a Git repository. Changes
-made there are not versioned, and a `git` command run against it will not
-behave the way it does in this checkout. Sync source to it deliberately and
+`/home/orionh/HEXAPOD` is a bind-mounted mirror. It is not a Git repository.
+Git does not version changes made there, and a `git` command run against it
+does not behave as it does in this checkout. Sync source to it on purpose and
 verify with the manifest.
 
 No Conda, venv, or uv is used for training. The Docker Compose image
@@ -88,8 +88,8 @@ anything by hand.
 
 The Spark is shared with unrelated workloads. The rules are:
 
-- Hold `/tmp/hexapod-isaac-gpu.lock` for the entire logical run, not just for
-  container creation.
+- Hold `/tmp/hexapod-isaac-gpu.lock` for the entire logical run, from before
+  container creation to cleanup.
 - Never signal, stop, modify, or compete with an unrelated workload. Observed
   producers include `/root/nsva_dl.sh` and its GPU children such as
   `validate_nsva.py`, plus `score_clip.py`, `validate_b51.py`, and
@@ -99,12 +99,27 @@ The Spark is shared with unrelated workloads. The rules are:
   the producer script and all of its descendants are gone, then recheck the
   GPU, active Docker containers, the systemd service, and the shared lock.
 - Producers spawn GPU children after their own start, so a clean prelaunch
-  check can be invalidated seconds later. Recheck contention immediately after
-  container creation and again before PPO starts. This post-launch race is the
-  gap the startup supervisor in §6 is meant to close.
+  check can turn stale seconds later. Recheck contention as soon as the
+  container exists and again before PPO starts. The startup supervisor in §6
+  exists to close this post-launch race.
 - Cleanup acts only on the exact immutable container ID owned by this run. It
   must never use `docker rm -f` on a broad match and must never touch a process
   it did not create.
+
+Sharing the Spark across the team:
+
+- One shared queue (a document or issue label) lists the next attempts in
+  order with experiment file, intervention file, seed, and label. You launch
+  only attempts on that list, and you run `ops/hexctl doctor` first.
+- Perception and navigation work do not use the Spark GPU. They run on
+  laptops, the bench computer, and the companion computer. You record sim
+  integration bags in scheduled windows.
+- A run longer than an hour goes through a systemd unit or a `screen` session
+  with the label in its name, so the next person can see what runs and who
+  owns it.
+- Each member has their own Tailscale identity and Unix account, or the team
+  shares one account and keeps the label discipline above. Unlabeled runs on
+  a shared account make a lost failure look like a phantom result.
 
 The operational objective is minimum idle GPU time without colliding with
 unrelated work and without blind retry storms: detect pre-AppReady stalls within
@@ -180,36 +195,36 @@ Rules that make the screen admissible:
 
 - Screen all 12 children before interpreting the arm. Do not read a partial
   batch.
-- The merger is fail-closed: it requires exact parsed-JSON equality of the
-  independently repeated parent reports and wrapper action-processing records,
+- The merger is fail-closed. It requires exact parsed-JSON equality of the
+  parent reports and wrapper action-processing records each shard repeats,
   and it enforces exact `model_0.pt` through `model_11.pt` membership and
   ordering.
 - Launch shard B only after shard A has reached AppReady.
-- Shard cleanup must be hardened to immutable container IDs before the sharded
-  screen is trusted unattended.
-- A causal gain is never automatic promotion. The absolute Stage2C gates in
-  `docs/TRAINING.md` §6 still decide admission.
+- Harden shard cleanup to immutable container IDs before you trust the
+  sharded screen unattended.
+- A causal gain does not promote a checkpoint by itself. The absolute Stage2C
+  gates in `docs/TRAINING.md` §6 decide admission.
 
-## 6. SPEC — attempt-aware startup supervisor
+## 6. Specification: attempt-aware startup supervisor
 
-**SPEC — implemented in `packages/hexapod_train`, not yet validated in vivo.**
-Nothing below describes current launcher behavior except where it repeats a fix
-that already shipped (§7). Do not cite this section as evidence that a run was
-supervised.
+**Specification. `packages/hexapod_train` implements it. In-vivo validation
+is pending.** The text below describes current launcher behavior only where it
+repeats a fix that already shipped (§7). Do not cite this section as evidence
+that a run ran under supervision.
 
-**Implementation status (2026-08-27).** The supervisor is implemented in
-`packages/hexapod_train` and exposed through `ops/hexctl` (`compose`, `doctor`,
-`probe`, `screen`), with unit tests under `isaaclab/tests/`. It has not been run
-against the Spark: nothing here is validated in vivo, and no attempt has yet
-been supervised. The bash launchers remain the executors — `hexctl` composes
-their argv and supervises one as a child process, and never replaces their
+**Implementation status (2026-08-27).** `packages/hexapod_train` implements
+the supervisor, `ops/hexctl` exposes it (`compose`, `doctor`, `probe`,
+`screen`), and unit tests under `isaaclab/tests/` cover it. Nobody has run it
+against the Spark, so no in-vivo validation exists and no attempt has run
+under supervision. The bash launchers remain the executors. `hexctl` composes
+their argv and supervises one as a child process. It does not replace their
 flock, Docker and service gates, atomic artifacts, or exact-container-ID
-cleanup. Three items are knowingly partial: item 1, because each launcher takes
-the shared lock itself, so the lock is held per attempt and not across the retry
-boundary; item 8, because the pinned 64-environment LR=0 warmup is not
-implemented; and item 10, because the sharded launcher starts both shards
-itself, so `hexctl screen` verifies the ordering from the shard logs and refuses
-to certify a violation rather than enforcing the order at launch.
+cleanup. Three items are partial by design. Item 1: each launcher takes the
+shared lock itself, so the lock holds per attempt and drops at the retry
+boundary. Item 8: the pinned 64-environment LR=0 warmup does not exist yet.
+Item 10: the sharded launcher starts both shards itself, so `hexctl screen`
+verifies the ordering from the shard logs and refuses to certify a violation.
+It does not enforce the order at launch.
 
 Implement in the hardened launcher:
 
@@ -217,7 +232,7 @@ Implement in the hardened launcher:
 2. Gate not only current GPU, Docker, and service use, but producer scripts and
    their descendants: `nsva_dl.sh`, `validate_nsva.py`, `score_clip.py`,
    `validate_b51.py`, and torch-compile / clip-scoring workers.
-3. Recheck contention immediately after container creation and again before PPO
+3. Recheck contention as soon as the container exists and again before PPO
    starts.
 4. Set `PYTHONUNBUFFERED=1`.
 5. Require `Loading user config` by 45 seconds and the AppLauncher completion
@@ -244,8 +259,8 @@ Implement in the hardened launcher:
 Diagnostic sequencing for the underlying failure class: add flushed wrapper
 milestone timestamps and opt-in `faulthandler` / SIGUSR1 dumps around the
 deferred import and `runpy` boundaries before changing caches, IPC, or image
-layout. Shared writable Kit/OV caches are a plausible lead, not proof. Do not
-auto-delete caches or Docker volumes.
+layout. Shared writable Kit/OV caches are a plausible lead without proof. Do
+not auto-delete caches or Docker volumes.
 
 Contract tests that must move with the implementation:
 
@@ -257,10 +272,10 @@ isaaclab/tests/test_calibrate_stage2c_bilateral_launcher_contract.py
 ## 7. Already fixed
 
 The exact-container cleanup in both hardened launchers uses `|` delimiters
-instead of a literal `\t` in the Docker Go template, and Docker's current
-`--timeout 30` option. The change is synced to the Spark, passed the test
-suite, and was validated in vivo by Probe21 attempt 1. Recorded hashes at the
-time of the fix:
+in the Docker Go template in place of a literal `\t`, and Docker's current
+`--timeout 30` option. The change is on the Spark, passed the test suite, and
+Probe21 attempt 1 validated it in vivo. Recorded hashes at the time of the
+fix:
 
 ```text
 probe launcher SHA:       5f69625d7638e538f2c6f48c2907c9b42c61ac0329afa340362f1cfc1c5cc506
@@ -286,9 +301,76 @@ Background on the parser bug and the stall class it exposed:
 ## 9. Working without Spark access
 
 A session that cannot reach the Spark or the Tailscale network can review
-source, run the CPU-safe test suite, and prepare patches, but it cannot
-truthfully claim to have resumed, monitored, evaluated, or recorded live
-training. In that case, return the exact patch plus the exact remote commands,
-working directory, expected output, and required return evidence, and let a
-session with Spark access execute them. Never request or accept credentials in
-chat.
+source, run the CPU-safe test suite, and prepare patches. It cannot claim to
+have resumed, monitored, evaluated, or recorded live training. In that case,
+return the exact patch plus the exact remote commands, working directory,
+expected output, and required return evidence, and let a session with Spark
+access execute them. Do not request or accept credentials in chat.
+
+## 10. Importing and validating a robot model (asset v1)
+
+Asset v1 is `robot/hexapod_mkii_assy/`. Its README holds the conventions,
+limits, stance, and regeneration steps. The spec is `MKII_V1_ASSET` in
+`packages/hexapod_env/hexapod_env/assets/spec.py` and the task ID is
+`Isaac-Velocity-Flat-Hexapod-MKII-V1-Direct-v0`. Do not train on it before
+step 4 passes and step 5 confirms the runtime joint order.
+
+1. Sync the source to `/home/orionh/HEXAPOD` and verify
+   `sha256sum -c isaaclab/deploy/stage2_pipeline.sha256` (the manifest covers
+   the asset modules).
+2. Generate the USD inside the container from `/workspace/hexapod`:
+   ```sh
+   python tools/import_urdf_to_usd.py \
+     robot/hexapod_mkii_assy/urdf/hexapod_mkii_serial.urdf \
+     robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda
+   ```
+   Expected: `rigid_bodies=19 revolute_joints=18`, the `.usda` plus a
+   `payloads/` folder beside it, and the nested hierarchy
+   `Robot/Geometry/body/lf_coxa/lf_femur/lf_tibia` in `payloads/base.usda`.
+   If the importer API differs on this build, import from the GUI with these
+   settings: floating base, import inertia tensor on, density 0 (keep URDF
+   masses), merge fixed joints on, self-collision off, convex decomposition
+   off, collision from visuals off, position drives. Save to the same path.
+   `package://hexapod_mkii_assy/...` resolves from the package directory, so
+   import from a checkout where `meshes/` sits beside `urdf/`.
+3. Contact reports, same container:
+   ```sh
+   python tools/enable_nested_contact_reports.py \
+     robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda
+   ```
+   Expected: `CONTACT_REPORTS_ENABLED bodies=19`.
+4. Validate (`--asset mock` re-validates the Phase-0 lineage):
+   ```sh
+   python isaaclab/validate.py --asset mkii_v1 --num_envs 32 --steps 1000
+   ```
+   The validator requires 18 joints, six feet, finite observations, no
+   terminations or truncations, no coxa/femur/tibia-shaft ground contact after
+   settling, and computed torque under the RS05 1.6 N m rating (saturation
+   fraction below 0.5 %). Expect `post_settle_mean_base_height_m` near 0.12
+   and `max_abs_computed_torque_nm` below 1.6 with margin.
+   `isaaclab/deploy/validate-stance-sweep` runs three candidate stances.
+5. Confirm the runtime joint order. The action vector is positional, so the
+   articulation's own `joint_names` order is a contract.
+   `hexapod_core/joints_v2.py` predicts it (breadth-first from `body`: six
+   coxa_yaw, six femur_pitch, six tibia_pitch, legs lf lm lr rf rm rr) and
+   marks it provisional. `HexapodEnv` refuses to construct on a mismatch. Keep
+   the `joint_names=[...]` line from step 4 as evidence. If it matches, set
+   `RUNTIME_ORDER_STATUS` to `"confirmed"` in `joints_v2.py` and in the spec,
+   in the same commit as that transcript. If it differs, correct both tuples
+   together. Do not bypass the check.
+6. Commit the generated `usd/` folder if the team shares it. The USD path
+   defaults to the container path in the spec, and `HEXAPOD_MKII_V1_USD_PATH`
+   overrides it per run. Curriculum stages for this asset derive from
+   `HexapodMkiiV1FlatEnvCfg` under new task IDs, with a fresh stance sweep for
+   the 8.26 kg mass distribution. The `phase2*_cfg.py` classes stay on the
+   mock. After you change a manifest-listed file, regenerate
+   `stage2_pipeline.sha256`.
+
+| symptom | likely cause |
+|---|---|
+| `Unexpected contact-body layout` from `env.py` | The USD hierarchy differs from `Geometry/body/<coxa>/<femur>/<tibia>`. Check the payload and the `MKII_V1_GEOMETRY_ROOT` sensor paths in `env_cfg.py` |
+| `Articulation joint order differs from the asset's runtime joint contract` | PhysX ordered the joints in a different order from the `joints_v2.py` prediction. Correct `joints_v2.RUNTIME_JOINT_NAMES` and `MKII_V1_ASSET.runtime_joint_names` from the printed `joint_names` |
+| `Expected 18 joints` / `Expected 6 feet` | You imported the wrong URDF (linkage variant, or the mock), or the importer did not merge fixed joints |
+| torque saturation on standing | The stance moved away from `stance.json`, or masses changed. Re-derive with the stance search in the importer |
+| foot contacts counted as shaft contacts | `distal_foot_min_y_m` (0.155, tibia frame +Y) no longer matches the pad. Re-check the pad spheres in the URDF |
+| meshes missing after import | `package://` did not resolve. Import from a checkout with `meshes/` beside `urdf/` |
