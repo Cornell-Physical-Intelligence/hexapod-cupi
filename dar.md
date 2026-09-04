@@ -39,7 +39,7 @@ numbers down. The team lead answered on 2026-09-04. Three rows stay open.
 | Mission time | Minutes of walking per battery | Not a constraint now; optimize later | Deferred |
 | Deck steadiness | Roll and pitch, vertical bounce, yaw wander limits | Minimize. The lead expects software compensation to absorb much of it. Orion is thinking about limits | Open (Orion) |
 | Sweep spacing | Distance between passes, from the data sensor footprint | To find by experiment in sim and in the field. Orion will report back | Open (Orion) |
-| Position accuracy | Localization error the sweep tolerates | Derived from sweep spacing once that row closes | Derived |
+| Position accuracy | Localization error the sweep tolerates | Derived from sweep spacing once that row closes. RTK GNSS is out of budget, so a standard GNSS fix (metres) anchors the polygon and lidar-inertial odometry carries position inside it | Derived; RTK excluded |
 | Payload | Data sensor mass, size, power, mount | Under 1 to 2 kg. Mass is not a constraint now because the robot needs a weight reduction anyway | Set (bound only) |
 | Speed | Minimum useful walking speed | Not a constraint now; make it faster later | Deferred |
 | Operator | Medium and range | Medium is open. Range is long, so LoRa (or cellular) for telemetry | Set (long range) |
@@ -53,6 +53,10 @@ Consequences for the gates:
   Stage2C artifact and does not come from this table.
 - Terrain for M1 is flat ground and for M2 is a packed path with a stated
   slope. Forest enters the plan only after a field sweep on a path.
+- Position comes from lidar-inertial odometry inside a 10 m square. A
+  standard GNSS fix is good to a few metres and cannot hold sweep lines on
+  its own, so it anchors the drawn polygon to the world and no more. The
+  start-anchored local frame in `docs/PLAN.md` §6 P1 is the fallback.
 - The operator link is a long-range radio. This closes the medium part of
   hardware decision 4 in `docs/PLAN.md` §2 toward LoRa or cellular.
 - The mechanical team plans a weight reduction. Asset v1 masses (8.26 kg)
@@ -62,7 +66,8 @@ Consequences for the gates:
 Reference mission the lead pointed to: Rodriguez-Sanchez, Johnsen, and Li,
 "A Ground Mobile Robot for Autonomous Terrestrial Laser Scanning-Based Field
 Phenotyping" (arXiv:2404.04404). It uses RTK-GNSS plus sensor fusion for
-localization and route optimization over crop trials.
+localization and route optimization over crop trials. This robot replaces
+RTK with lidar-inertial odometry.
 
 ## 3. The repo today
 
@@ -142,7 +147,7 @@ talks to the policy only through velocity commands.
 Rough list for the team to price:
 
 - Onboard computer (NVIDIA Jetson class): the largest single item.
-- GPS module (RTK-capable if sweep spacing demands it).
+- GPS module, standard GNSS. RTK is out of budget.
 - Battery, power distribution, emergency-stop hardware.
 - Data sensor: sponsor-provided or budgeted here.
 - The team already owns the Mid-360. Training compute is the shared Spark.
