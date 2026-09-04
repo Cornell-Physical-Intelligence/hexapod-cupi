@@ -12,11 +12,26 @@ import torch
 
 from isaaclab_tasks.utils import add_launcher_args, launch_simulation, resolve_task_config, setup_preset_cli
 
-from hexapod_rl.asset_cfg import FEMUR_JOINTS, TIBIA_JOINTS
-from hexapod_rl.register import TASK_ID, register_envs
+from hexapod_rl.register import MKII_V1_FLAT_TASK_ID, TASK_ID, register_envs
+
+# ``hexapod_rl`` has put ``packages/`` on sys.path by now.
+from hexapod_env.assets.spec import MKII_V1_ASSET, MOCK_ASSET  # noqa: E402
+
+# Asset name -> (task ID that loads it, its spec). Asset v1 is the default;
+# the mock stays selectable so the Phase-0 lineage can still be re-validated.
+ASSETS = {
+    MKII_V1_ASSET.name: (MKII_V1_FLAT_TASK_ID, MKII_V1_ASSET),
+    MOCK_ASSET.name: (TASK_ID, MOCK_ASSET),
+}
 
 
 parser = argparse.ArgumentParser(description="Validate the RobStride hexapod articulation.")
+parser.add_argument(
+    "--asset",
+    choices=sorted(ASSETS),
+    default=MKII_V1_ASSET.name,
+    help="Robot model to validate; selects the task ID and the joint limits.",
+)
 parser.add_argument("--steps", type=int, default=1000)
 parser.add_argument("--num_envs", type=int, default=32)
 parser.add_argument(
@@ -42,6 +57,7 @@ register_envs()
 
 
 def main() -> None:
+    task_id, asset = ASSETS[args_cli.asset]
     if args_cli.steps < 1:
         raise ValueError("--steps must be at least 1")
     if args_cli.num_envs < 1:
@@ -52,15 +68,15 @@ def main() -> None:
         raise ValueError("--root-height-m must be finite and positive")
     if args_cli.femur_angle_rad is not None and not (
         math.isfinite(args_cli.femur_angle_rad)
-        and 0.0 <= args_cli.femur_angle_rad <= 1.74533
+        and asset.femur_limits[0] <= args_cli.femur_angle_rad <= asset.femur_limits[1]
     ):
-        raise ValueError("--femur-angle-rad must lie within [0, 1.74533]")
+        raise ValueError(f"--femur-angle-rad must lie within {list(asset.femur_limits)}")
     if args_cli.tibia_angle_rad is not None and not (
         math.isfinite(args_cli.tibia_angle_rad)
-        and 0.0 <= args_cli.tibia_angle_rad <= 2.53073
+        and asset.tibia_limits[0] <= args_cli.tibia_angle_rad <= asset.tibia_limits[1]
     ):
-        raise ValueError("--tibia-angle-rad must lie within [0, 2.53073]")
-    env_cfg, _ = resolve_task_config(TASK_ID, "")
+        raise ValueError(f"--tibia-angle-rad must lie within {list(asset.tibia_limits)}")
+    env_cfg, _ = resolve_task_config(task_id, "")
     env_cfg.seed = 0
     env_cfg.scene.num_envs = args_cli.num_envs
     root_x, root_y, default_root_height = env_cfg.robot.init_state.pos
@@ -72,19 +88,19 @@ def main() -> None:
     femur_angle = float(
         args_cli.femur_angle_rad
         if args_cli.femur_angle_rad is not None
-        else env_cfg.robot.init_state.joint_pos[FEMUR_JOINTS[0]]
+        else env_cfg.robot.init_state.joint_pos[asset.femur_joints[0]]
     )
     tibia_angle = float(
         args_cli.tibia_angle_rad
         if args_cli.tibia_angle_rad is not None
-        else env_cfg.robot.init_state.joint_pos[TIBIA_JOINTS[0]]
+        else env_cfg.robot.init_state.joint_pos[asset.tibia_joints[0]]
     )
     env_cfg.robot.init_state.pos = (root_x, root_y, root_height)
     env_cfg.robot.init_state.joint_pos.update(
-        {name: femur_angle for name in FEMUR_JOINTS}
+        {name: femur_angle for name in asset.femur_joints}
     )
     env_cfg.robot.init_state.joint_pos.update(
-        {name: tibia_angle for name in TIBIA_JOINTS}
+        {name: tibia_angle for name in asset.tibia_joints}
     )
     env_cfg.nominal_height_m = root_height
     env_cfg.episode_length_s = max(
@@ -92,7 +108,7 @@ def main() -> None:
         args_cli.steps * env_cfg.decimation * env_cfg.sim.dt + 1.0,
     )
     with launch_simulation(env_cfg, args_cli):
-        env = gym.make(TASK_ID, cfg=env_cfg)
+        env = gym.make(task_id, cfg=env_cfg)
         env.reset(seed=0)
         unwrapped = env.unwrapped
         # DirectRLEnv staggers full-reset episode counters for training.  The
@@ -216,6 +232,11 @@ def main() -> None:
             post_settle_non_foot_contact_env_steps
             / (post_settle_samples * unwrapped.num_envs)
         )
+        print(f"asset={asset.name}")
+        print(f"task_id={task_id}")
+        # The articulation's own order is the action order; this line is the
+        # evidence that confirms (or corrects) the asset's runtime joint contract.
+        print(f"joint_names={list(unwrapped._robot.joint_names)}")
         print(f"joint_count={unwrapped._robot.num_joints}")
         print(f"body_count={unwrapped._robot.num_bodies}")
         print(f"foot_count={foot_count}")

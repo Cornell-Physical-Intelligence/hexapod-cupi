@@ -11,6 +11,7 @@ bootstrap is idempotent, so it is equally correct if it already ran.
 from hexapod_env.asset_cfg import *  # noqa: F401,F403
 from hexapod_env.asset_cfg import (
     USD_PATH,
+    ROOT_LINK_NAME,
     COXA_JOINTS,
     FEMUR_JOINTS,
     TIBIA_JOINTS,
@@ -20,6 +21,7 @@ from hexapod_env.asset_cfg import (
 
 __all__ = [
     "USD_PATH",
+    "ROOT_LINK_NAME",
     "COXA_JOINTS",
     "FEMUR_JOINTS",
     "TIBIA_JOINTS",

@@ -38,3 +38,10 @@ class HexapodPPORunnerCfg(RslRlOnPolicyRunnerCfg):
         desired_kl=0.01,
         max_grad_norm=1.0,
     )
+
+
+@configclass
+class HexapodMkiiV1PPORunnerCfg(HexapodPPORunnerCfg):
+    """Same PPO recipe, separate experiment directory for asset v1 runs."""
+
+    experiment_name = "hexapod_mkii_v1_flat_direct"

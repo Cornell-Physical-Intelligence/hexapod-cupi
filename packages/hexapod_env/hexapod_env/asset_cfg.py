@@ -1,4 +1,12 @@
-"""Physics and actuator configuration for the RobStride RS05 hexapod."""
+"""Physics and actuator configuration for the RobStride RS05 hexapod.
+
+``HEXAPOD_CFG`` is the Phase-0 mock (``robot/hexapod_mkii_mock_assy``), the
+articulation every existing task ID and checkpoint is bound to; its literals
+are frozen and bound by the contract tests. ``ROBSTRIDE_RS05_CFG`` is the
+shared actuator model. Newer robot models are described in
+:mod:`hexapod_env.assets.spec` and built by
+:mod:`hexapod_env.assets.articulation`; they register under new task IDs.
+"""
 
 from __future__ import annotations
 
@@ -15,6 +23,10 @@ USD_PATH = os.environ.get(
     "/workspace/hexapod/robot/hexapod_mkii_mock_assy/usd/"
     "hexapod_mkii_robstride/hexapod_mkii_robstride.usda",
 )
+
+# Root (base) link of the mock; the prim under ``Robot/Geometry`` that every
+# other link is nested beneath.
+ROOT_LINK_NAME = "root"
 
 COXA_JOINTS = (
     "revolute_1_1",

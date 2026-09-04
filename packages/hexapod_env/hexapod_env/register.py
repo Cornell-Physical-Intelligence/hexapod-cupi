@@ -75,6 +75,9 @@ PHASE2_RECOVERY_STAGE2E_E2_TASK_ID = (
 PHASE2_FINAL_TASK_ID = "Isaac-Velocity-Omni-Hexapod-RobStride-Direct-v0"
 # Stable shorthand for callers that only need the completed Phase 2 profile.
 PHASE2_TASK_ID = PHASE2_FINAL_TASK_ID
+# Asset v1 (ADR-0001): the CAD assembly under its own ID. Every ID above keeps
+# loading the Phase-0 mock it was trained on.
+MKII_V1_FLAT_TASK_ID = "Isaac-Velocity-Flat-Hexapod-MKII-V1-Direct-v0"
 
 
 def register_envs() -> list[str]:
@@ -86,6 +89,16 @@ def register_envs() -> list[str]:
             kwargs={
                 "env_cfg_entry_point": "hexapod_rl.env_cfg:HexapodFlatEnvCfg",
                 "rsl_rl_cfg_entry_point": "hexapod_rl.ppo_cfg:HexapodPPORunnerCfg",
+            },
+        )
+    if MKII_V1_FLAT_TASK_ID not in gym.registry:
+        gym.register(
+            id=MKII_V1_FLAT_TASK_ID,
+            entry_point="hexapod_rl.env:HexapodEnv",
+            disable_env_checker=True,
+            kwargs={
+                "env_cfg_entry_point": "hexapod_rl.env_cfg:HexapodMkiiV1FlatEnvCfg",
+                "rsl_rl_cfg_entry_point": "hexapod_rl.ppo_cfg:HexapodMkiiV1PPORunnerCfg",
             },
         )
     if PHASE1_V2_TASK_ID not in gym.registry:

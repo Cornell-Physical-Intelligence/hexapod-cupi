@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 __all__ = [
+    "MKII_V1_FLAT_TASK_ID",
     "PHASE1_V2_TASK_ID",
     "PHASE1_V3_TASK_ID",
     "PHASE1_V4_TASK_ID",

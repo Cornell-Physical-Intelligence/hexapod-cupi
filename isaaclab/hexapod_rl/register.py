@@ -11,6 +11,7 @@ bootstrap is idempotent, so it is equally correct if it already ran.
 from hexapod_env.register import *  # noqa: F401,F403
 from hexapod_env.register import (
     TASK_ID,
+    MKII_V1_FLAT_TASK_ID,
     PHASE1_V2_TASK_ID,
     PHASE1_V3_TASK_ID,
     PHASE1_V4_TASK_ID,
@@ -38,6 +39,7 @@ from hexapod_env.register import (
 
 __all__ = [
     "TASK_ID",
+    "MKII_V1_FLAT_TASK_ID",
     "PHASE1_V2_TASK_ID",
     "PHASE1_V3_TASK_ID",
     "PHASE1_V4_TASK_ID",

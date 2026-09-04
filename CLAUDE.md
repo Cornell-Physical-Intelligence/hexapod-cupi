@@ -1,7 +1,8 @@
 # Agent and contributor guide
 
-This repository trains walking policies for the Hexapod MKII, a 6.3 kg
-six-legged robot with 18 RobStride RS05 joints, using Isaac Sim 6.0.1 with
+This repository trains walking policies for the Hexapod MKII, a six-legged
+robot with 18 RobStride RS05 joints (8.26 kg in the CAD assembly with each
+RS05 at its 191 g datasheet mass; the earlier mock assumed 6.3 kg), using Isaac Sim 6.0.1 with
 Isaac Lab `DirectRLEnv` and RSL-RL PPO. Training runs on a shared DGX Spark
 host through hardened launchers; the repository holds the task source, the
 deployment scripts, the tests, and a curated evidence trail of every experiment
@@ -14,6 +15,7 @@ by explicit numeric acceptance criteria, not by how a gait looks.
 
 ```text
 STATUS.md                       Current state; rewritten in place, never appended
+AGENTS.md                       Asset v1 (CAD assembly) conventions and the Isaac Sim import/validation runbook
 docs/ROADMAP.md                 Program direction: workstreams, milestones, gates, Spark sharing
 docs/ARCHITECTURE.md            Autonomy layers and the contracts between them (C1-C4, O1, A1)
 docs/decisions/                 Architecture decision records; numbered, never edited once accepted
@@ -23,7 +25,7 @@ docs/OPERATIONS.md              Spark runbook, GPU protocol, launchers, screens
 docs/incidents/                 Frozen forensic records; append-only
 docs/archive/                   Superseded documents, kept verbatim
 packages/hexapod_core/          Frozen contracts: observation, action, command, joints, actuator
-packages/hexapod_env/           Env, rewards/, per-stage configs, gym registration
+packages/hexapod_env/           Env, rewards/, assets/ (one spec per robot model), per-stage configs, gym registration
 packages/hexapod_train/         Run composition, run contract, startup supervisor
 packages/hexapod_eval/          gates.py acceptance thresholds; evaluation entry point
 packages/hexapod_runtime/       Deployable runtime: observation builder, action pipeline
@@ -33,7 +35,7 @@ isaaclab/hexapod_rl/            Compatibility shims re-exporting hexapod_env
 isaaclab/deploy/                Launchers, systemd units, stage2_pipeline.sha256
 ops/                            hexctl operator CLI; attic/ holds retired deploy scripts
 isaaclab/tests/                 Unit and launcher/analyzer contract tests
-robot/                          URDF package, meshes, generated USD
+robot/                          hexapod_mkii_assy (asset v1), hexapod_mkii_mock_assy (Phase-0), leg v3, sensors, importers
 tools/                          URDF/USD generation and physics preparation
 viewer/                         Vite + React viewer
 artifacts/                      Checkpoints, evaluations, videos, probe ledger

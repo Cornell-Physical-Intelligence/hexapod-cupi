@@ -269,7 +269,7 @@ class HexapodEnv(DirectRLEnv):
             "bilateral_longitudinal_contact_moment_nm",
         }
 
-        expected_foot_names = [tibia for _, _, tibia in LEG_LINK_NAMES]
+        expected_foot_names = [tibia for _, _, tibia in self.cfg.leg_link_names]
         self._feet_body_ids, foot_names = self._robot.find_bodies(
             expected_foot_names, preserve_order=True
         )
@@ -291,6 +291,18 @@ class HexapodEnv(DirectRLEnv):
                 f"Unexpected contact-body layout: {body_counts}, "
                 f"robot_feet={foot_names}, plane_filters={foot_filter_counts}"
             )
+        expected_joint_names = self.cfg.expected_runtime_joint_names
+        if expected_joint_names is not None:
+            actual_joint_names = tuple(self._robot.joint_names)
+            if actual_joint_names != tuple(expected_joint_names):
+                raise RuntimeError(
+                    "Articulation joint order differs from the asset's runtime "
+                    f"joint contract: articulation={list(actual_joint_names)}, "
+                    f"contract={list(expected_joint_names)}. Correct the asset "
+                    "spec and its hexapod_core joints contract from the "
+                    "articulation order before training; a checkpoint must not "
+                    "be trained against an unconfirmed action order."
+                )
         ground_wrench_reward_requested = (
             self.cfg.inactive_ground_contact_yaw_moment_reward_scale != 0.0
             or self.cfg.inactive_bilateral_longitudinal_contact_moment_reward_scale

@@ -23,7 +23,7 @@ from isaaclab.sim import SimulationCfg
 from isaaclab.sim.spawners.sensors import SensorFrameCfg
 from isaaclab.utils.configclass import configclass
 
-from hexapod_rl.asset_cfg import HEXAPOD_CFG
+from hexapod_rl.asset_cfg import HEXAPOD_CFG, ROOT_LINK_NAME
 
 from .mid360_pattern import Mid360SurrogatePatternCfg
 from .sensor_model import DEFAULT_PHASE3_SENSOR_MODEL_CFG
@@ -31,7 +31,7 @@ from .sensor_model import DEFAULT_PHASE3_SENSOR_MODEL_CFG
 
 PHYSICS_DT_S = 1.0 / 200.0
 GROUND_PRIM_PATH = "/World/Phase3Ground"
-ROBOT_ROOT_RIGID_PRIM = "{ENV_REGEX_NS}/Robot/Geometry/root"
+ROBOT_ROOT_RIGID_PRIM = "{ENV_REGEX_NS}/Robot/Geometry/" + ROOT_LINK_NAME
 LIDAR_MOUNT_PRIM = f"{ROBOT_ROOT_RIGID_PRIM}/phase3_mid360"
 
 # The nineteen leaf meshes the robot occludes its own lidar with: one deck plus

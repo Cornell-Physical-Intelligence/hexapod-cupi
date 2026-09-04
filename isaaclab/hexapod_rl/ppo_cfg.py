@@ -11,8 +11,10 @@ bootstrap is idempotent, so it is equally correct if it already ran.
 from hexapod_env.ppo_cfg import *  # noqa: F401,F403
 from hexapod_env.ppo_cfg import (
     HexapodPPORunnerCfg,
+    HexapodMkiiV1PPORunnerCfg,
 )
 
 __all__ = [
     "HexapodPPORunnerCfg",
+    "HexapodMkiiV1PPORunnerCfg",
 ]

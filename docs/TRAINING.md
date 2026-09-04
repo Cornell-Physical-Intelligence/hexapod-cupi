@@ -35,6 +35,26 @@ container USD path: /workspace/hexapod/robot/hexapod_mkii_mock_assy/usd/hexapod_
 mass target: 1.5 kg body + six 0.8 kg complete legs = 6.3 kg
 ```
 
+Asset v1 (ADR-0001), the CAD assembly, is registered under its own task ID so
+every ID above keeps loading the mock it was trained on:
+
+```text
+task ID: Isaac-Velocity-Flat-Hexapod-MKII-V1-Direct-v0
+URDF: robot/hexapod_mkii_assy/urdf/hexapod_mkii_serial.urdf
+USD:  robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda  (tools/import_urdf_to_usd.py)
+container USD path: /workspace/hexapod/robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda  (override: HEXAPOD_MKII_V1_USD_PATH)
+mass: 8.261 kg from Onshape per-part properties, every RS05 hard-set to 191 g; no sensor payload yet
+spec: packages/hexapod_env/hexapod_env/assets/spec.py :: MKII_V1_ASSET
+runtime joint order: packages/hexapod_core/hexapod_core/joints_v2.py (provisional until read back from the imported articulation)
+```
+
+Each robot model is described once by a `HexapodAssetSpec` (USD, root link,
+joint and link names, limits, stance, foot-pad geometry, expected runtime joint
+order). An env config points at a spec; `HexapodEnv` reads link names from the
+config and, when the config names an expected runtime joint order, refuses to
+construct if the imported articulation's `joint_names` differ. Adding a robot
+is a new spec plus a new env config under a new task ID.
+
 ## 2. Observation, action, and timing contract
 
 ```text

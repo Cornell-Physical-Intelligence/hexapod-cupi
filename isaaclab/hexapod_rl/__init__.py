@@ -22,6 +22,7 @@ sys.path[:0] = [root for root in _SOURCE_ROOTS if root not in sys.path]
 
 from hexapod_env import *  # noqa: E402,F401,F403
 from hexapod_env import (  # noqa: E402
+    MKII_V1_FLAT_TASK_ID,
     PHASE1_V2_TASK_ID,
     PHASE1_V3_TASK_ID,
     PHASE1_V4_TASK_ID,
@@ -47,6 +48,7 @@ from hexapod_env import (  # noqa: E402
 )
 
 __all__ = [
+    "MKII_V1_FLAT_TASK_ID",
     "PHASE1_V2_TASK_ID",
     "PHASE1_V3_TASK_ID",
     "PHASE1_V4_TASK_ID",

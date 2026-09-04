@@ -14,6 +14,8 @@ from hexapod_env.env_cfg import (
     GROUND_PLANE_COLLISION_PATH,
     EventCfg,
     HexapodFlatEnvCfg,
+    MkiiV1EventCfg,
+    HexapodMkiiV1FlatEnvCfg,
 )
 
 __all__ = [
@@ -21,4 +23,6 @@ __all__ = [
     "GROUND_PLANE_COLLISION_PATH",
     "EventCfg",
     "HexapodFlatEnvCfg",
+    "MkiiV1EventCfg",
+    "HexapodMkiiV1FlatEnvCfg",
 ]

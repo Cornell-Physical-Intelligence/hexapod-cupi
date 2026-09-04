@@ -14,8 +14,12 @@ from isaaclab.terrains import TerrainImporterCfg
 from isaaclab.utils.configclass import configclass
 
 from .asset_cfg import HEXAPOD_CFG
+from .assets.articulation import HEXAPOD_MKII_V1_CFG
+from .assets.spec import MKII_V1_ASSET
 
 
+# Phase-0 mock link names. ``HexapodFlatEnvCfg`` and every task derived from
+# it keep these; a new robot model supplies its own through the asset spec.
 LEG_LINK_NAMES = (
     ("coxa", "femur", "tibia"),
     ("coxa_1", "femur_1", "tibia_1"),
@@ -150,6 +154,15 @@ class HexapodFlatEnvCfg(DirectRLEnvCfg):
     # Tibia link-frame +Y runs from the knee toward the terminal pad. The
     # imported mesh reaches y=0.210 m, leaving 30 mm of numerical margin here.
     distal_foot_min_y_m = 0.18
+    # Per-asset link names the environment resolves foot bodies from. The
+    # default is the mock's table above; asset configs point this at their
+    # spec so ``HexapodEnv`` carries no asset literals of its own.
+    leg_link_names: tuple[tuple[str, str, str], ...] = LEG_LINK_NAMES
+    # When set, ``HexapodEnv`` compares the imported articulation's joint order
+    # against this tuple at construction and refuses to run on a mismatch, so
+    # a new asset cannot train against an unconfirmed action order. ``None``
+    # preserves the historical behaviour for every existing task.
+    expected_runtime_joint_names: tuple[str, ...] | None = None
     # Phase 1 trains forward motion only. Keep these ranges explicit so later
     # phases can introduce standing, lateral motion, and turning without
     # changing environment code.
@@ -303,3 +316,59 @@ class HexapodFlatEnvCfg(DirectRLEnvCfg):
     deck_stability_height_error_scale_m = 0.025
     # Applied once on a terminal fall, outside policy-step time scaling.
     fall_penalty = 0.0
+
+
+# ---------------------------------------------------------------------------
+# Asset v1: the CAD assembly (ADR-0001). Same task, different robot. Every
+# asset-specific value comes from ``MKII_V1_ASSET``; reward scales, command
+# ranges and timing are inherited unchanged from ``HexapodFlatEnvCfg`` and are
+# expected to be re-derived for the 8.26 kg mass distribution (stance sweep).
+# ---------------------------------------------------------------------------
+
+# Isaac Sim's URDF importer nests every link under its parent inside the
+# robot's Geometry scope: Robot/Geometry/body/lf_coxa/lf_femur/lf_tibia.
+MKII_V1_GEOMETRY_ROOT = MKII_V1_ASSET.geometry_root_prim("/World/envs/env_.*/Robot")
+
+
+@configclass
+class MkiiV1EventCfg(EventCfg):
+    base_mass = EventTerm(
+        func=mdp.randomize_rigid_body_mass,
+        mode="startup",
+        params={
+            "asset_cfg": SceneEntityCfg("robot", body_names=MKII_V1_ASSET.root_link),
+            "mass_distribution_params": (-0.20, 0.40),
+            "operation": "add",
+        },
+    )
+
+
+@configclass
+class HexapodMkiiV1FlatEnvCfg(HexapodFlatEnvCfg):
+    """Flat-ground forward-walking task on asset v1 (``hexapod_mkii_serial``)."""
+
+    events: MkiiV1EventCfg = MkiiV1EventCfg()
+    robot = HEXAPOD_MKII_V1_CFG.replace(prim_path="/World/envs/env_.*/Robot")
+    base_contact_sensor: ContactSensorCfg = _contact_sensor(MKII_V1_GEOMETRY_ROOT)
+    coxa_contact_sensor: ContactSensorCfg = _contact_sensor(
+        f"{MKII_V1_GEOMETRY_ROOT}/{MKII_V1_ASSET.coxa_link_regex}"
+    )
+    feet_contact_sensors: tuple[ContactSensorCfg, ...] = tuple(
+        _contact_sensor(
+            f"{MKII_V1_GEOMETRY_ROOT}/{coxa}/{femur}/{tibia}",
+            track_air_time=True,
+            track_contact_points=True,
+            track_friction_forces=True,
+        )
+        for coxa, femur, tibia in MKII_V1_ASSET.leg_link_names
+    )
+    femur_contact_sensors: tuple[ContactSensorCfg, ...] = tuple(
+        _contact_sensor(f"{MKII_V1_GEOMETRY_ROOT}/{coxa}/{femur}")
+        for coxa, femur, _ in MKII_V1_ASSET.leg_link_names
+    )
+    leg_link_names: tuple[tuple[str, str, str], ...] = MKII_V1_ASSET.leg_link_names
+    expected_runtime_joint_names: tuple[str, ...] | None = MKII_V1_ASSET.runtime_joint_names
+    # The root link is the bottom plate of the chassis.
+    nominal_height_m = MKII_V1_ASSET.nominal_height_m
+    distal_foot_min_y_m = MKII_V1_ASSET.distal_foot_min_y_m
+    swing_clearance_pad_offset_y_m = MKII_V1_ASSET.swing_clearance_pad_offset_y_m
