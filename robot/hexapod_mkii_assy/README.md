@@ -29,9 +29,18 @@ python3 robot/tools/import_onshape_hexapod.py \
 - `preview/standalone_template.html` + `robot/tools/pack_urdf_viewer.py` —
   build the single-file viewer (meshes embedded, CAD feature edges
   precomputed from the 22 deg dihedral threshold) that is published as the
-  shareable web preview: joint sliders, zero / exported / gait poses, tint by
-  link, fasteners on/off, collision primitives, joint axes, edges,
-  click-to-identify.
+  shareable web preview. Styles: CAD colours, tint by link, tint by leg,
+  white + edges, white shaded, hidden line, ghost (x-ray), blueprint.
+  Two-level explode (assemblies away from the body, parts away from their
+  link) with an animated showcase, section cut on any axis, isolate by part,
+  link, leg, class or name search, in-canvas labels, ground shadows, centre
+  of mass marker, two-point measure, joint sliders and poses (zero, stance,
+  as exported, tripod gait), snapshot lightbox. Headless renders: open the
+  page with `?capture=<name>&post=http://localhost:8322/save&w=2400&h=1600`
+  plus `style=`, `view=iso|top|front|side` or `theta=&phi=`, `explode=`,
+  `parts=`, `isolate=lf,body`, `hide=fastener`, `labels=1`, `shadows=1`,
+  `section=y&sectionAt=0`, `pose=stance`; the page posts a PNG to the
+  `post` URL (a 20-line `http.server` that decodes base64 into a file).
 - `preview/index.html` — three.js viewer: 18 sliders, zero / CAD / stand
   poses, tripod-gait animation, CAD colours or body tints, collision shapes,
   click-to-identify. Serve the repo root (`.claude/launch.json` →
