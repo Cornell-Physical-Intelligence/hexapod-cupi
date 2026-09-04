@@ -79,13 +79,18 @@ Import `urdf/hexapod_mkii_serial.urdf` as a floating-base USD with
 convex decomposition, self-collision off), then author contact reports with
 `tools/enable_nested_contact_reports.py`. `package://hexapod_mkii_assy/...`
 resolves from this directory, exactly as the mock package was imported.
-`isaaclab/hexapod_rl/asset_cfg.py` points at
+`packages/hexapod_env/hexapod_env/assets/spec.py` (`MKII_V1_ASSET`) points at
 `usd/hexapod_mkii_serial/hexapod_mkii_serial.usda` (override with
-`HEXAPOD_USD_PATH`), names the joints and links, carries the joint limits and
-the reset stance from `joint_limits.json` / `stance.json`, and
-`isaaclab/validate.py` runs the standing gate: 18 joints, 19 rigid bodies,
-six foot sensors, finite observations, no falls, no non-foot ground contact,
-and computed torque under the 1.6 N*m rating.
+`HEXAPOD_MKII_V1_USD_PATH`), names the joints and links, and carries the joint
+limits and the reset stance from `joint_limits.json` / `stance.json`. The
+task is `Isaac-Velocity-Flat-Hexapod-MKII-V1-Direct-v0`
+(`HexapodMkiiV1FlatEnvCfg`); the mock's task IDs are untouched. The expected
+runtime joint order is `packages/hexapod_core/hexapod_core/joints_v2.py`,
+provisional until confirmed. `isaaclab/validate.py --asset mkii_v1` runs the
+standing gate: 18 joints, 19 rigid bodies, six foot sensors, finite
+observations, no falls, no non-foot ground contact, computed torque under the
+1.6 N*m rating, and it prints the articulation's `joint_names`, which is the
+evidence that confirms the runtime order.
 
 The linkage model needs mimic-joint support (Isaac Sim >= 4.5) and is meant
 for visual/kinematic checks. With 1927 visual meshes the model is heavy for

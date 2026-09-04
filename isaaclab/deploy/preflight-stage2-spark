@@ -70,7 +70,7 @@ else
     fi
     manifest_path=${BASH_REMATCH[2]}
     case "${manifest_path}" in
-      README.md | robot/* | isaaclab/*) ;;
+      README.md | robot/* | isaaclab/* | packages/* | ops/*) ;;
       *)
         printf 'FAIL: manifest line %d is outside approved release roots: %s\n' \
           "${manifest_line_number}" "${manifest_path}" >&2

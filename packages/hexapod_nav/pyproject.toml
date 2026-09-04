@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hexapod-nav"
+version = "0.1.0"
+description = "Command producers and path planning: the seam that turns goals into velocity commands for the locomotion policy."
+requires-python = ">=3.10"
+
+# ``hexapod_core`` only, for the command contract. Navigation must never depend
+# on the simulator or the training stack; when a real planner arrives here it
+# may bring its own geometry or mapping dependencies, but never Isaac Lab,
+# ``hexapod_env``, or ``hexapod_train``.
+dependencies = ["hexapod-core"]
+
+[tool.setuptools]
+packages = ["hexapod_nav"]

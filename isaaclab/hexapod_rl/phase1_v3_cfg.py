@@ -1,45 +1,20 @@
-"""Phase 1 torque-aware, heading-stable walking fine-tune configuration."""
+"""Compatibility shim for ``hexapod_rl.phase1_v3_cfg``.
 
-from isaaclab.utils.configclass import configclass
-from isaaclab_rl.rsl_rl import RslRlPpoAlgorithmCfg
+The implementation now lives in ``hexapod_env.phase1_v3_cfg``
+(``packages/hexapod_env/hexapod_env/phase1_v3_cfg.py``). Names are re-exported
+explicitly so ``importlib``-based entry-point resolution finds real attributes
+here. Importing this module first imports the ``hexapod_rl`` package, whose
+``__init__`` puts the workspace ``packages/`` directory on ``sys.path``; that
+bootstrap is idempotent, so it is equally correct if it already ran.
+"""
 
-from .phase1_v2_cfg import HexapodPhase1V2EnvCfg, HexapodPhase1V2PPORunnerCfg
+from hexapod_env.phase1_v3_cfg import *  # noqa: F401,F403
+from hexapod_env.phase1_v3_cfg import (
+    HexapodPhase1V3EnvCfg,
+    HexapodPhase1V3PPORunnerCfg,
+)
 
-
-@configclass
-class HexapodPhase1V3EnvCfg(HexapodPhase1V2EnvCfg):
-    """Fine-tune the strongest v2 gait against measured drift and clipping."""
-
-    # Preserve v2 action semantics so model_350 can be resumed safely.
-    action_scale = 0.20
-    lin_vel_reward_scale = 3.5
-    yaw_rate_reward_scale = 2.0
-    yaw_rate_tracking_std_rad_s = 0.10
-    rated_torque_excess_reward_scale = -0.12
-    torque_saturation_reward_scale = -0.5
-
-
-@configclass
-class HexapodPhase1V3PPORunnerCfg(HexapodPhase1V2PPORunnerCfg):
-    """Low-entropy PPO continuation for conservative gait refinement."""
-
-    max_iterations = 200
-    save_interval = 25
-    experiment_name = "hexapod_robstride_phase1_forward_v3_direct"
-    algorithm = RslRlPpoAlgorithmCfg(
-        value_loss_coef=1.0,
-        use_clipped_value_loss=True,
-        clip_param=0.2,
-        entropy_coef=0.002,
-        num_learning_epochs=5,
-        num_mini_batches=4,
-        learning_rate=2.0e-4,
-        schedule="adaptive",
-        gamma=0.99,
-        lam=0.95,
-        desired_kl=0.005,
-        max_grad_norm=1.0,
-    )
-
-
-__all__ = ["HexapodPhase1V3EnvCfg", "HexapodPhase1V3PPORunnerCfg"]
+__all__ = [
+    "HexapodPhase1V3EnvCfg",
+    "HexapodPhase1V3PPORunnerCfg",
+]

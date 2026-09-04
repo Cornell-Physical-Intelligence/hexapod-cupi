@@ -9,7 +9,10 @@ from pathlib import Path
 import torch
 
 
-MODULE_PATH = Path(__file__).parents[1] / "hexapod_rl" / "command_sampling.py"
+PACKAGE_ROOT = (
+    Path(__file__).parents[2] / "packages" / "hexapod_env" / "hexapod_env"
+)
+MODULE_PATH = PACKAGE_ROOT / "command_sampling.py"
 SPEC = importlib.util.spec_from_file_location("hexapod_command_sampling", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 command_sampling = importlib.util.module_from_spec(SPEC)
