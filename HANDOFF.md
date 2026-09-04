@@ -10,6 +10,8 @@ The single monolithic handoff has been split by lifespan. Use these instead:
 - [`docs/OPERATIONS.md`](docs/OPERATIONS.md) — Spark runbook: environment,
   audit sequence, GPU lock protocol, launchers, formal screens, and the
   startup-supervisor specification.
+- [`AGENTS.md`](AGENTS.md) — asset v1 (the CAD assembly) conventions and the
+  Isaac Sim import, contact-report, and validation runbook.
 - [`docs/incidents/`](docs/incidents/) — frozen forensic records of specific
   failures.
 - [`docs/archive/HANDOFF-2026-08-26.md`](docs/archive/HANDOFF-2026-08-26.md) —
