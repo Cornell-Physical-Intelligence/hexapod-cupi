@@ -179,6 +179,15 @@ def build(args):
         extra["cad_pose"] = {f"{leg}_{j}": round(v, 5) for leg, r in rep["legs"].items() for j, v in r["cad_pose_joint_angles_rad"].items()}
         extra["mounts"] = {leg: r["yaw_axis_point_m"] for leg, r in rep["legs"].items()}
         extra["source"] = rep["source"]["robot_name"]
+    stance_file = pkg_dir / "stance.json"
+    if stance_file.exists():
+        st = json.loads(stance_file.read_text())
+        extra["stance"] = {}
+        for J in joints:
+            for key in ("coxa_yaw", "femur_pitch", "tibia_pitch"):
+                if J["n"].endswith(key):
+                    extra["stance"][J["n"]] = st[f"{key}_rad"]
+        extra["stance_root_height_m"] = st.get("root_height_m")
     model = {"name": root.get("name"), "links": links, "joints": joints, "colors": color_list, "meshes": meshes,
              "dropped_visuals": dropped, **extra}
     b64 = base64.b64encode(bytes(blob)).decode("ascii")

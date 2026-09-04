@@ -12,7 +12,7 @@ import torch
 
 from isaaclab_tasks.utils import add_launcher_args, launch_simulation, resolve_task_config, setup_preset_cli
 
-from hexapod_rl.asset_cfg import FEMUR_JOINTS, TIBIA_JOINTS
+from hexapod_rl.asset_cfg import FEMUR_JOINTS, FEMUR_LIMITS, TIBIA_JOINTS, TIBIA_LIMITS
 from hexapod_rl.register import TASK_ID, register_envs
 
 
@@ -52,14 +52,14 @@ def main() -> None:
         raise ValueError("--root-height-m must be finite and positive")
     if args_cli.femur_angle_rad is not None and not (
         math.isfinite(args_cli.femur_angle_rad)
-        and 0.0 <= args_cli.femur_angle_rad <= 1.74533
+        and FEMUR_LIMITS[0] <= args_cli.femur_angle_rad <= FEMUR_LIMITS[1]
     ):
-        raise ValueError("--femur-angle-rad must lie within [0, 1.74533]")
+        raise ValueError(f"--femur-angle-rad must lie within {list(FEMUR_LIMITS)}")
     if args_cli.tibia_angle_rad is not None and not (
         math.isfinite(args_cli.tibia_angle_rad)
-        and 0.0 <= args_cli.tibia_angle_rad <= 2.53073
+        and TIBIA_LIMITS[0] <= args_cli.tibia_angle_rad <= TIBIA_LIMITS[1]
     ):
-        raise ValueError("--tibia-angle-rad must lie within [0, 2.53073]")
+        raise ValueError(f"--tibia-angle-rad must lie within {list(TIBIA_LIMITS)}")
     env_cfg, _ = resolve_task_config(TASK_ID, "")
     env_cfg.seed = 0
     env_cfg.scene.num_envs = args_cli.num_envs

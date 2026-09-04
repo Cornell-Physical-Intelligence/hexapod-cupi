@@ -13,17 +13,16 @@ from isaaclab.sim import SimulationCfg
 from isaaclab.terrains import TerrainImporterCfg
 from isaaclab.utils.configclass import configclass
 
-from .asset_cfg import HEXAPOD_CFG
-
-
-LEG_LINK_NAMES = (
-    ("coxa", "femur", "tibia"),
-    ("coxa_1", "femur_1", "tibia_1"),
-    ("coxa_2", "femur_2", "tibia_2"),
-    ("coxa_3", "femur_3", "tibia_3"),
-    ("coxa_4", "femur_4", "tibia_4"),
-    ("coxa_5", "femur_5", "tibia_5"),
+from .asset_cfg import (
+    HEXAPOD_CFG,
+    LEG_LINK_NAMES,
+    ROOT_LINK_NAME,
+    STANCE_ROOT_HEIGHT_M,
 )
+
+# Isaac Sim's URDF importer nests every link under its parent inside the
+# robot's Geometry scope: Robot/Geometry/body/lf_coxa/lf_femur/lf_tibia.
+ROBOT_GEOMETRY_ROOT = f"/World/envs/env_.*/Robot/Geometry/{ROOT_LINK_NAME}"
 
 GROUND_PLANE_COLLISION_PATH = "/World/ground/terrain/GroundPlane/CollisionPlane"
 
@@ -66,7 +65,7 @@ class EventCfg:
         func=mdp.randomize_rigid_body_mass,
         mode="startup",
         params={
-            "asset_cfg": SceneEntityCfg("robot", body_names="root"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=ROOT_LINK_NAME),
             "mass_distribution_params": (-0.20, 0.40),
             "operation": "add",
         },
@@ -119,17 +118,15 @@ class HexapodFlatEnvCfg(DirectRLEnvCfg):
     events: EventCfg = EventCfg()
     robot = HEXAPOD_CFG.replace(prim_path="/World/envs/env_.*/Robot")
     # PhysX contact views require bodies selected by one sensor to share a
-    # parent. The URDF preserves a nested root/coxa/femur/tibia hierarchy, so
-    # distal links use one exact-path sensor per leg.
-    base_contact_sensor: ContactSensorCfg = _contact_sensor(
-        "/World/envs/env_.*/Robot/Geometry/root"
-    )
+    # parent. The imported USD keeps the nested body/coxa/femur/tibia
+    # hierarchy, so distal links use one exact-path sensor per leg.
+    base_contact_sensor: ContactSensorCfg = _contact_sensor(ROBOT_GEOMETRY_ROOT)
     coxa_contact_sensor: ContactSensorCfg = _contact_sensor(
-        "/World/envs/env_.*/Robot/Geometry/root/coxa.*"
+        f"{ROBOT_GEOMETRY_ROOT}/.*_coxa"
     )
     feet_contact_sensors: tuple[ContactSensorCfg, ...] = tuple(
         _contact_sensor(
-            f"/World/envs/env_.*/Robot/Geometry/root/{coxa}/{femur}/{tibia}",
+            f"{ROBOT_GEOMETRY_ROOT}/{coxa}/{femur}/{tibia}",
             track_air_time=True,
             track_contact_points=True,
             track_friction_forces=True,
@@ -137,19 +134,21 @@ class HexapodFlatEnvCfg(DirectRLEnvCfg):
         for coxa, femur, tibia in LEG_LINK_NAMES
     )
     femur_contact_sensors: tuple[ContactSensorCfg, ...] = tuple(
-        _contact_sensor(f"/World/envs/env_.*/Robot/Geometry/root/{coxa}/{femur}")
+        _contact_sensor(f"{ROBOT_GEOMETRY_ROOT}/{coxa}/{femur}")
         for coxa, femur, _ in LEG_LINK_NAMES
     )
 
     rated_torque_nm = 1.6
-    # Moving/legacy base-height target. Tasks with stand commands can opt into
-    # a distinct target below; ``None`` preserves the historical single target
-    # for every command.
-    nominal_height_m = 0.205
+    # Moving/legacy base-height target (the root link is the bottom plate of
+    # the chassis). Tasks with stand commands can opt into a distinct target
+    # below; ``None`` preserves the historical single target for every command.
+    nominal_height_m = STANCE_ROOT_HEIGHT_M
     stand_nominal_height_m: float | None = None
-    # Tibia link-frame +Y runs from the knee toward the terminal pad. The
-    # imported mesh reaches y=0.210 m, leaving 30 mm of numerical margin here.
-    distal_foot_min_y_m = 0.18
+    # Tibia link-frame +Y runs from the knee toward the silicone foot pad: the
+    # pad's two collision spheres are centred at y = 0.177 and 0.206 m with a
+    # 0.016 m radius, so pad contact points lie above y = 0.161 m while the
+    # machined shaft ends below it.
+    distal_foot_min_y_m = 0.155
     # Phase 1 trains forward motion only. Keep these ranges explicit so later
     # phases can introduce standing, lateral motion, and turning without
     # changing environment code.

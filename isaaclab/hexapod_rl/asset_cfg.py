@@ -1,4 +1,10 @@
-"""Physics and actuator configuration for the RobStride RS05 hexapod."""
+"""Physics and actuator configuration for the RobStride RS05 hexapod.
+
+The articulation is the CAD assembly package ``robot/hexapod_mkii_assy``
+(``hexapod_mkii_serial.urdf`` imported as a floating-base USD, see
+``tools/import_urdf_to_usd.py``): 19 links, 18 revolute joints, 8.26 kg with
+every RS05 at its published 191 g.
+"""
 
 from __future__ import annotations
 
@@ -12,34 +18,40 @@ from isaaclab.assets import ArticulationCfg
 
 USD_PATH = os.environ.get(
     "HEXAPOD_USD_PATH",
-    "/workspace/hexapod/robot/hexapod_mkii_mock_assy/usd/"
-    "hexapod_mkii_robstride/hexapod_mkii_robstride.usda",
+    "/workspace/hexapod/robot/hexapod_mkii_assy/usd/"
+    "hexapod_mkii_serial/hexapod_mkii_serial.usda",
 )
 
-COXA_JOINTS = (
-    "revolute_1_1",
-    "revolute_1_7",
-    "revolute_2_5",
-    "revolute_3",
-    "revolute_4",
-    "revolute_5",
+# Body frame: URDF export frame, z up, forward = -y, left = +x.
+ROOT_LINK_NAME = "body"
+# left/right x front/middle/rear.
+LEG_NAMES = ("lf", "lm", "lr", "rf", "rm", "rr")
+COXA_JOINTS = tuple(f"{leg}_coxa_yaw" for leg in LEG_NAMES)
+FEMUR_JOINTS = tuple(f"{leg}_femur_pitch" for leg in LEG_NAMES)
+TIBIA_JOINTS = tuple(f"{leg}_tibia_pitch" for leg in LEG_NAMES)
+LEG_LINK_NAMES = tuple(
+    (f"{leg}_coxa", f"{leg}_femur", f"{leg}_tibia") for leg in LEG_NAMES
 )
-FEMUR_JOINTS = (
-    "revolute_1",
-    "revolute_1_2",
-    "revolute_1_3",
-    "revolute_1_4",
-    "revolute_1_5",
-    "revolute_1_6",
-)
-TIBIA_JOINTS = (
-    "revolute_2",
-    "revolute_2_1",
-    "revolute_2_2",
-    "revolute_2_3",
-    "revolute_2_4",
-    "revolute_2_6",
-)
+
+# URDF joint limits (robot/hexapod_mkii_assy/joint_limits.json).  Zero is the
+# CAD pose: coxa_yaw zero points the leg straight out of the body (positive is
+# counter-clockwise about body +z); femur_pitch positive raises the femur,
+# which already sits 46 deg above horizontal at zero; tibia_pitch positive
+# opens the knee, whose interior angle is 74 deg at zero (closed at -1.29,
+# straight at +1.85).  The femur/tibia ranges are derived from the CAD
+# kinematics and must be replaced by measured hardware stops.
+COXA_LIMITS = (-0.872665, 0.872665)
+FEMUR_LIMITS = (-1.745329, 0.55)
+TIBIA_LIMITS = (-0.95, 1.75)
+
+# Reset/validation stance (robot/hexapod_mkii_assy/stance.json), derived from
+# the URDF kinematics: feet 0.11 m outboard of the yaw axes, knee interior
+# angle 42 deg, femur 32 deg above horizontal, bottom plate 0.124 m above the
+# ground, static hip and knee torque both 0.9 N*m at 8.26 kg.
+STANCE_ROOT_HEIGHT_M = 0.124
+STANCE_RESET_ROOT_HEIGHT_M = 0.130
+STANCE_FEMUR_RAD = -0.25
+STANCE_TIBIA_RAD = -0.55
 
 
 ROBSTRIDE_RS05_CFG = DCMotorCfg(
@@ -83,13 +95,14 @@ HEXAPOD_CFG = ArticulationCfg(
         ),
     ),
     init_state=ArticulationCfg.InitialStateCfg(
-        # Conservative six-foot reset stance for the 6.3 kg target model.
-        # The standing validator, not this comment, is the torque acceptance gate.
-        pos=(0.0, 0.0, 0.210),
+        # Six-foot reset stance for the 8.26 kg CAD assembly, released 6 mm
+        # above its settled height.  The standing validator, not this comment,
+        # is the torque acceptance gate.
+        pos=(0.0, 0.0, STANCE_RESET_ROOT_HEIGHT_M),
         joint_pos={
             **{name: 0.0 for name in COXA_JOINTS},
-            **{name: 0.40 for name in FEMUR_JOINTS},
-            **{name: 2.10 for name in TIBIA_JOINTS},
+            **{name: STANCE_FEMUR_RAD for name in FEMUR_JOINTS},
+            **{name: STANCE_TIBIA_RAD for name in TIBIA_JOINTS},
         },
         joint_vel={".*": 0.0},
     ),

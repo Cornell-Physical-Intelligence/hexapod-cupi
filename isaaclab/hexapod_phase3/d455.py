@@ -23,6 +23,8 @@ from isaacsim.sensors.experimental.rtx import (
     SingleViewDepthCameraSensor,
 )
 
+from hexapod_rl.asset_cfg import ROOT_LINK_NAME
+
 
 D455_USD_PATH = f"{ISAAC_NUCLEUS_DIR}/Sensors/RealSense/D455/rsd455.usd"
 D455_RESOLUTION_HW = (480, 848)
@@ -300,7 +302,7 @@ class D455RigBatch:
         return cls(
             [
                 D455Rig(
-                    parent_prim_path=f"/World/envs/env_{index}/Robot/Geometry/root",
+                    parent_prim_path=f"/World/envs/env_{index}/Robot/Geometry/{ROOT_LINK_NAME}",
                     translation_b_m=translation_b_m,
                     orientation_b_wxyz=orientation_b_wxyz,
                 )

@@ -6,22 +6,32 @@ The original URDF in `robot/hexapod_mkii_mock_assy/` is an Onshape export. The
 
 ## Robot model
 
-- 26 links, 25 joints (18 actuated revolute: coxa / femur / tibia × 6 legs)
-- Joint limits: coxa ±0.87 rad, femur 0 – 1.75 rad, tibia 0 – 2.53 rad
-- Meshes: binary STL, meters, Z-up
-- Validated: single-rooted kinematic tree (`root`), no cycles, all mesh references resolve,
-  all revolute joints have `<limit>` elements
-- Physics mass target: 6.3 kg total — a 1.5 kg body plus six 0.8 kg complete legs;
-  each leg total already includes its three 191 g RobStride RS05 actuators
-- RS05 policy limit: 1.6 N·m continuous, 5.5 N·m published short-duration peak,
-  50.27 rad/s nominal no-load speed, and 0.0007 kg·m² output armature
+The training asset is the CAD assembly package `robot/hexapod_mkii_assy/`
+(built from the Onshape export by `robot/tools/import_onshape_hexapod.py`;
+`robot/hexapod_mkii_assy/assembly_report.md` audits the import):
 
-The 1.5 kg body and 0.8 kg complete-leg values are user-specified mass targets, not
-measurements of the assembled robot; 191 g is the published per-actuator mass. The
-link-level mass distribution and inertias therefore remain estimates. RS05 housing
-inertia, joint friction, latency, and thermal parameters are not published; the
-generator records the explicit estimates used here. Measure these properties before
-treating a policy as hardware-ready.
+- `urdf/hexapod_mkii_serial.urdf`: 19 links, 18 actuated revolute joints
+  (`<leg>_coxa_yaw`, `<leg>_femur_pitch`, `<leg>_tibia_pitch` for legs
+  `lf lm lr rf rm rr`), root link `body`
+- Body frame: z up, forward = -y, left = +x; coxa_yaw zero points the leg
+  straight out, femur/tibia zero is the CAD pose (see
+  `robot/hexapod_mkii_assy/joint_limits.json` for the sign conventions)
+- Joint limits: coxa +-0.87 rad, femur -1.745 to +0.55 rad, tibia -0.95 to
+  +1.75 rad (femur/tibia derived from the CAD kinematics; replace with
+  measured hardware stops)
+- Mass 8.261 kg from Onshape's per-part properties with every RS05 hard-set
+  to its published 191 g; per-part collision primitives; meshes: binary STL,
+  meters, z up
+- Reset/validation stance (`robot/hexapod_mkii_assy/stance.json`): femur
+  -0.25 rad, tibia -0.55 rad, bottom plate 0.124 m above the ground, static
+  hip and knee torque 0.9 N*m each
+- RS05 policy limit: 1.6 N*m continuous, 5.5 N*m published short-duration
+  peak, 50.27 rad/s nominal no-load speed, and 0.0007 kg*m^2 output armature
+
+`robot/hexapod_mkii_mock_assy/` is the earlier mock (normalised 1.5 kg body /
+0.8 kg legs) that the archived Phase 1-2 checkpoints were trained on; its
+`revolute_*` joint names and stance values in `phase2_cfg.py` belong to that
+asset.
 
 ## Isaac Lab training
 
@@ -52,11 +62,16 @@ hexapod-rl start        # start a fresh configured run
 Rebuild the source assets with:
 
 ```sh
-python3 tools/generate_robstride_urdf.py
-# Import the generated URDF as a floating-base USD with Isaac Sim's URDF importer.
-# Then, using Isaac Sim Python:
+# URDF package from the onshape-to-robot export (macOS/Linux, numpy + scipy)
+python3 robot/tools/import_onshape_hexapod.py --source "<export dir>"
+# USD for Isaac Sim (Isaac Sim python, headless), then contact reports:
+python tools/import_urdf_to_usd.py \
+  robot/hexapod_mkii_assy/urdf/hexapod_mkii_serial.urdf \
+  robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda
 python tools/enable_nested_contact_reports.py \
-  robot/hexapod_mkii_mock_assy/usd/hexapod_mkii_robstride/hexapod_mkii_robstride.usda
+  robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda
+# Standing validation gate (Isaac Lab):
+python isaaclab/validate.py --num_envs 32 --steps 1000
 ```
 
 The validation gate checks 18 joints, 19 rigid bodies, six foot sensors, finite

@@ -27,7 +27,7 @@ from isaaclab.utils.seed import configure_seed
 from isaaclab_rl.rsl_rl import RslRlVecEnvWrapper, handle_deprecated_rsl_rl_cfg
 from isaaclab_tasks.utils import add_launcher_args, launch_simulation
 
-from hexapod_rl.asset_cfg import FEMUR_JOINTS, TIBIA_JOINTS
+from hexapod_rl.asset_cfg import FEMUR_JOINTS, FEMUR_LIMITS, TIBIA_JOINTS, TIBIA_LIMITS
 from hexapod_rl.env_cfg import HexapodFlatEnvCfg
 from hexapod_rl.phase1_v2_cfg import HexapodPhase1V2EnvCfg, HexapodPhase1V2PPORunnerCfg
 from hexapod_rl.phase1_v3_cfg import HexapodPhase1V3EnvCfg, HexapodPhase1V3PPORunnerCfg
@@ -376,13 +376,13 @@ def _parse_args() -> argparse.Namespace:
     ):
         parser.error("--root-height-m must be finite and positive")
     if args.femur_angle_rad is not None and not (
-        math.isfinite(args.femur_angle_rad) and 0.0 <= args.femur_angle_rad <= 1.74533
+        math.isfinite(args.femur_angle_rad) and FEMUR_LIMITS[0] <= args.femur_angle_rad <= FEMUR_LIMITS[1]
     ):
-        parser.error("--femur-angle-rad must lie within the URDF range [0, 1.74533]")
+        parser.error(f"--femur-angle-rad must lie within the URDF range {list(FEMUR_LIMITS)}")
     if args.tibia_angle_rad is not None and not (
-        math.isfinite(args.tibia_angle_rad) and 0.0 <= args.tibia_angle_rad <= 2.53073
+        math.isfinite(args.tibia_angle_rad) and TIBIA_LIMITS[0] <= args.tibia_angle_rad <= TIBIA_LIMITS[1]
     ):
-        parser.error("--tibia-angle-rad must lie within the URDF range [0, 2.53073]")
+        parser.error(f"--tibia-angle-rad must lie within the URDF range {list(TIBIA_LIMITS)}")
     return args
 
 

@@ -1240,7 +1240,8 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--source", default="/Users/andreboufama/Downloads/export (1)")
     ap.add_argument("--leg-dir", default="robot/hexapod_leg_v3")
-    ap.add_argument("--limits", default="robot/hexapod_leg_v3/joint_limits.json")
+    ap.add_argument("--limits", default="robot/hexapod_mkii_assy/joint_limits.json",
+                    help="joint limits about the CAD zero (the leg v3 file holds the mock-inherited placeholders)")
     ap.add_argument("--out", default="robot/hexapod_mkii_assy")
     ap.add_argument("--forward", default="-y", choices=["+x", "-x", "+y", "-y"],
                     help="body-frame direction treated as forward for leg naming (pipeline convention: -y)")

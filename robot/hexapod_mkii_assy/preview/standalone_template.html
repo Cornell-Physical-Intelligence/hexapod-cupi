@@ -99,6 +99,7 @@ input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:2
     <div class="group"><p class="lbl">Pose</p><div class="seg">
       <button class="btn on" data-pose="zero">Zero</button>
       <button class="btn" data-pose="cad">As exported</button>
+      <button class="btn" data-pose="stance">Stance</button>
       <button class="btn" data-pose="walk">Tripod gait</button>
     </div></div>
     <div id="legs"></div>
@@ -318,9 +319,10 @@ function setAll(src){ for (const n in sliders) { jointVal[n] = src[n] ?? 0; slid
 function setPose(p){
   pose = p;
   document.querySelectorAll("[data-pose]").forEach(b => b.classList.toggle("on", b.dataset.pose === p));
-  $("status").innerHTML = p === "walk" ? "<b>Tripod gait</b> — lf, lr, rm alternate with rf, rm, lr" : p === "cad" ? "<b>As exported</b> — the pose the CAD holds each leg in" : p === "zero" ? "<b>Zero pose</b> — every leg points straight out; femur and tibia at the leg-reference zero" : "<b>Manual</b> — sliders";
+  $("status").innerHTML = p === "walk" ? "<b>Tripod gait</b> — lf, lr, rm alternate with rf, lm, rr" : p === "cad" ? "<b>As exported</b> — the pose the CAD holds each leg in" : p === "stance" ? `<b>Validation stance</b> — femur ${(MODEL.stance||{}).lf_femur_pitch ?? "?"} / tibia ${(MODEL.stance||{}).lf_tibia_pitch ?? "?"} rad, bottom plate ${MODEL.stance_root_height_m ?? "?"} m up` : p === "zero" ? "<b>Zero pose</b> — every leg points straight out; femur and tibia at the leg-reference zero" : "<b>Manual</b> — sliders";
   if (p === "zero") setAll({});
   if (p === "cad") setAll(MODEL.cad_pose || {});
+  if (p === "stance") setAll(MODEL.stance || {});
 }
 document.querySelectorAll("[data-pose]").forEach(b => b.onclick = () => setPose(b.dataset.pose));
 const TRIPOD_A = new Set(["lf","lr","rm"]);
@@ -329,8 +331,9 @@ function gait(t){
   for (const leg of LEGS) {
     const ph = TRIPOD_A.has(leg) ? w : w + Math.PI, swing = Math.max(0, Math.sin(ph));
     out[`${leg}_coxa_yaw`] = 0.22 * Math.cos(ph) * (leg[0] === "l" ? 1 : -1);
-    out[`${leg}_femur_pitch`] = 0.10 + 0.42 * swing;
-    out[`${leg}_tibia_pitch`] = 0.25 + 0.35 * swing;
+    const st = MODEL.stance || {};
+    out[`${leg}_femur_pitch`] = (st[`${leg}_femur_pitch`] ?? 0) + 0.40 * swing;
+    out[`${leg}_tibia_pitch`] = (st[`${leg}_tibia_pitch`] ?? 0) + 0.25 * swing;
   }
   return out;
 }

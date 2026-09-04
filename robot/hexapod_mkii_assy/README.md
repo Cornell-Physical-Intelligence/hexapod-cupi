@@ -74,14 +74,22 @@ python3 robot/tools/import_onshape_hexapod.py \
 
 ## Isaac Sim / Isaac Lab
 
-Import `urdf/hexapod_mkii_serial.urdf` (fixed base off, merge fixed joints
-irrelevant — there are none) with `package://hexapod_mkii_assy/...` resolved
-from this directory, exactly as `hexapod_mkii_mock_assy` was imported. The
-Isaac Lab task must be re-pointed at the new names
-(`isaaclab/hexapod_rl/env_cfg.py` `LEG_LINK_NAMES`, the `revolute_*` joint
-lists in `asset_cfg.py`) and re-validated: the masses differ from the mock's
-normalised 1.5 kg / 0.8 kg budget (see `assembly_report.md` for the link masses). The linkage model needs mimic-joint support
-(Isaac Sim ≥ 4.5) and is meant for visual/kinematic checks. With 1927 visual
-meshes the model is heavy for thousands of cloned environments; the STLs of
-fasteners and motor internals can be dropped from the visuals if rendering
-becomes the bottleneck.
+Import `urdf/hexapod_mkii_serial.urdf` as a floating-base USD with
+`tools/import_urdf_to_usd.py` (Isaac Sim python; URDF inertials kept, no
+convex decomposition, self-collision off), then author contact reports with
+`tools/enable_nested_contact_reports.py`. `package://hexapod_mkii_assy/...`
+resolves from this directory, exactly as the mock package was imported.
+`isaaclab/hexapod_rl/asset_cfg.py` points at
+`usd/hexapod_mkii_serial/hexapod_mkii_serial.usda` (override with
+`HEXAPOD_USD_PATH`), names the joints and links, carries the joint limits and
+the reset stance from `joint_limits.json` / `stance.json`, and
+`isaaclab/validate.py` runs the standing gate: 18 joints, 19 rigid bodies,
+six foot sensors, finite observations, no falls, no non-foot ground contact,
+and computed torque under the 1.6 N*m rating.
+
+The linkage model needs mimic-joint support (Isaac Sim >= 4.5) and is meant
+for visual/kinematic checks. With 1927 visual meshes the model is heavy for
+thousands of cloned environments; the STLs of fasteners and motor internals
+can be dropped from the visuals if rendering becomes the bottleneck. The
+Phase 1-2 curricula in `isaaclab/hexapod_rl/phase2_cfg.py` still carry the
+mock's stance values and belong to the archived mock checkpoints.
