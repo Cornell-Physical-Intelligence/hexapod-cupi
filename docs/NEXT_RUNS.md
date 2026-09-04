@@ -1,6 +1,6 @@
 # Prepared CAD simulation campaign
 
-**Status: design only, 2026-09-04. No runs are queued or authorized to start now.** The latest user request is review and GitHub publication. This document makes the next execution request concrete without launching a process or enabling a restart. [STATUS.md](../STATUS.md) records the pause; [PLAN.md](PLAN.md) defines the program.
+**Status: offline step 1 implemented, 2026-09-04. No training runs are queued.** The subsequent execution request authorized the offline asset/configuration repairs and animated inspection. C0 and the serial-conversion portion of C1 now have CPU evidence; physical linkage fidelity and C2 remain open. [Step 1](MKII_STEP1.md) records changes and limits; [PLAN.md](PLAN.md) defines the program.
 
 ## Why early full-body training is useful
 
@@ -51,4 +51,4 @@ Use an isolated, explicitly mounted source/run directory. The existing Spark mir
 
 Each run bundle records source commit and any diff, task ID, all USD layer/CAD hashes, package/container versions, resolved config and randomization ranges, motor assumptions/calibration version, command/observation/action contracts, named joint mapping, seed, timing, checkpoint hashes, evaluation cases and failure outcomes. Use unique run labels, frequent recoverable checkpoints and an explicit resume test. Keep log/manifest generation deterministic and exclude secrets.
 
-No new run command is supplied here because the corrected importer, CAD configuration and acceptance implementation have not yet been built. Writing a launch command against the currently invalid USD would make the plan look ready when its first prerequisite is still open.
+The new importer, v2 CAD configuration and runtime manifest are implemented. A versioned simulator acceptance implementation and physical linkage decision are still required. The future `isaaclab/train_mkii_v2.py` wrapper has a CPU-only `--dry-run`; it does not clear C2, authorize training or provide checkpoint admission. Never launch the historical validator as evidence for v2.
