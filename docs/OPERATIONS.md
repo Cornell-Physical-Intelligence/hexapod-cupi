@@ -32,9 +32,11 @@ made there are not versioned, and a `git` command run against it will not
 behave the way it does in this checkout. Sync source to it deliberately and
 verify with the manifest.
 
-No Conda or venv is used for training. The Docker Compose image
+No Conda, venv, or uv is used for training. The Docker Compose image
 `isaac-lab-base` bind-mounts `/home/orionh/HEXAPOD` at `/workspace/hexapod` and
-launches through `/workspace/isaaclab/_isaac_sim/python.sh`.
+launches through `/workspace/isaaclab/_isaac_sim/python.sh`. The repository's
+uv workspace (`pyproject.toml`, `uv.lock`) manages laptop and CI environments
+only; do not run `uv sync` inside the mirror, and do not sync a `.venv/` to it.
 
 Required non-secret environment inside the container:
 

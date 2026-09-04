@@ -9,21 +9,26 @@ and beside it, and the seams between them. Milestones and ownership live in
 
 ## 1. Mission
 
-The Hexapod MKII must accept an **area of interest** in unknown terrain (for
-example a forest), possibly designated by an air unit, and navigate to and
-explore that area autonomously, safely, and effectively, in places that are
-difficult for a person to reach. Everything below is in service of that.
+The Hexapod MKII must **survey a bounded area drawn on the fly**: an operator
+draws a zone on a map, places the robot near it, and the robot steadily
+traverses the zone while providing a steady platform for data collection
+(`dar.md`, ADR-0004). Everything below is in service of that. The earlier
+exploration framing (unknown terrain, air-unit designation) is recorded in
+ADR-0004 as superseded; the layers and contracts it produced carry over
+unchanged, because coverage of a known polygon is a special case of the same
+stack.
 
 ## 2. Three layers, three contracts
 
 ```text
-             air unit / operator
+             operator map page (phone / laptop)
                     |
-                    |  AreaOfInterest (polygon + priority)         [contract C4]
+                    |  AreaOfInterest (drawn polygon, no-go, revision)  [contract C4]
                     v
    +---------------------------------------------+
-   |  NAVIGATION / AUTONOMY  (hexapod_nav, ROS 2) |  global map + pose -> path,
-   |  exploration, traversability, safety monitor |  exploration frontier, stop
+   |  NAVIGATION / AUTONOMY  (hexapod_nav, ROS 2) |  polygon + map + pose ->
+   |  coverage sweep, traversability, geofence,   |  sweep path, velocity
+   |  safety monitor, data-collection trigger     |  commands, record/stop
    +---------------------------------------------+
                     |
                     |  VelocityCommand [vx, vy, yaw_rate] @ 50 Hz   [contract C1]
@@ -36,12 +41,12 @@ difficult for a person to reach. Everything below is in service of that.
                     |  HeightScan (body-frame local elevation grid)  [contract C2]
                     |
    +---------------------------------------------+
-   |  PERCEPTION  (hexapod_perception, ROS 2)     |  Mid-360 + IMU -> LIO pose,
-   |  lidar-inertial odometry, elevation mapping, |  registered cloud, local
-   |  global occupancy / traversability           |  elevation map, global map
+   |  PERCEPTION  (hexapod_perception, ROS 2)     |  Mid-360 + IMU + GPS ->
+   |  lidar-inertial odometry, GPS fusion,        |  map-frame pose, registered
+   |  elevation mapping, traversability           |  cloud, elevation map
    +---------------------------------------------+
                     |
-                    |  Odometry + maps                                [contract C3]
+                    |  Map-frame pose + maps                          [contract C3]
                     v
              navigation layer (above)
 ```
@@ -93,8 +98,8 @@ ROS 2 side) and a contract test under `isaaclab/tests/`.
 | C1 | `VelocityCommand` — `[vx, vy, yaw_rate]`, validated against the trained envelope, 50 Hz | navigation -> policy | **Frozen** (`hexapod_core.command`, `hexapod_nav.producer.CommandProducer`) |
 | O1 | Observation v1 — 66-dim proprioceptive layout | runtime -> policy | **Frozen** (`hexapod_core.observation`) |
 | C2 | `HeightScan` / Observation v2 — body-frame local elevation grid appended to O1: grid extent, cell size, frame origin, height clip, missing-cell sentinel, max age | perception -> policy (sim: raycaster -> policy) | **To define in M2** — see `docs/ROADMAP.md` |
-| C3 | Odometry and maps — `nav_msgs/Odometry` in `odom`, registered cloud, `grid_map_msgs` elevation layer in `odom`/`map`, occupancy or traversability layer | perception -> navigation | **To define in P1** |
-| C4 | `AreaOfInterest` — polygon (WGS84 or local ENU with a datum), priority, optional no-go polygons, revision id | air unit / operator -> navigation | **To define in M4**; the transport (radio link, message format) is a hardware decision |
+| C3 | Pose and maps — `nav_msgs/Odometry` in `odom`, the fused pose in the operator's `map` frame (GPS + LIO, or start-anchored local frame), registered cloud, `grid_map_msgs` elevation layer, occupancy or traversability layer | perception -> navigation | **To define in P1** |
+| C4 | `AreaOfInterest` — the operator's drawn polygon (WGS84 with GPS, or local frame with a datum at the robot's start), optional no-go polygons, sweep spacing, revision id; the same polygon is the geofence | operator map page -> navigation | **To define first in N1** (ADR-0004); the transport from the operator's phone or laptop (WiFi or radio) is a hardware decision |
 | A1 | Action interface — 18 joint offsets, clip, scale, slew | policy -> runtime -> motors | **Frozen** (`hexapod_core.action`, `hexapod_runtime.action_pipeline`) |
 
 Rules that follow from the table:
@@ -113,13 +118,15 @@ Rules that follow from the table:
 ```text
 Livox Mid-360 --(Ethernet)--> companion computer --(CAN)--> 18 x RobStride RS05
 RealSense D455 --(USB3)-----^        |
-                                     +-- ROS 2 graph: driver, LIO, mapping, nav
+GPS receiver ---(serial/USB)^        +-- ROS 2 graph: drivers, LIO + GPS fusion,
+data sensor ----(payload)---^        |   mapping, coverage nav, safety monitor
                                      +-- hexapod_runtime: obs builder, policy
                                          backend, action pipeline, watchdog
-air-unit link --(radio/WiFi)---------^
+operator phone / laptop --(WiFi/radio)-^   map page: draw polygon, go, stop
 ```
 
-Open hardware decisions that block sim-to-real, in the order they bite:
+Open hardware decisions that block sim-to-real, in the order they bite. The
+whole list must fit the $6000 budget in `dar.md`:
 
 1. Companion computer (GPU-capable, e.g. a Jetson-class board, if the elevation
    mapping and policy inference run on-robot) and its power budget next to the
@@ -129,7 +136,10 @@ Open hardware decisions that block sim-to-real, in the order they bite:
    metal plate Livox requires.
 3. Measured masses, inertias, and the actuator-to-joint mapping on the
    assembled robot (`docs/TRAINING.md` §7).
-4. Air-unit link and the C4 transport.
+4. GPS receiver class (RTK or not) from the position-accuracy blank in
+   `dar.md` §2, and the operator link that carries C4.
+5. The data sensor: mass, mount, power, and what "steady enough to record"
+   means for it (`dar.md` §2).
 
 ## 6. What the simulator is for, per layer
 
@@ -137,7 +147,7 @@ Open hardware decisions that block sim-to-real, in the order they bite:
 | --- | --- |
 | Locomotion | Training and formal screening (existing). Terrain curriculum plus a simulated height scan (M2). Domain randomization of everything in `docs/TRAINING.md` §7. |
 | Perception | Integration scene only: the raycaster Mid-360 surrogate and the D455 twin on the walking robot, producing bags the perception stack must process to the same C2/C3 outputs it produces from hardware bags. Not a training input. |
-| Navigation | Closed-loop scenario tests: forest-like scenes with an AOI, exploration coverage and safety metrics, policy in the loop through C1. |
+| Navigation | Closed-loop scenario tests: a drawn polygon on flat ground and on the `dar.md` terrain class, sweep-coverage fraction, deck steadiness during the traverse, fence violations, policy in the loop through C1. |
 | Hardware bring-up | Observation/action parity against the runtime (`isaaclab/tests/test_runtime_parity.py`) before any powered walking. |
 
 ## 7. Repository placement
@@ -146,10 +156,12 @@ Open hardware decisions that block sim-to-real, in the order they bite:
 packages/hexapod_core/        contracts C1, O1, A1 today; C2 validator lands here
 packages/hexapod_env/         locomotion task; terrain + height-scan sensor in M2
 packages/hexapod_runtime/     on-robot policy runtime; C2 ingestion + fallback
-packages/hexapod_nav/         CommandProducer seam; planners and exploration land here
+packages/hexapod_nav/         CommandProducer seam; coverage planner, geofence, safety monitor land here
 ros2_ws/                      (to create) perception and navigation ROS 2 packages
                               - hexapod_perception: driver bring-up, LIO, mapping
                               - hexapod_msgs: C2/C3/C4 message definitions
+                              - hexapod_nav_ros: coverage planning, geofence, safety monitor
+                              - hexapod_operator: the map page that draws and sends C4
                               - hexapod_bringup: launch files, parameter sets
 robot/                        assets; the M0 rebuilt robot goes in a new directory
 docs/decisions/               ADRs, numbered, never edited after acceptance

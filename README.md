@@ -1,20 +1,26 @@
-# Hexapod MKII — RL Walking
+# Hexapod MKII — autonomy and RL walking
 
-Long-running reinforcement-learning project to train walking gaits for the
-Hexapod MKII, using Isaac Sim 6.0.1 / Isaac Lab `DirectRLEnv` with RSL-RL PPO.
-Two robot models live in `robot/`: the Onshape mock in
+Software for the Hexapod MKII, whose mission is to **survey a bounded area
+drawn on the fly**: an operator draws a zone on a map, places the robot near
+it, and the robot steadily traverses the zone as a steady platform for data
+collection ([`dar.md`](dar.md), the team lead's requirements). The repository
+holds the Isaac Sim 6.0.1 / Isaac Lab `DirectRLEnv` + RSL-RL PPO walking
+pipeline, the robot models, the frozen contracts between locomotion,
+perception, and navigation, and the evidence trail of every experiment. Two
+robot models live in `robot/`: the Onshape mock in
 `robot/hexapod_mkii_mock_assy/` that every Phase-0 checkpoint was trained on,
 and the CAD assembly in `robot/hexapod_mkii_assy/` (asset v1, ADR-0001) that
 new training targets. Each has its own gym task IDs; see "Robot models" below.
 
-**Start with [`STATUS.md`](STATUS.md)** for the current best checkpoint, the
-current target, open contradictions, and next actions, and with
-[`docs/ROADMAP.md`](docs/ROADMAP.md) for where the program is going. This
-README is a map, not a status page.
+**Start with [`dar.md`](dar.md)** for the mission and the steps to it,
+[`STATUS.md`](STATUS.md) for the current best checkpoint, the current target,
+open contradictions, and next actions, and [`docs/ROADMAP.md`](docs/ROADMAP.md)
+for milestones and gates. This README is a map, not a status page.
 
 ## Repository map
 
 ```text
+dar.md / DAR.png                The mission (requirements slide) and the steps from here to it
 STATUS.md                       Current state. Rewritten in place, never appended
 CLAUDE.md                       Agent/contributor guide and project invariants
 HANDOFF.md                      Stub pointing at the split documentation
@@ -49,17 +55,20 @@ artifacts/                      Evidence: checkpoints, evaluations, videos, prob
 
 ## Quickstart
 
-Run the test suite (no simulator required):
+Set up the environment and run the test suite (no simulator required). The
+repository is a uv workspace; `uv sync` installs the pinned interpreter, the
+six `packages/` editable, and the test dependencies from `uv.lock`:
 
 ```sh
-python3 -m unittest discover -s isaaclab/tests
+uv sync
+uv run python -m unittest discover -s isaaclab/tests
 ```
 
-Without `torch`, `numpy`, `pyyaml`, and `opencv-python-headless` installed, the
-torch- and numpy-dependent modules surface as import errors and only the
-dependency-free tests run. The full suite needs those four dependencies; its
-total grows with every added test, so read the count off the run rather than
-from this page.
+With a bare `python3` and no dependencies installed, the torch- and
+numpy-dependent modules surface as import errors and only the dependency-free
+tests run. The suite total grows with every added test, so read the count off
+the run rather than from this page. uv manages the local and CI environment
+only; training runs in the Spark container as before.
 
 Run the interactive viewer:
 

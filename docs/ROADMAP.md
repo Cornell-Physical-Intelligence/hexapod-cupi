@@ -5,16 +5,21 @@ gate each milestone must pass, and how the team shares the DGX Spark. This file
 is rewritten in place as the plan changes; dated history of *why* it changed
 goes in `docs/decisions/`. Current run-level state stays in `STATUS.md`.
 
-Status of this document: **draft for team ratification** (2026-08-27). The
-three ADRs under `docs/decisions/` are `proposed`; accepting them is the first
-team action.
+Status of this document: **draft for team ratification** (2026-08-27, revised
+2026-09-03 for the team lead's requirements slide). The four ADRs under
+`docs/decisions/` are `proposed`; accepting them is the first team action.
 
 ## 1. Goal
 
-A Hexapod MKII that accepts an area of interest in unknown terrain, possibly
-designated by an air unit, and navigates to and explores it autonomously and
-safely — see `docs/ARCHITECTURE.md` §1. The end state is a field
-demonstration, not a simulation video.
+A Hexapod MKII that can **survey a bounded area drawn on the fly**: the user
+draws a zone on a map, places the robot near it, and the robot steadily
+traverses the zone while providing a steady platform for data collection.
+That is the team lead's requirements slide, `DAR.png`, transcribed and turned
+into steps in `dar.md` at the repo root; ADR-0004 records the change from the
+earlier exploration framing. The end state is a field demonstration with
+recorded data, not a simulation video. The numeric requirements (area, terrain,
+deck steadiness, sweep spacing, position accuracy, mission time) live in
+`dar.md` §2 and are the source of every gate threshold below.
 
 ## 2. Principles carried forward
 
@@ -32,6 +37,7 @@ These come from the existing `CLAUDE.md` invariants and stay in force:
 | [0001](decisions/0001-rebuild-training-asset-from-leg-v3.md) | Rebuild the training asset from the accurate leg v3, the real body, sensor payload, primitive collisions, and foot pads. | Every checkpoint trained on the mock asset becomes Phase-0 lineage. The Stage2C gate chase on the mock asset stops; its gates and evidence are kept and re-applied to the new asset. |
 | [0002](decisions/0002-policy-consumes-height-scan.md) | The locomotion policy consumes a body-frame height scan (contract C2), never a raw point cloud. | RL and perception proceed in parallel from day one; the lidar is an integration and mapping sensor. |
 | [0003](decisions/0003-ros2-for-perception-and-navigation.md) | Perception and navigation are ROS 2 packages under `ros2_ws/`; the training and runtime Python packages stay ROS-free. | Livox driver, LIO, elevation mapping, and Nav-style planning reuse mature packages; the test suite still runs on a bare interpreter. |
+| [0004](decisions/0004-mission-is-bounded-area-coverage.md) | The mission is steady coverage of an operator-drawn bounded area (`dar.md`), not exploration of unknown terrain with an air unit. | Navigation is coverage path planning inside a geofence; C4 is the operator's drawn polygon; steadiness is the primary locomotion grade; GPS joins perception; data collection is a deliverable. |
 
 ## 4. Workstreams
 
@@ -40,8 +46,8 @@ These come from the existing `CLAUDE.md` invariants and stay in force:
 | A | Platform and asset | `robot/`, `tools/`, URDF/USD generation, mass/inertia measurement, hardware mapping | Asset v1 (M0) |
 | B | Locomotion (RL) | `packages/hexapod_env`, `hexapod_train`, `hexapod_eval`, curriculum, gates | Flat-ground omnidirectional policy on asset v1 (M1) |
 | C | Perception | `ros2_ws/hexapod_perception`, Mid-360 and D455 bring-up, LIO, elevation and global maps, contracts C2/C3 | Bench LIO + elevation map from handheld data (P1) |
-| D | Autonomy and navigation | `packages/hexapod_nav`, `ros2_ws/` planning and exploration, contract C4, safety monitor | Sim closed-loop waypoint following through C1 (N1) |
-| E | Runtime and hardware bring-up | `packages/hexapod_runtime`, CAN/RS05 driver, watchdog, E-stop, parity tests | Restrained-robot parity check (H1) |
+| D | Autonomy and navigation | `packages/hexapod_nav`, `ros2_ws/` coverage planning, operator map page, contract C4, geofence and safety monitor, data-collection trigger | Sim closed-loop polygon sweep through C1 (N1) |
+| E | Runtime and hardware bring-up | `packages/hexapod_runtime`, CAN/RS05 driver, watchdog, E-stop, GPS and companion-computer integration, parity tests | Restrained-robot parity check (H1) |
 
 One person can hold more than one workstream; a workstream should not be held
 by nobody. Names go in the table when the team ratifies this file.
@@ -67,7 +73,9 @@ Entry: this roadmap and the ADRs accepted.
 - C: `ros2_ws/` skeleton; Mid-360 powered on the bench through
   `livox_ros_driver2`; first bag recorded; sensor identity confirmed from the
   physical label (the identification gate in `robot/sensors/README.md`).
-- All: CI runs `python3 -m unittest discover -s isaaclab/tests` on every PR;
+- All: uv workspace (`pyproject.toml`, `uv.lock`) is the one way to set up a
+  laptop or CI; CI runs `uv run python -m unittest discover -s isaaclab/tests`
+  and the manifest check on every PR;
   Git LFS for `artifacts/`; PR template; `docs/ONBOARDING.md` followed by one
   new member end to end.
 
@@ -92,6 +100,10 @@ Gate: the Stage2C gates from `docs/TRAINING.md` §6, applied unchanged at the
 `0.040 rad / 20 ms` limiter, plus lateral and yaw commands at the same
 thresholds, plus zero falls under a push of a stated magnitude. Hardware:
 restrained-robot parity within a stated tolerance on every observation term.
+Per ADR-0004 the deck-stability composite is the primary grade and speed is
+secondary; when `dar.md` §2 is filled in, the composite, tilt, and yaw
+thresholds are re-derived from it by a written gate change, not by editing
+this line.
 
 ### P1 — Perception on the bench (weeks 1-8, parallel)
 
@@ -101,12 +113,19 @@ restrained-robot parity within a stated tolerance on every observation term.
   a local body-frame grid extracted from it at 50 Hz — the first C2 producer.
 - C: a bag corpus under a documented naming scheme, with ground-truth loops
   (start and end at the same surveyed point).
-- C: C3 message set defined and validated.
+- C: C3 message set defined and validated, including the robot's pose in the
+  operator's map frame.
+- C + E: GPS receiver selected against the position-accuracy blank in
+  `dar.md` §2 (RTK if sweep spacing demands it), logged alongside LIO on the
+  same handheld walks, and fused into the C3 pose. Fallback if GPS is
+  deferred: a local frame anchored at the robot's start.
 
 Gate: closed-loop LIO drift below a stated fraction of path length over a
-stated handheld course; elevation map at 5 cm cells published at 10 Hz; local
-grid at 50 Hz with max age under the C2 limit; a replay of the sim integration
-bag (M2) through the same launch file produces C2/C3 outputs.
+stated handheld course; fused map-frame pose error within the `dar.md` §2
+position-accuracy blank on a surveyed loop; elevation map at 5 cm cells
+published at 10 Hz; local grid at 50 Hz with max age under the C2 limit; a
+replay of the sim integration bag (M2) through the same launch file produces
+C2/C3 outputs.
 
 ### M2 — Rough terrain in simulation (weeks 9-17)
 
@@ -117,7 +136,8 @@ Entry: M1 gate passed; C2 drafted jointly by B and C.
 - B: terrain curriculum (Isaac Lab terrain generator: slopes, steps, stairs,
   random rough, discrete obstacles) and a `RayCaster` grid height scan; new
   task IDs; height-scan noise, dropout, and lag randomized to the C2 envelope.
-- B: forest-like evaluation scene (uneven ground, roots and logs as obstacles,
+- B: evaluation scene matching the terrain class named in `dar.md` §2 (for
+  example mown or rough grass, gravel, a stated slope, discrete obstacles,
   soft-ground friction range) used only for screening.
 - C: raycaster Mid-360 surrogate and D455 twin mounted on asset v1 in an
   integration scene; bags recorded from a walking policy; perception stack
@@ -142,22 +162,45 @@ Entry: M1 hardware parity; M2 gate; sensor mount installed.
 - C: extrinsics calibration Mid-360/IMU/D455/body; map quality on a real
   outdoor course.
 
-Gate: stated distance walked without fall on flat ground and on a stated
-rough course; motor temperatures and current duty inside the RS05 envelope
-over the run; recorded bags for every run.
+Gate: stated distance walked without fall on flat ground and on a course
+matching the `dar.md` §2 terrain class; deck steadiness inside the `dar.md`
+§2 limits over that distance; motor temperatures and current duty inside the
+RS05 envelope over the run; recorded bags for every run.
 
-### N1/M4 — Autonomy in simulation, then field (weeks 20-34)
+### N1/M4 — Coverage autonomy in simulation, then field (weeks 20-34)
 
-- D: traversability from the elevation map; global planner; frontier-based
-  exploration bounded by an AOI polygon; safety monitor (unknown-cell stop,
-  tip-over risk, command envelope); C4 defined with the air-unit team.
-- D: closed loop in the Isaac Sim forest scene through C1 with the M2 policy.
-- D + all: field trial in a real outdoor area with an operator-designated AOI;
-  air-unit hand-off as a stretch.
+The concept of operations in `dar.md` §1, end to end.
 
-Gate: in sim, stated coverage fraction of the AOI within a stated time with
-zero falls over stated seeds; in the field, one complete AOI exploration with
-the safety monitor never overridden by hand.
+- D: C4 written down first: the operator's drawn polygon (map coordinates,
+  optional no-go polygons, revision id) and the transport from the operator's
+  phone or laptop to the robot. Then the operator map page (draw, review,
+  go, stop).
+- D: coverage path planning over the polygon (boustrophedon sweep at the
+  `dar.md` §2 sweep spacing; the ROS 2 Nav2 coverage plugin or equivalent),
+  with the elevation-map traversability layer marking cells not to step on;
+  the polygon doubles as a geofence.
+- D: safety monitor: stop on position uncertainty, stale map, tilt beyond the
+  `dar.md` §2 limit, fence violation, or lost operator link; hardware E-stop
+  from E.
+- D: data-collection trigger: records only while the deck is inside the
+  steadiness limits, each stamped with the C3 pose.
+- D: closed loop in Isaac Sim through C1: first with the Phase-0 policy on
+  flat ground (start now), then with the M1 policy on asset v1, then the M2
+  policy on the terrain scene.
+- D + all: indoor sweep of a drawn polygon on flat floor (local frame), then
+  the outdoor field trial on the `dar.md` terrain with GPS, then the same with
+  the data sensor on the deck.
+
+Gate: in sim, sweep coverage of the drawn polygon at or above a stated
+fraction within a stated time, zero falls, zero fence violations, and deck
+steadiness inside the `dar.md` §2 limits for a stated fraction of the
+traverse, over stated seeds; in the field, one complete sweep of an
+operator-drawn polygon with the safety monitor never overridden by hand and
+a position-stamped data record delivered.
+
+The demo ladder in `dar.md` §5 maps onto these milestones: rung 1 is M1,
+rung 2 is N1 in simulation, rung 3 is H1, rungs 4 to 6 are M4 indoor, field,
+and field with the data sensor.
 
 ## 6. Dependency graph
 

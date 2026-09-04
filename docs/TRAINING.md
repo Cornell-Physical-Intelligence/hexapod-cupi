@@ -320,12 +320,23 @@ asset and task, not a policy screen.
 
 ## 9. Roadmap beyond Stage2C
 
-1. Stable, natural anatomical forward/backward walking with a low, steady deck.
-2. General joystick locomotion: forward, reverse, lateral, diagonal, and yaw in
-   both signs, including command transitions for a navigation policy.
-3. Varied terrain with camera/depth/LiDAR/IMU sensor fusion.
+The mission the locomotion work serves is in `dar.md`: survey an
+operator-drawn bounded area while providing a steady platform for data
+collection (ADR-0004). For training that means:
 
-Phase 3 prototypes reference an Intel RealSense D455 depth camera and a Livox
-Mid-360-like near-hemispherical LiDAR/IMU. They are not fused into a trained
-terrain task. Phase 3 is paused, and a long sensor-fusion or difficult-terrain
-job requires explicit user approval before launch.
+1. Stable anatomical forward/backward walking with a low, steady deck on
+   asset v1 (the CAD assembly). The deck-stability composite is the primary
+   grade and speed is secondary; thresholds are re-derived from `dar.md` §2
+   once the team lead fills in the deck-steadiness numbers.
+2. General joystick locomotion: forward, reverse, lateral, diagonal, and yaw in
+   both signs, including the command transitions a coverage planner emits at
+   the ends of sweep lines.
+3. The `dar.md` terrain class (grass, gravel, a stated slope) with a
+   body-frame height scan (contract C2, ADR-0002); the lidar is a mapping and
+   localization sensor, never a policy input.
+
+Milestones, gates, and ownership are in `docs/ROADMAP.md`. Phase 3 prototypes
+reference an Intel RealSense D455 depth camera and a Livox Mid-360-like
+near-hemispherical LiDAR/IMU. They are not fused into a trained terrain task.
+Phase 3 is paused, and a long sensor-fusion or difficult-terrain job requires
+explicit user approval before launch.

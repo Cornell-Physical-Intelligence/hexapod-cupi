@@ -1,9 +1,12 @@
 # Agent and contributor guide
 
-This repository trains walking policies for the Hexapod MKII, a six-legged
-robot with 18 RobStride RS05 joints (8.26 kg in the CAD assembly with each
-RS05 at its 191 g datasheet mass; the earlier mock assumed 6.3 kg), using Isaac Sim 6.0.1 with
-Isaac Lab `DirectRLEnv` and RSL-RL PPO. Training runs on a shared DGX Spark
+This repository builds the autonomy software for the Hexapod MKII, a
+six-legged robot with 18 RobStride RS05 joints (8.26 kg in the CAD assembly
+with each RS05 at its 191 g datasheet mass; the earlier mock assumed 6.3 kg).
+The mission (`dar.md`, ADR-0004) is to survey a bounded area an operator draws
+on a map, steadily, as a stable platform for data collection. The walking
+policies are trained with Isaac Sim 6.0.1, Isaac Lab `DirectRLEnv`, and RSL-RL
+PPO. Training runs on a shared DGX Spark
 host through hardened launchers; the repository holds the task source, the
 deployment scripts, the tests, and a curated evidence trail of every experiment
 that has been run. The work is organized as a staged curriculum, and the
@@ -14,6 +17,7 @@ by explicit numeric acceptance criteria, not by how a gait looks.
 ## Repository map
 
 ```text
+dar.md                          The mission: requirements slide transcribed, numeric blanks, steps, demo ladder
 STATUS.md                       Current state; rewritten in place, never appended
 AGENTS.md                       Asset v1 (CAD assembly) conventions and the Isaac Sim import/validation runbook
 docs/ROADMAP.md                 Program direction: workstreams, milestones, gates, Spark sharing
@@ -98,19 +102,22 @@ conflicts with one of them, stop and raise the conflict.
 
 ## Tests
 
-Canonical command:
+Canonical command (the repository is a uv workspace; `uv sync` once, then):
 
 ```sh
-python3 -m unittest discover -s isaaclab/tests
+uv run python -m unittest discover -s isaaclab/tests
 ```
 
-The full suite requires `torch`, `numpy`, `pyyaml`, and
-`opencv-python-headless`. Without them, the ten torch-dependent modules surface
-as 10 import errors and the rest of the suite still runs; that is the expected
-result on a machine with no simulator dependencies, and documentation changes
-must not alter it. Do not hardcode a suite total here — it moves with every
-added test; read it off the run instead. Isaac Sim itself is not required for
-the test suite.
+`uv.lock` pins the test dependencies (`torch`, `numpy`, `pyyaml`,
+`opencv-python-headless`); `uv sync` installs them with the six `packages/`
+editable. A bare `python3 -m unittest discover -s isaaclab/tests` still works:
+without those dependencies the torch- and numpy-dependent modules surface as
+import errors and the rest of the suite still runs; that is the expected result
+on a machine with no dependencies, and documentation changes must not alter it.
+Do not hardcode a suite total here — it moves with every added test; read it
+off the run instead. Isaac Sim itself is not required for the test suite, and
+uv never touches the Spark container. Dependency changes go through `uv add`
+and are committed with the updated lockfile.
 
 Run the focused tests for whatever you touched. Reward math, reset batching,
 launcher contracts, analyzer contracts, and shard merging all have dedicated
