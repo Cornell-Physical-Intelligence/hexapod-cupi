@@ -51,11 +51,18 @@ python3 robot/tools/import_onshape_hexapod.py \
   leg pointing straight out from the body centre (the yaw mates are locked at
   arbitrary angles in the CAD; `--yaw-zero cad` reproduces the CAD placement
   instead). Limits ±0.872665 rad.
-- `femur_pitch` / `tibia_pitch` keep the leg reference convention (motor
-  positions at the shared CAD zero, limits 0…1.74533 and 0…2.53073 rad, RS05
-  5.5 N·m / 50.27 rad/s). The leg-internal joint transforms were measured
-  from this assembly (mean of the six legs, leg-to-leg spread 0.03 mm); the
-  knee sits 0.5 mm further along its axis than in the leg export.
+- `femur_pitch` / `tibia_pitch` zero = the CAD pose. Positive `femur_pitch`
+  raises the femur (46 deg above horizontal at zero, horizontal at -0.804);
+  positive `tibia_pitch` opens the knee (74 deg interior at zero, closed at
+  -1.29, straight at +1.85). Limits femur -1.745329..0.55, tibia -0.95..1.75
+  (`joint_limits.json`; derived from the CAD kinematics, to be replaced by
+  measured hardware stops). Motor 3 drives the push lever and the
+  parallelogram carries its delta 1:1 to the knee. The leg-internal joint
+  transforms were measured from this assembly (mean of the six legs,
+  leg-to-leg spread 0.03 mm); the knee sits 0.5 mm further along its axis
+  than in the leg export.
+- Reset/validation stance (`stance.json`): femur -0.25, tibia -0.55, bottom
+  plate 0.124 m up (reset 0.130); static hip and knee torque 0.9 N m each.
 - Inertials: parallel-axis sums of Onshape's per-part mass, centroid and
   inertia (from the export's `robot.pkl`), with one hard override: every
   RS05 actuator totals 191 g (its vendor CAD is a 62 g hollow shell; the
@@ -74,27 +81,21 @@ python3 robot/tools/import_onshape_hexapod.py \
 
 ## Isaac Sim / Isaac Lab
 
-Import `urdf/hexapod_mkii_serial.urdf` as a floating-base USD with
-`tools/import_urdf_to_usd.py` (Isaac Sim python; URDF inertials kept, no
-convex decomposition, self-collision off), then author contact reports with
-`tools/enable_nested_contact_reports.py`. `package://hexapod_mkii_assy/...`
-resolves from this directory, exactly as the mock package was imported.
-`packages/hexapod_env/hexapod_env/assets/spec.py` (`MKII_V1_ASSET`) points at
-`usd/hexapod_mkii_serial/hexapod_mkii_serial.usda` (override with
-`HEXAPOD_MKII_V1_USD_PATH`), names the joints and links, and carries the joint
-limits and the reset stance from `joint_limits.json` / `stance.json`. The
-task is `Isaac-Velocity-Flat-Hexapod-MKII-V1-Direct-v0`
-(`HexapodMkiiV1FlatEnvCfg`); the mock's task IDs are untouched. The expected
-runtime joint order is `packages/hexapod_core/hexapod_core/joints_v2.py`,
-provisional until confirmed. `isaaclab/validate.py --asset mkii_v1` runs the
-standing gate: 18 joints, 19 rigid bodies, six foot sensors, finite
-observations, no falls, no non-foot ground contact, computed torque under the
-1.6 N*m rating, and it prints the articulation's `joint_names`, which is the
-evidence that confirms the runtime order.
+`docs/OPERATIONS.md` §10 is the import, contact-report, and validation
+procedure on the Spark. `packages/hexapod_env/hexapod_env/assets/spec.py`
+(`MKII_V1_ASSET`) mirrors the names, limits, stance, and foot-pad geometry
+from this directory; change them here and there together, and
+`isaaclab/tests/test_mkii_v1_asset_contract.py` binds the two. The linkage
+model needs mimic-joint support (Isaac Sim >= 4.5) and is for visual and
+kinematic checks only. With 1927 visual meshes the model is heavy for
+thousands of cloned environments; fastener and motor-internal STLs can be
+dropped from the visuals if rendering becomes the bottleneck.
 
-The linkage model needs mimic-joint support (Isaac Sim >= 4.5) and is meant
-for visual/kinematic checks. With 1927 visual meshes the model is heavy for
-thousands of cloned environments; the STLs of fasteners and motor internals
-can be dropped from the visuals if rendering becomes the bottleneck. The
-Phase 1-2 curricula in `isaaclab/hexapod_rl/phase2_cfg.py` still carry the
-mock's stance values and belong to the archived mock checkpoints.
+## Regenerating
+
+Never hand-edit the URDFs; change the inputs and re-run the importer above.
+Keep `part_overrides.json` and the `--yaw-output-side` rule when re-exporting.
+Read `assembly_report.md`: every leg body must register at sub-0.1 mm, no leg
+part may be missing, and the mass totals must match. Mesh names stay ASCII.
+`python3 robot/tools/pack_urdf_viewer.py --out tmp/hexapod_mkii_viewer.html`
+builds the single-file web preview (`tmp/` is git-ignored).

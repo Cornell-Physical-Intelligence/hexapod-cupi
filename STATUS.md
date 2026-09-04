@@ -1,6 +1,6 @@
 # Current status
 
-Last updated: 2026-08-26
+Last updated: 2026-09-04
 
 This is the single current-state page for the project. **Rewrite this file in
 place; never append to it.** Anything that must survive as a dated record goes
@@ -40,10 +40,10 @@ formal absolute-gate checks.
 
 Mission of record (2026-09-03): survey a bounded area an operator draws on a
 map, steadily, as a stable platform for data collection. See `dar.md` and
-ADR-0004. The training target below serves that mission: a steady deck is the
-primary grade, and the Phase-0 checkpoints above are the reference lineage
-while asset v1 (the CAD assembly, pull request #9) is brought up under its own
-task ID.
+ADR-0004 in `docs/PLAN.md` §7. The training target below serves that mission:
+a steady deck is the primary grade, and the Phase-0 checkpoints above are the
+reference lineage while asset v1 (the CAD assembly, merged 2026-09-04) is
+brought up under its own task ID.
 
 Stage2C: stable anatomical-forward walking. A candidate is admitted only by
 passing all of the gates below in the canonical formal screen (seed 60,

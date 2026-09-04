@@ -335,7 +335,7 @@ collection (ADR-0004). For training that means:
    body-frame height scan (contract C2, ADR-0002); the lidar is a mapping and
    localization sensor, never a policy input.
 
-Milestones, gates, and ownership are in `docs/ROADMAP.md`. Phase 3 prototypes
+Milestones, gates, and ownership are in `docs/PLAN.md`. Phase 3 prototypes
 reference an Intel RealSense D455 depth camera and a Livox Mid-360-like
 near-hemispherical LiDAR/IMU. They are not fused into a trained terrain task.
 Phase 3 is paused, and a long sensor-fusion or difficult-terrain job requires

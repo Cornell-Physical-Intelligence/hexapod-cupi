@@ -3,8 +3,8 @@
 Source: `DAR.png` at the repo root (the team lead's "dead ass requirements"
 slide, 2026-09-03). This page transcribes it, turns it into testable
 statements, and lays out the steps from the current repo to the demo.
-`docs/ROADMAP.md` carries the detailed milestones and gates; when the two
-disagree, this page states the mission and the roadmap is the one to update.
+`docs/PLAN.md` carries the detailed milestones and gates; when the two
+disagree, this page states the mission and the plan is the one to update.
 
 ## 1. What the slide says
 
@@ -53,14 +53,14 @@ change with a decision record, never silently.
 ## 3. Where the repo is today
 
 - **Legs.** Walking policies exist for the old mock robot model (Phase-0
-  lineage). The real CAD assembly (asset v1, 8.26 kg) is in pull request #9
-  under its own task ID and has not been trained on yet.
+  lineage). The real CAD assembly (asset v1, 8.26 kg) is merged under its
+  own task ID and has not been trained on yet.
 - **Eyes.** A Livox Mid-360 lidar is on hand. Its mount position is decided
   (upright, deck centre, at least 75 mm above the deck). It is not yet on the
   robot model as a link, and no data has been recorded from it.
 - **Brain.** The three-layer architecture (perception, locomotion,
   navigation) and the small contracts between them are written in
-  `docs/ARCHITECTURE.md`. The navigation seam exists in code as a
+  `docs/PLAN.md` §1. The navigation seam exists in code as a
   velocity-command producer. No coverage planner exists yet.
 - **Hardware.** No motor driver, runtime, or safety layer has run on the
   physical robot.
@@ -135,13 +135,12 @@ Rough, to be priced by the team:
 
 ## 7. What changes in the repo because of this page
 
-- `docs/ROADMAP.md` milestones M2 to M4 were written for exploration and an
-  air unit. They are now rewritten around the concept of operations above,
-  with section 2 as the source of every numeric gate; the decision record is
-  `docs/decisions/0004-mission-is-bounded-area-coverage.md` (proposed, awaiting
-  team acceptance).
+- `docs/PLAN.md` milestones M2 to M4 are written around the concept of
+  operations above, with section 2 as the source of every numeric gate; the
+  decision record is ADR-0004 in `docs/PLAN.md` §7 (proposed, awaiting team
+  acceptance).
 - Move `DAR.png` under `docs/` next to this page once the team is happy with
   the wording, and keep this page in step with the slide if the slide
   changes.
-- The Mid-360 link and payload mass go on asset v1 (already listed as an M0
-  follow-up in pull request #9).
+- The Mid-360 link and payload mass go on asset v1 (an M0 item in
+  `docs/PLAN.md` §6).

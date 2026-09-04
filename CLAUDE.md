@@ -1,31 +1,22 @@
 # Agent and contributor guide
 
-This repository builds the autonomy software for the Hexapod MKII, a
-six-legged robot with 18 RobStride RS05 joints (8.26 kg in the CAD assembly
-with each RS05 at its 191 g datasheet mass; the earlier mock assumed 6.3 kg).
-The mission (`dar.md`, ADR-0004) is to survey a bounded area an operator draws
-on a map, steadily, as a stable platform for data collection. The walking
-policies are trained with Isaac Sim 6.0.1, Isaac Lab `DirectRLEnv`, and RSL-RL
-PPO. Training runs on a shared DGX Spark
-host through hardened launchers; the repository holds the task source, the
-deployment scripts, the tests, and a curated evidence trail of every experiment
-that has been run. The work is organized as a staged curriculum, and the
-current research target is Stage2C: stable anatomical-forward walking with a
-low, steady deck that stays inside the RS05 torque envelope. Progress is gated
-by explicit numeric acceptance criteria, not by how a gait looks.
+Autonomy software for the Hexapod MKII, a six-legged robot with 18 RobStride
+RS05 joints. Mission: survey a bounded area an operator draws on a map,
+steadily, as a stable platform for data collection (`dar.md`). Walking policies
+are trained with Isaac Sim 6.0.1, Isaac Lab `DirectRLEnv`, and RSL-RL PPO on a
+shared DGX Spark through hardened launchers. Progress is gated by explicit
+numeric acceptance criteria, never by how a gait looks. The current training
+target is Stage2C (`STATUS.md`); the plan beyond it is `docs/PLAN.md`.
 
 ## Repository map
 
 ```text
-dar.md                          The mission: requirements slide transcribed, numeric blanks, steps, demo ladder
+dar.md / DAR.png                Mission: requirements slide, numeric blanks, steps, demo ladder
 STATUS.md                       Current state; rewritten in place, never appended
-AGENTS.md                       Asset v1 (CAD assembly) conventions and the Isaac Sim import/validation runbook
-docs/ROADMAP.md                 Program direction: workstreams, milestones, gates, Spark sharing
-docs/ARCHITECTURE.md            Autonomy layers and the contracts between them (C1-C4, O1, A1)
-docs/decisions/                 Architecture decision records; numbered, never edited once accepted
-docs/ONBOARDING.md              Read order, local setup, Spark access, working rules
+CLAUDE.md (= AGENTS.md)         This file; AGENTS.md is a symlink to it for other agents
+docs/PLAN.md                    Architecture and contracts, workstreams, milestones and gates, decisions (ADR-0001..0004)
 docs/TRAINING.md                Task/training design, curriculum, acceptance gates
-docs/OPERATIONS.md              Spark runbook, GPU protocol, launchers, screens
+docs/OPERATIONS.md              Spark runbook: environment, GPU protocol, launchers, screens, asset import (§10)
 docs/incidents/                 Frozen forensic records; append-only
 docs/archive/                   Superseded documents, kept verbatim
 packages/hexapod_core/          Frozen contracts: observation, action, command, joints, actuator
@@ -37,9 +28,9 @@ packages/hexapod_nav/           Command-producer protocol and an example waypoin
 configs/                        Named experiment baselines and intervention deltas
 isaaclab/hexapod_rl/            Compatibility shims re-exporting hexapod_env
 isaaclab/deploy/                Launchers, systemd units, stage2_pipeline.sha256
-ops/                            hexctl operator CLI; attic/ holds retired deploy scripts
 isaaclab/tests/                 Unit and launcher/analyzer contract tests
-robot/                          hexapod_mkii_assy (asset v1), hexapod_mkii_mock_assy (Phase-0), leg v3, sensors, importers
+ops/                            hexctl operator CLI; attic/ holds retired deploy scripts
+robot/                          hexapod_mkii_assy (asset v1, README = conventions), hexapod_mkii_mock_assy (Phase-0), leg v3, sensors, importers
 tools/                          URDF/USD generation and physics preparation
 viewer/                         Vite + React viewer
 artifacts/                      Checkpoints, evaluations, videos, probe ledger
@@ -47,15 +38,15 @@ artifacts/                      Checkpoints, evaluations, videos, probe ledger
 
 Where things live:
 
-- **Current state** — `STATUS.md`. One page, rewritten in place. If a fact is
-  about right now, it goes there and nowhere else.
-- **Direction** — `docs/ROADMAP.md` and `docs/decisions/`. Where the program
-  is going and why; a plan change is a roadmap rewrite plus an ADR.
-- **Design** — `docs/`. Durable contracts and procedure that outlive any run.
-  `docs/ARCHITECTURE.md` defines the locomotion / perception / navigation
-  layers and the contracts between them.
-- **Evidence** — `artifacts/`. Checkpoints, evaluation JSON, resolved configs,
+- **Current state**: `STATUS.md`. If a fact is about right now, it goes there
+  and nowhere else.
+- **Direction and design**: `docs/PLAN.md` (layers, contracts, milestones,
+  decisions), `docs/TRAINING.md` (the task), `docs/OPERATIONS.md` (the Spark).
+  A plan change edits `PLAN.md` and adds a dated decision to its §7.
+- **Evidence**: `artifacts/`. Checkpoints, evaluation JSON, resolved configs,
   hashes, videos, and the probe ledger.
+- Each `packages/hexapod_*/CLAUDE.md` holds that package's ownership and
+  don'ts; the robot READMEs under `robot/` hold each model's conventions.
 
 ## Invariants
 

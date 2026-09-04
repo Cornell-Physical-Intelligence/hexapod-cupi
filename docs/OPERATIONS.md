@@ -106,6 +106,21 @@ The Spark is shared with unrelated workloads. The rules are:
   must never use `docker rm -f` on a broad match and must never touch a process
   it did not create.
 
+Sharing the Spark across the team:
+
+- One shared queue (a document or issue label) lists the next attempts in
+  order with experiment file, intervention file, seed, and label. Nobody
+  launches an unlisted attempt. `ops/hexctl doctor` before anything else.
+- Perception and navigation work never use the Spark GPU; they run on laptops,
+  the bench computer, and the companion computer. Sim integration bags are
+  recorded during scheduled windows.
+- Runs longer than an hour go through a systemd unit or a `screen` session
+  with the label in its name so the next person can see what is running and
+  whose it is.
+- Each member has their own Tailscale identity and Unix account, or one shared
+  account with the label discipline above. A shared account plus unlabeled
+  runs is what turns a lost failure into a phantom result.
+
 The operational objective is minimum idle GPU time without colliding with
 unrelated work and without blind retry storms: detect pre-AppReady stalls within
 45-90 seconds, preserve diagnostics, prove exact-container cleanup, and perform
@@ -292,3 +307,71 @@ training. In that case, return the exact patch plus the exact remote commands,
 working directory, expected output, and required return evidence, and let a
 session with Spark access execute them. Never request or accept credentials in
 chat.
+
+## 10. Importing and validating a robot model (asset v1)
+
+Asset v1 is `robot/hexapod_mkii_assy/` (conventions, limits, stance, and
+regeneration in its README; spec `MKII_V1_ASSET` in
+`packages/hexapod_env/hexapod_env/assets/spec.py`; task ID
+`Isaac-Velocity-Flat-Hexapod-MKII-V1-Direct-v0`). Nothing trains on it before
+step 4 passes and the runtime joint order is confirmed.
+
+1. Sync the source to `/home/orionh/HEXAPOD` and verify
+   `sha256sum -c isaaclab/deploy/stage2_pipeline.sha256` (the manifest covers
+   the asset modules).
+2. Generate the USD inside the container from `/workspace/hexapod`:
+   ```sh
+   python tools/import_urdf_to_usd.py \
+     robot/hexapod_mkii_assy/urdf/hexapod_mkii_serial.urdf \
+     robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda
+   ```
+   Expected: `rigid_bodies=19 revolute_joints=18`, the `.usda` plus a
+   `payloads/` folder beside it, and the nested hierarchy
+   `Robot/Geometry/body/lf_coxa/lf_femur/lf_tibia` in `payloads/base.usda`.
+   If the importer API differs on this build, import from the GUI with:
+   floating base, import inertia tensor on, density 0 (keep URDF masses),
+   merge fixed joints on, self-collision off, convex decomposition off,
+   collision from visuals off, position drives; save to the same path.
+   `package://hexapod_mkii_assy/...` resolves from the package directory, so
+   import from a checkout where `meshes/` sits beside `urdf/`.
+3. Contact reports, same container:
+   ```sh
+   python tools/enable_nested_contact_reports.py \
+     robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda
+   ```
+   Expected: `CONTACT_REPORTS_ENABLED bodies=19`.
+4. Validate (`--asset mock` re-validates the Phase-0 lineage):
+   ```sh
+   python isaaclab/validate.py --asset mkii_v1 --num_envs 32 --steps 1000
+   ```
+   Requires 18 joints, six feet, finite observations, no terminations or
+   truncations, no coxa/femur/tibia-shaft ground contact after settling, and
+   computed torque under the RS05 1.6 N m rating (saturation fraction below
+   0.5 %). Expect `post_settle_mean_base_height_m` near 0.12 and
+   `max_abs_computed_torque_nm` well under 1.6.
+   `isaaclab/deploy/validate-stance-sweep` runs three candidate stances.
+5. Confirm the runtime joint order. The action vector is positional, so the
+   articulation's own `joint_names` order is a contract.
+   `hexapod_core/joints_v2.py` predicts it (breadth-first from `body`: six
+   coxa_yaw, six femur_pitch, six tibia_pitch, legs lf lm lr rf rm rr) and is
+   marked provisional; `HexapodEnv` refuses to construct on a mismatch. Keep
+   the `joint_names=[...]` line from step 4 as evidence. If it matches, flip
+   `RUNTIME_ORDER_STATUS` to `"confirmed"` in `joints_v2.py` and in the spec in
+   the same commit as that transcript; if it differs, correct both tuples
+   together. Never bypass the check.
+6. Commit the generated `usd/` folder if it is meant to be shared. The USD
+   path defaults to the container path in the spec and is overridden per run
+   by `HEXAPOD_MKII_V1_USD_PATH`. Curriculum stages for this asset derive from
+   `HexapodMkiiV1FlatEnvCfg` under new task IDs with a fresh stance sweep for
+   the 8.26 kg mass distribution; the `phase2*_cfg.py` classes stay on the
+   mock. Any change to a manifest-listed file means regenerating
+   `stage2_pipeline.sha256`.
+
+| symptom | likely cause |
+|---|---|
+| `Unexpected contact-body layout` from `env.py` | USD hierarchy is not `Geometry/body/<coxa>/<femur>/<tibia>`; check the payload and the `MKII_V1_GEOMETRY_ROOT` sensor paths in `env_cfg.py` |
+| `Articulation joint order differs from the asset's runtime joint contract` | PhysX ordered the joints differently from the `joints_v2.py` prediction; correct `joints_v2.RUNTIME_JOINT_NAMES` and `MKII_V1_ASSET.runtime_joint_names` from the printed `joint_names` |
+| `Expected 18 joints` / `Expected 6 feet` | wrong URDF imported (linkage variant, or the mock), or fixed joints not merged |
+| torque saturation on standing | stance moved away from `stance.json`, or masses changed; re-derive with the stance search in the importer |
+| foot contacts counted as shaft contacts | `distal_foot_min_y_m` (0.155, tibia frame +Y) no longer matches the pad; re-check the pad spheres in the URDF |
+| meshes missing after import | `package://` not resolvable; import from a checkout with `meshes/` beside `urdf/` |
