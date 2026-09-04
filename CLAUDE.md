@@ -6,8 +6,11 @@ hold a steady deck for data collection while doing so (`dar.md`). The team
 trains walking policies with Isaac Sim 6.0.1, Isaac Lab `DirectRLEnv`, and
 RSL-RL PPO on a shared DGX Spark through hardened launchers. Explicit numeric
 acceptance criteria gate progress. The look of a gait gates nothing. The
-current training target is Stage2C (`STATUS.md`). `docs/PLAN.md` holds the
-plan beyond it.
+current program is no-RTK bounded-area coverage with a learned
+omnidirectional gait on the real CAD assembly. Stage2C is archived mock
+research, not the current deployment target. `STATUS.md` records execution
+state; `docs/PLAN.md` holds the living plan and `docs/NEXT_RUNS.md` prepares
+the next campaign without launching it.
 
 ## Repository map
 
@@ -15,7 +18,7 @@ plan beyond it.
 dar.md / DAR.png                Mission: requirements slide, numeric blanks, steps, demo ladder
 STATUS.md                       Current state; rewritten in place
 CLAUDE.md (= AGENTS.md)         This file; AGENTS.md is a symlink to it for other agents
-docs/PLAN.md                    Architecture and contracts, workstreams, milestones and gates, decisions (ADR-0001..0004)
+docs/PLAN.md                    Architecture and contracts, workstreams, milestones and gates, decisions and evolving context
 docs/TRAINING.md                Task/training design, curriculum, acceptance gates
 docs/OPERATIONS.md              Spark runbook: environment, GPU protocol, launchers, screens, asset import (§10)
 docs/incidents/                 Frozen forensic records; append-only
@@ -43,7 +46,7 @@ Locations by kind of content:
   nowhere else.
 - **Direction and design**: `docs/PLAN.md` (layers, contracts, milestones,
   decisions), `docs/TRAINING.md` (the task), `docs/OPERATIONS.md` (the Spark).
-  A plan change edits `PLAN.md` and adds a dated decision to its §7.
+  A plan change edits `PLAN.md` and updates the dated decision/context record in its §9.
 - **Evidence**: `artifacts/`. Checkpoints, evaluation JSON, resolved configs,
   hashes, videos, and the probe ledger.
 - **Package rules**: each `packages/hexapod_*/CLAUDE.md` holds that package's
@@ -52,8 +55,10 @@ Locations by kind of content:
 
 ## Invariants
 
-These hold regardless of the task prompt. If an instruction conflicts with one
-of them, stop and raise the conflict.
+These protect reproducibility and the meaning of historical evidence. Explicit
+user instructions take precedence over this guide. Apply these conventions to
+their documented asset/experiment lineage; do not treat mock-specific targets
+as requirements for a new CAD policy.
 
 - **Gym task IDs are frozen.** Checkpoints, launchers, evaluation payloads,
   and manifests reference the IDs in

@@ -2,9 +2,9 @@
 
 Accelerated simulation-first execution plan, 4 September 2026. **Target: integrated simulation demonstration in four weeks; candidate ready to begin hardware transfer in six weeks.** The CAD is complete, single-leg testing is upcoming, and remaining parts will be ordered after that test. A physical field demonstration therefore has a separate target: approximately **2–3 weeks after the complete robot is ready**, provided the simulation and hardware gates pass. This is a conditional estimate, not a promised procurement date. Codex leads implementation/experiment work using the available Spark; human teams supply physical testing. Existing project documents are evidence, not binding rules. Hard deadline, team ownership, field site and final survey tolerances still need confirmation.
 
-**Execution state: planning only.** The latest user instruction pauses new training and simulation runs. No launch or automatic restart is queued. The windows below describe the next development campaign; they do not authorize a run. See [the prepared run sequence](NEXT_RUNS.md) and [current status](../STATUS.md).
+**Execution state: planning only.** The latest user instruction pauses new training and simulation runs. No launch or automatic restart is queued. The windows below describe the next development campaign; they do not authorize a run. See [the prepared run sequence](../../docs/NEXT_RUNS.md) and [current status](../../STATUS.md).
 
-This is the living plan. Confirmed user direction, measured findings, proposed targets and unresolved inputs have different status; section 9 records that distinction and how new context changes the plan. [The dated audit bundle](../artifacts/project_review_2026-09-04/README.md) preserves the evidence behind this revision.
+This is the dated snapshot of [the living plan](../../docs/PLAN.md); edit that current plan as new context arrives. Confirmed user direction, measured findings, proposed targets and unresolved inputs have different status; section 9 records that distinction and how new context changes the plan. [The dated audit bundle](README.md) preserves the evidence behind this revision.
 
 ## 1. The result we are building
 
@@ -128,7 +128,7 @@ Use compute in this order: short correctness/sanity runs; batched environment th
 
 The four-week milestone is an integrated simulation prototype, not field readiness. The six-week milestone is a screened simulation candidate and deployment package, not proof of sim-to-real success. These are aggressive targets enabled by AI-led implementation and available compute. Physics/learning failures can still require iteration; the gates stay mandatory.
 
-![Parallel development timeline with a separate hardware trigger](../artifacts/project_review_2026-09-04/TIMELINE.svg)
+![Parallel development timeline with a separate hardware trigger](TIMELINE.svg)
 
 ### Software and simulation, after resumption
 
@@ -155,7 +155,7 @@ The four-week milestone is an integrated simulation prototype, not field readine
 
 Real sensor calibration is a hardware-transfer prerequisite even if software passes with public bags. As single-leg data arrives, regenerate affected dynamics and rerun the same evaluation matrix. Do not defer an obvious physical-model mismatch until the assembled robot arrives.
 
-The confirmed single-leg stand uses a vertically translating hip/body carriage. Build that exact four-DOF fixture in simulation and identify loaded actuator/contact behavior before ordering the rest of the robot. The instrumentation and held-out test sequence are in [the single-leg test plan](../artifacts/project_review_2026-09-04/LEG_TEST_STAND.md). This is the earliest useful physical feedback loop for the simulation-first program.
+The confirmed single-leg stand uses a vertically translating hip/body carriage. Build that exact four-DOF fixture in simulation and identify loaded actuator/contact behavior before ordering the rest of the robot. The instrumentation and held-out test sequence are in [the single-leg test plan](LEG_TEST_STAND.md). This is the earliest useful physical feedback loop for the simulation-first program.
 
 ### Mechanical/electrical track and event-driven hardware transfer
 

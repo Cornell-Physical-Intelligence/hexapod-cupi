@@ -1,5 +1,7 @@
 # Spark operations runbook
 
+> Execution update, 2026-09-04: [current status](../STATUS.md) is planning-only, with hexapod jobs stopped and no restart queued. The [asset audit](../artifacts/project_review_2026-09-04/URDF_VALIDATION.md) found an unresolved all-link USD inertia conversion defect. The procedures below do not override the pause or replace the new campaign's [prerequisites](NEXT_RUNS.md).
+
 Durable operating procedure for hexapod training and evaluation on the DGX
 Spark host. It covers the environment, the audit that precedes each launch,
 the GPU lock protocol, launcher and formal-screen usage, the specification and
