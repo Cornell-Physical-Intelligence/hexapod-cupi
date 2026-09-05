@@ -144,3 +144,70 @@ live backend overlap proof still pending. Existing sources/manifests untouched.
 Good SSHsocket `/tmp/hexapod_fourbar_translation.sock`. Priorityguard1465763 remains
 bounded until2026-09-06T02:16:34Z; inspect live status before acting. Avoid transient
 CPU Docker readers during the older frozen supervisor's active jobs.
+
+## 2026-09-05 21:20 UTC — collision proof and targeted velocity solve
+
+No physical-model PPO. The single robot at (−2, 0) m reproduces noisy batch row 7
+exactly; (2,−2) and origin controls also match their own batch rows. Filtered and
+unfiltered spaced-world NPZ bytes are identical. Additional robots are not
+required for the transient. Its post-contact mimic velocity residual reaches
+4.425369 rad/s and C-pin relative speed about 0.3625 m/s despite small position
+error. These are diagnostic findings, not new silently chosen tolerances.
+
+External overlap fixture v2 (4d62eca) completed both native GPU controls on
+frozen source d863663: filtered body pair zero contacts/force, negative pair
+340 contacts and 19690.2949 N peak, independent ground support in both filtered
+robots, all 24 cloned mimic references valid. Both exact containers were removed.
+Attempt 1's UInt32 diagnostic-code failure remains preserved. Successful evidence:
+`artifacts/mkii_fourbar_2026-09-05/dynamics_trace_analysis/live_controls_attempt_002/`.
+This establishes measured body-pair collision response, not full-body training admission.
+
+Candidate source83a9bca uses four final velocity iterations, retaining all other
+physical/controller settings and gates.886 CPU tests passed64.064s. Manifest291
+files SHA256 `5f786620e955424fa0196b471f00609ec1b9f5135096bd11298ba8f3a3475ba7`.
+Frozen source `/home/orionh/HEXAPOD_runs/mkii_final_velocity4_v1/source` is an exact
+Git archive of those291 files plus the manifest; prior run logs are excluded,
+all runtime identity files retained. Functional identity
+`f825a1fb3cfcf33d27dae217cb29aa777a5dd5e0bed96819fa48175a97e7d694`.
+Diagnostic `/home/orionh/HEXAPOD_runs/mkii_final_velocity4_v1/standing_refined_20260905T211904Z`
+PID1635933 is running8 environments ×200 standing control steps at128/4.
+Read live state before acting; source and shared note must remain unchanged.
+Additional full-validation velocity telemetry is being developed separately.
+
+## 2026-09-05 21:51 UTC — sixteen velocity iterations and larger standing comparison
+
+The completed eight-world comparison is preserved in
+`artifacts/mkii_fourbar_2026-09-05/translation_diagnostics/final_velocity16_comparison/`.
+One → four → sixteen final iterations reduce worst settled passive velocity
+residual 4.425369 → 1.104570 → 0.097386 rad/s, and pin speed 0.362515 →
+0.020240 → 0.003487 m/s. Sixteen is not uniformly better by position: row 2's
+velocity residual and row 4's torque/support regress versus four iterations.
+Do not escalate iteration count blindly or infer training admission. The new
+per-substep velocity telemetry was independently reproduced from raw traces;
+startup remains separate. No physical-model PPO has started.
+
+Frozen source c804169 at `/home/orionh/HEXAPOD_runs/mkii_final_velocity16_v1/source`
+has functional identity `d3442002687f4ff7b34bd2e24134a8e3265a87e05221d3cbf33f2630c0b52d36`.
+Its separate 292-file manifest is
+`isaaclab/deploy/mkii_fourbar_v1_final_velocity16_pipeline.sha256`, SHA256
+`6598f8868f8a02240847798bed47cde0700010c28a34c21af0e23d72bbf55319`.
+891 local CPU tests passed in 80.730 seconds; GitHub CI 33993230661 succeeded.
+The source is an exact lean Git archive of manifest files plus the manifest;
+prior runtime reports remain outside source. Do not modify the frozen directory.
+
+Host PID 1646773 launched the matched 32 × 600-control-step standing pair at
+21:51:19 UTC. Output directory:
+`/home/orionh/HEXAPOD_runs/mkii_final_velocity16_v1/standing_pair_20260905T215119Z`.
+The external `standing_pair_launcher_v1.py` invokes the ordinary owned supervisor
+at 64/16 then 128/16, 1,200-second bound each, stops on phase failure and cannot
+admit training. Compare actual root placements, complete runtime identity and
+both old convergence metrics and new velocity telemetry. The 2.4–12 s settled
+window matches the previous 32-world Kd 0.30 standing experiment. Live state is
+in `pair.json`; do not edit source or shared note during either phase. Priority
+guard 1465763 remains bounded until 2026-09-06T02:16:34Z. SSH socket:
+`/tmp/hexapod_fourbar_translation.sock`. Inspect live state before acting.
+
+Successful GPU body-pair overlap evidence, the isolated (−2,0) replay and the
+four-iteration comparison are now preserved beside the sixteen-iteration result.
+The overlap negative control's 340 is the maximum native contact-point count
+per directional body query/sample, not the total collision count across the run.
