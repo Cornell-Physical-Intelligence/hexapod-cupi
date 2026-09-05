@@ -1,0 +1,46 @@
+{
+  "schema": "hexapod.short_standing_comparison.v1",
+  "simulation_training_admission": false,
+  "hardware_admission": false,
+  "complete_full_validation": false,
+  "source_commit": "a3081dd",
+  "contract_sha256": "6d81d3117af6d39d703b68ecbeb6a410806a0f6931d0f059863e4081769e25c7",
+  "reports": {
+    "nominal": {
+      "path": "nominal/hexapod-fourbar-validate-20260905T195746Z-14ead46a/report.json",
+      "sha256": "c0e3b6310969ba0b7a44968b22f2bc31313c22513573d9a68b9e39e8e85cf053",
+      "physical_standing_pass": true
+    },
+    "refined": {
+      "path": "refined/hexapod-fourbar-validate-20260905T194825Z-e5e2e098/report.json",
+      "sha256": "f7f16751bd9f3514245a050af0a9a09662a40e25d5885a6fb99be55df2ee7fa6",
+      "physical_standing_pass": true
+    }
+  },
+  "matched_window": {
+    "physics_dt_s": 0.00125,
+    "first_physics_sample": 1920,
+    "last_physics_sample_exclusive": 9600,
+    "first_time_s": 2.4,
+    "last_time_s": 12.0,
+    "num_envs": 32
+  },
+  "runtime_equivalent_except_position_iterations": true,
+  "standing_comparisons": {
+    "mean_height_m": {
+      "nominal": 0.13570258275722152,
+      "refined": 0.1357222822921661,
+      "absolute_delta": 1.9699534944572772e-05,
+      "unchanged_bound": 0.001,
+      "within_bound": true
+    },
+    "max_applied_nm": {
+      "nominal": 0.6656231880187988,
+      "refined": 1.925208568572998,
+      "absolute_delta": 1.2595853805541992,
+      "unchanged_bound": 0.0962604284286499,
+      "within_bound": false
+    }
+  },
+  "standing_comparison_pass": false
+}
