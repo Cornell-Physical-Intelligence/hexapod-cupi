@@ -111,3 +111,14 @@ probe passed and full nominal is underway. Source remains frozen at 9cd8d4c in
 socket is `/tmp/hexapod_fourbar_live.sock`; the previous recovery socket timed out.
 Inspect live state before acting. No PPO yet. Priority guard 1465763 still holds
 the weather scheduler lock, with maximum expiry 2026-09-06T02:16:34Z.
+
+## 2026-09-05 19:29 UTC — first full nominal pass
+
+Campaign 006 nominal `185936Z-b545949f` passed all 32 × 3,400 control steps and
+all individual/group directions. Driven closure 0.0819092 mm, passive residual
+0.000996530 rad, minimum support three feet, no resets or non-foot ground
+contacts. Raw demand peaked at 14.32394 N·m; applied torque stayed within its
+5.5 N·m envelope and burst budget. Primary evidence is in
+`artifacts/mkii_fourbar_2026-09-05/campaign_006_ramped_targets/`.
+The same campaign has advanced to refined validation automatically; no PPO yet.
+Keep source 9cd8d4c frozen and inspect campaign JSON for the active phase.
