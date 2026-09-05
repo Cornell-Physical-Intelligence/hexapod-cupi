@@ -3,3 +3,10 @@ robot/hexapod_mkii_assy/preview/inspection_vendor/** linguist-vendored
 robot/hexapod_mkii_assy/usd/hexapod_mkii_serial_v2/source/** linguist-generated
 # Preserve raw validation logs, including the SDK's trailing spaces.
 artifacts/mkii_step2_2026-09-04/*/container.log -whitespace linguist-generated=true
+
+# Preserve exact raw physical-campaign logs.
+artifacts/mkii_fourbar_2026-09-05/**/container.log -whitespace linguist-generated=true
+# Preserve generated plotting and USD output byte-for-byte for reproducibility.
+artifacts/mkii_fourbar_2026-09-05/collider_fit/*.svg -whitespace linguist-generated=true
+artifacts/mkii_fourbar_2026-09-05/collider_fit/*.csv -whitespace linguist-generated=true
+robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v3/** -whitespace linguist-generated=true

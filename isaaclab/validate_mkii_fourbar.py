@@ -1,0 +1,375 @@
+#!/usr/bin/env python3
+"""Standing and driven-coordinate tests of the physical MKII four-bar.
+
+Every 5 ms measures actual link-pose closure and primitive ground clearance.
+Provisional numerical tolerances require a second solver-resolution run before
+training admission. Passing never qualifies real motors or rough terrain.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import math
+from pathlib import Path
+import subprocess
+import sys
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path[:0] = [str(ROOT / p) for p in ("tools", "isaaclab", "packages/hexapod_core", "packages/hexapod_env")]
+from mkii_training_contract import TASK_ID, identity, write_json
+
+
+def tensor(value):
+    return value.torch if hasattr(value, "torch") else value
+
+
+def parser(add_launcher_args=None):
+    p = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    p.add_argument("--num_envs", type=int, default=32)
+    p.add_argument("--steps", type=int, default=1000)
+    p.add_argument("--solver-multiplier", type=int, choices=(1, 2), default=1)
+    p.add_argument("--report", type=Path, required=True)
+    if add_launcher_args:
+        add_launcher_args(p)
+        p.set_defaults(visualizer=[])
+    return p
+
+
+class SubstepHook:
+    def __init__(self, raw, callback):
+        self.raw, self.callback, self.total = raw, callback, 0
+        self.active = False
+
+    def __enter__(self):
+        if (getattr(self.raw, "_physics_handles_decimation", None) is not False
+                or self.raw.cfg.sim.dt != .005 or self.raw.cfg.decimation != 4):
+            raise ValueError("Validator requires explicit four ×5ms physics updates")
+        if any(not 0 <= s.cfg.update_period <= .005 for s in self.raw._body_contact_sensors.values()):
+            raise ValueError("Contact sensors cannot cover every substep")
+        self.original = self.raw.scene.update
+        self.had_override = "update" in vars(self.raw.scene)
+        self.previous = vars(self.raw.scene).get("update")
+        def update(*args, **kwargs):
+            dt = kwargs.get("dt", args[0] if args else None)
+            if not self.active or dt != .005:
+                raise ValueError("Unexpected unmeasured scene update")
+            result = self.original(*args, **kwargs)
+            self.callback()
+            self.total += 1
+            return result
+        self.raw.scene.update = update
+        return self
+
+    def step(self, env, actions):
+        before = self.total
+        self.active = True
+        try:
+            result = env.step(actions)
+        finally:
+            self.active = False
+        if self.total - before != 4:
+            raise ValueError("Missing physics-substep observations")
+        return result
+
+    def __exit__(self, *_):
+        if self.had_override:
+            self.raw.scene.update = self.previous
+        else:
+            del self.raw.scene.update
+
+
+class PhysicalMetrics:
+    """Batched link-pose/primitive math; no contact-centroid classification."""
+    def __init__(self, raw, kinematics):
+        import torch
+        from audit_mkii_stance import _origin
+        self.torch, self.raw, self.kinematics = torch, raw, kinematics
+        self.pending = []
+        self.windows = {}
+        self.window = "startup"
+        self.body_names = list(raw._robot.body_names)
+        self.body_indices = {n: i for i, n in enumerate(self.body_names)}
+        self.frames = []
+        for name in kinematics["closure_joint_names"]:
+            f = kinematics["joint_frames"][name]
+            self.frames.append([(self.body_indices[f[f"body{s}"]],
+                torch.tensor(f[f"body{s}_from_hinge_matrix"], device=raw.device, dtype=torch.float32)) for s in (0, 1)])
+        root = ET.parse(ROOT / "robot/hexapod_mkii_assy/urdf/hexapod_mkii_linkage.urdf").getroot()
+        indices, transforms, radii, lengths, boxes, kinds, feet = [], [], [], [], [], [], []
+        for link in root.findall("link"):
+            for collision in link.findall("collision"):
+                shape = list(collision.find("geometry"))[0]
+                indices.append(self.body_indices[link.get("name")])
+                transforms.append(_origin(collision))
+                radii.append(float(shape.get("radius", 0)))
+                lengths.append(float(shape.get("length", 0)))
+                boxes.append([float(v)/2 for v in shape.get("size", "0 0 0").split()])
+                kinds.append({"sphere": 0, "box": 1, "cylinder": 2}[shape.tag])
+                feet.append(link.get("name").endswith("_tibia") and shape.tag == "sphere")
+        import numpy as np
+        self.indices = indices
+        self.local = torch.tensor(np.array(transforms), device=raw.device, dtype=torch.float32)
+        self.radius = torch.tensor(radii, device=raw.device)
+        self.length = torch.tensor(lengths, device=raw.device)
+        self.boxes = torch.tensor(boxes, device=raw.device)
+        self.kinds = torch.tensor(kinds, device=raw.device)
+        self.feet = torch.tensor(feet, device=raw.device)
+
+    def capture(self):
+        torch, raw = self.torch, self.raw
+        from isaaclab.utils.math import matrix_from_quat
+        data = raw._robot.data
+        pos, quat = tensor(data.body_link_pos_w), tensor(data.body_link_quat_w)
+        rot = matrix_from_quat(quat)
+        point_error, axis_error = [], []
+        for pair in self.frames:
+            states = [(pos[:, i] + torch.einsum("nij,j->ni", rot[:, i], f[:3, 3]),
+                       torch.einsum("nij,j->ni", rot[:, i], f[:3, 2])) for i, f in pair]
+            point_error.append(torch.linalg.vector_norm(states[0][0]-states[1][0], dim=-1))
+            axis_error.append(torch.linalg.vector_norm(states[0][1]-states[1][1], dim=-1))
+        r = rot[:, self.indices]
+        centers = pos[:, self.indices] + torch.einsum("ncij,cj->nci", r, self.local[:, :3, 3])
+        rz = torch.einsum("nci,cij->ncj", r[:, :, 2], self.local[:, :3, :3])
+        sphere = self.radius.expand(raw.num_envs, -1)
+        box = (rz.abs() * self.boxes).sum(-1)
+        cylinder = rz[:, :, 2].abs() * self.length/2 + self.radius * (1-rz[:, :, 2].square()).clamp(min=0).sqrt()
+        support = torch.where(self.kinds == 0, sphere, torch.where(self.kinds == 1, box, cylinder))
+        bottom = centers[:, :, 2] - support - tensor(raw._terrain.env_origins)[:, 2, None]
+        forces = torch.stack([torch.linalg.vector_norm(tensor(s.data.net_forces_w), dim=-1).amax(-1)
+                              for s in raw._body_contact_sensors.values()], dim=1)
+        contact_names = list(raw._body_contact_sensors)
+        foot_mask = torch.tensor([n.endswith("_tibia") for n in contact_names], device=raw.device)
+        height = tensor(data.root_pos_w)[:, 2] - tensor(raw._terrain.env_origins)[:, 2]
+        torque = raw.motor_state("applied_torque").abs()
+        demand = raw.motor_state("computed_torque").abs()
+        limit = raw.motor_telemetry("instantaneous_limit_nm")
+        continuous = raw.motor_telemetry("continuous_limit_nm")
+        headroom = raw.motor_telemetry("burst_headroom")
+        invalid = raw.motor_telemetry("invalid_input")
+        finite = torch.stack([torch.isfinite(t).all() for t in (pos, quat, forces, height, torque,
+            demand, limit, headroom, continuous, tensor(data.joint_pos), tensor(data.joint_vel))]).all()
+        row = torch.stack([height.min(), height.sum(), torque.max(), demand.max(),
+            torch.stack(point_error).max(), torch.stack(axis_error).max(), bottom[:, ~self.feet].min(),
+            (forces[:, ~foot_mask] > 1.).any(-1).sum(), (forces[:, foot_mask] > 1.).sum(-1).min(),
+            (torque-limit).max(), (torque-continuous).clamp(min=0).max(), headroom.min(),
+            (~finite).to(height.dtype) + invalid.any(), raw.closure_coordinate_error().abs().max()])
+        self.pending.append(row)
+
+    def drain(self):
+        torch = self.torch
+        if len(self.pending) != 4:
+            raise ValueError("Expected all four physical samples")
+        rows = torch.stack(self.pending).cpu().tolist()
+        self.pending.clear()
+        w = self.windows.setdefault(self.window, {"substeps": 0, "height_sum": 0., "min_height_m": 99.,
+            "max_applied_nm": 0., "max_demand_nm": 0., "max_closure_point_m": 0., "max_closure_axis_chord": 0.,
+            "min_nonfoot_clearance_m": 99., "nonfoot_contact_env_substeps": 0, "min_support": 6,
+            "max_envelope_excess_nm": 0., "max_continuous_excess_nm": 0., "min_burst_headroom": 1.,
+            "invalid_samples": 0, "max_passive_relation_error_rad": 0.})
+        names = ("min_height_m", "height_sum", "max_applied_nm", "max_demand_nm", "max_closure_point_m",
+                 "max_closure_axis_chord", "min_nonfoot_clearance_m", "nonfoot_contact_env_substeps", "min_support",
+                 "max_envelope_excess_nm", "max_continuous_excess_nm", "min_burst_headroom", "invalid_samples",
+                 "max_passive_relation_error_rad")
+        for row in rows:
+            w["substeps"] += 1
+            for name, value in zip(names, row):
+                if not math.isfinite(value):
+                    raise ValueError(f"Nonfinite physical metric {name}")
+                if name.startswith("min_"):
+                    w[name] = min(w[name], value)
+                elif name.startswith("max_"):
+                    w[name] = max(w[name], value)
+                else:
+                    w[name] += value
+        w["mean_height_m"] = w["height_sum"]/(w["substeps"] * self.raw.num_envs)
+
+
+def grade(report):
+    errors = []
+    if not report.get("cpu_asset_pass") or not report.get("kit_asset_pass"):
+        errors.append("Asset integrity did not pass in both USD runtimes")
+    if report.get("body_count") != 31 or report.get("joint_count") != 30 or report.get("active_motor_count") != 18:
+        errors.append("Physical articulation layout differs")
+    if report.get("reset_max_joint_error_rad", 1.) > 5e-6 or report.get("anatomical_frame_pass") is not True:
+        errors.append("Live reset or anatomical command frame differs from the physical contract")
+    if report.get("steps_completed") != report["steps_requested"] or report.get("terminated_count") or report.get("truncated_count"):
+        errors.append("Standing or driven test did not complete without resets")
+    if report.get("physics_substeps") != 4*(report.get("steps_completed", 0)+report.get("driven_steps", 0)):
+        errors.append("Incomplete physics-substep coverage")
+    for name, window in report.get("windows", {}).items():
+        for key, maximum in (("max_closure_point_m", .0001), ("max_closure_axis_chord", math.radians(.1)),
+                             ("max_envelope_excess_nm", 1e-5), ("max_applied_nm", 5.50001),
+                             ("max_passive_relation_error_rad", .005), ("invalid_samples", 0)):
+            if window[key] > maximum:
+                errors.append(f"{name}: {key}={window[key]:.6g} exceeds {maximum:.6g}")
+        if window["min_height_m"] < .055 or window["min_nonfoot_clearance_m"] < .001:
+            errors.append(f"{name}: unstable height or nonfoot geometry within 1mm of ground")
+        if name != "startup" and (window["nonfoot_contact_env_substeps"] or window["min_support"] < 1):
+            errors.append(f"{name}: unintended contact or missing support")
+    if not report.get("windows", {}).get("settled", {}).get("substeps"):
+        errors.append("No settled observations")
+    if report["steps_requested"] >= 1000 and report.get("driven_coordinate_pass") is not True:
+        errors.append("Driven motor-coordinate direction test did not pass")
+    return errors
+
+
+def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    early, _ = parser().parse_known_args(argv)
+    if early.report.exists():
+        raise ValueError("Refusing to overwrite evidence")
+    report = {"schema_version": 1, "task_id": TASK_ID, "pass": False, "errors": [],
+        "simulation_training_admission": False, "hardware_admission": False, "steps_requested": early.steps,
+        "steps_completed": 0, "driven_steps": 0, "num_envs": early.num_envs, "solver_multiplier": early.solver_multiplier,
+        "terminated_count": 0, "truncated_count": 0, "windows": {}, "physics_substeps": 0,
+        "scope": "Nominal planar standing and small driven perturbations; not full-range or all-terrain qualification"}
+    persisted = False
+    def finish(error=None):
+        nonlocal persisted
+        if persisted:
+            return
+        if error:
+            report["errors"].append(f"{type(error).__name__}: {error}")
+        else:
+            report["errors"].extend(grade(report))
+        report["pass"] = not report["errors"]
+        early.report.parent.mkdir(parents=True, exist_ok=True)
+        write_json(early.report, report)
+        persisted = True
+        print(f"FOURBAR_VALIDATION_RESULT pass={report['pass']} errors={report['errors']}", flush=True)
+    try:
+        report["contract"] = identity()
+        kinematics = json.loads((ROOT / "configs/mkii_fourbar_v3_kinematics.json").read_text())
+        usd = ROOT / kinematics["usd_path_relative"]
+        result = subprocess.run([sys.executable, str(ROOT / "tools/audit_mkii_fourbar_usd.py"), str(usd)],
+                                text=True, capture_output=True, timeout=180)
+        cpu = json.loads(result.stdout)
+        report["cpu_asset_pass"] = cpu.get("pass") is True and result.returncode == 0
+        if not report["cpu_asset_pass"]:
+            raise ValueError(f"CPU geometry gate failed: {cpu}")
+        from hexapod_env.tasks.mkii_fourbar_v1.register import register_mkii_fourbar_v1
+        register_mkii_fourbar_v1()
+        from isaaclab_tasks.utils import add_launcher_args, launch_simulation, resolve_task_config, setup_preset_cli
+        saved = sys.argv
+        try:
+            sys.argv = [__file__, *argv]
+            args, overrides = setup_preset_cli(parser(add_launcher_args))
+            if overrides:
+                raise ValueError(f"Unreviewed config overrides: {overrides}")
+            sys.argv = [__file__]
+            cfg, _ = resolve_task_config(TASK_ID, "")
+        finally:
+            sys.argv = saved
+        cfg.scene.num_envs, cfg.seed = args.num_envs, 0
+        cfg.standing_only, cfg.reset_joint_jitter_rad = True, 0.
+        cfg.episode_length_s = (args.steps + 2401)*.02 + 1.
+        cfg.robot.spawn.articulation_props.solver_position_iteration_count = 32 * args.solver_multiplier
+        cfg.robot.spawn.articulation_props.solver_velocity_iteration_count = 4 * args.solver_multiplier
+        report["solver_iterations"] = [32*args.solver_multiplier, 4*args.solver_multiplier]
+        if "pxr" in sys.modules:
+            raise ValueError("Configuration imported standalone USD before Kit; refusing native ABI collision")
+        with launch_simulation(cfg, args):
+            env = None
+            try:
+                from audit_mkii_fourbar_usd import validate
+                import mkii_fourbar_kinematics as kin
+                kit = validate(kin.URDF, kin.PINS, usd)
+                report["kit_asset_pass"] = kit["pass"]
+                if not kit["pass"]:
+                    raise ValueError(f"Kit geometry gate failed: {kit['errors']}")
+                import gymnasium as gym
+                import torch
+                env = gym.make(TASK_ID, cfg=cfg)
+                raw = env.unwrapped
+                env.reset(seed=0)
+                raw.episode_length_buf.zero_()
+                report.update(body_count=raw._robot.num_bodies, joint_count=raw._robot.num_joints,
+                    active_motor_count=len(raw.active_joint_names), joint_names=list(raw._robot.joint_names),
+                    active_motor_names=list(raw.active_joint_names), body_names=list(raw._robot.body_names))
+                report["runtime_manifest"] = raw.runtime_manifest
+                expected = torch.tensor([kinematics["default_joint_positions_rad"][name]
+                    for name in raw._robot.joint_names], device=raw.device)
+                report["reset_max_joint_error_rad"] = float((tensor(raw._robot.data.joint_pos)-expected).abs().max())
+                report["reset_first_env_joint_positions_rad"] = tensor(raw._robot.data.joint_pos)[0].cpu().tolist()
+                report["reset_root_positions_m"] = tensor(raw._robot.data.root_pos_w).cpu().tolist()
+                vectors = torch.tensor([[0., -1., 0.], [1., 0., 0.], [0., 0., 1.]], device=raw.device)
+                report["anatomical_frame_pass"] = bool(torch.equal(raw._vector_in_command_frame(vectors),
+                    torch.eye(3, device=raw.device)))
+                if set(raw._robot.joint_names) != set(kinematics["tree_joint_names"]):
+                    raise ValueError("Unexpected articulation joint names")
+                metrics = PhysicalMetrics(raw, kinematics)
+                actions = torch.zeros((args.num_envs, 18), device=raw.device)
+                with SubstepHook(raw, metrics.capture) as hook:
+                    def step():
+                        obs, rewards, terminated, truncated, _ = hook.step(env, actions)
+                        metrics.drain()
+                        report["windows"] = metrics.windows
+                        report["physics_substeps"] = hook.total
+                        report["terminated_count"] += int(tensor(terminated).sum())
+                        report["truncated_count"] += int(tensor(truncated).sum())
+                        if not bool(torch.isfinite(tensor(obs["policy"])).all() and torch.isfinite(tensor(rewards)).all()):
+                            raise ValueError("Nonfinite policy observation/reward")
+                        if report["terminated_count"] or report["truncated_count"]:
+                            raise ValueError("Unexpected environment reset")
+                    for index in range(args.steps):
+                        metrics.window = "startup" if index < max(1, args.steps//5) else "settled"
+                        step()
+                        report["steps_completed"] = index + 1
+                        if (index+1) % 100 == 0 or index == 0:
+                            print(f"FOURBAR_STANDING step={index+1}/{args.steps} metrics={json.dumps(metrics.windows[metrics.window])}", flush=True)
+                    if args.steps >= 1000:
+                        metrics.window = "driven"
+                        individual_response = {}
+                        for motor, name in enumerate(raw.active_joint_names):
+                            measured = []
+                            for sign in (1., -1.):
+                                actions.zero_()
+                                actions[:, motor] = sign * (.04/.30)
+                                positions = []
+                                for index in range(50):
+                                    step()
+                                    report["driven_steps"] += 1
+                                    if index >= 45:
+                                        positions.append(raw.motor_state("joint_pos")[:, motor].clone())
+                                measured.append(torch.stack(positions).mean(0))
+                            individual_response[name] = float((measured[0]-measured[1]).min())
+                            print(f"FOURBAR_DRIVEN motor={name} positive_minus_negative_rad={individual_response[name]:.6f}", flush=True)
+                        report["individual_motor_positive_minus_negative_rad"] = individual_response
+                        response = {}
+                        for group in range(3):
+                            measured = []
+                            for sign in (1., -1.):
+                                actions.zero_()
+                                actions[:, group*6:(group+1)*6] = sign * (.04/.30)
+                                positions = []
+                                for index in range(100):
+                                    step()
+                                    report["driven_steps"] += 1
+                                    if index >= 90:
+                                        positions.append(raw.motor_state("joint_pos").clone())
+                                measured.append(torch.stack(positions).mean(0))
+                            delta = (measured[0]-measured[1])[:, group*6:(group+1)*6].min(0).values.cpu().tolist()
+                            response.update(zip(raw.active_joint_names[group*6:(group+1)*6], delta))
+                        report["driven_positive_minus_negative_response_rad"] = response
+                        report["driven_coordinate_pass"] = all(value > .005 for value in
+                            [*response.values(), *individual_response.values()])
+            except BaseException as error:
+                finish(error)
+                raise
+            finally:
+                finish()
+                if env is not None:
+                    env.close()
+    except Exception as error:
+        import traceback
+        traceback.print_exc()
+        if not persisted:
+            finish(error)
+        return 1
+    finish()
+    return 0 if report["pass"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

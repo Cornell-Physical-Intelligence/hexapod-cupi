@@ -122,3 +122,25 @@ The original `/home/orionh/HEXAPOD` mirror is not a Git checkout.
   handoff is acknowledged or a paired sharing pilot is agreed.
 - MPS / shared launcher: not enabled by this task. Current resource checks
   remain exclusive for short acceptance jobs.
+
+## Physical four-bar run coordination (2026-09-05 UTC)
+
+HEXAPOD_SHARE_STATUS=NONE
+
+For the new guarded physical-model runner, change that single line to
+`HEXAPOD_SHARE_STATUS=REQUESTED` and add your workload details below. Any change
+to the shared file during training requests a checkpoint and pause at the next
+PPO iteration; the supervisor allows at most 120 seconds before stopping only its
+owned container. GPU contention causes an immediate owned-job stop. No MPS
+allocation is installed. Keep the earlier 60/40 preference for a coordinated pilot.
+
+The new source is `/home/orionh/HEXAPOD_runs/mkii_fourbar_v1/source`, branch
+`codex/mkii-fourbar-training`. Logs/checkpoints are in the sibling `runs` directory.
+`supervisor.json` is authoritative for each run's state. Training remains gated on
+physical-model standing, driven-coordinate and solver-convergence checks.
+
+## 5 September UTC priority update
+
+The user explicitly gave hexapod priority over current Spark occupancy. After the initial weather run exited, another weather GPU run (PID 1218868, historical-training-20230127-0730-v1) was stopped with SIGTERM; its output files were retained. CPU scoring was left running. The hexapod reservation guard acquires the existing `/opt/wx/gpu.lock` and releases it when its owned campaign exits or after three hours. This reserves the cooperative weather GPU slot; it is not hardware partitioning. Live shared-file checkpoint/pause requests remain supported.
+
+Campaign: `/home/orionh/HEXAPOD_runs/mkii_fourbar_v1/campaigns/fourbar-campaign-20260905T034653Z-a83056cd/campaign.json`. Source is the sibling `source` directory, archived and hashed separately per phase. Check live state rather than assuming recorded PIDs remain active.

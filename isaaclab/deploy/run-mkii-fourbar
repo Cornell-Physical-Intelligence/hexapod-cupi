@@ -1,0 +1,535 @@
+#!/usr/bin/env python3
+"""Bounded host supervisor for physical four-bar validation and PPO runs.
+
+Owns host FD9 flock and only its labelled immutable container ID. The
+container waits at a CPU-only admission barrier before starting Isaac Sim.
+No legacy checkpoint, source mirror overwrite, retry or systemd restart.
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shlex
+import signal
+import stat
+import subprocess
+import sys
+import tarfile
+import time
+import uuid
+
+LOCK = Path('/tmp/hexapod-isaac-gpu.lock')
+LAB = Path('/home/orionh/IsaacLab')
+CONTAINER_SOURCE = '/workspace/hexapod'
+CONTAINER_OUTPUT = '/workspace/validation_artifacts'
+OWNER_LABEL = 'org.cornell.hexapod.fourbar-run'
+COORDINATION = Path('/home/orionh/SPARK_COMPUTE_COORDINATION.md')
+MIN_AVAILABLE_MEMORY_BYTES = 16 * 1024**3
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'tools'))
+from mkii_training_contract import identity, require_admission, require_checkpoint
+# Keep the reviewed shell spelling visible to the shared launcher contract;
+# shlex removes only grouping quotes, yielding exactly one subprocess argument.
+TELEMETRY_ARGUMENT = '--kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry"'
+PRODUCERS = re.compile(r'nsva_dl[.]sh|validate_nsva[.]py|score_clip[.]py|validate_b51[.]py|nowcast_run[.]py|train_model_only_resume[.]py|evaluate_checkpoint[.]py|torch[^\n]*compile')
+SERVICES = ('hexapod-rl-training.service', 'hexapod-rl-training-stage2b-lateral.service', 'hexapod-rl-training-stage2c-stable-forward.service')
+
+
+class Blocked(RuntimeError):
+    pass
+
+
+def command(argv, *, cwd=None, timeout=20, check=True):
+    result = subprocess.run(argv, cwd=cwd, text=True, capture_output=True, timeout=timeout)
+    if check and result.returncode:
+        # Never dump arbitrary Docker/config stderr: it may contain expanded
+        # environment values. Full validator logs are collected separately.
+        raise Blocked(f'{argv[0]} {argv[1] if len(argv)>1 else ""} failed (exit {result.returncode})')
+    return result
+
+
+def atomic_json(path, value):
+    temporary = path.with_suffix(path.suffix + '.partial')
+    temporary.write_text(json.dumps(value, indent=2) + '\n')
+    temporary.replace(path)
+
+
+def parse_processes(text):
+    processes = {}
+    for line in text.splitlines():
+        fields = line.strip().split(None, 2)
+        if len(fields) == 3 and fields[0].isdigit() and fields[1].isdigit():
+            processes[int(fields[0])] = (int(fields[1]), fields[2])
+    return processes
+
+
+def descendants(processes, roots):
+    found = {pid for pid in roots if pid > 0}
+    while True:
+        expanded = found | {pid for pid, (parent, _) in processes.items() if parent in found}
+        if expanded == found:
+            return found
+        found = expanded
+
+
+def blocking_producers(processes, owned_pids):
+    readers = {'ps', 'grep', 'rg', 'tail', 'cat', 'sed', 'head'}
+    return sorted(pid for pid, (_, argv) in processes.items() if pid not in owned_pids and Path(argv.split(None, 1)[0]).name not in readers and PRODUCERS.search(argv))
+
+
+def ancestors(processes, pid):
+    found = set()
+    while pid in processes and pid not in found:
+        found.add(pid); pid = processes[pid][0]
+    return found
+
+
+def container_gpu_capable(description):
+    return description['runtime'] == 'nvidia' or description.get('privileged', False) or any('nvidia' in item.get('PathOnHost', '') or '/dev/dri' in item.get('PathOnHost', '') for item in (description.get('devices') or [])) or any(
+        request.get('Driver') == 'nvidia' or 'gpu' in sum(request.get('Capabilities', []), [])
+        for request in (description['device_requests'] or [])
+    )
+
+
+def inspect_container(identifier):
+    result = command(['docker', 'inspect', '--type', 'container', '--format',
+        '{{json .Id}}|{{json .Name}}|{{json .State.Running}}|{{json .State.Pid}}|{{json .State.ExitCode}}|{{json .Config.Labels}}', identifier], check=False)
+    if result.returncode:
+        if 'No such object:' in result.stderr or 'No such container:' in result.stderr:
+            return None
+        raise Blocked('Cannot inspect container identity/state through Docker')
+    fields = result.stdout.strip().split('|')
+    if len(fields) != 6:
+        raise Blocked('Container identity inspection returned malformed fields')
+    identity = dict(zip(('id', 'name', 'running', 'pid', 'exit_code', 'labels'), map(json.loads, fields)))
+    if not re.fullmatch(r'[0-9a-f]{64}', identity['id']):
+        raise Blocked('Container ID is not an immutable full Docker ID')
+    return identity
+
+
+def check_identity(identity, name, owner):
+    return bool(identity and identity['name'] == '/' + name and (identity['labels'] or {}).get(OWNER_LABEL) == owner)
+
+
+def available_memory_bytes(meminfo=Path('/proc/meminfo')):
+    matches = re.findall(r'^MemAvailable:\s+(\d+)\s+kB\s*$', meminfo.read_text(), re.MULTILINE)
+    if len(matches) != 1:
+        raise Blocked('Cannot establish host MemAvailable from /proc/meminfo')
+    available = int(matches[0]) * 1024
+    if available < MIN_AVAILABLE_MEMORY_BYTES:
+        raise Blocked(f'Host MemAvailable is below the required 16 GiB: {available} bytes')
+    return available
+
+
+def require_unchanged_source(source, contract, stage):
+    if identity(source) != contract:
+        raise Blocked(f'Isolated source/asset identity changed {stage}; admission no longer applies')
+    return True
+
+
+def resource_gate(*, owned_container=None, allow_owned_gpu=False):
+    """Read-only gate; return compact evidence without arbitrary process argv."""
+    memory = available_memory_bytes()
+    processes = parse_processes(command(['ps', '-eo', 'pid=,ppid=,args=']).stdout)
+    owned = descendants(processes, [os.getpid()] + ([owned_container['pid']] if owned_container else []))
+    producers = blocking_producers(processes, owned | ancestors(processes, os.getpid()))
+    if producers:
+        raise Blocked(f'Unrelated GPU producer processes remain: PIDs {producers}')
+    for service in SERVICES:
+        result = command(['systemctl', 'is-active', service], check=False)
+        # systemd: 3 inactive, 4 unknown unit. Neither may be running.
+        if result.returncode not in (3, 4) or result.stdout.strip() in ('active', 'activating', 'reloading', 'deactivating'):
+            raise Blocked(f'Cannot establish inactive legacy service: {service}')
+    containers = command(['docker', 'ps', '--no-trunc', '--format', '{{.ID}}']).stdout.split()
+    cpu_containers = []
+    for identifier in containers:
+        if owned_container and identifier == owned_container['id']:
+            continue
+        description = command(['docker', 'inspect', '--type', 'container', '--format',
+            '{"runtime":{{json .HostConfig.Runtime}},"device_requests":{{json .HostConfig.DeviceRequests}},"devices":{{json .HostConfig.Devices}},"privileged":{{json .HostConfig.Privileged}}}', identifier])
+        if container_gpu_capable(json.loads(description.stdout)):
+            raise Blocked(f'Unrelated GPU-capable container remains: {identifier}')
+        cpu_containers.append(identifier)
+    gpu_rows = list(csv.reader(command(['nvidia-smi', '--query-compute-apps=pid,process_name', '--format=csv,noheader,nounits']).stdout.splitlines()))
+    gpu_pids = []
+    for row in gpu_rows:
+        if not row or not row[0].strip():
+            continue
+        if not row[0].strip().isdigit():
+            raise Blocked('Cannot parse GPU process inventory')
+        pid = int(row[0].strip()); gpu_pids.append(pid)
+        if allow_owned_gpu and pid not in owned:
+            # App startup can spawn a worker between ps and nvidia-smi. Refresh
+            # once before treating a newly created descendant as unrelated.
+            fresh = parse_processes(command(['ps', '-eo', 'pid=,ppid=,args=']).stdout)
+            owned = descendants(fresh, [os.getpid(), owned_container['pid']])
+        if not (allow_owned_gpu and pid in owned):
+            raise Blocked(f'Unrelated or premature GPU process: PID {pid}')
+    utilization = command(['nvidia-smi', '--query-gpu=utilization.gpu', '--format=csv,noheader,nounits']).stdout.splitlines()
+    if not utilization or any(not value.strip().isdigit() for value in utilization):
+        raise Blocked('Cannot establish GPU utilization')
+    if not allow_owned_gpu and any(int(value.strip()) != 0 for value in utilization):
+        raise Blocked('GPU utilization is nonzero before admission')
+    return {'time_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'mem_available_bytes': memory,
+            'minimum_mem_available_bytes': MIN_AVAILABLE_MEMORY_BYTES, 'gpu_pids': gpu_pids,
+            'gpu_utilization_percent': [int(value.strip()) for value in utilization],
+            'unrelated_cpu_container_ids': cpu_containers, 'producer_pids': producers}
+
+
+def snapshot_source(source, manifest):
+    """Hash regular source files; neither secrets outside the source nor symlink escapes."""
+    source = source.resolve()
+    records = []
+    for path in sorted(source.rglob('*')):
+        if '.git' in path.relative_to(source).parts:
+            continue
+        if not path.is_file():
+            continue
+        if not path.resolve().is_relative_to(source):
+            raise Blocked(f'Source symlink escapes isolated root: {path.relative_to(source)}')
+        if any(character in str(path.relative_to(source)) for character in ('\n', '\r')):
+            raise Blocked('Source paths with line breaks cannot be represented in SHA256SUMS')
+        digest = hashlib.sha256()
+        with path.open('rb') as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b''):
+                digest.update(block)
+        records.append(f'{digest.hexdigest()}  {path.relative_to(source)}')
+    manifest.write_text('\n'.join(records) + '\n')
+    return {'file': manifest.name, 'files': len(records), 'sha256': hashlib.sha256(manifest.read_bytes()).hexdigest()}
+
+
+def archive_source(source, manifest, archive, *, expected_manifest_sha256):
+    """Preserve exactly the manifest's bytes as relative regular tar entries.
+
+    Hash the same stream consumed by tar, so a file changed after the snapshot
+    cannot produce an apparently valid archive. Streaming bounds memory usage.
+    """
+    source = source.resolve()
+    manifest_bytes = manifest.read_bytes()
+    if hashlib.sha256(manifest_bytes).hexdigest() != expected_manifest_sha256:
+        raise Blocked('Source manifest changed before archival')
+    entries, seen = [], set()
+    for row in manifest_bytes.decode('utf-8').splitlines():
+        digest, separator, relative = row.partition('  ')
+        path = Path(relative)
+        if (not separator or not re.fullmatch(r'[0-9a-f]{64}', digest) or not relative
+                or path.is_absolute() or '..' in path.parts or '.git' in path.parts
+                or path.as_posix() != relative or relative in seen):
+            raise Blocked('Source manifest contains an invalid or duplicate relative file')
+        seen.add(relative)
+        entries.append((digest, path))
+    if not entries:
+        raise Blocked('Source manifest has no files to preserve')
+    temporary = archive.with_suffix(archive.suffix + '.partial')
+    if archive.exists() or archive.is_symlink():
+        raise Blocked('Refusing to overwrite an existing source archive')
+
+    class HashingReader:
+        def __init__(self, stream):
+            self.stream, self.digest = stream, hashlib.sha256()
+
+        def read(self, size):
+            chunk = self.stream.read(size)
+            self.digest.update(chunk)
+            return chunk
+
+    temporary_created = False
+    try:
+        with temporary.open('xb') as output:
+            temporary_created = True
+            with tarfile.open(fileobj=output, mode='w:gz', compresslevel=3) as bundle:
+                for expected, relative in entries:
+                    path = source / relative
+                    if not path.resolve().is_relative_to(source):
+                        raise Blocked(f'Source symlink escapes isolated root during archival: {relative}')
+                    # A file replaced by a FIFO must fail instead of hanging
+                    # the supervisor before its fstat regular-file check.
+                    with os.fdopen(os.open(path, os.O_RDONLY | os.O_NONBLOCK), 'rb') as stream:
+                        before = os.fstat(stream.fileno())
+                        if not stat.S_ISREG(before.st_mode):
+                            raise Blocked(f'Source archive entry is not a regular file: {relative}')
+                        info = tarfile.TarInfo(relative.as_posix())
+                        info.size, info.mode, info.mtime = before.st_size, stat.S_IMODE(before.st_mode), before.st_mtime
+                        reader = HashingReader(stream)
+                        bundle.addfile(info, reader)
+                        after = os.fstat(stream.fileno())
+                        if (reader.digest.hexdigest() != expected
+                                or (before.st_size, before.st_mtime_ns, before.st_ctime_ns)
+                                != (after.st_size, after.st_mtime_ns, after.st_ctime_ns)):
+                            raise Blocked(f'Source file changed between snapshot and archival: {relative}')
+        digest = hashlib.sha256()
+        with temporary.open('rb') as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b''):
+                digest.update(block)
+        # Atomic publication refuses any destination created concurrently.
+        os.link(temporary, archive)
+        return {'file': archive.name, 'files': len(entries), 'sha256': digest.hexdigest(),
+                'compressed_bytes': archive.stat().st_size, 'manifest_sha256': expected_manifest_sha256,
+                'format': 'tar.gz; relative regular files; each stream verified against SHA256SUMS'}
+    finally:
+        if temporary_created:
+            temporary.unlink(missing_ok=True)
+
+
+def validate_written_report(path, *, args, contract):
+    if not path.is_file():
+        raise Blocked('Process exited without its mandatory final report')
+    try:
+        result = json.loads(path.read_text(), parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
+    except ValueError as exc:
+        raise Blocked('Final report is not valid finite JSON') from exc
+    if not isinstance(result, dict):
+        raise Blocked('Final report must be a JSON object')
+    if result.get('pass') is not True or result.get('errors') != [] or result.get('contract') != contract:
+        raise Blocked('Final report failed or has different source/asset lineage')
+    if result.get('task_id') != contract['task_id']:
+        raise Blocked('Final report task mismatch')
+    if args.mode == 'validate':
+        if (result.get('steps_requested') != args.steps or result.get('steps_completed') != args.steps
+                or result.get('num_envs') != args.num_envs
+                or result.get('solver_multiplier') != args.solver_multiplier
+                or result.get('solver_iterations') != [32*args.solver_multiplier, 4*args.solver_multiplier]):
+            raise Blocked('Validation did not complete requested workload')
+    else:
+        completed = result.get('iterations_completed')
+        if (type(completed) is not int or not 1 <= completed <= args.iterations
+                or result.get('iterations_requested') != args.iterations
+                or result.get('num_envs') != args.num_envs
+                or result.get('checkpoint_verified') is not True
+                or result.get('checkpoint_roundtrip_pass') is not True
+                or (completed != args.iterations and result.get('paused') is not True)):
+            raise Blocked('Training did not complete or explicitly pause the requested workload with a verified checkpoint')
+        checkpoint = require_checkpoint(path.parent / 'checkpoint.pt', contract)
+        if (result.get('checkpoint_sha256') != checkpoint['checkpoint_sha256']
+                or result.get('next_iteration') != checkpoint['next_iteration']):
+            raise Blocked('Final checkpoint bytes/iteration differ from the training report')
+    return {key: result.get(key) for key in ('pass', 'mode', 'simulation_training_admission', 'iterations_completed', 'paused')}
+
+
+def coordination_snapshot():
+    content = COORDINATION.read_bytes()
+    text = content.decode('utf-8')
+    # Explicit machine-readable state, kept beside the human notes. Unrecognized
+    # or duplicate states fail closed; prose is never evaluated as commands.
+    matches = re.findall(r'^HEXAPOD_SHARE_STATUS=(NONE|REQUESTED)\s*$', text, re.MULTILINE)
+    if matches != ['NONE']:
+        raise Blocked('Shared coordination file requests sharing or lacks one unambiguous NONE state')
+    return hashlib.sha256(content).hexdigest()
+
+
+def compose_argv(source, output, name, owner, args):
+    barrier = 'while [ ! -f /workspace/validation_artifacts/admitted ]; do sleep 0.1; done; exec "$@"'
+    mounts = []
+    extra = []
+    if args.mode == 'train':
+        mounts += ['-v', f'{args.admission.resolve()}:/workspace/admission.json:ro']
+        extra += ['--admission', '/workspace/admission.json', '--iterations', str(args.iterations)]
+        if args.checkpoint:
+            mounts += ['-v', f'{args.checkpoint.resolve()}:/workspace/resume.pt:ro',
+                       '-v', f'{args.checkpoint.resolve()}.json:/workspace/resume.pt.json:ro']
+            extra += ['--checkpoint', '/workspace/resume.pt']
+    else:
+        extra += ['--steps', str(args.steps), '--solver-multiplier', str(args.solver_multiplier)]
+    script = 'train_mkii_fourbar.py' if args.mode == 'train' else 'validate_mkii_fourbar.py'
+    return ['docker', 'compose', '--env-file', 'docker/.env.base', '-f', 'docker/docker-compose.yaml', '--profile', 'base',
+        'run', '--no-deps', '-d', '-T', '--name', name, '--label', f'{OWNER_LABEL}={owner}',
+        '-w', CONTAINER_OUTPUT, '-e', f'PYTHONPATH={CONTAINER_SOURCE}/isaaclab', '-e', 'PYTHONDONTWRITEBYTECODE=1',
+        '-v', f'{source}:{CONTAINER_SOURCE}:ro', '-v', f'{output}:{CONTAINER_OUTPUT}:rw', *mounts,
+        '--entrypoint', '/bin/bash', 'isaac-lab-base', '-c', barrier, 'hexapod-fourbar-barrier',
+        '/workspace/isaaclab/_isaac_sim/python.sh', f'{CONTAINER_SOURCE}/isaaclab/{script}', *shlex.split(TELEMETRY_ARGUMENT),
+        '--num_envs', str(args.num_envs), '--report', f'{CONTAINER_OUTPUT}/report.json',
+        '--viz', 'none', '--device', 'cuda:0', *extra]
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('mode', choices=('validate', 'train'))
+    parser.add_argument('--admission', type=Path)
+    parser.add_argument('--checkpoint', type=Path)
+    parser.add_argument('--iterations', type=int, default=10)
+    parser.add_argument('--solver-multiplier', type=int, choices=(1, 2), default=1)
+    parser.add_argument('--source-dir', type=Path, required=True)
+    parser.add_argument('--source-commit', default='uncommitted', help='Source baseline commit; SHA256SUMS records the exact running files')
+    parser.add_argument('--output-root', type=Path)
+    parser.add_argument('--num-envs', '--num_envs', dest='num_envs', type=int, default=32)
+    parser.add_argument('--steps', type=int, default=1000)
+    parser.add_argument('--timeout-seconds', type=int, default=900)
+    parser.add_argument('--dry-run', action='store_true')
+    args = parser.parse_args(argv)
+    if not 1 <= args.num_envs <= 4096 or not 2 <= args.steps <= 100000 or not 1 <= args.iterations <= 10000:
+        parser.error('Invalid bounded environment/step/iteration count')
+    if not 30 <= args.timeout_seconds <= 7200:
+        parser.error('The bounded timeout must be 30..7200 seconds')
+    if args.source_commit != 'uncommitted' and not re.fullmatch(r'[0-9a-f]{7,40}', args.source_commit):
+        parser.error('--source-commit must be a hex commit ID or uncommitted')
+    source = args.source_dir.expanduser().resolve()
+    if not source.is_dir() or not (source / 'isaaclab/validate_mkii_fourbar.py').is_file():
+        parser.error('Source must contain isaaclab/validate_mkii_fourbar.py')
+    output_root = (args.output_root or source.parent / 'runs').expanduser().resolve()
+    if output_root.is_relative_to(source):
+        parser.error('--output-root must be outside the read-only isolated source')
+    if any(character in str(path) for path in (source, output_root) for character in ('\n', '\r', ':')):
+        parser.error('Mount paths cannot contain newlines or colons')
+    contract = identity(source)
+    if args.mode == 'train':
+        if not args.admission:
+            parser.error('--admission is required for training')
+        args.admission = args.admission.expanduser().resolve()
+        if args.checkpoint:
+            args.checkpoint = args.checkpoint.expanduser().resolve()
+        if any(character in str(path) for path in (args.admission, args.checkpoint) if path is not None
+               for character in ('\n', '\r', ':')):
+            parser.error('Admission/checkpoint mount paths cannot contain newlines or colons')
+        require_admission(args.admission, contract)
+        if args.checkpoint:
+            require_checkpoint(args.checkpoint, contract)
+    elif args.checkpoint or args.admission:
+        parser.error('Validation does not accept a checkpoint or admission')
+    owner = uuid.uuid4().hex
+    name = 'hexapod-fourbar-' + args.mode + '-' + time.strftime('%Y%m%dT%H%M%SZ', time.gmtime()) + '-' + owner[:8]
+    output = output_root / name
+    argv = compose_argv(source, output, name, owner, args)
+    if args.dry_run:
+        print(json.dumps({'execution': 'not_started', 'output': str(output), 'argv': argv, 'timeout_seconds': args.timeout_seconds}, indent=2))
+        return 0
+    for required in (LAB / 'docker/.env.base', LAB / 'docker/docker-compose.yaml'):
+        if not required.is_file():
+            raise Blocked(f'Required Compose file does not exist: {required}')
+    # Do not inspect or print .env.base; only Compose consumes it.
+    lock_fd = os.open(LOCK, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+    if lock_fd != 9:
+        os.dup2(lock_fd, 9); os.close(lock_fd)
+    try:
+        fcntl.flock(9, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        os.close(9); raise Blocked('Another hexapod launcher holds the shared GPU lock')
+    output.mkdir(parents=True, exist_ok=False)
+    report = {'execution': 'preflight', 'source': str(source), 'container_name': name, 'owner': owner, 'gates': [], 'exit_code': None, 'cleanup': 'not_required', 'source_commit': args.source_commit}
+    container = None
+    deadline = time.monotonic() + args.timeout_seconds
+    exit_code = 1
+    def stop_signal(signum, _frame):
+        raise Blocked(f'Supervisor interrupted by signal {signum}')
+    for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        signal.signal(signum, stop_signal)
+    try:
+        shared_digest = coordination_snapshot()
+        report['contract'] = contract
+        report['coordination_sha256'] = shared_digest
+        report['source_manifest'] = snapshot_source(source, output / 'source.SHA256SUMS')
+        report['source_archive'] = archive_source(source, output / 'source.SHA256SUMS', output / 'source.tar.gz',
+            expected_manifest_sha256=report['source_manifest']['sha256'])
+        report['gates'].append(resource_gate())
+        atomic_json(output / 'supervisor.json', report)
+        result = command(argv, cwd=LAB, timeout=60, check=False)
+        container = inspect_container(name)
+        if not check_identity(container, name, owner):
+            raise Blocked('Cannot establish ownership of the newly created container')
+        report['container_id'] = container['id']
+        if result.returncode:
+            raise Blocked(f'Compose container creation failed (exit {result.returncode})')
+        # Isaac remains behind the CPU-only admission barrier for both checks.
+        report['gates'].append(resource_gate(owned_container=container))
+        time.sleep(1)
+        report['gates'].append(resource_gate(owned_container=container))
+        require_unchanged_source(source, contract, 'before releasing the CPU admission barrier')
+        if args.mode == 'train':
+            require_admission(args.admission, contract)
+            if args.checkpoint:
+                require_checkpoint(args.checkpoint, contract)
+        (output / 'admitted').touch(exist_ok=False)
+        report['execution'] = 'running'
+        atomic_json(output / 'supervisor.json', report)
+        print(f'FOURBAR_STARTED container_id={container["id"]} output={output}', flush=True)
+        next_gate = time.monotonic()
+        pause_deadline = None
+        while True:
+            current = inspect_container(container['id'])
+            if not check_identity(current, name, owner):
+                raise Blocked('Owned container identity disappeared or changed')
+            if not current['running']:
+                exit_code = int(current['exit_code'])
+                report['execution'] = 'finished' if exit_code == 0 else 'failed'
+                report['exit_code'] = exit_code
+                if exit_code != 0:
+                    report['error'] = f'Validator process exited with status {exit_code}'
+                break
+            if time.monotonic() >= deadline:
+                raise Blocked(f'Validation exceeded {args.timeout_seconds} second execution timeout')
+            if time.monotonic() >= next_gate:
+                if hashlib.sha256(COORDINATION.read_bytes()).hexdigest() != shared_digest:
+                    if pause_deadline is None:
+                        (output / 'stop_requested').write_text('Shared coordination file changed; checkpoint and pause.\n')
+                        pause_deadline = time.monotonic() + 120
+                        report['pause_requested'] = 'shared coordination file changed'
+                    if args.mode == 'validate' or time.monotonic() >= pause_deadline:
+                        raise Blocked('Coordination changed; owned job yielded compute')
+                report['last_runtime_gate'] = resource_gate(owned_container=current, allow_owned_gpu=True)
+                atomic_json(output / 'supervisor.json', report)
+                next_gate = time.monotonic() + 5
+            time.sleep(1)
+    except (Blocked, subprocess.TimeoutExpired, OSError, ValueError) as exc:
+        report['execution'] = 'failed'; report['error'] = str(exc); exit_code = 1
+    finally:
+        for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+            signal.signal(signum, signal.SIG_IGN)
+        try:
+            # Resolve our unique name only if creation failed before returning
+            # an ID; require both exact name and unpredictable ownership label.
+            if container is None:
+                container = inspect_container(name)
+            if check_identity(container, name, owner):
+                current = inspect_container(container['id'])
+                if not check_identity(current, name, owner):
+                    raise Blocked('Cannot prove final identity/state of the owned container')
+                if current['running']:
+                    command(['docker', 'stop', '--time', '25', container['id']], timeout=30, check=False)
+                with (output / 'container.log').open('w') as log:
+                    subprocess.run(['docker', 'logs', '--timestamps', container['id']], stdout=log, stderr=subprocess.STDOUT, timeout=20)
+                after = inspect_container(container['id'])
+                if after and not after['running']:
+                    report['final_container_exit_code'] = after['exit_code']
+                    removed = command(['docker', 'rm', container['id']], timeout=15, check=False)
+                    report['cleanup'] = 'removed_exact_id' if removed.returncode == 0 else 'stopped_removal_failed'
+                    if removed.returncode:
+                        exit_code = 1
+                else:
+                    raise Blocked('Owned container is still running after bounded stop')
+            elif container is not None:
+                raise Blocked('Cleanup refused a container ownership mismatch')
+        except (Blocked, subprocess.TimeoutExpired, OSError, ValueError) as exc:
+            report['cleanup'] = 'FAILED'; report['cleanup_error'] = str(exc)
+            report['execution'] = 'failed'; exit_code = 1
+        try:
+            report['source_identity_unchanged_at_finish'] = require_unchanged_source(source, contract, 'during execution')
+            report['validator_report_present'] = (output / 'report.json').is_file()
+            if exit_code != 0 and not report['validator_report_present']:
+                report['validator_report_status'] = 'missing_after_process_failure'
+            if exit_code == 0:
+                report['validator_summary'] = validate_written_report(output / 'report.json', args=args, contract=contract)
+                report['validator_report_status'] = 'passed'
+        except (Blocked, OSError, ValueError) as exc:
+            # Keep successful exact-ID cleanup distinct from a failed report.
+            report['execution'] = 'failed'; report['validator_report_status'] = 'rejected'
+            report['report_error'] = str(exc); exit_code = 1
+        finally:
+            report['supervisor_exit_code'] = exit_code
+            try:
+                atomic_json(output / 'supervisor.json', report)
+            finally:
+                fcntl.flock(9, fcntl.LOCK_UN); os.close(9)
+    print(f'FOURBAR_FINISHED exit={exit_code} supervisor={output / "supervisor.json"} report={output / "report.json"} log={output / "container.log"}', flush=True)
+    return exit_code
+
+
+if __name__ == '__main__':
+    try:
+        raise SystemExit(main())
+    except Blocked as exc:
+        print(f'FOURBAR_BLOCKED: {exc}', file=sys.stderr)
+        raise SystemExit(75)

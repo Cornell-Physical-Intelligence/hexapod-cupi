@@ -12,6 +12,20 @@ research, not the current deployment target. `STATUS.md` records execution
 state; `docs/PLAN.md` holds the living plan and `docs/NEXT_RUNS.md` prepares
 the next campaign without launching it.
 
+## Physical four-bar campaign
+
+The versioned physical task and guarded runner are documented in
+`docs/MKII_FOURBAR_TRAINING.md`. Use its 31-body/30-coordinate asset and explicit
+18-motor adapter for new physical-model work; keep serial-v2 characterization and
+archived mock task contracts intact. The third active coordinate is the pushlever
+motor, with per-leg CAD offsets. Never substitute serial knee defaults.
+
+Use `isaaclab/deploy/run-mkii-fourbar` for bounded physical validation/training.
+Only a matching physical admission report can admit scratch PPO; resume additionally
+requires checkpoint bytes and source/asset/motor lineage to match. The shared
+coordination file controls yielding compute. Hardware calibration and terrain
+qualification remain explicit follow-on gates.
+
 ## Repository map
 
 ```text

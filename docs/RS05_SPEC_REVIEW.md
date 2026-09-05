@@ -78,3 +78,15 @@ The URDF itself already gives all 18 active joints an effort limit of 5.5 N·m a
 5. Re-run torque-speed, transient/thermal, reset/standing and directional tests on that new model, then screen candidate policies. Full-body load redistribution, battery sag and enclosed-motor cooling still require assembled-robot evidence.
 
 The project lead confirmed that the motor housing will conduct heat directly into a metal mount, with useful heat removal expected. Use this conductive path as a design assumption; its thermal resistance, heat capacity, interface and ambient rejection remain provisional until measured. The mount is not automatically equivalent to either vendor plate. Battery voltage/cell count and allowable joint temperature remain open inputs. These cannot be recovered from a visually accurate URDF. This review corrects the specification interpretation; it does not relabel unmeasured actuator dynamics as 1:1.
+
+## Versioned implementation follow-up
+
+The physical four-bar task now has a dedicated `rs05_v2` implementation rather
+than inheriting the archived DCMotor. Its JSON records the primary-document byte
+hashes, speed/voltage and overload tables, continuous-power assumption and
+unmeasured recovery parameters. An explicit actuator preserves raw PD demand and
+limits delivered effort per physics step; 18 normalized overload-headroom values
+are included in the new policy observation. See
+[the physical training runbook](MKII_FOURBAR_TRAINING.md) for its scope and gates.
+This implementation is a provisional simulation model; the measurements listed
+above still determine hardware calibration and release.
