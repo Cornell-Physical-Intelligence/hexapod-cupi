@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bounded host supervisor for physical four-bar validation and PPO runs.
+"""Bounded host supervisor for physical four-bar diagnosis, validation and PPO runs.
 
 Owns host FD9 flock and only its labelled immutable container ID. The
 container waits at a CPU-only admission barrier before starting Isaac Sim.
@@ -8,6 +8,7 @@ No legacy checkpoint, source mirror overwrite, retry or systemd restart.
 from __future__ import annotations
 
 import argparse
+import ast
 import csv
 import fcntl
 import hashlib
@@ -18,11 +19,13 @@ import re
 import shlex
 import signal
 import stat
+import struct
 import subprocess
 import sys
 import tarfile
 import time
 import uuid
+import zipfile
 
 LOCK = Path('/tmp/hexapod-isaac-gpu.lock')
 LAB = Path('/home/orionh/IsaacLab')
@@ -40,6 +43,11 @@ from hexapod_core.fourbar_v1 import validate_numerical_recipe_report
 TELEMETRY_ARGUMENT = '--kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry"'
 PRODUCERS = re.compile(r'nsva_dl[.]sh|validate_nsva[.]py|score_clip[.]py|validate_b51[.]py|nowcast_run[.]py|train_model_only_resume[.]py|evaluate_checkpoint[.]py|torch[^\n]*compile')
 SERVICES = ('hexapod-rl-training.service', 'hexapod-rl-training-stage2b-lateral.service', 'hexapod-rl-training-stage2c-stable-forward.service')
+DIAGNOSTIC_MOTION_STEPS = {'individuals': 18 * 2 * 50 + 100, 'groups': 3 * 2 * 100 + 100, 'lf_tibia': 2 * 100 + 100}
+DIAGNOSTIC_USD_PATHS = {
+    'revolute_v3': 'robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v3/hexapod_mkii_fourbar_v3.usda',
+    'planar_d6_v4': 'robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v4/hexapod_mkii_fourbar_v4.usda',
+}
 
 
 class Blocked(RuntimeError):
@@ -278,6 +286,58 @@ def archive_source(source, manifest, archive, *, expected_manifest_sha256):
             temporary.unlink(missing_ok=True)
 
 
+def validate_diagnostic_traces(directory, result, *, num_envs, samples):
+    """Check archived trace bytes and NPY shape without a host NumPy dependency."""
+    records = result.get('trace_files')
+    if not isinstance(records, list) or not records:
+        raise Blocked('Diagnostic trace files are missing')
+    offset, width, seen = 0, None, set()
+    for record in records:
+        if not isinstance(record, dict):
+            raise Blocked('Diagnostic trace record is not an object')
+        filename, shape = record.get('file'), record.get('shape')
+        if not isinstance(filename, str) or not re.fullmatch(r'trace_[0-9]+\.npz', filename) or filename in seen:
+            raise Blocked('Diagnostic trace path is invalid or duplicated')
+        seen.add(filename)
+        path = directory / filename
+        if path.is_symlink() or not path.is_file():
+            raise Blocked('Diagnostic trace must be an existing regular file')
+        if (not isinstance(shape, list) or len(shape) != 3 or any(type(v) is not int or v <= 0 for v in shape)
+                or shape[1] != num_envs or type(record.get('first_physics_sample')) is not int
+                or record['first_physics_sample'] != offset or (width is not None and width != shape[2])):
+            raise Blocked('Diagnostic trace shape or sample sequence is inconsistent')
+        checksum = hashlib.sha256()
+        with path.open('rb') as stream:
+            for block in iter(lambda: stream.read(1024*1024), b''):
+                checksum.update(block)
+        if record.get('sha256') != checksum.hexdigest():
+            raise Blocked('Diagnostic trace hash mismatch')
+        try:
+            with zipfile.ZipFile(path) as archive:
+                info = archive.getinfo('values.npy')
+                with archive.open(info) as stream:
+                    prefix = stream.read(8)
+                    if prefix[:6] != b'\x93NUMPY' or prefix[6:] not in (b'\x01\x00', b'\x02\x00', b'\x03\x00'):
+                        raise ValueError('Invalid NPY header')
+                    size = 2 if prefix[6] == 1 else 4
+                    header_size = struct.unpack('<H' if size == 2 else '<I', stream.read(size))[0]
+                    if header_size > 65536:
+                        raise ValueError('Oversized NPY header')
+                    header = ast.literal_eval(stream.read(header_size).decode('utf-8').strip())
+                    if (not isinstance(header, dict) or header.get('shape') != tuple(shape)
+                            or header.get('descr') not in ('<f4', '<f8') or header.get('fortran_order') is not False):
+                        raise ValueError('Unexpected diagnostic array layout')
+                    expected_bytes = 8 + size + header_size + shape[0]*shape[1]*shape[2]*int(header['descr'][-1])
+                    if info.file_size != expected_bytes:
+                        raise ValueError('Diagnostic array payload length mismatch')
+        except (OSError, KeyError, ValueError, SyntaxError, struct.error, zipfile.BadZipFile) as exc:
+            raise Blocked(f'Diagnostic trace array cannot be verified: {filename}') from exc
+        width = shape[2]
+        offset += shape[0]
+    if offset != samples:
+        raise Blocked('Diagnostic trace files do not cover all physics samples')
+
+
 def validate_written_report(path, *, args, contract):
     if not path.is_file():
         raise Blocked('Process exited without its mandatory final report')
@@ -287,10 +347,51 @@ def validate_written_report(path, *, args, contract):
         raise Blocked('Final report is not valid finite JSON') from exc
     if not isinstance(result, dict):
         raise Blocked('Final report must be a JSON object')
-    if result.get('pass') is not True or result.get('errors') != [] or result.get('contract') != contract:
+    if result.get('errors') != [] or result.get('contract') != contract:
         raise Blocked('Final report failed or has different source/asset lineage')
     if result.get('task_id') != contract['task_id']:
         raise Blocked('Final report task mismatch')
+    if args.mode == 'diagnose':
+        # A complete trace is useful evidence even when the physical model
+        # fails its gate. It can never be promoted to validation/admission.
+        if (result.get('schema') != 'hexapod.fourbar_diagnostic.v1'
+                or result.get('mode') != 'diagnose'
+                or result.get('pass') is not False
+                or result.get('diagnostic_complete') is not True
+                or result.get('simulation_training_admission') is not False
+                or result.get('hardware_admission') is not False
+                or result.get('diagnostic_motion') != args.diagnostic_motion
+                or result.get('diagnostic_usd') != args.diagnostic_usd):
+            raise Blocked('Diagnostic report is incomplete or claims validation/admission')
+        usd_path = DIAGNOSTIC_USD_PATHS[args.diagnostic_usd]
+        usd_hash = contract.get('files', {}).get(usd_path)
+        if (not isinstance(usd_hash, str) or not re.fullmatch(r'[0-9a-f]{64}', usd_hash)
+                or result.get('usd_path_relative') != usd_path or result.get('usd_sha256') != usd_hash):
+            raise Blocked('Diagnostic selected USD is missing or differs from source identity')
+        try:
+            validate_numerical_recipe_report(result, args.solver_multiplier)
+        except ValueError as exc:
+            raise Blocked(f'Diagnostic numerical recipe mismatch: {exc}') from exc
+        expected = {'steps_requested': args.steps, 'steps_completed': args.steps,
+                    'num_envs': args.num_envs, 'solver_multiplier': args.solver_multiplier,
+                    'driven_steps_requested': DIAGNOSTIC_MOTION_STEPS[args.diagnostic_motion],
+                    'driven_steps_completed': DIAGNOSTIC_MOTION_STEPS[args.diagnostic_motion]}
+        for field, value in expected.items():
+            if type(result.get(field)) is not int or result[field] != value:
+                raise Blocked(f'Diagnostic did not complete requested workload: {field}')
+        expected_substeps = (args.steps + expected['driven_steps_requested']) * result['numerical_recipe']['decimation']
+        for field in ('physics_substeps', 'trace_samples', 'force_writes'):
+            if type(result.get(field)) is not int or result[field] != expected_substeps:
+                raise Blocked(f'Diagnostic did not capture every requested physics substep: {field}')
+        if type(result.get('driven_steps')) is not int or result['driven_steps'] != expected['driven_steps_completed']:
+            raise Blocked('Diagnostic driven-step counters disagree')
+        validate_diagnostic_traces(path.parent, result, num_envs=args.num_envs, samples=expected_substeps)
+        return {key: result[key] for key in ('pass', 'mode', 'diagnostic_complete',
+                'simulation_training_admission', 'hardware_admission', 'physics_substeps')}
+    if (result.get('schema') == 'hexapod.fourbar_diagnostic.v1'
+            or result.get('mode') == 'diagnose' or 'diagnostic_complete' in result
+            or result.get('pass') is not True):
+        raise Blocked('Final report failed or is diagnostic evidence rather than validation/training')
     if args.mode == 'validate':
         try:
             validate_numerical_recipe_report(result, args.solver_multiplier)
@@ -340,7 +441,10 @@ def compose_argv(source, output, name, owner, args):
             extra += ['--checkpoint', '/workspace/resume.pt']
     else:
         extra += ['--steps', str(args.steps), '--solver-multiplier', str(args.solver_multiplier)]
-    script = 'train_mkii_fourbar.py' if args.mode == 'train' else 'validate_mkii_fourbar.py'
+        if args.mode == 'diagnose':
+            extra += ['--diagnostic-motion', args.diagnostic_motion, '--diagnostic-usd', args.diagnostic_usd]
+    script = {'train': 'train_mkii_fourbar.py', 'validate': 'validate_mkii_fourbar.py',
+              'diagnose': 'diagnose_mkii_fourbar.py'}[args.mode]
     return ['docker', 'compose', '--env-file', 'docker/.env.base', '-f', 'docker/docker-compose.yaml', '--profile', 'base',
         'run', '--no-deps', '-d', '-T', '--name', name, '--label', f'{OWNER_LABEL}={owner}',
         '-w', CONTAINER_OUTPUT, '-e', f'PYTHONPATH={CONTAINER_SOURCE}/isaaclab', '-e', 'PYTHONDONTWRITEBYTECODE=1',
@@ -353,21 +457,31 @@ def compose_argv(source, output, name, owner, args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=('validate', 'train'))
+    parser.add_argument('mode', choices=('validate', 'train', 'diagnose'))
     parser.add_argument('--admission', type=Path)
     parser.add_argument('--checkpoint', type=Path)
     parser.add_argument('--iterations', type=int, default=10)
     parser.add_argument('--solver-multiplier', type=int, choices=(1, 2), default=1)
+    parser.add_argument('--diagnostic-motion', choices=tuple(DIAGNOSTIC_MOTION_STEPS), default='individuals')
+    parser.add_argument('--diagnostic-usd', choices=tuple(DIAGNOSTIC_USD_PATHS))
     parser.add_argument('--source-dir', type=Path, required=True)
     parser.add_argument('--source-commit', default='uncommitted', help='Source baseline commit; SHA256SUMS records the exact running files')
     parser.add_argument('--output-root', type=Path)
-    parser.add_argument('--num-envs', '--num_envs', dest='num_envs', type=int, default=32)
+    parser.add_argument('--num-envs', '--num_envs', dest='num_envs', type=int)
     parser.add_argument('--steps', type=int, default=1000)
     parser.add_argument('--timeout-seconds', type=int, default=900)
     parser.add_argument('--dry-run', action='store_true')
     args = parser.parse_args(argv)
+    if args.diagnostic_usd is not None and args.mode != 'diagnose':
+        parser.error('--diagnostic-usd is only accepted for diagnose')
+    if args.diagnostic_usd is None:
+        args.diagnostic_usd = 'revolute_v3'
+    if args.num_envs is None:
+        args.num_envs = 1 if args.mode == 'diagnose' else 32
     if not 1 <= args.num_envs <= 4096 or not 2 <= args.steps <= 100000 or not 1 <= args.iterations <= 10000:
         parser.error('Invalid bounded environment/step/iteration count')
+    if args.mode == 'diagnose' and (args.num_envs > 8 or args.steps > 1000):
+        parser.error('Diagnosis requires 1..8 environments and 2..1000 standing steps')
     maximum_timeout = 21600 if args.mode == 'train' else 7200
     if not 30 <= args.timeout_seconds <= maximum_timeout:
         parser.error(f'The bounded timeout for {args.mode} must be 30..{maximum_timeout} seconds')
@@ -376,12 +490,16 @@ def main(argv=None):
     source = args.source_dir.expanduser().resolve()
     if not source.is_dir() or not (source / 'isaaclab/validate_mkii_fourbar.py').is_file():
         parser.error('Source must contain isaaclab/validate_mkii_fourbar.py')
+    if args.mode == 'diagnose' and not (source / 'isaaclab/diagnose_mkii_fourbar.py').is_file():
+        parser.error('Diagnostic source must contain isaaclab/diagnose_mkii_fourbar.py')
     output_root = (args.output_root or source.parent / 'runs').expanduser().resolve()
     if output_root.is_relative_to(source):
         parser.error('--output-root must be outside the read-only isolated source')
     if any(character in str(path) for path in (source, output_root) for character in ('\n', '\r', ':')):
         parser.error('Mount paths cannot contain newlines or colons')
     contract = identity(source)
+    if args.mode == 'diagnose' and DIAGNOSTIC_USD_PATHS[args.diagnostic_usd] not in contract.get('files', {}):
+        parser.error('The selected diagnostic USD must be present in the source identity')
     if args.mode == 'train':
         if not args.admission:
             parser.error('--admission is required for training')
@@ -395,7 +513,7 @@ def main(argv=None):
         if args.checkpoint:
             require_checkpoint(args.checkpoint, contract)
     elif args.checkpoint or args.admission:
-        parser.error('Validation does not accept a checkpoint or admission')
+        parser.error('Validation/diagnosis does not accept a checkpoint or admission')
     owner = uuid.uuid4().hex
     name = 'hexapod-fourbar-' + args.mode + '-' + time.strftime('%Y%m%dT%H%M%SZ', time.gmtime()) + '-' + owner[:8]
     output = output_root / name
@@ -473,7 +591,7 @@ def main(argv=None):
                         (output / 'stop_requested').write_text('Shared coordination file changed; checkpoint and pause.\n')
                         pause_deadline = time.monotonic() + 120
                         report['pause_requested'] = 'shared coordination file changed'
-                    if args.mode == 'validate' or time.monotonic() >= pause_deadline:
+                    if args.mode != 'train' or time.monotonic() >= pause_deadline:
                         raise Blocked('Coordination changed; owned job yielded compute')
                 report['last_runtime_gate'] = resource_gate(owned_container=current, allow_owned_gpu=True)
                 atomic_json(output / 'supervisor.json', report)
@@ -518,7 +636,9 @@ def main(argv=None):
                 report['validator_report_status'] = 'missing_after_process_failure'
             if exit_code == 0:
                 report['validator_summary'] = validate_written_report(output / 'report.json', args=args, contract=contract)
-                report['validator_report_status'] = 'passed'
+                report['validator_report_status'] = 'diagnostic_complete' if args.mode == 'diagnose' else 'passed'
+                if args.mode == 'diagnose':
+                    report['execution'] = 'diagnostic_complete'
         except (Blocked, OSError, ValueError) as exc:
             # Keep successful exact-ID cleanup distinct from a failed report.
             report['execution'] = 'failed'; report['validator_report_status'] = 'rejected'

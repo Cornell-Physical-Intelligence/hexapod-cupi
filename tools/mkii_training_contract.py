@@ -19,6 +19,7 @@ def identity(root=ROOT):
     for directory, suffixes in (("packages", {".py", ".json", ".yaml", ".yml", ".toml"}), ("configs", {".json", ".yaml"}),
                                 ("tools", {".py"}), ("isaaclab", {".py"}),
                                 ("robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v3", None),
+                                ("robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v4", None),
                                 ("robot/hexapod_mkii_assy/meshes", None)):
         for path in (root / directory).rglob("*"):
             if path.is_file() and not any(p in {"__pycache__", "tests"} for p in path.parts):

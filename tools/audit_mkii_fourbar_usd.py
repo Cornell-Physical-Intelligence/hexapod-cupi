@@ -37,8 +37,10 @@ def joint_frame(joint, side):
     return result
 
 
-def validate(urdf, pins, usd, contract_path=None):
-    from prepare_mkii_fourbar_usd import mesh_sources, read_stl
+def validate(urdf, pins, usd, contract_path=None, *, closure_variant=None):
+    from prepare_mkii_fourbar_usd import (
+        mesh_sources, read_stl, check_closure_variant, REVOLUTE_CLOSURE, PLANAR_D6_CLOSURE,
+    )
 
     urdf, pins, usd = Path(urdf), Path(pins), Path(usd)
     contract_path = Path(contract_path) if contract_path else usd.parent/'kinematics.json'
@@ -55,6 +57,15 @@ def validate(urdf, pins, usd, contract_path=None):
     if not stage:
         raise ValueError(f'Cannot open USD {usd}')
     check_stage_units_and_scale(stage)
+    metadata = stage.GetRootLayer().customLayerData
+    observed_variant = metadata.get('closure_constraint_variant', REVOLUTE_CLOSURE)
+    check(observed_variant in (REVOLUTE_CLOSURE, PLANAR_D6_CLOSURE), 'Unknown closure constraint variant')
+    if closure_variant is not None:
+        check_closure_variant(closure_variant)
+        check(observed_variant == closure_variant, 'Requested closure constraint variant differs from USD')
+    planar_variant = observed_variant == PLANAR_D6_CLOSURE
+    check(metadata.get('hexapod_physical_fourbar_version') == (4 if planar_variant else 3),
+          'Physical bundle version differs from closure constraint variant')
     check(stage.GetDefaultPrim().GetPath() == '/Robot', 'Expected /Robot default prim')
     check(stage.GetRootLayer().customLayerData.get('kinematic_contract_sha256') == sha256(contract_path), 'Authored kinematic contract hash mismatch')
     bodies = rigid_bodies(stage)
@@ -62,13 +73,33 @@ def validate(urdf, pins, usd, contract_path=None):
     mass = mass_comparison(stage, read_inertials(urdf))
     errors.extend(mass['errors'])
     source_frames = contract['joint_frames']
-    usd_joints = {prim.GetName(): UsdPhysics.RevoluteJoint(prim) for prim in stage.Traverse() if prim.IsA(UsdPhysics.RevoluteJoint)}
-    check(set(usd_joints) == set(source_frames), '36 physical revolute joint identities mismatch')
-    check(len([prim for prim in stage.Traverse() if prim.IsA(UsdPhysics.Joint)]) == 36, 'Unexpected non-revolute joint')
+    joint_prims = [prim for prim in stage.Traverse() if prim.IsA(UsdPhysics.Joint)]
+    usd_joints = {prim.GetName(): UsdPhysics.Joint(prim) for prim in joint_prims}
+    check(set(usd_joints) == set(source_frames), '36 physical joint identities mismatch')
+    check(len(joint_prims) == 36, 'Expected exactly 36 physical joints')
     observed_frames, active, closures = {}, [], []
     for name in sorted(set(usd_joints) & set(source_frames)):
         joint, reference = usd_joints[name], source_frames[name]
-        check(joint.GetAxisAttr().Get() == 'Z', f'{name}: joint axis is not Z')
+        planar_closure = planar_variant and reference['exclude_from_articulation']
+        prim = joint.GetPrim()
+        if planar_closure:
+            check(prim.GetTypeName() == 'PhysicsJoint', f'{name}: planar closure must be a generic D6 joint')
+            check(set(prim.GetAppliedSchemas()) == {'PhysicsLimitAPI:transX', 'PhysicsLimitAPI:transY'},
+                  f'{name}: planar closure must lock only transX/transY without drives or extra APIs')
+            for axis in ('transX', 'transY'):
+                limit = UsdPhysics.LimitAPI(prim, axis)
+                check(limit.GetLowAttr().Get() == 1. and limit.GetHighAttr().Get() == -1.,
+                      f'{name}: {axis} must use the exact locked low/high pair')
+            authored = {a.GetName() for a in prim.GetAttributes() if a.HasAuthoredValue()}
+            permitted = {'physics:localPos0', 'physics:localPos1', 'physics:localRot0', 'physics:localRot1',
+                         'physics:excludeFromArticulation', 'physics:collisionEnabled', 'physics:jointEnabled',
+                         'limit:transX:physics:low', 'limit:transX:physics:high',
+                         'limit:transY:physics:low', 'limit:transY:physics:high'}
+            check(authored == permitted, f'{name}: unexpected or missing planar closure properties')
+        else:
+            check(prim.GetTypeName() == 'PhysicsRevoluteJoint', f'{name}: expected a revolute joint')
+            revolute = UsdPhysics.RevoluteJoint(prim)
+            check(revolute.GetAxisAttr().Get() == 'Z', f'{name}: joint axis is not Z')
         check(joint.GetJointEnabledAttr().Get() is True, f'{name}: joint disabled')
         excluded = joint.GetExcludeFromArticulationAttr().Get()
         check(excluded is reference['exclude_from_articulation'], f'{name}: articulation exclusion differs')
@@ -95,10 +126,12 @@ def validate(urdf, pins, usd, contract_path=None):
         else:
             check(not any(('drive:' in a or 'armature' in a or 'maxforce' in a or 'jointfriction' in a) for a in attrs), f'{name}: passive actuator property')
         if name in contract['joint_limits_rad']:
-            actual = np.radians([joint.GetLowerLimitAttr().Get(), joint.GetUpperLimitAttr().Get()])
+            revolute = UsdPhysics.RevoluteJoint(prim)
+            actual = np.radians([revolute.GetLowerLimitAttr().Get(), revolute.GetUpperLimitAttr().Get()])
             check(np.allclose(actual, contract['joint_limits_rad'][name], atol=2e-7, rtol=0), f'{name}: transformed limits differ')
-        else:
-            check(not joint.GetLowerLimitAttr().HasAuthoredValue() and not joint.GetUpperLimitAttr().HasAuthoredValue(), f'{name}: unexpected closure limit')
+        elif not planar_closure:
+            revolute = UsdPhysics.RevoluteJoint(prim)
+            check(not revolute.GetLowerLimitAttr().HasAuthoredValue() and not revolute.GetUpperLimitAttr().HasAuthoredValue(), f'{name}: unexpected closure limit')
     check(set(active) == set(contract['active_joint_names']) and len(active) == 18, '18 active motors required')
     check(set(closures) == set(contract['closure_joint_names']) and len(closures) == 6, 'Six external closures required')
     roots = [p for p in stage.Traverse() if p.HasAPI(UsdPhysics.ArticulationRootAPI)]
@@ -183,7 +216,11 @@ def validate(urdf, pins, usd, contract_path=None):
     else:
         rows = []
     deps = dependencies(usd, usd.parent)
-    return {'pass': not errors, 'errors': errors, 'schema': 'hexapod.mkii_fourbar_v3.cpu_audit.v1',
+    return {'pass': not errors, 'errors': errors,
+            'schema': f'hexapod.mkii_fourbar_v{4 if planar_variant else 3}.cpu_audit.v1',
+            'closure_constraint_variant': observed_variant,
+            'closure_constraint_rows_per_loop': 2 if planar_variant else 5,
+            'closure_locked_axes': ['transX', 'transY'] if planar_variant else ['transX', 'transY', 'transZ', 'rotX', 'rotY'],
             'rigid_bodies': len(bodies), 'tree_joints': len(usd_joints)-len(closures), 'closure_joints': len(closures),
             'active_joints': len(active), 'mass_kg': sum(x.mass for x in read_inertials(urdf).values()),
             'mass_properties': mass, 'visual_instances': visual_count, 'collision_primitives': collision_count,
@@ -201,8 +238,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('usd', type=Path)
     parser.add_argument('--report', type=Path)
+    from prepare_mkii_fourbar_usd import CLOSURE_VARIANTS
+    parser.add_argument('--closure-variant', choices=CLOSURE_VARIANTS)
     args = parser.parse_args()
-    result = validate(kin.URDF, kin.PINS, args.usd)
+    result = validate(kin.URDF, kin.PINS, args.usd, closure_variant=args.closure_variant)
     text = json.dumps(result, indent=2, allow_nan=False)+'\n'
     if args.report:
         if args.report.exists():

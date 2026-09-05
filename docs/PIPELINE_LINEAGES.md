@@ -28,7 +28,13 @@ The original four-bar manifest `isaaclab/deploy/mkii_fourbar_v1_pipeline.sha256`
 
 The 5 ms TGS manifest `isaaclab/deploy/mkii_fourbar_v1_tgs_pipeline.sha256` is also preserved at source `ae1a023`. Its driven reversal failed; the current release changes physics to 1.25 ms while preserving 20 ms policy control and every physical acceptance tolerance.
 
-`isaaclab/deploy/mkii_fourbar_v1_800hz_pipeline.sha256` covers **all 112 historical
+The 800 Hz manifest `isaaclab/deploy/mkii_fourbar_v1_800hz_pipeline.sha256` remains
+preserved at source `ea05fe8`. Its full driven test completed but exceeded the
+original closure bounds. The new diagnostic release preserves that physical
+configuration, adds event traces, and separately authors a D6 candidate that
+removes redundant closure constraints. Diagnostic completion never admits PPO.
+
+`isaaclab/deploy/mkii_fourbar_v1_diagnostics_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

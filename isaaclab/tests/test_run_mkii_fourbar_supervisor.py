@@ -2,14 +2,17 @@
 import hashlib
 import importlib.machinery
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
+import struct
 from types import SimpleNamespace
 import tempfile
 import tarfile
 import unittest
 from unittest.mock import patch
+import zipfile
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -22,7 +25,8 @@ from qualify_mkii_fourbar import qualify
 from hexapod_core.fourbar_v1 import numerical_recipe
 
 
-CONTRACT = {"task_id": "Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0", "sha256": "fixture"}
+CONTRACT = {"task_id": "Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0", "sha256": "fixture",
+            "files": {path: "a"*64 for path in supervisor.DIAGNOSTIC_USD_PATHS.values()}}
 
 
 def validation_report(multiplier=1):
@@ -35,6 +39,32 @@ def validation_report(multiplier=1):
             "driven_steps": 2400, "driven_coordinate_pass": True,
             "windows": {window: {"mean_height_m": .138, "max_applied_nm": 1.2}
                         for window in ("settled", "driven")}}
+
+
+def diagnostic_report(motion="individuals", multiplier=1):
+    result = validation_report(multiplier)
+    driven_steps = supervisor.DIAGNOSTIC_MOTION_STEPS[motion]
+    result.update(schema="hexapod.fourbar_diagnostic.v1", mode="diagnose", num_envs=1)
+    result.update({"pass": False, "diagnostic_complete": True,
+                   "simulation_training_admission": False, "hardware_admission": False,
+                   "diagnostic_usd": "revolute_v3", "usd_sha256": "a"*64,
+                   "usd_path_relative": supervisor.DIAGNOSTIC_USD_PATHS["revolute_v3"],
+                   "diagnostic_motion": motion, "driven_steps_requested": driven_steps,
+                   "driven_steps_completed": driven_steps, "driven_steps": driven_steps,
+                   "physics_substeps": (1000 + driven_steps) * result["numerical_recipe"]["decimation"]})
+    result.update(trace_samples=result["physics_substeps"], force_writes=result["physics_substeps"])
+    return result
+
+
+def write_trace_fixture(directory, report):
+    shape = (report["physics_substeps"], report["num_envs"], 2)
+    header = repr({"descr": "<f4", "fortran_order": False, "shape": shape}).encode() + b"\n"
+    data = b"\x93NUMPY\x01\x00" + struct.pack("<H", len(header)) + header + bytes(shape[0]*shape[1]*shape[2]*4)
+    path = directory / "trace_000.npz"
+    with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("values.npy", data)
+    report["trace_files"] = [{"file": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                              "shape": list(shape), "first_physics_sample": 0}]
 
 
 class FourbarSupervisorTests(unittest.TestCase):
@@ -254,6 +284,119 @@ class FourbarSupervisorTests(unittest.TestCase):
         self.assertEqual(argv[argv.index("--checkpoint")+1], "/workspace/resume.pt")
         self.assertNotIn("--rm", argv)
         self.assertEqual(len([value for value in argv if value.startswith("--kit_args=")]), 1)
+
+    def test_diagnostic_routes_to_its_script_and_retains_owned_barrier(self):
+        for motion in supervisor.DIAGNOSTIC_MOTION_STEPS:
+            args = SimpleNamespace(mode="diagnose", steps=200, num_envs=1, solver_multiplier=2,
+                                   diagnostic_motion=motion, diagnostic_usd="planar_d6_v4")
+            argv = supervisor.compose_argv(Path("/source"), Path("/output"), "owned", "nonce", args)
+            self.assertIn("/workspace/hexapod/isaaclab/diagnose_mkii_fourbar.py", argv)
+            for flag, value in (("--steps", "200"), ("--num_envs", "1"),
+                                ("--solver-multiplier", "2"), ("--diagnostic-motion", motion),
+                                ("--diagnostic-usd", "planar_d6_v4")):
+                self.assertEqual(argv[argv.index(flag)+1], value)
+            self.assertIn('exec "$@"', argv[argv.index("-c")+1])
+            self.assertIn("/source:/workspace/hexapod:ro", argv)
+            self.assertIn(f"{supervisor.OWNER_LABEL}=nonce", argv)
+            self.assertNotIn("--admission", argv)
+            self.assertNotIn("--checkpoint", argv)
+            self.assertEqual(len([value for value in argv if value.startswith("--kit_args=")]), 1)
+
+    def test_diagnostic_reports_require_exact_complete_nonadmitting_trace(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "report.json"
+            for motion in supervisor.DIAGNOSTIC_MOTION_STEPS:
+                args = SimpleNamespace(mode="diagnose", steps=1000, num_envs=1, solver_multiplier=1,
+                                       diagnostic_motion=motion, diagnostic_usd="revolute_v3")
+                baseline = diagnostic_report(motion)
+                write_trace_fixture(path.parent, baseline)
+                path.write_text(json.dumps(baseline))
+                result = supervisor.validate_written_report(path, args=args, contract=CONTRACT)
+                self.assertTrue(result["diagnostic_complete"])
+                self.assertFalse(result["pass"])
+                self.assertFalse(result["simulation_training_admission"])
+                for change in ({"pass": True}, {"pass": 0}, {"diagnostic_complete": 1},
+                               {"schema": "hexapod.fourbar_validation.v1"}, {"mode": "validate"},
+                               {"simulation_training_admission": True}, {"hardware_admission": True},
+                               {"diagnostic_usd": "planar_d6_v4"}, {"usd_sha256": "b"*64},
+                               {"usd_path_relative": "/outside.usda"},
+                               {"diagnostic_motion": "other"}, {"steps_completed": 999},
+                               {"num_envs": True}, {"solver_multiplier": True},
+                               {"driven_steps_requested": 1}, {"driven_steps_completed": 1},
+                               {"physics_substeps": baseline["physics_substeps"]-1},
+                               {"trace_samples": baseline["physics_substeps"]-1},
+                               {"force_writes": baseline["physics_substeps"]-1},
+                               {"driven_steps": 1}, {"trace_files": []},
+                               {"errors": ["trace failed"]}, {"contract": {}}):
+                    with self.subTest(motion=motion, change=change):
+                        path.write_text(json.dumps(dict(baseline, **change)))
+                        with self.assertRaises(supervisor.Blocked):
+                            supervisor.validate_written_report(path, args=args, contract=CONTRACT)
+
+    def test_diagnostic_cannot_be_used_as_validation_training_or_qualification(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "report.json"
+            for mode in ("validate", "train"):
+                args = SimpleNamespace(mode=mode, steps=1000, num_envs=32, solver_multiplier=1,
+                                       iterations=10)
+                for claimed_pass in (False, True):
+                    report = dict(diagnostic_report(), **{"pass": claimed_pass})
+                    path.write_text(json.dumps(report))
+                    with self.assertRaises(supervisor.Blocked):
+                        supervisor.validate_written_report(path, args=args, contract=CONTRACT)
+            result = qualify(diagnostic_report(), diagnostic_report(multiplier=2), CONTRACT)
+            self.assertFalse(result["simulation_training_admission"])
+
+    def test_diagnostic_cli_bounds_and_default_motion_are_checked_before_launch(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "source"
+            (source / "isaaclab").mkdir(parents=True)
+            for filename in ("validate_mkii_fourbar.py", "diagnose_mkii_fourbar.py"):
+                (source / "isaaclab" / filename).write_text("# test fixture\n")
+            argv = ["diagnose", "--source-dir", str(source), "--dry-run"]
+            with patch.object(supervisor, "identity", return_value=CONTRACT), \
+                 patch.object(supervisor, "command") as command, \
+                 patch("sys.stdout", new_callable=io.StringIO) as stdout:
+                self.assertEqual(supervisor.main(argv), 0)
+                result = json.loads(stdout.getvalue())
+                self.assertEqual(result["execution"], "not_started")
+                launched = result["argv"]
+                self.assertEqual(launched[launched.index("--diagnostic-motion")+1], "individuals")
+                self.assertEqual(launched[launched.index("--steps")+1], "1000")
+                self.assertEqual(launched[launched.index("--num_envs")+1], "1")
+                self.assertEqual(launched[launched.index("--diagnostic-usd")+1], "revolute_v3")
+                command.assert_not_called()
+            for extra in (["--timeout-seconds", "7201"], ["--timeout-seconds", "29"],
+                          ["--diagnostic-motion", "unbounded"], ["--solver-multiplier", "3"],
+                          ["--diagnostic-usd", "other"], ["--num-envs", "9"], ["--steps", "1001"],
+                          ["--checkpoint", "/checkpoint.pt"], ["--admission", "/admission.json"]):
+                with self.subTest(extra=extra), patch.object(supervisor, "identity", return_value=CONTRACT), \
+                     patch.object(supervisor, "command") as command, patch("sys.stderr", new_callable=io.StringIO):
+                    with self.assertRaises(SystemExit):
+                        supervisor.main(argv + extra)
+                    command.assert_not_called()
+            for mode in ("validate", "train"):
+                with patch("sys.stderr", new_callable=io.StringIO), patch.object(supervisor, "command") as command:
+                    with self.assertRaises(SystemExit):
+                        supervisor.main([mode, "--source-dir", str(source), "--diagnostic-usd", "revolute_v3", "--dry-run"])
+                    command.assert_not_called()
+
+    def test_diagnostic_trace_checks_reject_tampering_shape_and_path_escapes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory)
+            baseline = diagnostic_report("lf_tibia")
+            write_trace_fixture(directory, baseline)
+            kwargs = dict(num_envs=1, samples=baseline["physics_substeps"])
+            supervisor.validate_diagnostic_traces(directory, baseline, **kwargs)
+            for changes in ({"file": "../trace_000.npz"}, {"sha256": "wrong"},
+                            {"first_physics_sample": 1}, {"shape": [baseline["physics_substeps"], 1, 3]},
+                            {"shape": [baseline["physics_substeps"]-1, 1, 2]}):
+                report = dict(baseline, trace_files=[dict(baseline["trace_files"][0], **changes)])
+                with self.subTest(changes=changes), self.assertRaises(supervisor.Blocked):
+                    supervisor.validate_diagnostic_traces(directory, report, **kwargs)
+            (directory / "trace_000.npz").write_bytes(b"replaced bytes")
+            with self.assertRaisesRegex(supervisor.Blocked, "hash mismatch"):
+                supervisor.validate_diagnostic_traces(directory, baseline, **kwargs)
 
 
 class FourbarQualificationTests(unittest.TestCase):

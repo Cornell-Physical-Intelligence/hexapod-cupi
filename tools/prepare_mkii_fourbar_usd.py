@@ -2,7 +2,9 @@
 """Build a NEW 31-body physical four-bar USD directly from measured CAD frames.
 
 CPU/OpenUSD only: no Isaac application, importer defaults, or GPU. The 12 source
-mimics are omitted; six ordinary revolutes close the loops outside articulation.
+mimics are omitted; six ordinary revolutes close the loops outside articulation
+by default. An explicit diagnostic variant uses only the two independent planar
+closure rows; neither variant receives live-physics admission from this tool.
 The output directory must be new. URDFs and historical USDs are never modified.
 """
 from __future__ import annotations
@@ -21,6 +23,16 @@ from pxr import Gf, Sdf, Tf, Usd, UsdGeom, UsdPhysics, Vt
 from audit_mkii_stance import _origin
 import mkii_fourbar_kinematics as kin
 from prepare_mkii_usd import dependencies, principal_axes, read_inertials, sha256
+
+REVOLUTE_CLOSURE = 'revolute_5row_v3'
+PLANAR_D6_CLOSURE = 'planar_d6_xy_v4'
+CLOSURE_VARIANTS = (REVOLUTE_CLOSURE, PLANAR_D6_CLOSURE)
+
+
+def check_closure_variant(value):
+    if value not in CLOSURE_VARIANTS:
+        raise ValueError(f'Unknown closure constraint variant: {value!r}')
+    return value
 
 
 def set_transform(prim, matrix):
@@ -138,7 +150,8 @@ def author_collision(stage, path, collision):
     return geom
 
 
-def author_stage(output, root, contract, meshes):
+def author_stage(output, root, contract, meshes, *, closure_variant=REVOLUTE_CLOSURE):
+    check_closure_variant(closure_variant)
     stage = Usd.Stage.CreateNew(str(output))
     UsdGeom.SetStageMetersPerUnit(stage, 1.)
     UsdPhysics.SetStageKilogramsPerUnit(stage, 1.)
@@ -152,6 +165,11 @@ def author_stage(output, root, contract, meshes):
         'source_cad_pin_frames_sha256': contract['source_sha256']['cad_pin_frames'],
         'physical_validation': 'not_performed',
     }
+    if closure_variant == PLANAR_D6_CLOSURE:
+        metadata = dict(stage.GetRootLayer().customLayerData)
+        metadata.update(hexapod_physical_fourbar_version=4,
+                        closure_constraint_variant=PLANAR_D6_CLOSURE)
+        stage.GetRootLayer().customLayerData = metadata
     UsdGeom.Scope.Define(stage, '/Robot/Geometry')
     UsdGeom.Scope.Define(stage, '/Robot/Physics')
     frames = contract['joint_frames']
@@ -189,8 +207,20 @@ def author_stage(output, root, contract, meshes):
         for index, collision in enumerate(link.findall('collision')):
             author_collision(stage, path+f'/collisions/collision_{index:03d}', collision)
     for name, frame in frames.items():
-        joint = UsdPhysics.RevoluteJoint.Define(stage, '/Robot/Physics/'+name)
-        joint.CreateAxisAttr('Z')
+        planar_closure = (closure_variant == PLANAR_D6_CLOSURE
+                          and frame['exclude_from_articulation'])
+        if planar_closure:
+            joint = UsdPhysics.Joint.Define(stage, '/Robot/Physics/'+name)
+            # The tree already enforces hinge-axis alignment and zero axial
+            # separation. The excluded D6 adds only in-plane point closure.
+            # USD axes without a LimitAPI or DriveAPI remain free.
+            for axis in ('transX', 'transY'):
+                limit = UsdPhysics.LimitAPI.Apply(joint.GetPrim(), axis)
+                limit.CreateLowAttr(1.)
+                limit.CreateHighAttr(-1.)
+        else:
+            joint = UsdPhysics.RevoluteJoint.Define(stage, '/Robot/Physics/'+name)
+            joint.CreateAxisAttr('Z')
         joint.CreateBody0Rel().SetTargets(['/Robot/'+contract['body_paths'][frame['body0']]])
         joint.CreateBody1Rel().SetTargets(['/Robot/'+contract['body_paths'][frame['body1']]])
         for side in [0, 1]:
@@ -217,7 +247,9 @@ def author_stage(output, root, contract, meshes):
     stage.GetRootLayer().Save()
 
 
-def prepare(output, urdf=kin.URDF, pins=kin.PINS, contract_path=kin.CONTRACT):
+def prepare(output, urdf=kin.URDF, pins=kin.PINS, contract_path=kin.CONTRACT,
+            *, closure_variant=REVOLUTE_CLOSURE):
+    check_closure_variant(closure_variant)
     output = Path(output).resolve()
     if output.suffix not in ('.usd', '.usda') or output.exists():
         raise ValueError('Choose a new .usd/.usda output; existing artifacts are immutable')
@@ -239,9 +271,9 @@ def prepare(output, urdf=kin.URDF, pins=kin.PINS, contract_path=kin.CONTRACT):
         local_output = work/output.name
         shutil.copyfile(contract_path, work/'kinematics.json')
         create_mesh_layer(work/'geometry.usdc', meshes)
-        author_stage(local_output, root, contract, meshes)
+        author_stage(local_output, root, contract, meshes, closure_variant=closure_variant)
         from audit_mkii_fourbar_usd import validate
-        report = validate(urdf, pins, local_output, work/'kinematics.json')
+        report = validate(urdf, pins, local_output, work/'kinematics.json', closure_variant=closure_variant)
         if not report['pass']:
             raise ValueError('Physical four-bar CPU validation failed: '+str(report['errors']))
         report['source_meshes'] = {uri: {'sha256': row['sha256'], 'usd_prim_path': row['prim_path']} for uri, row in sorted(meshes.items())}
@@ -257,8 +289,11 @@ def prepare(output, urdf=kin.URDF, pins=kin.PINS, contract_path=kin.CONTRACT):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, default=kin.ROOT/kin.USD_RELATIVE)
+    parser.add_argument('--closure-variant', choices=CLOSURE_VARIANTS, default=REVOLUTE_CLOSURE)
     args = parser.parse_args()
-    report = prepare(args.output)
+    if args.closure_variant != REVOLUTE_CLOSURE and args.output == kin.ROOT/kin.USD_RELATIVE:
+        parser.error('A diagnostic closure variant requires an explicit new --output path')
+    report = prepare(args.output, closure_variant=args.closure_variant)
     print(json.dumps({'pass': report['pass'], 'output': str(args.output), 'bodies': report['rigid_bodies'], 'tree_joints': report['tree_joints'], 'closures': report['closure_joints']}))
 
 
