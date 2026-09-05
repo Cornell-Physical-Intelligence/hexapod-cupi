@@ -21,6 +21,33 @@ from test_mkii_fourbar_collision_isolation import fixture as usd_fixture, verify
 
 
 class LivePairFixtureTests(unittest.TestCase):
+    def test_native_torch_uint32_counts_normalize_before_math_and_survive_npz_exactly(self):
+        import numpy as np
+        import torch
+        native = torch.tensor([[0, 1, 512, 2**24 + 1, 2**32 - 1]], dtype=torch.uint32)
+        counts = fixture.native_contact_counts(native)
+        self.assertEqual(native.dtype, torch.uint32)
+        self.assertEqual(counts.dtype, torch.int64)
+        self.assertEqual(counts.tolist(), [[0, 1, 512, 2**24 + 1, 2**32 - 1]])
+        self.assertFalse(bool((counts < 0).any()))
+        self.assertTrue(bool((torch.stack([counts, counts]) >= fixture.CAPACITY).any()))
+        row = fixture.trace_row(torch.zeros(2, 3), counts, torch.zeros(2, 6, 3), torch.zeros(2, 3))
+        self.assertEqual(row.dtype, np.float64)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "trace.npz"
+            np.savez_compressed(path, values=np.stack([row]), pair_contact_counts=counts.numpy())
+            with np.load(path, allow_pickle=False) as trace:
+                np.testing.assert_array_equal(trace["values"][0, 6:11].astype(np.int64), counts.numpy().reshape(-1))
+                np.testing.assert_array_equal(trace["pair_contact_counts"], counts.numpy())
+                self.assertEqual(trace["pair_contact_counts"].dtype, np.int64)
+        for invalid in (torch.tensor([True]), torch.tensor([1.]), torch.tensor([1], dtype=torch.uint64),
+                        torch.tensor([-1]), torch.tensor([2**32])):
+            with self.subTest(dtype=invalid.dtype):
+                with self.assertRaises(ValueError):
+                    fixture.native_contact_counts(invalid)
+        with self.assertRaisesRegex(ValueError, "normalized to int64"):
+            fixture.trace_row(torch.zeros(2, 3), native, torch.zeros(2, 6, 3), torch.zeros(2, 3))
+
     def test_actual_recipe_checker_accepts_emitted_fields_and_rejects_cfg_runtime_drift(self):
         for multiplier in (1, 2):
             recipe = fixture.contract.numerical_recipe(multiplier)

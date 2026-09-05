@@ -56,6 +56,30 @@ def record_numerical_recipe(report, cfg, multiplier):
     return contract.validate_numerical_recipe_report(report, multiplier)
 
 
+def native_contact_counts(native):
+    """Convert native uint32 counts before unsupported CUDA integer operations."""
+    import torch
+    try:
+        limits = torch.iinfo(native.dtype)
+    except TypeError as error:
+        raise ValueError("Native contact counts require an integer tensor dtype") from error
+    if limits.max > torch.iinfo(torch.int64).max:
+        raise ValueError("Native contact count dtype cannot be converted losslessly to int64")
+    counts = native.to(dtype=torch.int64)
+    if bool(((counts < 0) | (counts > 2**32 - 1)).any()):
+        raise ValueError("Native contact counts exceed the PhysX uint32 count range")
+    return counts
+
+
+def trace_row(force, counts, ground, root_positions):
+    """Keep mixed trace rows lossless for the entire native uint32 count range."""
+    import torch
+    if counts.dtype != torch.int64:
+        raise ValueError("Trace contact counts must have been normalized to int64")
+    return torch.cat([value.flatten().to(dtype=torch.float64)
+                      for value in (force, counts, ground, root_positions)]).detach().cpu().numpy().copy()
+
+
 def write_json(path, value):
     with Path(path).open("x") as stream:
         json.dump(value, stream, indent=2, sort_keys=True, allow_nan=False)
@@ -297,6 +321,8 @@ def main(argv=None):
                     views.append(view)
                 report["native_pair_bindings"] = [{"source_body": paths[i], "target_filter": paths[1-i]}
                                                    for i in range(2)]
+                report["native_pair_count_dtypes"] = [None, None]
+                report["pair_count_storage_dtype"] = "int64"
                 actions = torch.zeros(2, 18, device=env.device)
                 pair_forces, pair_counts, ground_forces = [], [], []
                 columns = [f"pair_{i}_force_{axis}" for i in range(2) for axis in "xyz"] + ["pair_0_count", "pair_1_count"]
@@ -311,10 +337,16 @@ def main(argv=None):
                     env.sim.step(render=False)
                     env.scene.update(dt=contract.PHYSICS_DT_S)
                     forces, counts = [], []
-                    for view in views:
+                    for pair_index, view in enumerate(views):
                         matrix = wp.to_torch(view.get_contact_force_matrix(dt=contract.PHYSICS_DT_S))
                         contact_data = view.get_contact_data(dt=contract.PHYSICS_DT_S)
-                        count = wp.to_torch(contact_data[4])
+                        native_count = wp.to_torch(contact_data[4])
+                        native_dtype = str(native_count.dtype)
+                        recorded_dtype = report["native_pair_count_dtypes"][pair_index]
+                        if recorded_dtype is not None and recorded_dtype != native_dtype:
+                            raise ValueError("Native pair-contact count dtype changed during sampling")
+                        report["native_pair_count_dtypes"][pair_index] = native_dtype
+                        count = native_contact_counts(native_count)
                         if matrix.shape != (1, 1, 3) or count.shape != (1, 1):
                             raise ValueError("Unsupported native pair-contact tensor layout")
                         forces.append(matrix.reshape(3).clone())
@@ -332,7 +364,7 @@ def main(argv=None):
                     pair_forces.append(force.detach().cpu().numpy().copy())
                     pair_counts.append(count.detach().cpu().numpy().copy())
                     ground_forces.append(ground.detach().cpu().numpy().copy())
-                    rows.append(torch.cat([force.flatten(), count.to(force.dtype), ground.flatten(), root_positions.flatten()]).detach().cpu().numpy().copy())
+                    rows.append(trace_row(force, count, ground, root_positions))
                 forces, counts, ground = np.stack(pair_forces), np.stack(pair_counts), np.stack(ground_forces)
                 report["metrics"] = {"samples": len(rows), "finite": True,
                     "max_pair_contact_count": int(counts.max()), "max_pair_force_n": float(np.linalg.norm(forces, axis=-1).max()),
@@ -350,8 +382,10 @@ def main(argv=None):
                     if rows:
                         trace_path = early.report.with_name("trace.npz")
                         with trace_path.open("xb") as stream:
-                            np.savez_compressed(stream, values=np.stack(rows), columns=np.asarray(columns), physics_dt_s=contract.PHYSICS_DT_S)
-                        report["trace"] = {"file": trace_path.name, "sha256": digest(trace_path), "samples": len(rows), "columns": columns}
+                            np.savez_compressed(stream, values=np.stack(rows), pair_contact_counts=np.stack(pair_counts),
+                                columns=np.asarray(columns), physics_dt_s=contract.PHYSICS_DT_S)
+                        report["trace"] = {"file": trace_path.name, "sha256": digest(trace_path), "samples": len(rows),
+                            "columns": columns, "values_dtype": "float64", "pair_contact_counts_dtype": "int64"}
                     if identity(ROOT) != report["source_identity"]:
                         raise ValueError("Production source identity changed during fixture")
                 except BaseException as error:
