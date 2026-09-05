@@ -20,6 +20,7 @@ from hexapod_core import fourbar_v1 as contract
 from hexapod_core.rs05_v2 import contract_manifest as motor_contract_manifest, verify_runtime_cfg
 from ...command_sampling import body_to_navigation_frame
 from .math import MotorCoordinates, observations, reward_terms
+from .target_schedule import MotorTargetRamp
 
 ROOT = Path(__file__).resolve().parents[5]
 
@@ -63,6 +64,7 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
         self._actions = torch.zeros(self.num_envs, 18, device=self.device)
         self._previous_actions = torch.zeros_like(self._actions)
         self._processed_actions = self.coordinates.default.repeat(self.num_envs, 1)
+        self._target_schedule = MotorTargetRamp(self._processed_actions, substeps=contract.DECIMATION)
         self._commands = torch.zeros(self.num_envs, 3, device=self.device)
         self._command_time_left_s = torch.zeros(self.num_envs, device=self.device)
         self._joint_target_slew_limited_fraction = torch.zeros(self.num_envs, device=self.device)
@@ -132,9 +134,10 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
     def _pre_physics_step(self, actions):
         self._actions, self._processed_actions, self._joint_target_slew_limited_fraction = self.coordinates.process_action(
             actions, self._processed_actions, step_dt=self.step_dt)
+        self._target_schedule.begin(self._processed_actions)
 
     def _apply_action(self):
-        self._robot.set_joint_position_target_index(target=self._processed_actions, joint_ids=self.active_joint_ids)
+        self._robot.set_joint_position_target_index(target=self._target_schedule.step(), joint_ids=self.active_joint_ids)
 
     def _get_observations(self):
         data = self._robot.data
@@ -254,6 +257,7 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
             motors = motors.clamp(min=self.coordinates.soft_limits[:,0], max=self.coordinates.soft_limits[:,1])
         q, qd = self.coordinates.closed_reset(motors, torch.zeros_like(motors))
         self._processed_actions[env_ids] = motors
+        self._target_schedule.reset(motors, env_ids=env_ids)
         self._joint_target_slew_limited_fraction[env_ids] = 0.
         pose = tensor(self._robot.data.default_root_pose)[env_ids].clone()
         velocity = tensor(self._robot.data.default_root_vel)[env_ids].clone()

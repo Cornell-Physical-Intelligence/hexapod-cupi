@@ -42,6 +42,7 @@ SOLVER_VELOCITY_ITERATIONS = 1
 ENABLE_EXTERNAL_FORCES_EVERY_ITERATION = True
 ACTION_SCALE_RAD = .30
 SLEW_RAD_PER_20MS = .040
+MOTOR_TARGET_SCHEDULE_ID = "linear_physics_substeps_v1"
 SOFT_LIMIT_FACTOR = .95
 OBSERVATION_FIELDS = (
     ("root_linear_velocity_navigation", 3), ("root_angular_velocity_navigation", 3),
@@ -267,5 +268,9 @@ def runtime_manifest(kinematics, motor_manifest, *, kinematics_sha256, usd_sha25
         "action_scale_rad": ACTION_SCALE_RAD, "action_clip": [-1., 1.], "slew_rad_per_20ms": SLEW_RAD_PER_20MS,
         "physics_dt_s": PHYSICS_DT_S, "decimation": DECIMATION, "policy_dt_s": POLICY_DT_S,
         "numerical_recipe_id": NUMERICAL_RECIPE_ID,
+        "motor_target_schedule": {"id": MOTOR_TARGET_SCHEDULE_ID, "substeps": DECIMATION,
+            "endpoint_semantics": "existing 50 Hz clipped and slew-limited motor position target",
+            "position_fractions": "1/substeps through 1, exact endpoint on final substep",
+            "velocity_feedforward_rad_s": 0.},
         "scope": "physical-model simulation contract; hardware calibration not admitted",
     }

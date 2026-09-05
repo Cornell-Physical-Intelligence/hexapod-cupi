@@ -175,3 +175,9 @@ the campaign reaches a terminal state, preserving any intervening agent request.
 ## Renewed priority at2026-09-05 07:02 UTC
 
 User reaffirmed hexapod as top priority over weather. Current guardPID1407273 holds the weather scheduler lock; maximum expiry17:02:04UTC. Status: `/home/orionh/HEXAPOD_runs/mkii_fourbar_diagnostics_v1/priority_20260905T0700/status.json`. Create sibling `release` to release explicitly; sibling `campaign_path.txt` selects the exact following campaign and causes automatic release on terminal state. The old1364926 guard has ended; queued weather wrapper1394883 was cancelled during handover before any GPU work started. Other work may use the existing shared-file checkpoint/pause handshake. Read the live remote file and process state rather than treating this snapshot as current indefinitely.
+
+## 2026-09-05 17:48 UTC reservation and physical campaign update
+
+The former 07:02 guard was handed over at16:16 UTC. Active guard **1465763** holds `/opt/wx/gpu.lock`; its status is `/home/orionh/HEXAPOD_runs/mkii_fourbar_diagnostics_v1/priority_20260905T1616/status.json`, with a hard maximum expiry **2026-09-06T02:16:34Z**. Creating the sibling `release` file requests release. This is cooperative exclusive priority, not an MPS quota.
+
+The v5 full nominal validation completed but failed; no PPO is running. A bounded eight-environment v5 group diagnostic is using the GPU. Current source: `/home/orionh/HEXAPOD_runs/mkii_fourbar_physical_mimic_v1/source`; reports in sibling `campaigns/` and `diagnostics/`. Source commitcfe0cf5 is frozen. Use the shared status line to request a yield; the owned supervisor checks changes. Inspect live state before acting because this note is a dated snapshot.

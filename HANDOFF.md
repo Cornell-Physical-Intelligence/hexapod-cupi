@@ -85,3 +85,9 @@ The new release records actual selected physical bundle identity and requires ma
 ## 2026-09-05 16:16 UTC — v5 physical coupling preparation
 
 Complete D6 group diagnostic `072121Z-16d523c4` failed (0.505577 mm closure; raw42.0734 N·m, applied5.5 N·m). Source remains0d1ceab on Spark. Native physical-coupling v5 candidate is separate; see `docs/MKII_PHYSICAL_COUPLING_CANDIDATE.md`. It retains30tree coordinates and31bodies, replacing6external closures with12bilateral internal constraints. Defaultv3 remains; explicitv5 will run the unchanged full admission campaign. Three parallel follow-up reviews hit the account usage limit, so the primary agent continued locally. No physical-model PPO has started.
+
+## 2026-09-05 17:48 UTC — complete native-coupling nominal failure
+
+Campaign 005 completed the full32 ×1000 standing +2400 driven sequence with v5 native bilateral mimic constraints. It failed closure (0.108253 mm), support (minimum0) and simultaneous LM knee direction (−0.00476402 rad); all18 individual direction tests passed. No resets/non-foot contacts; applied peak5.5 N·m, raw16.6328 N·m. Primary evidence is `artifacts/mkii_fourbar_2026-09-05/campaign_005_physical_mimic/`. No PPO started. Sourcecfe0cf5 remains frozen on Spark; test-onlyffa44f6 passed CI and has the same functional identity.
+
+Bounded diagnostic174632Z-36232e95 now compares v5 at128/1, eight environments,200 standing +700 group-motion steps, with full per-substep traces. Priority reservation1465763 (directory `.../mkii_fourbar_diagnostics_v1/priority_20260905T1616/`) is still active, maximum expiry2026-09-06T02:16:34Z. Do not modify the source or shared note during its owned run.

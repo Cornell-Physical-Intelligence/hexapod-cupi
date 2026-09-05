@@ -22,6 +22,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 from hexapod_core import fourbar_v1 as contract
 from hexapod_runtime.fourbar_adapter_v1 import FourbarActionPipeline, FourbarJointAdapter, build_fourbar_observation
 from hexapod_env.tasks.mkii_fourbar_v1.math import MotorCoordinates, observations, reward_terms
+from hexapod_env.tasks.mkii_fourbar_v1.target_schedule import MotorTargetRamp
 from mkii_fourbar_kinematics import closure_errors, joint_frames, load_model
 
 
@@ -193,7 +194,7 @@ class EnvironmentWiringTests(unittest.TestCase):
         class Base:
             def _reset_idx(self, env_ids):
                 self.base_reset_ids = env_ids.clone()
-        namespace = {"DirectRLEnv":Base,"contract":contract,"torch":torch,
+        namespace = {"DirectRLEnv":Base,"contract":contract,"torch":torch,"MotorTargetRamp":MotorTargetRamp,
                      "observations":observations,"reward_terms":reward_terms,
                      "body_to_navigation_frame":lambda value: torch.stack((-value[...,1],value[...,0],value[...,2]),-1)}
         exec(compile(ast.Module(body=nodes,type_ignores=[]),str(path),"exec"),namespace)
@@ -242,6 +243,7 @@ class EnvironmentWiringTests(unittest.TestCase):
         raw._actions=torch.full((3,18),.2)
         raw._previous_actions=torch.full((3,18),.1)
         raw._processed_actions=raw.coordinates.default.repeat(3,1)
+        raw._target_schedule=MotorTargetRamp(raw._processed_actions, substeps=contract.DECIMATION)
         raw._joint_target_slew_limited_fraction=torch.ones(3)
         raw._commands=torch.zeros(3,3)
         raw._command_time_left_s=torch.full((3,),4.)
@@ -262,12 +264,33 @@ class EnvironmentWiringTests(unittest.TestCase):
 
     def test_actual_apply_action_writes_only18_named_motors(self):
         raw=self.environment()
+        raw._pre_physics_step(torch.zeros(3,18))
         raw._apply_action()
         kwargs=raw._robot.set_joint_position_target_index.call_args.kwargs
         self.assertEqual(kwargs["target"].shape,(3,18))
         self.assertEqual(kwargs["joint_ids"].tolist(),list(contract.active_indices(raw.coordinates.names)))
         self.assertEqual(kwargs["joint_ids"].dtype, torch.int32)
         self.assertEqual(raw.coordinates.active_indices.dtype, torch.int64)
+
+    def test_actual_physics_writes_ramp_without_driving_passive_coordinates(self):
+        raw = self.environment()
+        start = raw._processed_actions.clone()
+        raw._pre_physics_step(torch.ones(3,18))
+        endpoint = raw._processed_actions.clone()
+        delivered = []
+        for _ in range(contract.DECIMATION):
+            raw._apply_action()
+            kwargs = raw._robot.set_joint_position_target_index.call_args.kwargs
+            delivered.append(kwargs["target"].clone())
+            self.assertEqual(kwargs["joint_ids"].tolist(), list(contract.active_indices(raw.coordinates.names)))
+        self.assertTrue(torch.equal(delivered[-1], endpoint))
+        self.assertTrue(torch.allclose(delivered[0], start+(endpoint-start)/16))
+        history = torch.stack([start, *delivered])
+        self.assertLessEqual((history[1:]-history[:-1]).abs().max().item(), .0025001)
+        raw._pre_physics_step(-torch.ones(3,18))
+        raw._apply_action()
+        self.assertTrue(torch.allclose(raw._robot.set_joint_position_target_index.call_args.kwargs["target"],
+                                       endpoint+(raw._processed_actions-endpoint)/16))
 
     def test_actual_partial_reset_writes_closed30_positions_and_velocities(self):
         raw=self.environment()
