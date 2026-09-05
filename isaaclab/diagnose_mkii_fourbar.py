@@ -44,6 +44,16 @@ def parser(add_launcher_args=None):
     return p
 
 
+def persist_then_close(report, path, env):
+    """Kit teardown can exit the process; durable evidence must precede it."""
+    report["pass"] = False
+    write_json(path, report)
+    print("FOURBAR_DIAGNOSTIC_RESULT " + json.dumps({key: report.get(key) for key in
+        ("diagnostic_complete", "pass", "errors", "physical_gate_errors", "trace_samples")}), flush=True)
+    if env is not None:
+        env.close()
+
+
 class Trace:
     def __init__(self, raw, metrics, output):
         self.raw, self.metrics, self.output = raw, metrics, output
@@ -262,23 +272,30 @@ def main(argv=None):
                         print("FOURBAR_DIAGNOSTIC_SEGMENT " + json.dumps({"segment": segment, "metrics": metrics.windows[metrics.window]}), flush=True)
                 report["diagnostic_complete"] = True
                 report["physical_gate_errors"] = grade(report)
+            except BaseException as error:
+                report["errors"].append(f"{type(error).__name__}: {error}")
+                raise
             finally:
-                if trace is not None:
-                    trace.flush(segment)
-                    report["trace_files"] = trace.files
-                    report["trace_samples"] = trace.samples
-                    report["force_writes"] = trace.force_writes
-                if env is not None:
-                    env.close()
+                try:
+                    if trace is not None:
+                        trace.flush(segment)
+                        report["trace_files"] = trace.files
+                        report["trace_samples"] = trace.samples
+                        report["force_writes"] = trace.force_writes
+                except BaseException as error:
+                    report["errors"].append(f"Trace persistence {type(error).__name__}: {error}")
+                    raise
+                finally:
+                    persist_then_close(report, early.report, env)
     except Exception as error:
         import traceback
         traceback.print_exc()
-        report["errors"].append(f"{type(error).__name__}: {error}")
+        message = f"{type(error).__name__}: {error}"
+        if message not in report["errors"]:
+            report["errors"].append(message)
     finally:
-        report["pass"] = False
-        write_json(early.report, report)
-        print("FOURBAR_DIAGNOSTIC_RESULT " + json.dumps({key: report.get(key) for key in
-            ("diagnostic_complete", "pass", "errors", "physical_gate_errors", "trace_samples")}), flush=True)
+        if not early.report.exists():
+            persist_then_close(report, early.report, None)
     return 0 if report["diagnostic_complete"] and not report["errors"] else 1
 
 

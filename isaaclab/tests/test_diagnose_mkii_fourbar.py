@@ -3,6 +3,8 @@ import importlib.util
 import json
 from pathlib import Path
 import tempfile
+import subprocess
+import sys
 import unittest
 
 import numpy as np
@@ -14,6 +16,28 @@ spec.loader.exec_module(module)
 
 
 class FourbarDiagnosticTests(unittest.TestCase):
+    def test_report_survives_nonreturning_native_teardown(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root)/"report.json"
+            program = """
+import importlib.util, os, sys
+from pathlib import Path
+spec=importlib.util.spec_from_file_location('diagnostic_child',sys.argv[1])
+m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+class NativeExit:
+    def close(self): os._exit(0)
+report={'pass':True,'diagnostic_complete':True,'errors':[],'trace_samples':8000}
+m.persist_then_close(report,Path(sys.argv[2]),NativeExit())
+raise AssertionError('Native teardown unexpectedly returned')
+"""
+            result = subprocess.run([sys.executable, "-c", program, str(ROOT/"isaaclab/diagnose_mkii_fourbar.py"), str(path)], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(path.read_text())
+            self.assertFalse(report["pass"])
+            self.assertTrue(report["diagnostic_complete"])
+            self.assertEqual(report["trace_samples"], 8000)
+            self.assertIn("FOURBAR_DIAGNOSTIC_RESULT", result.stdout)
+
     def test_motions_have_both_signs_and_zero_recovery(self):
         for kind, count in (("lf_tibia", 300), ("groups", 700), ("individuals", 1900)):
             rows = module.motions(kind)
