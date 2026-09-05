@@ -6,7 +6,9 @@ This is a separate physical-loop training lineage. It preserves the archived moc
 
 The first live physical probe passed: `fourbar-campaign-20260905T034653Z-a83056cd/probe/hexapod-fourbar-validate-20260905T034654Z-91ce5326`. It completed 100 control steps / 400 physical substeps with one robot. Settled peak torque was 0.67483574 N·m, six pads supported the robot, nonfoot ground contacts were zero, mean plate height was 0.13569902 m, and maximum settled physical closure error was 1.8253 µm. Startup torque peaked at 1.81281567 N·m and closure error at 65.9877 µm. This short result does not grant full training admission.
 
-The active campaign proceeds through 32-environment standing plus 2,400 driven control steps at nominal and refined solver settings; only matching passes admit a 64-environment / 3-iteration scratch PPO and checkpoint/inference check, followed by a separate 512-environment / 1,000-iteration resume process. Campaign JSON records actual progress. An incomplete campaign is not a successful training run.
+The first campaign stopped after nominal driven closure failed: 0.246159 mm pin separation and 0.0114364 rad passive residual exceeded the original 0.1 mm / 0.005 rad bounds. All direction, torque-envelope, contact and reset checks passed. A higher-resolution diagnostic is underway; the failure is not a training admission.
+
+The prepared sequence proceeds through 32-environment standing plus 2,400 driven control steps at nominal and refined solver settings; only matching passes admit a 64-environment / 3-iteration scratch PPO and checkpoint/inference check, followed by a separate 512-environment / 1,000-iteration resume process. Campaign JSON records actual progress. An incomplete campaign is not a successful training run.
 
 Local release checks: 784 unit tests passed in 21.720 seconds. The historical 112-file manifest verifies against its immutable Git source; a separate 268-file manifest verifies this release. Two package-definition files changed to package the new versioned modules/data. No old checkpoint or archived manifest was rewritten.
 
