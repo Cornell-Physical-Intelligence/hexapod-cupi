@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import ast
+from dataclasses import dataclass, replace
 import importlib.util
 import json
 import math
@@ -28,6 +29,40 @@ from hexapod_core.frames import body_to_navigation, navigation_to_body  # noqa: 
 ASSEMBLY = ROOT / "robot/hexapod_mkii_assy"
 URDF = ROOT / ASSET.urdf_path
 STANCE = json.loads((ASSEMBLY / "stance_v2.json").read_text())
+
+
+class InstanceConfigFieldTests(unittest.TestCase):
+    def test_v2_config_supports_instance_only_inherited_sim_fields(self):
+        """Reproduce the installed Lab 3 configclass shape without importing Kit."""
+        @dataclass
+        class SimConfig:
+            dt: float = .01
+            render_interval: int = 1
+
+            def replace(self, **changes):
+                return replace(self, **changes)
+
+        class ParentConfig:
+            def __init__(self):
+                self.sim = SimConfig()
+
+        class Articulation:
+            def replace(self, **changes):
+                return self
+
+        path = ROOT / "packages/hexapod_env/hexapod_env/tasks/mkii_v2/config.py"
+        source = ast.parse(path.read_text())
+        source.body = [node for node in source.body if not isinstance(node, (ast.Import, ast.ImportFrom))]
+        namespace = {name: getattr(contract, name) for name in dir(contract) if name.isupper()}
+        namespace.update(configclass=lambda cls: cls, MKII_V2_ASSET=ASSET,
+                         articulation_cfg_from_spec=lambda spec: Articulation(),
+                         HexapodMkiiV1FlatEnvCfg=ParentConfig, HexapodPPORunnerCfg=object)
+        self.assertFalse(hasattr(ParentConfig, "sim"))
+        exec(compile(source, str(path), "exec"), namespace)
+        actual = namespace["HexapodMkiiV2FlatEnvCfg"].sim
+        self.assertEqual(actual.dt, contract.PHYSICS_DT_S)
+        self.assertEqual(actual.render_interval, contract.DECIMATION)
+        self.assertEqual(ParentConfig().sim.dt, .01)
 
 
 class StanceGeometryTests(unittest.TestCase):

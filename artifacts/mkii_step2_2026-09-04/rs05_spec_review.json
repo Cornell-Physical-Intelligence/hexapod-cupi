@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "scope": "specification reconciliation and source audit, not an identified or admitted motor model",
+  "review_date_utc": "2026-09-05",
+  "model": "RobStride RS05",
+  "vendor_sources": [
+    {
+      "url": "https://github.com/RobStride/Product_Information/blob/main/Product%20Literature/RS05/RS05User%20Manual260713.pdf",
+      "sha256": "1b2c61a6daa8331b9a348455005d10d6e425165c22e6f64c39cbca33f6360e82",
+      "local_filename_at_review": "rs05_en.pdf"
+    },
+    {
+      "url": "https://github.com/RobStride/Product_Information/blob/main/%E7%81%B5%E8%B6%B3%E6%97%B6%E4%BB%A3RS%E7%B3%BB%E5%88%97%E4%BA%A7%E5%93%81%E8%A7%84%E6%A0%BC%E4%BB%8B%E7%BB%8D%28260713%EF%BC%89.pdf",
+      "sha256": "79576e55fee940ce4e718ceffabb31ecb9fd49c9ecf2dd7ddd5d050a31eeebee",
+      "local_filename_at_review": "spec.pdf"
+    }
+  ],
+  "published": {
+    "peak_output_torque_nm": 5.5,
+    "stall_continuous_torque_nm": 1.2,
+    "stall_peak_5p5_nm_duration_s": 1.0,
+    "rotating_ratings": [
+      {
+        "torque_nm": 1.6,
+        "rpm": 100,
+        "aluminum_plate_mm": [
+          70,
+          70
+        ],
+        "peak_5p5_nm_duration_s": 3.0
+      },
+      {
+        "torque_nm": 1.8,
+        "rpm": 100,
+        "aluminum_plate_mm": [
+          150,
+          150
+        ],
+        "peak_5p5_nm_duration_s": 3.7
+      }
+    ],
+    "nominal_voltage_v": 48,
+    "operating_voltage_range_v": [
+      15,
+      60
+    ],
+    "no_load_speed_rpm": 480,
+    "gear_ratio": 7.75,
+    "nominal_mass_kg": 0.191,
+    "thermal_table_conditions": "vendor bench conditions; stall table does not independently restate heatsink; no universal repeat-duty or recovery guarantee"
+  },
+  "audited_existing_software": {
+    "actuator_class": "isaaclab.actuators.DCMotor",
+    "effort_limit_nm": 1.6,
+    "saturation_effort_nm": 5.5,
+    "effort_limit_sim_nm": 5.5,
+    "raw_pd_demand_capped_by_peak": false,
+    "thermal_voltage_current_states_modeled": false,
+    "actuator_parameters_bound_in_cad_v2_manifest": false,
+    "hardware_CAN_driver_implemented": false,
+    "full_motor_model_approved": false
+  },
+  "source_sha256": {
+    "packages/hexapod_env/hexapod_env/asset_cfg.py": "6cf3caf1e608f0e24a24ef84196e3831b986ab401e85aaebe950b0a4d2fe89ca",
+    "packages/hexapod_core/hexapod_core/actuator.py": "c7770f045692180c7a874009190473db36b418b41439f7c6fd9a9307cc40d58d",
+    "packages/hexapod_core/hexapod_core/cad_manifest_v2.py": "606915e442565640ec6fccdd08971d2712f615f28b426bbc984aede1bf4a1818",
+    "isaaclab/validate_mkii_v2.py": "15d96626723392b1e44be09f4afae51f1ba4e65d10543c508cd5e99206f0a5f6"
+  },
+  "open_hardware_inputs": [
+    "battery voltage/cell count",
+    "thermal resistance/capacity and ambient rejection of confirmed metal mounting path",
+    "actuator hardware/firmware revision",
+    "measured torque-speed/current/thermal/latency behavior"
+  ],
+  "review_document": "../../docs/RS05_SPEC_REVIEW.md",
+  "user_confirmed_design_assumptions": {
+    "motor_heat_path": "direct conduction into metal mount; useful heat removal expected",
+    "effective_thermal_conductance": "provisional; not measured or established equivalent to vendor plates"
+  }
+}

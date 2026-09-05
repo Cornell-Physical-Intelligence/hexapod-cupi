@@ -39,7 +39,9 @@ class HexapodMkiiV2FlatEnvCfg(HexapodMkiiV1FlatEnvCfg):
     axis_command_active_threshold = COMMAND_ACTIVE_THRESHOLD
     processed_joint_target_slew_limit_rad_per_20ms = SLEW_LIMIT_RAD_PER_20MS
     decimation = DECIMATION
-    sim = HexapodMkiiV1FlatEnvCfg.sim.replace(dt=PHYSICS_DT_S, render_interval=DECIMATION)
+    # Isaac Lab's configclass materializes inherited fields on instances;
+    # the decorated subclass need not expose a class-level ``sim`` value.
+    sim = HexapodMkiiV1FlatEnvCfg().sim.replace(dt=PHYSICS_DT_S, render_interval=DECIMATION)
 
 
 @configclass
