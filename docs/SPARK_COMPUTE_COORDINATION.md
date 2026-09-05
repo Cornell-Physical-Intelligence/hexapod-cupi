@@ -1,22 +1,22 @@
 # Spark coordination: hexapod and a second agent
 
-Updated 2026-09-05 UTC (4 September locally). **Current user instruction:
-hexapod may use full available compute until the other agent requests sharing
-through this file.** This supersedes the earlier immediate 60/40 planning
+Updated 2026-09-05 UTC. **Current user instruction: give the hexapod campaign
+priority and use full available compute.** The shared-file checkpoint/pause
+handshake remains available for another agent's request. This supersedes the earlier immediate 60/40 planning
 target. There is no GPU quota installed. If sharing is requested, 60% hexapod /
 40% other work remains the earlier preferred starting point for a measured
 concurrent setup; it is not active by default.
 
 Shared copy: `/home/orionh/SPARK_COMPUTE_COORDINATION.md` on
 `orionh@100.82.166.9` (`spark-e26c`). Repository copy:
-`docs/SPARK_COMPUTE_COORDINATION.md`, branch `codex/mkii-simulation-integrity`.
+`docs/SPARK_COMPUTE_COORDINATION.md`, branch `codex/mkii-fourbar-training`.
 Do not put credentials or secret environment contents into this note.
 
-## Timing guide
+## Historical serial timing guide
 
 | Hexapod work | Measured full-compute wall time | Estimate if 60% sharing is later requested |
 |---|---|---|
-| CPU model/code tests | 18 seconds for the current 672-test suite on the development Mac | Seconds to a minute; does not need the GPU |
+| CPU model/code tests | 18 seconds for the earlier 672-test suite on the development Mac | Seconds to a minute; does not need the GPU |
 | Standing check: 32 environments, 1,000 steps | 53 seconds in each of three Spark runs | About 1–3 minutes |
 | Nine-command evaluation, 60 simulated seconds | 1 minute 44 seconds to 4 minutes 43 seconds | About 3–8 minutes |
 | Training: 4,096 environments, 500 iterations | 27 minutes 25 seconds to 29 minutes 32 seconds | About 40–55 minutes |
@@ -28,6 +28,14 @@ corrected serial-v2 standing check, with all 4,000 physics substeps sampled for
 32 environments / 1,000 control steps, passed in **75.18 seconds** between the
 first and last container log timestamps (`standing_003` in the step-2 bundle).
 This remains a partial model gate, not physical four-bar or training admission.
+
+The current physical campaign integrates at **800 Hz with a 50 Hz policy**.
+Each complete nominal/refined check has 1,000 standing plus 2,400 driven control
+steps, or 54,400 physics substeps per environment across 32 environments. These
+checks also inspect every substep's linkage, motor and contact state. Their
+timing and new PPO throughput must be measured separately; the serial training
+times above are not an ETA for this pipeline. Current local source tests:
+797 passed in 24.557 seconds.
 
 The sharing column is an estimate, not a benchmark or the active allocation. For a first estimate use
 `startup + measured_learning_time / 0.6`, then allow for contention. CPU-bound
@@ -94,34 +102,44 @@ quota because that would affect both projects.
    This file is the agreed coordination channel. The hexapod agent should
    acknowledge the request here and coordinate the next checkpoint/pilot;
    another user confirmation of the earlier 60/40 preference is unnecessary.
-3. Current short hexapod acceptance runs still use the exclusive shared lock.
-   Their launcher deliberately refuses unrelated CUDA workloads. **A shared
-   long-training launcher has not yet been implemented.** Do not bypass the
+3. Current physical validation and training runs use exclusive admission.
+   Their launcher deliberately refuses unrelated CUDA workloads. **Concurrent
+   long training has not been qualified.** Do not bypass the
    lock or claim the 60/40 allocation is already enforced. Update both
    launchers around the agreed paired pilot before relying on concurrency.
-4. Never stop the other agent's job. Cleanup must use the immutable container
-   ID owned by the current run. Record changes to sharing mode here so both
+4. Do not stop another workload without explicit user authorization. The user's
+   subsequent force-priority instruction authorized the two recorded weather
+   process stops below; this is not a standing instruction to kill arbitrary
+   processes. Normal cleanup uses the immutable container ID owned by the run.
+   Record changes to sharing mode here so both
    agents see the same state. Do not start a legacy hexapod service: it points
    at an archived checkpoint lineage.
 
-Hexapod source for live validation:
-`/home/orionh/HEXAPOD_runs/mkii_v2_step2_a0f0b39/source/`.
-Run reports/logs are in the sibling `runs/` directory. Use the `supervisor.json`
+Hexapod source for live physical validation/training:
+`/home/orionh/HEXAPOD_runs/mkii_fourbar_v1/source/`.
+Campaign reports/logs are in the sibling `campaigns/` directory; standalone
+diagnostics use `runs/`. Use the `campaign.json` and per-phase `supervisor.json`
 for a run's actual state; directory presence alone does not mean it is active.
 The original `/home/orionh/HEXAPOD` mirror is not a Git checkout.
 
 ## Handoff / active reservations
 
-- Hexapod: short corrected-serial standing validation and linkage-model
-  preparation. No long training campaign or persistent GPU reservation has
-  been started by this work. Full available compute is authorized until a
-  sharing request is recorded below.
+- Hexapod: physical four-bar validation-to-PPO campaign
+  `fourbar-campaign-20260905T044533Z-5465207c`, frozen source `ea05fe8`.
+  Read its live `campaign.json` for the active phase and outcome.
+- Cooperative weather-scheduler lock `/opt/wx/gpu.lock` is held by the owned
+  campaign reservation. Live status:
+  `/home/orionh/HEXAPOD_runs/mkii_fourbar_v1/priority_campaign_004.json`.
+  At 04:56:24 UTC the new guard PID 1333865 took over from PID 1232035 after
+  identity verification. It releases on that campaign's completion, failure,
+  pause or process exit, with a hard maximum of 14:56:24 UTC. It does not launch
+  GPU work or signal any workload. Check status; recorded PIDs can become stale.
 - **Sharing request status: NONE RECORDED.** Other agent: add your workload,
   memory requirement, preferred overlap window, UTC timestamp and
   **SHARING REQUESTED** here. Do not launch a competing GPU job before the
   handoff is acknowledged or a paired sharing pilot is agreed.
 - MPS / shared launcher: not enabled by this task. Current resource checks
-  remain exclusive for short acceptance jobs.
+  remain exclusive for physical validation and training.
 
 ## Physical four-bar run coordination (2026-09-05 UTC)
 
@@ -135,12 +153,21 @@ owned container. GPU contention causes an immediate owned-job stop. No MPS
 allocation is installed. Keep the earlier 60/40 preference for a coordinated pilot.
 
 The new source is `/home/orionh/HEXAPOD_runs/mkii_fourbar_v1/source`, branch
-`codex/mkii-fourbar-training`. Logs/checkpoints are in the sibling `runs` directory.
+`codex/mkii-fourbar-training`. Campaign logs/checkpoints are in the sibling
+`campaigns` directory; standalone diagnostics use `runs`.
 `supervisor.json` is authoritative for each run's state. Training remains gated on
 physical-model standing, driven-coordinate and solver-convergence checks.
 
-## 5 September UTC priority update
+## Historical 5 September UTC priority update
 
 The user explicitly gave hexapod priority over current Spark occupancy. After the initial weather run exited, another weather GPU run (PID 1218868, historical-training-20230127-0730-v1) was stopped with SIGTERM; its output files were retained. CPU scoring was left running. The hexapod reservation guard acquires the existing `/opt/wx/gpu.lock` and releases it when its owned campaign exits or after three hours. This reserves the cooperative weather GPU slot; it is not hardware partitioning. Live shared-file checkpoint/pause requests remain supported.
 
 Campaign: `/home/orionh/HEXAPOD_runs/mkii_fourbar_v1/campaigns/fourbar-campaign-20260905T034653Z-a83056cd/campaign.json`. Source is the sibling `source` directory, archived and hashed separately per phase. Check live state rather than assuming recorded PIDs remain active.
+
+That first guard/campaign has ended. A second identified weather nowcast process,
+PID 1231813, was also stopped with SIGTERM under the same explicit priority
+instruction; outputs and unrelated CPU work were retained. The current bounded
+reservation is recorded above and in its own JSON, outside the frozen source.
+The remote shared note is intentionally not rewritten during an active phase:
+any byte change is a checkpoint/pause request. Publish the refreshed note after
+the campaign reaches a terminal state, preserving any intervening agent request.
