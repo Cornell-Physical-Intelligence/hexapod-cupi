@@ -1,6 +1,6 @@
 # Current status
 
-Last reviewed: 2026-09-05 18:20 UTC. **No physical-model PPO has started.** The full v5 campaign failed its unchanged closure/support/group-response checks. A subsequent short v5 group test at 128/1 solver iterations passed closure and all direction checks but briefly lost support at abrupt target reversals. New source `9cd8d4c` delivers each motor endpoint gradually over sixteen physics substeps, preserving gains, limits, assets and gates. **854 local tests passed in 60.570 seconds; the 286-file release manifest verifies.** A bounded eight-environment v5 group diagnostic at the nominal 64/1 solver setting is running from its own frozen source. [Full failed campaign](artifacts/mkii_fourbar_2026-09-05/campaign_005_physical_mimic/README.md) · [Follow-up trace](artifacts/mkii_fourbar_2026-09-05/dynamics_trace_analysis/v5_groups128_20260905T174632Z/README.md) · [Scheduling candidate](docs/MKII_MOTOR_TARGET_SCHEDULING.md).
+Last reviewed: 2026-09-05 19:05 UTC. **The scheduled-target diagnostic completed without physical-check failures; full campaign 006 is running. No physical-model PPO has started yet.** All 18 group directions passed, minimum driven support was four feet, maximum pin separation was 0.025073 mm, and peak requested/delivered torque was 4.29035 N·m. Actual sixteen-step target delivery was independently verified from the trace. The new campaign's startup probe passed and its full 32-environment nominal validation is underway; nominal and refined must both pass before scratch/full PPO. Source `9cd8d4c` remains frozen. [Clean diagnostic evidence](artifacts/mkii_fourbar_2026-09-05/dynamics_trace_analysis/ramped_groups64_20260905T181945Z/README.md) · [Prior full failure](artifacts/mkii_fourbar_2026-09-05/campaign_005_physical_mimic/README.md) · [Scheduling candidate](docs/MKII_MOTOR_TARGET_SCHEDULING.md).
 
 [Mission](dar.md) · [Living plan](docs/PLAN.md) · [Prepared future runs](docs/NEXT_RUNS.md) · [Dated audit](artifacts/project_review_2026-09-04/URDF_VALIDATION.md) · [Leg test plan](artifacts/project_review_2026-09-04/LEG_TEST_STAND.md)
 
@@ -92,3 +92,20 @@ The bounded diagnostic `hexapod-fourbar-diagnose-20260905T174632Z-36232e95` uses
 The v5 128/1 group trace completed: maximum closure21.017 µm, all18 group directions positive, four zero-support samples of1.25 ms each at the second negative knee-target update. This shorter eight-environment sequence does not reproduce the full nominal history and cannot admit learning. The interpolation source is9cd8d4c, functional identity `c53071afdf320f6a9d6f91de09ddc6102de74df6f45a203e3a8166a8686548ca`.
 
 Current diagnostic is `hexapod-fourbar-diagnose-20260905T181945Z-ec78eb1e`, supervisorPID1519950, ownedcontainera421e1ff02ab0b2013907339215b1425df344fd6432e4b58cc8cb59859244b1f. Source `/home/orionh/HEXAPOD_runs/mkii_ramped_targets_v1/source` is frozen. It uses200 standing +700 group-motion steps, eight environments, nominal64/1 and v5. Only delivery of active motor position targets changed; velocity feedforward remainszero.
+
+## 2026-09-05 19:05 UTC — full campaign 006
+
+The short scheduled-target diagnostic completed all 14,400 physics samples per
+environment with no physical gate errors. Independent analysis also verifies all
+18 group directions and 2,073,600 delivered target values. This is diagnostic
+evidence, not training admission. The source passed 854 local tests and GitHub CI.
+
+Full campaign `fourbar-campaign-20260905T185810Z-c36097a7` started at 18:58 UTC
+under PID 1532490 in `/home/orionh/HEXAPOD_runs/mkii_ramped_targets_v1/campaigns/`.
+Its new startup probe passed; nominal validation is running under supervisor
+1534642 in `nominal/hexapod-fourbar-validate-20260905T185936Z-b545949f/`.
+The campaign automatically proceeds to refined validation, qualification,
+64-environment / 3-update scratch PPO and 512-environment / 1,000-update resumed
+PPO only after each prior phase passes. The physical bounds remain unchanged.
+An SSH timeout delayed the diagnostic-to-campaign handoff; a fresh connection
+restored access. The running campaign does not depend on the local connection.

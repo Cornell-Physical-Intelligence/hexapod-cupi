@@ -97,3 +97,17 @@ Bounded diagnostic174632Z-36232e95 now compares v5 at128/1, eight environments,2
 Short v5/128 group trace completed with21.017µmmaximumclosure, all18directionspositive, four1.25mssupportgaps atsecondnegativekneestep. Compact primary/trace evidence is `artifacts/mkii_fourbar_2026-09-05/dynamics_trace_analysis/v5_groups128_20260905T174632Z/`.
 
 Source9cd8d4c introduces sixteen-step linear interpolation of the existing50Hz active motor endpoints at800Hz, zero velocityfeedforward, unchangedgains/physics/assets/gates.854tests pass;286filemanifest97ee8246a7849cb805ad65f40a3144a2f47a4746e4d74deaa9b862c3750729a6. Frozen source `/home/orionh/HEXAPOD_runs/mkii_ramped_targets_v1/source`, identityc53071afdf320f6a9d6f91de09ddc6102de74df6f45a203e3a8166a8686548ca. Bounded8envgroupdiag181945Z-ec78eb1e at64/1 isrunning; noPPO. Successfulshortdiagnostics stillrequire full32envnominal/refined qualification.
+
+## 2026-09-05 19:05 UTC — clean diagnostic and full campaign
+
+Ramped-target diagnostic 181945Z-ec78eb1e completed with no physical gate errors,
+all 18 group directions passing, at least four driven supporting feet, 25.073 µm
+maximum closure and 4.29035 N·m peak torque. Exact sixteen-step scheduling is
+verified in the compact `ramped_groups64_20260905T181945Z` evidence directory.
+
+Campaign `fourbar-campaign-20260905T185810Z-c36097a7` is running, PID 1532490;
+probe passed and full nominal is underway. Source remains frozen at 9cd8d4c in
+`/home/orionh/HEXAPOD_runs/mkii_ramped_targets_v1/source`. The current good SSH
+socket is `/tmp/hexapod_fourbar_live.sock`; the previous recovery socket timed out.
+Inspect live state before acting. No PPO yet. Priority guard 1465763 still holds
+the weather scheduler lock, with maximum expiry 2026-09-06T02:16:34Z.

@@ -209,3 +209,31 @@ A reduced linearized inertia analysis motivates the timestep: ideal closed-loop 
 ## Motor target interpolation candidate
 
 The next source revision delivers each existing 50 Hz motor endpoint as sixteen linear position increments, with zero velocity feedforward. It preserves gains, limits, assets, validation motions and acceptance bounds; see [the scheduling contract](MKII_MOTOR_TARGET_SCHEDULING.md). It requires fresh validation and is not yet admitted. The existing hardware action adapter still emits endpoints; embedded scheduling and bus latency must be implemented and measured before transfer.
+
+## Measuring throughput and preserving a long run
+
+`progress.json` is written after every completed PPO update. Its
+`iterations_completed` counts updates in that process; `last_iteration` is the
+absolute zero-based RSL iteration. Measure elapsed wall-time differences over
+several warmed updates. `collect_seconds` and `learn_seconds` describe the last
+update, but omit some hashing, logging and checkpoint overhead. A 512-environment
+update contains 12,288 transitions. The six-hour full-run ceiling requires less
+than 21.6 seconds per update before setup and finalization; no measured full-run
+ETA exists until this candidate actually learns.
+
+If measured throughput will exceed the ceiling, create `stop_requested` only in
+the exact owned training output directory, comfortably before its deadline.
+The trainer checks it after a completed update, saves `checkpoint.pt` and its
+SHA sidecar, verifies model/optimizer/normalizer/adaptive-learning-rate reload,
+and exits with `pass=true`, `paused=true`. Verify the supervisor's successful
+report, unchanged source and exact container removal. The campaign records
+`state=paused` and exits 2; it intentionally does not resume automatically.
+
+For three scratch updates followed by one thousand additional full updates,
+the final target is `next_iteration=1003`. Resume using the same source, selected
+asset and admission, the verified paused checkpoint, and
+`--iterations 1003-minus-checkpoint-next-iteration` (calculate the positive integer
+first). Use a new output directory and the guarded training launcher. A resumed
+process restores learner state but starts fresh simulated episodes; this is not
+continuous restoration of robot/terrain trajectories. Never edit the source or
+reuse output paths to extend a run.
