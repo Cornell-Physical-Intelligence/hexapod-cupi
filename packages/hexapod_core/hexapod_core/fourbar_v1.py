@@ -19,7 +19,7 @@ ASSET_BUNDLES = MappingProxyType({
         "usd_path_relative": f"robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v{version}/hexapod_mkii_fourbar_v{version}.usda",
         "closure_constraint_variant": variant,
     })
-    for version, variant in ((3, "revolute_5row_v3"), (4, "planar_d6_xy_v4"))
+    for version, variant in ((3, "revolute_5row_v3"), (4, "planar_d6_xy_v4"), (5, "physical_mimic_v5"))
 })
 TASK_ID = "Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0"
 KINEMATICS_SCHEMA = "hexapod.mkii_fourbar_v3.kinematics.v1"

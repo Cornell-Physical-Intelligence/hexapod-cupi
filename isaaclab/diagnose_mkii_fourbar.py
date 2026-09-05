@@ -60,7 +60,7 @@ def parser(add_launcher_args=None):
     p.add_argument("--steps", type=int, default=200)
     p.add_argument("--solver-multiplier", type=int, choices=(1, 2), default=1)
     p.add_argument("--diagnostic-motion", choices=("individuals", "groups", "lf_tibia"), default="individuals")
-    p.add_argument("--diagnostic-usd", choices=("revolute_v3", "planar_d6_v4"), default="revolute_v3")
+    p.add_argument("--diagnostic-usd", choices=("revolute_v3", "planar_d6_v4", "physical_mimic_v5"), default="revolute_v3")
     p.add_argument("--report", type=Path, required=True)
     if add_launcher_args:
         add_launcher_args(p)
@@ -208,6 +208,8 @@ def main(argv=None):
         usd = ROOT / kinematics["usd_path_relative"]
         if early.diagnostic_usd == "planar_d6_v4":
             usd = ROOT / "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v4/hexapod_mkii_fourbar_v4.usda"
+        if early.diagnostic_usd == "physical_mimic_v5":
+            usd = ROOT / "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/hexapod_mkii_fourbar_v5.usda"
         report["usd_path_relative"], report["usd_sha256"] = usd.relative_to(ROOT).as_posix(), digest(usd)
         result = subprocess.run([sys.executable, str(ROOT / "tools/audit_mkii_fourbar_usd.py"), str(usd)],
                                 text=True, capture_output=True, timeout=180)

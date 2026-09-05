@@ -39,7 +39,7 @@ def joint_frame(joint, side):
 
 def validate(urdf, pins, usd, contract_path=None, *, closure_variant=None):
     from prepare_mkii_fourbar_usd import (
-        mesh_sources, read_stl, check_closure_variant, REVOLUTE_CLOSURE, PLANAR_D6_CLOSURE,
+        mesh_sources, read_stl, check_closure_variant, REVOLUTE_CLOSURE, PLANAR_D6_CLOSURE, PHYSICAL_MIMIC_CLOSURE,
     )
 
     urdf, pins, usd = Path(urdf), Path(pins), Path(usd)
@@ -59,12 +59,14 @@ def validate(urdf, pins, usd, contract_path=None, *, closure_variant=None):
     check_stage_units_and_scale(stage)
     metadata = stage.GetRootLayer().customLayerData
     observed_variant = metadata.get('closure_constraint_variant', REVOLUTE_CLOSURE)
-    check(observed_variant in (REVOLUTE_CLOSURE, PLANAR_D6_CLOSURE), 'Unknown closure constraint variant')
+    check(observed_variant in (REVOLUTE_CLOSURE, PLANAR_D6_CLOSURE, PHYSICAL_MIMIC_CLOSURE), 'Unknown closure constraint variant')
     if closure_variant is not None:
         check_closure_variant(closure_variant)
         check(observed_variant == closure_variant, 'Requested closure constraint variant differs from USD')
     planar_variant = observed_variant == PLANAR_D6_CLOSURE
-    check(metadata.get('hexapod_physical_fourbar_version') == (4 if planar_variant else 3),
+    mimic_variant = observed_variant == PHYSICAL_MIMIC_CLOSURE
+    version = 5 if mimic_variant else (4 if planar_variant else 3)
+    check(metadata.get('hexapod_physical_fourbar_version') == version,
           'Physical bundle version differs from closure constraint variant')
     check(stage.GetDefaultPrim().GetPath() == '/Robot', 'Expected /Robot default prim')
     check(stage.GetRootLayer().customLayerData.get('kinematic_contract_sha256') == sha256(contract_path), 'Authored kinematic contract hash mismatch')
@@ -75,9 +77,13 @@ def validate(urdf, pins, usd, contract_path=None, *, closure_variant=None):
     source_frames = contract['joint_frames']
     joint_prims = [prim for prim in stage.Traverse() if prim.IsA(UsdPhysics.Joint)]
     usd_joints = {prim.GetName(): UsdPhysics.Joint(prim) for prim in joint_prims}
-    check(set(usd_joints) == set(source_frames), '36 physical joint identities mismatch')
-    check(len(joint_prims) == 36, 'Expected exactly 36 physical joints')
-    observed_frames, active, closures = {}, [], []
+    expected_joints = set(source_frames) - (set(contract['closure_joint_names']) if mimic_variant else set())
+    check(set(usd_joints) == expected_joints, 'Physical joint identities mismatch')
+    check(len(joint_prims) == (30 if mimic_variant else 36), 'Unexpected physical joint count')
+    # With coordinate coupling, endpoints are CAD measurement frames, not USD
+    # joint prims; all their body poses still come from the audited real tree.
+    observed_frames = {name: dict(source_frames[name]) for name in contract['closure_joint_names']} if mimic_variant else {}
+    active, closures, coupled = [], [], []
     for name in sorted(set(usd_joints) & set(source_frames)):
         joint, reference = usd_joints[name], source_frames[name]
         planar_closure = planar_variant and reference['exclude_from_articulation']
@@ -117,7 +123,26 @@ def validate(urdf, pins, usd, contract_path=None, *, closure_variant=None):
         check(drive == reference['actuated'], f'{name}: active/passive drive mismatch')
         attrs = [a.GetName().lower() for a in joint.GetPrim().GetAttributes() if a.HasAuthoredValue()]
         schemas = str(joint.GetPrim().GetMetadata('apiSchemas')).lower()
-        check(not any('mimic' in a for a in attrs) and 'mimic' not in schemas, f'{name}: mimic remains')
+        is_coupled = mimic_variant and (name.endswith('_tibia_pitch') or name.endswith('_tibia_rod_pivot'))
+        if is_coupled:
+            coupled.append(name)
+            prim = joint.GetPrim()
+            expected_schema = 'PhysxMimicJointAPI:rotZ'
+            authored_schemas = list(prim.GetMetadata('apiSchemas').GetAddedOrExplicitItems())
+            check(authored_schemas == [expected_schema], f'{name}: unexpected coupled joint APIs')
+            prefix = 'physxMimicJoint:rotZ:'
+            expected_values = {'gearing': -1. if name.endswith('_tibia_pitch') else 1.,
+                               'offset': 0., 'naturalFrequency': 0., 'dampingRatio': 0., 'referenceJointAxis': 'rotZ'}
+            for key, value in expected_values.items():
+                check(prim.GetAttribute(prefix+key).Get() == value, f'{name}: coupling {key} differs')
+            mimic_attrs = {a.GetName() for a in prim.GetAttributes() if a.HasAuthoredValue() and 'mimic' in a.GetName().lower()}
+            check(mimic_attrs == {prefix+key for key in expected_values}, f'{name}: unexpected coupling attributes')
+            target = '/Robot/Physics/'+name.split('_', 1)[0]+'_tibia_lever_pivot'
+            check([str(p) for p in prim.GetRelationship(prefix+'referenceJoint').GetTargets()] == [target],
+                  f'{name}: coupling reference differs')
+            check(not drive and not excluded, f'{name}: coupling must be passive within articulation')
+        else:
+            check(not any('mimic' in a for a in attrs) and 'mimic' not in schemas, f'{name}: unexpected mimic')
         if reference['actuated']:
             active.append(name)
             api = UsdPhysics.DriveAPI(joint.GetPrim(), 'angular')
@@ -133,7 +158,10 @@ def validate(urdf, pins, usd, contract_path=None, *, closure_variant=None):
             revolute = UsdPhysics.RevoluteJoint(prim)
             check(not revolute.GetLowerLimitAttr().HasAuthoredValue() and not revolute.GetUpperLimitAttr().HasAuthoredValue(), f'{name}: unexpected closure limit')
     check(set(active) == set(contract['active_joint_names']) and len(active) == 18, '18 active motors required')
-    check(set(closures) == set(contract['closure_joint_names']) and len(closures) == 6, 'Six external closures required')
+    if mimic_variant:
+        check(not closures and len(coupled) == 12, 'Twelve physical couplings and no external closures required')
+    else:
+        check(set(closures) == set(contract['closure_joint_names']) and len(closures) == 6, 'Six external closures required')
     roots = [p for p in stage.Traverse() if p.HasAPI(UsdPhysics.ArticulationRootAPI)]
     check(len(roots) == 1 and roots[0].GetPath() == '/Robot/Geometry/body', 'One floating-body articulation root required')
     source_zero = kin.forward_kinematics(source_frames, {name: 0. for name in contract['tree_joint_names']})
@@ -217,10 +245,11 @@ def validate(urdf, pins, usd, contract_path=None, *, closure_variant=None):
         rows = []
     deps = dependencies(usd, usd.parent)
     return {'pass': not errors, 'errors': errors,
-            'schema': f'hexapod.mkii_fourbar_v{4 if planar_variant else 3}.cpu_audit.v1',
+            'schema': f'hexapod.mkii_fourbar_v{version}.cpu_audit.v1',
             'closure_constraint_variant': observed_variant,
-            'closure_constraint_rows_per_loop': 2 if planar_variant else 5,
-            'closure_locked_axes': ['transX', 'transY'] if planar_variant else ['transX', 'transY', 'transZ', 'rotX', 'rotY'],
+            'closure_constraint_rows_per_loop': 2 if (planar_variant or mimic_variant) else 5,
+            'physical_mimic_constraints': len(coupled),
+            'closure_locked_axes': ['q_tibia-q_lever', 'q_rod+q_lever'] if mimic_variant else (['transX', 'transY'] if planar_variant else ['transX', 'transY', 'transZ', 'rotX', 'rotY']),
             'rigid_bodies': len(bodies), 'tree_joints': len(usd_joints)-len(closures), 'closure_joints': len(closures),
             'active_joints': len(active), 'mass_kg': sum(x.mass for x in read_inertials(urdf).values()),
             'mass_properties': mass, 'visual_instances': visual_count, 'collision_primitives': collision_count,

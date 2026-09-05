@@ -47,7 +47,13 @@ runtime, requires equality through qualification and learner creation, and
 distinguishes a proven blocked scheduler lock waiter from an active producer.
 Model dynamics and physical acceptance thresholds are unchanged.
 
-`isaaclab/deploy/mkii_fourbar_v1_asset_binding_pipeline.sha256` covers **all 112 historical
+The asset-binding release is preserved at `0d1ceab`. Its complete D6 group
+diagnostic failed the original closure and support checks. The next candidate
+uses native bilateral PhysX mimic constraints for the parallelogram relations,
+with all masses, geometry, actuator settings and measured residual limits
+preserved. v3 remains default; v5 needs explicit selection and live admission.
+
+`isaaclab/deploy/mkii_fourbar_v1_physical_mimic_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

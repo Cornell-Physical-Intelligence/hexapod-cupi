@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Build a NEW 31-body physical four-bar USD directly from measured CAD frames.
 
-CPU/OpenUSD only: no Isaac application, importer defaults, or GPU. The 12 source
-mimics are omitted; six ordinary revolutes close the loops outside articulation
-by default. An explicit diagnostic variant uses only the two independent planar
-closure rows; neither variant receives live-physics admission from this tool.
+CPU/OpenUSD only: no Isaac application, importer defaults, or GPU. The 12 URDF
+kinematic mimics are replaced by six ordinary excluded revolutes by default.
+Explicit candidates use D6 transverse rows or native bilateral PhysX joint
+couplings. No variant receives live-physics admission from this tool.
 The output directory must be new. URDFs and historical USDs are never modified.
 """
 from __future__ import annotations
@@ -26,7 +26,8 @@ from prepare_mkii_usd import dependencies, principal_axes, read_inertials, sha25
 
 REVOLUTE_CLOSURE = 'revolute_5row_v3'
 PLANAR_D6_CLOSURE = 'planar_d6_xy_v4'
-CLOSURE_VARIANTS = (REVOLUTE_CLOSURE, PLANAR_D6_CLOSURE)
+PHYSICAL_MIMIC_CLOSURE = 'physical_mimic_v5'
+CLOSURE_VARIANTS = (REVOLUTE_CLOSURE, PLANAR_D6_CLOSURE, PHYSICAL_MIMIC_CLOSURE)
 
 
 def check_closure_variant(value):
@@ -165,10 +166,10 @@ def author_stage(output, root, contract, meshes, *, closure_variant=REVOLUTE_CLO
         'source_cad_pin_frames_sha256': contract['source_sha256']['cad_pin_frames'],
         'physical_validation': 'not_performed',
     }
-    if closure_variant == PLANAR_D6_CLOSURE:
+    if closure_variant in (PLANAR_D6_CLOSURE, PHYSICAL_MIMIC_CLOSURE):
         metadata = dict(stage.GetRootLayer().customLayerData)
-        metadata.update(hexapod_physical_fourbar_version=4,
-                        closure_constraint_variant=PLANAR_D6_CLOSURE)
+        metadata.update(hexapod_physical_fourbar_version=5 if closure_variant == PHYSICAL_MIMIC_CLOSURE else 4,
+                        closure_constraint_variant=closure_variant)
         stage.GetRootLayer().customLayerData = metadata
     UsdGeom.Scope.Define(stage, '/Robot/Geometry')
     UsdGeom.Scope.Define(stage, '/Robot/Physics')
@@ -207,6 +208,10 @@ def author_stage(output, root, contract, meshes, *, closure_variant=REVOLUTE_CLO
         for index, collision in enumerate(link.findall('collision')):
             author_collision(stage, path+f'/collisions/collision_{index:03d}', collision)
     for name, frame in frames.items():
+        if closure_variant == PHYSICAL_MIMIC_CLOSURE and frame['exclude_from_articulation']:
+            # The equivalent passive-coordinate constraints below replace the
+            # external loop joint. CAD endpoints remain in the hashed contract.
+            continue
         planar_closure = (closure_variant == PLANAR_D6_CLOSURE
                           and frame['exclude_from_articulation'])
         if planar_closure:
@@ -244,6 +249,22 @@ def author_stage(output, root, contract, meshes, *, closure_variant=REVOLUTE_CLO
             drive.CreateMaxForceAttr(5.5)
             drive.CreateTargetPositionAttr(0.)
             drive.CreateTargetVelocityAttr(0.)
+    if closure_variant == PHYSICAL_MIMIC_CLOSURE:
+        for leg in kin.LEGS:
+            reference = '/Robot/Physics/'+leg+'_tibia_lever_pivot'
+            for suffix, gearing in (('tibia_pitch', -1.), ('tibia_rod_pivot', 1.)):
+                prim = stage.GetPrimAtPath('/Robot/Physics/'+leg+'_'+suffix)
+                # Native PhysX bilateral impulse constraint:
+                # q_target + gearing*q_reference + offset = 0.
+                # This is not a kinematic copy or a passive position drive.
+                prim.AddAppliedSchema('PhysxMimicJointAPI:rotZ')
+                prefix = 'physxMimicJoint:rotZ:'
+                for name, value in (('gearing', gearing), ('offset', 0.),
+                                    ('naturalFrequency', 0.), ('dampingRatio', 0.)):
+                    prim.CreateAttribute(prefix+name, Sdf.ValueTypeNames.Float, custom=False).Set(value)
+                prim.CreateAttribute(prefix+'referenceJointAxis', Sdf.ValueTypeNames.Token,
+                                     custom=False, variability=Sdf.VariabilityUniform).Set('rotZ')
+                prim.CreateRelationship(prefix+'referenceJoint', custom=False).SetTargets([reference])
     stage.GetRootLayer().Save()
 
 

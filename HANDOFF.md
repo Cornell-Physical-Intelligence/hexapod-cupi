@@ -81,3 +81,7 @@ No physical-model PPO has started. Full campaign004 failed closure; completed sh
 Current priority guard1407273 holds `/opt/wx/gpu.lock`; status/release/campaign selection files are in `/home/orionh/HEXAPOD_runs/mkii_fourbar_diagnostics_v1/priority_20260905T0700/`. User explicitly reaffirmed top priority over weather. Guard expires17:02:04UTC at the latest. Live checks remain necessary.
 
 The new release records actual selected physical bundle identity and requires matching CPU/Kit/runtime/source dependencies, nominal/refined identity, and exact pre-learner admission. CAD kinematics JSON and v3/v4 geometry remain unchanged. Default remainsv3; full v4 runs require explicit selection. Continue candidate comparison, full32×1000standing+2400driven nominal/refined, then scratch and full PPO only if admitted.
+
+## 2026-09-05 16:16 UTC — v5 physical coupling preparation
+
+Complete D6 group diagnostic `072121Z-16d523c4` failed (0.505577 mm closure; raw42.0734 N·m, applied5.5 N·m). Source remains0d1ceab on Spark. Native physical-coupling v5 candidate is separate; see `docs/MKII_PHYSICAL_COUPLING_CANDIDATE.md`. It retains30tree coordinates and31bodies, replacing6external closures with12bilateral internal constraints. Defaultv3 remains; explicitv5 will run the unchanged full admission campaign. Three parallel follow-up reviews hit the account usage limit, so the primary agent continued locally. No physical-model PPO has started.
