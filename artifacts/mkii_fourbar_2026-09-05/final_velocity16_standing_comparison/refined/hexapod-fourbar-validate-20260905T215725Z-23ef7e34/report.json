@@ -1,0 +1,4686 @@
+{
+  "schema_version": 1,
+  "task_id": "Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0",
+  "pass": true,
+  "errors": [],
+  "simulation_training_admission": false,
+  "hardware_admission": false,
+  "steps_requested": 600,
+  "steps_completed": 600,
+  "driven_steps": 0,
+  "num_envs": 32,
+  "solver_multiplier": 2,
+  "terminated_count": 0,
+  "truncated_count": 0,
+  "windows": {
+    "startup": {
+      "substeps": 1920,
+      "height_sum": 8341.85546541214,
+      "min_height_m": 0.13330471515655518,
+      "max_applied_nm": 1.6167833805084229,
+      "max_demand_nm": 1.6167833805084229,
+      "max_closure_point_m": 1.5090690794750117e-06,
+      "max_closure_axis_chord": 9.096203825720295e-07,
+      "min_nonfoot_clearance_m": 0.025241002440452576,
+      "nonfoot_contact_env_substeps": 0.0,
+      "min_support": 0.0,
+      "max_envelope_excess_nm": 0.0,
+      "max_continuous_excess_nm": 0.3560371398925781,
+      "min_burst_headroom": 0.5000417232513428,
+      "invalid_samples": 0.0,
+      "max_passive_relation_error_rad": 1.2576580047607422e-05,
+      "max_passive_velocity_relation_error_rad_s": 0.765599250793457,
+      "passive_velocity_relation_squared_sum": 11.95022391363577,
+      "max_closure_relative_point_velocity_m_s": 0.013587867841124535,
+      "closure_relative_point_velocity_squared_norm_sum": 0.009145784030939585,
+      "mean_height_m": 0.13577238713235903,
+      "passive_velocity_relation_samples": 737280,
+      "closure_relative_point_velocity_samples": 368640,
+      "rms_passive_velocity_relation_error_rad_s": 0.004025981685091768,
+      "rms_closure_relative_point_velocity_m_s": 0.0001575104028108976
+    },
+    "settled": {
+      "substeps": 7680,
+      "height_sum": 33354.5559387207,
+      "min_height_m": 0.1357119232416153,
+      "max_applied_nm": 0.755706250667572,
+      "max_demand_nm": 0.755706250667572,
+      "max_closure_point_m": 1.5090690794750117e-06,
+      "max_closure_axis_chord": 8.42969882342004e-07,
+      "min_nonfoot_clearance_m": 0.02536216378211975,
+      "nonfoot_contact_env_substeps": 0.0,
+      "min_support": 5.0,
+      "max_envelope_excess_nm": 0.0,
+      "max_continuous_excess_nm": 0.0,
+      "min_burst_headroom": 0.500669002532959,
+      "invalid_samples": 0.0,
+      "max_passive_relation_error_rad": 7.68899917602539e-06,
+      "max_passive_velocity_relation_error_rad_s": 0.7144862413406372,
+      "passive_velocity_relation_squared_sum": 6.995956069475157,
+      "max_closure_relative_point_velocity_m_s": 0.012560686096549034,
+      "closure_relative_point_velocity_squared_norm_sum": 0.00851729442108473,
+      "mean_height_m": 0.13572003555794557,
+      "passive_velocity_relation_samples": 2949120,
+      "closure_relative_point_velocity_samples": 1474560,
+      "rms_passive_velocity_relation_error_rad_s": 0.0015402006936661643,
+      "rms_closure_relative_point_velocity_m_s": 7.600105231860352e-05
+    }
+  },
+  "physics_substeps": 9600,
+  "scope": "Nominal planar standing and small driven perturbations; not full-range or all-terrain qualification",
+  "contract": {
+    "schema": "hexapod.fourbar_training_contract.v1",
+    "task_id": "Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0",
+    "sha256": "d3442002687f4ff7b34bd2e24134a8e3265a87e05221d3cbf33f2630c0b52d36",
+    "files": {
+      "artifacts/mkii_step2_2026-09-04/physical_fourbar_reference/cad_pin_frames.json": "1213dced0e17fa0ad2cdf58f14b46c181e028a8341c19e07d706853378a6a825",
+      "configs/experiment/stage2c_accel.yaml": "04fbf3f69e03e5caaa5ed2db6d3c0aac8d841669a551396fdcaaa7b88d46d848",
+      "configs/intervention/probe21_bilateral.yaml": "720a28f80df9df2f1e9c82387562f0dc97bd64b9be4ea64e60e25b5a8dc2ad22",
+      "configs/mkii_fourbar_v3_kinematics.json": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+      "configs/mkii_v2_simulation_manifest.json": "be9457c0eb65fdc64937c1193fa2fcd27736e31b74ea770bd822a6a41f5cd0c3",
+      "isaaclab/analyze_stage2c_probe_sweep.py": "9b9494434a1d5c7e6ca38eddb12f08f68eb55c48fa28ea55e02e200be9800519",
+      "isaaclab/bootstrap_phase2_recovery.py": "1b9a06c510ae86925d069f66c5e86ec1d7f7a19f5c11f81a8261f58bf5fb8467",
+      "isaaclab/diagnose_mkii_fourbar.py": "fdcafd25db72281ec649d5bb2171dc3491e8a7c895cc1afe8fb1570038762420",
+      "isaaclab/evaluate_checkpoint.py": "134c82ee812ab8049cd51e77c44a1638daedd6e52b3e61afb29d44e837724775",
+      "isaaclab/evaluate_stage2_command_transitions.py": "0170abd714eb4b57880d804f6762935ca8df9675ca89fe13591c8d467ccb42d8",
+      "isaaclab/grade_stage1_recovery.py": "3dd99a7760053d506d41a8d4b0daff58e4734f6ac0c4599cdd3a4071f9063e9c",
+      "isaaclab/grade_stage2_axis_acquisition.py": "edcf3ff3e87afd7298fe0d0c0be1d3c71aec26bdc49e8a0abd96e0a7f5362778",
+      "isaaclab/grade_stage2_command_transitions.py": "275d8aa1375cf775d01d5b101c3d85576aa1a6d44587c820f63bfde13bb42b62",
+      "isaaclab/grade_stage2b_lateral_acquisition.py": "17c01527a27e4715715f437eea1aec7f2765e26d9d92c2b064bd1552abdd5f37",
+      "isaaclab/grade_stage2c_robustness.py": "81317455b0e764fc632e67e944b5d1fa6e35421224800f716a8807da9b8e1e66",
+      "isaaclab/grade_stage2c_stable_forward.py": "6e20012f7773141f3d1b3240d408e51101f968bf1cbc005a40bd3d4f4f941b92",
+      "isaaclab/grade_stage2d_homotopy.py": "dcaace8c4767c4867cbd0e55f91e86ccd9e1c5dab19bb5eead672da7f9dcc4fb",
+      "isaaclab/grade_stage2e_static.py": "71ed28960b6fbbc4f30051660b76d34867f6112b1220d732ea00b9d041ff9eae",
+      "isaaclab/hexapod_phase3/__init__.py": "de279775658f70c95585af9ada60cfc656c98449b36f49d93dab60f7298cee6b",
+      "isaaclab/hexapod_phase3/d455.py": "ebc379348edc8cb19efc0f8c5bdd98698ad6e33bb428c7c4bb0ec95e4d2ea464",
+      "isaaclab/hexapod_phase3/mid360_pattern.py": "d560a7b60d34f28e8563a345c528e5457a1a96cb2efde30ae9125569737977e0",
+      "isaaclab/hexapod_phase3/sensor_cfg.py": "edea9fbcd482ec520020f45cc780e24435165234ffc5465a044d2e961bf31e5c",
+      "isaaclab/hexapod_phase3/sensor_model.py": "101f6a59488f702117e93da87354b0d68c3d475e50421f445a12d9caf1491336",
+      "isaaclab/hexapod_rl/__init__.py": "d29cdba1aabbc082f1a0205989c1ccb65ba5e1de471539519c26dbbe61d1db13",
+      "isaaclab/hexapod_rl/asset_cfg.py": "5840c53e7d923596c610d16b78170223f3e85f6cdd4539837975c6433f0aadcc",
+      "isaaclab/hexapod_rl/command_sampling.py": "f9eccf0c7e46bb5dad95916bf5375c08fc76c17f1181eaf889b4411521e9e924",
+      "isaaclab/hexapod_rl/env.py": "b08e7f49b8d10815fbbab6db007c203bd254c49d341a0994337bfad25a31cb69",
+      "isaaclab/hexapod_rl/env_cfg.py": "94abd478d6744cbf6d692be2488bf79983c6e280445aa40513956272b217884d",
+      "isaaclab/hexapod_rl/phase1_v2_cfg.py": "131e0a5f76fb0ddde5bfa3204dc1fb08b49454415149cd2413aa9155fe9341b6",
+      "isaaclab/hexapod_rl/phase1_v3_cfg.py": "e3935d912797645ab15d09f803b6af27c2508c4e6400bf6372f6775fd311a65e",
+      "isaaclab/hexapod_rl/phase1_v4_cfg.py": "7ae5a2f963f3eb78176fee6a9ce5375789d51969ddd1afaff2676a7ac6533bbb",
+      "isaaclab/hexapod_rl/phase1_v5_cfg.py": "0151f0e78a9c5d28b48b658b9e8cf06b2ccf9fde3354b77b1c568e604a1eb8cd",
+      "isaaclab/hexapod_rl/phase2_cfg.py": "3327221e478281b640a6b745bc5ae150098ee5c51067947de9867f703f38b2c5",
+      "isaaclab/hexapod_rl/phase2d_cfg.py": "892978b07b5a1f59a4dd2f7f1b4d65c6805a3efd235021a4f44f1fd170dce552",
+      "isaaclab/hexapod_rl/phase2e_cfg.py": "695212490c83317fc26948654e577557966af5f0a76d77dcc2e7638061d8ab0a",
+      "isaaclab/hexapod_rl/phase2g_cfg.py": "ebb7f2c91104229f40cc42ef2e881ecf6d44f5704b36d7005c32722b2c382cbb",
+      "isaaclab/hexapod_rl/ppo_cfg.py": "b513a8f52c3ed6a50ead7e00940df2ab94ab1b5c57d79404c3b7eea0f7c6938b",
+      "isaaclab/hexapod_rl/register.py": "efd1c65f478667a402be86d6c9ce4b296155d7793d5ea7e0d43eb3d37f1266ce",
+      "isaaclab/hexapod_rl/showcase_sequence.py": "02568483fba7fa6fe783150e0d46a8fbb8fc1002ef8c8cfd2eabc36b4d755cd0",
+      "isaaclab/hexapod_rl/tasks/__init__.py": "7346e7e680f0940bb4c8b9f312e2262d2fb1d797da44f97947c16e96afc35df1",
+      "isaaclab/hexapod_rl/tasks/mkii_fourbar_v1.py": "8d413dcef0bb6f22c8f4e70306a357009f4ab0b536b7bc48b5a671ae634d0443",
+      "isaaclab/hexapod_rl/tasks/mkii_v2.py": "bbc3744289906e413cf72ff04e17182b49eff43fb6eb56ab18c8ac9a4b9d8e86",
+      "isaaclab/merge_stage2c_probe_shards.py": "3f157aae83575455db4742975a87095517f8bf51768ed90276e7c873e2c9e744",
+      "isaaclab/phase3_lidar_placement_probe.py": "967f61e9a97206f562cb750864b29954174a7524f5aaa158d2025544ee01d23a",
+      "isaaclab/phase3_sensor_smoke.py": "757e84a0af082afb700e97b3092f4e17731e0f4d046d98940c50384b7aac2fa0",
+      "isaaclab/showcase_phase2.py": "4b8be8319beaa28f7fcf448d8f3419eafb09064a0107e799fdb43f7fad1b52f9",
+      "isaaclab/stage2_command_transition_contract.py": "c463c84b2b885f7ab6a5f11bc8a0f4c70d3523a3ef3eac81f3971a0c1b07617b",
+      "isaaclab/summarize_stance_validation.py": "781c757dfd5dbef0ebbb4cf2c7788ca82a63322070de6f8fd54cc6133bac47ac",
+      "isaaclab/train_mkii_fourbar.py": "409afb0372c1c3523c932622c6ef8c9d668110b082600958bbfa65227a531996",
+      "isaaclab/train_mkii_v2.py": "101bb57f7fcc12678fa57d9f4e10cee114271a312d6f99ca7958a1e92e99fce7",
+      "isaaclab/train_model_only_resume.py": "294c84b8e462e95d25acb6a7031b7b470f297f0a10aafc2d3a078f4ab48a0aed",
+      "isaaclab/validate.py": "5dc65395cfbb615cf9a1eead6baeb4bc36f2e51c35567576c72b139270c42d78",
+      "isaaclab/validate_mkii_fourbar.py": "f37fe31771552224cdcd9f08c14d1e278c135f8c30f264cce893bba2082e5a3e",
+      "isaaclab/validate_mkii_v2.py": "15d96626723392b1e44be09f4afae51f1ba4e65d10543c508cd5e99206f0a5f6",
+      "packages/hexapod_core/hexapod_core/__init__.py": "2578adf3030765741c2bcc05d32fc33a87cbc18f1e0c362791e5c90ac8f17dff",
+      "packages/hexapod_core/hexapod_core/action.py": "2f52720f2d57f9ba00e1dc6069821f19be7da91a802d81bb0147a2e76560a87d",
+      "packages/hexapod_core/hexapod_core/actuator.py": "c7770f045692180c7a874009190473db36b418b41439f7c6fd9a9307cc40d58d",
+      "packages/hexapod_core/hexapod_core/cad_manifest_v2.py": "606915e442565640ec6fccdd08971d2712f615f28b426bbc984aede1bf4a1818",
+      "packages/hexapod_core/hexapod_core/command.py": "01d43f3622e512089f81ddcb3666aee336571454ba474dd28214447f6dde26d1",
+      "packages/hexapod_core/hexapod_core/fourbar_v1.py": "72d62c2ff8d340bde870d84df1a426be24b6a55529459bbad3ff1c0a3a363778",
+      "packages/hexapod_core/hexapod_core/frames.py": "13b19c51cc0ac4d87ea0ee74d0859647e1c72001b8630732c18b628dabc521c4",
+      "packages/hexapod_core/hexapod_core/joints.py": "a3f353295ad58b23ae9642d1779132dda1155a226ff5923098deb2e71ec4fe59",
+      "packages/hexapod_core/hexapod_core/joints_v2.py": "f962c573b8ed97dd8d6c59380c146ce67c26912dc7a7e5eb94b4dc79463eb0f9",
+      "packages/hexapod_core/hexapod_core/observation.py": "6aed69cf5f97c607249ba51accd45342811473daed5304920ff5251607b4f591",
+      "packages/hexapod_core/hexapod_core/rs05_v2.json": "177875078f6b51de0935c129aacd278b16e753086da034848da5d7d4148b870e",
+      "packages/hexapod_core/hexapod_core/rs05_v2.py": "e04c8746bdb4324dcede629b7d70c40da3ca1a445dd6819a57029610ca0288d5",
+      "packages/hexapod_core/pyproject.toml": "185eb6fd6a84ce4d83af0eed730ba84115edd689d9726a64471d9e96c7e31c3c",
+      "packages/hexapod_env/hexapod_env/__init__.py": "c457c54c432ad7f9f0bc7a1d2b74e551b7646ce427a3c028f474419c7c0d0ee9",
+      "packages/hexapod_env/hexapod_env/actuators/__init__.py": "8fc734453766191efbb024257787e49d9d2dec3ab7c4073cecbb15529961e2d2",
+      "packages/hexapod_env/hexapod_env/actuators/rs05_v2.py": "4a4e02a869f88265cd6cd780055b7237eed709fac4da321df39d12803a537f65",
+      "packages/hexapod_env/hexapod_env/actuators/rs05_v2_model.py": "c905c84e4a34688d5a93e0668df6d087a9484a32c803f95f03b897950d5efb15",
+      "packages/hexapod_env/hexapod_env/actuators/rs05_v2_runtime.py": "3456545bf68baebd45317a20933dd08800b7de817e93440868b19db0b490a04c",
+      "packages/hexapod_env/hexapod_env/asset_cfg.py": "6cf3caf1e608f0e24a24ef84196e3831b986ab401e85aaebe950b0a4d2fe89ca",
+      "packages/hexapod_env/hexapod_env/assets/__init__.py": "2fb4aab073fc979ed29fda127e74a847c9f53dba6b51932df7525de17d5e0fbe",
+      "packages/hexapod_env/hexapod_env/assets/articulation.py": "ec694c703c33a3f2273f5a5678cf7ad080a0c64ba19e7a89965f19c7d45465c1",
+      "packages/hexapod_env/hexapod_env/assets/mkii_v2.py": "825ebecb77c1ca8eac1fd353f3276d701bb3dc3ce2ad25400bfaafba36042ef7",
+      "packages/hexapod_env/hexapod_env/assets/spec.py": "4b61711e9674258aac29a85fe37866d0c015d781dbc1589aa5697a00386c4b58",
+      "packages/hexapod_env/hexapod_env/command_sampling.py": "4e88c8487c5bdf4377d5a66ff11f1c8c4767750350e9bb1297450dbb2858f7f2",
+      "packages/hexapod_env/hexapod_env/env.py": "1c6babe8973a8b8c8944238a185019ee0fb03a758046f1e2cfc3bb70f1bff844",
+      "packages/hexapod_env/hexapod_env/env_cfg.py": "f74f3dc05341218cf524dd7f44aa0b875bb978d601f161f839e5bd2c9d3ccf6e",
+      "packages/hexapod_env/hexapod_env/phase1_v2_cfg.py": "34b88ca9857668191f33c5f785bb5af6ed61b96415abfe4071e1287b03e02a91",
+      "packages/hexapod_env/hexapod_env/phase1_v3_cfg.py": "c494b3527e5cb00ad52495da59ac7854f2d4aaf24c54ff1346b02685857a12df",
+      "packages/hexapod_env/hexapod_env/phase1_v4_cfg.py": "c2948aaa3fa36b1a2c956c842804681fab2c3aa174499ec2f5eba9f5956672bd",
+      "packages/hexapod_env/hexapod_env/phase1_v5_cfg.py": "9def7618be9bfab33551a83e2db62f119dda3afaf8860349b00deb7c4a67dc57",
+      "packages/hexapod_env/hexapod_env/phase2_cfg.py": "32d90902c914b86c55c8db41451913efdc10e0196764844149e014dc172a938d",
+      "packages/hexapod_env/hexapod_env/phase2d_cfg.py": "d1f609c9cf6baaab282f3bfdab7a7efd22d913fd3b89cc23f9f3e231e73c4a9c",
+      "packages/hexapod_env/hexapod_env/phase2e_cfg.py": "226a1e3b462e404a8fcaff19cc224bc0d9195afa45bd4e777121c73dcae01d4c",
+      "packages/hexapod_env/hexapod_env/phase2g_cfg.py": "4d94da8f4a6b7f2ff6be7806d87919809dc0bb586e0f504eb32b0ac4794b7ebb",
+      "packages/hexapod_env/hexapod_env/ppo_cfg.py": "4b6e4185e2b9095e18152933b31ec7a13d71d247864b934f88ab493b4db94c16",
+      "packages/hexapod_env/hexapod_env/register.py": "6bb0ecf94a0ef4ebc591818c15e08e402072938441143a700190ad4b66704453",
+      "packages/hexapod_env/hexapod_env/rewards/__init__.py": "8d69c4460ce2693164bde4ad45d633eb3799f981adab182b6c68350f0a96be99",
+      "packages/hexapod_env/hexapod_env/rewards/actions.py": "b3e802a6571af9157dc7082837628509d23f43065bd6312e4fd1a00d520ee843",
+      "packages/hexapod_env/hexapod_env/rewards/axes.py": "68372b52d2b1755d94dd5b09054159674c71f6a84b754847504370d015692e30",
+      "packages/hexapod_env/hexapod_env/rewards/contact_wrench.py": "339c2fc83b35abeeeedb41c2c0db602a4b4ccf02b218cf63a73178e32f90780e",
+      "packages/hexapod_env/hexapod_env/rewards/gait.py": "50e0ab039ac1e0eecbbde17ae59026fafb63a2f05029aa56aea70d7b2d554175",
+      "packages/hexapod_env/hexapod_env/rewards/stability.py": "26f3f55dbf495a3fbe3cc34d164ebe4f43a5994f4c87674ee0fb66345802aa6e",
+      "packages/hexapod_env/hexapod_env/rewards/torque.py": "5fac5db318eadf2a94c1d4035f3d86e1ed11be92323b9d019a1b89136e63d399",
+      "packages/hexapod_env/hexapod_env/showcase_sequence.py": "8a2449f447ca8c493e7ba22c155c59ef7a083db200bff71a1f2349f9bf42e5e1",
+      "packages/hexapod_env/hexapod_env/tasks/__init__.py": "bf80664bea4d55832b96735d087637715e997a535c067ceac308f573bf96f829",
+      "packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/__init__.py": "4b1449586daa579da53aa23e6c180927f3d37f82e75e42f4babd03cc3192ccef",
+      "packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/collision_isolation.py": "72d573e0e9550d38d494dae5507265da68b6d5693a976d002688cfe092cfd5c3",
+      "packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/config.py": "b3e12f0f878450e68298b219006914bfcc81f1216ea1d689c9bfd0b9f4f6f137",
+      "packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/env.py": "b3f28a1bbacc41521f56133aef5d6459de29a5564487832ca310c72f51a8f4ee",
+      "packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/math.py": "fa4884098bbc1f7c1bdd696d6093591d0c9fc0bba46009231d24c5a13611d170",
+      "packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/register.py": "35c21f58a4232aff81efa191ac3969d228eebe044c232a02c733d805f57b00df",
+      "packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/target_schedule.py": "f81f555963f067a8d02e89b2d481c3a0e3c19a64b89b7166f32399359b50557c",
+      "packages/hexapod_env/hexapod_env/tasks/mkii_v2/__init__.py": "16baf803ed668d2cccb2651b366fd180e00ff557583e50d0a1e805c75552c7cc",
+      "packages/hexapod_env/hexapod_env/tasks/mkii_v2/config.py": "357ac029e14beed096958aafb0cc858ccbd51141cfc71b3970590a20f06230c9",
+      "packages/hexapod_env/hexapod_env/tasks/mkii_v2/register.py": "3a1132b6b8f0d4456669085cad2122d01a6ad26fa9b50ebd975e7d5a869a6149",
+      "packages/hexapod_env/pyproject.toml": "11b8875a389d531c6a317d3b649034d0190e1549f2faac00eb17bcd1e5e24275",
+      "packages/hexapod_eval/hexapod_eval/__init__.py": "b3c9a86ecf313b7b3871f562589cf04f15ab8df263673710423aad77ff90a44a",
+      "packages/hexapod_eval/hexapod_eval/__main__.py": "e75b3ea0fc79e3c36be0eb417eaa02d7264203a38a4374e9c98d69794ad03436",
+      "packages/hexapod_eval/hexapod_eval/dispatch.py": "08648577cf436394f0da12eabcf393b383a1beb02f982c2a04fec59bb8eb2c42",
+      "packages/hexapod_eval/hexapod_eval/gates.py": "1da095a982300120c69126221045d856747b02418f3857bb4e9df816b44c913d",
+      "packages/hexapod_eval/pyproject.toml": "468636932a1fa53eb55047d1a00f64059a230b356d903b8d671a878174fab49f",
+      "packages/hexapod_nav/hexapod_nav/__init__.py": "c289ca339c00cea9bc180699e3cd02cc5e1fce48efcd57d8a7689ac3ab871c6f",
+      "packages/hexapod_nav/hexapod_nav/producer.py": "a33e23524b1718637d61b8f84a8eda1adc5950ca1bb0425ef8097bf3649bb1f6",
+      "packages/hexapod_nav/hexapod_nav/waypoint.py": "4ebac6028daf58e496f1f26716dfe17e6c3a24d1e9886976a2a83e224090c0dd",
+      "packages/hexapod_nav/pyproject.toml": "39b605a9af359f58cf2d6cc5a5bdb3bc329210cd13b42471a9288516fefcbb61",
+      "packages/hexapod_runtime/hexapod_runtime/__init__.py": "c8e5dbd0a5fbc084110fb4d18d9cf5de0b79d713a9a803720b0300a9f9fb2217",
+      "packages/hexapod_runtime/hexapod_runtime/action_pipeline.py": "c40a68ca92452f9757771dad11ca6e1d1864809553cdd05bd63c9c23f3389c9b",
+      "packages/hexapod_runtime/hexapod_runtime/cad_action_pipeline.py": "06961b54adbaa09935fff2c7e58959211856e9541c455992b43432e39972a031",
+      "packages/hexapod_runtime/hexapod_runtime/fourbar_adapter_v1.py": "574b84f4ba0136bc8393236fd23ace3c0484cd4261bbce437e04aafd6b83d081",
+      "packages/hexapod_runtime/hexapod_runtime/observation_builder.py": "923f3a9453e5a1d7fc3f925e5e9355d17027bb97a79630cc9009129321495b66",
+      "packages/hexapod_runtime/pyproject.toml": "73476bff0a59eb012c78ac87769380bac3675789ea3ba2200d12b23f7e52c6c5",
+      "packages/hexapod_train/hexapod_train/__init__.py": "7b0b7a61cb9f77daa538f3ca690dc5bb4626285b66f69a7012aeb2b778511157",
+      "packages/hexapod_train/hexapod_train/cli.py": "a11e530d593a8a1f467ee582ff889f05206a324ed615941191760a0193228647",
+      "packages/hexapod_train/hexapod_train/compose.py": "b2a814b6d716436c6c47fc03eaf3aca9f55e320006c2b78587e13bdd38001919",
+      "packages/hexapod_train/hexapod_train/configio.py": "e910c33ce540a432e65ead8a521b4b21cbc30ddcf6e7c300be70ec4812549ee2",
+      "packages/hexapod_train/hexapod_train/contract.py": "bf7c85c86fe27eff7f3d3f91e69bf580960290d9d9c86dca7d424ee083534961",
+      "packages/hexapod_train/hexapod_train/gates.py": "2b1b410fcdeb7ec55e1ec2660f1c751ae3506b329f424d8b0afb3ae4b9b1866b",
+      "packages/hexapod_train/hexapod_train/labels.py": "6637a92b3c1eea4420cca60b677bb39c00a5158302c0940e3f406192ab26ae03",
+      "packages/hexapod_train/hexapod_train/supervisor.py": "4ed4778f55e261ddd67318457cb966e38dc4016f2b5806fb091d79affb8f7116",
+      "packages/hexapod_train/hexapod_train/system.py": "0005f526d090393bffccffec4356a03971e2ece10b3fc3b343451900dc599a51",
+      "packages/hexapod_train/pyproject.toml": "4245f37c510ca892fef5ae98ec4f230eb18de446266b9dc2b35d7d6dc3d2f295",
+      "robot/hexapod_mkii_assy/meshes/bearing_insert.stl": "45c36d3fddca00476b7cc0bfb40d47e64b19b3db1493f8866bb84ab53d3dfeed",
+      "robot/hexapod_mkii_assy/meshes/bottom_enclosure.stl": "577f284a02841d5d7b3e52f78b618e26f1d7301e7e361ab8ed6cbc46aedf52dc",
+      "robot/hexapod_mkii_assy/meshes/bottom_plate.stl": "64a57048a0e6f27170df6b0ee275208b8851f769a818b80dea2215fea3171ae5",
+      "robot/hexapod_mkii_assy/meshes/cirpattern1_1.stl": "68c053f7bd27e071c5bb0671ebffe2fc708f60bf8f346db2aead961d246aadbf",
+      "robot/hexapod_mkii_assy/meshes/cirpattern1_10.stl": "687f9b525bc4264eb94902b4bcce7ca8914c29efe187074f552107684a008590",
+      "robot/hexapod_mkii_assy/meshes/cirpattern1_11.stl": "66422b214fa38c89b5eb0589d78438d74aef925e0204931f711d6598c9fe9c95",
+      "robot/hexapod_mkii_assy/meshes/cirpattern1_12.stl": "b5a54b3c38576eaa393af7649f1b93bc5f7e3542ab001ba754650b28562a1c2a",
+      "robot/hexapod_mkii_assy/meshes/cirpattern1_2.stl": "830a95b1632cb708e40b5cb7489e0d12267352040516e634abad18d4e8330df5",
+      "robot/hexapod_mkii_assy/meshes/cirpattern1_3.stl": "ac9634ae0f60e903d15579c0e98ff7bb41184b013269623f573508f1a3d3f2fb",
+      "robot/hexapod_mkii_assy/meshes/cirpattern1_4.stl": "68b33c52393b826c1e1933bf7323219699ab97fb36e2778c412968be018f8705",
+      "robot/hexapod_mkii_assy/meshes/cirpattern1_5.stl": "f6fcc50d9185646aa9feff37a5e4fcdd7293b18333b4ff024f255523691ac0d9",
+      "robot/hexapod_mkii_assy/meshes/cirpattern1_6.stl": "992ff44896cb30e0e74adc3a40ca0e27b02eba92a94dac9d12a501936817f512",
+      "robot/hexapod_mkii_assy/meshes/cirpattern1_7.stl": "65cf84b2cb3b4909efca001b9bd1ea5456e2c2f3e1194df7f160dfa469614ace",
+      "robot/hexapod_mkii_assy/meshes/cirpattern1_8.stl": "174d7af35adcb2ce132253595bd951e2f02f3d2381f15a93471830c4103c1c6e",
+      "robot/hexapod_mkii_assy/meshes/cirpattern1_9.stl": "63e769487fc819984b911823c12d97e0b47c703fc8541cb2b3ba1f72d1c5c995",
+      "robot/hexapod_mkii_assy/meshes/cirpattern2.stl": "c05e482f8a5f8bb0732f031edbd822c8ca9ecec403a65c3bae909f550da8ade6",
+      "robot/hexapod_mkii_assy/meshes/cut_extrude2.stl": "d134f41b91bd8056392e0e907aadf36c8b54f5d3291dca6bc9777c8426189547",
+      "robot/hexapod_mkii_assy/meshes/femur_plate.stl": "2ca8b1fd41b6f134ecb043dd94f85514e13de24f47c6ca0b48c181ef1f678b7b",
+      "robot/hexapod_mkii_assy/meshes/femur_plate_cover_large.stl": "16ddb51de1b83c5c5b1ec825d6257530ef01c90e544c1784b037edca01ebe360",
+      "robot/hexapod_mkii_assy/meshes/femur_plate_cover_small.stl": "6ad7d14065930936a8a1a3972c9a70552dc132a7c69547740b4f96b8b31fda35",
+      "robot/hexapod_mkii_assy/meshes/femur_plate_motor_spacer.stl": "abcb5133547b7b58157c49fecfa62b1e1b6e8cb822c87b966332909815343ac8",
+      "robot/hexapod_mkii_assy/meshes/femur_plate_non_motor.stl": "2aa76b8c37edf62e6a40bde749eb652a6fa42fcbe748cb0a0503767e0f21275f",
+      "robot/hexapod_mkii_assy/meshes/first_joint_bottom_plate.stl": "ca3991253587835343e0acb7a6f84e1a522560f3c4d18dc64f14fb1c350d327b",
+      "robot/hexapod_mkii_assy/meshes/first_joint_spacer.stl": "64dce807cca542ffd71230f3b659a95013bca2a127b5e135c52ca5f275f33f23",
+      "robot/hexapod_mkii_assy/meshes/first_joint_top.stl": "be34fff110a5d74420536eb8f239544ff8cc8d80e68bd8a5ee3d9ac15fed4290",
+      "robot/hexapod_mkii_assy/meshes/hex_socket_head_countersunk_screw_grade_c_m3x0_5_x_10.stl": "ad9009aea4f6cedf83d68a8b8e0f787dcb53144ba1ead3cc5f1181cd90cca34d",
+      "robot/hexapod_mkii_assy/meshes/m3_countersunk_hex_drive_screw__8mm_l__alloy_steel.stl": "4ca7cdd28a861d966b2e4a666e91eeae07aa570eb7fcad736b5891683e8dbe65",
+      "robot/hexapod_mkii_assy/meshes/m3_low_profile__socket_head_shoulder_screw__45mm_shoulder_l__4mm_l__18_8_ss.stl": "3c91de171c7854c4d8053fd56dc1a4c19f45c2f12f3e5900894e5649cb68efd3",
+      "robot/hexapod_mkii_assy/meshes/m3_low_profile_socket_head_screw__12mm_l__18_8_ss.stl": "bf649ceb531e90620bff64f9282b33256c4b0bfa8b02b651d6a537562abe51ba",
+      "robot/hexapod_mkii_assy/meshes/m3_low_profile_socket_head_screw__5mm_l__hs_steel.stl": "bd088c8f570139fc0a0134a4f441800b23711bb9c882aa73b3635b2d7f66ef66",
+      "robot/hexapod_mkii_assy/meshes/m3_low_profile_socket_head_screw__6mm_l__18_8_ss.stl": "a532f0a42f108a4892206c88027747f6a7808d9e310cf53725ec740e1f437b02",
+      "robot/hexapod_mkii_assy/meshes/m3_low_profile_socket_head_screw__8mm_l__18_8_ss.stl": "68a14befa8dab304beab13cdb1980e12b94f2a1c882aefdf747079687f570a3f",
+      "robot/hexapod_mkii_assy/meshes/m3_ultra_low_profile_socket_head_screw__12mm_l__hs_steel.stl": "60b8eb05ed874a3e1d331a6cc352362b41736c75393c7af0020b7e671077ab90",
+      "robot/hexapod_mkii_assy/meshes/m4_countersunk_hex_drive_screw__12mm_l__alloy_steel.stl": "af4173f3e78822da490cd0971e0ac4a2211d72ca943810ec24a28d1e17945622",
+      "robot/hexapod_mkii_assy/meshes/m4_low_profile_socket_head_screw__4mm_l__18_8_ss.stl": "38f65367d8c2a98255914106f552d947855d03b28ef3e14521bee2e81068a20a",
+      "robot/hexapod_mkii_assy/meshes/m4_low_profile_socket_head_screw__8mm_l__18_8_ss.stl": "a94924be1256ddf9025ba2a1de4d9f35ac1feed2964b5d7b40d82417b903251d",
+      "robot/hexapod_mkii_assy/meshes/m4_through_hole_standoff__8mm_l__hardened_steel.stl": "6eb33897c1c30291ba1f140c86751bf109ec4c6e133cf26fa510c80115ea189e",
+      "robot/hexapod_mkii_assy/meshes/m5_low_profile_socket_screw__10mm_l__18_8_stainless_steel.stl": "d84724bfbd9798c492a4886cb8b71098eb792ef944c6ce0e558836de95e27988",
+      "robot/hexapod_mkii_assy/meshes/m5_low_profile_socket_screw__14mm_l__18_8.stl": "2031994b97dba1d74b74be495861e3def5b6e5741ddc284041a8ae5fbc9b91de",
+      "robot/hexapod_mkii_assy/meshes/m5_nylon_lubricant_filled_nylon_washer__5_5mm_id__10mm_od__1mm_t.stl": "c8af9378974228369ce8a681d821a5f7c4fc7ca26083d420fd3dc20390f3e9ef",
+      "robot/hexapod_mkii_assy/meshes/machined_tibia.stl": "fbf946ad97a579ddd3edb19a8c9bbb143e101a39df01808fd1a5e01fadb476e4",
+      "robot/hexapod_mkii_assy/meshes/mirror1.stl": "6cee806302f3fea851c1fee027157485c7699279611a6492fb402426d9ec240f",
+      "robot/hexapod_mkii_assy/meshes/motor_0001755650_00mini_000.stl": "65ff49efc97eef3b18018844ea38a02da4407112beb2da089f43edde2ef2b276",
+      "robot/hexapod_mkii_assy/meshes/motor_0001755652_00mini_000.stl": "b2fbb6b413174cce59b420fe76b85db7f1b6f1f19d49584a30caa9d55f7660aa",
+      "robot/hexapod_mkii_assy/meshes/motor_0001755652_1_1_30_gr_2202.stl": "b2fbb6b413174cce59b420fe76b85db7f1b6f1f19d49584a30caa9d55f7660aa",
+      "robot/hexapod_mkii_assy/meshes/motor_1_1_02_eb461_502.stl": "15ce5d3d8db9bcd2a520c5dac8180e213b924bfe7f107aeb9aae53adfbd888bf",
+      "robot/hexapod_mkii_assy/meshes/motor_1_1_06_eb463_507.stl": "0dbae3b3712ea006e322d5b0342078357620521c4004a444bb17255c7ce555bd",
+      "robot/hexapod_mkii_assy/meshes/motor_1_1_06_eb463_509.stl": "8d0d72ea395b317620564bc018764de28af38a7f632fb0f91c4309b57bbb2c95",
+      "robot/hexapod_mkii_assy/meshes/motor_1_1_31_eb463_510.stl": "bb509ea5df373e1f9294e0dda120b27499e94a6b6cc420a0a9085b9e02a4d069",
+      "robot/hexapod_mkii_assy/meshes/motor_1_21_121000022__610001_1_1_00mini_000.stl": "6b4e18f3b1e7252c47f5049a500df73621ac854fb0a0dc20ad2cf6e8289da94a",
+      "robot/hexapod_mkii_assy/meshes/motor_1_2_05_000438.stl": "76baaa1782cfd111b63365c0459f4c382a4ece0f47ca30982986ce8a46ea6736",
+      "robot/hexapod_mkii_assy/meshes/motor_1_2_05_000555.stl": "a6f88ff94087909c7380970d13a55dd711f23fdd69e8b127d147707726d5816f",
+      "robot/hexapod_mkii_assy/meshes/motor_1_2_05_000608.stl": "7428d2fd077f9f9f57c16bfd3814b069e3e02a7c7e5485ed7d488eba1e748c41",
+      "robot/hexapod_mkii_assy/meshes/motor_1_2_05_020051.stl": "d6543865ca567612644b4a300cf456b359463b135ad89b0953b38c761d311fd0",
+      "robot/hexapod_mkii_assy/meshes/motor_1_2_05_020051_2.stl": "1186bee12f86dc569fba008f5d9723e9517a7b16ee196b22855cf7926e2be793",
+      "robot/hexapod_mkii_assy/meshes/motor_1_2_16_001425.stl": "2be3df7c6312e2fa26620cd97e8bf8495615ac8e7a5813eef419683df1c46986",
+      "robot/hexapod_mkii_assy/meshes/motor_6706__300001_1_1_00mini_000.stl": "cdd0a387fdf3d7227d420110985a9c5369134fe54fa1cd8785ae93753514041b",
+      "robot/hexapod_mkii_assy/meshes/motor_bearing_holder.stl": "9d21a29d2904cdc69469c79c0a3dc988c9257022729379b87b89cb1050bfcd18",
+      "robot/hexapod_mkii_assy/meshes/motor_flange.stl": "0e990e0653a203b559bd031e64e3d1f15ecdb06f383608ca1d9edaffe1e5c08d",
+      "robot/hexapod_mkii_assy/meshes/pem_bsos_m3_6.stl": "2fa0abafe19db3fc3bd8f409bc9f4387a7ee288100cdd86f3b57128529f1d947",
+      "robot/hexapod_mkii_assy/meshes/pem_m4_self_clinching_nut__300_ss.stl": "13f10e057e04aed43f65b635cb91c307a4fe6be6771aaa7ebbd83f48a3c4e096",
+      "robot/hexapod_mkii_assy/meshes/revolve1.stl": "fb88247e9b54173382b67b26764948ab6c907e3a236e08403e8ba496cd9e920b",
+      "robot/hexapod_mkii_assy/meshes/revolve1_1.stl": "43926dfae947a6f4e92124ab4fd8739fa53890f0da1fc9753018790ea2a86887",
+      "robot/hexapod_mkii_assy/meshes/revolve1_2.stl": "9bceb2cd1ff8bd3a9486066fc579c6ad15bc30dd90be932b22e0549b66bff1c9",
+      "robot/hexapod_mkii_assy/meshes/revolve2.stl": "1386f9709e57e58c25caf13b918e95cfd5f522502edc9e302c41787a7d36663b",
+      "robot/hexapod_mkii_assy/meshes/revolve3_1.stl": "c743835c1cf2c244a386346ef58434c5937fe756a7c721e58163d6a0cd6efdbb",
+      "robot/hexapod_mkii_assy/meshes/revolve3_2.stl": "be8b73b04f231277e33f61ebdb11f1d26aec0bf77f48a1d0ca1b72203289315b",
+      "robot/hexapod_mkii_assy/meshes/screw_head_cap.stl": "78abbc36f44a857f423787dd9bea0cfb76e227f79d2fca1be56707248918d799",
+      "robot/hexapod_mkii_assy/meshes/silicone_foot.stl": "58a2b9d528ae7b4b89034305595d1c38c4412e423662464462493a1e1c394e58",
+      "robot/hexapod_mkii_assy/meshes/standoff_plate.stl": "24e9b1cd37e1ae27ee51aea0d73fbb47f661ac28b2823fe53a1488650ca19c8c",
+      "robot/hexapod_mkii_assy/meshes/standoff_plate__2.stl": "f7898de852e9562a57d74a1ca63857ca0d59c371b8406421f7411552a52dc485",
+      "robot/hexapod_mkii_assy/meshes/tibia_narrow_insert.stl": "4debf60e47c3eba50a58a61f3acd969b8f1ca598046c25cdce96f56e7d2a49ad",
+      "robot/hexapod_mkii_assy/meshes/tibia_push_lever.stl": "6afc359e0b96e5184beb7c6b5b45516f5842877ccf99dbe06f9e74106b090f00",
+      "robot/hexapod_mkii_assy/meshes/tibia_pushrod.stl": "c2f0835aa8747f12e6ed3015bbfae32c984d530d521ff9b8e6ff95f41738c13b",
+      "robot/hexapod_mkii_assy/meshes/tibia_pushrod_cover.stl": "a08861edc7d07b5348a0d299ad293b766ba15b4945000df452581943d9c7e50c",
+      "robot/hexapod_mkii_assy/meshes/tibia_spacer.stl": "01436f2cffde030c93a214bc6c6341c6b22aaa01c9b1cf25a4f4f1db6cdeafbe",
+      "robot/hexapod_mkii_assy/meshes/top_enclosure.stl": "99cf69d5dbb94cf7eb0e5fea47f22303506a612ed19d8499ff668b075de5c889",
+      "robot/hexapod_mkii_assy/urdf/hexapod_mkii_linkage.urdf": "2dae7165852b419f0bd6edbe03f7d398b403f1410c5b6bdc2c287b6834f543a6",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v3/geometry.usdc": "06b6bb5aee6dd1082112aa37792a065c9637e2494b20157deaf265c4418c7065",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v3/hexapod_mkii_fourbar_v3.usda": "97414285d1b3b187d0f2e69e13c4056e57083d098b35d73dd0fbcff69e33c30c",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v3/kinematics.json": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v3/manifest.json": "8e725baa84a13c743adc0e42e6d6c4303adbbb65b70241760052f1c87dc7466b",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v4/geometry.usdc": "06b6bb5aee6dd1082112aa37792a065c9637e2494b20157deaf265c4418c7065",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v4/hexapod_mkii_fourbar_v4.usda": "7f6116965882f9ddf75b4a942590b91d57bb6557b70771e74ed2d438a2c7c42f",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v4/kinematics.json": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v4/manifest.json": "2abb222ad30df59e814a22f1085a33b8c396fae95d6813557e8bd929c2aa9d05",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/geometry.usdc": "06b6bb5aee6dd1082112aa37792a065c9637e2494b20157deaf265c4418c7065",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/hexapod_mkii_fourbar_v5.usda": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/kinematics.json": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/manifest.json": "738fe892849e849db178280460376ad4bc9eedb335db55ab09ad8760a0d17247",
+      "tools/audit_mkii_fourbar_usd.py": "e6d9154a40a3979e1dc6e09448ca8b835f38af6350fdfedaca24a94ba25e9e5a",
+      "tools/audit_mkii_linkage.py": "45c5107bd3f7f75e281241e1160d58e58b31ebcdddc89e121519526aa591a637",
+      "tools/audit_mkii_stance.py": "cc7828618e0f2d53110e0178e5af032cb0f796f8624d74475489ac02b717733b",
+      "tools/check_pipeline_lineages.py": "c1cb850e9ad1992aa3a06755bfeb3bfe31f43a8ae809cb46e2fd99a9fea3df1e",
+      "tools/enable_nested_contact_reports.py": "8ae3801f982af750e36877179354199bd876ecb23aff3c22f3b7af55e822955f",
+      "tools/generate_robstride_urdf.py": "1f8ae74b3d56a99b4ec50d1b36091d81d2413b125a0330b998db44f28fd1f2ff",
+      "tools/import_urdf_to_usd.py": "e01e49efaee978cbd144bf8504c2975608d9cd0a68b150d0055c22f1e59f5417",
+      "tools/lidar_placement_study.py": "2dbd6f9e26f21c584df580d4f60d1b80df1a9fbe17740f13a2b03e6bcae690cb",
+      "tools/mkii_asset_binding.py": "28174fe4d0ceb5365f83e4b7974df6115e4ddc8e23548c12c4d9ae6bf68e08ab",
+      "tools/mkii_fourbar_kinematics.py": "749e369d26a6d2d0b41138c475716917a9b33ba0d093b472fa7afac7784baa6a",
+      "tools/mkii_training_contract.py": "f3173c6076562128965023dfd3f7e0e17adfae14b1e87b62b5f125cb317b5822",
+      "tools/prepare_mkii_fourbar_usd.py": "23ddec51b2abbe4d114dbadb09519bffd6d024efa9f47eccf47fe28f09503b0f",
+      "tools/prepare_mkii_usd.py": "061915050b81107a2d2e50d423f3c9b1e44eb2f3256fbf75e0df2a01aa2603f1",
+      "tools/qualify_mkii_fourbar.py": "33da80d9f7a30eb266873cef0fba029a15a3c6c904ed4cfbf93aaa283a38036d",
+      "tools/usd_geometry_audit.py": "3b2f45c8010090eb4dc5ce75ba71af99e993adf4c9d12676d92a7ddfc037ff2d"
+    }
+  },
+  "selected_asset_bundle": {
+    "model_id": "mkii_fourbar_v5",
+    "usd_path_relative": "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/hexapod_mkii_fourbar_v5.usda",
+    "closure_constraint_variant": "physical_mimic_v5",
+    "usd_root_sha256": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf",
+    "kinematics_sha256": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+    "bundle_files_sha256": {
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/hexapod_mkii_fourbar_v5.usda": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/geometry.usdc": "06b6bb5aee6dd1082112aa37792a065c9637e2494b20157deaf265c4418c7065",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/kinematics.json": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+      "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/manifest.json": "738fe892849e849db178280460376ad4bc9eedb335db55ab09ad8760a0d17247"
+    }
+  },
+  "cpu_asset_audit": {
+    "pass": true,
+    "errors": [],
+    "schema": "hexapod.mkii_fourbar_v5.cpu_audit.v1",
+    "closure_constraint_variant": "physical_mimic_v5",
+    "closure_constraint_rows_per_loop": 2,
+    "physical_mimic_constraints": 12,
+    "closure_locked_axes": [
+      "q_tibia-q_lever",
+      "q_rod+q_lever"
+    ],
+    "rigid_bodies": 31,
+    "tree_joints": 30,
+    "closure_joints": 0,
+    "active_joints": 18,
+    "mass_kg": 8.260811322,
+    "mass_properties": {
+      "errors": [],
+      "links": [
+        {
+          "link": "body",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 1.6210460057619613e-09
+        },
+        {
+          "link": "lf_coxa",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.041152281714192e-11
+        },
+        {
+          "link": "lf_femur",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 6.917132285792077e-11
+        },
+        {
+          "link": "lf_tibia",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 3.423508492753774e-11
+        },
+        {
+          "link": "lf_tibia_push_lever",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 3.4803027972561684e-13
+        },
+        {
+          "link": "lf_tibia_pushrod",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 7.686485521967053e-13
+        },
+        {
+          "link": "lm_coxa",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 4.030473895019255e-10
+        },
+        {
+          "link": "lm_femur",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 4.221201578384626e-11
+        },
+        {
+          "link": "lm_tibia",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 5.6266533966786714e-11
+        },
+        {
+          "link": "lm_tibia_push_lever",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.907484095062557e-13
+        },
+        {
+          "link": "lm_tibia_pushrod",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 4.186547755604536e-13
+        },
+        {
+          "link": "lr_coxa",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 4.986153937720545e-10
+        },
+        {
+          "link": "lr_femur",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 3.0331191876696584e-11
+        },
+        {
+          "link": "lr_tibia",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 7.214761036863915e-11
+        },
+        {
+          "link": "lr_tibia_push_lever",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 4.296641354203023e-13
+        },
+        {
+          "link": "lr_tibia_pushrod",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 9.667906056341595e-13
+        },
+        {
+          "link": "rf_coxa",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 1.1186322143108898e-10
+        },
+        {
+          "link": "rf_femur",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 3.015485723536354e-11
+        },
+        {
+          "link": "rf_tibia",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 3.441998866916124e-11
+        },
+        {
+          "link": "rf_tibia_push_lever",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.7170488284939363e-13
+        },
+        {
+          "link": "rf_tibia_pushrod",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 8.425896123127798e-13
+        },
+        {
+          "link": "rm_coxa",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.6394460674440765e-10
+        },
+        {
+          "link": "rm_femur",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 1.2508053312310129e-11
+        },
+        {
+          "link": "rm_tibia",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 5.3837132993860004e-11
+        },
+        {
+          "link": "rm_tibia_push_lever",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 4.004294573196508e-13
+        },
+        {
+          "link": "rm_tibia_pushrod",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 6.873324473596551e-13
+        },
+        {
+          "link": "rr_coxa",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.2746702461500835e-10
+        },
+        {
+          "link": "rr_femur",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.4238970422821304e-11
+        },
+        {
+          "link": "rr_tibia",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.7881444548960577e-11
+        },
+        {
+          "link": "rr_tibia_push_lever",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 3.6277574944987376e-13
+        },
+        {
+          "link": "rr_tibia_pushrod",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 1.0974004331935818e-12
+        }
+      ]
+    },
+    "visual_instances": 1927,
+    "collision_primitives": 171,
+    "unique_source_meshes": 77,
+    "prescribed_closure_samples": 1206,
+    "prescribed_closure_maxima": {
+      "point_error_m": 1.0389200258727974e-08,
+      "axis_error_rad": 6.7641421635248525e-12
+    },
+    "reset_primitive_heights": [
+      {
+        "link": "body",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.19923455007848268
+      },
+      {
+        "link": "body",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13739743989511358
+      },
+      {
+        "link": "body",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14260114499151688
+      },
+      {
+        "link": "body",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14291944688337238
+      },
+      {
+        "link": "body",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14275785503560706
+      },
+      {
+        "link": "body",
+        "index": 5,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14275785294518417
+      },
+      {
+        "link": "body",
+        "index": 6,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14260114800897325
+      },
+      {
+        "link": "body",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14260114800897325
+      },
+      {
+        "link": "body",
+        "index": 8,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14260114499151688
+      },
+      {
+        "link": "body",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.19565218567181913
+      },
+      {
+        "link": "body",
+        "index": 10,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18764176083586323
+      },
+      {
+        "link": "body",
+        "index": 11,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.19565218567181913
+      },
+      {
+        "link": "body",
+        "index": 12,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18764176083586323
+      },
+      {
+        "link": "body",
+        "index": 13,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.19565218567181913
+      },
+      {
+        "link": "body",
+        "index": 14,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18764176083586323
+      },
+      {
+        "link": "body",
+        "index": 15,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.19565218567181913
+      },
+      {
+        "link": "body",
+        "index": 16,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18764181810201522
+      },
+      {
+        "link": "body",
+        "index": 17,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.19565218567181913
+      },
+      {
+        "link": "body",
+        "index": 18,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18764176083586323
+      },
+      {
+        "link": "body",
+        "index": 19,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.19565218567181913
+      },
+      {
+        "link": "body",
+        "index": 20,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18764176083586323
+      },
+      {
+        "link": "lf_coxa",
+        "index": 0,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14640535381186517
+      },
+      {
+        "link": "lf_coxa",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.11840829604930372
+      },
+      {
+        "link": "lf_coxa",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14718210619432165
+      },
+      {
+        "link": "lf_coxa",
+        "index": 3,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15471640341092543
+      },
+      {
+        "link": "lf_coxa",
+        "index": 4,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15469279592051177
+      },
+      {
+        "link": "lf_coxa",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14654068442512846
+      },
+      {
+        "link": "lf_coxa",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14293863110778468
+      },
+      {
+        "link": "lf_coxa",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1955940743558189
+      },
+      {
+        "link": "lf_coxa",
+        "index": 8,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13454472087752717
+      },
+      {
+        "link": "lf_coxa",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15407068354871004
+      },
+      {
+        "link": "lf_femur",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.16890010035932704
+      },
+      {
+        "link": "lf_femur",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17357900646763083
+      },
+      {
+        "link": "lf_femur",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1390715858130387
+      },
+      {
+        "link": "lf_femur",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13812604028644615
+      },
+      {
+        "link": "lf_femur",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17442744817224917
+      },
+      {
+        "link": "lf_femur",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13456403868449718
+      },
+      {
+        "link": "lf_femur",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1745566123514591
+      },
+      {
+        "link": "lf_tibia",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.030286463864448096
+      },
+      {
+        "link": "lf_tibia",
+        "index": 1,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.23093710811544724
+      },
+      {
+        "link": "lf_tibia",
+        "index": 2,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.005035635540556638
+      },
+      {
+        "link": "lf_tibia",
+        "index": 3,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.032025362955962505
+      },
+      {
+        "link": "lf_tibia_push_lever",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18452589995150415
+      },
+      {
+        "link": "lf_tibia_push_lever",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18510929504661292
+      },
+      {
+        "link": "lf_tibia_push_lever",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1896136452394117
+      },
+      {
+        "link": "lf_tibia_pushrod",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.22468429131220294
+      },
+      {
+        "link": "lm_coxa",
+        "index": 0,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1464053647495099
+      },
+      {
+        "link": "lm_coxa",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.11840829169265416
+      },
+      {
+        "link": "lm_coxa",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14718319709372746
+      },
+      {
+        "link": "lm_coxa",
+        "index": 3,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1547164128559958
+      },
+      {
+        "link": "lm_coxa",
+        "index": 4,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15469280457093038
+      },
+      {
+        "link": "lm_coxa",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14654068188824648
+      },
+      {
+        "link": "lm_coxa",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14293862988989944
+      },
+      {
+        "link": "lm_coxa",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.19559396376949006
+      },
+      {
+        "link": "lm_coxa",
+        "index": 8,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13454363916069173
+      },
+      {
+        "link": "lm_coxa",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15407069303169815
+      },
+      {
+        "link": "lm_femur",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.16886245904910646
+      },
+      {
+        "link": "lm_femur",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17354275058147003
+      },
+      {
+        "link": "lm_femur",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13903151691448318
+      },
+      {
+        "link": "lm_femur",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1381360443636141
+      },
+      {
+        "link": "lm_femur",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17444425424916327
+      },
+      {
+        "link": "lm_femur",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13453240982409054
+      },
+      {
+        "link": "lm_femur",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.17457241005538826
+      },
+      {
+        "link": "lm_tibia",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.03026463448939433
+      },
+      {
+        "link": "lm_tibia",
+        "index": 1,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.23094156819711764
+      },
+      {
+        "link": "lm_tibia",
+        "index": 2,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.00503029114969164
+      },
+      {
+        "link": "lm_tibia",
+        "index": 3,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.03201998796132191
+      },
+      {
+        "link": "lm_tibia_push_lever",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18448835271744685
+      },
+      {
+        "link": "lm_tibia_push_lever",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1850678454945092
+      },
+      {
+        "link": "lm_tibia_push_lever",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18958301360764956
+      },
+      {
+        "link": "lm_tibia_pushrod",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.2246552468449824
+      },
+      {
+        "link": "lr_coxa",
+        "index": 0,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14640536252075273
+      },
+      {
+        "link": "lr_coxa",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.11840829294129576
+      },
+      {
+        "link": "lr_coxa",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14718146319750236
+      },
+      {
+        "link": "lr_coxa",
+        "index": 3,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15471641135047406
+      },
+      {
+        "link": "lr_coxa",
+        "index": 4,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15469280338170055
+      },
+      {
+        "link": "lr_coxa",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14654068425545452
+      },
+      {
+        "link": "lr_coxa",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14293863285276256
+      },
+      {
+        "link": "lr_coxa",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.19559396109437294
+      },
+      {
+        "link": "lr_coxa",
+        "index": 8,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13454466113589003
+      },
+      {
+        "link": "lr_coxa",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15407069126359144
+      },
+      {
+        "link": "lr_femur",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1688500692572315
+      },
+      {
+        "link": "lr_femur",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17353066276642926
+      },
+      {
+        "link": "lr_femur",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13904063001104605
+      },
+      {
+        "link": "lr_femur",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13812189528181779
+      },
+      {
+        "link": "lr_femur",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17440796022055383
+      },
+      {
+        "link": "lr_femur",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13453248011117713
+      },
+      {
+        "link": "lr_femur",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1745301562776314
+      },
+      {
+        "link": "lr_tibia",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.030235256977394362
+      },
+      {
+        "link": "lr_tibia",
+        "index": 1,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.23088651468492605
+      },
+      {
+        "link": "lr_tibia",
+        "index": 2,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.005000519072515391
+      },
+      {
+        "link": "lr_tibia",
+        "index": 3,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.031985937747666504
+      },
+      {
+        "link": "lr_tibia_push_lever",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18447205618741364
+      },
+      {
+        "link": "lr_tibia_push_lever",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.185053568958976
+      },
+      {
+        "link": "lr_tibia_push_lever",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18956646028363747
+      },
+      {
+        "link": "lr_tibia_pushrod",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.22463445984145844
+      },
+      {
+        "link": "rf_coxa",
+        "index": 0,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14640536415523409
+      },
+      {
+        "link": "rf_coxa",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1184082894187917
+      },
+      {
+        "link": "rf_coxa",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14717952145504476
+      },
+      {
+        "link": "rf_coxa",
+        "index": 3,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1547164146430949
+      },
+      {
+        "link": "rf_coxa",
+        "index": 4,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1546928032521064
+      },
+      {
+        "link": "rf_coxa",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14654068345200308
+      },
+      {
+        "link": "rf_coxa",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14293866040559197
+      },
+      {
+        "link": "rf_coxa",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1955940939788385
+      },
+      {
+        "link": "rf_coxa",
+        "index": 8,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13454472149150704
+      },
+      {
+        "link": "rf_coxa",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15407069175401022
+      },
+      {
+        "link": "rf_femur",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.16886254401424916
+      },
+      {
+        "link": "rf_femur",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17354282664332993
+      },
+      {
+        "link": "rf_femur",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13903147942191063
+      },
+      {
+        "link": "rf_femur",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13813596405798903
+      },
+      {
+        "link": "rf_femur",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1744442871163353
+      },
+      {
+        "link": "rf_femur",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13453280568853168
+      },
+      {
+        "link": "rf_femur",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1745726977238472
+      },
+      {
+        "link": "rf_tibia",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.03026478420055005
+      },
+      {
+        "link": "rf_tibia",
+        "index": 1,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.23094225940292573
+      },
+      {
+        "link": "rf_tibia",
+        "index": 2,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.005030379134433077
+      },
+      {
+        "link": "rf_tibia",
+        "index": 3,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.03202010256458172
+      },
+      {
+        "link": "rf_tibia_push_lever",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18448847880896985
+      },
+      {
+        "link": "rf_tibia_push_lever",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18506797544643566
+      },
+      {
+        "link": "rf_tibia_push_lever",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18958287205563884
+      },
+      {
+        "link": "rf_tibia_pushrod",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.22465589221561047
+      },
+      {
+        "link": "rm_coxa",
+        "index": 0,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14640536495439846
+      },
+      {
+        "link": "rm_coxa",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1184082903391504
+      },
+      {
+        "link": "rm_coxa",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14717589078533358
+      },
+      {
+        "link": "rm_coxa",
+        "index": 3,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15471641512599693
+      },
+      {
+        "link": "rm_coxa",
+        "index": 4,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15469280485257803
+      },
+      {
+        "link": "rm_coxa",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14654068342026969
+      },
+      {
+        "link": "rm_coxa",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1429386616826097
+      },
+      {
+        "link": "rm_coxa",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.19559409534058442
+      },
+      {
+        "link": "rm_coxa",
+        "index": 8,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13454506785512282
+      },
+      {
+        "link": "rm_coxa",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1540706931902397
+      },
+      {
+        "link": "rm_femur",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1688628752258302
+      },
+      {
+        "link": "rm_femur",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17354315971486922
+      },
+      {
+        "link": "rm_femur",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13903175343400076
+      },
+      {
+        "link": "rm_femur",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13813629180925735
+      },
+      {
+        "link": "rm_femur",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.174444672095693
+      },
+      {
+        "link": "rm_femur",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1345325150994789
+      },
+      {
+        "link": "rm_femur",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.17457305423810468
+      },
+      {
+        "link": "rm_tibia",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.030265219603712396
+      },
+      {
+        "link": "rm_tibia",
+        "index": 1,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.2309426271453729
+      },
+      {
+        "link": "rm_tibia",
+        "index": 2,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.005030794035198655
+      },
+      {
+        "link": "rm_tibia",
+        "index": 3,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.03202054215552293
+      },
+      {
+        "link": "rm_tibia_push_lever",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18448863700131363
+      },
+      {
+        "link": "rm_tibia_push_lever",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1850681259211261
+      },
+      {
+        "link": "rm_tibia_push_lever",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18958367171655197
+      },
+      {
+        "link": "rm_tibia_pushrod",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.22465638489313333
+      },
+      {
+        "link": "rr_coxa",
+        "index": 0,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1464053668780677
+      },
+      {
+        "link": "rr_coxa",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.11840829327984481
+      },
+      {
+        "link": "rr_coxa",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14717952351060606
+      },
+      {
+        "link": "rr_coxa",
+        "index": 3,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1547164170125226
+      },
+      {
+        "link": "rr_coxa",
+        "index": 4,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15469280691945433
+      },
+      {
+        "link": "rr_coxa",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14654068553752775
+      },
+      {
+        "link": "rr_coxa",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14293866324457363
+      },
+      {
+        "link": "rr_coxa",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1955940957065542
+      },
+      {
+        "link": "rr_coxa",
+        "index": 8,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1345444848746509
+      },
+      {
+        "link": "rr_coxa",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15407069537654253
+      },
+      {
+        "link": "rr_femur",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1688625736296281
+      },
+      {
+        "link": "rr_femur",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17354286301910132
+      },
+      {
+        "link": "rr_femur",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1390316030006207
+      },
+      {
+        "link": "rr_femur",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13813612300845524
+      },
+      {
+        "link": "rr_femur",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17444435905937894
+      },
+      {
+        "link": "rr_femur",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13453321988535324
+      },
+      {
+        "link": "rr_femur",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.17457262068000234
+      },
+      {
+        "link": "rr_tibia",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.03026545770879284
+      },
+      {
+        "link": "rr_tibia",
+        "index": 1,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.23094212642741288
+      },
+      {
+        "link": "rr_tibia",
+        "index": 2,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.005031087132093687
+      },
+      {
+        "link": "rr_tibia",
+        "index": 3,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.03202081059965653
+      },
+      {
+        "link": "rr_tibia_push_lever",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1844883104175835
+      },
+      {
+        "link": "rr_tibia_push_lever",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18506779843527071
+      },
+      {
+        "link": "rr_tibia_push_lever",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.189583045118286
+      },
+      {
+        "link": "rr_tibia_pushrod",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.2246558317250081
+      }
+    ],
+    "source_sha256": {
+      "linkage_urdf": "2dae7165852b419f0bd6edbe03f7d398b403f1410c5b6bdc2c287b6834f543a6",
+      "cad_pin_frames": "1213dced0e17fa0ad2cdf58f14b46c181e028a8341c19e07d706853378a6a825"
+    },
+    "kinematic_contract_sha256": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+    "kinematic_contract_comparison": {
+      "pass": true,
+      "errors": [],
+      "bounded_numeric_differences": [
+        {
+          "path": "default_joint_positions_rad/lr_tibia_lever_pivot",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "default_joint_positions_rad/lr_tibia_pitch",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "default_joint_positions_rad/lr_tibia_rod_pivot",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lm_tibia_lever_pivot/0",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lm_tibia_lever_pivot/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lm_tibia_pitch/0",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lm_tibia_pitch/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lm_tibia_rod_pivot/0",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lm_tibia_rod_pivot/1",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lr_tibia_lever_pivot/0",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lr_tibia_lever_pivot/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lr_tibia_pitch/0",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lr_tibia_pitch/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lr_tibia_rod_pivot/0",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lr_tibia_rod_pivot/1",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/rf_tibia_lever_pivot/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/rf_tibia_pitch/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/rf_tibia_rod_pivot/0",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/rr_tibia_lever_pivot/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/rr_tibia_pitch/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/rr_tibia_rod_pivot/0",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "nominal_foot_clearance_m/lm",
+          "absolute_difference": 2.7755575615628914e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "nominal_foot_clearance_m/lr",
+          "absolute_difference": 2.7755575615628914e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "nominal_foot_clearance_m/rf",
+          "absolute_difference": 2.7755575615628914e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "nominal_nonfoot_min_clearance_m",
+          "absolute_difference": 2.7755575615628914e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lf/canonical_zero_old_knee_phase_rad",
+          "absolute_difference": 6.938893903907228e-18,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lf/stance_full_pose_translation_residual_m",
+          "absolute_difference": 1.5358401399614974e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lm/canonical_limits_rad/0",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lm/canonical_limits_rad/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lm/canonical_zero_old_knee_phase_rad",
+          "absolute_difference": 1.5265566588595902e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lm/stance_full_pose_orientation_residual_rad",
+          "absolute_difference": 7.895150523206263e-12,
+          "tolerance": 2e-11
+        },
+        {
+          "path": "phase_bridge/lm/stance_full_pose_translation_residual_m",
+          "absolute_difference": 5.144031088675366e-18,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lm/stance_phase_error_rad",
+          "absolute_difference": 1.1102230246251565e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lr/canonical_limits_rad/0",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lr/canonical_limits_rad/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lr/canonical_stance_rad",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lr/canonical_zero_old_knee_phase_rad",
+          "absolute_difference": 7.632783294297951e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lr/stance_full_pose_orientation_residual_rad",
+          "absolute_difference": 5.735997980304934e-12,
+          "tolerance": 2e-11
+        },
+        {
+          "path": "phase_bridge/lr/stance_full_pose_translation_residual_m",
+          "absolute_difference": 1.3300111337787024e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rf/canonical_limits_rad/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rf/canonical_zero_old_knee_phase_rad",
+          "absolute_difference": 5.1347137262555687e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rm/canonical_zero_old_knee_phase_rad",
+          "absolute_difference": 1.3877787807814457e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rm/stance_full_pose_translation_residual_m",
+          "absolute_difference": 2.432593921219625e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rm/stance_phase_error_rad",
+          "absolute_difference": 1.1102230246251565e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rr/canonical_limits_rad/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rr/canonical_zero_old_knee_phase_rad",
+          "absolute_difference": 1.2736728548744507e-18,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rr/stance_full_pose_orientation_residual_rad",
+          "absolute_difference": 6.0671298578651375e-12,
+          "tolerance": 2e-11
+        },
+        {
+          "path": "phase_bridge/rr/stance_full_pose_translation_residual_m",
+          "absolute_difference": 2.6560412127053096e-17,
+          "tolerance": 1e-14
+        }
+      ],
+      "numeric_absolute_tolerance": 1e-14,
+      "orientation_diagnostic_absolute_tolerance_rad": 2e-11
+    },
+    "usd_root_sha256": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf",
+    "dependencies": [
+      {
+        "path": "geometry.usdc",
+        "sha256": "06b6bb5aee6dd1082112aa37792a065c9637e2494b20157deaf265c4418c7065"
+      },
+      {
+        "path": "hexapod_mkii_fourbar_v5.usda",
+        "sha256": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf"
+      }
+    ],
+    "tolerances": {
+      "frame_absolute": 2e-07,
+      "closure_point_m": 2e-07,
+      "closure_axis_rad": 2e-06
+    },
+    "physical_validation": "not_performed",
+    "scope": "Authored geometry, source properties and sampled prescribed kinematics; no PhysX, continuous self-collision, torque-speed or thermal qualification"
+  },
+  "cpu_asset_pass": true,
+  "numerical_recipe": {
+    "recipe_id": "mkii_fourbar_tgs_external_forces_800hz_final_velocity16_v5",
+    "solver_type": 1,
+    "solver_position_iterations": 128,
+    "solver_velocity_iterations": 16,
+    "enable_external_forces_every_iteration": true,
+    "physics_dt_s": 0.00125,
+    "decimation": 16
+  },
+  "solver_iterations": [
+    128,
+    16
+  ],
+  "kit_asset_audit": {
+    "pass": true,
+    "errors": [],
+    "schema": "hexapod.mkii_fourbar_v5.cpu_audit.v1",
+    "closure_constraint_variant": "physical_mimic_v5",
+    "closure_constraint_rows_per_loop": 2,
+    "physical_mimic_constraints": 12,
+    "closure_locked_axes": [
+      "q_tibia-q_lever",
+      "q_rod+q_lever"
+    ],
+    "rigid_bodies": 31,
+    "tree_joints": 30,
+    "closure_joints": 0,
+    "active_joints": 18,
+    "mass_kg": 8.260811322,
+    "mass_properties": {
+      "errors": [],
+      "links": [
+        {
+          "link": "body",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 1.6210460057619613e-09
+        },
+        {
+          "link": "lf_coxa",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.041152281714192e-11
+        },
+        {
+          "link": "lf_femur",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 6.917132285792077e-11
+        },
+        {
+          "link": "lf_tibia",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 3.423508492753774e-11
+        },
+        {
+          "link": "lf_tibia_push_lever",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 3.4803027972561684e-13
+        },
+        {
+          "link": "lf_tibia_pushrod",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 7.686485521967053e-13
+        },
+        {
+          "link": "lm_coxa",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 4.030473895019255e-10
+        },
+        {
+          "link": "lm_femur",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 4.221201578384626e-11
+        },
+        {
+          "link": "lm_tibia",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 5.6266533966786714e-11
+        },
+        {
+          "link": "lm_tibia_push_lever",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.907484095062557e-13
+        },
+        {
+          "link": "lm_tibia_pushrod",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 4.186547755604536e-13
+        },
+        {
+          "link": "lr_coxa",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 4.986153937720545e-10
+        },
+        {
+          "link": "lr_femur",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 3.0331191876696584e-11
+        },
+        {
+          "link": "lr_tibia",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 7.214761036863915e-11
+        },
+        {
+          "link": "lr_tibia_push_lever",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 4.296641354203023e-13
+        },
+        {
+          "link": "lr_tibia_pushrod",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 9.667906056341595e-13
+        },
+        {
+          "link": "rf_coxa",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 1.1186322143108898e-10
+        },
+        {
+          "link": "rf_femur",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 3.015485723536354e-11
+        },
+        {
+          "link": "rf_tibia",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 3.441998866916124e-11
+        },
+        {
+          "link": "rf_tibia_push_lever",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.7170488284939363e-13
+        },
+        {
+          "link": "rf_tibia_pushrod",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 8.425896123127798e-13
+        },
+        {
+          "link": "rm_coxa",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.6394460674440765e-10
+        },
+        {
+          "link": "rm_femur",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 1.2508053312310129e-11
+        },
+        {
+          "link": "rm_tibia",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 5.3837132993860004e-11
+        },
+        {
+          "link": "rm_tibia_push_lever",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 4.004294573196508e-13
+        },
+        {
+          "link": "rm_tibia_pushrod",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 6.873324473596551e-13
+        },
+        {
+          "link": "rr_coxa",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.2746702461500835e-10
+        },
+        {
+          "link": "rr_femur",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.4238970422821304e-11
+        },
+        {
+          "link": "rr_tibia",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 2.7881444548960577e-11
+        },
+        {
+          "link": "rr_tibia_push_lever",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 3.6277574944987376e-13
+        },
+        {
+          "link": "rr_tibia_pushrod",
+          "mass_ok": true,
+          "com_ok": true,
+          "inertia_ok": true,
+          "max_abs_tensor_error_kg_m2": 1.0974004331935818e-12
+        }
+      ]
+    },
+    "visual_instances": 1927,
+    "collision_primitives": 171,
+    "unique_source_meshes": 77,
+    "prescribed_closure_samples": 1206,
+    "prescribed_closure_maxima": {
+      "point_error_m": 1.0389200258727974e-08,
+      "axis_error_rad": 6.7641421635248525e-12
+    },
+    "reset_primitive_heights": [
+      {
+        "link": "body",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.19923455007848268
+      },
+      {
+        "link": "body",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13739743989511358
+      },
+      {
+        "link": "body",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14260114499151688
+      },
+      {
+        "link": "body",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14291944688337238
+      },
+      {
+        "link": "body",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14275785503560706
+      },
+      {
+        "link": "body",
+        "index": 5,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14275785294518417
+      },
+      {
+        "link": "body",
+        "index": 6,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14260114800897325
+      },
+      {
+        "link": "body",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14260114800897325
+      },
+      {
+        "link": "body",
+        "index": 8,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.14260114499151688
+      },
+      {
+        "link": "body",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.19565218567181913
+      },
+      {
+        "link": "body",
+        "index": 10,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18764176083586323
+      },
+      {
+        "link": "body",
+        "index": 11,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.19565218567181913
+      },
+      {
+        "link": "body",
+        "index": 12,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18764176083586323
+      },
+      {
+        "link": "body",
+        "index": 13,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.19565218567181913
+      },
+      {
+        "link": "body",
+        "index": 14,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18764176083586323
+      },
+      {
+        "link": "body",
+        "index": 15,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.19565218567181913
+      },
+      {
+        "link": "body",
+        "index": 16,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18764181810201522
+      },
+      {
+        "link": "body",
+        "index": 17,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.19565218567181913
+      },
+      {
+        "link": "body",
+        "index": 18,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18764176083586323
+      },
+      {
+        "link": "body",
+        "index": 19,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.19565218567181913
+      },
+      {
+        "link": "body",
+        "index": 20,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18764176083586323
+      },
+      {
+        "link": "lf_coxa",
+        "index": 0,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14640535381186517
+      },
+      {
+        "link": "lf_coxa",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.11840829604930372
+      },
+      {
+        "link": "lf_coxa",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14718210619432165
+      },
+      {
+        "link": "lf_coxa",
+        "index": 3,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15471640341092543
+      },
+      {
+        "link": "lf_coxa",
+        "index": 4,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15469279592051177
+      },
+      {
+        "link": "lf_coxa",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14654068442512846
+      },
+      {
+        "link": "lf_coxa",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14293863110778468
+      },
+      {
+        "link": "lf_coxa",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1955940743558189
+      },
+      {
+        "link": "lf_coxa",
+        "index": 8,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13454472087752717
+      },
+      {
+        "link": "lf_coxa",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15407068354871004
+      },
+      {
+        "link": "lf_femur",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.16890010035932704
+      },
+      {
+        "link": "lf_femur",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17357900646763083
+      },
+      {
+        "link": "lf_femur",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1390715858130387
+      },
+      {
+        "link": "lf_femur",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13812604028644615
+      },
+      {
+        "link": "lf_femur",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17442744817224917
+      },
+      {
+        "link": "lf_femur",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13456403868449718
+      },
+      {
+        "link": "lf_femur",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1745566123514591
+      },
+      {
+        "link": "lf_tibia",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.030286463864448096
+      },
+      {
+        "link": "lf_tibia",
+        "index": 1,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.23093710811544724
+      },
+      {
+        "link": "lf_tibia",
+        "index": 2,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.005035635540556638
+      },
+      {
+        "link": "lf_tibia",
+        "index": 3,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.032025362955962505
+      },
+      {
+        "link": "lf_tibia_push_lever",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18452589995150415
+      },
+      {
+        "link": "lf_tibia_push_lever",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18510929504661292
+      },
+      {
+        "link": "lf_tibia_push_lever",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1896136452394117
+      },
+      {
+        "link": "lf_tibia_pushrod",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.22468429131220294
+      },
+      {
+        "link": "lm_coxa",
+        "index": 0,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1464053647495099
+      },
+      {
+        "link": "lm_coxa",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.11840829169265416
+      },
+      {
+        "link": "lm_coxa",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14718319709372746
+      },
+      {
+        "link": "lm_coxa",
+        "index": 3,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1547164128559958
+      },
+      {
+        "link": "lm_coxa",
+        "index": 4,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15469280457093038
+      },
+      {
+        "link": "lm_coxa",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14654068188824648
+      },
+      {
+        "link": "lm_coxa",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14293862988989944
+      },
+      {
+        "link": "lm_coxa",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.19559396376949006
+      },
+      {
+        "link": "lm_coxa",
+        "index": 8,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13454363916069173
+      },
+      {
+        "link": "lm_coxa",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15407069303169815
+      },
+      {
+        "link": "lm_femur",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.16886245904910646
+      },
+      {
+        "link": "lm_femur",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17354275058147003
+      },
+      {
+        "link": "lm_femur",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13903151691448318
+      },
+      {
+        "link": "lm_femur",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1381360443636141
+      },
+      {
+        "link": "lm_femur",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17444425424916327
+      },
+      {
+        "link": "lm_femur",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13453240982409054
+      },
+      {
+        "link": "lm_femur",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.17457241005538826
+      },
+      {
+        "link": "lm_tibia",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.03026463448939433
+      },
+      {
+        "link": "lm_tibia",
+        "index": 1,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.23094156819711764
+      },
+      {
+        "link": "lm_tibia",
+        "index": 2,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.00503029114969164
+      },
+      {
+        "link": "lm_tibia",
+        "index": 3,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.03201998796132191
+      },
+      {
+        "link": "lm_tibia_push_lever",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18448835271744685
+      },
+      {
+        "link": "lm_tibia_push_lever",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1850678454945092
+      },
+      {
+        "link": "lm_tibia_push_lever",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18958301360764956
+      },
+      {
+        "link": "lm_tibia_pushrod",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.2246552468449824
+      },
+      {
+        "link": "lr_coxa",
+        "index": 0,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14640536252075273
+      },
+      {
+        "link": "lr_coxa",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.11840829294129576
+      },
+      {
+        "link": "lr_coxa",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14718146319750236
+      },
+      {
+        "link": "lr_coxa",
+        "index": 3,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15471641135047406
+      },
+      {
+        "link": "lr_coxa",
+        "index": 4,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15469280338170055
+      },
+      {
+        "link": "lr_coxa",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14654068425545452
+      },
+      {
+        "link": "lr_coxa",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14293863285276256
+      },
+      {
+        "link": "lr_coxa",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.19559396109437294
+      },
+      {
+        "link": "lr_coxa",
+        "index": 8,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13454466113589003
+      },
+      {
+        "link": "lr_coxa",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15407069126359144
+      },
+      {
+        "link": "lr_femur",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1688500692572315
+      },
+      {
+        "link": "lr_femur",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17353066276642926
+      },
+      {
+        "link": "lr_femur",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13904063001104605
+      },
+      {
+        "link": "lr_femur",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13812189528181779
+      },
+      {
+        "link": "lr_femur",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17440796022055383
+      },
+      {
+        "link": "lr_femur",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13453248011117713
+      },
+      {
+        "link": "lr_femur",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1745301562776314
+      },
+      {
+        "link": "lr_tibia",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.030235256977394362
+      },
+      {
+        "link": "lr_tibia",
+        "index": 1,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.23088651468492605
+      },
+      {
+        "link": "lr_tibia",
+        "index": 2,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.005000519072515391
+      },
+      {
+        "link": "lr_tibia",
+        "index": 3,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.031985937747666504
+      },
+      {
+        "link": "lr_tibia_push_lever",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18447205618741364
+      },
+      {
+        "link": "lr_tibia_push_lever",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.185053568958976
+      },
+      {
+        "link": "lr_tibia_push_lever",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18956646028363747
+      },
+      {
+        "link": "lr_tibia_pushrod",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.22463445984145844
+      },
+      {
+        "link": "rf_coxa",
+        "index": 0,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14640536415523409
+      },
+      {
+        "link": "rf_coxa",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1184082894187917
+      },
+      {
+        "link": "rf_coxa",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14717952145504476
+      },
+      {
+        "link": "rf_coxa",
+        "index": 3,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1547164146430949
+      },
+      {
+        "link": "rf_coxa",
+        "index": 4,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1546928032521064
+      },
+      {
+        "link": "rf_coxa",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14654068345200308
+      },
+      {
+        "link": "rf_coxa",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14293866040559197
+      },
+      {
+        "link": "rf_coxa",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1955940939788385
+      },
+      {
+        "link": "rf_coxa",
+        "index": 8,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13454472149150704
+      },
+      {
+        "link": "rf_coxa",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15407069175401022
+      },
+      {
+        "link": "rf_femur",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.16886254401424916
+      },
+      {
+        "link": "rf_femur",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17354282664332993
+      },
+      {
+        "link": "rf_femur",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13903147942191063
+      },
+      {
+        "link": "rf_femur",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13813596405798903
+      },
+      {
+        "link": "rf_femur",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1744442871163353
+      },
+      {
+        "link": "rf_femur",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13453280568853168
+      },
+      {
+        "link": "rf_femur",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1745726977238472
+      },
+      {
+        "link": "rf_tibia",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.03026478420055005
+      },
+      {
+        "link": "rf_tibia",
+        "index": 1,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.23094225940292573
+      },
+      {
+        "link": "rf_tibia",
+        "index": 2,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.005030379134433077
+      },
+      {
+        "link": "rf_tibia",
+        "index": 3,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.03202010256458172
+      },
+      {
+        "link": "rf_tibia_push_lever",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18448847880896985
+      },
+      {
+        "link": "rf_tibia_push_lever",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18506797544643566
+      },
+      {
+        "link": "rf_tibia_push_lever",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18958287205563884
+      },
+      {
+        "link": "rf_tibia_pushrod",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.22465589221561047
+      },
+      {
+        "link": "rm_coxa",
+        "index": 0,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14640536495439846
+      },
+      {
+        "link": "rm_coxa",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1184082903391504
+      },
+      {
+        "link": "rm_coxa",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14717589078533358
+      },
+      {
+        "link": "rm_coxa",
+        "index": 3,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15471641512599693
+      },
+      {
+        "link": "rm_coxa",
+        "index": 4,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15469280485257803
+      },
+      {
+        "link": "rm_coxa",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14654068342026969
+      },
+      {
+        "link": "rm_coxa",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1429386616826097
+      },
+      {
+        "link": "rm_coxa",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.19559409534058442
+      },
+      {
+        "link": "rm_coxa",
+        "index": 8,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13454506785512282
+      },
+      {
+        "link": "rm_coxa",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1540706931902397
+      },
+      {
+        "link": "rm_femur",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1688628752258302
+      },
+      {
+        "link": "rm_femur",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17354315971486922
+      },
+      {
+        "link": "rm_femur",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13903175343400076
+      },
+      {
+        "link": "rm_femur",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13813629180925735
+      },
+      {
+        "link": "rm_femur",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.174444672095693
+      },
+      {
+        "link": "rm_femur",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1345325150994789
+      },
+      {
+        "link": "rm_femur",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.17457305423810468
+      },
+      {
+        "link": "rm_tibia",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.030265219603712396
+      },
+      {
+        "link": "rm_tibia",
+        "index": 1,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.2309426271453729
+      },
+      {
+        "link": "rm_tibia",
+        "index": 2,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.005030794035198655
+      },
+      {
+        "link": "rm_tibia",
+        "index": 3,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.03202054215552293
+      },
+      {
+        "link": "rm_tibia_push_lever",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18448863700131363
+      },
+      {
+        "link": "rm_tibia_push_lever",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1850681259211261
+      },
+      {
+        "link": "rm_tibia_push_lever",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.18958367171655197
+      },
+      {
+        "link": "rm_tibia_pushrod",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.22465638489313333
+      },
+      {
+        "link": "rr_coxa",
+        "index": 0,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1464053668780677
+      },
+      {
+        "link": "rr_coxa",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.11840829327984481
+      },
+      {
+        "link": "rr_coxa",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14717952351060606
+      },
+      {
+        "link": "rr_coxa",
+        "index": 3,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1547164170125226
+      },
+      {
+        "link": "rr_coxa",
+        "index": 4,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15469280691945433
+      },
+      {
+        "link": "rr_coxa",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14654068553752775
+      },
+      {
+        "link": "rr_coxa",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.14293866324457363
+      },
+      {
+        "link": "rr_coxa",
+        "index": 7,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1955940957065542
+      },
+      {
+        "link": "rr_coxa",
+        "index": 8,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.1345444848746509
+      },
+      {
+        "link": "rr_coxa",
+        "index": 9,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.15407069537654253
+      },
+      {
+        "link": "rr_femur",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1688625736296281
+      },
+      {
+        "link": "rr_femur",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17354286301910132
+      },
+      {
+        "link": "rr_femur",
+        "index": 2,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1390316030006207
+      },
+      {
+        "link": "rr_femur",
+        "index": 3,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.13813612300845524
+      },
+      {
+        "link": "rr_femur",
+        "index": 4,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.17444435905937894
+      },
+      {
+        "link": "rr_femur",
+        "index": 5,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.13453321988535324
+      },
+      {
+        "link": "rr_femur",
+        "index": 6,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.17457262068000234
+      },
+      {
+        "link": "rr_tibia",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.03026545770879284
+      },
+      {
+        "link": "rr_tibia",
+        "index": 1,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.23094212642741288
+      },
+      {
+        "link": "rr_tibia",
+        "index": 2,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.005031087132093687
+      },
+      {
+        "link": "rr_tibia",
+        "index": 3,
+        "shape": "sphere",
+        "foot": true,
+        "bottom_z_m": 0.03202081059965653
+      },
+      {
+        "link": "rr_tibia_push_lever",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.1844883104175835
+      },
+      {
+        "link": "rr_tibia_push_lever",
+        "index": 1,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.18506779843527071
+      },
+      {
+        "link": "rr_tibia_push_lever",
+        "index": 2,
+        "shape": "cylinder",
+        "foot": false,
+        "bottom_z_m": 0.189583045118286
+      },
+      {
+        "link": "rr_tibia_pushrod",
+        "index": 0,
+        "shape": "box",
+        "foot": false,
+        "bottom_z_m": 0.2246558317250081
+      }
+    ],
+    "source_sha256": {
+      "linkage_urdf": "2dae7165852b419f0bd6edbe03f7d398b403f1410c5b6bdc2c287b6834f543a6",
+      "cad_pin_frames": "1213dced0e17fa0ad2cdf58f14b46c181e028a8341c19e07d706853378a6a825"
+    },
+    "kinematic_contract_sha256": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+    "kinematic_contract_comparison": {
+      "pass": true,
+      "errors": [],
+      "bounded_numeric_differences": [
+        {
+          "path": "default_joint_positions_rad/lr_tibia_lever_pivot",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "default_joint_positions_rad/lr_tibia_pitch",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "default_joint_positions_rad/lr_tibia_rod_pivot",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lm_tibia_lever_pivot/0",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lm_tibia_lever_pivot/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lm_tibia_pitch/0",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lm_tibia_pitch/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lm_tibia_rod_pivot/0",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lm_tibia_rod_pivot/1",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lr_tibia_lever_pivot/0",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lr_tibia_lever_pivot/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lr_tibia_pitch/0",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lr_tibia_pitch/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lr_tibia_rod_pivot/0",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/lr_tibia_rod_pivot/1",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/rf_tibia_lever_pivot/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/rf_tibia_pitch/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/rf_tibia_rod_pivot/0",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/rr_tibia_lever_pivot/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/rr_tibia_pitch/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "joint_limits_rad/rr_tibia_rod_pivot/0",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "nominal_foot_clearance_m/lm",
+          "absolute_difference": 2.7755575615628914e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "nominal_foot_clearance_m/lr",
+          "absolute_difference": 2.7755575615628914e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "nominal_foot_clearance_m/rf",
+          "absolute_difference": 2.7755575615628914e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "nominal_nonfoot_min_clearance_m",
+          "absolute_difference": 2.7755575615628914e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lf/canonical_zero_old_knee_phase_rad",
+          "absolute_difference": 6.938893903907228e-18,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lf/stance_full_pose_translation_residual_m",
+          "absolute_difference": 1.5358401399614974e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lm/canonical_limits_rad/0",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lm/canonical_limits_rad/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lm/canonical_zero_old_knee_phase_rad",
+          "absolute_difference": 1.5265566588595902e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lm/stance_full_pose_orientation_residual_rad",
+          "absolute_difference": 7.895150523206263e-12,
+          "tolerance": 2e-11
+        },
+        {
+          "path": "phase_bridge/lm/stance_full_pose_translation_residual_m",
+          "absolute_difference": 5.144031088675366e-18,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lm/stance_phase_error_rad",
+          "absolute_difference": 1.1102230246251565e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lr/canonical_limits_rad/0",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lr/canonical_limits_rad/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lr/canonical_stance_rad",
+          "absolute_difference": 2.220446049250313e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lr/canonical_zero_old_knee_phase_rad",
+          "absolute_difference": 7.632783294297951e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/lr/stance_full_pose_orientation_residual_rad",
+          "absolute_difference": 5.735997980304934e-12,
+          "tolerance": 2e-11
+        },
+        {
+          "path": "phase_bridge/lr/stance_full_pose_translation_residual_m",
+          "absolute_difference": 1.3300111337787024e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rf/canonical_limits_rad/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rf/canonical_zero_old_knee_phase_rad",
+          "absolute_difference": 5.1347137262555687e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rm/canonical_zero_old_knee_phase_rad",
+          "absolute_difference": 1.3877787807814457e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rm/stance_full_pose_translation_residual_m",
+          "absolute_difference": 2.432593921219625e-17,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rm/stance_phase_error_rad",
+          "absolute_difference": 1.1102230246251565e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rr/canonical_limits_rad/1",
+          "absolute_difference": 4.440892098500626e-16,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rr/canonical_zero_old_knee_phase_rad",
+          "absolute_difference": 1.2736728548744507e-18,
+          "tolerance": 1e-14
+        },
+        {
+          "path": "phase_bridge/rr/stance_full_pose_orientation_residual_rad",
+          "absolute_difference": 6.0671298578651375e-12,
+          "tolerance": 2e-11
+        },
+        {
+          "path": "phase_bridge/rr/stance_full_pose_translation_residual_m",
+          "absolute_difference": 2.6560412127053096e-17,
+          "tolerance": 1e-14
+        }
+      ],
+      "numeric_absolute_tolerance": 1e-14,
+      "orientation_diagnostic_absolute_tolerance_rad": 2e-11
+    },
+    "usd_root_sha256": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf",
+    "dependencies": [
+      {
+        "path": "geometry.usdc",
+        "sha256": "06b6bb5aee6dd1082112aa37792a065c9637e2494b20157deaf265c4418c7065"
+      },
+      {
+        "path": "hexapod_mkii_fourbar_v5.usda",
+        "sha256": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf"
+      }
+    ],
+    "tolerances": {
+      "frame_absolute": 2e-07,
+      "closure_point_m": 2e-07,
+      "closure_axis_rad": 2e-06
+    },
+    "physical_validation": "not_performed",
+    "scope": "Authored geometry, source properties and sampled prescribed kinematics; no PhysX, continuous self-collision, torque-speed or thermal qualification"
+  },
+  "kit_asset_pass": true,
+  "body_count": 31,
+  "joint_count": 30,
+  "active_motor_count": 18,
+  "joint_names": [
+    "lf_coxa_yaw",
+    "lm_coxa_yaw",
+    "lr_coxa_yaw",
+    "rf_coxa_yaw",
+    "rm_coxa_yaw",
+    "rr_coxa_yaw",
+    "lf_femur_pitch",
+    "lm_femur_pitch",
+    "lr_femur_pitch",
+    "rf_femur_pitch",
+    "rm_femur_pitch",
+    "rr_femur_pitch",
+    "lf_tibia_lever_pivot",
+    "lf_tibia_pitch",
+    "lm_tibia_lever_pivot",
+    "lm_tibia_pitch",
+    "lr_tibia_lever_pivot",
+    "lr_tibia_pitch",
+    "rf_tibia_lever_pivot",
+    "rf_tibia_pitch",
+    "rm_tibia_lever_pivot",
+    "rm_tibia_pitch",
+    "rr_tibia_lever_pivot",
+    "rr_tibia_pitch",
+    "lf_tibia_rod_pivot",
+    "lm_tibia_rod_pivot",
+    "lr_tibia_rod_pivot",
+    "rf_tibia_rod_pivot",
+    "rm_tibia_rod_pivot",
+    "rr_tibia_rod_pivot"
+  ],
+  "active_motor_names": [
+    "lf_coxa_yaw",
+    "lm_coxa_yaw",
+    "lr_coxa_yaw",
+    "rf_coxa_yaw",
+    "rm_coxa_yaw",
+    "rr_coxa_yaw",
+    "lf_femur_pitch",
+    "lm_femur_pitch",
+    "lr_femur_pitch",
+    "rf_femur_pitch",
+    "rm_femur_pitch",
+    "rr_femur_pitch",
+    "lf_tibia_lever_pivot",
+    "lm_tibia_lever_pivot",
+    "lr_tibia_lever_pivot",
+    "rf_tibia_lever_pivot",
+    "rm_tibia_lever_pivot",
+    "rr_tibia_lever_pivot"
+  ],
+  "body_names": [
+    "body",
+    "lf_coxa",
+    "lm_coxa",
+    "lr_coxa",
+    "rf_coxa",
+    "rm_coxa",
+    "rr_coxa",
+    "lf_femur",
+    "lm_femur",
+    "lr_femur",
+    "rf_femur",
+    "rm_femur",
+    "rr_femur",
+    "lf_tibia_push_lever",
+    "lf_tibia",
+    "lm_tibia_push_lever",
+    "lm_tibia",
+    "lr_tibia_push_lever",
+    "lr_tibia",
+    "rf_tibia_push_lever",
+    "rf_tibia",
+    "rm_tibia_push_lever",
+    "rm_tibia",
+    "rr_tibia_push_lever",
+    "rr_tibia",
+    "lf_tibia_pushrod",
+    "lm_tibia_pushrod",
+    "lr_tibia_pushrod",
+    "rf_tibia_pushrod",
+    "rm_tibia_pushrod",
+    "rr_tibia_pushrod"
+  ],
+  "runtime_manifest": {
+    "schema": "hexapod.physical_fourbar_runtime.v1",
+    "task_id": "Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0",
+    "model_id": "mkii_fourbar_v5",
+    "asset_bundle": {
+      "model_id": "mkii_fourbar_v5",
+      "usd_path_relative": "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/hexapod_mkii_fourbar_v5.usda",
+      "closure_constraint_variant": "physical_mimic_v5",
+      "usd_root_sha256": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf",
+      "kinematics_sha256": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+      "bundle_files_sha256": {
+        "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/hexapod_mkii_fourbar_v5.usda": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf",
+        "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/geometry.usdc": "06b6bb5aee6dd1082112aa37792a065c9637e2494b20157deaf265c4418c7065",
+        "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/kinematics.json": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+        "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/manifest.json": "738fe892849e849db178280460376ad4bc9eedb335db55ab09ad8760a0d17247"
+      }
+    },
+    "usd_path_relative": "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/hexapod_mkii_fourbar_v5.usda",
+    "closure_constraint_variant": "physical_mimic_v5",
+    "kinematics_sha256": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+    "usd_root_sha256": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf",
+    "motor_contract": {
+      "model_id": "rs05-v2-provisional-70mm-2026-09-05",
+      "status": "PROVISIONAL_SIMULATION_NOT_HARDWARE_CALIBRATED",
+      "physics_dt_s": 0.00125,
+      "assumed_bus_voltage_v": 48.0,
+      "controller_profile": "mkii_pd_damping_030_v1",
+      "controller_parameters": {
+        "stiffness_nm_per_rad": 30.0,
+        "damping_nm_s_per_rad": 0.3
+      },
+      "actual_battery_voltage_known": false,
+      "implementation_sha256": {
+        "packages/hexapod_core/hexapod_core/rs05_v2.py": "e04c8746bdb4324dcede629b7d70c40da3ca1a445dd6819a57029610ca0288d5",
+        "packages/hexapod_core/hexapod_core/rs05_v2.json": "177875078f6b51de0935c129aacd278b16e753086da034848da5d7d4148b870e",
+        "packages/hexapod_env/hexapod_env/actuators/rs05_v2.py": "4a4e02a869f88265cd6cd780055b7237eed709fac4da321df39d12803a537f65",
+        "packages/hexapod_env/hexapod_env/actuators/rs05_v2_model.py": "c905c84e4a34688d5a93e0668df6d087a9484a32c803f95f03b897950d5efb15",
+        "packages/hexapod_env/hexapod_env/actuators/rs05_v2_runtime.py": "3456545bf68baebd45317a20933dd08800b7de817e93440868b19db0b490a04c"
+      },
+      "configuration": {
+        "schema_version": 2,
+        "model_id": "rs05-v2-provisional-70mm-2026-09-05",
+        "status": "PROVISIONAL_SIMULATION_NOT_HARDWARE_CALIBRATED",
+        "units": "output-side Nm, rad/s, seconds; current proxy Arms/Apk is not battery current",
+        "sources": {
+          "manual": {
+            "url": "https://github.com/RobStride/Product_Information/blob/main/Product%20Literature/RS05/RS05User%20Manual260713.pdf",
+            "downloaded_pdf_sha256": "1b2c61a6daa8331b9a348455005d10d6e425165c22e6f64c39cbca33f6360e82",
+            "pdf_pages": [
+              10,
+              11,
+              12,
+              14,
+              34,
+              50,
+              53
+            ],
+            "qualification": "Filename 260713; internal history initial release 2025-11-25. 70x70mm aluminum plate, 25C ambient overload test; 100rpm rated rotating point. Thickness/interface/airflow/repeated duty not specified."
+          },
+          "catalog": {
+            "url": "https://github.com/RobStride/Product_Information/blob/main/%E7%81%B5%E8%B6%B3%E6%97%B6%E4%BB%A3RS%E7%B3%BB%E5%88%97%E4%BA%A7%E5%93%81%E8%A7%84%E6%A0%BC%E4%BB%8B%E7%BB%8D(260713%EF%BC%89.pdf",
+            "downloaded_pdf_sha256": "79576e55fee940ce4e718ceffabb31ecb9fd49c9ecf2dd7ddd5d050a31eeebee",
+            "pdf_pages": [
+              27,
+              28,
+              29
+            ],
+            "qualification": "48V torque-speed points; 1.8Nm uses150x150mm aluminum plate and is NOT this model's rating."
+          }
+        },
+        "vendor": {
+          "peak_output_torque_nm": 5.5,
+          "stall_continuous_nm": 1.2,
+          "rotating_continuous_nm": 1.6,
+          "rated_rotating_rpm": 100.0,
+          "reference_voltage_v": 48.0,
+          "operating_voltage_range_v": [
+            15.0,
+            60.0
+          ],
+          "no_load_rpm": 480.0,
+          "torque_constant_nm_per_arms": 0.94,
+          "maximum_phase_current_apk": 11.0,
+          "rated_phase_current_apk": 2.4,
+          "torque_speed_rpm_nm": [
+            [
+              0.0,
+              5.5
+            ],
+            [
+              70.0,
+              5.5
+            ],
+            [
+              275.0,
+              4.0
+            ],
+            [
+              340.0,
+              3.0
+            ],
+            [
+              450.0,
+              1.6
+            ],
+            [
+              477.0,
+              0.5
+            ],
+            [
+              480.0,
+              0.0
+            ]
+          ],
+          "stall_overload_nm_s": [
+            [
+              1.2,
+              null
+            ],
+            [
+              1.6,
+              175.0
+            ],
+            [
+              3.0,
+              12.0
+            ],
+            [
+              4.0,
+              4.0
+            ],
+            [
+              5.0,
+              2.0
+            ],
+            [
+              5.5,
+              1.0
+            ]
+          ],
+          "rotating_overload_nm_s": [
+            [
+              1.6,
+              null
+            ],
+            [
+              2.0,
+              278.0
+            ],
+            [
+              2.5,
+              90.0
+            ],
+            [
+              3.0,
+              42.0
+            ],
+            [
+              3.5,
+              21.0
+            ],
+            [
+              4.0,
+              13.0
+            ],
+            [
+              4.5,
+              8.0
+            ],
+            [
+              5.0,
+              5.0
+            ],
+            [
+              5.5,
+              3.0
+            ]
+          ],
+          "thermal_thresholds_context_only": {
+            "winding_test_constraint_c": 145.0,
+            "thermistor_default_protection_c": 135.0,
+            "control_board_maximum_c": 135.0
+          },
+          "larger_plate_variant_not_enabled": {
+            "rotating_continuous_nm": 1.8,
+            "plate_mm": [
+              150,
+              150
+            ],
+            "peak_rotating_duration_s": 3.7
+          }
+        },
+        "provisional": {
+          "physics_dt_s": 0.005,
+          "physics_dt_role": "Historical constructor default; active runtime physics_dt_s is explicitly selected and hashed in the contract manifest.",
+          "supported_physics_dt_s": [
+            0.005,
+            0.0025,
+            0.00125
+          ],
+          "assumed_bus_voltage_v": 48.0,
+          "actual_battery_voltage_known": false,
+          "reset_burst_headroom": 0.5,
+          "zero_load_full_recovery_s": 60.0,
+          "recovery_below_continuous_fraction": 0.5,
+          "peak_exposure_threshold_fraction": 0.99,
+          "stiffness_nm_per_rad": 30.0,
+          "damping_nm_s_per_rad": 0.6,
+          "armature_kg_m2": 0.0007,
+          "friction": 0.01,
+          "dynamic_friction": 0.01,
+          "viscous_friction": 0.002,
+          "assumptions": [
+            "Piecewise linear 48V torque-speed interpolation; zero-speed peak and zero-torque480rpm endpoints are provisional joins. Absolute-speed bound applies identically to braking; no identified regenerative/four-quadrant map.",
+            "Below48V both speed axis and available torque scale by voltage/48; above48V no extra authority. This is provisional derating, not a measured voltage family.",
+            "Continuous torque interpolates1.2Nm at stall to1.6Nm at100rpm, then is capped by16.755160819Nm*rad/s mechanical power; also limited by the instantaneous torque-speed envelope.",
+            "Normalized overload rate is1/vendor-duration at table points, linearly interpolated in normalized excess torque. Blend stall and rotating rates by min(abs(rpm)/100,1). One common budget prevents switching operating points from resetting exposure.",
+            "Budget consumption integrates delivered load. At zero headroom applied torque is limited to continuous; inverse rate interpolation clips before integration so a step cannot overdraw budget.",
+            "Budget recovers only below half continuous load, linearly to1/60 per second atzero torque. This assumed cooldown is not a thermal-temperature model or hardware permission.",
+            "Episode resets initialize independent simulated motors at50percent headroom; selected resets leave all other motors' budgets continuous. Real control must persist measured thermal state, not apply episode reset semantics.",
+            "Phase current proxy is abs(delivered torque)/0.94 Arms, with sqrt(2) conversion toApk. It omits saturation/losses and is neither measured current nor a certified current limiter.",
+            "Metal housing-to-mount heat path confirmed qualitatively; equivalence to vendor plate unverified. Gains/friction/armature remain provisional pending leg-stand identification."
+          ]
+        }
+      },
+      "contract_sha256": "506c069cc689379de9bd17b5d92f4b6e87cbb55fe4b0edd082b246f612f59046"
+    },
+    "motor_contract_sha256": "f101345d2425e20eb7d5e99adc9cafb33f56042e92845fad6927fd55cfc998d3",
+    "active_motor_names": [
+      "lf_coxa_yaw",
+      "lm_coxa_yaw",
+      "lr_coxa_yaw",
+      "rf_coxa_yaw",
+      "rm_coxa_yaw",
+      "rr_coxa_yaw",
+      "lf_femur_pitch",
+      "lm_femur_pitch",
+      "lr_femur_pitch",
+      "rf_femur_pitch",
+      "rm_femur_pitch",
+      "rr_femur_pitch",
+      "lf_tibia_lever_pivot",
+      "lm_tibia_lever_pivot",
+      "lr_tibia_lever_pivot",
+      "rf_tibia_lever_pivot",
+      "rm_tibia_lever_pivot",
+      "rr_tibia_lever_pivot"
+    ],
+    "tree_joint_names": [
+      "lf_coxa_yaw",
+      "lm_coxa_yaw",
+      "lr_coxa_yaw",
+      "rf_coxa_yaw",
+      "rm_coxa_yaw",
+      "rr_coxa_yaw",
+      "lf_femur_pitch",
+      "lm_femur_pitch",
+      "lr_femur_pitch",
+      "rf_femur_pitch",
+      "rm_femur_pitch",
+      "rr_femur_pitch",
+      "lf_tibia_lever_pivot",
+      "lm_tibia_lever_pivot",
+      "lr_tibia_lever_pivot",
+      "rf_tibia_lever_pivot",
+      "rm_tibia_lever_pivot",
+      "rr_tibia_lever_pivot",
+      "lf_tibia_pitch",
+      "lm_tibia_pitch",
+      "lr_tibia_pitch",
+      "rf_tibia_pitch",
+      "rm_tibia_pitch",
+      "rr_tibia_pitch",
+      "lf_tibia_rod_pivot",
+      "lm_tibia_rod_pivot",
+      "lr_tibia_rod_pivot",
+      "rf_tibia_rod_pivot",
+      "rm_tibia_rod_pivot",
+      "rr_tibia_rod_pivot"
+    ],
+    "default_motor_positions_rad": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      -0.25,
+      -0.25,
+      -0.25,
+      -0.25,
+      -0.25,
+      -0.25,
+      -0.5779794024797098,
+      -0.5901906624193223,
+      -0.5708460029462148,
+      -0.5500010227983445,
+      -0.5127791632541843,
+      -0.549999592873893
+    ],
+    "soft_motor_limits_rad": [
+      [
+        -0.82903175,
+        0.82903175
+      ],
+      [
+        -0.82903175,
+        0.82903175
+      ],
+      [
+        -0.82903175,
+        0.82903175
+      ],
+      [
+        -0.82903175,
+        0.82903175
+      ],
+      [
+        -0.82903175,
+        0.82903175
+      ],
+      [
+        -0.82903175,
+        0.82903175
+      ],
+      [
+        -1.6879457749999998,
+        0.4926167749999998
+      ],
+      [
+        -1.6879457749999998,
+        0.4926167749999998
+      ],
+      [
+        -1.6879457749999998,
+        0.4926167749999998
+      ],
+      [
+        -1.6879457749999998,
+        0.4926167749999998
+      ],
+      [
+        -1.6879457749999998,
+        0.4926167749999998
+      ],
+      [
+        -1.6879457749999998,
+        0.4926167749999998
+      ],
+      [
+        -0.9104794028147065,
+        1.6545205995442318
+      ],
+      [
+        -0.9226906630637896,
+        1.6423093405869666
+      ],
+      [
+        -0.9033460032573485,
+        1.661653999458058
+      ],
+      [
+        -0.8825010233218831,
+        1.68249898022064
+      ],
+      [
+        -0.8452791636928056,
+        1.7197208400708037
+      ],
+      [
+        -0.8824995934580645,
+        1.6825004104393395
+      ]
+    ],
+    "command_frame": "anatomical_navigation",
+    "body_to_navigation": [
+      [
+        0,
+        -1,
+        0
+      ],
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ],
+    "observation_fields": [
+      [
+        "root_linear_velocity_navigation",
+        3
+      ],
+      [
+        "root_angular_velocity_navigation",
+        3
+      ],
+      [
+        "projected_gravity_navigation",
+        3
+      ],
+      [
+        "velocity_command_navigation",
+        3
+      ],
+      [
+        "active_motor_position_error",
+        18
+      ],
+      [
+        "active_motor_velocity",
+        18
+      ],
+      [
+        "previous_clipped_action",
+        18
+      ],
+      [
+        "estimated_motor_burst_headroom",
+        18
+      ]
+    ],
+    "observation_dim": 84,
+    "action_scale_rad": 0.3,
+    "action_clip": [
+      -1.0,
+      1.0
+    ],
+    "slew_rad_per_20ms": 0.04,
+    "physics_dt_s": 0.00125,
+    "decimation": 16,
+    "policy_dt_s": 0.02,
+    "numerical_recipe_id": "mkii_fourbar_tgs_external_forces_800hz_final_velocity16_v5",
+    "motor_target_schedule": {
+      "id": "linear_physics_substeps_v1",
+      "substeps": 16,
+      "endpoint_semantics": "existing 50 Hz clipped and slew-limited motor position target",
+      "position_fractions": "1/substeps through 1, exact endpoint on final substep",
+      "velocity_feedforward_rad_s": 0.0
+    },
+    "scope": "physical-model simulation contract; hardware calibration not admitted",
+    "resolved_motor_configuration": {
+      "active_joint_names": [
+        "lf_coxa_yaw",
+        "lm_coxa_yaw",
+        "lr_coxa_yaw",
+        "rf_coxa_yaw",
+        "rm_coxa_yaw",
+        "rr_coxa_yaw",
+        "lf_femur_pitch",
+        "lm_femur_pitch",
+        "lr_femur_pitch",
+        "rf_femur_pitch",
+        "rm_femur_pitch",
+        "rr_femur_pitch",
+        "lf_tibia_lever_pivot",
+        "lm_tibia_lever_pivot",
+        "lr_tibia_lever_pivot",
+        "rf_tibia_lever_pivot",
+        "rm_tibia_lever_pivot",
+        "rr_tibia_lever_pivot"
+      ],
+      "joint_names_expr": [
+        "^lf_coxa_yaw$",
+        "^lm_coxa_yaw$",
+        "^lr_coxa_yaw$",
+        "^rf_coxa_yaw$",
+        "^rm_coxa_yaw$",
+        "^rr_coxa_yaw$",
+        "^lf_femur_pitch$",
+        "^lm_femur_pitch$",
+        "^lr_femur_pitch$",
+        "^rf_femur_pitch$",
+        "^rm_femur_pitch$",
+        "^rr_femur_pitch$",
+        "^lf_tibia_lever_pivot$",
+        "^lm_tibia_lever_pivot$",
+        "^lr_tibia_lever_pivot$",
+        "^rf_tibia_lever_pivot$",
+        "^rm_tibia_lever_pivot$",
+        "^rr_tibia_lever_pivot$"
+      ],
+      "physics_dt_s": 0.00125,
+      "assumed_bus_voltage_v": 48.0,
+      "model_id": "rs05-v2-provisional-70mm-2026-09-05",
+      "controller_profile": "mkii_pd_damping_030_v1",
+      "reset_burst_headroom": 0.5,
+      "effort_limit": 5.5,
+      "effort_limit_sim": 5.5,
+      "velocity_limit": 50.26548245743668,
+      "velocity_limit_sim": 50.26548245743668,
+      "stiffness": 30.0,
+      "damping": 0.3,
+      "armature": 0.0007,
+      "friction": 0.01,
+      "dynamic_friction": 0.01,
+      "viscous_friction": 0.002,
+      "class_type": "hexapod_env.actuators.rs05_v2_runtime.RS05V2Actuator"
+    },
+    "resolved_collision_isolation": {
+      "schema": "hexapod.physx_collision_isolation.v1",
+      "mode": "explicit_usd_inverted_collision_groups",
+      "authored_topology_verified": true,
+      "invert_collision_group_filter": true,
+      "collection_expansion_rule": "expandPrims",
+      "environment_collection_membership": "exactly_own_environment_subtree",
+      "environment_allowlist": "own_group_and_global_group_only",
+      "global_allowlist": "global_group_and_every_environment_group",
+      "global_prim_paths": [
+        "/World/ground"
+      ],
+      "cross_environment_allowlinks": false,
+      "global_allowlinks_reciprocal": true
+    },
+    "observed_tree_joint_names": [
+      "lf_coxa_yaw",
+      "lm_coxa_yaw",
+      "lr_coxa_yaw",
+      "rf_coxa_yaw",
+      "rm_coxa_yaw",
+      "rr_coxa_yaw",
+      "lf_femur_pitch",
+      "lm_femur_pitch",
+      "lr_femur_pitch",
+      "rf_femur_pitch",
+      "rm_femur_pitch",
+      "rr_femur_pitch",
+      "lf_tibia_lever_pivot",
+      "lf_tibia_pitch",
+      "lm_tibia_lever_pivot",
+      "lm_tibia_pitch",
+      "lr_tibia_lever_pivot",
+      "lr_tibia_pitch",
+      "rf_tibia_lever_pivot",
+      "rf_tibia_pitch",
+      "rm_tibia_lever_pivot",
+      "rm_tibia_pitch",
+      "rr_tibia_lever_pivot",
+      "rr_tibia_pitch",
+      "lf_tibia_rod_pivot",
+      "lm_tibia_rod_pivot",
+      "lr_tibia_rod_pivot",
+      "rf_tibia_rod_pivot",
+      "rm_tibia_rod_pivot",
+      "rr_tibia_rod_pivot"
+    ],
+    "observed_motor_model_joint_names": [
+      "lf_coxa_yaw",
+      "lm_coxa_yaw",
+      "lr_coxa_yaw",
+      "rf_coxa_yaw",
+      "rm_coxa_yaw",
+      "rr_coxa_yaw",
+      "lf_femur_pitch",
+      "lm_femur_pitch",
+      "lr_femur_pitch",
+      "rf_femur_pitch",
+      "rm_femur_pitch",
+      "rr_femur_pitch",
+      "lf_tibia_lever_pivot",
+      "lm_tibia_lever_pivot",
+      "lr_tibia_lever_pivot",
+      "rf_tibia_lever_pivot",
+      "rm_tibia_lever_pivot",
+      "rr_tibia_lever_pivot"
+    ],
+    "resolved_simulation": {
+      "physics_dt_s": 0.00125,
+      "decimation": 16,
+      "solver_type": 1,
+      "enable_external_forces_every_iteration": true,
+      "solver_position_iterations": 128,
+      "solver_velocity_iterations": 16,
+      "self_collision_enabled": false,
+      "reset_motor_jitter_rad": 0.0
+    }
+  },
+  "asset_binding": {
+    "pass": true,
+    "model_id": "mkii_fourbar_v5",
+    "usd_root_sha256": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf",
+    "closure_constraint_variant": "physical_mimic_v5"
+  },
+  "reset_max_joint_error_rad": 0.0,
+  "reset_first_env_joint_positions_rad": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.25,
+    -0.25,
+    -0.25,
+    -0.25,
+    -0.25,
+    -0.25,
+    -0.5779793858528137,
+    -0.5779793858528137,
+    -0.5901906490325928,
+    -0.5901906490325928,
+    -0.5708460211753845,
+    -0.5708460211753845,
+    -0.5500010251998901,
+    -0.5500010251998901,
+    -0.512779176235199,
+    -0.512779176235199,
+    -0.5499995946884155,
+    -0.5499995946884155,
+    0.5779793858528137,
+    0.5901906490325928,
+    0.5708460211753845,
+    0.5500010251998901,
+    0.512779176235199,
+    0.5499995946884155
+  ],
+  "reset_root_positions_m": [
+    [
+      5.0,
+      -5.0,
+      0.1429699957370758
+    ],
+    [
+      5.0,
+      -3.0,
+      0.1429699957370758
+    ],
+    [
+      5.0,
+      -1.0,
+      0.1429699957370758
+    ],
+    [
+      5.0,
+      1.0,
+      0.1429699957370758
+    ],
+    [
+      5.0,
+      3.0,
+      0.1429699957370758
+    ],
+    [
+      5.0,
+      5.0,
+      0.1429699957370758
+    ],
+    [
+      3.0,
+      -5.0,
+      0.1429699957370758
+    ],
+    [
+      3.0,
+      -3.0,
+      0.1429699957370758
+    ],
+    [
+      3.0,
+      -1.0,
+      0.1429699957370758
+    ],
+    [
+      3.0,
+      1.0,
+      0.1429699957370758
+    ],
+    [
+      3.0,
+      3.0,
+      0.1429699957370758
+    ],
+    [
+      3.0,
+      5.0,
+      0.1429699957370758
+    ],
+    [
+      1.0,
+      -5.0,
+      0.1429699957370758
+    ],
+    [
+      1.0,
+      -3.0,
+      0.1429699957370758
+    ],
+    [
+      1.0,
+      -1.0,
+      0.1429699957370758
+    ],
+    [
+      1.0,
+      1.0,
+      0.1429699957370758
+    ],
+    [
+      1.0,
+      3.0,
+      0.1429699957370758
+    ],
+    [
+      1.0,
+      5.0,
+      0.1429699957370758
+    ],
+    [
+      -1.0,
+      -5.0,
+      0.1429699957370758
+    ],
+    [
+      -1.0,
+      -3.0,
+      0.1429699957370758
+    ],
+    [
+      -1.0,
+      -1.0,
+      0.1429699957370758
+    ],
+    [
+      -1.0,
+      1.0,
+      0.1429699957370758
+    ],
+    [
+      -1.0,
+      3.0,
+      0.1429699957370758
+    ],
+    [
+      -1.0,
+      5.0,
+      0.1429699957370758
+    ],
+    [
+      -3.0,
+      -5.0,
+      0.1429699957370758
+    ],
+    [
+      -3.0,
+      -3.0,
+      0.1429699957370758
+    ],
+    [
+      -3.0,
+      -1.0,
+      0.1429699957370758
+    ],
+    [
+      -3.0,
+      1.0,
+      0.1429699957370758
+    ],
+    [
+      -3.0,
+      3.0,
+      0.1429699957370758
+    ],
+    [
+      -3.0,
+      5.0,
+      0.1429699957370758
+    ],
+    [
+      -5.0,
+      -5.0,
+      0.1429699957370758
+    ],
+    [
+      -5.0,
+      -3.0,
+      0.1429699957370758
+    ]
+  ],
+  "anatomical_frame_pass": true,
+  "velocity_constraint_telemetry": {
+    "acceptance_use": "observational_only_no_velocity_thresholds",
+    "sampling": "after every scene.update physics substep",
+    "physics_dt_s": 0.00125,
+    "passive_relation_names": [
+      "lf_tibia_pitch",
+      "lf_tibia_rod_pivot",
+      "lm_tibia_pitch",
+      "lm_tibia_rod_pivot",
+      "lr_tibia_pitch",
+      "lr_tibia_rod_pivot",
+      "rf_tibia_pitch",
+      "rf_tibia_rod_pivot",
+      "rm_tibia_pitch",
+      "rm_tibia_rod_pivot",
+      "rr_tibia_pitch",
+      "rr_tibia_rod_pivot"
+    ],
+    "closure_pin_names": [
+      "lf_tibia_loop_closure",
+      "lm_tibia_loop_closure",
+      "lr_tibia_loop_closure",
+      "rf_tibia_loop_closure",
+      "rm_tibia_loop_closure",
+      "rr_tibia_loop_closure"
+    ],
+    "passive_relation_definition": "qdot_passive - multiplier*qdot_source; affine offsets have zero derivative",
+    "pin_velocity_definition": "v_C1-v_C0 in world frame, each v_C=v_link_origin+omega_world cross (R_world_from_link*r_link_to_C)",
+    "passive_rms_population": "all passive relations, environments and physics substeps in this window",
+    "pin_rms_population": "Euclidean velocity norms over all six pins, environments and physics substeps in this window"
+  },
+  "test_context": {
+    "phase": "standing",
+    "control_step": 599
+  }
+}

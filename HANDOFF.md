@@ -211,3 +211,61 @@ Successful GPU body-pair overlap evidence, the isolated (−2,0) replay and the
 four-iteration comparison are now preserved beside the sixteen-iteration result.
 The overlap negative control's 340 is the maximum native contact-point count
 per directional body query/sample, not the total collision count across the run.
+
+## 2026-09-05 22:03 UTC — qualification review and staged release
+
+Source `fd34f661bd672df9f68e6d8568548ad092ef32cf` strengthens the admission
+comparison without changing dynamics. It requires finite, exactly matching
+ordered actual reset-root positions; derives truthful solver descriptions;
+and compares raw pre-envelope demand using the existing 0.05 N m / 5% torque
+criterion so identical clipped peaks cannot hide different requests. The raw
+comparison is not an absolute demand cap or proof of trajectory convergence.
+The known velocity metrics remain observational and require explicit review.
+
+898 local CPU tests passed in 74.366 seconds; GitHub CI 33994676204 succeeded.
+The first suite run found two older campaign fixtures missing the newly
+required placement/demand fields; only those fixture inputs were updated,
+then the full suite passed. No running Spark source was edited.
+
+Frozen next source: `/home/orionh/HEXAPOD_runs/mkii_placement_convergence_v1/source`.
+Functional SHA256 `1fcab03b2c9f810a931e3d65fd057312d6dfb3b92003ca30058ccd821ff965e6`.
+New 293-file manifest `isaaclab/deploy/mkii_fourbar_v1_placement_convergence_pipeline.sha256`,
+SHA256 `3e64b8b0a7cb30ee3a78ae37f28ae7644e719d7d42dcb7d7af1c4f9765e2ae01`.
+The lean Git archive contains those 293 files plus the manifest; all hashes
+verified on Spark. Prior published manifests remain unchanged. This source
+is staged, not yet physically admitted. The ongoing c804169 standing pair
+continues independently; it cannot admit fd34f66 or any PPO run.
+
+## 2026-09-05 22:10 UTC — standing comparison passed; full campaign launched
+
+The matched c804169 pair completed both 32 × 600 controls with exact source
+and placement matching and clean owned-container removal. Settled applied/raw
+peak torque delta is 0.00353038311 N m (bound 0.05), height delta 18.1112497 µm
+(bound 1 mm), and both maintain at least five supporting feet. Passive velocity
+peaks 0.692814/0.714486 rad/s and pin speeds 0.0127074/0.0125607 m/s remain
+observational; RMS decreases in the refined run. All original short physical
+gates pass. This is standing screening, not complete training admission.
+Evidence: `artifacts/mkii_fourbar_2026-09-05/final_velocity16_standing_comparison/`.
+
+Fresh full campaign PID 1667897 started at 22:09:44 UTC on frozen fd34f66:
+`/home/orionh/HEXAPOD_runs/mkii_placement_convergence_v1/campaigns/fourbar-campaign-20260905T220944Z-78b3e50d/campaign.json`.
+It runs fresh 1×100 probe, full32×1000 standing +2400 driven nominal/refined,
+64×3 scratch PPO with checkpoint/inference checks, then separate512×1000
+resumed PPO only if admitted. Phase execution bounds are7200 seconds and
+full training21600 seconds. No prior report is admitted under the new identity.
+Read live campaign/progress files before claiming a phase has started or passed.
+
+The former guard1465763 was identified by exact /proc arguments and stopped
+only after successor1667860 queued on the same scheduler lock. No GPU workload
+was interrupted. Successor status/release/campaign selection:
+`/home/orionh/HEXAPOD_runs/mkii_placement_convergence_v1/priority_20260905T220942Z/`.
+It expires2026-09-06T08:09:43.812781Z at the latest and is bound to this exact
+campaign's terminal state. The shared coordination note was appended before
+launch; do not edit its bytes during an active phase. Read `campaign.json`
+and the priority status if Wi-Fi is interrupted; never launch a duplicate.
+
+Bootstrap and launch record reside in the same remote run parent:
+`launch_reviewed_campaign_v1.py` and `campaign_launch_20260905T220942Z.json`.
+The unchanged-source first PPO throughput must be measured before forecasting
+full training duration; see `docs/MKII_RUNTIME_PROFILING.md`. No runtime
+optimization has been applied or justified solely from GPU utilization.
