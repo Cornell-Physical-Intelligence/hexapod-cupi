@@ -21,6 +21,8 @@ from hexapod_core.rs05_v2 import contract_manifest as motor_contract_manifest, v
 from ...command_sampling import body_to_navigation_frame
 from .math import MotorCoordinates, observations, reward_terms
 
+ROOT = Path(__file__).resolve().parents[5]
+
 
 def tensor(value):
     return value.torch if hasattr(value, "torch") else value
@@ -28,6 +30,7 @@ def tensor(value):
 
 class HexapodMkiiFourbarEnv(DirectRLEnv):
     def __init__(self, cfg, render_mode=None, **kwargs):
+        asset_bundle = contract.resolve_asset_bundle(cfg.robot.spawn.usd_path, repo_root=ROOT)
         super().__init__(cfg, render_mode, **kwargs)
         self.kinematics = contract.load_kinematics(cfg.kinematics_path)
         self.coordinates = MotorCoordinates(self._robot.joint_names, self.kinematics, device=self.device)
@@ -76,10 +79,12 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
             raise ValueError("Reset motor jitter must be finite and within [0,.03] radians")
         kin_hash = hashlib.sha256(Path(cfg.kinematics_path).read_bytes()).hexdigest()
         usd_hash = hashlib.sha256(Path(cfg.robot.spawn.usd_path).read_bytes()).hexdigest()
+        if contract.resolve_asset_bundle(cfg.robot.spawn.usd_path, repo_root=ROOT) != asset_bundle:
+            raise ValueError("Physical bundle changed during environment construction")
         self.runtime_manifest = contract.runtime_manifest(self.kinematics,
             motor_contract_manifest(physics_dt_s=motor_cfg["physics_dt_s"],
                                     assumed_bus_voltage_v=motor_cfg["assumed_bus_voltage_v"]),
-            kinematics_sha256=kin_hash, usd_sha256=usd_hash)
+            kinematics_sha256=kin_hash, usd_sha256=usd_hash, asset_bundle=asset_bundle)
         self.runtime_manifest["resolved_motor_configuration"] = motor_cfg
         self.runtime_manifest["observed_tree_joint_names"] = list(self._robot.joint_names)
         self.runtime_manifest["observed_motor_model_joint_names"] = list(motor_names)

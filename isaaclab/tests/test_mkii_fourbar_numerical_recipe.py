@@ -148,7 +148,7 @@ class NumericalRecipeTests(unittest.TestCase):
         identity = {'task_id': contract.TASK_ID}
         def valid(multiplier):
             value = report(multiplier)
-            value.update({'pass': True, 'errors': [], 'contract': identity, 'task_id': contract.TASK_ID,
+            value.update({'asset_binding': {'pass': True}, 'pass': True, 'errors': [], 'contract': identity, 'task_id': contract.TASK_ID,
                 'num_envs': 32, 'steps_completed': 1000, 'steps_requested': 1000, 'driven_steps': 2400,
                 'driven_coordinate_pass': True, 'windows': {window: {'mean_height_m': .138, 'max_applied_nm': 1.2}
                     for window in ('settled', 'driven')}})

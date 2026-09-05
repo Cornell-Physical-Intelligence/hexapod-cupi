@@ -15,6 +15,30 @@ from hexapod_core.fourbar_v1 import ACTIVE_JOINT_NAMES, PHYSICS_DT_S, DECIMATION
 from validate_mkii_fourbar import PhysicalMetrics, SubstepHook, apply_numerical_recipe, grade, tensor
 
 
+TRACE_COORDINATE_CONVENTIONS = {
+    "sample_phase": "after scene.update at each physics substep",
+    "world_frame": "right-handed world XYZ; +Z up",
+    "body_link_pos_w": "link frame origin in world coordinates, metres; not centre of mass",
+    "body_link_quat_w": "Isaac Lab 3 native XYZW; rotates link-local vectors into world coordinates",
+    "terrain_origin_w": "per-environment terrain origin in world coordinates, metres",
+    "terrain_support_plane": "world Z equals terrain_origin_w/z for this flat-ground diagnostic",
+    "foot_force_w": "per-foot net contact force in world coordinates, newtons",
+}
+
+
+def body_pose_trace_fields(body_names, pos, quat, terrain_origin):
+    """Preserve native link poses so offline collider support heights are recoverable."""
+    envs, bodies = pos.shape[0], len(body_names)
+    if (len(set(body_names)) != bodies or tuple(pos.shape) != (envs, bodies, 3)
+            or tuple(quat.shape) != (envs, bodies, 4) or tuple(terrain_origin.shape) != (envs, 3)):
+        raise ValueError("Diagnostic body pose layout does not match named bodies/environments")
+    return [
+        ("body_link_pos_w", pos.reshape(envs, -1), [f"{name}_{a}" for name in body_names for a in "xyz"]),
+        ("body_link_quat_w", quat.reshape(envs, -1), [f"{name}_{a}" for name in body_names for a in "xyzw"]),
+        ("terrain_origin_w", terrain_origin, list("xyz")),
+    ]
+
+
 def motions(kind):
     if kind == "individuals":
         groups, duration = [[name] for name in ACTIVE_JOINT_NAMES], 50
@@ -119,6 +143,7 @@ class Trace:
         body_axes = [f"{name}_{axis}" for name in raw._robot.body_names for axis in "xyz"]
         fields += [("body_link_linear_velocity_w", lin.flatten(1), body_axes),
                    ("body_link_angular_velocity_w", ang.flatten(1), body_axes)]
+        fields += body_pose_trace_fields(raw._robot.body_names, pos, quat, tensor(raw._terrain.env_origins))
         for key, values in (("hinge_gap_local", gaps), ("hinge_axis_difference_local", axes),
                             ("hinge_relative_point_velocity_local", velocities)):
             names = [f"{leg}_{axis}" for leg in ("lf", "lm", "lr", "rf", "rm", "rr") for axis in "xyz"]
@@ -172,6 +197,7 @@ def main(argv=None):
         "num_envs": early.num_envs, "steps_requested": early.steps, "steps_completed": 0,
         "driven_steps": 0, "driven_steps_completed": 0,
         "driven_steps_requested": sum(row["steps"] for row in motions(early.diagnostic_motion)),
+        "trace_coordinate_conventions": dict(TRACE_COORDINATE_CONVENTIONS),
         "physics_substeps": 0, "solver_multiplier": early.solver_multiplier,
         "terminated_count": 0, "truncated_count": 0, "errors": [], "trace_files": []}
     env = trace = None

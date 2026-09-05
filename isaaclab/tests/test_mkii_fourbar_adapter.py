@@ -102,8 +102,9 @@ class FourbarAdapterTests(unittest.TestCase):
                 contract.validate_kinematics(kin)
 
     def manifest(self):
+        bundle = contract.select_asset_bundle(repo_root=ROOT, environ={})
         return contract.runtime_manifest(self.kin, {"model_id": "test_motor", "peak": 5.5},
-            kinematics_sha256=hashlib.sha256(json.dumps(self.kin,sort_keys=True).encode()).hexdigest(), usd_sha256="a"*64)
+            kinematics_sha256=bundle["kinematics_sha256"], usd_sha256=bundle["usd_root_sha256"], asset_bundle=bundle)
 
     def test_runtime_and_torch_action_slew_parity_with_measured_reset(self):
         manifest = self.manifest()

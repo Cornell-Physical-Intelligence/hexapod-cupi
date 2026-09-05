@@ -9,6 +9,7 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "packages/hexapod_core"))
 from hexapod_core.fourbar_v1 import validate_numerical_recipe_report
+from mkii_asset_binding import solver_runtime_equivalent
 from mkii_training_contract import identity, read_json, write_json, digest
 
 
@@ -28,6 +29,11 @@ def qualify(nominal, refined, contract):
             errors.append(f"{label}: incomplete or incompatible physical validation")
     if nominal.get("num_envs") != refined.get("num_envs") or nominal.get("steps_completed") != refined.get("steps_completed"):
         errors.append("Solver comparison requires the same environment and step counts")
+    for label, result in (("nominal", nominal), ("refined", refined)):
+        if result.get("asset_binding", {}).get("pass") is not True:
+            errors.append(f"{label}: selected CPU/Kit/runtime asset binding did not pass")
+    if not solver_runtime_equivalent(nominal.get("runtime_manifest"), refined.get("runtime_manifest")):
+        errors.append("Solver comparison changed runtime identity beyond position iterations")
     comparisons = {}
     for window in ("settled", "driven"):
         a, b = nominal.get("windows", {}).get(window, {}), refined.get("windows", {}).get(window, {})

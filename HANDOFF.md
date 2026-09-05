@@ -73,3 +73,11 @@ foot-pad discrepancies of several millimetres; see the
 [quantitative collider audit](artifacts/mkii_fourbar_2026-09-05/collider_fit/README.md).
 Hardware transfer, precise terrain contact and rough-terrain locomotion are
 not qualified by this probe.
+
+## 2026-09-05 07:02 UTC — Wi-Fi continuation and exact asset binding
+
+No physical-model PPO has started. Full campaign004 failed closure; completed short v3 group diagnostic055416 stayed below closure bounds but briefly reported zero support. Candidate060625 was interrupted by the host regex misclassifying a weather `flock` waiter. Preserve all failed/interrupted evidence; no generated replacement primary reports.
+
+Current priority guard1407273 holds `/opt/wx/gpu.lock`; status/release/campaign selection files are in `/home/orionh/HEXAPOD_runs/mkii_fourbar_diagnostics_v1/priority_20260905T0700/`. User explicitly reaffirmed top priority over weather. Guard expires17:02:04UTC at the latest. Live checks remain necessary.
+
+The new release records actual selected physical bundle identity and requires matching CPU/Kit/runtime/source dependencies, nominal/refined identity, and exact pre-learner admission. CAD kinematics JSON and v3/v4 geometry remain unchanged. Default remainsv3; full v4 runs require explicit selection. Continue candidate comparison, full32×1000standing+2400driven nominal/refined, then scratch and full PPO only if admitted.

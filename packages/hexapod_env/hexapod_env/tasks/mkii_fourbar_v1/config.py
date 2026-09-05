@@ -20,7 +20,8 @@ ROOT = Path(__file__).resolve().parents[5]
 KINEMATICS = contract.load_kinematics(ROOT / contract.KINEMATICS_PATH)
 ROBOT_PRIM = "/World/envs/env_.*/Robot"
 GROUND = "/World/ground/terrain/GroundPlane/CollisionPlane"
-USD_PATH = os.environ.get("HEXAPOD_MKII_FOURBAR_USD_PATH", str(ROOT / KINEMATICS["usd_path_relative"]))
+ASSET_BUNDLE = contract.select_asset_bundle(repo_root=ROOT, environ=os.environ)
+USD_PATH = str(ROOT / ASSET_BUNDLE["usd_path_relative"])
 
 
 def _sensor(name, path):

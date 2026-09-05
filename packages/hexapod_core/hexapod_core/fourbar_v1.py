@@ -9,8 +9,18 @@ import hashlib
 import json
 import math
 from pathlib import Path
+from types import MappingProxyType
 
-MODEL_ID = "mkii_fourbar_v3"
+DEFAULT_ASSET_MODEL_ID = "mkii_fourbar_v3"
+MODEL_ID = DEFAULT_ASSET_MODEL_ID  # Historical default, never the resolved run identity.
+ASSET_BUNDLES = MappingProxyType({
+    f"mkii_fourbar_v{version}": MappingProxyType({
+        "model_id": f"mkii_fourbar_v{version}",
+        "usd_path_relative": f"robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v{version}/hexapod_mkii_fourbar_v{version}.usda",
+        "closure_constraint_variant": variant,
+    })
+    for version, variant in ((3, "revolute_5row_v3"), (4, "planar_d6_xy_v4"))
+})
 TASK_ID = "Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0"
 KINEMATICS_SCHEMA = "hexapod.mkii_fourbar_v3.kinematics.v1"
 KINEMATICS_PATH = "configs/mkii_fourbar_v3_kinematics.json"
@@ -40,6 +50,95 @@ OBSERVATION_FIELDS = (
     ("previous_clipped_action", 18), ("estimated_motor_burst_headroom", 18),
 )
 OBSERVATION_DIM = sum(width for _, width in OBSERVATION_FIELDS)
+
+
+def _file_sha256(path):
+    value = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            value.update(chunk)
+    return value.hexdigest()
+
+
+def _is_sha256(value):
+    return isinstance(value, str) and len(value) == 64 and all(c in "0123456789abcdef" for c in value)
+
+
+def validate_asset_bundle(value):
+    """Validate a resolved identity; live USD audits still establish its physics."""
+    fields = {"model_id", "usd_path_relative", "closure_constraint_variant", "usd_root_sha256",
+              "kinematics_sha256", "bundle_files_sha256"}
+    if not isinstance(value, dict) or set(value) != fields:
+        raise ValueError("Incomplete physical asset bundle identity")
+    model_id = value["model_id"]
+    if not isinstance(model_id, str) or model_id not in ASSET_BUNDLES:
+        raise ValueError("Unknown physical asset model")
+    descriptor = ASSET_BUNDLES[model_id]
+    if any(value[key] != expected for key, expected in descriptor.items()):
+        raise ValueError("Physical asset path/model/closure identity mismatch")
+    usd = Path(descriptor["usd_path_relative"])
+    expected_files = {usd.as_posix(), *(str(usd.parent/name) for name in ("geometry.usdc", "kinematics.json", "manifest.json"))}
+    files = value["bundle_files_sha256"]
+    if (not isinstance(files, dict) or set(files) != expected_files
+            or not all(_is_sha256(digest) for digest in files.values())
+            or value["usd_root_sha256"] != files[usd.as_posix()]
+            or value["kinematics_sha256"] != files[str(usd.parent/"kinematics.json")]):
+        raise ValueError("Physical bundle file hashes are incomplete or inconsistent")
+    return dict(value, bundle_files_sha256=dict(files))
+
+
+def resolve_asset_bundle(usd_path, *, repo_root):
+    """Select a known root USD and hash its actual portable bundle with stdlib.
+
+    A relocated checkout is supported. Arbitrary USD roots and redirected bundle
+    dependencies are rejected. The original kinematics JSON describes CAD frames; its stored
+    USD path is historical provenance, not the selected physical formulation.
+    """
+    root = Path(repo_root).resolve()
+    supplied = Path(usd_path)
+    actual = (supplied if supplied.is_absolute() else root/supplied).resolve()
+    matches = [value for value in ASSET_BUNDLES.values() if actual == root/value["usd_path_relative"]]
+    if len(matches) != 1:
+        raise ValueError("USD must resolve to one of the registered physical bundle roots")
+    descriptor = dict(matches[0])
+    relative = Path(descriptor["usd_path_relative"])
+    records = {}
+    for name in (relative.name, "geometry.usdc", "kinematics.json", "manifest.json"):
+        path = actual.parent/name
+        if path.resolve() != path or not path.is_file():
+            raise ValueError(f"Physical bundle file is missing or redirected: {name}")
+        records[path.relative_to(root).as_posix()] = _file_sha256(path)
+    def reject_nonfinite(value):
+        raise ValueError(f"Nonfinite physical bundle manifest: {value}")
+    manifest = json.loads((actual.parent/"manifest.json").read_text(), parse_constant=reject_nonfinite)
+    if (not isinstance(manifest, dict) or manifest.get("pass") is not True
+            or manifest.get("schema") != f"hexapod.{descriptor['model_id']}.cpu_audit.v1"
+            or manifest.get("closure_constraint_variant", "revolute_5row_v3") != descriptor["closure_constraint_variant"]):
+        raise ValueError("Bundle creation manifest has a different model or closure variant")
+    root_hash = records[relative.as_posix()]
+    kin_hash = records[str(relative.parent/"kinematics.json")]
+    dependencies = manifest.get("dependencies")
+    expected_dependencies = [{"path": name, "sha256": records[str(relative.parent/name)]}
+                             for name in sorted((relative.name, "geometry.usdc"))]
+    if (manifest.get("usd_root_sha256") != root_hash
+            or manifest.get("kinematic_contract_sha256") != kin_hash
+            or dependencies != expected_dependencies):
+        raise ValueError("Physical bundle bytes differ from its creation manifest")
+    return validate_asset_bundle(dict(descriptor, usd_root_sha256=root_hash,
+        kinematics_sha256=kin_hash, bundle_files_sha256=records))
+
+
+def select_asset_bundle(*, repo_root, environ):
+    """Resolve explicit environment selection, retaining v3 when unspecified."""
+    paths = [environ[name] for name in ("HEXAPOD_USD_PATH", "HEXAPOD_MKII_FOURBAR_USD_PATH") if name in environ]
+    if any(not isinstance(path, str) or not path.strip() for path in paths):
+        raise ValueError("Explicit physical USD path cannot be empty")
+    if not paths:
+        paths = [ASSET_BUNDLES[DEFAULT_ASSET_MODEL_ID]["usd_path_relative"]]
+    selected = [resolve_asset_bundle(path, repo_root=repo_root) for path in paths]
+    if any(value != selected[0] for value in selected[1:]):
+        raise ValueError("Conflicting physical USD environment overrides")
+    return selected[0]
 
 
 def numerical_recipe(multiplier=1):
@@ -144,14 +243,20 @@ def soft_limits(kinematics):
     return result
 
 
-def runtime_manifest(kinematics, motor_manifest, *, kinematics_sha256, usd_sha256):
+def runtime_manifest(kinematics, motor_manifest, *, kinematics_sha256, usd_sha256, asset_bundle):
     validate_kinematics(kinematics)
+    asset_bundle = validate_asset_bundle(asset_bundle)
     for name, digest in (("kinematics", kinematics_sha256), ("USD", usd_sha256)):
         if len(digest) != 64 or any(char not in "0123456789abcdef" for char in digest):
             raise ValueError(f"Expected SHA-256 for {name}")
+    if (asset_bundle["kinematics_sha256"] != kinematics_sha256
+            or asset_bundle["usd_root_sha256"] != usd_sha256):
+        raise ValueError("Executed USD/kinematics hashes differ from the selected physical bundle")
     motor_json = json.dumps(motor_manifest, sort_keys=True, separators=(",", ":"), allow_nan=False)
     return {
-        "schema": "hexapod.physical_fourbar_runtime.v1", "task_id": TASK_ID, "model_id": MODEL_ID,
+        "schema": "hexapod.physical_fourbar_runtime.v1", "task_id": TASK_ID, "model_id": asset_bundle["model_id"],
+        "asset_bundle": asset_bundle, "usd_path_relative": asset_bundle["usd_path_relative"],
+        "closure_constraint_variant": asset_bundle["closure_constraint_variant"],
         "kinematics_sha256": kinematics_sha256, "usd_root_sha256": usd_sha256,
         "motor_contract": motor_manifest, "motor_contract_sha256": hashlib.sha256(motor_json.encode()).hexdigest(),
         "active_motor_names": list(ACTIVE_JOINT_NAMES), "tree_joint_names": list(kinematics["tree_joint_names"]),

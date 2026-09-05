@@ -28,6 +28,7 @@ import uuid
 import zipfile
 
 LOCK = Path('/tmp/hexapod-isaac-gpu.lock')
+SHARED_GPU_LOCK = Path('/opt/wx/gpu.lock')
 LAB = Path('/home/orionh/IsaacLab')
 CONTAINER_SOURCE = '/workspace/hexapod'
 CONTAINER_OUTPUT = '/workspace/validation_artifacts'
@@ -37,7 +38,7 @@ MIN_AVAILABLE_MEMORY_BYTES = 16 * 1024**3
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'tools'))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'packages/hexapod_core'))
 from mkii_training_contract import identity, require_admission, require_checkpoint
-from hexapod_core.fourbar_v1 import validate_numerical_recipe_report
+from hexapod_core.fourbar_v1 import ASSET_BUNDLES, validate_asset_bundle, validate_numerical_recipe_report
 # Keep the reviewed shell spelling visible to the shared launcher contract;
 # shlex removes only grouping quotes, yielding exactly one subprocess argument.
 TELEMETRY_ARGUMENT = '--kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry"'
@@ -87,9 +88,75 @@ def descendants(processes, roots):
         found = expanded
 
 
-def blocking_producers(processes, owned_pids):
+def blocked_flock_waiter(pid, processes, *, proc_root=Path('/proc'), lock_path=SHARED_GPU_LOCK,
+                         flock_executable=Path('/usr/bin/flock')):
+    """Prove a real, childless flock is waiting on the shared GPU lock.
+
+    A command line mentioning a producer is not evidence it has started. This
+    exception requires matching kernel lock, executable and descriptor state;
+    missing/ambiguous/racing proc evidence leaves the producer blocked.
+    """
+    if pid not in processes or descendants(processes, [pid]) != {pid}:
+        return None
+    process = proc_root / str(pid)
+    try:
+        # The PID start time prevents combining evidence across PID reuse.
+        def start_time():
+            return int((process / 'stat').read_text().rsplit(')', 1)[1].split()[19])
+
+        start = start_time()
+        expected_exe, actual_exe = flock_executable.stat(), (process / 'exe').stat()
+        if (not stat.S_ISREG(actual_exe.st_mode)
+                or (actual_exe.st_dev, actual_exe.st_ino) != (expected_exe.st_dev, expected_exe.st_ino)):
+            return None
+        if (process / 'wchan').read_text().strip() != 'locks_lock_inode_wait':
+            return None
+        lock_stat = lock_path.stat()
+        if not stat.S_ISREG(lock_stat.st_mode):
+            return None
+        key = (os.major(lock_stat.st_dev), os.minor(lock_stat.st_dev), lock_stat.st_ino)
+        descriptors = list((process / 'fd').iterdir())
+        if not any((item.stat().st_dev, item.stat().st_ino) == (lock_stat.st_dev, lock_stat.st_ino)
+                   for item in descriptors if item.name.isdigit()):
+            return None
+        rows = []
+        pattern = re.compile(r'^(\d+):\s+(?:(->)\s+)?FLOCK\s+ADVISORY\s+WRITE\s+'
+                             r'(\d+)\s+([0-9a-fA-F]+):([0-9a-fA-F]+):(\d+)\s+0\s+EOF$')
+        for line in (proc_root / 'locks').read_text().splitlines():
+            match = pattern.fullmatch(line.strip())
+            if match:
+                identifier, arrow, owner, major, minor, inode = match.groups()
+                rows.append((identifier, bool(arrow), int(owner), (int(major, 16), int(minor, 16), int(inode))))
+        waits = [row for row in rows if row[1] and row[2] == pid and row[3] == key]
+        if len(waits) != 1:
+            return None
+        holders = [row for row in rows if row[0] == waits[0][0] and not row[1] and row[3] == key and row[2] != pid]
+        if len(holders) != 1:
+            return None
+        tasks = list((process / 'task').iterdir())
+        if not tasks or any(not item.name.isdigit() or (item / 'children').read_text().strip() for item in tasks):
+            return None
+        if start_time() != start or (process / 'wchan').read_text().strip() != 'locks_lock_inode_wait':
+            return None
+        return {'pid': pid, 'executable': str(flock_executable), 'lock_path': str(lock_path),
+                'lock_inode': lock_stat.st_ino, 'lock_device': list(key[:2]),
+                'holder_pid': holders[0][2], 'wait_channel': 'locks_lock_inode_wait'}
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def blocking_producers(processes, owned_pids, *, waiter_evidence=None):
     readers = {'ps', 'grep', 'rg', 'tail', 'cat', 'sed', 'head'}
-    return sorted(pid for pid, (_, argv) in processes.items() if pid not in owned_pids and Path(argv.split(None, 1)[0]).name not in readers and PRODUCERS.search(argv))
+    blocked = []
+    for pid, (_, argv) in processes.items():
+        if pid in owned_pids or Path(argv.split(None, 1)[0]).name in readers or not PRODUCERS.search(argv):
+            continue
+        evidence = blocked_flock_waiter(pid, processes)
+        if evidence is None:
+            blocked.append(pid)
+        elif waiter_evidence is not None:
+            waiter_evidence.append(evidence)
+    return sorted(blocked)
 
 
 def ancestors(processes, pid):
@@ -147,7 +214,8 @@ def resource_gate(*, owned_container=None, allow_owned_gpu=False):
     memory = available_memory_bytes()
     processes = parse_processes(command(['ps', '-eo', 'pid=,ppid=,args=']).stdout)
     owned = descendants(processes, [os.getpid()] + ([owned_container['pid']] if owned_container else []))
-    producers = blocking_producers(processes, owned | ancestors(processes, os.getpid()))
+    waiters = []
+    producers = blocking_producers(processes, owned | ancestors(processes, os.getpid()), waiter_evidence=waiters)
     if producers:
         raise Blocked(f'Unrelated GPU producer processes remain: PIDs {producers}')
     for service in SERVICES:
@@ -188,7 +256,8 @@ def resource_gate(*, owned_container=None, allow_owned_gpu=False):
     return {'time_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'mem_available_bytes': memory,
             'minimum_mem_available_bytes': MIN_AVAILABLE_MEMORY_BYTES, 'gpu_pids': gpu_pids,
             'gpu_utilization_percent': [int(value.strip()) for value in utilization],
-            'unrelated_cpu_container_ids': cpu_containers, 'producer_pids': producers}
+            'unrelated_cpu_container_ids': cpu_containers, 'producer_pids': producers,
+            'blocked_shared_lock_waiters': waiters}
 
 
 def snapshot_source(source, manifest):
@@ -338,6 +407,25 @@ def validate_diagnostic_traces(directory, result, *, num_envs, samples):
         raise Blocked('Diagnostic trace files do not cover all physics samples')
 
 
+def require_requested_asset(result, asset_model, contract):
+    """Bind the explicit host selection to executed runtime bundle bytes."""
+    runtime = result.get('runtime_manifest')
+    if not isinstance(runtime, dict):
+        raise Blocked('Requested asset requires an executed runtime manifest')
+    try:
+        bundle = validate_asset_bundle(runtime.get('asset_bundle'))
+    except ValueError as exc:
+        raise Blocked(f'Requested asset has invalid runtime bundle: {exc}') from exc
+    if (bundle['model_id'] != asset_model or runtime.get('model_id') != asset_model
+            or runtime.get('usd_root_sha256') != bundle['usd_root_sha256']
+            or runtime.get('usd_path_relative') != bundle['usd_path_relative']
+            or runtime.get('closure_constraint_variant') != bundle['closure_constraint_variant']
+            or runtime.get('kinematics_sha256') != bundle['kinematics_sha256']
+            or any(contract.get('files', {}).get(path) != checksum for path, checksum in bundle['bundle_files_sha256'].items())):
+        raise Blocked('Executed runtime asset differs from the requested model or source identity')
+    return bundle
+
+
 def validate_written_report(path, *, args, contract):
     if not path.is_file():
         raise Blocked('Process exited without its mandatory final report')
@@ -392,6 +480,8 @@ def validate_written_report(path, *, args, contract):
             or result.get('mode') == 'diagnose' or 'diagnostic_complete' in result
             or result.get('pass') is not True):
         raise Blocked('Final report failed or is diagnostic evidence rather than validation/training')
+    if getattr(args, 'asset_model', None) is not None:
+        require_requested_asset(result, args.asset_model, contract)
     if args.mode == 'validate':
         try:
             validate_numerical_recipe_report(result, args.solver_multiplier)
@@ -445,9 +535,14 @@ def compose_argv(source, output, name, owner, args):
             extra += ['--diagnostic-motion', args.diagnostic_motion, '--diagnostic-usd', args.diagnostic_usd]
     script = {'train': 'train_mkii_fourbar.py', 'validate': 'validate_mkii_fourbar.py',
               'diagnose': 'diagnose_mkii_fourbar.py'}[args.mode]
+    usd_relative = (DIAGNOSTIC_USD_PATHS[args.diagnostic_usd] if args.mode == 'diagnose'
+                    else ASSET_BUNDLES[getattr(args, 'asset_model', None) or 'mkii_fourbar_v3']['usd_path_relative'])
+    usd_environment = [value for key in ('HEXAPOD_USD_PATH', 'HEXAPOD_MKII_FOURBAR_USD_PATH')
+                       for value in ('-e', f'{key}={CONTAINER_SOURCE}/{usd_relative}')]
     return ['docker', 'compose', '--env-file', 'docker/.env.base', '-f', 'docker/docker-compose.yaml', '--profile', 'base',
         'run', '--no-deps', '-d', '-T', '--name', name, '--label', f'{OWNER_LABEL}={owner}',
         '-w', CONTAINER_OUTPUT, '-e', f'PYTHONPATH={CONTAINER_SOURCE}/isaaclab', '-e', 'PYTHONDONTWRITEBYTECODE=1',
+        *usd_environment,
         '-v', f'{source}:{CONTAINER_SOURCE}:ro', '-v', f'{output}:{CONTAINER_OUTPUT}:rw', *mounts,
         '--entrypoint', '/bin/bash', 'isaac-lab-base', '-c', barrier, 'hexapod-fourbar-barrier',
         '/workspace/isaaclab/_isaac_sim/python.sh', f'{CONTAINER_SOURCE}/isaaclab/{script}', *shlex.split(TELEMETRY_ARGUMENT),
@@ -464,6 +559,7 @@ def main(argv=None):
     parser.add_argument('--solver-multiplier', type=int, choices=(1, 2), default=1)
     parser.add_argument('--diagnostic-motion', choices=tuple(DIAGNOSTIC_MOTION_STEPS), default='individuals')
     parser.add_argument('--diagnostic-usd', choices=tuple(DIAGNOSTIC_USD_PATHS))
+    parser.add_argument('--asset-model', choices=tuple(ASSET_BUNDLES), help='Validation/training model; default mkii_fourbar_v3')
     parser.add_argument('--source-dir', type=Path, required=True)
     parser.add_argument('--source-commit', default='uncommitted', help='Source baseline commit; SHA256SUMS records the exact running files')
     parser.add_argument('--output-root', type=Path)
@@ -472,6 +568,10 @@ def main(argv=None):
     parser.add_argument('--timeout-seconds', type=int, default=900)
     parser.add_argument('--dry-run', action='store_true')
     args = parser.parse_args(argv)
+    if args.mode == 'diagnose' and args.asset_model is not None:
+        parser.error('--asset-model is only accepted for validate/train; diagnosis uses --diagnostic-usd')
+    if args.mode != 'diagnose' and args.asset_model is None:
+        args.asset_model = 'mkii_fourbar_v3'
     if args.diagnostic_usd is not None and args.mode != 'diagnose':
         parser.error('--diagnostic-usd is only accepted for diagnose')
     if args.diagnostic_usd is None:
@@ -498,6 +598,8 @@ def main(argv=None):
     if any(character in str(path) for path in (source, output_root) for character in ('\n', '\r', ':')):
         parser.error('Mount paths cannot contain newlines or colons')
     contract = identity(source)
+    if args.asset_model is not None and ASSET_BUNDLES[args.asset_model]['usd_path_relative'] not in contract.get('files', {}):
+        parser.error('The selected asset model must be present in the source identity')
     if args.mode == 'diagnose' and DIAGNOSTIC_USD_PATHS[args.diagnostic_usd] not in contract.get('files', {}):
         parser.error('The selected diagnostic USD must be present in the source identity')
     if args.mode == 'train':
@@ -509,7 +611,7 @@ def main(argv=None):
         if any(character in str(path) for path in (args.admission, args.checkpoint) if path is not None
                for character in ('\n', '\r', ':')):
             parser.error('Admission/checkpoint mount paths cannot contain newlines or colons')
-        require_admission(args.admission, contract)
+        require_requested_asset(require_admission(args.admission, contract), args.asset_model, contract)
         if args.checkpoint:
             require_checkpoint(args.checkpoint, contract)
     elif args.checkpoint or args.admission:
@@ -519,7 +621,8 @@ def main(argv=None):
     output = output_root / name
     argv = compose_argv(source, output, name, owner, args)
     if args.dry_run:
-        print(json.dumps({'execution': 'not_started', 'output': str(output), 'argv': argv, 'timeout_seconds': args.timeout_seconds}, indent=2))
+        print(json.dumps({'execution': 'not_started', 'output': str(output), 'argv': argv,
+                          'asset_model': args.asset_model, 'timeout_seconds': args.timeout_seconds}, indent=2))
         return 0
     for required in (LAB / 'docker/.env.base', LAB / 'docker/docker-compose.yaml'):
         if not required.is_file():
@@ -534,6 +637,9 @@ def main(argv=None):
         os.close(9); raise Blocked('Another hexapod launcher holds the shared GPU lock')
     output.mkdir(parents=True, exist_ok=False)
     report = {'execution': 'preflight', 'source': str(source), 'container_name': name, 'owner': owner, 'gates': [], 'exit_code': None, 'cleanup': 'not_required', 'source_commit': args.source_commit}
+    report['asset_model'] = args.asset_model
+    if args.mode == 'diagnose':
+        report['diagnostic_usd'] = args.diagnostic_usd
     container = None
     deadline = time.monotonic() + args.timeout_seconds
     exit_code = 1
@@ -563,7 +669,7 @@ def main(argv=None):
         report['gates'].append(resource_gate(owned_container=container))
         require_unchanged_source(source, contract, 'before releasing the CPU admission barrier')
         if args.mode == 'train':
-            require_admission(args.admission, contract)
+            require_requested_asset(require_admission(args.admission, contract), args.asset_model, contract)
             if args.checkpoint:
                 require_checkpoint(args.checkpoint, contract)
         (output / 'admitted').touch(exist_ok=False)

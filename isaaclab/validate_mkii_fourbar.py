@@ -18,6 +18,8 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / p) for p in ("tools", "isaaclab", "packages/hexapod_core", "packages/hexapod_env")]
 from mkii_training_contract import TASK_ID, identity, write_json
+from mkii_asset_binding import verify_asset_binding
+from hexapod_core.fourbar_v1 import resolve_asset_bundle
 from hexapod_core.fourbar_v1 import numerical_recipe, validate_numerical_recipe_report, PHYSICS_DT_S, DECIMATION
 
 
@@ -261,13 +263,6 @@ def main(argv=None):
     try:
         report["contract"] = identity()
         kinematics = json.loads((ROOT / "configs/mkii_fourbar_v3_kinematics.json").read_text())
-        usd = ROOT / kinematics["usd_path_relative"]
-        result = subprocess.run([sys.executable, str(ROOT / "tools/audit_mkii_fourbar_usd.py"), str(usd)],
-                                text=True, capture_output=True, timeout=180)
-        cpu = json.loads(result.stdout)
-        report["cpu_asset_pass"] = cpu.get("pass") is True and result.returncode == 0
-        if not report["cpu_asset_pass"]:
-            raise ValueError(f"CPU geometry gate failed: {cpu}")
         from hexapod_env.tasks.mkii_fourbar_v1.register import register_mkii_fourbar_v1
         register_mkii_fourbar_v1()
         from isaaclab_tasks.utils import add_launcher_args, launch_simulation, resolve_task_config, setup_preset_cli
@@ -281,6 +276,19 @@ def main(argv=None):
             cfg, _ = resolve_task_config(TASK_ID, "")
         finally:
             sys.argv = saved
+        usd = Path(cfg.robot.spawn.usd_path).resolve(strict=True)
+        bundle = resolve_asset_bundle(usd, repo_root=ROOT)
+        report["selected_asset_bundle"] = bundle
+        early.report.parent.mkdir(parents=True, exist_ok=True)
+        cpu_path = early.report.with_name("cpu_asset_audit.json")
+        result = subprocess.run([sys.executable, str(ROOT / "tools/audit_mkii_fourbar_usd.py"), str(usd),
+            "--closure-variant", bundle["closure_constraint_variant"], "--report", str(cpu_path)],
+            text=True, capture_output=True, timeout=180)
+        cpu = json.loads(cpu_path.read_text())
+        report["cpu_asset_audit"] = cpu
+        report["cpu_asset_pass"] = cpu.get("pass") is True and result.returncode == 0
+        if not report["cpu_asset_pass"]:
+            raise ValueError(f"CPU geometry gate failed: {cpu['errors']}")
         cfg.scene.num_envs, cfg.seed = args.num_envs, 0
         cfg.standing_only, cfg.reset_joint_jitter_rad = True, 0.
         cfg.episode_length_s = (args.steps + 2401)*.02 + 1.
@@ -294,7 +302,8 @@ def main(argv=None):
             try:
                 from audit_mkii_fourbar_usd import validate
                 import mkii_fourbar_kinematics as kin
-                kit = validate(kin.URDF, kin.PINS, usd)
+                kit = validate(kin.URDF, kin.PINS, usd, closure_variant=bundle["closure_constraint_variant"])
+                report["kit_asset_audit"] = kit
                 report["kit_asset_pass"] = kit["pass"]
                 if not kit["pass"]:
                     raise ValueError(f"Kit geometry gate failed: {kit['errors']}")
@@ -308,6 +317,7 @@ def main(argv=None):
                     active_motor_count=len(raw.active_joint_names), joint_names=list(raw._robot.joint_names),
                     active_motor_names=list(raw.active_joint_names), body_names=list(raw._robot.body_names))
                 report["runtime_manifest"] = raw.runtime_manifest
+                report["asset_binding"] = verify_asset_binding(bundle, cpu, kit, raw.runtime_manifest, report["contract"])
                 validate_numerical_recipe_report(report, args.solver_multiplier)
                 expected = torch.tensor([kinematics["default_joint_positions_rad"][name]
                     for name in raw._robot.joint_names], device=raw.device)

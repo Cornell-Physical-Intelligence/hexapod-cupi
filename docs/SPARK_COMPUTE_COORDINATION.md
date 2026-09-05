@@ -171,3 +171,7 @@ reservation is recorded above and in its own JSON, outside the frozen source.
 The remote shared note is intentionally not rewritten during an active phase:
 any byte change is a checkpoint/pause request. Publish the refreshed note after
 the campaign reaches a terminal state, preserving any intervening agent request.
+
+## Renewed priority at2026-09-05 07:02 UTC
+
+User reaffirmed hexapod as top priority over weather. Current guardPID1407273 holds the weather scheduler lock; maximum expiry17:02:04UTC. Status: `/home/orionh/HEXAPOD_runs/mkii_fourbar_diagnostics_v1/priority_20260905T0700/status.json`. Create sibling `release` to release explicitly; sibling `campaign_path.txt` selects the exact following campaign and causes automatic release on terminal state. The old1364926 guard has ended; queued weather wrapper1394883 was cancelled during handover before any GPU work started. Other work may use the existing shared-file checkpoint/pause handshake. Read the live remote file and process state rather than treating this snapshot as current indefinitely.

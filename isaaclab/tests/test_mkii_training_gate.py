@@ -72,7 +72,7 @@ class TrainingGateTests(unittest.TestCase):
                 numerical_recipe=recipe,
                 runtime_manifest={"resolved_simulation": {k: v for k, v in recipe.items() if k != "recipe_id"}})
         contract = {"sha256": "c"*64, "task_id": TASK_ID}
-        nominal = {"pass": True, "errors": [], "contract": contract, "solver_multiplier": 1,
+        nominal = {"pass": True, "asset_binding": {"pass": True}, "errors": [], "contract": contract, "solver_multiplier": 1,
                    "task_id": TASK_ID, "solver_iterations": [64, 1], "steps_requested": 1000,
                    "num_envs": 32, "steps_completed": 1000, "driven_steps": 2400,
                    "driven_coordinate_pass": True, "windows": {window: {"mean_height_m": .13,

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import ast
 import importlib.util
 import json
 import math
@@ -10,6 +11,7 @@ import sys
 import tempfile
 import types
 import unittest
+from unittest.mock import Mock
 
 import torch
 
@@ -121,6 +123,112 @@ class LearningStateTests(unittest.TestCase):
         self.assertEqual(original, trainer.parameters_digest(runner))
         with torch.no_grad(): policy.weight += 1
         self.assertNotEqual(original, trainer.parameters_digest(runner))
+
+
+class AdmittedRuntimeTests(unittest.TestCase):
+    def manifest(self):
+        return {"schema": "hexapod.physical_fourbar_runtime.v1", "task_id": TASK_ID,
+                "model_id": "mkii_fourbar_v3", "usd_root_sha256": "a"*64,
+                "motor_contract": {"model_id": "RS05-provisional-v2", "physics_dt_s": .00125,
+                                   "implementation_sha256": {"runtime.py": "b"*64}},
+                "resolved_motor_configuration": {"armature": .0007, "effort_limit_sim": 5.5},
+                "observed_tree_joint_names": ["lf_coxa_yaw", "lf_femur_pitch", "lf_tibia_lever_pivot"],
+                "observed_motor_model_joint_names": ["lf_femur_pitch", "lf_coxa_yaw", "lf_tibia_lever_pivot"],
+                "resolved_simulation": {"solver_position_iterations": 64, "solver_velocity_iterations": 1,
+                                        "reset_motor_jitter_rad": 0., "self_collision_enabled": False},
+                "future_asset_identity": {"closure_type": "revolute", "dependencies": {"base.usda": "c"*64}}}
+
+    def test_exact_manifest_accepts_only_object_key_reordering(self):
+        actual = self.manifest()
+        admitted = json.loads(json.dumps(dict(reversed(list(actual.items())))))
+        result = trainer.compare_admitted_runtime(admitted, actual)
+        self.assertTrue(result["pass"])
+        self.assertEqual(result["admitted_sha256"], result["actual_sha256"])
+        self.assertEqual(result["excluded_fields"], [])
+        self.assertEqual(result["mismatch_paths"], [])
+        self.assertEqual(result["errors"], [])
+
+    def test_asset_motor_solver_and_joint_order_changes_all_fail(self):
+        baseline = self.manifest()
+        cases = [(("usd_root_sha256",), "d"*64), (("model_id",), "mkii_fourbar_v4"),
+                 (("motor_contract", "model_id"), "other"),
+                 (("motor_contract", "implementation_sha256", "runtime.py"), "e"*64),
+                 (("resolved_motor_configuration", "armature"), .007),
+                 (("resolved_motor_configuration", "effort_limit_sim"), 55.),
+                 (("resolved_simulation", "solver_position_iterations"), 128),
+                 (("resolved_simulation", "reset_motor_jitter_rad"), .01),
+                 (("observed_tree_joint_names",), list(reversed(baseline["observed_tree_joint_names"]))),
+                 (("observed_motor_model_joint_names",), list(reversed(baseline["observed_motor_model_joint_names"]))),
+                 (("future_asset_identity", "closure_type"), "planar_d6"),
+                 (("future_asset_identity", "dependencies", "base.usda"), "f"*64)]
+        for keys, value in cases:
+            actual = copy.deepcopy(baseline)
+            parent = actual
+            for key in keys[:-1]:
+                parent = parent[key]
+            parent[keys[-1]] = value
+            with self.subTest(keys=keys):
+                result = trainer.compare_admitted_runtime(baseline, actual)
+                self.assertFalse(result["pass"])
+                self.assertNotEqual(result["admitted_sha256"], result["actual_sha256"])
+                self.assertTrue(any(path.startswith("/" + "/".join(keys)) for path in result["mismatch_paths"]))
+
+    def test_missing_extra_nonfinite_and_type_coercions_fail(self):
+        baseline = self.manifest()
+        for side in ("admitted", "actual"):
+            for change in (None, {}, [], dict(baseline, extra_assumption="new")):
+                pair = {"admitted": baseline, "actual": baseline}
+                pair[side] = change
+                with self.subTest(side=side, change=change):
+                    self.assertFalse(trainer.compare_admitted_runtime(**pair)["pass"])
+        for value in (True, 1., float("nan"), float("inf"), (1,)):
+            actual = copy.deepcopy(baseline)
+            actual["resolved_simulation"]["solver_velocity_iterations"] = value
+            with self.subTest(value=value):
+                self.assertFalse(trainer.compare_admitted_runtime(baseline, actual)["pass"])
+        actual = copy.deepcopy(baseline)
+        del actual["future_asset_identity"]
+        self.assertIn("/future_asset_identity", trainer.compare_admitted_runtime(baseline, actual)["mismatch_paths"])
+
+    def pre_wrapper_block(self):
+        """Execute the actual trainer statements from gym.make through wrapper creation."""
+        module = ast.parse((ROOT / "isaaclab/train_mkii_fourbar.py").read_text())
+        for node in ast.walk(module):
+            if not isinstance(node, ast.Try):
+                continue
+            start = next((i for i, statement in enumerate(node.body)
+                if isinstance(statement, ast.Assign) and any(isinstance(target, ast.Name) and target.id == "env" for target in statement.targets)
+                and isinstance(statement.value, ast.Call) and isinstance(statement.value.func, ast.Attribute)
+                and statement.value.func.attr == "make"), None)
+            stop = next((i for i, statement in enumerate(node.body)
+                if isinstance(statement, ast.Assign) and any(isinstance(target, ast.Name) and target.id == "wrapped" for target in statement.targets)), None)
+            if start is not None and stop is not None:
+                return compile(ast.Module(body=node.body[start:stop+1], type_ignores=[]), "trainer_pre_wrapper", "exec")
+        self.fail("Trainer gym.make/wrapper initialization block not found")
+
+    def test_actual_training_path_rejects_before_wrapper_and_records_comparison(self):
+        baseline = self.manifest()
+        code = self.pre_wrapper_block()
+        for matching in (True, False):
+            actual = copy.deepcopy(baseline)
+            if not matching:
+                actual["usd_root_sha256"] = "f"*64
+            wrapper = Mock()
+            scope = {"gym": types.SimpleNamespace(make=lambda *a, **k: types.SimpleNamespace(
+                        unwrapped=types.SimpleNamespace(runtime_manifest=actual))),
+                     "TASK_ID": TASK_ID, "cfg": object(), "report": {},
+                     "admission": {"runtime_manifest": baseline}, "compare_admitted_runtime": trainer.compare_admitted_runtime,
+                     "torch": types.SimpleNamespace(__version__="test"),
+                     "agent_cfg": types.SimpleNamespace(clip_actions=None), "RslRlVecEnvWrapper": wrapper}
+            if matching:
+                exec(code, scope)
+                wrapper.assert_called_once()
+            else:
+                with self.assertRaisesRegex(ValueError, "differs from admitted nominal"):
+                    exec(code, scope)
+                wrapper.assert_not_called()
+            self.assertEqual(scope["report"]["admitted_runtime_comparison"]["pass"], matching)
+            self.assertEqual(scope["report"]["runtime_manifest"], actual)
 
 
 class FakeScene:

@@ -25,7 +25,7 @@ def report_fixture(directory, phase, parent=None):
               'num_envs': phase['num_envs'], 'mode': phase['mode']}
     if phase['mode'] == 'validate':
         recipe = numerical_recipe(phase['solver_multiplier'])
-        report.update(steps_requested=phase['steps'], steps_completed=phase['steps'],
+        report.update(asset_binding={'pass': True}, steps_requested=phase['steps'], steps_completed=phase['steps'],
             solver_multiplier=phase['solver_multiplier'], solver_iterations=[64*phase['solver_multiplier'], 1],
             numerical_recipe=recipe,
             runtime_manifest={'resolved_simulation': {key: value for key, value in recipe.items() if key != 'recipe_id'}},
@@ -165,6 +165,37 @@ class CampaignTests(unittest.TestCase):
             self.assertEqual(calls, ['nominal', 'refined', 'scratch'])
             self.assertEqual(state['phases'][0]['state'], 'reused_verified')
             self.assertEqual(state['phases'][-1]['state'], 'paused')
+
+    def test_explicit_asset_propagates_through_every_phase_and_preserves_default(self):
+        args = SimpleNamespace(source_dir=Path('/source'), source_commit='a'*40,
+                               full_timeout_seconds=21600, phase_timeout_seconds=3600)
+        for model in campaign.host.ASSET_BUNDLES:
+            args.asset_model = model
+            plan = campaign.phases(model)
+            self.assertEqual([row['asset_model'] for row in plan], [model]*5)
+            for phase in plan:
+                argv = campaign.phase_argv(phase, args, Path('/output'), admission=Path('/admission.json'))
+                self.assertEqual(argv[argv.index('--asset-model')+1], model)
+            wrong = dict(plan[0], asset_model=next(name for name in campaign.host.ASSET_BUNDLES if name != model))
+            with self.assertRaises(campaign.CampaignFailed):
+                campaign.phase_argv(wrong, args, Path('/output'))
+        del args.asset_model
+        argv = campaign.phase_argv(campaign.phases()[0], args, Path('/output'))
+        self.assertEqual(argv[argv.index('--asset-model')+1], 'mkii_fourbar_v3')
+
+    def test_reused_probe_is_checked_against_requested_asset_before_resource_wait(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path, _ = report_fixture(root/'probe', campaign.phases()[0])
+            args = SimpleNamespace(asset_model='mkii_fourbar_v4', probe_report=path)
+            # The historical fixture lacks a resolved bundle and cannot be
+            # silently promoted to a probe of the explicitly selected v4 model.
+            with patch.object(campaign, 'wait_for_resources') as wait, \
+                 patch.object(campaign, 'require_campaign_source'), \
+                 self.assertRaises(campaign.host.Blocked):
+                campaign.run_campaign(args, root, CONTRACT, {'phases': []}, lambda: None,
+                                      launch=lambda *args: self.fail('No phase may start'))
+            wait.assert_not_called()
 
 
 if __name__ == '__main__':

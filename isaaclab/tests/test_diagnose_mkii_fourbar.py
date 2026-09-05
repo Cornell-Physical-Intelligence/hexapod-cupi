@@ -16,6 +16,34 @@ spec.loader.exec_module(module)
 
 
 class FourbarDiagnosticTests(unittest.TestCase):
+    def test_body_pose_trace_keeps_named_native_xyzw_and_terrain(self):
+        names = [f"body_{i}" for i in reversed(range(31))]
+        pos = np.arange(2*31*3, dtype=np.float32).reshape(2, 31, 3)
+        quat = np.zeros((2, 31, 4), dtype=np.float32)
+        quat[..., 3] = 1.  # Native XYZW identity, preserved without reordering.
+        quat[1, 4] = [.1, .2, .3, .4]
+        origin = np.array([[0., 0., 0.], [5., 6., 7.]], dtype=np.float32)
+        fields = module.body_pose_trace_fields(names, pos, quat, origin)
+        columns = [f"{key}/{name}" for key, _, labels in fields for name in labels]
+        values = np.concatenate([value for _, value, _ in fields], axis=-1)
+        self.assertEqual(values.shape, (2, 220))  # 31*(3+4) + 3.
+        self.assertEqual(len(columns), len(set(columns)))
+        for axis_index, axis in enumerate("xyzw"):
+            self.assertEqual(values[1, columns.index(f"body_link_quat_w/body_26_{axis}")], quat[1, 4, axis_index])
+        self.assertEqual(values[1, columns.index("body_link_pos_w/body_30_z")], pos[1, 0, 2])
+        self.assertEqual(values[1, columns.index("terrain_origin_w/z")], 7.)
+        self.assertIn("XYZW", module.TRACE_COORDINATE_CONVENTIONS["body_link_quat_w"])
+        self.assertIn("not centre of mass", module.TRACE_COORDINATE_CONVENTIONS["body_link_pos_w"])
+
+    def test_body_pose_trace_rejects_misaligned_environment_or_body_rows(self):
+        pos, quat, origin = np.zeros((2, 31, 3)), np.zeros((2, 31, 4)), np.zeros((2, 3))
+        names = [str(i) for i in range(31)]
+        for bad_names, bad_pos, bad_quat, bad_origin in (
+                (names, pos, quat[:, :-1], origin), (names, pos, quat, origin[:1]),
+                (["duplicate"]*31, pos, quat, origin), (names[:-1], pos, quat, origin)):
+            with self.assertRaises(ValueError):
+                module.body_pose_trace_fields(bad_names, bad_pos, bad_quat, bad_origin)
+
     def test_report_survives_nonreturning_native_teardown(self):
         with tempfile.TemporaryDirectory() as root:
             path = Path(root)/"report.json"

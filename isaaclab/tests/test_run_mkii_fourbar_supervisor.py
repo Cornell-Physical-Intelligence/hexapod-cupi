@@ -31,7 +31,7 @@ CONTRACT = {"task_id": "Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0", 
 
 def validation_report(multiplier=1):
     recipe = numerical_recipe(multiplier)
-    return {"pass": True, "errors": [], "contract": CONTRACT, "task_id": CONTRACT["task_id"],
+    return {"pass": True, "errors": [], "asset_binding": {"pass": True}, "contract": CONTRACT, "task_id": CONTRACT["task_id"],
             "solver_multiplier": multiplier, "solver_iterations": [64*multiplier, 1],
             "numerical_recipe": recipe,
             "runtime_manifest": {"resolved_simulation": {key: value for key, value in recipe.items() if key != "recipe_id"}},
@@ -434,6 +434,188 @@ class FourbarQualificationTests(unittest.TestCase):
             result = qualify(validation_report(), refined, CONTRACT)
             self.assertFalse(result["pass"])
             self.assertFalse(result["convergence"]["comparisons"][f"driven.{key}"]["pass"])
+
+
+class BlockedFlockWaiterTests(unittest.TestCase):
+    def fixture(self, directory):
+        root = Path(directory)
+        proc, executable, lock = root / "proc", root / "flock", root / "gpu.lock"
+        executable.write_bytes(b"test trusted flock executable")
+        lock.write_bytes(b"")
+        pid = 1234
+        process = proc / str(pid)
+        (process / "fd").mkdir(parents=True)
+        (process / "task" / str(pid)).mkdir(parents=True)
+        (process / "exe").symlink_to(executable)
+        (process / "fd/3").symlink_to(lock)
+        (process / "wchan").write_text("locks_lock_inode_wait")
+        (process / "stat").write_text(f"{pid} (flock) S " + "0 "*18 + "999\n")
+        (process / "task" / str(pid) / "children").write_text("")
+        info = lock.stat()
+        key = f"{os.major(info.st_dev):02x}:{os.minor(info.st_dev):02x}:{info.st_ino}"
+        (proc / "locks").write_text(f"7: FLOCK ADVISORY WRITE 456 {key} 0 EOF\n"
+                                   f"7: -> FLOCK ADVISORY WRITE {pid} {key} 0 EOF\n")
+        processes = {pid: (1, "/usr/bin/flock /opt/wx/gpu.lock python /opt/wx/nowcast_run.py")}
+        return pid, processes, dict(proc_root=proc, lock_path=lock, flock_executable=executable)
+
+    def test_proven_real_childless_shared_lock_waiter_is_not_a_running_producer(self):
+        with tempfile.TemporaryDirectory() as directory:
+            pid, processes, paths = self.fixture(directory)
+            evidence = supervisor.blocked_flock_waiter(pid, processes, **paths)
+            self.assertEqual(evidence["pid"], pid)
+            self.assertEqual(evidence["holder_pid"], 456)
+            self.assertEqual(evidence["lock_inode"], paths["lock_path"].stat().st_ino)
+            original = supervisor.blocked_flock_waiter
+            with patch.object(supervisor, "blocked_flock_waiter", side_effect=lambda p, ps: original(p, ps, **paths)):
+                records = []
+                self.assertEqual(supervisor.blocking_producers(processes, set(), waiter_evidence=records), [])
+                self.assertEqual(records, [evidence])
+
+    def test_acquired_flock_and_live_children_are_never_exempted(self):
+        with tempfile.TemporaryDirectory() as directory:
+            pid, processes, paths = self.fixture(directory)
+            child = 2345
+            processes[child] = (pid, "python /opt/wx/nowcast_run.py")
+            self.assertIsNone(supervisor.blocked_flock_waiter(pid, processes, **paths))
+            del processes[child]
+            children = paths["proc_root"] / str(pid) / "task" / str(pid) / "children"
+            children.write_text(str(child))
+            self.assertIsNone(supervisor.blocked_flock_waiter(pid, processes, **paths))
+            children.write_text("")
+            # Owning the lock is not waiting for it, even with no current child.
+            locks = paths["proc_root"] / "locks"
+            locks.write_text(locks.read_text().splitlines()[0].replace("456", str(pid))+"\n")
+            self.assertIsNone(supervisor.blocked_flock_waiter(pid, processes, **paths))
+
+    def test_argv_masquerade_wrong_fd_nonwaiting_and_missing_proof_fail_closed(self):
+        for failure in ("exe", "fd", "wchan", "locks", "children", "stat"):
+            with tempfile.TemporaryDirectory() as directory, self.subTest(failure=failure):
+                pid, processes, paths = self.fixture(directory)
+                process = paths["proc_root"] / str(pid)
+                if failure == "exe":
+                    other = Path(directory) / "bash"
+                    other.write_bytes(b"a shell masquerading as flock in argv")
+                    (process / "exe").unlink()
+                    (process / "exe").symlink_to(other)
+                elif failure == "fd":
+                    other = Path(directory) / "other.lock"
+                    other.write_bytes(b"")
+                    (process / "fd/3").unlink()
+                    (process / "fd/3").symlink_to(other)
+                elif failure == "wchan":
+                    (process / "wchan").write_text("do_wait")
+                elif failure == "locks":
+                    (paths["proc_root"] / "locks").unlink()
+                elif failure == "children":
+                    (process / "task" / str(pid) / "children").unlink()
+                elif failure == "stat":
+                    (process / "stat").write_text("malformed")
+                original = supervisor.blocked_flock_waiter
+                with patch.object(supervisor, "blocked_flock_waiter", side_effect=lambda p, ps: original(p, ps, **paths)):
+                    self.assertEqual(supervisor.blocking_producers(processes, set()), [pid])
+
+    def test_waiting_on_different_inode_or_missing_holder_is_not_enough(self):
+        with tempfile.TemporaryDirectory() as directory:
+            pid, processes, paths = self.fixture(directory)
+            locks = paths["proc_root"] / "locks"
+            rows = locks.read_text().splitlines()
+            locks.write_text(rows[1]+"\n")
+            self.assertIsNone(supervisor.blocked_flock_waiter(pid, processes, **paths))
+            rows[1] = rows[1].replace(f":{paths['lock_path'].stat().st_ino} ", ":999999999 ")
+            locks.write_text("\n".join(rows)+"\n")
+            self.assertIsNone(supervisor.blocked_flock_waiter(pid, processes, **paths))
+
+    def test_independent_gpu_pid_veto_still_applies_even_to_proven_waiter(self):
+        pid = 1234
+        def command(argv, **kwargs):
+            if argv[0] == "ps":
+                return SimpleNamespace(stdout=f"{pid} 1 /usr/bin/flock /opt/wx/gpu.lock python nowcast_run.py\n", returncode=0)
+            if argv[0] == "systemctl":
+                return SimpleNamespace(stdout="inactive\n", returncode=3)
+            if argv[:2] == ["docker", "ps"]:
+                return SimpleNamespace(stdout="", returncode=0)
+            if argv[0] == "nvidia-smi" and "--query-compute-apps=pid,process_name" in argv:
+                return SimpleNamespace(stdout=f"{pid}, unexpected_gpu_process\n", returncode=0)
+            raise AssertionError(f"Unexpected command: {argv}")
+        with patch.object(supervisor, "available_memory_bytes", return_value=32*1024**3), \
+             patch.object(supervisor, "blocked_flock_waiter", return_value={"pid": pid}), \
+             patch.object(supervisor, "command", side_effect=command):
+            with self.assertRaisesRegex(supervisor.Blocked, "Unrelated or premature GPU process"):
+                supervisor.resource_gate()
+
+
+class ExplicitAssetSelectionTests(unittest.TestCase):
+    def runtime(self, model):
+        descriptor = dict(supervisor.ASSET_BUNDLES[model])
+        root = Path(descriptor["usd_path_relative"])
+        files = {path: "a"*64 for path in (str(root), *(str(root.parent/name) for name in ("geometry.usdc", "kinematics.json", "manifest.json")))}
+        bundle = dict(descriptor, usd_root_sha256="a"*64, kinematics_sha256="a"*64, bundle_files_sha256=files)
+        return dict(descriptor, usd_root_sha256="a"*64, kinematics_sha256="a"*64, asset_bundle=bundle)
+
+    def test_selected_model_overrides_both_environment_names_with_container_path(self):
+        for mode in ("validate", "train"):
+            for model in supervisor.ASSET_BUNDLES:
+                args = SimpleNamespace(mode=mode, asset_model=model, num_envs=32, steps=1000,
+                    solver_multiplier=1, admission=Path("/admission.json"), checkpoint=None, iterations=3)
+                with patch.dict(os.environ, {"HEXAPOD_USD_PATH": "/host/arbitrary.usda",
+                    "HEXAPOD_MKII_FOURBAR_USD_PATH": "/host/other.usda"}):
+                    argv = supervisor.compose_argv(Path("/source"), Path("/output"), "owned", "nonce", args)
+                expected = "/workspace/hexapod/" + supervisor.ASSET_BUNDLES[model]["usd_path_relative"]
+                for key in ("HEXAPOD_USD_PATH", "HEXAPOD_MKII_FOURBAR_USD_PATH"):
+                    self.assertEqual([value for value in argv if value.startswith(key+"=")], [key+"="+expected])
+                self.assertFalse(any("/host/" in value for value in argv))
+        del args.asset_model
+        argv = supervisor.compose_argv(Path("/source"), Path("/output"), "owned", "nonce", args)
+        self.assertIn("HEXAPOD_USD_PATH=/workspace/hexapod/"+supervisor.ASSET_BUNDLES["mkii_fourbar_v3"]["usd_path_relative"], argv)
+
+    def test_actual_model_and_all_bundle_hashes_must_match_requested_model(self):
+        runtimes = {model: self.runtime(model) for model in supervisor.ASSET_BUNDLES}
+        contract = dict(CONTRACT, files={path: checksum for runtime in runtimes.values()
+            for path, checksum in runtime["asset_bundle"]["bundle_files_sha256"].items()})
+        for model, runtime in runtimes.items():
+            self.assertEqual(supervisor.require_requested_asset({"runtime_manifest": runtime}, model, contract)["model_id"], model)
+            other = next(name for name in runtimes if name != model)
+            with self.assertRaisesRegex(supervisor.Blocked, "differs from the requested"):
+                supervisor.require_requested_asset({"runtime_manifest": runtimes[other]}, model, contract)
+            changed = json.loads(json.dumps(runtime))
+            changed["usd_root_sha256"] = "b"*64
+            with self.assertRaises(supervisor.Blocked):
+                supervisor.require_requested_asset({"runtime_manifest": changed}, model, contract)
+            changed_contract = json.loads(json.dumps(contract))
+            dependency = str(Path(runtime["usd_path_relative"]).parent / "geometry.usdc")
+            changed_contract["files"][dependency] = "c"*64
+            with self.assertRaises(supervisor.Blocked):
+                supervisor.require_requested_asset({"runtime_manifest": runtime}, model, changed_contract)
+
+    def test_final_validation_report_cannot_ignore_host_asset_selection(self):
+        model = "mkii_fourbar_v4"
+        runtime = self.runtime(model)
+        contract = dict(CONTRACT, files=runtime["asset_bundle"]["bundle_files_sha256"])
+        result = validation_report()
+        result["contract"] = contract
+        result["runtime_manifest"].update(runtime)
+        args = SimpleNamespace(mode="validate", steps=1000, num_envs=32, solver_multiplier=1, asset_model=model)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "report.json"
+            path.write_text(json.dumps(result))
+            self.assertTrue(supervisor.validate_written_report(path, args=args, contract=contract)["pass"])
+            args.asset_model = "mkii_fourbar_v3"
+            with self.assertRaises(supervisor.Blocked):
+                supervisor.validate_written_report(path, args=args, contract=contract)
+
+    def test_asset_selector_is_recorded_and_diagnostic_conflict_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "source"
+            (source / "isaaclab").mkdir(parents=True)
+            (source / "isaaclab/validate_mkii_fourbar.py").write_text("fixture")
+            argv = ["validate", "--source-dir", str(source), "--asset-model", "mkii_fourbar_v4", "--dry-run"]
+            with patch.object(supervisor, "identity", return_value=CONTRACT), patch("sys.stdout", new_callable=io.StringIO) as stdout:
+                self.assertEqual(supervisor.main(argv), 0)
+                self.assertEqual(json.loads(stdout.getvalue())["asset_model"], "mkii_fourbar_v4")
+            with patch("sys.stderr", new_callable=io.StringIO), patch.object(supervisor, "command") as command:
+                with self.assertRaises(SystemExit):
+                    supervisor.main(["diagnose", "--source-dir", str(source), "--asset-model", "mkii_fourbar_v4"])
+                command.assert_not_called()
 
 
 if __name__ == "__main__":

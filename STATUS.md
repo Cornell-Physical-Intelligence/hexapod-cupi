@@ -1,6 +1,6 @@
 # Current status
 
-Last reviewed: 2026-09-05 UTC. **Campaign 004 completed all 3,400 standing/driven control steps at 800 Hz physics, but failed the original closure-accuracy bounds. PPO has not started.** Focused diagnostics and a separate D6 v4 closure candidate are prepared; neither has a GPU validation pass. Campaign 004's source remains frozen at commit `ea05fe8`. The user authorized continuing through validation into training. The plan remains open to continued context. [Physical campaign evidence](artifacts/mkii_fourbar_2026-09-05/README.md) · [Offline repairs](docs/MKII_STEP1.md) · [Historical serial evidence](artifacts/mkii_step2_2026-09-04/README.md) · [Collider-fit evidence](artifacts/mkii_fourbar_2026-09-05/collider_fit/README.md).
+Last reviewed: 2026-09-05 UTC. **Campaign 004 completed all 3,400 standing/driven control steps at 800 Hz physics, but failed the original closure-accuracy bounds. PPO has not started.** A completed eight-environment v3 group diagnostic stayed within closure bounds but briefly lost reported foot support; the D6 candidate comparison was interrupted by a false producer detection and has no complete GPU result. PPO remains blocked. Campaign 004's source remains frozen at commit `ea05fe8`. The user authorized continuing through validation into training. The plan remains open to continued context. [Physical campaign evidence](artifacts/mkii_fourbar_2026-09-05/README.md) · [Offline repairs](docs/MKII_STEP1.md) · [Historical serial evidence](artifacts/mkii_step2_2026-09-04/README.md) · [Collider-fit evidence](artifacts/mkii_fourbar_2026-09-05/collider_fit/README.md).
 
 [Mission](dar.md) · [Living plan](docs/PLAN.md) · [Prepared future runs](docs/NEXT_RUNS.md) · [Dated audit](artifacts/project_review_2026-09-04/URDF_VALIDATION.md) · [Leg test plan](artifacts/project_review_2026-09-04/LEG_TEST_STAND.md)
 
@@ -66,3 +66,13 @@ Perception, navigation, runtime emulation and leg-test preparation proceed indep
 Open inputs are the hard deadline, accountable stream owners, full-robot delivery/assembly dates, sensor availability, survey footprint/stability and measured actuator/terrain bounds. The [decision record](docs/PLAN.md#9-new-context-and-decision-record) defines how new context changes the plan and which evidence must be re-established.
 
 Frozen `ea05fe8` release checks: **797 tests passed**, and CI passed. Its immutable historical 112-file manifest and separate 270-file 800 Hz manifest both verified. The new diagnostic/D6 source now passes **811 tests in 41.946 seconds** and has a separate **276-path manifest**. Its planned isolated Spark source is `/home/orionh/HEXAPOD_runs/mkii_fourbar_diagnostics_v1/source`; these source checks are not GPU validation. [Solver stability analysis](artifacts/mkii_fourbar_2026-09-05/solver_stability/README.md).
+
+## 2026-09-05 07:02 UTC continuation
+
+The workload detector confused a blocked `/usr/bin/flock` weather wrapper with its not-yet-started Python command. The GPU was empty; kernel lock records proved the weather job was queued behind the hexapod reservation. The revised detector requires executable identity, blocked lock/inode evidence, stable PID and no children before treating a wrapper as waiting. Actual GPU processes still veto contention.
+
+The user reaffirmed top priority. Reservation was renewed without GPU work being interrupted: queued weather wrapper1394883 was cancelled, old guard1364926 ended, and guard1407273 acquired the existing scheduler lock at07:02:04UTC. Its ten-hour maximum is17:02:04UTC; selected campaign completion/failure or an explicit release file releases it sooner. Status is `/home/orionh/HEXAPOD_runs/mkii_fourbar_diagnostics_v1/priority_20260905T0700/status.json`.
+
+New source binds the selected immutable v3/v4 bundle through CPU audit, Kit audit, actual runtime, solver comparison and pre-learner admission. v3 remains the default; explicit v4 selection can undergo the full existing gates. Prior reports are preserved, including the historical diagnostic runtime label that saidv3 while its selected USD identifiedv4.
+
+Release verification: **841 tests passed in45.428seconds**; the new279-file asset-binding manifest and archived112-file lineage checks pass. Both actual CPU audit reports bind to their selected v3/v4 bundle; this is not a live Kit pass.

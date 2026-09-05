@@ -94,6 +94,63 @@ def restore_adaptive_learning_rate(algorithm):
     algorithm.learning_rate = rates[0]
 
 
+def compare_admitted_runtime(admitted, actual):
+    """Compare every JSON field, preserving scalar types and joint/list order."""
+    comparison = {"pass": False, "method": "exact complete runtime manifest equality",
+                  "excluded_fields": [], "admitted_sha256": None, "actual_sha256": None,
+                  "mismatch_paths": [], "errors": []}
+
+    def encode(value):
+        def check(item):
+            if type(item) is dict:
+                if any(type(key) is not str for key in item):
+                    raise ValueError("Runtime manifest object keys must be strings")
+                for child in item.values():
+                    check(child)
+            elif type(item) is list:
+                for child in item:
+                    check(child)
+            elif type(item) not in (str, bool, int, float, type(None)):
+                raise ValueError("Runtime manifest must contain only JSON values")
+        check(value)
+        return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+
+    encoded = {}
+    for label, manifest in (("admitted", admitted), ("actual", actual)):
+        try:
+            if (type(manifest) is not dict or manifest.get("schema") != "hexapod.physical_fourbar_runtime.v1"
+                    or manifest.get("task_id") != TASK_ID):
+                raise ValueError("Missing or incompatible physical four-bar runtime manifest")
+            encoded[label] = encode(manifest)
+            comparison[f"{label}_sha256"] = hashlib.sha256(encoded[label]).hexdigest()
+        except (TypeError, ValueError) as error:
+            comparison["errors"].append(f"{label}: {error}")
+    if comparison["errors"]:
+        return comparison
+
+    def differences(a, b, path=""):
+        if type(a) is not type(b):
+            comparison["mismatch_paths"].append(path or "/")
+        elif type(a) is dict:
+            for key in sorted(a.keys() | b.keys()):
+                child = path + "/" + key.replace("~", "~0").replace("/", "~1")
+                if key not in a or key not in b:
+                    comparison["mismatch_paths"].append(child)
+                else:
+                    differences(a[key], b[key], child)
+        elif type(a) is list:
+            if len(a) != len(b):
+                comparison["mismatch_paths"].append(path)
+            for index, (left, right) in enumerate(zip(a, b)):
+                differences(left, right, path + f"/{index}")
+        elif encode(a) != encode(b):
+            comparison["mismatch_paths"].append(path)
+
+    differences(admitted, actual)
+    comparison["pass"] = encoded["admitted"] == encoded["actual"]
+    return comparison
+
+
 def check_training_physics(windows):
     """Exploration may fall; it may not exploit broken loops or motor bounds."""
     limits = {"max_closure_point_m": .0001, "max_closure_axis_chord": math.radians(.1),
@@ -186,7 +243,7 @@ def main(argv=None):
 
     try:
         report["contract"] = contract = identity()
-        require_admission(early.admission, contract)
+        admission = require_admission(early.admission, contract)
         resume = require_checkpoint(early.checkpoint, contract) if early.checkpoint else None
         if not 1 <= early.num_envs <= 4096 or not 1 <= early.iterations <= 10000:
             raise ValueError("Invalid bounded training workload")
@@ -238,6 +295,10 @@ def main(argv=None):
 
                 env = gym.make(TASK_ID, cfg=cfg)
                 report["runtime_manifest"] = env.unwrapped.runtime_manifest
+                report["admitted_runtime_comparison"] = compare_admitted_runtime(
+                    admission.get("runtime_manifest"), report["runtime_manifest"])
+                if not report["admitted_runtime_comparison"]["pass"]:
+                    raise ValueError("Loaded runtime differs from admitted nominal runtime; see admitted_runtime_comparison")
                 report["torch_version"] = torch.__version__
                 wrapped = RslRlVecEnvWrapper(env, clip_actions=agent_cfg.clip_actions)
                 agent_cfg.device = str(env.unwrapped.device)

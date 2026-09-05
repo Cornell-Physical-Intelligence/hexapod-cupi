@@ -40,7 +40,14 @@ before the outer report writer ran. The lifecycle revision persists the report
 before teardown and tests a nonreturning native close; model parameters and
 physical gates are unchanged.
 
-`isaaclab/deploy/mkii_fourbar_v1_diagnostic_lifecycle_pipeline.sha256` covers **all 112 historical
+The diagnostic lifecycle manifest remains frozen at source `6734539` (the
+`addcd8d` portability fix changed tests only). The asset-binding release records
+the selected v3/v4 bundle consistently across CPU audit, Kit audit and live
+runtime, requires equality through qualification and learner creation, and
+distinguishes a proven blocked scheduler lock waiter from an active producer.
+Model dynamics and physical acceptance thresholds are unchanged.
+
+`isaaclab/deploy/mkii_fourbar_v1_asset_binding_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency
