@@ -29,6 +29,11 @@ class PlanarD6AssetTests(unittest.TestCase):
         cls.output = cls.base/'candidate'/'robot.usda'
         cls.historical = ROOT/kin.USD_RELATIVE
         cls.historical_bytes = {p.name: p.read_bytes() for p in cls.historical.parent.iterdir() if p.is_file()}
+        # Compare the closure variants under identical host math. Archived
+        # Mac-authored matrices can differ from Linux regeneration by ~1e-16;
+        # the original bundle has its own independent source audit below.
+        cls.control = cls.base/'revolute_control'/'robot.usda'
+        cls.control_report = builder.prepare(cls.control)
         cls.report = builder.prepare(cls.output, closure_variant=builder.PLANAR_D6_CLOSURE)
 
     @classmethod
@@ -42,6 +47,8 @@ class PlanarD6AssetTests(unittest.TestCase):
 
     def test_roundtrip_and_exact_preservation_of_all_nonclosure_data(self):
         self.assertTrue(self.report['pass'], self.report['errors'])
+        self.assertTrue(self.control_report['pass'], self.control_report['errors'])
+        self.assertEqual(self.control_report['closure_constraint_variant'], builder.REVOLUTE_CLOSURE)
         self.assertEqual(self.report['closure_constraint_rows_per_loop'], 2)
         self.assertEqual(self.report['closure_locked_axes'], ['transX', 'transY'])
         self.assertEqual(self.report['closure_constraint_variant'], builder.PLANAR_D6_CLOSURE)
@@ -49,7 +56,7 @@ class PlanarD6AssetTests(unittest.TestCase):
         self.assertEqual((self.report['rigid_bodies'], self.report['tree_joints'],
                           self.report['closure_joints'], self.report['active_joints']), (31, 30, 6, 18))
         self.assertEqual((self.output.parent/'kinematics.json').read_bytes(), kin.CONTRACT.read_bytes())
-        old, new = Usd.Stage.Open(str(self.historical)), Usd.Stage.Open(str(self.output))
+        old, new = Usd.Stage.Open(str(self.control)), Usd.Stage.Open(str(self.output))
         closure_names = set(json.loads(kin.CONTRACT.read_text())['closure_joint_names'])
         self.assertEqual({str(p.GetPath()) for p in old.Traverse()}, {str(p.GetPath()) for p in new.Traverse()})
         for prim in old.Traverse():
