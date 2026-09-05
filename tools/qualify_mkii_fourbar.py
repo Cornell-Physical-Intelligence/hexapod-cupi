@@ -13,11 +13,40 @@ from mkii_asset_binding import solver_runtime_equivalent
 from mkii_training_contract import identity, read_json, write_json, digest
 
 
+def reset_root_positions(result):
+    """Require the recorded physical placement for every compared environment."""
+    count, positions = result.get("num_envs"), result.get("reset_root_positions_m")
+    if (type(count) is not int or count < 1 or not isinstance(positions, list)
+            or len(positions) != count):
+        raise ValueError("Missing or incomplete actual reset-root placement")
+    for xyz in positions:
+        if (not isinstance(xyz, list) or len(xyz) != 3
+                or any(type(value) not in (int, float) or not math.isfinite(value) for value in xyz)):
+            raise ValueError("Actual reset-root placement requires finite XYZ values")
+    return positions
+
+
+def convergence_method(recipes):
+    """Describe only recipes that have passed the actual-runtime checks."""
+    if set(recipes) != {"nominal", "refined"}:
+        return "Numerical recipe validation incomplete; solver comparison unavailable"
+    a, b = recipes["nominal"], recipes["refined"]
+    solver = "TGS" if a["solver_type"] == 1 else "PGS"
+    forces = "enabled" if a["enable_external_forces_every_iteration"] else "disabled"
+    return (f"{solver} {a['solver_position_iterations']}/{a['solver_velocity_iterations']} versus "
+            f"{b['solver_position_iterations']}/{b['solver_velocity_iterations']} iterations at fixed "
+            f"{a['physics_dt_s']*1000:g} ms; external forces every iteration {forces}")
+
+
 def qualify(nominal, refined, contract):
-    errors = []
+    errors, recipes, placements = [], {}, {}
     for label, result, multiplier in (("nominal", nominal, 1), ("refined", refined, 2)):
         try:
-            validate_numerical_recipe_report(result, multiplier)
+            recipes[label] = validate_numerical_recipe_report(result, multiplier)
+        except ValueError as error:
+            errors.append(f"{label}: {error}")
+        try:
+            placements[label] = reset_root_positions(result)
         except ValueError as error:
             errors.append(f"{label}: {error}")
         if (result.get("pass") is not True or result.get("errors") != []
@@ -29,6 +58,10 @@ def qualify(nominal, refined, contract):
             errors.append(f"{label}: incomplete or incompatible physical validation")
     if nominal.get("num_envs") != refined.get("num_envs") or nominal.get("steps_completed") != refined.get("steps_completed"):
         errors.append("Solver comparison requires the same environment and step counts")
+    placement_match = (set(placements) == {"nominal", "refined"}
+                       and placements["nominal"] == placements["refined"])
+    if not placement_match:
+        errors.append("Solver comparison requires exactly matching recorded reset-root positions")
     for label, result in (("nominal", nominal), ("refined", refined)):
         if result.get("asset_binding", {}).get("pass") is not True:
             errors.append(f"{label}: selected CPU/Kit/runtime asset binding did not pass")
@@ -37,7 +70,11 @@ def qualify(nominal, refined, contract):
     comparisons = {}
     for window in ("settled", "driven"):
         a, b = nominal.get("windows", {}).get(window, {}), refined.get("windows", {}).get(window, {})
-        for key, absolute, relative in (("mean_height_m", .001, 0.), ("max_applied_nm", .05, .05)):
+        # Applied peaks can both equal the actuator cap while the underlying PD
+        # requests diverge. Compare pre-envelope demand with the same empirical
+        # torque tolerance; this is not an absolute cap on requested torque.
+        for key, absolute, relative in (("mean_height_m", .001, 0.), ("max_applied_nm", .05, .05),
+                                        ("max_demand_nm", .05, .05)):
             if key not in a or key not in b:
                 errors.append(f"{window}: missing solver convergence metric {key}")
                 continue
@@ -53,7 +90,9 @@ def qualify(nominal, refined, contract):
     result["pass"] = result["simulation_training_admission"] = not errors
     result["errors"] = errors
     result["convergence"] = {"pass": not errors,
-                             "method": "TGS 64/1 versus 128/1 iterations at fixed 1.25 ms; external forces every iteration",
+                             "method": convergence_method(recipes),
+                             "numerical_recipes": recipes,
+                             "reset_root_positions_match": placement_match,
                              "comparisons": comparisons}
     result["admission_scope"] = (
         "Standing and +/-0.04 rad driven qualification only. Provisional flat-ground scratch PPO may explore "

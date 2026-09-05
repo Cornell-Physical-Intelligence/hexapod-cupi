@@ -131,7 +131,20 @@ Earlier one/four-velocity evidence cannot admit this new source. The published
 four-velocity manifest remains unchanged; an unpublished telemetry-only draft
 was superseded before release.
 
-`isaaclab/deploy/mkii_fourbar_v1_final_velocity16_pipeline.sha256` covers **all 112 historical
+The sixteen-velocity source `c804169` and its released manifest remain frozen.
+Its eight-world diagnostic is complete, and a matched 32-world standing pair
+is running separately. The next release strengthens qualification without
+changing robot dynamics: both full reports must contain exactly matching,
+finite, ordered actual reset-root positions. Convergence descriptions derive
+from the validated numerical recipes. The existing 0.05 N m / 5% torque
+comparison now also checks raw pre-envelope demand; equal 5.5 N m clipped
+peaks must not conceal divergent controller requests. This is a solver
+sensitivity screen, not an absolute raw-demand cap. Velocity telemetry remains
+observational and must be reviewed for the known constraint-velocity issue.
+No prior short standing report grants admission to the new source. The
+published sixteen-velocity manifest is retained unchanged in this release.
+
+`isaaclab/deploy/mkii_fourbar_v1_placement_convergence_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

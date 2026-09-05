@@ -30,7 +30,8 @@ def report_fixture(directory, phase, parent=None):
             numerical_recipe=recipe,
             runtime_manifest={'resolved_simulation': {key: value for key, value in recipe.items() if key != 'recipe_id'}},
             driven_steps=2400 if phase['steps'] >= 1000 else 0, driven_coordinate_pass=True,
-            windows={window: {'mean_height_m': .138, 'max_applied_nm': 1.2} for window in ('settled', 'driven')})
+            reset_root_positions_m=[[float(index)*2., 0., .14297] for index in range(phase['num_envs'])],
+            windows={window: {'mean_height_m': .138, 'max_applied_nm': 1.2, 'max_demand_nm': 1.3} for window in ('settled', 'driven')})
     else:
         checkpoint = directory/'checkpoint.pt'
         checkpoint.write_bytes(phase['name'].encode())

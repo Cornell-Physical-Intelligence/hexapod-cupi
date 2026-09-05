@@ -75,8 +75,9 @@ class TrainingGateTests(unittest.TestCase):
         nominal = {"pass": True, "asset_binding": {"pass": True}, "errors": [], "contract": contract, "solver_multiplier": 1,
                    "task_id": TASK_ID, "solver_iterations": [64, 1], "steps_requested": 1000,
                    "num_envs": 32, "steps_completed": 1000, "driven_steps": 2400,
+                   "reset_root_positions_m": [[0., 0., .14297]]*32,
                    "driven_coordinate_pass": True, "windows": {window: {"mean_height_m": .13,
-                   "max_applied_nm": 1.} for window in ("settled", "driven")}}
+                   "max_applied_nm": 1., "max_demand_nm": 1.1} for window in ("settled", "driven")}}
         set_recipe(nominal, 1)
         refined = copy.deepcopy(nominal)
         set_recipe(refined, 2)

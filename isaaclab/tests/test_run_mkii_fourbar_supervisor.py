@@ -36,8 +36,9 @@ def validation_report(multiplier=1):
             "numerical_recipe": recipe,
             "runtime_manifest": {"resolved_simulation": {key: value for key, value in recipe.items() if key != "recipe_id"}},
             "num_envs": 32, "steps_requested": 1000, "steps_completed": 1000,
+            "reset_root_positions_m": [[0., 0., .14297]]*32,
             "driven_steps": 2400, "driven_coordinate_pass": True,
-            "windows": {window: {"mean_height_m": .138, "max_applied_nm": 1.2}
+            "windows": {window: {"mean_height_m": .138, "max_applied_nm": 1.2, "max_demand_nm": 1.3}
                         for window in ("settled", "driven")}}
 
 
