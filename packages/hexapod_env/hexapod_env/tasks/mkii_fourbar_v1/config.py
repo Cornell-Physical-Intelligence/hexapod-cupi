@@ -78,7 +78,8 @@ class HexapodMkiiFourbarV1EnvCfg(DirectRLEnvCfg):
             joint_pos=KINEMATICS["default_joint_positions_rad"], joint_vel={".*": 0.}),
         soft_joint_pos_limit_factor=contract.SOFT_LIMIT_FACTOR,
         actuators={"motors": make_rs05_v2_cfg(list(contract.ACTIVE_JOINT_NAMES),
-                                           physics_dt_s=contract.PHYSICS_DT_S, assumed_bus_voltage_v=48.)})
+                                           physics_dt_s=contract.PHYSICS_DT_S, assumed_bus_voltage_v=48.,
+                                           controller_profile=contract.MOTOR_CONTROLLER_PROFILE)})
     body_contact_sensors = {name: _sensor(name, path) for name, path in KINEMATICS["body_paths"].items()}
 
 

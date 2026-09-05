@@ -62,7 +62,18 @@ No velocity feedforward is added. This requires fresh physical admission and
 cannot reuse the preceding reports or checkpoints. The earlier physical-mimic
 manifest is retained byte for byte.
 
-`isaaclab/deploy/mkii_fourbar_v1_target_ramp_pipeline.sha256` covers **all 112 historical
+The scheduled-target release remains frozen at `9cd8d4c`. Its first full nominal
+validation passed, but the refined solver developed standing torque chatter and
+failed convergence. The next named controller candidate is
+`mkii_pd_damping_030_v1`: Kp stays 30 N m/rad and Kd changes from 0.60 to
+0.30 N m s/rad. Base RS05 JSON/defaults, voltage assumption, motor envelope,
+overload budget, armature, CAD, contact model, timing, target ramp and gates
+remain unchanged. The instantiated controller profile and gains are bound into
+the motor/runtime manifest. This uncalibrated software-gain experiment needs
+fresh physical admission; no preceding admission or checkpoint can be reused.
+Both earlier manifests remain byte-identical.
+
+`isaaclab/deploy/mkii_fourbar_v1_pd030_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

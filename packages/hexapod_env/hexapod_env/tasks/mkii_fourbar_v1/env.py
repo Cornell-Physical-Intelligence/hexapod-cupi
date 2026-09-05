@@ -50,6 +50,8 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
         if set(self._robot.actuators) != {"motors"}:
             raise ValueError("Unexpected actuator group; passive joints must not be driven")
         motor_cfg = verify_runtime_cfg(self._motor_model.cfg, self.active_joint_names)
+        if motor_cfg["controller_profile"] != contract.MOTOR_CONTROLLER_PROFILE:
+            raise ValueError("Motor controller profile differs from the physical task contract")
         if (cfg.sim.dt != contract.PHYSICS_DT_S or cfg.sim.dt != motor_cfg["physics_dt_s"]
                 or cfg.decimation != contract.DECIMATION or self.step_dt != contract.POLICY_DT_S):
             raise ValueError("Physics/control timing differs from the motor/runtime contract")
@@ -85,7 +87,8 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
             raise ValueError("Physical bundle changed during environment construction")
         self.runtime_manifest = contract.runtime_manifest(self.kinematics,
             motor_contract_manifest(physics_dt_s=motor_cfg["physics_dt_s"],
-                                    assumed_bus_voltage_v=motor_cfg["assumed_bus_voltage_v"]),
+                                    assumed_bus_voltage_v=motor_cfg["assumed_bus_voltage_v"],
+                                    controller_profile=motor_cfg["controller_profile"]),
             kinematics_sha256=kin_hash, usd_sha256=usd_hash, asset_bundle=asset_bundle)
         self.runtime_manifest["resolved_motor_configuration"] = motor_cfg
         self.runtime_manifest["observed_tree_joint_names"] = list(self._robot.joint_names)

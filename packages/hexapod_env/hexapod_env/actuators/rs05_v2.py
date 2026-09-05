@@ -8,7 +8,9 @@ from __future__ import annotations
 from isaaclab.actuators import IdealPDActuatorCfg
 from isaaclab.utils.configclass import configclass
 
-from hexapod_core.rs05_v2 import ACTUATOR_CLASS, MODEL_ID, configuration_values, verify_runtime_cfg
+from hexapod_core.rs05_v2 import (
+    ACTUATOR_CLASS, MODEL_ID, DEFAULT_CONTROLLER_PROFILE, configuration_values, verify_runtime_cfg,
+)
 
 
 @configclass
@@ -19,11 +21,14 @@ class RS05V2ActuatorCfg(IdealPDActuatorCfg):
     assumed_bus_voltage_v: float = 48.0
     reset_burst_headroom: float = 0.5
     model_id: str = MODEL_ID
+    controller_profile: str = DEFAULT_CONTROLLER_PROFILE
 
 
-def make_rs05_v2_cfg(active_joint_names, *, physics_dt_s=0.005, assumed_bus_voltage_v=48.0):
+def make_rs05_v2_cfg(active_joint_names, *, physics_dt_s=0.005, assumed_bus_voltage_v=48.0,
+                     controller_profile=DEFAULT_CONTROLLER_PROFILE):
     """Bind only18 explicitly named motors; never absorb passive joints."""
     cfg = RS05V2ActuatorCfg(**configuration_values(active_joint_names, physics_dt_s=physics_dt_s,
-                                                assumed_bus_voltage_v=assumed_bus_voltage_v))
+                                                assumed_bus_voltage_v=assumed_bus_voltage_v,
+                                                controller_profile=controller_profile))
     verify_runtime_cfg(cfg, active_joint_names)
     return cfg

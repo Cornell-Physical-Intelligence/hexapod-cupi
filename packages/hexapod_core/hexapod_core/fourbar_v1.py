@@ -43,6 +43,7 @@ ENABLE_EXTERNAL_FORCES_EVERY_ITERATION = True
 ACTION_SCALE_RAD = .30
 SLEW_RAD_PER_20MS = .040
 MOTOR_TARGET_SCHEDULE_ID = "linear_physics_substeps_v1"
+MOTOR_CONTROLLER_PROFILE = "mkii_pd_damping_030_v1"
 SOFT_LIMIT_FACTOR = .95
 OBSERVATION_FIELDS = (
     ("root_linear_velocity_navigation", 3), ("root_angular_velocity_navigation", 3),

@@ -4,16 +4,10 @@ This campaign implements the user-authorized restart on the physical linkage,
 with scratch policies and explicit provisional motor dynamics. Live outcomes
 are recorded separately; source implementation alone does not admit training.
 
-**Current gate: not admitted.** On source `cfe0cf5`, the v5 nominal run completed
-32 environments × 1,000 standing + 2,400 driven control steps, but failed the
-unchanged gate: maximum pin separation was **0.108253 mm** against 0.100 mm,
-minimum support reached zero, and the simultaneous knee-motor group test gave
-`lm_tibia_lever_pivot` a −0.004764 rad positive-minus-negative response. All 18
-individual motor direction checks passed. There were no episode resets or
-nonfoot contacts. See the [complete nominal report](../artifacts/mkii_fourbar_2026-09-05/campaign_005_physical_mimic/nominal/hexapod-fourbar-validate-20260905T165132Z-c57a59f3/report.json)
-and [campaign record](../artifacts/mkii_fourbar_2026-09-05/campaign_005_physical_mimic/campaign.json).
-A bounded eight-environment group diagnostic at 128/1 iterations is the next
-investigation; diagnostic completion cannot admit training.
+See [STATUS.md](../STATUS.md) for the current execution state and
+[campaign evidence](../artifacts/mkii_fourbar_2026-09-05/) for immutable results.
+A complete nominal pass alone cannot admit training: the refined repeat and
+solver-convergence comparison must also pass.
 
 ## What runs
 
@@ -64,6 +58,16 @@ distinguishes the 48 V torque-speed curve, 1.2 N·m continuous stall, 1.6 N·m a
 Applied effort must satisfy both speed/voltage and remaining overload budget.
 Raw PD demand, actual clipping, continuous excess, delivered overload exposure
 and current proxy are separate diagnostics.
+
+The physical task explicitly selects controller profile
+`mkii_pd_damping_030_v1` (Kp 30 N·m/rad, Kd 0.30 N·m·s/rad). The baseline
+RS05 JSON and default factory profile remain Kp 30/Kd 0.60. The instantiated
+profile, actual parameters and implementation hashes are bound into each
+runtime manifest, and the environment rejects a different task profile.
+This experiment reduces amplification of simulated velocity noise while
+retaining static proportional stiffness. It may also reduce damping of real
+motions; only live stability/convergence checks can establish whether it helps.
+No hardware tuning is inferred from this simulation setting.
 
 This is a provisional engineering model. The metal heat path is confirmed as a
 design intention; its thermal resistance/capacity and repeated-burst recovery

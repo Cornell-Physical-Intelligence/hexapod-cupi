@@ -1,5 +1,10 @@
 # Motor target scheduling candidate
 
+This document describes the isolated target-scheduling change frozen at
+`9cd8d4c`. The later named Kd 0.30 controller experiment is documented in
+[the training runbook](MKII_FOURBAR_TRAINING.md); it preserves this scheduler
+and records its separate gains in the runtime manifest.
+
 The 50 Hz policy still produces the same eighteen clipped, soft-limit-bounded,
 0.040 rad / 20 ms slew-limited motor endpoints. The new candidate delivers each
 endpoint to the explicit PD controller as sixteen equal position increments at
