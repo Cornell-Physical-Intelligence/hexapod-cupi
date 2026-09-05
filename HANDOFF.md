@@ -122,3 +122,25 @@ contacts. Raw demand peaked at 14.32394 N·m; applied torque stayed within its
 `artifacts/mkii_fourbar_2026-09-05/campaign_006_ramped_targets/`.
 The same campaign has advanced to refined validation automatically; no PPO yet.
 Keep source 9cd8d4c frozen and inspect campaign JSON for the active phase.
+
+## 2026-09-05 20:53 UTC — batch investigation and GPU isolation repair
+
+No physical-model PPO has started. Campaign006 refined failed; matched Kd0.30
+standing checks also failed convergence. Frozen d6d5863 one-robot diagnostics at
+origin,+6m X and(2,-2)m complete at0.667–0.681Nm settled, all six pads supporting.
+The same-source eight-robot trace at128/1 is now running from
+`/home/orionh/HEXAPOD_runs/mkii_placement_diagnostics_v1/batch8_20260905T205224Z`
+(PID1616777), to match row0 to the diagonal single exactly. Never infer precision
+as the cause from the earlier location correlation alone.
+
+Fixd863663 on GitHub adds explicit GPU/CPU clone collision groups and topology
+verification (installedLab3 disabled envIDs and this manual scene skipped auto
+filtering). A separate host fix tolerates only exact missing-foreign-container
+Docker responses; unknown errors still block.885CPUtests passed65.501s; new290-file
+manifest `mkii_fourbar_v1_collision_isolation_pipeline.sha256` SHA256
+`edeca5d58572f9fde4354648e68b736241bb52181d956a887936f1b631123b8d`.
+Staging new isolated source `/home/orionh/HEXAPOD_runs/mkii_collision_isolation_v1/source`;
+live backend overlap proof still pending. Existing sources/manifests untouched.
+Good SSHsocket `/tmp/hexapod_fourbar_translation.sock`. Priorityguard1465763 remains
+bounded until2026-09-06T02:16:34Z; inspect live status before acting. Avoid transient
+CPU Docker readers during the older frozen supervisor's active jobs.

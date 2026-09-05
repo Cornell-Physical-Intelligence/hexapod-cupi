@@ -1,8 +1,10 @@
 # First flat-ground policy evaluation
 
-This is a proposed evaluation, not an implemented runner or a claim that PPO has
-started or passed. After full PPO starts, evaluate only completed, hash-verified
-checkpoints; repeat on its final verified checkpoint. A finite 100-step inference
+The protocol below has an [external draft driver](../artifacts/mkii_fourbar_2026-09-05/first_policy_evaluation/README.md)
+with 17 passing CPU tests. It has not run on the GPU and still needs integration
+with the owned-container supervisor. No PPO or policy-quality result exists.
+After full PPO starts, evaluate only completed, hash-verified checkpoints;
+repeat on its final verified checkpoint. A finite 100-step inference
 probe establishes software continuity, not walking skill. See the
 [training runbook](MKII_FOURBAR_TRAINING.md) for admission and continuation.
 
