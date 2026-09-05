@@ -98,7 +98,21 @@ errors, GPU-capable foreign containers and unrelated GPU processes still block.
 Owned-container identity and cleanup checks are unchanged. These changes require
 a new source identity and fresh admission; all earlier manifests are retained.
 
-`isaaclab/deploy/mkii_fourbar_v1_collision_isolation_pipeline.sha256` covers **all 112 historical
+The explicit collision-isolation release remains frozen at `d863663` and
+completed its normal eight-robot GPU diagnostic with unchanged standing
+behavior. Matched single/batch traces show that the standing transient can be
+reproduced by one robot at the problematic world position. The trace contains
+a 4.425369 rad/s mimic velocity residual after a contact impulse, despite small
+coordinate error. The next targeted numerical recipe adds four final velocity
+iterations instead of one, retaining 64/128 position iterations, 800 Hz physics,
+50 Hz control, the same PD profile, assets and every acceptance tolerance.
+Its ID is `mkii_fourbar_tgs_external_forces_800hz_final_velocity4_v4`. Actual
+configured and resolved iteration counts remain checked at runtime and in
+reports; old 128/1 evidence cannot qualify it. The earlier collision-isolation
+manifest remains byte-identical. This is an unproven numerical candidate until
+new diagnostics and the full admission campaign pass.
+
+`isaaclab/deploy/mkii_fourbar_v1_final_velocity4_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

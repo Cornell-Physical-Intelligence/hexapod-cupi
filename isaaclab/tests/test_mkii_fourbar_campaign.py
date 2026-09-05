@@ -26,7 +26,7 @@ def report_fixture(directory, phase, parent=None):
     if phase['mode'] == 'validate':
         recipe = numerical_recipe(phase['solver_multiplier'])
         report.update(asset_binding={'pass': True}, steps_requested=phase['steps'], steps_completed=phase['steps'],
-            solver_multiplier=phase['solver_multiplier'], solver_iterations=[64*phase['solver_multiplier'], 1],
+            solver_multiplier=phase['solver_multiplier'], solver_iterations=[recipe['solver_position_iterations'], recipe['solver_velocity_iterations']],
             numerical_recipe=recipe,
             runtime_manifest={'resolved_simulation': {key: value for key, value in recipe.items() if key != 'recipe_id'}},
             driven_steps=2400 if phase['steps'] >= 1000 else 0, driven_coordinate_pass=True,

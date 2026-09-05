@@ -32,7 +32,7 @@ CONTRACT = {"task_id": "Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0", 
 def validation_report(multiplier=1):
     recipe = numerical_recipe(multiplier)
     return {"pass": True, "errors": [], "asset_binding": {"pass": True}, "contract": CONTRACT, "task_id": CONTRACT["task_id"],
-            "solver_multiplier": multiplier, "solver_iterations": [64*multiplier, 1],
+            "solver_multiplier": multiplier, "solver_iterations": [recipe["solver_position_iterations"], recipe["solver_velocity_iterations"]],
             "numerical_recipe": recipe,
             "runtime_manifest": {"resolved_simulation": {key: value for key, value in recipe.items() if key != "recipe_id"}},
             "num_envs": 32, "steps_requested": 1000, "steps_completed": 1000,
