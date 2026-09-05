@@ -82,7 +82,23 @@ and reset root positions, with complete physics coverage and both admission
 flags false. No validation/training option can request this translation.
 The earlier Kd 0.30 manifest remains byte-identical.
 
-`isaaclab/deploy/mkii_fourbar_v1_placement_diagnostics_pipeline.sha256` covers **all 112 historical
+The placement diagnostic release remains frozen at `d6d5863`. Matched one-robot
+origin and +6 m X runs completed without reproducing the larger-batch torque
+jitter; neither admits training. The next release explicitly filters collisions
+between environments on both CPU and GPU. This manually populated task bypassed
+Isaac Lab 3 automatic filtering, while the installed PhysX cloner disabled
+GPU environment IDs. An authored USD verifier rejects missing or nonreciprocal
+isolation groups and records their count-independent semantics in the runtime
+identity. Backend collision response still needs a separate live overlap test.
+
+The host supervisor also tolerates the narrow race where a foreign container
+listed by full immutable ID disappears before its GPU configuration inspection.
+Only an exact Docker missing-object response is accepted; unknown inspection
+errors, GPU-capable foreign containers and unrelated GPU processes still block.
+Owned-container identity and cleanup checks are unchanged. These changes require
+a new source identity and fresh admission; all earlier manifests are retained.
+
+`isaaclab/deploy/mkii_fourbar_v1_collision_isolation_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

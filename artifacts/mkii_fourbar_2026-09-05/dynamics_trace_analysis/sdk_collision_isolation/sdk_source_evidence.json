@@ -1,0 +1,294 @@
+{
+  "captured_at_utc": "2026-09-05T20:37:35.911021+00:00",
+  "cloner_callback_replays": [
+    {
+      "calls": [
+        {
+          "excluded_paths": [
+            "/World/template",
+            "/World/envs"
+          ],
+          "operation": "register"
+        },
+        {
+          "count": 31,
+          "destination_paths": [
+            "/World/envs/env_1",
+            "/World/envs/env_2",
+            "/World/envs/env_3",
+            "/World/envs/env_4",
+            "/World/envs/env_5",
+            "/World/envs/env_6",
+            "/World/envs/env_7",
+            "/World/envs/env_8",
+            "/World/envs/env_9",
+            "/World/envs/env_10",
+            "/World/envs/env_11",
+            "/World/envs/env_12",
+            "/World/envs/env_13",
+            "/World/envs/env_14",
+            "/World/envs/env_15",
+            "/World/envs/env_16",
+            "/World/envs/env_17",
+            "/World/envs/env_18",
+            "/World/envs/env_19",
+            "/World/envs/env_20",
+            "/World/envs/env_21",
+            "/World/envs/env_22",
+            "/World/envs/env_23",
+            "/World/envs/env_24",
+            "/World/envs/env_25",
+            "/World/envs/env_26",
+            "/World/envs/env_27",
+            "/World/envs/env_28",
+            "/World/envs/env_29",
+            "/World/envs/env_30",
+            "/World/envs/env_31"
+          ],
+          "keyword_arguments": {
+            "useEnvIds": false,
+            "useFabricForReplication": false
+          },
+          "operation": "replicate",
+          "source": "/World/envs/env_0"
+        },
+        {
+          "operation": "unregister"
+        }
+      ],
+      "device_argument": "cpu",
+      "mapping": "one homogeneous source maps to all environments",
+      "num_envs": 32
+    },
+    {
+      "calls": [
+        {
+          "excluded_paths": [
+            "/World/template",
+            "/World/envs"
+          ],
+          "operation": "register"
+        },
+        {
+          "count": 31,
+          "destination_paths": [
+            "/World/envs/env_1",
+            "/World/envs/env_2",
+            "/World/envs/env_3",
+            "/World/envs/env_4",
+            "/World/envs/env_5",
+            "/World/envs/env_6",
+            "/World/envs/env_7",
+            "/World/envs/env_8",
+            "/World/envs/env_9",
+            "/World/envs/env_10",
+            "/World/envs/env_11",
+            "/World/envs/env_12",
+            "/World/envs/env_13",
+            "/World/envs/env_14",
+            "/World/envs/env_15",
+            "/World/envs/env_16",
+            "/World/envs/env_17",
+            "/World/envs/env_18",
+            "/World/envs/env_19",
+            "/World/envs/env_20",
+            "/World/envs/env_21",
+            "/World/envs/env_22",
+            "/World/envs/env_23",
+            "/World/envs/env_24",
+            "/World/envs/env_25",
+            "/World/envs/env_26",
+            "/World/envs/env_27",
+            "/World/envs/env_28",
+            "/World/envs/env_29",
+            "/World/envs/env_30",
+            "/World/envs/env_31"
+          ],
+          "keyword_arguments": {
+            "useEnvIds": false,
+            "useFabricForReplication": false
+          },
+          "operation": "replicate",
+          "source": "/World/envs/env_0"
+        },
+        {
+          "operation": "unregister"
+        }
+      ],
+      "device_argument": "cuda:0",
+      "mapping": "one homogeneous source maps to all environments",
+      "num_envs": 32
+    }
+  ],
+  "method": "Read-only installed SDK source plus actual Python callback executed against stubs; no SDK import, GPU, or simulation.",
+  "proves_live_collision_isolation": false,
+  "schema": "hexapod.sdk_collision_isolation.source_review.v1",
+  "sources": {
+    "collision_group_authoring": {
+      "collision_group_occurrences": [
+        412,
+        414,
+        421,
+        425,
+        433,
+        438,
+        442,
+        446,
+        448,
+        455,
+        459,
+        467,
+        471,
+        475,
+        477,
+        478
+      ],
+      "excerpts": [
+        {
+          "first_line": 374,
+          "last_line": 478,
+          "text": "def filter_collisions(\n    stage: Usd.Stage,\n    physicsscene_path: str,\n    collision_root_path: str,\n    prim_paths: list[str],\n    global_paths: list[str] = [],\n) -> None:\n    \"\"\"Create inverted collision groups for clones (PhysX only).\n\n    Sets PhysX scene attributes and collision groups on the prim at ``physicsscene_path``\n    (no PhysxSchema import). Call only when the physics backend is PhysX; Newton uses\n    its own collision/world handling and does not use USD PhysX collision groups.\n\n    Creates one PhysicsCollisionGroup per prim under ``collision_root_path``, enabling\n    inverted filtering so clones don't collide across groups. Optionally adds a global\n    group that collides with all.\n\n    Args:\n        stage: USD stage.\n        physicsscene_path: Path to PhysicsScene prim.\n        collision_root_path: Root scope for collision groups.\n        prim_paths: Per-clone prim paths.\n        global_paths: Optional global-collider paths.\n\n    \"\"\"\n\n    scene_prim = stage.GetPrimAtPath(physicsscene_path)\n    # We invert the collision group filters for more efficient collision filtering across environments\n    invert_attr = scene_prim.CreateAttribute(\"physxScene:invertCollisionGroupFilter\", Sdf.ValueTypeNames.Bool)\n    invert_attr.Set(True)\n\n    # Make sure we create the collision_scope in the RootLayer since the edit target\n    # may be a live layer in the case of Live Sync.\n    with Usd.EditContext(stage, Usd.EditTarget(stage.GetRootLayer())):\n        UsdGeom.Scope.Define(stage, collision_root_path)\n\n    with Sdf.ChangeBlock():\n        if len(global_paths) > 0:\n            global_collision_group_path = collision_root_path + \"/global_group\"\n            # add collision group prim\n            global_collision_group = Sdf.PrimSpec(\n                stage.GetRootLayer().GetPrimAtPath(collision_root_path),\n                \"global_group\",\n                Sdf.SpecifierDef,\n                \"PhysicsCollisionGroup\",\n            )\n            # prepend collision API schema\n            global_collision_group.SetInfo(Usd.Tokens.apiSchemas, Sdf.TokenListOp.Create({\"CollectionAPI:colliders\"}))\n\n            # expansion rule\n            expansion_rule = Sdf.AttributeSpec(\n                global_collision_group,\n                \"collection:colliders:expansionRule\",\n                Sdf.ValueTypeNames.Token,\n                Sdf.VariabilityUniform,\n            )\n            expansion_rule.default = \"expandPrims\"\n\n            # includes rel\n            global_includes_rel = Sdf.RelationshipSpec(global_collision_group, \"collection:colliders:includes\", False)\n            for global_path in global_paths:\n                global_includes_rel.targetPathList.Append(global_path)\n\n            # filteredGroups rel\n            global_filtered_groups = Sdf.RelationshipSpec(global_collision_group, \"physics:filteredGroups\", False)\n            # We are using inverted collision group filtering, which means objects by default don't collide across\n            # groups. We need to add this group as a filtered group, so that objects within this group collide with\n            # each other.\n            global_filtered_groups.targetPathList.Append(global_collision_group_path)\n\n        # set collision groups and filters\n        for i, prim_path in enumerate(prim_paths):\n            collision_group_path = collision_root_path + f\"/group{i}\"\n            # add collision group prim\n            collision_group = Sdf.PrimSpec(\n                stage.GetRootLayer().GetPrimAtPath(collision_root_path),\n                f\"group{i}\",\n                Sdf.SpecifierDef,\n                \"PhysicsCollisionGroup\",\n            )\n            # prepend collision API schema\n            collision_group.SetInfo(Usd.Tokens.apiSchemas, Sdf.TokenListOp.Create({\"CollectionAPI:colliders\"}))\n\n            # expansion rule\n            expansion_rule = Sdf.AttributeSpec(\n                collision_group,\n                \"collection:colliders:expansionRule\",\n                Sdf.ValueTypeNames.Token,\n                Sdf.VariabilityUniform,\n            )\n            expansion_rule.default = \"expandPrims\"\n\n            # includes rel\n            includes_rel = Sdf.RelationshipSpec(collision_group, \"collection:colliders:includes\", False)\n            includes_rel.targetPathList.Append(prim_path)\n\n            # filteredGroups rel\n            filtered_groups = Sdf.RelationshipSpec(collision_group, \"physics:filteredGroups\", False)\n            # We are using inverted collision group filtering, which means objects by default don't collide across\n            # groups. We need to add this group as a filtered group, so that objects within this group collide with\n            # each other.\n            filtered_groups.targetPathList.Append(collision_group_path)\n            if len(global_paths) > 0:\n                filtered_groups.targetPathList.Append(global_collision_group_path)\n                global_filtered_groups.targetPathList.Append(collision_group_path)"
+        }
+      ],
+      "line_count": 530,
+      "path": "/workspace/isaaclab/source/isaaclab/isaaclab/cloner/cloner_utils.py",
+      "sha256": "80cdeda2fe6dc10391ac799cde36dc4eb9167e83613758bc497b3f08f148607a"
+    },
+    "contact_sensor": {
+      "collision_group_occurrences": [],
+      "excerpts": [
+        {
+          "first_line": 52,
+          "last_line": 67,
+          "text": "    The sensor can be configured to report the contact forces on a set of bodies with a given\n    filter pattern using the :attr:`ContactSensorCfg.filter_prim_paths_expr`. This is useful\n    when you want to report the contact forces between the sensor bodies and a specific set of\n    bodies in the scene. The data can be accessed using the :attr:`ContactSensorData.force_matrix_w`.\n    Please check the documentation on `RigidContact`_ for more details.\n\n    The reporting of the filtered contact forces is only possible as one-to-many. This means that only one\n    sensor body in an environment can be filtered against multiple bodies in that environment. If you need to\n    filter multiple sensor bodies against multiple bodies, you need to create separate sensors for each sensor\n    body.\n\n    As an example, suppose you want to report the contact forces for all the feet of a robot against an object\n    exclusively. In that case, setting the :attr:`ContactSensorCfg.prim_path` and\n    :attr:`ContactSensorCfg.filter_prim_paths_expr` with ``{ENV_REGEX_NS}/Robot/.*_FOOT`` and ``{ENV_REGEX_NS}/Object``\n    respectively will not work. Instead, you need to create a separate sensor for each foot and filter\n    it against the object."
+        },
+        {
+          "first_line": 288,
+          "last_line": 337,
+          "text": "    def _initialize_impl(self):\n        super()._initialize_impl()\n        # obtain global simulation view\n        self._physics_sim_view = SimulationManager.get_physics_sim_view()\n\n        # Split the configured prim path into a parent expression and a leaf-name regex.\n        parent_expr, leaf_pattern = self.cfg.prim_path.rsplit(\"/\", 1)\n        name_pattern = re.compile(leaf_pattern)\n\n        def has_contact_report(prim) -> bool:\n            return bool(name_pattern.fullmatch(prim.GetName())) and (\n                \"PhysxContactReportAPI\" in prim.GetAppliedSchemas()\n            )\n\n        # Resolve the asset subtree (clone-plan aware) and collect contact-reporting descendants.\n        matches = resolve_matching_prims_from_source(parent_expr)\n        if not matches:\n            raise RuntimeError(f\"No prim found at '{parent_expr}'.\")\n        asset_prim, body_parent = matches[0]\n        walk_root = asset_prim.GetPath().pathString\n        prims = get_all_matching_child_prims(walk_root, predicate=has_contact_report, traverse_instance_prims=False)\n        body_names = [prim.GetPath().pathString.rsplit(\"/\", 1)[-1] for prim in prims]\n        if not body_names:\n            raise RuntimeError(\n                f\"Sensor at path '{self.cfg.prim_path}' could not find any bodies with contact reporter API.\"\n                \"\\nHINT: Make sure to enable 'activate_contact_sensors' in the corresponding asset spawn configuration.\"\n            )\n\n        # construct regex expression for the body names and convert to PhysX glob form\n        body_names_regex = r\"(\" + \"|\".join(body_names) + r\")\"\n        body_names_regex = f\"{body_parent}/{body_names_regex}\"\n        body_names_glob = body_names_regex.replace(\".*\", \"*\")\n        filter_prim_paths_glob = [expr.replace(\".*\", \"*\") for expr in self.cfg.filter_prim_paths_expr]\n\n        # create a rigid prim view for the sensor\n        self._body_physx_view = self._physics_sim_view.create_rigid_body_view(body_names_glob)\n        self._contact_view = self._physics_sim_view.create_rigid_contact_view(\n            body_names_glob,\n            filter_patterns=filter_prim_paths_glob,\n            max_contact_data_count=self.cfg.max_contact_data_count_per_prim * len(body_names) * self._num_envs,\n        )\n        # resolve the true count of bodies\n        self._num_sensors = self.body_physx_view.count // self._num_envs\n        # check that contact reporter succeeded\n        if self._num_sensors != len(body_names):\n            raise RuntimeError(\n                \"Failed to initialize contact reporter for specified bodies.\"\n                f\"\\n\\tInput prim path    : {self.cfg.prim_path}\"\n                f\"\\n\\tResolved prim paths: {body_names_glob}\"\n            )"
+        },
+        {
+          "first_line": 375,
+          "last_line": 409,
+          "text": "        \"\"\"Fills the buffers of the sensor data.\"\"\"\n        # Convert env_mask to warp array\n        env_mask = self._resolve_indices_and_mask(None, env_mask)\n\n        # PhysX returns (N*B, 3) float32 -> (N*B,) vec3f\n        net_forces_flat = self.contact_view.get_net_contact_forces(dt=self._sim_physics_dt).view(wp.vec3f)\n        # PhysX returns (N*B, M, 3) float32 -> (N*B, M) vec3f\n        if self.cfg.filter_prim_paths_expr:\n            force_matrix_flat = self.contact_view.get_contact_force_matrix(dt=self._sim_physics_dt).view(wp.vec3f)\n        else:\n            force_matrix_flat = None\n        #\n        wp.launch(\n            update_net_forces_kernel,\n            dim=(self._num_envs, self._num_sensors),\n            inputs=[\n                net_forces_flat,\n                force_matrix_flat,\n                env_mask,\n                self._num_sensors,\n                self._num_filter_shapes,\n                self._history_length,\n                self.cfg.force_threshold,\n                self._timestamp,\n                self._timestamp_last_update,\n            ],\n            outputs=[\n                self._data._net_forces_w,\n                self._data._net_forces_w_history,\n                self._data._force_matrix_w,\n                self._data._force_matrix_w_history,\n                self._data._current_air_time,\n                self._data._current_contact_time,\n                self._data._last_air_time,\n                self._data._last_contact_time,"
+        }
+      ],
+      "line_count": 514,
+      "path": "/workspace/isaaclab/source/isaaclab_physx/isaaclab_physx/sensors/contact_sensor/contact_sensor.py",
+      "sha256": "09507db17049bcadd6a48f5992bc20f79b019356c13f1ba3ef1527b2e4188b2c"
+    },
+    "direct_env_setup": {
+      "collision_group_occurrences": [],
+      "excerpts": [
+        {
+          "first_line": 152,
+          "last_line": 160,
+          "text": "        # generate scene\n        with Timer(\"[INFO]: Time taken for scene creation\", \"scene_creation\"):\n            # set the stage context for scene creation steps which use the stage\n            with use_stage(self.sim.stage):\n                self.scene = InteractiveScene(self.cfg.scene)\n                self._setup_scene()\n                self.scene.initialize_renderers()\n            self.sim.register_interactive_scene(self.scene)\n        print(\"[INFO]: Scene manager: \", self.scene)"
+        }
+      ],
+      "line_count": 772,
+      "path": "/workspace/isaaclab/source/isaaclab/isaaclab/envs/direct_rl_env.py",
+      "sha256": "f75cb355938e4fc0c07d87d143cd255e4bd7ccb5ddcc5a45812a517de6947bde"
+    },
+    "interactive_scene": {
+      "collision_group_occurrences": [
+        941,
+        997
+      ],
+      "excerpts": [
+        {
+          "first_line": 149,
+          "last_line": 156,
+          "text": "        if self.physics_backend.startswith(\"ovphysx\"):\n            from isaaclab_ovphysx.cloner import ovphysx_replicate\n\n            physics_clone_fn = ovphysx_replicate\n        elif self.physics_backend.startswith(\"physx\"):\n            from isaaclab_physx.cloner import physx_replicate\n\n            physics_clone_fn = physx_replicate"
+        },
+        {
+          "first_line": 182,
+          "last_line": 219,
+          "text": "        self.env_fmt = self.env_regex_ns.replace(\".*\", \"{}\")\n        # allocate env indices\n        self._ALL_INDICES = torch.arange(self.cfg.num_envs, dtype=torch.long, device=self.device)\n        pos, quat = cloner.grid_transforms(self.num_envs, self.cfg.env_spacing, device=self.device)\n        self._default_env_pose = torch.cat([pos, quat], dim=-1)\n\n        homo_mask = torch.ones((1, self.num_envs), device=self.device, dtype=torch.bool)\n        # Suspend Fabric's USD notice listener enable fast usd cloning\n        with cloner.disabled_fabric_change_notifies(self.stage, restore=False):\n            # copy empty prim of env_0 to env_1, env_2, ..., env_{num_envs-1} with correct location.\n            rep_args = (self.stage, [self.env_fmt.format(0)], [self.env_fmt], self._ALL_INDICES, homo_mask, pos, quat)\n            cloner.usd_replicate(*rep_args)\n\n        self._global_prim_paths = list()\n        has_scene_cfg_entities = self._is_scene_setup_from_cfg()\n        if has_scene_cfg_entities:\n            self._clone_plan = self._build_clone_plan_from_cfg()\n            self.sim.set_clone_plan(self._clone_plan)\n            self._add_entities_from_cfg()\n        else:\n            self._clone_plan = cloner.ClonePlan(\n                sources=(self.env_fmt.format(0),),\n                destinations=(self.env_fmt,),\n                clone_mask=homo_mask,\n            )\n            self.sim.set_clone_plan(self._clone_plan)\n\n        # Aggregate scene-data requirements from declared visualizers and constructed sensors,\n        # then publish to ``SimulationContext`` so downstream providers (constructed later by\n        # :meth:`SimulationContext.initialize_visualizers`) see the full picture in one read.\n        self._aggregate_scene_data_requirements(requested_viz_types)\n\n        if has_scene_cfg_entities:\n            self.clone_environments(copy_from_source=(not self.cfg.replicate_physics))\n            # Collision filtering is PhysX-specific (PhysxSchema.PhysxSceneAPI)\n            # Intentionally matches both physx and ovphysx (both are PhysX-based)\n            if self.cfg.filter_collisions and \"physx\" in self.physics_backend:\n                self.filter_collisions(self._global_prim_paths)"
+        },
+        {
+          "first_line": 298,
+          "last_line": 332,
+          "text": "    def clone_environments(self, copy_from_source: bool = False):\n        \"\"\"Creates clones of the environment ``/World/envs/env_0``.\n\n        Args:\n            copy_from_source: (bool): If set to False, clones inherit from /World/envs/env_0 and mirror its changes.\n            If True, clones are independent copies of the source prim and won't reflect its changes (start-up time\n            may increase). Defaults to False.\n        \"\"\"\n        plan = self._clone_plan\n        assert self.sim is not None\n        if plan is None:\n            self.sim.set_clone_plan(None)\n            return\n\n        # PhysX-only: set env id bit count for replicated physics. Newton handles env separation in its own API.\n        # Intentionally matches both physx and ovphysx (both are PhysX-based)\n        if self.cfg.replicate_physics and \"physx\" in self.physics_backend:\n            from pxr import Sdf  # noqa: PLC0415\n\n            prim = self.stage.GetPrimAtPath(\"/physicsScene\")\n            prim.CreateAttribute(\"physxScene:envIdInBoundsBitCount\", Sdf.ValueTypeNames.Int).Set(4)\n\n        # Suspend Fabric's USD notice listener around bulk authoring. ``restore=False`` because the downstream\n        # ``SimulationContext.reset`` does the Fabric resync \u2014 re-enabling here would batch-resync everything\n        # we just authored, which is slower than the unsuppressed baseline.\n        with cloner.disabled_fabric_change_notifies(self.stage, restore=False):\n            replicate_args = (plan.sources, plan.destinations, self._ALL_INDICES, plan.clone_mask)\n\n            if not copy_from_source and self.cloner_cfg.physics_clone_fn is not None:\n                self.cloner_cfg.physics_clone_fn(\n                    self.stage,\n                    *replicate_args,\n                    positions=self._default_env_pose[:, :3],\n                    device=self.cloner_cfg.device,\n                )"
+        },
+        {
+          "first_line": 403,
+          "last_line": 435,
+          "text": "    def filter_collisions(self, global_prim_paths: list[str] | None = None):\n        \"\"\"Filter environments collisions.\n\n        Disables collisions between the environments in ``/World/envs/env_.*`` and enables collisions with the prims\n        in global prim paths (e.g. ground plane).\n\n        Args:\n            global_prim_paths: A list of global prim paths to enable collisions with.\n                Defaults to None, in which case no global prim paths are considered.\n        \"\"\"\n        # validate paths in global prim paths\n        if global_prim_paths is None:\n            global_prim_paths = []\n        else:\n            # remove duplicates in paths\n            global_prim_paths = list(set(global_prim_paths))\n\n        # if \"/World/collisions\" already exists in the stage, we don't filter again\n        if self.stage.GetPrimAtPath(\"/World/collisions\"):\n            return\n\n        # set global prim paths list if not previously defined\n        if len(self._global_prim_paths) < 1:\n            self._global_prim_paths += global_prim_paths\n\n        # filter collisions within each environment instance\n        cloner.filter_collisions(\n            self.stage,\n            self.physics_scene_path,\n            \"/World/collisions\",\n            self.env_prim_paths,\n            global_paths=self._global_prim_paths,\n        )"
+        },
+        {
+          "first_line": 452,
+          "last_line": 472,
+          "text": "    def physics_scene_path(self) -> str:\n        \"\"\"The path to the USD Physics Scene.\"\"\"\n        if self._physics_scene_path is None:\n            # Prefer a prim with PhysxSceneAPI applied (Isaac Sim flow).  Fall\n            # back to any UsdPhysics.Scene prim (kitless OvPhysX flow does not\n            # load the omni.physx schema, so the auto-created scene only\n            # carries the stock USD type without PhysxSceneAPI).\n            fallback_path: str | None = None\n            for prim in self.stage.Traverse():\n                if \"PhysxSceneAPI\" in prim.GetAppliedSchemas():\n                    self._physics_scene_path = prim.GetPrimPath().pathString\n                    logger.info(f\"Physics scene prim path: {self._physics_scene_path}\")\n                    break\n                if fallback_path is None and prim.GetTypeName() == \"PhysicsScene\":\n                    fallback_path = prim.GetPrimPath().pathString\n            if self._physics_scene_path is None and fallback_path is not None:\n                self._physics_scene_path = fallback_path\n                logger.info(f\"Physics scene prim path (no PhysxSceneAPI): {self._physics_scene_path}\")\n            if self._physics_scene_path is None:\n                raise RuntimeError(\"No physics scene found! Please make sure one exists.\")\n        return self._physics_scene_path"
+        },
+        {
+          "first_line": 866,
+          "last_line": 875,
+          "text": "    def _is_scene_setup_from_cfg(self) -> bool:\n        \"\"\"Check if scene entities are setup from the config or not.\n\n        Returns:\n            True if scene entities are setup from the config, False otherwise.\n        \"\"\"\n        return any(\n            not (asset_name in InteractiveSceneCfg.__dataclass_fields__ or asset_cfg is None)\n            for asset_name, asset_cfg in self.cfg.__dict__.items()\n        )"
+        },
+        {
+          "first_line": 996,
+          "last_line": 999,
+          "text": "            # store global collision paths\n            if hasattr(asset_cfg, \"collision_group\") and asset_cfg.collision_group == -1:\n                asset_paths = sim_utils.find_matching_prim_paths(asset_cfg.prim_path)\n                self._global_prim_paths += asset_paths"
+        }
+      ],
+      "line_count": 999,
+      "path": "/workspace/isaaclab/source/isaaclab/isaaclab/scene/interactive_scene.py",
+      "sha256": "caf1c0646707d6c5a3c28a81020cab741987d96e74f3e43290f0584e221afe40"
+    },
+    "physx_replicate": {
+      "collision_group_occurrences": [],
+      "excerpts": [
+        {
+          "first_line": 16,
+          "last_line": 38,
+          "text": "def physx_replicate(\n    stage: Usd.Stage,\n    sources: Sequence[str],  # e.g. [\"/World/Template/A\", \"/World/Template/B\"]\n    destinations: Sequence[str],  # e.g. [\"/World/envs/env_{}/Robot\", \"/World/envs/env_{}/Object\"]\n    env_ids: torch.Tensor,  # env_ids\n    mapping: torch.Tensor,  # (num_sources, num_envs) bool; True -> place sources[i] into world=j\n    positions: torch.Tensor | None = None,\n    quaternions: torch.Tensor | None = None,\n    use_fabric: bool = False,\n    device: str = \"cpu\",\n    exclude_self_replication: bool = True,\n) -> None:\n    \"\"\"Replicate prims via PhysX replicator with per-row mapping.\n\n    Builds per-source destination lists from ``mapping`` and calls PhysX ``replicate``.\n    Rows covering all environments use ``useEnvIds=True``; partial rows use ``False``.\n    The replicator is registered for the call and then unregistered.\n\n    ``attach_fn`` excludes ``/World/template`` and ``/World/envs`` so that PhysX does\n    not independently parse prims that the replicator will handle.  The source prim\n    receives its physics body as a side-effect of ``rep.replicate()`` (which always\n    parses the source internally), so every source must appear in at least one\n    ``replicate`` call."
+        },
+        {
+          "first_line": 63,
+          "last_line": 113,
+          "text": "    # Note: positions and quaternions are unused by PhysX replicator\n    # They are included for API compatibility with other backends (e.g., Newton)\n    del positions, quaternions\n\n    stage_id = UsdUtils.StageCache.Get().Insert(stage).ToLongInt()\n    current_worlds: list[int] = []\n    current_template: str = \"\"\n    num_envs = mapping.size(1)\n\n    if num_envs > 1:\n        # Pre-compute effective world lists after self-exclusion.\n        # Self is only removed when the source also maps to other environments;\n        # if it is the sole destination we must keep it so that rep.replicate()\n        # is still called (the source gets its physics body from that call).\n        effective_worlds: list[list[int]] = []\n        for i, src in enumerate(sources):\n            worlds = env_ids[mapping[i]].tolist()\n            if exclude_self_replication:\n                pre, _, suf = destinations[i].partition(\"{}\")\n                self_id = src.removeprefix(pre).removesuffix(suf)\n                if self_id.isdigit():\n                    filtered = [w for w in worlds if w != int(self_id)]\n                    worlds = filtered if filtered else worlds\n            effective_worlds.append(worlds)\n\n        def attach_fn(_stage_id: int):\n            return [\"/World/template\", \"/World/envs\"]\n\n        def rename_fn(_replicate_path: str, i: int):\n            return current_template.format(current_worlds[i])\n\n        def attach_end_fn(_stage_id: int):\n            nonlocal current_template\n            rep = get_physx_replicator_interface()\n            for i, src in enumerate(sources):\n                current_template = destinations[i]\n                current_worlds[:] = effective_worlds[i]\n                if not current_worlds:\n                    continue\n                rep.replicate(\n                    _stage_id,\n                    src,\n                    len(current_worlds),\n                    # TODO: envIds needs to support heterogeneous setup. for now, we rely on USD collision filtering\n                    useEnvIds=False,  # (len(current_worlds) == num_envs - 1) and device != \"cpu\",\n                    useFabricForReplication=use_fabric,\n                )\n            # unregister only AFTER all replicate() calls completed\n            rep.unregister_replicator(_stage_id)\n\n        get_physx_replicator_interface().register_replicator(stage_id, attach_fn, attach_end_fn, rename_fn)"
+        }
+      ],
+      "line_count": 113,
+      "path": "/workspace/isaaclab/source/isaaclab_physx/isaaclab_physx/cloner/physx_replicate.py",
+      "sha256": "a0e7eb7f47e45ce27351002a0ef6c137ddb3c1c4a20a5efcbbd389c3ff5a426c"
+    },
+    "scene_configuration": {
+      "collision_group_occurrences": [],
+      "excerpts": [
+        {
+          "first_line": 87,
+          "last_line": 112,
+          "text": "    replicate_physics: bool = True\n    \"\"\"Enable/disable replication of physics schemas when using the Cloner APIs. Default is True.\n\n    If True, the simulation will have the same asset instances (USD prims) in all the cloned environments.\n    Internally, this ensures optimization in setting up the scene and parsing it via the physics stage parser.\n\n    If False, the simulation allows having separate asset instances (USD prims) in each environment.\n    This flexibility comes at a cost of slowdowns in setting up and parsing the scene.\n\n    .. note::\n        Optimized parsing of certain prim types (such as deformable objects) is not currently supported\n        by the physics engine. In these cases, this flag needs to be set to False.\n    \"\"\"\n\n    filter_collisions: bool = True\n    \"\"\"Enable/disable collision filtering between cloned environments. Default is True.\n\n    If True, collisions will not occur between cloned environments.\n\n    If False, the simulation will generate collisions between environments.\n\n    .. note::\n        Collisions can only be filtered automatically in direct workflows when physics replication is enabled.\n        If :attr:`replicated_physics` is ``False`` and collision filtering is desired, make sure to call\n        ``scene.filter_collisions()``.\n    \"\"\""
+        }
+      ],
+      "line_count": 126,
+      "path": "/workspace/isaaclab/source/isaaclab/isaaclab/scene/interactive_scene_cfg.py",
+      "sha256": "b518a9781d40824933710b6e2a1408a3d1313c3510edff7cc2510f769b37f5e6"
+    },
+    "terrain_configuration": {
+      "collision_group_occurrences": [
+        29
+      ],
+      "excerpts": [
+        {
+          "first_line": 23,
+          "last_line": 37,
+          "text": "    class_type: type[TerrainImporter] | str = \"{DIR}.terrain_importer:TerrainImporter\"\n    \"\"\"The class to use for the terrain importer.\n\n    Defaults to :class:`isaaclab.terrains.terrain_importer.TerrainImporter`.\n    \"\"\"\n\n    collision_group: int = -1\n    \"\"\"The collision group of the terrain. Defaults to -1.\"\"\"\n\n    prim_path: str = MISSING\n    \"\"\"The absolute path of the USD terrain prim.\n\n    All sub-terrains are imported relative to this prim path.\n    \"\"\"\n"
+        }
+      ],
+      "line_count": 111,
+      "path": "/workspace/isaaclab/source/isaaclab/isaaclab/terrains/terrain_importer_cfg.py",
+      "sha256": "232c5f2505d4c0b6b0971355867af783501173ca244e774fddeb75f5ae1cefe2"
+    },
+    "terrain_importer": {
+      "collision_group_occurrences": [],
+      "excerpts": [],
+      "line_count": 391,
+      "path": "/workspace/isaaclab/source/isaaclab/isaaclab/terrains/terrain_importer.py",
+      "sha256": "f55af93107d608172d776995ebbdab54f282955759f92166ec7e65954ba47963"
+    }
+  },
+  "terrain_importer_reads_collision_group": false
+}

@@ -192,6 +192,41 @@ def inspect_container(identifier):
     return identity
 
 
+def inspect_foreign_container_gpu_config(identifier):
+    """Inspect one listed immutable foreign ID; tolerate only proven removal."""
+    if not re.fullmatch(r'[0-9a-f]{64}', identifier):
+        raise Blocked('Foreign container inventory requires immutable full Docker IDs')
+    result = command(['docker', 'inspect', '--type', 'container', '--format',
+        '{"runtime":{{json .HostConfig.Runtime}},"device_requests":{{json .HostConfig.DeviceRequests}},"devices":{{json .HostConfig.Devices}},"privileged":{{json .HostConfig.Privileged}}}',
+        identifier], check=False)
+    if result.returncode:
+        missing = (r'(?:Error: |Error response from daemon: )?No such (?:object|container): '
+                   + re.escape(identifier) + r'(?:\r?\n)?')
+        if result.returncode == 1 and result.stdout == '' and re.fullmatch(missing, result.stderr):
+            return None
+        # Do not expose arbitrary daemon/config stderr or reinterpret failures.
+        raise Blocked('Cannot inspect foreign container GPU configuration through Docker')
+    try:
+        description = json.loads(result.stdout, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
+        if (type(description) is not dict
+                or set(description) != {'runtime', 'device_requests', 'devices', 'privileged'}
+                or type(description['runtime']) is not str or type(description['privileged']) is not bool):
+            raise ValueError('Invalid container configuration fields')
+        devices, requests = description['devices'], description['device_requests']
+        if devices is not None and (type(devices) is not list or any(
+                type(device) is not dict or type(device.get('PathOnHost')) is not str for device in devices)):
+            raise ValueError('Invalid container device mappings')
+        if requests is not None and (type(requests) is not list or any(
+                type(request) is not dict or type(request.get('Driver')) is not str
+                or type(request.get('Capabilities')) is not list
+                or any(type(capability) is not list or any(type(value) is not str for value in capability)
+                       for capability in request['Capabilities']) for request in requests)):
+            raise ValueError('Invalid container device requests')
+    except (TypeError, ValueError, KeyError):
+        raise Blocked('Foreign container GPU configuration is malformed') from None
+    return description
+
+
 def check_identity(identity, name, owner):
     return bool(identity and identity['name'] == '/' + name and (identity['labels'] or {}).get(OWNER_LABEL) == owner)
 
@@ -227,13 +262,15 @@ def resource_gate(*, owned_container=None, allow_owned_gpu=False):
         if result.returncode not in (3, 4) or result.stdout.strip() in ('active', 'activating', 'reloading', 'deactivating'):
             raise Blocked(f'Cannot establish inactive legacy service: {service}')
     containers = command(['docker', 'ps', '--no-trunc', '--format', '{{.ID}}']).stdout.split()
-    cpu_containers = []
+    cpu_containers, disappeared_containers = [], []
     for identifier in containers:
         if owned_container and identifier == owned_container['id']:
             continue
-        description = command(['docker', 'inspect', '--type', 'container', '--format',
-            '{"runtime":{{json .HostConfig.Runtime}},"device_requests":{{json .HostConfig.DeviceRequests}},"devices":{{json .HostConfig.Devices}},"privileged":{{json .HostConfig.Privileged}}}', identifier])
-        if container_gpu_capable(json.loads(description.stdout)):
+        description = inspect_foreign_container_gpu_config(identifier)
+        if description is None:
+            disappeared_containers.append(identifier)
+            continue
+        if container_gpu_capable(description):
             raise Blocked(f'Unrelated GPU-capable container remains: {identifier}')
         cpu_containers.append(identifier)
     gpu_rows = list(csv.reader(command(['nvidia-smi', '--query-compute-apps=pid,process_name', '--format=csv,noheader,nounits']).stdout.splitlines()))
@@ -260,6 +297,7 @@ def resource_gate(*, owned_container=None, allow_owned_gpu=False):
             'minimum_mem_available_bytes': MIN_AVAILABLE_MEMORY_BYTES, 'gpu_pids': gpu_pids,
             'gpu_utilization_percent': [int(value.strip()) for value in utilization],
             'unrelated_cpu_container_ids': cpu_containers, 'producer_pids': producers,
+            'disappeared_foreign_container_ids': disappeared_containers,
             'blocked_shared_lock_waiters': waiters}
 
 

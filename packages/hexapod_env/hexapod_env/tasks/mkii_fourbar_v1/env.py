@@ -21,6 +21,7 @@ from hexapod_core.rs05_v2 import contract_manifest as motor_contract_manifest, v
 from ...command_sampling import body_to_navigation_frame
 from .math import MotorCoordinates, observations, reward_terms
 from .target_schedule import MotorTargetRamp
+from .collision_isolation import verify_collision_isolation
 
 ROOT = Path(__file__).resolve().parents[5]
 
@@ -91,6 +92,7 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
                                     controller_profile=motor_cfg["controller_profile"]),
             kinematics_sha256=kin_hash, usd_sha256=usd_hash, asset_bundle=asset_bundle)
         self.runtime_manifest["resolved_motor_configuration"] = motor_cfg
+        self.runtime_manifest["resolved_collision_isolation"] = self.collision_isolation_report["runtime_identity"]
         self.runtime_manifest["observed_tree_joint_names"] = list(self._robot.joint_names)
         self.runtime_manifest["observed_motor_model_joint_names"] = list(motor_names)
         self.runtime_manifest["resolved_simulation"] = {
@@ -114,8 +116,13 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
         self.cfg.terrain.env_spacing = self.scene.cfg.env_spacing
         self._terrain = self.cfg.terrain.class_type(self.cfg.terrain)
         self.scene.clone_environments(copy_from_source=False)
-        if self.device == "cpu":
-            self.scene.filter_collisions(global_prim_paths=[self.cfg.terrain.prim_path])
+        # The manually populated DirectRLEnv scene bypasses Isaac Lab's automatic
+        # asset filtering. PhysX clone replication currently disables env IDs,
+        # so explicit USD collision groups are required on both CPU and GPU.
+        self.scene.filter_collisions(global_prim_paths=[self.cfg.terrain.prim_path])
+        self.collision_isolation_report = verify_collision_isolation(self.scene.stage,
+            physics_scene_path=self.scene.physics_scene_path, env_prim_paths=self.scene.env_prim_paths,
+            global_prim_paths=[self.cfg.terrain.prim_path])
         light = sim_utils.DomeLightCfg(intensity=2000., color=(.75, .78, .82))
         light.func("/World/Light", light)
 
