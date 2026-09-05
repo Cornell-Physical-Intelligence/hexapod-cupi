@@ -32,7 +32,9 @@ OWNER_LABEL = 'org.cornell.hexapod.fourbar-run'
 COORDINATION = Path('/home/orionh/SPARK_COMPUTE_COORDINATION.md')
 MIN_AVAILABLE_MEMORY_BYTES = 16 * 1024**3
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'tools'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'packages/hexapod_core'))
 from mkii_training_contract import identity, require_admission, require_checkpoint
+from hexapod_core.fourbar_v1 import validate_numerical_recipe_report
 # Keep the reviewed shell spelling visible to the shared launcher contract;
 # shlex removes only grouping quotes, yielding exactly one subprocess argument.
 TELEMETRY_ARGUMENT = '--kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry"'
@@ -290,10 +292,13 @@ def validate_written_report(path, *, args, contract):
     if result.get('task_id') != contract['task_id']:
         raise Blocked('Final report task mismatch')
     if args.mode == 'validate':
+        try:
+            validate_numerical_recipe_report(result, args.solver_multiplier)
+        except ValueError as exc:
+            raise Blocked(f'Validation numerical recipe mismatch: {exc}') from exc
         if (result.get('steps_requested') != args.steps or result.get('steps_completed') != args.steps
                 or result.get('num_envs') != args.num_envs
-                or result.get('solver_multiplier') != args.solver_multiplier
-                or result.get('solver_iterations') != [32*args.solver_multiplier, 4*args.solver_multiplier]):
+                or result.get('solver_multiplier') != args.solver_multiplier):
             raise Blocked('Validation did not complete requested workload')
     else:
         completed = result.get('iterations_completed')

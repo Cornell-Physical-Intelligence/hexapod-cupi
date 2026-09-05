@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
 from mkii_training_contract import TASK_ID, identity, require_admission, require_checkpoint, digest
 from qualify_mkii_fourbar import qualify
+from hexapod_core.fourbar_v1 import numerical_recipe
 
 loader = importlib.machinery.SourceFileLoader("fourbar_host_gate", str(ROOT / "isaaclab/deploy/run-mkii-fourbar"))
 spec = importlib.util.spec_from_loader(loader.name, loader)
@@ -64,21 +65,27 @@ class TrainingGateTests(unittest.TestCase):
                     require_admission(p, {})
 
     def test_solver_comparison_rejects_incomplete_or_divergent_runs(self):
+        def set_recipe(report, multiplier):
+            recipe = numerical_recipe(multiplier)
+            report.update(solver_multiplier=multiplier,
+                solver_iterations=[recipe["solver_position_iterations"], recipe["solver_velocity_iterations"]],
+                numerical_recipe=recipe,
+                runtime_manifest={"resolved_simulation": {k: v for k, v in recipe.items() if k != "recipe_id"}})
         contract = {"sha256": "c"*64, "task_id": TASK_ID}
         nominal = {"pass": True, "errors": [], "contract": contract, "solver_multiplier": 1,
-                   "task_id": TASK_ID, "solver_iterations": [32, 4], "steps_requested": 1000,
+                   "task_id": TASK_ID, "solver_iterations": [64, 1], "steps_requested": 1000,
                    "num_envs": 32, "steps_completed": 1000, "driven_steps": 2400,
                    "driven_coordinate_pass": True, "windows": {window: {"mean_height_m": .13,
                    "max_applied_nm": 1.} for window in ("settled", "driven")}}
+        set_recipe(nominal, 1)
         refined = copy.deepcopy(nominal)
-        refined["solver_multiplier"] = 2
-        refined["solver_iterations"] = [64, 8]
+        set_recipe(refined, 2)
         self.assertTrue(qualify(nominal, refined, contract)["pass"])
         refined["windows"]["driven"]["max_applied_nm"] = 2.
         self.assertFalse(qualify(nominal, refined, contract)["pass"])
+        set_recipe(nominal, 1)
         refined = copy.deepcopy(nominal)
-        refined["solver_multiplier"] = 2
-        refined["solver_iterations"] = [64, 8]
+        set_recipe(refined, 2)
         refined["driven_coordinate_pass"] = False
         self.assertFalse(qualify(nominal, refined, contract)["pass"])
 

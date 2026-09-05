@@ -25,6 +25,11 @@ COMMAND_FRAME = "anatomical_navigation"
 PHYSICS_DT_S = .005
 DECIMATION = 4
 POLICY_DT_S = PHYSICS_DT_S * DECIMATION
+NUMERICAL_RECIPE_ID = "mkii_fourbar_tgs_external_forces_v2"
+SOLVER_TYPE = 1  # PhysX TGS
+SOLVER_POSITION_ITERATIONS = 64
+SOLVER_VELOCITY_ITERATIONS = 1
+ENABLE_EXTERNAL_FORCES_EVERY_ITERATION = True
 ACTION_SCALE_RAD = .30
 SLEW_RAD_PER_20MS = .040
 SOFT_LIMIT_FACTOR = .95
@@ -35,6 +40,40 @@ OBSERVATION_FIELDS = (
     ("previous_clipped_action", 18), ("estimated_motor_burst_headroom", 18),
 )
 OBSERVATION_DIM = sum(width for _, width in OBSERVATION_FIELDS)
+
+
+def numerical_recipe(multiplier=1):
+    if type(multiplier) is not int or multiplier not in (1, 2):
+        raise ValueError("Numerical recipe requires nominal=1 or refined=2")
+    return {"recipe_id": NUMERICAL_RECIPE_ID, "solver_type": SOLVER_TYPE,
+            "solver_position_iterations": SOLVER_POSITION_ITERATIONS * multiplier,
+            "solver_velocity_iterations": SOLVER_VELOCITY_ITERATIONS,
+            "enable_external_forces_every_iteration": ENABLE_EXTERNAL_FORCES_EVERY_ITERATION,
+            "physics_dt_s": PHYSICS_DT_S, "decimation": DECIMATION}
+
+
+def validate_numerical_recipe_report(report, multiplier):
+    """Require the selected recipe and actual resolved environment settings."""
+    expected = numerical_recipe(multiplier)
+    actual = report.get("numerical_recipe")
+    if (not isinstance(actual, dict) or actual != expected
+            or any(type(actual[key]) is not type(value) for key, value in expected.items())):
+        raise ValueError("Numerical recipe report differs from the selected TGS contract")
+    iterations = report.get("solver_iterations")
+    if (type(report.get("solver_multiplier")) is not int or report["solver_multiplier"] != multiplier
+            or not isinstance(iterations, list) or any(type(value) is not int for value in iterations)
+            or iterations != [expected["solver_position_iterations"], expected["solver_velocity_iterations"]]):
+        raise ValueError("Solver iteration report differs from the selected numerical recipe")
+    runtime = report.get("runtime_manifest")
+    resolved = runtime.get("resolved_simulation") if isinstance(runtime, dict) else None
+    if not isinstance(resolved, dict):
+        raise ValueError("Numerical recipe requires actual resolved simulation metadata")
+    for key, value in expected.items():
+        if key == "recipe_id":
+            continue
+        if resolved.get(key) != value or type(resolved.get(key)) is not type(value):
+            raise ValueError(f"Actual resolved simulation differs from numerical recipe: {key}")
+    return expected
 
 
 def finite_vector(values, width, label):
@@ -122,5 +161,6 @@ def runtime_manifest(kinematics, motor_manifest, *, kinematics_sha256, usd_sha25
         "observation_fields": [list(field) for field in OBSERVATION_FIELDS], "observation_dim": OBSERVATION_DIM,
         "action_scale_rad": ACTION_SCALE_RAD, "action_clip": [-1., 1.], "slew_rad_per_20ms": SLEW_RAD_PER_20MS,
         "physics_dt_s": PHYSICS_DT_S, "decimation": DECIMATION, "policy_dt_s": POLICY_DT_S,
+        "numerical_recipe_id": NUMERICAL_RECIPE_ID,
         "scope": "physical-model simulation contract; hardware calibration not admitted",
     }

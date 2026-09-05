@@ -15,6 +15,7 @@ loader = importlib.machinery.SourceFileLoader('_fourbar_campaign_tests', str(ROO
 spec = importlib.util.spec_from_loader(loader.name, loader)
 campaign = importlib.util.module_from_spec(spec)
 loader.exec_module(campaign)
+from hexapod_core.fourbar_v1 import numerical_recipe
 CONTRACT = {'task_id': 'Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0', 'sha256': 'fixture'}
 
 
@@ -23,8 +24,11 @@ def report_fixture(directory, phase, parent=None):
     report = {'pass': True, 'errors': [], 'contract': CONTRACT, 'task_id': CONTRACT['task_id'],
               'num_envs': phase['num_envs'], 'mode': phase['mode']}
     if phase['mode'] == 'validate':
+        recipe = numerical_recipe(phase['solver_multiplier'])
         report.update(steps_requested=phase['steps'], steps_completed=phase['steps'],
-            solver_multiplier=phase['solver_multiplier'], solver_iterations=[32*phase['solver_multiplier'], 4*phase['solver_multiplier']],
+            solver_multiplier=phase['solver_multiplier'], solver_iterations=[64*phase['solver_multiplier'], 1],
+            numerical_recipe=recipe,
+            runtime_manifest={'resolved_simulation': {key: value for key, value in recipe.items() if key != 'recipe_id'}},
             driven_steps=2400 if phase['steps'] >= 1000 else 0, driven_coordinate_pass=True,
             windows={window: {'mean_height_m': .138, 'max_applied_nm': 1.2} for window in ('settled', 'driven')})
     else:

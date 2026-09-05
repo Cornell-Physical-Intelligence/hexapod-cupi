@@ -107,7 +107,10 @@ class FourbarPhysicalMetricsTests(unittest.TestCase):
         return metrics.windows['settled']
 
     def report(self, window):
+        recipe = validator.numerical_recipe()
         return {'cpu_asset_pass': True, 'kit_asset_pass': True, 'body_count': 31,
+                'solver_multiplier': 1, 'solver_iterations': [64, 1], 'numerical_recipe': recipe,
+                'runtime_manifest': {'resolved_simulation': {key: value for key, value in recipe.items() if key != 'recipe_id'}},
                 'joint_count': 30, 'active_motor_count': 18, 'steps_completed': 1,
                 'steps_requested': 1, 'terminated_count': 0, 'truncated_count': 0,
                 'reset_max_joint_error_rad': 0., 'anatomical_frame_pass': True,

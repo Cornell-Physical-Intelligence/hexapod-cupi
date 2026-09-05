@@ -84,6 +84,8 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
         self.runtime_manifest["observed_motor_model_joint_names"] = list(motor_names)
         self.runtime_manifest["resolved_simulation"] = {
             "physics_dt_s": cfg.sim.dt, "decimation": cfg.decimation,
+            "solver_type": cfg.sim.physics.solver_type,
+            "enable_external_forces_every_iteration": cfg.sim.physics.enable_external_forces_every_iteration,
             "solver_position_iterations": cfg.robot.spawn.articulation_props.solver_position_iteration_count,
             "solver_velocity_iterations": cfg.robot.spawn.articulation_props.solver_velocity_iteration_count,
             "self_collision_enabled": cfg.robot.spawn.articulation_props.enabled_self_collisions,

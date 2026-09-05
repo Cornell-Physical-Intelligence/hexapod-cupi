@@ -55,7 +55,8 @@ class HexapodMkiiFourbarV1EnvCfg(DirectRLEnvCfg):
     closure_coordinate_termination_rad = .02
     kinematics_path = str(ROOT / contract.KINEMATICS_PATH)
     sim = SimulationCfg(dt=contract.PHYSICS_DT_S, render_interval=contract.DECIMATION,
-        physics=PhysxCfg(gpu_max_rigid_patch_count=2**20),
+        physics=PhysxCfg(gpu_max_rigid_patch_count=2**20, solver_type=contract.SOLVER_TYPE,
+            enable_external_forces_every_iteration=contract.ENABLE_EXTERNAL_FORCES_EVERY_ITERATION),
         physics_material=sim_utils.RigidBodyMaterialCfg(friction_combine_mode="multiply",
             restitution_combine_mode="multiply", static_friction=1., dynamic_friction=1., restitution=0.))
     terrain = TerrainImporterCfg(prim_path="/World/ground", terrain_type="plane", collision_group=-1,
@@ -69,7 +70,8 @@ class HexapodMkiiFourbarV1EnvCfg(DirectRLEnvCfg):
                 retain_accelerations=False, linear_damping=0., angular_damping=0.,
                 max_linear_velocity=20., max_angular_velocity=50., max_depenetration_velocity=1.),
             articulation_props=sim_utils.ArticulationRootPropertiesCfg(enabled_self_collisions=False,
-                solver_position_iteration_count=32, solver_velocity_iteration_count=4)),
+                solver_position_iteration_count=contract.SOLVER_POSITION_ITERATIONS,
+                solver_velocity_iteration_count=contract.SOLVER_VELOCITY_ITERATIONS)),
         init_state=ArticulationCfg.InitialStateCfg(pos=(0., 0., KINEMATICS["reset_root_height_m"]),
             joint_pos=KINEMATICS["default_joint_positions_rad"], joint_vel={".*": 0.}),
         soft_joint_pos_limit_factor=contract.SOFT_LIMIT_FACTOR,

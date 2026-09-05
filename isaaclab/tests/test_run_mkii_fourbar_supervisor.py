@@ -19,14 +19,18 @@ spec = importlib.util.spec_from_loader(loader.name, loader)
 supervisor = importlib.util.module_from_spec(spec)
 loader.exec_module(supervisor)
 from qualify_mkii_fourbar import qualify
+from hexapod_core.fourbar_v1 import numerical_recipe
 
 
 CONTRACT = {"task_id": "Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0", "sha256": "fixture"}
 
 
 def validation_report(multiplier=1):
+    recipe = numerical_recipe(multiplier)
     return {"pass": True, "errors": [], "contract": CONTRACT, "task_id": CONTRACT["task_id"],
-            "solver_multiplier": multiplier, "solver_iterations": [32*multiplier, 4*multiplier],
+            "solver_multiplier": multiplier, "solver_iterations": [64*multiplier, 1],
+            "numerical_recipe": recipe,
+            "runtime_manifest": {"resolved_simulation": {key: value for key, value in recipe.items() if key != "recipe_id"}},
             "num_envs": 32, "steps_requested": 1000, "steps_completed": 1000,
             "driven_steps": 2400, "driven_coordinate_pass": True,
             "windows": {window: {"mean_height_m": .138, "max_applied_nm": 1.2}

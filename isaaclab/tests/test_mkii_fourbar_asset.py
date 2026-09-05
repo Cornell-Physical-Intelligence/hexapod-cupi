@@ -185,7 +185,10 @@ class FourbarUsdTests(unittest.TestCase):
         self.assertEqual(kin.sha256(relocated), before)
 
     def test_builder_accepts_platform_roundoff_and_preserves_supplied_identity(self):
-        derived = json.loads(json.dumps(kin.make_contract()))
+        # Inject exactly two platform differences relative to the supplied
+        # bytes. Host-regenerated math can already differ at other fields;
+        # its real platform comparison is covered separately above.
+        derived = json.loads(kin.CONTRACT.read_text())
         derived['joint_limits_rad']['lm_tibia_pitch'][1] += 4.440892098500626e-16
         derived['phase_bridge']['lm']['stance_full_pose_orientation_residual_rad'] -= 7.895150523206263e-12
         output = self.base/'platform_build'/'robot.usda'

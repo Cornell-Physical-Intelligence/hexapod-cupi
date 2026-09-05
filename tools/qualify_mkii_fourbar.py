@@ -6,16 +6,22 @@ import argparse
 import copy
 import math
 from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "packages/hexapod_core"))
+from hexapod_core.fourbar_v1 import validate_numerical_recipe_report
 from mkii_training_contract import identity, read_json, write_json, digest
 
 
 def qualify(nominal, refined, contract):
     errors = []
     for label, result, multiplier in (("nominal", nominal, 1), ("refined", refined, 2)):
+        try:
+            validate_numerical_recipe_report(result, multiplier)
+        except ValueError as error:
+            errors.append(f"{label}: {error}")
         if (result.get("pass") is not True or result.get("errors") != []
                 or result.get("contract") != contract or result.get("solver_multiplier") != multiplier
                 or result.get("task_id") != contract.get("task_id")
-                or result.get("solver_iterations") != [32*multiplier, 4*multiplier]
                 or result.get("num_envs", 0) < 32 or result.get("steps_completed", 0) < 1000
                 or result.get("steps_requested") != result.get("steps_completed")
                 or result.get("driven_steps") != 2400 or result.get("driven_coordinate_pass") is not True):
@@ -40,7 +46,8 @@ def qualify(nominal, refined, contract):
     result["mode"] = "physical_fourbar_simulation_admission"
     result["pass"] = result["simulation_training_admission"] = not errors
     result["errors"] = errors
-    result["convergence"] = {"pass": not errors, "method": "32/4 versus64/8 iterations at fixed5ms",
+    result["convergence"] = {"pass": not errors,
+                             "method": "TGS 64/1 versus 128/1 iterations at fixed 5 ms; external forces every iteration",
                              "comparisons": comparisons}
     result["admission_scope"] = (
         "Standing and +/-0.04 rad driven qualification only. Provisional flat-ground scratch PPO may explore "

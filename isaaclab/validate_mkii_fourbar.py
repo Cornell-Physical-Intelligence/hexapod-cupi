@@ -18,6 +18,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / p) for p in ("tools", "isaaclab", "packages/hexapod_core", "packages/hexapod_env")]
 from mkii_training_contract import TASK_ID, identity, write_json
+from hexapod_core.fourbar_v1 import numerical_recipe, validate_numerical_recipe_report
 
 
 def tensor(value):
@@ -34,6 +35,21 @@ def parser(add_launcher_args=None):
         add_launcher_args(p)
         p.set_defaults(visualizer=[])
     return p
+
+
+def apply_numerical_recipe(cfg, multiplier):
+    recipe = numerical_recipe(multiplier)
+    cfg.sim.physics.solver_type = recipe["solver_type"]
+    cfg.sim.physics.enable_external_forces_every_iteration = recipe["enable_external_forces_every_iteration"]
+    cfg.robot.spawn.articulation_props.solver_position_iteration_count = recipe["solver_position_iterations"]
+    cfg.robot.spawn.articulation_props.solver_velocity_iteration_count = recipe["solver_velocity_iterations"]
+    # Report actual configured values, including timing which this function
+    # does not modify; a changed time step must fail the same contract check.
+    return dict(recipe, physics_dt_s=cfg.sim.dt, decimation=cfg.decimation,
+        solver_type=cfg.sim.physics.solver_type,
+        enable_external_forces_every_iteration=cfg.sim.physics.enable_external_forces_every_iteration,
+        solver_position_iterations=cfg.robot.spawn.articulation_props.solver_position_iteration_count,
+        solver_velocity_iterations=cfg.robot.spawn.articulation_props.solver_velocity_iteration_count)
 
 
 class SubstepHook:
@@ -187,6 +203,10 @@ class PhysicalMetrics:
 
 def grade(report):
     errors = []
+    try:
+        validate_numerical_recipe_report(report, report.get("solver_multiplier"))
+    except ValueError as error:
+        errors.append(str(error))
     if not report.get("cpu_asset_pass") or not report.get("kit_asset_pass"):
         errors.append("Asset integrity did not pass in both USD runtimes")
     if report.get("body_count") != 31 or report.get("joint_count") != 30 or report.get("active_motor_count") != 18:
@@ -264,9 +284,9 @@ def main(argv=None):
         cfg.scene.num_envs, cfg.seed = args.num_envs, 0
         cfg.standing_only, cfg.reset_joint_jitter_rad = True, 0.
         cfg.episode_length_s = (args.steps + 2401)*.02 + 1.
-        cfg.robot.spawn.articulation_props.solver_position_iteration_count = 32 * args.solver_multiplier
-        cfg.robot.spawn.articulation_props.solver_velocity_iteration_count = 4 * args.solver_multiplier
-        report["solver_iterations"] = [32*args.solver_multiplier, 4*args.solver_multiplier]
+        report["numerical_recipe"] = apply_numerical_recipe(cfg, args.solver_multiplier)
+        report["solver_iterations"] = [cfg.robot.spawn.articulation_props.solver_position_iteration_count,
+                                        cfg.robot.spawn.articulation_props.solver_velocity_iteration_count]
         if "pxr" in sys.modules:
             raise ValueError("Configuration imported standalone USD before Kit; refusing native ABI collision")
         with launch_simulation(cfg, args):
@@ -288,6 +308,7 @@ def main(argv=None):
                     active_motor_count=len(raw.active_joint_names), joint_names=list(raw._robot.joint_names),
                     active_motor_names=list(raw.active_joint_names), body_names=list(raw._robot.body_names))
                 report["runtime_manifest"] = raw.runtime_manifest
+                validate_numerical_recipe_report(report, args.solver_multiplier)
                 expected = torch.tensor([kinematics["default_joint_positions_rad"][name]
                     for name in raw._robot.joint_names], device=raw.device)
                 report["reset_max_joint_error_rad"] = float((tensor(raw._robot.data.joint_pos)-expected).abs().max())

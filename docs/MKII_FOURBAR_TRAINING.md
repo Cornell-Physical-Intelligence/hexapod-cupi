@@ -53,7 +53,7 @@ claim a measured four-quadrant motor map. Battery voltage is still unknown;
 3. Run 32 environments for 1,000 standing control steps, then 2,400 driven steps:
    each motor independently at ±0.04 rad, followed by simultaneous group tests.
    This checks individual mapping and the physical mechanism under small loads.
-4. Repeat with 64/8 position/velocity solver iterations versus the nominal 32/4.
+4. Repeat with 128/1 position/velocity solver iterations versus the nominal 64/1.
    Compare standing and driven height/torque; both runs must pass independently.
 5. Combine those reports with `tools/qualify_mkii_fourbar.py`. The resulting
    admission is restricted to monitored exploratory simulation learning.
@@ -123,3 +123,7 @@ polygon coverage remain parallel software work, independent of survey payloads.
 `isaaclab/deploy/run-mkii-fourbar-campaign` runs the short probe, both nominal/refined standing and driven checks, qualification, 64-environment / 3-iteration scratch PPO, and then a separate 512-environment / 1,000-iteration resumed PPO process. The latter produces 12,288,000 additional transitions. Each phase stops the sequence on failure; the full run does not inherit the old mock policy. Its separate process must restore the exact scratch policy and optimizer state.
 
 The full supervisor's 7,200-second ceiling is a hard timeout, counted from host preparation, not a graceful checkpoint request. Periodic checkpoints are written every ten iterations. If observed throughput predicts exceeding the ceiling, request a cooperative pause before it by writing the owned run's `stop_requested` marker; preserve its verified checkpoint and report before explicitly resuming. A timeout or exit zero without the required report is not a passed run.
+
+## TGS recipe revision
+
+The original 32/4 and 64/8 recipes completed every driven step but failed the unchanged closure bounds (0.246159 mm and 0.366053 mm pin separation respectively). The new recipe explicitly selects TGS, applies external forces on every iteration, uses one velocity iteration, and compares 64 against 128 position iterations at the same 5 ms physics timestep. This revision requires new complete validation reports; old source-identity reports cannot admit it. The previous manifests, reports and source commits are preserved.
