@@ -27,6 +27,27 @@ def tensor(value):
     return value.torch if hasattr(value, "torch") else value
 
 
+def closure_relative_point_velocities(rotations, link_linear_velocities, link_angular_velocities, frames):
+    """World v_C1-v_C0, using velocities at link origins, never COM velocities."""
+    import torch
+    differences = []
+    for pair in frames:
+        velocities = []
+        for index, frame in pair:
+            offset = torch.einsum("nij,j->ni", rotations[:, index], frame[:3, 3])
+            velocities.append(link_linear_velocities[:, index] +
+                              torch.cross(link_angular_velocities[:, index], offset, dim=-1))
+        differences.append(velocities[1] - velocities[0])
+    return torch.stack(differences, dim=1)
+
+
+def passive_joint_velocity_residuals(joint_velocities, relations):
+    """Differentiate the physical affine relations; constant offsets disappear."""
+    import torch
+    return torch.stack([joint_velocities[:, passive] - multiplier*joint_velocities[:, source]
+                        for passive, source, multiplier in relations], dim=1)
+
+
 def parser(add_launcher_args=None):
     p = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     p.add_argument("--num_envs", type=int, default=32)
@@ -108,6 +129,22 @@ class PhysicalMetrics:
         self.window = "startup"
         self.body_names = list(raw._robot.body_names)
         self.body_indices = {n: i for i, n in enumerate(self.body_names)}
+        joint_names = list(raw._robot.joint_names)
+        if len(joint_names) != len(set(joint_names)) or set(joint_names) != set(kinematics["tree_joint_names"]):
+            raise ValueError("Velocity telemetry requires the actual 30 distinct physical joint names")
+        self.velocity_relations = [(joint_names.index(name), joint_names.index(relation["source_joint"]),
+                                    relation["multiplier"]) for name, relation in kinematics["passive_relations"].items()]
+        self.velocity_telemetry_description = {
+            "acceptance_use": "observational_only_no_velocity_thresholds",
+            "sampling": "after every scene.update physics substep",
+            "physics_dt_s": PHYSICS_DT_S,
+            "passive_relation_names": list(kinematics["passive_relations"]),
+            "closure_pin_names": list(kinematics["closure_joint_names"]),
+            "passive_relation_definition": "qdot_passive - multiplier*qdot_source; affine offsets have zero derivative",
+            "pin_velocity_definition": "v_C1-v_C0 in world frame, each v_C=v_link_origin+omega_world cross (R_world_from_link*r_link_to_C)",
+            "passive_rms_population": "all passive relations, environments and physics substeps in this window",
+            "pin_rms_population": "Euclidean velocity norms over all six pins, environments and physics substeps in this window",
+        }
         self.frames = []
         for name in kinematics["closure_joint_names"]:
             f = kinematics["joint_frames"][name]
@@ -140,6 +177,9 @@ class PhysicalMetrics:
         data = raw._robot.data
         pos, quat = tensor(data.body_link_pos_w), tensor(data.body_link_quat_w)
         rot = matrix_from_quat(quat)
+        lin, ang = tensor(data.body_link_lin_vel_w), tensor(data.body_link_ang_vel_w)
+        pin_velocity = closure_relative_point_velocities(rot, lin, ang, self.frames)
+        passive_velocity = passive_joint_velocity_residuals(tensor(data.joint_vel), self.velocity_relations)
         point_error, axis_error = [], []
         for pair in self.frames:
             states = [(pos[:, i] + torch.einsum("nij,j->ni", rot[:, i], f[:3, 3]),
@@ -166,12 +206,14 @@ class PhysicalMetrics:
         headroom = raw.motor_telemetry("burst_headroom")
         invalid = raw.motor_telemetry("invalid_input")
         finite = torch.stack([torch.isfinite(t).all() for t in (pos, quat, forces, height, torque,
-            demand, limit, headroom, continuous, tensor(data.joint_pos), tensor(data.joint_vel))]).all()
+            demand, limit, headroom, continuous, tensor(data.joint_pos), tensor(data.joint_vel), lin, ang)]).all()
         row = torch.stack([height.min(), height.sum(), torque.max(), demand.max(),
             torch.stack(point_error).max(), torch.stack(axis_error).max(), bottom[:, ~self.feet].min(),
             (forces[:, ~foot_mask] > 1.).any(-1).sum(), (forces[:, foot_mask] > 1.).sum(-1).min(),
             (torque-limit).max(), (torque-continuous).clamp(min=0).max(), headroom.min(),
-            (~finite).to(height.dtype) + invalid.any(), raw.closure_coordinate_error().abs().max()])
+            (~finite).to(height.dtype) + invalid.any(), raw.closure_coordinate_error().abs().max(),
+            passive_velocity.abs().max(), passive_velocity.square().sum(dtype=torch.float64),
+            torch.linalg.vector_norm(pin_velocity, dim=-1).max(), pin_velocity.square().sum(dtype=torch.float64)])
         self.pending.append(row)
 
     def drain(self):
@@ -184,11 +226,15 @@ class PhysicalMetrics:
             "max_applied_nm": 0., "max_demand_nm": 0., "max_closure_point_m": 0., "max_closure_axis_chord": 0.,
             "min_nonfoot_clearance_m": 99., "nonfoot_contact_env_substeps": 0, "min_support": 6,
             "max_envelope_excess_nm": 0., "max_continuous_excess_nm": 0., "min_burst_headroom": 1.,
-            "invalid_samples": 0, "max_passive_relation_error_rad": 0.})
+            "invalid_samples": 0, "max_passive_relation_error_rad": 0.,
+            "max_passive_velocity_relation_error_rad_s": 0., "passive_velocity_relation_squared_sum": 0.,
+            "max_closure_relative_point_velocity_m_s": 0., "closure_relative_point_velocity_squared_norm_sum": 0.})
         names = ("min_height_m", "height_sum", "max_applied_nm", "max_demand_nm", "max_closure_point_m",
                  "max_closure_axis_chord", "min_nonfoot_clearance_m", "nonfoot_contact_env_substeps", "min_support",
                  "max_envelope_excess_nm", "max_continuous_excess_nm", "min_burst_headroom", "invalid_samples",
-                 "max_passive_relation_error_rad")
+                 "max_passive_relation_error_rad", "max_passive_velocity_relation_error_rad_s",
+                 "passive_velocity_relation_squared_sum", "max_closure_relative_point_velocity_m_s",
+                 "closure_relative_point_velocity_squared_norm_sum")
         for row in rows:
             w["substeps"] += 1
             for name, value in zip(names, row):
@@ -201,6 +247,12 @@ class PhysicalMetrics:
                 else:
                     w[name] += value
         w["mean_height_m"] = w["height_sum"]/(w["substeps"] * self.raw.num_envs)
+        w["passive_velocity_relation_samples"] = w["substeps"] * self.raw.num_envs * len(self.velocity_relations)
+        w["closure_relative_point_velocity_samples"] = w["substeps"] * self.raw.num_envs * len(self.frames)
+        w["rms_passive_velocity_relation_error_rad_s"] = math.sqrt(
+            w["passive_velocity_relation_squared_sum"]/w["passive_velocity_relation_samples"])
+        w["rms_closure_relative_point_velocity_m_s"] = math.sqrt(
+            w["closure_relative_point_velocity_squared_norm_sum"]/w["closure_relative_point_velocity_samples"])
 
 
 def grade(report):
@@ -330,6 +382,7 @@ def main(argv=None):
                 if set(raw._robot.joint_names) != set(kinematics["tree_joint_names"]):
                     raise ValueError("Unexpected articulation joint names")
                 metrics = PhysicalMetrics(raw, kinematics)
+                report["velocity_constraint_telemetry"] = metrics.velocity_telemetry_description
                 actions = torch.zeros((args.num_envs, 18), device=raw.device)
                 with SubstepHook(raw, metrics.capture) as hook:
                     def step():

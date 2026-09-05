@@ -57,7 +57,7 @@ class FakeRobot:
         data = types.SimpleNamespace(
             joint_pos=torch.tensor([[contract['default_joint_positions_rad'][n] for n in contract['tree_joint_names']]]*self.num_envs),
             joint_vel=torch.zeros(self.num_envs, 30))
-        self._robot = types.SimpleNamespace(body_names=self.names, data=data)
+        self._robot = types.SimpleNamespace(body_names=self.names, joint_names=list(contract['tree_joint_names']), data=data)
         self.sync()
         self._body_contact_sensors = {}
         for name in self.names:
@@ -74,6 +74,9 @@ class FakeRobot:
         # Deliberately different COM fields: metrics must use the link frame.
         data.body_com_pos_w = data.body_link_pos_w+10.
         data.body_com_quat_w = torch.tensor([1., 0., 0., 0.]).expand_as(data.body_link_quat_w)
+        data.body_link_lin_vel_w = torch.zeros_like(data.body_link_pos_w)
+        data.body_link_ang_vel_w = torch.zeros_like(data.body_link_pos_w)
+        data.body_com_lin_vel_w = torch.full_like(data.body_link_pos_w, 99.)
 
     def motor_state(self, name):
         return torch.full((self.num_envs, 18), .8 if name == 'applied_torque' else .9)

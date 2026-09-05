@@ -29,8 +29,8 @@ class NumericalRecipeTests(unittest.TestCase):
         nominal, refined = contract.numerical_recipe(), contract.numerical_recipe(2)
         self.assertEqual(nominal['solver_position_iterations'], 64)
         self.assertEqual(refined['solver_position_iterations'], 128)
-        self.assertEqual(nominal['solver_velocity_iterations'], 4)
-        self.assertEqual(refined['solver_velocity_iterations'], 4)
+        self.assertEqual(nominal['solver_velocity_iterations'], 16)
+        self.assertEqual(refined['solver_velocity_iterations'], 16)
         self.assertEqual(nominal['solver_type'], 1)
         self.assertIs(nominal['enable_external_forces_every_iteration'], True)
         self.assertEqual(nominal['physics_dt_s'], .00125)
@@ -48,7 +48,7 @@ class NumericalRecipeTests(unittest.TestCase):
                 solver_position_iteration_count=32, solver_velocity_iteration_count=1))))
         for multiplier in (1, 2):
             self.assertEqual(validator.apply_numerical_recipe(cfg, multiplier), contract.numerical_recipe(multiplier))
-            self.assertEqual(cfg.robot.spawn.articulation_props.solver_velocity_iteration_count, 4)
+            self.assertEqual(cfg.robot.spawn.articulation_props.solver_velocity_iteration_count, 16)
         cfg.sim.dt = .01
         observed = validator.apply_numerical_recipe(cfg, 1)
         self.assertEqual(observed['physics_dt_s'], .01)
@@ -76,7 +76,7 @@ class NumericalRecipeTests(unittest.TestCase):
 
     def test_final_velocity_recipe_rejects_coherent_old_one_pass_evidence(self):
         self.assertEqual(contract.NUMERICAL_RECIPE_ID,
-                         'mkii_fourbar_tgs_external_forces_800hz_final_velocity4_v4')
+                         'mkii_fourbar_tgs_external_forces_800hz_final_velocity16_v5')
         for multiplier in (1, 2):
             old = report(multiplier)
             old['numerical_recipe'].update(
@@ -85,6 +85,13 @@ class NumericalRecipeTests(unittest.TestCase):
             old['solver_iterations'][1] = 1
             with self.assertRaisesRegex(ValueError, 'selected TGS contract'):
                 contract.validate_numerical_recipe_report(old, multiplier)
+            previous_four = report(multiplier)
+            previous_four['numerical_recipe'].update(
+                recipe_id='mkii_fourbar_tgs_external_forces_800hz_final_velocity4_v4', solver_velocity_iterations=4)
+            previous_four['runtime_manifest']['resolved_simulation']['solver_velocity_iterations'] = 4
+            previous_four['solver_iterations'][1] = 4
+            with self.assertRaisesRegex(ValueError, 'selected TGS contract'):
+                contract.validate_numerical_recipe_report(previous_four, multiplier)
             # A fresh recipe label cannot conceal the prior actual backend setting.
             stale_backend = report(multiplier)
             stale_backend['runtime_manifest']['resolved_simulation']['solver_velocity_iterations'] = 1
@@ -158,7 +165,7 @@ class NumericalRecipeTests(unittest.TestCase):
         self.assertEqual(backend['solver_type'], 1)
         self.assertIs(backend['enable_external_forces_every_iteration'], True)
         self.assertEqual(articulation['solver_position_iteration_count'], 64)
-        self.assertEqual(articulation['solver_velocity_iteration_count'], 4)
+        self.assertEqual(articulation['solver_velocity_iteration_count'], 16)
         self.assertFalse(articulation['enabled_self_collisions'])
 
     def test_qualifier_requires_matching_actual_external_force_flag(self):

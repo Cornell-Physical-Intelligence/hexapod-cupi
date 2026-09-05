@@ -112,7 +112,26 @@ reports; old 128/1 evidence cannot qualify it. The earlier collision-isolation
 manifest remains byte-identical. This is an unproven numerical candidate until
 new diagnostics and the full admission campaign pass.
 
-`isaaclab/deploy/mkii_fourbar_v1_final_velocity4_pipeline.sha256` covers **all 112 historical
+The four-final-velocity candidate remains frozen at `83a9bca`. Its short standing
+trace reduced peak C-pin velocity mismatch from about 0.363 to 0.020 m/s, passive
+velocity residual from 4.425 to 1.105 rad/s, and torque from 0.968 to 0.735 N m.
+Some previously quiet locations worsened, so neither convergence nor full
+qualification is established. The next controlled candidate uses sixteen final
+velocity iterations, with ID
+`mkii_fourbar_tgs_external_forces_800hz_final_velocity16_v5`. Position iterations,
+controller, assets, timing and existing acceptance bounds remain unchanged.
+It must reproduce the same eight world positions before a longer campaign.
+
+This release also adds observational velocity-constraint measurements at every
+physical substep: peak and RMS passive-coordinate velocity residual and C-pin
+relative velocity, including angular lever-arm motion and explicit sample
+populations. Full validation, diagnostics and the training physical guard retain
+these values. No new velocity acceptance threshold is silently introduced.
+Earlier one/four-velocity evidence cannot admit this new source. The published
+four-velocity manifest remains unchanged; an unpublished telemetry-only draft
+was superseded before release.
+
+`isaaclab/deploy/mkii_fourbar_v1_final_velocity16_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

@@ -13,7 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / p) for p in ("tools", "isaaclab", "packages/hexapod_core", "packages/hexapod_env")]
 from mkii_training_contract import TASK_ID, digest, identity, write_json
 from hexapod_core.fourbar_v1 import ACTIVE_JOINT_NAMES, PHYSICS_DT_S, DECIMATION
-from validate_mkii_fourbar import PhysicalMetrics, SubstepHook, apply_numerical_recipe, grade, tensor
+from validate_mkii_fourbar import (PhysicalMetrics, SubstepHook, apply_numerical_recipe,
+                                  closure_relative_point_velocities, grade, tensor)
 
 
 TRACE_COORDINATE_CONVENTIONS = {
@@ -172,18 +173,19 @@ class Trace:
         pos, quat = tensor(data.body_link_pos_w), tensor(data.body_link_quat_w)
         rot = matrix_from_quat(quat)
         lin, ang = tensor(data.body_link_lin_vel_w), tensor(data.body_link_ang_vel_w)
+        relative_point_velocities = closure_relative_point_velocities(rot, lin, ang, self.metrics.frames)
         gaps, axes, velocities = [], [], []
-        for pair in self.metrics.frames:
+        for pair_index, pair in enumerate(self.metrics.frames):
             states = []
             for i, f in pair:
                 offset = torch.einsum("nij,j->ni", rot[:, i], f[:3, 3])
                 basis = rot[:, i] @ f[:3, :3]
-                states.append((pos[:, i]+offset, basis, lin[:, i]+torch.cross(ang[:, i], offset, dim=-1)))
+                states.append((pos[:, i]+offset, basis))
             a, b = states
             inverse = a[1].transpose(-1, -2)
             gaps.append(torch.einsum("nij,nj->ni", inverse, b[0]-a[0]))
             axes.append(torch.einsum("nij,nj->ni", inverse, b[1][:, :, 2]-a[1][:, :, 2]))
-            velocities.append(torch.einsum("nij,nj->ni", inverse, b[2]-a[2]))
+            velocities.append(torch.einsum("nij,nj->ni", inverse, relative_point_velocities[:, pair_index]))
         fields = [(key, value, raw._robot.joint_names if key in ("pre_q", "pre_qd", "direct_pre_q", "direct_pre_qd") else raw.active_joint_names)
                   for key, value in self.before.items()]
         fields += [("post_q", tensor(data.joint_pos), raw._robot.joint_names),
@@ -330,6 +332,7 @@ def main(argv=None):
                 report["motor_readback"] = {key: tensor(getattr(raw._motor_model, key)).clone().cpu().tolist()
                     for key in ("armature", "stiffness", "damping")}
                 metrics = PhysicalMetrics(raw, kinematics)
+                report["velocity_constraint_telemetry"] = metrics.velocity_telemetry_description
                 trace = Trace(raw, metrics, early.report.parent)
                 actions = torch.zeros(raw.num_envs, 18, device=raw.device)
                 segments = [{"phase": "standing", "motors": [], "offset_rad": 0., "steps": args.steps}]
