@@ -91,3 +91,9 @@ Complete D6 group diagnostic `072121Z-16d523c4` failed (0.505577 mm closure; raw
 Campaign 005 completed the full32 ×1000 standing +2400 driven sequence with v5 native bilateral mimic constraints. It failed closure (0.108253 mm), support (minimum0) and simultaneous LM knee direction (−0.00476402 rad); all18 individual direction tests passed. No resets/non-foot contacts; applied peak5.5 N·m, raw16.6328 N·m. Primary evidence is `artifacts/mkii_fourbar_2026-09-05/campaign_005_physical_mimic/`. No PPO started. Sourcecfe0cf5 remains frozen on Spark; test-onlyffa44f6 passed CI and has the same functional identity.
 
 Bounded diagnostic174632Z-36232e95 now compares v5 at128/1, eight environments,200 standing +700 group-motion steps, with full per-substep traces. Priority reservation1465763 (directory `.../mkii_fourbar_diagnostics_v1/priority_20260905T1616/`) is still active, maximum expiry2026-09-06T02:16:34Z. Do not modify the source or shared note during its owned run.
+
+## 2026-09-05 18:20 UTC — scheduled active targets
+
+Short v5/128 group trace completed with21.017µmmaximumclosure, all18directionspositive, four1.25mssupportgaps atsecondnegativekneestep. Compact primary/trace evidence is `artifacts/mkii_fourbar_2026-09-05/dynamics_trace_analysis/v5_groups128_20260905T174632Z/`.
+
+Source9cd8d4c introduces sixteen-step linear interpolation of the existing50Hz active motor endpoints at800Hz, zero velocityfeedforward, unchangedgains/physics/assets/gates.854tests pass;286filemanifest97ee8246a7849cb805ad65f40a3144a2f47a4746e4d74deaa9b862c3750729a6. Frozen source `/home/orionh/HEXAPOD_runs/mkii_ramped_targets_v1/source`, identityc53071afdf320f6a9d6f91de09ddc6102de74df6f45a203e3a8166a8686548ca. Bounded8envgroupdiag181945Z-ec78eb1e at64/1 isrunning; noPPO. Successfulshortdiagnostics stillrequire full32envnominal/refined qualification.
