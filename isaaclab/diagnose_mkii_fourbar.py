@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 import subprocess
 import sys
@@ -24,6 +25,54 @@ TRACE_COORDINATE_CONVENTIONS = {
     "terrain_support_plane": "world Z equals terrain_origin_w/z for this flat-ground diagnostic",
     "foot_force_w": "per-foot net contact force in world coordinates, newtons",
 }
+PLACEMENT_TOLERANCE_M = 1e-5  # Float32 placement readback, not a physical-gate tolerance.
+
+
+def bounded_xy_coordinate(value):
+    value = float(value)
+    if not math.isfinite(value) or not -20. <= value <= 20.:
+        raise argparse.ArgumentTypeError("Diagnostic XY coordinates must be finite and within [-20,20] metres")
+    return value
+
+
+def translate_reset_origins(raw, xy_offset):
+    """Translate the actual terrain origins consumed by the task's reset code."""
+    import torch
+    if len(xy_offset) != 2:
+        raise ValueError("Diagnostic placement requires exactly two XY coordinates")
+    offset = [bounded_xy_coordinate(value) for value in xy_offset]
+    origins = tensor(raw._terrain.env_origins)
+    defaults = tensor(raw._robot.data.default_root_pose)[:, :3]
+    if (tuple(origins.shape) != (raw.num_envs, 3) or defaults.shape != origins.shape
+            or not bool(torch.isfinite(origins).all() & torch.isfinite(defaults).all())):
+        raise ValueError("Diagnostic origins/default reset positions have an invalid layout or nonfinite values")
+    original = origins.clone()
+    expected = original.clone()
+    expected[:, :2] += origins.new_tensor(offset)
+    origins.copy_(expected)
+    actual = tensor(raw._terrain.env_origins).clone()
+    if not torch.equal(actual, expected) or not torch.equal(actual[:, 2], original[:, 2]):
+        raise ValueError("Actual reset origins did not retain the requested pure XY translation")
+    return {"requested_xy_offset_m": offset, "position_tolerance_m": PLACEMENT_TOLERANCE_M,
+            "original_terrain_origins_m": original.cpu().tolist(),
+            "actual_terrain_origins_m": actual.cpu().tolist(),
+            "default_root_positions_m": defaults.clone().cpu().tolist(),
+            "translation_verified": True, "reset_pose_verified": False}
+
+
+def verify_reset_placement(raw, placement):
+    """Read back actor root XYZ after reset; reject a scene-only origin change."""
+    import torch
+    origins = tensor(raw._terrain.env_origins)
+    roots = tensor(raw._robot.data.root_pos_w)
+    actual = origins.new_tensor(placement["actual_terrain_origins_m"])
+    defaults = origins.new_tensor(placement["default_root_positions_m"])
+    if (roots.shape != origins.shape or not torch.equal(origins, actual)
+            or not bool(torch.isfinite(roots).all())
+            or not torch.allclose(roots, defaults + actual, rtol=0, atol=PLACEMENT_TOLERANCE_M)):
+        raise ValueError("Initial reset root positions differ from the translated terrain origins")
+    placement["initial_reset_root_positions_m"] = roots.clone().cpu().tolist()
+    placement["reset_pose_verified"] = True
 
 
 def body_pose_trace_fields(body_names, pos, quat, terrain_origin):
@@ -40,6 +89,8 @@ def body_pose_trace_fields(body_names, pos, quat, terrain_origin):
 
 
 def motions(kind):
+    if kind == "standing":
+        return []
     if kind == "individuals":
         groups, duration = [[name] for name in ACTIVE_JOINT_NAMES], 50
     elif kind == "groups":
@@ -59,7 +110,8 @@ def parser(add_launcher_args=None):
     p.add_argument("--num_envs", type=int, default=1)
     p.add_argument("--steps", type=int, default=200)
     p.add_argument("--solver-multiplier", type=int, choices=(1, 2), default=1)
-    p.add_argument("--diagnostic-motion", choices=("individuals", "groups", "lf_tibia"), default="individuals")
+    p.add_argument("--diagnostic-motion", choices=("individuals", "groups", "lf_tibia", "standing"), default="individuals")
+    p.add_argument("--diagnostic-xy-offset", nargs=2, type=bounded_xy_coordinate, default=(0., 0.), metavar=("X", "Y"))
     p.add_argument("--diagnostic-usd", choices=("revolute_v3", "planar_d6_v4", "physical_mimic_v5"), default="revolute_v3")
     p.add_argument("--report", type=Path, required=True)
     if add_launcher_args:
@@ -71,6 +123,7 @@ def parser(add_launcher_args=None):
 def persist_then_close(report, path, env):
     """Kit teardown can exit the process; durable evidence must precede it."""
     report["pass"] = False
+    report["simulation_training_admission"] = report["hardware_admission"] = False
     write_json(path, report)
     print("FOURBAR_DIAGNOSTIC_RESULT " + json.dumps({key: report.get(key) for key in
         ("diagnostic_complete", "pass", "errors", "physical_gate_errors", "trace_samples")}), flush=True)
@@ -194,6 +247,7 @@ def main(argv=None):
         "pass": False, "simulation_training_admission": False, "hardware_admission": False,
         "diagnostic_complete": False, "diagnostic_motion": early.diagnostic_motion,
         "diagnostic_usd": early.diagnostic_usd,
+        "diagnostic_xy_offset_m": list(early.diagnostic_xy_offset),
         "num_envs": early.num_envs, "steps_requested": early.steps, "steps_completed": 0,
         "driven_steps": 0, "driven_steps_completed": 0,
         "driven_steps_requested": sum(row["steps"] for row in motions(early.diagnostic_motion)),
@@ -251,7 +305,9 @@ def main(argv=None):
                     raise ValueError("Diagnostic Kit asset audit failed")
                 env = gym.make(TASK_ID, cfg=cfg)
                 raw = env.unwrapped
+                report["placement"] = translate_reset_origins(raw, args.diagnostic_xy_offset)
                 env.reset(seed=0)
+                verify_reset_placement(raw, report["placement"])
                 raw.episode_length_buf.zero_()
                 report.update(body_count=raw._robot.num_bodies, joint_count=raw._robot.num_joints,
                     active_motor_count=len(raw.active_joint_names), joint_names=list(raw._robot.joint_names),

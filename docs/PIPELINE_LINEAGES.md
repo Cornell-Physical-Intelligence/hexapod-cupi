@@ -73,7 +73,16 @@ the motor/runtime manifest. This uncalibrated software-gain experiment needs
 fresh physical admission; no preceding admission or checkpoint can be reused.
 Both earlier manifests remain byte-identical.
 
-`isaaclab/deploy/mkii_fourbar_v1_pd030_pipeline.sha256` covers **all 112 historical
+The Kd 0.30 release is frozen at `a3081dd`. Both short standing checks passed
+their individual physical gates, but their matched torque comparison failed.
+The next release adds diagnostic-only world-XY translation and standing-only
+traces. It leaves the task, gains, robot, solver recipe and all physical gates
+unchanged. Diagnostics must report the requested and actual terrain origins
+and reset root positions, with complete physics coverage and both admission
+flags false. No validation/training option can request this translation.
+The earlier Kd 0.30 manifest remains byte-identical.
+
+`isaaclab/deploy/mkii_fourbar_v1_placement_diagnostics_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

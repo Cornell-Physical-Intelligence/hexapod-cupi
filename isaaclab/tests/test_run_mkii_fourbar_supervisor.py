@@ -53,6 +53,11 @@ def diagnostic_report(motion="individuals", multiplier=1):
                    "driven_steps_completed": driven_steps, "driven_steps": driven_steps,
                    "physics_substeps": (1000 + driven_steps) * result["numerical_recipe"]["decimation"]})
     result.update(trace_samples=result["physics_substeps"], force_writes=result["physics_substeps"])
+    result.update(diagnostic_xy_offset_m=[0., 0.], placement={
+        "requested_xy_offset_m": [0., 0.], "position_tolerance_m": 1e-5,
+        "translation_verified": True, "reset_pose_verified": True,
+        "original_terrain_origins_m": [[0., 0., 0.]], "actual_terrain_origins_m": [[0., 0., 0.]],
+        "default_root_positions_m": [[0., 0., .14297]], "initial_reset_root_positions_m": [[0., 0., .14297]]})
     return result
 
 

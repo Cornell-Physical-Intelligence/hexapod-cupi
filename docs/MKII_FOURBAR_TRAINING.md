@@ -159,6 +159,15 @@ every physics substep, with matching force-write/sample counts and archived NPZ
 hashes. A completed diagnostic reports `diagnostic_complete`, `pass=false` and
 both admission flags false, even if its measured physical bounds pass.
 
+To isolate placement sensitivity, `diagnose --diagnostic-motion standing`
+records only the requested standing steps, with zero driven steps. The optional
+diagnostic-only `--diagnostic-xy-offset X Y` translates the actual terrain
+origins used by reset (each component must be finite and within ±20 m).
+Original/actual origins and actual reset root positions are recorded and
+independently checked by the host. Z and the physical model remain unchanged.
+Use matching step counts, seeds and all other options for a translation
+comparison; it cannot grant admission or alter a validation/training launch.
+
 The host supervisor holds the existing GPU lock, waits at a CPU admission barrier,
 requires at least 16 GiB available host memory, rejects unrelated GPU workloads,
 and checks source identity before and after execution. Cleanup addresses only the

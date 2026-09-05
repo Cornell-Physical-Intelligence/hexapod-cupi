@@ -13,6 +13,7 @@ import csv
 import fcntl
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -44,7 +45,8 @@ from hexapod_core.fourbar_v1 import ASSET_BUNDLES, validate_asset_bundle, valida
 TELEMETRY_ARGUMENT = '--kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry"'
 PRODUCERS = re.compile(r'nsva_dl[.]sh|validate_nsva[.]py|score_clip[.]py|validate_b51[.]py|nowcast_run[.]py|train_model_only_resume[.]py|evaluate_checkpoint[.]py|torch[^\n]*compile')
 SERVICES = ('hexapod-rl-training.service', 'hexapod-rl-training-stage2b-lateral.service', 'hexapod-rl-training-stage2c-stable-forward.service')
-DIAGNOSTIC_MOTION_STEPS = {'individuals': 18 * 2 * 50 + 100, 'groups': 3 * 2 * 100 + 100, 'lf_tibia': 2 * 100 + 100}
+DIAGNOSTIC_MOTION_STEPS = {'individuals': 18 * 2 * 50 + 100, 'groups': 3 * 2 * 100 + 100, 'lf_tibia': 2 * 100 + 100, 'standing': 0}
+DIAGNOSTIC_PLACEMENT_TOLERANCE_M = 1e-5
 DIAGNOSTIC_USD_PATHS = {
     'revolute_v3': 'robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v3/hexapod_mkii_fourbar_v3.usda',
     'planar_d6_v4': 'robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v4/hexapod_mkii_fourbar_v4.usda',
@@ -408,6 +410,47 @@ def validate_diagnostic_traces(directory, result, *, num_envs, samples):
         raise Blocked('Diagnostic trace files do not cover all physics samples')
 
 
+def bounded_xy_coordinate(value):
+    value = float(value)
+    if not math.isfinite(value) or not -20. <= value <= 20.:
+        raise argparse.ArgumentTypeError('Diagnostic XY coordinates must be finite and within [-20,20] metres')
+    return value
+
+
+def validate_diagnostic_placement(result, *, xy_offset, num_envs):
+    """Independently check the requested translation and reset readback using stdlib."""
+    expected_offset = list(xy_offset)
+    placement = result.get('placement')
+    offsets = [result.get('diagnostic_xy_offset_m')]
+    if isinstance(placement, dict):
+        offsets.append(placement.get('requested_xy_offset_m'))
+    if any(not isinstance(values, list) or len(values) != 2
+           or any(type(value) not in (int, float) or not math.isfinite(value) or abs(value) > 20.
+                  for value in values) for values in offsets):
+        raise Blocked('Diagnostic XY offset must contain two finite bounded numeric coordinates')
+    if (not isinstance(placement, dict) or placement.get('translation_verified') is not True
+            or placement.get('reset_pose_verified') is not True
+            or placement.get('position_tolerance_m') != DIAGNOSTIC_PLACEMENT_TOLERANCE_M
+            or placement.get('requested_xy_offset_m') != expected_offset
+            or result.get('diagnostic_xy_offset_m') != expected_offset):
+        raise Blocked('Diagnostic placement is missing, unverified or differs from requested XY offset')
+    fields = ('original_terrain_origins_m', 'actual_terrain_origins_m',
+              'default_root_positions_m', 'initial_reset_root_positions_m')
+    for name in fields:
+        rows = placement.get(name)
+        if (not isinstance(rows, list) or len(rows) != num_envs
+                or any(not isinstance(row, list) or len(row) != 3
+                    or any(type(value) not in (int, float) or not math.isfinite(value) for value in row) for row in rows)):
+            raise Blocked(f'Diagnostic placement has invalid coordinates: {name}')
+    for original, actual, default, root in zip(*(placement[name] for name in fields)):
+        if actual[2] != original[2]:
+            raise Blocked('Diagnostic translation changed terrain Z')
+        expected = [original[0]+expected_offset[0], original[1]+expected_offset[1], original[2]]
+        if (any(abs(a-b) > DIAGNOSTIC_PLACEMENT_TOLERANCE_M for a, b in zip(actual, expected))
+                or any(abs(root[i]-(default[i]+actual[i])) > DIAGNOSTIC_PLACEMENT_TOLERANCE_M for i in range(3))):
+            raise Blocked('Diagnostic actual origins or reset root positions differ from requested placement')
+
+
 def require_requested_asset(result, asset_model, contract):
     """Bind the explicit host selection to executed runtime bundle bytes."""
     runtime = result.get('runtime_manifest')
@@ -474,6 +517,7 @@ def validate_written_report(path, *, args, contract):
                 raise Blocked(f'Diagnostic did not capture every requested physics substep: {field}')
         if type(result.get('driven_steps')) is not int or result['driven_steps'] != expected['driven_steps_completed']:
             raise Blocked('Diagnostic driven-step counters disagree')
+        validate_diagnostic_placement(result, xy_offset=getattr(args, 'diagnostic_xy_offset', (0., 0.)), num_envs=args.num_envs)
         validate_diagnostic_traces(path.parent, result, num_envs=args.num_envs, samples=expected_substeps)
         return {key: result[key] for key in ('pass', 'mode', 'diagnostic_complete',
                 'simulation_training_admission', 'hardware_admission', 'physics_substeps')}
@@ -534,6 +578,7 @@ def compose_argv(source, output, name, owner, args):
         extra += ['--steps', str(args.steps), '--solver-multiplier', str(args.solver_multiplier)]
         if args.mode == 'diagnose':
             extra += ['--diagnostic-motion', args.diagnostic_motion, '--diagnostic-usd', args.diagnostic_usd]
+            extra += ['--diagnostic-xy-offset', *[str(value) for value in getattr(args, 'diagnostic_xy_offset', (0., 0.))]]
     script = {'train': 'train_mkii_fourbar.py', 'validate': 'validate_mkii_fourbar.py',
               'diagnose': 'diagnose_mkii_fourbar.py'}[args.mode]
     usd_relative = (DIAGNOSTIC_USD_PATHS[args.diagnostic_usd] if args.mode == 'diagnose'
@@ -560,6 +605,7 @@ def main(argv=None):
     parser.add_argument('--solver-multiplier', type=int, choices=(1, 2), default=1)
     parser.add_argument('--diagnostic-motion', choices=tuple(DIAGNOSTIC_MOTION_STEPS), default='individuals')
     parser.add_argument('--diagnostic-usd', choices=tuple(DIAGNOSTIC_USD_PATHS))
+    parser.add_argument('--diagnostic-xy-offset', nargs=2, type=bounded_xy_coordinate, metavar=('X', 'Y'))
     parser.add_argument('--asset-model', choices=tuple(ASSET_BUNDLES), help='Validation/training model; default mkii_fourbar_v3')
     parser.add_argument('--source-dir', type=Path, required=True)
     parser.add_argument('--source-commit', default='uncommitted', help='Source baseline commit; SHA256SUMS records the exact running files')
@@ -569,6 +615,10 @@ def main(argv=None):
     parser.add_argument('--timeout-seconds', type=int, default=900)
     parser.add_argument('--dry-run', action='store_true')
     args = parser.parse_args(argv)
+    if args.diagnostic_xy_offset is not None and args.mode != 'diagnose':
+        parser.error('--diagnostic-xy-offset is only accepted for diagnose')
+    if args.diagnostic_xy_offset is None:
+        args.diagnostic_xy_offset = (0., 0.)
     if args.mode == 'diagnose' and args.asset_model is not None:
         parser.error('--asset-model is only accepted for validate/train; diagnosis uses --diagnostic-usd')
     if args.mode != 'diagnose' and args.asset_model is None:
@@ -641,6 +691,8 @@ def main(argv=None):
     report['asset_model'] = args.asset_model
     if args.mode == 'diagnose':
         report['diagnostic_usd'] = args.diagnostic_usd
+        report['diagnostic_motion'] = args.diagnostic_motion
+        report['diagnostic_xy_offset_m'] = list(args.diagnostic_xy_offset)
     container = None
     deadline = time.monotonic() + args.timeout_seconds
     exit_code = 1
