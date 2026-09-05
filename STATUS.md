@@ -1,6 +1,6 @@
 # Current status
 
-Last reviewed: 2026-09-05 19:29 UTC. **The first full nominal physical-model validation passed.** All 32 robots completed 1,000 standing + 2,400 driven control steps; all individual/group directions passed, minimum driven support was three feet, and maximum linkage gap was 0.081909 mm against 0.100 mm. No resets or non-foot ground contacts occurred; delivered torque remained inside the RS05 envelope. Campaign 006 has automatically advanced to the refined solver comparison. **No physical-model PPO has started yet:** both passes and their convergence comparison must succeed first. Frozen source is `9cd8d4c`. [Full nominal evidence](artifacts/mkii_fourbar_2026-09-05/campaign_006_ramped_targets/README.md) · [Prior full failure](artifacts/mkii_fourbar_2026-09-05/campaign_005_physical_mimic/README.md) · [Scheduling change](docs/MKII_MOTOR_TARGET_SCHEDULING.md).
+Last reviewed: 2026-09-05 19:48 UTC. **Campaign 006 passed full nominal validation but failed refinement; no physical-model PPO has started.** All 32 nominal robots completed 1,000 standing + 2,400 driven control steps, with all individual/group directions passing, at least three supporting feet, and maximum linkage gap 0.081909 mm against 0.100 mm. During refined standing, peak delivered torque reached 5.015796 N·m versus nominal 0.668155 N·m, making the unchanged convergence criterion impossible to recover. The supervisor was stopped at 19:38:31 UTC and removed its exact container. The incomplete refined run has no final validator report and grants no admission. Frozen source `9cd8d4c` is unchanged. A separate named Kp = 30 / Kd = 0.30 candidate, source `a3081dd`, has now launched a bounded 32-environment / 600-standing-step comparison at 128/1 with the same physics and gates; its live result is pending. [Refined stop evidence](artifacts/mkii_fourbar_2026-09-05/campaign_006_ramped_targets/README.refined_stop.md) · [Preserved full nominal pass](artifacts/mkii_fourbar_2026-09-05/campaign_006_ramped_targets/README.md) · [Scheduling change](docs/MKII_MOTOR_TARGET_SCHEDULING.md).
 
 [Mission](dar.md) · [Living plan](docs/PLAN.md) · [Prepared future runs](docs/NEXT_RUNS.md) · [Dated audit](artifacts/project_review_2026-09-04/URDF_VALIDATION.md) · [Leg test plan](artifacts/project_review_2026-09-04/LEG_TEST_STAND.md)
 
@@ -59,7 +59,7 @@ It misses the moving-command yaw gates and highest-command deck gate. It is neit
 
 ## Next work
 
-Diagnose the v5 simultaneous-knee failure and qualify a physically justified candidate, then repeat the gated sequence: **1-environment × 100-step startup probe → 32-environment × 1,000 standing plus 2,400 driven control-step validation at nominal and refined solver settings → 64 environments × 3 scratch PPO iterations → a separate process resuming that verified checkpoint for 512 environments × 1,000 iterations**. At 1.25 ms / 16 substeps, each full validation samples 16,000 standing and 38,400 driven physics substeps per environment. No stage may use a prior failed campaign or short probe as admission. The larger workload remains contingent on smoke-run memory/throughput and checkpoint checks. During initial PPO, closure failure invalidates the run; ordinary falls remain learning events. PPO has not started, and terrain/hardware gates remain open.
+Assess the explicitly named Kp = 30 / Kd = 0.30 controller candidate after campaign 006's failed solver refinement, keeping the physical model and acceptance bounds unchanged. Then repeat the gated sequence: **1-environment × 100-step startup probe → 32-environment × 1,000 standing plus 2,400 driven control-step validation at nominal and refined solver settings → 64 environments × 3 scratch PPO iterations → a separate process resuming that verified checkpoint for 512 environments × 1,000 iterations**. At 1.25 ms / 16 substeps, each full validation samples 16,000 standing and 38,400 driven physics substeps per environment. No stage may use a prior failed campaign, nominal pass alone or short probe as admission. The larger workload remains contingent on smoke-run memory/throughput and checkpoint checks. During initial PPO, closure failure invalidates the run; ordinary falls remain learning events. PPO has not started, and terrain/hardware gates remain open.
 
 Perception, navigation, runtime emulation and leg-test preparation proceed independently. Early policies are bootstrap candidates; measured dynamics or collider revisions require screening and sometimes retraining.
 
@@ -109,3 +109,39 @@ The campaign automatically proceeds to refined validation, qualification,
 PPO only after each prior phase passes. The physical bounds remain unchanged.
 An SSH timeout delayed the diagnostic-to-campaign handoff; a fresh connection
 restored access. The running campaign does not depend on the local connection.
+
+## 2026-09-05 19:38 UTC — campaign 006 stopped during refinement
+
+The first full nominal pass remains valid as its own evidence. The refined
+128/1 run `hexapod-fourbar-validate-20260905T192754Z-80fadcba` was stopped after
+the captured standing-700 log showed a 5.015796 N·m settled peak, compared with
+0.668155 N·m in the completed nominal run. This already exceeds the unchanged
+solver-convergence allowance; a cumulative peak cannot decrease. The final
+container log reached standing 800 during shutdown with the same peak, but no
+complete refined validator report was produced.
+
+The [terminal evidence](artifacts/mkii_fourbar_2026-09-05/campaign_006_ramped_targets/README.refined_stop.md)
+records supervisor SIGTERM at 19:38:31 UTC, supervisor exit 1, final container
+exit 137 and exact-ID cleanup. The campaign is failed and advanced to no later
+phase. A read-only check at 19:46 UTC confirmed that the container was absent
+and all 1,150 frozen-source files still matched their captured hashes. The
+original nominal/probe publication and its manifest remain byte-identical;
+the refined stop has a separate dated manifest. No PPO has started. A named
+Kp = 30 / Kd = 0.30 candidate is being prepared for the same physical gates.
+
+## 2026-09-05 19:48 UTC — named damping-profile standing comparison
+
+Source `a3081dd` is committed and pushed. The separate frozen mirror is
+`/home/orionh/HEXAPOD_runs/mkii_pd030_v1/source`, functional identity
+`6d81d3117af6d39d703b68ecbeb6a410806a0f6931d0f059863e4081769e25c7`.
+Supervisor PID 1578713 launched at 19:48:25 UTC for 32 environments × 600
+standing control steps, TGS 128/1, with Kp = 30 / Kd = 0.30. Output is
+`/home/orionh/HEXAPOD_runs/mkii_pd030_v1/standing_refined_20260905T194825Z`.
+This bounded comparison has no result yet and cannot admit PPO.
+
+All 287 remote source-manifest hashes verified; the manifest digest is
+`b8414d33d79da2dd73a60781ab09d3b2ea7746bd7f9484ea480368b06d3aa6f1`.
+The full suite passed 859 tests in 75.659 seconds. Three integration tests
+were added after that suite started; all eight focused profile tests passed
+afterward. Physical acceptance bounds and the original failed campaign evidence
+remain unchanged.
