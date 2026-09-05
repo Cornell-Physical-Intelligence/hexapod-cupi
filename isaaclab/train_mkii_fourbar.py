@@ -19,6 +19,7 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / p) for p in ("tools", "isaaclab", "packages/hexapod_core", "packages/hexapod_env")]
 from mkii_training_contract import TASK_ID, digest, identity, require_admission, require_checkpoint, write_json
+from hexapod_core.fourbar_v1 import PHYSICS_DT_S, DECIMATION
 
 
 class PauseRequested(Exception):
@@ -113,9 +114,9 @@ class PhysicalTrainingGuard:
 
     def __enter__(self):
         if (getattr(self.raw, "_physics_handles_decimation", None) is not False
-                or self.raw.cfg.sim.dt != .005 or self.raw.cfg.decimation != 4):
-            raise ValueError("Training physical guard requires explicit4x5ms updates")
-        if any(not 0 <= s.cfg.update_period <= .005 for s in self.raw._body_contact_sensors.values()):
+                or self.raw.cfg.sim.dt != PHYSICS_DT_S or self.raw.cfg.decimation != DECIMATION):
+            raise ValueError("Training physical guard requires the selected physics/control timing")
+        if any(not 0 <= s.cfg.update_period <= PHYSICS_DT_S for s in self.raw._body_contact_sensors.values()):
             raise ValueError("Training contact sensors cannot cover every physics substep")
         self.original = self.raw.scene.update
         self.had_override = "update" in vars(self.raw.scene)
@@ -123,20 +124,20 @@ class PhysicalTrainingGuard:
 
         def update(*args, **kwargs):
             dt = kwargs.get("dt", args[0] if args else None)
-            if dt != .005:
+            if dt != PHYSICS_DT_S:
                 raise ValueError("Unexpected scene update during training")
             counter = self.raw.common_step_counter
             if counter != self.policy_counter:
-                if self.policy_counter is not None and self.policy_samples != 4:
+                if self.policy_counter is not None and self.policy_samples != DECIMATION:
                     raise ValueError("Missing training physics substep")
                 self.policy_counter, self.policy_samples = counter, 0
-            if self.policy_samples >= 4:
+            if self.policy_samples >= DECIMATION:
                 raise ValueError("Extra training physics substep")
             result = self.original(*args, **kwargs)
             self.metrics.capture()
             self.total += 1
             self.policy_samples += 1
-            if self.policy_samples == 4:
+            if self.policy_samples == DECIMATION:
                 self.metrics.drain()
                 check_training_physics(self.metrics.windows)
             return result
@@ -146,8 +147,8 @@ class PhysicalTrainingGuard:
         return self
 
     def require_coverage(self, expected_control_steps):
-        if (self.total != expected_control_steps * 4 or self.metrics.pending
-                or (self.total and self.policy_samples != 4)):
+        if (self.total != expected_control_steps * DECIMATION or self.metrics.pending
+                or (self.total and self.policy_samples != DECIMATION)):
             raise ValueError("Incomplete training/inference physical sample coverage")
 
     def __exit__(self, *_):

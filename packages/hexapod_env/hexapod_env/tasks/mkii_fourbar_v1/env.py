@@ -46,7 +46,8 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
         if set(self._robot.actuators) != {"motors"}:
             raise ValueError("Unexpected actuator group; passive joints must not be driven")
         motor_cfg = verify_runtime_cfg(self._motor_model.cfg, self.active_joint_names)
-        if cfg.sim.dt != motor_cfg["physics_dt_s"] or cfg.decimation != contract.DECIMATION:
+        if (cfg.sim.dt != contract.PHYSICS_DT_S or cfg.sim.dt != motor_cfg["physics_dt_s"]
+                or cfg.decimation != contract.DECIMATION or self.step_dt != contract.POLICY_DT_S):
             raise ValueError("Physics/control timing differs from the motor/runtime contract")
         for name, sensor in self._body_contact_sensors.items():
             if list(sensor.body_names) != [name]:

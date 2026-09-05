@@ -100,10 +100,10 @@ class FourbarPhysicalMetricsTests(unittest.TestCase):
         sdk_math = types.ModuleType('isaaclab.utils.math')
         sdk_math.matrix_from_quat = matrix_from_quat
         with patch.dict(sys.modules, {'isaaclab.utils.math': sdk_math}):
-            for _ in range(4):
+            for _ in range(validator.DECIMATION):
                 metrics.capture()
         metrics.drain()
-        self.assertEqual(metrics.windows['settled']['substeps'], 4)
+        self.assertEqual(metrics.windows['settled']['substeps'], validator.DECIMATION)
         return metrics.windows['settled']
 
     def report(self, window):
@@ -114,7 +114,7 @@ class FourbarPhysicalMetricsTests(unittest.TestCase):
                 'joint_count': 30, 'active_motor_count': 18, 'steps_completed': 1,
                 'steps_requested': 1, 'terminated_count': 0, 'truncated_count': 0,
                 'reset_max_joint_error_rad': 0., 'anatomical_frame_pass': True,
-                'physics_substeps': 4, 'driven_steps': 0, 'windows': {'settled': window}}
+                'physics_substeps': validator.DECIMATION, 'driven_steps': 0, 'windows': {'settled': window}}
 
     def test_named_link_frames_and_translated_terrain_origins(self):
         raw = FakeRobot(self.contract)
@@ -174,7 +174,7 @@ class FourbarPhysicalMetricsTests(unittest.TestCase):
 
     def test_missing_driven_direction_result_cannot_admit_long_probe(self):
         report = self.report(self.capture(FakeRobot(self.contract)))
-        report.update(steps_requested=1000, steps_completed=1000, physics_substeps=4000)
+        report.update(steps_requested=1000, steps_completed=1000, physics_substeps=1000*validator.DECIMATION)
         self.assertTrue(any('Driven motor-coordinate' in x for x in validator.grade(report)))
         report['driven_coordinate_pass'] = False
         self.assertTrue(any('Driven motor-coordinate' in x for x in validator.grade(report)))

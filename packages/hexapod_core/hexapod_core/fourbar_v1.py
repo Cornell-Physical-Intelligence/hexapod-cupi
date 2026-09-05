@@ -22,10 +22,10 @@ TREE_JOINT_NAMES = ACTIVE_JOINT_NAMES + PASSIVE_JOINT_NAMES
 BODY_NAMES = ("body",) + tuple(f"{leg}_{part}" for leg in LEGS for part in (
     "coxa", "femur", "tibia", "tibia_push_lever", "tibia_pushrod"))
 COMMAND_FRAME = "anatomical_navigation"
-PHYSICS_DT_S = .005
-DECIMATION = 4
+PHYSICS_DT_S = .00125
+DECIMATION = 16
 POLICY_DT_S = PHYSICS_DT_S * DECIMATION
-NUMERICAL_RECIPE_ID = "mkii_fourbar_tgs_external_forces_v2"
+NUMERICAL_RECIPE_ID = "mkii_fourbar_tgs_external_forces_800hz_v3"
 SOLVER_TYPE = 1  # PhysX TGS
 SOLVER_POSITION_ITERATIONS = 64
 SOLVER_VELOCITY_ITERATIONS = 1

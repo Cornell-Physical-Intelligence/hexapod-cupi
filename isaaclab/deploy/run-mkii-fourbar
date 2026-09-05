@@ -368,8 +368,9 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if not 1 <= args.num_envs <= 4096 or not 2 <= args.steps <= 100000 or not 1 <= args.iterations <= 10000:
         parser.error('Invalid bounded environment/step/iteration count')
-    if not 30 <= args.timeout_seconds <= 7200:
-        parser.error('The bounded timeout must be 30..7200 seconds')
+    maximum_timeout = 21600 if args.mode == 'train' else 7200
+    if not 30 <= args.timeout_seconds <= maximum_timeout:
+        parser.error(f'The bounded timeout for {args.mode} must be 30..{maximum_timeout} seconds')
     if args.source_commit != 'uncommitted' and not re.fullmatch(r'[0-9a-f]{7,40}', args.source_commit):
         parser.error('--source-commit must be a hex commit ID or uncommitted')
     source = args.source_dir.expanduser().resolve()

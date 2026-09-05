@@ -47,11 +47,11 @@ def qualify(nominal, refined, contract):
     result["pass"] = result["simulation_training_admission"] = not errors
     result["errors"] = errors
     result["convergence"] = {"pass": not errors,
-                             "method": "TGS 64/1 versus 128/1 iterations at fixed 5 ms; external forces every iteration",
+                             "method": "TGS 64/1 versus 128/1 iterations at fixed 1.25 ms; external forces every iteration",
                              "comparisons": comparisons}
     result["admission_scope"] = (
         "Standing and +/-0.04 rad driven qualification only. Provisional flat-ground scratch PPO may explore "
-        "the configured +/-0.30 rad action offsets under a continuous 5 ms closure point/axis and motor-envelope "
+        "the configured +/-0.30 rad action offsets under a continuous 1.25 ms closure point/axis and motor-envelope "
         "monitor; a monitor bound violation invalidates the run. Self-collision is off, so this does not qualify "
         "the collision-free workspace or hardware. This is not full joint-range, timestep-convergence or terrain "
         "qualification. The 48 V reference and uncalibrated metal-mount overload recovery remain explicit assumptions.")

@@ -139,7 +139,7 @@ class FakeMetrics:
         self.pending.append(self.raw.scene.state)
 
     def drain(self):
-        if len(self.pending) != 4: raise ValueError("Missing sample")
+        if len(self.pending) != trainer.DECIMATION: raise ValueError("Missing sample")
         self.pending.clear()
         self.windows[self.window] = {"max_closure_point_m": 0., "max_closure_axis_chord": 0.,
             "max_envelope_excess_nm": 0., "invalid_samples": 0,
@@ -150,8 +150,8 @@ class FakeMetrics:
 class PhysicsGuardTests(unittest.TestCase):
     def raw(self):
         return types.SimpleNamespace(scene=FakeScene(), _physics_handles_decimation=False,
-            common_step_counter=0, cfg=types.SimpleNamespace(sim=types.SimpleNamespace(dt=.005), decimation=4),
-            _body_contact_sensors={"body": types.SimpleNamespace(cfg=types.SimpleNamespace(update_period=.005))})
+            common_step_counter=0, cfg=types.SimpleNamespace(sim=types.SimpleNamespace(dt=trainer.PHYSICS_DT_S), decimation=trainer.DECIMATION),
+            _body_contact_sensors={"body": types.SimpleNamespace(cfg=types.SimpleNamespace(update_period=trainer.PHYSICS_DT_S))})
 
     def test_measures_after_update_all_substeps_and_allows_falling(self):
         raw = self.raw()
@@ -159,9 +159,9 @@ class PhysicsGuardTests(unittest.TestCase):
         with trainer.PhysicalTrainingGuard(raw, metrics) as guard:
             for control_step in range(2):
                 raw.common_step_counter = control_step
-                for _ in range(4): raw.scene.update(dt=.005)
+                for _ in range(trainer.DECIMATION): raw.scene.update(dt=trainer.PHYSICS_DT_S)
             guard.require_coverage(2)
-        self.assertEqual(metrics.seen, list(range(1, 9)))
+        self.assertEqual(metrics.seen, list(range(1, 2*trainer.DECIMATION+1)))
         self.assertNotIn("update", vars(raw.scene))
 
     def test_rejects_loop_error_axis_motor_envelope_and_invalid_sample(self):
@@ -172,20 +172,20 @@ class PhysicsGuardTests(unittest.TestCase):
             metrics.bad = key, bad
             with self.assertRaises(ValueError):
                 with trainer.PhysicalTrainingGuard(raw, metrics):
-                    for _ in range(4): raw.scene.update(.005)
+                    for _ in range(trainer.DECIMATION): raw.scene.update(trainer.PHYSICS_DT_S)
             self.assertNotIn("update", vars(raw.scene))
 
     def test_partial_extra_wrong_dt_and_hidden_substeps_rejected(self):
         raw = self.raw()
         with trainer.PhysicalTrainingGuard(raw, FakeMetrics(raw)) as guard:
-            for _ in range(3): raw.scene.update(.005)
+            for _ in range(trainer.DECIMATION-1): raw.scene.update(trainer.PHYSICS_DT_S)
             with self.assertRaises(ValueError): guard.require_coverage(1)
             raw.common_step_counter = 1
-            with self.assertRaises(ValueError): raw.scene.update(.005)
+            with self.assertRaises(ValueError): raw.scene.update(trainer.PHYSICS_DT_S)
         raw = self.raw()
         with trainer.PhysicalTrainingGuard(raw, FakeMetrics(raw)):
-            for _ in range(4): raw.scene.update(.005)
-            with self.assertRaises(ValueError): raw.scene.update(.005)
+            for _ in range(trainer.DECIMATION): raw.scene.update(trainer.PHYSICS_DT_S)
+            with self.assertRaises(ValueError): raw.scene.update(trainer.PHYSICS_DT_S)
             with self.assertRaises(ValueError): raw.scene.update(.02)
         raw = self.raw()
         raw._physics_handles_decimation = True

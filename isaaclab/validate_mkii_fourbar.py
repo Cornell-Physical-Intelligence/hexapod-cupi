@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Standing and driven-coordinate tests of the physical MKII four-bar.
 
-Every 5 ms measures actual link-pose closure and primitive ground clearance.
+Every physics step measures actual link-pose closure and primitive ground clearance.
 Provisional numerical tolerances require a second solver-resolution run before
 training admission. Passing never qualifies real motors or rough terrain.
 """
@@ -18,7 +18,7 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / p) for p in ("tools", "isaaclab", "packages/hexapod_core", "packages/hexapod_env")]
 from mkii_training_contract import TASK_ID, identity, write_json
-from hexapod_core.fourbar_v1 import numerical_recipe, validate_numerical_recipe_report
+from hexapod_core.fourbar_v1 import numerical_recipe, validate_numerical_recipe_report, PHYSICS_DT_S, DECIMATION
 
 
 def tensor(value):
@@ -59,16 +59,16 @@ class SubstepHook:
 
     def __enter__(self):
         if (getattr(self.raw, "_physics_handles_decimation", None) is not False
-                or self.raw.cfg.sim.dt != .005 or self.raw.cfg.decimation != 4):
-            raise ValueError("Validator requires explicit four ×5ms physics updates")
-        if any(not 0 <= s.cfg.update_period <= .005 for s in self.raw._body_contact_sensors.values()):
+                or self.raw.cfg.sim.dt != PHYSICS_DT_S or self.raw.cfg.decimation != DECIMATION):
+            raise ValueError("Validator requires every physics update from the selected timing contract")
+        if any(not 0 <= s.cfg.update_period <= PHYSICS_DT_S for s in self.raw._body_contact_sensors.values()):
             raise ValueError("Contact sensors cannot cover every substep")
         self.original = self.raw.scene.update
         self.had_override = "update" in vars(self.raw.scene)
         self.previous = vars(self.raw.scene).get("update")
         def update(*args, **kwargs):
             dt = kwargs.get("dt", args[0] if args else None)
-            if not self.active or dt != .005:
+            if not self.active or dt != PHYSICS_DT_S:
                 raise ValueError("Unexpected unmeasured scene update")
             result = self.original(*args, **kwargs)
             self.callback()
@@ -84,7 +84,7 @@ class SubstepHook:
             result = env.step(actions)
         finally:
             self.active = False
-        if self.total - before != 4:
+        if self.total - before != DECIMATION:
             raise ValueError("Missing physics-substep observations")
         return result
 
@@ -174,8 +174,8 @@ class PhysicalMetrics:
 
     def drain(self):
         torch = self.torch
-        if len(self.pending) != 4:
-            raise ValueError("Expected all four physical samples")
+        if len(self.pending) != DECIMATION:
+            raise ValueError("Expected every physical sample in this policy step")
         rows = torch.stack(self.pending).cpu().tolist()
         self.pending.clear()
         w = self.windows.setdefault(self.window, {"substeps": 0, "height_sum": 0., "min_height_m": 99.,
@@ -215,7 +215,7 @@ def grade(report):
         errors.append("Live reset or anatomical command frame differs from the physical contract")
     if report.get("steps_completed") != report["steps_requested"] or report.get("terminated_count") or report.get("truncated_count"):
         errors.append("Standing or driven test did not complete without resets")
-    if report.get("physics_substeps") != 4*(report.get("steps_completed", 0)+report.get("driven_steps", 0)):
+    if report.get("physics_substeps") != DECIMATION*(report.get("steps_completed", 0)+report.get("driven_steps", 0)):
         errors.append("Incomplete physics-substep coverage")
     for name, window in report.get("windows", {}).items():
         for key, maximum in (("max_closure_point_m", .0001), ("max_closure_axis_chord", math.radians(.1)),
@@ -332,8 +332,10 @@ def main(argv=None):
                         if not bool(torch.isfinite(tensor(obs["policy"])).all() and torch.isfinite(tensor(rewards)).all()):
                             raise ValueError("Nonfinite policy observation/reward")
                         if report["terminated_count"] or report["truncated_count"]:
+                            report["termination_reasons"] = {name: int(tensor(value).sum()) for name, value in raw.last_termination_reasons.items()}
                             raise ValueError("Unexpected environment reset")
                     for index in range(args.steps):
+                        report["test_context"] = {"phase": "standing", "control_step": index}
                         metrics.window = "startup" if index < max(1, args.steps//5) else "settled"
                         step()
                         report["steps_completed"] = index + 1
@@ -349,6 +351,7 @@ def main(argv=None):
                                 actions[:, motor] = sign * (.04/.30)
                                 positions = []
                                 for index in range(50):
+                                    report["test_context"] = {"phase": "individual_motor", "motor": name, "target_offset_rad": sign*.04, "control_step": index}
                                     step()
                                     report["driven_steps"] += 1
                                     if index >= 45:
@@ -365,6 +368,7 @@ def main(argv=None):
                                 actions[:, group*6:(group+1)*6] = sign * (.04/.30)
                                 positions = []
                                 for index in range(100):
+                                    report["test_context"] = {"phase": "motor_group", "motors": raw.active_joint_names[group*6:(group+1)*6], "target_offset_rad": sign*.04, "control_step": index}
                                     step()
                                     report["driven_steps"] += 1
                                     if index >= 90:

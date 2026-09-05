@@ -23,9 +23,9 @@ from hexapod_core import rs05_v2 as contract
 from hexapod_env.actuators.rs05_v2_model import RS05V2BudgetModel, TELEMETRY_FIELDS
 
 
-def model(headroom=1.0, shape=(1, 1), voltage=48.0):
+def model(headroom=1.0, shape=(1, 1), voltage=48.0, dt=.005):
     return RS05V2BudgetModel(shape, dtype=torch.float64, reset_burst_headroom=headroom,
-                            assumed_bus_voltage_v=voltage)
+                            assumed_bus_voltage_v=voltage, physics_dt_s=dt)
 
 
 def step(m, torque, rpm=0):
@@ -278,6 +278,15 @@ class ContractTests(unittest.TestCase):
         self.assertTrue(torch.all(actuator.burst_headroom[0] == .5))
         self.assertTrue(torch.all(actuator.burst_headroom[1] == .495))
         with self.assertRaises(ValueError): runtime.RS05V2Actuator(cfg, names[:-1] + ["passive"])
+        for dt in (.0025, .00125):
+            fine_cfg = binding.make_rs05_v2_cfg(names, physics_dt_s=dt)
+            fine_actuator = runtime.RS05V2Actuator(fine_cfg, list(reversed(names)))
+            fine_action = types.SimpleNamespace(joint_positions=torch.ones_like(zeros),
+                joint_velocities=zeros.clone(), joint_efforts=zeros.clone())
+            fine_actuator.compute(fine_action, zeros, zeros)
+            self.assertEqual(fine_actuator._budget.dt, dt)
+            self.assertTrue(torch.all(fine_actuator.applied_effort == 5.5))
+            self.assertTrue(torch.allclose(fine_actuator.burst_headroom, torch.full_like(zeros, .5-dt)))
 
     def test_configuration_import_cannot_resolve_runtime_or_usd(self):
         """Separate interpreter: runtime SDK symbol access fails before Kit."""
@@ -366,6 +375,77 @@ print("PRE_KIT_TASK_SHIM_PASS")
             else:
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertIn("PRE_KIT_TASK_SHIM_PASS", result.stdout)
+
+
+class PhysicsTimeScalingTests(unittest.TestCase):
+    def test_smaller_step_scales_budget_with_identical_instantaneous_bounds(self):
+        for torque, rpm in ((1.6, 0), (3., 0), (5.5, 0), (3., 100), (5.5, 100)):
+            for dt in (.0025, .00125):
+                coarse, fine = model(dt=.005), model(dt=dt)
+                coarse_applied, fine_applied = step(coarse, torque, rpm), step(fine, torque, rpm)
+                torch.testing.assert_close(coarse_applied, fine_applied, rtol=0, atol=1e-12)
+                ratio = .005/dt
+                self.assertAlmostEqual(coarse.budget_consumed.item(), ratio * fine.budget_consumed.item(), places=12)
+                self.assertAlmostEqual(coarse.applied_overload_exposure_s.item(),
+                                       ratio * fine.applied_overload_exposure_s.item(), places=12)
+                torch.testing.assert_close(coarse.continuous_limit_nm, fine.continuous_limit_nm, rtol=0, atol=0)
+                torch.testing.assert_close(coarse.torque_speed_limit_nm, fine.torque_speed_limit_nm, rtol=0, atol=0)
+
+    def test_peak_duration_and_holding_after_exhaustion_match_in_seconds(self):
+        results = []
+        for dt in (.005, .0025, .00125):
+            motor = model(dt=dt)
+            for _ in range(round(1 / dt)):
+                self.assertAlmostEqual(step(motor, 5.5).item(), 5.5, places=9)
+            self.assertAlmostEqual(motor.burst_headroom.item(), 0, places=10)
+            for _ in range(round(.1 / dt)):
+                # Repeated subtraction leaves about1e-14 budget after800
+                # steps; inverse rate interpolation magnifies only that
+                # arithmetic residue. This is a numeric test tolerance,
+                # not a change to the motor or physical admission limits.
+                self.assertAlmostEqual(step(motor, 5.5).item(), 1.2, delta=1e-8)
+            results.append((motor.applied_peak_exposure_s.item(), motor.applied_overload_exposure_s.item(),
+                            motor.burst_headroom.item()))
+        for result in results[1:]:
+            for coarse, fine in zip(results[0], result):
+                self.assertAlmostEqual(coarse, fine, places=10)
+        self.assertAlmostEqual(results[0][0], 1., places=10)
+
+    def test_rotating_exposure_and_low_load_cooldown_match_physical_time(self):
+        for torque, rpm in ((3., 100), (0., 0), (.3, 0), (1.2, 0)):
+            results = []
+            for dt in (.005, .0025, .00125):
+                motor = model(.5, dt=dt)
+                for _ in range(round(1 / dt)):
+                    step(motor, torque, rpm)
+                results.append((motor.burst_headroom.item(), motor.applied_overload_exposure_s.item()))
+            for result in results[1:]:
+                for coarse, fine in zip(results[0], result):
+                    self.assertAlmostEqual(coarse, fine, places=10)
+
+    def test_partial_step_budget_never_overdraws_at_any_supported_resolution(self):
+        for dt in (.005, .0025, .00125):
+            motor = model(.0007, dt=dt)
+            self.assertLess(step(motor, 5.5).item(), 5.5)
+            self.assertAlmostEqual(motor.budget_consumed.item(), .0007, places=12)
+            self.assertAlmostEqual(motor.burst_headroom.item(), 0, places=12)
+            self.assertEqual(motor.envelope_violation_nm.item(), 0)
+
+    def test_selected_timestep_is_runtime_verified_and_manifest_bound(self):
+        names = [f"motor_{i}" for i in range(18)]
+        self.assertEqual(contract.PHYSICS_DT_S, .005)
+        self.assertEqual(contract.SUPPORTED_PHYSICS_DT_S, (.005, .0025, .00125))
+        for dt in (.0025, .00125):
+            values = contract.configuration_values(names, physics_dt_s=dt)
+            cfg = types.SimpleNamespace(**values, class_type=contract.ACTUATOR_CLASS)
+            self.assertEqual(contract.verify_runtime_cfg(cfg, names)["physics_dt_s"], dt)
+            coarse, fine = contract.contract_manifest(), contract.contract_manifest(physics_dt_s=dt)
+            self.assertEqual(coarse["implementation_sha256"], fine["implementation_sha256"])
+            self.assertEqual(coarse["configuration"]["vendor"], fine["configuration"]["vendor"])
+            self.assertNotEqual(coarse["contract_sha256"], fine["contract_sha256"])
+            self.assertEqual(fine["physics_dt_s"], dt)
+        for unsupported in (.02, .004, .001, 0., float("nan"), float("inf")):
+            with self.assertRaises(ValueError): model(dt=unsupported)
 
 
 if __name__ == "__main__":

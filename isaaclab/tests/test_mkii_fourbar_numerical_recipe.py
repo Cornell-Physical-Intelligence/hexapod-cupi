@@ -33,16 +33,17 @@ class NumericalRecipeTests(unittest.TestCase):
         self.assertEqual(refined['solver_velocity_iterations'], 1)
         self.assertEqual(nominal['solver_type'], 1)
         self.assertIs(nominal['enable_external_forces_every_iteration'], True)
-        self.assertEqual(nominal['physics_dt_s'], .005)
-        self.assertEqual(nominal['decimation'], 4)
+        self.assertEqual(nominal['physics_dt_s'], .00125)
+        self.assertEqual(nominal['decimation'], 16)
+        self.assertEqual(contract.POLICY_DT_S, .02)
         self.assertEqual({key for key in nominal if nominal[key] != refined[key]}, {'solver_position_iterations'})
         for invalid in (True, 0, 3, 1., '1'):
             with self.assertRaises(ValueError):
                 contract.numerical_recipe(invalid)
 
     def test_validator_applies_exact_recipe_without_modifying_timing_or_limits(self):
-        cfg = SimpleNamespace(sim=SimpleNamespace(dt=.005, physics=SimpleNamespace(solver_type=0,
-            enable_external_forces_every_iteration=False)), decimation=4,
+        cfg = SimpleNamespace(sim=SimpleNamespace(dt=.00125, physics=SimpleNamespace(solver_type=0,
+            enable_external_forces_every_iteration=False)), decimation=16,
             robot=SimpleNamespace(spawn=SimpleNamespace(articulation_props=SimpleNamespace(
                 solver_position_iteration_count=32, solver_velocity_iteration_count=4))))
         for multiplier in (1, 2):
@@ -84,6 +85,46 @@ class NumericalRecipeTests(unittest.TestCase):
             target['enable_external_forces_every_iteration'] = 1
             with self.assertRaises(ValueError):
                 contract.validate_numerical_recipe_report(changed, 1)
+        changed = report()
+        for target in (changed['numerical_recipe'], changed['runtime_manifest']['resolved_simulation']):
+            target.update(physics_dt_s=.005, decimation=4)
+        with self.assertRaises(ValueError):
+            contract.validate_numerical_recipe_report(changed, 1)
+
+    def test_config_resolves_motor_contact_physics_and_policy_timing_together(self):
+        tree = ast.parse((ROOT/'packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/config.py').read_text())
+        calls = {node.func.id: node for node in ast.walk(tree) if isinstance(node, ast.Call)
+                 and isinstance(node.func, ast.Name) and node.func.id in ('SimulationCfg', 'make_rs05_v2_cfg')}
+        simulation = eval(compile(ast.Expression(calls['SimulationCfg']), '<simulation-config>', 'eval'),
+            {'contract': contract, 'SimulationCfg': lambda **values: values, 'PhysxCfg': lambda **values: values,
+             'sim_utils': SimpleNamespace(RigidBodyMaterialCfg=lambda **values: values)})
+        motor = eval(compile(ast.Expression(calls['make_rs05_v2_cfg']), '<motor-config>', 'eval'),
+            {'contract': contract, 'make_rs05_v2_cfg': lambda names, **values: values})
+        sensor = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == '_sensor')
+        namespace = {'contract': contract, 'ContactSensorCfg': lambda **values: values, 'ROBOT_PRIM': '/Robot', 'GROUND': '/Ground'}
+        exec(compile(ast.Module(body=[sensor], type_ignores=[]), '<sensor-config>', 'exec'), namespace)
+        contact = namespace['_sensor']('lf_tibia', 'Geometry/lf_tibia')
+        self.assertEqual(simulation['dt'], .00125)
+        self.assertEqual(motor['physics_dt_s'], .00125)
+        self.assertEqual(contact['update_period'], .00125)
+        self.assertEqual(simulation['render_interval'], 16)
+        self.assertEqual(simulation['dt']*simulation['render_interval'], .02)
+
+    def test_environment_rejects_old_or_divergent_motor_and_policy_timing(self):
+        tree = ast.parse((ROOT/'packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/env.py').read_text())
+        guard = next(node for node in ast.walk(tree) if isinstance(node, ast.If)
+                     and any(isinstance(item, ast.Constant) and item.value == 'Physics/control timing differs from the motor/runtime contract'
+                             for item in ast.walk(node)))
+        code = compile(ast.Module(body=[guard], type_ignores=[]), '<actual-env-timing-guard>', 'exec')
+        def check(physics=.00125, motor=.00125, decimation=16, policy=.02):
+            exec(code, {'contract': contract, 'cfg': SimpleNamespace(sim=SimpleNamespace(dt=physics), decimation=decimation),
+                        'motor_cfg': {'physics_dt_s': motor}, 'self': SimpleNamespace(step_dt=policy)})
+        check()
+        for changed in ({'physics': .005, 'motor': .005}, {'physics': .0025, 'motor': .0025},
+                        {'motor': .0025}, {'motor': .005}, {'decimation': 8}, {'decimation': 4}, {'policy': .04}):
+            with self.subTest(changed=changed):
+                with self.assertRaises(ValueError):
+                    check(**changed)
 
     def test_config_uses_explicit_backend_and_iteration_constants(self):
         # Evaluate only the constructor expressions with recording stdlib stubs;

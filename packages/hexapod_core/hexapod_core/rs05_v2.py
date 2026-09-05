@@ -18,6 +18,7 @@ PEAK_TORQUE_NM = CONFIG["vendor"]["peak_output_torque_nm"]
 STALL_CONTINUOUS_NM = CONFIG["vendor"]["stall_continuous_nm"]
 ROTATING_CONTINUOUS_NM = CONFIG["vendor"]["rotating_continuous_nm"]
 PHYSICS_DT_S = CONFIG["provisional"]["physics_dt_s"]
+SUPPORTED_PHYSICS_DT_S = tuple(CONFIG["provisional"]["supported_physics_dt_s"])
 ACTUATOR_CLASS = "hexapod_env.actuators.rs05_v2_runtime.RS05V2Actuator"
 IMPLEMENTATION_PATHS = (
     "packages/hexapod_core/hexapod_core/rs05_v2.py",
@@ -30,8 +31,8 @@ IMPLEMENTATION_PATHS = (
 
 def validate_operating_assumptions(physics_dt_s=PHYSICS_DT_S, assumed_bus_voltage_v=48.0):
     """Reject malformed settings; voltage-range validity is not calibration."""
-    if not math.isfinite(physics_dt_s) or physics_dt_s != PHYSICS_DT_S:
-        raise ValueError("RS05 v2 contract requires physics_dt_s=0.005")
+    if not math.isfinite(physics_dt_s) or physics_dt_s not in SUPPORTED_PHYSICS_DT_S:
+        raise ValueError("RS05 v2 contract requires an explicitly supported physics_dt_s: 0.005, 0.0025 or 0.00125")
     lo, hi = CONFIG["vendor"]["operating_voltage_range_v"]
     if not math.isfinite(assumed_bus_voltage_v) or not lo <= assumed_bus_voltage_v <= hi:
         raise ValueError("Assumed bus voltage must be finite and within15..60 V")

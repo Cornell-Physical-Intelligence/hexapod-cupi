@@ -122,8 +122,14 @@ polygon coverage remain parallel software work, independent of survey payloads.
 
 `isaaclab/deploy/run-mkii-fourbar-campaign` runs the short probe, both nominal/refined standing and driven checks, qualification, 64-environment / 3-iteration scratch PPO, and then a separate 512-environment / 1,000-iteration resumed PPO process. The latter produces 12,288,000 additional transitions. Each phase stops the sequence on failure; the full run does not inherit the old mock policy. Its separate process must restore the exact scratch policy and optimizer state.
 
-The full supervisor's 7,200-second ceiling is a hard timeout, counted from host preparation, not a graceful checkpoint request. Periodic checkpoints are written every ten iterations. If observed throughput predicts exceeding the ceiling, request a cooperative pause before it by writing the owned run's `stop_requested` marker; preserve its verified checkpoint and report before explicitly resuming. A timeout or exit zero without the required report is not a passed run.
+The full supervisor's 21,600-second ceiling is a hard timeout, counted from host preparation, not a graceful checkpoint request. Periodic checkpoints are written every ten iterations. If observed throughput predicts exceeding the ceiling, request a cooperative pause before it by writing the owned run's `stop_requested` marker; preserve its verified checkpoint and report before explicitly resuming. A timeout or exit zero without the required report is not a passed run.
 
 ## TGS recipe revision
 
 The original 32/4 and 64/8 recipes completed every driven step but failed the unchanged closure bounds (0.246159 mm and 0.366053 mm pin separation respectively). The new recipe explicitly selects TGS, applies external forces on every iteration, uses one velocity iteration, and compares 64 against 128 position iterations at the same 5 ms physics timestep. This revision requires new complete validation reports; old source-identity reports cannot admit it. The previous manifests, reports and source commits are preserved.
+
+## 800 Hz physics revision
+
+At 5 ms, the explicit-force 64/1 recipe failed the first tibia reversal after 1,252 driven steps, reaching 0.883917 mm physical pin separation and 0.0571375 rad passive residual before closure termination. Applied torque remained inside its instantaneous envelope. The follow-up uses **1.25 ms physics, sixteen substeps and unchanged 20 ms policy control**. Motor budget/overload/recovery integration is tested over equal physical durations at 5, 2.5 and 1.25 ms. Every physical substep remains measured; the full 1,000 standing plus 2,400 driven-control-step sequence and its bounds remain unchanged.
+
+A reduced linearized inertia analysis motivates the timestep: ideal closed-loop modes and light unconstrained lever modes have different timestep margins. It does not replace the actual constrained/contact simulation checks. The new recipe needs fresh nominal/refined validation, complete checkpoint tests and a new training source identity. Training has a six-hour maximum to accommodate the increased integration work; actual throughput must be measured before quoting an ETA.

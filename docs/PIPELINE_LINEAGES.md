@@ -26,7 +26,9 @@ configuration remain recoverable at the pinned commit.
 
 The original four-bar manifest `isaaclab/deploy/mkii_fourbar_v1_pipeline.sha256` remains preserved with source commit `3dc3fa0c9d0f9d05dd625c00f599ca456e94779c`. It describes the first 32/4-iteration implementation, whose driven solver test subsequently failed. Its bytes are included in the new release manifest.
 
-`isaaclab/deploy/mkii_fourbar_v1_tgs_pipeline.sha256` covers **all 112 historical
+The 5 ms TGS manifest `isaaclab/deploy/mkii_fourbar_v1_tgs_pipeline.sha256` is also preserved at source `ae1a023`. Its driven reversal failed; the current release changes physics to 1.25 ms while preserving 20 ms policy control and every physical acceptance tolerance.
+
+`isaaclab/deploy/mkii_fourbar_v1_800hz_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

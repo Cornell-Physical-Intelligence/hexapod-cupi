@@ -211,11 +211,12 @@ def main(argv=None):
     parser.add_argument('--output-root', type=Path)
     parser.add_argument('--probe-report', type=Path)
     parser.add_argument('--wait-seconds', type=int, default=2700)
-    parser.add_argument('--phase-timeout-seconds', type=int, default=1800)
-    parser.add_argument('--full-timeout-seconds', type=int, default=7200)
+    parser.add_argument('--phase-timeout-seconds', type=int, default=3600)
+    parser.add_argument('--full-timeout-seconds', type=int, default=21600)
     args = parser.parse_args(argv)
-    if not 0 <= args.wait_seconds <= 2700 or any(not 30 <= bound <= 7200 for bound in (args.phase_timeout_seconds, args.full_timeout_seconds)):
-        parser.error('Wait must be 0..2700 seconds and phase timeouts 30..7200 seconds')
+    if (not 0 <= args.wait_seconds <= 2700 or not 30 <= args.phase_timeout_seconds <= 7200
+            or not 30 <= args.full_timeout_seconds <= 21600):
+        parser.error('Wait must be 0..2700 seconds; phase timeout 30..7200 and full training timeout 30..21600 seconds')
     args.source_dir = args.source_dir.expanduser().resolve()
     output_root = (args.output_root or args.source_dir.parent/'campaigns').expanduser().resolve()
     if output_root.is_relative_to(args.source_dir):
