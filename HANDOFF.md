@@ -294,3 +294,45 @@ release fixes prose edits causing false handoff requests while retaining
 explicit/invalid control handling and all resource/physics gates. It needs
 its own source manifest, tests, immutable staging and fresh full validation.
 Takeover evidence is `artifacts/mkii_fourbar_2026-09-05/coordination_recovery_20260906/`.
+
+## 2026-09-06 02:22 UTC — coordination fix and fresh campaign 008
+
+Release `1239159c185cd504c359bb20e98bde9986acbbb4` separates the canonical
+sharing control from status-note prose. Exactly one valid `NONE` permits work;
+`REQUESTED` or malformed/missing/duplicate control still latches a controlled
+yield. The runner rechecks immediately before barrier release and during
+execution. Training retains checkpoint grace and resource checks. Historical
+frozen runners retain their old behavior; concurrency/MPS is not enabled.
+
+906 local tests passed in 70.128 seconds; GitHub CI 34005889807 succeeded.
+The 294-file release manifest is
+`isaaclab/deploy/mkii_fourbar_v1_coordination_control_pipeline.sha256`, SHA256
+`b75f8ca4d3045e058c9e2eb27deebea9e08aa789b56f50fbf7fd215f6960a1f8`.
+Functional identity:
+`c06e56ed68508f944363bfe6564a13d0760066e4a338164b664214edb695fb5a`.
+Frozen source: `/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source`.
+The exact Git archive and all staged manifest entries were verified on Spark.
+
+Fresh campaign PID 1712641 launched at 02:15:07 UTC:
+`/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/campaigns/fourbar-campaign-20260906T021507Z-9d668815/campaign.json`.
+Its 1 × 100 startup probe passed, report SHA256
+`2a85e74824a8fc28f8f74907e1324e94db5fa2728681d6685115dfe9bb35b9b2`.
+Nominal supervisor 1716170 began at 02:17:40 UTC in
+`nominal/hexapod-fourbar-validate-20260906T021740Z-96e3036c/`.
+The 02:22 UTC snapshot had reached standing step 200/1000 with no recorded
+invalid samples. This is partial progress, not nominal admission. All full
+standing/driven, refined convergence and checkpoint/inference gates remain
+required before the campaign's separate 512 × 1,000-update PPO stage.
+
+Guard 1711343 is now bound to this exact campaign through `campaign_path.txt`
+in `priority_20260906T020649Z/`. It releases on the campaign's terminal state
+or at 12:06:50 UTC at the latest. No competing CUDA workload was present at
+launch. Do not replay the bootstrap or launch a duplicate after Wi-Fi loss.
+
+A live prose-only shared-note update at 02:21:46 UTC was observed by this
+nominal supervisor at 02:21:52 UTC, without a pause, stop marker or container
+interruption. Evidence:
+`artifacts/mkii_fourbar_2026-09-06/live_coordination_prose_check/`.
+Release, launch and completed probe evidence:
+`artifacts/mkii_fourbar_2026-09-06/coordination_control_release/`.
+Read live campaign and supervisor state before claiming further progress.

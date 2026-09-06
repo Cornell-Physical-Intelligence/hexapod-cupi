@@ -23,7 +23,8 @@ solver-convergence comparison must also pass.
   per 50 Hz policy update; 84 observations include 18 motor overload-headroom
   states. Anatomical forward is body -Y, left +X.
 - Solver: TGS with external forces applied every position iteration; nominal
-  64/1 position/velocity iterations, refined 128/1 at the same timestep.
+  64/16 position/velocity iterations, refined 128/16 at the same timestep.
+  The earlier 64/1 and 128/1 results remain historical evidence.
 - Baseline commands: ±0.15 m/s on both horizontal axes and ±0.30 rad/s yaw, with
   20% standing commands. Actions have ±0.30 rad offsets and a 0.04 rad/20 ms
   target slew limit. These are initial simulation settings, not hardware limits.
@@ -87,8 +88,10 @@ claim a measured four-quadrant motor map. Battery voltage is still unknown;
 3. Run 32 environments for 1,000 standing control steps, then 2,400 driven steps:
    each motor independently at ±0.04 rad, followed by simultaneous group tests.
    This checks individual mapping and the physical mechanism under small loads.
-4. Repeat with 128/1 position/velocity solver iterations versus the nominal 64/1.
-   Compare standing and driven height/torque; both runs must pass independently.
+4. Repeat with 128/16 position/velocity solver iterations versus nominal 64/16.
+   Compare standing and driven height, applied torque and raw pre-envelope
+   demand; both runs must pass independently. Actual ordered reset-root
+   positions must be finite and exactly equal between the runs.
    The same selected model, dependency hashes, motor contract and runtime settings
    must match; only the specified solver position-iteration count may differ.
 5. Combine those reports with `tools/qualify_mkii_fourbar.py`. The resulting
@@ -115,15 +118,17 @@ settings and observed joint order. The comparison is saved in the training repor
 
 ## Reproduction and compute ownership
 
-On Spark, isolated source is
-`/home/orionh/HEXAPOD_runs/mkii_fourbar_v1/source`; outputs are in sibling `runs/`.
+The commands below use the frozen coordination-control release at
+`/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source`.
+Check [STATUS.md](../STATUS.md) and the live campaign before launching; do not
+duplicate an active campaign. Earlier isolated source directories remain frozen.
 The original project mirror and archived task/checkpoint contracts are retained.
 
 ```sh
 python3 isaaclab/deploy/run-mkii-fourbar validate \
-  --source-dir /home/orionh/HEXAPOD_runs/mkii_fourbar_v1/source \
+  --source-dir /home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source \
   --asset-model mkii_fourbar_v5 \
-  --num-envs 32 --steps 1000 --solver-multiplier 1 --timeout-seconds 3600
+  --num-envs 32 --steps 1000 --solver-multiplier 1 --timeout-seconds 7200
 
 # Repeat the same model with --solver-multiplier 2.
 # Only two complete passing reports can produce admission.
@@ -131,7 +136,7 @@ python3 tools/qualify_mkii_fourbar.py NOMINAL_REPORT REFINED_REPORT ADMISSION_JS
 
 # This remains blocked until the admission gate above passes.
 python3 isaaclab/deploy/run-mkii-fourbar train \
-  --source-dir /home/orionh/HEXAPOD_runs/mkii_fourbar_v1/source \
+  --source-dir /home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source \
   --asset-model mkii_fourbar_v5 \
   --admission ADMISSION_JSON --num-envs 64 --iterations 3 --timeout-seconds 3600
 
@@ -148,7 +153,7 @@ For diagnosis, use the separate selector and report type:
 
 ```sh
 python3 isaaclab/deploy/run-mkii-fourbar diagnose \
-  --source-dir /home/orionh/HEXAPOD_runs/mkii_fourbar_v1/source \
+  --source-dir /home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source \
   --diagnostic-usd physical_mimic_v5 --diagnostic-motion groups \
   --num-envs 8 --steps 200 --solver-multiplier 2 --timeout-seconds 3600
 ```
@@ -181,8 +186,10 @@ not predicted completion times.
 Use full available compute until sharing is requested in
 `/home/orionh/SPARK_COMPUTE_COORDINATION.md`. Change its single
 `HEXAPOD_SHARE_STATUS=NONE` line to `HEXAPOD_SHARE_STATUS=REQUESTED` and describe
-the workload. A file change during learning requests a checkpoint and pause at
-the next PPO iteration; an unresponsive owned job is stopped after 120 seconds.
+the workload. The coordination-control release ignores ordinary prose edits. An explicit
+request or invalid control latches a yield: validation stops immediately, while
+learning requests a checkpoint at the next PPO iteration, with a 120-second
+maximum grace period. Older frozen launchers still react to any file change.
 MPS and a 60/40 allocation are not installed. See [the shared note](SPARK_COMPUTE_COORDINATION.md).
 An unrelated producer remains a veto. A real `flock` process queued on
 `/opt/wx/gpu.lock` is exempt only when kernel lock, descriptor, executable and
@@ -205,7 +212,7 @@ polygon coverage remain parallel software work, independent of survey payloads.
 Pass `--asset-model mkii_fourbar_v5` explicitly when investigating v5. The
 campaign records and forwards that choice through every phase, including reused
 probe checks, scratch training and resumed training. A failed nominal run stops
-before refined qualification or PPO; the current v5 failure is preserved.
+before refined qualification or PPO; prior failed attempts remain preserved.
 
 The full supervisor's 21,600-second ceiling is a hard timeout, counted from host preparation, not a graceful checkpoint request. Periodic checkpoints are written every ten iterations. If observed throughput predicts exceeding the ceiling, request a cooperative pause before it by writing the owned run's `stop_requested` marker; preserve its verified checkpoint and report before explicitly resuming. A timeout or exit zero without the required report is not a passed run.
 
@@ -221,7 +228,7 @@ A reduced linearized inertia analysis motivates the timestep: ideal closed-loop 
 
 ## Motor target interpolation candidate
 
-The next source revision delivers each existing 50 Hz motor endpoint as sixteen linear position increments, with zero velocity feedforward. It preserves gains, limits, assets, validation motions and acceptance bounds; see [the scheduling contract](MKII_MOTOR_TARGET_SCHEDULING.md). It requires fresh validation and is not yet admitted. The existing hardware action adapter still emits endpoints; embedded scheduling and bus latency must be implemented and measured before transfer.
+The current source delivers each existing 50 Hz motor endpoint as sixteen linear position increments, with zero velocity feedforward. It preserves gains, limits, assets, validation motions and acceptance bounds; see [the scheduling contract](MKII_MOTOR_TARGET_SCHEDULING.md). It requires fresh validation and is not yet admitted. The existing hardware action adapter still emits endpoints; embedded scheduling and bus latency must be implemented and measured before transfer.
 
 ## Measuring throughput and preserving a long run
 

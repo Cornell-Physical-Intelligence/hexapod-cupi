@@ -1,0 +1,91 @@
+{
+  "schema": "selected_campaign_progress_evidence.v1",
+  "captured_utc": "2026-09-06T02:23:03.547000+00:00",
+  "source_path": "/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/campaigns/fourbar-campaign-20260906T021507Z-9d668815/campaign.json",
+  "source_sha256_at_capture": "145de318b03e98351a064ad57a8ca739247c0f497d32b759af97ce50a8edbd78",
+  "source_mtime_utc": "2026-09-06T02:17:40.232825+00:00",
+  "selected_fields": {
+    "state": "running",
+    "pass": false,
+    "errors": [],
+    "source_commit": "1239159c185cd504c359bb20e98bde9986acbbb4",
+    "pid": 1712641,
+    "active_phase": "nominal",
+    "phases": [
+      {
+        "name": "probe",
+        "state": "passed",
+        "requested": {
+          "name": "probe",
+          "mode": "validate",
+          "num_envs": 1,
+          "steps": 100,
+          "solver_multiplier": 1,
+          "asset_model": "mkii_fourbar_v5"
+        },
+        "launcher_log": "/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/campaigns/fourbar-campaign-20260906T021507Z-9d668815/probe/launcher.log",
+        "argv": [
+          "/usr/bin/python3",
+          "/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source/isaaclab/deploy/run-mkii-fourbar",
+          "validate",
+          "--source-dir",
+          "/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source",
+          "--source-commit",
+          "1239159c185cd504c359bb20e98bde9986acbbb4",
+          "--output-root",
+          "/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/campaigns/fourbar-campaign-20260906T021507Z-9d668815/probe",
+          "--num-envs",
+          "1",
+          "--asset-model",
+          "mkii_fourbar_v5",
+          "--timeout-seconds",
+          "7200",
+          "--steps",
+          "100",
+          "--solver-multiplier",
+          "1"
+        ],
+        "supervisor_pid": 1712677,
+        "launcher_exit_code": 0,
+        "report": "/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/campaigns/fourbar-campaign-20260906T021507Z-9d668815/probe/hexapod-fourbar-validate-20260906T021508Z-e5cb9280/report.json",
+        "report_sha256": "2a85e74824a8fc28f8f74907e1324e94db5fa2728681d6685115dfe9bb35b9b2"
+      },
+      {
+        "name": "nominal",
+        "state": "running",
+        "requested": {
+          "name": "nominal",
+          "mode": "validate",
+          "num_envs": 32,
+          "steps": 1000,
+          "solver_multiplier": 1,
+          "asset_model": "mkii_fourbar_v5"
+        },
+        "launcher_log": "/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/campaigns/fourbar-campaign-20260906T021507Z-9d668815/nominal/launcher.log",
+        "argv": [
+          "/usr/bin/python3",
+          "/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source/isaaclab/deploy/run-mkii-fourbar",
+          "validate",
+          "--source-dir",
+          "/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source",
+          "--source-commit",
+          "1239159c185cd504c359bb20e98bde9986acbbb4",
+          "--output-root",
+          "/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/campaigns/fourbar-campaign-20260906T021507Z-9d668815/nominal",
+          "--num-envs",
+          "32",
+          "--asset-model",
+          "mkii_fourbar_v5",
+          "--timeout-seconds",
+          "7200",
+          "--steps",
+          "1000",
+          "--solver-multiplier",
+          "1"
+        ],
+        "supervisor_pid": 1716170
+      }
+    ],
+    "separate_process_resume_verified": false
+  }
+}
