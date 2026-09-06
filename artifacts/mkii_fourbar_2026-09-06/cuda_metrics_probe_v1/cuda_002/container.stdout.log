@@ -1,0 +1,52 @@
+{
+  "pass": true,
+  "report": "/workspace/validation_artifacts/report.json",
+  "randomized_case_count": 40,
+  "device": "cuda:0",
+  "timing_and_dispatch": [
+    {
+      "num_envs": 32,
+      "dtype": "torch.float32",
+      "current_timing": {
+        "median_seconds": 0.0014203242002986372,
+        "min_seconds": 0.0013959425315260886,
+        "max_seconds": 0.0014454764383845032,
+        "repeats": 7,
+        "calls_per_repeat": 100
+      },
+      "proposed_timing": {
+        "median_seconds": 0.0001351307285949588,
+        "min_seconds": 0.00013307597953826189,
+        "max_seconds": 0.00013708673883229495,
+        "repeats": 7,
+        "calls_per_repeat": 100
+      }
+    },
+    {
+      "num_envs": 512,
+      "dtype": "torch.float32",
+      "current_timing": {
+        "median_seconds": 0.0014949189801700413,
+        "min_seconds": 0.0014754338399507105,
+        "max_seconds": 0.0015073043899610638,
+        "repeats": 7,
+        "calls_per_repeat": 100
+      },
+      "proposed_timing": {
+        "median_seconds": 0.000133455831091851,
+        "min_seconds": 0.0001318284496665001,
+        "max_seconds": 0.0001359902508556843,
+        "repeats": 7,
+        "calls_per_repeat": 100
+      }
+    },
+    {
+      "num_envs": 32,
+      "dtype": "torch.float64"
+    },
+    {
+      "num_envs": 512,
+      "dtype": "torch.float64"
+    }
+  ]
+}
