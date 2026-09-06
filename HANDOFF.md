@@ -377,3 +377,79 @@ not physical admission. Compare actual reset positions, runtime parameters
 and earlier phase responses against campaign 008 before calling it an exact
 native-dynamics reproduction. Live recovery state is
 `/home/orionh/HEXAPOD_runs/mkii_motion_recovery_v1/recovery.json`.
+
+
+## 2026-09-06 11:40 UTC — exact failure replay, collision controls and candidate campaign
+
+The motion-prefix diagnostic completed all 32 × 2,500 controls at approximately
+03:50:35 UTC: 1,000 standing plus the first 15 individual motors through LR,
+40,000 physics samples and force writes per environment. It retained all 32
+original grid placements and the full preceding action history. Both standing
+windows, all 15 primary response minima, maximum C-pin separation
+0.213820967474 mm, raw demand 85.207611083984 N m, passive velocity residual
+221.326507568359 rad/s and relative pin velocity 7.051413536072 m/s match
+campaign 008 exactly. LM/LR direction, closure and support checks still fail;
+applied torque stays within its envelope. No reset or non-foot contact occurred.
+The native replay is completed diagnostic evidence, not training admission.
+
+Compact original evidence and the read-only verifier are preserved in
+`artifacts/mkii_fourbar_2026-09-06/prefix_replay_001/`. Its six detailed trace
+NPZs and 31 control-boundary NPZs remain on Spark in
+`/home/orionh/HEXAPOD_runs/mkii_motion_recovery_v1/prefix_replay_001/hexapod-fourbar-diagnose-20260906T032844Z-d73ff362/`.
+The remote inventory records exact paths, hashes, sizes and modification times;
+the local SHA manifest does not claim to contain those raw bytes. Detailed
+coverage is controls [2200,2500), or physics [35200,40000), all 32 environments.
+The replay used commit 3011b0f and functional identity
+`9fa39026e79ca4d327d67f58c37b9e2f800700e627994b51b3640bb53d106089`.
+The first traced LF-femur velocity impulse precedes clipping; subsequent
+artifact analyses preserve the chronology without claiming a unique cause.
+
+Release `ae4f38828181b33c9fc4fd2b8f9d68b03e6c31f1` adds the explicit
+`coincident_flat_origin_v1` flat-world layout; `grid_2m_v1` remains the default.
+Scene and terrain spacing are set to zero before construction. Actual USD
+transforms, native articulation/sensor rows, all authored collider ownership,
+all twelve mimic references per robot and exact per-env reset readbacks are
+verified. Layout selection is bound to admission and checkpoint runtime
+identity. Robot geometry, physical motor bounds, gains, 800 Hz physics /
+50 Hz policy timing and existing full physical gates are unchanged.
+
+926 CPU tests passed. The separate 297-path release manifest is
+`isaaclab/deploy/mkii_fourbar_v1_coincident_layout_pipeline.sha256`, SHA256
+`7c15d6ce4e6f5c516a361d74d7f062ae78a075450a2e123f073f1b535d0d757d`.
+Functional identity is
+`8fb32bc3e39642338bfbcf37bcc3a7e58d1ab0b8c901174532234248644a93e9`.
+Frozen source is `/home/orionh/HEXAPOD_runs/mkii_coincident_layout_v1/source`.
+Artifact-only overlap tools were added in 0ae0607 without changing that identity.
+Prior release manifests and failed evidence remain unchanged.
+
+The candidate's one-environment / 100-control startup probe passed. Supervisor
+PID 1805891 launched the separate full-body overlap controls at 04:32:03 UTC in
+`/home/orionh/HEXAPOD_runs/mkii_coincident_layout_v1/overlap_controls_001`.
+The filtered control passed. The original negative control hit its 600-second
+limit without GPU execution/output; this infrastructure failure is preserved.
+Negative retry PID 1842070 launched at 11:19:35 UTC and completed successfully:
+every source body was excited, with none unexcited. The combined successful
+pair report is `/home/orionh/HEXAPOD_runs/mkii_coincident_layout_v1/combined_overlap_001/pair_report.json`,
+SHA256 `3d67408fac04bc2f1484018806a7c3ea40efb260b85107a721c3f754b9f10e34`.
+Each case uses a fresh Kit process, two 31-body robots, 62 exact native views and
+31 foreign filters per view: 1,922 directed queries. Every source body seeing
+foreign contacts does not imply every possible body pair was physically excited. The negative case explicitly
+allows inter-environment contacts before physics initialization. Both controls
+must retain shared-ground support, exact source/layout identity, finite native
+UInt32-to-int64 counts, complete samples and unsaturated contact buffers.
+Neither case nor their pair report can grant training/hardware admission.
+
+Fresh campaign PID 1845574 launched at 11:40:47.559716 UTC, with output in
+`/home/orionh/HEXAPOD_runs/mkii_coincident_layout_v1/campaign_001/fourbar-campaign-20260906T114047Z-73b4f841/campaign.json`.
+It reuses the verified 100-control startup probe, then requires full nominal and
+refined standing plus every individual/group motion check before 64×3 scratch
+PPO, checkpoint/inference validation and separate 512×1,000 resumed PPO.
+PPO had not started at the launch snapshot. Read the actual campaign/progress
+files before asserting a later phase or launching any duplicate.
+
+Current guard PID 1845570 was renewed in
+`/home/orionh/HEXAPOD_runs/mkii_coincident_layout_v1/priority_20260906T114047Z/`
+and expires at 21:40:47.521619 UTC at the latest. Root owns the active GPU
+supervisor and reservation. The user removed the progress automation; it was
+confirmed absent and was not recreated. Actual policy video remains downstream
+of the admitted learner. No inference of terrain/hardware readiness follows.
