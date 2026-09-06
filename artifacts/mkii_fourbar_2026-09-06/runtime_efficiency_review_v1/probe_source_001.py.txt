@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+"""Synthetic CPU arithmetic/dispatch comparison; never starts a simulator or CUDA."""
+from __future__ import annotations
+
+import argparse
+from collections import Counter
+import hashlib
+import importlib.util
+import json
+import os
+from pathlib import Path
+import platform
+import statistics
+import time
+
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+os.environ["OMP_NUM_THREADS"] = "1"
+
+import torch
+from torch.utils._python_dispatch import TorchDispatchMode
+
+ROOT = Path(__file__).resolve().parents[3]
+VALIDATOR = ROOT / "isaaclab/validate_mkii_fourbar.py"
+KINEMATICS = ROOT / "configs/mkii_fourbar_v3_kinematics.json"
+spec = importlib.util.spec_from_file_location("review_validator", VALIDATOR)
+validator = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(validator)
+
+
+def setup(num_envs, dtype, seed):
+    torch.manual_seed(seed)
+    kinematics = json.loads(KINEMATICS.read_text())
+    # Intentionally permute both lists; a proposed production implementation must
+    # bind cached indices to runtime names, not rely on USD/config index order.
+    bodies = list(kinematics["body_paths"])
+    bodies = [bodies[i] for i in torch.randperm(len(bodies)).tolist()]
+    joints = list(kinematics["tree_joint_names"])
+    joints = [joints[i] for i in torch.randperm(len(joints)).tolist()]
+    frames = []
+    for name in kinematics["closure_joint_names"]:
+        record = kinematics["joint_frames"][name]
+        frames.append([(bodies.index(record[f"body{s}"]),
+            torch.tensor(record[f"body{s}_from_hinge_matrix"], dtype=dtype)) for s in (0, 1)])
+    relations = [(joints.index(name), joints.index(r["source_joint"]), r["multiplier"])
+                 for name,r in kinematics["passive_relations"].items()]
+    indices = torch.tensor([[i for i,_ in pair] for pair in frames])
+    offsets = torch.stack([torch.stack([f[:3,3] for _,f in pair]) for pair in frames])
+    axes = torch.stack([torch.stack([f[:3,2] for _,f in pair]) for pair in frames])
+    relation_indices = torch.tensor([[a,b] for a,b,_ in relations])
+    multipliers = torch.tensor([m for _,_,m in relations], dtype=dtype)
+    rotations,_ = torch.linalg.qr(torch.randn(num_envs,31,3,3,dtype=dtype))
+    args = (torch.randn(num_envs,31,3,dtype=dtype), rotations,
+            torch.randn(num_envs,31,3,dtype=dtype), torch.randn(num_envs,31,3,dtype=dtype),
+            torch.randn(num_envs,30,dtype=dtype),
+            tuple(torch.randn(num_envs,1,3,dtype=dtype) for _ in range(31)))
+    return args,frames,relations,(indices,offsets,axes,relation_indices,multipliers)
+
+
+def current(args,frames,relations):
+    pos,rot,lin,ang,qdot,sensor_forces = args
+    pin_velocity = validator.closure_relative_point_velocities(rot,lin,ang,frames)
+    passive_velocity = validator.passive_joint_velocity_residuals(qdot,relations)
+    point_error,axis_error = [],[]
+    # These statements match the corresponding PhysicalMetrics.capture block.
+    for pair in frames:
+        states = [(pos[:,i] + torch.einsum("nij,j->ni",rot[:,i],f[:3,3]),
+                   torch.einsum("nij,j->ni",rot[:,i],f[:3,2])) for i,f in pair]
+        point_error.append(torch.linalg.vector_norm(states[0][0]-states[1][0],dim=-1))
+        axis_error.append(torch.linalg.vector_norm(states[0][1]-states[1][1],dim=-1))
+    forces = torch.stack([torch.linalg.vector_norm(value,dim=-1).amax(-1) for value in sensor_forces],dim=1)
+    return torch.stack(point_error,1),torch.stack(axis_error,1),pin_velocity,passive_velocity,forces
+
+
+def proposed(args,cached):
+    pos,rot,lin,ang,qdot,sensor_forces = args
+    indices,offsets,axes,relation_indices,multipliers = cached
+    flat_indices = indices.flatten()
+    batch = pos.shape[0]
+    r = rot.index_select(1,flat_indices).reshape(batch,6,2,3,3)
+    offset_w = torch.einsum("nlbij,lbj->nlbi",r,offsets)
+    axis_w = torch.einsum("nlbij,lbj->nlbi",r,axes)
+    centers = pos.index_select(1,flat_indices).reshape(batch,6,2,3)+offset_w
+    velocities = (lin.index_select(1,flat_indices).reshape(batch,6,2,3)
+        + torch.cross(ang.index_select(1,flat_indices).reshape(batch,6,2,3),offset_w,dim=-1))
+    point_error = torch.linalg.vector_norm(centers[:,:,0]-centers[:,:,1],dim=-1)
+    axis_error = torch.linalg.vector_norm(axis_w[:,:,0]-axis_w[:,:,1],dim=-1)
+    passive_velocity = (qdot.index_select(1,relation_indices[:,0])
+                        - multipliers*qdot.index_select(1,relation_indices[:,1]))
+    # Native sensor acquisition is deliberately unchanged, including all 31
+    # sensor views. This only batches the downstream norm over each XYZ vector.
+    forces = torch.linalg.vector_norm(torch.stack(sensor_forces,1),dim=-1).amax(-1)
+    return point_error,axis_error,velocities[:,:,1]-velocities[:,:,0],passive_velocity,forces
+
+
+class Dispatches(TorchDispatchMode):
+    def __init__(self):
+        super().__init__()
+        self.counts = Counter()
+
+    def __torch_dispatch__(self,func,types,args=(),kwargs=None):
+        self.counts[str(func)] += 1
+        return func(*args,**(kwargs or {}))
+
+
+def time_call(function,repeats=7,loops=100):
+    for _ in range(20):
+        function()
+    values=[]
+    for _ in range(repeats):
+        start=time.perf_counter()
+        for _ in range(loops):
+            function()
+        values.append((time.perf_counter()-start)/loops)
+    return {"median_seconds":statistics.median(values),"min_seconds":min(values),
+            "max_seconds":max(values),"repeats":repeats,"calls_per_repeat":loops}
+
+
+def main():
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--report",type=Path,required=True)
+    args=p.parse_args()
+    if args.report.exists():
+        raise ValueError("Do not overwrite benchmark evidence")
+    torch.set_num_threads(1)
+    results=[]
+    for dtype in (torch.float32,torch.float64):
+        for count in (32,512):
+            inputs,frames,relations,cached=setup(count,dtype,seed=19+count)
+            old=lambda:current(inputs,frames,relations)
+            new=lambda:proposed(inputs,cached)
+            a,b=old(),new()
+            differences=[]
+            for name,left,right in zip(("point_error_m","axis_chord","pin_velocity_m_s","passive_velocity_rad_s","force_norm_n"),a,b):
+                error=float((left-right).abs().max())
+                differences.append({"name":name,"bitwise_equal":torch.equal(left,right),"max_abs_error":error})
+                torch.testing.assert_close(left,right,rtol=16*torch.finfo(dtype).eps,atol=16*torch.finfo(dtype).eps)
+            rows={"num_envs":count,"dtype":str(dtype),"comparisons":differences}
+            if dtype==torch.float32:
+                rows["current_cpu_timing"]=time_call(old)
+                rows["proposed_cpu_timing"]=time_call(new)
+                for name,fn in (("current",old),("proposed",new)):
+                    mode=Dispatches()
+                    with mode:fn()
+                    rows[name+"_aten_dispatches"]={"total":sum(mode.counts.values()),"operations":dict(sorted(mode.counts.items()))}
+            results.append(rows)
+    report={"schema":"hexapod.cpu_metrics_batch_review.v1","pass":True,"physics_qualification":False,
+        "torch":torch.__version__,"python":platform.python_version(),"machine":platform.machine(),
+        "system":platform.system(),"threads":torch.get_num_threads(),"cuda_initialized":torch.cuda.is_initialized(),
+        "scope":"synthetic arithmetic only; no native sensors, full PhysicalMetrics, PhysX, GPU, or training",
+        "source_sha256":{str(path.relative_to(ROOT)):hashlib.sha256(path.read_bytes()).hexdigest() for path in
+            (VALIDATOR,KINEMATICS,ROOT/'packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/env.py',Path(__file__))},
+        "results":results}
+    assert not report["cuda_initialized"]
+    args.report.write_text(json.dumps(report,indent=2,allow_nan=False)+'\n')
+    print(json.dumps({"pass":True,"report":str(args.report),"results":[{k:v for k,v in row.items() if not k.endswith('_aten_dispatches')} for row in results]},indent=2))
+
+
+if __name__=="__main__":main()
