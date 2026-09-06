@@ -144,7 +144,20 @@ observational and must be reviewed for the known constraint-velocity issue.
 No prior short standing report grants admission to the new source. The
 published sixteen-velocity manifest is retained unchanged in this release.
 
-`isaaclab/deploy/mkii_fourbar_v1_placement_convergence_pipeline.sha256` covers **all 112 historical
+The placement-convergence source `fd34f66` remains frozen. Its full campaign
+was interrupted by an explicit shared-compute request before completing
+standing validation; it produced no nominal final report or PPO checkpoint.
+The user subsequently granted exclusive Spark takeover. The next release
+changes only coordination handling and release bookkeeping: the supervisor
+reads exactly one canonical share-control line, records its semantic state
+separately from raw note hashes, and ignores ordinary prose edits for control.
+Explicit or invalid control still yields validation immediately and latches
+the existing 120-second checkpoint grace for training. Initial and pre-barrier
+control checks, unrelated-workload gates and exact-container cleanup remain.
+This does not enable concurrent GPU sharing, alter robot dynamics or admit
+prior incomplete runs. The old manifest and source are not rewritten.
+
+`isaaclab/deploy/mkii_fourbar_v1_coordination_control_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

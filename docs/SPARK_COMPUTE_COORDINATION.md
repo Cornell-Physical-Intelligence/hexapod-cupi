@@ -98,7 +98,8 @@ quota because that would affect both projects.
    proceed alongside the hexapod run if memory remains available.
 2. Record your workload type, expected memory, expected duration, launch
    command/container identity and preferred window in the handoff section
-   below and explicitly write **SHARING REQUESTED**, with a UTC timestamp.
+   below with a UTC timestamp, and change the single canonical control line
+   from `HEXAPOD_SHARE_STATUS=NONE` to `HEXAPOD_SHARE_STATUS=REQUESTED`.
    This file is the agreed coordination channel. The hexapod agent should
    acknowledge the request here and coordinate the next checkpoint/pilot;
    another user confirmation of the earlier 60/40 preference is unnecessary.
@@ -134,9 +135,10 @@ The original `/home/orionh/HEXAPOD` mirror is not a Git checkout.
   identity verification. It releases on that campaign's completion, failure,
   pause or process exit, with a hard maximum of 14:56:24 UTC. It does not launch
   GPU work or signal any workload. Check status; recorded PIDs can become stale.
-- **Sharing request status: NONE RECORDED.** Other agent: add your workload,
-  memory requirement, preferred overlap window, UTC timestamp and
-  **SHARING REQUESTED** here. Do not launch a competing GPU job before the
+- **Sharing request status: read the canonical control line below.** Other
+  agent: add your workload, memory requirement, preferred window and UTC
+  timestamp, then set that line to `HEXAPOD_SHARE_STATUS=REQUESTED`.
+  Do not launch a competing GPU job before the
   handoff is acknowledged or a paired sharing pilot is agreed.
 - MPS / shared launcher: not enabled by this task. Current resource checks
   remain exclusive for physical validation and training.
@@ -146,11 +148,26 @@ The original `/home/orionh/HEXAPOD` mirror is not a Git checkout.
 HEXAPOD_SHARE_STATUS=NONE
 
 For the new guarded physical-model runner, change that single line to
-`HEXAPOD_SHARE_STATUS=REQUESTED` and add your workload details below. Any change
-to the shared file during training requests a checkpoint and pause at the next
-PPO iteration; the supervisor allows at most 120 seconds before stopping only its
-owned container. GPU contention causes an immediate owned-job stop. No MPS
-allocation is installed. Keep the earlier 60/40 preference for a coordinated pilot.
+`HEXAPOD_SHARE_STATUS=REQUESTED` and add your workload details below. The
+`canonical_share_status_v2` supervisor reacts to that explicit control state;
+ordinary prose, timestamps and status updates do not request a pause. Keep exactly
+one unindented control line with no extra spaces or inline comments. Missing,
+duplicate, malformed or unreadable control state blocks initial admission and
+is checked again before releasing the CPU-only launch barrier.
+
+During training, an explicit request or invalid control state creates the existing
+checkpoint/pause marker and allows 120 seconds of grace for the next PPO iteration
+to save and exit. Validation and diagnostics yield immediately. Once observed,
+the request remains latched for that run even if the note later returns to `NONE`;
+only a separately admitted run may consume the cleared state. GPU contention still
+causes an immediate owned-job stop. Use an atomic file replacement when changing
+the control line, so a partial rewrite cannot look like missing control state.
+
+The supervisor records the canonical semantic token separately from the raw
+initial-note SHA256 and later note snapshots. The raw hash is provenance, not a
+pause trigger. Archived supervisors retain their historical behavior; this
+protocol applies only to newly versioned runs. No MPS allocation is installed.
+Keep the earlier 60/40 preference for a coordinated pilot.
 
 The new source is `/home/orionh/HEXAPOD_runs/mkii_fourbar_v1/source`, branch
 `codex/mkii-fourbar-training`. Campaign logs/checkpoints are in the sibling
@@ -168,9 +185,10 @@ That first guard/campaign has ended. A second identified weather nowcast process
 PID 1231813, was also stopped with SIGTERM under the same explicit priority
 instruction; outputs and unrelated CPU work were retained. The current bounded
 reservation is recorded above and in its own JSON, outside the frozen source.
-The remote shared note is intentionally not rewritten during an active phase:
-any byte change is a checkpoint/pause request. Publish the refreshed note after
-the campaign reaches a terminal state, preserving any intervening agent request.
+Under that historical supervisor, any byte change requested a checkpoint/pause,
+so the remote note was not rewritten during an active phase. The canonical
+control protocol above supersedes that behavior for new runs; preserve explicit
+requests when publishing a refreshed note.
 
 ## Renewed priority at2026-09-05 07:02 UTC
 

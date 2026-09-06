@@ -590,15 +590,59 @@ def validate_written_report(path, *, args, contract):
     return {key: result.get(key) for key in ('pass', 'mode', 'simulation_training_admission', 'iterations_completed', 'paused')}
 
 
+def read_coordination_control():
+    """Read one canonical control line; retain prose bytes only as audit evidence."""
+    snapshot = {'protocol': 'canonical_share_status_v2', 'status': 'INVALID',
+                'semantic_token': None, 'raw_note_sha256': None}
+    try:
+        content = COORDINATION.read_bytes()
+    except OSError:
+        return dict(snapshot, error='Shared coordination file could not be read')
+    snapshot['raw_note_sha256'] = hashlib.sha256(content).hexdigest()
+    try:
+        text = content.decode('utf-8')
+    except UnicodeError:
+        return dict(snapshot, error='Shared coordination file is not valid UTF-8')
+    # Detect malformed/indented/case-changed control lines as well as duplicates;
+    # a valid NONE elsewhere must not hide an ambiguous control assignment.
+    controls = [line for line in text.splitlines()
+                if line.lstrip().upper().startswith('HEXAPOD_SHARE_STATUS')]
+    if len(controls) != 1 or re.fullmatch(r'HEXAPOD_SHARE_STATUS=(NONE|REQUESTED)', controls[0]) is None:
+        return dict(snapshot, error='Shared coordination file requires one canonical NONE or REQUESTED control line')
+    snapshot['semantic_token'] = controls[0]
+    snapshot['status'] = controls[0].split('=', 1)[1]
+    return snapshot
+
+
+def require_coordination_none(snapshot):
+    if snapshot['status'] != 'NONE':
+        raise Blocked(snapshot.get('error', 'Shared coordination file explicitly requests sharing'))
+
+
 def coordination_snapshot():
-    content = COORDINATION.read_bytes()
-    text = content.decode('utf-8')
-    # Explicit machine-readable state, kept beside the human notes. Unrecognized
-    # or duplicate states fail closed; prose is never evaluated as commands.
-    matches = re.findall(r'^HEXAPOD_SHARE_STATUS=(NONE|REQUESTED)\s*$', text, re.MULTILINE)
-    if matches != ['NONE']:
-        raise Blocked('Shared coordination file requests sharing or lacks one unambiguous NONE state')
-    return hashlib.sha256(content).hexdigest()
+    """Compatibility initial check; returned raw hash is evidence, not control."""
+    snapshot = read_coordination_control()
+    require_coordination_none(snapshot)
+    return snapshot['raw_note_sha256']
+
+
+def poll_coordination(report, output, mode, pause_deadline, now):
+    """Latch explicit/invalid control while preserving the bounded checkpoint grace."""
+    snapshot = read_coordination_control()
+    report['coordination_latest'] = snapshot
+    if snapshot['status'] != 'NONE' and pause_deadline is None:
+        reason = ('explicit sharing request' if snapshot['status'] == 'REQUESTED'
+                  else 'invalid sharing control')
+        (output / 'stop_requested').write_text(f'{reason}; checkpoint and pause.\n')
+        pause_deadline = now + 120
+        report['pause_requested'] = reason
+        report['coordination_pause_trigger'] = snapshot
+        report['checkpoint_pause_grace_seconds'] = 120
+    # An observed request remains latched even if another writer restores NONE.
+    # Only the next separately admitted run may consume the cleared request.
+    if pause_deadline is not None and (mode != 'train' or now >= pause_deadline):
+        raise Blocked('Coordination handoff requested; owned job yielded compute')
+    return pause_deadline
 
 
 def compose_argv(source, output, name, owner, args):
@@ -739,9 +783,13 @@ def main(argv=None):
     for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
         signal.signal(signum, stop_signal)
     try:
-        shared_digest = coordination_snapshot()
+        shared_control = read_coordination_control()
+        report['coordination_protocol'] = shared_control['protocol']
+        report['coordination_initial'] = shared_control
+        # Retain the historical field as raw initial-note provenance only.
+        report['coordination_sha256'] = shared_control['raw_note_sha256']
+        require_coordination_none(shared_control)
         report['contract'] = contract
-        report['coordination_sha256'] = shared_digest
         report['source_manifest'] = snapshot_source(source, output / 'source.SHA256SUMS')
         report['source_archive'] = archive_source(source, output / 'source.SHA256SUMS', output / 'source.tar.gz',
             expected_manifest_sha256=report['source_manifest']['sha256'])
@@ -763,6 +811,8 @@ def main(argv=None):
             require_requested_asset(require_admission(args.admission, contract), args.asset_model, contract)
             if args.checkpoint:
                 require_checkpoint(args.checkpoint, contract)
+        report['coordination_before_barrier'] = read_coordination_control()
+        require_coordination_none(report['coordination_before_barrier'])
         (output / 'admitted').touch(exist_ok=False)
         report['execution'] = 'running'
         atomic_json(output / 'supervisor.json', report)
@@ -783,13 +833,7 @@ def main(argv=None):
             if time.monotonic() >= deadline:
                 raise Blocked(f'Validation exceeded {args.timeout_seconds} second execution timeout')
             if time.monotonic() >= next_gate:
-                if hashlib.sha256(COORDINATION.read_bytes()).hexdigest() != shared_digest:
-                    if pause_deadline is None:
-                        (output / 'stop_requested').write_text('Shared coordination file changed; checkpoint and pause.\n')
-                        pause_deadline = time.monotonic() + 120
-                        report['pause_requested'] = 'shared coordination file changed'
-                    if args.mode != 'train' or time.monotonic() >= pause_deadline:
-                        raise Blocked('Coordination changed; owned job yielded compute')
+                pause_deadline = poll_coordination(report, output, args.mode, pause_deadline, time.monotonic())
                 report['last_runtime_gate'] = resource_gate(owned_container=current, allow_owned_gpu=True)
                 atomic_json(output / 'supervisor.json', report)
                 next_gate = time.monotonic() + 5
