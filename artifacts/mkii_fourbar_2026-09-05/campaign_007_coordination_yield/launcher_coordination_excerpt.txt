@@ -1,0 +1,57 @@
+Source: fd34f661bd672df9f68e6d8568548ad092ef32cf:isaaclab/deploy/run-mkii-fourbar
+Full source SHA256: 8c2e06f28fdaf39cbed61b53ae3d7244e3693b0b833e9b7cc5e005cbfb270798
+
+782:                 break
+783:             if time.monotonic() >= deadline:
+784:                 raise Blocked(f'Validation exceeded {args.timeout_seconds} second execution timeout')
+785:             if time.monotonic() >= next_gate:
+786:                 if hashlib.sha256(COORDINATION.read_bytes()).hexdigest() != shared_digest:
+787:                     if pause_deadline is None:
+788:                         (output / 'stop_requested').write_text('Shared coordination file changed; checkpoint and pause.\n')
+789:                         pause_deadline = time.monotonic() + 120
+790:                         report['pause_requested'] = 'shared coordination file changed'
+791:                     if args.mode != 'train' or time.monotonic() >= pause_deadline:
+792:                         raise Blocked('Coordination changed; owned job yielded compute')
+793:                 report['last_runtime_gate'] = resource_gate(owned_container=current, allow_owned_gpu=True)
+794:                 atomic_json(output / 'supervisor.json', report)
+795:                 next_gate = time.monotonic() + 5
+796:             time.sleep(1)
+797:     except (Blocked, subprocess.TimeoutExpired, OSError, ValueError) as exc:
+798:         report['execution'] = 'failed'; report['error'] = str(exc); exit_code = 1
+799:     finally:
+800:         for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+801:             signal.signal(signum, signal.SIG_IGN)
+802:         try:
+803:             # Resolve our unique name only if creation failed before returning
+804:             # an ID; require both exact name and unpredictable ownership label.
+805:             if container is None:
+806:                 container = inspect_container(name)
+807:             if check_identity(container, name, owner):
+808:                 current = inspect_container(container['id'])
+809:                 if not check_identity(current, name, owner):
+810:                     raise Blocked('Cannot prove final identity/state of the owned container')
+811:                 if current['running']:
+812:                     command(['docker', 'stop', '--time', '25', container['id']], timeout=30, check=False)
+813:                 with (output / 'container.log').open('w') as log:
+814:                     subprocess.run(['docker', 'logs', '--timestamps', container['id']], stdout=log, stderr=subprocess.STDOUT, timeout=20)
+815:                 after = inspect_container(container['id'])
+816:                 if after and not after['running']:
+817:                     report['final_container_exit_code'] = after['exit_code']
+818:                     removed = command(['docker', 'rm', container['id']], timeout=15, check=False)
+819:                     report['cleanup'] = 'removed_exact_id' if removed.returncode == 0 else 'stopped_removal_failed'
+820:                     if removed.returncode:
+821:                         exit_code = 1
+822:                 else:
+823:                     raise Blocked('Owned container is still running after bounded stop')
+824:             elif container is not None:
+825:                 raise Blocked('Cleanup refused a container ownership mismatch')
+826:         except (Blocked, subprocess.TimeoutExpired, OSError, ValueError) as exc:
+827:             report['cleanup'] = 'FAILED'; report['cleanup_error'] = str(exc)
+828:             report['execution'] = 'failed'; exit_code = 1
+829:         try:
+830:             report['source_identity_unchanged_at_finish'] = require_unchanged_source(source, contract, 'during execution')
+831:             report['validator_report_present'] = (output / 'report.json').is_file()
+832:             if exit_code != 0 and not report['validator_report_present']:
+833:                 report['validator_report_status'] = 'missing_after_process_failure'
+834:             if exit_code == 0:
+835:                 report['validator_summary'] = validate_written_report(output / 'report.json', args=args, contract=contract)

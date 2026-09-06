@@ -269,3 +269,28 @@ Bootstrap and launch record reside in the same remote run parent:
 The unchanged-source first PPO throughput must be measured before forecasting
 full training duration; see `docs/MKII_RUNTIME_PROFILING.md`. No runtime
 optimization has been applied or justified solely from GPU utilization.
+
+## 2026-09-06 02:08 UTC — interrupted campaign and user-authorized takeover
+
+Campaign007 stopped because coordination changed, not a recorded model failure.
+Last flushed nominal step600/1000 was22:18:24.289578780UTC; first stop marker
+mtime22:18:56.719657UTC; campaign terminal mtime22:19:22.910692UTC. No nominal
+final report, driven progress, refined phase or PPO exists. Original evidence:
+`artifacts/mkii_fourbar_2026-09-05/campaign_007_coordination_yield/`.
+The prior reservation1667860 released22:19:23.982830UTC.
+
+The user explicitly instructed full takeover and push. Queue1706414 identity
+was verified by recorded start ticks and exact /proc script arguments, then
+sent SIGTERM; its own handler stopped its GPU child group. Outputs preserved.
+At02:08:18UTC, that parent and all GPU processes were gone. Successor bounded
+guard1711343 holds `/opt/wx/gpu.lock`; status/release files:
+`/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/priority_20260906T020649Z/`.
+It expires2026-09-06T12:06:50.120523Z at the latest; attach the next exact
+campaign via campaign_path.txt once launched. Shared note now records fresh
+exclusive user priority and HEXAPOD_SHARE_STATUS=NONE. No MPS/concurrency.
+
+Sourcefd34f66 and interrupted evidence remain frozen. The next supervisor
+release fixes prose edits causing false handoff requests while retaining
+explicit/invalid control handling and all resource/physics gates. It needs
+its own source manifest, tests, immutable staging and fresh full validation.
+Takeover evidence is `artifacts/mkii_fourbar_2026-09-05/coordination_recovery_20260906/`.
