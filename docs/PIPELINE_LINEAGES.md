@@ -179,7 +179,18 @@ by its implementation or by an overlap diagnostic: full matched nominal/refined
 physical validation remains required. External overlap/video tools are separate
 artifact scripts with their own hashes, outside the frozen runtime identity.
 
-`isaaclab/deploy/mkii_fourbar_v1_coincident_layout_pipeline.sha256` covers **all 112 historical
+The coincident-layout release remains frozen at `ae4f388`. Its full nominal
+finished but missed the unchanged closure-position bound; no PPO was admitted.
+The next release fixes two independently reproduced RSL-RL 5.0.1 API issues:
+the trainer now applies Isaac Lab's deprecated-config adapter before runner
+construction, and clones only inference-created model buffers before strict
+checkpoint reload. It preserves buffer values, parameters, optimizer state,
+normalizer settings and all physical parameters/bounds. Actual CPU runner
+learning, checkpoint roundtrip and further learning in both the same and a
+fresh runner are separate API evidence, not robot training. The new source
+identity requires its own physical qualification; prior reports do not admit it.
+
+`isaaclab/deploy/mkii_fourbar_v1_rsl501_compat_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

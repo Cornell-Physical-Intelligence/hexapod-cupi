@@ -94,6 +94,40 @@ def restore_adaptive_learning_rate(algorithm):
     algorithm.learning_rate = rates[0]
 
 
+def runner_config_dict(agent_cfg, version="5.0.1"):
+    """Apply the installed Lab compatibility adapter before RSL 5 construction."""
+    if version != "5.0.1":
+        raise ValueError("Only the reviewed RSL-RL 5.0.1 runner configuration is supported")
+    from isaaclab_rl.rsl_rl import handle_deprecated_rsl_rl_cfg
+
+    # Lab's new model config still inherits obsolete stochastic keyword fields.
+    # Its adapter removes them while preserving distribution/normalizer settings.
+    agent_cfg = handle_deprecated_rsl_rl_cfg(agent_cfg, version)
+    result = agent_cfg.to_dict()
+    result["check_for_nan"] = True
+    return result
+
+
+def prepare_algorithm_buffers_for_load(algorithm):
+    """Keep RSL's rollout-created inference buffers writable for strict reload."""
+    import torch
+    replaced = []
+    for model_name in ("actor", "critic", "rnd"):
+        model = getattr(algorithm, model_name, None)
+        if model is None:
+            continue
+        for module_name, module in model.named_modules():
+            for name, tensor in tuple(module.named_buffers(recurse=False)):
+                if tensor.is_inference():
+                    # RSL 5 assigns normalizer._std inside the rollout's inference
+                    # context. Clone only those buffers, never parameters or Adam
+                    # state, so load_state_dict may copy into them outside it.
+                    with torch.inference_mode(False):
+                        setattr(module, name, tensor.clone())
+                    replaced.append(".".join(filter(None, (model_name, module_name, name))))
+    return replaced
+
+
 def compare_admitted_runtime(admitted, actual):
     """Compare every JSON field, preserving scalar types and joint/list order."""
     comparison = {"pass": False, "method": "exact complete runtime manifest equality",
@@ -288,6 +322,7 @@ def main(argv=None):
                             "checkpoint_sha256": digest(path), "next_iteration": self.current_learning_iteration + 1})
 
                     def load(self, *args, **kwargs):
+                        prepare_algorithm_buffers_for_load(self.alg)
                         infos = super().load(*args, **kwargs)
                         restore_adaptive_learning_rate(self.alg)
                         algorithm_state_digest(self)
@@ -306,8 +341,7 @@ def main(argv=None):
                 agent_cfg.device = str(env.unwrapped.device)
                 agent_cfg.save_interval = 10
                 agent_cfg.logger = "tensorboard"
-                agent_dict = agent_cfg.to_dict()
-                agent_dict["check_for_nan"] = True
+                agent_dict = runner_config_dict(agent_cfg, report["rsl_rl_version"])
                 runner = GuardedRunner(wrapped, agent_dict, log_dir=str(output / "ppo"), device=agent_cfg.device)
                 from validate_mkii_fourbar import PhysicalMetrics
                 kinematics = json.loads((ROOT / "configs/mkii_fourbar_v3_kinematics.json").read_text())

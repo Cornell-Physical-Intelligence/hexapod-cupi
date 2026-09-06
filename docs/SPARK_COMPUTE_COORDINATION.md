@@ -1,3 +1,9 @@
+> Current policy recovered 2026-09-06: the authoritative shared file records a
+> 13:33 UTC user pause for HEXAPOD pending explicit resume and prohibits long-lived
+> exclusive reservations. `HEXAPOD_SHARE_STATUS=REQUESTED` is active. Earlier full
+> takeover notes below are historical. Do not clear that control or create a new
+> lease from these old instructions. Normal per-job collision locks remain required.
+
 # Spark coordination: hexapod and a second agent
 
 Updated 2026-09-05 UTC. **Current user instruction: give the hexapod campaign

@@ -453,3 +453,11 @@ and expires at 21:40:47.521619 UTC at the latest. Root owns the active GPU
 supervisor and reservation. The user removed the progress automation; it was
 confirmed absent and was not recreated. Actual policy video remains downstream
 of the admitted learner. No inference of terrain/hardware readiness follows.
+
+## 2026-09-06 — coincident full nominal failure and recovered pause
+
+The full coincident-origin nominal finished at12:10UTC, failing only the unchanged 0.100mm C-pin separation bound (observed0.111171183mm). All36 direction responses pass; maximum raw/applied4.423689Nm, at least3 loaded feet, no resets/non-foot contacts/nonfinite samples. No refined run or PPO started. Six original campaign/report/supervisor/source-inventory/audit/log files are preserved under `artifacts/mkii_fourbar_2026-09-06/coincident_nominal_failure_001/`, verified against remote SHA-256 values.
+
+The shared Spark file contains a newer13:33UTC user instruction from the weather task: pause HEXAPOD pending explicit resume and never hold a long-lived exclusive reservation. Guard1845570 released13:33:47UTC. Root recovered this state at22:51–22:55UTC; preflight blocked on canonical REQUESTED before creating a new output directory/guard/GPU job. No launch occurred. The five-minute progress automation remains removed. Historical full-priority notes do not override the newer pause. Current work continues locally with actual RSL5.0.1 CPU runner/checkpoint integration and an official-reference CAD export audit.
+
+The corrected RSL-RL release has functional identity `d6fbd6e9b5cf499dd8603613d6977ff226f443fb15f149bbe320fc11e15d5b54`, a new298-path manifest SHA `418cb5cf1ccc10729407e19e0c2962b83736c6ed17c9b6dd49bbac041c499868`, and931 passing repository tests (75.778s). Both actual CPU API fixes pass strict save/load and continued optimization in the same and a fresh runner; this is synthetic API evidence, not physical robot PPO. New CAD audit documents the pad-envelope undercoverage, reconstructed export structure and official OpenArm/SO101 reference differences. Capture v2 and the one-shot follower have33 focused tests; neither is deployed.

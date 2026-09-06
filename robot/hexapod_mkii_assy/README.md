@@ -1,5 +1,16 @@
 # Hexapod MKII full assembly (from the onshape-to-robot export)
 
+The intended physical simulation candidate is now the **31-body, 30-coordinate,
+18-motor four-bar model**, including the tibia pushlever and pushrod as moving
+bodies. Its v5 USD uses native PhysX bilateral mimic constraints to transmit
+forces through the CAD parallelograms. Follow
+[the physical campaign documentation](../../docs/MKII_FOURBAR_TRAINING.md),
+and [STATUS.md](../../STATUS.md) for admission and training outcomes. A generated
+asset or a CPU audit pass does not establish a successful PPO run.
+
+The source URDFs and serial-v2 workflow below retain their historical identities.
+The 19-link serial reduction is not the physical four-bar training asset.
+
 `robot/tools/import_onshape_hexapod.py` built this package from the
 2026-09-03 `hexapod-mkii-assy` export (a single merged link: 1927 part
 instances, exact per-part Onshape mass properties, per-part CAD colours, no
@@ -19,10 +30,19 @@ python3 robot/tools/import_onshape_hexapod.py \
   leg, `coxa`, `femur`, `tibia`, `tibia_push_lever`, `tibia_pushrod`. The
   tibia four-bar motion is approximated by `<mimic>` joints (lever = +tibia,
   rod = -tibia); the cut pivot of each loop is documented in a comment. The
-  documented pin points differ by about 0.5 mm, mainly axially. Mimic motion
-  is not a physical loop constraint; see [the step-1 audit](../../docs/MKII_STEP1.md).
+  source comment's pin points differ by about 0.5 mm, mainly axially. This is
+  a carried-frame discrepancy, not evidence of a 0.5 mm physical CAD bore
+  mismatch. The [pin-frame recovery](../../artifacts/mkii_step2_2026-09-04/physical_fourbar_reference/README.md)
+  derives the actual 30 mm / 77.5 mm parallelogram from the current CAD geometry.
+  These URDF mimics describe kinematics; the physical v5 USD authors a distinct
+  native constraint formulation.
 - `urdf/hexapod_mkii_serial.urdf`: 19 links / 18 revolute joints (lever and
-  pushrod welded into the femur): the training-pipeline contract.
+  pushrod welded into the femur): historical serial approximation. Welding
+  these moving bodies changes the linkage dynamics.
+- `usd/hexapod_mkii_fourbar_v5/`: immutable physical candidate bundle, including
+  all 31 moving bodies, CAD-derived pin frames, and twelve native bilateral
+  mimic constraints. Its eighteen active coordinates are coxa, femur and
+  **pushlever motor** positions; passive knee/rod coordinates are not actions.
 - `meshes/`: the 77 export STLs with ASCII-safe names (vendor motor parts
   renamed `motor_*`; the map is in `assembly_report.json`).
 - `part_overrides.json`: user-verified attachments the leg record cannot
@@ -68,13 +88,16 @@ python3 robot/tools/import_onshape_hexapod.py \
   leg-internal joint transforms from this assembly (mean of the six legs,
   leg-to-leg spread 0.03 mm). The knee sits 0.5 mm further along its axis
   than in the leg export.
-- Current simulation stance (`stance_v2.json`): coxa 0, femur -0.25, tibia
+- Historical serial-v2 stance (`stance_v2.json`): coxa 0, femur -0.25, tibia
   -0.55; geometric contact height 0.137964 m, reset height 0.142964 m. These
   heights are derived from the actual collision primitives and give every pad
   at least 5 mm clearance at the nominal pose before reset jitter. They are
   not a measured settling height or
   a torque validation. Historical `stance.json` stays unchanged for v1
   reproducibility; its 0.130 m reset penetrates the ground by up to 7.964 mm.
+  The physical four-bar task instead derives all 30 reset coordinates from
+  the 18 motor positions and per-leg CAD phase offsets, with a 0.142970 m
+  plate reset height. Do not copy serial knee defaults into pushlever actions.
 - Inertials: parallel-axis sums of Onshape's per-part mass, centroid and
   inertia (from the export's `robot.pkl`), with one hard override: every
   RS05 actuator totals 191 g (its vendor CAD is a 62 g hollow shell; the
@@ -91,7 +114,11 @@ python3 robot/tools/import_onshape_hexapod.py \
   silicone foot pad.
 - Materials: the 14 CAD colours are shared `<material>` definitions.
 
-## Isaac Sim / Isaac Lab
+## Historical serial-v2 Isaac Sim / Isaac Lab workflow
+
+This section explains the retained serial-v2 lineage. For current physical
+four-bar work, use the campaign link at the top of this file and its guarded
+admission workflow.
 
 `docs/OPERATIONS.md` §10 records the historical import, contact-report, and
 validation procedure. Follow [MKII_STEP1.md](../../docs/MKII_STEP1.md) for the
@@ -143,9 +170,11 @@ Registration is explicit: call
 `Isaac-Velocity-Flat-Hexapod-MKII-V2-Direct-v0`. Existing launchers do not
 automatically select or register this ID. Historical `spec.py`
 (`MKII_V1_ASSET`), `stance.json`, task IDs and their tests remain unchanged.
-New revisions require a newly hashed asset/manifest and reviewed stance. The linkage
-model serves visual and kinematic checks only; physical loop authoring and
-actuator/transmission validation remain open. With 1927 visual meshes the model is heavy for
+New revisions require a newly hashed asset/manifest and reviewed stance. The
+source linkage URDF serves visual and kinematic checks; the separate physical
+v5 USD now authors the mechanism's force-transmitting constraints. Physical
+qualification remains a live-simulator gate, and hardware calibration remains
+separate. With 1927 visual meshes the model is heavy for
 thousands of cloned environments. If rendering becomes the bottleneck, drop
 the fastener and motor-internal STLs from the visuals.
 
