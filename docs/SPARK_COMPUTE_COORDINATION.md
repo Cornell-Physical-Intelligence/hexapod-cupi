@@ -1,3 +1,8 @@
+> Latest user instruction, 2026-09-06 23:12 UTC: **take full training priority**.
+> HEXAPOD resumed the prepared refined comparison; shared control is NONE. Use
+> bounded per-job locks only, with no long-lived exclusive reservation. The actual
+> job retains all resource/coordination gates. The earlier pause below is historical.
+
 > Current policy recovered 2026-09-06: the authoritative shared file records a
 > 13:33 UTC user pause for HEXAPOD pending explicit resume and prohibits long-lived
 > exclusive reservations. `HEXAPOD_SHARE_STATUS=REQUESTED` is active. Earlier full
