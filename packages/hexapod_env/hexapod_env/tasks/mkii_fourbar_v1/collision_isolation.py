@@ -93,3 +93,61 @@ def verify_collision_isolation(stage, *, physics_scene_path, env_prim_paths, glo
     return {"runtime_identity": runtime_identity, "physics_scene_path": str(physics_scene_path),
             "collision_scope_path": root, "environment_groups": details, "global_group": global_details,
             "live_collision_response_verified": False}
+
+
+def verify_physical_environment_ownership(stage, isolation, kinematics):
+    """Audit every actual rigid body/collider and native-mimic USD reference."""
+    from pxr import Sdf, Usd, UsdPhysics
+
+    groups = isolation["environment_groups"]
+    queries = [(row["env_prim_path"], Usd.CollectionAPI(stage.GetPrimAtPath(row["group_path"]),
+                  "colliders").ComputeMembershipQuery()) for row in groups]
+    global_query = Usd.CollectionAPI(stage.GetPrimAtPath(isolation["global_group"]["group_path"]),
+                                     "colliders").ComputeMembershipQuery()
+    results = []
+    for environment, own_query in queries:
+        robot = environment + "/Robot"
+        root = stage.GetPrimAtPath(robot)
+        if not root:
+            raise ValueError("Physical environment Robot prim is missing")
+        expected = {f"{robot}/{path}" for path in kinematics["body_paths"].values()}
+        bodies = {str(prim.GetPath()) for prim in Usd.PrimRange(root) if prim.HasAPI(UsdPhysics.RigidBodyAPI)}
+        if len(expected) != 31 or bodies != expected:
+            raise ValueError("Physical environment rigid body paths differ from the 31-body model")
+        colliders, covered = [], set()
+        for prim in Usd.PrimRange(stage.GetPrimAtPath(environment)):
+            if not prim.HasAPI(UsdPhysics.CollisionAPI):
+                continue
+            path = prim.GetPath()
+            if (not own_query.IsPathIncluded(path) or global_query.IsPathIncluded(path)
+                    or any(query.IsPathIncluded(path) for other, query in queries if other != environment)):
+                raise ValueError(f"Collider belongs to an incorrect collision group: {path}")
+            ancestor = prim
+            while ancestor and not ancestor.HasAPI(UsdPhysics.RigidBodyAPI):
+                ancestor = ancestor.GetParent()
+            if not ancestor or str(ancestor.GetPath()) not in expected:
+                raise ValueError(f"Collider is outside its robot's declared rigid bodies: {path}")
+            covered.add(str(ancestor.GetPath()))
+            colliders.append(str(path))
+        if covered != expected:
+            raise ValueError("Physical ownership audit did not cover every body's colliders")
+        references = []
+        for name, relation in kinematics["passive_relations"].items():
+            path = f"{robot}/Physics/{name}"
+            prim = stage.GetPrimAtPath(path)
+            schemas = set(prim.GetAppliedSchemas()) if prim else set()
+            authored = prim.GetMetadata("apiSchemas") if prim else None
+            if authored:
+                schemas.update(authored.GetAppliedItems())
+            reference = f"{robot}/Physics/{relation['source_joint']}"
+            if (not prim or "PhysxMimicJointAPI:rotZ" not in schemas
+                    or list(prim.GetRelationship("physxMimicJoint:rotZ:referenceJoint").GetTargets()) != [Sdf.Path(reference)]
+                    or not stage.GetPrimAtPath(reference)):
+                raise ValueError(f"Mimic reference escapes or differs from its physical articulation: {path}")
+            references.append({"joint": path, "reference_joint": reference})
+        if len(references) != 12:
+            raise ValueError("Physical environment does not have all twelve native mimic references")
+        results.append({"environment_prim_path": environment, "rigid_body_paths": sorted(bodies),
+                        "collider_paths": sorted(colliders), "mimic_references": references})
+    return {"verified": True, "environment_count": len(results), "environments": results,
+            "live_collision_response_verified": False}

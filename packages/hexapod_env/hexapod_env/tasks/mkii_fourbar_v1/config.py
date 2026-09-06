@@ -15,6 +15,7 @@ from isaaclab_physx.physics import PhysxCfg
 from hexapod_core import fourbar_v1 as contract
 from ...actuators.rs05_v2 import make_rs05_v2_cfg
 from ...ppo_cfg import HexapodPPORunnerCfg
+from .environment_layout import select_environment_layout, COINCIDENT_LAYOUT
 
 ROOT = Path(__file__).resolve().parents[5]
 KINEMATICS = contract.load_kinematics(ROOT / contract.KINEMATICS_PATH)
@@ -22,6 +23,7 @@ ROBOT_PRIM = "/World/envs/env_.*/Robot"
 GROUND = "/World/ground/terrain/GroundPlane/CollisionPlane"
 ASSET_BUNDLE = contract.select_asset_bundle(repo_root=ROOT, environ=os.environ)
 USD_PATH = str(ROOT / ASSET_BUNDLE["usd_path_relative"])
+ENVIRONMENT_LAYOUT = select_environment_layout(os.environ)
 
 
 def _sensor(name, path):
@@ -34,6 +36,7 @@ def _sensor(name, path):
 
 @configclass
 class HexapodMkiiFourbarV1EnvCfg(DirectRLEnvCfg):
+    environment_layout = ENVIRONMENT_LAYOUT
     episode_length_s = 20.
     decimation = contract.DECIMATION
     action_space = 18
@@ -65,7 +68,7 @@ class HexapodMkiiFourbarV1EnvCfg(DirectRLEnvCfg):
         physics_material=sim_utils.RigidBodyMaterialCfg(friction_combine_mode="multiply",
             restitution_combine_mode="multiply", static_friction=1., dynamic_friction=1., restitution=0.),
         debug_vis=False)
-    scene = InteractiveSceneCfg(num_envs=32, env_spacing=2., replicate_physics=True)
+    scene = InteractiveSceneCfg(num_envs=32, env_spacing=0. if ENVIRONMENT_LAYOUT == COINCIDENT_LAYOUT else 2., replicate_physics=True)
     robot = ArticulationCfg(prim_path=ROBOT_PRIM,
         spawn=sim_utils.UsdFileCfg(usd_path=USD_PATH, activate_contact_sensors=True,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(disable_gravity=False,

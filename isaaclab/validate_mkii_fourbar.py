@@ -369,6 +369,9 @@ def main(argv=None):
                     active_motor_count=len(raw.active_joint_names), joint_names=list(raw._robot.joint_names),
                     active_motor_names=list(raw.active_joint_names), body_names=list(raw._robot.body_names))
                 report["runtime_manifest"] = raw.runtime_manifest
+                if getattr(raw, "layout_report", None) is not None:
+                    # Freeze the full reset batch before subsequent simulation can update it.
+                    report["environment_layout_evidence"] = json.loads(json.dumps(raw.layout_report))
                 report["asset_binding"] = verify_asset_binding(bundle, cpu, kit, raw.runtime_manifest, report["contract"])
                 validate_numerical_recipe_report(report, args.solver_multiplier)
                 expected = torch.tensor([kinematics["default_joint_positions_rad"][name]

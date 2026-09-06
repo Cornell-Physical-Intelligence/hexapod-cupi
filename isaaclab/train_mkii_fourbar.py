@@ -301,6 +301,8 @@ def main(argv=None):
                     raise ValueError("Loaded runtime differs from admitted nominal runtime; see admitted_runtime_comparison")
                 report["torch_version"] = torch.__version__
                 wrapped = RslRlVecEnvWrapper(env, clip_actions=agent_cfg.clip_actions)
+                if getattr(env.unwrapped, "layout_report", None) is not None:
+                    report["environment_layout_evidence"] = json.loads(json.dumps(env.unwrapped.layout_report))
                 agent_cfg.device = str(env.unwrapped.device)
                 agent_cfg.save_interval = 10
                 agent_cfg.logger = "tensorboard"

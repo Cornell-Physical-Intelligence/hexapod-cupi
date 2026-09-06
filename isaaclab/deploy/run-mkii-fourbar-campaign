@@ -40,7 +40,7 @@ BUSY_MESSAGES = (
 )
 
 
-def phases(asset_model=None):
+def phases(asset_model=None, environment_layout=None):
     if asset_model is not None and asset_model not in host.ASSET_BUNDLES:
         raise ValueError('Unknown campaign asset model')
     plan = [
@@ -53,6 +53,11 @@ def phases(asset_model=None):
     if asset_model is not None:
         for phase in plan:
             phase['asset_model'] = asset_model
+    if environment_layout is not None:
+        if environment_layout not in host.ENVIRONMENT_LAYOUTS:
+            raise ValueError('Unknown campaign environment layout')
+        for phase in plan:
+            phase['environment_layout'] = environment_layout
     return plan
 
 
@@ -133,9 +138,14 @@ def phase_argv(phase, args, output, *, admission=None, checkpoint=None):
     asset_model = phase.get('asset_model', requested_model)
     if asset_model not in host.ASSET_BUNDLES or asset_model != requested_model:
         raise CampaignFailed('Campaign phase asset differs from the requested model')
+    requested_layout = getattr(args, 'environment_layout', 'grid_2m_v1')
+    layout = phase.get('environment_layout', requested_layout)
+    if layout not in host.ENVIRONMENT_LAYOUTS or layout != requested_layout:
+        raise CampaignFailed('Campaign phase layout differs from the requested layout')
     argv = [sys.executable, str(LAUNCHER), phase['mode'], '--source-dir', str(args.source_dir),
             '--source-commit', args.source_commit, '--output-root', str(output), '--num-envs', str(phase['num_envs']),
             '--asset-model', asset_model,
+            '--environment-layout', layout,
             '--timeout-seconds', str(args.full_timeout_seconds if phase['name'] == 'full' else args.phase_timeout_seconds)]
     if phase['mode'] == 'validate':
         argv += ['--steps', str(phase['steps']), '--solver-multiplier', str(phase['solver_multiplier'])]
@@ -155,7 +165,7 @@ def require_campaign_source(args, contract, state):
 
 def run_campaign(args, campaign, contract, state, save, *, launch):
     results, paths = {}, {}
-    plan = phases(getattr(args, 'asset_model', None))
+    plan = phases(getattr(args, 'asset_model', None), getattr(args, 'environment_layout', None))
     if args.probe_report:
         results['probe'] = verify_phase(args.probe_report, plan[0], contract)
         paths['probe'] = args.probe_report.resolve()
@@ -220,6 +230,7 @@ def main(argv=None):
     parser.add_argument('--source-dir', required=True, type=Path)
     parser.add_argument('--source-commit', default='uncommitted')
     parser.add_argument('--asset-model', choices=tuple(host.ASSET_BUNDLES), default='mkii_fourbar_v3')
+    parser.add_argument('--environment-layout', choices=host.ENVIRONMENT_LAYOUTS, default='grid_2m_v1')
     parser.add_argument('--output-root', type=Path)
     parser.add_argument('--probe-report', type=Path)
     parser.add_argument('--wait-seconds', type=int, default=2700)
@@ -251,8 +262,10 @@ def main(argv=None):
              'campaign': str(campaign), 'source': str(args.source_dir), 'contract': contract,
              'source_commit': args.source_commit, 'pid': os.getpid(), 'phases': [],
              'asset_model': args.asset_model,
+             'environment_layout': args.environment_layout,
              'host_entrypoint_sha256': entrypoints,
-             'wait_seconds': args.wait_seconds, 'plan': phases(args.asset_model), 'separate_process_resume_verified': False}
+             'wait_seconds': args.wait_seconds, 'plan': phases(args.asset_model, args.environment_layout),
+             'separate_process_resume_verified': False}
     def save():
         write_json(campaign/'campaign.json', state)
     save()

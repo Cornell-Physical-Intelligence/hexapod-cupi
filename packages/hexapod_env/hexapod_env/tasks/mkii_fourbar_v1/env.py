@@ -21,7 +21,9 @@ from hexapod_core.rs05_v2 import contract_manifest as motor_contract_manifest, v
 from ...command_sampling import body_to_navigation_frame
 from .math import MotorCoordinates, observations, reward_terms
 from .target_schedule import MotorTargetRamp
-from .collision_isolation import verify_collision_isolation
+from .collision_isolation import verify_collision_isolation, verify_physical_environment_ownership
+from .environment_layout import (configure_environment_layout, verify_scene_layout,
+    verify_native_sensor_rows, record_reset_readback, layout_runtime_descriptor)
 
 ROOT = Path(__file__).resolve().parents[5]
 
@@ -32,7 +34,10 @@ def tensor(value):
 
 class HexapodMkiiFourbarEnv(DirectRLEnv):
     def __init__(self, cfg, render_mode=None, **kwargs):
+        selected_layout = configure_environment_layout(cfg)
         asset_bundle = contract.resolve_asset_bundle(cfg.robot.spawn.usd_path, repo_root=ROOT)
+        if selected_layout == "coincident_flat_origin_v1" and asset_bundle["model_id"] != "mkii_fourbar_v5":
+            raise ValueError("Coincident layout candidate requires the physical v5 mimic asset")
         super().__init__(cfg, render_mode, **kwargs)
         self.kinematics = contract.load_kinematics(cfg.kinematics_path)
         self.coordinates = MotorCoordinates(self._robot.joint_names, self.kinematics, device=self.device)
@@ -104,6 +109,9 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
             "self_collision_enabled": cfg.robot.spawn.articulation_props.enabled_self_collisions,
             "reset_motor_jitter_rad": cfg.reset_joint_jitter_rad,
         }
+        if selected_layout == "coincident_flat_origin_v1":
+            self.layout_report["native_row_mapping"] = verify_native_sensor_rows(self, self.kinematics["body_paths"])
+            self.runtime_manifest["resolved_environment_layout"] = layout_runtime_descriptor()
 
     def _setup_scene(self):
         self._robot = Articulation(self.cfg.robot)
@@ -123,6 +131,12 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
         self.collision_isolation_report = verify_collision_isolation(self.scene.stage,
             physics_scene_path=self.scene.physics_scene_path, env_prim_paths=self.scene.env_prim_paths,
             global_prim_paths=[self.cfg.terrain.prim_path])
+        self.layout_report = {"layout_id": "grid_2m_v1"}
+        if getattr(self.cfg, "environment_layout", "grid_2m_v1") == "coincident_flat_origin_v1":
+            self.layout_report = verify_scene_layout(self)
+            self.layout_report["physical_ownership"] = verify_physical_environment_ownership(
+                self.scene.stage, self.collision_isolation_report,
+                contract.load_kinematics(self.cfg.kinematics_path))
         light = sim_utils.DomeLightCfg(intensity=2000., color=(.75, .78, .82))
         light.func("/World/Light", light)
 
@@ -278,3 +292,5 @@ class HexapodMkiiFourbarEnv(DirectRLEnv):
         self._robot.write_joint_velocity_to_sim_index(velocity=qd, env_ids=env_ids)
         self._robot.set_joint_position_target_index(target=motors, joint_ids=self.active_joint_ids, env_ids=env_ids)
         self._sample_commands(env_ids)
+        if getattr(self.cfg, "environment_layout", "grid_2m_v1") == "coincident_flat_origin_v1":
+            record_reset_readback(self, env_ids, pose)

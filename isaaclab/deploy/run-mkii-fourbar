@@ -38,8 +38,12 @@ COORDINATION = Path('/home/orionh/SPARK_COMPUTE_COORDINATION.md')
 MIN_AVAILABLE_MEMORY_BYTES = 16 * 1024**3
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'tools'))
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'packages/hexapod_core'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'packages/hexapod_env'))
 from mkii_training_contract import identity, require_admission, require_checkpoint
 from hexapod_core.fourbar_v1 import ASSET_BUNDLES, validate_asset_bundle, validate_numerical_recipe_report
+from hexapod_env.tasks.mkii_fourbar_v1.environment_layout import validate_layout_runtime, validate_layout_evidence
+
+ENVIRONMENT_LAYOUTS = ('grid_2m_v1', 'coincident_flat_origin_v1')
 # Keep the reviewed shell spelling visible to the shared launcher contract;
 # shlex removes only grouping quotes, yielding exactly one subprocess argument.
 TELEMETRY_ARGUMENT = '--kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry"'
@@ -566,6 +570,16 @@ def require_requested_asset(result, asset_model, contract):
     return bundle
 
 
+def require_requested_layout(result, requested_layout):
+    """Reject a run/admission using a different or incomplete layout recipe."""
+    if requested_layout not in ENVIRONMENT_LAYOUTS:
+        raise Blocked('Unknown requested environment layout')
+    try:
+        validate_layout_runtime(result.get('runtime_manifest', {}), requested_layout)
+    except (TypeError, ValueError) as exc:
+        raise Blocked(f'Executed environment layout differs from the requested layout: {exc}') from exc
+
+
 def validate_written_report(path, *, args, contract):
     if not path.is_file():
         raise Blocked('Process exited without its mandatory final report')
@@ -637,6 +651,12 @@ def validate_written_report(path, *, args, contract):
         raise Blocked('Final report failed or is diagnostic evidence rather than validation/training')
     if getattr(args, 'asset_model', None) is not None:
         require_requested_asset(result, args.asset_model, contract)
+    require_requested_layout(result, getattr(args, 'environment_layout', 'grid_2m_v1'))
+    if getattr(args, 'environment_layout', 'grid_2m_v1') == 'coincident_flat_origin_v1':
+        try:
+            validate_layout_evidence(result.get('environment_layout_evidence'), args.num_envs)
+        except (TypeError, ValueError) as exc:
+            raise Blocked(f'Incomplete executed coincident layout evidence: {exc}') from exc
     if args.mode == 'validate':
         try:
             validate_numerical_recipe_report(result, args.solver_multiplier)
@@ -739,10 +759,12 @@ def compose_argv(source, output, name, owner, args):
                     else ASSET_BUNDLES[getattr(args, 'asset_model', None) or 'mkii_fourbar_v3']['usd_path_relative'])
     usd_environment = [value for key in ('HEXAPOD_USD_PATH', 'HEXAPOD_MKII_FOURBAR_USD_PATH')
                        for value in ('-e', f'{key}={CONTAINER_SOURCE}/{usd_relative}')]
+    layout_environment = ['-e', 'HEXAPOD_MKII_ENVIRONMENT_LAYOUT=' +
+                          getattr(args, 'environment_layout', 'grid_2m_v1')]
     return ['docker', 'compose', '--env-file', 'docker/.env.base', '-f', 'docker/docker-compose.yaml', '--profile', 'base',
         'run', '--no-deps', '-d', '-T', '--name', name, '--label', f'{OWNER_LABEL}={owner}',
         '-w', CONTAINER_OUTPUT, '-e', f'PYTHONPATH={CONTAINER_SOURCE}/isaaclab', '-e', 'PYTHONDONTWRITEBYTECODE=1',
-        *usd_environment,
+        *usd_environment, *layout_environment,
         '-v', f'{source}:{CONTAINER_SOURCE}:ro', '-v', f'{output}:{CONTAINER_OUTPUT}:rw', *mounts,
         '--entrypoint', '/bin/bash', 'isaac-lab-base', '-c', barrier, 'hexapod-fourbar-barrier',
         '/workspace/isaaclab/_isaac_sim/python.sh', f'{CONTAINER_SOURCE}/isaaclab/{script}', *shlex.split(TELEMETRY_ARGUMENT),
@@ -761,6 +783,7 @@ def main(argv=None):
     parser.add_argument('--diagnostic-usd', choices=tuple(DIAGNOSTIC_USD_PATHS))
     parser.add_argument('--diagnostic-xy-offset', nargs=2, type=bounded_xy_coordinate, metavar=('X', 'Y'))
     parser.add_argument('--asset-model', choices=tuple(ASSET_BUNDLES), help='Validation/training model; default mkii_fourbar_v3')
+    parser.add_argument('--environment-layout', choices=ENVIRONMENT_LAYOUTS, default='grid_2m_v1')
     parser.add_argument('--source-dir', type=Path, required=True)
     parser.add_argument('--source-commit', default='uncommitted', help='Source baseline commit; SHA256SUMS records the exact running files')
     parser.add_argument('--output-root', type=Path)
@@ -769,6 +792,8 @@ def main(argv=None):
     parser.add_argument('--timeout-seconds', type=int, default=900)
     parser.add_argument('--dry-run', action='store_true')
     args = parser.parse_args(argv)
+    if args.mode == 'diagnose' and args.environment_layout != 'grid_2m_v1':
+        parser.error('Historical diagnostic trajectories require the original grid_2m_v1 layout')
     if args.diagnostic_xy_offset is not None and args.mode != 'diagnose':
         parser.error('--diagnostic-xy-offset is only accepted for diagnose')
     if args.diagnostic_xy_offset is None:
@@ -820,7 +845,9 @@ def main(argv=None):
         if any(character in str(path) for path in (args.admission, args.checkpoint) if path is not None
                for character in ('\n', '\r', ':')):
             parser.error('Admission/checkpoint mount paths cannot contain newlines or colons')
-        require_requested_asset(require_admission(args.admission, contract), args.asset_model, contract)
+        admission = require_admission(args.admission, contract)
+        require_requested_asset(admission, args.asset_model, contract)
+        require_requested_layout(admission, args.environment_layout)
         if args.checkpoint:
             require_checkpoint(args.checkpoint, contract)
     elif args.checkpoint or args.admission:
@@ -831,7 +858,8 @@ def main(argv=None):
     argv = compose_argv(source, output, name, owner, args)
     if args.dry_run:
         print(json.dumps({'execution': 'not_started', 'output': str(output), 'argv': argv,
-                          'asset_model': args.asset_model, 'timeout_seconds': args.timeout_seconds}, indent=2))
+                          'asset_model': args.asset_model, 'environment_layout': args.environment_layout,
+                          'timeout_seconds': args.timeout_seconds}, indent=2))
         return 0
     for required in (LAB / 'docker/.env.base', LAB / 'docker/docker-compose.yaml'):
         if not required.is_file():
@@ -847,6 +875,7 @@ def main(argv=None):
     output.mkdir(parents=True, exist_ok=False)
     report = {'execution': 'preflight', 'source': str(source), 'container_name': name, 'owner': owner, 'gates': [], 'exit_code': None, 'cleanup': 'not_required', 'source_commit': args.source_commit}
     report['asset_model'] = args.asset_model
+    report['environment_layout'] = args.environment_layout
     if args.mode == 'diagnose':
         report['diagnostic_usd'] = args.diagnostic_usd
         report['diagnostic_motion'] = args.diagnostic_motion
@@ -884,7 +913,9 @@ def main(argv=None):
         report['gates'].append(resource_gate(owned_container=container))
         require_unchanged_source(source, contract, 'before releasing the CPU admission barrier')
         if args.mode == 'train':
-            require_requested_asset(require_admission(args.admission, contract), args.asset_model, contract)
+            admission = require_admission(args.admission, contract)
+            require_requested_asset(admission, args.asset_model, contract)
+            require_requested_layout(admission, args.environment_layout)
             if args.checkpoint:
                 require_checkpoint(args.checkpoint, contract)
         report['coordination_before_barrier'] = read_coordination_control()

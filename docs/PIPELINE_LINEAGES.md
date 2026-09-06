@@ -166,7 +166,20 @@ metric, per-environment phase means and detailed traces around controls
 and acceptance gates, and cannot admit training. The preceding manifest remains
 byte-identical; the diagnostic extension has its own source identity.
 
-`isaaclab/deploy/mkii_fourbar_v1_motion_prefix_pipeline.sha256` covers **all 112 historical
+The motion-prefix source remains frozen at `3011b0f`. Its completed replay
+reproduced the campaign 008 motion failure with identical runtime/reset layout
+and matching recorded aggregate peaks. The opt-in `coincident_flat_origin_v1`
+candidate changes environment placement before scene construction while keeping
+the physical model, controller, solver recipe and acceptance bounds unchanged.
+Its runtime identity records the named layout; reports separately retain every
+environment's authored transforms, native sensor/link mapping, collider/mimic
+ownership and actual initial reset readback. The original grid remains the
+default and retains its existing runtime manifest. The candidate is not admitted
+by its implementation or by an overlap diagnostic: full matched nominal/refined
+physical validation remains required. External overlap/video tools are separate
+artifact scripts with their own hashes, outside the frozen runtime identity.
+
+`isaaclab/deploy/mkii_fourbar_v1_coincident_layout_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

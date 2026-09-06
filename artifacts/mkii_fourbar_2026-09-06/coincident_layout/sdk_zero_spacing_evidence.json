@@ -1,0 +1,26 @@
+{
+  "schema": "hexapod.sdk_zero_spacing_source.v1",
+  "method": "SSH host source reads only; no SDK import, no new container, no GPU execution",
+  "sources": {
+    "cloner/cloner_utils.py": {
+      "path": "/home/orionh/IsaacLab/source/isaaclab/isaaclab/cloner/cloner_utils.py",
+      "sha256": "80cdeda2fe6dc10391ac799cde36dc4eb9167e83613758bc497b3f08f148607a",
+      "functions": {
+        "grid_transforms": "def grid_transforms(N: int, spacing: float = 1.0, up_axis: str = \"z\", device=\"cpu\"):\n    \"\"\"Create a centered grid of transforms for ``N`` instances.\n\n    Computes ``(x, y)`` coordinates in a roughly square grid centered at the origin\n    with the provided spacing, places the third coordinate according to ``up_axis``,\n    and returns identity orientations. This matches the grid layout used by\n    :class:`isaaclab.terrains.TerrainImporter` for consistent environment positioning.\n\n    Args:\n        N: Number of instances.\n        spacing: Distance between neighboring grid positions.\n        up_axis: Up axis for positions (\"z\", \"y\", or \"x\").\n        device: Torch device for returned tensors.\n\n    Returns:\n        A tuple ``(pos, ori)`` where:\n            - ``pos`` is a tensor of shape ``(N, 3)`` with positions.\n            - ``ori`` is a tensor of shape ``(N, 4)`` with identity quaternions in ``(x, y, z, w)``.\n    \"\"\"\n    # Match terrain_importer._compute_env_origins_grid layout for consistency\n    num_rows = int(math.ceil(N / math.sqrt(N)))\n    num_cols = int(math.ceil(N / num_rows))\n\n    # Create meshgrid matching terrain's \"ij\" indexing\n    ii, jj = torch.meshgrid(\n        torch.arange(num_rows, device=device, dtype=torch.float32),\n        torch.arange(num_cols, device=device, dtype=torch.float32),\n        indexing=\"ij\",\n    )\n    # Flatten and take first N elements\n    ii = ii.flatten()[:N]\n    jj = jj.flatten()[:N]\n\n    # Match terrain's coordinate system: X from rows (negated), Y from cols\n    x = -(ii - (num_rows - 1) / 2) * spacing\n    y = (jj - (num_cols - 1) / 2) * spacing\n    z0 = torch.zeros(N, device=device)\n\n    # place on plane based on up_axis\n    if up_axis.lower() == \"z\":\n        pos = torch.stack([x, y, z0], dim=1)\n    elif up_axis.lower() == \"y\":\n        pos = torch.stack([x, z0, y], dim=1)\n    else:  # up_axis == \"x\"\n        pos = torch.stack([z0, x, y], dim=1)\n\n    # identity orientations (x,y,z,w)\n    ori = torch.zeros((N, 4), device=device)\n    ori[:, 3] = 1.0  # w=1 for identity quaternion\n    return pos, ori"
+      }
+    },
+    "terrains/terrain_importer.py": {
+      "path": "/home/orionh/IsaacLab/source/isaaclab/isaaclab/terrains/terrain_importer.py",
+      "sha256": "f55af93107d608172d776995ebbdab54f282955759f92166ec7e65954ba47963",
+      "functions": {
+        "configure_env_origins": "def configure_env_origins(self, origins: np.ndarray | torch.Tensor | None = None):\n        \"\"\"Configure the origins of the environments based on the added terrain.\n\n        Args:\n            origins: The origins of the sub-terrains. Shape is (num_rows, num_cols, 3).\n        \"\"\"\n        # decide whether to compute origins in a grid or based on curriculum\n        if origins is not None:\n            # convert to numpy\n            if isinstance(origins, np.ndarray):\n                origins = torch.from_numpy(origins)\n            # store the origins\n            self.terrain_origins = origins.to(self.device, dtype=torch.float)\n            # compute environment origins\n            self.env_origins = self._compute_env_origins_curriculum(self.cfg.num_envs, self.terrain_origins)\n        else:\n            self.terrain_origins = None\n            # check if env spacing is valid\n            if self.cfg.env_spacing is None:\n                raise ValueError(\"Environment spacing must be specified for configuring grid-like origins.\")\n            # compute environment origins\n            self.env_origins = self._compute_env_origins_grid(self.cfg.num_envs, self.cfg.env_spacing)",
+        "_compute_env_origins_grid": "def _compute_env_origins_grid(self, num_envs: int, env_spacing: float) -> torch.Tensor:\n        \"\"\"Compute the origins of the environments in a grid based on configured spacing.\"\"\"\n        from isaaclab.cloner import grid_transforms\n\n        env_origins, _ = grid_transforms(num_envs, env_spacing, device=self.device)\n        return env_origins"
+      }
+    },
+    "scene/interactive_scene_cfg.py": {
+      "path": "/home/orionh/IsaacLab/source/isaaclab/isaaclab/scene/interactive_scene_cfg.py",
+      "sha256": "b518a9781d40824933710b6e2a1408a3d1313c3510edff7cc2510f769b37f5e6",
+      "functions": {}
+    }
+  }
+}
