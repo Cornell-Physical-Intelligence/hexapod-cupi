@@ -45,7 +45,7 @@ from hexapod_core.fourbar_v1 import ASSET_BUNDLES, validate_asset_bundle, valida
 TELEMETRY_ARGUMENT = '--kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry"'
 PRODUCERS = re.compile(r'nsva_dl[.]sh|validate_nsva[.]py|score_clip[.]py|validate_b51[.]py|nowcast_run[.]py|train_model_only_resume[.]py|evaluate_checkpoint[.]py|torch[^\n]*compile')
 SERVICES = ('hexapod-rl-training.service', 'hexapod-rl-training-stage2b-lateral.service', 'hexapod-rl-training-stage2c-stable-forward.service')
-DIAGNOSTIC_MOTION_STEPS = {'individuals': 18 * 2 * 50 + 100, 'groups': 3 * 2 * 100 + 100, 'lf_tibia': 2 * 100 + 100, 'standing': 0}
+DIAGNOSTIC_MOTION_STEPS = {'individuals': 18 * 2 * 50 + 100, 'groups': 3 * 2 * 100 + 100, 'lf_tibia': 2 * 100 + 100, 'standing': 0, 'validation_prefix': 15 * 2 * 50}
 DIAGNOSTIC_PLACEMENT_TOLERANCE_M = 1e-5
 DIAGNOSTIC_USD_PATHS = {
     'revolute_v3': 'robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v3/hexapod_mkii_fourbar_v3.usda',
@@ -396,25 +396,26 @@ def archive_source(source, manifest, archive, *, expected_manifest_sha256):
             temporary.unlink(missing_ok=True)
 
 
-def validate_diagnostic_traces(directory, result, *, num_envs, samples):
+def validate_diagnostic_traces(directory, result, *, num_envs, samples, first_sample=0,
+                               records_field='trace_files', file_prefix='trace', index_field='first_physics_sample'):
     """Check archived trace bytes and NPY shape without a host NumPy dependency."""
-    records = result.get('trace_files')
+    records = result.get(records_field)
     if not isinstance(records, list) or not records:
         raise Blocked('Diagnostic trace files are missing')
-    offset, width, seen = 0, None, set()
+    offset, width, seen = first_sample, None, set()
     for record in records:
         if not isinstance(record, dict):
             raise Blocked('Diagnostic trace record is not an object')
         filename, shape = record.get('file'), record.get('shape')
-        if not isinstance(filename, str) or not re.fullmatch(r'trace_[0-9]+\.npz', filename) or filename in seen:
+        if not isinstance(filename, str) or not re.fullmatch(re.escape(file_prefix)+r'_[0-9]+\.npz', filename) or filename in seen:
             raise Blocked('Diagnostic trace path is invalid or duplicated')
         seen.add(filename)
         path = directory / filename
         if path.is_symlink() or not path.is_file():
             raise Blocked('Diagnostic trace must be an existing regular file')
         if (not isinstance(shape, list) or len(shape) != 3 or any(type(v) is not int or v <= 0 for v in shape)
-                or shape[1] != num_envs or type(record.get('first_physics_sample')) is not int
-                or record['first_physics_sample'] != offset or (width is not None and width != shape[2])):
+                or shape[1] != num_envs or type(record.get(index_field)) is not int
+                or record[index_field] != offset or (width is not None and width != shape[2])):
             raise Blocked('Diagnostic trace shape or sample sequence is inconsistent')
         checksum = hashlib.sha256()
         with path.open('rb') as stream:
@@ -444,8 +445,65 @@ def validate_diagnostic_traces(directory, result, *, num_envs, samples):
             raise Blocked(f'Diagnostic trace array cannot be verified: {filename}') from exc
         width = shape[2]
         offset += shape[0]
-    if offset != samples:
+    if offset != first_sample + samples:
         raise Blocked('Diagnostic trace files do not cover all physics samples')
+
+
+def validate_prefix_evidence(result, *, args):
+    from hexapod_core.fourbar_v1 import ACTIVE_JOINT_NAMES
+    if (args.num_envs != 32 or args.steps != 1000 or args.diagnostic_usd != 'physical_mimic_v5'
+            or tuple(getattr(args, 'diagnostic_xy_offset', (0., 0.))) != (0., 0.)):
+        raise Blocked('Validation-prefix replay requires the original 32-environment workload')
+    decimation = result['numerical_recipe']['decimation']
+    expected = {'mode': 'validation_prefix_sparse_v1', 'control_interval_half_open': [2200, 2500],
+                'physics_interval_half_open': [2200*decimation, 2500*decimation],
+                'physical_metrics': 'all physics substeps', 'control_telemetry': 'every control boundary',
+                'environment_indices': list(range(32))}
+    if result.get('trace_coverage') != expected or result.get('episode_length_s') != (1000+2401)*.02+1.:
+        raise Blocked('Validation-prefix coverage or episode horizon differs from the full validator')
+    if result.get('active_motor_names') != list(ACTIVE_JOINT_NAMES):
+        raise Blocked('Validation-prefix motor order differs from the full validator')
+    if result.get('reset_root_positions_m') != result.get('placement', {}).get('initial_reset_root_positions_m'):
+        raise Blocked('Validation-prefix environment placement evidence disagrees')
+    phases = result.get('individual_phase_means')
+    if not isinstance(phases, list) or len(phases) != 30:
+        raise Blocked('Validation-prefix per-environment phase responses are incomplete')
+    for index, row in enumerate(phases):
+        expected_phase = {'motor': ACTIVE_JOINT_NAMES[index//2], 'offset_rad': .04 if index % 2 == 0 else -.04,
+                          'first_control_step': 1000+index*50, 'control_steps': 50,
+                          'mean_control_indices': [45, 46, 47, 48, 49]}
+        if not isinstance(row, dict) or any(row.get(key) != value for key, value in expected_phase.items()):
+            raise Blocked('Validation-prefix individual phase history changed')
+        values = row.get('mean_joint_position_rad')
+        if (not isinstance(values, list) or len(values) != 32
+                or row.get('mean_dtype') not in ('float32', 'float64')
+                or any(type(value) not in (int, float) or not math.isfinite(value) for value in values)):
+            raise Blocked('Validation-prefix response contains invalid environment rows')
+        if row['mean_dtype'] == 'float32':
+            try:
+                if any(struct.unpack('<f', struct.pack('<f', value))[0] != value for value in values):
+                    raise ValueError('Mean is not an exact float32 readback')
+            except (ValueError, OverflowError, struct.error) as exc:
+                raise Blocked('Validation-prefix response precision is invalid') from exc
+    responses = result.get('individual_motor_response_by_env')
+    if not isinstance(responses, dict) or set(responses) != set(ACTIVE_JOINT_NAMES[:15]):
+        raise Blocked('Validation-prefix motor response map is incomplete')
+    for index, name in enumerate(ACTIVE_JOINT_NAMES[:15]):
+        dtype = phases[2*index]['mean_dtype']
+        if phases[2*index+1]['mean_dtype'] != dtype:
+            raise Blocked('Validation-prefix response precision changed between signs')
+        differences = [a-b for a, b in zip(phases[2*index]['mean_joint_position_rad'], phases[2*index+1]['mean_joint_position_rad'])]
+        if dtype == 'float32':
+            try:
+                differences = [struct.unpack('<f', struct.pack('<f', value))[0] for value in differences]
+            except (OverflowError, struct.error) as exc:
+                raise Blocked('Validation-prefix response difference overflowed') from exc
+        if not all(math.isfinite(value) for value in differences):
+            raise Blocked('Validation-prefix response difference is nonfinite')
+        expected_response = {'positive_minus_negative_rad': differences, 'minimum_rad': min(differences),
+                             'worst_env_index': differences.index(min(differences))}
+        if responses[name] != expected_response:
+            raise Blocked('Validation-prefix response reduction disagrees with per-environment means')
 
 
 def bounded_xy_coordinate(value):
@@ -550,13 +608,27 @@ def validate_written_report(path, *, args, contract):
             if type(result.get(field)) is not int or result[field] != value:
                 raise Blocked(f'Diagnostic did not complete requested workload: {field}')
         expected_substeps = (args.steps + expected['driven_steps_requested']) * result['numerical_recipe']['decimation']
-        for field in ('physics_substeps', 'trace_samples', 'force_writes'):
+        prefix = args.diagnostic_motion == 'validation_prefix'
+        for field in (('physics_substeps', 'physics_samples_observed', 'force_writes') if prefix
+                      else ('physics_substeps', 'trace_samples', 'force_writes')):
             if type(result.get(field)) is not int or result[field] != expected_substeps:
                 raise Blocked(f'Diagnostic did not capture every requested physics substep: {field}')
         if type(result.get('driven_steps')) is not int or result['driven_steps'] != expected['driven_steps_completed']:
             raise Blocked('Diagnostic driven-step counters disagree')
         validate_diagnostic_placement(result, xy_offset=getattr(args, 'diagnostic_xy_offset', (0., 0.)), num_envs=args.num_envs)
-        validate_diagnostic_traces(path.parent, result, num_envs=args.num_envs, samples=expected_substeps)
+        if prefix:
+            validate_prefix_evidence(result, args=args)
+            trace_samples = 300 * result['numerical_recipe']['decimation']
+            if type(result.get('trace_samples')) is not int or result['trace_samples'] != trace_samples:
+                raise Blocked('Validation-prefix detailed trace window is incomplete')
+            if type(result.get('control_trace_samples')) is not int or result['control_trace_samples'] != 2500:
+                raise Blocked('Validation-prefix control telemetry is incomplete')
+            validate_diagnostic_traces(path.parent, result, num_envs=32, samples=trace_samples,
+                                      first_sample=2200*result['numerical_recipe']['decimation'])
+            validate_diagnostic_traces(path.parent, result, num_envs=32, samples=2500,
+                                      records_field='control_trace_files', file_prefix='control', index_field='first_control_step')
+        else:
+            validate_diagnostic_traces(path.parent, result, num_envs=args.num_envs, samples=expected_substeps)
         return {key: result[key] for key in ('pass', 'mode', 'diagnostic_complete',
                 'simulation_training_admission', 'hardware_admission', 'physics_substeps')}
     if (result.get('schema') == 'hexapod.fourbar_diagnostic.v1'
@@ -713,7 +785,11 @@ def main(argv=None):
         args.num_envs = 1 if args.mode == 'diagnose' else 32
     if not 1 <= args.num_envs <= 4096 or not 2 <= args.steps <= 100000 or not 1 <= args.iterations <= 10000:
         parser.error('Invalid bounded environment/step/iteration count')
-    if args.mode == 'diagnose' and (args.num_envs > 8 or args.steps > 1000):
+    if args.diagnostic_motion == 'validation_prefix':
+        if (args.mode != 'diagnose' or args.num_envs != 32 or args.steps != 1000
+                or args.diagnostic_usd != 'physical_mimic_v5' or tuple(args.diagnostic_xy_offset) != (0., 0.)):
+            parser.error('Validation-prefix replay requires diagnose, 32 environments, 1000 steps, physical_mimic_v5 and zero XY offset')
+    elif args.mode == 'diagnose' and (args.num_envs > 8 or args.steps > 1000):
         parser.error('Diagnosis requires 1..8 environments and 2..1000 standing steps')
     maximum_timeout = 21600 if args.mode == 'train' else 7200
     if not 30 <= args.timeout_seconds <= maximum_timeout:

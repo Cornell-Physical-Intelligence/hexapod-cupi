@@ -27,6 +27,45 @@ TRACE_COORDINATE_CONVENTIONS = {
     "foot_force_w": "per-foot net contact force in world coordinates, newtons",
 }
 PLACEMENT_TOLERANCE_M = 1e-5  # Float32 placement readback, not a physical-gate tolerance.
+PREFIX_TRACE_CONTROLS = (2200, 2500)  # LF/LM/LR lever phases; half-open, zero-based.
+
+
+def check_workload(args):
+    if args.diagnostic_motion == "validation_prefix":
+        if (args.num_envs != 32 or args.steps != 1000 or tuple(args.diagnostic_xy_offset) != (0., 0.)
+                or args.diagnostic_usd != "physical_mimic_v5"):
+            raise ValueError("Validation-prefix replay requires 32 environments, 1000 standing steps, zero XY offset and physical_mimic_v5")
+    elif not 1 <= args.num_envs <= 8 or not 2 <= args.steps <= 1000:
+        raise ValueError("Diagnostic needs 1..8 environments and 2..1000 standing steps")
+
+
+def record_phase_mean(report, segment, samples, first_control):
+    """Match validator's five end-of-control samples; retain every environment."""
+    import torch
+    if len(samples) != 5 or len(segment["motors"]) != 1:
+        raise ValueError("Individual response requires exactly five end-hold samples")
+    mean = torch.stack(samples).mean(0)
+    if (mean.ndim != 1 or type(report.get("num_envs")) is not int or mean.numel() != report["num_envs"]
+            or mean.dtype not in (torch.float32, torch.float64) or not bool(torch.isfinite(mean).all())):
+        raise ValueError("Individual response has invalid/nonfinite environment rows")
+    name = segment["motors"][0]
+    rows = report.setdefault("individual_phase_means", [])
+    rows.append({"motor": name, "offset_rad": segment["offset_rad"],
+                 "first_control_step": first_control, "control_steps": segment["steps"],
+                 "mean_control_indices": [45, 46, 47, 48, 49],
+                 "mean_dtype": str(mean.dtype).removeprefix("torch."),
+                 "mean_joint_position_rad": mean.cpu().tolist()})
+    if segment["offset_rad"] < 0:
+        positive = rows[-2]
+        if (positive["motor"] != name or positive["offset_rad"] != .04
+                or positive["mean_dtype"] != rows[-1]["mean_dtype"]
+                or len(positive["mean_joint_position_rad"]) != mean.numel()):
+            raise ValueError("Individual positive/negative phase history changed")
+        # Preserve the validator's tensor subtraction precision, not Python float64.
+        differences = (mean.new_tensor(positive["mean_joint_position_rad"])-mean).cpu().tolist()
+        report.setdefault("individual_motor_response_by_env", {})[name] = {
+            "positive_minus_negative_rad": differences,
+            "minimum_rad": min(differences), "worst_env_index": differences.index(min(differences))}
 
 
 def bounded_xy_coordinate(value):
@@ -92,8 +131,9 @@ def body_pose_trace_fields(body_names, pos, quat, terrain_origin):
 def motions(kind):
     if kind == "standing":
         return []
-    if kind == "individuals":
-        groups, duration = [[name] for name in ACTIVE_JOINT_NAMES], 50
+    if kind in ("individuals", "validation_prefix"):
+        names = ACTIVE_JOINT_NAMES[:15] if kind == "validation_prefix" else ACTIVE_JOINT_NAMES
+        groups, duration = [[name] for name in names], 50
     elif kind == "groups":
         groups, duration = [list(ACTIVE_JOINT_NAMES[i:i+6]) for i in (0, 6, 12)], 100
     elif kind == "lf_tibia":
@@ -102,7 +142,8 @@ def motions(kind):
         raise ValueError("Unknown diagnostic motion")
     result = [{"motors": group, "offset_rad": sign*.04, "steps": duration}
               for group in groups for sign in (1., -1.)]
-    result.append({"motors": [], "offset_rad": 0., "steps": 100})
+    if kind != "validation_prefix":
+        result.append({"motors": [], "offset_rad": 0., "steps": 100})
     return result
 
 
@@ -111,7 +152,7 @@ def parser(add_launcher_args=None):
     p.add_argument("--num_envs", type=int, default=1)
     p.add_argument("--steps", type=int, default=200)
     p.add_argument("--solver-multiplier", type=int, choices=(1, 2), default=1)
-    p.add_argument("--diagnostic-motion", choices=("individuals", "groups", "lf_tibia", "standing"), default="individuals")
+    p.add_argument("--diagnostic-motion", choices=("individuals", "groups", "lf_tibia", "standing", "validation_prefix"), default="individuals")
     p.add_argument("--diagnostic-xy-offset", nargs=2, type=bounded_xy_coordinate, default=(0., 0.), metavar=("X", "Y"))
     p.add_argument("--diagnostic-usd", choices=("revolute_v3", "planar_d6_v4", "physical_mimic_v5"), default="revolute_v3")
     p.add_argument("--report", type=Path, required=True)
@@ -133,14 +174,23 @@ def persist_then_close(report, path, env):
 
 
 class Trace:
-    def __init__(self, raw, metrics, output):
+    def __init__(self, raw, metrics, output, control_window=None):
         self.raw, self.metrics, self.output = raw, metrics, output
         self.pending, self.files, self.columns = [], [], []
         self.before = None
         self.force_writes = self.samples = 0
+        self.recorded_samples = 0
+        self.control_window = control_window
+
+    def selected(self):
+        return self.control_window is None or self.control_window[0]*DECIMATION <= self.samples < self.control_window[1]*DECIMATION
 
     def write_forces(self):
         raw = self.raw
+        if not self.selected():
+            self.original_write()
+            self.force_writes += 1
+            return
         import warp as wp
         self.before = {"pre_q": tensor(raw._robot.data.joint_pos).clone(),
                        "pre_qd": tensor(raw._robot.data.joint_vel).clone(),
@@ -164,11 +214,18 @@ class Trace:
         self.force_writes += 1
 
     def capture(self):
+        if self.force_writes != self.samples + 1:
+            raise ValueError("Diagnostic requires one force write per physics observation")
+        self.metrics.capture()  # Never subsample physical measurements.
+        if not self.selected():
+            if self.before is not None:
+                raise ValueError("Unexpected detailed trace state outside selected window")
+            self.samples += 1
+            return
         import torch
         from isaaclab.utils.math import matrix_from_quat
-        if self.before is None or self.force_writes != self.samples + 1:
+        if self.before is None:
             raise ValueError("Diagnostic requires one force write per physics observation")
-        self.metrics.capture()
         raw, data = self.raw, self.raw._robot.data
         pos, quat = tensor(data.body_link_pos_w), tensor(data.body_link_quat_w)
         rot = matrix_from_quat(quat)
@@ -209,20 +266,21 @@ class Trace:
         self.columns = columns
         self.pending.append(torch.cat([value for _, value, _ in fields], -1).detach().cpu().numpy().copy())
         self.samples += 1
+        self.recorded_samples += 1
         self.before = None
 
     def flush(self, segment):
         import numpy as np
         if not self.pending:
             return
-        path = self.output / f"trace_{len(self.files):03d}.npz"
+        path = self.output / f"{getattr(self, 'file_prefix', 'trace')}_{len(self.files):03d}.npz"
         values = np.stack(self.pending)
         if not np.isfinite(values).all():
             raise ValueError("Diagnostic trace contains nonfinite values")
         with path.open("xb") as stream:
             np.savez_compressed(stream, values=values, columns=np.asarray(self.columns))
         self.files.append({"file": path.name, "sha256": digest(path), "segment": dict(segment),
-                           "shape": list(values.shape), "first_physics_sample": self.samples-len(self.pending)})
+                           "shape": list(values.shape), getattr(self, 'first_index_field', 'first_physics_sample'): self.samples-len(self.pending)})
         self.pending.clear()
 
     def __enter__(self):
@@ -239,11 +297,38 @@ class Trace:
             del self.raw.scene.write_data_to_sim
 
 
+class ControlTrace(Trace):
+    """Compact post-control telemetry at every policy boundary, in actual env order."""
+    file_prefix, first_index_field = "control", "first_control_step"
+
+    def capture(self):
+        import torch
+        raw = self.raw
+        fields = [(key, raw.motor_state(key), raw.active_joint_names) for key in
+                  ("joint_pos", "joint_vel", "joint_pos_target", "computed_torque", "applied_torque")]
+        fields += [(key, raw.motor_telemetry(key), raw.active_joint_names) for key in
+                   ("instantaneous_limit_nm", "burst_headroom")]
+        fields += [("processed_target", raw._processed_actions, raw.active_joint_names),
+                   ("tree_joint_pos", tensor(raw._robot.data.joint_pos), raw._robot.joint_names),
+                   ("tree_joint_vel", tensor(raw._robot.data.joint_vel), raw._robot.joint_names),
+                   ("root_pos_w", tensor(raw._robot.data.root_pos_w), list("xyz"))]
+        sensors = raw._body_contact_sensors
+        forces = torch.stack([tensor(sensor.data.net_forces_w)[:, 0] for sensor in sensors.values()], 1)
+        fields.append(("body_contact_force_w", forces.flatten(1), [f"{name}_{axis}" for name in sensors for axis in "xyz"]))
+        columns = [f"{key}/{name}" for key, _, names in fields for name in names]
+        if self.columns and columns != self.columns:
+            raise ValueError("Control trace layout changed")
+        self.columns = columns
+        self.pending.append(torch.cat([value for _, value, _ in fields], -1).detach().cpu().numpy().copy())
+        self.samples += 1
+
+
 def main(argv=None):
     argv = list(sys.argv[1:] if argv is None else argv)
     early, _ = parser().parse_known_args(argv)
-    if early.report.exists() or not 1 <= early.num_envs <= 8 or not 2 <= early.steps <= 1000:
-        raise ValueError("Diagnostic needs new evidence, 1..8 environments and 2..1000 standing steps")
+    check_workload(early)
+    if early.report.exists():
+        raise ValueError("Diagnostic needs new evidence")
     early.report.parent.mkdir(parents=True, exist_ok=True)
     report = {"schema": "hexapod.fourbar_diagnostic.v1", "mode": "diagnose", "task_id": TASK_ID,
         "pass": False, "simulation_training_admission": False, "hardware_admission": False,
@@ -256,7 +341,7 @@ def main(argv=None):
         "trace_coordinate_conventions": dict(TRACE_COORDINATE_CONVENTIONS),
         "physics_substeps": 0, "solver_multiplier": early.solver_multiplier,
         "terminated_count": 0, "truncated_count": 0, "errors": [], "trace_files": []}
-    env = trace = None
+    env = trace = controls = None
     segment = {"phase": "setup"}
     try:
         report["contract"] = identity()
@@ -289,7 +374,11 @@ def main(argv=None):
         cfg.scene.num_envs, cfg.seed = args.num_envs, 0
         cfg.robot.spawn.usd_path = str(usd)
         cfg.standing_only, cfg.reset_joint_jitter_rad = True, 0.
-        cfg.episode_length_s = (args.steps + sum(row["steps"] for row in plan) + 2)*.02 + 1.
+        prefix = args.diagnostic_motion == "validation_prefix"
+        # Match the full validator's horizon even though this replay stops at LR.
+        cfg.episode_length_s = ((args.steps + 2401)*.02 + 1. if prefix else
+                               (args.steps + sum(row["steps"] for row in plan) + 2)*.02 + 1.)
+        report["episode_length_s"] = cfg.episode_length_s
         report["numerical_recipe"] = apply_numerical_recipe(cfg, args.solver_multiplier)
         report["solver_iterations"] = [cfg.robot.spawn.articulation_props.solver_position_iteration_count,
                                         cfg.robot.spawn.articulation_props.solver_velocity_iteration_count]
@@ -310,6 +399,7 @@ def main(argv=None):
                 report["placement"] = translate_reset_origins(raw, args.diagnostic_xy_offset)
                 env.reset(seed=0)
                 verify_reset_placement(raw, report["placement"])
+                report["reset_root_positions_m"] = tensor(raw._robot.data.root_pos_w).clone().cpu().tolist()
                 raw.episode_length_buf.zero_()
                 report.update(body_count=raw._robot.num_bodies, joint_count=raw._robot.num_joints,
                     active_motor_count=len(raw.active_joint_names), joint_names=list(raw._robot.joint_names),
@@ -333,29 +423,58 @@ def main(argv=None):
                     for key in ("armature", "stiffness", "damping")}
                 metrics = PhysicalMetrics(raw, kinematics)
                 report["velocity_constraint_telemetry"] = metrics.velocity_telemetry_description
-                trace = Trace(raw, metrics, early.report.parent)
+                if prefix and list(raw.active_joint_names) != list(ACTIVE_JOINT_NAMES):
+                    raise ValueError("Validation-prefix active motor order differs from full validator")
+                trace = Trace(raw, metrics, early.report.parent, PREFIX_TRACE_CONTROLS if prefix else None)
+                controls = ControlTrace(raw, None, early.report.parent) if prefix else None
+                if prefix:
+                    report["trace_coverage"] = {"mode": "validation_prefix_sparse_v1",
+                        "control_interval_half_open": list(PREFIX_TRACE_CONTROLS),
+                        "physics_interval_half_open": [value*DECIMATION for value in PREFIX_TRACE_CONTROLS],
+                        "physical_metrics": "all physics substeps", "control_telemetry": "every control boundary",
+                        "environment_indices": list(range(raw.num_envs))}
                 actions = torch.zeros(raw.num_envs, 18, device=raw.device)
                 segments = [{"phase": "standing", "motors": [], "offset_rad": 0., "steps": args.steps}]
                 segments += [dict(row, phase="driven") for row in plan]
                 with trace, SubstepHook(raw, trace.capture) as hook:
                     for segment in segments:
+                        first_control = report["steps_completed"] + report["driven_steps"]
+                        phase_samples = []
                         actions.zero_()
                         for motor in segment["motors"]:
                             actions[:, raw.active_joint_names.index(motor)] = segment["offset_rad"]/.30
                         for index in range(segment["steps"]):
                             metrics.window = ("startup" if index < max(1, args.steps//5) else "settled") if segment["phase"] == "standing" else "driven"
-                            report["test_context"] = dict(segment, control_step=index)
-                            _, _, terminated, truncated, _ = hook.step(env, actions)
+                            report["test_context"] = dict(segment, control_step=index, global_control_step=first_control+index)
+                            obs, reward, terminated, truncated, _ = hook.step(env, actions)
                             metrics.drain()
+                            if controls is not None:
+                                controls.capture()
+                                if segment["phase"] == "driven" and index >= 45:
+                                    phase_samples.append(raw.motor_state("joint_pos")[:, raw.active_joint_names.index(segment["motors"][0])].clone())
                             report["windows"], report["physics_substeps"] = metrics.windows, hook.total
                             report["terminated_count"] += int(tensor(terminated).sum())
                             report["truncated_count"] += int(tensor(truncated).sum())
                             report["steps_completed" if segment["phase"] == "standing" else "driven_steps"] += 1
                             report["driven_steps_completed"] = report["driven_steps"]
+                            completed_controls = report["steps_completed"] + report["driven_steps"]
+                            if prefix and completed_controls % 100 == 0:
+                                window = metrics.windows[metrics.window]
+                                print("FOURBAR_PREFIX_PROGRESS " + json.dumps({"controls_completed": completed_controls,
+                                    "physics_substeps": report["physics_substeps"], "phase": segment["phase"],
+                                    "motors": segment["motors"], "offset_rad": segment["offset_rad"],
+                                    "max_demand_nm": window.get("max_demand_nm"),
+                                    "max_closure_point_m": window.get("max_closure_point_m")}), flush=True)
+                            if not bool(torch.isfinite(tensor(obs["policy"])).all() & torch.isfinite(tensor(reward)).all()):
+                                raise ValueError("Diagnostic observed nonfinite observation/reward")
                             if report["terminated_count"] or report["truncated_count"]:
                                 report["termination_reasons"] = {name: int(tensor(value).sum()) for name, value in raw.last_termination_reasons.items()}
                                 raise ValueError("Diagnostic observed reset; final trace precedes reset")
                         trace.flush(segment)
+                        if controls is not None:
+                            controls.flush(segment)
+                            if segment["phase"] == "driven":
+                                record_phase_mean(report, segment, phase_samples, first_control)
                         print("FOURBAR_DIAGNOSTIC_SEGMENT " + json.dumps({"segment": segment, "metrics": metrics.windows[metrics.window]}), flush=True)
                 report["diagnostic_complete"] = True
                 report["physical_gate_errors"] = grade(report)
@@ -367,8 +486,13 @@ def main(argv=None):
                     if trace is not None:
                         trace.flush(segment)
                         report["trace_files"] = trace.files
-                        report["trace_samples"] = trace.samples
+                        report["trace_samples"] = trace.recorded_samples
+                        report["physics_samples_observed"] = trace.samples
                         report["force_writes"] = trace.force_writes
+                    if controls is not None:
+                        controls.flush(segment)
+                        report["control_trace_files"] = controls.files
+                        report["control_trace_samples"] = controls.samples
                 except BaseException as error:
                     report["errors"].append(f"Trace persistence {type(error).__name__}: {error}")
                     raise

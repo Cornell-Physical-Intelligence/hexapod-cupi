@@ -336,3 +336,44 @@ interruption. Evidence:
 Release, launch and completed probe evidence:
 `artifacts/mkii_fourbar_2026-09-06/coordination_control_release/`.
 Read live campaign and supervisor state before claiming further progress.
+
+
+## 2026-09-06 03:25 UTC — completed motion failure, full compute cleanup and exact replay
+
+Campaign 008 completed all 32 × 3,400 controls at 03:09:38 UTC and failed:
+C-pin separation 0.213821 mm, zero-support samples and four direction-response
+scores below the existing bound. Raw demand peaked at 85.207611 N m; applied
+peak remained 5.5 N m. No resets or non-foot contact occurred. The raw report,
+source identity, completed log and exact owned-container removal are preserved
+in `artifacts/mkii_fourbar_2026-09-06/campaign_008_motion_failure/`. No refined
+validation or physical PPO followed. Aggregate maxima do not identify the
+failing environment or cause.
+
+The user explicitly requested removing competing processes, continuing until
+PPO trains, finding a different approach when evidence shows a dead end, and
+capturing a video of the resulting policy. All 21 identified weather CPU
+processes, including the exact materializer service, were stopped through
+verified SIGTERM/service actions at 03:13:57–03:14:00 UTC; outputs were not
+deleted. Evidence: `artifacts/mkii_fourbar_2026-09-06/cpu_takeover_20260906T031357Z/`.
+Spark then had 118 GiB available memory and no CUDA producer. Successor guard
+1772925 holds `/opt/wx/gpu.lock`, bounded until 13:10:41 UTC. Its directory is
+`/home/orionh/HEXAPOD_runs/mkii_motion_recovery_v1/priority_20260906T031041Z/`.
+The shared coordination note records the fresh priority and stopped jobs.
+
+The new diagnostic-only `validation_prefix` replays 1,000 standing controls
+and the first 15 individual motor tests through LR: 2,500 controls / 40,000
+physics steps, same 32 environments, seed, reset and episode horizon. Physical
+metrics and force-write counts cover all substeps. Detailed traces cover
+controls 2200–2499 (LF/LM/LR), while compact control telemetry and per-env
+end-hold means recover the discarded response information. Float32 response
+reduction matches the validator; no physical parameter or gate changed.
+
+914 local CPU tests passed in 61.846 seconds, with independent replay review.
+The separate 295-file manifest is
+`isaaclab/deploy/mkii_fourbar_v1_motion_prefix_pipeline.sha256`, SHA256
+`22e3429f14cd42feace994b48d18b0ba7d342ebaa22e3c2b556cdd57f5141706`.
+Both archived and current lineage checks pass. This is source verification,
+not physical admission. Compare actual reset positions, runtime parameters
+and earlier phase responses against campaign 008 before calling it an exact
+native-dynamics reproduction. Live recovery state is
+`/home/orionh/HEXAPOD_runs/mkii_motion_recovery_v1/recovery.json`.

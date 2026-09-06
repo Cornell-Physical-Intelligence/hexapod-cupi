@@ -157,7 +157,16 @@ control checks, unrelated-workload gates and exact-container cleanup remain.
 This does not enable concurrent GPU sharing, alter robot dynamics or admit
 prior incomplete runs. The old manifest and source are not rewritten.
 
-`isaaclab/deploy/mkii_fourbar_v1_coordination_control_pipeline.sha256` covers **all 112 historical
+The coordination-control release remains frozen at `1239159`. Campaign 008
+completed every nominal standing and driven step but failed closure, support
+and motor-direction checks. The motion-prefix diagnostic adds an exact
+32-environment replay through the LR pushlever test, with every physics-step
+metric, per-environment phase means and detailed traces around controls
+2200–2499. It preserves physical parameters, prior motion history, placements
+and acceptance gates, and cannot admit training. The preceding manifest remains
+byte-identical; the diagnostic extension has its own source identity.
+
+`isaaclab/deploy/mkii_fourbar_v1_motion_prefix_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

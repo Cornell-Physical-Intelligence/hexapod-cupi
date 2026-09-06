@@ -311,7 +311,8 @@ class FourbarSupervisorTests(unittest.TestCase):
     def test_diagnostic_reports_require_exact_complete_nonadmitting_trace(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "report.json"
-            for motion in supervisor.DIAGNOSTIC_MOTION_STEPS:
+            # The strict 32-env sparse prefix has its own complete host fixtures.
+            for motion in set(supervisor.DIAGNOSTIC_MOTION_STEPS) - {"validation_prefix"}:
                 args = SimpleNamespace(mode="diagnose", steps=1000, num_envs=1, solver_multiplier=1,
                                        diagnostic_motion=motion, diagnostic_usd="revolute_v3")
                 baseline = diagnostic_report(motion)
