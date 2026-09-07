@@ -1,0 +1,21 @@
+..........................................................................................................................................................................................................................................................................................................................................................................................................usage: python3 -m unittest [-h] [--admission ADMISSION]
+                           [--checkpoint CHECKPOINT] [--iterations ITERATIONS]
+                           [--solver-multiplier {1,2}]
+                           [--diagnostic-motion {individuals,groups,lf_tibia,standing,validation_prefix}]
+                           [--diagnostic-usd {revolute_v3,planar_d6_v4,physical_mimic_v5}]
+                           [--diagnostic-xy-offset X Y]
+                           [--asset-model {mkii_fourbar_v3,mkii_fourbar_v4,mkii_fourbar_v5}]
+                           [--environment-layout {grid_2m_v1,coincident_flat_origin_v1}]
+                           --source-dir SOURCE_DIR
+                           [--source-commit SOURCE_COMMIT]
+                           [--output-root OUTPUT_ROOT] [--num-envs NUM_ENVS]
+                           [--steps STEPS] [--timeout-seconds TIMEOUT_SECONDS]
+                           [--dry-run]
+                           {validate,train,diagnose}
+python3 -m unittest: error: Historical diagnostic trajectories require the original grid_2m_v1 layout
+.................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 939 tests in 79.489s
+
+OK
+[RECOVERY] Loaded actor+critic only; optimizer/iteration ignored; observation RMS frozen; scalar action std bounded to [0.06, 0.14]

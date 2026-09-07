@@ -1,0 +1,12 @@
+{
+  "pass": false,
+  "scope": "local archive verifier implementation",
+  "error": "ValueError: Archive path escape",
+  "cause": "macOS temporary directory may use /var path resolving through /private/var; compared resolved member target to unresolved temporary root",
+  "script": "verify_release.py",
+  "script_sha256": "eeac783904950fa3070fc578bd5f06718082b185d87f7ed11619083e504b8380",
+  "source_archive_changed": false,
+  "source_runtime_changed": false,
+  "fix": "Resolve the temporary root once before comparing resolved member containment; recheck all path names/hashes unchanged in verify_release_v2.py",
+  "recorded_utc": "2026-09-07T01:04:58.807671+00:00"
+}
