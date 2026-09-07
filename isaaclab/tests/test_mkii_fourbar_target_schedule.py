@@ -17,6 +17,37 @@ from hexapod_env.tasks.mkii_fourbar_v1.target_schedule import MotorTargetRamp
 
 
 class MotorTargetRampTests(unittest.TestCase):
+    def test_1600hz_ramp_preserves_800hz_targets_at_common_physical_times(self):
+        initial = torch.linspace(-1., 1., 54, dtype=torch.float64).reshape(3, 18)
+        endpoint = initial + torch.linspace(-.04, .04, 18, dtype=torch.float64)
+        coarse, fine = MotorTargetRamp(initial, substeps=16), MotorTargetRamp(initial, substeps=32)
+        coarse.begin(endpoint)
+        fine.begin(endpoint)
+        previous = initial
+        for index in range(1, 33):
+            current = fine.step()
+            self.assertLessEqual(float((current-previous).abs().max()), .00125 + 1e-15)
+            if index % 2 == 0:
+                self.assertTrue(torch.equal(current, coarse.step()))
+            previous = current
+        self.assertTrue(torch.equal(current, endpoint))
+        with self.assertRaises(RuntimeError):
+            fine.step()
+
+    def test_32_substep_partial_reset_preserves_other_rows_and_phase(self):
+        initial = torch.zeros(3, 18, dtype=torch.float64)
+        endpoint = torch.tensor([.016, .032, -.04], dtype=torch.float64)[:, None].repeat(1, 18)
+        ramp = MotorTargetRamp(initial, substeps=32)
+        ramp.begin(endpoint)
+        for _ in range(11):
+            ramp.step()
+        ramp.reset(torch.full((1, 18), .5, dtype=torch.float64), env_ids=[1])
+        for index in range(12, 33):
+            delivered = ramp.step()
+            self.assertTrue(torch.equal(delivered[1], torch.full((18,), .5, dtype=torch.float64)))
+            torch.testing.assert_close(delivered[[0, 2]], endpoint[[0, 2]] * index/32, rtol=0, atol=1e-17)
+        self.assertTrue(torch.equal(delivered[[0, 2]], endpoint[[0, 2]]))
+
     def test_all16_fractions_reach_exact_endpoint_without_initial_jump(self):
         initial = torch.linspace(-1., 1., 54, dtype=torch.float64).reshape(3, 18)
         endpoint = initial + torch.linspace(-.04, .04, 18, dtype=torch.float64)
@@ -95,7 +126,7 @@ class MotorTargetRampTests(unittest.TestCase):
         torch.testing.assert_close(ramp.step(), torch.full((2, 18), .201))
 
     def test_fraction_count_is_strict_and_failed_early_begin_does_not_change_ramp(self):
-        for count in (1, 4, 16):
+        for count in (1, 4, 16, 32):
             with self.subTest(count=count):
                 ramp = MotorTargetRamp(torch.zeros(1, 18), substeps=count)
                 with self.assertRaises(RuntimeError):

@@ -190,7 +190,24 @@ learning, checkpoint roundtrip and further learning in both the same and a
 fresh runner are separate API evidence, not robot training. The new source
 identity requires its own physical qualification; prior reports do not admit it.
 
-`isaaclab/deploy/mkii_fourbar_v1_rsl501_compat_pipeline.sha256` covers **all 112 historical
+The RSL501 compatibility source remains frozen at `5d476d4`. Its full 128/16
+comparison overturned all 32 robots during the right-middle pushlever test,
+despite staying within the geometric closure bound. The next numerical recipe
+uses 1,600 Hz outer steps and 32 updates per 20 ms policy interval, retaining 64/128
+position iterations and 16 velocity iterations. The RS05 contract explicitly
+supports the 0.625 ms timestep; gains, physical geometry, torque/burst limits,
+action endpoints, and every physical acceptance bound remain unchanged.
+This changes controller/contact refresh frequency and requires a new identity
+and fresh full paired qualification. Previous 800 Hz reports cannot admit it.
+
+The measurement implementation reuses the original per-frame pin offsets and
+batches passive velocity and force-norm arithmetic. Closure point/axis
+contractions, acceptance reductions, all 31 native sensor reads, every substep
+and the guard before reset remain intact. A frozen complete-row fixture using
+the installed SDK quaternion math checks current capture against the previous
+implementation; those regression inputs are included in this release manifest.
+
+`isaaclab/deploy/mkii_fourbar_v1_1600hz_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

@@ -33,8 +33,8 @@ class NumericalRecipeTests(unittest.TestCase):
         self.assertEqual(refined['solver_velocity_iterations'], 16)
         self.assertEqual(nominal['solver_type'], 1)
         self.assertIs(nominal['enable_external_forces_every_iteration'], True)
-        self.assertEqual(nominal['physics_dt_s'], .00125)
-        self.assertEqual(nominal['decimation'], 16)
+        self.assertEqual(nominal['physics_dt_s'], .000625)
+        self.assertEqual(nominal['decimation'], 32)
         self.assertEqual(contract.POLICY_DT_S, .02)
         self.assertEqual({key for key in nominal if nominal[key] != refined[key]}, {'solver_position_iterations'})
         for invalid in (True, 0, 3, 1., '1'):
@@ -42,8 +42,8 @@ class NumericalRecipeTests(unittest.TestCase):
                 contract.numerical_recipe(invalid)
 
     def test_validator_applies_exact_recipe_without_modifying_timing_or_limits(self):
-        cfg = SimpleNamespace(sim=SimpleNamespace(dt=.00125, physics=SimpleNamespace(solver_type=0,
-            enable_external_forces_every_iteration=False)), decimation=16,
+        cfg = SimpleNamespace(sim=SimpleNamespace(dt=.000625, physics=SimpleNamespace(solver_type=0,
+            enable_external_forces_every_iteration=False)), decimation=32,
             robot=SimpleNamespace(spawn=SimpleNamespace(articulation_props=SimpleNamespace(
                 solver_position_iteration_count=32, solver_velocity_iteration_count=1))))
         for multiplier in (1, 2):
@@ -76,7 +76,7 @@ class NumericalRecipeTests(unittest.TestCase):
 
     def test_final_velocity_recipe_rejects_coherent_old_one_pass_evidence(self):
         self.assertEqual(contract.NUMERICAL_RECIPE_ID,
-                         'mkii_fourbar_tgs_external_forces_800hz_final_velocity16_v5')
+                         'mkii_fourbar_tgs_external_forces_1600hz_position64_128_velocity16_v6')
         for multiplier in (1, 2):
             old = report(multiplier)
             old['numerical_recipe'].update(
@@ -97,6 +97,21 @@ class NumericalRecipeTests(unittest.TestCase):
             stale_backend['runtime_manifest']['resolved_simulation']['solver_velocity_iterations'] = 1
             with self.assertRaisesRegex(ValueError, 'Actual resolved simulation'):
                 contract.validate_numerical_recipe_report(stale_backend, multiplier)
+
+    def test_previous_800hz_recipe_cannot_admit_1600hz_runtime(self):
+        for multiplier in (1, 2):
+            old = report(multiplier)
+            old['numerical_recipe'].update(
+                recipe_id='mkii_fourbar_tgs_external_forces_800hz_final_velocity16_v5',
+                physics_dt_s=.00125, decimation=16)
+            old['runtime_manifest']['resolved_simulation'].update(physics_dt_s=.00125, decimation=16)
+            with self.assertRaisesRegex(ValueError, 'selected TGS contract'):
+                contract.validate_numerical_recipe_report(old, multiplier)
+            current_label_old_backend = report(multiplier)
+            current_label_old_backend['runtime_manifest']['resolved_simulation'].update(
+                physics_dt_s=.00125, decimation=16)
+            with self.assertRaisesRegex(ValueError, 'Actual resolved simulation'):
+                contract.validate_numerical_recipe_report(current_label_old_backend, multiplier)
 
     def test_stale_recipe_and_bool_integer_substitutions_fail(self):
         for changed in ({'solver_iterations': [32, 4]}, {'solver_iterations': [64, 8]},
@@ -128,10 +143,10 @@ class NumericalRecipeTests(unittest.TestCase):
         namespace = {'contract': contract, 'ContactSensorCfg': lambda **values: values, 'ROBOT_PRIM': '/Robot', 'GROUND': '/Ground'}
         exec(compile(ast.Module(body=[sensor], type_ignores=[]), '<sensor-config>', 'exec'), namespace)
         contact = namespace['_sensor']('lf_tibia', 'Geometry/lf_tibia')
-        self.assertEqual(simulation['dt'], .00125)
-        self.assertEqual(motor['physics_dt_s'], .00125)
-        self.assertEqual(contact['update_period'], .00125)
-        self.assertEqual(simulation['render_interval'], 16)
+        self.assertEqual(simulation['dt'], .000625)
+        self.assertEqual(motor['physics_dt_s'], .000625)
+        self.assertEqual(contact['update_period'], .000625)
+        self.assertEqual(simulation['render_interval'], 32)
         self.assertEqual(simulation['dt']*simulation['render_interval'], .02)
 
     def test_environment_rejects_old_or_divergent_motor_and_policy_timing(self):
@@ -140,11 +155,13 @@ class NumericalRecipeTests(unittest.TestCase):
                      and any(isinstance(item, ast.Constant) and item.value == 'Physics/control timing differs from the motor/runtime contract'
                              for item in ast.walk(node)))
         code = compile(ast.Module(body=[guard], type_ignores=[]), '<actual-env-timing-guard>', 'exec')
-        def check(physics=.00125, motor=.00125, decimation=16, policy=.02):
+        def check(physics=.000625, motor=.000625, decimation=32, policy=.02):
             exec(code, {'contract': contract, 'cfg': SimpleNamespace(sim=SimpleNamespace(dt=physics), decimation=decimation),
                         'motor_cfg': {'physics_dt_s': motor}, 'self': SimpleNamespace(step_dt=policy)})
         check()
         for changed in ({'physics': .005, 'motor': .005}, {'physics': .0025, 'motor': .0025},
+                        {'physics': .00125, 'motor': .00125, 'decimation': 16},
+                        {'physics': .00125}, {'motor': .00125}, {'decimation': 16},
                         {'motor': .0025}, {'motor': .005}, {'decimation': 8}, {'decimation': 4}, {'policy': .04}):
             with self.subTest(changed=changed):
                 with self.assertRaises(ValueError):

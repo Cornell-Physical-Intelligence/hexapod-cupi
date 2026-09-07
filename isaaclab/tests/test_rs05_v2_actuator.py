@@ -278,7 +278,7 @@ class ContractTests(unittest.TestCase):
         self.assertTrue(torch.all(actuator.burst_headroom[0] == .5))
         self.assertTrue(torch.all(actuator.burst_headroom[1] == .495))
         with self.assertRaises(ValueError): runtime.RS05V2Actuator(cfg, names[:-1] + ["passive"])
-        for dt in (.0025, .00125):
+        for dt in (.0025, .00125, .000625):
             fine_cfg = binding.make_rs05_v2_cfg(names, physics_dt_s=dt)
             fine_actuator = runtime.RS05V2Actuator(fine_cfg, list(reversed(names)))
             fine_action = types.SimpleNamespace(joint_positions=torch.ones_like(zeros),
@@ -287,6 +287,16 @@ class ContractTests(unittest.TestCase):
             self.assertEqual(fine_actuator._budget.dt, dt)
             self.assertTrue(torch.all(fine_actuator.applied_effort == 5.5))
             self.assertTrue(torch.allclose(fine_actuator.burst_headroom, torch.full_like(zeros, .5-dt)))
+            if dt == .000625:
+                for _ in range(31):
+                    fine_action = types.SimpleNamespace(joint_positions=torch.ones_like(zeros),
+                        joint_velocities=zeros.clone(), joint_efforts=zeros.clone())
+                    fine_actuator.compute(fine_action, zeros, zeros)
+                # Exactly 32 explicit motor updates represent one 20 ms action.
+                torch.testing.assert_close(fine_actuator.burst_headroom,
+                    torch.full_like(zeros, .48), rtol=0, atol=1e-12)
+                torch.testing.assert_close(fine_actuator.applied_peak_exposure_s,
+                    torch.full_like(zeros, .02), rtol=0, atol=1e-12)
 
     def test_configuration_import_cannot_resolve_runtime_or_usd(self):
         """Separate interpreter: runtime SDK symbol access fails before Kit."""
@@ -380,7 +390,7 @@ print("PRE_KIT_TASK_SHIM_PASS")
 class PhysicsTimeScalingTests(unittest.TestCase):
     def test_smaller_step_scales_budget_with_identical_instantaneous_bounds(self):
         for torque, rpm in ((1.6, 0), (3., 0), (5.5, 0), (3., 100), (5.5, 100)):
-            for dt in (.0025, .00125):
+            for dt in (.0025, .00125, .000625):
                 coarse, fine = model(dt=.005), model(dt=dt)
                 coarse_applied, fine_applied = step(coarse, torque, rpm), step(fine, torque, rpm)
                 torch.testing.assert_close(coarse_applied, fine_applied, rtol=0, atol=1e-12)
@@ -393,7 +403,7 @@ class PhysicsTimeScalingTests(unittest.TestCase):
 
     def test_peak_duration_and_holding_after_exhaustion_match_in_seconds(self):
         results = []
-        for dt in (.005, .0025, .00125):
+        for dt in (.005, .0025, .00125, .000625):
             motor = model(dt=dt)
             for _ in range(round(1 / dt)):
                 self.assertAlmostEqual(step(motor, 5.5).item(), 5.5, places=9)
@@ -414,7 +424,7 @@ class PhysicsTimeScalingTests(unittest.TestCase):
     def test_rotating_exposure_and_low_load_cooldown_match_physical_time(self):
         for torque, rpm in ((3., 100), (0., 0), (.3, 0), (1.2, 0)):
             results = []
-            for dt in (.005, .0025, .00125):
+            for dt in (.005, .0025, .00125, .000625):
                 motor = model(.5, dt=dt)
                 for _ in range(round(1 / dt)):
                     step(motor, torque, rpm)
@@ -424,18 +434,21 @@ class PhysicsTimeScalingTests(unittest.TestCase):
                     self.assertAlmostEqual(coarse, fine, places=10)
 
     def test_partial_step_budget_never_overdraws_at_any_supported_resolution(self):
-        for dt in (.005, .0025, .00125):
-            motor = model(.0007, dt=dt)
+        for dt in (.005, .0025, .00125, .000625):
+            # Half of one peak-step budget makes the final update partial at
+            # every resolution, including a timestep smaller than .0007 s.
+            remaining = dt / 2
+            motor = model(remaining, dt=dt)
             self.assertLess(step(motor, 5.5).item(), 5.5)
-            self.assertAlmostEqual(motor.budget_consumed.item(), .0007, places=12)
+            self.assertAlmostEqual(motor.budget_consumed.item(), remaining, places=12)
             self.assertAlmostEqual(motor.burst_headroom.item(), 0, places=12)
             self.assertEqual(motor.envelope_violation_nm.item(), 0)
 
     def test_selected_timestep_is_runtime_verified_and_manifest_bound(self):
         names = [f"motor_{i}" for i in range(18)]
         self.assertEqual(contract.PHYSICS_DT_S, .005)
-        self.assertEqual(contract.SUPPORTED_PHYSICS_DT_S, (.005, .0025, .00125))
-        for dt in (.0025, .00125):
+        self.assertEqual(contract.SUPPORTED_PHYSICS_DT_S, (.005, .0025, .00125, .000625))
+        for dt in (.0025, .00125, .000625):
             values = contract.configuration_values(names, physics_dt_s=dt)
             cfg = types.SimpleNamespace(**values, class_type=contract.ACTUATOR_CLASS)
             self.assertEqual(contract.verify_runtime_cfg(cfg, names)["physics_dt_s"], dt)

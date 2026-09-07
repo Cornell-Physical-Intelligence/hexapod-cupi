@@ -58,7 +58,7 @@ class HexapodMkiiFourbarV1EnvCfg(DirectRLEnvCfg):
     distal_foot_min_y_m = .155
     closure_coordinate_termination_rad = .02
     kinematics_path = str(ROOT / contract.KINEMATICS_PATH)
-    # Motor/contact updates run at 800 Hz; 16 updates preserve the 50 Hz policy.
+    # Motor/contact updates run at 1600 Hz; 32 updates preserve the 50 Hz policy.
     sim = SimulationCfg(dt=contract.PHYSICS_DT_S, render_interval=contract.DECIMATION,
         physics=PhysxCfg(gpu_max_rigid_patch_count=2**20, solver_type=contract.SOLVER_TYPE,
             enable_external_forces_every_iteration=contract.ENABLE_EXTERNAL_FORCES_EVERY_ITERATION),

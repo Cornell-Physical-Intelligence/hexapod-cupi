@@ -8,7 +8,7 @@ import math
 from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "packages/hexapod_core"))
-from hexapod_core.fourbar_v1 import validate_numerical_recipe_report
+from hexapod_core.fourbar_v1 import PHYSICS_DT_S, validate_numerical_recipe_report
 from mkii_asset_binding import solver_runtime_equivalent
 from mkii_training_contract import identity, read_json, write_json, digest
 
@@ -96,7 +96,7 @@ def qualify(nominal, refined, contract):
                              "comparisons": comparisons}
     result["admission_scope"] = (
         "Standing and +/-0.04 rad driven qualification only. Provisional flat-ground scratch PPO may explore "
-        "the configured +/-0.30 rad action offsets under a continuous 1.25 ms closure point/axis and motor-envelope "
+        f"the configured +/-0.30 rad action offsets under a continuous {PHYSICS_DT_S * 1000:g} ms closure point/axis and motor-envelope "
         "monitor; a monitor bound violation invalidates the run. Self-collision is off, so this does not qualify "
         "the collision-free workspace or hardware. This is not full joint-range, timestep-convergence or terrain "
         "qualification. The 48 V reference and uncalibrated metal-mount overload recovery remain explicit assumptions.")

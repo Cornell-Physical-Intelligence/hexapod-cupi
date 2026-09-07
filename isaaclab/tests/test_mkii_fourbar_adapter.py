@@ -284,13 +284,15 @@ class EnvironmentWiringTests(unittest.TestCase):
             delivered.append(kwargs["target"].clone())
             self.assertEqual(kwargs["joint_ids"].tolist(), list(contract.active_indices(raw.coordinates.names)))
         self.assertTrue(torch.equal(delivered[-1], endpoint))
-        self.assertTrue(torch.allclose(delivered[0], start+(endpoint-start)/16))
+        self.assertEqual(raw._robot.set_joint_position_target_index.call_count, 32)
+        self.assertLessEqual((endpoint-start).abs().max().item(), .0400001)
+        self.assertTrue(torch.allclose(delivered[0], start+(endpoint-start)/32))
         history = torch.stack([start, *delivered])
-        self.assertLessEqual((history[1:]-history[:-1]).abs().max().item(), .0025001)
+        self.assertLessEqual((history[1:]-history[:-1]).abs().max().item(), .0012501)
         raw._pre_physics_step(-torch.ones(3,18))
         raw._apply_action()
         self.assertTrue(torch.allclose(raw._robot.set_joint_position_target_index.call_args.kwargs["target"],
-                                       endpoint+(raw._processed_actions-endpoint)/16))
+                                       endpoint+(raw._processed_actions-endpoint)/32))
 
     def test_actual_partial_reset_writes_closed30_positions_and_velocities(self):
         raw=self.environment()

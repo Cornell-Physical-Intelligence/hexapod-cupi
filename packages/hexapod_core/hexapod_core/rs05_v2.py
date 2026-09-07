@@ -47,7 +47,7 @@ IMPLEMENTATION_PATHS = (
 def validate_operating_assumptions(physics_dt_s=PHYSICS_DT_S, assumed_bus_voltage_v=48.0):
     """Reject malformed settings; voltage-range validity is not calibration."""
     if not math.isfinite(physics_dt_s) or physics_dt_s not in SUPPORTED_PHYSICS_DT_S:
-        raise ValueError("RS05 v2 contract requires an explicitly supported physics_dt_s: 0.005, 0.0025 or 0.00125")
+        raise ValueError(f"RS05 v2 contract requires an explicitly supported physics_dt_s: {SUPPORTED_PHYSICS_DT_S}")
     lo, hi = CONFIG["vendor"]["operating_voltage_range_v"]
     if not math.isfinite(assumed_bus_voltage_v) or not lo <= assumed_bus_voltage_v <= hi:
         raise ValueError("Assumed bus voltage must be finite and within15..60 V")
