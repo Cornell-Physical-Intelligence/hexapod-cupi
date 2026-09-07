@@ -213,7 +213,25 @@ and the guard before reset remain intact. A frozen complete-row fixture using
 the installed SDK quaternion math checks current capture against the previous
 implementation; those regression inputs are included in this release manifest.
 
-`isaaclab/deploy/mkii_fourbar_v1_1600hz_metrics_pipeline.sha256` covers **all 112 historical
+The 1600 Hz metrics release remains frozen at `c2af43c`. Its 308-path manifest,
+`isaaclab/deploy/mkii_fourbar_v1_1600hz_metrics_pipeline.sha256`, retains SHA-256
+`8d6ad0b053e2b2a73e6610a51871443efdeb1234d7c44165dbf27a67498e66fb`.
+The separately prepared fallback selects numerical recipe
+`mkii_fourbar_tgs_external_forces_1600hz_position64_128_velocity1_v7`: one TGS
+velocity iteration, with 64/128 position iterations, 1600 Hz physics, 50 Hz
+policy control, and unchanged motor dynamics, geometry and physical gates.
+It follows the matching NVIDIA 110.1 guidance as a controlled experiment, not
+a proven diagnosis or physical admission. It has not been synchronized to the
+Spark or run on the GPU. Complete new paired validation is required before PPO.
+
+The initial local fallback commit `efe4338` froze CPU evidence before updating
+the deployment pointer. That evidence remains unchanged and belongs to that
+exact source identity. This release additionally updates the lineage checker,
+CI pointer and documentation and includes the unchanged prior 308-path manifest
+as a new covered file. The checker is functional source, so this release has a
+new source identity; the earlier candidate identity cannot be used for admission.
+
+`isaaclab/deploy/mkii_fourbar_v1_1600hz_velocity1_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

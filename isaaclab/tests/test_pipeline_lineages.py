@@ -19,6 +19,21 @@ def encode(records):
 
 
 class PipelineLineageTests(unittest.TestCase):
+    def test_velocity_one_release_binds_ci_and_preserves_prior_metrics_manifest(self):
+        self.assertEqual(lineage.CURRENT_MANIFEST,
+                         'isaaclab/deploy/mkii_fourbar_v1_1600hz_velocity1_pipeline.sha256')
+        previous = 'isaaclab/deploy/mkii_fourbar_v1_1600hz_metrics_pipeline.sha256'
+        self.assertIn(previous, lineage.CURRENT_EXTRA_PATHS)
+        self.assertNotIn(lineage.CURRENT_MANIFEST, lineage.CURRENT_EXTRA_PATHS)
+        content = (ROOT / previous).read_bytes()
+        self.assertEqual(hashlib.sha256(content).hexdigest(),
+                         '8d6ad0b053e2b2a73e6610a51871443efdeb1234d7c44165dbf27a67498e66fb')
+        self.assertEqual(len(lineage.parse_manifest(content)), 308)
+        workflow = (ROOT / '.github/workflows/tests.yml').read_text()
+        self.assertIn('run: uv run python tools/check_pipeline_lineages.py current --manifest '
+                      + lineage.CURRENT_MANIFEST, workflow)
+        self.assertIn('run: uv run python tools/check_pipeline_lineages.py historical', workflow)
+
     def git(self, root, *args):
         return subprocess.run(["git", "-c", "user.name=Lineage Test", "-c", "user.email=test@example.invalid",
                                "-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null", *args],
