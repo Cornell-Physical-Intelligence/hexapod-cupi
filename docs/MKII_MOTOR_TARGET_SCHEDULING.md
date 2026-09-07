@@ -1,9 +1,11 @@
 # Motor target scheduling candidate
 
-This document describes the isolated target-scheduling change frozen at
+This document records the original isolated target-scheduling change frozen at
 `9cd8d4c`. The later named Kd 0.30 controller experiment is documented in
 [the training runbook](MKII_FOURBAR_TRAINING.md); it preserves this scheduler
 and records its separate gains in the runtime manifest.
+
+The current c2af43c numerical release retains this scheduling rule with **32 increments at 1,600 Hz**, so the maximum target-induced proportional increment is now **0.0375 N·m per physics step**. The 50 Hz endpoint and 0.040 rad endpoint slew limit are unchanged. The following sixteen-increment numbers describe the original 800 Hz experiment.
 
 The 50 Hz policy still produces the same eighteen clipped, soft-limit-bounded,
 0.040 rad / 20 ms slew-limited motor endpoints. The new candidate delivers each

@@ -19,12 +19,12 @@ solver-convergence comparison must also pass.
 - Reset: all 30 coordinates derive from the 18 motor positions; per-leg CAD
   phase offsets are explicit. Plate reset height is 0.142970 m. No independent
   passive jitter. Initial qualification uses zero joint jitter.
-- Control: 800 Hz explicit motor dynamics (1.25 ms), sixteen physics substeps
+- Control: 1,600 Hz explicit motor dynamics (0.625 ms), 32 physics substeps
   per 50 Hz policy update; 84 observations include 18 motor overload-headroom
   states. Anatomical forward is body -Y, left +X.
 - Solver: TGS with external forces applied every position iteration; nominal
   64/16 position/velocity iterations, refined 128/16 at the same timestep.
-  The earlier 64/1 and 128/1 results remain historical evidence.
+  The earlier 64/1 and 128/1 results at larger timesteps remain historical evidence.
 - Baseline commands: ±0.15 m/s on both horizontal axes and ±0.30 rad/s yaw, with
   20% standing commands. Actions have ±0.30 rad offsets and a 0.04 rad/20 ms
   target slew limit. These are initial simulation settings, not hardware limits.
@@ -118,16 +118,17 @@ settings and observed joint order. The comparison is saved in the training repor
 
 ## Reproduction and compute ownership
 
-The commands below use the frozen coordination-control release at
-`/home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source`.
+The commands below use the frozen c2af43c / c33b4591 release at
+`/home/orionh/HEXAPOD_runs/mkii_1600hz_metrics_v1/source`.
 Check [STATUS.md](../STATUS.md) and the live campaign before launching; do not
 duplicate an active campaign. Earlier isolated source directories remain frozen.
 The original project mirror and archived task/checkpoint contracts are retained.
 
 ```sh
-python3 isaaclab/deploy/run-mkii-fourbar validate \
-  --source-dir /home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source \
-  --asset-model mkii_fourbar_v5 \
+/usr/bin/flock --nonblock --no-fork /opt/wx/gpu.lock \
+python3 /home/orionh/HEXAPOD_runs/mkii_1600hz_metrics_v1/source/isaaclab/deploy/run-mkii-fourbar validate \
+  --source-dir /home/orionh/HEXAPOD_runs/mkii_1600hz_metrics_v1/source \
+  --asset-model mkii_fourbar_v5 --environment-layout coincident_flat_origin_v1 \
   --num-envs 32 --steps 1000 --solver-multiplier 1 --timeout-seconds 7200
 
 # Repeat the same model with --solver-multiplier 2.
@@ -135,9 +136,10 @@ python3 isaaclab/deploy/run-mkii-fourbar validate \
 python3 tools/qualify_mkii_fourbar.py NOMINAL_REPORT REFINED_REPORT ADMISSION_JSON
 
 # This remains blocked until the admission gate above passes.
-python3 isaaclab/deploy/run-mkii-fourbar train \
-  --source-dir /home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source \
-  --asset-model mkii_fourbar_v5 \
+/usr/bin/flock --nonblock --no-fork /opt/wx/gpu.lock \
+python3 /home/orionh/HEXAPOD_runs/mkii_1600hz_metrics_v1/source/isaaclab/deploy/run-mkii-fourbar train \
+  --source-dir /home/orionh/HEXAPOD_runs/mkii_1600hz_metrics_v1/source \
+  --asset-model mkii_fourbar_v5 --environment-layout coincident_flat_origin_v1 \
   --admission ADMISSION_JSON --num-envs 64 --iterations 3 --timeout-seconds 3600
 
 # A later process may add --checkpoint PATH_TO_CHECKPOINT_PT.
@@ -152,8 +154,9 @@ arbitrary host environment overrides cannot select another bundle.
 For diagnosis, use the separate selector and report type:
 
 ```sh
-python3 isaaclab/deploy/run-mkii-fourbar diagnose \
-  --source-dir /home/orionh/HEXAPOD_runs/mkii_coordination_control_v1/source \
+/usr/bin/flock --nonblock --no-fork /opt/wx/gpu.lock \
+python3 /home/orionh/HEXAPOD_runs/mkii_1600hz_metrics_v1/source/isaaclab/deploy/run-mkii-fourbar diagnose \
+  --source-dir /home/orionh/HEXAPOD_runs/mkii_1600hz_metrics_v1/source \
   --diagnostic-usd physical_mimic_v5 --diagnostic-motion groups \
   --num-envs 8 --steps 200 --solver-multiplier 2 --timeout-seconds 3600
 ```
@@ -173,7 +176,7 @@ independently checked by the host. Z and the physical model remain unchanged.
 Use matching step counts, seeds and all other options for a translation
 comparison; it cannot grant admission or alter a validation/training launch.
 
-The host supervisor holds the existing GPU lock, waits at a CPU admission barrier,
+The external prefix holds `/opt/wx/gpu.lock` for each actual job; the host supervisor also owns `/tmp/hexapod-isaac-gpu.lock`, waits at a CPU admission barrier,
 requires at least 16 GiB available host memory, rejects unrelated GPU workloads,
 and checks source identity before and after execution. Cleanup addresses only the
 run's immutable container ID and ownership label. A zero exit without the required
@@ -218,17 +221,21 @@ The full supervisor's 21,600-second ceiling is a hard timeout, counted from host
 
 ## TGS recipe revision
 
-The original 32/4 and 64/8 recipes completed every driven step but failed the unchanged closure bounds (0.246159 mm and 0.366053 mm pin separation respectively). The subsequent 5 ms recipe selected TGS, external forces on every position iteration, and nominal/refined counts of 64/1 and 128/1. That timestep is historical and has been superseded by the 1.25 ms recipe below. Previous manifests, reports and source commits remain preserved and cannot admit a changed runtime.
+The original 32/4 and 64/8 recipes completed every driven step but failed the unchanged closure bounds (0.246159 mm and 0.366053 mm pin separation respectively). The subsequent 5 ms recipe selected TGS, external forces on every position iteration, and nominal/refined counts of 64/1 and 128/1. That timestep and the following 1.25 ms recipe are historical; the current release uses 0.625 ms. Previous manifests, reports and source commits remain preserved and cannot admit a changed runtime.
 
 ## 800 Hz physics revision
 
-At 5 ms, the explicit-force 64/1 recipe failed the first tibia reversal after 1,252 driven steps, reaching 0.883917 mm physical pin separation and 0.0571375 rad passive residual before closure termination. Applied torque remained inside its instantaneous envelope. The follow-up uses **1.25 ms physics, sixteen substeps and unchanged 20 ms policy control**. Motor budget/overload/recovery integration is tested over equal physical durations at 5, 2.5 and 1.25 ms. Every physical substep remains measured; the full 1,000 standing plus 2,400 driven-control-step sequence and its bounds remain unchanged.
+At 5 ms, the explicit-force 64/1 recipe failed the first tibia reversal after 1,252 driven steps, reaching 0.883917 mm physical pin separation and 0.0571375 rad passive residual before closure termination. Applied torque remained inside its instantaneous envelope. That historical follow-up used **1.25 ms physics, sixteen substeps and unchanged 20 ms policy control**. Motor budget/overload/recovery integration is tested over equal physical durations at 5, 2.5 and 1.25 ms. Every physical substep remains measured; the full 1,000 standing plus 2,400 driven-control-step sequence and its bounds remain unchanged.
 
 A reduced linearized inertia analysis motivates the timestep: ideal closed-loop modes and light unconstrained lever modes have different timestep margins. It does not replace the actual constrained/contact simulation checks. Each physical formulation still needs passing nominal/refined validation, complete checkpoint tests and matching training source/runtime identities. No current formulation has that admission. Actual throughput must be measured before quoting a training ETA.
 
+## Current 1,600 Hz candidate
+
+The 800 Hz nominal comparison completed all motions but missed the unchanged 0.100 mm closure bound at 0.111171 mm. Increasing position iterations to 128 tightened closure but later overturned all 32 robots during a right-middle tibia motor test. The separate c2af43c release halves the outer timestep to 0.625 ms, retaining 64/16 and 128/16 comparison counts, 50 Hz policy, geometry, gains and all acceptance bounds. All 935 repository tests and exact staging hashes pass. Its 100-control probe passed; complete standing/driven admission is still pending. Each full comparison now captures 108,800 physics substeps per environment. See [current status](../STATUS.md).
+
 ## Motor target interpolation candidate
 
-The current source delivers each existing 50 Hz motor endpoint as sixteen linear position increments, with zero velocity feedforward. It preserves gains, limits, assets, validation motions and acceptance bounds; see [the scheduling contract](MKII_MOTOR_TARGET_SCHEDULING.md). It requires fresh validation and is not yet admitted. The existing hardware action adapter still emits endpoints; embedded scheduling and bus latency must be implemented and measured before transfer.
+The current source delivers each existing 50 Hz motor endpoint as 32 linear position increments, with zero velocity feedforward. It preserves gains, limits, assets, validation motions and acceptance bounds; see [the scheduling contract](MKII_MOTOR_TARGET_SCHEDULING.md). It requires fresh validation and is not yet admitted. The existing hardware action adapter still emits endpoints; embedded scheduling and bus latency must be implemented and measured before transfer.
 
 ## Measuring throughput and preserving a long run
 

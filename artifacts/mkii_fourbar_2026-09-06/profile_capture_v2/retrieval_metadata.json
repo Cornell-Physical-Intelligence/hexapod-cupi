@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "operation": "Read-only SSH retrieval of exact original bytes; no GPU imports or jobs",
+  "local_started_utc": "2026-09-07T00:48:59.944162+00:00",
+  "remote_host": "orionh@100.82.166.9",
+  "ssh_argv": [
+    "ssh",
+    "-o",
+    "ControlMaster=auto",
+    "-o",
+    "ControlPersist=600",
+    "-o",
+    "ControlPath=/tmp/hexapod_profiler_readonly.sock",
+    "-o",
+    "ConnectTimeout=15",
+    "-o",
+    "BatchMode=yes",
+    "orionh@100.82.166.9",
+    "python3 -"
+  ],
+  "remote_script_sha256": "9ae183ed5a9ce87e096b99eb162b9693ad9c4ecdbdf5994b5a7430a6741897cb",
+  "remote_script": "import pathlib,json,hashlib,base64,datetime\nroot=pathlib.Path('/home/orionh/HEXAPOD_runs/mkii_profile_v2/profile_001')\nfiles={}\nfor name in ['supervisor.json', 'validation_report.json', 'container.stdout.log', 'container.stderr.log', 'admitted', 'cpu_asset_audit.json', 'profile.json', 'torch_summary.txt']:\n p=root/name\n before=p.stat()\n data=p.read_bytes()\n after=p.stat()\n if (before.st_size,before.st_mtime_ns)!=(after.st_size,after.st_mtime_ns): raise RuntimeError('Remote file changed during read: '+name)\n files[name]={'size_bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'mtime_ns':after.st_mtime_ns,'base64':base64.b64encode(data).decode('ascii')}\ntraces={}\nfor p in sorted(root.glob('*trace*')):\n if p.is_file():\n  before=p.stat(); h=hashlib.sha256()\n  with p.open('rb') as f:\n   for block in iter(lambda:f.read(1024*1024),b''): h.update(block)\n  after=p.stat()\n  if (before.st_size,before.st_mtime_ns)!=(after.st_size,after.st_mtime_ns): raise RuntimeError('Trace changed during hash')\n  traces[p.name]={'remote_path':str(p),'size_bytes':after.st_size,'sha256':h.hexdigest(),'mtime_ns':after.st_mtime_ns,'copied':False}\nprint(json.dumps({'remote_root':str(root),'captured_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'files':files,'remote_only_traces':traces}))\n",
+  "ssh_exit_code": 0,
+  "ssh_stderr": "",
+  "captured": {
+    "remote_root": "/home/orionh/HEXAPOD_runs/mkii_profile_v2/profile_001",
+    "captured_at_utc": "2026-09-07T00:49:00.241520+00:00",
+    "files": {
+      "supervisor.json": {
+        "size_bytes": 35415,
+        "sha256": "3b65f9c5deb19b12d5a9e25afcf81a6a9184a8e1955d13b6888505a0d377ee86",
+        "mtime_ns": 1788740587958922957,
+        "local_sha256": "3b65f9c5deb19b12d5a9e25afcf81a6a9184a8e1955d13b6888505a0d377ee86",
+        "match": true
+      },
+      "validation_report.json": {
+        "size_bytes": 1023359,
+        "sha256": "142a449aa6d0f7bb5a1c44334602f6ac33dfe0252dabe63a6a0d4360229607dd",
+        "mtime_ns": 1788740576046350298,
+        "local_sha256": "142a449aa6d0f7bb5a1c44334602f6ac33dfe0252dabe63a6a0d4360229607dd",
+        "match": true
+      },
+      "container.stdout.log": {
+        "size_bytes": 22090,
+        "sha256": "891cc88c2bc4ae34d75c6372943f1350c8599c3dc040e81f3434d06c3b239911",
+        "mtime_ns": 1788740587904376979,
+        "local_sha256": "891cc88c2bc4ae34d75c6372943f1350c8599c3dc040e81f3434d06c3b239911",
+        "match": true
+      },
+      "container.stderr.log": {
+        "size_bytes": 989,
+        "sha256": "b1ca422d40a96d239a15b2c5e00a22fa13478d6e2b22931d72c45c43ff31a59c",
+        "mtime_ns": 1788740587905091785,
+        "local_sha256": "b1ca422d40a96d239a15b2c5e00a22fa13478d6e2b22931d72c45c43ff31a59c",
+        "match": true
+      },
+      "admitted": {
+        "size_bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mtime_ns": 1788740490180497310,
+        "local_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "match": true
+      },
+      "cpu_asset_audit.json": {
+        "size_bytes": 39872,
+        "sha256": "5a72c9e3971541e918a21e4068c0222987d797d0ce9cdeec253c2baea0914042",
+        "mtime_ns": 1788740493839707253,
+        "local_sha256": "5a72c9e3971541e918a21e4068c0222987d797d0ce9cdeec253c2baea0914042",
+        "match": true
+      },
+      "profile.json": {
+        "size_bytes": 111741,
+        "sha256": "ccd65597368911cd118ba878c7cb68d8017e4e936c62b910ff5a0ea6f54aed22",
+        "mtime_ns": 1788740586203334983,
+        "local_sha256": "ccd65597368911cd118ba878c7cb68d8017e4e936c62b910ff5a0ea6f54aed22",
+        "match": true
+      },
+      "torch_summary.txt": {
+        "size_bytes": 20653,
+        "sha256": "a44c7f65008039731a66260a64ce60a3bb824f36405d9e48c1846513aa81a7fa",
+        "mtime_ns": 1788740585875358738,
+        "local_sha256": "a44c7f65008039731a66260a64ce60a3bb824f36405d9e48c1846513aa81a7fa",
+        "match": true
+      }
+    },
+    "remote_only_traces": {
+      "trace.json": {
+        "remote_path": "/home/orionh/HEXAPOD_runs/mkii_profile_v2/profile_001/trace.json",
+        "size_bytes": 82890837,
+        "sha256": "52d0cd58363f1c538468b161c5e44075066627e45ef7630b2c68f785b82b41fa",
+        "mtime_ns": 1788740576481274273,
+        "copied": false
+      }
+    }
+  }
+}
