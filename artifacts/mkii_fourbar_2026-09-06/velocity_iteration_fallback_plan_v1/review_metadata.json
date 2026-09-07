@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "scope": "read-only implementation plan; no fallback runtime or test changes; no GPU launches",
+  "reviewed_at_utc": "2026-09-07T00:47:17.998117+00:00",
+  "source_commit": "c2af43ca0f384a4c2c7ab8f1d627f309dc78a683",
+  "source_files": {
+    "packages/hexapod_core/hexapod_core/fourbar_v1.py": "bfc280c02ec5f60a1318a634a895934c5803fcbf66cc92248721d3034ae2c016",
+    "packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/config.py": "d291c6a8e7bb09553fd259378158934fecc698e259b8a568367da7d3aeeba670",
+    "packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/env.py": "ead9ec2a829dcebfaef4f940992fd18bda3bb056ff68d79f7a6878aac229ed34",
+    "isaaclab/validate_mkii_fourbar.py": "811726701377ec9cc55672ac5df0f417bcb22eb112258bda259feed177becdb3",
+    "isaaclab/train_mkii_fourbar.py": "d12e8ff695a4a8d896484b624c30f85a63ea016d1fe78c3075abaa9b0e50410d",
+    "tools/mkii_training_contract.py": "f3173c6076562128965023dfd3f7e0e17adfae14b1e87b62b5f125cb317b5822",
+    "tools/qualify_mkii_fourbar.py": "f356a9f05d9cefb54802cd6ed001f1cc2908c0df810a1c05518926c5635a080e",
+    "tools/mkii_asset_binding.py": "28174fe4d0ceb5365f83e4b7974df6115e4ddc8e23548c12c4d9ae6bf68e08ab",
+    "isaaclab/deploy/run-mkii-fourbar-campaign": "4e3e5f3407f780c5d28df35e72ab141b1b745f367b9e1d53f761f9952666ed44",
+    "isaaclab/tests/test_mkii_fourbar_numerical_recipe.py": "798f623a5b12bc30937750fffd8d31f67615d2fd04ac5d281e80aa73bcfca7f8",
+    "isaaclab/tests/test_mkii_fourbar_training_guards.py": "43dda18fd70ef7d82349a54efa2ccf08a1783ccc0339af50711ae3eda0fb550e",
+    "docs/MKII_FOURBAR_TRAINING.md": "b25125cdd8b9ecb64b130aec260fe06136acaa572b17c65cdb053216d8a67209"
+  },
+  "physx_review_manifest_sha256": "e50cf78cd8b39102baacc917431137147502c08e8869bee57702f9dde3a46037",
+  "physx_review_verification": [
+    {
+      "argv": [
+        "python3",
+        "verify.py"
+      ],
+      "exit_code": 0,
+      "stdout": "PASS: recorded installed-image identity, live plugin binding, static version markers, metadata cleanup and public-source hashes\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "shasum",
+        "-a",
+        "256",
+        "-c",
+        "SHA256SUMS"
+      ],
+      "exit_code": 0,
+      "stdout": "README.md: OK\ninspect_image_files.py: OK\ninstalled_image_metadata.json: OK\nlive_bundle_changelog.txt: OK\nlive_profiler_image_binding.txt: OK\noptional_followup_read.json: OK\npublic_source_manifest.json: OK\npublic_sources/LICENSE.md: OK\npublic_sources/omni__ovexts__extensions__ux__source__omni.physx.bundle__docs__CHANGELOG.md: OK\npublic_sources/omni__ovruntime__source__omni.physx__plugins__PhysXScene.cpp: OK\npublic_sources/physx__CHANGELOG.md: OK\npublic_sources/physx__include__foundation__PxPhysicsVersion.h: OK\npublic_sources/physx__source__physxextensions__src__serialization__Xml__SnXmlSerialization.cpp: OK\npublic_tag_commit.json: OK\nverify.py: OK\n",
+      "stderr": ""
+    }
+  ],
+  "proposed_velocity_iterations": 1,
+  "current_velocity_iterations": 16,
+  "current_physics_dt_s": 0.000625,
+  "current_decimation": 32,
+  "nominal_refined_position_iterations": [
+    64,
+    128
+  ]
+}

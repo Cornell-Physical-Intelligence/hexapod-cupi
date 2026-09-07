@@ -1,0 +1,11 @@
+--- v1/test_complete_metrics.py
++++ v2/test_complete_metrics.py
+@@ -17,7 +17,7 @@
+ 
+ HERE = Path(__file__).resolve().parent
+ SETTINGS = globals().get('_COMPARISON_SETTINGS',{})
+-ROOT = Path(SETTINGS.get('source_dir',HERE.parents[2])).resolve()
++ROOT = Path(SETTINGS['source_dir'] if 'source_dir' in SETTINGS else HERE.parents[2]).resolve()
+ DEVICE = SETTINGS.get('device','cpu')
+ SCALAR_INDEX = 3 if SETTINGS.get('sdk_xyzw') else 0
+ sys.path[:0] = [str(ROOT/'isaaclab/tests'),str(ROOT/'tools'),str(ROOT/'isaaclab')]
