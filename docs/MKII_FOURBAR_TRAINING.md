@@ -9,6 +9,14 @@ See [STATUS.md](../STATUS.md) for the current execution state and
 A complete nominal pass alone cannot admit training: the refined repeat and
 solver-convergence comparison must also pass.
 
+This branch prepares an unqualified local fallback recipe, `v7`: 1600 Hz with
+one TGS velocity iteration. It has not been deployed or tested on the GPU.
+The active 1600 Hz / 16-iteration `v6` campaign remains a separate source
+release; its evidence cannot admit this fallback. NVIDIA's matching
+[Omni Physics 110.1 guidance](https://docs.omniverse.nvidia.com/kit/docs/omni_physics/110.1/dev_guide/simulation_control/simulation_control.html#physics-solver)
+recommends approximately one TGS velocity iteration. This motivates a controlled
+experiment, not a claim that the earlier failure's cause is established.
+
 ## What runs
 
 - Task: `Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0`.
@@ -19,12 +27,13 @@ solver-convergence comparison must also pass.
 - Reset: all 30 coordinates derive from the 18 motor positions; per-leg CAD
   phase offsets are explicit. Plate reset height is 0.142970 m. No independent
   passive jitter. Initial qualification uses zero joint jitter.
-- Control: 800 Hz explicit motor dynamics (1.25 ms), sixteen physics substeps
+- Control: 1600 Hz explicit motor dynamics (0.625 ms), 32 physics substeps
   per 50 Hz policy update; 84 observations include 18 motor overload-headroom
   states. Anatomical forward is body -Y, left +X.
 - Solver: TGS with external forces applied every position iteration; nominal
-  64/16 position/velocity iterations, refined 128/16 at the same timestep.
-  The earlier 64/1 and 128/1 results remain historical evidence.
+  64/1 position/velocity iterations, refined 128/1 at the same timestep.
+  Earlier 800 Hz one-iteration runs and the 1600 Hz 16-iteration recipe remain
+  historical/separate evidence. This recipe requires new complete validations.
 - Baseline commands: ±0.15 m/s on both horizontal axes and ±0.30 rad/s yaw, with
   20% standing commands. Actions have ±0.30 rad offsets and a 0.04 rad/20 ms
   target slew limit. These are initial simulation settings, not hardware limits.
@@ -88,7 +97,7 @@ claim a measured four-quadrant motor map. Battery voltage is still unknown;
 3. Run 32 environments for 1,000 standing control steps, then 2,400 driven steps:
    each motor independently at ±0.04 rad, followed by simultaneous group tests.
    This checks individual mapping and the physical mechanism under small loads.
-4. Repeat with 128/16 position/velocity solver iterations versus nominal 64/16.
+4. Repeat with 128/1 position/velocity solver iterations versus nominal 64/1.
    Compare standing and driven height, applied torque and raw pre-envelope
    demand; both runs must pass independently. Actual ordered reset-root
    positions must be finite and exactly equal between the runs.

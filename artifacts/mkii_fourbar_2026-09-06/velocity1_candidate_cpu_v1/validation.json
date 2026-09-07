@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "candidate_status": "CPU tested local fallback; not deployed; no GPU qualification or training admission",
+  "base_commit": "c2af43ca0f384a4c2c7ab8f1d627f309dc78a683",
+  "branch": "codex/mkii-velocity1-candidate",
+  "created_at_utc": "2026-09-07T00:56:19.910565+00:00",
+  "source_sha256": "328efb07dded31e871d0b6dad3c50d949a7af798bacd8f8e6f3451ccbb7ca340",
+  "source_file_count": 241,
+  "selected_recipes": {
+    "nominal": {
+      "recipe_id": "mkii_fourbar_tgs_external_forces_1600hz_position64_128_velocity1_v7",
+      "solver_type": 1,
+      "solver_position_iterations": 64,
+      "solver_velocity_iterations": 1,
+      "enable_external_forces_every_iteration": true,
+      "physics_dt_s": 0.000625,
+      "decimation": 32
+    },
+    "refined": {
+      "recipe_id": "mkii_fourbar_tgs_external_forces_1600hz_position64_128_velocity1_v7",
+      "solver_type": 1,
+      "solver_position_iterations": 128,
+      "solver_velocity_iterations": 1,
+      "enable_external_forces_every_iteration": true,
+      "physics_dt_s": 0.000625,
+      "decimation": 32
+    }
+  },
+  "core_ast_delta": [
+    {
+      "name": "NUMERICAL_RECIPE_ID",
+      "before": "mkii_fourbar_tgs_external_forces_1600hz_position64_128_velocity16_v6",
+      "after": "mkii_fourbar_tgs_external_forces_1600hz_position64_128_velocity1_v7"
+    },
+    {
+      "name": "SOLVER_VELOCITY_ITERATIONS",
+      "before": 16,
+      "after": 1
+    }
+  ],
+  "changed_tracked_paths": {
+    "docs/MKII_FOURBAR_TRAINING.md": "c19039f418c585e10b0e08229cca9f91a2ba622860b417e9d91772cafd4a77a8",
+    "isaaclab/tests/test_mkii_fourbar_numerical_recipe.py": "8adabef055121656d1a1356e8e6b54e212c63194f2bcb85483dabcc40d7df137",
+    "packages/hexapod_core/hexapod_core/fourbar_v1.py": "584a8839441f08162ce0891a42b2334461f3e274385edc7ba2f66fd55d279678"
+  },
+  "protected_paths_byte_identical_to_base": {
+    "isaaclab/validate_mkii_fourbar.py": "811726701377ec9cc55672ac5df0f417bcb22eb112258bda259feed177becdb3",
+    "isaaclab/train_mkii_fourbar.py": "d12e8ff695a4a8d896484b624c30f85a63ea016d1fe78c3075abaa9b0e50410d",
+    "tools/qualify_mkii_fourbar.py": "f356a9f05d9cefb54802cd6ed001f1cc2908c0df810a1c05518926c5635a080e",
+    "tools/mkii_asset_binding.py": "28174fe4d0ceb5365f83e4b7974df6115e4ddc8e23548c12c4d9ae6bf68e08ab",
+    "packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/config.py": "d291c6a8e7bb09553fd259378158934fecc698e259b8a568367da7d3aeeba670",
+    "packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/env.py": "ead9ec2a829dcebfaef4f940992fd18bda3bb056ff68d79f7a6878aac229ed34",
+    "packages/hexapod_core/hexapod_core/rs05_v2.json": "6d119149801fcd78189045ba7ca46a0f112738467cab4bcba97cb30783107478",
+    "isaaclab/deploy/run-mkii-fourbar": "60dc7803aa962c2a1152fa00bb20ccafe5348890509a903d65bfb850fb42bfbc",
+    "isaaclab/deploy/run-mkii-fourbar-campaign": "4e3e5f3407f780c5d28df35e72ab141b1b745f367b9e1d53f761f9952666ed44"
+  },
+  "cpu_checks": [
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "--offline",
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "isaaclab/tests",
+        "-p",
+        "test_mkii_fourbar_*.py"
+      ],
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "log": "focused_tests.log",
+      "sha256": "ff49ab7248f5cf583280038b270b0dbc780d711f60ecbc8662d46512f610b510",
+      "tests": 139,
+      "reported_seconds": 64.088,
+      "exit_code": 0,
+      "pass": true
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "--frozen",
+        "--offline",
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "isaaclab/tests"
+      ],
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "log": "full_tests.log",
+      "sha256": "8614724a6dde59d566d3e08e4d5be16a693cbf23d99d79d369179a5e0b4fd298",
+      "tests": 938,
+      "reported_seconds": 91.275,
+      "exit_code": 0,
+      "pass": true
+    }
+  ],
+  "dependencies": "uv sync --frozen --offline in a fresh local virtualenv; uv.lock and pyproject.toml unchanged",
+  "gpu_launches": 0,
+  "spark_sync": false,
+  "hardware_admission": false,
+  "simulation_training_admission": false
+}

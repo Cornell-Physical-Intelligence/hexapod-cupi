@@ -29,8 +29,8 @@ class NumericalRecipeTests(unittest.TestCase):
         nominal, refined = contract.numerical_recipe(), contract.numerical_recipe(2)
         self.assertEqual(nominal['solver_position_iterations'], 64)
         self.assertEqual(refined['solver_position_iterations'], 128)
-        self.assertEqual(nominal['solver_velocity_iterations'], 16)
-        self.assertEqual(refined['solver_velocity_iterations'], 16)
+        self.assertEqual(nominal['solver_velocity_iterations'], 1)
+        self.assertEqual(refined['solver_velocity_iterations'], 1)
         self.assertEqual(nominal['solver_type'], 1)
         self.assertIs(nominal['enable_external_forces_every_iteration'], True)
         self.assertEqual(nominal['physics_dt_s'], .000625)
@@ -45,10 +45,10 @@ class NumericalRecipeTests(unittest.TestCase):
         cfg = SimpleNamespace(sim=SimpleNamespace(dt=.000625, physics=SimpleNamespace(solver_type=0,
             enable_external_forces_every_iteration=False)), decimation=32,
             robot=SimpleNamespace(spawn=SimpleNamespace(articulation_props=SimpleNamespace(
-                solver_position_iteration_count=32, solver_velocity_iteration_count=1))))
+                solver_position_iteration_count=32, solver_velocity_iteration_count=16))))
         for multiplier in (1, 2):
             self.assertEqual(validator.apply_numerical_recipe(cfg, multiplier), contract.numerical_recipe(multiplier))
-            self.assertEqual(cfg.robot.spawn.articulation_props.solver_velocity_iteration_count, 16)
+            self.assertEqual(cfg.robot.spawn.articulation_props.solver_velocity_iteration_count, 1)
         cfg.sim.dt = .01
         observed = validator.apply_numerical_recipe(cfg, 1)
         self.assertEqual(observed['physics_dt_s'], .01)
@@ -61,7 +61,8 @@ class NumericalRecipeTests(unittest.TestCase):
         for multiplier in (1, 2):
             contract.validate_numerical_recipe_report(report(multiplier), multiplier)
             for key, wrong in (('solver_type', 0), ('solver_position_iterations', 32),
-                               ('solver_velocity_iterations', 8), ('enable_external_forces_every_iteration', False),
+                               ('solver_velocity_iterations', 8), ('solver_velocity_iterations', 16),
+                               ('enable_external_forces_every_iteration', False),
                                ('physics_dt_s', .01), ('decimation', 2)):
                 with self.subTest(multiplier=multiplier, key=key):
                     changed = report(multiplier)
@@ -74,9 +75,9 @@ class NumericalRecipeTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     contract.validate_numerical_recipe_report(changed, multiplier)
 
-    def test_final_velocity_recipe_rejects_coherent_old_one_pass_evidence(self):
+    def test_one_velocity_recipe_rejects_coherent_old_recipe_evidence(self):
         self.assertEqual(contract.NUMERICAL_RECIPE_ID,
-                         'mkii_fourbar_tgs_external_forces_1600hz_position64_128_velocity16_v6')
+                         'mkii_fourbar_tgs_external_forces_1600hz_position64_128_velocity1_v7')
         for multiplier in (1, 2):
             old = report(multiplier)
             old['numerical_recipe'].update(
@@ -94,9 +95,36 @@ class NumericalRecipeTests(unittest.TestCase):
                 contract.validate_numerical_recipe_report(previous_four, multiplier)
             # A fresh recipe label cannot conceal the prior actual backend setting.
             stale_backend = report(multiplier)
-            stale_backend['runtime_manifest']['resolved_simulation']['solver_velocity_iterations'] = 1
+            stale_backend['runtime_manifest']['resolved_simulation']['solver_velocity_iterations'] = 16
             with self.assertRaisesRegex(ValueError, 'Actual resolved simulation'):
                 contract.validate_numerical_recipe_report(stale_backend, multiplier)
+
+    def test_coherent_1600hz_velocity16_recipe_is_not_fallback_admission(self):
+        for multiplier in (1, 2):
+            previous = report(multiplier)
+            previous['numerical_recipe'].update(
+                recipe_id='mkii_fourbar_tgs_external_forces_1600hz_position64_128_velocity16_v6',
+                solver_velocity_iterations=16)
+            previous['runtime_manifest']['resolved_simulation']['solver_velocity_iterations'] = 16
+            previous['solver_iterations'][1] = 16
+            with self.assertRaisesRegex(ValueError, 'selected TGS contract'):
+                contract.validate_numerical_recipe_report(previous, multiplier)
+
+    def test_one_velocity_iteration_requires_exact_integer_type_everywhere(self):
+        # True and 1.0 compare equal to 1; both must remain invalid evidence.
+        for multiplier in (1, 2):
+            for wrong in (True, 1.0):
+                for location in ('numerical_recipe', 'resolved_simulation', 'solver_iterations'):
+                    with self.subTest(multiplier=multiplier, wrong=repr(wrong), location=location):
+                        changed = report(multiplier)
+                        if location == 'solver_iterations':
+                            changed[location][1] = wrong
+                        else:
+                            target = (changed[location] if location == 'numerical_recipe'
+                                      else changed['runtime_manifest'][location])
+                            target['solver_velocity_iterations'] = wrong
+                        with self.assertRaises(ValueError):
+                            contract.validate_numerical_recipe_report(changed, multiplier)
 
     def test_previous_800hz_recipe_cannot_admit_1600hz_runtime(self):
         for multiplier in (1, 2):
@@ -182,7 +210,7 @@ class NumericalRecipeTests(unittest.TestCase):
         self.assertEqual(backend['solver_type'], 1)
         self.assertIs(backend['enable_external_forces_every_iteration'], True)
         self.assertEqual(articulation['solver_position_iteration_count'], 64)
-        self.assertEqual(articulation['solver_velocity_iteration_count'], 16)
+        self.assertEqual(articulation['solver_velocity_iteration_count'], 1)
         self.assertFalse(articulation['enabled_self_collisions'])
 
     def test_qualifier_requires_matching_actual_external_force_flag(self):
@@ -199,6 +227,30 @@ class NumericalRecipeTests(unittest.TestCase):
         self.assertTrue(qualify(nominal, refined, identity)['pass'])
         refined['runtime_manifest']['resolved_simulation']['enable_external_forces_every_iteration'] = False
         self.assertFalse(qualify(nominal, refined, identity)['pass'])
+
+    def test_qualifier_rejects_new_nominal_with_coherent_old_velocity16_refined(self):
+        identity = {'task_id': contract.TASK_ID}
+        def valid(multiplier):
+            value = report(multiplier)
+            value.update({'asset_binding': {'pass': True}, 'pass': True, 'errors': [], 'contract': identity,
+                'task_id': contract.TASK_ID, 'num_envs': 32, 'steps_completed': 1000, 'steps_requested': 1000,
+                'driven_steps': 2400, 'reset_root_positions_m': [[0., 0., .14297]]*32,
+                'driven_coordinate_pass': True, 'windows': {window: {
+                    'mean_height_m': .138, 'max_applied_nm': 1.2, 'max_demand_nm': 1.3}
+                    for window in ('settled', 'driven')}})
+            return value
+        nominal, refined = valid(1), valid(2)
+        self.assertTrue(qualify(nominal, refined, identity)['pass'])
+        refined['numerical_recipe'].update(
+            recipe_id='mkii_fourbar_tgs_external_forces_1600hz_position64_128_velocity16_v6',
+            solver_velocity_iterations=16)
+        refined['runtime_manifest']['resolved_simulation']['solver_velocity_iterations'] = 16
+        refined['solver_iterations'][1] = 16
+        result = qualify(nominal, refined, identity)
+        self.assertFalse(result['pass'])
+        self.assertFalse(result['simulation_training_admission'])
+        self.assertTrue(any('selected TGS contract' in error for error in result['errors']))
+        self.assertIn('Solver comparison changed runtime identity beyond position iterations', result['errors'])
 
 
 if __name__ == '__main__':
