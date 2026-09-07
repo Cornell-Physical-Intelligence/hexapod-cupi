@@ -22,7 +22,7 @@ ARCHIVED_MANIFEST = "isaaclab/deploy/stage2_pipeline.sha256"
 ARCHIVED_REF = "81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df"
 ARCHIVED_MANIFEST_SHA256 = "19fc816cf9c53a79be8e14831daa58a12eba3f7f07c5fca80d03f2dc947ccda1"
 ARCHIVED_ENTRY_COUNT = 112
-CURRENT_MANIFEST = "isaaclab/deploy/mkii_fourbar_v1_1600hz_pipeline.sha256"
+CURRENT_MANIFEST = "isaaclab/deploy/mkii_fourbar_v1_1600hz_metrics_pipeline.sha256"
 CURRENT_HEADER = (
     "# hexapod.mkii_fourbar_pipeline.v1\n"
     f"# Archived source commit: {ARCHIVED_REF}\n"
@@ -53,6 +53,7 @@ CURRENT_EXTRA_PATHS = (
     "isaaclab/deploy/mkii_fourbar_v1_motion_prefix_pipeline.sha256",
     "isaaclab/deploy/mkii_fourbar_v1_coincident_layout_pipeline.sha256",
     "isaaclab/deploy/mkii_fourbar_v1_rsl501_compat_pipeline.sha256",
+    "isaaclab/deploy/mkii_fourbar_v1_1600hz_pipeline.sha256",
     "isaaclab/deploy/run-mkii-fourbar",
     "isaaclab/deploy/run-mkii-fourbar-campaign",
     ".github/workflows/tests.yml",
@@ -60,13 +61,13 @@ CURRENT_EXTRA_PATHS = (
     "tools/check_pipeline_lineages.py",
     "isaaclab/tests/test_pipeline_lineages.py",
     "isaaclab/tests/test_mkii_fourbar_metrics_equivalence.py",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v3/compare_complete_metrics.py",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v3/test_complete_metrics.py",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v3/baseline_validate_mkii_fourbar.py.txt",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v3/proposed_validate_mkii_fourbar.py.txt",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v3/installed_isaaclab_math.py.txt",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v3/installed_matrix_from_quat.py",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v3/sdk_math_provenance.json",
+    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/compare_complete_metrics.py",
+    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/test_complete_metrics.py",
+    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/baseline_validate_mkii_fourbar.py.txt",
+    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/proposed_validate_mkii_fourbar.py.txt",
+    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/installed_isaaclab_math.py.txt",
+    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/installed_matrix_from_quat.py",
+    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/sdk_math_provenance.json",
     "pyproject.toml", "uv.lock", ".python-version",
 )
 

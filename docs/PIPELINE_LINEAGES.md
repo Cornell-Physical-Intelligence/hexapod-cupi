@@ -200,6 +200,12 @@ action endpoints, and every physical acceptance bound remain unchanged.
 This changes controller/contact refresh frequency and requires a new identity
 and fresh full paired qualification. Previous 800 Hz reports cannot admit it.
 
+The initial preparation snapshot `8c1ade7` and its manifest preserve a single
+regression-fixture failure: the test still expected an unapplied runtime after
+the patch was installed. The next fixture revision explicitly selects the
+installed-candidate comparison and retains all eight strict equivalence tests.
+This is a test-lifecycle correction; physical parameters and gates are unchanged.
+
 The measurement implementation reuses the original per-frame pin offsets and
 batches passive velocity and force-norm arithmetic. Closure point/axis
 contractions, acceptance reductions, all 31 native sensor reads, every substep
@@ -207,7 +213,7 @@ and the guard before reset remain intact. A frozen complete-row fixture using
 the installed SDK quaternion math checks current capture against the previous
 implementation; those regression inputs are included in this release manifest.
 
-`isaaclab/deploy/mkii_fourbar_v1_1600hz_pipeline.sha256` covers **all 112 historical
+`isaaclab/deploy/mkii_fourbar_v1_1600hz_metrics_pipeline.sha256` covers **all 112 historical
 paths** at their current hashes, every source/configuration/asset path in the
 four-bar runtime identity, and the current launcher, CI workflow, lineage
 checker, lineage regression tests, this document and workspace dependency

@@ -9,7 +9,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[2]
-BUNDLE = ROOT / "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v3"
+BUNDLE = ROOT / "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4"
 
 
 class CompletePhysicalMetricsEquivalenceTests(unittest.TestCase):
