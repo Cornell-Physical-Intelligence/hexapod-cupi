@@ -1,3 +1,5 @@
+> Publication note, 8 September 2026: this separate solver candidate is unlaunched and unqualified. Simulation/training are paused pending the revised single-leg export. The remaining status text below is inherited preparation history; see [PUBLICATION.md](PUBLICATION.md) and the [current primary status](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/codex/mkii-fourbar-training/STATUS.md).
+
 # Current status
 
 Reviewed 2026-09-06. **No corrected physical-model PPO run has started or completed. No learned-policy video exists for that model.** CPU checks, startup probes, standing results and historical serial/mock policies do not change that.
