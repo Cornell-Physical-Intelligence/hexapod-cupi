@@ -4,6 +4,14 @@
 
 This is a component-level design and procurement BOM, not a commissioned instrument. It covers force and carriage-position acquisition for the existing vertical-rail stand design. Firmware, assembly and calibration remain to be done. The actual rail stroke, fixture dimensions and existing motor-power/CAN equipment have not been supplied; the mechanical integration and motor-system prerequisites below therefore remain explicit. No purchase has been made. Simulation and training remain paused pending the revised single-leg URDF.
 
+## Preferred daily setup: one USB cable
+
+The user prefers computer-powered sensing with no separate power adapter. **Adopt a USB-powered sensor box as the intended daily setup and defer buying the bench supply.** USB supplies both energy and data; the leg motors still require their own power system. Retain the Pico, bridge ADC and encoder level converter. After one-time wiring, firmware installation and calibration, the intended workflow is plug in USB, open the logger and record force/position.
+
+The exact existing combination is not yet qualified for that workflow. Pico VBUS exposes the incoming USB voltage, not a regulated precision 5 V rail. Encoder current consumption was not established from the published listing, and the selected cell's seller specifies a 5 V minimum excitation. Verify total startup/running current, loaded rail voltage and force noise on the actual host/cable. Design within the host's granted USB current, including enumeration and suspend behavior; a USB-C connector alone does not establish a higher power allowance. Use suitable USB-fed regulation/filtering if required, and recheck its output tolerance against both sensor and ADC requirements. A nominal 5 V converter is not automatically sufficient. Do not power the 5 V encoder from a 3.3 V GPIO or return regulated output into USB VBUS. [Pico 2 power architecture](https://datasheets.raspberrypi.com/pico/pico-2-datasheet.pdf).
+
+The dedicated-supply wiring below remains a commissioning/fallback configuration. The $183.23 subtotal excludes any subsequently selected USB power-conditioning/protection parts. No final USB conditioner or complete power budget is claimed yet; using a lab supply to characterize the assembly does not mean one is required for daily use.
+
 ## Why retain the encoder
 
 | Property | Selected ENC4110 | User-linked KTC-150mm potentiometer |
@@ -35,7 +43,7 @@ Prices and availability observed on **8 September 2026**. Amazon delivery estima
 | 1 | [10-conductor 26 AWG ribbon wire, 1 m, Adafruit 6182](https://www.adafruit.com/product/6182) | 2.50 | Short internal wiring; in stock. Keep analog signal leads separate from digital lines. |
 | 1 pack | [20 female/male jumpers, 150 mm, Adafruit 1954](https://www.adafruit.com/product/1954) | 1.95 | ADC header connections; in stock. Secure the finished stationary harness. |
 | 10 | [100 nF X7R capacitors, K104K15X7RF5TL2](https://www.digikey.com/en/products/detail/vishay-beyschlag-draloric-bc-components/K104K15X7RF5TL2/286538) | 1.70 | Decoupling and spares; in stock. Use equivalent lab stock if available. |
-| 0 or 1 | [KORAD KD3005D regulated bench supply, B00FPU6G4E](https://www.amazon.com/dp/B00FPU6G4E) | 109.99 | Buy only if no suitable isolated, adjustable bench supply is available. In stock, ships/sold SRA Soldering Products; Sep 10 estimate. Dedicated instrumentation supply, set nominal 5.00 V. |
+| 0 or 1 | [KORAD KD3005D regulated bench supply, B00FPU6G4E](https://www.amazon.com/dp/B00FPU6G4E) | 109.99 | Defer purchase: USB-only operation is preferred. Optional commissioning/fallback supply; use lab stock first. Observed in stock, ships/sold SRA Soldering Products; Sep 10 estimate. Set nominal 5.00 V for the dedicated-supply configuration. |
 
 **Listed electronics subtotal: $183.23; $293.22 including the optional supply.** If Pico 2 with headers sells out, use [bare Pico 2, 6006](https://www.adafruit.com/product/6006) at $6.25 plus [standard breakaway headers, 4151](https://www.adafruit.com/product/4151) at $4.95 per pack; both were in stock. Solder two 20-pin strips. This substitution adds $3.70 to the listed total.
 
