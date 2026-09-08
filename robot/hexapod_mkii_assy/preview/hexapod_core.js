@@ -77,6 +77,21 @@ function createHexapodCore(THREE, MODEL, BLOB, container, opts = {}) {
   const fill = new THREE.DirectionalLight(0x8fb7ff, 0.45); fill.position.set(-1.1, 0.9, 0.6); scene.add(fill);
   const rim = new THREE.DirectionalLight(0xffd9a0, 0.35); rim.position.set(0.3, 1.2, -0.4); scene.add(rim);
   key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
+  // studio environment: a procedural softbox room baked with PMREM, for product-shot material response
+  let envTex = null;
+  function studioEnvironment(){
+    if (envTex) return envTex;
+    const pm = new THREE.PMREMGenerator(renderer); pm.compileEquirectangularShader();
+    const room = new THREE.Scene();
+    room.add(new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), new THREE.MeshBasicMaterial({color:0x3a3f47, side:THREE.BackSide})));
+    const soft = (w, h, x, y, z, ry, i) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({color:new THREE.Color(i, i, i)})); m.position.set(x, y, z); m.lookAt(0, 0, 0); room.add(m); };
+    soft(6, 4, 0, 0, 4.9, 0, 3.2);      // top light
+    soft(3, 5, -4.9, -2, 1.5, 0, 1.6);  // key softbox
+    soft(3, 5, 4.9, 2.5, 1.0, 0, 0.9);  // fill
+    soft(6, 2, 0, 4.9, 0.5, 0, 0.5);    // rim strip
+    envTex = pm.fromScene(room, 0.06).texture; pm.dispose();
+    return envTex;
+  }
   Object.assign(key.shadow.camera, {left:-1.2, right:1.2, top:1.2, bottom:-1.2, near:0.1, far:8}); key.shadow.bias = -0.0005; key.shadow.radius = 3;
 
   // ---------- materials and styles
@@ -309,7 +324,7 @@ function createHexapodCore(THREE, MODEL, BLOB, container, opts = {}) {
   function applyMode(){
     for (const m of meshes) {
       const u = m.userData;
-      if (m !== highlighted) m.material = currentMat(m);
+      if (m !== highlighted) m.material = api.materialOverride ? api.materialOverride(m) : currentMat(m);
       m.visible = linkVisible[u.link] && classVisible[u.pclass] && !u.hidden && (!isolate || isolate.has(m));
       u.edge.visible = state.edgesOn && m.visible;
       m.castShadow = state.shadows;
@@ -327,7 +342,8 @@ function createHexapodCore(THREE, MODEL, BLOB, container, opts = {}) {
     return at;
   }
   const api = {
-    THREE, MODEL, LEGS, JOINTS, BODIES, STYLES, renderer, scene, camera, robot, meshes, linkObj, jointObj, jointVal, linkRest, geoms, box, size, radius, centre,
+    materialOverride: null, // optional (mesh) => material, used by applyMode when set
+    THREE, MODEL, LEGS, JOINTS, BODIES, STYLES, renderer, scene, camera, robot, meshes, linkObj, jointObj, jointVal, linkRest, geoms, box, size, radius, centre, key, hemi, PO,
     materials: {cadMats, tintMats, legMats, whiteFlat, whiteShaded, hiddenMat, ghostMat, edgeMat, hiMat},
     state, view, linkVisible, classVisible, collObjs, axisObjs, comGroup, totalMass,
     get isolate(){ return isolate; }, set isolate(v){ isolate = v; },
@@ -340,6 +356,8 @@ function createHexapodCore(THREE, MODEL, BLOB, container, opts = {}) {
     setBackground(v){ state.background = v; applyLook(); },
     setGrid(on){ state.gridOn = on; applyLook(); },
     setShadows(on){ state.shadows = on; applyMode(); },
+    setStudio(on, intensity = 0.7){ scene.environment = on ? studioEnvironment() : null; for (const m of [whiteShaded, ...cadMats, ...Object.values(tintMats), ...Object.values(legMats)]) { m.envMapIntensity = intensity; m.needsUpdate = true; } hemi.intensity = on ? 0.5 : (currentLook !== "dark" ? 1.35 : 0.85); },
+    setFov(f){ camera.fov = f; camera.updateProjectionMatrix(); },
     setLabels(on){ state.labelsOn = on; },
     setCom(on){ state.comOn = on; applyMode(); },
     setSection(axis, t, flip){ Object.assign(state.section, {axis, t: t ?? state.section.t, flip: flip ?? state.section.flip}); return applySection(); },
