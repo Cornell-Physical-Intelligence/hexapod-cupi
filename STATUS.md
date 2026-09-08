@@ -1,10 +1,12 @@
 # Current status
 
+Publication index, 8 September 2026: [project findings, CAD handoff, prepared tools and separate branches](docs/PROJECT_HANDOFF.md). Publication preserves the user's pause and does not resume experiments.
+
 Reviewed 2026-09-07 UTC. **Paused by the user at 02:00 UTC pending their revised single-leg URDF and meshes. No corrected physical-model PPO run has started or completed, and no learned-policy video exists.** The last campaign and both one-shot helpers have exited. No next solver candidate was launched; there is no hexapod GPU job or queued restart. The canonical shared control is `HEXAPOD_SHARE_STATUS=REQUESTED`, and the remote recovery state records the pause. Resume with the new leg audit before deciding further full-body work.
 
 ## Latest physical result
 
-The 1,600 Hz nominal test completed at **01:45 UTC** and failed the driven support gate. All 1,000 standing controls and 2,400 driven controls completed across 32 robots, with 108,800 physics substeps per robot. All 36 individual/grouped direction checks passed and there were zero terminations or truncations. However, minimum detected support reached zero; raw demand peaked at **83.728661 Nm** while applied torque stayed capped at **5.5 Nm**. C-pin separation stayed under its bound at **0.072674 mm** and there were no non-foot contacts. This is not training admission. The exact container was removed; refined/PPO phases did not start.
+The 1,600 Hz nominal test completed at **01:45 UTC** and failed the driven support gate. All 1,000 standing controls and 2,400 driven controls completed across 32 robots, with 108,800 physics substeps per robot. All 36 individual/grouped direction checks passed and there were zero terminations or truncations. However, minimum detected support reached zero; raw demand peaked at **83.728661 Nm** while applied torque stayed capped at **5.5 Nm**. C-pin separation stayed under its bound at **0.072674 mm** and there were no non-foot contacts. This is not training admission. The exact container was removed; refined/PPO phases did not start. [Preserved original reports/logs and verified retrieval](artifacts/mkii_fourbar_2026-09-07/1600hz_nominal_failure_001/README.md).
 
 The corrected-source **128/16 refined comparison failed at 23:48 UTC** during the right-middle tibia pushlever's positive 0.04 rad test. All 1,000 standing controls and the first 16 individual motor checks completed; all 32 robots then terminated as upside-down. Driven raw demand peaked at 83.598953 Nm, delivered torque remained capped at 5.5 Nm, and support fell to zero. C-pin separation stayed under its bound at 0.060937 mm, demonstrating that positional closure alone did not establish stable dynamics. The supervisor rejected the result and removed its exact container. [Original report and verified retrieval](artifacts/mkii_fourbar_2026-09-06/refined_rsl501_failure_001/README.md).
 
@@ -48,7 +50,7 @@ The current RS05 envelope permits **5.5 Nm peak**, with **1.2 Nm continuous stal
 
 ## Next gates — paused pending revised leg input
 
-The user has requested a fresh single-leg export before further work. No experimental launch below is currently queued or authorized to bypass that pause. The prepared velocity-one candidate remains local and unlaunched.
+The user has requested a fresh single-leg export before further work. No experimental launch below is currently queued or authorized to bypass that pause. The prepared velocity-one candidate is [published separately](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/codex/mkii-velocity1-candidate/PUBLICATION.md) and remains unlaunched and unqualified on the GPU.
 
 1. Local runner/checkpoint integration and all 935 repository tests pass. The new 308-path release and archived 112-path lineage verify. Source is pushed and staged independently on Spark; older manifests and failures remain preserved.
 2. Launch the frozen 1,600 Hz candidate through fresh probe and complete nominal/refined validation. The earlier 800 Hz 128/16 overturn remains a failure and supplies no training admission.

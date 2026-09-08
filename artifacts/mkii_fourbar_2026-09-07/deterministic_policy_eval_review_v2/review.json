@@ -1,0 +1,46 @@
+{
+  "schema": "hexapod.deterministic_policy_eval_independent_delta_review.v2",
+  "review_scope": "v1 to v2 source bootstrap and log-failure cleanup only",
+  "manifest_verification": {
+    "deterministic_policy_eval_v1": {
+      "manifest_sha256": "47f70410037ef90a1783352a16ab71e0702a3eb87a158848d22fee49b7b6ebde",
+      "members": 6,
+      "mismatches": []
+    },
+    "deterministic_policy_eval_v2": {
+      "manifest_sha256": "0d9c4a9e0d38d844dc2fed6dda8a1b1308d5cf6a920eecc26210a520450808ac",
+      "members": 8,
+      "mismatches": []
+    }
+  },
+  "tests_command": [
+    ".venv/bin/python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "artifacts/mkii_fourbar_2026-09-07/deterministic_policy_eval_v2",
+    "-p",
+    "test_evaluation.py",
+    "-v"
+  ],
+  "tests_exit_code": 0,
+  "tests_run": 19,
+  "errors": 0,
+  "failures": 0,
+  "test_log_sha256": "3d2c7e6b2034ee22dade417cc7b59d7e9119b9f8b78af605f0528603378fa97d",
+  "evaluate_policy_unchanged": true,
+  "reviewed_file_sha256": {
+    "evaluation_common.py": "1c05250c99c510b0401a9dcb1f93d588aa444dc6268eec7eaa9849ba03b46458",
+    "run_evaluation.py": "beb88f906c484ca945b4e93c9970f7a1123c8d2d3b566660c60a91e80c59ffee",
+    "test_evaluation.py": "50f58772d368aa031d40d9c9bd8651d3d4def033b395729157c646f39c61e9b0"
+  },
+  "material_findings": [],
+  "runtime_source_modified": false,
+  "frozen_artifacts_modified": false,
+  "gpu_launched": false,
+  "qualifications": [
+    "CPU-only review; native CUDA execution remains untested",
+    "Unchanged evaluator admission is execution/integrity only, not walking/terrain/hardware acceptance"
+  ]
+}

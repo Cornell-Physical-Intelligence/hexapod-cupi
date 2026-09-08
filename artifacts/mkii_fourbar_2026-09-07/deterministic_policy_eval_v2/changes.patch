@@ -1,0 +1,178 @@
+--- deterministic_policy_eval_v1/evaluation_common.py
++++ deterministic_policy_eval_v2/evaluation_common.py
+@@ -8,6 +8,8 @@
+ 
+ SCHEMA = 'hexapod.deterministic_flat_policy_evaluation.v1'
+ SOURCE_SHA256 = 'c33b4591e99f287579181469dcc132f659d1980200708475442dbe3ffcb7ecfc'
++SOURCE_MANIFEST = 'isaaclab/deploy/mkii_fourbar_v1_1600hz_metrics_pipeline.sha256'
++SOURCE_MANIFEST_SHA256 = '8d6ad0b053e2b2a73e6610a51871443efdeb1234d7c44165dbf27a67498e66fb'
+ CAPTURE_HELPER_SHA256 = 'ff60b5227ea8fbc2f3fc3ffe5091f0691ccff13cc1dab8e85063bb48d24df993'
+ DT = .02
+ PHASES = (('settle',50),('motion',150),('stop',100),('reverse',150))
+@@ -34,7 +36,21 @@
+ 
+ def tool_identity(directory):return {name:digest(Path(directory)/name) for name in TOOL_FILES}
+ 
++def verify_source_before_import(source):
++    """Stdlib-only admission of source bytes before source_api executes them."""
++    source=Path(source).resolve(strict=True)
++    manifest=(source/SOURCE_MANIFEST).resolve(strict=True)
++    if not manifest.is_relative_to(source) or digest(manifest)!=SOURCE_MANIFEST_SHA256:
++        raise ValueError('Frozen source bootstrap manifest differs')
++    for line in manifest.read_text().splitlines():
++        if not line or line.startswith('#'):continue
++        expected,name=line.split(maxsplit=1)
++        path=(source/name).resolve(strict=True)
++        if not path.is_relative_to(source) or digest(path)!=expected:
++            raise ValueError('Frozen source bootstrap bytes differ: '+name)
++
+ def verify_inputs(common,source,checkpoint,admission,training):
++    verify_source_before_import(source)
+     result=common.verify_inputs(source,checkpoint,admission,training)
+     if result['contract']['sha256']!=SOURCE_SHA256:raise ValueError('Evaluation requires frozen 1600 Hz source')
+     return result
+--- deterministic_policy_eval_v1/run_evaluation.py
++++ deterministic_policy_eval_v2/run_evaluation.py
+@@ -214,9 +214,17 @@
+                     raise guard.Blocked("Evaluation cleanup identity mismatch")
+                 if current["running"]:
+                     guard.command(["docker", "stop", "--time", "25", container["id"]], timeout=30, check=False)
+-                with (output / "container.log").open("w") as stream:
+-                    subprocess.run(["docker", "logs", "--timestamps", container["id"]], stdout=stream,
+-                                   stderr=subprocess.STDOUT, timeout=20, check=True)
++                try:
++                    with (output / "container.log").open("w") as stream:
++                        subprocess.run(["docker", "logs", "--timestamps", container["id"]], stdout=stream,
++                                       stderr=subprocess.STDOUT, timeout=20, check=True)
++                    report["container_log_retrieved"] = True
++                except BaseException as error:
++                    # Missing logs fail evidence acceptance, but must not skip
++                    # reinspection/removal of the exact owned stopped container.
++                    report["container_log_retrieved"] = False
++                    report["container_log_error"] = f"{type(error).__name__}: {error}"
++                    exit_code = 1
+                 current = guard.inspect_container(container["id"])
+                 if not guard.check_identity(current, name, owner) or current["running"]:
+                     raise guard.Blocked("Owned evaluation did not stop cleanly")
+--- deterministic_policy_eval_v1/test_evaluation.py
++++ deterministic_policy_eval_v2/test_evaluation.py
+@@ -7,7 +7,7 @@
+ from types import SimpleNamespace
+ import tempfile
+ import unittest
+-from unittest.mock import patch
++from unittest.mock import Mock, patch
+ import numpy as np
+ import torch
+ import evaluation_common as e
+@@ -100,10 +100,54 @@
+         helper=e.helpers(FROZEN)
+         self.assertTrue(callable(helper.require_same_inputs));self.assertTrue(callable(helper.validate_training))
+         wrong=SimpleNamespace(verify_inputs=lambda *args:{'contract':{'sha256':'bad'}})
+-        with self.assertRaisesRegex(ValueError,'frozen 1600'):e.verify_inputs(wrong,None,None,None,None)
++        with self.assertRaisesRegex(ValueError,'frozen 1600'):e.verify_inputs(wrong,ROOT,None,None,None)
+         with tempfile.TemporaryDirectory() as d:
+             (Path(d)/'capture_common.py').write_text('raise RuntimeError("must not execute")')
+             with self.assertRaisesRegex(ValueError,'hash differs'):e.helpers(d)
++
++    def test_changed_source_is_rejected_before_real_source_api_executes(self):
++        helper=e.helpers(FROZEN)
++        with tempfile.TemporaryDirectory() as d:
++            root=Path(d);source=root/'source';script=source/'tools/mkii_training_contract.py'
++            script.parent.mkdir(parents=True);script.write_text('# reviewed CPU source fixture\n')
++            manifest=source/e.SOURCE_MANIFEST;manifest.parent.mkdir(parents=True)
++            manifest.write_text(e.digest(script)+'  tools/mkii_training_contract.py\n')
++            reviewed_manifest=e.digest(manifest);sentinel=root/'unreviewed_source_executed'
++            script.write_text('from pathlib import Path\nPath('+repr(str(sentinel))+').write_text("executed")\n')
++            with patch.object(e,'SOURCE_MANIFEST_SHA256',reviewed_manifest), \
++                 patch.object(helper,'source_api',wraps=helper.source_api) as source_api:
++                with self.assertRaisesRegex(ValueError,'bootstrap bytes differ'):
++                    e.verify_inputs(helper,source,None,None,None)
++                source_api.assert_not_called()
++            self.assertFalse(sentinel.exists())
++
++    def test_rewritten_manifest_cannot_rebase_source_before_import(self):
++        with tempfile.TemporaryDirectory() as d:
++            source=Path(d);script=source/'tools/mkii_training_contract.py'
++            script.parent.mkdir();script.write_text('# reviewed fixture\n')
++            manifest=source/e.SOURCE_MANIFEST;manifest.parent.mkdir(parents=True)
++            manifest.write_text(e.digest(script)+'  tools/mkii_training_contract.py\n')
++            reviewed_manifest=e.digest(manifest)
++            script.write_text('raise RuntimeError("unreviewed")\n')
++            manifest.write_text(e.digest(script)+'  tools/mkii_training_contract.py\n')
++            common=SimpleNamespace(verify_inputs=Mock(side_effect=AssertionError('Source cannot execute')))
++            with patch.object(e,'SOURCE_MANIFEST_SHA256',reviewed_manifest):
++                with self.assertRaisesRegex(ValueError,'bootstrap manifest differs'):
++                    e.verify_inputs(common,source,None,None,None)
++            common.verify_inputs.assert_not_called()
++
++    def test_manifest_member_cannot_escape_frozen_source(self):
++        with tempfile.TemporaryDirectory() as d:
++            root=Path(d);source=root/'source';source.mkdir();outside=root/'outside.py'
++            outside.write_text('# outside the reviewed source\n')
++            link=source/'escaped.py';link.symlink_to(outside)
++            manifest=source/e.SOURCE_MANIFEST;manifest.parent.mkdir(parents=True)
++            manifest.write_text(e.digest(outside)+'  escaped.py\n')
++            common=SimpleNamespace(verify_inputs=Mock(side_effect=AssertionError('Source cannot execute')))
++            with patch.object(e,'SOURCE_MANIFEST_SHA256',e.digest(manifest)):
++                with self.assertRaisesRegex(ValueError,'bootstrap bytes differ'):
++                    e.verify_inputs(common,source,None,None,None)
++            common.verify_inputs.assert_not_called()
+     def test_request_and_report_guards(self):
+         verified={'contract':{'sha256':e.SOURCE_SHA256},'input_sha256':{'checkpoint':'a'*64},'runtime_manifest':{'schema':'CPU fixture'}}
+         tools=e.tool_identity(HERE)
+@@ -158,7 +202,7 @@
+         self.assertEqual(cmd[-4:],['--viz','none','--device','cuda:0'])
+ 
+ class SupervisorTests(unittest.TestCase):
+-    def run_host(self,primary_pass=True,yield_requested=False):
++    def run_host(self,primary_pass=True,yield_requested=False,log_error=None,log_open_error=None):
+         with tempfile.TemporaryDirectory() as directory:
+             root=Path(directory);lab=root/'lab';(lab/'docker').mkdir(parents=True)
+             for name in ('.env.base','docker-compose.yaml'):(lab/'docker'/name).write_text('CPU fixture only')
+@@ -208,13 +252,24 @@
+             def opened(path,flags,*args):
+                 events.append(('open',str(path),flags))
+                 return 11 if str(path)=='/opt/wx/gpu.lock' else 9
++            original_path_open=Path.open
++            def path_open(path,*args,**kwargs):
++                if path.name=='container.log' and log_open_error is not None:
++                    raise log_open_error
++                return original_path_open(path,*args,**kwargs)
++            def retrieve_logs(argv,**kwargs):
++                events.append(('docker','logs'))
++                self.assertEqual(argv,['docker','logs','--timestamps','c'*64])
++                if log_error is not None:raise log_error
++                return SimpleNamespace(returncode=0)
+             with ExitStack() as stack:
+                 for context in (patch.object(host,'verify_inputs',return_value=verified),patch.object(host,'load_module',return_value=guard),
+                     patch.object(host,'environment_layout',return_value='coincident_flat_origin_v1'),patch('os.open',side_effect=opened),
+                     patch('os.close',side_effect=lambda fd:events.append(('close',fd))),
+                     patch('fcntl.flock',side_effect=lambda fd,op:events.append(('flock',fd,op))),
+                     patch('signal.signal',return_value=host.signal.SIG_DFL),patch('time.sleep'),
+-                    patch('subprocess.run',return_value=SimpleNamespace(returncode=0)),patch('sys.stdout',new_callable=io.StringIO)):
++                    patch.object(Path,'open',path_open),patch('subprocess.run',side_effect=retrieve_logs),
++                    patch('sys.stdout',new_callable=io.StringIO)):
+                     stack.enter_context(context)
+                 code=host.main(['--source-dir',str(ROOT),'--capture-tools-dir',str(FROZEN),'--checkpoint',str(paths[0]),
+                     '--admission',str(paths[1]),'--training-report',str(paths[2]),'--output-root',str(root/'output')])
+@@ -231,5 +286,19 @@
+         code,report,_=self.run_host(primary_pass=False);self.assertEqual(code,1);self.assertFalse(report['pass'])
+     def test_coordination_stops_only_own_job_and_releases_both_locks(self):
+         code,report,stop=self.run_host(yield_requested=True);self.assertEqual(code,1);self.assertTrue(stop)
++    def test_log_command_failure_preserves_exact_cleanup_but_fails_acceptance(self):
++        for error in (host.subprocess.TimeoutExpired(['docker','logs'],20),
++                      host.subprocess.CalledProcessError(1,['docker','logs']),OSError('Cannot invoke Docker logs')):
++            with self.subTest(error=type(error).__name__):
++                code,report,_=self.run_host(log_error=error)
++                self.assertEqual(code,1);self.assertFalse(report['pass'])
++                self.assertFalse(report['container_log_retrieved'])
++                self.assertIn(type(error).__name__,report['container_log_error'])
++                self.assertNotIn('evaluation_artifacts_verified',report)
++    def test_log_file_open_failure_does_not_skip_exact_cleanup(self):
++        code,report,_=self.run_host(log_open_error=OSError('Log path cannot be opened'))
++        self.assertEqual(code,1);self.assertFalse(report['pass'])
++        self.assertFalse(report['container_log_retrieved'])
++        self.assertIn('Log path cannot be opened',report['container_log_error'])
+ 
+ if __name__=='__main__':unittest.main()
