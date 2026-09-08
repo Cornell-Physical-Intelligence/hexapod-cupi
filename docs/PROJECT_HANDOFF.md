@@ -13,6 +13,8 @@
 
 The separate candidate's frozen records describe its original local preparation. Its new publication note explains its current status. Large reproducible source archives and old local showcase renders are not implied to be uploaded by a branch push; source/file maps, exact hashes, curated reports and original failure logs are preserved in the corresponding evidence packages.
 
+The [test-stand hardware recommendation](LEG_STAND_HARDWARE.md) compares direct rail sensing and vision, specifies a provisional force-plate cell and acquisition options, and records the timing, mounting and calibration requirements. It is guidance for the upcoming build; no equipment has been purchased or commissioned.
+
 ## Findings that drive the next decisions
 
 | Finding | Consequence and evidence |
