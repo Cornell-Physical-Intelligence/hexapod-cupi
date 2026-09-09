@@ -8,10 +8,11 @@ import unittest
 
 
 ROOT = Path(__file__).parents[1]
-PHASE2E_PATH = ROOT / "hexapod_rl" / "phase2e_cfg.py"
-PHASE2D_PATH = ROOT / "hexapod_rl" / "phase2d_cfg.py"
-REGISTER_PATH = ROOT / "hexapod_rl" / "register.py"
-INIT_PATH = ROOT / "hexapod_rl" / "__init__.py"
+PACKAGE_ROOT = ROOT.parent / "packages" / "hexapod_env" / "hexapod_env"
+PHASE2E_PATH = PACKAGE_ROOT / "phase2e_cfg.py"
+PHASE2D_PATH = PACKAGE_ROOT / "phase2d_cfg.py"
+REGISTER_PATH = PACKAGE_ROOT / "register.py"
+INIT_PATH = PACKAGE_ROOT / "__init__.py"
 EVALUATOR_PATH = ROOT / "evaluate_checkpoint.py"
 
 PHASE2E_SOURCE = PHASE2E_PATH.read_text(encoding="utf-8")
@@ -213,7 +214,7 @@ class Stage2EEnvironmentContractTest(unittest.TestCase):
             self.assertTrue(
                 required in PHASE2D_SOURCE
                 or required
-                in (ROOT / "hexapod_rl" / "phase2_cfg.py").read_text(encoding="utf-8")
+                in (PACKAGE_ROOT / "phase2_cfg.py").read_text(encoding="utf-8")
             )
 
 

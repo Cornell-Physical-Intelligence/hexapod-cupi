@@ -1,0 +1,21 @@
+# Probe21: bilateral longitudinal ground-contact moment, causal training arm.
+#
+# This is the complete delta applied on top of configs/experiment/stage2c_accel.yaml;
+# everything else stays at the named baseline.
+#
+# Reference calibration comes from the probe ledger
+# (artifacts/phase2_recovery_stage2c_stable_forward/probes/README.md, rows
+# "21 calibration A" and "21 calibration B").  Calibration A ran the term at
+# scale=-1, reference=0.50 N*m with LR 0 -- a no-learning telemetry pass over
+# one 12,288 x 24 rollout -- and measured raw mean/p50 of 1.654/1.800 N*m,
+# i.e. the 0.50 N*m reference saturated the bounded cost (p50 0.694).
+# Calibration B re-scored the same collection at reference=1.80 N*m, the
+# measured raw p50, giving bounded cost mean/p50 0.355/0.400.  That calibrated
+# reference is the one used here, with the causal scale at -2.0.
+#
+# Ledger status: both full attempts of this arm ended in pre-AppReady
+# infrastructure failures, so the arm remains scientifically untested.
+
+env:
+  inactive_bilateral_longitudinal_contact_moment_reward_scale: -2.0
+  inactive_bilateral_longitudinal_contact_moment_reference_nm: 1.8

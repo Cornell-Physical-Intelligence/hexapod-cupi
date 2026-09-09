@@ -1,25 +1,20 @@
-"""Safer second-pass configuration for Phase 1 forward walking."""
+"""Compatibility shim for ``hexapod_rl.phase1_v2_cfg``.
 
-from isaaclab.utils.configclass import configclass
+The implementation now lives in ``hexapod_env.phase1_v2_cfg``
+(``packages/hexapod_env/hexapod_env/phase1_v2_cfg.py``). Names are re-exported
+explicitly so ``importlib``-based entry-point resolution finds real attributes
+here. Importing this module first imports the ``hexapod_rl`` package, whose
+``__init__`` puts the workspace ``packages/`` directory on ``sys.path``; that
+bootstrap is idempotent, so it is equally correct if it already ran.
+"""
 
-from .env_cfg import HexapodFlatEnvCfg
-from .ppo_cfg import HexapodPPORunnerCfg
+from hexapod_env.phase1_v2_cfg import *  # noqa: F401,F403
+from hexapod_env.phase1_v2_cfg import (
+    HexapodPhase1V2EnvCfg,
+    HexapodPhase1V2PPORunnerCfg,
+)
 
-
-@configclass
-class HexapodPhase1V2EnvCfg(HexapodFlatEnvCfg):
-    """Reduce raw position demand and explicitly protect heading and falls."""
-
-    action_scale = 0.20
-    lin_vel_reward_scale = 4.0
-    yaw_rate_reward_scale = 1.0
-    yaw_rate_tracking_std_rad_s = 0.20
-    fall_penalty = -1.0
-
-
-@configclass
-class HexapodPhase1V2PPORunnerCfg(HexapodPPORunnerCfg):
-    experiment_name = "hexapod_robstride_phase1_forward_v2_direct"
-
-
-__all__ = ["HexapodPhase1V2EnvCfg", "HexapodPhase1V2PPORunnerCfg"]
+__all__ = [
+    "HexapodPhase1V2EnvCfg",
+    "HexapodPhase1V2PPORunnerCfg",
+]

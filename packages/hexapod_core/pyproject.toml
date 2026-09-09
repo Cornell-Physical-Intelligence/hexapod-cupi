@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hexapod-core"
+version = "0.1.0"
+description = "Frozen, versioned interface contracts: observation layout, action interface and timing, velocity command, runtime joint order, RS05 actuator, coordinate frames."
+requires-python = ">=3.10"
+
+# Deliberately empty, and stricter than empty: this package imports nothing
+# outside the standard library -- not torch, not numpy, not gymnasium, not
+# Isaac Lab. It is the one thing the training container, the deployable
+# runtime, the navigation layer, and an operator's bare system interpreter can
+# all import, so it must stay importable everywhere.
+dependencies = []
+
+[tool.setuptools]
+packages = ["hexapod_core"]
+
+[tool.setuptools.package-data]
+hexapod_core = ["rs05_v2.json"]

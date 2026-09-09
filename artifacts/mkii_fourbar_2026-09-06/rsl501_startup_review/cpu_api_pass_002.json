@@ -1,0 +1,237 @@
+{
+  "schema": "hexapod.rsl501_cpu_api_probe.v1",
+  "pass": true,
+  "physical_robot_ppo_started": false,
+  "physical_admission": false,
+  "isaac_sim_or_cuda_imported": false,
+  "device": "cpu",
+  "environment": "synthetic linear recurrence; no robot or contacts",
+  "probe_sha256": "5a331e33e9913adf2e8e2a7cf22a91513b75d6085d6a7eb6940a36ac409e571d",
+  "trainer_sha256": "d12e8ff695a4a8d896484b624c30f85a63ea016d1fe78c3075abaa9b0e50410d",
+  "config_sha256": "4b6e4185e2b9095e18152933b31ec7a13d71d247864b934f88ab493b4db94c16",
+  "sdk_sources_manifest_sha256": "f38e6cb4e4b909fdec6f1993bb59c2ef9af2a371a5bbb74ccea24e7c533eeb22",
+  "torch_version": "2.14.0",
+  "versions": {
+    "rsl-rl-lib": "5.0.1",
+    "tensordict": "0.14.1",
+    "gymnasium": "1.3.0",
+    "tensorboard": "2.21.0",
+    "packaging": "26.3"
+  },
+  "rsl_byte_matches_to_spark": {
+    "runners/on_policy_runner.py": "39358a0a60219fdb360df7acddf80f6a382837aa58e2ec0ccf875df4afee4825",
+    "algorithms/ppo.py": "a2d35e7ad7b884c80b7434e7d2ce785a6da1e18d93c96f1179fbd3a208669f8c",
+    "utils/logger.py": "d9822d8317724507a7c817e85399db0db9e56a4eae959435138e75cf92e44b8d",
+    "models/mlp_model.py": "6219ebb3ed4df036dae7ff1c30d0fbb169eaaa659e44a659dd757a292124476b",
+    "utils/utils.py": "4d094c17e54ab09a0d37b14711157f638f0bd929d0f1b49a3f89b4c8fc67caaa"
+  },
+  "unadapted_constructor_error": "MLPModel.__init__() got an unexpected keyword argument 'stochastic'",
+  "raw_config": {
+    "seed": 42,
+    "device": "cpu",
+    "num_steps_per_env": 24,
+    "max_iterations": 1200,
+    "empirical_normalization": {},
+    "obs_groups": {},
+    "clip_actions": null,
+    "check_for_nan": true,
+    "save_interval": 10,
+    "experiment_name": "hexapod_robstride_flat_direct",
+    "run_name": "",
+    "logger": "tensorboard",
+    "neptune_project": "isaaclab",
+    "wandb_project": "isaaclab",
+    "resume": false,
+    "load_run": ".*",
+    "load_checkpoint": "model_.*.pt",
+    "class_name": "OnPolicyRunner",
+    "actor": {
+      "class_name": "MLPModel",
+      "hidden_dims": [
+        256,
+        256,
+        128
+      ],
+      "activation": "elu",
+      "obs_normalization": true,
+      "distribution_cfg": {
+        "class_name": "GaussianDistribution",
+        "init_std": 0.15,
+        "std_type": "scalar"
+      },
+      "stochastic": {},
+      "init_noise_std": {},
+      "noise_std_type": "scalar",
+      "state_dependent_std": false
+    },
+    "critic": {
+      "class_name": "MLPModel",
+      "hidden_dims": [
+        256,
+        256,
+        128
+      ],
+      "activation": "elu",
+      "obs_normalization": true,
+      "distribution_cfg": null,
+      "stochastic": {},
+      "init_noise_std": {},
+      "noise_std_type": "scalar",
+      "state_dependent_std": false
+    },
+    "algorithm": {
+      "class_name": "PPO",
+      "num_learning_epochs": 5,
+      "num_mini_batches": 4,
+      "learning_rate": 0.001,
+      "schedule": "adaptive",
+      "gamma": 0.99,
+      "lam": 0.95,
+      "entropy_coef": 0.01,
+      "desired_kl": 0.01,
+      "max_grad_norm": 1.0,
+      "optimizer": "adam",
+      "value_loss_coef": 1.0,
+      "use_clipped_value_loss": true,
+      "clip_param": 0.2,
+      "normalize_advantage_per_mini_batch": false,
+      "share_cnn_encoders": false,
+      "rnd_cfg": null,
+      "symmetry_cfg": null
+    },
+    "policy": {}
+  },
+  "adapted_config": {
+    "seed": 42,
+    "device": "cpu",
+    "num_steps_per_env": 24,
+    "max_iterations": 1200,
+    "empirical_normalization": {},
+    "obs_groups": {},
+    "clip_actions": null,
+    "check_for_nan": true,
+    "save_interval": 10,
+    "experiment_name": "hexapod_robstride_flat_direct",
+    "run_name": "",
+    "logger": "tensorboard",
+    "neptune_project": "isaaclab",
+    "wandb_project": "isaaclab",
+    "resume": false,
+    "load_run": ".*",
+    "load_checkpoint": "model_.*.pt",
+    "class_name": "OnPolicyRunner",
+    "actor": {
+      "class_name": "MLPModel",
+      "hidden_dims": [
+        256,
+        256,
+        128
+      ],
+      "activation": "elu",
+      "obs_normalization": true,
+      "distribution_cfg": {
+        "class_name": "GaussianDistribution",
+        "init_std": 0.15,
+        "std_type": "scalar"
+      }
+    },
+    "critic": {
+      "class_name": "MLPModel",
+      "hidden_dims": [
+        256,
+        256,
+        128
+      ],
+      "activation": "elu",
+      "obs_normalization": true,
+      "distribution_cfg": null
+    },
+    "algorithm": {
+      "class_name": "PPO",
+      "num_learning_epochs": 5,
+      "num_mini_batches": 4,
+      "learning_rate": 0.001,
+      "schedule": "adaptive",
+      "gamma": 0.99,
+      "lam": 0.95,
+      "entropy_coef": 0.01,
+      "desired_kl": 0.01,
+      "max_grad_norm": 1.0,
+      "optimizer": "adam",
+      "value_loss_coef": 1.0,
+      "use_clipped_value_loss": true,
+      "clip_param": 0.2,
+      "normalize_advantage_per_mini_batch": false,
+      "share_cnn_encoders": false,
+      "rnd_cfg": null,
+      "symmetry_cfg": null
+    },
+    "policy": {}
+  },
+  "policy_before_sha256": "f522aba78af39896278555a94d919c7b97a098108e8fd1ce7b8f0312f8c17123",
+  "policy_after_sha256": "bdacc71abc08b6ca47aaca93d0cbd939f2cc8a0b780837d08062e3857205abf0",
+  "synthetic_checkpoint_sha256": "263583269dc7194c798ffda5986ae06b693a8a62909e100924fb59160ff5aaf4",
+  "checkpoint_roundtrip_pass": true,
+  "same_runner_resume_pass": true,
+  "fresh_runner_resume_pass": true,
+  "normalization_state_keys": [
+    "obs_normalizer._mean",
+    "obs_normalizer._var",
+    "obs_normalizer._std",
+    "obs_normalizer.count"
+  ],
+  "logger_history": [
+    {
+      "iteration": 0,
+      "start_iteration": 0,
+      "losses": {
+        "value": 36.96919136047363,
+        "surrogate": -0.0036157243419438602,
+        "entropy": -8.588207483291626
+      },
+      "collect_seconds": 0.029229164123535156,
+      "learn_seconds": 0.08408880233764648
+    },
+    {
+      "iteration": 1,
+      "start_iteration": 0,
+      "losses": {
+        "value": 43.25685081481934,
+        "surrogate": -0.015847548888996244,
+        "entropy": -8.585528373718262
+      },
+      "collect_seconds": 0.01081991195678711,
+      "learn_seconds": 0.034024953842163086
+    },
+    {
+      "iteration": 2,
+      "start_iteration": 2,
+      "losses": {
+        "value": 40.062868309021,
+        "surrogate": -0.05353136578050908,
+        "entropy": -8.58216471672058
+      },
+      "collect_seconds": 0.007952213287353516,
+      "learn_seconds": 0.030038833618164062
+    },
+    {
+      "iteration": 3,
+      "start_iteration": 3,
+      "losses": {
+        "value": 40.86760272979736,
+        "surrogate": -0.05553212213962979,
+        "entropy": -8.57552456855774
+      },
+      "collect_seconds": 0.00757908821105957,
+      "learn_seconds": 0.028120756149291992
+    }
+  ],
+  "limitations": [
+    "Synthetic CPU environment is not a physical robot PPO run or admission.",
+    "Captured config/wrapper source is loaded without Isaac package initializers.",
+    "Unused native array conversion imports are replaced with fail-on-use dictionaries.",
+    "DirectRLEnv type check uses a synthetic class; Isaac/PhysX lifecycle is not exercised.",
+    "The local dependencies are recorded, not claimed identical to the Spark dependency stack.",
+    "Temporary synthetic checkpoints and event logs are removed after successful checks."
+  ]
+}

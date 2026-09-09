@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hexapod-env"
+version = "0.1.0"
+description = "Isaac Lab task definitions, reward primitives, and gym registration for the RobStride hexapod."
+requires-python = ">=3.10"
+
+# Isaac Lab, isaaclab_rl, isaaclab_physx, gymnasium, torch, and warp are
+# supplied by the Isaac Lab container image, so they are deliberately not
+# declared as install requirements here.
+dependencies = []
+
+[tool.setuptools]
+packages = [
+    "hexapod_env", "hexapod_env.rewards", "hexapod_env.assets", "hexapod_env.actuators",
+    "hexapod_env.tasks", "hexapod_env.tasks.mkii_v2", "hexapod_env.tasks.mkii_fourbar_v1",
+]

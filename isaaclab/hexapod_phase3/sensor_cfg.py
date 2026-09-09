@@ -34,6 +34,27 @@ GROUND_PRIM_PATH = "/World/Phase3Ground"
 ROBOT_ROOT_RIGID_PRIM = "{ENV_REGEX_NS}/Robot/Geometry/" + ROOT_LINK_NAME
 LIDAR_MOUNT_PRIM = f"{ROBOT_ROOT_RIGID_PRIM}/phase3_mid360"
 
+# The nineteen leaf meshes the robot occludes its own lidar with: one deck plus
+# six each of coxa, femur and tibia.
+#
+# Three properties of the converted USD and of `isaaclab.sim.utils.queries`
+# shape these strings, and all three fail silently or confusingly if ignored:
+#
+# 1. A bare `*` is treated as deprecated wildcard syntax and rewritten, so
+#    `coxa[^/]*` becomes `coxa[^/].*` and matches nothing. Write `.*` only.
+# 2. `.*` spans exactly one path segment, so each link's nesting depth has to
+#    be spelled out: coxa hangs off the deck, femur off coxa, tibia off femur.
+# 3. The links are not structured alike. `coxa_1` and `femur_1` are plain
+#    Xforms holding a child instance named `Coxa` / `Femur`, but `tibia_1` is
+#    itself the instanceable prim referencing `</Instances/Tibia>` and has no
+#    mesh child. The tibia pattern therefore names the link, not a child.
+SELF_OCCLUSION_MESH_EXPRESSIONS: tuple[str, ...] = (
+    f"{ROBOT_ROOT_RIGID_PRIM}/BODY_MOCK",
+    f"{ROBOT_ROOT_RIGID_PRIM}/coxa.*/Coxa",
+    f"{ROBOT_ROOT_RIGID_PRIM}/coxa.*/femur.*/Femur",
+    f"{ROBOT_ROOT_RIGID_PRIM}/coxa.*/femur.*/tibia.*",
+)
+
 
 @dataclass(frozen=True)
 class Phase3HardwareAccounting:
@@ -263,6 +284,29 @@ class HexapodPhase3SensorSceneCfg(InteractiveSceneCfg):
                 prim_expr="{ENV_REGEX_NS}/Phase3CalibrationWall",
                 is_shared=True,
                 track_mesh_transforms=True,
+            ),
+            # The robot occludes its own lidar, and that occlusion is the whole
+            # question a mount study asks. Without these targets the simulated
+            # Mid-360 reports a clean 360 degrees by construction and cannot
+            # confirm or refute any mount. The knees dominate: at the Stage2C
+            # stance the femur tops reach 0.241 m, 56 mm above the 0.185 m deck.
+            #
+            # Each entry names a leaf mesh, not a link and not the articulation
+            # root, for two reasons. The mesh loader recurses, so a link target
+            # swallows every descendant link's mesh and freezes it to that
+            # link's transform: targeting `root` merges all nineteen meshes into
+            # one body-fixed blob whose legs never move. And the robot prim also
+            # carries the D455 visual asset, which has no RigidBodyAPI, so any
+            # target that reaches it aborts the run in the PhysX tensor view.
+            # Leaf meshes have exactly one rigid-body ancestor each, which the
+            # ray caster resolves and tracks individually.
+            *(
+                MultiMeshRayCasterCfg.RaycastTargetCfg(
+                    prim_expr=expression,
+                    is_shared=True,
+                    track_mesh_transforms=True,
+                )
+                for expression in SELF_OCCLUSION_MESH_EXPRESSIONS
             ),
         ],
         reference_meshes=True,

@@ -1,0 +1,54 @@
+# Stage2C "accel" causal-probe baseline.
+#
+# This file is the single named source of the Stage2C probe baseline.  The
+# bash arrays in isaaclab/deploy/probe-stage2c-single-current-best must match
+# it exactly, key for key and value for value; that equality is enforced by
+# isaaclab/tests/test_experiment_config_contract.py, which also checks the
+# baseline against the Probe20 zero-intervention resolved config recorded
+# under artifacts/.
+#
+# The Python configclasses (isaaclab/hexapod_rl/env_cfg.py and
+# isaaclab/hexapod_rl/phase2_cfg.py) own the schema, the defaults, and the
+# validation.  This file owns only the named delta applied on top of them as
+# Hydra-style env.*/agent.* overrides, so every key below must also exist as
+# a configclass attribute.
+
+run:
+  task_id: Isaac-Velocity-Omni-Recovery-Stage2C-Stabilized-Forward-Hexapod-RobStride-Direct-v0
+  experiment_name: hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct
+  parent_run: 2026-08-25_23-44-14_accel_scale4_yaw160_trackguard_20260825T234500Z_seed86
+  parent_checkpoint: model_2.pt
+  parent_sha256: a66a1c83e5b0675ade73d05538ae57d81451568ab45d9e8bcfd2edc67bb2e69a
+  num_envs: 12288
+  max_iterations: 12
+
+# Fixed runner overrides: checkpoint-dense saving plus the conservative
+# fine-tuning rate and clip used for every probe launched from this parent.
+agent:
+  save_interval: 1
+  algorithm.learning_rate: 2.0e-5
+  algorithm.clip_param: 0.06
+
+# Pinned environment baseline.  The eight keys that the launcher also exposes
+# as its intervention surface appear here at their control values, so a probe
+# is exactly this file with one or two of them replaced.
+env:
+  gate_longitudinal_reward_by_command: false
+  longitudinal_signed_progress_reward_scale: 2.0
+  longitudinal_normalized_error_penalty_scale: 1.0
+  inactive_yaw_rate_reward_scale: -160.0
+  inactive_yaw_rate_slew_reward_scale: 0.0
+  inactive_yaw_rate_slew_reference_rad_s_per_step: 0.04
+  inactive_ground_contact_yaw_moment_reward_scale: 0.0
+  inactive_ground_contact_yaw_moment_reference_nm: 0.5
+  inactive_bilateral_longitudinal_contact_moment_reward_scale: 0.0
+  inactive_bilateral_longitudinal_contact_moment_reference_nm: 0.5
+  support_contact_low_speed_threshold_mps: 0.18
+  support_contact_target_high_speed: 4.0
+  support_shortfall_reward_scale: -0.90
+  rated_torque_excess_reward_scale: -0.65
+  max_joint_rated_torque_excess_l1_reward_scale: -0.50
+  torque_saturation_reward_scale: -1.50
+  joint_torque_slew_reward_scale: -0.01
+  processed_joint_target_slew_limit_rad_per_20ms: 0.040
+  foot_slip_reward_scale: -0.50

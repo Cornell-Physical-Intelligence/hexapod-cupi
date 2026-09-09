@@ -1,0 +1,43 @@
+{
+  "schema": "hexapod.deterministic_eval_v2_cpu_validation.v1",
+  "recorded_utc": "2026-09-07T01:39:30.681667+00:00",
+  "command": [
+    "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/mkii_simulation_integrity/.venv/bin/python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "artifacts/mkii_fourbar_2026-09-07/deterministic_policy_eval_v2",
+    "-p",
+    "test_evaluation.py",
+    "-v"
+  ],
+  "returncode": 0,
+  "tests_passed": 19,
+  "output": "test_changed_source_is_rejected_before_real_source_api_executes (test_evaluation.IntegrityTests.test_changed_source_is_rejected_before_real_source_api_executes) ... ok\ntest_frozen_helper_and_source_guard_are_reused (test_evaluation.IntegrityTests.test_frozen_helper_and_source_guard_are_reused) ... ok\ntest_host_argv_is_headless_readonly_and_preserves_helper_flag (test_evaluation.IntegrityTests.test_host_argv_is_headless_readonly_and_preserves_helper_flag) ... ok\ntest_host_dry_run_does_not_open_locks_or_start_processes (test_evaluation.IntegrityTests.test_host_dry_run_does_not_open_locks_or_start_processes) ... ok\ntest_manifest_member_cannot_escape_frozen_source (test_evaluation.IntegrityTests.test_manifest_member_cannot_escape_frozen_source) ... ok\ntest_request_and_report_guards (test_evaluation.IntegrityTests.test_request_and_report_guards) ... ok\ntest_rewritten_manifest_cannot_rebase_source_before_import (test_evaluation.IntegrityTests.test_rewritten_manifest_cannot_rebase_source_before_import) ... ok\ntest_reset_transition_excluded_but_counted_without_erasing_raw_state (test_evaluation.MetricsTests.test_reset_transition_excluded_but_counted_without_erasing_raw_state) ... ok\ntest_stale_observation_and_changed_schedule_fail (test_evaluation.MetricsTests.test_stale_observation_and_changed_schedule_fail) ... ok\ntest_stationary_policy_not_masked_by_reward (test_evaluation.MetricsTests.test_stationary_policy_not_masked_by_reward) ... ok\ntest_exact_timing_bounds_and_signed_coverage (test_evaluation.ScheduleTests.test_exact_timing_bounds_and_signed_coverage) ... ok\ntest_frame_transform (test_evaluation.ScheduleTests.test_frame_transform) ... ok\ntest_injected_command_reaches_fresh_observation_and_reset_callback (test_evaluation.ScheduleTests.test_injected_command_reaches_fresh_observation_and_reset_callback) ... ok\ntest_pre_reset_end_state_hook_preserves_original_done_result (test_evaluation.ScheduleTests.test_pre_reset_end_state_hook_preserves_original_done_result) ... ok\ntest_completed_job_verified_and_locks_released_after_exact_cleanup (test_evaluation.SupervisorTests.test_completed_job_verified_and_locks_released_after_exact_cleanup) ... ok\ntest_coordination_stops_only_own_job_and_releases_both_locks (test_evaluation.SupervisorTests.test_coordination_stops_only_own_job_and_releases_both_locks) ... ok\ntest_log_command_failure_preserves_exact_cleanup_but_fails_acceptance (test_evaluation.SupervisorTests.test_log_command_failure_preserves_exact_cleanup_but_fails_acceptance) ... ok\ntest_log_file_open_failure_does_not_skip_exact_cleanup (test_evaluation.SupervisorTests.test_log_file_open_failure_does_not_skip_exact_cleanup) ... ok\ntest_zero_exit_does_not_mask_failed_primary_report (test_evaluation.SupervisorTests.test_zero_exit_does_not_mask_failed_primary_report) ... ok\n\n----------------------------------------------------------------------\nRan 19 tests in 0.329s\n\nOK\n",
+  "source_files_before": {
+    "evaluate_policy.py": "b820f8e2bf5a71a0c66863457e98cf640257750321fd475ac11c748f5a93f1e2",
+    "evaluation_common.py": "1c05250c99c510b0401a9dcb1f93d588aa444dc6268eec7eaa9849ba03b46458",
+    "run_evaluation.py": "beb88f906c484ca945b4e93c9970f7a1123c8d2d3b566660c60a91e80c59ffee",
+    "test_evaluation.py": "50f58772d368aa031d40d9c9bd8651d3d4def033b395729157c646f39c61e9b0"
+  },
+  "source_files_after": {
+    "evaluate_policy.py": "b820f8e2bf5a71a0c66863457e98cf640257750321fd475ac11c748f5a93f1e2",
+    "evaluation_common.py": "1c05250c99c510b0401a9dcb1f93d588aa444dc6268eec7eaa9849ba03b46458",
+    "run_evaluation.py": "beb88f906c484ca945b4e93c9970f7a1123c8d2d3b566660c60a91e80c59ffee",
+    "test_evaluation.py": "50f58772d368aa031d40d9c9bd8651d3d4def033b395729157c646f39c61e9b0"
+  },
+  "source_files_unchanged": true,
+  "frozen_v1_files_verified_unchanged": {
+    "SHA256SUMS": "47f70410037ef90a1783352a16ab71e0702a3eb87a158848d22fee49b7b6ebde",
+    "README.md": "f442909b2010eebd6d0e93766bc7edb0e3978f7a21e0303969d38fac2e8925a8",
+    "VALIDATION.json": "ccec769fed6ead74a40224e76aaeb7154973ec90d3164843d8359ca75fa94c5d",
+    "evaluate_policy.py": "b820f8e2bf5a71a0c66863457e98cf640257750321fd475ac11c748f5a93f1e2",
+    "evaluation_common.py": "ad0b0f32c824aeb983a3d8996a16fbd4d5568ba3f6aed9f2744eea49300a4ba7",
+    "run_evaluation.py": "bc733389377d2068d82e4265de5ede8424226b8411f3685831d9f6dac95e3f87",
+    "test_evaluation.py": "829ba3d750678f2135d45bc230123e7ea915f249cb579c802b69e9e30dcc33f7"
+  },
+  "gpu_dispatch": false,
+  "remote_deployment": false,
+  "scope": "CPU fixtures verify schedule, source bootstrap, guarded ownership/cleanup and evidence acceptance; native simulator and policy quality remain untested."
+}

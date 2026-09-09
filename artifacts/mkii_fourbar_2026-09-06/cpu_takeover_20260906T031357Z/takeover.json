@@ -1,0 +1,477 @@
+{
+  "started_utc": "2026-09-06T03:13:57.588920+00:00",
+  "authorization": "User requested removing competing processes and continuing toward finished PPO tonight; previous explicit full Spark priority remains in force",
+  "audit_source": "/home/orionh/HEXAPOD_runs/mkii_motion_recovery_v1/cpu_cleanup_audit_20260906T030929Z.json",
+  "verified_before": [
+    {
+      "pid": 1502485,
+      "start_ticks": 94536435,
+      "pgid": 1502485,
+      "state": "S",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/6b01e58a4746e1f6/wx/landfall_batch.py",
+        "--plan",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/batches/equivalent-baseline-6b01e58a4746e1f6/plan.json",
+        "--workers",
+        "2"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1502486,
+      "start_ticks": 94536437,
+      "pgid": 1502486,
+      "state": "S",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/626f4c3dead059cf/wx/landfall_batch.py",
+        "--plan",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/batches/precipitation-v2-626f4c3dead059cf/plan.json",
+        "--workers",
+        "2"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1502498,
+      "start_ticks": 94536442,
+      "pgid": 1502485,
+      "state": "R",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/6b01e58a4746e1f6/wx/landfall_replay.py",
+        "--source-dir",
+        "/home/orionh/stormscope-regional-development-state-v2/2025-census-replays-v2/mrms-replay-20250415T0000Z-406dea8e01e026adad96d847",
+        "--targets-json",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/6b01e58a4746e1f6/targets.json",
+        "--output-dir",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/batches/equivalent-baseline-6b01e58a4746e1f6/jobs/2025-04-15-20/prediction",
+        "--poll-minutes",
+        "20"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1530836,
+      "start_ticks": 94927007,
+      "pgid": 1530836,
+      "state": "S",
+      "argv": [
+        "/opt/wx/venv-models/bin/python",
+        "corrdiff_materialize.py",
+        "--database",
+        "radar-catalog.sqlite",
+        "--config",
+        "corrdiff_study_v1.json",
+        "--start",
+        "2021-01-01",
+        "--end",
+        "2022-01-01",
+        "--output",
+        "prepared-radar"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1621743,
+      "start_ticks": 95782745,
+      "pgid": 1621743,
+      "state": "S",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/d141b57a255f1880/wx/landfall_batch.py",
+        "--plan",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/batches/history-v3-d141b57a255f1880/plan.json",
+        "--workers",
+        "2"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1621752,
+      "start_ticks": 95782754,
+      "pgid": 1621743,
+      "state": "R",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/d141b57a255f1880/wx/landfall_replay.py",
+        "--source-dir",
+        "/home/orionh/stormscope-regional-development-state-v2/2025-census-replays-v2/mrms-replay-20250415T0000Z-406dea8e01e026adad96d847",
+        "--targets-json",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/d141b57a255f1880/targets.json",
+        "--output-dir",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/batches/history-v3-d141b57a255f1880/jobs/2025-04-15-20/prediction",
+        "--poll-minutes",
+        "20",
+        "--radar-history-minutes",
+        "60"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1621753,
+      "start_ticks": 95782754,
+      "pgid": 1621743,
+      "state": "R",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/d141b57a255f1880/wx/landfall_replay.py",
+        "--source-dir",
+        "/home/orionh/stormscope-regional-development-state-v2/2025-census-replays-v2/mrms-replay-20250415T0000Z-406dea8e01e026adad96d847",
+        "--targets-json",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/d141b57a255f1880/targets.json",
+        "--output-dir",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/batches/history-v3-d141b57a255f1880/jobs/2025-04-15-30/prediction",
+        "--poll-minutes",
+        "30",
+        "--radar-history-minutes",
+        "60"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1646640,
+      "start_ticks": 96083180,
+      "pgid": 1502486,
+      "state": "R",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/626f4c3dead059cf/wx/landfall_replay.py",
+        "--source-dir",
+        "/home/orionh/stormscope-regional-training-state-v1/older-training-census-expansion-v1/mrms-replay-20240115T0000Z-35b4df2ba847cde18ba0a769",
+        "--targets-json",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/626f4c3dead059cf/targets.json",
+        "--output-dir",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/batches/precipitation-v2-626f4c3dead059cf/jobs/2024-01-15-20/prediction",
+        "--poll-minutes",
+        "20"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1653686,
+      "start_ticks": 96125689,
+      "pgid": 1653686,
+      "state": "S",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/watch-history-v3-primary-scores.py"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1669554,
+      "start_ticks": 96209898,
+      "pgid": 1669554,
+      "state": "S",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/9e304f65de16e9eb/wx/landfall_batch.py",
+        "--plan",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/batches/motion-v4-9e304f65de16e9eb/plan.json",
+        "--workers",
+        "2"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1669564,
+      "start_ticks": 96209907,
+      "pgid": 1669554,
+      "state": "R",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/9e304f65de16e9eb/wx/landfall_replay.py",
+        "--source-dir",
+        "/home/orionh/stormscope-regional-development-state-v2/2025-census-replays-v2/mrms-replay-20250415T0000Z-406dea8e01e026adad96d847",
+        "--targets-json",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/9e304f65de16e9eb/targets.json",
+        "--output-dir",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/batches/motion-v4-9e304f65de16e9eb/jobs/2025-04-15-20/prediction",
+        "--poll-minutes",
+        "20",
+        "--radar-history-minutes",
+        "60",
+        "--motion-consistency-guard"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1669565,
+      "start_ticks": 96209907,
+      "pgid": 1669554,
+      "state": "R",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/9e304f65de16e9eb/wx/landfall_replay.py",
+        "--source-dir",
+        "/home/orionh/stormscope-regional-development-state-v2/2025-census-replays-v2/mrms-replay-20250415T0000Z-406dea8e01e026adad96d847",
+        "--targets-json",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/9e304f65de16e9eb/targets.json",
+        "--output-dir",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/batches/motion-v4-9e304f65de16e9eb/jobs/2025-04-15-30/prediction",
+        "--poll-minutes",
+        "30",
+        "--radar-history-minutes",
+        "60",
+        "--motion-consistency-guard"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1673448,
+      "start_ticks": 96225219,
+      "pgid": 1673448,
+      "state": "S",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/watch-motion-v4-primary-scores.py"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1690633,
+      "start_ticks": 96654994,
+      "pgid": 1690633,
+      "state": "S",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/forecast-intent-continuation-v2/continue_january.py",
+        "--run"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1691736,
+      "start_ticks": 96703085,
+      "pgid": 1691736,
+      "state": "R",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/f773a5b895afab3a/wx/landfall_replay.py",
+        "--source-dir",
+        "/home/orionh/stormscope-regional-development-state-v2/2025-census-replays-v2/mrms-replay-20250115T0000Z-aa289554e9fae4c26e25f5ea",
+        "--output-dir",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/forecast-intent-f773a5b895afab3a/replay/2025-01-15",
+        "--targets-json",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/f773a5b895afab3a/targets.json",
+        "--guidance-index",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/forecast-intent-f773a5b895afab3a/derived-guidance/guidance_index.json",
+        "--poll-minutes",
+        "20",
+        "--radar-history-minutes",
+        "60",
+        "--motion-consistency-guard"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1697443,
+      "start_ticks": 96932816,
+      "pgid": 1502486,
+      "state": "R",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/626f4c3dead059cf/wx/landfall_replay.py",
+        "--source-dir",
+        "/home/orionh/stormscope-regional-training-state-v1/older-training-census-expansion-v1/mrms-replay-20241015T0000Z-1b6d954925a117e441db0008",
+        "--targets-json",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/626f4c3dead059cf/targets.json",
+        "--output-dir",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/batches/precipitation-v2-626f4c3dead059cf/jobs/2024-10-15-20/prediction",
+        "--poll-minutes",
+        "20"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1702199,
+      "start_ticks": 97172033,
+      "pgid": 1702199,
+      "state": "S",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/seasonal-forecast-intent-continuation-v1/april/continue_january.py",
+        "--run"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1702241,
+      "start_ticks": 97172149,
+      "pgid": 1702241,
+      "state": "R",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/f773a5b895afab3a/wx/landfall_replay.py",
+        "--source-dir",
+        "/home/orionh/stormscope-regional-development-state-v2/2025-census-replays-v2/mrms-replay-20250415T0000Z-406dea8e01e026adad96d847",
+        "--output-dir",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/forecast-intent-f773a5b895afab3a-april/replay",
+        "--targets-json",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/f773a5b895afab3a/targets.json",
+        "--guidance-index",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/forecast-intent-f773a5b895afab3a-april/derived-guidance/guidance_index.json",
+        "--poll-minutes",
+        "20",
+        "--radar-history-minutes",
+        "60",
+        "--motion-consistency-guard"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1706368,
+      "start_ticks": 97388857,
+      "pgid": 1706368,
+      "state": "S",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/seasonal-forecast-intent-continuation-v1/july/continue_january.py",
+        "--run"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1706399,
+      "start_ticks": 97388978,
+      "pgid": 1706399,
+      "state": "R",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/f773a5b895afab3a/wx/landfall_replay.py",
+        "--source-dir",
+        "/home/orionh/stormscope-regional-development-state-v2/2025-census-replays-v2/mrms-replay-20250715T0000Z-dd8c65f2781eb7059379dbf9",
+        "--output-dir",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/forecast-intent-f773a5b895afab3a-july/replay",
+        "--targets-json",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/f773a5b895afab3a/targets.json",
+        "--guidance-index",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/forecast-intent-f773a5b895afab3a-july/derived-guidance/guidance_index.json",
+        "--poll-minutes",
+        "20",
+        "--radar-history-minutes",
+        "60",
+        "--motion-consistency-guard"
+      ],
+      "uid": 1000
+    },
+    {
+      "pid": 1712454,
+      "start_ticks": 97672454,
+      "pgid": 1502485,
+      "state": "R",
+      "argv": [
+        "/opt/wx/venv/bin/python",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/6b01e58a4746e1f6/wx/landfall_replay.py",
+        "--source-dir",
+        "/home/orionh/stormscope-regional-development-state-v2/2025-census-replays-v2/mrms-replay-20250715T0000Z-dd8c65f2781eb7059379dbf9",
+        "--targets-json",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/candidates/6b01e58a4746e1f6/targets.json",
+        "--output-dir",
+        "/home/orionh/stormscope-landfall-benchmark-20260905/batches/equivalent-baseline-6b01e58a4746e1f6/jobs/2025-07-15-30/prediction",
+        "--poll-minutes",
+        "30"
+      ],
+      "uid": 1000
+    }
+  ],
+  "service_before": "Restart=no\nMainPID=1530836\nKillMode=control-group\n",
+  "actions": [
+    {
+      "pid": 1653686,
+      "start_ticks": 96125689,
+      "signal": "SIGTERM",
+      "target": "process_group",
+      "utc": "2026-09-06T03:13:57.615161+00:00"
+    },
+    {
+      "pid": 1673448,
+      "start_ticks": 96225219,
+      "signal": "SIGTERM",
+      "target": "process_group",
+      "utc": "2026-09-06T03:13:57.640002+00:00"
+    },
+    {
+      "pid": 1690633,
+      "start_ticks": 96654994,
+      "signal": "SIGTERM",
+      "target": "process",
+      "utc": "2026-09-06T03:13:57.640624+00:00"
+    },
+    {
+      "pid": 1702199,
+      "start_ticks": 97172033,
+      "signal": "SIGTERM",
+      "target": "process",
+      "utc": "2026-09-06T03:13:57.641126+00:00"
+    },
+    {
+      "pid": 1706368,
+      "start_ticks": 97388857,
+      "signal": "SIGTERM",
+      "target": "process",
+      "utc": "2026-09-06T03:13:57.641598+00:00"
+    },
+    {
+      "pid": 1691736,
+      "start_ticks": 96703085,
+      "signal": "SIGTERM",
+      "target": "process_group",
+      "utc": "2026-09-06T03:13:57.666405+00:00"
+    },
+    {
+      "pid": 1702241,
+      "start_ticks": 97172149,
+      "signal": "SIGTERM",
+      "target": "process_group",
+      "utc": "2026-09-06T03:13:57.691002+00:00"
+    },
+    {
+      "pid": 1706399,
+      "start_ticks": 97388978,
+      "signal": "SIGTERM",
+      "target": "process_group",
+      "utc": "2026-09-06T03:13:57.715727+00:00"
+    },
+    {
+      "pid": 1502485,
+      "start_ticks": 94536435,
+      "signal": "SIGTERM",
+      "target": "process_group",
+      "utc": "2026-09-06T03:13:57.740470+00:00"
+    },
+    {
+      "pid": 1502486,
+      "start_ticks": 94536437,
+      "signal": "SIGTERM",
+      "target": "process_group",
+      "utc": "2026-09-06T03:13:57.765605+00:00"
+    },
+    {
+      "pid": 1621743,
+      "start_ticks": 95782745,
+      "signal": "SIGTERM",
+      "target": "process_group",
+      "utc": "2026-09-06T03:13:57.790930+00:00"
+    },
+    {
+      "pid": 1669554,
+      "start_ticks": 96209898,
+      "signal": "SIGTERM",
+      "target": "process_group",
+      "utc": "2026-09-06T03:13:57.815835+00:00"
+    },
+    {
+      "service": "corrdiff-radar-year2021-cPZhN6.service",
+      "action": "stop",
+      "exit_code": 0,
+      "stderr": ""
+    }
+  ],
+  "outputs_deleted": false,
+  "remaining": [],
+  "finished_utc": "2026-09-06T03:14:00.858089+00:00",
+  "service_after": "MainPID=0\nActiveState=inactive\nSubState=dead\n"
+}

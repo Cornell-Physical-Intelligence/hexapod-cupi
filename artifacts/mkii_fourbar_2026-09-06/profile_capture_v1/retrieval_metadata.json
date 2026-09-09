@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "operation": "Read-only SSH retrieval of exact original bytes; no GPU imports or jobs",
+  "local_started_utc": "2026-09-07T00:48:59.943639+00:00",
+  "remote_host": "orionh@100.82.166.9",
+  "ssh_argv": [
+    "ssh",
+    "-o",
+    "ControlMaster=auto",
+    "-o",
+    "ControlPersist=600",
+    "-o",
+    "ControlPath=/tmp/hexapod_profiler_readonly.sock",
+    "-o",
+    "ConnectTimeout=15",
+    "-o",
+    "BatchMode=yes",
+    "orionh@100.82.166.9",
+    "python3 -"
+  ],
+  "remote_script_sha256": "3c0a517caeb65c1e4b6e4aea4dd8af424d370e9a5df553fb47c3cd1ee8c5602f",
+  "remote_script": "import pathlib,json,hashlib,base64,datetime\nroot=pathlib.Path('/home/orionh/HEXAPOD_runs/mkii_profile_v1/profile_001')\nfiles={}\nfor name in ['supervisor.json', 'validation_report.json', 'container.stdout.log', 'container.stderr.log', 'admitted', 'cpu_asset_audit.json']:\n p=root/name\n before=p.stat()\n data=p.read_bytes()\n after=p.stat()\n if (before.st_size,before.st_mtime_ns)!=(after.st_size,after.st_mtime_ns): raise RuntimeError('Remote file changed during read: '+name)\n files[name]={'size_bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),'mtime_ns':after.st_mtime_ns,'base64':base64.b64encode(data).decode('ascii')}\ntraces={}\nfor p in sorted(root.glob('*trace*')):\n if p.is_file():\n  before=p.stat(); h=hashlib.sha256()\n  with p.open('rb') as f:\n   for block in iter(lambda:f.read(1024*1024),b''): h.update(block)\n  after=p.stat()\n  if (before.st_size,before.st_mtime_ns)!=(after.st_size,after.st_mtime_ns): raise RuntimeError('Trace changed during hash')\n  traces[p.name]={'remote_path':str(p),'size_bytes':after.st_size,'sha256':h.hexdigest(),'mtime_ns':after.st_mtime_ns,'copied':False}\nprint(json.dumps({'remote_root':str(root),'captured_at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'files':files,'remote_only_traces':traces}))\n",
+  "ssh_exit_code": 0,
+  "ssh_stderr": "",
+  "captured": {
+    "remote_root": "/home/orionh/HEXAPOD_runs/mkii_profile_v1/profile_001",
+    "captured_at_utc": "2026-09-07T00:49:00.135101+00:00",
+    "files": {
+      "supervisor.json": {
+        "size_bytes": 35534,
+        "sha256": "ecbe2b861a20244f464b75557b4d60af16204891623498baad1d4e82415e366f",
+        "mtime_ns": 1788739905131611792,
+        "local_sha256": "ecbe2b861a20244f464b75557b4d60af16204891623498baad1d4e82415e366f",
+        "match": true
+      },
+      "validation_report.json": {
+        "size_bytes": 1023359,
+        "sha256": "142a449aa6d0f7bb5a1c44334602f6ac33dfe0252dabe63a6a0d4360229607dd",
+        "mtime_ns": 1788739903575415264,
+        "local_sha256": "142a449aa6d0f7bb5a1c44334602f6ac33dfe0252dabe63a6a0d4360229607dd",
+        "match": true
+      },
+      "container.stdout.log": {
+        "size_bytes": 21990,
+        "sha256": "0c5549abbd4f0267068d8e5816c5524fa1b85b26e00d04a51bec659ccf8926ad",
+        "mtime_ns": 1788739905071749347,
+        "local_sha256": "0c5549abbd4f0267068d8e5816c5524fa1b85b26e00d04a51bec659ccf8926ad",
+        "match": true
+      },
+      "container.stderr.log": {
+        "size_bytes": 989,
+        "sha256": "a4ee28198ae8954f21163f02bc2075df9d8e7f817c590966bfbb49e02741e53f",
+        "mtime_ns": 1788739905071894164,
+        "local_sha256": "a4ee28198ae8954f21163f02bc2075df9d8e7f817c590966bfbb49e02741e53f",
+        "match": true
+      },
+      "admitted": {
+        "size_bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "mtime_ns": 1788739817763354569,
+        "local_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "match": true
+      },
+      "cpu_asset_audit.json": {
+        "size_bytes": 39872,
+        "sha256": "5a72c9e3971541e918a21e4068c0222987d797d0ce9cdeec253c2baea0914042",
+        "mtime_ns": 1788739821246385601,
+        "local_sha256": "5a72c9e3971541e918a21e4068c0222987d797d0ce9cdeec253c2baea0914042",
+        "match": true
+      }
+    },
+    "remote_only_traces": {}
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "schema": "hexapod.matched_translation_diagnostic.v1",
+  "simulation_training_admission": false,
+  "hardware_admission": false,
+  "same_source_and_runtime_identity": true,
+  "exactly_equal_delivered_target_arrays": true,
+  "settled_window_seconds": [
+    0.8,
+    4.0
+  ],
+  "cases": [
+    {
+      "label": "origin",
+      "report": "origin/hexapod-fourbar-diagnose-20260905T201519Z-26c8180e/report.json",
+      "report_sha256": "07fd5c408ba2e91072063aef64ae3ed437864ce5eab08633f747a24690df74b3",
+      "trace_sha256": "bdbb68107cc4070fddc5c8d5ed879c9ed1e2268f20432d0010ec0a2aaa5b83bf",
+      "source_sha256": "1f35d5296244b80877abdaec77214ef910f5bc86831c8b6d853ea8841a455736",
+      "offset_xy_m": [
+        0.0,
+        0.0
+      ],
+      "physics_substeps": 3200,
+      "settled": {
+        "substeps": 2560,
+        "height_sum": 347.4292598068714,
+        "min_height_m": 0.13571053743362427,
+        "max_applied_nm": 0.6666584610939026,
+        "max_demand_nm": 0.6666584610939026,
+        "max_closure_point_m": 1.341104507446289e-07,
+        "max_closure_axis_chord": 6.885034622428066e-07,
+        "min_nonfoot_clearance_m": 0.025372207164764404,
+        "nonfoot_contact_env_substeps": 0.0,
+        "min_support": 6,
+        "max_envelope_excess_nm": 0.0,
+        "max_continuous_excess_nm": 0.0,
+        "min_burst_headroom": 0.5007073879241943,
+        "invalid_samples": 0.0,
+        "max_passive_relation_error_rad": 3.5762786865234375e-07,
+        "mean_height_m": 0.13571455461205914
+      },
+      "settled_max_abs_tree_joint_velocity_rad_s": 0.06669902056455612,
+      "settled_rms_tree_joint_velocity_rad_s": 0.005169056618444542,
+      "source_unchanged": true
+    },
+    {
+      "label": "translated_retry",
+      "report": "translated_retry/hexapod-fourbar-diagnose-20260905T203846Z-b1dbc43e/report.json",
+      "report_sha256": "3bd5bc97289f4d1321a12a987587ec8e22fd85cfbd3fc11cba00f3c7c468076a",
+      "trace_sha256": "340bff600b41ee86d105aa8be5f8d4f55d5a5a00ccbc991b9fa82e65b40a13f4",
+      "source_sha256": "1f35d5296244b80877abdaec77214ef910f5bc86831c8b6d853ea8841a455736",
+      "offset_xy_m": [
+        6.0,
+        0.0
+      ],
+      "physics_substeps": 3200,
+      "settled": {
+        "substeps": 2560,
+        "height_sum": 347.4401244968176,
+        "min_height_m": 0.1357170045375824,
+        "max_applied_nm": 0.6805205345153809,
+        "max_demand_nm": 0.6805205345153809,
+        "max_closure_point_m": 9.597088137525134e-07,
+        "max_closure_axis_chord": 7.020058205853275e-07,
+        "min_nonfoot_clearance_m": 0.0253848135471344,
+        "nonfoot_contact_env_substeps": 0.0,
+        "min_support": 6,
+        "max_envelope_excess_nm": 0.0,
+        "max_continuous_excess_nm": 0.0,
+        "min_burst_headroom": 0.5006938576698303,
+        "invalid_samples": 0.0,
+        "max_passive_relation_error_rad": 4.172325134277344e-07,
+        "mean_height_m": 0.13571879863156938
+      },
+      "settled_max_abs_tree_joint_velocity_rad_s": 0.052018459886312485,
+      "settled_rms_tree_joint_velocity_rad_s": 0.004912391379313379,
+      "source_unchanged": true
+    }
+  ],
+  "delta_settled_peak_applied_nm": 0.013862073421478271,
+  "interpretation": "The single-robot X translation did not reproduce large multi-environment standing jitter. This does not rule out Y placement, batch behavior, solver ordering or long-duration effects. These diagnostics grant no admission."
+}

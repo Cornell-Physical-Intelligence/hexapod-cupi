@@ -1,0 +1,315 @@
+#!/usr/bin/env python3
+"""One bounded physical validation-to-PPO campaign; stop on the first failed phase."""
+from __future__ import annotations
+
+import argparse
+import fcntl
+import importlib.machinery
+import importlib.util
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+from types import SimpleNamespace
+import uuid
+
+LAUNCHER = Path(__file__).resolve().with_name('run-mkii-fourbar')
+loader = importlib.machinery.SourceFileLoader('_fourbar_campaign_supervisor', str(LAUNCHER))
+spec = importlib.util.spec_from_loader(loader.name, loader)
+host = importlib.util.module_from_spec(spec)
+loader.exec_module(host)
+from mkii_training_contract import digest, identity, read_json, require_admission, require_checkpoint, write_json
+from qualify_mkii_fourbar import qualify
+
+
+class CampaignFailed(RuntimeError):
+    pass
+
+
+class CampaignPaused(RuntimeError):
+    pass
+
+
+BUSY_MESSAGES = (
+    'Unrelated GPU producer processes remain:', 'Unrelated GPU-capable container remains:',
+    'Unrelated or premature GPU process:', 'GPU utilization is nonzero before admission',
+    'Host MemAvailable is below the required 16 GiB:', 'Another hexapod launcher holds the shared GPU lock',
+)
+
+
+def phases(asset_model=None, environment_layout=None):
+    if asset_model is not None and asset_model not in host.ASSET_BUNDLES:
+        raise ValueError('Unknown campaign asset model')
+    plan = [
+        {'name': 'probe', 'mode': 'validate', 'num_envs': 1, 'steps': 100, 'solver_multiplier': 1},
+        {'name': 'nominal', 'mode': 'validate', 'num_envs': 32, 'steps': 1000, 'solver_multiplier': 1},
+        {'name': 'refined', 'mode': 'validate', 'num_envs': 32, 'steps': 1000, 'solver_multiplier': 2},
+        {'name': 'scratch', 'mode': 'train', 'num_envs': 64, 'iterations': 3},
+        {'name': 'full', 'mode': 'train', 'num_envs': 512, 'iterations': 1000},
+    ]
+    if asset_model is not None:
+        for phase in plan:
+            phase['asset_model'] = asset_model
+    if environment_layout is not None:
+        if environment_layout not in host.ENVIRONMENT_LAYOUTS:
+            raise ValueError('Unknown campaign environment layout')
+        for phase in plan:
+            phase['environment_layout'] = environment_layout
+    return plan
+
+
+def resource_ready():
+    # Briefly test availability, then release. Each actual launcher acquires
+    # and owns the lock for its entire run and repeats its own admission gates.
+    descriptor = os.open(host.LOCK, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+    try:
+        try:
+            fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise host.Blocked('Another hexapod launcher holds the shared GPU lock') from exc
+        host.coordination_snapshot()
+        return host.resource_gate()
+    finally:
+        os.close(descriptor)
+
+
+def wait_for_resources(timeout_seconds, record, *, gate=resource_ready, clock=time.monotonic, sleep=time.sleep):
+    deadline = clock() + timeout_seconds
+    attempts = 0
+    while True:
+        attempts += 1
+        try:
+            evidence = gate()
+            record({'state': 'resources_ready', 'attempts': attempts, 'evidence': evidence})
+            return
+        except host.Blocked as exc:
+            if not str(exc).startswith(BUSY_MESSAGES):
+                raise
+            remaining = deadline-clock()
+            record({'state': 'waiting_for_resources', 'attempts': attempts,
+                    'reason': str(exc), 'remaining_seconds': max(0, round(remaining, 3))})
+            if remaining <= 0:
+                raise CampaignFailed('Initial resource wait expired; no physical phase was started') from exc
+            sleep(min(15., remaining))
+
+
+def verify_phase(report_path, phase, contract, *, parent=None):
+    report_path = Path(report_path).resolve()
+    supervision = read_json(report_path.with_name('supervisor.json'))
+    if (not isinstance(supervision, dict) or supervision.get('supervisor_exit_code') != 0
+            or supervision.get('execution') != 'finished' or supervision.get('validator_report_status') != 'passed'
+            or supervision.get('contract') != contract
+            or supervision.get('source_identity_unchanged_at_finish') is not True
+            or supervision.get('cleanup') != 'removed_exact_id'):
+        raise CampaignFailed(f"{phase['name']}: supervisor did not finish with verified source/report and owned cleanup")
+    host.validate_written_report(report_path, args=SimpleNamespace(**phase), contract=contract)
+    report = read_json(report_path)
+    if phase['mode'] == 'validate':
+        if phase['steps'] >= 1000 and (report.get('driven_steps') != 2400 or report.get('driven_coordinate_pass') is not True):
+            raise CampaignFailed(f"{phase['name']}: full standing and independently driven validation is incomplete")
+        return report
+    checkpoint = require_checkpoint(report_path.with_name('checkpoint.pt'), contract)
+    if parent is None:
+        if report.get('resumed_from_sha256') is not None or report.get('start_iteration') != 0:
+            raise CampaignFailed('Scratch phase unexpectedly resumed a checkpoint')
+    elif (report.get('resumed_from_sha256') != parent.get('checkpoint_sha256')
+          or report.get('start_iteration') != parent.get('next_iteration')
+          or report.get('policy_before_sha256') != parent.get('policy_after_sha256')
+          or report.get('algorithm_before_sha256') != parent.get('algorithm_after_sha256')):
+        raise CampaignFailed('Separate training process did not restore the exact scratch policy/optimizer state')
+    if (report.get('policy_changed') is not True
+            or type(report.get('start_iteration')) is not int
+            or checkpoint['next_iteration'] != report['start_iteration'] + report['iterations_completed']):
+        raise CampaignFailed(f"{phase['name']}: training update or checkpoint iteration continuity failed")
+    if report.get('paused') is True:
+        raise CampaignPaused(f"{phase['name']}: owned training paused with a verified checkpoint; campaign will not auto-resume")
+    inference = report.get('inference_probe', {})
+    if (report.get('iterations_completed') != phase['iterations']
+            or inference.get('steps') != 100 or inference.get('finite') is not True):
+        raise CampaignFailed(f"{phase['name']}: complete training and finite checkpoint inference are required")
+    return report
+
+
+def phase_argv(phase, args, output, *, admission=None, checkpoint=None):
+    requested_model = getattr(args, 'asset_model', None) or 'mkii_fourbar_v3'
+    asset_model = phase.get('asset_model', requested_model)
+    if asset_model not in host.ASSET_BUNDLES or asset_model != requested_model:
+        raise CampaignFailed('Campaign phase asset differs from the requested model')
+    requested_layout = getattr(args, 'environment_layout', 'grid_2m_v1')
+    layout = phase.get('environment_layout', requested_layout)
+    if layout not in host.ENVIRONMENT_LAYOUTS or layout != requested_layout:
+        raise CampaignFailed('Campaign phase layout differs from the requested layout')
+    argv = [sys.executable, str(LAUNCHER), phase['mode'], '--source-dir', str(args.source_dir),
+            '--source-commit', args.source_commit, '--output-root', str(output), '--num-envs', str(phase['num_envs']),
+            '--asset-model', asset_model,
+            '--environment-layout', layout,
+            '--timeout-seconds', str(args.full_timeout_seconds if phase['name'] == 'full' else args.phase_timeout_seconds)]
+    if phase['mode'] == 'validate':
+        argv += ['--steps', str(phase['steps']), '--solver-multiplier', str(phase['solver_multiplier'])]
+    else:
+        argv += ['--iterations', str(phase['iterations']), '--admission', str(admission)]
+        if checkpoint is not None:
+            argv += ['--checkpoint', str(checkpoint)]
+    return argv
+
+
+def require_campaign_source(args, contract, state):
+    host.require_unchanged_source(args.source_dir, contract, 'between campaign phases')
+    for relative, expected in state['host_entrypoint_sha256'].items():
+        if digest(args.source_dir/relative) != expected:
+            raise CampaignFailed(f'Campaign host entrypoint changed: {relative}')
+
+
+def run_campaign(args, campaign, contract, state, save, *, launch):
+    results, paths = {}, {}
+    plan = phases(getattr(args, 'asset_model', None), getattr(args, 'environment_layout', None))
+    if args.probe_report:
+        results['probe'] = verify_phase(args.probe_report, plan[0], contract)
+        paths['probe'] = args.probe_report.resolve()
+        state['phases'].append({'name': 'probe', 'state': 'reused_verified', 'report': str(paths['probe']),
+                                'report_sha256': digest(paths['probe'])})
+        save()
+    def record_wait(value):
+        state['initial_resource_gate'] = value
+        state['state'] = value['state']
+        save()
+    wait_for_resources(args.wait_seconds, record_wait)
+    for phase in plan:
+        if phase['name'] in results:
+            continue
+        require_campaign_source(args, contract, state)
+        if phase['name'] == 'scratch':
+            admission = qualify(results['nominal'], results['refined'], contract)
+            admission['source_reports'] = {name+'_sha256': digest(paths[name]) for name in ('nominal', 'refined')}
+            admission_path = campaign / 'admission.json'
+            write_json(admission_path, admission)
+            state['admission'] = {'path': str(admission_path), 'sha256': digest(admission_path), 'pass': admission['pass']}
+            save()
+            require_admission(admission_path, contract)
+        phase_root = campaign / phase['name']
+        phase_root.mkdir(exist_ok=False)
+        argv = phase_argv(phase, args, phase_root,
+            admission=campaign/'admission.json' if phase['mode'] == 'train' else None,
+            checkpoint=paths['scratch'].with_name('checkpoint.pt') if phase['name'] == 'full' else None)
+        row = {'name': phase['name'], 'state': 'running', 'requested': phase,
+               'launcher_log': str(phase_root/'launcher.log'), 'argv': argv}
+        state['phases'].append(row)
+        state['state'], state['active_phase'] = 'running', phase['name']
+        save()
+        code = launch(argv, phase_root/'launcher.log', row)
+        row['launcher_exit_code'] = code
+        if code != 0:
+            row['state'] = 'failed'
+            raise CampaignFailed(f"{phase['name']}: supervisor exited {code}; no retry or subsequent phase")
+        reports = sorted(phase_root.glob('hexapod-fourbar-*/report.json'))
+        if len(reports) != 1:
+            raise CampaignFailed(f"{phase['name']}: expected exactly one owned run report")
+        row['report'] = str(reports[0])
+        row['report_sha256'] = digest(reports[0])
+        try:
+            results[phase['name']] = verify_phase(reports[0], phase, contract, parent=results.get('scratch') if phase['name'] == 'full' else None)
+        except CampaignPaused:
+            row['state'] = 'paused'
+            raise
+        paths[phase['name']] = reports[0]
+        row['state'] = 'passed'
+        require_campaign_source(args, contract, state)
+        if phase['name'] == 'full':
+            state['separate_process_resume_verified'] = True
+            state['final_checkpoint'] = str(reports[0].with_name('checkpoint.pt'))
+        save()
+    state.update({'state': 'complete', 'pass': True, 'active_phase': None})
+    save()
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    parser.add_argument('--source-dir', required=True, type=Path)
+    parser.add_argument('--source-commit', default='uncommitted')
+    parser.add_argument('--asset-model', choices=tuple(host.ASSET_BUNDLES), default='mkii_fourbar_v3')
+    parser.add_argument('--environment-layout', choices=host.ENVIRONMENT_LAYOUTS, default='grid_2m_v1')
+    parser.add_argument('--output-root', type=Path)
+    parser.add_argument('--probe-report', type=Path)
+    parser.add_argument('--wait-seconds', type=int, default=2700)
+    parser.add_argument('--phase-timeout-seconds', type=int, default=3600)
+    parser.add_argument('--full-timeout-seconds', type=int, default=21600)
+    args = parser.parse_args(argv)
+    if (not 0 <= args.wait_seconds <= 2700 or not 30 <= args.phase_timeout_seconds <= 7200
+            or not 30 <= args.full_timeout_seconds <= 21600):
+        parser.error('Wait must be 0..2700 seconds; phase timeout 30..7200 and full training timeout 30..21600 seconds')
+    args.source_dir = args.source_dir.expanduser().resolve()
+    output_root = (args.output_root or args.source_dir.parent/'campaigns').expanduser().resolve()
+    if output_root.is_relative_to(args.source_dir):
+        parser.error('Campaign output must be outside the isolated source')
+    if args.probe_report:
+        args.probe_report = args.probe_report.expanduser().resolve()
+    try:
+        contract = identity(args.source_dir)
+        if host.ASSET_BUNDLES[args.asset_model]['usd_path_relative'] not in contract.get('files', {}):
+            raise ValueError('Selected campaign asset must be present in the source identity')
+        entrypoints = {f'isaaclab/deploy/{path.name}': digest(path) for path in (LAUNCHER, Path(__file__).resolve())}
+        for relative, expected in entrypoints.items():
+            if digest(args.source_dir/relative) != expected:
+                raise ValueError('Execute the campaign/host entrypoints matching the isolated source')
+    except (OSError, ValueError) as exc:
+        parser.error(str(exc))
+    campaign = output_root / ('fourbar-campaign-'+time.strftime('%Y%m%dT%H%M%SZ', time.gmtime())+'-'+uuid.uuid4().hex[:8])
+    campaign.mkdir(parents=True, exist_ok=False)
+    state = {'schema': 'hexapod.fourbar_campaign.v1', 'state': 'created', 'pass': False, 'errors': [],
+             'campaign': str(campaign), 'source': str(args.source_dir), 'contract': contract,
+             'source_commit': args.source_commit, 'pid': os.getpid(), 'phases': [],
+             'asset_model': args.asset_model,
+             'environment_layout': args.environment_layout,
+             'host_entrypoint_sha256': entrypoints,
+             'wait_seconds': args.wait_seconds, 'plan': phases(args.asset_model, args.environment_layout),
+             'separate_process_resume_verified': False}
+    def save():
+        write_json(campaign/'campaign.json', state)
+    save()
+    print(f'FOURBAR_CAMPAIGN_STARTED state={campaign / "campaign.json"}', flush=True)
+    current = None
+    interrupted = False
+    def on_signal(number, _frame):
+        nonlocal interrupted
+        interrupted = True
+        if current is not None and current.poll() is None:
+            # Signal only the exact child supervisor; it performs owned cleanup.
+            current.send_signal(signal.SIGTERM)
+        else:
+            raise CampaignFailed(f'Campaign interrupted by signal {number}')
+    for number in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        signal.signal(number, on_signal)
+    def launch(command, log_path, row):
+        nonlocal current
+        with log_path.open('x') as log:
+            current = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+            row['supervisor_pid'] = current.pid
+            save()
+            code = current.wait()
+            current = None
+        if interrupted:
+            raise CampaignFailed('Campaign interrupted; owned supervisor has returned after cleanup')
+        return code
+    try:
+        run_campaign(args, campaign, contract, state, save, launch=launch)
+        return 0
+    except CampaignPaused as exc:
+        state.update(state='paused', pause_reason=str(exc), active_phase=None)
+        return 2
+    except (CampaignFailed, host.Blocked, OSError, ValueError, subprocess.SubprocessError) as exc:
+        state.update(state='failed', active_phase=None)
+        state['errors'].append(str(exc))
+        for row in state['phases']:
+            if row['state'] == 'running':
+                row['state'] = 'failed'
+        return 1
+    finally:
+        save()
+        print(f'FOURBAR_CAMPAIGN_FINISHED state={state["state"]} report={campaign / "campaign.json"}', flush=True)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

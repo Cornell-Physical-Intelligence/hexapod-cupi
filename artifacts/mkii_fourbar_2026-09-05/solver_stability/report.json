@@ -1,0 +1,615 @@
+{
+  "schema": "hexapod.fourbar.explicit_pd_inertia_diagnostic.v1",
+  "scope": "Nominal CAD pose, local linearization; no live PhysX or hardware stability proof",
+  "source_sha256": {
+    "robot/hexapod_mkii_assy/urdf/hexapod_mkii_linkage.urdf": "2dae7165852b419f0bd6edbe03f7d398b403f1410c5b6bdc2c287b6834f543a6",
+    "artifacts/mkii_step2_2026-09-04/physical_fourbar_reference/cad_pin_frames.json": "1213dced0e17fa0ad2cdf58f14b46c181e028a8341c19e07d706853378a6a825",
+    "configs/mkii_fourbar_v3_kinematics.json": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+    "packages/hexapod_core/hexapod_core/rs05_v2.json": "177875078f6b51de0935c129aacd278b16e753086da034848da5d7d4148b870e",
+    "tools/mkii_fourbar_kinematics.py": "749e369d26a6d2d0b41138c475716917a9b33ba0d093b472fa7afac7784baa6a",
+    "tools/audit_mkii_stance.py": "cc7828618e0f2d53110e0178e5af032cb0f796f8624d74475489ac02b717733b",
+    "artifacts/mkii_fourbar_2026-09-05/solver_stability/audit.py": "884020e247c947c3758f62bb7c8579c52fb53b254606a6d77c4668f377e9b05d"
+  },
+  "body_count": 31,
+  "total_mass_kg": 8.260811322,
+  "motor_parameters": {
+    "kp_nm_per_rad": 30.0,
+    "kd_nm_s_per_rad": 0.6,
+    "active_armature_kg_m2": 0.0007
+  },
+  "finite_difference_max_matrix_difference": {
+    "ideal_closed": 1.5243459272618054e-11,
+    "unclosed_tree_limiting_model": 1.5243459272618054e-11
+  },
+  "closed_vs_projected_tree_max_matrix_difference": 1.8252691025288925e-12,
+  "scenarios": {
+    "ideal_closed": {
+      "fixed_body": {
+        "minimum_motor_mode_inertia_kg_m2": 0.0027597437426213033,
+        "maximum_motor_mode_inertia_kg_m2": 0.010558049456606527,
+        "individual_effective_inertia_kg_m2": {
+          "lf_coxa_yaw": 0.010555987726309462,
+          "lm_coxa_yaw": 0.010555614949595374,
+          "lr_coxa_yaw": 0.010555825700976195,
+          "rf_coxa_yaw": 0.010555619421428472,
+          "rm_coxa_yaw": 0.01055560904952659,
+          "rr_coxa_yaw": 0.0105556062807039,
+          "lf_femur_pitch": 0.005812418601500305,
+          "lm_femur_pitch": 0.0058123121055121685,
+          "lr_femur_pitch": 0.005812385854222763,
+          "rf_femur_pitch": 0.00581231835800221,
+          "rm_femur_pitch": 0.00581231303760337,
+          "rr_femur_pitch": 0.005812316279190949,
+          "lf_tibia_lever_pivot": 0.0029332621816483247,
+          "lm_tibia_lever_pivot": 0.0029332772481172925,
+          "lr_tibia_lever_pivot": 0.0029332755099456295,
+          "rf_tibia_lever_pivot": 0.0029332853142030285,
+          "rm_tibia_lever_pivot": 0.0029332935650291728,
+          "rr_tibia_lever_pivot": 0.0029332768365548318
+        },
+        "lightest_mode_components": {
+          "lf_coxa_yaw": -0.0009314947237219594,
+          "lm_coxa_yaw": 1.1102230246251565e-16,
+          "lr_coxa_yaw": 1.1102230246251565e-16,
+          "rf_coxa_yaw": -8.058292858550188e-18,
+          "rm_coxa_yaw": 1.1459610654968001e-17,
+          "rr_coxa_yaw": -2.5481871817064014e-18,
+          "lf_femur_pitch": 0.3181643248298144,
+          "lm_femur_pitch": -1.1917626796246086e-14,
+          "lr_femur_pitch": -2.1665852083087014e-14,
+          "rf_femur_pitch": 8.565549357685436e-20,
+          "rm_femur_pitch": -2.2443740157967923e-19,
+          "rr_femur_pitch": -1.2186895695874032e-18,
+          "lf_tibia_lever_pivot": -0.9480351231484874,
+          "lm_tibia_lever_pivot": 3.563546551330436e-14,
+          "lr_tibia_lever_pivot": 6.466936818547442e-14,
+          "rf_tibia_lever_pivot": 1.6059478878080276e-19,
+          "rm_tibia_lever_pivot": -2.709293557096143e-18,
+          "rr_tibia_lever_pivot": 3.7568876726257466e-18
+        },
+        "integration_diagnostics": {
+          "semi_implicit_euler": {
+            "critical_dt_s": 0.007712196454801397,
+            "samples": [
+              {
+                "dt_s": 0.005,
+                "poles_real_imag": [
+                  [
+                    0.7562894691462034,
+                    0.0
+                  ],
+                  [
+                    -0.115111283681098,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.7562894691462034,
+                "linear_mode_stable": true
+              },
+              {
+                "dt_s": 0.0025,
+                "poles_real_imag": [
+                  [
+                    0.8540547766543503,
+                    0.0
+                  ],
+                  [
+                    0.5344754068049472,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.8540547766543503,
+                "linear_mode_stable": true
+              },
+              {
+                "dt_s": 0.00125,
+                "poles_real_imag": [
+                  [
+                    0.9177445457846719,
+                    0.0
+                  ],
+                  [
+                    0.793505818626663,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.9177445457846719,
+                "linear_mode_stable": true
+              }
+            ]
+          },
+          "constant_acceleration_zoh": {
+            "critical_dt_s": 0.009199145808737678,
+            "samples": [
+              {
+                "dt_s": 0.005,
+                "poles_real_imag": [
+                  [
+                    0.7081095533087005,
+                    0.0
+                  ],
+                  [
+                    0.06895081360989441,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.7081095533087005,
+                "linear_mode_stable": true
+              },
+              {
+                "dt_s": 0.0025,
+                "poles_real_imag": [
+                  [
+                    0.8354890915693436,
+                    0.0
+                  ],
+                  [
+                    0.5870116372533261,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.8354890915693436,
+                "linear_mode_stable": true
+              },
+              {
+                "dt_s": 0.00125,
+                "poles_real_imag": [
+                  [
+                    0.911356680041331,
+                    0.0
+                  ],
+                  [
+                    0.808386320710847,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.911356680041331,
+                "linear_mode_stable": true
+              }
+            ]
+          }
+        }
+      },
+      "free_body": {
+        "minimum_motor_mode_inertia_kg_m2": 0.0021749754511133403,
+        "maximum_motor_mode_inertia_kg_m2": 0.010557860039854997,
+        "individual_effective_inertia_kg_m2": {
+          "lf_coxa_yaw": 0.007244131053711128,
+          "lm_coxa_yaw": 0.008200804854691773,
+          "lr_coxa_yaw": 0.0072337750921146,
+          "rf_coxa_yaw": 0.007233308770174357,
+          "rm_coxa_yaw": 0.008199611694691638,
+          "rr_coxa_yaw": 0.007242725142786742,
+          "lf_femur_pitch": 0.004422673243815369,
+          "lm_femur_pitch": 0.004450272721558833,
+          "lr_femur_pitch": 0.004625132187352119,
+          "rf_femur_pitch": 0.004624928624482047,
+          "rm_femur_pitch": 0.0044498823881408646,
+          "rr_femur_pitch": 0.004422627829827282,
+          "lf_tibia_lever_pivot": 0.0028336398811018852,
+          "lm_tibia_lever_pivot": 0.0028487633740382047,
+          "lr_tibia_lever_pivot": 0.0028351582610718763,
+          "rf_tibia_lever_pivot": 0.0028352124254253015,
+          "rm_tibia_lever_pivot": 0.0028487974443287085,
+          "rr_tibia_lever_pivot": 0.002833657191553751
+        },
+        "lightest_mode_components": {
+          "lf_coxa_yaw": 0.02738348417901263,
+          "lm_coxa_yaw": -0.043612634288827806,
+          "lr_coxa_yaw": -0.05979516207047967,
+          "rf_coxa_yaw": 0.059837092418837196,
+          "rm_coxa_yaw": 0.04354836213234987,
+          "rr_coxa_yaw": -0.02724163515172716,
+          "lf_femur_pitch": -0.3424233066812844,
+          "lm_femur_pitch": -0.2671214574027267,
+          "lr_femur_pitch": 0.07319394079832946,
+          "rf_femur_pitch": -0.07303304865071768,
+          "rm_femur_pitch": 0.26739554874635585,
+          "rr_femur_pitch": 0.34242522191212327,
+          "lf_tibia_lever_pivot": 0.42549263225281536,
+          "lm_tibia_lever_pivot": 0.33523186750217965,
+          "lr_tibia_lever_pivot": -0.0790056840840298,
+          "rf_tibia_lever_pivot": 0.07882612370197285,
+          "rm_tibia_lever_pivot": -0.3355419895399778,
+          "rr_tibia_lever_pivot": -0.4254775251510964
+        },
+        "integration_diagnostics": {
+          "semi_implicit_euler": {
+            "critical_dt_s": 0.006267788769043962,
+            "samples": [
+              {
+                "dt_s": 0.005,
+                "poles_real_imag": [
+                  [
+                    0.7690696222868827,
+                    0.0
+                  ],
+                  [
+                    -0.4932270136176337,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.7690696222868827,
+                "linear_mode_stable": true
+              },
+              {
+                "dt_s": 0.0025,
+                "poles_real_imag": [
+                  [
+                    0.8656114566439096,
+                    0.0
+                  ],
+                  [
+                    0.35851771725725246,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.8656114566439096,
+                "linear_mode_stable": true
+              },
+              {
+                "dt_s": 0.00125,
+                "poles_real_imag": [
+                  [
+                    0.9263858292581265,
+                    0.0
+                  ],
+                  [
+                    0.707230725084089,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.9263858292581265,
+                "linear_mode_stable": true
+              }
+            ]
+          },
+          "constant_acceleration_zoh": {
+            "critical_dt_s": 0.0072499181703778014,
+            "samples": [
+              {
+                "dt_s": 0.005,
+                "poles_real_imag": [
+                  [
+                    0.7312229132878196,
+                    0.0
+                  ],
+                  [
+                    -0.28296456548549515,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.7312229132878196,
+                "linear_mode_stable": true
+              },
+              {
+                "dt_s": 0.0025,
+                "poles_real_imag": [
+                  [
+                    0.8527716585162529,
+                    0.0
+                  ],
+                  [
+                    0.4144614501681779,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.8527716585162529,
+                "linear_mode_stable": true
+              },
+              {
+                "dt_s": 0.00125,
+                "poles_real_imag": [
+                  [
+                    0.9225067837177439,
+                    0.0
+                  ],
+                  [
+                    0.7218857543202889,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.9225067837177439,
+                "linear_mode_stable": true
+              }
+            ]
+          }
+        }
+      }
+    },
+    "unclosed_tree_limiting_model": {
+      "fixed_body": {
+        "minimum_motor_mode_inertia_kg_m2": 0.0007250142077339134,
+        "maximum_motor_mode_inertia_kg_m2": 0.010554304178599072,
+        "individual_effective_inertia_kg_m2": {
+          "lf_coxa_yaw": 0.010553719945778806,
+          "lm_coxa_yaw": 0.01055334491089049,
+          "lr_coxa_yaw": 0.01055355741510362,
+          "rf_coxa_yaw": 0.01055334931601903,
+          "rm_coxa_yaw": 0.010553338871680983,
+          "rr_coxa_yaw": 0.010553335840250559,
+          "lf_femur_pitch": 0.005228638016035397,
+          "lm_femur_pitch": 0.0052285325013746945,
+          "lr_femur_pitch": 0.005228604331447564,
+          "rf_femur_pitch": 0.005228539536310578,
+          "rm_femur_pitch": 0.005228532793740143,
+          "rr_femur_pitch": 0.0052285380084498055,
+          "lf_tibia_lever_pivot": 0.000725102542534524,
+          "lm_tibia_lever_pivot": 0.0007251004622798232,
+          "lr_tibia_lever_pivot": 0.0007251021641880411,
+          "rf_tibia_lever_pivot": 0.0007251006017358888,
+          "rm_tibia_lever_pivot": 0.0007251009303382997,
+          "rr_tibia_lever_pivot": 0.0007251006695572645
+        },
+        "lightest_mode_components": {
+          "lf_coxa_yaw": -1.0351981161982381e-16,
+          "lm_coxa_yaw": 0.00161985011034825,
+          "lr_coxa_yaw": -4.630827711248556e-13,
+          "rf_coxa_yaw": 6.511989298491061e-18,
+          "rm_coxa_yaw": -1.1844691893969639e-14,
+          "rr_coxa_yaw": 5.218048215738236e-15,
+          "lf_femur_pitch": 7.427172138936101e-16,
+          "lm_femur_pitch": -0.011629141434320119,
+          "lr_femur_pitch": 3.3246374554616155e-12,
+          "rf_femur_pitch": -3.99348661922913e-17,
+          "rm_femur_pitch": 8.45556312865398e-14,
+          "rr_femur_pitch": -3.7167420689397547e-14,
+          "lf_tibia_lever_pivot": -6.390556413652315e-14,
+          "lm_tibia_lever_pivot": 0.9999310672016946,
+          "lr_tibia_lever_pivot": -2.8586534639920425e-10,
+          "rf_tibia_lever_pivot": 2.516863764611732e-15,
+          "rm_tibia_lever_pivot": -7.275199118257491e-12,
+          "rr_tibia_lever_pivot": 3.1969061215801887e-12
+        },
+        "integration_diagnostics": {
+          "semi_implicit_euler": {
+            "critical_dt_s": 0.0022860620350744877,
+            "samples": [
+              {
+                "dt_s": 0.005,
+                "poles_real_imag": [
+                  [
+                    0.7916035462878117,
+                    0.0
+                  ],
+                  [
+                    -3.9639159782343634,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 3.9639159782343634,
+                "linear_mode_stable": false
+              },
+              {
+                "dt_s": 0.0025,
+                "poles_real_imag": [
+                  [
+                    0.8830084201251254,
+                    0.0
+                  ],
+                  [
+                    -1.2105490145010738,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 1.2105490145010738,
+                "linear_mode_stable": false
+              },
+              {
+                "dt_s": 0.00125,
+                "poles_real_imag": [
+                  [
+                    0.9376381765011321,
+                    0.0
+                  ],
+                  [
+                    -0.03675456828977438,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.9376381765011321,
+                "linear_mode_stable": true
+              }
+            ]
+          },
+          "constant_acceleration_zoh": {
+            "critical_dt_s": 0.002416714025779711,
+            "samples": [
+              {
+                "dt_s": 0.005,
+                "poles_real_imag": [
+                  [
+                    0.7660168402502507,
+                    0.0
+                  ],
+                  [
+                    -3.4210980290021475,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 3.4210980290021475,
+                "linear_mode_stable": false
+              },
+              {
+                "dt_s": 0.0025,
+                "poles_real_imag": [
+                  [
+                    0.8752763530022643,
+                    0.0
+                  ],
+                  [
+                    -1.0735091365795488,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 1.0735091365795488,
+                "linear_mode_stable": false
+              },
+              {
+                "dt_s": 0.00125,
+                "poles_real_imag": [
+                  [
+                    0.9354933496560529,
+                    0.0
+                  ],
+                  [
+                    -0.0022827887450291235,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.9354933496560529,
+                "linear_mode_stable": true
+              }
+            ]
+          }
+        }
+      },
+      "free_body": {
+        "minimum_motor_mode_inertia_kg_m2": 0.0007246728470862224,
+        "maximum_motor_mode_inertia_kg_m2": 0.010554116009765918,
+        "individual_effective_inertia_kg_m2": {
+          "lf_coxa_yaw": 0.0072188724302161365,
+          "lm_coxa_yaw": 0.008174696992409594,
+          "lr_coxa_yaw": 0.007208199864206629,
+          "rf_coxa_yaw": 0.007207716158762157,
+          "rm_coxa_yaw": 0.008173516282562342,
+          "rr_coxa_yaw": 0.00721751042535429,
+          "lf_femur_pitch": 0.004024487405503612,
+          "lm_femur_pitch": 0.004058233091059164,
+          "lr_femur_pitch": 0.004199214881982708,
+          "rf_femur_pitch": 0.0041990435271074475,
+          "rm_femur_pitch": 0.004057902594566554,
+          "rr_femur_pitch": 0.0040244258027388865,
+          "lf_tibia_lever_pivot": 0.0007249873115093478,
+          "lm_tibia_lever_pivot": 0.0007249965076470371,
+          "lr_tibia_lever_pivot": 0.0007249895021388833,
+          "rf_tibia_lever_pivot": 0.0007249879679214018,
+          "rm_tibia_lever_pivot": 0.0007249969676223657,
+          "rr_tibia_lever_pivot": 0.0007249855333807162
+        },
+        "lightest_mode_components": {
+          "lf_coxa_yaw": 0.0014311236795049296,
+          "lm_coxa_yaw": 0.0011273316444934736,
+          "lr_coxa_yaw": -0.0005259585047591873,
+          "rf_coxa_yaw": 0.0005276356855367551,
+          "rm_coxa_yaw": -0.0011282308624835046,
+          "rr_coxa_yaw": -0.0014327543808951586,
+          "lf_femur_pitch": -0.008841640961780117,
+          "lm_femur_pitch": -0.0015362573900284532,
+          "lr_femur_pitch": 0.006944936072080417,
+          "rf_femur_pitch": -0.006957565560956536,
+          "rm_femur_pitch": 0.0015495323821509582,
+          "rr_femur_pitch": 0.008884932470768322,
+          "lf_tibia_lever_pivot": 0.5428087984057789,
+          "lm_tibia_lever_pivot": 0.07858571503567126,
+          "lr_tibia_lever_pivot": -0.44326204660012897,
+          "rf_tibia_lever_pivot": 0.4446685242602681,
+          "rm_tibia_lever_pivot": -0.07939359341759918,
+          "rr_tibia_lever_pivot": -0.5462622953487326
+        },
+        "integration_diagnostics": {
+          "semi_implicit_euler": {
+            "critical_dt_s": 0.0022850408632823244,
+            "samples": [
+              {
+                "dt_s": 0.005,
+                "poles_real_imag": [
+                  [
+                    0.7916078459199705,
+                    0.0
+                  ],
+                  [
+                    -3.9663567206405665,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 3.9663567206405665,
+                "linear_mode_stable": false
+              },
+              {
+                "dt_s": 0.0025,
+                "poles_real_imag": [
+                  [
+                    0.8830114981191854,
+                    0.0
+                  ],
+                  [
+                    -1.2116484917434536,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 1.2116484917434536,
+                "linear_mode_stable": false
+              },
+              {
+                "dt_s": 0.00125,
+                "poles_real_imag": [
+                  [
+                    0.9376400555734576,
+                    0.0
+                  ],
+                  [
+                    -0.03727419145158432,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.9376400555734576,
+                "linear_mode_stable": true
+              }
+            ]
+          },
+          "constant_acceleration_zoh": {
+            "critical_dt_s": 0.0024155761569540747,
+            "samples": [
+              {
+                "dt_s": 0.005,
+                "poles_real_imag": [
+                  [
+                    0.7660229962383709,
+                    0.0
+                  ],
+                  [
+                    -3.423296983486907,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 3.423296983486907,
+                "linear_mode_stable": false
+              },
+              {
+                "dt_s": 0.0025,
+                "poles_real_imag": [
+                  [
+                    0.8752801111469153,
+                    0.0
+                  ],
+                  [
+                    -1.0745483829031686,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 1.0745483829031686,
+                "linear_mode_stable": false
+              },
+              {
+                "dt_s": 0.00125,
+                "poles_real_imag": [
+                  [
+                    0.9354954387003204,
+                    0.0
+                  ],
+                  [
+                    -0.0027873941114434564,
+                    0.0
+                  ]
+                ],
+                "spectral_radius": 0.9354954387003204,
+                "linear_mode_stable": true
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

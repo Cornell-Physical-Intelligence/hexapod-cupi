@@ -1,0 +1,1042 @@
+{
+  "schema": "hexapod.fourbar.planar_closure_equivalence.v1",
+  "scope": "All-angle geometric bound and independent grids; no dynamic or hardware admission",
+  "source_sha256": {
+    "configs/mkii_fourbar_v3_kinematics.json": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+    "robot/hexapod_mkii_assy/urdf/hexapod_mkii_linkage.urdf": "2dae7165852b419f0bd6edbe03f7d398b403f1410c5b6bdc2c287b6834f543a6",
+    "artifacts/mkii_step2_2026-09-04/physical_fourbar_reference/cad_pin_frames.json": "1213dced0e17fa0ad2cdf58f14b46c181e028a8341c19e07d706853378a6a825",
+    "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v3/hexapod_mkii_fourbar_v3.usda": "97414285d1b3b187d0f2e69e13c4056e57083d098b35d73dd0fbcff69e33c30c",
+    "artifacts/mkii_fourbar_2026-09-05/closure_equivalence/audit.py": "e57bfd2d91e6af80e5bc3e3b9e9fa20dbca51d7d4af735c64b1a3b60296674a0",
+    "tools/mkii_fourbar_kinematics.py": "749e369d26a6d2d0b41138c475716917a9b33ba0d093b472fa7afac7784baa6a",
+    "tools/audit_mkii_stance.py": "cc7828618e0f2d53110e0178e5af032cb0f796f8624d74475489ac02b717733b"
+  },
+  "numerical_check_margin": 1e-12,
+  "equivalence_bound_limit_m_and_axis_chord": 1e-08,
+  "pass": true,
+  "sources": {
+    "kinematic_contract": {
+      "lf": {
+        "lengths_m": {
+          "AB": 0.03000000000000002,
+          "BC": 0.07749999999999996,
+          "DC": 0.030000000000000002,
+          "AD": 0.0775
+        },
+        "baseline_reference_axial_gap_m": 4.337250617356659e-18,
+        "reference_axial_rotation_drift_bound_m": 2.82807545122852e-21,
+        "c0_axis_chord_from_reference_bound": 1.1102569162828044e-16,
+        "c1_axis_chord_from_reference_bound": 1.6940658945086007e-20,
+        "all_angle_c0_local_axial_gap_bound_m": 2.821060239288818e-17,
+        "all_angle_c_axis_chord_bound": 1.1104263228722552e-16,
+        "equivalence_within_1e_minus_8": true,
+        "zero_geometry_in_femur_frame": {
+          "pA": [
+            -0.046836732218813695,
+            -0.04860509218649419,
+            -0.005503463862071373
+          ],
+          "pB": [
+            -0.03585998770979955,
+            -0.07652481782648246,
+            -0.005503878121114055
+          ],
+          "pD": [
+            -0.10061430789026687,
+            -0.10441031013934877,
+            -0.0055054974606361246
+          ],
+          "pC0": [
+            -0.0896375633812527,
+            -0.13233003577933702,
+            -0.005505911719678804
+          ],
+          "pC1": [
+            -0.08963756338125273,
+            -0.13233003577933702,
+            -0.0055059117196788
+          ],
+          "nA": [
+            -1.592216769846777e-05,
+            -2.1097363812628764e-05,
+            0.9999999996506933
+          ],
+          "nB": [
+            -1.5922167698467764e-05,
+            -2.109736381262875e-05,
+            0.9999999996506934
+          ],
+          "nD": [
+            -1.592216769846777e-05,
+            -2.1097363812628764e-05,
+            0.9999999996506933
+          ],
+          "nC0": [
+            -1.5922167698467764e-05,
+            -2.1097363812628747e-05,
+            0.9999999996506934
+          ],
+          "nC1": [
+            -1.5922167698467784e-05,
+            -2.1097363812628774e-05,
+            0.9999999996506933
+          ]
+        },
+        "independent_hard_limit_grid": {
+          "independent_configurations": 5832,
+          "maximum_c0_local_axial_gap_m": 8.16010860082597e-17,
+          "maximum_c_axis_chord": 2.2204461280909637e-16,
+          "maximum_full_pin_separation_m": 0.20921683776107747
+        },
+        "independent_full_rotation_grid": {
+          "independent_configurations": 729,
+          "maximum_c0_local_axial_gap_m": 8.33197168372118e-17,
+          "maximum_c_axis_chord": 2.2204460792356103e-16,
+          "maximum_full_pin_separation_m": 0.21226910160602538
+        },
+        "ideal_branch_toggles_rad": [
+          -1.1414875140289393,
+          2.000105139560854
+        ],
+        "ideal_branch_toggle_inside_hard_interval": false,
+        "nearest_toggle_distance_to_hard_interval_rad": 0.16350811115215547
+      },
+      "lm": {
+        "lengths_m": {
+          "AB": 0.03000000000000002,
+          "BC": 0.07750000000000005,
+          "DC": 0.029999999999999975,
+          "AD": 0.07749999999999999
+        },
+        "baseline_reference_axial_gap_m": 2.599961186986482e-18,
+        "reference_axial_rotation_drift_bound_m": 1.1464415713761617e-21,
+        "c0_axis_chord_from_reference_bound": 4.3155335477436095e-20,
+        "c1_axis_chord_from_reference_bound": 5.082197683525802e-21,
+        "all_angle_c0_local_axial_gap_bound_m": 2.610386025685507e-18,
+        "all_angle_c_axis_chord_bound": 4.8237533160961897e-20,
+        "equivalence_within_1e_minus_8": true,
+        "zero_geometry_in_femur_frame": {
+          "pA": [
+            -0.04683451288184923,
+            -0.04860667292128348,
+            -0.005503301461193367
+          ],
+          "pB": [
+            -0.03551860706354246,
+            -0.07639066607234596,
+            -0.005502996624709423
+          ],
+          "pD": [
+            -0.10060750853536668,
+            -0.10441630411685668,
+            -0.005505365654240426
+          ],
+          "pC0": [
+            -0.08929160271705999,
+            -0.13220029726791918,
+            -0.005505060817756483
+          ],
+          "pC1": [
+            -0.08929160271705994,
+            -0.13220029726791913,
+            -0.005505060817756481
+          ],
+          "nA": [
+            -3.498567892085049e-05,
+            -3.2773605796686245e-06,
+            0.9999999993826305
+          ],
+          "nB": [
+            -3.498567892085049e-05,
+            -3.277360579668622e-06,
+            0.9999999993826306
+          ],
+          "nD": [
+            -3.498567892085049e-05,
+            -3.2773605796686245e-06,
+            0.9999999993826305
+          ],
+          "nC0": [
+            -3.498567892085052e-05,
+            -3.277360579668633e-06,
+            0.9999999993826305
+          ],
+          "nC1": [
+            -3.498567892085049e-05,
+            -3.277360579668629e-06,
+            0.9999999993826304
+          ]
+        },
+        "independent_hard_limit_grid": {
+          "independent_configurations": 5832,
+          "maximum_c0_local_axial_gap_m": 2.375715834426934e-17,
+          "maximum_c_axis_chord": 1.1102234022281953e-16,
+          "maximum_full_pin_separation_m": 0.20921763762344078
+        },
+        "independent_full_rotation_grid": {
+          "independent_configurations": 729,
+          "maximum_c0_local_axial_gap_m": 2.5181505284428302e-17,
+          "maximum_c_axis_chord": 2.220446130692059e-16,
+          "maximum_full_pin_separation_m": 0.21208128494857556
+        },
+        "ideal_branch_toggles_rad": [
+          -1.1535826269098284,
+          1.9880100266799647
+        ],
+        "ideal_branch_toggle_inside_hard_interval": false,
+        "nearest_toggle_distance_to_hard_interval_rad": 0.16339196374996634
+      },
+      "lr": {
+        "lengths_m": {
+          "AB": 0.029999999999999975,
+          "BC": 0.07749999999999997,
+          "DC": 0.029999999999999978,
+          "AD": 0.07750000000000001
+        },
+        "baseline_reference_axial_gap_m": 5.1173769057650386e-17,
+        "reference_axial_rotation_drift_bound_m": 5.251604273588027e-22,
+        "c0_axis_chord_from_reference_bound": 1.0164395367051604e-20,
+        "c1_axis_chord_from_reference_bound": 3.3881317890172014e-21,
+        "all_angle_c0_local_axial_gap_bound_m": 5.1176479563081665e-17,
+        "all_angle_c_axis_chord_bound": 1.3552527156068805e-20,
+        "equivalence_within_1e_minus_8": true,
+        "zero_geometry_in_femur_frame": {
+          "pA": [
+            -0.046836246611687435,
+            -0.04860550581966087,
+            -0.005503281613658706
+          ],
+          "pB": [
+            -0.03605899477478792,
+            -0.07660284217138913,
+            -0.005503510173887326
+          ],
+          "pD": [
+            -0.10061238126908056,
+            -0.10441211239332507,
+            -0.005505292131494199
+          ],
+          "pC0": [
+            -0.08983512943218101,
+            -0.1324094487450533,
+            -0.0055055206917228264
+          ],
+          "pC1": [
+            -0.08983512943218099,
+            -0.1324094487450533,
+            -0.005505520691722775
+          ],
+          "nA": [
+            -2.066129357369828e-05,
+            -1.611696866417496e-05,
+            0.9999999996566771
+          ],
+          "nB": [
+            -2.066129357369828e-05,
+            -1.6116968664174957e-05,
+            0.9999999996566771
+          ],
+          "nD": [
+            -2.066129357369828e-05,
+            -1.611696866417496e-05,
+            0.9999999996566771
+          ],
+          "nC0": [
+            -2.0661293573698284e-05,
+            -1.6116968664174967e-05,
+            0.9999999996566772
+          ],
+          "nC1": [
+            -2.066129357369828e-05,
+            -1.6116968664174957e-05,
+            0.9999999996566771
+          ]
+        },
+        "independent_hard_limit_grid": {
+          "independent_configurations": 5832,
+          "maximum_c0_local_axial_gap_m": 8.341677841004331e-17,
+          "maximum_c_axis_chord": 3.3306690880064716e-16,
+          "maximum_full_pin_separation_m": 0.20921702855835275
+        },
+        "independent_full_rotation_grid": {
+          "independent_configurations": 729,
+          "maximum_c0_local_axial_gap_m": 8.667664104667124e-17,
+          "maximum_c_axis_chord": 2.220446081562056e-16,
+          "maximum_full_pin_separation_m": 0.21237739502127623
+        },
+        "ideal_branch_toggles_rad": [
+          -1.1343264165955993,
+          2.0072662369941936
+        ],
+        "ideal_branch_toggle_inside_hard_interval": false,
+        "nearest_toggle_distance_to_hard_interval_rad": 0.16348041326679263
+      },
+      "rf": {
+        "lengths_m": {
+          "AB": 0.03,
+          "BC": 0.07749999999999994,
+          "DC": 0.03000000000000002,
+          "AD": 0.07750000000000001
+        },
+        "baseline_reference_axial_gap_m": 5.205107591109611e-18,
+        "reference_axial_rotation_drift_bound_m": 2.6258021377110633e-22,
+        "c0_axis_chord_from_reference_bound": 2.2204460858312443e-16,
+        "c1_axis_chord_from_reference_bound": 2.752857078576476e-21,
+        "all_angle_c0_local_axial_gap_bound_m": 5.2944961016695124e-17,
+        "all_angle_c_axis_chord_bound": 2.22047361440203e-16,
+        "equivalence_within_1e_minus_8": true,
+        "zero_geometry_in_femur_frame": {
+          "pA": [
+            -0.046834682703019284,
+            -0.04860663274969576,
+            -0.00550324923865704
+          ],
+          "pB": [
+            -0.036643879669788326,
+            -0.076822719180053,
+            -0.005502945099281681
+          ],
+          "pD": [
+            -0.10060724912149074,
+            -0.10441667751926537,
+            -0.005505143892338055
+          ],
+          "pC0": [
+            -0.09041644608825972,
+            -0.1326327639496226,
+            -0.00550483975296262
+          ],
+          "pC1": [
+            -0.09041644608825969,
+            -0.1326327639496226,
+            -0.0055048397529626255
+          ],
+          "nA": [
+            -3.3764969026461866e-05,
+            -1.415957300340574e-06,
+            0.9999999994289611
+          ],
+          "nB": [
+            -3.376496902646187e-05,
+            -1.4159573003405756e-06,
+            0.9999999994289612
+          ],
+          "nD": [
+            -3.3764969026461866e-05,
+            -1.415957300340574e-06,
+            0.9999999994289611
+          ],
+          "nC0": [
+            -3.37649690264619e-05,
+            -1.4159573003405843e-06,
+            0.9999999994289613
+          ],
+          "nC1": [
+            -3.3764969026461866e-05,
+            -1.4159573003405712e-06,
+            0.9999999994289611
+          ]
+        },
+        "independent_hard_limit_grid": {
+          "independent_configurations": 5832,
+          "maximum_c0_local_axial_gap_m": 6.025409972448427e-17,
+          "maximum_c_axis_chord": 3.330669106753341e-16,
+          "maximum_full_pin_separation_m": 0.20921760203976653
+        },
+        "independent_full_rotation_grid": {
+          "independent_configurations": 729,
+          "maximum_c0_local_axial_gap_m": 7.149316776204624e-17,
+          "maximum_c_axis_chord": 3.3306690898267e-16,
+          "maximum_full_pin_separation_m": 0.21268146801014798
+        },
+        "ideal_branch_toggles_rad": [
+          -1.1133981558094852,
+          2.0281944977803077
+        ],
+        "ideal_branch_toggle_inside_hard_interval": false,
+        "nearest_toggle_distance_to_hard_interval_rad": 0.1633971323943777
+      },
+      "rm": {
+        "lengths_m": {
+          "AB": 0.02999999999999999,
+          "BC": 0.07749999999999999,
+          "DC": 0.030000000000000034,
+          "AD": 0.07749999999999996
+        },
+        "baseline_reference_axial_gap_m": 4.333309291697683e-18,
+        "reference_axial_rotation_drift_bound_m": 2.182142687059019e-21,
+        "c0_axis_chord_from_reference_bound": 2.206923275875747e-20,
+        "c1_axis_chord_from_reference_bound": 1.1181155744966746e-20,
+        "all_angle_c0_local_axial_gap_bound_m": 4.340236319427875e-18,
+        "all_angle_c_axis_chord_bound": 3.3250388503724213e-20,
+        "equivalence_within_1e_minus_8": true,
+        "zero_geometry_in_femur_frame": {
+          "pA": [
+            -0.04683511003350077,
+            -0.04860666145906676,
+            -0.005503277017316086
+          ],
+          "pB": [
+            -0.03770086925818751,
+            -0.07718227423277349,
+            -0.0055030205557299915
+          ],
+          "pD": [
+            -0.10060768173224474,
+            -0.10441670113457792,
+            -0.005505355791891637
+          ],
+          "pC0": [
+            -0.0914734409569315,
+            -0.13299231390828467,
+            -0.00550509933030554
+          ],
+          "pC1": [
+            -0.0914734409569314,
+            -0.13299231390828467,
+            -0.005505099330305536
+          ],
+          "nA": [
+            -3.6022573472191746e-05,
+            -2.5398326219070193e-06,
+            0.9999999993479617
+          ],
+          "nB": [
+            -3.6022573472191767e-05,
+            -2.5398326219070235e-06,
+            0.9999999993479618
+          ],
+          "nD": [
+            -3.6022573472191746e-05,
+            -2.5398326219070193e-06,
+            0.9999999993479617
+          ],
+          "nC0": [
+            -3.602257347219175e-05,
+            -2.539832621907019e-06,
+            0.9999999993479617
+          ],
+          "nC1": [
+            -3.602257347219174e-05,
+            -2.5398326219070104e-06,
+            0.9999999993479617
+          ]
+        },
+        "independent_hard_limit_grid": {
+          "independent_configurations": 5832,
+          "maximum_c0_local_axial_gap_m": 2.660872775651451e-17,
+          "maximum_c_axis_chord": 2.220446064824573e-16,
+          "maximum_full_pin_separation_m": 0.20921747872913254
+        },
+        "independent_full_rotation_grid": {
+          "independent_configurations": 729,
+          "maximum_c0_local_axial_gap_m": 2.7248318528443148e-17,
+          "maximum_c_axis_chord": 2.2204460694289964e-16,
+          "maximum_full_pin_separation_m": 0.2131762099871563
+        },
+        "ideal_branch_toggles_rad": [
+          -1.0761942083366032,
+          2.06539844525319
+        ],
+        "ideal_branch_toggle_inside_hard_interval": false,
+        "nearest_toggle_distance_to_hard_interval_rad": 0.16341504454475508
+      },
+      "rr": {
+        "lengths_m": {
+          "AB": 0.030000000000000016,
+          "BC": 0.07749999999999996,
+          "DC": 0.02999999999999999,
+          "AD": 0.0775
+        },
+        "baseline_reference_axial_gap_m": 1.1274054394107027e-17,
+        "reference_axial_rotation_drift_bound_m": 2.4101659812659753e-21,
+        "c0_axis_chord_from_reference_bound": 2.4837899351341732e-20,
+        "c1_axis_chord_from_reference_bound": 1.1102230259903277e-16,
+        "all_angle_c0_local_axial_gap_bound_m": 1.1281804708448832e-17,
+        "all_angle_c_axis_chord_bound": 1.110471404983841e-16,
+        "equivalence_within_1e_minus_8": true,
+        "zero_geometry_in_femur_frame": {
+          "pA": [
+            -0.04683494357327493,
+            -0.0486066377502755,
+            -0.005503804694398401
+          ],
+          "pB": [
+            -0.03664405672859023,
+            -0.07682269390991067,
+            -0.005503465360438945
+          ],
+          "pD": [
+            -0.10060750173103314,
+            -0.10441669046556125,
+            -0.005506060251429579
+          ],
+          "pC0": [
+            -0.0904166148863484,
+            -0.1326327466251964,
+            -0.0055057209174701
+          ],
+          "pC1": [
+            -0.09041661488634845,
+            -0.1326327466251964,
+            -0.005505720917470112
+          ],
+          "nA": [
+            -3.958822304506171e-05,
+            -2.2719384263424106e-06,
+            0.9999999992138054
+          ],
+          "nB": [
+            -3.958822304506172e-05,
+            -2.2719384263424025e-06,
+            0.9999999992138053
+          ],
+          "nD": [
+            -3.958822304506171e-05,
+            -2.2719384263424106e-06,
+            0.9999999992138054
+          ],
+          "nC0": [
+            -3.958822304506172e-05,
+            -2.2719384263423966e-06,
+            0.9999999992138054
+          ],
+          "nC1": [
+            -3.958822304506171e-05,
+            -2.271938426342416e-06,
+            0.9999999992138056
+          ]
+        },
+        "independent_hard_limit_grid": {
+          "independent_configurations": 5832,
+          "maximum_c0_local_axial_gap_m": 5.3450854475444203e-17,
+          "maximum_c_axis_chord": 3.3306690930497964e-16,
+          "maximum_full_pin_separation_m": 0.20921757277367087
+        },
+        "independent_full_rotation_grid": {
+          "independent_configurations": 729,
+          "maximum_c0_local_axial_gap_m": 5.229293866845125e-17,
+          "maximum_c_axis_chord": 3.3306690759891963e-16,
+          "maximum_full_pin_separation_m": 0.21268142824844707
+        },
+        "ideal_branch_toggles_rad": [
+          -1.1134009784221583,
+          2.0281916751676348
+        ],
+        "ideal_branch_toggle_inside_hard_interval": false,
+        "nearest_toggle_distance_to_hard_interval_rad": 0.16340138486153033
+      }
+    },
+    "authored_v3_usd": {
+      "lf": {
+        "lengths_m": {
+          "AB": 0.029999999427756364,
+          "BC": 0.07750000123096654,
+          "DC": 0.030000000566548578,
+          "AD": 0.07750000221422687
+        },
+        "baseline_reference_axial_gap_m": 2.1340846865304463e-11,
+        "reference_axial_rotation_drift_bound_m": 2.6778033092820887e-21,
+        "c0_axis_chord_from_reference_bound": 2.4052413684857144e-20,
+        "c1_axis_chord_from_reference_bound": 1.2216082893331058e-20,
+        "all_angle_c0_local_axial_gap_bound_m": 2.1340846873153535e-11,
+        "all_angle_c_axis_chord_bound": 3.62684965781882e-20,
+        "equivalence_within_1e_minus_8": true,
+        "zero_geometry_in_femur_frame": {
+          "pA": [
+            -0.0468367338180542,
+            -0.048605091869831085,
+            -0.00550346402451396
+          ],
+          "pB": [
+            -0.03585999084453688,
+            -0.07652481749862461,
+            -0.005503878283551658
+          ],
+          "pD": [
+            -0.10061430931091309,
+            -0.1044103130698204,
+            -0.005505497567355633
+          ],
+          "pC0": [
+            -0.08963756777385115,
+            -0.1323300359488391,
+            -0.005505911836928886
+          ],
+          "pC1": [
+            -0.08963756521140682,
+            -0.13233003947956998,
+            -0.005505911815621729
+          ],
+          "nA": [
+            -1.592216716291575e-05,
+            -2.1097363403213793e-05,
+            0.999999999650693
+          ],
+          "nB": [
+            -1.5922167162915743e-05,
+            -2.1097363403213773e-05,
+            0.9999999996506929
+          ],
+          "nD": [
+            -1.592216716291575e-05,
+            -2.1097363403213793e-05,
+            0.999999999650693
+          ],
+          "nC0": [
+            -1.5922167162915743e-05,
+            -2.1097363403213766e-05,
+            0.9999999996506928
+          ],
+          "nC1": [
+            -1.5922167162915757e-05,
+            -2.1097363403213796e-05,
+            0.9999999996506929
+          ]
+        },
+        "independent_hard_limit_grid": {
+          "independent_configurations": 5832,
+          "maximum_c0_local_axial_gap_m": 2.134084842734799e-11,
+          "maximum_c_axis_chord": 3.3306691097199627e-16,
+          "maximum_full_pin_separation_m": 0.20921684060521903
+        },
+        "independent_full_rotation_grid": {
+          "independent_configurations": 729,
+          "maximum_c0_local_axial_gap_m": 2.13408480498538e-11,
+          "maximum_c_axis_chord": 2.220446091643319e-16,
+          "maximum_full_pin_separation_m": 0.21226910573983748
+        },
+        "ideal_branch_toggles_rad": [
+          -1.1414875140289393,
+          2.000105139560854
+        ],
+        "ideal_branch_toggle_inside_hard_interval": false,
+        "nearest_toggle_distance_to_hard_interval_rad": 0.16350811115215547
+      },
+      "lm": {
+        "lengths_m": {
+          "AB": 0.030000000246175516,
+          "BC": 0.07749999976491126,
+          "DC": 0.030000000833802328,
+          "AD": 0.07749999896529808
+        },
+        "baseline_reference_axial_gap_m": 5.644736929072282e-11,
+        "reference_axial_rotation_drift_bound_m": 3.9387031952812377e-22,
+        "c0_axis_chord_from_reference_bound": 1.8751326725114502e-20,
+        "c1_axis_chord_from_reference_bound": 6.89434869366917e-21,
+        "all_angle_c0_local_axial_gap_bound_m": 5.6447369295148223e-11,
+        "all_angle_c_axis_chord_bound": 2.5645675418783672e-20,
+        "equivalence_within_1e_minus_8": true,
+        "zero_geometry_in_femur_frame": {
+          "pA": [
+            -0.046834513545036316,
+            -0.04860667139291763,
+            -0.0055033015087246895
+          ],
+          "pB": [
+            -0.03551860805524454,
+            -0.07639066494358825,
+            -0.005502996672232297
+          ],
+          "pD": [
+            -0.1006075069308281,
+            -0.10441630333662033,
+            -0.005505365785211325
+          ],
+          "pC0": [
+            -0.08929160466890047,
+            -0.1322002948876023,
+            -0.005505060940435564
+          ],
+          "pC1": [
+            -0.0892916026419283,
+            -0.13220029801088745,
+            -0.005505060996822254
+          ],
+          "nA": [
+            -3.498567976994426e-05,
+            -3.2773599020292122e-06,
+            0.9999999993826305
+          ],
+          "nB": [
+            -3.498567976994426e-05,
+            -3.2773599020292097e-06,
+            0.9999999993826305
+          ],
+          "nD": [
+            -3.498567976994426e-05,
+            -3.2773599020292122e-06,
+            0.9999999993826305
+          ],
+          "nC0": [
+            -3.498567976994427e-05,
+            -3.277359902029201e-06,
+            0.9999999993826305
+          ],
+          "nC1": [
+            -3.4985679769944264e-05,
+            -3.2773599020292135e-06,
+            0.9999999993826305
+          ]
+        },
+        "independent_hard_limit_grid": {
+          "independent_configurations": 5832,
+          "maximum_c0_local_axial_gap_m": 5.644737092072105e-11,
+          "maximum_c_axis_chord": 2.220446128547367e-16,
+          "maximum_full_pin_separation_m": 0.20921763723800688
+        },
+        "independent_full_rotation_grid": {
+          "independent_configurations": 729,
+          "maximum_c0_local_axial_gap_m": 5.644737017373053e-11,
+          "maximum_c_axis_chord": 2.2204460767152944e-16,
+          "maximum_full_pin_separation_m": 0.21208128543105184
+        },
+        "ideal_branch_toggles_rad": [
+          -1.1535826269098284,
+          1.9880100266799647
+        ],
+        "ideal_branch_toggle_inside_hard_interval": false,
+        "nearest_toggle_distance_to_hard_interval_rad": 0.16339196374996634
+      },
+      "lr": {
+        "lengths_m": {
+          "AB": 0.03000000076004745,
+          "BC": 0.07749999867133511,
+          "DC": 0.02999999968175762,
+          "AD": 0.0775000024041696
+        },
+        "baseline_reference_axial_gap_m": 2.200024241424068e-10,
+        "reference_axial_rotation_drift_bound_m": 1.1742943948356991e-21,
+        "c0_axis_chord_from_reference_bound": 1.7159176851241525e-20,
+        "c1_axis_chord_from_reference_bound": 1.1102230334139505e-16,
+        "all_angle_c0_local_axial_gap_bound_m": 2.200024241472703e-10,
+        "all_angle_c_axis_chord_bound": 1.110394625182463e-16,
+        "equivalence_within_1e_minus_8": true,
+        "zero_geometry_in_femur_frame": {
+          "pA": [
+            -0.0468362458050251,
+            -0.048605505377054214,
+            -0.005503281485289335
+          ],
+          "pB": [
+            -0.036058994325570054,
+            -0.07660284268079065,
+            -0.005503510045640234
+          ],
+          "pD": [
+            -0.10061237961053848,
+            -0.10441211611032486,
+            -0.00550529221072793
+          ],
+          "pC0": [
+            -0.08983512633253185,
+            -0.13240944996330736,
+            -0.005505520447707264
+          ],
+          "pC1": [
+            -0.08983512846107532,
+            -0.13240945238566826,
+            -0.005505520667792708
+          ],
+          "nA": [
+            -2.066129320147986e-05,
+            -1.6116968595126776e-05,
+            0.9999999996566772
+          ],
+          "nB": [
+            -2.0661293201479857e-05,
+            -1.6116968595126783e-05,
+            0.9999999996566772
+          ],
+          "nD": [
+            -2.066129320147986e-05,
+            -1.6116968595126776e-05,
+            0.9999999996566772
+          ],
+          "nC0": [
+            -2.0661293201479864e-05,
+            -1.6116968595126776e-05,
+            0.9999999996566772
+          ],
+          "nC1": [
+            -2.0661293201479857e-05,
+            -1.6116968595126762e-05,
+            0.9999999996566773
+          ]
+        },
+        "independent_hard_limit_grid": {
+          "independent_configurations": 5832,
+          "maximum_c0_local_axial_gap_m": 2.2000242631450946e-10,
+          "maximum_c_axis_chord": 2.220446100173619e-16,
+          "maximum_full_pin_separation_m": 0.20921703025610672
+        },
+        "independent_full_rotation_grid": {
+          "independent_configurations": 729,
+          "maximum_c0_local_axial_gap_m": 2.2000242575738085e-10,
+          "maximum_c_axis_chord": 2.220446072256274e-16,
+          "maximum_full_pin_separation_m": 0.2123773974112792
+        },
+        "ideal_branch_toggles_rad": [
+          -1.1343264165955993,
+          2.0072662369941936
+        ],
+        "ideal_branch_toggle_inside_hard_interval": false,
+        "nearest_toggle_distance_to_hard_interval_rad": 0.16348041326679263
+      },
+      "rf": {
+        "lengths_m": {
+          "AB": 0.02999999993681005,
+          "BC": 0.07750000022779628,
+          "DC": 0.03000000012607216,
+          "AD": 0.07749999680809733
+        },
+        "baseline_reference_axial_gap_m": 2.697088708600725e-10,
+        "reference_axial_rotation_drift_bound_m": 1.9484531226780536e-21,
+        "c0_axis_chord_from_reference_bound": 2.0345394235817738e-20,
+        "c1_axis_chord_from_reference_bound": 7.396397234278379e-21,
+        "all_angle_c0_local_axial_gap_bound_m": 2.697088708663952e-10,
+        "all_angle_c_axis_chord_bound": 2.7741791470096117e-20,
+        "equivalence_within_1e_minus_8": true,
+        "zero_geometry_in_femur_frame": {
+          "pA": [
+            -0.04683468118309975,
+            -0.04860663414001465,
+            -0.005503249354660511
+          ],
+          "pB": [
+            -0.03664387704526768,
+            -0.07682272010423809,
+            -0.0055029452152784404
+          ],
+          "pD": [
+            -0.1006072461605072,
+            -0.10441667586565018,
+            -0.005505143664777279
+          ],
+          "pC0": [
+            -0.09041644416712491,
+            -0.1326327645124268,
+            -0.005504839888192784
+          ],
+          "pC1": [
+            -0.09041644129794202,
+            -0.13263276176935063,
+            -0.005504839618383151
+          ],
+          "nA": [
+            -3.3764970344839714e-05,
+            -1.4159576051523032e-06,
+            0.9999999994289609
+          ],
+          "nB": [
+            -3.376497034483972e-05,
+            -1.4159576051523138e-06,
+            0.9999999994289609
+          ],
+          "nD": [
+            -3.3764970344839714e-05,
+            -1.4159576051523032e-06,
+            0.9999999994289609
+          ],
+          "nC0": [
+            -3.376497034483973e-05,
+            -1.4159576051523176e-06,
+            0.9999999994289609
+          ],
+          "nC1": [
+            -3.3764970344839714e-05,
+            -1.415957605152306e-06,
+            0.9999999994289608
+          ]
+        },
+        "independent_hard_limit_grid": {
+          "independent_configurations": 5832,
+          "maximum_c0_local_axial_gap_m": 2.6970887255448544e-10,
+          "maximum_c_axis_chord": 3.330669091714244e-16,
+          "maximum_full_pin_separation_m": 0.20921759865256376
+        },
+        "independent_full_rotation_grid": {
+          "independent_configurations": 729,
+          "maximum_c0_local_axial_gap_m": 2.697088720225365e-10,
+          "maximum_c_axis_chord": 3.330669088895718e-16,
+          "maximum_full_pin_separation_m": 0.21268146422593487
+        },
+        "ideal_branch_toggles_rad": [
+          -1.1133981558094852,
+          2.0281944977803077
+        ],
+        "ideal_branch_toggle_inside_hard_interval": false,
+        "nearest_toggle_distance_to_hard_interval_rad": 0.1633971323943777
+      },
+      "rm": {
+        "lengths_m": {
+          "AB": 0.02999999971418322,
+          "BC": 0.07749999937122734,
+          "DC": 0.029999999789736474,
+          "AD": 0.0774999967148987
+        },
+        "baseline_reference_axial_gap_m": 2.8217644876458115e-10,
+        "reference_axial_rotation_drift_bound_m": 1.181610952582033e-21,
+        "c0_axis_chord_from_reference_bound": 1.3976043629695956e-20,
+        "c1_axis_chord_from_reference_bound": 1.1520893652006631e-20,
+        "all_angle_c0_local_axial_gap_bound_m": 2.821764487687676e-10,
+        "all_angle_c_axis_chord_bound": 2.5496937281702588e-20,
+        "equivalence_within_1e_minus_8": true,
+        "zero_geometry_in_femur_frame": {
+          "pA": [
+            -0.04683510959148407,
+            -0.04860666021704674,
+            -0.005503276828676462
+          ],
+          "pB": [
+            -0.037700868376937056,
+            -0.07718227255028802,
+            -0.005503020367116382
+          ],
+          "pD": [
+            -0.10060767829418182,
+            -0.10441669821739197,
+            -0.005505356006324291
+          ],
+          "pC0": [
+            -0.09147344056693074,
+            -0.13299231087934177,
+            -0.005505099238928243
+          ],
+          "pC1": [
+            -0.09147343871086423,
+            -0.13299231115137744,
+            -0.0055050995210385225
+          ],
+          "nA": [
+            -3.602257354209341e-05,
+            -2.5398328860685435e-06,
+            0.9999999993479617
+          ],
+          "nB": [
+            -3.602257354209342e-05,
+            -2.5398328860685515e-06,
+            0.9999999993479618
+          ],
+          "nD": [
+            -3.602257354209341e-05,
+            -2.5398328860685435e-06,
+            0.9999999993479617
+          ],
+          "nC0": [
+            -3.602257354209341e-05,
+            -2.5398328860685448e-06,
+            0.9999999993479617
+          ],
+          "nC1": [
+            -3.6022573542093425e-05,
+            -2.5398328860685532e-06,
+            0.9999999993479618
+          ]
+        },
+        "independent_hard_limit_grid": {
+          "independent_configurations": 5832,
+          "maximum_c0_local_axial_gap_m": 2.821764511414374e-10,
+          "maximum_c_axis_chord": 2.2204460890745354e-16,
+          "maximum_full_pin_separation_m": 0.20921747434279322
+        },
+        "independent_full_rotation_grid": {
+          "independent_configurations": 729,
+          "maximum_c0_local_axial_gap_m": 2.8217645068458745e-10,
+          "maximum_c_axis_chord": 2.2204461088372046e-16,
+          "maximum_full_pin_separation_m": 0.21317620570893395
+        },
+        "ideal_branch_toggles_rad": [
+          -1.0761942083366032,
+          2.06539844525319
+        ],
+        "ideal_branch_toggle_inside_hard_interval": false,
+        "nearest_toggle_distance_to_hard_interval_rad": 0.16341504454475508
+      },
+      "rr": {
+        "lengths_m": {
+          "AB": 0.030000000595888775,
+          "BC": 0.0774999997096325,
+          "DC": 0.030000000660975225,
+          "AD": 0.07749999969632752
+        },
+        "baseline_reference_axial_gap_m": 2.9749973283352905e-10,
+        "reference_axial_rotation_drift_bound_m": 1.5809422334559765e-21,
+        "c0_axis_chord_from_reference_bound": 1.1103250578955584e-16,
+        "c1_axis_chord_from_reference_bound": 1.4330886327490188e-20,
+        "all_angle_c0_local_axial_gap_bound_m": 2.974997567070988e-10,
+        "all_angle_c_axis_chord_bound": 1.1104683667588333e-16,
+        "equivalence_within_1e_minus_8": true,
+        "zero_geometry_in_femur_frame": {
+          "pA": [
+            -0.04683494195342064,
+            -0.04860663786530495,
+            -0.005503804888576269
+          ],
+          "pB": [
+            -0.036644056532692246,
+            -0.07682269517279858,
+            -0.005503465554615144
+          ],
+          "pD": [
+            -0.1006074994802475,
+            -0.10441669076681137,
+            -0.0055060600861907005
+          ],
+          "pC0": [
+            -0.09041661549543381,
+            -0.13263274670927303,
+            -0.005505721122793662
+          ],
+          "pC1": [
+            -0.09041661342198087,
+            -0.1326327479132456,
+            -0.00550572082521458
+          ],
+          "nA": [
+            -3.958822404447392e-05,
+            -2.2719381972837228e-06,
+            0.9999999992138054
+          ],
+          "nB": [
+            -3.958822404447391e-05,
+            -2.2719381972837304e-06,
+            0.9999999992138054
+          ],
+          "nD": [
+            -3.958822404447392e-05,
+            -2.2719381972837228e-06,
+            0.9999999992138054
+          ],
+          "nC0": [
+            -3.958822404447394e-05,
+            -2.2719381972837397e-06,
+            0.9999999992138056
+          ],
+          "nC1": [
+            -3.9588224044473926e-05,
+            -2.271938197283727e-06,
+            0.9999999992138053
+          ]
+        },
+        "independent_hard_limit_grid": {
+          "independent_configurations": 5832,
+          "maximum_c0_local_axial_gap_m": 2.974997353688529e-10,
+          "maximum_c_axis_chord": 3.3306690830977797e-16,
+          "maximum_full_pin_separation_m": 0.20921757312051784
+        },
+        "independent_full_rotation_grid": {
+          "independent_configurations": 729,
+          "maximum_c0_local_axial_gap_m": 2.974997349419494e-10,
+          "maximum_c_axis_chord": 2.220446116458737e-16,
+          "maximum_full_pin_separation_m": 0.2126814294629612
+        },
+        "ideal_branch_toggles_rad": [
+          -1.1134009784221583,
+          2.0281916751676348
+        ],
+        "ideal_branch_toggle_inside_hard_interval": false,
+        "nearest_toggle_distance_to_hard_interval_rad": 0.16340138486153033
+      }
+    }
+  }
+}

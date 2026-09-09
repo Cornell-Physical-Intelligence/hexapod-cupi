@@ -1,0 +1,252 @@
+{
+  "schema": "hexapod.cpu_metrics_batch_review.v1",
+  "pass": true,
+  "physics_qualification": false,
+  "torch": "2.14.0",
+  "python": "3.12.12",
+  "machine": "arm64",
+  "system": "Darwin",
+  "threads": 1,
+  "cuda_initialized": false,
+  "scope": "synthetic arithmetic only; no native sensors, full PhysicalMetrics, PhysX, GPU, or training",
+  "source_sha256": {
+    "isaaclab/validate_mkii_fourbar.py": "2007a7d84d9c51888a67df8bec7292924b2e57411d9312e6e5607c713617725c",
+    "configs/mkii_fourbar_v3_kinematics.json": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+    "packages/hexapod_env/hexapod_env/tasks/mkii_fourbar_v1/env.py": "ead9ec2a829dcebfaef4f940992fd18bda3bb056ff68d79f7a6878aac229ed34",
+    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_review_v1/cpu_batch_probe.py": "38f352b42d45692b472019c13749c6f909136eb36c68bd1a9379771dfa90ca43"
+  },
+  "results": [
+    {
+      "num_envs": 32,
+      "dtype": "torch.float32",
+      "comparisons": [
+        {
+          "name": "point_error_m",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "axis_chord",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "pin_velocity_m_s",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "passive_velocity_rad_s",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "force_norm_n",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        }
+      ],
+      "current_cpu_timing": {
+        "median_seconds": 0.0005731887510046363,
+        "min_seconds": 0.0005679745902307332,
+        "max_seconds": 0.000586096670012921,
+        "repeats": 7,
+        "calls_per_repeat": 100
+      },
+      "proposed_cpu_timing": {
+        "median_seconds": 7.036249968223274e-05,
+        "min_seconds": 6.892750039696693e-05,
+        "max_seconds": 7.204083958640694e-05,
+        "repeats": 7,
+        "calls_per_repeat": 100
+      },
+      "current_aten_dispatches": {
+        "total": 793,
+        "operations": {
+          "aten._unsafe_view.default": 36,
+          "aten.add.Tensor": 24,
+          "aten.amax.default": 31,
+          "aten.bmm.default": 36,
+          "aten.clone.default": 36,
+          "aten.linalg_cross.default": 12,
+          "aten.linalg_vector_norm.default": 43,
+          "aten.mul.Tensor": 12,
+          "aten.permute.default": 180,
+          "aten.select.int": 132,
+          "aten.slice.Tensor": 36,
+          "aten.stack.default": 5,
+          "aten.sub.Tensor": 30,
+          "aten.unsqueeze.default": 72,
+          "aten.view.default": 108
+        }
+      },
+      "proposed_aten_dispatches": {
+        "total": 58,
+        "operations": {
+          "aten._unsafe_view.default": 2,
+          "aten.add.Tensor": 2,
+          "aten.amax.default": 1,
+          "aten.bmm.default": 2,
+          "aten.clone.default": 2,
+          "aten.index_select.default": 6,
+          "aten.linalg_cross.default": 1,
+          "aten.linalg_vector_norm.default": 3,
+          "aten.mul.Tensor": 1,
+          "aten.permute.default": 10,
+          "aten.select.int": 8,
+          "aten.stack.default": 1,
+          "aten.sub.Tensor": 4,
+          "aten.unsqueeze.default": 4,
+          "aten.view.default": 11
+        }
+      }
+    },
+    {
+      "num_envs": 512,
+      "dtype": "torch.float32",
+      "comparisons": [
+        {
+          "name": "point_error_m",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "axis_chord",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "pin_velocity_m_s",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "passive_velocity_rad_s",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "force_norm_n",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        }
+      ],
+      "current_cpu_timing": {
+        "median_seconds": 0.0013118424999993294,
+        "min_seconds": 0.0013038829097058624,
+        "max_seconds": 0.0013203516695648432,
+        "repeats": 7,
+        "calls_per_repeat": 100
+      },
+      "proposed_cpu_timing": {
+        "median_seconds": 0.0005420812498778105,
+        "min_seconds": 0.000533580839401111,
+        "max_seconds": 0.0005549812503159046,
+        "repeats": 7,
+        "calls_per_repeat": 100
+      },
+      "current_aten_dispatches": {
+        "total": 793,
+        "operations": {
+          "aten._unsafe_view.default": 36,
+          "aten.add.Tensor": 24,
+          "aten.amax.default": 31,
+          "aten.bmm.default": 36,
+          "aten.clone.default": 36,
+          "aten.linalg_cross.default": 12,
+          "aten.linalg_vector_norm.default": 43,
+          "aten.mul.Tensor": 12,
+          "aten.permute.default": 180,
+          "aten.select.int": 132,
+          "aten.slice.Tensor": 36,
+          "aten.stack.default": 5,
+          "aten.sub.Tensor": 30,
+          "aten.unsqueeze.default": 72,
+          "aten.view.default": 108
+        }
+      },
+      "proposed_aten_dispatches": {
+        "total": 58,
+        "operations": {
+          "aten._unsafe_view.default": 2,
+          "aten.add.Tensor": 2,
+          "aten.amax.default": 1,
+          "aten.bmm.default": 2,
+          "aten.clone.default": 2,
+          "aten.index_select.default": 6,
+          "aten.linalg_cross.default": 1,
+          "aten.linalg_vector_norm.default": 3,
+          "aten.mul.Tensor": 1,
+          "aten.permute.default": 10,
+          "aten.select.int": 8,
+          "aten.stack.default": 1,
+          "aten.sub.Tensor": 4,
+          "aten.unsqueeze.default": 4,
+          "aten.view.default": 11
+        }
+      }
+    },
+    {
+      "num_envs": 32,
+      "dtype": "torch.float64",
+      "comparisons": [
+        {
+          "name": "point_error_m",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "axis_chord",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "pin_velocity_m_s",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "passive_velocity_rad_s",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "force_norm_n",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        }
+      ]
+    },
+    {
+      "num_envs": 512,
+      "dtype": "torch.float64",
+      "comparisons": [
+        {
+          "name": "point_error_m",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "axis_chord",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "pin_velocity_m_s",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "passive_velocity_rad_s",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        },
+        {
+          "name": "force_norm_n",
+          "bitwise_equal": true,
+          "max_abs_error": 0.0
+        }
+      ]
+    }
+  ]
+}

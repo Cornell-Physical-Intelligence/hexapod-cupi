@@ -1,0 +1,15 @@
+{
+  "schema": "hexapod.external_capture_cpu_validation.v1",
+  "tested_utc": "2026-09-06T22:56:19.976064+00:00",
+  "python": "3.12.12",
+  "tests": 12,
+  "pass": true,
+  "gpu_dispatch": false,
+  "remote_dispatch": false,
+  "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s artifacts/mkii_fourbar_2026-09-06/campaign_capture_followup -p test_*.py -v",
+  "source_files_sha256": {
+    "follow_campaign.py": "c25fdcffabbd62da383dbb3f2cc2a36b2e60b5b930d74a09b9583d5f60cde3c2",
+    "test_follow_campaign.py": "6699e506d2a49f083afc1be86f93a4409b34243acd16d1032a190304228c9ea5"
+  },
+  "scope": "CPU lineage, argument, state and mocked lifecycle checks; no Isaac Sim, encoder or checkpoint execution"
+}

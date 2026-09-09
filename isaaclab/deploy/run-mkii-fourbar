@@ -1,0 +1,1009 @@
+#!/usr/bin/env python3
+"""Bounded host supervisor for physical four-bar diagnosis, validation and PPO runs.
+
+Owns host FD9 flock and only its labelled immutable container ID. The
+container waits at a CPU-only admission barrier before starting Isaac Sim.
+No legacy checkpoint, source mirror overwrite, retry or systemd restart.
+"""
+from __future__ import annotations
+
+import argparse
+import ast
+import csv
+import fcntl
+import hashlib
+import json
+import math
+import os
+from pathlib import Path
+import re
+import shlex
+import signal
+import stat
+import struct
+import subprocess
+import sys
+import tarfile
+import time
+import uuid
+import zipfile
+
+LOCK = Path('/tmp/hexapod-isaac-gpu.lock')
+SHARED_GPU_LOCK = Path('/opt/wx/gpu.lock')
+LAB = Path('/home/orionh/IsaacLab')
+CONTAINER_SOURCE = '/workspace/hexapod'
+CONTAINER_OUTPUT = '/workspace/validation_artifacts'
+OWNER_LABEL = 'org.cornell.hexapod.fourbar-run'
+COORDINATION = Path('/home/orionh/SPARK_COMPUTE_COORDINATION.md')
+MIN_AVAILABLE_MEMORY_BYTES = 16 * 1024**3
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'tools'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'packages/hexapod_core'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'packages/hexapod_env'))
+from mkii_training_contract import identity, require_admission, require_checkpoint
+from hexapod_core.fourbar_v1 import ASSET_BUNDLES, validate_asset_bundle, validate_numerical_recipe_report
+from hexapod_env.tasks.mkii_fourbar_v1.environment_layout import validate_layout_runtime, validate_layout_evidence
+
+ENVIRONMENT_LAYOUTS = ('grid_2m_v1', 'coincident_flat_origin_v1')
+# Keep the reviewed shell spelling visible to the shared launcher contract;
+# shlex removes only grouping quotes, yielding exactly one subprocess argument.
+TELEMETRY_ARGUMENT = '--kit_args="--/exts/omni.kit.telemetry/skipDeferredStartup=true --/app/extensions/excluded/4=omni.kit.telemetry"'
+PRODUCERS = re.compile(r'nsva_dl[.]sh|validate_nsva[.]py|score_clip[.]py|validate_b51[.]py|nowcast_run[.]py|train_model_only_resume[.]py|evaluate_checkpoint[.]py|torch[^\n]*compile')
+SERVICES = ('hexapod-rl-training.service', 'hexapod-rl-training-stage2b-lateral.service', 'hexapod-rl-training-stage2c-stable-forward.service')
+DIAGNOSTIC_MOTION_STEPS = {'individuals': 18 * 2 * 50 + 100, 'groups': 3 * 2 * 100 + 100, 'lf_tibia': 2 * 100 + 100, 'standing': 0, 'validation_prefix': 15 * 2 * 50}
+DIAGNOSTIC_PLACEMENT_TOLERANCE_M = 1e-5
+DIAGNOSTIC_USD_PATHS = {
+    'revolute_v3': 'robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v3/hexapod_mkii_fourbar_v3.usda',
+    'planar_d6_v4': 'robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v4/hexapod_mkii_fourbar_v4.usda',
+    'physical_mimic_v5': 'robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/hexapod_mkii_fourbar_v5.usda',
+}
+
+
+class Blocked(RuntimeError):
+    pass
+
+
+def command(argv, *, cwd=None, timeout=20, check=True):
+    result = subprocess.run(argv, cwd=cwd, text=True, capture_output=True, timeout=timeout)
+    if check and result.returncode:
+        # Never dump arbitrary Docker/config stderr: it may contain expanded
+        # environment values. Full validator logs are collected separately.
+        raise Blocked(f'{argv[0]} {argv[1] if len(argv)>1 else ""} failed (exit {result.returncode})')
+    return result
+
+
+def atomic_json(path, value):
+    temporary = path.with_suffix(path.suffix + '.partial')
+    temporary.write_text(json.dumps(value, indent=2) + '\n')
+    temporary.replace(path)
+
+
+def parse_processes(text):
+    processes = {}
+    for line in text.splitlines():
+        fields = line.strip().split(None, 2)
+        if len(fields) == 3 and fields[0].isdigit() and fields[1].isdigit():
+            processes[int(fields[0])] = (int(fields[1]), fields[2])
+    return processes
+
+
+def descendants(processes, roots):
+    found = {pid for pid in roots if pid > 0}
+    while True:
+        expanded = found | {pid for pid, (parent, _) in processes.items() if parent in found}
+        if expanded == found:
+            return found
+        found = expanded
+
+
+def blocked_flock_waiter(pid, processes, *, proc_root=Path('/proc'), lock_path=SHARED_GPU_LOCK,
+                         flock_executable=Path('/usr/bin/flock')):
+    """Prove a real, childless flock is waiting on the shared GPU lock.
+
+    A command line mentioning a producer is not evidence it has started. This
+    exception requires matching kernel lock, executable and descriptor state;
+    missing/ambiguous/racing proc evidence leaves the producer blocked.
+    """
+    if pid not in processes or descendants(processes, [pid]) != {pid}:
+        return None
+    process = proc_root / str(pid)
+    try:
+        # The PID start time prevents combining evidence across PID reuse.
+        def start_time():
+            return int((process / 'stat').read_text().rsplit(')', 1)[1].split()[19])
+
+        start = start_time()
+        expected_exe, actual_exe = flock_executable.stat(), (process / 'exe').stat()
+        if (not stat.S_ISREG(actual_exe.st_mode)
+                or (actual_exe.st_dev, actual_exe.st_ino) != (expected_exe.st_dev, expected_exe.st_ino)):
+            return None
+        if (process / 'wchan').read_text().strip() != 'locks_lock_inode_wait':
+            return None
+        lock_stat = lock_path.stat()
+        if not stat.S_ISREG(lock_stat.st_mode):
+            return None
+        key = (os.major(lock_stat.st_dev), os.minor(lock_stat.st_dev), lock_stat.st_ino)
+        descriptors = list((process / 'fd').iterdir())
+        if not any((item.stat().st_dev, item.stat().st_ino) == (lock_stat.st_dev, lock_stat.st_ino)
+                   for item in descriptors if item.name.isdigit()):
+            return None
+        rows = []
+        pattern = re.compile(r'^(\d+):\s+(?:(->)\s+)?FLOCK\s+ADVISORY\s+WRITE\s+'
+                             r'(\d+)\s+([0-9a-fA-F]+):([0-9a-fA-F]+):(\d+)\s+0\s+EOF$')
+        for line in (proc_root / 'locks').read_text().splitlines():
+            match = pattern.fullmatch(line.strip())
+            if match:
+                identifier, arrow, owner, major, minor, inode = match.groups()
+                rows.append((identifier, bool(arrow), int(owner), (int(major, 16), int(minor, 16), int(inode))))
+        waits = [row for row in rows if row[1] and row[2] == pid and row[3] == key]
+        if len(waits) != 1:
+            return None
+        holders = [row for row in rows if row[0] == waits[0][0] and not row[1] and row[3] == key and row[2] != pid]
+        if len(holders) != 1:
+            return None
+        tasks = list((process / 'task').iterdir())
+        if not tasks or any(not item.name.isdigit() or (item / 'children').read_text().strip() for item in tasks):
+            return None
+        if start_time() != start or (process / 'wchan').read_text().strip() != 'locks_lock_inode_wait':
+            return None
+        return {'pid': pid, 'executable': str(flock_executable), 'lock_path': str(lock_path),
+                'lock_inode': lock_stat.st_ino, 'lock_device': list(key[:2]),
+                'holder_pid': holders[0][2], 'wait_channel': 'locks_lock_inode_wait'}
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def blocking_producers(processes, owned_pids, *, waiter_evidence=None):
+    readers = {'ps', 'grep', 'rg', 'tail', 'cat', 'sed', 'head'}
+    blocked = []
+    for pid, (_, argv) in processes.items():
+        if pid in owned_pids or Path(argv.split(None, 1)[0]).name in readers or not PRODUCERS.search(argv):
+            continue
+        evidence = blocked_flock_waiter(pid, processes)
+        if evidence is None:
+            blocked.append(pid)
+        elif waiter_evidence is not None:
+            waiter_evidence.append(evidence)
+    return sorted(blocked)
+
+
+def ancestors(processes, pid):
+    found = set()
+    while pid in processes and pid not in found:
+        found.add(pid); pid = processes[pid][0]
+    return found
+
+
+def container_gpu_capable(description):
+    return description['runtime'] == 'nvidia' or description.get('privileged', False) or any('nvidia' in item.get('PathOnHost', '') or '/dev/dri' in item.get('PathOnHost', '') for item in (description.get('devices') or [])) or any(
+        request.get('Driver') == 'nvidia' or 'gpu' in sum(request.get('Capabilities', []), [])
+        for request in (description['device_requests'] or [])
+    )
+
+
+def inspect_container(identifier):
+    result = command(['docker', 'inspect', '--type', 'container', '--format',
+        '{{json .Id}}|{{json .Name}}|{{json .State.Running}}|{{json .State.Pid}}|{{json .State.ExitCode}}|{{json .Config.Labels}}', identifier], check=False)
+    if result.returncode:
+        if 'No such object:' in result.stderr or 'No such container:' in result.stderr:
+            return None
+        raise Blocked('Cannot inspect container identity/state through Docker')
+    fields = result.stdout.strip().split('|')
+    if len(fields) != 6:
+        raise Blocked('Container identity inspection returned malformed fields')
+    identity = dict(zip(('id', 'name', 'running', 'pid', 'exit_code', 'labels'), map(json.loads, fields)))
+    if not re.fullmatch(r'[0-9a-f]{64}', identity['id']):
+        raise Blocked('Container ID is not an immutable full Docker ID')
+    return identity
+
+
+def inspect_foreign_container_gpu_config(identifier):
+    """Inspect one listed immutable foreign ID; tolerate only proven removal."""
+    if not re.fullmatch(r'[0-9a-f]{64}', identifier):
+        raise Blocked('Foreign container inventory requires immutable full Docker IDs')
+    result = command(['docker', 'inspect', '--type', 'container', '--format',
+        '{"runtime":{{json .HostConfig.Runtime}},"device_requests":{{json .HostConfig.DeviceRequests}},"devices":{{json .HostConfig.Devices}},"privileged":{{json .HostConfig.Privileged}}}',
+        identifier], check=False)
+    if result.returncode:
+        missing = (r'(?:Error: |Error response from daemon: )?No such (?:object|container): '
+                   + re.escape(identifier) + r'(?:\r?\n)?')
+        if result.returncode == 1 and result.stdout == '' and re.fullmatch(missing, result.stderr):
+            return None
+        # Do not expose arbitrary daemon/config stderr or reinterpret failures.
+        raise Blocked('Cannot inspect foreign container GPU configuration through Docker')
+    try:
+        description = json.loads(result.stdout, parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
+        if (type(description) is not dict
+                or set(description) != {'runtime', 'device_requests', 'devices', 'privileged'}
+                or type(description['runtime']) is not str or type(description['privileged']) is not bool):
+            raise ValueError('Invalid container configuration fields')
+        devices, requests = description['devices'], description['device_requests']
+        if devices is not None and (type(devices) is not list or any(
+                type(device) is not dict or type(device.get('PathOnHost')) is not str for device in devices)):
+            raise ValueError('Invalid container device mappings')
+        if requests is not None and (type(requests) is not list or any(
+                type(request) is not dict or type(request.get('Driver')) is not str
+                or type(request.get('Capabilities')) is not list
+                or any(type(capability) is not list or any(type(value) is not str for value in capability)
+                       for capability in request['Capabilities']) for request in requests)):
+            raise ValueError('Invalid container device requests')
+    except (TypeError, ValueError, KeyError):
+        raise Blocked('Foreign container GPU configuration is malformed') from None
+    return description
+
+
+def check_identity(identity, name, owner):
+    return bool(identity and identity['name'] == '/' + name and (identity['labels'] or {}).get(OWNER_LABEL) == owner)
+
+
+def available_memory_bytes(meminfo=Path('/proc/meminfo')):
+    matches = re.findall(r'^MemAvailable:\s+(\d+)\s+kB\s*$', meminfo.read_text(), re.MULTILINE)
+    if len(matches) != 1:
+        raise Blocked('Cannot establish host MemAvailable from /proc/meminfo')
+    available = int(matches[0]) * 1024
+    if available < MIN_AVAILABLE_MEMORY_BYTES:
+        raise Blocked(f'Host MemAvailable is below the required 16 GiB: {available} bytes')
+    return available
+
+
+def require_unchanged_source(source, contract, stage):
+    if identity(source) != contract:
+        raise Blocked(f'Isolated source/asset identity changed {stage}; admission no longer applies')
+    return True
+
+
+def resource_gate(*, owned_container=None, allow_owned_gpu=False):
+    """Read-only gate; return compact evidence without arbitrary process argv."""
+    memory = available_memory_bytes()
+    processes = parse_processes(command(['ps', '-eo', 'pid=,ppid=,args=']).stdout)
+    owned = descendants(processes, [os.getpid()] + ([owned_container['pid']] if owned_container else []))
+    waiters = []
+    producers = blocking_producers(processes, owned | ancestors(processes, os.getpid()), waiter_evidence=waiters)
+    if producers:
+        raise Blocked(f'Unrelated GPU producer processes remain: PIDs {producers}')
+    for service in SERVICES:
+        result = command(['systemctl', 'is-active', service], check=False)
+        # systemd: 3 inactive, 4 unknown unit. Neither may be running.
+        if result.returncode not in (3, 4) or result.stdout.strip() in ('active', 'activating', 'reloading', 'deactivating'):
+            raise Blocked(f'Cannot establish inactive legacy service: {service}')
+    containers = command(['docker', 'ps', '--no-trunc', '--format', '{{.ID}}']).stdout.split()
+    cpu_containers, disappeared_containers = [], []
+    for identifier in containers:
+        if owned_container and identifier == owned_container['id']:
+            continue
+        description = inspect_foreign_container_gpu_config(identifier)
+        if description is None:
+            disappeared_containers.append(identifier)
+            continue
+        if container_gpu_capable(description):
+            raise Blocked(f'Unrelated GPU-capable container remains: {identifier}')
+        cpu_containers.append(identifier)
+    gpu_rows = list(csv.reader(command(['nvidia-smi', '--query-compute-apps=pid,process_name', '--format=csv,noheader,nounits']).stdout.splitlines()))
+    gpu_pids = []
+    for row in gpu_rows:
+        if not row or not row[0].strip():
+            continue
+        if not row[0].strip().isdigit():
+            raise Blocked('Cannot parse GPU process inventory')
+        pid = int(row[0].strip()); gpu_pids.append(pid)
+        if allow_owned_gpu and pid not in owned:
+            # App startup can spawn a worker between ps and nvidia-smi. Refresh
+            # once before treating a newly created descendant as unrelated.
+            fresh = parse_processes(command(['ps', '-eo', 'pid=,ppid=,args=']).stdout)
+            owned = descendants(fresh, [os.getpid(), owned_container['pid']])
+        if not (allow_owned_gpu and pid in owned):
+            raise Blocked(f'Unrelated or premature GPU process: PID {pid}')
+    utilization = command(['nvidia-smi', '--query-gpu=utilization.gpu', '--format=csv,noheader,nounits']).stdout.splitlines()
+    if not utilization or any(not value.strip().isdigit() for value in utilization):
+        raise Blocked('Cannot establish GPU utilization')
+    if not allow_owned_gpu and any(int(value.strip()) != 0 for value in utilization):
+        raise Blocked('GPU utilization is nonzero before admission')
+    return {'time_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'mem_available_bytes': memory,
+            'minimum_mem_available_bytes': MIN_AVAILABLE_MEMORY_BYTES, 'gpu_pids': gpu_pids,
+            'gpu_utilization_percent': [int(value.strip()) for value in utilization],
+            'unrelated_cpu_container_ids': cpu_containers, 'producer_pids': producers,
+            'disappeared_foreign_container_ids': disappeared_containers,
+            'blocked_shared_lock_waiters': waiters}
+
+
+def snapshot_source(source, manifest):
+    """Hash regular source files; neither secrets outside the source nor symlink escapes."""
+    source = source.resolve()
+    records = []
+    for path in sorted(source.rglob('*')):
+        if '.git' in path.relative_to(source).parts:
+            continue
+        if not path.is_file():
+            continue
+        if not path.resolve().is_relative_to(source):
+            raise Blocked(f'Source symlink escapes isolated root: {path.relative_to(source)}')
+        if any(character in str(path.relative_to(source)) for character in ('\n', '\r')):
+            raise Blocked('Source paths with line breaks cannot be represented in SHA256SUMS')
+        digest = hashlib.sha256()
+        with path.open('rb') as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b''):
+                digest.update(block)
+        records.append(f'{digest.hexdigest()}  {path.relative_to(source)}')
+    manifest.write_text('\n'.join(records) + '\n')
+    return {'file': manifest.name, 'files': len(records), 'sha256': hashlib.sha256(manifest.read_bytes()).hexdigest()}
+
+
+def archive_source(source, manifest, archive, *, expected_manifest_sha256):
+    """Preserve exactly the manifest's bytes as relative regular tar entries.
+
+    Hash the same stream consumed by tar, so a file changed after the snapshot
+    cannot produce an apparently valid archive. Streaming bounds memory usage.
+    """
+    source = source.resolve()
+    manifest_bytes = manifest.read_bytes()
+    if hashlib.sha256(manifest_bytes).hexdigest() != expected_manifest_sha256:
+        raise Blocked('Source manifest changed before archival')
+    entries, seen = [], set()
+    for row in manifest_bytes.decode('utf-8').splitlines():
+        digest, separator, relative = row.partition('  ')
+        path = Path(relative)
+        if (not separator or not re.fullmatch(r'[0-9a-f]{64}', digest) or not relative
+                or path.is_absolute() or '..' in path.parts or '.git' in path.parts
+                or path.as_posix() != relative or relative in seen):
+            raise Blocked('Source manifest contains an invalid or duplicate relative file')
+        seen.add(relative)
+        entries.append((digest, path))
+    if not entries:
+        raise Blocked('Source manifest has no files to preserve')
+    temporary = archive.with_suffix(archive.suffix + '.partial')
+    if archive.exists() or archive.is_symlink():
+        raise Blocked('Refusing to overwrite an existing source archive')
+
+    class HashingReader:
+        def __init__(self, stream):
+            self.stream, self.digest = stream, hashlib.sha256()
+
+        def read(self, size):
+            chunk = self.stream.read(size)
+            self.digest.update(chunk)
+            return chunk
+
+    temporary_created = False
+    try:
+        with temporary.open('xb') as output:
+            temporary_created = True
+            with tarfile.open(fileobj=output, mode='w:gz', compresslevel=3) as bundle:
+                for expected, relative in entries:
+                    path = source / relative
+                    if not path.resolve().is_relative_to(source):
+                        raise Blocked(f'Source symlink escapes isolated root during archival: {relative}')
+                    # A file replaced by a FIFO must fail instead of hanging
+                    # the supervisor before its fstat regular-file check.
+                    with os.fdopen(os.open(path, os.O_RDONLY | os.O_NONBLOCK), 'rb') as stream:
+                        before = os.fstat(stream.fileno())
+                        if not stat.S_ISREG(before.st_mode):
+                            raise Blocked(f'Source archive entry is not a regular file: {relative}')
+                        info = tarfile.TarInfo(relative.as_posix())
+                        info.size, info.mode, info.mtime = before.st_size, stat.S_IMODE(before.st_mode), before.st_mtime
+                        reader = HashingReader(stream)
+                        bundle.addfile(info, reader)
+                        after = os.fstat(stream.fileno())
+                        if (reader.digest.hexdigest() != expected
+                                or (before.st_size, before.st_mtime_ns, before.st_ctime_ns)
+                                != (after.st_size, after.st_mtime_ns, after.st_ctime_ns)):
+                            raise Blocked(f'Source file changed between snapshot and archival: {relative}')
+        digest = hashlib.sha256()
+        with temporary.open('rb') as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b''):
+                digest.update(block)
+        # Atomic publication refuses any destination created concurrently.
+        os.link(temporary, archive)
+        return {'file': archive.name, 'files': len(entries), 'sha256': digest.hexdigest(),
+                'compressed_bytes': archive.stat().st_size, 'manifest_sha256': expected_manifest_sha256,
+                'format': 'tar.gz; relative regular files; each stream verified against SHA256SUMS'}
+    finally:
+        if temporary_created:
+            temporary.unlink(missing_ok=True)
+
+
+def validate_diagnostic_traces(directory, result, *, num_envs, samples, first_sample=0,
+                               records_field='trace_files', file_prefix='trace', index_field='first_physics_sample'):
+    """Check archived trace bytes and NPY shape without a host NumPy dependency."""
+    records = result.get(records_field)
+    if not isinstance(records, list) or not records:
+        raise Blocked('Diagnostic trace files are missing')
+    offset, width, seen = first_sample, None, set()
+    for record in records:
+        if not isinstance(record, dict):
+            raise Blocked('Diagnostic trace record is not an object')
+        filename, shape = record.get('file'), record.get('shape')
+        if not isinstance(filename, str) or not re.fullmatch(re.escape(file_prefix)+r'_[0-9]+\.npz', filename) or filename in seen:
+            raise Blocked('Diagnostic trace path is invalid or duplicated')
+        seen.add(filename)
+        path = directory / filename
+        if path.is_symlink() or not path.is_file():
+            raise Blocked('Diagnostic trace must be an existing regular file')
+        if (not isinstance(shape, list) or len(shape) != 3 or any(type(v) is not int or v <= 0 for v in shape)
+                or shape[1] != num_envs or type(record.get(index_field)) is not int
+                or record[index_field] != offset or (width is not None and width != shape[2])):
+            raise Blocked('Diagnostic trace shape or sample sequence is inconsistent')
+        checksum = hashlib.sha256()
+        with path.open('rb') as stream:
+            for block in iter(lambda: stream.read(1024*1024), b''):
+                checksum.update(block)
+        if record.get('sha256') != checksum.hexdigest():
+            raise Blocked('Diagnostic trace hash mismatch')
+        try:
+            with zipfile.ZipFile(path) as archive:
+                info = archive.getinfo('values.npy')
+                with archive.open(info) as stream:
+                    prefix = stream.read(8)
+                    if prefix[:6] != b'\x93NUMPY' or prefix[6:] not in (b'\x01\x00', b'\x02\x00', b'\x03\x00'):
+                        raise ValueError('Invalid NPY header')
+                    size = 2 if prefix[6] == 1 else 4
+                    header_size = struct.unpack('<H' if size == 2 else '<I', stream.read(size))[0]
+                    if header_size > 65536:
+                        raise ValueError('Oversized NPY header')
+                    header = ast.literal_eval(stream.read(header_size).decode('utf-8').strip())
+                    if (not isinstance(header, dict) or header.get('shape') != tuple(shape)
+                            or header.get('descr') not in ('<f4', '<f8') or header.get('fortran_order') is not False):
+                        raise ValueError('Unexpected diagnostic array layout')
+                    expected_bytes = 8 + size + header_size + shape[0]*shape[1]*shape[2]*int(header['descr'][-1])
+                    if info.file_size != expected_bytes:
+                        raise ValueError('Diagnostic array payload length mismatch')
+        except (OSError, KeyError, ValueError, SyntaxError, struct.error, zipfile.BadZipFile) as exc:
+            raise Blocked(f'Diagnostic trace array cannot be verified: {filename}') from exc
+        width = shape[2]
+        offset += shape[0]
+    if offset != first_sample + samples:
+        raise Blocked('Diagnostic trace files do not cover all physics samples')
+
+
+def validate_prefix_evidence(result, *, args):
+    from hexapod_core.fourbar_v1 import ACTIVE_JOINT_NAMES
+    if (args.num_envs != 32 or args.steps != 1000 or args.diagnostic_usd != 'physical_mimic_v5'
+            or tuple(getattr(args, 'diagnostic_xy_offset', (0., 0.))) != (0., 0.)):
+        raise Blocked('Validation-prefix replay requires the original 32-environment workload')
+    decimation = result['numerical_recipe']['decimation']
+    expected = {'mode': 'validation_prefix_sparse_v1', 'control_interval_half_open': [2200, 2500],
+                'physics_interval_half_open': [2200*decimation, 2500*decimation],
+                'physical_metrics': 'all physics substeps', 'control_telemetry': 'every control boundary',
+                'environment_indices': list(range(32))}
+    if result.get('trace_coverage') != expected or result.get('episode_length_s') != (1000+2401)*.02+1.:
+        raise Blocked('Validation-prefix coverage or episode horizon differs from the full validator')
+    if result.get('active_motor_names') != list(ACTIVE_JOINT_NAMES):
+        raise Blocked('Validation-prefix motor order differs from the full validator')
+    if result.get('reset_root_positions_m') != result.get('placement', {}).get('initial_reset_root_positions_m'):
+        raise Blocked('Validation-prefix environment placement evidence disagrees')
+    phases = result.get('individual_phase_means')
+    if not isinstance(phases, list) or len(phases) != 30:
+        raise Blocked('Validation-prefix per-environment phase responses are incomplete')
+    for index, row in enumerate(phases):
+        expected_phase = {'motor': ACTIVE_JOINT_NAMES[index//2], 'offset_rad': .04 if index % 2 == 0 else -.04,
+                          'first_control_step': 1000+index*50, 'control_steps': 50,
+                          'mean_control_indices': [45, 46, 47, 48, 49]}
+        if not isinstance(row, dict) or any(row.get(key) != value for key, value in expected_phase.items()):
+            raise Blocked('Validation-prefix individual phase history changed')
+        values = row.get('mean_joint_position_rad')
+        if (not isinstance(values, list) or len(values) != 32
+                or row.get('mean_dtype') not in ('float32', 'float64')
+                or any(type(value) not in (int, float) or not math.isfinite(value) for value in values)):
+            raise Blocked('Validation-prefix response contains invalid environment rows')
+        if row['mean_dtype'] == 'float32':
+            try:
+                if any(struct.unpack('<f', struct.pack('<f', value))[0] != value for value in values):
+                    raise ValueError('Mean is not an exact float32 readback')
+            except (ValueError, OverflowError, struct.error) as exc:
+                raise Blocked('Validation-prefix response precision is invalid') from exc
+    responses = result.get('individual_motor_response_by_env')
+    if not isinstance(responses, dict) or set(responses) != set(ACTIVE_JOINT_NAMES[:15]):
+        raise Blocked('Validation-prefix motor response map is incomplete')
+    for index, name in enumerate(ACTIVE_JOINT_NAMES[:15]):
+        dtype = phases[2*index]['mean_dtype']
+        if phases[2*index+1]['mean_dtype'] != dtype:
+            raise Blocked('Validation-prefix response precision changed between signs')
+        differences = [a-b for a, b in zip(phases[2*index]['mean_joint_position_rad'], phases[2*index+1]['mean_joint_position_rad'])]
+        if dtype == 'float32':
+            try:
+                differences = [struct.unpack('<f', struct.pack('<f', value))[0] for value in differences]
+            except (OverflowError, struct.error) as exc:
+                raise Blocked('Validation-prefix response difference overflowed') from exc
+        if not all(math.isfinite(value) for value in differences):
+            raise Blocked('Validation-prefix response difference is nonfinite')
+        expected_response = {'positive_minus_negative_rad': differences, 'minimum_rad': min(differences),
+                             'worst_env_index': differences.index(min(differences))}
+        if responses[name] != expected_response:
+            raise Blocked('Validation-prefix response reduction disagrees with per-environment means')
+
+
+def bounded_xy_coordinate(value):
+    value = float(value)
+    if not math.isfinite(value) or not -20. <= value <= 20.:
+        raise argparse.ArgumentTypeError('Diagnostic XY coordinates must be finite and within [-20,20] metres')
+    return value
+
+
+def validate_diagnostic_placement(result, *, xy_offset, num_envs):
+    """Independently check the requested translation and reset readback using stdlib."""
+    expected_offset = list(xy_offset)
+    placement = result.get('placement')
+    offsets = [result.get('diagnostic_xy_offset_m')]
+    if isinstance(placement, dict):
+        offsets.append(placement.get('requested_xy_offset_m'))
+    if any(not isinstance(values, list) or len(values) != 2
+           or any(type(value) not in (int, float) or not math.isfinite(value) or abs(value) > 20.
+                  for value in values) for values in offsets):
+        raise Blocked('Diagnostic XY offset must contain two finite bounded numeric coordinates')
+    if (not isinstance(placement, dict) or placement.get('translation_verified') is not True
+            or placement.get('reset_pose_verified') is not True
+            or placement.get('position_tolerance_m') != DIAGNOSTIC_PLACEMENT_TOLERANCE_M
+            or placement.get('requested_xy_offset_m') != expected_offset
+            or result.get('diagnostic_xy_offset_m') != expected_offset):
+        raise Blocked('Diagnostic placement is missing, unverified or differs from requested XY offset')
+    fields = ('original_terrain_origins_m', 'actual_terrain_origins_m',
+              'default_root_positions_m', 'initial_reset_root_positions_m')
+    for name in fields:
+        rows = placement.get(name)
+        if (not isinstance(rows, list) or len(rows) != num_envs
+                or any(not isinstance(row, list) or len(row) != 3
+                    or any(type(value) not in (int, float) or not math.isfinite(value) for value in row) for row in rows)):
+            raise Blocked(f'Diagnostic placement has invalid coordinates: {name}')
+    for original, actual, default, root in zip(*(placement[name] for name in fields)):
+        if actual[2] != original[2]:
+            raise Blocked('Diagnostic translation changed terrain Z')
+        expected = [original[0]+expected_offset[0], original[1]+expected_offset[1], original[2]]
+        if (any(abs(a-b) > DIAGNOSTIC_PLACEMENT_TOLERANCE_M for a, b in zip(actual, expected))
+                or any(abs(root[i]-(default[i]+actual[i])) > DIAGNOSTIC_PLACEMENT_TOLERANCE_M for i in range(3))):
+            raise Blocked('Diagnostic actual origins or reset root positions differ from requested placement')
+
+
+def require_requested_asset(result, asset_model, contract):
+    """Bind the explicit host selection to executed runtime bundle bytes."""
+    runtime = result.get('runtime_manifest')
+    if not isinstance(runtime, dict):
+        raise Blocked('Requested asset requires an executed runtime manifest')
+    try:
+        bundle = validate_asset_bundle(runtime.get('asset_bundle'))
+    except ValueError as exc:
+        raise Blocked(f'Requested asset has invalid runtime bundle: {exc}') from exc
+    if (bundle['model_id'] != asset_model or runtime.get('model_id') != asset_model
+            or runtime.get('usd_root_sha256') != bundle['usd_root_sha256']
+            or runtime.get('usd_path_relative') != bundle['usd_path_relative']
+            or runtime.get('closure_constraint_variant') != bundle['closure_constraint_variant']
+            or runtime.get('kinematics_sha256') != bundle['kinematics_sha256']
+            or any(contract.get('files', {}).get(path) != checksum for path, checksum in bundle['bundle_files_sha256'].items())):
+        raise Blocked('Executed runtime asset differs from the requested model or source identity')
+    return bundle
+
+
+def require_requested_layout(result, requested_layout):
+    """Reject a run/admission using a different or incomplete layout recipe."""
+    if requested_layout not in ENVIRONMENT_LAYOUTS:
+        raise Blocked('Unknown requested environment layout')
+    try:
+        validate_layout_runtime(result.get('runtime_manifest', {}), requested_layout)
+    except (TypeError, ValueError) as exc:
+        raise Blocked(f'Executed environment layout differs from the requested layout: {exc}') from exc
+
+
+def validate_written_report(path, *, args, contract):
+    if not path.is_file():
+        raise Blocked('Process exited without its mandatory final report')
+    try:
+        result = json.loads(path.read_text(), parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
+    except ValueError as exc:
+        raise Blocked('Final report is not valid finite JSON') from exc
+    if not isinstance(result, dict):
+        raise Blocked('Final report must be a JSON object')
+    if result.get('errors') != [] or result.get('contract') != contract:
+        raise Blocked('Final report failed or has different source/asset lineage')
+    if result.get('task_id') != contract['task_id']:
+        raise Blocked('Final report task mismatch')
+    if args.mode == 'diagnose':
+        # A complete trace is useful evidence even when the physical model
+        # fails its gate. It can never be promoted to validation/admission.
+        if (result.get('schema') != 'hexapod.fourbar_diagnostic.v1'
+                or result.get('mode') != 'diagnose'
+                or result.get('pass') is not False
+                or result.get('diagnostic_complete') is not True
+                or result.get('simulation_training_admission') is not False
+                or result.get('hardware_admission') is not False
+                or result.get('diagnostic_motion') != args.diagnostic_motion
+                or result.get('diagnostic_usd') != args.diagnostic_usd):
+            raise Blocked('Diagnostic report is incomplete or claims validation/admission')
+        usd_path = DIAGNOSTIC_USD_PATHS[args.diagnostic_usd]
+        usd_hash = contract.get('files', {}).get(usd_path)
+        if (not isinstance(usd_hash, str) or not re.fullmatch(r'[0-9a-f]{64}', usd_hash)
+                or result.get('usd_path_relative') != usd_path or result.get('usd_sha256') != usd_hash):
+            raise Blocked('Diagnostic selected USD is missing or differs from source identity')
+        try:
+            validate_numerical_recipe_report(result, args.solver_multiplier)
+        except ValueError as exc:
+            raise Blocked(f'Diagnostic numerical recipe mismatch: {exc}') from exc
+        expected = {'steps_requested': args.steps, 'steps_completed': args.steps,
+                    'num_envs': args.num_envs, 'solver_multiplier': args.solver_multiplier,
+                    'driven_steps_requested': DIAGNOSTIC_MOTION_STEPS[args.diagnostic_motion],
+                    'driven_steps_completed': DIAGNOSTIC_MOTION_STEPS[args.diagnostic_motion]}
+        for field, value in expected.items():
+            if type(result.get(field)) is not int or result[field] != value:
+                raise Blocked(f'Diagnostic did not complete requested workload: {field}')
+        expected_substeps = (args.steps + expected['driven_steps_requested']) * result['numerical_recipe']['decimation']
+        prefix = args.diagnostic_motion == 'validation_prefix'
+        for field in (('physics_substeps', 'physics_samples_observed', 'force_writes') if prefix
+                      else ('physics_substeps', 'trace_samples', 'force_writes')):
+            if type(result.get(field)) is not int or result[field] != expected_substeps:
+                raise Blocked(f'Diagnostic did not capture every requested physics substep: {field}')
+        if type(result.get('driven_steps')) is not int or result['driven_steps'] != expected['driven_steps_completed']:
+            raise Blocked('Diagnostic driven-step counters disagree')
+        validate_diagnostic_placement(result, xy_offset=getattr(args, 'diagnostic_xy_offset', (0., 0.)), num_envs=args.num_envs)
+        if prefix:
+            validate_prefix_evidence(result, args=args)
+            trace_samples = 300 * result['numerical_recipe']['decimation']
+            if type(result.get('trace_samples')) is not int or result['trace_samples'] != trace_samples:
+                raise Blocked('Validation-prefix detailed trace window is incomplete')
+            if type(result.get('control_trace_samples')) is not int or result['control_trace_samples'] != 2500:
+                raise Blocked('Validation-prefix control telemetry is incomplete')
+            validate_diagnostic_traces(path.parent, result, num_envs=32, samples=trace_samples,
+                                      first_sample=2200*result['numerical_recipe']['decimation'])
+            validate_diagnostic_traces(path.parent, result, num_envs=32, samples=2500,
+                                      records_field='control_trace_files', file_prefix='control', index_field='first_control_step')
+        else:
+            validate_diagnostic_traces(path.parent, result, num_envs=args.num_envs, samples=expected_substeps)
+        return {key: result[key] for key in ('pass', 'mode', 'diagnostic_complete',
+                'simulation_training_admission', 'hardware_admission', 'physics_substeps')}
+    if (result.get('schema') == 'hexapod.fourbar_diagnostic.v1'
+            or result.get('mode') == 'diagnose' or 'diagnostic_complete' in result
+            or result.get('pass') is not True):
+        raise Blocked('Final report failed or is diagnostic evidence rather than validation/training')
+    if getattr(args, 'asset_model', None) is not None:
+        require_requested_asset(result, args.asset_model, contract)
+    require_requested_layout(result, getattr(args, 'environment_layout', 'grid_2m_v1'))
+    if getattr(args, 'environment_layout', 'grid_2m_v1') == 'coincident_flat_origin_v1':
+        try:
+            validate_layout_evidence(result.get('environment_layout_evidence'), args.num_envs)
+        except (TypeError, ValueError) as exc:
+            raise Blocked(f'Incomplete executed coincident layout evidence: {exc}') from exc
+    if args.mode == 'validate':
+        try:
+            validate_numerical_recipe_report(result, args.solver_multiplier)
+        except ValueError as exc:
+            raise Blocked(f'Validation numerical recipe mismatch: {exc}') from exc
+        if (result.get('steps_requested') != args.steps or result.get('steps_completed') != args.steps
+                or result.get('num_envs') != args.num_envs
+                or result.get('solver_multiplier') != args.solver_multiplier):
+            raise Blocked('Validation did not complete requested workload')
+    else:
+        completed = result.get('iterations_completed')
+        if (type(completed) is not int or not 1 <= completed <= args.iterations
+                or result.get('iterations_requested') != args.iterations
+                or result.get('num_envs') != args.num_envs
+                or result.get('checkpoint_verified') is not True
+                or result.get('checkpoint_roundtrip_pass') is not True
+                or (completed != args.iterations and result.get('paused') is not True)):
+            raise Blocked('Training did not complete or explicitly pause the requested workload with a verified checkpoint')
+        checkpoint = require_checkpoint(path.parent / 'checkpoint.pt', contract)
+        if (result.get('checkpoint_sha256') != checkpoint['checkpoint_sha256']
+                or result.get('next_iteration') != checkpoint['next_iteration']):
+            raise Blocked('Final checkpoint bytes/iteration differ from the training report')
+    return {key: result.get(key) for key in ('pass', 'mode', 'simulation_training_admission', 'iterations_completed', 'paused')}
+
+
+def read_coordination_control():
+    """Read one canonical control line; retain prose bytes only as audit evidence."""
+    snapshot = {'protocol': 'canonical_share_status_v2', 'status': 'INVALID',
+                'semantic_token': None, 'raw_note_sha256': None}
+    try:
+        content = COORDINATION.read_bytes()
+    except OSError:
+        return dict(snapshot, error='Shared coordination file could not be read')
+    snapshot['raw_note_sha256'] = hashlib.sha256(content).hexdigest()
+    try:
+        text = content.decode('utf-8')
+    except UnicodeError:
+        return dict(snapshot, error='Shared coordination file is not valid UTF-8')
+    # Detect malformed/indented/case-changed control lines as well as duplicates;
+    # a valid NONE elsewhere must not hide an ambiguous control assignment.
+    controls = [line for line in text.splitlines()
+                if line.lstrip().upper().startswith('HEXAPOD_SHARE_STATUS')]
+    if len(controls) != 1 or re.fullmatch(r'HEXAPOD_SHARE_STATUS=(NONE|REQUESTED)', controls[0]) is None:
+        return dict(snapshot, error='Shared coordination file requires one canonical NONE or REQUESTED control line')
+    snapshot['semantic_token'] = controls[0]
+    snapshot['status'] = controls[0].split('=', 1)[1]
+    return snapshot
+
+
+def require_coordination_none(snapshot):
+    if snapshot['status'] != 'NONE':
+        raise Blocked(snapshot.get('error', 'Shared coordination file explicitly requests sharing'))
+
+
+def coordination_snapshot():
+    """Compatibility initial check; returned raw hash is evidence, not control."""
+    snapshot = read_coordination_control()
+    require_coordination_none(snapshot)
+    return snapshot['raw_note_sha256']
+
+
+def poll_coordination(report, output, mode, pause_deadline, now):
+    """Latch explicit/invalid control while preserving the bounded checkpoint grace."""
+    snapshot = read_coordination_control()
+    report['coordination_latest'] = snapshot
+    if snapshot['status'] != 'NONE' and pause_deadline is None:
+        reason = ('explicit sharing request' if snapshot['status'] == 'REQUESTED'
+                  else 'invalid sharing control')
+        (output / 'stop_requested').write_text(f'{reason}; checkpoint and pause.\n')
+        pause_deadline = now + 120
+        report['pause_requested'] = reason
+        report['coordination_pause_trigger'] = snapshot
+        report['checkpoint_pause_grace_seconds'] = 120
+    # An observed request remains latched even if another writer restores NONE.
+    # Only the next separately admitted run may consume the cleared request.
+    if pause_deadline is not None and (mode != 'train' or now >= pause_deadline):
+        raise Blocked('Coordination handoff requested; owned job yielded compute')
+    return pause_deadline
+
+
+def compose_argv(source, output, name, owner, args):
+    barrier = 'while [ ! -f /workspace/validation_artifacts/admitted ]; do sleep 0.1; done; exec "$@"'
+    mounts = []
+    extra = []
+    if args.mode == 'train':
+        mounts += ['-v', f'{args.admission.resolve()}:/workspace/admission.json:ro']
+        extra += ['--admission', '/workspace/admission.json', '--iterations', str(args.iterations)]
+        if args.checkpoint:
+            mounts += ['-v', f'{args.checkpoint.resolve()}:/workspace/resume.pt:ro',
+                       '-v', f'{args.checkpoint.resolve()}.json:/workspace/resume.pt.json:ro']
+            extra += ['--checkpoint', '/workspace/resume.pt']
+    else:
+        extra += ['--steps', str(args.steps), '--solver-multiplier', str(args.solver_multiplier)]
+        if args.mode == 'diagnose':
+            extra += ['--diagnostic-motion', args.diagnostic_motion, '--diagnostic-usd', args.diagnostic_usd]
+            extra += ['--diagnostic-xy-offset', *[str(value) for value in getattr(args, 'diagnostic_xy_offset', (0., 0.))]]
+    script = {'train': 'train_mkii_fourbar.py', 'validate': 'validate_mkii_fourbar.py',
+              'diagnose': 'diagnose_mkii_fourbar.py'}[args.mode]
+    usd_relative = (DIAGNOSTIC_USD_PATHS[args.diagnostic_usd] if args.mode == 'diagnose'
+                    else ASSET_BUNDLES[getattr(args, 'asset_model', None) or 'mkii_fourbar_v3']['usd_path_relative'])
+    usd_environment = [value for key in ('HEXAPOD_USD_PATH', 'HEXAPOD_MKII_FOURBAR_USD_PATH')
+                       for value in ('-e', f'{key}={CONTAINER_SOURCE}/{usd_relative}')]
+    layout_environment = ['-e', 'HEXAPOD_MKII_ENVIRONMENT_LAYOUT=' +
+                          getattr(args, 'environment_layout', 'grid_2m_v1')]
+    return ['docker', 'compose', '--env-file', 'docker/.env.base', '-f', 'docker/docker-compose.yaml', '--profile', 'base',
+        'run', '--no-deps', '-d', '-T', '--name', name, '--label', f'{OWNER_LABEL}={owner}',
+        '-w', CONTAINER_OUTPUT, '-e', f'PYTHONPATH={CONTAINER_SOURCE}/isaaclab', '-e', 'PYTHONDONTWRITEBYTECODE=1',
+        *usd_environment, *layout_environment,
+        '-v', f'{source}:{CONTAINER_SOURCE}:ro', '-v', f'{output}:{CONTAINER_OUTPUT}:rw', *mounts,
+        '--entrypoint', '/bin/bash', 'isaac-lab-base', '-c', barrier, 'hexapod-fourbar-barrier',
+        '/workspace/isaaclab/_isaac_sim/python.sh', f'{CONTAINER_SOURCE}/isaaclab/{script}', *shlex.split(TELEMETRY_ARGUMENT),
+        '--num_envs', str(args.num_envs), '--report', f'{CONTAINER_OUTPUT}/report.json',
+        '--viz', 'none', '--device', 'cuda:0', *extra]
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('mode', choices=('validate', 'train', 'diagnose'))
+    parser.add_argument('--admission', type=Path)
+    parser.add_argument('--checkpoint', type=Path)
+    parser.add_argument('--iterations', type=int, default=10)
+    parser.add_argument('--solver-multiplier', type=int, choices=(1, 2), default=1)
+    parser.add_argument('--diagnostic-motion', choices=tuple(DIAGNOSTIC_MOTION_STEPS), default='individuals')
+    parser.add_argument('--diagnostic-usd', choices=tuple(DIAGNOSTIC_USD_PATHS))
+    parser.add_argument('--diagnostic-xy-offset', nargs=2, type=bounded_xy_coordinate, metavar=('X', 'Y'))
+    parser.add_argument('--asset-model', choices=tuple(ASSET_BUNDLES), help='Validation/training model; default mkii_fourbar_v3')
+    parser.add_argument('--environment-layout', choices=ENVIRONMENT_LAYOUTS, default='grid_2m_v1')
+    parser.add_argument('--source-dir', type=Path, required=True)
+    parser.add_argument('--source-commit', default='uncommitted', help='Source baseline commit; SHA256SUMS records the exact running files')
+    parser.add_argument('--output-root', type=Path)
+    parser.add_argument('--num-envs', '--num_envs', dest='num_envs', type=int)
+    parser.add_argument('--steps', type=int, default=1000)
+    parser.add_argument('--timeout-seconds', type=int, default=900)
+    parser.add_argument('--dry-run', action='store_true')
+    args = parser.parse_args(argv)
+    if args.mode == 'diagnose' and args.environment_layout != 'grid_2m_v1':
+        parser.error('Historical diagnostic trajectories require the original grid_2m_v1 layout')
+    if args.diagnostic_xy_offset is not None and args.mode != 'diagnose':
+        parser.error('--diagnostic-xy-offset is only accepted for diagnose')
+    if args.diagnostic_xy_offset is None:
+        args.diagnostic_xy_offset = (0., 0.)
+    if args.mode == 'diagnose' and args.asset_model is not None:
+        parser.error('--asset-model is only accepted for validate/train; diagnosis uses --diagnostic-usd')
+    if args.mode != 'diagnose' and args.asset_model is None:
+        args.asset_model = 'mkii_fourbar_v3'
+    if args.diagnostic_usd is not None and args.mode != 'diagnose':
+        parser.error('--diagnostic-usd is only accepted for diagnose')
+    if args.diagnostic_usd is None:
+        args.diagnostic_usd = 'revolute_v3'
+    if args.num_envs is None:
+        args.num_envs = 1 if args.mode == 'diagnose' else 32
+    if not 1 <= args.num_envs <= 4096 or not 2 <= args.steps <= 100000 or not 1 <= args.iterations <= 10000:
+        parser.error('Invalid bounded environment/step/iteration count')
+    if args.diagnostic_motion == 'validation_prefix':
+        if (args.mode != 'diagnose' or args.num_envs != 32 or args.steps != 1000
+                or args.diagnostic_usd != 'physical_mimic_v5' or tuple(args.diagnostic_xy_offset) != (0., 0.)):
+            parser.error('Validation-prefix replay requires diagnose, 32 environments, 1000 steps, physical_mimic_v5 and zero XY offset')
+    elif args.mode == 'diagnose' and (args.num_envs > 8 or args.steps > 1000):
+        parser.error('Diagnosis requires 1..8 environments and 2..1000 standing steps')
+    maximum_timeout = 21600 if args.mode == 'train' else 7200
+    if not 30 <= args.timeout_seconds <= maximum_timeout:
+        parser.error(f'The bounded timeout for {args.mode} must be 30..{maximum_timeout} seconds')
+    if args.source_commit != 'uncommitted' and not re.fullmatch(r'[0-9a-f]{7,40}', args.source_commit):
+        parser.error('--source-commit must be a hex commit ID or uncommitted')
+    source = args.source_dir.expanduser().resolve()
+    if not source.is_dir() or not (source / 'isaaclab/validate_mkii_fourbar.py').is_file():
+        parser.error('Source must contain isaaclab/validate_mkii_fourbar.py')
+    if args.mode == 'diagnose' and not (source / 'isaaclab/diagnose_mkii_fourbar.py').is_file():
+        parser.error('Diagnostic source must contain isaaclab/diagnose_mkii_fourbar.py')
+    output_root = (args.output_root or source.parent / 'runs').expanduser().resolve()
+    if output_root.is_relative_to(source):
+        parser.error('--output-root must be outside the read-only isolated source')
+    if any(character in str(path) for path in (source, output_root) for character in ('\n', '\r', ':')):
+        parser.error('Mount paths cannot contain newlines or colons')
+    contract = identity(source)
+    if args.asset_model is not None and ASSET_BUNDLES[args.asset_model]['usd_path_relative'] not in contract.get('files', {}):
+        parser.error('The selected asset model must be present in the source identity')
+    if args.mode == 'diagnose' and DIAGNOSTIC_USD_PATHS[args.diagnostic_usd] not in contract.get('files', {}):
+        parser.error('The selected diagnostic USD must be present in the source identity')
+    if args.mode == 'train':
+        if not args.admission:
+            parser.error('--admission is required for training')
+        args.admission = args.admission.expanduser().resolve()
+        if args.checkpoint:
+            args.checkpoint = args.checkpoint.expanduser().resolve()
+        if any(character in str(path) for path in (args.admission, args.checkpoint) if path is not None
+               for character in ('\n', '\r', ':')):
+            parser.error('Admission/checkpoint mount paths cannot contain newlines or colons')
+        admission = require_admission(args.admission, contract)
+        require_requested_asset(admission, args.asset_model, contract)
+        require_requested_layout(admission, args.environment_layout)
+        if args.checkpoint:
+            require_checkpoint(args.checkpoint, contract)
+    elif args.checkpoint or args.admission:
+        parser.error('Validation/diagnosis does not accept a checkpoint or admission')
+    owner = uuid.uuid4().hex
+    name = 'hexapod-fourbar-' + args.mode + '-' + time.strftime('%Y%m%dT%H%M%SZ', time.gmtime()) + '-' + owner[:8]
+    output = output_root / name
+    argv = compose_argv(source, output, name, owner, args)
+    if args.dry_run:
+        print(json.dumps({'execution': 'not_started', 'output': str(output), 'argv': argv,
+                          'asset_model': args.asset_model, 'environment_layout': args.environment_layout,
+                          'timeout_seconds': args.timeout_seconds}, indent=2))
+        return 0
+    for required in (LAB / 'docker/.env.base', LAB / 'docker/docker-compose.yaml'):
+        if not required.is_file():
+            raise Blocked(f'Required Compose file does not exist: {required}')
+    # Do not inspect or print .env.base; only Compose consumes it.
+    lock_fd = os.open(LOCK, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+    if lock_fd != 9:
+        os.dup2(lock_fd, 9); os.close(lock_fd)
+    try:
+        fcntl.flock(9, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        os.close(9); raise Blocked('Another hexapod launcher holds the shared GPU lock')
+    output.mkdir(parents=True, exist_ok=False)
+    report = {'execution': 'preflight', 'source': str(source), 'container_name': name, 'owner': owner, 'gates': [], 'exit_code': None, 'cleanup': 'not_required', 'source_commit': args.source_commit}
+    report['asset_model'] = args.asset_model
+    report['environment_layout'] = args.environment_layout
+    if args.mode == 'diagnose':
+        report['diagnostic_usd'] = args.diagnostic_usd
+        report['diagnostic_motion'] = args.diagnostic_motion
+        report['diagnostic_xy_offset_m'] = list(args.diagnostic_xy_offset)
+    container = None
+    deadline = time.monotonic() + args.timeout_seconds
+    exit_code = 1
+    def stop_signal(signum, _frame):
+        raise Blocked(f'Supervisor interrupted by signal {signum}')
+    for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        signal.signal(signum, stop_signal)
+    try:
+        shared_control = read_coordination_control()
+        report['coordination_protocol'] = shared_control['protocol']
+        report['coordination_initial'] = shared_control
+        # Retain the historical field as raw initial-note provenance only.
+        report['coordination_sha256'] = shared_control['raw_note_sha256']
+        require_coordination_none(shared_control)
+        report['contract'] = contract
+        report['source_manifest'] = snapshot_source(source, output / 'source.SHA256SUMS')
+        report['source_archive'] = archive_source(source, output / 'source.SHA256SUMS', output / 'source.tar.gz',
+            expected_manifest_sha256=report['source_manifest']['sha256'])
+        report['gates'].append(resource_gate())
+        atomic_json(output / 'supervisor.json', report)
+        result = command(argv, cwd=LAB, timeout=60, check=False)
+        container = inspect_container(name)
+        if not check_identity(container, name, owner):
+            raise Blocked('Cannot establish ownership of the newly created container')
+        report['container_id'] = container['id']
+        if result.returncode:
+            raise Blocked(f'Compose container creation failed (exit {result.returncode})')
+        # Isaac remains behind the CPU-only admission barrier for both checks.
+        report['gates'].append(resource_gate(owned_container=container))
+        time.sleep(1)
+        report['gates'].append(resource_gate(owned_container=container))
+        require_unchanged_source(source, contract, 'before releasing the CPU admission barrier')
+        if args.mode == 'train':
+            admission = require_admission(args.admission, contract)
+            require_requested_asset(admission, args.asset_model, contract)
+            require_requested_layout(admission, args.environment_layout)
+            if args.checkpoint:
+                require_checkpoint(args.checkpoint, contract)
+        report['coordination_before_barrier'] = read_coordination_control()
+        require_coordination_none(report['coordination_before_barrier'])
+        (output / 'admitted').touch(exist_ok=False)
+        report['execution'] = 'running'
+        atomic_json(output / 'supervisor.json', report)
+        print(f'FOURBAR_STARTED container_id={container["id"]} output={output}', flush=True)
+        next_gate = time.monotonic()
+        pause_deadline = None
+        while True:
+            current = inspect_container(container['id'])
+            if not check_identity(current, name, owner):
+                raise Blocked('Owned container identity disappeared or changed')
+            if not current['running']:
+                exit_code = int(current['exit_code'])
+                report['execution'] = 'finished' if exit_code == 0 else 'failed'
+                report['exit_code'] = exit_code
+                if exit_code != 0:
+                    report['error'] = f'Validator process exited with status {exit_code}'
+                break
+            if time.monotonic() >= deadline:
+                raise Blocked(f'Validation exceeded {args.timeout_seconds} second execution timeout')
+            if time.monotonic() >= next_gate:
+                pause_deadline = poll_coordination(report, output, args.mode, pause_deadline, time.monotonic())
+                report['last_runtime_gate'] = resource_gate(owned_container=current, allow_owned_gpu=True)
+                atomic_json(output / 'supervisor.json', report)
+                next_gate = time.monotonic() + 5
+            time.sleep(1)
+    except (Blocked, subprocess.TimeoutExpired, OSError, ValueError) as exc:
+        report['execution'] = 'failed'; report['error'] = str(exc); exit_code = 1
+    finally:
+        for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+            signal.signal(signum, signal.SIG_IGN)
+        try:
+            # Resolve our unique name only if creation failed before returning
+            # an ID; require both exact name and unpredictable ownership label.
+            if container is None:
+                container = inspect_container(name)
+            if check_identity(container, name, owner):
+                current = inspect_container(container['id'])
+                if not check_identity(current, name, owner):
+                    raise Blocked('Cannot prove final identity/state of the owned container')
+                if current['running']:
+                    command(['docker', 'stop', '--time', '25', container['id']], timeout=30, check=False)
+                with (output / 'container.log').open('w') as log:
+                    subprocess.run(['docker', 'logs', '--timestamps', container['id']], stdout=log, stderr=subprocess.STDOUT, timeout=20)
+                after = inspect_container(container['id'])
+                if after and not after['running']:
+                    report['final_container_exit_code'] = after['exit_code']
+                    removed = command(['docker', 'rm', container['id']], timeout=15, check=False)
+                    report['cleanup'] = 'removed_exact_id' if removed.returncode == 0 else 'stopped_removal_failed'
+                    if removed.returncode:
+                        exit_code = 1
+                else:
+                    raise Blocked('Owned container is still running after bounded stop')
+            elif container is not None:
+                raise Blocked('Cleanup refused a container ownership mismatch')
+        except (Blocked, subprocess.TimeoutExpired, OSError, ValueError) as exc:
+            report['cleanup'] = 'FAILED'; report['cleanup_error'] = str(exc)
+            report['execution'] = 'failed'; exit_code = 1
+        try:
+            report['source_identity_unchanged_at_finish'] = require_unchanged_source(source, contract, 'during execution')
+            report['validator_report_present'] = (output / 'report.json').is_file()
+            if exit_code != 0 and not report['validator_report_present']:
+                report['validator_report_status'] = 'missing_after_process_failure'
+            if exit_code == 0:
+                report['validator_summary'] = validate_written_report(output / 'report.json', args=args, contract=contract)
+                report['validator_report_status'] = 'diagnostic_complete' if args.mode == 'diagnose' else 'passed'
+                if args.mode == 'diagnose':
+                    report['execution'] = 'diagnostic_complete'
+        except (Blocked, OSError, ValueError) as exc:
+            # Keep successful exact-ID cleanup distinct from a failed report.
+            report['execution'] = 'failed'; report['validator_report_status'] = 'rejected'
+            report['report_error'] = str(exc); exit_code = 1
+        finally:
+            report['supervisor_exit_code'] = exit_code
+            try:
+                atomic_json(output / 'supervisor.json', report)
+            finally:
+                fcntl.flock(9, fcntl.LOCK_UN); os.close(9)
+    print(f'FOURBAR_FINISHED exit={exit_code} supervisor={output / "supervisor.json"} report={output / "report.json"} log={output / "container.log"}', flush=True)
+    return exit_code
+
+
+if __name__ == '__main__':
+    try:
+        raise SystemExit(main())
+    except Blocked as exc:
+        print(f'FOURBAR_BLOCKED: {exc}', file=sys.stderr)
+        raise SystemExit(75)

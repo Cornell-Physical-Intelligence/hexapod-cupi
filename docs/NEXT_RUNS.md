@@ -1,0 +1,74 @@
+# Prepared CAD simulation campaign
+
+**Physical four-bar validation and training campaign implemented, 5 September 2026 UTC; physical acceptance remains pending and PPO has not started.** The user authorized continuing into training after the required checks. The new task has 31 bodies, 30 articulation coordinates, six physical closure joints, 18 active motors, an explicit bounded RS05 model and an 84-value observation contract without a gait clock. The earlier [serial standing reports](../artifacts/mkii_step2_2026-09-04/README.md) remain a separate baseline. [STATUS.md](../STATUS.md) records the latest probe and compute state; [PLAN.md](PLAN.md) defines the program.
+
+## Why early full-body training is useful
+
+Yes: once known model/import defects and the actuator acceptance gate are addressed, full-body training can start before the leg stand is built, with unmeasured parameters explicitly provisional. It can establish action/frame correctness, discover candidate omnidirectional coordination, expose reward exploits, exercise navigation and deployment code, and compare terrain observations. Those gains do not require pretending CAD is exact hardware.
+
+A later dynamics update does not automatically make every policy useless. Keep a nominal baseline and plausible randomized variants. When measurements arrive, evaluate existing checkpoints on the new nominal model and its measured uncertainty range before deciding to fine-tune or retrain. Large geometry, linkage, control-mode, action-schema or observation changes can require a new lineage. Domain randomization is not a substitute for correcting a known inertia error.
+
+## Campaign sequence and stop conditions
+
+The immediate bounded sequence is **1 environment × 100 control steps → 32 environments × 1,000 standing control steps plus 2,400 driven control steps (9,600 driven physics substeps), repeated with nominal and refined solver iterations → 64 environments × 3 scratch PPO iterations → a separate process resuming the verified checkpoint for 512 environments × 1,000 iterations**. The larger run depends on smoke-run memory/throughput, checkpoint/inference checks, source identity and fresh GPU admission. No step is automatically admitted by the historical serial pass.
+
+The driven count includes **18 individual motors × two signs × 50 control steps = 1,800**, plus **three motor groups × two signs × 100 = 600**. Each control step contains four 5 ms physics substeps. The first 1-environment probe has passed; the nominal 32-environment run is active. [STATUS.md](../STATUS.md) records the exact report, metrics and remaining stages. PPO is not yet live.
+
+The physical validator samples actual body-link pin positions/axes, primitive ground clearance and motor limits every 5 ms. Reset coordinates must match the physical contract, and the anatomical command-frame check must pass. During initial PPO, a numerical closure failure invalidates the whole run before reset can hide it; normal falls remain learning events. A successful bounded campaign establishes provisional flat-ground learning, not a qualified terrain or hardware controller.
+
+| Phase | Question answered | Required evidence before proceeding |
+|---|---|---|
+| C0: source and asset reconciliation | What exact robot/configuration will run? | Baseline commit, clean isolated work area, CAD input hashes, Spark config comparison, versioned actuator parameters/hash and resolved configuration identity in the simulation/runtime manifest, and explicit artifact directory. Preserve all historical tasks/runs. |
+| C1: offline import correction | Does USD preserve the intended physics? | Serial characterization: all 19 tensors, masses/COMs/units/joints/collisions and dependency hashes. Physical reference before training: dedicated 31-body / 30-tree-coordinate / six-closure audit, corrected passive joint frames, no mimic/passive drives, and an explicit 18-actuator adapter. Never apply a blind global quaternion inversion. |
+| C2: short simulator acceptance | Does the actual mechanism behave correctly before learning? | Serial standing is an intermediate characterization. Before training, qualify the physical loop/adapter under one-mechanism and full-body tests: closure/branch/convergence, measured reset, all 18 active motor mappings and passive states, per-collider support/shaft/lever/rod contacts, substep torque, driven joint sweeps, anatomical direction/yaw and finite observations. Qualify the versioned motor's torque-speed/voltage, thermal, burst/recovery and phase-current limits; align applied clipping, rewards, faults and runtime semantics. Freeze the corresponding runtime manifest. |
+| C3: small throughput/smoke run | Can this exact environment learn and save recoverable artifacts? | Profile a small batch then increase environment count within measured memory/throughput limits; complete a short learning cycle, checkpoint, evaluation and resume test. No fixed giant environment count before profiling. |
+| C4: flat omnidirectional baseline | Can an unconstrained gait track and stop in all directions? | Stand, ±forward, ±lateral, diagonals, ±yaw and combined-command transitions; reject collapse, foot dragging, persistent harmful contacts, joint-limit exploitation or excessive sustained torque. |
+| C5: bounded robustness and terrain | Which uncertainties matter and where does the policy fail? | Measured/provisional actuator variants, friction and payload bounds; progressively qualified slopes/steps; evaluate each change against a common suite. |
+| C6: perception and deployment | Can the actor work using only available onboard observations? | Compare proprioceptive baseline, ideal-terrain teacher and realistic-terrain student; calibration/age/dropout/occlusion tests; exact deployment preprocessing, timing, action and recurrent-state parity. |
+| C7: integrated candidate | Does the full system accomplish the mission? | Held-out polygon/obstacle/fault scenarios, independently scored trajectory/coverage, failure ledger, reproducible release bundle and hardware-transfer prerequisites. |
+
+Stop an experiment early for nonfinite state, wrong physical command direction, mismatched assets/schemas, unstable startup, persistent infeasible torque/contact, corrupt checkpointing or an invalid observation source. A loss/reward curve alone does not admit a policy. Tune only on training/development cases, then screen finalists over multiple seeds on the held-out matrix.
+
+The existing 32-environment/1,000-step standing procedure is a starting probe after repair, not complete acceptance. Record startup peak raw demand separately from applied torque and steady-state saturation. Passing a standing threshold cannot establish dynamic accuracy, leg-leg clearance, motor thermal duty or terrain capability.
+
+The historical serial reports characterize an actuator capped at 1.6 N·m, although 5.5 N·m peak already appears in that URDF/config. Startup raw demand of 2.364431 N·m is below published peak. The [RS05 specification review](RS05_SPEC_REVIEW.md) distinguishes 1.2 N·m continuous stall from cooling-dependent rotating ratings and bounded bursts. The old scalar cap is not universally conservative and its manifest omits actuator parameters. Preserve those reports with that interpretation.
+
+The physical task now has a separate versioned model and resolved motor identity: torque-speed/voltage limits, continuous-load allowance, shared burst/recovery budget and phase-current proxy. Its 48 V assumption, cooldown, gains, friction, inertia and cooling equivalence remain provisional. The budget is not a calibrated temperature model, and the proxy is not hardware CAN/current protection. Native qualification and later stand identification remain necessary.
+
+The [collider-fit evidence](../artifacts/mkii_fourbar_2026-09-05/collider_fit/README.md) prevents a 1:1 contact claim: silicone samples lie up to 6.38 mm outside the complete tibia collision union, including 5.04 mm in a nominal lower contact band. The tested ±0.30 rad target grid gives foot-bottom bias −3.109 to +0.427 mm relative to CAD; broad structural boxes also introduce substantial per-link excess volume. Fit the pad exterior and structural clearance regions, then requalify the changed asset before relying on precise terrain contact. These sampled measurements neither prove full mesh coverage nor qualify self-collision or real pad compliance.
+
+## Training design to resolve before a long run
+
+- Add a new versioned CAD task/configuration where behavior or interfaces change; do not rename an existing task or retrofit a checkpoint's provenance.
+- Define forward as anatomical -Y in the CAD frame and left as +X, with explicit transforms at the navigation seam. Resolve all 18 actions by joint name and record the observed articulation order.
+- Use conservative initial velocity/acceleration envelopes derived from stance clearance, actuator capability and short checks. Increase them only after evaluation; archived mock command magnitudes are not new hardware requirements.
+- Use tracking, stability appropriate to terrain, slip/contact, energy/actuation, limits and smoothness objectives. Log component values. No fixed tripod phase, gait clock or scripted swing sequence in the new learned policy.
+- Include standing, starts/stops, reversals, turns and combined commands from the first tracking suite. Test all directions at the actual navigation sensor visibility limits.
+- Bind an explicit versioned motor configuration instead of inheriting the archived actuator. Parameterize mode/gains, friction/backlash, effective transmission, torque-speed/voltage, thermal and burst/recovery limits, phase current, latency/jitter and payload dynamics. Do not make 5.5 N·m an indefinite effort allowance. Unmeasured ranges are labeled provisional and physically motivated; no invented identification result.
+- Isolate initial curriculum questions rather than changing reward, geometry, gains and randomization together. Reserve compute for finalists and reproducibility checks, not just one long training trajectory.
+
+## Leg-stand update loop
+
+Build the confirmed fixture as a fixed rail, passive vertical carriage and the three actuated joints, with the actual hip mount, moving mass, rail friction and ground contact. Use [the stand protocol](../artifacts/project_review_2026-09-04/LEG_TEST_STAND.md) for synchronized encoder/carriage/force and motor logs.
+
+Fit actuator/linkage/fixture parameters on one subset of trajectories and validate on held-out loads and motions. Compare predicted and measured joint angles, carriage displacement, force, timing and temperatures within explicitly selected error tolerances. The stand constrains body motion and cannot validate whole-body balance or six-leg load redistribution.
+
+For every model revision, run the same old-checkpoint/new-model screen and publish its delta. Fine-tune candidates that remain stable but lose performance; retrain when the representation or dynamics changed substantially. Recheck full-body torque, geometry, self-collision and support limits after mass or mechanical revisions. Freeze the model/calibration versions used by each field release.
+
+## Spark readiness and experiment provenance
+
+Spark execution is authorized. Inspect current unrelated GPU/container workloads before each launch and use the versioned supervised launcher and lock protocol. Access through Tailscale and live Isaac startup are verified, but current load, disk headroom and software health must be rechecked at launch. A stopped project queue does not guarantee the GPU is idle indefinitely.
+
+Use an isolated, explicitly mounted source/run directory. The existing Spark mirror is not a Git checkout; do not run a blind `git pull` there or overwrite another task's changes. Save the effective source and configuration manifest before launching. Determine concurrency from actual memory/load; never compete with an unrelated job just because overall compute access is broad.
+
+Each run bundle records source commit and any diff, task ID, all USD layer/CAD hashes, package/container versions, resolved config and randomization ranges, motor assumptions/calibration version, command/observation/action contracts, named joint mapping, seed, timing, checkpoint hashes, evaluation cases and failure outcomes. Use unique run labels, frequent recoverable checkpoints and an explicit resume test. Keep log/manifest generation deterministic and exclude secrets.
+
+Use the new physical campaign's `isaaclab/deploy/run-mkii-fourbar`, `isaaclab/validate_mkii_fourbar.py` and `isaaclab/train_mkii_fourbar.py` with an isolated source and unique report directory. The physical source is `/home/orionh/HEXAPOD_runs/mkii_fourbar_v1/source`. The earlier `validate-mkii-v2` and `train_mkii_v2.py` apply to the serial lineage and cannot certify or train this physical task. Preserve its source/checkpoint identities and resume in a separate process.
+
+The physical model and 30-coordinate / 18-motor adapter are implemented from the [recovered CAD pin frames](../artifacts/mkii_step2_2026-09-04/physical_fourbar_reference/README.md). Its active push-lever coordinate uses a recorded phase bridge and per-leg defaults/limits; passive reset coordinates close the loops without mimic drives. The nominal reset height is 0.142970 m. The 1-environment startup pass is preliminary; full standing, driven and solver-convergence acceptance remains pending. Current live results and retries belong in [STATUS.md](../STATUS.md).
+
+Packaging changes are limited to the two old-manifest-listed core/env `pyproject.toml` files; 112 archived lineage files remain independently verified. Preserve the old manifest and historical reports instead of relabeling them as the physical task's release evidence.
+
+Use **full available Spark compute now**, until another agent requests sharing through `/home/orionh/SPARK_COMPUTE_COORDINATION.md`. Read that file before each new launch and at checkpoint boundaries during future long runs; the [coordination note](SPARK_COMPUTE_COORDINATION.md) holds the handoff procedure. The former 60/40 split is a starting preference if sharing is requested. Short acceptance remains exclusive and already uses full available compute. No quota or shared launcher is enabled; measure throughput and memory in a paired pilot before relying on overlapping long jobs.
+
+The user explicitly prioritized the present hexapod campaign over weather. An owned guard reserves the weather launcher's existing `/opt/wx/gpu.lock` cooperatively until campaign exit, for at most three hours. Preserve workload admission checks and the shared-file handoff; this reservation does not authorize arbitrary changes to other jobs. Exact process and probe state is recorded in [STATUS.md](../STATUS.md).

@@ -1,0 +1,74 @@
+--- a/isaaclab/validate_mkii_fourbar.py
++++ b/isaaclab/validate_mkii_fourbar.py
+@@ -150,6 +150,20 @@
+             f = kinematics["joint_frames"][name]
+             self.frames.append([(self.body_indices[f[f"body{s}"]],
+                 torch.tensor(f[f"body{s}_from_hinge_matrix"], device=raw.device, dtype=torch.float32)) for s in (0, 1)])
++        # Cache only immutable name-resolved indices and local frames. Every
++        # physical update still reads the live body/joint/contact tensors.
++        self._closure_body_indices = torch.tensor(
++            [index for pair in self.frames for index, _ in pair], device=raw.device, dtype=torch.long)
++        self._closure_offsets = torch.stack([torch.stack([frame[:3, 3] for _, frame in pair])
++                                             for pair in self.frames])
++        self._closure_axes = torch.stack([torch.stack([frame[:3, 2] for _, frame in pair])
++                                          for pair in self.frames])
++        self._velocity_passive_indices = torch.tensor([p for p, _, _ in self.velocity_relations],
++                                                      device=raw.device, dtype=torch.long)
++        self._velocity_source_indices = torch.tensor([s for _, s, _ in self.velocity_relations],
++                                                     device=raw.device, dtype=torch.long)
++        self._velocity_multipliers = torch.tensor([m for _, _, m in self.velocity_relations],
++                                                  device=raw.device, dtype=torch.float32)
+         root = ET.parse(ROOT / "robot/hexapod_mkii_assy/urdf/hexapod_mkii_linkage.urdf").getroot()
+         indices, transforms, radii, lengths, boxes, kinds, feet = [], [], [], [], [], [], []
+         for link in root.findall("link"):
+@@ -178,14 +192,20 @@
+         pos, quat = tensor(data.body_link_pos_w), tensor(data.body_link_quat_w)
+         rot = matrix_from_quat(quat)
+         lin, ang = tensor(data.body_link_lin_vel_w), tensor(data.body_link_ang_vel_w)
+-        pin_velocity = closure_relative_point_velocities(rot, lin, ang, self.frames)
+-        passive_velocity = passive_joint_velocity_residuals(tensor(data.joint_vel), self.velocity_relations)
+-        point_error, axis_error = [], []
+-        for pair in self.frames:
+-            states = [(pos[:, i] + torch.einsum("nij,j->ni", rot[:, i], f[:3, 3]),
+-                       torch.einsum("nij,j->ni", rot[:, i], f[:3, 2])) for i, f in pair]
+-            point_error.append(torch.linalg.vector_norm(states[0][0]-states[1][0], dim=-1))
+-            axis_error.append(torch.linalg.vector_norm(states[0][1]-states[1][1], dim=-1))
++        count = len(self.frames)
++        closure_rot = rot.index_select(1, self._closure_body_indices).reshape(raw.num_envs, count, 2, 3, 3)
++        offset_w = torch.einsum("nlbij,lbj->nlbi", closure_rot, self._closure_offsets)
++        axis_w = torch.einsum("nlbij,lbj->nlbi", closure_rot, self._closure_axes)
++        points = pos.index_select(1, self._closure_body_indices).reshape(raw.num_envs, count, 2, 3) + offset_w
++        velocities = (lin.index_select(1, self._closure_body_indices).reshape(raw.num_envs, count, 2, 3)
++            + torch.cross(ang.index_select(1, self._closure_body_indices).reshape(raw.num_envs, count, 2, 3),
++                          offset_w, dim=-1))
++        pin_velocity = velocities[:, :, 1] - velocities[:, :, 0]
++        joint_velocity = tensor(data.joint_vel)
++        passive_velocity = (joint_velocity.index_select(1, self._velocity_passive_indices)
++            - self._velocity_multipliers * joint_velocity.index_select(1, self._velocity_source_indices))
++        point_error = torch.linalg.vector_norm(points[:, :, 0] - points[:, :, 1], dim=-1)
++        axis_error = torch.linalg.vector_norm(axis_w[:, :, 0] - axis_w[:, :, 1], dim=-1)
+         r = rot[:, self.indices]
+         centers = pos[:, self.indices] + torch.einsum("ncij,cj->nci", r, self.local[:, :3, 3])
+         rz = torch.einsum("nci,cij->ncj", r[:, :, 2], self.local[:, :3, :3])
+@@ -194,8 +214,10 @@
+         cylinder = rz[:, :, 2].abs() * self.length/2 + self.radius * (1-rz[:, :, 2].square()).clamp(min=0).sqrt()
+         support = torch.where(self.kinds == 0, sphere, torch.where(self.kinds == 1, box, cylinder))
+         bottom = centers[:, :, 2] - support - tensor(raw._terrain.env_origins)[:, 2, None]
+-        forces = torch.stack([torch.linalg.vector_norm(tensor(s.data.net_forces_w), dim=-1).amax(-1)
+-                              for s in raw._body_contact_sensors.values()], dim=1)
++        # Preserve all sensor views and acquisition order; batch only the norm.
++        force_vectors = torch.stack([tensor(s.data.net_forces_w)
++                                     for s in raw._body_contact_sensors.values()], dim=1)
++        forces = torch.linalg.vector_norm(force_vectors, dim=-1).amax(-1)
+         contact_names = list(raw._body_contact_sensors)
+         foot_mask = torch.tensor([n.endswith("_tibia") for n in contact_names], device=raw.device)
+         height = tensor(data.root_pos_w)[:, 2] - tensor(raw._terrain.env_origins)[:, 2]
+@@ -208,7 +230,7 @@
+         finite = torch.stack([torch.isfinite(t).all() for t in (pos, quat, forces, height, torque,
+             demand, limit, headroom, continuous, tensor(data.joint_pos), tensor(data.joint_vel), lin, ang)]).all()
+         row = torch.stack([height.min(), height.sum(), torque.max(), demand.max(),
+-            torch.stack(point_error).max(), torch.stack(axis_error).max(), bottom[:, ~self.feet].min(),
++            point_error.max(), axis_error.max(), bottom[:, ~self.feet].min(),
+             (forces[:, ~foot_mask] > 1.).any(-1).sum(), (forces[:, foot_mask] > 1.).sum(-1).min(),
+             (torque-limit).max(), (torque-continuous).clamp(min=0).max(), headroom.min(),
+             (~finite).to(height.dtype) + invalid.any(), raw.closure_coordinate_error().abs().max(),

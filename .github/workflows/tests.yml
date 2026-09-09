@@ -1,0 +1,35 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The archived release is checked from its exact immutable Git tree.
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install the pinned interpreter
+        run: uv python install
+
+      - name: Sync the locked environment
+        run: uv sync --locked
+
+      - name: Run the test suite
+        run: uv run python -m unittest discover -s isaaclab/tests
+
+      - name: Verify the frozen Stage2 source lineage
+        run: uv run python tools/check_pipeline_lineages.py historical
+
+      - name: Verify the current four-bar release manifest
+        run: uv run python tools/check_pipeline_lineages.py current --manifest isaaclab/deploy/mkii_fourbar_v1_1600hz_metrics_pipeline.sha256

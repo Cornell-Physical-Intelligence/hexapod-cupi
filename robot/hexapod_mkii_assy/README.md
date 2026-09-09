@@ -1,11 +1,23 @@
 # Hexapod MKII full assembly (from the onshape-to-robot export)
 
-Built by `robot/tools/import_onshape_hexapod.py` from the 2026-09-03
-`hexapod-mkii-assy` export (a single merged link: 1927 part instances, exact
-per-part Onshape mass properties, per-part CAD colours, no mate structure) by
-registering the leg v3 record (`robot/hexapod_leg_v3/leg_parts.json`) onto
-every leg, body by body. `assembly_report.md` is the full audit of that
-import; regenerate everything with
+The intended physical simulation candidate is now the **31-body, 30-coordinate,
+18-motor four-bar model**, including the tibia pushlever and pushrod as moving
+bodies. Its v5 USD uses native PhysX bilateral mimic constraints to transmit
+forces through the CAD parallelograms. Follow
+[the physical campaign documentation](../../docs/MKII_FOURBAR_TRAINING.md),
+and [STATUS.md](../../STATUS.md) for admission and training outcomes. A generated
+asset or a CPU audit pass does not establish a successful PPO run.
+
+The source URDFs and serial-v2 workflow below retain their historical identities.
+The 19-link serial reduction is not the physical four-bar training asset.
+
+`robot/tools/import_onshape_hexapod.py` built this package from the
+2026-09-03 `hexapod-mkii-assy` export (a single merged link: 1927 part
+instances, exact per-part Onshape mass properties, per-part CAD colours, no
+mate structure). It registered the leg v3 record
+(`robot/hexapod_leg_v3/leg_parts.json`) onto each leg, body by body.
+`assembly_report.md` is the full audit of that import. Regenerate the package
+with
 
 ```sh
 python3 robot/tools/import_onshape_hexapod.py \
@@ -14,15 +26,26 @@ python3 robot/tools/import_onshape_hexapod.py \
 
 ## Files
 
-- `urdf/hexapod_mkii_linkage.urdf` — 31 links / 30 joints: `body` plus, per
+- `urdf/hexapod_mkii_linkage.urdf`: 31 links / 30 joints: `body` plus, per
   leg, `coxa`, `femur`, `tibia`, `tibia_push_lever`, `tibia_pushrod`. The
-  tibia four-bar is closed by `<mimic>` joints (lever = +tibia, rod = -tibia);
-  the cut pivot of each loop is documented in a comment.
-- `urdf/hexapod_mkii_serial.urdf` — 19 links / 18 revolute joints (lever and
-  pushrod welded into the femur): the training-pipeline contract.
-- `meshes/` — the 77 export STLs with ASCII-safe names (vendor motor parts
+  tibia four-bar motion is approximated by `<mimic>` joints (lever = +tibia,
+  rod = -tibia); the cut pivot of each loop is documented in a comment. The
+  source comment's pin points differ by about 0.5 mm, mainly axially. This is
+  a carried-frame discrepancy, not evidence of a 0.5 mm physical CAD bore
+  mismatch. The [pin-frame recovery](../../artifacts/mkii_step2_2026-09-04/physical_fourbar_reference/README.md)
+  derives the actual 30 mm / 77.5 mm parallelogram from the current CAD geometry.
+  These URDF mimics describe kinematics; the physical v5 USD authors a distinct
+  native constraint formulation.
+- `urdf/hexapod_mkii_serial.urdf`: 19 links / 18 revolute joints (lever and
+  pushrod welded into the femur): historical serial approximation. Welding
+  these moving bodies changes the linkage dynamics.
+- `usd/hexapod_mkii_fourbar_v5/`: immutable physical candidate bundle, including
+  all 31 moving bodies, CAD-derived pin frames, and twelve native bilateral
+  mimic constraints. Its eighteen active coordinates are coxa, femur and
+  **pushlever motor** positions; passive knee/rod coordinates are not actions.
+- `meshes/`: the 77 export STLs with ASCII-safe names (vendor motor parts
   renamed `motor_*`; the map is in `assembly_report.json`).
-- `part_overrides.json` — user-verified attachments the leg record cannot
+- `part_overrides.json`: user-verified attachments the leg record cannot
   know (the screw head caps are hard-attached to the first joint bottom plate).
   The yaw motor split (output flange + hub fixed to the frame, everything else
   rotating with the coxa) is the importer's `--yaw-output-side` rule.
@@ -38,7 +61,7 @@ python3 robot/tools/import_onshape_hexapod.py \
   with an animated showcase, section cut on any axis, isolate by part, link,
   leg, class or name search, in-canvas labels, ground shadows, centre of mass
   marker, two-point measure, joint sliders and poses (zero, stance, as
-  exported, tripod gait), snapshot lightbox (opaque or transparent).
+  exported, scripted tripod gait), snapshot lightbox (opaque or transparent).
   Headless renders: `?capture=<name>&post=http://localhost:8322/save&w=2400&h=1600`
   plus `style=`, `view=iso|top|front|side` or `theta=&phi=`, `explode=`,
   `parts=`, `isolate=lf,body`, `hide=fastener`, `labels=1`, `shadows=1`,
@@ -47,17 +70,22 @@ python3 robot/tools/import_onshape_hexapod.py \
   URL (a 20-line `http.server` that decodes base64 into a file).
 - `preview/showcase_template.html` — a clean auto-playing tour for a website
   (no controls): reveal, leg fly-through, exploded views, blueprint, x-ray,
-  section sweep, tripod gait, plan view, looping with fades and captions.
+  section sweep, scripted tripod gait, plan view, looping with fades and captions.
   Query options: `bg=hex`, `face=hex`, `edge=hex`, `captions=0`, `speed=`,
   `shots=reveal,explode,...`; click pauses. Pack with
   `python3 robot/tools/pack_urdf_viewer.py --template robot/hexapod_mkii_assy/preview/showcase_template.html --out tmp/hexapod_mkii_showcase.html`
   and drop the single HTML file into the site (it loads three.js from cdnjs
-  and fonts from Google Fonts).
+  and fonts from Google Fonts). This is an unfinished scripted draft; see
+  [the publication record](../../artifacts/showcase_draft_2026-09-08/README.md).
 - `preview/index.html` — three.js viewer: 18 sliders, zero / CAD / stand
   poses, tripod-gait animation, CAD colours or body tints, collision shapes,
-  click-to-identify. Serve the repo root (`.claude/launch.json` →
+  click-to-identify. Serve the repo root (`.claude/launch.json`,
   `hexapod-preview`, port 8321) and open
   `/robot/hexapod_mkii_assy/preview/index.html`.
+- `preview/inspection_v2.html`: current offline inspection with local
+  dependencies, animated linkage by default, serial-model comparison,
+  knee/joint sweeps, pose cycling, play/pause and speed controls. These are
+  kinematic inspection motions, not a learned gait or physics simulation.
 
 ## Conventions
 
@@ -72,18 +100,33 @@ python3 robot/tools/import_onshape_hexapod.py \
   leg pointing straight out from the body centre (the yaw mates are locked at
   arbitrary angles in the CAD; `--yaw-zero cad` reproduces the CAD placement
   instead). Limits ±0.872665 rad.
-- `femur_pitch` / `tibia_pitch` keep the leg reference convention (motor
-  positions at the shared CAD zero, limits 0…1.74533 and 0…2.53073 rad, RS05
-  5.5 N·m / 50.27 rad/s). The leg-internal joint transforms were measured
-  from this assembly (mean of the six legs, leg-to-leg spread 0.03 mm); the
-  knee sits 0.5 mm further along its axis than in the leg export.
+- `femur_pitch` / `tibia_pitch` zero = the CAD pose. Positive `femur_pitch`
+  raises the femur (46 deg above horizontal at zero, horizontal at -0.804);
+  positive `tibia_pitch` opens the knee (74 deg interior at zero, closed at
+  -1.29, straight at +1.85). Limits femur -1.745329..0.55, tibia -0.95..1.75
+  (`joint_limits.json`, derived from the CAD kinematics and valid until the
+  team measures the hardware stops). Motor 3 drives the push lever and the
+  parallelogram carries its delta 1:1 to the knee. The importer measured the
+  leg-internal joint transforms from this assembly (mean of the six legs,
+  leg-to-leg spread 0.03 mm). The knee sits 0.5 mm further along its axis
+  than in the leg export.
+- Historical serial-v2 stance (`stance_v2.json`): coxa 0, femur -0.25, tibia
+  -0.55; geometric contact height 0.137964 m, reset height 0.142964 m. These
+  heights are derived from the actual collision primitives and give every pad
+  at least 5 mm clearance at the nominal pose before reset jitter. They are
+  not a measured settling height or
+  a torque validation. Historical `stance.json` stays unchanged for v1
+  reproducibility; its 0.130 m reset penetrates the ground by up to 7.964 mm.
+  The physical four-bar task instead derives all 30 reset coordinates from
+  the 18 motor positions and per-leg CAD phase offsets, with a 0.142970 m
+  plate reset height. Do not copy serial knee defaults into pushlever actions.
 - Inertials: parallel-axis sums of Onshape's per-part mass, centroid and
   inertia (from the export's `robot.pkl`), with one hard override: every
   RS05 actuator totals 191 g (its vendor CAD is a 62 g hollow shell; the
   difference sits on the link carrying the housing as a solid cylinder the
   size of the housing). Everything else keeps its CAD mass, so the robot
   weighs 8.261 kg against Onshape's fused 5.942 kg; `--motor-mass 0`
-  reproduces the CAD exactly. Only the
+  reproduces the CAD masses. Only the
   yaw motor's output flange and hub (bolted through the frame) belong to the
   `body` link; the motor body, its top plate and the screws on them rotate
   with the coxa.
@@ -93,24 +136,76 @@ python3 robot/tools/import_onshape_hexapod.py \
   silicone foot pad.
 - Materials: the 14 CAD colours are shared `<material>` definitions.
 
-## Isaac Sim / Isaac Lab
+## Historical serial-v2 Isaac Sim / Isaac Lab workflow
 
-Import `urdf/hexapod_mkii_serial.urdf` as a floating-base USD with
-`tools/import_urdf_to_usd.py` (Isaac Sim python; URDF inertials kept, no
-convex decomposition, self-collision off), then author contact reports with
-`tools/enable_nested_contact_reports.py`. `package://hexapod_mkii_assy/...`
-resolves from this directory, exactly as the mock package was imported.
-`isaaclab/hexapod_rl/asset_cfg.py` points at
-`usd/hexapod_mkii_serial/hexapod_mkii_serial.usda` (override with
-`HEXAPOD_USD_PATH`), names the joints and links, carries the joint limits and
-the reset stance from `joint_limits.json` / `stance.json`, and
-`isaaclab/validate.py` runs the standing gate: 18 joints, 19 rigid bodies,
-six foot sensors, finite observations, no falls, no non-foot ground contact,
-and computed torque under the 1.6 N*m rating.
+This section explains the retained serial-v2 lineage. For current physical
+four-bar work, use the campaign link at the top of this file and its guarded
+admission workflow.
 
-The linkage model needs mimic-joint support (Isaac Sim >= 4.5) and is meant
-for visual/kinematic checks. With 1927 visual meshes the model is heavy for
-thousands of cloned environments; the STLs of fasteners and motor internals
-can be dropped from the visuals if rendering becomes the bottleneck. The
-Phase 1-2 curricula in `isaaclab/hexapod_rl/phase2_cfg.py` still carry the
-mock's stance values and belong to the archived mock checkpoints.
+`docs/OPERATIONS.md` §10 records the historical import, contact-report, and
+validation procedure. Follow [MKII_STEP1.md](../../docs/MKII_STEP1.md) for the
+current immutable bundle workflow; contact reports are now authored by the
+importer before hashing, not added after preparation. The CAD-v1 reset/import is archived: the original USD
+has incorrect inertia orientations and cannot be admitted for new training.
+The corrective importer/integrity gate and
+`packages/hexapod_env/hexapod_env/assets/mkii_v2.py` (`MKII_V2_ASSET`) define
+the corrected simulation lineage of this same mechanical URDF. Its USD has
+a separate path under `usd/hexapod_mkii_serial_v2/` and uses
+`HEXAPOD_MKII_V2_USD_PATH` for an explicit override.
+
+Run the CPU geometry gate after every model/stance change:
+
+```sh
+python3 tools/audit_mkii_stance.py
+python3 -m unittest discover -s isaaclab/tests -p test_mkii_v2_stance_and_frames.py
+```
+
+The gate evaluates all 171 collision primitives with full joint transforms,
+checks the source URDF hash and requires the configured heights to match the
+measured geometry. The nominal pose has at least 5 mm foot clearance, but the
+inherited environment then adds independent uniform ±0.03 rad offsets to all
+18 joints. The audit therefore also samples five offsets per joint on each
+independent three-joint leg branch (125 samples per leg, 750 leg poses total),
+including the endpoints and interior. The sampled minimum is **1.265 mm** for
+a foot and **26.499 mm** for a non-foot collider. The complete jitter intervals
+remain inside the articulation's soft joint limits. Thus the 5 mm nominal
+clearance is not a claim about the randomized reset poses.
+
+This grid is evidence at the sampled poses, **not a proof over the continuous
+jitter range**. The report distinguishes that limitation from the exact
+interval check for joint limits. A pass does not certify inter-leg collision,
+contact dynamics, actuator/linkage dynamics or post-import standing. A new
+asset must still pass the live simulator acceptance gate.
+Measured hardware limits must still replace the current CAD-derived ranges.
+
+`HexapodMkiiV2FlatEnvCfg` uses anatomical navigation commands: positive
+forward is body -Y, positive left is body +X, positive yaw remains body +Z.
+Linear velocity, angular velocity and gravity use that same proper rotation.
+The new config uses the CAD runtime manifest for actions and an explicit
+0.040 rad / 20 ms target slew limit; it is not a tuned omnidirectional policy.
+Its joint order is checked by name against the imported articulation before
+use. The next Isaac acceptance run must record the corrected import
+articulation order; no GPU acceptance is implied by the CPU geometry gate.
+
+Registration is explicit: call
+`hexapod_env.tasks.mkii_v2.register.register_mkii_v2()` before resolving
+`Isaac-Velocity-Flat-Hexapod-MKII-V2-Direct-v0`. Existing launchers do not
+automatically select or register this ID. Historical `spec.py`
+(`MKII_V1_ASSET`), `stance.json`, task IDs and their tests remain unchanged.
+New revisions require a newly hashed asset/manifest and reviewed stance. The
+source linkage URDF serves visual and kinematic checks; the separate physical
+v5 USD now authors the mechanism's force-transmitting constraints. Physical
+qualification remains a live-simulator gate, and hardware calibration remains
+separate. With 1927 visual meshes the model is heavy for
+thousands of cloned environments. If rendering becomes the bottleneck, drop
+the fastener and motor-internal STLs from the visuals.
+
+## Regenerating
+
+Do not hand-edit the URDFs. Change the inputs and re-run the importer above.
+Keep `part_overrides.json` and the `--yaw-output-side` rule when you
+re-export. Read `assembly_report.md`: each leg body must register below
+0.1 mm, each leg part must be present, and the mass totals must match. Mesh
+names stay ASCII.
+`python3 robot/tools/pack_urdf_viewer.py --out tmp/hexapod_mkii_viewer.html`
+builds the single-file web preview (`tmp/` is git-ignored).

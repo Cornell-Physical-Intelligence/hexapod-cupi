@@ -175,7 +175,7 @@ body.capture .panel,body.capture #dockToggle{display:none !important}
       <button class="btn on" data-pose="zero">Zero</button>
       <button class="btn" data-pose="stance">Stance</button>
       <button class="btn" data-pose="cad">As exported</button>
-      <button class="btn" data-pose="walk">Tripod gait</button>
+      <button class="btn" data-pose="walk">Scripted tripod gait</button>
     </div></div>
     <div id="legs"></div>
   </div>
@@ -373,7 +373,7 @@ function setPose(p){
   pose = p;
   document.querySelectorAll("[data-pose]").forEach(b => b.classList.toggle("on", b.dataset.pose === p));
   const st = MODEL.stance || {};
-  $("status").innerHTML = p === "walk" ? "<b>Tripod gait</b> — lf, lr, rm alternate with rf, lm, rr" : p === "cad" ? "<b>As exported</b> — the pose the CAD holds each leg in" : p === "stance" ? `<b>Validation stance</b> — femur ${st.lf_femur_pitch ?? "?"} / tibia ${st.lf_tibia_pitch ?? "?"} rad, bottom plate ${MODEL.stance_root_height_m ?? "?"} m up` : p === "zero" ? "<b>Zero pose</b> — every leg points straight out; femur and tibia at the CAD zero" : "<b>Manual</b> — sliders";
+  $("status").innerHTML = p === "walk" ? "<b>Scripted tripod gait</b> — lf, lr, rm alternate with rf, lm, rr" : p === "cad" ? "<b>As exported</b> — the pose the CAD holds each leg in" : p === "stance" ? `<b>Historical CAD stance</b> — femur ${st.lf_femur_pitch ?? "?"} / tibia ${st.lf_tibia_pitch ?? "?"} rad, bottom plate ${MODEL.stance_root_height_m ?? "?"} m up` : p === "zero" ? "<b>Zero pose</b> — every leg points straight out; femur and tibia at the CAD zero" : "<b>Manual</b> — sliders";
   if (p === "zero") setAll({});
   if (p === "cad") setAll(MODEL.cad_pose || {});
   if (p === "stance") setAll(st);

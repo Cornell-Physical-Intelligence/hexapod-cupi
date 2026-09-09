@@ -1,0 +1,44 @@
+{
+  "schema": "hexapod.capture_shutdown_review.v1",
+  "pass": true,
+  "runtime_or_capture_source_changed": false,
+  "native_simulation_executed": false,
+  "gpu_initialized": false,
+  "v2_manifest_sha256": "d76e6601c9327f6c04bde05fb6012d399c8db1463b1ffe68c5f57b17c42959d3",
+  "verified_v2_files": {
+    "README.md": "5301fe62152b207580c5bf49614ed8940f8cfec0e459325ae1e97e48526e8b88",
+    "VALIDATION.json": "98ee8f9449eaa5459ad8dcf98dc3f62cca69c4ca7e21dd92b136030a7202d147",
+    "capture_common.py": "ff60b5227ea8fbc2f3fc3ffe5091f0691ccff13cc1dab8e85063bb48d24df993",
+    "capture_policy.py": "ff10046f8e5964457aa68add1157cb4a092ce1a024da7492d44c980517e93843",
+    "record_admitted_policy.py": "32f6b8736d180ede22b2f9a96262383a0d63572972bbf62708f6916875d28f38",
+    "test_capture_tools.py": "e7b67e2a1bf0150001f17972779d69dd533727590c78f975cb3bf94afcd3c956"
+  },
+  "recorder": {
+    "launch_context_lines": [
+      120,
+      299
+    ],
+    "encoder_close_before_context_exit": 249,
+    "state_npz_before_context_exit": 256,
+    "metadata_before_context_exit": 277,
+    "success_report_before_context_exit": 285,
+    "env_close_after_success_report": 299
+  },
+  "host_supervisor": {
+    "separate_process": true,
+    "validate_capture_report_after_container_cleanup": 236,
+    "ffprobe_decodes_actual_video_after_container_cleanup": 239,
+    "verify_probe_before_supervisor_success": 242
+  },
+  "focused_existing_tests": {
+    "command": ".venv/bin/python -m unittest discover -s artifacts/mkii_fourbar_2026-09-06/policy_capture_tools_v2 -p test_capture_tools.py -v",
+    "tests_run": 21,
+    "pass": true
+  },
+  "finding": "No capture v3 lifecycle fix required. All successful recorder outputs precede native shutdown; host verifies report and decoded video independently.",
+  "limits": [
+    "Source/control-flow audit and mocked supervisor tests; no live encoding or native capture was run.",
+    "Kit can exit without returning from launch_simulation; capture success cannot depend on the return statement after that context.",
+    "Failed or missing primary report rejects even when container exit code is zero."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "hexapod.full_ppo_continuation_cpu_validation.v1",
+  "recorded_utc": "2026-09-07T01:25:03.457926+00:00",
+  "command": [
+    "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/mkii_simulation_integrity/.venv/bin/python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/mkii_simulation_integrity/artifacts/mkii_fourbar_2026-09-06/full_ppo_continuation_v1",
+    "-p",
+    "test_continuation.py",
+    "-v"
+  ],
+  "returncode": 0,
+  "tests_passed": 24,
+  "output": "test_chain_excludes_scratch_and_rejects_gap_overlap_overshoot_or_fourth_segment (test_continuation.Decisions.test_chain_excludes_scratch_and_rejects_gap_overlap_overshoot_or_fourth_segment) ... ok\ntest_chunk_count_reserves_inference_capture_cleanup_and_total_time (test_continuation.Decisions.test_chunk_count_reserves_inference_capture_cleanup_and_total_time) ... ok\ntest_job_command_keeps_frozen_host_limits_and_nonblocking_job_lock (test_continuation.Decisions.test_job_command_keeps_frozen_host_limits_and_nonblocking_job_lock) ... ok\ntest_only_measured_eta_over_deadline_inside_checkpoint_margin_pauses (test_continuation.Decisions.test_only_measured_eta_over_deadline_inside_checkpoint_margin_pauses) ... ok\ntest_strict_progress_and_nonregressing_timing (test_continuation.Decisions.test_strict_progress_and_nonregressing_timing) ... ok\ntest_admission_is_pinned_once_and_change_rejected_before_acceptance (test_continuation.Evidence.test_admission_is_pinned_once_and_change_rejected_before_acceptance) ... ok\ntest_capture_common_accepts_final_unpaused_remaining_segment_but_not_paused (test_continuation.Evidence.test_capture_common_accepts_final_unpaused_remaining_segment_but_not_paused) ... ok\ntest_complete_original_never_launches_continuation_or_duplicate_capture (test_continuation.Evidence.test_complete_original_never_launches_continuation_or_duplicate_capture) ... ok\ntest_complete_segment_retains_requested_completed_and_all_state_handoffs (test_continuation.Evidence.test_complete_segment_retains_requested_completed_and_all_state_handoffs) ... ok\ntest_discovery_binds_recorded_owner_and_rejects_later_container_identity_changes (test_continuation.Evidence.test_discovery_binds_recorded_owner_and_rejects_later_container_identity_changes) ... ok\ntest_full_mocked_pause_resume_chain_then_exactly_one_capture (test_continuation.Evidence.test_full_mocked_pause_resume_chain_then_exactly_one_capture) ... ok\ntest_modified_imported_tool_is_rejected_before_its_sentinel_executes (test_continuation.Evidence.test_modified_imported_tool_is_rejected_before_its_sentinel_executes) ... ok\ntest_old_follower_must_be_no_video_and_exited_without_any_capture_reservation (test_continuation.Evidence.test_old_follower_must_be_no_video_and_exited_without_any_capture_reservation) ... ok\ntest_pause_file_requires_fresh_exact_ownership_and_cannot_be_reused (test_continuation.Evidence.test_pause_file_requires_fresh_exact_ownership_and_cannot_be_reused) ... ok\ntest_pause_on_final_update_is_not_captured_and_never_adds_update_1001 (test_continuation.Evidence.test_pause_on_final_update_is_not_captured_and_never_adds_update_1001) ... ok\ntest_paused_segment_honestly_keeps_600_requested_and_200_completed (test_continuation.Evidence.test_paused_segment_honestly_keeps_600_requested_and_200_completed) ... ok\ntest_physics_failure_missing_cleanup_or_source_error_never_continues (test_continuation.Evidence.test_physics_failure_missing_cleanup_or_source_error_never_continues) ... ok\ntest_policy_optimizer_checkpoint_iteration_mismatches_rejected (test_continuation.Evidence.test_policy_optimizer_checkpoint_iteration_mismatches_rejected) ... ok\ntest_rejected_supervisor_cannot_be_hidden_by_original_inner_report_pass (test_continuation.Evidence.test_rejected_supervisor_cannot_be_hidden_by_original_inner_report_pass) ... ok\ntest_reserved_launch_restart_fails_closed_without_duplicate_dispatch (test_continuation.Evidence.test_reserved_launch_restart_fails_closed_without_duplicate_dispatch) ... ok\ntest_restart_bound_capture_job_does_not_launch_second_capture (test_continuation.Evidence.test_restart_bound_capture_job_does_not_launch_second_capture) ... ok\ntest_restart_bound_training_job_does_not_launch_another_training_process (test_continuation.Evidence.test_restart_bound_training_job_does_not_launch_another_training_process) ... ok\ntest_spawned_pid_is_durable_before_post_exec_identity_confirmation (test_continuation.Evidence.test_spawned_pid_is_durable_before_post_exec_identity_confirmation) ... ok\ntest_total_budget_uses_same_boot_monotonic_deadline_not_wall_clock (test_continuation.Evidence.test_total_budget_uses_same_boot_monotonic_deadline_not_wall_clock) ... ok\n\n----------------------------------------------------------------------\nRan 24 tests in 0.038s\n\nOK\n",
+  "source_files_before": {
+    "continuation.py": "a9def3ef253d97c05bdda0c535f19801d72958aabfa0aeb849c5573fb108b6d0",
+    "test_continuation.py": "ae5a8646523ac9e1222b76dbf87b28ca7788888d1b8cfba8f06bcc11bb604a04"
+  },
+  "source_files_after": {
+    "continuation.py": "a9def3ef253d97c05bdda0c535f19801d72958aabfa0aeb849c5573fb108b6d0",
+    "test_continuation.py": "ae5a8646523ac9e1222b76dbf87b28ca7788888d1b8cfba8f06bcc11bb604a04"
+  },
+  "source_files_unchanged": true,
+  "gpu_initialization_or_dispatch": false,
+  "deployment": false,
+  "scope": "Synthetic CPU decisions, process/evidence fixtures, mocked complete run/attestation transitions; no live Spark continuation, simulator or policy quality validation."
+}

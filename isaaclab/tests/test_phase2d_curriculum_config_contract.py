@@ -8,10 +8,11 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).parents[1]
-PHASE2D_PATH = ROOT / "hexapod_rl" / "phase2d_cfg.py"
-PHASE2_PATH = ROOT / "hexapod_rl" / "phase2_cfg.py"
-REGISTER_PATH = ROOT / "hexapod_rl" / "register.py"
-INIT_PATH = ROOT / "hexapod_rl" / "__init__.py"
+PACKAGE_ROOT = ROOT.parent / "packages" / "hexapod_env" / "hexapod_env"
+PHASE2D_PATH = PACKAGE_ROOT / "phase2d_cfg.py"
+PHASE2_PATH = PACKAGE_ROOT / "phase2_cfg.py"
+REGISTER_PATH = PACKAGE_ROOT / "register.py"
+INIT_PATH = PACKAGE_ROOT / "__init__.py"
 EVALUATOR_PATH = ROOT / "evaluate_checkpoint.py"
 
 PHASE2D_SOURCE = PHASE2D_PATH.read_text()
