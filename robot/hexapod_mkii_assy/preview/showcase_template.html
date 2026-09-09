@@ -1,0 +1,490 @@
+<title>Hexapod MKII Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=Barlow:wght@400;500&display=swap">
+<style>
+:root{--bg:#ffffff;--ink:#1b2129;--ink-2:#4b5563;--rule:#e8a33d}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg)}
+#stage{position:fixed;inset:0;background:var(--bg)}
+#stage canvas{display:block;width:100%;height:100%}
+#veil{position:fixed;inset:0;background:var(--bg);opacity:1;pointer-events:none;transition:opacity 1.2s ease}
+#vignette{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center, rgba(0,0,0,0) 58%, rgba(0,0,0,.09) 100%)}
+#mark{position:fixed;left:5vw;top:5vh;font:600 clamp(13px,1.15vw,18px) "Chakra Petch",system-ui,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-2);opacity:.8;transition:color .4s}
+#scrim{position:fixed;left:0;bottom:0;width:48vw;height:26vh;pointer-events:none;opacity:0;background:radial-gradient(ellipse at 22% 100%, var(--bg) 0%, var(--bg) 34%, transparent 66%)}
+#cap{position:fixed;left:5vw;bottom:6vh;max-width:70vw;pointer-events:none}
+#cap .r{width:42px;height:2px;background:var(--rule);margin-bottom:.9em;opacity:0}
+#cap .t{font:600 clamp(22px,3.4vw,46px)/1.05 "Chakra Petch",system-ui,sans-serif;color:var(--ink);letter-spacing:.01em;text-wrap:balance;transition:color .4s;opacity:0}
+#cap .s{font:400 clamp(15px,1.4vw,22px)/1.45 "Barlow","Helvetica Neue",Arial,sans-serif;color:var(--ink-2);margin-top:.45em;max-width:60ch;transition:color .4s;opacity:0}
+body.dark #cap .t{color:#e9f1ff} body.dark #cap .s{color:#b9c9e2} body.dark #mark{color:#b9c9e2}
+#loading{position:fixed;inset:0;display:grid;place-items:center;background:var(--bg);z-index:5;font:500 14px "Barlow",sans-serif;color:var(--ink-2)}
+#loading .bar{width:180px;height:2px;background:rgba(127,127,127,.15);margin-top:10px;overflow:hidden}
+#loading .bar i{display:block;height:100%;width:30%;background:var(--ink-2);animation:slide 1.1s infinite ease-in-out}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
+#pause{position:fixed;right:2vw;bottom:2vh;font:500 12px "Barlow",sans-serif;color:var(--ink-2);opacity:.6;pointer-events:none}
+</style>
+<div id="stage"></div>
+<div id="vignette"></div>
+<div id="mark">Hexapod MKII</div>
+<div id="veil"></div>
+<div id="scrim"></div>
+<div id="cap"><div class="r"></div><div class="t"></div><div class="s"></div></div>
+<div id="pause"></div>
+<div id="loading"><div>Loading<div class="bar"><i></i></div></div></div>
+<script id="model" type="application/json">__MODEL__</script>
+<script id="blob" type="text/plain">__BLOB__</script>
+<script type="module">
+import * as THREE from "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.module.min.js";
+__CORE_JS__
+const MODEL = JSON.parse(document.getElementById("model").textContent);
+const BLOB = document.getElementById("blob").textContent.trim();
+const $ = id => document.getElementById(id);
+const P = new URLSearchParams(location.search);
+const hex = (k, d) => "#" + (P.get(k) || d).replace("#", "");
+const BG = hex("bg", "fafbfd"), FACE = hex("face", "cdc4b6"), MOTOR = hex("motor", "2b2e33"), ACCENT = hex("accent", "e8a33d");
+const EDGE = P.get("edge") ? hex("edge", "141a21") : null;
+const CAPTIONS = P.get("captions") !== "0", SPEED = parseFloat(P.get("speed") || 1);
+document.documentElement.style.setProperty("--bg", BG); document.documentElement.style.setProperty("--rule", ACCENT);
+const lumHex = c => { const n = parseInt(c.slice(1), 16); return (0.2126*(n>>16) + 0.7152*((n>>8)&255) + 0.0722*(n&255)) / 255; };
+const darkBg = lumHex(BG) < 0.5;
+if (darkBg) document.body.classList.add("dark");
+if (P.get("vignette") === "0") $("vignette").remove();
+if (P.get("mark") === "0") $("mark").remove();
+
+const V = createHexapodCore(THREE, MODEL, BLOB, $("stage"), {});
+V.setStyle("shaded"); V.setGrid(false); V.setBackground(BG); V.setEdges(true); V.setShadows(true); V.setStudio(true, 0.6); V.setFov(30);
+const {state, view, jointVal, materials} = V;
+const edge = materials.edgeMat;
+const FLOOR_Z = V.box.min.z;
+
+// ---------- product materials: warm aluminium structure, satin anthracite actuators, grey fasteners, charcoal covers, rubber feet
+const std = (color, roughness, metalness, extra = {}) => new THREE.MeshStandardMaterial({color:new THREE.Color(color), roughness, metalness, envMapIntensity:0.8, flatShading:true, transparent:true, opacity:1, ...V.PO, ...extra});
+const MAT = {
+  structure: std(FACE, 0.42, 0.5, {envMapIntensity:1.0}),
+  motor: new THREE.MeshPhysicalMaterial({color:new THREE.Color(MOTOR), roughness:0.45, metalness:0.5, clearcoat:0.35, clearcoatRoughness:0.3, envMapIntensity:0.8, flatShading:true, transparent:true, opacity:1, ...V.PO}),
+  fastener: std("#8a8f96", 0.5, 0.55),
+  cover: std("#3a3d42", 0.7, 0.1),
+  foot: std("#5f5b58", 0.9, 0.0),
+};
+MAT.femurGhost = MAT.structure.clone(); MAT.coverGhost = MAT.cover.clone();
+// the five legs that are not featured get their own material set so they can fade to a ghost during the leg beat
+const OTHER = Object.fromEntries(["structure", "motor", "fastener", "cover", "foot"].map(k => [k, MAT[k].clone()]));
+const ALL_MATS = [...Object.values(MAT), ...Object.values(OTHER)], GHOST_MATS = [MAT.femurGhost, MAT.coverGhost], OTHER_MATS = Object.values(OTHER);
+// the three actuators of the left-front leg, gathered around their housings, for the amber highlight
+const HI = {}, hiMats = {}, hiCentre = {};
+// a part's centre in world space (mesh origins sit at the part frame, not at the part's centroid)
+function worldCentre(m){ if (!m.geometry.boundingSphere) m.geometry.computeBoundingSphere(); return m.localToWorld(m.geometry.boundingSphere.center.clone()); }
+{
+  const housings = V.meshes.filter(m => m.userData.leg === "lf" && m.userData.part.startsWith("motor_1_1_06_eb463_507"));
+  V.robot.updateMatrixWorld(true);
+  const centres = housings.map(h => worldCentre(h));
+  const coxaIdx = housings.findIndex(h => h.userData.link === "lf_coxa");
+  const femurIdx = housings.map((h, i) => i).filter(i => housings[i].userData.link === "lf_femur");
+  // yaw = the housing in the coxa; hip = the femur housing next to it; knee = the femur housing at the far end
+  femurIdx.sort((a, b) => centres[a].distanceTo(centres[coxaIdx]) - centres[b].distanceTo(centres[coxaIdx]));
+  const order = {yaw: coxaIdx, hip: femurIdx[0], knee: femurIdx[1]};
+  const names = Object.keys(order).filter(k => order[k] !== undefined && order[k] >= 0);
+  for (const name of names) { HI[name] = new Set(); hiMats[name] = MAT.motor.clone(); hiCentre[name] = housings[order[name]]; }
+  // every actuator part of the leg joins the nearest housing (the yaw and hip drives sit only ~50 mm apart)
+  for (const m of V.meshes) {
+    if (m.userData.leg !== "lf" || m.userData.pclass !== "motor") continue;
+    const c = worldCentre(m); let best = null, bd = Infinity;
+    for (const name of names) { const d = c.distanceTo(centres[order[name]]); if (d < bd) { bd = d; best = name; } }
+    if (best && bd < 0.09) HI[best].add(m);
+  }
+}
+const AMBER = new THREE.Color(ACCENT), MOTOR_C = new THREE.Color(MOTOR), STRUCT_C = new THREE.Color(FACE);
+const edgeAmber = new THREE.LineBasicMaterial({color:AMBER, transparent:true, opacity:1});
+const edgeFast = edge.clone();
+const HERO = "lf";
+// the knee linkage (pushrod and lever) lights up together with the knee actuator
+HI.linkage = new Set(V.meshes.filter(m => (m.userData.link === HERO + "_tibia_pushrod" || m.userData.link === HERO + "_tibia_push_lever") && m.userData.pclass !== "fastener" && m.userData.pclass !== "motor"));
+hiMats.linkage = MAT.structure.clone();
+V.materialOverride = m => {
+  for (const [name, set] of Object.entries(HI)) if (set.has(m)) return hiMats[name];
+  const u = m.userData, set = (u.leg && u.leg !== HERO) ? OTHER : MAT;
+  if (u.pclass === "motor") return set.motor;
+  if (u.pclass === "fastener") return set.fastener;
+  if (u.link === HERO + "_femur") return u.pclass === "cover" ? MAT.coverGhost : MAT.femurGhost;
+  if (u.pclass === "cover") return set.cover;
+  if (u.part.startsWith("silicone_foot")) return set.foot;
+  return set.structure;
+};
+const otherLegMeshes = V.meshes.filter(m => m.userData.leg && m.userData.leg !== HERO);
+const fastenerMeshes = V.meshes.filter(m => m.userData.pclass === "fastener");
+for (const m of fastenerMeshes) m.userData.edge.material = edgeFast;
+const FAST_MATS = [MAT.fastener, OTHER.fastener];
+const GHOST_C = new THREE.Color("#dfe3e8"); let otherFocused = false;
+for (const m of OTHER_MATS) m.userData.base = m.color.clone();
+V.applyMode();
+const shadowPlane = V.scene.children.find(o => o.material && o.material.isShadowMaterial);
+shadowPlane.material.opacity = 0.2;
+V.renderer.shadowMap.type = THREE.VSMShadowMap; V.key.shadow.radius = 7; V.key.shadow.blurSamples = 16; V.key.shadow.bias = -0.0002; V.key.shadow.mapSize.set(2048, 2048); V.key.shadow.map = null;
+
+// ---------- light rig that travels with the camera (a turntable under fixed lights), rim light for separation
+V.key.intensity = 1.2; V.hemi.intensity = 0.6;
+const rim = new THREE.DirectionalLight(0xf4f7ff, 2.4); V.scene.add(rim);
+function rig(theta){
+  V.key.position.set(Math.cos(theta + 0.7) * 2.2, Math.sin(theta + 0.7) * 2.2, 2.6);
+  rim.position.set(Math.cos(theta + Math.PI - 0.6) * 2.6, Math.sin(theta + Math.PI - 0.6) * 2.6, 1.6);
+}
+// ---------- floor: a faint dot grid that appears for the walk and scrolls like a treadmill, plus contact shadows under the feet
+const dotTex = (() => { const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d"); g.fillStyle = "#000"; g.fillRect(0, 0, 128, 128); g.fillStyle = "#fff"; g.beginPath(); g.arc(64, 64, 5, 0, Math.PI * 2); g.fill(); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(64, 64); t.anisotropy = 8; return t; })();
+const DOT_PITCH = 0.125;
+const floorMat = new THREE.MeshBasicMaterial({color:new THREE.Color(darkBg ? "#ffffff" : "#000000"), alphaMap:dotTex, transparent:true, depthWrite:false, opacity:0});
+floorMat.onBeforeCompile = sh => {
+  sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nvarying vec2 vFloor;").replace("#include <begin_vertex>", "#include <begin_vertex>\nvFloor = position.xy;");
+  sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\nvarying vec2 vFloor;").replace("#include <dithering_fragment>", "#include <dithering_fragment>\ngl_FragColor.a *= smoothstep(2.4, 0.7, length(vFloor));");
+};
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(64 * DOT_PITCH, 64 * DOT_PITCH), floorMat); floor.position.z = FLOOR_Z + 0.0004; floor.renderOrder = -1; V.scene.add(floor);
+const decalTex = (() => { const c = document.createElement("canvas"); c.width = c.height = 128; const g = c.getContext("2d"); const gr = g.createRadialGradient(64, 64, 4, 64, 64, 64); gr.addColorStop(0, "#fff"); gr.addColorStop(0.45, "#8c8c8c"); gr.addColorStop(1, "#000"); g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
+const feet = V.meshes.filter(m => m.userData.part.startsWith("silicone_foot"));
+const decals = feet.map(() => { const d = new THREE.Mesh(new THREE.CircleGeometry(0.042, 28), new THREE.MeshBasicMaterial({color:0x000000, alphaMap:decalTex, transparent:true, depthWrite:false, opacity:0})); d.position.z = FLOOR_Z + 0.0008; d.renderOrder = -1; V.scene.add(d); return d; });
+const vtx = new THREE.Vector3();
+function footLowest(f){
+  const a = f.geometry.attributes.position; let best = null;
+  for (let i = 0; i < a.count; i += 3) { vtx.fromBufferAttribute(a, i); f.localToWorld(vtx); if (!best || vtx.z < best.z) best = vtx.clone(); }
+  return best;
+}
+const footLow = feet.map(() => new THREE.Vector3());
+function measureFeet(){ feet.forEach((f, i) => footLow[i].copy(footLowest(f))); return Math.min(...footLow.map(v => v.z)); }
+function updateDecals(strength){
+  feet.forEach((f, i) => {
+    const lowest = footLow[i], h = lowest.z - FLOOR_Z, d = decals[i];
+    d.position.x = lowest.x; d.position.y = lowest.y; d.material.opacity = strength * 0.55 * Math.max(0, Math.min(1, 1 - h / 0.03)); d.visible = d.material.opacity > 0.01 && f.visible;
+  });
+}
+
+// background changes are soft radial wipes (a disc growing over the frame) instead of colour dissolves
+const wipeTex = (() => { const c = document.createElement("canvas"); c.width = c.height = 256; const g = c.getContext("2d"); g.fillStyle = "#000"; g.fillRect(0, 0, 256, 256); const gr = g.createRadialGradient(128, 128, 0, 128, 128, 128); gr.addColorStop(0, "#fff"); gr.addColorStop(0.72, "#fff"); gr.addColorStop(1, "#000"); g.fillStyle = gr; g.fillRect(0, 0, 256, 256); return new THREE.CanvasTexture(c); })();
+const wipe = new THREE.Mesh(new THREE.CircleGeometry(1, 96), new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, alphaMap:wipeTex, depthTest:false, depthWrite:false, fog:false}));
+wipe.renderOrder = -20; wipe.visible = false; wipe.frustumCulled = false; V.scene.add(wipe);
+const WIPE_DIST = 20;
+function placeWipe(colour, u){
+  wipe.visible = u > 0 && u < 1; if (!wipe.visible) return;
+  const cam = V.camera; cam.updateMatrixWorld(true);
+  const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(cam.quaternion);
+  // the disc is centred beyond the bottom-left corner, so its edge sweeps diagonally across the frame
+  const halfH = WIPE_DIST * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2), halfW = halfH * cam.aspect;
+  const rightV = new THREE.Vector3(1, 0, 0).applyQuaternion(cam.quaternion), upV = new THREE.Vector3(0, 1, 0).applyQuaternion(cam.quaternion);
+  wipe.position.copy(cam.position).addScaledVector(dir, WIPE_DIST).addScaledVector(rightV, -halfW * 1.1).addScaledVector(upV, -halfH * 1.1); wipe.quaternion.copy(cam.quaternion);
+  const reach = Math.hypot(halfW * 2.1, halfH * 2.1) * 1.25;
+  const r = 0.2 + smooth(u) * reach; wipe.scale.set(r, r, 1); wipe.material.color.copy(colour);
+}
+const STANCE = MODEL.stance || {};
+const ZERO = Object.fromEntries(Object.keys(jointVal).map(n => [n, 0]));
+const EDGE_DARK = new THREE.Color(EDGE || (darkBg ? "#e3e9f2" : "#141a21")), EDGE_BP = new THREE.Color("#9fd3ff");
+const BG_MAIN = new THREE.Color(BG), BG_BP = new THREE.Color("#0b2545");
+const smooth = u => u <= 0 ? 0 : u >= 1 ? 1 : u*u*(3 - 2*u);
+const lerp = (a, b, u) => a + (b - a) * u;
+// perceptual colour blend (OKLab) so white -> navy never passes through muddy grey
+const toLin = v => v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+const toSrgb = v => v <= 0.0031308 ? 12.92 * v : 1.055 * Math.pow(v, 1 / 2.4) - 0.055;
+function oklab(c){ const r = toLin(c.r), g = toLin(c.g), b = toLin(c.b);
+  const l = Math.cbrt(0.4122214708*r + 0.5363325363*g + 0.0514459929*b), m = Math.cbrt(0.2119034982*r + 0.6806995451*g + 0.1073969566*b), s = Math.cbrt(0.0883024619*r + 0.2817188376*g + 0.6299787005*b);
+  return [0.2104542553*l + 0.7936177850*m - 0.0040720468*s, 1.9779984951*l - 2.4285922050*m + 0.4505937099*s, 0.0259040371*l + 0.7827717662*m - 0.8086757660*s]; }
+function fromOklab(L, a, b){ const l = Math.pow(L + 0.3963377774*a + 0.2158037573*b, 3), m = Math.pow(L - 0.1055613458*a - 0.0638541728*b, 3), s = Math.pow(L - 0.0894841775*a - 1.2914855480*b, 3);
+  const cl = v => Math.min(1, Math.max(0, toSrgb(v)));
+  return new THREE.Color(cl(4.0767416621*l - 3.3077115913*m + 0.2309699292*s), cl(-1.2684380046*l + 2.6097574011*m - 0.3413193965*s), cl(-0.0041960863*l - 0.7034186147*m + 1.7076147010*s)); }
+function mixLab(c1, c2, u){ const a = oklab(c1), b = oklab(c2); return fromOklab(lerp(a[0], b[0], u), lerp(a[1], b[1], u), lerp(a[2], b[2], u)); }
+
+// ---------- reference framings (worst case over a full turn of azimuth so nothing is cropped at any angle)
+let r0 = 1, rExpF = 1.6, rStF = 0.8, targetExp = V.centre.clone(), targetSt = V.centre.clone(), targetRest = V.centre.clone();
+// worst-case fit over the azimuth range a held shot actually sweeps (plus a little slack either side)
+function fitAll(margin, phi, thetaA = 0, thetaB = 2 * Math.PI, steps = 7){
+  const hidden = fastenerMeshes.filter(m => m.visible); hidden.forEach(m => m.visible = false);
+  try { return fitCore(margin, phi, thetaA, thetaB, steps); } finally { hidden.forEach(m => m.visible = true); }
+}
+function fitCore(margin, phi, thetaA, thetaB, steps){
+  view.phi = phi; let rMax = 0, target = null;
+  const lo = Math.min(thetaA, thetaB) - 0.12, hi = Math.max(thetaA, thetaB) + 0.12;
+  for (let k = 0; k < steps; k++) { view.theta = lo + (hi - lo) * k / (steps - 1); V.frameVisible(margin); if (view.r > rMax) { rMax = view.r; } if (!target) target = view.target.clone(); }
+  view.r = rMax; view.target.copy(target); return {r: rMax, target};
+}
+const EXPLODE = {links: 0.6, parts: 0.4};
+function computeFramings(){
+  V.robot.position.set(0, 0, 0); V.robot.rotation.set(0, 0, 0);
+  V.setPose(ZERO); V.setExplode(0, 0); V.update(); V.robot.updateMatrixWorld(true);
+  let f = fitAll(0.88, 1.12, -1.31, -1.55); r0 = f.r; targetRest = f.target;
+  V.setExplode(EXPLODE.links, EXPLODE.parts); V.update(); V.robot.updateMatrixWorld(true); f = fitAll(0.9, 1.01, -4.30, -4.60); rExpF = f.r / r0; targetExp = f.target;
+  V.setExplode(0, 0); V.setPose(STANCE); V.update(); V.robot.updateMatrixWorld(true); V.robot.position.z = FLOOR_Z - measureFeet(); V.robot.updateMatrixWorld(true);
+  f = fitAll(0.84, 1.38, -6.10, -6.85); rStF = f.r / r0; targetSt = f.target; V.robot.position.z = 0;
+  V.setPose(ZERO); V.update();
+}
+computeFramings();
+const EXPORT = P.get("export");
+addEventListener("resize", () => { if (EXPORT) return; V.resize($("stage").clientWidth, $("stage").clientHeight); computeFramings(); });
+
+// ---------- one continuous take: closed camera spline plus keyframed envelopes
+const T = 92;
+const centre = () => targetRest.clone();
+const jointW = name => V.jointObj[name].getWorldPosition(new THREE.Vector3());
+const partW = name => worldCentre(hiCentre[name]);
+// [time, theta, phi, distance (factor of r0 | {m: metres} | "exp" | "st"), target, shift right, shift up]  (shifts are fractions of the half-frame; + moves the subject that way)
+const CAM = [
+  // held shots sit between measured rest-pose leg directions (lf -0.93, rf -1.69, rm -2.82, rr -4.07, lr -4.83, lm -5.95 rad)
+  [0,    -1.36, 1.24, 1.10, centre, 0.08, 0.06],
+  [4,    -1.48, 1.16, 1.03, centre, 0.08, 0.06],
+  [7,    -1.60, 1.10, 0.98, centre, 0.08, 0.06],
+  [11,   -1.98, 1.30, {m:1.15}, () => jointW("lf_coxa_yaw"), 0.12, 0.06],
+  [13,   -2.05, 1.46, {m:0.85}, () => jointW("lf_coxa_yaw"), 0.12, 0.06],
+  [16.5, -2.05, 1.66, {m:0.55}, () => partW("yaw"), 0.10, 0.05],
+  [20.5, -2.40, 1.30, {m:0.62}, () => partW("hip"), 0.22, 0.16],
+  [24,   -2.58, 1.28, {m:0.58}, () => partW("knee"), 0.22, 0.20],
+  [26.5, -2.62, 1.20, {m:0.72}, () => partW("knee"), 0.22, 0.20],
+  [29.5, -3.20, 1.08, 0.98, centre, 0.08, 0.06],
+  [33,   -3.45, 1.02, "exp", () => targetExp, 0.06, 0.04],
+  [43,   -3.70, 1.02, "exp", () => targetExp, 0.06, 0.04],
+  [49,   -4.20, 1.04, "exp", () => targetExp, 0.06, 0.04],
+  [52.5, -4.40, 1.08, 0.94, centre, 0.08, 0.06],
+  [57,   -4.55, 1.12, 0.90, centre, 0.08, 0.06],
+  [63,   -5.15, 1.30, "st", () => targetSt, 0.04, 0.02],
+  [70,   -5.55, 1.38, "st", () => targetSt, 0.04, 0.02],
+  [78,   -6.15, 1.44, "st", () => targetSt, 0.04, 0.02],
+  [84,   -6.75, 1.34, "st", () => targetSt, 0.04, 0.02],
+  [92,   -7.643185, 1.24, 1.10, centre, 0.08, 0.06],
+];
+const TWO_PI = Math.PI * 2;
+const camVal = (k, j, wrap) => j === 1 ? k[1] + wrap : j === 3 ? (k[3] === "exp" ? rExpF * r0 : k[3] === "st" ? rStF * r0 : typeof k[3] === "object" ? k[3].m : k[3] * r0) : k[j];
+function hermite(v0, v1, v2, v3, t0, t1, t2, t3, t){
+  const h = t2 - t1, s = (t - t1) / h, m1 = (v2 - v0) / (t2 - t0) * h, m2 = (v3 - v1) / (t3 - t1) * h;
+  const s2 = s*s, s3 = s2*s;
+  return (2*s3 - 3*s2 + 1) * v1 + (s3 - 2*s2 + s) * m1 + (-2*s3 + 3*s2) * v2 + (s3 - s2) * m2;
+}
+function camera(t){
+  const n = CAM.length - 1;
+  let i = 0; while (i < n - 1 && t >= CAM[i+1][0]) i++;
+  const idx = j => ((j % n) + n) % n;
+  const k0 = CAM[idx(i-1)], k1 = CAM[i], k2 = CAM[i+1], k3 = CAM[idx(i+2)];
+  const t0 = i === 0 ? k0[0] - T : k0[0], t1 = k1[0], t2 = k2[0], t3 = (i + 2 >= n) ? k3[0] + T : k3[0];
+  // the azimuth makes one full turn per loop: wrapped keys carry the turn so the spline is C1 across the loop point
+  const w0 = i === 0 ? TWO_PI : 0, w3 = (i + 2 >= n) ? -TWO_PI : 0;
+  const H = j => hermite(camVal(k0, j, w0), camVal(k1, j, 0), camVal(k2, j, 0), camVal(k3, j, w3), t0, t1, t2, t3, t);
+  const tg = [k0[4](), k1[4](), k2[4](), k3[4]()];
+  const target = new THREE.Vector3(...[0, 1, 2].map(c => hermite(tg[0].getComponent(c), tg[1].getComponent(c), tg[2].getComponent(c), tg[3].getComponent(c), t0, t1, t2, t3, t)));
+  return {theta: H(1), phi: H(2), r: H(3), target, shift: H(5), lift: H(6)};
+}
+function env(keys, t){
+  if (t <= keys[0][0]) return keys[0][1];
+  for (let i = 0; i < keys.length - 1; i++) if (t < keys[i+1][0]) {
+    const u = smooth((t - keys[i][0]) / (keys[i+1][0] - keys[i][0])), a = keys[i][1], b = keys[i+1][1];
+    return a.isColor ? mixLab(a, b, u) : lerp(a, b, u);
+  }
+  return keys[keys.length - 1][1];
+}
+const E = {
+  links:   [[0,0],[31,0],[36,EXPLODE.links],[45.5,EXPLODE.links],[50.5,0]],
+  parts:   [[0,0],[34.5,0],[39,EXPLODE.parts],[41.8,EXPLODE.parts * 1.18],[44.5,EXPLODE.parts],[49.5,0]],
+  edges:   [[0,0],[29.5,0],[32,0.95],[51.9,0.95],[52.6,0.35],[56.5,0.35],[58,0]],
+  faceOp:  [[0,1],[43.5,1],[45,0],[51.6,0],[51.9,0.12],[56.5,0.12],[58,1]],
+  occlude: [[0,1],[51.7,1],[51.9,0],[57.95,0],[58.05,1]],
+  wipeIn:  [[0,0],[43.6,0],[44.9,1]],
+  wipeOut: [[0,0],[50.6,0],[51.9,1]],
+  edgeCol: [[0,EDGE_DARK],[43.6,EDGE_DARK],[44.9,EDGE_BP],[50.6,EDGE_BP],[51.9,EDGE_DARK]],
+  shadow:  [[0,1],[13,1],[14.6,0],[27,0],[29.5,1],[30,1],[32.5,0],[58,0],[60.5,1],[92,1]],
+  fastOp:  [[0,1],[44.4,1],[45.1,0],[57.6,0],[58.6,1]],
+  stand:   [[0,0],[58,0],[62.5,1],[85,1],[88.5,0]],
+  gait:    [[0,0],[63.5,0],[66,1],[82,1],[84.5,0]],
+  floor:   [[0,0],[56,0],[59,1],[84,1],[88,0]],
+  legdemo: [[0,0],[11,0],[13,1],[26,1],[28,0]],
+  kneedemo:[[0,0],[21,0],[22.5,1],[25.8,1],[27.5,0]],
+  ghost:   [[0,0],[17.8,0],[19.2,1],[25.6,1],[27,0]],
+  focus:   [[0,0],[13,0],[14.6,1],[26.5,1],[29.5,0]],
+  hiYaw:   [[0,0],[14.5,0],[15.2,1],[18.3,1],[19,0]],
+  hiHip:   [[0,0],[18.3,0],[19,1],[21.8,1],[22.5,0]],
+  hiKnee:  [[0,0],[21.8,0],[22.5,1],[25.8,1],[26.8,0]],
+};
+const isDarkAt = t => env(E.wipeIn, t) > 0.5 && env(E.wipeOut, t) < 0.5;
+const TITLES = [[1, 7.5, "Hexapod MKII"], [11, 26.5, "Leg drive"], [32.5, 43, "Exploded"], [45.8, 50, "Blueprint"], [52.7, 57, "X-ray"], [59, 63.5, "Standing"], [66, 73, "Scripted tripod"], [74, 80, "Kinematic preview"], [85.5, 90.8, "Hexapod MKII"]];
+const SUBS = [[1, 7.5, "Six legs. Eighteen RS05 actuators."], [11, 15, "Three actuators per leg"], [15, 19, "Yaw drive under the deck"], [19, 22.5, "Hip actuator in the femur"], [22.5, 26.5, "Knee through a parallelogram"], [32.5, 43, "Parts separated along their own axes"], [45.8, 50, "Every joint modelled before a part was cut"], [52.7, 57, "Eighteen actuators in view"], [59, 63.5, "From rest to full stance"], [66, 73, "Three legs swing while three stand"], [74, 80, "Scripted motion for CAD inspection"], [85.5, 90.8, "A six-legged research platform"]];
+const FADE = 0.7;
+function capAt(list, t){ for (const c of list) if (t >= c[0] - FADE && t < c[1]) { const a = Math.min(smooth((t - (c[0] - FADE)) / FADE), smooth((c[1] - t) / FADE)); if (a > 0) return {text: c[2], a}; } return {text: "", a: 0}; }
+const LEGS = V.LEGS;
+// treadmill distance for the dot floor: the integral of the gait envelope times the walking speed
+const WALK_SPEED = 0.10;
+const gaitDist = (() => { const dt = 0.05, n = Math.ceil(T / dt) + 1, arr = new Float32Array(n); let acc = 0; for (let i = 0; i < n; i++) { arr[i] = acc; acc += env(E.gait, i * dt) * WALK_SPEED * dt; } return t => { const x = Math.min(n - 1, Math.max(0, t / dt)), i = Math.floor(x), f = x - i; return i + 1 < n ? arr[i] * (1 - f) + arr[i + 1] * f : arr[n - 1]; }; })();
+
+// ---------- per-frame evaluation
+let shadowsOn = true, lastDark = null;
+const right = new THREE.Vector3(), up = new THREE.Vector3();
+function applyLook(t){
+  V.setExplode(env(E.links, t), env(E.parts, t));
+  edge.opacity = env(E.edges, t); edge.color.copy(env(E.edgeCol, t));
+  const op = env(E.faceOp, t), occ = env(E.occlude, t) > 0.5;
+  for (const m of ALL_MATS) { m.opacity = op; m.depthWrite = occ; }
+  const ghost = env(E.ghost, t); for (const m of GHOST_MATS) { m.opacity = op * (1 - 0.82 * ghost); m.depthWrite = occ && ghost < 0.5; }
+  // the other five legs fade to a flat light ghost while one leg is featured: no shadows, no edges, no fasteners
+  const focus = env(E.focus, t), focused = focus > 0.5;
+  for (const m of OTHER_MATS) { m.opacity = op * (1 - 0.93 * focus); m.depthWrite = occ && !focused; m.color.copy(m.userData.base).lerp(GHOST_C, focus); m.emissive.set(0x000000); }
+  for (const m of otherLegMeshes) m.userData.edge.visible = state.edgesOn && m.visible && focus < 0.02;
+  const fo = env(E.fastOp, t), showFast = fo > 0.005;
+  MAT.fastener.opacity = op * fo; OTHER.fastener.opacity = op * fo * (1 - 0.93 * focus); edgeFast.opacity = edge.opacity * fo; edgeFast.color.copy(edge.color);
+  if (showFast !== V.classVisible.fastener) { V.classVisible.fastener = showFast; V.applyMode(); otherFocused = null; }
+
+  for (const m of Object.values(hiMats)) { m.opacity = op; m.depthWrite = occ; }
+  const u1 = env(E.wipeIn, t), u2 = env(E.wipeOut, t);
+  const bg = (u1 >= 1 && u2 < 1) ? BG_BP : BG_MAIN; V.scene.background.copy(bg); V.renderer.setClearColor(bg, 1);
+  if (u1 > 0 && u1 < 1) placeWipe(BG_BP, u1); else if (u2 > 0 && u2 < 1) placeWipe(BG_MAIN, u2); else wipe.visible = false;
+  const isDark = isDarkAt(t);
+  if (isDark !== lastDark) { lastDark = isDark; document.body.classList.toggle("dark", isDark); $("scrim").style.setProperty("--bg", "#" + bg.getHexString()); }
+  const sh = env(E.shadow, t); shadowPlane.material.opacity = 0.2 * sh;
+  const wantShadows = sh > 0.005; if (wantShadows !== shadowsOn) { shadowsOn = wantShadows; V.setShadows(wantShadows); otherFocused = null; }
+  for (const [name, key] of [["yaw", "hiYaw"], ["hip", "hiHip"], ["knee", "hiKnee"], ["linkage", "hiKnee"]]) if (hiMats[name]) {
+    const k = env(E[key], t), base = name === "linkage" ? STRUCT_C : MOTOR_C;
+    hiMats[name].color.copy(base).lerp(AMBER, k); hiMats[name].emissive.copy(AMBER).multiplyScalar(0.35 * k);
+    for (const m of HI[name]) m.userData.edge.material = k > 0.5 ? edgeAmber : edge;
+  }
+  floorMat.opacity = env(E.floor, t) * (darkBg ? 0.32 : 0.30);
+  floor.visible = floorMat.opacity > 0.003;
+  dotTex.offset.y = -(gaitDist(t) / DOT_PITCH) % 1;
+  return {sh, isDark, bg};
+}
+function applyPose(t, tAbs){
+  const w = env(E.stand, t), g = env(E.gait, t), demo = env(E.legdemo, t);
+  const gait = g > 0 ? V.gait(tAbs, STANCE, {yaw:0.2, femur:0.34, tibia:0.22}, 0.65) : null;
+  for (const n of Object.keys(jointVal)) {
+    const J = MODEL.joints.find(j => j.n === n); if (J.mimic) continue;
+    let v = lerp(0, STANCE[n] ?? 0, w);
+    if (gait) v += g * (gait[n] - (STANCE[n] ?? 0));
+    jointVal[n] = v;
+  }
+  if (t < 4) for (let i = 0; i < LEGS.length; i++) { const u = (t - (0.8 + 0.18 * i)) / 0.5; if (u > 0 && u < 1) { jointVal[`${LEGS[i]}_tibia_pitch`] += 0.17 * Math.sin(Math.PI * u); jointVal[`${LEGS[i]}_femur_pitch`] += 0.05 * Math.sin(Math.PI * u); } }
+  if (demo > 0) { const p = (t - 12) / 8 * 2 * Math.PI; jointVal.lf_coxa_yaw += demo * 0.24 * Math.sin(p); jointVal.lf_femur_pitch += demo * 0.12 * Math.sin(p * 0.5 + 0.6); jointVal.lf_tibia_pitch += demo * 0.10 * Math.sin(p * 0.5 - 0.4); }
+  const kd = env(E.kneedemo, t); if (kd > 0) jointVal.lf_tibia_pitch += kd * 0.5 * Math.sin((t - 22.5) / 1.7 * 2 * Math.PI);
+  const wph = tAbs * 2 * Math.PI * 0.65;
+  V.robot.position.z = 0; V.robot.rotation.x = g * 0.012 * Math.sin(wph); V.robot.rotation.y = g * 0.006 * Math.sin(2 * wph + 0.7);
+  V.update(); V.robot.updateMatrixWorld(true);
+  // the body rises as the legs extend: keep the lowest planted foot on the floor, then add the walking bob
+  const minZ = measureFeet();
+  V.robot.position.z = (FLOOR_Z - minZ) + g * 0.008 * Math.sin(2 * wph);
+  V.robot.updateMatrixWorld(true); feet.forEach((f, i) => footLow[i].z += V.robot.position.z);
+  return {w, g};
+}
+function applyCamera(c){
+  view.theta = c.theta; view.phi = c.phi; view.r = c.r; view.target.copy(c.target);
+  if (c.shift || c.lift) {
+    V.updateCamera(); V.camera.updateMatrixWorld(true);
+    right.setFromMatrixColumn(V.camera.matrixWorld, 0); up.setFromMatrixColumn(V.camera.matrixWorld, 1);
+    const vHalf = Math.tan(THREE.MathUtils.degToRad(V.camera.fov) / 2), hHalf = vHalf * V.camera.aspect;
+    view.target.addScaledVector(right, -(c.shift || 0) * view.r * hHalf).addScaledVector(up, -(c.lift || 0) * view.r * vHalf);
+  }
+  V.updateCamera(); V.camera.updateMatrixWorld(true); rig(view.theta);
+}
+function renderAt(t, tAbs){
+  applyPose(t, tAbs);
+  const look = applyLook(t);
+  applyCamera(camera(t));
+  { const u1 = env(E.wipeIn, t), u2 = env(E.wipeOut, t); if (u1 > 0 && u1 < 1) placeWipe(BG_BP, u1); else if (u2 > 0 && u2 < 1) placeWipe(BG_MAIN, u2); }
+  updateDecals(look.sh);
+  const ti = capAt(TITLES, t), su = capAt(SUBS, t), on = CAPTIONS ? 1 : 0;
+  const cap = $("cap"); cap.querySelector(".t").textContent = ti.text; cap.querySelector(".s").textContent = su.text;
+  cap.querySelector(".t").style.opacity = ti.a * on; cap.querySelector(".r").style.opacity = ti.a * on; cap.querySelector(".s").style.opacity = su.a * on;
+  $("scrim").style.opacity = Math.max(ti.a, su.a) * 0.92 * on;
+  V.render();
+}
+let paused = false, pauseAt = 0, offset = 0;
+const clock = new THREE.Clock();
+addEventListener("click", () => { paused = !paused; if (paused) pauseAt = clock.getElapsedTime(); else offset += clock.getElapsedTime() - pauseAt; $("pause").textContent = paused ? "paused — click to resume" : ""; });
+$("loading").remove();
+
+// ---------- framing probes (used while authoring: fraction of an actuator visible, subject bounds, caption-zone occupancy)
+const probeRT = new THREE.WebGLRenderTarget(320, 180), px = new Uint8Array(320 * 180 * 4);
+const magenta = new THREE.MeshBasicMaterial({color:0xff00ff});
+function probe(setName, subjectLeg = "lf"){
+  const set = HI[setName]; if (!set) return null;
+  const saved = V.meshes.map(m => [m, m.material, m.visible, m.userData.edge.visible]);
+  const savedExtras = [[shadowPlane, shadowPlane.visible], [floor, floor.visible], ...decals.map(d => [d, d.visible])];
+  savedExtras.forEach(([o]) => o.visible = false);
+  V.meshes.forEach(m => { m.userData.edge.visible = false; });
+  const bgSave = V.scene.background.clone(); V.scene.background = new THREE.Color(0xffffff);
+  const pass = () => {
+    V.renderer.setRenderTarget(probeRT); V.renderer.clear(); V.renderer.render(V.scene, V.camera); V.renderer.readRenderTargetPixels(probeRT, 0, 0, 320, 180, px); V.renderer.setRenderTarget(null);
+    let mag = 0, zone = 0, any = 0; const bb = [320, 180, 0, 0];
+    for (let i = 0; i < 320 * 180; i++) { const r = px[4*i], g = px[4*i+1], b = px[4*i+2]; const x = i % 320, y = 179 - Math.floor(i / 320);
+      const isMag = r > 180 && g < 90 && b > 180, isBg = r > 245 && g > 245 && b > 245;
+      if (isMag) mag++; if (!isBg) { any++; if (x < 128 && y > 140) zone++; if (x < bb[0]) bb[0] = x; if (y < bb[1]) bb[1] = y; if (x > bb[2]) bb[2] = x; if (y > bb[3]) bb[3] = y; } }
+    return {mag, zone, any, bb};
+  };
+  const shadowsWere = V.renderer.shadowMap.enabled; V.renderer.shadowMap.enabled = false;
+  let alone, all, leg;
+  try {
+    V.meshes.forEach(m => { const inSet = set.has(m); m.visible = inSet; if (inSet) m.material = magenta; });
+    alone = pass();
+    saved.forEach(([m, mat, vis]) => { m.visible = vis; });
+    all = pass();
+    // subject (the featured leg, no fasteners) bounds: render it alone in magenta
+    V.meshes.forEach(m => { const inLeg = m.userData.leg === subjectLeg && m.userData.pclass !== "fastener"; m.visible = inLeg; if (inLeg) m.material = magenta; });
+    leg = pass();
+  } finally {
+    saved.forEach(([m, mat, vis, ev]) => { m.material = mat; m.visible = vis; m.userData.edge.visible = ev; });
+    savedExtras.forEach(([o, v]) => o.visible = v); V.scene.background = bgSave; V.renderer.shadowMap.enabled = shadowsWere;
+  }
+  return {visible: alone.mag ? all.mag / alone.mag : 0, size: alone.mag / (320 * 180), zone: all.zone / (128 * 40), legBox: leg.bb.map((v, i) => v / (i % 2 ? 180 : 320)), legCut: leg.bb[0] <= 0 || leg.bb[1] <= 0 || leg.bb[2] >= 319 || leg.bb[3] >= 179};
+}
+function searchBeat(setName, t, grid){
+  applyPose(t, t); applyLook(t);
+  const target = partW(setName), out = [];
+  for (const theta of grid.theta) for (const phi of grid.phi) for (const r of grid.r) for (const shift of grid.shift) for (const lift of grid.lift) {
+    applyCamera({theta, phi, r, target, shift, lift});
+    const p = probe(setName);
+    const inside = p.legBox[0] > 0.04 && p.legBox[1] > 0.06 && p.legBox[2] < 0.96 && p.legBox[3] < 0.95;
+    const score = p.visible * 2 + (inside ? 1 : -1) - p.zone * 1.5 + Math.min(p.size * 40, 1) * 0.5 + (p.legBox[0] > 0.45 ? 0.3 : 0);
+    out.push({theta, phi, r, shift, lift, visible: +p.visible.toFixed(2), size: +(p.size * 100).toFixed(2), zone: +p.zone.toFixed(2), legBox: p.legBox.map(v => +v.toFixed(2)), inside, score: +score.toFixed(2)});
+  }
+  out.sort((a, b) => b.score - a.score);
+  return out.slice(0, 12);
+}
+window.__show = {V, THREE, renderAt, camera, env, E, CAM, probe, searchBeat, applyPose, applyLook, applyCamera, partW, jointW, computeFramings, get r0(){ return r0; }};
+
+if (!EXPORT) {
+  setTimeout(() => { $("veil").style.opacity = 0; }, 150);
+  V.renderer.setAnimationLoop(() => { const now = paused ? pauseAt : clock.getElapsedTime(); const tAbs = (now - offset) * SPEED; renderAt(tAbs % T, tAbs); });
+} else {
+  // deterministic export for review and video: ?export=sheets|frames&post=URL&every=1&from=&to=&w=&h=&cols=6&rows=4&fps=10&fmt=png|jpg&name=
+  $("veil").remove();
+  const post = P.get("post"), name = P.get("name") || EXPORT, W = parseInt(P.get("w") || 1600), H = parseInt(P.get("h") || 900), FMT = P.get("fmt") === "jpg" ? "image/jpeg" : "image/png";
+  const send = (nm, url) => fetch(`${post}?name=${encodeURIComponent(nm)}`, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain"}, body:url});
+  V.renderer.setPixelRatio(1); V.resize(W, H, false); computeFramings();
+  const drawCaption = (ctx, x, y, w, h, t) => {
+    const s = w / 1600; ctx.save(); ctx.translate(x, y);
+    const dark = isDarkAt(t), bg = dark ? BG_BP : BG_MAIN;
+    ctx.fillStyle = dark ? "#b9c9e2" : "#4b5563"; ctx.font = `600 ${18*s}px "Chakra Petch", sans-serif`; ctx.fillText("H E X A P O D   M K I I", 80*s, 72*s);
+    const ti = capAt(TITLES, t), su = capAt(SUBS, t);
+    if (ti.a > 0 || su.a > 0) {
+      const bgHex = "#" + bg.getHexString(), R = 0.42 * w, sy = (0.26 * h) / R;
+      ctx.save(); ctx.globalAlpha = Math.max(ti.a, su.a) * 0.92; ctx.translate(0.105 * w, h); ctx.scale(1, sy);
+      const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, R); gr.addColorStop(0, bgHex); gr.addColorStop(0.34, bgHex); gr.addColorStop(0.66, bgHex + "00");
+      ctx.fillStyle = gr; ctx.fillRect(-0.11 * w, -R, w, R); ctx.restore();
+      ctx.globalAlpha = ti.a; ctx.fillStyle = ACCENT; ctx.fillRect(80*s, h - 150*s, 42*s, 2*s);
+      ctx.fillStyle = dark ? "#e9f1ff" : "#1b2129"; ctx.font = `600 ${44*s}px "Chakra Petch", sans-serif`; ctx.fillText(ti.text, 80*s, h - 100*s);
+      ctx.globalAlpha = su.a; ctx.fillStyle = dark ? "#b9c9e2" : "#4b5563"; ctx.font = `400 ${22*s}px Barlow, sans-serif`; ctx.fillText(su.text, 80*s, h - 66*s);
+    }
+    ctx.restore();
+  };
+  const snap = () => { const c = document.createElement("canvas"); c.width = W; c.height = H; const ctx = c.getContext("2d"); ctx.drawImage(V.renderer.domElement, 0, 0, W, H); return [c, ctx]; };
+  (async () => {
+    await document.fonts.ready;
+    if (EXPORT === "frames") {
+      const fps = parseFloat(P.get("fps") || 10), n = Math.round(T * fps);
+      const i0 = Math.round(parseFloat(P.get("from") || 0) * fps), i1 = Math.min(n, Math.round(parseFloat(P.get("to") || T) * fps));
+      for (let i = i0; i < i1; i++) {
+        const t = i / fps; renderAt(t, t);
+        const [c, ctx] = snap(); if (CAPTIONS) drawCaption(ctx, 0, 0, W, H, t);
+        await send(`${name}_${String(i).padStart(4, "0")}`, c.toDataURL(FMT, 0.92));
+      }
+    } else {
+      const every = parseFloat(P.get("every") || 1), cols = parseInt(P.get("cols") || 6), rows = parseInt(P.get("rows") || 4), tw = 400, th = Math.round(400 * H / W);
+      let sheet = 0, k = 0, c = null, ctx = null;
+      for (let t = 0; t < T; t += every) {
+        if (k === 0) { c = document.createElement("canvas"); c.width = cols * tw; c.height = rows * (th + 22); ctx = c.getContext("2d"); ctx.fillStyle = "#e9ecf0"; ctx.fillRect(0, 0, c.width, c.height); }
+        renderAt(t, t);
+        const x = (k % cols) * tw, y = Math.floor(k / cols) * (th + 22);
+        ctx.drawImage(V.renderer.domElement, x, y, tw, th); if (CAPTIONS) drawCaption(ctx, x, y, tw, th, t);
+        ctx.fillStyle = "#333"; ctx.font = "12px Barlow, sans-serif"; ctx.fillText(`t = ${t.toFixed(1)} s`, x + 6, y + th + 15);
+        k++;
+        if (k === cols * rows) { await send(`${name}_sheet${String(sheet++).padStart(2, "0")}`, c.toDataURL("image/png")); k = 0; }
+      }
+      if (k) await send(`${name}_sheet${String(sheet++).padStart(2, "0")}`, c.toDataURL("image/png"));
+    }
+    document.title = "exported:" + name;
+  })();
+}
+</script>
