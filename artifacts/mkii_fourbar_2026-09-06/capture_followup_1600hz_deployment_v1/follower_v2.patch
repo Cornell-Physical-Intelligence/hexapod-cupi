@@ -1,0 +1,122 @@
+--- v1/follow_campaign.py
++++ v2/follow_campaign.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""One exact campaign → one guarded video; no GPU API and no recurring automation."""
++"""One exact campaign → one guarded video; optionally bind a reviewed wrapper by hash."""
+ from __future__ import annotations
+ 
+ import argparse
+@@ -59,12 +59,26 @@
+     return argv[argv.index(name)+1]
+ 
+ 
++def campaign_entrypoint(binding):
++    """A wrapper is accepted only by its exact path and immutable reviewed bytes."""
++    wrapper, expected = binding.get("campaign_wrapper"), binding.get("campaign_wrapper_sha256")
++    if wrapper is None and expected is None:
++        return Path(binding["source"])/"isaaclab/deploy/run-mkii-fourbar-campaign"
++    if (not isinstance(wrapper, str) or not isinstance(expected, str)
++            or len(expected) != 64 or any(c not in "0123456789abcdef" for c in expected)):
++        raise ValueError("Campaign wrapper requires an exact path and SHA-256")
++    path = Path(wrapper).resolve(strict=True)
++    if str(path) != wrapper or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != expected:
++        raise ValueError("Reviewed campaign wrapper bytes or path changed")
++    return path
++
++
+ def verify_campaign_process(identity, binding):
+     if (identity is None or identity["pid"] != binding["campaign_pid"]
+             or identity["start_ticks"] != binding["campaign_start_ticks"]):
+         raise ValueError("Exact campaign process is absent or its PID was reused")
+     argv = identity["argv"]
+-    if (len(argv)<2 or Path(argv[1]).resolve() != Path(binding["source"])/"isaaclab/deploy/run-mkii-fourbar-campaign"
++    if (len(argv)<2 or Path(argv[1]).resolve() != campaign_entrypoint(binding)
+             or Path(flag(argv,"--source-dir")).resolve() != Path(binding["source"])
+             or flag(argv,"--source-commit") != binding["source_commit"]
+             or Path(flag(argv,"--output-root")).resolve() != Path(binding["campaign_file"]).parent.parent):
+@@ -72,6 +86,7 @@
+ 
+ 
+ def verify_campaign_header(campaign, binding):
++    campaign_entrypoint(binding)
+     if (campaign.get("schema") != "hexapod.fourbar_campaign.v1"
+             or Path(campaign.get("campaign", "")).resolve() != Path(binding["campaign_file"]).parent
+             or Path(campaign.get("source", "")).resolve() != Path(binding["source"])
+@@ -131,6 +146,16 @@
+     return {"checkpoint":str(checkpoint), "admission":str(admission), "training_report":str(report)}
+ 
+ 
++def capture_launch_command(command, binding):
++    """Only the actual capture job owns the optional shared lock; never wait."""
++    lock = binding.get("capture_shared_lock")
++    if lock is None:
++        return list(command)
++    if lock != "/opt/wx/gpu.lock":
++        raise ValueError("Unreviewed capture shared lock")
++    return ["/usr/bin/flock", "--nonblock", "--no-fork", lock, *command]
++
++
+ def reserve_launch(state, save, argv):
+     """Fsync before Popen: a restart never retries an ambiguous launch window."""
+     if state.get("state") != "waiting" or "capture_argv" in state:
+@@ -149,6 +174,7 @@
+ def verify_completed_capture(folder, state, common):
+     """Bind final artifacts to this dispatch, including the external capture code."""
+     binding = state["binding"]
++    campaign_entrypoint(binding)
+     tools = Path(binding["capture_tools"])
+     if common.tool_identity(tools) != binding["capture_tools_sha256"]:
+         raise ValueError("Capture tools changed after follower launch")
+@@ -203,8 +229,13 @@
+     p.add_argument("--campaign-start-ticks", type=int, required=True)
+     p.add_argument("--source-sha256", required=True)
+     p.add_argument("--source-commit", required=True)
++    p.add_argument("--campaign-wrapper", type=Path)
++    p.add_argument("--campaign-wrapper-sha256")
++    p.add_argument("--capture-shared-lock", choices=("/opt/wx/gpu.lock",))
+     p.add_argument("--wait-seconds", type=int, default=64800)
+     args = p.parse_args(argv)
++    if (args.campaign_wrapper is None) != (args.campaign_wrapper_sha256 is None):
++        p.error("Reviewed wrapper path and SHA-256 must be supplied together")
+     if not 1 <= args.wait_seconds <= 86400 or min(args.campaign_pid,args.campaign_start_ticks)<=0:
+         p.error("Wait is bounded to 1–86400 seconds; PID/start ticks must be positive")
+     campaign_file, source, tools = [path.resolve(strict=True) for path in (args.campaign,args.source_dir,args.capture_tools)]
+@@ -222,11 +253,17 @@
+         "source_sha256":args.source_sha256, "source_commit":args.source_commit,
+         "capture_tools":str(tools), "capture_tools_sha256":common.tool_identity(tools),
+         "follower_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
++    if args.campaign_wrapper is not None:
++        binding.update(campaign_wrapper=str(args.campaign_wrapper.resolve(strict=True)),
++                       campaign_wrapper_sha256=args.campaign_wrapper_sha256)
++        campaign_entrypoint(binding)
++    if args.capture_shared_lock is not None:
++        binding["capture_shared_lock"] = args.capture_shared_lock
+     folder.mkdir(parents=True,exist_ok=True)
+     with (folder/"follower.lock").open("a") as lock:
+         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+         path = folder/"state.json"
+-        state = common.read_json(path) if path.exists() else {"schema":"hexapod.campaign_capture_followup.v1",
++        state = common.read_json(path) if path.exists() else {"schema":"hexapod.campaign_capture_followup.v2",
+             "binding":binding,"state":"waiting","started_utc":time.time(),"deadline_utc":time.time()+args.wait_seconds}
+         if state.get("binding") != binding:
+             raise ValueError("Existing follower state is bound to a different campaign/tools/source")
+@@ -287,11 +324,15 @@
+                         "--checkpoint",selected["checkpoint"],"--admission",selected["admission"],
+                         "--training-report",selected["training_report"],"--output-root",str(folder/"capture_outputs"),
+                         "--seconds","15","--width","1280","--height","720","--timeout-seconds","1800"]
+-                    reserve_launch(state,save,cmd)
++                    campaign_entrypoint(binding)
++                    spawn_cmd = capture_launch_command(cmd,binding)
++                    reserve_launch(state,save,spawn_cmd)
+                     with (folder/"capture_launcher.log").open("x") as log:
+-                        child = subprocess.Popen(cmd,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,
++                        child = subprocess.Popen(spawn_cmd,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,
+                             start_new_session=True,close_fds=True,env={**os.environ,"PYTHONDONTWRITEBYTECODE":"1"})
+-                    # Python exec may take a moment; record exact post-exec argv, never infer ownership.
++                    # flock --no-fork exec keeps the PID and held lock; its argv
++                    # becomes cmd after successful admission. Bind that exact Python
++                    # process, never the transient flock invocation or a descendant.
+                     owned = None
+                     for _ in range(100):
+                         observed = process_identity(child.pid)

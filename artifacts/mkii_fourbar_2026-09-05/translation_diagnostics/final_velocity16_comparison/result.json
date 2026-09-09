@@ -1,0 +1,4479 @@
+{
+  "aggregate_maxima": {
+    "1": {
+      "max_C_pin_relative_velocity_m_s": 0.3625154463101013,
+      "max_post_mimic_velocity_residual_rad_s": 4.425369024276733,
+      "peak_active_joint_speed_rad_s": 1.0945483446121216,
+      "peak_applied_nm": 0.968124508857727,
+      "peak_closure_point_m": 8.616943881127458e-07,
+      "peak_passive_relation_error_rad": 3.3736228942871094e-05,
+      "peak_raw_nm": 0.968124508857727,
+      "rms_C_pin_relative_velocity_m_s": 0.0030464558887584588,
+      "rms_post_mimic_velocity_residual_rad_s": 0.03202416133286686
+    },
+    "16": {
+      "max_C_pin_relative_velocity_m_s": 0.0034869129205455005,
+      "max_post_mimic_velocity_residual_rad_s": 0.09738627076148987,
+      "peak_active_joint_speed_rad_s": 0.6276146769523621,
+      "peak_applied_nm": 0.7684478163719177,
+      "peak_closure_point_m": 8.642674178805113e-07,
+      "peak_passive_relation_error_rad": 1.043081283569336e-05,
+      "peak_raw_nm": 0.7684478163719177,
+      "rms_C_pin_relative_velocity_m_s": 9.560259006695818e-05,
+      "rms_post_mimic_velocity_residual_rad_s": 0.0011655365927078268
+    },
+    "4": {
+      "max_C_pin_relative_velocity_m_s": 0.02024017000095196,
+      "max_post_mimic_velocity_residual_rad_s": 1.1045700311660767,
+      "peak_active_joint_speed_rad_s": 0.5323973894119263,
+      "peak_applied_nm": 0.734733521938324,
+      "peak_closure_point_m": 8.60146990125077e-07,
+      "peak_passive_relation_error_rad": 7.927417755126953e-06,
+      "peak_raw_nm": 0.734733521938324,
+      "rms_C_pin_relative_velocity_m_s": 0.0004345561768583539,
+      "rms_post_mimic_velocity_residual_rad_s": 0.01186151809819674
+    }
+  },
+  "common_physical_runtime": {
+    "action_clip": [
+      -1.0,
+      1.0
+    ],
+    "action_scale_rad": 0.3,
+    "active_motor_names": [
+      "lf_coxa_yaw",
+      "lm_coxa_yaw",
+      "lr_coxa_yaw",
+      "rf_coxa_yaw",
+      "rm_coxa_yaw",
+      "rr_coxa_yaw",
+      "lf_femur_pitch",
+      "lm_femur_pitch",
+      "lr_femur_pitch",
+      "rf_femur_pitch",
+      "rm_femur_pitch",
+      "rr_femur_pitch",
+      "lf_tibia_lever_pivot",
+      "lm_tibia_lever_pivot",
+      "lr_tibia_lever_pivot",
+      "rf_tibia_lever_pivot",
+      "rm_tibia_lever_pivot",
+      "rr_tibia_lever_pivot"
+    ],
+    "asset_bundle": {
+      "bundle_files_sha256": {
+        "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/geometry.usdc": "06b6bb5aee6dd1082112aa37792a065c9637e2494b20157deaf265c4418c7065",
+        "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/hexapod_mkii_fourbar_v5.usda": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf",
+        "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/kinematics.json": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+        "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/manifest.json": "738fe892849e849db178280460376ad4bc9eedb335db55ab09ad8760a0d17247"
+      },
+      "closure_constraint_variant": "physical_mimic_v5",
+      "kinematics_sha256": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+      "model_id": "mkii_fourbar_v5",
+      "usd_path_relative": "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/hexapod_mkii_fourbar_v5.usda",
+      "usd_root_sha256": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf"
+    },
+    "body_to_navigation": [
+      [
+        0,
+        -1,
+        0
+      ],
+      [
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ],
+    "closure_constraint_variant": "physical_mimic_v5",
+    "command_frame": "anatomical_navigation",
+    "decimation": 16,
+    "default_motor_positions_rad": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      -0.25,
+      -0.25,
+      -0.25,
+      -0.25,
+      -0.25,
+      -0.25,
+      -0.5779794024797098,
+      -0.5901906624193223,
+      -0.5708460029462148,
+      -0.5500010227983445,
+      -0.5127791632541843,
+      -0.549999592873893
+    ],
+    "kinematics_sha256": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+    "model_id": "mkii_fourbar_v5",
+    "motor_contract": {
+      "actual_battery_voltage_known": false,
+      "assumed_bus_voltage_v": 48.0,
+      "configuration": {
+        "model_id": "rs05-v2-provisional-70mm-2026-09-05",
+        "provisional": {
+          "actual_battery_voltage_known": false,
+          "armature_kg_m2": 0.0007,
+          "assumed_bus_voltage_v": 48.0,
+          "assumptions": [
+            "Piecewise linear 48V torque-speed interpolation; zero-speed peak and zero-torque480rpm endpoints are provisional joins. Absolute-speed bound applies identically to braking; no identified regenerative/four-quadrant map.",
+            "Below48V both speed axis and available torque scale by voltage/48; above48V no extra authority. This is provisional derating, not a measured voltage family.",
+            "Continuous torque interpolates1.2Nm at stall to1.6Nm at100rpm, then is capped by16.755160819Nm*rad/s mechanical power; also limited by the instantaneous torque-speed envelope.",
+            "Normalized overload rate is1/vendor-duration at table points, linearly interpolated in normalized excess torque. Blend stall and rotating rates by min(abs(rpm)/100,1). One common budget prevents switching operating points from resetting exposure.",
+            "Budget consumption integrates delivered load. At zero headroom applied torque is limited to continuous; inverse rate interpolation clips before integration so a step cannot overdraw budget.",
+            "Budget recovers only below half continuous load, linearly to1/60 per second atzero torque. This assumed cooldown is not a thermal-temperature model or hardware permission.",
+            "Episode resets initialize independent simulated motors at50percent headroom; selected resets leave all other motors' budgets continuous. Real control must persist measured thermal state, not apply episode reset semantics.",
+            "Phase current proxy is abs(delivered torque)/0.94 Arms, with sqrt(2) conversion toApk. It omits saturation/losses and is neither measured current nor a certified current limiter.",
+            "Metal housing-to-mount heat path confirmed qualitatively; equivalence to vendor plate unverified. Gains/friction/armature remain provisional pending leg-stand identification."
+          ],
+          "damping_nm_s_per_rad": 0.6,
+          "dynamic_friction": 0.01,
+          "friction": 0.01,
+          "peak_exposure_threshold_fraction": 0.99,
+          "physics_dt_role": "Historical constructor default; active runtime physics_dt_s is explicitly selected and hashed in the contract manifest.",
+          "physics_dt_s": 0.005,
+          "recovery_below_continuous_fraction": 0.5,
+          "reset_burst_headroom": 0.5,
+          "stiffness_nm_per_rad": 30.0,
+          "supported_physics_dt_s": [
+            0.005,
+            0.0025,
+            0.00125
+          ],
+          "viscous_friction": 0.002,
+          "zero_load_full_recovery_s": 60.0
+        },
+        "schema_version": 2,
+        "sources": {
+          "catalog": {
+            "downloaded_pdf_sha256": "79576e55fee940ce4e718ceffabb31ecb9fd49c9ecf2dd7ddd5d050a31eeebee",
+            "pdf_pages": [
+              27,
+              28,
+              29
+            ],
+            "qualification": "48V torque-speed points; 1.8Nm uses150x150mm aluminum plate and is NOT this model's rating.",
+            "url": "https://github.com/RobStride/Product_Information/blob/main/%E7%81%B5%E8%B6%B3%E6%97%B6%E4%BB%A3RS%E7%B3%BB%E5%88%97%E4%BA%A7%E5%93%81%E8%A7%84%E6%A0%BC%E4%BB%8B%E7%BB%8D(260713%EF%BC%89.pdf"
+          },
+          "manual": {
+            "downloaded_pdf_sha256": "1b2c61a6daa8331b9a348455005d10d6e425165c22e6f64c39cbca33f6360e82",
+            "pdf_pages": [
+              10,
+              11,
+              12,
+              14,
+              34,
+              50,
+              53
+            ],
+            "qualification": "Filename 260713; internal history initial release 2025-11-25. 70x70mm aluminum plate, 25C ambient overload test; 100rpm rated rotating point. Thickness/interface/airflow/repeated duty not specified.",
+            "url": "https://github.com/RobStride/Product_Information/blob/main/Product%20Literature/RS05/RS05User%20Manual260713.pdf"
+          }
+        },
+        "status": "PROVISIONAL_SIMULATION_NOT_HARDWARE_CALIBRATED",
+        "units": "output-side Nm, rad/s, seconds; current proxy Arms/Apk is not battery current",
+        "vendor": {
+          "larger_plate_variant_not_enabled": {
+            "peak_rotating_duration_s": 3.7,
+            "plate_mm": [
+              150,
+              150
+            ],
+            "rotating_continuous_nm": 1.8
+          },
+          "maximum_phase_current_apk": 11.0,
+          "no_load_rpm": 480.0,
+          "operating_voltage_range_v": [
+            15.0,
+            60.0
+          ],
+          "peak_output_torque_nm": 5.5,
+          "rated_phase_current_apk": 2.4,
+          "rated_rotating_rpm": 100.0,
+          "reference_voltage_v": 48.0,
+          "rotating_continuous_nm": 1.6,
+          "rotating_overload_nm_s": [
+            [
+              1.6,
+              null
+            ],
+            [
+              2.0,
+              278.0
+            ],
+            [
+              2.5,
+              90.0
+            ],
+            [
+              3.0,
+              42.0
+            ],
+            [
+              3.5,
+              21.0
+            ],
+            [
+              4.0,
+              13.0
+            ],
+            [
+              4.5,
+              8.0
+            ],
+            [
+              5.0,
+              5.0
+            ],
+            [
+              5.5,
+              3.0
+            ]
+          ],
+          "stall_continuous_nm": 1.2,
+          "stall_overload_nm_s": [
+            [
+              1.2,
+              null
+            ],
+            [
+              1.6,
+              175.0
+            ],
+            [
+              3.0,
+              12.0
+            ],
+            [
+              4.0,
+              4.0
+            ],
+            [
+              5.0,
+              2.0
+            ],
+            [
+              5.5,
+              1.0
+            ]
+          ],
+          "thermal_thresholds_context_only": {
+            "control_board_maximum_c": 135.0,
+            "thermistor_default_protection_c": 135.0,
+            "winding_test_constraint_c": 145.0
+          },
+          "torque_constant_nm_per_arms": 0.94,
+          "torque_speed_rpm_nm": [
+            [
+              0.0,
+              5.5
+            ],
+            [
+              70.0,
+              5.5
+            ],
+            [
+              275.0,
+              4.0
+            ],
+            [
+              340.0,
+              3.0
+            ],
+            [
+              450.0,
+              1.6
+            ],
+            [
+              477.0,
+              0.5
+            ],
+            [
+              480.0,
+              0.0
+            ]
+          ]
+        }
+      },
+      "contract_sha256": "506c069cc689379de9bd17b5d92f4b6e87cbb55fe4b0edd082b246f612f59046",
+      "controller_parameters": {
+        "damping_nm_s_per_rad": 0.3,
+        "stiffness_nm_per_rad": 30.0
+      },
+      "controller_profile": "mkii_pd_damping_030_v1",
+      "implementation_sha256": {
+        "packages/hexapod_core/hexapod_core/rs05_v2.json": "177875078f6b51de0935c129aacd278b16e753086da034848da5d7d4148b870e",
+        "packages/hexapod_core/hexapod_core/rs05_v2.py": "e04c8746bdb4324dcede629b7d70c40da3ca1a445dd6819a57029610ca0288d5",
+        "packages/hexapod_env/hexapod_env/actuators/rs05_v2.py": "4a4e02a869f88265cd6cd780055b7237eed709fac4da321df39d12803a537f65",
+        "packages/hexapod_env/hexapod_env/actuators/rs05_v2_model.py": "c905c84e4a34688d5a93e0668df6d087a9484a32c803f95f03b897950d5efb15",
+        "packages/hexapod_env/hexapod_env/actuators/rs05_v2_runtime.py": "3456545bf68baebd45317a20933dd08800b7de817e93440868b19db0b490a04c"
+      },
+      "model_id": "rs05-v2-provisional-70mm-2026-09-05",
+      "physics_dt_s": 0.00125,
+      "status": "PROVISIONAL_SIMULATION_NOT_HARDWARE_CALIBRATED"
+    },
+    "motor_contract_sha256": "f101345d2425e20eb7d5e99adc9cafb33f56042e92845fad6927fd55cfc998d3",
+    "motor_target_schedule": {
+      "endpoint_semantics": "existing 50 Hz clipped and slew-limited motor position target",
+      "id": "linear_physics_substeps_v1",
+      "position_fractions": "1/substeps through 1, exact endpoint on final substep",
+      "substeps": 16,
+      "velocity_feedforward_rad_s": 0.0
+    },
+    "observation_dim": 84,
+    "observation_fields": [
+      [
+        "root_linear_velocity_navigation",
+        3
+      ],
+      [
+        "root_angular_velocity_navigation",
+        3
+      ],
+      [
+        "projected_gravity_navigation",
+        3
+      ],
+      [
+        "velocity_command_navigation",
+        3
+      ],
+      [
+        "active_motor_position_error",
+        18
+      ],
+      [
+        "active_motor_velocity",
+        18
+      ],
+      [
+        "previous_clipped_action",
+        18
+      ],
+      [
+        "estimated_motor_burst_headroom",
+        18
+      ]
+    ],
+    "observed_motor_model_joint_names": [
+      "lf_coxa_yaw",
+      "lm_coxa_yaw",
+      "lr_coxa_yaw",
+      "rf_coxa_yaw",
+      "rm_coxa_yaw",
+      "rr_coxa_yaw",
+      "lf_femur_pitch",
+      "lm_femur_pitch",
+      "lr_femur_pitch",
+      "rf_femur_pitch",
+      "rm_femur_pitch",
+      "rr_femur_pitch",
+      "lf_tibia_lever_pivot",
+      "lm_tibia_lever_pivot",
+      "lr_tibia_lever_pivot",
+      "rf_tibia_lever_pivot",
+      "rm_tibia_lever_pivot",
+      "rr_tibia_lever_pivot"
+    ],
+    "observed_tree_joint_names": [
+      "lf_coxa_yaw",
+      "lm_coxa_yaw",
+      "lr_coxa_yaw",
+      "rf_coxa_yaw",
+      "rm_coxa_yaw",
+      "rr_coxa_yaw",
+      "lf_femur_pitch",
+      "lm_femur_pitch",
+      "lr_femur_pitch",
+      "rf_femur_pitch",
+      "rm_femur_pitch",
+      "rr_femur_pitch",
+      "lf_tibia_lever_pivot",
+      "lf_tibia_pitch",
+      "lm_tibia_lever_pivot",
+      "lm_tibia_pitch",
+      "lr_tibia_lever_pivot",
+      "lr_tibia_pitch",
+      "rf_tibia_lever_pivot",
+      "rf_tibia_pitch",
+      "rm_tibia_lever_pivot",
+      "rm_tibia_pitch",
+      "rr_tibia_lever_pivot",
+      "rr_tibia_pitch",
+      "lf_tibia_rod_pivot",
+      "lm_tibia_rod_pivot",
+      "lr_tibia_rod_pivot",
+      "rf_tibia_rod_pivot",
+      "rm_tibia_rod_pivot",
+      "rr_tibia_rod_pivot"
+    ],
+    "physics_dt_s": 0.00125,
+    "policy_dt_s": 0.02,
+    "resolved_collision_isolation": {
+      "authored_topology_verified": true,
+      "collection_expansion_rule": "expandPrims",
+      "cross_environment_allowlinks": false,
+      "environment_allowlist": "own_group_and_global_group_only",
+      "environment_collection_membership": "exactly_own_environment_subtree",
+      "global_allowlinks_reciprocal": true,
+      "global_allowlist": "global_group_and_every_environment_group",
+      "global_prim_paths": [
+        "/World/ground"
+      ],
+      "invert_collision_group_filter": true,
+      "mode": "explicit_usd_inverted_collision_groups",
+      "schema": "hexapod.physx_collision_isolation.v1"
+    },
+    "resolved_motor_configuration": {
+      "active_joint_names": [
+        "lf_coxa_yaw",
+        "lm_coxa_yaw",
+        "lr_coxa_yaw",
+        "rf_coxa_yaw",
+        "rm_coxa_yaw",
+        "rr_coxa_yaw",
+        "lf_femur_pitch",
+        "lm_femur_pitch",
+        "lr_femur_pitch",
+        "rf_femur_pitch",
+        "rm_femur_pitch",
+        "rr_femur_pitch",
+        "lf_tibia_lever_pivot",
+        "lm_tibia_lever_pivot",
+        "lr_tibia_lever_pivot",
+        "rf_tibia_lever_pivot",
+        "rm_tibia_lever_pivot",
+        "rr_tibia_lever_pivot"
+      ],
+      "armature": 0.0007,
+      "assumed_bus_voltage_v": 48.0,
+      "class_type": "hexapod_env.actuators.rs05_v2_runtime.RS05V2Actuator",
+      "controller_profile": "mkii_pd_damping_030_v1",
+      "damping": 0.3,
+      "dynamic_friction": 0.01,
+      "effort_limit": 5.5,
+      "effort_limit_sim": 5.5,
+      "friction": 0.01,
+      "joint_names_expr": [
+        "^lf_coxa_yaw$",
+        "^lm_coxa_yaw$",
+        "^lr_coxa_yaw$",
+        "^rf_coxa_yaw$",
+        "^rm_coxa_yaw$",
+        "^rr_coxa_yaw$",
+        "^lf_femur_pitch$",
+        "^lm_femur_pitch$",
+        "^lr_femur_pitch$",
+        "^rf_femur_pitch$",
+        "^rm_femur_pitch$",
+        "^rr_femur_pitch$",
+        "^lf_tibia_lever_pivot$",
+        "^lm_tibia_lever_pivot$",
+        "^lr_tibia_lever_pivot$",
+        "^rf_tibia_lever_pivot$",
+        "^rm_tibia_lever_pivot$",
+        "^rr_tibia_lever_pivot$"
+      ],
+      "model_id": "rs05-v2-provisional-70mm-2026-09-05",
+      "physics_dt_s": 0.00125,
+      "reset_burst_headroom": 0.5,
+      "stiffness": 30.0,
+      "velocity_limit": 50.26548245743668,
+      "velocity_limit_sim": 50.26548245743668,
+      "viscous_friction": 0.002
+    },
+    "resolved_simulation": {
+      "decimation": 16,
+      "enable_external_forces_every_iteration": true,
+      "physics_dt_s": 0.00125,
+      "reset_motor_jitter_rad": 0.0,
+      "self_collision_enabled": false,
+      "solver_position_iterations": 128,
+      "solver_type": 1
+    },
+    "schema": "hexapod.physical_fourbar_runtime.v1",
+    "scope": "physical-model simulation contract; hardware calibration not admitted",
+    "slew_rad_per_20ms": 0.04,
+    "soft_motor_limits_rad": [
+      [
+        -0.82903175,
+        0.82903175
+      ],
+      [
+        -0.82903175,
+        0.82903175
+      ],
+      [
+        -0.82903175,
+        0.82903175
+      ],
+      [
+        -0.82903175,
+        0.82903175
+      ],
+      [
+        -0.82903175,
+        0.82903175
+      ],
+      [
+        -0.82903175,
+        0.82903175
+      ],
+      [
+        -1.6879457749999998,
+        0.4926167749999998
+      ],
+      [
+        -1.6879457749999998,
+        0.4926167749999998
+      ],
+      [
+        -1.6879457749999998,
+        0.4926167749999998
+      ],
+      [
+        -1.6879457749999998,
+        0.4926167749999998
+      ],
+      [
+        -1.6879457749999998,
+        0.4926167749999998
+      ],
+      [
+        -1.6879457749999998,
+        0.4926167749999998
+      ],
+      [
+        -0.9104794028147065,
+        1.6545205995442318
+      ],
+      [
+        -0.9226906630637896,
+        1.6423093405869666
+      ],
+      [
+        -0.9033460032573485,
+        1.661653999458058
+      ],
+      [
+        -0.8825010233218831,
+        1.68249898022064
+      ],
+      [
+        -0.8452791636928056,
+        1.7197208400708037
+      ],
+      [
+        -0.8824995934580645,
+        1.6825004104393395
+      ]
+    ],
+    "task_id": "Isaac-Velocity-Flat-Hexapod-MKII-Fourbar-V1-Direct-v0",
+    "tree_joint_names": [
+      "lf_coxa_yaw",
+      "lm_coxa_yaw",
+      "lr_coxa_yaw",
+      "rf_coxa_yaw",
+      "rm_coxa_yaw",
+      "rr_coxa_yaw",
+      "lf_femur_pitch",
+      "lm_femur_pitch",
+      "lr_femur_pitch",
+      "rf_femur_pitch",
+      "rm_femur_pitch",
+      "rr_femur_pitch",
+      "lf_tibia_lever_pivot",
+      "lm_tibia_lever_pivot",
+      "lr_tibia_lever_pivot",
+      "rf_tibia_lever_pivot",
+      "rm_tibia_lever_pivot",
+      "rr_tibia_lever_pivot",
+      "lf_tibia_pitch",
+      "lm_tibia_pitch",
+      "lr_tibia_pitch",
+      "rf_tibia_pitch",
+      "rm_tibia_pitch",
+      "rr_tibia_pitch",
+      "lf_tibia_rod_pivot",
+      "lm_tibia_rod_pivot",
+      "lr_tibia_rod_pivot",
+      "rf_tibia_rod_pivot",
+      "rm_tibia_rod_pivot",
+      "rr_tibia_rod_pivot"
+    ],
+    "usd_path_relative": "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/hexapod_mkii_fourbar_v5.usda",
+    "usd_root_sha256": "e98143d0ce2be3fc4ff71099ba0a38abb9b6a101bcf1bd866a53bbec1a367acf"
+  },
+  "comparison_checks": {
+    "full_physical_runtime_equal_except_recipe_and_velocity_count": true,
+    "initial_state_actual_origins_targets_and_backend_readbacks_equal": true
+  },
+  "dependency_sha256": "0268cdf9e5d6296847fbbac5086dc455e279c6f716942494a2e23d574f4ecc5c",
+  "environments": [
+    {
+      "by_velocity_iterations": {
+        "1": {
+          "actual_initial_root_xyz_m": [
+            2.0,
+            -2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            2.0,
+            -2.0,
+            0.0
+          ],
+          "environment": 0,
+          "max_C_pin_relative_velocity_m_s": 0.000656641577988285,
+          "max_post_mimic_velocity_residual_rad_s": 0.012266342528164387,
+          "min_feet_with_force_gt1N": 6,
+          "peak_active_joint_speed_rad_s": 0.05553051084280014,
+          "peak_applied_nm": 0.6704615354537964,
+          "peak_axis_chord": 7.098179213954924e-07,
+          "peak_closure_point_m": 8.616943881127458e-07,
+          "peak_d_term_nm": 0.016659153625369072,
+          "peak_passive_relation_error_rad": 3.5762786865234375e-07,
+          "peak_raw_event": {
+            "applied_nm": -0.6704615354537964,
+            "d_term_nm": -0.0029053175821900368,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.8191012713941745e-06,
+                0.0,
+                13.5391263961792
+              ],
+              "lm": [
+                1.7977671404878492e-06,
+                0.0,
+                13.380341529846191
+              ],
+              "lr": [
+                1.7987290448218118e-06,
+                0.0,
+                13.387499809265137
+              ],
+              "rf": [
+                1.8548146272223676e-06,
+                0.0,
+                13.804931640625
+              ],
+              "rm": [
+                1.8336730818191427e-06,
+                0.0,
+                13.64758014678955
+              ],
+              "rr": [
+                1.788813506209408e-06,
+                0.0,
+                13.313701629638672
+              ]
+            },
+            "joint_position_difference_rate_rad_s": -0.002002716064453125,
+            "matching_sample_window": [
+              {
+                "d_term_nm": 0.0001076348198694177,
+                "demand_nm": -0.6675174236297607,
+                "dq_dt_rad_s": 7.152557373046875e-05,
+                "physics_sample": 1016,
+                "post_qd_rad_s": -0.0003608636325225234,
+                "pre_qd_rad_s": -0.00035878270864486694,
+                "total_vertical_foot_force_N": 81.06725311279297
+              },
+              {
+                "d_term_nm": 0.00010825909703271464,
+                "demand_nm": -0.6675195097923279,
+                "dq_dt_rad_s": -0.0012993812561035156,
+                "physics_sample": 1017,
+                "post_qd_rad_s": 0.0016012018313631415,
+                "pre_qd_rad_s": -0.0003608636325225234,
+                "total_vertical_foot_force_N": 80.91669845581055
+              },
+              {
+                "d_term_nm": -0.00048036055522970855,
+                "demand_nm": -0.6680594086647034,
+                "dq_dt_rad_s": -0.0006079673767089844,
+                "physics_sample": 1018,
+                "post_qd_rad_s": 0.00968439131975174,
+                "pre_qd_rad_s": 0.0016012018313631415,
+                "total_vertical_foot_force_N": 81.25361919403076
+              },
+              {
+                "d_term_nm": -0.0029053175821900368,
+                "demand_nm": -0.6704615354537964,
+                "dq_dt_rad_s": -0.002002716064453125,
+                "physics_sample": 1019,
+                "post_qd_rad_s": -0.0029693678952753544,
+                "pre_qd_rad_s": 0.00968439131975174,
+                "total_vertical_foot_force_N": 81.07318115234375
+              },
+              {
+                "d_term_nm": 0.0008908103918656707,
+                "demand_nm": -0.6665903329849243,
+                "dq_dt_rad_s": 0.0008940696716308594,
+                "physics_sample": 1020,
+                "post_qd_rad_s": -0.0005513140931725502,
+                "pre_qd_rad_s": -0.0029693678952753544,
+                "total_vertical_foot_force_N": 80.61907291412354
+              },
+              {
+                "d_term_nm": 0.0001653942308621481,
+                "demand_nm": -0.6673492789268494,
+                "dq_dt_rad_s": 0.001430511474609375,
+                "physics_sample": 1021,
+                "post_qd_rad_s": 0.0021112528629601,
+                "pre_qd_rad_s": -0.0005513140931725502,
+                "total_vertical_foot_force_N": 81.04696464538574
+              },
+              {
+                "d_term_nm": -0.0006333758938126266,
+                "demand_nm": -0.6682016849517822,
+                "dq_dt_rad_s": 0.0010013580322265625,
+                "physics_sample": 1022,
+                "post_qd_rad_s": 0.003398108296096325,
+                "pre_qd_rad_s": 0.0021112528629601,
+                "total_vertical_foot_force_N": 81.22035312652588
+              }
+            ],
+            "motor": "lr_femur_pitch",
+            "p_term_nm": -0.6675562262535095,
+            "physics_sample": 1019,
+            "post_joint_speed_rad_s": -0.0029693678952753544,
+            "pre_joint_speed_rad_s": 0.00968439131975174,
+            "pre_time_s": 1.27375,
+            "raw_nm": -0.6704615354537964
+          },
+          "peak_raw_nm": 0.6704615354537964,
+          "rms_C_pin_relative_velocity_m_s": 0.0002229684600539763,
+          "rms_active_joint_speed_rad_s": 0.005372167244621826,
+          "rms_demeaned_demand_nm": 0.0015891698431149041,
+          "rms_post_mimic_velocity_residual_rad_s": 0.0025626950044732497,
+          "root_mean_xyz_m": [
+            1.9999648096971214,
+            -2.0000106867868452,
+            0.13571457030484452
+          ]
+        },
+        "16": {
+          "actual_initial_root_xyz_m": [
+            2.0,
+            -2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            2.0,
+            -2.0,
+            0.0
+          ],
+          "environment": 0,
+          "max_C_pin_relative_velocity_m_s": 0.00019434639577427956,
+          "max_post_mimic_velocity_residual_rad_s": 0.004001942448667251,
+          "min_feet_with_force_gt1N": 6,
+          "peak_active_joint_speed_rad_s": 0.03636709600687027,
+          "peak_applied_nm": 0.6697413921356201,
+          "peak_axis_chord": 7.125238543546995e-07,
+          "peak_closure_point_m": 7.562982239186541e-07,
+          "peak_d_term_nm": 0.01091012917459011,
+          "peak_passive_relation_error_rad": 2.980232238769531e-07,
+          "peak_raw_event": {
+            "applied_nm": -0.6697413921356201,
+            "d_term_nm": -0.004992954432964325,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.8372496697338647e-06,
+                0.0,
+                13.674200057983398
+              ],
+              "lm": [
+                1.7667412066657562e-06,
+                0.0,
+                13.149422645568848
+              ],
+              "lr": [
+                1.764504986567772e-06,
+                0.0,
+                13.132779121398926
+              ],
+              "rf": [
+                1.8792727587424451e-06,
+                0.0,
+                13.986967086791992
+              ],
+              "rm": [
+                1.862235535554646e-06,
+                0.0,
+                13.860162734985352
+              ],
+              "rr": [
+                1.794793774934078e-06,
+                0.0,
+                13.358211517333984
+              ]
+            },
+            "joint_position_difference_rate_rad_s": -0.0029206275939941406,
+            "matching_sample_window": [
+              {
+                "d_term_nm": 0.0007435293518938124,
+                "demand_nm": -0.6639266610145569,
+                "dq_dt_rad_s": 0.0011324882507324219,
+                "physics_sample": 2751,
+                "post_qd_rad_s": 0.009081999771296978,
+                "pre_qd_rad_s": -0.0024784309789538383,
+                "total_vertical_foot_force_N": 80.9464750289917
+              },
+              {
+                "d_term_nm": -0.002724600024521351,
+                "demand_nm": -0.6674372553825378,
+                "dq_dt_rad_s": 0.0014424324035644531,
+                "physics_sample": 2752,
+                "post_qd_rad_s": 0.0010659070685505867,
+                "pre_qd_rad_s": 0.009081999771296978,
+                "total_vertical_foot_force_N": 80.62910652160645
+              },
+              {
+                "d_term_nm": -0.0003197721380274743,
+                "demand_nm": -0.6650865077972412,
+                "dq_dt_rad_s": -0.0004887580871582031,
+                "physics_sample": 2753,
+                "post_qd_rad_s": 0.016643181443214417,
+                "pre_qd_rad_s": 0.0010659070685505867,
+                "total_vertical_foot_force_N": 81.27555084228516
+              },
+              {
+                "d_term_nm": -0.004992954432964325,
+                "demand_nm": -0.6697413921356201,
+                "dq_dt_rad_s": -0.0029206275939941406,
+                "physics_sample": 2754,
+                "post_qd_rad_s": -0.006243404000997543,
+                "pre_qd_rad_s": 0.016643181443214417,
+                "total_vertical_foot_force_N": 81.1617431640625
+              },
+              {
+                "d_term_nm": 0.0018730212468653917,
+                "demand_nm": -0.6627658605575562,
+                "dq_dt_rad_s": 0.0006079673767089844,
+                "physics_sample": 2755,
+                "post_qd_rad_s": 0.012519951909780502,
+                "pre_qd_rad_s": -0.006243404000997543,
+                "total_vertical_foot_force_N": 80.89267158508301
+              },
+              {
+                "d_term_nm": -0.0037559857591986656,
+                "demand_nm": -0.6684176325798035,
+                "dq_dt_rad_s": 0.0011205673217773438,
+                "physics_sample": 2756,
+                "post_qd_rad_s": -0.004141606390476227,
+                "pre_qd_rad_s": 0.012519951909780502,
+                "total_vertical_foot_force_N": 80.94933128356934
+              },
+              {
+                "d_term_nm": 0.0012424819869920611,
+                "demand_nm": -0.6634612679481506,
+                "dq_dt_rad_s": 0.0007390975952148438,
+                "physics_sample": 2757,
+                "post_qd_rad_s": 0.0008712122216820717,
+                "pre_qd_rad_s": -0.004141606390476227,
+                "total_vertical_foot_force_N": 81.11643028259277
+              }
+            ],
+            "motor": "lr_femur_pitch",
+            "p_term_nm": -0.6647484302520752,
+            "physics_sample": 2754,
+            "post_joint_speed_rad_s": -0.006243404000997543,
+            "pre_joint_speed_rad_s": 0.016643181443214417,
+            "pre_time_s": 3.4425,
+            "raw_nm": -0.6697413921356201
+          },
+          "peak_raw_nm": 0.6697413921356201,
+          "rms_C_pin_relative_velocity_m_s": 7.243043761386859e-05,
+          "rms_active_joint_speed_rad_s": 0.004498721380050092,
+          "rms_demeaned_demand_nm": 0.0011986756959078684,
+          "rms_post_mimic_velocity_residual_rad_s": 0.0009944688624189265,
+          "root_mean_xyz_m": [
+            2.0000476679764687,
+            -2.0000284555368126,
+            0.13571889971499332
+          ]
+        },
+        "4": {
+          "actual_initial_root_xyz_m": [
+            2.0,
+            -2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            2.0,
+            -2.0,
+            0.0
+          ],
+          "environment": 0,
+          "max_C_pin_relative_velocity_m_s": 0.02024017000095196,
+          "max_post_mimic_velocity_residual_rad_s": 1.1045700311660767,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 0.5099442005157471,
+          "peak_applied_nm": 0.7324106097221375,
+          "peak_axis_chord": 7.095969876491528e-07,
+          "peak_closure_point_m": 7.562982270652952e-07,
+          "peak_d_term_nm": 0.15298326313495636,
+          "peak_passive_relation_error_rad": 7.748603820800781e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.7324106097221375,
+            "d_term_nm": -0.07050850242376328,
+            "foot_force_xyz_N": {
+              "lf": [
+                8.898567216419906e-07,
+                0.0,
+                6.62298583984375
+              ],
+              "lm": [
+                1.8514049315854209e-06,
+                0.0,
+                13.779553413391113
+              ],
+              "lr": [
+                1.8170366047343123e-06,
+                0.0,
+                13.523758888244629
+              ],
+              "rf": [
+                1.8731590216702898e-06,
+                0.0,
+                13.941465377807617
+              ],
+              "rm": [
+                1.8001123862632085e-06,
+                0.0,
+                13.397796630859375
+              ],
+              "rr": [
+                1.7419871483070892e-06,
+                0.0,
+                12.965184211730957
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.10614395141601562,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -0.000690799904987216,
+                "demand_nm": -0.6628079414367676,
+                "dq_dt_rad_s": -0.0013828277587890625,
+                "physics_sample": 1615,
+                "post_qd_rad_s": -0.0006011980585753918,
+                "pre_qd_rad_s": 0.0023026661947369576,
+                "total_vertical_foot_force_N": 81.5326795578003
+              },
+              {
+                "d_term_nm": 0.00018035942048300058,
+                "demand_nm": -0.6618849039077759,
+                "dq_dt_rad_s": 0.0012278556823730469,
+                "physics_sample": 1616,
+                "post_qd_rad_s": 0.007867539301514626,
+                "pre_qd_rad_s": -0.0006011980585753918,
+                "total_vertical_foot_force_N": 80.64482307434082
+              },
+              {
+                "d_term_nm": -0.0023602619767189026,
+                "demand_nm": -0.6644716262817383,
+                "dq_dt_rad_s": -0.0055789947509765625,
+                "physics_sample": 1617,
+                "post_qd_rad_s": 0.23502832651138306,
+                "pre_qd_rad_s": 0.007867539301514626,
+                "total_vertical_foot_force_N": 90.35862731933594
+              },
+              {
+                "d_term_nm": -0.07050850242376328,
+                "demand_nm": -0.7324106097221375,
+                "dq_dt_rad_s": 0.10614395141601562,
+                "physics_sample": 1618,
+                "post_qd_rad_s": 0.02223367989063263,
+                "pre_qd_rad_s": 0.23502832651138306,
+                "total_vertical_foot_force_N": 74.23074436187744
+              },
+              {
+                "d_term_nm": -0.006670104339718819,
+                "demand_nm": -0.6725526452064514,
+                "dq_dt_rad_s": -0.009059906005859375,
+                "physics_sample": 1619,
+                "post_qd_rad_s": -0.1398109793663025,
+                "pre_qd_rad_s": 0.02223367989063263,
+                "total_vertical_foot_force_N": 70.94274377822876
+              },
+              {
+                "d_term_nm": 0.041943296790122986,
+                "demand_nm": -0.6235994696617126,
+                "dq_dt_rad_s": 0.006234645843505859,
+                "physics_sample": 1620,
+                "post_qd_rad_s": 0.04102867469191551,
+                "pre_qd_rad_s": -0.1398109793663025,
+                "total_vertical_foot_force_N": 86.17472457885742
+              },
+              {
+                "d_term_nm": -0.012308603152632713,
+                "demand_nm": -0.678085207939148,
+                "dq_dt_rad_s": 0.005590915679931641,
+                "physics_sample": 1621,
+                "post_qd_rad_s": -0.0239745881408453,
+                "pre_qd_rad_s": 0.04102867469191551,
+                "total_vertical_foot_force_N": 82.91039276123047
+              }
+            ],
+            "motor": "lf_femur_pitch",
+            "p_term_nm": -0.661902129650116,
+            "physics_sample": 1618,
+            "post_joint_speed_rad_s": 0.02223367989063263,
+            "pre_joint_speed_rad_s": 0.23502832651138306,
+            "pre_time_s": 2.0225,
+            "raw_nm": -0.7324106097221375
+          },
+          "peak_raw_nm": 0.7324106097221375,
+          "rms_C_pin_relative_velocity_m_s": 0.00041141820079829155,
+          "rms_active_joint_speed_rad_s": 0.013518181489329843,
+          "rms_demeaned_demand_nm": 0.0046144645712018284,
+          "rms_post_mimic_velocity_residual_rad_s": 0.011469201098995678,
+          "root_mean_xyz_m": [
+            1.9999402228277177,
+            -2.000040927994996,
+            0.13572147595696152
+          ]
+        }
+      },
+      "environment": 0,
+      "origin_xyz_m": [
+        2.0,
+        -2.0,
+        0.0
+      ],
+      "sixteen_over_four": {
+        "max_C_pin_relative_velocity_m_s": 0.009602014003100706,
+        "max_post_mimic_velocity_residual_rad_s": 0.003623077157400753,
+        "peak_active_joint_speed_rad_s": 0.07131583410516158,
+        "peak_applied_nm": 0.9144343121813967,
+        "peak_closure_point_m": 0.9999999958394176,
+        "peak_passive_relation_error_rad": 0.038461538461538464,
+        "peak_raw_nm": 0.9144343121813967,
+        "rms_C_pin_relative_velocity_m_s": 0.1760506401353388,
+        "rms_post_mimic_velocity_residual_rad_s": 0.08670777099775581
+      }
+    },
+    {
+      "by_velocity_iterations": {
+        "1": {
+          "actual_initial_root_xyz_m": [
+            2.0,
+            0.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            2.0,
+            0.0,
+            0.0
+          ],
+          "environment": 1,
+          "max_C_pin_relative_velocity_m_s": 0.02543823624569086,
+          "max_post_mimic_velocity_residual_rad_s": 1.1705177426338196,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 0.40749791264533997,
+          "peak_applied_nm": 0.7063176035881042,
+          "peak_axis_chord": 7.837414327802218e-07,
+          "peak_closure_point_m": 7.158764027760269e-07,
+          "peak_d_term_nm": 0.12224937975406647,
+          "peak_passive_relation_error_rad": 6.496906280517578e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.7063176035881042,
+            "d_term_nm": -0.05232173576951027,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.8733231854639598e-06,
+                0.0,
+                13.942686080932617
+              ],
+              "lm": [
+                1.8134026049665408e-06,
+                0.0,
+                13.496711730957031
+              ],
+              "lr": [
+                1.964851662705769e-06,
+                0.0,
+                14.623909950256348
+              ],
+              "rf": [
+                1.8128262126992922e-06,
+                0.0,
+                13.492422103881836
+              ],
+              "rm": [
+                6.70145709591452e-07,
+                0.0,
+                4.987730979919434
+              ],
+              "rr": [
+                1.7127439377873088e-06,
+                0.0,
+                12.747533798217773
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.04711151123046875,
+            "matching_sample_window": [
+              {
+                "d_term_nm": 0.0054924264550209045,
+                "demand_nm": -0.6481699347496033,
+                "dq_dt_rad_s": -0.0007033348083496094,
+                "physics_sample": 3171,
+                "post_qd_rad_s": -0.00964333675801754,
+                "pre_qd_rad_s": -0.018308088183403015,
+                "total_vertical_foot_force_N": 67.53163528442383
+              },
+              {
+                "d_term_nm": 0.0028930010739713907,
+                "demand_nm": -0.6507429480552673,
+                "dq_dt_rad_s": 0.004351139068603516,
+                "physics_sample": 3172,
+                "post_qd_rad_s": -0.02560758963227272,
+                "pre_qd_rad_s": -0.00964333675801754,
+                "total_vertical_foot_force_N": 78.6569709777832
+              },
+              {
+                "d_term_nm": 0.007682277355343103,
+                "demand_nm": -0.6461169123649597,
+                "dq_dt_rad_s": 0.005245208740234375,
+                "physics_sample": 3173,
+                "post_qd_rad_s": 0.1744057834148407,
+                "pre_qd_rad_s": -0.02560758963227272,
+                "total_vertical_foot_force_N": 103.62263774871826
+              },
+              {
+                "d_term_nm": -0.05232173576951027,
+                "demand_nm": -0.7063176035881042,
+                "dq_dt_rad_s": 0.04711151123046875,
+                "physics_sample": 3174,
+                "post_qd_rad_s": -0.07912415266036987,
+                "pre_qd_rad_s": 0.1744057834148407,
+                "total_vertical_foot_force_N": 73.29099464416504
+              },
+              {
+                "d_term_nm": 0.023737246170639992,
+                "demand_nm": -0.6320253014564514,
+                "dq_dt_rad_s": -0.0011086463928222656,
+                "physics_sample": 3175,
+                "post_qd_rad_s": 0.00020963512361049652,
+                "pre_qd_rad_s": -0.07912415266036987,
+                "total_vertical_foot_force_N": 78.11379337310791
+              },
+              {
+                "d_term_nm": -6.2890539993532e-05,
+                "demand_nm": -0.6557838320732117,
+                "dq_dt_rad_s": 0.013136863708496094,
+                "physics_sample": 3176,
+                "post_qd_rad_s": -0.04500366747379303,
+                "pre_qd_rad_s": 0.00020963512361049652,
+                "total_vertical_foot_force_N": 82.99801731109619
+              },
+              {
+                "d_term_nm": 0.013501101173460484,
+                "demand_nm": -0.6427125334739685,
+                "dq_dt_rad_s": 0.002777576446533203,
+                "physics_sample": 3177,
+                "post_qd_rad_s": 0.018741868436336517,
+                "pre_qd_rad_s": -0.04500366747379303,
+                "total_vertical_foot_force_N": 82.86575984954834
+              }
+            ],
+            "motor": "rm_femur_pitch",
+            "p_term_nm": -0.6539958715438843,
+            "physics_sample": 3174,
+            "post_joint_speed_rad_s": -0.07912415266036987,
+            "pre_joint_speed_rad_s": 0.1744057834148407,
+            "pre_time_s": 3.9675000000000002,
+            "raw_nm": -0.7063176035881042
+          },
+          "peak_raw_nm": 0.7063176035881042,
+          "rms_C_pin_relative_velocity_m_s": 0.000377699479344559,
+          "rms_active_joint_speed_rad_s": 0.008304070408406973,
+          "rms_demeaned_demand_nm": 0.002461479488789666,
+          "rms_post_mimic_velocity_residual_rad_s": 0.008282914383420277,
+          "root_mean_xyz_m": [
+            2.0000523307360707,
+            4.439329782144341e-05,
+            0.13571838063653557
+          ]
+        },
+        "16": {
+          "actual_initial_root_xyz_m": [
+            2.0,
+            0.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            2.0,
+            0.0,
+            0.0
+          ],
+          "environment": 1,
+          "max_C_pin_relative_velocity_m_s": 0.0034869129205455005,
+          "max_post_mimic_velocity_residual_rad_s": 0.04010564088821411,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 0.6276146769523621,
+          "peak_applied_nm": 0.7684478163719177,
+          "peak_axis_chord": 7.916763234117977e-07,
+          "peak_closure_point_m": 7.211685352384737e-07,
+          "peak_d_term_nm": 0.18828441202640533,
+          "peak_passive_relation_error_rad": 1.043081283569336e-05,
+          "peak_raw_event": {
+            "applied_nm": -0.7684478163719177,
+            "d_term_nm": -0.13088853657245636,
+            "foot_force_xyz_N": {
+              "lf": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "lm": [
+                2.0754869183292612e-06,
+                0.0,
+                15.447340965270996
+              ],
+              "lr": [
+                1.7216484593518544e-06,
+                0.0,
+                12.81380844116211
+              ],
+              "rf": [
+                1.949923216670868e-06,
+                0.0,
+                14.512801170349121
+              ],
+              "rm": [
+                1.8745264469544054e-06,
+                0.0,
+                13.951642990112305
+              ],
+              "rr": [
+                1.8180868437411846e-06,
+                0.0,
+                13.531576156616211
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.2834916114807129,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -0.0031168460845947266,
+                "demand_nm": -0.6406720876693726,
+                "dq_dt_rad_s": 0.0005125999450683594,
+                "physics_sample": 2358,
+                "post_qd_rad_s": -0.0072339363396167755,
+                "pre_qd_rad_s": 0.010389486327767372,
+                "total_vertical_foot_force_N": 81.81492614746094
+              },
+              {
+                "d_term_nm": 0.0021701809018850327,
+                "demand_nm": -0.6354042887687683,
+                "dq_dt_rad_s": 0.0019192695617675781,
+                "physics_sample": 2359,
+                "post_qd_rad_s": -0.006333004683256149,
+                "pre_qd_rad_s": -0.0072339363396167755,
+                "total_vertical_foot_force_N": 81.39191246032715
+              },
+              {
+                "d_term_nm": 0.0018999014282599092,
+                "demand_nm": -0.6357465386390686,
+                "dq_dt_rad_s": -0.0023245811462402344,
+                "physics_sample": 2360,
+                "post_qd_rad_s": 0.4362950921058655,
+                "pre_qd_rad_s": -0.006333004683256149,
+                "total_vertical_foot_force_N": 92.57729148864746
+              },
+              {
+                "d_term_nm": -0.13088853657245636,
+                "demand_nm": -0.7684478163719177,
+                "dq_dt_rad_s": 0.2834916114807129,
+                "physics_sample": 2361,
+                "post_qd_rad_s": 0.14433710277080536,
+                "pre_qd_rad_s": 0.4362950921058655,
+                "total_vertical_foot_force_N": 70.25716972351074
+              },
+              {
+                "d_term_nm": -0.04330113157629967,
+                "demand_nm": -0.6914913654327393,
+                "dq_dt_rad_s": 0.03616809844970703,
+                "physics_sample": 2362,
+                "post_qd_rad_s": 0.007252752780914307,
+                "pre_qd_rad_s": 0.14433710277080536,
+                "total_vertical_foot_force_N": 75.61183643341064
+              },
+              {
+                "d_term_nm": -0.0021758258808404207,
+                "demand_nm": -0.6517223119735718,
+                "dq_dt_rad_s": -0.02498626708984375,
+                "physics_sample": 2363,
+                "post_qd_rad_s": 0.022140199318528175,
+                "pre_qd_rad_s": 0.007252752780914307,
+                "total_vertical_foot_force_N": 74.91554832458496
+              },
+              {
+                "d_term_nm": -0.00664205988869071,
+                "demand_nm": -0.6552515625953674,
+                "dq_dt_rad_s": 0.004303455352783203,
+                "physics_sample": 2364,
+                "post_qd_rad_s": 0.0014199342112988234,
+                "pre_qd_rad_s": 0.022140199318528175,
+                "total_vertical_foot_force_N": 89.20059108734131
+              }
+            ],
+            "motor": "lf_femur_pitch",
+            "p_term_nm": -0.6375592947006226,
+            "physics_sample": 2361,
+            "post_joint_speed_rad_s": 0.14433710277080536,
+            "pre_joint_speed_rad_s": 0.4362950921058655,
+            "pre_time_s": 2.95125,
+            "raw_nm": -0.7684478163719177
+          },
+          "peak_raw_nm": 0.7684478163719177,
+          "rms_C_pin_relative_velocity_m_s": 9.560259006695818e-05,
+          "rms_active_joint_speed_rad_s": 0.011348791077931185,
+          "rms_demeaned_demand_nm": 0.0037462300324417486,
+          "rms_post_mimic_velocity_residual_rad_s": 0.0011462185755934252,
+          "root_mean_xyz_m": [
+            1.9999964580405503,
+            -3.764340044369874e-05,
+            0.13571644498733804
+          ]
+        },
+        "4": {
+          "actual_initial_root_xyz_m": [
+            2.0,
+            0.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            2.0,
+            0.0,
+            0.0
+          ],
+          "environment": 1,
+          "max_C_pin_relative_velocity_m_s": 0.019961286636649183,
+          "max_post_mimic_velocity_residual_rad_s": 1.0552838742733002,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 0.5323973894119263,
+          "peak_applied_nm": 0.7330824136734009,
+          "peak_axis_chord": 7.667613307633463e-07,
+          "peak_closure_point_m": 7.214379017076043e-07,
+          "peak_d_term_nm": 0.15971922874450684,
+          "peak_passive_relation_error_rad": 7.927417755126953e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.7330824136734009,
+            "d_term_nm": -0.07288435846567154,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.8012178770732135e-06,
+                0.0,
+                13.406023025512695
+              ],
+              "lm": [
+                1.74212482306757e-06,
+                0.0,
+                12.966209411621094
+              ],
+              "lr": [
+                1.8474759144737618e-06,
+                0.0,
+                13.750311851501465
+              ],
+              "rf": [
+                1.8481662209524075e-06,
+                0.0,
+                13.755449295043945
+              ],
+              "rm": [
+                1.9077751858276315e-06,
+                0.0,
+                14.199103355407715
+              ],
+              "rr": [
+                1.221418983732292e-07,
+                0.0,
+                0.9090722799301147
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.10862350463867188,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -0.00020087357552256435,
+                "demand_nm": -0.6605862379074097,
+                "dq_dt_rad_s": 8.344650268554688e-05,
+                "physics_sample": 2301,
+                "post_qd_rad_s": 0.003608172992244363,
+                "pre_qd_rad_s": 0.000669578555971384,
+                "total_vertical_foot_force_N": 81.03099155426025
+              },
+              {
+                "d_term_nm": -0.0010824518976733088,
+                "demand_nm": -0.6614709496498108,
+                "dq_dt_rad_s": 0.00019073486328125,
+                "physics_sample": 2302,
+                "post_qd_rad_s": 0.006227790378034115,
+                "pre_qd_rad_s": 0.003608172992244363,
+                "total_vertical_foot_force_N": 81.16969871520996
+              },
+              {
+                "d_term_nm": -0.0018683371599763632,
+                "demand_nm": -0.6622639298439026,
+                "dq_dt_rad_s": -0.005269050598144531,
+                "physics_sample": 2303,
+                "post_qd_rad_s": 0.24294784665107727,
+                "pre_qd_rad_s": 0.006227790378034115,
+                "total_vertical_foot_force_N": 89.90045833587646
+              },
+              {
+                "d_term_nm": -0.07288435846567154,
+                "demand_nm": -0.7330824136734009,
+                "dq_dt_rad_s": 0.10862350463867188,
+                "physics_sample": 2304,
+                "post_qd_rad_s": -0.07365545630455017,
+                "pre_qd_rad_s": 0.24294784665107727,
+                "total_vertical_foot_force_N": 68.98616921901703
+              },
+              {
+                "d_term_nm": 0.02209663763642311,
+                "demand_nm": -0.6421747803688049,
+                "dq_dt_rad_s": 0.0009655952453613281,
+                "physics_sample": 2305,
+                "post_qd_rad_s": 0.0027440153062343597,
+                "pre_qd_rad_s": -0.07365545630455017,
+                "total_vertical_foot_force_N": 84.38514995574951
+              },
+              {
+                "d_term_nm": -0.0008232046384364367,
+                "demand_nm": -0.6651307940483093,
+                "dq_dt_rad_s": -0.0028014183044433594,
+                "physics_sample": 2306,
+                "post_qd_rad_s": 0.004793818108737469,
+                "pre_qd_rad_s": 0.0027440153062343597,
+                "total_vertical_foot_force_N": 80.76176929473877
+              },
+              {
+                "d_term_nm": -0.001438145525753498,
+                "demand_nm": -0.6656407117843628,
+                "dq_dt_rad_s": -0.003731250762939453,
+                "physics_sample": 2307,
+                "post_qd_rad_s": 0.004822903778403997,
+                "pre_qd_rad_s": 0.004793818108737469,
+                "total_vertical_foot_force_N": 81.61947345733643
+              }
+            ],
+            "motor": "rr_femur_pitch",
+            "p_term_nm": -0.6601980328559875,
+            "physics_sample": 2304,
+            "post_joint_speed_rad_s": -0.07365545630455017,
+            "pre_joint_speed_rad_s": 0.24294784665107727,
+            "pre_time_s": 2.88,
+            "raw_nm": -0.7330824136734009
+          },
+          "peak_raw_nm": 0.7330824136734009,
+          "rms_C_pin_relative_velocity_m_s": 0.0004345561768583539,
+          "rms_active_joint_speed_rad_s": 0.013461228535760242,
+          "rms_demeaned_demand_nm": 0.004245745770037282,
+          "rms_post_mimic_velocity_residual_rad_s": 0.01186151809819674,
+          "root_mean_xyz_m": [
+            1.9999987978953868,
+            9.779195914916272e-06,
+            0.1357213308219798
+          ]
+        }
+      },
+      "environment": 1,
+      "origin_xyz_m": [
+        2.0,
+        0.0,
+        0.0
+      ],
+      "sixteen_over_four": {
+        "max_C_pin_relative_velocity_m_s": 0.17468377585157677,
+        "max_post_mimic_velocity_residual_rad_s": 0.038004599393534795,
+        "peak_active_joint_speed_rad_s": 1.1788462705378977,
+        "peak_applied_nm": 1.0482420557892045,
+        "peak_closure_point_m": 0.9996266255647327,
+        "peak_passive_relation_error_rad": 1.3157894736842106,
+        "peak_raw_nm": 1.0482420557892045,
+        "rms_C_pin_relative_velocity_m_s": 0.22000053194070784,
+        "rms_post_mimic_velocity_residual_rad_s": 0.0966333791429008
+      }
+    },
+    {
+      "by_velocity_iterations": {
+        "1": {
+          "actual_initial_root_xyz_m": [
+            2.0,
+            2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            2.0,
+            2.0,
+            0.0
+          ],
+          "environment": 2,
+          "max_C_pin_relative_velocity_m_s": 0.000605670800747277,
+          "max_post_mimic_velocity_residual_rad_s": 0.012991071678698063,
+          "min_feet_with_force_gt1N": 6,
+          "peak_active_joint_speed_rad_s": 0.05408963933587074,
+          "peak_applied_nm": 0.6615259647369385,
+          "peak_axis_chord": 6.842692225427243e-07,
+          "peak_closure_point_m": 8.596303806929789e-07,
+          "peak_d_term_nm": 0.016226893290877342,
+          "peak_passive_relation_error_rad": 4.172325134277344e-07,
+          "peak_raw_event": {
+            "applied_nm": -0.6615259647369385,
+            "d_term_nm": -0.004361984319984913,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.8097646261594491e-06,
+                0.0,
+                13.469635009765625
+              ],
+              "lm": [
+                1.8112694988303701e-06,
+                0.0,
+                13.480835914611816
+              ],
+              "lr": [
+                1.8215783939012908e-06,
+                0.0,
+                13.557561874389648
+              ],
+              "rf": [
+                1.7980590882871184e-06,
+                0.0,
+                13.382513999938965
+              ],
+              "rm": [
+                1.8131837578039267e-06,
+                0.0,
+                13.49508285522461
+              ],
+              "rr": [
+                1.811398988138535e-06,
+                0.0,
+                13.481800079345703
+              ]
+            },
+            "joint_position_difference_rate_rad_s": -0.00022649765014648438,
+            "matching_sample_window": [
+              {
+                "d_term_nm": 0.00015430169878527522,
+                "demand_nm": -0.6570780873298645,
+                "dq_dt_rad_s": 0.0009417533874511719,
+                "physics_sample": 1399,
+                "post_qd_rad_s": 7.384491618722677e-05,
+                "pre_qd_rad_s": -0.0005143389571458101,
+                "total_vertical_foot_force_N": 81.27839756011963
+              },
+              {
+                "d_term_nm": -2.2153475583763793e-05,
+                "demand_nm": -0.6572898626327515,
+                "dq_dt_rad_s": -0.0018239021301269531,
+                "physics_sample": 1400,
+                "post_qd_rad_s": -0.0008448207518085837,
+                "pre_qd_rad_s": 7.384491618722677e-05,
+                "total_vertical_foot_force_N": 80.9967269897461
+              },
+              {
+                "d_term_nm": 0.0002534462255425751,
+                "demand_nm": -0.6569458842277527,
+                "dq_dt_rad_s": -0.0009417533874511719,
+                "physics_sample": 1401,
+                "post_qd_rad_s": 0.014539947733283043,
+                "pre_qd_rad_s": -0.0008448207518085837,
+                "total_vertical_foot_force_N": 81.2034273147583
+              },
+              {
+                "d_term_nm": -0.004361984319984913,
+                "demand_nm": -0.6615259647369385,
+                "dq_dt_rad_s": -0.00022649765014648438,
+                "physics_sample": 1402,
+                "post_qd_rad_s": 0.002022913657128811,
+                "pre_qd_rad_s": 0.014539947733283043,
+                "total_vertical_foot_force_N": 80.86742973327637
+              },
+              {
+                "d_term_nm": -0.0006068741204217076,
+                "demand_nm": -0.6577624082565308,
+                "dq_dt_rad_s": -0.005507469177246094,
+                "physics_sample": 1403,
+                "post_qd_rad_s": -0.00015462259761989117,
+                "pre_qd_rad_s": 0.002022913657128811,
+                "total_vertical_foot_force_N": 80.89162540435791
+              },
+              {
+                "d_term_nm": 4.638678001356311e-05,
+                "demand_nm": -0.6569026112556458,
+                "dq_dt_rad_s": -0.0017285346984863281,
+                "physics_sample": 1404,
+                "post_qd_rad_s": -0.00018920633010566235,
+                "pre_qd_rad_s": -0.00015462259761989117,
+                "total_vertical_foot_force_N": 80.85795974731445
+              },
+              {
+                "d_term_nm": 5.676190266967751e-05,
+                "demand_nm": -0.656827449798584,
+                "dq_dt_rad_s": -0.0024080276489257812,
+                "physics_sample": 1405,
+                "post_qd_rad_s": 0.00076651806011796,
+                "pre_qd_rad_s": -0.00018920633010566235,
+                "total_vertical_foot_force_N": 81.24562740325928
+              }
+            ],
+            "motor": "lr_femur_pitch",
+            "p_term_nm": -0.6571639776229858,
+            "physics_sample": 1402,
+            "post_joint_speed_rad_s": 0.002022913657128811,
+            "pre_joint_speed_rad_s": 0.014539947733283043,
+            "pre_time_s": 1.7525,
+            "raw_nm": -0.6615259647369385
+          },
+          "peak_raw_nm": 0.6615259647369385,
+          "rms_C_pin_relative_velocity_m_s": 0.00022228928156551081,
+          "rms_active_joint_speed_rad_s": 0.005496383818582697,
+          "rms_demeaned_demand_nm": 0.0016774894482154128,
+          "rms_post_mimic_velocity_residual_rad_s": 0.0025464279434163958,
+          "root_mean_xyz_m": [
+            1.9999951678793877,
+            2.0000120092183353,
+            0.13571510850451887
+          ]
+        },
+        "16": {
+          "actual_initial_root_xyz_m": [
+            2.0,
+            2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            2.0,
+            2.0,
+            0.0
+          ],
+          "environment": 2,
+          "max_C_pin_relative_velocity_m_s": 0.001952505993365218,
+          "max_post_mimic_velocity_residual_rad_s": 0.09738627076148987,
+          "min_feet_with_force_gt1N": 6,
+          "peak_active_joint_speed_rad_s": 0.22045420110225677,
+          "peak_applied_nm": 0.6965538263320923,
+          "peak_axis_chord": 7.60896221409018e-07,
+          "peak_closure_point_m": 8.642674178805113e-07,
+          "peak_d_term_nm": 0.06613626331090927,
+          "peak_passive_relation_error_rad": 5.424022674560547e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.6965538263320923,
+            "d_term_nm": -0.037194862961769104,
+            "foot_force_xyz_N": {
+              "lf": [
+                6.196075332809414e-07,
+                0.0,
+                4.611587047576904
+              ],
+              "lm": [
+                1.8063890365738189e-06,
+                0.0,
+                13.444511413574219
+              ],
+              "lr": [
+                1.6780076066424954e-06,
+                0.0,
+                12.48900032043457
+              ],
+              "rf": [
+                1.9673461792990565e-06,
+                0.0,
+                14.642475128173828
+              ],
+              "rm": [
+                1.8375100125922472e-06,
+                0.0,
+                13.676137924194336
+              ],
+              "rr": [
+                1.7059171568689635e-06,
+                0.0,
+                12.696724891662598
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.01379251480102539,
+            "matching_sample_window": [
+              {
+                "d_term_nm": 0.0003596861206460744,
+                "demand_nm": -0.6589938998222351,
+                "dq_dt_rad_s": 0.00324249267578125,
+                "physics_sample": 3179,
+                "post_qd_rad_s": 0.0035428369883447886,
+                "pre_qd_rad_s": -0.001198953716084361,
+                "total_vertical_foot_force_N": 81.3894739151001
+              },
+              {
+                "d_term_nm": -0.0010628511663526297,
+                "demand_nm": -0.6605380773544312,
+                "dq_dt_rad_s": 9.5367431640625e-05,
+                "physics_sample": 3180,
+                "post_qd_rad_s": 0.01663167029619217,
+                "pre_qd_rad_s": 0.0035428369883447886,
+                "total_vertical_foot_force_N": 80.67340183258057
+              },
+              {
+                "d_term_nm": -0.004989501088857651,
+                "demand_nm": -0.6644682884216309,
+                "dq_dt_rad_s": -0.0031948089599609375,
+                "physics_sample": 3181,
+                "post_qd_rad_s": 0.12398287653923035,
+                "pre_qd_rad_s": 0.01663167029619217,
+                "total_vertical_foot_force_N": 86.13829135894775
+              },
+              {
+                "d_term_nm": -0.037194862961769104,
+                "demand_nm": -0.6965538263320923,
+                "dq_dt_rad_s": 0.01379251480102539,
+                "physics_sample": 3182,
+                "post_qd_rad_s": -0.11279215663671494,
+                "pre_qd_rad_s": 0.12398287653923035,
+                "total_vertical_foot_force_N": 71.56043672561646
+              },
+              {
+                "d_term_nm": 0.03383764997124672,
+                "demand_nm": -0.6260384917259216,
+                "dq_dt_rad_s": 0.0003933906555175781,
+                "physics_sample": 3183,
+                "post_qd_rad_s": 0.003219804260879755,
+                "pre_qd_rad_s": -0.11279215663671494,
+                "total_vertical_foot_force_N": 85.90380573272705
+              },
+              {
+                "d_term_nm": -0.0009659412899054587,
+                "demand_nm": -0.6608568429946899,
+                "dq_dt_rad_s": 0.0010967254638671875,
+                "physics_sample": 3184,
+                "post_qd_rad_s": 0.009922683238983154,
+                "pre_qd_rad_s": 0.003219804260879755,
+                "total_vertical_foot_force_N": 80.27469730377197
+              },
+              {
+                "d_term_nm": -0.00297680520452559,
+                "demand_nm": -0.6629088521003723,
+                "dq_dt_rad_s": -0.0018000602722167969,
+                "physics_sample": 3185,
+                "post_qd_rad_s": 0.0052273571491241455,
+                "pre_qd_rad_s": 0.009922683238983154,
+                "total_vertical_foot_force_N": 81.38593578338623
+              }
+            ],
+            "motor": "lf_femur_pitch",
+            "p_term_nm": -0.6593589782714844,
+            "physics_sample": 3182,
+            "post_joint_speed_rad_s": -0.11279215663671494,
+            "pre_joint_speed_rad_s": 0.12398287653923035,
+            "pre_time_s": 3.9775,
+            "raw_nm": -0.6965538263320923
+          },
+          "peak_raw_nm": 0.6965538263320923,
+          "rms_C_pin_relative_velocity_m_s": 7.653635257463806e-05,
+          "rms_active_joint_speed_rad_s": 0.006633338688559474,
+          "rms_demeaned_demand_nm": 0.0018949863468270159,
+          "rms_post_mimic_velocity_residual_rad_s": 0.0011655365927078268,
+          "root_mean_xyz_m": [
+            1.9999498852062971,
+            2.0000222239643337,
+            0.13572085503838024
+          ]
+        },
+        "4": {
+          "actual_initial_root_xyz_m": [
+            2.0,
+            2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            2.0,
+            2.0,
+            0.0
+          ],
+          "environment": 2,
+          "max_C_pin_relative_velocity_m_s": 0.00017998104650877552,
+          "max_post_mimic_velocity_residual_rad_s": 0.004377910052426159,
+          "min_feet_with_force_gt1N": 6,
+          "peak_active_joint_speed_rad_s": 0.016113119199872017,
+          "peak_applied_nm": 0.6671704649925232,
+          "peak_axis_chord": 6.474141131875745e-07,
+          "peak_closure_point_m": 8.60146990125077e-07,
+          "peak_d_term_nm": 0.004833935759961605,
+          "peak_passive_relation_error_rad": 2.980232238769531e-07,
+          "peak_raw_event": {
+            "applied_nm": -0.6671704649925232,
+            "d_term_nm": -0.001004497637040913,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.8100091665473883e-06,
+                0.0,
+                13.471455574035645
+              ],
+              "lm": [
+                1.800150130293332e-06,
+                0.0,
+                13.398077011108398
+              ],
+              "lr": [
+                1.8114384374712245e-06,
+                0.0,
+                13.482093811035156
+              ],
+              "rf": [
+                1.8382482949164114e-06,
+                0.0,
+                13.681632041931152
+              ],
+              "rm": [
+                1.8196471955889137e-06,
+                0.0,
+                13.543188095092773
+              ],
+              "rr": [
+                1.8088163642460131e-06,
+                0.0,
+                13.462577819824219
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.0009417533874511719,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -0.00013077033509034663,
+                "demand_nm": -0.6663646697998047,
+                "dq_dt_rad_s": -0.0010967254638671875,
+                "physics_sample": 2510,
+                "post_qd_rad_s": 0.0002515703672543168,
+                "pre_qd_rad_s": 0.0004359011072665453,
+                "total_vertical_foot_force_N": 81.0271987915039
+              },
+              {
+                "d_term_nm": -7.547111454186961e-05,
+                "demand_nm": -0.6662682294845581,
+                "dq_dt_rad_s": -0.0002384185791015625,
+                "physics_sample": 2511,
+                "post_qd_rad_s": -0.0001978378277271986,
+                "pre_qd_rad_s": 0.0002515703672543168,
+                "total_vertical_foot_force_N": 80.9604606628418
+              },
+              {
+                "d_term_nm": 5.9351350500946864e-05,
+                "demand_nm": -0.6661244630813599,
+                "dq_dt_rad_s": -0.000476837158203125,
+                "physics_sample": 2512,
+                "post_qd_rad_s": 0.003348325379192829,
+                "pre_qd_rad_s": -0.0001978378277271986,
+                "total_vertical_foot_force_N": 81.09469223022461
+              },
+              {
+                "d_term_nm": -0.001004497637040913,
+                "demand_nm": -0.6671704649925232,
+                "dq_dt_rad_s": 0.0009417533874511719,
+                "physics_sample": 2513,
+                "post_qd_rad_s": -6.203039083629847e-05,
+                "pre_qd_rad_s": 0.003348325379192829,
+                "total_vertical_foot_force_N": 81.03902435302734
+              },
+              {
+                "d_term_nm": 1.8609118342283182e-05,
+                "demand_nm": -0.6661826372146606,
+                "dq_dt_rad_s": 0.00020265579223632812,
+                "physics_sample": 2514,
+                "post_qd_rad_s": 0.0006536521250382066,
+                "pre_qd_rad_s": -6.203039083629847e-05,
+                "total_vertical_foot_force_N": 80.94468879699707
+              },
+              {
+                "d_term_nm": -0.00019609564333222806,
+                "demand_nm": -0.6664049625396729,
+                "dq_dt_rad_s": -0.0009059906005859375,
+                "physics_sample": 2515,
+                "post_qd_rad_s": 0.00027105340268462896,
+                "pre_qd_rad_s": 0.0006536521250382066,
+                "total_vertical_foot_force_N": 81.14820766448975
+              },
+              {
+                "d_term_nm": -8.131602226058021e-05,
+                "demand_nm": -0.6662561893463135,
+                "dq_dt_rad_s": 0.00035762786865234375,
+                "physics_sample": 2516,
+                "post_qd_rad_s": 0.0002097924007102847,
+                "pre_qd_rad_s": 0.00027105340268462896,
+                "total_vertical_foot_force_N": 80.8964033126831
+              }
+            ],
+            "motor": "lr_femur_pitch",
+            "p_term_nm": -0.6661659479141235,
+            "physics_sample": 2513,
+            "post_joint_speed_rad_s": -6.203039083629847e-05,
+            "pre_joint_speed_rad_s": 0.003348325379192829,
+            "pre_time_s": 3.14125,
+            "raw_nm": -0.6671704649925232
+          },
+          "peak_raw_nm": 0.6671704649925232,
+          "rms_C_pin_relative_velocity_m_s": 5.9167928230064e-05,
+          "rms_active_joint_speed_rad_s": 0.0018309891074918291,
+          "rms_demeaned_demand_nm": 0.0005654935470107063,
+          "rms_post_mimic_velocity_residual_rad_s": 0.001101228336002165,
+          "root_mean_xyz_m": [
+            2.00002214172855,
+            1.9999851417727768,
+            0.13571283904602752
+          ]
+        }
+      },
+      "environment": 2,
+      "origin_xyz_m": [
+        2.0,
+        2.0,
+        0.0
+      ],
+      "sixteen_over_four": {
+        "max_C_pin_relative_velocity_m_s": 10.848397824323227,
+        "max_post_mimic_velocity_residual_rad_s": 22.24492271318369,
+        "peak_active_joint_speed_rad_s": 13.681658924487309,
+        "peak_applied_nm": 1.0440417597620997,
+        "peak_closure_point_m": 1.0047903762993289,
+        "peak_passive_relation_error_rad": 18.2,
+        "peak_raw_nm": 1.0440417597620997,
+        "rms_C_pin_relative_velocity_m_s": 1.293544574977174,
+        "rms_post_mimic_velocity_residual_rad_s": 1.0583968416024625
+      }
+    },
+    {
+      "by_velocity_iterations": {
+        "1": {
+          "actual_initial_root_xyz_m": [
+            0.0,
+            -2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            0.0,
+            -2.0,
+            0.0
+          ],
+          "environment": 3,
+          "max_C_pin_relative_velocity_m_s": 0.026953944082877036,
+          "max_post_mimic_velocity_residual_rad_s": 1.1459988355636597,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 0.4458889961242676,
+          "peak_applied_nm": 0.7117511034011841,
+          "peak_axis_chord": 7.045515718243736e-07,
+          "peak_closure_point_m": 7.183534952874096e-07,
+          "peak_d_term_nm": 0.13376671075820923,
+          "peak_passive_relation_error_rad": 6.556510925292969e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.7117511034011841,
+            "d_term_nm": -0.06203779950737953,
+            "foot_force_xyz_N": {
+              "lf": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "lm": [
+                1.8112207271769876e-06,
+                0.0,
+                13.480472564697266
+              ],
+              "lr": [
+                1.8145111653211643e-06,
+                0.0,
+                13.504962921142578
+              ],
+              "rf": [
+                1.8631075135999708e-06,
+                0.0,
+                13.866654396057129
+              ],
+              "rm": [
+                1.774115844455082e-06,
+                0.0,
+                13.204309463500977
+              ],
+              "rr": [
+                1.7684199065115536e-06,
+                0.0,
+                13.161916732788086
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.08291006088256836,
+            "matching_sample_window": [
+              {
+                "d_term_nm": 0.0018347324803471565,
+                "demand_nm": -0.6478838920593262,
+                "dq_dt_rad_s": -0.0007748603820800781,
+                "physics_sample": 2178,
+                "post_qd_rad_s": -0.0002792754676192999,
+                "pre_qd_rad_s": -0.0061157746240496635,
+                "total_vertical_foot_force_N": 80.87864303588867
+              },
+              {
+                "d_term_nm": 8.378264465136454e-05,
+                "demand_nm": -0.6496057510375977,
+                "dq_dt_rad_s": -1.1920928955078125e-05,
+                "physics_sample": 2179,
+                "post_qd_rad_s": -0.00017281272448599339,
+                "pre_qd_rad_s": -0.0002792754676192999,
+                "total_vertical_foot_force_N": 81.0794849395752
+              },
+              {
+                "d_term_nm": 5.184382098377682e-05,
+                "demand_nm": -0.6496372818946838,
+                "dq_dt_rad_s": 0.0006437301635742188,
+                "physics_sample": 2180,
+                "post_qd_rad_s": 0.2067926526069641,
+                "pre_qd_rad_s": -0.00017281272448599339,
+                "total_vertical_foot_force_N": 89.59211158752441
+              },
+              {
+                "d_term_nm": -0.06203779950737953,
+                "demand_nm": -0.7117511034011841,
+                "dq_dt_rad_s": 0.08291006088256836,
+                "physics_sample": 2181,
+                "post_qd_rad_s": -0.09923231601715088,
+                "pre_qd_rad_s": 0.2067926526069641,
+                "total_vertical_foot_force_N": 67.21831607818604
+              },
+              {
+                "d_term_nm": 0.029769696295261383,
+                "demand_nm": -0.6230526566505432,
+                "dq_dt_rad_s": 5.9604644775390625e-05,
+                "physics_sample": 2182,
+                "post_qd_rad_s": 4.165433347225189e-05,
+                "pre_qd_rad_s": -0.09923231601715088,
+                "total_vertical_foot_force_N": 86.44724750518799
+              },
+              {
+                "d_term_nm": -1.2496300769271329e-05,
+                "demand_nm": -0.6528371572494507,
+                "dq_dt_rad_s": -0.006175041198730469,
+                "physics_sample": 2183,
+                "post_qd_rad_s": 6.334984209388494e-05,
+                "pre_qd_rad_s": 4.165433347225189e-05,
+                "total_vertical_foot_force_N": 81.10711860656738
+              },
+              {
+                "d_term_nm": -1.9004954083357006e-05,
+                "demand_nm": -0.6526120901107788,
+                "dq_dt_rad_s": -0.002574920654296875,
+                "physics_sample": 2184,
+                "post_qd_rad_s": -0.005907194223254919,
+                "pre_qd_rad_s": 6.334984209388494e-05,
+                "total_vertical_foot_force_N": 80.70503520965576
+              }
+            ],
+            "motor": "lf_femur_pitch",
+            "p_term_nm": -0.6497132778167725,
+            "physics_sample": 2181,
+            "post_joint_speed_rad_s": -0.09923231601715088,
+            "pre_joint_speed_rad_s": 0.2067926526069641,
+            "pre_time_s": 2.72625,
+            "raw_nm": -0.7117511034011841
+          },
+          "peak_raw_nm": 0.7117511034011841,
+          "rms_C_pin_relative_velocity_m_s": 0.00046781380132738436,
+          "rms_active_joint_speed_rad_s": 0.009069613101938875,
+          "rms_demeaned_demand_nm": 0.003546806563701372,
+          "rms_post_mimic_velocity_residual_rad_s": 0.013176120207117437,
+          "root_mean_xyz_m": [
+            1.0984357834331604e-05,
+            -1.9999916938599198,
+            0.13571617444977163
+          ]
+        },
+        "16": {
+          "actual_initial_root_xyz_m": [
+            0.0,
+            -2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            0.0,
+            -2.0,
+            0.0
+          ],
+          "environment": 3,
+          "max_C_pin_relative_velocity_m_s": 0.00019865143729373735,
+          "max_post_mimic_velocity_residual_rad_s": 0.004091436974704266,
+          "min_feet_with_force_gt1N": 6,
+          "peak_active_joint_speed_rad_s": 0.03141269087791443,
+          "peak_applied_nm": 0.6808826923370361,
+          "peak_axis_chord": 6.96187304862711e-07,
+          "peak_closure_point_m": 7.183534694373563e-07,
+          "peak_d_term_nm": 0.009423807263374329,
+          "peak_passive_relation_error_rad": 2.980232238769531e-07,
+          "peak_raw_event": {
+            "applied_nm": -0.6808826923370361,
+            "d_term_nm": -0.001747393631376326,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.8217244814877631e-06,
+                0.0,
+                13.558650016784668
+              ],
+              "lm": [
+                1.8128721421817318e-06,
+                0.0,
+                13.492764472961426
+              ],
+              "lr": [
+                1.8317967942493851e-06,
+                0.0,
+                13.633614540100098
+              ],
+              "rf": [
+                1.8285365968040423e-06,
+                0.0,
+                13.60935115814209
+              ],
+              "rm": [
+                1.8202254068455659e-06,
+                0.0,
+                13.547492027282715
+              ],
+              "rr": [
+                1.7982856661546975e-06,
+                0.0,
+                13.384201049804688
+              ]
+            },
+            "joint_position_difference_rate_rad_s": -0.0007867813110351562,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -3.053307591471821e-05,
+                "demand_nm": -0.6791555881500244,
+                "dq_dt_rad_s": -0.0006794929504394531,
+                "physics_sample": 1803,
+                "post_qd_rad_s": 6.297770596574992e-06,
+                "pre_qd_rad_s": 0.00010177691001445055,
+                "total_vertical_foot_force_N": 81.05862712860107
+              },
+              {
+                "d_term_nm": -1.8893312017098651e-06,
+                "demand_nm": -0.6791014671325684,
+                "dq_dt_rad_s": 0.0015616416931152344,
+                "physics_sample": 1804,
+                "post_qd_rad_s": 0.0023510996252298355,
+                "pre_qd_rad_s": 6.297770596574992e-06,
+                "total_vertical_foot_force_N": 80.75808429718018
+              },
+              {
+                "d_term_nm": -0.0007053299341350794,
+                "demand_nm": -0.6798633933067322,
+                "dq_dt_rad_s": -0.0006079673767089844,
+                "physics_sample": 1805,
+                "post_qd_rad_s": 0.005824645049870014,
+                "pre_qd_rad_s": 0.0023510996252298355,
+                "total_vertical_foot_force_N": 80.82513046264648
+              },
+              {
+                "d_term_nm": -0.001747393631376326,
+                "demand_nm": -0.6808826923370361,
+                "dq_dt_rad_s": -0.0007867813110351562,
+                "physics_sample": 1806,
+                "post_qd_rad_s": 0.0032105911523103714,
+                "pre_qd_rad_s": 0.005824645049870014,
+                "total_vertical_foot_force_N": 81.22607326507568
+              },
+              {
+                "d_term_nm": -0.0009631773573346436,
+                "demand_nm": -0.6800689697265625,
+                "dq_dt_rad_s": -0.0020503997802734375,
+                "physics_sample": 1807,
+                "post_qd_rad_s": 7.628812454640865e-05,
+                "pre_qd_rad_s": 0.0032105911523103714,
+                "total_vertical_foot_force_N": 80.922926902771
+              },
+              {
+                "d_term_nm": -2.2886437363922596e-05,
+                "demand_nm": -0.6790518164634705,
+                "dq_dt_rad_s": -0.0011801719665527344,
+                "physics_sample": 1808,
+                "post_qd_rad_s": 0.0019404373597353697,
+                "pre_qd_rad_s": 7.628812454640865e-05,
+                "total_vertical_foot_force_N": 81.2753438949585
+              },
+              {
+                "d_term_nm": -0.0005821312079206109,
+                "demand_nm": -0.6795668005943298,
+                "dq_dt_rad_s": 0.0017762184143066406,
+                "physics_sample": 1809,
+                "post_qd_rad_s": 0.003080823225900531,
+                "pre_qd_rad_s": 0.0019404373597353697,
+                "total_vertical_foot_force_N": 80.93526363372803
+              }
+            ],
+            "motor": "lf_femur_pitch",
+            "p_term_nm": -0.6791353225708008,
+            "physics_sample": 1806,
+            "post_joint_speed_rad_s": 0.0032105911523103714,
+            "pre_joint_speed_rad_s": 0.005824645049870014,
+            "pre_time_s": 2.2575,
+            "raw_nm": -0.6808826923370361
+          },
+          "peak_raw_nm": 0.6808826923370361,
+          "rms_C_pin_relative_velocity_m_s": 7.382317779602901e-05,
+          "rms_active_joint_speed_rad_s": 0.003931876892022626,
+          "rms_demeaned_demand_nm": 0.0010479365756335798,
+          "rms_post_mimic_velocity_residual_rad_s": 0.0010450476828626762,
+          "root_mean_xyz_m": [
+            -3.167883509860303e-05,
+            -2.000093416403979,
+            0.13572994168498553
+          ]
+        },
+        "4": {
+          "actual_initial_root_xyz_m": [
+            0.0,
+            -2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            0.0,
+            -2.0,
+            0.0
+          ],
+          "environment": 3,
+          "max_C_pin_relative_velocity_m_s": 0.019454580020043195,
+          "max_post_mimic_velocity_residual_rad_s": 1.0529807209968567,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 0.48442691564559937,
+          "peak_applied_nm": 0.7277562618255615,
+          "peak_axis_chord": 6.690591995184347e-07,
+          "peak_closure_point_m": 7.208605590333135e-07,
+          "peak_d_term_nm": 0.1453280746936798,
+          "peak_passive_relation_error_rad": 7.62939453125e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.7277562618255615,
+            "d_term_nm": -0.0785360112786293,
+            "foot_force_xyz_N": {
+              "lf": [
+                8.683346663929115e-07,
+                0.0,
+                6.462802886962891
+              ],
+              "lm": [
+                1.850702005867788e-06,
+                0.0,
+                13.774321556091309
+              ],
+              "lr": [
+                1.8699246311371098e-06,
+                0.0,
+                13.91739273071289
+              ],
+              "rf": [
+                1.8353564428252866e-06,
+                0.0,
+                13.66010856628418
+              ],
+              "rm": [
+                1.7433743551009684e-06,
+                0.0,
+                12.975509643554688
+              ],
+              "rr": [
+                1.7804119352149428e-06,
+                0.0,
+                13.25117015838623
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.1278400421142578,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -0.00021973550610709935,
+                "demand_nm": -0.6495401263237,
+                "dq_dt_rad_s": 0.0016570091247558594,
+                "physics_sample": 1825,
+                "post_qd_rad_s": 0.0035962644033133984,
+                "pre_qd_rad_s": 0.0007324516773223877,
+                "total_vertical_foot_force_N": 80.88077640533447
+              },
+              {
+                "d_term_nm": -0.0010788793442770839,
+                "demand_nm": -0.6504613757133484,
+                "dq_dt_rad_s": 7.152557373046875e-05,
+                "physics_sample": 1826,
+                "post_qd_rad_s": 0.00078922527609393,
+                "pre_qd_rad_s": 0.0035962644033133984,
+                "total_vertical_foot_force_N": 81.17587852478027
+              },
+              {
+                "d_term_nm": -0.00023676759155932814,
+                "demand_nm": -0.6496219038963318,
+                "dq_dt_rad_s": -0.004398822784423828,
+                "physics_sample": 1827,
+                "post_qd_rad_s": 0.26178669929504395,
+                "pre_qd_rad_s": 0.00078922527609393,
+                "total_vertical_foot_force_N": 90.58378982543945
+              },
+              {
+                "d_term_nm": -0.0785360112786293,
+                "demand_nm": -0.7277562618255615,
+                "dq_dt_rad_s": 0.1278400421142578,
+                "physics_sample": 1828,
+                "post_qd_rad_s": 0.03382403403520584,
+                "pre_qd_rad_s": 0.26178669929504395,
+                "total_vertical_foot_force_N": 74.04130554199219
+              },
+              {
+                "d_term_nm": -0.010147210210561752,
+                "demand_nm": -0.6641614437103271,
+                "dq_dt_rad_s": -0.12327432632446289,
+                "physics_sample": 1829,
+                "post_qd_rad_s": -0.23102954030036926,
+                "pre_qd_rad_s": 0.03382403403520584,
+                "total_vertical_foot_force_N": 67.75435161590576
+              },
+              {
+                "d_term_nm": 0.06930886209011078,
+                "demand_nm": -0.5800825357437134,
+                "dq_dt_rad_s": -0.0019073486328125,
+                "physics_sample": 1830,
+                "post_qd_rad_s": 0.024735286831855774,
+                "pre_qd_rad_s": -0.23102954030036926,
+                "total_vertical_foot_force_N": 87.8339033126831
+              },
+              {
+                "d_term_nm": -0.007420586422085762,
+                "demand_nm": -0.6567404866218567,
+                "dq_dt_rad_s": 0.006365776062011719,
+                "physics_sample": 1831,
+                "post_qd_rad_s": -0.0033062566071748734,
+                "pre_qd_rad_s": 0.024735286831855774,
+                "total_vertical_foot_force_N": 84.14247989654541
+              }
+            ],
+            "motor": "lf_femur_pitch",
+            "p_term_nm": -0.6492202281951904,
+            "physics_sample": 1828,
+            "post_joint_speed_rad_s": 0.03382403403520584,
+            "pre_joint_speed_rad_s": 0.26178669929504395,
+            "pre_time_s": 2.285,
+            "raw_nm": -0.7277562618255615
+          },
+          "peak_raw_nm": 0.7277562618255615,
+          "rms_C_pin_relative_velocity_m_s": 0.00033839998505222097,
+          "rms_active_joint_speed_rad_s": 0.010597130500596318,
+          "rms_demeaned_demand_nm": 0.0033312924572063566,
+          "rms_post_mimic_velocity_residual_rad_s": 0.011117076036831158,
+          "root_mean_xyz_m": [
+            1.6242372759478484e-05,
+            -2.000016235373914,
+            0.13571816345793195
+          ]
+        }
+      },
+      "environment": 3,
+      "origin_xyz_m": [
+        0.0,
+        -2.0,
+        0.0
+      ],
+      "sixteen_over_four": {
+        "max_C_pin_relative_velocity_m_s": 0.01021103704572782,
+        "max_post_mimic_velocity_residual_rad_s": 0.0038855763387870036,
+        "peak_active_joint_speed_rad_s": 0.06484505683597391,
+        "peak_applied_nm": 0.9355916644798851,
+        "peak_closure_point_m": 0.9965220879897781,
+        "peak_passive_relation_error_rad": 0.0390625,
+        "peak_raw_nm": 0.9355916644798851,
+        "rms_C_pin_relative_velocity_m_s": 0.21815360832429356,
+        "rms_post_mimic_velocity_residual_rad_s": 0.09400382613201587
+      }
+    },
+    {
+      "by_velocity_iterations": {
+        "1": {
+          "actual_initial_root_xyz_m": [
+            0.0,
+            0.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "environment": 4,
+          "max_C_pin_relative_velocity_m_s": 0.0006453299079600788,
+          "max_post_mimic_velocity_residual_rad_s": 0.011667185463011265,
+          "min_feet_with_force_gt1N": 6,
+          "peak_active_joint_speed_rad_s": 0.06669902056455612,
+          "peak_applied_nm": 0.6666584610939026,
+          "peak_axis_chord": 6.885034155326504e-07,
+          "peak_closure_point_m": 1.3411045458243736e-07,
+          "peak_d_term_nm": 0.020009707659482956,
+          "peak_passive_relation_error_rad": 3.5762786865234375e-07,
+          "peak_raw_event": {
+            "applied_nm": -0.6666584610939026,
+            "d_term_nm": -0.002925265347585082,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.8134638821720728e-06,
+                0.0,
+                13.497167587280273
+              ],
+              "lm": [
+                1.794112222341937e-06,
+                0.0,
+                13.35313892364502
+              ],
+              "lr": [
+                1.8025159533863189e-06,
+                0.0,
+                13.415685653686523
+              ],
+              "rf": [
+                1.8205804508397705e-06,
+                0.0,
+                13.550135612487793
+              ],
+              "rm": [
+                1.810087724152254e-06,
+                0.0,
+                13.472040176391602
+              ],
+              "rr": [
+                1.8058260593534214e-06,
+                0.0,
+                13.44032096862793
+              ]
+            },
+            "joint_position_difference_rate_rad_s": -0.004255771636962891,
+            "matching_sample_window": [
+              {
+                "d_term_nm": 6.4920463955786545e-06,
+                "demand_nm": -0.6639466285705566,
+                "dq_dt_rad_s": -0.0019311904907226562,
+                "physics_sample": 1749,
+                "post_qd_rad_s": -0.0008812390733510256,
+                "pre_qd_rad_s": -2.1640153136104345e-05,
+                "total_vertical_foot_force_N": 81.0265007019043
+              },
+              {
+                "d_term_nm": 0.00026437174528837204,
+                "demand_nm": -0.6636163592338562,
+                "dq_dt_rad_s": -0.002467632293701172,
+                "physics_sample": 1750,
+                "post_qd_rad_s": -0.001602250267751515,
+                "pre_qd_rad_s": -0.0008812390733510256,
+                "total_vertical_foot_force_N": 81.07025718688965
+              },
+              {
+                "d_term_nm": 0.00048067510942928493,
+                "demand_nm": -0.6633075475692749,
+                "dq_dt_rad_s": -0.0014662742614746094,
+                "physics_sample": 1751,
+                "post_qd_rad_s": 0.009750884026288986,
+                "pre_qd_rad_s": -0.001602250267751515,
+                "total_vertical_foot_force_N": 81.1895809173584
+              },
+              {
+                "d_term_nm": -0.002925265347585082,
+                "demand_nm": -0.6666584610939026,
+                "dq_dt_rad_s": -0.004255771636962891,
+                "physics_sample": 1752,
+                "post_qd_rad_s": 0.0034545378293842077,
+                "pre_qd_rad_s": 0.009750884026288986,
+                "total_vertical_foot_force_N": 80.72848892211914
+              },
+              {
+                "d_term_nm": -0.0010363614419475198,
+                "demand_nm": -0.664609968662262,
+                "dq_dt_rad_s": -0.004279613494873047,
+                "physics_sample": 1753,
+                "post_qd_rad_s": 0.0033763153478503227,
+                "pre_qd_rad_s": 0.0034545378293842077,
+                "total_vertical_foot_force_N": 81.06196117401123
+              },
+              {
+                "d_term_nm": -0.00101289467420429,
+                "demand_nm": -0.6644260287284851,
+                "dq_dt_rad_s": -0.0032663345336914062,
+                "physics_sample": 1754,
+                "post_qd_rad_s": 0.0001944082323461771,
+                "pre_qd_rad_s": 0.0033763153478503227,
+                "total_vertical_foot_force_N": 80.89659404754639
+              },
+              {
+                "d_term_nm": -5.8322471886640415e-05,
+                "demand_nm": -0.663348913192749,
+                "dq_dt_rad_s": -0.0034570693969726562,
+                "physics_sample": 1755,
+                "post_qd_rad_s": -0.00020837935153394938,
+                "pre_qd_rad_s": 0.0001944082323461771,
+                "total_vertical_foot_force_N": 80.77110195159912
+              }
+            ],
+            "motor": "rf_femur_pitch",
+            "p_term_nm": -0.663733184337616,
+            "physics_sample": 1752,
+            "post_joint_speed_rad_s": 0.0034545378293842077,
+            "pre_joint_speed_rad_s": 0.009750884026288986,
+            "pre_time_s": 2.19,
+            "raw_nm": -0.6666584610939026
+          },
+          "peak_raw_nm": 0.6666584610939026,
+          "rms_C_pin_relative_velocity_m_s": 0.00021443933953189273,
+          "rms_active_joint_speed_rad_s": 0.006358350835502877,
+          "rms_demeaned_demand_nm": 0.001968321017850102,
+          "rms_post_mimic_velocity_residual_rad_s": 0.0024879879511932332,
+          "root_mean_xyz_m": [
+            -2.503056466025555e-05,
+            8.622561026072617e-07,
+            0.13571455461205914
+          ]
+        },
+        "16": {
+          "actual_initial_root_xyz_m": [
+            0.0,
+            0.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "environment": 4,
+          "max_C_pin_relative_velocity_m_s": 0.0016850424833790912,
+          "max_post_mimic_velocity_residual_rad_s": 0.019404172897338867,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 0.46017056703567505,
+          "peak_applied_nm": 0.708512544631958,
+          "peak_axis_chord": 7.622676356390175e-07,
+          "peak_closure_point_m": 2.7314280771243776e-07,
+          "peak_d_term_nm": 0.13805118203163147,
+          "peak_passive_relation_error_rad": 7.867813110351562e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.708512544631958,
+            "d_term_nm": -0.06377436220645905,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.682437073213805e-06,
+                0.0,
+                12.521968841552734
+              ],
+              "lm": [
+                1.8609737253427738e-06,
+                0.0,
+                13.850772857666016
+              ],
+              "lr": [
+                1.9038836853724206e-06,
+                0.0,
+                14.170140266418457
+              ],
+              "rf": [
+                1.8194094764112378e-06,
+                0.0,
+                13.541419982910156
+              ],
+              "rm": [
+                1.7326692614005879e-06,
+                0.0,
+                12.895833969116211
+              ],
+              "rr": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.09275674819946289,
+            "matching_sample_window": [
+              {
+                "d_term_nm": 0.0026449309661984444,
+                "demand_nm": -0.6419560313224792,
+                "dq_dt_rad_s": 0.031888484954833984,
+                "physics_sample": 2132,
+                "post_qd_rad_s": 0.02015160769224167,
+                "pre_qd_rad_s": -0.008816435933113098,
+                "total_vertical_foot_force_N": 74.7563910484314
+              },
+              {
+                "d_term_nm": -0.006045482587069273,
+                "demand_nm": -0.6518422365188599,
+                "dq_dt_rad_s": -0.023376941680908203,
+                "physics_sample": 2133,
+                "post_qd_rad_s": -0.015466578304767609,
+                "pre_qd_rad_s": 0.02015160769224167,
+                "total_vertical_foot_force_N": 84.20680332183838
+              },
+              {
+                "d_term_nm": 0.0046399738639593124,
+                "demand_nm": -0.6402801871299744,
+                "dq_dt_rad_s": -0.004851818084716797,
+                "physics_sample": 2134,
+                "post_qd_rad_s": 0.21258118748664856,
+                "pre_qd_rad_s": -0.015466578304767609,
+                "total_vertical_foot_force_N": 88.5823163986206
+              },
+              {
+                "d_term_nm": -0.06377436220645905,
+                "demand_nm": -0.708512544631958,
+                "dq_dt_rad_s": 0.09275674819946289,
+                "physics_sample": 2135,
+                "post_qd_rad_s": -0.010884415358304977,
+                "pre_qd_rad_s": 0.21258118748664856,
+                "total_vertical_foot_force_N": 66.98013591766357
+              },
+              {
+                "d_term_nm": 0.0032653247471898794,
+                "demand_nm": -0.6449512839317322,
+                "dq_dt_rad_s": -0.003635883331298828,
+                "physics_sample": 2136,
+                "post_qd_rad_s": 0.026236403733491898,
+                "pre_qd_rad_s": -0.010884415358304977,
+                "total_vertical_foot_force_N": 87.85611248016357
+              },
+              {
+                "d_term_nm": -0.007870921865105629,
+                "demand_nm": -0.6559511423110962,
+                "dq_dt_rad_s": 0.004541873931884766,
+                "physics_sample": 2137,
+                "post_qd_rad_s": 0.0026364787481725216,
+                "pre_qd_rad_s": 0.026236403733491898,
+                "total_vertical_foot_force_N": 80.43751430511475
+              },
+              {
+                "d_term_nm": -0.0007909436826594174,
+                "demand_nm": -0.6490415334701538,
+                "dq_dt_rad_s": 0.0012040138244628906,
+                "physics_sample": 2138,
+                "post_qd_rad_s": 0.006452111527323723,
+                "pre_qd_rad_s": 0.0026364787481725216,
+                "total_vertical_foot_force_N": 81.11144733428955
+              }
+            ],
+            "motor": "rr_femur_pitch",
+            "p_term_nm": -0.6447381973266602,
+            "physics_sample": 2135,
+            "post_joint_speed_rad_s": -0.010884415358304977,
+            "pre_joint_speed_rad_s": 0.21258118748664856,
+            "pre_time_s": 2.66875,
+            "raw_nm": -0.708512544631958
+          },
+          "peak_raw_nm": 0.708512544631958,
+          "rms_C_pin_relative_velocity_m_s": 8.074480357592077e-05,
+          "rms_active_joint_speed_rad_s": 0.007170533105094575,
+          "rms_demeaned_demand_nm": 0.002033058951503822,
+          "rms_post_mimic_velocity_residual_rad_s": 0.0010478114150879654,
+          "root_mean_xyz_m": [
+            4.854160557954401e-07,
+            -4.0027474680925935e-05,
+            0.13572069903602824
+          ]
+        },
+        "4": {
+          "actual_initial_root_xyz_m": [
+            0.0,
+            0.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "environment": 4,
+          "max_C_pin_relative_velocity_m_s": 8.84596173638962e-05,
+          "max_post_mimic_velocity_residual_rad_s": 0.0022828536120869103,
+          "min_feet_with_force_gt1N": 6,
+          "peak_active_joint_speed_rad_s": 0.009594745934009552,
+          "peak_applied_nm": 0.6699214577674866,
+          "peak_axis_chord": 7.1233142030268e-07,
+          "peak_closure_point_m": 1.3838837605872373e-07,
+          "peak_d_term_nm": 0.0028784237802028656,
+          "peak_passive_relation_error_rad": 2.980232238769531e-07,
+          "peak_raw_event": {
+            "applied_nm": -0.6699214577674866,
+            "d_term_nm": -0.00018460718274582177,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.8106916286342312e-06,
+                0.0,
+                13.47653579711914
+              ],
+              "lm": [
+                1.809903892535658e-06,
+                0.0,
+                13.470671653747559
+              ],
+              "lr": [
+                1.8303243223272148e-06,
+                0.0,
+                13.62265682220459
+              ],
+              "rf": [
+                1.8226032807433512e-06,
+                0.0,
+                13.565190315246582
+              ],
+              "rm": [
+                1.817768520595564e-06,
+                0.0,
+                13.529207229614258
+              ],
+              "rr": [
+                1.7955471776076593e-06,
+                0.0,
+                13.363819122314453
+              ]
+            },
+            "joint_position_difference_rate_rad_s": -0.0006556510925292969,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -0.00014298294263426214,
+                "demand_nm": -0.6698775887489319,
+                "dq_dt_rad_s": 0.00021457672119140625,
+                "physics_sample": 2032,
+                "post_qd_rad_s": 0.0005313099245540798,
+                "pre_qd_rad_s": 0.00047660976997576654,
+                "total_vertical_foot_force_N": 81.06488609313965
+              },
+              {
+                "d_term_nm": -0.00015939297736622393,
+                "demand_nm": -0.6699020862579346,
+                "dq_dt_rad_s": -0.0002980232238769531,
+                "physics_sample": 2033,
+                "post_qd_rad_s": 0.000468404614366591,
+                "pre_qd_rad_s": 0.0005313099245540798,
+                "total_vertical_foot_force_N": 81.04211521148682
+              },
+              {
+                "d_term_nm": -0.0001405213843099773,
+                "demand_nm": -0.6698720455169678,
+                "dq_dt_rad_s": 0.0001430511474609375,
+                "physics_sample": 2034,
+                "post_qd_rad_s": 0.0006153572467155755,
+                "pre_qd_rad_s": 0.000468404614366591,
+                "total_vertical_foot_force_N": 81.07779693603516
+              },
+              {
+                "d_term_nm": -0.00018460718274582177,
+                "demand_nm": -0.6699214577674866,
+                "dq_dt_rad_s": -0.0006556510925292969,
+                "physics_sample": 2035,
+                "post_qd_rad_s": 0.0004018869367428124,
+                "pre_qd_rad_s": 0.0006153572467155755,
+                "total_vertical_foot_force_N": 81.02808094024658
+              },
+              {
+                "d_term_nm": -0.00012056608829880133,
+                "demand_nm": -0.6698328852653503,
+                "dq_dt_rad_s": 0.0001430511474609375,
+                "physics_sample": 2036,
+                "post_qd_rad_s": 0.0005419508670456707,
+                "pre_qd_rad_s": 0.0004018869367428124,
+                "total_vertical_foot_force_N": 80.98905849456787
+              },
+              {
+                "d_term_nm": -0.00016258526011370122,
+                "demand_nm": -0.6698802709579468,
+                "dq_dt_rad_s": 0.0003457069396972656,
+                "physics_sample": 2037,
+                "post_qd_rad_s": 0.0005180033622309566,
+                "pre_qd_rad_s": 0.0005419508670456707,
+                "total_vertical_foot_force_N": 81.00190925598145
+              },
+              {
+                "d_term_nm": -0.00015540100866928697,
+                "demand_nm": -0.6698859930038452,
+                "dq_dt_rad_s": 0.00013113021850585938,
+                "physics_sample": 2038,
+                "post_qd_rad_s": 0.00044634874211624265,
+                "pre_qd_rad_s": 0.0005180033622309566,
+                "total_vertical_foot_force_N": 81.1043758392334
+              }
+            ],
+            "motor": "lr_femur_pitch",
+            "p_term_nm": -0.6697368621826172,
+            "physics_sample": 2035,
+            "post_joint_speed_rad_s": 0.0004018869367428124,
+            "pre_joint_speed_rad_s": 0.0006153572467155755,
+            "pre_time_s": 2.54375,
+            "raw_nm": -0.6699214577674866
+          },
+          "peak_raw_nm": 0.6699214577674866,
+          "rms_C_pin_relative_velocity_m_s": 6.07644657956584e-05,
+          "rms_active_joint_speed_rad_s": 0.0011754028804124017,
+          "rms_demeaned_demand_nm": 0.0002138453990071629,
+          "rms_post_mimic_velocity_residual_rad_s": 0.0011193382427627026,
+          "root_mean_xyz_m": [
+            -7.518625143632107e-06,
+            -8.200283328108072e-06,
+            0.1357135168160312
+          ]
+        }
+      },
+      "environment": 4,
+      "origin_xyz_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sixteen_over_four": {
+        "max_C_pin_relative_velocity_m_s": 19.048720010254332,
+        "max_post_mimic_velocity_residual_rad_s": 8.499963727240576,
+        "peak_active_joint_speed_rad_s": 47.96068287796488,
+        "peak_applied_nm": 1.0576053900304616,
+        "peak_closure_point_m": 1.9737409708206441,
+        "peak_passive_relation_error_rad": 26.4,
+        "peak_raw_nm": 1.0576053900304616,
+        "rms_C_pin_relative_velocity_m_s": 1.3288161513252363,
+        "rms_post_mimic_velocity_residual_rad_s": 0.9360990048028754
+      }
+    },
+    {
+      "by_velocity_iterations": {
+        "1": {
+          "actual_initial_root_xyz_m": [
+            0.0,
+            2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            0.0,
+            2.0,
+            0.0
+          ],
+          "environment": 5,
+          "max_C_pin_relative_velocity_m_s": 0.02965252147079423,
+          "max_post_mimic_velocity_residual_rad_s": 1.3743823170661926,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 0.5191390514373779,
+          "peak_applied_nm": 0.7202672362327576,
+          "peak_axis_chord": 7.221378680957637e-07,
+          "peak_closure_point_m": 7.158763381811499e-07,
+          "peak_d_term_nm": 0.15574172139167786,
+          "peak_passive_relation_error_rad": 7.68899917602539e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.7202672362327576,
+            "d_term_nm": -0.0670747384428978,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.7743358284860733e-06,
+                0.0,
+                13.205948829650879
+              ],
+              "lm": [
+                1.7628335626795888e-06,
+                0.0,
+                13.120339393615723
+              ],
+              "lr": [
+                1.8632406408869429e-06,
+                0.0,
+                13.867643356323242
+              ],
+              "rf": [
+                1.820258830775856e-06,
+                0.0,
+                13.547740936279297
+              ],
+              "rm": [
+                1.8900581153502571e-06,
+                0.0,
+                14.067239761352539
+              ],
+              "rr": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.09750127792358398,
+            "matching_sample_window": [
+              {
+                "d_term_nm": 0.000577309459913522,
+                "demand_nm": -0.6528400778770447,
+                "dq_dt_rad_s": 0.00019073486328125,
+                "physics_sample": 1936,
+                "post_qd_rad_s": 0.0013260256964713335,
+                "pre_qd_rad_s": -0.0019243648275732994,
+                "total_vertical_foot_force_N": 80.94455528259277
+              },
+              {
+                "d_term_nm": -0.00039780771476216614,
+                "demand_nm": -0.6538223624229431,
+                "dq_dt_rad_s": -0.00040531158447265625,
+                "physics_sample": 1937,
+                "post_qd_rad_s": 0.0003081689355894923,
+                "pre_qd_rad_s": 0.0013260256964713335,
+                "total_vertical_foot_force_N": 81.31487464904785
+              },
+              {
+                "d_term_nm": -9.245068213203922e-05,
+                "demand_nm": -0.6535018086433411,
+                "dq_dt_rad_s": -0.005781650543212891,
+                "physics_sample": 1938,
+                "post_qd_rad_s": 0.223582461476326,
+                "pre_qd_rad_s": 0.0003081689355894923,
+                "total_vertical_foot_force_N": 89.70726585388184
+              },
+              {
+                "d_term_nm": -0.0670747384428978,
+                "demand_nm": -0.7202672362327576,
+                "dq_dt_rad_s": 0.09750127792358398,
+                "physics_sample": 1939,
+                "post_qd_rad_s": -0.10077975690364838,
+                "pre_qd_rad_s": 0.223582461476326,
+                "total_vertical_foot_force_N": 67.80891227722168
+              },
+              {
+                "d_term_nm": 0.030233928933739662,
+                "demand_nm": -0.6266149282455444,
+                "dq_dt_rad_s": 0.0014066696166992188,
+                "physics_sample": 1940,
+                "post_qd_rad_s": -0.032878126949071884,
+                "pre_qd_rad_s": -0.10077975690364838,
+                "total_vertical_foot_force_N": 85.32588863372803
+              },
+              {
+                "d_term_nm": 0.009863438084721565,
+                "demand_nm": -0.6470381617546082,
+                "dq_dt_rad_s": -0.0005841255187988281,
+                "physics_sample": 1941,
+                "post_qd_rad_s": 0.00010736333206295967,
+                "pre_qd_rad_s": -0.032878126949071884,
+                "total_vertical_foot_force_N": 81.80889129638672
+              },
+              {
+                "d_term_nm": -3.2209001801675186e-05,
+                "demand_nm": -0.6569118499755859,
+                "dq_dt_rad_s": -0.00286102294921875,
+                "physics_sample": 1942,
+                "post_qd_rad_s": 0.000747591839171946,
+                "pre_qd_rad_s": 0.00010736333206295967,
+                "total_vertical_foot_force_N": 80.70829582214355
+              }
+            ],
+            "motor": "rr_femur_pitch",
+            "p_term_nm": -0.6531925201416016,
+            "physics_sample": 1939,
+            "post_joint_speed_rad_s": -0.10077975690364838,
+            "pre_joint_speed_rad_s": 0.223582461476326,
+            "pre_time_s": 2.42375,
+            "raw_nm": -0.7202672362327576
+          },
+          "peak_raw_nm": 0.7202672362327576,
+          "rms_C_pin_relative_velocity_m_s": 0.0004898747850488853,
+          "rms_active_joint_speed_rad_s": 0.009800338230730647,
+          "rms_demeaned_demand_nm": 0.002959444259737926,
+          "rms_post_mimic_velocity_residual_rad_s": 0.012731424076987555,
+          "root_mean_xyz_m": [
+            2.954812610624913e-05,
+            2.000002950336784,
+            0.13571712821139953
+          ]
+        },
+        "16": {
+          "actual_initial_root_xyz_m": [
+            0.0,
+            2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            0.0,
+            2.0,
+            0.0
+          ],
+          "environment": 5,
+          "max_C_pin_relative_velocity_m_s": 0.001714724244771328,
+          "max_post_mimic_velocity_residual_rad_s": 0.019667193293571472,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 0.42098838090896606,
+          "peak_applied_nm": 0.693041980266571,
+          "peak_axis_chord": 7.837984153725806e-07,
+          "peak_closure_point_m": 7.154108837026645e-07,
+          "peak_d_term_nm": 0.1262965202331543,
+          "peak_passive_relation_error_rad": 7.092952728271484e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.693041980266571,
+            "d_term_nm": -0.04979553446173668,
+            "foot_force_xyz_N": {
+              "lf": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "lm": [
+                1.8844206124413176e-06,
+                0.0,
+                14.025280952453613
+              ],
+              "lr": [
+                1.929262452904368e-06,
+                0.0,
+                14.359028816223145
+              ],
+              "rf": [
+                1.8004044477493153e-06,
+                0.0,
+                13.399971008300781
+              ],
+              "rm": [
+                1.7857577176982886e-06,
+                0.0,
+                13.290958404541016
+              ],
+              "rr": [
+                1.513358142801735e-06,
+                0.0,
+                11.263554573059082
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.041353702545166016,
+            "matching_sample_window": [
+              {
+                "d_term_nm": 0.015631912276148796,
+                "demand_nm": -0.6278890371322632,
+                "dq_dt_rad_s": 0.002682209014892578,
+                "physics_sample": 646,
+                "post_qd_rad_s": 0.011237329803407192,
+                "pre_qd_rad_s": -0.05210636928677559,
+                "total_vertical_foot_force_N": 81.94356441497803
+              },
+              {
+                "d_term_nm": -0.0033711991272866726,
+                "demand_nm": -0.6469927430152893,
+                "dq_dt_rad_s": -0.0019311904907226562,
+                "physics_sample": 647,
+                "post_qd_rad_s": 0.001995884347707033,
+                "pre_qd_rad_s": 0.011237329803407192,
+                "total_vertical_foot_force_N": 81.02598667144775
+              },
+              {
+                "d_term_nm": -0.0005987653275951743,
+                "demand_nm": -0.6441478729248047,
+                "dq_dt_rad_s": -0.00807046890258789,
+                "physics_sample": 648,
+                "post_qd_rad_s": 0.165985107421875,
+                "pre_qd_rad_s": 0.001995884347707033,
+                "total_vertical_foot_force_N": 88.61460399627686
+              },
+              {
+                "d_term_nm": -0.04979553446173668,
+                "demand_nm": -0.693041980266571,
+                "dq_dt_rad_s": 0.041353702545166016,
+                "physics_sample": 649,
+                "post_qd_rad_s": -0.08720319718122482,
+                "pre_qd_rad_s": 0.165985107421875,
+                "total_vertical_foot_force_N": 66.33879375457764
+              },
+              {
+                "d_term_nm": 0.026160961017012596,
+                "demand_nm": -0.6186362504959106,
+                "dq_dt_rad_s": 0.0003218650817871094,
+                "physics_sample": 650,
+                "post_qd_rad_s": 0.010296306572854519,
+                "pre_qd_rad_s": -0.08720319718122482,
+                "total_vertical_foot_force_N": 88.8944845199585
+              },
+              {
+                "d_term_nm": -0.0030888922046869993,
+                "demand_nm": -0.6478981971740723,
+                "dq_dt_rad_s": 0.0025272369384765625,
+                "physics_sample": 651,
+                "post_qd_rad_s": 0.0044510276056826115,
+                "pre_qd_rad_s": 0.010296306572854519,
+                "total_vertical_foot_force_N": 79.08339500427246
+              },
+              {
+                "d_term_nm": -0.0013353083049878478,
+                "demand_nm": -0.6462393999099731,
+                "dq_dt_rad_s": -0.0017762184143066406,
+                "physics_sample": 652,
+                "post_qd_rad_s": -0.007203262764960527,
+                "pre_qd_rad_s": 0.0044510276056826115,
+                "total_vertical_foot_force_N": 84.70374870300293
+              }
+            ],
+            "motor": "lf_femur_pitch",
+            "p_term_nm": -0.6432464718818665,
+            "physics_sample": 649,
+            "post_joint_speed_rad_s": -0.08720319718122482,
+            "pre_joint_speed_rad_s": 0.165985107421875,
+            "pre_time_s": 0.81125,
+            "raw_nm": -0.693041980266571
+          },
+          "peak_raw_nm": 0.693041980266571,
+          "rms_C_pin_relative_velocity_m_s": 7.076164561635337e-05,
+          "rms_active_joint_speed_rad_s": 0.0053574652302820274,
+          "rms_demeaned_demand_nm": 0.0015599977779220057,
+          "rms_post_mimic_velocity_residual_rad_s": 0.0010159671144222612,
+          "root_mean_xyz_m": [
+            -2.2650036861193712e-05,
+            2.0000438197515904,
+            0.13572009009076283
+          ]
+        },
+        "4": {
+          "actual_initial_root_xyz_m": [
+            0.0,
+            2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            0.0,
+            2.0,
+            0.0
+          ],
+          "environment": 5,
+          "max_C_pin_relative_velocity_m_s": 0.015405177275249364,
+          "max_post_mimic_velocity_residual_rad_s": 0.7342572808265686,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 0.5094085931777954,
+          "peak_applied_nm": 0.721291184425354,
+          "peak_axis_chord": 7.143365172058031e-07,
+          "peak_closure_point_m": 5.374756200521276e-07,
+          "peak_d_term_nm": 0.1528225839138031,
+          "peak_passive_relation_error_rad": 7.68899917602539e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.721291184425354,
+            "d_term_nm": -0.07320241630077362,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.7840397958934773e-06,
+                0.0,
+                13.27817153930664
+              ],
+              "lm": [
+                1.7670582792561618e-06,
+                0.0,
+                13.151782989501953
+              ],
+              "lr": [
+                1.8449109120410867e-06,
+                0.0,
+                13.731220245361328
+              ],
+              "rf": [
+                1.8007089011007338e-06,
+                0.0,
+                13.40223503112793
+              ],
+              "rm": [
+                1.8701498447626363e-06,
+                0.0,
+                13.919069290161133
+              ],
+              "rr": [
+                3.2153798201761674e-07,
+                0.0,
+                2.3931286334991455
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.11200904846191406,
+            "matching_sample_window": [
+              {
+                "d_term_nm": 0.00012683328532148153,
+                "demand_nm": -0.6480298638343811,
+                "dq_dt_rad_s": 0.0015854835510253906,
+                "physics_sample": 1696,
+                "post_qd_rad_s": 0.0064184414222836494,
+                "pre_qd_rad_s": -0.00042277760803699493,
+                "total_vertical_foot_force_N": 80.70304679870605
+              },
+              {
+                "d_term_nm": -0.0019255324732512236,
+                "demand_nm": -0.6501416563987732,
+                "dq_dt_rad_s": 5.9604644775390625e-05,
+                "physics_sample": 1697,
+                "post_qd_rad_s": 0.00014205742627382278,
+                "pre_qd_rad_s": 0.0064184414222836494,
+                "total_vertical_foot_force_N": 80.89709091186523
+              },
+              {
+                "d_term_nm": -4.261723006493412e-05,
+                "demand_nm": -0.6482610106468201,
+                "dq_dt_rad_s": -0.0034570693969726562,
+                "physics_sample": 1698,
+                "post_qd_rad_s": 0.24400804936885834,
+                "pre_qd_rad_s": 0.00014205742627382278,
+                "total_vertical_foot_force_N": 90.53049850463867
+              },
+              {
+                "d_term_nm": -0.07320241630077362,
+                "demand_nm": -0.721291184425354,
+                "dq_dt_rad_s": 0.11200904846191406,
+                "physics_sample": 1699,
+                "post_qd_rad_s": -0.045924436300992966,
+                "pre_qd_rad_s": 0.24400804936885834,
+                "total_vertical_foot_force_N": 69.87560772895813
+              },
+              {
+                "d_term_nm": 0.013777331449091434,
+                "demand_nm": -0.6385117769241333,
+                "dq_dt_rad_s": 0.01424551010131836,
+                "physics_sample": 1700,
+                "post_qd_rad_s": -0.006326957605779171,
+                "pre_qd_rad_s": -0.045924436300992966,
+                "total_vertical_foot_force_N": 83.3990831375122
+              },
+              {
+                "d_term_nm": 0.00189808732829988,
+                "demand_nm": -0.6509252190589905,
+                "dq_dt_rad_s": 0.0037550926208496094,
+                "physics_sample": 1701,
+                "post_qd_rad_s": -0.006616824772208929,
+                "pre_qd_rad_s": -0.006326957605779171,
+                "total_vertical_foot_force_N": 80.96090412139893
+              },
+              {
+                "d_term_nm": 0.0019850474782288074,
+                "demand_nm": -0.6509790420532227,
+                "dq_dt_rad_s": -0.0004649162292480469,
+                "physics_sample": 1702,
+                "post_qd_rad_s": 0.002186203608289361,
+                "pre_qd_rad_s": -0.006616824772208929,
+                "total_vertical_foot_force_N": 81.22559547424316
+              }
+            ],
+            "motor": "rr_femur_pitch",
+            "p_term_nm": -0.6480887532234192,
+            "physics_sample": 1699,
+            "post_joint_speed_rad_s": -0.045924436300992966,
+            "pre_joint_speed_rad_s": 0.24400804936885834,
+            "pre_time_s": 2.1237500000000002,
+            "raw_nm": -0.721291184425354
+          },
+          "peak_raw_nm": 0.721291184425354,
+          "rms_C_pin_relative_velocity_m_s": 0.00025546575253595344,
+          "rms_active_joint_speed_rad_s": 0.01046205134771725,
+          "rms_demeaned_demand_nm": 0.0032354464343510043,
+          "rms_post_mimic_velocity_residual_rad_s": 0.005346408271622276,
+          "root_mean_xyz_m": [
+            1.2632161632097904e-05,
+            1.999950773594901,
+            0.13571972255595027
+          ]
+        }
+      },
+      "environment": 5,
+      "origin_xyz_m": [
+        0.0,
+        2.0,
+        0.0
+      ],
+      "sixteen_over_four": {
+        "max_C_pin_relative_velocity_m_s": 0.11130830980609872,
+        "max_post_mimic_velocity_residual_rad_s": 0.026785152571359872,
+        "peak_active_joint_speed_rad_s": 0.8264257543885432,
+        "peak_applied_nm": 0.9608352288662881,
+        "peak_closure_point_m": 1.3310573670918873,
+        "peak_passive_relation_error_rad": 0.9224806201550387,
+        "peak_raw_nm": 0.9608352288662881,
+        "rms_C_pin_relative_velocity_m_s": 0.2769907312973178,
+        "rms_post_mimic_velocity_residual_rad_s": 0.19002797070602004
+      }
+    },
+    {
+      "by_velocity_iterations": {
+        "1": {
+          "actual_initial_root_xyz_m": [
+            -2.0,
+            -2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            -2.0,
+            -2.0,
+            0.0
+          ],
+          "environment": 6,
+          "max_C_pin_relative_velocity_m_s": 0.04909747713668535,
+          "max_post_mimic_velocity_residual_rad_s": 1.2178611159324646,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 0.5519986152648926,
+          "peak_applied_nm": 0.732394814491272,
+          "peak_axis_chord": 6.905480750851986e-07,
+          "peak_closure_point_m": 8.601468464341368e-07,
+          "peak_d_term_nm": 0.16559958457946777,
+          "peak_passive_relation_error_rad": 8.52346420288086e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.732394814491272,
+            "d_term_nm": -0.07471713423728943,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.8537321011535823e-06,
+                0.0,
+                13.796875
+              ],
+              "lm": [
+                1.8776856904878514e-06,
+                0.0,
+                13.975154876708984
+              ],
+              "lr": [
+                1.8006053323915694e-06,
+                0.0,
+                13.40146541595459
+              ],
+              "rf": [
+                1.082156018128444e-06,
+                0.0,
+                8.054222106933594
+              ],
+              "rm": [
+                1.8710650238062954e-06,
+                0.0,
+                13.925880432128906
+              ],
+              "rr": [
+                1.7613713225728134e-06,
+                0.0,
+                13.109456062316895
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.14771223068237305,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -0.0022399751469492912,
+                "demand_nm": -0.6628819108009338,
+                "dq_dt_rad_s": -0.0022530555725097656,
+                "physics_sample": 1608,
+                "post_qd_rad_s": -0.005869807675480843,
+                "pre_qd_rad_s": 0.007466583512723446,
+                "total_vertical_foot_force_N": 67.3564395904541
+              },
+              {
+                "d_term_nm": 0.0017609423957765102,
+                "demand_nm": -0.658796489238739,
+                "dq_dt_rad_s": -0.01119375228881836,
+                "physics_sample": 1609,
+                "post_qd_rad_s": -0.06421112269163132,
+                "pre_qd_rad_s": -0.005869807675480843,
+                "total_vertical_foot_force_N": 95.57785224914551
+              },
+              {
+                "d_term_nm": 0.019263338297605515,
+                "demand_nm": -0.6408743262290955,
+                "dq_dt_rad_s": -0.06560087203979492,
+                "physics_sample": 1610,
+                "post_qd_rad_s": 0.2490571141242981,
+                "pre_qd_rad_s": -0.06421112269163132,
+                "total_vertical_foot_force_N": 88.0531964302063
+              },
+              {
+                "d_term_nm": -0.07471713423728943,
+                "demand_nm": -0.732394814491272,
+                "dq_dt_rad_s": 0.14771223068237305,
+                "physics_sample": 1611,
+                "post_qd_rad_s": 0.05264440178871155,
+                "pre_qd_rad_s": 0.2490571141242981,
+                "total_vertical_foot_force_N": 76.26305389404297
+              },
+              {
+                "d_term_nm": -0.015793321654200554,
+                "demand_nm": -0.6790101528167725,
+                "dq_dt_rad_s": -0.07807016372680664,
+                "physics_sample": 1612,
+                "post_qd_rad_s": -0.21158161759376526,
+                "pre_qd_rad_s": 0.05264440178871155,
+                "total_vertical_foot_force_N": 67.81615161895752
+              },
+              {
+                "d_term_nm": 0.06347449123859406,
+                "demand_nm": -0.596814751625061,
+                "dq_dt_rad_s": -0.08115768432617188,
+                "physics_sample": 1613,
+                "post_qd_rad_s": 0.012954093515872955,
+                "pre_qd_rad_s": -0.21158161759376526,
+                "total_vertical_foot_force_N": 86.95650291442871
+              },
+              {
+                "d_term_nm": -0.003886228194460273,
+                "demand_nm": -0.6611320376396179,
+                "dq_dt_rad_s": -0.0053882598876953125,
+                "physics_sample": 1614,
+                "post_qd_rad_s": -0.012994545511901379,
+                "pre_qd_rad_s": 0.012954093515872955,
+                "total_vertical_foot_force_N": 81.61711597442627
+              }
+            ],
+            "motor": "rf_femur_pitch",
+            "p_term_nm": -0.6576776504516602,
+            "physics_sample": 1611,
+            "post_joint_speed_rad_s": 0.05264440178871155,
+            "pre_joint_speed_rad_s": 0.2490571141242981,
+            "pre_time_s": 2.01375,
+            "raw_nm": -0.732394814491272
+          },
+          "peak_raw_nm": 0.732394814491272,
+          "rms_C_pin_relative_velocity_m_s": 0.000977292258043667,
+          "rms_active_joint_speed_rad_s": 0.012590496480168602,
+          "rms_demeaned_demand_nm": 0.004757512516198893,
+          "rms_post_mimic_velocity_residual_rad_s": 0.02074346283259832,
+          "root_mean_xyz_m": [
+            -1.9999511729460209,
+            -1.999970377003774,
+            0.13571465102722868
+          ]
+        },
+        "16": {
+          "actual_initial_root_xyz_m": [
+            -2.0,
+            -2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            -2.0,
+            -2.0,
+            0.0
+          ],
+          "environment": 6,
+          "max_C_pin_relative_velocity_m_s": 0.00033873383012730546,
+          "max_post_mimic_velocity_residual_rad_s": 0.005512915551662445,
+          "min_feet_with_force_gt1N": 6,
+          "peak_active_joint_speed_rad_s": 0.053472790867090225,
+          "peak_applied_nm": 0.6842517852783203,
+          "peak_axis_chord": 7.128677725186644e-07,
+          "peak_closure_point_m": 8.601468985113106e-07,
+          "peak_d_term_nm": 0.016041837632656097,
+          "peak_passive_relation_error_rad": 2.980232238769531e-07,
+          "peak_raw_event": {
+            "applied_nm": -0.6842517852783203,
+            "d_term_nm": -0.005115179345011711,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.8126402210327797e-06,
+                0.0,
+                13.491037368774414
+              ],
+              "lm": [
+                1.764178705343511e-06,
+                0.0,
+                13.130350112915039
+              ],
+              "lr": [
+                1.7930706235347316e-06,
+                0.0,
+                13.345386505126953
+              ],
+              "rf": [
+                1.855506639003579e-06,
+                0.0,
+                13.810081481933594
+              ],
+              "rm": [
+                1.8397415715298848e-06,
+                0.0,
+                13.692745208740234
+              ],
+              "rr": [
+                1.809196191970841e-06,
+                0.0,
+                13.465404510498047
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.0006318092346191406,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -0.0004927414702251554,
+                "demand_nm": -0.6795811057090759,
+                "dq_dt_rad_s": -0.00133514404296875,
+                "physics_sample": 657,
+                "post_qd_rad_s": 0.005298448260873556,
+                "pre_qd_rad_s": 0.0016424714121967554,
+                "total_vertical_foot_force_N": 81.59867191314697
+              },
+              {
+                "d_term_nm": -0.0015895345713943243,
+                "demand_nm": -0.6806278228759766,
+                "dq_dt_rad_s": -0.0009059906005859375,
+                "physics_sample": 658,
+                "post_qd_rad_s": -0.004538592882454395,
+                "pre_qd_rad_s": 0.005298448260873556,
+                "total_vertical_foot_force_N": 80.5630750656128
+              },
+              {
+                "d_term_nm": 0.001361577888019383,
+                "demand_nm": -0.6776427626609802,
+                "dq_dt_rad_s": 0.003528594970703125,
+                "physics_sample": 659,
+                "post_qd_rad_s": 0.017050597816705704,
+                "pre_qd_rad_s": -0.004538592882454395,
+                "total_vertical_foot_force_N": 81.02767658233643
+              },
+              {
+                "d_term_nm": -0.005115179345011711,
+                "demand_nm": -0.6842517852783203,
+                "dq_dt_rad_s": 0.0006318092346191406,
+                "physics_sample": 660,
+                "post_qd_rad_s": -0.00047608523163944483,
+                "pre_qd_rad_s": 0.017050597816705704,
+                "total_vertical_foot_force_N": 80.93500518798828
+              },
+              {
+                "d_term_nm": 0.00014282557822298259,
+                "demand_nm": -0.6790175437927246,
+                "dq_dt_rad_s": -0.0006556510925292969,
+                "physics_sample": 661,
+                "post_qd_rad_s": -0.0001607454614713788,
+                "pre_qd_rad_s": -0.00047608523163944483,
+                "total_vertical_foot_force_N": 81.0597562789917
+              },
+              {
+                "d_term_nm": 4.82236391690094e-05,
+                "demand_nm": -0.6790875792503357,
+                "dq_dt_rad_s": 0.0019550323486328125,
+                "physics_sample": 662,
+                "post_qd_rad_s": 0.002594148740172386,
+                "pre_qd_rad_s": -0.0001607454614713788,
+                "total_vertical_foot_force_N": 81.29811191558838
+              },
+              {
+                "d_term_nm": -0.000778244633693248,
+                "demand_nm": -0.679987370967865,
+                "dq_dt_rad_s": 0.00035762786865234375,
+                "physics_sample": 663,
+                "post_qd_rad_s": 0.0022468501701951027,
+                "pre_qd_rad_s": 0.002594148740172386,
+                "total_vertical_foot_force_N": 80.90679168701172
+              }
+            ],
+            "motor": "lr_femur_pitch",
+            "p_term_nm": -0.6791366338729858,
+            "physics_sample": 660,
+            "post_joint_speed_rad_s": -0.00047608523163944483,
+            "pre_joint_speed_rad_s": 0.017050597816705704,
+            "pre_time_s": 0.8250000000000001,
+            "raw_nm": -0.6842517852783203
+          },
+          "peak_raw_nm": 0.6842517852783203,
+          "rms_C_pin_relative_velocity_m_s": 6.0492382246658164e-05,
+          "rms_active_joint_speed_rad_s": 0.005613518935224969,
+          "rms_demeaned_demand_nm": 0.0016371874472347887,
+          "rms_post_mimic_velocity_residual_rad_s": 0.0008677187416913217,
+          "root_mean_xyz_m": [
+            -1.9999634895008058,
+            -1.999980329349637,
+            0.13572384915314614
+          ]
+        },
+        "4": {
+          "actual_initial_root_xyz_m": [
+            -2.0,
+            -2.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            -2.0,
+            -2.0,
+            0.0
+          ],
+          "environment": 6,
+          "max_C_pin_relative_velocity_m_s": 0.019747872993399064,
+          "max_post_mimic_velocity_residual_rad_s": 1.0769158601760864,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 0.4092797040939331,
+          "peak_applied_nm": 0.734733521938324,
+          "peak_axis_chord": 7.707112406403698e-07,
+          "peak_closure_point_m": 8.601468297835683e-07,
+          "peak_d_term_nm": 0.12278391420841217,
+          "peak_passive_relation_error_rad": 7.271766662597656e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.734733521938324,
+            "d_term_nm": -0.0828789472579956,
+            "foot_force_xyz_N": {
+              "lf": [
+                2.0579986426128016e-07,
+                0.0,
+                1.531718134880066
+              ],
+              "lm": [
+                1.8372898011875805e-06,
+                0.0,
+                13.67449951171875
+              ],
+              "lr": [
+                1.8415148588246666e-06,
+                0.0,
+                13.705945014953613
+              ],
+              "rf": [
+                1.8241128145746188e-06,
+                0.0,
+                13.576425552368164
+              ],
+              "rm": [
+                1.796101059881039e-06,
+                0.0,
+                13.367940902709961
+              ],
+              "rr": [
+                1.7957773934540455e-06,
+                0.0,
+                13.365532875061035
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.14531612396240234,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -0.00017580483108758926,
+                "demand_nm": -0.6520116329193115,
+                "dq_dt_rad_s": 0.002586841583251953,
+                "physics_sample": 3180,
+                "post_qd_rad_s": -0.00011265859939157963,
+                "pre_qd_rad_s": 0.0005860161036252975,
+                "total_vertical_foot_force_N": 81.32991790771484
+              },
+              {
+                "d_term_nm": 3.379757981747389e-05,
+                "demand_nm": -0.6518990397453308,
+                "dq_dt_rad_s": 0.0027298927307128906,
+                "physics_sample": 3181,
+                "post_qd_rad_s": 0.0023929390590637922,
+                "pre_qd_rad_s": -0.00011265859939157963,
+                "total_vertical_foot_force_N": 80.83077430725098
+              },
+              {
+                "d_term_nm": -0.0007178817177191377,
+                "demand_nm": -0.6527530550956726,
+                "dq_dt_rad_s": -0.0048160552978515625,
+                "physics_sample": 3182,
+                "post_qd_rad_s": 0.27626314759254456,
+                "pre_qd_rad_s": 0.0023929390590637922,
+                "total_vertical_foot_force_N": 91.43874931335449
+              },
+              {
+                "d_term_nm": -0.0828789472579956,
+                "demand_nm": -0.734733521938324,
+                "dq_dt_rad_s": 0.14531612396240234,
+                "physics_sample": 3183,
+                "post_qd_rad_s": -0.02382884919643402,
+                "pre_qd_rad_s": 0.27626314759254456,
+                "total_vertical_foot_force_N": 69.22206199169159
+              },
+              {
+                "d_term_nm": 0.007148655131459236,
+                "demand_nm": -0.650155246257782,
+                "dq_dt_rad_s": 0.018537044525146484,
+                "physics_sample": 3184,
+                "post_qd_rad_s": -0.0030646035447716713,
+                "pre_qd_rad_s": -0.02382884919643402,
+                "total_vertical_foot_force_N": 82.23376369476318
+              },
+              {
+                "d_term_nm": 0.0009193810983560979,
+                "demand_nm": -0.6570796370506287,
+                "dq_dt_rad_s": 0.0011682510375976562,
+                "physics_sample": 3185,
+                "post_qd_rad_s": -0.007082287222146988,
+                "pre_qd_rad_s": -0.0030646035447716713,
+                "total_vertical_foot_force_N": 82.16397476196289
+              },
+              {
+                "d_term_nm": 0.002124686259776354,
+                "demand_nm": -0.6559182405471802,
+                "dq_dt_rad_s": -0.00095367431640625,
+                "physics_sample": 3186,
+                "post_qd_rad_s": -0.002630826085805893,
+                "pre_qd_rad_s": -0.007082287222146988,
+                "total_vertical_foot_force_N": 80.67873764038086
+              }
+            ],
+            "motor": "lf_femur_pitch",
+            "p_term_nm": -0.6518545746803284,
+            "physics_sample": 3183,
+            "post_joint_speed_rad_s": -0.02382884919643402,
+            "pre_joint_speed_rad_s": 0.27626314759254456,
+            "pre_time_s": 3.9787500000000002,
+            "raw_nm": -0.734733521938324
+          },
+          "peak_raw_nm": 0.734733521938324,
+          "rms_C_pin_relative_velocity_m_s": 0.0002864307012141503,
+          "rms_active_joint_speed_rad_s": 0.009574454822581345,
+          "rms_demeaned_demand_nm": 0.0029196920543408055,
+          "rms_post_mimic_velocity_residual_rad_s": 0.009373256281361856,
+          "root_mean_xyz_m": [
+            -1.9999958108179272,
+            -2.0000138035044075,
+            0.13572110964450984
+          ]
+        }
+      },
+      "environment": 6,
+      "origin_xyz_m": [
+        -2.0,
+        -2.0,
+        0.0
+      ],
+      "sixteen_over_four": {
+        "max_C_pin_relative_velocity_m_s": 0.017152927317313153,
+        "max_post_mimic_velocity_residual_rad_s": 0.005119170174317081,
+        "peak_active_joint_speed_rad_s": 0.1306509712849523,
+        "peak_applied_nm": 0.9312924548116082,
+        "peak_closure_point_m": 1.0000000799023374,
+        "peak_passive_relation_error_rad": 0.040983606557377046,
+        "peak_raw_nm": 0.9312924548116082,
+        "rms_C_pin_relative_velocity_m_s": 0.21119377912436474,
+        "rms_post_mimic_velocity_residual_rad_s": 0.09257388421318716
+      }
+    },
+    {
+      "by_velocity_iterations": {
+        "1": {
+          "actual_initial_root_xyz_m": [
+            -2.0,
+            0.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            -2.0,
+            0.0,
+            0.0
+          ],
+          "environment": 7,
+          "max_C_pin_relative_velocity_m_s": 0.3625154463101013,
+          "max_post_mimic_velocity_residual_rad_s": 4.425369024276733,
+          "min_feet_with_force_gt1N": 5,
+          "peak_active_joint_speed_rad_s": 1.0945483446121216,
+          "peak_applied_nm": 0.968124508857727,
+          "peak_axis_chord": 6.787286246913275e-07,
+          "peak_closure_point_m": 7.980125451032365e-07,
+          "peak_d_term_nm": 0.3283645212650299,
+          "peak_passive_relation_error_rad": 3.3736228942871094e-05,
+          "peak_raw_event": {
+            "applied_nm": -0.968124508857727,
+            "d_term_nm": -0.3283645212650299,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.5591954252158757e-06,
+                0.0,
+                11.60470962524414
+              ],
+              "lm": [
+                1.7669657381702564e-06,
+                0.0,
+                13.151094436645508
+              ],
+              "lr": [
+                2.383500486757839e-06,
+                0.0,
+                17.739810943603516
+              ],
+              "rf": [
+                1.9648150555440225e-06,
+                0.0,
+                14.623639106750488
+              ],
+              "rm": [
+                2.1334242319426266e-06,
+                0.0,
+                15.878555297851562
+              ],
+              "rr": [
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 1.069784164428711,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -0.00016177208453882486,
+                "demand_nm": -0.6381233930587769,
+                "dq_dt_rad_s": -0.007534027099609375,
+                "physics_sample": 1926,
+                "post_qd_rad_s": 0.1401745080947876,
+                "pre_qd_rad_s": 0.0005392402526922524,
+                "total_vertical_foot_force_N": 86.28508377075195
+              },
+              {
+                "d_term_nm": -0.04205235466361046,
+                "demand_nm": -0.6797314286231995,
+                "dq_dt_rad_s": 0.02410411834716797,
+                "physics_sample": 1927,
+                "post_qd_rad_s": -0.0029601603746414185,
+                "pre_qd_rad_s": 0.1401745080947876,
+                "total_vertical_foot_force_N": 75.17809772491455
+              },
+              {
+                "d_term_nm": 0.0008880481473170221,
+                "demand_nm": -0.6376949548721313,
+                "dq_dt_rad_s": 0.0313878059387207,
+                "physics_sample": 1928,
+                "post_qd_rad_s": 1.0945483446121216,
+                "pre_qd_rad_s": -0.0029601603746414185,
+                "total_vertical_foot_force_N": 133.90386533737183
+              },
+              {
+                "d_term_nm": -0.3283645212650299,
+                "demand_nm": -0.968124508857727,
+                "dq_dt_rad_s": 1.069784164428711,
+                "physics_sample": 1929,
+                "post_qd_rad_s": 0.8953055739402771,
+                "pre_qd_rad_s": 1.0945483446121216,
+                "total_vertical_foot_force_N": 72.99780941009521
+              },
+              {
+                "d_term_nm": -0.26859167218208313,
+                "demand_nm": -0.9484685659408569,
+                "dq_dt_rad_s": 0.7155656814575195,
+                "physics_sample": 1930,
+                "post_qd_rad_s": 0.5432447791099548,
+                "pre_qd_rad_s": 0.8953055739402771,
+                "total_vertical_foot_force_N": 67.18735885620117
+              },
+              {
+                "d_term_nm": -0.16297343373298645,
+                "demand_nm": -0.869684100151062,
+                "dq_dt_rad_s": 0.37332773208618164,
+                "physics_sample": 1931,
+                "post_qd_rad_s": 0.2097102254629135,
+                "pre_qd_rad_s": 0.5432447791099548,
+                "total_vertical_foot_force_N": 67.80516529083252
+              },
+              {
+                "d_term_nm": -0.06291306763887405,
+                "demand_nm": -0.7836235165596008,
+                "dq_dt_rad_s": 0.07606744766235352,
+                "physics_sample": 1932,
+                "post_qd_rad_s": -0.04060668498277664,
+                "pre_qd_rad_s": 0.2097102254629135,
+                "total_vertical_foot_force_N": 66.98242568969727
+              }
+            ],
+            "motor": "rr_femur_pitch",
+            "p_term_nm": -0.6397600173950195,
+            "physics_sample": 1929,
+            "post_joint_speed_rad_s": 0.8953055739402771,
+            "pre_joint_speed_rad_s": 1.0945483446121216,
+            "pre_time_s": 2.41125,
+            "raw_nm": -0.968124508857727
+          },
+          "peak_raw_nm": 0.968124508857727,
+          "rms_C_pin_relative_velocity_m_s": 0.0030464558887584588,
+          "rms_active_joint_speed_rad_s": 0.019183765899901367,
+          "rms_demeaned_demand_nm": 0.020340309963675696,
+          "rms_post_mimic_velocity_residual_rad_s": 0.03202416133286686,
+          "root_mean_xyz_m": [
+            -2.0000782486051323,
+            -0.00010072703737193934,
+            0.1357071467442438
+          ]
+        },
+        "16": {
+          "actual_initial_root_xyz_m": [
+            -2.0,
+            0.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            -2.0,
+            0.0,
+            0.0
+          ],
+          "environment": 7,
+          "max_C_pin_relative_velocity_m_s": 0.0001780251397844553,
+          "max_post_mimic_velocity_residual_rad_s": 0.0037617961643263698,
+          "min_feet_with_force_gt1N": 6,
+          "peak_active_joint_speed_rad_s": 0.034323036670684814,
+          "peak_applied_nm": 0.6691520810127258,
+          "peak_axis_chord": 6.730501360961648e-07,
+          "peak_closure_point_m": 7.164964301625268e-07,
+          "peak_d_term_nm": 0.010296911001205444,
+          "peak_passive_relation_error_rad": 2.980232238769531e-07,
+          "peak_raw_event": {
+            "applied_nm": -0.6691520810127258,
+            "d_term_nm": -0.0034832581877708435,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.8251544133818243e-06,
+                0.0,
+                13.584178924560547
+              ],
+              "lm": [
+                1.7887148260342656e-06,
+                0.0,
+                13.312967300415039
+              ],
+              "lr": [
+                1.7879992810776457e-06,
+                0.0,
+                13.30764102935791
+              ],
+              "rf": [
+                1.8469256701791892e-06,
+                0.0,
+                13.7462158203125
+              ],
+              "rm": [
+                1.8376874777459307e-06,
+                0.0,
+                13.677458763122559
+              ],
+              "rr": [
+                1.7893077028929838e-06,
+                0.0,
+                13.317378997802734
+              ]
+            },
+            "joint_position_difference_rate_rad_s": -0.0015974044799804688,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -0.0006024484755471349,
+                "demand_nm": -0.6661747097969055,
+                "dq_dt_rad_s": 0.0006198883056640625,
+                "physics_sample": 1522,
+                "post_qd_rad_s": 0.0034985558595508337,
+                "pre_qd_rad_s": 0.0020081615075469017,
+                "total_vertical_foot_force_N": 81.00660514831543
+              },
+              {
+                "d_term_nm": -0.0010495667811483145,
+                "demand_nm": -0.6666451096534729,
+                "dq_dt_rad_s": -0.0006318092346191406,
+                "physics_sample": 1523,
+                "post_qd_rad_s": -0.001033375971019268,
+                "pre_qd_rad_s": 0.0034985558595508337,
+                "total_vertical_foot_force_N": 80.82513904571533
+              },
+              {
+                "d_term_nm": 0.0003100128087680787,
+                "demand_nm": -0.6652618050575256,
+                "dq_dt_rad_s": 0.002586841583251953,
+                "physics_sample": 1524,
+                "post_qd_rad_s": 0.011610860005021095,
+                "pre_qd_rad_s": -0.001033375971019268,
+                "total_vertical_foot_force_N": 80.93707656860352
+              },
+              {
+                "d_term_nm": -0.0034832581877708435,
+                "demand_nm": -0.6691520810127258,
+                "dq_dt_rad_s": -0.0015974044799804688,
+                "physics_sample": 1525,
+                "post_qd_rad_s": -0.00011473055928945541,
+                "pre_qd_rad_s": 0.011610860005021095,
+                "total_vertical_foot_force_N": 80.94584083557129
+              },
+              {
+                "d_term_nm": 3.4419168514432386e-05,
+                "demand_nm": -0.6655745506286621,
+                "dq_dt_rad_s": 0.001049041748046875,
+                "physics_sample": 1526,
+                "post_qd_rad_s": 0.003272269619628787,
+                "pre_qd_rad_s": -0.00011473055928945541,
+                "total_vertical_foot_force_N": 81.2771635055542
+              },
+              {
+                "d_term_nm": -0.0009816809324547648,
+                "demand_nm": -0.6666299700737,
+                "dq_dt_rad_s": 0.0012516975402832031,
+                "physics_sample": 1527,
+                "post_qd_rad_s": -0.00014655257109552622,
+                "pre_qd_rad_s": 0.003272269619628787,
+                "total_vertical_foot_force_N": 81.2390251159668
+              },
+              {
+                "d_term_nm": 4.396577423904091e-05,
+                "demand_nm": -0.6656512022018433,
+                "dq_dt_rad_s": -0.0002384185791015625,
+                "physics_sample": 1528,
+                "post_qd_rad_s": 0.002429443411529064,
+                "pre_qd_rad_s": -0.00014655257109552622,
+                "total_vertical_foot_force_N": 81.12319087982178
+              }
+            ],
+            "motor": "lr_femur_pitch",
+            "p_term_nm": -0.6656688451766968,
+            "physics_sample": 1525,
+            "post_joint_speed_rad_s": -0.00011473055928945541,
+            "pre_joint_speed_rad_s": 0.011610860005021095,
+            "pre_time_s": 1.90625,
+            "raw_nm": -0.6691520810127258
+          },
+          "peak_raw_nm": 0.6691520810127258,
+          "rms_C_pin_relative_velocity_m_s": 6.830434662954832e-05,
+          "rms_active_joint_speed_rad_s": 0.004030833798323362,
+          "rms_demeaned_demand_nm": 0.0011062940530540788,
+          "rms_post_mimic_velocity_residual_rad_s": 0.0010111508392913258,
+          "root_mean_xyz_m": [
+            -2.000004659499973,
+            2.679928271902554e-05,
+            0.1357261423021555
+          ]
+        },
+        "4": {
+          "actual_initial_root_xyz_m": [
+            -2.0,
+            0.0,
+            0.1429699957370758
+          ],
+          "actual_terrain_origin_xyz_m": [
+            -2.0,
+            0.0,
+            0.0
+          ],
+          "environment": 7,
+          "max_C_pin_relative_velocity_m_s": 0.015907185827916705,
+          "max_post_mimic_velocity_residual_rad_s": 0.770753026008606,
+          "min_feet_with_force_gt1N": 6,
+          "peak_active_joint_speed_rad_s": 0.3419998288154602,
+          "peak_applied_nm": 0.7212047576904297,
+          "peak_axis_chord": 7.058010055538489e-07,
+          "peak_closure_point_m": 7.164963984313737e-07,
+          "peak_d_term_nm": 0.10259995609521866,
+          "peak_passive_relation_error_rad": 7.450580596923828e-06,
+          "peak_raw_event": {
+            "applied_nm": -0.7212047576904297,
+            "d_term_nm": -0.06708323955535889,
+            "foot_force_xyz_N": {
+              "lf": [
+                1.7923629229699145e-06,
+                0.0,
+                13.340118408203125
+              ],
+              "lm": [
+                1.7575089259480592e-06,
+                0.0,
+                13.080710411071777
+              ],
+              "lr": [
+                1.8583319842946366e-06,
+                0.0,
+                13.831110000610352
+              ],
+              "rf": [
+                1.8442433429299854e-06,
+                0.0,
+                13.726252555847168
+              ],
+              "rm": [
+                1.8742161955742631e-06,
+                0.0,
+                13.949333190917969
+              ],
+              "rr": [
+                6.322745207398839e-07,
+                0.0,
+                4.705864906311035
+              ]
+            },
+            "joint_position_difference_rate_rad_s": 0.09320974349975586,
+            "matching_sample_window": [
+              {
+                "d_term_nm": -0.00010428121458971873,
+                "demand_nm": -0.6543174386024475,
+                "dq_dt_rad_s": -0.0002741813659667969,
+                "physics_sample": 2656,
+                "post_qd_rad_s": 0.0010174848139286041,
+                "pre_qd_rad_s": 0.00034760404378175735,
+                "total_vertical_foot_force_N": 81.02806758880615
+              },
+              {
+                "d_term_nm": -0.0003052454558201134,
+                "demand_nm": -0.6545080542564392,
+                "dq_dt_rad_s": 0.00011920928955078125,
+                "physics_sample": 2657,
+                "post_qd_rad_s": 0.0008464641869068146,
+                "pre_qd_rad_s": 0.0010174848139286041,
+                "total_vertical_foot_force_N": 81.00485706329346
+              },
+              {
+                "d_term_nm": -0.00025393927353434265,
+                "demand_nm": -0.6544612646102905,
+                "dq_dt_rad_s": -0.002288818359375,
+                "physics_sample": 2658,
+                "post_qd_rad_s": 0.2236107885837555,
+                "pre_qd_rad_s": 0.0008464641869068146,
+                "total_vertical_foot_force_N": 89.41854572296143
+              },
+              {
+                "d_term_nm": -0.06708323955535889,
+                "demand_nm": -0.7212047576904297,
+                "dq_dt_rad_s": 0.09320974349975586,
+                "physics_sample": 2659,
+                "post_qd_rad_s": -0.02917235717177391,
+                "pre_qd_rad_s": 0.2236107885837555,
+                "total_vertical_foot_force_N": 72.63338947296143
+              },
+              {
+                "d_term_nm": 0.008751707151532173,
+                "demand_nm": -0.6488651633262634,
+                "dq_dt_rad_s": -0.02415180206298828,
+                "physics_sample": 2660,
+                "post_qd_rad_s": -0.0022286158055067062,
+                "pre_qd_rad_s": -0.02917235717177391,
+                "total_vertical_foot_force_N": 80.61247634887695
+              },
+              {
+                "d_term_nm": 0.0006685847765766084,
+                "demand_nm": -0.6560425758361816,
+                "dq_dt_rad_s": 0.004076957702636719,
+                "physics_sample": 2661,
+                "post_qd_rad_s": 0.004700355231761932,
+                "pre_qd_rad_s": -0.0022286158055067062,
+                "total_vertical_foot_force_N": 80.75339221954346
+              },
+              {
+                "d_term_nm": -0.0014101066626608372,
+                "demand_nm": -0.6582741737365723,
+                "dq_dt_rad_s": -0.004589557647705078,
+                "physics_sample": 2662,
+                "post_qd_rad_s": 0.0014661774039268494,
+                "pre_qd_rad_s": 0.004700355231761932,
+                "total_vertical_foot_force_N": 81.78299617767334
+              }
+            ],
+            "motor": "rr_femur_pitch",
+            "p_term_nm": -0.6541215181350708,
+            "physics_sample": 2659,
+            "post_joint_speed_rad_s": -0.02917235717177391,
+            "pre_joint_speed_rad_s": 0.2236107885837555,
+            "pre_time_s": 3.32375,
+            "raw_nm": -0.7212047576904297
+          },
+          "peak_raw_nm": 0.7212047576904297,
+          "rms_C_pin_relative_velocity_m_s": 0.00023558193269000895,
+          "rms_active_joint_speed_rad_s": 0.007302367395144319,
+          "rms_demeaned_demand_nm": 0.0024096351984853226,
+          "rms_post_mimic_velocity_residual_rad_s": 0.005796102146794989,
+          "root_mean_xyz_m": [
+            -1.9999721412546934,
+            -3.413153825704285e-05,
+            0.13572204314987174
+          ]
+        }
+      },
+      "environment": 7,
+      "origin_xyz_m": [
+        -2.0,
+        0.0,
+        0.0
+      ],
+      "sixteen_over_four": {
+        "max_C_pin_relative_velocity_m_s": 0.011191491801901612,
+        "max_post_mimic_velocity_residual_rad_s": 0.004880676477920655,
+        "peak_active_joint_speed_rad_s": 0.10035980658108806,
+        "peak_applied_nm": 0.9278253836755096,
+        "peak_closure_point_m": 1.0000000442865493,
+        "peak_passive_relation_error_rad": 0.04,
+        "peak_raw_nm": 0.9278253836755096,
+        "rms_C_pin_relative_velocity_m_s": 0.2899388159762946,
+        "rms_post_mimic_velocity_residual_rad_s": 0.17445359203175043
+      }
+    }
+  ],
+  "functional_changes_four_to_sixteen": {
+    "isaaclab/diagnose_mkii_fourbar.py": {
+      "after": "fdcafd25db72281ec649d5bb2171dc3491e8a7c895cc1afe8fb1570038762420",
+      "before": "28f24ac9bca093def93e9d97a8ab7da5ec2c96854d8b7d0d327706d946b7502c"
+    },
+    "isaaclab/validate_mkii_fourbar.py": {
+      "after": "f37fe31771552224cdcd9f08c14d1e278c135f8c30f264cce893bba2082e5a3e",
+      "before": "6bcb442d48fdce832be1a02df21b56ac8aeef00060309010c0b0e05e003ba545"
+    },
+    "packages/hexapod_core/hexapod_core/fourbar_v1.py": {
+      "after": "72d62c2ff8d340bde870d84df1a426be24b6a55529459bbad3ff1c0a3a363778",
+      "before": "943d3d7353ac73ba9cf02f0b23a85a320463019efb31c56370a851f4cbce0347"
+    },
+    "tools/check_pipeline_lineages.py": {
+      "after": "c1cb850e9ad1992aa3a06755bfeb3bfe31f43a8ae809cb46e2fd99a9fea3df1e",
+      "before": "f06e271dbc04799d3a57de8bd2532042fbe5523dbca4ff0d846624d7684efaad"
+    }
+  },
+  "measurement_window": {
+    "physics_samples_half_open": [
+      640,
+      3200
+    ],
+    "time_s": [
+      0.8,
+      4.0
+    ]
+  },
+  "primary_physical_gate_errors": {
+    "1": [],
+    "16": [],
+    "4": []
+  },
+  "primary_settled_windows": {
+    "1": {
+      "height_sum": 2779.4373492002487,
+      "invalid_samples": 0.0,
+      "max_applied_nm": 0.968124508857727,
+      "max_closure_axis_chord": 7.83741484156053e-07,
+      "max_closure_point_m": 8.616943318884296e-07,
+      "max_continuous_excess_nm": 0.0,
+      "max_demand_nm": 0.968124508857727,
+      "max_envelope_excess_nm": 0.0,
+      "max_passive_relation_error_rad": 3.3736228942871094e-05,
+      "mean_height_m": 0.1357147143164184,
+      "min_burst_headroom": 0.5006889700889587,
+      "min_height_m": 0.135697603225708,
+      "min_nonfoot_clearance_m": 0.02532404661178589,
+      "min_support": 5.0,
+      "nonfoot_contact_env_substeps": 0.0,
+      "substeps": 2560
+    },
+    "16": {
+      "closure_relative_point_velocity_samples": 122880,
+      "closure_relative_point_velocity_squared_norm_sum": 0.0006995779848463391,
+      "height_sum": 2779.5889217853546,
+      "invalid_samples": 0.0,
+      "max_applied_nm": 0.7684478163719177,
+      "max_closure_axis_chord": 8.01155692897737e-07,
+      "max_closure_point_m": 8.642673492431641e-07,
+      "max_closure_relative_point_velocity_m_s": 0.0034869126975536346,
+      "max_continuous_excess_nm": 0.0,
+      "max_demand_nm": 0.7684478163719177,
+      "max_envelope_excess_nm": 0.0,
+      "max_passive_relation_error_rad": 1.043081283569336e-05,
+      "max_passive_velocity_relation_error_rad_s": 0.09738627076148987,
+      "mean_height_m": 0.1357221153215505,
+      "min_burst_headroom": 0.5006804466247559,
+      "min_height_m": 0.13571083545684814,
+      "min_nonfoot_clearance_m": 0.025369912385940552,
+      "min_support": 5.0,
+      "nonfoot_contact_env_substeps": 0.0,
+      "passive_velocity_relation_samples": 245760,
+      "passive_velocity_relation_squared_sum": 0.26599972881479794,
+      "rms_closure_relative_point_velocity_m_s": 7.54531657070852e-05,
+      "rms_passive_velocity_relation_error_rad_s": 0.001040363238190355,
+      "substeps": 2560
+    },
+    "4": {
+      "height_sum": 2779.520519256592,
+      "invalid_samples": 0.0,
+      "max_applied_nm": 0.734733521938324,
+      "max_closure_axis_chord": 7.7071126725059e-07,
+      "max_closure_point_m": 8.601468834967818e-07,
+      "max_continuous_excess_nm": 0.0,
+      "max_demand_nm": 0.734733521938324,
+      "max_envelope_excess_nm": 0.0,
+      "max_passive_relation_error_rad": 7.927417755126953e-06,
+      "mean_height_m": 0.13571877535432578,
+      "min_burst_headroom": 0.5007035732269287,
+      "min_height_m": 0.13571158051490784,
+      "min_nonfoot_clearance_m": 0.02536982297897339,
+      "min_support": 5.0,
+      "nonfoot_contact_env_substeps": 0.0,
+      "substeps": 2560
+    }
+  },
+  "runtime_differences": {
+    "1": {},
+    "16": {
+      "numerical_recipe_id": {
+        "after": "mkii_fourbar_tgs_external_forces_800hz_final_velocity16_v5",
+        "before": "mkii_fourbar_tgs_external_forces_800hz_v3"
+      },
+      "resolved_simulation.solver_velocity_iterations": {
+        "after": 16,
+        "before": 1
+      }
+    },
+    "4": {
+      "numerical_recipe_id": {
+        "after": "mkii_fourbar_tgs_external_forces_800hz_final_velocity4_v4",
+        "before": "mkii_fourbar_tgs_external_forces_800hz_v3"
+      },
+      "resolved_simulation.solver_velocity_iterations": {
+        "after": 4,
+        "before": 1
+      }
+    }
+  },
+  "schema": "hexapod.final_velocity_solve_sequence.v1",
+  "scope": "Diagnostic iteration study; no new physical gates, full qualification, PPO admission or hardware claim.",
+  "sources": {
+    "1": {
+      "functional_contract_sha256": "a1eaf8e5411519c7b8fe70edff45acfc5e4f217c5cff8904c5cd0ca3e607b20f",
+      "report_path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/mkii_simulation_integrity/artifacts/mkii_fourbar_2026-09-05/translation_diagnostics/filtered_batch8/hexapod-fourbar-diagnose-20260905T210111Z-96687d5d/report.json",
+      "report_sha256": "3fe5a9e257d9419b9bda7c6b4413795a5f534ac5ab9be6b08cb0e7e2b2d40183",
+      "source_commit": "d863663",
+      "source_manifest": {
+        "file": "source.SHA256SUMS",
+        "files": 1229,
+        "sha256": "6398df673f24c335cf1d4c2167fbe3f0883d45a59981a81ef13f2986ce7fc6dc"
+      },
+      "supervisor_completion_source_and_cleanup_verified": true,
+      "trace_sha256": "71042eff15c71a63c2e345795f57c6de7c860c5a80c86936ff6a18a9d04d9bef"
+    },
+    "16": {
+      "functional_contract_sha256": "d3442002687f4ff7b34bd2e24134a8e3265a87e05221d3cbf33f2630c0b52d36",
+      "report_path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/mkii_simulation_integrity/artifacts/mkii_fourbar_2026-09-05/translation_diagnostics/final_velocity16_refined/hexapod-fourbar-diagnose-20260905T213117Z-203b3597/report.json",
+      "report_sha256": "1125e9c8ebb3da8fb0c5c81aa83e01c53732063151ce8d9b0fd875274c9a8b59",
+      "source_commit": "c804169",
+      "source_manifest": {
+        "file": "source.SHA256SUMS",
+        "files": 303,
+        "sha256": "32c57b0e09d92ba9698dddde159727626528b8b66de1f5a89edeb5212436e436"
+      },
+      "supervisor_completion_source_and_cleanup_verified": true,
+      "trace_sha256": "39146769e2716e4c92c8a060d1bc422e40206fc3c2d2abbe2f813d52bc07b667"
+    },
+    "4": {
+      "functional_contract_sha256": "f825a1fb3cfcf33d27dae217cb29aa777a5dd5e0bed96819fa48175a97e7d694",
+      "report_path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/mkii_simulation_integrity/artifacts/mkii_fourbar_2026-09-05/translation_diagnostics/final_velocity4_refined/hexapod-fourbar-diagnose-20260905T211904Z-59720fc9/report.json",
+      "report_sha256": "6bd9ed7827c59f0ca6ad12e50ecbc4e2aabf4af32c9622902217dd2b5b07d84b",
+      "source_commit": "83a9bca",
+      "source_manifest": {
+        "file": "source.SHA256SUMS",
+        "files": 302,
+        "sha256": "c3d81fa7832f5a13be596c341c194e9eb9a68e682e6504456115f9327b156f07"
+      },
+      "supervisor_completion_source_and_cleanup_verified": true,
+      "trace_sha256": "388691b7c542e3622924bef1d13e7d5d065b0c60c06b040b3cdf5be7a272acb5"
+    }
+  },
+  "trace_consistency": {
+    "1": {
+      "P_plus_D_plus_FF_residual_max_Nm": 5.960464477539063e-08,
+      "cached_vs_direct_pre_q_max_difference_rad": 0.0,
+      "cached_vs_direct_pre_qd_max_difference_rad_s": 0.0
+    },
+    "16": {
+      "P_plus_D_plus_FF_residual_max_Nm": 5.960464477539063e-08,
+      "cached_vs_direct_pre_q_max_difference_rad": 0.0,
+      "cached_vs_direct_pre_qd_max_difference_rad_s": 0.0
+    },
+    "4": {
+      "P_plus_D_plus_FF_residual_max_Nm": 5.960464477539063e-08,
+      "cached_vs_direct_pre_q_max_difference_rad": 0.0,
+      "cached_vs_direct_pre_qd_max_difference_rad_s": 0.0
+    }
+  },
+  "velocity16_report_vs_raw_trace": {
+    "descriptor": {
+      "acceptance_use": "observational_only_no_velocity_thresholds",
+      "closure_pin_names": [
+        "lf_tibia_loop_closure",
+        "lm_tibia_loop_closure",
+        "lr_tibia_loop_closure",
+        "rf_tibia_loop_closure",
+        "rm_tibia_loop_closure",
+        "rr_tibia_loop_closure"
+      ],
+      "passive_relation_definition": "qdot_passive - multiplier*qdot_source; affine offsets have zero derivative",
+      "passive_relation_names": [
+        "lf_tibia_pitch",
+        "lf_tibia_rod_pivot",
+        "lm_tibia_pitch",
+        "lm_tibia_rod_pivot",
+        "lr_tibia_pitch",
+        "lr_tibia_rod_pivot",
+        "rf_tibia_pitch",
+        "rf_tibia_rod_pivot",
+        "rm_tibia_pitch",
+        "rm_tibia_rod_pivot",
+        "rr_tibia_pitch",
+        "rr_tibia_rod_pivot"
+      ],
+      "passive_rms_population": "all passive relations, environments and physics substeps in this window",
+      "physics_dt_s": 0.00125,
+      "pin_rms_population": "Euclidean velocity norms over all six pins, environments and physics substeps in this window",
+      "pin_velocity_definition": "v_C1-v_C0 in world frame, each v_C=v_link_origin+omega_world cross (R_world_from_link*r_link_to_C)",
+      "sampling": "after every scene.update physics substep"
+    },
+    "roundoff_comparison": {
+      "absolute": 1e-10,
+      "relative": 7.62939453125e-06
+    },
+    "scope": "Telemetry consistency check only; roundoff allowance is not a physical acceptance limit.",
+    "windows": {
+      "settled": {
+        "metrics": {
+          "closure_relative_point_velocity_squared_norm_sum": {
+            "absolute_difference": 3.866461621357398e-11,
+            "reported": 0.0006995779848463391,
+            "trace_derived": 0.0006995780235109553,
+            "within_float32_roundoff_allowance": true
+          },
+          "max_closure_relative_point_velocity_m_s": {
+            "absolute_difference": 2.2299186585791886e-10,
+            "reported": 0.0034869126975536346,
+            "trace_derived": 0.0034869129205455005,
+            "within_float32_roundoff_allowance": true
+          },
+          "max_passive_velocity_relation_error_rad_s": {
+            "absolute_difference": 0.0,
+            "reported": 0.09738627076148987,
+            "trace_derived": 0.09738627076148987,
+            "within_float32_roundoff_allowance": true
+          },
+          "passive_velocity_relation_squared_sum": {
+            "absolute_difference": 4.795843722149584e-10,
+            "reported": 0.26599972881479794,
+            "trace_derived": 0.26599972833521357,
+            "within_float32_roundoff_allowance": true
+          },
+          "rms_closure_relative_point_velocity_m_s": {
+            "absolute_difference": 2.0850910922983953e-12,
+            "reported": 7.54531657070852e-05,
+            "trace_derived": 7.54531677921763e-05,
+            "within_float32_roundoff_allowance": true
+          },
+          "rms_passive_velocity_relation_error_rad_s": {
+            "absolute_difference": 9.37861767413839e-13,
+            "reported": 0.001040363238190355,
+            "trace_derived": 0.0010403632372524931,
+            "within_float32_roundoff_allowance": true
+          }
+        },
+        "passive_samples": 245760,
+        "pin_samples": 122880
+      },
+      "startup": {
+        "metrics": {
+          "closure_relative_point_velocity_squared_norm_sum": {
+            "absolute_difference": 1.0775192760617558e-10,
+            "reported": 0.0023522911522340373,
+            "trace_derived": 0.002352291259985965,
+            "within_float32_roundoff_allowance": true
+          },
+          "max_closure_relative_point_velocity_m_s": {
+            "absolute_difference": 1.7426406359599689e-09,
+            "reported": 0.016047751531004906,
+            "trace_derived": 0.01604775327364554,
+            "within_float32_roundoff_allowance": true
+          },
+          "max_passive_velocity_relation_error_rad_s": {
+            "absolute_difference": 0.0,
+            "reported": 0.8375101685523987,
+            "trace_derived": 0.8375101685523987,
+            "within_float32_roundoff_allowance": true
+          },
+          "passive_velocity_relation_squared_sum": {
+            "absolute_difference": 2.1087192436652913e-08,
+            "reported": 3.7965024725006766,
+            "trace_derived": 3.796502493587869,
+            "within_float32_roundoff_allowance": true
+          },
+          "rms_closure_relative_point_velocity_m_s": {
+            "absolute_difference": 6.337805443217687e-12,
+            "reported": 0.0002767164209290534,
+            "trace_derived": 0.00027671642726685887,
+            "within_float32_roundoff_allowance": true
+          },
+          "rms_passive_velocity_relation_error_rad_s": {
+            "absolute_difference": 2.1830884322504573e-11,
+            "reported": 0.007860790827265665,
+            "trace_derived": 0.00786079084909655,
+            "within_float32_roundoff_allowance": true
+          }
+        },
+        "passive_samples": 61440,
+        "pin_samples": 30720
+      }
+    }
+  }
+}

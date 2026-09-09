@@ -1,0 +1,173 @@
+{
+  "schema": "hexapod.independent_nominal_failure_summary.v1",
+  "source_commit": "c2af43ca0f384a4c2c7ab8f1d627f309dc78a683",
+  "functional_source_sha256": "c33b4591e99f287579181469dcc132f659d1980200708475442dbe3ffcb7ecfc",
+  "asset_model": "mkii_fourbar_v5",
+  "numerical_recipe": {
+    "recipe_id": "mkii_fourbar_tgs_external_forces_1600hz_position64_128_velocity16_v6",
+    "solver_type": 1,
+    "solver_position_iterations": 64,
+    "solver_velocity_iterations": 16,
+    "enable_external_forces_every_iteration": true,
+    "physics_dt_s": 0.000625,
+    "decimation": 32
+  },
+  "pass": false,
+  "errors": [
+    "driven: unintended contact or missing support"
+  ],
+  "simulation_training_admission": false,
+  "hardware_admission": false,
+  "standing_controls_completed": 1000,
+  "driven_controls_completed": 2400,
+  "num_envs": 32,
+  "global_physics_substeps": 108800,
+  "environment_substeps": 3481600,
+  "terminated_count": 0,
+  "truncated_count": 0,
+  "driven": {
+    "substeps": 76800,
+    "height_sum": 333560.7086815834,
+    "min_height_m": 0.13152872025966644,
+    "max_applied_nm": 5.5,
+    "max_demand_nm": 83.7286605834961,
+    "max_closure_point_m": 7.267358159879223e-05,
+    "max_closure_axis_chord": 8.147779340106354e-07,
+    "min_nonfoot_clearance_m": 0.022042319178581238,
+    "nonfoot_contact_env_substeps": 0.0,
+    "min_support": 0.0,
+    "max_envelope_excess_nm": 0.0,
+    "max_continuous_excess_nm": 4.299996852874756,
+    "min_burst_headroom": 0.09906907379627228,
+    "invalid_samples": 0.0,
+    "max_passive_relation_error_rad": 0.0008745789527893066,
+    "max_passive_velocity_relation_error_rad_s": 82.37409210205078,
+    "passive_velocity_relation_squared_sum": 249598.29768713744,
+    "max_closure_relative_point_velocity_m_s": 2.642582893371582,
+    "closure_relative_point_velocity_squared_norm_sum": 390.7213022983455,
+    "mean_height_m": 0.13572619982160783,
+    "passive_velocity_relation_samples": 29491200,
+    "closure_relative_point_velocity_samples": 14745600,
+    "rms_passive_velocity_relation_error_rad_s": 0.09199719530467716,
+    "rms_closure_relative_point_velocity_m_s": 0.005147570703845866
+  },
+  "settled": {
+    "substeps": 25600,
+    "height_sum": 111175.94175338745,
+    "min_height_m": 0.13570579886436462,
+    "max_applied_nm": 0.822079598903656,
+    "max_demand_nm": 0.822079598903656,
+    "max_closure_point_m": 3.379148267868004e-07,
+    "max_closure_axis_chord": 8.019411552595557e-07,
+    "min_nonfoot_clearance_m": 0.025232672691345215,
+    "nonfoot_contact_env_substeps": 0.0,
+    "min_support": 5.0,
+    "max_envelope_excess_nm": 0.0,
+    "max_continuous_excess_nm": 0.0,
+    "min_burst_headroom": 0.5006884336471558,
+    "invalid_samples": 0.0,
+    "max_passive_relation_error_rad": 4.708766937255859e-06,
+    "max_passive_velocity_relation_error_rad_s": 0.18759891390800476,
+    "passive_velocity_relation_squared_sum": 23.14473825649855,
+    "max_closure_relative_point_velocity_m_s": 0.0035111994948238134,
+    "closure_relative_point_velocity_squared_norm_sum": 0.03381671264963815,
+    "mean_height_m": 0.13571281952317804,
+    "passive_velocity_relation_samples": 9830400,
+    "closure_relative_point_velocity_samples": 4915200,
+    "rms_passive_velocity_relation_error_rad_s": 0.0015344068972791742,
+    "rms_closure_relative_point_velocity_m_s": 8.294593300120297e-05
+  },
+  "individual_direction_checks": {
+    "lf_coxa_yaw": 0.04086710512638092,
+    "lm_coxa_yaw": 0.046420931816101074,
+    "lr_coxa_yaw": 0.03999292105436325,
+    "rf_coxa_yaw": 0.04067066311836243,
+    "rm_coxa_yaw": 0.051299262791872025,
+    "rr_coxa_yaw": 0.050321079790592194,
+    "lf_femur_pitch": 0.013285130262374878,
+    "lm_femur_pitch": 0.05033232271671295,
+    "lr_femur_pitch": 0.03416968882083893,
+    "rf_femur_pitch": 0.027443215250968933,
+    "rm_femur_pitch": 0.028956785798072815,
+    "rr_femur_pitch": 0.05951938033103943,
+    "lf_tibia_lever_pivot": 0.05627340078353882,
+    "lm_tibia_lever_pivot": 0.0507168173789978,
+    "lr_tibia_lever_pivot": 0.02567112445831299,
+    "rf_tibia_lever_pivot": 0.1348055601119995,
+    "rm_tibia_lever_pivot": 0.054162681102752686,
+    "rr_tibia_lever_pivot": 0.11724621057510376
+  },
+  "coordinated_direction_checks": {
+    "lf_coxa_yaw": 0.08325858414173126,
+    "lm_coxa_yaw": 0.06412528455257416,
+    "lr_coxa_yaw": 0.0861530601978302,
+    "rf_coxa_yaw": 0.08609387278556824,
+    "rm_coxa_yaw": 0.06449471414089203,
+    "rr_coxa_yaw": 0.08315755426883698,
+    "lf_femur_pitch": 0.05322699248790741,
+    "lm_femur_pitch": 0.05294664204120636,
+    "lr_femur_pitch": 0.05439780652523041,
+    "rf_femur_pitch": 0.053625404834747314,
+    "rm_femur_pitch": 0.05395297706127167,
+    "rr_femur_pitch": 0.05440574884414673,
+    "lf_tibia_lever_pivot": 0.027442574501037598,
+    "lm_tibia_lever_pivot": 0.024759113788604736,
+    "lr_tibia_lever_pivot": 0.025203227996826172,
+    "rf_tibia_lever_pivot": 0.02426081895828247,
+    "rm_tibia_lever_pivot": 0.024617016315460205,
+    "rr_tibia_lever_pivot": 0.02563166618347168
+  },
+  "driven_coordinate_pass": true,
+  "cpu_asset_pass": true,
+  "kit_asset_pass": true,
+  "container_exit_code": 0,
+  "supervisor_exit_code": 1,
+  "cleanup": "removed_exact_id",
+  "source_identity_unchanged_at_finish": true,
+  "campaign_state": "failed",
+  "campaign_errors": [
+    "nominal: supervisor exited 1; no retry or subsequent phase"
+  ],
+  "campaign_phases": [
+    {
+      "name": "probe",
+      "state": "passed"
+    },
+    {
+      "name": "nominal",
+      "state": "failed"
+    }
+  ],
+  "terminal_process_snapshot": {
+    "campaign": {
+      "pid": 2021559,
+      "expected_start_ticks": 105778155,
+      "process_absent": true
+    },
+    "capture_follower": {
+      "pid": 2030164,
+      "expected_start_ticks": 105810847,
+      "process_absent": true
+    },
+    "continuation": {
+      "pid": 2075580,
+      "expected_start_ticks": 106045128,
+      "process_absent": true
+    }
+  },
+  "gpu_actions_performed": false,
+  "capture_followup": {
+    "state": "no_video",
+    "reason": "Campaign failed",
+    "exit_code": 0
+  },
+  "continuation": {
+    "state": "original_failed",
+    "reason": "Original campaign failed or paused without our owned request",
+    "exit_code": 1,
+    "completed_full_updates": 0,
+    "launch_history": [],
+    "active_job": null,
+    "segments": []
+  }
+}

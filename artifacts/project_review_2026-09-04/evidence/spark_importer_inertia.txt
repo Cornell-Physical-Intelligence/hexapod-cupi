@@ -1,0 +1,61 @@
+def extract_inertia(inertia: ElementInertia) -> tuple[Gf.Quatf, Gf.Vec3f]:
+    """
+    Extract the principal moments of inertia (diagonal inertia) and orientation
+    from URDF link inertia tensor using eigenvalue decomposition.
+
+    Args:
+        inertia: URDF inertia tensor element
+
+    Returns:
+        tuple[Gf.Quatf, Gf.Vec3f]: (orientation, diagonal_inertia)
+    """
+    ixx = inertia.get_with_default("ixx")
+    ixy = inertia.get_with_default("ixy")
+    ixz = inertia.get_with_default("ixz")
+    iyy = inertia.get_with_default("iyy")
+    iyz = inertia.get_with_default("iyz")
+    izz = inertia.get_with_default("izz")
+
+    # Build inertia tensor matrix (symmetric matrix)
+    mat = np.array([[ixx, ixy, ixz], [ixy, iyy, iyz], [ixz, iyz, izz]], dtype=np.float64)
+
+    # Eigenvalue decomposition (using eigh for symmetric matrix)
+    # eigenvalues: principal moments of inertia
+    # eigenvectors: rotation matrix representing principal axes
+    eigenvalues, eigenvectors = np.linalg.eigh(mat)
+
+    # In the case of two degenerate eigenvalues, the corresponding eigenvectors are not unique.
+    # Detect degeneracy with absolute tolerance and canonicalize the eigenvector matrix.
+    _canonicalize_eigenvectors(eigenvalues, eigenvectors)
+
+    # Use eigenvalues as diagonal inertia
+    diag_inertia = Gf.Vec3f(float(eigenvalues[0]), float(eigenvalues[1]), float(eigenvalues[2]))
+
+    # Convert eigenvector matrix (rotation matrix) to quaternion
+    # Use Gf.Matrix3d to extract quaternion from rotation matrix
+    rotation_matrix = Gf.Matrix3d(
+        eigenvectors[0, 0],
+        eigenvectors[0, 1],
+        eigenvectors[0, 2],
+        eigenvectors[1, 0],
+        eigenvectors[1, 1],
+        eigenvectors[1, 2],
+        eigenvectors[2, 0],
+        eigenvectors[2, 1],
+        eigenvectors[2, 2],
+    )
+
+    # Extract quaternion from rotation matrix
+    orientation = Gf.Quatf(rotation_matrix.ExtractRotation().GetQuat())
+    return orientation, diag_inertia
+
+
+def physics_joints(parent: Usd.Prim, link: ElementLink, data: ConversionData):
+    """
+    Create physics joints.
+    """
+    # Determines if the root link is a ghost link (no inertia/colliders/visuals).
+    root_link = data.link_hierarchy.get_root_link()
+    has_root_ghost_link = data.link_hierarchy.has_ghost_link(root_link.name)
+
+    default_prim = parent.GetStage().GetDefaultPrim()

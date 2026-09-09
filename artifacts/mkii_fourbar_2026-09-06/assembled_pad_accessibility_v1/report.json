@@ -1,0 +1,3102 @@
+{
+  "schema": "hexapod.assembled_pad_accessibility.v1",
+  "scope": "LF tibia rigid assembly CAD occupancy only; no simulator, hardware measurement, approach-path or terrain accessibility proof",
+  "runtime_assets_modified": false,
+  "published_candidate_modified": false,
+  "sources": {
+    "robot/hexapod_mkii_assy/urdf/hexapod_mkii_linkage.urdf": {
+      "sha256": "2dae7165852b419f0bd6edbe03f7d398b403f1410c5b6bdc2c287b6834f543a6",
+      "bytes": 600418
+    },
+    "artifacts/mkii_fourbar_2026-09-06/pad_collision_candidate_v1/silicone_pad_convex64.stl": {
+      "sha256": "c24f698f93385229a464ec518857f6c155d6124c69ff9515e4367748b13d7e9b",
+      "bytes": 6284
+    },
+    "artifacts/mkii_fourbar_2026-09-06/pad_collision_candidate_v1/geometry_report.json": {
+      "sha256": "0a7a2ebc14fdf76361c243907ea9885e3df74d66b214a2e836e881f12cf473c0",
+      "bytes": 17194
+    },
+    "artifacts/mkii_fourbar_2026-09-06/pad_collision_candidate_v1/build_candidate.py": {
+      "sha256": "c96eca2f13405f22ddf7e6c149ad972f78efaf3cd214440138b2dbd6c2d4b9bf",
+      "bytes": 20049
+    },
+    "robot/hexapod_mkii_assy/meshes/silicone_foot.stl": {
+      "sha256": "58a2b9d528ae7b4b89034305595d1c38c4412e423662464462493a1e1c394e58",
+      "bytes": 448784
+    }
+  },
+  "tolerances": {
+    "expanded_mesh_aabb_m": 1e-08,
+    "winding_near_integer": 1e-06,
+    "minimum_unsigned_pad_surface_distance_for_classification_m": 0.0001
+  },
+  "sample_selection": {
+    "candidate_surface_samples": 3970,
+    "farther_than_0_1mm_from_silicone_surface": 443,
+    "outside_silicone_solid": 352,
+    "inside_silicone_material": 91,
+    "ambiguous_silicone_winding": 0
+  },
+  "assembly": {
+    "link": "lf_tibia",
+    "total_visual_instances": 46,
+    "non_silicone_visual_instances": 45,
+    "unique_non_silicone_meshes": 25,
+    "instances": [
+      {
+        "visual_index": 0,
+        "mesh": "tibia_narrow_insert.stl",
+        "source_visual_origin": {
+          "xyz": "8.0922461e-06 -6.3114397e-06 -0.018249389",
+          "rpy": "-1.5707362 1.1621646e-05 -2.3656713"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.7137760449477988,
+            5.040649708693835e-05,
+            0.7003740108812312,
+            8.0922461e-06
+          ],
+          [
+            -0.700374012598708,
+            -3.477756700604119e-05,
+            -0.7137760441951702,
+            -6.3114397e-06
+          ],
+          [
+            -1.1621645999738392e-05,
+            -0.999999998124853,
+            6.012679485630325e-05,
+            -0.018249389
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "4debf60e47c3eba50a58a61f3acd969b8f1ca598046c25cdce96f56e7d2a49ad",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 1,
+        "mesh": "tibia_spacer.stl",
+        "source_visual_origin": {
+          "xyz": "9.037877e-06 -7.0590674e-06 -0.039750041",
+          "rpy": "-3.1415789 -5.7388073e-05 -0.81296865"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            0.6873452416256643,
+            -0.7263308587487732,
+            4.943507563579674e-05,
+            9.037877e-06
+          ],
+          [
+            -0.7263308581639405,
+            -0.6873452432657903,
+            -3.222926383724966e-05,
+            -7.0590674e-06
+          ],
+          [
+            5.738807296849977e-05,
+            -1.3753589770315896e-05,
+            -0.999999998258724,
+            -0.039750041
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "01436f2cffde030c93a214bc6c6341c6b22aaa01c9b1cf25a4f4f1db6cdeafbe",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 2,
+        "mesh": "machined_tibia.stl",
+        "source_visual_origin": {
+          "xyz": "8.0922461e-06 -6.3114397e-06 -0.018249389",
+          "rpy": "-1.5708227 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            5.037863342268293e-05,
+            -0.8672593042872072,
+            8.0922461e-06
+          ],
+          [
+            0.8672593039905966,
+            -3.4785377797383804e-05,
+            -0.49785670471705346,
+            -6.3114397e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            -0.9999999981259854,
+            -2.637320505997676e-05,
+            -0.018249389
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "fbf946ad97a579ddd3edb19a8c9bbb143e101a39df01808fd1a5e01fadb476e4",
+        "sampled_overfill_points_in_mesh_aabb": 197,
+        "confirmed_occupied_sample_points": 158,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 4,
+        "mesh": "m3_ultra_low_profile_socket_head_screw__12mm_l__hs_steel.stl",
+        "source_visual_origin": {
+          "xyz": "-0.10761784 0.18496476 -0.012511434",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            -0.10761784
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            0.18496476
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.012511434
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "60b8eb05ed874a3e1d331a6cc352362b41736c75393c7af0020b7e671077ab90",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 5,
+        "mesh": "m5_nylon_lubricant_filled_nylon_washer__5_5mm_id__10mm_od__1mm_t.stl",
+        "source_visual_origin": {
+          "xyz": "0.010198727 -0.028222033 -0.010048589",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            0.010198727
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -0.028222033
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.010048589
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "c8af9378974228369ce8a681d821a5f7c4fc7ca26083d420fd3dc20390f3e9ef",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 6,
+        "mesh": "bearing_insert.stl",
+        "source_visual_origin": {
+          "xyz": "8.637295e-06 -6.7895769e-06 -0.031999899",
+          "rpy": "-3.1415789 -5.7388073e-05 -0.81296865"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            0.6873452416256643,
+            -0.7263308587487732,
+            4.943507563579674e-05,
+            8.637295e-06
+          ],
+          [
+            -0.7263308581639405,
+            -0.6873452432657903,
+            -3.222926383724966e-05,
+            -6.7895769e-06
+          ],
+          [
+            5.738807296849977e-05,
+            -1.3753589770315896e-05,
+            -0.999999998258724,
+            -0.031999899
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "45c36d3fddca00476b7cc0bfb40d47e64b19b3db1493f8866bb84ab53d3dfeed",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 7,
+        "mesh": "m3_ultra_low_profile_socket_head_screw__12mm_l__hs_steel.stl",
+        "source_visual_origin": {
+          "xyz": "-0.11094248 0.17267876 -0.012512056",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            -0.11094248
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            0.17267876
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.012512056
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "60b8eb05ed874a3e1d331a6cc352362b41736c75393c7af0020b7e671077ab90",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 8,
+        "mesh": "m3_ultra_low_profile_socket_head_screw__12mm_l__hs_steel.stl",
+        "source_visual_origin": {
+          "xyz": "-0.11094173 0.17267829 -0.026012218",
+          "rpy": "-2.2726205e-05 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            -0.8672593044651706,
+            -4.7215738650043767e-05,
+            -0.11094173
+          ],
+          [
+            0.8672593039905966,
+            -0.49785670458688025,
+            3.660106125067314e-05,
+            0.17267829
+          ],
+          [
+            -5.524928297189208e-05,
+            -2.2726204963358046e-05,
+            0.9999999982155181,
+            -0.026012218
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "60b8eb05ed874a3e1d331a6cc352362b41736c75393c7af0020b7e671077ab90",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 9,
+        "mesh": "m3_ultra_low_profile_socket_head_screw__12mm_l__hs_steel.stl",
+        "source_visual_origin": {
+          "xyz": "-0.10761709 0.18496429 -0.026011597",
+          "rpy": "-2.2726205e-05 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            -0.8672593044651706,
+            -4.7215738650043767e-05,
+            -0.10761709
+          ],
+          [
+            0.8672593039905966,
+            -0.49785670458688025,
+            3.660106125067314e-05,
+            0.18496429
+          ],
+          [
+            -5.524928297189208e-05,
+            -2.2726204963358046e-05,
+            0.9999999982155181,
+            -0.026011597
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "60b8eb05ed874a3e1d331a6cc352362b41736c75393c7af0020b7e671077ab90",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 10,
+        "mesh": "revolve1_1.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "43926dfae947a6f4e92124ab4fd8739fa53890f0da1fc9753018790ea2a86887",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 11,
+        "mesh": "cirpattern1_7.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "65cf84b2cb3b4909efca001b9bd1ea5456e2c2f3e1194df7f160dfa469614ace",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 12,
+        "mesh": "revolve3_1.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "c743835c1cf2c244a386346ef58434c5937fe756a7c721e58163d6a0cd6efdbb",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 13,
+        "mesh": "cirpattern1_8.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "174d7af35adcb2ce132253595bd951e2f02f3d2381f15a93471830c4103c1c6e",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 14,
+        "mesh": "cirpattern1_11.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "66422b214fa38c89b5eb0589d78438d74aef925e0204931f711d6598c9fe9c95",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 15,
+        "mesh": "cirpattern1_9.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "63e769487fc819984b911823c12d97e0b47c703fc8541cb2b3ba1f72d1c5c995",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 16,
+        "mesh": "cirpattern1_3.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "ac9634ae0f60e903d15579c0e98ff7bb41184b013269623f573508f1a3d3f2fb",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 17,
+        "mesh": "cirpattern1_6.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "992ff44896cb30e0e74adc3a40ca0e27b02eba92a94dac9d12a501936817f512",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 18,
+        "mesh": "cirpattern1_5.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "f6fcc50d9185646aa9feff37a5e4fcdd7293b18333b4ff024f255523691ac0d9",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 19,
+        "mesh": "revolve1_2.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "9bceb2cd1ff8bd3a9486066fc579c6ad15bc30dd90be932b22e0549b66bff1c9",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 20,
+        "mesh": "revolve2.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "1386f9709e57e58c25caf13b918e95cfd5f522502edc9e302c41787a7d36663b",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 21,
+        "mesh": "cirpattern1_12.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "b5a54b3c38576eaa393af7649f1b93bc5f7e3542ab001ba754650b28562a1c2a",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 22,
+        "mesh": "cirpattern1_1.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "68c053f7bd27e071c5bb0671ebffe2fc708f60bf8f346db2aead961d246aadbf",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 23,
+        "mesh": "cirpattern1_2.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "830a95b1632cb708e40b5cb7489e0d12267352040516e634abad18d4e8330df5",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 24,
+        "mesh": "cirpattern1_4.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "68b33c52393b826c1e1933bf7323219699ab97fb36e2778c412968be018f8705",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 25,
+        "mesh": "revolve3_2.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "be8b73b04f231277e33f61ebdb11f1d26aec0bf77f48a1d0ca1b72203289315b",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 26,
+        "mesh": "cirpattern1_10.stl",
+        "source_visual_origin": {
+          "xyz": "8.6854506e-06 -6.8591258e-06 -0.034000022",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            8.6854506e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -6.8591258e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.034000022
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "687f9b525bc4264eb94902b4bcce7ca8914c29efe187074f552107684a008590",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 27,
+        "mesh": "revolve1_1.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "43926dfae947a6f4e92124ab4fd8739fa53890f0da1fc9753018790ea2a86887",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 28,
+        "mesh": "cirpattern1_7.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "65cf84b2cb3b4909efca001b9bd1ea5456e2c2f3e1194df7f160dfa469614ace",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 29,
+        "mesh": "revolve3_1.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "c743835c1cf2c244a386346ef58434c5937fe756a7c721e58163d6a0cd6efdbb",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 30,
+        "mesh": "cirpattern1_8.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "174d7af35adcb2ce132253595bd951e2f02f3d2381f15a93471830c4103c1c6e",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 31,
+        "mesh": "cirpattern1_11.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "66422b214fa38c89b5eb0589d78438d74aef925e0204931f711d6598c9fe9c95",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 32,
+        "mesh": "cirpattern1_9.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "63e769487fc819984b911823c12d97e0b47c703fc8541cb2b3ba1f72d1c5c995",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 33,
+        "mesh": "cirpattern1_3.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "ac9634ae0f60e903d15579c0e98ff7bb41184b013269623f573508f1a3d3f2fb",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 34,
+        "mesh": "cirpattern1_6.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "992ff44896cb30e0e74adc3a40ca0e27b02eba92a94dac9d12a501936817f512",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 35,
+        "mesh": "cirpattern1_5.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "f6fcc50d9185646aa9feff37a5e4fcdd7293b18333b4ff024f255523691ac0d9",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 36,
+        "mesh": "revolve1_2.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "9bceb2cd1ff8bd3a9486066fc579c6ad15bc30dd90be932b22e0549b66bff1c9",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 37,
+        "mesh": "revolve2.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "1386f9709e57e58c25caf13b918e95cfd5f522502edc9e302c41787a7d36663b",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 38,
+        "mesh": "cirpattern1_12.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "b5a54b3c38576eaa393af7649f1b93bc5f7e3542ab001ba754650b28562a1c2a",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 39,
+        "mesh": "cirpattern1_1.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "68c053f7bd27e071c5bb0671ebffe2fc708f60bf8f346db2aead961d246aadbf",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 40,
+        "mesh": "cirpattern1_2.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "830a95b1632cb708e40b5cb7489e0d12267352040516e634abad18d4e8330df5",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 41,
+        "mesh": "cirpattern1_4.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "68b33c52393b826c1e1933bf7323219699ab97fb36e2778c412968be018f8705",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 42,
+        "mesh": "revolve3_2.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "be8b73b04f231277e33f61ebdb11f1d26aec0bf77f48a1d0ca1b72203289315b",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 43,
+        "mesh": "cirpattern1_10.stl",
+        "source_visual_origin": {
+          "xyz": "7.3460848e-06 -5.7638024e-06 -0.002500163",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            7.3460848e-06
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -5.7638024e-06
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.002500163
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "687f9b525bc4264eb94902b4bcce7ca8914c29efe187074f552107684a008590",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 44,
+        "mesh": "revolve1.stl",
+        "source_visual_origin": {
+          "xyz": "0.010198366 -0.028222139 -0.013098515",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            0.010198366
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -0.028222139
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.013098515
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "fb88247e9b54173382b67b26764948ab6c907e3a236e08403e8ba496cd9e920b",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      },
+      {
+        "visual_index": 45,
+        "mesh": "cut_extrude2.stl",
+        "source_visual_origin": {
+          "xyz": "0.010198366 -0.028222139 -0.013098515",
+          "rpy": "3.1415626 5.5249283e-05 2.091922"
+        },
+        "mesh_scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "link_from_mesh": [
+          [
+            -0.4978567028666607,
+            0.8672593040959209,
+            5.357048128816316e-05,
+            0.010198366
+          ],
+          [
+            0.8672593039905966,
+            0.49785670484170524,
+            -3.2953073603257706e-05,
+            -0.028222139
+          ],
+          [
+            -5.524928297189208e-05,
+            3.005358974297339e-05,
+            -0.9999999980221492,
+            -0.013098515
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ],
+        "source_mesh_sha256": "d134f41b91bd8056392e0e907aadf36c8b54f5d3291dca6bc9777c8426189547",
+        "sampled_overfill_points_in_mesh_aabb": 0,
+        "confirmed_occupied_sample_points": 0,
+        "uncertain_sample_points": 0
+      }
+    ],
+    "meshes": {
+      "tibia_narrow_insert.stl": {
+        "sha256": "4debf60e47c3eba50a58a61f3acd969b8f1ca598046c25cdce96f56e7d2a49ad",
+        "bytes": 122784,
+        "bounds_mesh_m": [
+          [
+            -0.009499999694526196,
+            -0.02449999935925007,
+            -0.009499999694526196
+          ],
+          [
+            0.009499999694526196,
+            -0.013749999925494194,
+            0.009499999694526196
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 1229,
+          "triangles": 2454,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.9880871259250013e-06
+        }
+      },
+      "tibia_spacer.stl": {
+        "sha256": "01436f2cffde030c93a214bc6c6341c6b22aaa01c9b1cf25a4f4f1db6cdeafbe",
+        "bytes": 110884,
+        "bounds_mesh_m": [
+          [
+            -0.01549999974668026,
+            -0.01549999974668026,
+            0.0
+          ],
+          [
+            0.01549999974668026,
+            0.01549999974668026,
+            0.0024999999441206455
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 1098,
+          "triangles": 2216,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.6014173064198127e-06
+        }
+      },
+      "machined_tibia.stl": {
+        "sha256": "fbf946ad97a579ddd3edb19a8c9bbb143e101a39df01808fd1a5e01fadb476e4",
+        "bytes": 700684,
+        "bounds_mesh_m": [
+          [
+            -0.03554423153400421,
+            -0.0182499997317791,
+            -0.019991880282759666
+          ],
+          [
+            0.2199999988079071,
+            0.0182499997317791,
+            0.019988002255558968
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 6980,
+          "triangles": 14012,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 8.4176250834433e-05
+        }
+      },
+      "m3_ultra_low_profile_socket_head_screw__12mm_l__hs_steel.stl": {
+        "sha256": "60b8eb05ed874a3e1d331a6cc352362b41736c75393c7af0020b7e671077ab90",
+        "bytes": 1403584,
+        "bounds_mesh_m": [
+          [
+            -0.002749999985098839,
+            -0.002749999985098839,
+            -0.006500000134110451
+          ],
+          [
+            0.002749999985098839,
+            0.002749999985098839,
+            0.006500000134110451
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 14037,
+          "triangles": 28070,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 8.968334375803454e-08
+        }
+      },
+      "m5_nylon_lubricant_filled_nylon_washer__5_5mm_id__10mm_od__1mm_t.stl": {
+        "sha256": "c8af9378974228369ce8a681d821a5f7c4fc7ca26083d420fd3dc20390f3e9ef",
+        "bytes": 547284,
+        "bounds_mesh_m": [
+          [
+            -0.004999999888241291,
+            -0.004999999888241291,
+            -0.0005499999970197678
+          ],
+          [
+            0.004999999888241291,
+            0.004999999888241291,
+            0.0005499999970197678
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 5472,
+          "triangles": 10944,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 5.992947814068428e-08
+        }
+      },
+      "bearing_insert.stl": {
+        "sha256": "45c36d3fddca00476b7cc0bfb40d47e64b19b3db1493f8866bb84ab53d3dfeed",
+        "bytes": 184984,
+        "bounds_mesh_m": [
+          [
+            -0.01549999974668026,
+            -0.01549999974668026,
+            0.0
+          ],
+          [
+            0.01549999974668026,
+            0.01549999974668026,
+            0.00774999987334013
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 1837,
+          "triangles": 3698,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 2.0575060437367003e-06
+        }
+      },
+      "revolve1_1.stl": {
+        "sha256": "43926dfae947a6f4e92124ab4fd8739fa53890f0da1fc9753018790ea2a86887",
+        "bytes": 180084,
+        "bounds_mesh_m": [
+          [
+            -0.013000000268220901,
+            -0.013000000268220901,
+            -0.0024999999441206455
+          ],
+          [
+            0.013000000268220901,
+            0.013000000268220901,
+            0.0024999999441206455
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 1800,
+          "triangles": 3600,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 3.284858517576506e-07
+        }
+      },
+      "cirpattern1_7.stl": {
+        "sha256": "65cf84b2cb3b4909efca001b9bd1ea5456e2c2f3e1194df7f160dfa469614ace",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            -0.0041473242454230785,
+            -0.012012304738163948,
+            -0.0015750000020489097
+          ],
+          [
+            -0.00099796277936548,
+            -0.008862944319844246,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.6313675587147362e-08
+        }
+      },
+      "revolve3_1.stl": {
+        "sha256": "c743835c1cf2c244a386346ef58434c5937fe756a7c721e58163d6a0cd6efdbb",
+        "bytes": 50484,
+        "bounds_mesh_m": [
+          [
+            -0.011447332799434662,
+            -0.011447332799434662,
+            0.0015750000020489097
+          ],
+          [
+            0.011447332799434662,
+            0.011447332799434662,
+            0.0024116116110235453
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 504,
+          "triangles": 1008,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 9.70394914659953e-08
+        }
+      },
+      "cirpattern1_8.stl": {
+        "sha256": "174d7af35adcb2ce132253595bd951e2f02f3d2381f15a93471830c4103c1c6e",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            -0.008703000843524933,
+            -0.00962092261761427,
+            -0.0015750000020489097
+          ],
+          [
+            -0.0055541363544762135,
+            -0.00647205812856555,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.6313675387548217e-08
+        }
+      },
+      "cirpattern1_11.stl": {
+        "sha256": "66422b214fa38c89b5eb0589d78438d74aef925e0204931f711d6598c9fe9c95",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            -0.010422040708363056,
+            0.004531731363385916,
+            -0.0015750000020489097
+          ],
+          [
+            -0.007272112183272839,
+            0.007681660354137421,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.631367554908505e-08
+        }
+      },
+      "cirpattern1_9.stl": {
+        "sha256": "63e769487fc819984b911823c12d97e0b47c703fc8541cb2b3ba1f72d1c5c995",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            -0.011626282706856728,
+            -0.005386860575526953,
+            -0.0015750000020489097
+          ],
+          [
+            -0.008476566523313522,
+            -0.0022371443919837475,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.6313675512680193e-08
+        }
+      },
+      "cirpattern1_3.stl": {
+        "sha256": "ac9634ae0f60e903d15579c0e98ff7bb41184b013269623f573508f1a3d3f2fb",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            0.0090975072234869,
+            -0.0002783436211757362,
+            -0.0015750000020489097
+          ],
+          [
+            0.01224573329091072,
+            0.0028698821552097797,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.631367541932594e-08
+        }
+      },
+      "cirpattern1_6.stl": {
+        "sha256": "992ff44896cb30e0e74adc3a40ca0e27b02eba92a94dac9d12a501936817f512",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            0.00099796277936548,
+            -0.012012304738163948,
+            -0.0015750000020489097
+          ],
+          [
+            0.0041473242454230785,
+            -0.008862944319844246,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.6313675587147396e-08
+        }
+      },
+      "cirpattern1_5.stl": {
+        "sha256": "f6fcc50d9185646aa9feff37a5e4fcdd7293b18333b4ff024f255523691ac0d9",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            0.0055541363544762135,
+            -0.00962092261761427,
+            -0.0015750000020489097
+          ],
+          [
+            0.008703000843524933,
+            -0.00647205812856555,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.6313675387548264e-08
+        }
+      },
+      "revolve1_2.stl": {
+        "sha256": "9bceb2cd1ff8bd3a9486066fc579c6ad15bc30dd90be932b22e0549b66bff1c9",
+        "bytes": 151284,
+        "bounds_mesh_m": [
+          [
+            -0.00938600953668356,
+            -0.00938600953668356,
+            -0.0024999999441206455
+          ],
+          [
+            0.00938600953668356,
+            0.00938600953668356,
+            0.0024999999441206455
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 1512,
+          "triangles": 3024,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 2.2752139446240938e-07
+        }
+      },
+      "revolve2.stl": {
+        "sha256": "1386f9709e57e58c25caf13b918e95cfd5f522502edc9e302c41787a7d36663b",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            -0.0015750000020489097,
+            0.00917499978095293,
+            -0.0015750000020489097
+          ],
+          [
+            0.0015750000020489097,
+            0.012325000017881393,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.6313675712392893e-08
+        }
+      },
+      "cirpattern1_12.stl": {
+        "sha256": "b5a54b3c38576eaa393af7649f1b93bc5f7e3542ab001ba754650b28562a1c2a",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            -0.00656949682161212,
+            0.007944929413497448,
+            -0.0015750000020489097
+          ],
+          [
+            -0.0034220514353364706,
+            0.01109237503260374,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.6313675368739844e-08
+        }
+      },
+      "cirpattern1_1.stl": {
+        "sha256": "68c053f7bd27e071c5bb0671ebffe2fc708f60bf8f346db2aead961d246aadbf",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            0.0034220514353364706,
+            0.007944929413497448,
+            -0.0015750000020489097
+          ],
+          [
+            0.00656949682161212,
+            0.01109237503260374,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.6313675368739887e-08
+        }
+      },
+      "cirpattern1_2.stl": {
+        "sha256": "830a95b1632cb708e40b5cb7489e0d12267352040516e634abad18d4e8330df5",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            0.007272112183272839,
+            0.004531731363385916,
+            -0.0015750000020489097
+          ],
+          [
+            0.010422040708363056,
+            0.007681660354137421,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.631367554908507e-08
+        }
+      },
+      "cirpattern1_4.stl": {
+        "sha256": "68b33c52393b826c1e1933bf7323219699ab97fb36e2778c412968be018f8705",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            0.008476566523313522,
+            -0.005386860575526953,
+            -0.0015750000020489097
+          ],
+          [
+            0.011626282706856728,
+            -0.0022371443919837475,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.6313675512680176e-08
+        }
+      },
+      "revolve3_2.stl": {
+        "sha256": "be8b73b04f231277e33f61ebdb11f1d26aec0bf77f48a1d0ca1b72203289315b",
+        "bytes": 50484,
+        "bounds_mesh_m": [
+          [
+            -0.011447332799434662,
+            -0.011447332799434662,
+            -0.0024116116110235453
+          ],
+          [
+            0.011447332799434662,
+            0.011447332799434662,
+            -0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 504,
+          "triangles": 1008,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 9.703949146599575e-08
+        }
+      },
+      "cirpattern1_10.stl": {
+        "sha256": "687f9b525bc4264eb94902b4bcce7ca8914c29efe187074f552107684a008590",
+        "bytes": 252084,
+        "bounds_mesh_m": [
+          [
+            -0.01224573329091072,
+            -0.0002783436211757362,
+            -0.0015750000020489097
+          ],
+          [
+            -0.0090975072234869,
+            0.0028698821552097797,
+            0.0015750000020489097
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 2522,
+          "triangles": 5040,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.6313675419325975e-08
+        }
+      },
+      "revolve1.stl": {
+        "sha256": "fb88247e9b54173382b67b26764948ab6c907e3a236e08403e8ba496cd9e920b",
+        "bytes": 151284,
+        "bounds_mesh_m": [
+          [
+            -0.00395999988541007,
+            -0.00395999988541007,
+            0.0016666667070239782
+          ],
+          [
+            0.00395999988541007,
+            0.00395999988541007,
+            0.002460000105202198
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 1512,
+          "triangles": 3024,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 2.6051193487704536e-08
+        }
+      },
+      "cut_extrude2.stl": {
+        "sha256": "d134f41b91bd8056392e0e907aadf36c8b54f5d3291dca6bc9777c8426189547",
+        "bytes": 638284,
+        "bounds_mesh_m": [
+          [
+            -0.004000000189989805,
+            -0.004618802107870579,
+            -0.0024999999441206455
+          ],
+          [
+            0.004000000189989805,
+            0.004618802107870579,
+            0.0024999999441206455
+          ]
+        ],
+        "topology": {
+          "unique_vertices": 6382,
+          "triangles": 12764,
+          "boundary_edges": 0,
+          "nonmanifold_edges": 0,
+          "inconsistent_winding_edges": 0,
+          "degenerate_triangles": 0,
+          "closed_consistently_wound_manifold": true,
+          "signed_volume_m3": 1.6452230101445057e-07
+        }
+      }
+    }
+  },
+  "classification_counts": {
+    "empty": 194,
+    "occupied": 158,
+    "uncertain": 0
+  },
+  "outside_every_non_silicone_mesh_aabb": 155,
+  "prior_worst_overfill_witness": {
+    "sample_index": 2103,
+    "pad_mesh_point_m": [
+      0.23595058359205723,
+      -0.012749999761581421,
+      -0.0029668083880096674
+    ],
+    "lf_tibia_point_m": [
+      -0.11488913748953143,
+      0.20610151642366265,
+      -0.0055123471186265365
+    ],
+    "distance_to_silicone_surface_m": 0.0078072714333952764,
+    "silicone_winding_number": -5.0800526162264503e-17,
+    "classification": "empty",
+    "containing_visual_indices": [],
+    "uncertain_visual_indices": [],
+    "non_silicone_aabb_hits": 0,
+    "distance_lower_bound_to_other_cad_solids_m": 0.015950584784150096
+  },
+  "largest_20_pad_overfill_samples": [
+    {
+      "sample_index": 2103,
+      "pad_mesh_point_m": [
+        0.23595058359205723,
+        -0.012749999761581421,
+        -0.0029668083880096674
+      ],
+      "lf_tibia_point_m": [
+        -0.11488913748953143,
+        0.20610151642366265,
+        -0.0055123471186265365
+      ],
+      "distance_to_silicone_surface_m": 0.0078072714333952764,
+      "silicone_winding_number": -5.0800526162264503e-17,
+      "classification": "empty",
+      "containing_visual_indices": [],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 0,
+      "distance_lower_bound_to_other_cad_solids_m": 0.015950584784150096
+    },
+    {
+      "sample_index": 2110,
+      "pad_mesh_point_m": [
+        0.23627512529492378,
+        0.014750000089406967,
+        -0.0028440298046916723
+      ],
+      "lf_tibia_point_m": [
+        -0.11515580820800143,
+        0.20632089549622187,
+        -0.03301236808684065
+      ],
+      "distance_to_silicone_surface_m": 0.007543141640139423,
+      "silicone_winding_number": -1.1043592643970544e-16,
+      "classification": "empty",
+      "containing_visual_indices": [],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 0,
+      "distance_lower_bound_to_other_cad_solids_m": 0.01627512648701665
+    },
+    {
+      "sample_index": 2067,
+      "pad_mesh_point_m": [
+        0.23465934582054615,
+        -0.012749999761581421,
+        -0.006579769542440772
+      ],
+      "lf_tibia_point_m": [
+        -0.11111291193278142,
+        0.20678041538727138,
+        -0.0055121804933001145
+      ],
+      "distance_to_silicone_surface_m": 0.006170230219140649,
+      "silicone_winding_number": 0.0,
+      "classification": "empty",
+      "containing_visual_indices": [],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 0,
+      "distance_lower_bound_to_other_cad_solids_m": 0.014659347012639018
+    },
+    {
+      "sample_index": 2196,
+      "pad_mesh_point_m": [
+        0.23892227560281754,
+        -0.012749999761581421,
+        -0.004599543230142444
+      ],
+      "lf_tibia_point_m": [
+        -0.1149526097926702,
+        0.20949161195677,
+        -0.005512468242028544
+      ],
+      "distance_to_silicone_surface_m": 0.006150499851228435,
+      "silicone_winding_number": 1.4577542290041119e-16,
+      "classification": "empty",
+      "containing_visual_indices": [],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 0,
+      "distance_lower_bound_to_other_cad_solids_m": 0.018922276794910403
+    },
+    {
+      "sample_index": 563,
+      "pad_mesh_point_m": [
+        0.1934371292591095,
+        0.0010000001639127731,
+        0.011898986529558897
+      ],
+      "lf_tibia_point_m": [
+        -0.10661533553953875,
+        0.16182981363903207,
+        -0.019260390239142215
+      ],
+      "distance_to_silicone_surface_m": 0.00575000038581712,
+      "silicone_winding_number": 4.417437057588218e-17,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 382,
+      "pad_mesh_point_m": [
+        0.19294776767492294,
+        0.0010000001639127731,
+        0.015713971573859453
+      ],
+      "lf_tibia_point_m": [
+        -0.10968028487011222,
+        0.1595060943694304,
+        -0.01926046381564845
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": 0.0,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 733,
+      "pad_mesh_point_m": [
+        0.19429027289152145,
+        0.0010000001639127731,
+        0.01605455344542861
+      ],
+      "lf_tibia_point_m": [
+        -0.11064403288781915,
+        0.16050083354091557,
+        -0.01926054697033459
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": 0.0,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 135,
+      "pad_mesh_point_m": [
+        0.19231362454593182,
+        0.0010000001639127731,
+        0.01517842779867351
+      ],
+      "lf_tibia_point_m": [
+        -0.10890011714088405,
+        0.15922275189989693,
+        -0.01926041465568947
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": 0.0,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 678,
+      "pad_mesh_point_m": [
+        0.19390853494405746,
+        0.0010000001639127731,
+        0.016007018042728305
+      ],
+      "lf_tibia_point_m": [
+        -0.11041275657166076,
+        0.1601934335732369,
+        -0.019260524625925788
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": -2.208718528794109e-18,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 160,
+      "pad_mesh_point_m": [
+        0.19237547740340233,
+        0.0010000001639127731,
+        0.015254907310009003
+      ],
+      "lf_tibia_point_m": [
+        -0.10899723856836024,
+        0.15923831852852477,
+        -0.01926042009002533
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": 1.987846675914698e-17,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 166,
+      "pad_mesh_point_m": [
+        0.192386319860816,
+        0.0010000001639127731,
+        0.013513710349798203
+      ],
+      "lf_tibia_point_m": [
+        -0.10749256729411975,
+        0.1601145883314688,
+        -0.019260374768118847
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": 3.092205940311753e-17,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 1026,
+      "pad_mesh_point_m": [
+        0.20344816148281097,
+        0.0010000001639127731,
+        0.001737270038574934
+      ],
+      "lf_tibia_point_m": [
+        -0.10278655186038806,
+        0.17557105316405705,
+        -0.019260675344461606
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": 3.533949646070574e-17,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 185,
+      "pad_mesh_point_m": [
+        0.19243733026087284,
+        0.0010000001639127731,
+        0.015331386821344495
+      ],
+      "lf_tibia_point_m": [
+        -0.10909435999583643,
+        0.15925388515715264,
+        -0.01926042552436119
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": -3.754821498949985e-17,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 594,
+      "pad_mesh_point_m": [
+        0.19352679699659348,
+        0.0010000001639127731,
+        0.015959482640028
+      ],
+      "lf_tibia_point_m": [
+        -0.11018148025550238,
+        0.15988603360555828,
+        -0.019260502281516986
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": -2.4295903816735198e-17,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 211,
+      "pad_mesh_point_m": [
+        0.19249918311834335,
+        0.0010000001639127731,
+        0.015407866332679987
+      ],
+      "lf_tibia_point_m": [
+        -0.10919148142331263,
+        0.15926945178578045,
+        -0.01926043095869705
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": -2.208718528794109e-18,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 226,
+      "pad_mesh_point_m": [
+        0.19253486767411232,
+        0.0010000001639127731,
+        0.013251748401671648
+      ],
+      "lf_tibia_point_m": [
+        -0.10733933388178357,
+        0.16037383731689303,
+        -0.019260376066502844
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": -4.1965652047088066e-17,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 885,
+      "pad_mesh_point_m": [
+        0.19677414000034332,
+        0.0010000001639127731,
+        0.00851174769923091
+      ],
+      "lf_tibia_point_m": [
+        -0.10533907431315519,
+        0.1664102268140404,
+        -0.01926048527424868
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": -4.417437057588218e-17,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 252,
+      "pad_mesh_point_m": [
+        0.19261132925748825,
+        0.0010000001639127731,
+        0.015484392642974854
+      ],
+      "lf_tibia_point_m": [
+        -0.10931368228501254,
+        0.15932861243169294,
+        -0.0192604391729349
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": 2.208718528794109e-18,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 1165,
+      "pad_mesh_point_m": [
+        0.21023407764732838,
+        0.0010000001639127731,
+        -0.005137494998052716
+      ],
+      "lf_tibia_point_m": [
+        -0.10020276176518056,
+        0.1848788499606744,
+        -0.019260868951875953
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": 6.184411880623505e-17,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    },
+    {
+      "sample_index": 511,
+      "pad_mesh_point_m": [
+        0.19328583776950836,
+        0.0010000001639127731,
+        0.012106196023523808
+      ],
+      "lf_tibia_point_m": [
+        -0.10671971841893184,
+        0.16159544405120943,
+        -0.019260387345174372
+      ],
+      "distance_to_silicone_surface_m": 0.005750000011175871,
+      "silicone_winding_number": -1.3252311172764653e-17,
+      "classification": "occupied",
+      "containing_visual_indices": [
+        2
+      ],
+      "uncertain_visual_indices": [],
+      "non_silicone_aabb_hits": 1,
+      "distance_lower_bound_to_other_cad_solids_m": 0.0
+    }
+  ],
+  "interpretation": [
+    "Empty means outside every other solid in this LF tibia assembly under the recorded AABB/winding checks; it does not establish an obstacle approach path.",
+    "The prior worst witness is outside all 45 non-silicone visual AABBs, so its empty classification does not depend on watertightness or winding.",
+    "Occupancy is sampled; do not interpret counts as area, volume, collision probability or a full assembly-wide bound.",
+    "Moving neighboring links, wires absent from CAD and other legs were not included. No assumption that they permanently fill the pad is made.",
+    "A closed consistently wound mesh can still self-intersect; edge checks alone do not establish an embedded manifold. Zero winding is used only with this caveat; the worst AABB witness is independent of it."
+  ]
+}

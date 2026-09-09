@@ -1,5 +1,7 @@
 # Spark operations runbook
 
+> Current procedure: the project lead has authorized short live Spark validation of the corrected serial CAD-v2 model. Use the isolated, bounded launcher in [§11](#11-corrected-serial-cad-v2-live-validation), which preserves the original mirror and still requires exclusive GPU admission. This is standing characterization, not full G0 or permission to adopt an archived policy. [STATUS.md](../STATUS.md) records current execution; [live evidence](../artifacts/mkii_step2_2026-09-04/README.md) records the results. The earlier [asset audit](../artifacts/project_review_2026-09-04/URDF_VALIDATION.md) remains the record of the original import defect.
+
 Durable operating procedure for hexapod training and evaluation on the DGX
 Spark host. It covers the environment, the audit that precedes each launch,
 the GPU lock protocol, launcher and formal-screen usage, the specification and
@@ -30,7 +32,10 @@ Gymnasium: 1.2.1
 `/home/orionh/HEXAPOD` is a bind-mounted mirror. It is not a Git repository.
 Git does not version changes made there, and a `git` command run against it
 does not behave as it does in this checkout. Sync source to it on purpose and
-verify with the manifest.
+verify with the applicable manifest. Current CAD-v2 validation uses a separate
+source snapshot under `/home/orionh/HEXAPOD_runs/mkii_v2_step2_a0f0b39/source`,
+mounted read-only at the same container path. Its output goes to the sibling
+`runs/` directory; see §11.
 
 No Conda, venv, or uv is used for training. The Docker Compose image
 `isaac-lab-base` bind-mounts `/home/orionh/HEXAPOD` at `/workspace/hexapod` and
@@ -59,15 +64,24 @@ jobs, so this warning is not a confirmed failure cause.
 
 ## 2. Audit before touching anything
 
-Run this read-only sequence first, every time, and change nothing until it is
-clean:
+Inspect host processes, GPU use, containers, services and the shared lock
+before a GPU launch. The current CAD-v2 launcher performs and records those
+checks itself, including checks after container creation and during the run.
+Read `/home/orionh/SPARK_COMPUTE_COORDINATION.md` before every new launch,
+and at checkpoint boundaries during future long runs, for sharing requests
+from another agent. The [repository copy](SPARK_COMPUTE_COORDINATION.md)
+records the coordination procedure.
+
+The following sequence additionally verifies the **archived Stage2 release and
+its checkpoint**, for reproducing that lineage only. Its manifest and parent
+checkpoint hash are not prerequisites for new CAD-v2 standing validation:
 
 ```bash
 ssh orionh@100.82.166.9
 cd /home/orionh/HEXAPOD
 date -u
 ps -eo pid,ppid,lstart,etime,%cpu,%mem,args --sort=-%cpu | head -80
-pgrep -af 'nsva_dl|validate_nsva|score_clip|validate_b51|torch.*compile|train_model_only_resume|evaluate_checkpoint' || true
+pgrep -af 'nsva_dl|validate_nsva|score_clip|validate_b51|nowcast_run|torch.*compile|train_model_only_resume|evaluate_checkpoint' || true
 docker ps --format '{{.ID}} {{.Names}} {{.Status}}'
 systemctl is-active hexapod-rl-training.service || true
 nvidia-smi
@@ -76,9 +90,10 @@ sha256sum -c isaaclab/deploy/stage2_pipeline.sha256
 sha256sum isaaclab/logs/rsl_rl/hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/2026-08-25_23-44-14_accel_scale4_yaw160_trackguard_20260825T234500Z_seed86/model_2.pt
 ```
 
-`sha256sum -c isaaclab/deploy/stage2_pipeline.sha256` verifies every entry in
-the manifest and must pass both locally and on the Spark. The parent checkpoint
-hash must equal
+For an archived Stage2 reproduction,
+`sha256sum -c isaaclab/deploy/stage2_pipeline.sha256` verifies every frozen entry
+and must pass in the matching local and Spark source snapshots. That lineage's
+parent checkpoint hash must equal
 `a66a1c83e5b0675ade73d05538ae57d81451568ab45d9e8bcfd2edc67bb2e69a`.
 
 Also check whether an automated watcher has already acted before launching
@@ -86,7 +101,9 @@ anything by hand.
 
 ## 3. GPU lock and shared-workload protocol
 
-The Spark is shared with unrelated workloads. The rules are:
+The current short validation launcher remains **exclusive**. The Spark is
+shared with unrelated workloads, so the following admission and cleanup rules
+still apply to these runs:
 
 - Hold `/tmp/hexapod-isaac-gpu.lock` for the entire logical run, from before
   container creation to cleanup.
@@ -106,7 +123,18 @@ The Spark is shared with unrelated workloads. The rules are:
   must never use `docker rm -f` on a broad match and must never touch a process
   it did not create.
 
-Sharing the Spark across the team:
+The latest instruction is to **use full available Spark compute now**, until
+another agent requests sharing through `/home/orionh/SPARK_COMPUTE_COORDINATION.md`.
+Current exclusive validation already permits full available compute; no quota
+is enabled. Read that shared file before each new launch and at checkpoints
+during future long runs. Its [repository copy](SPARK_COMPUTE_COORDINATION.md)
+holds the handoff procedure. If sharing is requested, the former **60% hexapod /
+40% other work** split is the starting preference for coordination. MPS and a
+shared long-training launcher have not been configured or validated by this
+work. Coordinate and measure a paired pilot before relying on concurrent GPU
+training, and leave unrelated jobs untouched.
+
+Historical Stage2 team workflow (new CAD-v2 validation uses §11):
 
 - One shared queue (a document or issue label) lists the next attempts in
   order with experiment file, intervention file, seed, and label. You launch
@@ -127,9 +155,14 @@ unrelated work and without blind retry storms: detect pre-AppReady stalls within
 at most one bounded identical retry while holding the GPU lock for the logical
 run.
 
-## 4. Launchers
+## 4. Archived Stage2 launchers
 
-Persistent training service helpers:
+These helpers and the following Stage2 launchers reproduce the archived mock
+lineage. **Do not use `hexapod-rl start` for CAD v2**: its service selects a
+legacy checkpoint/task and is not the corrected-model validator. The bounded
+CAD-v2 launcher is documented in §11.
+
+Persistent Stage2 training service helpers:
 
 ```sh
 hexapod-rl status       # persistent training service
@@ -307,7 +340,12 @@ return the exact patch plus the exact remote commands, working directory,
 expected output, and required return evidence, and let a session with Spark
 access execute them. Do not request or accept credentials in chat.
 
-## 10. Importing and validating a robot model (asset v1)
+## 10. Historical import procedure (asset v1)
+
+This section is retained for interpreting and reproducing asset-v1 evidence.
+It is superseded by §11 for new work. A successful old standing check does not
+repair the original USD's inertia orientation defect, and its reset/height
+expectations do not apply to the corrected v2 configuration.
 
 Asset v1 is `robot/hexapod_mkii_assy/`. Its README holds the conventions,
 limits, stance, and regeneration steps. The spec is `MKII_V1_ASSET` in
@@ -345,9 +383,11 @@ step 4 passes and step 5 confirms the runtime joint order.
    ```
    The validator requires 18 joints, six feet, finite observations, no
    terminations or truncations, no coxa/femur/tibia-shaft ground contact after
-   settling, and computed torque under the RS05 1.6 N m rating (saturation
-   fraction below 0.5 %). Expect `post_settle_mean_base_height_m` near 0.12
-   and `max_abs_computed_torque_nm` below 1.6 with margin.
+   settling, and a post-settling computed-torque saturation fraction below
+   0.5 % against this historical baseline's 1.6 N m threshold. `max_abs_computed_torque_nm` includes
+   startup; the historical gate does not require this raw maximum to stay
+   below 1.6. Keep startup and settled results separate. Old height/torque
+   expectations are not acceptance criteria for a new asset.
    `isaaclab/deploy/validate-stance-sweep` runs three candidate stances.
 5. Confirm the runtime joint order. The action vector is positional, so the
    articulation's own `joint_names` order is a contract.
@@ -363,8 +403,8 @@ step 4 passes and step 5 confirms the runtime joint order.
    overrides it per run. Curriculum stages for this asset derive from
    `HexapodMkiiV1FlatEnvCfg` under new task IDs, with a fresh stance sweep for
    the 8.26 kg mass distribution. The `phase2*_cfg.py` classes stay on the
-   mock. After you change a manifest-listed file, regenerate
-   `stage2_pipeline.sha256`.
+   mock. The archived `stage2_pipeline.sha256` is now frozen; new revisions
+   need a separate manifest and must preserve the historical source/evidence.
 
 | symptom | likely cause |
 |---|---|
@@ -374,3 +414,97 @@ step 4 passes and step 5 confirms the runtime joint order.
 | torque saturation on standing | The stance moved away from `stance.json`, or masses changed. Re-derive with the stance search in the importer |
 | foot contacts counted as shaft contacts | `distal_foot_min_y_m` (0.155, tibia frame +Y) no longer matches the pad. Re-check the pad spheres in the URDF |
 | meshes missing after import | `package://` did not resolve. Import from a checkout with `meshes/` beside `urdf/` |
+
+
+## 11. Corrected serial CAD-v2 live validation
+
+The current source snapshot is
+`/home/orionh/HEXAPOD_runs/mkii_v2_step2_a0f0b39/source/`. Its model is the same
+19-link, 18-joint serial CAD URDF, with a separately generated corrected USD
+at `robot/hexapod_mkii_assy/usd/hexapod_mkii_serial_v2/hexapod_mkii_serial_v2.usda`.
+The config is `hexapod_env.tasks.mkii_v2.config.HexapodMkiiV2FlatEnvCfg`, registered
+as `Isaac-Velocity-Flat-Hexapod-MKII-V2-Direct-v0`. It uses anatomical navigation
+axes and the v2 source/action contract. The configured reset plate height is
+0.142964 m, with 5 mm geometric foot clearance **before** the inherited
+independent ±0.03 rad joint jitter. CPU sampling found a 1.265 mm minimum after
+jitter; the live validator measures the actual randomized reset positions.
+
+Prepare and verify the corrected USD and source snapshot before launching.
+The old `/home/orionh/HEXAPOD` mirror, old task IDs and frozen Stage2 manifests
+remain untouched. `a0f0b39` names the source baseline; the launcher writes
+`source.SHA256SUMS` for the exact files actually supplied to each run, including
+subsequent fixes. No parent policy/checkpoint is loaded for standing validation.
+
+Run from the Spark host using the isolated source's new launcher:
+
+```sh
+/home/orionh/HEXAPOD_runs/mkii_v2_step2_a0f0b39/source/isaaclab/deploy/validate-mkii-v2 \
+  --source-dir /home/orionh/HEXAPOD_runs/mkii_v2_step2_a0f0b39/source \
+  --source-commit uncommitted \
+  --output-root /home/orionh/HEXAPOD_runs/mkii_v2_step2_a0f0b39/runs \
+  --num-envs 32 --steps 1000 --timeout-seconds 900
+```
+
+Add `--dry-run` to inspect the composed invocation without launching anything.
+Replace `uncommitted` with a published commit only when the supplied source has
+been verified against it; the directory's baseline name alone is insufficient.
+A first startup probe can use `--num-envs 1 --steps 100`; its report is explicitly
+`run_kind: short_probe`. At least 32 environments and 1,000 completed steps
+produce `run_kind: acceptance`, which refers only to this standing gate.
+Use a new generated run directory for every attempt, including failures.
+
+The supervisor holds host FD9 on `/tmp/hexapod-isaac-gpu.lock` from before
+container creation through cleanup. It starts a detached container behind a
+CPU-only admission barrier, checks unrelated producers/GPU use/services before
+creation and twice afterward, and keeps checking during execution. It refuses
+unrelated GPU-capable containers, while allowing CPU-only containers to remain.
+It mounts source read-only and the run directory writable. It uses the existing
+Compose SDK environment without printing the secret env file, applies the
+combined telemetry startup mitigation, and passes `--viz none --device cuda:0`.
+The execution timeout is at most 900 seconds, followed by bounded cleanup.
+There is no automatic restart or retry. Only the run's nonce-labelled, exact
+immutable container ID can be stopped or removed; other jobs are never stopped.
+
+Each run directory contains:
+
+- `source.SHA256SUMS`: the exact supplied source-file hashes.
+- `supervisor.json`: admission/runtime checks, process status and exact-ID cleanup.
+- `container.log`: preserved startup, validation and shutdown output.
+- `report.json`: validator measurements and graded outcome, when the validator
+  reaches report persistence. Absence is a failure, even if Kit exits zero.
+
+The validator persists its report before Kit shutdown can terminate the Python
+process. A zero container exit alone is insufficient: the supervisor requires
+strict JSON with `pass` and `standing_gate_pass` both literally true, no errors,
+the correct task and run kind, and the requested number of completed steps and
+environments. A graded failure stays failed even if SDK shutdown returns zero.
+Read the report and supervisor together; directory presence does not mean a job
+is running or that it passed. Curated results are recorded in the
+[live validation evidence](../artifacts/mkii_step2_2026-09-04/README.md).
+
+This is a **partial standing gate, not full G0 or full physical-model approval**.
+It checks the corrected asset in the native runtime, joint identity, measured
+reset clearance, finite states, held-zero commands, standing contacts,
+terminations and torque demand. Report raw startup computed torque separately
+from applied torque and settled saturation: initial contact/jitter transients
+must not be presented as continuous capability, or hidden by a settled average.
+The physical four-bar dynamics and driven joint/direction checks remain pending.
+The serial approximation still fixes the push lever and rod to the femur;
+a visually connected mimic-linkage preview does not repair that physics.
+A passing report grants no general-terrain or hardware-transfer claim and does
+not admit an old policy for training or deployment.
+
+The [RS05 specification review](RS05_SPEC_REVIEW.md) corrects the motor
+interpretation: these are short tests with a 1.6 N·m applied cap, although
+5.5 N·m peak is already present in the URDF/config. The 2.364431 N·m startup
+raw demand is below that peak; the historical `startup_raw_rating_exceeded`
+flag refers to the 1.6 baseline. Vendor continuous stall is 1.2 N·m, and rotating
+ratings depend on cooling. Neither this scalar cap nor a standing pass qualifies
+the unmodeled torque-speed/thermal envelope or endurance.
+
+Before training a new physical task, version its motor parameters and resolved
+configuration identity in the simulation/runtime manifest, and qualify
+torque-speed/voltage, thermal, bounded burst/recovery and phase-current limits.
+The current manifest omits motor parameters; hardware CAN/current/temperature
+protection is not implemented. Do not simply raise `effort_limit` to 5.5 N·m
+indefinitely or reinterpret the preserved baseline reports as that new model.

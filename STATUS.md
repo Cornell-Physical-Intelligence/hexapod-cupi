@@ -1,140 +1,62 @@
 # Current status
 
-Last updated: 2026-09-04
+Publication index, 8 September 2026: [project findings, CAD handoff, prepared tools and separate branches](docs/PROJECT_HANDOFF.md). Publication preserves the user's pause and does not resume experiments.
 
-This is the single current-state page for the project. **Rewrite this file in
-place. Do not append to it.** A fact that must survive as a dated record goes
-to `docs/incidents/` or to the probe ledger under `artifacts/`. Both are
-append-only. `docs/TRAINING.md` holds the durable design and
-`docs/OPERATIONS.md` holds the operating procedure.
+Reviewed 2026-09-07 UTC. **Paused by the user at 02:00 UTC pending their revised single-leg URDF and meshes. No corrected physical-model PPO run has started or completed, and no learned-policy video exists.** The last campaign and both one-shot helpers have exited. No next solver candidate was launched; there is no hexapod GPU job or queued restart. The canonical shared control is `HEXAPOD_SHARE_STATUS=REQUESTED`, and the remote recovery state records the pause. Resume with the new leg audit before deciding further full-body work.
 
-## Current best checkpoint
+## Latest physical result
 
-```text
-local:  artifacts/phase2_recovery_stage2c_stable_forward/checkpoints/current_best/model_2.pt
-remote: /home/orionh/HEXAPOD/isaaclab/logs/rsl_rl/
-          hexapod_robstride_phase2_recovery_stage2c_stable_forward_direct/
-          2026-08-25_23-44-14_accel_scale4_yaw160_trackguard_20260825T234500Z_seed86/
-          model_2.pt
-SHA-256: a66a1c83e5b0675ade73d05538ae57d81451568ab45d9e8bcfd2edc67bb2e69a
-```
+The 1,600 Hz nominal test completed at **01:45 UTC** and failed the driven support gate. All 1,000 standing controls and 2,400 driven controls completed across 32 robots, with 108,800 physics substeps per robot. All 36 individual/grouped direction checks passed and there were zero terminations or truncations. However, minimum detected support reached zero; raw demand peaked at **83.728661 Nm** while applied torque stayed capped at **5.5 Nm**. C-pin separation stayed under its bound at **0.072674 mm** and there were no non-foot contacts. This is not training admission. The exact container was removed; refined/PPO phases did not start. [Preserved original reports/logs and verified retrieval](artifacts/mkii_fourbar_2026-09-07/1600hz_nominal_failure_001/README.md).
 
-Formal seed-60 nominal screen at the `0.040 rad / 20 ms` playback limiter:
+The corrected-source **128/16 refined comparison failed at 23:48 UTC** during the right-middle tibia pushlever's positive 0.04 rad test. All 1,000 standing controls and the first 16 individual motor checks completed; all 32 robots then terminated as upside-down. Driven raw demand peaked at 83.598953 Nm, delivered torque remained capped at 5.5 Nm, and support fell to zero. C-pin separation stayed under its bound at 0.060937 mm, demonstrating that positional closure alone did not establish stable dynamics. The supervisor rejected the result and removed its exact container. [Original report and verified retrieval](artifacts/mkii_fourbar_2026-09-06/refined_rsl501_failure_001/README.md).
 
-| Command | Achieved forward | Yaw RMSE | Deck composite | Worst-joint duty | Falls |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| stand | 0.0003 m/s | 0.0002 rad/s | 0.013 | 0.000 | 0 |
-| 0.16 | 0.1599 m/s | 0.1070 rad/s | 0.765 | 0.206 | 0 |
-| 0.20 | 0.1962 m/s | 0.1117 rad/s | 0.862 | 0.238 | 0 |
-| 0.30 | 0.2420 m/s | 0.1378 rad/s | 1.032 | 0.223 | 0 |
+The preceding coincident-origin campaign completed full nominal validation at **12:10 UTC**: 32 robots, 1,000 standing plus 2,400 driven controls, 54,400 sampled physics substeps per robot. It failed **one bound**: C-pin separation reached **0.111171 mm**, exceeding the unchanged **0.100 mm** limit. All 18 individual and all 18 grouped motor response checks passed. Driven raw/applied torque peaked at **4.423689 Nm**, within the modeled envelope; at least three feet remained loaded. No resets, non-foot contacts or nonfinite samples were recorded. Refined validation and PPO did not begin. [Original report and byte verification](artifacts/mkii_fourbar_2026-09-06/coincident_nominal_failure_001/README.md).
 
-Worst burst is `0.08 s`; peak raw demand is `2.691 Nm`.
+Frozen source: `ae4f38828181b33c9fc4fd2b8f9d68b03e6c31f1`; functional identity `8fb32bc3e39642338bfbcf37bcc3a7e58d1ab0b8c901174532234248644a93e9`. Remote campaign: `/home/orionh/HEXAPOD_runs/mkii_coincident_layout_v1/campaign_001/fourbar-campaign-20260906T114047Z-73b4f841/campaign.json`. The supervisor rejected the failed report and removed its exact container.
 
-This checkpoint is the immutable parent for each current probe. It stays
-inside the RS05 limits in the nominal screen and walks anatomical forward on
-video. It misses the yaw gate at each moving command and the deck gate at
-`0.30 m/s`. It is not hardware-ready. Do not promote a candidate over it
-without formal absolute-gate checks.
+The preceding grid-layout campaign had closure, support and direction failures, reproduced by the [exact motion-prefix replay](artifacts/mkii_fourbar_2026-09-06/prefix_replay_001/README.md). Keeping each flat environment near the world origin substantially improved this comparison; it has not yet established a fully qualified numerical recipe. The separate full-body overlap controls passed their filtered/unfiltered tests. They verify tested collision isolation, not rough-terrain or camera isolation.
 
-## Current target
+## Work and compute policy
 
-Mission of record (2026-09-03): survey a bounded area an operator draws on a
-map and hold a steady deck for data collection. See `dar.md` and ADR-0004 in
-`docs/PLAN.md` §7. The training target below serves that mission. A steady
-deck is the primary grade. The Phase-0 checkpoints above are the reference
-lineage while the team brings up asset v1 (the CAD assembly, merged
-2026-09-04) under its own task ID.
+The five-minute **Hexapod training progress** automation is removed. It has not been recreated. Local investigation and implementation continue.
 
-Stage2C: stable anatomical-forward walking. A candidate enters only after it
-passes each gate below in the canonical formal screen (seed 60,
-10 s / 475 samples, `0.040 rad / 20 ms` limiter, commands stand / 0.16 / 0.20 /
-0.30 m/s):
+The user explicitly resumed work with **“take full training priority”**. The complete refined 128/16 attempt ran from 23:12 to 23:48 UTC on corrected source `5d476d42546bf4f5c84ca39b8c224c8f68f1454b` and failed as described above. Its frozen output remains `/home/orionh/HEXAPOD_runs/mkii_rsl501_compat_v1/refined_diagnosis_001/hexapod-fourbar-validate-20260906T231242Z-6d88ed34/`. No training was admitted.
 
-- Yaw-rate RMSE at most `0.080 rad/s` at every moving command.
-- Moving normalized deck composite at most `1.000`.
-- Zero falls and zero timeouts.
-- At least `0.240 m/s` achieved at the `0.30 m/s` command.
-- RS05 limits held: bounded continuous-duty fraction, burst length, raw peak
-  demand, and worst-joint duty; never exceeding the `5.5 Nm` raw-demand safety
-  termination.
+The new **1,600 Hz / 32-substep** candidate is frozen at `c2af43ca0f384a4c2c7ab8f1d627f309dc78a683`, functional identity `c33b4591e99f287579181469dcc132f659d1980200708475442dbe3ffcb7ecfc`. All **935 repository tests** pass and GitHub CI is green. Its 308-path manifest and every staged Spark file verify. The policy still runs at 50 Hz; geometry, gains, motor torque limits and acceptance bounds are unchanged. It requires entirely fresh nominal/refined physics admission. The bounded campaign launched at **00:45:23 UTC**, PID `2021559`: `/home/orionh/HEXAPOD_runs/mkii_1600hz_metrics_v1/campaign_001/fourbar-campaign-20260907T004524Z-8592e14a/campaign.json`. The 100-control / 3,200-substep probe passed and the full 32-robot nominal phase subsequently failed as recorded above. [Probe evidence](artifacts/mkii_fourbar_2026-09-07/1600hz_probe_001/README.md). Its external, pinned host wrapper acquires the shared GPU lock separately for every actual phase; it changes no simulation source.
 
-There is no admitted Stage2C breakthrough. Stage2D and Stage2E are configured
-but not admitted. Phase 3 is paused.
+The installed measurement optimization preserves the original closure calculation and all native sensor reads. Complete-row CUDA comparison passed 400 rows with every field byte-identical; the new 32-substep CPU comparison passed 800 rows. Actual simulation profiling measured 55% of host time in physics stepping and 30% in metric capture; these percentages overlap with nested sensor acquisition. The earlier 10–11x synthetic arithmetic speedup was not adopted as a full simulation speed claim. [Profiler analysis](artifacts/mkii_fourbar_2026-09-06/profile_analysis_v2/README.md).
 
-## Open contradictions
+During that campaign the shared control was `HEXAPOD_SHARE_STATUS=NONE`; the latest user pause changed it to `REQUESTED`. Actual jobs hold normal per-job locks; the completed jobs have released them. No separate persistent reservation was created. The previous13:33UTC pause and reservation release remain historical evidence. Existing CPU-only weather work and the unrelated viewer continue while the resource gates pass; no competing CUDA workload was present at launch.
 
-Both remain unresolved as of this writing. Do not treat either side as settled.
+Local CPU integration review found an actual Isaac Lab 3 / RSL-RL 5.0.1 startup incompatibility: deprecated model fields were passed to constructors that reject them. The new trainer applies the installed SDK compatibility adapter. Testing the real runner additionally exposed an inference-buffer checkpoint-reload failure. Both fixes now pass actual CPU construction, learning, strict save/reload, further learning, fresh-runner resume and deterministic inference. [Reproduction and verification](artifacts/mkii_fourbar_2026-09-06/rsl501_startup_review/README.md). These are learner API issues, separate from the physical closure failure.
 
-### 1. Declared next action versus the recorded next commit
+[Capture v2](artifacts/mkii_fourbar_2026-09-06/policy_capture_tools_v2/README.md) remains unchanged. The [one-shot follower v2](artifacts/mkii_fourbar_2026-09-06/campaign_capture_followup_v2/README.md) was deployed as CPU-only PID `2030164`, bound to campaign PID `2021559`, its process start time, exact frozen source and external wrapper hash. State: `/home/orionh/HEXAPOD_runs/mkii_1600hz_metrics_v1/capture_followup_001/state.json`. It holds no GPU lock while waiting and captures only after a verified complete 512-robot/1,000-update campaign. A paused or failed campaign produces no video. The removed five-minute app automation remains removed.
 
-`docs/archive/HANDOFF-2026-08-26.md` (snapshot `2026-08-26T17:46:47Z`) declares
-that the next scientific action is a repeat of the same Probe21 causal arm
-from the immutable parent, under a new unique attempt label, with no other
-change:
+The full trainer's six-hour bound may be shorter than the required 24,000 rollout controls plus inference. Warm nominal validation measures about 1.0–1.06 seconds per control; 512-robot PPO throughput is still unmeasured. The separate [continuation coordinator](artifacts/mkii_fourbar_2026-09-06/full_ppo_continuation_v1/README.md) was deployed as CPU-only PID `2075580`, with [verified deployment evidence](artifacts/mkii_fourbar_2026-09-06/full_ppo_continuation_deployment_v1/README.md). It holds no GPU reservation while waiting. If measured update times cannot fit the existing job deadline, it can request an owned update-boundary checkpoint pause and verify policy/optimizer/normalizer continuity into at most two further segments. The exact total remains 1,000 full updates, excluding scratch; final finite inference and capture remain required. It changes no live source or physical gate, and has an overall 18-hour bound including qualification and capture. No pause or continuation GPU job was dispatched at deployment. After the campaign failed, the original follower exited with `no_video` and this coordinator exited with `original_failed`; neither remains running.
 
-```text
-seed=99
-num_envs=12288
-rollout_steps=24
-updates=12
-learning_rate=2e-5
-clip_param=0.06
-inactive_bilateral_longitudinal_contact_moment_reward_scale=-2.0
-inactive_bilateral_longitudinal_contact_moment_reference_nm=1.8
-processed_joint_target_slew_limit_rad_per_20ms=0.040
-```
+At **01:43 UTC**, all 1,000 standing controls and all 18 individual motor direction checks had completed in the new nominal run, including the right-middle tibia test that overturned the earlier 800 Hz attempt. Grouped-motion checks were still running; no final physical pass or PPO admission was claimed.
 
-That snapshot does not mention Stage2G. Commit `1f95f52`, made later the
-same day, adds a full Stage2G insect-gait rework. The repository does not
-record whether the author superseded Probe21 on purpose or set it aside.
+The [learning-feasibility review](artifacts/mkii_fourbar_2026-09-06/ppo_feasibility_review_v1/README.md) confirms a learned flat-ground multidirectional task, but shows why aggregate reward is insufficient evidence of walking. Command-conditioned motion, stops, slip, duty cycle and later terrain/randomization remain required evaluations.
 
-### 2. Unverified Stage2G adapt result
+## Model and redesign
 
-The commit message of `1f95f52` claims that the first Stage2G adapt arm
-"reaches 0.291 m/s at the 0.30 command (parent: 0.242) with zero falls and
-equal-or-better deck motion."
+The intended physical candidate is the **v5 USD: 31 rigid bodies, 30 articulation coordinates, 18 active motors, mass 8.260811322 kg**. It retains the moving pushlever/rod bodies and native bilateral constraints for the CAD parallelogram. The 19-link serial export welds those moving parts and is not a faithful physical substitute. The original serial USD inertia defects and stale closure frames have separate repaired, versioned assets and preserved historical evidence.
 
-By this repository's evidence standards the claim is unverified:
+The [CAD/reference review](artifacts/mkii_fourbar_2026-09-06/cad_reference_review/README.md) compares export structure with official robot descriptions and separates software corrections from mechanical redesign choices. Reference arm URDFs are not measurement ground truth for this robot's foot contact or dynamics.
 
-- No Stage2G evaluation artifacts exist. `find artifacts -iname '*stage2g*'`
-  returns nothing.
-- Nobody mirrored a Stage2G checkpoint or recorded a SHA-256 for one.
-- Nobody recorded a screen configuration. The number could come from the
-  canonical 10 s / 475-sample formal screen, from a diagnostic
-  6 s / 275-sample screen, or from an ad hoc rollout.
-- The Stage2G adapt task trains at a `0.06 rad / 20 ms` slew limiter, while
-  each recorded formal measurement, including the parent's `0.242 m/s`, uses
-  `0.040 rad / 20 ms`. A speed comparison across different limiters is
-  invalid.
+The [CAD-engineer handoff](docs/CAD_ENGINEER_HANDOFF.md) now specifies prioritized Onshape deliverables, responsible disciplines and acceptance evidence. Start with one explicitly named leg and closure-frame export, then the complete ownership graph, loaded mass/workspace ledgers, structural cases, assembled foot geometry, navigation/payload frames and leg-stand measurements. The current importer requires a new adapter for a structured export. Neither URDF's tree limitation nor the present collider approximation justifies an automatic mechanical redesign. The proposed single convex foot hull remains uninstalled and unqualified because it fills a verified empty region.
 
-Resolution takes one of two forms. Import the Stage2G evaluation artifacts,
-checkpoint, and hashes into `artifacts/` and re-screen at the common `0.040`
-limiter, or withdraw the claim. Until then, do not cite `0.291 m/s` as a
-result. The current best above does not change.
+The current RS05 envelope permits **5.5 Nm peak**, with **1.2 Nm continuous stall** and a provisional speed/cooling/burst model. Actual battery voltage, braking and regeneration limits, hardware stops, friction, compliance and thermal behavior remain unmeasured. Metal heat conduction alone does not calibrate cooling. Only CAD is complete; single-leg tests precede remaining-parts ordering.
 
-## Next actions
+## Next gates — paused pending revised leg input
 
-1. **Reconcile the Stage2G evidence.** Either import the adapt arm's
-   checkpoint, evaluation JSON, resolved config, and SHA-256 manifest entries
-   and re-screen at `0.040 rad / 20 ms`, or record that the claim is withdrawn.
-   This comes first because it decides whether the research target has already
-   moved.
-2. **Validate the attempt-aware startup supervisor in vivo.** The supervisor
-   specified in `docs/OPERATIONS.md` §6 exists in `packages/hexapod_train`.
-   `ops/hexctl` drives it (`compose`, `doctor`, `probe`, `screen`) and unit
-   tests exercise it against fakes. Nobody has run it against the Spark. The
-   pre-AppReady stall class (`docs/incidents/2026-08-26-preappready-stall.md`)
-   has cost four attempts. That class and the post-launch GPU-contention race
-   stay open until one real attempt runs under supervision end to end. Items
-   1, 8, and 10 of the specification are partial by design.
-3. **Then run one arm.** Either retry the Probe21 bilateral arm under a new
-   unique label with the settings quoted above, or put Stage2G through a
-   formal screen under the `0.040 rad / 20 ms` limiter. Screen all 12 children
-   before you interpret either one.
+The user has requested a fresh single-leg export before further work. No experimental launch below is currently queued or authorized to bypass that pause. The prepared velocity-one candidate is [published separately](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/codex/mkii-velocity1-candidate/PUBLICATION.md) and remains unlaunched and unqualified on the GPU.
 
-## Environment note
+1. Local runner/checkpoint integration and all 935 repository tests pass. The new 308-path release and archived 112-path lineage verify. Source is pushed and staged independently on Spark; older manifests and failures remain preserved.
+2. Launch the frozen 1,600 Hz candidate through fresh probe and complete nominal/refined validation. The earlier 800 Hz 128/16 overturn remains a failure and supplies no training admission.
+3. Establish full matching nominal/refined physics and convergence on the exact selected training source, without relaxing acceptance bounds. Then run the 64-robot/3-update startup check and separate 512-robot/1,000-update resume.
+4. Verify checkpoint bytes, restored optimizer/normalizers and actual finite inference; capture and inspect the learned policy video. Completing PPO alone does not establish useful all-terrain walking or hardware readiness.
 
-The Spark mirror `/home/orionh/HEXAPOD` is not a Git repository. The
-dirty-work transfer caveat in the archived handoff is closed. `main` holds the
-Probe15-21 evidence, launchers, tests, and Stage2G configuration through
-`3d1500f`.
+The mission remains no-RTK bounded-area zigzag coverage, learned omnidirectional locomotion, vision/LiDAR/IMU navigation and a generic survey-payload interface on Jetson Orin Nano. Mechanical, electrical and test-stand development run in parallel. Hardware readiness, survey accuracy and field dates remain open inputs.
+
+[Living plan](docs/PLAN.md) · [Training design](docs/TRAINING.md) · [Leg test stand](artifacts/project_review_2026-09-04/LEG_TEST_STAND.md) · [Run history](HANDOFF.md) · [RS05 review](docs/RS05_SPEC_REVIEW.md).

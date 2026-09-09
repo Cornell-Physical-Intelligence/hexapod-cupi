@@ -1,5 +1,7 @@
 # Training and task design
 
+> Scope update, 2026-09-04: the Stage2C/Phase-0 design and gates below document the existing mock lineage. The current CAD autonomy program is in [PLAN.md](PLAN.md), with a distinct prepared campaign in [NEXT_RUNS.md](NEXT_RUNS.md). Do not reuse mock stance/action defaults or a forced tripod schedule for the new policy. The USD inertia audit is unresolved; no new runs are authorized by this document.
+
 Durable design reference for the hexapod locomotion task: the simulator stack,
 the observation/action/timing contract, the coordinate contract, the staged
 curriculum, the reward structure, the Stage2C acceptance gates, and the known

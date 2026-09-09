@@ -1,0 +1,598 @@
+{
+  "schema": "hexapod.pad_collision_candidate.v1",
+  "status": "unqualified_rigid_envelope_proposal",
+  "runtime_assets_modified": false,
+  "units": "meters",
+  "coordinate_frame": "Original silicone_foot.stl frame, no recenter/rotation/rescale",
+  "sources": {
+    "robot/hexapod_mkii_assy/meshes/silicone_foot.stl": {
+      "sha256": "58a2b9d528ae7b4b89034305595d1c38c4412e423662464462493a1e1c394e58",
+      "bytes": 448784
+    },
+    "robot/hexapod_mkii_assy/urdf/hexapod_mkii_linkage.urdf": {
+      "sha256": "2dae7165852b419f0bd6edbe03f7d398b403f1410c5b6bdc2c287b6834f543a6",
+      "bytes": 600418
+    },
+    "configs/mkii_fourbar_v3_kinematics.json": {
+      "sha256": "0ab3acc43d4c6c77c93a996858b8f928a1f157a533c8967c5ac84b77222f7f61",
+      "bytes": 59791
+    }
+  },
+  "dependencies": {
+    "python": "3.12.12 (main, Jan 27 2026, 23:41:44) [Clang 21.1.4 ]",
+    "numpy": "2.5.2",
+    "scipy": "1.18.1"
+  },
+  "algorithm": "Greedy farthest Euclidean CAD-hull vertex refinement, starting with signed-axis support extrema, exact source vertices only, 64-vertex budget",
+  "original_mesh": {
+    "triangles": 8974,
+    "unique_vertices": 4479,
+    "convex_hull_vertices": 564,
+    "closed_consistently_wound_manifold": true,
+    "signed_mesh_volume_m3": 1.8381593192003217e-05,
+    "convex_hull_volume_m3": 3.395404802320215e-05
+  },
+  "tradeoff": [
+    {
+      "vertices": 16,
+      "triangles": 28,
+      "max_cad_hull_to_candidate_distance_m": 0.00142261441729646,
+      "volume_m3": 3.140235824759968e-05
+    },
+    {
+      "vertices": 24,
+      "triangles": 44,
+      "max_cad_hull_to_candidate_distance_m": 0.0009439596316558464,
+      "volume_m3": 3.2650187943660154e-05
+    },
+    {
+      "vertices": 32,
+      "triangles": 60,
+      "max_cad_hull_to_candidate_distance_m": 0.0007927175400647378,
+      "volume_m3": 3.357610792708659e-05
+    },
+    {
+      "vertices": 48,
+      "triangles": 92,
+      "max_cad_hull_to_candidate_distance_m": 0.00029505435861301987,
+      "volume_m3": 3.376943363518943e-05
+    },
+    {
+      "vertices": 64,
+      "triangles": 124,
+      "max_cad_hull_to_candidate_distance_m": 0.00015792045901116955,
+      "volume_m3": 3.3815980742770925e-05
+    }
+  ],
+  "candidate": {
+    "path": "silicone_pad_convex64.stl",
+    "sha256": "c24f698f93385229a464ec518857f6c155d6124c69ff9515e4367748b13d7e9b",
+    "bytes": 6284,
+    "vertices": 64,
+    "triangles": 124,
+    "volume_m3": 3.381598074277093e-05,
+    "closed_consistently_wound_manifold": true,
+    "all_vertices_exact_source_vertices": true,
+    "maximum_cad_surface_to_candidate_distance_m": 0.00015792045901116955,
+    "witness_cad_mesh_point_m": [
+      0.24101901054382324,
+      -0.011749999597668648,
+      -0.016059916466474533
+    ],
+    "witness_candidate_point_m": [
+      0.240977735785333,
+      -0.011749441319893729,
+      -0.015907486305378395
+    ],
+    "witness_direction": [
+      0.26136422569118367,
+      -0.003535183334791098,
+      -0.9652337768683741
+    ],
+    "bound_scope": "Distance to a closed convex set is convex: vertex maximum bounds every original CAD triangle and its convex hull. Candidate is inside CAD convex hull. Thus this directed Hausdorff distance bounds all directional support deficits, within floating-point tolerance; it does not bound filling of CAD concavities."
+  },
+  "existing_two_spheres": {
+    "maximum_outside_distance_m": 0.009816224753971804,
+    "witness_point_mesh_m": [
+      0.2239985162626835,
+      0.013749999925494194,
+      0.016237738233300228
+    ],
+    "partition_vertices_evaluated": 5275,
+    "scope": "Entire triangulated CAD surface, equal-radius sphere Voronoi partition, floating-point geometry"
+  },
+  "concavity_fill": {
+    "sampled_maximum_candidate_surface_to_cad_surface_distance_m": 0.0078072714333952764,
+    "uniform_upper_bound_on_unsigned_surface_distance_m": 0.015259379493017543,
+    "sampling_cover_radius_bound_m": 0.007452108059622268,
+    "sample_points": 3970,
+    "barycentric_divisions_per_edge": 8,
+    "witness_candidate_mesh_point_m": [
+      0.23595058359205723,
+      -0.012749999761581421,
+      -0.0029668083880096674
+    ],
+    "nearest_cad_surface_point_m": [
+      0.23971750561047853,
+      -0.012749999761581421,
+      0.003871596816556873
+    ],
+    "witness_generalized_winding_number_in_cad": -5.0800526162264503e-17,
+    "witness_is_outside_cad_solid": true,
+    "scope": "Unsigned triangle-surface deviation; witness outside status uses oriented CAD winding. Upper bound is conservative (1-Lipschitz + grid cover radius), not a tight full-volume or signed-distance bound."
+  },
+  "sampled_support_comparison": {
+    "directions": 5351,
+    "sampling": "4096 Fibonacci + six axes + full CAD/candidate hull normals + exact Hausdorff witness direction",
+    "candidate_max_deficit_m": 0.00015792045901116825,
+    "candidate_max_excess_m": 0.0,
+    "two_spheres_max_deficit_m": 0.006493419975024992,
+    "two_spheres_max_excess_m": 0.012807379676151254,
+    "warning": "Support functions cannot detect the two-sphere waist or CAD concavities; use the separate full-surface gap check."
+  },
+  "nominal_physical_stance": [
+    {
+      "link": "lf_tibia",
+      "down_direction_mesh": [
+        0.9613780817653076,
+        0.0007395314743177175,
+        0.2752301527711972
+      ],
+      "candidate_bottom_minus_cad_bottom_m": 3.11222030866809e-05,
+      "sphere_bottom_minus_cad_bottom_m": 0.00023159828070959398
+    },
+    {
+      "link": "lm_tibia",
+      "down_direction_mesh": [
+        0.9613655801721215,
+        -0.00024885331386095453,
+        0.275274697951605
+      ],
+      "candidate_bottom_minus_cad_bottom_m": 1.2247564787737364e-05,
+      "sphere_bottom_minus_cad_bottom_m": 0.00022493267897838454
+    },
+    {
+      "link": "lr_tibia",
+      "down_direction_mesh": [
+        0.9612854807112229,
+        0.00020961504637806316,
+        0.27555431521811585
+      ],
+      "candidate_bottom_minus_cad_bottom_m": 1.748845550508804e-05,
+      "sphere_bottom_minus_cad_bottom_m": 0.0002238478756097506
+    },
+    {
+      "link": "rf_tibia",
+      "down_direction_mesh": [
+        0.9613660155044392,
+        -0.00024765473168652396,
+        0.27527317867938383
+      ],
+      "candidate_bottom_minus_cad_bottom_m": 1.2248131465775192e-05,
+      "sphere_bottom_minus_cad_bottom_m": 0.00022491831679946617
+    },
+    {
+      "link": "rm_tibia",
+      "down_direction_mesh": [
+        0.961366527604191,
+        -0.0002493241456596727,
+        0.2752713887052734
+      ],
+      "candidate_bottom_minus_cad_bottom_m": 1.2248799025393886e-05,
+      "sphere_bottom_minus_cad_bottom_m": 0.000224938557725346
+    },
+    {
+      "link": "rr_tibia",
+      "down_direction_mesh": [
+        0.9613659755429431,
+        -0.0002497661215073111,
+        0.27527331633351104
+      ],
+      "candidate_bottom_minus_cad_bottom_m": 1.2248080064475309e-05,
+      "sphere_bottom_minus_cad_bottom_m": 0.0002249390309236876
+    }
+  ],
+  "lf_plane_normal_sweep": [
+    {
+      "tilt_from_nominal_degrees": 0,
+      "azimuth_samples": 72,
+      "candidate_bottom_error_min_m": 3.11222030866809e-05,
+      "candidate_bottom_error_max_m": 3.11222030866809e-05,
+      "sphere_bottom_error_min_m": 0.00023159828070959398,
+      "sphere_bottom_error_max_m": 0.00023159828070959398
+    },
+    {
+      "tilt_from_nominal_degrees": 15,
+      "azimuth_samples": 72,
+      "candidate_bottom_error_min_m": 0.0,
+      "candidate_bottom_error_max_m": 8.161805146406076e-05,
+      "sphere_bottom_error_min_m": -0.0007983670204791959,
+      "sphere_bottom_error_max_m": 0.003124941997019348
+    },
+    {
+      "tilt_from_nominal_degrees": 30,
+      "azimuth_samples": 72,
+      "candidate_bottom_error_min_m": 0.0,
+      "candidate_bottom_error_max_m": 0.00011247854954354874,
+      "sphere_bottom_error_min_m": -0.0025019019201863724,
+      "sphere_bottom_error_max_m": 0.004752707150592311
+    },
+    {
+      "tilt_from_nominal_degrees": 45,
+      "azimuth_samples": 72,
+      "candidate_bottom_error_min_m": 0.0,
+      "candidate_bottom_error_max_m": 9.266811608746317e-05,
+      "sphere_bottom_error_min_m": -0.004662261091237574,
+      "sphere_bottom_error_max_m": 0.005021674305506485
+    },
+    {
+      "tilt_from_nominal_degrees": 60,
+      "azimuth_samples": 72,
+      "candidate_bottom_error_min_m": 0.0,
+      "candidate_bottom_error_max_m": 8.742565169614358e-05,
+      "sphere_bottom_error_min_m": -0.0014149465535732153,
+      "sphere_bottom_error_max_m": 0.004224179499049491
+    },
+    {
+      "tilt_from_nominal_degrees": 75,
+      "azimuth_samples": 72,
+      "candidate_bottom_error_min_m": 0.0,
+      "candidate_bottom_error_max_m": 9.94567645758275e-05,
+      "sphere_bottom_error_min_m": -0.002677998779379827,
+      "sphere_bottom_error_max_m": 0.004336507012517012
+    },
+    {
+      "tilt_from_nominal_degrees": 90,
+      "azimuth_samples": 72,
+      "candidate_bottom_error_min_m": 0.0,
+      "candidate_bottom_error_max_m": 0.00013764051706310898,
+      "sphere_bottom_error_min_m": -0.0022289635956743437,
+      "sphere_bottom_error_max_m": 0.004541420680955217
+    }
+  ],
+  "placements": [
+    {
+      "link": "lf_tibia",
+      "source_visual_origin": {
+        "xyz": "8.0922461e-06 -6.3114397e-06 -0.018249389",
+        "rpy": "-1.5708227 5.5249283e-05 2.091922"
+      },
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "link_from_mesh": [
+        [
+          -0.4978567028666607,
+          5.037863342268293e-05,
+          -0.8672593042872072,
+          8.0922461e-06
+        ],
+        [
+          0.8672593039905966,
+          -3.4785377797383804e-05,
+          -0.49785670471705346,
+          -6.3114397e-06
+        ],
+        [
+          -5.524928297189208e-05,
+          -0.9999999981259854,
+          -2.637320505997676e-05,
+          -0.018249389
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "existing_sphere_centers_in_mesh_m": [
+        [
+          0.23554279528856062,
+          0.0006970351203741953,
+          -0.0023770192771550985
+        ],
+        [
+          0.20581037157299742,
+          0.0013037850830353928,
+          0.0034142209916670635
+        ]
+      ],
+      "existing_sphere_radii_m": [
+        0.015682,
+        0.015682
+      ],
+      "proposed_mesh": "silicone_pad_convex64.stl",
+      "proposed_approximation": "convexHull"
+    },
+    {
+      "link": "lm_tibia",
+      "source_visual_origin": {
+        "xyz": "8.005524e-06 -6.331141e-06 -0.018250057",
+        "rpy": "-1.5708292 5.4456148e-05 2.0919225"
+      },
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "link_from_mesh": [
+        [
+          -0.4978571365179102,
+          5.562096675436092e-05,
+          -0.867259055025945,
+          8.005524e-06
+        ],
+        [
+          0.8672590550998674,
+          -3.086142769780732e-05,
+          -0.49785713853961905,
+          -6.331141e-06
+        ],
+        [
+          -5.4456147973085304e-05,
+          -0.9999999979769402,
+          -3.287320504864331e-05,
+          -0.018250057
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "existing_sphere_centers_in_mesh_m": [
+        [
+          0.23554279635321002,
+          0.0006970353885201279,
+          -0.002377026580583308
+        ],
+        [
+          0.20581037007666675,
+          0.0013037851261904002,
+          0.0034142238268586034
+        ]
+      ],
+      "existing_sphere_radii_m": [
+        0.015682,
+        0.015682
+      ],
+      "proposed_mesh": "silicone_pad_convex64.stl",
+      "proposed_approximation": "convexHull"
+    },
+    {
+      "link": "lr_tibia",
+      "source_visual_origin": {
+        "xyz": "8.0450224e-06 -6.3054913e-06 -0.018250089",
+        "rpy": "-1.5708128 5.5474863e-05 2.0919215"
+      },
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "link_from_mesh": [
+        [
+          -0.4978562692307294,
+          4.190505286801858e-05,
+          -0.8672595536698492,
+          8.0450224e-06
+        ],
+        [
+          0.8672595529080086,
+          -3.990981647859884e-05,
+          -0.49785627072178923,
+          -6.3054913e-06
+        ],
+        [
+          -5.547486297154638e-05,
+          -0.9999999983255865,
+          -1.6473205077185952e-05,
+          -0.018250089
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "existing_sphere_centers_in_mesh_m": [
+        [
+          0.23554279511187648,
+          0.0006970354540162677,
+          -0.0023770196340254374
+        ],
+        [
+          0.2058103699185902,
+          0.0013037854569331458,
+          0.0034142220842689475
+        ]
+      ],
+      "existing_sphere_radii_m": [
+        0.015682,
+        0.015682
+      ],
+      "proposed_mesh": "silicone_pad_convex64.stl",
+      "proposed_approximation": "convexHull"
+    },
+    {
+      "link": "rf_tibia",
+      "source_visual_origin": {
+        "xyz": "7.7113134e-06 -6.3853983e-06 -0.018250369",
+        "rpy": "-1.5708182 5.3033676e-05 2.0919224"
+      },
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "link_from_mesh": [
+        [
+          -0.4978570498300638,
+          4.537292579894201e-05,
+          -0.8672591053865061,
+          7.7113134e-06
+        ],
+        [
+          0.8672591049518791,
+          -3.51042090346717e-05,
+          -0.49785705141713116,
+          -6.3853983e-06
+        ],
+        [
+          -5.303367597513984e-05,
+          -0.999999998354496,
+          -2.1873205070818947e-05,
+          -0.018250369
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "existing_sphere_centers_in_mesh_m": [
+        [
+          0.2355428008728118,
+          0.000697035293834386,
+          -0.002377030115352702
+        ],
+        [
+          0.20581036945863307,
+          0.0013037844416710492,
+          0.003414224294001053
+        ]
+      ],
+      "existing_sphere_radii_m": [
+        0.015682,
+        0.015682
+      ],
+      "proposed_mesh": "silicone_pad_convex64.stl",
+      "proposed_approximation": "convexHull"
+    },
+    {
+      "link": "rm_tibia",
+      "source_visual_origin": {
+        "xyz": "8.0092054e-06 -6.3343627e-06 -0.018250049",
+        "rpy": "-1.5708119 5.4692394e-05 2.0919214"
+      },
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "link_from_mesh": [
+        [
+          -0.4978561825262296,
+          4.07349582048024e-05,
+          -0.8672596034989021,
+          8.0092054e-06
+        ],
+        [
+          0.8672596027310114,
+          -3.9679287480621506e-05,
+          -0.4978561839491426,
+          -6.3343627e-06
+        ],
+        [
+          -5.469239397273349e-05,
+          -0.9999999983831087,
+          -1.5573205079498252e-05,
+          -0.018250049
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "existing_sphere_centers_in_mesh_m": [
+        [
+          0.2355428032859312,
+          0.000697034619149401,
+          -0.0023770198197486797
+        ],
+        [
+          0.2058103733456436,
+          0.0013037845695497846,
+          0.0034142320302983226
+        ]
+      ],
+      "existing_sphere_radii_m": [
+        0.015682,
+        0.015682
+      ],
+      "proposed_mesh": "silicone_pad_convex64.stl",
+      "proposed_approximation": "convexHull"
+    },
+    {
+      "link": "rr_tibia",
+      "source_visual_origin": {
+        "xyz": "8.4141321e-06 -6.3695344e-06 -0.018250353",
+        "rpy": "-1.5708232 5.3843591e-05 2.0919232"
+      },
+      "mesh_scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "link_from_mesh": [
+        [
+          -0.49785774361564084,
+          5.011246987152445e-05,
+          -0.8672587068520461,
+          8.4141321e-06
+        ],
+        [
+          0.8672587066284262,
+          -3.331728984489439e-05,
+          -0.49785774541242966,
+          -6.3695344e-06
+        ],
+        [
+          -5.3843590973983386e-05,
+          -0.9999999981893493,
+          -2.6873205061166844e-05,
+          -0.018250353
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "existing_sphere_centers_in_mesh_m": [
+        [
+          0.23554279875147457,
+          0.0006970354088600209,
+          -0.002377003808400918
+        ],
+        [
+          0.20581036989295945,
+          0.0013037846816085184,
+          0.0034142327738734685
+        ]
+      ],
+      "existing_sphere_radii_m": [
+        0.015682,
+        0.015682
+      ],
+      "proposed_mesh": "silicone_pad_convex64.stl",
+      "proposed_approximation": "convexHull"
+    }
+  ],
+  "limitations": [
+    "Not installed or cooked in PhysX; importer/cooking must preserve the measured envelope.",
+    "A convex hull fills source concavities and internal sockets; no self-collision compatibility is implied.",
+    "No new mass, COM, or inertia is derived from the collision volume.",
+    "Rigid geometry does not identify silicone stiffness, damping, friction, or hysteresis.",
+    "These are exact tessellated-CAD comparisons, not hardware dimensional measurements or a contact/solver qualification."
+  ]
+}

@@ -1,0 +1,247 @@
+#usda 1.0
+(
+    customLayerData = {
+        int hexapod_inertia_repair_version = 2
+        string source_usd_sha256 = "01e5a12b234d62bb94edf8a77529a1dde20df2e485c6b4d5c2e095292e2b032c"
+        string urdf_sha256 = "6109956e9e3a7a648bc4afa7310904c2fd3f7cb790e157d83212339a73b7fbc0"
+    }
+    defaultPrim = "hexapod_mkii_serial"
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    subLayers = [
+        @source/hexapod_mkii_serial.usda@
+    ]
+    upAxis = "Z"
+)
+
+over "hexapod_mkii_serial"
+{
+    over "Geometry"
+    {
+        over "body"
+        {
+            float3 physics:diagonalInertia = (0.01337377, 0.03644051, 0.04714211)
+            quatf physics:principalAxes = (0.000046387686, 0.7071143, 0.7070994, 0.000017316814)
+
+            over "lf_coxa"
+            {
+                float3 physics:diagonalInertia = (0.00020278267, 0.00046247602, 0.0004702224)
+                quatf physics:principalAxes = (0.9993464, 0.0056945556, -0.020119116, 0.029489176)
+
+                over "lf_femur"
+                {
+                    float3 physics:diagonalInertia = (0.00029392005, 0.0012486024, 0.0013234925)
+                    quatf physics:principalAxes = (0.5918499, 0.68648064, 0.3401998, 0.2504438)
+
+                    over "lf_tibia"
+                    {
+                        float3 physics:diagonalInertia = (0.000029735165, 0.0012473378, 0.0012518985)
+                        quatf physics:principalAxes = (0.35912257, 0.3451445, 0.60207474, 0.62402904)
+                    }
+                }
+            }
+
+            over "lm_coxa"
+            {
+                float3 physics:diagonalInertia = (0.00020278337, 0.00046247678, 0.00047022352)
+                quatf physics:principalAxes = (0.9993399, 0.006197996, -0.020156175, 0.02958363)
+
+                over "lm_femur"
+                {
+                    float3 physics:diagonalInertia = (0.00029390954, 0.0012486035, 0.0013234981)
+                    quatf physics:principalAxes = (0.5918872, 0.68643075, 0.34020382, 0.25048697)
+
+                    over "lm_tibia"
+                    {
+                        float3 physics:diagonalInertia = (0.000029735034, 0.001247338, 0.0012518985)
+                        quatf physics:principalAxes = (0.35912177, 0.34514508, 0.60207623, 0.6240277)
+                    }
+                }
+            }
+
+            over "lr_coxa"
+            {
+                float3 physics:diagonalInertia = (0.00020278306, 0.000462476, 0.00047022296)
+                quatf physics:principalAxes = (0.9993406, 0.0059301793, -0.020295145, 0.029519573)
+
+                over "lr_femur"
+                {
+                    float3 physics:diagonalInertia = (0.0002939171, 0.001248599, 0.0013234902)
+                    quatf physics:principalAxes = (0.5918591, 0.6864678, 0.34020028, 0.25045648)
+
+                    over "lr_tibia"
+                    {
+                        float3 physics:diagonalInertia = (0.000029734865, 0.0012473379, 0.0012518981)
+                        quatf physics:principalAxes = (0.3591238, 0.34514347, 0.60207343, 0.6240302)
+                    }
+                }
+            }
+
+            over "rf_coxa"
+            {
+                float3 physics:diagonalInertia = (0.00020278242, 0.00046247564, 0.00047022256)
+                quatf physics:principalAxes = (0.9993405, 0.006115146, -0.020155879, 0.029580073)
+
+                over "rf_femur"
+                {
+                    float3 physics:diagonalInertia = (0.00029391013, 0.0012486067, 0.0013235015)
+                    quatf physics:principalAxes = (0.5918861, 0.6864326, 0.34020275, 0.250486)
+
+                    over "rf_tibia"
+                    {
+                        float3 physics:diagonalInertia = (0.00002973509, 0.0012473392, 0.0012518998)
+                        quatf physics:principalAxes = (0.3591246, 0.34514177, 0.6020701, 0.62403387)
+                    }
+                }
+            }
+
+            over "rm_coxa"
+            {
+                float3 physics:diagonalInertia = (0.00020278216, 0.00046247517, 0.00047022273)
+                quatf physics:principalAxes = (0.999341, 0.0060364283, -0.020155158, 0.02957906)
+
+                over "rm_femur"
+                {
+                    float3 physics:diagonalInertia = (0.0002939095, 0.0012486008, 0.0013234955)
+                    quatf physics:principalAxes = (0.5918867, 0.68643117, 0.34020406, 0.2504868)
+
+                    over "rm_tibia"
+                    {
+                        float3 physics:diagonalInertia = (0.000029735042, 0.0012473381, 0.0012518987)
+                        quatf physics:principalAxes = (0.35912365, 0.34514362, 0.60207313, 0.6240305)
+                    }
+                }
+            }
+
+            over "rr_coxa"
+            {
+                float3 physics:diagonalInertia = (0.00020278248, 0.00046247698, 0.00047022395)
+                quatf physics:principalAxes = (0.9993404, 0.0061155185, -0.020156337, 0.029582044)
+
+                over "rr_femur"
+                {
+                    float3 physics:diagonalInertia = (0.00029390876, 0.0012486062, 0.0013234996)
+                    quatf physics:principalAxes = (0.5918858, 0.6864329, 0.3402037, 0.25048453)
+
+                    over "rr_tibia"
+                    {
+                        float3 physics:diagonalInertia = (0.000029735033, 0.0012473374, 0.001251898)
+                        quatf physics:principalAxes = (0.3591195, 0.34514728, 0.6020799, 0.6240243)
+                    }
+                }
+            }
+        }
+    }
+
+    over "Physics"
+    {
+        over "lf_coxa_yaw"
+        {
+            float physics:lowerLimit = -50.000023
+            float physics:upperLimit = 50.000023
+        }
+
+        over "lf_femur_pitch"
+        {
+            float physics:lowerLimit = -99.999985
+            float physics:upperLimit = 31.512678
+        }
+
+        over "lf_tibia_pitch"
+        {
+            float physics:lowerLimit = -54.430992
+            float physics:upperLimit = 100.26762
+        }
+
+        over "lm_coxa_yaw"
+        {
+            float physics:lowerLimit = -50.000023
+            float physics:upperLimit = 50.000023
+        }
+
+        over "lm_femur_pitch"
+        {
+            float physics:lowerLimit = -99.999985
+            float physics:upperLimit = 31.512678
+        }
+
+        over "lm_tibia_pitch"
+        {
+            float physics:lowerLimit = -54.430992
+            float physics:upperLimit = 100.26762
+        }
+
+        over "lr_coxa_yaw"
+        {
+            float physics:lowerLimit = -50.000023
+            float physics:upperLimit = 50.000023
+        }
+
+        over "lr_femur_pitch"
+        {
+            float physics:lowerLimit = -99.999985
+            float physics:upperLimit = 31.512678
+        }
+
+        over "lr_tibia_pitch"
+        {
+            float physics:lowerLimit = -54.430992
+            float physics:upperLimit = 100.26762
+        }
+
+        over "rf_coxa_yaw"
+        {
+            float physics:lowerLimit = -50.000023
+            float physics:upperLimit = 50.000023
+        }
+
+        over "rf_femur_pitch"
+        {
+            float physics:lowerLimit = -99.999985
+            float physics:upperLimit = 31.512678
+        }
+
+        over "rf_tibia_pitch"
+        {
+            float physics:lowerLimit = -54.430992
+            float physics:upperLimit = 100.26762
+        }
+
+        over "rm_coxa_yaw"
+        {
+            float physics:lowerLimit = -50.000023
+            float physics:upperLimit = 50.000023
+        }
+
+        over "rm_femur_pitch"
+        {
+            float physics:lowerLimit = -99.999985
+            float physics:upperLimit = 31.512678
+        }
+
+        over "rm_tibia_pitch"
+        {
+            float physics:lowerLimit = -54.430992
+            float physics:upperLimit = 100.26762
+        }
+
+        over "rr_coxa_yaw"
+        {
+            float physics:lowerLimit = -50.000023
+            float physics:upperLimit = 50.000023
+        }
+
+        over "rr_femur_pitch"
+        {
+            float physics:lowerLimit = -99.999985
+            float physics:upperLimit = 31.512678
+        }
+
+        over "rr_tibia_pitch"
+        {
+            float physics:lowerLimit = -54.430992
+            float physics:upperLimit = 100.26762
+        }
+    }
+}
+

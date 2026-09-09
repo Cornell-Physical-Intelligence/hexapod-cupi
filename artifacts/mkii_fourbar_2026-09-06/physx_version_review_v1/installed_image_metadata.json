@@ -1,0 +1,213 @@
+{
+  "operation": "never-started image filesystem inspection",
+  "gpu_process_started": false,
+  "container_started": false,
+  "name": "hexapod-physx-metadata-c451fc69f7c1",
+  "time_utc": "2026-09-07T00:22:16Z",
+  "files": [
+    {
+      "path": "/isaac-sim/VERSION",
+      "bytes": 36,
+      "sha256": "dd69799842a727b6a272edfaaa11b471be6ca19a2d2806973eb5ddb89a2aac0d",
+      "text": "6.0.1-rc.7+release.42383.32955d8d.gl"
+    },
+    {
+      "path": "/isaac-sim/extscache/omni.physx-110.1.13+110.1.2.la64.r.cp312.u7f4/config/extension.toml",
+      "bytes": 1056,
+      "sha256": "36fecddd676f1e5de19157684113afe94a4a90b8fbedd59827c164abaf7b2f9e",
+      "text": "[package]\ntitle = \"PhysX Core\"\ndescription=\"PhysX 5 integration code.\"\n\nversion = \"110.1.13\"\nauthors = [\"NVIDIA\"]\n\nrepository = \"\"\nkeywords = [\"physics\", \"physx\"]\ncategory = \"simulation\"\n\nicon = \"data/icon.png\"\npreview_image = \"data/preview.png\"\nchangelog=\"docs/CHANGELOG.md\"\nreadme  = \"docs/README.md\"\nsupport_level = \"Core\"\n\n[package.writeTarget]\nkit = true\npython = true\nusd = true\n\n[dependencies]\n\"omni.usd.libs\" = {}\n\"omni.usd.schema.physx\" = { version = \"110.1.13\", exact = true }\n\"omni.usdphysics\" = { version = \"110.1.13\", exact = true }\n\"usdrt.scenegraph\" = {}\n\"omni.gpucompute.plugins\" = {}\n\"omni.physx.cooking\" = { version = \"110.1.13\", exact = true }\n\"omni.physx.foundation\" = { version = \"110.1.13\", exact = true }\n\"omni.usd.schema.newton\" = {}\n\n[[python.module]]\nname = \"omni.physx\"\n\n[[native.plugin]]\npath = \"bin/omni.physx.plugin\"\n\n[[native.library]]\npath = \"bin/${lib_prefix}PVDRuntime_64${lib_ext}\"\n\n[[test]]\ndependencies = [\n   \"omni.usd\"\n]\nwaiver = \"PhysX tests are running in a separate CI pipeline. Tests are in separate extensions.\"\n"
+    },
+    {
+      "path": "/isaac-sim/extscache/omni.physx-110.1.13+110.1.2.la64.r.cp312.u7f4/docs/CHANGELOG.md",
+      "bytes": 1210,
+      "sha256": "1ceac94dfd489edb8af56cbae911ba1e536730bc34d1d7821f1b0d55847c9b98",
+      "text": "\n# Release Notes\n\n## [110.1.13] - 2026-06-04\nVersion bump.\n\n## [110.1.12] - 2026-05-27\nVersion bump.\n\n## [110.1.11] - 2026-05-26\nVersion bump.\n\n## [110.1.10] - 2026-05-20\nVersion bump.\n\n## [110.1.9] - 2026-05-14\nVersion bump.\n\n## [110.1.8] - 2026-04-30\nVersion bump.\n\n## [110.1.7] - 2026-04-23\nVersion bump.\n\n## [110.1.6] - 2026-04-16\nVersion bump.\n\n## [110.1.5] - 2026-04-14\nVersion bump.\n\n## [110.1.4] - 2026-04-10\nVersion bump.\n\n## [110.1.3] - 2026-04-02\nVersion bump.\n\n## [110.1.2] - 2026-03-30\nVersion bump.\n\n## [110.1.1] - 2026-03-03\nVersion bump.\n\n## [110.1.0] - 2026-02-09\nVersion bump.\n\n## [110.0.0] - 2025-11-28\nVersion bump.\n\n## [109.0.2] - 2025-10-06\nVersion bump.\n\n## [109.0.1] - 2025-10-05\nVersion bump.\n\n## [109.0.0] - 2025-08-22\nVersion bump.\n\n## [108.0.2] - 2025-07-04\nVersion bump.\n\n## [108.0.1] - 2025-06-30\nVersion bump.\n\n## [108.0.0] - 2025-05-01\nVersion bump.\n\n## [107.0.18] - 2025-02-07\nVersion bump.\n\n## [107.0.16] - 2024-12-05\nVersion bump.\n\n## [107.0.15] - 2024-12-02\nVersion bump.\n\n## [107.0.14] - 2024-11-17\nInitial OpenUSD 24.05 and Python 3.11 version.\n\n## [106.2.0] - 2024-07-30\nVersion bump.\n\n## [106.1.0] - 2024-01-31\nVersion bump.\n\n## [106.0.0] - 2024-09-01\n- initial version\n"
+    },
+    {
+      "path": "/isaac-sim/extscache/omni.physx.foundation-110.1.13+110.1.2.la64.r.cp312.u7f4/config/extension.toml",
+      "bytes": 716,
+      "sha256": "37b1eb3d0a52587f3d04c16eb11dd72263635a1f710afc38d31ea46e5448ead7",
+      "text": "[package]\ntitle = \"PhysX Foundation\"\ndescription=\"PhysX 5 foundation.\"\n\nversion = \"110.1.13\"\nauthors = [\"NVIDIA\"]\n\nrepository = \"\"\nkeywords = [\"physics\", \"physx\", \"foundation\"]\ncategory = \"simulation\"\n\nicon = \"data/icon.png\"\npreview_image = \"data/preview.png\"\nchangelog=\"docs/CHANGELOG.md\"\nreadme  = \"docs/README.md\"\nsupport_level = \"Core\"\n\n[package.writeTarget]\nkit = true\npython = true\nusd = true\n\n[dependencies]\n\"omni.gpu_foundation\" = {}\n\"omni.physx.gpu\" = { version = \"110.1.13\", exact = true }\n\n[[python.module]]\nname = \"omni.physxfoundation\"\n\n[[native.plugin]]\npath = \"bin/omni.physx.foundation.plugin\"\n\n[[test]]\nwaiver = \"PhysX tests are running in a separate CI pipeline. Tests are in separate extensions.\"\n"
+    },
+    {
+      "path": "/isaac-sim/extscache/omni.physx.gpu-110.1.13+110.1.2.la64.r.cp312.u7f4/config/extension.toml",
+      "bytes": 521,
+      "sha256": "9ff084c15932d2485dc13e87e1a154d6a694ae6d831f0dc0e73d73c6143a4895",
+      "text": "[package]\ntitle = \"PhysX GPU\"\ndescription = \"PhysX 5 GPU runtime binaries.\"\nversion = \"110.1.13\"\nauthors = [\"NVIDIA\"]\nrepository = \"\"\nkeywords = [\"physics\", \"physx\", \"gpu\"]\ncategory = \"simulation\"\nicon = \"data/icon.png\"\npreview_image = \"data/preview.png\"\nchangelog = \"docs/CHANGELOG.md\"\nreadme = \"docs/README.md\"\nsupport_level = \"Core\"\n\n[package.writeTarget]\nkit = true\npython = true\nusd = true\n\n[[native.plugin]]\npath = \"bin/omni.physx.gpu.plugin\"\n\n[[test]]\nwaiver = \"PhysX tests are running in a separate CI pipeline.\"\n"
+    },
+    {
+      "path": "/isaac-sim/extscache/omni.physx.bundle-110.1.13+110.1.2.la64.r.cp312.u7f4/docs/CHANGELOG.md",
+      "error": "Command '['docker', 'cp', '7d2128c13bf2c460d8783e7888ad391d404cdb754d0c9151c50d4c7bc310bea9:/isaac-sim/extscache/omni.physx.bundle-110.1.13+110.1.2.la64.r.cp312.u7f4/docs/CHANGELOG.md', '-']' returned non-zero exit status 1."
+    },
+    {
+      "path": "/isaac-sim/extscache/omni.physx-110.1.13+110.1.2.la64.r.cp312.u7f4/bin/libomni.physx.plugin.so",
+      "bytes": 11021920,
+      "sha256": "a66e7338758473c3361e7d81730a2fab3c1f746329e4e99541bf7e7834ab4b35",
+      "selected_printable_strings": [
+        {
+          "offset": 9437928,
+          "text": "carb::l10n::IL10n"
+        },
+        {
+          "offset": 9437952,
+          "text": "\"'\\/,#$%^&*()!~`[]{}|<>?;:=+."
+        },
+        {
+          "offset": 9437992,
+          "text": "/crashreporter/data/"
+        },
+        {
+          "offset": 9438016,
+          "text": "110.1.13"
+        },
+        {
+          "offset": 9438032,
+          "text": "lib_physx_buildVersion"
+        },
+        {
+          "offset": 9438056,
+          "text": "omniverse/physics"
+        },
+        {
+          "offset": 9438080,
+          "text": "lib_physx_buildRepo"
+        },
+        {
+          "offset": 9438104,
+          "text": "c38f7d1"
+        },
+        {
+          "offset": 9438112,
+          "text": "lib_physx_buildHash"
+        },
+        {
+          "offset": 9438136,
+          "text": "HEAD"
+        },
+        {
+          "offset": 9438144,
+          "text": "lib_physx_buildBranch"
+        },
+        {
+          "offset": 9438168,
+          "text": "Jun-04-2026"
+        },
+        {
+          "offset": 9438184,
+          "text": "lib_physx_buildDate"
+        },
+        {
+          "offset": 9438208,
+          "text": "carb::stats::IStats"
+        },
+        {
+          "offset": 9438232,
+          "text": "addProfileStatsSubscription"
+        },
+        {
+          "offset": 9438264,
+          "text": "addStatusEventSubscription"
+        },
+        {
+          "offset": 9506600,
+          "text": "Could not get parent attachment at %s."
+        },
+        {
+          "offset": 9506640,
+          "text": "Could not parse attachment %s at %s because its parent attachment %s at %s is not part of the same articulation."
+        },
+        {
+          "offset": 9506760,
+          "text": "Could not parse capsule cct at %s : failed to create a PxCapsuleController."
+        },
+        {
+          "offset": 9506840,
+          "text": "Detected an articulation at %s with more than 4 velocity iterations being added to a TGS scene.The related behavior changed recently, please consult the changelog. This warning will only print once."
+        },
+        {
+          "offset": 9507040,
+          "text": "addArticulationToScene"
+        },
+        {
+          "offset": 9507064,
+          "text": "EnvId not found for given scene partition token: %s"
+        },
+        {
+          "offset": 9507120,
+          "text": "getEnvIdFromToken"
+        },
+        {
+          "offset": 9588472,
+          "text": "eSIMULATION_SHAPE"
+        },
+        {
+          "offset": 9588496,
+          "text": "eSCENE_QUERY_SHAPE"
+        },
+        {
+          "offset": 9588520,
+          "text": "eTRIGGER_SHAPE"
+        },
+        {
+          "offset": 9588536,
+          "text": "/builds/omniverse/physics/physx/source/physxextensions/src/serialization/Xml/SnXmlSerialization.cpp"
+        },
+        {
+          "offset": 9588640,
+          "text": "createNodeEditor"
+        },
+        {
+          "offset": 9588664,
+          "text": "createCollection"
+        },
+        {
+          "offset": 9588688,
+          "text": "RepXCollection::create"
+        },
+        {
+          "offset": 9588712,
+          "text": "5.9.0"
+        },
+        {
+          "offset": 9588720,
+          "text": "PxSerialization::createCollectionFromXml: PxRepXSerializer missing for type %s"
+        },
+        {
+          "offset": 9588816,
+          "text": "&lt;"
+        },
+        {
+          "offset": 9588824,
+          "text": "&gt;"
+        }
+      ]
+    }
+  ],
+  "image": {
+    "Id": "sha256:8ddc1623d70d5dd622fd728ce4eb3f59dea6ce1ea5cfbe858353dab15e8d0ef8",
+    "RepoTags": [
+      "isaac-lab-base:latest"
+    ],
+    "RepoDigests": [
+      "isaac-lab-base@sha256:8ddc1623d70d5dd622fd728ce4eb3f59dea6ce1ea5cfbe858353dab15e8d0ef8"
+    ],
+    "Created": "2026-08-24T17:12:39.108055869-05:00",
+    "Os": "linux",
+    "Architecture": "arm64"
+  },
+  "container_id": "7d2128c13bf2c460d8783e7888ad391d404cdb754d0c9151c50d4c7bc310bea9",
+  "state_before": {
+    "Status": "created",
+    "Running": false,
+    "Pid": 0,
+    "StartedAt": "0001-01-01T00:00:00Z"
+  },
+  "container_image_id": "sha256:8ddc1623d70d5dd622fd728ce4eb3f59dea6ce1ea5cfbe858353dab15e8d0ef8",
+  "state_after": {
+    "Status": "created",
+    "Running": false,
+    "Pid": 0,
+    "StartedAt": "0001-01-01T00:00:00Z"
+  },
+  "exact_stopped_container_removed": true
+}

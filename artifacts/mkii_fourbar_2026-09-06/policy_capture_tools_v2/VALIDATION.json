@@ -1,0 +1,17 @@
+{
+  "schema": "hexapod.external_capture_cpu_validation.v1",
+  "tested_utc": "2026-09-06T22:56:19.973962+00:00",
+  "python": "3.12.12",
+  "tests": 21,
+  "pass": true,
+  "gpu_dispatch": false,
+  "remote_dispatch": false,
+  "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s artifacts/mkii_fourbar_2026-09-06/policy_capture_tools_v2 -p test_*.py -v",
+  "source_files_sha256": {
+    "capture_common.py": "ff60b5227ea8fbc2f3fc3ffe5091f0691ccff13cc1dab8e85063bb48d24df993",
+    "capture_policy.py": "ff10046f8e5964457aa68add1157cb4a092ce1a024da7492d44c980517e93843",
+    "record_admitted_policy.py": "32f6b8736d180ede22b2f9a96262383a0d63572972bbf62708f6916875d28f38",
+    "test_capture_tools.py": "e7b67e2a1bf0150001f17972779d69dd533727590c78f975cb3bf94afcd3c956"
+  },
+  "scope": "CPU lineage, argument, state and mocked lifecycle checks; no Isaac Sim, encoder or checkpoint execution"
+}

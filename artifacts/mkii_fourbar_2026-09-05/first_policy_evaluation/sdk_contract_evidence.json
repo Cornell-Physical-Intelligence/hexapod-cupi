@@ -1,0 +1,69 @@
+{
+  "schema": "hexapod.evaluator_installed_sdk_evidence.v1",
+  "source_host": "spark-e26c",
+  "read_only": true,
+  "runtime_exercised": false,
+  "files": {
+    "/home/orionh/IsaacLab/source/isaaclab/isaaclab/assets/articulation/base_articulation_data.py": {
+      "sha256": "677d500672162d9bdc04b417c726b0d61edc839e0396cb3faf15316fbca28067",
+      "definitions": {
+        "root_link_quat_w": {
+          "line": 885,
+          "source": "def root_link_quat_w(self) -> ProxyArray:\n        \"\"\"Root link orientation (x, y, z, w) in simulation world frame.\n\n        Shape is (num_instances), dtype = wp.quatf. In torch this resolves to (num_instances, 4).\n\n        This quantity is the orientation of the actor frame of the root rigid body.\n        \"\"\"\n        raise NotImplementedError"
+        },
+        "root_quat_w": {
+          "line": 1162,
+          "source": "def root_quat_w(self) -> ProxyArray:\n        \"\"\"Shorthand for :attr:`root_link_quat_w`.\"\"\"\n        return self.root_link_quat_w"
+        }
+      }
+    },
+    "/home/orionh/IsaacLab/source/isaaclab_physx/isaaclab_physx/assets/articulation/articulation_data.py": {
+      "sha256": "43a31992353ad3a500024d0ec908d5b253ada7a0aac9a1cd2261466e10bda4ff",
+      "definitions": {
+        "root_link_pose_w": {
+          "line": 616,
+          "source": "def root_link_pose_w(self) -> ProxyArray:\n        \"\"\"Root link pose ``[pos, quat]`` in simulation world frame.\n        Shape is (num_instances,), dtype = wp.transformf. In torch this resolves to (num_instances, 7).\n\n        This quantity is the pose of the articulation root's actor frame relative to the world.\n        The orientation is provided in (x, y, z, w) format.\n        \"\"\"\n        if self._root_link_pose_w.timestamp < self._sim_timestamp:\n            # set the buffer data and timestamp\n            self._root_link_pose_w.data = self._root_view.get_root_transforms().view(wp.transformf)\n            self._root_link_pose_w.timestamp = self._sim_timestamp\n\n        if self._root_link_pose_w_ta is None:\n            self._root_link_pose_w_ta = ProxyArray(self._root_link_pose_w.data)\n        return self._root_link_pose_w_ta"
+        },
+        "root_link_quat_w": {
+          "line": 1132,
+          "source": "def root_link_quat_w(self) -> ProxyArray:\n        \"\"\"Root link orientation (x, y, z, w) in simulation world frame.\n        Shape is (num_instances,), dtype = wp.quatf. In torch this resolves to (num_instances, 4).\n\n        This quantity is the orientation of the actor frame of the root rigid body.\n        \"\"\"\n        # Access parent property to trigger its getter call (PhysX is pull-on-demand)\n        parent = self.root_link_pose_w\n        if self._root_link_quat_w_ta is None:\n            self._root_link_quat_w_ta = ProxyArray(self._get_quat_from_transform(parent.warp))\n        return self._root_link_quat_w_ta"
+        }
+      }
+    },
+    "/home/orionh/IsaacLab/source/isaaclab/isaaclab/envs/direct_rl_env.py": {
+      "sha256": "f75cb355938e4fc0c07d87d143cd255e4bd7ccb5ddcc5a45812a517de6947bde",
+      "definitions": {
+        "reset": {
+          "line": 343,
+          "source": "def reset(self, seed: int | None = None, options: dict[str, Any] | None = None) -> tuple[VecEnvObs, dict]:\n        \"\"\"Resets all the environments and returns observations.\n\n        This function calls the :meth:`_reset_idx` function to reset all the environments.\n        However, certain operations, such as procedural terrain generation, that happened during initialization\n        are not repeated.\n\n        Args:\n            seed: The seed to use for randomization. Defaults to None, in which case the seed is not set.\n            options: Additional information to specify how the environment is reset. Defaults to None.\n\n                Note:\n                    This argument is used for compatibility with Gymnasium environment definition.\n\n        Returns:\n            A tuple containing the observations and extras.\n        \"\"\"\n        # set the seed\n        if seed is not None:\n            self.seed(seed)\n\n        # reset state of scene\n        indices = torch.arange(self.num_envs, dtype=torch.int32, device=self.device)\n        self._reset_idx(indices)\n\n        # update articulation kinematics\n        self.scene.write_data_to_sim()\n        self.sim.forward()\n\n        # if sensors are added to the scene, make sure we render to reflect changes in reset\n        if self.has_rtx_sensors and self.cfg.num_rerenders_on_reset > 0:\n            for _ in range(self.cfg.num_rerenders_on_reset):\n                self.sim.render()\n\n        if self.cfg.wait_for_textures and self.has_rtx_sensors:\n            # Wait for assets to finish loading (PhysX-specific)\n            if hasattr(self.sim.physics_manager, \"assets_loading\"):\n                while self.sim.physics_manager.assets_loading():\n                    self.sim.render()\n\n        # return observations\n        return self._get_observations(), self.extras"
+        },
+        "_reset_idx": {
+          "line": 665,
+          "source": "def _reset_idx(self, env_ids: Sequence[int]):\n        \"\"\"Reset environments based on specified indices.\n\n        Args:\n            env_ids: List of environment ids which must be reset\n        \"\"\"\n        self.scene.reset(env_ids)\n\n        # apply events such as randomization for environments that need a reset\n        if self.cfg.events:\n            if \"reset\" in self.event_manager.available_modes:\n                env_step_count = self._sim_step_counter // self.cfg.decimation\n                self.event_manager.apply(mode=\"reset\", env_ids=env_ids, global_env_step_count=env_step_count)\n\n        # reset noise models\n        if self.cfg.action_noise_model:\n            self._action_noise_model.reset(env_ids)\n        if self.cfg.observation_noise_model:\n            self._observation_noise_model.reset(env_ids)\n\n        # reset the episode length buffer\n        self.episode_length_buf[env_ids] = 0"
+        }
+      }
+    },
+    "/isaac-sim/kit/python/lib/python3.12/site-packages/rsl_rl/algorithms/ppo.py": {
+      "sha256": "a2d35e7ad7b884c80b7434e7d2ce785a6da1e18d93c96f1179fbd3a208669f8c",
+      "definitions": {
+        "eval_mode": {
+          "line": 425,
+          "source": "def eval_mode(self) -> None:\n        \"\"\"Set evaluation mode for learnable models.\"\"\"\n        self.actor.eval()\n        self.critic.eval()\n        if self.rnd:\n            self.rnd.eval()"
+        },
+        "save": {
+          "line": 432,
+          "source": "def save(self) -> dict:\n        \"\"\"Return a dict of all models for saving.\"\"\"\n        saved_dict = {\n            \"actor_state_dict\": self.actor.state_dict(),\n            \"critic_state_dict\": self.critic.state_dict(),\n            \"optimizer_state_dict\": self.optimizer.state_dict(),\n        }\n        if self.rnd:\n            saved_dict[\"rnd_state_dict\"] = self.rnd.state_dict()\n            saved_dict[\"rnd_optimizer_state_dict\"] = self.rnd_optimizer.state_dict()\n        return saved_dict"
+        }
+      }
+    },
+    "/isaac-sim/kit/python/lib/python3.12/site-packages/rsl_rl/runners/on_policy_runner.py": {
+      "sha256": "39358a0a60219fdb360df7acddf80f6a382837aa58e2ec0ccf875df4afee4825",
+      "definitions": {
+        "get_inference_policy": {
+          "line": 163,
+          "source": "def get_inference_policy(self, device: str | None = None) -> MLPModel:\n        \"\"\"Return the policy on the requested device for inference.\"\"\"\n        self.alg.eval_mode()  # Switch to evaluation mode (e.g. for dropout)\n        return self.alg.get_policy().to(device)"
+        }
+      }
+    }
+  }
+}
