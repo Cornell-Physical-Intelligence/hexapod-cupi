@@ -1,0 +1,107 @@
+[
+  {
+    "path": "/home/orionh/IsaacLab/source/isaaclab_physx/isaaclab_physx/assets/articulation/articulation.py",
+    "sha256": "47d96553282b389493e69f691b8dcbfeb98997a5a80b88c2571c60ba8b58cb6d",
+    "spans": [
+      {
+        "line": 222,
+        "text": "    \"\"\"\n    Operations.\n    \"\"\"\n\n    def reset(self, env_ids: Sequence[int] | None = None, env_mask: wp.array | None = None) -> None:\n        \"\"\"Reset the articulation.\n\n        .. caution::\n            If both `env_ids` and `env_mask` are provided, then `env_mask` takes precedence over `env_ids`.\n\n        Args:\n            env_ids: Environment indices. If None, then all indices are used.\n            env_mask: Environment mask. If None, then all the instances are updated. Shape is (num_instances,).\n        \"\"\"\n        # use ellipses object to skip initial indices.\n        if (env_ids is None) or (env_ids == slice(None)):"
+      },
+      {
+        "line": 4267,
+        "text": "                    actuator.velocity_limit,\n                    joint_indices,\n                ],\n                outputs=[\n                    self._data.computed_torque,\n                    self._data.applied_torque,\n                    self._data.gear_ratio,\n                    self._data.soft_joint_vel_limits,\n                ],\n                device=self.device,\n            )\n\n    def _apply_actuator_model_newton(self):\n        \"\"\"Pre-fill effort buffer with FF, step Newton actuators, sync telemetry.\n\n        Pre-fills ``w.joint_f_2d`` with the user's effort target across all"
+      },
+      {
+        "line": 4268,
+        "text": "                    joint_indices,\n                ],\n                outputs=[\n                    self._data.computed_torque,\n                    self._data.applied_torque,\n                    self._data.gear_ratio,\n                    self._data.soft_joint_vel_limits,\n                ],\n                device=self.device,\n            )\n\n    def _apply_actuator_model_newton(self):\n        \"\"\"Pre-fill effort buffer with FF, step Newton actuators, sync telemetry.\n\n        Pre-fills ``w.joint_f_2d`` with the user's effort target across all\n        DOFs. ``newton_adapter.step`` (no-op if no explicit Newton actuators"
+      },
+      {
+        "line": 4283,
+        "text": "        DOFs. ``newton_adapter.step`` (no-op if no explicit Newton actuators\n        exist) then zeroes ``joint_f_2d`` at explicit DOFs and overwrites\n        them with each actuator's computed effort, while implicit DOFs keep\n        the FF. The :func:`sync_torque_telemetry` kernel then fills\n        ``_data._computed_torque`` / ``_data._applied_torque`` from the\n        resulting buffer. The final ``joint_f_2d`` is what gets pushed to\n        PhysX as the actuation force in :meth:`write_data_to_sim`.\n        \"\"\"\n        from isaaclab_newton.actuators import kernels as actuator_kernels  # noqa: PLC0415\n\n        w = self._physx_actuator_wrapper\n        w.joint_f_2d.assign(self._data._joint_effort_target)\n        if self.newton_actuator_adapter is not None:\n            self.newton_actuator_adapter.step(w, w, SimulationManager.get_physics_dt())\n\n        wp.launch("
+      },
+      {
+        "line": 4310,
+        "text": "                w.joint_f_2d,\n                self._data._sim_bind_joint_computed_effort,\n            ],\n            outputs=[\n                self._data._computed_torque,\n                self._data._applied_torque,\n            ],\n            device=self.device,\n        )\n\n    \"\"\"\n    Internal helpers -- Debugging.\n    \"\"\"\n\n    def _validate_cfg(self):\n        \"\"\"Validate the configuration after processing."
+      },
+      {
+        "line": 4311,
+        "text": "                self._data._sim_bind_joint_computed_effort,\n            ],\n            outputs=[\n                self._data._computed_torque,\n                self._data._applied_torque,\n            ],\n            device=self.device,\n        )\n\n    \"\"\"\n    Internal helpers -- Debugging.\n    \"\"\"\n\n    def _validate_cfg(self):\n        \"\"\"Validate the configuration after processing.\n"
+      }
+    ]
+  },
+  {
+    "path": "/home/orionh/IsaacLab/source/isaaclab_physx/isaaclab_physx/assets/articulation/articulation_data.py",
+    "sha256": "43a31992353ad3a500024d0ec908d5b253ada7a0aac9a1cd2261466e10bda4ff",
+    "spans": [
+      {
+        "line": 266,
+        "text": "\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints).\n\n        For an implicit actuator model, the targets are directly set into the simulation.\n        For an explicit actuator model, the targets are used to compute the joint torques (see :attr:`applied_torque`),\n        which are then set into the simulation.\n        \"\"\"\n        if self._joint_pos_target_ta is None:\n            self._joint_pos_target_ta = ProxyArray(self._joint_pos_target)\n        return self._joint_pos_target_ta\n\n    @property\n    def joint_vel_target(self) -> ProxyArray:\n        \"\"\"Joint velocity targets commanded by the user.\n\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints)."
+      },
+      {
+        "line": 280,
+        "text": "\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints).\n\n        For an implicit actuator model, the targets are directly set into the simulation.\n        For an explicit actuator model, the targets are used to compute the joint torques (see :attr:`applied_torque`),\n        which are then set into the simulation.\n        \"\"\"\n        if self._joint_vel_target_ta is None:\n            self._joint_vel_target_ta = ProxyArray(self._joint_vel_target)\n        return self._joint_vel_target_ta\n\n    @property\n    def joint_effort_target(self) -> ProxyArray:\n        \"\"\"Joint effort targets commanded by the user.\n\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints)."
+      },
+      {
+        "line": 294,
+        "text": "\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints).\n\n        For an implicit actuator model, the targets are directly set into the simulation.\n        For an explicit actuator model, the targets are used to compute the joint torques (see :attr:`applied_torque`),\n        which are then set into the simulation.\n        \"\"\"\n        if self._joint_effort_target_ta is None:\n            self._joint_effort_target_ta = ProxyArray(self._joint_effort_target)\n        return self._joint_effort_target_ta\n\n    \"\"\"\n    Joint commands -- Explicit actuators.\n    \"\"\"\n\n    @property"
+      },
+      {
+        "line": 306,
+        "text": "    Joint commands -- Explicit actuators.\n    \"\"\"\n\n    @property\n    def computed_torque(self) -> ProxyArray:\n        \"\"\"Joint torques computed from the actuator model (before clipping).\n\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints).\n\n        This quantity is the raw torque output from the actuator mode, before any clipping is applied.\n        It is exposed for users who want to inspect the computations inside the actuator model.\n        For instance, to penalize the learning agent for a difference between the computed and applied torques.\n        \"\"\"\n        if self._computed_torque_ta is None:\n            self._computed_torque_ta = ProxyArray(self._computed_torque)\n        return self._computed_torque_ta"
+      },
+      {
+        "line": 315,
+        "text": "        This quantity is the raw torque output from the actuator mode, before any clipping is applied.\n        It is exposed for users who want to inspect the computations inside the actuator model.\n        For instance, to penalize the learning agent for a difference between the computed and applied torques.\n        \"\"\"\n        if self._computed_torque_ta is None:\n            self._computed_torque_ta = ProxyArray(self._computed_torque)\n        return self._computed_torque_ta\n\n    @property\n    def applied_torque(self) -> ProxyArray:\n        \"\"\"Joint torques applied from the actuator model (after clipping).\n\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints).\n\n        These torques are set into the simulation, after clipping the :attr:`computed_torque` based on the\n        actuator model."
+      },
+      {
+        "line": 316,
+        "text": "        It is exposed for users who want to inspect the computations inside the actuator model.\n        For instance, to penalize the learning agent for a difference between the computed and applied torques.\n        \"\"\"\n        if self._computed_torque_ta is None:\n            self._computed_torque_ta = ProxyArray(self._computed_torque)\n        return self._computed_torque_ta\n\n    @property\n    def applied_torque(self) -> ProxyArray:\n        \"\"\"Joint torques applied from the actuator model (after clipping).\n\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints).\n\n        These torques are set into the simulation, after clipping the :attr:`computed_torque` based on the\n        actuator model.\n        \"\"\""
+      },
+      {
+        "line": 317,
+        "text": "        For instance, to penalize the learning agent for a difference between the computed and applied torques.\n        \"\"\"\n        if self._computed_torque_ta is None:\n            self._computed_torque_ta = ProxyArray(self._computed_torque)\n        return self._computed_torque_ta\n\n    @property\n    def applied_torque(self) -> ProxyArray:\n        \"\"\"Joint torques applied from the actuator model (after clipping).\n\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints).\n\n        These torques are set into the simulation, after clipping the :attr:`computed_torque` based on the\n        actuator model.\n        \"\"\"\n        if self._applied_torque_ta is None:"
+      },
+      {
+        "line": 320,
+        "text": "            self._computed_torque_ta = ProxyArray(self._computed_torque)\n        return self._computed_torque_ta\n\n    @property\n    def applied_torque(self) -> ProxyArray:\n        \"\"\"Joint torques applied from the actuator model (after clipping).\n\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints).\n\n        These torques are set into the simulation, after clipping the :attr:`computed_torque` based on the\n        actuator model.\n        \"\"\"\n        if self._applied_torque_ta is None:\n            self._applied_torque_ta = ProxyArray(self._applied_torque)\n        return self._applied_torque_ta\n"
+      },
+      {
+        "line": 325,
+        "text": "        \"\"\"Joint torques applied from the actuator model (after clipping).\n\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints).\n\n        These torques are set into the simulation, after clipping the :attr:`computed_torque` based on the\n        actuator model.\n        \"\"\"\n        if self._applied_torque_ta is None:\n            self._applied_torque_ta = ProxyArray(self._applied_torque)\n        return self._applied_torque_ta\n\n    \"\"\"\n    Joint properties\n    \"\"\"\n\n    @property"
+      },
+      {
+        "line": 328,
+        "text": "\n        These torques are set into the simulation, after clipping the :attr:`computed_torque` based on the\n        actuator model.\n        \"\"\"\n        if self._applied_torque_ta is None:\n            self._applied_torque_ta = ProxyArray(self._applied_torque)\n        return self._applied_torque_ta\n\n    \"\"\"\n    Joint properties\n    \"\"\"\n\n    @property\n    def joint_stiffness(self) -> ProxyArray:\n        \"\"\"Joint stiffness provided to the simulation.\n"
+      },
+      {
+        "line": 329,
+        "text": "        These torques are set into the simulation, after clipping the :attr:`computed_torque` based on the\n        actuator model.\n        \"\"\"\n        if self._applied_torque_ta is None:\n            self._applied_torque_ta = ProxyArray(self._applied_torque)\n        return self._applied_torque_ta\n\n    \"\"\"\n    Joint properties\n    \"\"\"\n\n    @property\n    def joint_stiffness(self) -> ProxyArray:\n        \"\"\"Joint stiffness provided to the simulation.\n\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints)."
+      },
+      {
+        "line": 330,
+        "text": "        actuator model.\n        \"\"\"\n        if self._applied_torque_ta is None:\n            self._applied_torque_ta = ProxyArray(self._applied_torque)\n        return self._applied_torque_ta\n\n    \"\"\"\n    Joint properties\n    \"\"\"\n\n    @property\n    def joint_stiffness(self) -> ProxyArray:\n        \"\"\"Joint stiffness provided to the simulation.\n\n        Shape is (num_instances, num_joints), dtype = wp.float32. In torch this resolves to (num_instances, num_joints).\n"
+      },
+      {
+        "line": 1505,
+        "text": "        self._joint_effort_target = wp.zeros(\n            (self._num_instances, self._num_joints), dtype=wp.float32, device=self.device\n        )\n        # -- Joint commands (explicit actuator model)\n        self._computed_torque = wp.zeros((self._num_instances, self._num_joints), dtype=wp.float32, device=self.device)\n        self._applied_torque = wp.zeros((self._num_instances, self._num_joints), dtype=wp.float32, device=self.device)\n        # -- Joint properties\n        self._joint_stiffness = wp.clone(self._root_view.get_dof_stiffnesses(), device=self.device)\n        self._joint_damping = wp.clone(self._root_view.get_dof_dampings(), device=self.device)\n        self._joint_armature = wp.clone(self._root_view.get_dof_armatures(), device=self.device)\n        friction_props = wp.clone(self._root_view.get_dof_friction_properties(), device=self.device)\n        # Initialize output arrays\n        self._joint_friction_coeff = wp.zeros(\n            (self._num_instances, self._num_joints), dtype=wp.float32, device=self.device\n        )\n        self._joint_dynamic_friction_coeff = wp.zeros("
+      },
+      {
+        "line": 1506,
+        "text": "            (self._num_instances, self._num_joints), dtype=wp.float32, device=self.device\n        )\n        # -- Joint commands (explicit actuator model)\n        self._computed_torque = wp.zeros((self._num_instances, self._num_joints), dtype=wp.float32, device=self.device)\n        self._applied_torque = wp.zeros((self._num_instances, self._num_joints), dtype=wp.float32, device=self.device)\n        # -- Joint properties\n        self._joint_stiffness = wp.clone(self._root_view.get_dof_stiffnesses(), device=self.device)\n        self._joint_damping = wp.clone(self._root_view.get_dof_dampings(), device=self.device)\n        self._joint_armature = wp.clone(self._root_view.get_dof_armatures(), device=self.device)\n        friction_props = wp.clone(self._root_view.get_dof_friction_properties(), device=self.device)\n        # Initialize output arrays\n        self._joint_friction_coeff = wp.zeros(\n            (self._num_instances, self._num_joints), dtype=wp.float32, device=self.device\n        )\n        self._joint_dynamic_friction_coeff = wp.zeros(\n            (self._num_instances, self._num_joints), dtype=wp.float32, device=self.device"
+      },
+      {
+        "line": 1606,
+        "text": "        self._joint_pos_target_ta: ProxyArray | None = None\n        self._joint_vel_target_ta: ProxyArray | None = None\n        self._joint_effort_target_ta: ProxyArray | None = None\n        # Joint commands (explicit actuator model)\n        self._computed_torque_ta: ProxyArray | None = None\n        self._applied_torque_ta: ProxyArray | None = None\n        # Joint properties\n        self._joint_stiffness_ta: ProxyArray | None = None\n        self._joint_damping_ta: ProxyArray | None = None\n        self._joint_armature_ta: ProxyArray | None = None\n        self._joint_friction_coeff_ta: ProxyArray | None = None\n        self._joint_dynamic_friction_coeff_ta: ProxyArray | None = None\n        self._joint_viscous_friction_coeff_ta: ProxyArray | None = None\n        self._joint_pos_limits_ta: ProxyArray | None = None\n        self._joint_vel_limits_ta: ProxyArray | None = None\n        self._joint_effort_limits_ta: ProxyArray | None = None"
+      },
+      {
+        "line": 1607,
+        "text": "        self._joint_vel_target_ta: ProxyArray | None = None\n        self._joint_effort_target_ta: ProxyArray | None = None\n        # Joint commands (explicit actuator model)\n        self._computed_torque_ta: ProxyArray | None = None\n        self._applied_torque_ta: ProxyArray | None = None\n        # Joint properties\n        self._joint_stiffness_ta: ProxyArray | None = None\n        self._joint_damping_ta: ProxyArray | None = None\n        self._joint_armature_ta: ProxyArray | None = None\n        self._joint_friction_coeff_ta: ProxyArray | None = None\n        self._joint_dynamic_friction_coeff_ta: ProxyArray | None = None\n        self._joint_viscous_friction_coeff_ta: ProxyArray | None = None\n        self._joint_pos_limits_ta: ProxyArray | None = None\n        self._joint_vel_limits_ta: ProxyArray | None = None\n        self._joint_effort_limits_ta: ProxyArray | None = None\n        # Joint properties (custom)"
+      }
+    ]
+  },
+  {
+    "path": "/home/orionh/IsaacLab/source/isaaclab/isaaclab/assets/articulation/articulation.py",
+    "sha256": "be6a3e97b5f385e1d66e04b60d245776b39ace320d1e5612fc89778a981cb7f2",
+    "spans": []
+  }
+]

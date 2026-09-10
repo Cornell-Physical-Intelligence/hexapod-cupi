@@ -1,0 +1,614 @@
+{
+  "status": "rejected",
+  "mode": "wave",
+  "started_unix": 1789020175.9853408,
+  "identity": {
+    "variant": "f050_t060",
+    "stance_index": 0,
+    "urdf_sha256": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+    "plan_sha256": "356b72f0e82b207ba6105cb42057643d21a5b911d0517661465dcfe57745d00f",
+    "source_manifest_sha256": "a433e529d29d5360c828b406a3dfd769e078d69fc9deaf03f4fe110eb6fa7a63",
+    "geometry_reference_sha256": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+    "controller": {
+      "profile": "formal_004",
+      "residual_radius_rad": 0.02,
+      "residual_velocity_rad_s": 0.25,
+      "residual_acceleration_rad_s2": 2.0,
+      "total_acceleration_rad_s2": 8.0
+    },
+    "wave_schedule": {
+      "settle_steps": 200,
+      "forward_steps": 1200,
+      "stop_steps": 1000,
+      "requested_forward_mps": 0.005,
+      "requested_left_mps": 0.0,
+      "requested_yaw_rad_s": 0.0
+    },
+    "startup": {
+      "duration_s": 2.0,
+      "canonical_hold_before_scoring_s": 2.0,
+      "path": "quintic_C2_target_only",
+      "physical_reset_noise_preserved": true
+    },
+    "runtime_tree_sha256": "abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280"
+  },
+  "runtime_binding": {
+    "mode": "vendored",
+    "package_directory": "/workspace/hexapod/experiments/c_length_study/runtime/hexapod_rl",
+    "runtime_tree_sha256": "abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280",
+    "base_commit": "36769da93f90e0602fb0e3591caeb98bbd7090ed",
+    "manifest_path": "/workspace/hexapod/experiments/c_length_study/runtime/SHA256SUMS.json",
+    "manifest_sha256": "b23846761f36754ff8c7061209de31445cfc52afb417f5a16313ed392bb2432a",
+    "python_files_verified": 16
+  },
+  "policy_training_started": false,
+  "stage2_complete": false,
+  "terrain_qualified": false,
+  "scope": "fullC zero-residual bounded contact-physics screen",
+  "asset_audit": {
+    "passed": true,
+    "body_count": 19,
+    "joint_count": 18,
+    "total_mass_kg": 8.26081134,
+    "max_tensor_error_kg_m2": 1.6210460543342187e-09,
+    "usd_sha256": "1731c8757b5ff947b65e2e000615e15032f7e4fe3d87c1e476ac8c1fd413942c",
+    "read_only": true
+  },
+  "controller": {
+    "lineage": "c_serial_omni_reference_position_residual_v1",
+    "profile": "formal_004",
+    "residual_radius_rad": 0.02,
+    "residual_velocity_rad_s": 0.25,
+    "residual_acceleration_rad_s2": 2.0,
+    "total_acceleration_rad_s2": 8.0,
+    "total_position_step_rad_per_20ms": 0.04,
+    "total_velocity_rad_s": 2.0,
+    "reference_velocity_rad_s": 1.75,
+    "reference_acceleration_rad_s2": 6.0,
+    "action_semantics": "bounded_position_residual_goal_tanh",
+    "integration": "separate_reference_knots_plus_bounded_residual_servo",
+    "controller_observation_width": 72,
+    "zero_command_feedback_disabled": false,
+    "old_checkpoint_transfer_supported": false,
+    "physics_admitted": false,
+    "motor_speed_limit_claim": false
+  },
+  "layout": {
+    "joint_names_runtime": [
+      "revolute_1_1",
+      "revolute_1_7",
+      "revolute_2_5",
+      "revolute_3",
+      "revolute_4",
+      "revolute_5",
+      "revolute_1",
+      "revolute_1_6",
+      "revolute_1_5",
+      "revolute_1_3",
+      "revolute_1_4",
+      "revolute_1_2",
+      "revolute_2",
+      "revolute_2_6",
+      "revolute_2_4",
+      "revolute_2_2",
+      "revolute_2_3",
+      "revolute_2_1"
+    ],
+    "joint_names_leg_major": [
+      "revolute_1_1",
+      "revolute_1",
+      "revolute_2",
+      "revolute_2_5",
+      "revolute_1_5",
+      "revolute_2_4",
+      "revolute_1_7",
+      "revolute_1_6",
+      "revolute_2_6",
+      "revolute_4",
+      "revolute_1_4",
+      "revolute_2_3",
+      "revolute_5",
+      "revolute_1_2",
+      "revolute_2_1",
+      "revolute_3",
+      "revolute_1_3",
+      "revolute_2_2"
+    ],
+    "joint_runtime_to_leg_major": [
+      0,
+      6,
+      12,
+      2,
+      8,
+      14,
+      1,
+      7,
+      13,
+      4,
+      10,
+      16,
+      5,
+      11,
+      17,
+      3,
+      9,
+      15
+    ],
+    "foot_body_ids": [
+      13,
+      15,
+      14,
+      17,
+      18,
+      16
+    ],
+    "foot_link_names": [
+      "tibia_1",
+      "tibia_5",
+      "tibia_2",
+      "tibia_3",
+      "tibia",
+      "tibia_4"
+    ]
+  },
+  "startup_reference": {
+    "kind": "target_only_quintic_C2_random_reset_to_named_canonical_stance",
+    "duration_s": 2.0,
+    "control_dt_s": 0.02,
+    "physical_reset_preserved": true,
+    "randomized_start_target_rad": [
+      [
+        -0.02883303351700306,
+        0.01640082709491253,
+        0.0219029001891613,
+        0.01858144998550415,
+        0.009993660263717175,
+        -0.008084854111075401,
+        0.6899533867835999,
+        0.7022157311439514,
+        0.6839506030082703,
+        0.7118192911148071,
+        0.669359564781189,
+        0.7149891257286072,
+        2.072700023651123,
+        2.1182820796966553,
+        2.070303201675415,
+        2.066073179244995,
+        2.1219873428344727,
+        2.118924617767334
+      ]
+    ],
+    "nominal_target_rad": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.6981316804885864,
+        0.6981316804885864,
+        0.6981316804885864,
+        0.6981316804885864,
+        0.6981316804885864,
+        0.6981316804885864,
+        2.094395160675049,
+        2.094395160675049,
+        2.094395160675049,
+        2.094395160675049,
+        2.094395160675049,
+        2.094395160675049
+      ]
+    ],
+    "reference_residual_margin_rad": 0.02,
+    "max_discrete_velocity_rad_s": 0.027023761528802235,
+    "max_discrete_acceleration_rad_s2": 0.041603039896559446,
+    "analytic_endpoint_velocity_and_acceleration_zero": true,
+    "discrete_hold_derivatives_checked_through_step": 102,
+    "joint_names_runtime": [
+      "revolute_1_1",
+      "revolute_1_7",
+      "revolute_2_5",
+      "revolute_3",
+      "revolute_4",
+      "revolute_5",
+      "revolute_1",
+      "revolute_1_6",
+      "revolute_1_5",
+      "revolute_1_3",
+      "revolute_1_4",
+      "revolute_1_2",
+      "revolute_2",
+      "revolute_2_6",
+      "revolute_2_4",
+      "revolute_2_2",
+      "revolute_2_3",
+      "revolute_2_1"
+    ],
+    "canonical_hold_before_scoring_s": 2.0
+  },
+  "control_steps": 625,
+  "physics_substep_review": {
+    "articulation_data_class": "isaaclab_physx.assets.articulation.articulation_data.ArticulationData",
+    "backend_name": "physx",
+    "joint_names_runtime": [
+      "revolute_1_1",
+      "revolute_1_7",
+      "revolute_2_5",
+      "revolute_3",
+      "revolute_4",
+      "revolute_5",
+      "revolute_1",
+      "revolute_1_6",
+      "revolute_1_5",
+      "revolute_1_3",
+      "revolute_1_4",
+      "revolute_1_2",
+      "revolute_2",
+      "revolute_2_6",
+      "revolute_2_4",
+      "revolute_2_2",
+      "revolute_2_3",
+      "revolute_2_1"
+    ],
+    "physics_handles_decimation": false,
+    "decimation": 8,
+    "physics_dt_s": 0.0025,
+    "capture": "after original scene.update, before next simulation substep/reset",
+    "ordinary_control_metrics_unchanged": true,
+    "samples_including_initial": 5001,
+    "completed_controls": 625,
+    "error": null,
+    "method_restored": true,
+    "physical_acceptance_gate_changed": false,
+    "postsettle_prefix": {
+      "start_control_boundary": 200,
+      "end_control_boundary": 625,
+      "duration_s": 8.5,
+      "acceptance_verdict": null,
+      "scope": "independent raw400Hz evidence; old50Hz gate unchanged",
+      "link": {
+        "measured_world_displacement_m": [
+          [
+            -0.0018942462047562003,
+            -0.03732693940401077,
+            -0.0007635354995727539
+          ]
+        ],
+        "measured_forward_displacement_m": [
+          0.03731142822208583
+        ],
+        "integrals": {
+          "left": {
+            "world_m": [
+              [
+                -0.0026944587007164955,
+                -0.0274200402200222,
+                -0.0012063534231856465
+              ]
+            ],
+            "forward_m": [
+              0.027398721261967327
+            ],
+            "position_difference_norm_m": [
+              0.009949023835361004
+            ]
+          },
+          "right": {
+            "world_m": [
+              [
+                -0.002691521542146802,
+                -0.027419866994023323,
+                -0.0012014680542051792
+              ]
+            ],
+            "forward_m": [
+              0.027398570413145508
+            ],
+            "position_difference_norm_m": [
+              0.00994874443858862
+            ]
+          },
+          "trapezoid": {
+            "world_m": [
+              [
+                -0.002692990005016327,
+                -0.027419954538345337,
+                -0.001203910680487752
+              ]
+            ],
+            "forward_m": [
+              0.027398646769738702
+            ],
+            "position_difference_norm_m": [
+              0.009948883205652237
+            ]
+          }
+        }
+      },
+      "com": {
+        "measured_world_displacement_m": [
+          [
+            -0.0019043840002268553,
+            -0.03734103590250015,
+            -0.0007633417844772339
+          ]
+        ],
+        "measured_forward_displacement_m": [
+          0.037325447092696064
+        ],
+        "integrals": {
+          "left": {
+            "world_m": [
+              [
+                -0.0027045931201428175,
+                -0.027460977435112,
+                -0.0012055205879732966
+              ]
+            ],
+            "forward_m": [
+              0.02743958009626307
+            ],
+            "position_difference_norm_m": [
+              0.00992226880043745
+            ]
+          },
+          "right": {
+            "world_m": [
+              [
+                -0.002701590536162257,
+                -0.02746075578033924,
+                -0.0012006352189928293
+              ]
+            ],
+            "forward_m": [
+              0.02743938131841349
+            ],
+            "position_difference_norm_m": [
+              0.009922031313180923
+            ]
+          },
+          "trapezoid": {
+            "world_m": [
+              [
+                -0.0027030918281525373,
+                -0.027460865676403046,
+                -0.001203077845275402
+              ]
+            ],
+            "forward_m": [
+              0.027439479776042722
+            ],
+            "position_difference_norm_m": [
+              0.0099221495911479
+            ]
+          }
+        }
+      }
+    },
+    "moving_window_or_prefix": {
+      "start_control_boundary": 200,
+      "end_control_boundary": 625,
+      "duration_s": 8.5,
+      "acceptance_verdict": null,
+      "scope": "independent raw400Hz evidence; old50Hz gate unchanged",
+      "link": {
+        "measured_world_displacement_m": [
+          [
+            -0.0018942462047562003,
+            -0.03732693940401077,
+            -0.0007635354995727539
+          ]
+        ],
+        "measured_forward_displacement_m": [
+          0.03731142822208583
+        ],
+        "integrals": {
+          "left": {
+            "world_m": [
+              [
+                -0.0026944587007164955,
+                -0.0274200402200222,
+                -0.0012063534231856465
+              ]
+            ],
+            "forward_m": [
+              0.027398721261967327
+            ],
+            "position_difference_norm_m": [
+              0.009949023835361004
+            ]
+          },
+          "right": {
+            "world_m": [
+              [
+                -0.002691521542146802,
+                -0.027419866994023323,
+                -0.0012014680542051792
+              ]
+            ],
+            "forward_m": [
+              0.027398570413145508
+            ],
+            "position_difference_norm_m": [
+              0.00994874443858862
+            ]
+          },
+          "trapezoid": {
+            "world_m": [
+              [
+                -0.002692990005016327,
+                -0.027419954538345337,
+                -0.001203910680487752
+              ]
+            ],
+            "forward_m": [
+              0.027398646769738702
+            ],
+            "position_difference_norm_m": [
+              0.009948883205652237
+            ]
+          }
+        }
+      },
+      "com": {
+        "measured_world_displacement_m": [
+          [
+            -0.0019043840002268553,
+            -0.03734103590250015,
+            -0.0007633417844772339
+          ]
+        ],
+        "measured_forward_displacement_m": [
+          0.037325447092696064
+        ],
+        "integrals": {
+          "left": {
+            "world_m": [
+              [
+                -0.0027045931201428175,
+                -0.027460977435112,
+                -0.0012055205879732966
+              ]
+            ],
+            "forward_m": [
+              0.02743958009626307
+            ],
+            "position_difference_norm_m": [
+              0.00992226880043745
+            ]
+          },
+          "right": {
+            "world_m": [
+              [
+                -0.002701590536162257,
+                -0.02746075578033924,
+                -0.0012006352189928293
+              ]
+            ],
+            "forward_m": [
+              0.02743938131841349
+            ],
+            "position_difference_norm_m": [
+              0.009922031313180923
+            ]
+          },
+          "trapezoid": {
+            "world_m": [
+              [
+                -0.0027030918281525373,
+                -0.027460865676403046,
+                -0.001203077845275402
+              ]
+            ],
+            "forward_m": [
+              0.027439479776042722
+            ],
+            "position_difference_norm_m": [
+              0.0099221495911479
+            ]
+          }
+        }
+      }
+    },
+    "all_recorded_substep_max_requested_torque_nm": 63.65962219238281,
+    "all_recorded_substep_max_applied_torque_nm": 1.600000023841858,
+    "postsettle_substep_max_requested_torque_nm": 1.1462247371673584,
+    "postsettle_worst_joint_substep_saturation_fraction": 0.0
+  },
+  "gate": {
+    "control_steps": 625,
+    "num_envs": 1,
+    "settle_steps": 200,
+    "control_dt_s": 0.02,
+    "post_settle_measured_duration_s": 8.5,
+    "max_applied_torque_nm": 1.600000023841858,
+    "post_settle_max_requested_torque_nm": 1.1451877355575562,
+    "post_settle_joint_saturation_fraction": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "post_settle_max_joint_saturation_fraction": 0.0,
+    "post_settle_all_motor_saturation_fraction": 0.0,
+    "post_settle_nonfoot_env_steps": 0,
+    "post_settle_min_distal_support_count": 5,
+    "terminations": 0,
+    "truncations": 0,
+    "min_root_height_m": 0.12884868681430817,
+    "mean_measured_forward_mps": 0.003155388170853257,
+    "mean_measured_left_mps": -0.00028185080736875534,
+    "max_reference_to_executable_lag_rad": 0.0,
+    "max_target_cast_error_rad": 1.1920928955078125e-07,
+    "original_basic_standing_physics_pass": true,
+    "kind": "single_leg_wave_bounded_physics_screen_not_stage2",
+    "measured_flight_events": [
+      {
+        "leg_index": 0,
+        "flight_begin_step": 219,
+        "flight_end_step": 277,
+        "flight_samples": 58,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.0046956662424668255,
+        "measured_reference_point_planar_step_m": 0.0277046559903134
+      },
+      {
+        "leg_index": 1,
+        "flight_begin_step": 453,
+        "flight_end_step": 515,
+        "flight_samples": 62,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.005071720773815375,
+        "measured_reference_point_planar_step_m": 0.0525620079992145
+      },
+      {
+        "leg_index": 3,
+        "flight_begin_step": 579,
+        "flight_end_step": 624,
+        "flight_samples": 45,
+        "confirmed_measured_touchdown": false,
+        "measured_reference_point_lift_m": 0.0034417624178677275,
+        "measured_reference_point_planar_step_m": 0.052830123796190426
+      },
+      {
+        "leg_index": 5,
+        "flight_begin_step": 337,
+        "flight_end_step": 397,
+        "flight_samples": 60,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004840444295538898,
+        "measured_reference_point_planar_step_m": 0.041911869442378985
+      }
+    ],
+    "completed_measured_leg_indices": [
+      0,
+      1,
+      5
+    ],
+    "moving_window_forward_mps": 0.003155388170853257,
+    "generator_confirmed_touchdowns": 3,
+    "generator_final_mode": "swing",
+    "independent_link_progress": null,
+    "final_quiet_stop_window": null,
+    "passed": false
+  },
+  "failure": "Reference rejected before target emission: Measured landing endpoint exceeds12mm correction bound",
+  "finished_unix": 1789020224.4077234
+}

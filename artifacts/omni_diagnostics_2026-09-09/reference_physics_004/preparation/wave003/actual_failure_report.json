@@ -1,0 +1,70 @@
+{
+  "kind": "actual_reference003_clearance_failure",
+  "source_trace_sha256": "f6a8c120ba9ce25167df1eeae19e3954d2cead2daa71bc67ad15c6696cd17609",
+  "confirmed_prior_steps": 3,
+  "confirmed_leg_order": [
+    "lf",
+    "rr",
+    "lm"
+  ],
+  "failed_leg": "rf",
+  "failure_components": {
+    "sustained_flight": true,
+    "passed_planned_apex": true,
+    "actual_descent_seen": true,
+    "minimum2mm_measured_lift_pass": false
+  },
+  "flight_start_step": 584,
+  "flight_end_step": 615,
+  "flight_samples": 32,
+  "return_step": 616,
+  "return_time_s": 12.34,
+  "return_normal_force_n": 2.067577362060547,
+  "measured_lift_m": 0.0014451922130633843,
+  "minimum_measured_lift_m": 0.002,
+  "old_lift_m": 0.005,
+  "proposed_lift_m": 0.007,
+  "trajectory_state_unchanged": true,
+  "torque_support_contact_criteria_unchanged": true,
+  "predicted_effect": "Additional virtual clearance hypothesis only; actual bodypose/loadresponse requires fresh physics.",
+  "decomposition": [
+    {
+      "step": 552,
+      "time_s": 11.06,
+      "virtual_target_z_m": -0.000539601443438037,
+      "same_joint_target_at_measured_body_z_m": -0.001270280374586985,
+      "measured_toe_z_m": -0.0003481770251213545,
+      "measured_body_pose_z_effect_m": -0.0007306789311489481,
+      "measured_joint_deflection_z_effect_m": 0.0009221033494656306
+    },
+    {
+      "step": 583,
+      "time_s": 11.68,
+      "virtual_target_z_m": 0.0025921142746418518,
+      "same_joint_target_at_measured_body_z_m": -3.999733077517109e-05,
+      "measured_toe_z_m": -0.000355470995235585,
+      "measured_body_pose_z_effect_m": -0.002632111605417023,
+      "measured_joint_deflection_z_effect_m": -0.0003154736644604139
+    },
+    {
+      "step": 602,
+      "time_s": 12.06,
+      "virtual_target_z_m": 0.004460398556561963,
+      "same_joint_target_at_measured_body_z_m": 0.0014865565310230866,
+      "measured_toe_z_m": 0.0010897212178277993,
+      "measured_body_pose_z_effect_m": -0.0029738420255388765,
+      "measured_joint_deflection_z_effect_m": -0.0003968353131952873
+    },
+    {
+      "step": 616,
+      "time_s": 12.34,
+      "virtual_target_z_m": 0.003374187505042191,
+      "same_joint_target_at_measured_body_z_m": 0.00025606930089380753,
+      "measured_toe_z_m": -0.0001329829736931576,
+      "measured_body_pose_z_effect_m": -0.0031181182041483835,
+      "measured_joint_deflection_z_effect_m": -0.0003890522745869651
+    }
+  ],
+  "screened_alternative_lift_m": 0.008,
+  "selection_reason": "7mm passed narrowrightstrafe margin check with more reserve than7.5;8mm failed residualjointmargin. Full7mmmatrix required beforefreeze."
+}
