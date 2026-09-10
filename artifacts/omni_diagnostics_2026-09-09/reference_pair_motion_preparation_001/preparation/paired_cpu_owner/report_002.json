@@ -1,0 +1,140 @@
+{
+  "scope": "CPU-only paired contact-aware controller with ideal synthetic measured pose/contact streams; no actual physics, torque or speed qualification",
+  "geometry_and_residual_sources": {
+    "oracle_files": {
+      "oracle/wave_reference.py": "8bacf0c61f7fdc6d43d9f9ebdb5adc643b026495bb303ec3c18157d121c78893",
+      "oracle/wave_math.py": "75353a885bd1e11795dff81458a7e547bbd2611769ef905b3f372c1814a6b12f",
+      "oracle/serial_geometry.py": "8c0451d151e077830986d8deb259129b4eb49f3750110883dad99683e8d7f8d3",
+      "oracle/geometry/candidate_c_reference.json": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+      "oracle/geometry/f050_t060.urdf": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+      "oracle/reference_residual.py": "fbf65749c2d1ffc36b22986f71c0972ce7b1ecf82beebef57a0bd3e1be966e40"
+    },
+    "paired_target_plan_sha256": "9076a8253f8245169651c7b75e5362accba5887c737600b1c28a3e01eca55470",
+    "static_diagonal_actual_review_sha256": "2ce2ea07868311f4ddf743a2cca26dfe396cfbb0d96026a0901707f13760f60b",
+    "scalar_wave005_state_packet_not_reused": "846/849 retained unchanged; new paired fragment required",
+    "current_scope": "CPU only, no physics or torque outcome"
+  },
+  "runtime_sources_sha256": {
+    "checkpoint.py": "9ee83f4d60ced5b64d94f5ade0dfa6dea44d2de0ae020a1fd049f84da2d0825e",
+    "compare_target_speeds.py": "ba1c774b22601a5f66dd06e7622e18a3737a893337b219085e266edb2173ab48",
+    "ideal_fixture.py": "449cda439a4a7625aab2d9ffb6c4b258e6a8ad157b4b03654824a5a66079b127",
+    "oracle/reference_residual.py": "fbf65749c2d1ffc36b22986f71c0972ce7b1ecf82beebef57a0bd3e1be966e40",
+    "oracle/serial_geometry.py": "8c0451d151e077830986d8deb259129b4eb49f3750110883dad99683e8d7f8d3",
+    "oracle/wave_math.py": "75353a885bd1e11795dff81458a7e547bbd2611769ef905b3f372c1814a6b12f",
+    "oracle/wave_reference.py": "8bacf0c61f7fdc6d43d9f9ebdb5adc643b026495bb303ec3c18157d121c78893",
+    "pair_motion.py": "d26e058241985e87a8dac37603d5e1147e89c637001b1136c30d8249af9d8a04",
+    "planned_target_oracle.py": "99a9f4c2e808c707984e0965003524cc3a61a8f6720903d1126b8108ee083c2a",
+    "prepare_evidence.py": "f8a595f09288e983be69b1b5140f0e90bc8a83d5e4ae3819913976267d72e3f1",
+    "prepare_evidence_002.py": "3edcb6843c07f3faec94ccf502f5194b0b9a88b5564dfc0816da1bbdabe84426",
+    "run_baseline.py": "7620c5d643d3d57a3575b51a50b8fcb2ed029f1fc715e5174022a11fb6adf1eb",
+    "state_packet.py": "498630b24891d2de70d101d7a0f00639612fe0befef5f798de497d07a8762b8a",
+    "test_pair_motion.py": "2a3d9cf195dcc9c339d4fe47ca152f4c4bc4f4d000dd7a50c399c354f4ad4b3d"
+  },
+  "cases": [
+    {
+      "speed": 0.01,
+      "controls": 2200,
+      "failure": null,
+      "completed_pairs": 10,
+      "touchdowns": 20,
+      "liftoffs": 20,
+      "lifts_after_stop": 0,
+      "vmax": 0.7592005767919519,
+      "amax": 1.7865530923877326,
+      "zero_residual_lag": 0.0,
+      "minimum_measured_fixture_margin": 0.10282846695447866,
+      "quiet_time": 31.89999999999941,
+      "stop_latency": 5.899999999999409,
+      "final_mode": "reference_quiet_hold",
+      "physics": false
+    },
+    {
+      "speed": 0.015,
+      "controls": 1092,
+      "failure": {
+        "control": 1092,
+        "time_s": 21.84,
+        "reason": "A required measured retained support is missing"
+      },
+      "completed_pairs": 8,
+      "touchdowns": 16,
+      "liftoffs": 18,
+      "lifts_after_stop": null,
+      "vmax": 1.1695788310612354,
+      "amax": 2.727707473018093,
+      "zero_residual_lag": 0.0,
+      "minimum_measured_fixture_margin": 0.09620089160109555,
+      "quiet_time": null,
+      "stop_latency": null,
+      "final_mode": "paired_motion",
+      "physics": false
+    },
+    {
+      "speed": 0.02,
+      "controls": 1149,
+      "failure": {
+        "control": 1149,
+        "time_s": 22.98,
+        "reason": "A required measured retained support is missing"
+      },
+      "completed_pairs": 8,
+      "touchdowns": 16,
+      "liftoffs": 18,
+      "lifts_after_stop": null,
+      "vmax": 1.5942246985588993,
+      "amax": 3.657881586337508,
+      "zero_residual_lag": 0.0,
+      "minimum_measured_fixture_margin": 0.08904609222633658,
+      "quiet_time": null,
+      "stop_latency": null,
+      "final_mode": "paired_motion",
+      "physics": false
+    }
+  ],
+  "constant_joint_deflection_fixture_rejection": {
+    "speed": 0.01,
+    "controls": 149,
+    "failure": {
+      "control": 149,
+      "time_s": 2.98,
+      "reason": "A required measured retained support is missing"
+    },
+    "completed_pairs": 0,
+    "touchdowns": 0,
+    "liftoffs": 2,
+    "lifts_after_stop": null,
+    "vmax": 0.3135132107362715,
+    "amax": 0.74651108354723,
+    "zero_residual_lag": 0.0,
+    "minimum_measured_fixture_margin": 0.18512338748262658,
+    "quiet_time": null,
+    "stop_latency": null,
+    "final_mode": "paired_motion",
+    "physics": false
+  },
+  "constant_joint_deflection_caveat": "Frozen joint deflection is not a physical contact model; it loses a retained ideal sharp-plane contact as stance angles change. The rejection and initial failed assertion are preserved. No contact tolerance or gate was relaxed.",
+  "new_state_version": "pair_contact_motion_v001",
+  "observation_fragment_version": "pair_contact_motion_fragment_v001",
+  "fragment_features": 1014,
+  "fragment_schema_sha256": "da863625e026f8c96297ae6e6a28f84a008cf7956c946dc314d95980db038326",
+  "fragment_scope": "Explicit controller state only; no full actor/critic concatenation, tensor backend, normalization or PPO registration",
+  "old846_849_scalar_packet_unchanged_and_incompatible": true,
+  "tests": {
+    "count": 14,
+    "log_sha256": "ced98a8fcccd9e5548b9ef7513053c0eecb188f6e78a3a6b2d27634cb2b8d849",
+    "initial_failed_expectation_log_sha256": "a6bad704a312bfcdf1e9ea5f1b087bd6a02997d77b5c48262b5b71506806e84d",
+    "zero_residual_full_forward_and_stop": true,
+    "each_foot_independently_qualified": true,
+    "JSON_controller_motor_state_and_history_replay_exact": true,
+    "new_reset_epoch_clears_all_history_slots": true
+  },
+  "actual_new_GPU_controls": 0,
+  "actual_contact_confirmations": 0,
+  "torque_tested_by_CPU": false,
+  "actual_all_three_static_pairs_previously_passed": true,
+  "new_moving_pair_physics_admitted": false,
+  "PPO_ready": false,
+  "Stage2_complete": false,
+  "gates_weakened": false,
+  "next_real_physics": "Separate fresh32standing+allquiet, then bounded zero-residual0.01m/s forward/stop paired case with four-retained-foot>=1N support,>=50mm measured margin, two independent>=2mm flights/three-sample stable landings, actual progress/stop, every400Hz torque and named-frame/source/asset checks; preserve original wave gates separately."
+}

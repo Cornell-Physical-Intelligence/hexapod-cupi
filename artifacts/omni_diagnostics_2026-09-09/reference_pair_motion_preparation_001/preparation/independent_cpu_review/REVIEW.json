@@ -1,0 +1,56 @@
+{
+  "scope": "Independent CPU code and synthetic interface review; no physical or launch admission",
+  "owner_path": "tmp/reference_pair_motion_001",
+  "owner_final_manifest_bound": false,
+  "binding_reason": "Bound exact reviewed payloads before owner final documentation/manifest; any later runtime delta requires re-review",
+  "reviewed_payloads_sha256": {
+    "checkpoint.py": "9ee83f4d60ced5b64d94f5ade0dfa6dea44d2de0ae020a1fd049f84da2d0825e",
+    "compare_target_speeds.py": "ba1c774b22601a5f66dd06e7622e18a3737a893337b219085e266edb2173ab48",
+    "ideal_fixture.py": "449cda439a4a7625aab2d9ffb6c4b258e6a8ad157b4b03654824a5a66079b127",
+    "oracle/reference_residual.py": "fbf65749c2d1ffc36b22986f71c0972ce7b1ecf82beebef57a0bd3e1be966e40",
+    "oracle/serial_geometry.py": "8c0451d151e077830986d8deb259129b4eb49f3750110883dad99683e8d7f8d3",
+    "oracle/wave_math.py": "75353a885bd1e11795dff81458a7e547bbd2611769ef905b3f372c1814a6b12f",
+    "oracle/wave_reference.py": "8bacf0c61f7fdc6d43d9f9ebdb5adc643b026495bb303ec3c18157d121c78893",
+    "pair_motion.py": "d26e058241985e87a8dac37603d5e1147e89c637001b1136c30d8249af9d8a04",
+    "planned_target_oracle.py": "99a9f4c2e808c707984e0965003524cc3a61a8f6720903d1126b8108ee083c2a",
+    "prepare_evidence.py": "f8a595f09288e983be69b1b5140f0e90bc8a83d5e4ae3819913976267d72e3f1",
+    "prepare_evidence_002.py": "3edcb6843c07f3faec94ccf502f5194b0b9a88b5564dfc0816da1bbdabe84426",
+    "run_baseline.py": "7620c5d643d3d57a3575b51a50b8fcb2ed029f1fc715e5174022a11fb6adf1eb",
+    "state_packet.py": "498630b24891d2de70d101d7a0f00639612fe0befef5f798de497d07a8762b8a",
+    "test_pair_motion.py": "2a3d9cf195dcc9c339d4fe47ca152f4c4bc4f4d000dd7a50c399c354f4ad4b3d",
+    "oracle/geometry/candidate_c_reference.json": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+    "oracle/geometry/f050_t060.urdf": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+    "SOURCE_INPUTS.json": "8ce2ba5c8333e6f2471089ab8286cd77ce67cbf24083798aedbae56afdcf5adb",
+    "STATE_SCHEMA.json": "395f9e6bba0ebeb4cb10fe4a9c996aec3a01499c06207a47ec67bb1733f5cb6c",
+    "report_002.json": "37795241947dadf9522d929e91e3bc47200ad06e1a9fece59920ae6ed3440e37"
+  },
+  "reviewed_payloads": 19,
+  "oracle_files_verified": 6,
+  "owner_tests": {
+    "passed": 14,
+    "log": "owner_tests.log"
+  },
+  "additional_independent_tests": {
+    "passed": 3,
+    "log": "independent_tests_final.log",
+    "cases": [
+      "qualified early obstacle contact rejects",
+      "six-sample landing contact loss rejects at100ms",
+      "asymmetric landing checkpoint/core/history exact continuation"
+    ]
+  },
+  "source_files_modified_by_reviewer": false,
+  "concrete_blockers": [],
+  "actor_critic846849_adoption": false,
+  "fragment_features": 1014,
+  "physics_qualified": false,
+  "PPO_training": false,
+  "stage2_complete": false,
+  "limitations": [
+    "Synthetic fixture follows virtual desired body and assumes equal force shares",
+    "Contact bools/valid points must be supplied by authoritative1N classifier; generator does not verify torque or sensor clocks",
+    "No batch/device/PPO integration",
+    "0.015 and0.02 fixture failures preserved",
+    "0.01 fixture stop latency5.90s is not a prompt physical-stop admission"
+  ]
+}
