@@ -1,0 +1,63 @@
+{
+  "schema": "c_reference_residual_two_update_smoke_plan_v1",
+  "scope": "preparation_only_not_GPU_admitted",
+  "observation_width": 846,
+  "critic_width": 849,
+  "normalized_residual_action_width": 18,
+  "residual_position_goal": ".02*tanh(action) rad; finite offset about reference, never an integrated velocity goal",
+  "residual_profile": {
+    "profile": "formal_004",
+    "residual_radius_rad": 0.02,
+    "residual_velocity_rad_s": 0.25,
+    "residual_acceleration_rad_s2": 2.0,
+    "total_acceleration_rad_s2": 8.0
+  },
+  "control_dt_s": 0.02,
+  "physics_dt_s": 0.0025,
+  "decimation": 8,
+  "PPO_updates": 2,
+  "rollout_steps_per_update": 24,
+  "num_envs": 32,
+  "actor_and_critic_hidden_dims": [
+    256,
+    256,
+    128
+  ],
+  "initial_exploration_std": 0.02,
+  "initialization": "fresh weights/normalizers and Adam; exact zero actor mean head",
+  "std_status": "unadmitted proposal; must pass actual32-replica quiet/motor calibration before optimization",
+  "initial_small_signal_residual_sigma_rad": 0.0004,
+  "learning_rate": 0.0001,
+  "schedule": "fixed",
+  "entropy_coef": 0.0,
+  "requires_before_physical_optimization": [
+    "accepted exact source009/observation005/device001 bridge1and32",
+    "explicit current-source directional reference physics admission for planned command envelope",
+    "fresh exactsource32-replica standing physical and allquiet admission",
+    "zero-mean and sampled exploration per-replica calibration under unchanged gates"
+  ],
+  "initial_training_scope": "two-update infrastructure smoke; no automatic longer training",
+  "post_smoke_required": [
+    "strict actor/critic/normalizer/Adam checkpoint readback",
+    "deterministic zero-command quiet screen",
+    "forward-to-stop reference/actor retention screen",
+    "per-direction measured comparison before continuation"
+  ],
+  "original_observation_flags_unchanged": true,
+  "old_checkpoint_resume": false,
+  "native_velocity_fidelity_qualified": false,
+  "rawSDK_and_interval_angle_channels": "both preserved; original scoring gates unchanged",
+  "Stage2_complete": false,
+  "calibration_controls_per_trial": 1000,
+  "post_update_quiet_controls": 1000,
+  "retention": {
+    "num_envs": 1,
+    "startup_controls": 200,
+    "forward_controls": 1200,
+    "stop_controls": 1000,
+    "forward_mps": 0.005,
+    "left_mps": 0.0,
+    "yaw_rad_s": 0.0
+  },
+  "actor_observation_noise": "No additional observation perturbation in this narrowly admitted instrumented simulator smoke; not deployment qualified"
+}

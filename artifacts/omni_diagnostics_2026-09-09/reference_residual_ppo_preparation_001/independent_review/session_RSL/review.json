@@ -1,0 +1,63 @@
+{
+  "scope": "Independent synthetic CPU session/actual RSL lifecycle review only; not physical entrypoint approval",
+  "reviewed_source_sha256": {
+    "rollout_session.py": "589adddc63a8bade1d8c4c6250b8fe9b5c67790ccbfcecca0470e000c255c4c9",
+    "residual_runner.py": "b42a1391a5146b9f50a1ff6d752e356ab98a8424934a81b75391f628d81ba27e",
+    "plan.json": "db90531b5cfaa096e42b4a383bb4f8e9c68f7e61b753971642a2acc5a5d9223d",
+    "checkpoint_compatibility.py": "e44660de8b27b43af5f993b782fef0cd1c3d83f66c42c1c851a89e137da8a8b3",
+    "real_rsl_cpu_regression.py": "6269d5e225073bf95991fe15574137661738e2f7e20ccf08b4d28db7542dfc69",
+    "RSL_SOURCE_PARITY.json": "d0c808254bfd4f3657330864bae4c7a9468c80a87e220a0827d8b0a0cba67172"
+  },
+  "before_after_source_identity_equal": true,
+  "RSL_source_matches_recorded_installed_Spark_five_files": {
+    "rsl_rl_version": "5.0.1",
+    "CPU_dependency_scope": "Isolated local wheel for executable integration regression; not a Spark launch",
+    "sources": [
+      {
+        "relative_file": "rsl_rl/runners/on_policy_runner.py",
+        "installed_Spark_sha256": "39358a0a60219fdb360df7acddf80f6a382837aa58e2ec0ccf875df4afee4825",
+        "local_wheel_sha256": "39358a0a60219fdb360df7acddf80f6a382837aa58e2ec0ccf875df4afee4825",
+        "exact_match": true
+      },
+      {
+        "relative_file": "rsl_rl/algorithms/ppo.py",
+        "installed_Spark_sha256": "a2d35e7ad7b884c80b7434e7d2ce785a6da1e18d93c96f1179fbd3a208669f8c",
+        "local_wheel_sha256": "a2d35e7ad7b884c80b7434e7d2ce785a6da1e18d93c96f1179fbd3a208669f8c",
+        "exact_match": true
+      },
+      {
+        "relative_file": "rsl_rl/utils/logger.py",
+        "installed_Spark_sha256": "d9822d8317724507a7c817e85399db0db9e56a4eae959435138e75cf92e44b8d",
+        "local_wheel_sha256": "d9822d8317724507a7c817e85399db0db9e56a4eae959435138e75cf92e44b8d",
+        "exact_match": true
+      },
+      {
+        "relative_file": "rsl_rl/models/mlp_model.py",
+        "installed_Spark_sha256": "6219ebb3ed4df036dae7ff1c30d0fbb169eaaa659e44a659dd757a292124476b",
+        "local_wheel_sha256": "6219ebb3ed4df036dae7ff1c30d0fbb169eaaa659e44a659dd757a292124476b",
+        "exact_match": true
+      },
+      {
+        "relative_file": "rsl_rl/utils/utils.py",
+        "installed_Spark_sha256": "4d094c17e54ab09a0d37b14711157f638f0bd929d0f1b49a3f89b4c8fc67caaa",
+        "local_wheel_sha256": "4d094c17e54ab09a0d37b14711157f638f0bd929d0f1b49a3f89b4c8fc67caaa",
+        "exact_match": true
+      }
+    ]
+  },
+  "observation_freeze_sha256": "22402b0079b0b5ac0acdd4e1d7e819fe206b20ee1883077f7de6eaca55808a63",
+  "session_tests_passed": 5,
+  "real_RSL_PPO_updates": 2,
+  "real_RSL_controls": 48,
+  "real_RSL_replicas": 32,
+  "actor_width": 846,
+  "critic_width": 849,
+  "optimizer_entries_exact_reload": 17,
+  "deterministic_reload_difference": 0.0,
+  "raw_reported_velocity_and_interval_rate_preserved": true,
+  "real_RSL_report_sha256": "4d528c773ac5a868403a952414ed1ac7b62b370092c881a612e5b10511247888",
+  "GPU_launches": 0,
+  "physical_admission": false,
+  "physical_entrypoint_reviewed": false,
+  "stage2_complete": false
+}

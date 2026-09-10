@@ -1,0 +1,132 @@
+{
+  "passed": true,
+  "scope": "real_RSL501_CPU_integration_with_synthetic_fixed_measurements_not_physical_admission",
+  "rsl_rl_version": "5.0.1",
+  "torch_version": "2.14.0",
+  "device": "cpu",
+  "PPO_updates": 2,
+  "controls": 48,
+  "replicas": 32,
+  "actor_width": 846,
+  "critic_width": 849,
+  "initialization": {
+    "mean_head": "exact_zero",
+    "initial_std_per_joint": [
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164
+    ],
+    "optimizer": "fresh_adam",
+    "optimizer_state_entries": 0,
+    "learning_rate": 0.0001,
+    "schedule": "fixed",
+    "entropy_coef": 0.0,
+    "physical_exploration_admitted": false
+  },
+  "initial_checkpoint": {
+    "lineage": "c_wave005_finite_position_residual_PPO_smoke_v1",
+    "scope": "synthetic_CPU_runner_integration",
+    "bindings": {
+      "directional_admission_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "consumer_source_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "physical_source_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "device_admission_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "observation_freeze_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "standing_admission_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "calibration_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "observation_schema_sha256": "26dfa8604379a396d477683b530c3c0b0aa576aa646c90ccca94eb660a7a8d7e"
+    },
+    "plan_sha256": "db90531b5cfaa096e42b4a383bb4f8e9c68f7e61b753971642a2acc5a5d9223d",
+    "actor_width": 846,
+    "critic_width": 849,
+    "actions": 18,
+    "action_semantics": "finite_position_residual_goal_0p02_tanh",
+    "maximum_updates": 2,
+    "old_checkpoint_transfer_allowed": false,
+    "prototype_bundle_training_flags_unchanged": true,
+    "native_velocity_fidelity_qualified": false,
+    "stage2_complete": false,
+    "checkpoint_sha256": "39963557f2d0b857f289df86c2a1001095072503d72261c53a56117f6d70bc3c"
+  },
+  "final_checkpoint": {
+    "lineage": "c_wave005_finite_position_residual_PPO_smoke_v1",
+    "scope": "synthetic_CPU_runner_integration",
+    "bindings": {
+      "directional_admission_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "consumer_source_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "physical_source_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "device_admission_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "observation_freeze_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "standing_admission_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "calibration_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "observation_schema_sha256": "26dfa8604379a396d477683b530c3c0b0aa576aa646c90ccca94eb660a7a8d7e"
+    },
+    "plan_sha256": "db90531b5cfaa096e42b4a383bb4f8e9c68f7e61b753971642a2acc5a5d9223d",
+    "actor_width": 846,
+    "critic_width": 849,
+    "actions": 18,
+    "action_semantics": "finite_position_residual_goal_0p02_tanh",
+    "maximum_updates": 2,
+    "old_checkpoint_transfer_allowed": false,
+    "prototype_bundle_training_flags_unchanged": true,
+    "native_velocity_fidelity_qualified": false,
+    "stage2_complete": false,
+    "checkpoint_sha256": "53f586911aab1982948549a0def77af545444091cd9fffeb03f52c4c58b0e214"
+  },
+  "reload": {
+    "checkpoint_sha256": "53f586911aab1982948549a0def77af545444091cd9fffeb03f52c4c58b0e214",
+    "actor_critic_normalizer_and_optimizer_exact": true,
+    "inference_buffers_made_writable": [
+      "actor.obs_normalizer._std",
+      "critic.obs_normalizer._std"
+    ],
+    "longer_training_allowed": false
+  },
+  "actor_changed_tensors": [
+    "obs_normalizer._mean",
+    "obs_normalizer._var",
+    "obs_normalizer._std",
+    "obs_normalizer.count",
+    "distribution.std_param",
+    "mlp.0.weight",
+    "mlp.0.bias",
+    "mlp.2.weight",
+    "mlp.2.bias",
+    "mlp.4.weight",
+    "mlp.4.bias",
+    "mlp.6.weight",
+    "mlp.6.bias"
+  ],
+  "optimizer_state_entries": 17,
+  "deterministic_reload_max_difference": 0.0,
+  "rejected": [
+    "physical_source_sha256",
+    "observation_schema_sha256",
+    "existing_checkpoint",
+    "orphan_sidecar"
+  ],
+  "rawSDK_and_interval_angle_preserved": true,
+  "Stage2_complete": false,
+  "sources": {
+    "real_rsl_cpu_regression.py": "6269d5e225073bf95991fe15574137661738e2f7e20ccf08b4d28db7542dfc69",
+    "residual_runner.py": "b42a1391a5146b9f50a1ff6d752e356ab98a8424934a81b75391f628d81ba27e",
+    "plan.json": "db90531b5cfaa096e42b4a383bb4f8e9c68f7e61b753971642a2acc5a5d9223d",
+    "checkpoint_compatibility.py": "e44660de8b27b43af5f993b782fef0cd1c3d83f66c42c1c851a89e137da8a8b3"
+  },
+  "observation_freeze_sha256": "22402b0079b0b5ac0acdd4e1d7e819fe206b20ee1883077f7de6eaca55808a63"
+}
