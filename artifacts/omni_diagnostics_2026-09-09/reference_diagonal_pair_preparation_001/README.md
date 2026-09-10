@@ -1,0 +1,9 @@
+This source prepares two independent cold diagonal-pair transfers: LF/RR, then LR/RF, each following fresh32-replica standing admission. It retains the middle-pair diagnostic timing, target limits, measured four-support criteria,400 Hz torque evidence and quiet return. It does not admit a moving paired gait or change the single-leg wave gates.
+
+`preparation/` preserves the frozen25-payload compact source recipe. Exactly six paths differ from the934-file middle-pair source;928 original payloads remain unchanged. The seam selects the named pair and its complement consistently in generation, scoring, CLI and case identity. It supplies no unmeasured diagonal static-force prediction.
+
+[Root review](ROOT_REVIEW.json) records twelve independently repeated CPU checks, including complete synthetic diagonal windows, reversed runtime joint order, retained-support rejection, exact old middle-target and actual-scorer parity, and unchanged simulation loops/cleanup. Eight tests exercise the exact embedded restorer. The [remote preflight](remote_preflight.json) verifies all934 source files, the guard, prior directional003 terminal state and exact container removal, pause046 restoration and fresh names before dispatch. These are preparation and ownership checks, not actual diagonal results.
+
+`guard/` is the exact bounded launcher for pause047: three phases at most600 s each,90 s AppReady deadline,1920 s outer bound,180 s stop allowance and40 min restoration fallback. It verifies the exact host/source before import and uses the existing single-owner locks and unrelated-workload checks. The main owner is `hexapod-diagonal-pairs-001-20260910.service`; actual terminal evidence belongs in a new result bundle.
+
+For portable publication verification, run `python3 -B verify_payload.py`. To reconstruct the source, follow `preparation/RECONSTRUCTION.json` and verify its complete934-file map. No GPU dispatch is performed by the verifier.
