@@ -1,0 +1,17 @@
+# Independent measured review of reference002's first swing
+
+Reference002 passed its fresh 32-replica standing admission, then stopped after 274 controls in the wave phase. The first LF swing returned contact at 5.48 seconds, 1.48 seconds after movement started and 74% through its planned two-second swing. The generator rejected that contact before another target was emitted. No walking completion, policy admission or terrain result follows from this partial trace.
+
+`analyze.py` reads the exact wave trace and reference-state history without changing them. `report.json` binds both inputs by SHA-256 and records selected samples, body motion, foot flight and target rates.
+
+- LF had 50 below-threshold contact samples and 2.691 mm measured reference-point lift. Its returning contact had 1.874 N vertical force; only one such sample is available, so this is not yet a three-sample confirmed touchdown.
+- Requested torque stayed at or below 1.1452 N·m after settling. At least five distal support contacts remained. Other planted reference points moved at most 1.427 mm; no termination or truncation occurred.
+- Reference target rates remained modest: at most 0.223 rad/s and 0.534 rad/s². The failure was not a reference rate-limit violation.
+- Actual forward displacement was 2.035 mm over 1.48 seconds, versus 7.4 mm implied by the raw requested command. The command filter was still starting: its mean admitted speed was 2.083 mm/s. Desired-body tracking error at rejection was 1.147 mm. This short startup window cannot establish useful sustained tracking; the full-cycle and stop gates remain necessary.
+- The root-link displacement and integrated link velocity differ by 0.791 mm over this short window. Both are recorded separately; neither is replaced by the desired virtual motion.
+
+A descending, measured-contact landing phase is physically plausible. It must remain provisional until measured contact is stable and its bounded motion has finished. It must preserve the actual outgoing reference position, velocity and acceleration, retain the original planned endpoint for a real position-consistency check, and stop on unsupported, bouncing, stale or out-of-envelope contact. It must not reset anchors merely to make the measured error zero. This is a separate controller hypothesis, not a waiver of the physical acceptance gates.
+
+For the proposed 0.50-second blend, retaining the current virtual XY endpoint avoids a larger horizontal preload restoration jump. However, the measured source's nonzero approach velocity means a quintic ending at that same XY overshoots by about 1.697 mm before returning. C2 continuity alone does not mean a reversal-free target. A bounded forward braking endpoint, or an explicitly measured and justified small reversal, should be tested rather than hidden.
+
+Any new landing mode also changes the future actor contract. Export all decision-relevant state: landing mode, trigger/elapsed/duration, original planned endpoint, candidate measured contact point, current landing endpoint and coefficients, measured lift history, contact/loss counters, and preload values used by the landing rule. Existing reference/controller fields may reconstruct some of these, but that must be demonstrated. Do not silently retain the provisional 525/528 schema. There is no learner in this physical screen, so implementing that later encoder is not a prerequisite for this bounded feasibility run.

@@ -1373,3 +1373,12 @@ Main3fc36818a703494375cf0fe01e69368bafbce68a published reference001 and the Stag
 
 
 Root independently scored the existing reference002 standing trace with its exact frozen quiet_metrics/QUIET_GATES:32/32replicas pass the16-second settledwindow. WorstjointRMS0.0106975rad/s,range0.00346019rad,planarexcursion0.1071mm,heading0.03368°,target-stepp95zero,requested/appliedsampledpeak1.46298Nm,0terminalevents. Newappend-only siblingartifactreference002_quiet_review preserves all32rows, rawtrace/scorer hashes, exactfrozenmodule and AST-basedreplay that reproduced everyrow. Original002evidence unchanged. This isundisturbedreferenceholdonly; learnedwalking/stop/Stage2stillunqualified.
+
+
+## 10 September UTC: contact-triggered landing completed three real steps
+
+Reference003 used the reviewed wave002 landing reference, source map 7c75f0372abcea9eace3a280a2c204164179b8c433fc9d6280f60dd189737e24, with fresh standing admission. All 32 standing replicas passed. The wave completed confirmed LF, RR and LM flight/landing sequences, then stopped at control 617 because RF measured clearance was 1.445192 mm against the unchanged 2 mm gate. Actual flight lasted 32 samples, followed by contact after the apex and during descent; this was insufficient clearance, not contact flicker. Minimum support count remained five, with no resets/nonfoot contact/sampled requested saturation. Full gait, progress and quiet-stop admission were not reached.
+
+Independent analysis also found 36.402 mm root-link forward displacement versus 25.879 mm from the sampled velocity integral over the partial moving interval: 10.541 mm full-vector mismatch, exceeding the existing complete-run 5 mm bound. No frame correction or relaxed gate is justified yet. The next source will retain that metric while collecting read-only 400 Hz substep state and torque. Separately frozen wave003 changes nominal lift from 5 to 7 mm; its 23 CPU cases and 16 tests pass. An 8 mm trial violated a right-strafe soft-limit reserve and remains preserved. These are CPU preparation, not physical admission.
+
+Root independently matched all 24 remote payloads, 924 source files and 550 assets, verified both exact owned containers absent and pause029 restoration. The complete 70-file terminal publication is artifacts/omni_diagnostics_2026-09-09/reference_physics_003, primary map SHA 469ff0d6e87bf81a87f6201803ee70fe136506d08535b7919284b1e83434b898. Original reference001/002 and preparation bytes remain unchanged. Stage 2 remains incomplete; no further unchanged target-velocity PPO is allocated.
