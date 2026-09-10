@@ -1,0 +1,1322 @@
+{
+  "kind": "compact_control_probe_review",
+  "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+  "measurement_window": "post_settle_nonterminal",
+  "identity_checks": {
+    "baseline": {
+      "complete": true,
+      "checkpoint": true,
+      "urdf": true,
+      "stance": true,
+      "joint_order": true,
+      "physics_and_control_dt": true,
+      "duration_seed_settle": true,
+      "scenario_commands_and_replicas": true,
+      "same_slew": true,
+      "same_rewards": true
+    },
+    "zero": {
+      "complete": true,
+      "checkpoint": true,
+      "urdf": true,
+      "stance": true,
+      "joint_order": true,
+      "physics_and_control_dt": true,
+      "duration_seed_settle": true,
+      "scenario_commands_and_replicas": true,
+      "same_slew": true,
+      "same_rewards": true
+    },
+    "no_noise": {
+      "complete": true,
+      "checkpoint": true,
+      "urdf": true,
+      "stance": true,
+      "joint_order": true,
+      "physics_and_control_dt": true,
+      "duration_seed_settle": true,
+      "scenario_commands_and_replicas": true,
+      "same_slew": true,
+      "same_rewards": true
+    },
+    "filtered": {
+      "complete": true,
+      "checkpoint": true,
+      "urdf": true,
+      "stance": true,
+      "joint_order": true,
+      "physics_and_control_dt": true,
+      "duration_seed_settle": true,
+      "scenario_commands_and_replicas": true,
+      "same_slew": true,
+      "same_rewards": true
+    }
+  },
+  "comparisons": {
+    "baseline": {
+      "controller": "policy",
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.03,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2
+        }
+      },
+      "diagnostics_sha256": "ff4beb2dbdc85082680d4629fcd4e87743177ad6fc7436e49328f81809e9f0bb",
+      "state_sha256": "93817e5b17b748c1b844375b784080aa82ea7fe9a11fc8fffbaba3db2ce11fb4",
+      "terminations": 0,
+      "truncations": 0,
+      "median": {
+        "planar_error_mps": 0.03950969688594341,
+        "yaw_error_rad_s": 0.09177955985069275,
+        "torque_saturation_fraction": 0.057444444444444444,
+        "positive_mechanical_power_w": 2.300856113433838
+      },
+      "stand": {
+        "planar_error_mps": 0.03369458019733429,
+        "yaw_error_rad_s": 0.06219008192420006,
+        "torque_saturation_fraction": 0.057527777777777775,
+        "positive_mechanical_power_w": 1.9082411527633667,
+        "finite_difference_heading_rate_std_rad_s": 0.06985606253147125,
+        "computed_torque_abs_max_nm": 5.732059478759766,
+        "applied_torque_abs_max_nm": 1.600000023841858,
+        "joint_velocity_rms_rad_s": 0.7501377001288956,
+        "joint_velocity_rms_max_rad_s": 1.0216331481933594,
+        "target_velocity_rms_rad_s": 1.4459410254454232,
+        "action_rate_raw_term": 3.938814401626587
+      },
+      "directions": [
+        {
+          "name": "stand",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03369458019733429,
+              "current": 0.03369458019733429,
+              "delta": 0.0
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.06219008192420006,
+              "current": 0.06219008192420006,
+              "delta": 0.0
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.057527777777777775,
+              "current": 0.057527777777777775,
+              "delta": 0.0
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "forward",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.04576670005917549,
+              "current": 0.04576670005917549,
+              "delta": 0.0
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.08887111395597458,
+              "current": 0.08887111395597458,
+              "delta": 0.0
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.059055555555555556,
+              "current": 0.059055555555555556,
+              "delta": 0.0
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "reverse",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03647033870220184,
+              "current": 0.03647033870220184,
+              "delta": 0.0
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.09468800574541092,
+              "current": 0.09468800574541092,
+              "delta": 0.0
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.0565,
+              "current": 0.0565,
+              "delta": 0.0
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "left",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.0402899831533432,
+              "current": 0.0402899831533432,
+              "delta": 0.0
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.07520660758018494,
+              "current": 0.07520660758018494,
+              "delta": 0.0
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05291666666666667,
+              "current": 0.05291666666666667,
+              "delta": 0.0
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "right",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.04046553745865822,
+              "current": 0.04046553745865822,
+              "delta": 0.0
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.07399795204401016,
+              "current": 0.07399795204401016,
+              "delta": 0.0
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.06216666666666667,
+              "current": 0.06216666666666667,
+              "delta": 0.0
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "forward_fast",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.08927585184574127,
+              "current": 0.08927585184574127,
+              "delta": 0.0
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.12242535501718521,
+              "current": 0.12242535501718521,
+              "delta": 0.0
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.056416666666666664,
+              "current": 0.056416666666666664,
+              "delta": 0.0
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "turn_left",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03166505694389343,
+              "current": 0.03166505694389343,
+              "delta": 0.0
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.0856880322098732,
+              "current": 0.0856880322098732,
+              "delta": 0.0
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05736111111111111,
+              "current": 0.05736111111111111,
+              "delta": 0.0
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "turn_right",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03422519564628601,
+              "current": 0.03422519564628601,
+              "delta": 0.0
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.07296741008758545,
+              "current": 0.07296741008758545,
+              "delta": 0.0
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.06302777777777778,
+              "current": 0.06302777777777778,
+              "delta": 0.0
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "arc_left",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.05811703950166702,
+              "current": 0.05811703950166702,
+              "delta": 0.0
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.13211140036582947,
+              "current": 0.13211140036582947,
+              "delta": 0.0
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.07641666666666666,
+              "current": 0.07641666666666666,
+              "delta": 0.0
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "arc_right",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03795881196856499,
+              "current": 0.03795881196856499,
+              "delta": 0.0
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.10928706079721451,
+              "current": 0.10928706079721451,
+              "delta": 0.0
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05383333333333333,
+              "current": 0.05383333333333333,
+              "delta": 0.0
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "strafe_arc",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.038729410618543625,
+              "current": 0.038729410618543625,
+              "delta": 0.0
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.11327739804983139,
+              "current": 0.11327739804983139,
+              "delta": 0.0
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05336111111111111,
+              "current": 0.05336111111111111,
+              "delta": 0.0
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "diagonal",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.043303001672029495,
+              "current": 0.043303001672029495,
+              "delta": 0.0
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.10322693735361099,
+              "current": 0.10322693735361099,
+              "delta": 0.0
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.06394444444444444,
+              "current": 0.06394444444444444,
+              "delta": 0.0
+            }
+          },
+          "tracking_regressions": []
+        }
+      ],
+      "observation_audit": {
+        "actor_width": 315,
+        "critic_width": 318,
+        "max_same_step_repeat_difference": 0.0,
+        "max_command_slice_difference": 0.0,
+        "max_history_shift_difference": 0.0
+      }
+    },
+    "zero": {
+      "controller": "zero",
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.03,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2
+        }
+      },
+      "diagnostics_sha256": "52626b11455abfc0c80d7bf9cebc38ac7b53a1f841a83febb8a0c9814a88afbd",
+      "state_sha256": "2162b839a7ecae3e4fb6d6f1b8879c9465a0eacb630d65341ddbed98dbdcadf8",
+      "terminations": 0,
+      "truncations": 0,
+      "median": {
+        "planar_error_mps": 0.0999351292848587,
+        "yaw_error_rad_s": 0.0009342072589788586,
+        "torque_saturation_fraction": 0.0,
+        "positive_mechanical_power_w": 0.0010477447649464011
+      },
+      "stand": {
+        "planar_error_mps": 0.00022145269031170756,
+        "yaw_error_rad_s": 0.00029542300035245717,
+        "torque_saturation_fraction": 0.0,
+        "positive_mechanical_power_w": 0.0010856719454750419,
+        "finite_difference_heading_rate_std_rad_s": 2.642505569383502e-05,
+        "computed_torque_abs_max_nm": 0.51552414894104,
+        "applied_torque_abs_max_nm": 0.51552414894104,
+        "joint_velocity_rms_rad_s": 0.001577536096186655,
+        "joint_velocity_rms_max_rad_s": 0.002785831457003951,
+        "target_velocity_rms_rad_s": 0.0,
+        "action_rate_raw_term": 0.0
+      },
+      "directions": [
+        {
+          "name": "stand",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03369458019733429,
+              "current": 0.00022145269031170756,
+              "delta": -0.03347312750702258
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.06219008192420006,
+              "current": 0.00029542300035245717,
+              "delta": -0.0618946589238476
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.057527777777777775,
+              "current": 0.0,
+              "delta": -0.057527777777777775
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "forward",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.04576670005917549,
+              "current": 0.0998828336596489,
+              "delta": 0.054116133600473404
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.08887111395597458,
+              "current": 0.0005088791367597878,
+              "delta": -0.08836223481921479
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.059055555555555556,
+              "current": 0.0,
+              "delta": -0.059055555555555556
+            }
+          },
+          "tracking_regressions": [
+            "planar_error_mps"
+          ]
+        },
+        {
+          "name": "reverse",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03647033870220184,
+              "current": 0.09997805953025818,
+              "delta": 0.06350772082805634
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.09468800574541092,
+              "current": 0.000529131677467376,
+              "delta": -0.09415887406794354
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.0565,
+              "current": 0.0,
+              "delta": -0.0565
+            }
+          },
+          "tracking_regressions": [
+            "planar_error_mps"
+          ]
+        },
+        {
+          "name": "left",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.0402899831533432,
+              "current": 0.09998759627342224,
+              "delta": 0.05969761312007904
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.07520660758018494,
+              "current": 0.0005409795558080077,
+              "delta": -0.07466562802437693
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05291666666666667,
+              "current": 0.0,
+              "delta": -0.05291666666666667
+            }
+          },
+          "tracking_regressions": [
+            "planar_error_mps"
+          ]
+        },
+        {
+          "name": "right",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.04046553745865822,
+              "current": 0.0999765545129776,
+              "delta": 0.05951101705431938
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.07399795204401016,
+              "current": 0.0010315340477973223,
+              "delta": -0.07296641799621284
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.06216666666666667,
+              "current": 0.0,
+              "delta": -0.06216666666666667
+            }
+          },
+          "tracking_regressions": [
+            "planar_error_mps"
+          ]
+        },
+        {
+          "name": "forward_fast",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.08927585184574127,
+              "current": 0.20010125637054443,
+              "delta": 0.11082540452480316
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.12242535501718521,
+              "current": 0.0005012898473069072,
+              "delta": -0.1219240651698783
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.056416666666666664,
+              "current": 0.0,
+              "delta": -0.056416666666666664
+            }
+          },
+          "tracking_regressions": [
+            "planar_error_mps"
+          ]
+        },
+        {
+          "name": "turn_left",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03166505694389343,
+              "current": 0.0001679401466390118,
+              "delta": -0.03149711679725442
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.0856880322098732,
+              "current": 0.2008511871099472,
+              "delta": 0.115163154900074
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05736111111111111,
+              "current": 0.0,
+              "delta": -0.05736111111111111
+            }
+          },
+          "tracking_regressions": [
+            "yaw_error_rad_s"
+          ]
+        },
+        {
+          "name": "turn_right",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03422519564628601,
+              "current": 0.0001669059129199013,
+              "delta": -0.03405828973336611
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.07296741008758545,
+              "current": 0.19877949357032776,
+              "delta": 0.1258120834827423
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.06302777777777778,
+              "current": 0.0,
+              "delta": -0.06302777777777778
+            }
+          },
+          "tracking_regressions": [
+            "yaw_error_rad_s"
+          ]
+        },
+        {
+          "name": "arc_left",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.05811703950166702,
+              "current": 0.09989370405673981,
+              "delta": 0.041776664555072784
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.13211140036582947,
+              "current": 0.20064251124858856,
+              "delta": 0.0685311108827591
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.07641666666666666,
+              "current": 0.0,
+              "delta": -0.07641666666666666
+            }
+          },
+          "tracking_regressions": [
+            "planar_error_mps",
+            "yaw_error_rad_s"
+          ]
+        },
+        {
+          "name": "arc_right",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03795881196856499,
+              "current": 0.09985855966806412,
+              "delta": 0.06189974769949913
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.10928706079721451,
+              "current": 0.1990697979927063,
+              "delta": 0.08978273719549179
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05383333333333333,
+              "current": 0.0,
+              "delta": -0.05383333333333333
+            }
+          },
+          "tracking_regressions": [
+            "planar_error_mps",
+            "yaw_error_rad_s"
+          ]
+        },
+        {
+          "name": "strafe_arc",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.038729410618543625,
+              "current": 0.10000269114971161,
+              "delta": 0.061273280531167984
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.11327739804983139,
+              "current": 0.19998742640018463,
+              "delta": 0.08671002835035324
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05336111111111111,
+              "current": 0.0,
+              "delta": -0.05336111111111111
+            }
+          },
+          "tracking_regressions": [
+            "planar_error_mps",
+            "yaw_error_rad_s"
+          ]
+        },
+        {
+          "name": "diagonal",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.043303001672029495,
+              "current": 0.10038711875677109,
+              "delta": 0.05708411708474159
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.10322693735361099,
+              "current": 0.0008368804701603949,
+              "delta": -0.1023900568834506
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.06394444444444444,
+              "current": 0.0,
+              "delta": -0.06394444444444444
+            }
+          },
+          "tracking_regressions": [
+            "planar_error_mps"
+          ]
+        }
+      ],
+      "observation_audit": {
+        "actor_width": 315,
+        "critic_width": 318,
+        "max_same_step_repeat_difference": 0.0,
+        "max_command_slice_difference": 0.0,
+        "max_history_shift_difference": 0.0
+      }
+    },
+    "no_noise": {
+      "controller": "policy",
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.03,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2
+        },
+        "observation_noise_scale": 0.0
+      },
+      "diagnostics_sha256": "14b7ae641464ba38a1a106107bfd2caf1a6d4572522df2fce78fae9913b4c6c7",
+      "state_sha256": "c73cf7f33b8ba6a2cf390b0b34c337e4cc67995c52cbbdb9de48ca45693a6910",
+      "terminations": 0,
+      "truncations": 0,
+      "median": {
+        "planar_error_mps": 0.039335947483778,
+        "yaw_error_rad_s": 0.09157363325357437,
+        "torque_saturation_fraction": 0.05804166666666667,
+        "positive_mechanical_power_w": 2.301144242286682
+      },
+      "stand": {
+        "planar_error_mps": 0.033809296786785126,
+        "yaw_error_rad_s": 0.05802905932068825,
+        "torque_saturation_fraction": 0.058,
+        "positive_mechanical_power_w": 1.9208457469940186,
+        "finite_difference_heading_rate_std_rad_s": 0.0664982721209526,
+        "computed_torque_abs_max_nm": 6.377018928527832,
+        "applied_torque_abs_max_nm": 1.600000023841858,
+        "joint_velocity_rms_rad_s": 0.7492133790878996,
+        "joint_velocity_rms_max_rad_s": 1.0105478763580322,
+        "target_velocity_rms_rad_s": 1.4446672803621936,
+        "action_rate_raw_term": 3.786187171936035
+      },
+      "directions": [
+        {
+          "name": "stand",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03369458019733429,
+              "current": 0.033809296786785126,
+              "delta": 0.00011471658945083618
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.06219008192420006,
+              "current": 0.05802905932068825,
+              "delta": -0.00416102260351181
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.057527777777777775,
+              "current": 0.058,
+              "delta": 0.00047222222222222804
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "forward",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.04576670005917549,
+              "current": 0.045700281858444214,
+              "delta": -6.641820073127747e-05
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.08887111395597458,
+              "current": 0.08548306673765182,
+              "delta": -0.003388047218322754
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.059055555555555556,
+              "current": 0.058638888888888886,
+              "delta": -0.00041666666666666935
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "reverse",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03647033870220184,
+              "current": 0.03821313753724098,
+              "delta": 0.0017427988350391388
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.09468800574541092,
+              "current": 0.09766419976949692,
+              "delta": 0.0029761940240859985
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.0565,
+              "current": 0.058083333333333334,
+              "delta": 0.0015833333333333324
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "left",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.0402899831533432,
+              "current": 0.03989188373088837,
+              "delta": -0.000398099422454834
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.07520660758018494,
+              "current": 0.07534027844667435,
+              "delta": 0.0001336708664894104
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05291666666666667,
+              "current": 0.05511111111111111,
+              "delta": 0.0021944444444444433
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "right",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.04046553745865822,
+              "current": 0.03879191726446152,
+              "delta": -0.001673620194196701
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.07399795204401016,
+              "current": 0.07142731547355652,
+              "delta": -0.002570636570453644
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.06216666666666667,
+              "current": 0.059166666666666666,
+              "delta": -0.0030000000000000027
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "forward_fast",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.08927585184574127,
+              "current": 0.08759098500013351,
+              "delta": -0.0016848668456077576
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.12242535501718521,
+              "current": 0.11965515464544296,
+              "delta": -0.0027702003717422485
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.056416666666666664,
+              "current": 0.05441666666666667,
+              "delta": -0.001999999999999995
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "turn_left",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03166505694389343,
+              "current": 0.03088504821062088,
+              "delta": -0.0007800087332725525
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.0856880322098732,
+              "current": 0.08484496921300888,
+              "delta": -0.0008430629968643188
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05736111111111111,
+              "current": 0.05591666666666667,
+              "delta": -0.0014444444444444426
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "turn_right",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03422519564628601,
+              "current": 0.031825385987758636,
+              "delta": -0.0023998096585273743
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.07296741008758545,
+              "current": 0.07313751429319382,
+              "delta": 0.00017010420560836792
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.06302777777777778,
+              "current": 0.06744444444444445,
+              "delta": 0.004416666666666666
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "arc_left",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.05811703950166702,
+              "current": 0.0587848424911499,
+              "delta": 0.0006678029894828796
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.13211140036582947,
+              "current": 0.1353032886981964,
+              "delta": 0.0031918883323669434
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.07641666666666666,
+              "current": 0.07508333333333334,
+              "delta": -0.0013333333333333253
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "arc_right",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03795881196856499,
+              "current": 0.03805869072675705,
+              "delta": 9.987875819206238e-05
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.10928706079721451,
+              "current": 0.11092501878738403,
+              "delta": 0.0016379579901695251
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05383333333333333,
+              "current": 0.05333333333333334,
+              "delta": -0.0004999999999999935
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "strafe_arc",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.038729410618543625,
+              "current": 0.03987997770309448,
+              "delta": 0.0011505670845508575
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.11327739804983139,
+              "current": 0.11159858852624893,
+              "delta": -0.0016788095235824585
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05336111111111111,
+              "current": 0.05252777777777778,
+              "delta": -0.0008333333333333318
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "diagonal",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.043303001672029495,
+              "current": 0.04369116201996803,
+              "delta": 0.0003881603479385376
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.10322693735361099,
+              "current": 0.10371264815330505,
+              "delta": 0.0004857107996940613
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.06394444444444444,
+              "current": 0.06469444444444444,
+              "delta": 0.0007500000000000007
+            }
+          },
+          "tracking_regressions": []
+        }
+      ],
+      "observation_audit": {
+        "actor_width": 315,
+        "critic_width": 318,
+        "max_same_step_repeat_difference": 0.0,
+        "max_command_slice_difference": 0.0,
+        "max_history_shift_difference": 0.0
+      }
+    },
+    "filtered": {
+      "controller": "policy",
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.03,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2
+        },
+        "target_filter_time_constant_s": 0.08
+      },
+      "diagnostics_sha256": "d13cf8be221223a87f21be171f9a66c27b8ed39845d34a1ee60abe0d526fce4d",
+      "state_sha256": "625c3d4eaa2b40c12d3b6dd5ca5e8687a83b50c4e387b7318fb048eb1566cf58",
+      "terminations": 0,
+      "truncations": 0,
+      "median": {
+        "planar_error_mps": 0.03319922089576721,
+        "yaw_error_rad_s": 0.11354344338178635,
+        "torque_saturation_fraction": 0.08084722222222222,
+        "positive_mechanical_power_w": 2.7153279781341553
+      },
+      "stand": {
+        "planar_error_mps": 0.035254936665296555,
+        "yaw_error_rad_s": 0.06157588213682175,
+        "torque_saturation_fraction": 0.08433333333333333,
+        "positive_mechanical_power_w": 2.0743041038513184,
+        "finite_difference_heading_rate_std_rad_s": 0.06465575844049454,
+        "computed_torque_abs_max_nm": 5.045798301696777,
+        "applied_torque_abs_max_nm": 1.600000023841858,
+        "joint_velocity_rms_rad_s": 0.7398644533349423,
+        "joint_velocity_rms_max_rad_s": 0.9450980424880981,
+        "target_velocity_rms_rad_s": 1.3252585950456501,
+        "action_rate_raw_term": 2.9206128120422363
+      },
+      "directions": [
+        {
+          "name": "stand",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03369458019733429,
+              "current": 0.035254936665296555,
+              "delta": 0.001560356467962265
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.06219008192420006,
+              "current": 0.06157588213682175,
+              "delta": -0.0006141997873783112
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.057527777777777775,
+              "current": 0.08433333333333333,
+              "delta": 0.026805555555555555
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "forward",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.04576670005917549,
+              "current": 0.035089269280433655,
+              "delta": -0.010677430778741837
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.08887111395597458,
+              "current": 0.1635790914297104,
+              "delta": 0.07470797747373581
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.059055555555555556,
+              "current": 0.08205555555555556,
+              "delta": 0.023000000000000007
+            }
+          },
+          "tracking_regressions": [
+            "yaw_error_rad_s"
+          ]
+        },
+        {
+          "name": "reverse",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03647033870220184,
+              "current": 0.028823798522353172,
+              "delta": -0.007646540179848671
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.09468800574541092,
+              "current": 0.0866803526878357,
+              "delta": -0.008007653057575226
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.0565,
+              "current": 0.07472222222222222,
+              "delta": 0.018222222222222216
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "left",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.0402899831533432,
+              "current": 0.024616379290819168,
+              "delta": -0.015673603862524033
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.07520660758018494,
+              "current": 0.1083511933684349,
+              "delta": 0.03314458578824997
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05291666666666667,
+              "current": 0.0643611111111111,
+              "delta": 0.011444444444444438
+            }
+          },
+          "tracking_regressions": [
+            "yaw_error_rad_s"
+          ]
+        },
+        {
+          "name": "right",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.04046553745865822,
+              "current": 0.037239640951156616,
+              "delta": -0.003225896507501602
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.07399795204401016,
+              "current": 0.07621952146291733,
+              "delta": 0.0022215694189071655
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.06216666666666667,
+              "current": 0.08561111111111111,
+              "delta": 0.02344444444444444
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "forward_fast",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.08927585184574127,
+              "current": 0.07716816663742065,
+              "delta": -0.012107685208320618
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.12242535501718521,
+              "current": 0.11873569339513779,
+              "delta": -0.0036896616220474243
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.056416666666666664,
+              "current": 0.06013888888888889,
+              "delta": 0.003722222222222224
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "turn_left",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03166505694389343,
+              "current": 0.025416702032089233,
+              "delta": -0.006248354911804199
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.0856880322098732,
+              "current": 0.07975177466869354,
+              "delta": -0.005936257541179657
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05736111111111111,
+              "current": 0.08163888888888889,
+              "delta": 0.024277777777777773
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "turn_right",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03422519564628601,
+              "current": 0.03130917251110077,
+              "delta": -0.0029160231351852417
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.07296741008758545,
+              "current": 0.07404866069555283,
+              "delta": 0.0010812506079673767
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.06302777777777778,
+              "current": 0.08330555555555555,
+              "delta": 0.02027777777777777
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "arc_left",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.05811703950166702,
+              "current": 0.05153880640864372,
+              "delta": -0.0065782330930233
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.13211140036582947,
+              "current": 0.14125558733940125,
+              "delta": 0.009144186973571777
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.07641666666666666,
+              "current": 0.08938888888888889,
+              "delta": 0.012972222222222232
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "arc_right",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.03795881196856499,
+              "current": 0.026148570701479912,
+              "delta": -0.011810241267085075
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.10928706079721451,
+              "current": 0.17170128226280212,
+              "delta": 0.062414221465587616
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05383333333333333,
+              "current": 0.07180555555555555,
+              "delta": 0.017972222222222223
+            }
+          },
+          "tracking_regressions": [
+            "yaw_error_rad_s"
+          ]
+        },
+        {
+          "name": "strafe_arc",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.038729410618543625,
+              "current": 0.025663843378424644,
+              "delta": -0.01306556724011898
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.11327739804983139,
+              "current": 0.12601338326931,
+              "delta": 0.012735985219478607
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.05336111111111111,
+              "current": 0.06544444444444444,
+              "delta": 0.012083333333333335
+            }
+          },
+          "tracking_regressions": []
+        },
+        {
+          "name": "diagonal",
+          "metrics": {
+            "planar_error_mps": {
+              "baseline": 0.043303001672029495,
+              "current": 0.037868063896894455,
+              "delta": -0.00543493777513504
+            },
+            "yaw_error_rad_s": {
+              "baseline": 0.10322693735361099,
+              "current": 0.17423321306705475,
+              "delta": 0.07100627571344376
+            },
+            "torque_saturation_fraction": {
+              "baseline": 0.06394444444444444,
+              "current": 0.08005555555555556,
+              "delta": 0.016111111111111118
+            }
+          },
+          "tracking_regressions": [
+            "yaw_error_rad_s"
+          ]
+        }
+      ],
+      "observation_audit": {
+        "actor_width": 315,
+        "critic_width": 318,
+        "max_same_step_repeat_difference": 0.0,
+        "max_command_slice_difference": 0.0,
+        "max_history_shift_difference": 0.0
+      }
+    }
+  },
+  "interpretation": {
+    "zero": "Plant can stand quietly with active finite-torque PD holding nominal joint targets; this is a control, not a walking policy.",
+    "no_noise": "Removing synthetic observation noise does not remove the learned oscillator.",
+    "filtered": "80ms position filter worsens torque demand and several directions; reject for next pilot."
+  },
+  "next_experiment": {
+    "type": "paired_50_update_PPO_comparison",
+    "base_checkpoint": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+    "keep": {
+      "target_slew_rad_per_20ms": 0.03,
+      "observation_noise_scale": 1,
+      "target_filter_time_constant_s": 0,
+      "RS05_applied_cap_nm": 1.6,
+      "actor_observations": 315,
+      "critic_observations": 318
+    },
+    "both_arms": {
+      "initialize_training_exploration_std": 0.1,
+      "entropy_coefficient": 0,
+      "retain_actor_critic_weights_and_observation_normalizers": true,
+      "record_optimizer_and_std_initialization_explicitly": true
+    },
+    "arm_A": "Existing repair rewards, low-exploration training only.",
+    "arm_B": "Same as A plus a standing-only mean-square UNCLIPPED sampled policy-action cost, weight -2.0; keep current command mixture to isolate that cost.",
+    "why": "The processed target limiter is active about 90% of samples, so its motion penalty is nearly flat. Raw action cost penalizes large intent before either clipping or slew and has a clear optimum at the empirically quiet zero-action stance.",
+    "review": "After 50 updates per arm, compare each direction and standing against matching deterministic baseline; continue only a branch improving quiet motion and torque without material directional regression. Neither more updates nor aggregate medians qualify Stage 2.",
+    "fallback": "If neither branch escapes the oscillation, stop reward-only retries and prepare the command-conditioned smooth reference plus residual-PPO alternative using Benchmark 1 as the reference."
+  },
+  "limitations": [
+    "Only compact diagnostic JSON and state files downloaded; no new trace-derived spectral or displacement claims are made.",
+    "Single-seed 12-second probes with 4 replicas per scenario are causal screens, not full qualification.",
+    "All baselines here use 0.03 rad per 20 ms and the same original checkpoint; no 0.06 baseline is mixed into this comparison.",
+    "Observation-noise removal is a diagnostic idealization, not a deployable sensor claim."
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "version": 1,
+  "status": "synthetic_cpu_perception_contract_fixture",
+  "source_rig": "D405_out0.12_z0.14_p90",
+  "source_coverage_sha256": "b63267ec238b318326d002ab034369000796a333fc11c6e8beb33b015069d214",
+  "source_tool_sha256": "a26ea6e3e045e6f4f7cd769d79fa198c5cad6beb7f274a42ea3ae1d3301dce73",
+  "depth_input": "160x90synthetic rectified optical-Z planes+walls; known synthetic intrinsics; not hardware calibration",
+  "visibility": "nearest25mmneighbour of actual flat-CAD sampled mask, independently per camera; coherent geometric pattern, not exact step/pit camera rendering",
+  "map_contract": "fixed continuous odomXY raster; observed/height/variance/acquisition-time; gravity-aligned body patch available; no unknown fill",
+  "sensors": [
+    {
+      "sensor": "lf_D405_out0.12_z0.14_p90",
+      "projection": {
+        "input_points": 6535,
+        "accepted_points": 6535,
+        "no_pose_points": 0,
+        "accepted_clock": "replay_clock",
+        "motion_compensation": "acquisition-time pose per timestamp",
+        "frame_pixels": 14400,
+        "optically_accepted_pixels": 6535,
+        "robot_mask_pixels": 7865
+      },
+      "map_integration": {
+        "accepted_points": 6535,
+        "updated_cells": 215
+      }
+    },
+    {
+      "sensor": "lm_D405_out0.12_z0.14_p90",
+      "projection": {
+        "input_points": 6172,
+        "accepted_points": 6172,
+        "no_pose_points": 0,
+        "accepted_clock": "replay_clock",
+        "motion_compensation": "acquisition-time pose per timestamp",
+        "frame_pixels": 14400,
+        "optically_accepted_pixels": 6172,
+        "robot_mask_pixels": 8228
+      },
+      "map_integration": {
+        "accepted_points": 6172,
+        "updated_cells": 203
+      }
+    },
+    {
+      "sensor": "lr_D405_out0.12_z0.14_p90",
+      "projection": {
+        "input_points": 4996,
+        "accepted_points": 4996,
+        "no_pose_points": 0,
+        "accepted_clock": "replay_clock",
+        "motion_compensation": "acquisition-time pose per timestamp",
+        "frame_pixels": 14400,
+        "optically_accepted_pixels": 4996,
+        "robot_mask_pixels": 9404
+      },
+      "map_integration": {
+        "accepted_points": 4996,
+        "updated_cells": 172
+      }
+    },
+    {
+      "sensor": "rf_D405_out0.12_z0.14_p90",
+      "projection": {
+        "input_points": 5000,
+        "accepted_points": 5000,
+        "no_pose_points": 0,
+        "accepted_clock": "replay_clock",
+        "motion_compensation": "acquisition-time pose per timestamp",
+        "frame_pixels": 14400,
+        "optically_accepted_pixels": 5000,
+        "robot_mask_pixels": 9400
+      },
+      "map_integration": {
+        "accepted_points": 5000,
+        "updated_cells": 173
+      }
+    },
+    {
+      "sensor": "rm_D405_out0.12_z0.14_p90",
+      "projection": {
+        "input_points": 5900,
+        "accepted_points": 5900,
+        "no_pose_points": 0,
+        "accepted_clock": "replay_clock",
+        "motion_compensation": "acquisition-time pose per timestamp",
+        "frame_pixels": 14400,
+        "optically_accepted_pixels": 5900,
+        "robot_mask_pixels": 8500
+      },
+      "map_integration": {
+        "accepted_points": 5900,
+        "updated_cells": 203
+      }
+    },
+    {
+      "sensor": "rr_D405_out0.12_z0.14_p90",
+      "projection": {
+        "input_points": 6532,
+        "accepted_points": 6532,
+        "no_pose_points": 0,
+        "accepted_clock": "replay_clock",
+        "motion_compensation": "acquisition-time pose per timestamp",
+        "frame_pixels": 14400,
+        "optically_accepted_pixels": 6532,
+        "robot_mask_pixels": 7868
+      },
+      "map_integration": {
+        "accepted_points": 6532,
+        "updated_cells": 214
+      }
+    }
+  ],
+  "total_cells": 3600,
+  "fresh_usable_cells": 1031,
+  "stale_usable_cells": 0,
+  "unobserved_usable_cells": 0,
+  "step_pit": {
+    "step": {
+      "required_cells": 30,
+      "usable_cells": 30,
+      "mean_height_m": 0.019999999999999997,
+      "target_height_m": 0.02,
+      "all_region_observed": true
+    },
+    "pit": {
+      "required_cells": 30,
+      "usable_cells": 30,
+      "mean_height_m": -0.08000000000000003,
+      "target_height_m": -0.08,
+      "all_region_observed": true
+    }
+  },
+  "no_real_sensor_or_ros_integration": true,
+  "no_actor_injection": true,
+  "outstanding": [
+    "real selected-mode intrinsics/extrinsics and clock alignment",
+    "moving-C-CAD pixel masks at acquisition time",
+    "real noise and timing calibration",
+    "actual Mid360 packets and acquisition pattern",
+    "LIO/visual estimator",
+    "3D obstacle/overhang layer",
+    "student learning and simulator/runtime profiling"
+  ]
+}

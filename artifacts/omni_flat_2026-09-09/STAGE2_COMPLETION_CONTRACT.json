@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "status": "not_complete",
+  "user_requirement": "Every direction and path-following maneuver must reach the smoothness of the liked forward walk; zero command must settle into a quiet static stance.",
+  "reference": {
+    "benchmark_1_checkpoint_sha256": "5ecbe978d659413dc050fec93b0e211a3eadf6ce1c807790d87c14044ff245a2",
+    "current_liked_video": "omni_preview_001/rollout.mp4",
+    "current_checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8"
+  },
+  "required_motion_cases": [
+    "stand after reset",
+    "forward",
+    "reverse",
+    "left strafe",
+    "right strafe",
+    "all evaluated diagonal bearings",
+    "left turn",
+    "right turn",
+    "translation with both yaw signs",
+    "fixed-heading curved path",
+    "direction reversal",
+    "arc curvature reversal",
+    "walk-to-stop",
+    "turn-to-stop",
+    "stop-to-walk"
+  ],
+  "evidence_required": [
+    "Existing static and transition tracking/stability/motor gates pass on matched checkpoint and source",
+    "Same-speed same-view actual-simulation video review across required cases",
+    "Per-case joint motion and target changes, body velocity/yaw variation, drift, contact slip and requested/applied torque",
+    "Quiet stance after settling; distinguish intended response to a disturbance from spontaneous chatter",
+    "Held-out seeds and robustness checks within the declared operating envelope"
+  ],
+  "visual_review": {
+    "status": "pending",
+    "all_cases_comparable_to_reference": false
+  },
+  "automatic_completion_prohibited_on": [
+    "training budget completion",
+    "mean reward",
+    "aggregate median",
+    "one forward demo",
+    "short diagnostic pass"
+  ],
+  "quantitative_smoothness_thresholds": "Calibrate from matched reference traces and validated standing controls; do not invent a pass by relaxing motor or failure limits."
+}

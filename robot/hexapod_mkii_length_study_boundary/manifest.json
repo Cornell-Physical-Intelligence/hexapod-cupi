@@ -1,0 +1,1394 @@
+{
+  "schema_version": 1,
+  "study": {
+    "schema_version": 1,
+    "geometry_urdf": "robot/hexapod_mkii_mock_assy/urdf/hexapod_mkii_robstride.urdf",
+    "inertia_urdf": "robot/hexapod_mkii_assy/urdf/hexapod_mkii_serial.urdf",
+    "actuator_config": "isaaclab/hexapod_rl/asset_cfg.py",
+    "femur_scales": [
+      0.4,
+      0.45,
+      0.55
+    ],
+    "tibia_scales": [
+      0.5,
+      0.6,
+      0.8
+    ],
+    "inertia_policy": "fixed_transferred_tensor",
+    "com_policy": "scale_longitudinal_offset_about_proximal_joint",
+    "body_alignment": "align_bottom_planes_keep_xyz_directions",
+    "screening_pose_mock_rad": {
+      "coxa": 0.0,
+      "femur": 0.6108652381980153,
+      "tibia": 2.181661564992912
+    },
+    "reset_clearance_m": 0.006,
+    "distal_foot_fraction": 0.93,
+    "leg_to_mock_suffix": {
+      "lf": "_1",
+      "lm": "_5",
+      "lr": "_2",
+      "rf": "_3",
+      "rm": "",
+      "rr": "_4"
+    }
+  },
+  "source_sha256": {
+    "robot/hexapod_mkii_mock_assy/urdf/hexapod_mkii_robstride.urdf": "0b51db0e955f205bb170217f189afb318faac692c2f07caef7959bab8c9250c1",
+    "robot/hexapod_mkii_assy/urdf/hexapod_mkii_serial.urdf": "6109956e9e3a7a648bc4afa7310904c2fd3f7cb790e157d83212339a73b7fbc0",
+    "isaaclab/hexapod_rl/asset_cfg.py": "82838570f44fa7cd84cbd82e363b2b33ebedd0059c67b5cdeb82f46ef6e96fd4",
+    "robot/tools/generate_length_study.py": "48d51c087803305575a45f044766b20c2d557f7e625e84b0cf14e86780a5dc39",
+    "study_config_sha256": "3ca978a43ced0e9d6122d1014969bd74cf63f40d926aaf91c1bdef766cdca8e7",
+    "robot/hexapod_mkii_mock_assy/meshes/BODY_MOCK.stl": "32ee3b35f18aad4ce8b14ad5c1b5760ce65410cfc6818b1a88638dafba4ccc8f",
+    "robot/hexapod_mkii_mock_assy/meshes/Coxa.stl": "2b90f15628af3c22d30c5126d8f6ecca318dff4a06fcf8b0b2643017de2ec1b2",
+    "robot/hexapod_mkii_mock_assy/meshes/Femur.stl": "4e63e31386340b23fa5476ae487585dee8c57bfcd82c38f144af1c76dbbc83db",
+    "robot/hexapod_mkii_mock_assy/meshes/Tibia.stl": "0fc66d741ac055da6226409286c641b843d021b5e92d14afe2c7d42872ff56ef"
+  },
+  "variant_count": 9,
+  "link_joint_mapping": {
+    "lf": {
+      "links": {
+        "coxa": "coxa_1",
+        "femur": "femur_1",
+        "tibia": "tibia_1"
+      },
+      "joints": {
+        "coxa": "revolute_1_1",
+        "femur": "revolute_1",
+        "tibia": "revolute_2"
+      }
+    },
+    "lm": {
+      "links": {
+        "coxa": "coxa_5",
+        "femur": "femur_5",
+        "tibia": "tibia_5"
+      },
+      "joints": {
+        "coxa": "revolute_2_5",
+        "femur": "revolute_1_5",
+        "tibia": "revolute_2_4"
+      }
+    },
+    "lr": {
+      "links": {
+        "coxa": "coxa_2",
+        "femur": "femur_2",
+        "tibia": "tibia_2"
+      },
+      "joints": {
+        "coxa": "revolute_1_7",
+        "femur": "revolute_1_6",
+        "tibia": "revolute_2_6"
+      }
+    },
+    "rf": {
+      "links": {
+        "coxa": "coxa_3",
+        "femur": "femur_3",
+        "tibia": "tibia_3"
+      },
+      "joints": {
+        "coxa": "revolute_4",
+        "femur": "revolute_1_4",
+        "tibia": "revolute_2_3"
+      }
+    },
+    "rm": {
+      "links": {
+        "coxa": "coxa",
+        "femur": "femur",
+        "tibia": "tibia"
+      },
+      "joints": {
+        "coxa": "revolute_5",
+        "femur": "revolute_1_2",
+        "tibia": "revolute_2_1"
+      }
+    },
+    "rr": {
+      "links": {
+        "coxa": "coxa_4",
+        "femur": "femur_4",
+        "tibia": "tibia_4"
+      },
+      "joints": {
+        "coxa": "revolute_3",
+        "femur": "revolute_1_3",
+        "tibia": "revolute_2_2"
+      }
+    }
+  },
+  "runtime_joint_order": "UNOBSERVED: resolve by joint name after import",
+  "joint_convention": "ARCHIVED MOCK: femur zero horizontal/positive raises; tibia zero straight/positive closes; body root is TOP of mock plate",
+  "body_bottom_in_root_m": -0.023,
+  "baseline_lengths_m": {
+    "femur_hip_to_knee": 0.145,
+    "tibia_knee_to_distal_mesh_tip": 0.21000001406669616,
+    "coxa_yaw_to_hip_3d": 0.05545353843182597,
+    "coxa_yaw_to_hip_horizontal": 0.04771826091351192
+  },
+  "inertial_transfer": {
+    "body_mock": {
+      "source_link": "body",
+      "source_to_mock_rotation": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "translation_m": [
+        0.0,
+        0.0,
+        -0.023
+      ]
+    },
+    "coxa_1": {
+      "source_link": "lf_coxa",
+      "source_to_mock_rotation": [
+        [
+          -0.9924758014910607,
+          -0.12244093863849984,
+          0.0
+        ],
+        [
+          -0.12244093863849984,
+          0.9924758014910607,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "femur_1": {
+      "source_link": "lf_femur",
+      "source_to_mock_rotation": [
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.6939074562919232,
+          -0.7200641930428652,
+          0.0
+        ],
+        [
+          0.7200641930428652,
+          -0.6939074562919232,
+          0.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "tibia_1": {
+      "source_link": "lf_tibia",
+      "source_to_mock_rotation": [
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.4890649318517641,
+          0.8722473802957674,
+          0.0
+        ],
+        [
+          -0.8722473802957674,
+          -0.4890649318517641,
+          0.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "coxa_5": {
+      "source_link": "lm_coxa",
+      "source_to_mock_rotation": [
+        [
+          -0.8907449848319687,
+          -0.45450343452684233,
+          0.0
+        ],
+        [
+          -0.45450343452684233,
+          0.8907449848319687,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "femur_5": {
+      "source_link": "lm_femur",
+      "source_to_mock_rotation": [
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.6939074562919181,
+          -0.7200641930428702,
+          0.0
+        ],
+        [
+          0.7200641930428702,
+          -0.6939074562919181,
+          0.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "tibia_5": {
+      "source_link": "lm_tibia",
+      "source_to_mock_rotation": [
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.489065640028632,
+          0.872246983224009,
+          0.0
+        ],
+        [
+          -0.872246983224009,
+          -0.489065640028632,
+          0.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "coxa_2": {
+      "source_link": "lr_coxa",
+      "source_to_mock_rotation": [
+        [
+          -0.6815772644726327,
+          -0.7317461530845264,
+          0.0
+        ],
+        [
+          -0.7317461530845265,
+          0.6815772644726327,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "femur_2": {
+      "source_link": "lr_femur",
+      "source_to_mock_rotation": [
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.6939074562919232,
+          -0.7200641930428652,
+          0.0
+        ],
+        [
+          0.7200641930428652,
+          -0.6939074562919232,
+          0.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "tibia_2": {
+      "source_link": "lr_tibia",
+      "source_to_mock_rotation": [
+        [
+          0.0,
+          0.0,
+          1.0
+        ],
+        [
+          -0.48906466168754387,
+          0.872247531775498,
+          0.0
+        ],
+        [
+          -0.872247531775498,
+          -0.48906466168754387,
+          0.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "coxa_3": {
+      "source_link": "rf_coxa",
+      "source_to_mock_rotation": [
+        [
+          0.6815772644726327,
+          0.7317461530845264,
+          0.0
+        ],
+        [
+          -0.7317461530845265,
+          0.6815772644726327,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "femur_3": {
+      "source_link": "rf_femur",
+      "source_to_mock_rotation": [
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          -0.6939074562919231,
+          -0.7200641930428653,
+          0.0
+        ],
+        [
+          -0.7200641930428653,
+          0.6939074562919231,
+          0.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "tibia_3": {
+      "source_link": "rf_tibia",
+      "source_to_mock_rotation": [
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          -0.4890666168742706,
+          0.8722464355095729,
+          0.0
+        ],
+        [
+          0.8722464355095729,
+          0.4890666168742706,
+          0.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "coxa": {
+      "source_link": "rm_coxa",
+      "source_to_mock_rotation": [
+        [
+          0.8907449848320174,
+          0.454503434526747,
+          0.0
+        ],
+        [
+          -0.454503434526747,
+          0.8907449848320174,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "femur": {
+      "source_link": "rm_femur",
+      "source_to_mock_rotation": [
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          -0.6939074562919231,
+          -0.7200641930428653,
+          0.0
+        ],
+        [
+          -0.7200641930428653,
+          0.6939074562919231,
+          0.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "tibia": {
+      "source_link": "rm_tibia",
+      "source_to_mock_rotation": [
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          -0.4890647443984606,
+          0.8722474853999111,
+          0.0
+        ],
+        [
+          0.8722474853999111,
+          0.4890647443984606,
+          0.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "coxa_4": {
+      "source_link": "rr_coxa",
+      "source_to_mock_rotation": [
+        [
+          0.9924758014910607,
+          0.12244093863849984,
+          0.0
+        ],
+        [
+          -0.12244093863849984,
+          0.9924758014910607,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "femur_4": {
+      "source_link": "rr_femur",
+      "source_to_mock_rotation": [
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          -0.6939074562919231,
+          -0.7200641930428653,
+          0.0
+        ],
+        [
+          -0.7200641930428653,
+          0.6939074562919231,
+          0.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    },
+    "tibia_4": {
+      "source_link": "rr_tibia",
+      "source_to_mock_rotation": [
+        [
+          0.0,
+          0.0,
+          -1.0
+        ],
+        [
+          -0.48906510026194194,
+          0.8722472858689654,
+          0.0
+        ],
+        [
+          0.8722472858689654,
+          0.48906510026194194,
+          0.0
+        ]
+      ],
+      "translation_m": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "actuator_config_snapshot": {
+    "joint_names_expr": [
+      ".*"
+    ],
+    "saturation_effort": 5.5,
+    "effort_limit": 1.6,
+    "effort_limit_sim": 5.5,
+    "velocity_limit": 50.26548245743668,
+    "velocity_limit_sim": 55.29203070318036,
+    "stiffness": 30.0,
+    "damping": 0.6,
+    "armature": 0.0007,
+    "friction": 0.01,
+    "dynamic_friction": 0.01,
+    "viscous_friction": 0.002
+  },
+  "urdf_effort_is_peak_not_continuous": true,
+  "training_ready": false,
+  "variants": [
+    {
+      "variant": "f040_t050",
+      "femur_scale": 0.4,
+      "tibia_scale": 0.5,
+      "femur_length_m": 0.057999999999999996,
+      "tibia_length_m": 0.10500000703334808,
+      "max_abs_static_hold_torque_nm": 0.5486911848961364,
+      "static_torque_margin_nm": 1.0513088151038636,
+      "six_foot_geometry_eligible": true,
+      "reset_root_height_m": 0.12898268333509477,
+      "simulation_validated": false,
+      "urdf": "urdf/f040_t050.urdf",
+      "sha256": "aa30fe5fdbe40ea4711bb58a0ee2a2861aad63305e1f6e8cc75782e8d87a0f76",
+      "is_unchanged_length_baseline": false,
+      "audit": {
+        "physical_links": 19,
+        "revolute_joints": 18,
+        "total_mass_kg": 8.260811339999998,
+        "minimum_principal_inertia_kg_m2": 2.973486528831611e-05,
+        "static_structure_pass": true
+      },
+      "screening": {
+        "method": "six_foot_static_gravity_balance_at_common_mock_pose",
+        "joint_positions_rad": {
+          "revolute_1_1": 0.0,
+          "revolute_1": 0.6108652381980153,
+          "revolute_2": 2.181661564992912,
+          "revolute_2_5": 0.0,
+          "revolute_1_5": 0.6108652381980153,
+          "revolute_2_4": 2.181661564992912,
+          "revolute_1_7": 0.0,
+          "revolute_1_6": 0.6108652381980153,
+          "revolute_2_6": 2.181661564992912,
+          "revolute_4": 0.0,
+          "revolute_1_4": 0.6108652381980153,
+          "revolute_2_3": 2.181661564992912,
+          "revolute_5": 0.0,
+          "revolute_1_2": 0.6108652381980153,
+          "revolute_2_1": 2.181661564992912,
+          "revolute_3": 0.0,
+          "revolute_1_3": 0.6108652381980153,
+          "revolute_2_2": 2.181661564992912
+        },
+        "signed_hold_torques_nm": {
+          "revolute_1_1": -4.120155030288473e-17,
+          "revolute_1": -0.4142417453067878,
+          "revolute_2": -0.06139801668720237,
+          "revolute_2_5": -4.871772039178794e-17,
+          "revolute_1_5": -0.5364244183082284,
+          "revolute_2_4": 0.05192166713845057,
+          "revolute_1_7": -5.565363933617201e-17,
+          "revolute_1_6": -0.5486911848961364,
+          "revolute_2_6": 0.052929045119021086,
+          "revolute_4": 1.9943451888556516e-06,
+          "revolute_1_4": -0.5320459224333802,
+          "revolute_2_3": 0.051560836260867375,
+          "revolute_5": -2.109562661027036e-06,
+          "revolute_1_2": -0.5451240166169629,
+          "revolute_2_1": 0.05263600498395255,
+          "revolute_3": 1.6649671706591279e-06,
+          "revolute_1_3": -0.437653155072494,
+          "revolute_2_2": -0.06369628042803498
+        },
+        "max_abs_hold_torque_nm": 0.5486911848961364,
+        "normal_reactions_n": [
+          13.238479530139617,
+          13.424994351580496,
+          13.662017130550533,
+          13.340413293723136,
+          13.593069855609258,
+          13.779585083797054
+        ],
+        "balance_residual": 1.1368683772161603e-13,
+        "foot_height_spread_m": 1.7285601186523003e-07,
+        "nonfoot_mesh_vertex_clearance_m": 0.025000026862256053,
+        "root_height_at_contact_m": 0.12298268333509477,
+        "suggested_reset_root_height_m": 0.12898268333509477,
+        "six_foot_geometry_eligible": true,
+        "simulation_validated": false,
+        "training_ready": false,
+        "below_continuous_limit_at_screening_pose": true
+      },
+      "distal_foot_min_y_m": 0.09765000654101372,
+      "foot_tip_offset_y_m": 0.10500000703334808
+    },
+    {
+      "variant": "f040_t060",
+      "femur_scale": 0.4,
+      "tibia_scale": 0.6,
+      "femur_length_m": 0.057999999999999996,
+      "tibia_length_m": 0.12600000844001769,
+      "max_abs_static_hold_torque_nm": 0.5406758756825574,
+      "static_torque_margin_nm": 1.0593241243174427,
+      "six_foot_geometry_eligible": true,
+      "reset_root_height_m": 0.14998268474169046,
+      "simulation_validated": false,
+      "urdf": "urdf/f040_t060.urdf",
+      "sha256": "0ef689147120e64a471d0e1792c28b74a65cce1307a7f99a10f8a7fe61805aaf",
+      "is_unchanged_length_baseline": false,
+      "audit": {
+        "physical_links": 19,
+        "revolute_joints": 18,
+        "total_mass_kg": 8.260811339999998,
+        "minimum_principal_inertia_kg_m2": 2.973486528831611e-05,
+        "static_structure_pass": true
+      },
+      "screening": {
+        "method": "six_foot_static_gravity_balance_at_common_mock_pose",
+        "joint_positions_rad": {
+          "revolute_1_1": 0.0,
+          "revolute_1": 0.6108652381980153,
+          "revolute_2": 2.181661564992912,
+          "revolute_2_5": 0.0,
+          "revolute_1_5": 0.6108652381980153,
+          "revolute_2_4": 2.181661564992912,
+          "revolute_1_7": 0.0,
+          "revolute_1_6": 0.6108652381980153,
+          "revolute_2_6": 2.181661564992912,
+          "revolute_4": 0.0,
+          "revolute_1_4": 0.6108652381980153,
+          "revolute_2_3": 2.181661564992912,
+          "revolute_5": 0.0,
+          "revolute_1_2": 0.6108652381980153,
+          "revolute_2_1": 2.181661564992912,
+          "revolute_3": 0.0,
+          "revolute_1_3": 0.6108652381980153,
+          "revolute_2_2": 2.181661564992912
+        },
+        "signed_hold_torques_nm": {
+          "revolute_1_1": -4.2646766390425854e-17,
+          "revolute_1": -0.4257686778484843,
+          "revolute_2": -0.06253043771564754,
+          "revolute_2_5": -4.9212503838556e-17,
+          "revolute_1_5": -0.5406092861920204,
+          "revolute_2_4": 0.05226528001820437,
+          "revolute_1_7": -4.9975992467344346e-17,
+          "revolute_1_6": -0.5406758756825574,
+          "revolute_2_6": 0.05227092076300728,
+          "revolute_4": 2.034180408261695e-06,
+          "revolute_1_4": -0.5406004607882153,
+          "revolute_2_3": 0.052262995738332346,
+          "revolute_5": -2.086844499348237e-06,
+          "revolute_1_2": -0.5406694164513213,
+          "revolute_2_1": 0.052270244733332485,
+          "revolute_3": 1.6014262923533977e-06,
+          "revolute_1_3": -0.4259009950833481,
+          "revolute_2_2": -0.06254149093063029
+        },
+        "max_abs_hold_torque_nm": 0.5406758756825574,
+        "normal_reactions_n": [
+          13.504931549942645,
+          13.505844463612954,
+          13.507164297465422,
+          13.50568878515423,
+          13.507008616544509,
+          13.507921532680243
+        ],
+        "balance_residual": 2.842170943040401e-14,
+        "foot_height_spread_m": 1.7285601186523003e-07,
+        "nonfoot_mesh_vertex_clearance_m": 0.030000028054331357,
+        "root_height_at_contact_m": 0.14398268474169046,
+        "suggested_reset_root_height_m": 0.14998268474169046,
+        "six_foot_geometry_eligible": true,
+        "simulation_validated": false,
+        "training_ready": false,
+        "below_continuous_limit_at_screening_pose": true
+      },
+      "distal_foot_min_y_m": 0.11718000784921645,
+      "foot_tip_offset_y_m": 0.12600000844001769
+    },
+    {
+      "variant": "f040_t080",
+      "femur_scale": 0.4,
+      "tibia_scale": 0.8,
+      "femur_length_m": 0.057999999999999996,
+      "tibia_length_m": 0.16800001125335695,
+      "max_abs_static_hold_torque_nm": 0.5406757939558994,
+      "static_torque_margin_nm": 1.0593242060441006,
+      "six_foot_geometry_eligible": true,
+      "reset_root_height_m": 0.19198268755488185,
+      "simulation_validated": false,
+      "urdf": "urdf/f040_t080.urdf",
+      "sha256": "040d76b3c2d83925310872063fd79e585c59bff6b549bf19324837ee1f151af2",
+      "is_unchanged_length_baseline": false,
+      "audit": {
+        "physical_links": 19,
+        "revolute_joints": 18,
+        "total_mass_kg": 8.260811339999998,
+        "minimum_principal_inertia_kg_m2": 2.973486528831611e-05,
+        "static_structure_pass": true
+      },
+      "screening": {
+        "method": "six_foot_static_gravity_balance_at_common_mock_pose",
+        "joint_positions_rad": {
+          "revolute_1_1": 0.0,
+          "revolute_1": 0.6108652381980153,
+          "revolute_2": 2.181661564992912,
+          "revolute_2_5": 0.0,
+          "revolute_1_5": 0.6108652381980153,
+          "revolute_2_4": 2.181661564992912,
+          "revolute_1_7": 0.0,
+          "revolute_1_6": 0.6108652381980153,
+          "revolute_2_6": 2.181661564992912,
+          "revolute_4": 0.0,
+          "revolute_1_4": 0.6108652381980153,
+          "revolute_2_3": 2.181661564992912,
+          "revolute_5": 0.0,
+          "revolute_1_2": 0.6108652381980153,
+          "revolute_2_1": 2.181661564992912,
+          "revolute_3": 0.0,
+          "revolute_1_3": 0.6108652381980153,
+          "revolute_2_2": 2.181661564992912
+        },
+        "signed_hold_torques_nm": {
+          "revolute_1_1": -4.2646774543438913e-17,
+          "revolute_1": -0.4257687428764124,
+          "revolute_2": -0.06253044410381484,
+          "revolute_2_5": -4.921250431156905e-17,
+          "revolute_1_5": -0.5406092901927522,
+          "revolute_2_4": 0.05226528034669254,
+          "revolute_1_7": -4.997598312468696e-17,
+          "revolute_1_6": -0.5406757939558994,
+          "revolute_2_6": 0.05227091405255832,
+          "revolute_4": 2.0341807889059065e-06,
+          "revolute_1_4": -0.5406000513800662,
+          "revolute_2_3": 0.05226251129701785,
+          "revolute_5": -2.0868444787568577e-06,
+          "revolute_1_2": -0.5406694124084668,
+          "revolute_2_1": 0.052270244396537165,
+          "revolute_3": 1.6014259408556e-06,
+          "revolute_1_3": -0.42590142130549524,
+          "revolute_2_2": -0.06254099330934197
+        },
+        "max_abs_hold_torque_nm": 0.5406757939558994,
+        "normal_reactions_n": [
+          13.504933053097034,
+          13.50584454090574,
+          13.507162718536426,
+          13.505690364439115,
+          13.50700853853998,
+          13.507920029881749
+        ],
+        "balance_residual": 7.105427357601002e-14,
+        "foot_height_spread_m": 1.7285601183747445e-07,
+        "nonfoot_mesh_vertex_clearance_m": 0.040000030438481965,
+        "root_height_at_contact_m": 0.18598268755488184,
+        "suggested_reset_root_height_m": 0.19198268755488185,
+        "six_foot_geometry_eligible": true,
+        "simulation_validated": false,
+        "training_ready": false,
+        "below_continuous_limit_at_screening_pose": true
+      },
+      "distal_foot_min_y_m": 0.15624001046562197,
+      "foot_tip_offset_y_m": 0.16800001125335695
+    },
+    {
+      "variant": "f045_t050",
+      "femur_scale": 0.45,
+      "tibia_scale": 0.5,
+      "femur_length_m": 0.06525,
+      "tibia_length_m": 0.10500000703334808,
+      "max_abs_static_hold_torque_nm": 0.6099766277517246,
+      "static_torque_margin_nm": 0.9900233722482755,
+      "six_foot_geometry_eligible": true,
+      "reset_root_height_m": 0.12482425956156187,
+      "simulation_validated": false,
+      "urdf": "urdf/f045_t050.urdf",
+      "sha256": "2eff56b571ccaa148ae5e770009885b192760b96a2a3c7bbee8ef1f2ae50ad72",
+      "is_unchanged_length_baseline": false,
+      "audit": {
+        "physical_links": 19,
+        "revolute_joints": 18,
+        "total_mass_kg": 8.260811339999998,
+        "minimum_principal_inertia_kg_m2": 2.973486528831611e-05,
+        "static_structure_pass": true
+      },
+      "screening": {
+        "method": "six_foot_static_gravity_balance_at_common_mock_pose",
+        "joint_positions_rad": {
+          "revolute_1_1": 0.0,
+          "revolute_1": 0.6108652381980153,
+          "revolute_2": 2.181661564992912,
+          "revolute_2_5": 0.0,
+          "revolute_1_5": 0.6108652381980153,
+          "revolute_2_4": 2.181661564992912,
+          "revolute_1_7": 0.0,
+          "revolute_1_6": 0.6108652381980153,
+          "revolute_2_6": 2.181661564992912,
+          "revolute_4": 0.0,
+          "revolute_1_4": 0.6108652381980153,
+          "revolute_2_3": 2.181661564992912,
+          "revolute_5": 0.0,
+          "revolute_1_2": 0.6108652381980153,
+          "revolute_2_1": 2.181661564992912,
+          "revolute_3": 0.0,
+          "revolute_1_3": 0.6108652381980153,
+          "revolute_2_2": 2.181661564992912
+        },
+        "signed_hold_torques_nm": {
+          "revolute_1_1": -4.482042137720268e-17,
+          "revolute_1": -0.4731908467892989,
+          "revolute_2": -0.06141223577735909,
+          "revolute_2_5": -5.2401514112604873e-17,
+          "revolute_1_5": -0.5964630538093625,
+          "revolute_2_4": 0.05193245542200961,
+          "revolute_1_7": -5.940552244958107e-17,
+          "revolute_1_6": -0.6099766277517246,
+          "revolute_2_6": 0.05292798808289362,
+          "revolute_4": 2.1425607022689643e-06,
+          "revolute_1_4": -0.5914636702867623,
+          "revolute_2_3": 0.051562885707359285,
+          "revolute_5": -2.270397898478805e-06,
+          "revolute_1_2": -0.6058611537922526,
+          "revolute_2_1": 0.05262472052277839,
+          "revolute_3": 1.818701932626545e-06,
+          "revolute_1_3": -0.4994808079672582,
+          "revolute_2_2": -0.06368156539028444
+        },
+        "max_abs_hold_torque_nm": 0.6099766277517246,
+        "normal_reactions_n": [
+          13.241825198576048,
+          13.427532771953455,
+          13.66176841609784,
+          13.340895527263731,
+          13.590414688143179,
+          13.776122643365763
+        ],
+        "balance_residual": 2.842170943040401e-14,
+        "foot_height_spread_m": 1.8363596765436085e-07,
+        "nonfoot_mesh_vertex_clearance_m": 0.025000026862256053,
+        "root_height_at_contact_m": 0.11882425956156187,
+        "suggested_reset_root_height_m": 0.12482425956156187,
+        "six_foot_geometry_eligible": true,
+        "simulation_validated": false,
+        "training_ready": false,
+        "below_continuous_limit_at_screening_pose": true
+      },
+      "distal_foot_min_y_m": 0.09765000654101372,
+      "foot_tip_offset_y_m": 0.10500000703334808
+    },
+    {
+      "variant": "f045_t060",
+      "femur_scale": 0.45,
+      "tibia_scale": 0.6,
+      "femur_length_m": 0.06525,
+      "tibia_length_m": 0.12600000844001769,
+      "max_abs_static_hold_torque_nm": 0.6010560676240977,
+      "static_torque_margin_nm": 0.9989439323759024,
+      "six_foot_geometry_eligible": true,
+      "reset_root_height_m": 0.14582426096815757,
+      "simulation_validated": false,
+      "urdf": "urdf/f045_t060.urdf",
+      "sha256": "fa060dcf856f17808263a7b9ec995bbad1d5aefc0eb624403123e4c91492d495",
+      "is_unchanged_length_baseline": false,
+      "audit": {
+        "physical_links": 19,
+        "revolute_joints": 18,
+        "total_mass_kg": 8.260811339999998,
+        "minimum_principal_inertia_kg_m2": 2.973486528831611e-05,
+        "static_structure_pass": true
+      },
+      "screening": {
+        "method": "six_foot_static_gravity_balance_at_common_mock_pose",
+        "joint_positions_rad": {
+          "revolute_1_1": 0.0,
+          "revolute_1": 0.6108652381980153,
+          "revolute_2": 2.181661564992912,
+          "revolute_2_5": 0.0,
+          "revolute_1_5": 0.6108652381980153,
+          "revolute_2_4": 2.181661564992912,
+          "revolute_1_7": 0.0,
+          "revolute_1_6": 0.6108652381980153,
+          "revolute_2_6": 2.181661564992912,
+          "revolute_4": 0.0,
+          "revolute_1_4": 0.6108652381980153,
+          "revolute_2_3": 2.181661564992912,
+          "revolute_5": 0.0,
+          "revolute_1_2": 0.6108652381980153,
+          "revolute_2_1": 2.181661564992912,
+          "revolute_3": 0.0,
+          "revolute_1_3": 0.6108652381980153,
+          "revolute_2_2": 2.181661564992912
+        },
+        "signed_hold_torques_nm": {
+          "revolute_1_1": -4.634328525366642e-17,
+          "revolute_1": -0.4861365787414328,
+          "revolute_2": -0.06253052288905013,
+          "revolute_2_5": -5.290935841308658e-17,
+          "revolute_1_5": -0.600982657022533,
+          "revolute_2_4": 0.05226535695105867,
+          "revolute_1_7": -5.367321718944482e-17,
+          "revolute_1_6": -0.6010560676240977,
+          "revolute_2_6": 0.05227092418448792,
+          "revolute_4": 2.1847198889478216e-06,
+          "revolute_1_4": -0.6009718848606008,
+          "revolute_2_3": 0.0522629923167629,
+          "revolute_5": -2.247061155962265e-06,
+          "revolute_1_2": -0.6010476064595537,
+          "revolute_2_1": 0.05227016780082074,
+          "revolute_3": 1.751994158814215e-06,
+          "revolute_1_3": -0.48628464443389796,
+          "revolute_2_2": -0.06254140575935892
+        },
+        "max_abs_hold_torque_nm": 0.6010560676240977,
+        "normal_reactions_n": [
+          13.504951590744236,
+          13.505862565466101,
+          13.507165102519918,
+          13.505687980057367,
+          13.506990514776144,
+          13.507901491836234
+        ],
+        "balance_residual": 1.4210854715202004e-14,
+        "foot_height_spread_m": 1.8363596765436085e-07,
+        "nonfoot_mesh_vertex_clearance_m": 0.030000028054331357,
+        "root_height_at_contact_m": 0.13982426096815756,
+        "suggested_reset_root_height_m": 0.14582426096815757,
+        "six_foot_geometry_eligible": true,
+        "simulation_validated": false,
+        "training_ready": false,
+        "below_continuous_limit_at_screening_pose": true
+      },
+      "distal_foot_min_y_m": 0.11718000784921645,
+      "foot_tip_offset_y_m": 0.12600000844001769
+    },
+    {
+      "variant": "f045_t080",
+      "femur_scale": 0.45,
+      "tibia_scale": 0.8,
+      "femur_length_m": 0.06525,
+      "tibia_length_m": 0.16800001125335695,
+      "max_abs_static_hold_torque_nm": 0.6010559773279888,
+      "static_torque_margin_nm": 0.9989440226720113,
+      "six_foot_geometry_eligible": true,
+      "reset_root_height_m": 0.18782426378134895,
+      "simulation_validated": false,
+      "urdf": "urdf/f045_t080.urdf",
+      "sha256": "ea3a6b89cc94c76b21006c9db2e7666421ed95589dc4b79938cb7f80faa03787",
+      "is_unchanged_length_baseline": false,
+      "audit": {
+        "physical_links": 19,
+        "revolute_joints": 18,
+        "total_mass_kg": 8.260811339999998,
+        "minimum_principal_inertia_kg_m2": 2.973486528831611e-05,
+        "static_structure_pass": true
+      },
+      "screening": {
+        "method": "six_foot_static_gravity_balance_at_common_mock_pose",
+        "joint_positions_rad": {
+          "revolute_1_1": 0.0,
+          "revolute_1": 0.6108652381980153,
+          "revolute_2": 2.181661564992912,
+          "revolute_2_5": 0.0,
+          "revolute_1_5": 0.6108652381980153,
+          "revolute_2_4": 2.181661564992912,
+          "revolute_1_7": 0.0,
+          "revolute_1_6": 0.6108652381980153,
+          "revolute_2_6": 2.181661564992912,
+          "revolute_4": 0.0,
+          "revolute_1_4": 0.6108652381980153,
+          "revolute_2_3": 2.181661564992912,
+          "revolute_5": 0.0,
+          "revolute_1_2": 0.6108652381980153,
+          "revolute_2_1": 2.181661564992912,
+          "revolute_3": 0.0,
+          "revolute_1_3": 0.6108652381980153,
+          "revolute_2_2": 2.181661564992912
+        },
+        "signed_hold_torques_nm": {
+          "revolute_1_1": -4.634329388043447e-17,
+          "revolute_1": -0.4861366520769441,
+          "revolute_2": -0.06253052922370948,
+          "revolute_2_5": -5.290935890506527e-17,
+          "revolute_1_5": -0.6009826614009363,
+          "revolute_2_4": 0.052265357273554164,
+          "revolute_1_7": -5.36732073605162e-17,
+          "revolute_1_6": -0.6010559773279888,
+          "revolute_2_6": 0.05227091753352274,
+          "revolute_4": 2.1847202893972274e-06,
+          "revolute_1_4": -0.6009714840237009,
+          "revolute_2_3": 0.05226250781597144,
+          "revolute_5": -2.247061134539457e-06,
+          "revolute_1_2": -0.601047602035508,
+          "revolute_2_1": 0.05227016747007018,
+          "revolute_3": 1.7519937881913285e-06,
+          "revolute_1_3": -0.486285062349517,
+          "revolute_2_2": -0.06254090819231443
+        },
+        "max_abs_hold_torque_nm": 0.6010559773279888,
+        "normal_reactions_n": [
+          13.504953081308525,
+          13.505862641348847,
+          13.50716353758711,
+          13.505689545339944,
+          13.50699043819391,
+          13.507900001621708
+        ],
+        "balance_residual": 5.684341886080802e-14,
+        "foot_height_spread_m": 1.8363596762660528e-07,
+        "nonfoot_mesh_vertex_clearance_m": 0.040000030438481965,
+        "root_height_at_contact_m": 0.18182426378134894,
+        "suggested_reset_root_height_m": 0.18782426378134895,
+        "six_foot_geometry_eligible": true,
+        "simulation_validated": false,
+        "training_ready": false,
+        "below_continuous_limit_at_screening_pose": true
+      },
+      "distal_foot_min_y_m": 0.15624001046562197,
+      "foot_tip_offset_y_m": 0.16800001125335695
+    },
+    {
+      "variant": "f055_t050",
+      "femur_scale": 0.55,
+      "tibia_scale": 0.5,
+      "femur_length_m": 0.07975,
+      "tibia_length_m": 0.10500000703334808,
+      "max_abs_static_hold_torque_nm": 0.7325279358446177,
+      "static_torque_margin_nm": 0.8674720641553824,
+      "six_foot_geometry_eligible": true,
+      "reset_root_height_m": 0.11650741201449608,
+      "simulation_validated": false,
+      "urdf": "urdf/f055_t050.urdf",
+      "sha256": "621f3fb2163d909108f565ecc7418fa36b1d82c52a0325c5caae20067f7d0686",
+      "is_unchanged_length_baseline": false,
+      "audit": {
+        "physical_links": 19,
+        "revolute_joints": 18,
+        "total_mass_kg": 8.260811339999998,
+        "minimum_principal_inertia_kg_m2": 2.973486528831611e-05,
+        "static_structure_pass": true
+      },
+      "screening": {
+        "method": "six_foot_static_gravity_balance_at_common_mock_pose",
+        "joint_positions_rad": {
+          "revolute_1_1": 0.0,
+          "revolute_1": 0.6108652381980153,
+          "revolute_2": 2.181661564992912,
+          "revolute_2_5": 0.0,
+          "revolute_1_5": 0.6108652381980153,
+          "revolute_2_4": 2.181661564992912,
+          "revolute_1_7": 0.0,
+          "revolute_1_6": 0.6108652381980153,
+          "revolute_2_6": 2.181661564992912,
+          "revolute_4": 0.0,
+          "revolute_1_4": 0.6108652381980153,
+          "revolute_2_3": 2.181661564992912,
+          "revolute_5": 0.0,
+          "revolute_1_2": 0.6108652381980153,
+          "revolute_2_1": 2.181661564992912,
+          "revolute_3": 0.0,
+          "revolute_1_3": 0.6108652381980153,
+          "revolute_2_2": 2.181661564992912
+        },
+        "signed_hold_torques_nm": {
+          "revolute_1_1": -5.2063367649649674e-17,
+          "revolute_1": -0.5911886182856537,
+          "revolute_2": -0.06143930677027538,
+          "revolute_2_5": -5.977144489588767e-17,
+          "revolute_1_5": -0.7165999452917661,
+          "revolute_2_4": 0.05195214871642969,
+          "revolute_1_7": -6.690761307356082e-17,
+          "revolute_1_6": -0.7325279358446177,
+          "revolute_2_6": 0.052925219496638455,
+          "revolute_4": 2.4390699341246757e-06,
+          "revolute_1_4": -0.7103249676278456,
+          "revolute_2_3": 0.051567511011424504,
+          "revolute_5": -2.5919599265146975e-06,
+          "revolute_1_2": -0.7272726960388601,
+          "revolute_2_1": 0.052604098915335205,
+          "revolute_3": 2.1259575354105648e-06,
+          "revolute_1_3": -0.6230333048359603,
+          "revolute_2_2": -0.06365356651925279
+        },
+        "max_abs_hold_torque_nm": 0.7325279358446177,
+        "normal_reactions_n": [
+          13.248194844280848,
+          13.432166489587313,
+          13.661116983855075,
+          13.34198385855927,
+          13.585562544976012,
+          13.769534524141475
+        ],
+        "balance_residual": 1.4210854715202004e-14,
+        "foot_height_spread_m": 2.051958792326225e-07,
+        "nonfoot_mesh_vertex_clearance_m": 0.025000026862256053,
+        "root_height_at_contact_m": 0.11050741201449607,
+        "suggested_reset_root_height_m": 0.11650741201449608,
+        "six_foot_geometry_eligible": true,
+        "simulation_validated": false,
+        "training_ready": false,
+        "below_continuous_limit_at_screening_pose": true
+      },
+      "distal_foot_min_y_m": 0.09765000654101372,
+      "foot_tip_offset_y_m": 0.10500000703334808
+    },
+    {
+      "variant": "f055_t060",
+      "femur_scale": 0.55,
+      "tibia_scale": 0.6,
+      "femur_length_m": 0.07975,
+      "tibia_length_m": 0.12600000844001769,
+      "max_abs_static_hold_torque_nm": 0.7218164038473212,
+      "static_torque_margin_nm": 0.8781835961526789,
+      "six_foot_geometry_eligible": true,
+      "reset_root_height_m": 0.13750741342109177,
+      "simulation_validated": false,
+      "urdf": "urdf/f055_t060.urdf",
+      "sha256": "e8ecb9691d0c584d78c2d77b5287cf932b5b31ef7e511f4fd6c9d6b10e46589b",
+      "is_unchanged_length_baseline": false,
+      "audit": {
+        "physical_links": 19,
+        "revolute_joints": 18,
+        "total_mass_kg": 8.260811339999998,
+        "minimum_principal_inertia_kg_m2": 2.973486528831611e-05,
+        "static_structure_pass": true
+      },
+      "screening": {
+        "method": "six_foot_static_gravity_balance_at_common_mock_pose",
+        "joint_positions_rad": {
+          "revolute_1_1": 0.0,
+          "revolute_1": 0.6108652381980153,
+          "revolute_2": 2.181661564992912,
+          "revolute_2_5": 0.0,
+          "revolute_1_5": 0.6108652381980153,
+          "revolute_2_4": 2.181661564992912,
+          "revolute_1_7": 0.0,
+          "revolute_1_6": 0.6108652381980153,
+          "revolute_2_6": 2.181661564992912,
+          "revolute_4": 0.0,
+          "revolute_1_4": 0.6108652381980153,
+          "revolute_2_3": 2.181661564992912,
+          "revolute_5": 0.0,
+          "revolute_1_2": 0.6108652381980153,
+          "revolute_2_1": 2.181661564992912,
+          "revolute_3": 0.0,
+          "revolute_1_3": 0.6108652381980153,
+          "revolute_2_2": 2.181661564992912
+        },
+        "signed_hold_torques_nm": {
+          "revolute_1_1": -5.3736353066788736e-17,
+          "revolute_1": -0.6068729667643312,
+          "revolute_2": -0.06253068433759006,
+          "revolute_2_5": -6.030308426476102e-17,
+          "revolute_1_5": -0.7217298237680444,
+          "revolute_2_4": 0.05226549738207711,
+          "revolute_1_7": -6.10676607003576e-17,
+          "revolute_1_6": -0.7218164038473212,
+          "revolute_2_6": 0.05227092636397425,
+          "revolute_4": 2.485799092007203e-06,
+          "revolute_1_4": -0.7217147806642406,
+          "revolute_2_3": 0.052262990136985515,
+          "revolute_5": -2.567493741473182e-06,
+          "revolute_1_2": -0.7218035613950772,
+          "revolute_2_1": 0.052270027370468666,
+          "revolute_3": 2.053128693765435e-06,
+          "revolute_1_3": -0.6070513568959331,
+          "revolute_2_2": -0.06254124431485089
+        },
+        "max_abs_hold_torque_nm": 0.7218164038473212,
+        "normal_reactions_n": [
+          13.504989578637849,
+          13.505895608067943,
+          13.507165615340375,
+          13.50568746715477,
+          13.50695747233873,
+          13.507863503860376
+        ],
+        "balance_residual": 7.105427357601002e-14,
+        "foot_height_spread_m": 2.051958792326225e-07,
+        "nonfoot_mesh_vertex_clearance_m": 0.030000028054331357,
+        "root_height_at_contact_m": 0.13150741342109176,
+        "suggested_reset_root_height_m": 0.13750741342109177,
+        "six_foot_geometry_eligible": true,
+        "simulation_validated": false,
+        "training_ready": false,
+        "below_continuous_limit_at_screening_pose": true
+      },
+      "distal_foot_min_y_m": 0.11718000784921645,
+      "foot_tip_offset_y_m": 0.12600000844001769
+    },
+    {
+      "variant": "f055_t080",
+      "femur_scale": 0.55,
+      "tibia_scale": 0.8,
+      "femur_length_m": 0.07975,
+      "tibia_length_m": 0.16800001125335695,
+      "max_abs_static_hold_torque_nm": 0.7218162968596796,
+      "static_torque_margin_nm": 0.8781837031403205,
+      "six_foot_geometry_eligible": true,
+      "reset_root_height_m": 0.17950741623428315,
+      "simulation_validated": false,
+      "urdf": "urdf/f055_t080.urdf",
+      "sha256": "d8d917d1c59718af20f8e6fc59e220af3f3a20145d7711c9ee753e4de2a70bbf",
+      "is_unchanged_length_baseline": false,
+      "audit": {
+        "physical_links": 19,
+        "revolute_joints": 18,
+        "total_mass_kg": 8.260811339999998,
+        "minimum_principal_inertia_kg_m2": 2.973486528831611e-05,
+        "static_structure_pass": true
+      },
+      "screening": {
+        "method": "six_foot_static_gravity_balance_at_common_mock_pose",
+        "joint_positions_rad": {
+          "revolute_1_1": 0.0,
+          "revolute_1": 0.6108652381980153,
+          "revolute_2": 2.181661564992912,
+          "revolute_2_5": 0.0,
+          "revolute_1_5": 0.6108652381980153,
+          "revolute_2_4": 2.181661564992912,
+          "revolute_1_7": 0.0,
+          "revolute_1_6": 0.6108652381980153,
+          "revolute_2_6": 2.181661564992912,
+          "revolute_4": 0.0,
+          "revolute_1_4": 0.6108652381980153,
+          "revolute_2_3": 2.181661564992912,
+          "revolute_5": 0.0,
+          "revolute_1_2": 0.6108652381980153,
+          "revolute_2_1": 2.181661564992912,
+          "revolute_3": 0.0,
+          "revolute_1_3": 0.6108652381980153,
+          "revolute_2_2": 2.181661564992912
+        },
+        "signed_hold_torques_nm": {
+          "revolute_1_1": -5.3736362617576175e-17,
+          "revolute_1": -0.606873056303694,
+          "revolute_2": -0.06253069056782973,
+          "revolute_2_5": -6.030308479246539e-17,
+          "revolute_1_5": -0.7217298288599512,
+          "revolute_2_4": 0.052265497693100633,
+          "revolute_1_7": -6.106764992425179e-17,
+          "revolute_1_6": -0.7218162968596796,
+          "revolute_2_6": 0.05227091982883947,
+          "revolute_4": 2.4857995310336777e-06,
+          "revolute_1_4": -0.721714396522242,
+          "revolute_2_3": 0.05226250552033735,
+          "revolute_5": -2.5674937184840974e-06,
+          "revolute_1_2": -0.7218035562508558,
+          "revolute_2_1": 0.05227002705129003,
+          "revolute_3": 2.053128285840615e-06,
+          "revolute_1_3": -0.6070517586097005,
+          "revolute_2_2": -0.06254074685362024
+        },
+        "max_abs_hold_torque_nm": 0.7218162968596796,
+        "normal_reactions_n": [
+          13.504991044632797,
+          13.5058956812514,
+          13.507164077661784,
+          13.505689005171336,
+          13.5069573984793,
+          13.507862038203394
+        ],
+        "balance_residual": 2.842170943040401e-14,
+        "foot_height_spread_m": 2.0519587920486693e-07,
+        "nonfoot_mesh_vertex_clearance_m": 0.040000030438481965,
+        "root_height_at_contact_m": 0.17350741623428315,
+        "suggested_reset_root_height_m": 0.17950741623428315,
+        "six_foot_geometry_eligible": true,
+        "simulation_validated": false,
+        "training_ready": false,
+        "below_continuous_limit_at_screening_pose": true
+      },
+      "distal_foot_min_y_m": 0.15624001046562197,
+      "foot_tip_offset_y_m": 0.16800001125335695
+    }
+  ]
+}

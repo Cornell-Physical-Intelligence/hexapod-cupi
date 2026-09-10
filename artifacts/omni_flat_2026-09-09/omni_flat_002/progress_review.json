@@ -1,0 +1,116 @@
+{
+  "status": "completed_campaign_not_qualified",
+  "stages": [
+    {
+      "stage": "stage_000",
+      "checkpoint_sha256": "3ed406ca46d948ff9c438ac9b9817a58df39d842c6264a3dc96dc78bedfd3ef8",
+      "evaluation_sha256": "3d359fdcc08add23a88e77dbdf5f6aa9b7712ef803f46b0a32b89cf86edeb04e",
+      "static_total": 154,
+      "static_passed": 0,
+      "transition_passed": 0,
+      "failed_rows_by_criterion": {
+        "terminations": 124,
+        "truncations": 0,
+        "nonfoot": 106,
+        "saturation": 154,
+        "planar": 152,
+        "yaw": 154,
+        "tilt": 0,
+        "vertical": 151
+      },
+      "median_over_scenarios": {
+        "planar_error_mps": 0.0855233296751976,
+        "yaw_error_rad_s": 0.14055614173412323,
+        "torque_saturation_fraction": 0.14908993244171143,
+        "nonfoot_fraction": 0.006666666828095913,
+        "tilt_rms_deg": 1.1677541159149962,
+        "vertical_velocity_rms_mps": 0.0558465290665832,
+        "positive_mechanical_power_w": 6.639660358428955
+      }
+    },
+    {
+      "stage": "stage_001",
+      "checkpoint_sha256": "075ce50c05a4dd5e69b5a5cea9732c729c8b51c0997765d9e94066cd10e9cf7b",
+      "evaluation_sha256": "560008eed0b69d9f6880453d1b810d77a8cfa22cbb3050da1b6e7390881ae5ae",
+      "static_total": 154,
+      "static_passed": 0,
+      "transition_passed": 0,
+      "failed_rows_by_criterion": {
+        "terminations": 90,
+        "truncations": 0,
+        "nonfoot": 81,
+        "saturation": 154,
+        "planar": 145,
+        "yaw": 152,
+        "tilt": 0,
+        "vertical": 154
+      },
+      "median_over_scenarios": {
+        "planar_error_mps": 0.05329325050115585,
+        "yaw_error_rad_s": 0.13553299009799957,
+        "torque_saturation_fraction": 0.16548657417297363,
+        "nonfoot_fraction": 0.0020138889085501432,
+        "tilt_rms_deg": 1.0520243704174899,
+        "vertical_velocity_rms_mps": 0.053812777299392635,
+        "positive_mechanical_power_w": 5.862887859344482
+      }
+    },
+    {
+      "stage": "stage_002",
+      "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+      "evaluation_sha256": "fdb43fcf7c4fc325d9565231079d0c59ac3fc64b02db07bef1ea03f31cd63975",
+      "static_total": 154,
+      "static_passed": 0,
+      "transition_passed": 0,
+      "failed_rows_by_criterion": {
+        "terminations": 97,
+        "truncations": 0,
+        "nonfoot": 96,
+        "saturation": 154,
+        "planar": 124,
+        "yaw": 154,
+        "tilt": 0,
+        "vertical": 152
+      },
+      "median_over_scenarios": {
+        "planar_error_mps": 0.04626622423529625,
+        "yaw_error_rad_s": 0.11432885751128197,
+        "torque_saturation_fraction": 0.14256973564624786,
+        "nonfoot_fraction": 0.004305555485188961,
+        "tilt_rms_deg": 2.2168626061562264,
+        "vertical_velocity_rms_mps": 0.0548000093567013,
+        "positive_mechanical_power_w": 5.561117649078369
+      }
+    }
+  ],
+  "definitions": [
+    "Saturation is requested/computed torque above1.6Nm, not applied torque above1.6Nm",
+    "Failure counts overlap; one row can fail several criteria",
+    "Current evaluation omits first2s globally but includes later resets; diagnose post-reset contamination separately",
+    "Demo uses ideal simulator pose feedback and cannot replace the open-loop qualification"
+  ],
+  "next_experiment": {
+    "purpose": "identify motor/velocity oscillation before another long run",
+    "unchanged": [
+      "checkpoint",
+      "asset",
+      "1.6Nm applied cap",
+      "command scenarios"
+    ],
+    "record": [
+      "runtime joint_names",
+      "joint target/position/velocity",
+      "computed/applied torque",
+      "termination cause and time-since-reset",
+      "body velocity vs finite-difference pose",
+      "per-joint saturation duration and tracking error"
+    ],
+    "comparisons": [
+      "existing controller",
+      "one change: target slew0.06 to0.03rad per20ms",
+      "separate numerical probe: external-forces-every-iteration solver option if available"
+    ],
+    "follow_up": "If oscillation is physical, short PPO continuation with stronger motor-demand/smoothness costs; keep gates fixed",
+    "not_started": true
+  }
+}
