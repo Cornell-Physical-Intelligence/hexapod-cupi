@@ -1,0 +1,39 @@
+{
+  "schema": "independent_learning_host_review_v1",
+  "reviewed_utc": "2026-09-10T13:44:22.298388+00:00",
+  "files_sha256": {
+    "tmp/reference_learning_ppo_launch_001/launch_learning_ppo_spark.py": "409b3c5b32372a47f7a8e1df7344f51cb1c370b557079d17b9b0819005b97069",
+    "tmp/reference_learning_ppo_launch_001/test_host.py": "ab6cbb0a7b7632649ea4cdd9c57f920accdb3936948569b0fc5b10d36a1a9217",
+    "tmp/reference_moving_ppo_003/campaign_contract.py": "2eae8f33a87c4f2b310db16887d5cd71c385211a3110e2ecf07a745cbbb8099b",
+    "tmp/reference_moving_ppo_003/run_moving_ppo.py": "5dddf1251c2f3d1bb76456a1aeb41ba7291c275ddea372d57f4fbf6e7137fe71",
+    "tmp/reference_moving_ppo_launch_001/launch_moving_ppo_spark.py": "2fcf3dcbf7b66ab0726e97dafd215144fb807b45e3d10bef156271ef4767e4b5"
+  },
+  "test_command": "PYTHONDONTWRITEBYTECODE=1 uv run python -B -m unittest discover -s tmp/reference_learning_ppo_launch_001 -p 'test_host.py'",
+  "tests_passed": 28,
+  "test_elapsed_s": 0.107,
+  "exit_code": 0,
+  "unchanged_ast_from_moving001": {
+    "run_owned": true,
+    "owned_container": true,
+    "tree_hashes": true
+  },
+  "resolved_findings": [
+    "Exact external decision SHA is verified before and after every allocated phase, and at finalization.",
+    "Admission campaign/root accepted and hash receipts plus existing admission job/log payloads receive explicit read-only mounts during learning."
+  ],
+  "reviewed_invariants": [
+    "Admission runs standing, calibration and learning_recovery_32 only, then exits with campaign.json and zero PPO updates.",
+    "Learning requires a completed exact same-host/source admission plus external reviewed ten-update decision and writes a distinct learning_campaign.json.",
+    "Completed checkpoints, receipts and source assets are checked before and after each phase; old phase/checkpoint identities are enforced.",
+    "Only train_10 has an 1800 s bound; all other declared phases remain 600 s; startup/owned cleanup implementation is unchanged.",
+    "No train_25 allocation exists in this host; no automatic subsequent allocation or Stage2 completion claim."
+  ],
+  "remaining_dispatch_requirements": [
+    "Replace PENDING_CONSUMER003_FREEZE with final immutable consumer manifest and freeze the host bundle.",
+    "Verify final constant-only binding delta and actual remote source/host/consumer maps through normal root preflight.",
+    "Actual learning-recovery admission and subsequent review must pass before any ten-update allocation."
+  ],
+  "no_concrete_blocker_in_reviewed_bytes": true,
+  "gpu_or_training_run_performed": false,
+  "full_consumer_review_scope": false
+}

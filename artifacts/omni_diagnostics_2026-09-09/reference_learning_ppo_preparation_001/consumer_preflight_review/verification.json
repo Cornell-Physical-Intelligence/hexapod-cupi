@@ -1,0 +1,40 @@
+{
+  "schema": "moving_consumer003_frozen_preflight_receipt_v1",
+  "consumer_freeze_sha256": "fd9bef87dda976f9b229e7541408d24e674245ca2c51231dfce9075b81d38334",
+  "consumer_payloads": 51,
+  "preflight_sha256": "d6ae77e73ac88b6b02fba9891abbbbfd17f89dd0b225e89ccf241c404199a2b9",
+  "preflight_passed": true,
+  "fresh_standing_admitted": false,
+  "GPU_executed": false,
+  "PPO_updates": 0,
+  "CPU_tests": {
+    "count": 30,
+    "log_sha256": "e1026c12ec460da784cc68ec8295261687de6249f39ecd9459d48730449fef3a"
+  },
+  "late_app_flags": {
+    "learning_recovery_32_tested": true,
+    "log_sha256": "6a2219d7a80afd9c41e97534a8d03d9f51f10fdecee89e34ed914b272b0a206f"
+  },
+  "old_inputs_exact": {
+    "001": {
+      "payloads": 35,
+      "freeze_sha256": "dd49fd3e3639e453b067b9d4d67e5465db20865200c6a17616dd6936b527b842"
+    },
+    "002": {
+      "payloads": 40,
+      "freeze_sha256": "23b3405c99931cfd675db6074b7e05f41cb5717b90af26b761efebfaf94bd4ee"
+    }
+  },
+  "host_api": {
+    "preflight": "verify_inputs(args, require_standing=False)",
+    "actual_admission": "verify_inputs(args, require_standing=True)",
+    "learning_allocation": "validate_learning_decision(args, identity); args.output=CAMPAIGN/train_10",
+    "result": "validate_result(phaseDir, identity)"
+  },
+  "admission_phases": [
+    "standing",
+    "calibration",
+    "learning_recovery_32"
+  ],
+  "automatic_training_allowed": false
+}

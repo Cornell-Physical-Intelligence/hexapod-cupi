@@ -1,0 +1,40 @@
+{
+  "schema": "learning_admission_guard_cpu_readiness_v1",
+  "prepared_utc": "2026-09-10T13:50:11.801418+00:00",
+  "guard_sha256": "7507ed78173bd74261de259bfb110a5e4d4782e2d1f882ea6a2d48276d005ed7",
+  "parent_guard_sha256": "cc5eaef1e69d3f492faae958679404bb4201dae0090faceb32a174472b476df6",
+  "embedded_restorer_byte_identical": true,
+  "embedded_restorer_sha256": "08c4b4cb564035f61731ba957e45cf14c28ceb27410eb4421f53fb3a4af7ae92",
+  "tests": {
+    "count": 16,
+    "passed": true,
+    "elapsed_s": 0.048,
+    "command": "PYTHONDONTWRITEBYTECODE=1 uv run python -B -m unittest discover -s tmp/reference_learning_ppo_guard_001 -p 'test_*.py'",
+    "files_sha256": {
+      "test_guard_contract.py": "21dad8243e97dccc4a6b153092d5adf5ff556c1a180ef51c67e38ade945c979e",
+      "test_embedded_restorer.py": "54b1c337d6364610abe6a4d925b99761a30457729a8029fc1b04e5e97a604e23"
+    }
+  },
+  "prior_unit": "hexapod-pair-motion-001-20260910.service",
+  "prior_invocation": "aeb33fdfce794cfca50e4227ebfada1d",
+  "read_only_prior_verification": {
+    "four_payloads_matched": true,
+    "four_exact_container_id_name_tokens_absent": true,
+    "unit_terminal_failed": true,
+    "forecast_pause_050_restoration_matched": true,
+    "receipt_sha256": "62ad16e06c0abffd9a4b9d6a81b63ff199205c3b33f553661ad67f09a3574575"
+  },
+  "proposed_unit": "hexapod-learning-ppo-admission-001-20260910.service",
+  "pause": "forecast_pause_051",
+  "output": "reference_learning_ppo_001",
+  "outer_runtime_seconds": 1920,
+  "stop_timeout_seconds": 180,
+  "fallback_minutes": 40,
+  "final_bindings_pending": [
+    "HOST_SHA256",
+    "HOST_FREEZE_SHA256",
+    "CONSUMER_FREEZE_SHA256"
+  ],
+  "dispatched": false,
+  "forecasting_paused": false
+}

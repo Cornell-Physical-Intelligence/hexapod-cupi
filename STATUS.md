@@ -28,7 +28,7 @@ The complete PPO002 audit includes all80 original raw files, every sensor-clock 
 
 ## Active execution and next decisions
 
-**No HEXAPOD GPU job is active during preparation of the repaired learning run.** The new consumer has passed 30 local tests; independent reset/history review and final source binding precede dispatch. Root remains the sole GPU dispatcher; the hourly reminder is a quiet fallback.
+**The repaired recovery admission is running on Spark.** [Preparation and dispatch](artifacts/omni_diagnostics_2026-09-09/reference_learning_ppo_preparation_001/README.md) passed 30 root consumer tests, 28 host tests, 16 guard/restorer tests, independent review and remote Python-S preflight. Unit `hexapod-learning-ppo-admission-001-20260910.service`, invocation `d161f77036f346d2b1abe244d95b2dbe`, output `reference_learning_ppo_001`, pause051. Fresh standing is underway. This allocation ends after standing/calibration/actual recovery evidence; it has zero PPO updates. Root reviews that evidence before the separate ten-update learner and unchanged cold evaluations. Root remains the sole GPU dispatcher; the hourly reminder is a quiet fallback.
 
 [Moving PPO001](artifacts/omni_diagnostics_2026-09-09/reference_moving_ppo_001/README.md) passed fresh standing and both 32-replica calibrations, then **failed before any PPO update**. Replica 6 lost required RR support at control 224, and its deferred reset hit an inference-tensor mutation error. All 56 raw files, including lossless chunks for two large NPZs, preserve the failed reset and incomplete ledger. Three exact owned names/IDs are absent and pause049 restored forecasting timers. The new learning-recovery protocol preserves that failure and requires actual completed recovery before PPO allocation.
 

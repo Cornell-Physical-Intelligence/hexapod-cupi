@@ -1,0 +1,13 @@
+# Actual recovery proof before moving PPO
+
+The repaired learner is a new, explicit checkpoint lineage. It fixes the actual inference-tensor reset failure, uses the installed SDK’s int32 reset IDs and records actual selected-row history, final critic and bootstrap evidence. The failed moving001 profile and minimal reset-only002 source remain unchanged. Finite task failures remain failed episodes; this protocol tests whether they can be learned from correctly.
+
+The first allocation is fresh32-replica standing, both quiet calibrations, then200 startup plus512 zero-residual recovery controls. It must observe a finite failure and complete its200-control recovery with correct packet/history/clocks. It stops with zero PPO updates and releases compute. Root reviews actual per-environment failures, valid experience, progress, memory/timing and raw evidence before a separate ten-update allocation. That allocation uses an external read-only receipt and a new report; it cannot overwrite the initial admission. Formal cold motion, quiet, contact and motor gates remain unchanged.
+
+Root independently passed all30 consumer tests,28 host tests and16 guard/restorer tests. A separate reviewer passed seven focused recovery/RSL tests and verified the final51-file consumer. Host review closed two evidence-mutation findings before freeze. Final host/guard changes from reviewed runtime bytes are only their expected concrete hash bindings, preserved in the operator receipt. Historical preparation/review files retain their then-pending hash descriptions; final manifests and the final-binding receipt govern these frozen bytes.
+
+The actual remote Python-S preflight verifies exact source009, consumer, host, guard, observation, bridge, device proof and admitted study assets, prior pair-motion owner exit and four exact container-name/ID absences, pause050 restoration and unchanged shared coordination. Dispatch created unit`hexapod-learning-ppo-admission-001-20260910.service`, invocation`d161f77036f346d2b1abe244d95b2dbe`, output`reference_learning_ppo_001`, pause051. Bounds are600s per phase,90s AppReady,1920s outer plus180s stop and40min fallback restoration. Bounds are not an ETA.
+
+This bundle records preparation and dispatch, not actual completed recovery or learning. Stage2 still requires omnidirectional/path quality matching the accepted forward benchmark and quiet standing. Yesterday’s omnidirectional PPO checkpoint remains the capability baseline; a reference-only forward trial is not its replacement. Production four-bar and terrain qualification remain separate.
+
+Run`python3 verify_payload.py` for portable source/receipt verification. No Isaac, network, service or GPU action is performed by that verifier.

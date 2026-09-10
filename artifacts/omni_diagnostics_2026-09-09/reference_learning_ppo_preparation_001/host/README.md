@@ -1,0 +1,13 @@
+# Separate recovery admission and reviewed PPO allocation
+
+This host preserves the exact source009 C-study runtime and consumer003 checkpoint contract. It first proves that actual finite task failures can reset and recover correctly. Only a separate, explicit root review can allocate learning. The failed moving001 no-event profile is not reclassified and no physical acceptance gate changes.
+
+`--phase-group admission` requires a fresh output. It runs fresh 32-replica standing, zero/sample calibration and `learning_recovery_32`; it exits with zero PPO updates and releases each job's GPU locks. Each phase has a 600-second bound and a 90-second application-readiness bound. This group writes immutable `campaign.json` and exact accepted-phase/evidence maps.
+
+`--phase-group learn --decision-receipt EXTERNAL_JSON` requires that exact completed admission, source/host/consumer/asset/checkpoint identity and reviewed per-environment recovery evidence. It runs ten PPO updates followed by cold initial/final forward-stop and final quiet screens. Training has 1,800 seconds; each other phase has 600 seconds. It writes a new `learning_campaign.json`, preserving the admission report and every previous output. A ten-update pilot is not a Stage 2 pass or an automatic larger allocation.
+
+The entrypoint's standard-library `validate_learning_decision` is shared with host preflight. The receipt lives outside the campaign and is mounted read-only. Every prior phase, admission root file, recorded job/log and the study inputs have read-only container mounts during learning. Hashes are checked before and after each phase and at finalization, including the external decision receipt. Existing partial learning output cannot be overwritten or resumed by this host.
+
+All source, prior qualified runs, consumer, bridge and observation trees are read-only. Exact existing owned-container cleanup, resource/coordination checks, contact-data audit and per-job locks are retained from moving001. The separate outer guard owns forecasting timer pause/restoration; this host creates no standalone compute reservation. Incomplete inspection does not count as container absence. The original standing launcher remains source-bound and its output assets are verified unchanged.
+
+The 28 focused tests cover phase separation, decision and prior-evidence mutation, read-only aliases, rejected prior identities/partial outputs, immutable checkpoints and exact previous owned-cleanup AST. Independent review is stored separately; the final consumer manifest substitution is verified before this host is frozen. Actual Spark recovery/learning evidence is still required.
