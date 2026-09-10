@@ -1,0 +1,11 @@
+# Canonical native inspection terminal auditor 003
+
+This is a pin/namespace-only successor of frozen auditor002 for actually dispatched inspection003, invocation `ab32f02fccd1400da1e25ff3b8e525d7`, unit `hexapod-canonical-native-inspection-003-20260910.service`, output `native_inspection_003` and pause `forecast_pause_003` under `/home/orionh/HEXAPOD_runs/canonical_direct_20260910`.
+
+It verifies source33/host15/guard38/supervisor926/asset9 with exact frozen maps: source `1d636f6b6909171e366be7b08b3590c0a65a8a9206e57b76792d3f4bcd166cd8`, host `94ef24b181f4144f658a3814796f147859133ebaece0b3e5f3f9355d3bd5c2de`, guard `3c041150881bfcc2e1b7c15d709880b24b6fb92eef541f15573fb6acab9ab327`. All auditor function ASTs are unchanged. The canonical asset and original ownership supervisor stay identical.
+
+Root runs `python3 -B -S audit_remote.py` only after terminality and captures stdout/stderr outside frozen inputs and original output/pause directories. Only file reads, `systemctl show`, `journalctl` and exact-name/ID `docker inspect` occur. The script never signals, starts, stops, restores, installs, writes files or allocates a GPU. It preserves original statuses/errors, independently verifies source and native post-exit receipts, and inventories every raw/pause payload with hashes and sizes twice.
+
+`audit_verified` means authentic evidence, identities and cleanup/restoration were checked. It is independent of `inspection_completed`. Authentic failed campaigns remain `authentic_terminal_failure` with completion false. A completed campaign needs exact native post-exit validation, successful owner/job exit, matching identity/receipt and the full host seal. Missing recorded IDs are explicitly unavailable; unknown Docker absence rejects. Timer restoration checks its recorded original set and exact dispatch command without claiming current timer activity. Neither outcome admits physical control or training.
+
+Eight unchanged focused CPU tests pass on the new bindings. Their generic failure fixtures demonstrate truthful rejection handling and are not observations of actual003. No remote execution happened while preparing this bundle. Root owns actual audit execution, terminal acquisition and any central update under `docs/PROJECT_SITE.md`.

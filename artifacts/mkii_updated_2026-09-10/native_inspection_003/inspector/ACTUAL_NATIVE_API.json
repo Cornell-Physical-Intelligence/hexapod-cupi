@@ -1,0 +1,130 @@
+{
+  "source": "Root CPU-only created-never-GPU-enabled image readback; full extracted source remains external and is not republished",
+  "files": {
+    "/isaac-sim/extscache/omni.physics.tensors-110.1.13+110.1.2.la64.r.cp312.u7f4/omni/physics/tensors/api.py": {
+      "sha256": "b913fdb1a3c0cf04b62aa01d6ceaf7d96cfe577a510d0e02b71485018661c903"
+    },
+    "/isaac-sim/extscache/omni.physics.tensors-110.1.13+110.1.2.la64.r.cp312.u7f4/omni/physics/tensors/__init__.py": {
+      "sha256": "377af3ebe0786768209c0582f5032db37d712e1a45c6f58f00e5b5284158afd4"
+    }
+  },
+  "signatures": {
+    "create_simulation_view": [
+      {
+        "line": 12,
+        "signature": "def create_simulation_view(frontend_name, stage_id=-1, backend='physx'):"
+      }
+    ],
+    "create_sdf_shape_view": [
+      {
+        "line": 444,
+        "signature": "def create_sdf_shape_view(self, pattern, num_points):"
+      }
+    ],
+    "check": [
+      {
+        "line": 514,
+        "signature": "def check(self):"
+      },
+      {
+        "line": 3215,
+        "signature": "def check(self):"
+      },
+      {
+        "line": 4171,
+        "signature": "def check(self):"
+      },
+      {
+        "line": 4600,
+        "signature": "def check(self):"
+      },
+      {
+        "line": 4819,
+        "signature": "def check(self):"
+      },
+      {
+        "line": 5246,
+        "signature": "def check(self):"
+      },
+      {
+        "line": 5347,
+        "signature": "def check(self):"
+      }
+    ],
+    "get_dof_limits": [
+      {
+        "line": 828,
+        "signature": "def get_dof_limits(self):"
+      }
+    ],
+    "get_dof_friction_properties": [
+      {
+        "line": 1031,
+        "signature": "def get_dof_friction_properties(self):"
+      }
+    ],
+    "get_dof_max_velocities": [
+      {
+        "line": 1063,
+        "signature": "def get_dof_max_velocities(self):"
+      }
+    ],
+    "get_link_transforms": [
+      {
+        "line": 1438,
+        "signature": "def get_link_transforms(self):"
+      }
+    ],
+    "get_link_velocities": [
+      {
+        "line": 1468,
+        "signature": "def get_link_velocities(self):"
+      }
+    ],
+    "get_dof_positions": [
+      {
+        "line": 1639,
+        "signature": "def get_dof_positions(self):"
+      }
+    ],
+    "get_dof_velocities": [
+      {
+        "line": 1668,
+        "signature": "def get_dof_velocities(self):"
+      }
+    ],
+    "get_masses": [
+      {
+        "line": 2253,
+        "signature": "def get_masses(self):"
+      },
+      {
+        "line": 3529,
+        "signature": "def get_masses(self):"
+      }
+    ],
+    "get_coms": [
+      {
+        "line": 2305,
+        "signature": "def get_coms(self):"
+      },
+      {
+        "line": 3579,
+        "signature": "def get_coms(self):"
+      }
+    ],
+    "get_inertias": [
+      {
+        "line": 2334,
+        "signature": "def get_inertias(self):"
+      },
+      {
+        "line": 3607,
+        "signature": "def get_inertias(self):"
+      }
+    ]
+  },
+  "independent_inertia_review": "Actual110.1.13 docstring explicitly gives inertia at COM in rigid-body-prim frame; column-major ninevalues. Exact same numerical interpretation as parent.",
+  "cooking_reference": "https://docs.omniverse.nvidia.com/kit/docs/omni_physics/latest/dev_guide/rigid_bodies_articulations/collision.html#generate-mesh-colliders-cooking",
+  "cooking_scope": "Native simulation initialization returns after required data cooking; validateactualrepresentationpresence. Legacy task counter notneeded/unknownifAPIabsent; no claimcacheidleglobally/contactfidelity."
+}

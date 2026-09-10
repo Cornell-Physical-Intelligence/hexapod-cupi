@@ -1,0 +1,103 @@
+--- parent001/run_inspection.py
++++ successor002/run_inspection.py
+@@ -11,6 +11,33 @@
+ import traceback
+ 
+ from inspection_contract import DT, STEPS, SCHEMA, read, sha, verify_inputs
++
++TENSOR_API_SHA='b913fdb1a3c0cf04b62aa01d6ceaf7d96cfe577a510d0e02b71485018661c903'
++TENSOR_PACKAGE_SHA='377af3ebe0786768209c0582f5032db37d712e1a45c6f58f00e5b5284158afd4'
++
++
++def tensor_provider(tensors):
++    """Resolve the installed public factory; never assume a private package layout."""
++    source=inspect.getsourcefile(tensors.create_simulation_view)
++    if source is None:raise ValueError('Tensor factory has no inspectable source')
++    package=Path(tensors.__file__).resolve()
++    result={'tensor_api_source':str(Path(source).resolve()),'tensor_api_sha256':sha(source),
++            'tensor_package_source':str(package),'tensor_package_sha256':sha(package)}
++    if result['tensor_api_sha256']!=TENSOR_API_SHA or result['tensor_package_sha256']!=TENSOR_PACKAGE_SHA:
++        raise ValueError('Actual native tensor provider differs from extracted110.1.13 source')
++    return result
++
++
++def legacy_cooking_counter(physx):
++    """Optional diagnostic only. An absent API never means zero pending tasks."""
++    factory=getattr(physx,'get_physx_cooking_interface',None)
++    if not callable(factory):return {'available':False,'pending':None,'reason':'legacy cooking interface unavailable'}
++    cooking=factory()
++    getter=getattr(cooking,'get_num_collision_tasks',None)
++    if not callable(getter):return {'available':False,'pending':None,'reason':'legacy task getter unavailable'}
++    value=getter()
++    if type(value) is not int or value<0:raise ValueError('Invalid legacy cooking task count')
++    return {'available':True,'pending':value,'reason':None}
+ 
+ 
+ def save(path, value):
+@@ -121,6 +148,7 @@
+         from isaaclab.sim import SimulationContext, SimulationCfg
+         from isaaclab_physx.physics import PhysxCfg
+         import omni.physx
++        import omni.physics.tensors as tensors
+         import omni.kit.app
+         from pxr import PhysxSchema,UsdPhysics
+         from inspect_core import usd_readback,validate_usd,validate_native,validate_sdf,validate_samples,validate_native_frames,validate_scene
+@@ -134,9 +162,8 @@
+                  'physx_schema_python':str(PhysxSchema.__file__),
+                  'physx_extension':extmanager.get_enabled_extension_id('omni.physx'),
+                  'tensor_extension':extmanager.get_enabled_extension_id('omni.physics.tensors'),
+-                 'tensor_api_source':inspect.getsourcefile(importlib.import_module('omni.physics.tensors.impl.api')),
++                 **tensor_provider(tensors),
+                  'warmup_scope':'SDK reset contains two update_simulation(dt,0) calls and play/app pump; explicit counter does not certify total warmup steps.'}
+-        runtime['tensor_api_sha256']=sha(runtime['tensor_api_source'])
+         save(output/'runtime_api.json',runtime)
+         state['checks']['sdk_source_bound']=True
+         cfg=SimulationCfg(dt=DT,gravity=(0.,0.,0.),device=args.device,render_interval=8,
+@@ -160,7 +187,6 @@
+             errors.append({'type':int(e.type),'payload':repr(e.payload)})
+             save(output/'native_errors.json',errors)
+         error_subscription=omni.physx.get_physx_interface().get_error_event_stream().create_subscription_to_pop(on_error)
+-        cooking=omni.physx.get_physx_cooking_interface()
+         initstart=time.monotonic()
+         sim.reset()
+         scene_prim=sim.stage.GetPrimAtPath(cfg.physics_prim_path)
+@@ -183,7 +209,10 @@
+         paths=[x['path']for x in usd['colliders']]
+         sdfview=sim.physics_sim_view.create_sdf_shape_view(paths,1)
+         sdf={'count':sdfview.count,'valid':bool(sdfview.check()),'paths':list(sdfview.object_paths),
+-             'pending_cooking_tasks':cooking.get_num_collision_tasks(),
++             'initialization_barrier':{'sim_reset_returned':True,'physics_view_valid':bool(sim.physics_sim_view.check()),
++                                       'articulation_view_valid':bool(view.check())},
++             'legacy_task_counter':legacy_cooking_counter(omni.physx),
++             'contract':'canonical_native_sdf_initialization_v2',
+              'scope':'Actual native SDF shape existence, not contact accuracy or geometric distance validation'}
+         save(output/'sdf_readback.json',sdf)
+         state['checks']['native_sdf_paths']=validate_sdf(sdf,usd)
+--- parent001/inspection_contract.py
++++ successor002/inspection_contract.py
+@@ -52,6 +52,7 @@
+     if output.is_relative_to(asset) or output.is_relative_to(own):
+         raise ValueError('Output must be outside immutable inputs')
+     return {'schema': SCHEMA, 'inspector_freeze_sha256': sha(own/'FREEZE_SHA256.json'),
++            'sdf_inspection_contract':'canonical_native_sdf_initialization_v2',
+             'runtime_binding': {'runtime_tree_sha256': sha(own/'FREEZE_SHA256.json'),
+                                 'scope': 'canonical_native_inspection_only'},
+             'asset_manifest_sha256': ASSET_MAP_SHA256,
+--- parent001/inspect_core.py
++++ successor002/inspect_core.py
+@@ -125,7 +125,14 @@
+ def validate_sdf(r, usd):
+     paths=[x['path']for x in usd['colliders']]
+     if r['count']!=153 or r['valid'] is not True or len(r['paths'])!=153 or set(r['paths'])!=set(paths):raise ValueError('Missing native SDF shape representation')
+-    if r['pending_cooking_tasks']!=0: raise ValueError('Cooking unfinished')
++    if r.get('contract')!='canonical_native_sdf_initialization_v2':raise ValueError('Wrong native SDF initialization contract')
++    if r.get('initialization_barrier')!={'sim_reset_returned':True,'physics_view_valid':True,'articulation_view_valid':True}:
++        raise ValueError('Native initialization barrier incomplete')
++    counter=r['legacy_task_counter']
++    if counter.get('available') is True:
++        if type(counter.get('pending'))is not int or counter['pending']!=0:raise ValueError('Reported cooking unfinished')
++    elif counter.get('available')is not False or counter.get('pending')is not None:
++        raise ValueError('Unknown cooking count must stay null')
+     return True
+ 
+ 

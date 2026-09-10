@@ -1,0 +1,24 @@
+--- parent002/run_inspection.py
++++ successor003/run_inspection.py
+@@ -26,6 +26,11 @@
+     if result['tensor_api_sha256']!=TENSOR_API_SHA or result['tensor_package_sha256']!=TENSOR_PACKAGE_SHA:
+         raise ValueError('Actual native tensor provider differs from extracted110.1.13 source')
+     return result
++
++
++def create_sdf_view(sim_view):
++    # Actual110.1.13 compiled backend requires a string, despite Python docs accepting lists.
++    return sim_view.create_sdf_shape_view('/Robot/*/collisions/part_*',1)
+ 
+ 
+ def legacy_cooking_counter(physx):
+@@ -206,8 +211,7 @@
+         state['checks']['native_identity']=validate_native(native,model)
+         state['checks']['native_frames']=validate_native_frames(rows[0],native['body_names'],native['joint_names'],model)
+         state['checks']['no_drive_gains']=True
+-        paths=[x['path']for x in usd['colliders']]
+-        sdfview=sim.physics_sim_view.create_sdf_shape_view(paths,1)
++        sdfview=create_sdf_view(sim.physics_sim_view)
+         sdf={'count':sdfview.count,'valid':bool(sdfview.check()),'paths':list(sdfview.object_paths),
+              'initialization_barrier':{'sim_reset_returned':True,'physics_view_valid':bool(sim.physics_sim_view.check()),
+                                        'articulation_view_valid':bool(view.check())},

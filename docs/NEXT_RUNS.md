@@ -132,4 +132,10 @@ The successor to [inspection001](../artifacts/mkii_updated_2026-09-10/native_ins
 
 [Inspection002](../artifacts/mkii_updated_2026-09-10/native_inspection_002/README.md) preserves the partial native identity result and the compiled SDF signature failure. The next isolated source uses a supported string pattern and retains exact returned-path/count validation against all 153 instances. No tolerance, collider or mass changes follow from that API correction. Do not treat the successful initial readback as an eight-step or contact pass.
 
+## 2026-09-10 — after passive import, admit explicit actuation and support
+
+Bind [native003](../artifacts/mkii_updated_2026-09-10/native_inspection_003/README.md) and the [corrected actuation design](../artifacts/mkii_updated_2026-09-10/actuation_design_001/README.md). Prepare one floating zero-gravity coordinate/effort experiment with unchanged model detail, no floor or position drives, signed0.005Nm pulses for20ms and20ms coast. Keep the0.05rad/2rad/s diagnostic bounds and preserve all raw channels. The old larger pulse/coast proposal was rejected before execution.
+
+In parallel, prove SDF distance/gradient channel layout, local frames and toe geometry against source meshes. Then qualify the provisional neutral servo on one cold robot and32 replicas with the new distal+X contact classifier. Only the matching actuator/support result can admit fresh32×24×2 PPO integration and strict reload. Choose larger batches from measured canonical-model throughput and memory. Existing omnidirectional smoothness, quiet-standing and actuator gates remain unchanged; hardware transfer still requires identification.
+
 The [historical comparison and independent/Fable review](../artifacts/project_review_2026-09-10/direct_omni_extended500_interpretation_001/README.md) inform logging and action-state design. No further C-study GPU training follows from that result. Suspended excitation, gravity/support settling and motor-envelope tests require the subsequent explicit runtime and justified actuator settings; CAD zero is not automatically a supported stance.

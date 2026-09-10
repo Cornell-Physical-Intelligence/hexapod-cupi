@@ -1,0 +1,157 @@
+{
+  "deferred": "hardware transfer, burstthermal model, fullomni/terrain qualification and larger allocation",
+  "first_native_experiment": {
+    "baseline_seconds": 0.1,
+    "diagnostic_limits": {
+      "joint_displacement_rad": 0.05,
+      "joint_velocity_rad_s": 2.0,
+      "requested_nm": 0.1
+    },
+    "full_floating_prediction": "floating_pulse_report.json",
+    "gravity": [
+      0,
+      0,
+      0
+    ],
+    "ground": false,
+    "native_effort_readback_is": "actuation input, separately from projected reaction and full joint wrench; not hardware motor measurement",
+    "position_drives": false,
+    "pulse_cases": "Each of18 names at+/-0.005Nm, eight2.5ms substeps plus eight zero-force coast steps; cold baseline per case",
+    "pulse_nm": 0.005,
+    "pulse_steps": 8,
+    "recovery_zero_effort_seconds": 0.02,
+    "reset_coordinate_cases": "Each of18 names at+/-0.01rad, cold named-order write/read/FK; no full-range physical sweep"
+  },
+  "hardware_qualified": false,
+  "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+  "next_standing": {
+    "cold_order": [
+      1,
+      32
+    ],
+    "controls": 1000,
+    "gate": "Existing actuator/quiet/no-nonfoot/no-termination criteria; new geometry-specific foot classifier and height contracts authored before run",
+    "neutral_q_rad": 0,
+    "requested_applied_capture_hz": 400,
+    "reset_plate_height_m": 0.08161109101311194
+  },
+  "physics": {
+    "colliders": "preserve exact153SDF",
+    "control_decimation": 8,
+    "dt_s": 0.0025,
+    "other_solver_settings": "inherit actual003 and read back; no implicit prior C settings",
+    "proposed_external_forces_every_iteration": true,
+    "root": "floating",
+    "self_collision": "preserve authored true"
+  },
+  "provisional_motor": {
+    "added_armature": 0,
+    "added_friction": 0,
+    "assumed_bus_voltage_v": 48.0,
+    "braking": "same absolute-speed bound, explicitly unvalidated",
+    "burst_authority": false,
+    "hardware_current_model": null,
+    "latency_model_s": 0,
+    "numerical_cap_nm": 1.6,
+    "output_side": true,
+    "semantics": "Unmodeled does not mean identifiedzero; cap1.6 is not continuous-stall certification",
+    "speed_envelope": "min(1.6, piecewise interpolated manufacturer48Vcurve(abs(output_speed)))",
+    "speed_rpm": [
+      0,
+      70,
+      275,
+      340,
+      450,
+      477,
+      480
+    ],
+    "thermal_model": null,
+    "torque_nm": [
+      5.5,
+      5.5,
+      4,
+      3,
+      1.6,
+      0.5,
+      0
+    ]
+  },
+  "schema": "canonical_phase_b_cpu_proposal_v1",
+  "scratch_smoke": {
+    "fresh_network": true,
+    "load_old_checkpoint": false,
+    "replicas": 32,
+    "required": "new model-bound observation/action/reset/termination contract; valid standing; actual1-to32 memory/timing evidence; strictfreshreload",
+    "steps_per_update": 24,
+    "updates": 2
+  },
+  "servo_candidate": {
+    "damping_nm_s_per_rad": [
+      0.44197696391810243,
+      0.2456657243160222,
+      0.10552064613953134,
+      0.4419789704596685,
+      0.24566676283633715,
+      0.10552131615792909,
+      0.441977634689341,
+      0.24566456721764315,
+      0.10552100524837532,
+      0.4419765017453795,
+      0.245667092769639,
+      0.10552130774083751,
+      0.44197471269634825,
+      0.24566700905274597,
+      0.10552141334046235,
+      0.4419772543481437,
+      0.24566767616660323,
+      0.10552122889741367
+    ],
+    "declared_damping_ratio_heuristic": 0.8,
+    "declared_static_error_design_budget_rad": 0.05,
+    "dt_s": 0.0025,
+    "joint_names": [
+      "lf_coxa_yaw",
+      "lf_femur_pitch",
+      "lf_tibia_pitch",
+      "lm_coxa_yaw",
+      "lm_femur_pitch",
+      "lm_tibia_pitch",
+      "lr_coxa_yaw",
+      "lr_femur_pitch",
+      "lr_tibia_pitch",
+      "rf_coxa_yaw",
+      "rf_femur_pitch",
+      "rf_tibia_pitch",
+      "rm_coxa_yaw",
+      "rm_femur_pitch",
+      "rm_tibia_pitch",
+      "rr_coxa_yaw",
+      "rr_femur_pitch",
+      "rr_tibia_pitch"
+    ],
+    "linear_fixed_root_semiimplicit_euler_spectral_radius": 0.9089752900078397,
+    "scope": "Zero-pose rigid-link fixed-root linear numerical candidate only. No motor armature, native contact/solver, delay, saturation or floating-root stability proof.",
+    "stiffness_nm_per_rad": [
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0,
+      12.0
+    ]
+  },
+  "status": "ROOT_REVIEW_REQUIRED_BEFORE_NEW_NATIVE_SOURCE_ADMISSION",
+  "training_allowed": false
+}
