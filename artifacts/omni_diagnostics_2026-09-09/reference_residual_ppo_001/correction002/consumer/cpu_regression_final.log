@@ -1,0 +1,66 @@
+/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_policy_observation_005_001/reference/oracle/serial_geometry.py:10: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/utils/tensor_new.cpp:255.)
+  def tensor(x):return torch.as_tensor(x,dtype=DTYPE,device='cpu')
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=846, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (mlp): MLP(
+    (0): Linear(in_features=849, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+Storing git diff for 'HEXAPOD' in: tmp/reference_residual_ppo_001/cpu_regression_final/logs/git/HEXAPOD.diff
+################################################################################
+[1m                             Learning iteration 0/2                             [0m 
+
+                            Total steps: 768 
+                       Steps per second: 1601 
+                        Collection time: 0.400s 
+                          Learning time: 0.080s 
+                        Mean value loss: 0.0016
+                    Mean surrogate loss: -0.0612
+                      Mean entropy loss: -44.8493
+                        Mean action std: 0.02
+--------------------------------------------------------------------------------
+                         Iteration time: 0.48s
+                           Time elapsed: 00:00:00
+                                    ETA: 00:00:00
+
+################################################################################
+[1m                             Learning iteration 1/2                             [0m 
+
+                            Total steps: 1536 
+                       Steps per second: 1672 
+                        Collection time: 0.398s 
+                          Learning time: 0.061s 
+                        Mean value loss: 0.0001
+                    Mean surrogate loss: -0.0575
+                      Mean entropy loss: -44.9173
+                        Mean action std: 0.02
+--------------------------------------------------------------------------------
+                         Iteration time: 0.46s
+                           Time elapsed: 00:00:00
+                                    ETA: 00:00:00
+
+REAL_RSL_RESIDUAL_CPU_PASS {"controls": 48, "optimizer_entries": 17, "final_checkpoint": "bf3739e23f3bacfb1089bea4351dd13cb3ad0424db00edcf59853981fd43ec17"}

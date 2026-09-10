@@ -1,0 +1,11 @@
+--- consumer001/run_residual_ppo.py
++++ consumer002/run_residual_ppo.py
+@@ -6,7 +6,7 @@
+ from physical_contract import verify_inputs,save,sha,read,RUNTIME,RUNTIME_SCHEMA
+ 
+ def main():
+-    parser=argparse.ArgumentParser(add_help=False)
++    parser=argparse.ArgumentParser(add_help=False,allow_abbrev=False)
+     for key in ('source-root','run','device-run','bridge','observation-bundle','package','standing','output'):
+         parser.add_argument('--'+key,type=Path,required=True)
+     parser.add_argument('--mode',choices=('smoke','evaluate_initial','evaluate_final'),required=True)

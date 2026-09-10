@@ -1,0 +1,84 @@
+{
+  "scope": "Proposed next physical admission; no dispatch or policy adoption",
+  "first_discriminator": {
+    "cases": [
+      [
+        "lf",
+        "rr"
+      ],
+      [
+        "lr",
+        "rf"
+      ]
+    ],
+    "zero_body_command": true,
+    "reuse_actual_middle_pair_profile": {
+      "baseline_s": 2,
+      "raise_s": 3,
+      "unloaded_hold_s": 2,
+      "return_s": 3,
+      "quiet_s": 12
+    },
+    "fresh_exact_source_standing": {
+      "num_envs": 32,
+      "steps": 1000,
+      "all_physical_and_quiet_pass_required": true
+    },
+    "measured_gates": {
+      "required_other_supports": 4,
+      "minimum_COM_support_margin_m": 0.05,
+      "minimum_pair_lift_m": 0.002,
+      "minimum_simultaneous_unloaded_hold_s": 1.0,
+      "maximum_unloaded_force_n": 1.0,
+      "requested_torque_each_400Hz_sample_nm": 1.6,
+      "applied_torque_each_400Hz_sample_nm": 1.60001,
+      "maximum_body_displacement_m": 0.015,
+      "maximum_body_angle_rad": 0.1,
+      "maximum_support_foot_drift_m": 0.01,
+      "maximum_support_slip_mps": 0.02,
+      "return_all_six_contacts_deadline_s": 0.6,
+      "stable_return_contact_samples": 3,
+      "measured_quiet_s_after_settling": 10.0,
+      "quiet_settling_s": 2.0,
+      "no_nonfoot_contact": true,
+      "no_resets_or_nonfinite": true
+    }
+  },
+  "conditional_next_moving_diagnostic": {
+    "requires_both_new_static_pairs_pass": true,
+    "requested_forward_left_yaw": [
+      0.01,
+      0,
+      0
+    ],
+    "pair_order": [
+      [
+        "lm",
+        "rm"
+      ],
+      [
+        "lf",
+        "rr"
+      ],
+      [
+        "lr",
+        "rf"
+      ]
+    ],
+    "motion_s": 24,
+    "zero_request_stop_s": 18,
+    "both_feet_require_actual_qualified_flight_and_bounded_landing": true,
+    "next_pair_requires_both_prior_measured_contacts_stable": true,
+    "no_scheduled_touchdown_as_contact_evidence": true,
+    "original50Hz_position_rate_consistency_bound_m": 0.005,
+    "full400Hz_joint_pose_rate_and_torque_diagnostics_required": true,
+    "same_target_bounds": true,
+    "same_four_support_proposed_margin_m": 0.05,
+    "same_motor_torque_nm": 1.6,
+    "new_controller_and_observation_identity_required": true
+  },
+  "five_support_wave_contract_changed": false,
+  "PPO_ready": false,
+  "terrain_qualified": false,
+  "GPU_dispatch": false
+}

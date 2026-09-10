@@ -1,0 +1,126 @@
+{
+  "scope": "frozen reward mask and isolated components; not exact full reward replay",
+  "source_manifest_sha256": "04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e",
+  "source_files": {
+    "tools/omni_flat_math.py": "27066ce852170c79a004484ce456d450cdb6e4665bb6ea37736d4763f0f4a581",
+    "tools/omni_flat_env.py": "f6ef7b74143c6c746b13e1f2c2bc8718c8350ff393f7a7fe9528ebdca3168eee"
+  },
+  "actual_trace": {
+    "path": "artifacts/omni_diagnostics_2026-09-09/reference_physics_009/evidence/run/wave/trace.npz",
+    "sha256": "ab7640bce1d98ce4d175882537ef993c68a620987adff88b7c919dc1a0c6c0e8"
+  },
+  "environment": {
+    "path": "artifacts/omni_diagnostics_2026-09-09/reference_physics_009/evidence/run/wave/environment.yaml",
+    "sha256": "a239d09d5fd4d92a20a68cf452035ac4c0580e76e1eac8a18bcea9cdcef8b1c5"
+  },
+  "cases": [
+    {
+      "case": "stand",
+      "requested_twist": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "frozen_quiet_penalties_enabled": true,
+      "frozen_linear_progress_at_perfect_tracking": 0.0,
+      "frozen_yaw_progress_at_perfect_tracking": 0.0,
+      "stopped_linear_tracking": 1.0,
+      "stopped_yaw_tracking": 1.0,
+      "perfect_tracking_gain_weighted_per_second": 0.0
+    },
+    {
+      "case": "forward",
+      "requested_twist": [
+        0.005,
+        0.0,
+        0.0
+      ],
+      "frozen_quiet_penalties_enabled": true,
+      "frozen_linear_progress_at_perfect_tracking": 0.0,
+      "frozen_yaw_progress_at_perfect_tracking": 0.0,
+      "stopped_linear_tracking": 0.9855889527651829,
+      "stopped_yaw_tracking": 1.0,
+      "perfect_tracking_gain_weighted_per_second": 0.05764418893926848
+    },
+    {
+      "case": "reverse",
+      "requested_twist": [
+        -0.005,
+        0.0,
+        0.0
+      ],
+      "frozen_quiet_penalties_enabled": true,
+      "frozen_linear_progress_at_perfect_tracking": 0.0,
+      "frozen_yaw_progress_at_perfect_tracking": 0.0,
+      "stopped_linear_tracking": 0.9855889527651829,
+      "stopped_yaw_tracking": 1.0,
+      "perfect_tracking_gain_weighted_per_second": 0.05764418893926848
+    },
+    {
+      "case": "left_strafe",
+      "requested_twist": [
+        0.0,
+        0.005,
+        0.0
+      ],
+      "frozen_quiet_penalties_enabled": true,
+      "frozen_linear_progress_at_perfect_tracking": 0.0,
+      "frozen_yaw_progress_at_perfect_tracking": 0.0,
+      "stopped_linear_tracking": 0.9855889527651829,
+      "stopped_yaw_tracking": 1.0,
+      "perfect_tracking_gain_weighted_per_second": 0.05764418893926848
+    },
+    {
+      "case": "left_turn",
+      "requested_twist": [
+        0.0,
+        0.0,
+        0.015
+      ],
+      "frozen_quiet_penalties_enabled": true,
+      "frozen_linear_progress_at_perfect_tracking": 0.0,
+      "frozen_yaw_progress_at_perfect_tracking": 0.0,
+      "stopped_linear_tracking": 1.0,
+      "stopped_yaw_tracking": 0.9793140624497068,
+      "perfect_tracking_gain_weighted_per_second": 0.041371875100586486
+    },
+    {
+      "case": "forward_right_arc",
+      "requested_twist": [
+        0.0035355339059327372,
+        -0.0035355339059327372,
+        -0.01
+      ],
+      "frozen_quiet_penalties_enabled": true,
+      "frozen_linear_progress_at_perfect_tracking": 0.0,
+      "frozen_yaw_progress_at_perfect_tracking": 0.0,
+      "stopped_linear_tracking": 0.9855889527651829,
+      "stopped_yaw_tracking": 0.990527010195496,
+      "perfect_tracking_gain_weighted_per_second": 0.07659016854827638
+    }
+  ],
+  "actual_requested_motion_rows": 1200,
+  "component_replay": {
+    "stand_joint_velocity": {
+      "weight": -0.5,
+      "mean_weighted_per_second_on_requested_motion": -0.0028526950627565384
+    },
+    "stand_target_velocity": {
+      "weight": -0.15,
+      "mean_weighted_per_second_on_requested_motion": -0.001313500355367926
+    }
+  },
+  "limitations": [
+    "Requested command is replayed; internal reward command slew timing is not reconstructed.",
+    "Reported SDK joint-rate bias remains; no finite-difference substitution.",
+    "This audit does not show a trained reward exploit or quantify all reward terms.",
+    "Current two-update zero-command integration is unchanged."
+  ],
+  "requires_before_moving_PPO": [
+    "Explicit moving/finite-stop/settled-stand reward states.",
+    "Direction-invariant tracking/progress at the actually admitted speed envelope.",
+    "Raw component logging and matched quiet/forward retention with unchanged acceptance gates."
+  ],
+  "gpu_launches": 0,
+  "Stage2_complete": false
+}

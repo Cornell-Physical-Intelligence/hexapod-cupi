@@ -1,0 +1,22 @@
+{
+  "scope": "Independent read-only review of isolated frozen reward terms; no experiment or runtime change",
+  "reviewed": {
+    "analyze.py": "423c3c729e7efa8f0b491f4c84046cac57cf39672fea64c244e62f86f0c0e574",
+    "report.json": "c23a6c53fb69073628af840133b65efc287e4432be513da30c565c90b4878075"
+  },
+  "findings": [
+    "Requested command order is forward/left/yaw and isolated tracking inputs use that same command frame.",
+    "The active norm mask selects 1200 recorded nonzero-command controls; previous-target reconstruction includes the immediate predecessor of the first moving row.",
+    "All six cases receive frozen standing penalties; linear and yaw progress are zero at these speeds.",
+    "Tracking gain and weighted quiet components are per second before the inherited 0.02 s reward multiplier.",
+    "Airtime and stand_posture also use the same >0.03 m/s or >0.05 rad/s moving predicate and must be covered by the next explicit low-speed/finite-stop/settled-stand reward contract."
+  ],
+  "limitations": [
+    "This is isolated component replay, not full inherited reward replay or reconstruction of the internal command slew.",
+    "No learned exploit, quiet-penalty dominance, native velocity accuracy, or new physical admission is demonstrated.",
+    "Current zero-command two-update smoke is intentionally unchanged."
+  ],
+  "blocking_issue_found": false,
+  "runtime_changes": 0,
+  "gpu_launches": 0
+}

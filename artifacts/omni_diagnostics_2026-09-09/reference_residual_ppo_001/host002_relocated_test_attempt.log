@@ -1,0 +1,29 @@
+test_digest_helper_alias (test_host.HostTest) ... ok
+test_failed_initial_retention_prevents_final (test_host.HostTest) ... ok
+test_four_serial_phases (test_host.HostTest) ... ok
+test_owned_supervisor_preserved_except_declared_two_edits (test_host.HostTest) ... ERROR
+test_parent_owns_unchanged_standing_command (test_host.HostTest) ... ok
+test_readonly_dependency_mounts_and_phase_boundaries (test_host.HostTest) ... ok
+test_rejected_smoke_never_evaluates (test_host.HostTest) ... ok
+test_smoke_mutation_prevents_next_allocation (test_host.HostTest) ... ok
+test_wrong_checkpoint_stops_retention (test_host.HostTest) ... ok
+test_wrong_phase_stops_smoke (test_host.HostTest) ... ok
+
+======================================================================
+ERROR: test_owned_supervisor_preserved_except_declared_two_edits (test_host.HostTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_residual_ppo_publication_001/correction002/host/test_host.py", line 56, in test_owned_supervisor_preserved_except_declared_two_edits
+    original=ast.parse(p.read_text());actual=ast.parse(Path(h.__file__).read_text())
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py", line 1256, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py", line 1242, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/pathlib.py", line 1110, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_residual_ppo_publication_001/correction002/reference_physics_adapter_009/source_009/tools/launch_reference_physics_spark.py'
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.014s
+
+FAILED (errors=1)

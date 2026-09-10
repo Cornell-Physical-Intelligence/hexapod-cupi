@@ -1,0 +1,26 @@
+time="2026-09-10T03:53:28-05:00" level=warning msg="No services to build"
+time="2026-09-10T03:53:28-05:00" level=warning msg="No services to build"
+ Container hexapod-reference-physics-0333deb83f06411ba28d1b3683407e8c Creating 
+ Container hexapod-reference-physics-0333deb83f06411ba28d1b3683407e8c Created 
+Traceback (most recent call last):
+  File "/consumer/run_residual_ppo.py", line 153, in <module>
+    if __name__=='__main__':raise SystemExit(main())
+                                             ^^^^^^
+  File "/consumer/run_residual_ppo.py", line 19, in main
+    identity=verify_inputs(early,require_standing=not early.preflight_only)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/consumer/physical_contract.py", line 47, in verify_inputs
+    if sha(args.device_run/'campaign.json')!=DEVICE_CAMPAIGN:raise ValueError('Exact completed physical device001 proof required')
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/consumer/physical_contract.py", line 13, in sha
+    def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+                                        ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/isaaclab/_isaac_sim/kit/python/lib/python3.12/pathlib.py", line 1019, in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/isaaclab/_isaac_sim/kit/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/outputs/cuda:0/campaign.json'
+There was an error running python
+
