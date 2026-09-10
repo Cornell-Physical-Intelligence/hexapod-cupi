@@ -1,0 +1,7 @@
+# Final reviewed CAD publication checks
+
+Root independently reran four joint-coordinate revision regressions, four wide-angle USD regressions and five saved-USD preparation regressions. `final_asset_check.py` additionally checks the selected URDF/model/USD hashes, all59 source mesh hashes, equality of raw/corrected part geometry and joint kinematics, all19 positive-definite physical tensors in each URDF, all18 exact user/geometry limits in each variant, mass sums and every successor evidence manifest. Its passing JSON preserves the final canonical selection identity.
+
+The generic Vite entry built successfully; static public files were not recopied during this resource-bounded JS build. Actual Vite browser loading separately verified the public assets and all1,753 part instances. The full-range viewer test and browser QA are in viewer_002. Poster check/build and pipeline lineage receipts are retained here. No native Isaac cooking, GPU training or hardware qualification is claimed by these checks.
+
+The near-zero quaternion audit repair was reviewed: double-normalizing an expanded float quaternion before Gf rotation extraction fixes numerical interpretation without changing authored geometry, bounds or tolerances. The earlier failed USD attempt is preserved in usd_002. The widened user pitch limits can produce legitimate body/self intersections; the continuous 0.5mm proof concerns coxa versus standoff plates only.

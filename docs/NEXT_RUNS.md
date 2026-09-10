@@ -1,11 +1,18 @@
 # Prepared CAD simulation campaign
 
-> **9 September 2026 update:** the user prioritizes the selected C-study Stage 2 controller, requiring smooth walking/pathing in every direction and quiet standing, with terrain/perception implementation in parallel. [STATUS](../STATUS.md) is current; [the C-study contract](../experiments/c_length_study/README.md) separates its pinned runtime and 1.6 N·m study cap from the physical four-bar program. Earlier pause, plan and actuator statements below apply to their dated physical lineage. Commit/push each verified step with relevant Markdown and preserve other work on main.
+> **10 September 2026 — approved ground-truth training model:** the user visually approved the detailed direct-drive robot and requires its motor-weight-corrected URDF for **all future training**. [Canonical selection](../robot/active_model.json) and [full CAD/limit report](UPDATED_CAD_IMPORT.md) are authoritative. Do not launch further simplified C-study/mock or historical four-bar training. First prepare the new model-bound runtime, native SDF cooking and physical admission. Earlier campaign sequences below retain their dated lineage for reproduction; old checkpoints/task IDs are unchanged. Stage 2 smoothness and quiet-standing gates remain required.
 
 
-## C-study continuation order
+## Detailed-model next steps
 
-Use this sequence for the authorized C study; the later physical campaign sections remain a separate lineage. Live outcomes and exact Spark ownership belong in [STATUS](../STATUS.md).
+1. Verify `robot/active_model.json` and the corresponding `usd_002` nominal motor corrected source identities on the isolated native preparation directory.
+2. Introduce a new task/runtime contract for the actual joint names, signs/zeros, per-leg yaw limits, +X tibia contact geometry and explicitly modeled actuator behavior. Preserve old task registrations.
+3. Cook the exact SDF geometry in Isaac Sim 6.0.1 and qualify suspended travel, contacts/settling, self-collision handling, solver effort and observation/action mapping before a small learning smoke.
+4. Only a matching native admission can authorize learning on this canonical model; record its source, asset, motor and checkpoint hashes. Then pursue the unchanged all-direction, smoothness and quiet-standing gates.
+
+## Historical C-study continuation order (superseded)
+
+This sequence records the prior C-study plan and no longer authorizes new simplified-model training. The later four-bar campaign sections also remain historical. Live outcomes and exact Spark ownership belong in [STATUS](../STATUS.md).
 
 1. Bind the preserved 315/318 omnidirectional checkpoint to a newly named cold evaluation under the common 0.040 rad/20 ms formal limiter; completed execution is recorded in STATUS. Keep original solver 16/4 and external-force settings explicit; the historical 0.03 diagnostic and reference009 physics are separate comparisons. Require exact checkpoint/source/asset identity and fresh standing before actor playback.
 2. Run a 32×24×2 positive-CAPS integration smoke with actual checkpoint reload and constant/stop evaluations. After successful integration, independently initialize matched 1024×24×50 curriculum and curriculum-plus-CAPS pilots from the original checkpoint. Use one immutable behavioral source with explicit branch/allocation selectors and fresh standing for each allocation. The curriculum covers standing, starts/stops, reversals, all bearings and combined translation/yaw. Mask reset-crossing temporal pairs and avoid treating intentional command transitions as sensor noise. Preserve quiet and useful tracking together; do not accept reduced motion as smoothness.

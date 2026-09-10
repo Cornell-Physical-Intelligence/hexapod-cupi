@@ -25,12 +25,17 @@
     </section>
     <aside>
       <section class="controls">
+        <h2>Full range review</h2>
+        <div class="tour-controls"><button id="tour" aria-pressed="false">▶ Play all 18 joints</button><button id="tour-stop">Reset</button><select id="tour-speed" aria-label="Animation speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></div>
+        <p id="tour-status" role="status" class="note">One joint at a time: zero → lower → upper → zero. Both endpoints pause briefly.</p>
+        <progress id="tour-progress" max="18" value="0" aria-label="Joint review progress"></progress>
         <h2>Move a joint</h2>
         <select id="joint" aria-label="Joint to inspect"></select>
-        <div class="joint-value"><label for="angle">Angle from inspection stance</label><output id="angle-label">0.0°</output></div>
-        <input id="angle" aria-label="Joint angle" type="range" min="-25" max="25" step="0.1" value="0">
+        <div class="joint-value"><label for="angle">Angle from joint zero</label><output id="angle-label">0.0°</output></div>
+        <input id="angle" aria-label="Joint angle" type="range" min="-25" max="25" step="0.005" value="0">
         <div class="bounds"><label>Lower / °<input id="lower" type="number" step="1" aria-label="Preview lower bound"></label><label>Upper / °<input id="upper" type="number" step="1" aria-label="Preview upper bound"></label><button id="sweep" aria-pressed="false">▶ Sweep</button></div>
-        <p class="note">Draft inspection bounds. Edits affect this preview only. Motion is kinematic; contact and hardware stops are not enforced.</p>
+        <p id="joint-context" class="note"></p>
+        <p class="note">Edits affect this preview only. Joint travel limits do not prevent collisions between parts in combined poses.</p>
         <div class="checkrow"><label><input id="axes" type="checkbox" checked> Joint axes</label><label><input id="tint" type="checkbox" checked> Link colors</label><label><input id="ghost" type="checkbox"> X-ray</label></div>
         <div class="joint-value"><label for="explode">Separate parts</label><output id="explode-label">0 mm</output></div>
         <input id="explode" type="range" min="0" max="40" value="0" step="1" aria-label="Explode individual parts">
@@ -44,7 +49,7 @@
         <div id="part-list" role="list" aria-label="Exported CAD part instances"></div>
       </section>
       <section id="detail" aria-live="polite"><p>Select a part in the model or list to inspect its assigned link and CAD mass.</p></section>
-      <footer><strong>Geometry-based reconstruction</strong><span>Original meshes and CAD inertias. Grouping and operating limits remain subject to review.</span><button id="save-review">Save preview settings</button></footer>
+      <footer><strong>Approved detailed training model</strong><span>Original meshes and CAD inertias plus nominal motor weight overrides. Part entries show original CAD mass; link totals include the overrides. Added motor inertia and native physics remain unqualified.</span><button id="save-review">Save preview settings</button></footer>
     </aside>
   </main>
   <script type="module" src="./inspection.js"></script>

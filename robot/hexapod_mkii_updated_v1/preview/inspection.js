@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
+import { createMotionTour, sampleMotionTour } from './motion-tour.js';
 
 const $ = id => document.getElementById(id);
 const RAD = Math.PI / 180;
@@ -26,8 +27,10 @@ const grid = new THREE.GridHelper(2,40,0xc3cdd1,0xe1e6e8);grid.rotation.x=Math.P
 const robot = new THREE.Group();scene.add(robot);
 const raycaster=new THREE.Raycaster(), pointer=new THREE.Vector2();
 const temp=new THREE.Object3D(), quaternion=new THREE.Quaternion();
-let overlapIDs=new Set();
+let overlapIDs=new Set(),modelDigest;
+const MOTION_LIFT_M=.20,SWEEP_MAX_RATE_RAD_S=.5;
 let model,selected=null,playing=false,startTime=0,phaseOffset=0,lastAngle=0;
+let tour=null,tourPlaying=false,tourElapsed=0,tourIndex=-1,lastFrameTime=null,tourMovingLinks=new Set(),tourVisits=[];
 const links=new Map(),joints=new Map(),parts=new Map(),batches=[],rows=new Map(),jointAxes=[];
 let linkColors=new Map(),angles=new Map();
 
@@ -44,7 +47,39 @@ function setView(name='iso'){
   camera.position.copy(center).add(new THREE.Vector3(...dir).normalize().multiplyScalar(distance));
   controls.target.copy(center);controls.update();
 }
-function stop(){playing=false;$('sweep').textContent='▶ Sweep';$('sweep').setAttribute('aria-pressed','false');}
+function setRootHeight(height){const delta=height-robot.position.z;robot.position.z=height;camera.position.z+=delta;controls.target.z+=delta;}
+function stop(){
+  playing=false;$('sweep').textContent='▶ Sweep';$('sweep').setAttribute('aria-pressed','false');
+  if(tour){tour=null;tourPlaying=false;tourMovingLinks.clear();updateAppearance();$('tour-status').textContent='Review stopped. Play all 18 joints to restart.';}
+  $('tour').textContent='▶ Play all 18 joints';$('tour').setAttribute('aria-pressed','false');document.body.dataset.tourState='stopped';
+}
+function startTour(){
+  setPose('stand');selectPart(null);$('isolate').checked=false;$('overlaps').checked=false;$('explode').value=0;$('link-filter').value='all';explode();filterParts();
+  tour=createMotionTour([...joints.values()]);tourElapsed=0;tourIndex=-1;tourVisits=[];tourPlaying=true;
+  setRootHeight(model.root_height_m+MOTION_LIFT_M);setView($('view').value);
+  $('tour').textContent='❚❚ Pause review';$('tour').setAttribute('aria-pressed','true');document.body.dataset.tourState='playing';
+}
+function advanceTour(dt){
+  tourElapsed=Math.min(tour.duration,tourElapsed+dt*Number($('tour-speed').value));
+  const sample=sampleMotionTour(tour,tourElapsed);
+  if(sample.index!==tourIndex){
+    tourIndex=sample.index;$('joint').value=sample.name;tourMovingLinks.clear();
+    const collect=name=>{tourMovingLinks.add(name);for(const j of joints.values())if(j.parent===name)collect(j.child);};
+    collect(joints.get(sample.name).child);updateAppearance();
+  }
+  for(const [name,j] of joints)angles.set(name,j.default_value||0);
+  angles.set(sample.name,sample.angle);applyAngles();updateJointUI();
+  const key=sample.name+'/'+sample.label;
+  if(sample.hold&&!tourVisits.some(v=>v.key===key))tourVisits.push({key,joint:sample.name,phase:sample.label,angle_rad:sample.angle});
+  $('tour-status').textContent=(sample.index+1)+' / 18 · '+sample.name.replaceAll('_',' ')+' · '+sample.label+(sample.hold?' · hold':'');
+  $('tour-progress').value=sample.index+(sample.complete?1:0);
+  $('pose').textContent='Full range review · '+sample.name.replaceAll('_',' ')+' · '+(sample.angle/RAD).toFixed(2)+'°';
+  document.body.dataset.tourJoint=sample.name;document.body.dataset.tourPhase=sample.label;document.body.dataset.tourEndpointVisits=tourVisits.length;
+  if(sample.complete){
+    tourPlaying=false;tourMovingLinks.clear();updateAppearance();$('tour').textContent='↻ Replay all 18';$('tour').setAttribute('aria-pressed','false');
+    $('tour-status').textContent='Complete · 18 joints · all 36 endpoints visited · returned to zero';$('pose').textContent='Full range review complete · body lifted 200 mm';document.body.dataset.tourState='complete';
+  }
+}
 function applyAngles(){
   for(const [name,j] of joints){
     const group=links.get(j.child);group.quaternion.fromArray(j.quaternion_xyzw);
@@ -57,16 +92,18 @@ function currentJoint(){return joints.get($('joint').value);}
 function updateJointUI(){
   const j=currentJoint();if(!j)return;
   const value=(angles.get(j.name)||0)/RAD;
-  $('lower').value=(j.lower/RAD).toFixed(1);$('upper').value=(j.upper/RAD).toFixed(1);
+  $('lower').value=(j.lower/RAD).toFixed(3);$('upper').value=(j.upper/RAD).toFixed(3);
   $('angle').min=Math.min(j.lower/RAD,value);$('angle').max=Math.max(j.upper/RAD,value);
-  $('angle').value=value;$('angle-label').textContent=value.toFixed(1)+'°';
+  $('angle').value=value;$('angle-label').textContent=value.toFixed(2)+'°';
   const outside=value<j.lower/RAD-.001||value>j.upper/RAD+.001;
   $('angle-label').style.color=outside?'#ad532c':'';
+  const absolute=j.absolute_zero_azimuth_deg;
+  $('joint-context').textContent=Number.isFinite(absolute)?'Body azimuth '+(absolute+value).toFixed(2)+'° · plate envelope '+j.absolute_lower_azimuth_deg.toFixed(2)+'° to '+j.absolute_upper_azimuth_deg.toFixed(2)+'°. Zero is the envelope midpoint; 0.5 mm plate clearance.':(model.joint_review_revision?'User-supplied travel limits in the original viewer zero. Femur and tibia zeros are unchanged.':'Initial inspection envelope; the reviewed travel-limit revision is being prepared.');
   jointAxes.forEach(a=>a.visible=$('axes').checked);
 }
 function setPose(kind){
   stop();for(const [name,j] of joints)angles.set(name,kind==='cad'?(model.cad_pose?.[name]??j.cad_value??0):(j.default_value||0));
-  robot.position.z=kind==='cad'?(model.cad_root_height_m??model.root_height_m):model.root_height_m;
+  setRootHeight(kind==='cad'?(model.cad_root_height_m??model.root_height_m):model.root_height_m);
   $('pose').textContent=kind==='cad'?'Original exported pose · may exceed draft bounds':'Inspection stance';
   applyAngles();updateJointUI();
 }
@@ -98,6 +135,7 @@ function updateAppearance(){
       if(!tinted)c.setRGB(...p.color.slice(0,3),THREE.SRGBColorSpace);
       if(selected&&selected.id===p.id)c.set('#efca35');
       else if(selected&&selected.link!==p.link&&!ghost)c.lerp(new THREE.Color('#e5e9eb'),.4);
+      else if(tourMovingLinks.size&&!tourMovingLinks.has(p.link))c.lerp(new THREE.Color('#e5e9eb'),.65);
       batch.mesh.setColorAt(i,c);
     }
     if(batch.mesh.instanceColor)batch.mesh.instanceColor.needsUpdate=true;
@@ -128,7 +166,7 @@ async function loadGeometry(files){
   await Promise.all(Array.from({length:6},worker));return geometries;
 }
 async function initialize(){
-  const response=await fetch('../model.json');if(!response.ok)throw new Error('Model data HTTP '+response.status);model=await response.json();
+  const response=await fetch('../model_rs05_mass_corrected.json');if(!response.ok)throw new Error('Model data HTTP '+response.status);const payload=await response.text();model=JSON.parse(payload);modelDigest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(payload)))).map(v=>v.toString(16).padStart(2,'0')).join('');
   if(model.parts.length!==1753||model.links.length!==19||model.joints.length!==18)throw new Error('Unexpected model inventory; inspect the build report.');
   const review=await (await fetch('../overlap_review_parts.json')).json();
   overlapIDs=new Set(Object.values(review.groups).flatMap(g=>[g.tibia_part_id,...g.screw_part_ids]));
@@ -161,26 +199,32 @@ async function initialize(){
     }
   }
   $('part-list').append(fragment);explode();applyAngles();updateAppearance();filterParts();updateJointUI();setView();
-  $('summary').textContent=model.parts.length+' parts · '+model.links.length+' moving bodies · '+model.joints.length+' joints · '+model.links.reduce((s,l)=>s+l.mass,0).toFixed(6)+' kg CAD mass';
+  $('summary').textContent=model.parts.length+' parts · '+model.links.length+' bodies · '+model.joints.length+' joints · '+model.links.reduce((s,l)=>s+l.mass,0).toFixed(6)+' kg with motor overrides';
   document.querySelectorAll('button,select,input').forEach(el=>el.disabled=false);
   document.body.dataset.modelReady='true';document.body.dataset.partCount=parts.size;document.body.dataset.batchCount=batches.length;
+  if(new URLSearchParams(location.search).get('tour')==='1')startTour();
 }
+$('tour').onclick=()=>{
+  if(!tour||tourElapsed>=tour.duration){startTour();return;}
+  tourPlaying=!tourPlaying;$('tour').textContent=tourPlaying?'❚❚ Pause review':'▶ Resume review';$('tour').setAttribute('aria-pressed',String(tourPlaying));document.body.dataset.tourState=tourPlaying?'playing':'paused';
+};
+$('tour-stop').onclick=()=>{setPose('stand');$('tour-progress').value=0;};
 $('stand').onclick=()=>setPose('stand');$('cad').onclick=()=>setPose('cad');$('fit').onclick=()=>setView($('view').value);$('view').onchange=()=>setView($('view').value);
 $('joint').onchange=()=>{stop();updateJointUI();};
-$('angle').oninput=()=>{stop();robot.position.z=model.root_height_m+.04;angles.set(currentJoint().name,Number($('angle').value)*RAD);$('pose').textContent='Manual joint inspection · body lifted 40 mm';applyAngles();updateJointUI();};
+$('angle').oninput=()=>{stop();setRootHeight(model.root_height_m+MOTION_LIFT_M);angles.set(currentJoint().name,Number($('angle').value)*RAD);$('pose').textContent='Manual joint inspection · body lifted 200 mm';applyAngles();updateJointUI();};
 for(const field of ['lower','upper'])$(field).onchange=()=>{
   stop();const lower=Number($('lower').value),upper=Number($('upper').value);if(!Number.isFinite(lower)||!Number.isFinite(upper)||lower>=upper||Math.max(Math.abs(lower),Math.abs(upper))>180){updateJointUI();return;}
   const j=currentJoint();j.lower=lower*RAD;j.upper=upper*RAD;updateJointUI();
 };
 $('sweep').onclick=()=>{
-  if(playing){stop();return;}const j=currentJoint();if(!j)return;playing=true;robot.position.z=model.root_height_m+.04;startTime=performance.now();lastAngle=angles.get(j.name)||0;phaseOffset=Math.asin(THREE.MathUtils.clamp((lastAngle-(j.lower+j.upper)/2)/((j.upper-j.lower)/2),-1,1));$('sweep').textContent='❚❚ Pause';$('sweep').setAttribute('aria-pressed','true');$('pose').textContent='Kinematic sweep · body lifted 40 mm · '+j.name;
+  if(playing){stop();return;}stop();const j=currentJoint();if(!j)return;playing=true;setRootHeight(model.root_height_m+MOTION_LIFT_M);startTime=performance.now();lastAngle=angles.get(j.name)||0;phaseOffset=Math.asin(THREE.MathUtils.clamp((lastAngle-(j.lower+j.upper)/2)/((j.upper-j.lower)/2),-1,1));$('sweep').textContent='❚❚ Pause';$('sweep').setAttribute('aria-pressed','true');$('pose').textContent='Kinematic sweep · body lifted 200 mm · '+j.name;
 };
 for(const id of ['ghost','tint','isolate'])$(id).onchange=updateAppearance;
 $('axes').onchange=()=>jointAxes.forEach(a=>a.visible=$('axes').checked);
 $('overlaps').onchange=()=>{explode();filterParts();$('pose').textContent=$('overlaps').checked?'CAD overlaps · inspect screw attachment and clearance':'Inspection view';};
 $('explode').oninput=explode;$('search').oninput=filterParts;$('link-filter').onchange=filterParts;$('clear').onclick=()=>selectPart(null);
 $('save-review').onclick=()=>{
-  if(!model)return;const data={kind:'inspection_preferences_only',source_urdf_sha256:model.source_urdf_sha256,selected_part:selected?.id??null,angles_rad:Object.fromEntries(angles),draft_limits_rad:Object.fromEntries([...joints].map(([n,j])=>[n,{lower:j.lower,upper:j.upper}])),note:'User preview edits are not hardware limits or qualified simulation settings.'};
+  if(!model)return;const data={kind:'inspection_preferences_only',model_sha256:modelDigest,joint_review_revision:model.joint_review_revision??'initial_inspection',source_urdf_sha256:model.source_urdf_sha256,selected_part:selected?.id??null,angles_rad:Object.fromEntries(angles),draft_limits_rad:Object.fromEntries([...joints].map(([n,j])=>[n,{lower:j.lower,upper:j.upper}])),motion_review:{state:document.body.dataset.tourState,visits:tourVisits},note:'User preview edits are not hardware limits or qualified simulation settings.'};
   const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)+'\n'],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mkii-joint-inspection-settings.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 let pointerDown;
@@ -192,7 +236,9 @@ renderer.domElement.addEventListener('pointerup',e=>{
 });
 function frame(time){
   requestAnimationFrame(frame);
-  if(playing){const j=currentJoint(),t=(time-startTime)/1000;angles.set(j.name,(j.lower+j.upper)/2+(j.upper-j.lower)/2*Math.sin(phaseOffset+t*Math.PI/5));applyAngles();updateJointUI();}
+  const dt=lastFrameTime===null?0:Math.min(.1,Math.max(0,(time-lastFrameTime)/1000));lastFrameTime=time;
+  if(tourPlaying)advanceTour(dt);
+  if(playing){const j=currentJoint(),t=(time-startTime)/1000,amplitude=(j.upper-j.lower)/2,omega=Math.min(Math.PI/5,SWEEP_MAX_RATE_RAD_S/amplitude);angles.set(j.name,(j.lower+j.upper)/2+amplitude*Math.sin(phaseOffset+t*omega));applyAngles();updateJointUI();}
   controls.update();renderer.render(scene,camera);
 }
 resize();requestAnimationFrame(frame);initialize().catch(fail);

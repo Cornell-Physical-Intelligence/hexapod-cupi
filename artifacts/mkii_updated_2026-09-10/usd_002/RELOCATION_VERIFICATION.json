@@ -1,0 +1,92 @@
+{
+  "schema": "hexapod.usd_relocation_verification.v1",
+  "created_utc": "2026-09-10T19:19:32.590572+00:00",
+  "description": "Read-only CPU audits executed after APFS clone into the integration worktree; all asset and provenance references resolve from the new location. Native SDF cooking and physics remain pending.",
+  "audits": [
+    {
+      "variant": "raw_cad",
+      "command": [
+        "/Users/andreboufama/Documents/CUPI/HEXAPOD/.venv/bin/python",
+        "-B",
+        "/Users/andreboufama/Documents/CUPI/HEXAPOD-urdf-20260910/artifacts/mkii_updated_2026-09-10/usd_002/prepare_updated_usd.py",
+        "audit",
+        "/Users/andreboufama/Documents/CUPI/HEXAPOD-urdf-20260910/artifacts/mkii_updated_2026-09-10/usd_002/raw_cad"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "status": "offline prepared, native cooking/physics pending",
+        "pass": true,
+        "errors": [],
+        "counts": {
+          "bodies": 19,
+          "revolute_joints": 18,
+          "visuals": 1753,
+          "collisions": 153,
+          "unique_meshes": 59
+        },
+        "world_visual_bounds_m": [
+          [
+            -0.261868500557079,
+            -0.3298910829886648,
+            0.005000000000000088
+          ],
+          [
+            0.26181761882588556,
+            0.33008449833425396,
+            0.15848236746615996
+          ]
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "variant": "rs05_mass_corrected",
+      "command": [
+        "/Users/andreboufama/Documents/CUPI/HEXAPOD/.venv/bin/python",
+        "-B",
+        "/Users/andreboufama/Documents/CUPI/HEXAPOD-urdf-20260910/artifacts/mkii_updated_2026-09-10/usd_002/prepare_updated_usd.py",
+        "audit",
+        "/Users/andreboufama/Documents/CUPI/HEXAPOD-urdf-20260910/artifacts/mkii_updated_2026-09-10/usd_002/rs05_mass_corrected"
+      ],
+      "returncode": 0,
+      "stdout": {
+        "status": "offline prepared, native cooking/physics pending",
+        "pass": true,
+        "errors": [],
+        "counts": {
+          "bodies": 19,
+          "revolute_joints": 18,
+          "visuals": 1753,
+          "collisions": 153,
+          "unique_meshes": 59
+        },
+        "world_visual_bounds_m": [
+          [
+            -0.261868500557079,
+            -0.3298910829886648,
+            0.005000000000000088
+          ],
+          [
+            0.26181761882588556,
+            0.33008449833425396,
+            0.15848236746615996
+          ]
+        ]
+      },
+      "stderr": ""
+    }
+  ],
+  "additional_observed_wide_limit_audits": {
+    "raw_cad": {
+      "pass": true,
+      "kinematic_sample_count": 45,
+      "errors": []
+    },
+    "rs05_mass_corrected": {
+      "pass": true,
+      "kinematic_sample_count": 45,
+      "errors": []
+    }
+  },
+  "additional_audit_command": "python -B audit_joint_review_usd.py <relocated variant directory>"
+}

@@ -6,17 +6,15 @@
   "description": "Cornell Physical Intelligence \u00b7 Learn a stable gait, extend it to all-direction motion, then add terrain perception and autonomous surveying.",
   "status_source": "STATUS.md",
   "geometry": {
-    "label": "Selected C study",
-    "coxa_joint_centers_mm": 55.453538,
-    "coxa_horizontal_mm": 47.718261,
-    "femur_hip_to_knee_mm": 72.5,
-    "tibia_knee_to_distal_reference_mm": 126.00000844,
-    "tibia_mesh_extent_mm": 135.750005,
-    "mass_kg": 8.26081134,
+    "label": "Canonical detailed direct-drive CAD",
+    "coxa_joint_centers_mm": 49.0,
+    "femur_hip_to_knee_mm": 73.502,
+    "tibia_knee_to_distal_reference_mm": 130.0,
+    "mass_kg": 7.466088235225788,
+    "raw_cad_mass_kg": 5.147603654203134,
     "motors": 18,
-    "applied_torque_cap_nm": 1.6,
-    "source": "experiments/c_length_study/README.md",
-    "note": "Kinematic reference distances for the selected C study, not material cut lengths. The updated physical CAD is a separate 19-body/18-joint direct-drive candidate; its nonspherical foot, mass distribution and native dynamics require qualification."
+    "source": "docs/UPDATED_CAD_IMPORT.md",
+    "note": "User-approved ground truth for all future training. All 1,753 parts and 59 meshes are retained. Nominal motor weight overrides are included; added inertia remains an estimate. Per-leg yaw has a 0.5 mm standoff gap; wider pitch travel permits coupled collisions. Historical videos/checkpoints use their original simplified geometry. Native physics remains unqualified."
   },
   "checkpoint": {
     "receipt": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_004/terminal/run/train/training_receipt.json",
@@ -243,7 +241,7 @@
       "meaning": "Limit target changes and motor effort, then translate targets through the appropriate robot model.",
       "input": "18 joint targets",
       "output": "Motor actuation and measured response",
-      "today": "The C study uses a 1.6 N\u00b7m applied cap. New physical CAD uses 18 direct-drive joints; its nominal RS05 envelope and hardware response require identification.",
+      "today": "Canonical model has 18 direct-drive RS05 motors with nominal mass overrides. Hardware torque-speed/thermal response and added inertia distribution remain uncalibrated.",
       "source": "docs/UPDATED_CAD_IMPORT.md",
       "next": "Review signed axes, motor mass distribution, measured travel, torque-speed and thermal behavior."
     },
@@ -468,7 +466,7 @@
   "focus": {
     "milestone": "stage2",
     "title": "Checkpoint 2: smooth omnidirectional movement and quiet standing.",
-    "text": "PPO Stage 2 is the priority. Terrain and perception preparation continue in parallel.",
+    "text": "Prepare native admission of the newly approved detailed robot before further training. Stage 2 smoothness and quiet-standing gates remain unchanged; terrain/perception preparation continues.",
     "badge": "Stage 2 \u00b7 not passed"
   },
   "primary_video_id": "caps50_preview",
@@ -494,8 +492,8 @@
     },
     {
       "label": "CAD audit",
-      "title": "Detailed direct-drive robot reconstructed",
-      "text": "All 1,753 source parts are retained. The 133-pose geometry audit passes a narrowed knee envelope; existing screw/tibia overlaps need review. Raw CAD 5.148 kg and nominal motor corrected 7.466 kg remain distinct.",
+      "title": "Detailed CAD approved as training ground truth",
+      "text": "The user approved full-range movement and grouping. The canonical motor-weight-corrected URDF preserves 1,753 parts, 19 bodies and 18 joints at 7.466 kg. All new training must use this model after native admission.",
       "source": "docs/UPDATED_CAD_IMPORT.md"
     }
   ]

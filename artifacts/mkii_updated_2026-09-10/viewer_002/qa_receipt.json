@@ -1,0 +1,52 @@
+{
+  "date_utc": "2026-09-10T19:32:05.793461+00:00",
+  "method": "Actual CUA browser accessibility inspection and screenshot, plus deterministic endpoint/cadence tests with the exact final corrected model.",
+  "sources": [
+    {
+      "path": "robot/hexapod_mkii_updated_v1/preview/inspection.js",
+      "sha256": "6643f52cb3cf6b08e989f4eb3c01a9468fa61f4404c9fb6a2d7567e16d2d5ee6"
+    },
+    {
+      "path": "robot/hexapod_mkii_updated_v1/preview/motion-tour.js",
+      "sha256": "c28aa247fd66879fa66977ddd56825e31cdfd3aee3db4d3d90773db246627722"
+    },
+    {
+      "path": "robot/hexapod_mkii_updated_v1/preview/index.html",
+      "sha256": "c7e9022c9de13e6c855e3e834ebaf0bc83dfae45c29ff839a89bea33448a5d9f"
+    },
+    {
+      "path": "robot/hexapod_mkii_updated_v1/preview/style.css",
+      "sha256": "99b64bb67a8e81d292f0d4a7d676e1847c9d9c8bede06922c10c09f299dba6ad"
+    },
+    {
+      "path": "robot/hexapod_mkii_updated_v1/model_rs05_mass_corrected.json",
+      "sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881"
+    },
+    {
+      "path": "viewer/src/App.jsx",
+      "sha256": "c6bca800a9c6d82e0307af523010737be06fe351843707c816e879895a49bb8f"
+    },
+    {
+      "path": "robot/active_model.json",
+      "sha256": "d11edd466902e2122d6cec7cd1b0c4399b566a6ed1598d6bfe911317197353e4"
+    }
+  ],
+  "verified": [
+    "All 1753 parts and 19 bodies loaded with 18 joints.",
+    "Default Vite entry loads the explicit detailed preview/index.html, with no recursive application iframe.",
+    "Final default and standalone viewers show 7.466088 kg with motor overrides; coxa links 501.2 g and femurs 302.5 g.",
+    "Initial full all18 tour reached Complete with all36 endpoints and zero return displayed.",
+    "Pause/resume control paused at LF yaw -0.15 degrees during the initial tour replay.",
+    "Final corrected model showed LM tibia lower endpoint -5.00 degrees and upper bound +180.000, with original pitch zero context.",
+    "Final corrected model uses identical per-part geometry and joint kinematics to the visually approved review.",
+    "Endpoint/cadence tests cover 18 joints,36 endpoints,54 holds and all1x/2x/4x speeds.",
+    "Final corrected-model browser tour completed all18 joints/all36 endpoints and returned to zero; switched from1\u00d7 to4\u00d7 mid-tour and observed Complete with RR tibia at0.00 degrees."
+  ],
+  "repaired_during_QA": "Vite public-directory URLs initially fell through to the application shell, recursively nesting the viewer. Using explicit preview/index.html fixed it; final browser inspection verifies a single detailed inspector.",
+  "limitations": [
+    "Kinematic animation; not contact dynamics or a gait.",
+    "No claim of collision-free combined poses.",
+    "Current saved-settings download was not independently captured as a file."
+  ],
+  "user_signoff": "Looks good on my end; designate URDF as ground truth for all training with motor weight overrides."
+}

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <robot name="hexapod_updated_direct_drive_inspection">
-  <!--INFERRED INSPECTION CANDIDATE ONLY. All source CAD masses preserved. Motor CAD underweight. Finite joint sweeps are not measured stops or clearance certification. Per-part collision meshes are unprepared. No Isaac admission.-->
+  <!--REVIEWED JOINT TRAVEL SUCCESSOR. Pitch zeros preserved; coxa neutral rebased to buffered interval midpoint. Wide user pitch travel is not a collision-free envelope. No Isaac admission.-->
   <link name="body">
     <inertial>
       <origin xyz="-2.8658317076464076e-05 6.1870559400405842e-05 0.025399876659591501" rpy="0 -0 0" />
@@ -26432,127 +26432,127 @@
   <joint name="lf_coxa_yaw" type="revolute">
     <parent link="body" />
     <child link="lf_coxa" />
-    <origin xyz="0.079974503128936378 -0.199902994827965 0.028250030527750904" rpy="-0 -0 -1.1902892749824068" />
+    <origin xyz="0.079974503128936378 -0.199902994827965 0.028250030527750904" rpy="0 0 -0.88514373014892411" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.43633231299858238" upper="0.43633231299858238" effort="0" velocity="0.5" />
+    <limit lower="-1.2966923677691873" upper="1.2966923677691873" effort="0" velocity="0.5" />
   </joint>
   <joint name="lf_femur_pitch" type="revolute">
     <parent link="lf_coxa" />
     <child link="lf_femur" />
     <origin xyz="0.049000215152391891 0 0" rpy="1.5707981075347506 -0.3490658503757012 -9.1099503567798479e-06" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.3490658503988659" upper="0.3490658503988659" effort="0" velocity="0.5" />
+    <limit lower="-2.0943951023931953" upper="1.3962634015954636" effort="0" velocity="0.5" />
   </joint>
   <joint name="lf_tibia_pitch" type="revolute">
     <parent link="lf_femur" />
     <child link="lf_tibia" />
     <origin xyz="0.073502073328735623 -8.6736173798840355e-18 0" rpy="1.9446212134917921e-16 -1.5382880019213444e-16 -1.9198621771636402" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.05235987755982989" upper="0.3490658503988659" effort="0" velocity="0.5" />
+    <limit lower="-0.087266462599716474" upper="3.1415926535897931" effort="0" velocity="0.5" />
   </joint>
   <joint name="lm_coxa_yaw" type="revolute">
     <parent link="body" />
     <child link="lm_coxa" />
-    <origin xyz="0.11997399851761598 9.7120160266750126e-05 0.028250030526969751" rpy="0 -0 6.8475982839115914e-07" />
+    <origin xyz="0.11997399851761598 9.7120160266750126e-05 0.028250030526969751" rpy="0 0 -0.0089884456477707982" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.43633231299858238" upper="0.43633231299858238" effort="0" velocity="0.5" />
+    <limit lower="-0.81533056006915106" upper="0.81533056006915106" effort="0" velocity="0.5" />
   </joint>
   <joint name="lm_femur_pitch" type="revolute">
     <parent link="lm_coxa" />
     <child link="lm_femur" />
     <origin xyz="0.049000157635767899 0 0" rpy="1.5707981075347506 -0.34906585039122701 -5.0617294894749194e-06" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.3490658503988659" upper="0.3490658503988659" effort="0" velocity="0.5" />
+    <limit lower="-2.0943951023931953" upper="1.3962634015954636" effort="0" velocity="0.5" />
   </joint>
   <joint name="lm_tibia_pitch" type="revolute">
     <parent link="lm_femur" />
     <child link="lm_tibia" />
     <origin xyz="0.073501978536716805 -2.7755575615628914e-17 4.3368086899420177e-19" rpy="-2.5919911940346134e-19 -8.1846984944269431e-19 -1.9198621771855102" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.05235987755982989" upper="0.3490658503988659" effort="0" velocity="0.5" />
+    <limit lower="-0.087266462599716474" upper="3.1415926535897931" effort="0" velocity="0.5" />
   </joint>
   <joint name="lr_coxa_yaw" type="revolute">
     <parent link="body" />
     <child link="lr_coxa" />
-    <origin xyz="0.079974494811767702 0.2000970031020049 0.028250019015532757" rpy="0 -0 1.1902891941000178" />
+    <origin xyz="0.079974494811767702 0.2000970031020049 0.028250019015532757" rpy="0 -0 0.87510808694995645" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.43633231299858238" upper="0.43633231299858238" effort="0" velocity="0.5" />
+    <limit lower="-1.3046336158657614" upper="1.3046336158657614" effort="0" velocity="0.5" />
   </joint>
   <joint name="lr_femur_pitch" type="revolute">
     <parent link="lr_coxa" />
     <child link="lr_femur" />
     <origin xyz="0.049000613705767276 1.3877787807814457e-17 0" rpy="1.5707975450783906 -0.3490658503980606 -1.9958910183695338e-06" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.3490658503988659" upper="0.3490658503988659" effort="0" velocity="0.5" />
+    <limit lower="-2.0943951023931953" upper="1.3962634015954636" effort="0" velocity="0.5" />
   </joint>
   <joint name="lr_tibia_pitch" type="revolute">
     <parent link="lr_femur" />
     <child link="lr_tibia" />
     <origin xyz="0.073501498914480073 -1.1275702593849246e-17 -2.7755575615628914e-17" rpy="1.5649025755006556e-16 -4.6033616345639408e-17 -1.919862177193151" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.05235987755982989" upper="0.3490658503988659" effort="0" velocity="0.5" />
+    <limit lower="-0.087266462599716474" upper="3.1415926535897931" effort="0" velocity="0.5" />
   </joint>
   <joint name="rf_coxa_yaw" type="revolute">
     <parent link="body" />
     <child link="rf_coxa" />
-    <origin xyz="-0.080025494953448406 -0.19990300332753749 0.02825003052689477" rpy="0 -0 -1.9513018931236898" />
+    <origin xyz="-0.080025494953448406 -0.19990300332753749 0.02825003052689477" rpy="0 -0 -2.2664845666398361" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.43633231299858238" upper="0.43633231299858238" effort="0" velocity="0.5" />
+    <limit lower="-1.3046336158657614" upper="1.3046336158657614" effort="0" velocity="0.5" />
   </joint>
   <joint name="rf_femur_pitch" type="revolute">
     <parent link="rf_coxa" />
     <child link="rf_femur" />
     <origin xyz="0.048999525819311426 -1.3877787807814457e-17 0" rpy="1.5707981075347506 -0.34906585039223131 -4.6972294909123618e-06" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.3490658503988659" upper="0.3490658503988659" effort="0" velocity="0.5" />
+    <limit lower="-2.0943951023931953" upper="1.3962634015954636" effort="0" velocity="0.5" />
   </joint>
   <joint name="rf_tibia_pitch" type="revolute">
     <parent link="rf_femur" />
     <child link="rf_tibia" />
     <origin xyz="0.073502167037295313 1.7347234759768071e-17 1.3877787807814457e-17" rpy="0 6.7397268193760501e-17 -1.919862177186596" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.05235987755982989" upper="0.3490658503988659" effort="0" velocity="0.5" />
+    <limit lower="-0.087266462599716474" upper="3.1415926535897931" effort="0" velocity="0.5" />
   </joint>
   <joint name="rm_coxa_yaw" type="revolute">
     <parent link="body" />
     <child link="rm_coxa" />
-    <origin xyz="-0.1200259984620559 9.7108454068357857e-05 0.028250030526966504" rpy="0 -0 3.141592066385154" />
+    <origin xyz="-0.1200259984620559 9.7108454068357857e-05 0.028250030526966504" rpy="0 -0 3.132604207942022" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.43633231299858238" upper="0.43633231299858238" effort="0" velocity="0.5" />
+    <limit lower="-0.81533056006915094" upper="0.81533056006915094" effort="0" velocity="0.5" />
   </joint>
   <joint name="rm_femur_pitch" type="revolute">
     <parent link="rm_coxa" />
     <child link="rm_femur" />
     <origin xyz="0.048999101967106329 0 0" rpy="1.5707981075347506 -0.34906585039259375 -4.559552292290731e-06" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.3490658503988659" upper="0.3490658503988659" effort="0" velocity="0.5" />
+    <limit lower="-2.0943951023931953" upper="1.3962634015954636" effort="0" velocity="0.5" />
   </joint>
   <joint name="rm_tibia_pitch" type="revolute">
     <parent link="rm_femur" />
     <child link="rm_tibia" />
     <origin xyz="0.073502085768300224 -4.163336342344337e-17 -4.9873299934333204e-18" rpy="2.591991194026042e-19 -9.3974921299259437e-20 -1.9198621771870521" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.05235987755982989" upper="0.3490658503988659" effort="0" velocity="0.5" />
+    <limit lower="-0.087266462599716474" upper="3.1415926535897931" effort="0" velocity="0.5" />
   </joint>
   <joint name="rr_coxa_yaw" type="revolute">
     <parent link="body" />
     <child link="rr_coxa" />
-    <origin xyz="-0.080025502213655203 0.20009699437506273 0.02825001279546957" rpy="0 -0 1.9513020708504265" />
+    <origin xyz="-0.080025502213655203 0.20009699437506273 0.02825001279546957" rpy="0 -0 2.2564489234408689" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.43633231299858238" upper="0.43633231299858238" effort="0" velocity="0.5" />
+    <limit lower="-1.2966923677691873" upper="1.2966923677691873" effort="0" velocity="0.5" />
   </joint>
   <joint name="rr_femur_pitch" type="revolute">
     <parent link="rr_coxa" />
     <child link="rr_femur" />
     <origin xyz="0.048999585755567079 1.3877787807814457e-17 0" rpy="1.5707972411260194 -0.34906585039856758 1.3582189130844497e-06" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.3490658503988659" upper="0.3490658503988659" effort="0" velocity="0.5" />
+    <limit lower="-2.0943951023931953" upper="1.3962634015954636" effort="0" velocity="0.5" />
   </joint>
   <joint name="rr_tibia_pitch" type="revolute">
     <parent link="rr_femur" />
     <child link="rr_tibia" />
     <origin xyz="0.073502379720313177 -1.2576745200831851e-17 4.163336342344337e-17" rpy="-6.1656385133487342e-17 -4.7353052684445726e-17 -1.9198621771937532" />
     <axis xyz="0 0 1" />
-    <limit lower="-0.05235987755982989" upper="0.3490658503988659" effort="0" velocity="0.5" />
+    <limit lower="-0.087266462599716474" upper="3.1415926535897931" effort="0" velocity="0.5" />
   </joint>
 </robot>

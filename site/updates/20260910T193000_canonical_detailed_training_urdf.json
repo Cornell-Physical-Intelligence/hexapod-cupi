@@ -1,0 +1,43 @@
+{
+  "id": "20260910T193000_canonical_detailed_training_urdf",
+  "date": "2026-09-10T19:30:00Z",
+  "title": "Approved detailed CAD becomes the canonical training URDF",
+  "summary": "The user approved the full-range 18-joint animation and designated the motor-weight-corrected detailed URDF as ground truth for all future training. Its mass is7.466088235kg; pitch zeros are preserved, per-leg yaw limits retain a continuous0.5mm standoff gap, and source geometry/inertias are preserved with explicit nominal motor corrections. The default viewer and contributor guidance now use the detailed robot; native admission remains pending.",
+  "areas": [
+    "geometry",
+    "hardware",
+    "simulation",
+    "locomotion"
+  ],
+  "changes": [
+    ".gitattributes",
+    "CLAUDE.md",
+    "README.md",
+    "STATUS.md",
+    "docs/PLAN.md",
+    "docs/NEXT_RUNS.md",
+    "docs/UPDATED_CAD_IMPORT.md",
+    "robot/active_model.json",
+    "robot/hexapod_mkii_updated_v1/**",
+    "viewer/src/App.jsx",
+    "site/project.json",
+    "site/poster.js",
+    "artifacts/mkii_updated_2026-09-10/joint_review_002/**",
+    "artifacts/mkii_updated_2026-09-10/yaw_envelope_002/**",
+    "artifacts/mkii_updated_2026-09-10/usd_002/**",
+    "artifacts/mkii_updated_2026-09-10/viewer_002/**",
+    "artifacts/mkii_updated_2026-09-10/main_selection_001/**",
+    "artifacts/mkii_updated_2026-09-10/publication_002/**"
+  ],
+  "evidence": [
+    "robot/active_model.json",
+    "docs/UPDATED_CAD_IMPORT.md",
+    "artifacts/mkii_updated_2026-09-10/main_selection_001/activation_receipt.json",
+    "artifacts/mkii_updated_2026-09-10/publication_002/final_asset_check.json",
+    "artifacts/mkii_updated_2026-09-10/yaw_envelope_002/integrated_model_verification.json",
+    "artifacts/mkii_updated_2026-09-10/usd_002/verification_summary.json",
+    "artifacts/mkii_updated_2026-09-10/viewer_002/qa_receipt.json"
+  ],
+  "next": "Use the canonical detailed model for a new runtime contract and native SDF/contact/actuator admission before further training. Preserve historical simplified and four-bar task/checkpoint identities; no new training on those assets.",
+  "no_project_impact": false
+}

@@ -52,15 +52,23 @@ isaaclab/hexapod_rl/            Compatibility shims re-exporting hexapod_env
 isaaclab/deploy/                Launchers, systemd units, stage2_pipeline.sha256
 isaaclab/tests/                 Unit and contract tests
 ops/                            hexctl operator CLI; attic/ holds retired deploy scripts
-robot/hexapod_mkii_assy/        Asset v1: CAD assembly URDF package and its README (conventions, regeneration)
+robot/hexapod_mkii_updated_v1/ Canonical detailed direct-drive training model, motor weights corrected
+robot/active_model.json        Canonical URDF/model/USD identities
+robot/hexapod_mkii_assy/        Historical CAD and four-bar asset lineages
 robot/hexapod_mkii_mock_assy/   Archived Phase-0 mock; new geometry studies are explicit
 robot/hexapod_leg_v3/           Single-leg reference the assembly import registers onto
 robot/sensors/                  Mid-360 datasheet values and mount placement study
 robot/tools/                    onshape-to-robot importers, viewer packer
 tools/                          URDF-to-USD import and physics preparation
-viewer/                         Vite + React + urdf-loader web viewer
+viewer/                         Default entry point to the detailed CAD inspector
 artifacts/                      Evidence: checkpoints, evaluations, videos, probe ledger
 ```
+
+## Canonical training robot
+
+The user-approved [detailed direct-drive URDF](robot/hexapod_mkii_updated_v1/urdf/hexapod_updated_rs05_mass_corrected.urdf) is the ground-truth model for **all future training**, with the motor weight overrides: **7.466088235 kg**, 19 bodies, 18 joints, and all 1,753 original CAD parts. [robot/active_model.json](robot/active_model.json) pins the selected URDF/model/USD hashes. The repository viewer now opens its detailed part and full-range joint inspector.
+
+See [joint limits and import checks](docs/UPDATED_CAD_IMPORT.md), [all link weights/COMs/inertias](robot/hexapod_mkii_updated_v1/MASS_INERTIA.md), and [Isaac preparation](artifacts/mkii_updated_2026-09-10/usd_002/README.md). The original CAD mass is preserved separately; the added motor inertia distribution is a labeled estimate. Native SDF cooking and a new asset-bound runtime/admission are required before training. Do not start new simplified-model or four-bar training. Historical task IDs/checkpoints keep their original assets and remain available for reproduction.
 
 ## Quickstart
 
@@ -80,7 +88,7 @@ Training and evaluation run on the DGX Spark over Tailscale. Ask the project
 lead for an invite and an account, then follow `docs/OPERATIONS.md` §2 before
 you launch anything. uv manages laptops and CI only.
 
-## Robot models
+## Historical robot models
 
 `packages/hexapod_env/hexapod_env/assets/spec.py` describes each robot model
 once: USD path, root link, joint and link names, limits, reset stance,
@@ -105,7 +113,7 @@ task ID. Existing IDs keep loading the model they trained on.
 - User-selected [C geometry study](artifacts/length_study_2026-09-09/README.md):
   72.5 mm femur, 126 mm tibia, unchanged coxa, with current CAD mass/inertia and
   RS05 constraints transferred to scaled mock geometry (approximately 8.2608 kg).
-  This isolated study does not replace the production four-bar work. Detailed C
+  This isolated study predates the now-canonical updated direct-drive model. Detailed C
   motor/linkage fit, payload and hardware geometry remain unverified.
 
 The exact [C forward Benchmark 1](artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md)
@@ -128,8 +136,7 @@ Consult STATUS for the current checkpoint and scheduler state.
   and [mild curriculum](artifacts/terrain_readiness_2026-09-09/mild_curriculum_001/curriculum.json)
   prepare procedural assets and evaluation inputs; runtime admission is separate.
 - [Camera-mount study](artifacts/sensor_mount_study_2026-09-09/README.md) records
-  visibility on its hashed serial-CAD snapshot. It does not qualify the newer
-  physical four-bar or final C mounting geometry.
+  visibility on its hashed serial-CAD snapshot. It does not qualify sensor placement on the canonical updated CAD.
 - [CPU perception replay](artifacts/perception_readiness_2026-09-09/README.md)
   exercises timestamped depth/point-cloud transforms and an age/uncertainty-aware
   map with synthetic data. It claims no real-sensor calibration, ROS integration,

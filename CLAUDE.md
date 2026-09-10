@@ -7,13 +7,13 @@ trains walking policies with Isaac Sim 6.0.1, Isaac Lab `DirectRLEnv`, and
 RSL-RL PPO on a shared DGX Spark through hardened launchers. Explicit numeric
 acceptance criteria gate progress. For the current C-study Stage 2, the user requires visual smoothness matching the accepted forward clip as well as quantitative gates. The
 current program is no-RTK bounded-area coverage with a learned
-omnidirectional gait on the real CAD assembly. The historical Stage2C is archived mock research. The explicitly authorized 9 September C-length study is the current execution priority, while production deployment remains a separately qualified physical CAD model. `STATUS.md` records execution
+omnidirectional gait on the real CAD assembly. The historical Stage2C is archived mock research. The user approved the detailed direct-drive CAD on 10 September and designated its motor-weight-corrected URDF as ground truth for all future training. The C-length study is now historical; native admission of the new model precedes further training. `STATUS.md` records execution
 state; `docs/PLAN.md` holds the living plan and `docs/NEXT_RUNS.md` prepares
 the next campaign without launching it.
 
 ## Current execution priority and publication
 
-The user selected the C geometry study and asks for Stage 2 all-direction/path smoothness and quiet standing, with terrain/perception prepared in parallel. Read `STATUS.md` and `experiments/c_length_study/README.md`. Its pinned serial-study runtime, 1.6 N·m cap and checkpoint contracts are not the physical four-bar runtime. Do not silently substitute either lineage. Every meaningful verified step must be committed and pushed with the relevant Markdown context; this is explicit user authorization. Preserve teammates' commits, use a current main integration, run relevant checks, and verify the remote SHA. Historical frozen evidence is not rewritten to update status.
+The user approved `robot/active_model.json` as the canonical model selection for **all future training**, using `robot/hexapod_mkii_updated_v1/urdf/hexapod_updated_rs05_mass_corrected.urdf` with the motor weight overrides (7.466088235 kg). Do not start new training on the simplified C-study/mock or historical four-bar models. Prepare a new model-bound runtime and native Isaac admission for the detailed 19-body/18-joint direct-drive robot first. Preserve old task IDs, checkpoints and evidence unchanged for historical reproduction; do not silently make an old task load this new asset. Stage 2 still requires all-direction/path smoothness and quiet standing, with terrain/perception prepared in parallel. Read `STATUS.md` and `docs/UPDATED_CAD_IMPORT.md`. Every meaningful verified step must be committed and pushed with the relevant Markdown context; this is explicit user authorization. Preserve teammates' commits, use a current main integration, run relevant checks, and verify the remote SHA. Historical frozen evidence is not rewritten to update status.
 
 **Weather compute priority, 10 September 2026:** the user explicitly authorizes overriding all weather activity to prioritize HEXAPOD PPO. Identified weather services and timers may be deferred when they block training; preserve their outputs and record exact ownership and restoration/defer decisions. This authorization does not cover unrelated non-weather workloads. Keep the hardened launchers, shared GPU locks, exact container cleanup and bounded recovery controls. Do not delay a ready HEXAPOD allocation merely to favor a weather job.
 
@@ -32,9 +32,11 @@ The user requests Claude Code with Fable 5.1 (`claude-fable-5-1`) with maximum r
 The user confirmed on 10 September 2026 that the new physical design removes the
 external four-bar and has 18 direct-drive joints/19 main rigid bodies. New CAD
 intake and offline preparation use `robot/hexapod_mkii_updated_v1/` and
-`docs/UPDATED_CAD_IMPORT.md`. Its topology is user-confirmed; attachment ownership,
-hardware limits, corrected motor inertia distribution and native Isaac physics
-remain review/admission tasks. It is not admitted by either existing runtime.
+`docs/UPDATED_CAD_IMPORT.md`. The user visually approved grouping and full joint travel, then selected the
+motor-weight-corrected URDF as ground truth for training. The CAD mate graph was
+absent: inferred attachment ownership, source screw overlaps, measured hardware
+stops and motor inertia distribution remain explicit uncertainties. Native Isaac
+physics remains an admission task. It is not admitted by either existing runtime.
 Do not apply the four-bar motor adapter or its runner to this updated asset.
 
 The following contract is retained **only for the historical four-bar lineage**:
