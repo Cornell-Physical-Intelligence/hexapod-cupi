@@ -1,0 +1,73 @@
+{
+  "source": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_physics_adapter_006/source_006",
+  "files": 926,
+  "manifest_sha256": "90d7cf551ccf52f7cc2d224b81547c1bad0ad6191c2db56389bb2d54de0ff193",
+  "runtime": {
+    "mode": "vendored",
+    "package_directory": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_physics_adapter_006/source_006/experiments/c_length_study/runtime/hexapod_rl",
+    "runtime_tree_sha256": "abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280",
+    "base_commit": "36769da93f90e0602fb0e3591caeb98bbd7090ed",
+    "manifest_path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_physics_adapter_006/source_006/experiments/c_length_study/runtime/SHA256SUMS.json",
+    "manifest_sha256": "b23846761f36754ff8c7061209de31445cfc52afb417f5a16313ed392bb2432a",
+    "python_files_verified": 16
+  },
+  "changed_from005": [
+    "source_origin.json",
+    "tools/reference_physics_env.py",
+    "tools/screen_contract.py",
+    "tools/solver_comparison.py"
+  ],
+  "same_file_set": true,
+  "all_other_files_byte_identical": true,
+  "source_no_extras": true,
+  "focused_CPU_tests": 5,
+  "independent_review": "No setting-delta blocker; full cloned-stage USD iteration readback is an explicit first-run fail-closed gate",
+  "protocol": {
+    "name": "reference006_standing_TGS_velocity_iterations_one",
+    "baseline_source_manifest_sha256": "c557b71636c8b1e10883ab8a6b2b49f40b661988f9b09faeaefe4821a72844b4",
+    "baseline_run": "reference_physics_005",
+    "only_physics_change": "robot.spawn.articulation_props.solver_velocity_iteration_count",
+    "baseline_value": 4,
+    "comparison_value": 1,
+    "inherited_external_forces_every_iteration": true,
+    "unchanged_position_iterations": 16,
+    "standing_only": true,
+    "num_envs": 32,
+    "control_steps": 1000,
+    "production_default_adopted": false,
+    "automatic_wave_or_PPO": false,
+    "legacy_50Hz_metric_and_5mm_gate_unchanged": true,
+    "predeclared_comparison": {
+      "interval_control_boundaries": [
+        200,
+        1000
+      ],
+      "duration_s": 16.0,
+      "all32envs_individually": true,
+      "frames": [
+        "root_link",
+        "root_COM"
+      ],
+      "velocity_integrals": [
+        "400Hz_left",
+        "400Hz_right",
+        "400Hz_trapezoid",
+        "50Hz_last_substep_right"
+      ],
+      "report": [
+        "world_pose_displacement",
+        "integrated_velocity",
+        "3D_difference_norm",
+        "forward_displacement",
+        "per_joint_400Hz_computed_and_applied_torque_extrema",
+        "postsettle_contact_and_reset_gates",
+        "unchanged_50Hz_quiet_metrics_all32",
+        "joint_position_delta_vs_reported_velocity_bias_all32x18"
+      ],
+      "5mm_difference_reported_as_diagnostic_not_new_standing_gate": true,
+      "retain_every_existing_standing_gate": true,
+      "interpretation": "Compare every matched env to005; retain004 context; no metric chosen for a favorable result and no default adoption."
+    }
+  },
+  "new_physics_result_claimed": false
+}

@@ -1,0 +1,220 @@
+{
+  "scope": "Synthetic sparse flat-ground acquisition with actual004 C mesh/body/joint motion; no real sensor or terrain traversal",
+  "actual_motion_trace_sha256": "0b18528e8d537cce7c3591d407970bf81348fa34b09e95080d30c2b6c7c813ee",
+  "frame_count": 85,
+  "capture_hz": 10.0,
+  "latency_s": 0.04,
+  "max_usable_age_s": 0.25,
+  "grid_resolution_m": 0.02,
+  "optical_profile": {
+    "id": "D405_848x480",
+    "model": "D405",
+    "width": 848,
+    "height": 480,
+    "fx": 448.0085572578692,
+    "fy": 432.97146126514167,
+    "ppx": 424.0,
+    "ppy": 240.0,
+    "baseline_m": 0.018,
+    "min_z_m": 0.07,
+    "max_z_m": 0.5,
+    "mass_kg": 0.058,
+    "nominal_depth_hfov_deg": 84.0,
+    "nominal_depth_vfov_deg": 58.0,
+    "fov_reference_z_m": 0.2,
+    "calibrated": false,
+    "source": "D400 datasheet rev020 tables3-49,4-11; section4.4; inferred pinhole intrinsics"
+  },
+  "profile_primary_source": "Frozen D400 datasheet rev020 tables3-49,4-11 and section4.4; https://www.realsenseai.com/download/21345/?tmstv=1780360410",
+  "synthetic_noise_and_pose_assumptions": {
+    "point_sigma_m": 0.003,
+    "body_position_sigma_m": 0.001,
+    "body_rotation_sigma_rad": 0.001,
+    "hardware_validated": false
+  },
+  "calibration": "Nominal inferred profile and hypothetical mounts, not device calibration",
+  "scene": "flat world Z=0 sampled at20mm cell centres; not a full depth-image renderer",
+  "motion": "Raw actual004 recorded poses/joints from failed wave; no physics pose prescribed or terrain transplant",
+  "occlusion": "Exact included C simulation visual triangles, both stereo segments; camera-origin ambiguity is unknown",
+  "mounts": "Hashed production-anchor proposals reused as hypothetical C placements; bracket/cable/housing feasibility unvalidated",
+  "observed_mask": "Ever acquired sampled cells; does not imply current freshness",
+  "usable_mask": "Explicit250ms age and15mm uncertainty criteria from existing terrain contract",
+  "required_footprints": "All six15mmradius footprint disks conservatively rasterized; current feet plus active original planned endpoint at receipt time",
+  "future_use_horizons_s": [
+    0.0,
+    0.1,
+    0.25,
+    0.5,
+    3.0,
+    6.0
+  ],
+  "future_use_assumption": "No future reacquisition. Same required world cells; this is an age-lease stress test, not a computed stopping envelope.",
+  "pose_provider": "Recorded simulator ground truth with explicitly assumed1mm/.001rad uncertainty; no real pose estimator qualified",
+  "support_eligibility_computed": false,
+  "physics_qualification": false,
+  "hardware_qualification": false,
+  "cases": [
+    {
+      "id": "2cam_continuous",
+      "camera_count": 2,
+      "sectors": [
+        "lm",
+        "rm"
+      ],
+      "dropout": false,
+      "mean_instantaneous_visibility_fraction": 0.1788954248366013,
+      "mean_retained_usable_fraction": 0.17999346405228756,
+      "final_ever_observed_fraction": 0.21027777777777779,
+      "mean_required_footprint_usable_fraction": 0.3374888979982236,
+      "minimum_required_footprint_usable_fraction": 0.21951219512195122,
+      "complete_required_footprint_frames": 0,
+      "mean_required_footprint_optical_fraction": 0.7251902712304432,
+      "mean_active_planned_footprint_usable_fraction": 0.5018796992481203,
+      "mean_required_future_use_fraction": [
+        0.3374888979982235,
+        0.33403737104597925,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "2cam_dropout",
+      "camera_count": 2,
+      "sectors": [
+        "lm",
+        "rm"
+      ],
+      "dropout": true,
+      "mean_instantaneous_visibility_fraction": 0.1788954248366013,
+      "mean_retained_usable_fraction": 0.17160457516339866,
+      "final_ever_observed_fraction": 0.21027777777777779,
+      "mean_required_footprint_usable_fraction": 0.3233712509394001,
+      "minimum_required_footprint_usable_fraction": 0.0,
+      "complete_required_footprint_frames": 0,
+      "mean_required_footprint_optical_fraction": 0.7251902712304432,
+      "mean_active_planned_footprint_usable_fraction": 0.4868421052631579,
+      "mean_required_future_use_fraction": [
+        0.32337125093940006,
+        0.3163903122224499,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "4cam_continuous",
+      "camera_count": 4,
+      "sectors": [
+        "lf",
+        "lm",
+        "rm",
+        "rr"
+      ],
+      "dropout": false,
+      "mean_instantaneous_visibility_fraction": 0.33802614379084966,
+      "mean_retained_usable_fraction": 0.33950653594771235,
+      "final_ever_observed_fraction": 0.3827777777777778,
+      "mean_required_footprint_usable_fraction": 0.3790315638450502,
+      "minimum_required_footprint_usable_fraction": 0.3170731707317073,
+      "complete_required_footprint_frames": 0,
+      "mean_required_footprint_optical_fraction": 0.7747151055544168,
+      "mean_active_planned_footprint_usable_fraction": 0.6390977443609023,
+      "mean_required_future_use_fraction": [
+        0.37903156384505066,
+        0.3750198128031704,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "4cam_dropout",
+      "camera_count": 4,
+      "sectors": [
+        "lf",
+        "lm",
+        "rm",
+        "rr"
+      ],
+      "dropout": true,
+      "mean_instantaneous_visibility_fraction": 0.33802614379084966,
+      "mean_retained_usable_fraction": 0.3234509803921568,
+      "final_ever_observed_fraction": 0.3827777777777778,
+      "mean_required_footprint_usable_fraction": 0.36256097560975614,
+      "minimum_required_footprint_usable_fraction": 0.0,
+      "complete_required_footprint_frames": 0,
+      "mean_required_footprint_optical_fraction": 0.7747151055544168,
+      "mean_active_planned_footprint_usable_fraction": 0.6203007518796992,
+      "mean_required_future_use_fraction": [
+        0.3625609756097565,
+        0.35443157750905274,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "6cam_continuous",
+      "camera_count": 6,
+      "sectors": [
+        "lf",
+        "lm",
+        "lr",
+        "rf",
+        "rm",
+        "rr"
+      ],
+      "dropout": false,
+      "mean_instantaneous_visibility_fraction": 0.4081013071895425,
+      "mean_retained_usable_fraction": 0.4096372549019608,
+      "final_ever_observed_fraction": 0.45305555555555554,
+      "mean_required_footprint_usable_fraction": 0.5525818132130902,
+      "minimum_required_footprint_usable_fraction": 0.4878048780487805,
+      "complete_required_footprint_frames": 0,
+      "mean_required_footprint_optical_fraction": 1.0,
+      "mean_active_planned_footprint_usable_fraction": 0.8211152882205514,
+      "mean_required_future_use_fraction": [
+        0.5525818132130905,
+        0.5482899501263925,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": "6cam_dropout",
+      "camera_count": 6,
+      "sectors": [
+        "lf",
+        "lm",
+        "lr",
+        "rf",
+        "rm",
+        "rr"
+      ],
+      "dropout": true,
+      "mean_instantaneous_visibility_fraction": 0.4081013071895425,
+      "mean_retained_usable_fraction": 0.39027777777777783,
+      "final_ever_observed_fraction": 0.45305555555555554,
+      "mean_required_footprint_usable_fraction": 0.527875930860149,
+      "minimum_required_footprint_usable_fraction": 0.0,
+      "complete_required_footprint_frames": 0,
+      "mean_required_footprint_optical_fraction": 1.0,
+      "mean_active_planned_footprint_usable_fraction": 0.8023182957393483,
+      "mean_required_future_use_fraction": [
+        0.5278759308601493,
+        0.5174075971852159,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

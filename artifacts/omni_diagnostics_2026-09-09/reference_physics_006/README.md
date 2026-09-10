@@ -1,0 +1,9 @@
+# Reference006: readback failed before control0
+
+The32-replica standing comparison reached the imported full-C environment but stopped before its first control step. The readback incorrectly required independent solver-iteration metadata on every articulation link. Its complete raw snapshot contains32 explicitly authored16/1 articulation roots and608 rigid bodies:32 root bodies resolve16/1 fallback metadata, while576 child links have absent, unauthored fields. The first such link, `env_0/Robot/Geometry/body_mock/coxa_1`, triggered the fail-closed check.
+
+This is an instrumentation failure, not a physical standing, quiet-hold, walking or torque outcome. There is no trace/control trajectory to score. No wave or PPO launched; Stage2 and terrain remain incomplete. The next source007 corrects this introspection rule while preserving the16/1 physical configuration, targets, observer and all existing gates. Its preparation and result are separate artifacts.
+
+The immutable source006 preparation reconstructs the exact926-file source against005 using only three runtime overlays plus source identity. The independent pre-run review records five passing CPU tests and the explicitly unproven runtime link-fallback assumption; its receipt is preserved even though that assumption failed in Isaac.
+
+All14 remote raw payloads matched locally; the audit verified926 source and550 asset files unchanged. The exact owned container ID/name were absent, and pause032 restored both named StormScope timers. These statements apply at the recorded audit time and do not assert that the GPU remains idle during later jobs. Full logs, failed readback, resolved configuration, guard, restoration, source identity, checksums and exact copy verification are included. Frozen preparation and raw files are unchanged.

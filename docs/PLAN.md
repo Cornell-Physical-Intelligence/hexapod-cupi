@@ -361,3 +361,13 @@ The separate 740/743-value observation contract explicitly includes the original
 ### Faster gait candidates retain a physical load-transfer gate, 10 September
 
 The [fixed-stance support study](../artifacts/omni_diagnostics_2026-09-09/static_support_patterns_001/README.md) gives no static basis to rule out alternating tripod motion on sufficiently grippy ground, while balanced four-foot support has more ideal torque reserve. These are optimized force allocations with exact nominal C link gravity, not forces already realized by the position controller. Keep the slow single-leg reference as a feasibility screen rather than a project speed ceiling. A separate proposed diagnostic can unload LM and RM while retaining the four corner feet, then return to quiet support; it must measure real load transfer, slip, body deflection, all-substep torque and continuity before a faster gait is selected. Preserve existing wave and Stage 2 gates and label any new diagnostic criteria separately.
+
+
+### Distinguish planted contact from new optical support, 10 September
+
+The [sequential synthetic acquisition replay](../artifacts/perception_readiness_2026-09-09/sequential_sensor_replay_001/README.md) shows why ever-observed map coverage cannot substitute for currently usable foothold evidence. Included body and leg occlusion leaves gaps even with six hypothetical views; planted feet naturally hide some ground. Keep measured planted-support evidence separate from the optical validity needed for a new foothold, and require an explicit trajectory-aware reacquisition/uncertainty contract. Preserve the existing250ms age bound until a separately justified contract is validated. This replay uses flat recorded C motion and does not validate production mounting, sensors or traversal.
+
+
+### Preserve measurement fidelity beyond a standing pass, 10 September
+
+The [reference007 comparison](../artifacts/omni_diagnostics_2026-09-09/reference_physics_007/README.md) passes existing standing and quiet checks with TGS16/1 and external-force timing enabled, yet a joint's reported velocity still integrates far from its measured angle change. Use those settings only in the separately identified next bounded C trial; no production default or large-PPO admission follows. Retain raw SDK velocity and unchanged gates alongside independent pose/angle comparisons. Do not substitute finite-difference measurements merely to obtain a pass. Fresh standing admission precedes each changed-source stepping screen, and contact, progress, torque and measured stop remain required.

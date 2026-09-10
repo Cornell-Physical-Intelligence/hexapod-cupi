@@ -1,0 +1,75 @@
+{
+  "actual006_snapshot_sha256": "7c77ed01d3d9973dbc1dd5131facd7f06c6bd99aa05f29fff4d989dcdc467f59",
+  "all_other_files_byte_identical": true,
+  "changed_from006": [
+    "source_origin.json",
+    "tools/solver_comparison.py"
+  ],
+  "files": 926,
+  "focused_CPU_tests": 4,
+  "independent_review": "Four tests passed independently before explicit root-authorship tightening; final strengthening does not alter actual006 replay outcome.",
+  "manifest_sha256": "666571ed6e37a73b857179323573ae20cdef0eee53aa25908108bd4e29465465",
+  "new_physics_result_claimed": false,
+  "protocol": {
+    "automatic_wave_or_PPO": false,
+    "baseline_run": "reference_physics_005",
+    "baseline_source_manifest_sha256": "c557b71636c8b1e10883ab8a6b2b49f40b661988f9b09faeaefe4821a72844b4",
+    "baseline_value": 4,
+    "comparison_value": 1,
+    "control_steps": 1000,
+    "inherited_external_forces_every_iteration": true,
+    "legacy_50Hz_metric_and_5mm_gate_unchanged": true,
+    "name": "reference007_standing_TGS_velocity_iterations_one_readback_correction",
+    "native_tensor_iteration_getter_status": "Unverified/unavailable in inspected source; no guessed getter or internal iteration-count claim",
+    "num_envs": 32,
+    "only_physics_change": "robot.spawn.articulation_props.solver_velocity_iteration_count",
+    "predeclared_comparison": {
+      "5mm_difference_reported_as_diagnostic_not_new_standing_gate": true,
+      "all32envs_individually": true,
+      "duration_s": 16.0,
+      "frames": [
+        "root_link",
+        "root_COM"
+      ],
+      "interpretation": "Compare every matched env to005; retain004 context; no metric chosen for a favorable result and no default adoption.",
+      "interval_control_boundaries": [
+        200,
+        1000
+      ],
+      "report": [
+        "world_pose_displacement",
+        "integrated_velocity",
+        "3D_difference_norm",
+        "forward_displacement",
+        "per_joint_400Hz_computed_and_applied_torque_extrema",
+        "postsettle_contact_and_reset_gates",
+        "unchanged_50Hz_quiet_metrics_all32",
+        "joint_position_delta_vs_reported_velocity_bias_all32x18"
+      ],
+      "retain_every_existing_standing_gate": true,
+      "velocity_integrals": [
+        "400Hz_left",
+        "400Hz_right",
+        "400Hz_trapezoid",
+        "50Hz_last_substep_right"
+      ]
+    },
+    "production_default_adopted": false,
+    "same_physics_as_source006": true,
+    "source006_retry_reason": "Articulation links have no independent solver iteration counts; absent per-link attributes are not unknown root settings",
+    "standing_only": true,
+    "unchanged_position_iterations": 16
+  },
+  "runtime": {
+    "base_commit": "36769da93f90e0602fb0e3591caeb98bbd7090ed",
+    "manifest_path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_physics_adapter_007/source_007/experiments/c_length_study/runtime/SHA256SUMS.json",
+    "manifest_sha256": "b23846761f36754ff8c7061209de31445cfc52afb417f5a16313ed392bb2432a",
+    "mode": "vendored",
+    "package_directory": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_physics_adapter_007/source_007/experiments/c_length_study/runtime/hexapod_rl",
+    "python_files_verified": 16,
+    "runtime_tree_sha256": "abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280"
+  },
+  "same_file_set": true,
+  "source": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_physics_adapter_007/source_007",
+  "source_no_extras": true
+}
