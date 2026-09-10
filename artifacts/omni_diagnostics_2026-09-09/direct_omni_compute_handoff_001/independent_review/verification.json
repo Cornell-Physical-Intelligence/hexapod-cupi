@@ -1,0 +1,19 @@
+{
+  "scope": "Independent CPU review; no service/GPU mutation",
+  "clear_for_bounded_defer": true,
+  "reviewed_helper_sha256": "231ae55e3fe3aba47cb52aff3720b4850704f16d4ce2e02aee963b24fae9d209",
+  "identity_sha256": "5120b38b654eb04f68ea03247a78204bb093a6f0c6bba6498b351fbe990dac81",
+  "independent_tests": 6,
+  "tests_passed": true,
+  "missing_unit_readonly": {
+    "command": "systemctl --user show hexapod-review-nonexistent-20260910.service -p LoadState -p ActiveState -p MainPID -p InvocationID",
+    "exit_code": 0,
+    "output": "MainPID=0\nLoadState=not-found\nActiveState=inactive\nInvocationID=\n"
+  },
+  "protected_service_readonly": {
+    "command": "systemctl --user list-units --all --type=service --state=active,activating,deactivating --no-legend --plain hexapod-*.service",
+    "exit_code": 0,
+    "output": ""
+  },
+  "actual_restore_not_performed_by_reviewer": true
+}

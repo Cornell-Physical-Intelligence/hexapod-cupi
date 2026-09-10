@@ -1,0 +1,33 @@
+test_archive_manifest_is_bound_to_original_receipt (test_review.Tests) ... ERROR
+test_collected_restore_archives_before_same_unit_recreation (test_review.Tests) ... ERROR
+test_kernel_lock_proof_requires_new_pid_exact_device_and_inode (test_review.Tests) ... ok
+test_previously_inactive_never_restarts (test_review.Tests) ... ok
+test_replacement_invocation_or_pid_never_matches (test_review.Tests) ... ok
+test_unknown_docker_inspection_is_not_absence (test_review.Tests) ... ok
+
+======================================================================
+ERROR: test_archive_manifest_is_bound_to_original_receipt (test_review.Tests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/forecast_halo_defer_independent_review_001/test_review.py", line 47, in test_archive_manifest_is_bound_to_original_receipt
+    m.archive(record);archive=receipt/record['archive'];payload=archive/'outputs/forecast.npz';payload.write_bytes(b'replaced')
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/forecast_halo_defer_helper_001/defer_halo.py", line 92, in archive
+    raise RuntimeError('Archive changed during copy; preserved partial archive, no restart')
+RuntimeError: Archive changed during copy; preserved partial archive, no restart
+
+======================================================================
+ERROR: test_collected_restore_archives_before_same_unit_recreation (test_review.Tests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/forecast_halo_defer_independent_review_001/test_review.py", line 34, in test_collected_restore_archives_before_same_unit_recreation
+    result=m.restore()
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/forecast_halo_defer_helper_001/defer_halo.py", line 174, in restore
+    archive(record)  # Complete/verify immutable snapshot before any restart.
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/forecast_halo_defer_helper_001/defer_halo.py", line 92, in archive
+    raise RuntimeError('Archive changed during copy; preserved partial archive, no restart')
+RuntimeError: Archive changed during copy; preserved partial archive, no restart
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.011s
+
+FAILED (errors=2)

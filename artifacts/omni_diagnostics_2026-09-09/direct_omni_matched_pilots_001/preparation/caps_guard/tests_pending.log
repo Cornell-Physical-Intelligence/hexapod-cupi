@@ -1,0 +1,17 @@
+....................................
+======================================================================
+FAIL: test_failed_train_or_missing_final_diagnostics_reject (test_guard_contract.GuardTests) (change={'branch': 'caps'})
+----------------------------------------------------------------------
+RuntimeError: Previous container not proven absent: test-only-standing
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/direct_omni_train_pilot_caps_guard_001/test_guard_contract.py", line 94, in test_failed_train_or_missing_final_diagnostics_reject
+    with self.assertRaisesRegex(RuntimeError,'allocation/source/phase'):g.verify_smoke_owner()
+AssertionError: "allocation/source/phase" does not match "Previous container not proven absent: test-only-standing"
+
+----------------------------------------------------------------------
+Ran 37 tests in 0.193s
+
+FAILED (failures=1)

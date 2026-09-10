@@ -1,0 +1,44 @@
+test_actual_late_app_flags_parse_before_launch (test_native.NativeTests.test_actual_late_app_flags_parse_before_launch) ... ok
+test_entry_only_declared_physics_allocation_delta (test_native.NativeTests.test_entry_only_declared_physics_allocation_delta) ... ok
+test_frozen_behavior_bytes_reused (test_native.NativeTests.test_frozen_behavior_bytes_reused) ... ok
+test_quiet_yaw_and_failure_not_hidden_by_reset (test_native.NativeTests.test_quiet_yaw_and_failure_not_hidden_by_reset) ... ok
+test_real_new_reload_helper_from_previously_trained_cpu_checkpoint (test_native.NativeTests.test_real_new_reload_helper_from_previously_trained_cpu_checkpoint) ... ok
+test_real_stop_schedule_has_motion_then_ten_second_quiet (test_native.NativeTests.test_real_stop_schedule_has_motion_then_ten_second_quiet) ... ok
+test_scope_command_checkpoint_mounts (test_native.NativeTests.test_scope_command_checkpoint_mounts) ... ok
+test_shared_allocation_and_branch (test_native.NativeTests.test_shared_allocation_and_branch) ... ok
+test_stdio_host_import_has_no_torch_or_numpy (test_native.NativeTests.test_stdio_host_import_has_no_torch_or_numpy) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.844s
+
+OK
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=315, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (mlp): MLP(
+    (0): Linear(in_features=318, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)

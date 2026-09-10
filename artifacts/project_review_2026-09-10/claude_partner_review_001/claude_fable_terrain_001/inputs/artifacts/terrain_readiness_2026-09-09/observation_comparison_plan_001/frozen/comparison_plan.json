@@ -1,0 +1,123 @@
+{
+  "schema": "c_study_terrain_observation_comparison_plan_v1",
+  "status": "implementation_proposal_only",
+  "launchable": false,
+  "GPU_started": false,
+  "actor_task_registered": false,
+  "Stage2_complete": false,
+  "Stage3_complete": false,
+  "geometry": {
+    "catalog_sha256": "e494a82c767a368c4105ce3a2a88675b47bede0ea1a88bb91de32b992719fc02",
+    "actual_fixture_admission_review_sha256": "829e42c10c9640d4ce6d764f06f887f9f6f62a783e5c9b9419b4e38aecf91cae",
+    "fixtures": 48,
+    "split_counts": {
+      "train": 32,
+      "heldout": 16
+    },
+    "first_development_fixture_ids": [
+      "mild0_train_ramp_1103",
+      "mild0_train_smooth_rough_1103",
+      "mild2_train_step_1103",
+      "mild2_train_ridge_1103"
+    ],
+    "pit_mode": "original_catalog_avoidance_only",
+    "read_only_geometry": true,
+    "convexification": false,
+    "backing_plane": false
+  },
+  "modes": [
+    "blind",
+    "ideal_teacher",
+    "corrupted_map"
+  ],
+  "common_across_modes": [
+    "robot",
+    "physics",
+    "selected_action_contract",
+    "reset_cases",
+    "commands",
+    "reward",
+    "critic",
+    "update_sample_budget",
+    "training_seed_streams"
+  ],
+  "actor_truth_exclusions": [
+    "perfect_root_velocity",
+    "true_contact_forces",
+    "true_friction",
+    "missing_sensor_filled_with_geometry"
+  ],
+  "map": {
+    "extent_m": [
+      2,
+      2
+    ],
+    "resolution_m": 0.02,
+    "shape": [
+      100,
+      100,
+      4
+    ],
+    "cell_convention": "centres",
+    "axes": "rows_forward_columns_left_gravity_aligned",
+    "channels": [
+      "relative_height_scaled",
+      "usable_mask",
+      "age_scaled",
+      "sigma_scaled"
+    ],
+    "max_age_s": 0.25,
+    "max_std_m": 0.015,
+    "threshold_status": "existing_uncalibrated_pilot_contract_retained",
+    "initial_registration": "explicit_oracle_localization_common_to_all_modes",
+    "sensor_acquisition": "cached_declared_cadence; age_updated_each_control",
+    "latent_width_proposed": 32,
+    "direct315_backbone_widths_after_encoding_proposed": [
+      347,
+      350
+    ],
+    "source_of_current_map_shape": "LocalHeightMap.local_patch(extent_m=2,resolution_m=.02)",
+    "actor_map_history_repetitions": 1
+  },
+  "pilot": {
+    "first_continuous_only": true,
+    "max_fixtures": 4,
+    "starts_per_fixture": 2,
+    "motion_types": [
+      "forward",
+      "reverse",
+      "left_strafe",
+      "right_strafe",
+      "turn_left",
+      "turn_right",
+      "arc_positive",
+      "arc_negative"
+    ],
+    "max_cases_per_mode": 64,
+    "max_paired_episodes": 192,
+    "meaning": "development_discriminator_not_final_qualification",
+    "proposed_flat_replay_fraction": 0.25
+  },
+  "mandatory_prelaunch_bindings": {
+    "Stage2_checkpoint_sha256": null,
+    "source_sha256": null,
+    "action_schema_sha256": null,
+    "observation_schema_sha256": null,
+    "resolved_physics_sha256": null,
+    "reset_distribution_sha256": null,
+    "route_manifest_sha256": null,
+    "command_values": null,
+    "durations_s": null,
+    "terrain_relative_reward_weights": null,
+    "terrain_stop_clearance_envelope": null,
+    "training_updates": null
+  },
+  "qualification": "Existing separate qualification_draft must be resolved and frozen; existing regression seeds are not final held-out layouts",
+  "implementation_files_proposed": [
+    "tools/omni_terrain_env.py",
+    "isaaclab/hexapod_terrain/course_runtime.py",
+    "isaaclab/hexapod_terrain/observation_modes.py",
+    "tools/terrain_actor_critic.py",
+    "tools/evaluate_terrain_comparison.py"
+  ]
+}

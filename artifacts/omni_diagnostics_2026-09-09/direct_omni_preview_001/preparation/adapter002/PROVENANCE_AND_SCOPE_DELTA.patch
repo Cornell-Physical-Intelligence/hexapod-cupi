@@ -1,0 +1,29 @@
+--- adapter001/preview_contract.py
++++ adapter002/preview_contract.py
+@@ -3,10 +3,10 @@
+ import hashlib,importlib.util,json,re,sys
+ 
+ HERE=Path(__file__).resolve().parent
+-SOURCE='37b4b6d5d75f6d697a122fc2a1903f8f625f6a67d1727e1257e1533300e44da6'
++SOURCE='64144b2c2466f17c809554ef53f82b736b4199136cc821451d7ac2788752bd2e'
+ PLAN='9fb7d0b01480523972b4f1c17e717756d7dcf1c54b9caa436245671937de538c'
+-NATIVE='9e591b93ae99ca3a76b7f7500ea20cc778da76c7f6b9b2c86fd22d31aceab3d7'
+-HOST='332fad29e0a0f88ba07012700f2a21c3a4f0453f3d71224da84fcc477e48394f'
++NATIVE='20fbcd40a869b39d8e3143a6c9715ec62ada5cc6211eaf473f60f8b7167678cb'
++HOST='19545653a00e635cc14ed9415f9799978da34674e84f6cad76eb42bd2a961ac4'
+ LEGACY='abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280'
+ ORIGINAL='1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8'
+ DT=.02;FPS=25;STEPS=1900;FRAMES=950
+@@ -64,9 +64,10 @@
+         or identity.get('plan_sha256')!=PLAN or identity.get('checkpoint_sha256')!=ORIGINAL
+         or identity.get('actor_width')!=315 or identity.get('critic_width')!=318):raise ValueError('Unmatched completed native campaign')
+     allocation=campaign.get('allocation');branch=campaign.get('branch')
++    if allocation!='pilot' or branch not in ('curriculum','caps'):raise ValueError('Preview requires a completed curriculum or CAPS pilot; smoke is not eligible')
+     selected=contract.selection('train',allocation,branch,None,None)
+-    if identity.get('selection')!=selected or (allocation=='smoke' and branch!='caps'):raise ValueError('Wrong campaign training selection')
+-    phases=('standing','train','final_constant','final_stop') if allocation=='smoke' else ('standing','initial_constant','initial_stop','train','final_constant','final_stop')
++    if identity.get('selection')!=selected or selected.get('updates')!=50:raise ValueError('Wrong campaign training selection')
++    phases=('standing','initial_constant','initial_stop','train','final_constant','final_stop')
+     if campaign.get('planned_phases')!=list(phases) or set(campaign.get('accepted_phases',{}))!=set(phases):raise ValueError('Incomplete selected campaign')
+     learned=contract.validate_result(args.pilot/'train','train',identity)
+     bound=learned['checkpoint_sha256']

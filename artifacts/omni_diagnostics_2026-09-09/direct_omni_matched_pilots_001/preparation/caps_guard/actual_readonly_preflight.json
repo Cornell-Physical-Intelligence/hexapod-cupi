@@ -1,0 +1,108 @@
+{
+  "read_only": true,
+  "checked_unix": 1789057455.4970026,
+  "guard_runtime_sha256": "759ec012585b30d4c8af184a1cfc9f4eb9bb90f0f8d53c9bac923ef403879cf5",
+  "identity": {
+    "schema": "direct315_stand_stop_caps_native_v2",
+    "source_manifest_sha256": "64144b2c2466f17c809554ef53f82b736b4199136cc821451d7ac2788752bd2e",
+    "plan_sha256": "9fb7d0b01480523972b4f1c17e717756d7dcf1c54b9caa436245671937de538c",
+    "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+    "actor_width": 315,
+    "critic_width": 318,
+    "selection": {
+      "schema": "direct315_stand_stop_caps_native_v2",
+      "allocation": "pilot",
+      "branch": "caps",
+      "replicas": 1024,
+      "controls_per_update": 24,
+      "updates": 50,
+      "caps": {
+        "temporal_weight": 0.1,
+        "spatial_weight": 0.1,
+        "noise_scale": 1.0,
+        "noise_seed": 1157
+      }
+    },
+    "overrides": {
+      "target_slew_rad_per_20ms": 0.04,
+      "reward_weights": {
+        "stand_joint_velocity": -0.5,
+        "stand_target_velocity": -0.15,
+        "stand_posture": -2.0,
+        "action_rate": -0.075,
+        "saturation": -0.75,
+        "torque_excess": -0.6,
+        "worst_torque_excess": -0.2,
+        "stand_raw_action": 0.0
+      },
+      "observation_noise_scale": 1.0,
+      "target_filter_time_constant_s": 0.0
+    },
+    "diagnostic_options": {
+      "duration_s": 12,
+      "settle_s": 2,
+      "seed": 7057,
+      "trace_envs_per_scenario": 1,
+      "controller": "policy"
+    },
+    "Stage2_complete": false,
+    "smoke_campaign_sha256": "aa478e602caceb75dd488db4fdd5e275aed6ed966a5390ad9aa20c6d66738d6f",
+    "smoke_state_sha256": "4bdaacc002e7c3480905c6c32ece4e713b3e654ddf31bfce8f16fea32a523612",
+    "smoke_receipt_sha256": "a511b9cf5587a448beeb354251b864cd458eea07ab3924054a0c2bb61771fc32"
+  },
+  "successful_smoke_admission": true,
+  "terminal_curriculum_ownership_checked": true,
+  "curriculum_immutable_aliases": {
+    "standing": {
+      "files": 3,
+      "map_sha256": "78a9da4b0794e820ed0ea0b770c834b525d6f3d0de88d4e1e73138b96bfbf87b",
+      "unchanged": true
+    },
+    "initial_constant": {
+      "files": 5,
+      "map_sha256": "da3898f111a92cee01b285b4b07f6da14e2edddb14fc301fe5d56059b75836b2",
+      "unchanged": true
+    },
+    "initial_stop": {
+      "files": 5,
+      "map_sha256": "b5af6d0a135347b0872e878e752ad8e3f34261a65066020abf4ddea310e14a3b",
+      "unchanged": true
+    },
+    "train": {
+      "files": 63,
+      "map_sha256": "2597fe1ba347e75d4ba1a19c53c2ca8519b2f34510c4973ff8ea57b2c231860d",
+      "unchanged": true
+    },
+    "final_constant": {
+      "files": 5,
+      "map_sha256": "ddf0dc382f938666036e39be9a9dd492234165843e19985220c52b6620d87ab4",
+      "unchanged": true
+    },
+    "final_stop": {
+      "files": 5,
+      "map_sha256": "8e98ce2e2ec5b56d51ebde28b1b4a2af589062171ff3640ed916853c6fc140be",
+      "unchanged": true
+    }
+  },
+  "curriculum_quality_used_as_admission": false,
+  "curriculum_updates": 50,
+  "curriculum_strict_reload": {
+    "passed": true,
+    "exact_actor_critic_normalizer_optimizer": true,
+    "exact_deterministic_action": true,
+    "optimizer_entries": 17,
+    "checkpoint_sha256": "32ce29dbd8639ee03fd2ce6d216da82919a65d3ba1e2ce50eb836d69580625de",
+    "inference_buffers_cloned_after_learning": [
+      "actor.obs_normalizer._std",
+      "critic.obs_normalizer._std"
+    ],
+    "reload_method": "Strict same-runner load after value-preserving inference-buffer normalization"
+  },
+  "curriculum_wall_seconds": 96.9526140911039,
+  "curriculum_quiet_passed_replicas": 0,
+  "exact_owned_identifiers_absent": {
+    "smoke": 8,
+    "curriculum": 12
+  },
+  "dispatch_performed": false
+}

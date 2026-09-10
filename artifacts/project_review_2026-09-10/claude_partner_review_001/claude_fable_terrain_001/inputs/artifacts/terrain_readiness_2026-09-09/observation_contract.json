@@ -1,0 +1,61 @@
+{
+  "version": "terrain_map_v1_proposed",
+  "deployment_approved": false,
+  "base_contract": "omni_history_direct_v1 retained as baseline",
+  "commands": [
+    "v_forward_mps",
+    "v_left_mps",
+    "yaw_rate_rad_s"
+  ],
+  "body_to_navigation": [
+    [
+      0,
+      -1,
+      0
+    ],
+    [
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1
+    ]
+  ],
+  "joint_order": "runtime joint_names; name lookup only",
+  "terrain": {
+    "frame": "gravity-aligned, body-centred navigation frame",
+    "extent_m": [
+      2,
+      2
+    ],
+    "resolution_m": 0.02,
+    "channels": [
+      "relative_height_scaled",
+      "usable_mask",
+      "age_scaled",
+      "sigma_scaled"
+    ],
+    "timebase": "same monotonic acquisition timebase as observation assembly",
+    "max_age_s": 0.25,
+    "max_std_m": 0.015,
+    "height_scale_m": 0.2,
+    "threshold_status": "proposed pilot settings; calibrate against real sensor/pose errors",
+    "missing": "zero height padding requires zero usable mask; never infer support",
+    "support_rule": "all required cells must be usable; material/support feasibility checked separately"
+  },
+  "actor_forbidden": [
+    "true_contact_forces",
+    "true_friction",
+    "perfect_root_velocity",
+    "true_terrain_without_sensor_model"
+  ],
+  "teacher_only": [
+    "terrain_truth",
+    "contact_truth",
+    "randomized_dynamics_parameters"
+  ],
+  "reuse": "Existing phase3 sensor transport code after compatibility/clock tests; do not reuse old mass/mount defaults"
+}

@@ -15,6 +15,16 @@ the next campaign without launching it.
 
 The user selected the C geometry study and asks for Stage 2 all-direction/path smoothness and quiet standing, with terrain/perception prepared in parallel. Read `STATUS.md` and `experiments/c_length_study/README.md`. Its pinned serial-study runtime, 1.6 N·m cap and checkpoint contracts are not the physical four-bar runtime. Do not silently substitute either lineage. Every meaningful verified step must be committed and pushed with the relevant Markdown context; this is explicit user authorization. Preserve teammates' commits, use a current main integration, run relevant checks, and verify the remote SHA. Historical frozen evidence is not rewritten to update status.
 
+## Mandatory live research poster framework
+
+**Hard user rule: every agent and human contributor changing this repository must follow [docs/PROJECT_SITE.md](docs/PROJECT_SITE.md).** Read it before edits and include this rule in every delegated task. The public research poster is driven by `site/project.json`, verified evidence references and `site/updates/` records. Every change must include a new update record covering its changed paths, with a plain-English explanation, affected workstreams, evidence and next action. Update the central presentation registry when implementation, goals, gates, geometry, results or media change. For changes with no project-facing impact, record the specific reason in a checked no-impact entry; silence is not an exemption. Never rewrite frozen research evidence to satisfy this rule.
+
+Run `python3 tools/project_site.py check --base <base-commit>` and `python3 tools/project_site.py build` before publication. CI rejects uncovered repository changes and broken evidence/media references; each push to main rebuilds and deploys GitHub Pages. STATUS remains the authoritative execution snapshot; the site reads it and links immutable results. Latest checkpoint, latest video and qualified benchmark are separate records. Do not relabel old media or mark a stage passed without its unchanged numeric and visual evidence. Root retains responsibility for integration and verifying deployment.
+
+## Architecture partnership and parallel work
+
+The user requests Claude Code with Fable 5.1 (`claude-fable-5-1`) with maximum reasoning (`--effort max`) as a partner for major architecture decisions and substantial parallel implementation/review work. Consult it on controller/action architecture, learning objectives, terrain/perception interfaces and consequential experiment changes. Give workers bounded work areas and concrete deliverables; keep one owner for Spark execution and integration. Preserve the actual model/session, inputs, findings, disagreements and the resulting engineering decision. Independently review proposed code and run relevant checks before adoption. Report unavailable authentication/model access honestly; do not silently substitute a model or claim a consultation that failed. Routine verified repairs and ongoing authorized jobs can continue while reviews run.
+
 ## Physical four-bar campaign
 
 The versioned physical task and guarded runner are documented in

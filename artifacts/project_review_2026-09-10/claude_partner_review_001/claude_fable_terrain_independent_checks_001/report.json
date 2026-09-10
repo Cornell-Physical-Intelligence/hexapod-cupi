@@ -1,0 +1,55 @@
+{
+  "source": "tmp/claude_fable_terrain_001/inputs/isaaclab/hexapod_phase3/sensor_model.py",
+  "source_sha256": "101f6a59488f702117e93da87354b0d68c3d475e50421f445a12d9caf1491336",
+  "torch": "2.8.0",
+  "scope": "CPU-only counterexamples, no source edits or GPU; original code preserved",
+  "older_arrival_overwrites_newer_acquisition": {
+    "legal_transport": {
+      "sample_period_s": 0.02,
+      "latency_s": 0.04,
+      "latency_jitter_s": 0.04,
+      "frame_dropout_probability": 0.0,
+      "stale_after_s": 0.2
+    },
+    "after_new_arrives": {
+      "capture_time_s": [
+        0.019999999552965164
+      ],
+      "value": [
+        [
+          20.0
+        ]
+      ]
+    },
+    "after_old_arrives": {
+      "capture_time_s": [
+        0.0
+      ],
+      "value": [
+        [
+          10.0
+        ]
+      ]
+    },
+    "reproduced": true,
+    "qualification": "Default sensor cadence/jitter combinations do not themselves create this reorder; a permitted custom latency ablation does."
+  },
+  "inference_rollout_then_selective_reset": {
+    "persistent_value_inference": {
+      "range": true
+    },
+    "error": "Inplace update to inference tensor outside InferenceMode is not allowed.You can make a clone to get a normal tensor before doing inplace update.See https://github.com/pytorch/rfcs/pull/17 for more details.",
+    "reproduced": true,
+    "qualification": "This reproduces a context-dependent adapter integration failure, not an already deployed terrain failure."
+  },
+  "rewound_transport_read_admits_negative_age": {
+    "age_s": [
+      -0.5
+    ],
+    "valid": [
+      true
+    ],
+    "reproduced": true,
+    "qualification": "Caller misuse is rejected by the new observation adapter, but not by this reused sensor primitive; a future bridge must enforce one monotonic clock."
+  }
+}

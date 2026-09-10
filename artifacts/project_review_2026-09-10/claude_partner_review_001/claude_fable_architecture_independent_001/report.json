@@ -1,0 +1,555 @@
+{
+  "scope": "CPU review of actual native003 direct smoke002 only; no new physical admission, source edits or GPU work",
+  "verified_raw_files": 52,
+  "verified_source_copies": 11,
+  "source_manifest_sha256": "64144b2c2466f17c809554ef53f82b736b4199136cc821451d7ac2788752bd2e",
+  "episode": {
+    "training_config_s": 20.0,
+    "stop_config_s": 90.0,
+    "stop_controls": 1600,
+    "stop_duration_s": 32.0,
+    "stop_terminations": 5,
+    "stop_truncations": 0,
+    "quiet_terminations": 2,
+    "quiet_truncations": 0,
+    "stop_termination_indices": [
+      [
+        914,
+        38
+      ],
+      [
+        922,
+        39
+      ],
+      [
+        926,
+        37
+      ],
+      [
+        1140,
+        44
+      ],
+      [
+        1429,
+        42
+      ]
+    ],
+    "train_terminations": 0,
+    "train_truncation_indices": [
+      [
+        31,
+        24
+      ]
+    ]
+  },
+  "quaternion": {
+    "raw_order": "XYZW",
+    "scorer_order": "WXYZ",
+    "bitwise_reorder_equal": true,
+    "norm_max_error": 1.8353664699155559e-07,
+    "first_W_min": 0.9999977946281433,
+    "first_W_max": 0.9999996423721313,
+    "independent_projected_gravity_max_error": 7.272940732994115e-07,
+    "independent_heading_max_error_rad": 3.3498700077738697e-07,
+    "synthetic_10deg_regression": [
+      {
+        "axis": "z",
+        "rotation_deg": 10.0,
+        "heading_change_deg": 10.000000000000002
+      },
+      {
+        "axis": "x",
+        "rotation_deg": 10.0,
+        "heading_change_deg": 0.0
+      }
+    ]
+  },
+  "commands": {
+    "quiet_first_row": 1100,
+    "quiet_first_endpoint_s": 22.02,
+    "quiet_last_endpoint_s": 32.0,
+    "quiet_samples": 500,
+    "scorer_duration_s": 10.0,
+    "endpoint_span_s": 9.98,
+    "quiet_actual_command_abs_max": 0.0,
+    "stop_target_abs_max": 0.0,
+    "all_replicas_permanently_zero_first_row": 841,
+    "all_replicas_permanently_zero_first_endpoint_s": 16.84,
+    "per_replica_last_nonzero_after_stop_row": [
+      799,
+      799,
+      799,
+      799,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      840,
+      840,
+      840,
+      840,
+      812,
+      812,
+      812,
+      812,
+      812,
+      812,
+      812,
+      812,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      819,
+      820,
+      820,
+      820,
+      820
+    ]
+  },
+  "learning": {
+    "nominal_config_learning_rate": 5e-05,
+    "updates": [
+      {
+        "update": 1,
+        "learning_rate_at_update_end": 1e-05,
+        "caps_temporal": 0.3108791410923004,
+        "caps_spatial": 0.002249949926044792,
+        "caps_weighted": 0.031312909349799155,
+        "caps_valid_pair_fraction": 0.7356770932674408,
+        "temporal_to_spatial_loss_ratio": 138.17158217329654
+      },
+      {
+        "update": 2,
+        "learning_rate_at_update_end": 1e-05,
+        "caps_temporal": 0.33920515328645706,
+        "caps_spatial": 0.0016543286270461976,
+        "caps_weighted": 0.034085949324071406,
+        "caps_valid_pair_fraction": 0.9583333432674408,
+        "temporal_to_spatial_loss_ratio": 205.0409741697498
+      }
+    ],
+    "intraupdate_learning_rate_or_gradient_share_not_recorded": true,
+    "target_delta_nonzero_rows": 1536,
+    "target_delta_total_rows": 1536,
+    "target_delta_rms_min_rad": 0.03183288127183914,
+    "target_delta_rms_max_rad": 0.03999999538064003,
+    "consecutive_target_replay_env_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "consecutive_target_replay_controls": 47,
+    "consecutive_target_rms_max_error_rad": 3.725290298461914e-09
+  },
+  "quiet": {
+    "pass_count": 0,
+    "replicas": 48,
+    "saved_verdict_parity": true,
+    "failed_bounds_per_replica": [
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ],
+      [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction"
+      ]
+    ]
+  },
+  "Stage2_complete": false
+}

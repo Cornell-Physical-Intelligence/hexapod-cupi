@@ -1,0 +1,43 @@
+{
+  "intended_artifact_root": "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001",
+  "root_owns_tracked_changes": true,
+  "checkpoint_registry": {
+    "receipt": "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/caps/raw/run/train/training_receipt.json",
+    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/REPORT.md",
+    "label": "Direct PPO \u00b7 CAPS 50-update pilot",
+    "qualification": "Unqualified; 0/48 final quiet trials pass",
+    "video_matches": false
+  },
+  "stop_result_registry": {
+    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/caps/raw/run/final_stop/stop_diagnostics.json",
+    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/caps/analysis/REPORT.md"
+  },
+  "milestones_unchanged": [
+    "Walking benchmark 1 reached",
+    "Omnidirectional movement in progress",
+    "Terrain/perception next",
+    "Autonomous surveying final mission"
+  ],
+  "latest_video_unchanged_until_actual_new_recording": true,
+  "proposed_update": {
+    "id": "20260910T170000_matched_direct_ppo_50",
+    "date": "2026-09-10T17:00:00Z",
+    "title": "Two matched 50-update PPO pilots completed",
+    "summary": "Curriculum and CAPS each completed 1,228,800 transitions with exact checkpoint reload. Both fail all 48 quiet trials. CAPS has smaller worst stop drift and is the proposed unqualified preview; Stage 2 remains incomplete.",
+    "areas": [
+      "locomotion"
+    ],
+    "changes": [
+      "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/**",
+      "site/project.json",
+      "STATUS.md"
+    ],
+    "evidence": [
+      "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/REPORT.md",
+      "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/LATEST_CHECKPOINTS.json",
+      "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/caps/raw/run/train/training_receipt.json"
+    ],
+    "next": "Record the actual CAPS checkpoint honestly, then select a changed smoothness intervention from per-replica failures and verified implementation findings.",
+    "no_project_impact": false
+  }
+}

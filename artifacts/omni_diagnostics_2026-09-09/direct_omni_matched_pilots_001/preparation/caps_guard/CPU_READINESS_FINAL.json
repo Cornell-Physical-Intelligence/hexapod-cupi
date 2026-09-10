@@ -1,0 +1,79 @@
+{
+  "status": "READY_FOR_ROOT_REVIEW_AND_DISPATCH",
+  "runtime_sha256": "759ec012585b30d4c8af184a1cfc9f4eb9bb90f0f8d53c9bac923ef403879cf5",
+  "tests_passed": 37,
+  "tests_sha256": "b7af8bb3669f5645a6a52e220e4c0330fd3e57bc72582316da449842b9248738",
+  "parent_guard_freeze_sha256": "b9a851aab9a358f2b519919d8a8424a1c38dda09bd350dc426265c972455f506",
+  "embedded_restorer_byte_identical": true,
+  "smoke_immutable_receipts": 7,
+  "curriculum_terminal_receipts": 9,
+  "actual_readonly_preflight_sha256": "749f91de1bd81ae679eaa590c61bad3ef4a69b8681332af17e85393fb808c46a",
+  "source_manifest_sha256": "64144b2c2466f17c809554ef53f82b736b4199136cc821451d7ac2788752bd2e",
+  "native_freeze_sha256": "20fbcd40a869b39d8e3143a6c9715ec62ada5cc6211eaf473f60f8b7167678cb",
+  "host_freeze_sha256": "19545653a00e635cc14ed9415f9799978da34674e84f6cad76eb42bd2a961ac4",
+  "host_runtime_sha256": "52c4b0bd944fe9e2f1fc0313199a2d214c53dbffa4d01700d7299c3c94275fa1",
+  "pilot_identity": {
+    "schema": "direct315_stand_stop_caps_native_v2",
+    "source_manifest_sha256": "64144b2c2466f17c809554ef53f82b736b4199136cc821451d7ac2788752bd2e",
+    "plan_sha256": "9fb7d0b01480523972b4f1c17e717756d7dcf1c54b9caa436245671937de538c",
+    "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+    "actor_width": 315,
+    "critic_width": 318,
+    "selection": {
+      "schema": "direct315_stand_stop_caps_native_v2",
+      "allocation": "pilot",
+      "branch": "caps",
+      "replicas": 1024,
+      "controls_per_update": 24,
+      "updates": 50,
+      "caps": {
+        "temporal_weight": 0.1,
+        "spatial_weight": 0.1,
+        "noise_scale": 1.0,
+        "noise_seed": 1157
+      }
+    },
+    "overrides": {
+      "target_slew_rad_per_20ms": 0.04,
+      "reward_weights": {
+        "stand_joint_velocity": -0.5,
+        "stand_target_velocity": -0.15,
+        "stand_posture": -2.0,
+        "action_rate": -0.075,
+        "saturation": -0.75,
+        "torque_excess": -0.6,
+        "worst_torque_excess": -0.2,
+        "stand_raw_action": 0.0
+      },
+      "observation_noise_scale": 1.0,
+      "target_filter_time_constant_s": 0.0
+    },
+    "diagnostic_options": {
+      "duration_s": 12,
+      "settle_s": 2,
+      "seed": 7057,
+      "trace_envs_per_scenario": 1,
+      "controller": "policy"
+    },
+    "Stage2_complete": false,
+    "smoke_campaign_sha256": "aa478e602caceb75dd488db4fdd5e275aed6ed966a5390ad9aa20c6d66738d6f",
+    "smoke_state_sha256": "4bdaacc002e7c3480905c6c32ece4e713b3e654ddf31bfce8f16fea32a523612",
+    "smoke_receipt_sha256": "a511b9cf5587a448beeb354251b864cd458eea07ab3924054a0c2bb61771fc32"
+  },
+  "previous_unit": "hexapod-direct-omni-train-pilot-curriculum-001-20260910.service",
+  "previous_invocation": "d9ffdd9882ec48dc8417d36a4245b2c4",
+  "output": "direct_omni_train_pilot_caps_001",
+  "unit": "hexapod-direct-omni-train-pilot-caps-001-20260910.service",
+  "pause": "forecast_pause_057",
+  "runtime_seconds": 3720,
+  "stop_seconds": 180,
+  "fallback_minutes": 70,
+  "curriculum_quality_admission_required": false,
+  "actual_curriculum_quiet_passed_replicas": 0,
+  "actual_curriculum_updates": 50,
+  "GPU_or_weather_actions_performed": false,
+  "Stage2_complete": false,
+  "project_site_contract_read": true,
+  "tracked_edits": false,
+  "publication_required": "Root must add a site/updates record with bounded published bundle paths and preserve unqualified outcomes."
+}

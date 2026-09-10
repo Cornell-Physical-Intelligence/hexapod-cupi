@@ -1,0 +1,398 @@
+{
+  "version": "mild_terrain_reset_curriculum_v1",
+  "ready_for_training": false,
+  "long_training_started": false,
+  "actor_or_task_registered": false,
+  "source_catalog_sha256": "ddf8549500e18f1ab9bfb1922a31a7751cfe865dbde1e1d2b98cc21544399e8b",
+  "derived_catalog_sha256": "e494a82c767a368c4105ce3a2a88675b47bede0ea1a88bb91de32b992719fc02",
+  "seed": 20260909,
+  "random_generator": "numpy PCG64 with independent SeedSequence streams by split",
+  "numpy_version": "2.0.2",
+  "variant": "f050_t060",
+  "source_urdf_sha256": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+  "source_study_manifest_sha256": "27cf795a7754b86afb159ae5991ae95bdcd35dc332b836ab3424b0cae7f9a9f4",
+  "source_plan_sha256": "ac7acdbd20f7f8b2dc8ed6952a34ae07b0d19539aaf30054740002ef3d676d6d",
+  "stance_index": 0,
+  "nominal_joint_positions_rad": {
+    "revolute_1_1": 0.0,
+    "revolute_1": 0.6981317007977318,
+    "revolute_2": 2.0943951023931953,
+    "revolute_2_5": 0.0,
+    "revolute_1_5": 0.6981317007977318,
+    "revolute_2_4": 2.0943951023931953,
+    "revolute_1_7": 0.0,
+    "revolute_1_6": 0.6981317007977318,
+    "revolute_2_6": 2.0943951023931953,
+    "revolute_4": 0.0,
+    "revolute_1_4": 0.6981317007977318,
+    "revolute_2_3": 2.0943951023931953,
+    "revolute_5": 0.0,
+    "revolute_1_2": 0.6981317007977318,
+    "revolute_2_1": 2.0943951023931953,
+    "revolute_3": 0.0,
+    "revolute_1_3": 0.6981317007977318,
+    "revolute_2_2": 2.0943951023931953
+  },
+  "joint_order": "Runtime joint_names; resolve by name",
+  "joint_reset_noise_rad": 0.0,
+  "reset_height_m": 0.13653251856352808,
+  "terrain_height_at_start_m": 0.0,
+  "body_axes": "forward=-Y,left=+X,up=+Z",
+  "course_axes": "X course forward,Y left,Z up",
+  "footprint": {
+    "method": "conservative body-XY rectangles enclosing exact distal collision vertices at nominal named stance",
+    "legs": [
+      "lf",
+      "lm",
+      "lr",
+      "rf",
+      "rm",
+      "rr"
+    ],
+    "rectangles_body_xy_m": [
+      [
+        [
+          0.1783537446012704,
+          -0.25872006951433674
+        ],
+        [
+          0.2149921607130042,
+          -0.25872006951433674
+        ],
+        [
+          0.2149921607130042,
+          -0.2262376700421883
+        ],
+        [
+          0.1783537446012704,
+          -0.2262376700421883
+        ]
+      ],
+      [
+        [
+          0.2278827702133428,
+          -0.012750308091022424
+        ],
+        [
+          0.2603452090002152,
+          -0.012750308091022424
+        ],
+        [
+          0.2603452090002152,
+          0.012749772905378858
+        ],
+        [
+          0.2278827702133428,
+          0.012749772905378858
+        ]
+      ],
+      [
+        [
+          0.17835126994745065,
+          0.22623422165200913
+        ],
+        [
+          0.21499382634396857,
+          0.22623422165200913
+        ],
+        [
+          0.21499382634396857,
+          0.2587190143129504
+        ],
+        [
+          0.17835126994745065,
+          0.2587190143129504
+        ]
+      ],
+      [
+        [
+          -0.21499362466851046,
+          -0.2587187525480092
+        ],
+        [
+          -0.1783510691338539,
+          -0.2587187525480092
+        ],
+        [
+          -0.1783510691338539,
+          -0.22623577078370727
+        ],
+        [
+          -0.21499362466851046,
+          -0.22623577078370727
+        ]
+      ],
+      [
+        [
+          -0.26034520996875044,
+          -0.012750018917352363
+        ],
+        [
+          -0.2278827693475307,
+          -0.012750018917352363
+        ],
+        [
+          -0.2278827693475307,
+          0.012750073023681207
+        ],
+        [
+          -0.26034520996875044,
+          0.012750073023681207
+        ]
+      ],
+      [
+        [
+          -0.21499196162308065,
+          0.22623794228151997
+        ],
+        [
+          -0.17835200968088483,
+          0.22623794228151997
+        ],
+        [
+          -0.17835200968088483,
+          0.25872033132398553
+        ],
+        [
+          -0.21499196162308065,
+          0.25872033132398553
+        ]
+      ]
+    ],
+    "flat_start_bounds_course_m": [
+      [
+        -1.49,
+        -1.49
+      ],
+      [
+        -0.66,
+        1.49
+      ]
+    ]
+  },
+  "course": {
+    "bounds_xy_m": [
+      [
+        -1.5,
+        -1.5
+      ],
+      [
+        1.5,
+        1.5
+      ]
+    ],
+    "goal_x_m": 0.85,
+    "proposed_episode_length_s": 60.0,
+    "bounds_rule": "Entire required body/foot swept envelope must stay inside; outside is unknown, never clipped or backed by a plane",
+    "goal_rule": "Stop within observed/qualified support; avoid extending targets beyond course boundaries"
+  },
+  "levels": [
+    {
+      "level": 0,
+      "name": "continuous_small",
+      "families": [
+        "ramp",
+        "smooth_rough"
+      ],
+      "height_scale": 0.25,
+      "speed_range_mps": [
+        0.05,
+        0.08
+      ],
+      "yaw_rate_limit_rad_s": 0.12,
+      "flat_replay_fraction": 0.25,
+      "local_continuous_slope_cap_deg": 5.0,
+      "command_contract": [
+        "v_forward",
+        "v_left",
+        "yaw_rate"
+      ],
+      "command_bearing": "continuous uniform 360 degrees; both pure-yaw signs and mixed twist",
+      "advancement": "Proposed: held-out per-family/per-bearing traversals and stops, no hard-limit violation, unchanged flat gates; no automatic promotion yet"
+    },
+    {
+      "level": 1,
+      "name": "continuous_medium",
+      "families": [
+        "ramp",
+        "smooth_rough"
+      ],
+      "height_scale": 0.5,
+      "speed_range_mps": [
+        0.05,
+        0.1
+      ],
+      "yaw_rate_limit_rad_s": 0.15,
+      "flat_replay_fraction": 0.25,
+      "local_continuous_slope_cap_deg": 5.0,
+      "command_contract": [
+        "v_forward",
+        "v_left",
+        "yaw_rate"
+      ],
+      "command_bearing": "continuous uniform 360 degrees; both pure-yaw signs and mixed twist",
+      "advancement": "Proposed: held-out per-family/per-bearing traversals and stops, no hard-limit violation, unchanged flat gates; no automatic promotion yet"
+    },
+    {
+      "level": 2,
+      "name": "mild_mixed",
+      "families": [
+        "ramp",
+        "smooth_rough",
+        "step",
+        "ridge"
+      ],
+      "height_scale": 1.0,
+      "speed_range_mps": [
+        0.05,
+        0.12
+      ],
+      "yaw_rate_limit_rad_s": 0.2,
+      "flat_replay_fraction": 0.25,
+      "local_continuous_slope_cap_deg": 5.0,
+      "command_contract": [
+        "v_forward",
+        "v_left",
+        "yaw_rate"
+      ],
+      "command_bearing": "continuous uniform 360 degrees; both pure-yaw signs and mixed twist",
+      "advancement": "Proposed: held-out per-family/per-bearing traversals and stops, no hard-limit violation, unchanged flat gates; no automatic promotion yet"
+    }
+  ],
+  "fixture_ids_by_split": {
+    "train": [
+      "mild0_train_smooth_rough_1103",
+      "mild0_train_smooth_rough_2207",
+      "mild0_train_smooth_rough_3301",
+      "mild0_train_smooth_rough_4409",
+      "mild0_train_ramp_1103",
+      "mild0_train_ramp_2207",
+      "mild0_train_ramp_3301",
+      "mild0_train_ramp_4409",
+      "mild1_train_smooth_rough_1103",
+      "mild1_train_smooth_rough_2207",
+      "mild1_train_smooth_rough_3301",
+      "mild1_train_smooth_rough_4409",
+      "mild1_train_ramp_1103",
+      "mild1_train_ramp_2207",
+      "mild1_train_ramp_3301",
+      "mild1_train_ramp_4409",
+      "mild2_train_smooth_rough_1103",
+      "mild2_train_smooth_rough_2207",
+      "mild2_train_smooth_rough_3301",
+      "mild2_train_smooth_rough_4409",
+      "mild2_train_ramp_1103",
+      "mild2_train_ramp_2207",
+      "mild2_train_ramp_3301",
+      "mild2_train_ramp_4409",
+      "mild2_train_step_1103",
+      "mild2_train_step_2207",
+      "mild2_train_step_3301",
+      "mild2_train_step_4409",
+      "mild2_train_ridge_1103",
+      "mild2_train_ridge_2207",
+      "mild2_train_ridge_3301",
+      "mild2_train_ridge_4409"
+    ],
+    "heldout": [
+      "mild0_heldout_smooth_rough_7103",
+      "mild0_heldout_smooth_rough_8209",
+      "mild0_heldout_ramp_7103",
+      "mild0_heldout_ramp_8209",
+      "mild1_heldout_smooth_rough_7103",
+      "mild1_heldout_smooth_rough_8209",
+      "mild1_heldout_ramp_7103",
+      "mild1_heldout_ramp_8209",
+      "mild2_heldout_smooth_rough_7103",
+      "mild2_heldout_smooth_rough_8209",
+      "mild2_heldout_ramp_7103",
+      "mild2_heldout_ramp_8209",
+      "mild2_heldout_step_7103",
+      "mild2_heldout_step_8209",
+      "mild2_heldout_ridge_7103",
+      "mild2_heldout_ridge_8209"
+    ]
+  },
+  "avoidance_only_source_fixtures": {
+    "train": [
+      "train_pit_1103",
+      "train_pit_2207",
+      "train_pit_3301",
+      "train_pit_4409"
+    ],
+    "heldout": [
+      "heldout_pit_7103",
+      "heldout_pit_8209"
+    ]
+  },
+  "resets": [
+    {
+      "id": "mild0_train_smooth_rough_1103_reset000",
+      "split": "train",
+      "level": 0,
+      "fixture_id": "mild0_train_smooth_rough_1103",
+      "body_yaw_in_course_rad": 2.249310449615652,
+      "root_position_course_m": [
+        -1.0835113685819067,
+        0.019685969029924266,
+        0.13653251856352808
+      ],
+      "root_quaternion_course_wxyz": [
+        0.43148757064868937,
+        0.0,
+        0.0,
+        0.9021188815093565
+      ],
+      "course_heading_of_body_forward_rad": 0.6785141228207556,
+      "start_geometry_check": {
+        "passed": true,
+        "sampled_corners": 24,
+        "minimum_start_pad_margin_m": 0.07013621264950953
+      }
+    },
+    {
+      "id": "mild0_train_smooth_rough_1103_reset001",
+      "split": "train",
+      "level": 0,
+      "fixture_id": "mild0_train_smooth_rough_1103",
+      "body_yaw_in_course_rad": -0.31641208847518576,
+      "root_position_course_m": [
+        -1.0718827918849572,
+        -0.013865217748612064,
+        0.13653251856352808
+      ],
+      "root_quaternion_course_wxyz": [
+        0.9875115044519955,
+        0.0,
+        0.0,
+        -0.15754690912536595
+      ],
+      "course_heading_of_body_forward_rad": -1.8872084152700823,
+      "start_geometry_check": {
+        "passed": true,
+        "sampled_corners": 24,
+        "minimum_start_pad_margin_m": 0.12705901095553118
+      }
+    }
+  ],
+  "observation_scope": "Teacher geometry truth only. Deployed map must retain height/usable/age/uncertainty; do not feed perfect geometry to actor implicitly",
+  "remaining_gates": [
+    "Isaac fixture/contact/sensor validation for derived assets",
+    "Exact full robot standing/reset admissions",
+    "Terrain-relative rewards, force feasibility and clearance limits",
+    "Collision atlas/environment origin integration",
+    "Realistic sensor and actuator/payload calibration",
+    "Independent held-out qualification"
+  ],
+  "sources": {
+    "prepare_curriculum.py": "9f02536651b2600658fa5266b6a4797ce846b3499226824f4746c55044f89cd2",
+    "robot_smoke.py": "bffbdecd5f4f30218721b25bebda9f4b461cb4c2fdb20a89631c6da0795fad0e"
+  },
+  "_curation_omissions": {
+    "resets": {
+      "total_rows": 1536,
+      "included_rows": 2,
+      "reason": "Two exact exemplars only; not an executed reset manifest"
+    }
+  }
+}

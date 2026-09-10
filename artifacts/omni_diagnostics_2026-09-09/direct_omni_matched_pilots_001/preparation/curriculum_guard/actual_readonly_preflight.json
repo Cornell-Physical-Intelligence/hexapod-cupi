@@ -1,0 +1,93 @@
+{
+  "checked_unix": 1789056579.3295405,
+  "read_only": true,
+  "guard_runtime_sha256": "95fd00c70516b9b9297354dd9c59effa861351b8e30e182b66892f6b720839cd",
+  "identity": {
+    "schema": "direct315_stand_stop_caps_native_v2",
+    "source_manifest_sha256": "64144b2c2466f17c809554ef53f82b736b4199136cc821451d7ac2788752bd2e",
+    "plan_sha256": "9fb7d0b01480523972b4f1c17e717756d7dcf1c54b9caa436245671937de538c",
+    "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+    "actor_width": 315,
+    "critic_width": 318,
+    "selection": {
+      "schema": "direct315_stand_stop_caps_native_v2",
+      "allocation": "pilot",
+      "branch": "curriculum",
+      "replicas": 1024,
+      "controls_per_update": 24,
+      "updates": 50,
+      "caps": {
+        "temporal_weight": 0.0,
+        "spatial_weight": 0.0,
+        "noise_scale": 1.0,
+        "noise_seed": 1157
+      }
+    },
+    "overrides": {
+      "target_slew_rad_per_20ms": 0.04,
+      "reward_weights": {
+        "stand_joint_velocity": -0.5,
+        "stand_target_velocity": -0.15,
+        "stand_posture": -2.0,
+        "action_rate": -0.075,
+        "saturation": -0.75,
+        "torque_excess": -0.6,
+        "worst_torque_excess": -0.2,
+        "stand_raw_action": 0.0
+      },
+      "observation_noise_scale": 1.0,
+      "target_filter_time_constant_s": 0.0
+    },
+    "diagnostic_options": {
+      "duration_s": 12,
+      "settle_s": 2,
+      "seed": 7057,
+      "trace_envs_per_scenario": 1,
+      "controller": "policy"
+    },
+    "Stage2_complete": false,
+    "smoke_campaign_sha256": "aa478e602caceb75dd488db4fdd5e275aed6ed966a5390ad9aa20c6d66738d6f",
+    "smoke_state_sha256": "4bdaacc002e7c3480905c6c32ece4e713b3e654ddf31bfce8f16fea32a523612",
+    "smoke_receipt_sha256": "a511b9cf5587a448beeb354251b864cd458eea07ab3924054a0c2bb61771fc32"
+  },
+  "previous_owner_checked": true,
+  "exact_container_names_and_IDs_absent": 8,
+  "phase_tree_aliases": {
+    "standing": {
+      "files": 3,
+      "immutable_map_sha256": "b3d8992e4bf3e4e5e8ad563a258dc9525cb7205a2b4905300b0d0486e7436fdf",
+      "unchanged": true
+    },
+    "train": {
+      "files": 13,
+      "immutable_map_sha256": "c95a0e53de3c0f6ba28f4a5886490b0dfb10027e376cc74d0a43e0bb3ab229cb",
+      "unchanged": true
+    },
+    "final_constant": {
+      "files": 5,
+      "immutable_map_sha256": "fabad2be269e5f7b607879ecab3a7d6322948f579258e2a5427f2211cb1a9c0c",
+      "unchanged": true
+    },
+    "final_stop": {
+      "files": 5,
+      "immutable_map_sha256": "ea997efc0898ed68a9796f18eece1a818a2dac80f2aedaacbe4dd90a642d1bbe",
+      "unchanged": true
+    }
+  },
+  "input_and_smoke_contract_passed": true,
+  "actual_smoke_updates": 2,
+  "actual_smoke_wrapper_seconds": 3.4876909870654345,
+  "actual_smoke_strict_reload": {
+    "passed": true,
+    "exact_actor_critic_normalizer_optimizer": true,
+    "exact_deterministic_action": true,
+    "optimizer_entries": 17,
+    "checkpoint_sha256": "4aaf556613e72a80332381c09309cc0ab52a03c6d55527bc76e8a7000a29e1f2",
+    "inference_buffers_cloned_after_learning": [
+      "actor.obs_normalizer._std",
+      "critic.obs_normalizer._std"
+    ],
+    "reload_method": "Strict same-runner load after value-preserving inference-buffer normalization"
+  },
+  "dispatch_performed": false
+}

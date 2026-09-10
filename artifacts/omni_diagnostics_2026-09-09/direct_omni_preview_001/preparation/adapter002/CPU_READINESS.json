@@ -1,0 +1,59 @@
+{
+  "scope": "CPU preparation only; completed same-source pilot and root-selected final checkpoint required at runtime",
+  "tests_passed": 23,
+  "test_command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=tmp/reference_residual_ppo_001/_deps .venv/bin/python -B -m unittest discover -s tmp/direct_omni_preview_adapter_002 -p 'test_*.py'",
+  "source_manifest_sha256": "64144b2c2466f17c809554ef53f82b736b4199136cc821451d7ac2788752bd2e",
+  "copied_actual_source_inputs": {
+    "inputs/native_entry.py": {
+      "source_key": "tools/train_length_study.py",
+      "sha256": "6d791e30bd73f3d66f1df05206169485c2b9f7d5ab4941f5fde99beeef7eadde"
+    },
+    "inputs/native_omni_flat_env.py": {
+      "source_key": "tools/omni_flat_env.py",
+      "sha256": "eaf21e81aae1e7f9209b507cdb242d068cf1227b52ccbed8714fe147e89ac910"
+    }
+  },
+  "render_helper_parent": "tmp/reference_progress_recording_001/render_helpers.py",
+  "render_helper_sha256": "b245d473abce3e1cdd795a6c1ff5f628000d5a4c235002b2a6d9eafc265037a5",
+  "seam_counts": {
+    "app": 1,
+    "save": 1,
+    "config": 1,
+    "render": 1,
+    "dispatch": 1
+  },
+  "inverse_AST_equals_exact_native_entry": true,
+  "controller_weights_changed": false,
+  "physical_configuration_edits": false,
+  "rendering_overrides": {
+    "num_envs": 1,
+    "width": 1280,
+    "height": 720,
+    "enable_cameras": true,
+    "render_mode": "rgb_array"
+  },
+  "synthetic_loop_controls": 1900,
+  "synthetic_frames": 950,
+  "fps": 25,
+  "playback_rate": 1.0,
+  "first_terminal_fixture": {
+    "controls": 7,
+    "last_render_control": 6,
+    "raw_terminal_preserved": true,
+    "complete": false
+  },
+  "full_runtime_preflight_performed": false,
+  "actual_native_RGB_render_performed": false,
+  "GPU_launched": false,
+  "Stage2_complete": false,
+  "pending": [
+    "Root selection of a completed same-source curriculum or CAPS pilot and exact final checkpoint",
+    "Externally pinned read-only host/mounts and pause/restore guard",
+    "Native App/camera/frame/physics execution and terminal integrity audit"
+  ],
+  "native_contract_freeze_sha256": "20fbcd40a869b39d8e3143a6c9715ec62ada5cc6211eaf473f60f8b7167678cb",
+  "host_freeze_sha256": "19545653a00e635cc14ed9415f9799978da34674e84f6cad76eb42bd2a961ac4",
+  "pilot_only": true,
+  "smoke_eligible": false,
+  "completed_update_requirement": 50
+}

@@ -1,0 +1,9 @@
+This isolated Claude Code worker produced a substantial terrain implementation review using the explicitly requested `claude-fable-5-1` model and `--effort max`. Read [SYNTHESIS.md](SYNTHESIS.md) first: the coordinating reviewer accepted useful interfaces, reproduced concrete sensor defects, and rejected or qualified several partner proposals. The raw partner answer is evidence of review, not authority or implementation admission.
+
+The exact prompt,33 curated source records and byte copies, CLI/version/session/command, raw JSONL, complete answer reconstruction, model usage and exit receipts are included. Only Read/Glob/Grep were enabled under safe-mode, restricted mode, empty strict MCP configuration and dontAsk; actual tool events and source-copy hashes were audited. The CLI's raw result string contained the second of two final text chunks; TEXT_ASSEMBLY.json records their reconstruction and RESULT_TAIL.md preserves that raw tail. No result was silently dropped.
+
+All visible assistant messages and the review answer use Fable5.1. Raw CLI modelUsage also reports an auxiliary Haiku entry of18 output tokens; its purpose is not specified. No fallback was configured. Reported dollar fields are CLI list-price estimates, not evidence of an additional subscription charge.
+
+The new central GitHub Pages contributor requirement arrived during the main noninteractive request. It was passed in a separate MAX continuation of the same session and acknowledged in GOVERNANCE_ACK.md. Root owns any publication and the required site progress/evidence/roadmap record. No tracked source, frozen input, Spark state, GPU job or policy was changed by this worker or its reviewer.
+
+The separate independent three-counterexample bundle remains immutable at ../claude_fable_terrain_independent_checks_001; AUDIT.json binds its manifest. Copy it unchanged alongside this bundle when publishing. Its findings are CPU preparation defects, not claims of deployed sensor failure.

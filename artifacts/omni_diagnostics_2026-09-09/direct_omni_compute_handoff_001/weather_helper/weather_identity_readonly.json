@@ -1,0 +1,46 @@
+{
+  "Type": "simple",
+  "Restart": "no",
+  "TimeoutStopUSec": "1min 30s",
+  "RuntimeMaxUSec": "2h",
+  "MainPID": "3544965",
+  "ExecStart": "{ path=/bin/bash ; argv[]=/bin/bash -c exec /opt/wx/venv-models/bin/python -u halo_replay.py --root /home/orionh/stormscope-halo-tests-20260910/halo104-1010 > halo104-1010.log 2>&1 ; ignore_errors=no ; start_time=[Thu 2026-09-10 10:12:21 EST] ; stop_time=[n/a] ; pid=3544965 ; code=(null) ; status=0/0 }",
+  "ControlGroup": "/user.slice/user-1000.slice/user@1000.service/app.slice/stormscope-halo104-1010-20260910.service",
+  "WorkingDirectory": "/home/orionh/stormscope-halo-tests-20260910",
+  "User": "",
+  "Group": "",
+  "KillMode": "control-group",
+  "KillSignal": "15",
+  "ActiveState": "active",
+  "SubState": "running",
+  "FragmentPath": "/run/user/1000/systemd/transient/stormscope-halo104-1010-20260910.service",
+  "InvocationID": "441bd8a01ae1421d8b0cf60283fd200e",
+  "unit_fragment": "# This is a transient unit file, created programmatically via the systemd API. Do not edit.\n[Unit]\nDescription=/bin/bash -c \"exec /opt/wx/venv-models/bin/python -u halo_replay.py --root /home/orionh/stormscope-halo-tests-20260910/halo104-1010 > halo104-1010.log 2>&1\"\n\n[Service]\nRuntimeMaxSec=2h\nWorkingDirectory=/home/orionh/stormscope-halo-tests-20260910\nExecStart=\nExecStart=\"/bin/bash\" \"-c\" \"exec /opt/wx/venv-models/bin/python -u halo_replay.py --root /home/orionh/stormscope-halo-tests-20260910/halo104-1010 > halo104-1010.log 2>&1\"\n",
+  "unit_fragment_sha256": "6310615d0e68ca40bbd78e3e3fe40323d8b263b30a965b15e793703d20d04b59",
+  "script_sha256": "08a46f047a1ba54a46d2886a27cc8cd918e16a51d83b8b1e193c8e6e17157df3",
+  "script_path": "/home/orionh/stormscope-halo-tests-20260910/halo_replay.py",
+  "proc_cgroup": "0::/user.slice/user-1000.slice/user@1000.service/app.slice/stormscope-halo104-1010-20260910.service\n",
+  "output_inventory": {
+    "grid.npz": {
+      "bytes": 2613857,
+      "symlink": false
+    },
+    "forecast.npz": {
+      "bytes": 3435110,
+      "symlink": false
+    },
+    "inputs.npz": {
+      "bytes": 19998427,
+      "symlink": false
+    },
+    "inputs/20260910T1010Z.json": {
+      "bytes": 217,
+      "symlink": false
+    },
+    "inputs/20260910T1010Z.npz": {
+      "bytes": 19998427,
+      "symlink": false
+    }
+  },
+  "log_path": "/home/orionh/stormscope-halo-tests-20260910/halo104-1010.log"
+}

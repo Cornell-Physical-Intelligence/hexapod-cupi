@@ -90,3 +90,15 @@ Use **full available Spark compute now**, until another agent requests sharing t
 The user explicitly prioritized the present hexapod campaign over weather. An owned guard reserves the weather launcher's existing `/opt/wx/gpu.lock` cooperatively until campaign exit, for at most three hours. Preserve workload admission checks and the shared-file handoff; this reservation does not authorize arbitrary changes to other jobs. Exact process and probe state is recorded in [STATUS.md](../STATUS.md).
 
 The earlier reference-only recovery proposal remains a separate infrastructure lineage. Its successful admission cannot guarantee every later timeout reset, and its fixed gait is not the project's selected final architecture. Any successor preserves requested-goal motion rewards, zero-bootstrap true terminations, final pre-reset critic values for time limits, and selected/unselected history isolation. Formal motor/contact, cold-policy, quiet and Stage 2 gates remain unchanged. See the C-study sequence above for the current experiment design.
+
+
+## 2026-09-10 — prepared next C-study direct-PPO comparison
+
+The next proposed allocation is one quiet-priority temporal-smoothing ablation, initialized afresh from original315/318 checkpoint1971…, with the current19-body/18-joint C asset and unchanged direct source/physics/action contracts. Native004 is preparation only until its frozen source, CPU regressions and fresh same-source smoke are admitted. Root remains the only guarded Spark dispatcher; this document does not launch or admit a job.
+
+- Valid consecutive exact-zero command pairs: temporal coefficient1.0. Moving pairs:0.1; spatial:0.1. Preserve the current all-valid denominator and done/command-change masks. Quiet pairs already make up68.34% of observed valid pairs, so the change explicitly increases their objective priority.
+- Pilot:1024 environments ×24 controls ×50 updates, with original checkpoint, fresh optimizer/std protocol, adaptive LR, deterministic acquisition phases and original common0.040 rad/20ms limiter. New smoke32×24×2 must exercise this actual branch and strict reload before the pilot.
+- Record mode-separated temporal losses, sparse actor-gradient decomposition and per-minibatch KL/rate. Verify diagnostics leave optimizer/normalizer/RNG and learning results unchanged when the objective is held equal.
+- Retain all-direction/yaw/arc and quiet-stop comparison, exact checkpoint hashes and full failure evidence. A longer unchanged budget remains scientifically valid; this short ablation is chosen to discriminate objective priority quickly, not to claim convergence or impossibility.
+
+See the [actual matched pilots](../artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/REPORT.md) and [verified review/proposal](../artifacts/project_review_2026-09-10/claude_partner_review_001/README.md). Never reuse the failed preview finalizer without its separately verified successor.
