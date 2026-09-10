@@ -1,0 +1,13 @@
+# Fresh standing002 ownership guard
+
+This prepares one fresh standing1 allocation after authentic failed standing001. Source00251 is `acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467`; host00222 is `c533454d1699058a7b686e49436247bbb9c94bbeec0a91b01090c234f4576763`, runtime `302aaf5da6d95f771832cc51ef5c002564cd8af77f9c19e65326ea04ea02f1bc`. All source/host/asset/admission and ownership checks run before pause and immediately before dispatch.
+
+Under `/home/orionh/HEXAPOD_runs/canonical_direct_20260910`, paths are `standing_source_002`, `standing_host_002`, `standing_guard_003`, unchanged `asset_001`, read-only admitted `native_actuation_001/actuation`, fresh output `native_standing_002` and fresh pause `forecast_pause_007`. Owner is `hexapod-canonical-native-standing-002-20260910.service`; fallback is uniquely `hexapod-canonical-forecast-restore-007`. Root launch command is `python3 -B /home/orionh/HEXAPOD_runs/canonical_direct_20260910/standing_guard_003/launch_guarded_remote.py`.
+
+Previous owner invocation `f3cd14c1078e47c891d97718643b22aa` remains an authentic failure. All32 original run/pause payloads and its independent audit are pinned, including14 actual steps,13 complete captured rows and1 control. The job's recorded exit_code is null; the owner exited1. Both exact recorded container identifiers must be absent. Failed source/host identities and exact pause006 restoration `1789076848.3458216` remain required. No previous successful standing result is invented.
+
+Only an explicit single environment with1,000 controls/8,000 steps is allocated. The source's exact-zero inactive contact records remain fully auditable; gains, geometry, physics and all contact/quiet gates remain unchanged. There is no automatic standing32, policy or broader physical admission.
+
+Both GPU locks, unknown non-weather workload refusal, explicit all-weather priority and coordination35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3 remain. Correct literal NVIDIA `--query-compute-apps` is tested against the parent and failed first guard. Protected ancestry and embedded restoration code remain equal to the corrected parent. Bounds remain720-second owner/180-second stop/15-minute fallback and original600-second phase/90-second actual AppReady. Unknown non-weather processes are protected.
+
+All22 final CPU tests and actual bound standard-library guard-to-host preflight pass. No remote or GPU action occurred in preparation. Original source001, failed standing001 and both earlier guards remain immutable. Root owns final transfer, actual setup, dispatch and central project updates under `docs/PROJECT_SITE.md`.

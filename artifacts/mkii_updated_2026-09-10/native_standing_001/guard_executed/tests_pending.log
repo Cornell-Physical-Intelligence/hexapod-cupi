@@ -1,0 +1,34 @@
+F....................
+======================================================================
+FAIL: test_actual_order_fallback_before_timer_stop_two_checks_then_dispatch (test_actual_guard_order.ActualMainOrderTests.test_actual_order_fallback_before_timer_stop_two_checks_then_dispatch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/canonical_native_standing_guard_001/test_actual_guard_order.py", line 66, in test_actual_order_fallback_before_timer_stop_two_checks_then_dispatch
+    self.assertEqual(dispatch[-4:],['--supervisor-source',str(pause.parent/'source'),'--output',str(pause.parent/'out')])
+AssertionError: Lists differ: ['--output', '/var/folders/4q/hbxvz4y536lb_2y[49 chars] '1'] != ['--supervisor-source', '/var/folders/4q/hbxv[124 chars]out']
+
+First differing element 0:
+'--output'
+'--supervisor-source'
+
++ ['--supervisor-source',
++  '/var/folders/4q/hbxvz4y536lb_2ypxzq7kjdw0000gn/T/tmpeibtni82/source',
+- ['--output',
+? ^
+
++  '--output',
+? ^
+
+-  '/var/folders/4q/hbxvz4y536lb_2ypxzq7kjdw0000gn/T/tmpeibtni82/out',
+?                                                                    ^
+
++  '/var/folders/4q/hbxvz4y536lb_2ypxzq7kjdw0000gn/T/tmpeibtni82/out']
+?                                                                    ^
+
+-  '--num-envs',
+-  '1']
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.083s
+
+FAILED (failures=1)

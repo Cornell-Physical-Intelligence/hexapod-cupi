@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/standing/run_standing.py", line 91, in main
+    session.step_control(np.zeros((a.num_envs,18),np.float32));state['explicit_steps_completed']=session.count
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/standing/standing_session.py", line 93, in step_control
+    try:contact=classify_contacts(data,self.sensor_map,row['link_pose_xyzw'],self.geometry,self.n)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/standing/standing_math.py", line 51, in classify_contacts
+    if abs(np.linalg.norm(n)-1)>1e-3:raise ValueError('Invalid patch normal')
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Invalid patch normal

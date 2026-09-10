@@ -1,0 +1,11 @@
+--- standing_guard_001/launch_guarded_remote.py
++++ standing_guard_002/launch_guarded_remote.py
+@@ -102,7 +102,7 @@
+         parents = {int(next(line.split('=', 1)[1] for line in units[name].splitlines() if line.startswith('MainPID=')))
+                    for name in active_services}
+         parents.discard(0)
+-        gpu = call(['nvidia-smi', '--standing-compute-apps=pid,process_name', '--format=csv,noheader,nounits'])
++        gpu = call(['nvidia-smi', '--query-compute-apps=pid,process_name', '--format=csv,noheader,nounits'])
+         for line in gpu.splitlines():
+             pid = int(line.split(',', 1)[0]); seen = set()
+             while pid > 1 and pid not in parents and pid not in seen:

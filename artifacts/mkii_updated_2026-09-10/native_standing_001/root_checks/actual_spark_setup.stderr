@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "<stdin>", line 23, in <module>
+  File "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/standing_host_001/launch_standing_spark.py", line 59, in verify_inputs
+    identity=CONTRACT.verify_inputs(SimpleNamespace(source=args.source,asset=args.asset,admission=args.admission,output=args.output/'standing',num_envs=args.num_envs,standing_one=args.standing_one))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/standing_source_001/standing_contract.py", line 17, in verify_inputs
+    admission=Path(args.admission).resolve();expected=read(own/'ACTUATION_SHA256.json');check_map(admission,expected)
+                                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/standing_source_001/inspection_contract.py", line 30, in check_map
+    raise ValueError(f'Unsafe/missing input: {name}')
+ValueError: Unsafe/missing input: case_results.json

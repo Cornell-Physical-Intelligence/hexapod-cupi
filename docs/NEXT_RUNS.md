@@ -7,7 +7,7 @@
 
 1. Verify `robot/active_model.json` and the corresponding `usd_002` nominal motor corrected source identities on the isolated native preparation directory.
 2. Introduce a new task/runtime contract for the actual joint names, signs/zeros, per-leg yaw limits, +X tibia contact geometry and explicitly modeled actuator behavior. Preserve old task registrations.
-3. Cook the exact SDF geometry in Isaac Sim 6.0.1 and qualify suspended travel, contacts/settling, self-collision handling, solver effort and observation/action mapping before a small learning smoke.
+3. Use the verified native import, suspended coordinate/effort response and sampled source-shape evidence. Complete loaded standing with the reviewed exact-zero-contact interpretation, preserving every native record and all existing force/quiet gates; then measure one-to-32-replica scaling and qualify observation/action mapping before a small learning smoke.
 4. Only a matching native admission can authorize learning on this canonical model; record its source, asset, motor and checkpoint hashes. Then pursue the unchanged all-direction, smoothness and quiet-standing gates.
 
 ## Historical C-study continuation order (superseded)
