@@ -5,6 +5,36 @@ unit=hexapod-rl-training.service
 logs=/home/orionh/HEXAPOD/isaaclab/logs/rsl_rl/hexapod_robstride_flat_direct
 
 case "${1:-status}" in
+  omni-repair)
+    shift
+    script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+    exec python3 "$script_dir/../../tools/launch_omni_repair_spark.py" "$@"
+    ;;
+  terrain-smoke)
+    shift
+    script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+    exec python3 "$script_dir/../../tools/launch_terrain_smoke_spark.py" "$@"
+    ;;
+  omni-diagnostics)
+    shift
+    script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+    exec python3 "$script_dir/../../tools/launch_omni_diagnostics_spark.py" "$@"
+    ;;
+  omni-flat)
+    shift
+    script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+    exec python3 "$script_dir/../../tools/launch_omni_flat_spark.py" "$@"
+    ;;
+  candidate-c)
+    shift
+    script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+    exec python3 "$script_dir/../../tools/launch_candidate_c_spark.py" "$@"
+    ;;
+  length-study)
+    shift
+    script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+    exec python3 "$script_dir/../../tools/launch_length_training_spark.py" "$@"
+    ;;
   start)
     sudo systemctl start "$unit"
     ;;
@@ -29,7 +59,7 @@ case "${1:-status}" in
       | sort -r
     ;;
   *)
-    echo "usage: hexapod-rl {start|stop|restart|status|logs|latest|runs}" >&2
+    echo "usage: hexapod-rl {start|stop|restart|status|logs|latest|runs|length-study --source PATH --output PATH}" >&2
     exit 2
     ;;
 esac
