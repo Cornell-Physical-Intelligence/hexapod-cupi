@@ -256,3 +256,9 @@ neither replaces the live physical acceptance evidence.
 `isaaclab/deploy/stage2_c_priority_20260909_pipeline.sha256` is the new current-check destination after integration onto main. It adds the separately isolated study and terrain tools plus the reviewed CI/dependency changes to the complete repository source identity. The previous 1,600 Hz metrics manifest, all archived paths and every production package remain byte-for-byte preserved. This source release is not new physical-model admission.
 
 CI checks this filename explicitly with `uv run python tools/check_pipeline_lineages.py current --manifest isaaclab/deploy/stage2_c_priority_20260909_pipeline.sha256`. The pinned C-study runtime separately checks all 16 vendored files against its fixed tree digest. The original historical Stage2 check remains unchanged. New frozen study sources must include that runtime and manifest as documented in `experiments/c_length_study/README.md`.
+
+### Documentation-contract follow-up
+
+The first integration CI run caught two failures in an inherited documentation fixture that required a pending sensor-photo confirmation and another long-run permission request. The user has since confirmed Mid-360/D455 ownership and authorized parallel work. The updated fixture checks the correct 360 × 59-degree Mid-360 identity, confirmed inventory and separate standing/qualification context. Sensor physics, hardware-accounting tests and simulator gates are unchanged.
+
+The current release check now targets `isaaclab/deploy/stage2_c_priority_20260909_docs_contract_pipeline.sha256`; it additionally covers this changed fixture and preserves the preceding integration manifest. CI and the default checker select this new filename.

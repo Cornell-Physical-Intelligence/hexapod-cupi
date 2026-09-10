@@ -22,7 +22,7 @@ ARCHIVED_MANIFEST = "isaaclab/deploy/stage2_pipeline.sha256"
 ARCHIVED_REF = "81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df"
 ARCHIVED_MANIFEST_SHA256 = "19fc816cf9c53a79be8e14831daa58a12eba3f7f07c5fca80d03f2dc947ccda1"
 ARCHIVED_ENTRY_COUNT = 112
-CURRENT_MANIFEST = "isaaclab/deploy/stage2_c_priority_20260909_pipeline.sha256"
+CURRENT_MANIFEST = "isaaclab/deploy/stage2_c_priority_20260909_docs_contract_pipeline.sha256"
 CURRENT_HEADER = (
     "# hexapod.mkii_fourbar_pipeline.v1\n"
     f"# Archived source commit: {ARCHIVED_REF}\n"
@@ -34,6 +34,8 @@ CURRENT_REVISIONS = {
     "packages/hexapod_env/pyproject.toml": "Package the new actuator and versioned task modules.",
 }
 CURRENT_EXTRA_PATHS = (
+    "isaaclab/deploy/stage2_c_priority_20260909_pipeline.sha256",
+    "isaaclab/tests/test_phase3_sensor_hardware_contract.py",
     'isaaclab/deploy/mkii_fourbar_v1_1600hz_metrics_pipeline.sha256',
     'experiments/c_length_study/runtime/SHA256SUMS.json',
     'robot/tools/generate_length_study.py',

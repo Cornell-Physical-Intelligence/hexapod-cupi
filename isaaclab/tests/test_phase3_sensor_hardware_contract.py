@@ -182,16 +182,16 @@ class StaticIntegrationContractTest(unittest.TestCase):
         self.assertNotIn("PHASE3_HARDWARE_ACCOUNTING", robot_cfg_source)
         self.assertNotIn("mass", robot_cfg_source)
 
-    def test_both_docs_keep_identity_and_long_run_approval_gates(self):
+    def test_both_docs_record_confirmed_inventory_and_separate_acceptance(self):
+        # The project lead confirmed Mid-360/D455 ownership and authorized
+        # parallel work. Preserve sensor identity and qualification boundaries,
+        # without resurrecting the superseded label/photo/permission request.
         for path in (PHASE3_README_PATH, SENSOR_README_PATH):
             with self.subTest(path=path):
                 source = path.read_text().lower()
-                self.assertIn("near-hemispherical", source)
-                self.assertIn("360 x 90", source)
-                self.assertIn("label", source)
-                self.assertIn("photo", source)
-                self.assertIn("approval-gated", source)
-                self.assertIn("overnight", source)
+                for term in ("near-hemispherical", "360 x 59", "mid-360", "d455",
+                             "confirmed", "parallel", "standing", "separate"):
+                    self.assertIn(term, source)
 
 
 if __name__ == "__main__":
