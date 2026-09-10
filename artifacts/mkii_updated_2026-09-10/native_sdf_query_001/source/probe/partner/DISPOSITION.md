@@ -1,0 +1,13 @@
+# Independent disposition of the single Fable MAX review
+
+The final response is preserved unchanged. It is design critique, not SDK or experimental evidence.
+
+Accepted and implemented: copy every native persistent return; require noncoplanar normals and both signed interior/exterior anchors; explicitly distinguish shape and link frames and report nonseparable cases; exact one-path views; distinct per-shape point order and reversed repeats; retain first raw output before the second query; compare poses, velocities, q and counter before/after. These have concrete CPU regressions. The actual source shape-to-link rotation is approximately 90 degrees about X, and the link alternative differs from source-local distances by 10.10 mm RMS at the anchors.
+
+Qualified: finite differences establish local consistency between returned distance and gradient. They do not by themselves prove a global field or physical contact gradient. The h=nominal-spacing stencil is retained only at anchors independently verified against the full source-triangle oracle. All sign checks use actual winding and nearest-surface distance, rather than trusting the initial normal offset to remain inside a thin feature. Gradients at curved/void points are reported separately from the smooth-anchor semantics gate.
+
+Not adopted as facts: the model's claimed cooked padding, approximate 1.6 mm band, interpolation curvature bound and proposed spacing/band reconstruction. Those were not independently established from this native instance. The code labels spacing as nominal and preserves raw errors. A band-recovery framework would exceed this bounded first probe. The suggested independent USD world transform is not treated as actual dynamic pose truth under Fabric; live articulation poses and constant USD shape-to-link transforms are used, with an explicit hidden-clock limitation.
+
+Not adopted: the claim that a 0.85–1.15 slope window cannot catch real unit errors is false for the tested factors 0.001 and 1000. It does permit substantial smaller scale error, so the README states that limitation and records slope plus intercept. No arbitrary 2% metrology threshold is adopted from a partner answer. The source +X 130 mm extent is CAD identity, not a verified physical measurement.
+
+The current code does not require the proposed source bundle to contain a site update before tmp-only review. The actual hard rule applies when root changes the repository: the README names the required bounded update and validated site build. No proprietary Tensor110 implementation, internal thinking content or unrelated source files are selected for publication.

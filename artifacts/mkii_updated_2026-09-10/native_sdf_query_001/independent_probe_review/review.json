@@ -1,0 +1,33 @@
+{
+  "owner_freeze_sha256": "e1109fc90dc3953bcb064fd0ab80158503ff0d48a3457453d504c5aa0e23e367",
+  "all28_owner_payloads_verified": true,
+  "reviewed_files": {
+    "native_probe.py": "52010262dfa951dec9ec0f356d4b494e2c06419fc048b74fc9fe265dcd0f271e",
+    "score_probe.py": "aa76c0eed9f78979691264b3b899c1d780c366722b41cd69f9845fd29b36feb7",
+    "mesh_oracle.py": "d169e2da0e35211b8acc0cf2b3ddc5189250bdfec629ccb765430539a0a22be7",
+    "README.md": "9b79f1532217d4729e37102c82c712ec7ef8a00154720b2b0c2c1ee402a825bd",
+    "test_probe.py": "ebf6bc14d6c9a1059a5125008b501af81230583ebe6763d6a99d16c21fa9b999"
+  },
+  "independent_tests": {
+    "count": 17,
+    "passed": true,
+    "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m unittest discover -s tmp/canonical_sdf_distance_probe_001 -p test_probe.py -v",
+    "log_sha256": "5a525bc69ee5b22db5ed7e1c7e5d2630b43cd6ff4bd3b41389ca854fe7fd34f7"
+  },
+  "concrete_blockers": [],
+  "findings": [
+    "The measured link pose uses explicit XYZW rotation; live link pose times composed fixed shape-to-link transform produces the geometric world hypothesis. Rigid-frame alternatives rotate the expected gradient consistently.",
+    "Exact six collider paths, source triangles and fixed transforms are checked before querying. Inputs remain source-shape coordinates and channel/sign/unit interpretations are scored explicitly rather than silently adopted.",
+    "Persistent native outputs are copied immediately. The first valid/nonfinite result is written before a second native query can fail. Per-query metadata and failed state distinguish incomplete prefixes; exact before/after counters and state must match for completion.",
+    "Source-triangle nearest-distance gradients and winding signs agree with analytic/rotated geometry and the independent actual-mesh cross-check exercised by tests.",
+    "Completion is acquisition completion only. Declared semantics, proposed geometry accuracy and contact/standing/training admission remain separate. World-frame comparison and nominal grid-spacing bounds retain their documented limitations."
+  ],
+  "limitations": [
+    "No native SDF distances or actual ABI execution were measured by this review.",
+    "No ground contact, force, friction, penetration or locomotion admission follows.",
+    "Final integration must bind this whole frozen addon and preserve separate diagnostic booleans and failed raw prefixes."
+  ],
+  "remote_calls": 0,
+  "GPU_calls": 0,
+  "owner_edits": false
+}

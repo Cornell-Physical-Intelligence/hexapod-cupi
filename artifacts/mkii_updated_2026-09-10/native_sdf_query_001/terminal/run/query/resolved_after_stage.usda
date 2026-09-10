@@ -1,0 +1,64 @@
+#usda 1.0
+(
+    endTimeCode = 100
+    kilogramsPerUnit = 1
+    metersPerUnit = 1
+    startTimeCode = 0
+    timeCodesPerSecond = 60
+    upAxis = "Z"
+)
+
+def PhysicsScene "physicsScene" (
+    prepend apiSchemas = ["PhysxSceneAPI", "MaterialBindingAPI"]
+)
+{
+    rel material:binding:physics = </physicsScene/defaultMaterial> (
+        bindMaterialAs = "strongerThanDescendants"
+    )
+    vector3f physics:gravityDirection = (0, 0, -1)
+    float physics:gravityMagnitude = 0
+    float physxScene:bounceThreshold = 0.5
+    uniform token physxScene:broadphaseType = "GPU"
+    bool physxScene:enableCCD = 0
+    bool physxScene:enableEnhancedDeterminism = 0
+    bool physxScene:enableExternalForcesEveryIteration = 0
+    bool physxScene:enableGPUDynamics = 1
+    bool physxScene:enableSceneQuerySupport = 0
+    bool physxScene:enableStabilization = 0
+    float physxScene:frictionCorrelationDistance = 0.025
+    float physxScene:frictionOffsetThreshold = 0.04
+    uint physxScene:gpuCollisionStackSize = 67108864
+    uint physxScene:gpuFoundLostAggregatePairsCapacity = 33554432
+    uint physxScene:gpuFoundLostPairsCapacity = 2097152
+    uint physxScene:gpuHeapCapacity = 67108864
+    uint physxScene:gpuMaxNumPartitions = 8
+    uint physxScene:gpuMaxParticleContacts = 1048576
+    uint physxScene:gpuMaxRigidContactCount = 8388608
+    uint physxScene:gpuMaxRigidPatchCount = 163840
+    int physxScene:gpuMaxSoftBodyContacts = 1048576
+    uint64 physxScene:gpuTempBufferCapacity = 16777216
+    uint physxScene:gpuTotalAggregatePairsCapacity = 2097152
+    uniform uint physxScene:maxPositionIterationCount = 255
+    uniform uint physxScene:maxVelocityIterationCount = 255
+    uniform uint physxScene:minPositionIterationCount = 1
+    uniform uint physxScene:minVelocityIterationCount = 0
+    bool physxScene:solveArticulationContactLast = 0
+    uniform token physxScene:solverType = "TGS"
+    uint physxScene:timeStepsPerSecond = 400
+
+    def Material "defaultMaterial" (
+        prepend apiSchemas = ["PhysicsMaterialAPI"]
+    )
+    {
+        float physics:dynamicFriction = 0.5
+        float physics:restitution = 0
+        float physics:staticFriction = 0.5
+    }
+}
+
+def Xform "Robot" (
+    prepend references = @/asset/robot.usda@
+)
+{
+}
+

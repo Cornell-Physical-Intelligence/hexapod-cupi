@@ -1,0 +1,19 @@
+# Detailed toe: actual signed-distance query and explicit SDK interpretation
+
+Isaac completed all 12 read-only queries of 140 points across the six exact tibia shapes, after the unchanged eight-step passive import. Root independently audited and fetched **all 46 raw files / 527,354 bytes**. Native acquisition, unchanged inputs, exact prior admission, post-exit seal, owned-container absence and pause005 restoration pass. The query added no physics steps or state writes.
+
+**The documented tuple order is wrong for this installed native backend.** The actual output is `(gradient_x, gradient_y, gradient_z, distance)`, in source-shape coordinates and metres. The original declared distance-first interpretation fails both diagnostic flags and remains unchanged in the native report. Its complete alternative ranking identifies the measured layout; no result was silently reclassified.
+
+The separate `interpretation/RESULT.json` explicitly decodes saved tuples with `[3,0,1,2]` before applying the same scorer and unchanged bounds. All nine semantic checks and the source-geometry diagnostic then pass: signed-distance RMS at semantic anchors is **0.253 µm**, and the maximum error across all selected points is **5.815 µm**. The two reordered queries agree exactly; metric scale, both signs, finite-difference gradients and distinguishable source-versus-link frames pass. This is agreement with the original CAD triangles at selected samples, not manufacturing accuracy or whole-surface metrology. No CAD, collider, physics parameter or numeric diagnostic bound changed.
+
+The original CPU replay verifies every raw hash and reproduces the original failed verdicts, but it is not bitwise identical to the Spark report: eleven scalar calculations differ in their last floating-point bits, by at most 2.274e-13. The first strict-equality interpretation attempt is preserved in `interpretation_initial/`. The separate successor records every difference and uses explicit numerical replay comparison; it does not modify any original acceptance gate or acquisition result. The initial draft has no completed decoded result.
+
+Distances alone do not establish contact forces, loaded penetration, friction, standing, walking or hardware calibration. The next supported-standing screen uses the exact nonspherical toe and the separately verified motor response. Physical and training admission remain false here.
+
+## Evidence and reproduction
+
+`source/` preserves the actual50-payload query source002 and complete frozen28-payload addon, including the original Fable5.1 MAX partner review. The unlaunched source001 host-import issue was corrected through a file-relative dependency import; its delta and parent identity are retained. Root independently passed eight source tests, the addon's17 tests,12 host tests,21 guard tests and eight auditor tests. `independent_probe_review/` records another bounded independent review. No partner response is an admission authority.
+
+`root_checks/` retains actual Spark Python3.12.3 -S input/setup validation with original ownership CodeTypes, exact fresh transfers and dispatch. `terminal/` preserves invocation8304b4418c734871a21cad8f2fe4184e, both recorded owned identifiers absent, and exact pause005 restoration at Unix1789075815.8519926. The unchanged canonical nine-file asset and actual inspection003 admission are separately bound dependencies. No old actor/task/checkpoint was loaded.
+
+Run `python3 -B -S verify_bundle.py` for all payload/raw identities and the original source-bound acquisition receipt. It deliberately confirms the original false diagnostic flags. CPU interpretation additionally requires NumPy and the recorded source probe; its input permutation and results are fully preserved for independent reproduction. This evidence is immutable; current execution belongs in `STATUS.md`.
