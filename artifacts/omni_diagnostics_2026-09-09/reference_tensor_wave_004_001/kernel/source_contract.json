@@ -1,0 +1,94 @@
+{
+  "schema": "c_reference_tensor_geometry_v1",
+  "source_inputs": {
+    "geometry_constants.json": "38848208bee962704da39bd517c09821bc1481749758e5ce9ee0c5778300622e",
+    "oracle/wave002.py": "ef92745daf4c3bf544b6c6f9f65e18f19745d9e84811c8888a464312f864a56b",
+    "oracle/serial_geometry.py": "8c0451d151e077830986d8deb259129b4eb49f3750110883dad99683e8d7f8d3",
+    "oracle/wave003.py": "2f9c6e5ef5119b299a5e2983bfceff666fd9b3ff312c1156ac909221c01fde8d",
+    "oracle/test_wave_reference.py": "37d8d69c73202971d2dbf2c9723015beeeac41e0310b0c9d59de585af456f963",
+    "oracle/wave_math.py": "75353a885bd1e11795dff81458a7e547bbd2611769ef905b3f372c1814a6b12f",
+    "oracle/geometry/candidate_c_reference.json": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+    "oracle/geometry/f050_t060.urdf": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+    "oracle/observation002/observation.py": "180b41dd85caea2706e636b956ed4f9e2535f3996ca4c56f43def93d67589a36",
+    "oracle/observation002/source_contract.json": "41d4ad49e612c335e9a96eed7c3dd2e6ab548788057f1e0394aa229a80e5f891",
+    "oracle/observation002/fixtures.json": "9d737e7087b42caf25e259b69830d8a7898c85fe9dd11f4ed0f9384f56248b36"
+  },
+  "bindings": {
+    "wave002_5mm": {
+      "controller_sha256": "ef92745daf4c3bf544b6c6f9f65e18f19745d9e84811c8888a464312f864a56b",
+      "configuration": {
+        "gait_order": [
+          "lf",
+          "rr",
+          "lm",
+          "rf",
+          "lr",
+          "rm"
+        ],
+        "swing_s": 2.0,
+        "contact_hold_s": 0.3,
+        "lift_m": 0.005,
+        "max_translation_mps": 0.005,
+        "max_yaw_rad_s": 0.015,
+        "command_filter_omega": 2.0,
+        "reference_velocity_rad_s": 1.75,
+        "reference_acceleration_rad_s2": 6.0,
+        "joint_margin_rad": 0.02,
+        "minimum_support_margin_m": 0.025,
+        "maximum_body_tracking_error_m": 0.035,
+        "maximum_stance_drift_m": 0.02,
+        "maximum_touchdown_error_m": 0.012,
+        "maximum_initial_preload_point_offset_m": 0.025,
+        "maximum_initial_joint_preload_rad": 0.15,
+        "max_touchdown_delay_s": 0.6,
+        "contact_confirm_steps": 3,
+        "minimum_measured_lift_m": 0.002,
+        "landing_blend_s": 0.5,
+        "minimum_landing_blend_s": 0.1,
+        "descent_drop_from_peak_m": 0.00025,
+        "maximum_landing_contact_gap_s": 0.1,
+        "stop_command_tolerance": 1e-06,
+        "stop_command_rate_tolerance": 2e-05
+      }
+    },
+    "wave003_7mm": {
+      "controller_sha256": "2f9c6e5ef5119b299a5e2983bfceff666fd9b3ff312c1156ac909221c01fde8d",
+      "configuration": {
+        "gait_order": [
+          "lf",
+          "rr",
+          "lm",
+          "rf",
+          "lr",
+          "rm"
+        ],
+        "swing_s": 2.0,
+        "contact_hold_s": 0.3,
+        "lift_m": 0.007,
+        "max_translation_mps": 0.005,
+        "max_yaw_rad_s": 0.015,
+        "command_filter_omega": 2.0,
+        "reference_velocity_rad_s": 1.75,
+        "reference_acceleration_rad_s2": 6.0,
+        "joint_margin_rad": 0.02,
+        "minimum_support_margin_m": 0.025,
+        "maximum_body_tracking_error_m": 0.035,
+        "maximum_stance_drift_m": 0.02,
+        "maximum_touchdown_error_m": 0.012,
+        "maximum_initial_preload_point_offset_m": 0.025,
+        "maximum_initial_joint_preload_rad": 0.15,
+        "max_touchdown_delay_s": 0.6,
+        "contact_confirm_steps": 3,
+        "minimum_measured_lift_m": 0.002,
+        "landing_blend_s": 0.5,
+        "minimum_landing_blend_s": 0.1,
+        "descent_drop_from_peak_m": 0.00025,
+        "maximum_landing_contact_gap_s": 0.1,
+        "stop_command_tolerance": 1e-06,
+        "stop_command_rate_tolerance": 2e-05
+      }
+    }
+  },
+  "urdf_sha256": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+  "residual_source_sha256": "fbf65749c2d1ffc36b22986f71c0972ce7b1ecf82beebef57a0bd3e1be966e40"
+}

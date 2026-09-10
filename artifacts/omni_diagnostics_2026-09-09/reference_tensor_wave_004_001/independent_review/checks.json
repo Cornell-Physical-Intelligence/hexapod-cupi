@@ -1,0 +1,273 @@
+{
+  "scope": "Independent read-only CPU review; no CUDA/Isaac execution or physical admission",
+  "source_manifest_sha256": "2c258dfccbae306d0a0e6c9231b744c7ef365cd059bf04553d47756ab7cdb0c3",
+  "manifest_file_count": 43,
+  "manifest_mismatches": [],
+  "mixed_precision_predictor_cases": [
+    {
+      "row": 0,
+      "position_float32": false,
+      "max_position_error_m": 1.3877787807814457e-17,
+      "max_rotation_error": 5.551115123125783e-17
+    },
+    {
+      "row": 1,
+      "position_float32": true,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 5.551115123125783e-16
+    },
+    {
+      "row": 2,
+      "position_float32": false,
+      "max_position_error_m": 6.938893903907228e-18,
+      "max_rotation_error": 1.6653345369377348e-16
+    },
+    {
+      "row": 3,
+      "position_float32": true,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 1.3877787807814457e-16
+    },
+    {
+      "row": 4,
+      "position_float32": false,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 4.440892098500626e-16
+    },
+    {
+      "row": 5,
+      "position_float32": true,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 5.551115123125783e-16
+    },
+    {
+      "row": 6,
+      "position_float32": false,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 4.996003610813204e-16
+    },
+    {
+      "row": 7,
+      "position_float32": true,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 0.0
+    },
+    {
+      "row": 8,
+      "position_float32": false,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 1.1102230246251565e-16
+    },
+    {
+      "row": 9,
+      "position_float32": true,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 1.6653345369377348e-16
+    },
+    {
+      "row": 10,
+      "position_float32": false,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 1.1102230246251565e-16
+    },
+    {
+      "row": 11,
+      "position_float32": true,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 1.1102230246251565e-16
+    },
+    {
+      "row": 12,
+      "position_float32": false,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 5.551115123125783e-16
+    },
+    {
+      "row": 13,
+      "position_float32": true,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 3.3306690738754696e-16
+    },
+    {
+      "row": 14,
+      "position_float32": false,
+      "max_position_error_m": 1.3877787807814457e-17,
+      "max_rotation_error": 7.771561172376096e-16
+    },
+    {
+      "row": 15,
+      "position_float32": true,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 5.551115123125783e-17
+    },
+    {
+      "row": 16,
+      "position_float32": false,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 4.440892098500626e-16
+    },
+    {
+      "row": 17,
+      "position_float32": true,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 5.551115123125783e-17
+    },
+    {
+      "row": 18,
+      "position_float32": false,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 1.3877787807814457e-17
+    },
+    {
+      "row": 19,
+      "position_float32": true,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 0.0
+    },
+    {
+      "row": 20,
+      "position_float32": false,
+      "max_position_error_m": 1.3877787807814457e-17,
+      "max_rotation_error": 3.3306690738754696e-16
+    },
+    {
+      "row": 21,
+      "position_float32": true,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 0.0
+    },
+    {
+      "row": 22,
+      "position_float32": false,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 3.3306690738754696e-16
+    },
+    {
+      "row": 23,
+      "position_float32": true,
+      "max_position_error_m": 0.0,
+      "max_rotation_error": 5.551115123125783e-17
+    }
+  ],
+  "max_position_error_m": 1.3877787807814457e-17,
+  "max_rotation_error": 7.771561172376096e-16,
+  "float32_rows_changed_by_final_cast_only": 12,
+  "max_final_cast_only_difference_m": 1.1920928955078125e-07,
+  "static_dynamic_module_audit": [
+    {
+      "file": "batch_wave.py",
+      "forbidden_host_conversion_calls": [],
+      "dtype_casts": [
+        {
+          "line": 183,
+          "call": "position.float().to(self.dtype)"
+        },
+        {
+          "line": 207,
+          "call": "candidate.float().to(self.dtype)"
+        },
+        {
+          "line": 183,
+          "call": "position.float()"
+        },
+        {
+          "line": 207,
+          "call": "candidate.float()"
+        }
+      ],
+      "loops": [
+        {
+          "line": 58,
+          "iterator": "contract['source_files'].items()"
+        },
+        {
+          "line": 92,
+          "iterator": "SNAP_FLOAT.items()"
+        },
+        {
+          "line": 95,
+          "iterator": "SNAP_BOOL.items()"
+        },
+        {
+          "line": 159,
+          "iterator": "FLOAT_FIELDS.items()"
+        },
+        {
+          "line": 160,
+          "iterator": "BOOL_FIELDS"
+        },
+        {
+          "line": 161,
+          "iterator": "INT_FIELDS"
+        },
+        {
+          "line": 163,
+          "iterator": "{'ready': True, 'episode': episode, 'current_leg': -1, 'time': m['time_s'], 'position': m['position_world_m'], 'R0': m['rotation_world_from_body'], 'q': target, 'lower': lower, 'upper': upper, 'neutral': neutral, 'anchors': anchors, 'measured_anchors': m['reference_point_world_m'], 'preload_world': preloadworld, 'preload_q': preload, 'hold_until': m['time_s'], 'factor': 1.0, 'position_float32': m['position_is_float32']}.items()"
+        },
+        {
+          "line": 205,
+          "iterator": "range(198)"
+        },
+        {
+          "line": 302,
+          "iterator": "{'land_active': True, 'land_start': self.s['time'], 'land_duration': duration, 'land_coeff': coeff, 'land_end': endpoint, 'landing_trigger': self.s['time'], 'landing_origin': foot, 'landing_preload': endpoint - foot, 'landing_correction': correction, 'landing_original_error': original, 'landing_excursion': excursion, 'landing_metadata_valid': True, 'landing_gap': 0, 'contact_count': 0, 'mode': 6}.items()"
+        },
+        {
+          "line": 319,
+          "iterator": "{'current_leg': -1, 'sw_active': False, 'land_active': False, 'mode': 3, 'hold_until': self.s['time'] + 0.3, 'touchdowns': self.s['touchdowns'] + 1}.items()"
+        },
+        {
+          "line": 350,
+          "iterator": "updates.items()"
+        },
+        {
+          "line": 355,
+          "iterator": "{'position': pos, 'yaw': yaw, 'command': command, 'rate': rate, 'time': self.s['time'] + 0.02}.items()"
+        },
+        {
+          "line": 66,
+          "iterator": "FLOAT_FIELDS.items()"
+        },
+        {
+          "line": 67,
+          "iterator": "BOOL_FIELDS"
+        },
+        {
+          "line": 68,
+          "iterator": "INT_FIELDS"
+        }
+      ]
+    },
+    {
+      "file": "kernel/tensor_kernel.py",
+      "forbidden_host_conversion_calls": [],
+      "dtype_casts": [],
+      "loops": [
+        {
+          "line": 27,
+          "iterator": "contract['source_inputs'].items()"
+        },
+        {
+          "line": 54,
+          "iterator": "c.items()"
+        },
+        {
+          "line": 94,
+          "iterator": "range(3)"
+        },
+        {
+          "line": 162,
+          "iterator": "((coefficients, (n, 6, 3), 'coefficients'), (start_s, (n,), 'start'), (duration_s, (n,), 'duration'), (lift_m, (n,), 'lift'), (time_s, (n,), 'time'), (world_up, (n, 3), 'world up'))"
+        },
+        {
+          "line": 211,
+          "iterator": "((selected, (n,), 'reset selection', torch.bool), (episode, (n,), 'fresh episode counters', torch.int64), (time_s, (n,), 'reset time', g.dtype), (q_runtime, (n, 18), 'reset q', g.dtype), (soft_limits_runtime, (n, 18, 2), 'soft limits', g.dtype), (executable_velocity_runtime, (n, 18), 'reset executed velocity', g.dtype))"
+        },
+        {
+          "line": 238,
+          "iterator": "((targets_world_m, (n, 6, 3), 'reference feet', g.dtype), (desired_position_world_m, (n, 3), 'desired position', g.dtype), (desired_rotation_world_from_body, (n, 3, 3), 'desired rotation', g.dtype), (sample_time_s, (n,), 'input sample time', g.dtype), (quiet_hold, (n,), 'quiet hold', torch.bool), (upstream_valid, (n,), 'upstream gate mask', torch.bool))"
+        }
+      ]
+    }
+  ]
+}
