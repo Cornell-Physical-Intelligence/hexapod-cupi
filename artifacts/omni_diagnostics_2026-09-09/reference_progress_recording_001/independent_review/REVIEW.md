@@ -1,0 +1,5 @@
+# Independent native recording review
+
+Final ten CPU tests pass with system python3 (0.634 s). The source009 main and serializable ASTs are unchanged, and the external adapter changes only renderer setup and post-step observation. Original pre-reset done flags are retained; terminal frames use the last valid image without rendering a reset pose. The inherited physical gates,2400control limit and zero-residual targets are unchanged. Renderer warmup advances no physics. Source, assets, standing/campaign identity and recording inputs are checked before and after. Incomplete/unverified output exits nonzero and retains source failure details. Ground labels correctly display+0.005m/s after review correction.
+
+The outer root host separately passed six tests and preserves exact run_owned locks, cleanup,90sAppReady/600sphase watchdog and contact-log audit. Its adapter hash must bind this final freeze. CPU review does not establish rendering success; root owns the actual launch and video inspection.
