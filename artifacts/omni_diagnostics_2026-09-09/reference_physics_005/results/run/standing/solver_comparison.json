@@ -1,0 +1,108 @@
+{
+  "actual_scene_attributes": {
+    "physxScene:enableExternalForcesEveryIteration": true,
+    "physxScene:enableStabilization": false,
+    "physxScene:solverType": "TGS"
+  },
+  "physics_config_after": {
+    "bounce_threshold_velocity": 0.5,
+    "class_type": "isaaclab_physx.physics.physx_manager:PhysxManager",
+    "enable_ccd": false,
+    "enable_enhanced_determinism": false,
+    "enable_external_forces_every_iteration": true,
+    "enable_scene_query_support": false,
+    "enable_stabilization": false,
+    "friction_correlation_distance": 0.025,
+    "friction_offset_threshold": 0.04,
+    "gpu_collision_stack_size": 67108864,
+    "gpu_found_lost_aggregate_pairs_capacity": 33554432,
+    "gpu_found_lost_pairs_capacity": 2097152,
+    "gpu_heap_capacity": 67108864,
+    "gpu_max_num_partitions": 8,
+    "gpu_max_particle_contacts": 1048576,
+    "gpu_max_rigid_contact_count": 8388608,
+    "gpu_max_rigid_patch_count": 1048576,
+    "gpu_max_soft_body_contacts": 1048576,
+    "gpu_temp_buffer_capacity": 16777216,
+    "gpu_total_aggregate_pairs_capacity": 2097152,
+    "max_position_iteration_count": 255,
+    "max_velocity_iteration_count": 255,
+    "min_position_iteration_count": 1,
+    "min_velocity_iteration_count": 0,
+    "solve_articulation_contact_last": false,
+    "solver_type": 1
+  },
+  "physics_config_before": {
+    "bounce_threshold_velocity": 0.5,
+    "class_type": "isaaclab_physx.physics.physx_manager:PhysxManager",
+    "enable_ccd": false,
+    "enable_enhanced_determinism": false,
+    "enable_external_forces_every_iteration": false,
+    "enable_scene_query_support": false,
+    "enable_stabilization": false,
+    "friction_correlation_distance": 0.025,
+    "friction_offset_threshold": 0.04,
+    "gpu_collision_stack_size": 67108864,
+    "gpu_found_lost_aggregate_pairs_capacity": 33554432,
+    "gpu_found_lost_pairs_capacity": 2097152,
+    "gpu_heap_capacity": 67108864,
+    "gpu_max_num_partitions": 8,
+    "gpu_max_particle_contacts": 1048576,
+    "gpu_max_rigid_contact_count": 8388608,
+    "gpu_max_rigid_patch_count": 1048576,
+    "gpu_max_soft_body_contacts": 1048576,
+    "gpu_temp_buffer_capacity": 16777216,
+    "gpu_total_aggregate_pairs_capacity": 2097152,
+    "max_position_iteration_count": 255,
+    "max_velocity_iteration_count": 255,
+    "min_position_iteration_count": 1,
+    "min_velocity_iteration_count": 0,
+    "solve_articulation_contact_last": false,
+    "solver_type": 1
+  },
+  "protocol": {
+    "automatic_wave_or_PPO": false,
+    "baseline_run": "reference_physics_004",
+    "baseline_source_manifest_sha256": "a433e529d29d5360c828b406a3dfd769e078d69fc9deaf03f4fe110eb6fa7a63",
+    "baseline_value": false,
+    "comparison_value": true,
+    "control_steps": 1000,
+    "legacy_50Hz_metric_and_5mm_gate_unchanged": true,
+    "name": "reference005_standing_TGS_external_forces_each_iteration",
+    "num_envs": 32,
+    "only_physics_change": "sim.physics.enable_external_forces_every_iteration",
+    "predeclared_comparison": {
+      "5mm_difference_reported_as_diagnostic_not_new_standing_gate": true,
+      "all32envs_individually": true,
+      "duration_s": 16.0,
+      "frames": [
+        "root_link",
+        "root_COM"
+      ],
+      "interpretation": "Compare every matched env to004; no metric chosen for a favorable result and no default adoption.",
+      "interval_control_boundaries": [
+        200,
+        1000
+      ],
+      "report": [
+        "world_pose_displacement",
+        "integrated_velocity",
+        "3D_difference_norm",
+        "forward_displacement",
+        "per_joint_400Hz_computed_and_applied_torque_extrema",
+        "postsettle_contact_and_reset_gates"
+      ],
+      "retain_every_existing_standing_gate": true,
+      "velocity_integrals": [
+        "400Hz_left",
+        "400Hz_right",
+        "400Hz_trapezoid",
+        "50Hz_last_substep_right"
+      ]
+    },
+    "production_default_adopted": false,
+    "standing_only": true
+  },
+  "readback_scope": "Authored resolved PhysX scene attributes after environment initialization; native solver internals not instrumented",
+  "scene_path": "/physicsScene"
+}
