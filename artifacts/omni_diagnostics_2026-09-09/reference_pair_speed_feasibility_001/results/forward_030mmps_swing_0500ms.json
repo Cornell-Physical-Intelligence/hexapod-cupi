@@ -1,0 +1,226 @@
+{
+  "parameters": {
+    "scope": "Target-only planned endpoints; timings are new proposed parameters and are not the contact-aware controller or a physical recording",
+    "candidate_id": "forward_030mmps_swing_0500ms",
+    "pair_order": [
+      [
+        "lm",
+        "rm"
+      ],
+      [
+        "lf",
+        "rr"
+      ],
+      [
+        "lr",
+        "rf"
+      ]
+    ],
+    "requested_forward_left_yaw": [
+      0.03,
+      0.0,
+      0.0
+    ],
+    "requested_speed_is_explicit_new_candidate_not_old_wave_admission": true,
+    "control_dt_s": 0.02,
+    "initial_hold_s": 2.0,
+    "motion_s": 24.0,
+    "stop_s": 18.0,
+    "swing_s": 0.5,
+    "lift_m": 0.007,
+    "horizontal_fraction": 0.8,
+    "handoff_hold_s": 0.3,
+    "cycle_s": 2.4000000000000004,
+    "placement_horizon_s": 1.4500000000000002,
+    "old_single_leg_cycle_s": 13.8,
+    "old_single_leg_placement_horizon_s": 7.9,
+    "fixed_target_limits": {
+      "reference_velocity_rad_s": 1.75,
+      "reference_acceleration_rad_s2": 6.0,
+      "residual_radius_rad": 0.02,
+      "residual_velocity_rad_s": 0.25,
+      "residual_acceleration_rad_s2": 2.0,
+      "total_velocity_rad_s": 2.0,
+      "total_acceleration_rad_s2": 8.0
+    },
+    "proposed_support_margin_m": 0.05,
+    "torque_ceiling_nm": 1.6,
+    "torque_tested_by_CPU": false,
+    "reset": "exact last actual pair001 startup sample; q0 target/softlimits/pose and recorded preload retained",
+    "endpoint": "unchanged frozen swing form; nominal neutral toe at paired-cycle lookahead, virtual initial toe Z retained",
+    "CPU_support_semantics": "four planned planted anchors during both-leg swing, six otherwise; no force/contact/flight/landing claims",
+    "CPU_stop_semantics": "no new pair lifts after zero request; finish current scheduled swing; unchanged filter finite-stop threshold and hold knot",
+    "failure_policy": "latch first IK/PVA/soft-limit/projected-support violation; no clipping, no target emission after failure, no automatic search",
+    "source_files": {
+      "oracle/wave_reference.py": "8bacf0c61f7fdc6d43d9f9ebdb5adc643b026495bb303ec3c18157d121c78893",
+      "oracle/wave_math.py": "75353a885bd1e11795dff81458a7e547bbd2611769ef905b3f372c1814a6b12f",
+      "oracle/serial_geometry.py": "8c0451d151e077830986d8deb259129b4eb49f3750110883dad99683e8d7f8d3",
+      "oracle/geometry/candidate_c_reference.json": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+      "oracle/geometry/f050_t060.urdf": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+      "oracle/reference_residual.py": "fbf65749c2d1ffc36b22986f71c0972ce7b1ecf82beebef57a0bd3e1be966e40"
+    },
+    "inputs": {
+      "inputs/actual_pair001_startup_trace.npz": "3fa821dc8411ca0f60d5a411e85a15c20f0f665628cf9bce7e439f3bd9e030b8",
+      "inputs/actual_pair001_review.json": "338dd7ec7bd3e359d8594dffe74a19d3ae3c6c82fdea92537cad04bd8196eeb9",
+      "inputs/speed_summary.json": "2ab75632c5084eb631f01eeff1581f2b02ba4a4a9705618898e0c2d3f459270b",
+      "inputs/speed_failures.json": "109b27f32b1e28ddadadce639249e6f1d7ec877c67bb4c6361dd23e1e016df38"
+    },
+    "source_speed_freeze_sha256": "b12b950adf3ec750c5641b2f1398bf725aded77ce1786ada879f9a80db8162e2",
+    "source_actual_pair_review_freeze_sha256": "6300c9659cdf97e0d176bd27bef3e13303df1ab82be94e371f0f5e8e09e9dd4a",
+    "source_pair_manifest_sha256": "69a1a23304448d53f7681dfa87ab4fa652ad682ba0e45406e82187a66c4224f0",
+    "no_frozen_source_or_original_five_support_gate_changes": true,
+    "GPU_dispatch": false,
+    "actor_or_runtime_adapter_created": false
+  },
+  "parameters_sha256": "27c831f7b72f37f8635aac4c7ba5168701b9ea1b163a7884c457d5d1a8fafba3",
+  "result": {
+    "scope": "Target-only planned endpoints; timings are new proposed parameters and are not the contact-aware controller or a physical recording",
+    "candidate_id": "forward_030mmps_swing_0500ms",
+    "completed_target_sequence": false,
+    "failure": {
+      "time_s": 2.06,
+      "error": "Reference discrete velocity/acceleration budget exceeded; no clipping",
+      "planned_pair": [
+        "lm",
+        "rm"
+      ],
+      "attempted_max_velocity_rad_s": 0.29658857501321245,
+      "attempted_max_acceleration_rad_s2": 8.330503596956362,
+      "attempted_joint_margin_rad": 0.3671940910221143,
+      "planned_support_margin_m": 0.18555740582029046
+    },
+    "planned_controls": 2200,
+    "accepted_controls": 102,
+    "actual_physics_controls": 0,
+    "actual_new_contact_confirmations": 0,
+    "target_velocity_peak_rad_s": 0.1299785030740852,
+    "target_acceleration_peak_rad_s2": 5.424075030733555,
+    "velocity_peak": {
+      "time_s": 2.04,
+      "runtime_joint": "revolute_1_5",
+      "value_rad_s": 0.1299785030740852
+    },
+    "acceleration_peak": {
+      "time_s": 2.04,
+      "runtime_joint": "revolute_1_5",
+      "value_rad_s2": 5.424075030733555
+    },
+    "max_zero_residual_executable_lag_rad": 0.0,
+    "minimum_executed_joint_margin_rad": 0.37107951911212034,
+    "proposed_reference_margin_rad": 0.02,
+    "actual_initial_snapshot_projected_margins_by_excluded_pair_m": {
+      "lm+rm": 0.1857724006929563,
+      "lf+rr": 0.11255370570809975,
+      "lr+rf": 0.11638820361295212
+    },
+    "planned_minimum_projected_support_margins_by_swing_pair_m": {
+      "lm+rm": 0.18556884621370784,
+      "lf+rr": null,
+      "lr+rf": null
+    },
+    "minimum_planned_projected_margin_m": 0.18556884621370784,
+    "planned_pair_swings": 1,
+    "planned_completed_pair_endpoints": 0,
+    "planned_liftoffs_after_stop_request": 0,
+    "reference_quiet_time_s": null,
+    "reference_stop_latency_s": null,
+    "final_reference_quiet_duration_s": null,
+    "final_virtual_desired_displacement_world_m": [
+      1.05355866253376e-08,
+      -1.3776298146694899e-06,
+      0.0
+    ],
+    "requested_peak_forward_mps": 0.03,
+    "admitted_target_equals_request_no_hidden_derating": true,
+    "reported_rates_used_for_target_feasibility": false,
+    "residual_core_contract": {
+      "lineage": "c_serial_omni_reference_position_residual_v1",
+      "profile": "formal_004",
+      "residual_radius_rad": 0.02,
+      "residual_velocity_rad_s": 0.25,
+      "residual_acceleration_rad_s2": 2.0,
+      "total_acceleration_rad_s2": 8.0,
+      "total_position_step_rad_per_20ms": 0.04,
+      "total_velocity_rad_s": 2.0,
+      "reference_velocity_rad_s": 1.75,
+      "reference_acceleration_rad_s2": 6.0,
+      "action_semantics": "bounded_position_residual_goal_tanh",
+      "integration": "separate_reference_knots_plus_bounded_residual_servo",
+      "controller_observation_width": 72,
+      "zero_command_feedback_disabled": false,
+      "old_checkpoint_transfer_supported": false,
+      "physics_admitted": false,
+      "motor_speed_limit_claim": false
+    },
+    "events": [
+      {
+        "kind": "planned_pair_swing_not_measured_liftoff",
+        "time_s": 2.0,
+        "pair": [
+          "lm",
+          "rm"
+        ],
+        "planned_stride_m": [
+          0.017545420826334774,
+          0.017545420826334774
+        ]
+      }
+    ],
+    "GPU_launches": 0,
+    "physics_admitted": false,
+    "five_support_wave_gates_changed": false,
+    "PPO_ready": false
+  },
+  "diagnostic": {
+    "first_crossing": {
+      "categories": [
+        "reference_acceleration"
+      ],
+      "time_s": 2.06,
+      "phase": "swing_XY_and_Z",
+      "active_pair": [
+        "lm",
+        "rm"
+      ],
+      "joint_peaks": {
+        "v": {
+          "joint": "revolute_1_5",
+          "leg": "lm",
+          "value": 0.29658857501321245
+        },
+        "a": {
+          "joint": "revolute_1_5",
+          "leg": "lm",
+          "value": 8.330503596956362
+        },
+        "minimum_margin": {
+          "joint": "revolute_2_4",
+          "rad": 0.3671940910221143
+        }
+      },
+      "min_jacobian_singular_value_m": 0.047756624258845325,
+      "planned_stride_of_active_pair_m": [
+        0.017545420826334774,
+        0.017545420826334774
+      ],
+      "planned_stride_of_last_started_pair_m": [
+        0.017545420826334774,
+        0.017545420826334774
+      ],
+      "first_rejected_q_is_diagnostic_only": true,
+      "not_emitted": true
+    },
+    "max_planned_stride_m": 0.017545420826334774,
+    "nominal_steady_stride_speed_times_cycle_m": 0.07200000000000001,
+    "minimum_accepted_Jacobian_singular_value_m": 0.04784106482030724,
+    "reference_speed_fraction": 0.07427343032804869,
+    "reference_acceleration_fraction": 0.9040125051222591,
+    "joint_margin_beyond_reserved_0p02_rad": 0.3510795191121203,
+    "requested_stop_time_s": 26.0,
+    "planned_stop_command_integral_m": null,
+    "stop_integral_complete": false,
+    "actual_stop_or_torque_measured": false,
+    "qualified_contact_simulator_used": false
+  },
+  "target_npz_sha256": "6483019a01237855fd910e12650cf1e454eb97cd197ee6ab45bb58f0d1fb8840"
+}

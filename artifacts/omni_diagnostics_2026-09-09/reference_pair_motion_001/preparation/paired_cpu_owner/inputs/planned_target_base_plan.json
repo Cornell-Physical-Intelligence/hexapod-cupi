@@ -1,0 +1,73 @@
+{
+  "scope": "CPU-only planned opposing-pair foot sequence; target feasibility and projected geometry, no simulated/measured contact or motor dynamics",
+  "candidate_id": "opposing_pair_crawl_2s_0p01_forward",
+  "pair_order": [
+    [
+      "lm",
+      "rm"
+    ],
+    [
+      "lf",
+      "rr"
+    ],
+    [
+      "lr",
+      "rf"
+    ]
+  ],
+  "requested_forward_left_yaw": [
+    0.01,
+    0.0,
+    0.0
+  ],
+  "requested_speed_is_explicit_new_candidate_not_old_wave_admission": true,
+  "control_dt_s": 0.02,
+  "initial_hold_s": 2.0,
+  "motion_s": 24.0,
+  "stop_s": 18.0,
+  "swing_s": 2.0,
+  "lift_m": 0.007,
+  "horizontal_fraction": 0.8,
+  "handoff_hold_s": 0.3,
+  "cycle_s": 6.9,
+  "placement_horizon_s": 4.45,
+  "old_single_leg_cycle_s": 13.8,
+  "old_single_leg_placement_horizon_s": 7.9,
+  "fixed_target_limits": {
+    "reference_velocity_rad_s": 1.75,
+    "reference_acceleration_rad_s2": 6.0,
+    "residual_radius_rad": 0.02,
+    "residual_velocity_rad_s": 0.25,
+    "residual_acceleration_rad_s2": 2.0,
+    "total_velocity_rad_s": 2.0,
+    "total_acceleration_rad_s2": 8.0
+  },
+  "proposed_support_margin_m": 0.05,
+  "torque_ceiling_nm": 1.6,
+  "torque_tested_by_CPU": false,
+  "reset": "exact last actual pair001 startup sample; q0 target/softlimits/pose and recorded preload retained",
+  "endpoint": "unchanged frozen swing form; nominal neutral toe at paired-cycle lookahead, virtual initial toe Z retained",
+  "CPU_support_semantics": "four planned planted anchors during both-leg swing, six otherwise; no force/contact/flight/landing claims",
+  "CPU_stop_semantics": "no new pair lifts after zero request; finish current scheduled swing; unchanged filter finite-stop threshold and hold knot",
+  "failure_policy": "latch first IK/PVA/soft-limit/projected-support violation; no clipping, no target emission after failure, no automatic search",
+  "source_files": {
+    "oracle/wave_reference.py": "8bacf0c61f7fdc6d43d9f9ebdb5adc643b026495bb303ec3c18157d121c78893",
+    "oracle/wave_math.py": "75353a885bd1e11795dff81458a7e547bbd2611769ef905b3f372c1814a6b12f",
+    "oracle/serial_geometry.py": "8c0451d151e077830986d8deb259129b4eb49f3750110883dad99683e8d7f8d3",
+    "oracle/geometry/candidate_c_reference.json": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+    "oracle/geometry/f050_t060.urdf": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+    "oracle/reference_residual.py": "fbf65749c2d1ffc36b22986f71c0972ce7b1ecf82beebef57a0bd3e1be966e40"
+  },
+  "inputs": {
+    "inputs/actual_pair001_startup_trace.npz": "3fa821dc8411ca0f60d5a411e85a15c20f0f665628cf9bce7e439f3bd9e030b8",
+    "inputs/actual_pair001_review.json": "338dd7ec7bd3e359d8594dffe74a19d3ae3c6c82fdea92537cad04bd8196eeb9",
+    "inputs/speed_summary.json": "2ab75632c5084eb631f01eeff1581f2b02ba4a4a9705618898e0c2d3f459270b",
+    "inputs/speed_failures.json": "109b27f32b1e28ddadadce639249e6f1d7ec877c67bb4c6361dd23e1e016df38"
+  },
+  "source_speed_freeze_sha256": "b12b950adf3ec750c5641b2f1398bf725aded77ce1786ada879f9a80db8162e2",
+  "source_actual_pair_review_freeze_sha256": "6300c9659cdf97e0d176bd27bef3e13303df1ab82be94e371f0f5e8e09e9dd4a",
+  "source_pair_manifest_sha256": "69a1a23304448d53f7681dfa87ab4fa652ad682ba0e45406e82187a66c4224f0",
+  "no_frozen_source_or_original_five_support_gate_changes": true,
+  "GPU_dispatch": false,
+  "actor_or_runtime_adapter_created": false
+}

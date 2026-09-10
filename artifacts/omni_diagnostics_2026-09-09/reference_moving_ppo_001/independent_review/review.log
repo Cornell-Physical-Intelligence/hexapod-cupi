@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_moving_ppo_actual001_review/analyze.py", line 48, in <module>
+    data={k:v[:end] for k,v in cal.items()};assert not data['requested_command'][start:].any();metrics=physical_metrics(data,settle_steps=start);each=[quiet_metrics(data,i,start,names,.02) for i in range(32)];lag=float(abs(data['reference_to_executable_lag_rad'][start:]).max())
+                                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_physics_adapter_009/source_009/tools/screen_metrics.py", line 35, in physical_metrics
+    if key != 'contact_point_world_m' and not np.isfinite(value).all():
+                                              ^^^^^^^^^^^^^^^^^^
+TypeError: ufunc 'isfinite' not supported for the input types, and the inputs could not be safely coerced to any supported types according to the casting rule ''safe''

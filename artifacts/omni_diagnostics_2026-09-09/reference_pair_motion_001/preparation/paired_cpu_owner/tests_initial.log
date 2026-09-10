@@ -1,0 +1,16 @@
+/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_pair_motion_001/oracle/serial_geometry.py:10: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/utils/tensor_new.cpp:255.)
+  def tensor(x):return torch.as_tensor(x,dtype=DTYPE,device='cpu')
+....F......
+======================================================================
+FAIL: test_named_runtime_permutation_and_reset_preload (test_pair_motion.PairMotionTests.test_named_runtime_permutation_and_reset_preload)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_pair_motion_001/test_pair_motion.py", line 62, in test_named_runtime_permutation_and_reset_preload
+    f=IdealMeasuredFixture();r,_,_,_=evaluate(duration=6,names=tuple(reversed(f.names)),preload=.01);self.assertIsNone(r['failure']);self.assertEqual(r['zero_residual_lag'],0)
+                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'control': 149, 'time_s': 2.98, 'reason': 'A required measured retained support is missing'} is not None
+
+----------------------------------------------------------------------
+Ran 11 tests in 6.000s
+
+FAILED (failures=1)

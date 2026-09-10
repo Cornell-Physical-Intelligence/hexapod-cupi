@@ -1,0 +1,1778 @@
+{
+  "scope": "Actual paired001 independent frozen-source replay; no walking or policy pass inferred from partial data",
+  "inputs_sha256": {
+    "run/paired_forward/trace.npz": "df4f4eccb14c4bb221a603a6e580fa8a39f665e2075f19f6fa73d797d07f802d",
+    "run/paired_forward/state.json": "f5fee0347b6870a665e9120e5c4775e52066f3dce20da745cd4a84b10d305b81",
+    "run/paired_forward/reference_states.json": "9ef0ebda28e972a1c9e7a2c066580d07671970783df77b1dc77f44915a62f849",
+    "run/paired_forward/physics_substeps.npz": "918ff2e30110f1ebe082fc24d59e2569aad4d214cddb25c6cd967b63cf6f8afd",
+    "run/paired_forward/paired_poststep_checks.json": "25440b71f7665936f5fce44b93f192175eaaa027fcaca66ba18044a1d811821d",
+    "run/standing/trace.npz": "4140fa7b774c1da49d54a741a528edd59ab41b07ee8b4282763f64d624942d83"
+  },
+  "remote_status": "rejected",
+  "failure": null,
+  "error": null,
+  "controls": 2400,
+  "source_manifest_sha256": "216224f3cb727549d8f70bfc2836f32bdf472f892b37b0c89fa471dc71b23932",
+  "standing_quiet_replay": {
+    "passed": true,
+    "replicas": 32,
+    "numeric_differences": [
+      {
+        "path": "root.per_environment[20].max_heading_excursion_deg",
+        "local": 6.830188794992864e-06,
+        "remote": 1.3660377589985728e-05
+      },
+      {
+        "path": "root.per_environment[22].max_heading_excursion_deg",
+        "local": 0.001126981107518077,
+        "remote": 0.001133811310864985
+      },
+      {
+        "path": "root.per_environment[23].max_heading_excursion_deg",
+        "local": 0.0035790188703686,
+        "remote": 0.0035721887834370136
+      }
+    ],
+    "full_rows_file": "standing_quiet.json"
+  },
+  "independent_gate": {
+    "control_steps": 2400,
+    "num_envs": 1,
+    "settle_steps": 200,
+    "control_dt_s": 0.02,
+    "post_settle_measured_duration_s": 44.0,
+    "max_applied_torque_nm": 1.600000023841858,
+    "post_settle_max_requested_torque_nm": 1.3946127891540527,
+    "post_settle_joint_saturation_fraction": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "post_settle_max_joint_saturation_fraction": 0.0,
+    "post_settle_all_motor_saturation_fraction": 0.0,
+    "post_settle_nonfoot_env_steps": 0,
+    "post_settle_min_distal_support_count": 4,
+    "terminations": 0,
+    "truncations": 0,
+    "min_root_height_m": 0.12855370342731476,
+    "mean_measured_forward_mps": 0.005478358827531338,
+    "mean_measured_left_mps": -0.0002635328855831176,
+    "max_reference_to_executable_lag_rad": 0.0,
+    "max_target_cast_error_rad": 1.1920928955078125e-07,
+    "original_basic_standing_physics_pass": true,
+    "kind": "explicit_four_support_paired_motion_not_scalarwave_orPPO",
+    "protocol": {
+      "name": "paired_contact_motion_physics001",
+      "parent_source009_manifest_sha256": "04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e",
+      "paired_owner_freeze_sha256": "636844a6032642014304408f1021e61478be3aed46642fd67686ed9d2f9a6f55",
+      "paired_controller_sha256": "d26e058241985e87a8dac37603d5e1147e89c637001b1136c30d8249af9d8a04",
+      "paired_state_version": "pair_contact_motion_v001",
+      "observation_fragment_version": "pair_contact_motion_fragment_v001",
+      "observation_fragment_features": 1014,
+      "old846_849_packet_compatible": false,
+      "actor_packet_emitted": false,
+      "PPO_permitted": false,
+      "fresh_standing": {
+        "num_envs": 32,
+        "steps": 1000,
+        "all_physical_and_quiet_required": true
+      },
+      "cold_case": {
+        "num_envs": 1,
+        "steps": 2400,
+        "seed": 0,
+        "dt_s": 0.02,
+        "startup_controls": 200,
+        "paired_reference_hold_controls": 100,
+        "motion_start_control": 300,
+        "motion_end_exclusive": 1500,
+        "motion_controls": 1200,
+        "stop_controls": 900,
+        "total_physical_s": 48.0,
+        "paired_sequence_s": 44.0
+      },
+      "requested_forward_left_yaw": [
+        0.01,
+        0.0,
+        0.0
+      ],
+      "pair_order": [
+        [
+          "lm",
+          "rm"
+        ],
+        [
+          "lf",
+          "rr"
+        ],
+        [
+          "lr",
+          "rf"
+        ]
+      ],
+      "support_contract": "New four retained feet; each moving foot has independent actual2mm flight/apex/descent/three-confirmation landing. Original scalar five-support gate is unchanged.",
+      "minimum_retained_supports": 4,
+      "minimum_measured_articulated_COM_margin_m": 0.05,
+      "contact_classification": "Pinned runtime finite point, norm(normalForce)>1N and distal tibia local+Y threshold; all14 source-bound sensor clocks fresh after8normal updates",
+      "no_completed_foot_contact_loss_before_partner": true,
+      "all6supports_before_next_pair": true,
+      "torque": "All recorded400Hz poststartup requested <=1.6Nm; applied <=1.60001Nm. Initialreset sampled separately, nothardwarestartupqualification.",
+      "body_tracking_error_m": 0.035,
+      "retained_toe_drift_m": 0.02,
+      "target_budgets": {
+        "reference_velocity_rad_s": 1.75,
+        "reference_acceleration_rad_s2": 6.0,
+        "total_velocity_rad_s": 2.0,
+        "total_acceleration_rad_s2": 8.0,
+        "joint_reserve_rad": 0.02
+      },
+      "motion_fraction_required": 0.5,
+      "original50Hz_displacement_integral_difference_m": 0.005,
+      "quiet": "Same frozen QUIET_GATES;>=10s contiguous measured zero-command afterreferencequiet+2s settle; both reference and actual quiet required",
+      "contact_sample_rate_hz": 50,
+      "pose_joint_torque_sample_rate_hz": 400,
+      "full_paired_state_recorded": true,
+      "numerical_replay_absolute_tolerance": 1e-08,
+      "stage2_complete": false,
+      "production_adoption": false,
+      "terrain_qualified": false,
+      "execution": "Fresh standing then exactly one paired forward/stop; fail closed, no automatic retry or PPO"
+    },
+    "measured_qualified_flight_events": [
+      {
+        "leg_index": 0,
+        "flight_begin_step": 434,
+        "flight_end_step": 498,
+        "flight_samples": 64,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.005468390406172349,
+        "measured_reference_point_planar_step_m": 0.05528485680656552
+      },
+      {
+        "leg_index": 0,
+        "flight_begin_step": 791,
+        "flight_end_step": 849,
+        "flight_samples": 58,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004820147589727708,
+        "measured_reference_point_planar_step_m": 0.06710803059244283
+      },
+      {
+        "leg_index": 0,
+        "flight_begin_step": 1145,
+        "flight_end_step": 1203,
+        "flight_samples": 58,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004885078215304928,
+        "measured_reference_point_planar_step_m": 0.06708427809202268
+      },
+      {
+        "leg_index": 0,
+        "flight_begin_step": 1499,
+        "flight_end_step": 1558,
+        "flight_samples": 59,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004879346323171774,
+        "measured_reference_point_planar_step_m": 0.06686933927148923
+      },
+      {
+        "leg_index": 1,
+        "flight_begin_step": 318,
+        "flight_end_step": 380,
+        "flight_samples": 62,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.005060605101442073,
+        "measured_reference_point_planar_step_m": 0.033071564398741454
+      },
+      {
+        "leg_index": 1,
+        "flight_begin_step": 673,
+        "flight_end_step": 733,
+        "flight_samples": 60,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004956522707200872,
+        "measured_reference_point_planar_step_m": 0.0671678729859205
+      },
+      {
+        "leg_index": 1,
+        "flight_begin_step": 1027,
+        "flight_end_step": 1087,
+        "flight_samples": 60,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.005007381836386715,
+        "measured_reference_point_planar_step_m": 0.06701982809534188
+      },
+      {
+        "leg_index": 1,
+        "flight_begin_step": 1381,
+        "flight_end_step": 1441,
+        "flight_samples": 60,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.005009582226213366,
+        "measured_reference_point_planar_step_m": 0.06702154799165419
+      },
+      {
+        "leg_index": 2,
+        "flight_begin_step": 555,
+        "flight_end_step": 615,
+        "flight_samples": 60,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.005149409252769688,
+        "measured_reference_point_planar_step_m": 0.07711735456903115
+      },
+      {
+        "leg_index": 2,
+        "flight_begin_step": 909,
+        "flight_end_step": 968,
+        "flight_samples": 59,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004795955527028231,
+        "measured_reference_point_planar_step_m": 0.06738008488885028
+      },
+      {
+        "leg_index": 2,
+        "flight_begin_step": 1263,
+        "flight_end_step": 1322,
+        "flight_samples": 59,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004846831850391517,
+        "measured_reference_point_planar_step_m": 0.0673131369353099
+      },
+      {
+        "leg_index": 3,
+        "flight_begin_step": 556,
+        "flight_end_step": 610,
+        "flight_samples": 54,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.0045906551880874474,
+        "measured_reference_point_planar_step_m": 0.07448181651884325
+      },
+      {
+        "leg_index": 3,
+        "flight_begin_step": 908,
+        "flight_end_step": 967,
+        "flight_samples": 59,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.005177091536330475,
+        "measured_reference_point_planar_step_m": 0.06714953428883627
+      },
+      {
+        "leg_index": 3,
+        "flight_begin_step": 1262,
+        "flight_end_step": 1321,
+        "flight_samples": 59,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.005132598681343067,
+        "measured_reference_point_planar_step_m": 0.0670222497897097
+      },
+      {
+        "leg_index": 4,
+        "flight_begin_step": 317,
+        "flight_end_step": 381,
+        "flight_samples": 64,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.005491136072971151,
+        "measured_reference_point_planar_step_m": 0.03431786842504989
+      },
+      {
+        "leg_index": 4,
+        "flight_begin_step": 674,
+        "flight_end_step": 731,
+        "flight_samples": 57,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004708772924263166,
+        "measured_reference_point_planar_step_m": 0.06567434323883453
+      },
+      {
+        "leg_index": 4,
+        "flight_begin_step": 1028,
+        "flight_end_step": 1085,
+        "flight_samples": 57,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.0047155103480321925,
+        "measured_reference_point_planar_step_m": 0.06571975156701836
+      },
+      {
+        "leg_index": 4,
+        "flight_begin_step": 1382,
+        "flight_end_step": 1439,
+        "flight_samples": 57,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.0047293708349573915,
+        "measured_reference_point_planar_step_m": 0.06567512894018925
+      },
+      {
+        "leg_index": 5,
+        "flight_begin_step": 437,
+        "flight_end_step": 498,
+        "flight_samples": 61,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.005137065945858499,
+        "measured_reference_point_planar_step_m": 0.05442369105102835
+      },
+      {
+        "leg_index": 5,
+        "flight_begin_step": 791,
+        "flight_end_step": 851,
+        "flight_samples": 60,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004973195415645101,
+        "measured_reference_point_planar_step_m": 0.06695086973942091
+      },
+      {
+        "leg_index": 5,
+        "flight_begin_step": 1146,
+        "flight_end_step": 1205,
+        "flight_samples": 59,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004896948298432846,
+        "measured_reference_point_planar_step_m": 0.0656597645781177
+      },
+      {
+        "leg_index": 5,
+        "flight_begin_step": 1500,
+        "flight_end_step": 1559,
+        "flight_samples": 59,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.0048734384870364605,
+        "measured_reference_point_planar_step_m": 0.0656640436555954
+      }
+    ],
+    "completed_measured_leg_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "completed_pairs": 11,
+    "generator_confirmed_touchdowns": 22,
+    "generator_final_mode": "reference_quiet_hold",
+    "full_state_numerical_replay": {
+      "reset_seen": true,
+      "reference_controls_replayed": 2200,
+      "max_absolute_difference": 1.6653345369377348e-11,
+      "absolute_tolerance": 1e-08,
+      "complete_state_including_each_foot_replayed": true,
+      "poststep_checks_independently_replayed": 2200,
+      "passed": true
+    },
+    "complete400Hz": {
+      "samples": 19201,
+      "all8updates_and_control_endpoints_verified": true,
+      "all_recorded_requested_peak_nm": 63.65962219238281,
+      "all_recorded_applied_peak_nm": 1.600000023841858,
+      "poststartup_requested_peak_nm": 1.3970317840576172,
+      "poststartup_applied_peak_nm": 1.3970317840576172,
+      "poststartup_requested_excess_samples": 0,
+      "passed": true
+    },
+    "poststep_checks_complete": true,
+    "minimum_measured_required_support_margin_m": 0.10189855027622266,
+    "independent_forward_motion": {
+      "duration_s": 24.0,
+      "measured_world_displacement_m": [
+        -0.01272503286600113,
+        -0.2350471019744873,
+        -0.0007131993770599365
+      ],
+      "integrated_link_velocity_displacement_m": [
+        -0.010945318266749382,
+        -0.2297588437795639,
+        -0.0006757481023669243
+      ],
+      "actual_initial_forward_axis_world": [
+        0.007608596645310607,
+        -0.9999710542096151,
+        0.0
+      ],
+      "measured_forward_displacement_m": 0.23494347870796722,
+      "integrated_forward_displacement_m": 0.22966891471638654,
+      "displacement_integral_difference_m": 0.005579825956374407,
+      "interval_terminations": 0,
+      "interval_truncations": 0,
+      "mean_measured_forward_mps": 0.009583095088601112,
+      "passed": false
+    },
+    "final_quiet_stop_window": {
+      "window_samples": 504,
+      "window_duration_s": 10.08,
+      "max_planar_excursion_m": 1.4326937503028603e-07,
+      "max_heading_excursion_deg": 6.830188794992864e-06,
+      "max_joint_velocity_rms_rad_s": 0.005605480633676052,
+      "max_joint_position_range_rad": 5.125999450683594e-06,
+      "max_target_step_abs_p95_rad_per_20ms": 0.0,
+      "max_requested_torque_saturation_fraction": 0.0,
+      "mean_requested_torque_saturation_fraction": 0.0,
+      "max_applied_torque_nm": 0.5138686299324036,
+      "requested_torque_abs_max_nm": 0.5138686299324036,
+      "terminations": 0,
+      "truncations": 0,
+      "joints": {
+        "revolute_1_1": {
+          "velocity_rms_rad_s": 0.00029242871096357703,
+          "position_range_rad": 1.817941665649414e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1_7": {
+          "velocity_rms_rad_s": 0.0009576939046382904,
+          "position_range_rad": 1.9371509552001953e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2_5": {
+          "velocity_rms_rad_s": 0.00017152966756839305,
+          "position_range_rad": 1.5087425708770752e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_3": {
+          "velocity_rms_rad_s": 0.0009632471483200788,
+          "position_range_rad": 1.7583370208740234e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_4": {
+          "velocity_rms_rad_s": 0.0034167745616286993,
+          "position_range_rad": 2.518296241760254e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_5": {
+          "velocity_rms_rad_s": 0.0019022416090592742,
+          "position_range_rad": 1.9073486328125e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1": {
+          "velocity_rms_rad_s": 0.00044102780520915985,
+          "position_range_rad": 3.2782554626464844e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1_6": {
+          "velocity_rms_rad_s": 0.00021156024013180286,
+          "position_range_rad": 4.589557647705078e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1_5": {
+          "velocity_rms_rad_s": 0.00526635255664587,
+          "position_range_rad": 5.125999450683594e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1_3": {
+          "velocity_rms_rad_s": 0.00012015902029816061,
+          "position_range_rad": 3.5762786865234375e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1_4": {
+          "velocity_rms_rad_s": 0.00037189442082308233,
+          "position_range_rad": 4.76837158203125e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1_2": {
+          "velocity_rms_rad_s": 0.0015592669369652867,
+          "position_range_rad": 4.172325134277344e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2": {
+          "velocity_rms_rad_s": 0.003404717892408371,
+          "position_range_rad": 4.0531158447265625e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2_6": {
+          "velocity_rms_rad_s": 0.0032383764628320932,
+          "position_range_rad": 3.5762786865234375e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2_4": {
+          "velocity_rms_rad_s": 0.0008327058749273419,
+          "position_range_rad": 4.0531158447265625e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2_2": {
+          "velocity_rms_rad_s": 0.005605480633676052,
+          "position_range_rad": 3.0994415283203125e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2_3": {
+          "velocity_rms_rad_s": 0.004366342909634113,
+          "position_range_rad": 4.0531158447265625e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2_1": {
+          "velocity_rms_rad_s": 0.004568550270050764,
+          "position_range_rad": 3.5762786865234375e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        }
+      },
+      "failed_bounds": [],
+      "pass": true,
+      "bounds": {
+        "max_planar_excursion_m": 0.01,
+        "max_heading_excursion_deg": 2.0,
+        "max_joint_velocity_rms_rad_s": 0.03,
+        "max_joint_position_range_rad": 0.02,
+        "max_target_step_abs_p95_rad_per_20ms": 0.002,
+        "max_requested_torque_saturation_fraction": 0.005,
+        "max_applied_torque_nm": 1.60001
+      }
+    },
+    "no_command_derating": true,
+    "original_scalar_five_support_gate_unchanged": true,
+    "old846_849_packet_admitted": false,
+    "stage2_complete": false,
+    "passed": false
+  },
+  "gate_differences": [
+    {
+      "path": "root.full_state_numerical_replay.max_absolute_difference",
+      "local": 1.6653345369377348e-11,
+      "remote": 0.0
+    },
+    {
+      "path": "root.independent_forward_motion.displacement_integral_difference_m",
+      "local": 0.005579825956374407,
+      "remote": 0.005579826422035694
+    }
+  ],
+  "last_reference": {
+    "valid": [
+      true
+    ],
+    "q_ref": [
+      [
+        -0.22939235788053836,
+        0.1306525287404261,
+        -0.06101492182715029,
+        0.2693535226836645,
+        -0.1458017118154733,
+        0.060670512587456926,
+        0.6751762499953499,
+        0.6856391806763671,
+        0.6991349140017056,
+        0.7002250481923883,
+        0.7095976631396879,
+        0.6996332722013814,
+        1.9845101123191076,
+        2.024748013216709,
+        2.097113188717793,
+        2.1310005683993722,
+        2.1468145895925597,
+        2.0899392685013254
+      ]
+    ],
+    "v_ref": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "a_ref": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "target_time_s": 48.000000000001904,
+    "joint_names_runtime": [
+      "revolute_1_1",
+      "revolute_1_7",
+      "revolute_2_5",
+      "revolute_3",
+      "revolute_4",
+      "revolute_5",
+      "revolute_1",
+      "revolute_1_6",
+      "revolute_1_5",
+      "revolute_1_3",
+      "revolute_1_4",
+      "revolute_1_2",
+      "revolute_2",
+      "revolute_2_6",
+      "revolute_2_4",
+      "revolute_2_2",
+      "revolute_2_3",
+      "revolute_2_1"
+    ],
+    "failure_reason": null,
+    "state": {
+      "version": "pair_contact_motion_v001",
+      "mode": "reference_quiet_hold",
+      "active_pair": null,
+      "pair_order": [
+        [
+          "lm",
+          "rm"
+        ],
+        [
+          "lf",
+          "rr"
+        ],
+        [
+          "lr",
+          "rf"
+        ]
+      ],
+      "next_pair_index": 2,
+      "completed_pairs": 11,
+      "foot_cycles": [
+        {
+          "leg": 0,
+          "current_leg": null,
+          "mode": "contact_hold",
+          "swing": null,
+          "landing": null,
+          "flight_seen": true,
+          "flight_count": 0,
+          "contact_count": 3,
+          "raw_force_free_runs": 1,
+          "raw_force_free_samples": 59,
+          "unqualified_contact_returns": 0,
+          "last_unqualified_return_time": null,
+          "last_unqualified_run_samples": 0,
+          "last_unqualified_lift_m": null,
+          "flight_baseline_z": -6.858188416702937e-05,
+          "flight_peak_z": 0.004810764439004744,
+          "descent_seen": true,
+          "landing_contact_gap_steps": 0,
+          "landing_trigger_s": 31.17999999999942,
+          "landing_contact_origin": [
+            0.17399839923830998,
+            -0.5088504838945916,
+            -1.9029295924136158e-05
+          ],
+          "landing_preload_world_m": [
+            0.019419603836314775,
+            0.008666344513926338,
+            -0.0007085982043958938
+          ],
+          "landing_endpoint_correction_m": 1.271015844633051e-05,
+          "landing_original_contact_error_m": 0.006475698885220197,
+          "landing_target_excursion_m": 0.002032945822276852,
+          "hold_until": 31.93999999999941
+        },
+        {
+          "leg": 1,
+          "current_leg": null,
+          "mode": "contact_hold",
+          "swing": null,
+          "landing": null,
+          "flight_seen": true,
+          "flight_count": 0,
+          "contact_count": 3,
+          "raw_force_free_runs": 1,
+          "raw_force_free_samples": 60,
+          "unqualified_contact_returns": 0,
+          "last_unqualified_return_time": null,
+          "last_unqualified_run_samples": 0,
+          "last_unqualified_lift_m": null,
+          "flight_baseline_z": -4.0815051246978484e-05,
+          "flight_peak_z": 0.0049687671749663875,
+          "descent_seen": true,
+          "landing_contact_gap_steps": 0,
+          "landing_trigger_s": 28.83999999999947,
+          "landing_contact_origin": [
+            0.22125760897864433,
+            -0.24545547198649714,
+            -5.000441019104018e-05
+          ],
+          "landing_preload_world_m": [
+            0.014334985353767482,
+            0.008383771719158967,
+            -0.0009470068218223604
+          ],
+          "landing_endpoint_correction_m": 9.447840542853303e-06,
+          "landing_original_contact_error_m": 0.005480556763740381,
+          "landing_target_excursion_m": 0.0018255601594574153,
+          "hold_until": 29.579999999999462
+        },
+        {
+          "leg": 2,
+          "current_leg": null,
+          "mode": "contact_hold",
+          "swing": null,
+          "landing": null,
+          "flight_seen": true,
+          "flight_count": 0,
+          "contact_count": 3,
+          "raw_force_free_runs": 2,
+          "raw_force_free_samples": 60,
+          "unqualified_contact_returns": 1,
+          "last_unqualified_return_time": 25.239999999999547,
+          "last_unqualified_run_samples": 1,
+          "last_unqualified_lift_m": 0.0,
+          "flight_baseline_z": -2.4238376281252028e-05,
+          "flight_peak_z": 0.004822593474110265,
+          "descent_seen": true,
+          "landing_contact_gap_steps": 0,
+          "landing_trigger_s": 26.45999999999952,
+          "landing_contact_origin": [
+            0.174699129986376,
+            0.0169077016360347,
+            -3.1706346442783584e-05
+          ],
+          "landing_preload_world_m": [
+            0.00942385311740998,
+            0.0074879798344125205,
+            -0.0011369406276137972
+          ],
+          "landing_endpoint_correction_m": 6.944731775588887e-06,
+          "landing_original_contact_error_m": 0.004130688760012303,
+          "landing_target_excursion_m": 0.0020387724523261985,
+          "hold_until": 27.219999999999512
+        },
+        {
+          "leg": 3,
+          "current_leg": null,
+          "mode": "contact_hold",
+          "swing": null,
+          "landing": null,
+          "flight_seen": true,
+          "flight_count": 0,
+          "contact_count": 3,
+          "raw_force_free_runs": 1,
+          "raw_force_free_samples": 59,
+          "unqualified_contact_returns": 0,
+          "last_unqualified_return_time": null,
+          "last_unqualified_run_samples": 0,
+          "last_unqualified_lift_m": null,
+          "flight_baseline_z": -0.0003135291564528575,
+          "flight_peak_z": 0.00481906952489021,
+          "descent_seen": true,
+          "landing_contact_gap_steps": 0,
+          "landing_trigger_s": 26.43999999999952,
+          "landing_contact_origin": [
+            -0.19515258442311018,
+            -0.4719969221262058,
+            -3.382270633983664e-07
+          ],
+          "landing_preload_world_m": [
+            0.01557873125078199,
+            0.0016126269191256704,
+            -0.00029234259464477885
+          ],
+          "landing_endpoint_correction_m": 3.5300515963296953e-05,
+          "landing_original_contact_error_m": 0.005657637449004378,
+          "landing_target_excursion_m": 0.002230102651059835,
+          "hold_until": 27.219999999999512
+        },
+        {
+          "leg": 4,
+          "current_leg": null,
+          "mode": "contact_hold",
+          "swing": null,
+          "landing": null,
+          "flight_seen": true,
+          "flight_count": 0,
+          "contact_count": 3,
+          "raw_force_free_runs": 1,
+          "raw_force_free_samples": 57,
+          "unqualified_contact_returns": 0,
+          "last_unqualified_return_time": null,
+          "last_unqualified_run_samples": 0,
+          "last_unqualified_lift_m": null,
+          "flight_baseline_z": -0.0001913323598076444,
+          "flight_peak_z": 0.004538038475149747,
+          "descent_seen": true,
+          "landing_contact_gap_steps": 0,
+          "landing_trigger_s": 28.79999999999947,
+          "landing_contact_origin": [
+            -0.24401005653747643,
+            -0.2580987987772949,
+            -0.00011853846240042487
+          ],
+          "landing_preload_world_m": [
+            0.013325492113514248,
+            0.0019827007372867356,
+            -0.0005283086971479833
+          ],
+          "landing_endpoint_correction_m": 2.5773484570233815e-05,
+          "landing_original_contact_error_m": 0.004343741145286671,
+          "landing_target_excursion_m": 0.0022402885178330256,
+          "hold_until": 29.579999999999462
+        },
+        {
+          "leg": 5,
+          "current_leg": null,
+          "mode": "contact_hold",
+          "swing": null,
+          "landing": null,
+          "flight_seen": true,
+          "flight_count": 0,
+          "contact_count": 3,
+          "raw_force_free_runs": 2,
+          "raw_force_free_samples": 60,
+          "unqualified_contact_returns": 1,
+          "last_unqualified_return_time": 29.87999999999945,
+          "last_unqualified_run_samples": 1,
+          "last_unqualified_lift_m": 6.928025930413861e-06,
+          "flight_baseline_z": -7.514658965689092e-05,
+          "flight_peak_z": 0.00479829189737957,
+          "descent_seen": true,
+          "landing_contact_gap_steps": 0,
+          "landing_trigger_s": 31.19999999999942,
+          "landing_contact_origin": [
+            -0.19938058125925162,
+            -0.04356743004801682,
+            -0.00026970257379882456
+          ],
+          "landing_preload_world_m": [
+            0.011229960044723014,
+            0.003356218020118283,
+            -0.0008882092564576893
+          ],
+          "landing_endpoint_correction_m": 2.9915368788546726e-06,
+          "landing_original_contact_error_m": 0.0028821532027933374,
+          "landing_target_excursion_m": 0.0018379995368791233,
+          "hold_until": 31.93999999999941
+        }
+      ],
+      "time_s": 48.000000000001904,
+      "desired_position_world_m": [
+        0.0024651377461850643,
+        -0.23958110809326172,
+        0.12961241602897644
+      ],
+      "desired_yaw_delta_rad": 0.0,
+      "initial_rotation_world_from_body": [
+        [
+          0.9999709439702243,
+          -0.007607499105466746,
+          0.00048700375649978834
+        ],
+        [
+          0.0076070606463201846,
+          0.9999706645397644,
+          0.000895928694350889
+        ],
+        [
+          -0.0004938052467612912,
+          -0.0008921979951093895,
+          0.9999994800694227
+        ]
+      ],
+      "command_filter_velocity": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "command_filter_rate": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "requested": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "command_target": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "derating_factor": 1.0,
+      "reference_anchors_world_m": [
+        [
+          0.19341800307462476,
+          -0.5001841393806653,
+          -0.00072762750032003
+        ],
+        [
+          0.2355925943324118,
+          -0.23707170026733818,
+          -0.0009970112320134006
+        ],
+        [
+          0.18412298310378597,
+          0.024395681470447222,
+          -0.0011686469740565808
+        ],
+        [
+          -0.17957385317232819,
+          -0.47038429520708014,
+          -0.0002926808217081772
+        ],
+        [
+          -0.23068456442396218,
+          -0.2561160980400082,
+          -0.0006468471595484082
+        ],
+        [
+          -0.1881506212145286,
+          -0.040211212027898534,
+          -0.001157911830256514
+        ]
+      ],
+      "measured_anchors_world_m": [
+        [
+          0.1740247281457786,
+          -0.508758039349297,
+          -2.2747359156388702e-05
+        ],
+        [
+          0.22119293338351273,
+          -0.24579087581098416,
+          -5.8314518860319575e-05
+        ],
+        [
+          0.17479540051009412,
+          0.016403352043713675,
+          -3.834700961924398e-05
+        ],
+        [
+          -0.1955436889495749,
+          -0.47211185158621194,
+          -3.4246709003385445e-05
+        ],
+        [
+          -0.24445310067176365,
+          -0.25822349249934756,
+          -0.00014255436210125483
+        ],
+        [
+          -0.199469800610123,
+          -0.043604155154522484,
+          -0.00027474333855967425
+        ]
+      ],
+      "preload_world_m": [
+        [
+          0.019393274928846155,
+          0.00857389996863167,
+          -0.0007048801411636413
+        ],
+        [
+          0.014399660948899079,
+          0.008719175543645985,
+          -0.000938696713153081
+        ],
+        [
+          0.009327582593691847,
+          0.007992329426733547,
+          -0.0011302999644373368
+        ],
+        [
+          0.015969835777246727,
+          0.0017275563791318005,
+          -0.0002584341127047918
+        ],
+        [
+          0.013768536247801472,
+          0.0021073944593393845,
+          -0.0005042927974471534
+        ],
+        [
+          0.011319179395594403,
+          0.00339294312662395,
+          -0.0008831684916968396
+        ]
+      ],
+      "initial_joint_preload_rad": [
+        [
+          0.028299564495682716,
+          -0.01045846939086914,
+          0.003241300582885742
+        ],
+        [
+          -0.003436742816120386,
+          -0.014384031295776367,
+          0.0015454292297363281
+        ],
+        [
+          0.0016797978896647692,
+          -0.022223472595214844,
+          -0.030124187469482422
+        ],
+        [
+          0.0071664247661828995,
+          -0.010596513748168945,
+          -0.037682294845581055
+        ],
+        [
+          0.019114874303340912,
+          -0.011849403381347656,
+          -0.018366336822509766
+        ],
+        [
+          -0.0017848372226580977,
+          -0.010857760906219482,
+          0.014004230499267578
+        ]
+      ],
+      "neutral_reference_toes_body_m": [
+        [
+          0.18902929229197962,
+          -0.2314317453788283,
+          -0.13053239824419502
+        ],
+        [
+          0.2332043019557334,
+          0.0077536244084892665,
+          -0.13053239824420101
+        ],
+        [
+          0.18372529854517786,
+          0.2460043869897139,
+          -0.1305323982441994
+        ],
+        [
+          -0.18372509773158108,
+          -0.2460041013465516,
+          -0.13053252047325775
+        ],
+        [
+          -0.2332043010899214,
+          -0.0077538825671338825,
+          -0.13053237782158425
+        ],
+        [
+          -0.1890290914783284,
+          0.23143203042944976,
+          -0.1305323149895289
+        ]
+      ],
+      "joint_lower_rad": [
+        [
+          -0.8290317500000001,
+          0.04363328218460083,
+          0.06326830387115479
+        ],
+        [
+          -0.8290317500000001,
+          0.04363328218460083,
+          0.06326830387115479
+        ],
+        [
+          -0.8290317500000001,
+          0.04363328218460083,
+          0.06326830387115479
+        ],
+        [
+          -0.8290317500000001,
+          0.04363328218460083,
+          0.06326830387115479
+        ],
+        [
+          -0.8290317500000001,
+          0.04363328218460083,
+          0.06326830387115479
+        ],
+        [
+          -0.8290317500000001,
+          0.04363328218460083,
+          0.06326830387115479
+        ]
+      ],
+      "joint_upper_rad": [
+        [
+          0.8290317500000001,
+          1.70169675,
+          2.467461585998535
+        ],
+        [
+          0.8290317500000001,
+          1.70169675,
+          2.467461585998535
+        ],
+        [
+          0.8290317500000001,
+          1.70169675,
+          2.467461585998535
+        ],
+        [
+          0.8290317500000001,
+          1.70169675,
+          2.467461585998535
+        ],
+        [
+          0.8290317500000001,
+          1.70169675,
+          2.467461585998535
+        ],
+        [
+          0.8290317500000001,
+          1.70169675,
+          2.467461585998535
+        ]
+      ],
+      "q_leg_major": [
+        [
+          -0.22939235788053836,
+          0.6751762499953499,
+          1.9845101123191076
+        ],
+        [
+          -0.06101492182715029,
+          0.6991349140017056,
+          2.097113188717793
+        ],
+        [
+          0.1306525287404261,
+          0.6856391806763671,
+          2.024748013216709
+        ],
+        [
+          -0.1458017118154733,
+          0.7095976631396879,
+          2.1468145895925597
+        ],
+        [
+          0.060670512587456926,
+          0.6996332722013814,
+          2.0899392685013254
+        ],
+        [
+          0.2693535226836645,
+          0.7002250481923883,
+          2.1310005683993722
+        ]
+      ],
+      "v_leg_major": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "hold_until_s": 31.93999999999941,
+      "liftoffs": 22,
+      "confirmed_touchdowns": 22,
+      "stop_requested_time_s": 29.999999999999446,
+      "reference_quiet_time_s": 35.90000000000001,
+      "failure": null
+    },
+    "requested_command": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "admitted_target_command": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "admitted_command": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "command_derating_factor": 1.0,
+    "actual_measured_command": [
+      -4.661005732486956e-05,
+      6.887937615829287e-07,
+      -0.00035947462311014533
+    ],
+    "diagnostics": {
+      "reference_point_world_m": [
+        [
+          0.19341800307462476,
+          -0.5001841393806653,
+          -0.00072762750032003
+        ],
+        [
+          0.2355925943324118,
+          -0.23707170026733818,
+          -0.0009970112320134006
+        ],
+        [
+          0.18412298310378597,
+          0.024395681470447222,
+          -0.0011686469740565808
+        ],
+        [
+          -0.17957385317232819,
+          -0.47038429520708014,
+          -0.0002926808217081772
+        ],
+        [
+          -0.23068456442396218,
+          -0.2561160980400082,
+          -0.0006468471595484082
+        ],
+        [
+          -0.1881506212145286,
+          -0.040211212027898534,
+          -0.001157911830256514
+        ]
+      ],
+      "measured_support_margin_m": 0.22598061083641505,
+      "body_tracking_error_m": 0.016350911930203438,
+      "stance_drift_m": [
+        9.370476016301012e-05,
+        0.0015768387013201405,
+        0.0030975631582381663,
+        0.002790181337314157,
+        0.0015201949921975623,
+        0.00010091876518258864
+      ],
+      "max_reference_velocity_rad_s": 0.0,
+      "max_reference_acceleration_rad_s2": 0.0,
+      "minimum_joint_margin_rad": 0.3206469964059755,
+      "configuration": {
+        "gait_order": [
+          "lf",
+          "rr",
+          "lm",
+          "rf",
+          "lr",
+          "rm"
+        ],
+        "swing_s": 2.0,
+        "contact_hold_s": 0.3,
+        "lift_m": 0.007,
+        "horizontal_duration_fraction": 0.8,
+        "max_translation_mps": 0.01,
+        "max_yaw_rad_s": 0.015,
+        "command_filter_omega": 2.0,
+        "reference_velocity_rad_s": 1.75,
+        "reference_acceleration_rad_s2": 6.0,
+        "joint_margin_rad": 0.02,
+        "minimum_support_margin_m": 0.05,
+        "maximum_body_tracking_error_m": 0.035,
+        "maximum_stance_drift_m": 0.02,
+        "maximum_touchdown_error_m": 0.012,
+        "maximum_initial_preload_point_offset_m": 0.025,
+        "maximum_initial_joint_preload_rad": 0.15,
+        "max_touchdown_delay_s": 0.6,
+        "contact_confirm_steps": 3,
+        "minimum_measured_lift_m": 0.002,
+        "landing_blend_s": 0.5,
+        "minimum_landing_blend_s": 0.1,
+        "descent_drop_from_peak_m": 0.00025,
+        "maximum_landing_contact_gap_s": 0.1,
+        "stop_command_tolerance": 1e-06,
+        "stop_command_rate_tolerance": 2e-05,
+        "pair_order": [
+          [
+            "lm",
+            "rm"
+          ],
+          [
+            "lf",
+            "rr"
+          ],
+          [
+            "lr",
+            "rf"
+          ]
+        ]
+      },
+      "pose_written_to_robot": false,
+      "physics_qualified": false,
+      "PPO_packet_846_849_compatible": false
+    }
+  },
+  "flight_events": [
+    {
+      "leg_index": 0,
+      "flight_begin_step": 434,
+      "flight_end_step": 498,
+      "flight_samples": 64,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.005468390406172349,
+      "measured_reference_point_planar_step_m": 0.05528485680656552
+    },
+    {
+      "leg_index": 0,
+      "flight_begin_step": 791,
+      "flight_end_step": 849,
+      "flight_samples": 58,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.004820147589727708,
+      "measured_reference_point_planar_step_m": 0.06710803059244283
+    },
+    {
+      "leg_index": 0,
+      "flight_begin_step": 1145,
+      "flight_end_step": 1203,
+      "flight_samples": 58,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.004885078215304928,
+      "measured_reference_point_planar_step_m": 0.06708427809202268
+    },
+    {
+      "leg_index": 0,
+      "flight_begin_step": 1499,
+      "flight_end_step": 1558,
+      "flight_samples": 59,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.004879346323171774,
+      "measured_reference_point_planar_step_m": 0.06686933927148923
+    },
+    {
+      "leg_index": 1,
+      "flight_begin_step": 318,
+      "flight_end_step": 380,
+      "flight_samples": 62,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.005060605101442073,
+      "measured_reference_point_planar_step_m": 0.033071564398741454
+    },
+    {
+      "leg_index": 1,
+      "flight_begin_step": 673,
+      "flight_end_step": 733,
+      "flight_samples": 60,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.004956522707200872,
+      "measured_reference_point_planar_step_m": 0.0671678729859205
+    },
+    {
+      "leg_index": 1,
+      "flight_begin_step": 1027,
+      "flight_end_step": 1087,
+      "flight_samples": 60,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.005007381836386715,
+      "measured_reference_point_planar_step_m": 0.06701982809534188
+    },
+    {
+      "leg_index": 1,
+      "flight_begin_step": 1381,
+      "flight_end_step": 1441,
+      "flight_samples": 60,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.005009582226213366,
+      "measured_reference_point_planar_step_m": 0.06702154799165419
+    },
+    {
+      "leg_index": 2,
+      "flight_begin_step": 555,
+      "flight_end_step": 615,
+      "flight_samples": 60,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.005149409252769688,
+      "measured_reference_point_planar_step_m": 0.07711735456903115
+    },
+    {
+      "leg_index": 2,
+      "flight_begin_step": 909,
+      "flight_end_step": 968,
+      "flight_samples": 59,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.004795955527028231,
+      "measured_reference_point_planar_step_m": 0.06738008488885028
+    },
+    {
+      "leg_index": 2,
+      "flight_begin_step": 1263,
+      "flight_end_step": 1322,
+      "flight_samples": 59,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.004846831850391517,
+      "measured_reference_point_planar_step_m": 0.0673131369353099
+    },
+    {
+      "leg_index": 3,
+      "flight_begin_step": 556,
+      "flight_end_step": 610,
+      "flight_samples": 54,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.0045906551880874474,
+      "measured_reference_point_planar_step_m": 0.07448181651884325
+    },
+    {
+      "leg_index": 3,
+      "flight_begin_step": 908,
+      "flight_end_step": 967,
+      "flight_samples": 59,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.005177091536330475,
+      "measured_reference_point_planar_step_m": 0.06714953428883627
+    },
+    {
+      "leg_index": 3,
+      "flight_begin_step": 1262,
+      "flight_end_step": 1321,
+      "flight_samples": 59,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.005132598681343067,
+      "measured_reference_point_planar_step_m": 0.0670222497897097
+    },
+    {
+      "leg_index": 4,
+      "flight_begin_step": 317,
+      "flight_end_step": 381,
+      "flight_samples": 64,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.005491136072971151,
+      "measured_reference_point_planar_step_m": 0.03431786842504989
+    },
+    {
+      "leg_index": 4,
+      "flight_begin_step": 674,
+      "flight_end_step": 731,
+      "flight_samples": 57,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.004708772924263166,
+      "measured_reference_point_planar_step_m": 0.06567434323883453
+    },
+    {
+      "leg_index": 4,
+      "flight_begin_step": 1028,
+      "flight_end_step": 1085,
+      "flight_samples": 57,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.0047155103480321925,
+      "measured_reference_point_planar_step_m": 0.06571975156701836
+    },
+    {
+      "leg_index": 4,
+      "flight_begin_step": 1382,
+      "flight_end_step": 1439,
+      "flight_samples": 57,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.0047293708349573915,
+      "measured_reference_point_planar_step_m": 0.06567512894018925
+    },
+    {
+      "leg_index": 5,
+      "flight_begin_step": 437,
+      "flight_end_step": 498,
+      "flight_samples": 61,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.005137065945858499,
+      "measured_reference_point_planar_step_m": 0.05442369105102835
+    },
+    {
+      "leg_index": 5,
+      "flight_begin_step": 791,
+      "flight_end_step": 851,
+      "flight_samples": 60,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.004973195415645101,
+      "measured_reference_point_planar_step_m": 0.06695086973942091
+    },
+    {
+      "leg_index": 5,
+      "flight_begin_step": 1146,
+      "flight_end_step": 1205,
+      "flight_samples": 59,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.004896948298432846,
+      "measured_reference_point_planar_step_m": 0.0656597645781177
+    },
+    {
+      "leg_index": 5,
+      "flight_begin_step": 1500,
+      "flight_end_step": 1559,
+      "flight_samples": 59,
+      "confirmed_measured_touchdown": true,
+      "measured_reference_point_lift_m": 0.0048734384870364605,
+      "measured_reference_point_planar_step_m": 0.0656640436555954
+    }
+  ],
+  "400Hz": {
+    "samples": 19201,
+    "all8updates_and_control_endpoints_verified": true,
+    "all_recorded_requested_peak_nm": 63.65962219238281,
+    "all_recorded_applied_peak_nm": 1.600000023841858,
+    "poststartup_requested_peak_nm": 1.3970317840576172,
+    "poststartup_applied_peak_nm": 1.3970317840576172,
+    "poststartup_requested_excess_samples": 0,
+    "passed": true
+  },
+  "actual_motion_prefix50Hz": {
+    "duration_s": 24.0,
+    "measured_world_displacement_m": [
+      -0.01272503286600113,
+      -0.2350471019744873,
+      -0.0007131993770599365
+    ],
+    "integrated_link_velocity_displacement_m": [
+      -0.010945318266749382,
+      -0.2297588437795639,
+      -0.0006757481023669243
+    ],
+    "actual_initial_forward_axis_world": [
+      0.007608596645310607,
+      -0.9999710542096151,
+      0.0
+    ],
+    "measured_forward_displacement_m": 0.23494347870796722,
+    "integrated_forward_displacement_m": 0.22966891471638654,
+    "displacement_integral_difference_m": 0.005579825956374407,
+    "interval_terminations": 0,
+    "interval_truncations": 0
+  },
+  "motion_prefix400Hz": {
+    "start_control_boundary": 300,
+    "end_control_boundary": 1500,
+    "duration_s": 24.0,
+    "acceptance_verdict": null,
+    "scope": "independent raw400Hz evidence; old50Hz gate unchanged",
+    "link": {
+      "measured_world_displacement_m": [
+        [
+          -0.01272503286600113,
+          -0.2350471019744873,
+          -0.0007131993770599365
+        ]
+      ],
+      "measured_forward_displacement_m": [
+        0.23494347870796722
+      ],
+      "integrals": {
+        "left": {
+          "world_m": [
+            [
+              -0.014890254475176334,
+              -0.22839519381523132,
+              -0.00034427549690008163
+            ]
+          ],
+          "forward_m": [
+            0.22827528879557857
+          ],
+          "position_difference_norm_m": [
+            0.007005153223872185
+          ]
+        },
+        "right": {
+          "world_m": [
+            [
+              -0.01489883940666914,
+              -0.22845225036144257,
+              -0.00034685691935010254
+            ]
+          ],
+          "forward_m": [
+            0.22833227837096204
+          ],
+          "position_difference_norm_m": [
+            0.006953539326786995
+          ]
+        },
+        "trapezoid": {
+          "world_m": [
+            [
+              -0.014894546940922737,
+              -0.22842371463775635,
+              -0.00034556619357317686
+            ]
+          ],
+          "forward_m": [
+            0.22830377613290537
+          ],
+          "position_difference_norm_m": [
+            0.0069793411530554295
+          ]
+        }
+      }
+    },
+    "com": {
+      "measured_world_displacement_m": [
+        [
+          -0.012726821005344391,
+          -0.23504942655563354,
+          -0.0007131695747375488
+        ]
+      ],
+      "measured_forward_displacement_m": [
+        0.23494578961659562
+      ],
+      "integrals": {
+        "left": {
+          "world_m": [
+            [
+              -0.014899575151503086,
+              -0.22840943932533264,
+              -0.00034404234611429274
+            ]
+          ],
+          "forward_m": [
+            0.2282894629760657
+          ],
+          "position_difference_norm_m": [
+            0.006996180396527052
+          ]
+        },
+        "right": {
+          "world_m": [
+            [
+              -0.014908118173480034,
+              -0.22846652567386627,
+              -0.00034662263351492584
+            ]
+          ],
+          "forward_m": [
+            0.2283464826717815
+          ],
+          "position_difference_norm_m": [
+            0.006944566499441862
+          ]
+        },
+        "trapezoid": {
+          "world_m": [
+            [
+              -0.014903847128152847,
+              -0.22843798995018005,
+              -0.0003453324898146093
+            ]
+          ],
+          "forward_m": [
+            0.2283179802707455
+          ],
+          "position_difference_norm_m": [
+            0.006970354355871677
+          ]
+        }
+      }
+    }
+  },
+  "observer_export_interval_note": "Inherited generic observer moving_window_or_prefix uses200..1400controls; new pairedmotion begins300. Use explicitly labeled300..1500paired report above, preserving original raw observer bytes.",
+  "poststartup_torque_peak": {
+    "abs_nm": 1.3970317840576172,
+    "runtime_joint": "revolute_2_3",
+    "physics_index": 2575,
+    "time_s": 6.4375,
+    "applied_nm": -1.3970317840576172
+  },
+  "full_initial_torque_peak_nm": 63.65962219238281,
+  "hardware_startup_qualified": false,
+  "last_contact_state": {
+    "time_s": 48.0,
+    "distal_contact": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "valid_points": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "normal_forces_world_n": [
+      [
+        2.014104893532931e-06,
+        0.0,
+        14.990490913391113
+      ],
+      [
+        1.6298398577418993e-06,
+        0.0,
+        12.130499839782715
+      ],
+      [
+        1.7904262676893268e-06,
+        0.0,
+        13.325704574584961
+      ],
+      [
+        1.661312353462563e-06,
+        0.0,
+        12.364741325378418
+      ],
+      [
+        1.6899526826819056e-06,
+        0.0,
+        12.57790470123291
+      ],
+      [
+        2.10253369914426e-06,
+        0.0,
+        15.648645401000977
+      ]
+    ]
+  },
+  "native_rate_fidelity_or_PPO_admitted": false,
+  "measured_motion_position_average_forward_mps": 0.009789311612831968,
+  "measured_stop_displacement_after_zero_request_m": 0.011240318973186626,
+  "reference_stop_latency_s": 5.900000000000567,
+  "synthetic_first_phase_not_used_for_result": true
+}

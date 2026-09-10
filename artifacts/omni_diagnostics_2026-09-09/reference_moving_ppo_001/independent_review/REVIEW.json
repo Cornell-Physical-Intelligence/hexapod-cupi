@@ -1,0 +1,502 @@
+{
+  "scope": "Actual moving001 infrastructure failure after a real reference-support outcome; no PPO updates or policy evaluation",
+  "raw_payloads_verified": 56,
+  "remote_audit_sha256": "e07b06743ac208d50220f0c699a5fdd40193c9482d914733fbd93a7b4653f7f3",
+  "standing": {
+    "passed_all32": true,
+    "controls": 1000,
+    "physical_metrics_exact": true,
+    "quiet_verdicts_exact": true,
+    "tiny_heading_numeric_differences": [
+      {
+        "path": "/per_environment/20/max_heading_excursion_deg",
+        "local": 6.830188794992864e-06,
+        "stored": 1.3660377589985728e-05,
+        "difference_deg": -6.830188794992864e-06
+      },
+      {
+        "path": "/per_environment/22/max_heading_excursion_deg",
+        "local": 0.001126981107518077,
+        "stored": 0.001133811310864985,
+        "difference_deg": -6.8302033469080925e-06
+      },
+      {
+        "path": "/per_environment/23/max_heading_excursion_deg",
+        "local": 0.0035790188703686,
+        "stored": 0.0035721887834370136,
+        "difference_deg": 6.8300869315862656e-06
+      }
+    ],
+    "substeps": {
+      "completed_controls": 1000,
+      "physical_samples": 8001,
+      "all_substep_max_requested_torque_nm": 3.9618892669677734,
+      "all_substep_max_applied_torque_nm": 1.600000023841858,
+      "requested_excess_samples": 892,
+      "post_startup_max_requested_torque_nm": 1.4839032888412476,
+      "joint_rate_semantics": "Raw SDK joint rate retained; no physical rate-fidelity claim"
+    },
+    "rate_and_cap": {
+      "post200_max_requested_Nm": 1.4839032888412476,
+      "post200_requested_elements_over1p6": 0,
+      "peak_substep": 1644,
+      "peak_replica": 6,
+      "peak_joint_index": 17,
+      "SDK_rate_vs_angle_max_difference_rad": 0.410396751512308,
+      "worst_rate_replica": 6,
+      "worst_rate_joint_index": 17,
+      "native_rate_fidelity_pass": false
+    }
+  },
+  "calibration": {
+    "passed": true,
+    "std": 0.02,
+    "controls": 2200,
+    "trials": {
+      "zero_mean": {
+        "passed_all32": true,
+        "numeric_differences": [],
+        "maximum_residual_offset_rad": 0.0,
+        "post_settle_max_requested_torque_nm": 1.4838526248931885
+      },
+      "sampled": {
+        "passed_all32": true,
+        "numeric_differences": [],
+        "maximum_residual_offset_rad": 0.0013948494527542543,
+        "post_settle_max_requested_torque_nm": 1.4797693490982056
+      }
+    },
+    "substeps": {
+      "completed_controls": 2200,
+      "physical_samples": 17601,
+      "all_substep_max_requested_torque_nm": 3.9618892669677734,
+      "all_substep_max_applied_torque_nm": 1.600000023841858,
+      "requested_excess_samples": 892,
+      "post_startup_max_requested_torque_nm": 1.4839032888412476,
+      "joint_rate_semantics": "Raw SDK joint rate retained; no physical rate-fidelity claim"
+    },
+    "clocks": {
+      "all_14_sensor_clocks_replayed": true,
+      "clock_reset_events": 0,
+      "first_clock_epoch": "Initial absolute sensor epoch is not independently exported"
+    },
+    "rate_and_cap": {
+      "post200_max_requested_Nm": 1.4839032888412476,
+      "post200_requested_elements_over1p6": 0,
+      "peak_substep": 1644,
+      "peak_replica": 6,
+      "peak_joint_index": 17,
+      "SDK_rate_vs_angle_max_difference_rad": 1.0124856534064774,
+      "worst_rate_replica": 6,
+      "worst_rate_joint_index": 17,
+      "native_rate_fidelity_pass": false
+    },
+    "initial_checkpoint_sha256": "8dd8157ddc0da4f7c68f498c6dcf85eaff721690830452b8c4ca387b021098d1",
+    "checkpoint_receipt_exact": true,
+    "PPO_updates_completed": 0
+  },
+  "profile": {
+    "status": "rejected",
+    "controls_completed": 224,
+    "requested_profile_controls_after200": 512,
+    "achieved_controls_after200": 24,
+    "error": "RuntimeError('Inplace update to inference tensor outside InferenceMode is not allowed.You can make a clone to get a normal tensor before doing inplace update.See https://github.com/pytorch/rfcs/pull/17 for more details.')",
+    "traceback": "Traceback (most recent call last):\n  File \"/consumer/run_moving_ppo.py\", line 172, in main\n    beginning=time.perf_counter();_,_,done,extra=session.step(act(False))\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/consumer/moving_session.py\", line 248, in step\n    try:return self._advance(actions)\n               ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/consumer/moving_session.py\", line 243, in _advance\n    self._reset_rows(ended,terminated,truncated)\n  File \"/consumer/moving_session.py\", line 170, in _reset_rows\n    self.env.reset_buf.copy_(ended)\nRuntimeError: Inplace update to inference tensor outside InferenceMode is not allowed.You can make a clone to get a normal tensor before doing inplace update.See https://github.com/pytorch/rfcs/pull/17 for more details.\n",
+    "ended_replica": 6,
+    "final_reference_failure_code": 4,
+    "final_active_leg": "LF",
+    "final_RR_force_N": 0.5976752042770386,
+    "final_LF_force_N": 5.45718240737915,
+    "total_contacts": 5,
+    "retained_contacts_excluding_LF": 4,
+    "window": [
+      {
+        "control": 214,
+        "time_s": 4.28,
+        "normal_forces_N": [
+          14.923434257507324,
+          10.914981842041016,
+          16.58847999572754,
+          6.204582214355469,
+          28.0789737701416,
+          4.643104076385498
+        ],
+        "distal_contact": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "current_leg": 0,
+        "command": [
+          0.005,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "control": 215,
+        "time_s": 4.3,
+        "normal_forces_N": [
+          14.397258758544922,
+          11.451020240783691,
+          16.551061630249023,
+          6.537601947784424,
+          28.036155700683594,
+          4.349221229553223
+        ],
+        "distal_contact": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "current_leg": 0,
+        "command": [
+          0.005,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "control": 216,
+        "time_s": 4.32,
+        "normal_forces_N": [
+          13.853902816772461,
+          12.023630142211914,
+          16.46775245666504,
+          6.936053276062012,
+          28.06187629699707,
+          4.04897403717041
+        ],
+        "distal_contact": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "current_leg": 0,
+        "command": [
+          0.005,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "control": 217,
+        "time_s": 4.34,
+        "normal_forces_N": [
+          13.204401969909668,
+          12.614109992980957,
+          16.398582458496094,
+          7.204668045043945,
+          28.101612091064453,
+          3.863471031188965
+        ],
+        "distal_contact": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "current_leg": 0,
+        "command": [
+          0.005,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "control": 218,
+        "time_s": 4.36,
+        "normal_forces_N": [
+          12.571930885314941,
+          13.248236656188965,
+          16.336652755737305,
+          7.531263828277588,
+          28.041580200195312,
+          3.6255881786346436
+        ],
+        "distal_contact": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "current_leg": 0,
+        "command": [
+          0.005,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "control": 219,
+        "time_s": 4.38,
+        "normal_forces_N": [
+          11.988665580749512,
+          13.85672378540039,
+          16.261442184448242,
+          7.834567070007324,
+          28.077571868896484,
+          3.368426561355591
+        ],
+        "distal_contact": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "current_leg": 0,
+        "command": [
+          0.005,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "control": 220,
+        "time_s": 4.4,
+        "normal_forces_N": [
+          11.315089225769043,
+          14.519682884216309,
+          16.203975677490234,
+          8.181254386901855,
+          28.08378028869629,
+          3.070272922515869
+        ],
+        "distal_contact": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "current_leg": 0,
+        "command": [
+          0.005,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "control": 221,
+        "time_s": 4.42,
+        "normal_forces_N": [
+          10.72102165222168,
+          15.154568672180176,
+          16.08097267150879,
+          8.493582725524902,
+          28.09421730041504,
+          2.8313844203948975
+        ],
+        "distal_contact": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "current_leg": 0,
+        "command": [
+          0.005,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "control": 222,
+        "time_s": 4.44,
+        "normal_forces_N": [
+          9.421146392822266,
+          16.357303619384766,
+          16.150300979614258,
+          9.316929817199707,
+          28.24508285522461,
+          2.1046032905578613
+        ],
+        "distal_contact": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "current_leg": 0,
+        "command": [
+          0.005,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "control": 223,
+        "time_s": 4.46,
+        "normal_forces_N": [
+          6.9515557289123535,
+          18.10533905029297,
+          16.478788375854492,
+          10.60087776184082,
+          28.194618225097656,
+          1.1215715408325195
+        ],
+        "distal_contact": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "current_leg": 0,
+        "command": [
+          0.005,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "control": 224,
+        "time_s": 4.48,
+        "normal_forces_N": [
+          5.45718240737915,
+          19.89420509338379,
+          16.089859008789062,
+          12.296895980834961,
+          27.561674118041992,
+          0.5976752042770386
+        ],
+        "distal_contact": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          false
+        ],
+        "current_leg": 0,
+        "command": [
+          0.005,
+          0.0,
+          0.0
+        ]
+      }
+    ],
+    "substeps": {
+      "completed_controls": 224,
+      "physical_samples": 1793,
+      "all_substep_max_requested_torque_nm": 3.9618892669677734,
+      "all_substep_max_applied_torque_nm": 1.600000023841858,
+      "requested_excess_samples": 892,
+      "post_startup_max_requested_torque_nm": 1.483689785003662,
+      "joint_rate_semantics": "Raw SDK joint rate retained; no physical rate-fidelity claim"
+    },
+    "clocks_all224_before_any_physical_reset": {
+      "all_14_sensor_clocks_replayed": true,
+      "clock_reset_events": 0,
+      "first_clock_epoch": "Initial absolute sensor epoch is not independently exported"
+    },
+    "rate_and_cap": {
+      "post200_max_requested_Nm": 1.483689785003662,
+      "post200_requested_elements_over1p6": 0,
+      "peak_substep": 1609,
+      "peak_replica": 6,
+      "peak_joint_index": 17,
+      "SDK_rate_vs_angle_max_difference_rad": 0.0259811552951578,
+      "worst_rate_replica": 9,
+      "worst_rate_joint_index": 12,
+      "native_rate_fidelity_pass": false
+    },
+    "complete_pre_event223_control_audit": {
+      "completed_controls": 223,
+      "physical_samples": 1785,
+      "all_substep_max_requested_torque_nm": 3.9618892669677734,
+      "all_substep_max_applied_torque_nm": 1.600000023841858,
+      "requested_excess_samples": 892,
+      "post_startup_max_requested_torque_nm": 1.483689785003662,
+      "joint_rate_semantics": "Raw SDK joint rate retained; no physical rate-fidelity claim",
+      "all_14_sensor_clocks_replayed": true,
+      "clock_reset_events": 0,
+      "first_clock_epoch": "Initial absolute sensor epoch is not independently exported",
+      "active_transitions": 736,
+      "recovery_transitions_excluded": 0,
+      "finite_terminal_transitions": 0,
+      "time_limit_transitions": 0,
+      "requested_spikes_terminating_active_rows": 0,
+      "PPO_updates_replayed": 0,
+      "ended_episodes_per_environment": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "actor_packet_history_directly_exported": false,
+      "optimizer_final_bootstrap_directly_exported": false,
+      "unexported_state_scope": "History/reset and final-pre-reset bootstrap are CPU-tested; no direct GPU tensor replay claim",
+      "physical_admission": false,
+      "Stage2_complete": false
+    },
+    "attempted_reset_receipt_incomplete": true,
+    "full_audit_preserved_failure": "KeyError(reset_kind)",
+    "reset_idx_not_reached_by_recorded_traceback": true,
+    "initial_checkpoint_sha256": "8dd8157ddc0da4f7c68f498c6dcf85eaff721690830452b8c4ca387b021098d1",
+    "zero_residual_lag": true,
+    "untrained_reference_support_outcome": true,
+    "no_event_profile_would_still_reject_after_API_only_fix": true,
+    "actual_physics_reset_completed": false,
+    "policy_training_started": false,
+    "PPO_updates_completed": 0,
+    "failure_export_method_restored": true
+  },
+  "PPO_updates_completed": 0,
+  "Stage2_complete": false,
+  "physical_training_policy_rejection": false,
+  "profile_gate_passed": false,
+  "source_paths": {
+    "physical_source": "tmp/reference_physics_adapter_009/source_009",
+    "audit_primitives": "tmp/reference_moving_ppo_audit_001"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "scope": "New bounded planned-endpoint CPU matrix, no physical/contact/force model or policy changes",
+  "control_dt_s": 0.02,
+  "speeds_mps": [
+    0.02,
+    0.025,
+    0.03,
+    0.05
+  ],
+  "swing_s": [
+    2.0,
+    1.5,
+    1.0,
+    0.75,
+    0.5
+  ],
+  "baselines_mps": [
+    0.01,
+    0.015
+  ],
+  "lift_m": 0.007,
+  "handoff_hold_s": 0.3,
+  "horizontal_fraction": 0.8,
+  "duration_s": 44.0,
+  "motion_s": 24.0,
+  "stop_s": 18.0,
+  "initial_hold_s": 2.0,
+  "cycle_formula": "3*(swing_s+handoff_hold_s)",
+  "placement_horizon_formula": "swing_s+0.5*(cycle_s-swing_s)",
+  "stop_filter_and_finite_stop_thresholds_unchanged": true,
+  "limits_and_reference_budget_unchanged": true,
+  "each_case_stops_at_first_rejection": true,
+  "no_automatic_matrix_expansion": true,
+  "actual_timing_warp": false,
+  "all_original_contact_and_physical_gates_remain_separate": true
+}

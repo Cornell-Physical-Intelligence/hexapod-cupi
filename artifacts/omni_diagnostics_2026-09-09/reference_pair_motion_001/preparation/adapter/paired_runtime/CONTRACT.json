@@ -1,0 +1,150 @@
+{
+  "version": "proposed_pair_motion_physics_contract_v001",
+  "status": "CPU-only reviewed prototype; actual adapter, physics and policy admission pending",
+  "controller_state_version": "pair_contact_motion_v001",
+  "observation": {
+    "fragment_version": "pair_contact_motion_fragment_v001",
+    "features": 1014,
+    "schema_sha256": "da863625e026f8c96297ae6e6a28f84a008cf7956c946dc314d95980db038326",
+    "full_actor_critic_schema": false,
+    "old846_849_compatible": false
+  },
+  "configuration": {
+    "gait_order": [
+      "lf",
+      "rr",
+      "lm",
+      "rf",
+      "lr",
+      "rm"
+    ],
+    "swing_s": 2.0,
+    "contact_hold_s": 0.3,
+    "lift_m": 0.007,
+    "horizontal_duration_fraction": 0.8,
+    "max_translation_mps": 0.01,
+    "max_yaw_rad_s": 0.015,
+    "command_filter_omega": 2.0,
+    "reference_velocity_rad_s": 1.75,
+    "reference_acceleration_rad_s2": 6.0,
+    "joint_margin_rad": 0.02,
+    "minimum_support_margin_m": 0.05,
+    "maximum_body_tracking_error_m": 0.035,
+    "maximum_stance_drift_m": 0.02,
+    "maximum_touchdown_error_m": 0.012,
+    "maximum_initial_preload_point_offset_m": 0.025,
+    "maximum_initial_joint_preload_rad": 0.15,
+    "max_touchdown_delay_s": 0.6,
+    "contact_confirm_steps": 3,
+    "minimum_measured_lift_m": 0.002,
+    "landing_blend_s": 0.5,
+    "minimum_landing_blend_s": 0.1,
+    "descent_drop_from_peak_m": 0.00025,
+    "maximum_landing_contact_gap_s": 0.1,
+    "stop_command_tolerance": 1e-06,
+    "stop_command_rate_tolerance": 2e-05,
+    "pair_order": [
+      [
+        "lm",
+        "rm"
+      ],
+      [
+        "lf",
+        "rr"
+      ],
+      [
+        "lr",
+        "rf"
+      ]
+    ]
+  },
+  "CPU_schedule": {
+    "control_dt_s": 0.02,
+    "initial_hold_s": 2.0,
+    "forward_s": 24.0,
+    "stop_s": 18.0,
+    "requested_forward_left_yaw": [
+      0.01,
+      0.0,
+      0.0
+    ],
+    "residual_actions": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "comparison_speeds_mps": [
+    0.015,
+    0.02
+  ],
+  "contact_input_ownership": {
+    "source": "caller classified distal_contact AND contact_point_valid",
+    "CPU_reads_force_threshold": false,
+    "CPU_reads_sensor_age": false,
+    "caller_proves_named_distal_minimum_force_n": 1.0,
+    "caller_proves_sensor_timestamp_and_no_overflow": true,
+    "caller_proves_all400Hz_torque_samples": true,
+    "CPU_synthetic_contacts_are_not_physical_evidence": true
+  },
+  "paired_branch": {
+    "retained_feet": 4,
+    "minimum_measured_articulated_COM_support_margin_m": 0.05,
+    "both_feet_independent_qualified_flight": true,
+    "measured_minimum_lift_m": 0.002,
+    "contact_confirmation_samples": 3,
+    "first_confirmed_foot_must_remain_supported": true,
+    "all6supports_before_new_pair": true,
+    "scheduled_touchdown_never_sufficient": true,
+    "original5support_wave_gates_unchanged": true
+  },
+  "preserved_target_budgets": {
+    "reference_velocity_rad_s": 1.75,
+    "reference_acceleration_rad_s2": 6.0,
+    "residual_radius_rad": 0.02,
+    "residual_velocity_rad_s": 0.25,
+    "residual_acceleration_rad_s2": 2.0,
+    "total_velocity_rad_s": 2.0,
+    "total_acceleration_rad_s2": 8.0,
+    "hardware_torque_rating_nm": 1.6,
+    "CPU_torque_validation": false
+  },
+  "next_actual_physics": {
+    "status": "proposed; not dispatched or admitted",
+    "fresh_standing": {
+      "num_envs": 32,
+      "steps": 1000,
+      "canonical_startup_unchanged": true,
+      "all_original_physical_and_quiet_gates": true
+    },
+    "motion_case": "one independently reset .01m/s zero-residual forward then stop",
+    "physics_source_settings": "exact admitted C-study source009 settings and actuators; immutable source and asset maps",
+    "measurement": "pre-reset 50Hz contact/control plus all8 existing physics substeps for q/qdot/pose/torque, dual original and diagnostic reports",
+    "require_actual_progress_stopping_and_quiet": true,
+    "no_nonfoot_or_reset": true,
+    "no_target_clipping_or_pose_prescription": true,
+    "do_not_replace_original50Hz_metric": true,
+    "hardware_startup_qualification": false
+  },
+  "actual_new_GPU_controls": 0,
+  "PPO_registration": false,
+  "production_model_changes": false,
+  "authoritative_report": "report_002.json",
+  "historical_report": "report.json",
+  "target_only_comparison": "target_speed_comparison.json"
+}
