@@ -1,0 +1,4692 @@
+{
+  "campaign": {
+    "status": "completed",
+    "started_unix": 1789051890.8806036,
+    "identity": {
+      "schema": "direct315_cold_formal004_v1",
+      "source_manifest_sha256": "4671eab012aaf79ce49769cfdc1667142237a4b4a45966fd0399a9caa900c51b",
+      "plan_sha256": "2875245e92806a1cf96cccf14d25a0887474eda98d5a81de9d99b9656e90280c",
+      "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+      "actor_width": 315,
+      "critic_width": 318,
+      "training_allowed": false,
+      "Stage2_complete": false,
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.04,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2,
+          "stand_raw_action": 0.0
+        },
+        "observation_noise_scale": 1.0,
+        "target_filter_time_constant_s": 0.0
+      },
+      "diagnostic_options": {
+        "duration_s": 12,
+        "settle_s": 2,
+        "seed": 7057,
+        "trace_envs_per_scenario": 1,
+        "controller": "policy"
+      }
+    },
+    "host_freeze_sha256": "efbeac2a0bfb7ebf93efb9ec4dce33363607092b30a7e81ac6351950e1fa6083",
+    "standing_admitted": true,
+    "baseline_complete": true,
+    "policy_training_started": false,
+    "PPO_updates_completed": 0,
+    "Stage2_complete": false,
+    "automatic_continuation": false,
+    "phase_scope": {
+      "standing": "32x1000",
+      "baseline": "48 replicas / 12 cases / 12 seconds"
+    },
+    "accepted_phases": {
+      "standing": {
+        "phase": "standing",
+        "passed": true,
+        "state_sha256": "80b1d57c34942d9a41473b2b86dd20ea684aa30520c02f09f986c9a1da009140",
+        "admission_sha256": "41002c8c4a43401fde265fbf9d3b3e14e65b053a47144ad3cafe357fe7bcb14a"
+      },
+      "baseline": {
+        "phase": "baseline",
+        "complete": true,
+        "state_sha256": "6addad5aea90079b83141a80feac0bf1a02f0df15a68db9441425f252dd8d4e7",
+        "diagnostics_sha256": "2c067b023b52e84b6dd3a3a78ccd35a6ea036602e243eb28d94f01a7177ea03e",
+        "scope": "Measured baseline, not physical or training admission",
+        "Stage2_complete": false
+      }
+    },
+    "last_completed_phase": "baseline",
+    "terminal_inputs_unchanged": true,
+    "finished_unix": 1789052038.6144824
+  },
+  "stage2_complete": false,
+  "training_admission": false,
+  "stop_transition_measured": false,
+  "source_asset_cleanup_restoration_audit": "Root-owned separate proof; this analyzer does not substitute for it.",
+  "files": {
+    "campaign.json": "2366c88ec70ec95dca54eeca97a5c5ce42535a4e232dd2b18bd1e5d85170a827",
+    "standing/state.json": "80b1d57c34942d9a41473b2b86dd20ea684aa30520c02f09f986c9a1da009140",
+    "baseline/state.json": "6addad5aea90079b83141a80feac0bf1a02f0df15a68db9441425f252dd8d4e7"
+  },
+  "historical_diagnostic003": {
+    "label": "historical_diagnostic003",
+    "diagnostics_sha256": "f0c5c9feba99c9785bc47b69724c501f3d87b4782b3466dd98616b0382fa9ee6",
+    "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+    "target_slew_rad_per_20ms": 0.03,
+    "options": {
+      "duration_s": 12,
+      "settle_s": 2,
+      "seed": 7057,
+      "trace_envs_per_scenario": 1,
+      "controller": "policy"
+    },
+    "overrides": {
+      "target_slew_rad_per_20ms": 0.03,
+      "reward_weights": {
+        "stand_joint_velocity": -0.5,
+        "stand_target_velocity": -0.15,
+        "stand_posture": -2.0,
+        "action_rate": -0.075,
+        "saturation": -0.75,
+        "torque_excess": -0.6,
+        "worst_torque_excess": -0.2,
+        "stand_raw_action": 0.0
+      },
+      "observation_noise_scale": 1.0,
+      "target_filter_time_constant_s": 0.0
+    },
+    "reward_weights": {
+      "linear_tracking": 4.0,
+      "yaw_tracking": 2.0,
+      "linear_progress": 1.5,
+      "yaw_progress": 0.75,
+      "vertical_velocity": -2.0,
+      "roll_pitch_rate": -0.15,
+      "tilt": -2.0,
+      "height": -25.0,
+      "torque": -0.03,
+      "torque_excess": -0.6,
+      "worst_torque_excess": -0.2,
+      "saturation": -0.75,
+      "positive_power": -0.015,
+      "action_rate": -0.075,
+      "joint_acceleration": -2.5e-07,
+      "slip": -0.5,
+      "nonfoot": -2.0,
+      "joint_limits": -2.0,
+      "airtime": 0.5,
+      "stand_posture": -2.0,
+      "stand_joint_velocity": -0.5,
+      "stand_target_velocity": -0.15,
+      "stand_raw_action": 0.0
+    },
+    "joint_names": [
+      "revolute_1_1",
+      "revolute_1_7",
+      "revolute_2_5",
+      "revolute_3",
+      "revolute_4",
+      "revolute_5",
+      "revolute_1",
+      "revolute_1_6",
+      "revolute_1_5",
+      "revolute_1_3",
+      "revolute_1_4",
+      "revolute_1_2",
+      "revolute_2",
+      "revolute_2_6",
+      "revolute_2_4",
+      "revolute_2_2",
+      "revolute_2_3",
+      "revolute_2_1"
+    ],
+    "observation_audit": {
+      "actor_width": 315,
+      "critic_width": 318,
+      "max_same_step_repeat_difference": 0.0,
+      "max_command_slice_difference": 0.0,
+      "max_history_shift_difference": 0.0
+    },
+    "scenarios": [
+      {
+        "name": "stand",
+        "command": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.0034119971096515656,
+              0.014705021865665913,
+              0.002114091068506241
+            ],
+            "velocity_std_mps": [
+              0.020124252885580063,
+              0.026900744065642357,
+              0.029454752802848816
+            ],
+            "mean_gyro_rad_s": [
+              0.009807176887989044,
+              -0.0015615024603903294,
+              -0.011577904224395752
+            ],
+            "gyro_std_rad_s": [
+              0.14064930379390717,
+              0.17765627801418304,
+              0.07722791284322739
+            ],
+            "planar_error_mps": 0.03280520811676979,
+            "yaw_error_rad_s": 0.06262977421283722,
+            "finite_difference_planar_error_mps": 0.03117995895445347,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.009893027134239674,
+              0.007790259551256895,
+              0.015406569465994835
+            ],
+            "torque_saturation_fraction": 0.058402777777777776,
+            "computed_torque_abs_max_nm": 5.732059478759766,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 1.9045157432556152,
+            "tilt_rms_deg": 1.2211791276931763
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.004012760706245899,
+              0.015741758048534393,
+              0.002742348937317729
+            ],
+            "velocity_std_mps": [
+              0.020344125106930733,
+              0.027296168729662895,
+              0.02759937010705471
+            ],
+            "mean_gyro_rad_s": [
+              0.012326850555837154,
+              -0.0008057631785050035,
+              -0.012097004801034927
+            ],
+            "gyro_std_rad_s": [
+              0.14013610780239105,
+              0.18170025944709778,
+              0.07652731239795685
+            ],
+            "planar_error_mps": 0.03369458019733429,
+            "yaw_error_rad_s": 0.06219008192420006,
+            "finite_difference_planar_error_mps": 0.03189971670508385,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010085602290928364,
+              0.00797702744603157,
+              0.014510449953377247
+            ],
+            "torque_saturation_fraction": 0.057527777777777775,
+            "computed_torque_abs_max_nm": 5.732059478759766,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 1.9082411527633667,
+            "tilt_rms_deg": 1.255334496498108
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.004012760706245899,
+              0.015741758048534393,
+              0.002742348937317729
+            ],
+            "velocity_std_mps": [
+              0.020344125106930733,
+              0.027296168729662895,
+              0.02759937010705471
+            ],
+            "mean_gyro_rad_s": [
+              0.012326850555837154,
+              -0.0008057631785050035,
+              -0.012097004801034927
+            ],
+            "gyro_std_rad_s": [
+              0.14013610780239105,
+              0.18170025944709778,
+              0.07652731239795685
+            ],
+            "planar_error_mps": 0.03369458019733429,
+            "yaw_error_rad_s": 0.06219008192420006,
+            "finite_difference_planar_error_mps": 0.03189971670508385,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010085602290928364,
+              0.00797702744603157,
+              0.014510449953377247
+            ],
+            "torque_saturation_fraction": 0.057527777777777775,
+            "computed_torque_abs_max_nm": 5.732059478759766,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 1.9082411527633667,
+            "tilt_rms_deg": 1.255334496498108
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.000408178981160745,
+              0.009521344676613808,
+              -0.0010272065410390496
+            ],
+            "velocity_std_mps": [
+              0.018699485808610916,
+              0.024171309545636177,
+              0.03721596300601959
+            ],
+            "mean_gyro_rad_s": [
+              -0.002791187260299921,
+              -0.005340203642845154,
+              -0.008982386440038681
+            ],
+            "gyro_std_rad_s": [
+              0.14252103865146637,
+              0.15581558644771576,
+              0.08058948069810867
+            ],
+            "planar_error_mps": 0.028358330950140953,
+            "yaw_error_rad_s": 0.06482826918363571,
+            "finite_difference_planar_error_mps": 0.027581190690398216,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.008867633529007435,
+              0.006779673509299755,
+              0.01927197352051735
+            ],
+            "torque_saturation_fraction": 0.06277777777777778,
+            "computed_torque_abs_max_nm": 5.1251115798950195,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 1.8858880996704102,
+            "tilt_rms_deg": 1.0336089134216309
+          }
+        }
+      },
+      {
+        "name": "forward",
+        "command": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.07276761531829834,
+              0.020378215238451958,
+              0.004097511060535908
+            ],
+            "velocity_std_mps": [
+              0.03363315016031265,
+              0.018837084993720055,
+              0.03274058923125267
+            ],
+            "mean_gyro_rad_s": [
+              0.0026573436334729195,
+              0.0012978510931134224,
+              -0.018902556970715523
+            ],
+            "gyro_std_rad_s": [
+              0.12146621942520142,
+              0.13599959015846252,
+              0.10892747342586517
+            ],
+            "planar_error_mps": 0.04457598924636841,
+            "yaw_error_rad_s": 0.08878155797719955,
+            "finite_difference_planar_error_mps": 0.04294603317975998,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.013049552217125893,
+              0.006236043758690357,
+              0.015270420350134373
+            ],
+            "torque_saturation_fraction": 0.059537037037037034,
+            "computed_torque_abs_max_nm": 5.7053632736206055,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.451256513595581,
+            "tilt_rms_deg": 2.8543825149536133
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.07365817576646805,
+              0.02108258754014969,
+              0.004168443847447634
+            ],
+            "velocity_std_mps": [
+              0.03341950476169586,
+              0.018844060599803925,
+              0.03141205757856369
+            ],
+            "mean_gyro_rad_s": [
+              0.0066228886134922504,
+              0.00022997736232355237,
+              -0.017103221267461777
+            ],
+            "gyro_std_rad_s": [
+              0.12209340929985046,
+              0.13668115437030792,
+              0.10917872190475464
+            ],
+            "planar_error_mps": 0.04576670005917549,
+            "yaw_error_rad_s": 0.08887111395597458,
+            "finite_difference_planar_error_mps": 0.04415206238627434,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.013329180888831615,
+              0.0062492601573467255,
+              0.014335001818835735
+            ],
+            "torque_saturation_fraction": 0.059055555555555556,
+            "computed_torque_abs_max_nm": 5.7053632736206055,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.437216281890869,
+            "tilt_rms_deg": 2.9744372367858887
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.07365817576646805,
+              0.02108258754014969,
+              0.004168443847447634
+            ],
+            "velocity_std_mps": [
+              0.03341950476169586,
+              0.018844060599803925,
+              0.03141205757856369
+            ],
+            "mean_gyro_rad_s": [
+              0.0066228886134922504,
+              0.00022997736232355237,
+              -0.017103221267461777
+            ],
+            "gyro_std_rad_s": [
+              0.12209340929985046,
+              0.13668115437030792,
+              0.10917872190475464
+            ],
+            "planar_error_mps": 0.04576670005917549,
+            "yaw_error_rad_s": 0.08887111395597458,
+            "finite_difference_planar_error_mps": 0.04415206238627434,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.013329180888831615,
+              0.0062492601573467255,
+              0.014335001818835735
+            ],
+            "torque_saturation_fraction": 0.059055555555555556,
+            "computed_torque_abs_max_nm": 5.7053632736206055,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.437216281890869,
+            "tilt_rms_deg": 2.9744372367858887
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.06831549108028412,
+              0.016856305301189423,
+              0.0037428406067192554
+            ],
+            "velocity_std_mps": [
+              0.03433704376220703,
+              0.018402064219117165,
+              0.038703158497810364
+            ],
+            "mean_gyro_rad_s": [
+              -0.017170384526252747,
+              0.006637221202254295,
+              -0.02789931930601597
+            ],
+            "gyro_std_rad_s": [
+              0.11626948416233063,
+              0.13241009414196014,
+              0.10721069574356079
+            ],
+            "planar_error_mps": 0.0386224165558815,
+            "yaw_error_rad_s": 0.08833381533622742,
+            "finite_difference_planar_error_mps": 0.036915894597768784,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011550298891961575,
+              0.006169554311782122,
+              0.01927831582725048
+            ],
+            "torque_saturation_fraction": 0.06194444444444445,
+            "computed_torque_abs_max_nm": 4.314768314361572,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.5214569568634033,
+            "tilt_rms_deg": 2.1560630798339844
+          }
+        }
+      },
+      {
+        "name": "reverse",
+        "command": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              -0.07193952053785324,
+              0.0019513354636728764,
+              0.002582426182925701
+            ],
+            "velocity_std_mps": [
+              0.024355249479413033,
+              0.020350761711597443,
+              0.03322042524814606
+            ],
+            "mean_gyro_rad_s": [
+              0.010105420835316181,
+              -0.009062481112778187,
+              0.003302442841231823
+            ],
+            "gyro_std_rad_s": [
+              0.16223125159740448,
+              0.19979961216449738,
+              0.11319674551486969
+            ],
+            "planar_error_mps": 0.03607437014579773,
+            "yaw_error_rad_s": 0.09472832828760147,
+            "finite_difference_planar_error_mps": 0.03533724322915077,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.009107623249292374,
+              0.006461417302489281,
+              0.016172686591744423
+            ],
+            "torque_saturation_fraction": 0.057152777777777775,
+            "computed_torque_abs_max_nm": 5.2735466957092285,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.479971170425415,
+            "tilt_rms_deg": 1.022324562072754
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              -0.07216273993253708,
+              0.0019491289276629686,
+              0.0035201760474592447
+            ],
+            "velocity_std_mps": [
+              0.02207634598016739,
+              0.020213071256875992,
+              0.03223621845245361
+            ],
+            "mean_gyro_rad_s": [
+              0.011891528964042664,
+              -0.008263963274657726,
+              0.004751630127429962
+            ],
+            "gyro_std_rad_s": [
+              0.1628945767879486,
+              0.20442281663417816,
+              0.11293087899684906
+            ],
+            "planar_error_mps": 0.03647033870220184,
+            "yaw_error_rad_s": 0.09468800574541092,
+            "finite_difference_planar_error_mps": 0.03566094860434532,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.008867341093719006,
+              0.006425888277590275,
+              0.01532837562263012
+            ],
+            "torque_saturation_fraction": 0.0565,
+            "computed_torque_abs_max_nm": 5.2735466957092285,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.51446533203125,
+            "tilt_rms_deg": 1.001533031463623
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              -0.07216273993253708,
+              0.0019491289276629686,
+              0.0035201760474592447
+            ],
+            "velocity_std_mps": [
+              0.02207634598016739,
+              0.020213071256875992,
+              0.03223621845245361
+            ],
+            "mean_gyro_rad_s": [
+              0.011891528964042664,
+              -0.008263963274657726,
+              0.004751630127429962
+            ],
+            "gyro_std_rad_s": [
+              0.1628945767879486,
+              0.20442281663417816,
+              0.11293087899684906
+            ],
+            "planar_error_mps": 0.03647033870220184,
+            "yaw_error_rad_s": 0.09468800574541092,
+            "finite_difference_planar_error_mps": 0.03566094860434532,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.008867341093719006,
+              0.006425888277590275,
+              0.01532837562263012
+            ],
+            "torque_saturation_fraction": 0.0565,
+            "computed_torque_abs_max_nm": 5.2735466957092285,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.51446533203125,
+            "tilt_rms_deg": 1.001533031463623
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              -0.07082350552082062,
+              0.001962375594303012,
+              -0.0021063298918306828
+            ],
+            "velocity_std_mps": [
+              0.03347768262028694,
+              0.021025734022259712,
+              0.03740767017006874
+            ],
+            "mean_gyro_rad_s": [
+              0.0011748563265427947,
+              -0.013055145740509033,
+              -0.003943508956581354
+            ],
+            "gyro_std_rad_s": [
+              0.15857131779193878,
+              0.17480434477329254,
+              0.11424139142036438
+            ],
+            "planar_error_mps": 0.034094542264938354,
+            "yaw_error_rad_s": 0.09492997825145721,
+            "finite_difference_planar_error_mps": 0.033718712627887726,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010224680416285992,
+              0.006636221427470446,
+              0.01986309513449669
+            ],
+            "torque_saturation_fraction": 0.06041666666666667,
+            "computed_torque_abs_max_nm": 4.985880374908447,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.3075003623962402,
+            "tilt_rms_deg": 1.1205096244812012
+          }
+        }
+      },
+      {
+        "name": "left",
+        "command": [
+          0.0,
+          0.1,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.005870084278285503,
+              0.07436470687389374,
+              0.0029550441540777683
+            ],
+            "velocity_std_mps": [
+              0.02599782682955265,
+              0.027034014463424683,
+              0.02695220336318016
+            ],
+            "mean_gyro_rad_s": [
+              0.01096733845770359,
+              -0.0026252500247210264,
+              -0.03358343616127968
+            ],
+            "gyro_std_rad_s": [
+              0.13892892003059387,
+              0.1465240865945816,
+              0.09072791039943695
+            ],
+            "planar_error_mps": 0.039478201419115067,
+            "yaw_error_rad_s": 0.07653149217367172,
+            "finite_difference_planar_error_mps": 0.037673041224479675,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01055180374532938,
+              0.010183699429035187,
+              0.012822895310819149
+            ],
+            "torque_saturation_fraction": 0.05439814814814815,
+            "computed_torque_abs_max_nm": 7.0342793464660645,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.1374690532684326,
+            "tilt_rms_deg": 1.8699101209640503
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.005917947273701429,
+              0.0752817764878273,
+              0.003607521066442132
+            ],
+            "velocity_std_mps": [
+              0.026599368080496788,
+              0.026247700676321983,
+              0.025240296497941017
+            ],
+            "mean_gyro_rad_s": [
+              0.013474375940859318,
+              -0.001754975994117558,
+              -0.0329262800514698
+            ],
+            "gyro_std_rad_s": [
+              0.13843633234500885,
+              0.15020295977592468,
+              0.08870398253202438
+            ],
+            "planar_error_mps": 0.0402899831533432,
+            "yaw_error_rad_s": 0.07520660758018494,
+            "finite_difference_planar_error_mps": 0.038438666611909866,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01080084964632988,
+              0.010427541099488735,
+              0.011771284975111485
+            ],
+            "torque_saturation_fraction": 0.05291666666666667,
+            "computed_torque_abs_max_nm": 5.7030181884765625,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.1448168754577637,
+            "tilt_rms_deg": 1.921759009361267
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.005917947273701429,
+              0.0752817764878273,
+              0.003607521066442132
+            ],
+            "velocity_std_mps": [
+              0.026599368080496788,
+              0.026247700676321983,
+              0.025240296497941017
+            ],
+            "mean_gyro_rad_s": [
+              0.013474375940859318,
+              -0.001754975994117558,
+              -0.0329262800514698
+            ],
+            "gyro_std_rad_s": [
+              0.13843633234500885,
+              0.15020295977592468,
+              0.08870398253202438
+            ],
+            "planar_error_mps": 0.0402899831533432,
+            "yaw_error_rad_s": 0.07520660758018494,
+            "finite_difference_planar_error_mps": 0.038438666611909866,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01080084964632988,
+              0.010427541099488735,
+              0.011771284975111485
+            ],
+            "torque_saturation_fraction": 0.05291666666666667,
+            "computed_torque_abs_max_nm": 5.7030181884765625,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.1448168754577637,
+            "tilt_rms_deg": 1.921759009361267
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.00563079072162509,
+              0.06977985054254532,
+              -0.000307337410049513
+            ],
+            "velocity_std_mps": [
+              0.022751247510313988,
+              0.03025059401988983,
+              0.03406456112861633
+            ],
+            "mean_gyro_rad_s": [
+              -0.0015678666532039642,
+              -0.006976615637540817,
+              -0.0368693470954895
+            ],
+            "gyro_std_rad_s": [
+              0.14069807529449463,
+              0.12644585967063904,
+              0.10017197579145432
+            ],
+            "planar_error_mps": 0.0354192778468132,
+            "yaw_error_rad_s": 0.08315595984458923,
+            "finite_difference_planar_error_mps": 0.03384491428732872,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.009206063114106655,
+              0.008864445611834526,
+              0.017138920724391937
+            ],
+            "torque_saturation_fraction": 0.06180555555555556,
+            "computed_torque_abs_max_nm": 7.0342793464660645,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.1007308959960938,
+            "tilt_rms_deg": 1.5854332447052002
+          }
+        }
+      },
+      {
+        "name": "right",
+        "command": [
+          0.0,
+          -0.1,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              -0.00015863474982324988,
+              -0.06587012112140656,
+              -0.0002929119218606502
+            ],
+            "velocity_std_mps": [
+              0.0222404133528471,
+              0.01961798220872879,
+              0.02636517770588398
+            ],
+            "mean_gyro_rad_s": [
+              -0.0006273603648878634,
+              -0.003839149372652173,
+              0.01879357360303402
+            ],
+            "gyro_std_rad_s": [
+              0.1414673775434494,
+              0.1790410280227661,
+              0.08906864374876022
+            ],
+            "planar_error_mps": 0.03994717448949814,
+            "yaw_error_rad_s": 0.07439476251602173,
+            "finite_difference_planar_error_mps": 0.03845832869410515,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.008537565357983112,
+              0.0054734996519982815,
+              0.013089978136122227
+            ],
+            "torque_saturation_fraction": 0.06351851851851852,
+            "computed_torque_abs_max_nm": 4.966084003448486,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.093555450439453,
+            "tilt_rms_deg": 1.7621734142303467
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.00018656591419130564,
+              -0.06672457605600357,
+              1.4479815945378505e-05
+            ],
+            "velocity_std_mps": [
+              0.02258741483092308,
+              0.01806020922958851,
+              0.02490205317735672
+            ],
+            "mean_gyro_rad_s": [
+              0.0012731085298582911,
+              -0.004178624600172043,
+              0.020550627261400223
+            ],
+            "gyro_std_rad_s": [
+              0.14113456010818481,
+              0.18320538103580475,
+              0.08808349817991257
+            ],
+            "planar_error_mps": 0.04046553745865822,
+            "yaw_error_rad_s": 0.07399795204401016,
+            "finite_difference_planar_error_mps": 0.038925062865018845,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.008607982657849789,
+              0.0053355819545686245,
+              0.012065928429365158
+            ],
+            "torque_saturation_fraction": 0.06216666666666667,
+            "computed_torque_abs_max_nm": 4.966084003448486,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.101646900177002,
+            "tilt_rms_deg": 1.8567665815353394
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.00018656591419130564,
+              -0.06672457605600357,
+              1.4479815945378505e-05
+            ],
+            "velocity_std_mps": [
+              0.02258741483092308,
+              0.01806020922958851,
+              0.02490205317735672
+            ],
+            "mean_gyro_rad_s": [
+              0.0012731085298582911,
+              -0.004178624600172043,
+              0.020550627261400223
+            ],
+            "gyro_std_rad_s": [
+              0.14113456010818481,
+              0.18320538103580475,
+              0.08808349817991257
+            ],
+            "planar_error_mps": 0.04046553745865822,
+            "yaw_error_rad_s": 0.07399795204401016,
+            "finite_difference_planar_error_mps": 0.038925062865018845,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.008607982657849789,
+              0.0053355819545686245,
+              0.012065928429365158
+            ],
+            "torque_saturation_fraction": 0.06216666666666667,
+            "computed_torque_abs_max_nm": 4.966084003448486,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.101646900177002,
+            "tilt_rms_deg": 1.8567665815353394
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              -0.0018846343737095594,
+              -0.06159772723913193,
+              -0.001829871442168951
+            ],
+            "velocity_std_mps": [
+              0.020329348742961884,
+              0.025620900094509125,
+              0.03267006576061249
+            ],
+            "mean_gyro_rad_s": [
+              -0.010129710659384727,
+              -0.0021417676471173763,
+              0.010008292272686958
+            ],
+            "gyro_std_rad_s": [
+              0.14274078607559204,
+              0.156555637717247,
+              0.09334444254636765
+            ],
+            "planar_error_mps": 0.037355367094278336,
+            "yaw_error_rad_s": 0.07637881487607956,
+            "finite_difference_planar_error_mps": 0.03612462058663368,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.00817639846354723,
+              0.006116604898124933,
+              0.017324872314929962
+            ],
+            "torque_saturation_fraction": 0.07027777777777777,
+            "computed_torque_abs_max_nm": 4.392890453338623,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.0530972480773926,
+            "tilt_rms_deg": 1.1805170774459839
+          }
+        }
+      },
+      {
+        "name": "forward_fast",
+        "command": [
+          0.2,
+          0.0,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.11081180721521378,
+              0.017732413485646248,
+              0.00497418362647295
+            ],
+            "velocity_std_mps": [
+              0.0334516242146492,
+              0.021533772349357605,
+              0.042079515755176544
+            ],
+            "mean_gyro_rad_s": [
+              -0.007703515700995922,
+              0.0034241711255162954,
+              -0.07235222309827805
+            ],
+            "gyro_std_rad_s": [
+              0.163829505443573,
+              0.2077685445547104,
+              0.1388963907957077
+            ],
+            "planar_error_mps": 0.08774688839912415,
+            "yaw_error_rad_s": 0.12355439364910126,
+            "finite_difference_planar_error_mps": 0.08715521544218063,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.013444174081087112,
+              0.007318323943763971,
+              0.018373938277363777
+            ],
+            "torque_saturation_fraction": 0.05710648148148148,
+            "computed_torque_abs_max_nm": 4.710270881652832,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.8971757888793945,
+            "tilt_rms_deg": 3.7321345806121826
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.11580806970596313,
+              0.01910233311355114,
+              0.004920708481222391
+            ],
+            "velocity_std_mps": [
+              0.02919861674308777,
+              0.021103305742144585,
+              0.041918400675058365
+            ],
+            "mean_gyro_rad_s": [
+              -0.0048517342656850815,
+              0.0008751946152187884,
+              -0.07061442732810974
+            ],
+            "gyro_std_rad_s": [
+              0.16909609735012054,
+              0.2166871279478073,
+              0.1380256861448288
+            ],
+            "planar_error_mps": 0.08927585184574127,
+            "yaw_error_rad_s": 0.12242535501718521,
+            "finite_difference_planar_error_mps": 0.08866267651319504,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.013490341603755951,
+              0.0073136077262461185,
+              0.018046896904706955
+            ],
+            "torque_saturation_fraction": 0.056416666666666664,
+            "computed_torque_abs_max_nm": 4.236360549926758,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.900021553039551,
+            "tilt_rms_deg": 3.9122116565704346
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.11580806970596313,
+              0.01910233311355114,
+              0.004920708481222391
+            ],
+            "velocity_std_mps": [
+              0.02919861674308777,
+              0.021103305742144585,
+              0.041918400675058365
+            ],
+            "mean_gyro_rad_s": [
+              -0.0048517342656850815,
+              0.0008751946152187884,
+              -0.07061442732810974
+            ],
+            "gyro_std_rad_s": [
+              0.16909609735012054,
+              0.2166871279478073,
+              0.1380256861448288
+            ],
+            "planar_error_mps": 0.08927585184574127,
+            "yaw_error_rad_s": 0.12242535501718521,
+            "finite_difference_planar_error_mps": 0.08866267651319504,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.013490341603755951,
+              0.0073136077262461185,
+              0.018046896904706955
+            ],
+            "torque_saturation_fraction": 0.056416666666666664,
+            "computed_torque_abs_max_nm": 4.236360549926758,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.900021553039551,
+            "tilt_rms_deg": 3.9122116565704346
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.08583083748817444,
+              0.010882813483476639,
+              0.005241570062935352
+            ],
+            "velocity_std_mps": [
+              0.04126029461622238,
+              0.022342193871736526,
+              0.04287506639957428
+            ],
+            "mean_gyro_rad_s": [
+              -0.021962370723485947,
+              0.016169050708413124,
+              -0.08104178309440613
+            ],
+            "gyro_std_rad_s": [
+              0.13352546095848083,
+              0.15506373345851898,
+              0.14285406470298767
+            ],
+            "planar_error_mps": 0.08010207116603851,
+            "yaw_error_rad_s": 0.12919963896274567,
+            "finite_difference_planar_error_mps": 0.0796179473400116,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.013210914097726345,
+              0.007341851945966482,
+              0.019928807392716408
+            ],
+            "torque_saturation_fraction": 0.06055555555555556,
+            "computed_torque_abs_max_nm": 4.710270881652832,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.882948637008667,
+            "tilt_rms_deg": 2.6544229984283447
+          }
+        }
+      },
+      {
+        "name": "turn_left",
+        "command": [
+          0.0,
+          0.0,
+          0.2
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.00513811269775033,
+              0.010537953115999699,
+              0.0021429762709885836
+            ],
+            "velocity_std_mps": [
+              0.019695069640874863,
+              0.02508769929409027,
+              0.030433891341090202
+            ],
+            "mean_gyro_rad_s": [
+              0.009766841307282448,
+              -0.007676683831959963,
+              0.1561146229505539
+            ],
+            "gyro_std_rad_s": [
+              0.1391359567642212,
+              0.1769796758890152,
+              0.09914252907037735
+            ],
+            "planar_error_mps": 0.03062182106077671,
+            "yaw_error_rad_s": 0.08560356497764587,
+            "finite_difference_planar_error_mps": 0.028480274602770805,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010182525031268597,
+              0.00777261471375823,
+              0.015799881890416145
+            ],
+            "torque_saturation_fraction": 0.057847222222222223,
+            "computed_torque_abs_max_nm": 5.32523250579834,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.0722815990448,
+            "tilt_rms_deg": 1.4703432321548462
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.005490727256983519,
+              0.011264589615166187,
+              0.0028440773021429777
+            ],
+            "velocity_std_mps": [
+              0.01996617205440998,
+              0.025834346190094948,
+              0.028745805844664574
+            ],
+            "mean_gyro_rad_s": [
+              0.01185290515422821,
+              -0.008403854444622993,
+              0.15733447670936584
+            ],
+            "gyro_std_rad_s": [
+              0.13962940871715546,
+              0.18148165941238403,
+              0.09686814993619919
+            ],
+            "planar_error_mps": 0.03166505694389343,
+            "yaw_error_rad_s": 0.0856880322098732,
+            "finite_difference_planar_error_mps": 0.029353760182857513,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010480805300176144,
+              0.007935614325106144,
+              0.015034428797662258
+            ],
+            "torque_saturation_fraction": 0.05736111111111111,
+            "computed_torque_abs_max_nm": 5.32523250579834,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.076206684112549,
+            "tilt_rms_deg": 1.5075900554656982
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.005490727256983519,
+              0.011264589615166187,
+              0.0028440773021429777
+            ],
+            "velocity_std_mps": [
+              0.01996617205440998,
+              0.025834346190094948,
+              0.028745805844664574
+            ],
+            "mean_gyro_rad_s": [
+              0.01185290515422821,
+              -0.008403854444622993,
+              0.15733447670936584
+            ],
+            "gyro_std_rad_s": [
+              0.13962940871715546,
+              0.18148165941238403,
+              0.09686814993619919
+            ],
+            "planar_error_mps": 0.03166505694389343,
+            "yaw_error_rad_s": 0.0856880322098732,
+            "finite_difference_planar_error_mps": 0.029353760182857513,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010480805300176144,
+              0.007935614325106144,
+              0.015034428797662258
+            ],
+            "torque_saturation_fraction": 0.05736111111111111,
+            "computed_torque_abs_max_nm": 5.32523250579834,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.076206684112549,
+            "tilt_rms_deg": 1.5075900554656982
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.003375026863068342,
+              0.0069047873839735985,
+              -0.0013625314459204674
+            ],
+            "velocity_std_mps": [
+              0.018177002668380737,
+              0.02057797834277153,
+              0.03756299242377281
+            ],
+            "mean_gyro_rad_s": [
+              -0.000663453945890069,
+              -0.004040839150547981,
+              0.15001553297042847
+            ],
+            "gyro_std_rad_s": [
+              0.13616380095481873,
+              0.15243688225746155,
+              0.10960676521062851
+            ],
+            "planar_error_mps": 0.0254056379199028,
+            "yaw_error_rad_s": 0.08518117666244507,
+            "finite_difference_planar_error_mps": 0.024112844839692116,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.008536167442798615,
+              0.006900094915181398,
+              0.019174188375473022
+            ],
+            "torque_saturation_fraction": 0.06027777777777778,
+            "computed_torque_abs_max_nm": 5.108896732330322,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.0526540279388428,
+            "tilt_rms_deg": 1.2677998542785645
+          }
+        }
+      },
+      {
+        "name": "turn_right",
+        "command": [
+          0.0,
+          0.0,
+          -0.2
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              -0.0031946904491633177,
+              0.01877596788108349,
+              0.001829188084229827
+            ],
+            "velocity_std_mps": [
+              0.022402120754122734,
+              0.022796837612986565,
+              0.027172785252332687
+            ],
+            "mean_gyro_rad_s": [
+              0.010597060434520245,
+              -0.0015015407698228955,
+              -0.17897574603557587
+            ],
+            "gyro_std_rad_s": [
+              0.13563375174999237,
+              0.19297268986701965,
+              0.09123104065656662
+            ],
+            "planar_error_mps": 0.03347709774971008,
+            "yaw_error_rad_s": 0.07411494851112366,
+            "finite_difference_planar_error_mps": 0.03272039443254471,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.009831469506025314,
+              0.007131950464099646,
+              0.01459677703678608
+            ],
+            "torque_saturation_fraction": 0.06358796296296296,
+            "computed_torque_abs_max_nm": 5.676270484924316,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.0024564266204834,
+            "tilt_rms_deg": 1.2243698835372925
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              -0.0033309063874185085,
+              0.019896535202860832,
+              0.0023001411464065313
+            ],
+            "velocity_std_mps": [
+              0.022367235273122787,
+              0.02311593107879162,
+              0.025538818910717964
+            ],
+            "mean_gyro_rad_s": [
+              0.012326151132583618,
+              -0.0019083220977336168,
+              -0.17994490265846252
+            ],
+            "gyro_std_rad_s": [
+              0.13568571209907532,
+              0.1977793425321579,
+              0.08852899074554443
+            ],
+            "planar_error_mps": 0.03422519564628601,
+            "yaw_error_rad_s": 0.07296741008758545,
+            "finite_difference_planar_error_mps": 0.03351551666855812,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.009951391257345676,
+              0.007234529592096806,
+              0.013653416186571121
+            ],
+            "torque_saturation_fraction": 0.06302777777777778,
+            "computed_torque_abs_max_nm": 5.676270484924316,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 1.998630166053772,
+            "tilt_rms_deg": 1.2462327480316162
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              -0.0033309063874185085,
+              0.019896535202860832,
+              0.0023001411464065313
+            ],
+            "velocity_std_mps": [
+              0.022367235273122787,
+              0.02311593107879162,
+              0.025538818910717964
+            ],
+            "mean_gyro_rad_s": [
+              0.012326151132583618,
+              -0.0019083220977336168,
+              -0.17994490265846252
+            ],
+            "gyro_std_rad_s": [
+              0.13568571209907532,
+              0.1977793425321579,
+              0.08852899074554443
+            ],
+            "planar_error_mps": 0.03422519564628601,
+            "yaw_error_rad_s": 0.07296741008758545,
+            "finite_difference_planar_error_mps": 0.03351551666855812,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.009951391257345676,
+              0.007234529592096806,
+              0.013653416186571121
+            ],
+            "torque_saturation_fraction": 0.06302777777777778,
+            "computed_torque_abs_max_nm": 5.676270484924316,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 1.998630166053772,
+            "tilt_rms_deg": 1.2462327480316162
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              -0.0025136140175163746,
+              0.013173158280551434,
+              -0.0005255704163573682
+            ],
+            "velocity_std_mps": [
+              0.022563379257917404,
+              0.020218035206198692,
+              0.03409331291913986
+            ],
+            "mean_gyro_rad_s": [
+              0.0019516093889251351,
+              0.0005323741352185607,
+              -0.17413008213043213
+            ],
+            "gyro_std_rad_s": [
+              0.13504207134246826,
+              0.1668601781129837,
+              0.10355469584465027
+            ],
+            "planar_error_mps": 0.029736580327153206,
+            "yaw_error_rad_s": 0.07985267788171768,
+            "finite_difference_planar_error_mps": 0.028744781389832497,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.00920847523957491,
+              0.006595168262720108,
+              0.018609588965773582
+            ],
+            "torque_saturation_fraction": 0.06638888888888889,
+            "computed_torque_abs_max_nm": 4.209353446960449,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.02158784866333,
+            "tilt_rms_deg": 1.1086069345474243
+          }
+        }
+      },
+      {
+        "name": "arc_left",
+        "command": [
+          0.1,
+          0.0,
+          0.2
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.05781003460288048,
+              0.019411122426390648,
+              0.0037068112287670374
+            ],
+            "velocity_std_mps": [
+              0.03434128686785698,
+              0.027841053903102875,
+              0.03266383334994316
+            ],
+            "mean_gyro_rad_s": [
+              0.0014418705832213163,
+              -0.0022569559514522552,
+              0.08538950979709625
+            ],
+            "gyro_std_rad_s": [
+              0.13532477617263794,
+              0.16352441906929016,
+              0.11092390865087509
+            ],
+            "planar_error_mps": 0.05593685060739517,
+            "yaw_error_rad_s": 0.13164463639259338,
+            "finite_difference_planar_error_mps": 0.05451158434152603,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01473352499306202,
+              0.0072713010013103485,
+              0.015795959159731865
+            ],
+            "torque_saturation_fraction": 0.07601851851851851,
+            "computed_torque_abs_max_nm": 5.305578231811523,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.532318115234375,
+            "tilt_rms_deg": 2.8552772998809814
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.056777507066726685,
+              0.019397670403122902,
+              0.003781713079661131
+            ],
+            "velocity_std_mps": [
+              0.034158773720264435,
+              0.028802737593650818,
+              0.031015485525131226
+            ],
+            "mean_gyro_rad_s": [
+              0.0052254777401685715,
+              -0.0033572164829820395,
+              0.08681084215641022
+            ],
+            "gyro_std_rad_s": [
+              0.13729840517044067,
+              0.168242946267128,
+              0.1094534695148468
+            ],
+            "planar_error_mps": 0.05811703950166702,
+            "yaw_error_rad_s": 0.13211140036582947,
+            "finite_difference_planar_error_mps": 0.0567459799349308,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.015107267536222935,
+              0.007474673446267843,
+              0.015043145976960659
+            ],
+            "torque_saturation_fraction": 0.07641666666666666,
+            "computed_torque_abs_max_nm": 5.305578231811523,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.502593517303467,
+            "tilt_rms_deg": 2.9771249294281006
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.056777507066726685,
+              0.019397670403122902,
+              0.003781713079661131
+            ],
+            "velocity_std_mps": [
+              0.034158773720264435,
+              0.028802737593650818,
+              0.031015485525131226
+            ],
+            "mean_gyro_rad_s": [
+              0.0052254777401685715,
+              -0.0033572164829820395,
+              0.08681084215641022
+            ],
+            "gyro_std_rad_s": [
+              0.13729840517044067,
+              0.168242946267128,
+              0.1094534695148468
+            ],
+            "planar_error_mps": 0.05811703950166702,
+            "yaw_error_rad_s": 0.13211140036582947,
+            "finite_difference_planar_error_mps": 0.0567459799349308,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.015107267536222935,
+              0.007474673446267843,
+              0.015043145976960659
+            ],
+            "torque_saturation_fraction": 0.07641666666666666,
+            "computed_torque_abs_max_nm": 5.305578231811523,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.502593517303467,
+            "tilt_rms_deg": 2.9771249294281006
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.06297251582145691,
+              0.019478274509310722,
+              0.0033323192037642
+            ],
+            "velocity_std_mps": [
+              0.03478291258215904,
+              0.02242210879921913,
+              0.039894700050354004
+            ],
+            "mean_gyro_rad_s": [
+              -0.017476161941885948,
+              0.0032443476375192404,
+              0.0782833844423294
+            ],
+            "gyro_std_rad_s": [
+              0.12325987964868546,
+              0.13739199936389923,
+              0.11774437874555588
+            ],
+            "planar_error_mps": 0.04503587633371353,
+            "yaw_error_rad_s": 0.12931083142757416,
+            "finite_difference_planar_error_mps": 0.04333958029747009,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01270093210041523,
+              0.0061544449999928474,
+              0.019120479002594948
+            ],
+            "torque_saturation_fraction": 0.07402777777777778,
+            "computed_torque_abs_max_nm": 5.1394572257995605,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.6809401512145996,
+            "tilt_rms_deg": 2.144594430923462
+          }
+        }
+      },
+      {
+        "name": "arc_right",
+        "command": [
+          0.1,
+          0.0,
+          -0.2
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.07372186332941055,
+              0.012962973676621914,
+              0.003679365385323763
+            ],
+            "velocity_std_mps": [
+              0.027222128584980965,
+              0.017946751788258553,
+              0.03299658000469208
+            ],
+            "mean_gyro_rad_s": [
+              0.007000891957432032,
+              0.007979283109307289,
+              -0.12903395295143127
+            ],
+            "gyro_std_rad_s": [
+              0.1416485607624054,
+              0.14480559527873993,
+              0.11702177673578262
+            ],
+            "planar_error_mps": 0.037696462124586105,
+            "yaw_error_rad_s": 0.10895124077796936,
+            "finite_difference_planar_error_mps": 0.03644328936934471,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011565585620701313,
+              0.006201085168868303,
+              0.015404006466269493
+            ],
+            "torque_saturation_fraction": 0.05453703703703704,
+            "computed_torque_abs_max_nm": 5.203047275543213,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.4382951259613037,
+            "tilt_rms_deg": 2.3424313068389893
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.07504428923130035,
+              0.013567631132900715,
+              0.0037536327727138996
+            ],
+            "velocity_std_mps": [
+              0.025557490065693855,
+              0.01770373433828354,
+              0.03152303397655487
+            ],
+            "mean_gyro_rad_s": [
+              0.00968361645936966,
+              0.007338550873100758,
+              -0.12785719335079193
+            ],
+            "gyro_std_rad_s": [
+              0.14183048903942108,
+              0.14675696194171906,
+              0.1165967583656311
+            ],
+            "planar_error_mps": 0.03795881196856499,
+            "yaw_error_rad_s": 0.10928706079721451,
+            "finite_difference_planar_error_mps": 0.03672688081860542,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011650506407022476,
+              0.006188915576785803,
+              0.014349856413900852
+            ],
+            "torque_saturation_fraction": 0.05383333333333333,
+            "computed_torque_abs_max_nm": 5.203047275543213,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.4111430644989014,
+            "tilt_rms_deg": 2.4553396701812744
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.07504428923130035,
+              0.013567631132900715,
+              0.0037536327727138996
+            ],
+            "velocity_std_mps": [
+              0.025557490065693855,
+              0.01770373433828354,
+              0.03152303397655487
+            ],
+            "mean_gyro_rad_s": [
+              0.00968361645936966,
+              0.007338550873100758,
+              -0.12785719335079193
+            ],
+            "gyro_std_rad_s": [
+              0.14183048903942108,
+              0.14675696194171906,
+              0.1165967583656311
+            ],
+            "planar_error_mps": 0.03795881196856499,
+            "yaw_error_rad_s": 0.10928706079721451,
+            "finite_difference_planar_error_mps": 0.03672688081860542,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011650506407022476,
+              0.006188915576785803,
+              0.014349856413900852
+            ],
+            "torque_saturation_fraction": 0.05383333333333333,
+            "computed_torque_abs_max_nm": 5.203047275543213,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.4111430644989014,
+            "tilt_rms_deg": 2.4553396701812744
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.0671098455786705,
+              0.009939674288034439,
+              0.003308030078187585
+            ],
+            "velocity_std_mps": [
+              0.03358382359147072,
+              0.01882653683423996,
+              0.03954701870679855
+            ],
+            "mean_gyro_rad_s": [
+              -0.006412738002836704,
+              0.011182903312146664,
+              -0.1349184364080429
+            ],
+            "gyro_std_rad_s": [
+              0.1399656981229782,
+              0.13457925617694855,
+              0.11894934624433517
+            ],
+            "planar_error_mps": 0.0363847017288208,
+            "yaw_error_rad_s": 0.10727207362651825,
+            "finite_difference_planar_error_mps": 0.035025350749492645,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011131318286061287,
+              0.0062615773640573025,
+              0.01985214836895466
+            ],
+            "torque_saturation_fraction": 0.058055555555555555,
+            "computed_torque_abs_max_nm": 4.681458950042725,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.5740549564361572,
+            "tilt_rms_deg": 1.6668665409088135
+          }
+        }
+      },
+      {
+        "name": "strafe_arc",
+        "command": [
+          0.0,
+          0.1,
+          0.2
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.002499200403690338,
+              0.07708779722452164,
+              0.003110428573563695
+            ],
+            "velocity_std_mps": [
+              0.029840990900993347,
+              0.024140823632478714,
+              0.028186531737446785
+            ],
+            "mean_gyro_rad_s": [
+              0.011442219838500023,
+              -0.007978719659149647,
+              0.10676638036966324
+            ],
+            "gyro_std_rad_s": [
+              0.13454170525074005,
+              0.13581587374210358,
+              0.09966455399990082
+            ],
+            "planar_error_mps": 0.038551077246665955,
+            "yaw_error_rad_s": 0.11189465969800949,
+            "finite_difference_planar_error_mps": 0.03676292672753334,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011147906072437763,
+              0.00888562947511673,
+              0.013212054967880249
+            ],
+            "torque_saturation_fraction": 0.05511574074074074,
+            "computed_torque_abs_max_nm": 5.0638108253479,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.1868181228637695,
+            "tilt_rms_deg": 1.6589058637619019
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.002078286139294505,
+              0.07859442383050919,
+              0.003791208378970623
+            ],
+            "velocity_std_mps": [
+              0.03022664599120617,
+              0.02238866314291954,
+              0.027100885286927223
+            ],
+            "mean_gyro_rad_s": [
+              0.013070805929601192,
+              -0.006791973952203989,
+              0.10722165554761887
+            ],
+            "gyro_std_rad_s": [
+              0.13161981105804443,
+              0.13612514734268188,
+              0.09795248508453369
+            ],
+            "planar_error_mps": 0.038729410618543625,
+            "yaw_error_rad_s": 0.11327739804983139,
+            "finite_difference_planar_error_mps": 0.03689942881464958,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011403282172977924,
+              0.008846842683851719,
+              0.012071187607944012
+            ],
+            "torque_saturation_fraction": 0.05336111111111111,
+            "computed_torque_abs_max_nm": 5.0638108253479,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.1905691623687744,
+            "tilt_rms_deg": 1.6960769891738892
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.002078286139294505,
+              0.07859442383050919,
+              0.003791208378970623
+            ],
+            "velocity_std_mps": [
+              0.03022664599120617,
+              0.02238866314291954,
+              0.027100885286927223
+            ],
+            "mean_gyro_rad_s": [
+              0.013070805929601192,
+              -0.006791973952203989,
+              0.10722165554761887
+            ],
+            "gyro_std_rad_s": [
+              0.13161981105804443,
+              0.13612514734268188,
+              0.09795248508453369
+            ],
+            "planar_error_mps": 0.038729410618543625,
+            "yaw_error_rad_s": 0.11327739804983139,
+            "finite_difference_planar_error_mps": 0.03689942881464958,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011403282172977924,
+              0.008846842683851719,
+              0.012071187607944012
+            ],
+            "torque_saturation_fraction": 0.05336111111111111,
+            "computed_torque_abs_max_nm": 5.0638108253479,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.1905691623687744,
+            "tilt_rms_deg": 1.6960769891738892
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.004603775218129158,
+              0.06955436617136002,
+              -0.00029347100644372404
+            ],
+            "velocity_std_mps": [
+              0.027736885473132133,
+              0.03036961890757084,
+              0.03287379816174507
+            ],
+            "mean_gyro_rad_s": [
+              0.003299291944131255,
+              -0.013912455178797245,
+              0.10448981076478958
+            ],
+            "gyro_std_rad_s": [
+              0.14802218973636627,
+              0.13410109281539917,
+              0.10778877139091492
+            ],
+            "planar_error_mps": 0.037659402936697006,
+            "yaw_error_rad_s": 0.10498098284006119,
+            "finite_difference_planar_error_mps": 0.03608041629195213,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.009771417826414108,
+              0.009077074006199837,
+              0.01785448007285595
+            ],
+            "torque_saturation_fraction": 0.06388888888888888,
+            "computed_torque_abs_max_nm": 4.185161590576172,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.1680641174316406,
+            "tilt_rms_deg": 1.4589134454727173
+          }
+        }
+      },
+      {
+        "name": "diagonal",
+        "command": [
+          0.071,
+          0.071,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.04263044148683548,
+              0.06072743237018585,
+              0.0037494539283216
+            ],
+            "velocity_std_mps": [
+              0.029367782175540924,
+              0.02429431676864624,
+              0.029159968718886375
+            ],
+            "mean_gyro_rad_s": [
+              0.014220401644706726,
+              0.0027209988329559565,
+              -0.019381940364837646
+            ],
+            "gyro_std_rad_s": [
+              0.1325681060552597,
+              0.18179082870483398,
+              0.12004762887954712
+            ],
+            "planar_error_mps": 0.042127061635255814,
+            "yaw_error_rad_s": 0.10173743218183517,
+            "finite_difference_planar_error_mps": 0.040244873613119125,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.012219458818435669,
+              0.009495276026427746,
+              0.013634545728564262
+            ],
+            "torque_saturation_fraction": 0.06412037037037037,
+            "computed_torque_abs_max_nm": 4.842004776000977,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.4476895332336426,
+            "tilt_rms_deg": 2.4065067768096924
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.04205424711108208,
+              0.0616738386452198,
+              0.004072543233633041
+            ],
+            "velocity_std_mps": [
+              0.029485363513231277,
+              0.023187117651104927,
+              0.026919832453131676
+            ],
+            "mean_gyro_rad_s": [
+              0.01679057814180851,
+              0.003209555521607399,
+              -0.020474307239055634
+            ],
+            "gyro_std_rad_s": [
+              0.13333480060100555,
+              0.18677063286304474,
+              0.12158169597387314
+            ],
+            "planar_error_mps": 0.043303001672029495,
+            "yaw_error_rad_s": 0.10322693735361099,
+            "finite_difference_planar_error_mps": 0.041484296321868896,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.012415960431098938,
+              0.009556647390127182,
+              0.01243012584745884
+            ],
+            "torque_saturation_fraction": 0.06394444444444444,
+            "computed_torque_abs_max_nm": 4.842004776000977,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.4397740364074707,
+            "tilt_rms_deg": 2.5093069076538086
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.04205424711108208,
+              0.0616738386452198,
+              0.004072543233633041
+            ],
+            "velocity_std_mps": [
+              0.029485363513231277,
+              0.023187117651104927,
+              0.026919832453131676
+            ],
+            "mean_gyro_rad_s": [
+              0.01679057814180851,
+              0.003209555521607399,
+              -0.020474307239055634
+            ],
+            "gyro_std_rad_s": [
+              0.13333480060100555,
+              0.18677063286304474,
+              0.12158169597387314
+            ],
+            "planar_error_mps": 0.043303001672029495,
+            "yaw_error_rad_s": 0.10322693735361099,
+            "finite_difference_planar_error_mps": 0.041484296321868896,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.012415960431098938,
+              0.009556647390127182,
+              0.01243012584745884
+            ],
+            "torque_saturation_fraction": 0.06394444444444444,
+            "computed_torque_abs_max_nm": 4.842004776000977,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.4397740364074707,
+            "tilt_rms_deg": 2.5093069076538086
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.04551123455166817,
+              0.05599524825811386,
+              0.002133994596078992
+            ],
+            "velocity_std_mps": [
+              0.028598979115486145,
+              0.028743669390678406,
+              0.038409601897001266
+            ],
+            "mean_gyro_rad_s": [
+              0.0013695263769477606,
+              0.00027821114053949714,
+              -0.013920055702328682
+            ],
+            "gyro_std_rad_s": [
+              0.12789371609687805,
+              0.15448011457920074,
+              0.1119031086564064
+            ],
+            "planar_error_mps": 0.03624735400080681,
+            "yaw_error_rad_s": 0.09428992867469788,
+            "finite_difference_planar_error_mps": 0.03404777869582176,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011185267940163612,
+              0.00918227806687355,
+              0.018516605719923973
+            ],
+            "torque_saturation_fraction": 0.065,
+            "computed_torque_abs_max_nm": 4.526227951049805,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.4872686862945557,
+            "tilt_rms_deg": 1.8068045377731323
+          }
+        }
+      }
+    ],
+    "terminations_all48": 0,
+    "truncations_all48": 0
+  },
+  "cold_formal004": {
+    "label": "cold_formal004",
+    "diagnostics_sha256": "2c067b023b52e84b6dd3a3a78ccd35a6ea036602e243eb28d94f01a7177ea03e",
+    "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+    "target_slew_rad_per_20ms": 0.04,
+    "options": {
+      "duration_s": 12,
+      "settle_s": 2,
+      "seed": 7057,
+      "trace_envs_per_scenario": 1,
+      "controller": "policy"
+    },
+    "overrides": {
+      "target_slew_rad_per_20ms": 0.04,
+      "reward_weights": {
+        "stand_joint_velocity": -0.5,
+        "stand_target_velocity": -0.15,
+        "stand_posture": -2.0,
+        "action_rate": -0.075,
+        "saturation": -0.75,
+        "torque_excess": -0.6,
+        "worst_torque_excess": -0.2,
+        "stand_raw_action": 0.0
+      },
+      "observation_noise_scale": 1.0,
+      "target_filter_time_constant_s": 0.0
+    },
+    "reward_weights": {
+      "linear_tracking": 4.0,
+      "yaw_tracking": 2.0,
+      "linear_progress": 1.5,
+      "yaw_progress": 0.75,
+      "vertical_velocity": -2.0,
+      "roll_pitch_rate": -0.15,
+      "tilt": -2.0,
+      "height": -25.0,
+      "torque": -0.03,
+      "torque_excess": -0.6,
+      "worst_torque_excess": -0.2,
+      "saturation": -0.75,
+      "positive_power": -0.015,
+      "action_rate": -0.075,
+      "joint_acceleration": -2.5e-07,
+      "slip": -0.5,
+      "nonfoot": -2.0,
+      "joint_limits": -2.0,
+      "airtime": 0.5,
+      "stand_posture": -2.0,
+      "stand_joint_velocity": -0.5,
+      "stand_target_velocity": -0.15,
+      "stand_raw_action": 0.0
+    },
+    "joint_names": [
+      "revolute_1_1",
+      "revolute_1_7",
+      "revolute_2_5",
+      "revolute_3",
+      "revolute_4",
+      "revolute_5",
+      "revolute_1",
+      "revolute_1_6",
+      "revolute_1_5",
+      "revolute_1_3",
+      "revolute_1_4",
+      "revolute_1_2",
+      "revolute_2",
+      "revolute_2_6",
+      "revolute_2_4",
+      "revolute_2_2",
+      "revolute_2_3",
+      "revolute_2_1"
+    ],
+    "observation_audit": {
+      "actor_width": 315,
+      "critic_width": 318,
+      "max_same_step_repeat_difference": 0.0,
+      "max_command_slice_difference": 0.0,
+      "max_history_shift_difference": 0.0
+    },
+    "scenarios": [
+      {
+        "name": "stand",
+        "command": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.0002673551207408309,
+              0.01378242764621973,
+              0.00340799568220973
+            ],
+            "velocity_std_mps": [
+              0.02230323851108551,
+              0.032013148069381714,
+              0.03867576643824577
+            ],
+            "mean_gyro_rad_s": [
+              0.009894832037389278,
+              -0.005905988626182079,
+              -0.0066489120945334435
+            ],
+            "gyro_std_rad_s": [
+              0.19878777861595154,
+              0.23222893476486206,
+              0.0990830808877945
+            ],
+            "planar_error_mps": 0.03686576336622238,
+            "yaw_error_rad_s": 0.07771997898817062,
+            "finite_difference_planar_error_mps": 0.03524557128548622,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010426255874335766,
+              0.009147509932518005,
+              0.01987394690513611
+            ],
+            "torque_saturation_fraction": 0.10726851851851851,
+            "computed_torque_abs_max_nm": 6.495723247528076,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.7264740467071533,
+            "tilt_rms_deg": 1.4672846794128418
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.0008701811311766505,
+              0.014781533740460873,
+              0.00413423590362072
+            ],
+            "velocity_std_mps": [
+              0.022257259115576744,
+              0.03290167450904846,
+              0.03798505291342735
+            ],
+            "mean_gyro_rad_s": [
+              0.012423641048371792,
+              -0.005192082840949297,
+              -0.005655028857290745
+            ],
+            "gyro_std_rad_s": [
+              0.20131267607212067,
+              0.23657788336277008,
+              0.09775038063526154
+            ],
+            "planar_error_mps": 0.03789219260215759,
+            "yaw_error_rad_s": 0.0764564648270607,
+            "finite_difference_planar_error_mps": 0.03633624315261841,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010519200004637241,
+              0.009279599413275719,
+              0.019584665074944496
+            ],
+            "torque_saturation_fraction": 0.107,
+            "computed_torque_abs_max_nm": 6.334527492523193,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.746088981628418,
+            "tilt_rms_deg": 1.4897170066833496
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.0008701811311766505,
+              0.014781533740460873,
+              0.00413423590362072
+            ],
+            "velocity_std_mps": [
+              0.022257259115576744,
+              0.03290167450904846,
+              0.03798505291342735
+            ],
+            "mean_gyro_rad_s": [
+              0.012423641048371792,
+              -0.005192082840949297,
+              -0.005655028857290745
+            ],
+            "gyro_std_rad_s": [
+              0.20131267607212067,
+              0.23657788336277008,
+              0.09775038063526154
+            ],
+            "planar_error_mps": 0.03789219260215759,
+            "yaw_error_rad_s": 0.0764564648270607,
+            "finite_difference_planar_error_mps": 0.03633624315261841,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010519200004637241,
+              0.009279599413275719,
+              0.019584665074944496
+            ],
+            "torque_saturation_fraction": 0.107,
+            "computed_torque_abs_max_nm": 6.334527492523193,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.746088981628418,
+            "tilt_rms_deg": 1.4897170066833496
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              -0.002746772952377796,
+              0.008786854334175587,
+              -0.00022319371055345982
+            ],
+            "velocity_std_mps": [
+              0.02228860929608345,
+              0.026580017060041428,
+              0.04177024960517883
+            ],
+            "mean_gyro_rad_s": [
+              -0.0027491822838783264,
+              -0.009475513361394405,
+              -0.011618340387940407
+            ],
+            "gyro_std_rad_s": [
+              0.1851319670677185,
+              0.20909571647644043,
+              0.1053537130355835
+            ],
+            "planar_error_mps": 0.03173360228538513,
+            "yaw_error_rad_s": 0.08403757214546204,
+            "finite_difference_planar_error_mps": 0.02979220449924469,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.009948503226041794,
+              0.008456156589090824,
+              0.021261408925056458
+            ],
+            "torque_saturation_fraction": 0.10861111111111112,
+            "computed_torque_abs_max_nm": 6.495723247528076,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.6284003257751465,
+            "tilt_rms_deg": 1.349541425704956
+          }
+        }
+      },
+      {
+        "name": "forward",
+        "command": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.0864454060792923,
+              0.014199796132743359,
+              0.005639323499053717
+            ],
+            "velocity_std_mps": [
+              0.03521859645843506,
+              0.023981807753443718,
+              0.04333459585905075
+            ],
+            "mean_gyro_rad_s": [
+              0.007350834086537361,
+              -0.0011013527400791645,
+              -0.0014528925530612469
+            ],
+            "gyro_std_rad_s": [
+              0.18073049187660217,
+              0.19889988005161285,
+              0.12116597592830658
+            ],
+            "planar_error_mps": 0.039866264909505844,
+            "yaw_error_rad_s": 0.09595511108636856,
+            "finite_difference_planar_error_mps": 0.03753828629851341,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.014062155038118362,
+              0.007767955306917429,
+              0.019558491185307503
+            ],
+            "torque_saturation_fraction": 0.10918981481481481,
+            "computed_torque_abs_max_nm": 6.331404685974121,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.4757626056671143,
+            "tilt_rms_deg": 2.9332282543182373
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.08791949599981308,
+              0.014964064583182335,
+              0.005827553570270538
+            ],
+            "velocity_std_mps": [
+              0.03433521091938019,
+              0.023810943588614464,
+              0.04250310733914375
+            ],
+            "mean_gyro_rad_s": [
+              0.01139387022703886,
+              -0.003110337071120739,
+              0.0013577145291492343
+            ],
+            "gyro_std_rad_s": [
+              0.18012796342372894,
+              0.19861650466918945,
+              0.12017016857862473
+            ],
+            "planar_error_mps": 0.0406227633357048,
+            "yaw_error_rad_s": 0.09502909332513809,
+            "finite_difference_planar_error_mps": 0.038220226764678955,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.014351427555084229,
+              0.007819103077054024,
+              0.018853969871997833
+            ],
+            "torque_saturation_fraction": 0.10955555555555556,
+            "computed_torque_abs_max_nm": 6.331404685974121,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.4651694297790527,
+            "tilt_rms_deg": 3.0442070960998535
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.08791949599981308,
+              0.014964064583182335,
+              0.005827553570270538
+            ],
+            "velocity_std_mps": [
+              0.03433521091938019,
+              0.023810943588614464,
+              0.04250310733914375
+            ],
+            "mean_gyro_rad_s": [
+              0.01139387022703886,
+              -0.003110337071120739,
+              0.0013577145291492343
+            ],
+            "gyro_std_rad_s": [
+              0.18012796342372894,
+              0.19861650466918945,
+              0.12017016857862473
+            ],
+            "planar_error_mps": 0.0406227633357048,
+            "yaw_error_rad_s": 0.09502909332513809,
+            "finite_difference_planar_error_mps": 0.038220226764678955,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.014351427555084229,
+              0.007819103077054024,
+              0.018853969871997833
+            ],
+            "torque_saturation_fraction": 0.10955555555555556,
+            "computed_torque_abs_max_nm": 6.331404685974121,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.4651694297790527,
+            "tilt_rms_deg": 3.0442070960998535
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.07907447218894958,
+              0.010378468781709671,
+              0.004698171280324459
+            ],
+            "velocity_std_mps": [
+              0.03850140422582626,
+              0.024463074281811714,
+              0.04726213589310646
+            ],
+            "mean_gyro_rad_s": [
+              -0.012864350341260433,
+              0.008943552151322365,
+              -0.015505918301641941
+            ],
+            "gyro_std_rad_s": [
+              0.18237362802028656,
+              0.20000706613063812,
+              0.1250832974910736
+            ],
+            "planar_error_mps": 0.036083754152059555,
+            "yaw_error_rad_s": 0.10058517754077911,
+            "finite_difference_planar_error_mps": 0.034128591418266296,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.012515921145677567,
+              0.007506987079977989,
+              0.02275623194873333
+            ],
+            "torque_saturation_fraction": 0.10736111111111112,
+            "computed_torque_abs_max_nm": 5.9639811515808105,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.5287282466888428,
+            "tilt_rms_deg": 2.2993433475494385
+          }
+        }
+      },
+      {
+        "name": "reverse",
+        "command": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              -0.08745315670967102,
+              0.005444190464913845,
+              0.0043976763263344765
+            ],
+            "velocity_std_mps": [
+              0.03108345717191696,
+              0.023750456050038338,
+              0.04389149323105812
+            ],
+            "mean_gyro_rad_s": [
+              0.012964505702257156,
+              -0.009001452475786209,
+              -0.002682354534044862
+            ],
+            "gyro_std_rad_s": [
+              0.20723840594291687,
+              0.25993233919143677,
+              0.12006470561027527
+            ],
+            "planar_error_mps": 0.03505890071392059,
+            "yaw_error_rad_s": 0.09687993675470352,
+            "finite_difference_planar_error_mps": 0.03427381440997124,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010753017850220203,
+              0.007439160719513893,
+              0.021251536905765533
+            ],
+            "torque_saturation_fraction": 0.09712962962962964,
+            "computed_torque_abs_max_nm": 6.398075103759766,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.550203561782837,
+            "tilt_rms_deg": 1.0742132663726807
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              -0.08746781945228577,
+              0.005539580713957548,
+              0.0055159288458526134
+            ],
+            "velocity_std_mps": [
+              0.028994498774409294,
+              0.023690195754170418,
+              0.04344454035162926
+            ],
+            "mean_gyro_rad_s": [
+              0.014665276743471622,
+              -0.007671934552490711,
+              -0.0015152385458350182
+            ],
+            "gyro_std_rad_s": [
+              0.2074604034423828,
+              0.26323190331459045,
+              0.12134067714214325
+            ],
+            "planar_error_mps": 0.03537432849407196,
+            "yaw_error_rad_s": 0.09812887758016586,
+            "finite_difference_planar_error_mps": 0.03452168405056,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01076542492955923,
+              0.0073955850675702095,
+              0.02090124785900116
+            ],
+            "torque_saturation_fraction": 0.09705555555555556,
+            "computed_torque_abs_max_nm": 6.398075103759766,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.6034281253814697,
+            "tilt_rms_deg": 1.062729835510254
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              -0.08746781945228577,
+              0.005539580713957548,
+              0.0055159288458526134
+            ],
+            "velocity_std_mps": [
+              0.028994498774409294,
+              0.023690195754170418,
+              0.04344454035162926
+            ],
+            "mean_gyro_rad_s": [
+              0.014665276743471622,
+              -0.007671934552490711,
+              -0.0015152385458350182
+            ],
+            "gyro_std_rad_s": [
+              0.2074604034423828,
+              0.26323190331459045,
+              0.12134067714214325
+            ],
+            "planar_error_mps": 0.03537432849407196,
+            "yaw_error_rad_s": 0.09812887758016586,
+            "finite_difference_planar_error_mps": 0.03452168405056,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01076542492955923,
+              0.0073955850675702095,
+              0.02090124785900116
+            ],
+            "torque_saturation_fraction": 0.09705555555555556,
+            "computed_torque_abs_max_nm": 6.398075103759766,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.6034281253814697,
+            "tilt_rms_deg": 1.062729835510254
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              -0.08737985789775848,
+              0.004967237822711468,
+              -0.0011935917427763343
+            ],
+            "velocity_std_mps": [
+              0.039920881390571594,
+              0.0240437351167202,
+              0.04565220698714256
+            ],
+            "mean_gyro_rad_s": [
+              0.0044606649316847324,
+              -0.015649039298295975,
+              -0.008517958223819733
+            ],
+            "gyro_std_rad_s": [
+              0.2059139460325241,
+              0.24265390634536743,
+              0.11328915506601334
+            ],
+            "planar_error_mps": 0.03348177298903465,
+            "yaw_error_rad_s": 0.09063522517681122,
+            "finite_difference_planar_error_mps": 0.033034469932317734,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01069075521081686,
+              0.0076533230021595955,
+              0.02292272076010704
+            ],
+            "torque_saturation_fraction": 0.0975,
+            "computed_torque_abs_max_nm": 6.223845958709717,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.284079074859619,
+            "tilt_rms_deg": 1.1298805475234985
+          }
+        }
+      },
+      {
+        "name": "left",
+        "command": [
+          0.0,
+          0.1,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.004986857529729605,
+              0.09231125563383102,
+              0.004795040003955364
+            ],
+            "velocity_std_mps": [
+              0.02760646492242813,
+              0.029558327049016953,
+              0.03914369270205498
+            ],
+            "mean_gyro_rad_s": [
+              0.010525216348469257,
+              -0.006536880508065224,
+              -0.0373266227543354
+            ],
+            "gyro_std_rad_s": [
+              0.1846664994955063,
+              0.18334947526454926,
+              0.10426872223615646
+            ],
+            "planar_error_mps": 0.035331133753061295,
+            "yaw_error_rad_s": 0.08902347832918167,
+            "finite_difference_planar_error_mps": 0.034127864986658096,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01109625119715929,
+              0.010341491550207138,
+              0.017962824553251266
+            ],
+            "torque_saturation_fraction": 0.09625,
+            "computed_torque_abs_max_nm": 6.476598262786865,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.9753549098968506,
+            "tilt_rms_deg": 1.9508532285690308
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.005287159699946642,
+              0.0946035161614418,
+              0.005628988612443209
+            ],
+            "velocity_std_mps": [
+              0.027587756514549255,
+              0.027897825464606285,
+              0.038137178868055344
+            ],
+            "mean_gyro_rad_s": [
+              0.012182844802737236,
+              -0.005884667858481407,
+              -0.03538181260228157
+            ],
+            "gyro_std_rad_s": [
+              0.18424484133720398,
+              0.18399542570114136,
+              0.10476469993591309
+            ],
+            "planar_error_mps": 0.03537477180361748,
+            "yaw_error_rad_s": 0.0888105183839798,
+            "finite_difference_planar_error_mps": 0.03414423018693924,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011141815222799778,
+              0.010548528283834457,
+              0.017330685630440712
+            ],
+            "torque_saturation_fraction": 0.09516666666666666,
+            "computed_torque_abs_max_nm": 5.776275634765625,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.9924099445343018,
+            "tilt_rms_deg": 1.9998338222503662
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.005287159699946642,
+              0.0946035161614418,
+              0.005628988612443209
+            ],
+            "velocity_std_mps": [
+              0.027587756514549255,
+              0.027897825464606285,
+              0.038137178868055344
+            ],
+            "mean_gyro_rad_s": [
+              0.012182844802737236,
+              -0.005884667858481407,
+              -0.03538181260228157
+            ],
+            "gyro_std_rad_s": [
+              0.18424484133720398,
+              0.18399542570114136,
+              0.10476469993591309
+            ],
+            "planar_error_mps": 0.03537477180361748,
+            "yaw_error_rad_s": 0.0888105183839798,
+            "finite_difference_planar_error_mps": 0.03414423018693924,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011141815222799778,
+              0.010548528283834457,
+              0.017330685630440712
+            ],
+            "torque_saturation_fraction": 0.09516666666666666,
+            "computed_torque_abs_max_nm": 5.776275634765625,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.9924099445343018,
+            "tilt_rms_deg": 1.9998338222503662
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.0034853413235396147,
+              0.08084982633590698,
+              0.0006252945750020444
+            ],
+            "velocity_std_mps": [
+              0.02765081077814102,
+              0.034541185945272446,
+              0.043592192232608795
+            ],
+            "mean_gyro_rad_s": [
+              0.002237051259726286,
+              -0.009797926992177963,
+              -0.047050341963768005
+            ],
+            "gyro_std_rad_s": [
+              0.18653962016105652,
+              0.18004927039146423,
+              0.1011933833360672
+            ],
+            "planar_error_mps": 0.035112954676151276,
+            "yaw_error_rad_s": 0.09008829295635223,
+            "finite_difference_planar_error_mps": 0.03404603153467178,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01086554303765297,
+              0.009236997924745083,
+              0.020837856456637383
+            ],
+            "torque_saturation_fraction": 0.10166666666666667,
+            "computed_torque_abs_max_nm": 6.476598262786865,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.8900787830352783,
+            "tilt_rms_deg": 1.6847246885299683
+          }
+        }
+      },
+      {
+        "name": "right",
+        "command": [
+          0.0,
+          -0.1,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.00026056423666886985,
+              -0.08552622050046921,
+              0.0002901398984249681
+            ],
+            "velocity_std_mps": [
+              0.029815593734383583,
+              0.023265810683369637,
+              0.03554145246744156
+            ],
+            "mean_gyro_rad_s": [
+              0.002285752445459366,
+              -0.0031158372294157743,
+              0.010890752077102661
+            ],
+            "gyro_std_rad_s": [
+              0.19855931401252747,
+              0.23218801617622375,
+              0.10682115703821182
+            ],
+            "planar_error_mps": 0.034262970089912415,
+            "yaw_error_rad_s": 0.08611374348402023,
+            "finite_difference_planar_error_mps": 0.03254982456564903,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010658644139766693,
+              0.006764246616512537,
+              0.01757807657122612
+            ],
+            "torque_saturation_fraction": 0.10131944444444445,
+            "computed_torque_abs_max_nm": 6.30651330947876,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.043583631515503,
+            "tilt_rms_deg": 1.9920527935028076
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.0012894172687083483,
+              -0.08682573586702347,
+              0.0005608783685602248
+            ],
+            "velocity_std_mps": [
+              0.030411476269364357,
+              0.0213799849152565,
+              0.03482065349817276
+            ],
+            "mean_gyro_rad_s": [
+              0.003873063251376152,
+              -0.0035566992592066526,
+              0.011144084855914116
+            ],
+            "gyro_std_rad_s": [
+              0.20095910131931305,
+              0.23895017802715302,
+              0.10536050796508789
+            ],
+            "planar_error_mps": 0.034686341881752014,
+            "yaw_error_rad_s": 0.08478211611509323,
+            "finite_difference_planar_error_mps": 0.033021096140146255,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010719171725213528,
+              0.006676254794001579,
+              0.01708209700882435
+            ],
+            "torque_saturation_fraction": 0.10036111111111111,
+            "computed_torque_abs_max_nm": 6.30651330947876,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.062995672225952,
+            "tilt_rms_deg": 2.048257827758789
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.0012894172687083483,
+              -0.08682573586702347,
+              0.0005608783685602248
+            ],
+            "velocity_std_mps": [
+              0.030411476269364357,
+              0.0213799849152565,
+              0.03482065349817276
+            ],
+            "mean_gyro_rad_s": [
+              0.003873063251376152,
+              -0.0035566992592066526,
+              0.011144084855914116
+            ],
+            "gyro_std_rad_s": [
+              0.20095910131931305,
+              0.23895017802715302,
+              0.10536050796508789
+            ],
+            "planar_error_mps": 0.034686341881752014,
+            "yaw_error_rad_s": 0.08478211611509323,
+            "finite_difference_planar_error_mps": 0.033021096140146255,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010719171725213528,
+              0.006676254794001579,
+              0.01708209700882435
+            ],
+            "torque_saturation_fraction": 0.10036111111111111,
+            "computed_torque_abs_max_nm": 6.30651330947876,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.062995672225952,
+            "tilt_rms_deg": 2.048257827758789
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              -0.004883705172687769,
+              -0.0790286436676979,
+              -0.0010635553626343608
+            ],
+            "velocity_std_mps": [
+              0.026034008711576462,
+              0.03019280731678009,
+              0.03891768306493759
+            ],
+            "mean_gyro_rad_s": [
+              -0.005650806240737438,
+              -0.0009115211432799697,
+              0.009624069556593895
+            ],
+            "gyro_std_rad_s": [
+              0.18589411675930023,
+              0.19487307965755463,
+              0.11383555829524994
+            ],
+            "planar_error_mps": 0.032146137207746506,
+            "yaw_error_rad_s": 0.09277187287807465,
+            "finite_difference_planar_error_mps": 0.030193474143743515,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010350706055760384,
+              0.007188076619058847,
+              0.019873132929205894
+            ],
+            "torque_saturation_fraction": 0.10611111111111111,
+            "computed_torque_abs_max_nm": 4.816286087036133,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.9465243816375732,
+            "tilt_rms_deg": 1.6831070184707642
+          }
+        }
+      },
+      {
+        "name": "forward_fast",
+        "command": [
+          0.2,
+          0.0,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.14759744703769684,
+              0.0275893434882164,
+              0.0066253431141376495
+            ],
+            "velocity_std_mps": [
+              0.036097630858421326,
+              0.02748090587556362,
+              0.052468035370111465
+            ],
+            "mean_gyro_rad_s": [
+              -0.00499652000144124,
+              0.0023373484145849943,
+              -0.05745094269514084
+            ],
+            "gyro_std_rad_s": [
+              0.21832135319709778,
+              0.26404598355293274,
+              0.16501963138580322
+            ],
+            "planar_error_mps": 0.06142931059002876,
+            "yaw_error_rad_s": 0.1380031406879425,
+            "finite_difference_planar_error_mps": 0.060685768723487854,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.012334415689110756,
+              0.008928840048611164,
+              0.0218361783772707
+            ],
+            "torque_saturation_fraction": 0.09094907407407407,
+            "computed_torque_abs_max_nm": 6.26438045501709,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 4.070393085479736,
+            "tilt_rms_deg": 3.748105764389038
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.15381641685962677,
+              0.029890626668930054,
+              0.006452906411141157
+            ],
+            "velocity_std_mps": [
+              0.027905305847525597,
+              0.026754140853881836,
+              0.052718423306941986
+            ],
+            "mean_gyro_rad_s": [
+              -0.0024543029721826315,
+              0.00012843901640735567,
+              -0.056769318878650665
+            ],
+            "gyro_std_rad_s": [
+              0.22359851002693176,
+              0.2727189362049103,
+              0.1671200394630432
+            ],
+            "planar_error_mps": 0.0622158907353878,
+            "yaw_error_rad_s": 0.13946469128131866,
+            "finite_difference_planar_error_mps": 0.06139388307929039,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01216566376388073,
+              0.009123848751187325,
+              0.021736159920692444
+            ],
+            "torque_saturation_fraction": 0.08911111111111111,
+            "computed_torque_abs_max_nm": 6.26438045501709,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 4.100352764129639,
+            "tilt_rms_deg": 3.896034002304077
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.15381641685962677,
+              0.029890626668930054,
+              0.006452906411141157
+            ],
+            "velocity_std_mps": [
+              0.027905305847525597,
+              0.026754140853881836,
+              0.052718423306941986
+            ],
+            "mean_gyro_rad_s": [
+              -0.0024543029721826315,
+              0.00012843901640735567,
+              -0.056769318878650665
+            ],
+            "gyro_std_rad_s": [
+              0.22359851002693176,
+              0.2727189362049103,
+              0.1671200394630432
+            ],
+            "planar_error_mps": 0.0622158907353878,
+            "yaw_error_rad_s": 0.13946469128131866,
+            "finite_difference_planar_error_mps": 0.06139388307929039,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01216566376388073,
+              0.009123848751187325,
+              0.021736159920692444
+            ],
+            "torque_saturation_fraction": 0.08911111111111111,
+            "computed_torque_abs_max_nm": 6.26438045501709,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 4.100352764129639,
+            "tilt_rms_deg": 3.896034002304077
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.1165025532245636,
+              0.01608300395309925,
+              0.007487517781555653
+            ],
+            "velocity_std_mps": [
+              0.0525779128074646,
+              0.02816743403673172,
+              0.051189228892326355
+            ],
+            "mean_gyro_rad_s": [
+              -0.017707617953419685,
+              0.013381903991103172,
+              -0.06085870787501335
+            ],
+            "gyro_std_rad_s": [
+              0.18923510611057281,
+              0.21516922116279602,
+              0.15404418110847473
+            ],
+            "planar_error_mps": 0.05749640613794327,
+            "yaw_error_rad_s": 0.1306953877210617,
+            "finite_difference_planar_error_mps": 0.05714518576860428,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.013145706616342068,
+              0.007881754077970982,
+              0.022329552099108696
+            ],
+            "torque_saturation_fraction": 0.10013888888888889,
+            "computed_torque_abs_max_nm": 5.477903842926025,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.920595645904541,
+            "tilt_rms_deg": 2.897307872772217
+          }
+        }
+      },
+      {
+        "name": "turn_left",
+        "command": [
+          0.0,
+          0.0,
+          0.2
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.006324281916022301,
+              0.007608757819980383,
+              0.003498669946566224
+            ],
+            "velocity_std_mps": [
+              0.021107662469148636,
+              0.02678842470049858,
+              0.04029864817857742
+            ],
+            "mean_gyro_rad_s": [
+              0.01205761544406414,
+              -0.010165548883378506,
+              0.1879711002111435
+            ],
+            "gyro_std_rad_s": [
+              0.18042004108428955,
+              0.2483547180891037,
+              0.11198007315397263
+            ],
+            "planar_error_mps": 0.03145492076873779,
+            "yaw_error_rad_s": 0.08798464387655258,
+            "finite_difference_planar_error_mps": 0.02975294180214405,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010419392958283424,
+              0.008939734660089016,
+              0.0208755973726511
+            ],
+            "torque_saturation_fraction": 0.09983796296296296,
+            "computed_torque_abs_max_nm": 6.966075420379639,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.8566277027130127,
+            "tilt_rms_deg": 1.6886305809020996
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.006898171734064817,
+              0.008633233606815338,
+              0.004200561437755823
+            ],
+            "velocity_std_mps": [
+              0.021215757355093956,
+              0.026569603011012077,
+              0.03926814720034599
+            ],
+            "mean_gyro_rad_s": [
+              0.014299590140581131,
+              -0.011031956411898136,
+              0.19090382754802704
+            ],
+            "gyro_std_rad_s": [
+              0.18068182468414307,
+              0.25281935930252075,
+              0.10807952284812927
+            ],
+            "planar_error_mps": 0.03168109804391861,
+            "yaw_error_rad_s": 0.08668423444032669,
+            "finite_difference_planar_error_mps": 0.02990470454096794,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010598788037896156,
+              0.008969133719801903,
+              0.020560480654239655
+            ],
+            "torque_saturation_fraction": 0.09955555555555555,
+            "computed_torque_abs_max_nm": 6.966075420379639,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.8576245307922363,
+            "tilt_rms_deg": 1.7403995990753174
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.006898171734064817,
+              0.008633233606815338,
+              0.004200561437755823
+            ],
+            "velocity_std_mps": [
+              0.021215757355093956,
+              0.026569603011012077,
+              0.03926814720034599
+            ],
+            "mean_gyro_rad_s": [
+              0.014299590140581131,
+              -0.011031956411898136,
+              0.19090382754802704
+            ],
+            "gyro_std_rad_s": [
+              0.18068182468414307,
+              0.25281935930252075,
+              0.10807952284812927
+            ],
+            "planar_error_mps": 0.03168109804391861,
+            "yaw_error_rad_s": 0.08668423444032669,
+            "finite_difference_planar_error_mps": 0.02990470454096794,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010598788037896156,
+              0.008969133719801903,
+              0.020560480654239655
+            ],
+            "torque_saturation_fraction": 0.09955555555555555,
+            "computed_torque_abs_max_nm": 6.966075420379639,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.8576245307922363,
+            "tilt_rms_deg": 1.7403995990753174
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.003454838413745165,
+              0.0024863772559911013,
+              -1.079048070096178e-05
+            ],
+            "velocity_std_mps": [
+              0.020316852256655693,
+              0.027285702526569366,
+              0.044935088604688644
+            ],
+            "mean_gyro_rad_s": [
+              0.0008477421361021698,
+              -0.005833523813635111,
+              0.17330771684646606
+            ],
+            "gyro_std_rad_s": [
+              0.17868448793888092,
+              0.22465448081493378,
+              0.12873712182044983
+            ],
+            "planar_error_mps": 0.030324019491672516,
+            "yaw_error_rad_s": 0.09448673576116562,
+            "finite_difference_planar_error_mps": 0.02899411879479885,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.009471575729548931,
+              0.008791281841695309,
+              0.022384779527783394
+            ],
+            "torque_saturation_fraction": 0.10125,
+            "computed_torque_abs_max_nm": 5.739837646484375,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.8516433238983154,
+            "tilt_rms_deg": 1.4013874530792236
+          }
+        }
+      },
+      {
+        "name": "turn_right",
+        "command": [
+          0.0,
+          0.0,
+          -0.2
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              -0.006192510947585106,
+              0.017549119889736176,
+              0.0037635706830769777
+            ],
+            "velocity_std_mps": [
+              0.026181861758232117,
+              0.0292751993983984,
+              0.03661595657467842
+            ],
+            "mean_gyro_rad_s": [
+              0.009607366286218166,
+              -0.004672136157751083,
+              -0.1956333965063095
+            ],
+            "gyro_std_rad_s": [
+              0.19150517880916595,
+              0.22329775989055634,
+              0.10102192312479019
+            ],
+            "planar_error_mps": 0.039176907390356064,
+            "yaw_error_rad_s": 0.08026578277349472,
+            "finite_difference_planar_error_mps": 0.03811401501297951,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011065390892326832,
+              0.008160951547324657,
+              0.018815865740180016
+            ],
+            "torque_saturation_fraction": 0.1099537037037037,
+            "computed_torque_abs_max_nm": 6.834641933441162,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.8660638332366943,
+            "tilt_rms_deg": 1.3888812065124512
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              -0.0060545229353010654,
+              0.018093330785632133,
+              0.004439147189259529
+            ],
+            "velocity_std_mps": [
+              0.026444796472787857,
+              0.029934367164969444,
+              0.03527868539094925
+            ],
+            "mean_gyro_rad_s": [
+              0.010930445976555347,
+              -0.003806296968832612,
+              -0.19762450456619263
+            ],
+            "gyro_std_rad_s": [
+              0.1920231133699417,
+              0.22444282472133636,
+              0.100461445748806
+            ],
+            "planar_error_mps": 0.04011452570557594,
+            "yaw_error_rad_s": 0.08004028350114822,
+            "finite_difference_planar_error_mps": 0.039010196924209595,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011228914372622967,
+              0.008360855281352997,
+              0.01817607879638672
+            ],
+            "torque_saturation_fraction": 0.11,
+            "computed_torque_abs_max_nm": 6.834641933441162,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.878498077392578,
+            "tilt_rms_deg": 1.397676944732666
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              -0.0060545229353010654,
+              0.018093330785632133,
+              0.004439147189259529
+            ],
+            "velocity_std_mps": [
+              0.026444796472787857,
+              0.029934367164969444,
+              0.03527868539094925
+            ],
+            "mean_gyro_rad_s": [
+              0.010930445976555347,
+              -0.003806296968832612,
+              -0.19762450456619263
+            ],
+            "gyro_std_rad_s": [
+              0.1920231133699417,
+              0.22444282472133636,
+              0.100461445748806
+            ],
+            "planar_error_mps": 0.04011452570557594,
+            "yaw_error_rad_s": 0.08004028350114822,
+            "finite_difference_planar_error_mps": 0.039010196924209595,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011228914372622967,
+              0.008360855281352997,
+              0.01817607879638672
+            ],
+            "torque_saturation_fraction": 0.11,
+            "computed_torque_abs_max_nm": 6.834641933441162,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.878498077392578,
+            "tilt_rms_deg": 1.397676944732666
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              -0.006882411893457174,
+              0.01482794526964426,
+              0.0003856816911138594
+            ],
+            "velocity_std_mps": [
+              0.024813925847411156,
+              0.025553934276103973,
+              0.0425175279378891
+            ],
+            "mean_gyro_rad_s": [
+              0.002991958288475871,
+              -0.009001332335174084,
+              -0.185678631067276
+            ],
+            "gyro_std_rad_s": [
+              0.18875433504581451,
+              0.21743029356002808,
+              0.10320379585027695
+            ],
+            "planar_error_mps": 0.03448881208896637,
+            "yaw_error_rad_s": 0.08139326423406601,
+            "finite_difference_planar_error_mps": 0.03363310173153877,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.010208550840616226,
+              0.007077236194163561,
+              0.021734096109867096
+            ],
+            "torque_saturation_fraction": 0.10972222222222222,
+            "computed_torque_abs_max_nm": 5.830010890960693,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.8038928508758545,
+            "tilt_rms_deg": 1.344039797782898
+          }
+        }
+      },
+      {
+        "name": "arc_left",
+        "command": [
+          0.1,
+          0.0,
+          0.2
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.0850333496928215,
+              0.01679384894669056,
+              0.005648784805089235
+            ],
+            "velocity_std_mps": [
+              0.03489460423588753,
+              0.02518627978861332,
+              0.044674843549728394
+            ],
+            "mean_gyro_rad_s": [
+              0.006567883770912886,
+              -0.007451135199517012,
+              0.12889181077480316
+            ],
+            "gyro_std_rad_s": [
+              0.17285850644111633,
+              0.2039182335138321,
+              0.11175644397735596
+            ],
+            "planar_error_mps": 0.04198649898171425,
+            "yaw_error_rad_s": 0.10250839591026306,
+            "finite_difference_planar_error_mps": 0.039434466511011124,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01426611840724945,
+              0.007258357480168343,
+              0.02020159922540188
+            ],
+            "torque_saturation_fraction": 0.11368055555555556,
+            "computed_torque_abs_max_nm": 6.638076305389404,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.551325798034668,
+            "tilt_rms_deg": 2.8274612426757812
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.08733686804771423,
+              0.017275694757699966,
+              0.005799913313239813
+            ],
+            "velocity_std_mps": [
+              0.03404370695352554,
+              0.024797692894935608,
+              0.04397958144545555
+            ],
+            "mean_gyro_rad_s": [
+              0.010404582135379314,
+              -0.008460857905447483,
+              0.13347262144088745
+            ],
+            "gyro_std_rad_s": [
+              0.17021304368972778,
+              0.20472022891044617,
+              0.10869161784648895
+            ],
+            "planar_error_mps": 0.042002301663160324,
+            "yaw_error_rad_s": 0.10088641196489334,
+            "finite_difference_planar_error_mps": 0.03934933990240097,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.014377991668879986,
+              0.007189124822616577,
+              0.01966165378689766
+            ],
+            "torque_saturation_fraction": 0.11413888888888889,
+            "computed_torque_abs_max_nm": 6.638076305389404,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.544247627258301,
+            "tilt_rms_deg": 2.8928749561309814
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.08733686804771423,
+              0.017275694757699966,
+              0.005799913313239813
+            ],
+            "velocity_std_mps": [
+              0.03404370695352554,
+              0.024797692894935608,
+              0.04397958144545555
+            ],
+            "mean_gyro_rad_s": [
+              0.010404582135379314,
+              -0.008460857905447483,
+              0.13347262144088745
+            ],
+            "gyro_std_rad_s": [
+              0.17021304368972778,
+              0.20472022891044617,
+              0.10869161784648895
+            ],
+            "planar_error_mps": 0.042002301663160324,
+            "yaw_error_rad_s": 0.10088641196489334,
+            "finite_difference_planar_error_mps": 0.03934933990240097,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.014377991668879986,
+              0.007189124822616577,
+              0.01966165378689766
+            ],
+            "torque_saturation_fraction": 0.11413888888888889,
+            "computed_torque_abs_max_nm": 6.638076305389404,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.544247627258301,
+            "tilt_rms_deg": 2.8928749561309814
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.07351547479629517,
+              0.014384479261934757,
+              0.004893145989626646
+            ],
+            "velocity_std_mps": [
+              0.03676596283912659,
+              0.026916485279798508,
+              0.04799306020140648
+            ],
+            "mean_gyro_rad_s": [
+              -0.012615621089935303,
+              -0.0024024921003729105,
+              0.10598704218864441
+            ],
+            "gyro_std_rad_s": [
+              0.18432697653770447,
+              0.19978268444538116,
+              0.12344231456518173
+            ],
+            "planar_error_mps": 0.041907500475645065,
+            "yaw_error_rad_s": 0.11061824858188629,
+            "finite_difference_planar_error_mps": 0.039860114455223083,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01369309239089489,
+              0.007595050614327192,
+              0.022709570825099945
+            ],
+            "torque_saturation_fraction": 0.11138888888888888,
+            "computed_torque_abs_max_nm": 5.978116512298584,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.5867185592651367,
+            "tilt_rms_deg": 2.4745888710021973
+          }
+        }
+      },
+      {
+        "name": "arc_right",
+        "command": [
+          0.1,
+          0.0,
+          -0.2
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.09177285432815552,
+              0.012701171450316906,
+              0.005326941609382629
+            ],
+            "velocity_std_mps": [
+              0.030393581837415695,
+              0.024339454248547554,
+              0.04109689220786095
+            ],
+            "mean_gyro_rad_s": [
+              0.01067089382559061,
+              0.008152470923960209,
+              -0.1531844139099121
+            ],
+            "gyro_std_rad_s": [
+              0.1929115206003189,
+              0.19525177776813507,
+              0.1234000027179718
+            ],
+            "planar_error_mps": 0.03589269146323204,
+            "yaw_error_rad_s": 0.10444863140583038,
+            "finite_difference_planar_error_mps": 0.03451572731137276,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.012548381462693214,
+              0.008005635812878609,
+              0.01866554655134678
+            ],
+            "torque_saturation_fraction": 0.10493055555555555,
+            "computed_torque_abs_max_nm": 7.053909778594971,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.4063472747802734,
+            "tilt_rms_deg": 2.703767776489258
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.09272755682468414,
+              0.013087383471429348,
+              0.005362045019865036
+            ],
+            "velocity_std_mps": [
+              0.02801123820245266,
+              0.02440948784351349,
+              0.03982682526111603
+            ],
+            "mean_gyro_rad_s": [
+              0.014741092920303345,
+              0.007350551895797253,
+              -0.15256907045841217
+            ],
+            "gyro_std_rad_s": [
+              0.19182188808918,
+              0.19624140858650208,
+              0.12245886772871017
+            ],
+            "planar_error_mps": 0.03620109334588051,
+            "yaw_error_rad_s": 0.10479049384593964,
+            "finite_difference_planar_error_mps": 0.03484752029180527,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.012624089606106281,
+              0.008032936602830887,
+              0.0179137010127306
+            ],
+            "torque_saturation_fraction": 0.10547222222222222,
+            "computed_torque_abs_max_nm": 7.053909778594971,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.3891618251800537,
+            "tilt_rms_deg": 2.791550636291504
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.09272755682468414,
+              0.013087383471429348,
+              0.005362045019865036
+            ],
+            "velocity_std_mps": [
+              0.02801123820245266,
+              0.02440948784351349,
+              0.03982682526111603
+            ],
+            "mean_gyro_rad_s": [
+              0.014741092920303345,
+              0.007350551895797253,
+              -0.15256907045841217
+            ],
+            "gyro_std_rad_s": [
+              0.19182188808918,
+              0.19624140858650208,
+              0.12245886772871017
+            ],
+            "planar_error_mps": 0.03620109334588051,
+            "yaw_error_rad_s": 0.10479049384593964,
+            "finite_difference_planar_error_mps": 0.03484752029180527,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.012624089606106281,
+              0.008032936602830887,
+              0.0179137010127306
+            ],
+            "torque_saturation_fraction": 0.10547222222222222,
+            "computed_torque_abs_max_nm": 7.053909778594971,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.3891618251800537,
+            "tilt_rms_deg": 2.791550636291504
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.08699983358383179,
+              0.010770151391625404,
+              0.005151413846760988
+            ],
+            "velocity_std_mps": [
+              0.03990146517753601,
+              0.02389279566705227,
+              0.04693399369716644
+            ],
+            "mean_gyro_rad_s": [
+              -0.009680119343101978,
+              0.012162130326032639,
+              -0.15626069903373718
+            ],
+            "gyro_std_rad_s": [
+              0.1970129907131195,
+              0.19017577171325684,
+              0.12795774638652802
+            ],
+            "planar_error_mps": 0.0343506820499897,
+            "yaw_error_rad_s": 0.10273927450180054,
+            "finite_difference_planar_error_mps": 0.032856766134500504,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.012162799015641212,
+              0.007867694832384586,
+              0.022043360397219658
+            ],
+            "torque_saturation_fraction": 0.10222222222222223,
+            "computed_torque_abs_max_nm": 5.3454461097717285,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.492274761199951,
+            "tilt_rms_deg": 2.2132279872894287
+          }
+        }
+      },
+      {
+        "name": "strafe_arc",
+        "command": [
+          0.0,
+          0.1,
+          0.2
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.004549171309918165,
+              0.09364081919193268,
+              0.005052313674241304
+            ],
+            "velocity_std_mps": [
+              0.027446437627077103,
+              0.02641991712152958,
+              0.03996548056602478
+            ],
+            "mean_gyro_rad_s": [
+              0.016228022053837776,
+              -0.008283057250082493,
+              0.11702097207307816
+            ],
+            "gyro_std_rad_s": [
+              0.17615677416324615,
+              0.20241259038448334,
+              0.10670606791973114
+            ],
+            "planar_error_mps": 0.03277948871254921,
+            "yaw_error_rad_s": 0.11031066626310349,
+            "finite_difference_planar_error_mps": 0.031258534640073776,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01122533529996872,
+              0.009270033799111843,
+              0.019436396658420563
+            ],
+            "torque_saturation_fraction": 0.09752314814814815,
+            "computed_torque_abs_max_nm": 7.222578048706055,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.9755029678344727,
+            "tilt_rms_deg": 1.8565714359283447
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.0049920761957764626,
+              0.09539089351892471,
+              0.0058855111710727215
+            ],
+            "velocity_std_mps": [
+              0.027427908033132553,
+              0.024608448147773743,
+              0.039302464574575424
+            ],
+            "mean_gyro_rad_s": [
+              0.017642099410295486,
+              -0.006603294052183628,
+              0.11849097907543182
+            ],
+            "gyro_std_rad_s": [
+              0.17385047674179077,
+              0.20341694355010986,
+              0.10379819571971893
+            ],
+            "planar_error_mps": 0.03298202157020569,
+            "yaw_error_rad_s": 0.10990875959396362,
+            "finite_difference_planar_error_mps": 0.03137421980500221,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011260443367064,
+              0.009309781715273857,
+              0.018990276381373405
+            ],
+            "torque_saturation_fraction": 0.09722222222222222,
+            "computed_torque_abs_max_nm": 6.12392520904541,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.9754478931427,
+            "tilt_rms_deg": 1.906799554824829
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.0049920761957764626,
+              0.09539089351892471,
+              0.0058855111710727215
+            ],
+            "velocity_std_mps": [
+              0.027427908033132553,
+              0.024608448147773743,
+              0.039302464574575424
+            ],
+            "mean_gyro_rad_s": [
+              0.017642099410295486,
+              -0.006603294052183628,
+              0.11849097907543182
+            ],
+            "gyro_std_rad_s": [
+              0.17385047674179077,
+              0.20341694355010986,
+              0.10379819571971893
+            ],
+            "planar_error_mps": 0.03298202157020569,
+            "yaw_error_rad_s": 0.10990875959396362,
+            "finite_difference_planar_error_mps": 0.03137421980500221,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.011260443367064,
+              0.009309781715273857,
+              0.018990276381373405
+            ],
+            "torque_saturation_fraction": 0.09722222222222222,
+            "computed_torque_abs_max_nm": 6.12392520904541,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.9754478931427,
+            "tilt_rms_deg": 1.906799554824829
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.0023346359375864267,
+              0.08489060401916504,
+              0.0008863216498866677
+            ],
+            "velocity_std_mps": [
+              0.027431832626461983,
+              0.032685164362192154,
+              0.04288569465279579
+            ],
+            "mean_gyro_rad_s": [
+              0.009157631546258926,
+              -0.016681773588061333,
+              0.10967095196247101
+            ],
+            "gyro_std_rad_s": [
+              0.18710139393806458,
+              0.19709999859333038,
+              0.11992473900318146
+            ],
+            "planar_error_mps": 0.03176682069897652,
+            "yaw_error_rad_s": 0.11232025176286697,
+            "finite_difference_planar_error_mps": 0.03068011999130249,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.0110480897128582,
+              0.009068673476576805,
+              0.021528784185647964
+            ],
+            "torque_saturation_fraction": 0.09902777777777778,
+            "computed_torque_abs_max_nm": 7.222578048706055,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 2.9757769107818604,
+            "tilt_rms_deg": 1.5816831588745117
+          }
+        }
+      },
+      {
+        "name": "diagonal",
+        "command": [
+          0.071,
+          0.071,
+          0.0
+        ],
+        "replicas": 4,
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "windows": {
+          "all": {
+            "samples": 2400,
+            "mean_velocity_mps": [
+              0.05300458148121834,
+              0.0706849992275238,
+              0.005076235625892878
+            ],
+            "velocity_std_mps": [
+              0.026632243767380714,
+              0.025238074362277985,
+              0.043089620769023895
+            ],
+            "mean_gyro_rad_s": [
+              0.014228343963623047,
+              -0.001514652743935585,
+              -0.016841324046254158
+            ],
+            "gyro_std_rad_s": [
+              0.16967079043388367,
+              0.22584597766399384,
+              0.11682071536779404
+            ],
+            "planar_error_mps": 0.034855663776397705,
+            "yaw_error_rad_s": 0.09408823400735855,
+            "finite_difference_planar_error_mps": 0.0334823876619339,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.012274504639208317,
+              0.008321835659444332,
+              0.019220950081944466
+            ],
+            "torque_saturation_fraction": 0.10532407407407407,
+            "computed_torque_abs_max_nm": 6.125965595245361,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.2424187660217285,
+            "tilt_rms_deg": 2.441371440887451
+          },
+          "post_settle": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.053711798042058945,
+              0.0724024847149849,
+              0.005340691190212965
+            ],
+            "velocity_std_mps": [
+              0.026126030832529068,
+              0.024583758786320686,
+              0.042059339582920074
+            ],
+            "mean_gyro_rad_s": [
+              0.017509734258055687,
+              -0.0012828352628275752,
+              -0.015440906397998333
+            ],
+            "gyro_std_rad_s": [
+              0.16658957302570343,
+              0.23102176189422607,
+              0.11720915883779526
+            ],
+            "planar_error_mps": 0.0355166532099247,
+            "yaw_error_rad_s": 0.09434877336025238,
+            "finite_difference_planar_error_mps": 0.03415541723370552,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.012421446852385998,
+              0.008351514115929604,
+              0.01868942379951477
+            ],
+            "torque_saturation_fraction": 0.10511111111111111,
+            "computed_torque_abs_max_nm": 5.927755832672119,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.2468338012695312,
+            "tilt_rms_deg": 2.501702070236206
+          },
+          "post_settle_nonterminal": {
+            "samples": 2000,
+            "mean_velocity_mps": [
+              0.053711798042058945,
+              0.0724024847149849,
+              0.005340691190212965
+            ],
+            "velocity_std_mps": [
+              0.026126030832529068,
+              0.024583758786320686,
+              0.042059339582920074
+            ],
+            "mean_gyro_rad_s": [
+              0.017509734258055687,
+              -0.0012828352628275752,
+              -0.015440906397998333
+            ],
+            "gyro_std_rad_s": [
+              0.16658957302570343,
+              0.23102176189422607,
+              0.11720915883779526
+            ],
+            "planar_error_mps": 0.0355166532099247,
+            "yaw_error_rad_s": 0.09434877336025238,
+            "finite_difference_planar_error_mps": 0.03415541723370552,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.012421446852385998,
+              0.008351514115929604,
+              0.01868942379951477
+            ],
+            "torque_saturation_fraction": 0.10511111111111111,
+            "computed_torque_abs_max_nm": 5.927755832672119,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.2468338012695312,
+            "tilt_rms_deg": 2.501702070236206
+          },
+          "reset_transient": {
+            "samples": 400,
+            "mean_velocity_mps": [
+              0.049468692392110825,
+              0.06209738180041313,
+              0.003753943368792534
+            ],
+            "velocity_std_mps": [
+              0.028771698474884033,
+              0.026673097163438797,
+              0.04788794368505478
+            ],
+            "mean_gyro_rad_s": [
+              -0.0021786345168948174,
+              -0.0026737346779555082,
+              -0.02384335547685623
+            ],
+            "gyro_std_rad_s": [
+              0.18342752754688263,
+              0.19794297218322754,
+              0.11460236459970474
+            ],
+            "planar_error_mps": 0.031550705432891846,
+            "yaw_error_rad_s": 0.09278556704521179,
+            "finite_difference_planar_error_mps": 0.030117224901914597,
+            "reported_minus_finite_difference_velocity_rms_mps": [
+              0.01151172537356615,
+              0.008171852678060532,
+              0.02168400026857853
+            ],
+            "torque_saturation_fraction": 0.1063888888888889,
+            "computed_torque_abs_max_nm": 6.125965595245361,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "positive_mechanical_power_w": 3.220344305038452,
+            "tilt_rms_deg": 2.114049196243286
+          }
+        }
+      }
+    ],
+    "terminations_all48": 0,
+    "truncations_all48": 0
+  },
+  "trace_subset": {
+    "trace_sha256": "a7dfe4307826fe26ad6afea403b58209ca70d8877a6e27218e2bc9e7700e0385",
+    "control_steps": 600,
+    "saved_replicas": 12,
+    "population_replicas": 48,
+    "field_shapes": {
+      "age_s": [
+        600,
+        12
+      ],
+      "command": [
+        600,
+        12,
+        3
+      ],
+      "target_command": [
+        600,
+        12,
+        3
+      ],
+      "joint_position_rad": [
+        600,
+        12,
+        18
+      ],
+      "joint_velocity_rad_s": [
+        600,
+        12,
+        18
+      ],
+      "joint_target_rad": [
+        600,
+        12,
+        18
+      ],
+      "action": [
+        600,
+        12,
+        18
+      ],
+      "computed_torque_nm": [
+        600,
+        12,
+        18
+      ],
+      "applied_torque_nm": [
+        600,
+        12,
+        18
+      ],
+      "velocity_navigation_mps": [
+        600,
+        12,
+        3
+      ],
+      "finite_difference_velocity_navigation_mps": [
+        600,
+        12,
+        3
+      ],
+      "gyro_navigation_rad_s": [
+        600,
+        12,
+        3
+      ],
+      "finite_difference_heading_rate_rad_s": [
+        600,
+        12
+      ],
+      "position_world_m": [
+        600,
+        12,
+        3
+      ],
+      "quaternion_world_wxyz": [
+        600,
+        12,
+        4
+      ],
+      "projected_gravity": [
+        600,
+        12,
+        3
+      ],
+      "terminated": [
+        600,
+        12
+      ],
+      "truncated": [
+        600,
+        12
+      ],
+      "reason_base_contact": [
+        600,
+        12
+      ],
+      "reason_too_low": [
+        600,
+        12
+      ],
+      "reason_upside_down": [
+        600,
+        12
+      ],
+      "reason_torque_duration": [
+        600,
+        12
+      ],
+      "target_slew_limited_fraction": [
+        600,
+        12
+      ],
+      "reward_term_linear_tracking": [
+        600,
+        12
+      ],
+      "reward_term_yaw_tracking": [
+        600,
+        12
+      ],
+      "reward_term_linear_progress": [
+        600,
+        12
+      ],
+      "reward_term_yaw_progress": [
+        600,
+        12
+      ],
+      "reward_term_vertical_velocity": [
+        600,
+        12
+      ],
+      "reward_term_roll_pitch_rate": [
+        600,
+        12
+      ],
+      "reward_term_tilt": [
+        600,
+        12
+      ],
+      "reward_term_height": [
+        600,
+        12
+      ],
+      "reward_term_torque": [
+        600,
+        12
+      ],
+      "reward_term_torque_excess": [
+        600,
+        12
+      ],
+      "reward_term_worst_torque_excess": [
+        600,
+        12
+      ],
+      "reward_term_saturation": [
+        600,
+        12
+      ],
+      "reward_term_positive_power": [
+        600,
+        12
+      ],
+      "reward_term_action_rate": [
+        600,
+        12
+      ],
+      "reward_term_joint_acceleration": [
+        600,
+        12
+      ],
+      "reward_term_slip": [
+        600,
+        12
+      ],
+      "reward_term_nonfoot": [
+        600,
+        12
+      ],
+      "reward_term_joint_limits": [
+        600,
+        12
+      ],
+      "reward_term_airtime": [
+        600,
+        12
+      ],
+      "reward_term_stand_posture": [
+        600,
+        12
+      ],
+      "reward_term_stand_joint_velocity": [
+        600,
+        12
+      ],
+      "reward_term_stand_target_velocity": [
+        600,
+        12
+      ],
+      "reward_term_stand_raw_action": [
+        600,
+        12
+      ],
+      "raw_policy_action": [
+        600,
+        12,
+        18
+      ],
+      "filtered_target_rad": [
+        600,
+        12,
+        18
+      ],
+      "unfiltered_target_rad": [
+        600,
+        12,
+        18
+      ],
+      "trace_env_ids": [
+        12
+      ],
+      "joint_names": [
+        18
+      ],
+      "time_s": [
+        600
+      ]
+    },
+    "scenarios": [
+      {
+        "name": "stand",
+        "actual_trace_env_id": 0,
+        "terminations_saved_replica": 0,
+        "truncations_saved_replica": 0,
+        "interval_windows": {
+          "all_valid_intervals": {
+            "intervals": 599,
+            "joint_angle_interval_velocity_rms_rad_s": 1.177285118500892,
+            "raw_sdk_joint_velocity_rms_rad_s": 0.9990756511688232,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5446940184786143,
+            "target_interval_velocity_rms_rad_s": 1.9122963138795623,
+            "target_max_step_rad": 0.04000002145767212
+          },
+          "post_settle_valid_intervals": {
+            "intervals": 500,
+            "joint_angle_interval_velocity_rms_rad_s": 1.1788681441771605,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0001581907272339,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5507262088284908,
+            "target_interval_velocity_rms_rad_s": 1.9085153599311713,
+            "target_max_step_rad": 0.04000002145767212
+          }
+        }
+      },
+      {
+        "name": "forward",
+        "actual_trace_env_id": 4,
+        "terminations_saved_replica": 0,
+        "truncations_saved_replica": 0,
+        "interval_windows": {
+          "all_valid_intervals": {
+            "intervals": 599,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2639736146159302,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0892245769500732,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5401844916317393,
+            "target_interval_velocity_rms_rad_s": 1.9069314553423284,
+            "target_max_step_rad": 0.040000081062316895
+          },
+          "post_settle_valid_intervals": {
+            "intervals": 500,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2685392574616732,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0898362398147583,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5409058744140903,
+            "target_interval_velocity_rms_rad_s": 1.905159820888266,
+            "target_max_step_rad": 0.040000081062316895
+          }
+        }
+      },
+      {
+        "name": "reverse",
+        "actual_trace_env_id": 8,
+        "terminations_saved_replica": 0,
+        "truncations_saved_replica": 0,
+        "interval_windows": {
+          "all_valid_intervals": {
+            "intervals": 599,
+            "joint_angle_interval_velocity_rms_rad_s": 1.279935614048749,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0968066453933716,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.563608296579715,
+            "target_interval_velocity_rms_rad_s": 1.8487284055886215,
+            "target_max_step_rad": 0.04000002145767212
+          },
+          "post_settle_valid_intervals": {
+            "intervals": 500,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2788083704659043,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0961204767227173,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5653766524313586,
+            "target_interval_velocity_rms_rad_s": 1.843594541541059,
+            "target_max_step_rad": 0.04000002145767212
+          }
+        }
+      },
+      {
+        "name": "left",
+        "actual_trace_env_id": 12,
+        "terminations_saved_replica": 0,
+        "truncations_saved_replica": 0,
+        "interval_windows": {
+          "all_valid_intervals": {
+            "intervals": 599,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2336546142678484,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0383682250976562,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5291094342064293,
+            "target_interval_velocity_rms_rad_s": 1.8846431179152314,
+            "target_max_step_rad": 0.040000081062316895
+          },
+          "post_settle_valid_intervals": {
+            "intervals": 500,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2352327497115745,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.039896845817566,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5347058966624004,
+            "target_interval_velocity_rms_rad_s": 1.8823868476453822,
+            "target_max_step_rad": 0.04000002145767212
+          }
+        }
+      },
+      {
+        "name": "right",
+        "actual_trace_env_id": 16,
+        "terminations_saved_replica": 0,
+        "truncations_saved_replica": 0,
+        "interval_windows": {
+          "all_valid_intervals": {
+            "intervals": 599,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2389237489020704,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.047167420387268,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5143178532859181,
+            "target_interval_velocity_rms_rad_s": 1.8766478844836747,
+            "target_max_step_rad": 0.040000081062316895
+          },
+          "post_settle_valid_intervals": {
+            "intervals": 500,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2438747815110909,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0536704063415527,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5138310001529401,
+            "target_interval_velocity_rms_rad_s": 1.8743022867006178,
+            "target_max_step_rad": 0.040000081062316895
+          }
+        }
+      },
+      {
+        "name": "forward_fast",
+        "actual_trace_env_id": 20,
+        "terminations_saved_replica": 0,
+        "truncations_saved_replica": 0,
+        "interval_windows": {
+          "all_valid_intervals": {
+            "intervals": 599,
+            "joint_angle_interval_velocity_rms_rad_s": 1.4387194239223327,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.2600528001785278,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5782835205110759,
+            "target_interval_velocity_rms_rad_s": 1.9184002504227071,
+            "target_max_step_rad": 0.040000081062316895
+          },
+          "post_settle_valid_intervals": {
+            "intervals": 500,
+            "joint_angle_interval_velocity_rms_rad_s": 1.4543426873435177,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.2760616540908813,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.584568239756347,
+            "target_interval_velocity_rms_rad_s": 1.9172426320330456,
+            "target_max_step_rad": 0.040000081062316895
+          }
+        }
+      },
+      {
+        "name": "turn_left",
+        "actual_trace_env_id": 24,
+        "terminations_saved_replica": 0,
+        "truncations_saved_replica": 0,
+        "interval_windows": {
+          "all_valid_intervals": {
+            "intervals": 599,
+            "joint_angle_interval_velocity_rms_rad_s": 1.1918286946192407,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0235618352890015,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5754255796186568,
+            "target_interval_velocity_rms_rad_s": 1.8830626833094815,
+            "target_max_step_rad": 0.04000002145767212
+          },
+          "post_settle_valid_intervals": {
+            "intervals": 500,
+            "joint_angle_interval_velocity_rms_rad_s": 1.1942766094534916,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0261147022247314,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5844789553107868,
+            "target_interval_velocity_rms_rad_s": 1.8796654971563003,
+            "target_max_step_rad": 0.04000002145767212
+          }
+        }
+      },
+      {
+        "name": "turn_right",
+        "actual_trace_env_id": 28,
+        "terminations_saved_replica": 0,
+        "truncations_saved_replica": 0,
+        "interval_windows": {
+          "all_valid_intervals": {
+            "intervals": 599,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2138470455441872,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0245962142944336,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5197269546894878,
+            "target_interval_velocity_rms_rad_s": 1.9142957373545357,
+            "target_max_step_rad": 0.04000002145767212
+          },
+          "post_settle_valid_intervals": {
+            "intervals": 500,
+            "joint_angle_interval_velocity_rms_rad_s": 1.212317636965388,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0222529172897339,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5193706935918698,
+            "target_interval_velocity_rms_rad_s": 1.9120238849072095,
+            "target_max_step_rad": 0.04000002145767212
+          }
+        }
+      },
+      {
+        "name": "arc_left",
+        "actual_trace_env_id": 32,
+        "terminations_saved_replica": 0,
+        "truncations_saved_replica": 0,
+        "interval_windows": {
+          "all_valid_intervals": {
+            "intervals": 599,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2702445093389396,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.1018507480621338,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.538237592783595,
+            "target_interval_velocity_rms_rad_s": 1.9155243152958747,
+            "target_max_step_rad": 0.040000081062316895
+          },
+          "post_settle_valid_intervals": {
+            "intervals": 500,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2712393654704326,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.1027148962020874,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5375660476603004,
+            "target_interval_velocity_rms_rad_s": 1.9126645390465236,
+            "target_max_step_rad": 0.040000081062316895
+          }
+        }
+      },
+      {
+        "name": "arc_right",
+        "actual_trace_env_id": 36,
+        "terminations_saved_replica": 0,
+        "truncations_saved_replica": 0,
+        "interval_windows": {
+          "all_valid_intervals": {
+            "intervals": 599,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2699388854742357,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0916810035705566,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5211111332765196,
+            "target_interval_velocity_rms_rad_s": 1.9043049006084225,
+            "target_max_step_rad": 0.040000081062316895
+          },
+          "post_settle_valid_intervals": {
+            "intervals": 500,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2719414258908912,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.09184730052948,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5165449137836609,
+            "target_interval_velocity_rms_rad_s": 1.9011086369847996,
+            "target_max_step_rad": 0.040000081062316895
+          }
+        }
+      },
+      {
+        "name": "strafe_arc",
+        "actual_trace_env_id": 40,
+        "terminations_saved_replica": 0,
+        "truncations_saved_replica": 0,
+        "interval_windows": {
+          "all_valid_intervals": {
+            "intervals": 599,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2564379621245463,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0633739233016968,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5476226628837868,
+            "target_interval_velocity_rms_rad_s": 1.8851491877714062,
+            "target_max_step_rad": 0.040000081062316895
+          },
+          "post_settle_valid_intervals": {
+            "intervals": 500,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2574139183078625,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0618515014648438,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5536208496989947,
+            "target_interval_velocity_rms_rad_s": 1.8804125761298596,
+            "target_max_step_rad": 0.04000002145767212
+          }
+        }
+      },
+      {
+        "name": "diagonal",
+        "actual_trace_env_id": 44,
+        "terminations_saved_replica": 0,
+        "truncations_saved_replica": 0,
+        "interval_windows": {
+          "all_valid_intervals": {
+            "intervals": 599,
+            "joint_angle_interval_velocity_rms_rad_s": 1.2542450306805555,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.0835649967193604,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5457055753320513,
+            "target_interval_velocity_rms_rad_s": 1.8978726613637869,
+            "target_max_step_rad": 0.040000081062316895
+          },
+          "post_settle_valid_intervals": {
+            "intervals": 500,
+            "joint_angle_interval_velocity_rms_rad_s": 1.25853667198675,
+            "raw_sdk_joint_velocity_rms_rad_s": 1.087581992149353,
+            "endpoint_reported_minus_interval_velocity_rms_rad_s": 0.5453658904332399,
+            "target_interval_velocity_rms_rad_s": 1.896324031564637,
+            "target_max_step_rad": 0.040000081062316895
+          }
+        }
+      }
+    ],
+    "limits": [
+      "Only one of four replicas per scenario was saved; this cannot reproduce the all48 JSON aggregates.",
+      "Endpoint SDK joint rate and interval angle rate are distinct measurements; their difference is not a hardware or native physics diagnosis.",
+      "Legacy quaternion_world_wxyz contains raw SDK XYZW on this installed build; no quaternion transform is recomputed or silently relabeled here.",
+      "50 Hz pre-reset trace cannot prove substep torque or oscillation above 25 Hz."
+    ]
+  },
+  "comparison_checks": {
+    "same_checkpoint": true,
+    "same_options": true,
+    "same_other_declared_overrides": true,
+    "same_effective_reward_weights": true,
+    "same_joint_names": true,
+    "causal_or_training_improvement_claim": false,
+    "scope": "Fresh .04 cold diagnostic versus preserved .03 historical diagnostic; both profiles and every scenario retained separately."
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "checked_unix": 1789051878.8471262,
+  "identity": {
+    "schema": "direct315_cold_formal004_v1",
+    "source_manifest_sha256": "4671eab012aaf79ce49769cfdc1667142237a4b4a45966fd0399a9caa900c51b",
+    "plan_sha256": "2875245e92806a1cf96cccf14d25a0887474eda98d5a81de9d99b9656e90280c",
+    "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+    "actor_width": 315,
+    "critic_width": 318,
+    "training_allowed": false,
+    "Stage2_complete": false,
+    "overrides": {
+      "target_slew_rad_per_20ms": 0.04,
+      "reward_weights": {
+        "stand_joint_velocity": -0.5,
+        "stand_target_velocity": -0.15,
+        "stand_posture": -2.0,
+        "action_rate": -0.075,
+        "saturation": -0.75,
+        "torque_excess": -0.6,
+        "worst_torque_excess": -0.2,
+        "stand_raw_action": 0.0
+      },
+      "observation_noise_scale": 1.0,
+      "target_filter_time_constant_s": 0.0
+    },
+    "diagnostic_options": {
+      "duration_s": 12,
+      "settle_s": 2,
+      "seed": 7057,
+      "trace_envs_per_scenario": 1,
+      "controller": "policy"
+    }
+  },
+  "guard_sha256": "f542de18cadf2a861039e27fc86dbaf980234b9239e4672c248ac94801f943b1",
+  "guard_freeze_sha256": "07d6462ab27120c223e7d12d4b5dfef5d9948afea822236c88f5963f2625cde5",
+  "host_freeze_sha256": "efbeac2a0bfb7ebf93efb9ec4dce33363607092b30a7e81ac6351950e1fa6083",
+  "source_manifest_sha256": "4671eab012aaf79ce49769cfdc1667142237a4b4a45966fd0399a9caa900c51b",
+  "previous_receipts": {
+    "reference_learning_ppo_001/learning_campaign.json": "f2275f1615eeced38abfa6b67a54efee9d4e97e6798046272f364a7f5658a2ca",
+    "reference_learning_ppo_001/jobs/train_10.json": "37b7ae066bd546965dfdc5f29e792c7425a40d3611769d71291a6183d9faf4ac",
+    "forecast_pause_052/restored.json": "669f1159a1d271bef666a5100fe778dd9aaa4af368a22bb1e9233a75ab0be10a"
+  },
+  "previous_owned_name_ID_absent": true,
+  "coordination_sha256": "fdad0bb0126158988dc36ea38538b2f7804299cffb5ff29601ba597089672234",
+  "unit": "hexapod-direct-omni-cold-001-20260910.service",
+  "pause": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/forecast_pause_053",
+  "output": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_cold_001",
+  "phases": [
+    "standing",
+    "baseline"
+  ],
+  "GPU_allocated": false
+}

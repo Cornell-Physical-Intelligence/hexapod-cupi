@@ -1,0 +1,56 @@
+{
+  "passed": true,
+  "checked_unix": 1789051369.501082,
+  "GPU_allocated": false,
+  "source_files": 589,
+  "identity": {
+    "schema": "direct315_cold_formal004_v1",
+    "source_manifest_sha256": "4671eab012aaf79ce49769cfdc1667142237a4b4a45966fd0399a9caa900c51b",
+    "plan_sha256": "2875245e92806a1cf96cccf14d25a0887474eda98d5a81de9d99b9656e90280c",
+    "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+    "actor_width": 315,
+    "critic_width": 318,
+    "training_allowed": false,
+    "Stage2_complete": false,
+    "overrides": {
+      "target_slew_rad_per_20ms": 0.04,
+      "reward_weights": {
+        "stand_joint_velocity": -0.5,
+        "stand_target_velocity": -0.15,
+        "stand_posture": -2.0,
+        "action_rate": -0.075,
+        "saturation": -0.75,
+        "torque_excess": -0.6,
+        "worst_torque_excess": -0.2,
+        "stand_raw_action": 0.0
+      },
+      "observation_noise_scale": 1.0,
+      "target_filter_time_constant_s": 0.0
+    },
+    "diagnostic_options": {
+      "duration_s": 12,
+      "settle_s": 2,
+      "seed": 7057,
+      "trace_envs_per_scenario": 1,
+      "controller": "policy"
+    }
+  },
+  "changed_parent_payloads": {
+    "robot/hexapod_mkii_length_study/training_plan.json": {
+      "old": "a499deaeacd547c8b88420a2977d03d3e23a5ac5a278a814607f207f57c81317",
+      "new": "2875245e92806a1cf96cccf14d25a0887474eda98d5a81de9d99b9656e90280c"
+    },
+    "tools/train_length_study.py": {
+      "old": "7dd764920c840e99d6116441b5d7fd4bd1049a4900ad7e120f7396cb88e8cfc2",
+      "new": "893e1b56b6ff443f47b4963dcb5e1ec549133913086d9aa54a25ab4124c46c5b"
+    }
+  },
+  "added_source_payloads": [
+    "source_origin.json",
+    "tools/candidate_asset_audit.py"
+  ],
+  "legacy_runtime_files": 16,
+  "legacy_runtime_sha256": "abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280",
+  "legacy_runtime_hash_method": "basename map, sorted JSON, compact separators; exact same16-file content",
+  "no_runtime_bootstrap_claim": true
+}

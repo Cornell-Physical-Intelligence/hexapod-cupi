@@ -1,0 +1,26 @@
+{
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=hexapod-direct-omni-cold-001-20260910.service",
+    "--property=RuntimeMaxSec=1800",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=Environment=PYTHONDONTWRITEBYTECODE=1",
+    "--property=ExecStopPost=/usr/bin/python3 /home/orionh/HEXAPOD_runs/mock_length_study_20260909/forecast_pause_053/resume_forecasting.py",
+    "--property=Environment=PYTHONUNBUFFERED=1",
+    "/usr/bin/python3",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_cold_host_001/launch_cold_spark.py",
+    "--source",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_cold_source_001",
+    "--checkpoint",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_repair_003/branch_a/inputs/original.pt",
+    "--contract",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_cold_preparation_001",
+    "--supervisor-source",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009",
+    "--output",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_cold_001"
+  ],
+  "launched_unix": 1789051890.6638176
+}
