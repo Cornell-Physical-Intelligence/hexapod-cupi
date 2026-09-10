@@ -1,0 +1,25 @@
+{
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=hexapod-omni-velocity-recording-005-20260910.service",
+    "--property=RuntimeMaxSec=720",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=Environment=PYTHONDONTWRITEBYTECODE=1",
+    "--property=ExecStopPost=/usr/bin/python3 /home/orionh/HEXAPOD_runs/mock_length_study_20260909/forecast_pause_024/resume_forecasting.py",
+    "/usr/bin/python3",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_velocity_recording_preparation_005/launch_recording_spark.py",
+    "--source",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_velocity_source_003",
+    "--probe",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_velocity_probe_003",
+    "--pilot",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_velocity_pilot_003",
+    "--adapter",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_velocity_recording_adapter_005",
+    "--output",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_velocity_recording_005"
+  ],
+  "launched_unix": 1789015152.863057
+}
