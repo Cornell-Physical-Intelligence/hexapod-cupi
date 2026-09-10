@@ -1,0 +1,7 @@
+# Root readiness verification for quiet-priority smoke003
+
+This is preparation evidence only. No GPU dispatch, policy result or Stage2 acceptance is recorded here. Root verified all native43, host20 and guard31 payloads, copied only the two fresh host/guard directories, then independently hashed the complete remote source599 and cold589 parent. Only the declared ten runtime additions, training entry, plan and source-origin record differ. The source map, plan and origin match the completed builder output. The stored `source_build_verified` data are a subsequent independent verification, not the original builder stdout.
+
+`host_preflight_001.json` preserves the successful actual remote no-GPU preflight, including the original1971 checkpoint, quiet-priority32×24×2 selection, source/native/supervisor checks and unchanged0.040 rad/20 ms and direct315/318 contracts. The audit preserves complete inventories. Root separately ran28 host and31 guard focused tests successfully; their tool-result summary is explicitly labeled, and owner raw test transcripts remain in their immutable preparation bundles. Native23 tests and bit-exact diagnostics comparisons are preserved in native004.
+
+At preparation time, the restored weather replay still held the GPU. These receipts do not grant a GPU slot or claim weather completion. Root must use the pinned external guard and current ownership checks before dispatch. Actual launch and terminal receipts belong to a later separate evidence directory.

@@ -1,0 +1,25 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_host_003/launch_train_spark.py",
+    "--source",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_source_003",
+    "--checkpoint",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_repair_003/branch_a/inputs/original.pt",
+    "--contract",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_preparation_003",
+    "--supervisor-source",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009",
+    "--output",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_smoke_003",
+    "--allocation",
+    "smoke",
+    "--branch",
+    "quiet_priority",
+    "--preflight-only"
+  ],
+  "exit_code": 0,
+  "stdout": "{\n  \"identity\": {\n    \"schema\": \"direct315_quiet_priority_native_v3\",\n    \"source_manifest_sha256\": \"ef962070bd770d03553eb824fb6caccada7d6a06ac26d2f180bad068f0a9cc62\",\n    \"plan_sha256\": \"eee25089a65ec112f5eeed9c70f6310ef019ca5f077618c736fcfaa859739fc2\",\n    \"checkpoint_sha256\": \"1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8\",\n    \"actor_width\": 315,\n    \"critic_width\": 318,\n    \"selection\": {\n      \"schema\": \"direct315_quiet_priority_native_v3\",\n      \"allocation\": \"smoke\",\n      \"branch\": \"quiet_priority\",\n      \"replicas\": 32,\n      \"controls_per_update\": 24,\n      \"updates\": 2,\n      \"caps\": {\n        \"temporal_weight\": 0.1,\n        \"spatial_weight\": 0.1,\n        \"noise_scale\": 1.0,\n        \"noise_seed\": 1157,\n        \"quiet_temporal_weight\": 1.0\n      }\n    },\n    \"overrides\": {\n      \"target_slew_rad_per_20ms\": 0.04,\n      \"reward_weights\": {\n        \"stand_joint_velocity\": -0.5,\n        \"stand_target_velocity\": -0.15,\n        \"stand_posture\": -2.0,\n        \"action_rate\": -0.075,\n        \"saturation\": -0.75,\n        \"torque_excess\": -0.6,\n        \"worst_torque_excess\": -0.2,\n        \"stand_raw_action\": 0.0\n      },\n      \"observation_noise_scale\": 1.0,\n      \"target_filter_time_constant_s\": 0.0\n    },\n    \"diagnostic_options\": {\n      \"duration_s\": 12,\n      \"settle_s\": 2,\n      \"seed\": 7057,\n      \"trace_envs_per_scenario\": 1,\n      \"controller\": \"policy\"\n    },\n    \"Stage2_complete\": false\n  },\n  \"host_freeze_sha256\": \"df815208f340a9c8c0c2ce8c9fcfad7fd28791f745961ab714f96c0508454efc\",\n  \"no_GPU\": true\n}\n",
+  "stderr": ""
+}

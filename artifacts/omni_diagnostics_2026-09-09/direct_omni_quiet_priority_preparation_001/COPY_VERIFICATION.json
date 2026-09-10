@@ -1,0 +1,61 @@
+{
+  "schema": "quiet_priority_copy_verification_v1",
+  "verified_at_utc": "2026-09-10T17:57:27.021656+00:00",
+  "checks": [
+    "Pinned original manifest hash and payload count",
+    "Exact original file inventory; no symlinks",
+    "Every original payload hash",
+    "Exact copied inventory and every copied hash",
+    "Original inventory and hash reread after copy",
+    "No JSONL or internal thinking nodes in selected model final result"
+  ],
+  "bundles": [
+    {
+      "destination": "native_004",
+      "source_repository_relative": "tmp/direct_omni_recovery_001/native_004",
+      "manifest_sha256": "1ab678beeba6bf74978c210c4e38f13655e25728fe66e3007e3b1db5e19b6b20",
+      "payloads": 43,
+      "copied_files_including_manifest": 44,
+      "exact_source_and_copy_inventory": true,
+      "each_copied_byte_sha256_verified": true
+    },
+    {
+      "destination": "host_003",
+      "source_repository_relative": "tmp/direct_omni_train_host_003",
+      "manifest_sha256": "df815208f340a9c8c0c2ce8c9fcfad7fd28791f745961ab714f96c0508454efc",
+      "payloads": 20,
+      "copied_files_including_manifest": 21,
+      "exact_source_and_copy_inventory": true,
+      "each_copied_byte_sha256_verified": true
+    },
+    {
+      "destination": "guard_004",
+      "source_repository_relative": "tmp/direct_omni_train_smoke_guard_004",
+      "manifest_sha256": "d7ecf21be4f9d38d9d5ba50d1d83b844b51ae82656c8e46efe51956d0630becb",
+      "payloads": 31,
+      "copied_files_including_manifest": 32,
+      "exact_source_and_copy_inventory": true,
+      "each_copied_byte_sha256_verified": true
+    },
+    {
+      "destination": "root_readiness",
+      "source_repository_relative": "tmp/direct_omni_smoke003_root_readiness_001",
+      "manifest_sha256": "6b5059bbf823383704a2e1900ef6509e2247f8f584b51fc654ccfae864786e9c",
+      "payloads": 10,
+      "copied_files_including_manifest": 11,
+      "exact_source_and_copy_inventory": true,
+      "each_copied_byte_sha256_verified": true
+    },
+    {
+      "destination": "dispatch",
+      "source_repository_relative": "tmp/direct_omni_train_smoke003_dispatch_001",
+      "manifest_sha256": "e41205ab0012bd356943a531fdf703b654c871cc95a4307b15ee645bf22208fb",
+      "payloads": 6,
+      "copied_files_including_manifest": 7,
+      "exact_source_and_copy_inventory": true,
+      "each_copied_byte_sha256_verified": true
+    }
+  ],
+  "unit_tests_rerun": false,
+  "reason": "Existing native23, host28 and guard31 results are preserved; this step performs publication integrity verification only."
+}

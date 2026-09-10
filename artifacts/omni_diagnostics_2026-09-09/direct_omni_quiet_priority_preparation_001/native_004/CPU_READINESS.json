@@ -1,0 +1,61 @@
+{
+  "schema": "native004_CPU_preparation_v1",
+  "runtime_files_sha256": {
+    "caps.py": "f5da55eb07a73c630e6627cf0356d0fb72b6e2891e38907e1b31492452bd6688",
+    "caps_ppo.py": "6395c6d3f6086aeb5d872c98a51a4416920befa37b52200709466b12da09de01",
+    "gradient_diagnostics.py": "2b8bc99b155d8d3ae181664776e4b3ebb5e6d4bef370bae644b3841569b569e3",
+    "curriculum.py": "cbc5c2a3b19f856d753a3b9b722f87d95ecdd893aa853c3fe8797df57e7af0f1",
+    "direct_config.py": "cdc97c218699f07512a000fe93930179acb2a0306d7a435ac4e3068ec606205f",
+    "direct_training.py": "06a71ad5a83c7ab77aa2fa1be12de435b4da828a8c2adad38ad31aa5b7364db2",
+    "direct_stop_evaluation.py": "6d424d01ec8fb22f3c10c64f6cfc4080dfe2a653dca46dd399a1aa7f620d79b3",
+    "direct_quiet_metrics.py": "e1e7ecc4d8e17e3c67c405dd412b0822fba4396dea784e58a6bb8f793b4efd05",
+    "direct_contract.py": "d2db15387ca9fda1b5ba3bb61f10579d3224fcbb4ab13b95c0cc7a9237e3b196",
+    "inputs/RSL_LICENSE": "3f58bb6b9272e416b8ccbe65889463f75a2fdf66e0e5722513f8622fb23dc778"
+  },
+  "tests": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=tmp/reference_residual_ppo_001/_deps:tmp/direct_omni_recovery_001/native_004 .venv/bin/python3 -m unittest discover -s tmp/direct_omni_recovery_001/native_004 -p test_*.py",
+    "count": 23,
+    "result": "PASS",
+    "log": "tests_successor_002.log",
+    "sha256": "aa70890ef060a91ee0a8b2325f3fa9031d7d4bb31ec12b35b873781299e81864"
+  },
+  "actual_RSL_CPU_updates_per_equivalence_branch": 2,
+  "instrumentation_on_off_exact_actor_critic_normalizer_Adam_RNG_history": true,
+  "CUDA_bit_exact_equivalence_claimed": false,
+  "physics_GPU_admission_claimed": false,
+  "parent_native003_freeze_sha256": "20fbcd40a869b39d8e3143a6c9715ec62ada5cc6211eaf473f60f8b7167678cb",
+  "inherited_payloads_unchanged": [
+    "DEPENDENCIES.json",
+    "PACKAGING_CHECK.json",
+    "PARENT_NATIVE001_SHA256.json",
+    "PARENT_NATIVE002_SHA256.json",
+    "RSL_SOURCE_PARITY.json",
+    "SUCCESSOR_PROVENANCE.json",
+    "curriculum.py",
+    "direct_quiet_metrics.py",
+    "direct_stop_evaluation.py",
+    "inputs/RSL_LICENSE",
+    "tests_001.log",
+    "tests_002.log",
+    "tests_003.log",
+    "tests_final.log",
+    "tests_inference_reload.log",
+    "tests_successor.log"
+  ],
+  "parent_payloads_changed": [
+    "README.md",
+    "build_source.py",
+    "caps.py",
+    "caps_ppo.py",
+    "direct_config.py",
+    "direct_contract.py",
+    "direct_training.py",
+    "test_inference_reload.py",
+    "test_native.py",
+    "test_runtime_wiring.py"
+  ],
+  "source_build_owner": "root",
+  "CLI_branch": "quiet_priority",
+  "schema_runtime": "direct315_quiet_priority_native_v3",
+  "source_expected_file_count_not_yet_measured": 599
+}

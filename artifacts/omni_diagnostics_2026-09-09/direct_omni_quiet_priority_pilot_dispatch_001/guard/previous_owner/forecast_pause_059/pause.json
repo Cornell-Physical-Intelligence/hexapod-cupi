@@ -1,0 +1,35 @@
+{
+  "user_authorized_pause": true,
+  "created_unix": 1789062815.6365972,
+  "units": {
+    "stormscope-dispatch.timer": "ActiveState=active\nSubState=running",
+    "stormscope-scout.timer": "ActiveState=active\nSubState=waiting",
+    "stormscope-dispatch.service": "MainPID=3625249\nActiveState=activating\nSubState=start",
+    "stormscope-scout.service": "MainPID=0\nActiveState=failed\nSubState=failed"
+  },
+  "unit": "hexapod-direct-omni-train-smoke-003-20260910.service",
+  "output": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_smoke_003",
+  "source": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_source_003",
+  "preflight": {
+    "compute_processes_before_authorized_pause": "3625292, /opt/wx/venv-models/bin/python",
+    "containers": "21faff779d05 isim-web-viewer-1 isim-web-viewer",
+    "forecast_services_authorized_for_graceful_stop": [
+      "stormscope-dispatch.service"
+    ],
+    "service_stop_semantics": {
+      "stormscope-dispatch.service": "TimeoutStopUSec=1min 30s\nKillMode=control-group\nKillSignal=15"
+    }
+  },
+  "coordination_sha256": "22c615d67c6c4dc14ab370b291f8eddd72f8475ad34118b91a4237a34ee05fab",
+  "reason": "Bounded direct315 quiet-priority smoke003: fresh standing, two updates with32 replicas, final constant and stop diagnostics; preview001 cleanup is ancestry evidence only, no pilot or automatic continuation",
+  "current_instruction": "9 September C-study authorization supersedes older physical-model pause notes",
+  "gracefully_stopped_services": [
+    "stormscope-dispatch.service"
+  ],
+  "post_pause_preflight": {
+    "available_memory_bytes": 125721518080,
+    "containers": "isim-web-viewer-1 isim-web-viewer",
+    "compute_processes": ""
+  },
+  "paused_unix": 1789062816.167506
+}

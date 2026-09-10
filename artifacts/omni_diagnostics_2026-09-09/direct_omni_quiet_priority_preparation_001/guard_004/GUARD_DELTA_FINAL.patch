@@ -1,0 +1,129 @@
+--- guard003/launch_guarded_remote.py
++++ guard004/launch_guarded_remote.py
+@@ -1,26 +1,26 @@
+-"""External pause055 guard: bounded direct315 smoke002 after exact failed smoke001 cleanup."""
++"""External pause059 guard: quiet-priority smoke003 after exact preview001 cleanup."""
+ from pathlib import Path
+ from types import SimpleNamespace
+ import fcntl,hashlib,importlib.util,json,os,subprocess,sys,time
+ sys.dont_write_bytecode=True
+ BASE=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909')
+ SUPERVISOR_SOURCE=BASE/'reference_physics_source_009'
+-SOURCE=BASE/'direct_omni_train_source_002'
+-CONTRACT=BASE/'direct_omni_train_preparation_002'
++SOURCE=BASE/'direct_omni_train_source_003'
++CONTRACT=BASE/'direct_omni_train_preparation_003'
+ CHECKPOINT=BASE/'omni_repair_003/branch_a/inputs/original.pt'
+-OUTPUT=BASE/'direct_omni_train_smoke_002'
+-PAUSE=BASE/'forecast_pause_055'
+-UNIT='hexapod-direct-omni-train-smoke-002-20260910.service'
+-HOST=BASE/'direct_omni_train_host_002/launch_train_spark.py'
+-SOURCE_SHA256='64144b2c2466f17c809554ef53f82b736b4199136cc821451d7ac2788752bd2e'
++OUTPUT=BASE/'direct_omni_train_smoke_003'
++PAUSE=BASE/'forecast_pause_059'
++UNIT='hexapod-direct-omni-train-smoke-003-20260910.service'
++HOST=BASE/'direct_omni_train_host_003/launch_train_spark.py'
++SOURCE_SHA256='ef962070bd770d03553eb824fb6caccada7d6a06ac26d2f180bad068f0a9cc62'
+ SUPERVISOR_SHA256='04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e'
+-CONTRACT_SHA256='20fbcd40a869b39d8e3143a6c9715ec62ada5cc6211eaf473f60f8b7167678cb'
++CONTRACT_SHA256='1ab678beeba6bf74978c210c4e38f13655e25728fe66e3007e3b1db5e19b6b20'
+ CHECKPOINT_SHA256='1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8'
+-HOST_SHA256='52c4b0bd944fe9e2f1fc0313199a2d214c53dbffa4d01700d7299c3c94275fa1'
+-HOST_FREEZE_SHA256='19545653a00e635cc14ed9415f9799978da34674e84f6cad76eb42bd2a961ac4'
+-PREVIOUS_UNIT='hexapod-direct-omni-train-smoke-001-20260910.service'
+-PREVIOUS_INVOCATION='1de80a43928f4d7497846dc762048d86'
+-PRIOR_PINS={'direct_omni_train_smoke_001/campaign.json': '5f1e9798dfd914c840539be66d5d2ac4ba52cc9e28a33d9a8539292139536d4a', 'direct_omni_train_smoke_001/jobs/standing.json': '540dd3201cf6e12c379dec7af2c1132899d1f839ef9effbd418bfac8e4e408fc', 'direct_omni_train_smoke_001/jobs/train.json': 'a9f61f516b6756eaa99c959619db55524d6101e1f10e7fb11692ba44f084f519', 'forecast_pause_054/pause.json': '9851e551be54e0e967fc8dfa9541d77ffb6435eece773639220005b5c007e432', 'forecast_pause_054/restored.json': '722aa07689c9a184c50e642f17111320c556b0a19e303216536954599dbff69a'}
++HOST_SHA256='d2b5298aa444f49b46611e377e63ad388dbaa11404bfb9c5b5024ed80cb6f672'
++HOST_FREEZE_SHA256='df815208f340a9c8c0c2ce8c9fcfad7fd28791f745961ab714f96c0508454efc'
++PREVIOUS_UNIT='hexapod-direct-omni-preview-001-20260910.service'
++PREVIOUS_INVOCATION='7121f177c458460e81de0ef7f4a967f3'
++PRIOR_PINS={'direct_omni_preview_001/campaign.json': 'f7352f3deaede92d9e52ba4a9f3a4d00c4ae60f66ef4308a877b49571c073983', 'direct_omni_preview_001/jobs/recording.json': '38c8a9fbea2fcba0f9f004eae3241a29b60e1576c461a19d265e297c74c6f988', 'forecast_pause_058/pause.json': '7265a0e179a65be9d125deaa123500ba4eda9aadec454ea6dfe2b9f111786d28', 'forecast_pause_058/restored.json': 'a2cd701484f2b8977c8e7ee3eec4dbef42e9317e304f7924fe0cf8b29dd46060'}
+ 
+ def call(args):return subprocess.check_output(args,text=True,timeout=30).strip()
+ def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+@@ -29,7 +29,7 @@
+         'checkpoint':CHECKPOINT_SHA256,'host':HOST_SHA256,'host freeze':HOST_FREEZE_SHA256,**PRIOR_PINS}.items():
+         if len(value)!=64 or any(c not in '0123456789abcdef' for c in value):raise RuntimeError('Final reviewed binding pending: '+name)
+     if len(PREVIOUS_INVOCATION)!=32 or any(c not in '0123456789abcdef' for c in PREVIOUS_INVOCATION):raise RuntimeError('Previous invocation not bound')
+-    if set(PRIOR_PINS)!={'direct_omni_train_smoke_001/campaign.json','direct_omni_train_smoke_001/jobs/standing.json','direct_omni_train_smoke_001/jobs/train.json','forecast_pause_054/restored.json','forecast_pause_054/pause.json'}:raise RuntimeError('Exact failed smoke owner/restoration receipts required')
++    if set(PRIOR_PINS)!={'forecast_pause_058/pause.json', 'direct_omni_preview_001/jobs/recording.json', 'direct_omni_preview_001/campaign.json', 'forecast_pause_058/restored.json'}:raise RuntimeError('Exact preview owner/restoration receipts required')
+ 
+ def verify_frozen(root,expected):
+     manifest=root/'FREEZE_SHA256.json'
+@@ -46,22 +46,19 @@
+     if live and live!=PREVIOUS_INVOCATION:raise RuntimeError('Previous owner invocation changed')
+     for name,bound in PRIOR_PINS.items():
+         if sha(BASE/name)!=bound:raise RuntimeError('Previous receipt changed: '+name)
+-    campaign=json.loads((BASE/'direct_omni_train_smoke_001/campaign.json').read_text())
+-    if campaign.get('status')!='failed' or campaign.get('terminal_inputs_unchanged') is not True:raise RuntimeError('Prior failed smoke campaign not terminal and immutable')
+-    if (campaign.get('allocation'),campaign.get('branch'),campaign.get('PPO_updates_completed'),campaign.get('last_completed_phase'))!=('smoke','caps',0,'standing') or set(campaign.get('accepted_phases',{}))!={'standing'} or campaign.get('planned_phases')!=['standing','train','final_constant','final_stop']:raise RuntimeError('Prior failed smoke phase/allocation differs')
+-    observed=campaign.get('observed_training',{})
+-    if observed.get('observed_updates_completed')!=2 or observed.get('training_receipt_complete') is not False or campaign.get('training_attempted') is not True:raise RuntimeError('Prior two-update finalizer failure differs')
+-    if campaign.get('host_freeze_sha256')!='332fad29e0a0f88ba07012700f2a21c3a4f0453f3d71224da84fcc477e48394f' or campaign.get('identity',{}).get('source_manifest_sha256')!='37b4b6d5d75f6d697a122fc2a1903f8f625f6a67d1727e1257e1533300e44da6':raise RuntimeError('Prior failed source/host identity differs')
+-    previous_pause=json.loads((BASE/'forecast_pause_054/pause.json').read_text())
+-    restored=json.loads((BASE/'forecast_pause_054/restored.json').read_text())
++    campaign=json.loads((BASE/'direct_omni_preview_001/campaign.json').read_text())
++    if campaign.get('status')!='failed' or campaign.get('terminal_inputs_unchanged') is not True:raise RuntimeError('Prior preview campaign not terminal and immutable')
++    if campaign.get('planned_phases')!=['recording'] or campaign.get('recording_only') is not True or campaign.get('policy_training_started') is not False or campaign.get('stage2_complete') is not False:raise RuntimeError('Prior preview scope differs')
++    if campaign.get('host_freeze_sha256')!='640ea3891d8e0d6e83f173f5bc5a2206ccdd2d0ef74c9a324d62ecda4fd9594e' or campaign.get('identity',{}).get('source_manifest_sha256')!='64144b2c2466f17c809554ef53f82b736b4199136cc821451d7ac2788752bd2e':raise RuntimeError('Prior preview source/host identity differs')
++    previous_pause=json.loads((BASE/'forecast_pause_058/pause.json').read_text())
++    restored=json.loads((BASE/'forecast_pause_058/restored.json').read_text())
+     expected_timers={name for name,state in previous_pause['units'].items() if name.endswith('.timer') and 'ActiveState=active' in state}
+     if previous_pause.get('unit')!=PREVIOUS_UNIT or set(restored.get('timers',[]))!=expected_timers or not restored.get('restored_unix'):raise RuntimeError('Prior exact timer restoration missing')
+-    for phase,expected_status in (('standing','completed'),('train','failed')):
+-        job=json.loads((BASE/('direct_omni_train_smoke_001/jobs/'+phase+'.json')).read_text())
+-        if job.get('status')!=expected_status or job.get('phase')!=phase or job.get('cleanup_checked') is not True or not job.get('container_id') or not job.get('container_name'):raise RuntimeError('Prior failed smoke job lacks exact terminal cleanup proof')
+-        for identifier in (job['container_name'],job['container_id']):
+-            found=subprocess.run(['docker','inspect','--format','{{.Id}} {{.Name}} {{.State.Running}}',identifier],text=True,capture_output=True,timeout=20)
+-            if found.returncode==0 or not any(x in found.stderr.lower() for x in ('no such object','no such container')):raise RuntimeError('Previous container not proven absent: '+identifier)
++    job=json.loads((BASE/'direct_omni_preview_001/jobs/recording.json').read_text())
++    if job.get('status')!='completed' or job.get('phase')!='recording' or job.get('exit_code')!=0 or job.get('cleanup_checked') is not True or not job.get('container_id') or not job.get('container_name'):raise RuntimeError('Prior recording lacks exact terminal cleanup proof')
++    for identifier in (job['container_name'],job['container_id']):
++        found=subprocess.run(['docker','inspect','--format','{{.Id}} {{.Name}} {{.State.Running}}',identifier],text=True,capture_output=True,timeout=20)
++        if found.returncode==0 or not any(x in found.stderr.lower() for x in ('no such object','no such container')):raise RuntimeError('Previous container not proven absent: '+identifier)
+ 
+ def validate_train_inputs(train_host):
+     if sha(SUPERVISOR_SOURCE/'campaign_source_hashes.json')!=SUPERVISOR_SHA256:raise RuntimeError('Changed supervisor source')
+@@ -69,12 +66,12 @@
+     if CHECKPOINT.is_symlink() or sha(CHECKPOINT)!=CHECKPOINT_SHA256:raise RuntimeError('Wrong original checkpoint')
+     if sha(HOST)!=HOST_SHA256:raise RuntimeError('Changed native host')
+     verify_frozen(HOST.parent,HOST_FREEZE_SHA256);verify_frozen(CONTRACT,CONTRACT_SHA256)
+-    args=SimpleNamespace(source=SOURCE,checkpoint=CHECKPOINT,contract=CONTRACT,supervisor_source=SUPERVISOR_SOURCE,output=OUTPUT,isaaclab=Path('/home/orionh/IsaacLab'),host_freeze_sha256=HOST_FREEZE_SHA256,allocation='smoke',branch='caps',smoke=None)
++    args=SimpleNamespace(source=SOURCE,checkpoint=CHECKPOINT,contract=CONTRACT,supervisor_source=SUPERVISOR_SOURCE,output=OUTPUT,isaaclab=Path('/home/orionh/IsaacLab'),host_freeze_sha256=HOST_FREEZE_SHA256,allocation='smoke',branch='quiet_priority',smoke=None)
+     if train_host.selected_phases(args)!=('standing','train','final_constant','final_stop'):raise RuntimeError('Host changed bounded smoke phase order')
+     identity=train_host.verify_inputs(args)
+     if identity.get('source_manifest_sha256')!=SOURCE_SHA256 or identity.get('checkpoint_sha256')!=CHECKPOINT_SHA256:raise RuntimeError('Host admitted different native inputs')
+-    expected={'schema':'direct315_stand_stop_caps_native_v2','allocation':'smoke','branch':'caps','replicas':32,'controls_per_update':24,'updates':2,'caps':{'temporal_weight':.1,'spatial_weight':.1,'noise_scale':1.,'noise_seed':1157}}
+-    if identity.get('selection')!=expected or (identity.get('actor_width'),identity.get('critic_width'))!=(315,318):raise RuntimeError('Host selection differs from bounded two-update CAPS smoke')
++    expected={'schema':'direct315_quiet_priority_native_v3','allocation':'smoke','branch':'quiet_priority','replicas':32,'controls_per_update':24,'updates':2,'caps':{'temporal_weight':.1,'spatial_weight':.1,'noise_scale':1.,'noise_seed':1157,'quiet_temporal_weight':1.0}}
++    if identity.get('selection')!=expected or (identity.get('actor_width'),identity.get('critic_width'))!=(315,318):raise RuntimeError('Host selection differs from bounded two-update quiet-priority smoke')
+     return identity
+ 
+ def main():
+@@ -122,7 +119,7 @@
+         record = dict(user_authorized_pause=True, created_unix=time.time(), units=units, unit=UNIT,
+             output=str(OUTPUT), source=str(SOURCE), preflight=snapshot,
+             coordination_sha256=hashlib.sha256(coordination).hexdigest(),
+-            reason='Bounded direct315 CAPS smoke002 after reviewed finalizer-only correction: fresh standing, two updates with32 replicas, final constant and stop diagnostics; original failed smoke preserved, no pilot or automatic continuation',
++            reason='Bounded direct315 quiet-priority smoke003: fresh standing, two updates with32 replicas, final constant and stop diagnostics; preview001 cleanup is ancestry evidence only, no pilot or automatic continuation',
+             current_instruction='9 September C-study authorization supersedes older physical-model pause notes')
+         (PAUSE / 'pause.json').write_text(json.dumps(record, indent=2) + '\n')
+         restorer = PAUSE / 'resume_forecasting.py'
+@@ -158,7 +155,7 @@
+ ''')
+         # Arm recovery before mutating timer state. It stops only this exact
+         # owner unit if needed, then restores only previously active timers.
+-        subprocess.run(['systemd-run', '--user', '--unit=hexapod-forecast-restore-055', '--on-active=45m',
++        subprocess.run(['systemd-run', '--user', '--unit=hexapod-forecast-restore-059', '--on-active=45m',
+             '/usr/bin/python3', str(restorer), '--stop-owner'], check=True)
+         active = [name for name, state in units.items() if name.endswith('.timer') and 'ActiveState=active' in state]
+         if active:
+@@ -198,7 +195,7 @@
+             '--property=ExecStopPost=/usr/bin/python3 '+str(restorer),'--property=Environment=PYTHONUNBUFFERED=1',
+             '/usr/bin/python3',str(HOST),'--source',str(SOURCE),'--checkpoint',str(CHECKPOINT),
+             '--contract',str(CONTRACT),'--supervisor-source',str(SUPERVISOR_SOURCE),'--output',str(OUTPUT),
+-            '--allocation','smoke','--branch','caps']
++            '--allocation','smoke','--branch','quiet_priority']
+         subprocess.run(cmd,check=True,timeout=30)
+         launched=True
+         (PAUSE/'launch.json').write_text(json.dumps(dict(command=cmd,launched_unix=time.time()),indent=2)+'\n')

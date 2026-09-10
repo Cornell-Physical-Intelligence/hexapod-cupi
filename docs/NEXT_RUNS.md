@@ -102,3 +102,6 @@ The next proposed allocation is one quiet-priority temporal-smoothing ablation, 
 - Retain all-direction/yaw/arc and quiet-stop comparison, exact checkpoint hashes and full failure evidence. A longer unchanged budget remains scientifically valid; this short ablation is chosen to discriminate objective priority quickly, not to claim convergence or impossibility.
 
 See the [actual matched pilots](../artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/REPORT.md) and [verified review/proposal](../artifacts/project_review_2026-09-10/claude_partner_review_001/README.md). Never reuse the failed preview finalizer without its separately verified successor.
+
+
+For the quiet-priority allocation, use the [frozen native004/host003/guard004 preparation](../artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_preparation_001/README.md) and require the complete matching source003 smoke before pilot admission. Keep root as sole dispatcher. The user explicitly prioritizes PPO over all weather activity: defer identified weather blockers while preserving outputs and exact recovery/ownership controls. Live state belongs in STATUS; this paragraph does not queue or launch a pilot.

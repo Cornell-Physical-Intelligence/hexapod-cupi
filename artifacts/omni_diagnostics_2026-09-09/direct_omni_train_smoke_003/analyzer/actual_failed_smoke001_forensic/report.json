@@ -1,0 +1,4901 @@
+{
+  "schema": "direct315_quiet_priority_matched_review_v2",
+  "native_contract_freeze_sha256": "1ab678beeba6bf74978c210c4e38f13655e25728fe66e3007e3b1db5e19b6b20",
+  "source_manifest_sha256": "ef962070bd770d03553eb824fb6caccada7d6a06ac26d2f180bad068f0a9cc62",
+  "plan_sha256": "eee25089a65ec112f5eeed9c70f6310ef019ca5f077618c736fcfaa859739fc2",
+  "errors": [
+    "campaign identity: ValueError('Wrong/missing native campaign schema')",
+    "standing identity/ownership receipt: ValueError('Phase asset/plan identity differs')",
+    "train identity/ownership receipt: ValueError('Phase asset/plan identity differs')",
+    "final_constant identity/ownership receipt: FileNotFoundError(2, 'No such file or directory')",
+    "final_stop identity/ownership receipt: FileNotFoundError(2, 'No such file or directory')",
+    "Optimizer diagnostic inventory has 9 evidence gaps; see optimizer_diagnostics.errors",
+    "Campaign did not complete terminal input integrity; no continuation admission",
+    "Matched final constant and stop diagnostics are incomplete or unverified"
+  ],
+  "Stage2_complete": false,
+  "automatic_continuation": false,
+  "stop_baseline_available": false,
+  "phase_receipts": {
+    "standing": {
+      "state_status": "completed",
+      "job_status": "completed",
+      "cleanup_checked": true,
+      "exit_code": 0
+    },
+    "train": {
+      "state_status": "running",
+      "job_status": "failed",
+      "cleanup_checked": true,
+      "exit_code": null
+    }
+  },
+  "scope": "Read-only numerical and forensic review, not host admission or physical qualification",
+  "campaign": {
+    "status": "failed",
+    "started_unix": 1789054795.1511388,
+    "identity": {
+      "schema": "direct315_stand_stop_caps_native_v2",
+      "source_manifest_sha256": "37b4b6d5d75f6d697a122fc2a1903f8f625f6a67d1727e1257e1533300e44da6",
+      "plan_sha256": "9fb7d0b01480523972b4f1c17e717756d7dcf1c54b9caa436245671937de538c",
+      "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+      "actor_width": 315,
+      "critic_width": 318,
+      "selection": {
+        "schema": "direct315_stand_stop_caps_native_v2",
+        "allocation": "smoke",
+        "branch": "caps",
+        "replicas": 32,
+        "controls_per_update": 24,
+        "updates": 2,
+        "caps": {
+          "temporal_weight": 0.1,
+          "spatial_weight": 0.1,
+          "noise_scale": 1.0,
+          "noise_seed": 1157
+        }
+      },
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.04,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2,
+          "stand_raw_action": 0.0
+        },
+        "observation_noise_scale": 1.0,
+        "target_filter_time_constant_s": 0.0
+      },
+      "diagnostic_options": {
+        "duration_s": 12,
+        "settle_s": 2,
+        "seed": 7057,
+        "trace_envs_per_scenario": 1,
+        "controller": "policy"
+      },
+      "Stage2_complete": false
+    },
+    "host_freeze_sha256": "332fad29e0a0f88ba07012700f2a21c3a4f0453f3d71224da84fcc477e48394f",
+    "allocation": "smoke",
+    "branch": "caps",
+    "planned_phases": [
+      "standing",
+      "train",
+      "final_constant",
+      "final_stop"
+    ],
+    "accepted_phases": {
+      "standing": {
+        "phase": "standing",
+        "state_sha256": "f36de8812d6007cd0b09e228e63e3bde53eb7c56e753fcd8f96dd8ae5cf2e56f",
+        "source_manifest_sha256": "37b4b6d5d75f6d697a122fc2a1903f8f625f6a67d1727e1257e1533300e44da6",
+        "Stage2_complete": false,
+        "passed": true,
+        "admission_sha256": "fae8fd3e3d5a265c93f4895976f440656a4282b235188dfa2350db49d2668a89"
+      }
+    },
+    "PPO_updates_completed": 0,
+    "training_attempted": true,
+    "Stage2_complete": false,
+    "automatic_continuation": false,
+    "qualification": "Training/evaluation completion is unqualified diagnostic evidence",
+    "last_completed_phase": "standing",
+    "error": "RuntimeError('train standing did not complete; inspect its state and log')",
+    "terminal_inputs_unchanged": true,
+    "observed_training": {
+      "training_receipt_exists": true,
+      "training_receipt_sha256": "084921d97a6eeb665a41391753106fb9033980bf651c305a2bb753b0b0746827",
+      "observed_updates_completed": 2,
+      "training_receipt_complete": false,
+      "training_error": "RuntimeError('Error(s) in loading state_dict for MLPModel:\\n\\tWhile copying the parameter named \"obs_normalizer._std\", whose dimensions in the model are torch.Size([1, 315]) and whose dimensions in the checkpoint are torch.Size([1, 315]), an exception occurred : (\\'Inplace update to inference tensor outside InferenceMode is not allowed.You can make a clone to get a normal tensor before doing inplace update.See https://github.com/pytorch/rfcs/pull/17 for more details.\\',).')",
+      "receipt_scope": "Preserve producer-reported updates even if a later phase fails; missing means unavailable."
+    },
+    "finished_unix": 1789054912.3028867
+  },
+  "cold_campaign": {
+    "status": "completed",
+    "started_unix": 1789051890.8806036,
+    "identity": {
+      "schema": "direct315_cold_formal004_v1",
+      "source_manifest_sha256": "4671eab012aaf79ce49769cfdc1667142237a4b4a45966fd0399a9caa900c51b",
+      "plan_sha256": "2875245e92806a1cf96cccf14d25a0887474eda98d5a81de9d99b9656e90280c",
+      "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+      "actor_width": 315,
+      "critic_width": 318,
+      "training_allowed": false,
+      "Stage2_complete": false,
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.04,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2,
+          "stand_raw_action": 0.0
+        },
+        "observation_noise_scale": 1.0,
+        "target_filter_time_constant_s": 0.0
+      },
+      "diagnostic_options": {
+        "duration_s": 12,
+        "settle_s": 2,
+        "seed": 7057,
+        "trace_envs_per_scenario": 1,
+        "controller": "policy"
+      }
+    },
+    "host_freeze_sha256": "efbeac2a0bfb7ebf93efb9ec4dce33363607092b30a7e81ac6351950e1fa6083",
+    "standing_admitted": true,
+    "baseline_complete": true,
+    "policy_training_started": false,
+    "PPO_updates_completed": 0,
+    "Stage2_complete": false,
+    "automatic_continuation": false,
+    "phase_scope": {
+      "standing": "32x1000",
+      "baseline": "48 replicas / 12 cases / 12 seconds"
+    },
+    "accepted_phases": {
+      "standing": {
+        "phase": "standing",
+        "passed": true,
+        "state_sha256": "80b1d57c34942d9a41473b2b86dd20ea684aa30520c02f09f986c9a1da009140",
+        "admission_sha256": "41002c8c4a43401fde265fbf9d3b3e14e65b053a47144ad3cafe357fe7bcb14a"
+      },
+      "baseline": {
+        "phase": "baseline",
+        "complete": true,
+        "state_sha256": "6addad5aea90079b83141a80feac0bf1a02f0df15a68db9441425f252dd8d4e7",
+        "diagnostics_sha256": "2c067b023b52e84b6dd3a3a78ccd35a6ea036602e243eb28d94f01a7177ea03e",
+        "scope": "Measured baseline, not physical or training admission",
+        "Stage2_complete": false
+      }
+    },
+    "last_completed_phase": "baseline",
+    "terminal_inputs_unchanged": true,
+    "finished_unix": 1789052038.6144824
+  },
+  "training_receipt_forensics": {
+    "complete": false,
+    "updates_completed": 2,
+    "reload_passed": null,
+    "final_checkpoint_sha256": null,
+    "error": "RuntimeError('Error(s) in loading state_dict for MLPModel:\\n\\tWhile copying the parameter named \"obs_normalizer._std\", whose dimensions in the model are torch.Size([1, 315]) and whose dimensions in the checkpoint are torch.Size([1, 315]), an exception occurred : (\\'Inplace update to inference tensor outside InferenceMode is not allowed.You can make a clone to get a normal tensor before doing inplace update.See https://github.com/pytorch/rfcs/pull/17 for more details.\\',).')",
+    "audit_error": null,
+    "scope": "Producer-reported values only; no independent raw/checkpoint verification implied"
+  },
+  "optimizer_diagnostics": {
+    "schema": "direct315_actor_gradients_v1",
+    "errors": [
+      "Optimizer diagnostics schema is missing or differs",
+      "update 1.caps_quiet_temporal_mean: missing/invalid finite number",
+      "update 1.caps_moving_temporal_mean: missing/invalid finite number",
+      "update 1: missing minibatches",
+      "update 1: expected 20 retained minibatches",
+      "update 2.caps_quiet_temporal_mean: missing/invalid finite number",
+      "update 2.caps_moving_temporal_mean: missing/invalid finite number",
+      "update 2: missing minibatches",
+      "update 2: expected 20 retained minibatches"
+    ],
+    "updates": [
+      {
+        "completed_update": 1,
+        "losses": {
+          "value": 0.3323597706854343,
+          "surrogate": -0.03278912643436342,
+          "entropy": -15.90317506790161,
+          "caps_temporal": 0.3108791410923004,
+          "caps_spatial": 0.002249949926044792,
+          "caps_weighted": 0.031312909349799155,
+          "caps_valid_pair_fraction": 0.7356770932674408,
+          "caps_quiet_temporal_mean": null,
+          "caps_moving_temporal_mean": null
+        },
+        "optimizer_wall_seconds": 0.2092104519251734,
+        "learning_rate": 1e-05,
+        "minibatches_retained": 0,
+        "pair_count_rows_valid": 0,
+        "pair_presentations": {
+          "valid_pairs": 0,
+          "quiet_pairs": 0,
+          "moving_pairs": 0
+        },
+        "quiet_valid_pair_fraction": null,
+        "kl_mean": {
+          "count": 0,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "median": null
+        },
+        "learning_rate_before": {
+          "count": 0,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "median": null
+        },
+        "learning_rate_after": {
+          "count": 0,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "median": null
+        },
+        "minibatch_learning_rates": []
+      },
+      {
+        "completed_update": 2,
+        "losses": {
+          "value": 0.025053142011165618,
+          "surrogate": -0.04381353102289722,
+          "entropy": -15.899204778671265,
+          "caps_temporal": 0.33920515328645706,
+          "caps_spatial": 0.0016543286270461976,
+          "caps_weighted": 0.034085949324071406,
+          "caps_valid_pair_fraction": 0.9583333432674408,
+          "caps_quiet_temporal_mean": null,
+          "caps_moving_temporal_mean": null
+        },
+        "optimizer_wall_seconds": 0.09526329603977501,
+        "learning_rate": 1e-05,
+        "minibatches_retained": 0,
+        "pair_count_rows_valid": 0,
+        "pair_presentations": {
+          "valid_pairs": 0,
+          "quiet_pairs": 0,
+          "moving_pairs": 0
+        },
+        "quiet_valid_pair_fraction": null,
+        "kl_mean": {
+          "count": 0,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "median": null
+        },
+        "learning_rate_before": {
+          "count": 0,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "median": null
+        },
+        "learning_rate_after": {
+          "count": 0,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "median": null
+        },
+        "minibatch_learning_rates": []
+      }
+    ],
+    "sparse_gradients": [],
+    "scope": "Optimizer diagnostics only. Aggregate temporal losses are not quiet target-step p95; sparse gradients do not describe every minibatch or the Adam parameter update.",
+    "pair_count_scope": "Optimizer minibatch presentations, including repeated PPO epochs; not unique simulation transitions.",
+    "quiet_mean_scope": "Per-update conditional mean over valid exact-zero pairs; a zero with zero quiet-pair count is not observed quiet quality.",
+    "producer_reported_complete": false,
+    "producer_reported_updates_completed": 2,
+    "selection": {
+      "schema": "direct315_stand_stop_caps_native_v2",
+      "allocation": "smoke",
+      "branch": "caps",
+      "replicas": 32,
+      "controls_per_update": 24,
+      "updates": 2,
+      "caps": {
+        "temporal_weight": 0.1,
+        "spatial_weight": 0.1,
+        "noise_scale": 1.0,
+        "noise_seed": 1157
+      }
+    },
+    "updates_retained": 2,
+    "minibatches_retained": 0,
+    "pair_count_rows_valid": 0,
+    "pair_presentations": {
+      "valid_pairs": 0,
+      "quiet_pairs": 0,
+      "moving_pairs": 0
+    },
+    "quiet_valid_pair_fraction": null,
+    "kl_mean": {
+      "count": 0,
+      "min": null,
+      "max": null,
+      "mean": null,
+      "median": null
+    },
+    "learning_rate_before": {
+      "count": 0,
+      "min": null,
+      "max": null,
+      "mean": null,
+      "median": null
+    },
+    "learning_rate_after": {
+      "count": 0,
+      "min": null,
+      "max": null,
+      "mean": null,
+      "median": null
+    },
+    "update_end_learning_rates": [
+      1e-05,
+      1e-05
+    ],
+    "learning_rate_at_existing_floor_count": 0,
+    "sparse_gradient_rows_retained": 0,
+    "loss_windows": {
+      "updates_per_window": 1,
+      "initial_update_ids": [
+        1
+      ],
+      "final_update_ids": [
+        2
+      ],
+      "initial": {
+        "value": {
+          "count": 1,
+          "min": 0.3323597706854343,
+          "max": 0.3323597706854343,
+          "mean": 0.3323597706854343,
+          "median": 0.3323597706854343
+        },
+        "surrogate": {
+          "count": 1,
+          "min": -0.03278912643436342,
+          "max": -0.03278912643436342,
+          "mean": -0.03278912643436342,
+          "median": -0.03278912643436342
+        },
+        "entropy": {
+          "count": 1,
+          "min": -15.90317506790161,
+          "max": -15.90317506790161,
+          "mean": -15.90317506790161,
+          "median": -15.90317506790161
+        },
+        "caps_temporal": {
+          "count": 1,
+          "min": 0.3108791410923004,
+          "max": 0.3108791410923004,
+          "mean": 0.3108791410923004,
+          "median": 0.3108791410923004
+        },
+        "caps_spatial": {
+          "count": 1,
+          "min": 0.002249949926044792,
+          "max": 0.002249949926044792,
+          "mean": 0.002249949926044792,
+          "median": 0.002249949926044792
+        },
+        "caps_weighted": {
+          "count": 1,
+          "min": 0.031312909349799155,
+          "max": 0.031312909349799155,
+          "mean": 0.031312909349799155,
+          "median": 0.031312909349799155
+        },
+        "caps_valid_pair_fraction": {
+          "count": 1,
+          "min": 0.7356770932674408,
+          "max": 0.7356770932674408,
+          "mean": 0.7356770932674408,
+          "median": 0.7356770932674408
+        },
+        "caps_quiet_temporal_mean": {
+          "count": 0,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "median": null
+        },
+        "caps_moving_temporal_mean": {
+          "count": 0,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "median": null
+        }
+      },
+      "final": {
+        "value": {
+          "count": 1,
+          "min": 0.025053142011165618,
+          "max": 0.025053142011165618,
+          "mean": 0.025053142011165618,
+          "median": 0.025053142011165618
+        },
+        "surrogate": {
+          "count": 1,
+          "min": -0.04381353102289722,
+          "max": -0.04381353102289722,
+          "mean": -0.04381353102289722,
+          "median": -0.04381353102289722
+        },
+        "entropy": {
+          "count": 1,
+          "min": -15.899204778671265,
+          "max": -15.899204778671265,
+          "mean": -15.899204778671265,
+          "median": -15.899204778671265
+        },
+        "caps_temporal": {
+          "count": 1,
+          "min": 0.33920515328645706,
+          "max": 0.33920515328645706,
+          "mean": 0.33920515328645706,
+          "median": 0.33920515328645706
+        },
+        "caps_spatial": {
+          "count": 1,
+          "min": 0.0016543286270461976,
+          "max": 0.0016543286270461976,
+          "mean": 0.0016543286270461976,
+          "median": 0.0016543286270461976
+        },
+        "caps_weighted": {
+          "count": 1,
+          "min": 0.034085949324071406,
+          "max": 0.034085949324071406,
+          "mean": 0.034085949324071406,
+          "median": 0.034085949324071406
+        },
+        "caps_valid_pair_fraction": {
+          "count": 1,
+          "min": 0.9583333432674408,
+          "max": 0.9583333432674408,
+          "mean": 0.9583333432674408,
+          "median": 0.9583333432674408
+        },
+        "caps_quiet_temporal_mean": {
+          "count": 0,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "median": null
+        },
+        "caps_moving_temporal_mean": {
+          "count": 0,
+          "min": null,
+          "max": null,
+          "mean": null,
+          "median": null
+        }
+      }
+    },
+    "diagnostic_inventory_complete": false,
+    "admission": false
+  },
+  "training": {
+    "complete": false,
+    "selection": {
+      "schema": "direct315_stand_stop_caps_native_v2",
+      "allocation": "smoke",
+      "branch": "caps",
+      "replicas": 32,
+      "controls_per_update": 24,
+      "updates": 2,
+      "caps": {
+        "temporal_weight": 0.1,
+        "spatial_weight": 0.1,
+        "noise_scale": 1.0,
+        "noise_seed": 1157
+      }
+    },
+    "updates_completed": 2,
+    "controls": 48,
+    "replicas": 32,
+    "transitions": 1536,
+    "training_wrapper_wall_seconds": 3.4363921110052615,
+    "wrapper_transitions_per_second": 446.9804231830423,
+    "wall_scope": "learn plus final reload/decision copy; actual RSL collection and learning timings listed separately",
+    "native_rsl_timings": {
+      "collection_seconds": [
+        1.557,
+        1.267
+      ],
+      "learning_seconds": [
+        0.211,
+        0.097
+      ],
+      "reported_steps_per_second": [
+        434.0,
+        563.0
+      ]
+    },
+    "optimizer_updates": [
+      {
+        "completed_update": 1,
+        "optimizer_wall_seconds": 0.2092104519251734,
+        "losses": {
+          "value": 0.3323597706854343,
+          "surrogate": -0.03278912643436342,
+          "entropy": -15.90317506790161,
+          "caps_temporal": 0.3108791410923004,
+          "caps_spatial": 0.002249949926044792,
+          "caps_weighted": 0.031312909349799155,
+          "caps_valid_pair_fraction": 0.7356770932674408
+        },
+        "learning_rate": 1e-05
+      },
+      {
+        "completed_update": 2,
+        "optimizer_wall_seconds": 0.09526329603977501,
+        "losses": {
+          "value": 0.025053142011165618,
+          "surrogate": -0.04381353102289722,
+          "entropy": -15.899204778671265,
+          "caps_temporal": 0.33920515328645706,
+          "caps_spatial": 0.0016543286270461976,
+          "caps_weighted": 0.034085949324071406,
+          "caps_valid_pair_fraction": 0.9583333432674408
+        },
+        "learning_rate": 1e-05
+      }
+    ],
+    "strict_reload": null,
+    "checkpoint_sha256": null,
+    "decision_checkpoints": null,
+    "initialization": {
+      "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+      "exploration_std": 0.1,
+      "entropy_coef": 0.0,
+      "optimizer": "reset",
+      "learning_rate": 5e-05,
+      "actor_and_critic_preserved_except_std": true,
+      "observation_normalizers_preserved": true,
+      "optimizer_state_entries": 0,
+      "checkpoint_iteration": 1847,
+      "runner_iteration": 1847,
+      "exploration_std_before": [
+        0.4032049775123596,
+        0.38398510217666626,
+        0.2871536314487457,
+        0.45611193776130676,
+        0.2955004572868347,
+        0.23039953410625458,
+        0.4657600224018097,
+        0.44896653294563293,
+        0.4871585965156555,
+        0.39336958527565,
+        0.5246296525001526,
+        0.49469467997550964,
+        0.4852926731109619,
+        0.47244736552238464,
+        0.4494502544403076,
+        0.4971517026424408,
+        0.45584002137184143,
+        0.4284435212612152
+      ],
+      "exploration_std_after": [
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612,
+        0.10000000149011612
+      ],
+      "load_cfg": {
+        "actor": true,
+        "critic": true,
+        "optimizer": false,
+        "iteration": true,
+        "rnd": false
+      },
+      "learning_rate_schedule": "adaptive",
+      "stage2_complete": false
+    },
+    "learned_std": null,
+    "cuda_peak_allocated_bytes": 41524736,
+    "cuda_peak_reserved_bytes": 46137344,
+    "per_row": [
+      {
+        "env_id": 0,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.940145969390869,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.08564815670251846,
+        "zero_command_reported_joint_rms_rad_s": 0.9177533984184265,
+        "zero_command_target_delta_rms_rad": 0.038081247359514236
+      },
+      {
+        "env_id": 1,
+        "controls": 48,
+        "zero_command_controls": 1,
+        "moving_command_controls": 47,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 5.309484481811523,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.1111111119389534,
+        "zero_command_reported_joint_rms_rad_s": 1.0021047592163086,
+        "zero_command_target_delta_rms_rad": 0.037683576345443726
+      },
+      {
+        "env_id": 2,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.779942512512207,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.11342593282461166,
+        "zero_command_reported_joint_rms_rad_s": 0.9806965589523315,
+        "zero_command_target_delta_rms_rad": 0.03838763013482094
+      },
+      {
+        "env_id": 3,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 5.608872890472412,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.09953704476356506,
+        "zero_command_reported_joint_rms_rad_s": 0.9900438785552979,
+        "zero_command_target_delta_rms_rad": 0.03863215073943138
+      },
+      {
+        "env_id": 4,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.5938897132873535,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.1111111268401146,
+        "zero_command_reported_joint_rms_rad_s": 0.9353320002555847,
+        "zero_command_target_delta_rms_rad": 0.03833252936601639
+      },
+      {
+        "env_id": 5,
+        "controls": 48,
+        "zero_command_controls": 1,
+        "moving_command_controls": 47,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 5.095945358276367,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.10300926119089127,
+        "zero_command_reported_joint_rms_rad_s": 0.9701251983642578,
+        "zero_command_target_delta_rms_rad": 0.03710271045565605
+      },
+      {
+        "env_id": 6,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 6.860121250152588,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.11342593282461166,
+        "zero_command_reported_joint_rms_rad_s": 0.968687891960144,
+        "zero_command_target_delta_rms_rad": 0.03872142359614372
+      },
+      {
+        "env_id": 7,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 5.167466163635254,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.10648148506879807,
+        "zero_command_reported_joint_rms_rad_s": 0.9651341438293457,
+        "zero_command_target_delta_rms_rad": 0.03898666799068451
+      },
+      {
+        "env_id": 8,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 5.669165134429932,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.10879629850387573,
+        "zero_command_reported_joint_rms_rad_s": 1.0034196376800537,
+        "zero_command_target_delta_rms_rad": 0.03874235227704048
+      },
+      {
+        "env_id": 9,
+        "controls": 48,
+        "zero_command_controls": 1,
+        "moving_command_controls": 47,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 5.109999179840088,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.09490741044282913,
+        "zero_command_reported_joint_rms_rad_s": 0.9146644473075867,
+        "zero_command_target_delta_rms_rad": 0.03341914713382721
+      },
+      {
+        "env_id": 10,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.553528308868408,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.11574073880910873,
+        "zero_command_reported_joint_rms_rad_s": 0.9670495986938477,
+        "zero_command_target_delta_rms_rad": 0.03857363015413284
+      },
+      {
+        "env_id": 11,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.54315710067749,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.10185185819864273,
+        "zero_command_reported_joint_rms_rad_s": 0.9589587450027466,
+        "zero_command_target_delta_rms_rad": 0.03862730413675308
+      },
+      {
+        "env_id": 12,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 5.18281364440918,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.10300926119089127,
+        "zero_command_reported_joint_rms_rad_s": 0.9525981545448303,
+        "zero_command_target_delta_rms_rad": 0.03847986459732056
+      },
+      {
+        "env_id": 13,
+        "controls": 48,
+        "zero_command_controls": 1,
+        "moving_command_controls": 47,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.894442558288574,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.1041666641831398,
+        "zero_command_reported_joint_rms_rad_s": 0.9145605564117432,
+        "zero_command_target_delta_rms_rad": 0.037176474928855896
+      },
+      {
+        "env_id": 14,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.812701225280762,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.10648149251937866,
+        "zero_command_reported_joint_rms_rad_s": 1.0098748207092285,
+        "zero_command_target_delta_rms_rad": 0.03862178325653076
+      },
+      {
+        "env_id": 15,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.897871971130371,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.09606482833623886,
+        "zero_command_reported_joint_rms_rad_s": 0.9891576170921326,
+        "zero_command_target_delta_rms_rad": 0.03862084820866585
+      },
+      {
+        "env_id": 16,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.76260232925415,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.10300926119089127,
+        "zero_command_reported_joint_rms_rad_s": 0.9751549959182739,
+        "zero_command_target_delta_rms_rad": 0.03839056193828583
+      },
+      {
+        "env_id": 17,
+        "controls": 48,
+        "zero_command_controls": 1,
+        "moving_command_controls": 47,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 5.35559606552124,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.09259259700775146,
+        "zero_command_reported_joint_rms_rad_s": 0.9810618162155151,
+        "zero_command_target_delta_rms_rad": 0.03655952960252762
+      },
+      {
+        "env_id": 18,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 5.531614780426025,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.11226852983236313,
+        "zero_command_reported_joint_rms_rad_s": 0.9820823073387146,
+        "zero_command_target_delta_rms_rad": 0.038535356521606445
+      },
+      {
+        "env_id": 19,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.6297078132629395,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.10185185819864273,
+        "zero_command_reported_joint_rms_rad_s": 0.9430750012397766,
+        "zero_command_target_delta_rms_rad": 0.03838746249675751
+      },
+      {
+        "env_id": 20,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 6.640103816986084,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.09490741044282913,
+        "zero_command_reported_joint_rms_rad_s": 0.9399529695510864,
+        "zero_command_target_delta_rms_rad": 0.038599640130996704
+      },
+      {
+        "env_id": 21,
+        "controls": 48,
+        "zero_command_controls": 1,
+        "moving_command_controls": 47,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 5.4355363845825195,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.09490740299224854,
+        "zero_command_reported_joint_rms_rad_s": 0.9527387022972107,
+        "zero_command_target_delta_rms_rad": 0.03633759543299675
+      },
+      {
+        "env_id": 22,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.416621208190918,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.10185185819864273,
+        "zero_command_reported_joint_rms_rad_s": 0.993078887462616,
+        "zero_command_target_delta_rms_rad": 0.03864280879497528
+      },
+      {
+        "env_id": 23,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.680502414703369,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.10648149251937866,
+        "zero_command_reported_joint_rms_rad_s": 0.9908456802368164,
+        "zero_command_target_delta_rms_rad": 0.03841794654726982
+      },
+      {
+        "env_id": 24,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 1,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.931439399719238,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.0972222313284874,
+        "zero_command_reported_joint_rms_rad_s": 0.9105353951454163,
+        "zero_command_target_delta_rms_rad": 0.03841959312558174
+      },
+      {
+        "env_id": 25,
+        "controls": 48,
+        "zero_command_controls": 1,
+        "moving_command_controls": 47,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.988088130950928,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.0972222313284874,
+        "zero_command_reported_joint_rms_rad_s": 1.0041463375091553,
+        "zero_command_target_delta_rms_rad": 0.03711961582303047
+      },
+      {
+        "env_id": 26,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 5.8479132652282715,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.10648149251937866,
+        "zero_command_reported_joint_rms_rad_s": 0.954414963722229,
+        "zero_command_target_delta_rms_rad": 0.03854706138372421
+      },
+      {
+        "env_id": 27,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 8.476327896118164,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.09375,
+        "zero_command_reported_joint_rms_rad_s": 0.9354202151298523,
+        "zero_command_target_delta_rms_rad": 0.03825804963707924
+      },
+      {
+        "env_id": 28,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.873516082763672,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.12731482088565826,
+        "zero_command_reported_joint_rms_rad_s": 0.9539768099784851,
+        "zero_command_target_delta_rms_rad": 0.038578178733587265
+      },
+      {
+        "env_id": 29,
+        "controls": 48,
+        "zero_command_controls": 1,
+        "moving_command_controls": 47,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.552816390991211,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.0972222313284874,
+        "zero_command_reported_joint_rms_rad_s": 0.9535459876060486,
+        "zero_command_target_delta_rms_rad": 0.03672068566083908
+      },
+      {
+        "env_id": 30,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 4.859883785247803,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.09953703731298447,
+        "zero_command_reported_joint_rms_rad_s": 0.9271895289421082,
+        "zero_command_target_delta_rms_rad": 0.03838992491364479
+      },
+      {
+        "env_id": 31,
+        "controls": 48,
+        "zero_command_controls": 48,
+        "moving_command_controls": 0,
+        "terminations": 0,
+        "truncations": 0,
+        "nonfoot_env_steps": 0,
+        "requested_peak_nm": 6.9754180908203125,
+        "applied_peak_nm": 1.600000023841858,
+        "requested_saturation_fraction": 0.0972222313284874,
+        "zero_command_reported_joint_rms_rad_s": 0.9548685550689697,
+        "zero_command_target_delta_rms_rad": 0.038688529282808304
+      }
+    ],
+    "scope": "Raw finite episode failures remain failures; 50Hz endpoint telemetry is not substep torque proof"
+  },
+  "runtime_failure": {
+    "variant": "f050_t060",
+    "mode": "train",
+    "error": "RuntimeError('Error(s) in loading state_dict for MLPModel:\\n\\tWhile copying the parameter named \"obs_normalizer._std\", whose dimensions in the model are torch.Size([1, 315]) and whose dimensions in the checkpoint are torch.Size([1, 315]), an exception occurred : (\\'Inplace update to inference tensor outside InferenceMode is not allowed.You can make a clone to get a normal tensor before doing inplace update.See https://github.com/pytorch/rfcs/pull/17 for more details.\\',).')",
+    "time": 1789054908.0908403
+  },
+  "constant_baseline_kind": "historical_cold_formal004",
+  "initial_constant": {
+    "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+    "options": {
+      "duration_s": 12,
+      "settle_s": 2,
+      "seed": 7057,
+      "trace_envs_per_scenario": 1,
+      "controller": "policy"
+    },
+    "overrides": {
+      "target_slew_rad_per_20ms": 0.04,
+      "reward_weights": {
+        "stand_joint_velocity": -0.5,
+        "stand_target_velocity": -0.15,
+        "stand_posture": -2.0,
+        "action_rate": -0.075,
+        "saturation": -0.75,
+        "torque_excess": -0.6,
+        "worst_torque_excess": -0.2,
+        "stand_raw_action": 0.0
+      },
+      "observation_noise_scale": 1.0,
+      "target_filter_time_constant_s": 0.0
+    },
+    "reward_weights": {
+      "linear_tracking": 4.0,
+      "yaw_tracking": 2.0,
+      "linear_progress": 1.5,
+      "yaw_progress": 0.75,
+      "vertical_velocity": -2.0,
+      "roll_pitch_rate": -0.15,
+      "tilt": -2.0,
+      "height": -25.0,
+      "torque": -0.03,
+      "torque_excess": -0.6,
+      "worst_torque_excess": -0.2,
+      "saturation": -0.75,
+      "positive_power": -0.015,
+      "action_rate": -0.075,
+      "joint_acceleration": -2.5e-07,
+      "slip": -0.5,
+      "nonfoot": -2.0,
+      "joint_limits": -2.0,
+      "airtime": 0.5,
+      "stand_posture": -2.0,
+      "stand_joint_velocity": -0.5,
+      "stand_target_velocity": -0.15,
+      "stand_raw_action": 0.0
+    },
+    "joint_names": [
+      "revolute_1_1",
+      "revolute_1_7",
+      "revolute_2_5",
+      "revolute_3",
+      "revolute_4",
+      "revolute_5",
+      "revolute_1",
+      "revolute_1_6",
+      "revolute_1_5",
+      "revolute_1_3",
+      "revolute_1_4",
+      "revolute_1_2",
+      "revolute_2",
+      "revolute_2_6",
+      "revolute_2_4",
+      "revolute_2_2",
+      "revolute_2_3",
+      "revolute_2_1"
+    ],
+    "cases": [
+      {
+        "name": "stand",
+        "command": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "aggregate_replicas": 4,
+        "metrics": {
+          "planar_error_mps": 0.03789219260215759,
+          "yaw_error_rad_s": 0.0764564648270607,
+          "finite_difference_planar_error_mps": 0.03633624315261841,
+          "torque_saturation_fraction": 0.107,
+          "computed_torque_abs_max_nm": 6.334527492523193,
+          "applied_torque_abs_max_nm": 1.600000023841858,
+          "tilt_rms_deg": 1.4897170066833496,
+          "mean_velocity_mps": [
+            0.0008701811311766505,
+            0.014781533740460873,
+            0.00413423590362072
+          ],
+          "mean_gyro_rad_s": [
+            0.012423641048371792,
+            -0.005192082840949297,
+            -0.005655028857290745
+          ],
+          "mean_nonfoot_body_count": 0.0,
+          "reported_joint_velocity_rms_max_rad_s": 1.2925697565078735
+        },
+        "joints": {
+          "revolute_1_1": {
+            "saturation_fraction": 0.078,
+            "computed_torque_abs_p95_nm": 1.9119677543640137,
+            "computed_torque_abs_max_nm": 2.967040538787842,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02877103164792061,
+            "velocity_rms_rad_s": 1.0530551671981812
+          },
+          "revolute_1_7": {
+            "saturation_fraction": 0.1195,
+            "computed_torque_abs_p95_nm": 2.2418835163116455,
+            "computed_torque_abs_max_nm": 4.319332599639893,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03530174121260643,
+            "velocity_rms_rad_s": 1.088235855102539
+          },
+          "revolute_2_5": {
+            "saturation_fraction": 0.0065,
+            "computed_torque_abs_p95_nm": 1.0518265962600708,
+            "computed_torque_abs_max_nm": 2.2892959117889404,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.019657960161566734,
+            "velocity_rms_rad_s": 0.8093728423118591
+          },
+          "revolute_3": {
+            "saturation_fraction": 0.1405,
+            "computed_torque_abs_p95_nm": 2.4509096145629883,
+            "computed_torque_abs_max_nm": 3.9138875007629395,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03778305649757385,
+            "velocity_rms_rad_s": 0.9434370994567871
+          },
+          "revolute_4": {
+            "saturation_fraction": 0.019,
+            "computed_torque_abs_p95_nm": 1.2872445583343506,
+            "computed_torque_abs_max_nm": 2.951909065246582,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.025889413431286812,
+            "velocity_rms_rad_s": 1.0352154970169067
+          },
+          "revolute_5": {
+            "saturation_fraction": 0.002,
+            "computed_torque_abs_p95_nm": 1.0004215240478516,
+            "computed_torque_abs_max_nm": 1.7548481225967407,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02160860039293766,
+            "velocity_rms_rad_s": 0.921684741973877
+          },
+          "revolute_1": {
+            "saturation_fraction": 0.1015,
+            "computed_torque_abs_p95_nm": 2.4951093196868896,
+            "computed_torque_abs_max_nm": 3.9714012145996094,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.029825322329998016,
+            "velocity_rms_rad_s": 1.1588910818099976
+          },
+          "revolute_1_6": {
+            "saturation_fraction": 0.1325,
+            "computed_torque_abs_p95_nm": 2.5664219856262207,
+            "computed_torque_abs_max_nm": 4.237851619720459,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03840506449341774,
+            "velocity_rms_rad_s": 1.1722636222839355
+          },
+          "revolute_1_5": {
+            "saturation_fraction": 0.072,
+            "computed_torque_abs_p95_nm": 1.8550554513931274,
+            "computed_torque_abs_max_nm": 3.291267156600952,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03453730791807175,
+            "velocity_rms_rad_s": 1.2925697565078735
+          },
+          "revolute_1_3": {
+            "saturation_fraction": 0.067,
+            "computed_torque_abs_p95_nm": 1.7898062467575073,
+            "computed_torque_abs_max_nm": 3.3267412185668945,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03177225962281227,
+            "velocity_rms_rad_s": 1.0258018970489502
+          },
+          "revolute_1_4": {
+            "saturation_fraction": 0.021,
+            "computed_torque_abs_p95_nm": 1.3524086475372314,
+            "computed_torque_abs_max_nm": 4.0435638427734375,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03407677263021469,
+            "velocity_rms_rad_s": 1.1744775772094727
+          },
+          "revolute_1_2": {
+            "saturation_fraction": 0.0865,
+            "computed_torque_abs_p95_nm": 1.796731948852539,
+            "computed_torque_abs_max_nm": 4.006592750549316,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.028988158330321312,
+            "velocity_rms_rad_s": 1.1583439111709595
+          },
+          "revolute_2": {
+            "saturation_fraction": 0.2105,
+            "computed_torque_abs_p95_nm": 2.876817464828491,
+            "computed_torque_abs_max_nm": 3.752906560897827,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.038422051817178726,
+            "velocity_rms_rad_s": 0.6983353495597839
+          },
+          "revolute_2_6": {
+            "saturation_fraction": 0.181,
+            "computed_torque_abs_p95_nm": 2.5257749557495117,
+            "computed_torque_abs_max_nm": 6.334527492523193,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04001590237021446,
+            "velocity_rms_rad_s": 0.6811609864234924
+          },
+          "revolute_2_4": {
+            "saturation_fraction": 0.273,
+            "computed_torque_abs_p95_nm": 3.528010368347168,
+            "computed_torque_abs_max_nm": 6.295217514038086,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.05503479018807411,
+            "velocity_rms_rad_s": 1.165232539176941
+          },
+          "revolute_2_2": {
+            "saturation_fraction": 0.165,
+            "computed_torque_abs_p95_nm": 2.5472443103790283,
+            "computed_torque_abs_max_nm": 3.745210647583008,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04219546541571617,
+            "velocity_rms_rad_s": 0.8196508884429932
+          },
+          "revolute_2_3": {
+            "saturation_fraction": 0.1625,
+            "computed_torque_abs_p95_nm": 2.4820375442504883,
+            "computed_torque_abs_max_nm": 4.441647529602051,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04006379842758179,
+            "velocity_rms_rad_s": 0.7198213934898376
+          },
+          "revolute_2_1": {
+            "saturation_fraction": 0.088,
+            "computed_torque_abs_p95_nm": 2.0754809379577637,
+            "computed_torque_abs_max_nm": 4.950528144836426,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03190082311630249,
+            "velocity_rms_rad_s": 0.8035036325454712
+          }
+        },
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "all_window_applied_peak_nm": 1.600000023841858,
+        "sampled_replica_rates": {
+          "traced_env_id": 0,
+          "samples": 500,
+          "valid_interval_samples": 499,
+          "reported_joint_rms_rad_s": [
+            1.0512492656707764,
+            1.0777806043624878,
+            0.8089242577552795,
+            0.9739579558372498,
+            1.0280250310897827,
+            0.9453437924385071,
+            1.1582950353622437,
+            1.1779354810714722,
+            1.2760250568389893,
+            1.0272400379180908,
+            1.1686649322509766,
+            1.1612887382507324,
+            0.7018773555755615,
+            0.6913343667984009,
+            1.1197092533111572,
+            0.8179768919944763,
+            0.7130918502807617,
+            0.8102956414222717
+          ],
+          "joint_position_range_rad": [
+            0.18356674909591675,
+            0.2308715581893921,
+            0.23358437418937683,
+            0.2009352147579193,
+            0.23038800060749054,
+            0.2075875699520111,
+            0.25372469425201416,
+            0.23390096426010132,
+            0.255160927772522,
+            0.25590813159942627,
+            0.26532143354415894,
+            0.26545530557632446,
+            0.1061248779296875,
+            0.10747694969177246,
+            0.21230053901672363,
+            0.2158975601196289,
+            0.15147924423217773,
+            0.2532331943511963
+          ],
+          "interval_angle_rms_rad_s": [
+            1.0704978987352642,
+            1.2946056608182364,
+            0.8295375304080491,
+            0.9749789113076491,
+            1.1946945269135345,
+            0.9203307741867454,
+            1.4064676134466447,
+            1.3994066714709241,
+            1.5098259962142528,
+            1.3910832548349725,
+            1.3904190028403212,
+            1.3756956911324019,
+            0.8817112472952854,
+            0.8989410493192894,
+            1.2038677316549864,
+            1.166608992046692,
+            0.8958650264251661,
+            1.0404536222014051
+          ],
+          "target_step_rms_rad": [
+            0.03909793695352609,
+            0.03870133238373244,
+            0.037013239239363734,
+            0.03853322368482325,
+            0.03761795855799355,
+            0.0359953965794169,
+            0.039835386828847186,
+            0.03933695792527366,
+            0.03952464335487336,
+            0.039494455710109094,
+            0.03963850864162183,
+            0.03968451844690969,
+            0.03539460423877369,
+            0.032690223187003264,
+            0.03796897539285856,
+            0.03894349431160518,
+            0.03816297107376875,
+            0.03883665004457394
+          ],
+          "target_step_p95_abs_rad": [
+            0.03999999910593033,
+            0.03999999165534973,
+            0.040000006556510925,
+            0.03999999165534973,
+            0.040000006556510925,
+            0.03999999165534973,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344
+          ],
+          "raw_endpoint_minus_interval_rms_rad_s": [
+            0.4107356959947151,
+            0.3956494651234569,
+            0.3123507383023664,
+            0.37729929250729977,
+            0.48565768055475494,
+            0.3429485239682554,
+            0.7753474548994213,
+            0.8138828356821778,
+            0.7351189910760972,
+            0.6121929642684777,
+            0.655633768788724,
+            0.5324028855220648,
+            0.5681490170560368,
+            0.6304513145206357,
+            0.5812884470272233,
+            0.5178472311953738,
+            0.43536344929998755,
+            0.3729331348356848
+          ]
+        },
+        "requested_saturation_above_existing_0_005_bound": true
+      },
+      {
+        "name": "forward",
+        "command": [
+          0.1,
+          0.0,
+          0.0
+        ],
+        "aggregate_replicas": 4,
+        "metrics": {
+          "planar_error_mps": 0.0406227633357048,
+          "yaw_error_rad_s": 0.09502909332513809,
+          "finite_difference_planar_error_mps": 0.038220226764678955,
+          "torque_saturation_fraction": 0.10955555555555556,
+          "computed_torque_abs_max_nm": 6.331404685974121,
+          "applied_torque_abs_max_nm": 1.600000023841858,
+          "tilt_rms_deg": 3.0442070960998535,
+          "mean_velocity_mps": [
+            0.08791949599981308,
+            0.014964064583182335,
+            0.005827553570270538
+          ],
+          "mean_gyro_rad_s": [
+            0.01139387022703886,
+            -0.003110337071120739,
+            0.0013577145291492343
+          ],
+          "mean_nonfoot_body_count": 0.0,
+          "reported_joint_velocity_rms_max_rad_s": 1.4870632886886597
+        },
+        "joints": {
+          "revolute_1_1": {
+            "saturation_fraction": 0.06,
+            "computed_torque_abs_p95_nm": 1.7537304162979126,
+            "computed_torque_abs_max_nm": 3.503296375274658,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.026008816435933113,
+            "velocity_rms_rad_s": 1.225704312324524
+          },
+          "revolute_1_7": {
+            "saturation_fraction": 0.1335,
+            "computed_torque_abs_p95_nm": 2.406766414642334,
+            "computed_torque_abs_max_nm": 4.148472785949707,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.044477734714746475,
+            "velocity_rms_rad_s": 1.4064686298370361
+          },
+          "revolute_2_5": {
+            "saturation_fraction": 0.0075,
+            "computed_torque_abs_p95_nm": 1.1131372451782227,
+            "computed_torque_abs_max_nm": 2.120797634124756,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02792639471590519,
+            "velocity_rms_rad_s": 1.325716257095337
+          },
+          "revolute_3": {
+            "saturation_fraction": 0.0325,
+            "computed_torque_abs_p95_nm": 1.3941714763641357,
+            "computed_torque_abs_max_nm": 3.2147226333618164,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02757415734231472,
+            "velocity_rms_rad_s": 0.8149412274360657
+          },
+          "revolute_4": {
+            "saturation_fraction": 0.004,
+            "computed_torque_abs_p95_nm": 0.8060021996498108,
+            "computed_torque_abs_max_nm": 3.0558340549468994,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.024509398266673088,
+            "velocity_rms_rad_s": 1.2854466438293457
+          },
+          "revolute_5": {
+            "saturation_fraction": 0.062,
+            "computed_torque_abs_p95_nm": 1.6755067110061646,
+            "computed_torque_abs_max_nm": 3.0590014457702637,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.035810574889183044,
+            "velocity_rms_rad_s": 1.4870632886886597
+          },
+          "revolute_1": {
+            "saturation_fraction": 0.0745,
+            "computed_torque_abs_p95_nm": 1.9370862245559692,
+            "computed_torque_abs_max_nm": 4.157339572906494,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02906229719519615,
+            "velocity_rms_rad_s": 1.1486073732376099
+          },
+          "revolute_1_6": {
+            "saturation_fraction": 0.1045,
+            "computed_torque_abs_p95_nm": 2.252819538116455,
+            "computed_torque_abs_max_nm": 3.656728744506836,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03797886520624161,
+            "velocity_rms_rad_s": 1.1125330924987793
+          },
+          "revolute_1_5": {
+            "saturation_fraction": 0.107,
+            "computed_torque_abs_p95_nm": 2.1213343143463135,
+            "computed_torque_abs_max_nm": 3.7871437072753906,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.035970356315374374,
+            "velocity_rms_rad_s": 1.1335784196853638
+          },
+          "revolute_1_3": {
+            "saturation_fraction": 0.079,
+            "computed_torque_abs_p95_nm": 1.879138469696045,
+            "computed_torque_abs_max_nm": 3.30229115486145,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03463168069720268,
+            "velocity_rms_rad_s": 1.1521905660629272
+          },
+          "revolute_1_4": {
+            "saturation_fraction": 0.073,
+            "computed_torque_abs_p95_nm": 2.16939640045166,
+            "computed_torque_abs_max_nm": 4.805774688720703,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03556384891271591,
+            "velocity_rms_rad_s": 1.1960471868515015
+          },
+          "revolute_1_2": {
+            "saturation_fraction": 0.066,
+            "computed_torque_abs_p95_nm": 1.750662088394165,
+            "computed_torque_abs_max_nm": 3.557051181793213,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.024976952001452446,
+            "velocity_rms_rad_s": 1.1593705415725708
+          },
+          "revolute_2": {
+            "saturation_fraction": 0.219,
+            "computed_torque_abs_p95_nm": 3.164659023284912,
+            "computed_torque_abs_max_nm": 4.434066295623779,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04131409898400307,
+            "velocity_rms_rad_s": 0.7251399755477905
+          },
+          "revolute_2_6": {
+            "saturation_fraction": 0.17,
+            "computed_torque_abs_p95_nm": 2.298313617706299,
+            "computed_torque_abs_max_nm": 4.867735862731934,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04244978353381157,
+            "velocity_rms_rad_s": 0.7764120697975159
+          },
+          "revolute_2_4": {
+            "saturation_fraction": 0.2605,
+            "computed_torque_abs_p95_nm": 3.1873292922973633,
+            "computed_torque_abs_max_nm": 6.331404685974121,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04934962838888168,
+            "velocity_rms_rad_s": 0.8563165664672852
+          },
+          "revolute_2_2": {
+            "saturation_fraction": 0.205,
+            "computed_torque_abs_p95_nm": 2.930262565612793,
+            "computed_torque_abs_max_nm": 5.059902191162109,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04797706753015518,
+            "velocity_rms_rad_s": 0.8439012169837952
+          },
+          "revolute_2_3": {
+            "saturation_fraction": 0.2,
+            "computed_torque_abs_p95_nm": 2.5726311206817627,
+            "computed_torque_abs_max_nm": 4.603640079498291,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.040881890803575516,
+            "velocity_rms_rad_s": 0.7451416850090027
+          },
+          "revolute_2_1": {
+            "saturation_fraction": 0.114,
+            "computed_torque_abs_p95_nm": 2.3479197025299072,
+            "computed_torque_abs_max_nm": 4.169886112213135,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03289613872766495,
+            "velocity_rms_rad_s": 0.706256628036499
+          }
+        },
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "all_window_applied_peak_nm": 1.600000023841858,
+        "sampled_replica_rates": {
+          "traced_env_id": 4,
+          "samples": 500,
+          "valid_interval_samples": 499,
+          "reported_joint_rms_rad_s": [
+            1.2615854740142822,
+            1.3790229558944702,
+            1.3329962491989136,
+            0.8336220383644104,
+            1.2763339281082153,
+            1.4481964111328125,
+            1.1650210618972778,
+            1.1273013353347778,
+            1.1338897943496704,
+            1.1554654836654663,
+            1.2015812397003174,
+            1.1634435653686523,
+            0.7365772128105164,
+            0.7776976823806763,
+            0.8351302742958069,
+            0.84276282787323,
+            0.749960720539093,
+            0.7240086197853088
+          ],
+          "joint_position_range_rad": [
+            0.4198894500732422,
+            0.2754020094871521,
+            0.28843316435813904,
+            0.1231641173362732,
+            0.2540888488292694,
+            0.3137241005897522,
+            0.31806451082229614,
+            0.22025179862976074,
+            0.28764718770980835,
+            0.21032661199569702,
+            0.3325447142124176,
+            0.27015578746795654,
+            0.1622622013092041,
+            0.10640835762023926,
+            0.1904771327972412,
+            0.24056053161621094,
+            0.18509435653686523,
+            0.2671377658843994
+          ],
+          "interval_angle_rms_rad_s": [
+            1.3063421859974724,
+            1.4925726245728161,
+            1.4370645977214038,
+            0.8358215992244414,
+            1.4039700136954611,
+            1.5838098326767187,
+            1.4049159306547045,
+            1.380745489191249,
+            1.3737374046734372,
+            1.4306450343984518,
+            1.4072437949542749,
+            1.427686209507413,
+            0.9820111160743819,
+            0.9494594748732236,
+            0.9948898020729929,
+            1.1400016621465214,
+            0.8975293544013622,
+            1.0061078361709566
+          ],
+          "target_step_rms_rad": [
+            0.038881232222509894,
+            0.03889661123461682,
+            0.0378617600745648,
+            0.02945313181000909,
+            0.03876286726679063,
+            0.038890486093145896,
+            0.039454047880272694,
+            0.03934553578670879,
+            0.03903575421479067,
+            0.039436548896567294,
+            0.039713756178444824,
+            0.039532953596442814,
+            0.03830348246634357,
+            0.03305865231055741,
+            0.03772401061864801,
+            0.039304214268604046,
+            0.03839873104502858,
+            0.038299231324573184
+          ],
+          "target_step_p95_abs_rad": [
+            0.03999999910593033,
+            0.03999999165534973,
+            0.03999999910593033,
+            0.03999999165534973,
+            0.03999999910593033,
+            0.04000000096857548,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344
+          ],
+          "raw_endpoint_minus_interval_rms_rad_s": [
+            0.486088214958861,
+            0.4932845474457855,
+            0.3557301381849395,
+            0.37573088044179026,
+            0.36054883570951385,
+            0.47523618499083087,
+            0.7558516434338545,
+            0.6937049212168656,
+            0.7079715913816836,
+            0.5957432514055949,
+            0.6317608885620545,
+            0.5213489006643179,
+            0.6170869315668507,
+            0.5546918989433202,
+            0.5021027836346026,
+            0.48040516749624423,
+            0.4935774246494066,
+            0.4138620138056344
+          ]
+        },
+        "requested_saturation_above_existing_0_005_bound": true
+      },
+      {
+        "name": "reverse",
+        "command": [
+          -0.1,
+          0.0,
+          0.0
+        ],
+        "aggregate_replicas": 4,
+        "metrics": {
+          "planar_error_mps": 0.03537432849407196,
+          "yaw_error_rad_s": 0.09812887758016586,
+          "finite_difference_planar_error_mps": 0.03452168405056,
+          "torque_saturation_fraction": 0.09705555555555556,
+          "computed_torque_abs_max_nm": 6.398075103759766,
+          "applied_torque_abs_max_nm": 1.600000023841858,
+          "tilt_rms_deg": 1.062729835510254,
+          "mean_velocity_mps": [
+            -0.08746781945228577,
+            0.005539580713957548,
+            0.0055159288458526134
+          ],
+          "mean_gyro_rad_s": [
+            0.014665276743471622,
+            -0.007671934552490711,
+            -0.0015152385458350182
+          ],
+          "mean_nonfoot_body_count": 0.0,
+          "reported_joint_velocity_rms_max_rad_s": 1.3827283382415771
+        },
+        "joints": {
+          "revolute_1_1": {
+            "saturation_fraction": 0.0375,
+            "computed_torque_abs_p95_nm": 1.483260154724121,
+            "computed_torque_abs_max_nm": 3.069512367248535,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.027585113421082497,
+            "velocity_rms_rad_s": 1.0935801267623901
+          },
+          "revolute_1_7": {
+            "saturation_fraction": 0.1695,
+            "computed_torque_abs_p95_nm": 2.4643189907073975,
+            "computed_torque_abs_max_nm": 4.481585502624512,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03511848673224449,
+            "velocity_rms_rad_s": 1.3238493204116821
+          },
+          "revolute_2_5": {
+            "saturation_fraction": 0.019,
+            "computed_torque_abs_p95_nm": 1.314788818359375,
+            "computed_torque_abs_max_nm": 3.6737728118896484,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03266210854053497,
+            "velocity_rms_rad_s": 1.2979620695114136
+          },
+          "revolute_3": {
+            "saturation_fraction": 0.037,
+            "computed_torque_abs_p95_nm": 1.4102267026901245,
+            "computed_torque_abs_max_nm": 3.0477137565612793,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.022266969084739685,
+            "velocity_rms_rad_s": 1.2683674097061157
+          },
+          "revolute_4": {
+            "saturation_fraction": 0.2595,
+            "computed_torque_abs_p95_nm": 2.9716153144836426,
+            "computed_torque_abs_max_nm": 4.049521446228027,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.055916763842105865,
+            "velocity_rms_rad_s": 1.2311193943023682
+          },
+          "revolute_5": {
+            "saturation_fraction": 0.0245,
+            "computed_torque_abs_p95_nm": 1.3023815155029297,
+            "computed_torque_abs_max_nm": 2.683112621307373,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03390198573470116,
+            "velocity_rms_rad_s": 1.3827283382415771
+          },
+          "revolute_1": {
+            "saturation_fraction": 0.1065,
+            "computed_torque_abs_p95_nm": 2.8660495281219482,
+            "computed_torque_abs_max_nm": 4.409682273864746,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.029352739453315735,
+            "velocity_rms_rad_s": 1.1494131088256836
+          },
+          "revolute_1_6": {
+            "saturation_fraction": 0.0915,
+            "computed_torque_abs_p95_nm": 2.016859292984009,
+            "computed_torque_abs_max_nm": 3.144144058227539,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03422970324754715,
+            "velocity_rms_rad_s": 1.296026349067688
+          },
+          "revolute_1_5": {
+            "saturation_fraction": 0.0675,
+            "computed_torque_abs_p95_nm": 1.8094755411148071,
+            "computed_torque_abs_max_nm": 3.0670394897460938,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03096914477646351,
+            "velocity_rms_rad_s": 1.329452395439148
+          },
+          "revolute_1_3": {
+            "saturation_fraction": 0.0255,
+            "computed_torque_abs_p95_nm": 1.392416000366211,
+            "computed_torque_abs_max_nm": 2.869002342224121,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.027875635772943497,
+            "velocity_rms_rad_s": 1.0886858701705933
+          },
+          "revolute_1_4": {
+            "saturation_fraction": 0.0245,
+            "computed_torque_abs_p95_nm": 1.4082204103469849,
+            "computed_torque_abs_max_nm": 2.2030179500579834,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.034690890461206436,
+            "velocity_rms_rad_s": 1.147052526473999
+          },
+          "revolute_1_2": {
+            "saturation_fraction": 0.001,
+            "computed_torque_abs_p95_nm": 1.1387462615966797,
+            "computed_torque_abs_max_nm": 2.0526418685913086,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.027100695297122,
+            "velocity_rms_rad_s": 1.166939377784729
+          },
+          "revolute_2": {
+            "saturation_fraction": 0.1355,
+            "computed_torque_abs_p95_nm": 2.352673292160034,
+            "computed_torque_abs_max_nm": 3.083704948425293,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.031317777931690216,
+            "velocity_rms_rad_s": 0.5084347128868103
+          },
+          "revolute_2_6": {
+            "saturation_fraction": 0.153,
+            "computed_torque_abs_p95_nm": 2.2769076824188232,
+            "computed_torque_abs_max_nm": 3.5635385513305664,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03846156597137451,
+            "velocity_rms_rad_s": 0.6609436869621277
+          },
+          "revolute_2_4": {
+            "saturation_fraction": 0.248,
+            "computed_torque_abs_p95_nm": 2.9768505096435547,
+            "computed_torque_abs_max_nm": 6.398075103759766,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04830099642276764,
+            "velocity_rms_rad_s": 1.0674614906311035
+          },
+          "revolute_2_2": {
+            "saturation_fraction": 0.097,
+            "computed_torque_abs_p95_nm": 2.1703059673309326,
+            "computed_torque_abs_max_nm": 3.9112565517425537,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02916349656879902,
+            "velocity_rms_rad_s": 0.3503463864326477
+          },
+          "revolute_2_3": {
+            "saturation_fraction": 0.1195,
+            "computed_torque_abs_p95_nm": 2.1941843032836914,
+            "computed_torque_abs_max_nm": 3.754271984100342,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.041316818445920944,
+            "velocity_rms_rad_s": 0.8440106511116028
+          },
+          "revolute_2_1": {
+            "saturation_fraction": 0.1305,
+            "computed_torque_abs_p95_nm": 2.3492214679718018,
+            "computed_torque_abs_max_nm": 5.614169120788574,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.036756549030542374,
+            "velocity_rms_rad_s": 0.8030928373336792
+          }
+        },
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "all_window_applied_peak_nm": 1.600000023841858,
+        "sampled_replica_rates": {
+          "traced_env_id": 8,
+          "samples": 500,
+          "valid_interval_samples": 499,
+          "reported_joint_rms_rad_s": [
+            1.0903204679489136,
+            1.3334276676177979,
+            1.3275420665740967,
+            1.2689447402954102,
+            1.2301350831985474,
+            1.3819684982299805,
+            1.1331332921981812,
+            1.3161733150482178,
+            1.317460536956787,
+            1.0889575481414795,
+            1.1392053365707397,
+            1.1625170707702637,
+            0.5036817789077759,
+            0.6623976826667786,
+            1.0525062084197998,
+            0.35012149810791016,
+            0.8513567447662354,
+            0.7933838963508606
+          ],
+          "joint_position_range_rad": [
+            0.27619752287864685,
+            0.22355347871780396,
+            0.29763591289520264,
+            0.32234179973602295,
+            0.25373348593711853,
+            0.26093292236328125,
+            0.27546536922454834,
+            0.25037646293640137,
+            0.24042874574661255,
+            0.229153573513031,
+            0.2693127989768982,
+            0.25277280807495117,
+            0.08335208892822266,
+            0.0990915298461914,
+            0.1399688720703125,
+            0.07028794288635254,
+            0.13469171524047852,
+            0.14395856857299805
+          ],
+          "interval_angle_rms_rad_s": [
+            1.2005292545799702,
+            1.4437313740810551,
+            1.463306898097741,
+            1.4809769806826658,
+            1.4476985529366522,
+            1.4408641299854295,
+            1.4241497043802596,
+            1.514065802825129,
+            1.5575944272012905,
+            1.437312108633025,
+            1.3301884085799895,
+            1.4669009095144263,
+            0.772682888742559,
+            0.815005691933798,
+            1.079255726011583,
+            0.43999721643630363,
+            1.0182213339356672,
+            1.0109930699845004
+          ],
+          "target_step_rms_rad": [
+            0.038839376913797345,
+            0.035549004591848295,
+            0.03775107218793801,
+            0.03873122462153753,
+            0.038475100772785154,
+            0.03763456497545998,
+            0.0396307787102288,
+            0.039457777202611656,
+            0.03931450417196617,
+            0.03914656413753413,
+            0.039432304894660326,
+            0.039652087933919035,
+            0.03108222186648292,
+            0.0312571527647487,
+            0.03436918234885711,
+            0.025932476382536544,
+            0.03592650569408542,
+            0.03816949002050544
+          ],
+          "target_step_p95_abs_rad": [
+            0.03999999910593033,
+            0.03999999165534973,
+            0.03999999165534973,
+            0.03999999910593033,
+            0.03999999910593033,
+            0.03999999165534973,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344
+          ],
+          "raw_endpoint_minus_interval_rms_rad_s": [
+            0.39339592627049197,
+            0.5101365990509029,
+            0.5886642205331534,
+            0.38609321311700723,
+            0.5783640173265893,
+            0.37460360725354525,
+            0.7881975372701328,
+            0.7510650048796655,
+            0.7912352806211389,
+            0.5854764956383476,
+            0.6215578120323508,
+            0.5431599359278328,
+            0.556807487334085,
+            0.5258089689082645,
+            0.6249875415961451,
+            0.31134549558114133,
+            0.5663427252302404,
+            0.38051523459664477
+          ]
+        },
+        "requested_saturation_above_existing_0_005_bound": true
+      },
+      {
+        "name": "left",
+        "command": [
+          0.0,
+          0.1,
+          0.0
+        ],
+        "aggregate_replicas": 4,
+        "metrics": {
+          "planar_error_mps": 0.03537477180361748,
+          "yaw_error_rad_s": 0.0888105183839798,
+          "finite_difference_planar_error_mps": 0.03414423018693924,
+          "torque_saturation_fraction": 0.09516666666666666,
+          "computed_torque_abs_max_nm": 5.776275634765625,
+          "applied_torque_abs_max_nm": 1.600000023841858,
+          "tilt_rms_deg": 1.9998338222503662,
+          "mean_velocity_mps": [
+            0.005287159699946642,
+            0.0946035161614418,
+            0.005628988612443209
+          ],
+          "mean_gyro_rad_s": [
+            0.012182844802737236,
+            -0.005884667858481407,
+            -0.03538181260228157
+          ],
+          "mean_nonfoot_body_count": 0.0,
+          "reported_joint_velocity_rms_max_rad_s": 1.28952157497406
+        },
+        "joints": {
+          "revolute_1_1": {
+            "saturation_fraction": 0.0755,
+            "computed_torque_abs_p95_nm": 1.875550389289856,
+            "computed_torque_abs_max_nm": 3.0205447673797607,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03246353194117546,
+            "velocity_rms_rad_s": 1.0142748355865479
+          },
+          "revolute_1_7": {
+            "saturation_fraction": 0.0865,
+            "computed_torque_abs_p95_nm": 2.099764108657837,
+            "computed_torque_abs_max_nm": 3.4529199600219727,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03601589426398277,
+            "velocity_rms_rad_s": 1.1985411643981934
+          },
+          "revolute_2_5": {
+            "saturation_fraction": 0.0195,
+            "computed_torque_abs_p95_nm": 1.2193654775619507,
+            "computed_torque_abs_max_nm": 3.736234426498413,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.024533167481422424,
+            "velocity_rms_rad_s": 1.0852530002593994
+          },
+          "revolute_3": {
+            "saturation_fraction": 0.057,
+            "computed_torque_abs_p95_nm": 1.8214631080627441,
+            "computed_torque_abs_max_nm": 2.7898576259613037,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.023545129224658012,
+            "velocity_rms_rad_s": 0.41350042819976807
+          },
+          "revolute_4": {
+            "saturation_fraction": 0.007,
+            "computed_torque_abs_p95_nm": 1.1006098985671997,
+            "computed_torque_abs_max_nm": 2.1929078102111816,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02584286592900753,
+            "velocity_rms_rad_s": 1.1858245134353638
+          },
+          "revolute_5": {
+            "saturation_fraction": 0.0075,
+            "computed_torque_abs_p95_nm": 1.1799516677856445,
+            "computed_torque_abs_max_nm": 2.3363711833953857,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.026765143498778343,
+            "velocity_rms_rad_s": 1.0627583265304565
+          },
+          "revolute_1": {
+            "saturation_fraction": 0.0805,
+            "computed_torque_abs_p95_nm": 2.096299886703491,
+            "computed_torque_abs_max_nm": 5.05468225479126,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03281744197010994,
+            "velocity_rms_rad_s": 1.1978346109390259
+          },
+          "revolute_1_6": {
+            "saturation_fraction": 0.0555,
+            "computed_torque_abs_p95_nm": 1.694430947303772,
+            "computed_torque_abs_max_nm": 3.5691843032836914,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03390751779079437,
+            "velocity_rms_rad_s": 1.1631602048873901
+          },
+          "revolute_1_5": {
+            "saturation_fraction": 0.179,
+            "computed_torque_abs_p95_nm": 2.9819257259368896,
+            "computed_torque_abs_max_nm": 5.776275634765625,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04367934539914131,
+            "velocity_rms_rad_s": 1.2328672409057617
+          },
+          "revolute_1_3": {
+            "saturation_fraction": 0.2175,
+            "computed_torque_abs_p95_nm": 2.9947445392608643,
+            "computed_torque_abs_max_nm": 5.107244968414307,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.046458788216114044,
+            "velocity_rms_rad_s": 0.9785082936286926
+          },
+          "revolute_1_4": {
+            "saturation_fraction": 0.1005,
+            "computed_torque_abs_p95_nm": 2.1122360229492188,
+            "computed_torque_abs_max_nm": 4.317049503326416,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03709178790450096,
+            "velocity_rms_rad_s": 1.0366055965423584
+          },
+          "revolute_1_2": {
+            "saturation_fraction": 0.0195,
+            "computed_torque_abs_p95_nm": 1.3235706090927124,
+            "computed_torque_abs_max_nm": 2.5281715393066406,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02293694019317627,
+            "velocity_rms_rad_s": 1.111825942993164
+          },
+          "revolute_2": {
+            "saturation_fraction": 0.243,
+            "computed_torque_abs_p95_nm": 2.912255048751831,
+            "computed_torque_abs_max_nm": 4.559439659118652,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04036220535635948,
+            "velocity_rms_rad_s": 0.9104935526847839
+          },
+          "revolute_2_6": {
+            "saturation_fraction": 0.12,
+            "computed_torque_abs_p95_nm": 2.3855717182159424,
+            "computed_torque_abs_max_nm": 5.5675249099731445,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.030050665140151978,
+            "velocity_rms_rad_s": 0.6672919392585754
+          },
+          "revolute_2_4": {
+            "saturation_fraction": 0.153,
+            "computed_torque_abs_p95_nm": 2.7691383361816406,
+            "computed_torque_abs_max_nm": 5.640582084655762,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03775410354137421,
+            "velocity_rms_rad_s": 1.28952157497406
+          },
+          "revolute_2_2": {
+            "saturation_fraction": 0.007,
+            "computed_torque_abs_p95_nm": 1.109924554824829,
+            "computed_torque_abs_max_nm": 2.4519972801208496,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.029681924730539322,
+            "velocity_rms_rad_s": 0.9957002997398376
+          },
+          "revolute_2_3": {
+            "saturation_fraction": 0.12,
+            "computed_torque_abs_p95_nm": 2.1760079860687256,
+            "computed_torque_abs_max_nm": 4.0418291091918945,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.040487125515937805,
+            "velocity_rms_rad_s": 0.9617875814437866
+          },
+          "revolute_2_1": {
+            "saturation_fraction": 0.1645,
+            "computed_torque_abs_p95_nm": 3.0247340202331543,
+            "computed_torque_abs_max_nm": 5.036716461181641,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.045751310884952545,
+            "velocity_rms_rad_s": 0.8493199944496155
+          }
+        },
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "all_window_applied_peak_nm": 1.600000023841858,
+        "sampled_replica_rates": {
+          "traced_env_id": 12,
+          "samples": 500,
+          "valid_interval_samples": 499,
+          "reported_joint_rms_rad_s": [
+            1.0278128385543823,
+            1.1751501560211182,
+            1.1233692169189453,
+            0.39943742752075195,
+            1.1931359767913818,
+            1.0619869232177734,
+            1.202505350112915,
+            1.1712045669555664,
+            1.2363566160202026,
+            0.9925687313079834,
+            1.0292664766311646,
+            1.1091525554656982,
+            0.9034698009490967,
+            0.6166843771934509,
+            1.2627862691879272,
+            1.0072054862976074,
+            0.9387845993041992,
+            0.8640479445457458
+          ],
+          "joint_position_range_rad": [
+            0.19576312601566315,
+            0.34829631447792053,
+            0.23633544147014618,
+            0.05985522270202637,
+            0.2387857884168625,
+            0.17818009853363037,
+            0.2730788588523865,
+            0.25562167167663574,
+            0.23306649923324585,
+            0.2088538408279419,
+            0.22300755977630615,
+            0.2505807876586914,
+            0.23827171325683594,
+            0.10597443580627441,
+            0.24096441268920898,
+            0.23660492897033691,
+            0.23114991188049316,
+            0.19950509071350098
+          ],
+          "interval_angle_rms_rad_s": [
+            1.0438920466066874,
+            1.3936678947389851,
+            1.1993059575135787,
+            0.3408878936820931,
+            1.3228545874275373,
+            1.0502323053414944,
+            1.388513370247975,
+            1.455593502715671,
+            1.3785279848641565,
+            1.2375326063319723,
+            1.314052431938396,
+            1.4599174766785787,
+            1.138406060748609,
+            0.7212390885475882,
+            1.274929130739455,
+            1.4652500156362416,
+            1.2624611383216593,
+            1.227620387685621
+          ],
+          "target_step_rms_rad": [
+            0.03914610274361249,
+            0.038335326494310075,
+            0.03738136392415616,
+            0.024621275663821943,
+            0.03823307800242913,
+            0.0374115571028315,
+            0.03962077019008843,
+            0.039310328372092876,
+            0.039409669786765265,
+            0.03937177216713634,
+            0.03931571598475643,
+            0.039611408790436384,
+            0.037032894175111346,
+            0.03123780247696236,
+            0.03862681894981216,
+            0.03859089860276316,
+            0.038632142040858096,
+            0.03868656268212909
+          ],
+          "target_step_p95_abs_rad": [
+            0.03999999910593033,
+            0.03999999910593033,
+            0.03999999910593033,
+            0.03999999165534973,
+            0.040000006556510925,
+            0.03999999165534973,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344
+          ],
+          "raw_endpoint_minus_interval_rms_rad_s": [
+            0.37007348638816256,
+            0.47374227575805783,
+            0.3754534870026048,
+            0.2468075893337634,
+            0.3963422959865517,
+            0.3676659949164174,
+            0.5782172201121435,
+            0.6562595801592984,
+            0.7237441178112675,
+            0.5608351700052929,
+            0.6305802824018544,
+            0.6035435841576353,
+            0.5186253313215868,
+            0.48696400971607207,
+            0.7210441294552655,
+            0.6063985008562041,
+            0.5111559842287363,
+            0.5257518284252511
+          ]
+        },
+        "requested_saturation_above_existing_0_005_bound": true
+      },
+      {
+        "name": "right",
+        "command": [
+          0.0,
+          -0.1,
+          0.0
+        ],
+        "aggregate_replicas": 4,
+        "metrics": {
+          "planar_error_mps": 0.034686341881752014,
+          "yaw_error_rad_s": 0.08478211611509323,
+          "finite_difference_planar_error_mps": 0.033021096140146255,
+          "torque_saturation_fraction": 0.10036111111111111,
+          "computed_torque_abs_max_nm": 6.30651330947876,
+          "applied_torque_abs_max_nm": 1.600000023841858,
+          "tilt_rms_deg": 2.048257827758789,
+          "mean_velocity_mps": [
+            0.0012894172687083483,
+            -0.08682573586702347,
+            0.0005608783685602248
+          ],
+          "mean_gyro_rad_s": [
+            0.003873063251376152,
+            -0.0035566992592066526,
+            0.011144084855914116
+          ],
+          "mean_nonfoot_body_count": 0.0,
+          "reported_joint_velocity_rms_max_rad_s": 1.351948857307434
+        },
+        "joints": {
+          "revolute_1_1": {
+            "saturation_fraction": 0.018,
+            "computed_torque_abs_p95_nm": 1.1876100301742554,
+            "computed_torque_abs_max_nm": 2.3738675117492676,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.024110659956932068,
+            "velocity_rms_rad_s": 1.0725293159484863
+          },
+          "revolute_1_7": {
+            "saturation_fraction": 0.0765,
+            "computed_torque_abs_p95_nm": 1.97885000705719,
+            "computed_torque_abs_max_nm": 3.899427652359009,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.028441358357667923,
+            "velocity_rms_rad_s": 0.9500330090522766
+          },
+          "revolute_2_5": {
+            "saturation_fraction": 0.021,
+            "computed_torque_abs_p95_nm": 1.2573598623275757,
+            "computed_torque_abs_max_nm": 2.8179752826690674,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.023718466982245445,
+            "velocity_rms_rad_s": 0.9034522771835327
+          },
+          "revolute_3": {
+            "saturation_fraction": 0.1335,
+            "computed_torque_abs_p95_nm": 2.4144110679626465,
+            "computed_torque_abs_max_nm": 3.580850601196289,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03895280882716179,
+            "velocity_rms_rad_s": 1.0241329669952393
+          },
+          "revolute_4": {
+            "saturation_fraction": 0.089,
+            "computed_torque_abs_p95_nm": 1.9536772966384888,
+            "computed_torque_abs_max_nm": 3.5594871044158936,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03755767643451691,
+            "velocity_rms_rad_s": 1.2623426914215088
+          },
+          "revolute_5": {
+            "saturation_fraction": 0.009,
+            "computed_torque_abs_p95_nm": 1.0948532819747925,
+            "computed_torque_abs_max_nm": 2.3391380310058594,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02320064604282379,
+            "velocity_rms_rad_s": 0.9560482501983643
+          },
+          "revolute_1": {
+            "saturation_fraction": 0.0935,
+            "computed_torque_abs_p95_nm": 2.1394355297088623,
+            "computed_torque_abs_max_nm": 4.632831573486328,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.029653744772076607,
+            "velocity_rms_rad_s": 1.0809309482574463
+          },
+          "revolute_1_6": {
+            "saturation_fraction": 0.1625,
+            "computed_torque_abs_p95_nm": 2.4631216526031494,
+            "computed_torque_abs_max_nm": 3.939049482345581,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03901739418506622,
+            "velocity_rms_rad_s": 1.0686111450195312
+          },
+          "revolute_1_5": {
+            "saturation_fraction": 0.0905,
+            "computed_torque_abs_p95_nm": 1.973615050315857,
+            "computed_torque_abs_max_nm": 3.6791725158691406,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03748917207121849,
+            "velocity_rms_rad_s": 1.1051324605941772
+          },
+          "revolute_1_3": {
+            "saturation_fraction": 0.1185,
+            "computed_torque_abs_p95_nm": 2.3376545906066895,
+            "computed_torque_abs_max_nm": 5.025083541870117,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.040245942771434784,
+            "velocity_rms_rad_s": 1.227790117263794
+          },
+          "revolute_1_4": {
+            "saturation_fraction": 0.0055,
+            "computed_torque_abs_p95_nm": 0.9597880840301514,
+            "computed_torque_abs_max_nm": 2.2189455032348633,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.028394000604748726,
+            "velocity_rms_rad_s": 1.2094424962997437
+          },
+          "revolute_1_2": {
+            "saturation_fraction": 0.0655,
+            "computed_torque_abs_p95_nm": 1.7028170824050903,
+            "computed_torque_abs_max_nm": 3.553438663482666,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02694668062031269,
+            "velocity_rms_rad_s": 1.215957760810852
+          },
+          "revolute_2": {
+            "saturation_fraction": 0.1225,
+            "computed_torque_abs_p95_nm": 2.043513059616089,
+            "computed_torque_abs_max_nm": 3.9720444679260254,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.034669019281864166,
+            "velocity_rms_rad_s": 0.6177079677581787
+          },
+          "revolute_2_6": {
+            "saturation_fraction": 0.025,
+            "computed_torque_abs_p95_nm": 1.3994348049163818,
+            "computed_torque_abs_max_nm": 2.2094883918762207,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03255727142095566,
+            "velocity_rms_rad_s": 0.9592102766036987
+          },
+          "revolute_2_4": {
+            "saturation_fraction": 0.1175,
+            "computed_torque_abs_p95_nm": 2.361600160598755,
+            "computed_torque_abs_max_nm": 4.091281890869141,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.042107876390218735,
+            "velocity_rms_rad_s": 0.9333966374397278
+          },
+          "revolute_2_2": {
+            "saturation_fraction": 0.257,
+            "computed_torque_abs_p95_nm": 3.9243581295013428,
+            "computed_torque_abs_max_nm": 6.30651330947876,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.05738647282123566,
+            "velocity_rms_rad_s": 1.351948857307434
+          },
+          "revolute_2_3": {
+            "saturation_fraction": 0.263,
+            "computed_torque_abs_p95_nm": 3.0541374683380127,
+            "computed_torque_abs_max_nm": 4.260610580444336,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04426101967692375,
+            "velocity_rms_rad_s": 0.68272864818573
+          },
+          "revolute_2_1": {
+            "saturation_fraction": 0.1385,
+            "computed_torque_abs_p95_nm": 2.1603567600250244,
+            "computed_torque_abs_max_nm": 6.010657787322998,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.027962656691670418,
+            "velocity_rms_rad_s": 1.0308685302734375
+          }
+        },
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "all_window_applied_peak_nm": 1.600000023841858,
+        "sampled_replica_rates": {
+          "traced_env_id": 16,
+          "samples": 500,
+          "valid_interval_samples": 499,
+          "reported_joint_rms_rad_s": [
+            1.086228609085083,
+            1.0129992961883545,
+            0.9232488870620728,
+            1.0057618618011475,
+            1.274878740310669,
+            0.9546049237251282,
+            1.0731433629989624,
+            1.0714426040649414,
+            1.113885760307312,
+            1.2040859460830688,
+            1.2177073955535889,
+            1.2294663190841675,
+            0.6174449920654297,
+            0.9454364776611328,
+            0.9436236619949341,
+            1.3183172941207886,
+            0.684997022151947,
+            1.0100035667419434
+          ],
+          "joint_position_range_rad": [
+            0.30200445652008057,
+            0.1687353253364563,
+            0.285916805267334,
+            0.2839154303073883,
+            0.2874077558517456,
+            0.20215684175491333,
+            0.2587238550186157,
+            0.2283940315246582,
+            0.27185702323913574,
+            0.25597357749938965,
+            0.26127398014068604,
+            0.2741645574569702,
+            0.1015157699584961,
+            0.15346002578735352,
+            0.1788184642791748,
+            0.22668731212615967,
+            0.11086535453796387,
+            0.33727431297302246
+          ],
+          "interval_angle_rms_rad_s": [
+            1.148090784552873,
+            1.1585304260508773,
+            1.0251304357235236,
+            0.9799063605689393,
+            1.480819337224578,
+            0.9045639745843598,
+            1.3940121577721736,
+            1.3560313210848467,
+            1.4206513613802005,
+            1.4370128414345085,
+            1.4889129594147834,
+            1.4553953224007006,
+            0.8560814324936313,
+            1.2839093454449366,
+            1.1751934665161579,
+            1.4167103786160606,
+            0.6745420598001243,
+            1.3250596837581403
+          ],
+          "target_step_rms_rad": [
+            0.03897407781871996,
+            0.0330081335941026,
+            0.03715375823494607,
+            0.03805721609094291,
+            0.03782800803791581,
+            0.03630361044090588,
+            0.039810857848967054,
+            0.039415630847296074,
+            0.039569187844903056,
+            0.0394558408238039,
+            0.03963348441262209,
+            0.03959672746101139,
+            0.032614020903868016,
+            0.03571483607088348,
+            0.03685315630332885,
+            0.03792425464247033,
+            0.032798354288840134,
+            0.03867454261533039
+          ],
+          "target_step_p95_abs_rad": [
+            0.03999999910593033,
+            0.03999999165534973,
+            0.040000006556510925,
+            0.03999999910593033,
+            0.040000006556510925,
+            0.03999999910593033,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344
+          ],
+          "raw_endpoint_minus_interval_rms_rad_s": [
+            0.3809966610268653,
+            0.3493000469594569,
+            0.41195481860178823,
+            0.3338544680585879,
+            0.450501988288742,
+            0.3460196728940645,
+            0.5850088141270473,
+            0.7622411883630019,
+            0.6803426089207049,
+            0.6665199653598922,
+            0.5011776231454785,
+            0.5112586519297933,
+            0.45843721590423603,
+            0.6011006799951507,
+            0.454897479358486,
+            0.53777674141513,
+            0.47541331652845986,
+            0.4882097097265438
+          ]
+        },
+        "requested_saturation_above_existing_0_005_bound": true
+      },
+      {
+        "name": "forward_fast",
+        "command": [
+          0.2,
+          0.0,
+          0.0
+        ],
+        "aggregate_replicas": 4,
+        "metrics": {
+          "planar_error_mps": 0.0622158907353878,
+          "yaw_error_rad_s": 0.13946469128131866,
+          "finite_difference_planar_error_mps": 0.06139388307929039,
+          "torque_saturation_fraction": 0.08911111111111111,
+          "computed_torque_abs_max_nm": 6.26438045501709,
+          "applied_torque_abs_max_nm": 1.600000023841858,
+          "tilt_rms_deg": 3.896034002304077,
+          "mean_velocity_mps": [
+            0.15381641685962677,
+            0.029890626668930054,
+            0.006452906411141157
+          ],
+          "mean_gyro_rad_s": [
+            -0.0024543029721826315,
+            0.00012843901640735567,
+            -0.056769318878650665
+          ],
+          "mean_nonfoot_body_count": 0.0,
+          "reported_joint_velocity_rms_max_rad_s": 1.8978486061096191
+        },
+        "joints": {
+          "revolute_1_1": {
+            "saturation_fraction": 0.076,
+            "computed_torque_abs_p95_nm": 1.9344966411590576,
+            "computed_torque_abs_max_nm": 3.8127169609069824,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.029909281060099602,
+            "velocity_rms_rad_s": 1.882170557975769
+          },
+          "revolute_1_7": {
+            "saturation_fraction": 0.002,
+            "computed_torque_abs_p95_nm": 0.9316933751106262,
+            "computed_torque_abs_max_nm": 1.7744160890579224,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.025411490350961685,
+            "velocity_rms_rad_s": 1.533679485321045
+          },
+          "revolute_2_5": {
+            "saturation_fraction": 0.011,
+            "computed_torque_abs_p95_nm": 1.043264627456665,
+            "computed_torque_abs_max_nm": 3.075587034225464,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.028330247849225998,
+            "velocity_rms_rad_s": 1.559805154800415
+          },
+          "revolute_3": {
+            "saturation_fraction": 0.0015,
+            "computed_torque_abs_p95_nm": 1.1047419309616089,
+            "computed_torque_abs_max_nm": 1.7848166227340698,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.025570981204509735,
+            "velocity_rms_rad_s": 1.2938761711120605
+          },
+          "revolute_4": {
+            "saturation_fraction": 0.0065,
+            "computed_torque_abs_p95_nm": 1.0178495645523071,
+            "computed_torque_abs_max_nm": 2.2060391902923584,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.030914735049009323,
+            "velocity_rms_rad_s": 1.5363818407058716
+          },
+          "revolute_5": {
+            "saturation_fraction": 0.0735,
+            "computed_torque_abs_p95_nm": 1.7925364971160889,
+            "computed_torque_abs_max_nm": 3.4577367305755615,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.0430937223136425,
+            "velocity_rms_rad_s": 1.8978486061096191
+          },
+          "revolute_1": {
+            "saturation_fraction": 0.0025,
+            "computed_torque_abs_p95_nm": 0.9167507290840149,
+            "computed_torque_abs_max_nm": 1.7568202018737793,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.024909861385822296,
+            "velocity_rms_rad_s": 1.160711646080017
+          },
+          "revolute_1_6": {
+            "saturation_fraction": 0.0195,
+            "computed_torque_abs_p95_nm": 1.388772964477539,
+            "computed_torque_abs_max_nm": 2.6553616523742676,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.036173827946186066,
+            "velocity_rms_rad_s": 1.1954349279403687
+          },
+          "revolute_1_5": {
+            "saturation_fraction": 0.2055,
+            "computed_torque_abs_p95_nm": 3.2046287059783936,
+            "computed_torque_abs_max_nm": 4.31582498550415,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04611574113368988,
+            "velocity_rms_rad_s": 1.2383368015289307
+          },
+          "revolute_1_3": {
+            "saturation_fraction": 0.0445,
+            "computed_torque_abs_p95_nm": 1.535202145576477,
+            "computed_torque_abs_max_nm": 2.3650641441345215,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.0336470790207386,
+            "velocity_rms_rad_s": 1.0337674617767334
+          },
+          "revolute_1_4": {
+            "saturation_fraction": 0.19,
+            "computed_torque_abs_p95_nm": 3.911336660385132,
+            "computed_torque_abs_max_nm": 6.030511856079102,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.05036905035376549,
+            "velocity_rms_rad_s": 1.4595417976379395
+          },
+          "revolute_1_2": {
+            "saturation_fraction": 0.1465,
+            "computed_torque_abs_p95_nm": 2.2233946323394775,
+            "computed_torque_abs_max_nm": 4.143013000488281,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.029901547357439995,
+            "velocity_rms_rad_s": 1.0853321552276611
+          },
+          "revolute_2": {
+            "saturation_fraction": 0.1755,
+            "computed_torque_abs_p95_nm": 2.4649860858917236,
+            "computed_torque_abs_max_nm": 6.26438045501709,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.042658258229494095,
+            "velocity_rms_rad_s": 0.7432615756988525
+          },
+          "revolute_2_6": {
+            "saturation_fraction": 0.0515,
+            "computed_torque_abs_p95_nm": 1.60613214969635,
+            "computed_torque_abs_max_nm": 2.9756267070770264,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.035645511001348495,
+            "velocity_rms_rad_s": 0.8681038022041321
+          },
+          "revolute_2_4": {
+            "saturation_fraction": 0.204,
+            "computed_torque_abs_p95_nm": 2.6209042072296143,
+            "computed_torque_abs_max_nm": 3.8152995109558105,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04290127754211426,
+            "velocity_rms_rad_s": 0.8962812423706055
+          },
+          "revolute_2_2": {
+            "saturation_fraction": 0.076,
+            "computed_torque_abs_p95_nm": 1.8756126165390015,
+            "computed_torque_abs_max_nm": 3.7356905937194824,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.037348370999097824,
+            "velocity_rms_rad_s": 0.9754813313484192
+          },
+          "revolute_2_3": {
+            "saturation_fraction": 0.195,
+            "computed_torque_abs_p95_nm": 3.666069507598877,
+            "computed_torque_abs_max_nm": 5.117766380310059,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04299408569931984,
+            "velocity_rms_rad_s": 0.9800019264221191
+          },
+          "revolute_2_1": {
+            "saturation_fraction": 0.123,
+            "computed_torque_abs_p95_nm": 2.49812388420105,
+            "computed_torque_abs_max_nm": 4.881617546081543,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03832988813519478,
+            "velocity_rms_rad_s": 0.7932267785072327
+          }
+        },
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "all_window_applied_peak_nm": 1.600000023841858,
+        "sampled_replica_rates": {
+          "traced_env_id": 20,
+          "samples": 500,
+          "valid_interval_samples": 499,
+          "reported_joint_rms_rad_s": [
+            1.9139341115951538,
+            1.5312519073486328,
+            1.52680242061615,
+            1.296965479850769,
+            1.5354745388031006,
+            1.9155021905899048,
+            1.1560510396957397,
+            1.1950329542160034,
+            1.2388086318969727,
+            1.0200748443603516,
+            1.4639239311218262,
+            1.0681127309799194,
+            0.7295058965682983,
+            0.8636733889579773,
+            0.9080459475517273,
+            0.9779974818229675,
+            0.9875611066818237,
+            0.7771340608596802
+          ],
+          "joint_position_range_rad": [
+            0.39742711186408997,
+            0.29938286542892456,
+            0.35496002435684204,
+            0.17783117294311523,
+            0.2928086519241333,
+            0.3123553395271301,
+            0.2812725305557251,
+            0.25527477264404297,
+            0.2346872091293335,
+            0.1690232902765274,
+            0.24753546714782715,
+            0.21021178364753723,
+            0.18939495086669922,
+            0.13542556762695312,
+            0.1916356086730957,
+            0.2805509567260742,
+            0.12949180603027344,
+            0.2302534580230713
+          ],
+          "interval_angle_rms_rad_s": [
+            2.02347934669934,
+            1.684263216309036,
+            1.6415075489840547,
+            1.3961306396864765,
+            1.638260735893995,
+            1.9911952168448979,
+            1.4764389765437078,
+            1.4860487360940338,
+            1.4285726906630412,
+            1.3044251181361544,
+            1.5109370468785228,
+            1.3494054715425208,
+            0.9663408436193502,
+            1.072636068650585,
+            1.1815595195019524,
+            1.3308018472679932,
+            1.0312961709704727,
+            1.1247347131929233
+          ],
+          "target_step_rms_rad": [
+            0.039063226900970915,
+            0.039763381648658176,
+            0.039670567705943884,
+            0.03534002762835414,
+            0.03879964764435719,
+            0.03939027274374843,
+            0.039787985975393396,
+            0.039524112720281036,
+            0.03976766287166719,
+            0.036991183909731044,
+            0.039723725830965964,
+            0.03882433001874047,
+            0.03797195918439438,
+            0.03358903869852253,
+            0.03727731025472092,
+            0.03933920529846903,
+            0.036983050646890794,
+            0.03773777265208401
+          ],
+          "target_step_p95_abs_rad": [
+            0.03999999910593033,
+            0.03999999910593033,
+            0.03999999910593033,
+            0.03999999165534973,
+            0.03999999165534973,
+            0.03999999910593033,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.03999999165534973,
+            0.04000002145767212,
+            0.03999999165534973,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344
+          ],
+          "raw_endpoint_minus_interval_rms_rad_s": [
+            0.6725280291063189,
+            0.46518124131023236,
+            0.4408503187653437,
+            0.3159030856267438,
+            0.42821639921949006,
+            0.5603046276707085,
+            0.5227517040267073,
+            0.5196762287990127,
+            0.9157841765276026,
+            0.5246097251884393,
+            0.9236008967376659,
+            0.5055398260694242,
+            0.4721797774656009,
+            0.4403597654239721,
+            0.6928105085151706,
+            0.4556439807207556,
+            0.7814180170285724,
+            0.46644622852628626
+          ]
+        },
+        "requested_saturation_above_existing_0_005_bound": true
+      },
+      {
+        "name": "turn_left",
+        "command": [
+          0.0,
+          0.0,
+          0.2
+        ],
+        "aggregate_replicas": 4,
+        "metrics": {
+          "planar_error_mps": 0.03168109804391861,
+          "yaw_error_rad_s": 0.08668423444032669,
+          "finite_difference_planar_error_mps": 0.02990470454096794,
+          "torque_saturation_fraction": 0.09955555555555555,
+          "computed_torque_abs_max_nm": 6.966075420379639,
+          "applied_torque_abs_max_nm": 1.600000023841858,
+          "tilt_rms_deg": 1.7403995990753174,
+          "mean_velocity_mps": [
+            0.006898171734064817,
+            0.008633233606815338,
+            0.004200561437755823
+          ],
+          "mean_gyro_rad_s": [
+            0.014299590140581131,
+            -0.011031956411898136,
+            0.19090382754802704
+          ],
+          "mean_nonfoot_body_count": 0.0,
+          "reported_joint_velocity_rms_max_rad_s": 1.268141269683838
+        },
+        "joints": {
+          "revolute_1_1": {
+            "saturation_fraction": 0.0845,
+            "computed_torque_abs_p95_nm": 1.8955247402191162,
+            "computed_torque_abs_max_nm": 3.304257392883301,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.031041527166962624,
+            "velocity_rms_rad_s": 1.070582389831543
+          },
+          "revolute_1_7": {
+            "saturation_fraction": 0.1155,
+            "computed_torque_abs_p95_nm": 2.2184383869171143,
+            "computed_torque_abs_max_nm": 4.067287445068359,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03275778517127037,
+            "velocity_rms_rad_s": 1.1123086214065552
+          },
+          "revolute_2_5": {
+            "saturation_fraction": 0.008,
+            "computed_torque_abs_p95_nm": 0.9999076128005981,
+            "computed_torque_abs_max_nm": 2.748021125793457,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.021381070837378502,
+            "velocity_rms_rad_s": 0.9306661486625671
+          },
+          "revolute_3": {
+            "saturation_fraction": 0.095,
+            "computed_torque_abs_p95_nm": 2.062192916870117,
+            "computed_torque_abs_max_nm": 3.5451152324676514,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03431467339396477,
+            "velocity_rms_rad_s": 0.8495299816131592
+          },
+          "revolute_4": {
+            "saturation_fraction": 0.0045,
+            "computed_torque_abs_p95_nm": 1.0353035926818848,
+            "computed_torque_abs_max_nm": 2.138728141784668,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02449708618223667,
+            "velocity_rms_rad_s": 1.1709164381027222
+          },
+          "revolute_5": {
+            "saturation_fraction": 0.012,
+            "computed_torque_abs_p95_nm": 1.0335220098495483,
+            "computed_torque_abs_max_nm": 2.096731662750244,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.021859468892216682,
+            "velocity_rms_rad_s": 1.0089842081069946
+          },
+          "revolute_1": {
+            "saturation_fraction": 0.1005,
+            "computed_torque_abs_p95_nm": 2.242401123046875,
+            "computed_torque_abs_max_nm": 3.532116174697876,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.029494354501366615,
+            "velocity_rms_rad_s": 1.1745917797088623
+          },
+          "revolute_1_6": {
+            "saturation_fraction": 0.1555,
+            "computed_torque_abs_p95_nm": 2.883108615875244,
+            "computed_torque_abs_max_nm": 4.173058032989502,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04137649014592171,
+            "velocity_rms_rad_s": 1.2029846906661987
+          },
+          "revolute_1_5": {
+            "saturation_fraction": 0.04,
+            "computed_torque_abs_p95_nm": 1.4979567527770996,
+            "computed_torque_abs_max_nm": 3.6708223819732666,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03113214299082756,
+            "velocity_rms_rad_s": 1.268141269683838
+          },
+          "revolute_1_3": {
+            "saturation_fraction": 0.0895,
+            "computed_torque_abs_p95_nm": 1.987969160079956,
+            "computed_torque_abs_max_nm": 3.0417065620422363,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03346242383122444,
+            "velocity_rms_rad_s": 1.0958914756774902
+          },
+          "revolute_1_4": {
+            "saturation_fraction": 0.0185,
+            "computed_torque_abs_p95_nm": 1.3987247943878174,
+            "computed_torque_abs_max_nm": 2.2830166816711426,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03527797386050224,
+            "velocity_rms_rad_s": 1.141222357749939
+          },
+          "revolute_1_2": {
+            "saturation_fraction": 0.041,
+            "computed_torque_abs_p95_nm": 1.5334157943725586,
+            "computed_torque_abs_max_nm": 3.1650233268737793,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.024428319185972214,
+            "velocity_rms_rad_s": 1.1977143287658691
+          },
+          "revolute_2": {
+            "saturation_fraction": 0.201,
+            "computed_torque_abs_p95_nm": 2.7939672470092773,
+            "computed_torque_abs_max_nm": 4.11855411529541,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03694766387343407,
+            "velocity_rms_rad_s": 0.611981213092804
+          },
+          "revolute_2_6": {
+            "saturation_fraction": 0.15,
+            "computed_torque_abs_p95_nm": 2.25726580619812,
+            "computed_torque_abs_max_nm": 3.282383680343628,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03748023882508278,
+            "velocity_rms_rad_s": 0.7652876973152161
+          },
+          "revolute_2_4": {
+            "saturation_fraction": 0.268,
+            "computed_torque_abs_p95_nm": 3.6339609622955322,
+            "computed_torque_abs_max_nm": 6.966075420379639,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.0556439645588398,
+            "velocity_rms_rad_s": 1.1846688985824585
+          },
+          "revolute_2_2": {
+            "saturation_fraction": 0.2375,
+            "computed_torque_abs_p95_nm": 3.299839973449707,
+            "computed_torque_abs_max_nm": 6.032992362976074,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04937398433685303,
+            "velocity_rms_rad_s": 0.8162869215011597
+          },
+          "revolute_2_3": {
+            "saturation_fraction": 0.071,
+            "computed_torque_abs_p95_nm": 1.8331812620162964,
+            "computed_torque_abs_max_nm": 3.699855327606201,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.033152226358652115,
+            "velocity_rms_rad_s": 0.7561123967170715
+          },
+          "revolute_2_1": {
+            "saturation_fraction": 0.1,
+            "computed_torque_abs_p95_nm": 2.2552547454833984,
+            "computed_torque_abs_max_nm": 4.880761623382568,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03266819193959236,
+            "velocity_rms_rad_s": 0.7774420976638794
+          }
+        },
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "all_window_applied_peak_nm": 1.600000023841858,
+        "sampled_replica_rates": {
+          "traced_env_id": 24,
+          "samples": 500,
+          "valid_interval_samples": 499,
+          "reported_joint_rms_rad_s": [
+            1.054865837097168,
+            1.1080718040466309,
+            0.9202699065208435,
+            0.8606343865394592,
+            1.180600881576538,
+            0.9941034317016602,
+            1.1697943210601807,
+            1.204573392868042,
+            1.2451777458190918,
+            1.083101511001587,
+            1.12956964969635,
+            1.2139521837234497,
+            0.6308190226554871,
+            0.7506164908409119,
+            1.2831865549087524,
+            0.7669158577919006,
+            0.7294400334358215,
+            0.7883062362670898
+          ],
+          "joint_position_range_rad": [
+            0.22777853906154633,
+            0.23520973324775696,
+            0.23508396744728088,
+            0.16150939464569092,
+            0.2564298212528229,
+            0.24939563870429993,
+            0.2576991319656372,
+            0.21982628107070923,
+            0.2702861428260803,
+            0.2502146363258362,
+            0.29044681787490845,
+            0.29354017972946167,
+            0.10603761672973633,
+            0.10984110832214355,
+            0.16587090492248535,
+            0.20037126541137695,
+            0.1350095272064209,
+            0.2554152011871338
+          ],
+          "interval_angle_rms_rad_s": [
+            1.044082832191814,
+            1.2963299870434524,
+            1.0080180207275125,
+            0.8066135819180873,
+            1.341168797876159,
+            1.0416234016111254,
+            1.3915957828172754,
+            1.4368790206747017,
+            1.5104305482191809,
+            1.3941075960517906,
+            1.3746205765894495,
+            1.4874115963185588,
+            0.7167815687969908,
+            0.9795755026133902,
+            1.2121877773797245,
+            0.968191932861394,
+            0.9802914775953652,
+            1.078660620073928
+          ],
+          "target_step_rms_rad": [
+            0.039069253968490425,
+            0.038379552214871084,
+            0.03674189599581663,
+            0.03752400590296669,
+            0.037478798869833393,
+            0.03563256589914673,
+            0.039608748765113916,
+            0.03958777285323548,
+            0.039535370481182566,
+            0.03926807081085186,
+            0.03976303076343486,
+            0.03963012899675748,
+            0.03228018033594395,
+            0.032281682152665046,
+            0.03794475662222789,
+            0.03752795759760792,
+            0.03401780130735176,
+            0.03901918931368071
+          ],
+          "target_step_p95_abs_rad": [
+            0.03999999910593033,
+            0.03999999165534973,
+            0.040000006556510925,
+            0.03999999165534973,
+            0.03999999910593033,
+            0.040000006556510925,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344
+          ],
+          "raw_endpoint_minus_interval_rms_rad_s": [
+            0.4958421560300012,
+            0.42663368565854914,
+            0.4119886458803149,
+            0.3616460153879689,
+            0.4113567000394872,
+            0.3454421381260892,
+            0.8804014730568348,
+            0.8406029118810017,
+            0.7365376696282744,
+            0.6266746090176174,
+            0.6471602125104917,
+            0.5275569362220082,
+            0.642957364591657,
+            0.6179401432081405,
+            0.7837043403206659,
+            0.5124239915172837,
+            0.438468369441647,
+            0.4005102705098962
+          ]
+        },
+        "requested_saturation_above_existing_0_005_bound": true
+      },
+      {
+        "name": "turn_right",
+        "command": [
+          0.0,
+          0.0,
+          -0.2
+        ],
+        "aggregate_replicas": 4,
+        "metrics": {
+          "planar_error_mps": 0.04011452570557594,
+          "yaw_error_rad_s": 0.08004028350114822,
+          "finite_difference_planar_error_mps": 0.039010196924209595,
+          "torque_saturation_fraction": 0.11,
+          "computed_torque_abs_max_nm": 6.834641933441162,
+          "applied_torque_abs_max_nm": 1.600000023841858,
+          "tilt_rms_deg": 1.397676944732666,
+          "mean_velocity_mps": [
+            -0.0060545229353010654,
+            0.018093330785632133,
+            0.004439147189259529
+          ],
+          "mean_gyro_rad_s": [
+            0.010930445976555347,
+            -0.003806296968832612,
+            -0.19762450456619263
+          ],
+          "mean_nonfoot_body_count": 0.0,
+          "reported_joint_velocity_rms_max_rad_s": 1.3220298290252686
+        },
+        "joints": {
+          "revolute_1_1": {
+            "saturation_fraction": 0.0625,
+            "computed_torque_abs_p95_nm": 1.846341848373413,
+            "computed_torque_abs_max_nm": 3.239531993865967,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.026584891602396965,
+            "velocity_rms_rad_s": 1.119314193725586
+          },
+          "revolute_1_7": {
+            "saturation_fraction": 0.14,
+            "computed_torque_abs_p95_nm": 2.5695672035217285,
+            "computed_torque_abs_max_nm": 4.405269622802734,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03986141085624695,
+            "velocity_rms_rad_s": 1.1423712968826294
+          },
+          "revolute_2_5": {
+            "saturation_fraction": 0.0085,
+            "computed_torque_abs_p95_nm": 1.2010173797607422,
+            "computed_torque_abs_max_nm": 3.136328935623169,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.0224600899964571,
+            "velocity_rms_rad_s": 0.9241843819618225
+          },
+          "revolute_3": {
+            "saturation_fraction": 0.1305,
+            "computed_torque_abs_p95_nm": 2.4715094566345215,
+            "computed_torque_abs_max_nm": 4.016000747680664,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03421175479888916,
+            "velocity_rms_rad_s": 1.0165141820907593
+          },
+          "revolute_4": {
+            "saturation_fraction": 0.0355,
+            "computed_torque_abs_p95_nm": 1.4805833101272583,
+            "computed_torque_abs_max_nm": 3.1049611568450928,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.030501704663038254,
+            "velocity_rms_rad_s": 1.0739436149597168
+          },
+          "revolute_5": {
+            "saturation_fraction": 0.0005,
+            "computed_torque_abs_p95_nm": 0.985821545124054,
+            "computed_torque_abs_max_nm": 1.6172047853469849,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.023916922509670258,
+            "velocity_rms_rad_s": 1.0997381210327148
+          },
+          "revolute_1": {
+            "saturation_fraction": 0.095,
+            "computed_torque_abs_p95_nm": 2.1812517642974854,
+            "computed_torque_abs_max_nm": 3.6276357173919678,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.028659991919994354,
+            "velocity_rms_rad_s": 1.168357014656067
+          },
+          "revolute_1_6": {
+            "saturation_fraction": 0.1165,
+            "computed_torque_abs_p95_nm": 2.568783760070801,
+            "computed_torque_abs_max_nm": 4.163906574249268,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03671281412243843,
+            "velocity_rms_rad_s": 1.1137186288833618
+          },
+          "revolute_1_5": {
+            "saturation_fraction": 0.1075,
+            "computed_torque_abs_p95_nm": 2.0852513313293457,
+            "computed_torque_abs_max_nm": 3.865985870361328,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03787640482187271,
+            "velocity_rms_rad_s": 1.3220298290252686
+          },
+          "revolute_1_3": {
+            "saturation_fraction": 0.0765,
+            "computed_torque_abs_p95_nm": 1.8517931699752808,
+            "computed_torque_abs_max_nm": 3.674492835998535,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03236234933137894,
+            "velocity_rms_rad_s": 0.9734219908714294
+          },
+          "revolute_1_4": {
+            "saturation_fraction": 0.0315,
+            "computed_torque_abs_p95_nm": 1.4217573404312134,
+            "computed_torque_abs_max_nm": 2.9990453720092773,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03320978581905365,
+            "velocity_rms_rad_s": 1.1756935119628906
+          },
+          "revolute_1_2": {
+            "saturation_fraction": 0.0835,
+            "computed_torque_abs_p95_nm": 1.7914984226226807,
+            "computed_torque_abs_max_nm": 3.516056537628174,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03017318621277809,
+            "velocity_rms_rad_s": 1.1259459257125854
+          },
+          "revolute_2": {
+            "saturation_fraction": 0.198,
+            "computed_torque_abs_p95_nm": 2.76121187210083,
+            "computed_torque_abs_max_nm": 3.9646708965301514,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03880700096487999,
+            "velocity_rms_rad_s": 0.7255561947822571
+          },
+          "revolute_2_6": {
+            "saturation_fraction": 0.17,
+            "computed_torque_abs_p95_nm": 2.6746490001678467,
+            "computed_torque_abs_max_nm": 5.551445007324219,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03724183887243271,
+            "velocity_rms_rad_s": 0.6491329669952393
+          },
+          "revolute_2_4": {
+            "saturation_fraction": 0.3065,
+            "computed_torque_abs_p95_nm": 3.583341598510742,
+            "computed_torque_abs_max_nm": 6.834641933441162,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.057283226400613785,
+            "velocity_rms_rad_s": 1.1543419361114502
+          },
+          "revolute_2_2": {
+            "saturation_fraction": 0.0655,
+            "computed_torque_abs_p95_nm": 1.7672187089920044,
+            "computed_torque_abs_max_nm": 3.1026713848114014,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03531455248594284,
+            "velocity_rms_rad_s": 0.9056979417800903
+          },
+          "revolute_2_3": {
+            "saturation_fraction": 0.2525,
+            "computed_torque_abs_p95_nm": 2.8697092533111572,
+            "computed_torque_abs_max_nm": 4.788731098175049,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04531639441847801,
+            "velocity_rms_rad_s": 0.6950298547744751
+          },
+          "revolute_2_1": {
+            "saturation_fraction": 0.0995,
+            "computed_torque_abs_p95_nm": 2.124490737915039,
+            "computed_torque_abs_max_nm": 5.2729716300964355,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03356102854013443,
+            "velocity_rms_rad_s": 0.7985838055610657
+          }
+        },
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "all_window_applied_peak_nm": 1.600000023841858,
+        "sampled_replica_rates": {
+          "traced_env_id": 28,
+          "samples": 500,
+          "valid_interval_samples": 499,
+          "reported_joint_rms_rad_s": [
+            1.1133328676223755,
+            1.0747414827346802,
+            0.9180933833122253,
+            1.027838945388794,
+            1.074602484703064,
+            1.0990595817565918,
+            1.1562974452972412,
+            1.1160212755203247,
+            1.3213392496109009,
+            0.9811784625053406,
+            1.1692560911178589,
+            1.1290334463119507,
+            0.6959790587425232,
+            0.6099141240119934,
+            1.1819206476211548,
+            0.9192511439323425,
+            0.6912743449211121,
+            0.8025802373886108
+          ],
+          "joint_position_range_rad": [
+            0.28709307312965393,
+            0.2548096179962158,
+            0.2249000072479248,
+            0.22345009446144104,
+            0.28995850682258606,
+            0.23996920883655548,
+            0.29833078384399414,
+            0.2888173460960388,
+            0.2434367537498474,
+            0.25288331508636475,
+            0.305683970451355,
+            0.2877722382545471,
+            0.11624979972839355,
+            0.1184079647064209,
+            0.22394275665283203,
+            0.34887218475341797,
+            0.1619272232055664,
+            0.22023987770080566
+          ],
+          "interval_angle_rms_rad_s": [
+            1.176518898348891,
+            1.3107064113692568,
+            0.9611866422315328,
+            1.1040084343612533,
+            1.2573994560174073,
+            1.1152291816888544,
+            1.407377932511134,
+            1.3986784063703412,
+            1.5007502626840958,
+            1.356243286396507,
+            1.396186145015331,
+            1.3461703986246794,
+            0.8935846731497162,
+            0.8692078777964465,
+            1.212210826360315,
+            1.3436040183577813,
+            0.8363250986914824,
+            1.0393921023536798
+          ],
+          "target_step_rms_rad": [
+            0.03901960490696818,
+            0.038567782404962045,
+            0.03652305960944853,
+            0.037620762446144665,
+            0.03811081531825194,
+            0.03657275988444073,
+            0.03984965223228142,
+            0.039513821646921715,
+            0.0393595269747654,
+            0.03964913895712134,
+            0.039853465663068945,
+            0.03959921605958306,
+            0.03658169447004307,
+            0.032227332459241496,
+            0.03784605263103546,
+            0.039581508199339754,
+            0.03813873552874619,
+            0.039046788350748506
+          ],
+          "target_step_p95_abs_rad": [
+            0.03999999910593033,
+            0.03999999165534973,
+            0.04000000283122063,
+            0.03999999165534973,
+            0.040000006556510925,
+            0.040000006556510925,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344
+          ],
+          "raw_endpoint_minus_interval_rms_rad_s": [
+            0.349469862284025,
+            0.40449753426904933,
+            0.34362952924445916,
+            0.31036020533075465,
+            0.3973418083968107,
+            0.34255775516656195,
+            0.6755515152461592,
+            0.6912205704782153,
+            0.7321875889491452,
+            0.5734865972347345,
+            0.5697302869578978,
+            0.49293159061331576,
+            0.5291635464869158,
+            0.591148847777116,
+            0.6072069756843236,
+            0.5450502583962186,
+            0.45343076160419443,
+            0.3694267363211475
+          ]
+        },
+        "requested_saturation_above_existing_0_005_bound": true
+      },
+      {
+        "name": "arc_left",
+        "command": [
+          0.1,
+          0.0,
+          0.2
+        ],
+        "aggregate_replicas": 4,
+        "metrics": {
+          "planar_error_mps": 0.042002301663160324,
+          "yaw_error_rad_s": 0.10088641196489334,
+          "finite_difference_planar_error_mps": 0.03934933990240097,
+          "torque_saturation_fraction": 0.11413888888888889,
+          "computed_torque_abs_max_nm": 6.638076305389404,
+          "applied_torque_abs_max_nm": 1.600000023841858,
+          "tilt_rms_deg": 2.8928749561309814,
+          "mean_velocity_mps": [
+            0.08733686804771423,
+            0.017275694757699966,
+            0.005799913313239813
+          ],
+          "mean_gyro_rad_s": [
+            0.010404582135379314,
+            -0.008460857905447483,
+            0.13347262144088745
+          ],
+          "mean_nonfoot_body_count": 0.0,
+          "reported_joint_velocity_rms_max_rad_s": 1.666182518005371
+        },
+        "joints": {
+          "revolute_1_1": {
+            "saturation_fraction": 0.08,
+            "computed_torque_abs_p95_nm": 2.050344228744507,
+            "computed_torque_abs_max_nm": 3.5045928955078125,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.028389841318130493,
+            "velocity_rms_rad_s": 1.0842057466506958
+          },
+          "revolute_1_7": {
+            "saturation_fraction": 0.1405,
+            "computed_torque_abs_p95_nm": 2.5437557697296143,
+            "computed_torque_abs_max_nm": 5.339704513549805,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04403403401374817,
+            "velocity_rms_rad_s": 1.18878972530365
+          },
+          "revolute_2_5": {
+            "saturation_fraction": 0.01,
+            "computed_torque_abs_p95_nm": 1.245449185371399,
+            "computed_torque_abs_max_nm": 2.0246269702911377,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02717406675219536,
+            "velocity_rms_rad_s": 1.1057451963424683
+          },
+          "revolute_3": {
+            "saturation_fraction": 0.0315,
+            "computed_torque_abs_p95_nm": 1.415755033493042,
+            "computed_torque_abs_max_nm": 2.6169214248657227,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.030741453170776367,
+            "velocity_rms_rad_s": 0.9554192423820496
+          },
+          "revolute_4": {
+            "saturation_fraction": 0.0015,
+            "computed_torque_abs_p95_nm": 0.9648906588554382,
+            "computed_torque_abs_max_nm": 2.5121827125549316,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.026496252045035362,
+            "velocity_rms_rad_s": 1.4337602853775024
+          },
+          "revolute_5": {
+            "saturation_fraction": 0.033,
+            "computed_torque_abs_p95_nm": 1.4086365699768066,
+            "computed_torque_abs_max_nm": 3.0053892135620117,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03623393923044205,
+            "velocity_rms_rad_s": 1.666182518005371
+          },
+          "revolute_1": {
+            "saturation_fraction": 0.077,
+            "computed_torque_abs_p95_nm": 2.1205990314483643,
+            "computed_torque_abs_max_nm": 4.327993392944336,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02878902480006218,
+            "velocity_rms_rad_s": 1.1754662990570068
+          },
+          "revolute_1_6": {
+            "saturation_fraction": 0.123,
+            "computed_torque_abs_p95_nm": 2.2518153190612793,
+            "computed_torque_abs_max_nm": 3.604205369949341,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03981735557317734,
+            "velocity_rms_rad_s": 1.1450464725494385
+          },
+          "revolute_1_5": {
+            "saturation_fraction": 0.063,
+            "computed_torque_abs_p95_nm": 1.7380067110061646,
+            "computed_torque_abs_max_nm": 3.513829231262207,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03286827355623245,
+            "velocity_rms_rad_s": 1.156422734260559
+          },
+          "revolute_1_3": {
+            "saturation_fraction": 0.083,
+            "computed_torque_abs_p95_nm": 1.9533617496490479,
+            "computed_torque_abs_max_nm": 3.7464303970336914,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03389326110482216,
+            "velocity_rms_rad_s": 1.131309151649475
+          },
+          "revolute_1_4": {
+            "saturation_fraction": 0.0675,
+            "computed_torque_abs_p95_nm": 2.1041364669799805,
+            "computed_torque_abs_max_nm": 4.704520225524902,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03472541645169258,
+            "velocity_rms_rad_s": 1.168508529663086
+          },
+          "revolute_1_2": {
+            "saturation_fraction": 0.0685,
+            "computed_torque_abs_p95_nm": 1.7058178186416626,
+            "computed_torque_abs_max_nm": 3.060035228729248,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02441638708114624,
+            "velocity_rms_rad_s": 1.178707480430603
+          },
+          "revolute_2": {
+            "saturation_fraction": 0.2535,
+            "computed_torque_abs_p95_nm": 3.3885624408721924,
+            "computed_torque_abs_max_nm": 4.568751335144043,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.042928751558065414,
+            "velocity_rms_rad_s": 0.7757761478424072
+          },
+          "revolute_2_6": {
+            "saturation_fraction": 0.1565,
+            "computed_torque_abs_p95_nm": 2.170747756958008,
+            "computed_torque_abs_max_nm": 3.6790544986724854,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.042725786566734314,
+            "velocity_rms_rad_s": 0.8457446694374084
+          },
+          "revolute_2_4": {
+            "saturation_fraction": 0.2805,
+            "computed_torque_abs_p95_nm": 3.6681971549987793,
+            "computed_torque_abs_max_nm": 6.638076305389404,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.0555977001786232,
+            "velocity_rms_rad_s": 1.0016006231307983
+          },
+          "revolute_2_2": {
+            "saturation_fraction": 0.219,
+            "computed_torque_abs_p95_nm": 3.1645631790161133,
+            "computed_torque_abs_max_nm": 4.379859447479248,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04852615296840668,
+            "velocity_rms_rad_s": 0.8605843186378479
+          },
+          "revolute_2_3": {
+            "saturation_fraction": 0.238,
+            "computed_torque_abs_p95_nm": 2.874722957611084,
+            "computed_torque_abs_max_nm": 4.673238277435303,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.046646848320961,
+            "velocity_rms_rad_s": 0.7388706207275391
+          },
+          "revolute_2_1": {
+            "saturation_fraction": 0.1285,
+            "computed_torque_abs_p95_nm": 2.575408935546875,
+            "computed_torque_abs_max_nm": 4.925783634185791,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03604734688997269,
+            "velocity_rms_rad_s": 0.753521740436554
+          }
+        },
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "all_window_applied_peak_nm": 1.600000023841858,
+        "sampled_replica_rates": {
+          "traced_env_id": 32,
+          "samples": 500,
+          "valid_interval_samples": 499,
+          "reported_joint_rms_rad_s": [
+            1.0837386846542358,
+            1.22312331199646,
+            1.0886715650558472,
+            0.9463303089141846,
+            1.4216232299804688,
+            1.6745281219482422,
+            1.1742790937423706,
+            1.1506963968276978,
+            1.1757149696350098,
+            1.150885820388794,
+            1.169179081916809,
+            1.18059504032135,
+            0.7683755159378052,
+            0.8504469990730286,
+            0.9727937579154968,
+            0.8816137313842773,
+            0.720629870891571,
+            0.764276921749115
+          ],
+          "joint_position_range_rad": [
+            0.22306706011295319,
+            0.25377357006073,
+            0.27295157313346863,
+            0.13721483945846558,
+            0.2914891839027405,
+            0.36254727840423584,
+            0.3238852620124817,
+            0.24138939380645752,
+            0.28267961740493774,
+            0.22675412893295288,
+            0.3298402428627014,
+            0.2563539445400238,
+            0.19390654563903809,
+            0.13783764839172363,
+            0.20556259155273438,
+            0.2466728687286377,
+            0.18229079246520996,
+            0.2302473783493042
+          ],
+          "interval_angle_rms_rad_s": [
+            1.1132648969716046,
+            1.37077858166586,
+            1.1555920530295944,
+            0.9723473768609642,
+            1.5089257927567181,
+            1.8013038042758194,
+            1.429598025965535,
+            1.3851498271959768,
+            1.4074573612269106,
+            1.3915898900034354,
+            1.4228249242869224,
+            1.4230624029724155,
+            0.9880066857496137,
+            1.065452350073694,
+            1.0765028871571454,
+            1.070166289598319,
+            0.8746728221226013,
+            1.0318146394446839
+          ],
+          "target_step_rms_rad": [
+            0.03890354371157871,
+            0.03822943084865608,
+            0.03733490183052972,
+            0.031644213941274986,
+            0.03886657789942726,
+            0.0390175850308605,
+            0.03970245115685409,
+            0.03931875689637662,
+            0.039279828555180696,
+            0.039278007991815224,
+            0.03981252914910777,
+            0.039661563687968936,
+            0.038592771405404645,
+            0.03396428590138254,
+            0.038361256319251864,
+            0.03873665559371679,
+            0.03857122915427993,
+            0.03833951668294204
+          ],
+          "target_step_p95_abs_rad": [
+            0.03999999910593033,
+            0.03999999165534973,
+            0.03999999910593033,
+            0.03999999165534973,
+            0.03999999910593033,
+            0.03999999910593033,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344
+          ],
+          "raw_endpoint_minus_interval_rms_rad_s": [
+            0.32310636722243435,
+            0.4495666897044907,
+            0.32263415551869706,
+            0.3893221533317073,
+            0.3677884607099897,
+            0.5252986497128617,
+            0.6662179767212432,
+            0.7743010552767947,
+            0.6582562724591099,
+            0.5971983773935835,
+            0.6550789996484396,
+            0.5303168628230196,
+            0.5859659335705462,
+            0.6106269523567884,
+            0.48728728700634316,
+            0.510746990499101,
+            0.5075897242541748,
+            0.4570712373901985
+          ]
+        },
+        "requested_saturation_above_existing_0_005_bound": true
+      },
+      {
+        "name": "arc_right",
+        "command": [
+          0.1,
+          0.0,
+          -0.2
+        ],
+        "aggregate_replicas": 4,
+        "metrics": {
+          "planar_error_mps": 0.03620109334588051,
+          "yaw_error_rad_s": 0.10479049384593964,
+          "finite_difference_planar_error_mps": 0.03484752029180527,
+          "torque_saturation_fraction": 0.10547222222222222,
+          "computed_torque_abs_max_nm": 7.053909778594971,
+          "applied_torque_abs_max_nm": 1.600000023841858,
+          "tilt_rms_deg": 2.791550636291504,
+          "mean_velocity_mps": [
+            0.09272755682468414,
+            0.013087383471429348,
+            0.005362045019865036
+          ],
+          "mean_gyro_rad_s": [
+            0.014741092920303345,
+            0.007350551895797253,
+            -0.15256907045841217
+          ],
+          "mean_nonfoot_body_count": 0.0,
+          "reported_joint_velocity_rms_max_rad_s": 1.558491826057434
+        },
+        "joints": {
+          "revolute_1_1": {
+            "saturation_fraction": 0.0335,
+            "computed_torque_abs_p95_nm": 1.4943785667419434,
+            "computed_torque_abs_max_nm": 3.1457371711730957,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.021584955975413322,
+            "velocity_rms_rad_s": 1.4093736410140991
+          },
+          "revolute_1_7": {
+            "saturation_fraction": 0.108,
+            "computed_torque_abs_p95_nm": 2.1754324436187744,
+            "computed_torque_abs_max_nm": 3.336531400680542,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04174215719103813,
+            "velocity_rms_rad_s": 1.4749870300292969
+          },
+          "revolute_2_5": {
+            "saturation_fraction": 0.023,
+            "computed_torque_abs_p95_nm": 1.2825795412063599,
+            "computed_torque_abs_max_nm": 3.5647366046905518,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03061039187014103,
+            "velocity_rms_rad_s": 1.558491826057434
+          },
+          "revolute_3": {
+            "saturation_fraction": 0.043,
+            "computed_torque_abs_p95_nm": 1.5508607625961304,
+            "computed_torque_abs_max_nm": 2.7608730792999268,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02714148536324501,
+            "velocity_rms_rad_s": 0.6597121953964233
+          },
+          "revolute_4": {
+            "saturation_fraction": 0.0055,
+            "computed_torque_abs_p95_nm": 0.9145687222480774,
+            "computed_torque_abs_max_nm": 1.9772487878799438,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.024037545546889305,
+            "velocity_rms_rad_s": 1.1557087898254395
+          },
+          "revolute_5": {
+            "saturation_fraction": 0.0385,
+            "computed_torque_abs_p95_nm": 1.463800072669983,
+            "computed_torque_abs_max_nm": 2.6390390396118164,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.030931878834962845,
+            "velocity_rms_rad_s": 1.3447858095169067
+          },
+          "revolute_1": {
+            "saturation_fraction": 0.049,
+            "computed_torque_abs_p95_nm": 1.5893681049346924,
+            "computed_torque_abs_max_nm": 3.105497360229492,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.028212226927280426,
+            "velocity_rms_rad_s": 1.1285529136657715
+          },
+          "revolute_1_6": {
+            "saturation_fraction": 0.141,
+            "computed_torque_abs_p95_nm": 2.3647656440734863,
+            "computed_torque_abs_max_nm": 3.8942906856536865,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.039228443056344986,
+            "velocity_rms_rad_s": 1.0880297422409058
+          },
+          "revolute_1_5": {
+            "saturation_fraction": 0.129,
+            "computed_torque_abs_p95_nm": 2.3671224117279053,
+            "computed_torque_abs_max_nm": 4.07243537902832,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04011685401201248,
+            "velocity_rms_rad_s": 1.1307529211044312
+          },
+          "revolute_1_3": {
+            "saturation_fraction": 0.1185,
+            "computed_torque_abs_p95_nm": 2.2701733112335205,
+            "computed_torque_abs_max_nm": 3.4925637245178223,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03949293866753578,
+            "velocity_rms_rad_s": 1.1222455501556396
+          },
+          "revolute_1_4": {
+            "saturation_fraction": 0.0595,
+            "computed_torque_abs_p95_nm": 1.7604295015335083,
+            "computed_torque_abs_max_nm": 4.8673176765441895,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03368999436497688,
+            "velocity_rms_rad_s": 1.1957058906555176
+          },
+          "revolute_1_2": {
+            "saturation_fraction": 0.086,
+            "computed_torque_abs_p95_nm": 1.8153471946716309,
+            "computed_torque_abs_max_nm": 4.042285919189453,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.026236891746520996,
+            "velocity_rms_rad_s": 1.153273105621338
+          },
+          "revolute_2": {
+            "saturation_fraction": 0.1535,
+            "computed_torque_abs_p95_nm": 2.6286158561706543,
+            "computed_torque_abs_max_nm": 4.730627059936523,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03722346946597099,
+            "velocity_rms_rad_s": 0.6983286738395691
+          },
+          "revolute_2_6": {
+            "saturation_fraction": 0.159,
+            "computed_torque_abs_p95_nm": 2.4355852603912354,
+            "computed_torque_abs_max_nm": 5.277287006378174,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03778090327978134,
+            "velocity_rms_rad_s": 0.6501556038856506
+          },
+          "revolute_2_4": {
+            "saturation_fraction": 0.2935,
+            "computed_torque_abs_p95_nm": 3.2966177463531494,
+            "computed_torque_abs_max_nm": 7.053909778594971,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.052832309156656265,
+            "velocity_rms_rad_s": 0.8579898476600647
+          },
+          "revolute_2_2": {
+            "saturation_fraction": 0.1135,
+            "computed_torque_abs_p95_nm": 2.062403678894043,
+            "computed_torque_abs_max_nm": 4.22385835647583,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03942059352993965,
+            "velocity_rms_rad_s": 0.8481491208076477
+          },
+          "revolute_2_3": {
+            "saturation_fraction": 0.2095,
+            "computed_torque_abs_p95_nm": 2.4746172428131104,
+            "computed_torque_abs_max_nm": 4.3611016273498535,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03802981972694397,
+            "velocity_rms_rad_s": 0.7825106978416443
+          },
+          "revolute_2_1": {
+            "saturation_fraction": 0.135,
+            "computed_torque_abs_p95_nm": 2.4493319988250732,
+            "computed_torque_abs_max_nm": 4.110969543457031,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03484966605901718,
+            "velocity_rms_rad_s": 0.7013259530067444
+          }
+        },
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "all_window_applied_peak_nm": 1.600000023841858,
+        "sampled_replica_rates": {
+          "traced_env_id": 36,
+          "samples": 500,
+          "valid_interval_samples": 499,
+          "reported_joint_rms_rad_s": [
+            1.4391206502914429,
+            1.4875112771987915,
+            1.578429102897644,
+            0.6385669708251953,
+            1.134406566619873,
+            1.3570603132247925,
+            1.1309555768966675,
+            1.1100271940231323,
+            1.1058341264724731,
+            1.1356679201126099,
+            1.191021203994751,
+            1.1551183462142944,
+            0.7034057378768921,
+            0.6502141952514648,
+            0.8251880407333374,
+            0.8237180113792419,
+            0.768065869808197,
+            0.7094394564628601
+          ],
+          "joint_position_range_rad": [
+            0.34729063510894775,
+            0.30750155448913574,
+            0.4242211878299713,
+            0.08865100145339966,
+            0.2917594909667969,
+            0.24786753952503204,
+            0.31307685375213623,
+            0.2653912901878357,
+            0.28488409519195557,
+            0.2237822413444519,
+            0.32661548256874084,
+            0.26833927631378174,
+            0.17159247398376465,
+            0.1050260066986084,
+            0.23319482803344727,
+            0.25018739700317383,
+            0.23869037628173828,
+            0.19940590858459473
+          ],
+          "interval_angle_rms_rad_s": [
+            1.5559264811486628,
+            1.6233298409589807,
+            1.637856607897086,
+            0.61863208660454,
+            1.2849250647396946,
+            1.4927718141269306,
+            1.394068160223578,
+            1.3520296894341783,
+            1.308616553737518,
+            1.3749978936895424,
+            1.4239083765616238,
+            1.3971069778466612,
+            0.9463512244650432,
+            0.8485923253518965,
+            0.9270723679160646,
+            1.2000919439223192,
+            0.9458526680465529,
+            0.9771521491349131
+          ],
+          "target_step_rms_rad": [
+            0.03928531073748482,
+            0.038923372895201834,
+            0.03875587135214571,
+            0.027329388701165074,
+            0.038576799966046786,
+            0.03816714739505275,
+            0.03957351505752242,
+            0.03923220305577126,
+            0.03912632207963528,
+            0.03933896943689641,
+            0.039715731333759094,
+            0.039605140820905646,
+            0.038341922092268846,
+            0.03149396383613025,
+            0.03833024906533009,
+            0.03943764480471684,
+            0.03878102382624934,
+            0.03807820103816578
+          ],
+          "target_step_p95_abs_rad": [
+            0.03999999910593033,
+            0.03999999165534973,
+            0.03999999910593033,
+            0.03999999165534973,
+            0.03999999910593033,
+            0.03999999910593033,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344
+          ],
+          "raw_endpoint_minus_interval_rms_rad_s": [
+            0.40756445097103,
+            0.5072554258198324,
+            0.45906442790506563,
+            0.27248802194455163,
+            0.40727225083102814,
+            0.4778845980663331,
+            0.6217303275950559,
+            0.6748816070714401,
+            0.66359115923706,
+            0.5772412297586621,
+            0.6046891306198507,
+            0.5244942680819622,
+            0.4901546909634128,
+            0.5836674723283831,
+            0.42449561477913594,
+            0.5335948299855923,
+            0.4592358762073315,
+            0.4325852178859375
+          ]
+        },
+        "requested_saturation_above_existing_0_005_bound": true
+      },
+      {
+        "name": "strafe_arc",
+        "command": [
+          0.0,
+          0.1,
+          0.2
+        ],
+        "aggregate_replicas": 4,
+        "metrics": {
+          "planar_error_mps": 0.03298202157020569,
+          "yaw_error_rad_s": 0.10990875959396362,
+          "finite_difference_planar_error_mps": 0.03137421980500221,
+          "torque_saturation_fraction": 0.09722222222222222,
+          "computed_torque_abs_max_nm": 6.12392520904541,
+          "applied_torque_abs_max_nm": 1.600000023841858,
+          "tilt_rms_deg": 1.906799554824829,
+          "mean_velocity_mps": [
+            0.0049920761957764626,
+            0.09539089351892471,
+            0.0058855111710727215
+          ],
+          "mean_gyro_rad_s": [
+            0.017642099410295486,
+            -0.006603294052183628,
+            0.11849097907543182
+          ],
+          "mean_nonfoot_body_count": 0.0,
+          "reported_joint_velocity_rms_max_rad_s": 1.3597135543823242
+        },
+        "joints": {
+          "revolute_1_1": {
+            "saturation_fraction": 0.081,
+            "computed_torque_abs_p95_nm": 1.8827145099639893,
+            "computed_torque_abs_max_nm": 2.7387049198150635,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03321261703968048,
+            "velocity_rms_rad_s": 1.1081544160842896
+          },
+          "revolute_1_7": {
+            "saturation_fraction": 0.0985,
+            "computed_torque_abs_p95_nm": 2.05800461769104,
+            "computed_torque_abs_max_nm": 4.372704029083252,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03523203358054161,
+            "velocity_rms_rad_s": 1.1699343919754028
+          },
+          "revolute_2_5": {
+            "saturation_fraction": 0.0155,
+            "computed_torque_abs_p95_nm": 1.2573152780532837,
+            "computed_torque_abs_max_nm": 3.320241689682007,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.024135619401931763,
+            "velocity_rms_rad_s": 1.1031434535980225
+          },
+          "revolute_3": {
+            "saturation_fraction": 0.098,
+            "computed_torque_abs_p95_nm": 1.9940648078918457,
+            "computed_torque_abs_max_nm": 3.4987473487854004,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.028966465964913368,
+            "velocity_rms_rad_s": 0.4379751682281494
+          },
+          "revolute_4": {
+            "saturation_fraction": 0.0035,
+            "computed_torque_abs_p95_nm": 0.9655771255493164,
+            "computed_torque_abs_max_nm": 2.111212968826294,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.026845188811421394,
+            "velocity_rms_rad_s": 1.3597135543823242
+          },
+          "revolute_5": {
+            "saturation_fraction": 0.0095,
+            "computed_torque_abs_p95_nm": 1.1860692501068115,
+            "computed_torque_abs_max_nm": 2.6667261123657227,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02592848241329193,
+            "velocity_rms_rad_s": 1.1291331052780151
+          },
+          "revolute_1": {
+            "saturation_fraction": 0.1155,
+            "computed_torque_abs_p95_nm": 2.629847764968872,
+            "computed_torque_abs_max_nm": 4.512529373168945,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.0352572537958622,
+            "velocity_rms_rad_s": 1.2074518203735352
+          },
+          "revolute_1_6": {
+            "saturation_fraction": 0.0555,
+            "computed_torque_abs_p95_nm": 1.786708950996399,
+            "computed_torque_abs_max_nm": 3.590886354446411,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03342164680361748,
+            "velocity_rms_rad_s": 1.2557382583618164
+          },
+          "revolute_1_5": {
+            "saturation_fraction": 0.1245,
+            "computed_torque_abs_p95_nm": 2.3996551036834717,
+            "computed_torque_abs_max_nm": 4.183993816375732,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03712903708219528,
+            "velocity_rms_rad_s": 1.245334506034851
+          },
+          "revolute_1_3": {
+            "saturation_fraction": 0.1325,
+            "computed_torque_abs_p95_nm": 2.259547710418701,
+            "computed_torque_abs_max_nm": 3.6741831302642822,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03790244460105896,
+            "velocity_rms_rad_s": 1.0332587957382202
+          },
+          "revolute_1_4": {
+            "saturation_fraction": 0.1325,
+            "computed_torque_abs_p95_nm": 2.2954325675964355,
+            "computed_torque_abs_max_nm": 4.497253894805908,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03970017284154892,
+            "velocity_rms_rad_s": 0.9638415575027466
+          },
+          "revolute_1_2": {
+            "saturation_fraction": 0.03,
+            "computed_torque_abs_p95_nm": 1.4233183860778809,
+            "computed_torque_abs_max_nm": 2.607309341430664,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.024062789976596832,
+            "velocity_rms_rad_s": 1.1148053407669067
+          },
+          "revolute_2": {
+            "saturation_fraction": 0.2275,
+            "computed_torque_abs_p95_nm": 2.606309413909912,
+            "computed_torque_abs_max_nm": 4.407049179077148,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03381041809916496,
+            "velocity_rms_rad_s": 0.9607239365577698
+          },
+          "revolute_2_6": {
+            "saturation_fraction": 0.226,
+            "computed_torque_abs_p95_nm": 2.8298747539520264,
+            "computed_torque_abs_max_nm": 4.536996364593506,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04233585298061371,
+            "velocity_rms_rad_s": 0.6751540899276733
+          },
+          "revolute_2_4": {
+            "saturation_fraction": 0.163,
+            "computed_torque_abs_p95_nm": 2.764173746109009,
+            "computed_torque_abs_max_nm": 6.12392520904541,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03815622255206108,
+            "velocity_rms_rad_s": 1.296921730041504
+          },
+          "revolute_2_2": {
+            "saturation_fraction": 0.0425,
+            "computed_torque_abs_p95_nm": 1.5281940698623657,
+            "computed_torque_abs_max_nm": 3.601574420928955,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.033238254487514496,
+            "velocity_rms_rad_s": 0.8620509505271912
+          },
+          "revolute_2_3": {
+            "saturation_fraction": 0.053,
+            "computed_torque_abs_p95_nm": 1.6279122829437256,
+            "computed_torque_abs_max_nm": 3.5316925048828125,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03460723161697388,
+            "velocity_rms_rad_s": 1.0416719913482666
+          },
+          "revolute_2_1": {
+            "saturation_fraction": 0.1415,
+            "computed_torque_abs_p95_nm": 2.5325355529785156,
+            "computed_torque_abs_max_nm": 4.489391803741455,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04204163700342178,
+            "velocity_rms_rad_s": 0.8694459795951843
+          }
+        },
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "all_window_applied_peak_nm": 1.600000023841858,
+        "sampled_replica_rates": {
+          "traced_env_id": 40,
+          "samples": 500,
+          "valid_interval_samples": 499,
+          "reported_joint_rms_rad_s": [
+            1.0907131433486938,
+            1.136596918106079,
+            1.059883952140808,
+            0.4443266689777374,
+            1.3597713708877563,
+            1.116295337677002,
+            1.2262779474258423,
+            1.2494163513183594,
+            1.2457932233810425,
+            1.0369256734848022,
+            0.9808685183525085,
+            1.1201744079589844,
+            0.9794335961341858,
+            0.6288057565689087,
+            1.2625064849853516,
+            0.852026104927063,
+            1.028948426246643,
+            0.8694448471069336
+          ],
+          "joint_position_range_rad": [
+            0.21182942390441895,
+            0.2992646098136902,
+            0.20564241707324982,
+            0.06623807549476624,
+            0.31408780813217163,
+            0.1927131712436676,
+            0.28809869289398193,
+            0.26039499044418335,
+            0.25194251537323,
+            0.23163235187530518,
+            0.2528544068336487,
+            0.28178662061691284,
+            0.2289597988128662,
+            0.0944669246673584,
+            0.268841028213501,
+            0.16610121726989746,
+            0.2654449939727783,
+            0.21682167053222656
+          ],
+          "interval_angle_rms_rad_s": [
+            1.0990092195938748,
+            1.3483365928222883,
+            1.1828767824485773,
+            0.414199446394723,
+            1.4737762166326664,
+            1.1655853806686254,
+            1.3734571139233291,
+            1.5255843174271169,
+            1.4343279383764107,
+            1.3244931180417385,
+            1.2453470297998728,
+            1.441639343998011,
+            1.1978904975161926,
+            0.723476213950061,
+            1.2867794632988603,
+            1.2758776002515164,
+            1.3520347792382272,
+            1.2611001689382735
+          ],
+          "target_step_rms_rad": [
+            0.03915973970606811,
+            0.038001681999643065,
+            0.03626612264916209,
+            0.02616484539750463,
+            0.03839997541589691,
+            0.03684887297098972,
+            0.0395686803567564,
+            0.039278045519137834,
+            0.039321741691650966,
+            0.03937264544676213,
+            0.039185537227126185,
+            0.03971195928827598,
+            0.03746888701706803,
+            0.03091212673359825,
+            0.0387276806857128,
+            0.037615328637293305,
+            0.039195226836051915,
+            0.03901245430601272
+          ],
+          "target_step_p95_abs_rad": [
+            0.03999999910593033,
+            0.03999999910593033,
+            0.03999999910593033,
+            0.03999999165534973,
+            0.03999999910593033,
+            0.03999999165534973,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344
+          ],
+          "raw_endpoint_minus_interval_rms_rad_s": [
+            0.3270733339265842,
+            0.4359022157605024,
+            0.3869270231478729,
+            0.2555628619216693,
+            0.3718689429489711,
+            0.3502306138394014,
+            0.7612265974096677,
+            0.7230018144756433,
+            0.7275017246726491,
+            0.5781762254243513,
+            0.6559347167530459,
+            0.595619164265925,
+            0.598078344073358,
+            0.5762408879107481,
+            0.6913034913013316,
+            0.5646233037680591,
+            0.49156730570989765,
+            0.5182202550862536
+          ]
+        },
+        "requested_saturation_above_existing_0_005_bound": true
+      },
+      {
+        "name": "diagonal",
+        "command": [
+          0.071,
+          0.071,
+          0.0
+        ],
+        "aggregate_replicas": 4,
+        "metrics": {
+          "planar_error_mps": 0.0355166532099247,
+          "yaw_error_rad_s": 0.09434877336025238,
+          "finite_difference_planar_error_mps": 0.03415541723370552,
+          "torque_saturation_fraction": 0.10511111111111111,
+          "computed_torque_abs_max_nm": 5.927755832672119,
+          "applied_torque_abs_max_nm": 1.600000023841858,
+          "tilt_rms_deg": 2.501702070236206,
+          "mean_velocity_mps": [
+            0.053711798042058945,
+            0.0724024847149849,
+            0.005340691190212965
+          ],
+          "mean_gyro_rad_s": [
+            0.017509734258055687,
+            -0.0012828352628275752,
+            -0.015440906397998333
+          ],
+          "mean_nonfoot_body_count": 0.0,
+          "reported_joint_velocity_rms_max_rad_s": 1.5228402614593506
+        },
+        "joints": {
+          "revolute_1_1": {
+            "saturation_fraction": 0.0435,
+            "computed_torque_abs_p95_nm": 1.572230339050293,
+            "computed_torque_abs_max_nm": 2.8157341480255127,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.025838539004325867,
+            "velocity_rms_rad_s": 1.1263911724090576
+          },
+          "revolute_1_7": {
+            "saturation_fraction": 0.1695,
+            "computed_torque_abs_p95_nm": 3.0347442626953125,
+            "computed_torque_abs_max_nm": 4.206603050231934,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04850960522890091,
+            "velocity_rms_rad_s": 1.5228402614593506
+          },
+          "revolute_2_5": {
+            "saturation_fraction": 0.028,
+            "computed_torque_abs_p95_nm": 1.3555443286895752,
+            "computed_torque_abs_max_nm": 2.8087046146392822,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.030566271394491196,
+            "velocity_rms_rad_s": 1.120772361755371
+          },
+          "revolute_3": {
+            "saturation_fraction": 0.039,
+            "computed_torque_abs_p95_nm": 1.4964191913604736,
+            "computed_torque_abs_max_nm": 3.021993637084961,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.02493889257311821,
+            "velocity_rms_rad_s": 0.6173754334449768
+          },
+          "revolute_4": {
+            "saturation_fraction": 0.003,
+            "computed_torque_abs_p95_nm": 0.9704848527908325,
+            "computed_torque_abs_max_nm": 1.9818799495697021,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.026768840849399567,
+            "velocity_rms_rad_s": 1.32654869556427
+          },
+          "revolute_5": {
+            "saturation_fraction": 0.023,
+            "computed_torque_abs_p95_nm": 1.3473585844039917,
+            "computed_torque_abs_max_nm": 2.4385790824890137,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.030391396954655647,
+            "velocity_rms_rad_s": 1.3140461444854736
+          },
+          "revolute_1": {
+            "saturation_fraction": 0.092,
+            "computed_torque_abs_p95_nm": 2.1356725692749023,
+            "computed_torque_abs_max_nm": 4.670022010803223,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03183998167514801,
+            "velocity_rms_rad_s": 1.2008047103881836
+          },
+          "revolute_1_6": {
+            "saturation_fraction": 0.115,
+            "computed_torque_abs_p95_nm": 2.645357131958008,
+            "computed_torque_abs_max_nm": 4.232572555541992,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03790585696697235,
+            "velocity_rms_rad_s": 1.1662616729736328
+          },
+          "revolute_1_5": {
+            "saturation_fraction": 0.0955,
+            "computed_torque_abs_p95_nm": 1.972025990486145,
+            "computed_torque_abs_max_nm": 3.9329192638397217,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.036220841109752655,
+            "velocity_rms_rad_s": 1.1759493350982666
+          },
+          "revolute_1_3": {
+            "saturation_fraction": 0.154,
+            "computed_torque_abs_p95_nm": 2.7510204315185547,
+            "computed_torque_abs_max_nm": 5.124257564544678,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04494252800941467,
+            "velocity_rms_rad_s": 1.13416588306427
+          },
+          "revolute_1_4": {
+            "saturation_fraction": 0.0495,
+            "computed_torque_abs_p95_nm": 1.5658413171768188,
+            "computed_torque_abs_max_nm": 4.976454734802246,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03229330852627754,
+            "velocity_rms_rad_s": 1.0858709812164307
+          },
+          "revolute_1_2": {
+            "saturation_fraction": 0.0325,
+            "computed_torque_abs_p95_nm": 1.441656231880188,
+            "computed_torque_abs_max_nm": 2.643035411834717,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.024998411536216736,
+            "velocity_rms_rad_s": 1.1195377111434937
+          },
+          "revolute_2": {
+            "saturation_fraction": 0.234,
+            "computed_torque_abs_p95_nm": 3.1005771160125732,
+            "computed_torque_abs_max_nm": 4.641157627105713,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04113857075572014,
+            "velocity_rms_rad_s": 0.8701736330986023
+          },
+          "revolute_2_6": {
+            "saturation_fraction": 0.193,
+            "computed_torque_abs_p95_nm": 3.001800060272217,
+            "computed_torque_abs_max_nm": 5.927755832672119,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.040619492530822754,
+            "velocity_rms_rad_s": 0.6342037320137024
+          },
+          "revolute_2_4": {
+            "saturation_fraction": 0.2695,
+            "computed_torque_abs_p95_nm": 3.424386739730835,
+            "computed_torque_abs_max_nm": 5.344658374786377,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.0470673143863678,
+            "velocity_rms_rad_s": 1.1800415515899658
+          },
+          "revolute_2_2": {
+            "saturation_fraction": 0.032,
+            "computed_torque_abs_p95_nm": 1.4642200469970703,
+            "computed_torque_abs_max_nm": 4.034702777862549,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.03195234760642052,
+            "velocity_rms_rad_s": 0.9222074747085571
+          },
+          "revolute_2_3": {
+            "saturation_fraction": 0.132,
+            "computed_torque_abs_p95_nm": 2.4999406337738037,
+            "computed_torque_abs_max_nm": 4.901980400085449,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.040834613144397736,
+            "velocity_rms_rad_s": 0.7990295886993408
+          },
+          "revolute_2_1": {
+            "saturation_fraction": 0.187,
+            "computed_torque_abs_p95_nm": 2.909761428833008,
+            "computed_torque_abs_max_nm": 4.944854736328125,
+            "applied_torque_abs_max_nm": 1.600000023841858,
+            "target_error_rms_rad": 0.04550221562385559,
+            "velocity_rms_rad_s": 0.7912057638168335
+          }
+        },
+        "terminations": 0,
+        "truncations": 0,
+        "termination_reasons": {
+          "base_contact": 0,
+          "too_low": 0,
+          "upside_down": 0,
+          "torque_duration": 0
+        },
+        "all_window_applied_peak_nm": 1.600000023841858,
+        "sampled_replica_rates": {
+          "traced_env_id": 44,
+          "samples": 500,
+          "valid_interval_samples": 499,
+          "reported_joint_rms_rad_s": [
+            1.112510085105896,
+            1.507897138595581,
+            1.1268256902694702,
+            0.6163183450698853,
+            1.3254036903381348,
+            1.3105467557907104,
+            1.1913427114486694,
+            1.1616185903549194,
+            1.187172770500183,
+            1.127425193786621,
+            1.0980100631713867,
+            1.1192604303359985,
+            0.8717544674873352,
+            0.6483923196792603,
+            1.1861010789871216,
+            0.9214950799942017,
+            0.8110884428024292,
+            0.808742880821228
+          ],
+          "joint_position_range_rad": [
+            0.3110467791557312,
+            0.328980028629303,
+            0.25384521484375,
+            0.0825447142124176,
+            0.2717721462249756,
+            0.27814817428588867,
+            0.29629915952682495,
+            0.22007811069488525,
+            0.24708008766174316,
+            0.2272413671016693,
+            0.2797563374042511,
+            0.2794152796268463,
+            0.2371048927307129,
+            0.09472084045410156,
+            0.2588825225830078,
+            0.36728012561798096,
+            0.18822765350341797,
+            0.2603471279144287
+          ],
+          "interval_angle_rms_rad_s": [
+            1.1432060542473264,
+            1.607611689459638,
+            1.1977077993625762,
+            0.5802362545675279,
+            1.445629928868958,
+            1.4092114521414683,
+            1.4035619341112604,
+            1.4080213597379803,
+            1.3527784500096336,
+            1.3500066677221771,
+            1.373075703637032,
+            1.3761087319948009,
+            1.0836623123476246,
+            0.7965167841147921,
+            1.170331111340125,
+            1.3405783043377408,
+            1.0830713141104118,
+            1.1168141218851868
+          ],
+          "target_step_rms_rad": [
+            0.03884038474600522,
+            0.03885597860372822,
+            0.03793457027853069,
+            0.02622217432221746,
+            0.0384971398639027,
+            0.03813041817077234,
+            0.03975303727111846,
+            0.039388044765372485,
+            0.039218134770450316,
+            0.039409227515119376,
+            0.03945670333450281,
+            0.03954544787295512,
+            0.0386707246952216,
+            0.031648797748821456,
+            0.037860042905288396,
+            0.03973094816864574,
+            0.03784544109938224,
+            0.03902113117803567
+          ],
+          "target_step_p95_abs_rad": [
+            0.03999999910593033,
+            0.03999999910593033,
+            0.040000006556510925,
+            0.03999999165534973,
+            0.03999999165534973,
+            0.03999999910593033,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.04000002145767212,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344,
+            0.039999961853027344
+          ],
+          "raw_endpoint_minus_interval_rms_rad_s": [
+            0.35156293921461995,
+            0.5961552760009148,
+            0.350274675242147,
+            0.28112926259705107,
+            0.40700473223774564,
+            0.4568454246608399,
+            0.6163839298888824,
+            0.7195257198724461,
+            0.6175195494006657,
+            0.6554190303332171,
+            0.6672530581166658,
+            0.5440149446829399,
+            0.5499377099126748,
+            0.627391915363866,
+            0.5497303789375622,
+            0.5862107876534594,
+            0.5615509231860418,
+            0.4404250612360868
+          ]
+        },
+        "requested_saturation_above_existing_0_005_bound": true
+      }
+    ],
+    "scope": "Four-replica direction summaries plus one traced replica; never fabricate unrecorded replica data or full formal admission"
+  },
+  "reviewed_inputs_unchanged": true,
+  "evidence_verified": false,
+  "conclusion": "This campaign has incomplete or inconsistent evidence; preserved partial results are diagnostic only.",
+  "next_decision": "Resolve the listed infrastructure/evidence failure before allocating a successor; no automatic training or promotion."
+}

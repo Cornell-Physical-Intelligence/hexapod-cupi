@@ -19,16 +19,16 @@
     "note": "Kinematic reference distances, not material cut lengths. The production four-bar linkage and physical foot contact point require separate CAD layout and qualification."
   },
   "checkpoint": {
-    "receipt": "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/caps/raw/run/train/training_receipt.json",
-    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/REPORT.md",
-    "label": "Direct PPO \u00b7 CAPS 50-update pilot",
-    "qualification": "Unqualified; 0/48 final quiet trials pass",
-    "video_matches": true,
-    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/caps/raw/run/train/policy/final.pt"
+    "receipt": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_003/terminal/run/train/training_receipt.json",
+    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_003/analysis/REPORT.md",
+    "label": "Quiet-priority PPO \u00b7 two-update integration run",
+    "qualification": "Integration verified; unqualified gait, 0/48 quiet trials pass",
+    "video_matches": false,
+    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_003/terminal/run/train/policy/final.pt"
   },
   "stop_result": {
-    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/caps/raw/run/final_stop/stop_diagnostics.json",
-    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/caps/analysis/REPORT.md"
+    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_003/terminal/run/final_stop/stop_diagnostics.json",
+    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_003/analysis/REPORT.md"
   },
   "media": [
     {
@@ -106,7 +106,7 @@
       "role": "research_image",
       "path": "artifacts/foot_design_2026-09-10/rigid_toe_proposal_001/toe_sketch.png",
       "sha256": "ef911d3950bd2e56bcdb0210b8846cd4dfcee1cc10ee559d85462e7cc28ce768",
-      "caption": "Editable \u00d830 / R15 spherical toe proposal. No optimal-size, structural or terrain qualification; current training assets are unchanged.",
+      "caption": "Provisional spherical contact-cap sketch. Keep a substantial attachment; a narrow neck is not required. Diameter and radius need the actual CAD dimensions and contact-angle check. Current training assets are unchanged.",
       "controller": "Engineering schematic; no experiment or policy depicted",
       "evidence": "artifacts/foot_design_2026-09-10/rigid_toe_proposal_001/README.md"
     },
@@ -271,8 +271,8 @@
       "meaning": "Evaluate directions, stops, torques, contacts and smoothness. A good reward curve or attractive clip cannot pass a stage.",
       "input": "Frozen checkpoints and common evaluation cases",
       "output": "Measured results and pass/fail evidence",
-      "today": "The newest smoke passes software integration but fails all 48 quiet-stop replicas.",
-      "source": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_002/README.md",
+      "today": "Both completed 50-update pilots fail all 48 quiet-stop replicas. Software integration and gait quality remain separate checks.",
+      "source": "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/REPORT.md",
       "next": "Retain useful speed while reducing jitter, drift and saturation."
     },
     {
@@ -401,7 +401,7 @@
   "next": [
     {
       "title": "Target the observed quiet oscillation",
-      "text": "The matched pilots preserve motion but do not remove limiter chatter. Use verified action and learning diagnostics to choose the next bounded intervention."
+      "text": "The small integration run completed with strict reload but still fails quiet standing. Compare the stronger zero-command smoothing objective in a matched 50-update pilot; retain all movement and stop gates."
     },
     {
       "title": "Retain motion while removing jitter",

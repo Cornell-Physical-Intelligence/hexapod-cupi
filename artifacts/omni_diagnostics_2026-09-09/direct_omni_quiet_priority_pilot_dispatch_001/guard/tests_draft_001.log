@@ -1,0 +1,28 @@
+..........................F...
+======================================================================
+FAIL: test_failed_train_or_missing_final_diagnostics_reject (test_guard_contract.GuardTests) (change={'branch': 'quiet_priority'})
+----------------------------------------------------------------------
+RuntimeError: Previous container not proven absent: test-only-standing
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/direct_omni_train_pilot_quiet_priority_guard_001/test_guard_contract.py", line 92, in test_failed_train_or_missing_final_diagnostics_reject
+    with self.assertRaisesRegex(RuntimeError,'allocation/source/phase'):g.verify_previous_owner()
+AssertionError: "allocation/source/phase" does not match "Previous container not proven absent: test-only-standing"
+
+======================================================================
+FAIL: test_six_phase_pilot_cli_and_bounds (test_guard_contract.GuardTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/direct_omni_train_pilot_quiet_priority_guard_001/test_guard_contract.py", line 112, in test_six_phase_pilot_cli_and_bounds
+    self.assertFalse(set(cmd)&{'learn','--decision-receipt','--phase-group'});self.assertEqual(cmd[cmd.index('--allocation')+1],'pilot');self.assertEqual(cmd[cmd.index('--branch')+1],'curriculum');self.assertEqual(cmd[cmd.index('--smoke')+1],str(g.SMOKE))
+AssertionError: 'quiet_priority' != 'curriculum'
+- quiet_priority
++ curriculum
+
+
+----------------------------------------------------------------------
+Ran 31 tests in 0.148s
+
+FAILED (failures=2)

@@ -1,0 +1,118 @@
+--- curriculum_guard002/launch_guarded_remote.py
++++ quiet_priority_guard001/launch_guarded_remote.py
+@@ -1,27 +1,27 @@
+-"""External pause056 guard: bounded direct315 curriculum pilot after verified smoke."""
++"""External pause060 guard: bounded direct315 quiet-priority pilot after verified smoke."""
+ from pathlib import Path
+ from types import SimpleNamespace
+ import fcntl,hashlib,importlib.util,json,os,subprocess,sys,time
+ sys.dont_write_bytecode=True
+ BASE=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909')
+ SUPERVISOR_SOURCE=BASE/'reference_physics_source_009'
+-SOURCE=BASE/'direct_omni_train_source_002'
+-CONTRACT=BASE/'direct_omni_train_preparation_002'
++SOURCE=BASE/'direct_omni_train_source_003'
++CONTRACT=BASE/'direct_omni_train_preparation_003'
+ CHECKPOINT=BASE/'omni_repair_003/branch_a/inputs/original.pt'
+-SMOKE=BASE/'direct_omni_train_smoke_002'
+-OUTPUT=BASE/'direct_omni_train_pilot_curriculum_001'
+-PAUSE=BASE/'forecast_pause_056'
+-UNIT='hexapod-direct-omni-train-pilot-curriculum-001-20260910.service'
+-HOST=BASE/'direct_omni_train_host_002/launch_train_spark.py'
+-SOURCE_SHA256='64144b2c2466f17c809554ef53f82b736b4199136cc821451d7ac2788752bd2e'
++SMOKE=BASE/'direct_omni_train_smoke_003'
++OUTPUT=BASE/'direct_omni_train_pilot_quiet_priority_001'
++PAUSE=BASE/'forecast_pause_060'
++UNIT='hexapod-direct-omni-train-pilot-quiet-priority-001-20260910.service'
++HOST=BASE/'direct_omni_train_host_003/launch_train_spark.py'
++SOURCE_SHA256='ef962070bd770d03553eb824fb6caccada7d6a06ac26d2f180bad068f0a9cc62'
+ SUPERVISOR_SHA256='04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e'
+-CONTRACT_SHA256='20fbcd40a869b39d8e3143a6c9715ec62ada5cc6211eaf473f60f8b7167678cb'
++CONTRACT_SHA256='1ab678beeba6bf74978c210c4e38f13655e25728fe66e3007e3b1db5e19b6b20'
+ CHECKPOINT_SHA256='1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8'
+-HOST_SHA256='52c4b0bd944fe9e2f1fc0313199a2d214c53dbffa4d01700d7299c3c94275fa1'
+-HOST_FREEZE_SHA256='19545653a00e635cc14ed9415f9799978da34674e84f6cad76eb42bd2a961ac4'
+-PREVIOUS_UNIT='hexapod-direct-omni-train-smoke-002-20260910.service'
+-PREVIOUS_INVOCATION='6cd738f30a0b4f499026de5cbf8a5bb6'
+-PRIOR_PINS={'direct_omni_train_smoke_002/campaign.json': 'aa478e602caceb75dd488db4fdd5e275aed6ed966a5390ad9aa20c6d66738d6f', 'direct_omni_train_smoke_002/jobs/standing.json': '43afe6d3190e463ff88f4d13fdab9639f6d6b209caca9f2113f43e47a53a98a2', 'direct_omni_train_smoke_002/jobs/train.json': 'a527c95d2e27378f0a50a80f737e6d0152d6374ce2068670e731a28fb6273c6c', 'direct_omni_train_smoke_002/jobs/final_constant.json': '5afed704d8982a2641cc19ef80d5deab1453fd08edfff7d1f2da375b6a90afe7', 'direct_omni_train_smoke_002/jobs/final_stop.json': 'c448a874c47940c5f4c96b7b14cc49dafabf6819dd454368280c2c5c66bf89b5', 'forecast_pause_055/pause.json': '92197a1eb5692474f5cb197241076808a2653a1c4007a8833dde71b86bca27b1', 'forecast_pause_055/restored.json': '6060f4a2fe7760fe2421022a2c7d668d7fe545672facb9897610f374f2f11956'}
++HOST_SHA256='d2b5298aa444f49b46611e377e63ad388dbaa11404bfb9c5b5024ed80cb6f672'
++HOST_FREEZE_SHA256='df815208f340a9c8c0c2ce8c9fcfad7fd28791f745961ab714f96c0508454efc'
++PREVIOUS_UNIT='hexapod-direct-omni-train-smoke-003-20260910.service'
++PREVIOUS_INVOCATION='0882531a12724963a64901721d87dc96'
++PRIOR_PINS={'direct_omni_train_smoke_003/campaign.json': 'PENDING_ACTUAL_SMOKE003_TERMINAL', 'direct_omni_train_smoke_003/jobs/standing.json': 'PENDING_ACTUAL_SMOKE003_TERMINAL', 'direct_omni_train_smoke_003/jobs/train.json': 'PENDING_ACTUAL_SMOKE003_TERMINAL', 'direct_omni_train_smoke_003/jobs/final_constant.json': 'PENDING_ACTUAL_SMOKE003_TERMINAL', 'direct_omni_train_smoke_003/jobs/final_stop.json': 'PENDING_ACTUAL_SMOKE003_TERMINAL', 'forecast_pause_059/pause.json': 'PENDING_ACTUAL_SMOKE003_TERMINAL', 'forecast_pause_059/restored.json': 'PENDING_ACTUAL_SMOKE003_TERMINAL'}
+ 
+ def call(args):return subprocess.check_output(args,text=True,timeout=30).strip()
+ def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+@@ -30,10 +30,10 @@
+         'checkpoint':CHECKPOINT_SHA256,'host':HOST_SHA256,'host freeze':HOST_FREEZE_SHA256,**PRIOR_PINS}.items():
+         if len(value)!=64 or any(c not in '0123456789abcdef' for c in value):raise RuntimeError('Final reviewed binding pending: '+name)
+     if len(PREVIOUS_INVOCATION)!=32 or any(c not in '0123456789abcdef' for c in PREVIOUS_INVOCATION):raise RuntimeError('Previous invocation not bound')
+-    if set(PRIOR_PINS)!={'direct_omni_train_smoke_002/campaign.json',
+-        'direct_omni_train_smoke_002/jobs/standing.json','direct_omni_train_smoke_002/jobs/train.json',
+-        'direct_omni_train_smoke_002/jobs/final_constant.json','direct_omni_train_smoke_002/jobs/final_stop.json',
+-        'forecast_pause_055/restored.json','forecast_pause_055/pause.json'}:raise RuntimeError('Exact completed smoke owner/restoration receipts required')
++    if set(PRIOR_PINS)!={'direct_omni_train_smoke_003/campaign.json',
++        'direct_omni_train_smoke_003/jobs/standing.json','direct_omni_train_smoke_003/jobs/train.json',
++        'direct_omni_train_smoke_003/jobs/final_constant.json','direct_omni_train_smoke_003/jobs/final_stop.json',
++        'forecast_pause_059/restored.json','forecast_pause_059/pause.json'}:raise RuntimeError('Exact completed smoke owner/restoration receipts required')
+ 
+ def verify_frozen(root,expected):
+     manifest=root/'FREEZE_SHA256.json'
+@@ -53,9 +53,9 @@
+     campaign=json.loads((SMOKE/'campaign.json').read_text())
+     if campaign.get('status')!='completed' or campaign.get('terminal_inputs_unchanged') is not True or campaign.get('bounded_campaign_complete') is not True:raise RuntimeError('Prior smoke campaign not complete and immutable')
+     phases=('standing','train','final_constant','final_stop')
+-    if (campaign.get('allocation'),campaign.get('branch'),campaign.get('PPO_updates_completed'))!=('smoke','caps',2) or campaign.get('planned_phases')!=list(phases) or set(campaign.get('accepted_phases',{}))!=set(phases) or campaign.get('host_freeze_sha256')!=HOST_FREEZE_SHA256 or campaign.get('identity',{}).get('source_manifest_sha256')!=SOURCE_SHA256:raise RuntimeError('Prior smoke allocation/source/phase inventory differs')
+-    previous_pause=json.loads((BASE/'forecast_pause_055/pause.json').read_text())
+-    restored=json.loads((BASE/'forecast_pause_055/restored.json').read_text())
++    if (campaign.get('allocation'),campaign.get('branch'),campaign.get('PPO_updates_completed'))!=('smoke','quiet_priority',2) or campaign.get('planned_phases')!=list(phases) or set(campaign.get('accepted_phases',{}))!=set(phases) or campaign.get('host_freeze_sha256')!=HOST_FREEZE_SHA256 or campaign.get('identity',{}).get('source_manifest_sha256')!=SOURCE_SHA256:raise RuntimeError('Prior smoke allocation/source/phase inventory differs')
++    previous_pause=json.loads((BASE/'forecast_pause_059/pause.json').read_text())
++    restored=json.loads((BASE/'forecast_pause_059/restored.json').read_text())
+     expected_timers={name for name,state in previous_pause['units'].items() if name.endswith('.timer') and 'ActiveState=active' in state}
+     if previous_pause.get('unit')!=PREVIOUS_UNIT or set(restored.get('timers',[]))!=expected_timers or not restored.get('restored_unix'):raise RuntimeError('Prior exact timer restoration missing')
+     for phase in phases:
+@@ -71,13 +71,13 @@
+     if CHECKPOINT.is_symlink() or sha(CHECKPOINT)!=CHECKPOINT_SHA256:raise RuntimeError('Wrong original checkpoint')
+     if sha(HOST)!=HOST_SHA256:raise RuntimeError('Changed native host')
+     verify_frozen(HOST.parent,HOST_FREEZE_SHA256);verify_frozen(CONTRACT,CONTRACT_SHA256)
+-    args=SimpleNamespace(source=SOURCE,checkpoint=CHECKPOINT,contract=CONTRACT,supervisor_source=SUPERVISOR_SOURCE,output=OUTPUT,isaaclab=Path('/home/orionh/IsaacLab'),host_freeze_sha256=HOST_FREEZE_SHA256,allocation='pilot',branch='curriculum',smoke=SMOKE)
++    args=SimpleNamespace(source=SOURCE,checkpoint=CHECKPOINT,contract=CONTRACT,supervisor_source=SUPERVISOR_SOURCE,output=OUTPUT,isaaclab=Path('/home/orionh/IsaacLab'),host_freeze_sha256=HOST_FREEZE_SHA256,allocation='pilot',branch='quiet_priority',smoke=SMOKE)
+     if train_host.selected_phases(args)!=('standing','initial_constant','initial_stop','train','final_constant','final_stop'):raise RuntimeError('Host changed bounded pilot phase order')
+     identity=train_host.verify_inputs(args)
+     if identity.get('source_manifest_sha256')!=SOURCE_SHA256 or identity.get('checkpoint_sha256')!=CHECKPOINT_SHA256:raise RuntimeError('Host admitted different native inputs')
+-    expected={'schema':'direct315_stand_stop_caps_native_v2','allocation':'pilot','branch':'curriculum','replicas':1024,'controls_per_update':24,'updates':50,'caps':{'temporal_weight':0.,'spatial_weight':0.,'noise_scale':1.,'noise_seed':1157}}
+-    if identity.get('selection')!=expected or (identity.get('actor_width'),identity.get('critic_width'))!=(315,318):raise RuntimeError('Host selection differs from bounded fifty-update curriculum pilot')
+-    if identity.get('smoke_campaign_sha256')!=PRIOR_PINS['direct_omni_train_smoke_002/campaign.json']:raise RuntimeError('Host admitted different prior smoke campaign')
++    expected={'schema':'direct315_quiet_priority_native_v3','allocation':'pilot','branch':'quiet_priority','replicas':1024,'controls_per_update':24,'updates':50,'caps':{'temporal_weight':.1,'spatial_weight':.1,'noise_scale':1.,'noise_seed':1157,'quiet_temporal_weight':1.0}}
++    if identity.get('selection')!=expected or (identity.get('actor_width'),identity.get('critic_width'))!=(315,318):raise RuntimeError('Host selection differs from bounded fifty-update quiet-priority pilot')
++    if identity.get('smoke_campaign_sha256')!=PRIOR_PINS['direct_omni_train_smoke_003/campaign.json']:raise RuntimeError('Host admitted different prior smoke campaign')
+     return identity
+ 
+ def main():
+@@ -125,7 +125,7 @@
+         record = dict(user_authorized_pause=True, created_unix=time.time(), units=units, unit=UNIT,
+             output=str(OUTPUT), source=str(SOURCE), preflight=snapshot,
+             coordination_sha256=hashlib.sha256(coordination).hexdigest(),
+-            reason='Bounded direct315 curriculum pilot: fresh standing, original-policy constant and stop diagnostics,50 updates with1024 replicas and24 controls per update, final constant and stop diagnostics; no automatic continuation or Stage2 performance admission',
++            reason='Bounded direct315 quiet-priority pilot: fresh standing, original-policy constant and stop diagnostics,50 updates with1024 replicas and24 controls per update, final constant and stop diagnostics; no automatic continuation or Stage2 performance admission',
+             current_instruction='9 September C-study authorization supersedes older physical-model pause notes')
+         (PAUSE / 'pause.json').write_text(json.dumps(record, indent=2) + '\n')
+         restorer = PAUSE / 'resume_forecasting.py'
+@@ -161,7 +161,7 @@
+ ''')
+         # Arm recovery before mutating timer state. It stops only this exact
+         # owner unit if needed, then restores only previously active timers.
+-        subprocess.run(['systemd-run', '--user', '--unit=hexapod-forecast-restore-056', '--on-active=70m',
++        subprocess.run(['systemd-run', '--user', '--unit=hexapod-forecast-restore-060', '--on-active=70m',
+             '/usr/bin/python3', str(restorer), '--stop-owner'], check=True)
+         active = [name for name, state in units.items() if name.endswith('.timer') and 'ActiveState=active' in state]
+         if active:
+@@ -201,7 +201,7 @@
+             '--property=ExecStopPost=/usr/bin/python3 '+str(restorer),'--property=Environment=PYTHONUNBUFFERED=1',
+             '/usr/bin/python3',str(HOST),'--source',str(SOURCE),'--checkpoint',str(CHECKPOINT),
+             '--contract',str(CONTRACT),'--supervisor-source',str(SUPERVISOR_SOURCE),'--output',str(OUTPUT),
+-            '--allocation','pilot','--branch','curriculum','--smoke',str(SMOKE)]
++            '--allocation','pilot','--branch','quiet_priority','--smoke',str(SMOKE)]
+         subprocess.run(cmd,check=True,timeout=30)
+         launched=True
+         (PAUSE/'launch.json').write_text(json.dumps(dict(command=cmd,launched_unix=time.time()),indent=2)+'\n')

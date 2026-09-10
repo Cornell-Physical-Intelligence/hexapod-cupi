@@ -1,0 +1,36 @@
+{
+  "model": "claude-fable-5-1",
+  "effort": "max",
+  "tools_disabled": true,
+  "result_sha256": "3a110ec6408c0aa65fa7a8f3387cbdbd55d6ee5f5fb58a15fcb618e8999e4b55",
+  "result_word_count": 497,
+  "accepted": [
+    {
+      "finding": "Early-only minibatch gradients may not represent later optimization.",
+      "action": "Sparse first AND last minibatches at updates1/10/25/50; all minibatch KL/rate logs retained."
+    }
+  ],
+  "rejected_or_limited": [
+    {
+      "claim": "RSL clips actor and critic jointly.",
+      "evidence": "Exact pinned update calls clip_grad_norm_ on actor and critic separately; unchanged in native004."
+    },
+    {
+      "claim": "Peak learning rate never exceeded the starting rate.",
+      "evidence": "Both actual pilot receipts reach5.0625e-5 versus5e-5 initial."
+    },
+    {
+      "claim": "First minibatch necessarily has ratio1/KL0.",
+      "evidence": "During rollout the source updates observation normalizers; equal network weights alone do not imply equal normalized inputs/distribution. No blanket KL0 claim."
+    },
+    {
+      "claim": "Quiet RMS implies a unique p95 target gate loss and four orders of magnitude requirement.",
+      "evidence": "Different distributions and nonlinear target clipping/slew prevent that inference; unchanged measured gates remain authoritative."
+    },
+    {
+      "claim": "Adam only rotates the update; negative cosine proves no coefficient or budget can fix oscillation.",
+      "evidence": "Scaling invariance is conditional and adaptive state/mixed gradients matter. A sampled cosine is local evidence, not a convergence theorem or causal proof."
+    }
+  ],
+  "no_implementation_blocker_verified": true
+}

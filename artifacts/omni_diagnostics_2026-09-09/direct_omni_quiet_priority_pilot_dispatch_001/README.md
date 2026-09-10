@@ -1,0 +1,7 @@
+# Quiet-priority50-update pilot dispatch
+
+At18:06:58UTC root dispatched one separately guarded pilot: `hexapod-direct-omni-train-pilot-quiet-priority-001-20260910.service`, invocation721f1886478a4e518c7e0b741256413f, fresh output `direct_omni_train_pilot_quiet_priority_001`, pause060. It starts afresh from original1971 checkpoint with source003/native004/host003,1024 environments×24 controls×50 updates, preceded by fresh standing and original constant/stop evaluations, followed by final constant/stop evaluations. Same-source completed smoke003 and its exact checkpoint/reload/evaluation receipts were verified before dispatch. The scope is a matched learning experiment, not Stage2 acceptance.
+
+The guard28-payload freeze7e55aecc20fbfe1adf0d62211cf5e39d1d33c7e52c4fee34cf5fa5f0c2b95a70 is preserved exactly. Root independently ran its34 focused tests successfully, verified all local and transferred bytes, and invoked the guard only after complete smoke cleanup. It binds the new all-weather-priority coordination SHA35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3. Shared locks, exact identity, fallback restoration and unrelated non-weather exclusion remain enforced.
+
+`snapshot.json` captures an active unit and accepted standing; later results are not implied. It preserves actual campaign and pause receipts at that observation, including their hashes. The snapshot must never be rewritten as terminal evidence. The earlier current publicCAPS50 checkpoint/video is unchanged until a later explicit candidate selection.

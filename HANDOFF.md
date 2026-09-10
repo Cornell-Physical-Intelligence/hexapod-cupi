@@ -1709,3 +1709,17 @@ Independent Fable audit verdicts and raw checks are published at `artifacts/proj
 ## 10 September 2026 — poster release-manifest correction
 
 The public poster deployed commit1ed5bc5 and all code/robot tests passed. The final integrated-source check correctly rejected missing coverage of new `tools/project_site.py`. The successor `stage2_research_poster_20260910_pipeline.sha256` preserves the prior contact-telemetry manifest, covers the new builder and is selected by CI/default checker. Existing physics/checkpoints/gates are unchanged. The hard poster workflow now explicitly includes the existing release-manifest check when covered source changes. The failed CI log remains preserved with the correction’s verification receipts.
+
+
+## 10 September 2026 — quiet-priority successor and weather priority
+
+The source003 build contains599 verified files, map `ef962070bd770d03553eb824fb6caccada7d6a06ac26d2f180bad068f0a9cc62`; plan `eee25089a65ec112f5eeed9c70f6310ef019ca5f077618c736fcfaa859739fc2`. Native00443, host00320 and guard00431 payloads remain independently frozen. Native23 tests plus root28 host and31 guard checks pass; actual remote preflight and exact source/cold-parent overlay audit pass. The stronger quiet objective is an ablation; its observational gradient/KL diagnostics preserve learning/optimizer/normalizer/RNG under the unchanged objective.
+
+Root dispatched smoke003 at17:53:36UTC, invocation `0882531a12724963a64901721d87dc96`, after the restored halo replay naturally completed. Pause059 retains its bounded fallback. The stored snapshot has a standing pass and training attempted; it contains no terminal PPO claim. See `artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_preparation_001/README.md`; current state is only in STATUS.
+
+The user explicitly authorizes overriding all weather activity for PPO priority. This is recorded in the contributor guide and plan; keep exact weather identity, preserved outputs, locks and recovery, and avoid changing pinned coordination during an active job. The foot screenshot review recommends a continuous dome blended into the current substantial section, without requiring the schematic's narrow neck. Actual tip size and contact angles remain unmeasured; training geometry is unchanged.
+
+
+Smoke003 subsequently completed all four phases,1,536 transitions, strict reload and40 minibatch/two sparse-gradient diagnostics. All52 raw files match the independent terminal audit; eight container identifiers are absent and pause059 restored. The portable analyzer reproduces0/48 quiet passes exactly. This is integration admission only. The all-weather coordination note was versioned between allocations to remoteSHA35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3, preserving both the distinct repository and remote histories.
+
+Root then dispatched the original-checkpoint1024×24×50 quiet-priority pilot at18:06:58UTC, invocation721f1886478a4e518c7e0b741256413f, pause060. Guard28 payloads freeze7e55aecc… passed34 root tests and exact actual same-source smoke verification. Its preserved dispatch snapshot shows accepted standing and an active unit, with no final result claim. Current execution belongs in STATUS.
