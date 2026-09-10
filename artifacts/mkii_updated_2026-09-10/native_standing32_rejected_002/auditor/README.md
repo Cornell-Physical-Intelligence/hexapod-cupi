@@ -1,0 +1,11 @@
+# Optimized standing32 terminal auditor002
+
+Binds actual invocation1a38495bda9f4fefa4e5585574aabc56, ownerhexapod-canonical-native-standing32-002-20260910.service, outputnative_standing32_002/pause010, source00387,host00433,guard32_00262,asset9,supervisor926 and coordination649ccda1…. Original effort19 and accepted same-source native4 standing1 are mandatory unchanged inputs. No completion is assumed.
+
+Root runs python3 -B -S audit_remote.py after terminality, redirecting audit output outside original run/pause/frozen directories. The script reads only files, systemctl show, journalctl and exact owned-name/ID docker inspect. It verifies all source/asset/admission maps and full raw inventory twice. Large JSONL/NPZ files are hashed in fixed8MiB blocks without loading them in memory or copying them locally. The unchanged native contract's imported SHA helper already streams1MiB; no monkeypatch or source rewrite is needed. Contact streams are not parsed into memory by this auditor.
+
+A completed result requires actual32 acceptance through the unchanged host/native validator, all32 numeric gates, complete capture, correct final receipt, exact post-exit seal and successful owner/job statuses. Acquisition completion remains separate. A stopped, failed or interrupted run retains original errors and unfinalized state; no final counter or physical verdict is fabricated. If ownership/finalization cannot be authenticated, the audit itself reports failure instead of inventing missing evidence.
+
+The13-file persistent reservation and loaded drop-in conditions are rechecked twice through the exact frozen guard verifier. Per-job cleanup metadata must explicitly preserve the persistent reservation. This result cannot mean global scheduler release. Prior standing1 state318c0bd2… and full canonical map43f79962… are independently bound; their raw input is also streamed twice. Original600s native/90s AppReady/720s outer/180s stop bounds remain unchanged.
+
+Eleven focused CPU tests pass: strict32 admission, exact hashes/large-file chunking, unknown ownership, incomplete/failed acceptance, restoration scope and no mutation. These are preparation checks, not a terminal result or native rescore. Root owns actual execution/publication under docs/PROJECT_SITE.md. No standing32 pass, walking, hardware, training or Stage2 qualification is assumed.

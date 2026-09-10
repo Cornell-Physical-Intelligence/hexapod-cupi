@@ -1,0 +1,87 @@
+--- guard005
++++ guard006
+@@ -12,11 +12,11 @@
+ OUTPUT=BASE/'native_standing_004'
+ PAUSE=BASE/'forecast_pause_011'
+ UNIT='hexapod-canonical-native-standing-004-20260910.service'
+-HOST=BASE/'standing_host_003/launch_standing_spark.py'
++HOST=BASE/'standing_host_004/launch_standing_spark.py'
+ SOURCE_SHA256='e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0'
+ SUPERVISOR_SHA256='04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e'
+-HOST_SHA256='5a4cd750cdaa0b4362af76e0be46e3cde8b1e7193960e19c332d3c178b553159'
+-HOST_FREEZE_SHA256='968caeb48082ee0a72dea9acc1a6b7b93d2f9b14b9f4c2f05874070a03be1a95'
++HOST_SHA256='4bd861a56eb8d72c1316167caf17580b9b8e67d1951923635c61d0acca9bad40'
++HOST_FREEZE_SHA256='c72c4dd63599f2c459c7b8eca7244528cb725094252c084f695f4aa44d8dba25'
+ PREVIOUS_UNIT='hexapod-canonical-native-standing-003-20260910.service'
+ PREVIOUS_INVOCATION='ff270c50458f47e5940dd93c4b3aa845'
+ PREVIOUS_ROOT=BASE/'native_standing_003'
+@@ -33,6 +33,9 @@
+ 
+ PREVIOUS_COMPETITORS=[{'process': '3758066, /home/orionh/ithaca-reconstruction/env/bin/python', 'cgroup': '0::/user.slice/user-1000.slice/session-c10825.scope'}]
+ 
++RESERVATION=BASE/'exclusive_reservation_001'
++RESERVATION_PINS={'/home/orionh/HEXAPOD_runs/canonical_direct_20260910/exclusive_reservation_001/ACTIVE': 'd6135e574b033fbbbe716e7f6b34876a42f1897f560d0c97ab3ae4da33532dc2', '/home/orionh/HEXAPOD_runs/canonical_direct_20260910/exclusive_reservation_001/initial_receipt.json': 'b0e17c5e7f2ae397260441dc8728eec079608cdf372717536dafc22d179df175', '/home/orionh/HEXAPOD_runs/canonical_direct_20260910/exclusive_reservation_001/scheduler_before.json': '139c7eec8e336bbf2df68f480848416232535bdceecabd4a5f210697955fd4f1', '/home/orionh/.config/systemd/user/stormscope-dispatch.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-dispatch.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-scout.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-scout.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-monitor.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-monitor.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-publish.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-publish.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-verify.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-verify.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26'}
++
+ def call(args):return subprocess.check_output(args,text=True,timeout=30).strip()
+ def sha(path):
+     h=hashlib.sha256()
+@@ -41,7 +44,7 @@
+     return h.hexdigest()
+ def valid_hash(v):return isinstance(v,str) and len(v)==64 and all(c in '0123456789abcdef' for c in v)
+ def require_final_bindings():
+-    for name,bound in {'source':SOURCE_SHA256,'supervisor':SUPERVISOR_SHA256,'host':HOST_SHA256,'host freeze':HOST_FREEZE_SHA256,'previous audit':PREVIOUS_AUDIT_SHA256,**PRIOR_PINS}.items():
++    for name,bound in {'source':SOURCE_SHA256,'supervisor':SUPERVISOR_SHA256,'host':HOST_SHA256,'host freeze':HOST_FREEZE_SHA256,'previous audit':PREVIOUS_AUDIT_SHA256,**PRIOR_PINS,**RESERVATION_PINS}.items():
+         if not valid_hash(bound):raise RuntimeError('Final reviewed binding pending: '+name)
+ 
+ def verify_manifest(root,manifest,bound):
+@@ -77,8 +80,21 @@
+         q=subprocess.run(['docker','inspect','--format','{{.Id}} {{.Name}} {{.State.Running}}',identifier],capture_output=True,text=True,timeout=20)
+         if q.returncode==0 or not any(v in q.stderr.lower()for v in ('no such object','no such container')):raise RuntimeError('Previous container absence unknown: '+identifier)
+ 
++def verify_reservation():
++    for name,bound in RESERVATION_PINS.items():
++        p=Path(name)
++        if p.is_symlink() or not p.is_file() or sha(p)!=bound:raise RuntimeError('Persistent reservation missing/changed: '+name)
++    for name in RESERVATION_PINS:
++        if not name.endswith('.conf'):continue
++        unit=Path(name).parent.name.removesuffix('.d')
++        fields=dict(line.split('=',1)for line in call(['systemctl','--user','show',unit,'-p','DropInPaths','-p','NeedDaemonReload','-p','ActiveState']).splitlines()if '='in line)
++        if fields.get('NeedDaemonReload')!='no' or name not in fields.get('DropInPaths','').split() or fields.get('ActiveState')not in ('inactive','failed'):raise RuntimeError('Reservation drop-in not loaded or covered scheduler active: '+unit)
++    if json.loads((RESERVATION/'ACTIVE').read_text()).get('exclusive')is not True:raise RuntimeError('Exclusive reservation is not active')
++    return {'path':str(RESERVATION),'marker_sha256':RESERVATION_PINS[str(RESERVATION/'ACTIVE')],'verified_files':len(RESERVATION_PINS),'reservation_active_at_preflight':True,'release_attempted':False}
++
+ def validate_standing_inputs(host):
+     require_final_bindings()
++    verify_reservation()
+     if sha(HOST)!=HOST_SHA256:raise RuntimeError('Canonical host changed')
+     verify_manifest(HOST.parent,'FREEZE_SHA256.json',HOST_FREEZE_SHA256)
+     verify_manifest(SOURCE,'FREEZE_SHA256.json',SOURCE_SHA256)
+@@ -101,7 +117,7 @@
+     validate_standing_inputs(train_host)
+     verify_previous_owner()
+     coordination = Path('/home/orionh/SPARK_COMPUTE_COORDINATION.md').read_bytes()
+-    if hashlib.sha256(coordination).hexdigest() != '35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3':
++    if hashlib.sha256(coordination).hexdigest() != '649ccda1bdef20bc967ae78f68a992cc8001f4ed7009f78cab5133cc67b29d8f':
+         raise RuntimeError('Coordination changed; review it before launch')
+     locks, restorer, launched = [], None, False
+     try:
+@@ -133,8 +149,9 @@
+         record = dict(user_authorized_pause=True, created_unix=time.time(), units=units, unit=UNIT,
+             output=str(OUTPUT), source=str(SOURCE), admission=str(ADMISSION), preflight=snapshot,
+             coordination_sha256=hashlib.sha256(coordination).hexdigest(),
++            reservation_path=str(RESERVATION), restoration_scope='per_job_snapshot_only', persistent_reservation_release_attempted=False,
+             reason='Canonical provisional standing1:1000 controls/8000 explicit400Hz steps; exact asset and completed coordinate/effort evidence; no policy or broader physical admission',
+-            current_instruction='10 September canonical detailed direct-drive model is authoritative; explicit all-weather priority applies, unknown non-weather work remains protected')
++            current_instruction='10 September user requests persistent exclusive HEXAPOD priority; preserve exact other-job progress and resume identities; this per-job guard never releases the reservation or bypasses actual CUDA ownership checks')
+         (PAUSE / 'pause.json').write_text(json.dumps(record, indent=2) + '\n')
+         restorer = PAUSE / 'resume_forecasting.py'
+         restorer.write_text('''from pathlib import Path
+@@ -164,7 +181,7 @@
+         cleanup.append(fields[0])
+     active=[name for name,state in r['units'].items() if name.endswith('.timer') and 'ActiveState=active' in state]
+     if active:subprocess.run(['systemctl','--user','start',*active],check=True,timeout=30)
+-    result={'restored_unix':time.time(),'timers':active,'owned_cleanup_checked':cleanup}
++    result={'restored_unix':time.time(),'timers':active,'owned_cleanup_checked':cleanup,'scope':'per_job_snapshot_only','persistent_reservation_release_attempted':False,'reservation_path':r.get('reservation_path')}
+     t=p/'restored.tmp';t.write_text(json.dumps(result,indent=2)+'\\n');t.replace(p/'restored.json')
+ ''')
+         # Arm recovery before mutating timer state. It stops only this exact

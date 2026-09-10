@@ -1,0 +1,46 @@
+--- frozen_standing002/standing_math.py
++++ draft/standing_math_candidate.py
+@@ -39,7 +39,7 @@
+  force,point,normal,sep,counts,starts=[np.asarray(x)for x in data]
+  if counts.shape!=(19*num_envs,1)or starts.shape!=counts.shape:raise ValueError('Incomplete sensor/filter contact layout')
+  if np.any(counts<0)or np.any(starts<0):raise ValueError('Negative contact indexing')
+- feet=np.zeros((num_envs,6,3));other=np.zeros((num_envs,4,3));patches=[];used=set()
++ feet=np.zeros((num_envs,6,3));other=np.zeros((num_envs,4,3));patches=[];used=set();cap_cache={}
+  for i,(e,body)in enumerate(sensor_map):
+   start,count=int(starts[i,0]),int(counts[i,0])
+   if count==0:continue
+@@ -52,17 +52,29 @@
+    if abs(np.linalg.norm(n)-1)>1e-3 and not inactive_zero_normal:raise ValueError('Invalid patch normal')
+    local=None
+    if body.endswith('_tibia'):
+-    cap,local=geometry.cap(body,p,poses[e,geometry.names.index(body)]);category='toe'if cap else'shaft'
++    key=(e,body)
++    if key not in cap_cache:
++     s=geometry.shapes[body];pose=poses[e,geometry.names.index(body)]
++     cap_cache[key]=(pose,np.asarray(s['shape_to_link']),rotation(np.asarray(pose)[3:]),np.asarray(s['cap_bounds_m']),s['contact_offset_m'],s['cap_lower_x_m'])
++    pose,T,R,b,skin,lower=cap_cache[key]
++    local=(np.asarray(p)-pose[:3])@R
++    local=(local-T[:3,3])@T[:3,:3]
++    cap=bool(local[0]>=lower-1e-12 and local[0]<=b[1,0]+skin and np.all(local[1:]>=b[0,1:]-skin)and np.all(local[1:]<=b[1,1:]+skin))
++    category='toe'if cap else'shaft'
+    else:category='coxa'if body.endswith('_coxa')else'femur'if body.endswith('_femur')else'body'
+    if category=='toe':feet[e,LEGS.index(body[:2])]+=f*n
+    else:other[e,['body','coxa','femur','shaft'].index(category)]+=f*n
+    patches.append({'buffer_index':k,'env':e,'body':body,'category':category,'normal_force_n':f,'point_world_m':p.tolist(),'normal_world':n.tolist(),'separation_m':d,'inactive_zero_normal':inactive_zero_normal,'shape_point_m':None if local is None else local.tolist()})
+  if len(used)>=len(force):raise ValueError('Contact capacity exhausted; completeness is unknown')
+  # Any nonfoot patch with >1N is retained even when vector cancellation would hide it.
+- nonfoot=np.zeros(num_envs,dtype=bool)
++ nonfoot=np.zeros(num_envs,dtype=bool);body_forces={}
+  for p in patches:
+-  if p['category']!='toe' and abs(p['normal_force_n'])>1.:nonfoot[p['env']]=True
++  if p['category']!='toe':
++   if abs(p['normal_force_n'])>1.:nonfoot[p['env']]=True
++   key=(p['env'],p['body'])
++   if key not in body_forces:body_forces[key]=np.zeros(3)
++   body_forces[key]=body_forces[key]+p['normal_force_n']*np.asarray(p['normal_world'])
+  for i,(e,body)in enumerate(sensor_map):
+-  body_force=sum((p['normal_force_n']*np.asarray(p['normal_world'])for p in patches if p['env']==e and p['body']==body and p['category']!='toe'),np.zeros(3))
+-  if np.linalg.norm(body_force)>1.:nonfoot[e]=True
++  body_force=body_forces.get((e,body))
++  if body_force is not None and np.linalg.norm(body_force)>1.:nonfoot[e]=True
+  return {'distal_contact':np.linalg.norm(feet,axis=-1)>1.,'distal_force_world':feet,'nonfoot_contact':nonfoot,'nonfoot_force_world':other,'patches':patches,'used_patch_count':len(used)}

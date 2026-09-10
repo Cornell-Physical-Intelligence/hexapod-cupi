@@ -1,0 +1,43 @@
+--- analyzer001
++++ analyzer002
+@@ -16,10 +16,21 @@
+  return h.hexdigest()
+ def read(p):return json.loads(Path(p).read_text())
+ def norm(v):return math.sqrt(sum(x*x for x in v))
++def f32(x):return struct.unpack('<f',struct.pack('<f',x))[0]
++def aggregate_patches(patches):
++ old=[0.,0.,0.];new=[0.,0.,0.];products=[]
++ for patch in patches:
++  if patch['category']!='toe':continue
++  force=patch['normal_force_n'];normal=patch['normal_world']
++  require(f32(force)==force and all(f32(x)==x for x in normal),'Raw force/normal is not originalfloat32')
++  x=[force*v for v in normal];y=[f32(v)for v in x]
++  for k in range(3):old[k]+=x[k];new[k]+=y[k]
++  if x!=y:products.append({'buffer_index':patch['buffer_index'],'force_float32':force,'normal_float32':normal,'unrounded_float64_product':x,'source_float32_product':y})
++ return old,new,products
+ def shape_point(point,pose,T):
+  x,y,z,w=pose[3:];require(abs(x*x+y*y+z*z+w*w-1)<2e-5,'Invalid pose quaternion')
+  R=[[1-2*(y*y+z*z),2*(x*y-z*w),2*(x*z+y*w)],[2*(x*y+z*w),1-2*(x*x+z*z),2*(y*z-x*w)],[2*(x*z-y*w),2*(y*z+x*w),1-2*(x*x+y*y)]]
+- local=[sum((point[k]-pose[k])*R[k][j]for k in range(3))for j in range(3)]
++ local=[sum(f32(f32(point[k])-f32(pose[k]))*R[k][j]for k in range(3))for j in range(3)]
+  return [sum((local[k]-T[k][3])*T[k][j]for k in range(3))for j in range(3)]
+ def summarize_report(report,roots):
+  out=[]
+@@ -112,11 +123,12 @@
+    selected=[p for p in row['patches']if p['env']in targets[sequence]and p['body']in targets[sequence][p['env']]]
+    for pch in selected:require(pch['env']in range(32)and roots[pch['env']]+'/'+pch['body']in expected_paths,'Patch named mapping differs')
+    for entry in detail[sequence]:
+-    ps=[p for p in selected if p['env']==entry['env']and p['body']==entry['body']];agg=[0.,0.,0.]
+-    for pch in ps:
+-     if pch['category']=='toe':
+-      for axis in range(3):agg[axis]+=pch['normal_force_n']*pch['normal_world'][axis]
+-    require(agg==entry['stored_toe_force_world_n'],'Raw patch aggregate differs from NPZ')
++    ps=[p for p in selected if p['env']==entry['env']and p['body']==entry['body']];old_agg,agg,products=aggregate_patches(ps)
++    expected=entry['stored_toe_force_world_n']
++    if old_agg!=expected and 'first_analyzer001_unrounded_product_mismatch'not in result:
++     result['first_analyzer001_unrounded_product_mismatch']={'sequence':sequence,'explicit_counter':row['explicit_counter'],'env':entry['env'],'body':entry['body'],'raw_force_normal_dtype':'float32','source_product_dtype':'float32','source_accumulator_dtype':'float64','old_analyzer_product_dtype':'float64','old_aggregate':old_agg,'corrected_aggregate':agg,'stored_NPZ_aggregate':expected,'old_minus_stored_components_n':[x-y for x,y in zip(old_agg,expected)],'corrected_exact_match':agg==expected,'differing_products':products}
++    if agg!=expected:
++     raise ValueError(json.dumps({'error':'Raw patch aggregate differs from NPZ after exactfloat32product emulation','sequence':sequence,'explicit_counter':row['explicit_counter'],'env':entry['env'],'body':entry['body'],'product_dtype':'float32','accumulator_dtype':'float64','actual':agg,'expected':expected,'component_delta_n':[x-y for x,y in zip(agg,expected)],'differing_products':products},allow_nan=False))
+     shape=geometry[entry['body']];T=shape['shape_to_link'];skin=shape['contact_offset_m'];bounds=shape['cap_bounds_m'];maxerr=0.;minedge=None
+     for patch in ps:
+      local=shape_point(patch['point_world_m'],entry['pose_xyzw'],T);maxerr=max(maxerr,max(abs(x-y)for x,y in zip(local,patch['shape_point_m'])))

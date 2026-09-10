@@ -1,0 +1,86 @@
+{
+  "passed": true,
+  "numpy_version": "2.5.2",
+  "raw_dtype_evidence": {
+    "file": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/canonical_native_standing_terminal_001/run/standing/failed_contact_buffer.npz",
+    "sha256": "f550871ecf7697b8e7481d40bdb10aae138533ced6cde4a2bf554bb6ded12b13",
+    "dtypes": {
+      "force": "float32",
+      "point": "float32",
+      "normal": "float32",
+      "separation": "float32",
+      "counts": "uint32",
+      "starts": "uint32"
+    }
+  },
+  "contact_sha256": "95ed8eb951dcf5aa56b79e4f43f53b3588d858b3a8af71e613aec79d9b09b216",
+  "actual_sequences": 8000,
+  "actual_named_foot_aggregates": 48000,
+  "all_exact_source_and_NPZ": true,
+  "first_old_algorithm_mismatch": {
+    "sequence": 12,
+    "explicit_counter": 13,
+    "env": 0,
+    "body": "lf_tibia",
+    "old_unrounded": [
+      7.586265454179056e-07,
+      -1.0623268595219765e-06,
+      52.38756561279297
+    ],
+    "source_float32_product_then_float64_accumulator": [
+      7.586265589054619e-07,
+      -1.0623268131837449e-06,
+      52.38756561279297
+    ],
+    "stored_NPZ": [
+      7.586265589054619e-07,
+      -1.0623268131837449e-06,
+      52.38756561279297
+    ],
+    "delta_n": [
+      -1.3487556340882612e-14,
+      -4.6338231645889905e-14,
+      0.0
+    ],
+    "differing_products": [
+      {
+        "buffer_index": 0,
+        "force_float32": 50.63032531738281,
+        "normal_float32": [
+          1.448104214318846e-08,
+          -2.0278225321135324e-08,
+          1.0
+        ],
+        "unrounded_float64_product": [
+          7.331798746443622e-07,
+          -1.026693144868271e-06,
+          50.63032531738281
+        ],
+        "source_float32_product": [
+          7.331798883569718e-07,
+          -1.0266930985380895e-06,
+          50.63032531738281
+        ]
+      },
+      {
+        "buffer_index": 2,
+        "force_float32": 1.7572402954101562,
+        "normal_float32": [
+          1.448104214318846e-08,
+          -2.0278225321135324e-08,
+          1.0
+        ],
+        "unrounded_float64_product": [
+          2.5446670773543413e-08,
+          -3.5633714653705547e-08,
+          1.7572402954101562
+        ],
+        "source_float32_product": [
+          2.5446670548490147e-08,
+          -3.5633714645655346e-08,
+          1.7572402954101562
+        ]
+      }
+    ]
+  }
+}

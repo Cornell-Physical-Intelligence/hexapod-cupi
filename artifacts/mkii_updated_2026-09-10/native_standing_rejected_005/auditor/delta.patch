@@ -1,0 +1,83 @@
+--- auditor004
++++ auditor005
+@@ -4,16 +4,16 @@
+ import hashlib,importlib.util,json,math,re,subprocess,sys,time
+ sys.dont_write_bytecode=True
+ BASE=Path('/home/orionh/HEXAPOD_runs/canonical_direct_20260910')
+-RUN=BASE/'native_standing_004'; PAUSE=BASE/'forecast_pause_011'
+-UNIT='hexapod-canonical-native-standing-004-20260910.service'
+-INV='808028c883fc4362880f1f112b4b7360'
+-SOURCE=BASE/'standing_source_003'; HOST=BASE/'standing_host_004'; GUARD=BASE/'standing_guard_006'; ASSET=BASE/'asset_001'
++RUN=BASE/'native_standing_005'; PAUSE=BASE/'forecast_pause_013'
++UNIT='hexapod-canonical-native-standing-005-20260910.service'
++INV='f70b9d4b929244699a5725e018b38ba9'
++SOURCE=BASE/'standing_source_004'; HOST=BASE/'standing_host_006'; GUARD=BASE/'standing_guard_007'; ASSET=BASE/'asset_001'
+ ADMISSION=BASE/'native_actuation_001/actuation'
+ RESERVATION=BASE/'exclusive_reservation_001'
+ SUPERVISOR=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009')
+-PINS=[('source',SOURCE,'FREEZE_SHA256.json','e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0',87),
+- ('host',HOST,'FREEZE_SHA256.json','c72c4dd63599f2c459c7b8eca7244528cb725094252c084f695f4aa44d8dba25',33),
+- ('guard',GUARD,'FREEZE_SHA256.json','488c0713eee56a38f78aa77b1b3d6fac2833e71129c5875020126e749d9381a5',48),
++PINS=[('source',SOURCE,'FREEZE_SHA256.json','037013353a30c5f3751235634aafdb3f204b676837962b14df72c3051c0a2786',95),
++ ('host',HOST,'FREEZE_SHA256.json','51a0dbdc5d46a6b4f4a24b4e26c5091e7c588ae8d31785a264f95b3ffc042ed6',55),
++ ('guard',GUARD,'FREEZE_SHA256.json','dc47526018efb5336dfa42fbb145366d9fbc53d47b59a657d25b8bd4784c3b8e',58),
+  ('ownership_supervisor',SUPERVISOR,'campaign_source_hashes.json','04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e',926)]
+ 
+ def require(ok,message):
+@@ -55,7 +55,7 @@
+  return {'identifiers':absent,'recorded_id_available':identifier is not None,'unavailable_id_not_claimed_absent':identifier is None}
+ 
+ def expected_launch_command():
+- return ['systemd-run','--user','--unit='+UNIT,'--property=RuntimeMaxSec=720',
++ return ['systemd-run','--user','--unit='+UNIT,'--property=RuntimeMaxSec=1320',
+   '--property=TimeoutStopSec=180','--property=KillMode=process','--property=Environment=PYTHONDONTWRITEBYTECODE=1',
+   '--property=ExecStopPost=/usr/bin/python3 '+str(PAUSE/'resume_forecasting.py'),'--property=Environment=PYTHONUNBUFFERED=1',
+   '/usr/bin/python3',str(HOST/'launch_standing_spark.py'),'--source',str(SOURCE),'--asset',str(ASSET),'--admission',str(ADMISSION),
+@@ -92,11 +92,30 @@
+  receipt=g.verify_reservation()
+  return {'verified':True,'guard_verification':receipt,'files':{name:{'sha256':sha(Path(name)),'size_bytes':Path(name).stat().st_size}for name in g.RESERVATION_PINS},'persistent_release_attempted':False}
+ 
++def solver_check(record,identity,state):
++ require(identity.get('solver_recipe')=={'position_iterations':32,'velocity_iterations':4},'Wrong declared solver recipe')
++ expected_roots={'/Robot'}
++ require(identity.get('num_envs')==1,'Unexpected replica allocation')
++ require(state.get('checks',{}).get('solver_recipe_readback')is True,'Missing completed solver check')
++ for phase in ('before','after_authoring','after_reset','after_controlled_steps'):
++  values=record.get(phase,{})
++  require(set(values)==expected_roots,'Incomplete solver root/phase:'+phase)
++  expected=(32,1,[False,False])if phase=='before'else(32,4,[True,True])
++  require(all((v.get('position_iterations'),v.get('velocity_iterations'),v.get('authored'))==expected for v in values.values()),'Wrong solver readback:'+phase)
++ return {'passed':True,'roots':sorted(expected_roots),'before':[32,1],'after':[32,4],'scope':'Authored USD attribute readback only; no independent backend solver introspection'}
++
++def deadline_check(job,proof):
++ expected={k:v for k,v in proof.items() if k not in ('original_function_source','adapted_function_source','_original_module_source')}
++ require(job.get('deadline_seconds')==1200 and job.get('app_ready_deadline_seconds')==90,'Wrong operational deadline receipt')
++ require(job.get('supervisor_runtime_adapter')==expected,'Wrong exact deadline adapter receipt')
++ return {'passed':True,'phase_seconds':1200,'AppReady_seconds':90,'adapter':expected}
++
+ def audit():
+  result={'schema':'canonical_native_standing_terminal_audit_v1','expected_invocation':INV,'unit_name':UNIT,'checked_unix':time.time(),'read_only':True,'audit_verified':False,'standing_completed':False,'physical_admission':False,'training_allowed':False,'errors':[]}
+  def attempt(label,fn):
+   try:v=fn();result[label]=v;return v
+   except Exception as e:result['errors'].append({'check':label,'error':repr(e)});return None
++ if attempt('invocation_binding',lambda:require(re.fullmatch('[0-9a-f]{32}',INV)is not None,'Actual native5 invocation remains pending')or True)is None:return result
+  unit=attempt('unit',lambda:dict(line.split('=',1) for line in call(['systemctl','--user','show',UNIT,'-p','ActiveState','-p','SubState','-p','Result','-p','InvocationID','-p','ExecMainStatus','-p','MainPID']).splitlines() if '=' in line))
+  journal=attempt('journal',lambda:[json.loads(s) for s in call(['journalctl','--user','-u',UNIT,'--no-pager','-o','json']).splitlines() if s.strip()])
+  if unit is None or journal is None:return result
+@@ -117,6 +136,7 @@
+  result['native_state_available']=state is not None
+  result['raw_acquisition_completed']=bool(state is not None and state.get('status')=='completed' and state.get('explicit_steps_completed')==8000)
+  if (RUN/'standing/standing_report.json').is_file():attempt('standing_report',lambda:read(RUN/'standing/standing_report.json'))
++ if (RUN/'standing/solver_readback.json').is_file():attempt('solver_readback',lambda:read(RUN/'standing/solver_readback.json'))
+  if job is not None:attempt('owned_absence',lambda:owned_absence(job))
+  def phase_inventory():
+   actual={p.name for p in (RUN/'jobs').glob('*.json') if not p.name.endswith('_contact_data_audit.json')};require(actual=={'standing.json'},'Unexpected or missing allocated jobs');return sorted(actual)
+@@ -128,6 +148,8 @@
+    s=importlib.util.spec_from_file_location('_audit_canonical_host',HOST/'launch_standing_spark.py');h=importlib.util.module_from_spec(s);s.loader.exec_module(h)
+    args=SimpleNamespace(source=SOURCE,asset=ASSET,admission=ADMISSION,supervisor_source=SUPERVISOR,output=RUN,host_freeze_sha256=PINS[1][3],num_envs=1,standing_one=None)
+    identity=h.verify_inputs(args)
++   if job is not None:attempt('operational_deadline',lambda:deadline_check(job,h.load_deadline_adapter().inspect_supervisor(SUPERVISOR/'tools/launch_reference_physics_spark.py')))
++   if state is not None and state.get('status')=='completed':attempt('solver_verification',lambda:solver_check(result.get('solver_readback',{}),identity,state))
+    if campaign is not None:require(campaign.get('identity')==identity and campaign.get('host_freeze_sha256')==PINS[1][3] and campaign.get('source_freeze_sha256')==PINS[0][3],'Host campaign input identity mismatch')
+    if state is not None and state.get('status')=='completed':
+     native_validation['attempted']=True

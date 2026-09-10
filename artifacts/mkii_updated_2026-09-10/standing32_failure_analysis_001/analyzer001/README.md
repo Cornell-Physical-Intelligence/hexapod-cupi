@@ -1,0 +1,15 @@
+# Standing32 actual002 failure analysis preparation
+
+The original audited native acquisition completed8000steps/1000controls, but21of32 replicas fail at least one postsettle six-toe support substep. Eleven pass:0,1,3,5,14,17,22,24,26,28,29. Seven of the21 also exceed the original0.03rad/s SDK joint-rate RMS gate: LM femur/tibia in2,4,7,15,27,30 and RM femur/tibia in18. No other quiet bound fails. These report-level facts preserve both the physical rejection and the independent600s host timeout; no retry/admission is authorized by this analysis.
+
+`analyze_remote.py` is a standard-library, read-only CPU program with exact audited input hashes. Root runs it against original remote data and redirects stdout outside the immutable run. It imports neither NumPy nor a simulator, starts no subprocess, writes no input/output file and performs no GPU action. It keeps at most one800-row NPZ chunk's selected arrays, rather than loading the4.62GB contact stream. It hashes the full stream, verifies all8000line sequence prefixes, parses only ±1step around every postsettle support-loss event, and rehashes every consumed original after analysis. No raw download is needed.
+
+It reports actual root/name/grid associations; exact reset checks and translated per-link errors; env0 versus same-source accepted singleenv raw parity; per-leg support minima/events;400Hz float64-accumulated SDK versus interval-angle RMS, means, integrals and correlations; exact event patch force reconstruction; and independent world-to-link-to-shape projection/category checks. Original50Hz float32-reduced scores are retained verbatim in the source report rather than replaced by favorable rates or windows. Input geometry/servo/thresholds remain unchanged.
+
+Contact JSONL contains every interpreted patch, but not native starts/counts arrays. Exact native path coverage and aggregate/projection checks can falsify many mapping errors; they cannot independently prove the unexported native count/start ABI. Grid distance, batch context, quantization and solver behavior remain confounded observations. A nonzero SDK/angle difference or tiny local-position variation is not proof of a native physics cause. Five focused CPU tests pass, including source-equivalent actual singleenv patch projection. The initial test chose an airborne firstrow with no patches; its failedfixturelog is preserved and the test now chooses the first actual patch-bearing row.
+
+Root execution (paths explicit; stdout outside originals):
+
+    python3 -B -S analyze_remote.py --run /home/orionh/HEXAPOD_runs/canonical_direct_20260910/native_standing32_002 --single /home/orionh/HEXAPOD_runs/canonical_direct_20260910/native_standing_004/standing --source /home/orionh/HEXAPOD_runs/canonical_direct_20260910/standing_source_003 --audit /path/to/exact/audit.json
+
+Preparation only until actual stdout is returned and independently checked. Any next diagnostic must preserve1N six-foot support and SDK quiet thresholds. Root owns GPU allocation and central poster updates under docs/PROJECT_SITE.md. No tracked files change here.

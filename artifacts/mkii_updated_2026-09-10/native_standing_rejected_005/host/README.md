@@ -1,0 +1,5 @@
+# Host006: explicit solver diagnostic source
+
+Pin-only successor of frozen host0051200s/90s, with identical deadline adapter, ownership cleanup, read-only mounts, full post-exit validation and all host function ASTs. Source004 is frozen at03701335… (95 payloads) and this host binds those exact bytes. Root owns the source004 explicit observed32/1→32/4 solver setting diagnostic. Source, geometry, servo, control count and all physical/quiet gates remain source-owned; this host cannot waive them. Fresh same-source1 then32 acceptance is required. Previous source003 native32 support/rate failure remains a failure, with timeout separate.
+
+Copied historical tests and setup receipts retain their original source/host identities. No new simulator/GPU action is performed. The upcoming native_standing_005 singleenv guard uses pause013, ownerstanding005,1200s phase/90s AppReady,1320s owner/180s stop and25min fallback. Source004 has no native success claim. Current24 CPUtests and actual local -S setup are separate from all historical copied receipts. Root handles central project-site publication under docs/PROJECT_SITE.md.

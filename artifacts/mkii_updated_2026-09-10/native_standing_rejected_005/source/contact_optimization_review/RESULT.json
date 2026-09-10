@@ -1,0 +1,123 @@
+{
+  "baseline_measured_sum_s": 418.46141312686086,
+  "baseline_weighted_32_cpu_components_s": {
+    "classification": 315.9837074262614,
+    "clearance": 63.73201764927944,
+    "json": 38.74568805132003
+  },
+  "candidate_changes": [
+    "Cache identical source-shape/body-pose transform values only within each classifier call, with original per-patch operations/order.",
+    "Replace repeated scans over all patches for every sensor with an ordered (env,body) non-toe sum; preserve patch-wise >1N and body sum tests."
+  ],
+  "candidate_plus_unchanged_clearance_json_s": 268.11289350740844,
+  "candidate_weighted_32_classifier_s": 165.63518780680897,
+  "distribution": {
+    "actual_one_env_session_wall_s": 107.99297730298713,
+    "categories": {
+      "toe": 444954
+    },
+    "contacts_sha256": "95ed8eb951dcf5aa56b79e4f43f53b3588d858b3a8af71e613aec79d9b09b216",
+    "inactive_zero_normal_records": 239014,
+    "machine": "macOS-15.6-arm64-arm-64bit",
+    "mean_patches": 55.61925,
+    "nonzero_force_records": 58120,
+    "numpy": "2.5.2",
+    "patch_histogram": {
+      "0": 12,
+      "151": 5,
+      "152": 1629,
+      "153": 38,
+      "26": 6112,
+      "27": 99,
+      "278": 103,
+      "279": 2
+    },
+    "python": "3.12.12",
+    "read_parse_wall_s": 0.9150919169915142,
+    "rows": 8000,
+    "source_freeze_sha256": "acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467"
+  },
+  "failed_test_attempt": "tests_failed_fixture.log retains an incorrect test expectation at exactly1N; both implementations already matched. The assertion was corrected without changing the candidate.",
+  "interpretation": "Weighted baseline stays below600s on Mac for measured components, so impossible was not established. Unknown Spark/native/IO overhead makes total deadline uncertain. Root elected bounded unchanged native32 measurement. Candidate is a CPU proposal, not a new native admission.",
+  "native_or_GPU_execution_by_review": false,
+  "negative_tests_passed": 7,
+  "parity": {
+    "actual_rows_bitexact_candidate_vs_parent": 8000,
+    "all_returned_arrays_dtype_shape_bytes_and_patch_json_order_exact": true,
+    "classification_seconds_full8000_one_env": {
+      "candidate": 5.341338422978879,
+      "parent": 7.49462350414251
+    },
+    "replicated_cases": [
+      {
+        "bitexact": true,
+        "classification_seconds": {
+          "candidate": 0.09386833201278932,
+          "parent": 0.13176887402369175
+        },
+        "grid_translation": true,
+        "replicas": 2,
+        "strata": 31
+      },
+      {
+        "bitexact": true,
+        "classification_seconds": {
+          "candidate": 0.36339687400322873,
+          "parent": 0.5629868290561717
+        },
+        "grid_translation": true,
+        "replicas": 8,
+        "strata": 31
+      },
+      {
+        "bitexact": true,
+        "classification_seconds": {
+          "candidate": 1.4845823279756587,
+          "parent": 2.781587628007401
+        },
+        "grid_translation": true,
+        "replicas": 32,
+        "strata": 31
+      }
+    ],
+    "source_bound_recorded_patch_replay_different_rows": 7988,
+    "source_bound_recorded_shape_max_abs_error_m": 2.7755575615628914e-17
+  },
+  "physical_thresholds_changed": false,
+  "raw_patch_order_or_fields_removed": false,
+  "schema": "canonical_standing_classifier_cpu_review_v1",
+  "settle_vs_quiet": {
+    "controls_0_200": {
+      "histogram": {
+        "0": 12,
+        "152": 200,
+        "153": 20,
+        "26": 1298,
+        "27": 49,
+        "278": 21
+      },
+      "inactive": 33274,
+      "mean_inactive_per_row": 20.79625,
+      "mean_patches_per_row": 46.480625,
+      "patches": 74369,
+      "rows": 1600
+    },
+    "controls_200_1000": {
+      "histogram": {
+        "151": 5,
+        "152": 1429,
+        "153": 18,
+        "26": 4814,
+        "27": 50,
+        "278": 82,
+        "279": 2
+      },
+      "inactive": 205740,
+      "mean_inactive_per_row": 32.146875,
+      "mean_patches_per_row": 57.90390625,
+      "patches": 370585,
+      "rows": 6400
+    }
+  },
+  "source_unchanged_during_running_32": true
+}

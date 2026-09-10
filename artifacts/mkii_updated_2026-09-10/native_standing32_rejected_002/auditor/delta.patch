@@ -1,0 +1,80 @@
+--- standing32_auditor001
++++ standing32_auditor002
+@@ -4,18 +4,19 @@
+ import hashlib,importlib.util,json,math,re,subprocess,sys,time
+ sys.dont_write_bytecode=True
+ BASE=Path('/home/orionh/HEXAPOD_runs/canonical_direct_20260910')
+-RUN=BASE/'native_standing32_001'; PAUSE=BASE/'forecast_pause_008'
+-UNIT='hexapod-canonical-native-standing32-001-20260910.service'
+-INV='ce49acca09a14d77b081fc5cb6c41622'
+-SOURCE=BASE/'standing_source_002'; HOST=BASE/'standing_host_002'; GUARD=BASE/'standing32_guard_001'; ASSET=BASE/'asset_001'
++RUN=BASE/'native_standing32_002'; PAUSE=BASE/'forecast_pause_010'
++UNIT='hexapod-canonical-native-standing32-002-20260910.service'
++INV='1a38495bda9f4fefa4e5585574aabc56'
++SOURCE=BASE/'standing_source_003'; HOST=BASE/'standing_host_004'; GUARD=BASE/'standing32_guard_002'; ASSET=BASE/'asset_001'
+ ADMISSION=BASE/'native_actuation_001/actuation'
+-STANDING_ONE=BASE/'native_standing_002/standing'
+-STANDING_ONE_MAP_SHA256='849c15536b0d6c3c7a408510608417e8732ced1fa28594bdb662c9fa35a9ebb1'
+-STANDING_ONE_STATE_SHA256='0d536d6906bfa8e755e971272bca98fed0e709db8f02651680cd95c04248cccd'
++RESERVATION=BASE/'exclusive_reservation_001'
++STANDING_ONE=BASE/'native_standing_004/standing'
++STANDING_ONE_MAP_SHA256='43f799625273680b29d00e3b2f063896dc1591582414b000ef6ba345f5830524'
++STANDING_ONE_STATE_SHA256='318c0bd2500cc954b6eec5464d5a0feca1fc2d570c5dae2e65e0177f18475da0'
+ SUPERVISOR=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009')
+-PINS=[('source',SOURCE,'FREEZE_SHA256.json','acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467',51),
+- ('host',HOST,'FREEZE_SHA256.json','c533454d1699058a7b686e49436247bbb9c94bbeec0a91b01090c234f4576763',22),
+- ('guard',GUARD,'FREEZE_SHA256.json','f7c23291abcc044844fb92ecf0b7482bccaedd9cb90515e49860be106ccf16cc',44),
++PINS=[('source',SOURCE,'FREEZE_SHA256.json','e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0',87),
++ ('host',HOST,'FREEZE_SHA256.json','c72c4dd63599f2c459c7b8eca7244528cb725094252c084f695f4aa44d8dba25',33),
++ ('guard',GUARD,'FREEZE_SHA256.json','6eee6697055138dc92791ff88aa4c257b5f85101fa978b4396b2de7f9337d9ad',62),
+  ('ownership_supervisor',SUPERVISOR,'campaign_source_hashes.json','04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e',926)]
+ 
+ def require(ok,message):
+@@ -65,13 +66,15 @@
+ 
+ def restoration(pause,restored,launch):
+  require(pause.get('unit')==UNIT and pause.get('output')==str(RUN) and pause.get('source')==str(SOURCE) and pause.get('admission')==str(ADMISSION) and pause.get('standing_one')==str(STANDING_ONE),'Pause identity differs')
+- require(pause.get('coordination_sha256')=='35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3','Wrong coordination identity')
++ require(pause.get('coordination_sha256')=='649ccda1bdef20bc967ae78f68a992cc8001f4ed7009f78cab5133cc67b29d8f','Wrong coordination identity')
+  timers={k for k,v in pause['units'].items() if k.endswith('.timer') and 'ActiveState=active' in v}
+  require(isinstance(restored.get('timers'),list) and len(restored['timers'])==len(timers) and set(restored['timers'])==timers,'Restored timer set differs')
+  t=restored.get('restored_unix');require(isinstance(t,(float,int)) and not isinstance(t,bool) and math.isfinite(t) and t>=pause['created_unix'],'Invalid restoration time')
++ require(pause.get('reservation_path')==str(RESERVATION) and pause.get('restoration_scope')=='per_job_snapshot_only' and pause.get('persistent_reservation_release_attempted')is False,'Missing reservation-aware pause metadata')
++ require(restored.get('scope')=='per_job_snapshot_only' and restored.get('persistent_reservation_release_attempted')is False and restored.get('reservation_path')==str(RESERVATION),'Per-job restoration incorrectly claims persistent reservation release')
+  require(launch.get('native_source_freeze_sha256')==PINS[0][3],'Wrong dispatched source freeze')
+  require(launch.get('command')==expected_launch_command(),'Exact dispatch command differs')
+- return {'passed':True,'timers':sorted(timers),'restored_unix':t,'recorded_owned_cleanup':restored.get('owned_cleanup_checked')}
++ return {'passed':True,'timers':sorted(timers),'restored_unix':t,'recorded_owned_cleanup':restored.get('owned_cleanup_checked'),'scope':restored.get('scope'),'persistent_reservation_release_attempted':False,'reservation_path':str(RESERVATION)}
+ 
+ def classify(campaign,job,state,unit,native_validation):
+  require(campaign.get('status') in ('completed','failed','stopped'),'Campaign is not terminal')
+@@ -95,6 +98,11 @@
+  require(mapping.get('state.json')==STANDING_ONE_STATE_SHA256,'Wrong original standing1 state')
+  return actual
+ 
++def reservation_check():
++ spec=importlib.util.spec_from_file_location('_audited_reservation_guard',GUARD/'launch_guarded_remote.py');g=importlib.util.module_from_spec(spec);spec.loader.exec_module(g)
++ receipt=g.verify_reservation()
++ return {'verified':True,'guard_verification':receipt,'files':{name:{'sha256':sha(Path(name)),'size_bytes':Path(name).stat().st_size}for name in g.RESERVATION_PINS},'persistent_release_attempted':False}
++
+ def audit():
+  result={'schema':'canonical_native_standing_terminal_audit_v1','expected_invocation':INV,'unit_name':UNIT,'checked_unix':time.time(),'read_only':True,'num_envs':32,'audit_verified':False,'standing_completed':False,'physical_admission':False,'training_allowed':False,'errors':[]}
+  def attempt(label,fn):
+@@ -114,6 +122,7 @@
+    actual=inventory(ADMISSION);require(len(actual)==19 and {k:v['sha256'] for k,v in actual.items()}==read(SOURCE/'ACTUATION_SHA256.json'),'Original coordinate/effort admission changed');require(sha(SOURCE/'ACTUATION_SHA256.json')=='1ccd8f4ffaa2eadc1fd9c6202af8da965b0e9b95f39c585b68a3a64313ce2728','Wrong coordinate/effort map');return actual
+   attempt('actuation_admission_inventory',admissioncheck)
+   attempt('standing_one_admission_inventory',standing_one_check)
++  attempt('exclusive_reservation',reservation_check)
+  campaign=attempt('campaign',lambda:read(RUN/'campaign.json'))
+  job=attempt('job',lambda:read(RUN/'jobs/standing.json'))
+  state=attempt('native_state',lambda:read(RUN/'standing/state.json')) if (RUN/'standing/state.json').is_file() else None
+@@ -162,6 +171,9 @@
+   final_standing=attempt('final_standing_one_admission_inventory',standing_one_check)
+   if final_standing is not None and final_standing!=result.get('standing_one_admission_inventory'):result['errors'].append({'check':'standing1_stability','error':'Original standing1 admission changed between audit passes'})
+   result.pop('final_standing_one_admission_inventory',None)
++  final_reservation=attempt('final_exclusive_reservation',reservation_check)
++  if final_reservation is not None and final_reservation!=result.get('exclusive_reservation'):result['errors'].append({'check':'reservation_stability','error':'Persistent reservation changed between audit passes'})
++  result.pop('final_exclusive_reservation',None)
+ 
+  result['audit_verified']=not result['errors']
+  if not result['audit_verified']:result['standing_completed']=False

@@ -7,7 +7,7 @@
 
 1. Verify `robot/active_model.json` and the corresponding `usd_002` nominal motor corrected source identities on the isolated native preparation directory.
 2. Introduce a new task/runtime contract for the actual joint names, signs/zeros, per-leg yaw limits, +X tibia contact geometry and explicitly modeled actuator behavior. Preserve old task registrations.
-3. Use the verified native import, suspended coordinate/effort response and sampled source-shape evidence. Requalify the contact-processing optimization after its exact-output CPU review, preserving every native record and all existing force/quiet gates; then measure one-to-32-replica scaling and qualify observation/action mapping before a small learning smoke.
+3. Use the verified native import, suspended coordinate/effort response and sampled source-shape evidence. Execute the latest controlled solver/measurement comparison below through fresh one-robot then matching-source 32-replica admission, preserving every contact record and all force/quiet gates. Qualify observation/action mapping before a small learning smoke.
 4. Only a matching native admission can authorize learning on this canonical model; record its source, asset, motor and checkpoint hashes. Then pursue the unchanged all-direction, smoothness and quiet-standing gates.
 
 ## Historical C-study continuation order (superseded)
@@ -153,4 +153,22 @@ The source-shape query's measured tuple binding is now recorded in the [separate
 
 ### Persistent Spark priority and immediate video
 
-Honor the latest exclusive user-compute reservation across runs. Native successors bind coordination649ccda1… and exact active reservation controls; per-job cleanup restores only its snapshot and does not release the reservation. Preserve the interrupted optimized attempt as evidence, admit only a completed matching one-robot retry before32 replicas, then fresh PPO integration. Prepare the detailed CAD video in parallel and label it kinematic; produce learned walking footage only from an actual admitted new-model policy. Current execution belongs in STATUS.
+Honor the latest exclusive user-compute reservation across runs. Native successors bind coordination649ccda1… and exact active reservation controls; per-job cleanup restores only its snapshot and does not release the reservation. Preserve interrupted and rejected optimized attempts as evidence. Require fresh one-robot then matching-source 32-replica admission for the solver successor before PPO integration. Keep the detailed CAD video labeled kinematic; produce learned walking footage only from an actual admitted new-model policy. Current execution belongs in STATUS.
+
+
+## 2026-09-10 — bounded 32/4 solver comparison before PPO
+
+Use the [recorded standing32 rejection](../artifacts/mkii_updated_2026-09-10/native_standing32_rejected_002/README.md) as the immutable comparison, retaining its distinct host timeout. This sequence prepares a new experiment; actual launch/result state belongs in STATUS.
+
+1. Pin the new canonical standing source004, exact asset, actuator/servo and predecessor evidence. Read every articulation before authoring and require the public USD attributes to return unauthored **32 position / 1 velocity iteration**. Installed behavior must establish that precondition; documentation alone does not. Preserve the complete readback and reject any mismatch.
+2. Explicitly author **32 position / 4 velocity iterations**. Preserve all geometry, SDF detail, masses/inertias, target/reset/servo behavior, external-force setting, 2.5 ms physics, 20 ms control, contact recording and numerical gates. Record and seal per-root values after authoring, after reset and after the full controlled interval. Identify these as USD attribute readbacks, not independent backend introspection.
+3. Run one cold robot for all 1,000 controls / 8,000 steps. Only its authentic complete physical/quiet admission can permit a separate same-source 32-robot screen with the same duration and thresholds. Keep all failed prefixes and readbacks. No old one-robot pass admits the changed solver source.
+4. Use the separately versioned **1,200-second phase budget** and unchanged 90-second AppReady bound, exact ownership/cleanup and persistent reservation controls. The longer wall-clock allowance changes no simulated interval or quality criterion. Review measured performance rather than treating the budget as an ETA.
+5. Compare support, requested/applied torque and saturation, raw SDK joint rates and independent angle motion using the original thresholds. Do not infer success or substitute an angle-derived rate for the existing SDK gate. Only matching native admission can unlock fresh 32×24×2 PPO integration; all-direction/stop quality and hardware qualification remain later gates.
+
+
+## 2026-09-10 — successor after the 32/4 rejection
+
+The earlier 32/4 sequence remains a historical experiment recipe; its actual rejection is recorded in STATUS. Next, prepare a fresh 32/0 comparison with the same 32 position iterations, detailed asset, motor envelope, 400 Hz PD and 50 Hz control. Retain every original numeric gate and raw channel. Add only read-only legacy friction-coefficient, link-velocity and direct floor-force observations to distinguish measurement semantics from contact dynamics. Do not replace SDK rates with finite differences or zero an unexpected friction coefficient.
+
+Use the unchanged 1,000-control / 8,000-step single-robot screen first. Scale only after authentic same-source admission; otherwise analyze the failed measurement before further allocation. Keep the 1,200-second operational / 90-second readiness bounds and exact reservation-aware cleanup. A diagnostic probe is neither PPO nor Stage 2 qualification.

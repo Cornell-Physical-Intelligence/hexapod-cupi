@@ -1,0 +1,34 @@
+{
+  "copied_freezes_verified": {
+    "auditor": 8,
+    "guard": 62,
+    "host": 33,
+    "source": 87
+  },
+  "curated_fetch_size_and_sha256_verified": true,
+  "negative_semantic_cases": [
+    {
+      "case": "acquisition_as_admission",
+      "reason": "Acquisition/admission conflated",
+      "rejected": true
+    },
+    {
+      "case": "wrong_invocation",
+      "reason": "Invocation mismatch",
+      "rejected": true
+    },
+    {
+      "case": "missing_cleanup",
+      "reason": "Owned cleanup not proven",
+      "rejected": true
+    },
+    {
+      "case": "false_native_validator_pass",
+      "reason": "Rejected native validator changed",
+      "rejected": true
+    }
+  ],
+  "positive_recorded_semantics": true,
+  "raw_replay_available": false,
+  "scope": "Static artifact verification only; no repeated owner runtime tests, native simulation, raw contact replay, or remote mutation."
+}
