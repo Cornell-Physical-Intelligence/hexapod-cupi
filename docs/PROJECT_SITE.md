@@ -19,6 +19,8 @@ This is a hard user requirement for every repository-changing agent and human co
 5. Run `python3 tools/project_site.py check --base <integration-base-SHA>` and `python3 tools/project_site.py build`, plus the tests relevant to the code change. The check requires new records relative to the base; editing an old entry cannot satisfy it.
 6. Commit and push with the relevant Markdown. Verify the GitHub Pages deployment and remote revision. The poster is a public research snapshot from that push, not an unverified progress claim.
 
+When a change adds or modifies files covered by the integrated runtime identity (including any `tools/*.py` file), also run `tools/check_pipeline_lineages.py current`. Create a new versioned release manifest when coverage or hashes change, update the checker's current default and the CI manifest selection, and preserve previous manifests unchanged. See `docs/PIPELINE_LINEAGES.md`. Poster checks do not replace this existing source-integrity check.
+
 Example entry:
 
 ```json

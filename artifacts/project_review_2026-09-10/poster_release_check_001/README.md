@@ -1,0 +1,5 @@
+# Poster builder release coverage correction
+
+Commit1ed5bc53e13baf3a2eebccd770c6e399d27d6337 passed the canonical code tests, C-study/terrain/perception tests, pinned C runtime and archived source-lineage check. The final [CI release check](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/actions/runs/34507608601) correctly failed because new `tools/project_site.py` was absent from the prior integrated manifest. The exact failing output is preserved in `failed_ci_log.txt`; Pages itself deployed successfully.
+
+A new versioned `stage2_research_poster_20260910_pipeline.sha256` includes the builder and preserves the preceding contact-telemetry manifest in its source inventory. The current default and CI selection now point at that new file. `generation.json` and `verification.json` prove full current coverage and retained historical source. The original manifest bytes are unchanged. This fixes publication/source-integrity metadata; it changes no training dynamics, checkpoints or acceptance thresholds. Subsequent full CI is a separate external outcome, not inferred from these local receipts.

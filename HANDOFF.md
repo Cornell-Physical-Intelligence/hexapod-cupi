@@ -1704,3 +1704,8 @@ The user’s newest CAD request produced `artifacts/foot_design_2026-09-10/rigid
 
 
 Independent Fable audit verdicts and raw checks are published at `artifacts/project_review_2026-09-10/claude_partner_review_001/README.md`. Stuck LR and missing command redraw are disproven by actual pilot traces. Strong quiet temporal weighting is selected as a bounded ablation, not a bug repair: native004 is being prepared in tmp with sparse gradient/KL diagnostics and a same-source smoke before pilot. Recording finalization and three sensor-transport fixes are independent versioned preparation. No additional GPU job is implied.
+
+
+## 10 September 2026 — poster release-manifest correction
+
+The public poster deployed commit1ed5bc5 and all code/robot tests passed. The final integrated-source check correctly rejected missing coverage of new `tools/project_site.py`. The successor `stage2_research_poster_20260910_pipeline.sha256` preserves the prior contact-telemetry manifest, covers the new builder and is selected by CI/default checker. Existing physics/checkpoints/gates are unchanged. The hard poster workflow now explicitly includes the existing release-manifest check when covered source changes. The failed CI log remains preserved with the correction’s verification receipts.
