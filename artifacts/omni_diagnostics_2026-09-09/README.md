@@ -29,3 +29,6 @@ The JSON contains direction-by-direction joint velocity, target increments, pose
 
 
 [Quiet-priority pilot terminal result](direct_omni_quiet_priority_pilot_001/README.md) preserves all six phases, exact CAPS50 comparison and portable replay. Quiet remains0/48; its worst scored excursion includes a reset. [Independent interpretation and Fable review](../project_review_2026-09-10/quiet_priority_interpretation_001/README.md) support testing a bounded fresh-original normal-CAPS500 budget without changing quality gates or claiming exact resume.
+
+
+[Smoke004](direct_omni_train_smoke_004/README.md) verifies source004 compatibility with exact prior checkpoint/raw behavior. [Extended001 failure](direct_omni_extended_caps_failure_001/README.md) occurred before simulation and preserves its host compilation-context rejection. [Retry002](direct_omni_extended_caps_retry_002/README.md) contains the repaired host and actual dispatch; [progress capture](direct_omni_extended_caps_progress_001/README.md) is an intermediate log observation, not completed500-update or Stage2 evidence.

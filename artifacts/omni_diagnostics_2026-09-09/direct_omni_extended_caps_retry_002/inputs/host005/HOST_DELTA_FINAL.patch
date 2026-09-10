@@ -1,0 +1,42 @@
+--- host004/deadline_adapter.py
++++ host005/deadline_adapter.py
+@@ -5,7 +5,6 @@
+ bound keep their original AST. No frozen supervisor file is written.
+ """
+ import ast
+-import copy
+ import hashlib
+ from pathlib import Path
+ import types
+@@ -72,7 +71,7 @@
+         'original_source_unchanged': True,
+         'original_function_source': original,
+         'adapted_function_source': adapted,
+-        '_original_node': nodes[0],
++        '_original_module_source': data.decode('utf-8'),
+     }
+ 
+ 
+@@ -84,9 +83,10 @@
+     function = module.run_owned
+     if not isinstance(function, types.FunctionType) or function.__globals__ is not vars(module):
+         raise ValueError('Supervisor run_owned is not in its own module globals')
+-    # Compile only the exact original function definition; no source imports,
+-    # main(), defaults with side effects or runtime statements are executed.
+-    code = compile(ast.Module(body=[copy.deepcopy(proof['_original_node'])], type_ignores=[]), str(path), 'exec')
++    # Compile the full verified module without executing it, matching Python's
++    # normal import compilation context. Isolated AST compilation is not
++    # CodeType-identical on Python 3.12. No imports or statements execute here.
++    code = compile(proof['_original_module_source'], str(path), 'exec', dont_inherit=True)
+     expected = next(c for c in code.co_consts if isinstance(c, types.CodeType) and c.co_name == 'run_owned')
+     if function.__code__ != expected or function.__defaults__ or function.__kwdefaults__ or function.__closure__:
+         raise ValueError('Loaded run_owned differs from exact verified source')
+@@ -97,7 +97,7 @@
+     replacement = types.FunctionType(body, vars(module), function.__name__)
+     replacement.__module__ = function.__module__
+     replacement.__doc__ = function.__doc__
+-    metadata = {k: v for k, v in proof.items() if k not in ('original_function_source', 'adapted_function_source', '_original_node')}
++    metadata = {k: v for k, v in proof.items() if k not in ('original_function_source', 'adapted_function_source', '_original_module_source')}
+     # Install only after all source/code checks succeed.
+     setattr(module, HELPER_NAME, phase_deadline_seconds)
+     module.DIRECT_DEADLINE_ADAPTER = metadata

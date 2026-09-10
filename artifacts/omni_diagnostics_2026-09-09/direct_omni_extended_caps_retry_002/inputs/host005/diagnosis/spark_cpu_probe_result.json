@@ -1,0 +1,146 @@
+{
+  "passed": true,
+  "python": "3.12.3 (main, Jun 19 2026, 12:46:00) [GCC 13.3.0]",
+  "adapter_sha256": "db8145942b006951653cb9284a038c3c91000e3c548e137d69cce0fd79d64c1a",
+  "host_launcher_sha256": "3a4bf617863dccb26e79f31eeaa3c95f661e9e227a5e966d1af529fb5069f440",
+  "supervisor_sha256": "9ebabaf254cc77fabad7d4759cc80fc26d7efd3912ea84bd55304594c88ed561",
+  "old_failure_reproduced": "Loaded run_owned differs from exact verified source",
+  "loaded_equals_isolated": false,
+  "loaded_equals_whole_module": true,
+  "different_code_fields": [
+    "co_code",
+    "co_linetable"
+  ],
+  "first_disassembly_differences": [
+    {
+      "index": 8,
+      "loaded": [
+        16,
+        "LOAD_GLOBAL",
+        "NULL + uuid"
+      ],
+      "isolated": [
+        16,
+        "LOAD_GLOBAL",
+        "uuid"
+      ]
+    },
+    {
+      "index": 9,
+      "loaded": [
+        26,
+        "LOAD_ATTR",
+        "uuid4"
+      ],
+      "isolated": [
+        26,
+        "LOAD_ATTR",
+        "NULL|self + uuid4"
+      ]
+    },
+    {
+      "index": 18,
+      "loaded": [
+        96,
+        "LOAD_GLOBAL",
+        "NULL + time"
+      ],
+      "isolated": [
+        96,
+        "LOAD_GLOBAL",
+        "time"
+      ]
+    },
+    {
+      "index": 19,
+      "loaded": [
+        106,
+        "LOAD_ATTR",
+        "time"
+      ],
+      "isolated": [
+        106,
+        "LOAD_ATTR",
+        "NULL|self + time"
+      ]
+    },
+    {
+      "index": 68,
+      "loaded": [
+        394,
+        "LOAD_GLOBAL",
+        "NULL + os"
+      ],
+      "isolated": [
+        394,
+        "LOAD_GLOBAL",
+        "os"
+      ]
+    },
+    {
+      "index": 69,
+      "loaded": [
+        404,
+        "LOAD_ATTR",
+        "open"
+      ],
+      "isolated": [
+        404,
+        "LOAD_ATTR",
+        "NULL|self + open"
+      ]
+    },
+    {
+      "index": 80,
+      "loaded": [
+        500,
+        "LOAD_GLOBAL",
+        "NULL + fcntl"
+      ],
+      "isolated": [
+        500,
+        "LOAD_GLOBAL",
+        "fcntl"
+      ]
+    },
+    {
+      "index": 81,
+      "loaded": [
+        510,
+        "LOAD_ATTR",
+        "flock"
+      ],
+      "isolated": [
+        510,
+        "LOAD_ATTR",
+        "NULL|self + flock"
+      ]
+    }
+  ],
+  "full_code_comparison_retained": true,
+  "actual_host_load_supervisor_extended_passed": true,
+  "adapter_metadata": {
+    "schema": "direct315_extended_supervisor_deadlines_v1",
+    "supervisor_sha256": "9ebabaf254cc77fabad7d4759cc80fc26d7efd3912ea84bd55304594c88ed561",
+    "adapter_sha256": "db8145942b006951653cb9284a038c3c91000e3c548e137d69cce0fd79d64c1a",
+    "original_run_owned_sha256": "3d93b850c4e26b08f0ed4de2869d18753309f231c9855eb300abdff02ec41add",
+    "adapted_run_owned_sha256": "fa1537462aa0230c90a8cccdbce664c992976e15a717dab08516b55376730246",
+    "source_substitutions": 3,
+    "phase_deadline_seconds": {
+      "standing": 600,
+      "initial_constant": 600,
+      "initial_stop": 600,
+      "train": 1800,
+      "final_constant": 600,
+      "final_stop": 600
+    },
+    "app_ready_deadline_seconds": 90,
+    "cleanup_AST_unchanged": true,
+    "original_source_unchanged": true
+  },
+  "altered_same_global_function_rejected": "Loaded run_owned differs from exact verified source",
+  "smoke_pilot_code_unchanged": true,
+  "no_run_owned_called": true,
+  "transport": "new adapter supplied in memory; unchanged actual host launcher loaded from disk",
+  "remote_writes_or_subprocesses": false
+}

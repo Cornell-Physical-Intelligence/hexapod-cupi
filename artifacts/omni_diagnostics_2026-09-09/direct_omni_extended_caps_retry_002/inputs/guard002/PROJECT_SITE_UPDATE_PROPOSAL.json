@@ -1,0 +1,18 @@
+{
+  "tracked_changes_made": false,
+  "proposed_artifact": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_retry_002/preparation/guard",
+  "affected_paths": [
+    "STATUS.md",
+    "docs/PLAN.md",
+    "docs/NEXT_RUNS.md",
+    "site/project.json",
+    "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_retry_002/**"
+  ],
+  "summary": "Prepare the same500-update CAPS experiment using repaired host005 and exact failed001 ownership/restoration proof. Preserve successful smoke004 and failed001; no new physical/Stage2 admission.",
+  "next": "Root live preflight and separately guarded retry, then actual raw/checkpoint/cleanup audit and matched evaluations.",
+  "root_required_checks": [
+    "python3 tools/project_site.py check --base <integration-base-SHA>",
+    "python3 tools/project_site.py build"
+  ],
+  "append_site_update_required": true
+}

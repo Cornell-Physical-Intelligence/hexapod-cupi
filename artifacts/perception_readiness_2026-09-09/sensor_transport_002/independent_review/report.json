@@ -1,0 +1,45 @@
+{
+  "schema": "phase3_sensor_transport_independent_review_v1",
+  "created_utc": "2026-09-10T17:38:21.331564+00:00",
+  "verdict": "No concrete blocker for bounded CPU transport integration; root owns adoption",
+  "owner_directory": "phase3_sensor_transport_002",
+  "owner_freeze_sha256": "c6aab3c11cd64c3cde22950e546df4dc9970c8500f3ec8ddeed258f69a1ff781",
+  "owner_payload_count": 9,
+  "runtime_sha256": "b35c37152c2a7875a26acb47467e26c9102cb6f082d5dcf592a86b3410ea5a7a",
+  "original_sha256": "101f6a59488f702117e93da87354b0d68c3d475e50421f445a12d9caf1491336",
+  "independent_python": "3.12.12 (main, Jan 27 2026, 23:41:44) [Clang 21.1.4 ]",
+  "independent_torch": "2.14.0",
+  "device": "cpu",
+  "owner_tests_independently_passed": 15,
+  "additional_independent_tests_passed": 4,
+  "original_fail_new_pass_verified": [
+    "late older arrival overwrites newer capture",
+    "inference tensor selective-reset exception",
+    "rewound read returns valid negative age"
+  ],
+  "nominal_parity": "Default configuration equal; seeded 401-read owner test matches original values, masks and float32 timestamps/age bitwise; bounded CPU evidence",
+  "randomized_oracle": {
+    "seeds": 24,
+    "rows": 6,
+    "reads_per_seed": 100,
+    "cases": [
+      "latency inversion",
+      "equal capture ties",
+      "per-row invalid mask",
+      "queued and delivered selective reset",
+      "inference rollout"
+    ]
+  },
+  "concrete_blockers": [],
+  "limits": [
+    "No GPU execution",
+    "No physical or hardware qualification",
+    "Public age precision remains float32",
+    "Transport age is not terrain support eligibility or map coverage",
+    "No new frame-drain API",
+    "Shared RNG semantics unchanged"
+  ],
+  "owner_source_edited": false,
+  "tracked_files_edited": false,
+  "site_adoption_required": true
+}

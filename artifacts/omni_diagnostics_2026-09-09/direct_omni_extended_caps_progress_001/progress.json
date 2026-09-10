@@ -1,0 +1,392 @@
+{
+  "schema": "extended_caps002_progress_snapshot_v1",
+  "captured_unix": 1789068055.1455572,
+  "unit": "hexapod-direct-omni-train-extended-caps-002-20260910.service",
+  "owner": "MainPID=3670326\nExecMainStatus=0\nActiveState=active\nSubState=running\nInvocationID=ca9455cefb554c7691e7f8b2ed3ac939\n",
+  "expected_invocation": "ca9455cefb554c7691e7f8b2ed3ac939",
+  "campaign": {
+    "status": "preparing",
+    "started_unix": 1789067685.8422434,
+    "identity": {
+      "schema": "direct315_extended_native_v4",
+      "source_manifest_sha256": "aa70659d33243f1e28e9c71b1a7f9d33341642db770fd7356192573a26fe904e",
+      "plan_sha256": "b2286828148c89fb34624d38beaf84b389584f7bda4d2648512e017da4b50acb",
+      "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+      "actor_width": 315,
+      "critic_width": 318,
+      "selection": {
+        "schema": "direct315_extended_native_v4",
+        "allocation": "extended",
+        "branch": "caps",
+        "replicas": 1024,
+        "controls_per_update": 24,
+        "updates": 500,
+        "caps": {
+          "temporal_weight": 0.1,
+          "spatial_weight": 0.1,
+          "noise_scale": 1.0,
+          "noise_seed": 1157,
+          "quiet_temporal_weight": 0.1
+        }
+      },
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.04,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2,
+          "stand_raw_action": 0.0
+        },
+        "observation_noise_scale": 1.0,
+        "target_filter_time_constant_s": 0.0
+      },
+      "diagnostic_options": {
+        "duration_s": 12,
+        "settle_s": 2,
+        "seed": 7057,
+        "trace_envs_per_scenario": 1,
+        "controller": "policy"
+      },
+      "Stage2_complete": false,
+      "smoke_campaign_sha256": "3c1787e06109d077ab3689ab300389e0bf34844aa33e86b52049b0c0701ad979",
+      "smoke_state_sha256": "4223cbf8577f123afb46dd8538984a00124f380088152d7c0c74eeb503c71b35",
+      "smoke_receipt_sha256": "4ae64d78ee4a58dda93274b323336fa10b809477f4eadd1b2131813e67bc2a0e"
+    },
+    "host_freeze_sha256": "2db7e44ec40543753a6d1325f6d5dc9ed81be2948931b2ca670deffda68ce959",
+    "allocation": "extended",
+    "branch": "caps",
+    "planned_phases": [
+      "standing",
+      "initial_constant",
+      "initial_stop",
+      "train",
+      "final_constant",
+      "final_stop"
+    ],
+    "accepted_phases": {
+      "standing": {
+        "phase": "standing",
+        "state_sha256": "ae6607cd529adfb21bd57b56d284b808279e2a0c5593af3332c548093c5ab6a0",
+        "source_manifest_sha256": "aa70659d33243f1e28e9c71b1a7f9d33341642db770fd7356192573a26fe904e",
+        "Stage2_complete": false,
+        "passed": true,
+        "admission_sha256": "0fdd84595c2dd1f1c39fcc52b72cf76fd7a9a268cf553ed649c4bd15123075ec"
+      },
+      "initial_constant": {
+        "phase": "initial_constant",
+        "state_sha256": "a93f8a317fd607f80b58e41d499aa07310155c504f78e0e43e9df2ee98375da6",
+        "source_manifest_sha256": "aa70659d33243f1e28e9c71b1a7f9d33341642db770fd7356192573a26fe904e",
+        "Stage2_complete": false,
+        "complete": true,
+        "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+        "report_sha256": "2c067b023b52e84b6dd3a3a78ccd35a6ea036602e243eb28d94f01a7177ea03e",
+        "trace_sha256": "a7dfe4307826fe26ad6afea403b58209ca70d8877a6e27218e2bc9e7700e0385",
+        "scope": "Acquisition completion only; all acceptance failures retained"
+      },
+      "initial_stop": {
+        "phase": "initial_stop",
+        "state_sha256": "90c8cae1f43c28644634fc2d159ac86ac553db1080eaf99ce6de4e497cee7cbe",
+        "source_manifest_sha256": "aa70659d33243f1e28e9c71b1a7f9d33341642db770fd7356192573a26fe904e",
+        "Stage2_complete": false,
+        "quiet_failed_env_ids": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47
+        ],
+        "complete": true,
+        "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+        "report_sha256": "891a6c2aa0cd6372bb07321b3fec68d127cdcfd8326715fe4843f327e4c6641a",
+        "trace_sha256": "8e92a5230ed959cbff1b8f86cf5046f50372209ff061792477f46b315fa9e2fc",
+        "scope": "Acquisition completion only; all acceptance failures retained"
+      }
+    },
+    "PPO_updates_completed": 0,
+    "training_attempted": true,
+    "Stage2_complete": false,
+    "automatic_continuation": false,
+    "qualification": "Training/evaluation completion is unqualified diagnostic evidence",
+    "last_completed_phase": "initial_stop"
+  },
+  "jobs": {
+    "initial_stop": {
+      "status": "completed",
+      "phase": "initial_stop",
+      "container_name": "hexapod-reference-physics-66506c9d50204860ada8f1c50991adf1",
+      "started_unix": 1789067828.9851735,
+      "deadline_seconds": 600,
+      "app_ready_deadline_seconds": 90,
+      "no_policy_loaded": false,
+      "coordination_sha256": "35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3",
+      "preflight": {
+        "available_memory_bytes": 126949072896,
+        "containers": "isim-web-viewer-1 isim-web-viewer",
+        "compute_processes": ""
+      },
+      "container_id": "8014d99cc793d1ebe677c222a15117395d98199c7bfc46167619c3f01220c20d",
+      "contact_data_completeness": {
+        "log_sha256": "68e044067ed83d35b74c391ff30fe6a728ef1cf488a066fabf307211c17d1384",
+        "incomplete_data_warning_count": 0,
+        "reported_capacities": [],
+        "first_warning": null,
+        "last_warning": null,
+        "passed": true,
+        "scope": "Required absence of reported contact/friction data truncation; raw physical gate must also pass"
+      },
+      "exit_code": 0,
+      "cleanup_checked": true,
+      "finished_unix": 1789067945.4097676,
+      "legacy_supervisor_no_policy_loaded": true,
+      "policy_phase_requested": true,
+      "checkpoint_load_verified_by_completed_state": true,
+      "allocation": "extended",
+      "branch": "caps",
+      "supervisor_runtime_adapter": {
+        "schema": "direct315_extended_supervisor_deadlines_v1",
+        "supervisor_sha256": "9ebabaf254cc77fabad7d4759cc80fc26d7efd3912ea84bd55304594c88ed561",
+        "adapter_sha256": "db8145942b006951653cb9284a038c3c91000e3c548e137d69cce0fd79d64c1a",
+        "original_run_owned_sha256": "3d93b850c4e26b08f0ed4de2869d18753309f231c9855eb300abdff02ec41add",
+        "adapted_run_owned_sha256": "fa1537462aa0230c90a8cccdbce664c992976e15a717dab08516b55376730246",
+        "source_substitutions": 3,
+        "phase_deadline_seconds": {
+          "standing": 600,
+          "initial_constant": 600,
+          "initial_stop": 600,
+          "train": 1800,
+          "final_constant": 600,
+          "final_stop": 600
+        },
+        "app_ready_deadline_seconds": 90,
+        "cleanup_AST_unchanged": true,
+        "original_source_unchanged": true
+      }
+    },
+    "train": {
+      "status": "running",
+      "phase": "train",
+      "container_name": "hexapod-reference-physics-d9cbb323c9fe43939a14a02322c10acb",
+      "started_unix": 1789067946.068501,
+      "deadline_seconds": 1800,
+      "app_ready_deadline_seconds": 90,
+      "no_policy_loaded": null,
+      "coordination_sha256": "35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3",
+      "preflight": {
+        "available_memory_bytes": 126984261632,
+        "containers": "isim-web-viewer-1 isim-web-viewer",
+        "compute_processes": ""
+      },
+      "container_id": "30dbe907be73eab87547d508d32e0abda2be279747fea6fbd6486f2df50ffe97",
+      "legacy_supervisor_no_policy_loaded": true,
+      "policy_phase_requested": true,
+      "checkpoint_load_verified_by_completed_state": false,
+      "allocation": "extended",
+      "branch": "caps",
+      "supervisor_runtime_adapter": {
+        "schema": "direct315_extended_supervisor_deadlines_v1",
+        "supervisor_sha256": "9ebabaf254cc77fabad7d4759cc80fc26d7efd3912ea84bd55304594c88ed561",
+        "adapter_sha256": "db8145942b006951653cb9284a038c3c91000e3c548e137d69cce0fd79d64c1a",
+        "original_run_owned_sha256": "3d93b850c4e26b08f0ed4de2869d18753309f231c9855eb300abdff02ec41add",
+        "adapted_run_owned_sha256": "fa1537462aa0230c90a8cccdbce664c992976e15a717dab08516b55376730246",
+        "source_substitutions": 3,
+        "phase_deadline_seconds": {
+          "standing": 600,
+          "initial_constant": 600,
+          "initial_stop": 600,
+          "train": 1800,
+          "final_constant": 600,
+          "final_stop": 600
+        },
+        "app_ready_deadline_seconds": 90,
+        "cleanup_AST_unchanged": true,
+        "original_source_unchanged": true
+      }
+    },
+    "standing": {
+      "status": "completed",
+      "phase": "standing",
+      "container_name": "hexapod-reference-physics-b7f7f12cb9db4a148ef46b8f91cc6b37",
+      "started_unix": 1789067686.1201336,
+      "deadline_seconds": 600,
+      "app_ready_deadline_seconds": 90,
+      "no_policy_loaded": true,
+      "coordination_sha256": "35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3",
+      "preflight": {
+        "available_memory_bytes": 126928617472,
+        "containers": "isim-web-viewer-1 isim-web-viewer",
+        "compute_processes": ""
+      },
+      "container_id": "faf337fb226c3a16c546dbf935f2fefd15cb0ee64e4daf2e3bf5b8e7637e03e7",
+      "contact_data_completeness": {
+        "log_sha256": "126f2d1ecb4267d2fbffcc30ea056deb611158c9828285649a02a0dd79b27426",
+        "incomplete_data_warning_count": 0,
+        "reported_capacities": [],
+        "first_warning": null,
+        "last_warning": null,
+        "passed": true,
+        "scope": "Required absence of reported contact/friction data truncation; raw physical gate must also pass"
+      },
+      "exit_code": 0,
+      "cleanup_checked": true,
+      "finished_unix": 1789067767.0743992,
+      "legacy_supervisor_no_policy_loaded": true,
+      "policy_phase_requested": false,
+      "checkpoint_load_verified_by_completed_state": false,
+      "allocation": "extended",
+      "branch": "caps",
+      "supervisor_runtime_adapter": {
+        "schema": "direct315_extended_supervisor_deadlines_v1",
+        "supervisor_sha256": "9ebabaf254cc77fabad7d4759cc80fc26d7efd3912ea84bd55304594c88ed561",
+        "adapter_sha256": "db8145942b006951653cb9284a038c3c91000e3c548e137d69cce0fd79d64c1a",
+        "original_run_owned_sha256": "3d93b850c4e26b08f0ed4de2869d18753309f231c9855eb300abdff02ec41add",
+        "adapted_run_owned_sha256": "fa1537462aa0230c90a8cccdbce664c992976e15a717dab08516b55376730246",
+        "source_substitutions": 3,
+        "phase_deadline_seconds": {
+          "standing": 600,
+          "initial_constant": 600,
+          "initial_stop": 600,
+          "train": 1800,
+          "final_constant": 600,
+          "final_stop": 600
+        },
+        "app_ready_deadline_seconds": 90,
+        "cleanup_AST_unchanged": true,
+        "original_source_unchanged": true
+      }
+    },
+    "initial_stop_contact_data_audit": {
+      "log_sha256": "68e044067ed83d35b74c391ff30fe6a728ef1cf488a066fabf307211c17d1384",
+      "incomplete_data_warning_count": 0,
+      "reported_capacities": [],
+      "first_warning": null,
+      "last_warning": null,
+      "passed": true,
+      "scope": "Required absence of reported contact/friction data truncation; raw physical gate must also pass"
+    },
+    "standing_contact_data_audit": {
+      "log_sha256": "126f2d1ecb4267d2fbffcc30ea056deb611158c9828285649a02a0dd79b27426",
+      "incomplete_data_warning_count": 0,
+      "reported_capacities": [],
+      "first_warning": null,
+      "last_warning": null,
+      "passed": true,
+      "scope": "Required absence of reported contact/friction data truncation; raw physical gate must also pass"
+    },
+    "initial_constant": {
+      "status": "completed",
+      "phase": "initial_constant",
+      "container_name": "hexapod-reference-physics-587a46d1b5424dbc944f22bad607252d",
+      "started_unix": 1789067767.6478786,
+      "deadline_seconds": 600,
+      "app_ready_deadline_seconds": 90,
+      "no_policy_loaded": false,
+      "coordination_sha256": "35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3",
+      "preflight": {
+        "available_memory_bytes": 126966964224,
+        "containers": "isim-web-viewer-1 isim-web-viewer",
+        "compute_processes": ""
+      },
+      "container_id": "bbff36ac41dfec1335c4f6c0195a9fad9d996ad58788d7e477a47d487b5a7d89",
+      "contact_data_completeness": {
+        "log_sha256": "150fcbe8f4395ffe83c1d75da203995b028315af41d4af76f09ac54f813ba935",
+        "incomplete_data_warning_count": 0,
+        "reported_capacities": [],
+        "first_warning": null,
+        "last_warning": null,
+        "passed": true,
+        "scope": "Required absence of reported contact/friction data truncation; raw physical gate must also pass"
+      },
+      "exit_code": 0,
+      "cleanup_checked": true,
+      "finished_unix": 1789067828.3828287,
+      "legacy_supervisor_no_policy_loaded": true,
+      "policy_phase_requested": true,
+      "checkpoint_load_verified_by_completed_state": true,
+      "allocation": "extended",
+      "branch": "caps",
+      "supervisor_runtime_adapter": {
+        "schema": "direct315_extended_supervisor_deadlines_v1",
+        "supervisor_sha256": "9ebabaf254cc77fabad7d4759cc80fc26d7efd3912ea84bd55304594c88ed561",
+        "adapter_sha256": "db8145942b006951653cb9284a038c3c91000e3c548e137d69cce0fd79d64c1a",
+        "original_run_owned_sha256": "3d93b850c4e26b08f0ed4de2869d18753309f231c9855eb300abdff02ec41add",
+        "adapted_run_owned_sha256": "fa1537462aa0230c90a8cccdbce664c992976e15a717dab08516b55376730246",
+        "source_substitutions": 3,
+        "phase_deadline_seconds": {
+          "standing": 600,
+          "initial_constant": 600,
+          "initial_stop": 600,
+          "train": 1800,
+          "final_constant": 600,
+          "final_stop": 600
+        },
+        "app_ready_deadline_seconds": 90,
+        "cleanup_AST_unchanged": true,
+        "original_source_unchanged": true
+      }
+    },
+    "initial_constant_contact_data_audit": {
+      "log_sha256": "150fcbe8f4395ffe83c1d75da203995b028315af41d4af76f09ac54f813ba935",
+      "incomplete_data_warning_count": 0,
+      "reported_capacities": [],
+      "first_warning": null,
+      "last_warning": null,
+      "passed": true,
+      "scope": "Required absence of reported contact/friction data truncation; raw physical gate must also pass"
+    }
+  },
+  "training_log_tail": "leration: 56805.5234\n                              Omni/slip: 0.0093\n                           Omni/nonfoot: 0.0000\n                      Omni/joint_limits: 0.0280\n                           Omni/airtime: -0.0070\n                     Omni/stand_posture: 0.0347\n              Omni/stand_joint_velocity: 0.6324\n             Omni/stand_target_velocity: 2.3433\n                  Omni/stand_raw_action: 0.4206\n                      Omni/terminations: 0.0417\n--------------------------------------------------------------------------------\n                         Iteration time: 1.94s\n                           Time elapsed: 00:01:12\n                                    ETA: 00:15:05\n\n################################################################################\n\u001b[1m                          Learning iteration 1884/2347                          \u001b[0m \n\n                            Total steps: 933888 \n                       Steps per second: 13027 \n                        Collection time: 1.708s \n                          Learning time: 0.178s \n                        Mean value loss: 0.1354\n                    Mean surrogate loss: -0.0073\n                      Mean entropy loss: -16.2074\n                Mean caps_temporal loss: 0.3127\n                 Mean caps_spatial loss: 0.0016\n                Mean caps_weighted loss: 0.0314\n     Mean caps_valid_pair_fraction loss: 0.9506\n     Mean caps_quiet_temporal_mean loss: 0.3102\n    Mean caps_moving_temporal_mean loss: 0.3176\n                            Mean reward: 41.83\n                    Mean episode length: 868.53\n                        Mean action std: 0.10\n                   Omni/linear_tracking: 0.5766\n                      Omni/yaw_tracking: 0.5609\n                   Omni/linear_progress: 0.2309\n                      Omni/yaw_progress: 0.0898\n                 Omni/vertical_velocity: 0.0015\n                   Omni/roll_pitch_rate: 0.0861\n                              Omni/tilt: 0.0009\n                            Omni/height: 0.0000\n                            Omni/torque: 0.5283\n                     Omni/torque_excess: 0.0453\n               Omni/worst_torque_excess: 0.6221\n                        Omni/saturation: 0.1033\n                    Omni/positive_power: 2.9687\n                       Omni/action_rate: 4.5360\n                Omni/joint_acceleration: 56681.0000\n                              Omni/slip: 0.0095\n                           Omni/nonfoot: 0.0002\n                      Omni/joint_limits: 0.0261\n                           Omni/airtime: -0.0076\n                     Omni/stand_posture: 0.0335\n              Omni/stand_joint_velocity: 0.6115\n             Omni/stand_target_velocity: 2.2497\n                  Omni/stand_raw_action: 0.4035\n                      Omni/terminations: 0.0000\n--------------------------------------------------------------------------------\n                         Iteration time: 1.89s\n                           Time elapsed: 00:01:14\n                                    ETA: 00:15:02\n\n################################################################################\n\u001b[1m                          Learning iteration 1885/2347                          \u001b[0m \n\n                            Total steps: 958464 \n                       Steps per second: 12565 \n                        Collection time: 1.781s \n                          Learning time: 0.175s \n                        Mean value loss: 0.1399\n                    Mean surrogate loss: -0.0076\n                      Mean entropy loss: -16.2146\n                Mean caps_temporal loss: 0.3126\n                 Mean caps_spatial loss: 0.0016\n                Mean caps_weighted loss: 0.0314\n     Mean caps_valid_pair_fraction loss: 0.9497\n     Mean caps_quiet_temporal_mean loss: 0.3103\n    Mean caps_moving_temporal_mean loss: 0.3171\n                            Mean reward: 44.91\n                    Mean episode length: 895.13\n                        Mean action std: 0.10\n                   Omni/linear_tracking: 0.5936\n                      Omni/yaw_tracking: 0.5700\n                   Omni/linear_progress: 0.2401\n                      Omni/yaw_progress: 0.1179\n                 Omni/vertical_velocity: 0.0016\n                   Omni/roll_pitch_rate: 0.0853\n                              Omni/tilt: 0.0010\n                            Omni/height: 0.0000\n                            Omni/torque: 0.5281\n                     Omni/torque_excess: 0.0422\n               Omni/worst_torque_excess: 0.5992\n                        Omni/saturation: 0.1035\n                    Omni/positive_power: 2.9640\n                       Omni/action_rate: 4.6237\n                Omni/joint_acceleration: 56872.0000\n                              Omni/slip: 0.0083\n                           Omni/nonfoot: 0.0007\n                      Omni/joint_limits: 0.0233\n                           Omni/airtime: -0.0099\n                     Omni/stand_posture: 0.0320\n              Omni/stand_joint_velocity: 0.5838\n             Omni/stand_target_velocity: 2.1537\n                  Omni/stand_raw_action: 0.3877\n                      Omni/terminations: 0.0000\n--------------------------------------------------------------------------------\n                         Iteration time: 1.96s\n                           Time elapsed: 00:01:16\n                                    ETA: 00:15:00\n\n################################################################################\n\u001b[1m                          Learning iteration 1886/2347                          \u001b[0m \n\n                            Total steps: 983040 \n                       Steps per second: 13273 \n                        Collection time: 1.676s \n                          Learning time: 0.175s \n                        Mean value loss: 0.1649\n                    Mean surrogate loss: -0.0071\n                      Mean entropy loss: -16.2222\n                Mean caps_temporal loss: 0.3140\n                 Mean caps_spatial loss: 0.0016\n                Mean caps_weighted loss: 0.0316\n     Mean caps_valid_pair_fraction loss: 0.9542\n     Mean caps_quiet_temporal_mean loss: 0.3115\n    Mean caps_moving_temporal_mean loss: 0.3187\n                            Mean reward: 45.20\n                    Mean episode length: 912.43\n                        Mean action std: 0.10\n                   Omni/linear_tracking: 0.5800\n                      Omni/yaw_tracking: 0.5764\n                   Omni/linear_progress: 0.2105\n                      Omni/yaw_progress: 0.1190\n                 Omni/vertical_velocity: 0.0015\n                   Omni/roll_pitch_rate: 0.0857\n                              Omni/tilt: 0.0010\n                            Omni/height: 0.0000\n                            Omni/torque: 0.5259\n                     Omni/torque_excess: 0.0419\n               Omni/worst_torque_excess: 0.6017\n                        Omni/saturation: 0.1023\n                    Omni/positive_power: 2.9680\n                       Omni/action_rate: 4.5465\n                Omni/joint_acceleration: 56977.8203\n                              Omni/slip: 0.0097\n                           Omni/nonfoot: 0.0000\n                      Omni/joint_limits: 0.0268\n                           Omni/airtime: -0.0061\n                     Omni/stand_posture: 0.0355\n              Omni/stand_joint_velocity: 0.6446\n             Omni/stand_target_velocity: 2.3723\n                  Omni/stand_raw_action: 0.4263\n                      Omni/terminations: 0.0000\n--------------------------------------------------------------------------------\n                         Iteration time: 1.85s\n                           Time elapsed: 00:01:18\n                                    ETA: 00:14:57\n\n################################################################################\n\u001b[1m                          Learning iteration 1887/2347                          \u001b[0m \n\n                            Total steps: 1007616 \n                       Steps per second: 12596 \n                        Collection time: 1.769s \n                          Learning time: 0.182s \n                        Mean value loss: 0.1204\n                    Mean surrogate loss: -0.0063\n                      Mean entropy loss: -16.2323\n                Mean caps_temporal loss: 0.3129\n                 Mean caps_spatial loss: 0.0016\n                Mean caps_weighted loss: 0.0314\n     Mean caps_valid_pair_fraction loss: 0.9576\n     Mean caps_quiet_temporal_mean loss: 0.3103\n    Mean caps_moving_temporal_mean loss: 0.3178\n                            Mean reward: 47.36\n                    Mean episode length: 938.60\n                        Mean action std: 0.10\n                   Omni/linear_tracking: 0.5912\n                      Omni/yaw_tracking: 0.5860\n                   Omni/linear_progress: 0.2385\n                      Omni/yaw_progress: 0.1385\n                 Omni/vertical_velocity: 0.0015\n                   Omni/roll_pitch_rate: 0.0861\n                              Omni/tilt: 0.0008\n                            Omni/height: 0.0000\n                            Omni/torque: 0.5249\n                     Omni/torque_excess: 0.0425\n               Omni/worst_torque_excess: 0.5997\n                        Omni/saturation: 0.1023\n                    Omni/positive_power: 2.9298\n                       Omni/action_rate: 4.5517\n                Omni/joint_acceleration: 57046.8555\n                              Omni/slip: 0.0079\n                           Omni/nonfoot: 0.0001\n                      Omni/joint_limits: 0.0273\n                           Omni/airtime: -0.0082\n                     Omni/stand_posture: 0.0325\n              Omni/stand_joint_velocity: 0.5899\n             Omni/stand_target_velocity: 2.1684\n                  Omni/stand_raw_action: 0.3909\n                      Omni/terminations: 0.0417\n--------------------------------------------------------------------------------\n                         Iteration time: 1.95s\n                           Time elapsed: 00:01:19\n                                    ETA: 00:14:55\n\n",
+  "last_reported_native_iteration": [
+    "1887",
+    "2347"
+  ],
+  "coordination_sha256": "35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3",
+  "Stage2_complete": false,
+  "scope": "Historical in-progress snapshot; no final training or quality acceptance"
+}

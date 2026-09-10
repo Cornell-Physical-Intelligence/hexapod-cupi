@@ -282,3 +282,8 @@ The active velocity comparisons keep their own immutable source, including the c
 ### Research-poster publication release, 10 September 2026
 
 The preceding contact-telemetry manifest remains byte-for-byte preserved. Publishing `tools/project_site.py` expands the integrated source inventory, so the new release is `isaaclab/deploy/stage2_research_poster_20260910_pipeline.sha256`. The checker’s current default and CI select it; its coverage also retains the preceding manifest. No robot runtime, C-study source, physics, checkpoint or acceptance gate changes. The first poster commit passed all code/robot tests and deployed Pages, then correctly failed release coverage because the new builder was missing. The separate failure/check record is `artifacts/project_review_2026-09-10/poster_release_check_001/README.md`.
+
+
+### Causal sensor transport release, 10 September 2026
+
+`isaaclab/deploy/stage3_sensor_transport_20260910_pipeline.sha256` selects the integrated transport correction, its immutable preparation/review/integration evidence map and the prior poster manifest. The checker default and CI select this new428-file release;112 historical paths remain verified. The evidence map binds the portable regression tests and exact old-source fixture as well as the adopted runtime. The previous poster manifest remains byte-for-byte unchanged. This source inventory change does not modify the separately frozen Spark C-study run or qualify terrain/perception.

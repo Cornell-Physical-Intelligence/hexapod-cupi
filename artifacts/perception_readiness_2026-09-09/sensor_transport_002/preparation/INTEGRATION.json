@@ -1,0 +1,39 @@
+{
+  "schema": "phase3_sensor_transport_v2",
+  "status": "CPU-tested successor; independent review pending; not adopted",
+  "original_sha256": "101f6a59488f702117e93da87354b0d68c3d475e50421f445a12d9caf1491336",
+  "new_runtime_sha256": "b35c37152c2a7875a26acb47467e26c9102cb6f082d5dcf592a86b3410ea5a7a",
+  "runtime_changes": {
+    "newest_capture": "lexicographic capture_time_s then enqueue_sequence; valid mask per row; invalid frames do not advance selected order",
+    "clock": "finite nonnegative capture and read times independently nondecreasing per stream; equal timestamps allowed; no negative-age delivery",
+    "reset": "None starts a new full clock epoch; a row list (including all rows) retains clocks; pending selected rows invalidated",
+    "inference": "queued/latest and IMU persistent buffers created under inference_mode(False), no_grad",
+    "scope": "latest delivered frame only, unchanged noise/dropout/cadence/public float32 age; no drain API, actor or terrain integration"
+  },
+  "integration_files": [
+    {
+      "source": "sensor_model.py",
+      "destination": "isaaclab/hexapod_phase3/sensor_model.py"
+    },
+    {
+      "source": "original/sensor_model.py",
+      "destination": "isaaclab/tests/fixtures/phase3_sensor_transport_v1.py"
+    },
+    {
+      "source": "integration/test_phase3_sensor_transport.py",
+      "destination": "isaaclab/tests/test_phase3_sensor_transport.py"
+    }
+  ],
+  "additional_required_documentation": [
+    "isaaclab/hexapod_phase3/README.md",
+    "STATUS.md if execution state changes",
+    "site/updates/<dated bounded evidence record>.json",
+    "site/project.json if presented sensor implementation changes"
+  ],
+  "checks": [
+    "PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s isaaclab/tests -p test_phase3_sensor_transport.py -v",
+    "python3 tools/project_site.py check --base <integration-base-SHA>",
+    "python3 tools/project_site.py build"
+  ],
+  "no_GPU_or_hardware_admission": true
+}

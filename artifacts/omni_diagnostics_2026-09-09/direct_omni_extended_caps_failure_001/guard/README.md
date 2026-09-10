@@ -1,0 +1,19 @@
+# Prepared extended normal-CAPS guard
+
+This is a frozen CPU-tested guard for a separately authorized500-update experiment. The exact completed smoke004 invocation and seven terminal/restoration hashes are now bound from immutable audit002 and actual fetched receipt bytes. Synthetic tests never supply runtime evidence. Root owns live preflight, dispatch and publication; this frozen preparation alone does not grant a GPU slot.
+
+The new unit is `hexapod-direct-omni-train-extended-caps-001-20260910.service`, output `BASE/direct_omni_train_extended_caps_001`, pause062. It uses exact source004/native005/host004, original1971 checkpoint, explicit `--allocation extended --branch caps --smoke BASE/direct_omni_train_smoke_004`. Source009 remains the pinned supervisor. Same-source completed quiet-priority smoke is required by the native contract; older smoke, incomplete evaluations or source substitutions are rejected.
+
+The six phases are standing, initial_constant, initial_stop, train, final_constant, final_stop. Native selection is1024×24×500 with ordinary CAPS temporal/spatial/quiet weights0.1/0.1/0.1. Host004's explicitly versioned runtime adapter gives training1800 seconds, other phases600 seconds each, and preserves90-second AppReady. Their worst-case phase sum is4800 seconds. The outer owner bound is5400 seconds plus180 stop; a95-minute restoration fallback is armed before timer mutation. This margin covers the declared phases and cleanup; it does not authorize more updates or automatic continuation.
+
+The previous owner is smoke004 under pause061. Required evidence is its exact completed campaign, four completed phase jobs and exact pause/restored receipts. Validation checks all four accepted phases, source/host identity, two completed updates, immutable terminal inputs, original active-timer restoration, inactive/failed live unit with either matching invocation or a collected empty invocation, and all eight exact prior container names/IDs absent. Unknown Docker errors, live/replaced owners, missing cleanup or changed receipts fail closed before pause.
+
+Original dual locks, CUDA ancestry checks, graceful timer/service pause, revalidation after pause and before launch, exact owner cleanup and conservative uncertain-dispatch restoration remain intact. The embedded restorer is byte-identical to the reviewed pilot guard. Coordination remains `35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3`; unrelated workloads are not silently competed with. No remote command has been executed by this preparation. ROOT_SMOKE004_TERMINAL_AUDIT.json preserves the independently observed inactive exit0, all eight exact container identifiers absent, and restored pause061; previous_owner holds the exact seven fetched bytes. These are historical terminal facts. The host repeats full source and same-source smoke validation before pause and before dispatch.
+
+38 CPU tests pass in tests_final.log; tests_draft_001.log preserves the earlier pending-pin run. Tests exercise actual guard call order with fake external effects, fallback-before-pause, post-pause input change and restoration, actual native500 selection, actual frozen host004 phase/deadline proof, prior-owner/invocation/receipt refusal, and the exact embedded cleanup/restorer against fake container outcomes. The main body AST is preserved except declared selection, reason, timer name and time bounds; the original source and guard remain unchanged.
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 -B -m unittest discover -s tmp/direct_omni_train_extended_caps_guard_001 -p 'test_*.py' -v
+```
+
+Acquisition of500 updates does not imply physical or Stage2 acceptance. Root's later publication must follow docs/PROJECT_SITE.md, append the bounded central site/update record, update STATUS/relevant Markdown and validate site check/build. This preparation changes only ignored tmp files.

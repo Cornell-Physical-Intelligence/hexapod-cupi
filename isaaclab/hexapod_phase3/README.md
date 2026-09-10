@@ -122,6 +122,60 @@ The transport values and bias/random-walk values are conservative engineering
 defaults, not measurements from this robot. They should become randomized
 ranges after bagged hardware data is available.
 
+## Sensor transport v2: ordering, clocks and reset
+
+[`sensor_model.py`](sensor_model.py) declares `phase3_sensor_transport_v2`.
+It corrects three CPU-reproduced failures: a delayed old frame replacing a newer
+sample, persistent inference tensors rejecting a later selective reset, and
+rewound or nonfinite clocks admitting invalid sample ages. It preserves the
+default noise, latency, dropout, cadence and public tensor formats above.
+
+Delivery still follows modeled arrival time. Each environment independently
+retains its newest **valid** capture, ordered by capture time and then enqueue
+sequence. A later-enqueued packet wins an equal-time tie only for its valid rows.
+An invalid packet cannot replace a held value or renew its age. Internal ordering
+uses float64 capture times and integer sequence numbers; public capture-time and
+age tensors retain their original float32 representation. This is a latest-frame
+API, not a drain of every delivered packet, and returned tensors remain owned by
+the model for read-only consumption.
+
+Capture and read times are finite, nonnegative simulation seconds within an
+epoch. They must each be nondecreasing per stream; equal times are allowed.
+A backlogged capture may precede the latest read if capture order itself does
+not rewind. A sample captured after `now` cannot be delivered, including within
+the readiness tolerance. Invalid capture times are rejected before noise draws
+or IMU bias updates, and model reads validate all three stream clocks before
+draining any stream. IMU integration intervals must also be finite and positive.
+Payload keys, shapes, dtypes and devices remain fixed within an epoch.
+
+`reset(None)` clears every stream and starts a new clock epoch. In contrast,
+`reset(env_ids)` invalidates only the selected rows of queued and held samples
+and their IMU initialization, while preserving peer state and all stream clocks.
+An explicit list containing every row still retains the clock epoch; use the
+full-reset API to restart simulation time. Pending samples for reset rows cannot
+reappear. There is no external packet-epoch protocol for separately injected
+late packets. Persistent queued, held and IMU state stays writable even when
+capture or read occurs inside `torch.inference_mode()`. Shared random-generator
+semantics are unchanged; selective reset does not promise independent future
+random draws across different reset schedules.
+
+The [portable CPU regressions](../tests/test_phase3_sensor_transport.py) preserve
+the exact original source as a historical fixture and reproduce each old failure
+before testing the correction. Their seeded nominal comparison checks every
+value, validity mask, public timestamp and age bitwise over 401 reads, including
+configured cadences, selective reset and a stale read. Other cases cover
+per-row masks, equal-time ties, latency inversions, mixed pending/delivered reset
+and invalid-clock mutation isolation. Run them with:
+
+```sh
+uv run python -m unittest discover -s isaaclab/tests -p test_phase3_sensor_transport.py
+```
+
+This integration changes no actor, physics or qualification gate. The separate
+terrain-map 250 ms lease is unchanged; the float32 public age channel is not a
+new high-precision timing guarantee. Sensor calibration, terrain-map ingestion
+and full-robot terrain performance still need their own evidence.
+
 ## Smoke test
 
 The command below documents the original stationary smoke scene. Before using it,

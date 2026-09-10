@@ -1,0 +1,138 @@
+--- analyzer003/analyze.py
++++ analyzer004/analyze.py
+@@ -4,11 +4,11 @@
+ import numpy as np
+ from optimizer_summary import summarize as summarize_optimizer, human as optimizer_human
+ 
+-NATIVE_FREEZE='1ab678beeba6bf74978c210c4e38f13655e25728fe66e3007e3b1db5e19b6b20'
++NATIVE_FREEZE='0bdd2abf3811e68ac59e4fbc325eb5d2bb96afd2183eb84c4d37faeb86ff9e9f'
+ ORIGINAL='1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8'
+-SCHEMA='direct315_quiet_priority_native_v3'
+-SOURCE='ef962070bd770d03553eb824fb6caccada7d6a06ac26d2f180bad068f0a9cc62'
+-PLAN='eee25089a65ec112f5eeed9c70f6310ef019ca5f077618c736fcfaa859739fc2'
++SCHEMA='direct315_extended_native_v4'
++SOURCE='aa70659d33243f1e28e9c71b1a7f9d33341642db770fd7356192573a26fe904e'
++PLAN='b2286828148c89fb34624d38beaf84b389584f7bda4d2648512e017da4b50acb'
+ QUIET_GATES={'max_planar_excursion_m':.01,'max_heading_excursion_deg':2.,'max_joint_velocity_rms_rad_s':.03,
+              'max_joint_position_range_rad':.02,'max_target_step_abs_p95_rad_per_20ms':.002,
+              'max_requested_torque_saturation_fraction':.005,'max_applied_torque_nm':1.60001}
+@@ -230,6 +230,42 @@
+             'cuda_peak_allocated_bytes':receipt.get('cuda_peak_allocated_bytes'),'cuda_peak_reserved_bytes':receipt.get('cuda_peak_reserved_bytes'),
+             'per_row':rows,'scope':'Raw finite episode failures remain failures; 50Hz endpoint telemetry is not substep torque proof'}
+ 
++
++def extended_receipt_review(inputs, campaign, receipt, selected, host):
++    """Curated-copy check; full ordinary autosave inventory remains a host audit."""
++    require(selected.get('allocation')=='extended' and selected.get('updates')==500 and selected.get('replicas')==1024 and selected.get('controls_per_update')==24,'Wrong extended allocation')
++    milestones=[1,10,25,50,100,250,500]
++    result={'selected_updates':500,'selected_controls':12000,'selected_replicas':1024,
++            'selected_transitions':12288000,'decision_milestones':milestones,
++            'producer_complete':receipt.get('complete') is True,
++            'producer_updates_completed':receipt.get('updates_completed'),
++            'ordinary_autosaves_scope':'Ordinary model_*.pt files are not read by this curated analyzer. Count/cadence is producer and host receipt evidence; verify all remote files with the separate terminal inventory.',
++            'admission':False}
++    if receipt.get('complete') is not True:
++        result['status']='incomplete; retain native autosave prefix and never infer final/decision completion'
++        return result
++    expected={'updates':500,'controls_per_update':24,'replicas':1024,'fresh_original_only':True,
++        'ordinary_save_interval':1,'decision_updates':milestones,'gradient_updates':milestones,
++        'gradient_minibatches':[1,20],'minibatches_per_update':20,
++        'train_deadline_seconds':1800,'other_phase_deadline_seconds':600,'automatic_continuation':False,
++        'ordinary_autosaves':500,'decision_checkpoints':7,'first_native_iteration':1847,
++        'last_native_iteration':2346,'actual_controls':12000,'actual_transitions':12288000,
++        'optimizer_minibatches':10000,'sparse_actor_gradient_rows':14}
++    require(receipt.get('extended_readback')==expected,'Missing/different extended runtime readback')
++    require(receipt.get('updates_completed')==500 and receipt.get('initial_runner_iteration')==1847 and receipt.get('final_runner_iteration')==2346,'Extended progress/native iteration differs')
++    decisions=receipt.get('decision_checkpoints')
++    require(isinstance(decisions,dict) and set(decisions)=={str(x) for x in milestones},'Missing/extra extended decision checkpoint')
++    for update in milestones:
++        row=decisions[str(update)];require(isinstance(row,dict),'Malformed extended decision row')
++        require(row.get('file')=='decision_'+str(update).zfill(3)+'.pt' and row.get('completed_updates')==update and row.get('native_iteration')==1847+update-1,'Extended checkpoint relative label differs')
++        require(sha(inputs.pin(campaign/'train/policy'/row['file']))==row.get('sha256'),'Extended decision checkpoint changed')
++    if host.get('status')=='completed':
++        accepted=host.get('accepted_phases',{}).get('train',{})
++        require(accepted.get('receipt_sha256')==sha(inputs.pin(campaign/'train/training_receipt.json')) and accepted.get('updates_completed')==500,'Extended accepted host receipt differs')
++        require(accepted.get('optimizer_diagnostics')=={'schema':'direct315_actor_gradients_v1','updates':500,'minibatches':10000,'sparse_actor_gradient_rows':14},'Extended accepted optimizer count differs')
++    result.update(status='completed declared cadence and seven local decisions verified; ordinary autosaves require separate full remote inventory',readback=expected)
++    return result
++
+ def human(report):
+     lines=['# Direct PPO comparison','',report['conclusion'],'',
+            'Acquisition completion is not physical acceptance. Every result retains the original 1.6 Nm cap and quiet bounds; no threshold or statistical significance is invented.','']
+@@ -239,6 +275,8 @@
+     if report.get('training_receipt_forensics'):
+         f=report['training_receipt_forensics'];lines += [f"Receipt-only evidence: producer reports {f.get('updates_completed')} updates, complete={f.get('complete')}, strict reload={f.get('reload_passed')}. Raw/checkpoint verification remains separate.",'']
+     if report.get('optimizer_diagnostics') is not None:lines += optimizer_human(report['optimizer_diagnostics'])+['']
++    if report.get('extended_allocation'):
++        extended=report['extended_allocation'];lines += [extended['ordinary_autosaves_scope'], '', 'Extended decision milestones: '+', '.join(map(str,extended['decision_milestones']))+'. '+extended['status'], '']
+     comparison=report.get('constant_comparison')
+     if comparison:
+         lines += ['Constant directions use four-replica summaries. Joint-rate traces cover one replica per direction; those trace values are never represented as all four.','',
+@@ -268,7 +306,7 @@
+     campaign,cold,output=map(lambda p:Path(p).resolve(),(campaign,cold,output))
+     require(not output.exists() and campaign not in output.parents and cold not in output.parents,'Fresh output outside immutable inputs required')
+     inputs=Inputs()
+-    report={'schema':'direct315_quiet_priority_matched_review_v2','native_contract_freeze_sha256':NATIVE_FREEZE,
++    report={'schema':'direct315_extended_matched_review_v3','native_contract_freeze_sha256':NATIVE_FREEZE,
+             'source_manifest_sha256':SOURCE,'plan_sha256':PLAN,
+             'errors':[],'Stage2_complete':False,'automatic_continuation':False,'stop_baseline_available':False,
+             'phase_receipts':{},'scope':'Read-only numerical and forensic review, not host admission or physical qualification'}
+@@ -292,14 +330,14 @@
+         require(identity.get('source_manifest_sha256')==SOURCE and identity.get('plan_sha256')==PLAN,'Unbound native source/plan')
+         require(len(SOURCE)==64 and len(PLAN)==64,'Analyzer source binding is not finalized')
+         require(identity.get('checkpoint_sha256')==ORIGINAL and identity.get('actor_width')==315 and identity.get('critic_width')==318,'Original checkpoint or observation contract differs')
+-        require(allocation in ('smoke','pilot') and branch in ('quiet_priority','caps','curriculum'),'Undeclared branch/allocation')
++        require(allocation in ('smoke','pilot','extended') and branch in ('quiet_priority','caps','curriculum'),'Undeclared branch/allocation')
+         require(allocation!='smoke' or branch=='quiet_priority','This source requires its own quiet-priority smoke')
+         expected={'schema':SCHEMA,'allocation':allocation,'branch':branch,
+-            'replicas':32 if allocation=='smoke' else 1024,'controls_per_update':24,'updates':2 if allocation=='smoke' else 50,
++            'replicas':32 if allocation=='smoke' else 1024,'controls_per_update':24,'updates':2 if allocation=='smoke' else (500 if allocation=='extended' else 50),
+             'caps':{'temporal_weight':.1 if branch!='curriculum' else 0.,'spatial_weight':.1 if branch!='curriculum' else 0.,
+                     'noise_scale':1.,'noise_seed':1157,'quiet_temporal_weight':1.0 if branch=='quiet_priority' else (.1 if branch=='caps' else 0.)}}
+         require(selected==expected,'Native training selection differs')
+-        if allocation=='pilot':
++        if allocation in ('pilot','extended'):
+             require(all(isinstance(identity.get(k),str) and re.fullmatch('[0-9a-f]{64}',identity[k]) for k in ('smoke_campaign_sha256','smoke_state_sha256','smoke_receipt_sha256')),'Missing same-source smoke provenance hashes')
+     check('campaign identity',campaign_identity)
+     def cold_identity():
+@@ -307,7 +345,7 @@
+         require(old.get('status')=='completed' and old.get('terminal_inputs_unchanged') is True,'Cold baseline integrity incomplete')
+     check('cold baseline identity',cold_identity)
+     expected_phases=(['standing','train','final_constant','final_stop'] if allocation=='smoke' else
+-                     ['standing','initial_constant','initial_stop','train','final_constant','final_stop'] if allocation=='pilot' else [])
++                     ['standing','initial_constant','initial_stop','train','final_constant','final_stop'] if allocation in ('pilot','extended') else [])
+     check('phase allocation',lambda:require(bool(expected_phases) and c.get('planned_phases')==expected_phases,'Campaign phase allocation differs'))
+     for phase in expected_phases:
+         def phase_identity():
+@@ -334,6 +372,8 @@
+         diag=attempt('optimizer_diagnostics',lambda:summarize_optimizer(receipt))
+         if diag is not None and diag['errors']:
+             report['errors'].append('Optimizer diagnostic inventory has '+str(len(diag['errors']))+' evidence gaps; see optimizer_diagnostics.errors')
++        if allocation=='extended':
++            attempt('extended_allocation',lambda:extended_receipt_review(inputs,campaign,receipt,selected,c))
+         attempt('training',lambda:training(inputs,campaign/'train',campaign/'logs/train.log'))
+         if c.get('status')=='completed':
+             check('completed training receipt',lambda:require(receipt.get('complete') is True and report.get('training',{}).get('complete') is True,'Completed campaign lacks fully verified training'))
+@@ -380,9 +420,9 @@
+         report['next_decision']='Resolve the listed infrastructure/evidence failure before allocating a successor; no automatic training or promotion.'
+     elif allocation=='smoke':
+         report['conclusion']='The two-update integration smoke completed. It establishes execution/reload evidence, not convergence or smooth walking.'
+-        report['next_decision']='Review every directional and quiet failure before separately dispatching the bounded quiet-priority pilot. Existing failures remain unqualified.'
++        report['next_decision']='Review every directional and quiet failure before separately dispatching one explicitly selected bounded allocation. Existing failures remain unqualified.'
+     else:
+-        report['conclusion']='The bounded pilot completed. Physical changes and regressions remain separate from optimizer loss and sparse gradients.'
++        report['conclusion']='The bounded allocation completed. Physical changes and regressions remain separate from optimizer loss and sparse gradients.'
+         report['next_decision']='Compare the matched constant and stop evidence with the preserved pilots. Losses, gradient alignment and learning-rate trends alone cannot promote or extend training.'
+     output.mkdir(parents=True)
+     (output/'report.json').write_text(json.dumps(report,indent=2,allow_nan=False)+'\n')
+--- analyzer003/optimizer_summary.py
++++ analyzer004/optimizer_summary.py
+@@ -101,7 +101,7 @@
+                 valid_count_rows += 1
+                 for key in counts: counts[key] += pair[key]
+             gradient = mb.get('gradient')
+-            expected_sparse = update_index in (1, 10, 25, 50) and mb_index in (1, 20)
++            expected_sparse = update_index in ((1, 10, 25, 50, 100, 250, 500) if selection.get('allocation') == 'extended' else (1, 10, 25, 50)) and mb_index in (1, 20)
+             if expected_sparse and not isinstance(gradient, dict):
+                 errors.append(mb_label + ': missing scheduled sparse gradient')
+             elif gradient is not None:
