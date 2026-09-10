@@ -1,0 +1,373 @@
+{
+  "schema": "locomotion_primary_source_matrix_v1",
+  "review_date": "2026-09-10",
+  "scope": "Breadth-first training-recipes review; literature evidence, not an adoption or run-admission receipt.",
+  "method": "Primary papers, author project pages, and official repositories only. Missing values mean not verified in reviewed sources, not absent from the full literature. Repository default configurations may differ from paper experiments.",
+  "works": [
+    {
+      "id": "hwangbo2019",
+      "title": "Learning agile and dynamic motor skills for legged robots",
+      "authors": [
+        "Jemin Hwangbo",
+        "Joonho Lee",
+        "Alexey Dosovitskiy",
+        "Dario Bellicoso",
+        "Vassilios Tsounis",
+        "Vladlen Koltun",
+        "Marco Hutter"
+      ],
+      "year": 2019,
+      "venue": "Science Robotics",
+      "urls": [
+        "https://arxiv.org/abs/1901.08652",
+        "https://arxiv.org/pdf/1901.08652"
+      ],
+      "robot": "ANYmal",
+      "motors": "12 series-elastic actuators; learned actuator model. Continuous rating not extracted.",
+      "algorithm": "TRPO, not PPO",
+      "observations": "Proprioception, body motion, joint history and requested forward/lateral/yaw velocity.",
+      "action": "12 joint-position targets; learned actuator model maps target/history to torque.",
+      "command_scope": "Three-component body twist.",
+      "training_cost": "Locomotion approximately 4 h / 250 million transitions; recovery approximately 11 h. Desktop CPU plus GPU; exact GPU not verified.",
+      "lesson": "A fixed foot trajectory is unnecessary; actuator fidelity and recoverable episodes matter.",
+      "limitation": "Different actuator architecture; its gait and training duration do not establish feasibility for RS05.",
+      "confidence": "Primary paper; exact GPU and actuator rating unverified."
+    },
+    {
+      "id": "rudin2022",
+      "title": "Learning to Walk in Minutes Using Massively Parallel Deep Reinforcement Learning",
+      "authors": [
+        "Nikita Rudin",
+        "David Hoeller",
+        "Philipp Reist",
+        "Marco Hutter"
+      ],
+      "year": 2022,
+      "venue": "CoRL / PMLR 164",
+      "urls": [
+        "https://proceedings.mlr.press/v164/rudin22a.html",
+        "https://arxiv.org/html/2109.11978v1",
+        "https://github.com/leggedrobotics/legged_gym",
+        "https://raw.githubusercontent.com/leggedrobotics/legged_gym/master/legged_gym/envs/base/legged_robot_config.py"
+      ],
+      "robot": "ANYmal C; additional simulated robots",
+      "motors": "12 ANYmal joint actuators, PD targets and actuator modeling; rating not extracted.",
+      "algorithm": "PPO",
+      "observations": "Proprioception and commands; terrain heights in the perceptive configuration.",
+      "action": "Joint-position offsets around nominal stance, through PD control.",
+      "command_scope": "Forward/lateral/yaw commands; terrain and command curricula.",
+      "training_cost": "Flat under 4 min; rough terrain under 20 min. RTX A6000 plus i9-11900K, 4,096 robots, batch 98,304, 1,500 iterations.",
+      "lesson": "GPU-resident collection and curriculum can dominate throughput; direct position control is a strong comparator.",
+      "limitation": "Paper hardware is not Spark; generic repository reward/action defaults are not a validated hexapod recipe.",
+      "confidence": "Paper plus official code; base configuration distinguished from robot-specific configuration."
+    },
+    {
+      "id": "rma2021",
+      "title": "RMA: Rapid Motor Adaptation for Legged Robots",
+      "authors": [
+        "Ashish Kumar",
+        "Zipeng Fu",
+        "Deepak Pathak",
+        "Jitendra Malik"
+      ],
+      "year": 2021,
+      "venue": "Robotics: Science and Systems",
+      "urls": [
+        "https://arxiv.org/abs/2107.04034",
+        "https://arxiv.org/html/2107.04034v1",
+        "https://ashish-kmr.github.io/rma-legged-robots/"
+      ],
+      "robot": "Unitree A1, approximately 12 kg",
+      "motors": "12 joints with PD position control; actuator rating not extracted.",
+      "algorithm": "PPO base policy, then adaptation module training",
+      "observations": "30-dimensional proprioceptive/contact state, previous action, learned extrinsics; 50-step history for adaptation.",
+      "action": "12 joint-position targets, base policy at 100 Hz.",
+      "command_scope": "Original experiment principally forward, capped at 0.35 m/s; lateral/yaw motion penalized.",
+      "training_cost": "Base approximately 24 h / 1.2 billion steps; adaptation approximately 3 h / 80 million steps. Desktop with one GPU, model not verified.",
+      "lesson": "History-based adaptation and gradually increasing penalties are useful; early penalties can favor standing.",
+      "limitation": "Original RMA is not an omnidirectional command curriculum.",
+      "confidence": "Primary paper and author project."
+    },
+    {
+      "id": "walktheseways2023",
+      "title": "Walk These Ways: Tuning Robot Control for Generalization with Multiplicity of Behavior",
+      "authors": [
+        "Gabriel B. Margolis",
+        "Pulkit Agrawal"
+      ],
+      "year": 2023,
+      "venue": "CoRL 2022 / PMLR 205",
+      "urls": [
+        "https://proceedings.mlr.press/v205/margolis23a.html",
+        "https://proceedings.mlr.press/v205/margolis23a/margolis23a.pdf",
+        "https://gmargo11.github.io/walk-these-ways/",
+        "https://github.com/Improbable-AI/walk-these-ways"
+      ],
+      "robot": "Unitree Go1 Edu",
+      "motors": "12 joints, PD Kp 20 / Kd 0.5; actuator network and 20 ms delay model.",
+      "algorithm": "PPO",
+      "observations": "Proprioception, 30-step history, body commands, behavior commands and timing.",
+      "action": "12 nominal-stance-relative position targets at 50 Hz; gait/style commands influence rewards and policy.",
+      "command_scope": "Body twist plus gait phase, frequency, posture, clearance and stance geometry.",
+      "training_cost": null,
+      "lesson": "Expose useful gait diversity instead of fixing one support pattern; velocity zero can still mean stepping in place.",
+      "limitation": "Does not establish a quiet-stand guarantee; wall-clock training cost not verified in reviewed sources.",
+      "confidence": "Primary paper, author project and official code."
+    },
+    {
+      "id": "pmtg2018",
+      "title": "Policies Modulating Trajectory Generators",
+      "authors": [
+        "Atil Iscen",
+        "Ken Caluwaerts",
+        "Jie Tan",
+        "Tingnan Zhang",
+        "Erwin Coumans",
+        "Vikas Sindhwani",
+        "Vincent Vanhoucke"
+      ],
+      "year": 2018,
+      "venue": "CoRL / PMLR 87",
+      "urls": [
+        "https://proceedings.mlr.press/v87/iscen18a/iscen18a.pdf",
+        "https://proceedings.mlr.press/v87/iscen18a.html"
+      ],
+      "robot": "Ghost Robotics Minitaur",
+      "motors": "Leg/joint trajectory actuation; exact motor model and rating not extracted.",
+      "algorithm": "PPO and augmented random search comparisons",
+      "observations": "IMU-derived state, generator state and desired speed.",
+      "action": "Generator modulation plus direct correction of trajectory output.",
+      "command_scope": "Demonstrated locomotion behaviors and speed control; not a full terrain-navigation system.",
+      "training_cost": "Some linear-policy experiments succeed within 1,000 rollouts; wall-clock duration not verified.",
+      "lesson": "A prior can accelerate learning while preserving authority over timing and motion.",
+      "limitation": "A fixed generator plus a tiny bounded correction is materially more restrictive than the paper architecture.",
+      "confidence": "Primary proceedings paper; rollout count is not a wall-clock estimate."
+    },
+    {
+      "id": "lee2020",
+      "title": "Learning Quadrupedal Locomotion over Challenging Terrain",
+      "authors": [
+        "Joonho Lee",
+        "Jemin Hwangbo",
+        "Lorenz Wellhausen",
+        "Vladlen Koltun",
+        "Marco Hutter"
+      ],
+      "year": 2020,
+      "venue": "Science Robotics",
+      "urls": [
+        "https://arxiv.org/abs/2010.11251",
+        "https://arxiv.org/pdf/2010.11251",
+        "https://github.com/leggedrobotics/learning_quadrupedal_locomotion_over_challenging_terrain_supplementary"
+      ],
+      "robot": "ANYmal B and C",
+      "motors": "12 joint actuators, learned actuator model; PD control at 400 Hz.",
+      "algorithm": "Privileged reinforcement-learning teacher, history-based student; exact optimizer not re-verified here.",
+      "observations": "Proprioception, command, phase and history; privileged teacher sees additional terrain/dynamics information.",
+      "action": "At 50 Hz: four leg-frequency controls plus 12 foot-position residuals; IK to joint targets.",
+      "command_scope": "Velocity tracking across an adaptive terrain curriculum.",
+      "training_cost": "Teacher approximately 12 h; student approximately 4 h, i7-8700K plus RTX 2080 (supplementary table).",
+      "lesson": "A close reference-residual precedent gives the learner phase/frequency and foot-placement authority.",
+      "limitation": "Quadruped phase structure and motor reserve do not transfer directly to this hexapod.",
+      "confidence": "Primary paper and supplementary source; no optimizer guess."
+    },
+    {
+      "id": "miki2022",
+      "title": "Learning robust perceptive locomotion for quadrupedal robots in the wild",
+      "authors": [
+        "Takahiro Miki",
+        "Joonho Lee",
+        "Jemin Hwangbo",
+        "Lorenz Wellhausen",
+        "Vladlen Koltun",
+        "Marco Hutter"
+      ],
+      "year": 2022,
+      "venue": "Science Robotics",
+      "urls": [
+        "https://arxiv.org/abs/2201.08117",
+        "https://arxiv.org/html/2201.08117v1",
+        "https://leggedrobotics.github.io/rl-perceptiveloco/"
+      ],
+      "robot": "ANYmal",
+      "motors": "12 actuated joints; exact motor rating not extracted.",
+      "algorithm": "PPO teacher, recurrent perceptive student",
+      "observations": "Proprioception, phase/history, commands and height samples; student gates noisy exteroception using recurrent state.",
+      "action": "Four phase increments plus 12 joint residuals over an IK-derived nominal foot trajectory.",
+      "command_scope": "Forward/lateral/yaw commands on natural terrain.",
+      "training_cost": null,
+      "lesson": "A useful locomotor can later consume uncertain terrain information through a trained recurrent interface.",
+      "limitation": "Ideal teacher height samples are not deployable sensor measurements; training wall time not verified.",
+      "confidence": "Primary paper and author project."
+    },
+    {
+      "id": "dreamwaq2023",
+      "title": "DreamWaQ: Learning Robust Quadrupedal Locomotion With Implicit Terrain Imagination via Deep Reinforcement Learning",
+      "authors": [
+        "I Made Aswin Nahrendra",
+        "Byeongho Yu",
+        "Hyun Myung"
+      ],
+      "year": 2023,
+      "venue": "ICRA",
+      "urls": [
+        "https://arxiv.org/abs/2301.10602",
+        "https://arxiv.org/pdf/2301.10602",
+        "https://sites.google.com/view/dreamwaq"
+      ],
+      "robot": "Unitree A1",
+      "motors": "12 joint targets; PD Kp 28 / Kd 0.7 at 200 Hz.",
+      "algorithm": "PPO with asymmetric critic and context estimation",
+      "observations": "Five-frame proprioception/command/action history; estimated velocity and latent terrain context.",
+      "action": "12 desired joint angles equal nominal stance plus policy action.",
+      "command_scope": "Body-twist command curriculum and progressively harder terrain.",
+      "training_cost": "Approximately 1 h, 4,096 agents, RTX 3060 Ti plus i7-8700 / 32 GB RAM.",
+      "lesson": "Direct joint targets with short history are a simpler terrain-ready comparator; first/second action differences shape smoothness.",
+      "limitation": "Blind contact-based inference cannot provide advance visibility of holes; energy measurements depend on trustworthy rates.",
+      "confidence": "Primary paper; no unofficial reproduction presented as official code."
+    },
+    {
+      "id": "caps2021",
+      "title": "Regularizing Action Policies for Smooth Control with Reinforcement Learning",
+      "authors": [
+        "Siddharth Mysore",
+        "Bassel Mabsout",
+        "Renato Mancuso",
+        "Kate Saenko"
+      ],
+      "year": 2021,
+      "venue": "ICRA",
+      "urls": [
+        "https://ai.bu.edu/caps/",
+        "https://arxiv.org/abs/2012.06644",
+        "https://cs-people.bu.edu/rmancuso/files/papers/ICRA21_1616_FI.pdf"
+      ],
+      "robot": "Simulation benchmarks and a physical quadrotor",
+      "motors": "Quadrotor motor control, not a legged actuator validation.",
+      "algorithm": "Temporal and spatial policy-output regularization added to RL",
+      "observations": "Task-specific; nearby states and successive states used in additional training losses.",
+      "action": "Task-specific motor action; directly regularizes policy output rather than only reward or output filtering.",
+      "command_scope": "Smooth control, not an omnidirectional legged-locomotion recipe.",
+      "training_cost": null,
+      "lesson": "A small policy-regularization ablation may address jitter without introducing a scripted gait.",
+      "limitation": "Quadrotor power savings cannot be projected onto this robot; preserve disturbance and command response.",
+      "confidence": "Author project and primary paper; motor model and training cost unverified."
+    },
+    {
+      "id": "rapid2022",
+      "title": "Rapid Locomotion via Reinforcement Learning",
+      "authors": [
+        "Gabriel B. Margolis",
+        "Ge Yang",
+        "Kartik Paigwar",
+        "Tao Chen",
+        "Pulkit Agrawal"
+      ],
+      "year": 2022,
+      "venue": "Robotics: Science and Systems",
+      "urls": [
+        "https://arxiv.org/html/2205.02824v1",
+        "https://www.roboticsproceedings.org/rss18/p022.pdf",
+        "https://agility.csail.mit.edu/home",
+        "https://github.com/Improbable-AI/rapid-locomotion-rl"
+      ],
+      "robot": "MIT Mini Cheetah, approximately 9 kg",
+      "motors": "12 quasi-direct-drive actuators, reported maximum torque 17 Nm; not a continuous rating.",
+      "algorithm": "PPO with adaptive command curriculum and adaptation",
+      "observations": "15-step proprioception/action history plus three-component body-twist command.",
+      "action": "12 joint-position targets through PD control at 50 Hz.",
+      "command_scope": "Forward/lateral/yaw command grid; reported sustained forward speed 3.9 m/s.",
+      "training_cost": "400 million steps, approximately 4,000 agents, under 3 h on RTX 3090.",
+      "lesson": "Expanding command coverage and motor-aware randomization can produce fast gaits without prescribed foot sequences.",
+      "limitation": "17 Nm maximum torque is not comparable to a 1.6 Nm continuous rating; neither speed nor training time transfers.",
+      "confidence": "Primary paper, project and official code."
+    },
+    {
+      "id": "parkour2024",
+      "title": "Extreme Parkour with Legged Robots",
+      "authors": [
+        "Xuxin Cheng",
+        "Kexin Shi",
+        "Ananye Agarwal",
+        "Deepak Pathak"
+      ],
+      "year": 2024,
+      "venue": "ICRA",
+      "urls": [
+        "https://arxiv.org/abs/2309.14341",
+        "https://extreme-parkour.github.io/resources/parkour.pdf",
+        "https://extreme-parkour.github.io/",
+        "https://github.com/chengxuxin/extreme-parkour"
+      ],
+      "robot": "Unitree A1, RealSense D435, Jetson NX",
+      "motors": "12 joint actuators; exact rating not extracted.",
+      "algorithm": "RL teacher, depth-conditioned student and regularized adaptation",
+      "observations": "Proprioception and privileged terrain/heading for teacher; depth and recurrent state for student.",
+      "action": "Joint-action policy in the official legged_gym lineage; exact action scale not extracted.",
+      "command_scope": "Waypoint-directed terrain traversal; no hand-specified stepping sequence.",
+      "training_cost": "Under 20 h on an RTX 3090.",
+      "lesson": "A privileged terrain teacher can later be distilled into perception without prescribing each foothold.",
+      "limitation": "Jumping/parkour is outside present torque and support evidence; this is a roadmap example, not the next pilot.",
+      "confidence": "Primary paper and official code; joint-action scale remains explicitly unverified."
+    },
+    {
+      "id": "energy2021",
+      "title": "Minimizing Energy Consumption Leads to the Emergence of Gaits in Legged Robots",
+      "authors": [
+        "Zipeng Fu",
+        "Ashish Kumar",
+        "Jitendra Malik",
+        "Deepak Pathak"
+      ],
+      "year": 2021,
+      "venue": "CoRL",
+      "urls": [
+        "https://arxiv.org/abs/2111.01674",
+        "https://arxiv.org/html/2111.01674v1",
+        "https://energy-locomotion.github.io/"
+      ],
+      "robot": "Unitree A1, approximately 12 kg",
+      "motors": "12 joints with PD position control; rating not extracted.",
+      "algorithm": "PPO and RMA adaptation",
+      "observations": "Proprioceptive/contact state and previous action, with adaptation.",
+      "action": "12 joint-position targets; no leg-motion primitives.",
+      "command_scope": "Speed-conditioned walking, trotting and bouncing; continuous transitions bootstrap from learned experts.",
+      "training_cost": "Approximately 1.5 billion steps / 24 h on a desktop with one GPU; model not verified.",
+      "lesson": "Energy and speed can select different gaits; animal-like appearance is not an optimality test.",
+      "limitation": "Mechanical power is not battery energy; our joint-rate bias prevents unqualified energy comparisons.",
+      "confidence": "Primary paper and author project; expert bootstrapping retained in interpretation."
+    }
+  ],
+  "local_evidence": [
+    {
+      "path": "artifacts/omni_diagnostics_2026-09-09/repair_003/METHOD.md",
+      "sha256": "2a27a2e64eba73ee1d44dc632ca2bb304c4a7f1f3424187db07d134aae203673"
+    },
+    {
+      "path": "artifacts/omni_diagnostics_2026-09-09/repair_003/results/README.md",
+      "sha256": "c872c14ff0f487991cd6bed749507e97d043050a4f2300ec89e0c9bb7c73373c"
+    }
+  ],
+  "ranked_candidates": [
+    {
+      "rank": 1,
+      "name": "Targeted preserved 315/318 direct-position PPO fine-tune",
+      "reason": "Existing useful movement; previous 50-update repairs did not test balanced stand/stop curriculum or policy-mapping regularization."
+    },
+    {
+      "rank": 2,
+      "name": "New phase/foot-placement-modulating residual",
+      "reason": "Literature-backed way to enlarge gait authority, with greater integration effort."
+    },
+    {
+      "rank": 3,
+      "name": "Fresh direct-position PPO",
+      "reason": "Initialization comparator if inherited limit cycle resists targeted intervention."
+    },
+    {
+      "rank": 4,
+      "name": "Current fixed-wave small residual",
+      "reason": "Bounded recovery/compensation evidence; insufficient authority to search faster gait families."
+    }
+  ]
+}

@@ -1,0 +1,321 @@
+{
+  "schema": "hexapod_actuation_source_matrix_v1",
+  "review_date": "2026-09-10",
+  "scope": "Eleven primary locomotion/co-design works, mostly hexapod, plus two manufacturer sources. Breadth-first decision review; no new physics or hardware qualification.",
+  "papers": [
+    {
+      "id": "H01",
+      "title": "Blind Hexapod Locomotion in Complex Terrain with Gait Adaptation Using Deep Reinforcement Learning and Classification",
+      "authors": "Teymur Azayev; Karel Zimmerman",
+      "year": 2020,
+      "url": "https://link.springer.com/article/10.1007/s10846-020-01162-8",
+      "access": "Publisher abstract; full methods not independently accessed",
+      "evidence": "Simulation",
+      "method": "Terrain experts and history-based gait classification",
+      "finding": "Blind proprioceptive expert selection adapts locomotion across modeled terrain.",
+      "transfer_limit": "Simulation evidence does not establish physical RS05 torque margin.",
+      "official_code": null,
+      "code_executed": false
+    },
+    {
+      "id": "H02",
+      "title": "Decentralized Deep Reinforcement Learning for a Distributed and Adaptive Locomotion Controller of a Hexapod Robot",
+      "authors": "Malte Schilling; Kai Konen; Frank W. Ohl; Timo Korthals",
+      "year": 2020,
+      "url": "https://arxiv.org/html/2005.11164v1",
+      "access": "Full primary paper",
+      "evidence": "Simulation: PhantomX",
+      "method": "PPO with six local controllers versus centralized baseline",
+      "finding": "Leg-local learning provides a useful alternative to a prescribed global clock.",
+      "transfer_limit": "No physical deployment here; decentralized learning is not universally superior.",
+      "official_code": {
+        "url": "https://github.com/kkonen/ros2learn",
+        "status": "Author-linked implementation; not independently run"
+      },
+      "code_executed": false
+    },
+    {
+      "id": "H03",
+      "title": "Adaptive Locomotion Control of a Hexapod Robot via Bio-Inspired Learning",
+      "authors": "Wenjuan Ouyang; Haozhen Chi; Jiangnan Pang; Wenyu Liang; Qinyuan Ren",
+      "year": 2021,
+      "url": "https://www.frontiersin.org/journals/neurorobotics/articles/10.3389/fnbot.2021.627157/full",
+      "access": "Full primary paper",
+      "evidence": "Simulation and real 1.995 kg hexapod",
+      "method": "Two-layer CPG with DDPG parameter adaptation",
+      "finding": "Low-dimensional learned gait modulation can coexist with velocity, acceleration and torque costs.",
+      "transfer_limit": "Small AX-12 platform and selected gait families do not validate our heavier RS05 robot.",
+      "official_code": null,
+      "code_executed": false
+    },
+    {
+      "id": "H04",
+      "title": "Deep Reinforcement Learning for Multi-contact Motion Planning of Hexapod Robots",
+      "authors": "Huiqiao Fu et al.",
+      "year": 2021,
+      "url": "https://www.ijcai.org/proceedings/2021/0328.pdf",
+      "access": "Full primary paper",
+      "evidence": "Simulation and simplified real stepping-pile experiment",
+      "method": "PPO foothold/COM planning with transition feasibility",
+      "finding": "Whole-transition dynamics and kinematics matter beyond reachable endpoints.",
+      "transfer_limit": "Known terrain/pose and discrete planning are not a demonstrated fast omnidirectional controller.",
+      "official_code": null,
+      "code_executed": false
+    },
+    {
+      "id": "H05",
+      "title": "Learning to Walk: Legged Hexapod Locomotion From Simulation to the Real World",
+      "authors": "Maxime Kawawa-Beaudan; Avideh Zakhor",
+      "year": 2022,
+      "url": "https://sites.google.com/view/hexapod-rl/home",
+      "access": "Official author project page",
+      "evidence": "Author-reported simulation and real low-cost hexapod transfer",
+      "method": "Parameterized gait plus residual; prior-free joint-target comparison",
+      "finding": "The author explicitly contrasts easier prior-guided learning with the restrictions imposed by that prior.",
+      "transfer_limit": "Project page accessed; linked Berkeley thesis PDF returned 404. No independent full-thesis or code reproduction.",
+      "official_code": {
+        "url": "https://github.com/maximejkb/hexapod-isaac",
+        "status": "Official project link resolved; repository content not independently audited"
+      },
+      "code_executed": false
+    },
+    {
+      "id": "H06",
+      "title": "Adaptive Gait Generation for Hexapod Robots Based on Reinforcement Learning and Hierarchical Framework",
+      "authors": "Zhiying Qiu; Wu Wei; Xiongding Liu",
+      "year": 2023,
+      "url": "https://mdpi-res.com/d_attachment/actuators/actuators-12-00075/article_deploy/actuators-12-00075.pdf",
+      "access": "Full primary paper",
+      "evidence": "Simulation and real VkHex flat-ground experiments",
+      "method": "Seven actions: duty factor, five phase offsets, step length",
+      "finding": "A learned contact schedule can change gait with commanded speed.",
+      "transfer_limit": "Flat-ground study; platform-specific virtual support depth must not be copied into our contact model.",
+      "official_code": null,
+      "code_executed": false
+    },
+    {
+      "id": "H07",
+      "title": "Smart Gait: A Gait Optimization Framework for Hexapod Robots",
+      "authors": "Yunpeng Yin; Feng Gao; Qiao Sun; Yue Zhao; Yuguang Xiao",
+      "year": 2024,
+      "url": "https://link.springer.com/article/10.1186/s10033-024-01000-0",
+      "access": "Full primary paper",
+      "evidence": "Simulation and real LittleStrong",
+      "method": "Model-based trajectory, timing and phase optimization; contact-force QP",
+      "finding": "Optimize force distribution and gait timing together under actuator and friction limits.",
+      "transfer_limit": "Not RL; force/energy formulation assumptions and robot mechanics restrict direct reuse.",
+      "official_code": null,
+      "code_executed": false
+    },
+    {
+      "id": "H08",
+      "title": "Whole-Body Constrained Learning for Legged Locomotion via Hierarchical Optimization",
+      "authors": "Haoyu Wang et al.",
+      "year": 2025,
+      "url": "https://arxiv.org/html/2506.05115v1",
+      "access": "Full primary paper",
+      "evidence": "Real 30 kg Elspider-Air hexapod and simulation",
+      "method": "RL joint trajectories with hierarchical whole-body follower",
+      "finding": "Hard torque and kinematic constraints can be separated from softer motion objectives.",
+      "transfer_limit": "Needs reliable dynamics, contact estimation and torque execution; no transferable numerical RS05 speed bound.",
+      "official_code": null,
+      "code_executed": false
+    },
+    {
+      "id": "H09",
+      "title": "Learning Natural and Robust Hexapod Locomotion over Complex Terrains via Motion Priors based on Deep Reinforcement Learning",
+      "authors": "Xin Liu et al.",
+      "year": 2025,
+      "url": "https://arxiv.org/html/2511.03167v1",
+      "access": "Full primary paper",
+      "evidence": "Real 25.5 kg hexapod and simulation",
+      "method": "PPO with optimized motion priors and adversarial style reward",
+      "finding": "A tripod motion prior can guide learning without requiring literal per-knot playback.",
+      "transfer_limit": "Different morphology/actuation; the paper cannot establish our best geometry or support count.",
+      "official_code": null,
+      "code_executed": false
+    },
+    {
+      "id": "H10",
+      "title": "Design, Modeling and Preliminary Control of a Compliant Hexapod Robot",
+      "authors": "Uluc Saranli; Martin Buehler; Daniel E. Koditschek",
+      "year": 2000,
+      "url": "https://kodlab.seas.upenn.edu/uploads/Kod/Saranli00.pdf",
+      "access": "Full primary paper",
+      "evidence": "Physical RHex prototype",
+      "method": "Clock-driven dynamic locomotion with compliant legs",
+      "finding": "Six-legged locomotion does not intrinsically require five feet on the ground.",
+      "transfer_limit": "Only six actuated DOF and compliant rotating legs; do not transplant its gait to an 18-DOF serial robot.",
+      "official_code": null,
+      "code_executed": false
+    },
+    {
+      "id": "H11",
+      "title": "Concurrent Optimization of Mechanical Design and Locomotion Control of a Legged Robot",
+      "authors": "Krishnamanaswi Digumarti; Christian Gehring; Stelian Coros; Je Min Hwangbo; Roland Siegwart",
+      "year": 2014,
+      "url": "https://la.disneyresearch.com/publication/concurrent-optimization-of-mechanical-design-and-locomotion-control-of-a-legged-robot/",
+      "access": "Official author-lab publication abstract",
+      "evidence": "Quadruped morphology/control co-design study",
+      "method": "Joint optimization of mechanical design and control",
+      "finding": "Controller and morphology should be compared together under the same actuator limits.",
+      "transfer_limit": "Quadruped trotting/bounding result is a co-design principle, not a hexapod femur/tibia optimum.",
+      "official_code": null,
+      "code_executed": false
+    }
+  ],
+  "hardware_sources": [
+    {
+      "id": "A01",
+      "title": "RS05 User Manual 260713",
+      "publisher": "RobStride",
+      "url": "https://github.com/RobStride/Product_Information/blob/main/Product%20Literature/RS05/RS05User%20Manual260713.pdf",
+      "local_download_sha256": "1b2c61a6daa8331b9a348455005d10d6e425165c22e6f64c39cbca33f6360e82",
+      "access": "Original English PDF retrieved and text read; no overload-curve digitization",
+      "pages": {
+        "pdf_10_printed_8": "Rated torque 1.6 N m; 70 by 70 mm heat sink condition",
+        "pdf_11_printed_9": "Rated test at 100 rpm; peak 5.5 N m; no-load 480 rpm ±10%",
+        "pdf_12_printed_10": "Thermal/overload discussion distinguishes stall from rotating heating"
+      },
+      "inference": "Retain current 1.6 N m gate pending exact hardware revision and cooling verification; peak is not continuous permission."
+    },
+    {
+      "id": "A02",
+      "title": "Product Information index",
+      "publisher": "RobStride",
+      "url": "https://github.com/RobStride/Product_Information",
+      "access": "Official current repository README, observed 2026-09-10",
+      "finding": "RS05 row lists 1.8 N m rated at 100 rpm, conflicting with the English manual; heat-sink conditions apply.",
+      "resolution": "Unresolved primary-source discrepancy; no project torque gate changed."
+    }
+  ],
+  "constraints": [
+    {
+      "id": "C01",
+      "name": "Requested torque cap",
+      "value": 1.6,
+      "unit": "N m",
+      "classification": "Hardware-informed present operating budget",
+      "change_recommendation": "Retain. Validate exact revision, torque-speed-current envelope, thermal duty and cooling before any expansion.",
+      "source_ids": [
+        "A01",
+        "A02"
+      ]
+    },
+    {
+      "id": "C02",
+      "name": "Total target change",
+      "value": 0.04,
+      "unit": "rad per 20 ms",
+      "equivalent_target_rate_rad_s": 2,
+      "classification": "Chosen software target limit, not a manufacturer joint-speed rating",
+      "change_recommendation": "New versioned sweep may test higher target rates against actual torque/current/acceleration and contact outcomes. No automatic relaxation.",
+      "local_source": "tmp/omni_reference_residual_002/reference_residual.py"
+    },
+    {
+      "id": "C03",
+      "name": "Swing duration",
+      "value": 2.0,
+      "unit": "s",
+      "classification": "Chosen gait-template timing",
+      "change_recommendation": "Expose cadence/phase or optimize trajectories, not merely compress identical knots.",
+      "source_ids": [
+        "H03",
+        "H06",
+        "H07"
+      ]
+    },
+    {
+      "id": "C04",
+      "name": "Retained wave supports",
+      "value": 5,
+      "unit": "feet",
+      "classification": "Chosen conservative wave admission contract",
+      "change_recommendation": "Preserve old proof; admit four-support or dynamic alternatives under explicitly new force/contact/stability criteria.",
+      "source_ids": [
+        "H04",
+        "H06",
+        "H10"
+      ]
+    },
+    {
+      "id": "C05",
+      "name": "Position residual radius",
+      "value": 0.02,
+      "unit": "rad",
+      "classification": "Chosen policy authority bound",
+      "change_recommendation": "Do not expect it to change contact schedule. Compare a learnable-reference or direct-target branch with equivalent physical limits.",
+      "source_ids": [
+        "H05",
+        "H08",
+        "H09"
+      ]
+    }
+  ],
+  "local_evidence": [
+    {
+      "path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/omni_reference_residual_002/reference_residual.py",
+      "repo_relative_path": "tmp/omni_reference_residual_002/reference_residual.py",
+      "sha256": "fbf65749c2d1ffc36b22986f71c0972ce7b1ecf82beebef57a0bd3e1be966e40"
+    },
+    {
+      "path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/omni_reference_wave_005/wave_reference.py",
+      "repo_relative_path": "tmp/omni_reference_wave_005/wave_reference.py",
+      "sha256": "8bacf0c61f7fdc6d43d9f9ebdb5adc643b026495bb303ec3c18157d121c78893"
+    },
+    {
+      "path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_physics_adapter_009/source_009/tools/screen_contract.py",
+      "repo_relative_path": "tmp/reference_physics_adapter_009/source_009/tools/screen_contract.py",
+      "sha256": "610f708d1ce9263eab724d53253bfdb84071fba373fc59960c40040df49ee893"
+    },
+    {
+      "path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_pair_motion_results_001/actual_review/report.json",
+      "repo_relative_path": "tmp/reference_pair_motion_results_001/actual_review/report.json",
+      "sha256": "a4396da30b259ea87e096c221a9a64ad4255d6a97e071df551923c164ec68a6f"
+    },
+    {
+      "path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_pair_motion_001/report_002.json",
+      "repo_relative_path": "tmp/reference_pair_motion_001/report_002.json",
+      "sha256": "37795241947dadf9522d929e91e3bc47200ad06e1a9fece59920ae6ed3440e37"
+    },
+    {
+      "path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_pair_speed_feasibility_001/CANDIDATES.json",
+      "repo_relative_path": "tmp/reference_pair_speed_feasibility_001/CANDIDATES.json",
+      "sha256": "7e536cdca9e38516e67fe294dced35b238bd70420efb59524971da40aba32e75"
+    },
+    {
+      "path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_speed_feasibility_001/report.json",
+      "repo_relative_path": "tmp/reference_speed_feasibility_001/report.json",
+      "sha256": "3f0f6ab23b785f3eda36abb8fb6bc52b48a2eb5168d9ad6ffec347ba38627e1d"
+    },
+    {
+      "path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_pair_root_gap_review_001/README.md",
+      "repo_relative_path": "tmp/reference_pair_root_gap_review_001/README.md",
+      "sha256": "aa6dab4603dc0e49e1998ab8cd1cafde59f00c2e3731bd972cc815e0be77525d"
+    },
+    {
+      "path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/robot/hexapod_mkii_assy/README.md",
+      "repo_relative_path": "robot/hexapod_mkii_assy/README.md",
+      "sha256": "969dfa2a84a1f1074440f81c48e4e2fcbb09768a86ca8948144c60517ea1a037"
+    },
+    {
+      "path": "/Users/andreboufama/Documents/CUPI/HEXAPOD/AGENTS.md",
+      "repo_relative_path": "AGENTS.md",
+      "sha256": "87a77bab26c87eb708d2235f5cf5a83f5ff85c627a21d0388d23c382218b488f"
+    }
+  ],
+  "calculations": {
+    "target_rate_rad_s": 2.0,
+    "target_rate_rpm": 19.098593171027442,
+    "residual_degrees": 1.1459155902616465,
+    "position_PD_term_change_at_fixed_other_state_Nm": 0.6,
+    "nominal_one_leg_cycle_s": 13.799999999999999,
+    "nominal_three_pair_cycle_s": 6.8999999999999995
+  },
+  "limitations": [
+    "No published comparison uses our exact C-study morphology, payload, gains and actuator thermal installation.",
+    "Prior-free and trajectory-prior approaches are both represented; paper choice does not decide the architecture.",
+    "No new trial, torque-cap change, CAD edit, source mutation or policy adoption is part of this review.",
+    "Current learned training results are outside this snapshot; numerical local claims are restricted to hashed paired001 and prior CPU evidence."
+  ]
+}
