@@ -1,0 +1,194 @@
+You are an independent engineering partner. Requested model claude-fable-5-1, maximum reasoning. Tools/MCP disabled. Return final answer only, <=500 words. Inspect this bounded native-physics import proposal for concrete bugs or unsupported claims. Do not broaden into training/controller design. Separate must-fix semantic issues from first-run API uncertainties and optional later work. Do not guess nonexistent SDK APIs. Give 3-5 actionable checks.
+
+The user has approved the detailed direct-drive7.466088235kg robot as ground truth for all future training; old C and four-bar work is historical. Imported SDF geometry is prepared, not native-admitted. Existing CAD overlaps remain explicit; zero gravity does not imply zero self-contact or no motion. No actuators are to be authored. IsaacLab wrapper initialization may author actuator state, so raw views are proposed instead.
+
+Every eventual tracked edit must follow docs/PROJECT_SITE.md bounded central update and reviewed publication. This is tmp-only critique; no authorization to run anything.
+
+PROPOSAL
+Bounded proposed Phase-A inspection (not standing, actuator, or training admission): standalone native Isaac Sim6.0.1/IsaacLab SimulationContext and raw PhysX articulation/SDF views. Exact canonical detailed direct-drive 19-body/18-joint robot, 153 authored SDF shapes, mass7.466088235kg. Zero gravity, no ground. No drive/gain authoring, no joint/root target or state setters, self-collision as authored. Eight explicit2.5ms steps after installedSDK warmup; record first post-initialization state and all later raw link pose/velocity and joint q/dq separately. Read named body/joint set, local frames,COM,inertia,limits; raw SdfShapeView count/object_paths/check proposed to detect missing/fallback colliders. Actual installed extension API still needs first-run proof; fail closed rather than guess missing getters. No old robot task/actor/18-action checkpoint reused. Phase-A has no gains, thermal or contact-support claim. Root sole GPU dispatcher; this review is CPU only.
+
+INSTALLED SDK EXCERPTS
+File tmp/updated_native_inspection_001/sdk/isaaclab_physx__isaaclab_physx__physics__physx_manager.py SHA 79852394dafa48aeb5e9cdb39072dde27c9ab35f6b587a17ce931318ab44fd4a
+287:     def initialize(cls, sim_context: SimulationContext) -> None:
+288:         """Initialize the physics manager."""
+289:         from isaaclab.sim.utils.stage import get_current_stage_id
+290: 
+291:         super().initialize(sim_context)
+292:         cls._stage_id = get_current_stage_id()
+293: 
+294:         cls._setup_subscriptions()
+295:         cls._configure_physics()
+296:         cls._load_fabric()
+297:         cls._anim_recorder = AnimationRecorder(sim_context)
+298:         cls._scene_data_backend = PhysxSceneDataBackend()
+299: 
+300:         # force update cycle to apply dt
+301:         sim = PhysicsManager._sim
+302:         sim.set_setting("/app/player/playSimulations", False)  # type: ignore[union-attr]
+303:         omni.kit.app.get_app().update()
+304:         sim.set_setting("/app/player/playSimulations", True)  # type: ignore[union-attr]
+305: 
+306:     @classmethod
+307:     def reset(cls, soft: bool = False) -> None:
+308:         """Reset the physics simulation."""
+309:         if not soft:
+310:             # Ensure views are created (warmup only happens once per stage)
+311:             if cls._view is None:
+312:                 cls._warmup_and_create_views()
+313:             # Deterministic lifecycle dispatch for backend-agnostic callbacks.
+314:             # This avoids relying on asynchronous event-bus ordering during env construction.
+315:             cls.dispatch_event(PhysicsEvent.PHYSICS_READY, payload={})
+316:             # Legacy IsaacEvents dispatch for callbacks registered directly on IsaacEvents.
+317:             cls._event_bus.dispatch_event(IsaacEvents.PHYSICS_READY.value, payload={})
+318: 
+319:         device = PhysicsManager._device
+320:         if "cuda" in device:
+321:             torch.cuda.set_device(device)
+322: 
+323:         if cls._view is not None:
+324:             cls._view._backend.initialize_kinematic_bodies()
+325: 
+326:         cls.raise_callback_exception_if_any()
+327: 
+328:     @classmethod
+329:     def forward(cls) -> None:
+330:         """Update articulation kinematics and fabric for rendering."""
+331:         sim = PhysicsManager._sim
+332:         if cls._fabric is not None and cls._update_fabric is not None:
+333:             if cls._view is not None and sim is not None and sim.is_playing():
+334:                 cls._view.update_articulations_kinematic()
+335:             cls._update_fabric(0.0, 0.0)
+336: 
+337:     @classmethod
+338:     def get_scene_data_backend(cls) -> SceneDataBackend:
+339:         """Return the SceneDataBackend for the SceneDataProvider."""
+340:         return cls._scene_data_backend
+341: 
+342:     @classmethod
+343:     def step(cls) -> None:
+344:         """Step the physics simulation."""
+345:         sim = PhysicsManager._sim
+346:         if sim is None:
+347:             return
+348: 
+349:         if cls._anim_recorder and cls._anim_recorder.enabled and cls._anim_recorder.update():
+350:             logger.warning("Animation recording finished. Shutting down.")
+351:             omni.kit.app.get_app().shutdown()
+352:             return
+353: 
+354:         cls._physx_sim.simulate(sim.cfg.dt, 0.0)
+355:         cls._physx_sim.fetch_results()
+356:         device = PhysicsManager._device
+357:         if "cuda" in device:
+358:             torch.cuda.set_device(device)
+359: 
+360:         cls.raise_callback_exception_if_any()
+361: 
+362:     @classmethod
+363:     def play(cls) -> None:
+364:         """Start or resume the timeline."""
+365:         cls._timeline.play()
+366:         # Pump events so timeline callbacks fire synchronously
+367:         omni.kit.app.get_app().update()
+368:         cls._sync_fabric_after_resume()
+369: 
+370:     @classmethod
+371:     def pause(cls) -> None:
+372:         """Pause the timeline."""
+373:         cls._timeline.pause()
+374:         # Pump events so timeline callbacks fire synchronously
+375:         omni.kit.app.get_app().update()
+376: 
+377:     @classmethod
+378:     def stop(cls) -> None:
+379:         """Stop the timeline."""
+380:         cls._timeline.stop()
+381:         # Pump events so timeline callbacks fire synchronously
+382:         omni.kit.app.get_app().update()
+
+File tmp/updated_native_inspection_001/sdk/isaaclab_physx__isaaclab_physx__physics__physx_manager.py SHA 79852394dafa48aeb5e9cdb39072dde27c9ab35f6b587a17ce931318ab44fd4a
+745:     def _warmup_and_create_views(cls) -> None:
+746:         """Warm-start physics and create simulation views."""
+747:         if not cls._warmup_needed:
+748:             return
+749: 
+750:         # Get stage ID first (needed for both warmup and view creation)
+751:         from isaaclab.sim.utils.stage import get_current_stage_id
+752: 
+753:         stage_id = get_current_stage_id()
+754: 
+755:         is_gpu = "cuda" in PhysicsManager.get_device()
+756: 
+757:         # Attach stage to PhysX BEFORE loading/starting - only needed for GPU pipeline.
+758:         # For CPU, the old SimulationManager never called attach_stage() explicitly.
+759:         # Calling attach_stage() + force_load_physics_from_usd() together causes a
+760:         # double-initialization that corrupts the CPU broadphase (MBP) collision setup,
+761:         # causing objects to fall through surfaces non-deterministically.
+762:         if is_gpu:
+763:             cls._physx_sim.attach_stage(stage_id)
+764: 
+765:         # warmup physx
+766:         cls._physx.force_load_physics_from_usd()
+767:         cls._physx.start_simulation()
+768:         cls._physx.update_simulation(cls.get_physics_dt(), 0.0)
+769:         cls._physx_sim.fetch_results()
+770:         cls._event_bus.dispatch_event(IsaacEvents.PHYSICS_WARMUP.value, payload={})
+771:         cls._warmup_needed = False
+772: 
+773:         if cls._view_created:
+774:             return
+775: 
+776:         # Create tensor views
+777:         cls._view = omni.physics.tensors.create_simulation_view("warp", stage_id=stage_id)
+778:         cls._view_warp = omni.physics.tensors.create_simulation_view("warp", stage_id=stage_id)
+779: 
+780:         if cls._view:
+781:             cls._view.set_subspace_roots("/")
+782:         if cls._view_warp:
+783:             cls._view_warp.set_subspace_roots("/")
+784: 
+785:         # Final update after view creation
+786:         cls._physx.update_simulation(cls.get_physics_dt(), 0.0)
+787:         cls._view_created = True
+788:         cls._scene_data_backend.simulation_view = cls._view
+789: 
+790:         cls._event_bus.dispatch_event(IsaacEvents.SIMULATION_VIEW_CREATED.value, payload={})
+
+File tmp/updated_native_inspection_001/sdk/isaaclab__isaaclab__sim__simulation_context.py SHA 819536a201b525774b4bc04d6bd9a9e3fc11397961b4881e9083eb4502ee958a
+714:     def reset(self, soft: bool = False) -> None:
+715:         """Reset the simulation.
+716: 
+717:         Args:
+718:             soft: If True, skip full reinitialization.
+719:         """
+720:         self.physics_manager.reset(soft)
+721:         for viz in self._visualizers:
+722:             viz.reset(soft)
+723:         if not self._visualizers:
+724:             # Initialize visualizers after PhysX sim views are ready, but before play() pumps timeline events.
+725:             self.initialize_visualizers()
+726:         # Start the timeline so the play button is pressed
+727:         self.physics_manager.play()
+728:         self._is_playing = True
+729:         self._is_stopped = False
+730: 
+731:     def step(self, render: bool = True) -> None:
+732:         """Step physics and optionally render.
+733: 
+734:         If the timeline is paused (e.g. via the GUI), this method blocks and keeps
+735:         the visualizer responsive until the timeline is resumed or stopped.
+736: 
+737:         Args:
+738:             render: Whether to render the scene after stepping. Defaults to True.
+739:         """
+740:         # Block while the GUI timeline is paused so the entire training loop freezes.
+741:         # See: https://github.com/isaac-sim/IsaacLab/issues/4279
+742:         self.physics_manager.wait_for_playing()
+743:         self._physics_step_count += 1
+744:         self.physics_manager.step()
+745:         if render and self.is_rendering:
+746:             self.render()
+747: 
+748:     def render(self, mode: int | None = None, skip_app_pumping: bool = False) -> None:
+
+Independent preliminary concern to check: high-level physics_step_count counts only explicit SimulationContext.step calls. Two native warmup updates occur, and play() pumps app.update with playSimulations true. Therefore exactly8 explicitsteps plus2 knownwarmupcalls is not necessarily a measured total of10 physical advances. Need truthful lifecycle labels and initial-state readbacks; any additional instrumentation must remain read-only. SDF view presence/count may not alone prove collision cooking fidelity or query sign/distance. Do not turn Phase-A into a massive framework; nominate the minimal discriminators.

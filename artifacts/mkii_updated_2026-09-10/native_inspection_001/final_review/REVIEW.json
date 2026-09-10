@@ -1,0 +1,55 @@
+{
+  "schema": "canonical_native_inspection_final_read_review_v1",
+  "owner_freeze_sha256": "c59ebd53bb221fd17b46d9fbc31e3df7240271bfd13d6f7269d7307876c7bfaa",
+  "payloads_verified": 21,
+  "runtime_hashes": {
+    "run_inspection.py": "3623cbd0d204b7f693112004d888a31a76eb65bb925f2229d8a1054a3969fc95",
+    "inspect_core.py": "7f27dc43ec67525cc2d689827402693b9def6a3f2f220b7e56983748141e64c7",
+    "inspection_contract.py": "40faa6153d9a406fd76fde2fb7604a01ca8fce35087bebc13bd9fd72391e08a7"
+  },
+  "review_scope": "Final frozen source read and primary API documentation check. Existing root15 CPU tests and host31 tests not repeated. No actual native execution or additional physics claim by this reviewer.",
+  "verdict": "No proven additional runtime blocker found. One explicit unresolved cooking-counter API compatibility seam remains for installed-runtime observation.",
+  "findings": [
+    {
+      "path": "run_inspection.py",
+      "symbol": "cooking.get_num_collision_tasks",
+      "status": "unverified_installed_API",
+      "evidence": "Documented in104.0; absent from cited107.3 PhysXCooking docs. Available copied installed Lab sources contain no exact binding declaration or supported replacement. Missing documentation is not proof of runtime absence.",
+      "action": "Root elected the immutable001 bounded first run; preserve any actual AttributeError and prior readbacks. Do not invent an alias or change001."
+    },
+    {
+      "symbol": "get_inertias / get_link_velocities / create_sdf_shape_view",
+      "status": "primary_API_agreement",
+      "evidence": "107.3 confirms body-frame COM inertia, column-major3x3 components; global linear velocity referenced to link COM; SDF factory accepts list patterns. Current code agrees."
+    },
+    {
+      "symbol": "partial readback / pre-close seal / post-exit errors",
+      "status": "previous_review_fixes_present",
+      "evidence": "Every successful native getter and failed getter is saved. Mutable lifecycle logs are excluded from pre-close measurement seal, and terminal validator rejects late native errors."
+    },
+    {
+      "symbol": "scene / native frames / step counts",
+      "status": "scope_preserved",
+      "evidence": "Zero gravity400Hz/managerdt and root self-collision readback enforced; actual names drive FK checks. Explicit count is checked without claiming total warmup count. No state/target setters, high-level actor or training admission."
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://docs.omniverse.nvidia.com/kit/docs/omni_physics/107.3/extensions/runtime/source/omni.physics.tensors/docs/api/python.html",
+      "use": "Signature/frame comparison, SDF representation versus query capability"
+    },
+    {
+      "url": "https://docs.omniverse.nvidia.com/kit/docs/omni_physics/107.3/extensions/runtime/source/omni.physx/docs/api/python.html",
+      "use": "Current cooking/error API documentation"
+    },
+    {
+      "url": "https://docs.omniverse.nvidia.com/kit/docs/omni_physics/104.0/source/extensions/omni.physx/docs/index.html",
+      "use": "Historical cooking-task getter documentation"
+    },
+    {
+      "url": "https://docs.omniverse.nvidia.com/kit/docs/omni_physics/latest/dev_guide/rigid_bodies_articulations/collision.html",
+      "use": "Startup blocks on required cooking data; possible separately versioned future proof, not a change to001"
+    }
+  ],
+  "mutation_scope": "No tracked, remote, GPU or owner-file mutations."
+}

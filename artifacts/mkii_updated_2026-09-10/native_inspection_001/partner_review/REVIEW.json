@@ -1,0 +1,61 @@
+{
+  "schema": "canonical_phase_a_partner_review_v1",
+  "scope": "Passive import/cooking/identity proposal and bounded draft-source review, not final implementation acceptance or native physics admission.",
+  "model": "claude-fable-5-1",
+  "effort": "max",
+  "session_id": "49c49d2f-9703-4d35-a8a7-0514dde854b5",
+  "model_metadata_note": "CLI modelUsage includes an auxiliary Haiku request and the substantive Fable response separately. No manual fallback, MCP tools or delegated subagents. Final response only; no internal thinking/event streams collected.",
+  "source_snapshot_hashes": {
+    "tmp/updated_native_inspection_001/run_inspection.py": "9b98effac1d45033f8ec63e9cd83d2355d38b969a6e2bfeb3fba068d9b5dbad1",
+    "tmp/updated_native_inspection_001/inspect_core.py": "f77aa532bdd0e752abc24735d358522fdeaef0c59c4838e139734b2929060681",
+    "tmp/updated_native_inspection_001/inspection_contract.py": "d5112e117264d3c0b5e089776a5aeb77c0c75d6ff2905256728d4e2d9c7ed2c9"
+  },
+  "independent_findings": [
+    {
+      "item": "Warmup and explicit control count are distinct",
+      "outcome": "Owner runtime now labels two authored warmup calls plus reset/play app pumps; no exact ten-total-steps claim.",
+      "evidence": "Pinned manager _warmup_and_create_views/reset/play and SimulationContext.step excerpts."
+    },
+    {
+      "item": "Preserve partial native getter evidence",
+      "outcome": "Owner fixed collect_native to save metadata, each successful getter and failed_getter before raising; inspected the changed draft."
+    },
+    {
+      "item": "Pre-close mutable logs can invalidate measurement hashes",
+      "outcome": "Owner excludes isaac_logs/** and native_errors.json from measurement seal, declares them for host post-exit inventory and preserves pre-close error observations; inspected the changed draft."
+    }
+  ],
+  "fable_disposition": [
+    {
+      "claim": "Step counts across SDK reset need caution",
+      "decision": "Accept lifecycle uncertainty and explicit labels; mandatory at-least-two callback event counts are not established by these excerpts."
+    },
+    {
+      "claim": "A physics-step subscription is the only read-only counter",
+      "decision": "Reject uniqueness assertion; API/event coverage requires actual proof. Do not add an unproven callback criterion solely on this recommendation."
+    },
+    {
+      "claim": "cfg dt, manager dt and scene rate must be checked",
+      "decision": "Accept bounded readback suggestion. Installed manager already sets timeStepsPerSecond=int(1/cfg.dt) at lines598\u2013600; there is no demonstrated 60 Hz mismatch."
+    },
+    {
+      "claim": "URDF import authors drives acting in this run",
+      "decision": "Reject as applied to this exact proposal: it loads prepared USD, not a generic URDF import. Canonical USD has no applied DriveAPI and 18 explicit no-drive notes. Draft also checks native stiffness/damping zero. Other effective parameters still deserve recorded readback."
+    },
+    {
+      "claim": "Self-collision semantics include root, joints and filtered pairs",
+      "decision": "Accept bounded authored/effective readback suggestion; no attribution of zero-gravity motion to a unique cause."
+    },
+    {
+      "claim": "SDF view count/path/valid proves all geometry/contact fidelity",
+      "decision": "Not claimed or adopted. Preserve native representation-presence scope. Signed-distance/contact probes are separate later work."
+    },
+    {
+      "claim": "CPU lifecycle behavior transfers to GPU",
+      "decision": "Not claimed or adopted. CPU source/tests prepare the fixed cuda:0 first native run; actual lifecycle/cooking remains unproven."
+    }
+  ],
+  "forwarded_to_owner": true,
+  "gpu_or_remote_mutations": false,
+  "tracked_changes": false
+}
