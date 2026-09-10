@@ -1,0 +1,164 @@
+--- a/tools/canonical_stance_startup.py
++++ b/tools/canonical_stance_startup.py
+@@ -0,0 +1,81 @@
++"""Bounded target-only C2 return from the actual randomized reset to nominal.
++
++The physical reset, joint noise, body pose and motor dynamics are untouched.
++No target clipping or retiming is allowed. The residual controller independently
++checks the emitted discrete knots; continuous derivatives are separate telemetry.
++"""
++import math
++import numpy as np
++
++
++class CanonicalStanceStartup:
++    def __init__(self, start, nominal, lower, upper, *, duration_s=2., dt=.02,
++                 reference_velocity_rad_s=1.75, reference_acceleration_rad_s2=6.,
++                 residual_margin_rad=.02):
++        self.start = np.array(start, dtype=np.float64, copy=True)
++        self.nominal = np.array(nominal, dtype=np.float64, copy=True)
++        self.lower = np.array(lower, dtype=np.float64, copy=True)
++        self.upper = np.array(upper, dtype=np.float64, copy=True)
++        if (self.start.ndim != 2 or self.start.shape[1] != 18
++                or any(x.shape != self.start.shape for x in (self.nominal,self.lower,self.upper))
++                or any(not np.isfinite(x).all() for x in (self.start,self.nominal,self.lower,self.upper))):
++            raise ValueError('Finite matching [environment,18] named arrays required')
++        if (not all(math.isfinite(x) and x > 0 for x in
++                    (duration_s,dt,reference_velocity_rad_s,reference_acceleration_rad_s2,residual_margin_rad))
++                or not math.isclose(duration_s/dt,round(duration_s/dt),abs_tol=1e-10)):
++            raise ValueError('Positive finite duration/rates and whole control intervals required')
++        self.duration_s,self.dt=duration_s,dt
++        self.velocity_limit,self.acceleration_limit=reference_velocity_rad_s,reference_acceleration_rad_s2
++        self.margin=residual_margin_rad
++        self.steps=int(round(duration_s/dt))
++        if any(((q < self.lower+self.margin) | (q > self.upper-self.margin)).any()
++               for q in (self.start,self.nominal)):
++            raise ValueError('Both endpoints require actual soft-limit residual margin')
++        # Check every startup knot plus both first hold derivatives before any
++        # simulator target is emitted, including v(0)=0 and held endpoint knots.
++        for step in range(1,self.steps+3):
++            self.sample(step)
++
++    def position(self, step):
++        if type(step) is not int or step < 0:
++            raise ValueError('Nonnegative integer control-knot index required')
++        if step == 0:
++            return self.start.copy()
++        if step >= self.steps:
++            return self.nominal.copy()
++        u=step/self.steps
++        s=u*u*u*(10.+u*(-15.+6.*u))
++        return self.start+(self.nominal-self.start)*s
++
++    def sample(self, step):
++        if type(step) is not int or step < 0:
++            raise ValueError('Nonnegative integer control-knot index required')
++        q=self.position(step)
++        previous=self.position(max(0,step-1))
++        previous_previous=self.position(max(0,step-2))
++        v=(q-previous)/self.dt
++        previous_v=(previous-previous_previous)/self.dt
++        a=(v-previous_v)/self.dt
++        u=min(1.,step/self.steps)
++        delta=self.nominal-self.start
++        analytic_v=delta*(30*u*u*(1-u)*(1-u))/self.duration_s
++        analytic_a=delta*(60*u-180*u*u+120*u*u*u)/(self.duration_s**2)
++        if (np.abs(v).max() > self.velocity_limit+1e-10
++                or np.abs(a).max() > self.acceleration_limit+1e-10
++                or ((q < self.lower+self.margin) | (q > self.upper-self.margin)).any()):
++            raise ValueError('Startup reference exceeds named position/rate/acceleration budget')
++        return {'q_ref':q,'v_ref':v,'a_ref':a,
++                'analytic_velocity_rad_s':analytic_v,'analytic_acceleration_rad_s2':analytic_a,
++                'valid':np.ones(len(q),dtype=bool),'time_s':step*self.dt,
++                'phase':'transition' if step < self.steps else 'canonical_hold'}
++
++    def contract(self):
++        samples=[self.sample(step) for step in range(self.steps+3)]
++        return {'kind':'target_only_quintic_C2_random_reset_to_named_canonical_stance',
++                'duration_s':self.duration_s,'control_dt_s':self.dt,
++                'physical_reset_preserved':True,'randomized_start_target_rad':self.start.tolist(),
++                'nominal_target_rad':self.nominal.tolist(),'reference_residual_margin_rad':self.margin,
++                'max_discrete_velocity_rad_s':max(float(np.abs(x['v_ref']).max()) for x in samples),
++                'max_discrete_acceleration_rad_s2':max(float(np.abs(x['a_ref']).max()) for x in samples),
++                'analytic_endpoint_velocity_and_acceleration_zero':True,
++                'discrete_hold_derivatives_checked_through_step':self.steps+2}
+--- a/tools/run_reference_physics.py
++++ b/tools/run_reference_physics.py
+@@ -10,7 +10,7 @@
+ from c_study_runtime import bootstrap_c_study_runtime
+ RUNTIME = bootstrap_c_study_runtime()
+ from isaaclab.app import AppLauncher
+-from screen_contract import OPTIONS, WAVE, preflight, save, digest
++from screen_contract import OPTIONS, WAVE, STARTUP, preflight, save, digest
+ 
+ parser = argparse.ArgumentParser(description=__doc__)
+ parser.add_argument('--package', type=Path, required=True)
+@@ -39,6 +39,7 @@
+ from reference_physics_env import build_reference_environment
+ from physics_telemetry import capture_measured_state, pre_reset_capture, require_single_pre_reset_sample, array
+ from screen_metrics import standing_screen, physical_metrics, measured_flight_touchdowns, measured_progress
++from canonical_stance_startup import CanonicalStanceStartup
+ 
+ 
+ def serializable(value):
+@@ -70,9 +71,18 @@
+         env.reset(seed=0)
+         env.episode_length_buf.zero_()
+         zero = torch.zeros((args.num_envs, 18), device=env.device)
+-        hold = env.reference_residual_controller.reference_position.clone()
+-        target_zero = torch.zeros_like(hold)
+-        valid = torch.ones(args.num_envs, device=env.device, dtype=torch.bool)
++        reset_target = array(env.reference_residual_controller.reference_position)
++        nominal = np.asarray([stance['joint_positions_rad'][name] for name in layout['joint_names_runtime']],dtype=np.float32).astype(np.float64)
++        nominal = np.broadcast_to(nominal,reset_target.shape).copy()
++        if not np.array_equal(nominal,array(env._robot.data.default_joint_pos).astype(np.float64)):
++            raise RuntimeError('Named plan stance differs from actual nominal articulation target')
++        soft_limits = array(env._robot.data.soft_joint_pos_limits)
++        startup = CanonicalStanceStartup(reset_target,nominal,soft_limits[...,0],soft_limits[...,1],
++            duration_s=STARTUP['duration_s'],dt=env.step_dt)
++        startup_contract = {**startup.contract(),'joint_names_runtime':list(layout['joint_names_runtime']),
++            'canonical_hold_before_scoring_s':STARTUP['canonical_hold_before_scoring_s']}
++        save(args.output / 'startup_reference.json',startup_contract)
++        state['startup_reference'] = startup_contract
+         clock = {'step': 0}
+         generator = None
+ 
+@@ -107,13 +117,17 @@
+                         break
+                     env.set_reference_targets(ref['q_ref'], ref['v_ref'], ref['a_ref'], ref['valid'])
+                 else:
+-                    env.set_reference_targets(hold, target_zero, target_zero, valid)
++                    startup_ref = startup.sample(step+1)
++                    env.set_reference_targets(startup_ref['q_ref'],startup_ref['analytic_velocity_rad_s'],
++                        startup_ref['analytic_acceleration_rad_s2'],startup_ref['valid'])
+                 env.set_evaluation_targets(torch.as_tensor(requested, device=env.device, dtype=zero.dtype).expand(args.num_envs, 3))
+                 before = len(captured)
+                 with torch.inference_mode():
+                     obs, reward, term, trunc, _ = env.step(zero)
+                 row = require_single_pre_reset_sample(captured, before, term, trunc)
+                 row['requested_command'] = np.broadcast_to(requested, (args.num_envs, 3)).copy()
++                row['reference_source_code'] = np.full(args.num_envs,
++                    2 if generator is not None else (0 if step+1 < startup.steps else 1),dtype=np.int8)
+                 samples.append(row)
+                 if not all(torch.isfinite(v).all() for v in obs.values()) or not torch.isfinite(reward).all():
+                     failure = 'Nonfinite observation or reward'
+--- a/tools/screen_contract.py
++++ b/tools/screen_contract.py
+@@ -16,6 +16,8 @@
+                residual_acceleration_rad_s2=2., total_acceleration_rad_s2=8.)
+ WAVE = dict(settle_steps=200, forward_steps=1200, stop_steps=1000,
+             requested_forward_mps=.005, requested_left_mps=0., requested_yaw_rad_s=0.)
++STARTUP = dict(duration_s=2., canonical_hold_before_scoring_s=2.,
++               path='quintic_C2_target_only', physical_reset_noise_preserved=True)
+ 
+ 
+ def digest(path):
+@@ -83,7 +85,7 @@
+         plan_sha256=digest(plan_path),
+         source_manifest_sha256=verify_source(source),
+         geometry_reference_sha256=digest(args.geometry_reference),
+-        controller=OPTIONS, wave_schedule=WAVE, runtime_tree_sha256=RUNTIME_TREE)
++        controller=OPTIONS, wave_schedule=WAVE, startup=STARTUP, runtime_tree_sha256=RUNTIME_TREE)
+     if args.mode == 'wave':
+         if args.admission is None:
+             raise ValueError('Fresh exact-source zero-residual standing admission required')
