@@ -1,0 +1,24 @@
+--- residual001/reference_residual_env.py
++++ residual002/reference_residual_env.py
+@@ -89,15 +89,18 @@
+         self.omni_previous_action.copy_(self._actions)
+         self.omni_previous_velocity.copy_(self._robot.data.joint_vel.torch)
+         self.omni_previous_target.copy_(self._processed_actions)
+-        self._actions = torch.tanh(actions)
+-        self._processed_actions = result['target_position_rad'].to(dtype=self._actions.dtype)
++        # Parent resets mutate these persisted tensors, including outside a
++        # rollout's inference_mode. Allocate normal writable storage explicitly.
++        with torch.inference_mode(False):
++            self._actions = torch.tanh(actions).detach().clone()
++            self._processed_actions = result['target_position_rad'].to(dtype=self._actions.dtype).detach().clone()
++            self._joint_target_slew_limited_fraction = torch.zeros(self.num_envs,device=self.device)
+         result['applied_position_target_rad'] = self._processed_actions.to(dtype=torch.float64).clone()
+         result['position_target_cast_error_rad'] = result['applied_position_target_rad']-result['target_position_rad']
+         result['reference_to_executable_lag_rad'] = result['target_position_rad']-result['reference_position_rad']
+         self.reference_residual_target = result
+         self._previous_processed_joint_target.copy_(self._processed_actions)
+         self._has_previous_processed_joint_target.fill_(True)
+-        self._joint_target_slew_limited_fraction = torch.zeros(self.num_envs,device=self.device)
+         self._reference_fresh.fill_(False)
+ 
+     def _apply_action(self):

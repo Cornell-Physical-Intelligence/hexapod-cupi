@@ -1,0 +1,20 @@
+{
+  "coverage": [
+    "Wrong immutable container identity or name is never signalled or restored",
+    "Docker daemon/permission uncertainty and malformed inspection reject restoration",
+    "Owned running container stopped then inspected before restoring only previously active timers",
+    "Explicit absence permits restoration without signalling another container",
+    "Post-stop unknown, running or wrong identity rejects restoration",
+    "Docker stop failure rejects restoration",
+    "Startup name-only record recovers immutable identity before stopping",
+    "Ambiguous systemd-run client failure first stops exact owner"
+  ],
+  "execution_command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tmp/reference_physics_launch_001 -p test_embedded_restorer.py -v",
+  "execution_context": "Independent review before bundle assembly; tests were not redundantly rerun during packaging.",
+  "guard_sha256": "4104249e3100b77ebd84719f74d6c6327910c2658f5f6cd5d409c81599d34a77",
+  "method": "AST extraction and execution of the actual embedded restorer against mocked subprocess responses and temporary job records.",
+  "outer_fix": "Failed/timed-out dispatch invokes restorer --stop-owner with timeout 300.",
+  "status": "passed",
+  "test_sha256": "54b1c337d6364610abe6a4d925b99761a30457729a8029fc1b04e5e97a604e23",
+  "tests_run": 8
+}
