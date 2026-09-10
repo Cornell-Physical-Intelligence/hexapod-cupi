@@ -1,0 +1,79 @@
+{
+  "passed": true,
+  "owner_freeze_sha256": "1ffc294c64d3e3eb47a13710115ae94c9033da398e015854c9d6645138387032",
+  "owner_payload_count": 12,
+  "reviewed_sources": {
+    "directional_metrics.py": "9b29ce9c330f0975b082ae441154ac511dfc7e9569fdf1e9033ffe2e54cf83a1",
+    "directional_contract.py": "9d6a3f818975515e62fc9b9c50f9a95b9222bb515439fa8ccb0b12301854ab94",
+    "run_directional_physics.py": "94bd0ef4c07c33e1bebec39bdd6c1076281ed9b250106449056f6589e2d8391d"
+  },
+  "synthetic_frame_covariance_cases": [
+    {
+      "case": "reverse",
+      "world_yaw_offset_rad": 0.73,
+      "same_motion_verdict": true
+    },
+    {
+      "case": "reverse",
+      "world_yaw_offset_rad": 1.5707963267948966,
+      "same_motion_verdict": true
+    },
+    {
+      "case": "reverse",
+      "world_yaw_offset_rad": -2.1,
+      "same_motion_verdict": true
+    },
+    {
+      "case": "left_strafe",
+      "world_yaw_offset_rad": 0.73,
+      "same_motion_verdict": true
+    },
+    {
+      "case": "left_strafe",
+      "world_yaw_offset_rad": 1.5707963267948966,
+      "same_motion_verdict": true
+    },
+    {
+      "case": "left_strafe",
+      "world_yaw_offset_rad": -2.1,
+      "same_motion_verdict": true
+    },
+    {
+      "case": "left_turn",
+      "world_yaw_offset_rad": 0.73,
+      "same_motion_verdict": true
+    },
+    {
+      "case": "left_turn",
+      "world_yaw_offset_rad": 1.5707963267948966,
+      "same_motion_verdict": true
+    },
+    {
+      "case": "left_turn",
+      "world_yaw_offset_rad": -2.1,
+      "same_motion_verdict": true
+    },
+    {
+      "case": "forward_right_arc",
+      "world_yaw_offset_rad": 0.73,
+      "same_motion_verdict": true
+    },
+    {
+      "case": "forward_right_arc",
+      "world_yaw_offset_rad": 1.5707963267948966,
+      "same_motion_verdict": true
+    },
+    {
+      "case": "forward_right_arc",
+      "world_yaw_offset_rad": -2.1,
+      "same_motion_verdict": true
+    }
+  ],
+  "no_GPU_or_physical_claim": true,
+  "limits": [
+    "No new raw runtime audit.",
+    "World/root-link displacement and velocity remain separate from reported COM body twist.",
+    "Body gyro Z is not a general exact Euler heading derivative under tilt; actual heading and reported yaw are both separately required and discrepancy remains diagnostic.",
+    "Four limited cases do not establish omni or PPO qualification."
+  ]
+}

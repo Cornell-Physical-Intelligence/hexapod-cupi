@@ -1,0 +1,543 @@
+{
+  "scope": "Posthoc replay of unchanged reverse001 scalar gates; run remains failed and reverse is not admitted",
+  "source_files_verified": 930,
+  "source_manifest_sha256": "373c9ea08406f6f3593279fa9fda24badf56ae86bd938e140dba7d734b5ee919",
+  "raw_payloads_verified": 33,
+  "standing32_physical_and_quiet_recomputed_pass": true,
+  "original_raw_state_status": "running",
+  "full_controls": 2400,
+  "full_substeps": 19201,
+  "partial_trace_and_fulltrace_same_arrays": true,
+  "exact_indices_timestamps_and_control_endpoint_parity": true,
+  "separate_finalization_failure": {
+    "reproduced_error": "Object of type bool is not JSON serializable",
+    "field": "gate.independent_directional_motion.yaw_required",
+    "type": "<class 'numpy.bool'>",
+    "explanation": "Numpy bool blocks strict final-state JSON. Exception handler retains the same gate, so its second JSON save also fails; previous running2400 state remains. No physical state is rewritten."
+  },
+  "original_gate_posthoc_replay": {
+    "control_steps": 2400,
+    "num_envs": 1,
+    "settle_steps": 200,
+    "control_dt_s": 0.02,
+    "post_settle_measured_duration_s": 44.0,
+    "max_applied_torque_nm": 1.600000023841858,
+    "post_settle_max_requested_torque_nm": 1.228878378868103,
+    "post_settle_joint_saturation_fraction": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "post_settle_max_joint_saturation_fraction": 0.0,
+    "post_settle_all_motor_saturation_fraction": 0.0,
+    "post_settle_nonfoot_env_steps": 0,
+    "post_settle_min_distal_support_count": 5,
+    "terminations": 0,
+    "truncations": 0,
+    "min_root_height_m": 0.12870068848133087,
+    "mean_measured_forward_mps": -0.002638425910845399,
+    "mean_measured_left_mps": 8.784729288890958e-05,
+    "max_reference_to_executable_lag_rad": 0.0,
+    "max_target_cast_error_rad": 1.1920928955078125e-07,
+    "original_basic_standing_physics_pass": true,
+    "kind": "limited_directional_reference_discriminator_not_omni_or_PPO",
+    "case": "reverse",
+    "requested_forward_left_yaw": [
+      -0.005,
+      0.0,
+      0.0
+    ],
+    "measured_flight_events": [
+      {
+        "leg_index": 0,
+        "flight_begin_step": 219,
+        "flight_end_step": 279,
+        "flight_samples": 60,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.0049997621934914915,
+        "measured_reference_point_planar_step_m": 0.03285076294069316
+      },
+      {
+        "leg_index": 0,
+        "flight_begin_step": 918,
+        "flight_end_step": 924,
+        "flight_samples": 6,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 1.0475878291796303e-05,
+        "measured_reference_point_planar_step_m": 0.004583322340504148
+      },
+      {
+        "leg_index": 0,
+        "flight_begin_step": 930,
+        "flight_end_step": 980,
+        "flight_samples": 50,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.003855800509906443,
+        "measured_reference_point_planar_step_m": 0.060941872418241116
+      },
+      {
+        "leg_index": 1,
+        "flight_begin_step": 454,
+        "flight_end_step": 516,
+        "flight_samples": 62,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.0052314650386394435,
+        "measured_reference_point_planar_step_m": 0.0552183653437836
+      },
+      {
+        "leg_index": 1,
+        "flight_begin_step": 1163,
+        "flight_end_step": 1219,
+        "flight_samples": 56,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004611827318940692,
+        "measured_reference_point_planar_step_m": 0.06389459575554868
+      },
+      {
+        "leg_index": 2,
+        "flight_begin_step": 696,
+        "flight_end_step": 744,
+        "flight_samples": 48,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.003638364684279277,
+        "measured_reference_point_planar_step_m": 0.06968501699607585
+      },
+      {
+        "leg_index": 2,
+        "flight_begin_step": 1402,
+        "flight_end_step": 1451,
+        "flight_samples": 49,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.003712330598501623,
+        "measured_reference_point_planar_step_m": 0.0605543418520645
+      },
+      {
+        "leg_index": 3,
+        "flight_begin_step": 579,
+        "flight_end_step": 629,
+        "flight_samples": 50,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.0037637923222318403,
+        "measured_reference_point_planar_step_m": 0.059040074413194886
+      },
+      {
+        "leg_index": 3,
+        "flight_begin_step": 1274,
+        "flight_end_step": 1276,
+        "flight_samples": 2,
+        "confirmed_measured_touchdown": false,
+        "measured_reference_point_lift_m": 1.4618003083693987e-06,
+        "measured_reference_point_planar_step_m": 0.0007666095299810342
+      },
+      {
+        "leg_index": 3,
+        "flight_begin_step": 1286,
+        "flight_end_step": 1335,
+        "flight_samples": 49,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.0035514366866988417,
+        "measured_reference_point_planar_step_m": 0.05820918641331056
+      },
+      {
+        "leg_index": 4,
+        "flight_begin_step": 802,
+        "flight_end_step": 804,
+        "flight_samples": 2,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 4.156734659352401e-06,
+        "measured_reference_point_planar_step_m": 0.001714317636607789
+      },
+      {
+        "leg_index": 4,
+        "flight_begin_step": 809,
+        "flight_end_step": 866,
+        "flight_samples": 57,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004603022788782066,
+        "measured_reference_point_planar_step_m": 0.08404897811410664
+      },
+      {
+        "leg_index": 5,
+        "flight_begin_step": 338,
+        "flight_end_step": 395,
+        "flight_samples": 57,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004804107557507306,
+        "measured_reference_point_planar_step_m": 0.04273333622017307
+      },
+      {
+        "leg_index": 5,
+        "flight_begin_step": 1047,
+        "flight_end_step": 1098,
+        "flight_samples": 51,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004143507928208737,
+        "measured_reference_point_planar_step_m": 0.06115799357799933
+      }
+    ],
+    "completed_measured_leg_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "generator_confirmed_touchdowns": 11,
+    "generator_final_mode": "reference_quiet_hold",
+    "command_channels": "Raw rows retain requested, admitted target, filtered reference twist and actual measured body/navigation twist; references retain complete wave005 state",
+    "independent_directional_motion": {
+      "duration_s": 24.0,
+      "requested_forward_left_yaw": [
+        -0.005,
+        0.0,
+        0.0
+      ],
+      "mean_measured_body_navigation_twist": [
+        -0.0046656759089895175,
+        0.00017302084144072674,
+        1.286933830366858e-05
+      ],
+      "old_world_displacement_integral_evidence": {
+        "duration_s": 24.0,
+        "measured_world_displacement_m": [
+          0.004776889458298683,
+          0.1174827367067337,
+          -0.0007020533084869385
+        ],
+        "integrated_link_velocity_displacement_m": [
+          0.0029321028850972652,
+          0.11191120743751526,
+          -0.0004206330340821296
+        ],
+        "actual_initial_forward_axis_world": [
+          0.007607502133318859,
+          -0.9999710625369573,
+          0.0
+        ],
+        "measured_forward_displacement_m": -0.11744299685763747,
+        "integrated_forward_displacement_m": -0.11188566303213249,
+        "displacement_integral_difference_m": 0.005875744391232729,
+        "interval_terminations": 0,
+        "interval_truncations": 0
+      },
+      "actual_heading_change_rad": 0.003488846328127071,
+      "reported_body_yaw_rate_integral_rad": 0.0003088641192880459,
+      "heading_minus_reported_body_yaw_integral_rad": 0.003179982208839025,
+      "max_planar_excursion_from_start_m": 0.11757981252581055,
+      "translation_required": true,
+      "yaw_required": false,
+      "signed_translation_pass": true,
+      "signed_yaw_pass": true,
+      "requested_axis_in_body_navigation": [
+        -1.0,
+        0.0
+      ],
+      "measured_command_axis_displacement_m": 0.11742262033287934,
+      "integrated_world_velocity_command_axis_m": 0.11187095468288132,
+      "mean_body_command_axis_velocity_mps": 0.0046656759089895175,
+      "commanded_axis_frame": "At each measured pose rotate [left,-forward,0] into world, projectXY; use normalized adjacent-direction mean for each actual displacement"
+    },
+    "final_quiet_stop_window": {
+      "window_samples": 623,
+      "window_duration_s": 12.46,
+      "max_planar_excursion_m": 1.8457171790942084e-07,
+      "max_heading_excursion_deg": 0.0,
+      "max_joint_velocity_rms_rad_s": 0.004750253167003393,
+      "max_joint_position_range_rad": 7.569789886474609e-06,
+      "max_target_step_abs_p95_rad_per_20ms": 0.0,
+      "max_requested_torque_saturation_fraction": 0.0,
+      "mean_requested_torque_saturation_fraction": 0.0,
+      "max_applied_torque_nm": 0.6176669001579285,
+      "requested_torque_abs_max_nm": 0.6176669001579285,
+      "terminations": 0,
+      "truncations": 0,
+      "joints": {
+        "revolute_1_1": {
+          "velocity_rms_rad_s": 0.002569551346823573,
+          "position_range_rad": 1.4081597328186035e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1_7": {
+          "velocity_rms_rad_s": 0.0007730717770755291,
+          "position_range_rad": 2.115964889526367e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2_5": {
+          "velocity_rms_rad_s": 0.002067502122372389,
+          "position_range_rad": 1.5422701835632324e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_3": {
+          "velocity_rms_rad_s": 0.002278960542753339,
+          "position_range_rad": 1.942738890647888e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_4": {
+          "velocity_rms_rad_s": 7.89652403909713e-05,
+          "position_range_rad": 1.8328428268432617e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_5": {
+          "velocity_rms_rad_s": 0.0031364471651613712,
+          "position_range_rad": 1.6987323760986328e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1": {
+          "velocity_rms_rad_s": 0.00038549420423805714,
+          "position_range_rad": 3.4570693969726562e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1_6": {
+          "velocity_rms_rad_s": 0.0003454069374129176,
+          "position_range_rad": 7.569789886474609e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1_5": {
+          "velocity_rms_rad_s": 0.002205552300438285,
+          "position_range_rad": 5.304813385009766e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1_3": {
+          "velocity_rms_rad_s": 0.0006553836283273995,
+          "position_range_rad": 4.231929779052734e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1_4": {
+          "velocity_rms_rad_s": 0.00025469454703852534,
+          "position_range_rad": 4.589557647705078e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_1_2": {
+          "velocity_rms_rad_s": 0.002454370493069291,
+          "position_range_rad": 3.635883331298828e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2": {
+          "velocity_rms_rad_s": 0.001131665427237749,
+          "position_range_rad": 2.86102294921875e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2_6": {
+          "velocity_rms_rad_s": 0.0037135432939976454,
+          "position_range_rad": 5.245208740234375e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2_4": {
+          "velocity_rms_rad_s": 0.004750253167003393,
+          "position_range_rad": 4.291534423828125e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2_2": {
+          "velocity_rms_rad_s": 0.0038594368379563093,
+          "position_range_rad": 3.337860107421875e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2_3": {
+          "velocity_rms_rad_s": 0.0043376749381423,
+          "position_range_rad": 4.5299530029296875e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        },
+        "revolute_2_1": {
+          "velocity_rms_rad_s": 0.0008449451415799558,
+          "position_range_rad": 3.0994415283203125e-06,
+          "target_step_abs_p95_rad_per_20ms": 0.0,
+          "saturation_fraction": 0.0
+        }
+      },
+      "failed_bounds": [],
+      "pass": true,
+      "bounds": {
+        "max_planar_excursion_m": 0.01,
+        "max_heading_excursion_deg": 2.0,
+        "max_joint_velocity_rms_rad_s": 0.03,
+        "max_joint_position_range_rad": 0.02,
+        "max_target_step_abs_p95_rad_per_20ms": 0.002,
+        "max_requested_torque_saturation_fraction": 0.005,
+        "max_applied_torque_nm": 1.60001
+      }
+    },
+    "all_omni_directions_qualified": false,
+    "stage2_complete": false,
+    "passed": false
+  },
+  "replay_serialization_conversion_scope": "Only converts numpy scalars for this separate review artifact, not original source or gate values",
+  "independent400Hz_motion": {
+    "start_control_boundary": 200,
+    "end_control_boundary": 1400,
+    "duration_s": 24.0,
+    "acceptance_verdict": null,
+    "scope": "independent raw400Hz evidence; old50Hz gate unchanged",
+    "link": {
+      "measured_world_displacement_m": [
+        [
+          0.004776889458298683,
+          0.1174827367067337,
+          -0.0007020533084869385
+        ]
+      ],
+      "measured_forward_displacement_m": [
+        -0.11744299685763747
+      ],
+      "integrals": {
+        "left": {
+          "world_m": [
+            [
+              0.005140981171280146,
+              0.1126670315861702,
+              -0.00025183073012158275
+            ]
+          ],
+          "forward_m": [
+            -0.11262466126287968
+          ],
+          "position_difference_norm_m": [
+            0.004850389435887337
+          ]
+        },
+        "right": {
+          "world_m": [
+            [
+              0.0051359497010707855,
+              0.1126876249909401,
+              -0.000254463724559173
+            ]
+          ],
+          "forward_m": [
+            -0.11264529234864903
+          ],
+          "position_difference_norm_m": [
+            0.004829322453588247
+          ]
+        },
+        "trapezoid": {
+          "world_m": [
+            [
+              0.005138465203344822,
+              0.11267732828855515,
+              -0.00025314721278846264
+            ]
+          ],
+          "forward_m": [
+            -0.11263497680753562
+          ],
+          "position_difference_norm_m": [
+            0.004839855711907148
+          ]
+        }
+      }
+    },
+    "com": {
+      "measured_world_displacement_m": [
+        [
+          0.004778490401804447,
+          0.11748606711626053,
+          -0.0007021278142929077
+        ]
+      ],
+      "measured_forward_displacement_m": [
+        -0.11744631499160955
+      ],
+      "integrals": {
+        "left": {
+          "world_m": [
+            [
+              0.005149394273757935,
+              0.11268316954374313,
+              -0.00025212057516910136
+            ]
+          ],
+          "forward_m": [
+            -0.11264073475076601
+          ],
+          "position_difference_norm_m": [
+            0.004838171415030956
+          ]
+        },
+        "right": {
+          "world_m": [
+            [
+              0.005144409369677305,
+              0.11270380765199661,
+              -0.00025475426809862256
+            ]
+          ],
+          "forward_m": [
+            -0.11266141018447344
+          ],
+          "position_difference_norm_m": [
+            0.004817057866603136
+          ]
+        },
+        "trapezoid": {
+          "world_m": [
+            [
+              0.0051469020545482635,
+              0.11269348859786987,
+              -0.0002534374361857772
+            ]
+          ],
+          "forward_m": [
+            -0.11265107246584846
+          ],
+          "position_difference_norm_m": [
+            0.0048276144079864025
+          ]
+        }
+      }
+    }
+  },
+  "postsettle400Hz_requested_peak_nm": 1.4578473567962646,
+  "postsettle400Hz_applied_peak_nm": 1.4578473567962646,
+  "moving400Hz_joint_rate_discrepancy": {
+    "joint": "revolute_2",
+    "actual_angle_delta_rad": -0.027978897094726562,
+    "reported_rate_integral_rad": -0.2728588929692482,
+    "difference_rad": -0.24487999587452164
+  },
+  "untested_cases": [
+    "left_strafe",
+    "left_turn",
+    "forward_right_arc"
+  ],
+  "next_explicit_scope": "Fresh002 for these three unmeasured cases; strict JSON scalar/failure finalization fix only, same physics/gates/wave005. Do not repeat identical reverse or waive5mm.",
+  "root_remote_cleanup_receipt_verified": true,
+  "new_live_lock_check_performed": false,
+  "stage2_complete": false,
+  "reverse_admitted": false,
+  "velocity_fidelity_qualified": false
+}

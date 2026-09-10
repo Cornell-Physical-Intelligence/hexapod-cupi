@@ -1,0 +1,1 @@
+Root independently replayed all11 focused tests, verified all930 source payloads and925 unchanged parent payloads, and passed exact host/pinned-runtime preflight. Reviewed named cold-case command contracts, signed translation and heading/gyro tests, pure-turn drift and failure-preserving capture. This clears the four-case bounded reference diagnostic only.

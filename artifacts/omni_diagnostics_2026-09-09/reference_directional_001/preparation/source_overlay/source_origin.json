@@ -1,0 +1,143 @@
+{
+  "exact_plan_sha256": "356b72f0e82b207ba6105cb42057643d21a5b911d0517661465dcfe57745d00f",
+  "original_asset_and_physical_gates_preserved": true,
+  "overlays": {
+    "tools/geometry/candidate_c_reference.json": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+    "tools/geometry/f050_t060.urdf": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+    "tools/launch_reference_physics_spark.py": "2b4eee469fa8b7d362d4488c69caf22b11c9c149407716d374d8812b626b4899",
+    "tools/physics_telemetry.py": "0e5d88348e362f8c026f6269703621fb92c5f0a2e591c04604f262e0b3b10077",
+    "tools/reference_physics_env.py": "4effd42209b53da79e71a0f14ed5eb92d8ae27966224d59ff7efdfdb5b8820dc",
+    "tools/reference_residual.py": "fbf65749c2d1ffc36b22986f71c0972ce7b1ecf82beebef57a0bd3e1be966e40",
+    "tools/reference_residual_env.py": "1d3311ecd7d04122927242fc545e7c9aaa444fd895d153a897f32cf0c7c5eed0",
+    "tools/run_reference_physics.py": "f8c0add8dcd2ca1f0f97bea60100dc8e26758e09a686763bff87a4b274bf5def",
+    "tools/screen_contract.py": "7f779e8eac0f81e98eacd2b46bea1c4ed2377d96750db88b8cabb047f7fc7a6b",
+    "tools/screen_metrics.py": "b092b32287fe0724a1e4ef5089a4a983895ba6bd7b0834dfbd055c98e4ac9db3",
+    "tools/serial_geometry.py": "8c0451d151e077830986d8deb259129b4eb49f3750110883dad99683e8d7f8d3",
+    "tools/terrain_contact_evidence.py": "9b78174f9cd85223504844a9bbc693f6cc466567c965d1cf13f2e966aef36ea5",
+    "tools/wave_math.py": "75353a885bd1e11795dff81458a7e547bbd2611769ef905b3f372c1814a6b12f",
+    "tools/wave_reference.py": "62df89544cd00fc6bb554901b91ad73fc64936541a944c8b296e179684bfd370"
+  },
+  "parent_source_identity": "fb5e472bb710daa50d1d7f16a6f3812d2ed845e2400fcc6769859b3fb0b9519e",
+  "parent_source_manifest_sha256": "00d4e07e0e31776e3d2faa0136a2b1386f79fd4940bf81d2f4a484155f81bb25",
+  "parent_source_origin_sha256": "c3c0ddba7abd0ca55daf3f21c6987d684645aebf5cf3804743f1a1fd412f7e8f",
+  "residual_owner_freeze_sha256": "b9ef7920b1943506cdea11e04ce6567b887e4d0c65e206705c943f0b41b649a2",
+  "scope": "32x1000zero-residualstanding then1x2400measuredcontactwave; noPPO/checkpoints/bodyposecontrol/automaticcontinuation",
+  "source002_gates_changed": false,
+  "source002_overlays": {
+    "tools/canonical_stance_startup.py": "b69a7699384bd342111fd4c18a3e26fa0de9e8ae9c25dcaa767712767ad55a96",
+    "tools/run_reference_physics.py": "23e40e1864f54c0ca3e735a9a1aa12293007ba2d398ce46de3f2471a1abc4475",
+    "tools/screen_contract.py": "6e270ed28b653bcce806f8153c3863b47befc33e0c287f6e12c0bfa81e6ee661"
+  },
+  "source002_reason": "Source001 held32randomized reset targets forever; preserve physical reset and smoothly bring joint targets to exact nominal C stance over2s, then hold2s before unchanged gates.",
+  "source003_cpu_landing_report_sha256": "34d831cb6c4a7de44264216d62b9d9bc20e1cb650a02f95d0f40d52eb7902916",
+  "source003_overlays": {
+    "tools/geometry/candidate_c_reference.json": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+    "tools/geometry/f050_t060.urdf": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+    "tools/serial_geometry.py": "8c0451d151e077830986d8deb259129b4eb49f3750110883dad99683e8d7f8d3",
+    "tools/wave_math.py": "75353a885bd1e11795dff81458a7e547bbd2611769ef905b3f372c1814a6b12f",
+    "tools/wave_reference.py": "ef92745daf4c3bf544b6c6f9f65e18f19745d9e84811c8888a464312f864a56b"
+  },
+  "source003_physical_acceptance_gates_changed": false,
+  "source003_reason": "Preserve admitted canonical startup and physics; new bounded C2 landing after measured flight/descent and returned contact, with three stable confirmations after endpoint.",
+  "source003_target_planar_overshoot_then_return_m": 0.001696795176175669,
+  "source004_control_rate_metrics_preserved": true,
+  "source004_overlays": {
+    "tools/physics_substeps.py": "99d5523ebdbe620f068d90e4e14f55026b0ad62e78a7c3e88f661cad77e6c3eb",
+    "tools/run_reference_physics.py": "a44dd22e0425df4be1cab77172a1d524b114af823fd8885f78f2a009a9952ba2",
+    "tools/wave_reference.py": "2f9c6e5ef5119b299a5e2983bfceff666fd9b3ff312c1156ac909221c01fde8d"
+  },
+  "source004_physics_or_acceptance_gates_changed": false,
+  "source004_reason": "RF physical lift1.445mm failed unchanged2mm gate; planned lift5mm to7mm. Add read-only all-eight-substep position/velocity/torque evidence to diagnose control-rate integral discrepancy.",
+  "source004_sdk_contract_sha256": "1dbd381ceb74e34d55cb5f2a340ae825b9c5471d33c099b81bdce8f781e48c1a",
+  "source004_substep_metrics_are_diagnostic_not_substituted_for_gate": true,
+  "source004_velocity_kernel_sha256": "e48c755115e031d84c0ad1d1645badd8169bb0d7c257c592af2186acdc60c1d8",
+  "source005_existing_metrics_and_gates_changed": false,
+  "source005_observer_and_targets_unchanged": true,
+  "source005_only_physics_change": {
+    "sim.physics.enable_external_forces_every_iteration": {
+      "from": false,
+      "to": true
+    }
+  },
+  "source005_overlays": {
+    "tools/launch_reference_physics_spark.py": "a3b86fae91a6ff75969b04ec06e2550d1e10800f1408c762f23d1a5bbf8861bd",
+    "tools/reference_physics_env.py": "5158e6591108abbb92c02991ae18142b2db6e862a6eb08a6a284fe7913da4fa1",
+    "tools/screen_contract.py": "6158dfc745dbc4835ba64f6fbef61e3b3aa6faa518feb15e86dd377245363efd",
+    "tools/solver_comparison.py": "0a881e9ae2524f422502de59bbfbd3e37b418c770b1599fc8d4939909a31ff27"
+  },
+  "source005_scope": "Isolated32x1000standing comparison only; no wave, policy or solver default adoption",
+  "source006_existing_metrics_and_gates_changed": false,
+  "source006_external_forces_every_iteration_remains_true": true,
+  "source006_observer_and_targets_unchanged": true,
+  "source006_only_physics_change": {
+    "robot.spawn.articulation_props.solver_velocity_iteration_count": {
+      "from": 4,
+      "to": 1
+    }
+  },
+  "source006_overlays": {
+    "tools/reference_physics_env.py": "ada50c7fb675ad63e0d28b93bc41374432620712cc45cea7c18b6dbc08e880b6",
+    "tools/screen_contract.py": "9519939a3ed6b257d1e1b8784f67df44aafbf4e80b857272dca0ca793f05a652",
+    "tools/solver_comparison.py": "7a9334e48fa59a5663d7bdcd75e3d252e908cad8a6a7225e92c3c614a1ceb5f2"
+  },
+  "source006_scope": "Isolated32x1000standing comparison only; no wave, policy or solver default adoption",
+  "source007_actual006_readback_sha256": "7c77ed01d3d9973dbc1dd5131facd7f06c6bd99aa05f29fff4d989dcdc467f59",
+  "source007_existing_metrics_and_gates_changed": false,
+  "source007_external_forces_every_iteration_remains_true": true,
+  "source007_observer_and_targets_unchanged": true,
+  "source007_overlays": {
+    "tools/solver_comparison.py": "7d8353066186db5fd9b2a1b0d1bddc934dd30c3ab3fd0f3db34e1ebe38ba9046"
+  },
+  "source007_physics_change_from006": null,
+  "source007_scope": "Introspection-only correction of006; same32x1000standing, no wave, policy or solver default adoption",
+  "source008_combined_changes_vs_last_wave004_no_causal_attribution": [
+    "TGS externalforcesTrue and velocityiterations1",
+    "horizontal swing completion80percent"
+  ],
+  "source008_existing_wave_metrics_and_gates_changed": false,
+  "source008_observer_startup_targets_and_actuators_unchanged": true,
+  "source008_overlays": {
+    "tools/launch_reference_physics_spark.py": "9ebabaf254cc77fabad7d4759cc80fc26d7efd3912ea84bd55304594c88ed561",
+    "tools/run_reference_physics.py": "cc9ea88dc234b4b4e9b232f36e732c7fe8532d5cb1b5c9df6e22b4bed46b88bf",
+    "tools/screen_contract.py": "610f708d1ce9263eab724d53253bfdb84071fba373fc59960c40040df49ee893",
+    "tools/screen_metrics.py": "3dfcca2e7b16e1bee07ed1bbf6082bee78a5d8684f9217fb1d92a92d29832cae",
+    "tools/solver_comparison.py": "e7cef23510624e3c57384ee1e5ab8f5e1aa2fbfa6502bbd210c23ce986037b54",
+    "tools/wave_reference.py": "a32b22eba03ff6fdd6b87d612c96173c519c7d2b212cb367a9b1f8f28fcd697d"
+  },
+  "source008_physics_change_from007": null,
+  "source008_scope": "Fresh32x1000standing including unchanged all32quiet gates, then1x2400 bounded zero-residual wave; no PPO or production adoption",
+  "source008_standing_admission_strengthening": "Every fresh replica must also pass the existing unchanged QUIET_GATES before wave",
+  "source008_wave_owner_freeze_sha256": "dedd5a2deb21703fe1d8713fcc2c276339a58db3f14b9ab85fb65a3f2ee7e834",
+  "source008_wave_schema_change": "AdvancedHorizontalSwing horizontal_duration_fraction=.8 and horizontal_coefficients; incompatible actor state is not reused",
+  "source009_future_actor_state_schema_not_claimed_compatible": true,
+  "source009_joint_angle_observer_freeze_sha256": "1c3a736017afeb810261a734558c7a4a904dd9010d0fdae09d68ef32efb80415",
+  "source009_original_entry_metrics_host_and_gates_unchanged": true,
+  "source009_overlays": {
+    "tools/physics_substeps.py": "8d52e0f56e3671a18c194b3f5d623cd95ca9187c5d58289001a74868c8d0c091",
+    "tools/solver_comparison.py": "dfa5cc172b1a17e4b1cf6fdfa617c2390a72eb8b1070801ac3c24fd3e1eb099f",
+    "tools/wave_reference.py": "8bacf0c61f7fdc6d43d9f9ebdb5adc643b026495bb303ec3c18157d121c78893"
+  },
+  "source009_physics_change_from008": null,
+  "source009_scope": "Fresh32x1000standing+unchanged all32quiet, then1x2400 qualified-liftoff wave; read-only400Hz joint angles; noPPO/productionadoption",
+  "source009_wave_owner_freeze_sha256": "5b6c076cb03426ac8e24cc6df7e8684e48862aa78a495bd61ae49773a7826814",
+  "stage2_complete": false,
+  "successor_of": {
+    "manifest_sha256": "a73075ebdf5d6c986728b96117495b8de85adc8db62de1c41ffbe49eb6176d66",
+    "source_origin_sha256": "bc835ca02ecb2eea26e38c06c1287eae4eb01fe34b782ec2aa3de0e65b014fb3"
+  },
+  "terrain_qualified": false,
+  "wave_owner_freeze_sha256": "8d7ced506abfb7875ab35befacb91b2e5694acf4ca8071077a81f37f61766221",
+  "directional_discriminator001": {
+    "parent_source009_manifest_sha256": "04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e",
+    "runtime_additions_sha256": {
+      "directional_contract.py": "9d6a3f818975515e62fc9b9c50f9a95b9222bb515439fa8ccb0b12301854ab94",
+      "directional_metrics.py": "9b29ce9c330f0975b082ae441154ac511dfc7e9569fdf1e9033ffe2e54cf83a1",
+      "run_directional_physics.py": "94bd0ef4c07c33e1bebec39bdd6c1076281ed9b250106449056f6589e2d8391d",
+      "launch_directional_physics_spark.py": "b6de01153053ffe746135e8f9f2fdc46d69371eae41b18ae5ef0487820fc7317"
+    },
+    "scope": "Fresh32standing then four independent cold low-speed directional reference cases; no all-direction/PPO qualification",
+    "all_original_runtime_bytes_unchanged": true,
+    "no_origin_pose_injection_or_pair_adapter": true,
+    "fresh_exact_source_admission_required": true
+  }
+}
