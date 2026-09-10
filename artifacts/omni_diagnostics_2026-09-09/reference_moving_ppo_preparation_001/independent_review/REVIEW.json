@@ -1,0 +1,32 @@
+{
+  "scope": "Independent read-only CPU moving host and guard review before exact final hash binding; no GPU actions",
+  "tested_files_sha256": {
+    "tmp/reference_moving_ppo_launch_001/launch_moving_ppo_spark.py": "d34fc3abe28edf3a4e1ab1456025618c1a7d553b356ed205e8b30f2c74a7fdf9",
+    "tmp/reference_moving_ppo_launch_001/test_host.py": "d12981df59308aa4cf1cdb4e9bb81c06a670af12a08e60b05f551c29826bd469",
+    "tmp/reference_moving_ppo_launch_001/README.md": "cf8f585f9b406dd1a015c6260b772bb2f3785faa2c666cb6e57971c1ac0810c7",
+    "tmp/reference_moving_ppo_guard_001/launch_guarded_remote.py": "8d74c6a5aefd4284c8d33e54b9e19c874246afb2e34fedc6c5b1841c3ebf7354",
+    "tmp/reference_moving_ppo_guard_001/test_embedded_restorer.py": "54b1c337d6364610abe6a4d925b99761a30457729a8029fc1b04e5e97a604e23"
+  },
+  "host_tests_passed": 16,
+  "guard_tests_passed": 8,
+  "stdlib_only_host_import": true,
+  "phase_count": 7,
+  "consumer_folder_mode_binding": "calibrate -> calibration; all remaining phase names exact",
+  "checkpoint_binding": {
+    "profile_32": "calibration/initial.pt",
+    "train_10": "calibration/initial.pt",
+    "evaluate_initial": "calibration/initial.pt",
+    "evaluate_010": "train_10/decision_010.pt",
+    "quiet_010": "train_10/decision_010.pt"
+  },
+  "fixed_issue": "Nested /outputs/inputs:ro closes admitted study RW alias for consumer phases; unchanged parent standing behavior documented and hash-verified",
+  "completed_phase_dirs_RO_and_hash_verified": true,
+  "owned_container_and_run_owned_AST_matches_prior_except_1800_600_deadlines": true,
+  "guard_embedded_restorer_AST_matches_RR002": true,
+  "prior_RR002_four_receipt_pins_match_actual_raw": true,
+  "all_final_failure_exports_preserved_by_host": true,
+  "pending_consumer_host_hashes_are_deliberately_not_launchable": true,
+  "concrete_blockers": [],
+  "GPU_dispatch_authorized_by_this_receipt": false,
+  "physical_performance_or_Stage2_claim": false
+}
