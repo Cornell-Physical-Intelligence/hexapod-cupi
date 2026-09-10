@@ -1,0 +1,17 @@
+{
+  "scope": "Independent read-only CPU frame/time/reset-epoch review; no sensor, actor, GPU, terrain traversal or abort admission",
+  "owner_freeze_sha256": "293b7a59f710efbad62a0bb78a7e90d649955a8b9d37dcf561eb14581d5f0f85",
+  "owner_payloads_verified": 10,
+  "oracle_files_verified": 10,
+  "tests_passed": 13,
+  "test_log_sha256": "9eb97ec36b8beedab444c0bee64322e27f6508231376fa15535973f33658f2ad",
+  "concrete_blockers": [],
+  "findings": [
+    "Course yaw/XYZ transform wraps exact triangle queries; course epoch changes invalidate observations until the selected map reset.",
+    "Capture times, actual receipt ordering, clock/frame identity and 250 ms lease remain distinct; no future receipt enters a packet.",
+    "Selected resets clear only selected maps/pending packets/provenance and reject old epoch or pre-reset captures; other rows retain independent state.",
+    "Usable map observations and collision support eligibility remain separate, including observed pit floors.",
+    "WorldPoints must already be transformed/masked/uncertainty-labelled by caller; this is an acquisition seam, not a sensor implementation.",
+    "Blind output masks terrain channels and truth; debug world coordinates must not enter any future actor."
+  ]
+}
