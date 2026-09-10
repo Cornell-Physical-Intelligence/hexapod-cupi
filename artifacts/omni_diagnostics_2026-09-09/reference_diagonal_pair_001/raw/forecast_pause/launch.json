@@ -1,0 +1,20 @@
+{
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=hexapod-diagonal-pairs-001-20260910.service",
+    "--property=RuntimeMaxSec=1920",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=Environment=PYTHONDONTWRITEBYTECODE=1",
+    "--property=ExecStopPost=/usr/bin/python3 /home/orionh/HEXAPOD_runs/mock_length_study_20260909/forecast_pause_047/resume_forecasting.py",
+    "--property=Environment=PYTHONUNBUFFERED=1",
+    "/usr/bin/python3",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_diagonal_pair_source_001/tools/launch_pair_physics_spark.py",
+    "--source",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_diagonal_pair_source_001",
+    "--output",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_diagonal_pair_001"
+  ],
+  "launched_unix": 1789034312.79449
+}

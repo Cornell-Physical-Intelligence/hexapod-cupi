@@ -1,0 +1,266 @@
+{
+  "status": "completed",
+  "runtime_binding": {
+    "mode": "vendored",
+    "package_directory": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_diagonal_pair_source_001/experiments/c_length_study/runtime/hexapod_rl",
+    "runtime_tree_sha256": "abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280",
+    "base_commit": "36769da93f90e0602fb0e3591caeb98bbd7090ed",
+    "manifest_path": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_diagonal_pair_source_001/experiments/c_length_study/runtime/SHA256SUMS.json",
+    "manifest_sha256": "b23846761f36754ff8c7061209de31445cfc52afb417f5a16313ed392bb2432a",
+    "python_files_verified": 16
+  },
+  "started_unix": 1789034312.955061,
+  "stage2_complete": false,
+  "terrain_qualified": false,
+  "policy_training_started": false,
+  "source": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_diagonal_pair_source_001",
+  "source_manifest_sha256": "26ff2b7f8e57b3a6ea69dae09be58b26c2b0967e92103ed3f2673c0f32ae9625",
+  "automatic_continuation": false,
+  "solver_comparison": {
+    "name": "reference009_fresh_standing_then_qualified_liftoff_wave_with_joint_angle_observer",
+    "scope": "New full-C zero-residual bounded reference trial; not production adoption or PPO",
+    "baseline_source_manifest_sha256": "a73075ebdf5d6c986728b96117495b8de85adc8db62de1c41ffbe49eb6176d66",
+    "baseline_run": "reference_physics_008",
+    "physics_change_from008": null,
+    "retained_solver": {
+      "solver": "TGS",
+      "position_iterations": 16,
+      "velocity_iterations": 1,
+      "external_forces_every_iteration": true,
+      "stabilization": false
+    },
+    "previous_source_admission_reusable": false,
+    "native_tensor_iteration_getter_status": "Unverified/unavailable in inspected source; no guessed getter or internal iteration-count claim",
+    "phase_contract": {
+      "standing": {
+        "num_envs": 32,
+        "steps": 1000
+      },
+      "wave": {
+        "num_envs": 1,
+        "steps": 2400
+      },
+      "wave_requires_fresh_exact_source_standing_admission": true,
+      "all32_standing_must_pass_existing_quiet_gates": true
+    },
+    "wave_dependency": {
+      "owner": "omni_reference_wave_005",
+      "owner_freeze_sha256": "5b6c076cb03426ac8e24cc6df7e8684e48862aa78a495bd61ae49773a7826814",
+      "wave_reference_py_sha256": "8bacf0c61f7fdc6d43d9f9ebdb5adc643b026495bb303ec3c18157d121c78893",
+      "swing_duration_s": 2.0,
+      "lift_m": 0.007,
+      "horizontal_duration_fraction": 0.8,
+      "serialized_swing_fields": [
+        "horizontal_duration_fraction",
+        "horizontal_coefficients"
+      ],
+      "qualified_liftoff_schema": "unloading until two consecutive force-free samples and actual2mm lift; fail at original apex if unqualified",
+      "actor_checkpoint_compatible": false
+    },
+    "standing_only": false,
+    "production_default_adopted": false,
+    "PPO_permitted": false,
+    "legacy_50Hz_metric_and_5mm_gate_unchanged": true,
+    "all_existing_physical_contact_torque_and_quiet_gates_retained": true,
+    "comparison_with_last_wave008": {
+      "interventions": [
+        "Explicit unloading versus qualified flight before bounded landing",
+        "Read-only actual400Hz joint-angle observation and endpoint parity"
+      ],
+      "solver_geometry_targets_and_lift_timing_unchanged": true
+    },
+    "joint_angle_observer": {
+      "owner_freeze_sha256": "1c3a736017afeb810261a734558c7a4a904dd9010d0fdae09d68ef32efb80415",
+      "runtime_sha256": "8d52e0f56e3671a18c194b3f5d623cd95ca9187c5d58289001a74868c8d0c091",
+      "new_raw_field": "joint_position_rad",
+      "joint_names_stable": true,
+      "original_physics_updates_only": true,
+      "control_endpoint_q_and_qdot_exact": true
+    },
+    "predeclared_measurement": "Retain original50Hz gates and independent400Hz pose/velocity/torque; add actualjointangle increments versus reportedrates without substituting metrics."
+  },
+  "pair_protocol": {
+    "name": "diagonal_pairs_static_transfer_diagnostic001",
+    "scope": "Separate proposed four-support diagnostic, not walking or Stage2 admission",
+    "parent_source_manifest_sha256": "69a1a23304448d53f7681dfa87ab4fa652ad682ba0e45406e82187a66c4224f0",
+    "pair_owner_freeze_sha256": "6cd797bee322d84328a6bbf9ff4aff289c57af45fbca27bc425d5e8d7a83e334",
+    "num_envs": 1,
+    "startup_controls": 200,
+    "diagnostic_controls": 1100,
+    "total_controls": 1300,
+    "cases": {
+      "lf_rr": {
+        "pair_legs": [
+          "lf",
+          "rr"
+        ],
+        "required_supports": [
+          "lm",
+          "lr",
+          "rf",
+          "rm"
+        ]
+      },
+      "lr_rf": {
+        "pair_legs": [
+          "lr",
+          "rf"
+        ],
+        "required_supports": [
+          "lf",
+          "lm",
+          "rm",
+          "rr"
+        ]
+      }
+    },
+    "case_order": [
+      "lf_rr",
+      "lr_rf"
+    ],
+    "independent_cold_cases": true,
+    "schedule_seconds_after_settled_reset": {
+      "baseline": 2.0,
+      "raise": 3.0,
+      "hold_unloaded": 2.0,
+      "return": 3.0,
+      "quiet_including2s_settle": 12.0
+    },
+    "lift_m": 0.007,
+    "measured_pair_clearance_m": 0.002,
+    "unloaded_hold_s": 1.0,
+    "proposed_bounds": {
+      "corner_support_margin_m": 0.05,
+      "body_displacement_m": 0.015,
+      "body_angle_rad": 0.1,
+      "corner_drift_m": 0.01,
+      "corner_slip_mps": 0.02,
+      "relative_vertical_force_balance_error": 0.05
+    },
+    "requested_torque_limit_nm": 1.6,
+    "applied_torque_limit_nm": 1.60001,
+    "complete400Hz_torque_and_joint_angles": true,
+    "fresh32x1000_physical_and_unchanged_quiet_admission_required": true,
+    "original_wave_gates_changed": false,
+    "automatic_wave_or_PPO": false,
+    "production_adoption": false,
+    "measured_contact_scope": "50Hz distal/nonfoot classifications plus complete400Hz torque; not fullsubstep collision classification"
+  },
+  "standing_admission_sha256": "f87f85a66cac3dec9b15a00b540e8eb9d77837391ec008ed3b889724a4887eb1",
+  "identity": {
+    "variant": "f050_t060",
+    "stance_index": 0,
+    "urdf_sha256": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+    "plan_sha256": "356b72f0e82b207ba6105cb42057643d21a5b911d0517661465dcfe57745d00f",
+    "source_manifest_sha256": "26ff2b7f8e57b3a6ea69dae09be58b26c2b0967e92103ed3f2673c0f32ae9625",
+    "geometry_reference_sha256": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+    "controller": {
+      "profile": "formal_004",
+      "residual_radius_rad": 0.02,
+      "residual_velocity_rad_s": 0.25,
+      "residual_acceleration_rad_s2": 2.0,
+      "total_acceleration_rad_s2": 8.0
+    },
+    "wave_schedule": {
+      "settle_steps": 200,
+      "forward_steps": 1200,
+      "stop_steps": 1000,
+      "requested_forward_mps": 0.005,
+      "requested_left_mps": 0.0,
+      "requested_yaw_rad_s": 0.0
+    },
+    "startup": {
+      "duration_s": 2.0,
+      "canonical_hold_before_scoring_s": 2.0,
+      "path": "quintic_C2_target_only",
+      "physical_reset_noise_preserved": true
+    },
+    "runtime_tree_sha256": "abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280",
+    "solver_comparison": {
+      "name": "reference009_fresh_standing_then_qualified_liftoff_wave_with_joint_angle_observer",
+      "scope": "New full-C zero-residual bounded reference trial; not production adoption or PPO",
+      "baseline_source_manifest_sha256": "a73075ebdf5d6c986728b96117495b8de85adc8db62de1c41ffbe49eb6176d66",
+      "baseline_run": "reference_physics_008",
+      "physics_change_from008": null,
+      "retained_solver": {
+        "solver": "TGS",
+        "position_iterations": 16,
+        "velocity_iterations": 1,
+        "external_forces_every_iteration": true,
+        "stabilization": false
+      },
+      "previous_source_admission_reusable": false,
+      "native_tensor_iteration_getter_status": "Unverified/unavailable in inspected source; no guessed getter or internal iteration-count claim",
+      "phase_contract": {
+        "standing": {
+          "num_envs": 32,
+          "steps": 1000
+        },
+        "wave": {
+          "num_envs": 1,
+          "steps": 2400
+        },
+        "wave_requires_fresh_exact_source_standing_admission": true,
+        "all32_standing_must_pass_existing_quiet_gates": true
+      },
+      "wave_dependency": {
+        "owner": "omni_reference_wave_005",
+        "owner_freeze_sha256": "5b6c076cb03426ac8e24cc6df7e8684e48862aa78a495bd61ae49773a7826814",
+        "wave_reference_py_sha256": "8bacf0c61f7fdc6d43d9f9ebdb5adc643b026495bb303ec3c18157d121c78893",
+        "swing_duration_s": 2.0,
+        "lift_m": 0.007,
+        "horizontal_duration_fraction": 0.8,
+        "serialized_swing_fields": [
+          "horizontal_duration_fraction",
+          "horizontal_coefficients"
+        ],
+        "qualified_liftoff_schema": "unloading until two consecutive force-free samples and actual2mm lift; fail at original apex if unqualified",
+        "actor_checkpoint_compatible": false
+      },
+      "standing_only": false,
+      "production_default_adopted": false,
+      "PPO_permitted": false,
+      "legacy_50Hz_metric_and_5mm_gate_unchanged": true,
+      "all_existing_physical_contact_torque_and_quiet_gates_retained": true,
+      "comparison_with_last_wave008": {
+        "interventions": [
+          "Explicit unloading versus qualified flight before bounded landing",
+          "Read-only actual400Hz joint-angle observation and endpoint parity"
+        ],
+        "solver_geometry_targets_and_lift_timing_unchanged": true
+      },
+      "joint_angle_observer": {
+        "owner_freeze_sha256": "1c3a736017afeb810261a734558c7a4a904dd9010d0fdae09d68ef32efb80415",
+        "runtime_sha256": "8d52e0f56e3671a18c194b3f5d623cd95ca9187c5d58289001a74868c8d0c091",
+        "new_raw_field": "joint_position_rad",
+        "joint_names_stable": true,
+        "original_physics_updates_only": true,
+        "control_endpoint_q_and_qdot_exact": true
+      },
+      "predeclared_measurement": "Retain original50Hz gates and independent400Hz pose/velocity/torque; add actualjointangle increments versus reportedrates without substituting metrics."
+    }
+  },
+  "cases": {
+    "lf_rr": {
+      "state_sha256": "061383851e2b0a348a3c0cc2a6a5ccc744071eb8147d2592d9e1255faf44ff45",
+      "proposed_criteria_met": true
+    },
+    "lr_rf": {
+      "state_sha256": "971ca96cc2116baeef5f0715849218de0f50580c4268a5ce1dcfca441d413f3b",
+      "proposed_criteria_met": true
+    }
+  },
+  "proposed_pair_diagnostic_criteria_met": true,
+  "physics_qualification": false,
+  "source_unchanged": true,
+  "admitted_asset_unchanged": true,
+  "terminal_source_integrity": {
+    "passed": true
+  },
+  "terminal_asset_integrity": {
+    "passed": true,
+    "files_checked": 550,
+    "before_map_available": true
+  },
+  "finished_unix": 1789034627.415429
+}

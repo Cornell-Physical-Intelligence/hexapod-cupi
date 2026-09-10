@@ -1,0 +1,93 @@
+--- directional002/tools/wave_reference.py
++++ rr_preload001/tools/wave_reference.py
+@@ -4,6 +4,7 @@
+ standing PD preload is preserved at reset and measured again at touchdown.
+ """
+ from dataclasses import dataclass, asdict
++from rr_preload_diagnostic import RRFirstLandingPreload
+ import math
+ import numpy as np
+ from serial_geometry import SerialGeometry, tensor
+@@ -90,6 +91,8 @@
+             raise ValueError('Positive swing/confirmed contact dwell required')
+         self.to_leg = np.array([self.names.index(name) for name in self.leg_names])
+         self.to_runtime = np.argsort(self.to_leg)
++        if asdict(config) != asdict(WaveConfig()):
++            raise ValueError("RR diagnostic requires the exact original wave005 configuration")
+         self.cfg = config
+         self.ready = False
+         self.failure = None
+@@ -183,6 +186,7 @@
+         self.landing_original_contact_error_m = None; self.landing_target_excursion_m = None
+         self.landing_preload_world_m = None
+         self.last_diagnostics = {}
++        self.rr_preload_diagnostic = RRFirstLandingPreload()
+         self._bounds(self.q, self.v, self.v)
+         return self._output(self.q, self.v, self.v, measured)
+ 
+@@ -278,6 +282,7 @@
+             admitted_command=self.command.copy(), command_derating_factor=self.factor,
+             actual_measured_command=np.array(actual_twist), state=state,
+             diagnostics={**self.last_diagnostics, 'configuration': asdict(self.cfg),
++                         'rr_preload_diagnostic': self.rr_preload_diagnostic.state(),
+                          'physics_qualified': False, 'pose_written_to_robot': False,
+                          'derivative_semantics': 'actual_discrete_reference_knots_zero_motor_velocity_feedforward'})
+ 
+@@ -293,6 +298,8 @@
+             requested = np.asarray(requested_forward_left_yaw, dtype=float)
+             if requested.shape != (3,) or not np.isfinite(requested).all():
+                 raise ValueError('Finite forward/left/yaw requested twist required')
++            if not (np.array_equal(requested, np.zeros(3)) or np.array_equal(requested, np.array([0., .005, 0.]))):
++                raise ValueError('RR diagnostic accepts only exact left_strafe0.005 or zero command')
+             if np.linalg.norm(requested) == 0 and np.linalg.norm(self.requested) > 0:
+                 self.stop_requested_time = self.time; self.reference_quiet_time = None
+             if np.linalg.norm(requested) > 0:
+@@ -304,6 +311,7 @@
+             if measured['terminal'] or measured['base_contact'] or any(measured[k].any() for k in ('shaft_contact', 'coxa_contact', 'femur_contact')):
+                 raise ValueError('Measured terminal or nonfoot contact')
+             margin = self._support(measured, self.current_leg)
++            self.rr_preload_diagnostic.require_contact(measured['contact'][5], measured['reference_point_world_m'][5])
+             body_error = np.linalg.norm(measured['position_world_m'][:2]-self.position[:2])
+             if body_error > self.cfg.maximum_body_tracking_error_m:
+                 raise ValueError('Actual body does not follow desired motion within declared bound')
+@@ -401,6 +409,8 @@
+                                 self.anchors[i] = self.landing.end.copy()
+                                 self.measured_anchors[i] = measured['reference_point_world_m'][i].copy()
+                                 self.preload_world[i] = self.anchors[i]-self.measured_anchors[i]
++                                self.rr_preload_diagnostic.arm(i, self.touchdowns, self.time, self.cfg.contact_hold_s,
++                                    self.anchors[i], self.measured_anchors[i], self.swing.end)
+                                 self.current_leg = None; self.swing = None; self.landing = None
+                                 self.mode = 'contact_hold'; self.hold_until = self.time+self.cfg.contact_hold_s
+                                 self.touchdowns += 1
+@@ -441,6 +451,7 @@
+                 self.order_index = (self.order_index+1)%6; self.liftoffs += 1
+             self.factor = factor; self.command_target = target.copy()
+             finite_stop = (np.linalg.norm(requested) == 0 and self.current_leg is None
++                           and not self.rr_preload_diagnostic.active
+                            and np.max(np.abs(self.command)) <= self.cfg.stop_command_tolerance
+                            and np.max(np.abs(self.command_rate)) <= self.cfg.stop_command_rate_tolerance)
+             if finite_stop:
+@@ -449,6 +460,7 @@
+                 self.command[:] = 0.; self.command_rate[:] = 0.
+             self.position, self.yaw, self.command, self.command_rate = self._advance(target, dt)
+             self.time += dt
++            self.rr_preload_diagnostic.apply(self.time, self.anchors, self.measured_anchors, self.preload_world)
+             points = self.anchors.copy()
+             if self.current_leg is not None:
+                 trajectory = self.landing if self.landing is not None else self.swing
+@@ -461,7 +473,8 @@
+             q = ik['q_checked'][0].numpy()
+             # A quiet hold is the existing executed knot, not a repeated IK
+             # solution that can remove preload through rounded URDF transforms.
+-            if self.current_leg is None and np.max(np.abs(self.command)) < 1e-14 and np.max(np.abs(self.command_rate)) < 1e-12:
++            if (self.current_leg is None and np.max(np.abs(self.command)) < 1e-14 and np.max(np.abs(self.command_rate)) < 1e-12
++                    and not self.rr_preload_diagnostic.changed_this_step):
+                 q = self.q.copy()
+             v = (q-self.q)/dt; a = (v-self.v)/dt
+             self._bounds(q, v, a)
+@@ -478,4 +491,5 @@
+             return self._output(q, v, a, measured)
+         except (ValueError, RuntimeError, np.linalg.LinAlgError) as exc:
+             self.failure = str(exc)
++            self.rr_preload_diagnostic.abort(self.failure)
+             return self._output(self.q, self.v, np.zeros_like(self.q), measured)

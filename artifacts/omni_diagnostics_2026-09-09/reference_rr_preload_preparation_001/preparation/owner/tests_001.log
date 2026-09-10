@@ -1,0 +1,22 @@
+...../Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_rr_preload_diagnostic_001/source_rr_preload_001/tools/serial_geometry.py:10: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at /Users/runner/work/pytorch/pytorch/torch/csrc/utils/tensor_new.cpp:255.)
+  def tensor(x):return torch.as_tensor(x,dtype=DTYPE,device='cpu')
+........E
+======================================================================
+ERROR: test_physical_loop_gates_and_owned_supervisor_unchanged (test_preload.ScopeTests.test_physical_loop_gates_and_owned_supervisor_unchanged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_rr_preload_diagnostic_001/test_preload.py", line 108, in test_physical_loop_gates_and_owned_supervisor_unchanged
+    self.assertEqual((SOURCE/'tools'/file).read_bytes(),(PARENT/'tools'/file).read_bytes(),file)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andreboufama/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/pathlib.py", line 1019, in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andreboufama/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/reference_rr_preload_diagnostic_001/source_rr_preload_001/tools/reference_metrics.py'
+
+----------------------------------------------------------------------
+Ran 14 tests in 2.883s
+
+FAILED (errors=1)
