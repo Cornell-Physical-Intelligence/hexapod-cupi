@@ -1,0 +1,50 @@
+{
+  "identity": {
+    "schema": "direct315_extended_native_v4",
+    "source_manifest_sha256": "aa70659d33243f1e28e9c71b1a7f9d33341642db770fd7356192573a26fe904e",
+    "plan_sha256": "b2286828148c89fb34624d38beaf84b389584f7bda4d2648512e017da4b50acb",
+    "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+    "actor_width": 315,
+    "critic_width": 318,
+    "selection": {
+      "schema": "direct315_extended_native_v4",
+      "allocation": "smoke",
+      "branch": "quiet_priority",
+      "replicas": 32,
+      "controls_per_update": 24,
+      "updates": 2,
+      "caps": {
+        "temporal_weight": 0.1,
+        "spatial_weight": 0.1,
+        "noise_scale": 1.0,
+        "noise_seed": 1157,
+        "quiet_temporal_weight": 1.0
+      }
+    },
+    "overrides": {
+      "target_slew_rad_per_20ms": 0.04,
+      "reward_weights": {
+        "stand_joint_velocity": -0.5,
+        "stand_target_velocity": -0.15,
+        "stand_posture": -2.0,
+        "action_rate": -0.075,
+        "saturation": -0.75,
+        "torque_excess": -0.6,
+        "worst_torque_excess": -0.2,
+        "stand_raw_action": 0.0
+      },
+      "observation_noise_scale": 1.0,
+      "target_filter_time_constant_s": 0.0
+    },
+    "diagnostic_options": {
+      "duration_s": 12,
+      "settle_s": 2,
+      "seed": 7057,
+      "trace_envs_per_scenario": 1,
+      "controller": "policy"
+    },
+    "Stage2_complete": false
+  },
+  "host_freeze_sha256": "b55282c968d64dca218baf10278339ff2013c23e28dc7cbe9a0d0b8dfd05d51f",
+  "no_GPU": true
+}

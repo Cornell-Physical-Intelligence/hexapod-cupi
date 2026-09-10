@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/andreboufama/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/unittest/__main__.py", line 18, in <module>
+    main(module=None)
+  File "/Users/andreboufama/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/unittest/main.py", line 104, in __init__
+    self.parseArgs(argv)
+  File "/Users/andreboufama/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/unittest/main.py", line 153, in parseArgs
+    self.createTests()
+  File "/Users/andreboufama/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/unittest/main.py", line 164, in createTests
+    self.test = self.testLoader.loadTestsFromNames(self.testNames,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andreboufama/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/unittest/loader.py", line 207, in loadTestsFromNames
+    suites = [self.loadTestsFromName(name, module) for name in names]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andreboufama/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/direct_omni_recovery_001/native_005/test_extended.py", line 28
+    audit={'controls':sel['updates']*24,'replicas':sel['replicas'],'terminations_per_row':[0]*sel['replicas'],'truncations_per_row':[0]*sel['replicas'],'requested_torque_max_per_row_nm':[7.]*sel['replicas'],'applied_torque_max_per_row_nm':[1.6]*sel['replicas],'requested_saturation_fraction_per_row':[.1]*sel['replicas']}
+                                                                                                                                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 28)

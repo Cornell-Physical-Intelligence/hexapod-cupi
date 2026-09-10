@@ -1,0 +1,107 @@
+--- host003/launch_train_spark.py
++++ host004/launch_train_spark.py
+@@ -1,17 +1,18 @@
+-"""Explicit quiet-priority smoke and independently selected native004 pilots with cold diagnostics."""
++"""Explicit native005 smoke, pilot and extended campaigns; versioned extended deadline adapter."""
+ from pathlib import Path
+ from types import SimpleNamespace
+ import argparse,hashlib,importlib.util,json,signal,sys,time
+ sys.dont_write_bytecode=True
+-SOURCE_MAP='ef962070bd770d03553eb824fb6caccada7d6a06ac26d2f180bad068f0a9cc62'
++SOURCE_MAP='aa70659d33243f1e28e9c71b1a7f9d33341642db770fd7356192573a26fe904e'
+ LEGACY_RUNTIME_TREE='abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280'
+-CONTRACT_FREEZE='1ab678beeba6bf74978c210c4e38f13655e25728fe66e3007e3b1db5e19b6b20'
++CONTRACT_FREEZE='0bdd2abf3811e68ac59e4fbc325eb5d2bb96afd2183eb84c4d37faeb86ff9e9f'
+ SUPERVISOR_MAP='04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e'
+ SUPERVISOR_CODE='9ebabaf254cc77fabad7d4759cc80fc26d7efd3912ea84bd55304594c88ed561'
+ COORDINATION=Path('/home/orionh/SPARK_COMPUTE_COORDINATION.md')
+ ORIGINAL_CHECKPOINT='1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8'
+ PHASES={'smoke':('standing','train','final_constant','final_stop'),
+-        'pilot':('standing','initial_constant','initial_stop','train','final_constant','final_stop')}
++        'pilot':('standing','initial_constant','initial_stop','train','final_constant','final_stop'),
++        'extended':('standing','initial_constant','initial_stop','train','final_constant','final_stop')}
+ CONTRACT=None
+ PARENT=None
+ 
+@@ -47,10 +48,13 @@
+ def load_module(name,path):
+  spec=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
+ 
++def load_deadline_adapter():
++ return load_module('_direct_host004_deadline_adapter',Path(__file__).resolve().parent/'deadline_adapter.py')
++
+ def selected_phases(args):
+  if args.allocation not in PHASES or args.branch not in ('caps','curriculum','quiet_priority'):raise ValueError('Explicit bounded allocation/branch required')
+  if args.allocation=='smoke' and args.branch!='quiet_priority':raise ValueError('Only quiet-priority smoke is allocated')
+- if args.allocation=='pilot' and getattr(args,'smoke',None) is None:raise ValueError('Pilot requires separate completed smoke proof')
++ if args.allocation in ('pilot','extended') and getattr(args,'smoke',None) is None:raise ValueError('Pilot/extended requires separate completed smoke proof')
+  if args.allocation=='smoke' and getattr(args,'smoke',None) is not None:raise ValueError('Smoke cannot inherit another campaign')
+  return PHASES[args.allocation]
+ 
+@@ -62,6 +66,7 @@
+  verify_tree(args.contract,'FREEZE_SHA256.json',CONTRACT_FREEZE)
+  verify_tree(args.supervisor_source,'campaign_source_hashes.json',SUPERVISOR_MAP)
+  if sha(args.supervisor_source/'tools/launch_reference_physics_spark.py')!=SUPERVISOR_CODE:raise ValueError('Wrong source009 supervisor')
++ if args.allocation=='extended':load_deadline_adapter().inspect_supervisor(args.supervisor_source/'tools/launch_reference_physics_spark.py')
+  if CONTRACT is None:
+   sys.path.insert(0,str(args.contract))
+   CONTRACT=load_module('_frozen_direct315_native_contract',args.contract/'direct_contract.py')
+@@ -96,13 +101,14 @@
+   cli+=['-v',str(args.output/completed)+':/output/'+completed+':ro']
+  if phase!='standing':cli+=['-v',str(args.output/'standing')+':/admission:ro']
+  if phase not in ('standing','train'):cli+=['-v',str(checkpoint)+':/checkpoint/evaluated.pt:ro']
+- if args.allocation=='pilot':cli+=['-v',str(args.smoke)+':/smoke:ro']
++ if args.allocation in ('pilot','extended'):cli+=['-v',str(args.smoke)+':/smoke:ro']
+  return cli+['--entrypoint','/workspace/isaaclab/_isaac_sim/python.sh','isaac-lab-base','/train-host/run_train_entry.py','--source-root','/source','--']+CONTRACT.runtime_arguments(phase,args.allocation,args.branch)
+ 
+ def load_supervisor(args):
+  global PARENT
+  sys.path.insert(0,str(args.supervisor_source/'tools'))
+  PARENT=load_module('_frozen_direct_native_source009_supervisor',args.supervisor_source/'tools/launch_reference_physics_spark.py')
++ if args.allocation=='extended':load_deadline_adapter().install(PARENT,args.supervisor_source/'tools/launch_reference_physics_spark.py')
+  PARENT.command=lambda source,output,name,phase:command(args,name,phase)
+  def native_verified_source(source):
+   if source!=args.source:raise ValueError('Unexpected source path in inherited supervisor')
+@@ -125,9 +131,20 @@
+    data['checkpoint_load_verified_by_completed_state']=loaded
+    data['no_policy_loaded']=True if phase=='standing' else (False if loaded else None)
+    data['allocation']=args.allocation;data['branch']=args.branch
++   if args.allocation=='extended':data['supervisor_runtime_adapter']=dict(PARENT.DIRECT_DEADLINE_ADAPTER)
+   return original_save(path,data)
+  PARENT.save=metadata_save
+  return PARENT
++
++def validated_completed_updates(args,identity,accepted):
++ selected=identity.get('selection',{})
++ updates=selected.get('updates')
++ if selected.get('allocation')!=args.allocation or selected.get('branch')!=args.branch or type(updates) is not int or updates<=0:
++  raise ValueError('Validated training selection is missing or mismatched')
++ receipt=read(args.output/'train/training_receipt.json')
++ if accepted.get('phase')!='train' or type(accepted.get('updates_completed')) is not int or accepted['updates_completed']!=updates or receipt.get('complete') is not True or type(receipt.get('updates_completed')) is not int or receipt['updates_completed']!=updates:
++  raise ValueError('Accepted training update count differs from validated selection/receipt')
++ return updates
+ 
+ def observed_training(args):
+  path=args.output/'train/training_receipt.json'
+@@ -140,7 +157,7 @@
+ 
+ def run_campaign(args,identity):
+  phases=selected_phases(args);completed={}
+- smoke_map=tree_hashes(args.smoke) if args.allocation=='pilot' else None
++ smoke_map=tree_hashes(args.smoke) if args.allocation in ('pilot','extended') else None
+  def unchanged():
+   if verify_inputs(args)!=identity:raise ValueError('Input identity changed')
+   if smoke_map is not None and tree_hashes(args.smoke)!=smoke_map:raise ValueError('Completed prior smoke changed')
+@@ -162,10 +179,11 @@
+    if checkpoint is not None and sha(checkpoint)!=bound:raise ValueError('Input checkpoint changed during phase')
+    accepted=CONTRACT.validate_result(args.output/phase,phase,identity,expected_checkpoint_sha256=bound)
+    if accepted['phase']!=phase:raise ValueError('Result phase mismatch')
++   completed_updates=validated_completed_updates(args,identity,accepted) if phase=='train' else None
+    completed[phase]=tree_hashes(args.output/phase)
+    save(args.output/(phase+'_immutable.sha256.json'),completed[phase])
+    report['accepted_phases'][phase]=accepted;report['last_completed_phase']=phase
+-   if phase=='train':report['PPO_updates_completed']=2 if args.allocation=='smoke' else 50
++   if phase=='train':report['PPO_updates_completed']=completed_updates
+    save(args.output/(phase+'_accepted.json'),accepted);save(args.output/'campaign.json',report)
+   report.update(status='completed',bounded_campaign_complete=True)
+  except Exception as exc:

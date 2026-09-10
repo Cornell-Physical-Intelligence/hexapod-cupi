@@ -105,3 +105,10 @@ See the [actual matched pilots](../artifacts/omni_diagnostics_2026-09-09/direct_
 
 
 For the quiet-priority allocation, use the [frozen native004/host003/guard004 preparation](../artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_preparation_001/README.md) and require the complete matching source003 smoke before pilot admission. Keep root as sole dispatcher. The user explicitly prioritizes PPO over all weather activity: defer identified weather blockers while preserving outputs and exact recovery/ownership controls. Live state belongs in STATUS; this paragraph does not queue or launch a pilot.
+
+
+## 2026-09-10 — successor budget experiment after quiet-priority comparison
+
+The [completed stronger-quiet comparison](../artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_pilot_001/README.md) supersedes the immediate50-update proposal above. Prepare one normal-CAPS1024×24×500 run from original checkpoint1971…, unchanged objective/physics/gates and the complete fresh optimizer/std protocol. Use native005/source004 and require its own successful32×24×2 integration; older-source smoke cannot admit it. Root alone dispatches through a separately bounded guard.
+
+Retain all500 ordinary saves remotely, exact file hashes, final and decision1/10/25/50/100/250/500; collect14 sparse gradient rows across those milestones. The versioned host must enforce1800 seconds for training,600 for other phases and90 for startup. A500-update result still requires exact reload, fresh direction/stop evaluation and unchanged numeric/visual gates. No automatic next branch, exact-resume claim or Stage2 promotion follows from budget completion. Current execution remains only in STATUS.

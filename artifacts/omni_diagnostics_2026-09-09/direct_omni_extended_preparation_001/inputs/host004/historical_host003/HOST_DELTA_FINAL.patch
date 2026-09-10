@@ -1,0 +1,37 @@
+--- host002/launch_train_spark.py
++++ host003/launch_train_spark.py
+@@ -1,11 +1,11 @@
+-"""Explicit independent CAPS smoke / curriculum or CAPS pilot, with cold diagnostics."""
++"""Explicit quiet-priority smoke and independently selected native004 pilots with cold diagnostics."""
+ from pathlib import Path
+ from types import SimpleNamespace
+ import argparse,hashlib,importlib.util,json,signal,sys,time
+ sys.dont_write_bytecode=True
+-SOURCE_MAP='64144b2c2466f17c809554ef53f82b736b4199136cc821451d7ac2788752bd2e'
++SOURCE_MAP='ef962070bd770d03553eb824fb6caccada7d6a06ac26d2f180bad068f0a9cc62'
+ LEGACY_RUNTIME_TREE='abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280'
+-CONTRACT_FREEZE='20fbcd40a869b39d8e3143a6c9715ec62ada5cc6211eaf473f60f8b7167678cb'
++CONTRACT_FREEZE='1ab678beeba6bf74978c210c4e38f13655e25728fe66e3007e3b1db5e19b6b20'
+ SUPERVISOR_MAP='04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e'
+ SUPERVISOR_CODE='9ebabaf254cc77fabad7d4759cc80fc26d7efd3912ea84bd55304594c88ed561'
+ COORDINATION=Path('/home/orionh/SPARK_COMPUTE_COORDINATION.md')
+@@ -48,8 +48,8 @@
+  spec=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
+ 
+ def selected_phases(args):
+- if args.allocation not in PHASES or args.branch not in ('caps','curriculum'):raise ValueError('Explicit bounded allocation/branch required')
+- if args.allocation=='smoke' and args.branch!='caps':raise ValueError('Only CAPS smoke is allocated')
++ if args.allocation not in PHASES or args.branch not in ('caps','curriculum','quiet_priority'):raise ValueError('Explicit bounded allocation/branch required')
++ if args.allocation=='smoke' and args.branch!='quiet_priority':raise ValueError('Only quiet-priority smoke is allocated')
+  if args.allocation=='pilot' and getattr(args,'smoke',None) is None:raise ValueError('Pilot requires separate completed smoke proof')
+  if args.allocation=='smoke' and getattr(args,'smoke',None) is not None:raise ValueError('Smoke cannot inherit another campaign')
+  return PHASES[args.allocation]
+@@ -182,7 +182,7 @@
+ def main():
+  p=argparse.ArgumentParser(allow_abbrev=False,description=__doc__)
+  for name in ('source','checkpoint','contract','supervisor-source','output'):p.add_argument('--'+name,type=Path,required=True)
+- p.add_argument('--allocation',choices=tuple(PHASES),required=True);p.add_argument('--branch',choices=('curriculum','caps'),required=True)
++ p.add_argument('--allocation',choices=tuple(PHASES),required=True);p.add_argument('--branch',choices=('curriculum','caps','quiet_priority'),required=True)
+  p.add_argument('--smoke',type=Path);p.add_argument('--isaaclab',type=Path,default=Path('/home/orionh/IsaacLab'));p.add_argument('--preflight-only',action='store_true')
+  args=p.parse_args()
+  for name in ('source','checkpoint','contract','supervisor_source','output','isaaclab','smoke'):

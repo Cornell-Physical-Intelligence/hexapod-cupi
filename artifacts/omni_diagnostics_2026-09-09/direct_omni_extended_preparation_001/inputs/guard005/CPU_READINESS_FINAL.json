@@ -1,0 +1,36 @@
+{
+  "status": "CPU checks passed; frozen and ready for root remote preflight, not dispatched",
+  "guard_runtime_sha256": "15a36281d069f5e605cacbd8f2962ea0f21dc47181f2a9b9950cf0a3039e672c",
+  "tests": 37,
+  "test_log_sha256": "1a42c1ca1a98f316518f022aebbb54d509b6fa99f29b083d7ceb248255e5b3a6",
+  "python": ".venv/bin/python 3.12.12",
+  "local_full_frozen_inputs": {
+    "native005": {
+      "freeze_sha256": "0bdd2abf3811e68ac59e4fbc325eb5d2bb96afd2183eb84c4d37faeb86ff9e9f",
+      "payloads_verified": 28
+    },
+    "host004": {
+      "freeze_sha256": "b55282c968d64dca218baf10278339ff2013c23e28dc7cbe9a0d0b8dfd05d51f",
+      "payloads_verified": 37
+    }
+  },
+  "stdlib_import": {
+    "guard": true,
+    "host": true,
+    "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -S <importlib spec from file for actual guard and actual host; guard.require_final_bindings()>",
+    "scope": "Imports and binding syntax only; no application, remote action or source preflight"
+  },
+  "initial_draft_preserved": {
+    "path": "history/draft_guard.py",
+    "sha256": "82bba3b49650cbf3e2538a0f01aa29fcb768dc9c47c0f9a27f67bdc9f0a443ba"
+  },
+  "bounded_smoke_selection": {
+    "allocation": "smoke",
+    "branch": "quiet_priority",
+    "replicas": 32,
+    "controls_per_update": 24,
+    "updates": 2
+  },
+  "guard_can_dispatch_extended": false,
+  "GPU_dispatched": false
+}

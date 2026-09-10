@@ -1,0 +1,160 @@
+{
+  "scope": "Raw final-stop result and event-timing comparison; no new physics/source/cleanup audit",
+  "results": {
+    "quiet_priority50": {
+      "checkpoint_sha256": "195593ca4d595184fefbc9161bad433f9fb9768d8fd16d514c7b755eee0a6173",
+      "quiet_pass_count": 0,
+      "replicas": 48,
+      "quiet_gates": {
+        "max_planar_excursion_m": 0.01,
+        "max_heading_excursion_deg": 2.0,
+        "max_joint_velocity_rms_rad_s": 0.03,
+        "max_joint_position_range_rad": 0.02,
+        "max_target_step_abs_p95_rad_per_20ms": 0.002,
+        "max_requested_torque_saturation_fraction": 0.005,
+        "max_applied_torque_nm": 1.60001
+      },
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.04,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2,
+          "stand_raw_action": 0.0
+        },
+        "observation_noise_scale": 1.0,
+        "target_filter_time_constant_s": 0.0
+      },
+      "quiet_planar_excursion_median_m": 0.057603174820542336,
+      "quiet_planar_excursion_max_m": 1.8702317476272583,
+      "target_step_p95_min_max": [
+        0.04000002145767212,
+        0.04000002145767212
+      ],
+      "sdk_joint_rms_min_max": [
+        1.2466142177581787,
+        1.2945653200149536
+      ],
+      "trial_events": [
+        {
+          "zero_based_trace_index": 875,
+          "time_s": 17.52,
+          "env_id": 44,
+          "terminated": true,
+          "truncated": false,
+          "inside_scored_quiet_window": false,
+          "next_row_position_jump_m": 1.096149378420045
+        },
+        {
+          "zero_based_trace_index": 1255,
+          "time_s": 25.12,
+          "env_id": 20,
+          "terminated": true,
+          "truncated": false,
+          "inside_scored_quiet_window": true,
+          "next_row_position_jump_m": 1.8654134749232574
+        }
+      ],
+      "training_requested_peak_nm": 11.86451530456543,
+      "constant_saturation_regression_names_vs_original": [
+        "stand",
+        "reverse",
+        "right",
+        "forward_fast",
+        "turn_left",
+        "turn_right",
+        "arc_left",
+        "strafe_arc",
+        "diagonal"
+      ],
+      "mean_quiet_requested_saturation_fraction_median": 0.11155555555555556
+    },
+    "normal_caps50": {
+      "checkpoint_sha256": "ca0545760f81b8b8fb0cafde4b1ef89bfa5d8765a8b43b578e451f648a954415",
+      "quiet_pass_count": 0,
+      "replicas": 48,
+      "quiet_gates": {
+        "max_planar_excursion_m": 0.01,
+        "max_heading_excursion_deg": 2.0,
+        "max_joint_velocity_rms_rad_s": 0.03,
+        "max_joint_position_range_rad": 0.02,
+        "max_target_step_abs_p95_rad_per_20ms": 0.002,
+        "max_requested_torque_saturation_fraction": 0.005,
+        "max_applied_torque_nm": 1.60001
+      },
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.04,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2,
+          "stand_raw_action": 0.0
+        },
+        "observation_noise_scale": 1.0,
+        "target_filter_time_constant_s": 0.0
+      },
+      "quiet_planar_excursion_median_m": 0.05042181722819805,
+      "quiet_planar_excursion_max_m": 0.07510803639888763,
+      "target_step_p95_min_max": [
+        0.04000002145767212,
+        0.04000002145767212
+      ],
+      "sdk_joint_rms_min_max": [
+        1.2464606761932373,
+        1.2934621572494507
+      ],
+      "trial_events": [
+        {
+          "zero_based_trace_index": 940,
+          "time_s": 18.82,
+          "env_id": 20,
+          "terminated": true,
+          "truncated": false,
+          "inside_scored_quiet_window": false,
+          "next_row_position_jump_m": 1.8299698039269718
+        },
+        {
+          "zero_based_trace_index": 1042,
+          "time_s": 20.86,
+          "env_id": 44,
+          "terminated": true,
+          "truncated": false,
+          "inside_scored_quiet_window": false,
+          "next_row_position_jump_m": 1.1570808298213098
+        }
+      ],
+      "training_requested_peak_nm": 39.40876770019531,
+      "constant_saturation_regression_names_vs_original": [
+        "reverse",
+        "diagonal"
+      ],
+      "mean_quiet_requested_saturation_fraction_median": 0.10527777777777778
+    }
+  },
+  "inputs_sha256": {
+    "tmp/direct_omni_quiet_pilot_terminal_001/run/final_stop/stop_diagnostics.json": "050dc390abb3c441b7101f2abfe4ed3a0ede8efaa4e5e5ff89f52d71e2735e34",
+    "tmp/direct_omni_quiet_pilot_terminal_001/run/final_stop/stop_trace.npz": "fc90392df976a030a0edac36e16f746a37df2ef77c1acfc000f8e94c25ab5542",
+    "tmp/direct_omni_quiet_pilot_terminal_001/run/initial_stop/stop_diagnostics.json": "891a6c2aa0cd6372bb07321b3fec68d127cdcfd8326715fe4843f327e4c6641a",
+    "tmp/direct_omni_quiet_pilot_terminal_001/run/train/training_receipt.json": "c41560dbe34d29bbce40d1060bd1c8b0155cdcc27173dc2316806f8368ad9b11",
+    "tmp/direct_omni_quiet_pilot_analysis_001/REPORT.md": "45667033369ed58d2a222bc1711b887caf1ea31c98ab7ed133c4cde88f127ab2",
+    "tmp/direct_omni_quiet_pilot_analysis_001/report.json": "f34d9d66c82a0a26ab6e2f165ca3f03d0e9ef1c58bc36339a050670d116c752f",
+    "tmp/direct_omni_quiet_pilot_analysis_001/INPUTS_SHA256.json": "437adebf00f0dc16d822f4b0b3256f37ddd3c57ee11e0945ce649658d74e7753",
+    "tmp/direct_omni_train_pilot_caps_results_001/run/final_stop/stop_diagnostics.json": "bb79867b73abb4c0ba5e8ea7c8be8994e42cc4f0d91ed844738a03ec49de6a51",
+    "tmp/direct_omni_train_pilot_caps_results_001/run/final_stop/stop_trace.npz": "a53355bd48ccdf8170e7f776eb1fbeb5ec4d9be8ef6f94cc298319e83d8e428c",
+    "tmp/direct_omni_train_pilot_caps_results_001/run/initial_stop/stop_diagnostics.json": "891a6c2aa0cd6372bb07321b3fec68d127cdcfd8326715fe4843f327e4c6641a",
+    "tmp/direct_omni_train_pilot_caps_results_001/run/train/training_receipt.json": "2f6bb5ddbadcc662ee3c56f7e4fda92af6052198ca5d2c02401e3a5a5708322b",
+    "tmp/direct_omni_train_pilot_caps_analysis_001/REPORT.md": "43c974249606c9cc42f199592ca6672c4205349767b4ff15c33e2c8df199767d",
+    "tmp/direct_omni_train_pilot_caps_analysis_001/report.json": "ae881a99b8602c3e30a8525f45279c3e79d13a318cf5dfe3ed3b4e8486765cbe",
+    "tmp/direct_omni_train_pilot_caps_analysis_001/INPUTS_SHA256.json": "b75c5f35f0e5d8c4d1281e5f8279bfd643dd0fed51b4752e6f6e19141fec93df"
+  },
+  "reset_rule": "Preserve original failed trial and scored excursion; never relabel reset jumps as uninterrupted motion or remove a failed row",
+  "Stage2_complete": false
+}

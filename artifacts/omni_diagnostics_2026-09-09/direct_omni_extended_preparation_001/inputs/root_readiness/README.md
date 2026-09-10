@@ -1,0 +1,3 @@
+# Source004 root readiness and smoke004 dispatch
+
+Actual source built once from exact cold589 and independently verified against its full599-file manifest. Native00516, host00447 and guard00537 root CPU tests passed (native test result is recorded from the tool run; host/guard transcripts included). Full transferred source/native/host/guard hashes and actual no-GPU host preflight passed. The original stdout and stderr are retained. Guard005 dispatched smoke004 under invocation5d7736253ce84660baefda6a672bf010 with pause061. The dispatch snapshot is historical, not a terminal result or Stage2 admission. The extended500 allocation is not launched by this guard.

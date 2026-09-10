@@ -1,0 +1,130 @@
+test_500_actual_wrapper_relative_saves_decisions_and_receipt (test_extended.Extended.test_500_actual_wrapper_relative_saves_decisions_and_receipt) ... ok
+test_failed_collection_keeps_prefix_and_cannot_claim_completion (test_extended.Extended.test_failed_collection_keeps_prefix_and_cannot_claim_completion) ... ok
+test_fixed_extended_capacity_and_explicit_branch (test_extended.Extended.test_fixed_extended_capacity_and_explicit_branch) ... ok
+test_missing_stale_mislabelled_decision_and_failed_state_reject (test_extended.Extended.test_missing_stale_mislabelled_decision_and_failed_state_reject) ... ok
+test_old_allocation_full_config_and_behavior_sources_exact (test_extended.Extended.test_old_allocation_full_config_and_behavior_sources_exact) ... ok
+test_parent50_wrapper_save_calls_unchanged (test_extended.Extended.test_parent50_wrapper_save_calls_unchanged) ... ok
+test_parent_and_new_actual_one_update_loss_rng_and_state_exact (test_extended.Extended.test_parent_and_new_actual_one_update_loss_rng_and_state_exact) ... ok
+test_sparse_masks_complete_10000_minibatches_and_missing_extra_reject (test_extended.Extended.test_sparse_masks_complete_10000_minibatches_and_missing_extra_reject) ... ok
+test_entry_only_declared_physics_allocation_delta (test_native.NativeTests.test_entry_only_declared_physics_allocation_delta) ... ok
+test_stdio_host_import_has_no_torch_or_numpy (test_native.NativeTests.test_stdio_host_import_has_no_torch_or_numpy) ... ok
+test_completed_smoke_campaign_boundary_not_just_phase_states (test_native.NativeTests.test_completed_smoke_campaign_boundary_not_just_phase_states) ... ok
+test_actual_late_app_flags_parse_before_launch (test_native.NativeTests.test_actual_late_app_flags_parse_before_launch) ... ok
+test_exact_complete_cadence_and_sparse_coverage (test_optimizer_contract.Contract.test_exact_complete_cadence_and_sparse_coverage) ... ok
+test_missing_reordered_nonfinite_or_unbound_diagnostics_rejected (test_optimizer_contract.Contract.test_missing_reordered_nonfinite_or_unbound_diagnostics_rejected) ... ok
+test_no_quiet_pairs_zero_gradient_cosine_is_null_not_nan (test_optimizer_contract.Contract.test_no_quiet_pairs_zero_gradient_cosine_is_null_not_nan) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 3.493s
+
+OK
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=315, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (mlp): MLP(
+    (0): Linear(in_features=318, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+Storing git diff for 'HEXAPOD' in: /var/folders/4q/hbxvz4y536lb_2ypxzq7kjdw0000gn/T/tmp7gh3pnim/git/HEXAPOD.diff
+################################################################################
+[1m                          Learning iteration 1847/1848                          [0m 
+
+                            Total steps: 192 
+                       Steps per second: 1141 
+                        Collection time: 0.034s 
+                          Learning time: 0.135s 
+                        Mean value loss: 44.4068
+                    Mean surrogate loss: 0.0787
+                      Mean entropy loss: -15.9042
+                Mean caps_temporal loss: 0.3709
+                 Mean caps_spatial loss: 0.0015
+                Mean caps_weighted loss: 0.0372
+     Mean caps_valid_pair_fraction loss: 0.8698
+     Mean caps_quiet_temporal_mean loss: 0.2114
+    Mean caps_moving_temporal_mean loss: 0.5419
+                            Mean reward: 16.84
+                    Mean episode length: 17.00
+                        Mean action std: 0.10
+--------------------------------------------------------------------------------
+                         Iteration time: 0.17s
+                           Time elapsed: 00:00:00
+                                    ETA: 00:00:00
+
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=315, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (mlp): MLP(
+    (0): Linear(in_features=318, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+Storing git diff for 'HEXAPOD' in: /var/folders/4q/hbxvz4y536lb_2ypxzq7kjdw0000gn/T/tmpsxpdk9cd/git/HEXAPOD.diff
+################################################################################
+[1m                          Learning iteration 1847/1848                          [0m 
+
+                            Total steps: 192 
+                       Steps per second: 1467 
+                        Collection time: 0.019s 
+                          Learning time: 0.112s 
+                        Mean value loss: 44.4068
+                    Mean surrogate loss: 0.0787
+                      Mean entropy loss: -15.9042
+                Mean caps_temporal loss: 0.3709
+                 Mean caps_spatial loss: 0.0015
+                Mean caps_weighted loss: 0.0372
+     Mean caps_valid_pair_fraction loss: 0.8698
+     Mean caps_quiet_temporal_mean loss: 0.2114
+    Mean caps_moving_temporal_mean loss: 0.5419
+                            Mean reward: 16.84
+                    Mean episode length: 17.00
+                        Mean action std: 0.10
+--------------------------------------------------------------------------------
+                         Iteration time: 0.13s
+                           Time elapsed: 00:00:00
+                                    ETA: 00:00:00
+

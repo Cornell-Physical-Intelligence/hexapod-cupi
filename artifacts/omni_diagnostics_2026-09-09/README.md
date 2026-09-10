@@ -26,3 +26,6 @@ The JSON contains direction-by-direction joint velocity, target increments, pose
 [Verified preparation and dispatch snapshot](direct_omni_quiet_priority_preparation_001/README.md) preserve source003/native004, the stronger quiet temporal objective, observational optimizer diagnostics, unchanged contracts, CPU checks and exact guarded smoke003 launch. The dispatch snapshot is not a terminal result or Stage2 pass. Current execution belongs in STATUS.
 
 [Smoke003 terminal evidence](direct_omni_train_smoke_003/README.md) verifies two updates and strict reload, with quiet still0/48. [Pilot dispatch](direct_omni_quiet_priority_pilot_dispatch_001/README.md) records the separately admitted50-update allocation. [All-weather priority](all_weather_priority_001/README.md) preserves the user's authorization and exact shared-note revision at the allocation boundary.
+
+
+[Quiet-priority pilot terminal result](direct_omni_quiet_priority_pilot_001/README.md) preserves all six phases, exact CAPS50 comparison and portable replay. Quiet remains0/48; its worst scored excursion includes a reset. [Independent interpretation and Fable review](../project_review_2026-09-10/quiet_priority_interpretation_001/README.md) support testing a bounded fresh-original normal-CAPS500 budget without changing quality gates or claiming exact resume.

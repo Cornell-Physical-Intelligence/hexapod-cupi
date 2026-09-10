@@ -19,16 +19,16 @@
     "note": "Kinematic reference distances, not material cut lengths. The production four-bar linkage and physical foot contact point require separate CAD layout and qualification."
   },
   "checkpoint": {
-    "receipt": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_003/terminal/run/train/training_receipt.json",
-    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_003/analysis/REPORT.md",
-    "label": "Quiet-priority PPO \u00b7 two-update integration run",
-    "qualification": "Integration verified; unqualified gait, 0/48 quiet trials pass",
+    "receipt": "artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_pilot_001/terminal/run/train/training_receipt.json",
+    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_pilot_001/analysis/REPORT.md",
+    "label": "Quiet-priority PPO \u00b7 50-update pilot",
+    "qualification": "Completed experiment; unqualified gait, 0/48 quiet trials pass",
     "video_matches": false,
-    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_003/terminal/run/train/policy/final.pt"
+    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_pilot_001/terminal/run/train/policy/final.pt"
   },
   "stop_result": {
-    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_003/terminal/run/final_stop/stop_diagnostics.json",
-    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_003/analysis/REPORT.md"
+    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_pilot_001/terminal/run/final_stop/stop_diagnostics.json",
+    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_pilot_001/analysis/REPORT.md"
   },
   "media": [
     {
@@ -271,7 +271,7 @@
       "meaning": "Evaluate directions, stops, torques, contacts and smoothness. A good reward curve or attractive clip cannot pass a stage.",
       "input": "Frozen checkpoints and common evaluation cases",
       "output": "Measured results and pass/fail evidence",
-      "today": "Both completed 50-update pilots fail all 48 quiet-stop replicas. Software integration and gait quality remain separate checks.",
+      "today": "The matched pilots and stronger quiet-priority pilot all fail quiet standing. Training completion and gait quality remain separate checks.",
       "source": "artifacts/omni_diagnostics_2026-09-09/direct_omni_matched_pilots_001/REPORT.md",
       "next": "Retain useful speed while reducing jitter, drift and saturation."
     },
@@ -400,8 +400,8 @@
   ],
   "next": [
     {
-      "title": "Target the observed quiet oscillation",
-      "text": "The small integration run completed with strict reload but still fails quiet standing. Compare the stronger zero-command smoothing objective in a matched 50-update pilot; retain all movement and stop gates."
+      "title": "Test a larger training budget",
+      "text": "The stronger quiet objective did not solve standing. Compare normal CAPS at 500 updates from the original checkpoint, preserving all movement and stop gates."
     },
     {
       "title": "Retain motion while removing jitter",

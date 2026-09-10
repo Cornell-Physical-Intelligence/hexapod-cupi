@@ -1,0 +1,59 @@
+{
+  "schema": "fable_smoke003_verified_disposition_v1",
+  "model": "claude-fable-5-1",
+  "effort": "max",
+  "responses": [
+    {
+      "path": "fable_final.json",
+      "sha256": "5df10623b8d9d5416fad6751deb29d1dcc2b007a1f735f53a029294334bd05a1"
+    },
+    {
+      "path": "fable_followup/fable_final.json",
+      "sha256": "5f5a288a422c56ece04b59cef1b664d6a199ada3dba4c83830c937e4173db87b"
+    }
+  ],
+  "accepted": [
+    "Weighted quiet/PPO ratios2.30% and5.12%, dominant versus other regularizers but not actual Adam shares",
+    "Exact inversion of mean weighted quiet/moving/spatial contribution from aggregate losses",
+    "Common actor clipping preserves ratios, separate critic clip",
+    "Coverage only first/last minibatches ofupdate1",
+    "Bounded QdotG signs after independently supplied arithmetic; no actualAdam inference"
+  ],
+  "corrected_or_rejected": [
+    {
+      "claim": "Inherited Adam moments explain spike / iteration1847 implies optimizer continuation",
+      "verdict": "Refuted: actual initialization optimizer reset, zeroentries and load_cfg.optimizer false; partner withdrew this."
+    },
+    {
+      "claim": "35 of38 nonzeroKL rows at LRfloor",
+      "verdict": "Refuted:35 is overshootcount; floor30exact/31roundoff among38nonzero,31exact/32roundoff amongall40; partner corrected."
+    },
+    {
+      "claim": "First KLspike is not the quietterm; laterKLdecay causedbyPPOclipping",
+      "verdict": "Unsupported causal attribution. No same-batch zero-quiet counterfactual or Adam step decomposition is retained; partner qualified/withdrew."
+    },
+    {
+      "claim": "Spatial loss fall proves noise or cannot be drivenbyitsown gradient",
+      "verdict": "Unsupported. Small gradient norm alone does not isolate causes or cumulative effect."
+    },
+    {
+      "claim": "Samplemix is exclusively responsible for allweightedloss decline",
+      "verdict": "Too strong. Exactmean contributions show quietdown,movingup,spatialdown; within-mode on-policy distributions also change. Do not infer exclusive cause."
+    },
+    {
+      "claim": "Conditional loss is mix-independent / aggregate normmatch alone proves every vector matches",
+      "verdict": "Limited: conditioning removes quiet-vs-moving prevalence but not within-mode state distribution changes. Code/CPUtests support instrumentation; equal norms alone are not vector equality."
+    }
+  ],
+  "independent_checks": [
+    "52raw payload hashes matched providedremoteaudit",
+    "43native ownerpayloads verified",
+    "4nativeobjective/instrumentationtests passed",
+    "3independentLR/count/sparse-row tests passed",
+    "Actualfinalcheckpoint SHA verified locally"
+  ],
+  "no_gpu": true,
+  "no_gate_change": true,
+  "Stage2_complete": false,
+  "created_utc": "2026-09-10T18:22:25.712584+00:00"
+}

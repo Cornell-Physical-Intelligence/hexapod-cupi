@@ -1,0 +1,66 @@
+{
+  "status": "completed",
+  "started_unix": 1789051890.8806036,
+  "identity": {
+    "schema": "direct315_cold_formal004_v1",
+    "source_manifest_sha256": "4671eab012aaf79ce49769cfdc1667142237a4b4a45966fd0399a9caa900c51b",
+    "plan_sha256": "2875245e92806a1cf96cccf14d25a0887474eda98d5a81de9d99b9656e90280c",
+    "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+    "actor_width": 315,
+    "critic_width": 318,
+    "training_allowed": false,
+    "Stage2_complete": false,
+    "overrides": {
+      "target_slew_rad_per_20ms": 0.04,
+      "reward_weights": {
+        "stand_joint_velocity": -0.5,
+        "stand_target_velocity": -0.15,
+        "stand_posture": -2.0,
+        "action_rate": -0.075,
+        "saturation": -0.75,
+        "torque_excess": -0.6,
+        "worst_torque_excess": -0.2,
+        "stand_raw_action": 0.0
+      },
+      "observation_noise_scale": 1.0,
+      "target_filter_time_constant_s": 0.0
+    },
+    "diagnostic_options": {
+      "duration_s": 12,
+      "settle_s": 2,
+      "seed": 7057,
+      "trace_envs_per_scenario": 1,
+      "controller": "policy"
+    }
+  },
+  "host_freeze_sha256": "efbeac2a0bfb7ebf93efb9ec4dce33363607092b30a7e81ac6351950e1fa6083",
+  "standing_admitted": true,
+  "baseline_complete": true,
+  "policy_training_started": false,
+  "PPO_updates_completed": 0,
+  "Stage2_complete": false,
+  "automatic_continuation": false,
+  "phase_scope": {
+    "standing": "32x1000",
+    "baseline": "48 replicas / 12 cases / 12 seconds"
+  },
+  "accepted_phases": {
+    "standing": {
+      "phase": "standing",
+      "passed": true,
+      "state_sha256": "80b1d57c34942d9a41473b2b86dd20ea684aa30520c02f09f986c9a1da009140",
+      "admission_sha256": "41002c8c4a43401fde265fbf9d3b3e14e65b053a47144ad3cafe357fe7bcb14a"
+    },
+    "baseline": {
+      "phase": "baseline",
+      "complete": true,
+      "state_sha256": "6addad5aea90079b83141a80feac0bf1a02f0df15a68db9441425f252dd8d4e7",
+      "diagnostics_sha256": "2c067b023b52e84b6dd3a3a78ccd35a6ea036602e243eb28d94f01a7177ea03e",
+      "scope": "Measured baseline, not physical or training admission",
+      "Stage2_complete": false
+    }
+  },
+  "last_completed_phase": "baseline",
+  "terminal_inputs_unchanged": true,
+  "finished_unix": 1789052038.6144824
+}

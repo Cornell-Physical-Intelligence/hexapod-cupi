@@ -1,0 +1,225 @@
+--- native004/build_source.py
++++ native005/build_source.py
+@@ -17,7 +17,7 @@
+ 
+ def patch_entry(text):
+     text = one(text, 'parser = argparse.ArgumentParser(description=__doc__)', 'parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)')
+-    text = one(text, 'AppLauncher.add_app_launcher_args(parser)', '''parser.add_argument("--direct-allocation", choices=("smoke", "pilot"))
++    text = one(text, 'AppLauncher.add_app_launcher_args(parser)', '''parser.add_argument("--direct-allocation", choices=("smoke", "pilot", "extended"))
+ parser.add_argument("--direct-branch", choices=("curriculum", "caps", "quiet_priority"))
+ parser.add_argument("--direct-evaluation", choices=("constant", "stop"))
+ AppLauncher.add_app_launcher_args(parser)''')
+--- native004/caps_ppo.py
++++ native005/caps_ppo.py
+@@ -10,7 +10,7 @@
+ from gradient_diagnostics import gradient_decomposition, assigned_gradient_norm
+ BASE_SHA='a2d35e7ad7b884c80b7434e7d2ce785a6da1e18d93c96f1179fbd3a208669f8c'
+ class CapsPPO(PPO):
+-    def __init__(self,*args,caps_options,gradient_diagnostics=True,**kwargs):
++    def __init__(self,*args,caps_options,gradient_diagnostics=True,gradient_update_milestones=None,**kwargs):
+         if hashlib.sha256(Path(inspect.getfile(PPO)).read_bytes()).hexdigest()!=BASE_SHA:
+             raise RuntimeError('Installed RSL PPO differs from reviewed source')
+         super().__init__(*args,**kwargs)
+@@ -19,6 +19,10 @@
+         self.regularizer=MeanRegularizer(caps_options,self.device)
+         if type(gradient_diagnostics) is not bool:raise ValueError('Explicit boolean diagnostics required')
+         self.gradient_diagnostics=gradient_diagnostics
++        milestones=(1,10,25,50) if gradient_update_milestones is None else tuple(gradient_update_milestones)
++        if milestones not in ((1,10,25,50),(1,10,25,50,100,250,500)) or any(type(x) is not int for x in milestones):
++            raise ValueError('Only declared sparse diagnostic milestones are supported')
++        self.gradient_update_milestones=milestones
+         self.completed_updates=0;self.last_update_diagnostics=[]
+         if {id(p) for p in self.actor.parameters()}&{id(p) for p in self.critic.parameters()}:
+             raise ValueError('Gradient decomposition requires separate actor/critic parameters')
+@@ -94,7 +98,7 @@
+ 
+             # Snapshot scalar state without changing the existing adaptive rule.
+             lr_before=float(self.learning_rate);kl_value=None
+-            sparse=self.gradient_diagnostics and self.current_update in (1,10,25,50) and minibatch_index in (1,self.num_learning_epochs*self.num_mini_batches)
++            sparse=self.gradient_diagnostics and self.current_update in self.gradient_update_milestones and minibatch_index in (1,self.num_learning_epochs*self.num_mini_batches)
+             # Compute KL divergence and adapt the learning rate
+             if self.desired_kl is not None and self.schedule == "adaptive":
+                 with torch.inference_mode():
+--- native004/direct_config.py
++++ native005/direct_config.py
+@@ -1,17 +1,19 @@
+ """Explicit launch selection for one immutable direct315 experiment source."""
+ import copy
+ 
+-SCHEMA = 'direct315_quiet_priority_native_v3'
++SCHEMA = 'direct315_extended_native_v4'
+ SMOKE_BRANCH = 'quiet_priority'
+ CHECKPOINT = '1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8'
+ ALLOCATIONS = {'smoke': {'replicas': 32, 'controls_per_update': 24, 'updates': 2},
+-               'pilot': {'replicas': 1024, 'controls_per_update': 24, 'updates': 50}}
++               'pilot': {'replicas': 1024, 'controls_per_update': 24, 'updates': 50},
++               'extended': {'replicas': 1024, 'controls_per_update': 24, 'updates': 500}}
+ 
+ def protocol():
+     return {'schema': SCHEMA, 'allocations': copy.deepcopy(ALLOCATIONS),
+             'branches': ['curriculum', 'caps', 'quiet_priority'], 'smoke_branch': SMOKE_BRANCH, 'quiet_priority_objective': {'quiet_temporal_weight':1.0,'moving_temporal_weight':0.1,'spatial_weight':0.1,'denominator':'all_valid_pairs'}, 'optimizer_diagnostics': {'minibatches_per_update':20,'sparse_gradient_updates':[1,10,25,50],'sparse_minibatches':[1,20]}, 'checkpoint_sha256': CHECKPOINT,
+             'command_schedule': '25percent_quiet_other_rows_8s_motion_8s_stop',
+-            'evaluations': ['constant', 'stop'], 'automatic_continuation': False}
++            'evaluations': ['constant', 'stop'], 'automatic_continuation': False,
++            'extended': extended_protocol()}
+ 
+ def selection(mode, allocation, branch, evaluation, iterations):
+     if mode == 'train':
+@@ -43,4 +45,25 @@
+     result['algorithm'].update(class_name='caps_ppo:CapsPPO', caps_options=validated_options(selected['caps']), gradient_diagnostics=True)
+     if (result['algorithm']['num_learning_epochs'],result['algorithm']['num_mini_batches'],result['algorithm']['schedule'],result['algorithm']['desired_kl'])!=(5,4,'adaptive',.01):
+         raise ValueError('Exact optimizer cadence/adaptive KL required')
++    if selected['allocation'] == 'extended':
++        result['algorithm']['gradient_update_milestones'] = list(gradient_updates(selected))
+     return result
++
++
++def gradient_updates(selected):
++    return (1, 10, 25, 50, 100, 250, 500) if selected.get('allocation') == 'extended' else (1, 10, 25, 50)
++
++
++def decision_updates(selected):
++    if selected['allocation'] == 'extended': return list(gradient_updates(selected))
++    return [2] if selected['allocation'] == 'smoke' else [10, 25, 50]
++
++
++def extended_protocol():
++    return {'updates': 500, 'controls_per_update': 24, 'replicas': 1024,
++            'fresh_original_only': True, 'ordinary_save_interval': 1,
++            'decision_updates': [1, 10, 25, 50, 100, 250, 500],
++            'gradient_updates': [1, 10, 25, 50, 100, 250, 500],
++            'gradient_minibatches': [1, 20], 'minibatches_per_update': 20,
++            'train_deadline_seconds': 1800, 'other_phase_deadline_seconds': 600,
++            'automatic_continuation': False}
+--- native004/direct_training.py
++++ native005/direct_training.py
+@@ -3,6 +3,7 @@
+ from pathlib import Path
+ import numpy as np
+ import torch
++from direct_config import decision_updates, gradient_updates
+ 
+ def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+ def save(p, d): Path(p).write_text(json.dumps(d, indent=2, allow_nan=False)+'\n')
+@@ -123,6 +124,9 @@
+         return losses
+     runner.alg.update=observed_update
+     try:
++        if selected['allocation']=='extended':
++            if runner.alg.storage.num_transitions_per_env!=24 or runner.alg.storage.num_envs!=1024 or runner.cfg.get('save_interval')!=1 or runner.cfg.get('num_steps_per_env')!=24 or runner.cfg.get('max_iterations')!=500 or tuple(runner.alg.gradient_update_milestones)!=gradient_updates(selected):
++                raise RuntimeError('Extended runner allocation/save/diagnostic cadence differs')
+         # Same native20 s episodes and randomized initial episode ages as old direct PPO.
+         runner.learn(num_learning_iterations=selected['updates'],init_at_random_ep_len=True)
+         checkpoint=output/'policy/final.pt'
+@@ -132,7 +136,7 @@
+         expected=selected['updates']*selected['controls_per_update']
+         if len(env.direct_audit_rows)!=expected or receipt['updates_completed']!=selected['updates']: raise RuntimeError('Actual collected controls or optimizer updates differ from bounded allocation')
+         receipts={}
+-        for update in ([2] if selected['allocation']=='smoke' else [10,25,50]):
++        for update in decision_updates(selected):
+             native=output/'policy'/('model_'+str(start_iteration+update-1)+'.pt')
+             target=output/'policy'/('decision_'+str(update).zfill(3)+'.pt')
+             if not native.is_file() or target.exists(): raise RuntimeError('Missing or existing immutable decision checkpoint')
+@@ -141,9 +145,14 @@
+         receipt.update(complete=True,updates_completed=selected['updates'],decision_checkpoints=receipts,
+                        final_checkpoint_sha256=sha(checkpoint),final_runner_iteration=runner.current_learning_iteration,
+                        learned_std=runner.alg.actor.distribution.std_param.detach().cpu().tolist())
++        if selected['allocation']=='extended':
++            from direct_contract import validate_extended_checkpoints
++            receipt['extended_readback']=validate_extended_checkpoints(output,receipt)
+         return receipt
+     except BaseException as exc:
+-        receipt['error']=repr(exc);raise
++        receipt['error']=repr(exc)
++        if selected['allocation']=='extended': receipt['complete']=False
++        raise
+     finally:
+         runner.alg.update=original_update
+         receipt['wall_seconds']=time.perf_counter()-start
+--- native004/direct_contract.py
++++ native005/direct_contract.py
+@@ -1,7 +1,7 @@
+ """Host-safe standard-library admission/result contract; no simulator or NumPy imports."""
+ import hashlib, json, math
+ from pathlib import Path
+-from direct_config import ALLOCATIONS, CHECKPOINT, SCHEMA, SMOKE_BRANCH, protocol, selection
++from direct_config import ALLOCATIONS, CHECKPOINT, SCHEMA, SMOKE_BRANCH, protocol, selection, gradient_updates, decision_updates, extended_protocol
+ 
+ PLAN='robot/hexapod_mkii_length_study/training_plan.json'
+ PARENT='4671eab012aaf79ce49769cfdc1667142237a4b4a45966fd0399a9caa900c51b'
+@@ -47,7 +47,7 @@
+     identity={'schema':SCHEMA,'source_manifest_sha256':sha(source/'campaign_source_hashes.json'),'plan_sha256':sha(source/PLAN),
+               'checkpoint_sha256':CHECKPOINT,'actor_width':315,'critic_width':318,'selection':selected,
+               'overrides':EXPECTED_OVERRIDES,'diagnostic_options':plan['omni']['diagnostics'],'Stage2_complete':False}
+-    if args.allocation=='pilot':
++    if args.allocation in ('pilot','extended'):
+         smoke=getattr(args,'smoke',None)
+         if smoke is None: raise ValueError('Pilot requires completed same-source actual quiet-priority smoke')
+         smoke_identity={**identity,'selection':selection('train','smoke',SMOKE_BRANCH,None,None)}
+@@ -80,7 +80,7 @@
+                 if not isinstance(counts,dict) or set(counts)!={'valid_pairs','quiet_pairs','moving_pairs'}:raise ValueError('Missing pair counts')
+                 if any(type(v) is not int or not 0<=v<=batch_size for v in counts.values()):raise ValueError('Invalid pair count')
+                 if counts['quiet_pairs']+counts['moving_pairs']!=counts['valid_pairs']:raise ValueError('Pair count sum differs')
+-            sparse=number in (1,10,25,50) and mb in (1,20)
++            sparse=number in gradient_updates(selected) and mb in (1,20)
+             g=row.get('gradient')
+             if sparse:
+                 if not isinstance(g,dict) or set(g.get('norms',{}))!={'ppo_actor','quiet_temporal','moving_temporal','spatial'}:raise ValueError('Missing sparse actor gradients')
+@@ -91,7 +91,7 @@
+             elif g is not None:raise ValueError('Unexpected sparse gradient row')
+         if finite(update.get('learning_rate'))!=rows[-1]['learning_rate_after']:raise ValueError('Final minibatch rate differs')
+     return {'schema':'direct315_actor_gradients_v1','updates':len(updates),'minibatches':20*len(updates),
+-            'sparse_actor_gradient_rows':2*sum(n in (1,10,25,50) for n in range(1,len(updates)+1))}
++            'sparse_actor_gradient_rows':2*sum(n in gradient_updates(selected) for n in range(1,len(updates)+1))}
+ 
+ def validate_result(directory,phase,identity,expected_checkpoint_sha256=None):
+     directory=Path(directory)
+@@ -124,12 +124,15 @@
+                 if finite(value)<0: raise ValueError('Negative raw metric')
+         if max(audit['applied_torque_max_per_row_nm'])>1.60001: raise ValueError('Applied cap exceeded')
+         for filename,key in [('training_trace.npz','trace_sha256'),('training_joint_trace.npz','joint_trace_sha256'),('training_events.json','event_ledger_sha256')]: check_hash(directory/filename,audit[key])
+-        expected_updates=[2] if sel['allocation']=='smoke' else [10,25,50]
++        expected_updates=decision_updates(sel)
+         if set(receipt['decision_checkpoints'])!={str(x) for x in expected_updates}: raise ValueError('Decision checkpoint inventory differs')
+         for update in expected_updates:
+             row=receipt['decision_checkpoints'][str(update)]
+             if row.get('file')!='decision_'+str(update).zfill(3)+'.pt' or row.get('completed_updates')!=update: raise ValueError('Wrong decision checkpoint label')
+             check_hash(directory/'policy'/row['file'],row['sha256'])
++        if sel['allocation']=='extended':
++            if receipt.get('extended_readback') != validate_extended_checkpoints(directory,receipt):
++                raise ValueError('Extended declared/runtime checkpoint cadence differs')
+         finite(receipt['wall_seconds'])
+         result.update(complete=True,optimizer_diagnostics=optimizer_diagnostics,updates_completed=sel['updates'],checkpoint_sha256=bound,receipt_sha256=sha(directory/'training_receipt.json'),scope='Bounded optimization/integrity, not physical acceptance');return result
+     expected=CHECKPOINT if phase.startswith('initial_') else expected_checkpoint_sha256
+@@ -170,3 +173,31 @@
+     if phase=='train': argv+=['--direct-allocation',allocation,'--direct-branch',branch,'--iterations',str(selected['updates'])]
+     elif phase!='standing': argv+=['--direct-evaluation',phase.split('_')[1]]
+     return argv
++
++
++def validate_extended_checkpoints(directory, receipt):
++    """Check declared relative-update saves; no resume or extra save callback."""
++    directory=Path(directory)
++    start=receipt.get('initial_runner_iteration')
++    final=receipt.get('final_runner_iteration')
++    if type(start) is not int or start!=1847 or type(final) is not int or final!=start+499:
++        raise ValueError('Extended checkpoint must be fresh original plus exactly 500 updates')
++    policy=directory/'policy'
++    expected={'model_'+str(start+i)+'.pt' for i in range(500)}
++    ordinary={p.name for p in policy.glob('model_*.pt')}
++    if ordinary!=expected or any(not (policy/name).is_file() or (policy/name).is_symlink() or (policy/name).stat().st_size<=0 for name in expected):
++        raise ValueError('Missing, empty, extra or aliased native autosave')
++    if set(receipt.get('decision_checkpoints',{}))!={str(x) for x in decision_updates({'allocation':'extended'})}:
++        raise ValueError('Extended decision checkpoint inventory differs')
++    for update in decision_updates({'allocation':'extended'}):
++        row=receipt['decision_checkpoints'][str(update)]
++        if row.get('native_iteration')!=start+update-1 or row.get('completed_updates')!=update or row.get('file')!='decision_'+str(update).zfill(3)+'.pt':
++            raise ValueError('Extended decision checkpoint iteration differs')
++        native=policy/('model_'+str(start+update-1)+'.pt')
++        check_hash(native,row.get('sha256'))
++        check_hash(policy/row['file'],row.get('sha256'))
++    check_hash(policy/'final.pt',receipt.get('final_checkpoint_sha256'))
++    return {**extended_protocol(), 'ordinary_autosaves':500, 'decision_checkpoints':7,
++            'first_native_iteration':start,'last_native_iteration':final,
++            'actual_controls':12000,'actual_transitions':12288000,
++            'optimizer_minibatches':10000,'sparse_actor_gradient_rows':14}
