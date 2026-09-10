@@ -1,0 +1,4290 @@
+{
+  "status": "CPU_only_contingency_not_selected_or_dynamically_admitted",
+  "source_sha256": {
+    "tmp/omni_reference_prototype/run_study.py": "79d6007f97bb0c458d34e9a1c5850d1f475928bc2684b349504e8449a074ecbc",
+    "tmp/omni_reference_prototype/reference.py": "bd2eca1e222acf31eb897f4e4e9b7e8a18989d33a23878c9e9caffb8be595e47",
+    "tmp/omni_reference_prototype/test_reference.py": "11d02bfbb9a5ce7abd2e773e496a167934200dbe1b875fb630f783956654ace2",
+    "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/f050_t060.urdf": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+    "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/candidate_c_reference.json": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+    "tools/omni_flat_math.py": "27066ce852170c79a004484ce456d450cdb6e4665bb6ea37736d4763f0f4a581"
+  },
+  "benchmark": {
+    "urdf_sha256": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+    "reference_cycle_shape_max_fk_error_m": 2.6293015208569613e-07,
+    "match_condition": "forward .20m/s, fixed 1.3Hz, duty .65, lift .020m; not a learned-policy comparison",
+    "selected_checkpoint_sha256": "5ecbe978d659413dc050fec93b0e211a3eadf6ce1c807790d87c14044ff245a2"
+  },
+  "configuration": {
+    "duty": 0.65,
+    "stance_travel_m": 0.1,
+    "lift_m": 0.02,
+    "min_frequency_hz": 0.8,
+    "lift_full_speed_mps": 0.04,
+    "command_filter_omega_rad_s": 4.0
+  },
+  "command_screen": {
+    "cases": 245,
+    "phases_per_case": 256,
+    "leg_phase_samples": 376320,
+    "passed_cases": 147,
+    "failed_cases": 98,
+    "notes": "Point-foot workspace + soft limits + local conditioning + URDF speed only; no torque/contact/collision/support admission",
+    "rows": [
+      {
+        "name": "stand",
+        "command": [
+          0,
+          0,
+          0
+        ],
+        "frequency_hz": 0.8,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.803232828417676e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.3730663329364705,
+        "minimum_jacobian_singular_value_m": 0.04788381823055167,
+        "max_joint_speed_rad_s": 0.0,
+        "max_horizontal_excursion_from_nominal_m": 0.0
+      },
+      {
+        "name": "turn_-0.40",
+        "command": [
+          0,
+          0,
+          -0.4
+        ],
+        "frequency_hz": 1.0845811412728006,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.10175703531061e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.09965096048871036,
+        "minimum_jacobian_singular_value_m": 0.0393008821546657,
+        "max_joint_speed_rad_s": 4.452528140006828,
+        "max_horizontal_excursion_from_nominal_m": 0.03991147536126953
+      },
+      {
+        "name": "turn_-0.20",
+        "command": [
+          0,
+          0,
+          -0.2
+        ],
+        "frequency_hz": 0.8798176305355291,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9483063177319043e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.13716714747275383,
+        "minimum_jacobian_singular_value_m": 0.040793893645027016,
+        "max_joint_speed_rad_s": 3.369908136594243,
+        "max_horizontal_excursion_from_nominal_m": 0.024610876346118353
+      },
+      {
+        "name": "turn_+0.20",
+        "command": [
+          0,
+          0,
+          0.2
+        ],
+        "frequency_hz": 0.8798176305355291,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.948377289938844e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.13724137503583833,
+        "minimum_jacobian_singular_value_m": 0.04079643740849672,
+        "max_joint_speed_rad_s": 3.3719971934528576,
+        "max_horizontal_excursion_from_nominal_m": 0.024610876346118367
+      },
+      {
+        "name": "turn_+0.40",
+        "command": [
+          0,
+          0,
+          0.4
+        ],
+        "frequency_hz": 1.0845811412728006,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1016501933389509e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.09960552284516888,
+        "minimum_jacobian_singular_value_m": 0.03929860600447507,
+        "max_joint_speed_rad_s": 4.455332123317668,
+        "max_horizontal_excursion_from_nominal_m": 0.03991147536126954
+      },
+      {
+        "name": "v0.05_bearing0_yaw-0.40",
+        "command": [
+          0.05,
+          0.0,
+          -0.4
+        ],
+        "frequency_hz": 1.1322284952135273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8930598857757678e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07215761668973464,
+        "minimum_jacobian_singular_value_m": 0.038145292781520686,
+        "max_joint_speed_rad_s": 5.890861060936719,
+        "max_horizontal_excursion_from_nominal_m": 0.0491565940282149
+      },
+      {
+        "name": "v0.05_bearing0_yaw-0.20",
+        "command": [
+          0.05,
+          0.0,
+          -0.2
+        ],
+        "frequency_hz": 0.937925433968816,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8040894353770164e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.10812423877165589,
+        "minimum_jacobian_singular_value_m": 0.039646648061870945,
+        "max_joint_speed_rad_s": 3.807167085631934,
+        "max_horizontal_excursion_from_nominal_m": 0.037493261503856616
+      },
+      {
+        "name": "v0.05_bearing0_yaw+0.00",
+        "command": [
+          0.05,
+          0.0,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9839965634287894e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.158308901991556,
+        "minimum_jacobian_singular_value_m": 0.0415911822005095,
+        "max_joint_speed_rad_s": 3.191608931621409,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318213
+      },
+      {
+        "name": "v0.05_bearing0_yaw+0.20",
+        "command": [
+          0.05,
+          0.0,
+          0.2
+        ],
+        "frequency_hz": 0.9379253735328379,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.210153402610475e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.10805446935125884,
+        "minimum_jacobian_singular_value_m": 0.03964422201677668,
+        "max_joint_speed_rad_s": 3.809441605750262,
+        "max_horizontal_excursion_from_nominal_m": 0.03749324018826501
+      },
+      {
+        "name": "v0.05_bearing0_yaw+0.40",
+        "command": [
+          0.05,
+          0.0,
+          0.4
+        ],
+        "frequency_hz": 1.1322283950845482,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.3494589538593294e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07218760471635743,
+        "minimum_jacobian_singular_value_m": 0.03814613432328018,
+        "max_joint_speed_rad_s": 5.889966923060337,
+        "max_horizontal_excursion_from_nominal_m": 0.04915655664638939
+      },
+      {
+        "name": "v0.05_bearing22.5_yaw-0.40",
+        "command": [
+          0.04619397662556434,
+          0.01913417161825449,
+          -0.4
+        ],
+        "frequency_hz": 1.1322285062794077,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.895216208292948e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04244682823776058,
+        "minimum_jacobian_singular_value_m": 0.03683859320308721,
+        "max_joint_speed_rad_s": 6.084515512797962,
+        "max_horizontal_excursion_from_nominal_m": 0.05222171662915503
+      },
+      {
+        "name": "v0.05_bearing22.5_yaw-0.20",
+        "command": [
+          0.04619397662556434,
+          0.01913417161825449,
+          -0.2
+        ],
+        "frequency_hz": 0.9379254406479743,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8042826770278021e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07693527269599132,
+        "minimum_jacobian_singular_value_m": 0.03835003860328994,
+        "max_joint_speed_rad_s": 4.088353776460164,
+        "max_horizontal_excursion_from_nominal_m": 0.040402232608153774
+      },
+      {
+        "name": "v0.05_bearing22.5_yaw+0.00",
+        "command": [
+          0.04619397662556434,
+          0.01913417161825449,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9752642376896673e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.141447118852573,
+        "minimum_jacobian_singular_value_m": 0.040957860576215185,
+        "max_joint_speed_rad_s": 3.283915072942523,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318206
+      },
+      {
+        "name": "v0.05_bearing22.5_yaw+0.20",
+        "command": [
+          0.04619397662556434,
+          0.01913417161825449,
+          0.2
+        ],
+        "frequency_hz": 0.9379253668536791,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1973666479165597e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07689531894484158,
+        "minimum_jacobian_singular_value_m": 0.03834788467580948,
+        "max_joint_speed_rad_s": 4.085094875847577,
+        "max_horizontal_excursion_from_nominal_m": 0.04040221047423389
+      },
+      {
+        "name": "v0.05_bearing22.5_yaw+0.40",
+        "command": [
+          0.04619397662556434,
+          0.01913417161825449,
+          0.4
+        ],
+        "frequency_hz": 1.1322283840186669,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.3388572915699333e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04245243246591235,
+        "minimum_jacobian_singular_value_m": 0.036838392430972734,
+        "max_joint_speed_rad_s": 6.0860606345209325,
+        "max_horizontal_excursion_from_nominal_m": 0.052221679496511575
+      },
+      {
+        "name": "v0.05_bearing45_yaw-0.40",
+        "command": [
+          0.03535533905932738,
+          0.035355339059327376,
+          -0.4
+        ],
+        "frequency_hz": 1.1322285080387435,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9207038966210147e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.023033011044007345,
+        "minimum_jacobian_singular_value_m": 0.035952958967732034,
+        "max_joint_speed_rad_s": 6.112750434019444,
+        "max_horizontal_excursion_from_nominal_m": 0.05368525454930545
+      },
+      {
+        "name": "v0.05_bearing45_yaw-0.20",
+        "command": [
+          0.03535533905932738,
+          0.035355339059327376,
+          -0.2
+        ],
+        "frequency_hz": 0.9379254417098765,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8103447862843422e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05030248148805372,
+        "minimum_jacobian_singular_value_m": 0.03718997724761262,
+        "max_joint_speed_rad_s": 4.378533250516473,
+        "max_horizontal_excursion_from_nominal_m": 0.04177761051908611
+      },
+      {
+        "name": "v0.05_bearing45_yaw+0.00",
+        "command": [
+          0.03535533905932738,
+          0.035355339059327376,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9306955324620142e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.11525651351898558,
+        "minimum_jacobian_singular_value_m": 0.039933925852510495,
+        "max_joint_speed_rad_s": 3.451215829699113,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318202
+      },
+      {
+        "name": "v0.05_bearing45_yaw+0.20",
+        "command": [
+          0.03535533905932738,
+          0.035355339059327376,
+          0.2
+        ],
+        "frequency_hz": 0.9379253657917769,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1396190498447187e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05024137200476586,
+        "minimum_jacobian_singular_value_m": 0.03718680357177584,
+        "max_joint_speed_rad_s": 4.375271466073112,
+        "max_horizontal_excursion_from_nominal_m": 0.04177758775866811
+      },
+      {
+        "name": "v0.05_bearing45_yaw+0.40",
+        "command": [
+          0.03535533905932738,
+          0.035355339059327376,
+          0.4
+        ],
+        "frequency_hz": 1.132228382259331,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.2865642377394237e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.02311495279353748,
+        "minimum_jacobian_singular_value_m": 0.035957041806266084,
+        "max_joint_speed_rad_s": 6.112787703240587,
+        "max_horizontal_excursion_from_nominal_m": 0.0536852171327876
+      },
+      {
+        "name": "v0.05_bearing67.5_yaw-0.40",
+        "command": [
+          0.019134171618254495,
+          0.04619397662556434,
+          -0.4
+        ],
+        "frequency_hz": 1.132228500223692,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9725347417657243e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.017533888014807264,
+        "minimum_jacobian_singular_value_m": 0.03569768152055528,
+        "max_joint_speed_rad_s": 6.471757734835909,
+        "max_horizontal_excursion_from_nominal_m": 0.053458116106311855
+      },
+      {
+        "name": "v0.05_bearing67.5_yaw-0.20",
+        "command": [
+          0.019134171618254495,
+          0.04619397662556434,
+          -0.2
+        ],
+        "frequency_hz": 0.9379254369928578,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.839310071011135e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04005541097427345,
+        "minimum_jacobian_singular_value_m": 0.03673082172656747,
+        "max_joint_speed_rad_s": 4.650385198033461,
+        "max_horizontal_excursion_from_nominal_m": 0.04156467424952976
+      },
+      {
+        "name": "v0.05_bearing67.5_yaw+0.00",
+        "command": [
+          0.019134171618254495,
+          0.04619397662556434,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8704757310015107e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.10093578161727823,
+        "minimum_jacobian_singular_value_m": 0.03935396913770139,
+        "max_joint_speed_rad_s": 3.5602598407132096,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318206
+      },
+      {
+        "name": "v0.05_bearing67.5_yaw+0.20",
+        "command": [
+          0.019134171618254495,
+          0.04619397662556434,
+          0.2
+        ],
+        "frequency_hz": 0.9379253705087961,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.0538566348757298e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04007178794903998,
+        "minimum_jacobian_singular_value_m": 0.03673110925522895,
+        "max_joint_speed_rad_s": 4.650929614139866,
+        "max_horizontal_excursion_from_nominal_m": 0.041564651029894116
+      },
+      {
+        "name": "v0.05_bearing67.5_yaw+0.40",
+        "command": [
+          0.019134171618254495,
+          0.04619397662556434,
+          0.4
+        ],
+        "frequency_hz": 1.1322283900743833,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.2049623763816474e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.01763477221016485,
+        "minimum_jacobian_singular_value_m": 0.035701945866831716,
+        "max_joint_speed_rad_s": 6.472376305978702,
+        "max_horizontal_excursion_from_nominal_m": 0.05345807786036525
+      },
+      {
+        "name": "v0.05_bearing90_yaw-0.40",
+        "command": [
+          3.061616997868383e-18,
+          0.05,
+          -0.4
+        ],
+        "frequency_hz": 1.1322284840240242,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.0508696373432924e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.026540645948436747,
+        "minimum_jacobian_singular_value_m": 0.03611403701002611,
+        "max_joint_speed_rad_s": 6.5363080137152245,
+        "max_horizontal_excursion_from_nominal_m": 0.05155388964439004
+      },
+      {
+        "name": "v0.05_bearing90_yaw-0.20",
+        "command": [
+          3.061616997868383e-18,
+          0.05,
+          -0.2
+        ],
+        "frequency_hz": 0.9379254272150411,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9020312086340573e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04821537215566574,
+        "minimum_jacobian_singular_value_m": 0.037096259374428224,
+        "max_joint_speed_rad_s": 4.669997110616637,
+        "max_horizontal_excursion_from_nominal_m": 0.03977187911121986
+      },
+      {
+        "name": "v0.05_bearing90_yaw+0.00",
+        "command": [
+          3.061616997868383e-18,
+          0.05,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.817507135862617e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.10043984745755008,
+        "minimum_jacobian_singular_value_m": 0.03933359806598239,
+        "max_joint_speed_rad_s": 3.5642408851486644,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318185
+      },
+      {
+        "name": "v0.05_bearing90_yaw+0.20",
+        "command": [
+          3.061616997868383e-18,
+          0.05,
+          0.2
+        ],
+        "frequency_hz": 0.9379253802866132,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9626985648635513e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04822070802362699,
+        "minimum_jacobian_singular_value_m": 0.03709679915391403,
+        "max_joint_speed_rad_s": 4.668013151548605,
+        "max_horizontal_excursion_from_nominal_m": 0.03977185571467302
+      },
+      {
+        "name": "v0.05_bearing90_yaw+0.40",
+        "command": [
+          3.061616997868383e-18,
+          0.05,
+          0.4
+        ],
+        "frequency_hz": 1.1322284062740524,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1117109676530868e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.026498128131621446,
+        "minimum_jacobian_singular_value_m": 0.036112376052959555,
+        "max_joint_speed_rad_s": 6.536939015881522,
+        "max_horizontal_excursion_from_nominal_m": 0.05155385020739089
+      },
+      {
+        "name": "v0.05_bearing112.5_yaw-0.40",
+        "command": [
+          -0.019134171618254488,
+          0.04619397662556434,
+          -0.4
+        ],
+        "frequency_hz": 1.132228461905992,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1466821851151372e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.03523388325023502,
+        "minimum_jacobian_singular_value_m": 0.03651195154290652,
+        "max_joint_speed_rad_s": 6.303136429041132,
+        "max_horizontal_excursion_from_nominal_m": 0.05230888283167403
+      },
+      {
+        "name": "v0.05_bearing112.5_yaw-0.20",
+        "command": [
+          -0.019134171618254488,
+          0.04619397662556434,
+          -0.2
+        ],
+        "frequency_hz": 0.9379254138650106,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9930600401061778e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05020089578717757,
+        "minimum_jacobian_singular_value_m": 0.037185003216699895,
+        "max_joint_speed_rad_s": 4.540729204539942,
+        "max_horizontal_excursion_from_nominal_m": 0.040830659752469016
+      },
+      {
+        "name": "v0.05_bearing112.5_yaw+0.00",
+        "command": [
+          -0.019134171618254488,
+          0.04619397662556434,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8252874867404885e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.10018358662619287,
+        "minimum_jacobian_singular_value_m": 0.03932306614191502,
+        "max_joint_speed_rad_s": 3.566305274022869,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318206
+      },
+      {
+        "name": "v0.05_bearing112.5_yaw+0.20",
+        "command": [
+          -0.019134171618254488,
+          0.04619397662556434,
+          0.2
+        ],
+        "frequency_hz": 0.9379253936366442,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8864277555152063e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05022914140712498,
+        "minimum_jacobian_singular_value_m": 0.03718595749887412,
+        "max_joint_speed_rad_s": 4.542604190998061,
+        "max_horizontal_excursion_from_nominal_m": 0.040830650297754095
+      },
+      {
+        "name": "v0.05_bearing112.5_yaw+0.40",
+        "command": [
+          -0.019134171618254488,
+          0.04619397662556434,
+          0.4
+        ],
+        "frequency_hz": 1.1322284283920858,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.0247490345756554e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.03521639728175163,
+        "minimum_jacobian_singular_value_m": 0.03651085803173733,
+        "max_joint_speed_rad_s": 6.304622239914918,
+        "max_horizontal_excursion_from_nominal_m": 0.05230886916369589
+      },
+      {
+        "name": "v0.05_bearing135_yaw-0.40",
+        "command": [
+          -0.035355339059327376,
+          0.03535533905932738,
+          -0.4
+        ],
+        "frequency_hz": 1.132228437236865,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.2419033703171916e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.03522075114630496,
+        "minimum_jacobian_singular_value_m": 0.03651135458525627,
+        "max_joint_speed_rad_s": 6.1145865441949345,
+        "max_horizontal_excursion_from_nominal_m": 0.05272069814370626
+      },
+      {
+        "name": "v0.05_bearing135_yaw-0.20",
+        "command": [
+          -0.035355339059327376,
+          0.03535533905932738,
+          -0.2
+        ],
+        "frequency_hz": 0.9379253989751872,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.0926339219113736e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05361461528029299,
+        "minimum_jacobian_singular_value_m": 0.037336454483276396,
+        "max_joint_speed_rad_s": 4.328563187897832,
+        "max_horizontal_excursion_from_nominal_m": 0.041215088958854715
+      },
+      {
+        "name": "v0.05_bearing135_yaw+0.00",
+        "command": [
+          -0.035355339059327376,
+          0.03535533905932738,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8849342212851302e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.10843416926681693,
+        "minimum_jacobian_singular_value_m": 0.03965961993867124,
+        "max_joint_speed_rad_s": 3.501862226252323,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318202
+      },
+      {
+        "name": "v0.05_bearing135_yaw+0.20",
+        "command": [
+          -0.035355339059327376,
+          0.03535533905932738,
+          0.2
+        ],
+        "frequency_hz": 0.9379254085264677,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8354756905508535e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.053694355118258486,
+        "minimum_jacobian_singular_value_m": 0.03733968047342013,
+        "max_joint_speed_rad_s": 4.332288877617692,
+        "max_horizontal_excursion_from_nominal_m": 0.041215082654200125
+      },
+      {
+        "name": "v0.05_bearing135_yaw+0.40",
+        "command": [
+          -0.035355339059327376,
+          0.03535533905932738,
+          0.4
+        ],
+        "frequency_hz": 1.132228453061213,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9568149988437935e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.03533896690170746,
+        "minimum_jacobian_singular_value_m": 0.036517141695921074,
+        "max_joint_speed_rad_s": 6.113128862016003,
+        "max_horizontal_excursion_from_nominal_m": 0.05272068697938235
+      },
+      {
+        "name": "v0.05_bearing157.5_yaw-0.40",
+        "command": [
+          -0.04619397662556434,
+          0.019134171618254495,
+          -0.4
+        ],
+        "frequency_hz": 1.1322284137722942,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.3146713278055533e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04967799153879415,
+        "minimum_jacobian_singular_value_m": 0.03716173641410203,
+        "max_joint_speed_rad_s": 6.132330247006953,
+        "max_horizontal_excursion_from_nominal_m": 0.051451505751824264
+      },
+      {
+        "name": "v0.05_bearing157.5_yaw-0.20",
+        "command": [
+          -0.04619397662556434,
+          0.019134171618254495,
+          -0.2
+        ],
+        "frequency_hz": 0.9379253848124116,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1724254895625497e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07467595906773639,
+        "minimum_jacobian_singular_value_m": 0.03825295935876631,
+        "max_joint_speed_rad_s": 4.106950942636735,
+        "max_horizontal_excursion_from_nominal_m": 0.040028364537071
+      },
+      {
+        "name": "v0.05_bearing157.5_yaw+0.00",
+        "command": [
+          -0.04619397662556434,
+          0.019134171618254495,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9500741140330188e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.13172997650604445,
+        "minimum_jacobian_singular_value_m": 0.04058355436423346,
+        "max_joint_speed_rad_s": 3.342372935175769,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318206
+      },
+      {
+        "name": "v0.05_bearing157.5_yaw+0.20",
+        "command": [
+          -0.04619397662556434,
+          0.019134171618254495,
+          0.2
+        ],
+        "frequency_hz": 0.937925422689243,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.80823165993885e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07467139791394084,
+        "minimum_jacobian_singular_value_m": 0.038253212278015765,
+        "max_joint_speed_rad_s": 4.110212564758737,
+        "max_horizontal_excursion_from_nominal_m": 0.04002836166435663
+      },
+      {
+        "name": "v0.05_bearing157.5_yaw+0.40",
+        "command": [
+          -0.04619397662556434,
+          0.019134171618254495,
+          0.4
+        ],
+        "frequency_hz": 1.1322284765257828,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9131085579655438e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04973577275314067,
+        "minimum_jacobian_singular_value_m": 0.03716400637019517,
+        "max_joint_speed_rad_s": 6.13422647157824,
+        "max_horizontal_excursion_from_nominal_m": 0.05145149734192345
+      },
+      {
+        "name": "v0.05_bearing180_yaw-0.40",
+        "command": [
+          -0.05,
+          6.123233995736766e-18,
+          -0.4
+        ],
+        "frequency_hz": 1.1322283950845482,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.349356631049649e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07215794588575708,
+        "minimum_jacobian_singular_value_m": 0.03814530727055434,
+        "max_joint_speed_rad_s": 5.890860087704448,
+        "max_horizontal_excursion_from_nominal_m": 0.04915655664638944
+      },
+      {
+        "name": "v0.05_bearing180_yaw-0.20",
+        "command": [
+          -0.05,
+          6.123233995736766e-18,
+          -0.2
+        ],
+        "frequency_hz": 0.9379253735328379,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.210255458049209e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.10812346343116186,
+        "minimum_jacobian_singular_value_m": 0.03964661684677932,
+        "max_joint_speed_rad_s": 3.8071677322387294,
+        "max_horizontal_excursion_from_nominal_m": 0.037493240188265005
+      },
+      {
+        "name": "v0.05_bearing180_yaw+0.00",
+        "command": [
+          -0.05,
+          6.123233995736766e-18,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9840890126336446e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.15830821320928745,
+        "minimum_jacobian_singular_value_m": 0.041591156913700154,
+        "max_joint_speed_rad_s": 3.1916125976349474,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318213
+      },
+      {
+        "name": "v0.05_bearing180_yaw+0.20",
+        "command": [
+          -0.05,
+          6.123233995736766e-18,
+          0.2
+        ],
+        "frequency_hz": 0.937925433968816,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.804090465237415e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.10805526027499512,
+        "minimum_jacobian_singular_value_m": 0.03964425386848715,
+        "max_joint_speed_rad_s": 3.809440730961051,
+        "max_horizontal_excursion_from_nominal_m": 0.03749326150385659
+      },
+      {
+        "name": "v0.05_bearing180_yaw+0.40",
+        "command": [
+          -0.05,
+          6.123233995736766e-18,
+          0.4
+        ],
+        "frequency_hz": 1.1322284952135273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8931461997838133e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07218728609863723,
+        "minimum_jacobian_singular_value_m": 0.03814612029068446,
+        "max_joint_speed_rad_s": 5.889968133617553,
+        "max_horizontal_excursion_from_nominal_m": 0.049156594028214914
+      },
+      {
+        "name": "v0.05_bearing202.5_yaw-0.40",
+        "command": [
+          -0.04619397662556435,
+          -0.019134171618254484,
+          -0.4
+        ],
+        "frequency_hz": 1.132228384018667,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.3387146044741142e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04244716117399561,
+        "minimum_jacobian_singular_value_m": 0.03683860852647184,
+        "max_joint_speed_rad_s": 6.084509792950097,
+        "max_horizontal_excursion_from_nominal_m": 0.052221679496511554
+      },
+      {
+        "name": "v0.05_bearing202.5_yaw-0.20",
+        "command": [
+          -0.04619397662556435,
+          -0.019134171618254484,
+          -0.2
+        ],
+        "frequency_hz": 0.9379253668536792,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1973969364621277e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07693568330353573,
+        "minimum_jacobian_singular_value_m": 0.038350056459463745,
+        "max_joint_speed_rad_s": 4.088352903155951,
+        "max_horizontal_excursion_from_nominal_m": 0.04040221047423383
+      },
+      {
+        "name": "v0.05_bearing202.5_yaw+0.00",
+        "command": [
+          -0.04619397662556435,
+          -0.019134171618254484,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.97527646923394e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.14144675624625025,
+        "minimum_jacobian_singular_value_m": 0.040957846429311835,
+        "max_joint_speed_rad_s": 3.283911128635292,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318206
+      },
+      {
+        "name": "v0.05_bearing202.5_yaw+0.20",
+        "command": [
+          -0.04619397662556435,
+          -0.019134171618254484,
+          0.2
+        ],
+        "frequency_hz": 0.9379254406479743,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8042798955745964e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07689492117772634,
+        "minimum_jacobian_singular_value_m": 0.03834786736747587,
+        "max_joint_speed_rad_s": 4.085095868002701,
+        "max_horizontal_excursion_from_nominal_m": 0.040402232608153746
+      },
+      {
+        "name": "v0.05_bearing202.5_yaw+0.40",
+        "command": [
+          -0.04619397662556435,
+          -0.019134171618254484,
+          0.4
+        ],
+        "frequency_hz": 1.1322285062794077,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8952977873186457e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04245211068050425,
+        "minimum_jacobian_singular_value_m": 0.036838377610105257,
+        "max_joint_speed_rad_s": 6.086066646862268,
+        "max_horizontal_excursion_from_nominal_m": 0.05222171662915503
+      },
+      {
+        "name": "v0.05_bearing225_yaw-0.40",
+        "command": [
+          -0.03535533905932738,
+          -0.035355339059327376,
+          -0.4
+        ],
+        "frequency_hz": 1.132228382259331,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.286480888132791e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.02303329477567262,
+        "minimum_jacobian_singular_value_m": 0.035952972443899604,
+        "max_joint_speed_rad_s": 6.112753992684468,
+        "max_horizontal_excursion_from_nominal_m": 0.05368521713278763
+      },
+      {
+        "name": "v0.05_bearing225_yaw-0.20",
+        "command": [
+          -0.03535533905932738,
+          -0.035355339059327376,
+          -0.2
+        ],
+        "frequency_hz": 0.9379253657917769,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1395091664359654e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.050302852295897704,
+        "minimum_jacobian_singular_value_m": 0.037189994079378424,
+        "max_joint_speed_rad_s": 4.378531584933338,
+        "max_horizontal_excursion_from_nominal_m": 0.04177758775866809
+      },
+      {
+        "name": "v0.05_bearing225_yaw+0.00",
+        "command": [
+          -0.03535533905932738,
+          -0.035355339059327376,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9308018034735688e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.11525689000475747,
+        "minimum_jacobian_singular_value_m": 0.03993394123807666,
+        "max_joint_speed_rad_s": 3.451218312517822,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318202
+      },
+      {
+        "name": "v0.05_bearing225_yaw+0.20",
+        "command": [
+          -0.03535533905932738,
+          -0.035355339059327376,
+          0.2
+        ],
+        "frequency_hz": 0.9379254417098765,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.81033136166443e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05024101311599516,
+        "minimum_jacobian_singular_value_m": 0.037186787269364655,
+        "max_joint_speed_rad_s": 4.375273227580362,
+        "max_horizontal_excursion_from_nominal_m": 0.041777610519086086
+      },
+      {
+        "name": "v0.05_bearing225_yaw+0.40",
+        "command": [
+          -0.03535533905932738,
+          -0.035355339059327376,
+          0.4
+        ],
+        "frequency_hz": 1.1322285080387435,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9206269590750308e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.023114661743026677,
+        "minimum_jacobian_singular_value_m": 0.035957027992793364,
+        "max_joint_speed_rad_s": 6.1127841578266136,
+        "max_horizontal_excursion_from_nominal_m": 0.053685254549305485
+      },
+      {
+        "name": "v0.05_bearing247.5_yaw-0.40",
+        "command": [
+          -0.01913417161825452,
+          -0.04619397662556433,
+          -0.4
+        ],
+        "frequency_hz": 1.1322283900743833,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.205040572772134e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.01753409186204591,
+        "minimum_jacobian_singular_value_m": 0.035697691376653656,
+        "max_joint_speed_rad_s": 6.471763767636682,
+        "max_horizontal_excursion_from_nominal_m": 0.05345807786036525
+      },
+      {
+        "name": "v0.05_bearing247.5_yaw-0.20",
+        "command": [
+          -0.01913417161825452,
+          -0.04619397662556433,
+          -0.2
+        ],
+        "frequency_hz": 0.937925370508796,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.0537840648730638e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.040055682881530164,
+        "minimum_jacobian_singular_value_m": 0.03673083434810189,
+        "max_joint_speed_rad_s": 4.650387508907085,
+        "max_horizontal_excursion_from_nominal_m": 0.041564651029894116
+      },
+      {
+        "name": "v0.05_bearing247.5_yaw+0.00",
+        "command": [
+          -0.01913417161825452,
+          -0.04619397662556433,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8704981174641795e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.1009354715487989,
+        "minimum_jacobian_singular_value_m": 0.03935395609664574,
+        "max_joint_speed_rad_s": 3.5602609766773483,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318192
+      },
+      {
+        "name": "v0.05_bearing247.5_yaw+0.20",
+        "command": [
+          -0.01913417161825452,
+          -0.04619397662556433,
+          0.2
+        ],
+        "frequency_hz": 0.9379254369928577,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8392844173765944e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04007152604936781,
+        "minimum_jacobian_singular_value_m": 0.0367310970864787,
+        "max_joint_speed_rad_s": 4.650927305413799,
+        "max_horizontal_excursion_from_nominal_m": 0.04156467424952976
+      },
+      {
+        "name": "v0.05_bearing247.5_yaw+0.40",
+        "command": [
+          -0.01913417161825452,
+          -0.04619397662556433,
+          0.4
+        ],
+        "frequency_hz": 1.132228500223692,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9725286760662246e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.01763457773424504,
+        "minimum_jacobian_singular_value_m": 0.03570193644922809,
+        "max_joint_speed_rad_s": 6.472370338203399,
+        "max_horizontal_excursion_from_nominal_m": 0.05345811610631182
+      },
+      {
+        "name": "v0.05_bearing270_yaw-0.40",
+        "command": [
+          -9.184850993605149e-18,
+          -0.05,
+          -0.4
+        ],
+        "frequency_hz": 1.1322284062740524,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.111757310267807e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.026540738301851885,
+        "minimum_jacobian_singular_value_m": 0.03611404161241308,
+        "max_joint_speed_rad_s": 6.536316660192359,
+        "max_horizontal_excursion_from_nominal_m": 0.05155385020739088
+      },
+      {
+        "name": "v0.05_bearing270_yaw-0.20",
+        "command": [
+          -9.184850993605149e-18,
+          -0.05,
+          -0.2
+        ],
+        "frequency_hz": 0.9379253802866132,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9625998937977312e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04821550857243695,
+        "minimum_jacobian_singular_value_m": 0.03709626580107701,
+        "max_joint_speed_rad_s": 4.670002100205696,
+        "max_horizontal_excursion_from_nominal_m": 0.039771855714673024
+      },
+      {
+        "name": "v0.05_bearing270_yaw+0.00",
+        "command": [
+          -9.184850993605149e-18,
+          -0.05,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8175194193496867e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.10043960650292094,
+        "minimum_jacobian_singular_value_m": 0.03933358785820793,
+        "max_joint_speed_rad_s": 3.564240057809272,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318213
+      },
+      {
+        "name": "v0.05_bearing270_yaw+0.20",
+        "command": [
+          -9.184850993605149e-18,
+          -0.05,
+          0.2
+        ],
+        "frequency_hz": 0.9379254272150411,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.902060389974331e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.0482205672909064,
+        "minimum_jacobian_singular_value_m": 0.03709679253430754,
+        "max_joint_speed_rad_s": 4.668008123105517,
+        "max_horizontal_excursion_from_nominal_m": 0.039771879111219856
+      },
+      {
+        "name": "v0.05_bearing270_yaw+0.40",
+        "command": [
+          -9.184850993605149e-18,
+          -0.05,
+          0.4
+        ],
+        "frequency_hz": 1.1322284840240242,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.0509064530966577e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.02649803163551434,
+        "minimum_jacobian_singular_value_m": 0.03611237125925263,
+        "max_joint_speed_rad_s": 6.53693028355746,
+        "max_horizontal_excursion_from_nominal_m": 0.051553889644390054
+      },
+      {
+        "name": "v0.05_bearing292.5_yaw-0.40",
+        "command": [
+          0.0191341716182545,
+          -0.046193976625564334,
+          -0.4
+        ],
+        "frequency_hz": 1.1322284283920858,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.0246637299296027e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.035234442324213244,
+        "minimum_jacobian_singular_value_m": 0.036511976701834675,
+        "max_joint_speed_rad_s": 6.303147761398998,
+        "max_horizontal_excursion_from_nominal_m": 0.052308869163695905
+      },
+      {
+        "name": "v0.05_bearing292.5_yaw-0.20",
+        "command": [
+          0.0191341716182545,
+          -0.046193976625564334,
+          -0.2
+        ],
+        "frequency_hz": 0.9379253936366442,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8864558250931784e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05020157898377953,
+        "minimum_jacobian_singular_value_m": 0.03718503335455364,
+        "max_joint_speed_rad_s": 4.540733271954485,
+        "max_horizontal_excursion_from_nominal_m": 0.040830650297754095
+      },
+      {
+        "name": "v0.05_bearing292.5_yaw+0.00",
+        "command": [
+          0.0191341716182545,
+          -0.046193976625564334,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8252687480530863e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.1001843482082796,
+        "minimum_jacobian_singular_value_m": 0.039323097214721374,
+        "max_joint_speed_rad_s": 3.5663055186946306,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318206
+      },
+      {
+        "name": "v0.05_bearing292.5_yaw+0.20",
+        "command": [
+          0.0191341716182545,
+          -0.046193976625564334,
+          0.2
+        ],
+        "frequency_hz": 0.9379254138650106,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9929317204851585e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05022846641239953,
+        "minimum_jacobian_singular_value_m": 0.03718592772766238,
+        "max_joint_speed_rad_s": 4.542600112332626,
+        "max_horizontal_excursion_from_nominal_m": 0.040830659752468974
+      },
+      {
+        "name": "v0.05_bearing292.5_yaw+0.40",
+        "command": [
+          0.0191341716182545,
+          -0.046193976625564334,
+          0.4
+        ],
+        "frequency_hz": 1.1322284619059917,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1468370233788655e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.035215844161692544,
+        "minimum_jacobian_singular_value_m": 0.03651083314335223,
+        "max_joint_speed_rad_s": 6.304611100574979,
+        "max_horizontal_excursion_from_nominal_m": 0.052308882831674036
+      },
+      {
+        "name": "v0.05_bearing315_yaw-0.40",
+        "command": [
+          0.03535533905932737,
+          -0.03535533905932738,
+          -0.4
+        ],
+        "frequency_hz": 1.132228453061213,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9567160258487344e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.03522141240160881,
+        "minimum_jacobian_singular_value_m": 0.0365113843896424,
+        "max_joint_speed_rad_s": 6.114587178685423,
+        "max_horizontal_excursion_from_nominal_m": 0.05272068697938232
+      },
+      {
+        "name": "v0.05_bearing315_yaw-0.20",
+        "command": [
+          0.03535533905932737,
+          -0.03535533905932738,
+          -0.2
+        ],
+        "frequency_hz": 0.9379254085264677,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8354988164560909e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05361541092563504,
+        "minimum_jacobian_singular_value_m": 0.0373364894445549,
+        "max_joint_speed_rad_s": 4.328560797617757,
+        "max_horizontal_excursion_from_nominal_m": 0.04121508265420014
+      },
+      {
+        "name": "v0.05_bearing315_yaw+0.00",
+        "command": [
+          0.03535533905932737,
+          -0.03535533905932738,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8850160281977004e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.10843332259966232,
+        "minimum_jacobian_singular_value_m": 0.039659585847705806,
+        "max_joint_speed_rad_s": 3.5018611265423654,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318202
+      },
+      {
+        "name": "v0.05_bearing315_yaw+0.20",
+        "command": [
+          0.03535533905932737,
+          -0.03535533905932738,
+          0.2
+        ],
+        "frequency_hz": 0.9379253989751872,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.092498526115709e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.053693569680376196,
+        "minimum_jacobian_singular_value_m": 0.03733964596856534,
+        "max_joint_speed_rad_s": 4.332291119575498,
+        "max_horizontal_excursion_from_nominal_m": 0.04121508895885471
+      },
+      {
+        "name": "v0.05_bearing315_yaw+0.40",
+        "command": [
+          0.03535533905932737,
+          -0.03535533905932738,
+          0.4
+        ],
+        "frequency_hz": 1.132228437236865,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.241751815909845e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.03533829357669127,
+        "minimum_jacobian_singular_value_m": 0.03651711225800325,
+        "max_joint_speed_rad_s": 6.113127976963954,
+        "max_horizontal_excursion_from_nominal_m": 0.05272069814370626
+      },
+      {
+        "name": "v0.05_bearing337.5_yaw-0.40",
+        "command": [
+          0.04619397662556433,
+          -0.019134171618254522,
+          -0.4
+        ],
+        "frequency_hz": 1.1322284765257828,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9131285493267779e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04967870779142869,
+        "minimum_jacobian_singular_value_m": 0.03716176804671222,
+        "max_joint_speed_rad_s": 6.132331425825188,
+        "max_horizontal_excursion_from_nominal_m": 0.051451497341923474
+      },
+      {
+        "name": "v0.05_bearing337.5_yaw-0.20",
+        "command": [
+          0.04619397662556433,
+          -0.019134171618254522,
+          -0.2
+        ],
+        "frequency_hz": 0.937925422689243,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8082370512556008e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07467678566026992,
+        "minimum_jacobian_singular_value_m": 0.038252994532874854,
+        "max_joint_speed_rad_s": 4.106949324431654,
+        "max_horizontal_excursion_from_nominal_m": 0.040028361664356645
+      },
+      {
+        "name": "v0.05_bearing337.5_yaw+0.00",
+        "command": [
+          0.04619397662556433,
+          -0.019134171618254522,
+          0
+        ],
+        "frequency_hz": 0.8634958019585273,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.950155654118822e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.13173078980583908,
+        "minimum_jacobian_singular_value_m": 0.04058358578623327,
+        "max_joint_speed_rad_s": 3.3423756079061726,
+        "max_horizontal_excursion_from_nominal_m": 0.020423108399318206
+      },
+      {
+        "name": "v0.05_bearing337.5_yaw+0.20",
+        "command": [
+          0.04619397662556433,
+          -0.019134171618254522,
+          0.2
+        ],
+        "frequency_hz": 0.9379253848124116,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.172468036121037e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07467055505864462,
+        "minimum_jacobian_singular_value_m": 0.038253176405847356,
+        "max_joint_speed_rad_s": 4.110214015560211,
+        "max_horizontal_excursion_from_nominal_m": 0.040028364537070954
+      },
+      {
+        "name": "v0.05_bearing337.5_yaw+0.40",
+        "command": [
+          0.04619397662556433,
+          -0.019134171618254522,
+          0.4
+        ],
+        "frequency_hz": 1.1322284137722942,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.3148873968366332e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04973506505473013,
+        "minimum_jacobian_singular_value_m": 0.03716397512162107,
+        "max_joint_speed_rad_s": 6.134225665048018,
+        "max_horizontal_excursion_from_nominal_m": 0.051451505751824264
+      },
+      {
+        "name": "v0.10_bearing0_yaw-0.40",
+        "command": [
+          0.1,
+          0.0,
+          -0.4
+        ],
+        "frequency_hz": 1.264443149668014,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8088983894282639e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.056058159994531565,
+        "minimum_jacobian_singular_value_m": 0.037444390102957616,
+        "max_joint_speed_rad_s": 7.630595590697569,
+        "max_horizontal_excursion_from_nominal_m": 0.05560697661437364
+      },
+      {
+        "name": "v0.10_bearing0_yaw-0.20",
+        "command": [
+          0.1,
+          0.0,
+          -0.2
+        ],
+        "frequency_hz": 1.0938826154437373,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9630143868780024e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.09114797789745177,
+        "minimum_jacobian_singular_value_m": 0.03894881604168466,
+        "max_joint_speed_rad_s": 5.642977500958905,
+        "max_horizontal_excursion_from_nominal_m": 0.047276507034367414
+      },
+      {
+        "name": "v0.10_bearing0_yaw+0.00",
+        "command": [
+          0.1,
+          0.0,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.2073845645010586e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.14230050455096377,
+        "minimum_jacobian_singular_value_m": 0.04098997621355348,
+        "max_joint_speed_rad_s": 3.9350897707373194,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617527
+      },
+      {
+        "name": "v0.10_bearing0_yaw+0.20",
+        "command": [
+          0.1,
+          0.0,
+          0.2
+        ],
+        "frequency_hz": 1.0938825118047524,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.4242218673095657e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.09122623237448257,
+        "minimum_jacobian_singular_value_m": 0.038952510882833934,
+        "max_joint_speed_rad_s": 5.6448569355950475,
+        "max_horizontal_excursion_from_nominal_m": 0.04727651163218081
+      },
+      {
+        "name": "v0.10_bearing0_yaw+0.40",
+        "command": [
+          0.1,
+          0.0,
+          0.4
+        ],
+        "frequency_hz": 1.264442970349732,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.540104848732005e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.056151812670384604,
+        "minimum_jacobian_singular_value_m": 0.03744821673807062,
+        "max_joint_speed_rad_s": 7.633339894237412,
+        "max_horizontal_excursion_from_nominal_m": 0.05560694929719388
+      },
+      {
+        "name": "v0.10_bearing22.5_yaw-0.40",
+        "command": [
+          0.09238795325112868,
+          0.03826834323650898,
+          -0.4
+        ],
+        "frequency_hz": 1.2644431694855989,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.809171718346722e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.009097830877016655,
+        "minimum_jacobian_singular_value_m": 0.035303023473072306,
+        "max_joint_speed_rad_s": 8.019559837962367,
+        "max_horizontal_excursion_from_nominal_m": 0.059921327046866577
+      },
+      {
+        "name": "v0.10_bearing22.5_yaw-0.20",
+        "command": [
+          0.09238795325112868,
+          0.03826834323650898,
+          -0.2
+        ],
+        "frequency_hz": 1.0938826268975301,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9480165150736374e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04290583369441414,
+        "minimum_jacobian_singular_value_m": 0.03685923593932781,
+        "max_joint_speed_rad_s": 5.883745971855178,
+        "max_horizontal_excursion_from_nominal_m": 0.050280921362767
+      },
+      {
+        "name": "v0.10_bearing22.5_yaw+0.00",
+        "command": [
+          0.09238795325112868,
+          0.03826834323650898,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1765024874202349e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.10580716875858842,
+        "minimum_jacobian_singular_value_m": 0.03955221522741419,
+        "max_joint_speed_rad_s": 4.178748346302916,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617528
+      },
+      {
+        "name": "v0.10_bearing22.5_yaw+0.20",
+        "command": [
+          0.09238795325112868,
+          0.03826834323650898,
+          0.2
+        ],
+        "frequency_hz": 1.0938825003509585,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.392090538764698e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04285601332278688,
+        "minimum_jacobian_singular_value_m": 0.03685654297599546,
+        "max_joint_speed_rad_s": 5.885006482094046,
+        "max_horizontal_excursion_from_nominal_m": 0.05028090612914888
+      },
+      {
+        "name": "v0.10_bearing22.5_yaw+0.40",
+        "command": [
+          0.09238795325112868,
+          0.03826834323650898,
+          0.4
+        ],
+        "frequency_hz": 1.264442950532144,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.514598791207916e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.009013263118979431,
+        "minimum_jacobian_singular_value_m": 0.03529862119665078,
+        "max_joint_speed_rad_s": 8.01865698715213,
+        "max_horizontal_excursion_from_nominal_m": 0.05992129987267001
+      },
+      {
+        "name": "v0.10_bearing45_yaw-0.40",
+        "command": [
+          0.07071067811865477,
+          0.07071067811865475,
+          -0.4
+        ],
+        "frequency_hz": 1.2644431726363456,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 14,
+        "max_requested_ik_error_m": 0.003446677485660134,
+        "joint_limit_fail_samples": 14,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034867476547641905,
+        "max_joint_speed_rad_s": 8.126315077710089,
+        "max_horizontal_excursion_from_nominal_m": 0.06196117635457231
+      },
+      {
+        "name": "v0.10_bearing45_yaw-0.20",
+        "command": [
+          0.07071067811865477,
+          0.07071067811865475,
+          -0.2
+        ],
+        "frequency_hz": 1.093882628718539,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 7,
+        "max_requested_ik_error_m": 0.000723931542250793,
+        "joint_limit_fail_samples": 7,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486951623679045,
+        "max_joint_speed_rad_s": 6.427147910849728,
+        "max_horizontal_excursion_from_nominal_m": 0.05190746307865155
+      },
+      {
+        "name": "v0.10_bearing45_yaw+0.00",
+        "command": [
+          0.07071067811865477,
+          0.07071067811865475,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.0699476239396703e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.051519906341745525,
+        "minimum_jacobian_singular_value_m": 0.03724335081866989,
+        "max_joint_speed_rad_s": 4.985803520586067,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617528
+      },
+      {
+        "name": "v0.10_bearing45_yaw+0.20",
+        "command": [
+          0.07071067811865477,
+          0.07071067811865475,
+          0.2
+        ],
+        "frequency_hz": 1.0938824985299491,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 6,
+        "max_requested_ik_error_m": 0.0007215598915848875,
+        "joint_limit_fail_samples": 6,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486979518899717,
+        "max_joint_speed_rad_s": 6.429084284281476,
+        "max_horizontal_excursion_from_nominal_m": 0.051907446897783024
+      },
+      {
+        "name": "v0.10_bearing45_yaw+0.40",
+        "command": [
+          0.07071067811865477,
+          0.07071067811865475,
+          0.4
+        ],
+        "frequency_hz": 1.2644429473813965,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 13,
+        "max_requested_ik_error_m": 0.0034334841274427444,
+        "joint_limit_fail_samples": 13,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486770435192466,
+        "max_joint_speed_rad_s": 8.125023236647571,
+        "max_horizontal_excursion_from_nominal_m": 0.06196114861187955
+      },
+      {
+        "name": "v0.10_bearing67.5_yaw-0.40",
+        "command": [
+          0.03826834323650899,
+          0.09238795325112868,
+          -0.4
+        ],
+        "frequency_hz": 1.264443158640582,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 16,
+        "max_requested_ik_error_m": 0.004801363726088343,
+        "joint_limit_fail_samples": 16,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486684550984254,
+        "max_joint_speed_rad_s": 8.797788348358754,
+        "max_horizontal_excursion_from_nominal_m": 0.061645366856238906
+      },
+      {
+        "name": "v0.10_bearing67.5_yaw-0.20",
+        "command": [
+          0.03826834323650899,
+          0.09238795325112868,
+          -0.2
+        ],
+        "frequency_hz": 1.0938826206295322,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 13,
+        "max_requested_ik_error_m": 0.003102348024115784,
+        "joint_limit_fail_samples": 13,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.0348674970843634,
+        "max_joint_speed_rad_s": 6.995318026058843,
+        "max_horizontal_excursion_from_nominal_m": 0.05165546927189224
+      },
+      {
+        "name": "v0.10_bearing67.5_yaw+0.00",
+        "command": [
+          0.03826834323650899,
+          0.09238795325112868,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9345624707944772e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.023165236856224514,
+        "minimum_jacobian_singular_value_m": 0.03595936690619854,
+        "max_joint_speed_rad_s": 5.388135061429408,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617528
+      },
+      {
+        "name": "v0.10_bearing67.5_yaw+0.20",
+        "command": [
+          0.03826834323650899,
+          0.09238795325112868,
+          0.2
+        ],
+        "frequency_hz": 1.0938825066189568,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 13,
+        "max_requested_ik_error_m": 0.0030933465626367695,
+        "joint_limit_fail_samples": 13,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486772318224189,
+        "max_joint_speed_rad_s": 6.99575386557154,
+        "max_horizontal_excursion_from_nominal_m": 0.0516554523182144
+      },
+      {
+        "name": "v0.10_bearing67.5_yaw+0.40",
+        "command": [
+          0.03826834323650899,
+          0.09238795325112868,
+          0.4
+        ],
+        "frequency_hz": 1.2644429613771628,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 15,
+        "max_requested_ik_error_m": 0.004814399030279057,
+        "joint_limit_fail_samples": 15,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486704433749679,
+        "max_joint_speed_rad_s": 8.798483801181064,
+        "max_horizontal_excursion_from_nominal_m": 0.061645337658328046
+      },
+      {
+        "name": "v0.10_bearing90_yaw-0.40",
+        "command": [
+          6.123233995736766e-18,
+          0.1,
+          -0.4
+        ],
+        "frequency_hz": 1.2644431296290353,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.0028640020610060457,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486746458648872,
+        "max_joint_speed_rad_s": 8.88556126386078,
+        "max_horizontal_excursion_from_nominal_m": 0.058986438683529346
+      },
+      {
+        "name": "v0.10_bearing90_yaw-0.20",
+        "command": [
+          6.123233995736766e-18,
+          0.1,
+          -0.2
+        ],
+        "frequency_hz": 1.0938826038619878,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 8,
+        "max_requested_ik_error_m": 0.0013657193671926563,
+        "joint_limit_fail_samples": 8,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486880497612052,
+        "max_joint_speed_rad_s": 6.997805545884639,
+        "max_horizontal_excursion_from_nominal_m": 0.049536375078609036
+      },
+      {
+        "name": "v0.10_bearing90_yaw+0.00",
+        "command": [
+          6.123233995736766e-18,
+          0.1,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8269433988035982e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.022203208810433583,
+        "minimum_jacobian_singular_value_m": 0.03591485502810296,
+        "max_joint_speed_rad_s": 5.401822664958036,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617527
+      },
+      {
+        "name": "v0.10_bearing90_yaw+0.20",
+        "command": [
+          6.123233995736766e-18,
+          0.1,
+          0.2
+        ],
+        "frequency_hz": 1.0938825233865028,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 9,
+        "max_requested_ik_error_m": 0.001370203610165773,
+        "joint_limit_fail_samples": 9,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034868413025122606,
+        "max_joint_speed_rad_s": 6.997122064412757,
+        "max_horizontal_excursion_from_nominal_m": 0.049536357742759565
+      },
+      {
+        "name": "v0.10_bearing90_yaw+0.40",
+        "command": [
+          6.123233995736766e-18,
+          0.1,
+          0.4
+        ],
+        "frequency_hz": 1.2644429903887133,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.0028478454069545633,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486769682803389,
+        "max_joint_speed_rad_s": 8.88371722450751,
+        "max_horizontal_excursion_from_nominal_m": 0.05898640752254539
+      },
+      {
+        "name": "v0.10_bearing112.5_yaw-0.40",
+        "command": [
+          -0.038268343236508975,
+          0.09238795325112868,
+          -0.4
+        ],
+        "frequency_hz": 1.2644430900184498,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.0028080459548997785,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034867712564428166,
+        "max_joint_speed_rad_s": 8.585991152363452,
+        "max_horizontal_excursion_from_nominal_m": 0.060556737645394695
+      },
+      {
+        "name": "v0.10_bearing112.5_yaw-0.20",
+        "command": [
+          -0.038268343236508975,
+          0.09238795325112868,
+          -0.2
+        ],
+        "frequency_hz": 1.093882580968611,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 10,
+        "max_requested_ik_error_m": 0.0020203437227684397,
+        "joint_limit_fail_samples": 10,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034868389519867635,
+        "max_joint_speed_rad_s": 6.897600420756486,
+        "max_horizontal_excursion_from_nominal_m": 0.05099072131817084
+      },
+      {
+        "name": "v0.10_bearing112.5_yaw+0.00",
+        "command": [
+          -0.038268343236508975,
+          0.09238795325112868,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8643335422000977e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.0217062133461563,
+        "minimum_jacobian_singular_value_m": 0.03589183672384771,
+        "max_joint_speed_rad_s": 5.4088934707947,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617528
+      },
+      {
+        "name": "v0.10_bearing112.5_yaw+0.20",
+        "command": [
+          -0.038268343236508975,
+          0.09238795325112868,
+          0.2
+        ],
+        "frequency_hz": 1.0938825462798807,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 11,
+        "max_requested_ik_error_m": 0.002009839994410758,
+        "joint_limit_fail_samples": 11,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486813765062415,
+        "max_joint_speed_rad_s": 6.895630569405777,
+        "max_horizontal_excursion_from_nominal_m": 0.05099071304845899
+      },
+      {
+        "name": "v0.10_bearing112.5_yaw+0.40",
+        "command": [
+          -0.038268343236508975,
+          0.09238795325112868,
+          0.4
+        ],
+        "frequency_hz": 1.264443029999302,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.002806309108155974,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034867483142593345,
+        "max_joint_speed_rad_s": 8.585611234701418,
+        "max_horizontal_excursion_from_nominal_m": 0.06055672518896066
+      },
+      {
+        "name": "v0.10_bearing135_yaw-0.40",
+        "command": [
+          -0.07071067811865475,
+          0.07071067811865477,
+          -0.4
+        ],
+        "frequency_hz": 1.2644430458391775,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.0027147429021612364,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034867740911988854,
+        "max_joint_speed_rad_s": 8.130493240854285,
+        "max_horizontal_excursion_from_nominal_m": 0.06112689316689846
+      },
+      {
+        "name": "v0.10_bearing135_yaw-0.20",
+        "command": [
+          -0.07071067811865475,
+          0.07071067811865477,
+          -0.2
+        ],
+        "frequency_hz": 1.093882555434712,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 8,
+        "max_requested_ik_error_m": 0.0011467838681311307,
+        "joint_limit_fail_samples": 8,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486909275136736,
+        "max_joint_speed_rad_s": 6.510085945905935,
+        "max_horizontal_excursion_from_nominal_m": 0.05144352204371942
+      },
+      {
+        "name": "v0.10_bearing135_yaw+0.00",
+        "command": [
+          -0.07071067811865475,
+          0.07071067811865477,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9929591334980183e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.03785284259271604,
+        "minimum_jacobian_singular_value_m": 0.03663123063840459,
+        "max_joint_speed_rad_s": 5.180599892720487,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617526
+      },
+      {
+        "name": "v0.10_bearing135_yaw+0.20",
+        "command": [
+          -0.07071067811865475,
+          0.07071067811865477,
+          0.2
+        ],
+        "frequency_hz": 1.0938825718137801,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 8,
+        "max_requested_ik_error_m": 0.0011527543353096654,
+        "joint_limit_fail_samples": 8,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034868825408860604,
+        "max_joint_speed_rad_s": 6.507555601174803,
+        "max_horizontal_excursion_from_nominal_m": 0.05144351660353791
+      },
+      {
+        "name": "v0.10_bearing135_yaw+0.40",
+        "command": [
+          -0.07071067811865475,
+          0.07071067811865477,
+          0.4
+        ],
+        "frequency_hz": 1.2644430741785748,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.0027115665726996007,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486810218411417,
+        "max_joint_speed_rad_s": 8.133652914123145,
+        "max_horizontal_excursion_from_nominal_m": 0.06112688306994256
+      },
+      {
+        "name": "v0.10_bearing157.5_yaw-0.40",
+        "command": [
+          -0.09238795325112868,
+          0.03826834323650899,
+          -0.4
+        ],
+        "frequency_hz": 1.264443003817112,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.47691791317314e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.0059884311088853615,
+        "minimum_jacobian_singular_value_m": 0.03515574633131141,
+        "max_joint_speed_rad_s": 8.097145209142262,
+        "max_horizontal_excursion_from_nominal_m": 0.05936684036878455
+      },
+      {
+        "name": "v0.10_bearing157.5_yaw-0.20",
+        "command": [
+          -0.09238795325112868,
+          0.03826834323650899,
+          -0.2
+        ],
+        "frequency_hz": 1.0938825311475944,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.3565476744234268e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.02964443833135677,
+        "minimum_jacobian_singular_value_m": 0.03625760047833125,
+        "max_joint_speed_rad_s": 5.920176637745491,
+        "max_horizontal_excursion_from_nominal_m": 0.05004652954980454
+      },
+      {
+        "name": "v0.10_bearing157.5_yaw+0.00",
+        "command": [
+          -0.09238795325112868,
+          0.03826834323650899,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1409889784511793e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.08531736360258035,
+        "minimum_jacobian_singular_value_m": 0.03870435254325663,
+        "max_joint_speed_rad_s": 4.493495078445022,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617526
+      },
+      {
+        "name": "v0.10_bearing157.5_yaw+0.20",
+        "command": [
+          -0.09238795325112868,
+          0.03826834323650899,
+          0.2
+        ],
+        "frequency_hz": 1.0938825961008967,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9081949242306926e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.029594253633414613,
+        "minimum_jacobian_singular_value_m": 0.03625500348849616,
+        "max_joint_speed_rad_s": 5.922387530558374,
+        "max_horizontal_excursion_from_nominal_m": 0.050046527427362736
+      },
+      {
+        "name": "v0.10_bearing157.5_yaw+0.40",
+        "command": [
+          -0.09238795325112868,
+          0.03826834323650899,
+          0.4
+        ],
+        "frequency_hz": 1.264443116200638,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.811731953237219e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.006061622111898757,
+        "minimum_jacobian_singular_value_m": 0.03515962125625736,
+        "max_joint_speed_rad_s": 8.09430788197849,
+        "max_horizontal_excursion_from_nominal_m": 0.05936683323348355
+      },
+      {
+        "name": "v0.10_bearing180_yaw-0.40",
+        "command": [
+          -0.1,
+          1.2246467991473533e-17,
+          -0.4
+        ],
+        "frequency_hz": 1.2644429703497322,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.540036167691202e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05605715587000226,
+        "minimum_jacobian_singular_value_m": 0.03744434607742219,
+        "max_joint_speed_rad_s": 7.630594487922856,
+        "max_horizontal_excursion_from_nominal_m": 0.05560694929719381
+      },
+      {
+        "name": "v0.10_bearing180_yaw-0.20",
+        "command": [
+          -0.1,
+          1.2246467991473533e-17,
+          -0.2
+        ],
+        "frequency_hz": 1.0938825118047524,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.424378901452465e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.09114692492018062,
+        "minimum_jacobian_singular_value_m": 0.03894877234060599,
+        "max_joint_speed_rad_s": 5.642978596548854,
+        "max_horizontal_excursion_from_nominal_m": 0.04727651163218081
+      },
+      {
+        "name": "v0.10_bearing180_yaw+0.00",
+        "command": [
+          -0.1,
+          1.2246467991473533e-17,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.207535735704141e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.14229960386448948,
+        "minimum_jacobian_singular_value_m": 0.040989942059416834,
+        "max_joint_speed_rad_s": 3.935103478866502,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617527
+      },
+      {
+        "name": "v0.10_bearing180_yaw+0.20",
+        "command": [
+          -0.1,
+          1.2246467991473533e-17,
+          0.2
+        ],
+        "frequency_hz": 1.0938826154437373,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.963066808813785e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.09122730990876926,
+        "minimum_jacobian_singular_value_m": 0.03895255560365308,
+        "max_joint_speed_rad_s": 5.644856294486304,
+        "max_horizontal_excursion_from_nominal_m": 0.0472765070343674
+      },
+      {
+        "name": "v0.10_bearing180_yaw+0.40",
+        "command": [
+          -0.1,
+          1.2246467991473533e-17,
+          0.4
+        ],
+        "frequency_hz": 1.264443149668014,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.808859111458995e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05615280294183389,
+        "minimum_jacobian_singular_value_m": 0.03744826014596206,
+        "max_joint_speed_rad_s": 7.633341328769317,
+        "max_horizontal_excursion_from_nominal_m": 0.05560697661437362
+      },
+      {
+        "name": "v0.10_bearing202.5_yaw-0.40",
+        "command": [
+          -0.0923879532511287,
+          -0.03826834323650897,
+          -0.4
+        ],
+        "frequency_hz": 1.2644429505321442,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.514654297305282e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.009098401536342227,
+        "minimum_jacobian_singular_value_m": 0.03530305073211277,
+        "max_joint_speed_rad_s": 8.019554283865059,
+        "max_horizontal_excursion_from_nominal_m": 0.05992129987266998
+      },
+      {
+        "name": "v0.10_bearing202.5_yaw-0.20",
+        "command": [
+          -0.0923879532511287,
+          -0.03826834323650897,
+          -0.2
+        ],
+        "frequency_hz": 1.0938825003509585,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.392106387936716e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.0429064998492521,
+        "minimum_jacobian_singular_value_m": 0.03685926623321679,
+        "max_joint_speed_rad_s": 5.8837424188016145,
+        "max_horizontal_excursion_from_nominal_m": 0.05028090612914888
+      },
+      {
+        "name": "v0.10_bearing202.5_yaw+0.00",
+        "command": [
+          -0.0923879532511287,
+          -0.03826834323650897,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1764516362864387e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.10580779100387172,
+        "minimum_jacobian_singular_value_m": 0.0395522408727559,
+        "max_joint_speed_rad_s": 4.178757251524673,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617526
+      },
+      {
+        "name": "v0.10_bearing202.5_yaw+0.20",
+        "command": [
+          -0.0923879532511287,
+          -0.03826834323650897,
+          0.2
+        ],
+        "frequency_hz": 1.0938826268975301,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9479132298033107e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04285536606231011,
+        "minimum_jacobian_singular_value_m": 0.03685651353028575,
+        "max_joint_speed_rad_s": 5.885009580771542,
+        "max_horizontal_excursion_from_nominal_m": 0.05028092136276702
+      },
+      {
+        "name": "v0.10_bearing202.5_yaw+0.40",
+        "command": [
+          -0.0923879532511287,
+          -0.03826834323650897,
+          0.4
+        ],
+        "frequency_hz": 1.2644431694855989,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8091636353136216e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.009012708966944505,
+        "minimum_jacobian_singular_value_m": 0.035298594713453875,
+        "max_joint_speed_rad_s": 8.018662946489595,
+        "max_horizontal_excursion_from_nominal_m": 0.05992132704686658
+      },
+      {
+        "name": "v0.10_bearing225_yaw-0.40",
+        "command": [
+          -0.07071067811865477,
+          -0.07071067811865475,
+          -0.4
+        ],
+        "frequency_hz": 1.2644429473813965,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 14,
+        "max_requested_ik_error_m": 0.0034465947052246763,
+        "joint_limit_fail_samples": 14,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034867476912790414,
+        "max_joint_speed_rad_s": 8.126314097044643,
+        "max_horizontal_excursion_from_nominal_m": 0.0619611486118796
+      },
+      {
+        "name": "v0.10_bearing225_yaw-0.20",
+        "command": [
+          -0.07071067811865477,
+          -0.07071067811865475,
+          -0.2
+        ],
+        "frequency_hz": 1.0938824985299491,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 7,
+        "max_requested_ik_error_m": 0.0007238603438186373,
+        "joint_limit_fail_samples": 7,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034869516603127454,
+        "max_joint_speed_rad_s": 6.427143612439565,
+        "max_horizontal_excursion_from_nominal_m": 0.05190744689778305
+      },
+      {
+        "name": "v0.10_bearing225_yaw+0.00",
+        "command": [
+          -0.07071067811865477,
+          -0.07071067811865475,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.0699373989973458e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.051519255937853004,
+        "minimum_jacobian_singular_value_m": 0.037243379448539816,
+        "max_joint_speed_rad_s": 4.985796440027885,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617526
+      },
+      {
+        "name": "v0.10_bearing225_yaw+0.20",
+        "command": [
+          -0.07071067811865477,
+          -0.07071067811865475,
+          0.2
+        ],
+        "frequency_hz": 1.093882628718539,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 6,
+        "max_requested_ik_error_m": 0.0007216285323592372,
+        "joint_limit_fail_samples": 6,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486979482266567,
+        "max_joint_speed_rad_s": 6.429088693893081,
+        "max_horizontal_excursion_from_nominal_m": 0.05190746307865157
+      },
+      {
+        "name": "v0.10_bearing225_yaw+0.40",
+        "command": [
+          -0.07071067811865477,
+          -0.07071067811865475,
+          0.4
+        ],
+        "frequency_hz": 1.2644431726363456,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 13,
+        "max_requested_ik_error_m": 0.003433563689696782,
+        "joint_limit_fail_samples": 13,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486770398604253,
+        "max_joint_speed_rad_s": 8.125024127935871,
+        "max_horizontal_excursion_from_nominal_m": 0.06196117635457232
+      },
+      {
+        "name": "v0.10_bearing247.5_yaw-0.40",
+        "command": [
+          -0.03826834323650904,
+          -0.09238795325112865,
+          -0.4
+        ],
+        "frequency_hz": 1.2644429613771626,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 16,
+        "max_requested_ik_error_m": 0.004801278523913882,
+        "joint_limit_fail_samples": 16,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486684587323727,
+        "max_joint_speed_rad_s": 8.797792382503822,
+        "max_horizontal_excursion_from_nominal_m": 0.061645337658328046
+      },
+      {
+        "name": "v0.10_bearing247.5_yaw-0.20",
+        "command": [
+          -0.03826834323650904,
+          -0.09238795325112865,
+          -0.2
+        ],
+        "frequency_hz": 1.0938825066189566,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 13,
+        "max_requested_ik_error_m": 0.0031022740603750512,
+        "joint_limit_fail_samples": 13,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.0348674974488078,
+        "max_joint_speed_rad_s": 6.995318391958497,
+        "max_horizontal_excursion_from_nominal_m": 0.05165545231821442
+      },
+      {
+        "name": "v0.10_bearing247.5_yaw+0.00",
+        "command": [
+          -0.03826834323650904,
+          -0.09238795325112865,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9346402180555426e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.023164735925824687,
+        "minimum_jacobian_singular_value_m": 0.035959343389321455,
+        "max_joint_speed_rad_s": 5.388132222147379,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617527
+      },
+      {
+        "name": "v0.10_bearing247.5_yaw+0.20",
+        "command": [
+          -0.03826834323650904,
+          -0.09238795325112865,
+          0.2
+        ],
+        "frequency_hz": 1.0938826206295322,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 13,
+        "max_requested_ik_error_m": 0.003093417424847103,
+        "joint_limit_fail_samples": 13,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034867722817046434,
+        "max_joint_speed_rad_s": 6.995753436893718,
+        "max_horizontal_excursion_from_nominal_m": 0.05165546927189227
+      },
+      {
+        "name": "v0.10_bearing247.5_yaw+0.40",
+        "command": [
+          -0.03826834323650904,
+          -0.09238795325112865,
+          0.4
+        ],
+        "frequency_hz": 1.264443158640582,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 15,
+        "max_requested_ik_error_m": 0.004814480585911163,
+        "joint_limit_fail_samples": 15,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486704397313318,
+        "max_joint_speed_rad_s": 8.798479776722886,
+        "max_horizontal_excursion_from_nominal_m": 0.061645366856238885
+      },
+      {
+        "name": "v0.10_bearing270_yaw-0.40",
+        "command": [
+          -1.8369701987210297e-17,
+          -0.1,
+          -0.4
+        ],
+        "frequency_hz": 1.2644429903887133,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.0028639287677541155,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034867464949443636,
+        "max_joint_speed_rad_s": 8.885570762269825,
+        "max_horizontal_excursion_from_nominal_m": 0.05898640752254537
+      },
+      {
+        "name": "v0.10_bearing270_yaw-0.20",
+        "command": [
+          -1.8369701987210297e-17,
+          -0.1,
+          -0.2
+        ],
+        "frequency_hz": 1.0938825233865028,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 8,
+        "max_requested_ik_error_m": 0.001365656694119063,
+        "joint_limit_fail_samples": 8,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034868805341101886,
+        "max_joint_speed_rad_s": 6.997811387470206,
+        "max_horizontal_excursion_from_nominal_m": 0.04953635774275957
+      },
+      {
+        "name": "v0.10_bearing270_yaw+0.00",
+        "command": [
+          -1.8369701987210297e-17,
+          -0.1,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.826930383827947e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.022202934020921994,
+        "minimum_jacobian_singular_value_m": 0.03591484196191996,
+        "max_joint_speed_rad_s": 5.401823147038357,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617527
+      },
+      {
+        "name": "v0.10_bearing270_yaw+0.20",
+        "command": [
+          -1.8369701987210297e-17,
+          -0.1,
+          0.2
+        ],
+        "frequency_hz": 1.0938826038619878,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 9,
+        "max_requested_ik_error_m": 0.0013702683282162044,
+        "joint_limit_fail_samples": 9,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486841266107042,
+        "max_joint_speed_rad_s": 6.9971161842793475,
+        "max_horizontal_excursion_from_nominal_m": 0.04953637507860905
+      },
+      {
+        "name": "v0.10_bearing270_yaw+0.40",
+        "command": [
+          -1.8369701987210297e-17,
+          -0.1,
+          0.4
+        ],
+        "frequency_hz": 1.2644431296290353,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.0028479210089776548,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486769646419493,
+        "max_joint_speed_rad_s": 8.883707642307222,
+        "max_horizontal_excursion_from_nominal_m": 0.05898643868352936
+      },
+      {
+        "name": "v0.10_bearing292.5_yaw-0.40",
+        "command": [
+          0.038268343236509,
+          -0.09238795325112867,
+          -0.4
+        ],
+        "frequency_hz": 1.264443029999302,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.0028079473898487,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034867712299401665,
+        "max_joint_speed_rad_s": 8.585998379430245,
+        "max_horizontal_excursion_from_nominal_m": 0.06055672518896066
+      },
+      {
+        "name": "v0.10_bearing292.5_yaw-0.20",
+        "command": [
+          0.038268343236509,
+          -0.09238795325112867,
+          -0.2
+        ],
+        "frequency_hz": 1.0938825462798807,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 10,
+        "max_requested_ik_error_m": 0.0020202490163680068,
+        "joint_limit_fail_samples": 10,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034868389255232106,
+        "max_joint_speed_rad_s": 6.897603022496108,
+        "max_horizontal_excursion_from_nominal_m": 0.05099071304845896
+      },
+      {
+        "name": "v0.10_bearing292.5_yaw+0.00",
+        "command": [
+          0.038268343236509,
+          -0.09238795325112867,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8643548113701895e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.021707235505249223,
+        "minimum_jacobian_singular_value_m": 0.03589188382104446,
+        "max_joint_speed_rad_s": 5.408895444150916,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617526
+      },
+      {
+        "name": "v0.10_bearing292.5_yaw+0.20",
+        "command": [
+          0.038268343236509,
+          -0.09238795325112867,
+          0.2
+        ],
+        "frequency_hz": 1.093882580968611,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 11,
+        "max_requested_ik_error_m": 0.002009937993553387,
+        "joint_limit_fail_samples": 11,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486813791572955,
+        "max_joint_speed_rad_s": 6.895627901964801,
+        "max_horizontal_excursion_from_nominal_m": 0.050990721318170874
+      },
+      {
+        "name": "v0.10_bearing292.5_yaw+0.40",
+        "command": [
+          0.038268343236509,
+          -0.09238795325112867,
+          0.4
+        ],
+        "frequency_hz": 1.2644430900184498,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.002806405287127399,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034867483408482856,
+        "max_joint_speed_rad_s": 8.585604004209817,
+        "max_horizontal_excursion_from_nominal_m": 0.06055673764539471
+      },
+      {
+        "name": "v0.10_bearing315_yaw-0.40",
+        "command": [
+          0.07071067811865474,
+          -0.07071067811865477,
+          -0.4
+        ],
+        "frequency_hz": 1.2644430741785748,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.002714640069275655,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486774064741706,
+        "max_joint_speed_rad_s": 8.13049435851082,
+        "max_horizontal_excursion_from_nominal_m": 0.06112688306994254
+      },
+      {
+        "name": "v0.10_bearing315_yaw-0.20",
+        "command": [
+          0.07071067811865474,
+          -0.07071067811865477,
+          -0.2
+        ],
+        "frequency_hz": 1.0938825718137801,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 8,
+        "max_requested_ik_error_m": 0.001146687635698239,
+        "joint_limit_fail_samples": 8,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486909248624045,
+        "max_joint_speed_rad_s": 6.510083921617616,
+        "max_horizontal_excursion_from_nominal_m": 0.051443516603537943
+      },
+      {
+        "name": "v0.10_bearing315_yaw+0.00",
+        "command": [
+          0.07071067811865474,
+          -0.07071067811865477,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9929960268702456e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.037851659585349307,
+        "minimum_jacobian_singular_value_m": 0.036631177316342765,
+        "max_joint_speed_rad_s": 5.180593526779425,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617526
+      },
+      {
+        "name": "v0.10_bearing315_yaw+0.20",
+        "command": [
+          0.07071067811865474,
+          -0.07071067811865477,
+          0.2
+        ],
+        "frequency_hz": 1.093882555434712,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 8,
+        "max_requested_ik_error_m": 0.00115285351344321,
+        "joint_limit_fail_samples": 8,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486882567391597,
+        "max_joint_speed_rad_s": 6.5075574813212445,
+        "max_horizontal_excursion_from_nominal_m": 0.05144352204371944
+      },
+      {
+        "name": "v0.10_bearing315_yaw+0.40",
+        "command": [
+          0.07071067811865474,
+          -0.07071067811865477,
+          0.4
+        ],
+        "frequency_hz": 1.2644430458391775,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.0027116728376042815,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034868102447736235,
+        "max_joint_speed_rad_s": 8.133651430547514,
+        "max_horizontal_excursion_from_nominal_m": 0.06112689316689851
+      },
+      {
+        "name": "v0.10_bearing337.5_yaw-0.40",
+        "command": [
+          0.09238795325112865,
+          -0.038268343236509045,
+          -0.4
+        ],
+        "frequency_hz": 1.264443116200638,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.8117460926780923e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.005989486180571824,
+        "minimum_jacobian_singular_value_m": 0.035155795998414764,
+        "max_joint_speed_rad_s": 8.097146846859324,
+        "max_horizontal_excursion_from_nominal_m": 0.059366833233483574
+      },
+      {
+        "name": "v0.10_bearing337.5_yaw-0.20",
+        "command": [
+          0.09238795325112865,
+          -0.038268343236509045,
+          -0.2
+        ],
+        "frequency_hz": 1.0938825961008967,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 1.9081280787500234e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.029645632028536095,
+        "minimum_jacobian_singular_value_m": 0.036257654917216754,
+        "max_joint_speed_rad_s": 5.920177139041992,
+        "max_horizontal_excursion_from_nominal_m": 0.050046527427362784
+      },
+      {
+        "name": "v0.10_bearing337.5_yaw+0.00",
+        "command": [
+          0.09238795325112865,
+          -0.038268343236509045,
+          0
+        ],
+        "frequency_hz": 1.0307764064044151,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1410608689076356e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.08531850757554649,
+        "minimum_jacobian_singular_value_m": 0.038704400493993076,
+        "max_joint_speed_rad_s": 4.493486534431157,
+        "max_horizontal_excursion_from_nominal_m": 0.03421744668617527
+      },
+      {
+        "name": "v0.10_bearing337.5_yaw+0.20",
+        "command": [
+          0.09238795325112865,
+          -0.038268343236509045,
+          0.2
+        ],
+        "frequency_hz": 1.0938825311475944,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.3565751149962996e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.02959307637103903,
+        "minimum_jacobian_singular_value_m": 0.03625494979951052,
+        "max_joint_speed_rad_s": 5.922386744147554,
+        "max_horizontal_excursion_from_nominal_m": 0.05004652954980454
+      },
+      {
+        "name": "v0.10_bearing337.5_yaw+0.40",
+        "command": [
+          0.09238795325112865,
+          -0.038268343236509045,
+          0.4
+        ],
+        "frequency_hz": 1.264443003817112,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.476738591254736e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.006060544732382933,
+        "minimum_jacobian_singular_value_m": 0.03515957053746099,
+        "max_joint_speed_rad_s": 8.094305892981673,
+        "max_horizontal_excursion_from_nominal_m": 0.05936684036878452
+      },
+      {
+        "name": "v0.20_bearing0_yaw-0.40",
+        "command": [
+          0.2,
+          0.0,
+          -0.4
+        ],
+        "frequency_hz": 1.6930199955937097,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.0512230014277707e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05707714336807479,
+        "minimum_jacobian_singular_value_m": 0.03748853251090726,
+        "max_joint_speed_rad_s": 11.287028357394043,
+        "max_horizontal_excursion_from_nominal_m": 0.061084862194084245
+      },
+      {
+        "name": "v0.20_bearing0_yaw-0.20",
+        "command": [
+          0.2,
+          0.0,
+          -0.2
+        ],
+        "frequency_hz": 1.5697386055451747,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.2466680239399984e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.09104965635644291,
+        "minimum_jacobian_singular_value_m": 0.03894402427227946,
+        "max_joint_speed_rad_s": 9.492768479638347,
+        "max_horizontal_excursion_from_nominal_m": 0.055414293379879014
+      },
+      {
+        "name": "v0.20_bearing0_yaw+0.00",
+        "command": [
+          0.2,
+          0.0,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.449337368061817e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.12897408920554376,
+        "minimum_jacobian_singular_value_m": 0.04047529155783254,
+        "max_joint_speed_rad_s": 7.699422822596467,
+        "max_horizontal_excursion_from_nominal_m": 0.04621299375695992
+      },
+      {
+        "name": "v0.20_bearing0_yaw+0.20",
+        "command": [
+          0.2,
+          0.0,
+          0.2
+        ],
+        "frequency_hz": 1.5697384611021659,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.612320213856084e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.0911195716492208,
+        "minimum_jacobian_singular_value_m": 0.03894735120444461,
+        "max_joint_speed_rad_s": 9.49489718816912,
+        "max_horizontal_excursion_from_nominal_m": 0.05541429851212214
+      },
+      {
+        "name": "v0.20_bearing0_yaw+0.40",
+        "command": [
+          0.2,
+          0.0,
+          0.4
+        ],
+        "frequency_hz": 1.6930197277436245,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.7116973139319205e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05699046073729663,
+        "minimum_jacobian_singular_value_m": 0.037485164877829304,
+        "max_joint_speed_rad_s": 11.29026953659093,
+        "max_horizontal_excursion_from_nominal_m": 0.06108487200793264
+      },
+      {
+        "name": "v0.20_bearing22.5_yaw-0.40",
+        "command": [
+          0.18477590650225736,
+          0.07653668647301796,
+          -0.4
+        ],
+        "frequency_hz": 1.6930200251954977,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 6,
+        "max_requested_ik_error_m": 0.0006274593865080108,
+        "joint_limit_fail_samples": 6,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486951536409024,
+        "max_joint_speed_rad_s": 11.827250128932073,
+        "max_horizontal_excursion_from_nominal_m": 0.06496679479050946
+      },
+      {
+        "name": "v0.20_bearing22.5_yaw-0.20",
+        "command": [
+          0.18477590650225736,
+          0.07653668647301796,
+          -0.2
+        ],
+        "frequency_hz": 1.5697386215084754,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1956640300665045e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.028480898756703787,
+        "minimum_jacobian_singular_value_m": 0.03620320439485997,
+        "max_joint_speed_rad_s": 9.71596006416333,
+        "max_horizontal_excursion_from_nominal_m": 0.05722799578205495
+      },
+      {
+        "name": "v0.20_bearing22.5_yaw+0.00",
+        "command": [
+          0.18477590650225736,
+          0.07653668647301796,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.388727216614351e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07582502934513524,
+        "minimum_jacobian_singular_value_m": 0.03830113996197847,
+        "max_joint_speed_rad_s": 7.85665269418826,
+        "max_horizontal_excursion_from_nominal_m": 0.04621299375695992
+      },
+      {
+        "name": "v0.20_bearing22.5_yaw+0.20",
+        "command": [
+          0.18477590650225736,
+          0.07653668647301796,
+          0.2
+        ],
+        "frequency_hz": 1.5697384451388634,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.5535777543601133e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.028436853121537542,
+        "minimum_jacobian_singular_value_m": 0.03620147936719106,
+        "max_joint_speed_rad_s": 9.719277972225054,
+        "max_horizontal_excursion_from_nominal_m": 0.05722798802760719
+      },
+      {
+        "name": "v0.20_bearing22.5_yaw+0.40",
+        "command": [
+          0.18477590650225736,
+          0.07653668647301796,
+          0.4
+        ],
+        "frequency_hz": 1.6930196981418313,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 6,
+        "max_requested_ik_error_m": 0.0006398338279976159,
+        "joint_limit_fail_samples": 6,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486979493009024,
+        "max_joint_speed_rad_s": 11.828410757144923,
+        "max_horizontal_excursion_from_nominal_m": 0.06496678013725626
+      },
+      {
+        "name": "v0.20_bearing45_yaw-0.40",
+        "command": [
+          0.14142135623730953,
+          0.1414213562373095,
+          -0.4
+        ],
+        "frequency_hz": 1.6930200299018099,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 20,
+        "max_requested_ik_error_m": 0.008011268841386011,
+        "joint_limit_fail_samples": 20,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034861282380744825,
+        "max_joint_speed_rad_s": 12.507838023801531,
+        "max_horizontal_excursion_from_nominal_m": 0.06706841097519921
+      },
+      {
+        "name": "v0.20_bearing45_yaw-0.20",
+        "command": [
+          0.14142135623730953,
+          0.1414213562373095,
+          -0.2
+        ],
+        "frequency_hz": 1.5697386240464397,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 17,
+        "max_requested_ik_error_m": 0.005337070951487131,
+        "joint_limit_fail_samples": 17,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486681842085359,
+        "max_joint_speed_rad_s": 10.924599685370476,
+        "max_horizontal_excursion_from_nominal_m": 0.058621685414524276
+      },
+      {
+        "name": "v0.20_bearing45_yaw+0.00",
+        "command": [
+          0.14142135623730953,
+          0.1414213562373095,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 6,
+        "max_requested_ik_error_m": 0.00020459149988146023,
+        "joint_limit_fail_samples": 6,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03487022162523202,
+        "max_joint_speed_rad_s": 9.513285435678048,
+        "max_horizontal_excursion_from_nominal_m": 0.04621299375695989
+      },
+      {
+        "name": "v0.20_bearing45_yaw+0.20",
+        "command": [
+          0.14142135623730953,
+          0.1414213562373095,
+          0.2
+        ],
+        "frequency_hz": 1.569738442600899,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 16,
+        "max_requested_ik_error_m": 0.005335241832888249,
+        "joint_limit_fail_samples": 16,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486701853707115,
+        "max_joint_speed_rad_s": 10.922938989353216,
+        "max_horizontal_excursion_from_nominal_m": 0.058621676650902295
+      },
+      {
+        "name": "v0.20_bearing45_yaw+0.40",
+        "command": [
+          0.14142135623730953,
+          0.1414213562373095,
+          0.4
+        ],
+        "frequency_hz": 1.6930196934355186,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 21,
+        "max_requested_ik_error_m": 0.00799969846457685,
+        "joint_limit_fail_samples": 21,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03485990158584174,
+        "max_joint_speed_rad_s": 12.507388743937383,
+        "max_horizontal_excursion_from_nominal_m": 0.06706839541017295
+      },
+      {
+        "name": "v0.20_bearing67.5_yaw-0.40",
+        "command": [
+          0.07653668647301798,
+          0.18477590650225736,
+          -0.4
+        ],
+        "frequency_hz": 1.6930200089961527,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 22,
+        "max_requested_ik_error_m": 0.010499898424308164,
+        "joint_limit_fail_samples": 22,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034848855847270196,
+        "max_joint_speed_rad_s": 13.70636940566689,
+        "max_horizontal_excursion_from_nominal_m": 0.06674281604052718
+      },
+      {
+        "name": "v0.20_bearing67.5_yaw-0.20",
+        "command": [
+          0.07653668647301798,
+          0.18477590650225736,
+          -0.2
+        ],
+        "frequency_hz": 1.5697386127726856,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 31,
+        "max_requested_ik_error_m": 0.008961958261442766,
+        "joint_limit_fail_samples": 31,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03485464331672201,
+        "max_joint_speed_rad_s": 11.95745824260281,
+        "max_horizontal_excursion_from_nominal_m": 0.058405063163740216
+      },
+      {
+        "name": "v0.20_bearing67.5_yaw+0.00",
+        "command": [
+          0.07653668647301798,
+          0.18477590650225736,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 47,
+        "max_requested_ik_error_m": 0.005086369645753134,
+        "joint_limit_fail_samples": 47,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034866850738166005,
+        "max_joint_speed_rad_s": 10.334010586327885,
+        "max_horizontal_excursion_from_nominal_m": 0.04621299375695991
+      },
+      {
+        "name": "v0.20_bearing67.5_yaw+0.20",
+        "command": [
+          0.07653668647301798,
+          0.18477590650225736,
+          0.2
+        ],
+        "frequency_hz": 1.5697384538746546,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 29,
+        "max_requested_ik_error_m": 0.008957421610156332,
+        "joint_limit_fail_samples": 29,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03485719063636225,
+        "max_joint_speed_rad_s": 11.957445793575257,
+        "max_horizontal_excursion_from_nominal_m": 0.05840505359029706
+      },
+      {
+        "name": "v0.20_bearing67.5_yaw+0.40",
+        "command": [
+          0.07653668647301798,
+          0.18477590650225736,
+          0.4
+        ],
+        "frequency_hz": 1.6930197143411791,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 23,
+        "max_requested_ik_error_m": 0.010524908649012227,
+        "joint_limit_fail_samples": 23,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03484662165685899,
+        "max_joint_speed_rad_s": 13.706141711663422,
+        "max_horizontal_excursion_from_nominal_m": 0.06674279879044588
+      },
+      {
+        "name": "v0.20_bearing90_yaw-0.40",
+        "command": [
+          1.2246467991473533e-17,
+          0.2,
+          -0.4
+        ],
+        "frequency_hz": 1.693019965661223,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 53,
+        "max_requested_ik_error_m": 0.008150586140819928,
+        "joint_limit_fail_samples": 53,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486577590263787,
+        "max_joint_speed_rad_s": 13.75801893022167,
+        "max_horizontal_excursion_from_nominal_m": 0.06400478496671068
+      },
+      {
+        "name": "v0.20_bearing90_yaw-0.20",
+        "command": [
+          1.2246467991473533e-17,
+          0.2,
+          -0.2
+        ],
+        "frequency_hz": 1.569738589403539,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 64,
+        "max_requested_ik_error_m": 0.006947232062524636,
+        "joint_limit_fail_samples": 64,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.0348662353718746,
+        "max_joint_speed_rad_s": 11.879416720137979,
+        "max_horizontal_excursion_from_nominal_m": 0.056593737269546314
+      },
+      {
+        "name": "v0.20_bearing90_yaw+0.00",
+        "command": [
+          1.2246467991473533e-17,
+          0.2,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 81,
+        "max_requested_ik_error_m": 0.005247775902671433,
+        "joint_limit_fail_samples": 81,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034866839880221566,
+        "max_joint_speed_rad_s": 10.361772198751417,
+        "max_horizontal_excursion_from_nominal_m": 0.04621299375695989
+      },
+      {
+        "name": "v0.20_bearing90_yaw+0.20",
+        "command": [
+          1.2246467991473533e-17,
+          0.2,
+          0.2
+        ],
+        "frequency_hz": 1.5697384772438032,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 63,
+        "max_requested_ik_error_m": 0.006964882205752355,
+        "joint_limit_fail_samples": 63,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034866398596636636,
+        "max_joint_speed_rad_s": 11.880442436004934,
+        "max_horizontal_excursion_from_nominal_m": 0.056593727298386354
+      },
+      {
+        "name": "v0.20_bearing90_yaw+0.40",
+        "command": [
+          1.2246467991473533e-17,
+          0.2,
+          0.4
+        ],
+        "frequency_hz": 1.693019757676115,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 55,
+        "max_requested_ik_error_m": 0.008142871053724684,
+        "joint_limit_fail_samples": 55,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486519388405889,
+        "max_joint_speed_rad_s": 13.763418994217322,
+        "max_horizontal_excursion_from_nominal_m": 0.06400476571869854
+      },
+      {
+        "name": "v0.20_bearing112.5_yaw-0.40",
+        "command": [
+          -0.07653668647301795,
+          0.18477590650225736,
+          -0.4
+        ],
+        "frequency_hz": 1.6930199064943685,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 34,
+        "max_requested_ik_error_m": 0.009180347244489816,
+        "joint_limit_fail_samples": 34,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034858352764037065,
+        "max_joint_speed_rad_s": 13.512301979962878,
+        "max_horizontal_excursion_from_nominal_m": 0.06588391245420383
+      },
+      {
+        "name": "v0.20_bearing112.5_yaw-0.20",
+        "command": [
+          -0.07653668647301795,
+          0.18477590650225736,
+          -0.2
+        ],
+        "frequency_hz": 1.5697385574967404,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 43,
+        "max_requested_ik_error_m": 0.008339567115803396,
+        "joint_limit_fail_samples": 43,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03485948396442932,
+        "max_joint_speed_rad_s": 11.879973281635571,
+        "max_horizontal_excursion_from_nominal_m": 0.057921718823419906
+      },
+      {
+        "name": "v0.20_bearing112.5_yaw+0.00",
+        "command": [
+          -0.07653668647301795,
+          0.18477590650225736,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 59,
+        "max_requested_ik_error_m": 0.005330992279181816,
+        "joint_limit_fail_samples": 59,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486683497980106,
+        "max_joint_speed_rad_s": 10.376112390585817,
+        "max_horizontal_excursion_from_nominal_m": 0.046212993756959905
+      },
+      {
+        "name": "v0.20_bearing112.5_yaw+0.20",
+        "command": [
+          -0.07653668647301795,
+          0.18477590650225736,
+          0.2
+        ],
+        "frequency_hz": 1.5697385091506029,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 42,
+        "max_requested_ik_error_m": 0.008337735789178794,
+        "joint_limit_fail_samples": 42,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486089279425155,
+        "max_joint_speed_rad_s": 11.882105761676993,
+        "max_horizontal_excursion_from_nominal_m": 0.057921713129278636
+      },
+      {
+        "name": "v0.20_bearing112.5_yaw+0.40",
+        "command": [
+          -0.07653668647301795,
+          0.18477590650225736,
+          0.4
+        ],
+        "frequency_hz": 1.6930198168429749,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 33,
+        "max_requested_ik_error_m": 0.009161530138263894,
+        "joint_limit_fail_samples": 33,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03485983826663503,
+        "max_joint_speed_rad_s": 13.517443477696242,
+        "max_horizontal_excursion_from_nominal_m": 0.06588390316731245
+      },
+      {
+        "name": "v0.20_bearing135_yaw-0.40",
+        "command": [
+          -0.1414213562373095,
+          0.14142135623730953,
+          -0.4
+        ],
+        "frequency_hz": 1.6930198405032062,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 21,
+        "max_requested_ik_error_m": 0.008484301165129694,
+        "joint_limit_fail_samples": 21,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034858548252552884,
+        "max_joint_speed_rad_s": 12.677012560158587,
+        "max_horizontal_excursion_from_nominal_m": 0.0664689666667321
+      },
+      {
+        "name": "v0.20_bearing135_yaw-0.20",
+        "command": [
+          -0.1414213562373095,
+          0.14142135623730953,
+          -0.2
+        ],
+        "frequency_hz": 1.5697385219098112,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 19,
+        "max_requested_ik_error_m": 0.0067407244325552685,
+        "joint_limit_fail_samples": 19,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486548026320095,
+        "max_joint_speed_rad_s": 11.20894180316268,
+        "max_horizontal_excursion_from_nominal_m": 0.05830935520841442
+      },
+      {
+        "name": "v0.20_bearing135_yaw+0.00",
+        "command": [
+          -0.1414213562373095,
+          0.14142135623730953,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 23,
+        "max_requested_ik_error_m": 0.002586578915323004,
+        "joint_limit_fail_samples": 23,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034867742365858004,
+        "max_joint_speed_rad_s": 9.910626567906725,
+        "max_horizontal_excursion_from_nominal_m": 0.046212993756959905
+      },
+      {
+        "name": "v0.20_bearing135_yaw+0.20",
+        "command": [
+          -0.1414213562373095,
+          0.14142135623730953,
+          0.2
+        ],
+        "frequency_hz": 1.5697385447375325,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 19,
+        "max_requested_ik_error_m": 0.00675446226576746,
+        "joint_limit_fail_samples": 19,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486629704758805,
+        "max_joint_speed_rad_s": 11.211473880154754,
+        "max_horizontal_excursion_from_nominal_m": 0.05830935132812899
+      },
+      {
+        "name": "v0.20_bearing135_yaw+0.40",
+        "command": [
+          -0.1414213562373095,
+          0.14142135623730953,
+          0.4
+        ],
+        "frequency_hz": 1.693019882834138,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 20,
+        "max_requested_ik_error_m": 0.00849372197882664,
+        "joint_limit_fail_samples": 20,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486004915443854,
+        "max_joint_speed_rad_s": 12.676768127527398,
+        "max_horizontal_excursion_from_nominal_m": 0.06646895897154274
+      },
+      {
+        "name": "v0.20_bearing157.5_yaw-0.40",
+        "command": [
+          -0.18477590650225736,
+          0.07653668647301798,
+          -0.4
+        ],
+        "frequency_hz": 1.693019777734292,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.002781337984683223,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486773957817066,
+        "max_joint_speed_rad_s": 11.938598924585479,
+        "max_horizontal_excursion_from_nominal_m": 0.06466394643493759
+      },
+      {
+        "name": "v0.20_bearing157.5_yaw-0.20",
+        "command": [
+          -0.18477590650225736,
+          0.07653668647301798,
+          -0.2
+        ],
+        "frequency_hz": 1.5697384880605376,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.521727155515824e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.0036259175631370155,
+        "minimum_jacobian_singular_value_m": 0.03504375480970928,
+        "max_joint_speed_rad_s": 9.776642025855839,
+        "max_horizontal_excursion_from_nominal_m": 0.05711616472372207
+      },
+      {
+        "name": "v0.20_bearing157.5_yaw+0.00",
+        "command": [
+          -0.18477590650225736,
+          0.07653668647301798,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.360534477934256e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.04625397419610522,
+        "minimum_jacobian_singular_value_m": 0.037008190899043704,
+        "max_joint_speed_rad_s": 8.504554929282866,
+        "max_horizontal_excursion_from_nominal_m": 0.0462129937569599
+      },
+      {
+        "name": "v0.20_bearing157.5_yaw+0.20",
+        "command": [
+          -0.18477590650225736,
+          0.07653668647301798,
+          0.2
+        ],
+        "frequency_hz": 1.5697385785868048,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.160202219681012e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.0035669361501766694,
+        "minimum_jacobian_singular_value_m": 0.035040677219104935,
+        "max_joint_speed_rad_s": 9.775483826882548,
+        "max_horizontal_excursion_from_nominal_m": 0.057116163142556416
+      },
+      {
+        "name": "v0.20_bearing157.5_yaw+0.40",
+        "command": [
+          -0.18477590650225736,
+          0.07653668647301798,
+          0.4
+        ],
+        "frequency_hz": 1.6930199456030486,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.0027838695083620417,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486810078666271,
+        "max_joint_speed_rad_s": 11.933318495221446,
+        "max_horizontal_excursion_from_nominal_m": 0.06466394112296708
+      },
+      {
+        "name": "v0.20_bearing180_yaw-0.40",
+        "command": [
+          -0.2,
+          2.4492935982947065e-17,
+          -0.4
+        ],
+        "frequency_hz": 1.6930197277436245,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.711664459115005e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.057075879467620716,
+        "minimum_jacobian_singular_value_m": 0.037488477118344736,
+        "max_joint_speed_rad_s": 11.287030577841353,
+        "max_horizontal_excursion_from_nominal_m": 0.06108487200793263
+      },
+      {
+        "name": "v0.20_bearing180_yaw-0.20",
+        "command": [
+          -0.2,
+          2.4492935982947065e-17,
+          -0.2
+        ],
+        "frequency_hz": 1.5697384611021659,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.612064840373727e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.09104842481455311,
+        "minimum_jacobian_singular_value_m": 0.03894397311287246,
+        "max_joint_speed_rad_s": 9.492770332893441,
+        "max_horizontal_excursion_from_nominal_m": 0.05541429851212214
+      },
+      {
+        "name": "v0.20_bearing180_yaw+0.00",
+        "command": [
+          -0.2,
+          2.4492935982947065e-17,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.449569634809817e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.12897515750211097,
+        "minimum_jacobian_singular_value_m": 0.040475333108257835,
+        "max_joint_speed_rad_s": 7.699422040121315,
+        "max_horizontal_excursion_from_nominal_m": 0.04621299375695989
+      },
+      {
+        "name": "v0.20_bearing180_yaw+0.20",
+        "command": [
+          -0.2,
+          2.4492935982947065e-17,
+          0.2
+        ],
+        "frequency_hz": 1.5697386055451747,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.2466058668124794e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.0911208364835856,
+        "minimum_jacobian_singular_value_m": 0.03894740374792175,
+        "max_joint_speed_rad_s": 9.494896151952801,
+        "max_horizontal_excursion_from_nominal_m": 0.055414293379879014
+      },
+      {
+        "name": "v0.20_bearing180_yaw+0.40",
+        "command": [
+          -0.2,
+          2.4492935982947065e-17,
+          0.4
+        ],
+        "frequency_hz": 1.6930199955937097,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.0513620640344457e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.05699175406087642,
+        "minimum_jacobian_singular_value_m": 0.03748522157400053,
+        "max_joint_speed_rad_s": 11.290268246990808,
+        "max_horizontal_excursion_from_nominal_m": 0.06108486219408425
+      },
+      {
+        "name": "v0.20_bearing202.5_yaw-0.40",
+        "command": [
+          -0.1847759065022574,
+          -0.07653668647301794,
+          -0.4
+        ],
+        "frequency_hz": 1.6930196981418313,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 6,
+        "max_requested_ik_error_m": 0.000627387204397377,
+        "joint_limit_fail_samples": 6,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486951573119571,
+        "max_joint_speed_rad_s": 11.827244760071514,
+        "max_horizontal_excursion_from_nominal_m": 0.06496678013725626
+      },
+      {
+        "name": "v0.20_bearing202.5_yaw-0.20",
+        "command": [
+          -0.1847759065022574,
+          -0.07653668647301794,
+          -0.2
+        ],
+        "frequency_hz": 1.5697384451388634,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.553500737577884e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.028481762313552927,
+        "minimum_jacobian_singular_value_m": 0.03620324437838833,
+        "max_joint_speed_rad_s": 9.715956986692486,
+        "max_horizontal_excursion_from_nominal_m": 0.057227988027607195
+      },
+      {
+        "name": "v0.20_bearing202.5_yaw+0.00",
+        "command": [
+          -0.1847759065022574,
+          -0.07653668647301794,
+          0
+        ],
+        "frequency_hz": 1.5264337522473752,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.3887339028184856e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.07582587188400414,
+        "minimum_jacobian_singular_value_m": 0.038301176320466715,
+        "max_joint_speed_rad_s": 7.856671632719568,
+        "max_horizontal_excursion_from_nominal_m": 0.04621299375695989
+      },
+      {
+        "name": "v0.20_bearing202.5_yaw+0.20",
+        "command": [
+          -0.1847759065022574,
+          -0.07653668647301794,
+          0.2
+        ],
+        "frequency_hz": 1.5697386215084757,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.1957210453457455e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.028435972692058442,
+        "minimum_jacobian_singular_value_m": 0.03620143860604587,
+        "max_joint_speed_rad_s": 9.719281577071758,
+        "max_horizontal_excursion_from_nominal_m": 0.057227995782054966
+      },
+      {
+        "name": "v0.20_bearing202.5_yaw+0.40",
+        "command": [
+          -0.1847759065022574,
+          -0.07653668647301794,
+          0.4
+        ],
+        "frequency_hz": 1.6930200251954977,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 6,
+        "max_requested_ik_error_m": 0.0006399075273339537,
+        "joint_limit_fail_samples": 6,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486979456322046,
+        "max_joint_speed_rad_s": 11.828416762173646,
+        "max_horizontal_excursion_from_nominal_m": 0.06496679479050943
+      },
+      {
+        "name": "v0.20_bearing225_yaw-0.40",
+        "command": [
+          -0.14142135623730953,
+          -0.1414213562373095,
+          -0.4
+        ],
+        "frequency_hz": 1.6930196934355186,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 20,
+        "max_requested_ik_error_m": 0.00801118061423636,
+        "joint_limit_fail_samples": 20,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.0348612824987189,
+        "max_joint_speed_rad_s": 12.50782870564259,
+        "max_horizontal_excursion_from_nominal_m": 0.06706839541017297
+      },
+      {
+        "name": "v0.20_bearing225_yaw-0.20",
+        "command": [
+          -0.14142135623730953,
+          -0.1414213562373095,
+          -0.2
+        ],
+        "frequency_hz": 1.569738442600899,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 17,
+        "max_requested_ik_error_m": 0.005336993229927309,
+        "joint_limit_fail_samples": 17,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.0348668187882613,
+        "max_joint_speed_rad_s": 10.924587061603422,
+        "max_horizontal_excursion_from_nominal_m": 0.0586216766509023
+      },
+      {
+        "name": "v0.20_bearing225_yaw+0.00",
+        "command": [
+          -0.14142135623730953,
+          -0.1414213562373095,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 6,
+        "max_requested_ik_error_m": 0.00020452984982530814,
+        "joint_limit_fail_samples": 6,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03487022199131229,
+        "max_joint_speed_rad_s": 9.513270467412791,
+        "max_horizontal_excursion_from_nominal_m": 0.04621299375695989
+      },
+      {
+        "name": "v0.20_bearing225_yaw+0.20",
+        "command": [
+          -0.14142135623730953,
+          -0.1414213562373095,
+          0.2
+        ],
+        "frequency_hz": 1.5697386240464397,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 16,
+        "max_requested_ik_error_m": 0.005335317030342729,
+        "joint_limit_fail_samples": 16,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486701816889741,
+        "max_joint_speed_rad_s": 10.922951220016124,
+        "max_horizontal_excursion_from_nominal_m": 0.05862168541452427
+      },
+      {
+        "name": "v0.20_bearing225_yaw+0.40",
+        "command": [
+          -0.14142135623730953,
+          -0.1414213562373095,
+          0.4
+        ],
+        "frequency_hz": 1.6930200299018099,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 21,
+        "max_requested_ik_error_m": 0.007999783439266817,
+        "joint_limit_fail_samples": 21,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03485990148553896,
+        "max_joint_speed_rad_s": 12.507398264630165,
+        "max_horizontal_excursion_from_nominal_m": 0.06706841097519918
+      },
+      {
+        "name": "v0.20_bearing247.5_yaw-0.40",
+        "command": [
+          -0.07653668647301808,
+          -0.1847759065022573,
+          -0.4
+        ],
+        "frequency_hz": 1.693019714341179,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 22,
+        "max_requested_ik_error_m": 0.010499800698921419,
+        "joint_limit_fail_samples": 22,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03484885560523321,
+        "max_joint_speed_rad_s": 13.706369840906913,
+        "max_horizontal_excursion_from_nominal_m": 0.06674279879044584
+      },
+      {
+        "name": "v0.20_bearing247.5_yaw-0.20",
+        "command": [
+          -0.07653668647301808,
+          -0.1847759065022573,
+          -0.2
+        ],
+        "frequency_hz": 1.5697384538746546,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 31,
+        "max_requested_ik_error_m": 0.008961871504387925,
+        "joint_limit_fail_samples": 31,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034854643269325095,
+        "max_joint_speed_rad_s": 11.957455232318958,
+        "max_horizontal_excursion_from_nominal_m": 0.05840505359029707
+      },
+      {
+        "name": "v0.20_bearing247.5_yaw+0.00",
+        "command": [
+          -0.07653668647301808,
+          -0.1847759065022573,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 47,
+        "max_requested_ik_error_m": 0.005086298915433212,
+        "joint_limit_fail_samples": 47,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.0348668511039212,
+        "max_joint_speed_rad_s": 10.334004284876146,
+        "max_horizontal_excursion_from_nominal_m": 0.0462129937569599
+      },
+      {
+        "name": "v0.20_bearing247.5_yaw+0.20",
+        "command": [
+          -0.07653668647301808,
+          -0.1847759065022573,
+          0.2
+        ],
+        "frequency_hz": 1.5697386127726851,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 29,
+        "max_requested_ik_error_m": 0.008957504608628705,
+        "joint_limit_fail_samples": 29,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03485719064221424,
+        "max_joint_speed_rad_s": 11.957448925671649,
+        "max_horizontal_excursion_from_nominal_m": 0.058405063163740216
+      },
+      {
+        "name": "v0.20_bearing247.5_yaw+0.40",
+        "command": [
+          -0.07653668647301808,
+          -0.1847759065022573,
+          0.4
+        ],
+        "frequency_hz": 1.6930200089961527,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 23,
+        "max_requested_ik_error_m": 0.010525001894323179,
+        "joint_limit_fail_samples": 23,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03484662194325033,
+        "max_joint_speed_rad_s": 13.706141344660892,
+        "max_horizontal_excursion_from_nominal_m": 0.06674281604052722
+      },
+      {
+        "name": "v0.20_bearing270_yaw-0.40",
+        "command": [
+          -3.6739403974420595e-17,
+          -0.2,
+          -0.4
+        ],
+        "frequency_hz": 1.693019757676115,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 53,
+        "max_requested_ik_error_m": 0.008150503546170348,
+        "joint_limit_fail_samples": 53,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486577626276402,
+        "max_joint_speed_rad_s": 13.758030122973736,
+        "max_horizontal_excursion_from_nominal_m": 0.06400476571869855
+      },
+      {
+        "name": "v0.20_bearing270_yaw-0.20",
+        "command": [
+          -3.6739403974420595e-17,
+          -0.2,
+          -0.2
+        ],
+        "frequency_hz": 1.5697384772438032,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 64,
+        "max_requested_ik_error_m": 0.006947158731283042,
+        "joint_limit_fail_samples": 64,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486623573406148,
+        "max_joint_speed_rad_s": 11.879424506540643,
+        "max_horizontal_excursion_from_nominal_m": 0.05659372729838636
+      },
+      {
+        "name": "v0.20_bearing270_yaw+0.00",
+        "command": [
+          -3.6739403974420595e-17,
+          -0.2,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 81,
+        "max_requested_ik_error_m": 0.005247758778095932,
+        "joint_limit_fail_samples": 81,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034866840237070706,
+        "max_joint_speed_rad_s": 10.36177303810999,
+        "max_horizontal_excursion_from_nominal_m": 0.04621299375695989
+      },
+      {
+        "name": "v0.20_bearing270_yaw+0.20",
+        "command": [
+          -3.6739403974420595e-17,
+          -0.2,
+          0.2
+        ],
+        "frequency_hz": 1.569738589403539,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 63,
+        "max_requested_ik_error_m": 0.0069649581900549495,
+        "joint_limit_fail_samples": 63,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486639823328352,
+        "max_joint_speed_rad_s": 11.880434704581766,
+        "max_horizontal_excursion_from_nominal_m": 0.05659373726954633
+      },
+      {
+        "name": "v0.20_bearing270_yaw+0.40",
+        "command": [
+          -3.6739403974420595e-17,
+          -0.2,
+          0.4
+        ],
+        "frequency_hz": 1.693019965661223,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 55,
+        "max_requested_ik_error_m": 0.008142956586102769,
+        "joint_limit_fail_samples": 55,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034865193815429726,
+        "max_joint_speed_rad_s": 13.763407713722223,
+        "max_horizontal_excursion_from_nominal_m": 0.06400478496671069
+      },
+      {
+        "name": "v0.20_bearing292.5_yaw-0.40",
+        "command": [
+          0.076536686473018,
+          -0.18477590650225734,
+          -0.4
+        ],
+        "frequency_hz": 1.6930198168429749,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 34,
+        "max_requested_ik_error_m": 0.009180225209337492,
+        "joint_limit_fail_samples": 34,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03485835180939298,
+        "max_joint_speed_rad_s": 13.512306480583177,
+        "max_horizontal_excursion_from_nominal_m": 0.06588390316731246
+      },
+      {
+        "name": "v0.20_bearing292.5_yaw-0.20",
+        "command": [
+          0.076536686473018,
+          -0.18477590650225734,
+          -0.2
+        ],
+        "frequency_hz": 1.5697385091506029,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 43,
+        "max_requested_ik_error_m": 0.008339451575375564,
+        "joint_limit_fail_samples": 43,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03485948310270899,
+        "max_joint_speed_rad_s": 11.879973041994873,
+        "max_horizontal_excursion_from_nominal_m": 0.057921713129278685
+      },
+      {
+        "name": "v0.20_bearing292.5_yaw+0.00",
+        "command": [
+          0.076536686473018,
+          -0.18477590650225734,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 59,
+        "max_requested_ik_error_m": 0.0053310965243385695,
+        "joint_limit_fail_samples": 59,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486683524205524,
+        "max_joint_speed_rad_s": 10.376117222817932,
+        "max_horizontal_excursion_from_nominal_m": 0.04621299375695989
+      },
+      {
+        "name": "v0.20_bearing292.5_yaw+0.20",
+        "command": [
+          0.076536686473018,
+          -0.18477590650225734,
+          0.2
+        ],
+        "frequency_hz": 1.5697385574967404,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 42,
+        "max_requested_ik_error_m": 0.008337855536157804,
+        "joint_limit_fail_samples": 42,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034860893615815236,
+        "max_joint_speed_rad_s": 11.882105819169215,
+        "max_horizontal_excursion_from_nominal_m": 0.05792171882341988
+      },
+      {
+        "name": "v0.20_bearing292.5_yaw+0.40",
+        "command": [
+          0.076536686473018,
+          -0.18477590650225734,
+          0.4
+        ],
+        "frequency_hz": 1.6930199064943685,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 33,
+        "max_requested_ik_error_m": 0.009161648985968086,
+        "joint_limit_fail_samples": 33,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.0348598391740763,
+        "max_joint_speed_rad_s": 13.517438855132475,
+        "max_horizontal_excursion_from_nominal_m": 0.06588391245420383
+      },
+      {
+        "name": "v0.20_bearing315_yaw-0.40",
+        "command": [
+          0.14142135623730948,
+          -0.14142135623730953,
+          -0.4
+        ],
+        "frequency_hz": 1.693019882834138,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 21,
+        "max_requested_ik_error_m": 0.00848417961592706,
+        "joint_limit_fail_samples": 21,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03485854742004479,
+        "max_joint_speed_rad_s": 12.6770076622321,
+        "max_horizontal_excursion_from_nominal_m": 0.06646895897154274
+      },
+      {
+        "name": "v0.20_bearing315_yaw-0.20",
+        "command": [
+          0.14142135623730948,
+          -0.14142135623730953,
+          -0.2
+        ],
+        "frequency_hz": 1.5697385447375325,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 19,
+        "max_requested_ik_error_m": 0.00674061297289877,
+        "joint_limit_fail_samples": 19,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034865479655309804,
+        "max_joint_speed_rad_s": 11.208932055984508,
+        "max_horizontal_excursion_from_nominal_m": 0.058309351328129005
+      },
+      {
+        "name": "v0.20_bearing315_yaw+0.00",
+        "command": [
+          0.14142135623730948,
+          -0.14142135623730953,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 23,
+        "max_requested_ik_error_m": 0.002586483878631985,
+        "joint_limit_fail_samples": 23,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486774210454573,
+        "max_joint_speed_rad_s": 9.910612796423203,
+        "max_horizontal_excursion_from_nominal_m": 0.04621299375695989
+      },
+      {
+        "name": "v0.20_bearing315_yaw+0.20",
+        "command": [
+          0.14142135623730948,
+          -0.14142135623730953,
+          0.2
+        ],
+        "frequency_hz": 1.569738521909811,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 19,
+        "max_requested_ik_error_m": 0.006754576870345925,
+        "joint_limit_fail_samples": 19,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486629730940829,
+        "max_joint_speed_rad_s": 11.21148329296334,
+        "max_horizontal_excursion_from_nominal_m": 0.05830935520841445
+      },
+      {
+        "name": "v0.20_bearing315_yaw+0.40",
+        "command": [
+          0.14142135623730948,
+          -0.14142135623730953,
+          0.4
+        ],
+        "frequency_hz": 1.6930198405032062,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 20,
+        "max_requested_ik_error_m": 0.008493847403705271,
+        "joint_limit_fail_samples": 20,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.034860049949539264,
+        "max_joint_speed_rad_s": 12.676772750678,
+        "max_horizontal_excursion_from_nominal_m": 0.0664689666667321
+      },
+      {
+        "name": "v0.20_bearing337.5_yaw-0.40",
+        "command": [
+          0.1847759065022573,
+          -0.07653668647301809,
+          -0.4
+        ],
+        "frequency_hz": 1.6930199456030486,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.00278122964591762,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486773931666693,
+        "max_joint_speed_rad_s": 11.938601519383456,
+        "max_horizontal_excursion_from_nominal_m": 0.06466394112296706
+      },
+      {
+        "name": "v0.20_bearing337.5_yaw-0.20",
+        "command": [
+          0.1847759065022573,
+          -0.07653668647301809,
+          -0.2
+        ],
+        "frequency_hz": 1.5697385785868048,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.160037462547833e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.0036274047551736466,
+        "minimum_jacobian_singular_value_m": 0.035043825148247394,
+        "max_joint_speed_rad_s": 9.776643728239389,
+        "max_horizontal_excursion_from_nominal_m": 0.057116163142556464
+      },
+      {
+        "name": "v0.20_bearing337.5_yaw+0.00",
+        "command": [
+          0.1847759065022573,
+          -0.07653668647301809,
+          0
+        ],
+        "frequency_hz": 1.5264337522473748,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.3604048348253304e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.046255387687291094,
+        "minimum_jacobian_singular_value_m": 0.037008253882714136,
+        "max_joint_speed_rad_s": 8.504536524219448,
+        "max_horizontal_excursion_from_nominal_m": 0.0462129937569599
+      },
+      {
+        "name": "v0.20_bearing337.5_yaw+0.20",
+        "command": [
+          0.1847759065022573,
+          -0.07653668647301809,
+          0.2
+        ],
+        "frequency_hz": 1.5697384880605376,
+        "all_sampled_kinematics_valid": true,
+        "invalid_leg_phase_samples": 0,
+        "max_requested_ik_error_m": 2.521877765139822e-07,
+        "joint_limit_fail_samples": 0,
+        "minimum_soft_limit_margin_rad": 0.0035654696418463416,
+        "minimum_jacobian_singular_value_m": 0.03504060785798115,
+        "max_joint_speed_rad_s": 9.775482889146272,
+        "max_horizontal_excursion_from_nominal_m": 0.05711616472372207
+      },
+      {
+        "name": "v0.20_bearing337.5_yaw+0.40",
+        "command": [
+          0.1847759065022573,
+          -0.07653668647301809,
+          0.4
+        ],
+        "frequency_hz": 1.693019777734292,
+        "all_sampled_kinematics_valid": false,
+        "invalid_leg_phase_samples": 12,
+        "max_requested_ik_error_m": 0.002783980616046126,
+        "joint_limit_fail_samples": 12,
+        "minimum_soft_limit_margin_rad": 0.0,
+        "minimum_jacobian_singular_value_m": 0.03486810104764588,
+        "max_joint_speed_rad_s": 11.933315320557329,
+        "max_horizontal_excursion_from_nominal_m": 0.06466394643493764
+      }
+    ]
+  },
+  "transition": {
+    "seconds": 44.0,
+    "segments": [
+      [
+        "start",
+        2,
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      [
+        "forward",
+        5,
+        [
+          0.1,
+          0,
+          0
+        ]
+      ],
+      [
+        "reverse",
+        5,
+        [
+          -0.1,
+          0,
+          0
+        ]
+      ],
+      [
+        "left",
+        5,
+        [
+          0,
+          0.1,
+          0
+        ]
+      ],
+      [
+        "left_arc",
+        5,
+        [
+          0,
+          0.1,
+          0.2
+        ]
+      ],
+      [
+        "right_arc",
+        5,
+        [
+          0.1,
+          0,
+          -0.2
+        ]
+      ],
+      [
+        "yaw",
+        5,
+        [
+          0,
+          0,
+          0.3
+        ]
+      ],
+      [
+        "stop",
+        12,
+        [
+          0,
+          0,
+          0
+        ]
+      ]
+    ],
+    "invalid_leg_steps": 7,
+    "max_joint_reference_step_rad": 0.13930720082283754,
+    "final_max_q_velocity_rad_s": 1.0617568989677146e-19,
+    "final_max_foot_offset_m": 0.0,
+    "max_stance_world_reference_slip_mps": 0.09521732693707269,
+    "note": "Slip diagnostic assumes commanded twist exactly achieved; actual robot tracking is unknown. Target slew/actuator dynamics are not simulated."
+  },
+  "cpu_seconds": 10.4265245,
+  "limitations": [
+    "No simulator, trained actor, motor torque/thermal load, support forces or collisions evaluated.",
+    "Point feet from frozen serial C benchmark; not full pad contact or physical four-bar motion.",
+    "C2 phase path and filtered commands do not guarantee no-slip during command transitions.",
+    "No sensor, terrain, command governor, residual-policy integration or architecture selection."
+  ]
+}

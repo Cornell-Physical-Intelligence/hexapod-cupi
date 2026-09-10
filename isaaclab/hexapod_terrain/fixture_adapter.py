@@ -6,6 +6,7 @@ must be replaced by terrain-relative objectives before a terrain PPO task is use
 from __future__ import annotations
 
 from dataclasses import dataclass
+from copy import deepcopy
 import math
 from pathlib import Path
 
@@ -54,6 +55,23 @@ def require_matching_admission(admission, asset_identity):
         raise ValueError("Invalid admission identity")
 
 
+def reference_fixture_mesh(stage, prim_path, usd_path):
+    """Reference a root-Mesh fixture without authoring a stronger Xform type.
+
+    The installed generic USD spawner authors an Xform at the reference site,
+    overriding this fixture's root Mesh type while retaining its collision API.
+    Author the matching Mesh type only in the new scene; keep the USD unchanged.
+    """
+    from pxr import UsdGeom
+    from terrain_fixture_checks import collision_meshes
+
+    if stage.GetPrimAtPath(prim_path).IsValid():
+        raise ValueError(f"Terrain prim already exists: {prim_path}")
+    prim = UsdGeom.Mesh.Define(stage, prim_path).GetPrim()
+    prim.GetReferences().AddReference(str(usd_path))
+    return collision_meshes(stage, prim_path)[0]
+
+
 def adapt_flat_cfg_for_fixture_smoke(cfg, spec, *, admission, asset_identity, purpose="standing_smoke"):
     """Copy an already admitted full-robot cfg; never change asset/action mapping.
 
@@ -68,18 +86,24 @@ def adapt_flat_cfg_for_fixture_smoke(cfg, spec, *, admission, asset_identity, pu
     entry, usd = spec.load()
 
     from isaaclab.terrains import TerrainImporter, TerrainImporterCfg
-    from terrain_fixture_checks import bind_fixture_material, collision_meshes
+    from terrain_fixture_checks import bind_fixture_material
 
     class ExplicitFixtureImporter(TerrainImporter):
         def import_usd(self, name, usd_path):
-            super().import_usd(name, usd_path)
             from isaaclab.sim import SimulationContext
+
+            prim_path = self.cfg.prim_path + "/" + name
+            if prim_path in self.terrain_prim_paths:
+                raise ValueError(f"Terrain already registered: {prim_path}")
             stage = SimulationContext.instance().stage
-            prim = collision_meshes(stage, self.cfg.prim_path + "/" + name)[0]
+            prim = reference_fixture_mesh(stage, prim_path, usd_path)
+            self.terrain_prim_paths.append(prim_path)
             bind_fixture_material(stage, prim, friction=spec.friction,
                                   contact_offset_m=spec.contact_offset_m)
 
-    result = cfg.copy()
+    # Isaac configclass.copy() uses dataclasses.replace, which drops controller
+    # fields attached by configure_omni after dataclass construction.
+    result = deepcopy(cfg)
     result.scene.num_envs = 1
     result.events = None
     result.terrain = TerrainImporterCfg(class_type=ExplicitFixtureImporter,
@@ -94,7 +118,8 @@ def adapt_flat_cfg_for_fixture_smoke(cfg, spec, *, admission, asset_identity, pu
     x, y = entry["start_xy_m"]
     result.robot.init_state.pos = (x, y, result.robot.init_state.pos[2])
     half_yaw = spec.start_body_yaw_rad / 2
-    result.robot.init_state.rot = (math.cos(half_yaw), 0., 0., math.sin(half_yaw))
+    # Installed Isaac Lab 6 AssetBaseCfg uses XYZW, matching its Warp tensors.
+    result.robot.init_state.rot = (0., 0., math.sin(half_yaw), math.cos(half_yaw))
     result.command_lin_vel_x_range_mps = (0., 0.)
     result.command_lin_vel_y_range_mps = (0., 0.)
     result.command_yaw_rate_range_rad_s = (0., 0.)

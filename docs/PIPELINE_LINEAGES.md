@@ -266,3 +266,7 @@ The current release check now targets `isaaclab/deploy/stage2_c_priority_2026090
 ### Paired PPO repair publication
 
 `isaaclab/deploy/stage2_c_repair003_20260909_pipeline.sha256` is the current source-check destination for the isolated paired fine-tune tools, explicit initializer, raw-action instrumentation, launcher tests and deploy dispatch. It also binds the result hash manifest and read-only report generator. The completed Spark sources are retained separately with their exact hashes; main preserves its verified vendored bootstrap and adds stricter paired-source/nonfinite-torque preflight checks for future runs. Earlier source manifests and all production packages remain unchanged. CI and the default checker select this new filename.
+
+### Terrain-entry adapter and reference feasibility
+
+`isaaclab/deploy/stage2_c_terrain_entry_20260910_pipeline.sha256` is the new source-check destination. It adds the guarded two-phase full-C standing launcher, type-preserving Mesh reference, configuration deep copy and installed XYZW rotation convention, plus their regression tests. The frozen reference feasibility payload map, safe replay helper and terrain attempts 002/003 result maps are bound separately. The C-study runtime, production packages, robot inputs, acceptance gates and earlier manifests remain unchanged. CI and the default checker select this new filename. Runtime results require their own source and admission identities; the CPU reference studies do not admit a controller.

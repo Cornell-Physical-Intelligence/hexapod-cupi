@@ -1,0 +1,235 @@
+{
+  "source_sha256": "bd2eca1e222acf31eb897f4e4e9b7e8a18989d33a23878c9e9caffb8be595e47",
+  "configuration": {
+    "duty": 0.65,
+    "stance_travel_m": 0.06,
+    "lift_m": 0.02,
+    "min_frequency_hz": 0.8,
+    "lift_full_speed_mps": 0.04,
+    "command_filter_omega_rad_s": 4.0
+  },
+  "transition": [
+    {
+      "name": "start",
+      "invalid_leg_steps": 0,
+      "max_reference_step_rad_per_20ms": 0.0,
+      "fraction_reference_steps_above_0p03": 0.0,
+      "max_qdot_rad_s": 4.1412582550363984e-40,
+      "max_stance_reference_slip_mps": 0.0
+    },
+    {
+      "name": "forward",
+      "invalid_leg_steps": 0,
+      "max_reference_step_rad_per_20ms": 0.09928817100477949,
+      "fraction_reference_steps_above_0p03": 0.20444444444444446,
+      "max_qdot_rad_s": 5.033273280707387,
+      "max_stance_reference_slip_mps": 0.03043970337957072
+    },
+    {
+      "name": "reverse",
+      "invalid_leg_steps": 0,
+      "max_reference_step_rad_per_20ms": 0.10400941814117637,
+      "fraction_reference_steps_above_0p03": 0.20022222222222222,
+      "max_qdot_rad_s": 5.264593891035187,
+      "max_stance_reference_slip_mps": 0.07231064765077294
+    },
+    {
+      "name": "left",
+      "invalid_leg_steps": 0,
+      "max_reference_step_rad_per_20ms": 0.11782539989744278,
+      "fraction_reference_steps_above_0p03": 0.16355555555555557,
+      "max_qdot_rad_s": 5.999993563725411,
+      "max_stance_reference_slip_mps": 0.05206462273672795
+    },
+    {
+      "name": "left_arc",
+      "invalid_leg_steps": 0,
+      "max_reference_step_rad_per_20ms": 0.14508055609568649,
+      "fraction_reference_steps_above_0p03": 0.18644444444444444,
+      "max_qdot_rad_s": 7.3186209161838995,
+      "max_stance_reference_slip_mps": 0.02086553546589958
+    },
+    {
+      "name": "right_arc",
+      "invalid_leg_steps": 0,
+      "max_reference_step_rad_per_20ms": 0.1371441199483847,
+      "fraction_reference_steps_above_0p03": 0.2068888888888889,
+      "max_qdot_rad_s": 6.844187720543426,
+      "max_stance_reference_slip_mps": 0.09864056674901232
+    },
+    {
+      "name": "yaw",
+      "invalid_leg_steps": 0,
+      "max_reference_step_rad_per_20ms": 0.1103635042186778,
+      "fraction_reference_steps_above_0p03": 0.19177777777777777,
+      "max_qdot_rad_s": 5.459806882949274,
+      "max_stance_reference_slip_mps": 0.06181981015175487
+    },
+    {
+      "name": "stop",
+      "invalid_leg_steps": 0,
+      "max_reference_step_rad_per_20ms": 0.08750261625548461,
+      "fraction_reference_steps_above_0p03": 0.009537037037037037,
+      "max_qdot_rad_s": 4.340077438760764,
+      "max_stance_reference_slip_mps": 0.028616149469436553
+    }
+  ],
+  "neutral_stance_envelope": [
+    {
+      "command": "forward",
+      "twist": [
+        0.2,
+        0.0,
+        0.0
+      ],
+      "max_neutral_stance_joint_speed_rad_s": 1.7667176298442688,
+      "scale_to_1p2_rad_s_necessary_not_sufficient": 0.6792256893399409,
+      "per_joint_qdot": {
+        "revolute_1_1": 1.6601733958791727,
+        "revolute_1": 0.07409931735617122,
+        "revolute_2": 0.4877948854489101,
+        "revolute_2_5": 1.7667176163382319,
+        "revolute_1_5": -0.01827887720381421,
+        "revolute_2_4": -0.12032962151263352,
+        "revolute_1_7": 1.6601717924422497,
+        "revolute_1_6": -0.1084538426071698,
+        "revolute_2_6": -0.7139502983141218,
+        "revolute_4": -1.6601718051337757,
+        "revolute_1_4": 0.10844487208919124,
+        "revolute_2_3": 0.7139446487032081,
+        "revolute_5": -1.7667176298442688,
+        "revolute_1_2": 0.018287837504004423,
+        "revolute_2_1": 0.1203352654419357,
+        "revolute_3": -1.6601734085715476,
+        "revolute_1_3": -0.07410827276483836,
+        "revolute_2_2": -0.48780052430403126
+      }
+    },
+    {
+      "command": "left",
+      "twist": [
+        0.0,
+        0.2,
+        0.0
+      ],
+      "max_neutral_stance_joint_speed_rad_s": 1.7568371963286158,
+      "scale_to_1p2_rad_s_necessary_not_sufficient": 0.6830456473187857,
+      "per_joint_qdot": {
+        "revolute_1_1": -0.6042496064737308,
+        "revolute_1": 0.2570327692533794,
+        "revolute_2": 1.6920435262839308,
+        "revolute_2_5": -6.489516152668729e-06,
+        "revolute_1_5": 0.26687536265051837,
+        "revolute_2_4": 1.7568371963286158,
+        "revolute_1_7": 0.6042540118906037,
+        "revolute_1_6": 0.24452877773321707,
+        "revolute_2_6": 1.609729905480332,
+        "revolute_4": -0.6042540165120763,
+        "revolute_1_4": -0.24452875744798416,
+        "revolute_2_3": -1.609729890764337,
+        "revolute_5": 6.489516214896214e-06,
+        "revolute_1_2": -0.26687534056371076,
+        "revolute_2_1": -1.7568371806113399,
+        "revolute_3": 0.6042496110954739,
+        "revolute_1_3": -0.2570327480275489,
+        "revolute_2_2": -1.6920435114601613
+      }
+    },
+    {
+      "command": "turn_left",
+      "twist": [
+        0.0,
+        0.0,
+        0.4
+      ],
+      "max_neutral_stance_joint_speed_rad_s": 0.9073294235813598,
+      "scale_to_1p2_rad_s_necessary_not_sufficient": 1.0,
+      "per_joint_qdot": {
+        "revolute_1_1": -0.9073279179648391,
+        "revolute_1": 0.09095720210450095,
+        "revolute_2": 0.5987701312827697,
+        "revolute_2_5": -0.8240122279209993,
+        "revolute_1_5": 0.004386923273054719,
+        "revolute_2_4": 0.028879061397790985,
+        "revolute_1_7": -0.9073294235813598,
+        "revolute_1_6": -0.0804588745853711,
+        "revolute_2_6": -0.5296597716718137,
+        "revolute_4": -0.9073284185464812,
+        "revolute_1_4": -0.08046206468567368,
+        "revolute_2_3": -0.5296612075073425,
+        "revolute_5": -0.8240122311576891,
+        "revolute_1_2": 0.004390964952805661,
+        "revolute_2_1": 0.02888078672504175,
+        "revolute_3": -0.9073276026150174,
+        "revolute_1_3": 0.09095398290915535,
+        "revolute_2_2": 0.5987691531538079
+      }
+    },
+    {
+      "command": "forward_left_arc",
+      "twist": [
+        0.2,
+        0.0,
+        0.4
+      ],
+      "max_neutral_stance_joint_speed_rad_s": 2.590729861001958,
+      "scale_to_1p2_rad_s_necessary_not_sufficient": 0.4631899365748242,
+      "per_joint_qdot": {
+        "revolute_1_1": 0.7528454779143335,
+        "revolute_1": 0.16505651946067218,
+        "revolute_2": 1.0865650167316798,
+        "revolute_2_5": 0.9427053884172325,
+        "revolute_1_5": -0.013891953930759492,
+        "revolute_2_4": -0.09145056011484251,
+        "revolute_1_7": 0.7528423688608895,
+        "revolute_1_6": -0.18891271719254088,
+        "revolute_2_6": -1.2436100699859354,
+        "revolute_4": -2.567500223680257,
+        "revolute_1_4": 0.027982807403517558,
+        "revolute_2_3": 0.18428344119586548,
+        "revolute_5": -2.590729861001958,
+        "revolute_1_2": 0.022678802456810084,
+        "revolute_2_1": 0.14921605216697742,
+        "revolute_3": -2.5675010111865646,
+        "revolute_1_3": 0.016845710144317013,
+        "revolute_2_2": 0.11096862884977676
+      }
+    },
+    {
+      "command": "strafe_left_arc",
+      "twist": [
+        0.0,
+        0.2,
+        0.4
+      ],
+      "max_neutral_stance_joint_speed_rad_s": 2.2908136575667,
+      "scale_to_1p2_rad_s_necessary_not_sufficient": 0.5238313452673574,
+      "per_joint_qdot": {
+        "revolute_1_1": -1.5115775244385696,
+        "revolute_1": 0.34798997135788035,
+        "revolute_2": 2.2908136575667,
+        "revolute_2_5": -0.824018717437152,
+        "revolute_1_5": 0.2712622859235731,
+        "revolute_2_4": 1.7857162577264067,
+        "revolute_1_7": -0.3030754116907563,
+        "revolute_1_6": 0.16406990314784595,
+        "revolute_2_6": 1.0800701338085184,
+        "revolute_4": -1.5115824350585576,
+        "revolute_1_4": -0.3249908221336579,
+        "revolute_2_3": -2.13939109827168,
+        "revolute_5": -0.8240057416414742,
+        "revolute_1_2": -0.2624843756109051,
+        "revolute_2_1": -1.727956393886298,
+        "revolute_3": -0.30307799151954334,
+        "revolute_1_3": -0.16607876511839356,
+        "revolute_2_2": -1.0932743583063536
+      }
+    }
+  ],
+  "stage2_complete": false,
+  "notes": [
+    "Kinematic-only, exact named serial C URDF. No torque, contacts, support, terrain or actuator admission.",
+    "20% residual velocity reserve is an illustrative design budget, not a qualified setting.",
+    "60mm transition sequence independently measured; do not substitute100mm transition metrics."
+  ]
+}

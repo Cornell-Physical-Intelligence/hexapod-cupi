@@ -22,7 +22,7 @@ ARCHIVED_MANIFEST = "isaaclab/deploy/stage2_pipeline.sha256"
 ARCHIVED_REF = "81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df"
 ARCHIVED_MANIFEST_SHA256 = "19fc816cf9c53a79be8e14831daa58a12eba3f7f07c5fca80d03f2dc947ccda1"
 ARCHIVED_ENTRY_COUNT = 112
-CURRENT_MANIFEST = "isaaclab/deploy/stage2_c_repair003_20260909_pipeline.sha256"
+CURRENT_MANIFEST = "isaaclab/deploy/stage2_c_terrain_entry_20260910_pipeline.sha256"
 CURRENT_HEADER = (
     "# hexapod.mkii_fourbar_pipeline.v1\n"
     f"# Archived source commit: {ARCHIVED_REF}\n"
@@ -34,6 +34,14 @@ CURRENT_REVISIONS = {
     "packages/hexapod_env/pyproject.toml": "Package the new actuator and versioned task modules.",
 }
 CURRENT_EXTRA_PATHS = (
+    "isaaclab/deploy/stage2_c_repair003_20260909_pipeline.sha256",
+    "robot/tests/test_terrain_config_copy.py",
+    "robot/tests/test_terrain_fixture_reference.py",
+    "robot/tests/test_terrain_robot_launcher.py",
+    "artifacts/omni_diagnostics_2026-09-09/reference_feasibility_001/FROZEN_SHA256SUMS.json",
+    "artifacts/omni_diagnostics_2026-09-09/reference_feasibility_001/replay.py",
+    "artifacts/terrain_readiness_2026-09-09/runtime/terrain_robot_smoke_002/SHA256SUMS.json",
+    "artifacts/terrain_readiness_2026-09-09/runtime/terrain_robot_smoke_003/SHA256SUMS.json",
     "isaaclab/deploy/stage2_c_priority_20260909_docs_contract_pipeline.sha256",
     "isaaclab/deploy/hexapod-rl",
     "robot/tests/test_omni_repair_training.py",

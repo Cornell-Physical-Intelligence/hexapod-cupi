@@ -15,6 +15,11 @@ case "${1:-status}" in
     script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
     exec python3 "$script_dir/../../tools/launch_omni_repair_spark.py" "$@"
     ;;
+  terrain-robot-smoke)
+    shift
+    script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+    exec python3 -B "$script_dir/../../tools/launch_terrain_robot_smoke_spark.py" "$@"
+    ;;
   terrain-smoke)
     shift
     script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)

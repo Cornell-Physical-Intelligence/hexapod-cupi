@@ -1,0 +1,48 @@
+--- a/isaaclab/hexapod_terrain/fixture_adapter.py
++++ b/isaaclab/hexapod_terrain/fixture_adapter.py
+@@ -54,6 +54,23 @@
+         raise ValueError("Invalid admission identity")
+ 
+ 
++def reference_fixture_mesh(stage, prim_path, usd_path):
++    """Reference a root-Mesh fixture without authoring a stronger Xform type.
++
++    The installed generic USD spawner authors an Xform at the reference site,
++    overriding this fixture's root Mesh type while retaining its collision API.
++    Author the matching Mesh type only in the new scene; keep the USD unchanged.
++    """
++    from pxr import UsdGeom
++    from terrain_fixture_checks import collision_meshes
++
++    if stage.GetPrimAtPath(prim_path).IsValid():
++        raise ValueError(f"Terrain prim already exists: {prim_path}")
++    prim = UsdGeom.Mesh.Define(stage, prim_path).GetPrim()
++    prim.GetReferences().AddReference(str(usd_path))
++    return collision_meshes(stage, prim_path)[0]
++
++
+ def adapt_flat_cfg_for_fixture_smoke(cfg, spec, *, admission, asset_identity, purpose="standing_smoke"):
+     """Copy an already admitted full-robot cfg; never change asset/action mapping.
+ 
+@@ -68,14 +85,18 @@
+     entry, usd = spec.load()
+ 
+     from isaaclab.terrains import TerrainImporter, TerrainImporterCfg
+-    from terrain_fixture_checks import bind_fixture_material, collision_meshes
++    from terrain_fixture_checks import bind_fixture_material
+ 
+     class ExplicitFixtureImporter(TerrainImporter):
+         def import_usd(self, name, usd_path):
+-            super().import_usd(name, usd_path)
+             from isaaclab.sim import SimulationContext
++
++            prim_path = self.cfg.prim_path + "/" + name
++            if prim_path in self.terrain_prim_paths:
++                raise ValueError(f"Terrain already registered: {prim_path}")
+             stage = SimulationContext.instance().stage
+-            prim = collision_meshes(stage, self.cfg.prim_path + "/" + name)[0]
++            prim = reference_fixture_mesh(stage, prim_path, usd_path)
++            self.terrain_prim_paths.append(prim_path)
+             bind_fixture_material(stage, prim, friction=spec.friction,
+                                   contact_offset_m=spec.contact_offset_m)
+ 

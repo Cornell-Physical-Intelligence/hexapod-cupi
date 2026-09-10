@@ -1,0 +1,121 @@
+{
+  "status": "separate_unselected_CPU_global_clock_continuation",
+  "reports": [
+    {
+      "configuration": {
+        "duty": 0.65,
+        "stance_travel_m": 0.06,
+        "lift_m": 0.01,
+        "min_frequency_hz": 0.8,
+        "lift_full_speed_mps": 0.04,
+        "command_filter_omega_rad_s": 4.0
+      },
+      "constant_cycles": {
+        "cases": 245,
+        "phases_per_case": 512,
+        "invalid_leg_phases": 0,
+        "max_virtual_joint_speed_rad_s": 12.4970377042596,
+        "min_soft_limit_margin_rad": 0.0865109246408835,
+        "max_fk_error_m": 2.2851976168354743e-07,
+        "max_virtual_frequency_hz": 2.6123195427567207
+      },
+      "virtual_transition": {
+        "max_joint_speed_rad_s": 6.239953632071904,
+        "invalid_leg_steps": 0
+      },
+      "global_time_scale": 0.09002133358504193,
+      "feedback_rate_reserve_rad_s": 0.25,
+      "sampled_proposed_command_envelope": {
+        "max_translation_mps": 0.018004266717008385,
+        "max_yaw_rad_s": 0.03600853343401677,
+        "bearings_degrees": 22.5,
+        "command_targets_are_derated": true,
+        "note": "All16 bearings and sampled interior speeds/yaws checked; not a formal continuum or dynamics guarantee."
+      },
+      "ideal_steady_stop_bounds": {
+        "translation_distance_m": 0.1,
+        "yaw_angle_rad": 0.2,
+        "derivation": "2*v/omega_filter and2*yaw/omega_filter for v=.2,yaw=.4,omega_filter4; coherent time scaling preserves these virtual path integrals."
+      },
+      "status": "sampled_kinematic_limits_only_not_dynamic_admission",
+      "physical_transition": {
+        "duration_s": 233.27803714622772,
+        "max_joint_step_rad": 0.011250058412311859,
+        "max_q_velocity_rad_s": 0.56255064880939,
+        "limiter03_pass": true,
+        "reference_budget_pass": true,
+        "max_planar_command_acceleration_mps2": 0.0023813907514716307,
+        "max_yaw_command_acceleration_rad_s2": 0.005948085909662288,
+        "stop_settle_s": 21.58000000001104,
+        "max_stance_reference_world_slip_mps": 0.008593310556380452,
+        "max_abs_target_command_derating": 0.2729935999244874,
+        "note": "Admitted vs requested commands explicitly differ; small q step is not original command tracking."
+      }
+    },
+    {
+      "configuration": {
+        "duty": 0.5,
+        "stance_travel_m": 0.06,
+        "lift_m": 0.005,
+        "min_frequency_hz": 0.25,
+        "lift_full_speed_mps": 0.04,
+        "command_filter_omega_rad_s": 4.0
+      },
+      "constant_cycles": {
+        "cases": 245,
+        "phases_per_case": 512,
+        "invalid_leg_phases": 0,
+        "max_virtual_joint_speed_rad_s": 7.4699376157762565,
+        "min_soft_limit_margin_rad": 0.07994639988483954,
+        "max_fk_error_m": 2.3948403925229984e-07,
+        "max_virtual_frequency_hz": 1.9291961709369525
+      },
+      "virtual_transition": {
+        "max_joint_speed_rad_s": 3.59798935240189,
+        "invalid_leg_steps": 0
+      },
+      "global_time_scale": 0.1506036673752185,
+      "feedback_rate_reserve_rad_s": 0.25,
+      "sampled_proposed_command_envelope": {
+        "max_translation_mps": 0.0301207334750437,
+        "max_yaw_rad_s": 0.0602414669500874,
+        "bearings_degrees": 22.5,
+        "command_targets_are_derated": true,
+        "note": "All16 bearings and sampled interior speeds/yaws checked; not a formal continuum or dynamics guarantee."
+      },
+      "ideal_steady_stop_bounds": {
+        "translation_distance_m": 0.1,
+        "yaw_angle_rad": 0.2,
+        "derivation": "2*v/omega_filter and2*yaw/omega_filter for v=.2,yaw=.4,omega_filter4; coherent time scaling preserves these virtual path integrals."
+      },
+      "status": "sampled_kinematic_limits_only_not_dynamic_admission",
+      "physical_transition": {
+        "duration_s": 139.43883549448614,
+        "max_joint_step_rad": 0.01083718878906037,
+        "max_q_velocity_rad_s": 0.5419250637649898,
+        "limiter03_pass": true,
+        "reference_budget_pass": true,
+        "max_planar_command_acceleration_mps2": 0.006665158885694869,
+        "max_yaw_command_acceleration_rad_s2": 0.016647794875150668,
+        "stop_settle_s": 13.859999999997243,
+        "max_stance_reference_world_slip_mps": 0.020010021107557886,
+        "max_abs_target_command_derating": 0.25481889978743444,
+        "note": "Admitted vs requested commands explicitly differ; small q step is not original command tracking."
+      }
+    }
+  ],
+  "cpu_seconds": 53.487922459,
+  "source_hashes": {
+    "study.py": "dd71fd86cddb7e7c2ef46a42a1ae4228d152f17c1f5dfda1bfbbaceefcd87310",
+    "time_governor.py": "de3219531f4c1fb38e93b69f53969ce934586ff0ab26b66dc38c46661ade604c",
+    "reference.py": "bd2eca1e222acf31eb897f4e4e9b7e8a18989d33a23878c9e9caffb8be595e47",
+    "FREEZE_SHA256.json": "a41c03301526b83650337a3258fedfb1a1c0861e64d26b8a2c5c32e68ae78112"
+  },
+  "limits": [
+    "No torque/contact/support/pad collision qualification.",
+    "Uniform time scaling is held fixed over each declared sequence; online scale changes require additional continuity analysis.",
+    "First prototype results unchanged. Samples with invalid IK are rejected; individual joints are not clipped to make this screen pass.",
+    "Derivative extrema are sampled with10% margin, not proven global between-sample bounds.",
+    "Feedback reserve is only a rate budget; a real combined residual target still needs an enforced shared limiter and verification."
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "user_authorized_pause": true,
+  "created_unix": 1789001283.3445911,
+  "units": {
+    "stormscope-dispatch.timer": "ActiveState=active\nSubState=running",
+    "stormscope-scout.timer": "ActiveState=active\nSubState=waiting",
+    "stormscope-dispatch.service": "MainPID=3158697\nActiveState=activating\nSubState=start",
+    "stormscope-scout.service": "MainPID=0\nActiveState=inactive\nSubState=dead"
+  },
+  "unit": "hexapod-terrain-robot-smoke-002-20260909.service",
+  "output": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/terrain_robot_smoke_002",
+  "source": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/terrain_robot_source_002",
+  "preflight": {
+    "compute_processes_before_authorized_pause": "3159101, /opt/wx/venv-models/bin/python",
+    "containers": "21faff779d05 isim-web-viewer-1 isim-web-viewer",
+    "forecast_services_authorized_for_graceful_stop": [
+      "stormscope-dispatch.service"
+    ],
+    "service_stop_semantics": {
+      "stormscope-dispatch.service": "TimeoutStopUSec=1min 30s\nKillMode=control-group\nKillSignal=15"
+    }
+  },
+  "coordination_sha256": "fdad0bb0126158988dc36ea38538b2f7804299cffb5ff29601ba597089672234",
+  "reason": "Fresh exact-plan flat gate then original-fixture full-C standing; no PPO",
+  "current_instruction": "9 September C-study authorization supersedes older physical-model pause notes",
+  "gracefully_stopped_services": [
+    "stormscope-dispatch.service"
+  ],
+  "post_pause_preflight": {
+    "available_memory_bytes": 127019499520,
+    "containers": "isim-web-viewer-1 isim-web-viewer",
+    "compute_processes": ""
+  },
+  "paused_unix": 1789001284.4303527
+}

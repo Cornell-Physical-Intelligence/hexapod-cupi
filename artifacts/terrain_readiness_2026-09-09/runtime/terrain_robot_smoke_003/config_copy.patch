@@ -1,0 +1,21 @@
+--- a/isaaclab/hexapod_terrain/fixture_adapter.py
++++ b/isaaclab/hexapod_terrain/fixture_adapter.py
+@@ -6,6 +6,7 @@
+ from __future__ import annotations
+ 
+ from dataclasses import dataclass
++from copy import deepcopy
+ import math
+ from pathlib import Path
+ 
+@@ -100,7 +101,9 @@
+             bind_fixture_material(stage, prim, friction=spec.friction,
+                                   contact_offset_m=spec.contact_offset_m)
+ 
+-    result = cfg.copy()
++    # Isaac configclass.copy() uses dataclasses.replace, which drops controller
++    # fields attached by configure_omni after dataclass construction.
++    result = deepcopy(cfg)
+     result.scene.num_envs = 1
+     result.events = None
+     result.terrain = TerrainImporterCfg(class_type=ExplicitFixtureImporter,

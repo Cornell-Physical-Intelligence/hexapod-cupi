@@ -321,3 +321,11 @@ API references checked during preparation:
 [scene-query setting](https://isaac-sim.github.io/IsaacLab/main/_modules/isaaclab/sim/simulation_cfg.html).
 The installed Spark API is the runtime acceptance target; public API review
 alone is preparation, while attempt 003 supplies measured fixture evidence.
+
+## Full-C standing launcher and installed-API corrections
+
+`isaaclab/deploy/hexapod-rl terrain-robot-smoke --source FROZEN_SOURCE --output FRESH_OUTPUT` runs only the exact 32×1,000 flat admission and a single-robot 1,000-control hold on the admitted original fixture's flat entry pad. It verifies the pinned C runtime, source, full-review plan, fixture evidence and unchanged per-run robot inputs. It owns both job-scoped locks, yields on coordination/resource changes and cleans up only its own immutable container identity. Forecast scheduling is managed by the separately recorded outer pause/restore procedure. No policy is loaded or trained.
+
+The installed generic USD spawner authors a stronger Xform type over a root-Mesh reference. The adapter now creates the reference as Mesh, preserving exact geometry, collision checks, importer registration and material binding without editing fixture files. It deep-copies the admitted configuration because the installed configclass `copy()` drops controller fields attached after dataclass construction. Regression tests reproduce both problems, check all 30 original meshes, and retain configuration values without shared mutable state. The adapter also uses the installed SDK's XYZW quaternion convention; an independent rotation check verifies an upright robot with body −Y aimed along course +X.
+
+Attempts [001](../../artifacts/terrain_readiness_2026-09-09/runtime/terrain_robot_smoke_001/README.md) and [002](../../artifacts/terrain_readiness_2026-09-09/runtime/terrain_robot_smoke_002/README.md) preserve those failures. Current execution and subsequent results belong in [STATUS](../../STATUS.md). A flat-entry hold does not establish ramp traversal, slope standing or terrain locomotion.
