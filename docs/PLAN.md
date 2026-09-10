@@ -1,6 +1,6 @@
 # Hexapod autonomy: development plan
 
-> **9 September 2026 update:** the user prioritizes the selected C-study Stage 2 controller, requiring smooth walking/pathing in every direction and quiet standing, with terrain/perception implementation in parallel. [STATUS](../STATUS.md) is current; [the C-study contract](../experiments/c_length_study/README.md) separates its pinned runtime and 1.6 N·m study cap from the physical four-bar program. Earlier pause, plan and actuator statements below apply to their dated physical lineage. Commit/push each verified step with relevant Markdown and preserve other work on main.
+> **10 September 2026 — approved ground-truth training model:** the user visually approved the detailed direct-drive robot and requires its motor-weight-corrected URDF for **all future training**. [Canonical selection](../robot/active_model.json) and [full CAD/limit report](UPDATED_CAD_IMPORT.md) are authoritative. Do not launch further simplified C-study/mock or historical four-bar training. First prepare the new model-bound runtime, native SDF cooking and physical admission. Earlier campaign sequences below retain their dated lineage for reproduction; old checkpoints/task IDs are unchanged. Stage 2 smoothness and quiet-standing gates remain required.
 
 
 Accelerated simulation-first execution plan, 4 September 2026. **Target: integrated simulation demonstration in four weeks; candidate ready to begin hardware transfer in six weeks.** The CAD is complete, single-leg testing is upcoming, and remaining parts will be ordered after that test. A physical field demonstration therefore has a separate target: approximately **2–3 weeks after the complete robot is ready**, provided the simulation and hardware gates pass. This is a conditional estimate, not a promised procurement date. Codex leads implementation/experiment work using the available Spark; human teams supply physical testing. Existing project documents are evidence, not binding rules. Hard deadline, team ownership, field site and final survey tolerances still need confirmation.
@@ -188,7 +188,7 @@ Calendar dates do not close gates. A gate closes only when its owner and integra
 
 | Gate | Target | Evidence required |
 |---|---|---|
-| G0: trustworthy simulation baseline | First 3 days | All-link tensor/geometry/units audit; physical 31-body four-bar with 30 tree coordinates, six closure joints and 18 active motor mapping; no passive drives/mimics; closure/branch/solver-convergence checks; nonpenetrating reset; per-collider contacts and substep torque; driven joint/directional tests; versioned actuator parameters and resolved configuration identity; qualified torque-speed/thermal, burst/recovery and current-limit behavior; explicit runtime contract and pinned tests. Serial standing alone is insufficient. Unmeasured hardware dynamics remain provisional. |
+| G0: trustworthy simulation baseline | First 3 days | All-link tensor/geometry/units audit; canonical 19-body/18-joint direct-drive CAD, reviewed per-leg limits, preserved source tensors and declared motor overrides; exact active-motor mapping and solver-convergence checks; nonpenetrating reset; per-collider contacts and substep torque; driven joint/directional tests; versioned actuator parameters and resolved configuration identity; qualified torque-speed/thermal, burst/recovery and current-limit behavior; explicit runtime contract and pinned tests. Serial standing alone is insufficient. Unmeasured hardware dynamics remain provisional. |
 | G1: learned motion foundation | End W2 | Flat omnidirectional policy, transitions and stopping pass the declared simulation suite; localization bag workflow, coverage stub and deployment contracts run. No physical-readiness claim. |
 | G2: terrain foundation | End W3 | Held-out terrain baseline; map age/unknown/confidence interface; policy-in-loop navigation and motor-emulator fault tests. |
 | G3: integrated simulation prototype | End W4 | Drawn polygon → local navigation → learned gait → coverage report, including obstacles, fence, pause/resume. Explicitly identify idealized observations still being replaced. |
@@ -491,3 +491,37 @@ The [preserved pre-simulator launch failure](../artifacts/omni_diagnostics_2026-
 Adopt the reviewed [sensor transport correction](../artifacts/perception_readiness_2026-09-09/sensor_transport_002/README.md) for Stage3 preparation. Delivery order does not determine capture freshness: accept only newer valid per-environment capture/sequence pairs. Persistent sensor state must remain writable after inference rollouts; clock rejection occurs before mutation. Full reset starts a clock epoch, while per-environment reset preserves stream time and peer state. Nominal401-read output parity and existing sensor contracts remain checked. Keep the250ms map lease and all noise/latency/dropout settings. This latest-frame transport does not replace the separately needed causal map/actor integration contract.
 
 Large training audit traces stay intact on Spark with complete SHA/size inventories. Analyze full raw data there on the verified CPU Python/NumPy runtime when local capacity or single-file publication limits prevent a complete local copy. Publish selected checkpoints, full evaluation evidence, reports and explicit omitted-input maps; do not label a subset as a complete local replay.
+
+### 2026-09-10 — updated direct-drive physical CAD lineage
+
+The user confirms the new robot removes the external four-bar. Use the separately
+versioned [updated CAD asset](UPDATED_CAD_IMPORT.md) for physical-design intake:
+19 bodies,18 active revolute joints,1,753 parts and 59 original meshes. Preserve the
+C-study training contract and historical four-bar mechanism/adapter/runner without
+substitution. The updated asset needs a new exact-source physical admission and
+runtime adapter; existing task IDs, checkpoint bytes, gates and lineage remain intact.
+
+The supplied export omitted its mate graph. Recover axes from current motor and
+bearing geometry, distinguish six-copy attachment evidence from engineering
+inference, preserve every original part pose and full mass tensor, and expose both
+CAD and canonical inspection poses. A future articulated Onshape export with
+named active mates and signed Z frames should supersede these inferred attachments.
+User review of the highlighted screw/tibia overlaps and attachment sides comes
+before physical qualification. Restrict provisional knee inspection travel to the
+sampled−3°…+20° interval; do not present sampled clearance as measured hard stops.
+
+Keep exact raw CAD 5.147604 kg and separate nominal-motor-mass 7.466088 kg variants.
+The added motor distribution is an explicit housing-cylinder estimate, not measured
+rotor/reflected inertia. Preserve the nonspherical hollow-foot geometry. The offline
+USD recipe uses exposed-structure SDF colliders with full visual/mass retention and
+explicit fastener/internal collision omissions. Native GPU cooking, contact behavior,
+resource use, actuator calibration and actual payload inventory are follow-on work.
+No PPO or Spark allocation is implied by this intake. The actual Fable 5.1 max-effort
+review and root disposition are preserved with the intake evidence; its earlier
+four-bar assumptions were superseded by the user’s mechanism confirmation.
+
+### 10 September 2026 — reviewed detailed CAD travel and main-model request
+
+The user confirmed femur −120°…+80° and tibia −5°…+180° relative to the existing inspection viewer, then requested a full-range animation of all 18 joints followed by main-URDF selection after visual review. The pitch zeros remain unchanged. Coxa zeros now center the exact standoff-clearance openings; per-leg yaw limits have a continuous ≥0.5 mm standoff gap under the recovered CAD grouping. See [UPDATED_CAD_IMPORT.md](UPDATED_CAD_IMPORT.md) and successor `joint_review_002`, `yaw_envelope_002`, and `usd_002` evidence. Existing source overlaps and combined-pose collision avoidance remain separate.
+
+The user subsequently approved the animation and designated the nominal RS05 mass-corrected detailed URDF as ground truth for all training. `robot/active_model.json` now pins it, and the repository viewer opens the detailed inspector. No further simplified-study or four-bar training is authorized by the older continuation plans. Preserve the exact raw CAD mass counterpart and label added motor inertia as provisional. Existing simplified-study and four-bar task IDs, checkpoints, gates and evidence remain immutable; the new main pointer must not silently change what an old task loads. New physical learning requires an explicit asset-bound runtime adapter, per-leg limit and foot geometry handling, calibrated actuator behavior and native admission. The review animation is kinematic and provides no walking, contact or sim-to-real qualification.

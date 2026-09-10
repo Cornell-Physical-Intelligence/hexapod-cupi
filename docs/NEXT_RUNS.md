@@ -1,11 +1,18 @@
 # Prepared CAD simulation campaign
 
-> **9 September 2026 update:** the user prioritizes the selected C-study Stage 2 controller, requiring smooth walking/pathing in every direction and quiet standing, with terrain/perception implementation in parallel. [STATUS](../STATUS.md) is current; [the C-study contract](../experiments/c_length_study/README.md) separates its pinned runtime and 1.6 N·m study cap from the physical four-bar program. Earlier pause, plan and actuator statements below apply to their dated physical lineage. Commit/push each verified step with relevant Markdown and preserve other work on main.
+> **10 September 2026 — approved ground-truth training model:** the user visually approved the detailed direct-drive robot and requires its motor-weight-corrected URDF for **all future training**. [Canonical selection](../robot/active_model.json) and [full CAD/limit report](UPDATED_CAD_IMPORT.md) are authoritative. Do not launch further simplified C-study/mock or historical four-bar training. First prepare the new model-bound runtime, native SDF cooking and physical admission. Earlier campaign sequences below retain their dated lineage for reproduction; old checkpoints/task IDs are unchanged. Stage 2 smoothness and quiet-standing gates remain required.
 
 
-## C-study continuation order
+## Detailed-model next steps
 
-Use this sequence for the authorized C study; the later physical campaign sections remain a separate lineage. Live outcomes and exact Spark ownership belong in [STATUS](../STATUS.md).
+1. Verify `robot/active_model.json` and the corresponding `usd_002` nominal motor corrected source identities on the isolated native preparation directory.
+2. Introduce a new task/runtime contract for the actual joint names, signs/zeros, per-leg yaw limits, +X tibia contact geometry and explicitly modeled actuator behavior. Preserve old task registrations.
+3. Cook the exact SDF geometry in Isaac Sim 6.0.1 and qualify suspended travel, contacts/settling, self-collision handling, solver effort and observation/action mapping before a small learning smoke.
+4. Only a matching native admission can authorize learning on this canonical model; record its source, asset, motor and checkpoint hashes. Then pursue the unchanged all-direction, smoothness and quiet-standing gates.
+
+## Historical C-study continuation order (superseded)
+
+This sequence records the prior C-study plan and no longer authorizes new simplified-model training. The later four-bar campaign sections also remain historical. Live outcomes and exact Spark ownership belong in [STATUS](../STATUS.md).
 
 1. Bind the preserved 315/318 omnidirectional checkpoint to a newly named cold evaluation under the common 0.040 rad/20 ms formal limiter; completed execution is recorded in STATUS. Keep original solver 16/4 and external-force settings explicit; the historical 0.03 diagnostic and reference009 physics are separate comparisons. Require exact checkpoint/source/asset identity and fresh standing before actor playback.
 2. Run a 32×24×2 positive-CAPS integration smoke with actual checkpoint reload and constant/stop evaluations. After successful integration, independently initialize matched 1024×24×50 curriculum and curriculum-plus-CAPS pilots from the original checkpoint. Use one immutable behavioral source with explicit branch/allocation selectors and fresh standing for each allocation. The curriculum covers standing, starts/stops, reversals, all bearings and combined translation/yaw. Mask reset-crossing temporal pairs and avoid treating intentional command transitions as sensor noise. Preserve quiet and useful tracking together; do not accept reduced motion as smoothness.
@@ -85,16 +92,16 @@ The physical model and 30-coordinate / 18-motor adapter are implemented from the
 
 Packaging changes are limited to the two old-manifest-listed core/env `pyproject.toml` files; 112 archived lineage files remain independently verified. Preserve the old manifest and historical reports instead of relabeling them as the physical task's release evidence.
 
-Use **full available Spark compute now**, until another agent requests sharing through `/home/orionh/SPARK_COMPUTE_COORDINATION.md`. Read that file before each new launch and at checkpoint boundaries during future long runs; the [coordination note](SPARK_COMPUTE_COORDINATION.md) holds the handoff procedure. The former 60/40 split is a starting preference if sharing is requested. Short acceptance remains exclusive and already uses full available compute. No quota or shared launcher is enabled; measure throughput and memory in a paired pilot before relying on overlapping long jobs.
+Historical four-bar allocation instruction, superseded for new training: use **full available Spark compute**, until another agent requests sharing through `/home/orionh/SPARK_COMPUTE_COORDINATION.md`. Read that file before each new launch and at checkpoint boundaries during future long runs; the [coordination note](SPARK_COMPUTE_COORDINATION.md) holds the handoff procedure. The former 60/40 split is a starting preference if sharing is requested. Short acceptance remains exclusive and already uses full available compute. No quota or shared launcher is enabled; measure throughput and memory in a paired pilot before relying on overlapping long jobs.
 
 The user explicitly prioritized the present hexapod campaign over weather. An owned guard reserves the weather launcher's existing `/opt/wx/gpu.lock` cooperatively until campaign exit, for at most three hours. Preserve workload admission checks and the shared-file handoff; this reservation does not authorize arbitrary changes to other jobs. Exact process and probe state is recorded in [STATUS.md](../STATUS.md).
 
 The earlier reference-only recovery proposal remains a separate infrastructure lineage. Its successful admission cannot guarantee every later timeout reset, and its fixed gait is not the project's selected final architecture. Any successor preserves requested-goal motion rewards, zero-bootstrap true terminations, final pre-reset critic values for time limits, and selected/unselected history isolation. Formal motor/contact, cold-policy, quiet and Stage 2 gates remain unchanged. See the C-study sequence above for the current experiment design.
 
 
-## 2026-09-10 — prepared next C-study direct-PPO comparison
+## Historical 2026-09-10 C-study direct-PPO proposal (superseded)
 
-The next proposed allocation is one quiet-priority temporal-smoothing ablation, initialized afresh from original315/318 checkpoint1971…, with the current19-body/18-joint C asset and unchanged direct source/physics/action contracts. Native004 is preparation only until its frozen source, CPU regressions and fresh same-source smoke are admitted. Root remains the only guarded Spark dispatcher; this document does not launch or admit a job.
+The then-proposed allocation was one quiet-priority temporal-smoothing ablation, initialized afresh from original315/318 checkpoint1971…, with the current19-body/18-joint C asset and unchanged direct source/physics/action contracts. Native004 is preparation only until its frozen source, CPU regressions and fresh same-source smoke are admitted. Root remains the only guarded Spark dispatcher; this document does not launch or admit a job.
 
 - Valid consecutive exact-zero command pairs: temporal coefficient1.0. Moving pairs:0.1; spatial:0.1. Preserve the current all-valid denominator and done/command-change masks. Quiet pairs already make up68.34% of observed valid pairs, so the change explicitly increases their objective priority.
 - Pilot:1024 environments ×24 controls ×50 updates, with original checkpoint, fresh optimizer/std protocol, adaptive LR, deterministic acquisition phases and original common0.040 rad/20ms limiter. New smoke32×24×2 must exercise this actual branch and strict reload before the pilot.
@@ -107,9 +114,9 @@ See the [actual matched pilots](../artifacts/omni_diagnostics_2026-09-09/direct_
 For the quiet-priority allocation, use the [frozen native004/host003/guard004 preparation](../artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_preparation_001/README.md) and require the complete matching source003 smoke before pilot admission. Keep root as sole dispatcher. The user explicitly prioritizes PPO over all weather activity: defer identified weather blockers while preserving outputs and exact recovery/ownership controls. Live state belongs in STATUS; this paragraph does not queue or launch a pilot.
 
 
-## 2026-09-10 — successor budget experiment after quiet-priority comparison
+## Historical 2026-09-10 C-study budget proposal (superseded)
 
-The [completed stronger-quiet comparison](../artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_pilot_001/README.md) supersedes the immediate50-update proposal above. Prepare one normal-CAPS1024×24×500 run from original checkpoint1971…, unchanged objective/physics/gates and the complete fresh optimizer/std protocol. Use native005/source004 and require its own successful32×24×2 integration; older-source smoke cannot admit it. Root alone dispatches through a separately bounded guard.
+Historical context only; this does not authorize another simplified-model launch. The [completed stronger-quiet comparison](../artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_pilot_001/README.md) supersedes the immediate50-update proposal above. Prepare one normal-CAPS1024×24×500 run from original checkpoint1971…, unchanged objective/physics/gates and the complete fresh optimizer/std protocol. Use native005/source004 and require its own successful32×24×2 integration; older-source smoke cannot admit it. Root alone dispatches through a separately bounded guard.
 
 Retain all500 ordinary saves remotely, exact file hashes, final and decision1/10/25/50/100/250/500; collect14 sparse gradient rows across those milestones. The versioned host must enforce1800 seconds for training,600 for other phases and90 for startup. A500-update result still requires exact reload, fresh direction/stop evaluation and unchanged numeric/visual gates. No automatic next branch, exact-resume claim or Stage2 promotion follows from budget completion. Current execution remains only in STATUS.
 
