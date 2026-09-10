@@ -1,0 +1,17 @@
+export hexapod-mkii-assy: 1753 instances, fused 5.14760 kg; leg record: 291 parts in 6 bodies
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/robot/tools/import_onshape_hexapod.py", line 1261, in <module>
+    sys.exit(build(ap.parse_args()))
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/robot/tools/import_onshape_hexapod.py", line 563, in build
+    attach(body)
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/robot/tools/import_onshape_hexapod.py", line 557, in attach
+    h = register_hinge(body, regs[(leg, parent)], jname, axes, leg_parts, full, counts_full)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/robot/tools/import_onshape_hexapod.py", line 486, in register_hinge
+    best = thetas[int(np.argmin([score(x) for x in thetas]))]
+                                 ^^^^^^^^
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/robot/tools/import_onshape_hexapod.py", line 481, in score
+    moved = olds @ T[:3, :3].T + T[:3, 3]
+            ~~~~~^~~~~~~~~~~~~
+ValueError: matmul: Input operand 1 has a mismatch in its core dimension 0, with gufunc signature (n?,k),(k,m?)->(n?,m?) (size 3 is different from 0)

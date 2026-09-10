@@ -491,3 +491,31 @@ The [preserved pre-simulator launch failure](../artifacts/omni_diagnostics_2026-
 Adopt the reviewed [sensor transport correction](../artifacts/perception_readiness_2026-09-09/sensor_transport_002/README.md) for Stage3 preparation. Delivery order does not determine capture freshness: accept only newer valid per-environment capture/sequence pairs. Persistent sensor state must remain writable after inference rollouts; clock rejection occurs before mutation. Full reset starts a clock epoch, while per-environment reset preserves stream time and peer state. Nominal401-read output parity and existing sensor contracts remain checked. Keep the250ms map lease and all noise/latency/dropout settings. This latest-frame transport does not replace the separately needed causal map/actor integration contract.
 
 Large training audit traces stay intact on Spark with complete SHA/size inventories. Analyze full raw data there on the verified CPU Python/NumPy runtime when local capacity or single-file publication limits prevent a complete local copy. Publish selected checkpoints, full evaluation evidence, reports and explicit omitted-input maps; do not label a subset as a complete local replay.
+
+### 2026-09-10 — updated direct-drive physical CAD lineage
+
+The user confirms the new robot removes the external four-bar. Use the separately
+versioned [updated CAD asset](UPDATED_CAD_IMPORT.md) for physical-design intake:
+19 bodies,18 active revolute joints,1,753 parts and 59 original meshes. Preserve the
+C-study training contract and historical four-bar mechanism/adapter/runner without
+substitution. The updated asset needs a new exact-source physical admission and
+runtime adapter; existing task IDs, checkpoint bytes, gates and lineage remain intact.
+
+The supplied export omitted its mate graph. Recover axes from current motor and
+bearing geometry, distinguish six-copy attachment evidence from engineering
+inference, preserve every original part pose and full mass tensor, and expose both
+CAD and canonical inspection poses. A future articulated Onshape export with
+named active mates and signed Z frames should supersede these inferred attachments.
+User review of the highlighted screw/tibia overlaps and attachment sides comes
+before physical qualification. Restrict provisional knee inspection travel to the
+sampled−3°…+20° interval; do not present sampled clearance as measured hard stops.
+
+Keep exact raw CAD 5.147604 kg and separate nominal-motor-mass 7.466088 kg variants.
+The added motor distribution is an explicit housing-cylinder estimate, not measured
+rotor/reflected inertia. Preserve the nonspherical hollow-foot geometry. The offline
+USD recipe uses exposed-structure SDF colliders with full visual/mass retention and
+explicit fastener/internal collision omissions. Native GPU cooking, contact behavior,
+resource use, actuator calibration and actual payload inventory are follow-on work.
+No PPO or Spark allocation is implied by this intake. The actual Fable 5.1 max-effort
+review and root disposition are preserved with the intake evidence; its earlier
+four-bar assumptions were superseded by the user’s mechanism confirmation.

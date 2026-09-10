@@ -27,11 +27,21 @@ Run `python3 tools/project_site.py check --base <base-commit>` and `python3 tool
 
 The user requests Claude Code with Fable 5.1 (`claude-fable-5-1`) with maximum reasoning (`--effort max`) as a partner for major architecture decisions and substantial parallel implementation/review work. Consult it on controller/action architecture, learning objectives, terrain/perception interfaces and consequential experiment changes. Give workers bounded work areas and concrete deliverables; keep one owner for Spark execution and integration. Preserve the actual model/session, inputs, findings, disagreements and the resulting engineering decision. Independently review proposed code and run relevant checks before adoption. Report unavailable authentication/model access honestly; do not silently substitute a model or claim a consultation that failed. Routine verified repairs and ongoing authorized jobs can continue while reviews run.
 
-## Physical four-bar campaign
+## Updated physical design and historical four-bar campaign
+
+The user confirmed on 10 September 2026 that the new physical design removes the
+external four-bar and has 18 direct-drive joints/19 main rigid bodies. New CAD
+intake and offline preparation use `robot/hexapod_mkii_updated_v1/` and
+`docs/UPDATED_CAD_IMPORT.md`. Its topology is user-confirmed; attachment ownership,
+hardware limits, corrected motor inertia distribution and native Isaac physics
+remain review/admission tasks. It is not admitted by either existing runtime.
+Do not apply the four-bar motor adapter or its runner to this updated asset.
+
+The following contract is retained **only for the historical four-bar lineage**:
 
 The versioned physical task and guarded runner are documented in
 `docs/MKII_FOURBAR_TRAINING.md`. Use its 31-body/30-coordinate asset and explicit
-18-motor adapter for new physical-model work; keep serial-v2 characterization and
+18-motor adapter for work on that exact four-bar model; keep serial-v2 characterization and
 archived mock task contracts intact. The third active coordinate is the pushlever
 motor, with per-leg CAD offsets. Never substitute serial knee defaults.
 

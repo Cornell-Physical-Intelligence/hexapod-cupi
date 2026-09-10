@@ -1,0 +1,21 @@
+$ /Users/andreboufama/Documents/CUPI/HEXAPOD/.venv/bin/python -B -m unittest discover -s /Users/andreboufama/Documents/CUPI/HEXAPOD-urdf-20260910/artifacts/mkii_updated_2026-09-10/import_001/mass_audit -p test_*.py -v
+test_allowlisted_numpy_roundtrip (test_audit_onshape_mass_properties.AuditMathTests.test_allowlisted_numpy_roundtrip) ... ok
+test_forbidden_pickle_callable_is_rejected (test_audit_onshape_mass_properties.AuditMathTests.test_forbidden_pickle_callable_is_rejected) ... ok
+test_nonphysical_triangle_and_zero_mass_inertia_rejected (test_audit_onshape_mass_properties.AuditMathTests.test_nonphysical_triangle_and_zero_mass_inertia_rejected) ... ok
+test_parallel_axis_sum_preserves_translated_tensor (test_audit_onshape_mass_properties.AuditMathTests.test_parallel_axis_sum_preserves_translated_tensor) ... ok
+test_urdf_decimal_precision_limits (test_audit_onshape_mass_properties.AuditMathTests.test_urdf_decimal_precision_limits) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.004s
+
+OK
+
+$ /Users/andreboufama/Documents/CUPI/HEXAPOD/.venv/bin/python -B -m unittest discover -s /Users/andreboufama/Documents/CUPI/HEXAPOD-urdf-20260910/artifacts/mkii_updated_2026-09-10/import_001/builder -p test_*.py -v
+test_full_tensor_and_off_diagonal_parallel_axis_sum (test_updated_urdf_builder.BuilderNumerics.test_full_tensor_and_off_diagonal_parallel_axis_sum) ... ok
+test_joint_frame_is_right_handed_with_requested_positive_axis (test_updated_urdf_builder.BuilderNumerics.test_joint_frame_is_right_handed_with_requested_positive_axis) ... ok
+test_rpy_serialization_at_and_near_both_gimbal_poles (test_updated_urdf_builder.BuilderNumerics.test_rpy_serialization_at_and_near_both_gimbal_poles) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.007s
+
+OK

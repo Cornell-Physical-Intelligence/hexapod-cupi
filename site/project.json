@@ -16,7 +16,7 @@
     "motors": 18,
     "applied_torque_cap_nm": 1.6,
     "source": "experiments/c_length_study/README.md",
-    "note": "Kinematic reference distances, not material cut lengths. The production four-bar linkage and physical foot contact point require separate CAD layout and qualification."
+    "note": "Kinematic reference distances for the selected C study, not material cut lengths. The updated physical CAD is a separate 19-body/18-joint direct-drive candidate; its nonspherical foot, mass distribution and native dynamics require qualification."
   },
   "checkpoint": {
     "receipt": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_004/terminal/run/train/training_receipt.json",
@@ -243,9 +243,9 @@
       "meaning": "Limit target changes and motor effort, then translate targets through the appropriate robot model.",
       "input": "18 joint targets",
       "output": "Motor actuation and measured response",
-      "today": "The C study uses a 1.6 N\u00b7m applied cap. Production uses a separate four-bar model and needs hardware calibration.",
-      "source": "docs/MKII_FOURBAR_TRAINING.md",
-      "next": "Verify real torque, temperatures, linkage offsets and timing."
+      "today": "The C study uses a 1.6 N\u00b7m applied cap. New physical CAD uses 18 direct-drive joints; its nominal RS05 envelope and hardware response require identification.",
+      "source": "docs/UPDATED_CAD_IMPORT.md",
+      "next": "Review signed axes, motor mass distribution, measured travel, torque-speed and thermal behavior."
     },
     {
       "id": "simulation",
@@ -285,9 +285,9 @@
       "meaning": "Identify the actual mechanism and actuators, then qualify the complete robot before transferring a simulated policy.",
       "input": "Physical CAD, calibrated motors and tested policy",
       "output": "A controlled real-robot release",
-      "today": "C-study results do not qualify the 31-body physical four-bar assembly.",
-      "source": "docs/MKII_FOURBAR_TRAINING.md",
-      "next": "Calibrate the leg stand and pass full-body hardware gates."
+      "today": "Updated CAD preserves 1,753 parts in 19 bodies/18 joints. Geometry and offline preparation are checked; native dynamics and hardware qualification remain pending.",
+      "source": "docs/UPDATED_CAD_IMPORT.md",
+      "next": "Resolve attachment/clearance review, identify actuators and payload, then admit the exact physical asset."
     },
     {
       "id": "survey",
@@ -491,6 +491,12 @@
       "title": "Test a larger normal-CAPS budget",
       "text": "Compare 500 updates from the original policy using the same movement and stop gates. More training is a hypothesis to test; final evaluation determines whether it helps.",
       "source": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_retry_002/README.md"
+    },
+    {
+      "label": "CAD audit",
+      "title": "Detailed direct-drive robot reconstructed",
+      "text": "All 1,753 source parts are retained. The 133-pose geometry audit passes a narrowed knee envelope; existing screw/tibia overlaps need review. Raw CAD 5.148 kg and nominal motor corrected 7.466 kg remain distinct.",
+      "source": "docs/UPDATED_CAD_IMPORT.md"
     }
   ]
 }

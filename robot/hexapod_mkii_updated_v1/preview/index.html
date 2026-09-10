@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Updated MKII — part and joint inspection</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="importmap">{"imports":{"three":"../../hexapod_mkii_assy/preview/inspection_vendor/three/build/three.module.js","three/examples/":"../../hexapod_mkii_assy/preview/inspection_vendor/three/examples/"}}</script>
+</head>
+<body>
+  <header>
+    <div><h1>Updated MKII <span>Part & joint inspection</span></h1><p id="summary" role="status">Loading the complete CAD assembly…</p></div>
+    <a href="../README.md" target="_blank">Audit & model notes ↗</a>
+  </header>
+  <main>
+    <section id="stage" aria-label="Interactive model with all exported CAD parts">
+      <div class="toolbar">
+        <button id="stand">Inspection stance</button><button id="cad">Export pose</button>
+        <button id="fit">Fit model</button>
+        <select id="view" aria-label="Camera view"><option value="iso">Orbit</option><option value="front">Front</option><option value="side">Left</option><option value="top">Top</option></select>
+      </div>
+      <div id="error" role="alert" hidden></div>
+      <div class="stage-bottom"><span id="pose">Inspection stance</span><span>Drag to orbit · scroll to zoom · click any part</span></div>
+      <div id="selection-label" hidden></div>
+    </section>
+    <aside>
+      <section class="controls">
+        <h2>Move a joint</h2>
+        <select id="joint" aria-label="Joint to inspect"></select>
+        <div class="joint-value"><label for="angle">Angle from inspection stance</label><output id="angle-label">0.0°</output></div>
+        <input id="angle" aria-label="Joint angle" type="range" min="-25" max="25" step="0.1" value="0">
+        <div class="bounds"><label>Lower / °<input id="lower" type="number" step="1" aria-label="Preview lower bound"></label><label>Upper / °<input id="upper" type="number" step="1" aria-label="Preview upper bound"></label><button id="sweep" aria-pressed="false">▶ Sweep</button></div>
+        <p class="note">Draft inspection bounds. Edits affect this preview only. Motion is kinematic; contact and hardware stops are not enforced.</p>
+        <div class="checkrow"><label><input id="axes" type="checkbox" checked> Joint axes</label><label><input id="tint" type="checkbox" checked> Link colors</label><label><input id="ghost" type="checkbox"> X-ray</label></div>
+        <div class="joint-value"><label for="explode">Separate parts</label><output id="explode-label">0 mm</output></div>
+        <input id="explode" type="range" min="0" max="40" value="0" step="1" aria-label="Explode individual parts">
+      </section>
+      <section class="parts-panel">
+        <div class="section-title"><h2>Every part</h2><span id="part-count">—</span></div>
+        <select id="link-filter" aria-label="Filter by moving link"><option value="all">All moving links</option></select>
+        <input id="search" type="search" placeholder="Find a part or its source ID" aria-label="Search all CAD parts">
+        <label class="checkrow"><input id="overlaps" type="checkbox"> Show CAD overlap parts only (78)</label>
+        <div class="checkrow"><label><input id="isolate" type="checkbox"> Isolate selected link</label><button id="clear">Clear selection</button></div>
+        <div id="part-list" role="list" aria-label="Exported CAD part instances"></div>
+      </section>
+      <section id="detail" aria-live="polite"><p>Select a part in the model or list to inspect its assigned link and CAD mass.</p></section>
+      <footer><strong>Geometry-based reconstruction</strong><span>Original meshes and CAD inertias. Grouping and operating limits remain subject to review.</span><button id="save-review">Save preview settings</button></footer>
+    </aside>
+  </main>
+  <script type="module" src="./inspection.js"></script>
+</body>
+</html>
