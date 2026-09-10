@@ -1,0 +1,27 @@
+{
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=hexapod-canonical-native-actuation-001-20260910.service",
+    "--property=RuntimeMaxSec=720",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=Environment=PYTHONDONTWRITEBYTECODE=1",
+    "--property=ExecStopPost=/usr/bin/python3 /home/orionh/HEXAPOD_runs/canonical_direct_20260910/forecast_pause_004/resume_forecasting.py",
+    "--property=Environment=PYTHONUNBUFFERED=1",
+    "/usr/bin/python3",
+    "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/actuation_host_001/launch_actuation_spark.py",
+    "--source",
+    "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/actuation_source_002",
+    "--asset",
+    "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/asset_001",
+    "--admission",
+    "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/native_inspection_003/inspection",
+    "--supervisor-source",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009",
+    "--output",
+    "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/native_actuation_001"
+  ],
+  "launched_unix": 1789074826.2456205,
+  "native_source_freeze_sha256": "1f02009cb22c1efbe4a0d0c7f7988d9d63b658d78e509ea444b7afafee6178c9"
+}

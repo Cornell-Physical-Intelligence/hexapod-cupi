@@ -1,0 +1,78 @@
+--- frozen003/run_inspection.py
++++ actuation001/run_actuation.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""One canonical zero-G import inspection. This is not a robot task or controller."""
++"""Canonical bounded coordinates/external-effort diagnostic. No servo, standing or learning."""
+ from pathlib import Path
+ import argparse
+ import importlib
+@@ -10,7 +10,7 @@
+ import time
+ import traceback
+ 
+-from inspection_contract import DT, STEPS, SCHEMA, read, sha, verify_inputs
++from actuation_contract import DT, STEPS, SCHEMA, read, sha, verify_inputs
+ 
+ TENSOR_API_SHA='b913fdb1a3c0cf04b62aa01d6ceaf7d96cfe577a510d0e02b71485018661c903'
+ TENSOR_PACKAGE_SHA='377af3ebe0786768209c0582f5032db37d712e1a45c6f58f00e5b5284158afd4'
+@@ -128,6 +128,7 @@
+ def main(argv=None):
+     parser=argparse.ArgumentParser(allow_abbrev=False)
+     parser.add_argument('--asset',type=Path,required=True)
++    parser.add_argument('--admission',type=Path,required=True)
+     parser.add_argument('--output',type=Path,required=True)
+     parser.add_argument('--preflight-only',action='store_true')
+     # Avoid importing Isaac in stdlib preflight, including full late launcher flags.
+@@ -140,7 +141,7 @@
+     args=parser.parse_args(argv)
+     if args.device!='cuda:0' or not args.headless:raise ValueError('Fixed native GPU headless inspection required')
+     args.output.mkdir(parents=True,exist_ok=False)
+-    output=args.output; app=None; rows=[]
++    output=args.output; app=None; rows=[]; experiment=None
+     state={'schema':SCHEMA,'identity':identity,'runtime_binding':identity['runtime_binding'],
+            'status':'running','physics_admitted':False,'physical_admission':False,'training_allowed':False,
+            'explicit_steps_completed':0,'checks':{},'errors':[]}
+@@ -172,7 +173,7 @@
+         save(output/'runtime_api.json',runtime)
+         state['checks']['sdk_source_bound']=True
+         cfg=SimulationCfg(dt=DT,gravity=(0.,0.,0.),device=args.device,render_interval=8,
+-                          physics=PhysxCfg(),visualizer_cfgs=[],log_dir=str(output/'isaac_logs'))
++                          physics=PhysxCfg(enable_external_forces_every_iteration=True),visualizer_cfgs=[],log_dir=str(output/'isaac_logs'))
+         sim=SimulationContext(cfg)
+         sim.stage.DefinePrim('/Robot','Xform').GetReferences().AddReference(str(args.asset.resolve()/'robot.usda'))
+         model=read(args.asset/'source/model.json')
+@@ -204,6 +205,8 @@
+                'attributes':{str(a.GetName()):clean(a.Get())for a in scene_prim.GetAttributes()}}
+         save(output/'native_scene.json',scene)
+         state['checks']['native_scene']=validate_scene(scene)
++        state['checks']['external_force_setting']=scene['attributes'].get('physxScene:enableExternalForcesEveryIteration') is True
++        if not state['checks']['external_force_setting']:raise ValueError('Explicit Phase B external-force setting not retained')
+         # Required native getters themselves fail closed; no fallback to authored attributes.
+         view=sim.physics_sim_view.create_articulation_view('/Robot/body')
+         rows.append(snapshot(view,sim,0));save(output/'samples.json',rows)
+@@ -228,6 +231,11 @@
+             validate_native_frames(rows[-1],native['body_names'],native['joint_names'],model)
+             if errors:raise RuntimeError('Native PhysX error event; raw event retained')
+         state['checks']['finite_samples']=validate_samples(rows)
++        from effort_experiment import Experiment
++        experiment=Experiment(view,sim,model,native,output,snapshot,save,to_list,errors,args.device)
++        result=experiment.run()
++        state['explicit_steps_completed']=STEPS+result['step_count']
++        state['checks']['coordinate_effort_cases']=result['status']=='completed'
+         sim.stage.GetRootLayer().Export(str(output/'resolved_after_stage.usda'))
+         state['native_error_events']=errors
+         import torch
+@@ -246,9 +254,11 @@
+              'warmup_motion_unobserved':True})
+         state['wall_s']=time.monotonic()-start
+         state['status']='completed'
+-        print('CANONICAL_NATIVE_INSPECTION_COMPLETED steps=8 physical_admission=false',flush=True)
++        print('CANONICAL_NATIVE_COORDINATE_EFFORT_COMPLETED physical_admission=false',flush=True)
+     except BaseException as e:
+         state['status']='failed';state['errors'].append(repr(e))
++        if experiment is not None:
++            state['explicit_steps_completed']=STEPS+experiment.sim.get_physics_step_count()-experiment.initial_counter
+         (output/'traceback.txt').write_text(traceback.format_exc())
+         print(traceback.format_exc(),flush=True)
+     finally:

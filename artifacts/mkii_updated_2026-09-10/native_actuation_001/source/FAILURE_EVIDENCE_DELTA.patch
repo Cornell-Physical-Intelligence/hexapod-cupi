@@ -1,0 +1,50 @@
+--- unlaunched_source001/effort_experiment.py
++++ source002/effort_experiment.py
+@@ -46,12 +46,23 @@
+ 
+  def arr(self,a):return self.wp.array(np.asarray(a,dtype=np.float32),dtype=self.wp.float32,device=self.device)
+ 
++ def failure_record(self,kind,row):
++  # Append rather than overwrite: final zero-force cleanup may also fail.
++  with(self.output/(kind+'.jsonl')).open('a')as stream:
++   stream.write(evidence_json(row))
++
+  def set_force(self,force):
+   x=np.asarray(force,dtype=np.float32)
+   if x.shape!=(1,18)or not np.isfinite(x).all()or np.max(abs(x))>BOUND_NM:raise ValueError('Unsafe external command')
+-  self.view.set_dof_actuation_forces(self.arr(x),self.ids)
+-  pre=np.asarray(self.to_list(self.view.get_dof_actuation_forces()),dtype=np.float32)
+-  if not np.array_equal(pre,x):raise ValueError('Native pre-step actuation input differs from software command')
++  record={'step_count':self.count,'physics_counter':self.sim.get_physics_step_count(),'requested_external_nm':x.tolist(),'operation':'set_dof_actuation_forces'}
++  try:
++   self.view.set_dof_actuation_forces(self.arr(x),self.ids)
++   record['operation']='get_dof_actuation_forces'
++   pre=np.asarray(self.to_list(self.view.get_dof_actuation_forces()),dtype=np.float32)
++   record['actual_native_input']=pre.tolist()
++   if not np.array_equal(pre,x):raise ValueError('Native pre-step actuation input differs from software command')
++  except Exception as e:
++   record['error']=repr(e);self.failure_record('failed_force_input',record);raise
+   return pre
+ 
+  def reset(self,label,q=None):
+@@ -64,11 +75,15 @@
+   # Synchronize unused target buffers explicitly; zero gains remain unchanged.
+   self.view.set_dof_position_targets(self.arr(q),self.ids)
+   self.view.set_dof_velocity_targets(self.arr(self.zero),self.ids)
+-  row=self.snapshot(self.view,self.sim,self.count)
+-  row.update(kind='reset',label=label,reset_index=self.reset_count,requested_q=q.tolist(),
+-   root_pose_xyzw=self.to_list(self.view.get_root_transforms()),root_com_velocity=self.to_list(self.view.get_root_velocities()),
+-   position_target=self.to_list(self.view.get_dof_position_targets()),velocity_target=self.to_list(self.view.get_dof_velocity_targets()),
+-   native_external_input=self.to_list(self.view.get_dof_actuation_forces()))
++  row={'kind':'reset','label':label,'reset_index':self.reset_count,'requested_q':q.tolist()}
++  try:
++   row.update(self.snapshot(self.view,self.sim,self.count))
++   for key,getter in [('root_pose_xyzw','get_root_transforms'),('root_com_velocity','get_root_velocities'),('position_target','get_dof_position_targets'),
++                      ('velocity_target','get_dof_velocity_targets'),('native_external_input','get_dof_actuation_forces')]:
++    row['active_getter']=getter;row[key]=self.to_list(getattr(self.view,getter)())
++   row.pop('active_getter')
++  except Exception as e:
++   row['error']=repr(e);self.failure_record('failed_reset_readback',row);raise
+   self.reset_stream.write(evidence_json(row));self.reset_stream.flush()
+   if self.sim.get_physics_step_count()!=self.last_counter:raise ValueError('Reset secretly stepped physics')
+   for k,expected in [('joint_position',q),('joint_velocity_sdk',self.zero),('position_target',q),('velocity_target',self.zero),('native_external_input',self.zero)]:
