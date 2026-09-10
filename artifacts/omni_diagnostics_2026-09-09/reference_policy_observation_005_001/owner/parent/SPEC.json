@@ -1,0 +1,521 @@
+{
+  "schema": "c_wave004_residual002_device_observation_v1",
+  "reference_freeze_sha256": "2c258dfccbae306d0a0e6c9231b744c7ef365cd059bf04553d47756ab7cdb0c3",
+  "batch_reference_sha256": "b3abc891eb2416e44c4269ef955769b0f046682e57ec4515c0cfdbd3ddebad8f",
+  "scalar_reference_sha256": "a32b22eba03ff6fdd6b87d612c96173c519c7d2b212cb367a9b1f8f28fcd697d",
+  "residual_source_sha256": "fbf65749c2d1ffc36b22986f71c0972ce7b1ecf82beebef57a0bd3e1be966e40",
+  "telemetry_oracle_sha256": "0e5d88348e362f8c026f6269703621fb92c5f0a2e591c04604f262e0b3b10077",
+  "profile": "formal_004",
+  "control_dt_s": 0.02,
+  "history_frames": 5,
+  "raw_reported_velocity_preserved": true,
+  "reported_velocity_physical_consistency_verified": false,
+  "finite_difference_rate_semantics": "separate50Hz_interval_average_not_instantaneous_velocity",
+  "old_checkpoint_compatible": false,
+  "policy_training_allowed": false,
+  "implementation_sha256": "f76e996a0d2deb11ad9fc47b99a08e16dfe0d5f9d7e68f6fef9f6140b0973454",
+  "joint_names_runtime": [
+    "revolute_1_1",
+    "revolute_1",
+    "revolute_2",
+    "revolute_2_5",
+    "revolute_1_5",
+    "revolute_2_4",
+    "revolute_1_7",
+    "revolute_1_6",
+    "revolute_2_6",
+    "revolute_4",
+    "revolute_1_4",
+    "revolute_2_3",
+    "revolute_5",
+    "revolute_1_2",
+    "revolute_2_1",
+    "revolute_3",
+    "revolute_1_3",
+    "revolute_2_2"
+  ],
+  "actor_width": 838,
+  "critic_width": 841,
+  "fields": [
+    {
+      "name": "sensor_history_raw_SDK_velocity_preserved",
+      "start": 0,
+      "stop": 315,
+      "source": "five63_value_frames"
+    },
+    {
+      "name": "history_valid",
+      "start": 315,
+      "stop": 320,
+      "source": "encoder"
+    },
+    {
+      "name": "episode_age",
+      "start": 320,
+      "stop": 321,
+      "source": "encoder"
+    },
+    {
+      "name": "executed_target_offset",
+      "start": 321,
+      "stop": 339,
+      "source": "known_controller"
+    },
+    {
+      "name": "executed_target_velocity",
+      "start": 339,
+      "stop": 357,
+      "source": "known_controller"
+    },
+    {
+      "name": "residual_position",
+      "start": 357,
+      "stop": 375,
+      "source": "known_controller"
+    },
+    {
+      "name": "residual_velocity",
+      "start": 375,
+      "stop": 393,
+      "source": "known_controller"
+    },
+    {
+      "name": "joint_position_interval_average_rate",
+      "start": 393,
+      "stop": 411,
+      "source": "separate50Hz_position_difference_not_instantaneous_velocity"
+    },
+    {
+      "name": "joint_position_interval_rate_valid",
+      "start": 411,
+      "stop": 412,
+      "source": "encoder"
+    },
+    {
+      "name": "sdk_reported_velocity_body_mps",
+      "start": 412,
+      "stop": 415,
+      "source": "raw_simulator_unverified_velocity"
+    },
+    {
+      "name": "sdk_reported_root_link_velocity_body_mps",
+      "start": 415,
+      "stop": 418,
+      "source": "raw_simulator_unverified_velocity"
+    },
+    {
+      "name": "world_up_body",
+      "start": 418,
+      "stop": 421,
+      "source": "measurement_frame"
+    },
+    {
+      "name": "reference_point_world_m_body",
+      "start": 421,
+      "stop": 439,
+      "source": "instrumented_simulator_contact_or_link_geometry"
+    },
+    {
+      "name": "contact_point_world_m_body",
+      "start": 439,
+      "stop": 457,
+      "source": "instrumented_simulator_contact_or_link_geometry"
+    },
+    {
+      "name": "sdk_reported_toe_velocity_body",
+      "start": 457,
+      "stop": 475,
+      "source": "raw_link_velocity_derived_unverified"
+    },
+    {
+      "name": "distal_contact",
+      "start": 475,
+      "stop": 481,
+      "source": "instrumented_simulator_contacts"
+    },
+    {
+      "name": "contact_point_valid",
+      "start": 481,
+      "stop": 487,
+      "source": "instrumented_simulator_contacts"
+    },
+    {
+      "name": "contact_valid",
+      "start": 487,
+      "stop": 493,
+      "source": "instrumented_simulator_contacts"
+    },
+    {
+      "name": "shaft_contact",
+      "start": 493,
+      "stop": 499,
+      "source": "instrumented_simulator_contacts"
+    },
+    {
+      "name": "coxa_contact",
+      "start": 499,
+      "stop": 505,
+      "source": "instrumented_simulator_contacts"
+    },
+    {
+      "name": "femur_contact",
+      "start": 505,
+      "stop": 511,
+      "source": "instrumented_simulator_contacts"
+    },
+    {
+      "name": "base_contact",
+      "start": 511,
+      "stop": 512,
+      "source": "instrumented_simulator_contacts"
+    },
+    {
+      "name": "contact_age_s",
+      "start": 512,
+      "stop": 518,
+      "source": "explicit_sensor_freshness"
+    },
+    {
+      "name": "reference.position",
+      "start": 518,
+      "stop": 521,
+      "source": "ideal_reference_vs_measured_pose"
+    },
+    {
+      "name": "reference.R0",
+      "start": 521,
+      "stop": 530,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.yaw",
+      "start": 530,
+      "stop": 531,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.command",
+      "start": 531,
+      "stop": 534,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.rate",
+      "start": 534,
+      "stop": 537,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.q",
+      "start": 537,
+      "stop": 555,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.v",
+      "start": 555,
+      "stop": 573,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.lower",
+      "start": 573,
+      "stop": 591,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.upper",
+      "start": 591,
+      "stop": 609,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.neutral",
+      "start": 609,
+      "stop": 627,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.anchors",
+      "start": 627,
+      "stop": 645,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.measured_anchors",
+      "start": 645,
+      "stop": 663,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.preload_world",
+      "start": 663,
+      "stop": 681,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.preload_q",
+      "start": 681,
+      "stop": 699,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.hold_until",
+      "start": 699,
+      "stop": 700,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.requested",
+      "start": 700,
+      "stop": 703,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.command_target",
+      "start": 703,
+      "stop": 706,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.factor",
+      "start": 706,
+      "stop": 707,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.flight_baseline_z",
+      "start": 707,
+      "stop": 708,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.flight_peak_z",
+      "start": 708,
+      "stop": 709,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.landing_trigger",
+      "start": 709,
+      "stop": 710,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.landing_origin",
+      "start": 710,
+      "stop": 713,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.landing_preload",
+      "start": 713,
+      "stop": 716,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.landing_correction",
+      "start": 716,
+      "stop": 717,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.landing_original_error",
+      "start": 717,
+      "stop": 718,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.landing_excursion",
+      "start": 718,
+      "stop": 719,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.stop_time",
+      "start": 719,
+      "stop": 720,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.quiet_time",
+      "start": 720,
+      "stop": 721,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.sw_start",
+      "start": 721,
+      "stop": 722,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.sw_duration",
+      "start": 722,
+      "stop": 723,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.sw_coeff",
+      "start": 723,
+      "stop": 741,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.sw_hcoeff",
+      "start": 741,
+      "stop": 759,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.sw_end",
+      "start": 759,
+      "stop": 762,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.land_start",
+      "start": 762,
+      "stop": 763,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.land_duration",
+      "start": 763,
+      "stop": 764,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.land_coeff",
+      "start": 764,
+      "stop": 782,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.land_end",
+      "start": 782,
+      "stop": 785,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.a",
+      "start": 785,
+      "stop": 803,
+      "source": "known_reference"
+    },
+    {
+      "name": "reference.flight_seen",
+      "start": 803,
+      "stop": 804,
+      "source": "known_reference_validity"
+    },
+    {
+      "name": "reference.descent_seen",
+      "start": 804,
+      "stop": 805,
+      "source": "known_reference_validity"
+    },
+    {
+      "name": "reference.sw_active",
+      "start": 805,
+      "stop": 806,
+      "source": "known_reference_validity"
+    },
+    {
+      "name": "reference.land_active",
+      "start": 806,
+      "stop": 807,
+      "source": "known_reference_validity"
+    },
+    {
+      "name": "reference.flight_valid",
+      "start": 807,
+      "stop": 808,
+      "source": "known_reference_validity"
+    },
+    {
+      "name": "reference.landing_metadata_valid",
+      "start": 808,
+      "stop": 809,
+      "source": "known_reference_validity"
+    },
+    {
+      "name": "reference.stop_valid",
+      "start": 809,
+      "stop": 810,
+      "source": "known_reference_validity"
+    },
+    {
+      "name": "reference.quiet_valid",
+      "start": 810,
+      "stop": 811,
+      "source": "known_reference_validity"
+    },
+    {
+      "name": "reference.position_float32",
+      "start": 811,
+      "stop": 812,
+      "source": "known_reference_validity"
+    },
+    {
+      "name": "reference.mode",
+      "start": 812,
+      "stop": 820,
+      "source": "known_reference_transition_state"
+    },
+    {
+      "name": "reference.current_leg",
+      "start": 820,
+      "stop": 827,
+      "source": "known_reference_transition_state"
+    },
+    {
+      "name": "reference.order",
+      "start": 827,
+      "stop": 833,
+      "source": "known_reference_transition_state"
+    },
+    {
+      "name": "reference.flight_count",
+      "start": 833,
+      "stop": 834,
+      "source": "known_reference_transition_state"
+    },
+    {
+      "name": "reference.contact_count",
+      "start": 834,
+      "stop": 835,
+      "source": "known_reference_transition_state"
+    },
+    {
+      "name": "reference.liftoffs",
+      "start": 835,
+      "stop": 836,
+      "source": "known_reference_transition_state"
+    },
+    {
+      "name": "reference.touchdowns",
+      "start": 836,
+      "stop": 837,
+      "source": "known_reference_transition_state"
+    },
+    {
+      "name": "reference.landing_gap",
+      "start": 837,
+      "stop": 838,
+      "source": "known_reference_transition_state"
+    }
+  ],
+  "excluded_reference_fields": {
+    "time": "represented by verified episode age and sample sequence",
+    "episode": "identity guard, not a policy feature",
+    "ready": "invalid rows cannot be encoded",
+    "failure": "invalid rows cannot be encoded",
+    "support_margin": "prior-sample diagnostic, not transition state",
+    "body_error": "prior-sample diagnostic; current desired/measured error is encoded",
+    "stance_drift": "prior-sample diagnostic; current feet and stored anchors are encoded",
+    "reference_points": "prior diagnostic, including uninitialized reset zeros; reconstructable from trajectories/anchors"
+  },
+  "critic_extra": "privileged_simulator_reported_twist_unverified_not_physical_truth",
+  "schema_sha256": "e4fc56a5de8bc1d32cbb1483f44b2c328b613bc3381b33a7b5088606225a16d1"
+}

@@ -1,0 +1,56 @@
+{
+  "platform": "macOS-15.6-arm64-arm-64bit",
+  "torch_version": "2.14.0",
+  "torch_threads": 1,
+  "device": "cpu",
+  "dtype": "float64",
+  "scope": "Complete validated synthetic SDK packing separately from typed reference/residual encoding and nonduplicate history update; measured local only",
+  "excluded": "Physics, reference state machine, PPO, actual Isaac sensor timestamp integration, GPU, setup",
+  "rows": [
+    {
+      "environments": 1,
+      "device_pack": {
+        "median_ms": 0.4947080014972016,
+        "min_ms": 0.472542000352405,
+        "max_ms": 0.5126670002937317,
+        "samples": 25
+      },
+      "observation_and_history": {
+        "median_ms": 1.5760409951326437,
+        "min_ms": 1.5543339977739379,
+        "max_ms": 1.6186659995582886,
+        "samples": 25
+      }
+    },
+    {
+      "environments": 32,
+      "device_pack": {
+        "median_ms": 0.5386250049923547,
+        "min_ms": 0.5293750000419095,
+        "max_ms": 0.5622079988825135,
+        "samples": 25
+      },
+      "observation_and_history": {
+        "median_ms": 1.8082079986925237,
+        "min_ms": 1.7657499993219972,
+        "max_ms": 1.8528749933466315,
+        "samples": 25
+      }
+    },
+    {
+      "environments": 128,
+      "device_pack": {
+        "median_ms": 0.6118339952081442,
+        "min_ms": 0.5715000006603077,
+        "max_ms": 0.6891670054756105,
+        "samples": 25
+      },
+      "observation_and_history": {
+        "median_ms": 2.507750003132969,
+        "min_ms": 2.4143749978975393,
+        "max_ms": 2.6950419996865094,
+        "samples": 25
+      }
+    }
+  ]
+}

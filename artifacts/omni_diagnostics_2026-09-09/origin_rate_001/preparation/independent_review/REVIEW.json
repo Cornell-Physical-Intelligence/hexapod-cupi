@@ -1,0 +1,22 @@
+{
+  "scope": "Bounded matched-origin diagnostic acquisition; no walking, PPO, quiet-gate relaxation or velocity-fidelity qualification",
+  "owner_freeze_sha256": "3d0a87dd9e167922a470a6d8fea970c55fccd0e95852ba0dc640d833075c300d",
+  "source_map_sha256": "47d190425712e7aec39c959fed3fa76aaaef9af6962860593cc0b558cd0df63f",
+  "reviewed_sources": {
+    "matched_origin.py": "60e50a464a46ed850bc8b180194e2fd6dfbe2fd641bc405ffe24d91aaf38e3e7",
+    "run_origin_physics.py": "f9e2494a2de315007aba0485b713e2234d82ab29df56d4ab1502c9b1b2a87067",
+    "launch_origin_physics_spark.py": "7095c68d42383ebb1ac684bd82489ffde4da595a7c8719053c80019300e7c33c",
+    "origin_contract.py": "ed50ee47b7c5ca25e9b084a3477cf35f679a3e0fcd272066536a0065bf185648",
+    "origin_metrics.py": "b3dee783ed986e01c61cc29e4dfec9f68df6518b2c5bb6e8d957fe169978ee52",
+    "origin_campaign_review.py": "4fa9f9875860d7faddd58a96ec30a1bf6f70d0e8f08a53e47dc0375571e33c34",
+    "sdk_origins_api.json": "9a02e5d73e16bff71971756061395369ff05e0419aa0a308a16f9e19ab0bd471",
+    "sdk_write_api.json": "6ca6ccd1340d3e3f3f3433f2d6f359f2fd05be8f14b35634549273e1872dbcc3",
+    "sdk_target_setter_api.json": "6312910d1ffe008fc7573f66c9bad3a6d1ff86aeed51d3f2e28c013a52ce1e0e"
+  },
+  "independent_tests": {
+    "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s tmp/reference_origin_adapter_001 -p test_*.py",
+    "passed": 15,
+    "seconds": 0.358
+  },
+  "verdict": "No concrete blocker found for the declared bounded acquisition; first-run ground and exact generalized-state readback must still pass."
+}

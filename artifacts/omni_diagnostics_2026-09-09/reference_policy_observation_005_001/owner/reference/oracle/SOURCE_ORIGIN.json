@@ -1,0 +1,42 @@
+{
+  "scope": "Scalar qualified-liftoff CPU candidate; no GPU, physical, PPO or checkpoint admission",
+  "parent_freeze_sha256": "dedd5a2deb21703fe1d8713fcc2c276339a58db3f14b9ab85fb65a3f2ee7e834",
+  "parent_wave_reference_sha256": "a32b22eba03ff6fdd6b87d612c96173c519c7d2b212cb367a9b1f8f28fcd697d",
+  "runtime_dependencies": {
+    "wave_reference.py": "8bacf0c61f7fdc6d43d9f9ebdb5adc643b026495bb303ec3c18157d121c78893",
+    "wave_math.py": "75353a885bd1e11795dff81458a7e547bbd2611769ef905b3f372c1814a6b12f",
+    "serial_geometry.py": "8c0451d151e077830986d8deb259129b4eb49f3750110883dad99683e8d7f8d3",
+    "geometry/candidate_c_reference.json": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+    "geometry/f050_t060.urdf": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c"
+  },
+  "runtime_changed_from_parent": [
+    "wave_reference.py"
+  ],
+  "diagnosis_freeze_sha256": "2dfed45dbe7746bb30258e090b6ed727c9d02e6c093977df21d445193395064e",
+  "source008_trace_sha256": "d76775110a5db0e2f61c972342b1a204d18dbf0c16d494239e5b9e431b6df742",
+  "new_config_parameters": [],
+  "new_mode": "unloading",
+  "changed_state_semantics": {
+    "flight_seen": "Two consecutive absent-contact samples AND measured minimum lift before apex; latched until next swing/reset",
+    "flight_count": "Current consecutive absent-contact run; reset on any contact"
+  },
+  "new_state_fields": [
+    "flight_qualification_semantics",
+    "raw_force_free_samples",
+    "raw_force_free_runs",
+    "unqualified_contact_returns",
+    "last_unqualified_return_time_s",
+    "last_unqualified_run_samples",
+    "last_unqualified_lift_m"
+  ],
+  "physical_gate_modules_edited": false,
+  "wave004_tensor_observation_compatible": false,
+  "historical_input_hashes": {
+    "inputs/actual_wave002_reference_states.json": "fae66f25c0089ab58d467a3869ee835f822346b7de88ef08d5fdface77a04cf4",
+    "inputs/actual_wave002_trace.npz": "a1e2a96251325b49431c27ce80506117ae713359d680bfd55d4892f72dd12d67",
+    "inputs/actual_wave003_trace.npz": "f6a8c120ba9ce25167df1eeae19e3954d2cead2daa71bc67ad15c6696cd17609",
+    "inputs/actual_wave004_trace.npz": "0b18528e8d537cce7c3591d407970bf81348fa34b09e95080d30c2b6c7c813ee",
+    "inputs/actual_wave008_trace.npz": "d76775110a5db0e2f61c972342b1a204d18dbf0c16d494239e5b9e431b6df742",
+    "inputs/oracle_wave004.py": "a32b22eba03ff6fdd6b87d612c96173c519c7d2b212cb367a9b1f8f28fcd697d"
+  }
+}

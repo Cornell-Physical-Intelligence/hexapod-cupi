@@ -1,0 +1,128 @@
+{
+  "rows": [
+    {
+      "replicas": 1,
+      "phases": [
+        "stance",
+        "swing",
+        "landing"
+      ],
+      "frozen_scalar": {
+        "seconds": [
+          0.0005732910067308694,
+          0.0005623329998343252,
+          0.0005629170045722276,
+          0.0005579170028795488,
+          0.0005490839976118878,
+          0.0005665409989887848,
+          0.0005535419986699708
+        ],
+        "median_s": 0.0005623329998343252
+      },
+      "batched": {
+        "seconds": [
+          0.0035659999994095415,
+          0.0035416250029811636,
+          0.003550416004145518,
+          0.003514999996696133,
+          0.0035346250006114133,
+          0.0035287079954287037,
+          0.003535625000949949
+        ],
+        "median_s": 0.003535625000949949
+      },
+      "q_max_error_rad": 0.0,
+      "speedup": 0.1590476930339722
+    },
+    {
+      "replicas": 32,
+      "phases": [
+        "stance",
+        "swing",
+        "landing"
+      ],
+      "frozen_scalar": {
+        "seconds": [
+          0.01837354199960828,
+          0.019090707995928824,
+          0.01809200000570854,
+          0.018375291998381726,
+          0.018114208003680687,
+          0.0180306250040303,
+          0.0182608339964645
+        ],
+        "median_s": 0.0182608339964645
+      },
+      "batched": {
+        "seconds": [
+          0.0047078749994398095,
+          0.0046094999997876585,
+          0.004640250001102686,
+          0.004622583001037128,
+          0.004586957998981234,
+          0.00455737500305986,
+          0.004602916997100692
+        ],
+        "median_s": 0.0046094999997876585
+      },
+      "q_max_error_rad": 4.440892098500626e-16,
+      "speedup": 3.9615650281604737
+    },
+    {
+      "replicas": 128,
+      "phases": [
+        "stance",
+        "swing",
+        "landing"
+      ],
+      "frozen_scalar": {
+        "seconds": [
+          0.07188479099568212,
+          0.0728194160037674,
+          0.07235837500047637,
+          0.07425491599860834,
+          0.07260837499779882,
+          0.07399849999637809,
+          0.07379654199758079
+        ],
+        "median_s": 0.0728194160037674
+      },
+      "batched": {
+        "seconds": [
+          0.0071815420014900155,
+          0.007226208996144123,
+          0.006943417000002228,
+          0.00714108299871441,
+          0.00701791699975729,
+          0.00705404100153828,
+          0.00698454200028209
+        ],
+        "median_s": 0.00705404100153828
+      },
+      "q_max_error_rad": 4.440892098500626e-16,
+      "speedup": 10.323078075090237
+    }
+  ],
+  "local_platform": "macOS-15.6-arm64-arm-64bit",
+  "python": "3.12.12 (main, Jan 27 2026, 23:41:44) [Clang 21.1.4 ]",
+  "torch_version": "2.14.0",
+  "torch_threads": 1,
+  "dtype": "float64_with_explicit_legacy_position_rounding",
+  "device": "cpu",
+  "repeats": 7,
+  "source_sha256": {
+    "batch_wave.py": "784d25a7598b21acb2633f27355ba5074023af78d790a36bed89d99094466637",
+    "benchmark_wave.py": "d68cedeadbc75200509b1a84d56c5a6082a81eaee56dc0f03f5c7a542d2a0a4a",
+    "test_batch_wave.py": "79b1cdea65997887c98bcc3d5f03ce89a5f780ae049336a88bc43198c9b52d1d",
+    "source_contract.json": "c2f1745ac089c2ecba7c97fe6d547e383a1078595ba5e91bbb523a0374ac9325"
+  },
+  "scope": "One complete reference step, including dynamic validation and typed state output; setup/cloning/CPU fixture packing excluded",
+  "physics_and_observation_and_PPO_included": false,
+  "Spark_or_GPU_measured": false,
+  "notes": [
+    "Same mixed phase states and commands for both implementations.",
+    "Batched output clones its full typed state; scalar output builds its normal state dictionary.",
+    "The legacy198-step position-rounding prediction scan is included for every row, includingquiet rows.",
+    "No physical walking or policy admission is inferred."
+  ]
+}

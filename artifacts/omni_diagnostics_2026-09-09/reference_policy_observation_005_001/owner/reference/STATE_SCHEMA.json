@@ -1,0 +1,180 @@
+{
+  "version": "wave005_batched_reference_state_v2",
+  "float64_fields": {
+    "time": [],
+    "position": [
+      3
+    ],
+    "R0": [
+      3,
+      3
+    ],
+    "yaw": [],
+    "command": [
+      3
+    ],
+    "rate": [
+      3
+    ],
+    "q": [
+      18
+    ],
+    "v": [
+      18
+    ],
+    "lower": [
+      18
+    ],
+    "upper": [
+      18
+    ],
+    "neutral": [
+      6,
+      3
+    ],
+    "anchors": [
+      6,
+      3
+    ],
+    "measured_anchors": [
+      6,
+      3
+    ],
+    "preload_world": [
+      6,
+      3
+    ],
+    "preload_q": [
+      6,
+      3
+    ],
+    "hold_until": [],
+    "requested": [
+      3
+    ],
+    "command_target": [
+      3
+    ],
+    "factor": [],
+    "flight_baseline_z": [],
+    "flight_peak_z": [],
+    "landing_trigger": [],
+    "landing_origin": [
+      3
+    ],
+    "landing_preload": [
+      3
+    ],
+    "landing_correction": [],
+    "landing_original_error": [],
+    "landing_excursion": [],
+    "stop_time": [],
+    "quiet_time": [],
+    "sw_start": [],
+    "sw_duration": [],
+    "sw_coeff": [
+      6,
+      3
+    ],
+    "sw_hcoeff": [
+      6,
+      3
+    ],
+    "sw_end": [
+      3
+    ],
+    "land_start": [],
+    "land_duration": [],
+    "land_coeff": [
+      6,
+      3
+    ],
+    "land_end": [
+      3
+    ],
+    "support_margin": [],
+    "body_error": [],
+    "stance_drift": [
+      6
+    ],
+    "reference_points": [
+      6,
+      3
+    ],
+    "a": [
+      18
+    ],
+    "unqualified_return_time": [],
+    "unqualified_lift": []
+  },
+  "bool_fields": [
+    "ready",
+    "flight_seen",
+    "descent_seen",
+    "sw_active",
+    "land_active",
+    "flight_valid",
+    "landing_metadata_valid",
+    "stop_valid",
+    "quiet_valid",
+    "position_float32",
+    "unqualified_return_valid"
+  ],
+  "int64_fields": [
+    "episode",
+    "failure",
+    "mode",
+    "current_leg",
+    "order",
+    "flight_count",
+    "contact_count",
+    "liftoffs",
+    "touchdowns",
+    "landing_gap",
+    "raw_force_free_samples",
+    "raw_force_free_runs",
+    "unqualified_contact_returns",
+    "last_unqualified_run_samples"
+  ],
+  "modes": [
+    "hold",
+    "swing",
+    "awaiting_contact",
+    "contact_hold",
+    "stopping_reference_motion",
+    "reference_quiet_hold",
+    "landing_blend",
+    "awaiting_landing_support",
+    "unloading"
+  ],
+  "failures": {
+    "0": "valid",
+    "1": "not reset",
+    "2": "malformed numeric measured state",
+    "3": "terminal or nonfoot contact",
+    "4": "fewer than five measured support contacts",
+    "5": "projected COM support margin insufficient",
+    "6": "actual body tracking error",
+    "7": "planted toe drift",
+    "8": "returned contact lacks flight/apex/descent",
+    "9": "returned contact speed",
+    "10": "landing endpoint exceeds12mm",
+    "11": "landing excursion exceeds12mm",
+    "12": "landing foot moved beyond contact region",
+    "13": "landing completion disagreement",
+    "14": "landing contact loss exceeds100ms",
+    "15": "liftoff not observed or touchdown missing",
+    "16": "next wave leg lacks initial contact",
+    "17": "IK invalid; no executable clipped target",
+    "18": "reference joint margin",
+    "19": "reference discrete rate budget",
+    "20": "time mismatch",
+    "21": "invalid requested command",
+    "22": "reset preload or measured FK invalid",
+    "23": "reset velocity or limits invalid",
+    "24": "reset episode identity is not fresh",
+    "25": "liftoff lacks measured2mm clearance by apex"
+  },
+  "actor_observation": false,
+  "raw_slots_per_replica": 339
+}

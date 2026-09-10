@@ -1,0 +1,15 @@
+..../Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/omni_reference_wave_005/serial_geometry.py:10: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_new.cpp:256.)
+  def tensor(x):return torch.as_tensor(x,dtype=DTYPE,device='cpu')
+..............F.........
+======================================================================
+FAIL: test_two_micrometre_force_free_samples_return_to_unloading (test_liftoff_qualification.QualificationTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/omni_reference_wave_005/test_liftoff_qualification.py", line 29, in test_two_micrometre_force_free_samples_return_to_unloading
+    self.assertAlmostEqual(r.last_unqualified_lift_m,8e-6,places=12)
+AssertionError: 8.434693952000575e-06 != 8e-06 within 12 places (4.346939520005755e-07 difference)
+
+----------------------------------------------------------------------
+Ran 28 tests in 63.216s
+
+FAILED (failures=1)
