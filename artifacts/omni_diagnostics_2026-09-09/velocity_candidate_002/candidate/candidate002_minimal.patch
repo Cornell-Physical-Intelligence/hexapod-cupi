@@ -1,0 +1,31 @@
+--- candidate001/candidate_runner.py
++++ candidate002/candidate_runner.py
+@@ -6,7 +6,8 @@
+ import torch
+ from velocity_action import LINEAGE,verify_new_lineage_checkpoint
+ 
+-INITIAL_STD=.05
++INITIAL_STD=.005
++SAMPLED_CALIBRATION_STEPS=1000
+ LEARNING_RATE=1.e-4
+ IDENTITY_KEYS={'variant','urdf_sha256','plan_sha256','stance_index','source_sha256'}
+ 
+@@ -130,7 +131,7 @@
+     env.omni_diagnostic_enabled=True
+     runner.alg.eval_mode()
+     try:
+-        for label,stochastic,steps in [('zero_mean',False,250),('sampled_std_005',True,500)]:
++        for label,stochastic,steps in [('zero_mean',False,250),('sampled_std_0p005',True,SAMPLED_CALIBRATION_STEPS)]:
+             env.reset(seed=7057);env.episode_length_buf.zero_();env.set_evaluation_targets(torch.zeros(env.num_envs,3,device=env.device))
+             samples=[];raw=[]
+             for i in range(steps):
+@@ -193,6 +194,9 @@
+         raise ValueError('Explicit new target-velocity architecture required; no reference or old repair lineage')
+     if set(omni.get('velocity_candidate',{}))!={'profile','max_acceleration_rad_s2'}:raise ValueError('Explicit controller profile and acceleration required')
+     config=VelocityActionConfig(**omni['velocity_candidate'])
++    if (omni.get('initial_exploration_std')!=INITIAL_STD
++        or omni.get('sampled_calibration_control_steps')!=SAMPLED_CALIBRATION_STEPS):
++        raise ValueError('Candidate 002 requires explicit std 0.005 and 20 s sampled calibration in the matched plan')
+     override=omni.get('overrides',{})
+     if override.get('observation_noise_scale')!=1. or override.get('target_filter_time_constant_s')!=0.:
+         raise ValueError('Initial comparison requires observation noise 1 and position filter off')

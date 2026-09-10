@@ -1,0 +1,19 @@
+{
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=hexapod-omni-velocity-probe-002-20260910.service",
+    "--property=RuntimeMaxSec=1320",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=Environment=PYTHONDONTWRITEBYTECODE=1",
+    "--property=ExecStopPost=/usr/bin/python3 /home/orionh/HEXAPOD_runs/mock_length_study_20260909/forecast_pause_019/resume_forecasting.py",
+    "/usr/bin/python3",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_velocity_source_002/tools/launch_velocity_probe_spark.py",
+    "--source",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_velocity_source_002",
+    "--output",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_velocity_probe_002"
+  ],
+  "launched_unix": 1789006589.7092118
+}

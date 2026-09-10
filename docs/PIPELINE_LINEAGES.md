@@ -270,3 +270,10 @@ The current release check now targets `isaaclab/deploy/stage2_c_priority_2026090
 ### Terrain-entry adapter and reference feasibility
 
 `isaaclab/deploy/stage2_c_terrain_entry_20260910_pipeline.sha256` is the new source-check destination. It adds the guarded two-phase full-C standing launcher, type-preserving Mesh reference, configuration deep copy and installed XYZW rotation convention, plus their regression tests. The frozen reference feasibility payload map, safe replay helper and terrain attempts 002/003 result maps are bound separately. The C-study runtime, production packages, robot inputs, acceptance gates and earlier manifests remain unchanged. CI and the default checker select this new filename. Runtime results require their own source and admission identities; the CPU reference studies do not admit a controller.
+
+
+### Contact completeness and explicit quaternion telemetry
+
+`isaaclab/deploy/stage2_c_contact_telemetry_20260910_pipeline.sha256` is the new source-check destination. Shared pre-reset capture preserves installed SDK XYZW and explicitly converts the WXYZ field used by quiet scoring; an independent 10° yaw regression rejects the unchanged 2° heading bound. Terrain point/friction sensors reserve at least 128 contact records per prim, and the guarded host rejects incomplete contact/friction data reported in the completed log even when raw metrics pass. Two new test modules, the reset-diagnostic/terrain-004 evidence maps and frozen velocity-candidate-001 source/result maps and replay helper are included. Prior manifests, checkpoints, runtime and acceptance gates remain unchanged.
+
+The active velocity comparisons keep their own immutable source, including the candidate-specific quaternion conversion. This main release does not alter those running sources or transfer a previous admission. CI and the default checker select the new filename; later terrain capacity validation still needs fresh source and standing evidence.

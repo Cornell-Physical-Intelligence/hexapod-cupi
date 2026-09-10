@@ -1,0 +1,22 @@
+{
+  "flat": {
+    "log_sha256": "cb79880d91583c68920047190da8467e0fb8c29f2f15020ce1caa588cae3d54a",
+    "incomplete_contact_warning_count": 0,
+    "first_warning": null,
+    "last_warning": null,
+    "reported_capacities": []
+  },
+  "terrain": {
+    "log_sha256": "d1de42d8de77a3f11da5a187db8d063f14e3824e7b0fc19da30734cba0ea9867",
+    "incomplete_contact_warning_count": 2796,
+    "first_warning": "2026-09-10T01:36:47Z [21,246ms] [Warning] [omni.physx.tensors.plugin] Incomplete contact data is reported in GpuRigidContactView::getContactData because there are more contact data points than specified maxContactDataCount = 8.",
+    "last_warning": "2026-09-10T01:37:41Z [74,809ms] [Warning] [omni.physx.tensors.plugin] Incomplete contact data is reported in GpuRigidContactView::getContactData because there are more contact data points than specified maxContactDataCount = 8.",
+    "reported_capacities": [
+      8
+    ]
+  },
+  "standing_admitted": false,
+  "affected_sensors": "Six tibia contact sensors request track_contact_points and track_friction_forces with max_contact_data_count_per_prim=8. Runtime warning does not identify which view; support gate reports minimum5.",
+  "interpretation": "Preserve raw rejected contact gate. Buffer overflow prevents complete distal-versus-shaft interpretation; no terrain standing admission.",
+  "next_step": "Increase only per-prim contact capacity in a new config, add explicit overflow rejection, CPU verify installed API; no new GPU launch authorized."
+}

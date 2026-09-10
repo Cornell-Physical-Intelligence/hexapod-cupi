@@ -110,7 +110,11 @@ def sample_masks(age_s, terminated, settle_s):
 
 
 def capture_step(env, terms):
-    """Called from rewards before command resampling and automatic reset."""
+    """Capture pre-reset state; Isaac XYZW is retained raw and converted to WXYZ.
+
+    Both quaternion keys explicitly describe their stored component order. The
+    historical WXYZ key feeds quiet_metrics; old mislabeled payloads stay frozen.
+    """
     d = env._robot.data
     from isaaclab.utils.math import quat_apply_inverse, quat_apply
     fd_world = (d.root_pos_w.torch - env.omni_diagnostic_start_position) / env.step_dt
@@ -138,7 +142,8 @@ def capture_step(env, terms):
         "gyro_navigation_rad_s": env._vector_in_command_frame(d.root_ang_vel_b.torch),
         "finite_difference_heading_rate_rad_s": fd_heading_rate,
         "position_world_m": d.root_pos_w.torch,
-        "quaternion_world_wxyz": d.root_quat_w.torch,
+        "quaternion_world_xyzw": d.root_quat_w.torch,
+        "quaternion_world_wxyz": d.root_quat_w.torch[:, [3, 0, 1, 2]],
         "projected_gravity": d.projected_gravity_b.torch,
         "terminated": env.reset_terminated,
         "truncated": env.reset_time_outs,

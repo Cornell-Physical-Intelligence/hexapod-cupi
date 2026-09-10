@@ -355,3 +355,10 @@ A standing raw-action penalty measures sampled normalized intent before wrapper 
 The separately versioned [CPU reference feasibility review](../artifacts/omni_diagnostics_2026-09-09/reference_feasibility_001/README.md) preserves failed workspace/rate/transition tests. It motivates support-aware swing/stop timing and a stateful target-velocity action comparison. These are candidate control interfaces, not new acceptance thresholds or qualified gait behavior. Both require executable controller state in observations, exact reset handling and a new checkpoint lineage if action meaning changes. Keep the original PPO actor/checkpoint frozen.
 
 The diagnostic 0.03 rad/20 ms target limiter and archived formal 0.04 comparison remain separate. Benchmark 1's reference authoring bypassed the inherited limiter; its original video is a visual target, not a retrospective formal pass. Measure commanded versus admitted twist, actual target/velocity/acceleration, joint motion, contact slip and motor demand through starts, stops and both turn signs. A smooth reference or CPU test cannot establish quiet physical balance.
+
+
+### C-study measurement completeness
+
+Shared diagnostic capture records the installed SDK's raw `quaternion_world_xyzw` and explicitly reordered `quaternion_world_wxyz` for quiet scoring. Do not infer old payload component order from its label: preserve original traces and perform versioned reanalysis before reusing historical heading passes. The 2° quiet-heading bound is unchanged.
+
+Full-C terrain admission additionally requires a completed-log check with no reported incomplete contact/friction data. A raw contact gate cannot establish support when its buffer overflowed. The adapter reserves at least 128 point/friction records per prim, preserving larger settings; force, support and motor limits remain fixed. Corrected buffer capacity still requires fresh simulator evidence.

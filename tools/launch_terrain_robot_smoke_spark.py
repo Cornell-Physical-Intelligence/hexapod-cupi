@@ -15,6 +15,7 @@ import uuid
 
 from launch_length_training_spark import live_competitors, save, verified_source
 from launch_length_study_spark import preflight, resources
+from terrain_contact_evidence import audit_contact_log
 
 VARIANT = "f050_t060"
 FIXTURE = "train_ramp_1103"
@@ -133,6 +134,11 @@ def run_owned(args, phase):
                             report["competitors"] = competitors
                             raise RuntimeError("Unrelated CUDA process appeared; yielding this owned job")
                 time.sleep(5)
+        contact_audit = audit_contact_log(args.output / "logs" / (phase + ".log"))
+        save(args.output / "jobs" / (phase + "_contact_data_audit.json"), contact_audit)
+        report["contact_data_completeness"] = contact_audit
+        if not contact_audit["passed"]:
+            raise RuntimeError(f"{phase} has incomplete contact/friction data; standing is not admitted")
         state_path = args.output / phase / "state.json"
         state = json.loads(state_path.read_text()) if state_path.is_file() else {}
         if process.returncode != 0 or state.get("status") != "completed" or (args.output / phase / "failure.json").exists():

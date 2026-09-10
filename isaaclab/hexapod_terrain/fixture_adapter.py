@@ -113,8 +113,12 @@ def adapt_flat_cfg_for_fixture_smoke(cfg, spec, *, admission, asset_identity, pu
     collider_path = "/World/ground/terrain"
     for sensor in (result.base_contact_sensor, result.coxa_contact_sensor,
                    *result.feet_contact_sensors, *result.femur_contact_sensors):
-        if sensor.track_contact_points:
+        if sensor.track_contact_points or getattr(sensor, "track_friction_forces", False):
             sensor.filter_prim_paths_expr = [collider_path]
+            # Mesh contacts overflowed the original plane-sized budget of8.
+            # This is buffer capacity only; force/shaft/torque thresholds stay fixed.
+            sensor.max_contact_data_count_per_prim = max(
+                128, getattr(sensor, "max_contact_data_count_per_prim", None) or 0)
     x, y = entry["start_xy_m"]
     result.robot.init_state.pos = (x, y, result.robot.init_state.pos[2])
     half_yaw = spec.start_body_yaw_rad / 2
