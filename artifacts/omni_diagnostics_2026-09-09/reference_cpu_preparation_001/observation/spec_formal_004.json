@@ -1,0 +1,463 @@
+{
+  "actor_width": 740,
+  "checkpoint_compatible_with_prior_lineages": false,
+  "control_dt_s": 0.02,
+  "critic_extra": {
+    "name": "privileged_true_navigation_velocity",
+    "start": 740,
+    "stop": 743
+  },
+  "critic_width": 743,
+  "deployment_qualified": false,
+  "encoder_implementation_sha256": "180b41dd85caea2706e636b956ed4f9e2535f3996ca4c56f43def93d67589a36",
+  "fields": [
+    {
+      "name": "sensor_history",
+      "source": "measurement_and_known_commands",
+      "start": 0,
+      "stop": 315,
+      "width": 315
+    },
+    {
+      "name": "history_valid",
+      "source": "encoder",
+      "start": 315,
+      "stop": 320,
+      "width": 5
+    },
+    {
+      "name": "episode_age",
+      "source": "encoder",
+      "start": 320,
+      "stop": 321,
+      "width": 1
+    },
+    {
+      "name": "executable_target_offset",
+      "source": "known_controller",
+      "start": 321,
+      "stop": 339,
+      "width": 18
+    },
+    {
+      "name": "executable_target_velocity",
+      "source": "known_controller",
+      "start": 339,
+      "stop": 357,
+      "width": 18
+    },
+    {
+      "name": "residual_position",
+      "source": "known_controller",
+      "start": 357,
+      "stop": 375,
+      "width": 18
+    },
+    {
+      "name": "residual_velocity",
+      "source": "known_controller",
+      "start": 375,
+      "stop": 393,
+      "width": 18
+    },
+    {
+      "name": "measured_body_linear_velocity",
+      "source": "measurement",
+      "start": 393,
+      "stop": 396,
+      "width": 3
+    },
+    {
+      "name": "world_up_body",
+      "source": "measurement_frame",
+      "start": 396,
+      "stop": 399,
+      "width": 3
+    },
+    {
+      "name": "measured_toes_body",
+      "source": "measurement",
+      "start": 399,
+      "stop": 417,
+      "width": 18
+    },
+    {
+      "name": "measured_toe_world_velocity_body",
+      "source": "measurement",
+      "start": 417,
+      "stop": 435,
+      "width": 18
+    },
+    {
+      "name": "distal_contact",
+      "source": "measurement",
+      "start": 435,
+      "stop": 441,
+      "width": 6
+    },
+    {
+      "name": "contact_valid",
+      "source": "measurement",
+      "start": 441,
+      "stop": 447,
+      "width": 6
+    },
+    {
+      "name": "contact_age",
+      "source": "measurement",
+      "start": 447,
+      "stop": 453,
+      "width": 6
+    },
+    {
+      "name": "contact_point_valid",
+      "source": "measurement",
+      "start": 453,
+      "stop": 459,
+      "width": 6
+    },
+    {
+      "name": "contact_points_body",
+      "source": "measurement",
+      "start": 459,
+      "stop": 477,
+      "width": 18
+    },
+    {
+      "name": "shaft_contact",
+      "source": "measurement",
+      "start": 477,
+      "stop": 483,
+      "width": 6
+    },
+    {
+      "name": "coxa_contact",
+      "source": "measurement",
+      "start": 483,
+      "stop": 489,
+      "width": 6
+    },
+    {
+      "name": "femur_contact",
+      "source": "measurement",
+      "start": 489,
+      "stop": 495,
+      "width": 6
+    },
+    {
+      "name": "base_contact",
+      "source": "measurement",
+      "start": 495,
+      "stop": 496,
+      "width": 1
+    },
+    {
+      "name": "previous_reference_request",
+      "source": "known_reference",
+      "start": 496,
+      "stop": 499,
+      "width": 3
+    },
+    {
+      "name": "admitted_target_twist",
+      "source": "known_reference",
+      "start": 499,
+      "stop": 502,
+      "width": 3
+    },
+    {
+      "name": "admitted_filtered_twist",
+      "source": "known_reference",
+      "start": 502,
+      "stop": 505,
+      "width": 3
+    },
+    {
+      "name": "admitted_twist_derivative",
+      "source": "known_reference",
+      "start": 505,
+      "stop": 508,
+      "width": 3
+    },
+    {
+      "name": "reference_mode",
+      "source": "known_reference",
+      "start": 508,
+      "stop": 516,
+      "width": 8
+    },
+    {
+      "name": "active_leg",
+      "source": "known_reference",
+      "start": 516,
+      "stop": 523,
+      "width": 7
+    },
+    {
+      "name": "next_wave_order",
+      "source": "known_reference",
+      "start": 523,
+      "stop": 529,
+      "width": 6
+    },
+    {
+      "name": "flight_count",
+      "source": "known_reference",
+      "start": 529,
+      "stop": 530,
+      "width": 1
+    },
+    {
+      "name": "contact_count",
+      "source": "known_reference",
+      "start": 530,
+      "stop": 531,
+      "width": 1
+    },
+    {
+      "name": "liftoffs",
+      "source": "known_reference",
+      "start": 531,
+      "stop": 532,
+      "width": 1
+    },
+    {
+      "name": "confirmed_touchdowns",
+      "source": "known_reference",
+      "start": 532,
+      "stop": 533,
+      "width": 1
+    },
+    {
+      "name": "landing_contact_gap_steps",
+      "source": "known_reference",
+      "start": 533,
+      "stop": 534,
+      "width": 1
+    },
+    {
+      "name": "flight_seen",
+      "source": "known_reference",
+      "start": 534,
+      "stop": 535,
+      "width": 1
+    },
+    {
+      "name": "actual_descent_seen",
+      "source": "known_reference",
+      "start": 535,
+      "stop": 536,
+      "width": 1
+    },
+    {
+      "name": "hold_remaining",
+      "source": "known_reference",
+      "start": 536,
+      "stop": 537,
+      "width": 1
+    },
+    {
+      "name": "stop_requested_time_s_valid_and_elapsed",
+      "source": "known_reference",
+      "start": 537,
+      "stop": 539,
+      "width": 2
+    },
+    {
+      "name": "reference_quiet_time_s_valid_and_elapsed",
+      "source": "known_reference",
+      "start": 539,
+      "stop": 541,
+      "width": 2
+    },
+    {
+      "name": "landing_trigger_s_valid_and_elapsed",
+      "source": "known_reference",
+      "start": 541,
+      "stop": 543,
+      "width": 2
+    },
+    {
+      "name": "reference_anchors_body",
+      "source": "known_reference_from_measurement",
+      "start": 543,
+      "stop": 561,
+      "width": 18
+    },
+    {
+      "name": "measured_anchors_body",
+      "source": "known_reference_from_measurement",
+      "start": 561,
+      "stop": 579,
+      "width": 18
+    },
+    {
+      "name": "preload_body",
+      "source": "known_reference_from_measurement",
+      "start": 579,
+      "stop": 597,
+      "width": 18
+    },
+    {
+      "name": "neutral_toes_initial_body",
+      "source": "known_reference",
+      "start": 597,
+      "stop": 615,
+      "width": 18
+    },
+    {
+      "name": "desired_position_error_body",
+      "source": "ideal_reference_vs_measurement",
+      "start": 615,
+      "stop": 618,
+      "width": 3
+    },
+    {
+      "name": "desired_rotation_relative",
+      "source": "ideal_reference_vs_measurement",
+      "start": 618,
+      "stop": 627,
+      "width": 9
+    },
+    {
+      "name": "initial_desired_rotation_relative",
+      "source": "known_reference",
+      "start": 627,
+      "stop": 636,
+      "width": 9
+    },
+    {
+      "name": "desired_yaw_delta",
+      "source": "known_reference",
+      "start": 636,
+      "stop": 637,
+      "width": 1
+    },
+    {
+      "name": "joint_lower_leg_major_rad",
+      "source": "known_reference_limits",
+      "start": 637,
+      "stop": 655,
+      "width": 18
+    },
+    {
+      "name": "joint_upper_leg_major_rad",
+      "source": "known_reference_limits",
+      "start": 655,
+      "stop": 673,
+      "width": 18
+    },
+    {
+      "name": "flight_height_valid_relative",
+      "source": "measurement_history",
+      "start": 673,
+      "stop": 676,
+      "width": 3
+    },
+    {
+      "name": "landing_contact_origin_world_m_valid_body",
+      "source": "measurement_history",
+      "start": 676,
+      "stop": 680,
+      "width": 4
+    },
+    {
+      "name": "landing_preload_world_m_valid_body",
+      "source": "measurement_history",
+      "start": 680,
+      "stop": 684,
+      "width": 4
+    },
+    {
+      "name": "landing_endpoint_correction_m_valid_value",
+      "source": "known_reference_audit",
+      "start": 684,
+      "stop": 686,
+      "width": 2
+    },
+    {
+      "name": "landing_original_contact_error_m_valid_value",
+      "source": "known_reference_audit",
+      "start": 686,
+      "stop": 688,
+      "width": 2
+    },
+    {
+      "name": "landing_target_excursion_m_valid_value",
+      "source": "known_reference_audit",
+      "start": 688,
+      "stop": 690,
+      "width": 2
+    },
+    {
+      "name": "swing_trajectory",
+      "source": "known_reference",
+      "start": 690,
+      "stop": 715,
+      "width": 25
+    },
+    {
+      "name": "landing_trajectory",
+      "source": "known_reference",
+      "start": 715,
+      "stop": 740,
+      "width": 25
+    }
+  ],
+  "history_frames": 5,
+  "joint_names_runtime": [
+    "revolute_1_1",
+    "revolute_1_7",
+    "revolute_2_5",
+    "revolute_3",
+    "revolute_4",
+    "revolute_5",
+    "revolute_1",
+    "revolute_1_6",
+    "revolute_1_5",
+    "revolute_1_3",
+    "revolute_1_4",
+    "revolute_1_2",
+    "revolute_2",
+    "revolute_2_6",
+    "revolute_2_4",
+    "revolute_2_2",
+    "revolute_2_3",
+    "revolute_2_1"
+  ],
+  "limits": {
+    "profile": "formal_004",
+    "residual_radius_rad": 0.02,
+    "residual_velocity_rad_s": 0.25,
+    "total_velocity_rad_s": 2.0
+  },
+  "nominal_joint_positions_rad_runtime": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.6981316804885864,
+    0.6981316804885864,
+    0.6981316804885864,
+    0.6981316804885864,
+    0.6981316804885864,
+    0.6981316804885864,
+    2.094395160675049,
+    2.094395160675049,
+    2.094395160675049,
+    2.094395160675049,
+    2.094395160675049,
+    2.094395160675049
+  ],
+  "policy_training_allowed": false,
+  "reference_source": "virtual_desired_motion_not_prescribed_physics_pose",
+  "residual_source_sha256": "fbf65749c2d1ffc36b22986f71c0972ce7b1ecf82beebef57a0bd3e1be966e40",
+  "schema": "c_wave002_residual002_instrumented_observation_v2",
+  "schema_identity_sha256": "2b351c6bf95ecca33e8f667d9f72133a5a06c8c5b13b8b1dc8bedd7ab17f9c2f",
+  "sensor_frame_width": 63,
+  "source_contract_sha256": "41d4ad49e612c335e9a96eed7c3dd2e6ab548788057f1e0394aa229a80e5f891",
+  "terrain_features_present": false,
+  "wave_source_sha256": "ef92745daf4c3bf544b6c6f9f65e18f19745d9e84811c8888a464312f864a56b"
+}

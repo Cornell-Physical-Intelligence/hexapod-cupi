@@ -1,0 +1,31 @@
+{
+  "actor_width": 740,
+  "actual_physics_qualification": false,
+  "command": "PYTHONDONTWRITEBYTECODE=1 uv run python -B -m unittest discover -s tmp/reference_policy_observation_002 -p test_*.py -v",
+  "critic_width": 743,
+  "deployment_qualified": false,
+  "diagnostic_schema_identity_sha256": "3373f1b7c7c03cef48d9b721db76121b4aab89e598a38f5c6896fc4eadc21b89",
+  "encoder_sha256": "180b41dd85caea2706e636b956ed4f9e2535f3996ca4c56f43def93d67589a36",
+  "fixtures_sha256": "9d737e7087b42caf25e259b69830d8a7898c85fe9dd11f4ed0f9384f56248b36",
+  "formal_schema_identity_sha256": "2b351c6bf95ecca33e8f667d9f72133a5a06c8c5b13b8b1dc8bedd7ab17f9c2f",
+  "passed": true,
+  "policy_training_allowed": false,
+  "test_names": [
+    "test_width_is_computed_and_slices_contiguous_for_standing_and_landing",
+    "test_common_translation_yaw_and_full_coordinate_rotation_invariant",
+    "test_same_step_identical_and_readback_cannot_mutate_history",
+    "test_history_clock_padding_and_partial_reset_do_not_leak",
+    "test_missed_reordered_and_stale_samples_rejected_transactionally",
+    "test_landing_and_next_action_state_changes_are_observable",
+    "test_executable_residual_state_is_observable_and_consistency_enforced",
+    "test_privileged_critic_signal_never_changes_actor",
+    "test_missing_malformed_nonfinite_and_invalid_state_fail_closed",
+    "test_unknown_stale_or_nonfinite_contact_never_becomes_support",
+    "test_profiles_are_separate_and_critic_overflow_cannot_commit_history",
+    "test_runtime_joint_permutation_uses_names_and_records_new_order",
+    "test_schema_identity_binds_profile_order_nominal_and_metadata_is_not_mutable",
+    "test_landing_preload_contact_origin_and_stop_state_are_explicit"
+  ],
+  "test_source_sha256": "500390709d71799562c0a441e7c22a0fdbe1bc5860846d8f63d8cb63020af1ed",
+  "tests_run": 14
+}
