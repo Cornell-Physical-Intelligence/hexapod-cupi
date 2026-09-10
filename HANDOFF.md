@@ -1474,3 +1474,15 @@ Root published reference_policy_observation_005_001 with the exact160-file owner
 
 
 Root published the31-payload footprint_reacquisition_001 wrapper after independently passing all16tests and inspecting the figure. Publication mapf03fc76958936c8088a1afd94e37f19a7449d57c45ab0bd4d24b797b96ed6a3d retains owner24freeze39b4669d05de39e62fb67dfd66adf0e23c56f6a3f5209c16583301627abc6c73 and independent3316b8851a72ce3a8bd630f5687e9ef852034c8846dfa5080e84dbbd5abc907f. All426reference rows,85exact40ms capture/receipt pairs and raw contact/motion arrays match the earlier evidence.169/377footprints are fully fresh now;0/377remain valid through original planned use. Synthetic registration drift reduces fresh-now to156. This demonstrates the declared250ms evidence contract's limitations and leaves a physically executable decision/abort interface unresolved; no camera purchase, mount, sensor, terrain or policy qualification.
+
+
+### 10 September: actual device bridge and bounded pair dispatch
+
+Device001 completed both1/32-replica phases with exact host002 raw checks, all264 real sensor-clock advances and846/849 packet shapes. Source926/adapter18/observation160/host8 and550assets verify; both exact containers are absent andpause039 restoration recorded. Independent terminal receipt is being assembled. This short hold supplies no new walking, sustained quiet or PPO qualification.
+
+Root passed ten pair-integration tests, eight inherited restoration tests and exact934-file local/remote source inventory and host preflight. Pair source map69a1a23304448d53f7681dfa87ab4fa652ad682ba0e45406e82187a66c4224f0; outerguard8083483990c18b8cdd94b8fe9e56611baff8b6fbcffebe2b60ac4bc4cf3d0e98, two-filefreeze2aaf03417e8e6d03c736b64eec9b9d240255845d7c711656e252ad5ea9f7835b. Dispatched unithexapod-pair-load-transfer-001-20260910.service invocation7ec9acdca24f4531b4ab4bbc5caa56ef underpause040. Fresh32×1000standing/quiet precedes1×1300controls; proposed four-corner-support criteria do not replace existing wave orStage2 gates. Host1320s plus180sstop,25minrestorationfallback.
+
+Root also verified all42 speed-study payloads and passed its five tests. All12 declared faster single-leg configurations reject existing P/V/A target bounds at the active swing leg; baseline passes. No joint-limit/singularity first-crossing explanation and no broad motor-impossibility claim. Two original frozen footprint replay/figure logs omitted by ignore rules are included with this publication. Previous main16924ab416335d898bde598b371e57d469a474f6 and its four preceding CI runs all pass.
+
+
+Origin002 terminal publication contains146 payloads, map4015f9f10a57ff8d55ecfaae4841a883990ed0ecb40fc5d58f28b316dd03e089. All96 raw files, source933/assets550, six exact owned containers andpause038restoration verified. Root and sensor recompute5physical/quiet cases, with identical origin/repeat trace/substeps/control-integrals. Same worstjointrevolute_2_1 remains0.3976517–0.4103968rad discrepancy over16s. Global translation does not fix rate bias; no native cause or fidelity qualification. Portable wrapper verifier passes.

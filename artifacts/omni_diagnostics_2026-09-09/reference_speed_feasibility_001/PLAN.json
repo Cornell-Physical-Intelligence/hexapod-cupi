@@ -1,0 +1,61 @@
+{
+  "scope": "CPU synthetic ideal-following wave speed feasibility only",
+  "stage_one": {
+    "swing_durations_s": [
+      1.5,
+      1.0,
+      0.75,
+      0.5
+    ],
+    "requested_translation_mps": [
+      0.01,
+      0.02,
+      0.04
+    ],
+    "bearing_deg": 0,
+    "baseline": {
+      "swing_s": 2.0,
+      "speed_mps": 0.005
+    }
+  },
+  "timing": {
+    "stand_s": 2.0,
+    "moving_s": 24.0,
+    "stop_s": 12.0,
+    "control_dt_s": 0.02
+  },
+  "configuration_overrides_only": [
+    "swing_s",
+    "max_translation_mps set equal to requested magnitude; no hidden original0.005 cap"
+  ],
+  "fixed": {
+    "lift_m": 0.007,
+    "horizontal_duration_fraction": 0.8,
+    "contact_hold_s": 0.3,
+    "reference_vmax_rad_s": 1.75,
+    "reference_amax_rad_s2": 6.0,
+    "total_vmax_rad_s": 2.0,
+    "total_amax_rad_s2": 8.0,
+    "residual_reserve_vmax_rad_s": 0.25,
+    "residual_reserve_amax_rad_s2": 2.0,
+    "joint_margin_rad": 0.02,
+    "minimum_measured_lift_m": 0.002,
+    "minimum_projected_COM_support_margin_m": 0.025,
+    "landing_error_bound_m": 0.012
+  },
+  "follow_up_rule": "Take at most three stage-one configurations with full24s movement, >=12 synthetic touchdowns and finite stop; rank highest requested speed then lower peak acceleration. Screen reverse/left/right/diagonal45 plus left/right arc at yaw\u00b1.01 without changing configuration. If none pass, preserve all failure evidence and do not invent candidates.",
+  "physics_or_torque_or_collision_admission": false,
+  "frozen_controller_modified": false,
+  "source_wave_freeze_sha256": "5b6c076cb03426ac8e24cc6df7e8684e48862aa78a495bd61ae49773a7826814",
+  "source_files": {
+    "oracle/geometry/candidate_c_reference.json": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+    "oracle/geometry/f050_t060.urdf": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+    "oracle/serial_geometry.py": "8c0451d151e077830986d8deb259129b4eb49f3750110883dad99683e8d7f8d3",
+    "oracle/test_wave_reference.py": "37d8d69c73202971d2dbf2c9723015beeeac41e0310b0c9d59de585af456f963",
+    "oracle/wave_math.py": "75353a885bd1e11795dff81458a7e547bbd2611769ef905b3f372c1814a6b12f",
+    "oracle/wave_reference.py": "8bacf0c61f7fdc6d43d9f9ebdb5adc643b026495bb303ec3c18157d121c78893"
+  },
+  "inputs": {
+    "inputs/actual009_soft_limits.json": "df2636b278c813f1a519ce2d8966beb62550912ab4a116326ddab7aac6f5579e"
+  }
+}

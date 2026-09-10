@@ -1,0 +1,233 @@
+{
+  "id": "swing1p5_speed0p01_bearing0_yawplus0",
+  "baseline": false,
+  "swing_s": 1.5,
+  "requested_speed_mps": 0.01,
+  "bearing_deg": 0.0,
+  "requested_yaw_rad_s": 0.0,
+  "requested_twist": [
+    0.01,
+    0.0,
+    0.0
+  ],
+  "configuration": {
+    "gait_order": [
+      "lf",
+      "rr",
+      "lm",
+      "rf",
+      "lr",
+      "rm"
+    ],
+    "swing_s": 1.5,
+    "contact_hold_s": 0.3,
+    "lift_m": 0.007,
+    "horizontal_duration_fraction": 0.8,
+    "max_translation_mps": 0.01,
+    "max_yaw_rad_s": 0.015,
+    "command_filter_omega": 2.0,
+    "reference_velocity_rad_s": 1.75,
+    "reference_acceleration_rad_s2": 6.0,
+    "joint_margin_rad": 0.02,
+    "minimum_support_margin_m": 0.025,
+    "maximum_body_tracking_error_m": 0.035,
+    "maximum_stance_drift_m": 0.02,
+    "maximum_touchdown_error_m": 0.012,
+    "maximum_initial_preload_point_offset_m": 0.025,
+    "maximum_initial_joint_preload_rad": 0.15,
+    "max_touchdown_delay_s": 0.6,
+    "contact_confirm_steps": 3,
+    "minimum_measured_lift_m": 0.002,
+    "landing_blend_s": 0.5,
+    "minimum_landing_blend_s": 0.1,
+    "descent_drop_from_peak_m": 0.00025,
+    "maximum_landing_contact_gap_s": 0.1,
+    "stop_command_tolerance": 1e-06,
+    "stop_command_rate_tolerance": 2e-05
+  },
+  "completed_ideal_sequence": false,
+  "failure": {
+    "control_index": 605,
+    "measured_time_s": 12.099999999999831,
+    "reference_time_s": 12.11999999999983,
+    "reason": "Reference discrete velocity/acceleration budget exceeded; no clipping",
+    "current_leg": "rm",
+    "mode": "swing",
+    "bound_candidate": {
+      "time_s": 12.11999999999983,
+      "maximum_velocity_rad_s": 1.7697388094591204,
+      "maximum_acceleration_rad_s2": 3.4165765519078573,
+      "minimum_joint_margin_rad": 0.29427589166145385,
+      "q_candidate": [
+        0.3537787619306467,
+        0.7027569485545073,
+        2.1301357622191155,
+        0.013243665163401364,
+        0.6981128598546075,
+        2.0934885700835726,
+        -0.33605275291752923,
+        0.7053009283582289,
+        2.1731856943370813,
+        0.13796005427755542,
+        0.6833831902059101,
+        2.0191472903313463,
+        -0.2719101922846159,
+        0.7878520535856584,
+        2.1319136447449587,
+        -0.16115327651273637,
+        0.6853074171520811,
+        2.02736822217071
+      ],
+      "v_candidate": [
+        0.0916924290246035,
+        -0.0006209660718514698,
+        -0.006327976830444726,
+        0.08824764928281326,
+        -0.0010886122587372427,
+        -0.007103375809203172,
+        0.0963077947926827,
+        -0.00011195293302956877,
+        -0.0069383480570728295,
+        -0.07268832587616902,
+        0.01178405574348007,
+        0.04945541267653564,
+        1.7697388094591204,
+        0.34498321040224433,
+        0.5822962137415955,
+        -0.07241168728238101,
+        -0.009257549566515921,
+        -0.04034470501910192
+      ],
+      "a_candidate": [
+        -0.000646317330765811,
+        -0.0008248085314743747,
+        -0.00775028368038555,
+        -0.0007118102118841563,
+        -0.00125578968196427,
+        -0.007761098687053547,
+        -0.0008985798238825282,
+        -0.00022590938897337765,
+        -0.007714127748803534,
+        -0.005943014899090215,
+        -0.004147371071572259,
+        -0.007653462686940671,
+        3.3552990298990615,
+        -1.3993577170243188,
+        -3.4165765519078573,
+        0.005520047724472121,
+        -0.0033664411408507178,
+        -0.00769671277045525
+      ]
+    }
+  },
+  "controls_completed": 605,
+  "planned_controls": 1900,
+  "confirmed_synthetic_touchdowns": 5,
+  "planned_liftoffs": 6,
+  "liftoffs_after_stop": null,
+  "minimum_admission_factor": 1.0,
+  "maximum_valid_target_velocity_rad_s": 1.7026328288611392,
+  "maximum_valid_target_acceleration_rad_s2": 4.961138866420578,
+  "minimum_valid_joint_margin_rad": 0.16655091723759796,
+  "minimum_synthetic_projected_COM_margin_m": 0.08307002626633109,
+  "maximum_attempted_velocity_rad_s": 1.7697388094591204,
+  "maximum_attempted_acceleration_rad_s2": 4.961138866420578,
+  "finite_reference_stop_latency_s": null,
+  "final_reference_mode": "swing",
+  "events": [
+    {
+      "kind": "synthetic_liftoff",
+      "leg": "lf",
+      "time_s": 2.0000000000000013,
+      "endpoint_world_m": [
+        0.18902930069935947,
+        -0.2829320734723402,
+        1.2222907092018787e-07
+      ],
+      "stride_m": 0.05150032503349661
+    },
+    {
+      "kind": "synthetic_confirmed_touchdown",
+      "time_s": 3.6200000000000028,
+      "confirmed_count": 1
+    },
+    {
+      "kind": "synthetic_liftoff",
+      "leg": "rr",
+      "time_s": 3.900000000000003,
+      "endpoint_world_m": [
+        -0.18902909988570823,
+        0.1609321935771908,
+        2.0548374507489697e-07
+      ],
+      "stride_m": 0.07049983991226916
+    },
+    {
+      "kind": "synthetic_confirmed_touchdown",
+      "time_s": 5.51999999999997,
+      "confirmed_count": 2
+    },
+    {
+      "kind": "synthetic_liftoff",
+      "leg": "lm",
+      "time_s": 5.819999999999964,
+      "endpoint_world_m": [
+        0.23320431090267305,
+        -0.08194636848163611,
+        1.2222906492498353e-07
+      ],
+      "stride_m": 0.08969999289009252
+    },
+    {
+      "kind": "synthetic_confirmed_touchdown",
+      "time_s": 7.439999999999929,
+      "confirmed_count": 3
+    },
+    {
+      "kind": "synthetic_liftoff",
+      "leg": "rf",
+      "time_s": 7.739999999999923,
+      "endpoint_world_m": [
+        -0.1837251061389528,
+        -0.3549041041408748,
+        2.7755575615628914e-17
+      ],
+      "stride_m": 0.10889999973428058
+    },
+    {
+      "kind": "synthetic_confirmed_touchdown",
+      "time_s": 9.35999999999989,
+      "confirmed_count": 4
+    },
+    {
+      "kind": "synthetic_liftoff",
+      "leg": "lr",
+      "time_s": 9.659999999999883,
+      "endpoint_world_m": [
+        0.18372530695254957,
+        0.11790439009193038,
+        1.2222906653480692e-07
+      ],
+      "stride_m": 0.12809999995782112
+    },
+    {
+      "kind": "synthetic_confirmed_touchdown",
+      "time_s": 11.279999999999848,
+      "confirmed_count": 5
+    },
+    {
+      "kind": "synthetic_liftoff",
+      "leg": "rm",
+      "time_s": 11.579999999999842,
+      "endpoint_world_m": [
+        -0.23320431003686104,
+        -0.1550538825313645,
+        1.4265168160609853e-07
+      ],
+      "stride_m": 0.14729999996426857
+    }
+  ],
+  "physics_or_torque_admitted": false,
+  "forbidden_contact_geometry_checked": false,
+  "actual_measured_motion_retimed": false
+}
