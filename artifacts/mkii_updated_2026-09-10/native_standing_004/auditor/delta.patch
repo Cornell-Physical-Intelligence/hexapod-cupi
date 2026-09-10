@@ -1,0 +1,73 @@
+--- auditor003
++++ auditor004
+@@ -4,15 +4,16 @@
+ import hashlib,importlib.util,json,math,re,subprocess,sys,time
+ sys.dont_write_bytecode=True
+ BASE=Path('/home/orionh/HEXAPOD_runs/canonical_direct_20260910')
+-RUN=BASE/'native_standing_003'; PAUSE=BASE/'forecast_pause_009'
+-UNIT='hexapod-canonical-native-standing-003-20260910.service'
+-INV='ff270c50458f47e5940dd93c4b3aa845'
+-SOURCE=BASE/'standing_source_003'; HOST=BASE/'standing_host_003'; GUARD=BASE/'standing_guard_004'; ASSET=BASE/'asset_001'
++RUN=BASE/'native_standing_004'; PAUSE=BASE/'forecast_pause_011'
++UNIT='hexapod-canonical-native-standing-004-20260910.service'
++INV='808028c883fc4362880f1f112b4b7360'
++SOURCE=BASE/'standing_source_003'; HOST=BASE/'standing_host_004'; GUARD=BASE/'standing_guard_006'; ASSET=BASE/'asset_001'
+ ADMISSION=BASE/'native_actuation_001/actuation'
++RESERVATION=BASE/'exclusive_reservation_001'
+ SUPERVISOR=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009')
+ PINS=[('source',SOURCE,'FREEZE_SHA256.json','e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0',87),
+- ('host',HOST,'FREEZE_SHA256.json','968caeb48082ee0a72dea9acc1a6b7b93d2f9b14b9f4c2f05874070a03be1a95',28),
+- ('guard',GUARD,'FREEZE_SHA256.json','5f13bfd6d23754051bd0520ca3a47d49d22aa467da8dcd2d56f50a87da6c2ea9',33),
++ ('host',HOST,'FREEZE_SHA256.json','c72c4dd63599f2c459c7b8eca7244528cb725094252c084f695f4aa44d8dba25',33),
++ ('guard',GUARD,'FREEZE_SHA256.json','488c0713eee56a38f78aa77b1b3d6fac2833e71129c5875020126e749d9381a5',48),
+  ('ownership_supervisor',SUPERVISOR,'campaign_source_hashes.json','04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e',926)]
+ 
+ def require(ok,message):
+@@ -62,13 +63,15 @@
+ 
+ def restoration(pause,restored,launch):
+  require(pause.get('unit')==UNIT and pause.get('output')==str(RUN) and pause.get('source')==str(SOURCE) and pause.get('admission')==str(ADMISSION),'Pause identity differs')
+- require(pause.get('coordination_sha256')=='35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3','Wrong coordination identity')
++ require(pause.get('coordination_sha256')=='649ccda1bdef20bc967ae78f68a992cc8001f4ed7009f78cab5133cc67b29d8f','Wrong coordination identity')
+  timers={k for k,v in pause['units'].items() if k.endswith('.timer') and 'ActiveState=active' in v}
+  require(isinstance(restored.get('timers'),list) and len(restored['timers'])==len(timers) and set(restored['timers'])==timers,'Restored timer set differs')
+  t=restored.get('restored_unix');require(isinstance(t,(float,int)) and not isinstance(t,bool) and math.isfinite(t) and t>=pause['created_unix'],'Invalid restoration time')
++ require(pause.get('reservation_path')==str(RESERVATION) and pause.get('restoration_scope')=='per_job_snapshot_only' and pause.get('persistent_reservation_release_attempted')is False,'Missing reservation-aware pause metadata')
++ require(restored.get('scope')=='per_job_snapshot_only' and restored.get('persistent_reservation_release_attempted')is False and restored.get('reservation_path')==str(RESERVATION),'Per-job restoration incorrectly claims persistent reservation release')
+  require(launch.get('native_source_freeze_sha256')==PINS[0][3],'Wrong dispatched source freeze')
+  require(launch.get('command')==expected_launch_command(),'Exact dispatch command differs')
+- return {'passed':True,'timers':sorted(timers),'restored_unix':t,'recorded_owned_cleanup':restored.get('owned_cleanup_checked')}
++ return {'passed':True,'timers':sorted(timers),'restored_unix':t,'recorded_owned_cleanup':restored.get('owned_cleanup_checked'),'scope':restored.get('scope'),'persistent_reservation_release_attempted':False,'reservation_path':str(RESERVATION)}
+ 
+ def classify(campaign,job,state,unit,native_validation):
+  require(campaign.get('status') in ('completed','failed','stopped'),'Campaign is not terminal')
+@@ -83,6 +86,11 @@
+   return 'authentic_completed_standing'
+  require(bool(campaign.get('error') or campaign.get('integrity_error') or job.get('error') or state.get('errors')),'Failed campaign lacks recorded failure evidence')
+  return 'authentic_terminal_failure'
++
++def reservation_check():
++ spec=importlib.util.spec_from_file_location('_audited_reservation_guard',GUARD/'launch_guarded_remote.py');g=importlib.util.module_from_spec(spec);spec.loader.exec_module(g)
++ receipt=g.verify_reservation()
++ return {'verified':True,'guard_verification':receipt,'files':{name:{'sha256':sha(Path(name)),'size_bytes':Path(name).stat().st_size}for name in g.RESERVATION_PINS},'persistent_release_attempted':False}
+ 
+ def audit():
+  result={'schema':'canonical_native_standing_terminal_audit_v1','expected_invocation':INV,'unit_name':UNIT,'checked_unix':time.time(),'read_only':True,'audit_verified':False,'standing_completed':False,'physical_admission':False,'training_allowed':False,'errors':[]}
+@@ -102,6 +110,7 @@
+   def admissioncheck():
+    actual=inventory(ADMISSION);require(len(actual)==19 and {k:v['sha256'] for k,v in actual.items()}==read(SOURCE/'ACTUATION_SHA256.json'),'Original coordinate/effort admission changed');require(sha(SOURCE/'ACTUATION_SHA256.json')=='1ccd8f4ffaa2eadc1fd9c6202af8da965b0e9b95f39c585b68a3a64313ce2728','Wrong coordinate/effort map');return actual
+   attempt('actuation_admission_inventory',admissioncheck)
++  attempt('exclusive_reservation',reservation_check)
+  campaign=attempt('campaign',lambda:read(RUN/'campaign.json'))
+  job=attempt('job',lambda:read(RUN/'jobs/standing.json'))
+  state=attempt('native_state',lambda:read(RUN/'standing/state.json')) if (RUN/'standing/state.json').is_file() else None
+@@ -146,6 +155,9 @@
+   final_admission=attempt('final_actuation_admission_inventory',admissioncheck)
+   if final_admission is not None and final_admission!=result.get('actuation_admission_inventory'):result['errors'].append({'check':'actuation_stability','error':'Original coordinate/effort admission changed between audit passes'})
+   result.pop('final_actuation_admission_inventory',None)
++  final_reservation=attempt('final_exclusive_reservation',reservation_check)
++  if final_reservation is not None and final_reservation!=result.get('exclusive_reservation'):result['errors'].append({'check':'reservation_stability','error':'Persistent reservation changed between audit passes'})
++  result.pop('final_exclusive_reservation',None)
+ 
+  result['audit_verified']=not result['errors']
+  if not result['audit_verified']:result['standing_completed']=False

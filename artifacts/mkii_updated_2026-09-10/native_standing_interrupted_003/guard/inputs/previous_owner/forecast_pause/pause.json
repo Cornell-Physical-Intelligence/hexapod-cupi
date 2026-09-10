@@ -1,0 +1,37 @@
+{
+  "user_authorized_pause": true,
+  "created_unix": 1789078647.0922794,
+  "units": {
+    "stormscope-dispatch.timer": "ActiveState=active\nSubState=running",
+    "stormscope-scout.timer": "ActiveState=active\nSubState=waiting",
+    "stormscope-dispatch.service": "MainPID=3745929\nActiveState=activating\nSubState=start",
+    "stormscope-scout.service": "MainPID=0\nActiveState=failed\nSubState=failed"
+  },
+  "unit": "hexapod-canonical-native-standing32-001-20260910.service",
+  "output": "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/native_standing32_001",
+  "source": "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/standing_source_002",
+  "admission": "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/native_actuation_001/actuation",
+  "standing_one": "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/native_standing_002/standing",
+  "preflight": {
+    "compute_processes_before_authorized_pause": "3746115, /opt/wx/venv-models/bin/python",
+    "containers": "21faff779d05 isim-web-viewer-1 isim-web-viewer",
+    "forecast_services_authorized_for_graceful_stop": [
+      "stormscope-dispatch.service"
+    ],
+    "service_stop_semantics": {
+      "stormscope-dispatch.service": "TimeoutStopUSec=1min 30s\nKillMode=control-group\nKillSignal=15"
+    }
+  },
+  "coordination_sha256": "35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3",
+  "reason": "Canonical provisional standing32:1000 controls/8000 explicit400Hz steps; exact asset, completed coordinate/effort and same-source standing1 evidence; no policy or broader physical admission",
+  "current_instruction": "10 September canonical detailed direct-drive model is authoritative; explicit all-weather priority applies, unknown non-weather work remains protected",
+  "gracefully_stopped_services": [
+    "stormscope-dispatch.service"
+  ],
+  "post_pause_preflight": {
+    "available_memory_bytes": 126886395904,
+    "containers": "isim-web-viewer-1 isim-web-viewer",
+    "compute_processes": ""
+  },
+  "paused_unix": 1789078648.1232705
+}

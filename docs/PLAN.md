@@ -129,7 +129,7 @@ Working rhythm: a daily integrated build and evidence review, short daily cross-
 
 Use compute in this order: short correctness/sanity runs; batched environment throughput profiling; broad but bounded candidate screening; early termination of failed candidates; multi-seed confirmation of finalists; then held-out qualification. Overlap CPU bag replay, software tests and analysis with GPU training where memory/load permit. Do not launch multiple oversized jobs that each expect the whole Spark. Profile feasible concurrency rather than inventing a runs-per-day promise. Avoid spending thousands of iterations optimizing an invalid imported asset or retuning rewards without a falsifiable hypothesis.
 
-The latest instruction is to **use the full available Spark compute now**, until another agent requests sharing through `/home/orionh/SPARK_COMPUTE_COORDINATION.md`. Read that shared file before each new launch and at checkpoint boundaries during future long runs. [The coordination note](SPARK_COMPUTE_COORDINATION.md) records the handoff and profiling procedure. The former **60% hexapod / 40% other work** split remains a starting preference if sharing is requested. No quota is enabled; current short validation already uses exclusive admission and full available compute. A shared training launcher or MPS allocation would still need implementation and profiling before concurrency.
+The latest instruction reserves **all available Spark user compute for HEXAPOD, including between runs**, until the user explicitly releases or changes that reservation. Read `/home/orionh/SPARK_COMPUTE_COORDINATION.md` before each new launch and at checkpoint boundaries during long runs. [The coordination note](SPARK_COMPUTE_COORDINATION.md) records the current policy and prior history. Defer competing producers with exact ownership and preserved outputs; keep the deferral through ordinary per-job cleanup. Earlier 60/40 and sharing-on-request preferences are superseded. Preserve SSH and host health, truthful resource checks, both per-job locks and bounded native supervision. Scheduler deferral is not a claim that arbitrary manual CUDA launches are blocked by hardware.
 
 ## 4. Timeline: simulate now, transfer when hardware arrives
 
@@ -567,3 +567,17 @@ The canonical standing preparation intentionally strengthens nonfoot-contact and
 The [first canonical standing failure](../artifacts/mkii_updated_2026-09-10/native_standing_001/README.md) motivates a contact-readout correction, not a geometry or acceptance change. Recognize only finite records with exactly zero normal force, zero normal vector and zero separation as inactive. Keep their original indices, body, point and geometric category in the trace; their force contribution is exactly zero and cannot establish support. All nonzero-force invalid normals, other malformed records, buffer completeness checks and existing contact/quiet thresholds still reject. The observed record pattern does not establish its native internal cause.
 
 Qualify the successor independently with one robot before measuring 32 replicas. Bind fresh PPO to that exact reviewed standing source and actual admissions. CPU learner, observation-frame and strict checkpoint-reload tests prepare integration; they cannot substitute for loaded native behavior or close Stage 2.
+
+
+### 10 September 2026 — switch after measured contact-processing cost
+
+The [stopped 32-robot acquisition and exact-output review](../artifacts/mkii_updated_2026-09-10/native_standing32_stopped_001/README.md) justify optimizing contact processing before further scaling. Use per-call cap-transform caching and ordered per-body force aggregation while retaining every patch and the same physical predicates. Preserve the original acquisition and classify its stop as operational; incomplete native state cannot be promoted to a physical failure or pass.
+
+Require fresh same-source one-robot and 32-robot admissions after the implementation change. Distinguish local CPU component benchmarks from measured native throughput, and check the early native rate before allocating longer work. Keep the existing deadlines and gates; do not extend a budget to disguise a throughput problem.
+
+
+### 2026-09-10 — persistent exclusive Spark reservation and detailed-model video
+
+The latest user instruction, “make sure our job takes full control of the spark at all times”, supersedes weather-only priority and sharing-on-request preferences. Preserve exclusive user-compute priority between allocations, persist known scheduler deferral across reconnects, and release only on a later user instruction. Keep exact producer identities and recovery state, source admission, truthful contention checks, immutable outputs, SSH and host health. Per-job cleanup and reservation release are distinct operations. Condition-based systemd deferral does not prevent arbitrary manual CUDA launches; do not claim a hardware partition or hide a suspended context from resource checks.
+
+The user also requests an immediate polished video of the detailed robot. Capture an actual CAD showcase in parallel with native validation and label its kinematic nature. The simulation and learned-policy recordings must identify their actual controller and asset; no historical gait or invented motion may stand in for the new detailed-model PPO.

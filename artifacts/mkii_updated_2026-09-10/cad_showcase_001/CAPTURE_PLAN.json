@@ -1,0 +1,48 @@
+{
+  "schema": "canonical_CAD_showcase_v1",
+  "scope": "CAD kinematic inspection only; no policy or native physics",
+  "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+  "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+  "parts": 1753,
+  "bodies": 19,
+  "joints": 18,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 25,
+  "frames": 600,
+  "duration_s": 24,
+  "playback_time_scale": 1,
+  "rendering": "Exact source STL geometry and instanced CAD placement, original source colors, deterministic per-frame camera with explicit shader lighting",
+  "camera": "Continuous orbit with modest smooth zoom; complete articulated AABB fit within caption-free viewport at every frame",
+  "joint_demo": {
+    "lf_femur_pitch_max_rad": 0.22,
+    "lf_tibia_pitch_max_rad": 0.28,
+    "interval_s": [
+      12,
+      21
+    ],
+    "shape": "sin(pi*(t-12)/9)^2",
+    "all_other_joints": "default zero",
+    "collision_or_support_test": false
+  },
+  "frame_qa_seconds": [
+    0,
+    8,
+    16,
+    22
+  ],
+  "no_remote_GPU": true,
+  "native_physics_admission": false,
+  "learned_policy": false,
+  "stage2_pass": false,
+  "selected_video": "hexapod_detailed_cad_showcase_final.mp4",
+  "draft_video": "hexapod_detailed_cad_showcase.mp4",
+  "projected_bounds_expected": {
+    "min_x_greater_than": -0.9,
+    "max_x_less_than": 0.9,
+    "min_y_greater_than": -0.71,
+    "max_y_less_than": 0.63
+  }
+}

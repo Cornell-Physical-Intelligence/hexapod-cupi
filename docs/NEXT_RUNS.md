@@ -7,7 +7,7 @@
 
 1. Verify `robot/active_model.json` and the corresponding `usd_002` nominal motor corrected source identities on the isolated native preparation directory.
 2. Introduce a new task/runtime contract for the actual joint names, signs/zeros, per-leg yaw limits, +X tibia contact geometry and explicitly modeled actuator behavior. Preserve old task registrations.
-3. Use the verified native import, suspended coordinate/effort response and sampled source-shape evidence. Complete loaded standing with the reviewed exact-zero-contact interpretation, preserving every native record and all existing force/quiet gates; then measure one-to-32-replica scaling and qualify observation/action mapping before a small learning smoke.
+3. Use the verified native import, suspended coordinate/effort response and sampled source-shape evidence. Requalify the contact-processing optimization after its exact-output CPU review, preserving every native record and all existing force/quiet gates; then measure one-to-32-replica scaling and qualify observation/action mapping before a small learning smoke.
 4. Only a matching native admission can authorize learning on this canonical model; record its source, asset, motor and checkpoint hashes. Then pursue the unchanged all-direction, smoothness and quiet-standing gates.
 
 ## Historical C-study continuation order (superseded)
@@ -149,3 +149,8 @@ For the new standing screen, identify the plate-frame root origin explicitly and
 
 
 The source-shape query's measured tuple binding is now recorded in the [separate interpretation](../artifacts/mkii_updated_2026-09-10/native_sdf_query_001/README.md). Future queries must explicitly decode gradient-first/distance-last and keep original acquisition verdicts intact. Proceed to supported standing on the unchanged geometry. For the new full-substep nonfoot/clearance requirement, use the clipped triangle boundary rather than a filtered vertex subset; six-toe support remains a post-settling check.
+
+
+### Persistent Spark priority and immediate video
+
+Honor the latest exclusive user-compute reservation across runs. Native successors bind coordination649ccda1… and exact active reservation controls; per-job cleanup restores only its snapshot and does not release the reservation. Preserve the interrupted optimized attempt as evidence, admit only a completed matching one-robot retry before32 replicas, then fresh PPO integration. Prepare the detailed CAD video in parallel and label it kinematic; produce learned walking footage only from an actual admitted new-model policy. Current execution belongs in STATUS.

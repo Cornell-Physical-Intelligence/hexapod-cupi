@@ -104,17 +104,22 @@ anything by hand.
 
 ## 3. GPU lock and shared-workload protocol
 
-The current short validation launcher remains **exclusive**. The Spark is
-shared with unrelated workloads, so the following admission and cleanup rules
-still apply to these runs:
+The latest user instruction reserves the Spark for HEXAPOD user compute at all
+times, including between runs. This supersedes earlier weather-only priority
+and sharing-on-request preferences. Read the current header of
+`/home/orionh/SPARK_COMPUTE_COORDINATION.md` before dispatch. Identified competing
+producers must remain deferred until a later user instruction releases or
+changes the reservation. Preserve their work and exact recovery state, SSH,
+operating-system services and host health. These admission and cleanup rules
+still apply:
 
 - Hold `/tmp/hexapod-isaac-gpu.lock` for the entire logical run, from before
   container creation to cleanup.
-- Never signal, stop, modify, or compete with an unrelated workload. Observed
-  producers include `/root/nsva_dl.sh` and its GPU children such as
-  `validate_nsva.py`, plus `score_clip.py`, `validate_b51.py`, and
-  torch-compile / clip-scoring workers. `/root/cvnba` is not ours; do not touch
-  it.
+- Defer competing user compute through source-verified producer controls,
+  retaining exact identity, outputs and restart state. Never use broad process
+  matching to kill work or modify another project's model/data. A stopped or
+  frozen CUDA process may retain its context and memory; keep resource checks
+  truthful and do not treat suspension as a free GPU.
 - A free GPU is not sufficient evidence that a producer is finished. Wait until
   the producer script and all of its descendants are gone, then recheck the
   GPU, active Docker containers, the systemd service, and the shared lock.
@@ -123,19 +128,20 @@ still apply to these runs:
   container exists and again before PPO starts. The startup supervisor in §6
   exists to close this post-launch race.
 - Cleanup acts only on the exact immutable container ID owned by this run. It
-  must never use `docker rm -f` on a broad match and must never touch a process
-  it did not create.
+  must never use `docker rm -f` on a broad match. Deferral of another producer
+  is a separate, recorded reservation operation.
 
-The latest instruction is to **use full available Spark compute now**, until
-another agent requests sharing through `/home/orionh/SPARK_COMPUTE_COORDINATION.md`.
-Current exclusive validation already permits full available compute; no quota
-is enabled. Read that shared file before each new launch and at checkpoints
-during future long runs. Its [repository copy](SPARK_COMPUTE_COORDINATION.md)
-holds the handoff procedure. If sharing is requested, the former **60% hexapod /
-40% other work** split is the starting preference for coordination. MPS and a
-shared long-training launcher have not been configured or validated by this
-work. Coordinate and measure a paired pilot before relying on concurrent GPU
-training, and leave unrelated jobs untouched.
+Persistent scheduler deferral must survive per-job cleanup and reconnects.
+Snapshot only the timers active when that job starts; restoring that snapshot
+does not release the broader reservation. Keep the reservation marker and
+owned systemd condition drop-ins until explicit user release, then restore
+only recorded prior state after identity checks. A condition-skipped start can
+return success without activating a unit; read back actual state. Verify loaded
+drop-in paths and that the manager needs no daemon reload. The
+[coordination record](SPARK_COMPUTE_COORDINATION.md) preserves earlier policies
+as history. Another workload's sharing request alone cannot override the
+current user instruction. No MPS quota or hardware GPU partition is implied;
+manual or privileged launches still require truthful detection and deferral.
 
 Historical Stage2 team workflow (new CAD-v2 validation uses §11):
 

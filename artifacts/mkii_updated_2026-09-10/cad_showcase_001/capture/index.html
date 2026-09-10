@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Updated MKII — part and joint inspection</title>
+  <link rel="stylesheet" href="/robot/hexapod_mkii_updated_v1/preview/style.css">
+  <script type="importmap">{"imports":{"three":"/robot/hexapod_mkii_assy/preview/inspection_vendor/three/build/three.module.js","three/examples/":"/robot/hexapod_mkii_assy/preview/inspection_vendor/three/examples/"}}</script>
+<style>body{display:block!important}main{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important}html,body,main,#stage{margin:0!important;width:100%!important;height:100%!important;overflow:hidden!important;background:#eef1f2!important}main{display:block!important}header,aside,.toolbar,.stage-bottom,#selection-label{display:none!important}#stage{border:0!important;border-radius:0!important}#title{position:fixed;left:76px;top:65px;z-index:50;font-family:Arial,sans-serif;color:#182b37;pointer-events:none}#title .eyebrow{font-size:17px;font-weight:700;letter-spacing:3px;color:#5a6b75}#title h1{font-size:44px;font-weight:500;letter-spacing:-1px;margin:13px 0 11px}#subtitle{font-size:20px;color:#52636d}#bottom{position:fixed;left:76px;bottom:58px;right:76px;display:flex;justify-content:space-between;align-items:end;font-family:Arial,sans-serif;color:#5d6b72;z-index:50;font-size:17px;letter-spacing:.3px}#shot{color:#233e50;font-size:21px;font-weight:500}#rule{position:fixed;left:76px;top:43px;width:66px;height:3px;background:#9b232b;z-index:50}</style></head>
+<body><div id="title"><div class="eyebrow">CORNELL PHYSICAL INTELLIGENCE</div><h1>HEXAPOD MKII</h1><div id="subtitle">Detailed direct-drive assembly</div></div><div id="bottom"><div><div id="shot">Six legs · eighteen direct-drive joints</div><div style="margin-top:10px">1,753 CAD parts · 19 rigid bodies</div></div><div style="text-align:right">CAD KINEMATIC PREVIEW<br><span style="font-size:14px;display:block;margin-top:8px">No learned policy · no physics qualification</span></div></div>
+  <header>
+    <div><h1>Updated MKII <span>Part & joint inspection</span></h1><p id="summary" role="status">Loading the complete CAD assembly…</p></div>
+    <a href="../README.md" target="_blank">Audit & model notes ↗</a>
+  </header>
+  <main>
+    <section id="stage" aria-label="Interactive model with all exported CAD parts">
+      <div class="toolbar">
+        <button id="stand">Inspection stance</button><button id="cad">Export pose</button>
+        <button id="fit">Fit model</button>
+        <select id="view" aria-label="Camera view"><option value="iso">Orbit</option><option value="front">Front</option><option value="side">Left</option><option value="top">Top</option></select>
+      </div>
+      <div id="error" role="alert" hidden></div>
+      <div class="stage-bottom"><span id="pose">Inspection stance</span><span>Drag to orbit · scroll to zoom · click any part</span></div>
+      <div id="selection-label" hidden></div>
+    </section>
+    <aside>
+      <section class="controls">
+        <h2>Full range review</h2>
+        <div class="tour-controls"><button id="tour" aria-pressed="false">▶ Play all 18 joints</button><button id="tour-stop">Reset</button><select id="tour-speed" aria-label="Animation speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></div>
+        <p id="tour-status" role="status" class="note">One joint at a time: zero → lower → upper → zero. Both endpoints pause briefly.</p>
+        <progress id="tour-progress" max="18" value="0" aria-label="Joint review progress"></progress>
+        <h2>Move a joint</h2>
+        <select id="joint" aria-label="Joint to inspect"></select>
+        <div class="joint-value"><label for="angle">Angle from joint zero</label><output id="angle-label">0.0°</output></div>
+        <input id="angle" aria-label="Joint angle" type="range" min="-25" max="25" step="0.005" value="0">
+        <div class="bounds"><label>Lower / °<input id="lower" type="number" step="1" aria-label="Preview lower bound"></label><label>Upper / °<input id="upper" type="number" step="1" aria-label="Preview upper bound"></label><button id="sweep" aria-pressed="false">▶ Sweep</button></div>
+        <p id="joint-context" class="note"></p>
+        <p class="note">Edits affect this preview only. Joint travel limits do not prevent collisions between parts in combined poses.</p>
+        <div class="checkrow"><label><input id="axes" type="checkbox" checked> Joint axes</label><label><input id="tint" type="checkbox" checked> Link colors</label><label><input id="ghost" type="checkbox"> X-ray</label></div>
+        <div class="joint-value"><label for="explode">Separate parts</label><output id="explode-label">0 mm</output></div>
+        <input id="explode" type="range" min="0" max="40" value="0" step="1" aria-label="Explode individual parts">
+      </section>
+      <section class="parts-panel">
+        <div class="section-title"><h2>Every part</h2><span id="part-count">—</span></div>
+        <select id="link-filter" aria-label="Filter by moving link"><option value="all">All moving links</option></select>
+        <input id="search" type="search" placeholder="Find a part or its source ID" aria-label="Search all CAD parts">
+        <label class="checkrow"><input id="overlaps" type="checkbox"> Show CAD overlap parts only (78)</label>
+        <div class="checkrow"><label><input id="isolate" type="checkbox"> Isolate selected link</label><button id="clear">Clear selection</button></div>
+        <div id="part-list" role="list" aria-label="Exported CAD part instances"></div>
+      </section>
+      <section id="detail" aria-live="polite"><p>Select a part in the model or list to inspect its assigned link and CAD mass.</p></section>
+      <footer><strong>Approved detailed training model</strong><span>Original meshes and CAD inertias plus nominal motor weight overrides. Part entries show original CAD mass; link totals include the overrides. Added motor inertia and native physics remain unqualified.</span><button id="save-review">Save preview settings</button></footer>
+    </aside>
+  </main>
+  <script type="module" src="./showcase.js"></script>
+</body>
+</html>

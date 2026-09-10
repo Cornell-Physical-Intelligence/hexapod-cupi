@@ -1,0 +1,86 @@
+--- auditor002/audit_remote.py
++++ standing32_auditor001/audit_remote.py
+@@ -4,15 +4,18 @@
+ import hashlib,importlib.util,json,math,re,subprocess,sys,time
+ sys.dont_write_bytecode=True
+ BASE=Path('/home/orionh/HEXAPOD_runs/canonical_direct_20260910')
+-RUN=BASE/'native_standing_002'; PAUSE=BASE/'forecast_pause_007'
+-UNIT='hexapod-canonical-native-standing-002-20260910.service'
+-INV='d9725b51027e44b59ffcb00a2b67763f'
+-SOURCE=BASE/'standing_source_002'; HOST=BASE/'standing_host_002'; GUARD=BASE/'standing_guard_003'; ASSET=BASE/'asset_001'
++RUN=BASE/'native_standing32_001'; PAUSE=BASE/'forecast_pause_008'
++UNIT='hexapod-canonical-native-standing32-001-20260910.service'
++INV='ce49acca09a14d77b081fc5cb6c41622'
++SOURCE=BASE/'standing_source_002'; HOST=BASE/'standing_host_002'; GUARD=BASE/'standing32_guard_001'; ASSET=BASE/'asset_001'
+ ADMISSION=BASE/'native_actuation_001/actuation'
++STANDING_ONE=BASE/'native_standing_002/standing'
++STANDING_ONE_MAP_SHA256='849c15536b0d6c3c7a408510608417e8732ced1fa28594bdb662c9fa35a9ebb1'
++STANDING_ONE_STATE_SHA256='0d536d6906bfa8e755e971272bca98fed0e709db8f02651680cd95c04248cccd'
+ SUPERVISOR=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009')
+ PINS=[('source',SOURCE,'FREEZE_SHA256.json','acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467',51),
+  ('host',HOST,'FREEZE_SHA256.json','c533454d1699058a7b686e49436247bbb9c94bbeec0a91b01090c234f4576763',22),
+- ('guard',GUARD,'FREEZE_SHA256.json','da808fb2f14f29e8a2d17bfecd30b7b50fe719b7d7db3d7305a7e33317ae5a53',50),
++ ('guard',GUARD,'FREEZE_SHA256.json','f7c23291abcc044844fb92ecf0b7482bccaedd9cb90515e49860be106ccf16cc',44),
+  ('ownership_supervisor',SUPERVISOR,'campaign_source_hashes.json','04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e',926)]
+ 
+ def require(ok,message):
+@@ -58,10 +61,10 @@
+   '--property=TimeoutStopSec=180','--property=KillMode=process','--property=Environment=PYTHONDONTWRITEBYTECODE=1',
+   '--property=ExecStopPost=/usr/bin/python3 '+str(PAUSE/'resume_forecasting.py'),'--property=Environment=PYTHONUNBUFFERED=1',
+   '/usr/bin/python3',str(HOST/'launch_standing_spark.py'),'--source',str(SOURCE),'--asset',str(ASSET),'--admission',str(ADMISSION),
+-  '--supervisor-source',str(SUPERVISOR),'--output',str(RUN),'--num-envs','1']
++  '--supervisor-source',str(SUPERVISOR),'--output',str(RUN),'--num-envs','32','--standing-one',str(STANDING_ONE)]
+ 
+ def restoration(pause,restored,launch):
+- require(pause.get('unit')==UNIT and pause.get('output')==str(RUN) and pause.get('source')==str(SOURCE) and pause.get('admission')==str(ADMISSION),'Pause identity differs')
++ require(pause.get('unit')==UNIT and pause.get('output')==str(RUN) and pause.get('source')==str(SOURCE) and pause.get('admission')==str(ADMISSION) and pause.get('standing_one')==str(STANDING_ONE),'Pause identity differs')
+  require(pause.get('coordination_sha256')=='35af5100e39980f55a3f5e19654e4550b3c3fb6da114b64fbe0d143817242cf3','Wrong coordination identity')
+  timers={k for k,v in pause['units'].items() if k.endswith('.timer') and 'ActiveState=active' in v}
+  require(isinstance(restored.get('timers'),list) and len(restored['timers'])==len(timers) and set(restored['timers'])==timers,'Restored timer set differs')
+@@ -84,8 +87,16 @@
+  require(bool(campaign.get('error') or campaign.get('integrity_error') or job.get('error') or state.get('errors')),'Failed campaign lacks recorded failure evidence')
+  return 'authentic_terminal_failure'
+ 
++def standing_one_check():
++ actual=inventory(STANDING_ONE);mapping={k:v['sha256'] for k,v in actual.items()}
++ expected=read(GUARD/'inputs/STANDING_ONE_SHA256.json')
++ require(mapping==expected,'Original same-source standing1 raw inventory changed')
++ require(hashlib.sha256(json.dumps(mapping,sort_keys=True,separators=(',',':')).encode()).hexdigest()==STANDING_ONE_MAP_SHA256,'Wrong original standing1 canonical map')
++ require(mapping.get('state.json')==STANDING_ONE_STATE_SHA256,'Wrong original standing1 state')
++ return actual
++
+ def audit():
+- result={'schema':'canonical_native_standing_terminal_audit_v1','expected_invocation':INV,'unit_name':UNIT,'checked_unix':time.time(),'read_only':True,'audit_verified':False,'standing_completed':False,'physical_admission':False,'training_allowed':False,'errors':[]}
++ result={'schema':'canonical_native_standing_terminal_audit_v1','expected_invocation':INV,'unit_name':UNIT,'checked_unix':time.time(),'read_only':True,'num_envs':32,'audit_verified':False,'standing_completed':False,'physical_admission':False,'training_allowed':False,'errors':[]}
+  def attempt(label,fn):
+   try:v=fn();result[label]=v;return v
+   except Exception as e:result['errors'].append({'check':label,'error':repr(e)});return None
+@@ -102,6 +113,7 @@
+   def admissioncheck():
+    actual=inventory(ADMISSION);require(len(actual)==19 and {k:v['sha256'] for k,v in actual.items()}==read(SOURCE/'ACTUATION_SHA256.json'),'Original coordinate/effort admission changed');require(sha(SOURCE/'ACTUATION_SHA256.json')=='1ccd8f4ffaa2eadc1fd9c6202af8da965b0e9b95f39c585b68a3a64313ce2728','Wrong coordinate/effort map');return actual
+   attempt('actuation_admission_inventory',admissioncheck)
++  attempt('standing_one_admission_inventory',standing_one_check)
+  campaign=attempt('campaign',lambda:read(RUN/'campaign.json'))
+  job=attempt('job',lambda:read(RUN/'jobs/standing.json'))
+  state=attempt('native_state',lambda:read(RUN/'standing/state.json')) if (RUN/'standing/state.json').is_file() else None
+@@ -117,8 +129,9 @@
+  if all(checks.values()) and result.get('input_asset'):
+   def hostidentity():
+    s=importlib.util.spec_from_file_location('_audit_canonical_host',HOST/'launch_standing_spark.py');h=importlib.util.module_from_spec(s);s.loader.exec_module(h)
+-   args=SimpleNamespace(source=SOURCE,asset=ASSET,admission=ADMISSION,supervisor_source=SUPERVISOR,output=RUN,host_freeze_sha256=PINS[1][3],num_envs=1,standing_one=None)
++   args=SimpleNamespace(source=SOURCE,asset=ASSET,admission=ADMISSION,supervisor_source=SUPERVISOR,output=RUN,host_freeze_sha256=PINS[1][3],num_envs=32,standing_one=STANDING_ONE)
+    identity=h.verify_inputs(args)
++   require(identity.get('num_envs')==32 and identity.get('standing_one_state_sha256')==STANDING_ONE_STATE_SHA256 and identity.get('standing_one_inventory_sha256')==STANDING_ONE_MAP_SHA256,'Standing32 admission identity differs')
+    if campaign is not None:require(campaign.get('identity')==identity and campaign.get('host_freeze_sha256')==PINS[1][3] and campaign.get('source_freeze_sha256')==PINS[0][3],'Host campaign input identity mismatch')
+    if state is not None and state.get('status')=='completed':
+     native_validation['attempted']=True
+@@ -146,6 +159,9 @@
+   final_admission=attempt('final_actuation_admission_inventory',admissioncheck)
+   if final_admission is not None and final_admission!=result.get('actuation_admission_inventory'):result['errors'].append({'check':'actuation_stability','error':'Original coordinate/effort admission changed between audit passes'})
+   result.pop('final_actuation_admission_inventory',None)
++  final_standing=attempt('final_standing_one_admission_inventory',standing_one_check)
++  if final_standing is not None and final_standing!=result.get('standing_one_admission_inventory'):result['errors'].append({'check':'standing1_stability','error':'Original standing1 admission changed between audit passes'})
++  result.pop('final_standing_one_admission_inventory',None)
+ 
+  result['audit_verified']=not result['errors']
+  if not result['audit_verified']:result['standing_completed']=False

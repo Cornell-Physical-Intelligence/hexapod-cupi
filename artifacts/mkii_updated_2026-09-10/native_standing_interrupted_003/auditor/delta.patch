@@ -1,0 +1,25 @@
+--- 
++++ 
+@@ -4,15 +4,15 @@
+ import hashlib,importlib.util,json,math,re,subprocess,sys,time
+ sys.dont_write_bytecode=True
+ BASE=Path('/home/orionh/HEXAPOD_runs/canonical_direct_20260910')
+-RUN=BASE/'native_standing_002'; PAUSE=BASE/'forecast_pause_007'
+-UNIT='hexapod-canonical-native-standing-002-20260910.service'
+-INV='d9725b51027e44b59ffcb00a2b67763f'
+-SOURCE=BASE/'standing_source_002'; HOST=BASE/'standing_host_002'; GUARD=BASE/'standing_guard_003'; ASSET=BASE/'asset_001'
++RUN=BASE/'native_standing_003'; PAUSE=BASE/'forecast_pause_009'
++UNIT='hexapod-canonical-native-standing-003-20260910.service'
++INV='ff270c50458f47e5940dd93c4b3aa845'
++SOURCE=BASE/'standing_source_003'; HOST=BASE/'standing_host_003'; GUARD=BASE/'standing_guard_004'; ASSET=BASE/'asset_001'
+ ADMISSION=BASE/'native_actuation_001/actuation'
+ SUPERVISOR=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009')
+-PINS=[('source',SOURCE,'FREEZE_SHA256.json','acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467',51),
+- ('host',HOST,'FREEZE_SHA256.json','c533454d1699058a7b686e49436247bbb9c94bbeec0a91b01090c234f4576763',22),
+- ('guard',GUARD,'FREEZE_SHA256.json','da808fb2f14f29e8a2d17bfecd30b7b50fe719b7d7db3d7305a7e33317ae5a53',50),
++PINS=[('source',SOURCE,'FREEZE_SHA256.json','e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0',87),
++ ('host',HOST,'FREEZE_SHA256.json','968caeb48082ee0a72dea9acc1a6b7b93d2f9b14b9f4c2f05874070a03be1a95',28),
++ ('guard',GUARD,'FREEZE_SHA256.json','5f13bfd6d23754051bd0520ca3a47d49d22aa467da8dcd2d56f50a87da6c2ea9',33),
+  ('ownership_supervisor',SUPERVISOR,'campaign_source_hashes.json','04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e',926)]
+ 
+ def require(ok,message):

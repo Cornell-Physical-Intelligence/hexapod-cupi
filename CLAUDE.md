@@ -15,7 +15,7 @@ the next campaign without launching it.
 
 The user approved `robot/active_model.json` as the canonical model selection for **all future training**, using `robot/hexapod_mkii_updated_v1/urdf/hexapod_updated_rs05_mass_corrected.urdf` with the motor weight overrides (7.466088235 kg). Do not start new training on the simplified C-study/mock or historical four-bar models. Prepare a new model-bound runtime and native Isaac admission for the detailed 19-body/18-joint direct-drive robot first. Preserve old task IDs, checkpoints and evidence unchanged for historical reproduction; do not silently make an old task load this new asset. Stage 2 still requires all-direction/path smoothness and quiet standing, with terrain/perception prepared in parallel. Read `STATUS.md` and `docs/UPDATED_CAD_IMPORT.md`. Every meaningful verified step must be committed and pushed with the relevant Markdown context; this is explicit user authorization. Preserve teammates' commits, use a current main integration, run relevant checks, and verify the remote SHA. Historical frozen evidence is not rewritten to update status.
 
-**Weather compute priority, 10 September 2026:** the user explicitly authorizes overriding all weather activity to prioritize HEXAPOD PPO. Identified weather services and timers may be deferred when they block training; preserve their outputs and record exact ownership and restoration/defer decisions. This authorization does not cover unrelated non-weather workloads. Keep the hardened launchers, shared GPU locks, exact container cleanup and bounded recovery controls. Do not delay a ready HEXAPOD allocation merely to favor a weather job.
+**Exclusive Spark priority, 10 September 2026:** the user's latest instruction is “make sure our job takes full control of the spark at all times”. Reserve user compute for HEXAPOD across validation, training, evaluation, recording and the intervals between runs. This supersedes weather-only priority and earlier sharing-on-request preferences. Defer identified competing producers, preserve outputs, and record exact unit/process identity and the later-resume state. Do not automatically restore competing schedulers after each HEXAPOD job; only a later user instruction releases or changes the reservation. Preserve SSH, operating-system services and host health. Keep hardened launchers, both GPU locks, truthful resource checks, exact container cleanup and bounded recovery. The shared coordination file and actual reservation receipts govern enforcement; a policy declaration does not prove manual launches are technically blocked.
 
 ## Mandatory live research poster framework
 
@@ -130,9 +130,12 @@ as requirements for a new CAD policy.
   bind-mounted directory. You sync source there and verify it with
   `sha256sum -c isaaclab/deploy/stage2_pipeline.sha256`. Git commands run
   against it do not behave as they do here.
-- **Do not compete with unrelated workloads on the shared GPU.** Hold
-  `/tmp/hexapod-isaac-gpu.lock`, gate on producer scripts and their
-  descendants, and do not signal a process this project did not create. See
+- **Enforce the user-authorized exclusive Spark reservation.** Hold
+  `/tmp/hexapod-isaac-gpu.lock` and `/opt/wx/gpu.lock`, gate on producer scripts
+  and their descendants, and defer competing compute through identified,
+  reversible producer controls. Never use broad process kills or hide an
+  allocated CUDA context from resource checks. Per-job cleanup touches only
+  its exact owned containers; reservation release is a separate action. See
   `docs/OPERATIONS.md` §3. `ops/hexctl` is the operational entry point. It
   composes and supervises the hardened launchers and does not replace them.
 - **Claims need artifacts.** A result is real when it has a checkpoint, a
