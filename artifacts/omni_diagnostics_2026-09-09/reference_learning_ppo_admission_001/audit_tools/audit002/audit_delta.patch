@@ -1,0 +1,41 @@
+--- audit001
++++ audit002
+@@ -42,10 +42,15 @@
+  require(actual==set(m)|{manifest},'Missing/unlisted source payload')
+  return {'path':str(root),'manifest':manifest,'manifest_sha256':bound,'files':count,'unchanged':True}
+ 
+-def terminal(fields):
++def terminal(fields,journal=None):
+  require(fields.get('ActiveState') in ('failed','inactive'),'Unit is not terminal')
+  require(fields.get('SubState') in ('failed','dead'),'Unit terminal substate is unknown')
+- require(fields.get('InvocationID')==INVOCATION,'Wrong or unavailable invocation identity')
++ if fields.get('InvocationID')!=INVOCATION:
++  require(fields.get('InvocationID')=='' and isinstance(journal,list) and len(journal)>=2,'Wrong or unavailable invocation identity')
++  matching=[r for r in journal if r.get('USER_UNIT')==UNIT]
++  require({r.get('USER_INVOCATION_ID') for r in matching}=={INVOCATION},'Historical journal contains another or unknown invocation')
++  require(any(r.get('MESSAGE','').startswith('Started '+UNIT) for r in matching),'Exact historical start missing')
++  require(any('Consumed ' in r.get('MESSAGE','') for r in matching),'Exact historical terminal accounting missing')
+  require(fields.get('Result') in ('success','exit-code','signal','timeout'),'Unexpected terminal result')
+  require('ExecMainStatus' in fields,'Missing main status')
+ 
+@@ -64,7 +69,10 @@
+ 
+ def main():
+  unittext=subprocess.check_output(['systemctl','--user','show',UNIT,'-p','ActiveState','-p','SubState','-p','Result','-p','ExecMainStatus','-p','InvocationID'],text=True,timeout=20)
+- unit=dict(line.split('=',1) for line in unittext.splitlines());terminal(unit)
++ unit=dict(line.split('=',1) for line in unittext.splitlines())
++ journaltext=subprocess.check_output(['journalctl','--user','-u',UNIT,'--no-pager','-o','json'],text=True,timeout=20)
++ journal=[json.loads(line) for line in journaltext.splitlines() if line.strip()]
++ terminal(unit,journal)
+  campaign=read(RUN/'campaign.json')
+  require(campaign.get('status') in ('completed','failed','stopped'),'Campaign is not terminal')
+  require(campaign.get('PPO_updates_completed',0)==0,'This is not the admission-only allocation')
+@@ -118,7 +126,7 @@
+   raw['preflight/'+name]=sha(BASE/name);sizes['preflight/'+name]=(BASE/name).stat().st_size
+  require(initial_campaign_sha==sha(RUN/'campaign.json'),'Campaign changed during audit')
+  print(json.dumps({'verified_unix':time.time(),'unit':unit,'campaign_status':campaign['status'],
+-    'campaign_sha256':initial_campaign_sha,'PPO_updates_completed':0,'input_maps':inputs,
++    'campaign_sha256':initial_campaign_sha,'historical_invocation_journal':journal,'journal_sha256':hashlib.sha256(journaltext.encode()).hexdigest(),'PPO_updates_completed':0,'input_maps':inputs,
+     'assets_files':550,'assets_unchanged':True,'host_readonly_proof_identity':identity,
+     'raw_payloads':raw,'raw_sizes_bytes':sizes,'jobs':jobs,'phases':phases,
+     'owned_names_and_ids_absent':absent,'unallocated_phases':[p for p in PHASES if p not in jobs],
