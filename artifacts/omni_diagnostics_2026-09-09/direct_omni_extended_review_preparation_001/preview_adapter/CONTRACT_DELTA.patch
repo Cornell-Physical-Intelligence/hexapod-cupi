@@ -1,0 +1,47 @@
+--- frozen adapter003/preview_contract.py
++++ adapter004/preview_contract.py
+@@ -3,10 +3,10 @@
+ import hashlib,importlib.util,json,re,sys
+ 
+ HERE=Path(__file__).resolve().parent
+-SOURCE='64144b2c2466f17c809554ef53f82b736b4199136cc821451d7ac2788752bd2e'
+-PLAN='9fb7d0b01480523972b4f1c17e717756d7dcf1c54b9caa436245671937de538c'
+-NATIVE='20fbcd40a869b39d8e3143a6c9715ec62ada5cc6211eaf473f60f8b7167678cb'
+-HOST='19545653a00e635cc14ed9415f9799978da34674e84f6cad76eb42bd2a961ac4'
++SOURCE='aa70659d33243f1e28e9c71b1a7f9d33341642db770fd7356192573a26fe904e'
++PLAN='b2286828148c89fb34624d38beaf84b389584f7bda4d2648512e017da4b50acb'
++NATIVE='0bdd2abf3811e68ac59e4fbc325eb5d2bb96afd2183eb84c4d37faeb86ff9e9f'
++HOST='2db7e44ec40543753a6d1325f6d5dc9ed81be2948931b2ca670deffda68ce959'
+ LEGACY='abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280'
+ ORIGINAL='1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8'
+ DT=.02;FPS=25;STEPS=1900;FRAMES=950
+@@ -34,7 +34,7 @@
+     bound=sha(HERE/'FREEZE_SHA256.json');verify_tree(HERE,'FREEZE_SHA256.json',bound);return bound
+ def verify_source(root):
+     mapping=verify_tree(root,'campaign_source_hashes.json',SOURCE)
+-    if len(mapping)!=598 or sha(root/'robot/hexapod_mkii_length_study/training_plan.json')!=PLAN:raise ValueError('Wrong native source/plan')
++    if len(mapping)!=599 or sha(root/'robot/hexapod_mkii_length_study/training_plan.json')!=PLAN:raise ValueError('Wrong native source/plan')
+     return mapping
+ def schedule():
+     rows=[]
+@@ -57,6 +57,7 @@
+         if cached is not None:sys.modules['direct_config']=cached
+ 
+ def verify_pilot(args,contract):
++    if not re.fullmatch('[0-9a-f]{64}',HOST):raise ValueError('Selected host005 binding pending')
+     if any(p.is_symlink() for p in args.pilot.rglob('*')):raise ValueError('Symlink selected campaign')
+     campaign=read(args.pilot/'campaign.json');identity=campaign.get('identity',{})
+     if (campaign.get('status')!='completed' or campaign.get('terminal_inputs_unchanged') is not True
+@@ -64,9 +65,10 @@
+         or identity.get('plan_sha256')!=PLAN or identity.get('checkpoint_sha256')!=ORIGINAL
+         or identity.get('actor_width')!=315 or identity.get('critic_width')!=318):raise ValueError('Unmatched completed native campaign')
+     allocation=campaign.get('allocation');branch=campaign.get('branch')
+-    if allocation!='pilot' or branch not in ('curriculum','caps'):raise ValueError('Preview requires a completed curriculum or CAPS pilot; smoke is not eligible')
++    if allocation!='extended' or branch!='caps':raise ValueError('Preview requires completed CAPS500 extended allocation; smoke and pilots are not eligible')
+     selected=contract.selection('train',allocation,branch,None,None)
+-    if identity.get('selection')!=selected or selected.get('updates')!=50:raise ValueError('Wrong campaign training selection')
++    if identity.get('selection')!=selected or selected.get('updates')!=500:raise ValueError('Wrong campaign training selection')
++    if (campaign.get('bounded_campaign_complete') is not True or campaign.get('last_completed_phase')!='final_stop' or campaign.get('PPO_updates_completed')!=500 or identity.get('schema')!='direct315_extended_native_v4' or campaign.get('Stage2_complete') is not False):raise ValueError('Incomplete or wrong extended500 source/schema scope')
+     phases=('standing','initial_constant','initial_stop','train','final_constant','final_stop')
+     if campaign.get('planned_phases')!=list(phases) or set(campaign.get('accepted_phases',{}))!=set(phases):raise ValueError('Incomplete selected campaign')
+     learned=contract.validate_result(args.pilot/'train','train',identity)

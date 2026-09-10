@@ -338,11 +338,13 @@ training that means:
    body-frame height scan (contract C2, ADR-0002). The lidar serves mapping
    and localization and does not feed the policy.
 
-`docs/PLAN.md` holds milestones, gates, and ownership. Phase 3 prototypes
-reference an Intel RealSense D455 depth camera and a Livox Mid-360-like
-near-hemispherical LiDAR/IMU. No trained terrain task fuses them. Phase 3 is
-paused. A long sensor-fusion or difficult-terrain job needs the user's
-approval before launch.
+`docs/PLAN.md` holds milestones, gates, and ownership. The user has confirmed
+RealSense D455 and Livox Mid-360 ownership, permits additional purchases, and
+authorizes terrain/perception preparation in parallel with the C-study Stage 2
+priority. Terrain training still requires the selected policy's Stage 2 gates
+and exact terrain/source admission; authorization does not replace those
+checks. Keep ideal terrain information, simulated sensing and calibrated
+physical sensing separately identified. `STATUS.md` records execution state.
 
 ## C-study fine-tune initialization and allocation experiments
 
