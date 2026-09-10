@@ -1,0 +1,29 @@
+--- candidate002/candidate_runner.py
++++ candidate003/candidate_runner.py
+@@ -53,11 +53,26 @@
+                     replaced.append('.'.join(filter(None,(model_name,module_name,name))))
+     return replaced
+ 
++def prepare_local_logger_for_early_checkpoint(runner):
++    """RSL 5.0.1 defers writer creation until learn, but save_model reads it.
++
++    Initialize only the absent local-writer sentinel. Calling the full writer
++    initializer here would create it twice when learn starts. No logging config,
++    learned tensor, normalizer or optimizer state changes.
++    """
++    logger=runner.logger
++    if not hasattr(logger,'writer'):
++        if logger.cfg.get('logger')!='tensorboard' or logger.log_dir is None:
++            raise ValueError('Early checkpoint requires the configured local TensorBoard logger')
++        logger.writer=None
++
++
+ def save_candidate(runner,path,config,identity):
+     path=Path(path);sidecar=path.with_suffix(path.suffix+'.json')
+     if path.exists() or sidecar.exists():raise FileExistsError('Candidate checkpoint and sidecar are immutable')
+     meta=checkpoint_metadata(config,identity)
+     path.parent.mkdir(parents=True,exist_ok=True)
++    prepare_local_logger_for_early_checkpoint(runner)
+     runner.save(str(path),infos={'candidate_contract':meta})
+     meta['checkpoint_sha256']=hashlib.sha256(path.read_bytes()).hexdigest()
+     save_json(sidecar,meta)

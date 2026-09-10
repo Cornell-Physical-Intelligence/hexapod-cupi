@@ -321,3 +321,15 @@ Full 32 × 1,000 standing precedes per-replica zero-mean/exploration motor/conta
 Before terrain standing or a teacher/traversal pilot, require fresh exact-plan flat admission, original-fixture full-C standing and a completed-log audit with no reported incomplete contact/friction data. Increase measurement capacity rather than changing collision geometry or loosening contact bounds. The original 30 fixture admissions do not qualify the full robot, derived curriculum or sensors. Admit derived mild fixtures and start footprints separately before terrain-relative support/clearance, teacher inputs and held-out courses.
 
 Shared quiet-heading capture now explicitly converts confirmed SDK XYZW to the scorer's WXYZ convention and retains both orders. Historical heading verdicts require separately versioned reanalysis from frozen traces before they guide continuation or release. Preserve existing gates and the body-twist navigation interface. The target-velocity exploration follow-up reduces initial standard deviation to 0.005 and samples a full 20-second episode before any short scratch walking allocation; a reduced noise setting alone is not proof of useful gait exploration.
+
+
+### Decision speed and alternative routes, 10 September
+
+The user explicitly prioritizes acceleration: investigate any major slowdown with the smallest decisive check, then switch approaches when further investment lacks evidence. Keep candidate PPO allocation at a short 50-update pilot until per-direction tracking and motor/quiet results earn continuation. Distinguish infrastructure failure, failed configuration and an unproven architecture; one failed pilot cannot establish general infeasibility. Prepare the recording path and support-aware reference in parallel so either a promising checkpoint or a rejected controller leads directly to the next useful action. Preserve every acceptance gate and frozen result.
+
+
+### Bounded reference residual after pilot003, 10 September
+
+The 50-update target-velocity pilot produced essentially no useful translation or yaw, while persistent small actor biases accumulated position-target error and requested torque saturation. Do not extend that unchanged branch. Prepare a new bounded position residual around an explicit stance/swing/quiet reference; preserve the body forward/left/yaw-rate command contract and planned terrain surface/clearance inputs. A desired trajectory may generate joint targets, but actual motion and contact must be measured independently and the simulated base must remain unconstrained. No old actor tensors are silently resumed into a different contract.
+
+First test the zero-residual reference on the full C robot for standing and one low-speed forward stance/swing cycle under the existing torque and common slew bounds. Reject invalid IK, missing support, target windup, falls and misleading command derating before allocating learning. This is a decisive feasibility screen, not a reduced Stage2 acceptance gate. Retain failed branches and recordings as evidence, then allocate the next short experiment according to measured movement, stability, contact and torque results.

@@ -1,0 +1,200 @@
+{
+  "observed_unix": 1789007282.6660867,
+  "scope": "Post-terminal historical terrain005 verification and separate instantaneous live ownership snapshot; no job was signaled or launched.",
+  "source": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/terrain_robot_source_005",
+  "output": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/terrain_robot_smoke_005",
+  "source_manifest_sha256": "4fcaedf7a43020b18e964f1bc666dd6dc0a95e6180ac431e686b716959b968e9",
+  "source_files_verified": 662,
+  "source_changed": [],
+  "source_extra_files": [],
+  "admitted_asset_files_verified": 550,
+  "asset_changed": [],
+  "before_after_flat_asset_maps_equal": true,
+  "owned_jobs": [
+    {
+      "phase": "flat",
+      "job": {
+        "status": "completed",
+        "phase": "flat",
+        "container_name": "hexapod-terrain-standing-f197fd3bad6348e8ae68bef3c7070b3f",
+        "started_unix": 1789006909.9113684,
+        "deadline_seconds": 600,
+        "no_policy_loaded": true,
+        "coordination_sha256": "fdad0bb0126158988dc36ea38538b2f7804299cffb5ff29601ba597089672234",
+        "preflight": {
+          "available_memory_bytes": 126940409856,
+          "containers": "isim-web-viewer-1 isim-web-viewer",
+          "compute_processes": ""
+        },
+        "container_id": "ed722211a97ed6848d3feab19239088febd3364f6a6675fb30028bf7bf2c9c52",
+        "contact_data_completeness": {
+          "log_sha256": "7b5c85217b5745063f08ffa172e7b4558629d5e7e5ba2f46210e797628577193",
+          "incomplete_data_warning_count": 0,
+          "reported_capacities": [],
+          "first_warning": null,
+          "last_warning": null,
+          "passed": true,
+          "scope": "Required absence of reported contact/friction data truncation; raw physical gate must also pass"
+        },
+        "exit_code": 0,
+        "cleanup_checked": true,
+        "finished_unix": 1789006990.9269812
+      },
+      "inspect_by_id": {
+        "command": [
+          "docker",
+          "inspect",
+          "ed722211a97ed6848d3feab19239088febd3364f6a6675fb30028bf7bf2c9c52"
+        ],
+        "returncode": 1,
+        "stdout": "[]\n",
+        "stderr": "error: no such object: ed722211a97ed6848d3feab19239088febd3364f6a6675fb30028bf7bf2c9c52\n"
+      },
+      "inspect_by_name": {
+        "command": [
+          "docker",
+          "inspect",
+          "hexapod-terrain-standing-f197fd3bad6348e8ae68bef3c7070b3f"
+        ],
+        "returncode": 1,
+        "stdout": "[]\n",
+        "stderr": "error: no such object: hexapod-terrain-standing-f197fd3bad6348e8ae68bef3c7070b3f\n"
+      }
+    },
+    {
+      "phase": "terrain",
+      "job": {
+        "status": "completed",
+        "phase": "terrain",
+        "container_name": "hexapod-terrain-standing-2a60b38e292b4d0f9e5ade18d251372a",
+        "started_unix": 1789006991.0595345,
+        "deadline_seconds": 600,
+        "no_policy_loaded": true,
+        "coordination_sha256": "fdad0bb0126158988dc36ea38538b2f7804299cffb5ff29601ba597089672234",
+        "preflight": {
+          "available_memory_bytes": 127038324736,
+          "containers": "isim-web-viewer-1 isim-web-viewer",
+          "compute_processes": ""
+        },
+        "container_id": "729957a810a6b6989f6fb67f069e083d3482cd5bbb018218ea0341b1afe50720",
+        "contact_data_completeness": {
+          "log_sha256": "fddfea3a40758b08c6eadeed98ae465e4e75d48f7410aacb84ca4b18a1add000",
+          "incomplete_data_warning_count": 0,
+          "reported_capacities": [],
+          "first_warning": null,
+          "last_warning": null,
+          "passed": true,
+          "scope": "Required absence of reported contact/friction data truncation; raw physical gate must also pass"
+        },
+        "exit_code": 0,
+        "cleanup_checked": true,
+        "finished_unix": 1789007066.9817002
+      },
+      "inspect_by_id": {
+        "command": [
+          "docker",
+          "inspect",
+          "729957a810a6b6989f6fb67f069e083d3482cd5bbb018218ea0341b1afe50720"
+        ],
+        "returncode": 1,
+        "stdout": "[]\n",
+        "stderr": "error: no such object: 729957a810a6b6989f6fb67f069e083d3482cd5bbb018218ea0341b1afe50720\n"
+      },
+      "inspect_by_name": {
+        "command": [
+          "docker",
+          "inspect",
+          "hexapod-terrain-standing-2a60b38e292b4d0f9e5ade18d251372a"
+        ],
+        "returncode": 1,
+        "stdout": "[]\n",
+        "stderr": "error: no such object: hexapod-terrain-standing-2a60b38e292b4d0f9e5ade18d251372a\n"
+      }
+    }
+  ],
+  "unit": {
+    "command": [
+      "systemctl",
+      "--user",
+      "show",
+      "hexapod-terrain-robot-smoke-005-20260910.service",
+      "--property=ActiveState,SubState,Result,ExecMainStatus"
+    ],
+    "returncode": 0,
+    "stdout": "Result=success\nExecMainStatus=0\nActiveState=inactive\nSubState=dead\n",
+    "stderr": ""
+  },
+  "forecast_restoration": {
+    "restored_unix": 1789007067.2288735,
+    "timers": [
+      "stormscope-dispatch.timer",
+      "stormscope-scout.timer"
+    ],
+    "owned_cleanup_checked": []
+  },
+  "forecast_timer_snapshot": {
+    "command": [
+      "systemctl",
+      "--user",
+      "show",
+      "stormscope-dispatch.timer",
+      "stormscope-scout.timer",
+      "--property=Id,ActiveState,SubState"
+    ],
+    "returncode": 0,
+    "stdout": "Id=stormscope-dispatch.timer\nActiveState=active\nSubState=waiting\n\nId=stormscope-scout.timer\nActiveState=active\nSubState=waiting\n",
+    "stderr": ""
+  },
+  "cuda_snapshot": {
+    "command": [
+      "nvidia-smi",
+      "--query-compute-apps=pid,process_name",
+      "--format=csv,noheader,nounits"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "docker_snapshot": {
+    "command": [
+      "docker",
+      "ps",
+      "--format",
+      "{{.ID}} {{.Names}} {{.Image}}"
+    ],
+    "returncode": 0,
+    "stdout": "21faff779d05 isim-web-viewer-1 isim-web-viewer\n",
+    "stderr": ""
+  },
+  "lock_snapshot": {
+    "/opt/wx/gpu.lock": "free_at_snapshot_released_immediately",
+    "/tmp/hexapod-isaac-gpu.lock": "free_at_snapshot_released_immediately"
+  },
+  "run_files_sha256": {
+    "campaign.json": "08527fe029fac32ceecaab59b66943ed8439f589ec8c041f6849b365f0187052",
+    "flat/admission.json": "f761e3e3042fba344bb379d9f818a0a9e8ef8f4ba9dc06de3d8a12ebcad5ed52",
+    "flat/environment.yaml": "fa28d8e208ac550d15c8c9fac3acee877ed0d7571558a418f342d3ee81127a82",
+    "flat/state.json": "738c5b6ff59a0c5b16e1c40c8e976d9d8c670a1393e660bbb79bf0e14f067549",
+    "inputs/study_after_flat.sha256.json": "a10ec4dbc7c0a1846ff45156c99f9ca0d1c9fc4cdf07c6ef2e7d4f2df5ae2ec1",
+    "inputs/study_before_flat.sha256.json": "a10ec4dbc7c0a1846ff45156c99f9ca0d1c9fc4cdf07c6ef2e7d4f2df5ae2ec1",
+    "jobs/flat.json": "66a578788c098f50ca82698a5ddb9e6352596f5d73ea385b1895caa855d0e20d",
+    "jobs/flat_contact_data_audit.json": "897067f2792772fc5096ad89faba0e3825c36f06887a7540031cd0bbec4ba951",
+    "jobs/terrain.json": "429a0795d34a7b2152d3b63f42b25bfea43630e9f6a72d68d5adb26b14c2f003",
+    "jobs/terrain_contact_data_audit.json": "521e505d55ab1d6e1f902b067c774a4a5fd37f978ba58478bc710a3198e9a337",
+    "logs/flat.log": "7b5c85217b5745063f08ffa172e7b4558629d5e7e5ba2f46210e797628577193",
+    "logs/terrain.log": "fddfea3a40758b08c6eadeed98ae465e4e75d48f7410aacb84ca4b18a1add000",
+    "terrain/environment.yaml": "973d6188835b9747047f6e72b8336bf1d60913492e9c92e483d525d5ea2bb3c0",
+    "terrain/state.json": "6f7b47bcebbb2235548663938761acc69e16813d488746b99e232791a5c19b88"
+  },
+  "pause_files_sha256": {
+    "launch.json": "76f94633f271fb246a49db1487cae37b8f1fb6318cdb6dca69607c9dad18d3f1",
+    "pause.json": "a1c77f95706516c69377e856f00eaad211d631e902fe26f648715be9cb77a2e9",
+    "restore.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "restored.json": "9895e05e616e932d638bfac331813584ac88bc5874b7d91d5f2dcb8c405d287e",
+    "resume_forecasting.py": "b79717deb05cb74ec716d36153b47e4c8f9d0e7a6ecc5ca4e73304d6ba33ea7c"
+  },
+  "outer_guard_sha256": "18b676cff5a0f27087399f5b0114f2bd4f5c9a8929da7f3ac2e12ad2bad304b6",
+  "source_origin_sha256": "b6b090566fa02475314c7e4dc0a1272ae71bd8dc4e31a4ce0192b31982bd5809",
+  "integrity_passed": true,
+  "owned_containers_absent": true
+}
