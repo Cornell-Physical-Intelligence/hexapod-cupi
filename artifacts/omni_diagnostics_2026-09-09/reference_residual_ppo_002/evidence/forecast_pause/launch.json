@@ -1,0 +1,30 @@
+{
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=hexapod-reference-residual-ppo-002-20260910.service",
+    "--property=RuntimeMaxSec=2520",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=Environment=PYTHONDONTWRITEBYTECODE=1",
+    "--property=ExecStopPost=/usr/bin/python3 /home/orionh/HEXAPOD_runs/mock_length_study_20260909/forecast_pause_043/resume_forecasting.py",
+    "--property=Environment=PYTHONUNBUFFERED=1",
+    "/usr/bin/python3",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_residual_ppo_launch_002/launch_residual_ppo_spark.py",
+    "--source",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009",
+    "--run",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_009",
+    "--device-run",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_device_smoke_001",
+    "--bridge",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_device_smoke_adapter_001",
+    "--consumer",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_residual_ppo_source_002",
+    "--observation",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_policy_observation_005_001",
+    "--output",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_residual_ppo_002"
+  ],
+  "launched_unix": 1789031087.3301997
+}

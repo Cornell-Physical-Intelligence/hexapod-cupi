@@ -1,0 +1,484 @@
+{
+  "scope": "Exact directional002 strafe rejection; remaining turn/arc unmeasured, no source/gate modification",
+  "source_manifest_sha256": "7c64602cae91478aebd4b03adcc79f56084db7529fd1c54c0439d061075a1c58",
+  "source_files_verified": 930,
+  "raw_payloads_verified": 32,
+  "fresh32_standing_physical_and_quiet_recomputed_pass": true,
+  "actual_terminal_state": "rejected",
+  "exact_full_scalar_gate_replay_equal": true,
+  "strict_terminal_JSON_serialization_passed": true,
+  "controls": 505,
+  "actual400Hz_samples": 4041,
+  "every8th_control_endpoint_and_counter_timestamp_parity": true,
+  "original_gate": {
+    "control_steps": 505,
+    "num_envs": 1,
+    "settle_steps": 200,
+    "control_dt_s": 0.02,
+    "post_settle_measured_duration_s": 6.1000000000000005,
+    "max_applied_torque_nm": 1.600000023841858,
+    "post_settle_max_requested_torque_nm": 1.5174518823623657,
+    "post_settle_joint_saturation_fraction": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "post_settle_max_joint_saturation_fraction": 0.0,
+    "post_settle_all_motor_saturation_fraction": 0.0,
+    "post_settle_nonfoot_env_steps": 0,
+    "post_settle_min_distal_support_count": 4,
+    "terminations": 0,
+    "truncations": 0,
+    "min_root_height_m": 0.1290668100118637,
+    "mean_measured_forward_mps": -0.00022387118951883167,
+    "mean_measured_left_mps": 0.00416596932336688,
+    "max_reference_to_executable_lag_rad": 0.0,
+    "max_target_cast_error_rad": 1.1920928955078125e-07,
+    "original_basic_standing_physics_pass": true,
+    "kind": "limited_directional_reference_discriminator_not_omni_or_PPO",
+    "case": "left_strafe",
+    "requested_forward_left_yaw": [
+      0.0,
+      0.005,
+      0.0
+    ],
+    "measured_flight_events": [
+      {
+        "leg_index": 0,
+        "flight_begin_step": 220,
+        "flight_end_step": 277,
+        "flight_samples": 57,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.004657946060173737,
+        "measured_reference_point_planar_step_m": 0.03203249672691723
+      },
+      {
+        "leg_index": 1,
+        "flight_begin_step": 454,
+        "flight_end_step": 505,
+        "flight_samples": 51,
+        "confirmed_measured_touchdown": false,
+        "measured_reference_point_lift_m": 0.005570689444329036,
+        "measured_reference_point_planar_step_m": null
+      },
+      {
+        "leg_index": 5,
+        "flight_begin_step": 331,
+        "flight_end_step": 333,
+        "flight_samples": 2,
+        "confirmed_measured_touchdown": false,
+        "measured_reference_point_lift_m": 2.430326429672669e-06,
+        "measured_reference_point_planar_step_m": 0.0018949030631538306
+      },
+      {
+        "leg_index": 5,
+        "flight_begin_step": 334,
+        "flight_end_step": 392,
+        "flight_samples": 58,
+        "confirmed_measured_touchdown": true,
+        "measured_reference_point_lift_m": 0.005261010849245934,
+        "measured_reference_point_planar_step_m": 0.04645290165485896
+      }
+    ],
+    "completed_measured_leg_indices": [
+      0,
+      5
+    ],
+    "generator_confirmed_touchdowns": 2,
+    "generator_final_mode": "swing",
+    "command_channels": "Raw rows retain requested, admitted target, filtered reference twist and actual measured body/navigation twist; references retain complete wave005 state",
+    "independent_directional_motion": null,
+    "final_quiet_stop_window": null,
+    "all_omni_directions_qualified": false,
+    "stage2_complete": false,
+    "passed": false
+  },
+  "failure_classification": {
+    "intended_swing_leg": "lm",
+    "first_subfive_support_index": 504,
+    "time_s": 10.1,
+    "other_support_below_threshold": "rr",
+    "RR_normal_force_n": 0.945591390132904,
+    "unchanged_distal_support_threshold_n": 1.0,
+    "RR_contact_point_finite": true,
+    "RR_reaction_force_world_n": [
+      0.3827788829803467,
+      0.8586413860321045,
+      0.9455913305282593
+    ],
+    "meaning": "RR carries nonzero force but is below admitted1N support while LM is airborne; no detached-foot or fallen-body claim",
+    "preceding_confirmed_landings": [
+      "lf",
+      "rr"
+    ],
+    "nonfoot_samples": 0,
+    "last10_control_rows": [
+      {
+        "control_index": 495,
+        "time_s": 9.92,
+        "distal_support": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "normal_force_z_n": [
+          13.980895042419434,
+          0.0,
+          31.405263900756836,
+          20.76500129699707,
+          13.25880241394043,
+          1.8440495729446411
+        ]
+      },
+      {
+        "control_index": 496,
+        "time_s": 9.94,
+        "distal_support": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "normal_force_z_n": [
+          13.989474296569824,
+          0.0,
+          31.49721908569336,
+          20.858123779296875,
+          13.24817943572998,
+          1.4434322118759155
+        ]
+      },
+      {
+        "control_index": 497,
+        "time_s": 9.96,
+        "distal_support": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "normal_force_z_n": [
+          13.921623229980469,
+          0.0,
+          31.590404510498047,
+          20.8165340423584,
+          13.244718551635742,
+          1.5459705591201782
+        ]
+      },
+      {
+        "control_index": 498,
+        "time_s": 9.98,
+        "distal_support": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "normal_force_z_n": [
+          13.957958221435547,
+          0.0,
+          31.519689559936523,
+          20.846538543701172,
+          13.299012184143066,
+          1.610227346420288
+        ]
+      },
+      {
+        "control_index": 499,
+        "time_s": 10.0,
+        "distal_support": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "normal_force_z_n": [
+          14.003759384155273,
+          0.0,
+          31.662416458129883,
+          20.875797271728516,
+          13.213557243347168,
+          1.4795100688934326
+        ]
+      },
+      {
+        "control_index": 500,
+        "time_s": 10.02,
+        "distal_support": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "normal_force_z_n": [
+          13.844664573669434,
+          0.0,
+          31.663612365722656,
+          20.84763526916504,
+          13.328856468200684,
+          1.4805922508239746
+        ]
+      },
+      {
+        "control_index": 501,
+        "time_s": 10.040000000000001,
+        "distal_support": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "normal_force_z_n": [
+          13.858808517456055,
+          0.0,
+          31.760894775390625,
+          20.906898498535156,
+          13.331219673156738,
+          1.0431174039840698
+        ]
+      },
+      {
+        "control_index": 502,
+        "time_s": 10.06,
+        "distal_support": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "normal_force_z_n": [
+          13.916058540344238,
+          0.0,
+          31.850749969482422,
+          20.926984786987305,
+          13.352869033813477,
+          1.171737551689148
+        ]
+      },
+      {
+        "control_index": 503,
+        "time_s": 10.08,
+        "distal_support": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "normal_force_z_n": [
+          13.89454174041748,
+          0.0,
+          31.785869598388672,
+          20.90836524963379,
+          13.416969299316406,
+          1.210515022277832
+        ]
+      },
+      {
+        "control_index": 504,
+        "time_s": 10.1,
+        "distal_support": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        "normal_force_z_n": [
+          13.810724258422852,
+          0.0,
+          31.93400764465332,
+          21.017606735229492,
+          13.419453620910645,
+          0.945591390132904
+        ]
+      }
+    ]
+  },
+  "postsettle400Hz_torque": {
+    "max_requested_nm": 1.5175960063934326,
+    "max_applied_nm": 1.5175960063934326,
+    "peak_time_s": 10.0975,
+    "runtime_joint": "revolute_2_6",
+    "samples_above1p6": 0
+  },
+  "available_prefix400Hz_motion_4_to10p1s_not_full24s_gate": {
+    "start_control_boundary": 200,
+    "end_control_boundary": 505,
+    "duration_s": 6.1000000000000005,
+    "acceptance_verdict": null,
+    "scope": "independent raw400Hz evidence; old50Hz gate unchanged",
+    "link": {
+      "measured_world_displacement_m": [
+        [
+          0.027158059179782867,
+          0.0012373639037832618,
+          -0.00013624131679534912
+        ]
+      ],
+      "measured_forward_displacement_m": [
+        -0.0010307231044640278
+      ],
+      "integrals": {
+        "left": {
+          "world_m": [
+            [
+              0.026733703911304474,
+              0.0012492223177105188,
+              3.665465919766575e-05
+            ]
+          ],
+          "forward_m": [
+            -0.0010458094588491045
+          ],
+          "position_difference_norm_m": [
+            0.0004583786940202117
+          ]
+        },
+        "right": {
+          "world_m": [
+            [
+              0.02674531191587448,
+              0.0012489680666476488,
+              3.646414552349597e-05
+            ]
+          ],
+          "forward_m": [
+            -0.0010454669072240852
+          ],
+          "position_difference_norm_m": [
+            0.0004475736350286752
+          ]
+        },
+        "trapezoid": {
+          "world_m": [
+            [
+              0.026739507913589478,
+              0.0012490951921790838,
+              3.655940236058086e-05
+            ]
+          ],
+          "forward_m": [
+            -0.0010456381830365948
+          ],
+          "position_difference_norm_m": [
+            0.0004529711732175201
+          ]
+        }
+      }
+    },
+    "com": {
+      "measured_world_displacement_m": [
+        [
+          0.02715247869491577,
+          0.0012344964779913425,
+          -0.00013624131679534912
+        ]
+      ],
+      "measured_forward_displacement_m": [
+        -0.0010278982151986677
+      ],
+      "integrals": {
+        "left": {
+          "world_m": [
+            [
+              0.02672186866402626,
+              0.0012473975075408816,
+              3.6547389754559845e-05
+            ]
+          ],
+          "forward_m": [
+            -0.0010440747381537615
+          ],
+          "position_difference_norm_m": [
+            0.0004641630803234875
+          ]
+        },
+        "right": {
+          "world_m": [
+            [
+              0.026733459904789925,
+              0.001247138949111104,
+              3.635677057900466e-05
+            ]
+          ],
+          "forward_m": [
+            -0.0010437280068171715
+          ],
+          "position_difference_norm_m": [
+            0.0004533505125436932
+          ]
+        },
+        "trapezoid": {
+          "world_m": [
+            [
+              0.026727665215730667,
+              0.001247268170118332,
+              3.6452081985771656e-05
+            ]
+          ],
+          "forward_m": [
+            -0.0010439013071944514
+          ],
+          "position_difference_norm_m": [
+            0.0004587511357385665
+          ]
+        }
+      }
+    }
+  },
+  "available_prefix400Hz_joint_rate_discrepancy": {
+    "runtime_joint": "revolute_2_1",
+    "angle_delta_rad": -0.2598414421081543,
+    "reported_rate_integral_rad": -0.21056458652892615,
+    "difference_rad": 0.049276855579228146
+  },
+  "no_full24s_motion_or_final_quiet_window": true,
+  "unmeasured_cases": [
+    "left_turn",
+    "forward_right_arc"
+  ],
+  "remote_source930_assets550_owned_absence_and_pause044_restoration_verified": true,
+  "new_live_lock_snapshot_claimed": false,
+  "next_declared_scope": "Fresh standing and only two unmeasured cases, same wave005/physics/gates; no identical strafe repeat",
+  "stage2_complete": false,
+  "left_strafe_admitted": false,
+  "velocity_fidelity_qualified": false
+}

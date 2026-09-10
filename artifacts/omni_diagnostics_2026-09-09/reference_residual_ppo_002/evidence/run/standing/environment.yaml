@@ -1,0 +1,1394 @@
+viewer:
+  eye: !!python/tuple
+  - 7.5
+  - 7.5
+  - 7.5
+  lookat: !!python/tuple
+  - 0.0
+  - 0.0
+  - 0.0
+  cam_prim_path: /OmniverseKit_Persp
+  resolution: !!python/tuple
+  - 1280
+  - 720
+  origin_type: world
+  env_index: 0
+  asset_name: null
+  body_name: null
+sim:
+  device: cuda:0
+  dt: 0.0025
+  gravity: !!python/tuple
+  - 0.0
+  - 0.0
+  - -9.81
+  physics_prim_path: /physicsScene
+  physics_material:
+    func: isaaclab.sim.spawners.materials.physics_materials:spawn_rigid_body_material
+    static_friction: 1.0
+    dynamic_friction: 1.0
+    restitution: 0.0
+    compliant_contact_stiffness: null
+    compliant_contact_damping: null
+    friction_combine_mode: multiply
+    restitution_combine_mode: multiply
+    _usd_applied_schema: PhysxMaterialAPI
+    _usd_field_exceptions: {}
+    _usd_namespace: physxMaterial
+  use_fabric: true
+  render_interval: 8
+  enable_scene_query_support: false
+  use_newton_actuators: false
+  physics:
+    class_type: isaaclab_physx.physics.physx_manager:PhysxManager
+    solver_type: 1
+    solve_articulation_contact_last: false
+    min_position_iteration_count: 1
+    max_position_iteration_count: 255
+    min_velocity_iteration_count: 0
+    max_velocity_iteration_count: 255
+    enable_scene_query_support: false
+    enable_ccd: false
+    enable_stabilization: false
+    enable_external_forces_every_iteration: true
+    enable_enhanced_determinism: false
+    bounce_threshold_velocity: 0.5
+    friction_offset_threshold: 0.04
+    friction_correlation_distance: 0.025
+    gpu_max_rigid_contact_count: 8388608
+    gpu_max_rigid_patch_count: 1048576
+    gpu_found_lost_pairs_capacity: 2097152
+    gpu_found_lost_aggregate_pairs_capacity: 33554432
+    gpu_total_aggregate_pairs_capacity: 2097152
+    gpu_collision_stack_size: 67108864
+    gpu_heap_capacity: 67108864
+    gpu_temp_buffer_capacity: 16777216
+    gpu_max_num_partitions: 8
+    gpu_max_soft_body_contacts: 1048576
+    gpu_max_particle_contacts: 1048576
+  render:
+    enable_translucency: null
+    enable_reflections: null
+    enable_global_illumination: null
+    antialiasing_mode: null
+    enable_dlssg: null
+    enable_dl_denoiser: null
+    dlss_mode: null
+    enable_direct_lighting: null
+    samples_per_pixel: null
+    enable_shadows: null
+    enable_ambient_occlusion: null
+    dome_light_upper_lower_strategy: null
+    max_bounces: null
+    split_glass: null
+    split_clearcoat: null
+    split_rough_reflection: null
+    ambient_light_intensity: null
+    ambient_occlusion_denoiser_mode: null
+    view_tile_limit: null
+    carb_settings: null
+    rendering_mode: null
+  create_stage_in_memory: false
+  logging_level: WARNING
+  save_logs_to_file: true
+  log_dir: null
+  visualizer_cfgs: []
+ui_window_class_type: isaaclab.envs.ui.base_env_window:BaseEnvWindow
+seed: 157
+decimation: 8
+is_finite_horizon: false
+episode_length_s: 90.0
+scene:
+  num_envs: 32
+  env_spacing: 2.0
+  lazy_sensor_update: true
+  replicate_physics: true
+  filter_collisions: true
+  clone_in_fabric: false
+events: null
+observation_space: 675
+num_observations: null
+state_space: 678
+num_states: null
+observation_noise_model: null
+action_space: 18
+num_actions: null
+action_noise_model: null
+rerender_on_reset: false
+num_rerenders_on_reset: 0
+wait_for_textures: true
+xr: null
+log_dir: null
+video_recorder:
+  class_type: isaaclab.envs.utils.video_recorder:VideoRecorder
+  env_render_mode: null
+  eye: !!python/tuple
+  - 7.5
+  - 7.5
+  - 7.5
+  lookat: !!python/tuple
+  - 0.0
+  - 0.0
+  - 0.0
+  backend_source: visualizer
+  window_width: 1280
+  window_height: 720
+base_contact_sensor:
+  class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: false
+  track_contact_points: false
+  track_friction_forces: false
+  max_contact_data_count_per_prim: null
+  track_air_time: false
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr: []
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+coxa_contact_sensor:
+  class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa.*
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: false
+  track_contact_points: false
+  track_friction_forces: false
+  max_contact_data_count_per_prim: null
+  track_air_time: false
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr: []
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+feet_contact_sensors: !!python/tuple
+- class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa_1/femur_1/tibia_1
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: true
+  track_contact_points: true
+  track_friction_forces: true
+  max_contact_data_count_per_prim: 128
+  track_air_time: true
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr:
+  - /World/ground/terrain/GroundPlane/CollisionPlane
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+- class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa_5/femur_5/tibia_5
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: true
+  track_contact_points: true
+  track_friction_forces: true
+  max_contact_data_count_per_prim: 128
+  track_air_time: true
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr:
+  - /World/ground/terrain/GroundPlane/CollisionPlane
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+- class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa_2/femur_2/tibia_2
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: true
+  track_contact_points: true
+  track_friction_forces: true
+  max_contact_data_count_per_prim: 128
+  track_air_time: true
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr:
+  - /World/ground/terrain/GroundPlane/CollisionPlane
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+- class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa_3/femur_3/tibia_3
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: true
+  track_contact_points: true
+  track_friction_forces: true
+  max_contact_data_count_per_prim: 128
+  track_air_time: true
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr:
+  - /World/ground/terrain/GroundPlane/CollisionPlane
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+- class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa/femur/tibia
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: true
+  track_contact_points: true
+  track_friction_forces: true
+  max_contact_data_count_per_prim: 128
+  track_air_time: true
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr:
+  - /World/ground/terrain/GroundPlane/CollisionPlane
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+- class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa_4/femur_4/tibia_4
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: true
+  track_contact_points: true
+  track_friction_forces: true
+  max_contact_data_count_per_prim: 128
+  track_air_time: true
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr:
+  - /World/ground/terrain/GroundPlane/CollisionPlane
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+femur_contact_sensors: !!python/tuple
+- class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa_1/femur_1
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: false
+  track_contact_points: false
+  track_friction_forces: false
+  max_contact_data_count_per_prim: null
+  track_air_time: false
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr: []
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+- class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa_5/femur_5
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: false
+  track_contact_points: false
+  track_friction_forces: false
+  max_contact_data_count_per_prim: null
+  track_air_time: false
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr: []
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+- class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa_2/femur_2
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: false
+  track_contact_points: false
+  track_friction_forces: false
+  max_contact_data_count_per_prim: null
+  track_air_time: false
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr: []
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+- class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa_3/femur_3
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: false
+  track_contact_points: false
+  track_friction_forces: false
+  max_contact_data_count_per_prim: null
+  track_air_time: false
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr: []
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+- class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa/femur
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: false
+  track_contact_points: false
+  track_friction_forces: false
+  max_contact_data_count_per_prim: null
+  track_air_time: false
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr: []
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+- class_type: isaaclab.sensors.contact_sensor.contact_sensor:ContactSensor
+  prim_path: /World/envs/env_.*/Robot/Geometry/body_mock/coxa_4/femur_4
+  update_period: 0.0025
+  debug_vis: false
+  track_pose: false
+  track_contact_points: false
+  track_friction_forces: false
+  max_contact_data_count_per_prim: null
+  track_air_time: false
+  force_threshold: null
+  history_length: 3
+  filter_prim_paths_expr: []
+  visualizer_cfg:
+    prim_path: /Visuals/ContactSensor
+    markers:
+      contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: true
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 1.0
+          - 0.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+      no_contact:
+        func: isaaclab.sim.spawners.shapes.shapes:spawn_sphere
+        visible: false
+        semantic_tags: null
+        copy_from_source: true
+        spawn_path: null
+        mass_props: null
+        rigid_props: null
+        collision_props: null
+        activate_contact_sensors: false
+        visual_material_path: material
+        visual_material:
+          func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+          diffuse_color: !!python/tuple
+          - 0.0
+          - 1.0
+          - 0.0
+          emissive_color: !!python/tuple
+          - 0.0
+          - 0.0
+          - 0.0
+          roughness: 0.5
+          metallic: 0.0
+          opacity: 1.0
+        physics_material_path: material
+        physics_material: null
+        radius: 0.02
+stand_nominal_height_m: null
+navigation_lateral_velocity_ema_tau_s: null
+processed_joint_target_slew_limit_rad_per_20ms: 0.04
+action_scale: 0.5
+stand_action_scale: 1.0
+terrain:
+  class_type: isaaclab.terrains.terrain_importer:TerrainImporter
+  collision_group: -1
+  prim_path: /World/ground
+  num_envs: 1
+  terrain_type: plane
+  terrain_generator: null
+  usd_path: null
+  env_spacing: null
+  use_terrain_origins: true
+  visual_material:
+    func: isaaclab.sim.spawners.materials.visual_materials:spawn_preview_surface
+    diffuse_color: !!python/tuple
+    - 0.0
+    - 0.0
+    - 0.0
+    emissive_color: !!python/tuple
+    - 0.0
+    - 0.0
+    - 0.0
+    roughness: 0.5
+    metallic: 0.0
+    opacity: 1.0
+  physics_material:
+    func: isaaclab.sim.spawners.materials.physics_materials:spawn_rigid_body_material
+    static_friction: 1.0
+    dynamic_friction: 1.0
+    restitution: 0.0
+    compliant_contact_stiffness: null
+    compliant_contact_damping: null
+    friction_combine_mode: multiply
+    restitution_combine_mode: multiply
+    _usd_applied_schema: PhysxMaterialAPI
+    _usd_field_exceptions: {}
+    _usd_namespace: physxMaterial
+  max_init_terrain_level: null
+  debug_vis: false
+robot:
+  class_type: isaaclab.assets.articulation.articulation:Articulation
+  prim_path: /World/envs/env_.*/Robot
+  spawn:
+    func: isaaclab.sim.spawners.from_files.from_files:spawn_from_usd
+    visible: true
+    semantic_tags: null
+    copy_from_source: true
+    spawn_path: null
+    mass_props: null
+    deformable_props: null
+    rigid_props:
+      rigid_body_enabled: null
+      kinematic_enabled: null
+      disable_gravity: false
+      linear_damping: 0.0
+      angular_damping: 0.0
+      max_linear_velocity: 20.0
+      max_angular_velocity: 50.0
+      max_depenetration_velocity: 1.0
+      max_contact_impulse: null
+      enable_gyroscopic_forces: null
+      retain_accelerations: false
+      solver_position_iteration_count: null
+      solver_velocity_iteration_count: null
+      sleep_threshold: null
+      stabilization_threshold: null
+      _usd_applied_schema: PhysxRigidBodyAPI
+      _usd_field_exceptions:
+        PhysxRigidBodyAPI: !!python/tuple
+        - physxRigidBody
+        - - disable_gravity
+      _usd_namespace: physxRigidBody
+    collision_props: null
+    activate_contact_sensors: true
+    scale: null
+    articulation_props:
+      articulation_enabled: null
+      fix_root_link: null
+      enabled_self_collisions: false
+      solver_position_iteration_count: 16
+      solver_velocity_iteration_count: 1
+      sleep_threshold: null
+      stabilization_threshold: null
+      _usd_applied_schema: PhysxArticulationAPI
+      _usd_field_exceptions:
+        PhysxArticulationAPI: !!python/tuple
+        - physxArticulation
+        - - articulation_enabled
+      _usd_namespace: physxArticulation
+    fixed_tendons_props: null
+    spatial_tendons_props: null
+    joint_drive_props: null
+    visual_material_path: material
+    visual_material: null
+    physics_material_path: material
+    physics_material: null
+    usd_path: /study/training_usd/f050_t060/f050_t060.usda
+    variants: null
+  init_state:
+    pos: !!python/tuple
+    - 0.0
+    - 0.0
+    - 0.13653251856352808
+    rot: !!python/tuple
+    - 0.0
+    - 0.0
+    - 0.0
+    - 1.0
+    lin_vel: !!python/tuple
+    - 0.0
+    - 0.0
+    - 0.0
+    ang_vel: !!python/tuple
+    - 0.0
+    - 0.0
+    - 0.0
+    joint_pos:
+      revolute_1_1: 0.0
+      revolute_1: 0.6981317007977318
+      revolute_2: 2.0943951023931953
+      revolute_2_5: 0.0
+      revolute_1_5: 0.6981317007977318
+      revolute_2_4: 2.0943951023931953
+      revolute_1_7: 0.0
+      revolute_1_6: 0.6981317007977318
+      revolute_2_6: 2.0943951023931953
+      revolute_4: 0.0
+      revolute_1_4: 0.6981317007977318
+      revolute_2_3: 2.0943951023931953
+      revolute_5: 0.0
+      revolute_1_2: 0.6981317007977318
+      revolute_2_1: 2.0943951023931953
+      revolute_3: 0.0
+      revolute_1_3: 0.6981317007977318
+      revolute_2_2: 2.0943951023931953
+    joint_vel:
+      .*: 0.0
+  collision_group: 0
+  debug_vis: false
+  disable_shape_checks: null
+  articulation_root_prim_path: null
+  soft_joint_pos_limit_factor: 0.95
+  actuators:
+    legs:
+      class_type: isaaclab.actuators.actuator_pd:DCMotor
+      joint_names_expr:
+      - .*
+      effort_limit: 1.6
+      velocity_limit: 50.26548245743668
+      effort_limit_sim: 5.5
+      velocity_limit_sim: 55.29203070318036
+      stiffness: 30.0
+      damping: 0.6
+      armature: 0.0007
+      friction: 0.01
+      dynamic_friction: 0.01
+      viscous_friction: 0.002
+      saturation_effort: 5.5
+  actuator_value_resolution_debug_print: false
+rated_torque_nm: 1.6
+nominal_height_m: 0.13053251856352807
+distal_foot_min_y_m: 0.11718000784921645
+command_frame: navigation
+command_lin_vel_x_range_mps: !!python/tuple
+- 0.1
+- 0.3
+command_lin_vel_y_range_mps: !!python/tuple
+- 0.0
+- 0.0
+command_yaw_rate_range_rad_s: !!python/tuple
+- 0.0
+- 0.0
+stand_command_fraction: 0.0
+moving_command_threshold_mps: 0.05
+support_contact_target: 3.0
+speed_conditioned_support_targets: false
+support_contact_low_speed_threshold_mps: 0.1
+support_contact_high_speed_threshold_mps: 0.25
+support_contact_target_low_speed: 5.0
+support_contact_target_medium_speed: 4.0
+support_contact_target_high_speed: 3.0
+forward_tracking_tolerance_mps: 0.1
+lin_vel_tracking_std_mps: 0.2
+yaw_rate_tracking_std_rad_s: 0.1
+axiswise_velocity_rewards: false
+lin_vel_x_tracking_std_mps: 0.2
+lin_vel_y_tracking_std_mps: 0.2
+lin_vel_x_reward_scale: 3.0
+lin_vel_y_reward_scale: 0.0
+gate_longitudinal_reward_by_command: false
+gate_axis_rewards_by_command: false
+axis_command_active_threshold: 0.01
+longitudinal_signed_progress_reward_scale: 0.0
+longitudinal_normalized_error_penalty_scale: 0.0
+longitudinal_normalized_error_cap: 2.0
+lateral_signed_progress_reward_scale: 0.0
+yaw_signed_progress_reward_scale: 0.0
+lateral_normalized_error_penalty_scale: 0.0
+lateral_normalized_error_cap: 2.0
+inactive_lateral_velocity_reward_scale: 0.0
+inactive_yaw_rate_reward_scale: 0.0
+inactive_yaw_rate_slew_reward_scale: 0.0
+inactive_yaw_rate_slew_reference_rad_s_per_step: 0.04
+inactive_ground_contact_yaw_moment_reward_scale: 0.0
+inactive_ground_contact_yaw_moment_reference_nm: 0.5
+inactive_bilateral_longitudinal_contact_moment_reward_scale: 0.0
+inactive_bilateral_longitudinal_contact_moment_reference_nm: 0.5
+gait_phase_contact_reward_scale: 0.0
+gait_duty_factor: 0.5
+gait_cycles_per_meter: 8.0
+gait_min_frequency_hz: 1.2
+gait_max_frequency_hz: 3.0
+gait_phase_transition_sharpness: 30.0
+swing_clearance_reward_scale: 0.0
+swing_clearance_target_m: 0.03
+swing_clearance_tolerance_m: 0.015
+swing_clearance_pad_offset_y_m: 0.12600000844001769
+include_gait_phase_observation: false
+lin_vel_reward_scale: 4.0
+yaw_rate_reward_scale: 2.0
+alive_reward_scale: 0.1
+z_vel_reward_scale: -1.5
+ang_vel_reward_scale: -0.1
+joint_torque_reward_scale: -0.0001
+rated_torque_excess_reward_scale: -0.12
+max_joint_rated_torque_excess_reward_scale: -0.05
+max_joint_rated_torque_excess_l1_reward_scale: 0.0
+torque_saturation_reward_scale: -0.5
+joint_accel_reward_scale: -2.5e-07
+action_rate_reward_scale: -0.02
+joint_torque_slew_reward_scale: 0.0
+feet_air_time_reward_scale: 0.0
+foot_slip_reward_scale: -0.1
+support_shortfall_reward_scale: -0.15
+undesired_contact_reward_scale: -1.0
+flat_orientation_reward_scale: -2.0
+base_height_reward_scale: -10.0
+joint_limit_reward_scale: -0.25
+deck_stability_reward_scale: 0.0
+deck_stability_vertical_velocity_scale_mps: 0.1
+deck_stability_roll_pitch_rate_scale_rad_s: 0.5
+deck_stability_projected_gravity_xy_scale: 0.15
+deck_stability_height_error_scale_m: 0.025
+fall_penalty: -2.0
+velocity_command: null
+omni_target_filter_time_constant_s: 0.0
+omni_observation_noise_scale: 1.0
+terminate_on_computed_torque_demand_nm: 5.5
+terminate_on_computed_torque_demand_duration_s: 0.1
+torque_demand_termination_grace_s: 0.5
+omni_reward_weights:
+  linear_tracking: 4.0
+  yaw_tracking: 2.0
+  linear_progress: 1.5
+  yaw_progress: 0.75
+  vertical_velocity: -2.0
+  roll_pitch_rate: -0.15
+  tilt: -2.0
+  height: -25.0
+  torque: -0.03
+  torque_excess: -0.6
+  worst_torque_excess: -0.2
+  saturation: -0.75
+  positive_power: -0.015
+  action_rate: -0.075
+  joint_acceleration: -2.5e-07
+  slip: -0.5
+  nonfoot: -2.0
+  joint_limits: -2.0
+  airtime: 0.5
+  stand_posture: -2.0
+  stand_joint_velocity: -0.5
+  stand_target_velocity: -0.15
+  stand_raw_action: 0.0
+reference_residual_options:
+  profile: formal_004
+  residual_radius_rad: 0.02
+  residual_velocity_rad_s: 0.25
+  residual_acceleration_rad_s2: 2.0
+  total_acceleration_rad_s2: 8.0

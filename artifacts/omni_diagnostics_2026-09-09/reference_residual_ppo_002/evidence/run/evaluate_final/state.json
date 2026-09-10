@@ -1,0 +1,535 @@
+{
+  "status": "completed",
+  "mode": "evaluate_final",
+  "identity": {
+    "schema": "c_reference_residual_external_training_consumer_v1",
+    "consumer_freeze_sha256": "e9a1d6d687504fd1323d8addbcb962c3025745a258f71b9f076879778eedaa0b",
+    "physical_source_sha256": "04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e",
+    "observation_freeze_sha256": "22402b0079b0b5ac0acdd4e1d7e819fe206b20ee1883077f7de6eaca55808a63",
+    "bridge_freeze_sha256": "be4870a8f7ca0857ba50ffd3a0c92ac5925b9a816767d66d826af7b59957aa0e",
+    "device_admission_sha256": "1e22a3b292be40501d97c6fd4a35e5a015c873fb773c2a9dca1ae5d28d8833b1",
+    "standing_admission_sha256": "827d790a7e00018ddb364040b4a03d24482faf89c079ee05ab42aee189f5529e",
+    "directional_admission_sha256": "dc42d919b57e548e03bf3c0208ab5af6e71f77beb493ba600adbdb1c6b5476c9",
+    "runtime_schema_sha256": "c2ab56b61c8ca56412090cd42cf109c90576bd5e78602a17eb29ada6d0559845",
+    "requested_envelope": {
+      "forward_mps": [
+        0,
+        0.005
+      ],
+      "left_mps": [
+        0,
+        0
+      ],
+      "yaw_rad_s": [
+        0,
+        0
+      ]
+    },
+    "maximum_PPO_updates": 2,
+    "optimization_command": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "native_velocity_fidelity_qualified": false,
+    "original_prototype_training_flags_unchanged": true,
+    "Stage2_complete": false
+  },
+  "runtime_binding": {
+    "mode": "vendored",
+    "package_directory": "/workspace/hexapod/experiments/c_length_study/runtime/hexapod_rl",
+    "runtime_tree_sha256": "abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280",
+    "base_commit": "36769da93f90e0602fb0e3591caeb98bbd7090ed",
+    "manifest_path": "/workspace/hexapod/experiments/c_length_study/runtime/SHA256SUMS.json",
+    "manifest_sha256": "b23846761f36754ff8c7061209de31445cfc52afb417f5a16313ed392bb2432a",
+    "python_files_verified": 16
+  },
+  "policy_training_started": false,
+  "PPO_updates_completed": 0,
+  "Stage2_complete": false,
+  "started_unix": 1789031785.9772792,
+  "sensor_source_readback": {
+    "isaaclab.sensors.sensor_base": {
+      "path": "/workspace/isaaclab/source/isaaclab/isaaclab/sensors/sensor_base.py",
+      "sha256": "618ce99c742ac35c2fcbdbe29649930fb228bf16d460277636cd7d02daf19b18"
+    },
+    "isaaclab.sensors.kernels": {
+      "path": "/workspace/isaaclab/source/isaaclab/isaaclab/sensors/kernels.py",
+      "sha256": "5e74672a1485965b08e1a38ed833dfe541667f0463f5f73f6c1d83a119379a35"
+    },
+    "isaaclab.sensors.contact_sensor.contact_sensor": {
+      "path": "/workspace/isaaclab/source/isaaclab/isaaclab/sensors/contact_sensor/contact_sensor.py",
+      "sha256": "2d5c8d1f52af0eb19de756bb1760db2d4c01408c59d68fcb47a8af662459c661"
+    },
+    "isaaclab_physx.sensors.contact_sensor.contact_sensor": {
+      "path": "/workspace/isaaclab/source/isaaclab_physx/isaaclab_physx/sensors/contact_sensor/contact_sensor.py",
+      "sha256": "09507db17049bcadd6a48f5992bc20f79b019356c13f1ba3ef1527b2e4188b2c"
+    }
+  },
+  "asset_audit": {
+    "passed": true,
+    "body_count": 19,
+    "joint_count": 18,
+    "total_mass_kg": 8.26081134,
+    "max_tensor_error_kg_m2": 1.6210460543342187e-09,
+    "usd_sha256": "1731c8757b5ff947b65e2e000615e15032f7e4fe3d87c1e476ac8c1fd413942c",
+    "read_only": true
+  },
+  "layout": {
+    "joint_names_runtime": [
+      "revolute_1_1",
+      "revolute_1_7",
+      "revolute_2_5",
+      "revolute_3",
+      "revolute_4",
+      "revolute_5",
+      "revolute_1",
+      "revolute_1_6",
+      "revolute_1_5",
+      "revolute_1_3",
+      "revolute_1_4",
+      "revolute_1_2",
+      "revolute_2",
+      "revolute_2_6",
+      "revolute_2_4",
+      "revolute_2_2",
+      "revolute_2_3",
+      "revolute_2_1"
+    ],
+    "joint_names_leg_major": [
+      "revolute_1_1",
+      "revolute_1",
+      "revolute_2",
+      "revolute_2_5",
+      "revolute_1_5",
+      "revolute_2_4",
+      "revolute_1_7",
+      "revolute_1_6",
+      "revolute_2_6",
+      "revolute_4",
+      "revolute_1_4",
+      "revolute_2_3",
+      "revolute_5",
+      "revolute_1_2",
+      "revolute_2_1",
+      "revolute_3",
+      "revolute_1_3",
+      "revolute_2_2"
+    ],
+    "joint_runtime_to_leg_major": [
+      0,
+      6,
+      12,
+      2,
+      8,
+      14,
+      1,
+      7,
+      13,
+      4,
+      10,
+      16,
+      5,
+      11,
+      17,
+      3,
+      9,
+      15
+    ],
+    "foot_body_ids": [
+      13,
+      15,
+      14,
+      17,
+      18,
+      16
+    ],
+    "foot_link_names": [
+      "tibia_1",
+      "tibia_5",
+      "tibia_2",
+      "tibia_3",
+      "tibia",
+      "tibia_4"
+    ]
+  },
+  "controller": {
+    "lineage": "c_serial_omni_reference_position_residual_v1",
+    "profile": "formal_004",
+    "residual_radius_rad": 0.02,
+    "residual_velocity_rad_s": 0.25,
+    "residual_acceleration_rad_s2": 2.0,
+    "total_acceleration_rad_s2": 8.0,
+    "total_position_step_rad_per_20ms": 0.04,
+    "total_velocity_rad_s": 2.0,
+    "reference_velocity_rad_s": 1.75,
+    "reference_acceleration_rad_s2": 6.0,
+    "action_semantics": "bounded_position_residual_goal_tanh",
+    "integration": "separate_reference_knots_plus_bounded_residual_servo",
+    "controller_observation_width": 72,
+    "zero_command_feedback_disabled": false,
+    "old_checkpoint_transfer_supported": false,
+    "physics_admitted": false,
+    "motor_speed_limit_claim": false
+  },
+  "initialization": {
+    "mean_head": "exact_zero",
+    "initial_std_per_joint": [
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164,
+      0.019999999552965164
+    ],
+    "optimizer": "fresh_adam",
+    "optimizer_state_entries": 0,
+    "learning_rate": 0.0001,
+    "schedule": "fixed",
+    "entropy_coef": 0.0,
+    "physical_exploration_admitted": false
+  },
+  "reload": {
+    "checkpoint_sha256": "0920cc1ac125fee9b8de00e983b0ecb6e7fa04b5403ca2db5869082969e15f4e",
+    "actor_critic_normalizer_and_optimizer_exact": true,
+    "inference_buffers_made_writable": [],
+    "longer_training_allowed": false
+  },
+  "checkpoint_sha256": "0920cc1ac125fee9b8de00e983b0ecb6e7fa04b5403ca2db5869082969e15f4e",
+  "policy_identity": {
+    "lineage": "c_wave005_finite_position_residual_PPO_smoke_v1",
+    "scope": "admitted_two_update_physical_smoke",
+    "bindings": {
+      "physical_source_sha256": "04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e",
+      "observation_freeze_sha256": "22402b0079b0b5ac0acdd4e1d7e819fe206b20ee1883077f7de6eaca55808a63",
+      "device_admission_sha256": "1e22a3b292be40501d97c6fd4a35e5a015c873fb773c2a9dca1ae5d28d8833b1",
+      "directional_admission_sha256": "dc42d919b57e548e03bf3c0208ab5af6e71f77beb493ba600adbdb1c6b5476c9",
+      "standing_admission_sha256": "827d790a7e00018ddb364040b4a03d24482faf89c079ee05ab42aee189f5529e",
+      "calibration_sha256": "b9293f2f491a70444793ef2f48d589eead12c801a6ca50f137125040a99967ac",
+      "consumer_source_sha256": "e9a1d6d687504fd1323d8addbcb962c3025745a258f71b9f076879778eedaa0b",
+      "observation_schema_sha256": "c2ab56b61c8ca56412090cd42cf109c90576bd5e78602a17eb29ada6d0559845"
+    },
+    "plan_sha256": "a60f9423c9d8056caca9e4b63f9ef0eca213e29e0204aecae8c0df67f7cd485d",
+    "actor_width": 846,
+    "critic_width": 849,
+    "actions": 18,
+    "action_semantics": "finite_position_residual_goal_0p02_tanh",
+    "maximum_updates": 2,
+    "old_checkpoint_transfer_allowed": false,
+    "prototype_bundle_training_flags_unchanged": true,
+    "native_velocity_fidelity_qualified": false,
+    "stage2_complete": false
+  },
+  "retention_passed": true,
+  "session": {
+    "controls": 2400,
+    "policy_steps": 2200,
+    "failure": null,
+    "substeps": {
+      "articulation_data_class": "isaaclab_physx.assets.articulation.articulation_data.ArticulationData",
+      "backend_name": "physx",
+      "joint_names_runtime": [
+        "revolute_1_1",
+        "revolute_1_7",
+        "revolute_2_5",
+        "revolute_3",
+        "revolute_4",
+        "revolute_5",
+        "revolute_1",
+        "revolute_1_6",
+        "revolute_1_5",
+        "revolute_1_3",
+        "revolute_1_4",
+        "revolute_1_2",
+        "revolute_2",
+        "revolute_2_6",
+        "revolute_2_4",
+        "revolute_2_2",
+        "revolute_2_3",
+        "revolute_2_1"
+      ],
+      "joint_kinematics_schema": "actual_named_joint_position_rad_and_velocity_rad_s_each_update",
+      "physics_handles_decimation": false,
+      "decimation": 8,
+      "physics_dt_s": 0.0025,
+      "capture": "after original scene.update, before next simulation substep/reset",
+      "ordinary_control_metrics_unchanged": true,
+      "samples_including_initial": 19201,
+      "completed_controls": 2400,
+      "error": null,
+      "method_restored": true,
+      "physical_acceptance_gate_changed": false,
+      "postsettle_prefix": {
+        "start_control_boundary": 200,
+        "end_control_boundary": 2400,
+        "duration_s": 44.0,
+        "acceptance_verdict": null,
+        "scope": "independent raw400Hz evidence; old50Hz gate unchanged",
+        "link": {
+          "measured_world_displacement_m": [
+            [
+              -0.004487438127398491,
+              -0.1208571195602417,
+              -0.00025138258934020996
+            ]
+          ],
+          "measured_forward_displacement_m": [
+            0.12081948406668366
+          ],
+          "integrals": {
+            "left": {
+              "world_m": [
+                [
+                  -0.0060556987300515175,
+                  -0.11410880833864212,
+                  0.0003868479689117521
+                ]
+              ],
+              "forward_m": [
+                0.11405943757821038
+              ],
+              "position_difference_norm_m": [
+                0.006957476958632469
+              ]
+            },
+            "right": {
+              "world_m": [
+                [
+                  -0.00605583842843771,
+                  -0.1141086146235466,
+                  0.00038691185181960464
+                ]
+              ],
+              "forward_m": [
+                0.11405924280596472
+              ],
+              "position_difference_norm_m": [
+                0.006957702338695526
+              ]
+            },
+            "trapezoid": {
+              "world_m": [
+                [
+                  -0.006055768579244614,
+                  -0.11410871148109436,
+                  0.00038687989581376314
+                ]
+              ],
+              "forward_m": [
+                0.11405934019208755
+              ],
+              "position_difference_norm_m": [
+                0.00695758918300271
+              ]
+            }
+          }
+        },
+        "com": {
+          "measured_world_displacement_m": [
+            [
+              -0.004489860497415066,
+              -0.1208600401878357,
+              -0.0002513378858566284
+            ]
+          ],
+          "measured_forward_displacement_m": [
+            0.12082238618157702
+          ],
+          "integrals": {
+            "left": {
+              "world_m": [
+                [
+                  -0.006053477991372347,
+                  -0.11413078755140305,
+                  0.00038740519084967673
+                ]
+              ],
+              "forward_m": [
+                0.11408143304922287
+              ],
+              "position_difference_norm_m": [
+                0.0069379922933876514
+              ]
+            },
+            "right": {
+              "world_m": [
+                [
+                  -0.006053619086742401,
+                  -0.11413060128688812,
+                  0.0003874691028613597
+                ]
+              ],
+              "forward_m": [
+                0.11408124571671464
+              ],
+              "position_difference_norm_m": [
+                0.006938210688531399
+              ]
+            },
+            "trapezoid": {
+              "world_m": [
+                [
+                  -0.00605354830622673,
+                  -0.11413069069385529,
+                  0.0003874371468555182
+                ]
+              ],
+              "forward_m": [
+                0.11408133565955753
+              ],
+              "position_difference_norm_m": [
+                0.006938104517757893
+              ]
+            }
+          }
+        }
+      },
+      "moving_window_or_prefix": {
+        "start_control_boundary": 200,
+        "end_control_boundary": 1400,
+        "duration_s": 24.0,
+        "acceptance_verdict": null,
+        "scope": "independent raw400Hz evidence; old50Hz gate unchanged",
+        "link": {
+          "measured_world_displacement_m": [
+            [
+              -0.0039625451900064945,
+              -0.11498693376779556,
+              -0.0007080882787704468
+            ]
+          ],
+          "measured_forward_displacement_m": [
+            0.11495346126666292
+          ],
+          "integrals": {
+            "left": {
+              "world_m": [
+                [
+                  -0.004935771692544222,
+                  -0.10999491810798645,
+                  5.21559122717008e-05
+                ]
+              ],
+              "forward_m": [
+                0.10995418624042821
+              ],
+              "position_difference_norm_m": [
+                0.005142505280673504
+              ]
+            },
+            "right": {
+              "world_m": [
+                [
+                  -0.004933441989123821,
+                  -0.11001360416412354,
+                  5.077482637716457e-05
+                ]
+              ],
+              "forward_m": [
+                0.10997288947906197
+              ],
+              "position_difference_norm_m": [
+                0.005123721435666084
+              ]
+            },
+            "trapezoid": {
+              "world_m": [
+                [
+                  -0.004934607073664665,
+                  -0.11000426113605499,
+                  5.1465369324432686e-05
+                ]
+              ],
+              "forward_m": [
+                0.10996353785797384
+              ],
+              "position_difference_norm_m": [
+                0.005133113358169794
+              ]
+            }
+          }
+        },
+        "com": {
+          "measured_world_displacement_m": [
+            [
+              -0.003958568908274174,
+              -0.11498260498046875,
+              -0.000708162784576416
+            ]
+          ],
+          "measured_forward_displacement_m": [
+            0.11494916285417199
+          ],
+          "integrals": {
+            "left": {
+              "world_m": [
+                [
+                  -0.004930139984935522,
+                  -0.11000071465969086,
+                  5.233293632045388e-05
+                ]
+              ],
+              "forward_m": [
+                0.10996002546762278
+              ],
+              "position_difference_norm_m": [
+                0.005132400430738926
+              ]
+            },
+            "right": {
+              "world_m": [
+                [
+                  -0.0049277967773377895,
+                  -0.11001937836408615,
+                  5.095127926324494e-05
+                ]
+              ],
+              "forward_m": [
+                0.1099787064578946
+              ],
+              "position_difference_norm_m": [
+                0.005113636143505573
+              ]
+            },
+            "trapezoid": {
+              "world_m": [
+                [
+                  -0.004928968381136656,
+                  -0.1100100427865982,
+                  5.164210597286001e-05
+                ]
+              ],
+              "forward_m": [
+                0.1099693622375762
+              ],
+              "position_difference_norm_m": [
+                0.005123022012412548
+              ]
+            }
+          }
+        }
+      },
+      "all_recorded_substep_max_requested_torque_nm": 63.65962219238281,
+      "all_recorded_substep_max_applied_torque_nm": 1.600000023841858,
+      "postsettle_substep_max_requested_torque_nm": 1.4247578382492065,
+      "postsettle_worst_joint_substep_saturation_fraction": 0.0
+    },
+    "autoreset_supported": false,
+    "long_training_admitted": false,
+    "prototype_flags_unchanged": true
+  },
+  "source_inputs_unchanged": true,
+  "finished_unix": 1789032024.2678967
+}
