@@ -250,3 +250,9 @@ their digests in `supervisor.json`. That preserves the actual isolated run
 snapshot, including uncommitted files, even if the staging directory is later
 updated. A release manifest and a per-run archive serve different purposes;
 neither replaces the live physical acceptance evidence.
+
+## 9 September: integrated C-study priority release
+
+`isaaclab/deploy/stage2_c_priority_20260909_pipeline.sha256` is the new current-check destination after integration onto main. It adds the separately isolated study and terrain tools plus the reviewed CI/dependency changes to the complete repository source identity. The previous 1,600 Hz metrics manifest, all archived paths and every production package remain byte-for-byte preserved. This source release is not new physical-model admission.
+
+CI checks this filename explicitly with `uv run python tools/check_pipeline_lineages.py current --manifest isaaclab/deploy/stage2_c_priority_20260909_pipeline.sha256`. The pinned C-study runtime separately checks all 16 vendored files against its fixed tree digest. The original historical Stage2 check remains unchanged. New frozen study sources must include that runtime and manifest as documented in `experiments/c_length_study/README.md`.

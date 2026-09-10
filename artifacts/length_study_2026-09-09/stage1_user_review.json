@@ -1,0 +1,35 @@
+{
+  "status": "candidate_c_training_authorized",
+  "rejected_candidates": [
+    {
+      "label": "A",
+      "variant": "f040_t050",
+      "reason": "User ruled out the 58 mm femur because it is too small to fit the motors.",
+      "source": "user",
+      "date": "2026-09-09"
+    }
+  ],
+  "assistant_recommendation": {
+    "lead": "f050_t060",
+    "closest_comparator": "f050_t080",
+    "compact_comparator": "f050_t050",
+    "packaging_fallback_to_check": "f055_t060",
+    "long_tibia_comparator": "f050_t100",
+    "scope": "Priority for further CAD fit checks and controlled walking tests; not a hardware selection or user confirmation."
+  },
+  "stage2_authorized": true,
+  "stance_audit": {
+    "report": "stance_audit_all_low_poses/STANCE_AUDIT.md",
+    "original_pose_selection_incomplete": true,
+    "finding": "C has a 107.53 mm belly-clearance prescribed-motion pose with 1.38709 N m peak at 0.20 m/s. Lower postures require explicit screening; the earlier tall poses are not required by geometry.",
+    "further_stage1_work": "Compare common body-height bands, stance widths and motion headroom across remaining candidates before a final ranking.",
+    "stage2_authorized": true
+  },
+  "selected_candidate": {
+    "label": "C",
+    "variant": "f050_t060",
+    "femur_mm": 72.5,
+    "tibia_mm": 126,
+    "user_instruction": "Proceed with C; fully trained walking policy ASAP with the full robot"
+  }
+}

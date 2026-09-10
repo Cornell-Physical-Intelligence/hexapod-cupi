@@ -28,8 +28,14 @@ jobs:
       - name: Run the test suite
         run: uv run python -m unittest discover -s isaaclab/tests
 
+      - name: Run C-study, terrain and perception tests
+        run: uv run python -m unittest discover -s robot/tests
+
+      - name: Verify the pinned C-study runtime
+        run: uv run python tools/c_study_runtime.py
+
       - name: Verify the frozen Stage2 source lineage
         run: uv run python tools/check_pipeline_lineages.py historical
 
-      - name: Verify the current four-bar release manifest
-        run: uv run python tools/check_pipeline_lineages.py current --manifest isaaclab/deploy/mkii_fourbar_v1_1600hz_metrics_pipeline.sha256
+      - name: Verify the current integrated release manifest
+        run: uv run python tools/check_pipeline_lineages.py current --manifest isaaclab/deploy/stage2_c_priority_20260909_pipeline.sha256

@@ -1,0 +1,160 @@
+<div id="hexapod-size-inspector">
+  <style>
+    #hexapod-size-inspector{color:var(--foreground);font-variant-numeric:tabular-nums}
+    #hexapod-size-inspector .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:12px 0}
+    #hexapod-size-inspector label{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+    #hexapod-size-inspector .canvas{height:450px;position:relative;touch-action:none;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+    #hexapod-size-inspector canvas{display:block;max-width:100%}
+    #hexapod-size-inspector .legend{display:flex;flex-wrap:wrap;gap:16px;margin:10px 0}
+    #hexapod-size-inspector .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
+    #hexapod-size-inspector .matrix{display:grid;grid-template-columns:40px repeat(7,minmax(0,1fr));gap:4px;max-width:540px;margin:8px auto}
+    #hexapod-size-inspector .matrix .axis{display:flex;justify-content:center;align-items:center;min-height:30px}
+    #hexapod-size-inspector .detail{margin:8px 0;overflow-wrap:anywhere}
+    #hexapod-size-inspector .angles{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
+    #hexapod-size-inspector .angles label{flex:1;min-width:200px;justify-content:space-between}
+    #hexapod-size-inspector input[type=range]{width:100%;accent-color:var(--primary)}
+    #hexapod-size-inspector .grid-caption{text-align:center;margin-top:16px}
+    #hexapod-size-inspector .part-info{min-height:40px;margin-top:8px}
+    @media(max-width:450px){#hexapod-size-inspector .canvas{height:360px}#hexapod-size-inspector .matrix{gap:2px;grid-template-columns:30px repeat(7,minmax(0,1fr))}}
+  </style>
+  <div class="text-small">Mock URDF geometry · 49 sizes · coxa fixed</div>
+  <div class="detail"><span class="viz-badge">Current production reference</span> <code>hexapod_mkii_serial.urdf</code> · detailed CAD assembly</div>
+  <div class="text-small">Production geometry has no exact match in this mock grid. ★ marks the original mock baseline.</div>
+  <div class="controls"><button class="btn" type="button" data-action="production">Download current production URDF</button><span class="text-small" data-field="production"></span></div>
+  <div class="controls">
+    <label>Femur <select class="form-select" data-control="femur" aria-label="Femur size"></select></label>
+    <label>Tibia <select class="form-select" data-control="tibia" aria-label="Tibia size"></select></label>
+    <label>Inspect <select class="form-select" data-control="scope" aria-label="Geometry to inspect"><option value="robot">Whole robot</option><option value="leg">Left-front leg</option><option value="femur">Femur detail</option><option value="tibia">Tibia detail</option><option value="grid">All 49 leg profiles</option></select></label>
+  </div>
+  <div class="detail" data-field="dimensions" aria-live="polite"></div>
+  <div class="canvas" data-field="canvas" role="img" aria-label="Interactive detailed URDF mesh viewer. Drag to orbit, scroll to zoom, and click a link to inspect its inertia."></div>
+  <div class="controls">
+    <button class="btn" type="button" data-action="iso">Isometric</button><button class="btn" type="button" data-action="side">Side</button><button class="btn" type="button" data-action="top">Top</button>
+    <label><input class="form-check-input" type="checkbox" data-control="overlay">100% outline</label>
+    <label><input class="form-check-input" type="checkbox" data-control="edges" checked>Feature edges</label>
+    <button class="btn" type="button" data-action="download">Download selected URDF</button>
+  </div>
+  <div class="legend text-small"><span><i class="dot" style="background:var(--muted-foreground)"></i>Fixed coxa / body</span><span><i class="dot" style="background:var(--viz-series-1)"></i>Femur</span><span><i class="dot" style="background:var(--viz-series-2)"></i>Tibia</span></div>
+  <div class="angles">
+    <label>Femur angle <output data-field="f-angle">35°</output><input class="form-range" type="range" data-control="f-angle" min="0" max="100" value="35" step="1" aria-label="Femur angle in mock coordinates"></label>
+    <label>Knee fold <output data-field="t-angle">125°</output><input class="form-range" type="range" data-control="t-angle" min="0" max="145" value="125" step="1" aria-label="Tibia angle in mock coordinates"></label>
+  </div>
+  <div class="text-small part-info" data-field="part" aria-live="polite">Drag to orbit · scroll to zoom · click a link for mass and inertia</div>
+  <div class="grid-caption text-small">Tibia → · femur ↓ · percentages of original mock length</div>
+  <div class="matrix" data-field="matrix" aria-label="All 49 femur and tibia size combinations"></div>
+  <div class="text-small detail" data-field="source"></div>
+  <div data-field="error" role="alert"></div>
+  <script type="module">
+    import * as THREE from 'https://esm.sh/three@0.160.0';
+    import { OrbitControls } from 'https://esm.sh/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+    const root=document.getElementById('hexapod-size-inspector');
+    const el=(kind,key)=>root.querySelector(`[data-${kind}="${key}"]`);
+    const PACK=__PACK__;
+    const compressed='__URDFS__',blob='__MESH_BLOB__';
+    const from64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+    try {
+      const decoded=await new Response(new Blob([from64(compressed)]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+      const DATA=JSON.parse(decoded),buf=from64(blob).buffer;
+      const geometries=PACK.map(m=>{
+        const q=new Int16Array(buf,m.op,m.nv*3),p=new Float32Array(m.nv*3);
+        for(let i=0;i<m.nv;i++)for(let k=0;k<3;k++)p[i*3+k]=m.min[k]+(q[i*3+k]+32768)/65535*m.span[k];
+        const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(p,3));
+        g.setIndex(new THREE.BufferAttribute((m.i32?new Uint32Array(buf,m.oi,m.nt*3):new Uint16Array(buf,m.oi,m.nt*3)).slice(),1));
+        g.computeVertexNormals();g.computeBoundingBox();
+        const e=new THREE.BufferGeometry();e.setAttribute('position',g.getAttribute('position'));
+        e.setIndex(new THREE.BufferAttribute((m.i32?new Uint32Array(buf,m.oe,m.ne*2):new Uint16Array(buf,m.oe,m.ne*2)).slice(),1));
+        g.userData.edge=e;return g;
+      });
+      const toVector=(s,def='0 0 0')=>(s||def).split(/\s+/).map(Number);
+      function transform(object,element){const o=element.querySelector(':scope > origin');object.position.fromArray(toVector(o?.getAttribute('xyz')));const r=toVector(o?.getAttribute('rpy'));object.quaternion.setFromEuler(new THREE.Euler(r[0],r[1],r[2],'ZYX'));}
+      function cssColor(key){const probe=document.createElement('span');probe.style.color='var('+key+')';probe.hidden=true;root.appendChild(probe);const color=getComputedStyle(probe).color;probe.remove();const ctx=document.createElement('canvas').getContext('2d');ctx.fillStyle=color;ctx.fillRect(0,0,1,1);const p=ctx.getImageData(0,0,1,1).data;return new THREE.Color(p[0]/255,p[1]/255,p[2]/255).convertSRGBToLinear();}
+      const scene=new THREE.Scene(),mount=el('field','canvas');
+      const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setClearColor(0,0);mount.appendChild(renderer.domElement);
+      const camera=new THREE.PerspectiveCamera(38,1,.001,100);camera.up.set(0,0,1);
+      const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=false;
+      scene.add(new THREE.HemisphereLight(0xffffff,0xffffff,1.6));
+      const light=new THREE.DirectionalLight(0xffffff,2.1);light.position.set(.6,-1,2);scene.add(light);
+      const materials={body:new THREE.MeshStandardMaterial({roughness:.68,metalness:.15}),coxa:new THREE.MeshStandardMaterial({roughness:.68,metalness:.15}),femur:new THREE.MeshStandardMaterial({roughness:.6,metalness:.15}),tibia:new THREE.MeshStandardMaterial({roughness:.6,metalness:.15})};
+      const edgeMaterial=new THREE.LineBasicMaterial({transparent:true,opacity:.5});
+      const ghostMaterial=new THREE.LineBasicMaterial({transparent:true,opacity:.4,depthTest:false});
+      let content=new THREE.Group();scene.add(content);
+      let scope='robot',selected='f100_t100',fAngle=35,tAngle=125,direction=new THREE.Vector3(1,-1.3,.8),pickables=[];
+      const kindOf=n=>n.startsWith('body')?'body':n.split('_')[0];
+      const id=(f,t)=>`f${String(f).padStart(3,'0')}_t${String(t).padStart(3,'0')}`;
+      const sizes=[50,60,70,80,90,100,110];
+      for(const [key,length] of [['femur',145],['tibia',210]])for(const s of sizes){const o=document.createElement('option');o.value=s;o.textContent=`${s}% · ${(length*s/100).toFixed(1)} mm`;o.selected=s===100;el('control',key).appendChild(o);}
+      const grid=el('field','matrix');grid.appendChild(document.createElement('span'));
+      for(const s of sizes){const a=document.createElement('span');a.className='axis text-small';a.textContent=s;grid.appendChild(a);}
+      for(const f of sizes){const a=document.createElement('span');a.className='axis text-small';a.textContent=f;grid.appendChild(a);for(const t of sizes){const b=document.createElement('button');b.type='button';b.className='btn viz-tile';b.textContent=f===100&&t===100?'★':'●';b.dataset.variant=id(f,t);b.setAttribute('aria-label',`Femur ${f} percent, tibia ${t} percent${f===100&&t===100?' — original mock baseline':''}`);b.addEventListener('click',()=>{el('control','femur').value=f;el('control','tibia').value=t;selected=id(f,t);rebuild(true);});grid.appendChild(b);}}
+      function buildModel(key,ghost=false){
+        const xml=new DOMParser().parseFromString(DATA.urdfs[key],'text/xml');
+        if(xml.querySelector('parsererror'))throw Error('Invalid embedded URDF '+key);
+        const group=new THREE.Group(),links={},joints={};
+        for(const link of xml.querySelectorAll('robot > link')){
+          const name=link.getAttribute('name'),node=new THREE.Group();links[name]=node;node.name=name;
+          for(const visual of link.querySelectorAll(':scope > visual')){
+            const mesh=visual.querySelector('geometry > mesh'),file=mesh.getAttribute('filename').split('/').pop();const g=geometries[PACK.findIndex(p=>p.file===file)];
+            const holder=new THREE.Group();transform(holder,visual);holder.scale.fromArray(toVector(mesh.getAttribute('scale'),'1 1 1'));
+            const edge=new THREE.LineSegments(g.userData.edge,ghost?ghostMaterial:edgeMaterial);edge.visible=ghost||el('control','edges').checked;holder.add(edge);
+            if(!ghost){const item=new THREE.Mesh(g,materials[kindOf(name)]);item.userData={variant:key,link:name,mass:Number(link.querySelector('mass').getAttribute('value')),inertia:Object.fromEntries(Array.from(link.querySelector('inertia').attributes,a=>[a.name,Number(a.value)]))};holder.add(item);pickables.push(item);}
+            node.add(holder);
+          }
+        }
+        const children=new Set();
+        for(const joint of xml.querySelectorAll('robot > joint')){
+          const n=joint.getAttribute('name'),parent=joint.querySelector('parent').getAttribute('link'),child=joint.querySelector('child').getAttribute('link');
+          const pivot=new THREE.Group();transform(pivot,joint);const rotation=new THREE.Group();pivot.add(rotation);rotation.add(links[child]);links[parent].add(pivot);children.add(child);
+          const kind=kindOf(child),angle=kind==='femur'?fAngle:kind==='tibia'?tAngle:0;
+          rotation.quaternion.setFromAxisAngle(new THREE.Vector3(...toVector(joint.querySelector('axis')?.getAttribute('xyz'))),angle*Math.PI/180);joints[n]=pivot;
+        }
+        for(const [n,l]of Object.entries(links))if(!children.has(n))group.add(l);
+        group.updateMatrixWorld(true);
+        if(scope==='leg'||scope==='grid'){
+          for(const [name,node]of Object.entries(links))for(const child of node.children)if(child.children.some(c=>c.isMesh||c.isLineSegments))child.visible=['coxa_1','femur_1','tibia_1'].includes(name);
+          const anchor=new THREE.Vector3();links.coxa_1.getWorldPosition(anchor);group.position.sub(anchor);
+        }
+        if(scope==='femur'||scope==='tibia'){
+          const chosen=links[scope+'_1'],single=new THREE.Group();
+          for(const child of chosen.children)if(child.children.some(c=>c.isMesh||c.isLineSegments))single.add(child.clone());
+          // Clone geometry only; all transforms and scales remain the selected
+          // link's actual URDF mesh transforms. Joint poses do not distort it.
+          if(!ghost){single.traverse(o=>{if(o.isMesh)pickables.push(o);});}
+          return single;
+        }
+        return group;
+      }
+      function paint(){materials.body.color.copy(cssColor('--muted-foreground'));materials.coxa.color.copy(cssColor('--muted-foreground'));materials.femur.color.copy(cssColor('--viz-series-1'));materials.tibia.color.copy(cssColor('--viz-series-2'));edgeMaterial.color.copy(cssColor('--foreground'));ghostMaterial.color.copy(cssColor('--foreground'));render();}
+      function visibleBounds(group){const box=new THREE.Box3();group.updateMatrixWorld(true);group.traverseVisible(o=>{if(o.isMesh){o.geometry.computeBoundingBox();box.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld));}});return box;}
+      function fit(){camera.up.set(0,Math.abs(direction.clone().normalize().z)>.999?1:0,Math.abs(direction.clone().normalize().z)>.999?0:1);const box=visibleBounds(content);if(box.isEmpty())return;const c=box.getCenter(new THREE.Vector3()),size=box.getSize(new THREE.Vector3());const radius=size.length()/2;const angle=Math.min(camera.fov*Math.PI/360,Math.atan(Math.tan(camera.fov*Math.PI/360)*camera.aspect));camera.position.copy(c).add(direction.clone().normalize().multiplyScalar(radius/Math.sin(angle)*1.06));controls.target.copy(c);camera.near=Math.max(.0001,radius/1000);camera.far=Math.max(20,radius*100);camera.updateProjectionMatrix();controls.update();render();}
+      function render(){renderer.render(scene,camera);}
+      function rebuild(refit=false){
+        scene.remove(content);content=new THREE.Group();scene.add(content);pickables=[];
+        if(scope==='grid'){
+          for(let fi=0;fi<7;fi++)for(let ti=0;ti<7;ti++){const g=buildModel(id(sizes[fi],sizes[ti])),cell=new THREE.Group();cell.add(g);cell.quaternion.setFromAxisAngle(new THREE.Vector3(1,0,0),-Math.PI/2).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1),Math.PI/4));cell.position.set(ti*.25,-fi*.28,0);content.add(cell);}
+        }else{content.add(buildModel(selected));if(el('control','overlay').checked)content.add(buildModel('f100_t100',true));}
+        for(const b of grid.querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.variant===selected));
+        const rec=DATA.records[selected];el('field','dimensions').textContent=`Femur ${(rec.femur_length_m*1000).toFixed(1)} mm · tibia ${(rec.tibia_length_m*1000).toFixed(1)} mm · coxa 47.718 mm horizontal, fixed`;
+        el('field','source').textContent=`${selected}.urdf · ${scope==='grid'?'49 left-front legs · ':''}mesh scaling along length; mounting holes scale too · SHA-256 ${rec.sha256.slice(0,12)}`;
+        el('field','f-angle').textContent=fAngle+'°';el('field','t-angle').textContent=tAngle+'°';
+        el('field','part').textContent=scope==='femur'||scope==='tibia'?'Actual link mesh at its joint origin · 100% outline reveals length and hole deformation':'Drag to orbit · scroll to zoom · click a link for mass and inertia';
+        if(refit)fit();render();
+      }
+      for(const kind of ['femur','tibia'])el('control',kind).addEventListener('change',()=>{selected=id(Number(el('control','femur').value),Number(el('control','tibia').value));rebuild();});
+      el('control','scope').addEventListener('change',e=>{scope=e.target.value;if(scope==='grid')direction.set(.001,0,1);else direction.set(1,-1.3,.8);rebuild(true);});
+      for(const key of ['overlay','edges'])el('control',key).addEventListener('change',()=>rebuild());
+      el('control','f-angle').addEventListener('input',e=>{fAngle=Number(e.target.value);rebuild();});el('control','t-angle').addEventListener('input',e=>{tAngle=Number(e.target.value);rebuild();});
+      for(const [key,dir]of [['iso',[1,-1.3,.8]],['side',[1,0,.001]],['top',[.001,0,1]]])el('action',key).addEventListener('click',()=>{direction.fromArray(dir);fit();});
+      el('action','download').addEventListener('click',()=>{const a=document.createElement('a'),url=URL.createObjectURL(new Blob([DATA.urdfs[selected]],{type:'application/xml'}));a.href=url;a.download=selected+'.urdf';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+      el('field','production').textContent='19 links · 18 joints · SHA-256 '+DATA.production.sha256.slice(0,12);
+      el('action','production').addEventListener('click',()=>{const a=document.createElement('a'),url=URL.createObjectURL(new Blob([DATA.production.urdf],{type:'application/xml'}));a.href=url;a.download=DATA.production.file;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+      function isVisible(o){while(o&&o!==content){if(!o.visible)return false;o=o.parent;}return o===content;}
+      let down;renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+      renderer.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>4)return;const b=renderer.domElement.getBoundingClientRect(),ray=new THREE.Raycaster();ray.setFromCamera(new THREE.Vector2((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1),camera);const hit=ray.intersectObjects(pickables).find(h=>isVisible(h.object));if(!hit)return;const d=hit.object.userData,tensor=d.inertia,mass=d.mass;if(!tensor)return;el('field','part').textContent=`${d.variant} · ${d.link} · ${Number(mass).toFixed(4)} kg · Ixx ${Number(tensor.ixx).toPrecision(4)}, Iyy ${Number(tensor.iyy).toPrecision(4)}, Izz ${Number(tensor.izz).toPrecision(4)} kg·m²`;});
+      controls.addEventListener('change',render);
+      const resize=new ResizeObserver(()=>{renderer.setSize(mount.clientWidth,mount.clientHeight);camera.aspect=mount.clientWidth/mount.clientHeight;camera.updateProjectionMatrix();fit();});resize.observe(mount);
+      new MutationObserver(paint).observe(document.documentElement,{attributes:true,attributeFilter:['class','style','data-theme']});
+      rebuild(true);paint();
+      root.dataset.loaded='true';root.dataset.variantCount=Object.keys(DATA.urdfs).length;
+    }catch(error){el('field','error').textContent='Geometry viewer error: '+error.message;console.error(error);}
+  </script>
+</div>

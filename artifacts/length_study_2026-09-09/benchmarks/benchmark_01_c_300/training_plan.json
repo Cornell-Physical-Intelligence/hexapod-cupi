@@ -1,0 +1,61 @@
+{
+  "method": "single user-selected C; phase-guided residual PPO on full 19-body/18-joint robot",
+  "physics_dt_s": 0.0025,
+  "decimation": 8,
+  "training_num_envs": 1024,
+  "training_iterations": 300,
+  "training_seed": 57,
+  "evaluation_seed": 7057,
+  "evaluation_forward_speeds_mps": [
+    0.1,
+    0.2
+  ],
+  "validation_num_envs": 32,
+  "validation_control_steps": 1000,
+  "evaluation_num_envs": 32,
+  "evaluation_control_steps_per_speed": 1000,
+  "ranking": "One selected geometry. Completion requires actual walking metrics and verified video, not an update count.",
+  "variants": {
+    "f050_t060": {
+      "urdf_sha256": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+      "stances": [
+        {
+          "femur_deg": 40,
+          "tibia_deg": 120,
+          "method": "user-selected lower C stance; mechanical audit, Isaac admission still required",
+          "joint_positions_rad": {
+            "revolute_1_1": 0.0,
+            "revolute_1": 0.6981317007977318,
+            "revolute_2": 2.0943951023931953,
+            "revolute_2_5": 0.0,
+            "revolute_1_5": 0.6981317007977318,
+            "revolute_2_4": 2.0943951023931953,
+            "revolute_1_7": 0.0,
+            "revolute_1_6": 0.6981317007977318,
+            "revolute_2_6": 2.0943951023931953,
+            "revolute_4": 0.0,
+            "revolute_1_4": 0.6981317007977318,
+            "revolute_2_3": 2.0943951023931953,
+            "revolute_5": 0.0,
+            "revolute_1_2": 0.6981317007977318,
+            "revolute_2_1": 2.0943951023931953,
+            "revolute_3": 0.0,
+            "revolute_1_3": 0.6981317007977318,
+            "revolute_2_2": 2.0943951023931953
+          },
+          "root_height_at_contact_m": 0.13053251856352807,
+          "suggested_reset_root_height_m": 0.13653251856352808,
+          "belly_clearance_m": 0.10753251856352808,
+          "simulation_validated": false
+        }
+      ]
+    }
+  },
+  "reference_controller": {
+    "file": "candidate_c_reference.json",
+    "sha256": "8466ad8b40c1857e3d01a1fe729cd3b20df53301c753346c4955959a856f6e6b",
+    "residual_scale_rad": 0.12,
+    "warmup_s": 2.0,
+    "velocity_targets": true
+  }
+}

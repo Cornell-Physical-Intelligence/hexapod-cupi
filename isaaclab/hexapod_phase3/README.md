@@ -1,5 +1,22 @@
 # Phase 3 sensor prototype
 
+This README preserves the isolated sensor prototype and its original assumptions.
+Use [STATUS.md](../../STATUS.md) for current jobs and admission outcomes, the
+[living plan](../../docs/PLAN.md) for architecture, and the
+[terrain/sensing plan](../../artifacts/project_review_2026-09-04/TERRAIN_AND_SENSING_PLAN_2026-09-09.md)
+for the current sensor workstream. Terrain/perception preparation is authorized
+in parallel with Stage 2; this prototype alone qualifies no terrain policy.
+
+The newer [production physical model](../../docs/MKII_FOURBAR_TRAINING.md) has
+31 bodies and 18 motor actions. The user-selected
+[C study](../../artifacts/length_study_2026-09-09/README.md) is a separate
+72.5/126 mm scaled-mock experiment with fixed coxa and transferred CAD physics.
+Neither asset can inherit the old mock mounts, 6.3 kg budget or observation
+assumptions without validation. Stage 2 remains incomplete, including smooth
+all-bearing/path control, bounded motor demand and quiet zero-command standing.
+The [forward Benchmark 1](../../artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md)
+remains immutable comparison evidence.
+
 This package is isolated from `hexapod_rl`: it registers no Gym task and is not
 imported by the Phase 1 or Phase 2 locomotion environments. It combines:
 
@@ -18,6 +35,11 @@ No foot/contact sensor is instantiated, and the Phase 1 asset's PhysX contact-
 reporting activation is explicitly disabled in this isolated scene.
 
 ## Provisional mounts
+
+These are historical prototype transforms, not measured production or final C
+brackets. The [new mount study](../../artifacts/sensor_mount_study_2026-09-09/README.md)
+uses a hashed serial-CAD snapshot and finds substantial near-foot blind areas;
+it also does not establish fit or visibility for the newer physical four-bar.
 
 All poses are relative to the exact imported root rigid body. Physical forward
 is body -Y, lateral is body +X, and up is body +Z. This physical convention is
@@ -45,6 +67,11 @@ center ray reaches level ground about 0.62 m ahead. This is inside the D455's
 published 0.6--6 m ideal range. The pose still requires physical CAD and
 occlusion validation.
 
+The nominal sensor +X above belongs to this authored USD mount convention. The
+CPU depth adapter uses standard optical +Z forward, +X image-right and +Y
+image-down. Preserve and test the full internal-camera transform when bridging
+the two; do not reuse the mount quaternion as an optical-frame calibration.
+
 ## Published hardware envelope and mass accounting
 
 These are manufacturer-published reference values, not inferred simulator
@@ -55,7 +82,7 @@ inertia. `PHASE3_HARDWARE_ACCOUNTING` also includes them in the smoke-test JSON.
 | Livox Mid-360 | 65 x 65 x 60 mm | 0.265 kg | 6.5 W average; 14 W cold self-heating peak | 360 degrees horizontal; -7 to +52 degrees elevation (59 degrees vertical) | 0.10 m minimum; 40 m at 10% reflectivity; 70 m at 80% |
 | RealSense D455 | 124 x 26 x 29 mm | 0.116 kg | 3.46147 W at the published maximum operating mode | 87 x 58 degrees depth | 0.52 m minimum at maximum resolution; 0.6--6 m ideal |
 
-| Accounting point | Mass |
+| Historical mock accounting point | Mass |
 | --- | ---: |
 | Existing sensor-free body | 1.500 kg |
 | Mid-360 + D455 | 0.381 kg |
@@ -69,14 +96,19 @@ approximate inertia to the articulation. Phase1/2 physics remains unchanged;
 measured completed hardware and CAD inertia are required before a dynamics
 update.
 
-### LiDAR identification gate
+The 6.300/6.681 kg arithmetic is retained only to explain this prototype. Reconcile
+the current CAD/study mass, physical linkage, sensors, compute, brackets, cabling
+and payload in the [payload ledger](../../artifacts/terrain_readiness_2026-09-09/payload_ledger.json)
+before changing dynamics; do not double-count already included components.
 
-The configured Livox Mid-360 is near-hemispherical at 360 x 59 degrees. It is
-not the 360 x 90-degree Unitree 4D LiDAR L1 that the phrase "hemispherical
-LiDAR" may identify. If the physical label or a clear photo says Unitree L1,
-stop and replace the FoV, point-rate, range, transport, mass, and noise model;
-do not relabel the current Mid-360 surrogate. A label/photo confirmation is
-required before sensor-fusion policy use.
+### Sensor identity and calibration
+
+The user confirmed ownership of a Livox Mid-360 and RealSense D455 on 9 September.
+The Mid-360's 360 x 59-degree envelope differs from a Unitree L1 profile; model
+names and assumptions remain explicit if alternatives are tested. The prototype's
+legacy `requires_physical_label_or_photo_confirmation` field is historical and
+must not override that confirmed inventory. Device-specific intrinsics, extrinsics,
+clock alignment, noise and loaded timing still require measurement.
 
 ## Default non-idealities
 
@@ -92,8 +124,10 @@ ranges after bagged hardware data is available.
 
 ## Smoke test
 
-After synchronizing the prototype to `/home/orionh/HEXAPOD`, run one short,
-stationary scene in the Spark's Isaac Lab 3 / Isaac Sim 6 container:
+The command below documents the original stationary smoke scene. Before using it,
+follow the current [operations runbook](../../docs/OPERATIONS.md) and shared GPU
+queue, check STATUS, and validate compatibility with the selected asset and
+container. It is not a launch instruction for an occupied Spark.
 
 ```bash
 cd /home/orionh/IsaacLab
@@ -118,17 +152,33 @@ prints a JSON report. Keep this D455 smoke test to at most four
 environments because it creates separate RGB and depth render products per
 environment.
 
-The difficult-terrain sensor-fusion training job remains approval-gated. This
-short smoke test and its accounting report do not authorize a long or overnight
-Phase3 run.
+The current user scope includes terrain/perception work in parallel. Runtime
+fixtures, full-robot standing, terrain walking and sensor-based policy evaluation
+are distinct gates; report their outcomes separately and schedule GPU work through
+the existing ownership/queue protocol.
+
+## CPU integration prepared alongside locomotion
+
+[Perception replay](../../artifacts/perception_readiness_2026-09-09/README.md)
+provides calibrated-frame depth unprojection, acquisition-time pose interpolation,
+timestamped point-cloud input, robot-return masking and height/variance/age/observed
+maps. Its step/pit tests are synthetic, with no real-sensor calibration, ROS node
+or actor injection. Missing or stale terrain never becomes observed flat support.
+
+The prototype's radial `depth_m` must be explicitly converted before using an
+adapter that expects optical-axis Z. The [CPU terrain preparation](../../artifacts/terrain_readiness_2026-09-09/readiness.json)
+and [mild curriculum](../../artifacts/terrain_readiness_2026-09-09/mild_curriculum_001/curriculum.json)
+provide separate fixtures. Check current runtime results in STATUS; a successful
+terrain-only fixture is not proof that the complete C robot stands or walks there.
 
 ## Known gaps before policy use
 
 - The Mid-360 pattern is a deterministic low-discrepancy coverage surrogate.
   Livox does not publish its proprietary non-repetitive temporal trajectory, so
   the same directions repeat each frame. Rolling acquisition, intensity,
-  material/reflectivity response, multi-return behavior, and self-occlusion are
-  not reproduced.
+  material/reflectivity response, and multi-return behavior are not reproduced.
+  The later [mock-mesh occlusion probe](../../robot/sensors/README.md#historical-isaac-sim-cross-check)
+  adds tracked robot meshes; it does not qualify new-asset sensor visibility.
 - The conservative 40 m simulated maximum corresponds to the published range at
   low reflectivity; the 0.1 m blind zone and 0.15-degree one-sigma angular
   precision are represented. Angular perturbations are clipped at three sigma
@@ -148,6 +198,7 @@ Phase3 run.
 - The experimental camera annotators do not supply a hardware-style sequence
   number through this wrapper. The smoke test verifies the configured 30 Hz
   polling schedule, but cannot prove that every poll produced a distinct RTX frame.
-- Ray-cast targets currently include only the smoke-test ground and wall. A
-  terrain task must replace/extend them with its actual static and dynamic mesh
-  targets, and define the observation encoder separately.
+- Ray-cast targets include the smoke-test ground, wall, and nineteen tracked
+  leaf meshes of the archived mock. A terrain task must replace/extend them
+  with the selected asset's actual static and dynamic mesh targets, and define
+  the observation encoder separately.

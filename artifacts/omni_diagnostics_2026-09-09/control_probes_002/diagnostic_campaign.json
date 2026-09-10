@@ -1,0 +1,70 @@
+{
+  "status": "completed_needs_comparison",
+  "started_unix": 1788998067.2360704,
+  "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+  "scope": "diagnostics only; no qualification or training claims",
+  "comparisons": [
+    {
+      "source": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_control_probe_source_002_zero",
+      "output": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_control_probes_002/comparison_00",
+      "status": "completed",
+      "diagnostics": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_control_probes_002/comparison_00/f050_t060/evaluate/diagnostics.json",
+      "terminations": 0,
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.03,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2
+        }
+      }
+    },
+    {
+      "source": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_control_probe_source_002_no_noise",
+      "output": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_control_probes_002/comparison_01",
+      "status": "completed",
+      "diagnostics": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_control_probes_002/comparison_01/f050_t060/evaluate/diagnostics.json",
+      "terminations": 0,
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.03,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2
+        },
+        "observation_noise_scale": 0.0
+      }
+    },
+    {
+      "source": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_control_probe_source_002_filtered",
+      "output": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_control_probes_002/comparison_02",
+      "status": "completed",
+      "diagnostics": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_control_probes_002/comparison_02/f050_t060/evaluate/diagnostics.json",
+      "terminations": 0,
+      "overrides": {
+        "target_slew_rad_per_20ms": 0.03,
+        "reward_weights": {
+          "stand_joint_velocity": -0.5,
+          "stand_target_velocity": -0.15,
+          "stand_posture": -2.0,
+          "action_rate": -0.075,
+          "saturation": -0.75,
+          "torque_excess": -0.6,
+          "worst_torque_excess": -0.2
+        },
+        "target_filter_time_constant_s": 0.08
+      }
+    }
+  ],
+  "current_source": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_control_probe_source_002_filtered",
+  "current_mode": "evaluate",
+  "finished_unix": 1788998491.1307251
+}

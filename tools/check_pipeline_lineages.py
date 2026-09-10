@@ -22,7 +22,7 @@ ARCHIVED_MANIFEST = "isaaclab/deploy/stage2_pipeline.sha256"
 ARCHIVED_REF = "81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df"
 ARCHIVED_MANIFEST_SHA256 = "19fc816cf9c53a79be8e14831daa58a12eba3f7f07c5fca80d03f2dc947ccda1"
 ARCHIVED_ENTRY_COUNT = 112
-CURRENT_MANIFEST = "isaaclab/deploy/mkii_fourbar_v1_1600hz_metrics_pipeline.sha256"
+CURRENT_MANIFEST = "isaaclab/deploy/stage2_c_priority_20260909_pipeline.sha256"
 CURRENT_HEADER = (
     "# hexapod.mkii_fourbar_pipeline.v1\n"
     f"# Archived source commit: {ARCHIVED_REF}\n"
@@ -34,6 +34,42 @@ CURRENT_REVISIONS = {
     "packages/hexapod_env/pyproject.toml": "Package the new actuator and versioned task modules.",
 }
 CURRENT_EXTRA_PATHS = (
+    'isaaclab/deploy/mkii_fourbar_v1_1600hz_metrics_pipeline.sha256',
+    'experiments/c_length_study/runtime/SHA256SUMS.json',
+    'robot/tools/generate_length_study.py',
+    'robot/tools/pack_length_study_viewer.py',
+    'robot/tools/prepare_length_study_training.py',
+    'experiments/c_length_study/runtime/hexapod_rl/__init__.py',
+    'experiments/c_length_study/runtime/hexapod_rl/asset_cfg.py',
+    'experiments/c_length_study/runtime/hexapod_rl/command_sampling.py',
+    'experiments/c_length_study/runtime/hexapod_rl/env.py',
+    'experiments/c_length_study/runtime/hexapod_rl/env_cfg.py',
+    'experiments/c_length_study/runtime/hexapod_rl/phase1_v2_cfg.py',
+    'experiments/c_length_study/runtime/hexapod_rl/phase1_v3_cfg.py',
+    'experiments/c_length_study/runtime/hexapod_rl/phase1_v4_cfg.py',
+    'experiments/c_length_study/runtime/hexapod_rl/phase1_v5_cfg.py',
+    'experiments/c_length_study/runtime/hexapod_rl/phase2_cfg.py',
+    'experiments/c_length_study/runtime/hexapod_rl/phase2d_cfg.py',
+    'experiments/c_length_study/runtime/hexapod_rl/phase2e_cfg.py',
+    'experiments/c_length_study/runtime/hexapod_rl/phase2g_cfg.py',
+    'experiments/c_length_study/runtime/hexapod_rl/ppo_cfg.py',
+    'experiments/c_length_study/runtime/hexapod_rl/register.py',
+    'experiments/c_length_study/runtime/hexapod_rl/showcase_sequence.py',
+    'robot/tests/test_c_study_runtime.py',
+    'robot/tests/test_candidate_c_reference.py',
+    'robot/tests/test_length_mechanics.py',
+    'robot/tests/test_length_study.py',
+    'robot/tests/test_length_training.py',
+    'robot/tests/test_omni_diagnostics.py',
+    'robot/tests/test_omni_flat.py',
+    'robot/tests/test_omni_repair_allocation.py',
+    'robot/tests/test_omni_reviews.py',
+    'robot/tests/test_perception_replay.py',
+    'robot/tests/test_sensor_mounts.py',
+    'robot/tests/test_terrain_curriculum.py',
+    'robot/tests/test_terrain_fixtures.py',
+    'robot/tests/test_terrain_readiness.py',
+    'robot/tests/test_terrain_support.py',
     ARCHIVED_MANIFEST,
     "isaaclab/deploy/mkii_fourbar_v1_pipeline.sha256",
     "isaaclab/deploy/mkii_fourbar_v1_tgs_pipeline.sha256",

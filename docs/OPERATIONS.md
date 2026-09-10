@@ -1,5 +1,8 @@
 # Spark operations runbook
 
+> **9 September 2026 update:** the user prioritizes the selected C-study Stage 2 controller, requiring smooth walking/pathing in every direction and quiet standing, with terrain/perception implementation in parallel. [STATUS](../STATUS.md) is current; [the C-study contract](../experiments/c_length_study/README.md) separates its pinned runtime and 1.6 N·m study cap from the physical four-bar program. Earlier pause, plan and actuator statements below apply to their dated physical lineage. Commit/push each verified step with relevant Markdown and preserve other work on main.
+
+
 > Current procedure: the project lead has authorized short live Spark validation of the corrected serial CAD-v2 model. Use the isolated, bounded launcher in [§11](#11-corrected-serial-cad-v2-live-validation), which preserves the original mirror and still requires exclusive GPU admission. This is standing characterization, not full G0 or permission to adopt an archived policy. [STATUS.md](../STATUS.md) records current execution; [live evidence](../artifacts/mkii_step2_2026-09-04/README.md) records the results. The earlier [asset audit](../artifacts/project_review_2026-09-04/URDF_VALIDATION.md) remains the record of the original import defect.
 
 Durable operating procedure for hexapod training and evaluation on the DGX

@@ -1,5 +1,8 @@
 # Prepared CAD simulation campaign
 
+> **9 September 2026 update:** the user prioritizes the selected C-study Stage 2 controller, requiring smooth walking/pathing in every direction and quiet standing, with terrain/perception implementation in parallel. [STATUS](../STATUS.md) is current; [the C-study contract](../experiments/c_length_study/README.md) separates its pinned runtime and 1.6 N·m study cap from the physical four-bar program. Earlier pause, plan and actuator statements below apply to their dated physical lineage. Commit/push each verified step with relevant Markdown and preserve other work on main.
+
+
 **Physical four-bar validation and training campaign implemented, 5 September 2026 UTC; physical acceptance remains pending and PPO has not started.** The user authorized continuing into training after the required checks. The new task has 31 bodies, 30 articulation coordinates, six physical closure joints, 18 active motors, an explicit bounded RS05 model and an 84-value observation contract without a gait clock. The earlier [serial standing reports](../artifacts/mkii_step2_2026-09-04/README.md) remain a separate baseline. [STATUS.md](../STATUS.md) records the latest probe and compute state; [PLAN.md](PLAN.md) defines the program.
 
 ## Why early full-body training is useful
@@ -12,7 +15,7 @@ A later dynamics update does not automatically make every policy useless. Keep a
 
 The immediate bounded sequence is **1 environment × 100 control steps → 32 environments × 1,000 standing control steps plus 2,400 driven control steps (9,600 driven physics substeps), repeated with nominal and refined solver iterations → 64 environments × 3 scratch PPO iterations → a separate process resuming the verified checkpoint for 512 environments × 1,000 iterations**. The larger run depends on smoke-run memory/throughput, checkpoint/inference checks, source identity and fresh GPU admission. No step is automatically admitted by the historical serial pass.
 
-The driven count includes **18 individual motors × two signs × 50 control steps = 1,800**, plus **three motor groups × two signs × 100 = 600**. Each control step contains four 5 ms physics substeps. The first 1-environment probe has passed; the nominal 32-environment run is active. [STATUS.md](../STATUS.md) records the exact report, metrics and remaining stages. PPO is not yet live.
+The driven count includes **18 individual motors × two signs × 50 control steps = 1,800**, plus **three motor groups × two signs × 100 = 600**. Each control step contains four 5 ms physics substeps. This paragraph describes the planned 5 September physical campaign. That lineage is now paused pending the revised leg export; its later support-gate failure and exited jobs are recorded in [the archived physical status](archive/STATUS_2026-09-08_physical.md). Corrected physical-model PPO has not started. [STATUS.md](../STATUS.md) records the separately authorized C-study execution.
 
 The physical validator samples actual body-link pin positions/axes, primitive ground clearance and motor limits every 5 ms. Reset coordinates must match the physical contract, and the anatomical command-frame check must pass. During initial PPO, a numerical closure failure invalidates the whole run before reset can hide it; normal falls remain learning events. A successful bounded campaign establishes provisional flat-ground learning, not a qualified terrain or hardware controller.
 

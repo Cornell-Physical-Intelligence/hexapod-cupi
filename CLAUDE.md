@@ -5,12 +5,15 @@ RS05 joints. Mission: survey a bounded area an operator draws on a map and
 hold a steady deck for data collection while doing so (`dar.md`). The team
 trains walking policies with Isaac Sim 6.0.1, Isaac Lab `DirectRLEnv`, and
 RSL-RL PPO on a shared DGX Spark through hardened launchers. Explicit numeric
-acceptance criteria gate progress. The look of a gait gates nothing. The
+acceptance criteria gate progress. For the current C-study Stage 2, the user requires visual smoothness matching the accepted forward clip as well as quantitative gates. The
 current program is no-RTK bounded-area coverage with a learned
-omnidirectional gait on the real CAD assembly. Stage2C is archived mock
-research, not the current deployment target. `STATUS.md` records execution
+omnidirectional gait on the real CAD assembly. The historical Stage2C is archived mock research. The explicitly authorized 9 September C-length study is the current execution priority, while production deployment remains a separately qualified physical CAD model. `STATUS.md` records execution
 state; `docs/PLAN.md` holds the living plan and `docs/NEXT_RUNS.md` prepares
 the next campaign without launching it.
+
+## Current execution priority and publication
+
+The user selected the C geometry study and asks for Stage 2 all-direction/path smoothness and quiet standing, with terrain/perception prepared in parallel. Read `STATUS.md` and `experiments/c_length_study/README.md`. Its pinned serial-study runtime, 1.6 N·m cap and checkpoint contracts are not the physical four-bar runtime. Do not silently substitute either lineage. Every meaningful verified step must be committed and pushed with the relevant Markdown context; this is explicit user authorization. Preserve teammates' commits, use a current main integration, run relevant checks, and verify the remote SHA. Historical frozen evidence is not rewritten to update status.
 
 ## Physical four-bar campaign
 

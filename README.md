@@ -6,12 +6,25 @@ deck for data collection while it does so. `dar.md` states the mission.
 `docs/PLAN.md` holds the architecture, milestones, and decisions. `STATUS.md`
 records the current state.
 
+For the latest user-directed C-study campaign, production work, verified job state
+and next actions, start with [STATUS.md](STATUS.md). The living [plan](docs/PLAN.md)
+and dated [training history](HANDOFF.md) provide context;
+[PROJECT_STATUS.md](PROJECT_STATUS.md) redirects to the canonical status. Dated
+reports are evidence, not live process status.
+
+**Stage 2 remains incomplete.** Success requires smooth translation through all
+bearings, both yaw signs, combined translation/turning and paths, reversals and
+stops, and quiet zero-command standing without persistent stepping or body
+oscillation. Tracking, contact, stability and motor-load gates must pass together;
+a training budget finishing or an appealing video does not close the stage.
+
 ## Read order
 
 1. `dar.md`: the requirements and the demo ladder.
 2. `CLAUDE.md`: the invariants. They bind people and agents alike.
 3. `docs/PLAN.md`: layers, contracts, workstreams, gates, decisions.
-4. `STATUS.md`: current best checkpoint, target, open contradictions.
+4. [STATUS.md](STATUS.md): current experiment coordination, production-model state,
+   target and open contradictions.
 5. `docs/TRAINING.md` and `docs/OPERATIONS.md` before you touch the task or
    the Spark.
 6. The `CLAUDE.md` inside each `packages/hexapod_*/` you touch.
@@ -21,6 +34,7 @@ records the current state.
 ```text
 dar.md / DAR.png                Mission: requirements slide, numeric blanks, steps, demo ladder
 STATUS.md                       Current state; rewritten in place
+PROJECT_STATUS.md               Compatibility pointer to canonical STATUS.md
 CLAUDE.md (= AGENTS.md)         Invariants, repository map, test command
 docs/PLAN.md                    Architecture and contracts, workstreams, milestones and gates, decisions
 docs/TRAINING.md                Task and training design, curriculum, acceptance gates
@@ -39,7 +53,7 @@ isaaclab/deploy/                Launchers, systemd units, stage2_pipeline.sha256
 isaaclab/tests/                 Unit and contract tests
 ops/                            hexctl operator CLI; attic/ holds retired deploy scripts
 robot/hexapod_mkii_assy/        Asset v1: CAD assembly URDF package and its README (conventions, regeneration)
-robot/hexapod_mkii_mock_assy/   Phase-0 mock; each existing checkpoint trained on it
+robot/hexapod_mkii_mock_assy/   Archived Phase-0 mock; new geometry studies are explicit
 robot/hexapod_leg_v3/           Single-leg reference the assembly import registers onto
 robot/sensors/                  Mid-360 datasheet values and mount placement study
 robot/tools/                    onshape-to-robot importers, viewer packer
@@ -80,12 +94,50 @@ task ID. Existing IDs keep loading the model they trained on.
   §10 holds the Spark import and validation procedure. Its runtime joint order
   (`hexapod_core/joints_v2.py`) stays provisional until that procedure
   confirms it.
-- Phase-0 mock, `robot/hexapod_mkii_mock_assy/`: each checkpoint under
-  `artifacts/` trained on this model. Its task IDs, `revolute_*` joint names,
+- Physical four-bar candidate: the newer [assembly documentation](robot/hexapod_mkii_assy/README.md)
+  and [physical training contract](docs/MKII_FOURBAR_TRAINING.md) describe 31
+  bodies, 30 articulation coordinates and 18 motor actions. The 19-link serial
+  reduction is historical and cannot establish physical linkage qualification.
+- Phase-0 mock, `robot/hexapod_mkii_mock_assy/`: the historical mock checkpoint
+  fleet trained on this model. Its task IDs, `revolute_*` joint names,
   stance values, and `hexapod_core/joints.py` order are frozen with those
   checkpoints.
+- User-selected [C geometry study](artifacts/length_study_2026-09-09/README.md):
+  72.5 mm femur, 126 mm tibia, unchanged coxa, with current CAD mass/inertia and
+  RS05 constraints transferred to scaled mock geometry (approximately 8.2608 kg).
+  This isolated study does not replace the production four-bar work. Detailed C
+  motor/linkage fit, payload and hardware geometry remain unverified.
+
+The exact [C forward Benchmark 1](artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md)
+is an immutable user-selected PPO demonstration. Preserve its checkpoint, video,
+configuration and checksums; new evaluations belong elsewhere. It has unresolved
+torque-demand limits and does not establish all-direction or hardware readiness.
 
 No checkpoint in this repository is hardware-ready (`docs/TRAINING.md` §7).
+
+## Parallel terrain and perception preparation
+
+The user has requested Stage 2 completion with terrain/perception work proceeding
+in parallel. PPO controls the 18 joint targets; a separate motion producer requests
+forward/left velocity and yaw rate, allowing arcs and independent path/body heading.
+See the [omnidirectional study plan](artifacts/omni_flat_2026-09-09/RESEARCH_AND_PLAN.md)
+and [terrain/sensing plan](artifacts/project_review_2026-09-04/TERRAIN_AND_SENSING_PLAN_2026-09-09.md).
+Consult STATUS for the current checkpoint and scheduler state.
+
+- [CPU terrain readiness](artifacts/terrain_readiness_2026-09-09/readiness.json)
+  and [mild curriculum](artifacts/terrain_readiness_2026-09-09/mild_curriculum_001/curriculum.json)
+  prepare procedural assets and evaluation inputs; runtime admission is separate.
+- [Camera-mount study](artifacts/sensor_mount_study_2026-09-09/README.md) records
+  visibility on its hashed serial-CAD snapshot. It does not qualify the newer
+  physical four-bar or final C mounting geometry.
+- [CPU perception replay](artifacts/perception_readiness_2026-09-09/README.md)
+  exercises timestamped depth/point-cloud transforms and an age/uncertainty-aware
+  map with synthetic data. It claims no real-sensor calibration, ROS integration,
+  trained terrain policy or hardware qualification.
+
+The user has a Mid-360 and D455; additional sensors may be evaluated. Preserve
+the project's procurement and physical-test decisions. Unknown or stale support
+stays unknown, and adding sensors does not bypass actuator or model gates.
 
 ## Working rules
 
