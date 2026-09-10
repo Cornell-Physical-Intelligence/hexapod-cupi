@@ -1,0 +1,13 @@
+# Reference009: distinguish unloading from qualified flight
+
+This is a fresh bounded full-C reference trial, not PPO or production adoption. It inherits source008's physical configuration, assets, noisy physical reset, canonical startup, motor limits, targets,7mm lift,2s swing,80% horizontal timing, host sequence and original acceptance metrics/gates.
+
+The wave005 dependency explicitly distinguishes unloading from qualified flight. Two consecutive force-free samples alone do not establish a step: measured lift must also reach the existing2mm bound. Early unqualified force returns are retained in telemetry and reset the unqualified run/baseline/peak, so separate blips cannot accumulate into flight. Failure is required by the existing nominal apex if lift has not qualified; there is no extra grace-period parameter. Qualified touchdown still requires passed apex, actual descent, bounded speed/endpoint correction, stable contact and all original support/torque constraints. No unqualified rebound increments touchdowns or advances the leg order.
+
+This addresses the actual008 stop at RR's second swing, when two zero-force samples had only micrometre lift before load returned. Actual008's seven previous touchdowns, incomplete forward interval and failed verdict remain unchanged. Common-prefix CPU replay checks cannot prove that continuing this case will succeed in physics.
+
+The separately reviewed observer adds actual joint angles at every existing400Hz update, stable named order and exact control-endpoint angle/rate equality. It creates no additional physics steps, changes no settings and does not substitute finite differences for reported velocity. This supplies missing evidence for the unresolved reported-rate/position discrepancy; it does not repair that discrepancy or qualify large-replica PPO scaling.
+
+Only `wave_reference.py`, `physics_substeps.py`, explicit protocol/source identity and lineage change from exact008. Host, entrypoint, metrics, environment configuration, residual core and startup remain byte-identical. The strengthened008 admission remains: fresh32×1000 physical standing **and all32 under the existing unchanged quiet gates**, then at most1×2400 bounded wave. Every new phase is bound to source009; previous source admission is not reused.
+
+The new unloaded/qualified-flight state and diagnostic fields are explicit in the protocol. No policy/checkpoint state compatibility is claimed. The source builder requires both exact owner freezes, unchanged geometry/math dependencies and the complete926-file parent, then refuses any existing output. Root owns dispatch/locks/restoration; this preparation launches nothing.

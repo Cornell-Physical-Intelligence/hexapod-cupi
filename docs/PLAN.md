@@ -371,3 +371,10 @@ The [sequential synthetic acquisition replay](../artifacts/perception_readiness_
 ### Preserve measurement fidelity beyond a standing pass, 10 September
 
 The [reference007 comparison](../artifacts/omni_diagnostics_2026-09-09/reference_physics_007/README.md) passes existing standing and quiet checks with TGS16/1 and external-force timing enabled, yet a joint's reported velocity still integrates far from its measured angle change. Use those settings only in the separately identified next bounded C trial; no production default or large-PPO admission follows. Retain raw SDK velocity and unchanged gates alongside independent pose/angle comparisons. Do not substitute finite-difference measurements merely to obtain a pass. Fresh standing admission precedes each changed-source stepping screen, and contact, progress, torque and measured stop remain required.
+
+
+### Complete reference is a stepping milestone, not policy admission, 10 September
+
+The [full009 reference screen](../artifacts/omni_diagnostics_2026-09-09/reference_physics_009/README.md) establishes a bounded slow six-leg stepping and eventual quiet-stop sequence. Its5.54-second stopping latency does not satisfy future terrain map leases or establish project-speed behavior. Preserve it as a diagnostic and visible progress reference while testing faster support transfers separately.
+
+Before scaling PPO, resolve or explicitly bound the reported-velocity bias using matched cold initial states at several world positions, with actual400Hz angle/pose and rawSDK velocity retained together. The original50Hz progress check and independent400Hz comparison disagree about the existing5mm bound; neither is silently replaced. A diagnostic quiet failure stays a failed verdict even when other matched cases continue to measure position dependence. Physical safety, reset or incomplete-contact failures still abort. No world-coordinate effect or native solver cause is assumed in advance.
