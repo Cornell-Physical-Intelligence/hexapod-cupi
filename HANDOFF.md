@@ -1486,3 +1486,12 @@ Root also verified all42 speed-study payloads and passed its five tests. All12 d
 
 
 Origin002 terminal publication contains146 payloads, map4015f9f10a57ff8d55ecfaae4841a883990ed0ecb40fc5d58f28b316dd03e089. All96 raw files, source933/assets550, six exact owned containers andpause038restoration verified. Root and sensor recompute5physical/quiet cases, with identical origin/repeat trace/substeps/control-integrals. Same worstjointrevolute_2_1 remains0.3976517–0.4103968rad discrepancy over16s. Global translation does not fix rate bias; no native cause or fidelity qualification. Portable wrapper verifier passes.
+
+
+### 10 September: published actual device bridge and positive paired support
+
+Device110-payload terminal map a1b85afbd85d8bc9d9e698f4ffb28ec6bdf501539189fe1e8011233e55342f23 is published at reference_device_smoke_001. Root portable verification checks all copied freezes/raw38 and both original host002 numeric gates without Isaac. Actual-review44freeze597e49746df8cebc2d3894e78fdbe7e1f4565a724e01a7c425c3d8ec7e147d6d retains raw clocks/packets and source/input/owned cleanup. The measured16msreference+68–69msenvstep+6.4–6.7msobservation includes instrumentation and CPU transfers; no PPO throughput inference.
+
+Pair001114-payload terminal map52c92d25de6e34ae5f3ea19941484f581e359215e29e9815834858deea31118c includes all38raw,56-payload preparation, exactguard, independent6-file scorer replay and root actual-measurement plot. Full32standing/quiet and1×1300pair screen pass distinct proposed criteria. Both middle toes unloaded2.02s, lift5.082/5.513mm from last planted samples, four corners supported, full8801substeps peak1.401371717Nm, final10.02squietRMS.0094297rad/s. Asymmetric measured foot forces and ratio0.5053 remain nominal friction evidence. Native toe lift plotted from initial reset differs by−1.676/+18.091µm of baseline; scorer inputs/results are unchanged. Source934/assets550/exact two-owned-container absence andpause040restoration verify. Root viewed figure and independently recomputed fullsubstep maximum; original scorer replay has zero numeric differences. This is static paired load transfer, not walking/PPO orStage2 qualification.
+
+Next: four cold directional reference cases after fresh standing; independently finish the new stand-only two-update PPO/strict reload and forward-stop retention integration. Source009 geometry/gates, frozenobs005 and earlier failure evidence remain unchanged.

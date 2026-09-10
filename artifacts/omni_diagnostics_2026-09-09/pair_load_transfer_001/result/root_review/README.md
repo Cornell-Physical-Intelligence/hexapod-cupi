@@ -1,0 +1,11 @@
+# Actual pair001 independent replay
+
+The fresh32-replica standing/quiet screen and the full1×1300 pair trial pass their unchanged source-bound criteria. The actual four corners support both middle feet clear for2.02s, followed by10.02s of measured quiet. The complete8801-sample diagnostic requested/applied torque peak is1.401371717Nm at physical13.01s, `revolute_2_3`. All1100 physical rows preserve the proposed body/support/foot-slip checks, and every400Hz endpoint equals the corresponding ordinary row. The frozen generator/scorer replay matches every recorded result scalar exactly.
+
+The smallest measured projected support margin is185.007mm; maximum body displacement.79106mm, rotation.001342rad, corner drift.75161mm and reported corner slip.0104511m/s. No forbidden contact or reset occurs. Actual mean vertical loads are unequal: LF/RR about12.3/12.5N and LR/RF27.9/28.3N; the middle feet are unloaded. Total measured vertical force81.0386N matches nominal weight. This proves this static load transfer in simulation; it does not yet prove an alternating support sequence, faster translation, trustworthy reported rates, PPO or Stage2 completion.
+
+The figure's reset-relative toe lifts (LM5.080680mm, RM5.530746mm) and scorer's last-planted-relative lifts (5.082357mm,5.512655mm) use the **same raw link-point channel**. The last planted LM point is1.676354µm lower than its reset point; RM is18.091136µm higher. These precise baseline offsets explain the different lift values; there is no inferred FK/SDK-frame conversion. `lift_baselines.json` gives exact samples and heights.
+
+All38 fetched payloads match the remote SHA audit, and all934 source hashes match the frozen source. Remote audit separately preserves550 unchanged assets, both owned container IDs/names absent, unit successful/inactive and pause040 restoration. This offline review does not claim a later live lock/workload check. Raw data and source are unchanged.
+
+The next immediate admission test is a small low-speed reverse/strafe/turn/combined-twist reference screen. Paired support sequencing is a separate useful follow-on, given this positive load-transfer result and the failed faster single-leg CPU timing variants. No existing wave gate or rate metric is relaxed.

@@ -1,0 +1,19 @@
+{
+  "reviewed_at_utc": "2026-09-10T06:32:31.750913+00:00",
+  "source_directory": "tmp/reference_load_transfer_001",
+  "source_sha256": {
+    "load_transfer.py": "cbc1abb08905bac72aa660b2289b1afe7c8f4bdd21e7829de33c32d5d93dd3c0",
+    "score_transfer.py": "33773d14d3159a3a52bf6b94d701cea9efa35088c232617c15e2c79e81a55bdd",
+    "FREEZE_SHA256.json": "6cd797bee322d84328a6bbf9ff4aff289c57af45fbca27bc425d5e8d7a83e334"
+  },
+  "test_command": "PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tmp/reference_load_transfer_001 -p \"test_*.py\"",
+  "independent_tests_passed": 16,
+  "blocking_issues_remaining_for_CPU_scope": [],
+  "notes": [
+    "CPU-only proposal reviewed;16 tests independently passed.",
+    "Reference times/emitted targets now match measured rows;400Hz computed/applied evidence requires full shapes, cadence, counters and exact control endpoints.",
+    "Finite config and QuinticPVA reject malformed inputs; C2 return seeds current position and analytic derivatives, while discrete PVA remains checked.",
+    "No runtime launch, physical admission or walking-gate change approved."
+  ],
+  "GPU_calls": 0
+}
