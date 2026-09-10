@@ -1,0 +1,217 @@
+{
+  "audit_sha256": "d337846ef9d983e7a17a17a992367a6248cf8cad67adf476958b1e152f271e7a",
+  "passed": true,
+  "checks": {
+    "terminal_owner": true,
+    "host_bundle": true,
+    "guard_bundle": true,
+    "inputs": true,
+    "predecessors": true,
+    "campaign": true,
+    "job_standing": true,
+    "job_initial_constant": true,
+    "job_initial_stop": true,
+    "job_train": true,
+    "job_final_constant": true,
+    "job_final_stop": true,
+    "restoration": true,
+    "halo_archive": true,
+    "inventory": true
+  },
+  "campaign": {
+    "completed": true,
+    "campaign_sha256": "fcf09c70705a02c588ebae0285e8e2737b0ad6f9745d5270bad5db4eff90403c",
+    "updates": 500,
+    "actual_controls": 12000,
+    "actual_transitions": 12288000,
+    "receipt_sha256": "cdd766e32cd5c74016f98bc1c74906f0fbd417fea07b13503ea54b50ab1a805d",
+    "checkpoint_path": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_extended_caps_002/train/policy/final.pt",
+    "checkpoint_sha256": "c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf",
+    "decisions": {
+      "1": {
+        "file": "decision_001.pt",
+        "sha256": "b680a4da90fdba378217b45950bdbf31d89a10b893a10c2504fa7505034f3125",
+        "native_iteration": 1847,
+        "completed_updates": 1,
+        "path": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_extended_caps_002/train/policy/decision_001.pt"
+      },
+      "10": {
+        "file": "decision_010.pt",
+        "sha256": "12748f50de0a5d556401600b86150b7e3a56ce7f54c63eb693ffd197e274c05c",
+        "native_iteration": 1856,
+        "completed_updates": 10,
+        "path": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_extended_caps_002/train/policy/decision_010.pt"
+      },
+      "25": {
+        "file": "decision_025.pt",
+        "sha256": "ebdce709d12b9c309becf763451cd51d61037d4704cb0fa8ed1c0f7b55d1d42e",
+        "native_iteration": 1871,
+        "completed_updates": 25,
+        "path": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_extended_caps_002/train/policy/decision_025.pt"
+      },
+      "50": {
+        "file": "decision_050.pt",
+        "sha256": "5c9c74c0306a18cbc0e603248e66c1f266fa366f46f66c315a17306491572bab",
+        "native_iteration": 1896,
+        "completed_updates": 50,
+        "path": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_extended_caps_002/train/policy/decision_050.pt"
+      },
+      "100": {
+        "file": "decision_100.pt",
+        "sha256": "57e06bbec002327657b7a819ebf6ef9c53c40c5b8949938934f76bf8c55b3491",
+        "native_iteration": 1946,
+        "completed_updates": 100,
+        "path": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_extended_caps_002/train/policy/decision_100.pt"
+      },
+      "250": {
+        "file": "decision_250.pt",
+        "sha256": "5ad64c942abf0b5eda18a854c65efc1a623febd38702bdd9b915d2cba88c1797",
+        "native_iteration": 2096,
+        "completed_updates": 250,
+        "path": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_extended_caps_002/train/policy/decision_250.pt"
+      },
+      "500": {
+        "file": "decision_500.pt",
+        "sha256": "dbb9c486a810284d8a70f220b67143e844f347479fb654c8c555c4b83245e726",
+        "native_iteration": 2346,
+        "completed_updates": 500,
+        "path": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_extended_caps_002/train/policy/decision_500.pt"
+      }
+    },
+    "extended_readback": {
+      "updates": 500,
+      "controls_per_update": 24,
+      "replicas": 1024,
+      "fresh_original_only": true,
+      "ordinary_save_interval": 1,
+      "decision_updates": [
+        1,
+        10,
+        25,
+        50,
+        100,
+        250,
+        500
+      ],
+      "gradient_updates": [
+        1,
+        10,
+        25,
+        50,
+        100,
+        250,
+        500
+      ],
+      "gradient_minibatches": [
+        1,
+        20
+      ],
+      "minibatches_per_update": 20,
+      "train_deadline_seconds": 1800,
+      "other_phase_deadline_seconds": 600,
+      "automatic_continuation": false,
+      "ordinary_autosaves": 500,
+      "decision_checkpoints": 7,
+      "first_native_iteration": 1847,
+      "last_native_iteration": 2346,
+      "actual_controls": 12000,
+      "actual_transitions": 12288000,
+      "optimizer_minibatches": 10000,
+      "sparse_actor_gradient_rows": 14
+    },
+    "wall_seconds": 1033.2449557951186,
+    "reload": {
+      "passed": true,
+      "exact_actor_critic_normalizer_optimizer": true,
+      "exact_deterministic_action": true,
+      "optimizer_entries": 17,
+      "checkpoint_sha256": "c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf",
+      "inference_buffers_cloned_after_learning": [
+        "actor.obs_normalizer._std",
+        "critic.obs_normalizer._std"
+      ],
+      "reload_method": "Strict same-runner load after value-preserving inference-buffer normalization"
+    },
+    "phase_trees_unchanged": [
+      "standing",
+      "initial_constant",
+      "initial_stop",
+      "train",
+      "final_constant",
+      "final_stop"
+    ],
+    "quiet_failed_env_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47
+    ],
+    "acquisition_is_not_physical_acceptance": true
+  },
+  "files": 576,
+  "bytes": 3251065549,
+  "owned_identifier_absences": 12,
+  "restoration": {
+    "restored_unix": 1789069237.6840482,
+    "timers": [
+      "stormscope-dispatch.timer",
+      "stormscope-scout.timer"
+    ],
+    "owned_cleanup_checked": []
+  },
+  "nine_preview_pins": {
+    "direct_omni_train_extended_caps_002/campaign.json": "fcf09c70705a02c588ebae0285e8e2737b0ad6f9745d5270bad5db4eff90403c",
+    "direct_omni_train_extended_caps_002/jobs/standing.json": "f5174a4754ff3f1c5e291d0127c6a2f289096b42dadc0aa0892ad7381bfd4aa9",
+    "direct_omni_train_extended_caps_002/jobs/initial_constant.json": "070e571d27ee141a246060326378aba1f9879395c49a80d7b06721423e111d83",
+    "direct_omni_train_extended_caps_002/jobs/initial_stop.json": "d634ed432db2a35352ffdd16ef830c07136068b3dbf030a077dfcd923437d112",
+    "direct_omni_train_extended_caps_002/jobs/train.json": "69f6ec94c18e4fe6ae18bed73a1ecf7709a938a1f70ef283b67b652a76e6638e",
+    "direct_omni_train_extended_caps_002/jobs/final_constant.json": "1e56b7d6dc4d758698172cb7eb83a6f6026f68173d429ef3acc76889a81e129d",
+    "direct_omni_train_extended_caps_002/jobs/final_stop.json": "b1f0269ccc4c9bda9a2aebb5d4f9b78b34dc45a78b42dafdbbe7f2c0387c0f46",
+    "forecast_pause_063/pause.json": "dc2e50748025506758186d755eff277ae4e4648c8a98e63545531fc141d07cbe",
+    "forecast_pause_063/restored.json": "40e331a26127d7ddb331e7df80b091fd487f33876c46e7b4023807e7597b0474"
+  }
+}

@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "title": "HEXAPOD \u00b7 Live research poster",
+  "title": "HEXAPOD · Live research poster",
   "repository": "Cornell-Physical-Intelligence/hexapod-cupi",
   "mission": "Hexapod MKII: from walking to autonomous surveying",
-  "description": "Cornell Physical Intelligence \u00b7 Learn a stable gait, extend it to all-direction motion, then add terrain perception and autonomous surveying.",
+  "description": "Cornell Physical Intelligence · Learn a stable gait, extend it to all-direction motion, then add terrain perception and autonomous surveying.",
   "status_source": "STATUS.md",
   "geometry": {
     "label": "Canonical detailed direct-drive CAD",
@@ -17,38 +17,38 @@
     "note": "User-approved ground truth for all future training. All 1,753 parts and 59 meshes are retained. Nominal motor weight overrides are included; added inertia remains an estimate. Per-leg yaw has a 0.5 mm standoff gap; wider pitch travel permits coupled collisions. Historical videos/checkpoints use their original simplified geometry. Native physics remains unqualified."
   },
   "checkpoint": {
-    "receipt": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_004/terminal/run/train/training_receipt.json",
-    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_004/analysis/REPORT.md",
-    "label": "Source004 PPO \u00b7 two-update integration run",
-    "qualification": "Integration verified; unqualified gait, 0/48 quiet trials pass",
-    "video_matches": false,
-    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_004/terminal/run/train/policy/final.pt"
+    "receipt": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/train/training_receipt.json",
+    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md",
+    "label": "Historical C-study PPO · 500 updates",
+    "qualification": "Unqualified historical gait; 0/48 quiet trials pass. New detailed CAD requires native admission.",
+    "video_matches": true,
+    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/train/policy/final.pt"
   },
   "stop_result": {
-    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_004/terminal/run/final_stop/stop_diagnostics.json",
-    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_004/analysis/REPORT.md"
+    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/final_stop/stop_diagnostics.json",
+    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md"
   },
   "media": [
     {
       "id": "benchmark_01",
-      "title": "Benchmark 1 \u2014 user-selected forward gait",
+      "title": "Benchmark 1 — user-selected forward gait",
       "type": "video",
       "role": "benchmark",
       "path": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/rollout.mp4",
       "sha256": "2c65b1f158379ab62c65fec3dd831ca91cf137b4eaa309ae63a7ff65ea7e1513",
-      "caption": "User-selected 300-update PPO residual demo, forward only; requested torque gate failed. Not terrain/hardware qualification. Playback is 1\u00d7 real time.",
+      "caption": "User-selected 300-update PPO residual demo, forward only; requested torque gate failed. Not terrain/hardware qualification. Playback is 1× real time.",
       "controller": "5ecbe978d659413dc050fec93b0e211a3eadf6ce1c807790d87c14044ff245a2",
       "evidence": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md",
       "poster_id": "benchmark_01_poster"
     },
     {
       "id": "benchmark_01_poster",
-      "title": "Benchmark 1 \u2014 user-selected forward gait frame",
+      "title": "Benchmark 1 — user-selected forward gait frame",
       "type": "image",
       "role": "video_poster",
       "path": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/frame_05.png",
       "sha256": "d3694c52e5f13c60fabc206f25490ac4431392cf94e704537f493ec706ad3644",
-      "caption": "Actual frame from Benchmark 1 \u2014 user-selected forward gait",
+      "caption": "Actual frame from Benchmark 1 — user-selected forward gait",
       "controller": "5ecbe978d659413dc050fec93b0e211a3eadf6ce1c807790d87c14044ff245a2",
       "evidence": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md"
     },
@@ -59,7 +59,7 @@
       "role": "historical_capability_demo",
       "path": "artifacts/omni_flat_2026-09-09/omni_preview_001/rollout.mp4",
       "sha256": "37b449194dd79f2c7d65106ca1deb97ffe4f401a967c6ff1f54cf22ad5f3849c",
-      "caption": "Original1971 checkpoint with ideal simulator localization in the outer pose follower; not latest weights or Stage2 qualification. Playback is 1\u00d7 real time.",
+      "caption": "Original1971 checkpoint with ideal simulator localization in the outer pose follower; not latest weights or Stage2 qualification. Playback is 1× real time.",
       "controller": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
       "evidence": "artifacts/omni_flat_2026-09-09/omni_preview_001/recording_audit.json",
       "poster_id": "direct315_1971_poster"
@@ -112,10 +112,10 @@
       "id": "caps50_preview",
       "title": "CAPS 50-update PPO pilot",
       "type": "video",
-      "role": "latest_policy_recording",
+      "role": "historical_capability_demo",
       "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_preview_001/terminal/run/recording/rollout.mp4",
       "sha256": "b2ccdd62821e58c3d8bfd62150b9272d4d3c47c7d8020dea0df2e8571550547d",
-      "caption": "Actual 38 s PPO recording at 1\u00d7 speed. Quiet standing fails. Video is complete; the job failed afterward on a missing final audit receipt.",
+      "caption": "Actual 38 s PPO recording at 1× speed. Quiet standing fails. Video is complete; the job failed afterward on a missing final audit receipt.",
       "controller": "ca0545760f81b8b8fb0cafde4b1ef89bfa5d8765a8b43b578e451f648a954415",
       "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_preview_001/README.md",
       "poster_id": "caps50_preview_poster"
@@ -130,6 +130,29 @@
       "caption": "Actual frame at 7 seconds; unqualified CAPS pilot.",
       "controller": "ca0545760f81b8b8fb0cafde4b1ef89bfa5d8765a8b43b578e451f648a954415",
       "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_preview_001/README.md"
+    },
+    {
+      "id": "caps500_preview",
+      "title": "Historical C-study PPO after500 updates",
+      "type": "video",
+      "role": "latest_policy_recording",
+      "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/terminal/run/recording/rollout.mp4",
+      "sha256": "1cd2dab2ac5d4c981f4528017febfed0287ac0cdb9e19e2d34cc52704e7f4745",
+      "caption": "Actual38s recording at1× speed: forward, strafe, arc and stop requests. Quiet standing still fails. This is the historical C-study model; future training uses the approved detailed CAD.",
+      "controller": "c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf",
+      "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/README.md",
+      "poster_id": "caps500_preview_poster"
+    },
+    {
+      "id": "caps500_preview_poster",
+      "title": "Actual historical CAPS500 frame",
+      "type": "image",
+      "role": "video_poster",
+      "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/terminal/review/frame_07.png",
+      "sha256": "81a7652c30061697330f059dea2a230af8a9492cb3f4d695c01ba732c7ea63d1",
+      "caption": "Actual7-second frame; full historical C-study robot and command arrows. Ground text has overlapping render strokes.",
+      "controller": "c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf",
+      "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/README.md"
     }
   ],
   "nodes": [
@@ -154,7 +177,7 @@
       "state": "planned",
       "column": 1,
       "row": 0,
-      "meaning": "Divide the area into reachable passes while respecting obstacles and the robot\u2019s stopping distance.",
+      "meaning": "Divide the area into reachable passes while respecting obstacles and the robot’s stopping distance.",
       "input": "Boundary, local map and robot pose",
       "output": "A sequence of local goals",
       "today": "Waypoint examples exist; a qualified coverage planner is still ahead.",
@@ -164,7 +187,7 @@
     {
       "id": "commands",
       "title": "Ask for motion",
-      "label": "Forward \u00b7 sideways \u00b7 turn",
+      "label": "Forward · sideways · turn",
       "state": "implemented",
       "column": 2,
       "row": 0,
@@ -290,7 +313,7 @@
     {
       "id": "survey",
       "title": "Collect steady data",
-      "label": "The project\u2019s end goal",
+      "label": "The project’s end goal",
       "state": "planned",
       "column": 3,
       "row": 2,
@@ -374,7 +397,7 @@
       "id": "stage2",
       "title": "Omnidirectional movement",
       "state": "In progress",
-      "description": "Translate in any direction and turn at the same time. Match the forward benchmark\u2019s smoothness and stand still when commanded to stop.",
+      "description": "Translate in any direction and turn at the same time. Match the forward benchmark’s smoothness and stand still when commanded to stop.",
       "gate": "Numeric gates AND visual quality matching accepted forward Benchmark 1.",
       "source": "docs/TRAINING.md",
       "media_id": "caps50_preview"
@@ -383,7 +406,7 @@
       "id": "stage3",
       "title": "Terrain and perception",
       "state": "Next; preparation in parallel",
-      "description": "Cross increasingly difficult ground, then use timely sensor information to select safe movement. Retain the flat-ground controller\u2019s capability.",
+      "description": "Cross increasingly difficult ground, then use timely sensor information to select safe movement. Retain the flat-ground controller’s capability.",
       "gate": "A frozen terrain envelope, untouched qualification cases and preserved motor/contact limits.",
       "source": "artifacts/terrain_readiness_2026-09-09/qualification_plan_001/QUALIFICATION_PLAN.md"
     },
@@ -417,7 +440,7 @@
   "papers": [
     {
       "title": "CAPS",
-      "role": "Smooth the policy\u2019s output across time and nearby observations.",
+      "role": "Smooth the policy’s output across time and nearby observations.",
       "url": "https://ai.bu.edu/caps/"
     },
     {
@@ -444,7 +467,7 @@
     },
     {
       "term": "Policy",
-      "meaning": "The learned function that chooses motor targets from the robot\u2019s observations and motion request."
+      "meaning": "The learned function that chooses motor targets from the robot’s observations and motion request."
     },
     {
       "term": "Checkpoint",
@@ -467,9 +490,9 @@
     "milestone": "stage2",
     "title": "Checkpoint 2: smooth omnidirectional movement and quiet standing.",
     "text": "Prepare native admission of the newly approved detailed robot before further training. Stage 2 smoothness and quiet-standing gates remain unchanged; terrain/perception preparation continues.",
-    "badge": "Stage 2 \u00b7 not passed"
+    "badge": "Stage 2 · not passed"
   },
-  "primary_video_id": "caps50_preview",
+  "primary_video_id": "caps500_preview",
   "findings": [
     {
       "label": "Measured",
@@ -480,15 +503,15 @@
     {
       "label": "Not solved",
       "title": "Quiet standing still fails in every trial",
-      "text": "The completed pilot comparisons and compatibility run still fail quiet standing. Target steps reach the 0.040 rad limiter; the quiet bound remains 0.002 rad.",
-      "source": "artifacts/omni_diagnostics_2026-09-09/direct_omni_train_smoke_004/analysis/REPORT.md",
+      "text": "The completed 500-update historical study still fails all 48 quiet trials. Target steps reach 0.040 rad; the quiet bound remains 0.002 rad.",
+      "source": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/README.md",
       "show_stop_replicas": true
     },
     {
       "label": "Historical study",
-      "title": "A larger C-study budget was dispatched",
-      "text": "The inherited execution snapshot records a 500-update normal-CAPS comparison on the earlier simplified model. Its outputs stay in that lineage. New training now requires the approved detailed CAD and native admission.",
-      "source": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_retry_002/README.md"
+      "title": "Longer training improved tracking, but did not solve standing",
+      "text": "The inherited C-study experiment completed 500 updates. Translation improved against its original policy, while turning and torque demand remained mixed. These results do not qualify the approved detailed CAD.",
+      "source": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/README.md"
     },
     {
       "label": "CAD audit",

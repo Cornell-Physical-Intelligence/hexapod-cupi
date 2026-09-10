@@ -1,0 +1,18 @@
+# Historical C-study CAPS500 progress recording
+
+The actual selected CAPS500 checkpoint completed one fresh 38-second physics preview: 1,900 controls and 950 H.264 frames at 25 fps, 1280×720, real-time playback. The native state and host campaign both completed. The pre-shutdown seal was present, and the host's actual post-exit verification of original inputs and all sealed output bytes passed. This repairs the earlier recording finalizer failure without changing that preserved earlier verdict.
+
+This video is historical C-study evidence, not the newly canonical detailed 19-body/18-joint direct-CAD robot. It is unqualified progress, not Stage2 completion or sustained quiet qualification. Future training belongs to the new canonical model. No further C-study simulation was launched by this audit.
+
+- Actual checkpoint: `c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf`, from completed `direct_omni_train_extended_caps_002`, six phases and 500 updates.
+- Video: `run/recording/rollout.mp4`, SHA `1cd2dab2ac5d4c981f4528017febfed0287ac0cdb9e19e2d34cc52704e7f4745`, 37,969,849 bytes.
+- Trace: `run/recording/trace.npz`, SHA `b962891509b44778dd63e85e882d64ace3d8b7932c318a838773287eb8ca00ad`.
+- Recording owner: `hexapod-direct-omni-extended-preview-001-20260910.service`, exact historical invocation `3e88eb521861497cb3bd275b60c3c1b8`. The live invocation had already been collected when terminal inspection ran; the matching journal and launch evidence are retained.
+
+The read-only remote audit verified all 599 native source files, source009's 926 supervisor files, native005's 28 files, training host005's 49, adapter004's 27, preview host003's 12 and guard's 27. All 550 study assets, 16 legacy Python files, selected checkpoint and completed training phase trees remained unchanged. The exact recording container name and recorded ID were both absent. Pause064 restored only the two timers that had originally been active at Unix1789069746.9245105. No audit process sent a signal, started a GPU job or changed a remote file.
+
+All 29 raw files totaling 42,295,739 bytes match the remote inventory. Local ffprobe decoded all 950 frames; a separate read-only Spark ffprobe also reported the same frame count, dimensions, rate and duration. `review/frame_07.png` was extracted from the actual video using `ffmpeg -ss 7 -frames:v 1`; the visible overlay marks approximately7.04 seconds. Visual inspection confirms the full robot, ground arrows, trajectory and clear top command/checkpoint/status labels. Ground text has visible overlapping render strokes; the frame has not been retouched.
+
+Two interrupted local transfers are preserved in `interrupted_fetch_001.json`, `interrupted_fetch_002.json` and the partial retry log. Only proven incomplete local copies were replaced; remote originals were unchanged. Root restored usable storage by verifying and removing older temporary duplicates. The final retry fetched only missing/mismatched files and `local_raw_verification.json` confirms exact complete recovery. The intermediate `progress.json` deliberately remains the producer's last `complete:false` progress snapshot; authoritative final `video.json`, state and campaign report completion. No raw file was rewritten to reconcile that distinction.
+
+Use `python3 -B verify_payload.py` for portable outer/raw/media verification. The verifier performs no remote operation or simulator import. Root owns publication and the central update required by docs/PROJECT_SITE.md. Keep latest saved checkpoint, latest recording, historical C-study benchmark and current canonical-model status separate.

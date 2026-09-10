@@ -32,3 +32,8 @@ The JSON contains direction-by-direction joint velocity, target increments, pose
 
 
 [Smoke004](direct_omni_train_smoke_004/README.md) verifies source004 compatibility with exact prior checkpoint/raw behavior. [Extended001 failure](direct_omni_extended_caps_failure_001/README.md) occurred before simulation and preserves its host compilation-context rejection. [Retry002](direct_omni_extended_caps_retry_002/README.md) contains the repaired host and actual dispatch; [progress capture](direct_omni_extended_caps_progress_001/README.md) is an intermediate log observation, not completed500-update or Stage2 evidence.
+
+
+[Completed historical CAPS500 result](direct_omni_extended_caps_002/README.md) preserves500 updates, all six phases, strict reload and complete remote CPU replay with explicit local raw omissions. All48 quiet trials fail. This result stays with the C-study lineage; future training uses the newly approved detailed model through native admission.
+
+[Completed historical CAPS500 recording](direct_omni_extended_preview_001/README.md) preserves38s at1×,950 decoded frames and successful pre-close/post-exit integrity. The selected checkpoint is explicit; quiet remains unqualified and future training uses the detailed CAD.

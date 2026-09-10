@@ -1,0 +1,109 @@
+{
+  "status": "completed",
+  "started_unix": 1789069524.384137,
+  "identity": {
+    "kind": "native_direct315_progress_not_qualification",
+    "source_manifest_sha256": "aa70659d33243f1e28e9c71b1a7f9d33341642db770fd7356192573a26fe904e",
+    "plan_sha256": "b2286828148c89fb34624d38beaf84b389584f7bda4d2648512e017da4b50acb",
+    "native_contract_freeze_sha256": "0bdd2abf3811e68ac59e4fbc325eb5d2bb96afd2183eb84c4d37faeb86ff9e9f",
+    "adapter_freeze_sha256": "fb60da984d73c01725e453521ca861e02b061103dfc2fb266a56aa9dd1fa7a20",
+    "checkpoint_sha256": "c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf",
+    "checkpoint_path": "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/direct_omni_train_extended_caps_002/train/policy/final.pt",
+    "pilot": {
+      "campaign_sha256": "fcf09c70705a02c588ebae0285e8e2737b0ad6f9745d5270bad5db4eff90403c",
+      "training_receipt_sha256": "cdd766e32cd5c74016f98bc1c74906f0fbd417fea07b13503ea54b50ab1a805d",
+      "standing_admission_sha256": "0fdd84595c2dd1f1c39fcc52b72cf76fd7a9a268cf553ed649c4bd15123075ec",
+      "identity": {
+        "schema": "direct315_extended_native_v4",
+        "source_manifest_sha256": "aa70659d33243f1e28e9c71b1a7f9d33341642db770fd7356192573a26fe904e",
+        "plan_sha256": "b2286828148c89fb34624d38beaf84b389584f7bda4d2648512e017da4b50acb",
+        "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+        "actor_width": 315,
+        "critic_width": 318,
+        "selection": {
+          "schema": "direct315_extended_native_v4",
+          "allocation": "extended",
+          "branch": "caps",
+          "replicas": 1024,
+          "controls_per_update": 24,
+          "updates": 500,
+          "caps": {
+            "temporal_weight": 0.1,
+            "spatial_weight": 0.1,
+            "noise_scale": 1.0,
+            "noise_seed": 1157,
+            "quiet_temporal_weight": 0.1
+          }
+        },
+        "overrides": {
+          "target_slew_rad_per_20ms": 0.04,
+          "reward_weights": {
+            "stand_joint_velocity": -0.5,
+            "stand_target_velocity": -0.15,
+            "stand_posture": -2.0,
+            "action_rate": -0.075,
+            "saturation": -0.75,
+            "torque_excess": -0.6,
+            "worst_torque_excess": -0.2,
+            "stand_raw_action": 0.0
+          },
+          "observation_noise_scale": 1.0,
+          "target_filter_time_constant_s": 0.0
+        },
+        "diagnostic_options": {
+          "duration_s": 12,
+          "settle_s": 2,
+          "seed": 7057,
+          "trace_envs_per_scenario": 1,
+          "controller": "policy"
+        },
+        "Stage2_complete": false,
+        "smoke_campaign_sha256": "3c1787e06109d077ab3689ab300389e0bf34844aa33e86b52049b0c0701ad979",
+        "smoke_state_sha256": "4223cbf8577f123afb46dd8538984a00124f380088152d7c0c74eeb503c71b35",
+        "smoke_receipt_sha256": "4ae64d78ee4a58dda93274b323336fa10b809477f4eadd1b2131813e67bc2a0e"
+      },
+      "allocation": "extended",
+      "branch": "caps",
+      "completed_updates": 500,
+      "pilot_tree_sha256": "ba27594adb557edafab7057f489083a59419912b91aea7434a181679ddcb598c"
+    },
+    "source_payloads": 599,
+    "seed": 7057,
+    "rendering_overrides": {
+      "num_envs": 1,
+      "width": 1280,
+      "height": 720,
+      "enable_cameras": true,
+      "render_mode": "rgb_array"
+    },
+    "stage2_complete": false,
+    "qualification_performed": false,
+    "policy_training_started": false,
+    "pose_forcing": false,
+    "planned_control_steps": 1900,
+    "planned_frames": 950,
+    "fps": 25,
+    "playback_rate": 1.0,
+    "dt_s": 0.02
+  },
+  "host_freeze_sha256": "2f4ae1fde7fb85787d700743b7267283fe2a8f150ed8f7d9c9514685039b5ad2",
+  "planned_phases": [
+    "recording"
+  ],
+  "recording_only": true,
+  "policy_training_started": false,
+  "stage2_complete": false,
+  "qualification": "Fresh progress video only; no quality acceptance or automatic continuation",
+  "post_exit_original_inputs_reverified": true,
+  "recording": {
+    "complete": true,
+    "video_sha256": "1cd2dab2ac5d4c981f4528017febfed0287ac0cdb9e19e2d34cc52704e7f4745",
+    "trace_sha256": "b962891509b44778dd63e85e882d64ace3d8b7932c318a838773287eb8ca00ad",
+    "checkpoint_sha256": "c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf",
+    "frames": 950,
+    "control_steps": 1900,
+    "qualification_performed": false
+  },
+  "terminal_inputs_unchanged": true,
+  "finished_unix": 1789069746.8221397
+}
