@@ -1,0 +1,191 @@
+{
+  "scope": "Synthetic CPU support/data-validity prototype; no executable braking model, actor, physics or sensorqualification",
+  "cases": {
+    "rotation_start": {
+      "schema": "synthetic_support_supervisor_v1",
+      "permit_candidate": true,
+      "decision": "permit_candidate",
+      "stop_feasibility_proven": false,
+      "reason_codes": [],
+      "reason_cell_counts": {
+        "unobserved": 0,
+        "unusable_now": 0,
+        "expires_before_required_use": 0,
+        "ineligible_support": 0,
+        "outside_course": 0,
+        "known_hazard": 0
+      },
+      "requested_twist": [
+        0.005,
+        0.0,
+        0.0
+      ],
+      "admitted_twist": [
+        0.005,
+        0.0,
+        0.0
+      ],
+      "required_cells": 6,
+      "observed_required_cells": 6,
+      "usable_now_required_cells": 6,
+      "eligible_required_cells": 6,
+      "future_usable_required_cells": 6,
+      "valid_until_s": 1.25,
+      "source_mode": "synthetic_interface",
+      "controller_id": "synthetic_supplied_pose_path_not_braking_model",
+      "synthetic_only": true
+    },
+    "rotation_end": {
+      "schema": "synthetic_support_supervisor_v1",
+      "permit_candidate": true,
+      "decision": "permit_candidate",
+      "stop_feasibility_proven": false,
+      "reason_codes": [],
+      "reason_cell_counts": {
+        "unobserved": 0,
+        "unusable_now": 0,
+        "expires_before_required_use": 0,
+        "ineligible_support": 0,
+        "outside_course": 0,
+        "known_hazard": 0
+      },
+      "requested_twist": [
+        0.005,
+        0.0,
+        0.0
+      ],
+      "admitted_twist": [
+        0.005,
+        0.0,
+        0.0
+      ],
+      "required_cells": 6,
+      "observed_required_cells": 6,
+      "usable_now_required_cells": 6,
+      "eligible_required_cells": 6,
+      "future_usable_required_cells": 6,
+      "valid_until_s": 1.25,
+      "source_mode": "synthetic_interface",
+      "controller_id": "synthetic_supplied_pose_path_not_braking_model",
+      "synthetic_only": true
+    },
+    "rotation_swept": {
+      "schema": "synthetic_support_supervisor_v1",
+      "permit_candidate": false,
+      "decision": "request_supported_stop_or_replan",
+      "stop_feasibility_proven": false,
+      "reason_codes": [
+        "ineligible_support",
+        "known_hazard"
+      ],
+      "reason_cell_counts": {
+        "unobserved": 0,
+        "unusable_now": 0,
+        "expires_before_required_use": 0,
+        "ineligible_support": 20,
+        "outside_course": 0,
+        "known_hazard": 12
+      },
+      "requested_twist": [
+        0.005,
+        0.0,
+        0.0
+      ],
+      "admitted_twist": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "required_cells": 68,
+      "observed_required_cells": 68,
+      "usable_now_required_cells": 68,
+      "eligible_required_cells": 48,
+      "future_usable_required_cells": 68,
+      "valid_until_s": 1.05,
+      "source_mode": "synthetic_interface",
+      "controller_id": "synthetic_supplied_pose_path_not_braking_model",
+      "synthetic_only": true
+    },
+    "flat_short_envelope": {
+      "schema": "synthetic_support_supervisor_v1",
+      "permit_candidate": true,
+      "decision": "permit_candidate",
+      "stop_feasibility_proven": false,
+      "reason_codes": [],
+      "reason_cell_counts": {
+        "unobserved": 0,
+        "unusable_now": 0,
+        "expires_before_required_use": 0,
+        "ineligible_support": 0,
+        "outside_course": 0,
+        "known_hazard": 0
+      },
+      "requested_twist": [
+        0.005,
+        0.0,
+        0.0
+      ],
+      "admitted_twist": [
+        0.005,
+        0.0,
+        0.0
+      ],
+      "required_cells": 12,
+      "observed_required_cells": 12,
+      "usable_now_required_cells": 12,
+      "eligible_required_cells": 12,
+      "future_usable_required_cells": 12,
+      "valid_until_s": 1.25,
+      "source_mode": "synthetic_interface",
+      "controller_id": "synthetic_supplied_pose_path_not_braking_model",
+      "synthetic_only": true
+    },
+    "flat_long_envelope_evidence_expires": {
+      "schema": "synthetic_support_supervisor_v1",
+      "permit_candidate": false,
+      "decision": "request_supported_stop_or_replan",
+      "stop_feasibility_proven": false,
+      "reason_codes": [
+        "expires_before_required_use"
+      ],
+      "reason_cell_counts": {
+        "unobserved": 0,
+        "unusable_now": 0,
+        "expires_before_required_use": 12,
+        "ineligible_support": 0,
+        "outside_course": 0,
+        "known_hazard": 0
+      },
+      "requested_twist": [
+        0.005,
+        0.0,
+        0.0
+      ],
+      "admitted_twist": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "required_cells": 12,
+      "observed_required_cells": 12,
+      "usable_now_required_cells": 12,
+      "eligible_required_cells": 12,
+      "future_usable_required_cells": 0,
+      "valid_until_s": 1.05,
+      "source_mode": "synthetic_interface",
+      "controller_id": "synthetic_supplied_pose_path_not_braking_model",
+      "synthetic_only": true
+    }
+  },
+  "coverage": {
+    "source": "single synthetic snapshot",
+    "instantaneous_visibility_measured": false,
+    "accumulated_map_qualification": false
+  },
+  "limits": [
+    "Given body-fixed pad path is a conservative synthetic support raster, not a physically admitted gait/stop prediction.",
+    "All point-contact support heights differ from actual footmesh/body/shaft collision clearance.",
+    "Permit means supplied support envelope passes this map check; force balance, torque and dynamics remain unproved.",
+    "No future reobservation is assumed. The0.25s evidence lease will reject longer stopping envelopes unless the evidence/uncertainty contract is explicitly revised and qualified."
+  ]
+}
