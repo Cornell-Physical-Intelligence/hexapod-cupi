@@ -1,0 +1,71 @@
+{
+  "model": "claude-fable-5-1",
+  "effort": "max",
+  "session_id": "f4cfbe0c-4b90-439e-8935-0c49083a7c2e",
+  "final_response_sha256": "c113610058d36b275be922e04b4dfbf49c527e82ba57d88563a3e29b840d3802",
+  "tools_disabled": true,
+  "MCP_disabled": true,
+  "one_consultation_only": true,
+  "metadata_note": "CLI modelUsage also records an auxiliary claude-haiku-4-5-20251001 usage. The requested substantive Fable response is separately identified by modelUsage, exact CLI and session; no manual fallback or delegated subagent was used. No internal thinking/event streams were collected.",
+  "decisions": [
+    {
+      "claim": "Quiet failure is budget-invariant; no quiet metric changed.",
+      "disposition": "Qualify",
+      "evidence": "Both checkpoints pass 0/48; several descriptive quiet metrics changed, including median drift 50.42 to 34.27 mm and joint range 0.318 to 0.297 rad. Two single-seed budgets do not establish general budget invariance."
+    },
+    {
+      "claim": "All 48 replicas fail every bound.",
+      "disposition": "Reject",
+      "evidence": "All 48 fail the conjunctive quiet gate, not every component. Applied torque remains below its 1.60001 Nm bound; some heading excursions are below 2 degrees."
+    },
+    {
+      "claim": "Different baseline tables need lists regenerated; diagonal termination delta conflicts.",
+      "disposition": "Reject numerical-error claim; accept explicit labeling",
+      "evidence": {
+        "analyzer_baseline_kind": "same_pilot_initial",
+        "analyzer_initial_checkpoint": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+        "new_comparison_baseline_checkpoint": "ca0545760f81b8b8fb0cafde4b1ef89bfa5d8765a8b43b578e451f648a954415",
+        "constant_case_terminations_50_and_500": "All 12 constant cases have zero terminations in both reports. The cited 20.86 s diagonal reset belongs to the separate 32 s stop trial.",
+        "decision": "Original analyzer compares original-to-500; this new comparison is 50-to-500. Preserve both original reports and label their scopes; no frozen regression list needs rewriting."
+      }
+    },
+    {
+      "claim": "Quiet bounds absent from supplied summary.",
+      "disposition": "Accept prompt limitation, corrected in README",
+      "evidence": {
+        "max_planar_excursion_m": 0.01,
+        "max_heading_excursion_deg": 2.0,
+        "max_joint_velocity_rms_rad_s": 0.03,
+        "max_joint_position_range_rad": 0.02,
+        "max_target_step_abs_p95_rad_per_20ms": 0.002,
+        "max_requested_torque_saturation_fraction": 0.005,
+        "max_applied_torque_nm": 1.60001
+      }
+    },
+    {
+      "claim": "Oscillation originates upstream of limiter; plant attenuates it.",
+      "disposition": "Qualify",
+      "evidence": "Raw output, targets and q share a 4.4 Hz aggregate peak. This proves oscillation is already present in raw output, not where the closed-loop oscillation originates. Normalized energy fractions in different signals do not establish absolute attenuation or causality."
+    },
+    {
+      "claim": "Sensing floor was never measured.",
+      "disposition": "Reject categorical claim",
+      "evidence": "Prior active-PD zero-action control has 0.00158 rad/s and zero saturation in its historical contract; previous reference/origin diagnostics measured SDK/angle disagreement. They do not admit the new model or fully calibrate every sensor channel."
+    },
+    {
+      "claim": "Canonical native admission and policy-free diagnostics before objective/architecture or more budget.",
+      "disposition": "Accept with ordered safety scope",
+      "evidence": "User-approved detailed direct-drive canonical model supersedes C training. First native import/cooking/identity inspection has no inferred gains or gravity-contact claim. Suspended drives/contact hold/excitation require separate model-bound actuator, collision and stance review."
+    },
+    {
+      "claim": "Use 2, 4.4 and 8 Hz excitation at declared rate limit; settle at zero pose and demand old quiet bounds.",
+      "disposition": "Defer/reject as immediate prescription",
+      "evidence": "New-model actuator bandwidth, gains and admissible stance are not yet admitted. CAD zero is not a proven support stance. The old 4.4 Hz observation informs logging, not an automatically safe excitation frequency or transferable old numeric gate."
+    },
+    {
+      "claim": "Reset-contaminated extreme is failure, not continuous drift; gradient norms do not identify Adam updates; no old checkpoint/limits transfer.",
+      "disposition": "Accept",
+      "evidence": "Independent exact raw replay and canonical selector support these limits."
+    }
+  ]
+}

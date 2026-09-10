@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/direct_omni_extended500_interpretation_001/compare.py", line 154, in <module>
+    if __name__=='__main__':main()
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/direct_omni_extended500_interpretation_001/compare.py", line 146, in main
+    result=compare(json.loads(paths['caps50_report'].read_text()),json.loads(paths['caps500_report'].read_text()),paths['caps50_trace'],paths['caps500_trace'])
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/direct_omni_extended500_interpretation_001/compare.py", line 113, in compare
+    ra, rb = raw_quiet(ta,a), raw_quiet(tb,b)
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/direct_omni_extended500_interpretation_001/compare.py", line 58, in raw_quiet
+    np.testing.assert_allclose(ar, rr['interval_angle_rms_rad_s'], atol=1e-9, rtol=1e-9)
+  File "/Users/andreboufama/Library/Python/3.9/lib/python/site-packages/numpy/testing/_private/utils.py", line 1684, in assert_allclose
+    assert_array_compare(compare, actual, desired, err_msg=str(err_msg),
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "/Users/andreboufama/Library/Python/3.9/lib/python/site-packages/numpy/testing/_private/utils.py", line 885, in assert_array_compare
+    raise AssertionError(msg)
+AssertionError: 
+Not equal to tolerance rtol=1e-09, atol=1e-09
+
+Mismatched elements: 18 / 18 (100%)
+Max absolute difference among violations: 0.00168216
+Max relative difference among violations: 0.00117472
+ ACTUAL: array([1.061089, 1.436125, 0.769415, 0.942701, 1.245876, 0.904546,
+       1.415746, 1.38088 , 1.430278, 1.317832, 1.341193, 1.437825,
+       0.899416, 0.951147, 1.060385, 0.998765, 0.987212, 0.964137])
+ DESIRED: array([1.060705, 1.434686, 0.769016, 0.942143, 1.246236, 0.903906,
+       1.415036, 1.379516, 1.43196 , 1.317696, 1.340098, 1.436808,
+       0.898827, 0.950241, 1.05936 , 0.998569, 0.986425, 0.963525])

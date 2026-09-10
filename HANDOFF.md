@@ -1750,3 +1750,8 @@ The already-started C-study retry002 completed500 updates/12,288,000transitions 
 Main concurrently merged the user-approved detailed motor-mass-corrected direct-drive model. Preserve its canonical selection and all related commits. No further simplified/four-bar training is allowed; finish historical result/media publication and proceed to a new exact-model native inspection/admission and runtime. Current state belongs only in STATUS.
 
 The separate historical CAPS500 recording completed under invocation3e88eb521861497cb3bd275b60c3c1b8 with950 decoded frames/38s at1×, exact checkpointc376… and video1cd2dab2…. Source/input/seal/post-exit/cleanup/restoration audits passed;29raw42,295,739bytes are preserved in the106-payload wrapper6f6293b8…. The initial unrelated-CUDA refusal and local ENOSPC retries remain recorded. No unrelated process was stopped.
+
+
+## 10 September 2026 — historical interpretation and canonical inspection boundary
+
+The38-payload CPU/Fable interpretation bundlec74e2f91… independently compares CAPS50 and500, reproduces raw interval-angle metrics, preserves all7 jitter-review payloads and retains one actual Fable5.1 maximum-effort final response with independent corrections. It identifies a4.4Hz closed-loop pattern and exact action-path recurrence, not a single proven cause. No new C GPU allocation follows. Canonical native inspection is being prepared as a zero-gravity/no-drive/no-ground identity-and-cooking phase with SDK warmup disclosed; supported dynamics and training remain separate admission steps. STATUS holds execution state.

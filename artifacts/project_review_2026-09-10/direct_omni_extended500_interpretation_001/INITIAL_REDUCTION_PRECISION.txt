@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/direct_omni_extended500_interpretation_001/compare.py", line 151, in <module>
+    if __name__=='__main__':main()
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/direct_omni_extended500_interpretation_001/compare.py", line 143, in main
+    result=compare(json.loads(paths['caps50_report'].read_text()),json.loads(paths['caps500_report'].read_text()),paths['caps50_trace'],paths['caps500_trace'])
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/direct_omni_extended500_interpretation_001/compare.py", line 110, in compare
+    ra, rb = raw_quiet(ta,a), raw_quiet(tb,b)
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/direct_omni_extended500_interpretation_001/compare.py", line 59, in raw_quiet
+    np.testing.assert_allclose(vr, rr['reported_joint_rms_rad_s'], atol=2e-7, rtol=2e-7)
+  File "/Users/andreboufama/Library/Python/3.9/lib/python/site-packages/numpy/testing/_private/utils.py", line 1684, in assert_allclose
+    assert_array_compare(compare, actual, desired, err_msg=str(err_msg),
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/contextlib.py", line 79, in inner
+    return func(*args, **kwds)
+  File "/Users/andreboufama/Library/Python/3.9/lib/python/site-packages/numpy/testing/_private/utils.py", line 885, in assert_array_compare
+    raise AssertionError(msg)
+AssertionError: 
+Not equal to tolerance rtol=2e-07, atol=2e-07
+
+Mismatched elements: 1 / 18 (5.56%)
+Max absolute difference among violations: 3.80507989e-07
+Max relative difference among violations: 4.77380567e-07
+ ACTUAL: array([1.036773, 1.131366, 0.778692, 0.918975, 1.041762, 0.960332,
+       1.16228 , 1.162195, 1.287257, 1.013941, 1.155681, 1.192547,
+       0.655314, 0.697042, 1.094076, 0.731335, 0.71035 , 0.797075])
+ DESIRED: array([1.036773, 1.131365, 0.778692, 0.918975, 1.041763, 0.960332,
+       1.16228 , 1.162195, 1.287257, 1.013941, 1.155681, 1.192548,
+       0.655314, 0.697042, 1.094076, 0.731335, 0.71035 , 0.797075])

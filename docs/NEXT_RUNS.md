@@ -122,3 +122,10 @@ Retain all500 ordinary saves remotely, exact file hashes, final and decision1/10
 
 
 For the bounded500-update source004 experiment, use the [host005/guard002 successor](../artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_retry_002/README.md), retaining both successful smoke004 and failed001 ownership/restoration admission. Read-only preflight must execute the actual installed supervisor setup on Spark. Select a final checkpoint for the prepared diagnostic recording only after full campaign/reload/evaluation evidence. Full training raw may remain remote with exact inventories and CPU analysis; explicit omissions must not be called local replay. Current execution belongs only in STATUS.
+
+
+## 2026-09-10 — first canonical native inspection scope
+
+Prepare one headless native import of the exact motor-mass-corrected USD through a new source/asset identity. The initial scope is zero-gravity, no ground, no drives or target/reset writes: inspect actual19-body/18-joint state, full inertias/limits and native SDF shapes, retain SDK warm-up and eight explicit2.5ms samples. Authoring readback alone cannot prove native cooking. Keep the authored self-collision settings; constraint correction remains possible in zero gravity. Bound actual application readiness and the total inspection, preserve failed outputs, and reverify all sources/dependencies after exit. This is preparation for native physical admission, not admission or learning.
+
+The [historical comparison and independent/Fable review](../artifacts/project_review_2026-09-10/direct_omni_extended500_interpretation_001/README.md) inform logging and action-state design. No further C-study GPU training follows from that result. Suspended excitation, gravity/support settling and motor-envelope tests require the subsequent explicit runtime and justified actuator settings; CAD zero is not automatically a supported stance.

@@ -1,0 +1,27 @@
+{
+  "source_map_sha256": "aa70659d33243f1e28e9c71b1a7f9d33341642db770fd7356192573a26fe904e",
+  "exact_files": {
+    "tools/omni_flat_env.py": {
+      "local_path": "artifacts/omni_diagnostics_2026-09-09/repair_003/frozen_changes/tools/omni_flat_env.py",
+      "sha256": "eaf21e81aae1e7f9209b507cdb242d068cf1227b52ccbed8714fe147e89ac910"
+    },
+    "tools/omni_flat_math.py": {
+      "local_path": "tmp/reference_physics_adapter_009/source_009/tools/omni_flat_math.py",
+      "sha256": "27066ce852170c79a004484ce456d450cdb6e4665bb6ea37736d4763f0f4a581"
+    },
+    "tools/omni_diagnostics.py": {
+      "local_path": "tmp/reference_physics_adapter_009/source_009/tools/omni_diagnostics.py",
+      "sha256": "6f4f3f69a335f4426f5f653300fdf3212002f4b7ee72f5374bf18292350e60d1"
+    },
+    "isaaclab/hexapod_rl/env.py": {
+      "local_path": "tmp/reference_physics_adapter_009/source_009/experiments/c_length_study/runtime/hexapod_rl/env.py",
+      "sha256": "9e3ead1474b88d2de1bfb0f881203fd6aadea680d5230491b67e8b914f4b1836"
+    },
+    "tools/direct_stop_evaluation.py": {
+      "local_path": "tmp/direct_omni_recovery_001/native_005/direct_stop_evaluation.py",
+      "sha256": "6d424d01ec8fb22f3c10c64f6cfc4080dfe2a653dca46dd399a1aa7f620d79b3"
+    }
+  },
+  "pipeline": "50Hz actor315=5x63 history: navigation angular rate*.25, gravity, command*[5,5,2.5],q-q0,raw SDK dq*.05,previous CLIPPED action. Noise cached per step: physical gyro std.015rad/s,gravity.01,q.005rad,dq.05rad/s; no command/action noise. Actor deterministic mean -> clamp[-1,1] -> q0+.5a -> joint limits -> .04rad/20ms slew state -> PD. No executed target or limiter state in actor input.",
+  "scope": "Exact historical source binding; no inference that SDK rate bias causes actual angle motion."
+}
