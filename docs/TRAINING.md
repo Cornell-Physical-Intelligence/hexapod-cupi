@@ -343,3 +343,9 @@ reference an Intel RealSense D455 depth camera and a Livox Mid-360-like
 near-hemispherical LiDAR/IMU. No trained terrain task fuses them. Phase 3 is
 paused. A long sensor-fusion or difficult-terrain job needs the user's
 approval before launch.
+
+## C-study fine-tune initialization and allocation experiments
+
+For the isolated C study, `omni.repair_training` describes a deliberately checkpoint-bound fine-tune. It must explicitly record checkpoint SHA, exploration standard deviation, entropy coefficient, optimizer reset and initial learning rate. Verify actor/critic tensors and both observation normalizers exactly after load; a saved checkpoint can overwrite `init_std`, so an initializer-only config change is insufficient. Keep these records distinct from a full optimizer-state resume. The bounded `omni-repair-pair` launcher independently starts each 50-update branch and rejects changes outside the intended plan delta.
+
+A standing raw-action penalty measures sampled normalized intent before wrapper clipping and joint-target slew; feedback remains active. All existing physical, motor, per-direction and visual gates still apply. A short allocation screen cannot qualify a controller or turn a failed result into progress by averaging directions. See [repair 003](../artifacts/omni_diagnostics_2026-09-09/repair_003/README.md) for the exact tested settings and limitations.

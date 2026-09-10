@@ -5,6 +5,11 @@ unit=hexapod-rl-training.service
 logs=/home/orionh/HEXAPOD/isaaclab/logs/rsl_rl/hexapod_robstride_flat_direct
 
 case "${1:-status}" in
+  omni-repair-pair)
+    shift
+    script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+    exec python3 "$script_dir/../../tools/launch_omni_repair_pair_spark.py" "$@"
+    ;;
   omni-repair)
     shift
     script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)

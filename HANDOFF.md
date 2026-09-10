@@ -1268,3 +1268,21 @@ The user requests a commit/push and relevant Markdown updates after every meanin
 ### Main CI follow-up: confirmed sensor contract
 
 GitHub run 34420179566 on b069287 completed all 935 production tests but failed two documentation subcases: an inherited string fixture expected a pending sensor label/photo check, a different sensor profile comparison and another permission gate. The user’s confirmed Mid-360/D455 inventory and parallel-work authorization supersede those requests. Updated the fixture to check confirmed identity and separate qualification boundaries. No physics, sensor-accounting, motor or simulator acceptance gate changed. The follow-up source manifest is `isaaclab/deploy/stage2_c_priority_20260909_docs_contract_pipeline.sha256`; the preceding manifest remains immutable.
+
+
+## 10 September UTC / 9 September Eastern: paired PPO repair 003
+
+Both independent 50-update branches completed from checkpoint `1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8`. Strict initialization preserved every learned actor/critic and observation-normalizer tensor, reset Adam moments and exploration standard deviations to 0.10, set entropy coefficient zero, and used initial learning rate 0.00005 with the existing adaptive schedule. Only B added weight −2 to mean-square sampled raw actions at near-zero commands. These are matched C-study diagnostics at 0.03 rad/20 ms, not archived Stage2C formal measurements.
+
+A checkpoint: `b87df2b9536460fe67db840784d41c43c1d4ad08339ceacb6aab4959f3757f8f`. B checkpoint: `7e6bb4b40bb56fb0bd547f71352098ef8aecafe3e447cb0a329a1206eefbcfd1`. Both original-checkpoint baselines match. Standing joint RMS changed 0.75014 → 0.73740 / 0.74017 rad/s; median requested saturation 5.744% → 5.676% / 5.531%. Standing saturation itself worsened, roughly 90% of standing target increments reached the limiter, and both existing continuation screens rejected further allocation. No terminations/truncations occurred. No full qualification or new walking video was claimed.
+
+Evidence is preserved under `artifacts/omni_diagnostics_2026-09-09/repair_003/`, including 34 SHA-bound result files, exact plan/source comparisons, checkpoint initialization records, both checkpoints and inspected plots. The service was a **user unit** (`systemctl --user`), `hexapod-omni-repair-pair-003-20260909.service`. Its exit restored both StormScope timers via pause 012; the agent verified no remaining CUDA process before releasing ownership.
+
+Behavioral changes were ported onto main without replacing its pinned runtime bootstrap. Future paired launches additionally enforce identical non-plan source hashes and reject nonfinite applied torque before metrics are scored; these CPU-tested guards are distinct from the immutable source used by the completed trial. The complete study suite passed 102 tests after integration. See STATUS.md for subsequent activity and docs/PLAN.md §9 for the controller contingency decision.
+
+
+### Full-C terrain entry attempt 001
+
+Source `terrain_robot_source_001` was built from published 9d610779 code, the pinned study runtime and the unchanged full-review plan. Source manifest SHA `734dbbfa87cbb9ee4a865d702d5a65c7e2dfefbeff2407a1032a2b4ee59cfc7b` covered 659 files. Fresh flat standing passed 32 × 1,000 controls, zero resets/nonfoot contacts/post-settle saturation, max settled computed torque 0.5367 N·m, mean root height 0.12953 m. Admission SHA `3c950f546c5bbb6af1337a1dfdda3c4b3f2115ce0087ee96db29726c4f035843`.
+
+The subsequent zero-action terrain-entry process failed before robot stepping: the installed TerrainImporter produced a non-Mesh collider composition, and the strict fixture adapter rejected it. No full-C terrain admission resulted; the original 30 direct-Mesh fixture checks remain separate evidence. Source and admitted asset bytes stayed unchanged. Both owned containers exited, CUDA was empty, locks were free and both StormScope timers were restored under pause 013. Seventeen hash-bound evidence files are published at `artifacts/terrain_readiness_2026-09-09/runtime/terrain_robot_smoke_001/`; a corrected attempt must use new source/output names.

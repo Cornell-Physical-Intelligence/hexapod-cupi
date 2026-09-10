@@ -1,0 +1,32 @@
+--- a/tools/omni_flat_env.py
++++ b/tools/omni_flat_env.py
+@@ -44,10 +44,10 @@
+         self.omni_targets.copy_(targets)
+ 
+     def _pre_physics_step(self, actions):
++        self.omni_raw_policy_action = actions.clone()
+         if getattr(self, "omni_diagnostic_enabled", False):
+             self.omni_diagnostic_start_position = self._robot.data.root_pos_w.torch.clone()
+             self.omni_diagnostic_start_quaternion = self._robot.data.root_quat_w.torch.clone()
+-            self.omni_raw_policy_action = actions.clone()
+         self.omni_step += 1
+         self.omni_previous_action.copy_(self._actions)
+         self.omni_previous_velocity.copy_(self._robot.data.joint_vel.torch)
+@@ -126,6 +126,8 @@
+         })
+         terms.update(quiet_stand_terms(self._commands, d.joint_vel.torch, self._processed_actions,
+                                       self.omni_previous_target, self.step_dt))
++        from omni_repair_training import stand_raw_action_cost
++        terms["stand_raw_action"] = stand_raw_action_cost(self._commands, self.omni_raw_policy_action)
+         weights = self.cfg.omni_reward_weights
+         reward = sum(terms[k] * weight for k, weight in weights.items()) * self.step_dt
+         # This event penalty is not multiplied by dt: termination must not pay
+@@ -194,7 +196,7 @@
+         "positive_power": -.015, "action_rate": -.025, "joint_acceleration": -2.5e-7,
+         "slip": -.5, "nonfoot": -2., "joint_limits": -2., "airtime": .5, "stand_posture": -1.,
+         # Opt-in repair terms preserve the frozen controller's reward defaults.
+-        "stand_joint_velocity": 0., "stand_target_velocity": 0.,
++        "stand_joint_velocity": 0., "stand_target_velocity": 0., "stand_raw_action": 0.,
+     }
+     if overrides is not None:
+         from omni_diagnostics import apply_omni_overrides

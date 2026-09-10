@@ -1,0 +1,862 @@
+{
+  "method": "C full-robot flat omni PPO; direct joints, proprioceptive history actor, velocity-privileged critic",
+  "physics_dt_s": 0.0025,
+  "decimation": 8,
+  "training_num_envs": 1024,
+  "training_iterations": 50,
+  "training_seed": 157,
+  "evaluation_seed": 7057,
+  "validation_num_envs": 32,
+  "validation_control_steps": 1000,
+  "evaluation_num_envs": 48,
+  "evaluation_control_steps_per_speed": 1000,
+  "ranking": "All direction/turn/combined and uninterrupted transition scenarios must pass; preserve Benchmark 1.",
+  "variants": {
+    "f050_t060": {
+      "urdf_sha256": "e916b1ebbb2720c90f23974bbffa5da120b32d2e5409fe419fb1492b8556746c",
+      "stances": [
+        {
+          "femur_deg": 40,
+          "tibia_deg": 120,
+          "method": "user-selected lower C stance; mechanical audit, Isaac admission still required",
+          "joint_positions_rad": {
+            "revolute_1_1": 0.0,
+            "revolute_1": 0.6981317007977318,
+            "revolute_2": 2.0943951023931953,
+            "revolute_2_5": 0.0,
+            "revolute_1_5": 0.6981317007977318,
+            "revolute_2_4": 2.0943951023931953,
+            "revolute_1_7": 0.0,
+            "revolute_1_6": 0.6981317007977318,
+            "revolute_2_6": 2.0943951023931953,
+            "revolute_4": 0.0,
+            "revolute_1_4": 0.6981317007977318,
+            "revolute_2_3": 2.0943951023931953,
+            "revolute_5": 0.0,
+            "revolute_1_2": 0.6981317007977318,
+            "revolute_2_1": 2.0943951023931953,
+            "revolute_3": 0.0,
+            "revolute_1_3": 0.6981317007977318,
+            "revolute_2_2": 2.0943951023931953
+          },
+          "root_height_at_contact_m": 0.13053251856352807,
+          "suggested_reset_root_height_m": 0.13653251856352808,
+          "belly_clearance_m": 0.10753251856352808,
+          "simulation_validated": false
+        }
+      ]
+    }
+  },
+  "omni": {
+    "architecture": "omni_history_direct_v1",
+    "history_frames": 5,
+    "actor_frame_width": 63,
+    "actor_fields": [
+      "angular_velocity_navigation_scaled",
+      "projected_gravity_navigation",
+      "ramped_v_forward_v_left_yaw_command_scaled",
+      "joint_position_offset",
+      "joint_velocity_scaled",
+      "previous_applied_action"
+    ],
+    "critic_extra_fields": [
+      "linear_velocity_navigation_truth_scaled"
+    ],
+    "command_frame": "forward=-body_y, left=+body_x, positive_yaw=+body_z",
+    "max_planar_speed_mps": 0.2,
+    "max_yaw_rad_s": 0.4,
+    "curriculum_version": 2,
+    "combined_yaw_range_rad_s": [
+      -0.4,
+      0.4
+    ],
+    "navigation_contract": "Plan position and body heading separately. Local predictive controller supplies continuous body twist; constant twist yields straight motion, arcs or pure turns without changing policy.",
+    "resampling_seconds": [
+      3,
+      6
+    ],
+    "linear_acceleration_mps2": 0.25,
+    "yaw_acceleration_rad_s2": 0.8,
+    "evaluation_seeds": [
+      7057,
+      17057
+    ],
+    "scenarios": [
+      {
+        "name": "stand",
+        "command": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_0deg",
+        "command": [
+          0.1,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_22.5deg",
+        "command": [
+          0.09238795325112868,
+          0.03826834323650898,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_45deg",
+        "command": [
+          0.07071067811865477,
+          0.07071067811865475,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_67.5deg",
+        "command": [
+          0.03826834323650899,
+          0.09238795325112868,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_90deg",
+        "command": [
+          6.123233995736766e-18,
+          0.1,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_112.5deg",
+        "command": [
+          -0.038268343236508975,
+          0.09238795325112868,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_135deg",
+        "command": [
+          -0.07071067811865475,
+          0.07071067811865477,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_157.5deg",
+        "command": [
+          -0.09238795325112868,
+          0.03826834323650899,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_180deg",
+        "command": [
+          -0.1,
+          1.2246467991473533e-17,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_202.5deg",
+        "command": [
+          -0.0923879532511287,
+          -0.03826834323650897,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_225deg",
+        "command": [
+          -0.07071067811865477,
+          -0.07071067811865475,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_247.5deg",
+        "command": [
+          -0.03826834323650904,
+          -0.09238795325112865,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_270deg",
+        "command": [
+          -1.8369701987210297e-17,
+          -0.1,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_292.5deg",
+        "command": [
+          0.038268343236509,
+          -0.09238795325112867,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_315deg",
+        "command": [
+          0.07071067811865474,
+          -0.07071067811865477,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.10_337.5deg",
+        "command": [
+          0.09238795325112865,
+          -0.038268343236509045,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_0deg",
+        "command": [
+          0.2,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_22.5deg",
+        "command": [
+          0.18477590650225736,
+          0.07653668647301796,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_45deg",
+        "command": [
+          0.14142135623730953,
+          0.1414213562373095,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_67.5deg",
+        "command": [
+          0.07653668647301798,
+          0.18477590650225736,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_90deg",
+        "command": [
+          1.2246467991473533e-17,
+          0.2,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_112.5deg",
+        "command": [
+          -0.07653668647301795,
+          0.18477590650225736,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_135deg",
+        "command": [
+          -0.1414213562373095,
+          0.14142135623730953,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_157.5deg",
+        "command": [
+          -0.18477590650225736,
+          0.07653668647301798,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_180deg",
+        "command": [
+          -0.2,
+          2.4492935982947065e-17,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_202.5deg",
+        "command": [
+          -0.1847759065022574,
+          -0.07653668647301794,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_225deg",
+        "command": [
+          -0.14142135623730953,
+          -0.1414213562373095,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_247.5deg",
+        "command": [
+          -0.07653668647301808,
+          -0.1847759065022573,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_270deg",
+        "command": [
+          -3.6739403974420595e-17,
+          -0.2,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_292.5deg",
+        "command": [
+          0.076536686473018,
+          -0.18477590650225734,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_315deg",
+        "command": [
+          0.14142135623730948,
+          -0.14142135623730953,
+          0.0
+        ]
+      },
+      {
+        "name": "translate_0.20_337.5deg",
+        "command": [
+          0.1847759065022573,
+          -0.07653668647301809,
+          0.0
+        ]
+      },
+      {
+        "name": "turn_-0.40",
+        "command": [
+          0.0,
+          0.0,
+          -0.4
+        ]
+      },
+      {
+        "name": "turn_-0.20",
+        "command": [
+          0.0,
+          0.0,
+          -0.2
+        ]
+      },
+      {
+        "name": "turn_+0.20",
+        "command": [
+          0.0,
+          0.0,
+          0.2
+        ]
+      },
+      {
+        "name": "turn_+0.40",
+        "command": [
+          0.0,
+          0.0,
+          0.4
+        ]
+      },
+      {
+        "name": "combined_0deg_-0.20",
+        "command": [
+          0.1,
+          0.0,
+          -0.2
+        ]
+      },
+      {
+        "name": "combined_0deg_+0.20",
+        "command": [
+          0.1,
+          0.0,
+          0.2
+        ]
+      },
+      {
+        "name": "combined_90deg_-0.20",
+        "command": [
+          6.123233995736766e-18,
+          0.1,
+          -0.2
+        ]
+      },
+      {
+        "name": "combined_90deg_+0.20",
+        "command": [
+          6.123233995736766e-18,
+          0.1,
+          0.2
+        ]
+      },
+      {
+        "name": "combined_180deg_-0.20",
+        "command": [
+          -0.1,
+          1.2246467991473533e-17,
+          -0.2
+        ]
+      },
+      {
+        "name": "combined_180deg_+0.20",
+        "command": [
+          -0.1,
+          1.2246467991473533e-17,
+          0.2
+        ]
+      },
+      {
+        "name": "combined_270deg_-0.20",
+        "command": [
+          -1.8369701987210297e-17,
+          -0.1,
+          -0.2
+        ]
+      },
+      {
+        "name": "combined_270deg_+0.20",
+        "command": [
+          -1.8369701987210297e-17,
+          -0.1,
+          0.2
+        ]
+      },
+      {
+        "name": "gentle_arc_0deg_-0.05",
+        "command": [
+          0.15,
+          0.0,
+          -0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_0deg_+0.05",
+        "command": [
+          0.15,
+          0.0,
+          0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_45deg_-0.05",
+        "command": [
+          0.10606601717798213,
+          0.10606601717798211,
+          -0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_45deg_+0.05",
+        "command": [
+          0.10606601717798213,
+          0.10606601717798211,
+          0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_90deg_-0.05",
+        "command": [
+          9.184850993605149e-18,
+          0.15,
+          -0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_90deg_+0.05",
+        "command": [
+          9.184850993605149e-18,
+          0.15,
+          0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_135deg_-0.05",
+        "command": [
+          -0.10606601717798211,
+          0.10606601717798213,
+          -0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_135deg_+0.05",
+        "command": [
+          -0.10606601717798211,
+          0.10606601717798213,
+          0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_180deg_-0.05",
+        "command": [
+          -0.15,
+          1.8369701987210297e-17,
+          -0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_180deg_+0.05",
+        "command": [
+          -0.15,
+          1.8369701987210297e-17,
+          0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_225deg_-0.05",
+        "command": [
+          -0.10606601717798216,
+          -0.10606601717798211,
+          -0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_225deg_+0.05",
+        "command": [
+          -0.10606601717798216,
+          -0.10606601717798211,
+          0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_270deg_-0.05",
+        "command": [
+          -2.7554552980815445e-17,
+          -0.15,
+          -0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_270deg_+0.05",
+        "command": [
+          -2.7554552980815445e-17,
+          -0.15,
+          0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_315deg_-0.05",
+        "command": [
+          0.1060660171779821,
+          -0.10606601717798216,
+          -0.05
+        ]
+      },
+      {
+        "name": "gentle_arc_315deg_+0.05",
+        "command": [
+          0.1060660171779821,
+          -0.10606601717798216,
+          0.05
+        ]
+      },
+      {
+        "name": "tight_arc_0deg_-0.40",
+        "command": [
+          0.2,
+          0.0,
+          -0.4
+        ]
+      },
+      {
+        "name": "tight_arc_0deg_+0.40",
+        "command": [
+          0.2,
+          0.0,
+          0.4
+        ]
+      },
+      {
+        "name": "tight_arc_45deg_-0.40",
+        "command": [
+          0.14142135623730953,
+          0.1414213562373095,
+          -0.4
+        ]
+      },
+      {
+        "name": "tight_arc_45deg_+0.40",
+        "command": [
+          0.14142135623730953,
+          0.1414213562373095,
+          0.4
+        ]
+      },
+      {
+        "name": "tight_arc_90deg_-0.40",
+        "command": [
+          1.2246467991473533e-17,
+          0.2,
+          -0.4
+        ]
+      },
+      {
+        "name": "tight_arc_90deg_+0.40",
+        "command": [
+          1.2246467991473533e-17,
+          0.2,
+          0.4
+        ]
+      },
+      {
+        "name": "tight_arc_135deg_-0.40",
+        "command": [
+          -0.1414213562373095,
+          0.14142135623730953,
+          -0.4
+        ]
+      },
+      {
+        "name": "tight_arc_135deg_+0.40",
+        "command": [
+          -0.1414213562373095,
+          0.14142135623730953,
+          0.4
+        ]
+      },
+      {
+        "name": "tight_arc_180deg_-0.40",
+        "command": [
+          -0.2,
+          2.4492935982947065e-17,
+          -0.4
+        ]
+      },
+      {
+        "name": "tight_arc_180deg_+0.40",
+        "command": [
+          -0.2,
+          2.4492935982947065e-17,
+          0.4
+        ]
+      },
+      {
+        "name": "tight_arc_225deg_-0.40",
+        "command": [
+          -0.14142135623730953,
+          -0.1414213562373095,
+          -0.4
+        ]
+      },
+      {
+        "name": "tight_arc_225deg_+0.40",
+        "command": [
+          -0.14142135623730953,
+          -0.1414213562373095,
+          0.4
+        ]
+      },
+      {
+        "name": "tight_arc_270deg_-0.40",
+        "command": [
+          -3.6739403974420595e-17,
+          -0.2,
+          -0.4
+        ]
+      },
+      {
+        "name": "tight_arc_270deg_+0.40",
+        "command": [
+          -3.6739403974420595e-17,
+          -0.2,
+          0.4
+        ]
+      },
+      {
+        "name": "tight_arc_315deg_-0.40",
+        "command": [
+          0.14142135623730948,
+          -0.14142135623730953,
+          -0.4
+        ]
+      },
+      {
+        "name": "tight_arc_315deg_+0.40",
+        "command": [
+          0.14142135623730948,
+          -0.14142135623730953,
+          0.4
+        ]
+      }
+    ],
+    "transition_sequence": [
+      [
+        "stand",
+        3.0,
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      [
+        "forward",
+        4.0,
+        [
+          0.1,
+          0.0,
+          0.0
+        ]
+      ],
+      [
+        "left",
+        4.0,
+        [
+          0.0,
+          0.1,
+          0.0
+        ]
+      ],
+      [
+        "reverse",
+        4.0,
+        [
+          -0.1,
+          0.0,
+          0.0
+        ]
+      ],
+      [
+        "right",
+        4.0,
+        [
+          0.0,
+          -0.1,
+          0.0
+        ]
+      ],
+      [
+        "turn_left",
+        4.0,
+        [
+          0.0,
+          0.0,
+          0.25
+        ]
+      ],
+      [
+        "turn_right",
+        4.0,
+        [
+          0.0,
+          0.0,
+          -0.25
+        ]
+      ],
+      [
+        "diagonal_turn_left",
+        4.0,
+        [
+          0.071,
+          0.071,
+          0.2
+        ]
+      ],
+      [
+        "reverse_diagonal_turn_right",
+        4.0,
+        [
+          -0.071,
+          -0.071,
+          -0.2
+        ]
+      ],
+      [
+        "gentle_arc",
+        6.0,
+        [
+          0.15,
+          0.0,
+          0.05
+        ]
+      ],
+      [
+        "strafe_arc",
+        6.0,
+        [
+          0.0,
+          0.1,
+          0.15
+        ]
+      ],
+      [
+        "s_curve",
+        10.0,
+        [
+          0.12,
+          0.0,
+          0.0
+        ]
+      ],
+      [
+        "fixed_heading_bend",
+        8.0,
+        [
+          0.1,
+          0.0,
+          0.0
+        ]
+      ],
+      [
+        "stop",
+        5.0,
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    ],
+    "future_terrain_contract": "Keep body-twist commands and joint-name action mapping. Add terrain-relative clearance/support observations, age/validity and recurrent terrain encoder after bounded terrain baseline. Actor never receives simulator terrain/state truth implicitly.",
+    "scope": "Flat ground only. No terrain or camera/LiDAR training is launched in this step.",
+    "overrides": {
+      "target_slew_rad_per_20ms": 0.03,
+      "reward_weights": {
+        "stand_joint_velocity": -0.5,
+        "stand_target_velocity": -0.15,
+        "stand_posture": -2.0,
+        "action_rate": -0.075,
+        "saturation": -0.75,
+        "torque_excess": -0.6,
+        "worst_torque_excess": -0.2,
+        "stand_raw_action": -2.0
+      },
+      "observation_noise_scale": 1.0,
+      "target_filter_time_constant_s": 0.0
+    },
+    "diagnostics": {
+      "duration_s": 12,
+      "settle_s": 2,
+      "seed": 7057,
+      "trace_envs_per_scenario": 1,
+      "controller": "policy"
+    },
+    "repair_training": {
+      "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+      "exploration_std": 0.1,
+      "entropy_coef": 0.0,
+      "optimizer": "reset",
+      "learning_rate": 5e-05
+    }
+  }
+}

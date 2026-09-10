@@ -1,0 +1,23 @@
+{
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=hexapod-omni-repair-pair-003-20260909.service",
+    "--property=RuntimeMaxSec=3600",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=ExecStopPost=/usr/bin/python3 /home/orionh/HEXAPOD_runs/mock_length_study_20260909/forecast_pause_012/resume_forecasting.py",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_repair_source_003_a/isaaclab/deploy/hexapod-rl",
+    "omni-repair-pair",
+    "--sources",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_repair_source_003_a",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_repair_source_003_b",
+    "--checkpoint",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_flat_002/stage_002/f050_t060/train/policy/final.pt",
+    "--checkpoint-sha256",
+    "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
+    "--output",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/omni_repair_003"
+  ],
+  "launched_unix": 1788999570.422329
+}

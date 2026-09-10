@@ -348,6 +348,15 @@ def main():
             runner_cfg.actor.distribution_cfg.init_std = .20
             runner_cfg.algorithm.learning_rate = 3.e-4
             runner_cfg.algorithm.entropy_coef = .005
+        repair = omni.get("repair_training") if omni and args.mode == "train" else None
+        if repair is not None:
+            from omni_repair_training import verified_checkpoint
+            repair = verified_checkpoint(args.checkpoint, repair)
+            runner_cfg.actor.distribution_cfg.init_std = repair["exploration_std"]
+            runner_cfg.algorithm.entropy_coef = repair["entropy_coef"]
+            runner_cfg.algorithm.learning_rate = repair["learning_rate"]
+            if runner_cfg.clip_actions is not None:
+                raise RuntimeError("Raw-action experiment requires no wrapper clipping")
         # Match Isaac Lab's own trainer: discard deprecated pre-v5 stochastic
         # fields while preserving the explicit Gaussian distribution config.
         runner_cfg = handle_deprecated_rsl_rl_cfg(runner_cfg, metadata.version("rsl-rl-lib"))
@@ -355,7 +364,12 @@ def main():
         wrapped = RslRlVecEnvWrapper(env,clip_actions=runner_cfg.clip_actions)
         runner = OnPolicyRunner(wrapped,runner_cfg.to_dict(),log_dir=str(args.output/"policy"),device=env.device)
         if args.mode=="train":
-            if args.checkpoint:
+            if repair is not None:
+                from omni_repair_training import load_repair_checkpoint
+                state["repair_initialization"] = load_repair_checkpoint(runner, args.checkpoint, repair)
+                save(args.output / "repair_initialization.json", state["repair_initialization"])
+                save(args.output / "state.json", state)
+            elif args.checkpoint:
                 runner.load(str(args.checkpoint))
             runner.learn(num_learning_iterations=runner_cfg.max_iterations,init_at_random_ep_len=True)
             checkpoint = args.output/"policy"/"final.pt"

@@ -1,0 +1,40 @@
+--- frozen_probe_no_noise/training_plan.json
++++ branch_a/training_plan.json
+@@ -3,7 +3,7 @@
+   "physics_dt_s": 0.0025,
+   "decimation": 8,
+   "training_num_envs": 1024,
+-  "training_iterations": 100,
++  "training_iterations": 50,
+   "training_seed": 157,
+   "evaluation_seed": 7057,
+   "validation_num_envs": 32,
+@@ -838,9 +838,11 @@
+         "action_rate": -0.075,
+         "saturation": -0.75,
+         "torque_excess": -0.6,
+-        "worst_torque_excess": -0.2
+-      },
+-      "observation_noise_scale": 0.0
++        "worst_torque_excess": -0.2,
++        "stand_raw_action": 0.0
++      },
++      "observation_noise_scale": 1.0,
++      "target_filter_time_constant_s": 0.0
+     },
+     "diagnostics": {
+       "duration_s": 12,
+@@ -848,6 +850,13 @@
+       "seed": 7057,
+       "trace_envs_per_scenario": 1,
+       "controller": "policy"
++    },
++    "repair_training": {
++      "checkpoint_sha256": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
++      "exploration_std": 0.1,
++      "entropy_coef": 0.0,
++      "optimizer": "reset",
++      "learning_rate": 5e-05
+     }
+   }
+ }

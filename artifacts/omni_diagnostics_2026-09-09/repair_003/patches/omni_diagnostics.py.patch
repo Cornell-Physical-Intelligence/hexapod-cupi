@@ -1,0 +1,11 @@
+--- a/tools/omni_diagnostics.py
++++ b/tools/omni_diagnostics.py
+@@ -84,7 +84,7 @@
+         if original > 0 and not 0 <= value <= 4 * original:
+             raise ValueError(f"Bonus {key} must be nonnegative and at most 4x default")
+         if original == 0:
+-            bounds = {"stand_joint_velocity": (-2., 0.), "stand_target_velocity": (-1., 0.)}
++            bounds = {"stand_joint_velocity": (-2., 0.), "stand_target_velocity": (-1., 0.), "stand_raw_action": (-4., 0.)}
+             if key not in bounds or not bounds[key][0] <= value <= bounds[key][1]:
+                 raise ValueError(f"Opt-in reward {key} exceeds its explicit nonpositive bounds")
+         cfg.omni_reward_weights[key] = float(value)

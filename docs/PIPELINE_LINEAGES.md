@@ -262,3 +262,7 @@ CI checks this filename explicitly with `uv run python tools/check_pipeline_line
 The first integration CI run caught two failures in an inherited documentation fixture that required a pending sensor-photo confirmation and another long-run permission request. The user has since confirmed Mid-360/D455 ownership and authorized parallel work. The updated fixture checks the correct 360 × 59-degree Mid-360 identity, confirmed inventory and separate standing/qualification context. Sensor physics, hardware-accounting tests and simulator gates are unchanged.
 
 The current release check now targets `isaaclab/deploy/stage2_c_priority_20260909_docs_contract_pipeline.sha256`; it additionally covers this changed fixture and preserves the preceding integration manifest. CI and the default checker select this new filename.
+
+### Paired PPO repair publication
+
+`isaaclab/deploy/stage2_c_repair003_20260909_pipeline.sha256` is the current source-check destination for the isolated paired fine-tune tools, explicit initializer, raw-action instrumentation, launcher tests and deploy dispatch. It also binds the result hash manifest and read-only report generator. The completed Spark sources are retained separately with their exact hashes; main preserves its verified vendored bootstrap and adds stricter paired-source/nonfinite-torque preflight checks for future runs. Earlier source manifests and all production packages remain unchanged. CI and the default checker select this new filename.

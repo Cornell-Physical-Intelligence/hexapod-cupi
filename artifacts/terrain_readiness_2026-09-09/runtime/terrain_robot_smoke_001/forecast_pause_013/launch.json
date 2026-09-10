@@ -1,0 +1,18 @@
+{
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit=hexapod-terrain-robot-smoke-001-20260909.service",
+    "--property=RuntimeMaxSec=1320",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=ExecStopPost=/usr/bin/python3 /home/orionh/HEXAPOD_runs/mock_length_study_20260909/forecast_pause_013/resume_forecasting.py",
+    "/usr/bin/python3",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/terrain_robot_source_001/tools/launch_terrain_robot_smoke_spark.py",
+    "--source",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/terrain_robot_source_001",
+    "--output",
+    "/home/orionh/HEXAPOD_runs/mock_length_study_20260909/terrain_robot_smoke_001"
+  ],
+  "launched_unix": 1789000694.8500488
+}
