@@ -1,0 +1,13 @@
+# Independent footprint-reacquisition review
+
+No concrete frame, timestamp or contact-separation blocker was found in frozen owner39b4669d05de39e62fb67dfd66adf0e23c56f6a3f5209c16583301627abc6c73. All24payload hashes were verified. All426valid reference rows, including mode and original swing/landing endpoints, exactly reproduce raw004 target-time-matched records. All85cached capture/receipt pairs are40ms apart. Shared motion and measured-contact arrays are byte-equal to raw004.
+
+The driver reconstructs points using the actual capture pose and frozen optical transform. It ingests them at the corresponding receipt time; each point retains capture age. The ledger rejects future/reordered frames and invalid frame/clock/calibration identities, filters optical/mesh/ambiguous-origin masks, and does not insert already expired points. The250ms lease is evaluated both now and at the requested original nominal landing time; no expected future camera frame is inserted. The complete pose timeline is available to replay, but this path uses the actual indexed capture timestamp, not future pose extrapolation.
+
+The proposed new footprint uses the original swing endpoint, including during a later contact landing blend. It does not read actual future touchdown to improve a proposal. After a nominal endpoint time has passed, the use time is current time; the report preserves this distinction. The all-control map timeline records expiry and reacquisition even while no foot proposal is active, avoiding interpolation across unqueried periods.
+
+Current load-bearing contacts use current raw distal-contact and point-validity fields. They are returned separately and never enter the terrain map, fill a foot disk or certify new support. Eligibility is explicitly ideal flat teacher geometry AND sensor usability. Visibility of a planted foot is not used to erase actual contact support.
+
+The scope remains a decision-only synthetic replay using actual004flat motion, cached exact C visual meshes, a hypothetical six-camera rig, nominal calibration and explicit uncertainty assumptions. Camera housings/cables are unmodelled; the15mm footprint is a proxy. Neither fresh-now coverage nor lease-through-use is hardware terrain admission, a verified stop/abort, actor integration or a guarantee of future sensing. The169/377fresh-now and zero lease-through-original-use results remain evidence of this particular prototype, not an explanation of an actual policy's behavior.
+
+Owner16CPU tests were not redundantly rerun. The independent read-only arithmetic is reproducible with `PYTHONDONTWRITEBYTECODE=1 uv run python -B tmp/footprint_reacquisition_review_001/verify_inputs.py`; it does not mutate owner inputs or launch Isaac.
