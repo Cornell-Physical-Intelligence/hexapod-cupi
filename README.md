@@ -6,7 +6,7 @@ deck for data collection while it does so. `dar.md` states the mission.
 `docs/PLAN.md` holds the architecture, milestones, and decisions. `STATUS.md`
 records the current state.
 
-For the latest user-directed C-study campaign, production work, verified job state
+For the canonical detailed-model preparation, historical study results, verified job state
 and next actions, start with [STATUS.md](STATUS.md). The living [plan](docs/PLAN.md)
 and dated [training history](HANDOFF.md) provide context;
 [PROJECT_STATUS.md](PROJECT_STATUS.md) redirects to the canonical status. Dated

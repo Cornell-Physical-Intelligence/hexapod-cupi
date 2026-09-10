@@ -185,9 +185,9 @@
       "meaning": "The policy turns the motion request and recent body/joint observations into targets for all 18 motors.",
       "input": "Motion command and recent proprioception",
       "output": "18 position targets",
-      "today": "Omnidirectional walking exists. Quiet standing and consistent smoothness still fail.",
+      "today": "Historical C-study policies show omnidirectional movement but fail quiet standing and smoothness. No policy is admitted on the newly approved detailed robot.",
       "source": "experiments/c_length_study/README.md",
-      "next": "Pass every flat-ground direction, arc, path and quiet-standing gate."
+      "next": "Admit the canonical detailed model and its runtime, then train and pass the unchanged movement and quiet-standing gates."
     },
     {
       "id": "sensors",
@@ -398,8 +398,8 @@
   ],
   "next": [
     {
-      "title": "Test a larger training budget",
-      "text": "The stronger quiet objective did not solve standing. Compare normal CAPS at 500 updates from the original checkpoint, preserving all movement and stop gates."
+      "title": "Admit the canonical detailed robot",
+      "text": "Prepare the new joint/actuator runtime and validate native SDF cooking, contacts, settling and solver effort on the approved motor-weight-corrected CAD before further training. Historical C-study results remain separate."
     },
     {
       "title": "Retain motion while removing jitter",
@@ -485,9 +485,9 @@
       "show_stop_replicas": true
     },
     {
-      "label": "Experiment",
-      "title": "Test a larger normal-CAPS budget",
-      "text": "Compare 500 updates from the original policy using the same movement and stop gates. More training is a hypothesis to test; final evaluation determines whether it helps.",
+      "label": "Historical study",
+      "title": "A larger C-study budget was dispatched",
+      "text": "The inherited execution snapshot records a 500-update normal-CAPS comparison on the earlier simplified model. Its outputs stay in that lineage. New training now requires the approved detailed CAD and native admission.",
       "source": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_retry_002/README.md"
     },
     {
