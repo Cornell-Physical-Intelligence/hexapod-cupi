@@ -1,0 +1,34 @@
+test_actual_order_fallback_before_timer_stop_two_checks_then_dispatch (test_actual_guard_order.ActualMainOrderTests.test_actual_order_fallback_before_timer_stop_two_checks_then_dispatch) ... FAIL
+test_changed_inputs_after_pause_restore_without_stopping_unlaunched_owner (test_actual_guard_order.ActualMainOrderTests.test_changed_inputs_after_pause_restore_without_stopping_unlaunched_owner) ... ok
+test_uncertain_dispatch_failure_stops_only_exact_new_owner_then_restores (test_actual_guard_order.ActualMainOrderTests.test_uncertain_dispatch_failure_stops_only_exact_new_owner_then_restores) ... ok
+test_ambiguous_dispatch_failure_stops_owner_before_restoration (test_embedded_restorer.EmbeddedRestorerTest.test_ambiguous_dispatch_failure_stops_owner_before_restoration) ... ok
+test_daemon_permission_and_malformed_results_do_not_restore (test_embedded_restorer.EmbeddedRestorerTest.test_daemon_permission_and_malformed_results_do_not_restore) ... ok
+test_docker_stop_failure_does_not_restore (test_embedded_restorer.EmbeddedRestorerTest.test_docker_stop_failure_does_not_restore) ... ok
+test_explicit_absence_allows_restore_without_signalling_another_container (test_embedded_restorer.EmbeddedRestorerTest.test_explicit_absence_allows_restore_without_signalling_another_container) ... ok
+test_name_only_startup_job_recovers_exact_identity_before_stopping (test_embedded_restorer.EmbeddedRestorerTest.test_name_only_startup_job_recovers_exact_identity_before_stopping) ... ok
+test_owned_running_container_stopped_then_checked_before_only_active_timer (test_embedded_restorer.EmbeddedRestorerTest.test_owned_running_container_stopped_then_checked_before_only_active_timer) ... ok
+test_post_stop_unknown_running_or_wrong_identity_does_not_restore (test_embedded_restorer.EmbeddedRestorerTest.test_post_stop_unknown_running_or_wrong_identity_does_not_restore) ... ok
+test_wrong_identity_or_name_never_signalled_or_restored (test_embedded_restorer.EmbeddedRestorerTest.test_wrong_identity_or_name_never_signalled_or_restored) ... ok
+
+======================================================================
+FAIL: test_actual_order_fallback_before_timer_stop_two_checks_then_dispatch (test_actual_guard_order.ActualMainOrderTests.test_actual_order_fallback_before_timer_stop_two_checks_then_dispatch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/canonical_native_inspection_guard_001/test_actual_guard_order.py", line 66, in test_actual_order_fallback_before_timer_stop_two_checks_then_dispatch
+    self.assertEqual(dispatch[-4:],['--supervisor-source',str(g.SUPERVISOR_SOURCE),'--output',str(pause.parent/'out')])
+AssertionError: Lists differ: ['--s[16 chars]', '/var/folders/4q/hbxvz4y536lb_2ypxzq7kjdw00[102 chars]out'] != ['--s[16 chars]', '/home/orionh/HEXAPOD_runs/mock_length_stud[116 chars]out']
+
+First differing element 1:
+'/var/folders/4q/hbxvz4y536lb_2ypxzq7kjdw00[21 chars]urce'
+'/home/orionh/HEXAPOD_runs/mock_length_stud[35 chars]_009'
+
+  ['--supervisor-source',
+-  '/var/folders/4q/hbxvz4y536lb_2ypxzq7kjdw0000gn/T/tmpeb1tkhkz/source',
++  '/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009',
+   '--output',
+   '/var/folders/4q/hbxvz4y536lb_2ypxzq7kjdw0000gn/T/tmpeb1tkhkz/out']
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.036s
+
+FAILED (failures=1)

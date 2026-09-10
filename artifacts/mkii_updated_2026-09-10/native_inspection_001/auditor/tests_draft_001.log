@@ -1,0 +1,24 @@
+E
+======================================================================
+ERROR: test_auditor (unittest.loader._FailedTest.test_auditor)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_auditor
+Traceback (most recent call last):
+  File "/Users/andreboufama/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/unittest/loader.py", line 396, in _find_test_path
+    module = self._get_module_from_name(name)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andreboufama/.local/share/uv/python/cpython-3.12.12-macos-aarch64-none/lib/python3.12/unittest/loader.py", line 339, in _get_module_from_name
+    __import__(name)
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/canonical_native_inspection_terminal_auditor_001/test_auditor.py", line 5, in <module>
+    s=importlib.util.spec_from_file_location('audit',HERE/'audit_remote.py');a=importlib.util.module_from_spec(s);s.loader.exec_module(a)
+                                                                                                                  ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/canonical_native_inspection_terminal_auditor_001/audit_remote.py", line 50
+    r=subprocess.run(['docker','inspect','--format','{{.Id}} {{.Name}} {{.State.Running}}',key,text=True,capture_output=True,timeout=20)
+                                                                                                                                       ^
+SyntaxError: closing parenthesis ')' does not match opening parenthesis '['
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (errors=1)
