@@ -1,0 +1,26 @@
+--- frozen_wave005.BatchWave005.step
++++ lazy_successor.BatchWave005.step
+@@ -101,12 +101,18 @@
+         nextmargin,nextcount=self._support(m,contact,nextleg)
+         self.fail(liftoff&(nextcount<5),4);self.fail(liftoff&(nextmargin<.025),5)
+         self.fail(liftoff&~contact[self.ids,nextleg],16)
+-        predicted_p,predicted_R=self._predict(target)
+-        endpoint=(predicted_R@self.s['neutral'][self.ids,nextleg,:,None]).squeeze(-1)+predicted_p
+-        endpoint=torch.cat((endpoint[:,:2],self.s['anchors'][self.ids,nextleg,2,None]),-1)
+-        start=self.s['anchors'][self.ids,nextleg];duration=torch.full_like(self.s['time'],2.)
+-        coeff=self._coeff(start,endpoint,duration);hcoeff=self._coeff(start,endpoint,duration*.8)
+         launch=self.active&liftoff
++        if bool(launch.any()):
++            predicted_p,predicted_R=self._predict(target)
++            endpoint=(predicted_R@self.s['neutral'][self.ids,nextleg,:,None]).squeeze(-1)+predicted_p
++            endpoint=torch.cat((endpoint[:,:2],self.s['anchors'][self.ids,nextleg,2,None]),-1)
++            start=self.s['anchors'][self.ids,nextleg];duration=torch.full_like(self.s['time'],2.)
++            coeff=self._coeff(start,endpoint,duration);hcoeff=self._coeff(start,endpoint,duration*.8)
++        else:
++            # Every subsequent trajectory update is masked by launch. Reuse the
++            # existing shape/dtype-correct values; none can alter a row's state.
++            endpoint=self.s['sw_end'];duration=self.s['sw_duration']
++            coeff=self.s['sw_coeff'];hcoeff=self.s['sw_hcoeff']
+         updates={'sw_active':True,'sw_start':self.s['time'],'sw_duration':duration,'sw_coeff':coeff,'sw_hcoeff':hcoeff,
+             'sw_end':endpoint,'current_leg':nextleg,'mode':8,'flight_seen':False,'flight_count':0,'contact_count':0,
+             'land_active':False,'landing_metadata_valid':False,'landing_gap':0,'descent_seen':False,
