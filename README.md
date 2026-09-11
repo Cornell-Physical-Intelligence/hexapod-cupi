@@ -5,7 +5,8 @@ Cover an operator-drawn region while holding a steady deck for useful measuremen
 - [Architecture](ARCHITECTURE.md): agreed requirements, boundaries and team workflow.
 - [Progress](https://cornell-physical-intelligence.github.io/hexapod-cupi/#roadmap): the four roadmap markers, evidence and open definitions.
 - [STATUS](STATUS.md): generated text view of the same progress.
-- [Contributor guide](CLAUDE.md): source locations, invariants and commands.
+- [Contributor guide](CLAUDE.md): source locations, invariants and commands; `AGENTS.md` points here.
+- [Reference documents](docs/README.md): model/gate references, operations and archived history.
 
 The approved robot is selected by [robot/active_model.json](robot/active_model.json).
 Historical walking results have their own model and qualification limits.

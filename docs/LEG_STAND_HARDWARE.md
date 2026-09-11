@@ -55,4 +55,4 @@ Use the [Waveshare schematic](https://files.waveshare.com/upload/2/29/High-Preci
 
 Use lab power and measurement tools for commissioning. Final motor supply, regenerative-energy handling, stop circuit, XT30 2+2 harness and CAN interface remain outside this sensing BOM.
 
-References: [detailed wiring/research](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/f5af556/docs/LEG_STAND_HARDWARE.md), [leg test sequence](../artifacts/project_review_2026-09-04/LEG_TEST_STAND.md), [CAD handoff](CAD_ENGINEER_HANDOFF.md).
+References: [detailed wiring/research](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/f5af556/docs/LEG_STAND_HARDWARE.md), [leg test sequence](../artifacts/project_review_2026-09-04/LEG_TEST_STAND.md), [CAD handoff](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/62fd7448264c5ebe051ba2de1d9a72844d6b4c3a/docs/CAD_ENGINEER_HANDOFF.md).

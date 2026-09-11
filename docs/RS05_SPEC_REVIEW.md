@@ -87,6 +87,6 @@ hashes, speed/voltage and overload tables, continuous-power assumption and
 unmeasured recovery parameters. An explicit actuator preserves raw PD demand and
 limits delivered effort per physics step; 18 normalized overload-headroom values
 are included in the new policy observation. See
-[the physical training runbook](MKII_FOURBAR_TRAINING.md) for its scope and gates.
+[the physical training runbook](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/62fd7448264c5ebe051ba2de1d9a72844d6b4c3a/docs/MKII_FOURBAR_TRAINING.md) for its scope and gates.
 This implementation is a provisional simulation model; the measurements listed
 above still determine hardware calibration and release.

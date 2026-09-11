@@ -34,6 +34,14 @@ def historical_source(value):
         if value == item['previous_path'] and value != item['path']:
             require((ROOT / item['path']).is_file(), 'Moved source replacement is missing')
             return 'https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/' + inventory['baseline'] + '/' + quote(value, safe='/')
+    for item in inventory.get('archived_documents', []):
+        if value == item['previous_path'] and not (ROOT / value).exists():
+            path = ROOT / item['path']
+            require(path.resolve().is_relative_to(ROOT) and not path.is_symlink()
+                    and path.is_file(), 'Archived document is missing or unsafe')
+            require(re.fullmatch('[0-9a-f]{40}', item['source_commit']), 'Invalid document source commit')
+            require(sha(path) == item['sha256'], 'Archived document bytes changed')
+            return 'https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/' + item['source_commit'] + '/' + quote(value, safe='/')
     return None
 
 

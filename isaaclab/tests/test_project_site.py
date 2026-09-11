@@ -66,4 +66,44 @@ class PosterContractTests(unittest.TestCase):
         project['checkpoint']['video_matches']=False
         site.checkpoint_media(project,receipt)
 
+class ArchivedDocumentTests(unittest.TestCase):
+    setUp = PosterContractTests.setUp
+    tearDown = PosterContractTests.tearDown
+
+    def archive_fixture(self):
+        destination = self.root / 'docs/archive/old.md'
+        destination.parent.mkdir(parents=True)
+        destination.write_text('Preserved failed attempt.\n')
+        (self.root / 'configs').mkdir()
+        item = dict(previous_path='HANDOFF.md', path='docs/archive/old.md',
+                    source_commit='a' * 40, sha256=site.sha(destination))
+        (self.root / 'configs/source_inventory.json').write_text(json.dumps(
+            dict(baseline='b' * 40, tools=[], archived_documents=[item])))
+        return destination
+
+    def test_archived_reference_uses_original_revision(self):
+        self.archive_fixture()
+        self.assertIsNone(site.reference('HANDOFF.md'))
+        self.assertEqual(site.historical_source('HANDOFF.md'),
+            'https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/'
+            + 'a' * 40 + '/HANDOFF.md')
+        with self.assertRaisesRegex(ValueError, 'Missing'):
+            site.reference('invented.md')
+
+    def test_archive_corruption_or_missing_copy_rejects_reference(self):
+        destination = self.archive_fixture()
+        destination.write_text('Changed conclusion.\n')
+        with self.assertRaisesRegex(ValueError, 'bytes changed'):
+            site.reference('HANDOFF.md')
+        destination.unlink()
+        with self.assertRaisesRegex(ValueError, 'missing or unsafe'):
+            site.reference('HANDOFF.md')
+
+    def test_maintained_reference_remains_current(self):
+        self.archive_fixture()
+        current = self.root / 'HANDOFF.md'
+        current.write_text('Current reference.\n')
+        self.assertEqual(site.reference('HANDOFF.md'), current)
+        self.assertIsNone(site.historical_source('HANDOFF.md'))
+
 if __name__=='__main__':unittest.main()

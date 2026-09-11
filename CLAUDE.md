@@ -3,6 +3,9 @@
 Keep chat responses under 100 words. Begin visible responses with `James,`.
 Use direct language. Preserve other contributors' work.
 
+Edit this file for shared agent instructions. `AGENTS.md` is a symlink to
+`CLAUDE.md`, so both names read and edit the same source.
+
 ## Context and authority
 
 Read the assigned issue, its input fixtures and the relevant section of
@@ -31,7 +34,8 @@ raw CAD and generated files. Open evidence intentionally when assessing a result
 - `robot/`: approved models, importers and model-specific conventions.
 - `site/`: the progress registry and static GitHub Pages presentation.
 - `artifacts/`: immutable results and exact replay inputs; never import these copies into new production code.
-- `docs/`: specialized runbooks and model/gate references. Historical prose is not current progress.
+- `docs/`: [maintained reference index](docs/README.md); `docs/archive/` holds superseded prose.
+  Historical prose is not current progress.
 
 ## Invariants
 
@@ -57,7 +61,7 @@ retain the exact compatibility constraints and tests.
 validation, training, recording and unattended continuation. This user's current
 authorization covers repository cleanup and its checks/publication. It does not
 resume research or release the Spark reservation. Keep the pause until James
-explicitly chooses to resume. [JAMES_HANDOFF](docs/JAMES_HANDOFF.md) preserves
+explicitly chooses to resume. [JAMES_HANDOFF](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/62fd7448264c5ebe051ba2de1d9a72844d6b4c3a/docs/JAMES_HANDOFF.md) preserves
 prepared, unexecuted sources and the actual pause receipts.
 
 The Spark mirror `/home/orionh/HEXAPOD` is not a Git repository. This local cleanup

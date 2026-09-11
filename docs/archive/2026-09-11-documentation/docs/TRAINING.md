@@ -1,10 +1,22 @@
-# Historical training contracts and gates
+# Training and task design
 
-These task contracts apply to their named mock, C-study or four-bar lineage.
-The approved direct-drive robot requires its own explicit contracts and admission
-under [ARCHITECTURE §§2–4 and §8](../ARCHITECTURE.md). Existing thresholds remain
-unchanged. [STATUS](../STATUS.md) owns progress; this reference authorizes no run.
-Earlier priority overlays remain in the [documentation archive](archive/README.md).
+> Current design: [ARCHITECTURE.md](../ARCHITECTURE.md). The canonical detailed
+> direct-drive model supersedes the dated C-study/four-bar execution directions
+> below. This file retains exact historical task contracts and gates; §9 of
+> ARCHITECTURE defines new-model admission and §11 the current quality roadmap.
+
+> **9 September 2026 update:** the user prioritizes the selected C-study Stage 2 controller, requiring smooth walking/pathing in every direction and quiet standing, with terrain/perception implementation in parallel. [STATUS](../STATUS.md) is current; [the C-study contract](../experiments/c_length_study/README.md) separates its pinned runtime and 1.6 N·m study cap from the physical four-bar program. Earlier pause, plan and actuator statements below apply to their dated physical lineage. Commit/push each verified step with relevant Markdown and preserve other work on main.
+
+
+> Scope update, 2026-09-04: the Stage2C/Phase-0 design and gates below document the existing mock lineage. The current CAD autonomy program is in [ARCHITECTURE.md](../ARCHITECTURE.md), with a distinct prepared campaign in [STATUS.md](../STATUS.md). Do not reuse mock stance/action defaults or a forced tripod schedule for the new policy. The USD inertia audit is unresolved; no new runs are authorized by this document.
+
+Durable design reference for the hexapod locomotion task: the simulator stack,
+the observation/action/timing contract, the coordinate contract, the staged
+curriculum, the reward structure, the Stage2C acceptance gates, and the known
+sim-to-real gaps.
+
+This file describes design that holds across runs. It does not record run
+results or current status. `STATUS.md` and `artifacts/` hold those.
 
 ## 1. Simulator and framework stack
 
