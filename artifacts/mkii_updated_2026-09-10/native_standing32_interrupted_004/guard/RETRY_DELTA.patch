@@ -1,0 +1,98 @@
+--- frozen_guard32_003
++++ guard32_004
+@@ -9,9 +9,9 @@
+ ASSET=BASE/'asset_001'
+ ADMISSION=BASE/'native_actuation_001/actuation'
+ SUPERVISOR_SOURCE=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009')
+-OUTPUT=BASE/'native_standing32_003'
+-PAUSE=BASE/'forecast_pause_015'
+-UNIT='hexapod-canonical-native-standing32-003-20260910.service'
++OUTPUT=BASE/'native_standing32_004'
++PAUSE=BASE/'forecast_pause_016'
++UNIT='hexapod-canonical-native-standing32-004-20260910.service'
+ HOST=BASE/'standing_host_007/launch_standing_spark.py'
+ SOURCE_SHA256='c87f2d340c935cd947c7aed3f3dcd7c9a9965b6e19d6726546abb560b27ab131'
+ SUPERVISOR_SHA256='04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e'
+@@ -36,6 +36,17 @@
+ RESERVATION=BASE/'exclusive_reservation_001'
+ RESERVATION_PINS={'/home/orionh/HEXAPOD_runs/canonical_direct_20260910/exclusive_reservation_001/ACTIVE': 'd6135e574b033fbbbe716e7f6b34876a42f1897f560d0c97ab3ae4da33532dc2', '/home/orionh/HEXAPOD_runs/canonical_direct_20260910/exclusive_reservation_001/initial_receipt.json': 'b0e17c5e7f2ae397260441dc8728eec079608cdf372717536dafc22d179df175', '/home/orionh/HEXAPOD_runs/canonical_direct_20260910/exclusive_reservation_001/scheduler_before.json': '139c7eec8e336bbf2df68f480848416232535bdceecabd4a5f210697955fd4f1', '/home/orionh/.config/systemd/user/stormscope-dispatch.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-dispatch.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-scout.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-scout.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-monitor.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-monitor.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-publish.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-publish.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-verify.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-verify.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26'}
+ 
++RETRY_UNIT='hexapod-canonical-native-standing32-003-20260910.service'
++RETRY_INVOCATION='6eac4972e2e64f9991955a1b7bb73afc'
++RETRY_AUDIT_SHA256='ba384bbc04558744254d5180a32c723a0debcf96817265ad84b648bd509ba6c8'
++RETRY_NAME='hexapod-reference-physics-5e6f8b80923e42d1bc7f318d0c2bc294'
++RETRY_ID='3f8fc2709874679d70bac5db2e73477ee25b6d81ea896ecd1c1e76addb00af89'
++RETRY_ERROR="TimeoutError('No AppReady by90s; preserve startup log and45s traceback')"
++RETRY_RESTORED_UNIX=1789085110.9715965
++RETRY_RAW_PINS={'native_standing32_003/campaign.json': '54c06742dd7ffd51f68adfd94a43f3fb6fa94cc3c216f1dbc0ead42f60960917', 'native_standing32_003/jobs/standing.json': 'bdb6b8717424c01242881da179ccaca502800c7c63fb0351e928fbca0d290c0f', 'native_standing32_003/logs/standing.log': 'd9f40ba31aa3169c0e51a55b21bee9cb761d72072eb7155dbe02e5f7a096f8b8', 'native_standing32_003/standing/state.json': '9e34cb925a208d67f1cc3c23f61b46a1c988bb788c6169f382ba3dad85789c0c', 'forecast_pause_015/launch.json': 'cddef4999acd6ff188305994ea2d5b1177ce336fd663393aa217911e5adc1ce4', 'forecast_pause_015/pause.json': '4edc0cd9be109b99ee466258758c44ee9e84567292a05f4e08f4969d05c1dd37', 'forecast_pause_015/restore.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'forecast_pause_015/restored.json': 'fa8afefc4f8dd432a4e7bfac63baccd4bb419734ef9923bdbe161c784bbe2016', 'forecast_pause_015/resume_forecasting.py': 'daffe2b2397c31b37145b193c29c947c4162123799365323f27acda0218a5d90'}
++RETRY_ROOT=BASE/'native_standing32_003'
++RETRY_PAUSE=BASE/'forecast_pause_015'
++
+ def call(args):return subprocess.check_output(args,text=True,timeout=30).strip()
+ def sha(path):
+     h=hashlib.sha256()
+@@ -44,7 +55,7 @@
+     return h.hexdigest()
+ def valid_hash(v):return isinstance(v,str) and len(v)==64 and all(c in '0123456789abcdef' for c in v)
+ def require_final_bindings():
+-    for name,bound in {'source':SOURCE_SHA256,'supervisor':SUPERVISOR_SHA256,'host':HOST_SHA256,'host freeze':HOST_FREEZE_SHA256,'previous audit':PREVIOUS_AUDIT_SHA256,'standing1 state':STANDING_ONE_STATE_SHA256,'standing1 inventory':STANDING_ONE_INVENTORY_SHA256,**PRIOR_PINS,**RESERVATION_PINS}.items():
++    for name,bound in {'source':SOURCE_SHA256,'supervisor':SUPERVISOR_SHA256,'host':HOST_SHA256,'host freeze':HOST_FREEZE_SHA256,'previous audit':PREVIOUS_AUDIT_SHA256,'startup audit':RETRY_AUDIT_SHA256,**RETRY_RAW_PINS,'standing1 state':STANDING_ONE_STATE_SHA256,'standing1 inventory':STANDING_ONE_INVENTORY_SHA256,**PRIOR_PINS,**RESERVATION_PINS}.items():
+         if not valid_hash(bound):raise RuntimeError('Final reviewed binding pending: '+name)
+ 
+ def verify_manifest(root,manifest,bound):
+@@ -81,6 +92,30 @@
+         q=subprocess.run(['docker','inspect','--format','{{.Id}} {{.Name}} {{.State.Running}}',identifier],capture_output=True,text=True,timeout=20)
+         if q.returncode==0 or not any(v in q.stderr.lower()for v in ('no such object','no such container')):raise RuntimeError('Previous container absence unknown: '+identifier)
+ 
++def verify_retry_cleanup():
++    audit_path=Path(__file__).resolve().parent/'inputs/startup_failure_audit.json'
++    if sha(audit_path)!=RETRY_AUDIT_SHA256:raise RuntimeError('Startup failure audit changed')
++    audit=json.loads(audit_path.read_text())
++    if audit.get('audit_verified')is not True or audit.get('errors')!=[]or audit.get('terminal_outcome')!='authentic_terminal_failure'or audit.get('standing_completed')is not False or audit.get('expected_invocation')!=RETRY_INVOCATION:raise RuntimeError('Startup failure provenance changed')
++    fields=dict(line.split('=',1)for line in call(['systemctl','--user','show',RETRY_UNIT,'-p','ActiveState','-p','InvocationID','-p','MainPID','-p','ExecMainStatus']).splitlines()if '='in line)
++    if fields.get('ActiveState')!='failed'or fields.get('MainPID')!='0'or fields.get('ExecMainStatus')!='1'or fields.get('InvocationID')not in ('',RETRY_INVOCATION):raise RuntimeError('Previous startup owner is not the exact terminal failure')
++    for rel,bound in RETRY_RAW_PINS.items():
++        if sha(BASE/rel)!=bound:raise RuntimeError('Startup failure raw changed: '+rel)
++    campaign=json.loads((RETRY_ROOT/'campaign.json').read_text());job=json.loads((RETRY_ROOT/'jobs/standing.json').read_text());native=json.loads((RETRY_ROOT/'standing/state.json').read_text());identity=campaign.get('identity',{})
++    if campaign.get('status')!='failed'or campaign.get('planned_phases')!=['standing']or campaign.get('error')!=RETRY_ERROR or campaign.get('terminal_inputs_unchanged')is not True or campaign.get('host_freeze_sha256')!=HOST_FREEZE_SHA256 or campaign.get('source_freeze_sha256')!=SOURCE_SHA256:raise RuntimeError('Startup failed campaign differs')
++    if identity.get('num_envs')!=32 or identity.get('inspector_freeze_sha256')!=SOURCE_SHA256 or identity.get('standing_one_state_sha256')!=STANDING_ONE_STATE_SHA256 or identity.get('standing_one_inventory_sha256')!=STANDING_ONE_INVENTORY_SHA256:raise RuntimeError('Startup failed admission identity differs')
++    # Preserve the native initial state. No AppReady or completed physics was observed.
++    if native.get('status')!='running'or native.get('explicit_steps_completed')!=0 or native.get('checks')!={}or native.get('errors')!=[]or native.get('identity')!=identity:raise RuntimeError('Initial unfinalized native state changed')
++    if job.get('phase')!='standing'or job.get('status')!='failed'or job.get('startup_failure_kind')!='no_reference_AppReady_by90s'or job.get('error')!=RETRY_ERROR or job.get('exit_code')is not None or job.get('cleanup_checked')is not True or job.get('container_name')!=RETRY_NAME or job.get('container_id')!=RETRY_ID or job.get('deadline_seconds')!=1200 or job.get('app_ready_deadline_seconds')!=90:raise RuntimeError('Exact startup failure or cleanup differs')
++    pause=json.loads((RETRY_PAUSE/'pause.json').read_text());restored=json.loads((RETRY_PAUSE/'restored.json').read_text())
++    timers={n for n,v in pause.get('units',{}).items()if n.endswith('.timer')and 'ActiveState=active'in v}
++    if pause.get('unit')!=RETRY_UNIT or pause.get('output')!=str(RETRY_ROOT)or set(restored.get('timers',[]))!=timers or restored.get('restored_unix')!=RETRY_RESTORED_UNIX or restored.get('scope')!='per_job_snapshot_only'or restored.get('persistent_reservation_release_attempted')is not False or restored.get('reservation_path')!=str(RESERVATION):raise RuntimeError('Startup failure pause015 restoration differs')
++    names={f.stem for f in (RETRY_ROOT/'jobs').glob('*.json')if not f.name.endswith('_contact_data_audit.json')}
++    if names!={'standing'}:raise RuntimeError('Startup job inventory changed')
++    for identifier in (RETRY_NAME,RETRY_ID):
++        q=subprocess.run(['docker','inspect','--format','{{.Id}} {{.Name}} {{.State.Running}}',identifier],capture_output=True,text=True,timeout=20)
++        if q.returncode==0 or not any(v in q.stderr.lower()for v in ('no such object','no such container')):raise RuntimeError('Startup owned container absence unknown: '+identifier)
++
+ def verify_reservation():
+     for name,bound in RESERVATION_PINS.items():
+         p=Path(name)
+@@ -118,6 +153,7 @@
+     train_host=importlib.util.module_from_spec(spec);spec.loader.exec_module(train_host)
+     validate_standing_inputs(train_host)
+     verify_previous_owner()
++    verify_retry_cleanup()
+     coordination = Path('/home/orionh/SPARK_COMPUTE_COORDINATION.md').read_bytes()
+     if hashlib.sha256(coordination).hexdigest() != '649ccda1bdef20bc967ae78f68a992cc8001f4ed7009f78cab5133cc67b29d8f':
+         raise RuntimeError('Coordination changed; review it before launch')
+@@ -188,7 +224,7 @@
+ ''')
+         # Arm recovery before mutating timer state. It stops only this exact
+         # owner unit if needed, then restores only previously active timers.
+-        subprocess.run(['systemd-run', '--user', '--unit=hexapod-canonical-forecast-restore-015', '--on-active=25m',
++        subprocess.run(['systemd-run', '--user', '--unit=hexapod-canonical-forecast-restore-016', '--on-active=25m',
+             '/usr/bin/python3', str(restorer), '--stop-owner'], check=True)
+         active = [name for name, state in units.items() if name.endswith('.timer') and 'ActiveState=active' in state]
+         if active:
+@@ -220,6 +256,7 @@
+     try:
+         validate_standing_inputs(train_host)
+         verify_previous_owner()
++        verify_retry_cleanup()
+     except Exception:
+         subprocess.run(['/usr/bin/python3',str(restorer)],check=True,timeout=120)
+         raise

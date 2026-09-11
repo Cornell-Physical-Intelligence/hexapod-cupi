@@ -1,0 +1,80 @@
+{
+  "schema": "spark_git_automation_readonly_inventory_v1",
+  "checked_unix": 1789086883.995486,
+  "read_only": true,
+  "mutations": 0,
+  "github_repository": {
+    "full_name": "CornellGeoData/Forecasting-Pipeline",
+    "html_url": "https://github.com/CornellGeoData/Forecasting-Pipeline",
+    "default_branch": "main",
+    "private": false,
+    "permissions": {
+      "admin": false,
+      "maintain": false,
+      "push": false,
+      "triage": false,
+      "pull": true
+    },
+    "updated_at": "2026-09-09T04:14:01Z",
+    "pushed_at": "2026-09-10T19:47:32Z"
+  },
+  "commit": "2b22d28ef604ed312668c3bcca235d23a92f1b62",
+  "tree_sha": "2b22d28ef604ed312668c3bcca235d23a92f1b62",
+  "tree_truncated": false,
+  "github_workflow_count": 0,
+  "github_run_count": 0,
+  "github_workflow_ids": [],
+  "github_active_or_queued_run_ids": [],
+  "main_contains_github_workflows": false,
+  "forecast_timer_names": [
+    "stormscope-dispatch.timer",
+    "stormscope-scout.timer",
+    "stormscope-monitor.timer",
+    "stormscope-publish.timer",
+    "stormscope-verify.timer"
+  ],
+  "forecast_service_names": [
+    "stormscope-dispatch.service",
+    "stormscope-scout.service",
+    "stormscope-monitor.service",
+    "stormscope-publish.service",
+    "stormscope-verify.service"
+  ],
+  "deploy_rearm_source": "install.sh:56-59 calls daemon-reload, enable --now and restart of those timers",
+  "ithaca_worker": {
+    "path": "/home/orionh/ithaca-reconstruction/queue-worker.py",
+    "sha256": "0b5ae6e035d4f355017cf170955ce6de13a99ae98dd4ad5b8c767a2bd870ad78",
+    "queue_pattern": "*.request.json",
+    "poll_seconds": 2,
+    "idle_lifetime_seconds": 1800,
+    "loads_GPU_before_waiting_for_requests": true,
+    "git_command_role": "git rev-parse HEAD records dependency provenance; not a fetch/pull hook or launch trigger",
+    "source_git_root_present": false,
+    "source_repository_or_external_uploader_identified": false
+  },
+  "accessible_local_git_checkouts_inspected": 6,
+  "no_ithaca_named_remote_found": true,
+  "pending_bounds": [
+    "Private webhooks/integrations cannot be ruled out from pull-only GitHub permissions.",
+    "Root crontab was inaccessible in the supplied readback.",
+    "No claim all external SSH/manual producers have been identified."
+  ],
+  "root_plan": [
+    {
+      "target": "CornellGeoData/Forecasting-Pipeline GitHub Actions",
+      "action": "None: no existing workflow/run IDs. Preserve readback; do not disable unrelated upstream MapAnything workflows."
+    },
+    {
+      "target": "Identified installed stormscope timers/services",
+      "action": "Root preserve exact installed fragments/state, stop and disable these known timers; retain persistent service+timer reservation conditions so deploy enable/restart cannot launch compute while reservation ACTIVE. Stop any exact identified retrying service as well."
+    },
+    {
+      "target": "Ithaca persistent worker and producer",
+      "action": "Root bind full command/starttick/cgroup before controlled stop, preserve requests/output/logs. Prevent relaunch at its own queue-worker.lock and/or an explicitly reviewed entrypoint reservation check; do not rely on draining request files or SIGSTOP to release GPU memory. Unknown external uploader remains a visibility limit."
+    },
+    {
+      "target": "A subsequently identified user-owned GitHub workflow",
+      "action": "Read and bind exact repo/workflow/run IDs first. Root disable that workflow and cancel only its active/queued runs after recording IDs/status/artifacts; verify terminal state. No IDs fabricated here."
+    }
+  ]
+}

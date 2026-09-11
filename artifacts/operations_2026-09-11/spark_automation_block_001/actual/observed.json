@@ -1,0 +1,45 @@
+{
+  "observed_unix": 1789086463.7423167,
+  "gpu": "3803709, /home/orionh/ithaca-reconstruction/env/bin/python, 10193\n",
+  "producers": [
+    [
+      {
+        "pid": 3803709,
+        "ppid": 3803686,
+        "state": "R",
+        "starttime": "140218694",
+        "uid": "Uid:\t1000\t1000\t1000\t1000",
+        "exe": "/usr/bin/python3.12",
+        "cwd": "/home/orionh",
+        "cmdline": "/home/orionh/ithaca-reconstruction/env/bin/python -u /home/orionh/ithaca-reconstruction/queue-worker.py --queue /home/orionh/ithaca-reconstruction/queue ",
+        "cgroup": "0::/user.slice/user-1000.slice/session-c11072.scope\n"
+      },
+      {
+        "pid": 3803686,
+        "ppid": 3803684,
+        "state": "S",
+        "starttime": "140218689",
+        "uid": "Uid:\t1000\t1000\t1000\t1000",
+        "exe": {
+          "unavailable": "PermissionError"
+        },
+        "cwd": {
+          "unavailable": "PermissionError"
+        },
+        "cmdline": "Singularity runtime parent ",
+        "cgroup": "0::/user.slice/user-1000.slice/session-c11072.scope\n"
+      },
+      {
+        "pid": 3803684,
+        "ppid": 1,
+        "state": "S",
+        "starttime": "140218689",
+        "uid": "Uid:\t1000\t1000\t1000\t1000",
+        "exe": "/usr/bin/flock",
+        "cwd": "/home/orionh",
+        "cmdline": "flock -n /home/orionh/ithaca-reconstruction/queue-worker.lock singularity exec --nv /data/opt/images/pytorch.sif /home/orionh/ithaca-reconstruction/env/bin/python -u /home/orionh/ithaca-reconstruction/queue-worker.py --queue /home/orionh/ithaca-reconstruction/queue ",
+        "cgroup": "0::/user.slice/user-1000.slice/session-c11072.scope\n"
+      }
+    ]
+  ]
+}

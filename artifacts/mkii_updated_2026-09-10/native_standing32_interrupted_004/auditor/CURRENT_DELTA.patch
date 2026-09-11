@@ -1,0 +1,35 @@
+--- auditor32_003
++++ auditor32_004
+@@ -4,10 +4,10 @@
+ import hashlib,importlib.util,json,math,re,subprocess,sys,time
+ sys.dont_write_bytecode=True
+ BASE=Path('/home/orionh/HEXAPOD_runs/canonical_direct_20260910')
+-RUN=BASE/'native_standing32_003'; PAUSE=BASE/'forecast_pause_015'
+-UNIT='hexapod-canonical-native-standing32-003-20260910.service'
+-INV='6eac4972e2e64f9991955a1b7bb73afc'
+-SOURCE=BASE/'standing_source_005'; HOST=BASE/'standing_host_007'; GUARD=BASE/'standing32_guard_003'; ASSET=BASE/'asset_001'
++RUN=BASE/'native_standing32_004'; PAUSE=BASE/'forecast_pause_016'
++UNIT='hexapod-canonical-native-standing32-004-20260910.service'
++INV='b33d418438ea438ca0805eea68e70a43'
++SOURCE=BASE/'standing_source_005'; HOST=BASE/'standing_host_007'; GUARD=BASE/'standing32_guard_004'; ASSET=BASE/'asset_001'
+ ADMISSION=BASE/'native_actuation_001/actuation'
+ RESERVATION=BASE/'exclusive_reservation_001'
+ STANDING_ONE=BASE/'native_standing_006/standing'
+@@ -16,7 +16,7 @@
+ SUPERVISOR=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009')
+ PINS=[('source',SOURCE,'FREEZE_SHA256.json','c87f2d340c935cd947c7aed3f3dcd7c9a9965b6e19d6726546abb560b27ab131',109),
+  ('host',HOST,'FREEZE_SHA256.json','7085776db928bd600ee3e8aff48af433eee1f35e758ce6221b34e4f2cfe50577',63),
+- ('guard',GUARD,'FREEZE_SHA256.json','1d74557aab401e921f6e69609883682d6d575432f723d9b7cd8e79878b860739',59),
++ ('guard',GUARD,'FREEZE_SHA256.json','8c62e9ce6eb7a0c4e396042f310527741a0a99da03819be0df3fb3a9106978ee',78),
+  ('ownership_supervisor',SUPERVISOR,'campaign_source_hashes.json','04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e',926)]
+ 
+ def require(ok,message):
+@@ -127,7 +127,7 @@
+  def attempt(label,fn):
+   try:v=fn();result[label]=v;return v
+   except Exception as e:result['errors'].append({'check':label,'error':repr(e)});return None
+- if attempt('invocation_binding',lambda:require(re.fullmatch('[0-9a-f]{32}',INV)is not None,'Actual native standing32_003 invocation remains pending')or True)is None:return result
++ if attempt('invocation_binding',lambda:require(re.fullmatch('[0-9a-f]{32}',INV)is not None,'Actual native standing32_004 invocation remains pending')or True)is None:return result
+  unit=attempt('unit',lambda:dict(line.split('=',1) for line in call(['systemctl','--user','show',UNIT,'-p','ActiveState','-p','SubState','-p','Result','-p','InvocationID','-p','ExecMainStatus','-p','MainPID']).splitlines() if '=' in line))
+  journal=attempt('journal',lambda:[json.loads(s) for s in call(['journalctl','--user','-u',UNIT,'--no-pager','-o','json']).splitlines() if s.strip()])
+  if unit is None or journal is None:return result

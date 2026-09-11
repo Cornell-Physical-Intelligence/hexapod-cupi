@@ -1,0 +1,7 @@
+# Standing32 startup retry: same source and accepted one-robot admission
+
+Fresh native_standing32_004 / pause016 / owner hexapod-canonical-native-standing32-004-20260910.service / fallback hexapod-canonical-forecast-restore-016. Source005109 and host00763 are unchanged. The exact accepted native6 state and complete40-file raw inventory remain mandatory and source-revalidated read-only.
+
+The immediately previous native_standing32_003 attempt failed before AppReady at the unchanged 90-second startup bound. Its initial native state remains running, zero explicit steps and empty checks; no physics or quality outcome was recorded. The historical error text mentions a 45-second traceback, but none exists in the actual nine-file inventory; this bundle claims none. New cleanup checks pin all nine raw files, the actual startup-kind/error, terminal invocation6eac4972e2e64f9991955a1b7bb73afc, both exact owned identifiers and pause015 restoration.
+
+The existing accepted-native6 prerequisite is checked separately from the failed immediate predecessor. Both checks run before any pause and again before dispatch. All GPU checks, both locks, 13 persistent reservation pins, per-job restoration, native physical/quiet gates and 1200/90 host bounds remain unchanged. Owner1320/stop180/fallback25min are retained. No source rewrite, new one-robot simulation or automatic PPO admission occurs. Root alone dispatches and publishes the central framework under docs/PROJECT_SITE.md.

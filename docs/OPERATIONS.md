@@ -1,9 +1,9 @@
 # Spark operations runbook
 
-> **9 September 2026 update:** the user prioritizes the selected C-study Stage 2 controller, requiring smooth walking/pathing in every direction and quiet standing, with terrain/perception implementation in parallel. [STATUS](../STATUS.md) is current; [the C-study contract](../experiments/c_length_study/README.md) separates its pinned runtime and 1.6 N·m study cap from the physical four-bar program. Earlier pause, plan and actuator statements below apply to their dated physical lineage. Commit/push each verified step with relevant Markdown and preserve other work on main.
+> **Current scope:** use the user-approved [detailed direct-drive model](UPDATED_CAD_IMPORT.md) for future training. The C-study and four-bar procedures below retain their historical contracts. [STATUS](../STATUS.md) records execution. Stage 2 still requires smooth all-direction walking/pathing and quiet standing, with terrain/perception prepared in parallel. Commit/push verified steps with relevant Markdown and preserve other work on main.
 
 
-> Current procedure: the project lead has authorized short live Spark validation of the corrected serial CAD-v2 model. Use the isolated, bounded launcher in [§11](#11-corrected-serial-cad-v2-live-validation), which preserves the original mirror and still requires exclusive GPU admission. This is standing characterization, not full G0 or permission to adopt an archived policy. [STATUS.md](../STATUS.md) records current execution; [live evidence](../artifacts/mkii_step2_2026-09-04/README.md) records the results. The earlier [asset audit](../artifacts/project_review_2026-09-04/URDF_VALIDATION.md) remains the record of the original import defect.
+> Historical serial CAD-v2 procedure: the isolated, bounded launcher in [§11](#11-corrected-serial-cad-v2-live-validation) preserves the original mirror and requires exclusive GPU admission. Its standing characterization is not full G0 or permission to adopt an archived policy. [Evidence](../artifacts/mkii_step2_2026-09-04/README.md) records that lineage; the earlier [asset audit](../artifacts/project_review_2026-09-04/URDF_VALIDATION.md) preserves the original import defect.
 
 Durable operating procedure for hexapod training and evaluation on the DGX
 Spark host. It covers the environment, the audit that precedes each launch,
@@ -131,17 +131,51 @@ still apply:
   must never use `docker rm -f` on a broad match. Deferral of another producer
   is a separate, recorded reservation operation.
 
-Persistent scheduler deferral must survive per-job cleanup and reconnects.
+Persistent scheduler blocking must survive per-job cleanup and reconnects.
 Snapshot only the timers active when that job starts; restoring that snapshot
 does not release the broader reservation. Keep the reservation marker and
-owned systemd condition drop-ins until explicit user release, then restore
-only recorded prior state after identity checks. A condition-skipped start can
-return success without activating a unit; read back actual state. Verify loaded
-drop-in paths and that the manager needs no daemon reload. The
+owned masks/queue lock until explicit user release, then restore only recorded
+prior state after identity checks. For a historical condition-only unit, verify
+loaded drop-in paths and no pending daemon reload; a skipped start may return
+success without activation. For the newer masked units, require the exact
+`/dev/null` symlink, loaded and file state `masked`, and inactive state. Services
+must report PID0; timers normally expose no MainPID. Retain reload metadata:
+the old condition drop-ins can leave `NeedDaemonReload=yes` even after reload
+on an otherwise loaded mask. Direct-start and re-enable rejection demonstrate
+the block; do not report that flag as `no`. The
 [coordination record](SPARK_COMPUTE_COORDINATION.md) preserves earlier policies
 as history. Another workload's sharing request alone cannot override the
 current user instruction. No MPS quota or hardware GPU partition is implied;
 manual or privileged launches still require truthful detection and deferral.
+
+### 3.1. Complete external automation block
+
+The 11 September user instruction requires external Spark automation to remain
+stopped, including any upstream triggers, while HEXAPOD retains priority.
+The [block and recovery record](../artifacts/operations_2026-09-11/spark_automation_block_001/README.md)
+defines the exact controls. Preserve its original unit files, enable states,
+worker source backup and queue outputs for a later user-authorized release.
+
+Mask the base `stormscope-`, `stormscope-private-` and `stormscope-private-v2-`
+timer/service families and Ollama. The private scout's restart policy means
+disabling timers alone is insufficient. Keep the four system `wx-forecast`
+timer/service units masked. A repository installer can try to enable timers;
+validate that the masks reject both direct start and `enable --now`.
+
+The reconstruction worker must reject startup while the reservation marker
+exists. Keep `hexapod-exclusive-reconstruction-queue.service` enabled and verify
+that its exact helper owns `queue-worker.lock` in `/proc/locks`. Bind its current
+PID to the acquisition receipt and command line. That receipt names the full
+`ACTIVE` marker path; per-job restoration receipts instead name the reservation
+directory. These are different fields and must not be compared interchangeably.
+Do not erase request files, completed reconstructions or partial outputs.
+
+Check actual GitHub workflow inventories before assuming Git is a scheduler.
+Disable identified competing triggers when present; a repository with no
+workflows has nothing to cancel. Preserve HEXAPOD's own jobs, repository CI,
+Pages deployment and continuation automation. Every native successor must
+recheck these operational controls without changing its admitted robot source,
+servo, physics or quality gates.
 
 Historical Stage2 team workflow (new CAD-v2 validation uses §11):
 
