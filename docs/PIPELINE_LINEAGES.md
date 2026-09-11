@@ -287,3 +287,24 @@ The preceding contact-telemetry manifest remains byte-for-byte preserved. Publis
 ### Causal sensor transport release, 10 September 2026
 
 `isaaclab/deploy/stage3_sensor_transport_20260910_pipeline.sha256` selects the integrated transport correction, its immutable preparation/review/integration evidence map and the prior poster manifest. The checker default and CI select this new428-file release;112 historical paths remain verified. The evidence map binds the portable regression tests and exact old-source fixture as well as the adopted runtime. The previous poster manifest remains byte-for-byte unchanged. This source inventory change does not modify the separately frozen Spark C-study run or qualify terrain/perception.
+
+
+### Repository foundation cleanup, 11 September 2026
+
+`isaaclab/deploy/repository_foundation_20260911_pipeline.sha256` is the new
+integrated source release. It preserves all published manifests and the frozen
+C-study runtime, and binds the relocated tools, their updated imports/callers,
+the owned source inventory and both complete CPU test directories. Tools moved
+into `tools/assets/`, `experiments/c_length_study/tools/` and
+`experiments/terrain/tools/`; repository checks retain their top-level commands.
+
+This is a source-organization change, not model or controller admission. The
+four-bar contract's current source identity changes with these relocations.
+Historical reproduction uses its original pinned checkout; no old admission or
+checkpoint gains approval for this source. Nothing is synced to the Spark by
+these local checks. Frozen raw results and source copies remain byte-identical.
+
+The Pages registry now generates STATUS. Old immutable poster entries that name
+a relocated tool resolve to that tool at the inventory's pinned pre-cleanup
+commit; new entries use its maintained location. Compatibility PLAN/NEXT_RUNS
+pointers preserve historical links without maintaining another roadmap.

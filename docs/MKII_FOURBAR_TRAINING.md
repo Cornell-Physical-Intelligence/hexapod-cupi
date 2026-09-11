@@ -94,7 +94,7 @@ claim a measured four-quadrant motor map. Battery voltage is still unknown;
    positions must be finite and exactly equal between the runs.
    The same selected model, dependency hashes, motor contract and runtime settings
    must match; only the specified solver position-iteration count may differ.
-5. Combine those reports with `tools/qualify_mkii_fourbar.py`. The resulting
+5. Combine those reports with `tools/assets/qualify_mkii_fourbar.py`. The resulting
    admission is restricted to monitored exploratory simulation learning.
 6. Run a small PPO cycle, save and reload actor, critic, optimizer and observation
    normalization, perform finite inference, then resume in a new process.
@@ -133,7 +133,7 @@ python3 /home/orionh/HEXAPOD_runs/mkii_1600hz_metrics_v1/source/isaaclab/deploy/
 
 # Repeat the same model with --solver-multiplier 2.
 # Only two complete passing reports can produce admission.
-python3 tools/qualify_mkii_fourbar.py NOMINAL_REPORT REFINED_REPORT ADMISSION_JSON
+python3 tools/assets/qualify_mkii_fourbar.py NOMINAL_REPORT REFINED_REPORT ADMISSION_JSON
 
 # This remains blocked until the admission gate above passes.
 /usr/bin/flock --nonblock --no-fork /opt/wx/gpu.lock \

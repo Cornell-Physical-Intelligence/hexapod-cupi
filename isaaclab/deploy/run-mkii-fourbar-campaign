@@ -21,8 +21,9 @@ loader = importlib.machinery.SourceFileLoader('_fourbar_campaign_supervisor', st
 spec = importlib.util.spec_from_loader(loader.name, loader)
 host = importlib.util.module_from_spec(spec)
 loader.exec_module(host)
-from mkii_training_contract import digest, identity, read_json, require_admission, require_checkpoint, write_json
-from qualify_mkii_fourbar import qualify
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from tools.mkii_training_contract import digest, identity, read_json, require_admission, require_checkpoint, write_json
+from tools.assets.qualify_mkii_fourbar import qualify
 
 
 class CampaignFailed(RuntimeError):

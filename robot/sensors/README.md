@@ -84,7 +84,7 @@ their original archived mock asset and stance. Re-run the relevant geometry
 and runtime checks for C and for the physical four-bar model before adopting
 these dimensions as production mounts.
 
-`tools/lidar_placement_study.py` scores candidate Mid-360 mounts by
+`experiments/terrain/tools/lidar_placement_study.py` scores candidate Mid-360 mounts by
 self-occlusion. It runs forward kinematics on
 `robot/hexapod_mkii_mock_assy/urdf/hexapod_mkii_robstride.urdf` at a fixed
 stance, transforms the visual meshes into world space, and rasterizes them into

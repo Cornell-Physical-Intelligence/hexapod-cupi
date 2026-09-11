@@ -11,8 +11,8 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-from mkii_training_contract import TASK_ID, identity, require_admission, require_checkpoint, digest
-from qualify_mkii_fourbar import qualify
+from tools.mkii_training_contract import TASK_ID, identity, require_admission, require_checkpoint, digest
+from tools.assets.qualify_mkii_fourbar import qualify
 from hexapod_core.fourbar_v1 import numerical_recipe
 
 loader = importlib.machinery.SourceFileLoader("fourbar_host_gate", str(ROOT / "isaaclab/deploy/run-mkii-fourbar"))

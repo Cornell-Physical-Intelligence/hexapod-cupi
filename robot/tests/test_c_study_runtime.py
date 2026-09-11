@@ -12,7 +12,7 @@ import unittest
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools"))
-import c_study_runtime as runtime
+from tools import c_study_runtime as runtime
 
 
 @contextmanager
@@ -118,7 +118,8 @@ class RuntimeBindingTests(unittest.TestCase):
         real = json.loads((root / "experiments/c_length_study/runtime/SHA256SUMS.json").read_text())
         self.assertEqual(runtime._tree_digest(real["files"]), "abe4e3542c7af7093f4a203b0db3631706a0b981f77befb40b243559b7a69280")
         for filename in ("train_length_study.py", "omni_flat_env.py", "length_reference_env.py", "validate_terrain_robot.py"):
-            tree = ast.parse((root / "tools" / filename).read_text())
+            directory = "experiments/terrain/tools" if filename == "validate_terrain_robot.py" else "experiments/c_length_study/tools"
+            tree = ast.parse((root / directory / filename).read_text())
             calls = [index for index, node in enumerate(tree.body)
                      if isinstance(node, (ast.Assign, ast.Expr)) and isinstance(node.value, ast.Call)
                      and isinstance(node.value.func, ast.Name) and node.value.func.id == "bootstrap_c_study_runtime"]

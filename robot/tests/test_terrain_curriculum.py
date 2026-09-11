@@ -10,7 +10,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "tools"), str(ROOT / "isaaclab")]
-from terrain_fixture_checks import digest, load_catalog
+from experiments.terrain.tools.terrain_fixture_checks import digest, load_catalog
 from hexapod_terrain.prepare_curriculum import (LEVELS, derive_mild_fixture, prepare,
     select_reset_records, surface_geometry_metrics, validate_reset_geometry)
 

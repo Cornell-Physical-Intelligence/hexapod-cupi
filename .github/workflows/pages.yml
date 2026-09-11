@@ -20,7 +20,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Test the contributor and evidence checks
-        run: python3 -m unittest discover -s isaaclab/tests -p test_project_site.py
+        run: python3 -m unittest discover -s isaaclab/tests -p 'test_project*.py'
       - name: Require a central update for every repository change
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -32,6 +32,8 @@ jobs:
           fi
       - name: Build the verified research poster
         run: python3 tools/project_site.py build
+      - name: Exercise the built roadmap renderer
+        run: node site/test_render.mjs
       - name: Configure GitHub Pages
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/configure-pages@v5

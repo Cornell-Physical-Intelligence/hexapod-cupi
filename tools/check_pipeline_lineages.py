@@ -15,14 +15,16 @@ import subprocess
 import tarfile
 import tempfile
 
-from mkii_training_contract import identity
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from tools.mkii_training_contract import identity
 
 ROOT = Path(__file__).resolve().parents[1]
 ARCHIVED_MANIFEST = "isaaclab/deploy/stage2_pipeline.sha256"
 ARCHIVED_REF = "81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df"
 ARCHIVED_MANIFEST_SHA256 = "19fc816cf9c53a79be8e14831daa58a12eba3f7f07c5fca80d03f2dc947ccda1"
 ARCHIVED_ENTRY_COUNT = 112
-CURRENT_MANIFEST = "isaaclab/deploy/stage3_sensor_transport_20260910_pipeline.sha256"
+CURRENT_MANIFEST = "isaaclab/deploy/repository_foundation_20260911_pipeline.sha256"
 CURRENT_HEADER = (
     "# hexapod.mkii_fourbar_pipeline.v1\n"
     f"# Archived source commit: {ARCHIVED_REF}\n"
@@ -34,6 +36,7 @@ CURRENT_REVISIONS = {
     "packages/hexapod_env/pyproject.toml": "Package the new actuator and versioned task modules.",
 }
 CURRENT_EXTRA_PATHS = (
+    "isaaclab/deploy/stage3_sensor_transport_20260910_pipeline.sha256",
     "isaaclab/deploy/stage2_research_poster_20260910_pipeline.sha256",
     "artifacts/perception_readiness_2026-09-09/sensor_transport_002/BUNDLE_SHA256.json",
     "isaaclab/deploy/stage2_c_contact_telemetry_20260910_pipeline.sha256",
@@ -216,7 +219,9 @@ def current_records(root=ROOT):
     root = Path(root).resolve()
     _, archived = read_archived_manifest(root)
     records = dict(identity(root)["files"])
-    for relative in set(archived) | set(CURRENT_EXTRA_PATHS):
+    test_paths = {str(p.relative_to(root)) for directory in ("isaaclab/tests", "robot/tests")
+                  for p in (root / directory).glob("*.py")}
+    for relative in set(archived) | set(CURRENT_EXTRA_PATHS) | test_paths:
         path = root / relative
         if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(root):
             raise ValueError(f"Current release path is missing or not an in-root regular file: {relative}")

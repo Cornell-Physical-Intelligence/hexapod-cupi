@@ -100,12 +100,12 @@ clears both feet and non-foot mesh vertices by 6 mm. An ineligible posture must
 be changed and validated before training that variant; it is not automatically
 a rejection of that segment length.
 
-`tools/simulate_length_study.py` imports the new assets, authors their source
+`experiments/c_length_study/tools/simulate_length_study.py` imports the new assets, authors their source
 mass properties explicitly and verifies all 19 tensors numerically using
 OpenUSD's own rotation transform. This is necessary because the saved September
 4 review found an inverse-principal-axis defect in the deployed importer.
 The repair touches only these newly generated study USDs. A CPU-only synthetic
-USD test is `tools/test_length_study_usd.py`; it checks authoring/round-trip
+USD test is `experiments/c_length_study/tools/test_length_study_usd.py`; it checks authoring/round-trip
 mathematics, not an actual URDF import or PhysX simulation.
 
 The finite live comparison uses one independent floating articulation per
@@ -118,7 +118,7 @@ standing acceptance gate, or manufacture an image when simulation is blocked.
 On the Spark, use a separate frozen source snapshot and a new output path:
 
 ```sh
-python3 tools/launch_length_study_spark.py \
+python3 experiments/c_length_study/tools/launch_length_study_spark.py \
   --source /home/orionh/HEXAPOD_runs/mock_length_study_20260909/source \
   --output /home/orionh/HEXAPOD_runs/mock_length_study_20260909/smoke_001 \
   --limit 1

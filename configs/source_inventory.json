@@ -1,0 +1,518 @@
+{
+  "schema_version": 1,
+  "baseline": "e6fc64444ee6b02c973e454ebe285843dcbe7fc2",
+  "historical_reproduction": "Use the original pinned Git checkout for frozen runs; relocated sources form a new release. No new C-study/four-bar training is authorized.",
+  "tools": [
+    {
+      "path": "experiments/c_length_study/tools/analyze_omni_policy_loop.py",
+      "previous_path": "tools/analyze_omni_policy_loop.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Reproduce the standing-loop and observation-noise analysis on saved evidence."
+    },
+    {
+      "path": "experiments/c_length_study/tools/audit_length_stances.py",
+      "previous_path": "tools/audit_length_stances.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Audit C/D torque components and omitted lower postures; CPU only."
+    },
+    {
+      "path": "tools/assets/audit_mkii_fourbar_usd.py",
+      "previous_path": "tools/audit_mkii_fourbar_usd.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Dedicated CPU gate for the 31-body / 30-tree / 6-closure physical MKII asset."
+    },
+    {
+      "path": "tools/assets/audit_mkii_linkage.py",
+      "previous_path": "tools/audit_mkii_linkage.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Read-only CPU audit of the CAD tibia four-bar's documented cut hinge."
+    },
+    {
+      "path": "tools/assets/audit_mkii_stance.py",
+      "previous_path": "tools/audit_mkii_stance.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "CPU-only reset geometry gate for the serial CAD asset."
+    },
+    {
+      "path": "tools/c_study_runtime.py",
+      "previous_path": "tools/c_study_runtime.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Pin the C morphology study to its validated, archived Python runtime."
+    },
+    {
+      "path": "tools/check_pipeline_lineages.py",
+      "previous_path": "tools/check_pipeline_lineages.py",
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Verify the frozen Stage2 Git lineage and a separately versioned current release."
+    },
+    {
+      "path": "tools/assets/enable_nested_contact_reports.py",
+      "previous_path": "tools/enable_nested_contact_reports.py",
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Author PhysX contact-report APIs on every rigid body in an imported USD."
+    },
+    {
+      "path": "tools/assets/generate_robstride_urdf.py",
+      "previous_path": "tools/generate_robstride_urdf.py",
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Generate a physics-ready RobStride RS05 variant of the exported URDF."
+    },
+    {
+      "path": "experiments/c_length_study/tools/hold_length_campaign_after_job.py",
+      "previous_path": "tools/hold_length_campaign_after_job.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Wait behind the active GPU job, then stop its coordinator between jobs."
+    },
+    {
+      "path": "tools/assets/import_urdf_to_usd.py",
+      "previous_path": "tools/import_urdf_to_usd.py",
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Import and prepare a verified, portable floating-base MKII USD bundle."
+    },
+    {
+      "path": "experiments/c_length_study/tools/launch_candidate_c_spark.py",
+      "previous_path": "tools/launch_candidate_c_spark.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Single-C validation, stepping probe, resumable PPO chunks and real videos."
+    },
+    {
+      "path": "experiments/c_length_study/tools/launch_length_pilot_spark.py",
+      "previous_path": "tools/launch_length_pilot_spark.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Record and evaluate a completed baseline; never enqueue the other sizes."
+    },
+    {
+      "path": "experiments/c_length_study/tools/launch_length_study_spark.py",
+      "previous_path": "tools/launch_length_study_spark.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Bounded, exclusive per-job launcher for the Isaac morphology comparison."
+    },
+    {
+      "path": "experiments/c_length_study/tools/launch_length_training_spark.py",
+      "previous_path": "tools/launch_length_training_spark.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Bounded 49-size campaign; waits for the shared GPU and owns only its jobs."
+    },
+    {
+      "path": "experiments/c_length_study/tools/launch_omni_diagnostics_spark.py",
+      "previous_path": "tools/launch_omni_diagnostics_spark.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Run isolated short comparisons with exact-plan standing admissions and GPU locks."
+    },
+    {
+      "path": "experiments/c_length_study/tools/launch_omni_flat_spark.py",
+      "previous_path": "tools/launch_omni_flat_spark.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Guarded, resumable omni experiment; short pilot exercises all runtime paths."
+    },
+    {
+      "path": "experiments/c_length_study/tools/launch_omni_repair_pair_spark.py",
+      "previous_path": "tools/launch_omni_repair_pair_spark.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Exactly two independent 50-update comparisons; no automatic continuation."
+    },
+    {
+      "path": "experiments/c_length_study/tools/launch_omni_repair_spark.py",
+      "previous_path": "tools/launch_omni_repair_spark.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Bounded PPO repair: matched baseline, short pilots, regression screen, full review."
+    },
+    {
+      "path": "experiments/terrain/tools/launch_terrain_robot_smoke_spark.py",
+      "previous_path": "tools/launch_terrain_robot_smoke_spark.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "Two bounded standing checks; no policy, training, queue or forecast management."
+    },
+    {
+      "path": "experiments/terrain/tools/launch_terrain_smoke_spark.py",
+      "previous_path": "tools/launch_terrain_smoke_spark.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "Bounded fixture-only Isaac validation using the same shared-GPU ownership rules."
+    },
+    {
+      "path": "experiments/c_length_study/tools/length_reference_env.py",
+      "previous_path": "tools/length_reference_env.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Position/velocity stepping prior plus learned bounded joint corrections."
+    },
+    {
+      "path": "experiments/terrain/tools/lidar_placement_study.py",
+      "previous_path": "tools/lidar_placement_study.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "Score candidate Livox Mid-360 mounts on the Hexapod MKII by self-occlusion."
+    },
+    {
+      "path": "tools/assets/mkii_asset_binding.py",
+      "previous_path": "tools/mkii_asset_binding.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Bind CPU/Kit audits and live runtime to the same portable physical bundle."
+    },
+    {
+      "path": "tools/assets/mkii_fourbar_kinematics.py",
+      "previous_path": "tools/mkii_fourbar_kinematics.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "CPU kinematics for the measured, regularized MKII physical four-bar."
+    },
+    {
+      "path": "tools/mkii_training_contract.py",
+      "previous_path": "tools/mkii_training_contract.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Exact source/asset lineage and checkpoint admission for four-bar scratch runs."
+    },
+    {
+      "path": "experiments/c_length_study/tools/omni_action_filter.py",
+      "previous_path": "tools/omni_action_filter.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Hardware-realizable first-order joint-position request filter."
+    },
+    {
+      "path": "experiments/c_length_study/tools/omni_diagnostics.py",
+      "previous_path": "tools/omni_diagnostics.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Short, pre-reset motor/observation probe; does not replace qualification."
+    },
+    {
+      "path": "experiments/c_length_study/tools/omni_flat_env.py",
+      "previous_path": "tools/omni_flat_env.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Flat omnidirectional direct-joint PPO task, isolated from archived rewards."
+    },
+    {
+      "path": "experiments/c_length_study/tools/omni_flat_evaluation.py",
+      "previous_path": "tools/omni_flat_evaluation.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Held-out command matrix, uninterrupted transitions and actual Isaac video."
+    },
+    {
+      "path": "experiments/c_length_study/tools/omni_flat_math.py",
+      "previous_path": "tools/omni_flat_math.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "CPU-testable command, reward and evaluation contracts for omni locomotion."
+    },
+    {
+      "path": "experiments/c_length_study/tools/omni_path_demo.py",
+      "previous_path": "tools/omni_path_demo.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Actual policy-in-the-loop path demos with non-colliding ground annotations."
+    },
+    {
+      "path": "experiments/c_length_study/tools/omni_quiet_review.py",
+      "previous_path": "tools/omni_quiet_review.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Undisturbed quiet-stand and stop-to-stand review, isolated from training."
+    },
+    {
+      "path": "experiments/c_length_study/tools/omni_repair_training.py",
+      "previous_path": "tools/omni_repair_training.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Explicit, checkpoint-bound PPO fine-tune initialization; no simulator imports."
+    },
+    {
+      "path": "experiments/c_length_study/tools/omni_visual_review.py",
+      "previous_path": "tools/omni_visual_review.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Actual-physics visual coverage of bearings, turns, paths and quiet standing."
+    },
+    {
+      "path": "experiments/c_length_study/tools/parallel_length_mechanical_paths.py",
+      "previous_path": "tools/parallel_length_mechanical_paths.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Run independent CPU geometry shards, preserving checked completed results."
+    },
+    {
+      "path": "experiments/terrain/tools/perception_replay.py",
+      "previous_path": "tools/perception_replay.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "CPU depth/point-cloud -> timestamped local terrain contract prototype."
+    },
+    {
+      "path": "experiments/c_length_study/tools/prepare_candidate_c_training.py",
+      "previous_path": "tools/prepare_candidate_c_training.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Prepare separate single-C training inputs and a named-joint stepping reference."
+    },
+    {
+      "path": "tools/assets/prepare_mkii_fourbar_usd.py",
+      "previous_path": "tools/prepare_mkii_fourbar_usd.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Build a NEW 31-body physical four-bar USD directly from measured CAD frames."
+    },
+    {
+      "path": "tools/assets/prepare_mkii_usd.py",
+      "previous_path": "tools/prepare_mkii_usd.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Repair and verify a CAD USD on the CPU, without starting Isaac Sim."
+    },
+    {
+      "path": "experiments/c_length_study/tools/prepare_omni_flat_training.py",
+      "previous_path": "tools/prepare_omni_flat_training.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Version new omni inputs while preserving the selected C benchmark verbatim."
+    },
+    {
+      "path": "experiments/terrain/tools/prepare_terrain_readiness.py",
+      "previous_path": "tools/prepare_terrain_readiness.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "Prepare deterministic terrain fixtures, mount sweep and explicit readiness gates."
+    },
+    {
+      "path": "tools/project_site.py",
+      "previous_path": "tools/project_site.py",
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Validate the mandatory research-poster update contract and build GitHub Pages."
+    },
+    {
+      "path": "tools/assets/qualify_mkii_fourbar.py",
+      "previous_path": "tools/qualify_mkii_fourbar.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Combine two live solver-resolution runs into narrow simulation admission."
+    },
+    {
+      "path": "experiments/c_length_study/tools/queue_omni_preview.py",
+      "previous_path": "tools/queue_omni_preview.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Render a corrected preview at the next free GPU interval, without interrupting PPO."
+    },
+    {
+      "path": "experiments/c_length_study/tools/rank_length_study.py",
+      "previous_path": "tools/rank_length_study.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Summarize completed matched evaluations without inventing a weighted score."
+    },
+    {
+      "path": "experiments/c_length_study/tools/refine_length_mechanical_candidates.py",
+      "previous_path": "tools/refine_length_mechanical_candidates.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Check candidate path loads at finer temporal resolution before review."
+    },
+    {
+      "path": "experiments/terrain/tools/render_terrain_plan_figures.py",
+      "previous_path": "tools/render_terrain_plan_figures.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "Render analytical/concept figures; these are not CAD or Isaac screenshots."
+    },
+    {
+      "path": "experiments/c_length_study/tools/repair_length_study_inertias.py",
+      "previous_path": "tools/repair_length_study_inertias.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Author and numerically verify source URDF inertials on a NEW study USD."
+    },
+    {
+      "path": "experiments/c_length_study/tools/report_length_stage1.py",
+      "previous_path": "tools/report_length_stage1.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Stage-one review figures from exact URDF meshes and completed CPU results."
+    },
+    {
+      "path": "experiments/c_length_study/tools/report_length_stance_audit.py",
+      "previous_path": "tools/report_length_stance_audit.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Refine and illustrate the C/D lower-stance audit without changing URDFs."
+    },
+    {
+      "path": "experiments/c_length_study/tools/report_omni_diagnostics.py",
+      "previous_path": "tools/report_omni_diagnostics.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Fetch completed motor probes and compare matched pre-reset measurements."
+    },
+    {
+      "path": "experiments/c_length_study/tools/report_omni_progress.py",
+      "previous_path": "tools/report_omni_progress.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Summarize completed omni evaluations without changing their acceptance limits."
+    },
+    {
+      "path": "experiments/c_length_study/tools/run_length_mechanical_paths.py",
+      "previous_path": "tools/run_length_mechanical_paths.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Equal-budget inverse-dynamics path screen after all-size static search."
+    },
+    {
+      "path": "experiments/c_length_study/tools/screen_length_mechanics.py",
+      "previous_path": "tools/screen_length_mechanics.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Quasi-static, point-contact geometry screen. No learned policy or GPU."
+    },
+    {
+      "path": "experiments/terrain/tools/screen_sensor_mounts.py",
+      "previous_path": "tools/screen_sensor_mounts.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "Reproducible CPU mount pre-screen. No CAD edits, GPU or robot connections."
+    },
+    {
+      "path": "experiments/terrain/tools/sensor_mount_math.py",
+      "previous_path": "tools/sensor_mount_math.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "CPU geometry for provisional sensor-mount screening (metres, radians)."
+    },
+    {
+      "path": "experiments/c_length_study/tools/simulate_length_study.py",
+      "previous_path": "tools/simulate_length_study.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Run all morphology candidates together and capture an actual Isaac frame."
+    },
+    {
+      "path": "experiments/c_length_study/tools/sync_candidate_c_results.py",
+      "previous_path": "tools/sync_candidate_c_results.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Fetch only a completed, identity-checked C checkpoint recording from Spark."
+    },
+    {
+      "path": "experiments/c_length_study/tools/sync_omni_results.py",
+      "previous_path": "tools/sync_omni_results.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Fetch completed omni evidence; never present an unfinished or mismatched clip."
+    },
+    {
+      "path": "experiments/terrain/tools/terrain_contact_evidence.py",
+      "previous_path": "tools/terrain_contact_evidence.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "Reject known PhysX contact-data truncation before admitting standing."
+    },
+    {
+      "path": "experiments/terrain/tools/terrain_fixture_checks.py",
+      "previous_path": "tools/terrain_fixture_checks.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "Independent geometry checks shared by CPU and Isaac terrain admission."
+    },
+    {
+      "path": "experiments/terrain/tools/terrain_readiness.py",
+      "previous_path": "tools/terrain_readiness.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "CPU geometry and observation checks for the proposed terrain stage."
+    },
+    {
+      "path": "experiments/c_length_study/tools/test_length_study_usd.py",
+      "previous_path": "tools/test_length_study_usd.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "CPU-only test using the installed OpenUSD library, without SimulationApp."
+    },
+    {
+      "path": "experiments/c_length_study/tools/train_length_study.py",
+      "previous_path": "tools/train_length_study.py",
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "One isolated morphology: full standing gate, scratch PPO, or matched evaluation."
+    },
+    {
+      "path": "tools/assets/usd_geometry_audit.py",
+      "previous_path": "tools/usd_geometry_audit.py",
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "CPU-only URDF/USD articulation and collision-geometry regression checks."
+    },
+    {
+      "path": "experiments/terrain/tools/validate_terrain_fixtures.py",
+      "previous_path": "tools/validate_terrain_fixtures.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "CPU/USD audit or short Isaac geometry/ray/contact smoke; never starts PPO."
+    },
+    {
+      "path": "experiments/terrain/tools/validate_terrain_robot.py",
+      "previous_path": "tools/validate_terrain_robot.py",
+      "classification": "prototype",
+      "owner": "Survey lead",
+      "purpose": "Hold the exact admitted full C robot on an imported fixture's flat start."
+    },
+    {
+      "path": "tools/source_inventory.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Both leads",
+      "purpose": "List owned tools and verify maintained-source boundaries."
+    },
+    {
+      "path": "tools/mkii_asset_binding.py",
+      "previous_path": null,
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Compatibility entry for the byte-frozen four-bar validator; delegates to tools.assets.mkii_asset_binding."
+    },
+    {
+      "path": "tools/audit_mkii_stance.py",
+      "previous_path": null,
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Compatibility entry for the byte-frozen four-bar validator; delegates to tools.assets.audit_mkii_stance."
+    },
+    {
+      "path": "tools/audit_mkii_fourbar_usd.py",
+      "previous_path": null,
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Compatibility entry for the byte-frozen four-bar validator; delegates to tools.assets.audit_mkii_fourbar_usd."
+    },
+    {
+      "path": "tools/mkii_fourbar_kinematics.py",
+      "previous_path": null,
+      "classification": "historical",
+      "owner": "Platform lead",
+      "purpose": "Compatibility entry for the byte-frozen four-bar validator; delegates to tools.assets.mkii_fourbar_kinematics."
+    }
+  ]
+}

@@ -21,7 +21,7 @@ loader = importlib.machinery.SourceFileLoader("_fourbar_supervisor_tests", str(L
 spec = importlib.util.spec_from_loader(loader.name, loader)
 supervisor = importlib.util.module_from_spec(spec)
 loader.exec_module(supervisor)
-from qualify_mkii_fourbar import qualify
+from tools.assets.qualify_mkii_fourbar import qualify
 from hexapod_core.fourbar_v1 import numerical_recipe
 
 

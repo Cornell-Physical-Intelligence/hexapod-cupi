@@ -9,10 +9,10 @@ import sys
 import xml.etree.ElementTree as ET
 
 ROOT=Path(__file__).resolve().parents[2]
-spec=importlib.util.spec_from_file_location("rank",ROOT/"tools/rank_length_study.py")
+spec=importlib.util.spec_from_file_location("rank",ROOT/"experiments/c_length_study/tools/rank_length_study.py")
 rank=importlib.util.module_from_spec(spec);spec.loader.exec_module(rank)
 sys.path.insert(0,str(ROOT/"tools"))
-from launch_length_training_spark import live_competitors
+from experiments.c_length_study.tools.launch_length_training_spark import live_competitors
 
 
 class TrainingPlanTests(unittest.TestCase):

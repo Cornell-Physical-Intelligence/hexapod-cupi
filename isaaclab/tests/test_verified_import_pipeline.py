@@ -14,10 +14,10 @@ from pxr import Usd, UsdGeom, UsdPhysics
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-spec = importlib.util.spec_from_file_location("verified_import_subject", ROOT / "tools/import_urdf_to_usd.py")
+spec = importlib.util.spec_from_file_location("verified_import_subject", ROOT / "tools/assets/import_urdf_to_usd.py")
 subject = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(subject)
-from enable_nested_contact_reports import enable_contact_reports  # noqa: E402
+from tools.assets.enable_nested_contact_reports import enable_contact_reports  # noqa: E402
 
 URDF = ROOT / "robot/hexapod_mkii_assy/urdf/hexapod_mkii_serial.urdf"
 

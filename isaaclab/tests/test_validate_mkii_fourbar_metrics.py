@@ -15,8 +15,8 @@ from pxr import Gf
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT/'tools'))
-import mkii_fourbar_kinematics as kin
-from audit_mkii_stance import _rotation
+from tools.assets import mkii_fourbar_kinematics as kin
+from tools.assets.audit_mkii_stance import _rotation
 
 spec = importlib.util.spec_from_file_location('fourbar_validator_metrics_under_test', ROOT/'isaaclab/validate_mkii_fourbar.py')
 validator = importlib.util.module_from_spec(spec)

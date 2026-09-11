@@ -8,8 +8,8 @@ import numpy as np
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools"))
-from omni_quiet_review import quiet_metrics
-from omni_visual_review import visual_review_specs, review_command, review_reference
+from experiments.c_length_study.tools.omni_quiet_review import quiet_metrics
+from experiments.c_length_study.tools.omni_visual_review import visual_review_specs, review_command, review_reference
 
 
 class ReviewContracts(unittest.TestCase):

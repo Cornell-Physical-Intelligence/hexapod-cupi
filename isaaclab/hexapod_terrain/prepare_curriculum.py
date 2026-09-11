@@ -14,8 +14,8 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 
-from terrain_fixture_checks import digest, load_catalog, vertical_surface_heights
-from terrain_readiness import mesh_usda, validate_mesh
+from experiments.terrain.tools.terrain_fixture_checks import digest, load_catalog, vertical_surface_heights
+from experiments.terrain.tools.terrain_readiness import mesh_usda, validate_mesh
 from .fixture_adapter import MildTerrainSpec
 from .robot_smoke import check_start_footprint
 

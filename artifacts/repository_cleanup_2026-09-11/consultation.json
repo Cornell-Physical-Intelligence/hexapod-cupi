@@ -1,0 +1,30 @@
+{
+  "requested_model": "claude-fable-5-1",
+  "effort": "max",
+  "session_id": "63b3dc60-3496-41ef-b19e-21e50e9dfe20",
+  "scope": "Repository/source/progress migration risks; tools disabled; no controller choices.",
+  "response": "Five risks stand out, each with a minimum check. I did not inspect the launcher sources for this reply, so the first risk applies to whichever `tools/` scripts the launchers and the pipeline manifest name.\n\n- **Spark mirror and lineage.** The mirror is a synced directory, so a rename here leaves stale copies there, and `isaaclab/deploy/stage2_pipeline.sha256` pins paths and hashes. The four-bar runner refuses resume when source lineage differs. Regenerate the manifest inside the rename commit, sync, and run the `sha256sum -c` check on the Spark. Run the runner's admission and lineage check against one existing checkpoint without starting training. If the lineage differs, record it as a new lineage and make no claim of historical resume.\n\n- **Frozen evidence bytes.** The 2591 frozen Python copies, the checkpoint manifests and the append-only ledgers must stay byte identical. Repo-wide formatters, lint autofix, a `.gitattributes` end-of-line rule, or a search exclusion that someone puts in `.gitignore` can rewrite or untrack them. Put search exclusions in `.ignore` or `.rgignore`. Confirm `git diff --stat main -- artifacts docs/incidents` shows no change and each SHA-256 manifest under artifacts passes verification.\n\n- **Import paths in tests and shims.** The launcher and analyzer contract tests and the `isaaclab/hexapod_rl` shim import modules by path. Moving study source into `experiments/` breaks those imports, and the invariant forbids editing tests to pass. Run `uv sync` and the unittest discover command before and after the move. The test count and outcome must match. Run the bare `python3` form as well, so the no-dependency import-error profile stays the same. Change `uv.lock` through `uv` if workspace members change.\n\n- **Site coverage and the site tool.** Each moved path needs an update record, and evidence references in `site/project.json` that point into moved paths fail CI. The thinned `tools/` must keep `tools/project_site.py`. Run the check against the merge base with main, then build, before you push. After merge, confirm the Pages deploy and the remote SHA.\n\n- **Generated STATUS.** STATUS holds facts with no field in project.json: reservation receipts, masked units, the queue-lock owner, the later-resume state, and next actions. A generator that defaults unknown fields fabricates state. Map each current STATUS statement to a project.json source or to a retained hand-written block. Make the generator fail on an unmapped field and render roadmap markers as needs-definition. Diff the generated file against the current STATUS before you switch authority.\n\nLand the renames as one content-free commit on a fresh main integration, then commit content edits, so teammates and the mirror sync see a clean rename.",
+  "disposition": {
+    "accepted": [
+      "Preserve evidence bytes and historical paths/semantics.",
+      "Search exclusions belong outside gitignore.",
+      "Check generated progress against the actual evidence and keep operational state in its runbook.",
+      "Verify source release and Pages before publishing."
+    ],
+    "rejected": [
+      "Regenerating the historical stage2 manifest: its published bytes are immutable. Create a new current manifest instead.",
+      "Syncing or touching Spark as part of local cleanup: no such execution is needed."
+    ],
+    "qualification": "Consultation did not inspect source. Local inspection and tests determine the actual migration."
+  },
+  "models": {
+    "claude-haiku-4-5-20251001": {
+      "canonical_model": "claude-haiku-4-5",
+      "thinking_tokens": 0
+    },
+    "claude-fable-5-1": {
+      "canonical_model": "claude-fable-5-1",
+      "thinking_tokens": 7106
+    }
+  }
+}

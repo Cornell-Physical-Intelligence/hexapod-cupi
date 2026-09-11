@@ -6,10 +6,8 @@ import unittest
 import numpy as np
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'tools'))
-from perception_replay import (CameraCalibration,DepthFrame,LocalHeightMap,PoseSample,
-    PoseTimeline,WorldPoints,calibrated_point_cloud,scene_height,synthetic_depth,
-    transform_timed_points,unproject_depth,validate_transform)
-from sensor_mount_math import transform
+from experiments.terrain.tools.perception_replay import CameraCalibration, DepthFrame, LocalHeightMap, PoseSample, PoseTimeline, WorldPoints, calibrated_point_cloud, scene_height, synthetic_depth, transform_timed_points, unproject_depth, validate_transform
+from experiments.terrain.tools.sensor_mount_math import transform
 
 
 class PerceptionReplayTests(unittest.TestCase):

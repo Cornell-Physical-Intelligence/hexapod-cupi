@@ -7,8 +7,8 @@ import torch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "tools"), str(ROOT / "isaaclab")]
-from terrain_readiness import terrain_mesh
-from terrain_fixture_checks import vertical_surface_heights
+from experiments.terrain.tools.terrain_readiness import terrain_mesh
+from experiments.terrain.tools.terrain_fixture_checks import vertical_surface_heights
 from hexapod_terrain.support_queries import TerrainSupportQueries
 
 

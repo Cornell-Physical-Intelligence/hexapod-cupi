@@ -4,3 +4,19 @@
 @media(max-width:620px){main{padding:23px 16px}.masthead{padding:15px 16px}.intro{padding-bottom:17px}h1{font-size:2rem}.major-stages{grid-template-columns:1fr}.major-stage::after{display:none}.major-stage h2{font-size:1.5rem}.major-stage .stage-media{max-width:500px}.robot-grid,.next-grid,.papers{grid-template-columns:1fr}.section-title h2,.major-heading{font-size:1.4rem}.detail-heading{flex-direction:column;gap:7px}.detail .io{grid-template-columns:1fr}.rail{gap:22px}.section{margin-top:30px}.robot-diagram svg{height:215px}.priority strong{font-size:.92rem}.institution{font-size:.64rem}.intro p{font-size:.91rem}.version{font-size:.7rem}footer{padding:20px 16px;flex-direction:column;gap:12px}.graph{min-width:760px}.checkpoint .stat{font-size:2rem}}
 @media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
 @media print{.masthead nav,.motion-toggle,.update-button{display:none}main{padding:10px}.section,.major-stages{break-inside:avoid}.major-stages{grid-template-columns:repeat(4,1fr)}.layout{grid-template-columns:1fr 270px}.graph{min-width:0}.panel{overflow:visible}video{height:130px}}
+
+/* The working roadmap leads; detailed research stays available below. */
+.current-evidence { border-block: 1px solid #aaa; padding: 1.25rem 0; margin: 1.5rem 0; max-width: 78rem; }
+.current-evidence h2 { font-size: 1.25rem; margin: 0 0 .75rem; }
+.current-evidence p { max-width: 75ch; line-height: 1.6; }
+.roadmap-list { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 2rem; }
+.roadmap-marker { border-top: 2px solid #333; padding: 1rem 0; scroll-margin-top: 6rem; }
+.marker-top { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
+.roadmap-marker h3 { font-size: 1.5rem; margin: .75rem 0; }
+.roadmap-marker p { font-size: 1rem; line-height: 1.6; margin: .75rem 0; }
+.marker-scope, .metric-unit { color: #555; font-size: .875rem; }
+.roadmap-marker details { margin-top: 1rem; border-top: 1px solid #ccc; padding-top: 1rem; }
+summary { cursor: pointer; font-size: 1rem; line-height: 1.5; }
+summary:focus-visible, a:focus-visible, button:focus-visible { outline: 2px solid #222; outline-offset: 4px; }
+.section > details > summary { font-size: 1.25rem; font-weight: 600; padding: .5rem 0; }
+@media (max-width: 760px) { .roadmap-list { grid-template-columns: 1fr; gap: 1rem; } .marker-top { flex-wrap: wrap; } }

@@ -17,8 +17,9 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 sys.path[:0] = [str(ROOT / p) for p in ("tools", "isaaclab", "packages/hexapod_core", "packages/hexapod_env")]
-from mkii_training_contract import TASK_ID, digest, identity, require_admission, require_checkpoint, write_json
+from tools.mkii_training_contract import TASK_ID, digest, identity, require_admission, require_checkpoint, write_json
 from hexapod_core.fourbar_v1 import PHYSICS_DT_S, DECIMATION
 
 

@@ -8,9 +8,9 @@ import unittest
 from unittest.mock import Mock, patch
 
 ROOT = Path(__file__).resolve().parents[2]
-HERE = ROOT / "tools"
+HERE = ROOT / "experiments/terrain/tools"
 sys.path[:0] = [str(HERE), str(ROOT / "isaaclab")]
-from terrain_contact_evidence import audit_contact_log
+from experiments.terrain.tools.terrain_contact_evidence import audit_contact_log
 
 
 class ContactEvidenceTests(unittest.TestCase):

@@ -18,7 +18,7 @@ for directory in (ROOT, ROOT / "packages/hexapod_env", ROOT / "packages/hexapod_
     if str(directory) not in sys.path:
         sys.path.insert(0, str(directory))
 
-from tools.audit_mkii_stance import (  # noqa: E402
+from tools.assets.audit_mkii_stance import (  # noqa: E402
     audit_stance, forward_kinematics, measure_stance, measure_reset_jitter, primitive_bottom_z,
 )
 from hexapod_env.assets.mkii_v2 import MKII_V2_ASSET as ASSET  # noqa: E402

@@ -8,7 +8,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT/"tools"), str(ROOT/"packages/hexapod_core")]
 from hexapod_core.fourbar_v1 import TASK_ID, numerical_recipe
-from qualify_mkii_fourbar import qualify
+from tools.assets.qualify_mkii_fourbar import qualify
 
 
 CONTRACT = {"task_id": TASK_ID}

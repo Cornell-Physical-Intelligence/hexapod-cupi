@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 
-from terrain_fixture_checks import digest, vertical_surface_heights
+from experiments.terrain.tools.terrain_fixture_checks import digest, vertical_surface_heights
 from .fixture_adapter import require_matching_admission
 
 LEGS = ("lf", "lm", "lr", "rf", "rm", "rr")

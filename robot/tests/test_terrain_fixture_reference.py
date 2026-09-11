@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "isaaclab"))
 sys.path.insert(0, str(ROOT / "tools"))
 from hexapod_terrain.fixture_adapter import reference_fixture_mesh
-from terrain_fixture_checks import collision_meshes, load_catalog
+from experiments.terrain.tools.terrain_fixture_checks import collision_meshes, load_catalog
 
 @unittest.skipIf(Usd is None, "OpenUSD is required for actual composition checks")
 

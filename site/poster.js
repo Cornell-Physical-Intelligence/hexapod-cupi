@@ -4,6 +4,7 @@ const short = (x) => `${x.slice(0, 12)}…`;
 const date = (x) => new Date(x).toLocaleString(undefined, {dateStyle:'medium',timeStyle:'short'});
 const link = (url, label) => `<a class="text-link" href="${esc(url)}" target="_blank" rel="noopener">${esc(label)} ↗</a>`;
 let data, selected = 'policy', paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const capabilityStates = {needs_definition:'Needs definition', ready:'Ready', active:'Active', blocked:'Blocked', accepted:'Accepted within stated scope'};
 const states = {implemented:'Implemented',in_progress:'In progress',prepared:'Prepared',planned:'Not qualified yet'};
 
 function mediaCard(item, top = 'ACTUAL SIMULATION RECORDING') {
@@ -31,37 +32,58 @@ function graph() {
 }
 function detail() {
   const n=data.nodes.find(n=>n.id===selected);
-  return `<div class="detail-heading"><h3>${esc(n.title)}</h3>${link(n.source_url,'Open implementation')}</div><p>${esc(n.meaning)}</p><div class="io"><div><span>Input</span><p>${esc(n.input)}</p></div><div><span>Output</span><p>${esc(n.output)}</p></div></div><p class="next-note"><strong>Evidence today:</strong> ${esc(n.today)}</p><p class="next-note"><strong>Next proof:</strong> ${esc(n.next)}</p>`;
+  return `<div class="detail-heading"><h3>${esc(n.title)}</h3>${link(n.source_url,'Open implementation')}</div><p>${esc(n.meaning)}</p><div class="io"><div><span>Input</span><p>${esc(n.input)}</p></div><div><span>Output</span><p>${esc(n.output)}</p></div></div><p class="next-note">This block describes a software boundary. Qualification and current evidence are recorded in the roadmap above.</p>`;
 }
 function geometryDiagram() {
   return `<svg viewBox="0 0 530 270" role="img" aria-label="Kinematic reference diagram: 49 millimeter yaw to hip, 73.502 millimeter hip to knee, 130 millimeter knee to distal surface. Schematic of the canonical direct-drive CAD."><defs><marker id="dim" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse"><path d="M0 0 L6 3 L0 6" fill="#777"/></marker></defs><path d="M45 95 L145 95 L285 65 L450 205" fill="none" stroke="#ddd" stroke-width="16" stroke-linecap="round"/><path d="M45 95 L145 95 L285 65 L450 205" fill="none" stroke="#222" stroke-width="3" stroke-linecap="round"/>${[[45,95],[145,95],[285,65],[450,205]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="8" fill="white" stroke="#222" stroke-width="3"/>`).join('')}<path d="M50 142 H140 M154 44 L275 20 M330 75 L472 196" fill="none" stroke="#777" marker-start="url(#dim)" marker-end="url(#dim)"/><text x="66" y="166">${esc(data.geometry.coxa_joint_centers_mm)} mm</text><text x="184" y="21">${esc(data.geometry.femur_hip_to_knee_mm)} mm</text><text x="376" y="117" transform="rotate(40 376 117)">${esc(data.geometry.tibia_knee_to_distal_reference_mm)} mm</text><text x="28" y="77">yaw</text><text x="130" y="122">hip</text><text x="265" y="106">knee</text><text x="332" y="244">distal reference</text></svg>`;
 }
 
-function majorStages() {
-  return `<section aria-labelledby="checkpoint-heading"><h2 class="major-heading" id="checkpoint-heading">Major checkpoints</h2><div class="major-stages">${data.milestones.map((m,i)=>{
-    const media=data.media.find(v=>v.id===m.media_id),poster=media&&data.media.find(v=>v.id===media.poster_id);
-    return `<article class="major-stage"><div class="stage-label">Checkpoint ${i+1}</div><h2>${esc(m.title)}</h2><div class="stage-state">${esc(m.state)}</div><p>${esc(m.description)}</p>${media?`<figure class="stage-media" style="margin-left:0;margin-right:0"><video controls playsinline preload="none" ${poster?`poster="${esc(poster.url)}"`:''} aria-label="${esc(media.title)}"><source src="${esc(media.url)}" type="video/mp4"></video><figcaption>${esc(media.caption)}</figcaption></figure>`:''}<details><summary>Evidence and completion criteria</summary><p>${esc(m.gate)}</p><div class="stage-evidence">${link(m.source_url,'Evidence')}</div></details></article>`;
-  }).join('')}</div></section>`;
+function roadmap() {
+  return `<section id="roadmap" class="section" aria-labelledby="roadmap-heading">
+    <div class="section-title"><h2 id="roadmap-heading">Roadmap against the architecture</h2>
+    <p>${esc(data.progress.definition_policy)}</p></div>
+    <ol class="roadmap-list">${data.milestones.map((m,i)=>{
+      const deps=m.depends_on.map(id=>data.milestones.find(x=>x.id===id));
+      const step=m.next_step;
+      return `<li class="roadmap-marker" id="marker-${esc(m.id)}">
+        <div class="marker-top"><span class="stage-label">${String(i+1).padStart(2,'0')}</span><span class="stage-state">${esc(capabilityStates[m.status])}</span></div>
+        <h3>${esc(m.title)}</h3><p>${esc(m.description)}</p>
+        <p class="marker-scope">${esc(m.backend)}</p>
+        <p><strong>Current boundary:</strong> ${esc(m.blocker)}</p>
+        <p><strong>Next step:</strong> ${step?esc(step.outcome):'Needs definition with the team.'}</p>
+        <details><summary>Evidence, ownership and open definition</summary>
+          <p><strong>Required proof:</strong> ${esc(m.gate)}</p>
+          ${m.acceptance?`<p><strong>Accepted by ${esc(m.acceptance.by)}:</strong> ${esc(m.acceptance.scope)}</p>`:''}
+          <p><strong>Owner:</strong> ${esc(m.owner)}</p>
+          <p><strong>Depends on:</strong> ${deps.length?deps.map(d=>`<a href="#marker-${esc(d.id)}">${esc(d.title)}</a>`).join(', '):'Historical reference; no prior marker.'}</p>
+          <p><strong>Question to define:</strong> ${esc(m.question)}</p>
+          ${step?`<p>${link(step.issue,'Assigned issue')} · Reviewer: ${esc(step.reviewer)}</p><p>Acceptance: ${esc(step.acceptance)}</p>`:'<p>No implementation packet has been assigned by this roadmap.</p>'}
+          <p>${link(m.source_url,'Recorded evidence')} · ${link(data.architecture_url,`Architecture: ${m.requirements.join(', ')}`)}</p>
+        </details>
+      </li>`;
+    }).join('')}</ol></section>`;
 }
 
 function render() {
-  const checkpoint=data.checkpoint_data, stop=data.stop_data;
-  const videos=data.media.filter(m=>m.type==='video');
-  const historical=videos.find(m=>m.id===data.primary_video_id);
-  const benchmark=videos.find(m=>m.role==='benchmark');
-  const supplementary=data.media.filter(m=>m.role==='research_image');
+  const progress=data.progress;
+  const evidence=data.media.filter(m=>m.role==='benchmark'||m.id===data.primary_video_id||m.role==='cad_preview');
   $('#poster').innerHTML=`
-  <section class="intro"><div><h1>${esc(data.mission)}</h1><p>${esc(data.description)}</p></div><div class="version">Published research snapshot<a href="${esc(data.version.commit_url)}">main / ${data.version.revision.slice(0,7)} ↗</a>${esc(date(data.version.commit_date))}<br>Rebuilt on every push to main</div></section>
-  <div class="priority"><div><strong>${esc(data.focus.title)}</strong><p>${esc(data.focus.text)}</p></div><span class="badge">${esc(data.focus.badge)}</span></div>
-  ${majorStages()}
-  <div class="layout"><section id="system" class="panel"><div class="panel-head"><div><h2>System implementation</h2><p class="subtle">Select a block to see what exists and what must be proved.</p></div><button class="motion-toggle" id="motion-toggle" aria-pressed="${paused}">${paused?'Resume flow':'Pause flow'}</button></div><div class="graph-scroll"><div class="graph" id="graph">${graph()}</div></div><div class="detail" id="detail" aria-live="polite">${detail()}</div><p class="subtle" style="padding:0 24px 20px;font-size:.75rem">Animated lines explain information flow. They are not live sensor or GPU activity.</p></section>
-  <aside class="rail"><article class="panel checkpoint"><div class="eyebrow">Latest published policy · historical C study</div><h3>${esc(data.checkpoint.label)}</h3><div class="stat">${checkpoint.updates}<span style="font-size:.8rem;color:var(--muted);letter-spacing:0"> updates</span></div><p>${esc(data.checkpoint.qualification)}. Strict reload: ${checkpoint.reload_passed?'passed':'failed'}.</p><code title="${checkpoint.sha256}">${short(checkpoint.sha256)}</code><p><strong>${data.checkpoint.video_matches ? 'Matching recording available.' : 'No matching video yet.'}</strong> ${data.checkpoint.video_matches ? 'The selected clip records these exact weights.' : 'The omnidirectional clip shows the earlier policy.'}</p>${link(checkpoint.evidence_url,'Checkpoint evidence')}</article><article class="panel checkpoint failure"><div class="eyebrow">Quiet-stop evaluation</div><div class="stat">${stop.passing}<span style="font-size:1.2rem;color:var(--muted)"> / ${stop.replicas}</span></div><h3>Replicas passed quiet standing</h3><p>Measured over the final ten seconds after stopping. Drift, jitter and requested torque remain open failures.</p>${link(stop.evidence_url,'See every failed bound')}</article></aside></div>
-  <section id="findings" class="section">${sectionTitle('01','Results','Software integration, walking quality and physical deployment are different milestones.')}<div class="findings">${data.findings.map(f=>`<article class="panel finding"><div class="label">${esc(f.label)}</div><h3>${esc(f.title)}</h3><p>${esc(f.text)}</p>${link(f.source_url,'Read the evidence')}</article>`).join('')}</div><div class="comparison-note">The accepted forward clip is a visual reference. It is not an all-direction, terrain or hardware qualification. Latest results are measured at the common 0.040 rad per 20 ms limiter.</div></section>
-  <section id="robot" class="section">${sectionTitle('02','Robot geometry','Canonical detailed direct-drive CAD · 19 bodies / 18 joints · approved for all future training.')}<div class="robot-grid"><article class="panel robot-diagram"><h3>Kinematic lengths, not material cut lengths</h3>${geometryDiagram()}<p>This schematic shows joint-to-joint and knee-to-tip references. The actual rounded-square foot and all original meshes are retained.</p></article><article class="panel dimensions"><table aria-label="Canonical detailed robot dimensions"><tbody><tr><th>Coxa · joint-center distance</th><td>${esc(data.geometry.coxa_joint_centers_mm)} mm</td></tr><tr><th>Femur · hip to knee</th><td>${esc(data.geometry.femur_hip_to_knee_mm)} mm</td></tr><tr><th>Tibia · knee to distal reference</th><td>${esc(data.geometry.tibia_knee_to_distal_reference_mm)} mm</td></tr></tbody></table><p class="subtle">${esc(data.geometry.note)}</p><div class="hardware-note"><div><strong>${Number(data.geometry.mass_kg).toFixed(3)} kg</strong><span>with nominal motor overrides</span></div><div><strong>${esc(data.geometry.motors)}</strong><span>RS05 motor coordinates</span></div><div><strong>${Number(data.geometry.raw_cad_mass_kg).toFixed(3)} kg</strong><span>original CAD mass</span></div></div></article></div></section>
-  <section id="roadmap" class="section">${sectionTitle('03','Next experiments','A stage closes only when its evidence passes. Preparation does not count as completion.')}<div class="next-grid">${data.next.map((n,i)=>`<article class="panel next-item"><span>${String(i+1).padStart(2,'0')} →</span><div><h3>${esc(n.title)}</h3><p>${esc(n.text)}</p></div></article>`).join('')}</div></section>
-  <section class="section">${sectionTitle('04','Figures','Actual recordings and study figures, with their scope kept explicit.')}<div class="findings">${supplementary.map(m=>mediaCard(m,'RESEARCH FIGURE')).join('')}</div></section>
-  <section class="section">${sectionTitle('05','Related work',`${link(data.research_url,'Read the 32-work review')}`)}<div class="papers">${data.papers.map(p=>`<a class="panel paper" href="${esc(p.url)}" target="_blank" rel="noopener"><h3>${esc(p.title)}</h3><p>${esc(p.role)}</p><span>Primary source ↗</span></a>`).join('')}</div></section>
-  <section id="notebook" class="section">${sectionTitle('06','Research record','Every repository change must explain its effect on this central poster framework.')}<div class="notebook-grid"><div class="panel updates">${data.updates.slice(0,8).map(u=>`<article class="update"><time datetime="${u.date}">${esc(date(u.date))}</time><h3>${esc(u.title)}</h3><p>${esc(u.summary)}</p>${u.no_project_impact?`<p>${esc(u.reason)}</p>`:''}<p class="next-action"><strong>Next:</strong> ${esc(u.next)}</p><div class="update-links">${u.evidence_links.slice(0,4).map(l=>link(l.url,l.label)).join('')}</div></article>`).join('')}</div><aside class="panel glossary"><h3>Technical words, plain English</h3>${data.glossary.map(g=>`<details><summary>${esc(g.term)}</summary><p>${esc(g.meaning)}</p></details>`).join('')}<details><summary>What does “live” mean here?</summary><p>This poster rebuilds from verified repository content on each push to main and checks for a new revision every minute. It is a published research snapshot, not a direct Spark telemetry feed.</p></details><details><summary>How do contributors keep it current?</summary><p>Every change needs a central update record and any relevant registry changes. CI checks evidence, media hashes and coverage of changed files.</p>${link(`https://github.com/${data.repository}/blob/main/docs/PROJECT_SITE.md`,'Required contributor contract')}</details></aside></div></section>`;
+    <section class="intro"><div><h1>${esc(data.mission)}</h1><p>${link(data.architecture_url,'Read the architecture')} · Requirements, boundaries and team workflow</p></div>
+      <div class="version">Published snapshot<a href="${esc(data.version.commit_url)}">${data.version.revision.slice(0,7)} ↗</a>${esc(date(data.version.built_utc))}</div></section>
+    <section class="current-evidence" aria-labelledby="current-heading"><h2 id="current-heading">Where the evidence stops</h2><p>${esc(progress.summary)}</p><p class="subtle">Evidence recorded ${esc(date(progress.as_of))}. Repository cleanup does not establish new robot capability.</p></section>
+    ${roadmap()}
+    <section id="findings" class="section">${sectionTitle('','Measured results','Each attempt retains its model, scope and original result.')}
+      <div class="findings">${progress.facts.map(f=>`<article class="panel finding"><div class="label">${esc(f.result)} · ${esc(f.backend)}</div><h3>${esc(f.title)}</h3>${f.metric?`<div class="stat">${f.metric.value} / ${f.metric.total}<span class="metric-unit"> ${esc(f.metric.units)}</span></div><p class="subtle">${esc(f.metric.window)}</p>`:''}<p>${esc(f.text)}</p>${link(f.source_url,'Read the evidence')}</article>`).join('')}</div></section>
+    <section id="system" class="section"><details class="system-details"><summary>System boundaries and existing source</summary><p>Source implementation and demonstrated robot capability are recorded separately.</p>
+      <div class="panel-head"><h2>System connections</h2><button class="motion-toggle" id="motion-toggle" aria-pressed="${paused}">${paused?'Resume flow':'Pause flow'}</button></div>
+      <div class="graph-scroll"><div class="graph" id="graph">${graph()}</div></div><div class="detail" id="detail" aria-live="polite">${detail()}</div>
+      <p class="subtle">The flow describes architecture. It is not live telemetry.</p></details></section>
+    <section id="robot" class="section"><details><summary>Approved robot and recorded media</summary><p>${esc(data.geometry.note)}</p>
+      <div class="robot-grid"><article class="panel robot-diagram"><h3>Direct-drive model · 19 bodies / 18 joints</h3>${geometryDiagram()}<p>${Number(data.geometry.mass_kg).toFixed(3)} kg with nominal motor mass overrides. Lengths are kinematic references.</p></article></div>
+      <div class="findings">${evidence.map(m=>mediaCard(m,m.role==='benchmark'?'HISTORICAL FORWARD BENCHMARK':m.id===data.primary_video_id?'HISTORICAL POLICY RECORDING':'KINEMATIC CAD PREVIEW')).join('')}</div>
+      <details><summary>All preserved figures and recordings</summary><div class="findings">${data.media.filter(m=>!evidence.includes(m)&&['video','research_image'].includes(m.type==='video'?'video':m.role)).map(m=>mediaCard(m,'RECORDED EVIDENCE')).join('')}</div></details></details></section>
+    <section id="notebook" class="section"><details><summary>Change history and research references</summary><div class="updates">${data.updates.slice(0,8).map(u=>`<article class="update"><time datetime="${esc(u.date)}">${esc(date(u.date))}</time><h3>${esc(u.title)}</h3><p>${esc(u.summary)}</p><div class="update-links">${u.evidence_links.slice(0,4).map(l=>link(l.url,l.label)).join('')}</div></article>`).join('')}</div>
+      <p>${link(data.research_url,'Research literature and prior experiments')}</p><p>${link(data.status_url,'Generated text progress')}</p></details></section>`;
   document.body.classList.toggle('paused',paused);
   $('#motion-toggle').addEventListener('click',()=>{paused=!paused;document.body.classList.toggle('paused',paused);$('#motion-toggle').textContent=paused?'Resume flow':'Pause flow';$('#motion-toggle').setAttribute('aria-pressed',String(paused));});
   $('#graph').addEventListener('click',e=>{const button=e.target.closest('[data-node]');if(!button)return;selected=button.dataset.node;$('#graph').innerHTML=graph();$('#detail').innerHTML=detail();$(`[data-node="${selected}"]`).focus({preventScroll:true});});

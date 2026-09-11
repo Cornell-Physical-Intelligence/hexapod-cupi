@@ -6,7 +6,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT/'tools'))
-from mkii_asset_binding import verify_asset_binding, solver_runtime_equivalent
+from tools.assets.mkii_asset_binding import verify_asset_binding, solver_runtime_equivalent
 
 
 class AssetBindingTests(unittest.TestCase):

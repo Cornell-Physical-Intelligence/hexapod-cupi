@@ -23,7 +23,7 @@ from hexapod_core import fourbar_v1 as contract
 from hexapod_runtime.fourbar_adapter_v1 import FourbarActionPipeline, FourbarJointAdapter, build_fourbar_observation
 from hexapod_env.tasks.mkii_fourbar_v1.math import MotorCoordinates, observations, reward_terms
 from hexapod_env.tasks.mkii_fourbar_v1.target_schedule import MotorTargetRamp
-from mkii_fourbar_kinematics import closure_errors, joint_frames, load_model
+from tools.assets.mkii_fourbar_kinematics import closure_errors, joint_frames, load_model
 
 
 class FourbarAdapterTests(unittest.TestCase):

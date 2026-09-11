@@ -2,7 +2,7 @@
 
 This README preserves the isolated sensor prototype and its original assumptions.
 Use [STATUS.md](../../STATUS.md) for current jobs and admission outcomes, the
-[living plan](../../docs/PLAN.md) for architecture, and the
+[living plan](../../ARCHITECTURE.md) for architecture, and the
 [terrain/sensing plan](../../artifacts/project_review_2026-09-04/TERRAIN_AND_SENSING_PLAN_2026-09-09.md)
 for the current sensor workstream. Terrain/perception preparation is authorized
 in parallel with Stage 2; this prototype alone qualifies no terrain policy.

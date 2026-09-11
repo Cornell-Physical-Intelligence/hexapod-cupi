@@ -19,6 +19,7 @@ from typing import Sequence
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 TASK_ID = "Isaac-Velocity-Flat-Hexapod-MKII-V2-Direct-v0"
 LEGS = ("lf", "lm", "lr", "rf", "rm", "rr")
 EXPECTED_JOINTS = tuple(f"{leg}_{kind}" for kind in ("coxa_yaw", "femur_pitch", "tibia_pitch") for leg in LEGS)
@@ -187,7 +188,7 @@ def reset_geometry_from_state(urdf, joint_names, joint_positions, root_positions
     relying on articulation link-pose caches before the first physics step.
     """
     import numpy as np
-    from audit_mkii_stance import forward_kinematics, primitive_bottom_z, _origin
+    from tools.assets.audit_mkii_stance import forward_kinematics, primitive_bottom_z, _origin
 
     root = ET.parse(urdf).getroot()
     counts = {len(joint_positions), len(root_positions), len(root_quaternions), len(ground_heights)}
@@ -396,7 +397,7 @@ def run_cpu_asset_gate(urdf: Path, usd: Path, *, python_executable=None, checker
     process can use the latter for preflight without poisoning Kit's imports.
     """
     command = [str(python_executable or sys.executable),
-               str(checker_script or ROOT / "tools/prepare_mkii_usd.py"),
+               str(checker_script or ROOT / "tools/assets/prepare_mkii_usd.py"),
                str(urdf), str(usd), "--check"]
     completed = subprocess.run(command, capture_output=True, text=True, timeout=180)
     try:
@@ -480,7 +481,7 @@ def run_live(args, report, resolve_task_config, launch_simulation):
         try:
             # Import pxr-dependent code only AFTER Kit has selected its own binary
             # libraries. Revalidate using that runtime before constructing the env.
-            from prepare_mkii_usd import validate as validate_asset
+            from tools.assets.prepare_mkii_usd import validate as validate_asset
             kit_asset_report = validate_asset(urdf, usd)
             report.update(kit_asset_integrity_pass=kit_asset_report["pass"],
                           kit_usd_version=kit_asset_report.get("usd_version"))

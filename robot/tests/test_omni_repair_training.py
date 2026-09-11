@@ -7,10 +7,10 @@ from types import SimpleNamespace
 import unittest
 import tempfile
 import torch
-ROOT=next(p for p in Path(__file__).resolve().parents if (p/'tools/omni_repair_training.py').exists())
+ROOT=next(p for p in Path(__file__).resolve().parents if (p/'experiments/c_length_study/tools/omni_repair_training.py').exists())
 sys.path.insert(0,str(ROOT/'tools'))
-from omni_repair_training import repair_options, load_repair_checkpoint, stand_raw_action_cost
-from launch_omni_repair_pair_spark import assert_source_pair, checked_report
+from experiments.c_length_study.tools.omni_repair_training import repair_options, load_repair_checkpoint, stand_raw_action_cost
+from experiments.c_length_study.tools.launch_omni_repair_pair_spark import assert_source_pair, checked_report
 
 CHECKPOINT=None
 OPTIONS={'checkpoint_sha256':'1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8',
@@ -76,7 +76,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(stand_raw_action_cost(cmd,raw).tolist(),[4.,0.,0.,4.])
         self.assertEqual(stand_raw_action_cost(cmd,torch.zeros_like(raw)).tolist(),[0.]*4)
     def test_capture_precedes_parent_clipping(self):
-        code=(ROOT/'tools/omni_flat_env.py').read_text().split('def _pre_physics_step',1)[1].split('def _get_observations',1)[0]
+        code=(ROOT/'experiments/c_length_study/tools/omni_flat_env.py').read_text().split('def _pre_physics_step',1)[1].split('def _get_observations',1)[0]
         self.assertLess(code.index('self.omni_raw_policy_action = actions.clone()'),code.index('super()._pre_physics_step(actions)'))
 
 class PairEvidenceTests(unittest.TestCase):
@@ -102,7 +102,7 @@ class PairEvidenceTests(unittest.TestCase):
             for bad in (float('nan'), float('inf'), -0.01, 1.7):
                 report['scenarios'][0]['windows']['all']['applied_torque_abs_max_nm'] = bad
                 path.write_text(json.dumps(report))
-                with patch('launch_omni_repair_pair_spark.metrics') as screen:
+                with patch('experiments.c_length_study.tools.launch_omni_repair_pair_spark.metrics') as screen:
                     with self.assertRaises(RuntimeError):
                         checked_report(path.parent, 'identity')
                     screen.assert_not_called()

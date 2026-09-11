@@ -3,7 +3,7 @@ from pathlib import Path
 import unittest
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'tools'))
-from launch_omni_repair_spark import continuation_screen
+from experiments.c_length_study.tools.launch_omni_repair_spark import continuation_screen
 
 
 class RepairAllocationTests(unittest.TestCase):

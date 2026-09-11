@@ -9,8 +9,8 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "tools"), str(ROOT / "isaaclab")]
-from terrain_readiness import terrain_mesh, mesh_usda
-from terrain_fixture_checks import audit_usd, digest, load_catalog, probe_locations, vertical_surface_heights
+from experiments.terrain.tools.terrain_readiness import terrain_mesh, mesh_usda
+from experiments.terrain.tools.terrain_fixture_checks import audit_usd, digest, load_catalog, probe_locations, vertical_surface_heights
 from hexapod_terrain.fixture_adapter import MildTerrainSpec, require_matching_admission
 from hexapod_terrain.robot_smoke import check_start_footprint
 

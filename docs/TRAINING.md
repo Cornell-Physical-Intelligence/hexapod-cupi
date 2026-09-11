@@ -1,9 +1,14 @@
 # Training and task design
 
+> Current design: [ARCHITECTURE.md](../ARCHITECTURE.md). The canonical detailed
+> direct-drive model supersedes the dated C-study/four-bar execution directions
+> below. This file retains exact historical task contracts and gates; §9 of
+> ARCHITECTURE defines new-model admission and §11 the current quality roadmap.
+
 > **9 September 2026 update:** the user prioritizes the selected C-study Stage 2 controller, requiring smooth walking/pathing in every direction and quiet standing, with terrain/perception implementation in parallel. [STATUS](../STATUS.md) is current; [the C-study contract](../experiments/c_length_study/README.md) separates its pinned runtime and 1.6 N·m study cap from the physical four-bar program. Earlier pause, plan and actuator statements below apply to their dated physical lineage. Commit/push each verified step with relevant Markdown and preserve other work on main.
 
 
-> Scope update, 2026-09-04: the Stage2C/Phase-0 design and gates below document the existing mock lineage. The current CAD autonomy program is in [PLAN.md](PLAN.md), with a distinct prepared campaign in [NEXT_RUNS.md](NEXT_RUNS.md). Do not reuse mock stance/action defaults or a forced tripod schedule for the new policy. The USD inertia audit is unresolved; no new runs are authorized by this document.
+> Scope update, 2026-09-04: the Stage2C/Phase-0 design and gates below document the existing mock lineage. The current CAD autonomy program is in [ARCHITECTURE.md](../ARCHITECTURE.md), with a distinct prepared campaign in [STATUS.md](../STATUS.md). Do not reuse mock stance/action defaults or a forced tripod schedule for the new policy. The USD inertia audit is unresolved; no new runs are authorized by this document.
 
 Durable design reference for the hexapod locomotion task: the simulator stack,
 the observation/action/timing contract, the coordinate contract, the staged
@@ -46,7 +51,7 @@ keeps loading the mock it trained on:
 ```text
 task ID: Isaac-Velocity-Flat-Hexapod-MKII-V1-Direct-v0
 URDF: robot/hexapod_mkii_assy/urdf/hexapod_mkii_serial.urdf
-USD:  robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda  (tools/import_urdf_to_usd.py)
+USD:  robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda  (tools/assets/import_urdf_to_usd.py)
 container USD path: /workspace/hexapod/robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda  (override: HEXAPOD_MKII_V1_USD_PATH)
 mass: 8.261 kg from Onshape per-part properties, every RS05 hard-set to 191 g; no sensor payload yet
 spec: packages/hexapod_env/hexapod_env/assets/spec.py :: MKII_V1_ASSET
@@ -323,22 +328,22 @@ asset and task. It screens no policy.
 
 ## 9. Roadmap beyond Stage2C
 
-The locomotion work serves the mission in `dar.md`: survey an operator-drawn
+The locomotion work serves the mission in `ARCHITECTURE.md` §1: survey an operator-drawn
 bounded area and hold a steady platform for data collection (ADR-0004). For
 training that means:
 
 1. Stable anatomical forward/backward walking with a low, steady deck on
    asset v1 (the CAD assembly). The deck-stability composite is the primary
    grade and speed is secondary. After the team lead fills in the
-   deck-steadiness numbers, you re-derive the thresholds from `dar.md` §2.
+   deck-steadiness numbers, you re-derive the thresholds from `ARCHITECTURE.md` §1.
 2. General joystick locomotion: forward, reverse, lateral, diagonal, and yaw in
    both signs, including the command transitions a coverage planner emits at
    the ends of sweep lines.
-3. The `dar.md` terrain class (grass, gravel, a stated slope) with a
+3. The `ARCHITECTURE.md` §1 terrain class (grass, gravel, a stated slope) with a
    body-frame height scan (contract C2, ADR-0002). The lidar serves mapping
    and localization and does not feed the policy.
 
-`docs/PLAN.md` holds milestones, gates, and ownership. The user has confirmed
+`ARCHITECTURE.md` holds milestones, gates, and ownership. The user has confirmed
 RealSense D455 and Livox Mid-360 ownership, permits additional purchases, and
 authorizes terrain/perception preparation in parallel with the C-study Stage 2
 priority. Terrain training still requires the selected policy's Stage 2 gates

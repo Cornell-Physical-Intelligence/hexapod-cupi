@@ -108,9 +108,9 @@ From the repository root with its locked development environment:
 ```sh
 uv sync --dev
 uv run python -m unittest discover -s isaaclab/tests
-uv run python tools/audit_mkii_stance.py
-uv run python tools/audit_mkii_linkage.py
-uv run python tools/prepare_mkii_usd.py --check \
+uv run python tools/assets/audit_mkii_stance.py
+uv run python tools/assets/audit_mkii_linkage.py
+uv run python tools/assets/prepare_mkii_usd.py --check \
   robot/hexapod_mkii_assy/urdf/hexapod_mkii_serial.urdf \
   robot/hexapod_mkii_assy/usd/hexapod_mkii_serial_v2/hexapod_mkii_serial_v2.usda
 ```
@@ -121,7 +121,7 @@ CLI gate. Tests deliberately require the known discrepancy to be reported,
 not mislabeled as a pass.
 
 To prepare another fresh, absent output directory from a raw self-contained
-import, use `tools/import_urdf_to_usd.py URDF NEW_OUTPUT --source-usd RAW_USD`.
+import, use `tools/assets/import_urdf_to_usd.py URDF NEW_OUTPUT --source-usd RAW_USD`.
 This CPU path copies the source, authors contact reports, then performs the
 complete gate before publishing. Existing/nonempty outputs are rejected.
 **Do not run the contact-report helper on a prepared bundle:** its immutable

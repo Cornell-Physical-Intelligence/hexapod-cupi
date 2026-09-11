@@ -114,7 +114,7 @@ raise AssertionError('Native teardown unexpectedly returned')
             self.assertEqual(target.read_bytes(), b"retained evidence")
 
     def test_diagnostic_cannot_supply_training_admission(self):
-        from mkii_training_contract import require_admission
+        from tools.mkii_training_contract import require_admission
         contract = {"task_id": module.TASK_ID}
         with tempfile.TemporaryDirectory() as root:
             path = Path(root)/"report.json"

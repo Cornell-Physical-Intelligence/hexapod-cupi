@@ -5,10 +5,8 @@ import sys
 import unittest
 import torch
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'tools'))
-from omni_flat_math import (sample_commands, slew_commands, tracking_terms,
-                            evaluation_scenarios, transition_sequence, ObservationHistory, scenario_gate,
-                            integrate_body_twist, trajectory_command)
-from omni_path_demo import path_follower, path_reference, demo_specs
+from experiments.c_length_study.tools.omni_flat_math import sample_commands, slew_commands, tracking_terms, evaluation_scenarios, transition_sequence, ObservationHistory, scenario_gate, integrate_body_twist, trajectory_command
+from experiments.c_length_study.tools.omni_path_demo import path_follower, path_reference, demo_specs
 
 
 class OmniContracts(unittest.TestCase):

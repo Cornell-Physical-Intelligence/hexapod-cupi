@@ -31,6 +31,9 @@ jobs:
       - name: Run C-study, terrain and perception tests
         run: uv run python -m unittest discover -s robot/tests
 
+      - name: Verify owned source boundaries
+        run: uv run python tools/source_inventory.py check
+
       - name: Verify the pinned C-study runtime
         run: uv run python tools/c_study_runtime.py
 
@@ -38,4 +41,4 @@ jobs:
         run: uv run python tools/check_pipeline_lineages.py historical
 
       - name: Verify the current integrated release manifest
-        run: uv run python tools/check_pipeline_lineages.py current --manifest isaaclab/deploy/stage3_sensor_transport_20260910_pipeline.sha256
+        run: uv run python tools/check_pipeline_lineages.py current --manifest isaaclab/deploy/repository_foundation_20260911_pipeline.sha256

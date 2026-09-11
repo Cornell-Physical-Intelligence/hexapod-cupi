@@ -52,7 +52,7 @@ class TerrainSupportQueries:
             raise ValueError("Nonempty fixtures, positive cell size and chunk size required")
         if dtype not in (torch.float32, torch.float64):
             raise ValueError("Terrain queries require a floating-point geometry type")
-        from terrain_fixture_checks import validate_mesh
+        from experiments.terrain.tools.terrain_fixture_checks import validate_mesh
         self.device, self.dtype = torch.device(device), dtype
         self.fixture_ids = tuple(record[0]["id"] for record in records)
         if len(set(self.fixture_ids)) != len(self.fixture_ids):

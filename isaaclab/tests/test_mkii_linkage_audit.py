@@ -12,7 +12,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-import audit_mkii_linkage as audit
+from tools.assets import audit_mkii_linkage as audit
 
 LINKAGE = ROOT / "robot/hexapod_mkii_assy/urdf/hexapod_mkii_linkage.urdf"
 

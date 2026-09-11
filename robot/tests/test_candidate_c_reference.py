@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/"tools"))
-import screen_length_mechanics as s
+from experiments.c_length_study.tools import screen_length_mechanics as s
 
 class CandidateReferenceTests(unittest.TestCase):
     def test_reference_preserves_asset_and_joint_identity(self):

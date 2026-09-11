@@ -8,7 +8,7 @@ RS05 limits. Its production CAD fit is still separate work.
 
 ## Original fixture physics passed
 
-`tools/validate_terrain_fixtures.py` runs two independent levels:
+`experiments/terrain/tools/validate_terrain_fixtures.py` runs two independent levels:
 
 - `--cpu-only`: opens each actual USDA with OpenUSD, compares its vertices and
   triangle indices against the prepared NPZ, verifies metre/Z-up frames and
@@ -30,7 +30,7 @@ RS05 limits. Its production CAD fit is still separate work.
 The exact remote evidence is
 `/home/orionh/HEXAPOD_runs/mock_length_study_20260909/terrain_fixture_smoke_003/fixtures/validation.json`.
 Its frozen source is the sibling `terrain_smoke_source_003` directory; the
-executed `tools/validate_terrain_fixtures.py` SHA-256 is
+executed `experiments/terrain/tools/validate_terrain_fixtures.py` SHA-256 is
 `60a1c9da5f01537492cf64d99d8140e2342d4b03c5a54ed3e96bd08a7f9bde9d`.
 The result has `status = completed` and `all_fixture_smokes_passed = true`.
 This qualifies fixture collision, ideal rays and probe contacts. Full C standing,
@@ -49,7 +49,7 @@ Inside the same Isaac Lab container, with the newly frozen source mounted at
 ```sh
 PYTHONPATH=/workspace/hexapod/tools:/workspace/hexapod/isaaclab \
   /workspace/isaaclab/_isaac_sim/python.sh \
-  /workspace/hexapod/tools/validate_terrain_fixtures.py \
+  /workspace/hexapod/experiments/terrain/tools/validate_terrain_fixtures.py \
   --catalog /workspace/hexapod/artifacts/terrain_readiness_2026-09-09/terrain_catalog.json \
   --fixtures train_smooth_rough_1103,train_ramp_1103,train_step_1103,train_ridge_1103,train_pit_1103 \
   --output /outputs/terrain_fixture_smoke_001 --headless --device cuda:0
@@ -118,7 +118,7 @@ passing the config to an arbitrary subclass will override that subclass's logic.
 
 ### Runnable full C standing check
 
-`tools/validate_terrain_robot.py` now supplies that runner. It requires the exact
+`experiments/terrain/tools/validate_terrain_robot.py` now supplies that runner. It requires the exact
 full 32-environment/1000-step flat standing admission, its matching study package
 and a successful fixture runtime admission. It verifies the original C geometry,
 all 18 named stance targets, imported masses/COM/inertia and contact-report APIs
@@ -144,7 +144,7 @@ at `/outputs`. The exact container invocation is:
 ```sh
 PYTHONPATH=/workspace/hexapod/tools:/workspace/hexapod/isaaclab \
   /workspace/isaaclab/_isaac_sim/python.sh \
-  /workspace/hexapod/tools/validate_terrain_robot.py \
+  /workspace/hexapod/experiments/terrain/tools/validate_terrain_robot.py \
   --package /study --admission /flat-admission.json \
   --fixture-admission /fixture-admission.json \
   --catalog /workspace/hexapod/artifacts/terrain_readiness_2026-09-09/terrain_catalog.json \

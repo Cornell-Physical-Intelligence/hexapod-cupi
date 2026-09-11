@@ -13,9 +13,9 @@ sys.path.insert(0, str(ROOT/'tools'))
 try:
     import numpy as np
     from pxr import Gf, Usd, UsdPhysics
-    import mkii_fourbar_kinematics as kin
-    import prepare_mkii_fourbar_usd as builder
-    import audit_mkii_fourbar_usd as audit
+    from tools.assets import mkii_fourbar_kinematics as kin
+    from tools.assets import prepare_mkii_fourbar_usd as builder
+    from tools.assets import audit_mkii_fourbar_usd as audit
 except ImportError:
     np = None
 

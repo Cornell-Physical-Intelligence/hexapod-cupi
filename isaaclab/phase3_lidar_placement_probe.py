@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Measure Mid-360 self-occlusion in Isaac Sim at one mount height.
 
-`tools/lidar_placement_study.py` answers the mount question offline, from the
+`experiments/terrain/tools/lidar_placement_study.py` answers the mount question offline, from the
 URDF and its meshes. This script answers the same question inside the simulator
 that will actually carry the sensor, so the two can be compared. It holds the
 robot at its default stance on flat ground, casts one Mid-360 surrogate scan,

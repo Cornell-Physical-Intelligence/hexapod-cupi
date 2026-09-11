@@ -10,7 +10,7 @@ from unittest.mock import Mock, patch
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
-spec = importlib.util.spec_from_file_location("terrain_robot_launcher", ROOT / "tools/launch_terrain_robot_smoke_spark.py")
+spec = importlib.util.spec_from_file_location("terrain_robot_launcher", ROOT / "experiments/terrain/tools/launch_terrain_robot_smoke_spark.py")
 launcher = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(launcher)
 

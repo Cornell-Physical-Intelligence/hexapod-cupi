@@ -11,7 +11,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / p) for p in ("tools", "isaaclab", "packages/hexapod_core", "packages/hexapod_env")]
-from mkii_training_contract import TASK_ID, digest, identity, write_json
+from tools.mkii_training_contract import TASK_ID, digest, identity, write_json
 from hexapod_core.fourbar_v1 import ACTIVE_JOINT_NAMES, PHYSICS_DT_S, DECIMATION
 from validate_mkii_fourbar import (PhysicalMetrics, SubstepHook, apply_numerical_recipe,
                                   closure_relative_point_velocities, grade, tensor)
@@ -352,7 +352,7 @@ def main(argv=None):
         if early.diagnostic_usd == "physical_mimic_v5":
             usd = ROOT / "robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5/hexapod_mkii_fourbar_v5.usda"
         report["usd_path_relative"], report["usd_sha256"] = usd.relative_to(ROOT).as_posix(), digest(usd)
-        result = subprocess.run([sys.executable, str(ROOT / "tools/audit_mkii_fourbar_usd.py"), str(usd)],
+        result = subprocess.run([sys.executable, str(ROOT / "tools/assets/audit_mkii_fourbar_usd.py"), str(usd)],
                                 text=True, capture_output=True, timeout=180)
         report["cpu_asset_pass"] = result.returncode == 0 and json.loads(result.stdout).get("pass") is True
         if not report["cpu_asset_pass"]:
@@ -386,8 +386,8 @@ def main(argv=None):
             raise ValueError("Diagnostic configuration imported standalone USD before Kit")
         with launch_simulation(cfg, args):
             try:
-                from audit_mkii_fourbar_usd import validate
-                import mkii_fourbar_kinematics as kin
+                from tools.assets.audit_mkii_fourbar_usd import validate
+                from tools.assets import mkii_fourbar_kinematics as kin
                 import gymnasium as gym
                 import torch
                 import warp as wp

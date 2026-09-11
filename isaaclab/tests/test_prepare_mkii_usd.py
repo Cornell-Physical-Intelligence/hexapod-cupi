@@ -23,7 +23,7 @@ from pxr import Gf, Usd, UsdGeom, UsdPhysics
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-spec = importlib.util.spec_from_file_location("prepare_mkii_usd_test_subject", ROOT / "tools/prepare_mkii_usd.py")
+spec = importlib.util.spec_from_file_location("prepare_mkii_usd_test_subject", ROOT / "tools/assets/prepare_mkii_usd.py")
 subject = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = subject
 spec.loader.exec_module(subject)

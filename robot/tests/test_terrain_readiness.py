@@ -4,8 +4,7 @@ import unittest
 import numpy as np
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'tools'))
-from terrain_readiness import (body_to_navigation,optical_rotation_body,terrain_channels,
-                              support_region_observed,terrain_mesh,validate_mesh,mesh_usda)
+from experiments.terrain.tools.terrain_readiness import body_to_navigation, optical_rotation_body, terrain_channels, support_region_observed, terrain_mesh, validate_mesh, mesh_usda
 
 
 class TerrainReadinessTests(unittest.TestCase):

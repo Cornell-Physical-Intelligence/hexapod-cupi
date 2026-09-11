@@ -156,7 +156,7 @@ a separate path under `usd/hexapod_mkii_serial_v2/` and uses
 Run the CPU geometry gate after every model/stance change:
 
 ```sh
-python3 tools/audit_mkii_stance.py
+python3 tools/assets/audit_mkii_stance.py
 python3 -m unittest discover -s isaaclab/tests -p test_mkii_v2_stance_and_frames.py
 ```
 

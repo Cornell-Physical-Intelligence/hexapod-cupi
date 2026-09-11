@@ -9,9 +9,7 @@ from types import SimpleNamespace
 import numpy as np
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'tools'))
-from sensor_mount_math import (apply_transform, axis_rotation, look_outward,
-                               nominal_profile, optical_visibility,
-                               replay_visibility_contract, segments_hit_boxes, transform)
+from experiments.terrain.tools.sensor_mount_math import apply_transform, axis_rotation, look_outward, nominal_profile, optical_visibility, replay_visibility_contract, segments_hit_boxes, transform
 
 
 class SensorMountMathTests(unittest.TestCase):
@@ -65,7 +63,7 @@ class SensorMountMathTests(unittest.TestCase):
     @unittest.skipUnless(importlib.util.find_spec('trimesh') and importlib.util.find_spec('rtree'),'optional exact-ray dependencies')
     def test_exact_triangle_hit_and_segment_end(self):
         import trimesh
-        from screen_sensor_mounts import ExactMeshScreen
+        from experiments.terrain.tools.screen_sensor_mounts import ExactMeshScreen
         path=Path('test_box.stl')
         box=np.array([[[1.,-1.,-1.],[2.,1.,1.]]])
         robot=SimpleNamespace(boxes={'body':box},parts={'body':[(path,np.eye(4))]})

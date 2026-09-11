@@ -17,7 +17,7 @@ import torch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-from mkii_training_contract import identity, require_admission, require_checkpoint, write_json, digest, TASK_ID
+from tools.mkii_training_contract import identity, require_admission, require_checkpoint, write_json, digest, TASK_ID
 
 spec = importlib.util.spec_from_file_location("fourbar_trainer_guard_tests", ROOT / "isaaclab/train_mkii_fourbar.py")
 trainer = importlib.util.module_from_spec(spec)

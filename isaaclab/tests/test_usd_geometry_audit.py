@@ -9,7 +9,7 @@ from pxr import Gf, Usd, UsdGeom, UsdPhysics
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-from usd_geometry_audit import validate_geometry  # noqa: E402
+from tools.assets.usd_geometry_audit import validate_geometry  # noqa: E402
 
 
 URDF = """<robot name="fixture">

@@ -17,7 +17,8 @@ def identity(root=ROOT):
     root = Path(root).resolve()
     files = set()
     for directory, suffixes in (("packages", {".py", ".json", ".yaml", ".yml", ".toml"}), ("configs", {".json", ".yaml"}),
-                                ("tools", {".py"}), ("isaaclab", {".py"}),
+                                ("tools", {".py"}), ("experiments/c_length_study/tools", {".py"}),
+                                ("experiments/terrain/tools", {".py"}), ("isaaclab", {".py"}),
                                 ("robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v3", None),
                                 ("robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v4", None),
                                 ("robot/hexapod_mkii_assy/usd/hexapod_mkii_fourbar_v5", None),

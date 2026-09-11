@@ -438,7 +438,7 @@ print(json.dumps({'pass': report['pass'], 'usd_version': report['usd_version']})
         import torch  # Load native extensions before guarding import ordering.
         events = []
         fake_gym = types.ModuleType("gymnasium")
-        fake_prepare = types.ModuleType("prepare_mkii_usd")
+        fake_prepare = types.ModuleType("tools.assets.prepare_mkii_usd")
         asset = {"pass": True, "errors": [], "usd_root_sha256": "fixture", "usd_version": [0, 26, 8]}
         fake_prepare.validate = lambda *_: events.append("kit_asset_gate") or asset
         def make(*_, **__):
@@ -455,11 +455,11 @@ print(json.dumps({'pass': report['pass'], 'usd_version': report['usd_version']})
                 raise SystemExit(0)
         original_import = builtins.__import__
         def guarded_import(name, *args, **kwargs):
-            if name == "prepare_mkii_usd" or name == "pxr" or name.startswith("pxr."):
+            if name == "tools.assets.prepare_mkii_usd" or name == "pxr" or name.startswith("pxr."):
                 self.assertIn("launcher_entered", events, "pxr imported before Kit selected its ABI")
             return original_import(name, *args, **kwargs)
         with tempfile.TemporaryDirectory() as directory, \
-                temporary_modules({"gymnasium": fake_gym, "prepare_mkii_usd": fake_prepare}), \
+                temporary_modules({"gymnasium": fake_gym, "tools.assets.prepare_mkii_usd": fake_prepare}), \
                 mock.patch.object(validator, "run_cpu_asset_gate", side_effect=lambda *_: events.append("child_gate") or asset), \
                 mock.patch("builtins.__import__", side_effect=guarded_import), contextlib.redirect_stdout(io.StringIO()):
             report_path = Path(directory) / "failed_startup.json"

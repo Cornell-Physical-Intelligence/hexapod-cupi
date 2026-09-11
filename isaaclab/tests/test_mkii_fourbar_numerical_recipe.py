@@ -10,7 +10,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT/'packages/hexapod_core'), str(ROOT/'tools')]
 from hexapod_core import fourbar_v1 as contract
-from qualify_mkii_fourbar import qualify
+from tools.assets.qualify_mkii_fourbar import qualify
 
 spec = importlib.util.spec_from_file_location('_fourbar_recipe_validator', ROOT/'isaaclab/validate_mkii_fourbar.py')
 validator = importlib.util.module_from_spec(spec)

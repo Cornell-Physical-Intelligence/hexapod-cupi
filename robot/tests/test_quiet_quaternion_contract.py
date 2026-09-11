@@ -11,8 +11,8 @@ import torch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools"))
-from omni_diagnostics import capture_step
-from omni_quiet_review import quiet_metrics, QUIET_GATES
+from experiments.c_length_study.tools.omni_diagnostics import capture_step
+from experiments.c_length_study.tools.omni_quiet_review import quiet_metrics, QUIET_GATES
 
 
 class QuietQuaternionContractTests(unittest.TestCase):

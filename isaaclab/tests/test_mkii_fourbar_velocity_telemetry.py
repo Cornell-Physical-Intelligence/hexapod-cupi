@@ -13,7 +13,7 @@ import torch
 
 import test_validate_mkii_fourbar_metrics as metrics_tests
 from test_validate_mkii_fourbar_metrics import ROOT, FakeRobot, kin, matrix_from_quat, validator
-from audit_mkii_stance import _rotation
+from tools.assets.audit_mkii_stance import _rotation
 
 
 class FourbarVelocityTelemetryTests(unittest.TestCase):

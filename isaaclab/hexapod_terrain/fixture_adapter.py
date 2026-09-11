@@ -35,7 +35,7 @@ class MildTerrainSpec:
 
     def load(self):
         # Put repository tools/ on PYTHONPATH alongside isaaclab/ in the launcher.
-        from terrain_fixture_checks import audit_usd, load_catalog
+        from experiments.terrain.tools.terrain_fixture_checks import audit_usd, load_catalog
 
         entry, usd, vertices, faces = load_catalog(self.catalog, [self.fixture_id])[0]
         if entry.get("curriculum") == "avoidance_only" or entry["family"] == "pit":
@@ -63,7 +63,7 @@ def reference_fixture_mesh(stage, prim_path, usd_path):
     Author the matching Mesh type only in the new scene; keep the USD unchanged.
     """
     from pxr import UsdGeom
-    from terrain_fixture_checks import collision_meshes
+    from experiments.terrain.tools.terrain_fixture_checks import collision_meshes
 
     if stage.GetPrimAtPath(prim_path).IsValid():
         raise ValueError(f"Terrain prim already exists: {prim_path}")
@@ -86,7 +86,7 @@ def adapt_flat_cfg_for_fixture_smoke(cfg, spec, *, admission, asset_identity, pu
     entry, usd = spec.load()
 
     from isaaclab.terrains import TerrainImporter, TerrainImporterCfg
-    from terrain_fixture_checks import bind_fixture_material
+    from experiments.terrain.tools.terrain_fixture_checks import bind_fixture_material
 
     class ExplicitFixtureImporter(TerrainImporter):
         def import_usd(self, name, usd_path):

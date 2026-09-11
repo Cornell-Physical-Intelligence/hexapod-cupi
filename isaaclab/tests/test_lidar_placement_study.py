@@ -1,7 +1,7 @@
 """Bind the Mid-360 placement study to the data it claims to come from.
 
 `robot/sensors/livox_mid360/config/mid360_sensor.json` is a transcription of
-Livox's manual and STEP models, and `tools/lidar_placement_study.py` is the
+Livox's manual and STEP models, and `experiments/terrain/tools/lidar_placement_study.py` is the
 geometry that consumes it. These tests re-derive the transcribed numbers from
 the STEP file itself, bind the field of view to the copy already held in
 `isaaclab/hexapod_phase3/sensor_cfg.py`, and check the rasterizer against two
@@ -25,7 +25,7 @@ import numpy as np
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-TOOL_PATH = REPO_ROOT / "tools" / "lidar_placement_study.py"
+TOOL_PATH = REPO_ROOT / "experiments/terrain/tools" / "lidar_placement_study.py"
 SENSOR_JSON = REPO_ROOT / "robot" / "sensors" / "livox_mid360" / "config" / "mid360_sensor.json"
 MOUNTS_JSON = REPO_ROOT / "robot" / "sensors" / "livox_mid360" / "config" / "mounts.json"
 DEVICE_STEP = REPO_ROOT / "robot" / "sensors" / "livox_mid360" / "source" / "mid-360-asm.stp"

@@ -391,7 +391,7 @@ def generate(config_path=DEFAULT_CONFIG, output=None):
     # same verified motor source after the production package refactor.
     if config["actuator_config"] == "isaaclab/hexapod_rl/asset_cfg.py":
         sys.path.insert(0, str(ROOT / "tools"))
-        from c_study_runtime import bootstrap_c_study_runtime
+        from tools.c_study_runtime import bootstrap_c_study_runtime
         binding = bootstrap_c_study_runtime(repo_root=ROOT)
         config["actuator_config"] = str((Path(binding["package_directory"]) / "asset_cfg.py").relative_to(ROOT))
     output = output or DEFAULT_CONFIG.parent

@@ -12,9 +12,8 @@ import numpy as np
 import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools"))
-from omni_diagnostics import (apply_omni_overrides, diagnostic_options,
-                              diagnostic_scenarios, sample_masks, _summary, capture_step)
-from omni_action_filter import filter_joint_targets
+from experiments.c_length_study.tools.omni_diagnostics import apply_omni_overrides, diagnostic_options, diagnostic_scenarios, sample_masks, _summary, capture_step
+from experiments.c_length_study.tools.omni_action_filter import filter_joint_targets
 
 
 class DiagnosticContracts(unittest.TestCase):
@@ -85,7 +84,7 @@ class DiagnosticContracts(unittest.TestCase):
 
     def test_stand_motion_costs_are_zero_for_moving_commands_and_rest(self):
         # Load only the actual pure function from the Isaac-backed module.
-        tree = ast.parse((Path(__file__).resolve().parents[2] / "tools/omni_flat_env.py").read_text())
+        tree = ast.parse((Path(__file__).resolve().parents[2] / "experiments/c_length_study/tools/omni_flat_env.py").read_text())
         function = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "quiet_stand_terms")
         namespace = {}
         exec(compile(ast.Module(body=[function], type_ignores=[]), "quiet_stand_terms", "exec"), namespace)

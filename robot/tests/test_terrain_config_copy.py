@@ -27,7 +27,7 @@ class Config:
 
 class TerrainConfigCopyTests(unittest.TestCase):
     def test_actual_omni_dynamic_fields_and_nested_state_survive_without_aliasing(self):
-        tree = ast.parse((ROOT / "tools/omni_flat_env.py").read_text())
+        tree = ast.parse((ROOT / "experiments/c_length_study/tools/omni_flat_env.py").read_text())
         function = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "configure_omni")
         namespace = {}
         exec(compile(ast.Module(body=[function], type_ignores=[]), "configure_omni.py", "exec"), namespace)

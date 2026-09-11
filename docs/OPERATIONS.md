@@ -401,7 +401,7 @@ step 4 passes and step 5 confirms the runtime joint order.
    the asset modules).
 2. Generate the USD inside the container from `/workspace/hexapod`:
    ```sh
-   python tools/import_urdf_to_usd.py \
+   python tools/assets/import_urdf_to_usd.py \
      robot/hexapod_mkii_assy/urdf/hexapod_mkii_serial.urdf \
      robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda
    ```
@@ -416,7 +416,7 @@ step 4 passes and step 5 confirms the runtime joint order.
    import from a checkout where `meshes/` sits beside `urdf/`.
 3. Contact reports, same container:
    ```sh
-   python tools/enable_nested_contact_reports.py \
+   python tools/assets/enable_nested_contact_reports.py \
      robot/hexapod_mkii_assy/usd/hexapod_mkii_serial/hexapod_mkii_serial.usda
    ```
    Expected: `CONTACT_REPORTS_ENABLED bodies=19`.
