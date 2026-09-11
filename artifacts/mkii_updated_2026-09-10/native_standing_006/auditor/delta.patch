@@ -1,0 +1,64 @@
+--- tmp/canonical_native_standing_terminal_auditor_005/audit_remote.py
++++ tmp/canonical_native_standing_terminal_auditor_006/audit_remote.py
+@@ -4,16 +4,16 @@
+ import hashlib,importlib.util,json,math,re,subprocess,sys,time
+ sys.dont_write_bytecode=True
+ BASE=Path('/home/orionh/HEXAPOD_runs/canonical_direct_20260910')
+-RUN=BASE/'native_standing_005'; PAUSE=BASE/'forecast_pause_013'
+-UNIT='hexapod-canonical-native-standing-005-20260910.service'
+-INV='f70b9d4b929244699a5725e018b38ba9'
+-SOURCE=BASE/'standing_source_004'; HOST=BASE/'standing_host_006'; GUARD=BASE/'standing_guard_007'; ASSET=BASE/'asset_001'
++RUN=BASE/'native_standing_006'; PAUSE=BASE/'forecast_pause_014'
++UNIT='hexapod-canonical-native-standing-006-20260910.service'
++INV='64a373e301c24b70aa3790c18aca147c'
++SOURCE=BASE/'standing_source_005'; HOST=BASE/'standing_host_007'; GUARD=BASE/'standing_guard_008'; ASSET=BASE/'asset_001'
+ ADMISSION=BASE/'native_actuation_001/actuation'
+ RESERVATION=BASE/'exclusive_reservation_001'
+ SUPERVISOR=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009')
+-PINS=[('source',SOURCE,'FREEZE_SHA256.json','037013353a30c5f3751235634aafdb3f204b676837962b14df72c3051c0a2786',95),
+- ('host',HOST,'FREEZE_SHA256.json','51a0dbdc5d46a6b4f4a24b4e26c5091e7c588ae8d31785a264f95b3ffc042ed6',55),
+- ('guard',GUARD,'FREEZE_SHA256.json','dc47526018efb5336dfa42fbb145366d9fbc53d47b59a657d25b8bd4784c3b8e',58),
++PINS=[('source',SOURCE,'FREEZE_SHA256.json','c87f2d340c935cd947c7aed3f3dcd7c9a9965b6e19d6726546abb560b27ab131',109),
++ ('host',HOST,'FREEZE_SHA256.json','7085776db928bd600ee3e8aff48af433eee1f35e758ce6221b34e4f2cfe50577',63),
++ ('guard',GUARD,'FREEZE_SHA256.json','75553e2d957aefded20704e15835f3a1512d0d182080243edf720d50613ed0a7',70),
+  ('ownership_supervisor',SUPERVISOR,'campaign_source_hashes.json','04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e',926)]
+ 
+ def require(ok,message):
+@@ -93,16 +93,16 @@
+  return {'verified':True,'guard_verification':receipt,'files':{name:{'sha256':sha(Path(name)),'size_bytes':Path(name).stat().st_size}for name in g.RESERVATION_PINS},'persistent_release_attempted':False}
+ 
+ def solver_check(record,identity,state):
+- require(identity.get('solver_recipe')=={'position_iterations':32,'velocity_iterations':4},'Wrong declared solver recipe')
++ require(identity.get('solver_recipe')=={'position_iterations':32,'velocity_iterations':0},'Wrong declared solver recipe')
+  expected_roots={'/Robot'}
+  require(identity.get('num_envs')==1,'Unexpected replica allocation')
+  require(state.get('checks',{}).get('solver_recipe_readback')is True,'Missing completed solver check')
+  for phase in ('before','after_authoring','after_reset','after_controlled_steps'):
+   values=record.get(phase,{})
+   require(set(values)==expected_roots,'Incomplete solver root/phase:'+phase)
+-  expected=(32,1,[False,False])if phase=='before'else(32,4,[True,True])
++  expected=(32,1,[False,False])if phase=='before'else(32,0,[True,True])
+   require(all((v.get('position_iterations'),v.get('velocity_iterations'),v.get('authored'))==expected for v in values.values()),'Wrong solver readback:'+phase)
+- return {'passed':True,'roots':sorted(expected_roots),'before':[32,1],'after':[32,4],'scope':'Authored USD attribute readback only; no independent backend solver introspection'}
++ return {'passed':True,'roots':sorted(expected_roots),'before':[32,1],'after':[32,0],'scope':'Authored USD attribute readback only; no independent backend solver introspection'}
+ 
+ def deadline_check(job,proof):
+  expected={k:v for k,v in proof.items() if k not in ('original_function_source','adapted_function_source','_original_module_source')}
+@@ -115,7 +115,7 @@
+  def attempt(label,fn):
+   try:v=fn();result[label]=v;return v
+   except Exception as e:result['errors'].append({'check':label,'error':repr(e)});return None
+- if attempt('invocation_binding',lambda:require(re.fullmatch('[0-9a-f]{32}',INV)is not None,'Actual native5 invocation remains pending')or True)is None:return result
++ if attempt('invocation_binding',lambda:require(re.fullmatch('[0-9a-f]{32}',INV)is not None,'Actual native6 invocation remains pending')or True)is None:return result
+  unit=attempt('unit',lambda:dict(line.split('=',1) for line in call(['systemctl','--user','show',UNIT,'-p','ActiveState','-p','SubState','-p','Result','-p','InvocationID','-p','ExecMainStatus','-p','MainPID']).splitlines() if '=' in line))
+  journal=attempt('journal',lambda:[json.loads(s) for s in call(['journalctl','--user','-u',UNIT,'--no-pager','-o','json']).splitlines() if s.strip()])
+  if unit is None or journal is None:return result
+@@ -137,6 +137,8 @@
+  result['raw_acquisition_completed']=bool(state is not None and state.get('status')=='completed' and state.get('explicit_steps_completed')==8000)
+  if (RUN/'standing/standing_report.json').is_file():attempt('standing_report',lambda:read(RUN/'standing/standing_report.json'))
+  if (RUN/'standing/solver_readback.json').is_file():attempt('solver_readback',lambda:read(RUN/'standing/solver_readback.json'))
++ if (RUN/'standing/legacy_friction_readback.json').is_file():attempt('legacy_friction_readback',lambda:read(RUN/'standing/legacy_friction_readback.json'))
++ if (RUN/'standing/session.json').is_file():attempt('session',lambda:read(RUN/'standing/session.json'))
+  if job is not None:attempt('owned_absence',lambda:owned_absence(job))
+  def phase_inventory():
+   actual={p.name for p in (RUN/'jobs').glob('*.json') if not p.name.endswith('_contact_data_audit.json')};require(actual=={'standing.json'},'Unexpected or missing allocated jobs');return sorted(actual)

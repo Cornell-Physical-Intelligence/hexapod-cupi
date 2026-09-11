@@ -1,0 +1,84 @@
+--- guard004
++++ guard005
+@@ -1,4 +1,4 @@
+-"""Canonical source003 standing1 guard; prior operationally stopped32 supplies ownership lineage only."""
++"""Canonical source003 standing1 guard; prior competing-workload interruption supplies ownership lineage only."""
+ from pathlib import Path
+ from types import SimpleNamespace
+ import fcntl,hashlib,importlib.util,json,os,subprocess,sys,time
+@@ -9,24 +9,29 @@
+ ASSET=BASE/'asset_001'
+ ADMISSION=BASE/'native_actuation_001/actuation'
+ SUPERVISOR_SOURCE=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009')
+-OUTPUT=BASE/'native_standing_003'
+-PAUSE=BASE/'forecast_pause_009'
+-UNIT='hexapod-canonical-native-standing-003-20260910.service'
++OUTPUT=BASE/'native_standing_004'
++PAUSE=BASE/'forecast_pause_011'
++UNIT='hexapod-canonical-native-standing-004-20260910.service'
+ HOST=BASE/'standing_host_003/launch_standing_spark.py'
+ SOURCE_SHA256='e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0'
+ SUPERVISOR_SHA256='04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e'
+ HOST_SHA256='5a4cd750cdaa0b4362af76e0be46e3cde8b1e7193960e19c332d3c178b553159'
+ HOST_FREEZE_SHA256='968caeb48082ee0a72dea9acc1a6b7b93d2f9b14b9f4c2f05874070a03be1a95'
+-PREVIOUS_UNIT='hexapod-canonical-native-standing32-001-20260910.service'
+-PREVIOUS_INVOCATION='ce49acca09a14d77b081fc5cb6c41622'
+-PREVIOUS_ROOT=BASE/'native_standing32_001'
+-PREVIOUS_PAUSE=BASE/'forecast_pause_008'
+-PREVIOUS_HOST='c533454d1699058a7b686e49436247bbb9c94bbeec0a91b01090c234f4576763'
+-PREVIOUS_SOURCE='acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467'
+-PREVIOUS_NAME='hexapod-reference-physics-bfc13a3ce7c84b8095f3b4621382ee1d'
+-PREVIOUS_ID='af9a25f3604c9d4453b7771451060ff748fce1ff0cf0b104ff9f6aa342059975'
+-PREVIOUS_AUDIT_SHA256='237e8a0862b31044aba285eb08ba7297b250386fa8fa47b78c54ba5e060c812f'
+-PRIOR_PINS={'native_standing32_001/campaign.json': 'd3e3daf3553cbd934ce4127396894876c3f675ce84d556666f76be051a530a77', 'native_standing32_001/jobs/standing.json': 'e1b45276b2d83b1d0c1224c3012f223b625b2f4eb8e10394db02588315a6ea46', 'native_standing32_001/logs/standing.log': '90e34e04365e9aa1be6f47d01bb7eadcfcdec691269470f6742cf15b6afc2252', 'native_standing32_001/standing/contact_view.json': 'a91d4e2237e3244c5ea75d402f369ac7e0435f93cc11381e9b6b670736383d3e', 'native_standing32_001/standing/contacts.jsonl': '9d792912b03d109bb2a726688d3ad28d989fa6ff00ec411c191cd5340d595fca', 'native_standing32_001/standing/initial_reset.json': 'f6ddbcb15363931f058c43a8c19fdd6daf6994a2cd3439abc56730a8fc95dfd7', 'native_standing32_001/standing/memory_before_scene.json': '36ac0cc16ee68799ded16a8a120c4f633e68f88fec092b6130b07dc4833e02bb', 'native_standing32_001/standing/native_errors.json': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570', 'native_standing32_001/standing/native_materials.json': '56d4112199eb41b4faf83f4e04d71f032ec402b4b2077b94d0468d6ae0000367', 'native_standing32_001/standing/native_readback.json': '8a81ab1c2438ca400c5452ba51c7557ba0e9ac60afe22fd309b677d76699e9b1', 'native_standing32_001/standing/native_scene.json': '0f805242c9aa6b694702f4dde4da2f2302f2dd7ec1638addbce720e53ffefaad', 'native_standing32_001/standing/resolved_stage.usda': '888206cb4f3ad0a90a404477b159e8ea99c8909e067b462a4c246f229039d437', 'native_standing32_001/standing/runtime_api.json': '0e402d157689122e829aa4597033364a9168c3b8f78b9514b3a80918c009e237', 'native_standing32_001/standing/sdf_readback.json': 'af2d1380fb71d1493ad9f8d6e9545ef40dc214b708acc500f0f056e692badf47', 'native_standing32_001/standing/sdk_readback.json': '1016fef5aa047bdd0e5684a9fc8acd599e95738601847ad4084f2be58c53c454', 'native_standing32_001/standing/state.json': '7f012a255146aa95607afc0de788385fdeb9e577820c2318d58b095340efa493', 'native_standing32_001/standing/substeps_000.npz': 'ab4cafd8ca1731c7ab04730a9f0d530aa034b2e8f99c9e76ee04f137b9bc701c', 'native_standing32_001/standing/substeps_001.npz': '13d954926099c760d3531e5f9d5c65c1874dd09a17172076d579373403f5b02c', 'native_standing32_001/standing/substeps_002.npz': '47c4b91c374a6aa0db6d6a079a318a9e6e856132833266f0f32eecb7c352cee5', 'native_standing32_001/standing/usd_readback.json': '9a3547d211a7fd456a897ccb54beda88cab027c00c6605532795f3eee01c67b8', 'native_standing32_001/standing/warmup_native_state.json': '4678b657dec75761a66ae243a0c7b7c8f9b49421a5ca0436362ed276e8b79d0c', 'native_standing32_001/stop.request': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'forecast_pause_008/launch.json': '9f6081b7720bab43bc37e3db309cbb5750fdf11277f938f1a6639936661515ad', 'forecast_pause_008/pause.json': '53e77a6f55427039c484780683e7bd72f986dcd15597cd2e2594248363a35b41', 'forecast_pause_008/restore.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'forecast_pause_008/restored.json': '68e34b54ab019bb74c462d5f9eb21454b92893d49ddc4c6de64f20482c3aaa47', 'forecast_pause_008/resume_forecasting.py': '08c4b4cb564035f61731ba957e45cf14c28ceb27410eb4421f53fb3a4af7ae92'}
++PREVIOUS_UNIT='hexapod-canonical-native-standing-003-20260910.service'
++PREVIOUS_INVOCATION='ff270c50458f47e5940dd93c4b3aa845'
++PREVIOUS_ROOT=BASE/'native_standing_003'
++PREVIOUS_PAUSE=BASE/'forecast_pause_009'
++PREVIOUS_HOST='968caeb48082ee0a72dea9acc1a6b7b93d2f9b14b9f4c2f05874070a03be1a95'
++PREVIOUS_SOURCE='e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0'
++PREVIOUS_NAME='hexapod-reference-physics-8f197ad2c7664e42bacc0514bfba9682'
++PREVIOUS_ID='6e2ab6f5aab0071833d48235ef709efdf7e49ca849262d3c76aa567e8b255e5c'
++PREVIOUS_AUDIT_SHA256='89f284cf60da07f79e92c41d9411a0f4be939b11a93bdb51f1d8254bc88d9b59'
++PRIOR_PINS={'native_standing_003/campaign.json': 'ccb1bd0f68ae8c694547cd26347d55d47147617702fbd645782051fef739cba8', 'native_standing_003/jobs/standing.json': 'd0f2e1f4bfc81dd17a767734da25d35bd70a3841e15a1645e9d8f836e5f377de', 'native_standing_003/logs/standing.log': 'b56737eb624ca46a340941d89559e441d0390419ffa68633832f72dfac108ab3', 'native_standing_003/standing/contact_view.json': '0ef9cbae7134b7ca5a2da23a0e95028324030fcf73cd558ea6504f78a759bde0', 'native_standing_003/standing/contacts.jsonl': '894642c4432ab2873e1422e1e9ee25cccc7680371944c94dc094a32e010757a2', 'native_standing_003/standing/initial_reset.json': '34b397b8eb1c7015ab9f31641bfcd14ef7ecc4f2cc76dc513ac1edcd802e2c97', 'native_standing_003/standing/memory_before_scene.json': '41391cbd75b17d5352bf07a76c0d5c2be197beacc51d51e9dff3e62c53de623d', 'native_standing_003/standing/native_errors.json': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570', 'native_standing_003/standing/native_materials.json': 'aa1174dcab7dfeed253cadbf11c4a83075b9cc6db874df644b2a8491ee8087b7', 'native_standing_003/standing/native_readback.json': 'd37ab0a618739c5ac77a3f5e412f8dd558081a23f03b1ede1c98578251d6aca4', 'native_standing_003/standing/native_scene.json': '5342a8b913c38d6675817d62c1dedff4765a3f141178e206fa7ce7d76f47dbc9', 'native_standing_003/standing/resolved_stage.usda': '692efa7d5f1c6d4872c8af1e289bad25b73a2d32b8ca891bbcdce433c816c4de', 'native_standing_003/standing/runtime_api.json': '0e402d157689122e829aa4597033364a9168c3b8f78b9514b3a80918c009e237', 'native_standing_003/standing/sdf_readback.json': '0a92ec3d0cd7101a932b7e5617ec5dc2072e89c59e70c28464908867e074597a', 'native_standing_003/standing/sdk_readback.json': '1016fef5aa047bdd0e5684a9fc8acd599e95738601847ad4084f2be58c53c454', 'native_standing_003/standing/state.json': 'fcb247544acc815d8b669c64f0b7a179035a1fb8f4abf212c66a695794bdacd0', 'native_standing_003/standing/substeps_000.npz': 'e2d09a8757e281207044c037bc91997a913c7749dc3e47406fcbdb388952400c', 'native_standing_003/standing/substeps_001.npz': '2bd8cd98a2f411fd7c05759969b3940310113577bbe812f494840017741fb1a6', 'native_standing_003/standing/substeps_002.npz': '4b732d547da314c08858ed05433fac68d68237ed7bc73a502c571f001d001927', 'native_standing_003/standing/substeps_003.npz': 'ab1a8b3afc830243c68cb81294df1ac688abd01eee257fe73705e3b44cc0d532', 'native_standing_003/standing/substeps_004.npz': '50b8bc7ef7ee6fb127950239f93a811e3fb784902d567b22cae0ca32c3f244a1', 'native_standing_003/standing/substeps_005.npz': '0fa8208e80e98492b52c2eb49d7ae201f4481a80d5c15d6f132109ba057a45d2', 'native_standing_003/standing/substeps_006.npz': 'c6d1d0915c73f573fb2fc75471c8aa581298225595f1b055aecbbed7274cdb31', 'native_standing_003/standing/substeps_007.npz': '3ded9f6715874010fac6f68f48a7df8ddba05849f456e19b3686366ee5da6a6c', 'native_standing_003/standing/usd_readback.json': '9a3547d211a7fd456a897ccb54beda88cab027c00c6605532795f3eee01c67b8', 'native_standing_003/standing/warmup_native_state.json': 'ef36393b80071441f3832cfe810bd449069f5d8f1c4bb0cf827dad792b9aa70b', 'forecast_pause_009/launch.json': 'e4264fb567338358063c49624c92fc33b591a9dd05196dd7654d12647375c646', 'forecast_pause_009/pause.json': 'f2c6daa39e5a269a2db1927d98971bffbbf4cbce3e6acb0bb51728b4d12a2113', 'forecast_pause_009/restore.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'forecast_pause_009/restored.json': '2913ee6d62d5ebbc9c709c6752f4a97d32c1c62affe47bb24b240c4df3fffab7', 'forecast_pause_009/resume_forecasting.py': '08c4b4cb564035f61731ba957e45cf14c28ceb27410eb4421f53fb3a4af7ae92'}
++
++PREVIOUS_ERROR="RuntimeError('Unrelated CUDA process appeared; yielding this owned job')"
++PREVIOUS_RESTORED_UNIX=1789079438.2097445
++
++PREVIOUS_COMPETITORS=[{'process': '3758066, /home/orionh/ithaca-reconstruction/env/bin/python', 'cgroup': '0::/user.slice/user-1000.slice/session-c10825.scope'}]
+ 
+ def call(args):return subprocess.check_output(args,text=True,timeout=30).strip()
+ def sha(path):
+@@ -56,18 +61,18 @@
+     for name,bound in PRIOR_PINS.items():
+         if sha(PRIOR_BASE/name)!=bound:raise RuntimeError('Previous failure/cleanup receipt changed: '+name)
+     campaign=json.loads((PREVIOUS_ROOT/'campaign.json').read_text());identity=campaign.get('identity',{})
+-    if campaign.get('status')!='stopped' or campaign.get('terminal_inputs_unchanged')is not True or campaign.get('planned_phases')!=['standing']or campaign.get('host_freeze_sha256')!=PREVIOUS_HOST or campaign.get('source_freeze_sha256')!=PREVIOUS_SOURCE or identity.get('inspector_freeze_sha256')!=PREVIOUS_SOURCE:raise RuntimeError('Previous failed campaign identity changed')
++    if campaign.get('status')!='failed' or campaign.get('terminal_inputs_unchanged')is not True or campaign.get('planned_phases')!=['standing']or campaign.get('host_freeze_sha256')!=PREVIOUS_HOST or campaign.get('source_freeze_sha256')!=PREVIOUS_SOURCE or identity.get('inspector_freeze_sha256')!=PREVIOUS_SOURCE:raise RuntimeError('Previous failed campaign identity changed')
+     native=json.loads((PREVIOUS_ROOT/'standing/state.json').read_text())
+-    # Operational stop left the on-disk initial state unfinalized. Preserve it;
++    # Competing-workload interruption left the on-disk initial state unfinalized. Preserve it;
+     # do not invent a terminal native counter or a physical-gate rejection.
+     if native.get('status')!='running' or native.get('explicit_steps_completed')!=0 or native.get('identity')!=identity or native.get('checks')!={} or native.get('errors')!=[] or native.get('physical_admission')is not False or native.get('training_allowed')is not False:raise RuntimeError('Previous unfinalized stopped state changed')
+-    if identity.get('num_envs')!=32 or campaign.get('error')!="InterruptedError('Stop requested')":raise RuntimeError('Previous operational stop evidence differs')
++    if identity.get('num_envs')!=1 or campaign.get('error')!=PREVIOUS_ERROR:raise RuntimeError('Previous competing-workload interruption differs')
+     pause=json.loads((PREVIOUS_PAUSE/'pause.json').read_text());restored=json.loads((PREVIOUS_PAUSE/'restored.json').read_text());timers={name for name,value in pause['units'].items()if name.endswith('.timer')and 'ActiveState=active'in value}
+-    if pause.get('unit')!=PREVIOUS_UNIT or pause.get('output')!=str(PREVIOUS_ROOT)or set(restored.get('timers',[]))!=timers or restored.get('restored_unix')!=1789078963.631424:raise RuntimeError('Previous exact pause008 restoration missing')
++    if pause.get('unit')!=PREVIOUS_UNIT or pause.get('output')!=str(PREVIOUS_ROOT)or set(restored.get('timers',[]))!=timers or restored.get('restored_unix')!=PREVIOUS_RESTORED_UNIX:raise RuntimeError('Previous exact pause009 restoration missing')
+     names={p.stem for p in (PREVIOUS_ROOT/'jobs').glob('*.json')if not p.name.endswith('_contact_data_audit.json')}
+     if names!={'standing'}:raise RuntimeError('Previous job inventory changed')
+     job=json.loads((PREVIOUS_ROOT/'jobs/standing.json').read_text())
+-    if job.get('error')!="InterruptedError('Stop requested')"or job.get('status')!='stopped'or job.get('phase')!='standing'or job.get('exit_code')is not None or job.get('cleanup_checked')is not True or job.get('container_name')!=PREVIOUS_NAME or job.get('container_id')!=PREVIOUS_ID:raise RuntimeError('Previous failed owned cleanup incomplete')
++    if job.get('competitors')!=PREVIOUS_COMPETITORS or job.get('error')!=PREVIOUS_ERROR or job.get('status')!='failed'or job.get('phase')!='standing'or job.get('exit_code')is not None or job.get('cleanup_checked')is not True or job.get('container_name')!=PREVIOUS_NAME or job.get('container_id')!=PREVIOUS_ID:raise RuntimeError('Previous failed owned cleanup incomplete')
+     for identifier in (PREVIOUS_NAME,PREVIOUS_ID):
+         q=subprocess.run(['docker','inspect','--format','{{.Id}} {{.Name}} {{.State.Running}}',identifier],capture_output=True,text=True,timeout=20)
+         if q.returncode==0 or not any(v in q.stderr.lower()for v in ('no such object','no such container')):raise RuntimeError('Previous container absence unknown: '+identifier)
+@@ -164,7 +169,7 @@
+ ''')
+         # Arm recovery before mutating timer state. It stops only this exact
+         # owner unit if needed, then restores only previously active timers.
+-        subprocess.run(['systemd-run', '--user', '--unit=hexapod-canonical-forecast-restore-009', '--on-active=15m',
++        subprocess.run(['systemd-run', '--user', '--unit=hexapod-canonical-forecast-restore-011', '--on-active=15m',
+             '/usr/bin/python3', str(restorer), '--stop-owner'], check=True)
+         active = [name for name, state in units.items() if name.endswith('.timer') and 'ActiveState=active' in state]
+         if active:

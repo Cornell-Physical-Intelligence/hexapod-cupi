@@ -172,3 +172,10 @@ Use the [recorded standing32 rejection](../artifacts/mkii_updated_2026-09-10/nat
 The earlier 32/4 sequence remains a historical experiment recipe; its actual rejection is recorded in STATUS. Next, prepare a fresh 32/0 comparison with the same 32 position iterations, detailed asset, motor envelope, 400 Hz PD and 50 Hz control. Retain every original numeric gate and raw channel. Add only read-only legacy friction-coefficient, link-velocity and direct floor-force observations to distinguish measurement semantics from contact dynamics. Do not replace SDK rates with finite differences or zero an unexpected friction coefficient.
 
 Use the unchanged 1,000-control / 8,000-step single-robot screen first. Scale only after authentic same-source admission; otherwise analyze the failed measurement before further allocation. Keep the 1,200-second operational / 90-second readiness bounds and exact reservation-aware cleanup. A diagnostic probe is neither PPO nor Stage 2 qualification.
+
+
+## 2026-09-11 — matching-source scaling and fresh learner
+
+Use source005 for the complete 32-replica screen, binding the authentic native6 single-robot admission. A startup-only failure may be retried under a fresh output and owner after exact cleanup, with the same source, admission and readiness bound; retain the failed original files. Read actual execution in STATUS.
+
+Only an authentic complete 32-replica pass may enable the new PPO003 binding. Run a fresh 32×24×2-update integration after the unchanged neutral prefix, retaining strict model/optimizer/normalizer/action reload, solver readbacks before and after the learner, and all diagnostic channels. The all-zero command integration proves software operation only. Subsequent omnidirectional training must cover translation, both yaw signs, combined arcs and quiet stops, with every Stage 2 numeric and visual gate intact. Keep recording optimizations separate until their exact-output and native performance claims are verified.

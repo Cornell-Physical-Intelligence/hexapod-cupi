@@ -1,0 +1,9 @@
+# Same-source native6 admission for standing32
+
+Exact source005 c87f2d34… (109 files), host007 7085776d… (63 files), and actual native6 standing pass are bound. Native6 completed 1,000 controls / 8,000 steps with all original physical and quiet gates passing. Its exact state is 33920a4af296ed124643fe61a16f4840c19949b5f6e434327d7cd7ea9953cd3f; canonical complete phase inventory is 877e26ab3fedae042d5e024c11116bc1b808fcb1aa539233eb88009d4a193afc. This admits only the next bounded standing32 screen, not PPO or broader physical qualification.
+
+All 40 native6 raw files / 224,058,842 original bytes remain pinned and are streamed remotely before dispatch. Only seven small original JSON receipts are copied into this guard. The exact source005 contract revalidates the full read-only standing-one folder. Completed post-exit seals, actual invocation 64a373e301c24b70aa3790c18aca147c, two owned name/ID absences and pause014 restoration are required. No raw contact or NPZ file is duplicated into this preparation.
+
+New output native_standing32_003 / pause015 / owner hexapod-canonical-native-standing32-003-20260910.service; fallback hexapod-canonical-forecast-restore-015. Host bounds are 1,200 s / 90 s AppReady, guard owner 1,320 s / 180 s stop / 25 min fallback. The parent32 guard's 600 s operational host budget was superseded explicitly; no native acceptance gate changes. Resource/ancestry checks, both locks, original ownership cleanup and 13 persistent reservation pins remain unchanged.
+
+Current CPU tests and actual -B -S host/source/admission preflight are recorded separately from copied historical receipts. Root alone dispatches and publishes under docs/PROJECT_SITE.md. Exact remote entry: /usr/bin/python3 /home/orionh/HEXAPOD_runs/canonical_direct_20260910/standing32_guard_003/launch_guarded_remote.py .

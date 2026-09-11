@@ -1,0 +1,46 @@
+.....................FFF......
+======================================================================
+FAIL: test_actual_cause_is_shared_gpu_interruption_without_physical_rejection (test_interruption.InterruptionEvidence.test_actual_cause_is_shared_gpu_interruption_without_physical_rejection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/canonical_native_standing_guard_007/test_interruption.py", line 8, in test_actual_cause_is_shared_gpu_interruption_without_physical_rejection
+    self.assertEqual((c['status'],j['status'],state['status']),('failed','failed','running'));self.assertEqual(state['explicit_steps_completed'],0);self.assertEqual(state['checks'],{})
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Tuples differ: ('failed', 'failed', 'completed') != ('failed', 'failed', 'running')
+
+First differing element 2:
+'completed'
+'running'
+
+- ('failed', 'failed', 'completed')
+?                       ^^^^^^^^^
+
++ ('failed', 'failed', 'running')
+?                       ^^^^^^^
+
+
+======================================================================
+FAIL: test_all31_full_raw_pins_retained_without_bulk_copy (test_interruption.InterruptionEvidence.test_all31_full_raw_pins_retained_without_bulk_copy)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/canonical_native_standing_guard_007/test_interruption.py", line 11, in test_all31_full_raw_pins_retained_without_bulk_copy
+    m=json.loads((HERE/'inputs/PRIOR_RAW_INVENTORY.json').read_text());self.assertEqual(len(m),31);self.assertEqual(sum(v['size_bytes'] for v in m.values()),144818179)
+                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 36 != 31
+
+======================================================================
+FAIL: test_same_source_host_and_single_environment_no_admission_reuse (test_interruption.InterruptionEvidence.test_same_source_host_and_single_environment_no_admission_reuse)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/canonical_native_standing_guard_007/test_interruption.py", line 15, in test_same_source_host_and_single_environment_no_admission_reuse
+    self.assertEqual(g.SOURCE_SHA256,g.PREVIOUS_SOURCE);self.assertNotEqual(g.HOST_FREEZE_SHA256,g.PREVIOUS_HOST);self.assertNotIn("'--standing-one'",(HERE/'launch_guarded_remote.py').read_text())
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '037013353a30c5f3751235634aafdb3f204b676837962b14df72c3051c0a2786' != 'e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0'
+- 037013353a30c5f3751235634aafdb3f204b676837962b14df72c3051c0a2786
++ e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0
+
+
+----------------------------------------------------------------------
+Ran 30 tests in 0.164s
+
+FAILED (failures=3)

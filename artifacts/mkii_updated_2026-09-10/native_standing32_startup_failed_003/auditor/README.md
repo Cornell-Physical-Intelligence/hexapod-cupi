@@ -1,0 +1,7 @@
+# Source005 standing32 terminal auditor003
+
+Pinned actual invocation 6eac4972e2e64f9991955a1b7bb73afc, output native_standing32_003, pause015, source005 109, host007 63, guard32_003 59, canonical asset9, original effort19 and ownership-only supervisor926. The exact accepted native6 one-robot phase is additionally checked in both passes using the frozen guard's current PRIOR_RAW_INVENTORY, canonical map877e26ab… and state33920a4a…; historical copied maps are not used.
+
+The auditor streams all input and raw files twice with 8 MiB buffers and leaves full raw on Spark. It preserves authentic failures and incomplete getter/counter evidence. All 32 solver roots require original unauthored32/1 followed by authored32/0 at each source-owned phase on completed acquisition. Original source005 diagnostic/physical/quiet validation remains mandatory; no gates or observations are replaced. Original legacy friction, session and solver receipts are retained even when the run fails.
+
+Audit verification, acquisition completion and accepted standing remain separate booleans. No Stage2/PPO or hardware admission is inferred. Exact owner journal/name+ID absence, 1200/90 deadline proof, 1320/180 owner launch and persistent reservation/per-job restoration are checked. Root runs python3 -B -S audit_remote.py after terminal with stdout outside all immutable directories. No writes, GPU, simulator or signal APIs are used by the auditor. Central publication remains root-owned under docs/PROJECT_SITE.md.

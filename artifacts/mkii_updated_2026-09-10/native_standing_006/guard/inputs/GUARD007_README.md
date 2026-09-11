@@ -1,0 +1,7 @@
+# Source004 controlled solver diagnostic guard007
+
+Fresh oneenv native_standing_005, pause013, ownerhexapod-canonical-native-standing-005-20260910.service; unique canonical forecast fallback013. Source00495/03701335… and host00655/51a0dbdc… are exactly bound; invalid or changed hashes refuse before any pause/output/systemd action. Root owns actual source freeze and dispatch. No source or native gate edits occur here.
+
+Parent guard006 ownership, NVIDIA literal CLI, two GPU locks, persistent reservation13 loaded-dropin checks, exact per-job restoration semantics and unknown-process rejection are preserved. Operational budget is source-owned identical1000controls/8000steps with host005-derived1200s walltime/90s AppReady, owner1320s/180s stop/fallback25min. This extends operational time, not physical acceptance thresholds. Prior original32_002 actual8000step acquisition had standing_pass=false and host600s timeout: both are required exactly as cleanup lineage, never admitted physical evidence. All36priorraw SHA pins are streamed remotely; only exact small fixtures are copied for local tests.
+
+The new source must independently pass same-source oneenv before any later32/PPO proposal. Historical copied test logs are not new execution claims. Current tests/preflight are recorded separately from historical receipts; root performs actual installed Spark setup before dispatch. Root handles publication/central update record under docs/PROJECT_SITE.md; tmp-only preparation, no GPU or remote mutation.

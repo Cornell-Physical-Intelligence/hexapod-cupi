@@ -1,0 +1,102 @@
+--- guard006
++++ guard007
+@@ -1,37 +1,37 @@
+-"""Canonical source003 standing1 guard; prior competing-workload interruption supplies ownership lineage only."""
++"""Canonical source004 standing1 solver diagnostic; prior32 quality+timeout failure supplies cleanup lineage only."""
+ from pathlib import Path
+ from types import SimpleNamespace
+ import fcntl,hashlib,importlib.util,json,os,subprocess,sys,time
+ sys.dont_write_bytecode=True
+ BASE=Path('/home/orionh/HEXAPOD_runs/canonical_direct_20260910')
+ PRIOR_BASE=BASE
+-SOURCE=BASE/'standing_source_003'
++SOURCE=BASE/'standing_source_004'
+ ASSET=BASE/'asset_001'
+ ADMISSION=BASE/'native_actuation_001/actuation'
+ SUPERVISOR_SOURCE=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009')
+-OUTPUT=BASE/'native_standing_004'
+-PAUSE=BASE/'forecast_pause_011'
+-UNIT='hexapod-canonical-native-standing-004-20260910.service'
+-HOST=BASE/'standing_host_004/launch_standing_spark.py'
+-SOURCE_SHA256='e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0'
++OUTPUT=BASE/'native_standing_005'
++PAUSE=BASE/'forecast_pause_013'
++UNIT='hexapod-canonical-native-standing-005-20260910.service'
++HOST=BASE/'standing_host_006/launch_standing_spark.py'
++SOURCE_SHA256='037013353a30c5f3751235634aafdb3f204b676837962b14df72c3051c0a2786'
+ SUPERVISOR_SHA256='04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e'
+-HOST_SHA256='4bd861a56eb8d72c1316167caf17580b9b8e67d1951923635c61d0acca9bad40'
+-HOST_FREEZE_SHA256='c72c4dd63599f2c459c7b8eca7244528cb725094252c084f695f4aa44d8dba25'
+-PREVIOUS_UNIT='hexapod-canonical-native-standing-003-20260910.service'
+-PREVIOUS_INVOCATION='ff270c50458f47e5940dd93c4b3aa845'
+-PREVIOUS_ROOT=BASE/'native_standing_003'
+-PREVIOUS_PAUSE=BASE/'forecast_pause_009'
+-PREVIOUS_HOST='968caeb48082ee0a72dea9acc1a6b7b93d2f9b14b9f4c2f05874070a03be1a95'
++HOST_SHA256='dbd97865d4b62ff4bc7852e186e12ce0db2ceb55399b0ff32db3e714803229eb'
++HOST_FREEZE_SHA256='51a0dbdc5d46a6b4f4a24b4e26c5091e7c588ae8d31785a264f95b3ffc042ed6'
++PREVIOUS_UNIT='hexapod-canonical-native-standing32-002-20260910.service'
++PREVIOUS_INVOCATION='1a38495bda9f4fefa4e5585574aabc56'
++PREVIOUS_ROOT=BASE/'native_standing32_002'
++PREVIOUS_PAUSE=BASE/'forecast_pause_010'
++PREVIOUS_HOST='c72c4dd63599f2c459c7b8eca7244528cb725094252c084f695f4aa44d8dba25'
+ PREVIOUS_SOURCE='e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0'
+-PREVIOUS_NAME='hexapod-reference-physics-8f197ad2c7664e42bacc0514bfba9682'
+-PREVIOUS_ID='6e2ab6f5aab0071833d48235ef709efdf7e49ca849262d3c76aa567e8b255e5c'
+-PREVIOUS_AUDIT_SHA256='89f284cf60da07f79e92c41d9411a0f4be939b11a93bdb51f1d8254bc88d9b59'
+-PRIOR_PINS={'native_standing_003/campaign.json': 'ccb1bd0f68ae8c694547cd26347d55d47147617702fbd645782051fef739cba8', 'native_standing_003/jobs/standing.json': 'd0f2e1f4bfc81dd17a767734da25d35bd70a3841e15a1645e9d8f836e5f377de', 'native_standing_003/logs/standing.log': 'b56737eb624ca46a340941d89559e441d0390419ffa68633832f72dfac108ab3', 'native_standing_003/standing/contact_view.json': '0ef9cbae7134b7ca5a2da23a0e95028324030fcf73cd558ea6504f78a759bde0', 'native_standing_003/standing/contacts.jsonl': '894642c4432ab2873e1422e1e9ee25cccc7680371944c94dc094a32e010757a2', 'native_standing_003/standing/initial_reset.json': '34b397b8eb1c7015ab9f31641bfcd14ef7ecc4f2cc76dc513ac1edcd802e2c97', 'native_standing_003/standing/memory_before_scene.json': '41391cbd75b17d5352bf07a76c0d5c2be197beacc51d51e9dff3e62c53de623d', 'native_standing_003/standing/native_errors.json': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570', 'native_standing_003/standing/native_materials.json': 'aa1174dcab7dfeed253cadbf11c4a83075b9cc6db874df644b2a8491ee8087b7', 'native_standing_003/standing/native_readback.json': 'd37ab0a618739c5ac77a3f5e412f8dd558081a23f03b1ede1c98578251d6aca4', 'native_standing_003/standing/native_scene.json': '5342a8b913c38d6675817d62c1dedff4765a3f141178e206fa7ce7d76f47dbc9', 'native_standing_003/standing/resolved_stage.usda': '692efa7d5f1c6d4872c8af1e289bad25b73a2d32b8ca891bbcdce433c816c4de', 'native_standing_003/standing/runtime_api.json': '0e402d157689122e829aa4597033364a9168c3b8f78b9514b3a80918c009e237', 'native_standing_003/standing/sdf_readback.json': '0a92ec3d0cd7101a932b7e5617ec5dc2072e89c59e70c28464908867e074597a', 'native_standing_003/standing/sdk_readback.json': '1016fef5aa047bdd0e5684a9fc8acd599e95738601847ad4084f2be58c53c454', 'native_standing_003/standing/state.json': 'fcb247544acc815d8b669c64f0b7a179035a1fb8f4abf212c66a695794bdacd0', 'native_standing_003/standing/substeps_000.npz': 'e2d09a8757e281207044c037bc91997a913c7749dc3e47406fcbdb388952400c', 'native_standing_003/standing/substeps_001.npz': '2bd8cd98a2f411fd7c05759969b3940310113577bbe812f494840017741fb1a6', 'native_standing_003/standing/substeps_002.npz': '4b732d547da314c08858ed05433fac68d68237ed7bc73a502c571f001d001927', 'native_standing_003/standing/substeps_003.npz': 'ab1a8b3afc830243c68cb81294df1ac688abd01eee257fe73705e3b44cc0d532', 'native_standing_003/standing/substeps_004.npz': '50b8bc7ef7ee6fb127950239f93a811e3fb784902d567b22cae0ca32c3f244a1', 'native_standing_003/standing/substeps_005.npz': '0fa8208e80e98492b52c2eb49d7ae201f4481a80d5c15d6f132109ba057a45d2', 'native_standing_003/standing/substeps_006.npz': 'c6d1d0915c73f573fb2fc75471c8aa581298225595f1b055aecbbed7274cdb31', 'native_standing_003/standing/substeps_007.npz': '3ded9f6715874010fac6f68f48a7df8ddba05849f456e19b3686366ee5da6a6c', 'native_standing_003/standing/usd_readback.json': '9a3547d211a7fd456a897ccb54beda88cab027c00c6605532795f3eee01c67b8', 'native_standing_003/standing/warmup_native_state.json': 'ef36393b80071441f3832cfe810bd449069f5d8f1c4bb0cf827dad792b9aa70b', 'forecast_pause_009/launch.json': 'e4264fb567338358063c49624c92fc33b591a9dd05196dd7654d12647375c646', 'forecast_pause_009/pause.json': 'f2c6daa39e5a269a2db1927d98971bffbbf4cbce3e6acb0bb51728b4d12a2113', 'forecast_pause_009/restore.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'forecast_pause_009/restored.json': '2913ee6d62d5ebbc9c709c6752f4a97d32c1c62affe47bb24b240c4df3fffab7', 'forecast_pause_009/resume_forecasting.py': '08c4b4cb564035f61731ba957e45cf14c28ceb27410eb4421f53fb3a4af7ae92'}
+-
+-PREVIOUS_ERROR="RuntimeError('Unrelated CUDA process appeared; yielding this owned job')"
+-PREVIOUS_RESTORED_UNIX=1789079438.2097445
+-
+-PREVIOUS_COMPETITORS=[{'process': '3758066, /home/orionh/ithaca-reconstruction/env/bin/python', 'cgroup': '0::/user.slice/user-1000.slice/session-c10825.scope'}]
++PREVIOUS_NAME='hexapod-reference-physics-d9e5c3e7d76448c295f78e41f8dc04a6'
++PREVIOUS_ID='200407d3ee326c3a0ad04cad539b7af66db54737685b4d80e9cc80f4229298b3'
++PREVIOUS_AUDIT_SHA256='c5e6697742a61d53f82c42324f45d7c8cdd54a77625fc5b0b955232ab0e080f5'
++PRIOR_PINS={'native_standing32_002/campaign.json': 'cebdc906d37d2740202dbba37f394e931bb6a80dd4b61f78e68480104508c80a', 'native_standing32_002/jobs/standing.json': '82639d5d3ba52f9ecaf33e599604539c15d2592a201cad6d4eab2e378680d01f', 'native_standing32_002/logs/standing.log': '035e86da9d64c2cb8833a4c37ec029ca11c99a827b85b2364f4e2a4a484c21bd', 'native_standing32_002/standing/contact_view.json': 'a91d4e2237e3244c5ea75d402f369ac7e0435f93cc11381e9b6b670736383d3e', 'native_standing32_002/standing/contacts.jsonl': '45279d622d43e521ba2f3ade28bcb79698107554e99e6b068d0c2c73796d761f', 'native_standing32_002/standing/control_trace.npz': '581d2a347fd308054edb4afc7c36134fea54e777adb5b9c42cbc595e0cdcd0b9', 'native_standing32_002/standing/initial_reset.json': 'f6ddbcb15363931f058c43a8c19fdd6daf6994a2cd3439abc56730a8fc95dfd7', 'native_standing32_002/standing/memory_before_scene.json': '36274bd1472c7b74bda528281e02974a66ff408949292c21c23194f25086d33e', 'native_standing32_002/standing/native_errors.json': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570', 'native_standing32_002/standing/native_materials.json': '56d4112199eb41b4faf83f4e04d71f032ec402b4b2077b94d0468d6ae0000367', 'native_standing32_002/standing/native_readback.json': '8a81ab1c2438ca400c5452ba51c7557ba0e9ac60afe22fd309b677d76699e9b1', 'native_standing32_002/standing/native_scene.json': '0f805242c9aa6b694702f4dde4da2f2302f2dd7ec1638addbce720e53ffefaad', 'native_standing32_002/standing/resolved_stage.usda': '888206cb4f3ad0a90a404477b159e8ea99c8909e067b462a4c246f229039d437', 'native_standing32_002/standing/runtime_api.json': '0e402d157689122e829aa4597033364a9168c3b8f78b9514b3a80918c009e237', 'native_standing32_002/standing/sdf_readback.json': 'af2d1380fb71d1493ad9f8d6e9545ef40dc214b708acc500f0f056e692badf47', 'native_standing32_002/standing/sdk_readback.json': '1016fef5aa047bdd0e5684a9fc8acd599e95738601847ad4084f2be58c53c454', 'native_standing32_002/standing/session.json': 'ac1a1aa8f2b87953741b45a1dea9dbe4575b18fff2604e946aa984bfb496e785', 'native_standing32_002/standing/standing_report.json': '2efba621c85d4eb58eb5bb58ab201ff62939a7e89ac9f84eeb9bff3f0d60146d', 'native_standing32_002/standing/state.json': 'c3dc1eac2423be6dda71b4111423d54831077dc5e102432dadb4d055518b083b', 'native_standing32_002/standing/substeps_000.npz': 'ab4cafd8ca1731c7ab04730a9f0d530aa034b2e8f99c9e76ee04f137b9bc701c', 'native_standing32_002/standing/substeps_001.npz': '13d954926099c760d3531e5f9d5c65c1874dd09a17172076d579373403f5b02c', 'native_standing32_002/standing/substeps_002.npz': '47c4b91c374a6aa0db6d6a079a318a9e6e856132833266f0f32eecb7c352cee5', 'native_standing32_002/standing/substeps_003.npz': 'ef67aa7ffb8c56d7dc6dfd8623875da1e1ec77b37e0de1479a3c9c1e5db31dee', 'native_standing32_002/standing/substeps_004.npz': '597124cbc1623deb5f4163aac331de9a985bd185cb93b0d55a880ee68cf8700a', 'native_standing32_002/standing/substeps_005.npz': '36764f08023f2cdc0beaed3785d75761b8f57d56dfb5dc9fd6fdda827158740d', 'native_standing32_002/standing/substeps_006.npz': '4d5d64445939619fede9313cf49689dce0d463c00ba42ac10a18235236b6c80d', 'native_standing32_002/standing/substeps_007.npz': '753c55e94f0334f166ffd361ca9a9a6b1290d5d6e316b9e7bd0dbba3ed384a21', 'native_standing32_002/standing/substeps_008.npz': '4bd57488e514d7918e2a2c541676eb7627776171bf738bff0bdd1d984aa740b7', 'native_standing32_002/standing/substeps_009.npz': 'ad11cf5c9ab9aad0f3c5ccaab45a1d2c535f49c6e3a86f00f62e5188220f6d81', 'native_standing32_002/standing/usd_readback.json': '9a3547d211a7fd456a897ccb54beda88cab027c00c6605532795f3eee01c67b8', 'native_standing32_002/standing/warmup_native_state.json': '4678b657dec75761a66ae243a0c7b7c8f9b49421a5ca0436362ed276e8b79d0c', 'forecast_pause_010/launch.json': '73801dea371dd301652f8e6cee0ead9bf62cfcd6a1cfd591c36ed5b07de1266d', 'forecast_pause_010/pause.json': 'fcd3248cbf2c5d650000bfd734880e8589c1615b37d7c77b7befeb4dc69a6e04', 'forecast_pause_010/restore.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'forecast_pause_010/restored.json': '3a01b3ac6c36118fb7756625f0b91bed508e11c2a8e6f11132e0c0b6c94e37e4', 'forecast_pause_010/resume_forecasting.py': 'daffe2b2397c31b37145b193c29c947c4162123799365323f27acda0218a5d90'}
++
++PREVIOUS_ERROR="TimeoutError('Standing phase exceeded ten-minute bound')"
++PREVIOUS_RESTORED_UNIX=1789081960.3203077
++
++PREVIOUS_COMPETITORS=None
+ 
+ RESERVATION=BASE/'exclusive_reservation_001'
+ RESERVATION_PINS={'/home/orionh/HEXAPOD_runs/canonical_direct_20260910/exclusive_reservation_001/ACTIVE': 'd6135e574b033fbbbe716e7f6b34876a42f1897f560d0c97ab3ae4da33532dc2', '/home/orionh/HEXAPOD_runs/canonical_direct_20260910/exclusive_reservation_001/initial_receipt.json': 'b0e17c5e7f2ae397260441dc8728eec079608cdf372717536dafc22d179df175', '/home/orionh/HEXAPOD_runs/canonical_direct_20260910/exclusive_reservation_001/scheduler_before.json': '139c7eec8e336bbf2df68f480848416232535bdceecabd4a5f210697955fd4f1', '/home/orionh/.config/systemd/user/stormscope-dispatch.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-dispatch.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-scout.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-scout.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-monitor.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-monitor.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-publish.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-publish.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-verify.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-verify.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26'}
+@@ -66,12 +66,15 @@
+     campaign=json.loads((PREVIOUS_ROOT/'campaign.json').read_text());identity=campaign.get('identity',{})
+     if campaign.get('status')!='failed' or campaign.get('terminal_inputs_unchanged')is not True or campaign.get('planned_phases')!=['standing']or campaign.get('host_freeze_sha256')!=PREVIOUS_HOST or campaign.get('source_freeze_sha256')!=PREVIOUS_SOURCE or identity.get('inspector_freeze_sha256')!=PREVIOUS_SOURCE:raise RuntimeError('Previous failed campaign identity changed')
+     native=json.loads((PREVIOUS_ROOT/'standing/state.json').read_text())
+-    # Competing-workload interruption left the on-disk initial state unfinalized. Preserve it;
+-    # do not invent a terminal native counter or a physical-gate rejection.
+-    if native.get('status')!='running' or native.get('explicit_steps_completed')!=0 or native.get('identity')!=identity or native.get('checks')!={} or native.get('errors')!=[] or native.get('physical_admission')is not False or native.get('training_allowed')is not False:raise RuntimeError('Previous unfinalized stopped state changed')
+-    if identity.get('num_envs')!=1 or campaign.get('error')!=PREVIOUS_ERROR:raise RuntimeError('Previous competing-workload interruption differs')
++    # Native acquisition completed with a false physical verdict; host also timed out.
++    # Neither is reinterpreted as successful standing admission.
++    if native.get('status')!='completed' or native.get('standing_pass')is not False or native.get('explicit_steps_completed')!=8000 or native.get('identity')!=identity or native.get('inputs_unchanged')is not True or native.get('errors')!=[] or native.get('physical_admission')is not False or native.get('training_allowed')is not False:raise RuntimeError('Previous completed acquisition/quality failure changed')
++    if identity.get('num_envs')!=32 or campaign.get('error')!=PREVIOUS_ERROR:raise RuntimeError('Previous32 host timeout differs')
++    session=json.loads((PREVIOUS_ROOT/'standing/session.json').read_text())
++    if session.get('steps')!=8000 or session.get('captured_steps')!=8000 or session.get('controls')!=1000 or session.get('all_rows_recorded')is not True or session.get('failure')is not None:raise RuntimeError('Previous32 acquisition evidence differs')
+     pause=json.loads((PREVIOUS_PAUSE/'pause.json').read_text());restored=json.loads((PREVIOUS_PAUSE/'restored.json').read_text());timers={name for name,value in pause['units'].items()if name.endswith('.timer')and 'ActiveState=active'in value}
+-    if pause.get('unit')!=PREVIOUS_UNIT or pause.get('output')!=str(PREVIOUS_ROOT)or set(restored.get('timers',[]))!=timers or restored.get('restored_unix')!=PREVIOUS_RESTORED_UNIX:raise RuntimeError('Previous exact pause009 restoration missing')
++    if pause.get('unit')!=PREVIOUS_UNIT or pause.get('output')!=str(PREVIOUS_ROOT)or set(restored.get('timers',[]))!=timers or restored.get('restored_unix')!=PREVIOUS_RESTORED_UNIX:raise RuntimeError('Previous exact pause010 restoration missing')
++    if restored.get('scope')!='per_job_snapshot_only' or restored.get('persistent_reservation_release_attempted')is not False or restored.get('reservation_path')!=str(RESERVATION):raise RuntimeError('Previous restoration must retain persistent reservation')
+     names={p.stem for p in (PREVIOUS_ROOT/'jobs').glob('*.json')if not p.name.endswith('_contact_data_audit.json')}
+     if names!={'standing'}:raise RuntimeError('Previous job inventory changed')
+     job=json.loads((PREVIOUS_ROOT/'jobs/standing.json').read_text())
+@@ -186,7 +189,7 @@
+ ''')
+         # Arm recovery before mutating timer state. It stops only this exact
+         # owner unit if needed, then restores only previously active timers.
+-        subprocess.run(['systemd-run', '--user', '--unit=hexapod-canonical-forecast-restore-011', '--on-active=15m',
++        subprocess.run(['systemd-run', '--user', '--unit=hexapod-canonical-forecast-restore-013', '--on-active=25m',
+             '/usr/bin/python3', str(restorer), '--stop-owner'], check=True)
+         active = [name for name, state in units.items() if name.endswith('.timer') and 'ActiveState=active' in state]
+         if active:
+@@ -222,7 +225,7 @@
+         subprocess.run(['/usr/bin/python3',str(restorer)],check=True,timeout=120)
+         raise
+     try:
+-        cmd=['systemd-run','--user','--unit='+UNIT,'--property=RuntimeMaxSec=720',
++        cmd=['systemd-run','--user','--unit='+UNIT,'--property=RuntimeMaxSec=1320',
+             '--property=TimeoutStopSec=180','--property=KillMode=process','--property=Environment=PYTHONDONTWRITEBYTECODE=1',
+             '--property=ExecStopPost=/usr/bin/python3 '+str(restorer),'--property=Environment=PYTHONUNBUFFERED=1',
+             '/usr/bin/python3',str(HOST),'--source',str(SOURCE),'--asset',str(ASSET),'--admission',str(ADMISSION),
