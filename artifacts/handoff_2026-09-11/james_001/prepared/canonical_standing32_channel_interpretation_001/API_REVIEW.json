@@ -1,0 +1,25 @@
+{
+  "installed_api_source_reference": "tmp/canonical_native_sdk_readback_001/files/isaac-sim/extscache/omni.physics.tensors-110.1.13+110.1.2.la64.r.cp312.u7f4/omni/physics/tensors/api.py",
+  "installed_api_sha256": "b913fdb1a3c0cf04b62aa01d6ceaf7d96cfe577a510d0e02b71485018661c903",
+  "actual_native_runtime_api_receipt_reference": "tmp/canonical_native_standing_terminal_006/run/standing/runtime_api.json",
+  "actual32_runtime_api_sha256": "0e402d157689122e829aa4597033364a9168c3b8f78b9514b3a80918c009e237",
+  "get_contact_force_matrix_lines": [
+    4950,
+    4984
+  ],
+  "get_contact_data_lines": [
+    4986,
+    5068
+  ],
+  "get_friction_data_lines": [
+    5070,
+    5141
+  ],
+  "findings": [
+    "The matrix API aggregates sensor/filter contact force; detailed API documented reconstruction multiplies scalar force by its normal.",
+    "Friction forces and points are exposed by the separate get_friction_data getter, which this acquisition did not record.",
+    "Interpret floor_total and floor-minus-momentum as normal-contact channel sums, not complete normal-plus-friction forces. Horizontal residual is not evidence of broken force balance.",
+    "Use the measured flat-floor vertical comparison only; shared backend agreement does not independently establish contact completeness."
+  ],
+  "no_SDK_source_copied": true
+}

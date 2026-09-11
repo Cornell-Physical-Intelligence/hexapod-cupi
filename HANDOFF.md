@@ -1,4 +1,6 @@
-# Physical MKII handoff
+# Hexapod handoff and preserved history
+
+**Current handoff: [James — 11 September 2026](docs/JAMES_HANDOFF.md). Research is paused.** The sections below preserve earlier results and operating decisions; use the current guide and STATUS before acting. Historical four-bar launch instructions do not apply to the canonical direct-drive model.
 
 The earlier training history remains unchanged in
 [the archived 2026-08-26 handoff](docs/archive/HANDOFF-2026-08-26.md).
@@ -1849,3 +1851,8 @@ Bundle `44c7e73abee2499ddd0d6ca30d1af24075489262ab989cfaf2d8e02c02d71734` preser
 ## 11 September 2026 — source005 force-channel replay
 
 The [read-only Spark CPU replay](artifacts/mkii_updated_2026-09-10/standing32_channel_analysis_001/README.md) uses frozen analyzer15/d1eb068b… and authentic terminal audit8834ba3d… . The exact result304bccb6… completed in22.67seconds and reverified all consumed raw inputs and source109 before/after analysis. Every one of the73 support-loss samples is also at or below1N in the tibia floor-force matrix; no alternate channel restores support. Exact source arithmetic replays360 selected patch rows across all32 robots. The two channels may share a backend, and observed slot occupancy cannot establish unexported native buffer completeness. The original16s/50Hz quiet verdict and the new16s/400Hz diagnostic accumulation remain distinct. No physical setting, acceptance threshold or PPO admission changes. Current execution is in STATUS; a future controlled comparison needs a separately reviewed identity.
+
+
+## 11 September 2026 — research paused and handed to James
+
+The user paused research and asked for all work to be pushed for James. The Codex continuation was set to PAUSED, all research agents are stopped, and the final Spark inspection found no training/GPU process. The stale historical weather-restore timer was stopped; the reservation helper and external-job blocks remain. The [handoff archive](artifacts/handoff_2026-09-11/james_001/README.md) preserves current unpublished preparations and actual pause receipts. The old pre-main stash is preserved under remote tag `handoff/pre-main-c-study-20260909` without applying it to main. Current worktrees were clean; no teammate history was rewritten. Read [James’s guide](docs/JAMES_HANDOFF.md) for exact model, blocker, proposed next step and remote raw-file locations. No stage or physical qualification was promoted by this handoff.

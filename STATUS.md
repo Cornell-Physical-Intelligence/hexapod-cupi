@@ -2,9 +2,9 @@
 
 <!-- Generated from site/project.json by tools/project_site.py status. Do not edit. -->
 
-Evidence snapshot: 2026-09-11T01:22:22Z · source `e6fc64444ee6b02c973e454ebe285843dcbe7fc2`.
+Evidence snapshot: 2026-09-11T01:47:58Z · source `a074f7927b4104d2916e73e1304bfb3d967495f1`.
 
-The approved detailed robot passes single-robot standing, but its completed batch screen passes 10/32 replicas. Canonical PPO has not started. Historical walking remains a comparison, with 0/48 quiet trials passing.
+Research is paused for James; no new experiment is queued. The approved detailed robot passes single-robot standing, but its completed batch screen passes 10/32 replicas. Canonical PPO has not started. Historical walking remains a comparison, with 0/48 quiet trials passing.
 
 [Architecture](ARCHITECTURE.md) · [Visual roadmap](https://cornell-physical-intelligence.github.io/hexapod-cupi/#roadmap)
 
@@ -73,9 +73,10 @@ Next step: **not defined**. What smallest region, payload quality and operating 
 - **Canonical standing (failed)** — Isaac simulation · detailed direct-drive model. One robot passes standing. The completed 32-robot screen accepts 10/32; 22 fail measured support, including eight that also fail quiet joint-rate limits. No canonical PPO has run. [Evidence](artifacts/mkii_updated_2026-09-10/native_standing32_rejected_005/README.md)
 - **Recorded contact analysis (inconclusive)** — CPU replay · detailed model recording. Both recorded normal-force channels agree on 73 below-bound events. They may share a backend; this does not identify a physical cause or prove buffer completeness. [Evidence](artifacts/mkii_updated_2026-09-10/standing32_channel_analysis_001/README.md)
 - **Historical walking policy (failed)** — Isaac simulation · historical C-study model. The 500-update policy retains partial motion but passes 0/48 quiet trials. It does not qualify the canonical robot. [Evidence](artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md)
+- **Research paused for handoff (passed)** — Recorded operations snapshot. The team lead recorded research agents and continuation stopped, with no native job queued. The external Spark reservation stays in place. Repository cleanup and publication do not resume research. [Evidence](artifacts/handoff_2026-09-11/james_001/README.md)
 
 Define the smallest useful next increment with James and the two subleads after cleanup. No experiment or contributor assignment is implied by these markers.
 
 Current compute rules and reservation records: [operations](docs/SPARK_COMPUTE_COORDINATION.md). This is not live GPU telemetry.
 
-[Full execution snapshot before consolidation](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/e6fc64444ee6b02c973e454ebe285843dcbe7fc2/STATUS.md). Historical results retain their original evidence and gates.
+[Full execution snapshot before consolidation](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/a074f7927b4104d2916e73e1304bfb3d967495f1/STATUS.md). Historical results retain their original evidence and gates.

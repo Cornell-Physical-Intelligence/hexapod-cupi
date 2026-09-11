@@ -53,6 +53,13 @@ retain the exact compatibility constraints and tests.
 
 ## Operations
 
+**Research remains paused for James.** The latest main handoff pauses native
+validation, training, recording and unattended continuation. This user's current
+authorization covers repository cleanup and its checks/publication. It does not
+resume research or release the Spark reservation. Keep the pause until James
+explicitly chooses to resume. [JAMES_HANDOFF](docs/JAMES_HANDOFF.md) preserves
+prepared, unexecuted sources and the actual pause receipts.
+
 The Spark mirror `/home/orionh/HEXAPOD` is not a Git repository. This local cleanup
 does not launch training or modify shared compute. For an authorized run read
 [OPERATIONS](docs/OPERATIONS.md) and the current

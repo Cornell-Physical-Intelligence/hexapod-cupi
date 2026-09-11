@@ -1,0 +1,457 @@
+--- ppo002/canonical_direct_ppo/native_contract.py
++++ ppo003/canonical_direct_ppo/native_contract.py
+@@ -5,6 +5,8 @@
+ from .binding_contract import sha,read,verify_directory,verify_admissions,bind_consumer_lineage
+ from .smoke_config import SCHEMA,protocol
+ from .native_entry_adapter import STANDING_FREEZE
++from . import source005_solver_diagnostics as diagnostics
++from .solver_evidence import validate_solver,validate_diagnostic_members
+ 
+ 
+ def verify_inputs(args):
+@@ -16,6 +18,7 @@
+     root=Path(args.standing_source).resolve()
+     spec=importlib.util.spec_from_file_location('_canonical_native_smoke_contract',root/'standing_contract.py')
+     native=importlib.util.module_from_spec(spec);spec.loader.exec_module(native)
++    if sha(root/'solver_diagnostics.py')!=sha(own/'canonical_direct_ppo/source005_solver_diagnostics.py'):raise ValueError('Consumer diagnostic protocol differs from exact standing source')
+     underlying=native.verify_inputs(SimpleNamespace(asset=Path(args.asset),admission=Path(args.admission),output=Path(args.output),num_envs=32,standing_one=Path(args.standing_one)))
+     one=read(Path(args.standing_one)/'state.json')['identity'];many=read(Path(args.standing32)/'state.json')['identity']
+     for field in ['actuation_state_sha256','actuation_inventory_sha256','asset_manifest_sha256']:
+@@ -27,7 +30,7 @@
+     return {'schema':SCHEMA,'phase':'canonical_ppo_smoke','runtime_binding':{'runtime_tree_sha256':own_digest,'scope':'fresh_canonical_405_408_two_update_smoke'},
+         'policy_lineage':lineage,'native_identity':underlying,'bindings_sha256':sha(args.bindings),'protocol':protocol(),
+         'fresh_neutral_controls':1000,'fresh_neutral_substeps':8000,'policy_controls':48,'policy_substeps':384,
+-        'total_controls':1048,'total_substeps':8384,'training_integration_only':True,'quality_admitted':False,'Stage2_complete':False}
++        'total_controls':1048,'total_substeps':8384,'solver_recipe':{'position_iterations':32,'velocity_iterations':0},'solver_diagnostics':diagnostics.declaration(32,8384),'training_integration_only':True,'quality_admitted':False,'Stage2_complete':False}
+ 
+ 
+ def finish(output,state,args,identity,app):
+@@ -60,19 +63,34 @@
+     if state.get('explicit_steps_completed')!=8384:raise ValueError('Incomplete exact native steps')
+     if not state.get('checks')or not all(v is True for v in state['checks'].values()):raise ValueError('Native setup checks rejected')
+     checks={'sdk_source_bound','usd_identity','native_scene','native_materials_offsets','all_native_inertias_limits_no_drives',
+-        'all_native_sdf_paths','all_reset_coordinate_frames','fresh_neutral_prefix_admitted','learner_2_updates_strict_reload'}
++        'all_native_sdf_paths','all_reset_coordinate_frames','fresh_neutral_prefix_admitted','learner_2_updates_strict_reload','neutral_solver_recipe_readback','solver_recipe_readback','legacy_friction_observed'}
+     if not checks.issubset(state['checks']):raise ValueError('Incomplete native setup/admission checks')
+     if state.get('quality_admitted')is not False or state.get('Stage2_complete')is not False:raise ValueError('Integration cannot claim walking/quiet quality')
+     required={'session.json','control_trace.npz','contacts.jsonl','initial_reset.json','native_readback.json','sdf_readback.json',
+-        'entry_composition.json','neutral_prefix/SHA256.json','neutral_prefix/standing_report.json',
++        'entry_composition.json','solver_readback.json','legacy_friction_readback.json','contact_view.json',
++        'neutral_prefix/SHA256.json','neutral_prefix/standing_report.json','neutral_prefix/session.json','neutral_prefix/solver_readback.json','neutral_prefix/legacy_friction_readback.json','neutral_prefix/native_readback.json','neutral_prefix/contact_view.json','neutral_prefix/contacts.jsonl','neutral_prefix/control_trace.npz',
+         'learner/state.json','learner/policy_control_trace.pt','learner/decision_001.pt','learner/decision_002.pt'}
+     if not required.issubset(state.get('outputs',{})):raise ValueError('Required raw evidence was not sealed')
+     for name,digest in state['outputs'].items():
+         p=d/name
+         if p.is_symlink()or not p.resolve().is_relative_to(d.resolve())or sha(p)!=digest:raise ValueError('Changed measured output:'+name)
++    if identity.get('solver_recipe')!={'position_iterations':32,'velocity_iterations':0}or identity.get('solver_diagnostics')!=diagnostics.declaration(32,8384):raise ValueError('Wrong solver/diagnostic composition identity')
++    solver=read(d/'solver_readback.json');neutral_solver=read(d/'neutral_prefix/solver_readback.json')
++    validate_solver(solver,32,final=True);validate_solver(neutral_solver,32,final=False)
++    if any(solver[k]!=neutral_solver[k]for k in ['before','after_authoring','after_reset','after_neutral_steps']):raise ValueError('Solver neutral prefix was not preserved')
+     session=read(d/'session.json');learner=read(d/'learner/state.json');prefix=read(d/'neutral_prefix/standing_report.json')
++    neutral_session=read(d/'neutral_prefix/session.json')
++    for where,current,steps in [(d,session,8384),(d/'neutral_prefix',neutral_session,8000)]:
++        if current.get('solver_diagnostics')!=diagnostics.declaration(32,steps):raise ValueError('Incomplete diagnostic channel declaration')
++        diagnostics.validate_legacy(read(where/'legacy_friction_readback.json'),32,read(where/'native_readback.json')['joint_names'])
++        validate_diagnostic_members(where,current)
++    for name in ['legacy_friction_readback.json','native_readback.json','contact_view.json']:
++        if sha(d/name)!=sha(d/'neutral_prefix'/name):raise ValueError('Changed native prefix readback:'+name)
++    if neutral_session.get('steps')!=8000 or neutral_session.get('captured_steps')!=8000 or neutral_session.get('controls')!=1000 or neutral_session.get('reset_count')!=1 or neutral_session.get('failure')is not None or neutral_session.get('all_rows_recorded')is not True:raise ValueError('Incomplete neutral clock/reset declaration')
+     if not session.get('substep_files')or any(n not in state['outputs']for n in session['substep_files']):raise ValueError('Missing native substeps')
+-    for name,digest in read(d/'neutral_prefix/SHA256.json').items():
++    prefix_map=read(d/'neutral_prefix/SHA256.json')
++    if not {'session.json','standing_report.json','solver_readback.json','legacy_friction_readback.json','native_readback.json','contact_view.json','contacts.jsonl','control_trace.npz'}.issubset(prefix_map)or not neutral_session.get('substep_files')or any(name not in prefix_map for name in neutral_session['substep_files']):raise ValueError('Incomplete immutable neutral prefix inventory')
++    for name,digest in prefix_map.items():
+         if state['outputs'].get('neutral_prefix/'+name)!=digest:raise ValueError('Changed immutable neutral prefix')
+     for name,digest in learner.get('outputs',{}).items():
+         if state['outputs'].get('learner/'+name)!=digest:raise ValueError('Changed learner sealed outputs')
+--- ppo002/canonical_direct_ppo/native_entry_adapter.py
++++ ppo003/canonical_direct_ppo/native_entry_adapter.py
+@@ -3,18 +3,24 @@
+ from contextlib import contextmanager
+ import ast,hashlib,sys
+ 
+-STANDING_FREEZE='e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0'
++STANDING_FREEZE='c87f2d340c935cd947c7aed3f3dcd7c9a9965b6e19d6726546abb560b27ab131'
+ ORIGINAL_TAIL='''  session.close();session=None
++  solver_record['after_controlled_steps']=verify_solver(stage,roots,PhysxSchema);save(out/'solver_readback.json',solver_record)
++  state['checks']['solver_recipe_readback']=True
+   from standing_score import score
+   report=score(out);save(out/'standing_report.json',report)
+   state['standing_pass']=report['all_pass'];state['status']='completed';state['native_error_events']=errors;state['wall_s']=time.monotonic()-started
+   print(f'CANONICAL_STANDING_ACQUISITION_COMPLETED standing_pass={report["all_pass"]} training_allowed=false',flush=True)'''
+-LEARNER_TAIL='''  learner_callback(session,model,out,state,errors,a)
++LEARNER_TAIL='''  solver_record['after_neutral_steps']=verify_solver(stage,roots,PhysxSchema);save(out/'solver_readback.json',solver_record)
++  state['checks']['neutral_solver_recipe_readback']=True
++  learner_callback(session,model,out,state,errors,a)
+   state['explicit_steps_completed']=session.count
+   session.close();session=None
++  solver_record['after_controlled_steps']=verify_solver(stage,roots,PhysxSchema);save(out/'solver_readback.json',solver_record)
++  state['checks']['solver_recipe_readback']=True
+   state['status']='completed';state['native_error_events']=errors;state['wall_s']=time.monotonic()-started
+   print('CANONICAL_PPO_SMOKE_COMPLETED updates=2 quality_admitted=false',flush=True)'''
+-HELPERS=('standing_contract','native_support','inspect_core','standing_math','standing_session','standing_score','quiet_metrics')
++HELPERS=('standing_contract','native_support','inspect_core','standing_math','standing_session','standing_score','quiet_metrics','solver_recipe','solver_diagnostics')
+ 
+ 
+ def adapted_source(root):
+@@ -26,9 +32,9 @@
+     if adapted.replace(LEARNER_TAIL,ORIGINAL_TAIL,1)!=original:raise ValueError('Unexpected native source adaptation')
+     # Prefix, loop and exception/finally statements remain byte identical. No rewritten physics step.
+     ast.parse(adapted)
+-    return adapted,{'schema':'canonical_native_ppo_entry_composition_v1','standing_source_sha256':STANDING_FREEZE,
++    return adapted,{'schema':'canonical_native_ppo_entry_composition_v2','standing_source_sha256':STANDING_FREEZE,
+         'original_entry_sha256':manifest['run_standing.py'],'adapted_entry_sha256':hashlib.sha256(adapted.encode()).hexdigest(),
+-        'changed_seam':'post1000 scoring tail only; fresh-prefix admission,48 policy controls,then close',
++        'changed_seam':'post1000 tail only; seal32/0 after_neutral_steps, fresh-prefix admission,48 policy controls,close,seal32/0 after_controlled_steps',
+         'neutral_physics_statements_unchanged':True,'exception_finally_statements_unchanged':True}
+ 
+ 
+--- ppo002/canonical_direct_ppo/neutral_prefix.py
++++ ppo003/canonical_direct_ppo/neutral_prefix.py
+@@ -8,10 +8,14 @@
+     if session.n!=32 or session.count!=8000 or session.captured_count!=8000 or session.control!=1000 or session.reset_count!=1 or session.failure is not None:
+         raise ValueError('Fresh complete32 neutral prefix required before policy')
+     if len(session.controls)!=1000:raise ValueError('Incomplete neutral control rows')
++    from .source005_solver_diagnostics import declaration,validate_legacy
++    from .solver_evidence import validate_solver
++    validate_solver(json.loads((Path(session.output)/'solver_readback.json').read_text()),session.n,final=False)
++    validate_legacy(json.loads((Path(session.output)/'legacy_friction_readback.json').read_text()),session.n,session.names)
+     session.flush() # flushes the active contact stream, but never closes or resets it
+     dest=Path(destination);dest.mkdir(parents=True,exist_ok=False)
+     source=Path(session.output)
+-    for name in ['initial_reset.json','native_readback.json','contacts.jsonl']:
++    for name in ['initial_reset.json','native_readback.json','contacts.jsonl','solver_readback.json','legacy_friction_readback.json','contact_view.json']:
+         # The active contact stream will grow. Its prefix must be an independent copy.
+         shutil.copyfile(source/name,dest/name)
+     for name in session.files:
+@@ -24,7 +28,7 @@
+     save(dest/'session.json',{'steps':session.count,'controls':session.control,'reset_count':session.reset_count,
+          'failure':session.failure,'substep_files':list(session.files),'body_names':list(session.body_names),
+          'joint_names':list(session.names),'root_paths':list(session.roots),'captured_steps':session.captured_count,
+-         'all_rows_recorded':session.captured_count==session.count,'scope':'Snapshot before actor construction; original session remains live.'})
++         'all_rows_recorded':session.captured_count==session.count,'solver_diagnostics':declaration(session.n,session.captured_count),'scope':'Snapshot before actor construction; original session remains live.'})
+     report=score(dest);save(dest/'standing_report.json',report)
+     from .binding_contract import sha
+     inventory={str(p.relative_to(dest)):sha(p)for p in sorted(dest.rglob('*'))if p.is_file()}
+--- ppo002/canonical_direct_ppo/solver_evidence.py
++++ ppo003/canonical_direct_ppo/solver_evidence.py
+@@ -0,0 +1,30 @@
++"""Additional source005 composition readbacks; no solver mutation or physical gates."""
++from pathlib import Path
++import zipfile
++from . import source005_solver_diagnostics as diagnostics
++
++
++def validate_solver(record,n,*,final):
++ roots={'/Robot'}|{f'/Robot_{i:03d}'for i in range(1,n)}
++ phases=['before','after_authoring','after_reset','after_neutral_steps']
++ if final:phases.append('after_controlled_steps')
++ for phase in phases:
++  values=record.get(phase,{})
++  if not isinstance(values,dict)or set(values)!=roots:raise ValueError('Incomplete solver recipe roots:'+phase)
++  expected=(32,1,[False,False])if phase=='before'else(32,0,[True,True])
++  for v in values.values():
++   if not isinstance(v,dict)or type(v.get('position_iterations'))is not int or type(v.get('velocity_iterations'))is not int or (v['position_iterations'],v['velocity_iterations'],v.get('authored'))!=expected:raise ValueError('Solver recipe differs:'+phase)
++ return True
++
++
++def validate_diagnostic_members(directory,session):
++ # Same stdlib member-presence check as exact source005 standing_contract.
++ # Runtime validates shapes/finite values and preserves all actual NPZ bytes;
++ # this host check does not pretend to independently recompute numerical traces.
++ d=Path(directory)
++ for name in ['control_trace.npz']+session.get('substep_files',[]):
++  path=d/name
++  if Path(name).name!=name or path.is_symlink()or not path.resolve().is_relative_to(d.resolve()):raise ValueError('Unsafe raw diagnostic path')
++  with zipfile.ZipFile(path)as archive:
++   if not {diagnostics.LINK_FIELD+'.npy',diagnostics.FLOOR_FIELD+'.npy'}.issubset(archive.namelist()):raise ValueError('Missing raw diagnostic channel:'+name)
++ return True
+--- ppo002/canonical_direct_ppo/source005_solver_diagnostics.py
++++ ppo003/canonical_direct_ppo/source005_solver_diagnostics.py
+@@ -0,0 +1,41 @@
++"""Read-only solver diagnostics. None of these channels replaces a physical gate.
++
++The two friction getters report different native properties. A zero new-model
++triple does not establish that the deprecated legacy coefficient is zero.
++"""
++import math
++from pathlib import Path
++
++SCHEMA='canonical_solver_observability_v1'
++LINK_FIELD='link_com_velocity_world'
++FLOOR_FIELD='floor_contact_force_matrix_world_n'
++
++def collect_legacy_friction(view,native,output,save):
++ record={'schema':SCHEMA,'joint_names':list(native['joint_names']),
++  'count':view.count,'getter':'get_dof_friction_coefficients',
++  'scope':'Read-only deprecated legacy coefficients; no setter or zero-value requirement. New friction properties remain separately recorded in native_readback.json.'}
++ path=Path(output)/'legacy_friction_readback.json';save(path,record)
++ try:
++  # Copy before validating so an unexpected native value survives in the receipt.
++  import numpy as np
++  values=np.array(view.get_dof_friction_coefficients().numpy(),copy=True)
++  record['shape']=list(values.shape);record['coefficients']=values.tolist();save(path,record)
++  validate_legacy(record,view.count,native['joint_names'])
++ except Exception as error:
++  record['failed_getter']={'name':record['getter'],'error':repr(error)};save(path,record);raise
++ return record
++
++def validate_legacy(record,n,names):
++ if record.get('schema')!=SCHEMA or record.get('getter')!='get_dof_friction_coefficients' or record.get('joint_names')!=list(names) or record.get('count')!=n or record.get('shape')!=[n,18] or 'failed_getter'in record:
++  raise ValueError('Incomplete legacy friction readback')
++ values=record.get('coefficients')
++ if not isinstance(values,list)or len(values)!=n or any(not isinstance(row,list)or len(row)!=18 for row in values):raise ValueError('Legacy friction readback shape differs')
++ if any(type(value)not in(int,float)or not math.isfinite(value)for row in values for value in row):raise ValueError('Nonfinite legacy friction readback')
++ # Nonzero coefficients are observations, never silently cleared or rejected.
++ return True
++
++def declaration(n,captured):
++ return {'schema':SCHEMA,'captured_steps':captured,
++  'channels':{LINK_FIELD:[n,19,6],FLOOR_FIELD:[19*n,1,3]},
++  'link_velocity_scope':'Native global linear velocity at each link COM, then angular velocity; native articulation body order. Derived from articulation state, not independent angle-difference truth.',
++  'floor_force_scope':'Native filtered contact-force matrix at dt=.0025, sensor order in contact_view.json and sole /Ground filter; copied independently of detailed patches but may share their backend. No replacement of toe/shaft classification.'}
+--- ppo002/check_entrypoint_cpu.py
++++ ppo003/check_entrypoint_cpu.py
+@@ -0,0 +1,22 @@
++#!/usr/bin/env python3
++"""Actual full native-main import/preflight path, with a labeled CPU identity stub.
++No simulator allocation or claim of actual native input admission.
++"""
++from pathlib import Path
++import argparse,json,sys
++from canonical_direct_ppo.native_entry_adapter import load
++
++
++def main():
++ p=argparse.ArgumentParser();p.add_argument('--standing-source',type=Path,required=True);args=p.parse_args()
++ events=[]
++ def verified_fixture(a):
++  events.append({'num_envs':a.num_envs,'preflight_only':a.preflight_only})
++  return {'CPU_ENTRYPOINT_FIXTURE_ONLY':True}
++ run,composition=load(args.standing_source,verified_fixture,None,None,'CPU_ENTRYPOINT_FIXTURE')
++ result=run(['--asset','/CPU_ASSET','--admission','/CPU_ADMISSION','--output','/CPU_OUTPUT','--num-envs','32','--standing-one','/CPU_ONE','--preflight-only'])
++ assert result==0 and events==[{'num_envs':32,'preflight_only':True}]
++ prohibited=[x for x in sys.modules if x in ('torch','numpy')or x.startswith('isaaclab')or x.startswith('omni.')]
++ assert not prohibited,prohibited
++ print(json.dumps({'test':'exact_full_source005_load_and_preflight_only','passed':True,'native_inputs_stubbed':True,'native_executed':False,'new_native_output_created':False,'prohibited_imports':prohibited,'composition':composition},sort_keys=True))
++if __name__=='__main__':main()
+--- ppo002/test_bindings.py
++++ ppo003/test_bindings.py
+@@ -4,6 +4,8 @@
+ from canonical_direct_ppo.smoke_config import protocol
+ 
+ from test_support import ROOT,STANDING
++from test_solver_fixture import write_native_records,write_member_fixture
++from canonical_direct_ppo import source005_solver_diagnostics as diag
+ 
+ def write(path,data):path.write_text(json.dumps(data))
+ 
+@@ -20,12 +22,14 @@
+  physical={k:0 for k in ['post_settle_missing_six_toe_substeps','all_controlled_nonfoot_substeps','max_applied_all_substeps_nm','max_requested_saturation_fraction_400hz','mean_requested_saturation_fraction_400hz','minimum_non_toe_mesh_floor_m']};physical['minimum_plate_height_m']=.1
+  report={'num_envs':n,'substeps':8000,'controls':1000,'all_pass':True,'replicas':[{'quiet':quiet,'physical':physical,'failed_physical_bounds':[],'pass':True}for _ in range(n)]}
+  write(directory/'standing_report.json',report)
+- write(directory/'session.json',{'captured_steps':8000,'all_rows_recorded':True,'steps':8000,'controls':1000,'reset_count':1,'failure':None,'substep_files':['substeps_000.npz']})
++ write(directory/'session.json',{'captured_steps':8000,'all_rows_recorded':True,'steps':8000,'controls':1000,'reset_count':1,'failure':None,'substep_files':['substeps_000.npz'],'solver_diagnostics':diag.declaration(n,8000)})
+  for name in ['control_trace.npz','initial_reset.json','native_readback.json','sdf_readback.json','contact_view.json','contacts.jsonl','substeps_000.npz']:(directory/name).write_text('CPU protocol fixture only')
++ write_native_records(directory,n,final=True)
++ for name in ['control_trace.npz','substeps_000.npz']:write_member_fixture(directory/name)
+  write(directory/'native_errors.json',[])
+  outputs={p.name:sha(p)for p in directory.iterdir()if p.name!='native_errors.json'}
+  state={'schema':'canonical_native_standing_v1','identity':identity,'status':'completed','inputs_unchanged':True,'errors':[],'native_error_events':[],
+-  'physical_admission':False,'physics_admitted':False,'training_allowed':False,'explicit_steps_completed':8000,'checks':{'CPU_PROTOCOL_FIXTURE_ONLY':True},'outputs':outputs}
++  'physical_admission':False,'physics_admitted':False,'training_allowed':False,'explicit_steps_completed':8000,'checks':{'CPU_PROTOCOL_FIXTURE_ONLY':True,'solver_recipe_readback':True,'legacy_friction_observed':True},'outputs':outputs}
+  write(directory/'state.json',state);return sha(directory/'state.json')
+ 
+ class BindingChecks(unittest.TestCase):
+--- ppo002/test_native_entry.py
++++ ppo003/test_native_entry.py
+@@ -8,6 +8,7 @@
+ from canonical_direct_ppo.neutral_prefix import snapshot
+ 
+ from test_support import ROOT,STANDING
++from test_solver_fixture import write_native_records
+ 
+ 
+ def save(path,data):Path(path).write_text(json.dumps(data))
+@@ -58,8 +59,9 @@
+  def fixture(self,root):
+   for n in ['initial_reset.json','native_readback.json']:(root/n).write_text('{}')
+   (root/'contacts.jsonl').write_text('prefix\n');(root/'substeps_000.npz').write_bytes(b'IMMUTABLE FIXTURE')
++  names=write_native_records(root,32,final=False)
+   s=SimpleNamespace(n=32,count=8000,captured_count=8000,control=1000,reset_count=1,failure=None,output=root,
+-    controls=[{'control_index':np.array(i)}for i in range(1000)],files=['substeps_000.npz'],body_names=['body'],names=['q'],roots=['robot']*32)
++    controls=[{'control_index':np.array(i)}for i in range(1000)],files=['substeps_000.npz'],body_names=['body'],names=names,roots=['robot']*32)
+   s.flush=lambda:None
+   return s
+  def test_snapshot_does_not_close_reset_or_alias_active_contact_stream(self):
+--- ppo002/test_native_result.py
++++ ppo003/test_native_result.py
+@@ -4,6 +4,8 @@
+ from canonical_direct_ppo.native_contract import validate_result
+ from canonical_direct_ppo.binding_contract import sha
+ from canonical_direct_ppo.smoke_config import SCHEMA
++from canonical_direct_ppo import source005_solver_diagnostics as diag
++from test_solver_fixture import write_native_records,write_member_fixture
+ 
+ 
+ def write(path,data):path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(data))
+@@ -11,16 +13,22 @@
+ 
+ class ResultChecks(unittest.TestCase):
+  def fixture(self,d):
+-  identity={'schema':SCHEMA,'CPU_PROTOCOL_FIXTURE_ONLY':True,'policy_lineage':{'CPU_ONLY':True}}
+-  checks=['sdk_source_bound','usd_identity','native_scene','native_materials_offsets','all_native_inertias_limits_no_drives','all_native_sdf_paths','all_reset_coordinate_frames','fresh_neutral_prefix_admitted','learner_2_updates_strict_reload']
++  identity={'schema':SCHEMA,'CPU_PROTOCOL_FIXTURE_ONLY':True,'policy_lineage':{'CPU_ONLY':True},'solver_recipe':{'position_iterations':32,'velocity_iterations':0},'solver_diagnostics':diag.declaration(32,8384)}
++  checks=['sdk_source_bound','usd_identity','native_scene','native_materials_offsets','all_native_inertias_limits_no_drives','all_native_sdf_paths','all_reset_coordinate_frames','fresh_neutral_prefix_admitted','learner_2_updates_strict_reload','neutral_solver_recipe_readback','solver_recipe_readback','legacy_friction_observed']
+   state={'schema':SCHEMA,'identity':identity,'status':'completed','inputs_unchanged':True,'errors':[],'native_error_events':[],'explicit_steps_completed':8384,
+    'checks':dict.fromkeys(checks,True),'quality_admitted':False,'Stage2_complete':False}
+   write(d/'native_errors.json',[])
+   for name in ['control_trace.npz','contacts.jsonl','initial_reset.json','native_readback.json','sdf_readback.json','entry_composition.json','substeps_000.npz','learner/policy_control_trace.pt','learner/decision_001.pt','learner/decision_002.pt']:
+    p=d/name;p.parent.mkdir(exist_ok=True,parents=True);p.write_bytes(b'CPU PROTOCOL FIXTURE ONLY')
+-  write(d/'session.json',{'steps':8384,'captured_steps':8384,'controls':1048,'reset_count':1,'failure':None,'all_rows_recorded':True,'substep_files':['substeps_000.npz']})
++  write_native_records(d,32,final=True)
++  for name in ['control_trace.npz','substeps_000.npz']:write_member_fixture(d/name)
++  write(d/'session.json',{'steps':8384,'captured_steps':8384,'controls':1048,'reset_count':1,'failure':None,'all_rows_recorded':True,'substep_files':['substeps_000.npz'],'solver_diagnostics':diag.declaration(32,8384)})
+   write(d/'neutral_prefix/standing_report.json',{'all_pass':True,'num_envs':32,'replicas':[{'pass':True}]*32})
+-  write(d/'neutral_prefix/SHA256.json',{'standing_report.json':sha(d/'neutral_prefix/standing_report.json')})
++  write_native_records(d/'neutral_prefix',32,final=False)
++  for name in ['control_trace.npz','substeps_000.npz']:write_member_fixture(d/'neutral_prefix'/name)
++  (d/'neutral_prefix/contacts.jsonl').write_text('CPU PREFIX FIXTURE ONLY\n')
++  write(d/'neutral_prefix/session.json',{'steps':8000,'captured_steps':8000,'controls':1000,'reset_count':1,'failure':None,'all_rows_recorded':True,'substep_files':['substeps_000.npz'],'solver_diagnostics':diag.declaration(32,8000)})
++  write(d/'neutral_prefix/SHA256.json',{p.name:sha(p)for p in(d/'neutral_prefix').iterdir()})
+   updates=[]
+   for i in [1,2]:
+    digest=sha(d/'learner'/f'decision_{i:03d}.pt')
+--- ppo002/test_solver_fixture.py
++++ ppo003/test_solver_fixture.py
+@@ -0,0 +1,28 @@
++"""Clearly synthetic CPU receipt helpers; no native or standing-admission evidence."""
++import json,zipfile
++from pathlib import Path
++from canonical_direct_ppo import source005_solver_diagnostics as diag
++
++
++def solver_record(n=32,final=True):
++ roots=['/Robot']+[f'/Robot_{i:03d}'for i in range(1,n)]
++ phases=['before','after_authoring','after_reset','after_neutral_steps']+(['after_controlled_steps']if final else [])
++ return {phase:{r:{'position_iterations':32,'velocity_iterations':1 if phase=='before'else 0,'authored':[False,False]if phase=='before'else[True,True]}for r in roots}for phase in phases}
++
++
++def write_native_records(root,n=32,final=True):
++ root=Path(root);root.mkdir(parents=True,exist_ok=True);names=[f'CPU_q{i}'for i in range(18)]
++ records={'solver_readback.json':solver_record(n,final),
++ 'native_readback.json':{'joint_names':names,'CPU_PROTOCOL_FIXTURE_ONLY':True},
++ 'legacy_friction_readback.json':{'schema':diag.SCHEMA,'getter':'get_dof_friction_coefficients','joint_names':names,'count':n,'shape':[n,18],'coefficients':[[.125]*18 for _ in range(n)]},
++ 'contact_view.json':{'CPU_PROTOCOL_FIXTURE_ONLY':True,'filter_paths':['/Ground']}}
++ for name,data in records.items():(root/name).write_text(json.dumps(data))
++ return names
++
++
++def write_member_fixture(path,omit=None):
++ # This exercises the stdlib host member barrier only. It deliberately does
++ # not claim these tiny bytes are complete native NumPy arrays or a scorer fixture.
++ with zipfile.ZipFile(path,'w')as z:
++  for field in [diag.LINK_FIELD,diag.FLOOR_FIELD]:
++   if field!=omit:z.writestr(field+'.npy',b'CPU MEMBER-PRESENCE FIXTURE ONLY')
+--- ppo002/test_standing005_binding.py
++++ ppo003/test_standing005_binding.py
+@@ -0,0 +1,90 @@
++"""Source005 composition/readonly diagnostic lifecycle and tamper counterexamples."""
++from pathlib import Path
++from types import SimpleNamespace,ModuleType
++from unittest.mock import patch
++import copy,hashlib,json,sys,tempfile,textwrap,unittest
++from canonical_direct_ppo import native_entry_adapter as entry,source005_solver_diagnostics as diag
++from canonical_direct_ppo.binding_contract import verify_admissions,sha
++from canonical_direct_ppo.native_contract import validate_result
++from test_support import ROOT,STANDING
++from test_solver_fixture import solver_record,write_member_fixture
++import test_native_result as result_fixture
++from test_native_result import write
++
++HERE=Path(__file__).resolve().parent
++PARENT_MAP=json.loads((HERE/'history/ppo002/FREEZE_SHA256.json').read_text())
++
++class Standing005Checks(unittest.TestCase):
++ def test_exact_source_and_actor_servo_preservation(self):
++  self.assertEqual(entry.STANDING_FREEZE,'c87f2d340c935cd947c7aed3f3dcd7c9a9965b6e19d6726546abb560b27ab131')
++  self.assertEqual(sha(STANDING/'FREEZE_SHA256.json'),entry.STANDING_FREEZE)
++  for name in ['adapter.py','frames.py','native_bridge.py','runner.py','run_bound_smoke.py','smoke_config.py','binding_contract.py','rsl_binding.py']:
++   self.assertEqual(sha(HERE/'canonical_direct_ppo'/name),PARENT_MAP['canonical_direct_ppo/'+name],name)
++  self.assertEqual(sha(HERE/'run_native_smoke.py'),PARENT_MAP['run_native_smoke.py'])
++  self.assertEqual((HERE/'canonical_direct_ppo/source005_solver_diagnostics.py').read_bytes(),(STANDING/'solver_diagnostics.py').read_bytes())
++  self.assertEqual(sha(HERE/'history/ppo002/FREEZE_SHA256.json'),'1e173946fe2548a82207791528f503ac6d12766fd5b50f25746e6edf92704617')
++ def test_earlier_source_refused_and_32_still_disabled(self):
++  with tempfile.TemporaryDirectory()as td:
++   old=Path(td);(old/'FREEZE_SHA256.json').write_bytes((HERE/'STANDING003_FREEZE_SHA256.json').read_bytes())
++   self.assertEqual(sha(old/'FREEZE_SHA256.json'),'e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0')
++   with self.assertRaisesRegex(ValueError,'Wrong frozen source'):entry.adapted_source(old)
++  b=json.loads((HERE/'BINDINGS.json').read_text())
++  self.assertEqual(b['standing1_state_sha256'],'33920a4af296ed124643fe61a16f4840c19949b5f6e434327d7cd7ea9953cd3f')
++  self.assertIsNone(b['standing32_state_sha256']);self.assertFalse(b['ready_for_native_dispatch'])
++  with self.assertRaisesRegex(ValueError,'Pending/invalid'):verify_admissions(STANDING,Path('/notread1'),Path('/notread32'),b)
++ def test_neutral_and_final_solver_reads_enclose_48_policy_controls(self):
++  events=[];saved=[];session=SimpleNamespace(count=8000)
++  session.close=lambda:events.append(('close',session.count))
++  def verify(stage,roots,schema):events.append(('verify',session.count));return solver_record()['after_authoring']
++  def save(path,value):saved.append(copy.deepcopy(value));events.append(('save',session.count))
++  def callback(s,*args):
++   self.assertEqual(s.count,8000);self.assertIn('after_neutral_steps',saved[-1]);self.assertNotIn('after_controlled_steps',saved[-1]);events.append(('learner',s.count));s.count+=384
++  record=solver_record(final=False);record.pop('after_neutral_steps')
++  env={'solver_record':record,'verify_solver':verify,'stage':None,'roots':None,'PhysxSchema':None,'save':save,'out':Path('/CPU_ONLY'),'state':{'checks':{}},'learner_callback':callback,'session':session,'model':None,'errors':[],'a':None,'time':SimpleNamespace(monotonic=lambda:1.),'started':0.,'print':lambda *a,**k:None}
++  exec(textwrap.dedent(entry.LEARNER_TAIL),env)
++  self.assertEqual(events,[('verify',8000),('save',8000),('learner',8000),('close',8384),('verify',8384),('save',8384)])
++  self.assertEqual(env['state']['explicit_steps_completed'],8384);self.assertEqual(env['state']['status'],'completed')
++ def test_solver_failure_before_callback_stops_actor(self):
++  def fail(*a):raise ValueError('changed32/4')
++  env={'verify_solver':fail,'solver_record':{},'stage':None,'roots':None,'PhysxSchema':None,'learner_callback':lambda *a:self.fail('actor reached')}
++  with self.assertRaisesRegex(ValueError,'changed32/4'):exec(textwrap.dedent(entry.LEARNER_TAIL),env)
++ def test_new_helpers_reject_foreign_cached_modules(self):
++  for name in ['solver_recipe','solver_diagnostics']:
++   m=ModuleType(name);m.__file__='/foreign/'+name+'.py'
++   with patch.dict(sys.modules,{name:m}):
++    with self.assertRaisesRegex(ValueError,'Foreign cached'):
++     with entry.exact_helper_imports(STANDING):self.fail('accepted')
++
++class DiagnosticResultChecks(unittest.TestCase):
++ def fixture(self,d):return result_fixture.ResultChecks().fixture(d)
++ def seal(self,d,state):
++  prefix=d/'neutral_prefix';write(prefix/'SHA256.json',{p.name:sha(p)for p in prefix.iterdir()if p.name!='SHA256.json'})
++  result_fixture.ResultChecks().seal(d,state)
++ def test_wrong_solver_missing_root_phase_or_unsealed_copy_rejected(self):
++  changes=[lambda v:v['after_neutral_steps']['/Robot'].update(velocity_iterations=4),lambda v:v.pop('after_controlled_steps'),lambda v:v['after_controlled_steps'].pop('/Robot_031')]
++  for change in changes:
++   with self.subTest(change=change),tempfile.TemporaryDirectory()as td:
++    d=Path(td);identity,state,_=self.fixture(d);v=json.loads((d/'solver_readback.json').read_text());change(v);write(d/'solver_readback.json',v);self.seal(d,state)
++    with self.assertRaises(ValueError):validate_result(d,identity)
++  with tempfile.TemporaryDirectory()as td:
++   d=Path(td);identity,state,_=self.fixture(d);state['outputs'].pop('neutral_prefix/solver_readback.json');write(d/'state.json',state)
++   with self.assertRaisesRegex(ValueError,'not sealed'):validate_result(d,identity)
++ def test_declaration_counters_and_missing_npz_channel_rejected(self):
++  for where in ['','neutral_prefix']:
++   with self.subTest(where=where),tempfile.TemporaryDirectory()as td:
++    d=Path(td);identity,state,_=self.fixture(d);p=d/where/'session.json';v=json.loads(p.read_text());v['solver_diagnostics']['captured_steps']-=1;write(p,v);self.seal(d,state)
++    with self.assertRaisesRegex(ValueError,'declaration'):validate_result(d,identity)
++   with tempfile.TemporaryDirectory()as td:
++    d=Path(td);identity,state,_=self.fixture(d);write_member_fixture(d/where/'substeps_000.npz',omit=diag.FLOOR_FIELD);self.seal(d,state)
++    with self.assertRaisesRegex(ValueError,'Missing raw diagnostic'):validate_result(d,identity)
++ def test_nonzero_legacy_allowed_changed_or_nonfinite_prefix_rejected(self):
++  with tempfile.TemporaryDirectory()as td:
++   d=Path(td);identity,state,_=self.fixture(d)
++   self.assertEqual(json.loads((d/'legacy_friction_readback.json').read_text())['coefficients'][0][0],.125)
++   self.assertEqual(validate_result(d,identity)['status'],'completed')
++   p=d/'neutral_prefix/legacy_friction_readback.json';v=json.loads(p.read_text());v['coefficients'][0][0]=.25;write(p,v);self.seal(d,state)
++   with self.assertRaisesRegex(ValueError,'Changed native prefix'):validate_result(d,identity)
++   v['coefficients'][0][0]=float('nan');write(p,v);self.seal(d,state)
++   with self.assertRaisesRegex(ValueError,'Nonfinite legacy'):validate_result(d,identity)
++
++if __name__=='__main__':unittest.main()
+--- ppo002/test_support.py
++++ ppo003/test_support.py
+@@ -4,5 +4,5 @@
+ 
+ ROOT=next((p for p in Path(__file__).resolve().parents if (p/'robot/active_model.json').is_file()and(p/'pyproject.toml').is_file()),None)
+ if ROOT is None:raise RuntimeError('Run these CPU tests within the HEXAPOD repository')
+-STANDING=Path(os.environ.get('HEXAPOD_CANONICAL_STANDING_SOURCE',str(ROOT/'tmp/updated_native_standing_003'))).resolve()
++STANDING=Path(os.environ.get('HEXAPOD_CANONICAL_STANDING_SOURCE',str(ROOT/'tmp/updated_native_standing_005'))).resolve()
+ TEST_DEPS=ROOT/'tmp/reference_residual_ppo_001/_deps'

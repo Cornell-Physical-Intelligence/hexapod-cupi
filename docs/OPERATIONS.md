@@ -173,9 +173,11 @@ Do not erase request files, completed reconstructions or partial outputs.
 Check actual GitHub workflow inventories before assuming Git is a scheduler.
 Disable identified competing triggers when present; a repository with no
 workflows has nothing to cancel. Preserve HEXAPOD's own jobs, repository CI,
-Pages deployment and continuation automation. Every native successor must
+Pages deployment. The later James handoff pauses continuation automation and all new research allocations; retain the reservation helper. Every native successor must
 recheck these operational controls without changing its admitted robot source,
 servo, physics or quality gates.
+
+**Handoff pause, 11 September 2026:** `/home/orionh/HEXAPOD_runs/canonical_direct_20260910/james_handoff_pause_001/PAUSED.json` records the user pause. The Codex continuation is PAUSED, and the old `hexapod-restore-forecasting-20260909.timer` is stopped with its transient units absent. No research job is queued. James or the user must explicitly resume project work; external scheduler release remains a separate user decision. Read [JAMES_HANDOFF](JAMES_HANDOFF.md) before using historical launchers.
 
 Historical Stage2 team workflow (new CAD-v2 validation uses §11):
 

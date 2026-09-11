@@ -1,0 +1,47 @@
+{
+  "frozen_source_sha256": "f6b239605e84389a9c3a9b292932b64304c54a853a28c85e83267234b1e637b9",
+  "source_payloads": 27,
+  "source_unchanged": true,
+  "scope": "CPU proposal only; no native source, physics gate or policy modified",
+  "cases": {
+    "single_NaN_substep_time": {
+      "rejected": false,
+      "reward": [
+        0.14
+      ],
+      "counter_interval": [
+        8000,
+        8008
+      ]
+    },
+    "NaN_before_time": {
+      "rejected": false,
+      "reward": [
+        0.14
+      ],
+      "counter_interval": [
+        8000,
+        8008
+      ]
+    },
+    "fractional_counters_and_substep_indices": {
+      "rejected": false,
+      "reward": [
+        0.14
+      ],
+      "counter_interval": [
+        8000,
+        8008
+      ]
+    },
+    "finite_wrong_time_control": {
+      "rejected": true,
+      "error": "ValueError('Substep clock/counter mismatch')"
+    },
+    "neutral_context_NaN_time": {
+      "rejected": false,
+      "reward": [],
+      "counter_interval": null
+    }
+  }
+}

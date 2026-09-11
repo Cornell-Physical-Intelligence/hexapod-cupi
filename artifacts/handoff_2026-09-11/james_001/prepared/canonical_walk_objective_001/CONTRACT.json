@@ -1,0 +1,152 @@
+{
+  "schema": "canonical_omni_objective_contract_proposal_v1",
+  "runtime_adopted": false,
+  "hardware_admitted": false,
+  "Stage2_complete": false,
+  "native_launch_authorized_by_this_contract": false,
+  "policy_contract": {
+    "actor": 405,
+    "critic": 408,
+    "history_frames": 5,
+    "frame_features": 81,
+    "units": "SI without implicit scale changes; empirical normalizers as separately pinned smoke",
+    "held_target_encoding": "actual previously held target minus current measured q",
+    "contact_in_actor": false,
+    "linear_velocity_in_actor": false,
+    "raw_sdk_qdot_retained": true,
+    "target_scale_rad": 0.1,
+    "maximum_target_delta_rad_per_control": 0.04
+  },
+  "clock": {
+    "control_s": 0.02,
+    "physics_s": 0.0025,
+    "substeps_per_control": 8,
+    "command_frame": "body-root-origin forward/left/up",
+    "attribution": "c[t] visible before action; reward hold t uses c[t]; observation heldtarget is u[t-1]"
+  },
+  "reward": {
+    "schema": "canonical_omni_reward_proposal_v1",
+    "weights": {
+      "planar_tracking": 5.0,
+      "yaw_tracking": 2.0,
+      "tilt": 0.2,
+      "roll_pitch_rate": 0.05,
+      "vertical_rate": 0.05,
+      "applied_effort": 0.02,
+      "requested_excess": 0.1,
+      "target_delta": 0.02,
+      "target_second_difference": 0.01,
+      "requested_target_excess": 0.05,
+      "contact_slip": 0.05,
+      "zero_command_angle_rate": 0.05,
+      "zero_command_target_delta": 0.05,
+      "terminal": 20.0
+    },
+    "gamma_for_terminal_bound": 0.99,
+    "terminal_bound": {
+      "maximum_cost_rate": 0.6500000000000002,
+      "minimum_discounted_continuing_return": -1.2999999999999994,
+      "strict_terminal_penalty_lower_bound": 1.4399999999999995,
+      "declared_terminal_penalty": 20.0,
+      "sufficient": true
+    },
+    "bounded_cost_form": "x^2/(1+x^2)",
+    "tracking_aggregation": "mean of squared errors across8samples, then exponential",
+    "scales": {
+      "planar_sigma_m_s": "max(.02,.5*norm(requested_vxy))",
+      "yaw_sigma_rad_s": "max(.05,.5*abs(requested_wz))",
+      "tilt_chord": 0.15,
+      "roll_pitch_rad_s": 0.25,
+      "vertical_m_s": 0.1,
+      "effort_nm": 1.6,
+      "target_delta_rad": 0.04,
+      "target_second_difference_rad": 0.04,
+      "requested_target_excess_rad": 0.04,
+      "contact_slip_m_s": 0.05,
+      "zero_command_angle_rate_rad_s": 0.05,
+      "zero_command_target_delta_rad": 0.002
+    },
+    "contact_vector_precondition": {
+      "native_raw_acceptance_unchanged": true,
+      "raw_normal_tolerance": 0.001,
+      "after_acceptance_only": "normalize accepted active normals before unit-vector calculation; never normalize rejected raw normals into acceptance",
+      "pose": "rigid matrices derived from normalized accepted native XYZW quaternions",
+      "helper_tolerance_is_not_physical_gate": true
+    }
+  },
+  "curriculum": {
+    "levels": {
+      "0": {
+        "linear_norm_m_s": [
+          0.02,
+          0.04
+        ],
+        "abs_yaw_rad_s": [
+          0.08,
+          0.16
+        ]
+      },
+      "1": {
+        "linear_norm_m_s": [
+          0.04,
+          0.08
+        ],
+        "abs_yaw_rad_s": [
+          0.16,
+          0.32
+        ]
+      },
+      "2": {
+        "linear_norm_m_s": [
+          0.08,
+          0.16
+        ],
+        "abs_yaw_rad_s": [
+          0.32,
+          0.5
+        ]
+      }
+    },
+    "requested_not_admitted": true,
+    "automatic_promotion": false,
+    "balanced_zero_fraction": 0.2,
+    "exact_balance": "25strata;25commandepochs perrow",
+    "program_controls": 600,
+    "physical_reset_on_program_restart": false,
+    "policy_history_reset_on_program_restart": false
+  },
+  "held_out": {
+    "cases": 32,
+    "controls": 1100,
+    "initial_zero": 100,
+    "motion": 400,
+    "stop": 600,
+    "quiet_last": 500,
+    "families": {
+      "translation": 8,
+      "pure_yaw": 2,
+      "arc": 16,
+      "quiet": 6
+    },
+    "replaces_existing_acceptance": false,
+    "reversal_actual_sequence_pending": true
+  },
+  "unresolved_native_seams": [
+    "matching source003 native1/32 admissions",
+    "405/408 zero-command two-update smoke",
+    "material-point raw contact/8substep reward packet",
+    "single-foot separation/return native diagnostic",
+    "distinct moving-support bridge/contract",
+    "actual terminal/timeout storage before auto reset",
+    "independent held-out tracking scorer preserving all formal quiet/physical bounds"
+  ],
+  "first_allocation_proposal_only": {
+    "num_envs": 32,
+    "rollout_controls": 24,
+    "updates": 50,
+    "level": 0,
+    "automatic_physical_reset": false,
+    "allocation_not_authorized": true
+  },
+  "publication": "Root owns tracked adoption with docs/PROJECT_SITE.md central record, relevant Markdown/status, validated site and applicable runtime lineage."
+}

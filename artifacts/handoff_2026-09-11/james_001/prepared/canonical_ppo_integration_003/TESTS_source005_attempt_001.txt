@@ -1,0 +1,315 @@
+test_actual_target_error_and_nonzero_command_survive_exact_layout (test_adapter002.Adapter002Checks.test_actual_target_error_and_nonzero_command_survive_exact_layout) ... ok
+test_nonzero_world_rotation_and_com_origin (test_adapter002.Adapter002Checks.test_nonzero_world_rotation_and_com_origin) ... ok
+test_selected_history_reset_preserves_unselected_rows (test_adapter002.Adapter002Checks.test_selected_history_reset_preserves_unselected_rows) ... ok
+test_changed_raw_and_different_first_admission_rejected (test_bindings.BindingChecks.test_changed_raw_and_different_first_admission_rejected) ... FAIL
+test_exact_source_contract_positive_and_wrong_model_rejected (test_bindings.BindingChecks.test_exact_source_contract_positive_and_wrong_model_rejected) ... ERROR
+test_invented_or_placeholder_hash_is_not_admission (test_bindings.BindingChecks.test_invented_or_placeholder_hash_is_not_admission) ... ok
+test_pending_bindings_fail_before_reading_native_paths (test_bindings.BindingChecks.test_pending_bindings_fail_before_reading_native_paths) ... ok
+test_actual_adapter_bridge_to_real_rsl_two_updates_cpu_only (test_bridge_session.SessionBridgeChecks.test_actual_adapter_bridge_to_real_rsl_two_updates_cpu_only) ... ok
+test_initial_actual_missing_foot_is_rejected (test_bridge_session.SessionBridgeChecks.test_initial_actual_missing_foot_is_rejected) ... ok
+test_intermediate_contact_loss_rejected_even_when_endpoint_recovers (test_bridge_session.SessionBridgeChecks.test_intermediate_contact_loss_rejected_even_when_endpoint_recovers) ... ok
+test_invalid_initial_contact_is_not_synthesized (test_bridge_session.SessionBridgeChecks.test_invalid_initial_contact_is_not_synthesized) ... ok
+test_measured_limit_violation_prevents_actor_step (test_bridge_session.SessionBridgeChecks.test_measured_limit_violation_prevents_actor_step) ... ok
+test_native_error_during_control_preserves_endpoint_and_blocks_next_action (test_bridge_session.SessionBridgeChecks.test_native_error_during_control_preserves_endpoint_and_blocks_next_action) ... ok
+test_action_math_parity_to_partner_pipeline_with_only_float32_rounding (test_native_bridge.BridgeMathChecks.test_action_math_parity_to_partner_pipeline_with_only_float32_rounding) ... ok
+test_emitted_float32_targets_never_exceed_actual_point040_budget (test_native_bridge.BridgeMathChecks.test_emitted_float32_targets_never_exceed_actual_point040_budget) ... ok
+test_measured_limit_violation_is_rejected_before_helper_clamp (test_native_bridge.BridgeMathChecks.test_measured_limit_violation_is_rejected_before_helper_clamp) ... ok
+test_reward_uses_actual_control_angle_difference_not_sdk_bias (test_native_bridge.BridgeMathChecks.test_reward_uses_actual_control_angle_difference_not_sdk_bias) ... ok
+test_changed_standing_source_fails_before_compile (test_native_entry.EntryChecks.test_changed_standing_source_fails_before_compile) ... ok
+test_exact_frozen_main_native_prefix_and_finally_unchanged (test_native_entry.EntryChecks.test_exact_frozen_main_native_prefix_and_finally_unchanged) ... ok
+test_foreign_lazy_helper_inserted_after_load_is_rejected (test_native_entry.EntryChecks.test_foreign_lazy_helper_inserted_after_load_is_rejected) ... ok
+test_lazy_native_import_is_in_scope_after_load_returns (test_native_entry.EntryChecks.test_lazy_native_import_is_in_scope_after_load_returns) ... ok
+test_incomplete_native_capture_cannot_score (test_native_entry.PrefixChecks.test_incomplete_native_capture_cannot_score) ... ok
+test_rejected_prefix_is_preserved_and_stops_before_learner (test_native_entry.PrefixChecks.test_rejected_prefix_is_preserved_and_stops_before_learner) ... ok
+test_snapshot_does_not_close_reset_or_alias_active_contact_stream (test_native_entry.PrefixChecks.test_snapshot_does_not_close_reset_or_alias_active_contact_stream) ... ok
+test_each_reload_and_optimizer_claim_must_be_true (test_native_result.ResultChecks.test_each_reload_and_optimizer_claim_must_be_true) ... ok
+test_late_error_and_missing_raw_seal_rejected (test_native_result.ResultChecks.test_late_error_and_missing_raw_seal_rejected) ... ok
+test_positive_explicit_integration_only (test_native_result.ResultChecks.test_positive_explicit_integration_only) ... ok
+test_failure_preserves_actual_attempted_native_prefix_without_second_update (test_runner.RunnerChecks.test_failure_preserves_actual_attempted_native_prefix_without_second_update) ... ok
+test_observation_clone_and_privilege_boundary (test_runner.RunnerChecks.test_observation_clone_and_privilege_boundary) ... ok
+test_protocol_not_old_task_and_explicit_smoke_parameters (test_runner.RunnerChecks.test_protocol_not_old_task_and_explicit_smoke_parameters) ... ok
+test_real_two_updates_and_every_checkpoint_strict_reload (test_runner.RunnerChecks.test_real_two_updates_and_every_checkpoint_strict_reload) ... --------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=405, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (mlp): MLP(
+    (0): Linear(in_features=408, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=405, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (mlp): MLP(
+    (0): Linear(in_features=408, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=405, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (mlp): MLP(
+    (0): Linear(in_features=408, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=405, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (mlp): MLP(
+    (0): Linear(in_features=408, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=405, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (mlp): MLP(
+    (0): Linear(in_features=408, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=405, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (mlp): MLP(
+    (0): Linear(in_features=408, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=405, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (mlp): MLP(
+    (0): Linear(in_features=408, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (distribution): GaussianDistribution()
+  (mlp): MLP(
+    (0): Linear(in_features=405, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)ok
+test_declaration_counters_and_missing_npz_channel_rejected (test_standing005_binding.DiagnosticResultChecks.test_declaration_counters_and_missing_npz_channel_rejected) ... ok
+test_nonzero_legacy_allowed_changed_or_nonfinite_prefix_rejected (test_standing005_binding.DiagnosticResultChecks.test_nonzero_legacy_allowed_changed_or_nonfinite_prefix_rejected) ... ok
+test_wrong_solver_missing_root_phase_or_unsealed_copy_rejected (test_standing005_binding.DiagnosticResultChecks.test_wrong_solver_missing_root_phase_or_unsealed_copy_rejected) ... ok
+test_each_reload_and_optimizer_claim_must_be_true (test_native_result.ResultChecks.test_each_reload_and_optimizer_claim_must_be_true) ... ok
+test_late_error_and_missing_raw_seal_rejected (test_native_result.ResultChecks.test_late_error_and_missing_raw_seal_rejected) ... ok
+test_positive_explicit_integration_only (test_native_result.ResultChecks.test_positive_explicit_integration_only) ... ok
+test_earlier_source_refused_and_32_still_disabled (test_standing005_binding.Standing005Checks.test_earlier_source_refused_and_32_still_disabled) ... ok
+test_exact_source_and_actor_servo_preservation (test_standing005_binding.Standing005Checks.test_exact_source_and_actor_servo_preservation) ... ok
+test_neutral_and_final_solver_reads_enclose_48_policy_controls (test_standing005_binding.Standing005Checks.test_neutral_and_final_solver_reads_enclose_48_policy_controls) ... ok
+test_new_helpers_reject_foreign_cached_modules (test_standing005_binding.Standing005Checks.test_new_helpers_reject_foreign_cached_modules) ... ok
+test_solver_failure_before_callback_stops_actor (test_standing005_binding.Standing005Checks.test_solver_failure_before_callback_stops_actor) ... ok
+
+======================================================================
+ERROR: test_exact_source_contract_positive_and_wrong_model_rejected (test_bindings.BindingChecks.test_exact_source_contract_positive_and_wrong_model_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/canonical_ppo_integration_003/test_bindings.py", line 44, in test_exact_source_contract_positive_and_wrong_model_rejected
+    lineage=verify_admissions(STANDING,one,many,b);self.assertFalse(lineage['Stage2_complete'])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/canonical_ppo_integration_003/canonical_direct_ppo/binding_contract.py", line 37, in verify_admissions
+    state=read(directory/'state.json');result=module.validate_result(directory,state['identity'])
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/updated_native_standing_005/standing_contract.py", line 47, in validate_result
+    if s['checks'].get('solver_recipe_readback')is not True:raise ValueError('Missing solver recipe readback')
+                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Missing solver recipe readback
+
+======================================================================
+FAIL: test_changed_raw_and_different_first_admission_rejected (test_bindings.BindingChecks.test_changed_raw_and_different_first_admission_rejected)
+----------------------------------------------------------------------
+ValueError: Missing solver recipe readback
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/canonical_ppo_integration_003/test_bindings.py", line 54, in test_changed_raw_and_different_first_admission_rejected
+    with self.assertRaisesRegex(ValueError,'exact standing1'):verify_admissions(STANDING,one,many,b)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "exact standing1" does not match "Missing solver recipe readback"
+
+----------------------------------------------------------------------
+Ran 42 tests in 4.992s
+
+FAILED (failures=1, errors=1)
+
+Critic Model: MLPModel(
+  (obs_normalizer): EmpiricalNormalization()
+  (mlp): MLP(
+    (0): Linear(in_features=408, out_features=512, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=512, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)

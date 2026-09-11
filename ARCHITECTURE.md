@@ -223,6 +223,7 @@ they are needed for the work; historical handoffs do not override this design.
 | Shared contracts | [core](packages/hexapod_core/), [runtime](packages/hexapod_runtime/) and their package guides; verify lineage before reuse |
 | Training/gate history | [TRAINING](docs/TRAINING.md), [source lineages](docs/PIPELINE_LINEAGES.md) |
 | Spark operation | [OPERATIONS](docs/OPERATIONS.md), [compute coordination](docs/SPARK_COMPUTE_COORDINATION.md); source preparation here never implies permission to launch a job |
+| Paused research and prepared sources | [James handoff](docs/JAMES_HANDOFF.md), including unexecuted canonical PPO proposals; these do not assign the next step |
 | Publication | [PROJECT_SITE](docs/PROJECT_SITE.md), [registry](site/project.json) |
 
 Prior full design drafts and handoffs are historical context. They contain

@@ -4,6 +4,9 @@ The static GitHub Pages site is the team's visual progress record against
 [ARCHITECTURE.md](../ARCHITECTURE.md). It is built from `site/project.json`.
 `STATUS.md` is generated from that same registry and must never be edited by hand.
 
+Research is paused for [James’s handoff](JAMES_HANDOFF.md). Publication and
+repository checks do not authorize native research or training to restart.
+
 ## Update progress
 
 1. Change a roadmap marker or recorded fact only when its evidence changes.

@@ -1,0 +1,35 @@
+--- unfrozen_guard001_before_budget
++++ unfrozen_guard001_host003_budget
+@@ -13,11 +13,11 @@
+ OUTPUT=BASE/'canonical_ppo_smoke_001'
+ PAUSE=BASE/'forecast_pause_012'
+ UNIT='hexapod-canonical-ppo-smoke-001-20260910.service'
+-HOST=BASE/'ppo_host_002/launch_ppo_spark.py'
++HOST=BASE/'ppo_host_003/launch_ppo_spark.py'
+ SOURCE_SHA256='1e173946fe2548a82207791528f503ac6d12766fd5b50f25746e6edf92704617'
+ SUPERVISOR_SHA256='04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e'
+-HOST_SHA256='f85a5200a99d14348b0ff418292575d7e78c4bef61d46eb0fea2eb9c4e344c4c'
+-HOST_FREEZE_SHA256='d314bf361da009e48e6180b5cc4596cb45e0de77d0be6c28baf2ccaf9fe89f19'
++HOST_SHA256='2a35ff78cdab80a596013fb61d69cf615bea10a33978a7ccfa0fce90d7a4af64'
++HOST_FREEZE_SHA256='42c8e28816fa637726ee9c4c421d58eaaf41aedb51d863fea8934849b1e5c8cf'
+ PREVIOUS_UNIT='hexapod-canonical-native-standing32-002-20260910.service'
+ PREVIOUS_INVOCATION='1a38495bda9f4fefa4e5585574aabc56'
+ PREVIOUS_ROOT=BASE/'native_standing32_002'
+@@ -207,7 +207,7 @@
+ ''')
+         # Arm recovery before mutating timer state. It stops only this exact
+         # owner unit if needed, then restores only previously active timers.
+-        subprocess.run(['systemd-run', '--user', '--unit=hexapod-canonical-forecast-restore-012', '--on-active=15m',
++        subprocess.run(['systemd-run', '--user', '--unit=hexapod-canonical-forecast-restore-012', '--on-active=25m',
+             '/usr/bin/python3', str(restorer), '--stop-owner'], check=True)
+         active = [name for name, state in units.items() if name.endswith('.timer') and 'ActiveState=active' in state]
+         if active:
+@@ -243,7 +243,7 @@
+         subprocess.run(['/usr/bin/python3',str(restorer)],check=True,timeout=120)
+         raise
+     try:
+-        cmd=['systemd-run','--user','--unit='+UNIT,'--property=RuntimeMaxSec=720',
++        cmd=['systemd-run','--user','--unit='+UNIT,'--property=RuntimeMaxSec=1320',
+             '--property=TimeoutStopSec=180','--property=KillMode=process','--property=Environment=PYTHONDONTWRITEBYTECODE=1',
+             '--property=ExecStopPost=/usr/bin/python3 '+str(restorer),'--property=Environment=PYTHONUNBUFFERED=1',
+             '/usr/bin/python3',str(HOST),'--source',str(SOURCE),'--asset',str(ASSET),'--admission',str(ADMISSION),

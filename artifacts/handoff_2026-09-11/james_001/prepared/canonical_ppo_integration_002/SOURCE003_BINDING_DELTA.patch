@@ -1,0 +1,110 @@
+--- parent/BINDINGS.json
++++ successor/BINDINGS.json
+@@ -1,10 +1,10 @@
+ {
+-  "standing_source_freeze_sha256": "acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467",
++  "standing_source_freeze_sha256": "e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0",
+   "standing1_state_sha256": null,
+   "standing32_state_sha256": null,
+   "servo_sha256": "2dd025050ddff94b55789e61f9e9a8afb330ed3340b6d79137d228d821d7266d",
+   "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+   "policy_adapter_sha256": "57f4089cdb19632025d26306decc0465958e928f9bbab09dee0e6aba6482bc06",
+   "ready_for_native_dispatch": false,
+-  "reason": "Reviewed standing002 and policy CPU source are bound; actual same-source standing1/32 states remain null. Native dispatch is disabled."
++  "reason": "Reviewed standing003 exact-output contact classifier and unchanged PPO CPU runtime are bound; actual same-source standing1/32 states remain null. Native dispatch is disabled."
+ }
+--- parent/PREPARATION_STATUS.json
++++ successor/PREPARATION_STATUS.json
+@@ -1,13 +1,14 @@
+ {
+   "schema": "canonical_ppo_preparation_status_v1",
+   "implementation": "CPU runnable canonical bridge, RSL learner, native composition, strict reload and result validator",
+-  "cpu_tests_passed": 31,
+-  "cpu_test_log": "TESTS_composition_complete.txt",
++  "cpu_tests_passed": 34,
++  "cpu_test_log": "TESTS_final_source003.txt",
+   "native_dispatch_ready": false,
+   "standing1_state_sha256": null,
+   "standing32_state_sha256": null,
+-  "proposed_standing_source_sha256": "acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467",
++  "proposed_standing_source_sha256": "e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0",
+   "policy_quality_admitted": false,
+   "Stage2_complete": false,
+-  "publication_owner": "root; docs/PROJECT_SITE.md bounded central update required for eventual tracked adoption"
++  "publication_owner": "root; docs/PROJECT_SITE.md bounded central update required for eventual tracked adoption",
++  "parent_ppo_freeze_sha256": "cc62938666b7b394e119fe05664767b2a265928ca46c8e15afd97312611f5d63"
+ }
+--- parent/READINESS.json
++++ successor/READINESS.json
+@@ -2,14 +2,14 @@
+   "schema": "canonical_ppo_CPU_readiness_v1",
+   "source_scope": "Bounded implementation and CPU verification only",
+   "tests": {
+-    "owner_count": 31,
+-    "owner_final_log": "TESTS_final_source002.txt",
+-    "owner_final_log_sha256": "9c6b5233b0939b074361cb0418e412f3712a7bdc894e3bc8e20ead16c6f44850",
++    "owner_count": 34,
++    "owner_final_log": "TESTS_final_source003.txt",
++    "owner_final_log_sha256": "b6582720944bcbce22ebd28756d01b69ed6d0b3bbe176c2714f712b556acf485",
+     "independent_count": 5,
+     "independent_review_freeze_sha256": "e77e137a033764e7d961524258d3214ebcabca35cf07ec2d6e4322a96964fb09",
+-    "independent_scope": "Prior exact inventory; final standing-source binding and portable test lookup documented separately"
++    "independent_scope": "Historical exact PPO001 runtime review; current pin-only successor checked by3newtests plus31inheritedtests. No additional independent run claimed."
+   },
+-  "standing_source_freeze_sha256": "acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467",
++  "standing_source_freeze_sha256": "e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0",
+   "native_entry_sha256": "1607aee3bd2545087d54b9b59fa35eb0e4e354af76dbe7b9538dd8ca1b53f414",
+   "adapter_sha256": "57f4089cdb19632025d26306decc0465958e928f9bbab09dee0e6aba6482bc06",
+   "runtime_scope": "32 replicas,1000 neutral controls gated then48 policy controls,2 PPO updates, no auto reset",
+@@ -18,5 +18,7 @@
+   "standing32_state_sha256": null,
+   "source_directory_immutable_after_freeze": true,
+   "future_bindings": "External reviewed JSON; do not mutate disabled template",
+-  "publication": "Root owns tracked adoption with docs/PROJECT_SITE.md central record and build"
++  "publication": "Root owns tracked adoption with docs/PROJECT_SITE.md central record and build",
++  "parent_ppo_freeze_sha256": "cc62938666b7b394e119fe05664767b2a265928ca46c8e15afd97312611f5d63",
++  "source003_pin_only_receipt": "SOURCE003_BINDING.json"
+ }
+--- parent/README.md
++++ successor/README.md
+@@ -1,3 +1,11 @@
++# Source003 binding successor
++
++This is a pin-only PPO preparation successor to frozen PPO001 (`cc629386…`). All34 CPUtests pass (31inherited+3source-binding checks), recorded in `TESTS_final_source003.txt`. The sole operational Python change is `STANDING_FREEZE` in the native entry adapter; the portable CPU test lookup now selects standing003. Actor, critic, reward, training loop, strict reload,400Hz servo composition and every gate are byte-identical. Standing003 is the exact-output contact classifier optimization, freeze `e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0`; this package independently checks its unchanged native entry, session, scorer, servo and geometry. Source002's stopped32 run is an operational timing failure and does not admit source003. Fresh matching1/32 results are still required; both receipt pins remain null.
++
++`SOURCE003_BINDING.json`, `SOURCE003_BINDING_DELTA.patch` and the focused binding tests record the precise successor. Historical test logs and `STANDING002_BINDING*` are copied unchanged and remain explicitly prior evidence. Root owns all dispatch and eventual publication under `docs/PROJECT_SITE.md`; this package does not authorize a GPU run.
++
++---
++
+ # Canonical PPO integration preparation — inputs pending
+ 
+ This new `canonical_direct_ppo` package targets the detailed 7.466088235 kg direct-drive model. It does not import an old environment, actor, task, checkpoint or four-bar adapter. **Native dispatch is blocked:** exact same-source supported standing1/32 receipt hashes remain null in `BINDINGS.json`. Reviewed standing002 source, servo/geometry and policy-adapter hashes are populated. Root owns final review, native composition, GPU dispatch and publication.
+@@ -18,7 +26,7 @@
+ 
+ `run_native_smoke.py` is now an executable native entry. Its CLI requires `--asset`, `--admission` (the exact native actuation result), `--standing-source`, `--standing-one`, `--standing32`, `--bindings`, and fresh `--output`; actual runtime additionally requires `--device cuda:0 --headless`. `--preflight-only` validates all source/admission bytes using standard-library code and cannot start Isaac. `canonical_direct_ppo.native_contract.verify_inputs(args)` and `validate_result(directory, identity)` are the host composition APIs. A host should import this unique package with the preparation directory on its path, not load a relative-import module under an unrelated bare name. No host or guard is added here.
+ 
+-The versioned entry adapter currently targets frozen standing source `acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467`. It compiles the complete verified module and replaces exactly its post1000-control reporting tail. All native scene/import/reset/servo/400Hz loop and original exception/finally statements remain byte identical. Exact helper paths stay active through lazy imports and foreign cached modules are rejected. This is explicitly an adapted entry, not a claim that the old standing entry itself ran PPO. A changed standing runtime requires a reviewed successor binding before dispatch.
++The versioned entry adapter currently targets frozen standing source `e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0`. It compiles the complete verified module and replaces exactly its post1000-control reporting tail. All native scene/import/reset/servo/400Hz loop and original exception/finally statements remain byte identical. Exact helper paths stay active through lazy imports and foreign cached modules are rejected. This is explicitly an adapted entry, not a claim that the old standing entry itself ran PPO. A changed standing runtime requires a reviewed successor binding before dispatch.
+ 
+ The new tail flushes but does not close the live session. It snapshots the full1000-control/8000-substep neutral prefix in a separate immutable directory, copies the still-active contact stream, and links/copies only already-flushed immutable chunks. The original standing scorer must pass all32 rows before constructing the actor. The learner then uses exactly48 policy controls/384 substeps, with no second reset or counter rebasing, for total1048 controls/8384 steps. Original native session close occurs after learning or on any failure. Every attempted policy endpoint remains available, including native errors discovered during a hold. Measurement files seal before application close; native lifecycle logs stay explicitly unsealed until the host inventories their actual post-exit bytes.
+ 
+--- parent/canonical_direct_ppo/native_entry_adapter.py
++++ successor/canonical_direct_ppo/native_entry_adapter.py
+@@ -3,7 +3,7 @@
+ from contextlib import contextmanager
+ import ast,hashlib,sys
+ 
+-STANDING_FREEZE='acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467'
++STANDING_FREEZE='e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0'
+ ORIGINAL_TAIL='''  session.close();session=None
+   from standing_score import score
+   report=score(out);save(out/'standing_report.json',report)
+--- parent/test_support.py
++++ successor/test_support.py
+@@ -4,5 +4,5 @@
+ 
+ ROOT=next((p for p in Path(__file__).resolve().parents if (p/'robot/active_model.json').is_file()and(p/'pyproject.toml').is_file()),None)
+ if ROOT is None:raise RuntimeError('Run these CPU tests within the HEXAPOD repository')
+-STANDING=Path(os.environ.get('HEXAPOD_CANONICAL_STANDING_SOURCE',str(ROOT/'tmp/updated_native_standing_002'))).resolve()
++STANDING=Path(os.environ.get('HEXAPOD_CANONICAL_STANDING_SOURCE',str(ROOT/'tmp/updated_native_standing_003'))).resolve()
+ TEST_DEPS=ROOT/'tmp/reference_residual_ppo_001/_deps'
