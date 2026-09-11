@@ -301,9 +301,9 @@
       "meaning": "Many simulated robots collect experience. PPO updates a policy, saves weights and tests that they can be loaded exactly.",
       "input": "Pinned robot, physics, curriculum and correctly versioned policy contract",
       "output": "Recoverable policy checkpoints",
-      "today": "External Spark automation is blocked. The detailed model passes single-robot standing, but its completed32/0 batch accepts10/32; the new PPO learner remains unrun.",
+      "today": "Paused for handoff to James. External Spark automation is blocked. The detailed model passes single-robot standing, but its completed32/0 batch accepts10/32; the new PPO learner remains unrun.",
       "source": "docs/TRAINING.md",
-      "next": "Complete matching 32-robot admission, then the fresh two-update PPO integration."
+      "next": "James reviews the handoff and explicitly selects the next bounded step after resuming."
     },
     {
       "id": "evaluation",
@@ -315,9 +315,9 @@
       "meaning": "Evaluate directions, stops, torques, contacts and smoothness. A good reward curve or attractive clip cannot pass a stage.",
       "input": "Frozen checkpoints and common evaluation cases",
       "output": "Measured results and pass/fail evidence",
-      "today": "The completed detailed32/0 batch accepts10/32 combined and24/32 quiet checks. Support and joint-rate failures remain; every original gate is preserved.",
+      "today": "Paused for handoff to James. The completed detailed32/0 batch accepts10/32 combined and24/32 quiet checks. Support and joint-rate failures remain; every original gate is preserved.",
       "source": "artifacts/mkii_updated_2026-09-10/native_standing32_rejected_005/README.md",
-      "next": "Check all 32 detailed replicas before enabling the new learner, then require all-direction numeric and visual quality."
+      "next": "James reviews the handoff and explicitly selects the next bounded step after resuming."
     },
     {
       "id": "hardware",
@@ -419,7 +419,7 @@
     {
       "id": "stage2",
       "title": "Omnidirectional movement",
-      "state": "In progress",
+      "state": "Paused for James; incomplete",
       "description": "Translate in any direction and turn at the same time. Match the forward benchmark\u2019s smoothness and stand still when commanded to stop.",
       "gate": "Numeric gates AND visual quality matching accepted forward Benchmark 1.",
       "source": "docs/TRAINING.md",
@@ -428,7 +428,7 @@
     {
       "id": "stage3",
       "title": "Terrain and perception",
-      "state": "Next; preparation in parallel",
+      "state": "Preparation preserved; paused",
       "description": "Cross increasingly difficult ground, then use timely sensor information to select safe movement. Retain the flat-ground controller\u2019s capability.",
       "gate": "A frozen terrain envelope, untouched qualification cases and preserved motor/contact limits.",
       "source": "artifacts/terrain_readiness_2026-09-09/qualification_plan_001/QUALIFICATION_PLAN.md"
@@ -443,6 +443,10 @@
     }
   ],
   "next": [
+    {
+      "title": "James reviews the handoff",
+      "text": "Start with the current model, batch standing failure and preserved PPO drafts. Resume explicitly; no experiment or unattended continuation is queued."
+    },
     {
       "title": "Explain the remaining batch failures",
       "text": "Compare detailed contact patches with the new floor-force and link-velocity channels before another controlled physics change. Keep robot geometry, servo and all gates explicit; only complete matching-source admission enables PPO."
@@ -517,6 +521,12 @@
   },
   "primary_video_id": "caps500_preview",
   "findings": [
+    {
+      "label": "Research paused",
+      "title": "Handoff to James",
+      "text": "Research and training are paused. The continuation is disabled, the Spark GPU is idle and reserved, and current code, evidence and unlaunched proposals are preserved for James. Stage 2 and terrain qualification remain incomplete.",
+      "source": "docs/JAMES_HANDOFF.md"
+    },
     {
       "label": "Scaling remains unqualified",
       "title": "Quiet standing passes on one robot; the batch still fails",

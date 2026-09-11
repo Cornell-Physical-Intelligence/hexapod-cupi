@@ -1,0 +1,823 @@
+{
+  "limitations": [
+    "Finite differences are average angle rate over each2.5ms interval, not the instantaneous end-of-step velocity.",
+    "These constrained-pose/SDK comparisons do not independently identify friction, joint sleep or solver internals.",
+    "No assertion that a pass under a different solver setting establishes hardware fidelity."
+  ],
+  "runs": [
+    {
+      "actual_physical": {
+        "all_controlled_nonfoot_substeps": 0,
+        "interval_angle_rate_abs_max_rad_s": 4.155239369720221,
+        "max_applied_all_substeps_nm": 1.1205459833145142,
+        "max_requested_all_substeps_nm": 1.1205459833145142,
+        "max_requested_saturation_fraction_400hz": 0.0,
+        "mean_requested_saturation_fraction_400hz": 0.0,
+        "minimum_non_toe_mesh_floor_m": 0.01483371492615465,
+        "minimum_plate_height_m": 0.07304437458515167,
+        "post_settle_missing_six_toe_substeps": 0
+      },
+      "actual_quiet_50hz": {
+        "failed_bounds": [],
+        "joints": {
+          "lf_coxa_yaw": {
+            "position_range_rad": 5.2193496230756864e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0028609945438802242
+          },
+          "lf_femur_pitch": {
+            "position_range_rad": 9.047612547874451e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0015455769607797265
+          },
+          "lf_tibia_pitch": {
+            "position_range_rad": 7.265247404575348e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.007057094480842352
+          },
+          "lm_coxa_yaw": {
+            "position_range_rad": 4.35952861153055e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0020686392672359943
+          },
+          "lm_femur_pitch": {
+            "position_range_rad": 5.4758042097091675e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.001650347956456244
+          },
+          "lm_tibia_pitch": {
+            "position_range_rad": 4.083849489688873e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.022996796295046806
+          },
+          "lr_coxa_yaw": {
+            "position_range_rad": 2.698868775041774e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0014166389591991901
+          },
+          "lr_femur_pitch": {
+            "position_range_rad": 0.0002037622034549713,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0010818092850968242
+          },
+          "lr_tibia_pitch": {
+            "position_range_rad": 0.00016400404274463654,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.005259972531348467
+          },
+          "rf_coxa_yaw": {
+            "position_range_rad": 3.754747012862936e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0018192376010119915
+          },
+          "rf_femur_pitch": {
+            "position_range_rad": 0.00011579692363739014,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0011454239720478654
+          },
+          "rf_tibia_pitch": {
+            "position_range_rad": 0.00010266900062561035,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0055023678578436375
+          },
+          "rm_coxa_yaw": {
+            "position_range_rad": 1.9762479496421292e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0022660642862319946
+          },
+          "rm_femur_pitch": {
+            "position_range_rad": 4.941783845424652e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0017555711092427373
+          },
+          "rm_tibia_pitch": {
+            "position_range_rad": 4.436075687408447e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.02302277833223343
+          },
+          "rr_coxa_yaw": {
+            "position_range_rad": 2.973507798742503e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0025661811232566833
+          },
+          "rr_femur_pitch": {
+            "position_range_rad": 9.505078196525574e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0015288147842511535
+          },
+          "rr_tibia_pitch": {
+            "position_range_rad": 7.750280201435089e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.007328198291361332
+          }
+        },
+        "max_applied_torque_nm": 0.3628872036933899,
+        "max_heading_excursion_deg": 0.0003278490621596575,
+        "max_joint_position_range_rad": 0.0002037622034549713,
+        "max_joint_velocity_rms_rad_s": 0.02302277833223343,
+        "max_planar_excursion_m": 3.229717094654916e-06,
+        "max_requested_torque_saturation_fraction": 0.0,
+        "max_target_step_abs_p95_rad_per_20ms": 0.0,
+        "mean_requested_torque_saturation_fraction": 0.0,
+        "pass": true,
+        "requested_torque_abs_max_nm": 0.3628872036933899,
+        "terminations": 0,
+        "truncations": 0,
+        "window_duration_s": 16.0,
+        "window_samples": 800
+      },
+      "actual_report_pass": true,
+      "all_8000_interval_recurrences_exact": true,
+      "consumed_raw": {
+        "run/standing/initial_reset.json": {
+          "sha256": "34b397b8eb1c7015ab9f31641bfcd14ef7ecc4f2cc76dc513ac1edcd802e2c97",
+          "size_bytes": 12865
+        },
+        "run/standing/session.json": {
+          "sha256": "0a299bb5f3b4c999cd9f523bf6cf2757879a05c9617e12ea3cd9aad4a4df2a77",
+          "size_bytes": 2077
+        },
+        "run/standing/standing_report.json": {
+          "sha256": "d876970b4751da0a198eda4edeaf2e50ccecfb13610858ca647cdb7c18c1b201",
+          "size_bytes": 6349
+        },
+        "run/standing/state.json": {
+          "sha256": "318c0bd2500cc954b6eec5464d5a0feca1fc2d570c5dae2e65e0177f18475da0",
+          "size_bytes": 5084
+        },
+        "run/standing/substeps_000.npz": {
+          "sha256": "e2d09a8757e281207044c037bc91997a913c7749dc3e47406fcbdb388952400c",
+          "size_bytes": 839146
+        },
+        "run/standing/substeps_001.npz": {
+          "sha256": "2bd8cd98a2f411fd7c05759969b3940310113577bbe812f494840017741fb1a6",
+          "size_bytes": 810099
+        },
+        "run/standing/substeps_002.npz": {
+          "sha256": "4b732d547da314c08858ed05433fac68d68237ed7bc73a502c571f001d001927",
+          "size_bytes": 830187
+        },
+        "run/standing/substeps_003.npz": {
+          "sha256": "ab1a8b3afc830243c68cb81294df1ac688abd01eee257fe73705e3b44cc0d532",
+          "size_bytes": 819546
+        },
+        "run/standing/substeps_004.npz": {
+          "sha256": "50b8bc7ef7ee6fb127950239f93a811e3fb784902d567b22cae0ca32c3f244a1",
+          "size_bytes": 815476
+        },
+        "run/standing/substeps_005.npz": {
+          "sha256": "0fa8208e80e98492b52c2eb49d7ae201f4481a80d5c15d6f132109ba057a45d2",
+          "size_bytes": 813115
+        },
+        "run/standing/substeps_006.npz": {
+          "sha256": "c6d1d0915c73f573fb2fc75471c8aa581298225595f1b055aecbbed7274cdb31",
+          "size_bytes": 812627
+        },
+        "run/standing/substeps_007.npz": {
+          "sha256": "3ded9f6715874010fac6f68f48a7df8ddba05849f456e19b3686366ee5da6a6c",
+          "size_bytes": 818325
+        },
+        "run/standing/substeps_008.npz": {
+          "sha256": "5d2f5873f2175329d257daab77b978d068ce7f8f4acc3dbc688f66909d1a31aa",
+          "size_bytes": 815590
+        },
+        "run/standing/substeps_009.npz": {
+          "sha256": "860abe5b5fba3fb5691c492529c3601f13138885b7644d327d050925918888e3",
+          "size_bytes": 811151
+        }
+      },
+      "joint_400hz": [
+        {
+          "interval_mean_rad_s": -2.343024220863299e-06,
+          "interval_rms_rad_s": 0.0005129605350118497,
+          "name": "lf_coxa_yaw",
+          "position_range_rad": 5.4113183068693615e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.002876391160401713,
+          "sdk_mean_rad_s": 0.0003094297169992899,
+          "sdk_minus_interval_integral_rad": 0.0049883638595224515,
+          "sdk_rms_rad_s": 0.0028929868401704442
+        },
+        {
+          "interval_mean_rad_s": -1.7149578184216807e-06,
+          "interval_rms_rad_s": 0.0004547323310938947,
+          "name": "lm_coxa_yaw",
+          "position_range_rad": 4.428203101269901e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0010107853517545313,
+          "sdk_mean_rad_s": -0.0017955736805481592,
+          "sdk_minus_interval_integral_rad": -0.0287017395636758,
+          "sdk_rms_rad_s": 0.002060527085383445
+        },
+        {
+          "interval_mean_rad_s": -9.401628631167114e-07,
+          "interval_rms_rad_s": 0.0007644799654905297,
+          "name": "lr_coxa_yaw",
+          "position_range_rad": 3.6106808693148196e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0017502689719074837,
+          "sdk_mean_rad_s": 0.00018312142286106337,
+          "sdk_minus_interval_integral_rad": 0.0029449853715868813,
+          "sdk_rms_rad_s": 0.0017598224142034162
+        },
+        {
+          "interval_mean_rad_s": -1.2636738802029868e-06,
+          "interval_rms_rad_s": 0.000796258366172229,
+          "name": "rf_coxa_yaw",
+          "position_range_rad": 4.1483898712613154e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0015228995830425388,
+          "sdk_mean_rad_s": -0.0009344753259244953,
+          "sdk_minus_interval_integral_rad": -0.014931386432708678,
+          "sdk_rms_rad_s": 0.0017867476807856308
+        },
+        {
+          "interval_mean_rad_s": 4.55707294122476e-09,
+          "interval_rms_rad_s": 0.0005526836097994475,
+          "name": "rm_coxa_yaw",
+          "position_range_rad": 2.6981525479641277e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0010063904392013801,
+          "sdk_mean_rad_s": -0.0020159585312808305,
+          "sdk_minus_interval_integral_rad": -0.03225540941366035,
+          "sdk_rms_rad_s": 0.0022532000612373302
+        },
+        {
+          "interval_mean_rad_s": 2.7047167350247037e-07,
+          "interval_rms_rad_s": 0.0006790452012734536,
+          "name": "rr_coxa_yaw",
+          "position_range_rad": 4.492983498494141e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.002379101453262421,
+          "sdk_mean_rad_s": 0.0008420320890968469,
+          "sdk_minus_interval_integral_rad": 0.013468185878773511,
+          "sdk_rms_rad_s": 0.002523715864352436
+        },
+        {
+          "interval_mean_rad_s": 8.323695510625839e-08,
+          "interval_rms_rad_s": 0.009371826567120774,
+          "name": "lf_femur_pitch",
+          "position_range_rad": 0.00013620592653751373,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0015535130483017667,
+          "sdk_mean_rad_s": -0.00027050818952233156,
+          "sdk_minus_interval_integral_rad": -0.004329462823639005,
+          "sdk_rms_rad_s": 0.0015768885413504966
+        },
+        {
+          "interval_mean_rad_s": -1.126900315284729e-06,
+          "interval_rms_rad_s": 0.002132284998427531,
+          "name": "lm_femur_pitch",
+          "position_range_rad": 5.4758042097091675e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0015997936865766104,
+          "sdk_mean_rad_s": -0.0004738075697679278,
+          "sdk_minus_interval_integral_rad": -0.00756289071124229,
+          "sdk_rms_rad_s": 0.0016684823801226584
+        },
+        {
+          "interval_mean_rad_s": -1.7668353393673897e-06,
+          "interval_rms_rad_s": 0.012042315224579724,
+          "name": "lr_femur_pitch",
+          "position_range_rad": 0.0007540080696344376,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0011176022691736934,
+          "sdk_mean_rad_s": -0.00011498213702680004,
+          "sdk_minus_interval_integral_rad": -0.0018114448269989226,
+          "sdk_rms_rad_s": 0.0011235015460147077
+        },
+        {
+          "interval_mean_rad_s": 2.0546140149235725e-06,
+          "interval_rms_rad_s": 0.005157911230900803,
+          "name": "rf_femur_pitch",
+          "position_range_rad": 0.00017974339425563812,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0010965257400838086,
+          "sdk_mean_rad_s": -0.0003562178262377813,
+          "sdk_minus_interval_integral_rad": -0.005732359044043278,
+          "sdk_rms_rad_s": 0.0011529353140553526
+        },
+        {
+          "interval_mean_rad_s": 1.200241968035698e-06,
+          "interval_rms_rad_s": 0.0023218236789391213,
+          "name": "rm_femur_pitch",
+          "position_range_rad": 5.7714059948921204e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.001633001672449883,
+          "sdk_mean_rad_s": -0.0005977436791386026,
+          "sdk_minus_interval_integral_rad": -0.009583102737706213,
+          "sdk_rms_rad_s": 0.0017389629001719003
+        },
+        {
+          "interval_mean_rad_s": 7.199123501777649e-07,
+          "interval_rms_rad_s": 0.008426814649534606,
+          "name": "rr_femur_pitch",
+          "position_range_rad": 0.00011307932436466217,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0015456386682727752,
+          "sdk_mean_rad_s": -9.776554678950333e-05,
+          "sdk_minus_interval_integral_rad": -0.0015757673462348976,
+          "sdk_rms_rad_s": 0.001548727540595533
+        },
+        {
+          "interval_mean_rad_s": -2.755550667643547e-07,
+          "interval_rms_rad_s": 0.007651915523273559,
+          "name": "lf_tibia_pitch",
+          "position_range_rad": 0.00011487305164337158,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0011954165639659565,
+          "sdk_mean_rad_s": -0.0069783358790664355,
+          "sdk_minus_interval_integral_rad": -0.11164896518399474,
+          "sdk_rms_rad_s": 0.007079985339142313
+        },
+        {
+          "interval_mean_rad_s": -1.0244548320770264e-08,
+          "interval_rms_rad_s": 0.001668265493994162,
+          "name": "lm_tibia_pitch",
+          "position_range_rad": 4.1330233216285706e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.001000126914453743,
+          "sdk_mean_rad_s": -0.02295475719467504,
+          "sdk_minus_interval_integral_rad": -0.3672759512020275,
+          "sdk_rms_rad_s": 0.022976534371212304
+        },
+        {
+          "interval_mean_rad_s": 4.1513703763484955e-07,
+          "interval_rms_rad_s": 0.009743505317325565,
+          "name": "lr_tibia_pitch",
+          "position_range_rad": 0.0006100982427597046,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0009738582324135887,
+          "sdk_mean_rad_s": -0.005161324622094981,
+          "sdk_minus_interval_integral_rad": -0.08258783614612185,
+          "sdk_rms_rad_s": 0.00525239675876486
+        },
+        {
+          "interval_mean_rad_s": -2.2398307919502258e-07,
+          "interval_rms_rad_s": 0.004173185909703365,
+          "name": "rf_tibia_pitch",
+          "position_range_rad": 0.00015077553689479828,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.000813327025141199,
+          "sdk_mean_rad_s": -0.0054674518025422,
+          "sdk_minus_interval_integral_rad": -0.08747564511140808,
+          "sdk_rms_rad_s": 0.0055276152238507865
+        },
+        {
+          "interval_mean_rad_s": -6.356276571750641e-08,
+          "interval_rms_rad_s": 0.0018299320212333983,
+          "name": "rm_tibia_pitch",
+          "position_range_rad": 5.265139043331146e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0010272631821692084,
+          "sdk_mean_rad_s": -0.023015687759034335,
+          "sdk_minus_interval_integral_rad": -0.3682499871402979,
+          "sdk_rms_rad_s": 0.02303860136090738
+        },
+        {
+          "interval_mean_rad_s": -8.506467565894127e-07,
+          "interval_rms_rad_s": 0.006870142943787691,
+          "name": "rr_tibia_pitch",
+          "position_range_rad": 9.25213098526001e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0010481645403363422,
+          "sdk_mean_rad_s": -0.007246280280742212,
+          "sdk_minus_interval_integral_rad": -0.11592687414376997,
+          "sdk_rms_rad_s": 0.007321695624013055
+        }
+      ],
+      "post_settle_400hz_samples": 6400,
+      "raw_inventory_sha256": "8228511f1962f6585c2933124e75ed65b138069c70536a77617868d675cd9839",
+      "selection": "32/1",
+      "source_freeze_sha256": "e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0",
+      "state_sha256": "318c0bd2500cc954b6eec5464d5a0feca1fc2d570c5dae2e65e0177f18475da0"
+    },
+    {
+      "actual_physical": {
+        "all_controlled_nonfoot_substeps": 0,
+        "interval_angle_rate_abs_max_rad_s": 4.155013617128134,
+        "max_applied_all_substeps_nm": 1.1202481985092163,
+        "max_requested_all_substeps_nm": 1.1202481985092163,
+        "max_requested_saturation_fraction_400hz": 0.0,
+        "mean_requested_saturation_fraction_400hz": 0.0,
+        "minimum_non_toe_mesh_floor_m": 0.01483197957893398,
+        "minimum_plate_height_m": 0.07305017113685608,
+        "post_settle_missing_six_toe_substeps": 0
+      },
+      "actual_quiet_50hz": {
+        "failed_bounds": [
+          "max_joint_velocity_rms_rad_s"
+        ],
+        "joints": {
+          "lf_coxa_yaw": {
+            "position_range_rad": 4.5910495828138664e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0058380914852023125
+          },
+          "lf_femur_pitch": {
+            "position_range_rad": 0.0001057405024766922,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0017848106799647212
+          },
+          "lf_tibia_pitch": {
+            "position_range_rad": 8.26660543680191e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.008339215070009232
+          },
+          "lm_coxa_yaw": {
+            "position_range_rad": 2.7437581593403593e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.003001254750415683
+          },
+          "lm_femur_pitch": {
+            "position_range_rad": 4.1961669921875e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0019851166289299726
+          },
+          "lm_tibia_pitch": {
+            "position_range_rad": 4.2201951146125793e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.038802314549684525
+          },
+          "lr_coxa_yaw": {
+            "position_range_rad": 2.9964401619508862e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.006437359843403101
+          },
+          "lr_femur_pitch": {
+            "position_range_rad": 0.0001864563673734665,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0017964327707886696
+          },
+          "lr_tibia_pitch": {
+            "position_range_rad": 0.00014773942530155182,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.006314956117421389
+          },
+          "rf_coxa_yaw": {
+            "position_range_rad": 2.8299580662860535e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.005653318949043751
+          },
+          "rf_femur_pitch": {
+            "position_range_rad": 0.0005927812308073044,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0017172007355839014
+          },
+          "rf_tibia_pitch": {
+            "position_range_rad": 0.0004800446331501007,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.007000480312854052
+          },
+          "rm_coxa_yaw": {
+            "position_range_rad": 2.35258812608663e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0032017275225371122
+          },
+          "rm_femur_pitch": {
+            "position_range_rad": 6.301887333393097e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.002001556335017085
+          },
+          "rm_tibia_pitch": {
+            "position_range_rad": 4.617124795913696e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.039215050637722015
+          },
+          "rr_coxa_yaw": {
+            "position_range_rad": 3.864918471663259e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.005182777065783739
+          },
+          "rr_femur_pitch": {
+            "position_range_rad": 9.566545486450195e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.0018344278214499354
+          },
+          "rr_tibia_pitch": {
+            "position_range_rad": 8.092448115348816e-05,
+            "saturation_fraction": 0.0,
+            "target_step_abs_p95_rad_per_20ms": 0.0,
+            "velocity_rms_rad_s": 0.007980872876942158
+          }
+        },
+        "max_applied_torque_nm": 0.36232322454452515,
+        "max_heading_excursion_deg": 0.0003210188588127494,
+        "max_joint_position_range_rad": 0.0005927812308073044,
+        "max_joint_velocity_rms_rad_s": 0.039215050637722015,
+        "max_planar_excursion_m": 2.754386741798953e-06,
+        "max_requested_torque_saturation_fraction": 0.0,
+        "max_target_step_abs_p95_rad_per_20ms": 0.0,
+        "mean_requested_torque_saturation_fraction": 0.0,
+        "pass": false,
+        "requested_torque_abs_max_nm": 0.36232322454452515,
+        "terminations": 0,
+        "truncations": 0,
+        "window_duration_s": 16.0,
+        "window_samples": 800
+      },
+      "actual_report_pass": false,
+      "all_8000_interval_recurrences_exact": true,
+      "consumed_raw": {
+        "run/standing/initial_reset.json": {
+          "sha256": "34b397b8eb1c7015ab9f31641bfcd14ef7ecc4f2cc76dc513ac1edcd802e2c97",
+          "size_bytes": 12865
+        },
+        "run/standing/session.json": {
+          "sha256": "60a0d5c7ff56dcbd07dda39a2b91c11570786226f5580413241a166f207ab951",
+          "size_bytes": 2079
+        },
+        "run/standing/standing_report.json": {
+          "sha256": "393a438f1575426232284e4ca0fc1bd07c386b0e393d7d1758ee49b4f6d1831e",
+          "size_bytes": 6398
+        },
+        "run/standing/state.json": {
+          "sha256": "d5dfefef4e646918fc598c2de97ee9d31897d66e0529773a35353fed87eea522",
+          "size_bytes": 5408
+        },
+        "run/standing/substeps_000.npz": {
+          "sha256": "5ca5a4ead722f5072ecd195ceaa976d9f11e6d60eca2f23a3460d4c2d7d1b878",
+          "size_bytes": 832600
+        },
+        "run/standing/substeps_001.npz": {
+          "sha256": "7d3fb71465f383f7544d8ba7cc74714f4e5785027e789eb0f040ceec8d1acab5",
+          "size_bytes": 813798
+        },
+        "run/standing/substeps_002.npz": {
+          "sha256": "4b801251f3348b650b1303477468a7c25e3df159fb53b53c3a73f38a723ad37c",
+          "size_bytes": 817058
+        },
+        "run/standing/substeps_003.npz": {
+          "sha256": "bcb74738e1c061147680db55d17f26d72e6f53525d998645840ea8557a3664fa",
+          "size_bytes": 816711
+        },
+        "run/standing/substeps_004.npz": {
+          "sha256": "e25db6ffe86a2d45b21f771f4c584d75ff4aa0d081ab9fcd679c3092d2608f1b",
+          "size_bytes": 824850
+        },
+        "run/standing/substeps_005.npz": {
+          "sha256": "6be844e8b1e0d1b5b92ca7b1a9c7e781b1dbd1341c918ef1ba368f15b1bf98a8",
+          "size_bytes": 827882
+        },
+        "run/standing/substeps_006.npz": {
+          "sha256": "3eabe7c10f312777cb35689812163fef81636fd191f3655615be911bbfd30a8f",
+          "size_bytes": 833869
+        },
+        "run/standing/substeps_007.npz": {
+          "sha256": "e47913547e20db2bc8c0c931f8157e802399787a22f12dab7c9b07bd10fcf265",
+          "size_bytes": 841252
+        },
+        "run/standing/substeps_008.npz": {
+          "sha256": "072aa4b539becbd1ec854ff5381c30bcd93210963eface2d5dba26f5a595646d",
+          "size_bytes": 830192
+        },
+        "run/standing/substeps_009.npz": {
+          "sha256": "c7cb377c92c6d63e99e62848a421aceb66dda522066860fb8f658ab9757e2087",
+          "size_bytes": 833252
+        }
+      },
+      "joint_400hz": [
+        {
+          "interval_mean_rad_s": -2.921362920460524e-07,
+          "interval_rms_rad_s": 0.0008347343769348438,
+          "name": "lf_coxa_yaw",
+          "position_range_rad": 5.1954073569504544e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.005785289277964363,
+          "sdk_mean_rad_s": -0.001014276545502497,
+          "sdk_minus_interval_integral_rad": -0.016223750547367216,
+          "sdk_rms_rad_s": 0.005873527810480333
+        },
+        {
+          "interval_mean_rad_s": 6.122779723227723e-07,
+          "interval_rms_rad_s": 0.0006781025456044199,
+          "name": "lm_coxa_yaw",
+          "position_range_rad": 3.71323683339142e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0009745288774808262,
+          "sdk_mean_rad_s": -0.002864894722740701,
+          "sdk_minus_interval_integral_rad": -0.04584811201140838,
+          "sdk_rms_rad_s": 0.0030261077815291965
+        },
+        {
+          "interval_mean_rad_s": 1.1018460668310581e-06,
+          "interval_rms_rad_s": 0.00111895415567912,
+          "name": "lr_coxa_yaw",
+          "position_range_rad": 3.450615349720465e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.003903927648747842,
+          "sdk_mean_rad_s": -0.004996312550028961,
+          "sdk_minus_interval_integral_rad": -0.07995863033753267,
+          "sdk_rms_rad_s": 0.006340645880683983
+        },
+        {
+          "interval_mean_rad_s": -1.2760838785652595e-07,
+          "interval_rms_rad_s": 0.00114198127211827,
+          "name": "rf_coxa_yaw",
+          "position_range_rad": 3.1689629395259544e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.003697956073445476,
+          "sdk_mean_rad_s": -0.0045427834774773145,
+          "sdk_minus_interval_integral_rad": -0.07268249390543133,
+          "sdk_rms_rad_s": 0.005857624163803372
+        },
+        {
+          "interval_mean_rad_s": 1.8211608221463393e-07,
+          "interval_rms_rad_s": 0.0006183635347507464,
+          "name": "rm_coxa_yaw",
+          "position_range_rad": 2.6061806238431018e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0010902817802177325,
+          "sdk_mean_rad_s": -0.0030394994044354463,
+          "sdk_minus_interval_integral_rad": -0.048634904328282574,
+          "sdk_rms_rad_s": 0.003229128518631332
+        },
+        {
+          "interval_mean_rad_s": 7.494408009733888e-07,
+          "interval_rms_rad_s": 0.0007862987282347204,
+          "name": "rr_coxa_yaw",
+          "position_range_rad": 4.147330264459015e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.005050609449778374,
+          "sdk_mean_rad_s": -0.0003629298553607896,
+          "sdk_minus_interval_integral_rad": -0.0058188687385882076,
+          "sdk_rms_rad_s": 0.005063632480157185
+        },
+        {
+          "interval_mean_rad_s": -2.4812761694192886e-06,
+          "interval_rms_rad_s": 0.009864605724148781,
+          "name": "lf_femur_pitch",
+          "position_range_rad": 0.00013531185686588287,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.001795991956294243,
+          "sdk_mean_rad_s": 0.00029907006832644354,
+          "sdk_minus_interval_integral_rad": 0.004824821511933806,
+          "sdk_rms_rad_s": 0.0018207223876369528
+        },
+        {
+          "interval_mean_rad_s": -5.399342626333237e-07,
+          "interval_rms_rad_s": 0.0021506482200333815,
+          "name": "lm_femur_pitch",
+          "position_range_rad": 4.775635898113251e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0019219863002201648,
+          "sdk_mean_rad_s": -0.00041045305032021416,
+          "sdk_minus_interval_integral_rad": -0.0065586098569212934,
+          "sdk_rms_rad_s": 0.0019653251753211642
+        },
+        {
+          "interval_mean_rad_s": -6.934860721230507e-07,
+          "interval_rms_rad_s": 0.010259008481418776,
+          "name": "lr_femur_pitch",
+          "position_range_rad": 0.00020004995167255402,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.001673692751316091,
+          "sdk_mean_rad_s": -0.0007177300034540224,
+          "sdk_minus_interval_integral_rad": -0.01147258427811039,
+          "sdk_rms_rad_s": 0.0018210941171905798
+        },
+        {
+          "interval_mean_rad_s": 3.988388925790787e-07,
+          "interval_rms_rad_s": 0.013470968177725584,
+          "name": "rf_femur_pitch",
+          "position_range_rad": 0.0007529556751251221,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0016952709173499324,
+          "sdk_mean_rad_s": 0.0002844570026120152,
+          "sdk_minus_interval_integral_rad": 0.004544930619510979,
+          "sdk_rms_rad_s": 0.0017189704097358668
+        },
+        {
+          "interval_mean_rad_s": 1.8032733350992203e-07,
+          "interval_rms_rad_s": 0.0028255213061237215,
+          "name": "rm_femur_pitch",
+          "position_range_rad": 6.307289004325867e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0019206882381924905,
+          "sdk_mean_rad_s": -0.00034244760094985337,
+          "sdk_minus_interval_integral_rad": -0.005482046852533813,
+          "sdk_rms_rad_s": 0.0019509776184588286
+        },
+        {
+          "interval_mean_rad_s": -8.85920599102974e-08,
+          "interval_rms_rad_s": 0.009038975719620316,
+          "name": "rr_femur_pitch",
+          "position_range_rad": 0.00012088567018508911,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0017661161809751412,
+          "sdk_mean_rad_s": -0.0006107198887787035,
+          "sdk_minus_interval_integral_rad": -0.009770100747500692,
+          "sdk_rms_rad_s": 0.0018687282165291157
+        },
+        {
+          "interval_mean_rad_s": 1.5939585864543915e-06,
+          "interval_rms_rad_s": 0.00807732423043197,
+          "name": "lf_tibia_pitch",
+          "position_range_rad": 0.00011322274804115295,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0015106176966488182,
+          "sdk_mean_rad_s": -0.008219130253946787,
+          "sdk_minus_interval_integral_rad": -0.13153158740053186,
+          "sdk_rms_rad_s": 0.008356797709456175
+        },
+        {
+          "interval_mean_rad_s": -3.8067810237407684e-08,
+          "interval_rms_rad_s": 0.0016830747753923284,
+          "name": "lm_tibia_pitch",
+          "position_range_rad": 4.803203046321869e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0012515420387222752,
+          "sdk_mean_rad_s": -0.03872866339399479,
+          "sdk_minus_interval_integral_rad": -0.6196580052189529,
+          "sdk_rms_rad_s": 0.03874888031621096
+        },
+        {
+          "interval_mean_rad_s": 2.953456714749336e-07,
+          "interval_rms_rad_s": 0.008264431932213682,
+          "name": "lr_tibia_pitch",
+          "position_range_rad": 0.00016032159328460693,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0013086912900538532,
+          "sdk_mean_rad_s": -0.006108534905188208,
+          "sdk_minus_interval_integral_rad": -0.09774128401375493,
+          "sdk_rms_rad_s": 0.006247149076223931
+        },
+        {
+          "interval_mean_rad_s": -2.0209699869155884e-07,
+          "interval_rms_rad_s": 0.010904395314292775,
+          "name": "rf_tibia_pitch",
+          "position_range_rad": 0.0006082355976104736,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.001391868670615977,
+          "sdk_mean_rad_s": -0.006924389439454899,
+          "sdk_minus_interval_integral_rad": -0.11078699747929932,
+          "sdk_rms_rad_s": 0.007062893706228123
+        },
+        {
+          "interval_mean_rad_s": 3.241002559661865e-07,
+          "interval_rms_rad_s": 0.0022258884847316343,
+          "name": "rm_tibia_pitch",
+          "position_range_rad": 5.260668694972992e-05,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0012532662475685968,
+          "sdk_mean_rad_s": -0.0392481232888531,
+          "sdk_minus_interval_integral_rad": -0.627975158225745,
+          "sdk_rms_rad_s": 0.03926812776265641
+        },
+        {
+          "interval_mean_rad_s": 6.078043952584267e-07,
+          "interval_rms_rad_s": 0.007401905228300411,
+          "name": "rr_tibia_pitch",
+          "position_range_rad": 0.00010162219405174255,
+          "samples_400hz": 6400,
+          "sdk_centered_rms_rad_s": 0.0015322209597180964,
+          "sdk_mean_rad_s": -0.007799230917917157,
+          "sdk_minus_interval_integral_rad": -0.12479741955699865,
+          "sdk_rms_rad_s": 0.007948314537082333
+        }
+      ],
+      "post_settle_400hz_samples": 6400,
+      "raw_inventory_sha256": "6991a73c07641e13756343c77a04b56915298588b7e3709dd7ce66ccb5691895",
+      "selection": "32/4",
+      "source_freeze_sha256": "037013353a30c5f3751235634aafdb3f204b676837962b14df72c3051c0a2786",
+      "state_sha256": "d5dfefef4e646918fc598c2de97ee9d31897d66e0529773a35353fed87eea522"
+    }
+  ],
+  "schema": "canonical_actual_solver_single_comparison_v1",
+  "scope": "Both actual8,000-step single runs, before any32/0 result; no native changes or velocity-channel substitution. Official gate remains SDK50Hz endpoint RMS;400Hz metrics below are separately named."
+}

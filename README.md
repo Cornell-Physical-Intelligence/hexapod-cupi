@@ -1,5 +1,7 @@
 # Hexapod MKII: autonomy and RL walking
 
+**Research is paused for handoff to James (11 September 2026 UTC). Start with [James's handoff guide](docs/JAMES_HANDOFF.md).** Current code, results and unpublished preparation are preserved; no research/training continuation is queued. External Spark jobs remain blocked.
+
 Software for the Hexapod MKII, an 18-joint RobStride RS05 hexapod. Its mission
 is to survey a bounded area an operator draws on a map and to hold a steady
 deck for data collection while it does so. `dar.md` states the mission.

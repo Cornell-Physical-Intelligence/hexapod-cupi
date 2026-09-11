@@ -1,0 +1,26 @@
+--- frozen_host002/launch_ppo_spark.py
++++ host003/launch_ppo_spark.py
+@@ -117,10 +117,14 @@
+         '--asset','/asset','--admission','/admission','--standing-source','/standing','--standing-one','/standing_one',
+         '--standing32','/standing32','--bindings','/bindings.json','--output','/output/'+PHASE,'--device','cuda:0','--headless']
+ 
++def load_deadline_adapter():
++    return load_module('_canonical_ppo_deadline_adapter',Path(__file__).resolve().parent/'deadline_adapter.py')
++
+ def load_supervisor(args,identity):
+     global PARENT
+     sys.path.insert(0,str(args.supervisor_source/'tools'))
+     PARENT=load_module('_canonical_ppo_ownership_source009',args.supervisor_source/'tools/launch_reference_physics_spark.py')
++    deadline_proof=load_deadline_adapter().install(PARENT,args.supervisor_source/'tools/launch_reference_physics_spark.py')
+     PARENT.command=lambda source,output,name,phase:command(args,name,phase)
+     def native_verified_source(source):
+         if source!=args.source:raise ValueError('Unexpected native source path')
+@@ -130,7 +134,7 @@
+     original_save=PARENT.save
+     def metadata_save(path,data):
+         if Path(path).parent.name=='jobs'and Path(path).name==PHASE+'.json':
+-            data={**data,'no_policy_loaded':False,'no_checkpoint_loaded':True,'checkpoint_input':None,
++            data={**data,'supervisor_runtime_adapter':deadline_proof,'no_policy_loaded':False,'no_checkpoint_loaded':True,'checkpoint_input':None,
+                 'policy_initialization':'fresh actor only after same-process neutral admission','training_integration_only':True,
+                 'quality_admitted':False,'physical_admission':False,'Stage2_complete':False,'ppo_scope':SCHEMA,'legacy_supervisor_reused_for_ownership_only':True}
+         return original_save(path,data)

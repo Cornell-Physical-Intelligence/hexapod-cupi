@@ -1,0 +1,53 @@
+--- standing005/standing_math.py
++++ cpu_candidate/standing_math.py
+@@ -44,24 +44,35 @@
+   start,count=int(starts[i,0]),int(counts[i,0])
+   if count==0:continue
+   if start+count>len(force):raise ValueError('Contact buffer overflow/range')
++  # Small ranges use the exact scalar path; hashing costs more without repetition.
++  patch_cache={}if count>=32 else None
+   for k in range(start,start+count):
+    if k in used:raise ValueError('Overlapping contact-buffer ranges')
+    used.add(k);f=float(force[k,0]);p=point[k];n=normal[k];d=float(sep[k,0])
+-   if not np.isfinite(np.r_[f,p,n,d]).all():raise ValueError('Nonfinite used contact patch')
+-   inactive_zero_normal=bool(f==0. and np.all(n==0.) and d==0.)
+-   if abs(np.linalg.norm(n)-1)>1e-3 and not inactive_zero_normal:raise ValueError('Invalid patch normal')
+-   local=None
+-   if body.endswith('_tibia'):
+-    key=(e,body)
+-    if key not in cap_cache:
+-     s=geometry.shapes[body];pose=poses[e,geometry.names.index(body)]
+-     cap_cache[key]=(pose,np.asarray(s['shape_to_link']),rotation(np.asarray(pose)[3:]),np.asarray(s['cap_bounds_m']),s['contact_offset_m'],s['cap_lower_x_m'])
+-    pose,T,R,b,skin,lower=cap_cache[key]
+-    local=(np.asarray(p)-pose[:3])@R
+-    local=(local-T[:3,3])@T[:3,:3]
+-    cap=bool(local[0]>=lower-1e-12 and local[0]<=b[1,0]+skin and np.all(local[1:]>=b[0,1:]-skin)and np.all(local[1:]<=b[1,1:]+skin))
+-    category='toe'if cap else'shaft'
+-   else:category='coxa'if body.endswith('_coxa')else'femur'if body.endswith('_femur')else'body'
++   # Cache only interpretation of identical raw bytes within this sensor range.
++   # Aggregation remains in original patch order with original float32 products.
++   cached=None
++   if patch_cache is not None:
++    patch_key=(force[k,0].tobytes(),p.tobytes(),n.tobytes(),sep[k,0].tobytes())
++    cached=patch_cache.get(patch_key)
++   if cached is None:
++    if not np.isfinite(np.r_[f,p,n,d]).all():raise ValueError('Nonfinite used contact patch')
++    inactive_zero_normal=bool(f==0. and np.all(n==0.) and d==0.)
++    if abs(np.linalg.norm(n)-1)>1e-3 and not inactive_zero_normal:raise ValueError('Invalid patch normal')
++    local=None
++    if body.endswith('_tibia'):
++     key=(e,body)
++     if key not in cap_cache:
++      s=geometry.shapes[body];pose=poses[e,geometry.names.index(body)]
++      cap_cache[key]=(pose,np.asarray(s['shape_to_link']),rotation(np.asarray(pose)[3:]),np.asarray(s['cap_bounds_m']),s['contact_offset_m'],s['cap_lower_x_m'])
++     pose,T,R,b,skin,lower=cap_cache[key]
++     local=(np.asarray(p)-pose[:3])@R
++     local=(local-T[:3,3])@T[:3,:3]
++     cap=bool(local[0]>=lower-1e-12 and local[0]<=b[1,0]+skin and np.all(local[1:]>=b[0,1:]-skin)and np.all(local[1:]<=b[1,1:]+skin))
++     category='toe'if cap else'shaft'
++    else:category='coxa'if body.endswith('_coxa')else'femur'if body.endswith('_femur')else'body'
++    if patch_cache is not None:patch_cache[patch_key]=(inactive_zero_normal,local,category)
++   else:inactive_zero_normal,local,category=cached
+    if category=='toe':feet[e,LEGS.index(body[:2])]+=f*n
+    else:other[e,['body','coxa','femur','shaft'].index(category)]+=f*n
+    patches.append({'buffer_index':k,'env':e,'body':body,'category':category,'normal_force_n':f,'point_world_m':p.tolist(),'normal_world':n.tolist(),'separation_m':d,'inactive_zero_normal':inactive_zero_normal,'shape_point_m':None if local is None else local.tolist()})

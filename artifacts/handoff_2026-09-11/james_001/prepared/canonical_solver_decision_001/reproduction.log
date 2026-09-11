@@ -1,0 +1,122 @@
+{
+  "schema": "canonical_solver_decision_evidence_v1",
+  "analyzer002_result_sha256": "194e926651c3ac8f3c0aff6ebaef44cdb4ca39053b75a9898b51fe8259055870",
+  "analyzer_runtime_sha256": "e5bfd7b4fa28281ba8e2e1ad2fd83bfdf08ce6be592eadd509732cb4a19e98f6",
+  "analyzer_helper_sha256": "e202a684cdb64d313649a8991d6a70f358dcbfd6b18ed59e0196daa0d8550348",
+  "source_sha256": "e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0",
+  "scope": "Independent reduction of analyzer002 derived result plus q-difference reconstruction on exported event-adjacent samples; full remote arrays not reread.",
+  "event_count": 74,
+  "all_events_single_toe_zero": true,
+  "all_events_128_inactive_slots": true,
+  "all_six_zero_events": 0,
+  "affected_leg_all_sdk_zero_events": 0,
+  "event_joint_interval_reconstructions": 222,
+  "max_interval_reconstruction_error": 0.0,
+  "other_foot_minimum_n": 10.74674987792972,
+  "event_tibia_endpoint_abs_max": 2.644890785217285,
+  "event_tibia_interval_abs_max": 1.35909765958786,
+  "event_tibia_interval_rms": 1.094187566069022,
+  "event_tibia_residual_rms_vs_post_sdk": 1.0415942398124427,
+  "event_tibia_residual_rms_vs_endpoint_average": 0.033610156224074886,
+  "worst_whole_window_400hz_sdk": {
+    "env": 20,
+    "name": "rf_tibia_pitch",
+    "sdk_rms_400hz": 0.06137701139162311,
+    "interval_rms_400hz": 0.03478717534368436,
+    "sdk_mean_400hz": -0.00435917868057004,
+    "interval_mean_400hz": 0.00031985167879611254,
+    "sdk_minus_interval_integral_16s_rad": -0.07486448574985843,
+    "pearson_sdk_interval": 0.9283404665809554,
+    "q_range_400hz_rad": 0.007355883717536926
+  },
+  "worst_whole_window_400hz_interval": {
+    "env": 3,
+    "name": "rf_femur_pitch",
+    "sdk_rms_400hz": 0.0026226450734131634,
+    "interval_rms_400hz": 0.0459880703087577,
+    "sdk_mean_400hz": 0.0006756283992859835,
+    "interval_mean_400hz": -3.320164978504181e-07,
+    "sdk_minus_interval_integral_16s_rad": 0.010815366652541344,
+    "pearson_sdk_interval": 0.0570093816600128,
+    "q_range_400hz_rad": 0.0002974141389131546
+  },
+  "example_event": {
+    "env": 11,
+    "sequence": 1604,
+    "time_s": 4.0125,
+    "body": "rm_tibia",
+    "force_n": [
+      12.232645988464357,
+      12.049426078796388,
+      12.122362136840822,
+      12.209362030029304,
+      0.0,
+      12.344271659851085
+    ],
+    "before_force_n": 12.35609722137454,
+    "after_force_n": 17.288555145263697,
+    "inactive_patch_count": 128,
+    "patch_count": 128,
+    "joints": {
+      "rm_coxa_yaw": {
+        "q": -0.00011914694914594293,
+        "sdk_endpoint": -0.0005999569548293948,
+        "sdk_previous": -0.004483676981180906,
+        "angle_interval": -0.0025081972125917673,
+        "recomputed_interval": -0.0025081972125917673,
+        "sdk_endpoint_average": -0.0025418169680051506
+      },
+      "rm_femur_pitch": {
+        "q": 0.02916376106441021,
+        "sdk_endpoint": -1.0145517587661743,
+        "sdk_previous": -0.0017108371248468757,
+        "angle_interval": -0.523337721824646,
+        "recomputed_interval": -0.523337721824646,
+        "sdk_endpoint_average": -0.5081312979455106
+      },
+      "rm_tibia_pitch": {
+        "q": -0.02128574252128601,
+        "sdk_endpoint": 2.5653226375579834,
+        "sdk_previous": -0.022629177197813988,
+        "angle_interval": 1.3117395341396332,
+        "recomputed_interval": 1.3117395341396332,
+        "sdk_endpoint_average": 1.2713467301800847
+      }
+    },
+    "all_six_force_zero": false,
+    "affected_leg_all_sdk_zero": false
+  },
+  "max_reset_relative_translation_delta_m": 8.940769475884736e-07,
+  "env0_reset_equal_single": {
+    "joint_position_rad": true,
+    "joint_velocity_rad_s": true,
+    "link_pose_xyzw": true,
+    "root_com_velocity": true,
+    "root_pose_xyzw": true
+  },
+  "env0_native_trajectory_equal_single": {
+    "joint_position_rad": {
+      "equal": false,
+      "max_abs_difference": 0.0007647797465324402
+    },
+    "joint_velocity_rad_s": {
+      "equal": false,
+      "max_abs_difference": 0.06005974626168609
+    },
+    "root_pose_xyzw": {
+      "equal": false,
+      "max_abs_difference": 6.345604560920037e-06
+    },
+    "distal_force_world_n": {
+      "equal": false,
+      "max_abs_difference": 0.21227505803108215
+    },
+    "distal_contact": {
+      "equal": true,
+      "max_abs_difference": 0.0
+    }
+  },
+  "all_native_replica_inertial_limits_equal": true,
+  "no_causal_claim": true,
+  "GPU_calls": 0
+}

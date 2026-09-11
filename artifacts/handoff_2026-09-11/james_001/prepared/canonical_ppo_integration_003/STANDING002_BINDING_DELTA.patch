@@ -1,0 +1,42 @@
+--- source001-proposal/canonical_direct_ppo/native_entry_adapter.py
++++ source002-proposal/canonical_direct_ppo/native_entry_adapter.py
+@@ -3,7 +3,7 @@
+ from contextlib import contextmanager
+ import ast,hashlib,sys
+ 
+-STANDING_FREEZE='f81f61d257cb92b65ad80f3b7d27c45497e66254092e244a32da02555b11e2a4'
++STANDING_FREEZE='acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467'
+ ORIGINAL_TAIL='''  session.close();session=None
+   from standing_score import score
+   report=score(out);save(out/'standing_report.json',report)
+--- source001-proposal/test_support.py
++++ source002-proposal/test_support.py
+@@ -4,5 +4,5 @@
+ 
+ ROOT=next((p for p in Path(__file__).resolve().parents if (p/'robot/active_model.json').is_file()and(p/'pyproject.toml').is_file()),None)
+ if ROOT is None:raise RuntimeError('Run these CPU tests within the HEXAPOD repository')
+-STANDING=Path(os.environ.get('HEXAPOD_CANONICAL_STANDING_SOURCE',str(ROOT/'tmp/updated_native_standing_001'))).resolve()
++STANDING=Path(os.environ.get('HEXAPOD_CANONICAL_STANDING_SOURCE',str(ROOT/'tmp/updated_native_standing_002'))).resolve()
+ TEST_DEPS=ROOT/'tmp/reference_residual_ppo_001/_deps'
+--- source001-proposal/README.md
++++ source002-proposal/README.md
+@@ -18,7 +18,7 @@
+ 
+ `run_native_smoke.py` is now an executable native entry. Its CLI requires `--asset`, `--admission` (the exact native actuation result), `--standing-source`, `--standing-one`, `--standing32`, `--bindings`, and fresh `--output`; actual runtime additionally requires `--device cuda:0 --headless`. `--preflight-only` validates all source/admission bytes using standard-library code and cannot start Isaac. `canonical_direct_ppo.native_contract.verify_inputs(args)` and `validate_result(directory, identity)` are the host composition APIs. A host should import this unique package with the preparation directory on its path, not load a relative-import module under an unrelated bare name. No host or guard is added here.
+ 
+-The versioned entry adapter currently targets frozen standing source `f81f61d257cb92b65ad80f3b7d27c45497e66254092e244a32da02555b11e2a4`. It compiles the complete verified module and replaces exactly its post1000-control reporting tail. All native scene/import/reset/servo/400Hz loop and original exception/finally statements remain byte identical. Exact helper paths stay active through lazy imports and foreign cached modules are rejected. This is explicitly an adapted entry, not a claim that the old standing entry itself ran PPO. A changed standing runtime requires a reviewed successor binding before dispatch.
++The versioned entry adapter currently targets frozen standing source `acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467`. It compiles the complete verified module and replaces exactly its post1000-control reporting tail. All native scene/import/reset/servo/400Hz loop and original exception/finally statements remain byte identical. Exact helper paths stay active through lazy imports and foreign cached modules are rejected. This is explicitly an adapted entry, not a claim that the old standing entry itself ran PPO. A changed standing runtime requires a reviewed successor binding before dispatch.
+ 
+ The new tail flushes but does not close the live session. It snapshots the full1000-control/8000-substep neutral prefix in a separate immutable directory, copies the still-active contact stream, and links/copies only already-flushed immutable chunks. The original standing scorer must pass all32 rows before constructing the actor. The learner then uses exactly48 policy controls/384 substeps, with no second reset or counter rebasing, for total1048 controls/8384 steps. Original native session close occurs after learning or on any failure. Every attempted policy endpoint remains available, including native errors discovered during a hold. Measurement files seal before application close; native lifecycle logs stay explicitly unsealed until the host inventories their actual post-exit bytes.
+ 
+--- source001-proposal/PREPARATION_STATUS.json
++++ source002-proposal/PREPARATION_STATUS.json
+@@ -6,7 +6,7 @@
+   "native_dispatch_ready": false,
+   "standing1_state_sha256": null,
+   "standing32_state_sha256": null,
+-  "proposed_standing_source_sha256": "f81f61d257cb92b65ad80f3b7d27c45497e66254092e244a32da02555b11e2a4",
++  "proposed_standing_source_sha256": "acb589708fcba8be2f6ef64171795889eca8b6583fdbb4bc2fc25d61717b0467",
+   "policy_quality_admitted": false,
+   "Stage2_complete": false,
+   "publication_owner": "root; docs/PROJECT_SITE.md bounded central update required for eventual tracked adoption"

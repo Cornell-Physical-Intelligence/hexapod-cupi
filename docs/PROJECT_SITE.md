@@ -1,6 +1,6 @@
 # Live research poster: required contributor contract
 
-This is a hard user requirement for every repository-changing agent and human contributor, including Claude Code workers. Pass it into delegated tasks. The poster should explain the project visually in clear English: the mission, full system, robot geometry, actual findings, media, unresolved issues and next experiments. PPO Stage 2 remains the immediate execution priority; site work runs alongside training.
+This is a hard user requirement for every repository-changing agent and human contributor, including Claude Code workers. Pass it into delegated tasks. The poster should explain the project visually in clear English: the mission, full system, robot geometry, actual findings, media, unresolved issues and next experiments. Research is paused for [James's handoff](JAMES_HANDOFF.md); publication does not authorize research or training to restart. When work explicitly resumes, PPO Stage 2 remains the roadmap priority.
 
 ## Central framework
 

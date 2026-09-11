@@ -1,0 +1,46 @@
+{
+  "observed_unix": 1789090655.5132437,
+  "marker": {
+    "schema": "james_handoff_pause_v1",
+    "paused_at_unix": 1789090655.51311,
+    "reason": "User paused all research for handoff to James. No autonomous training, validation, research or recording restart.",
+    "resume_owner": "James / explicit user instruction",
+    "research_paused": true,
+    "external_automation_reservation_released": false,
+    "continuation_automation_id": "advance-hexapod-stage-2",
+    "continuation_status": "PAUSED",
+    "previous_main": "e6fc64444ee6b02c973e454ebe285843dcbe7fc2",
+    "stopped_stale_timer": "hexapod-restore-forecasting-20260909.timer"
+  },
+  "remote_pause_path": "/home/orionh/HEXAPOD_runs/canonical_direct_20260910/james_handoff_pause_001",
+  "stale_timer_before": {
+    "hexapod-restore-forecasting-20260909.timer": "Id=hexapod-restore-forecasting-20260909.timer\nActiveState=active\nSubState=waiting\nFragmentPath=/run/user/1000/systemd/transient/hexapod-restore-forecasting-20260909.timer\nTransient=yes\n",
+    "hexapod-restore-forecasting-20260909.service": "MainPID=0\nExecStart={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 /home/orionh/HEXAPOD_runs/mock_length_study_20260909/forecast_pause_001/resume_forecasting.py ; ignore_errors=no ; start_time=[n/a] ; stop_time=[n/a] ; pid=0 ; code=(null) ; status=0/0 }\nId=hexapod-restore-forecasting-20260909.service\nActiveState=inactive\nSubState=dead\nFragmentPath=/run/user/1000/systemd/transient/hexapod-restore-forecasting-20260909.service\nTransient=yes\n"
+  },
+  "stale_timer_after": {
+    "hexapod-restore-forecasting-20260909.timer": {
+      "properties": {
+        "Id": "hexapod-restore-forecasting-20260909.timer",
+        "LoadState": "not-found",
+        "ActiveState": "inactive",
+        "SubState": "dead"
+      },
+      "returncode": 0,
+      "stderr": ""
+    },
+    "hexapod-restore-forecasting-20260909.service": {
+      "properties": {
+        "MainPID": "0",
+        "Id": "hexapod-restore-forecasting-20260909.service",
+        "LoadState": "not-found",
+        "ActiveState": "inactive",
+        "SubState": "dead"
+      },
+      "returncode": 0,
+      "stderr": ""
+    }
+  },
+  "marker_sha256": "70956062f7950949de63590119ec68c4831cc4b9aca219fa6619350adb26db5a",
+  "no_training_process_signaled": true,
+  "first_stop_outcome": "Timer stopped and transient service disappeared; combined stop returned nonzero for the unloaded service. This separate readback verifies both inactive and no scheduled timer."
+}

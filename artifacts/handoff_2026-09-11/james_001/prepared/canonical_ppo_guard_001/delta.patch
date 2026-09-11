@@ -1,0 +1,192 @@
+--- frozen_standing32_guard002
++++ pending_canonical_ppo_guard001
+@@ -1,37 +1,44 @@
+-"""Canonical native standing32 guard; same-source completed standing1 is a required admission."""
++"""First fresh canonical PPO smoke guard; actual standing32 terminal bindings are pending."""
+ from pathlib import Path
+ from types import SimpleNamespace
+ import fcntl,hashlib,importlib.util,json,os,subprocess,sys,time
+ sys.dont_write_bytecode=True
+ BASE=Path('/home/orionh/HEXAPOD_runs/canonical_direct_20260910')
+ PRIOR_BASE=BASE
+-SOURCE=BASE/'standing_source_003'
++SOURCE=BASE/'ppo_source_002'
++STANDING_SOURCE=BASE/'standing_source_003'
+ ASSET=BASE/'asset_001'
+ ADMISSION=BASE/'native_actuation_001/actuation'
+ SUPERVISOR_SOURCE=Path('/home/orionh/HEXAPOD_runs/mock_length_study_20260909/reference_physics_source_009')
+-OUTPUT=BASE/'native_standing32_002'
+-PAUSE=BASE/'forecast_pause_010'
+-UNIT='hexapod-canonical-native-standing32-002-20260910.service'
+-HOST=BASE/'standing_host_004/launch_standing_spark.py'
+-SOURCE_SHA256='e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0'
++OUTPUT=BASE/'canonical_ppo_smoke_001'
++PAUSE=BASE/'forecast_pause_012'
++UNIT='hexapod-canonical-ppo-smoke-001-20260910.service'
++HOST=BASE/'ppo_host_002/launch_ppo_spark.py'
++SOURCE_SHA256='1e173946fe2548a82207791528f503ac6d12766fd5b50f25746e6edf92704617'
+ SUPERVISOR_SHA256='04942c62de1f557d8f117f648f990b6dac69443d61c546529d05a4e2a7f0e01e'
+-HOST_SHA256='4bd861a56eb8d72c1316167caf17580b9b8e67d1951923635c61d0acca9bad40'
+-HOST_FREEZE_SHA256='c72c4dd63599f2c459c7b8eca7244528cb725094252c084f695f4aa44d8dba25'
+-PREVIOUS_UNIT='hexapod-canonical-native-standing-004-20260910.service'
+-PREVIOUS_INVOCATION='808028c883fc4362880f1f112b4b7360'
+-PREVIOUS_ROOT=BASE/'native_standing_004'
+-PREVIOUS_PAUSE=BASE/'forecast_pause_011'
++HOST_SHA256='f85a5200a99d14348b0ff418292575d7e78c4bef61d46eb0fea2eb9c4e344c4c'
++HOST_FREEZE_SHA256='d314bf361da009e48e6180b5cc4596cb45e0de77d0be6c28baf2ccaf9fe89f19'
++PREVIOUS_UNIT='hexapod-canonical-native-standing32-002-20260910.service'
++PREVIOUS_INVOCATION='1a38495bda9f4fefa4e5585574aabc56'
++PREVIOUS_ROOT=BASE/'native_standing32_002'
++PREVIOUS_PAUSE=BASE/'forecast_pause_010'
+ PREVIOUS_HOST='c72c4dd63599f2c459c7b8eca7244528cb725094252c084f695f4aa44d8dba25'
+ PREVIOUS_SOURCE='e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0'
+-PREVIOUS_NAME='hexapod-reference-physics-eb085ea700474b599b1bffb9dcc60d80'
+-PREVIOUS_ID='799c67104825fa70976292a3007ba52ad82c92d184d59671cb79314223dc8af6'
+-PREVIOUS_AUDIT_SHA256='af1deb693d66c871f7e0f7532b5a6ed9f4f7b5f75aab984e48021a99bda91fe6'
+-PRIOR_PINS={'native_standing_004/campaign.json': '4169ff5409b2f63a219fa6d304e0a6d4c8bf9c23bc5837e66f96ce583d2dd87b', 'native_standing_004/jobs/standing.json': 'cc9ba530a57406ff718316196638b9da4bbe438c4b4d15915eb3a1d99b028999', 'native_standing_004/jobs/standing_contact_data_audit.json': '68c9df057770bc217aad18c5c5e6d335e54d99afb26fbe8d04f572cda7eed7a1', 'native_standing_004/logs/standing.log': '68709f429015fab5a7194c9aacf621fb09ad2ea8af70d1f63097586b5ad0d433', 'native_standing_004/standing/contact_view.json': '0ef9cbae7134b7ca5a2da23a0e95028324030fcf73cd558ea6504f78a759bde0', 'native_standing_004/standing/contacts.jsonl': '95ed8eb951dcf5aa56b79e4f43f53b3588d858b3a8af71e613aec79d9b09b216', 'native_standing_004/standing/control_trace.npz': 'd828c327ed3cf366eb16c23839c4d431943f40e593aac7cad62eec9841937323', 'native_standing_004/standing/initial_reset.json': '34b397b8eb1c7015ab9f31641bfcd14ef7ecc4f2cc76dc513ac1edcd802e2c97', 'native_standing_004/standing/memory_before_scene.json': '0a1527f5e0a9936f00728dbc3cc9f6fa302fbf2d278a4895602f93a6113ad28f', 'native_standing_004/standing/native_errors.json': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570', 'native_standing_004/standing/native_materials.json': 'aa1174dcab7dfeed253cadbf11c4a83075b9cc6db874df644b2a8491ee8087b7', 'native_standing_004/standing/native_readback.json': 'd37ab0a618739c5ac77a3f5e412f8dd558081a23f03b1ede1c98578251d6aca4', 'native_standing_004/standing/native_scene.json': '5342a8b913c38d6675817d62c1dedff4765a3f141178e206fa7ce7d76f47dbc9', 'native_standing_004/standing/resolved_stage.usda': '692efa7d5f1c6d4872c8af1e289bad25b73a2d32b8ca891bbcdce433c816c4de', 'native_standing_004/standing/runtime_api.json': '0e402d157689122e829aa4597033364a9168c3b8f78b9514b3a80918c009e237', 'native_standing_004/standing/sdf_readback.json': '0a92ec3d0cd7101a932b7e5617ec5dc2072e89c59e70c28464908867e074597a', 'native_standing_004/standing/sdk_readback.json': '1016fef5aa047bdd0e5684a9fc8acd599e95738601847ad4084f2be58c53c454', 'native_standing_004/standing/session.json': '0a299bb5f3b4c999cd9f523bf6cf2757879a05c9617e12ea3cd9aad4a4df2a77', 'native_standing_004/standing/standing_report.json': 'd876970b4751da0a198eda4edeaf2e50ccecfb13610858ca647cdb7c18c1b201', 'native_standing_004/standing/state.json': '318c0bd2500cc954b6eec5464d5a0feca1fc2d570c5dae2e65e0177f18475da0', 'native_standing_004/standing/substeps_000.npz': 'e2d09a8757e281207044c037bc91997a913c7749dc3e47406fcbdb388952400c', 'native_standing_004/standing/substeps_001.npz': '2bd8cd98a2f411fd7c05759969b3940310113577bbe812f494840017741fb1a6', 'native_standing_004/standing/substeps_002.npz': '4b732d547da314c08858ed05433fac68d68237ed7bc73a502c571f001d001927', 'native_standing_004/standing/substeps_003.npz': 'ab1a8b3afc830243c68cb81294df1ac688abd01eee257fe73705e3b44cc0d532', 'native_standing_004/standing/substeps_004.npz': '50b8bc7ef7ee6fb127950239f93a811e3fb784902d567b22cae0ca32c3f244a1', 'native_standing_004/standing/substeps_005.npz': '0fa8208e80e98492b52c2eb49d7ae201f4481a80d5c15d6f132109ba057a45d2', 'native_standing_004/standing/substeps_006.npz': 'c6d1d0915c73f573fb2fc75471c8aa581298225595f1b055aecbbed7274cdb31', 'native_standing_004/standing/substeps_007.npz': '3ded9f6715874010fac6f68f48a7df8ddba05849f456e19b3686366ee5da6a6c', 'native_standing_004/standing/substeps_008.npz': '5d2f5873f2175329d257daab77b978d068ce7f8f4acc3dbc688f66909d1a31aa', 'native_standing_004/standing/substeps_009.npz': '860abe5b5fba3fb5691c492529c3601f13138885b7644d327d050925918888e3', 'native_standing_004/standing/usd_readback.json': '9a3547d211a7fd456a897ccb54beda88cab027c00c6605532795f3eee01c67b8', 'native_standing_004/standing/warmup_native_state.json': 'ef36393b80071441f3832cfe810bd449069f5d8f1c4bb0cf827dad792b9aa70b', 'native_standing_004/standing_immutable.sha256.json': '18799b0116e4f739a5ed668ae0d6f8bedccc0c83e8406a4144df48b85c18638d', 'forecast_pause_011/launch.json': 'e9224223176e0aa69dbdb8ce21f7e5d91b1131cbc6333b8e78b61e3a50b91bb4', 'forecast_pause_011/pause.json': '35977a7645fec5852c381ad82762f4d2f4e6b0d42ae4f2a033a8ab25970087c2', 'forecast_pause_011/restore.lock': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'forecast_pause_011/restored.json': 'eeec634dd8b4f26905529ff099968737d1b214ff39ab3a335d62399e48880dae', 'forecast_pause_011/resume_forecasting.py': 'daffe2b2397c31b37145b193c29c947c4162123799365323f27acda0218a5d90'}
+-
+-STANDING_ONE=PREVIOUS_ROOT/'standing'
++PREVIOUS_NAME=None
++PREVIOUS_ID=None
++PREVIOUS_AUDIT_SHA256=None
++PRIOR_PINS={}
++
++STANDING_ONE=BASE/'native_standing_004/standing'
+ STANDING_ONE_STATE_SHA256='318c0bd2500cc954b6eec5464d5a0feca1fc2d570c5dae2e65e0177f18475da0'
+ STANDING_ONE_INVENTORY_SHA256='43f799625273680b29d00e3b2f063896dc1591582414b000ef6ba345f5830524'
+-PREVIOUS_RESTORED_UNIX=1789081026.1759748
++PREVIOUS_RESTORED_UNIX=None
++STANDING_SOURCE_SHA256='e922ff1312b5106f957b384874ca5eb6ed4a9ed6566c0ef9a0602247a49670f0'
++STANDING32=PREVIOUS_ROOT/'standing'
++STANDING32_STATE_SHA256=None
++STANDING32_INVENTORY_SHA256=None
++BINDINGS=BASE/'ppo_bindings_001.json'
++BINDINGS_SHA256=None
+ 
+ RESERVATION=BASE/'exclusive_reservation_001'
+ RESERVATION_PINS={'/home/orionh/HEXAPOD_runs/canonical_direct_20260910/exclusive_reservation_001/ACTIVE': 'd6135e574b033fbbbe716e7f6b34876a42f1897f560d0c97ab3ae4da33532dc2', '/home/orionh/HEXAPOD_runs/canonical_direct_20260910/exclusive_reservation_001/initial_receipt.json': 'b0e17c5e7f2ae397260441dc8728eec079608cdf372717536dafc22d179df175', '/home/orionh/HEXAPOD_runs/canonical_direct_20260910/exclusive_reservation_001/scheduler_before.json': '139c7eec8e336bbf2df68f480848416232535bdceecabd4a5f210697955fd4f1', '/home/orionh/.config/systemd/user/stormscope-dispatch.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-dispatch.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-scout.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-scout.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-monitor.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-monitor.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-publish.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-publish.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-verify.timer.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26', '/home/orionh/.config/systemd/user/stormscope-verify.service.d/90-hexapod-exclusive-reservation-20260910.conf': 'bae12ac17239c89273a5b3daa7349ba76d74a0608dc0495abe35000a537bdd26'}
+@@ -44,8 +51,10 @@
+     return h.hexdigest()
+ def valid_hash(v):return isinstance(v,str) and len(v)==64 and all(c in '0123456789abcdef' for c in v)
+ def require_final_bindings():
+-    for name,bound in {'source':SOURCE_SHA256,'supervisor':SUPERVISOR_SHA256,'host':HOST_SHA256,'host freeze':HOST_FREEZE_SHA256,'previous audit':PREVIOUS_AUDIT_SHA256,'standing1 state':STANDING_ONE_STATE_SHA256,'standing1 inventory':STANDING_ONE_INVENTORY_SHA256,**PRIOR_PINS,**RESERVATION_PINS}.items():
++    for name,bound in {'source':SOURCE_SHA256,'standing source':STANDING_SOURCE_SHA256,'supervisor':SUPERVISOR_SHA256,'host':HOST_SHA256,'host freeze':HOST_FREEZE_SHA256,'previous audit':PREVIOUS_AUDIT_SHA256,'standing1 state':STANDING_ONE_STATE_SHA256,'standing1 inventory':STANDING_ONE_INVENTORY_SHA256,'standing32 state':STANDING32_STATE_SHA256,'standing32 inventory':STANDING32_INVENTORY_SHA256,'enabled bindings':BINDINGS_SHA256,**PRIOR_PINS,**RESERVATION_PINS}.items():
+         if not valid_hash(bound):raise RuntimeError('Final reviewed binding pending: '+name)
++    if not PRIOR_PINS or not isinstance(PREVIOUS_NAME,str) or not PREVIOUS_NAME or not valid_hash(PREVIOUS_ID):raise RuntimeError('Actual standing32 owned cleanup identities pending')
++    if not isinstance(PREVIOUS_INVOCATION,str) or len(PREVIOUS_INVOCATION)!=32 or any(c not in '0123456789abcdef'for c in PREVIOUS_INVOCATION) or type(PREVIOUS_RESTORED_UNIX)not in(int,float)or PREVIOUS_RESTORED_UNIX<=0:raise RuntimeError('Actual standing32 invocation/restoration pending')
+ 
+ def verify_manifest(root,manifest,bound):
+     if root.is_symlink() or any(p.is_symlink() for p in root.rglob('*')):raise RuntimeError('Symbolic frozen source')
+@@ -57,21 +66,24 @@
+     audit_path=Path(__file__).resolve().parent/'inputs/previous_terminal_audit.json'
+     if sha(audit_path)!=PREVIOUS_AUDIT_SHA256:raise RuntimeError('Prior admission audit changed')
+     audit=json.loads(audit_path.read_text())
+-    if audit.get('audit_verified')is not True or audit.get('terminal_outcome')!='authentic_completed_standing' or audit.get('standing_completed')is not True or audit.get('expected_invocation')!=PREVIOUS_INVOCATION or audit.get('errors')!=[]:raise RuntimeError('Prior standing1 admission invalid')
++    if audit.get('audit_verified')is not True or audit.get('terminal_outcome')!='authentic_completed_standing' or audit.get('standing_completed')is not True or audit.get('expected_invocation')!=PREVIOUS_INVOCATION or audit.get('errors')!=[]:raise RuntimeError('Prior standing32 admission invalid')
+     fields=dict(line.split('=',1)for line in call(['systemctl','--user','show',PREVIOUS_UNIT,'-p','ActiveState','-p','SubState','-p','InvocationID','-p','MainPID','-p','ExecMainStatus']).splitlines()if '='in line)
+     if fields.get('ActiveState')!='inactive' or fields.get('MainPID')!='0' or fields.get('ExecMainStatus')!='0':raise RuntimeError('Previous completed owner state changed')
+     if fields.get('InvocationID') and fields['InvocationID']!=PREVIOUS_INVOCATION:raise RuntimeError('Previous invocation changed')
+     for name,bound in PRIOR_PINS.items():
+         if sha(PRIOR_BASE/name)!=bound:raise RuntimeError('Previous admission/cleanup receipt changed: '+name)
++    standing_manifest=json.loads((PREVIOUS_ROOT/'standing_immutable.sha256.json').read_text())
++    if hashlib.sha256(json.dumps(standing_manifest,sort_keys=True,separators=(',',':')).encode()).hexdigest()!=STANDING32_INVENTORY_SHA256 or any(PRIOR_PINS.get(PREVIOUS_ROOT.name+'/standing/'+name)!=bound for name,bound in standing_manifest.items()):raise RuntimeError('Actual standing32 complete inventory binding differs')
+     campaign=json.loads((PREVIOUS_ROOT/'campaign.json').read_text());identity=campaign.get('identity',{})
+-    if campaign.get('status')!='completed' or campaign.get('terminal_inputs_unchanged')is not True or campaign.get('planned_phases')!=['standing']or campaign.get('host_freeze_sha256')!=PREVIOUS_HOST or campaign.get('source_freeze_sha256')!=PREVIOUS_SOURCE or identity.get('inspector_freeze_sha256')!=SOURCE_SHA256 or identity.get('num_envs')!=1:raise RuntimeError('Previous standing1 campaign identity changed')
++    if campaign.get('status')!='completed' or campaign.get('terminal_inputs_unchanged')is not True or campaign.get('planned_phases')!=['standing']or campaign.get('host_freeze_sha256')!=PREVIOUS_HOST or campaign.get('source_freeze_sha256')!=PREVIOUS_SOURCE or identity.get('inspector_freeze_sha256')!=STANDING_SOURCE_SHA256 or identity.get('num_envs')!=32:raise RuntimeError('Previous standing32 campaign identity changed')
+     receipt=campaign.get('standing',{})
+-    if receipt.get('standing_pass')is not True or receipt.get('status')!='completed' or receipt.get('num_envs')!=1 or receipt.get('state_sha256')!=STANDING_ONE_STATE_SHA256 or campaign.get('post_exit_original_inputs_reverified')is not True or campaign.get('post_exit_all_standing_payloads_inventoried')is not True:raise RuntimeError('Previous standing1 acceptance/seal changed')
+-    native=json.loads((STANDING_ONE/'state.json').read_text());session=json.loads((STANDING_ONE/'session.json').read_text())
+-    if native.get('status')!='completed' or native.get('standing_pass')is not True or native.get('explicit_steps_completed')!=8000 or native.get('identity')!=identity or native.get('inputs_unchanged')is not True or native.get('errors')!=[] or native.get('physical_admission')is not False or native.get('training_allowed')is not False:raise RuntimeError('Previous raw standing1 state changed')
+-    if session.get('steps')!=8000 or session.get('captured_steps')!=8000 or session.get('controls')!=1000 or session.get('all_rows_recorded')is not True or session.get('reset_count')!=1 or session.get('failure')is not None:raise RuntimeError('Previous standing1 acquisition differs')
++    if receipt.get('standing_pass')is not True or receipt.get('status')!='completed' or receipt.get('num_envs')!=32 or receipt.get('state_sha256')!=STANDING32_STATE_SHA256 or campaign.get('post_exit_original_inputs_reverified')is not True or campaign.get('post_exit_all_standing_payloads_inventoried')is not True:raise RuntimeError('Previous standing32 acceptance/seal changed')
++    if identity.get('standing_one_state_sha256')!=STANDING_ONE_STATE_SHA256 or identity.get('standing_one_inventory_sha256')!=STANDING_ONE_INVENTORY_SHA256:raise RuntimeError('Standing32 did not consume exact standing1')
++    native=json.loads((STANDING32/'state.json').read_text());session=json.loads((STANDING32/'session.json').read_text())
++    if native.get('status')!='completed' or native.get('standing_pass')is not True or native.get('explicit_steps_completed')!=8000 or native.get('identity')!=identity or native.get('inputs_unchanged')is not True or native.get('errors')!=[] or native.get('physical_admission')is not False or native.get('training_allowed')is not False:raise RuntimeError('Previous raw standing32 state changed')
++    if session.get('steps')!=8000 or session.get('captured_steps')!=8000 or session.get('controls')!=1000 or session.get('all_rows_recorded')is not True or session.get('reset_count')!=1 or session.get('failure')is not None:raise RuntimeError('Previous standing32 acquisition differs')
+     pause=json.loads((PREVIOUS_PAUSE/'pause.json').read_text());restored=json.loads((PREVIOUS_PAUSE/'restored.json').read_text());timers={name for name,value in pause['units'].items()if name.endswith('.timer')and 'ActiveState=active'in value}
+-    if pause.get('unit')!=PREVIOUS_UNIT or pause.get('output')!=str(PREVIOUS_ROOT)or set(restored.get('timers',[]))!=timers or restored.get('restored_unix')!=PREVIOUS_RESTORED_UNIX:raise RuntimeError('Previous exact pause011 restoration missing')
++    if pause.get('unit')!=PREVIOUS_UNIT or pause.get('output')!=str(PREVIOUS_ROOT)or set(restored.get('timers',[]))!=timers or restored.get('restored_unix')!=PREVIOUS_RESTORED_UNIX:raise RuntimeError('Previous exact pause010 restoration missing')
+     if restored.get('scope')!='per_job_snapshot_only' or restored.get('persistent_reservation_release_attempted')is not False or restored.get('reservation_path')!=str(RESERVATION):raise RuntimeError('Prior cleanup must preserve persistent reservation')
+     names={p.stem for p in (PREVIOUS_ROOT/'jobs').glob('*.json')if not p.name.endswith('_contact_data_audit.json')}
+     if names!={'standing'}:raise RuntimeError('Previous job inventory changed')
+@@ -93,18 +105,25 @@
+     if json.loads((RESERVATION/'ACTIVE').read_text()).get('exclusive')is not True:raise RuntimeError('Exclusive reservation is not active')
+     return {'path':str(RESERVATION),'marker_sha256':RESERVATION_PINS[str(RESERVATION/'ACTIVE')],'verified_files':len(RESERVATION_PINS),'reservation_active_at_preflight':True,'release_attempted':False}
+ 
+-def validate_standing_inputs(host):
++def validate_ppo_inputs(host):
+     require_final_bindings()
+     verify_reservation()
+     if sha(HOST)!=HOST_SHA256:raise RuntimeError('Canonical host changed')
+     verify_manifest(HOST.parent,'FREEZE_SHA256.json',HOST_FREEZE_SHA256)
+     verify_manifest(SOURCE,'FREEZE_SHA256.json',SOURCE_SHA256)
+-    if host.SOURCE_FREEZE!=SOURCE_SHA256 or host.SUPERVISOR_MAP!=SUPERVISOR_SHA256:raise RuntimeError('Host pins do not match canonical guard')
+-    args=SimpleNamespace(source=SOURCE,asset=ASSET,admission=ADMISSION,supervisor_source=SUPERVISOR_SOURCE,output=OUTPUT,isaaclab=Path('/home/orionh/IsaacLab'),host_freeze_sha256=HOST_FREEZE_SHA256,num_envs=32,standing_one=STANDING_ONE)
++    verify_manifest(STANDING_SOURCE,'FREEZE_SHA256.json',STANDING_SOURCE_SHA256)
++    if host.SOURCE_FREEZE!=SOURCE_SHA256 or host.STANDING_FREEZE!=STANDING_SOURCE_SHA256 or host.SUPERVISOR_MAP!=SUPERVISOR_SHA256 or host.EXPECTED_COORDINATION!='649ccda1bdef20bc967ae78f68a992cc8001f4ed7009f78cab5133cc67b29d8f':raise RuntimeError('Host pins do not match canonical PPO guard')
++    if BINDINGS.is_symlink()or not BINDINGS.is_file()or sha(BINDINGS)!=BINDINGS_SHA256:raise RuntimeError('Exact external enabled PPO bindings changed/missing')
++    binding=json.loads(BINDINGS.read_text())
++    for key,value in {'standing_source_freeze_sha256':STANDING_SOURCE_SHA256,'standing1_state_sha256':STANDING_ONE_STATE_SHA256,'standing32_state_sha256':STANDING32_STATE_SHA256,'ready_for_native_dispatch':True}.items():
++        if binding.get(key)!=value:raise RuntimeError('Wrong pending/source/standing PPO binding:'+key)
++    args=SimpleNamespace(source=SOURCE,asset=ASSET,admission=ADMISSION,standing_source=STANDING_SOURCE,standing_one=STANDING_ONE,standing32=STANDING32,bindings=BINDINGS,supervisor_source=SUPERVISOR_SOURCE,output=OUTPUT,isaaclab=Path('/home/orionh/IsaacLab'),host_freeze_sha256=HOST_FREEZE_SHA256)
+     host.require_fresh_output(args);identity=host.verify_inputs(args)
+-    if identity.get('training_allowed') is not False or identity.get('physical_admission') is not False or not valid_hash(identity.get('runtime_binding',{}).get('runtime_tree_sha256')):raise RuntimeError('Only identified canonical coordinate/effort diagnosis is allocated')
+-    if identity.get('schema')!='canonical_native_standing_v1' or identity.get('runtime_binding',{}).get('scope')!='canonical_provisional_native_standing_only' or identity.get('steps')!=8000 or identity.get('num_envs')!=32 or identity.get('controls')!=1000:raise RuntimeError('Wrong diagnostic phase or scope')
+-    if identity.get('standing_one_state_sha256')!=STANDING_ONE_STATE_SHA256 or identity.get('standing_one_inventory_sha256')!=STANDING_ONE_INVENTORY_SHA256:raise RuntimeError('Wrong same-source standing1 admission')
++    if identity.get('schema')!='canonical_direct_drive_ppo_smoke_v1' or identity.get('phase')!='canonical_ppo_smoke' or identity.get('runtime_binding')!={'runtime_tree_sha256':SOURCE_SHA256,'scope':'fresh_canonical_405_408_two_update_smoke'}:raise RuntimeError('Wrong fresh canonical PPO scope')
++    for key,value in {'training_integration_only':True,'quality_admitted':False,'Stage2_complete':False,'fresh_neutral_controls':1000,'fresh_neutral_substeps':8000,'policy_controls':48,'policy_substeps':384,'total_controls':1048,'total_substeps':8384}.items():
++        if identity.get(key)!=value:raise RuntimeError('Wrong fixed PPO allocation:'+key)
++    lineage=identity.get('policy_lineage',{});native=identity.get('native_identity',{})
++    if lineage.get('standing1_state_sha256')!=STANDING_ONE_STATE_SHA256 or lineage.get('standing32_state_sha256')!=STANDING32_STATE_SHA256 or native.get('standing_one_inventory_sha256')!=STANDING_ONE_INVENTORY_SHA256:raise RuntimeError('Wrong exact same-source standing pair')
+     return identity
+ 
+ def main():
+@@ -116,7 +135,7 @@
+     if sha(HOST)!=HOST_SHA256:raise RuntimeError('Wrong reviewed host before import')
+     spec=importlib.util.spec_from_file_location('train_host',HOST)
+     train_host=importlib.util.module_from_spec(spec);spec.loader.exec_module(train_host)
+-    validate_standing_inputs(train_host)
++    validate_ppo_inputs(train_host)
+     verify_previous_owner()
+     coordination = Path('/home/orionh/SPARK_COMPUTE_COORDINATION.md').read_bytes()
+     if hashlib.sha256(coordination).hexdigest() != '649ccda1bdef20bc967ae78f68a992cc8001f4ed7009f78cab5133cc67b29d8f':
+@@ -149,10 +168,10 @@
+             'service_stop_semantics': {name: call(['systemctl','--user','show',name,'-p','KillMode','-p','KillSignal','-p','TimeoutStopUSec']) for name in active_services}}
+         PAUSE.mkdir()
+         record = dict(user_authorized_pause=True, created_unix=time.time(), units=units, unit=UNIT,
+-            output=str(OUTPUT), source=str(SOURCE), admission=str(ADMISSION), standing_one=str(STANDING_ONE), preflight=snapshot,
++            output=str(OUTPUT), source=str(SOURCE), admission=str(ADMISSION), standing_source=str(STANDING_SOURCE), standing_one=str(STANDING_ONE), standing32=str(STANDING32), bindings=str(BINDINGS), preflight=snapshot,
+             coordination_sha256=hashlib.sha256(coordination).hexdigest(),
+             reservation_path=str(RESERVATION), restoration_scope='per_job_snapshot_only', persistent_reservation_release_attempted=False,
+-            reason='Canonical provisional standing32:1000 controls/8000 explicit400Hz steps; exact asset, completed coordinate/effort and same-source standing1 evidence; no policy or broader physical admission',
++            reason='Fresh canonical32 PPO smoke: exact same-source standing1/32,1000 neutral controls then48 policy controls/two updates; fresh actor and no checkpoint input; no walking or quality admission',
+             current_instruction='10 September user requests persistent exclusive HEXAPOD priority; preserve exact other-job progress and resume identities; this per-job guard never releases the reservation or bypasses actual CUDA ownership checks')
+         (PAUSE / 'pause.json').write_text(json.dumps(record, indent=2) + '\n')
+         restorer = PAUSE / 'resume_forecasting.py'
+@@ -188,7 +207,7 @@
+ ''')
+         # Arm recovery before mutating timer state. It stops only this exact
+         # owner unit if needed, then restores only previously active timers.
+-        subprocess.run(['systemd-run', '--user', '--unit=hexapod-canonical-forecast-restore-010', '--on-active=15m',
++        subprocess.run(['systemd-run', '--user', '--unit=hexapod-canonical-forecast-restore-012', '--on-active=15m',
+             '/usr/bin/python3', str(restorer), '--stop-owner'], check=True)
+         active = [name for name, state in units.items() if name.endswith('.timer') and 'ActiveState=active' in state]
+         if active:
+@@ -218,7 +237,7 @@
+     # Known not yet launched: if immutable inputs changed during authorized
+     # pause, restore directly without stopping a unit that has not been started.
+     try:
+-        validate_standing_inputs(train_host)
++        validate_ppo_inputs(train_host)
+         verify_previous_owner()
+     except Exception:
+         subprocess.run(['/usr/bin/python3',str(restorer)],check=True,timeout=120)
+@@ -228,7 +247,7 @@
+             '--property=TimeoutStopSec=180','--property=KillMode=process','--property=Environment=PYTHONDONTWRITEBYTECODE=1',
+             '--property=ExecStopPost=/usr/bin/python3 '+str(restorer),'--property=Environment=PYTHONUNBUFFERED=1',
+             '/usr/bin/python3',str(HOST),'--source',str(SOURCE),'--asset',str(ASSET),'--admission',str(ADMISSION),
+-            '--supervisor-source',str(SUPERVISOR_SOURCE),'--output',str(OUTPUT),'--num-envs','32','--standing-one',str(STANDING_ONE)]
++            '--supervisor-source',str(SUPERVISOR_SOURCE),'--output',str(OUTPUT),'--standing-source',str(STANDING_SOURCE),'--standing-one',str(STANDING_ONE),'--standing32',str(STANDING32),'--bindings',str(BINDINGS)]
+         subprocess.run(cmd,check=True,timeout=30)
+         launched=True
+         (PAUSE/'launch.json').write_text(json.dumps(dict(command=cmd,launched_unix=time.time(),native_source_freeze_sha256=SOURCE_SHA256),indent=2)+'\n')

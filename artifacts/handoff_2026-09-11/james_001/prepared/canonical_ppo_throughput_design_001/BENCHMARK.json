@@ -1,0 +1,152 @@
+{
+  "schema": "canonical_contact_record_CPU_microbenchmark_v1",
+  "native_executed": false,
+  "runtime_adopted": false,
+  "machine": "macOS-15.6-arm64-arm-64bit",
+  "python": "3.9.6",
+  "processor": "arm",
+  "scope": "In-memory serialization of already-built dictionaries. Includes encoding validations/compression, excludes native/PCIe transfers/classification/dict creation/geometry/disk writes. Local machine, not Spark.",
+  "inputs": {
+    "artifacts/mkii_updated_2026-09-10/native_standing_004/terminal/run/standing/contacts.jsonl.gz": {
+      "file_sha256": "0e93e220eddd428d94125350ba3f956180829fd45638447280ec985789f84f7c",
+      "selection": "First128 complete one-env frames, no full-file decompression retained."
+    },
+    "artifacts/mkii_updated_2026-09-10/standing32_failure_analysis_001/actual002/analysis.json": {
+      "file_sha256": "194e926651c3ac8f3c0aff6ebaef44cdb4ca39053b75a9898b51fe8259055870",
+      "selection": "All218 targeted support-event sequence excerpts; only selected env/body patches, NOT complete32-env frames."
+    }
+  },
+  "tests": {
+    "signed_zero_and_shape_present": true,
+    "shape_absent_and_body_label": true,
+    "unknown_field_rejected": true,
+    "nonfinite_rejected": true,
+    "truncated_block_rejected": true
+  },
+  "one_env_first128": {
+    "rows": 128,
+    "patches": 8690,
+    "inactive_zero_normal_records": 5715,
+    "byte_exact_reconstructed_current_JSON": true,
+    "ordered_source_JSON_sha256": "4b011f6bec10fb750729e832633cee08d89b2262c2c539f2b592be161aab10a5",
+    "variants": {
+      "current_json": {
+        "bytes": 3241695,
+        "sha256": "4b011f6bec10fb750729e832633cee08d89b2262c2c539f2b592be161aab10a5",
+        "encoding": {
+          "median_s": 0.042407874999999984,
+          "min_s": 0.03693895800000002,
+          "max_s": 0.05542387500000001,
+          "repetitions": 7
+        },
+        "decoding": {
+          "median_s": 0.03104345899999994,
+          "min_s": 0.02871254099999998,
+          "max_s": 0.069549042,
+          "repetitions": 7
+        }
+      },
+      "current_json_zlib1": {
+        "bytes": 325602,
+        "sha256": "95ac880dcca349a0a0408231ed8cbddf5715c46ef6b53c2860f0cd4eedcb245f",
+        "encoding": {
+          "median_s": 0.05053695800000002,
+          "min_s": 0.045209374999999996,
+          "max_s": 0.06112437500000012,
+          "repetitions": 7
+        }
+      },
+      "binary": {
+        "bytes": 888012,
+        "sha256": "00edcc51666c7bffac4e521ed0f7a74d88049e7c7ca883466a2e9959dec9f9e4",
+        "encoding": {
+          "median_s": 0.017845249999999924,
+          "min_s": 0.014706665999999924,
+          "max_s": 0.019850042000000068,
+          "repetitions": 7
+        },
+        "decoding": {
+          "median_s": 0.01899866699999997,
+          "min_s": 0.014512708999999901,
+          "max_s": 0.10934983300000001,
+          "repetitions": 7
+        }
+      },
+      "binary_zlib1": {
+        "bytes": 167391,
+        "sha256": "f004d4dbb848e63ccc4b4dfc8cd48b776ce150ac8ac3b149ba44146473d8cc2f",
+        "encoding": {
+          "median_s": 0.02087537500000014,
+          "min_s": 0.018505292000000173,
+          "max_s": 0.02751749999999986,
+          "repetitions": 7
+        }
+      }
+    },
+    "binary_zlib1_size_ratio": 0.05163687515327629,
+    "binary_zlib1_encode_speed_ratio": 2.0314784764345406
+  },
+  "actual32_selected218": {
+    "rows": 218,
+    "patches": 10085,
+    "inactive_zero_normal_records": 9472,
+    "byte_exact_reconstructed_current_JSON": true,
+    "ordered_source_JSON_sha256": "739ea1d473b1b2e5273930f5fd173d48a24caf8a4cda26816675b500bf955f21",
+    "variants": {
+      "current_json": {
+        "bytes": 3574380,
+        "sha256": "739ea1d473b1b2e5273930f5fd173d48a24caf8a4cda26816675b500bf955f21",
+        "encoding": {
+          "median_s": 0.04837875000000036,
+          "min_s": 0.04681462500000011,
+          "max_s": 0.055426874999999765,
+          "repetitions": 7
+        },
+        "decoding": {
+          "median_s": 0.060791250000000296,
+          "min_s": 0.05499916599999999,
+          "max_s": 0.11594841700000025,
+          "repetitions": 7
+        }
+      },
+      "current_json_zlib1": {
+        "bytes": 127364,
+        "sha256": "53d333f9ccffbdddb3c688346a62e12de108a69f5b02e09596e2930b6661a3be",
+        "encoding": {
+          "median_s": 0.06363275000000002,
+          "min_s": 0.05415045899999971,
+          "max_s": 0.08975624999999976,
+          "repetitions": 7
+        }
+      },
+      "binary": {
+        "bytes": 1032029,
+        "sha256": "7741d9907fec14e2c6782c8087fe3ce68820c5742d602e73d6dfb60a2a37a779",
+        "encoding": {
+          "median_s": 0.028641958000000134,
+          "min_s": 0.024155458999999713,
+          "max_s": 0.03755129199999985,
+          "repetitions": 7
+        },
+        "decoding": {
+          "median_s": 0.03720445799999972,
+          "min_s": 0.03090654100000023,
+          "max_s": 0.1171773749999998,
+          "repetitions": 7
+        }
+      },
+      "binary_zlib1": {
+        "bytes": 65497,
+        "sha256": "245b3fd956d4a18f04d181aae94b74645177d7a5f9153bb908536a1f63372f3c",
+        "encoding": {
+          "median_s": 0.038594207999999686,
+          "min_s": 0.03328437500000003,
+          "max_s": 0.05286520800000005,
+          "repetitions": 7
+        }
+      }
+    },
+    "binary_zlib1_size_ratio": 0.01832401703232449,
+    "binary_zlib1_encode_speed_ratio": 1.2535235857152647
+  }
+}

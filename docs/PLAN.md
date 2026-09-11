@@ -1,5 +1,7 @@
 # Hexapod autonomy: development plan
 
+> **11 September 2026 — paused for handoff to James.** No new research, validation, training or recording is authorized by the older execution sequences below while paused. The roadmap and quality gates are preserved. Read [James’s handoff](JAMES_HANDOFF.md) and [STATUS](../STATUS.md); resume only under James’s or the user’s explicit direction.
+
 > **10 September 2026 — approved ground-truth training model:** the user visually approved the detailed direct-drive robot and requires its motor-weight-corrected URDF for **all future training**. [Canonical selection](../robot/active_model.json) and [full CAD/limit report](UPDATED_CAD_IMPORT.md) are authoritative. Do not launch further simplified C-study/mock or historical four-bar training. First prepare the new model-bound runtime, native SDF cooking and physical admission. Earlier campaign sequences below retain their dated lineage for reproduction; old checkpoints/task IDs are unchanged. Stage 2 smoothness and quiet-standing gates remain required.
 
 
@@ -617,3 +619,8 @@ These are versioned operational controls. They do not change the admitted detail
 The [uninterrupted source005 batch](../artifacts/mkii_updated_2026-09-10/native_standing32_rejected_005/README.md) separates the remaining standing rejection from the earlier compute interruptions. Preserve its original support and quiet verdicts. Before changing solver settings again, compare the saved detailed patch forces with the same-step floor-force matrix, link velocities, actual joint-angle increments and raw SDK rates. Map sensor order to articulation order explicitly and retain the exact floating-point aggregation used by the classifier.
 
 Use a bounded, read-only CPU replay on Spark's retained traces. Inspect each failed support sample and its adjacent steps, with buffer occupancy across the complete acquisition. Reconstructed record counts cannot prove completeness of native buffers whose original count/start arrays were not saved. Agreement or disagreement between channels informs the next experiment; neither waives a support or quiet gate. Matching-source 32-replica admission still precedes the prepared PPO integration.
+
+
+### 11 September 2026 — pause autonomous execution for James’s handoff
+
+The latest user instruction supersedes the earlier unattended continuation and acceleration directives. Preserve the full roadmap and evidence while stopping new research and GPU allocations. Pause the Codex continuation, retain external-job reservation controls, publish previously local preparations as clearly labeled snapshots, and provide James with a single starting guide. Pausing is not Stage 2/3 completion, native admission or a release of competing compute. A future resume must review the canonical model and actual rejection before selecting a new bounded experiment.

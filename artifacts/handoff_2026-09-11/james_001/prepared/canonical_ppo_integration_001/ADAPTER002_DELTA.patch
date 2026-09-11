@@ -1,0 +1,11 @@
+--- Fable-original/adapter.py
++++ canonical-held-target-q/adapter.py
+@@ -341,7 +341,7 @@
+             (q - self._neutral) / s.joint_position_error,
+             qd / s.joint_rate,
+             act / s.previous_action,
+-            (tgt - self._neutral) / s.target_error,
++            (tgt - q) / s.target_error,
+         ], axis=1)
+ 
+     def reset_rows(self, rows, inputs: ActorFrameInputs) -> None:
