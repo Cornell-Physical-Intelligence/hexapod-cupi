@@ -67,9 +67,21 @@ Only explicitly selected public files enter `site/dist`; generated output is
 ignored by Git. Verify the deployed revision after publishing the integrated
 change. Preserve the existing GitHub Pages destination and evidence permissions.
 
-Lead with the mission, current evidence boundary and four roadmap markers.
-Expose ownership, dependencies, acceptance and the open definition on each
-marker. Put historical research, source diagrams and detailed media underneath.
+Lead with a concise mission and four visual checkpoint cards. Keep actual
+walking videos visible beside their stage and scope, the interactive system
+dependency graph expanded, and the approved CAD video directly accessible.
+Give planned outcomes clearly labelled conceptual illustrations. Selectable
+nodes expose inputs, outputs, existing source and the relevant qualification.
+Show approved increment definitions, including M1, underneath their parent
+capability without treating approved scope as accepted implementation.
+Keep ownership, acceptance and long evidence notes in optional detail panels.
+Historical recordings and figures remain visible in a separate gallery.
 Keep a readable white scientific-poster layout, restrained rules, meaningful
 labels, keyboard-accessible disclosures, mobile layout and reduced-motion support.
 Never animate invented robot behavior as experimental evidence.
+
+Write for a teammate opening the page for the first time. Name the robot model,
+the behavior tested, the measured result and the work remaining. Explain technical
+terms where they appear. Avoid internal shorthand such as “canonical admission”,
+“causal envelope” and “qualification boundary”. Keep videos and the system graph
+visible; use expandable sections for detailed test conditions and source links.

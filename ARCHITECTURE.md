@@ -1,8 +1,16 @@
 # Hexapod architecture
 
-An operator draws a region. The hexapod covers it while holding a steady deck
-for useful sensor or scientific measurements, then exports the measurements
-and an honest account of coverage and gaps.
+An operator draws a region. The hexapod surveys it by travelling between
+measurement locations, stopping and holding a steady deck for useful sensor or
+scientific measurements, then exporting the measurements and an honest account
+of coverage and gaps. Stop-and-measure acquisition satisfies the final mission;
+useful acquisition while moving is optional. The first completed survey
+deliverable is a 3D terrain map in local site coordinates. The operator confirms
+the survey boundary in that same local map. Geographic alignment is optional
+for this first delivery; the local origin and alignment procedure remain to be defined.
+The finished 3D terrain map may be generated after the survey from recorded
+measurements and poses. Localization remains available during navigation.
+The reconstruction compute location and export representation remain open.
 
 This document owns requirements and system boundaries. [The progress page](https://cornell-physical-intelligence.github.io/hexapod-cupi/#roadmap)
 and generated [STATUS.md](STATUS.md) show evidence against these requirements.
@@ -16,12 +24,12 @@ repository cleanup. Later implementation choices remain open until needed.
 | --- | --- |
 | R-01 | Accept an operator-drawn survey polygon and explicit exclusions, with a reviewed route before motion. |
 | R-02 | Work within a demonstrated ground, slope, load and operating-duration envelope. Retain flat-ground behavior when adding terrain. |
-| R-03 | Locate the robot relative to the approved map and expose uncertainty. The baseline has no operational RTK base station. |
-| R-04 | Learn useful omnidirectional locomotion: signed translation, both yaw directions, combinations, transitions and quiet stops, with a steady payload deck. |
+| R-03 | Locate the robot and approved survey boundary in the same local site map and expose uncertainty. Geographic registration is optional for the first delivery. The baseline has no operational RTK base station. |
+| R-04 | Learn useful omnidirectional locomotion: signed translation, both yaw directions, combinations, transitions and quiet stops. Hold a steady payload deck during measurement acquisition. |
 | R-05 | Keep the full moving footprint inside the approved region or entry corridor and outside exclusions, including localization and stopping uncertainty. |
 | R-06 | Support start, pause, resume, abort and hardware emergency stop. Expired control authority or critical sensing failure must stop mission execution. |
 | R-07 | Associate measurements with acquisition time, pose, calibration and quality. Credit coverage only from valid measurements. |
-| R-08 | Export complete or partial measurements, covered and missed areas, and failure reasons. |
+| R-08 | Deliver a 3D terrain map in local site coordinates for the first completed survey. Export complete or partial measurements, covered and missed areas, and failure reasons. |
 | R-09 | Run control and recording onboard; show stale telemetry and qualify operator-link behavior under loss and reconnection. |
 | R-10 | Use the approved 18-RS05 assembly and owned Jetson Orin Nano within measured payload, power, thermal and compute limits. Mid-360 and D455 are available. |
 | R-11 | Preserve reproducible releases, model-specific contracts, unchanged historical acceptance gates and failed-attempt evidence. |
@@ -30,9 +38,44 @@ repository cleanup. Later implementation choices remain open until needed.
 [DAR.png](DAR.png) retains the original mission slide. Terrestrial LiDAR is the
 initial survey payload; Cornell Geo Data owns acquisition and processing with
 the survey lead. Navigation sensing and survey acquisition have separate roles.
-A travelled path alone does not establish useful coverage. A stationary or
-stop-and-measure test must disclose its scope when compared with the moving-deck
-objective.
+A travelled path alone does not establish useful coverage. James confirmed
+that surveying a drawn region is the final mission and that stopping at
+measurement locations satisfies it. Measurement quality and deck-stability
+limits during acquisition remain to be defined with the payload owner. Map
+representation, accuracy, resolution, local origin and boundary-alignment method
+remain open decisions. Local coordinates do not waive accuracy or boundary
+registration requirements. Existing
+locomotion acceptance gates retain their historical scope and thresholds.
+
+The first survey test uses a level, hard-surfaced, obstacle-free course.
+Test-area dimensions and quantitative surface tolerances remain to be defined.
+Slopes and obstacle handling are later increments. This initial test setting
+does not define the final terrain envelope.
+
+The lead's [terrain/sensing plan](artifacts/project_review_2026-09-04/TERRAIN_AND_SENSING_PLAN_2026-09-09.md)
+uses the existing Mid-360 and its IMU for surrounding geometry and navigation
+odometry, with D455 forward depth added separately. It proposes LiDAR-inertial
+odometry before comparing camera fusion. The [earlier roadmap](artifacts/project_review_2026-09-04/ROADMAP.md)
+leaves the specific survey LiDAR unselected and keeps survey acquisition
+independent of navigation. James selected the existing **Livox Mid-360 for the
+first mapping test**. Development starts in simulation: the physical hexapod is
+unbuilt and the Mid-360 is not mounted. The agreed first mapping milestone,
+M1 in §6, establishes the simulated capture/export path. Real sensor accuracy
+and physical mounting require later measurements. D455 integration is deferred
+for this test. This sensor selection applies
+to the first test; final survey-payload qualification and any shared navigation
+failure behavior require separate evidence and decisions.
+
+The planned first hardware bridge is an instrumented single-leg test stand with
+force sensing and an encoder, following the lead's [stand design](artifacts/project_review_2026-09-04/LEG_TEST_STAND.md)
+and [hardware reference](docs/LEG_STAND_HARDWARE.md). Match the actual fixture in
+simulation, synchronize commands and measured force/position, then fit model
+parameters and validate them on separate measurements. Use the approved
+direct-drive leg; earlier four-bar assumptions and masses in the historical
+stand proposal require reconciliation. Fixture constraints remain part of the
+stand model. Single-leg agreement does not establish full-body balance or
+six-leg load redistribution. Physical sensor and full-robot tests follow their
+actual assembly readiness; the design review does not launch experiments.
 
 A single robot and one controlling operator form the initial system. Multi-robot
 coordination, self-righting, autonomous repair and unattended operation require
@@ -159,10 +202,56 @@ program. Each will acquire small approved increments as we define them.
 | `stage3` | Qualified terrain and causal perception while retaining admitted flat behavior. | Small declared terrain/sensing envelope, independent references and failure behavior. |
 | `mission` | Cover an approved region while collecting useful steady-deck measurements. | Smallest end-to-end scenario, actual backend, containment, data quality, valid coverage and readable partial/full export. |
 
-No implementation schedule or next experiment is assigned by this cleanup.
-Markers with missing definitions show that fact on Pages. A capability can remain
-blocked while a research issue closes with a useful failed result. Acceptance
-requires an explicit scope and human review of evidence for that scope.
+### M1: stationary simulated scan export and reload
+
+James approved this as the first mapping milestone. Reuse the existing
+[approximate Mid-360 model](isaaclab/hexapod_phase3/mid360_pattern.py) in a
+sensor-only scene with a fixed sensor, known floor and calibration wall. Export
+one scan's points and sensor pose, reopen it independently, and measure geometric
+error against the scene. The existing [sensor check](isaaclab/phase3_sensor_smoke.py)
+checks returns/timing and prints a report; scan export/reload is the missing step.
+The wall is a calibration reference, not an obstacle-traversal requirement.
+
+This software milestone can proceed independently of robot standing admission.
+Robot-body occlusion, moving acquisition and physical sensing are later scopes.
+James approved this fixed scene for both runs. Use local +X left, -Y forward,
++Z up, with distances in metres:
+
+| Fixture item | Frozen setting |
+| --- | --- |
+| Ground | Flat plane at z = 0. |
+| Calibration wall | Axis-aligned cuboid, dimensions (X, Y, Z) = (0.80, 0.08, 0.50), centre (0, -1.00, 0.25). |
+| Sensor optical origin | Fixed at (0, 0, 0.25), level; retain the lead's -90-degree yaw so sensor +X points forward along local -Y. |
+| Scan | One 20,000-ray scan in each run, retaining the existing field of view and range limits. |
+| Seeds | Ray pattern: 360. Sensor noise/transport: 20260824. |
+
+The 0.25 m optical height is a test-fixture choice. Physical mounting remains
+separate. These fixed seeds identify this regression fixture; they do not
+establish performance across randomized runs.
+
+James approved the following M1 acceptance limits:
+
+| Check | Pass condition |
+| --- | --- |
+| Save/reopen, both runs | Points, validity flags and sensor pose are preserved exactly. |
+| Noise-free geometry | Every expected floor/wall intersection is reproduced within 0.001 m (1 mm). Disable modeled measurement and ray-direction perturbations. |
+| Configured-noise geometry | At least 95% of expected floor/wall intersections are returned within 0.07 m (7 cm) of their correct intersections. Missing hits count against this denominator. Report false returns separately. |
+
+Retain the lead's existing noise configuration for the noisy run, including
+0.030 m range-noise standard deviation and 0.001 m range quantization. Identify
+the two runs separately and preserve raw observations. Freeze the scene and
+random seed before execution; do not tune noise or thresholds to pass.
+
+Scope, fixture and numerical limits are approved. Owner/reviewer and the issue
+remain to be assigned before the packet is ready. Implementation must record
+the exact source/configuration and runtime used for each result.
+These simulation checks do not establish real sensor or final survey accuracy.
+Scope approval establishes no completed capability and does not resume research.
+
+Later increments are defined one at a time. Markers with missing definitions show
+that fact on Pages. A capability can remain blocked while a research issue closes
+with a useful failed result. Acceptance requires an explicit scope and human
+review of evidence for that scope.
 
 ## 7. Team workflow
 

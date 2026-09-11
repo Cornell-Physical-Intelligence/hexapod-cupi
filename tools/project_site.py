@@ -73,6 +73,8 @@ def checkpoint_media(project, receipt):
 def registry():
     p = read(SITE / 'project.json')
     require(p['schema_version'] == 2, 'Unsupported progress schema')
+    require(isinstance(p.get('summary_tags'), list) and p['summary_tags']
+            and all(nonempty(t) for t in p['summary_tags']), 'Mission tags are required')
     for key in ['status_source', 'research_source']:
         reference(p[key])
     for item in p['nodes'] + p['milestones']:
@@ -89,6 +91,10 @@ def registry():
         require(item['caption'] and item['controller'], 'Media must identify the actual content')
         reference(item['evidence'])
     require(len({m['id'] for m in p['media']}) == len(p['media']), 'Repeated media ID')
+    require(all(n.get('milestone_id') in {m['id'] for m in p['milestones']} for n in p['nodes']),
+            'System node needs a known roadmap marker')
+    require(all(m.get('media_id') is None or m['media_id'] in {v['id'] for v in p['media']}
+                for m in p['milestones']), 'Unknown roadmap media')
     for item in p['papers']:
         reference(item['url'])
     receipt = read(reference(p['checkpoint']['receipt']))
@@ -136,6 +142,7 @@ def validate_progress(project):
     require(ids and len(ids) == len(set(ids)), 'Repeated or empty roadmap IDs')
     require(all(re.fullmatch('[a-z][a-z0-9_-]*', i) for i in ids), 'Invalid roadmap ID')
     states = {m['id']: m['status'] for m in markers}
+    definitions = set()
     for marker in markers:
         require(marker['status'] in PROGRESS_STATES, 'Unknown capability state')
         require(all(nonempty(marker[k]) for k in ('title', 'description', 'gate', 'backend', 'owner', 'question')), 'Incomplete roadmap meaning')
@@ -143,6 +150,15 @@ def validate_progress(project):
         require(isinstance(deps, list) and len(deps) == len(set(deps)) and all(d in ids for d in deps), 'Unknown or repeated dependency')
         require(marker['requirements'] and all(r in requirements for r in marker['requirements']), 'Unknown architecture requirement')
         reference(marker['source'])
+        definition = marker.get('definition')
+        if definition is not None:
+            require(isinstance(definition, dict) and all(nonempty(definition.get(k)) for k in
+                    ('id', 'title', 'by', 'summary', 'fixture')), 'Incomplete approved definition')
+            require(re.fullmatch('[A-Za-z][A-Za-z0-9_-]*', definition['id'])
+                    and definition['id'] not in definitions, 'Invalid or repeated definition ID')
+            definitions.add(definition['id'])
+            require(isinstance(definition.get('criteria'), list) and definition['criteria']
+                    and all(nonempty(c) for c in definition['criteria']), 'Definition needs acceptance criteria')
         if marker['status'] == 'blocked':
             require(nonempty(marker['blocker']), 'Blocked capability needs a reason')
         step = marker['next_step']
@@ -209,9 +225,17 @@ def status_text(project):
                       f"[Evidence]({marker['source']}) · Architecture: {', '.join(marker['requirements'])}.", ''])
         if marker['acceptance']:
             lines.extend([f"Accepted scope: {marker['acceptance']['scope']}", ''])
+        definition = marker.get('definition')
+        if definition:
+            lines.extend([f"Defined increment: **{definition['id']} — {definition['title']}**. Scope approved by {definition['by']}.", '',
+                          definition['summary'], '', f"Fixture: {definition['fixture']}", ''])
+            lines.extend(f"- {criterion}" for criterion in definition['criteria'])
+            lines.append('')
         if marker['next_step']:
             step = marker['next_step']
             lines.extend([f"Next defined step: [{step['outcome']}]({step['issue']}).", ''])
+        elif definition:
+            lines.extend([f"Assignment pending. {marker['question']}", ''])
         else:
             lines.extend([f"Next step: **not defined**. {marker['question']}", ''])
     lines.extend(['## Recorded attempts', ''])

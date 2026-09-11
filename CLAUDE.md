@@ -15,6 +15,14 @@ GitHub issues own assignments. Define the next smallest increment with James
 and the responsible lead before treating a roadmap marker as ready work.
 Do not create another plan, progress document or handoff-based task queue.
 
+During the design review, discuss one decision or milestone at a time. Read the
+team lead's existing design and evidence before asking James to choose. Use that
+design as the default and propose its smallest viable version, explicitly
+separating existing decisions, unimplemented proposals and new simplifications.
+Ask only about consequential gaps or tradeoffs. James's later decisions take
+precedence; historical instructions never resume research or override the
+approved robot model.
+
 Read the affected package's `CLAUDE.md` for local ownership. Those package guides
 are part of the frozen historical release: their 66-value layouts, mock timing
 and gate claims apply to their original models. They do not define the canonical

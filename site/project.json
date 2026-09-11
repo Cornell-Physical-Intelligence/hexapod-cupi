@@ -1,12 +1,12 @@
 {
   "schema_version": 2,
-  "title": "HEXAPOD \u00b7 Live research poster",
+  "title": "Hexapod · Development roadmap",
   "repository": "Cornell-Physical-Intelligence/hexapod-cupi",
   "mission": "Hexapod MKII: from walking to autonomous surveying",
-  "description": "Progress against the architecture. Evidence is recorded; the team will define the smallest next increments after the repository cleanup.",
+  "description": "Build a hexapod that surveys an area drawn on a map and returns a 3D map of the ground. It can stop to take measurements and process the finished map afterward.",
   "status_source": "STATUS.md",
   "geometry": {
-    "label": "Canonical detailed direct-drive CAD",
+    "label": "Approved detailed robot model",
     "coxa_joint_centers_mm": 49.0,
     "femur_hip_to_knee_mm": 73.502,
     "tibia_knee_to_distal_reference_mm": 130.0,
@@ -14,12 +14,12 @@
     "raw_cad_mass_kg": 5.147603654203134,
     "motors": 18,
     "source": "docs/UPDATED_CAD_IMPORT.md",
-    "note": "User-approved ground truth for all future training. All 1,753 parts and 59 meshes are retained. Nominal motor weight overrides are included; added inertia remains an estimate. Per-leg yaw has a 0.5 mm standoff gap; wider pitch travel permits coupled collisions. Historical videos/checkpoints use their original simplified geometry. Native physics remains unqualified."
+    "note": "Model mass includes the corrected motor weights. Added motor inertia is estimated. The 0.5 mm yaw-joint gap and possible collisions at combined joint limits still need physical checks. Earlier walking videos use simplified models."
   },
   "checkpoint": {
     "receipt": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/train/training_receipt.json",
     "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md",
-    "label": "Historical C-study PPO \u00b7 500 updates",
+    "label": "Historical C-study PPO · 500 updates",
     "qualification": "Unqualified historical gait; 0/48 quiet trials pass. New detailed CAD requires native admission.",
     "video_matches": true,
     "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/train/policy/final.pt"
@@ -31,150 +31,150 @@
   "media": [
     {
       "id": "benchmark_01",
-      "title": "Benchmark 1 \u2014 user-selected forward gait",
+      "title": "Forward-walking reference",
       "type": "video",
       "role": "benchmark",
       "path": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/rollout.mp4",
       "sha256": "2c65b1f158379ab62c65fec3dd831ca91cf137b4eaa309ae63a7ff65ea7e1513",
-      "caption": "User-selected 300-update PPO residual demo, forward only; requested torque gate failed. Not terrain/hardware qualification. Playback is 1\u00d7 real time.",
+      "caption": "Earlier robot model, forward walking only. James selected this gait as the visual reference. The motor-torque test failed. Real-time playback.",
       "controller": "5ecbe978d659413dc050fec93b0e211a3eadf6ce1c807790d87c14044ff245a2",
       "evidence": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md",
       "poster_id": "benchmark_01_poster"
     },
     {
       "id": "benchmark_01_poster",
-      "title": "Benchmark 1 \u2014 user-selected forward gait frame",
+      "title": "Forward-walking reference — preview frame",
       "type": "image",
       "role": "video_poster",
       "path": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/frame_05.png",
       "sha256": "d3694c52e5f13c60fabc206f25490ac4431392cf94e704537f493ec706ad3644",
-      "caption": "Actual frame from Benchmark 1 \u2014 user-selected forward gait",
+      "caption": "Frame from Forward-walking reference.",
       "controller": "5ecbe978d659413dc050fec93b0e211a3eadf6ce1c807790d87c14044ff245a2",
       "evidence": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md"
     },
     {
       "id": "direct315_1971",
-      "title": "Historical direct315 five-path PPO demo",
+      "title": "Earlier controller following five paths",
       "type": "video",
       "role": "historical_capability_demo",
       "path": "artifacts/omni_flat_2026-09-09/omni_preview_001/rollout.mp4",
       "sha256": "37b449194dd79f2c7d65106ca1deb97ffe4f401a967c6ff1f54cf22ad5f3849c",
-      "caption": "Original1971 checkpoint with ideal simulator localization in the outer pose follower; not latest weights or Stage2 qualification. Playback is 1\u00d7 real time.",
+      "caption": "Earlier robot model following five paths using exact position from the simulator. This bypasses sensor-based position estimation. Real-time playback.",
       "controller": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
       "evidence": "artifacts/omni_flat_2026-09-09/omni_preview_001/recording_audit.json",
       "poster_id": "direct315_1971_poster"
     },
     {
       "id": "direct315_1971_poster",
-      "title": "Historical direct315 five-path PPO demo frame",
+      "title": "Earlier controller following five paths — preview frame",
       "type": "image",
       "role": "video_poster",
       "path": "artifacts/omni_flat_2026-09-09/omni_preview_001/frame_33.png",
       "sha256": "bd6c1a98026fe690554d052dc9f9ae7523bcf50d2ae8e7e1eb816dfbd5c86f66",
-      "caption": "Actual frame from Historical direct315 five-path PPO demo",
+      "caption": "Frame from Earlier controller following five paths.",
       "controller": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
       "evidence": "artifacts/omni_flat_2026-09-09/omni_preview_001/recording_audit.json"
     },
     {
       "id": "geometry_sweep",
-      "title": "Historical actual49-geometry Isaac scene",
+      "title": "Comparison of 49 robot geometries",
       "type": "image",
       "role": "research_image",
       "path": "artifacts/length_study_2026-09-09/isaac_length_study.png",
       "sha256": "14a25cbdf22c5ffaacde9d9955402c59b1c3804f7f4b648144531bffbe748898",
-      "caption": "Actual geometry comparison, not49 walking policies.",
+      "caption": "49 simulated geometry variants shown together; this is a model comparison.",
       "controller": "No policy qualification; study figure",
       "evidence": "robot/hexapod_mkii_length_study/README.md"
     },
     {
       "id": "sensor_mounts",
-      "title": "Proposed sensor mount coverage study",
+      "title": "Proposed sensor positions and coverage",
       "type": "image",
       "role": "research_image",
       "path": "artifacts/sensor_mount_study_2026-09-09/exact_mount_comparison.png",
       "sha256": "37470e328cdab33f9ea74ec6ba74c23032995830542aac409fb9e17721418fc5",
-      "caption": "Hypothetical mounts and geometric coverage; no hardware qualification.",
+      "caption": "Proposed sensor placements and viewing coverage. The sensors have not been mounted or tested on the physical robot.",
       "controller": "No policy qualification; study figure",
       "evidence": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/e6fc64444ee6b02c973e454ebe285843dcbe7fc2/docs/PLAN.md"
     },
     {
       "id": "rigid_toe_proposal",
-      "title": "Proposed rigid toe for CAD",
+      "title": "Proposed rounded toe",
       "type": "image",
       "role": "research_image",
       "path": "artifacts/foot_design_2026-09-10/rigid_toe_proposal_001/toe_sketch.png",
       "sha256": "ef911d3950bd2e56bcdb0210b8846cd4dfcee1cc10ee559d85462e7cc28ce768",
-      "caption": "Provisional spherical contact-cap sketch. Keep a substantial attachment; a narrow neck is not required. Diameter and radius need the actual CAD dimensions and contact-angle check. Current training assets are unchanged.",
+      "caption": "Early toe-shape proposal. Dimensions and attachment design still need checking against the robot CAD.",
       "controller": "Engineering schematic; no experiment or policy depicted",
       "evidence": "artifacts/foot_design_2026-09-10/rigid_toe_proposal_001/README.md"
     },
     {
       "id": "caps50_preview",
-      "title": "CAPS 50-update PPO pilot",
+      "title": "Earlier controller after 50 training updates",
       "type": "video",
       "role": "historical_capability_demo",
       "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_preview_001/terminal/run/recording/rollout.mp4",
       "sha256": "b2ccdd62821e58c3d8bfd62150b9272d4d3c47c7d8020dea0df2e8571550547d",
-      "caption": "Actual 38 s PPO recording at 1\u00d7 speed. Quiet standing fails. Video is complete; the job failed afterward on a missing final audit receipt.",
+      "caption": "38-second simulation recording at real-time speed. The controller fails the standing test. Recording completed; the job later failed because its final audit record was missing.",
       "controller": "ca0545760f81b8b8fb0cafde4b1ef89bfa5d8765a8b43b578e451f648a954415",
       "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_preview_001/README.md",
       "poster_id": "caps50_preview_poster"
     },
     {
       "id": "caps50_preview_poster",
-      "title": "Actual CAPS pilot frame",
+      "title": "Earlier controller after 50 training updates — preview frame",
       "type": "image",
       "role": "video_poster",
       "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_preview_001/terminal/review/frame_07.png",
       "sha256": "306f612d535d76476720e03784342ac8d0c260efde27518117227ff4e1594f6d",
-      "caption": "Actual frame at 7 seconds; unqualified CAPS pilot.",
+      "caption": "Frame from Earlier controller after 50 training updates.",
       "controller": "ca0545760f81b8b8fb0cafde4b1ef89bfa5d8765a8b43b578e451f648a954415",
       "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_preview_001/README.md"
     },
     {
       "id": "caps500_preview",
-      "title": "Historical C-study PPO after500 updates",
+      "title": "Earlier controller after 500 training updates",
       "type": "video",
       "role": "latest_policy_recording",
       "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/terminal/run/recording/rollout.mp4",
       "sha256": "1cd2dab2ac5d4c981f4528017febfed0287ac0cdb9e19e2d34cc52704e7f4745",
-      "caption": "Actual38s recording at1\u00d7 speed: forward, strafe, arc and stop requests. Quiet standing still fails. This is the historical C-study model; future training uses the approved detailed CAD.",
+      "caption": "38-second simulation recording: forward, sideways, curved motion and stop commands. Stopping fails. This uses an earlier robot model. Real-time playback.",
       "controller": "c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf",
       "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/README.md",
       "poster_id": "caps500_preview_poster"
     },
     {
       "id": "caps500_preview_poster",
-      "title": "Actual historical CAPS500 frame",
+      "title": "Earlier controller after 500 training updates — preview frame",
       "type": "image",
       "role": "video_poster",
       "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/terminal/review/frame_07.png",
       "sha256": "81a7652c30061697330f059dea2a230af8a9492cb3f4d695c01ba732c7ea63d1",
-      "caption": "Actual7-second frame; full historical C-study robot and command arrows. Ground text has overlapping render strokes.",
+      "caption": "Frame from Earlier controller after 500 training updates.",
       "controller": "c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf",
       "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/README.md"
     },
     {
       "id": "canonical_detailed_cad_preview",
-      "title": "Detailed robot \u2014 CAD inspection video",
+      "title": "Approved robot model: CAD inspection",
       "type": "video",
       "role": "cad_preview",
       "path": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/hexapod_detailed_cad_showcase_final.mp4",
       "sha256": "d6096b2e0cb32b5527697b8c4fa08e590a77b5e44f14887b913626ca143feb20",
-      "caption": "24-second 1080p inspection of the approved detailed assembly, with a camera orbit and modest joint articulation. Kinematic preview; no learned policy or simulated contact dynamics.",
-      "controller": "No controller \u2014 prescribed CAD joint articulation",
+      "caption": "24-second view of the approved assembly with joint movement. This is a CAD animation; it does not simulate balance, foot contact or a walking controller.",
+      "controller": "No controller — prescribed CAD joint articulation",
       "evidence": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/README.md",
       "poster_id": "canonical_detailed_cad_poster"
     },
     {
       "id": "canonical_detailed_cad_poster",
-      "title": "Detailed robot \u2014 CAD preview frame",
+      "title": "Approved robot model: CAD inspection — preview frame",
       "type": "image",
       "role": "video_poster",
       "path": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/poster_final.png",
       "sha256": "3edfa8cf7282445312b3c2a6beb96694cc6310835689f71c10ae8ab9ca01d78a",
-      "caption": "Actual frame from the detailed CAD inspection video.",
-      "controller": "No controller \u2014 prescribed CAD joint articulation",
+      "caption": "Frame from Approved robot model: CAD inspection.",
+      "controller": "No controller — prescribed CAD joint articulation",
       "evidence": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/README.md"
     }
   ],
@@ -182,146 +182,158 @@
     {
       "id": "boundary",
       "title": "Draw the survey area",
-      "label": "Operator goal",
-      "state": "implemented",
+      "label": "Interface to build",
+      "state": "planned",
       "column": 0,
       "row": 0,
-      "meaning": "An operator chooses the area the robot should cover.",
-      "input": "Map coordinates and a boundary",
-      "output": "A bounded survey request",
-      "source": "ARCHITECTURE.md"
+      "meaning": "The operator draws the boundary on a map. The boundary and robot position use coordinates relative to the same test site.",
+      "input": "A map and the operator’s boundary",
+      "output": "The area to survey",
+      "source": "ARCHITECTURE.md",
+      "milestone_id": "mission"
     },
     {
       "id": "coverage",
-      "title": "Plan the coverage",
-      "label": "Where to go",
+      "title": "Plan the survey route",
+      "label": "Planner to build",
       "state": "planned",
       "column": 1,
       "row": 0,
-      "meaning": "Divide the area into reachable passes while respecting obstacles and the robot\u2019s stopping distance.",
-      "input": "Boundary, local map and robot pose",
-      "output": "A sequence of local goals",
-      "source": "ARCHITECTURE.md"
+      "meaning": "Choose a route and measurement stops that cover the requested area. The first course is level, hard and clear of obstacles.",
+      "input": "Survey boundary, ground map and robot position",
+      "output": "A route with measurement stops",
+      "source": "ARCHITECTURE.md",
+      "milestone_id": "mission"
     },
     {
       "id": "commands",
-      "title": "Ask for motion",
-      "label": "Forward \u00b7 sideways \u00b7 turn",
+      "title": "Set speed and direction",
+      "label": "Earlier command format exists",
       "state": "implemented",
       "column": 2,
       "row": 0,
-      "meaning": "A body-frame command combines forward speed, sideways speed and turning rate. Curved paths come from combining them.",
-      "input": "A local path and estimated robot pose",
-      "output": "Three velocity commands plus a safe stop",
-      "source": "packages/hexapod_core/"
+      "meaning": "Convert the route into forward speed, sideways speed and turning rate, all relative to the robot.",
+      "input": "Route and estimated robot position",
+      "output": "Forward speed, sideways speed, turning rate and stop",
+      "source": "packages/hexapod_core/",
+      "milestone_id": "stage2"
     },
     {
       "id": "policy",
-      "title": "Learn the gait",
-      "label": "PPO walking policy",
+      "title": "Control the gait",
+      "label": "New model: training pending",
       "state": "in_progress",
       "column": 3,
       "row": 0,
-      "meaning": "The policy turns the motion request and recent body/joint observations into targets for all 18 motors.",
-      "input": "Motion command and recent proprioception",
-      "output": "18 position targets",
-      "source": "experiments/c_length_study/README.md"
+      "meaning": "A learned controller uses the requested motion and the robot’s current state to choose positions for its 18 joints. Existing walking videos use earlier robot models.",
+      "input": "Requested motion, joint positions and body motion",
+      "output": "18 target joint positions",
+      "source": "experiments/c_length_study/README.md",
+      "milestone_id": "stage2"
     },
     {
       "id": "sensors",
-      "title": "Sense the surroundings",
-      "label": "LiDAR + depth + IMU",
+      "title": "Measure the surroundings",
+      "label": "M1: test scope agreed",
       "state": "prepared",
       "column": 0,
       "row": 1,
-      "meaning": "The Livox Mid-360 and RealSense D455 provide complementary views. Timing, mounts and calibration must make those views agree.",
-      "input": "Light, range, images and inertial measurements",
-      "output": "Time-stamped sensor samples",
-      "source": "artifacts/perception_readiness_2026-09-09/"
+      "meaning": "The first test uses a simulated Mid-360 laser scanner. Save a scan of a known floor and wall, then reload it and check the measured geometry. The physical sensor is not mounted.",
+      "input": "Simulated laser distances and sensor position",
+      "output": "Recorded 3D points and flags identifying valid measurements",
+      "source": "artifacts/perception_readiness_2026-09-09/",
+      "milestone_id": "stage3"
     },
     {
       "id": "estimate",
-      "title": "Estimate position",
-      "label": "No RTK dependency",
-      "state": "prepared",
+      "title": "Track robot position",
+      "label": "Estimator to build",
+      "state": "planned",
       "column": 1,
       "row": 1,
-      "meaning": "Fuse motion and sensor measurements to estimate where the robot is and how uncertain that estimate is.",
-      "input": "LiDAR, camera, IMU and calibration",
-      "output": "Robot pose, velocity and uncertainty",
-      "source": "ARCHITECTURE.md"
+      "meaning": "Combine sensor and movement measurements to track the robot’s position and orientation within the test site.",
+      "input": "Laser scans, motion measurements and sensor calibration",
+      "output": "Estimated position, orientation, speed and error",
+      "source": "ARCHITECTURE.md",
+      "milestone_id": "stage3"
     },
     {
       "id": "terrain",
-      "title": "Understand the ground",
-      "label": "A local height map",
+      "title": "Map the nearby ground",
+      "label": "Synthetic-data prototype",
       "state": "prepared",
       "column": 2,
       "row": 1,
-      "meaning": "Maintain a nearby map with height, age, uncertainty and whether a cell is usable for a new foot placement.",
-      "input": "Registered range samples",
-      "output": "A causal local map",
-      "source": "artifacts/terrain_readiness_2026-09-09/observation_comparison_cpu_001/README.md"
+      "meaning": "Combine scans into a ground-height map. Record which areas have measurements, when they were measured and how uncertain the heights are.",
+      "input": "Scans aligned using the estimated sensor position",
+      "output": "Nearby ground heights and measurement uncertainty",
+      "source": "artifacts/terrain_readiness_2026-09-09/observation_comparison_cpu_001/README.md",
+      "milestone_id": "stage3"
     },
     {
       "id": "motors",
-      "title": "Move the robot",
-      "label": "18 RobStride RS05 joints",
+      "title": "Drive the joints",
+      "label": "Simulation model prepared",
       "state": "prepared",
       "column": 3,
       "row": 1,
-      "meaning": "Limit target changes and motor effort, then translate targets through the appropriate robot model.",
-      "input": "18 joint targets",
-      "output": "Motor actuation and measured response",
-      "source": "docs/UPDATED_CAD_IMPORT.md"
+      "meaning": "Apply limits to joint movement and motor torque before sending targets to the motors. Check the simulated response against measurements from the planned leg test stand.",
+      "input": "18 target joint positions",
+      "output": "Motor commands and measured joint movement",
+      "source": "docs/UPDATED_CAD_IMPORT.md",
+      "milestone_id": "stage2"
     },
     {
       "id": "simulation",
       "title": "Train in simulation",
-      "label": "Isaac Lab on Spark",
+      "label": "Earlier-model training exists",
       "state": "implemented",
       "column": 0,
       "row": 2,
-      "meaning": "Many simulated robots collect experience. PPO updates a policy, saves weights and tests that they can be loaded exactly.",
-      "input": "Pinned robot, physics, curriculum and correctly versioned policy contract",
-      "output": "Recoverable policy checkpoints",
-      "source": "docs/TRAINING.md"
+      "meaning": "Train many simulated robots together and save the learned controller. Training on the approved detailed robot model is waiting for its standing test to pass.",
+      "input": "Robot model, physics settings and training task",
+      "output": "Saved walking controllers",
+      "source": "docs/TRAINING.md",
+      "milestone_id": "stage2"
     },
     {
       "id": "evaluation",
-      "title": "Try to disprove it",
-      "label": "Unchanged acceptance gates",
+      "title": "Test movement and stops",
+      "label": "Test scripts and results exist",
       "state": "implemented",
       "column": 1,
       "row": 2,
-      "meaning": "Evaluate directions, stops, torques, contacts and smoothness. A good reward curve or attractive clip cannot pass a stage.",
-      "input": "Frozen checkpoints and common evaluation cases",
-      "output": "Measured results and pass/fail evidence",
-      "source": "artifacts/mkii_updated_2026-09-10/native_standing32_rejected_005/README.md"
+      "meaning": "Measure direction tracking, stopping, motor torque, foot contact and smoothness. Compare the results with the agreed pass conditions.",
+      "input": "A saved controller and fixed test cases",
+      "output": "Measurements and a pass or fail result",
+      "source": "artifacts/mkii_updated_2026-09-10/native_standing32_rejected_005/README.md",
+      "milestone_id": "stage2"
     },
     {
       "id": "hardware",
-      "title": "Transfer to hardware",
-      "label": "Accurate CAD assembly",
+      "title": "Test a physical leg",
+      "label": "Test stand planned",
       "state": "planned",
       "column": 2,
       "row": 2,
-      "meaning": "Identify the actual mechanism and actuators, then qualify the complete robot before transferring a simulated policy.",
-      "input": "Physical CAD, calibrated motors and tested policy",
-      "output": "A controlled real-robot release",
-      "source": "docs/UPDATED_CAD_IMPORT.md"
+      "meaning": "Measure force and joint position on a single-leg test stand. Compare those measurements with the same setup in simulation before testing a complete robot.",
+      "input": "Leg test stand, force sensor and joint encoder",
+      "output": "Measured differences between the physical leg and simulation",
+      "source": "docs/UPDATED_CAD_IMPORT.md",
+      "milestone_id": "mission"
     },
     {
       "id": "survey",
-      "title": "Collect steady data",
-      "label": "The project\u2019s end goal",
+      "title": "Produce the survey map",
+      "label": "Final goal",
       "state": "planned",
       "column": 3,
       "row": 2,
-      "meaning": "Cover the requested area while holding a steady deck for useful sensor or scientific measurements.",
-      "input": "Qualified motion, navigation and survey payload",
-      "output": "Coverage plus reliable collected data",
-      "source": "ARCHITECTURE.md"
+      "meaning": "Follow the survey route, stop at measurement locations and hold the sensor platform steady. Combine the measurements into a 3D terrain map after the run.",
+      "input": "Survey route, robot position and recorded scans",
+      "output": "A 3D terrain map covering the requested area",
+      "source": "ARCHITECTURE.md",
+      "milestone_id": "mission"
     }
   ],
   "edges": [
@@ -385,37 +397,37 @@
   "milestones": [
     {
       "id": "walking",
-      "title": "Walking",
-      "description": "The first forward walking policy is the accepted visual benchmark. This establishes the starting point for the new approach.",
-      "gate": "The accepted clip is a forward-gait benchmark; it does not qualify every direction or the physical hardware.",
+      "title": "Forward walking reference",
+      "description": "Use the existing forward-walking video as the gait-quality reference. It shows an earlier, simplified robot model.",
+      "gate": "Accepted as a visual reference for forward walking. Its motor-torque test failed.",
       "source": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md",
       "media_id": "benchmark_01",
       "status": "accepted",
-      "backend": "Historical C-study model",
+      "backend": "Earlier simplified robot model",
       "owner": "James",
       "depends_on": [],
       "requirements": [
         "R-04",
         "R-11"
       ],
-      "blocker": "Historical forward visual comparison accepted; requested-torque failure remains on record.",
-      "question": "What does the canonical model need to establish before this comparison can be used?",
+      "blocker": "The gait is accepted as a reference. It still exceeds the tested motor-torque limit.",
+      "question": "Compare future walking results with this video and their measured test results.",
       "next_step": null,
       "acceptance": {
         "by": "James",
-        "scope": "Historical forward visual benchmark only; torque, omnidirectional and hardware qualification excluded.",
+        "scope": "Forward gait appearance on the earlier robot model. Motor-torque, sideways movement and physical-robot tests remain separate.",
         "source": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md"
       }
     },
     {
       "id": "stage2",
-      "title": "Omnidirectional movement",
-      "description": "Translate in any direction and turn at the same time. Match the forward benchmark\u2019s smoothness and stand still when commanded to stop.",
-      "gate": "Numeric gates AND visual quality matching accepted forward Benchmark 1.",
+      "title": "Walk in any direction",
+      "description": "Walk forward, backward and sideways while turning. Match the reference gait’s smoothness and remain still after a stop command.",
+      "gate": "Pass direction, stopping, motor-torque and foot-contact tests, and match the accepted reference gait’s visual quality.",
       "source": "artifacts/mkii_updated_2026-09-10/native_standing32_rejected_005/README.md",
-      "media_id": "caps50_preview",
+      "media_id": "caps500_preview",
       "status": "blocked",
-      "backend": "Canonical detailed model",
+      "backend": "Approved detailed robot model",
       "owner": "Platform lead",
       "depends_on": [
         "walking"
@@ -425,19 +437,19 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "Canonical batch-standing admission fails; omnidirectional policy qualification remains open.",
-      "question": "What is the smallest evidence-producing increment that addresses the current admission blocker?",
+      "blocker": "Only 10 of 32 simulated robots pass the standing test. Walking training on this model has not started.",
+      "question": "Define and assign the next controller task, including its test cases and pass conditions.",
       "next_step": null,
       "acceptance": null
     },
     {
       "id": "stage3",
-      "title": "Terrain and perception",
-      "description": "Cross increasingly difficult ground, then use timely sensor information to select safe movement. Retain the flat-ground controller\u2019s capability.",
-      "gate": "A frozen terrain envelope, untouched qualification cases and preserved motor/contact limits.",
+      "title": "Use sensors to cross terrain",
+      "description": "Use a map of nearby ground to guide walking across uneven surfaces. Keep the ability to walk and stop on level ground.",
+      "gate": "Agree which slopes and obstacles to test. Pass separate test cases while staying within motor and foot-contact limits.",
       "source": "artifacts/terrain_readiness_2026-09-09/qualification_plan_001/QUALIFICATION_PLAN.md",
       "status": "needs_definition",
-      "backend": "Canonical model with causal sensing",
+      "backend": "Detailed robot model with simulated sensors",
       "owner": "Survey and platform leads",
       "depends_on": [
         "stage2"
@@ -447,19 +459,20 @@
         "R-03",
         "R-04"
       ],
-      "blocker": "Terrain fixtures and sensing prototypes exist; canonical traversal is unqualified.",
-      "question": "What is the smallest terrain and sensing envelope worth demonstrating?",
+      "blocker": "Sensor and ground-map prototypes exist. Walking across terrain with the approved model has not passed testing.",
+      "question": "Choose the first terrain test and its pass conditions.",
       "next_step": null,
-      "acceptance": null
+      "acceptance": null,
+      "media_id": "sensor_mounts"
     },
     {
       "id": "mission",
-      "title": "Autonomous surveying",
-      "description": "Cover an operator-defined area on the accurate robot while maintaining a steady deck for data collection.",
-      "gate": "Calibrated hardware and a complete bounded-area mission demonstration.",
+      "title": "Survey a drawn area",
+      "description": "Follow a route through the requested area, stop with a steady sensor platform to scan, and deliver a 3D terrain map. Start on a level, hard surface with no obstacles.",
+      "gate": "On the physical robot, cover the drawn area and deliver the map. Coverage, map-accuracy and platform-motion limits still need agreement.",
       "source": "ARCHITECTURE.md",
       "status": "needs_definition",
-      "backend": "Calibrated robot and survey payload",
+      "backend": "Physical robot and survey sensor",
       "owner": "James and both leads",
       "depends_on": [
         "stage2",
@@ -475,16 +488,28 @@
         "R-09",
         "R-10"
       ],
-      "blocker": "An integrated bounded survey with useful measurements has not been demonstrated.",
-      "question": "What smallest region, payload quality and operating envelope would make a useful first survey?",
+      "blocker": "The robot is not built. M1 is the agreed first simulation test; it needs an owner and reviewer.",
+      "question": "Assign an owner and reviewer to M1.",
       "next_step": null,
-      "acceptance": null
+      "acceptance": null,
+      "definition": {
+        "id": "M1",
+        "title": "Save and reload one simulated laser scan",
+        "by": "James",
+        "summary": "Use a stationary Mid-360 laser scanner in simulation to measure a known floor and wall. Save the 3D points, reload them in a separate check, and compare them with the scene. This task can start before walking works.",
+        "criteria": [
+          "Reload the points, validity flags and sensor position and orientation without changing their values.",
+          "With noise disabled, every expected floor or wall hit must be within 1 mm of its expected position.",
+          "With the existing sensor noise enabled, at least 95% of expected hits must be within 7 cm. Missing hits count as failures; report false hits separately."
+        ],
+        "fixture": "Sensor height: 0.25 m. Wall: 0.80 m wide × 0.08 m thick × 0.50 m high, centred 1 m in front of the sensor. Use 20,000 rays per scan. Fixed random seeds: 360 for the scan pattern and 20260824 for sensor noise and timing."
+      }
     }
   ],
   "papers": [
     {
       "title": "CAPS",
-      "role": "Smooth the policy\u2019s output across time and nearby observations.",
+      "role": "Smooth the policy’s output across time and nearby observations.",
       "url": "https://ai.bu.edu/caps/"
     },
     {
@@ -506,28 +531,28 @@
   "research_source": "artifacts/project_review_2026-09-10/legged_policy_literature_001/REPORT.md",
   "glossary": [
     {
-      "term": "PPO",
-      "meaning": "The reinforcement-learning algorithm that updates the walking policy from simulated experience."
+      "term": "Learned controller (policy)",
+      "meaning": "A trained model that selects joint targets from the requested movement and the robot’s measured state."
     },
     {
-      "term": "Policy",
-      "meaning": "The learned function that chooses motor targets from the robot\u2019s observations and motion request."
+      "term": "Training update",
+      "meaning": "One adjustment to the controller based on its simulated experience. Update count alone does not measure walking quality."
     },
     {
-      "term": "Checkpoint",
-      "meaning": "Saved neural-network weights. A saved checkpoint is not automatically a qualified controller."
+      "term": "Point cloud",
+      "meaning": "A collection of 3D points measured by a laser scanner."
     },
     {
-      "term": "Proprioception",
-      "meaning": "What the robot senses about itself: joint positions, motion and orientation."
+      "term": "Local coordinates",
+      "meaning": "Positions measured relative to a reference at the test site, rather than latitude and longitude."
     },
     {
-      "term": "Privileged teacher",
-      "meaning": "A training policy allowed to use ideal information that the real robot will not directly have."
+      "term": "Pass conditions",
+      "meaning": "The measurements and limits a test must satisfy before its result is accepted."
     },
     {
-      "term": "Causal perception",
-      "meaning": "Use only sensor information that has actually arrived by the current time, including its delay and uncertainty."
+      "term": "Mid-360",
+      "meaning": "The laser scanner selected for the first mapping test. M1 uses its simulation model."
     }
   ],
   "primary_video_id": "caps500_preview",
@@ -535,17 +560,17 @@
     "as_of": "2026-09-11T01:47:58Z",
     "source_commit": "a074f7927b4104d2916e73e1304bfb3d967495f1",
     "architecture": "ARCHITECTURE.md",
-    "summary": "Research is paused for James; no new experiment is queued. The approved detailed robot passes single-robot standing, but its completed batch screen passes 10/32 replicas. Canonical PPO has not started. Historical walking remains a comparison, with 0/48 quiet trials passing.",
-    "definition_policy": "Define the smallest useful next increment with James and the two subleads after cleanup. No experiment or contributor assignment is implied by these markers.",
+    "summary": "Research is paused. The approved robot model passes a single-robot standing test, but only 10 of 32 simulated robots pass the batch test. Walking training on this model has not started. Videos show earlier robot models; the latest earlier controller failed all 48 stop tests.",
+    "definition_policy": "M1 has an agreed test scene and pass conditions. Assign an owner and reviewer next. Define later work with James and the leads.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/a074f7927b4104d2916e73e1304bfb3d967495f1/STATUS.md",
     "facts": [
       {
         "id": "canonical-standing",
-        "title": "Canonical standing",
-        "backend": "Isaac simulation \u00b7 detailed direct-drive model",
+        "title": "Standing test: 10 of 32 pass",
+        "backend": "Simulation · approved detailed model",
         "result": "failed",
-        "text": "One robot passes standing. The completed 32-robot screen accepts 10/32; 22 fail measured support, including eight that also fail quiet joint-rate limits. No canonical PPO has run.",
+        "text": "22 of 32 simulated robots fail the foot-support check. Eight of those also move their joints too quickly while asked to stand still. Walking training on this model has not started.",
         "source": "artifacts/mkii_updated_2026-09-10/native_standing32_rejected_005/README.md",
         "metric": {
           "path": "artifacts/mkii_updated_2026-09-10/standing32_channel_analysis_001/SUMMARY.json",
@@ -559,34 +584,39 @@
             "replicas"
           ],
           "total": 32,
-          "units": "replicas",
-          "window": "16 seconds after 4 seconds settling; original 50 Hz score"
+          "units": "robots passed",
+          "window": "Measured for 16 seconds after 4 seconds of settling, at 50 samples per second"
         }
       },
       {
         "id": "force-replay",
-        "title": "Recorded contact analysis",
-        "backend": "CPU replay \u00b7 detailed model recording",
+        "title": "Cause of standing failures unresolved",
+        "backend": "Analysis of saved simulation data",
         "result": "inconclusive",
-        "text": "Both recorded normal-force channels agree on 73 below-bound events. They may share a backend; this does not identify a physical cause or prove buffer completeness.",
+        "text": "Two recorded foot-force signals show the same 73 events below the support threshold. They may come from the same internal source, so agreement between them does not establish the cause.",
         "source": "artifacts/mkii_updated_2026-09-10/standing32_channel_analysis_001/README.md"
       },
       {
         "id": "historical-quiet",
-        "title": "Historical walking policy",
-        "backend": "Isaac simulation \u00b7 historical C-study model",
+        "title": "Earlier controller: 0 of 48 stop tests pass",
+        "backend": "Simulation · earlier simplified model",
         "result": "failed",
-        "text": "The 500-update policy retains partial motion but passes 0/48 quiet trials. It does not qualify the canonical robot.",
+        "text": "The controller shown after 500 training updates moves in some requested directions, but fails every stop test. Its results apply to that earlier robot model.",
         "source": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md"
       },
       {
         "id": "research-pause",
-        "title": "Research paused for handoff",
-        "backend": "Recorded operations snapshot",
+        "title": "Experiments paused",
+        "backend": "Team lead’s recorded handoff",
         "result": "passed",
-        "text": "The team lead recorded research agents and continuation stopped, with no native job queued. The external Spark reservation stays in place. Repository cleanup and publication do not resume research.",
+        "text": "The team lead stopped research automation and left no experiment queued. The shared training computer remains reserved. Current work is limited to repository and website updates.",
         "source": "artifacts/handoff_2026-09-11/james_001/README.md"
       }
     ]
-  }
+  },
+  "summary_tags": [
+    "Coordinates relative to the test site",
+    "Stop to take measurements",
+    "Simulation first"
+  ]
 }

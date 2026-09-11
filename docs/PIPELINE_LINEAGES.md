@@ -14,7 +14,7 @@ python3 tools/c_study_runtime.py
 
 The historical check verifies `stage2_pipeline.sha256` against the immutable Git
 revision `81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df`. Fetch repository history first.
-The current check selects `repository_docs_20260911_pipeline.sha256`. It covers
+The current check selects `repository_visual_roadmap_20260911_pipeline.sha256`. It covers
 current runtime/source paths, tests and retained release inputs. The two explicitly
 allowed historical packaging changes remain in the checker; frozen package guides
 and all other historical contracts retain their original bytes.
@@ -38,3 +38,7 @@ robot model, controller, acceptance gate, checkpoint or frozen runtime. The
 preceding `repository_progress_tests_20260911_pipeline.sha256` stays unchanged.
 [Archived release history](archive/README.md) preserves every earlier explanation
 and failed-attempt reference. New release explanations belong in site updates.
+
+The visual-roadmap release updates the page renderer and validates agreed test
+definitions separately from assigned or completed work. The preceding
+`repository_docs_20260911_pipeline.sha256` remains unchanged.

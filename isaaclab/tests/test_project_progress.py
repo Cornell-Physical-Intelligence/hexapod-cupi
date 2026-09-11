@@ -65,6 +65,26 @@ class ProgressTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'defined next step'):
             site.validate_progress(self.project)
 
+    def test_approved_scope_is_visible_but_does_not_assign_or_accept_work(self):
+        marker = self.marker('mission')
+        marker['definition'] = dict(id='M1', title='Scan reload', by='Reviewer',
+                                    summary='Save and independently reload a scan.',
+                                    fixture='Known floor and wall.', criteria=['Preserve points exactly.'])
+        site.validate_progress(self.project)
+        output = site.status_text(self.project)
+        self.assertIn('M1 — Scan reload', output)
+        self.assertIn('Preserve points exactly.', output)
+        self.assertIn('Assignment pending.', output)
+        marker['status'] = 'ready'
+        with self.assertRaisesRegex(ValueError, 'defined next step'):
+            site.validate_progress(self.project)
+
+    def test_approved_definition_requires_explicit_acceptance_checks(self):
+        self.marker('mission')['definition'] = dict(id='M1', title='Scan reload', by='Reviewer',
+                                                    summary='Reload scan.', fixture='Known scene.', criteria=[])
+        with self.assertRaisesRegex(ValueError, 'acceptance criteria'):
+            site.validate_progress(self.project)
+
     def test_unknown_requirements_and_dependencies_reject(self):
         for key, value, message in [('requirements', ['R-99'], 'architecture'),
                                     ('depends_on', ['missing'], 'dependency')]:

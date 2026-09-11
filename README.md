@@ -1,6 +1,7 @@
 # Hexapod
 
-Cover an operator-drawn region while holding a steady deck for useful measurements.
+Survey an operator-drawn region, stopping with a steady deck to collect measurements
+for a 3D terrain map in local site coordinates.
 
 - [Architecture](ARCHITECTURE.md): agreed requirements, boundaries and team workflow.
 - [Progress](https://cornell-physical-intelligence.github.io/hexapod-cupi/#roadmap): the four roadmap markers, evidence and open definitions.
