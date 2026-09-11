@@ -1,0 +1,35 @@
+{
+  "full_proprietary_source_copied": false,
+  "installed_package": "omni.physics.tensors-110.1.13+110.1.2.la64.r.cp312.u7f4",
+  "native_execution": false,
+  "provider_sha256": "b913fdb1a3c0cf04b62aa01d6ceaf7d96cfe577a510d0e02b71485018661c903",
+  "review": {
+    "floor_force": "sensor_count x filter_count x3; dt scales impulse to force. Only configured sensor/filter pairs. Existing sole filter is /Ground. Sensor ordering independently recorded.",
+    "legacy_friction": "N x max_dofs float32; deprecated getter remains implemented. Backend absence rejects and retains partial receipt. Never call setter.",
+    "link_velocity": "N x max_links x6; global linear at link COM then angular. Copy .numpy before any subsequent getter. Native articulation link ordering."
+  },
+  "signatures": {
+    "get_contact_force_matrix": {
+      "arguments": [
+        "self",
+        "dt"
+      ],
+      "function_source_sha256": "46e82454f2a25a7f16723edde95305867751fd906da95420335d2bb044100aab",
+      "line": 4950
+    },
+    "get_dof_friction_coefficients": {
+      "arguments": [
+        "self"
+      ],
+      "function_source_sha256": "cd15017da6646ff4aeddd324c6cb77791a88f10c82ed9394fe9eaf8f373470c9",
+      "line": 1002
+    },
+    "get_link_velocities": {
+      "arguments": [
+        "self"
+      ],
+      "function_source_sha256": "6659cf9e2ec5ea9dc883142cad4aeb7ba9afbfd6ef3e1ab6d78df4d7cb044d6a",
+      "line": 1468
+    }
+  }
+}
