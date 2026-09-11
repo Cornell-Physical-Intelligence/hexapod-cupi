@@ -29,13 +29,18 @@ for (const marker of data.milestones) {
   assert.ok(html.includes(`id="marker-${marker.id}"`));
   assert.ok(html.includes(marker.title));
 }
-if (data.milestones.some(m=>m.next_step===null)) {
-  assert.ok(html.includes('Task and pass conditions still need agreement.'));
+const roadmap = html.slice(html.indexOf('<ol class="major-stages">'), html.indexOf('</ol>'));
+for (const marker of data.milestones) {
+  const card = roadmap.split(`id="marker-${marker.id}"`)[1].split('</li>')[0];
+  assert.equal((card.match(/<p\b/g)||[]).length,1,'Each stage has one summary line');
+  assert.ok(!card.includes('<details'), 'Stage details belong in the linked document');
+  if (!marker.media_id) assert.ok(!/<(?:video|img|svg)\b/.test(card),'Unrecorded stages have no visual');
 }
+assert.ok(!html.includes('mission-figure'));
+assert.ok(!html.includes('exact_mount_comparison.png'));
 for (const fact of data.progress.facts) {
   if (fact.metric) assert.ok(html.includes(`${fact.metric.value} / ${fact.metric.total}`));
 }
-assert.ok(html.includes('Current status:'));
 assert.ok(!/(?:href|src)="undefined"|>undefined</.test(html), 'No missing field may become a link or displayed value');
 // The main visuals must be visible on arrival, independent of optional prose.
 const tags = html.match(/<\/?(?:details|video|div)\b[^>]*>/g);
@@ -60,7 +65,7 @@ assert.ok(elements.get('#detail').innerHTML.includes('#increment-M1'));
 elements.get('#motion-toggle').events.click();
 assert.equal(elements.get('#motion-toggle').attributes['aria-pressed'],'false');
 const unsafe = structuredClone(data);
-unsafe.milestones[1].question = '<script>bad()</script>';
+unsafe.milestones[1].card_text = '<script>bad()</script>';
 const {html:escaped} = await render(unsafe);
 assert.ok(escaped.includes('&lt;script&gt;bad()&lt;/script&gt;'));
 assert.ok(!escaped.includes('<script>bad()</script>'));

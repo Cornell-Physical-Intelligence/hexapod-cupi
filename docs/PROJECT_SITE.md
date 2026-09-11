@@ -67,21 +67,17 @@ Only explicitly selected public files enter `site/dist`; generated output is
 ignored by Git. Verify the deployed revision after publishing the integrated
 change. Preserve the existing GitHub Pages destination and evidence permissions.
 
-Lead with a concise mission and four visual checkpoint cards. Keep actual
-walking videos visible beside their stage and scope, the interactive system
-dependency graph expanded, and the approved CAD video directly accessible.
-Give planned outcomes clearly labelled conceptual illustrations. Selectable
-nodes expose inputs, outputs, existing source and the relevant qualification.
-Show approved increment definitions, including M1, underneath their parent
-capability without treating approved scope as accepted implementation.
-Keep ownership, acceptance and long evidence notes in optional detail panels.
-Historical recordings and figures remain visible in a separate gallery.
-Keep a readable white scientific-poster layout, restrained rules, meaningful
-labels, keyboard-accessible disclosures, mobile layout and reduced-motion support.
-Never animate invented robot behavior as experimental evidence.
+Keep each roadmap stage to a title, status, optional recorded media with one short
+caption, one summary line and a Details link. Full criteria, ownership and next-task
+context remain in the linked status/design documents. Keep M1 to a single row
+linking its test specification. Do not add explanatory paragraphs between these
+items.
 
-Write for a teammate opening the page for the first time. Name the robot model,
-the behavior tested, the measured result and the work remaining. Explain technical
-terms where they appear. Avoid internal shorthand such as “canonical admission”,
-“causal envelope” and “qualification boundary”. Keep videos and the system graph
-visible; use expandable sections for detailed test conditions and source links.
+Stages without uploaded progress media show no image, illustration or placeholder.
+James supplies their visuals when progress is available. Keep the interactive
+system graph expanded and existing walking videos playable. Preserve historical
+recordings and their model labels; never present a concept image as progress.
+
+Write for a teammate opening the page for the first time. Use concrete results
+and actions, explain necessary technical terms, and remove repeated descriptions.
+Keep keyboard access, mobile layout and reduced-motion support.
