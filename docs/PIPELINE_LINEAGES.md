@@ -308,3 +308,10 @@ The Pages registry now generates STATUS. Old immutable poster entries that name
 a relocated tool resolve to that tool at the inventory's pinned pre-cleanup
 commit; new entries use its maintained location. Compatibility PLAN/NEXT_RUNS
 pointers preserve historical links without maintaining another roadmap.
+
+
+The follow-up `repository_progress_tests_20260911_pipeline.sha256` preserves the
+foundation release and makes progress/render tests independent of today's
+measurement values. Synthetic validator fixtures test rejection; separate tests
+check the live registry against its actual evidence. Future valid progress edits
+therefore require no test rewrites. No robot code, gate or evidence changes.

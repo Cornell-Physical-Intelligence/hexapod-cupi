@@ -4,6 +4,7 @@ import importlib.util
 import json
 from pathlib import Path
 import unittest
+import tempfile
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -14,12 +15,40 @@ spec.loader.exec_module(site)
 
 class ProgressTests(unittest.TestCase):
     def setUp(self):
-        self.project = json.loads((ROOT / 'site/project.json').read_text())
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        root = Path(self.temp.name).resolve()
+        (root / 'ARCHITECTURE.md').write_text('R-01 fixture requirement')
+        (root / 'evidence.json').write_text(json.dumps({'passed': 10, 'total': 32}))
+        (root / 'evidence.md').write_text('Fixture evidence')
+        patcher = patch.object(site, 'ROOT', root)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.project = {'progress': {
+            'as_of': '2026-09-11T00:00:00Z', 'source_commit': 'a'*40,
+            'architecture': 'ARCHITECTURE.md', 'execution_source': 'evidence.md',
+            'prior_snapshot': 'https://example.com/snapshot', 'summary': 'Fixture: 10/32.',
+            'definition_policy': 'Define the next step with the team.',
+            'facts': [dict(id='fixture', title='Fixture', backend='Synthetic test',
+                          result='failed', text='Fixture result', source='evidence.md',
+                          metric=dict(path='evidence.json', field=['passed'], value=10,
+                                      total_field=['total'], total=32, units='cases', window='fixture window'))]},
+            'milestones': []}
+        for identifier, dependencies in [('walking', []), ('stage2', ['walking']),
+                                          ('stage3', ['stage2']), ('mission', ['stage2', 'stage3'])]:
+            self.project['milestones'].append(dict(
+                id=identifier, title='Historical fixture' if identifier=='walking' else identifier,
+                status='accepted' if identifier=='walking' else 'blocked',
+                description='Fixture description', gate='Fixture proof', backend='Synthetic test',
+                owner='Fixture owner', question='What next?', depends_on=dependencies,
+                requirements=['R-01'], source='evidence.md', blocker='Fixture blocker',
+                next_step=None, acceptance=dict(by='Fixture reviewer', scope='Fixture only',
+                                               source='evidence.md') if identifier=='walking' else None))
 
     def marker(self, identifier):
         return next(m for m in self.project['milestones'] if m['id'] == identifier)
 
-    def test_current_progress_metrics_match_actual_preserved_payload(self):
+    def test_progress_cannot_promote_a_failed_payload(self):
         site.validate_progress(self.project)
         metric = self.project['progress']['facts'][0]['metric']
         metric['value'] = metric['total']
@@ -74,7 +103,12 @@ class ProgressTests(unittest.TestCase):
         self.assertIn('Historical', before)
 
     def test_committed_status_matches_registry(self):
-        self.assertEqual((ROOT / 'STATUS.md').read_text(), site.status_text(self.project))
+        project = json.loads((ROOT / 'site/project.json').read_text())
+        self.assertEqual((ROOT / 'STATUS.md').read_text(), site.status_text(project))
+
+    def test_current_registry_validates_against_its_actual_evidence(self):
+        with patch.object(site, 'ROOT', ROOT):
+            site.validate_progress(json.loads((ROOT / 'site/project.json').read_text()))
 
     def test_unknown_fields_in_source_are_errors_not_zeroes(self):
         self.project['progress']['facts'][0]['metric']['field'] = ['unavailable']

@@ -25,9 +25,13 @@ for (const marker of data.milestones) {
   assert.ok(html.includes(`id="marker-${marker.id}"`));
   assert.ok(html.includes(marker.title));
 }
-assert.ok(html.includes('Needs definition with the team.'));
-assert.ok(html.includes('10 / 32'));
-assert.ok(html.includes('Historical forward visual benchmark only'));
+if (data.milestones.some(m=>m.next_step===null)) {
+  assert.ok(html.includes('Needs definition with the team.'));
+}
+for (const fact of data.progress.facts) {
+  if (fact.metric) assert.ok(html.includes(`${fact.metric.value} / ${fact.metric.total}`));
+}
+assert.ok(html.includes('Current boundary:'));
 assert.ok(!/(?:href|src)="undefined"|>undefined</.test(html), 'No missing field may become a link or displayed value');
 const unsafe = structuredClone(data);
 unsafe.milestones[1].question = '<script>bad()</script>';

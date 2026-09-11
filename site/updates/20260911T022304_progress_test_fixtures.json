@@ -1,0 +1,24 @@
+{
+  "id": "20260911T022304_progress_test_fixtures",
+  "date": "2026-09-11T02:23:04.842230Z",
+  "title": "Keep progress tests independent of today\u2019s results",
+  "summary": "Use synthetic failure fixtures for progress validation and derive rendered metric expectations from the built registry. Actual registry evidence is checked separately, so later legitimate progress changes require no test edits. Physics gates and recorded results remain unchanged.",
+  "areas": [
+    "research-poster",
+    "verification"
+  ],
+  "changes": [
+    "isaaclab/tests/test_project_progress.py",
+    "site/test_render.mjs",
+    "tools/check_pipeline_lineages.py",
+    ".github/workflows/tests.yml",
+    "docs/PIPELINE_LINEAGES.md",
+    "isaaclab/deploy/repository_progress_tests_20260911_pipeline.sha256"
+  ],
+  "evidence": [
+    "isaaclab/tests/test_project_progress.py",
+    "site/test_render.mjs"
+  ],
+  "next": "Verify the final published foundation; define the next roadmap increment with the team afterward.",
+  "no_project_impact": false
+}
