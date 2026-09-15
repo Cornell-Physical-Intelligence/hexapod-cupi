@@ -1,6 +1,6 @@
 # Contributor guide
 
-Keep chat responses under 100 words.
+Keep chat responses to 200 words or fewer.
 Use direct language. Preserve other contributors' work.
 
 Edit this file for shared agent instructions. `AGENTS.md` is a symlink to
