@@ -1,0 +1,35 @@
+{
+  "id": "20260915T002751_admitted_batch128_ppo_and_native_bc_failures",
+  "date": "2026-09-15T00:27:51Z",
+  "title": "Record adopted standing admission, completed larger-batch PPO and failed BC evaluation",
+  "summary": "The lead adopts exact one- and 128-replica simulation standing admission after the full independent raw audit. Train006 completes 200 PPO updates and 614,400 native transitions, with 142 joint-limit terminations and weak commanded-direction movement; training completion is not gait acceptance. Evaluation012 completes all three selected BC-only probes and fails each; root video review finds no sustained forward walking. Actual PPO evaluation013 is dispatched with results pending. The new Fable follow-up is advisory and not yet adopted. All historical evidence and numerical gates remain unchanged.",
+  "areas": [
+    "standing admission",
+    "native PPO",
+    "native policy evaluation",
+    "progress record"
+  ],
+  "changes": [
+    "site/project.json",
+    "STATUS.md",
+    "docs/TRAINING.md",
+    "docs/OPERATIONS.md",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/**",
+    "artifacts/restart_2026-09-14/paper_ppo_stability_review_004/**"
+  ],
+  "evidence": [
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/admission_002/verification.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_006/standing/state.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_006/standing/learner/latest_checkpoint.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_006/standing/learner/metrics.jsonl",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_006/standing/task/latest_status.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_006/cleanup.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_012/standing/evaluation/summary.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/analysis_evaluate_012/NUMERICAL_COMPARISON.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_005/REVIEW.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_evaluate_013.json",
+    "artifacts/restart_2026-09-14/paper_ppo_stability_review_004/REQUEST.json"
+  ],
+  "next": "Assess the actual PPO native probes and pending stability review, then continue toward the unchanged full Stage 2 numerical and human visual requirements.",
+  "no_project_impact": false
+}

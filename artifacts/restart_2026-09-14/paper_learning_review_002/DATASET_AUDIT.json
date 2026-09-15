@@ -1,0 +1,674 @@
+{
+  "scope": "Read-only CPU audit; no BC fitting, native run or acceptance decision",
+  "raw_hashes_verified": {
+    "heldout_prior.npz": true,
+    "realized_prior.npz": true,
+    "replay_controls.npz": true,
+    "replay_substeps.npz": true
+  },
+  "finite_all_recorded_arrays": true,
+  "train_transitions": 1860,
+  "heldout_transitions": 1860,
+  "accepted_envs": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30
+  ],
+  "train_control_indices": [
+    260,
+    319
+  ],
+  "heldout_control_indices": [
+    320,
+    379
+  ],
+  "train_cycle": 1,
+  "heldout_cycle": 2,
+  "dataset_fields_exactly_match_raw_control_selection": true,
+  "command_observation_columns_210_213_exact": true,
+  "latest_q_dq_angular_and_history_exact": true,
+  "gravity_history_CPU_reconstruction_max_error": 1.862645149230957e-09,
+  "previous_applied_action_max_float_error": 5.960464477539063e-08,
+  "requested_q_action_reconstruction_max_rad": 2.2351741790771484e-08,
+  "requested_vs_applied_target_max_rad": 2.2351741790771484e-08,
+  "actual_max_slew_rad": 0.037509769201278687,
+  "action_min": -0.7324395179748535,
+  "action_max": 0.6996785998344421,
+  "zero_action_baseline_mse": 0.06427420675754547,
+  "copy_previous_action_baseline_mse": 0.0009531381074339151,
+  "train_heldout_actions_bit_identical": true,
+  "shared_exact_train_test_state_rows": 0,
+  "shared_exact_train_test_observation_rows": 0,
+  "heldout_first_four_phases_with_training_history_frames": 124,
+  "train_final_next_state_equals_heldout_initial_state_rows": 31,
+  "split_caveat": "No heldout file loaded by PPO/AMP/BC. However row acceptance uses BOTH cycles; heldout is selection-conditioned and temporally adjacent, repeats all targets and shares boundary/history. It is not independent generalization.",
+  "missing_demonstrations": [
+    "startup from reset with nonzero command",
+    "command changes",
+    "walking-to-stop transitions",
+    "long quiet intervals",
+    "perturbation recovery",
+    "different gait period",
+    "unseen directions or higher speeds"
+  ],
+  "zero_command_samples": 120,
+  "zero_command_fraction": 0.06451612903225806,
+  "per_command": [
+    {
+      "index": 0,
+      "command": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "samples": 120,
+      "achieved_navigation_velocity": [
+        7.577601536468137e-06,
+        1.1495258149807341e-05,
+        -0.00041040938231162727
+      ],
+      "linear_projection_fraction": null,
+      "yaw_projection_fraction": null,
+      "minimum_support": 6,
+      "mean_support": 6.0,
+      "toe_contact_occupancy": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "joint_rate_rms_rad_s": 0.0020813827868551016,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 1,
+      "command": [
+        0.02500000037252903,
+        0.0,
+        0.0
+      ],
+      "samples": 120,
+      "achieved_navigation_velocity": [
+        0.02042335271835327,
+        5.1251030527055264e-05,
+        0.0003276280767749995
+      ],
+      "linear_projection_fraction": 0.8169340491294861,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.098958333333333,
+      "toe_contact_occupancy": [
+        0.696875,
+        0.659375,
+        0.6927083333333334,
+        0.6979166666666666,
+        0.6583333333333333,
+        0.69375
+      ],
+      "joint_rate_rms_rad_s": 0.5494347214698792,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 2,
+      "command": [
+        0.01767767034471035,
+        0.01767767034471035,
+        0.0
+      ],
+      "samples": 120,
+      "achieved_navigation_velocity": [
+        0.01459556445479393,
+        0.015371578745543957,
+        5.535378022614168e-06
+      ],
+      "linear_projection_fraction": 0.8475988507270813,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.096875,
+      "toe_contact_occupancy": [
+        0.7010416666666667,
+        0.6625,
+        0.69375,
+        0.6875,
+        0.6645833333333333,
+        0.6875
+      ],
+      "joint_rate_rms_rad_s": 0.5525367856025696,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 3,
+      "command": [
+        1.5308084623338832e-18,
+        0.02500000037252903,
+        0.0
+      ],
+      "samples": 120,
+      "achieved_navigation_velocity": [
+        -3.4288407277927035e-06,
+        0.021492067724466324,
+        7.524571992689744e-05
+      ],
+      "linear_projection_fraction": 0.8596826791763306,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.094791666666667,
+      "toe_contact_occupancy": [
+        0.6958333333333333,
+        0.6635416666666667,
+        0.7010416666666667,
+        0.6833333333333333,
+        0.665625,
+        0.6854166666666667
+      ],
+      "joint_rate_rms_rad_s": 0.5581783652305603,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 4,
+      "command": [
+        -0.01767767034471035,
+        0.01767767034471035,
+        0.0
+      ],
+      "samples": 120,
+      "achieved_navigation_velocity": [
+        -0.014589279890060425,
+        0.014913339167833328,
+        0.0010155944619327784
+      ],
+      "linear_projection_fraction": 0.8344600200653076,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.090625,
+      "toe_contact_occupancy": [
+        0.6927083333333334,
+        0.6645833333333333,
+        0.7020833333333333,
+        0.6854166666666667,
+        0.665625,
+        0.6802083333333333
+      ],
+      "joint_rate_rms_rad_s": 0.5542336702346802,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 5,
+      "command": [
+        -0.02500000037252903,
+        3.0616169246677665e-18,
+        0.0
+      ],
+      "samples": 120,
+      "achieved_navigation_velocity": [
+        -0.02063862420618534,
+        -2.328790105821099e-05,
+        -2.609820330690127e-05
+      ],
+      "linear_projection_fraction": 0.8255449533462524,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.097916666666666,
+      "toe_contact_occupancy": [
+        0.69375,
+        0.6572916666666667,
+        0.6979166666666666,
+        0.6916666666666667,
+        0.6604166666666667,
+        0.696875
+      ],
+      "joint_rate_rms_rad_s": 0.5488301515579224,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 6,
+      "command": [
+        -0.01767767034471035,
+        -0.01767767034471035,
+        0.0
+      ],
+      "samples": 120,
+      "achieved_navigation_velocity": [
+        -0.014669148251414299,
+        -0.015131845138967037,
+        6.377696877279959e-07
+      ],
+      "linear_projection_fraction": 0.8428993821144104,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.09375,
+      "toe_contact_occupancy": [
+        0.6885416666666667,
+        0.6614583333333334,
+        0.6875,
+        0.6958333333333333,
+        0.6583333333333333,
+        0.7020833333333333
+      ],
+      "joint_rate_rms_rad_s": 0.5533403754234314,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 7,
+      "command": [
+        -4.5924256971943795e-18,
+        -0.02500000037252903,
+        0.0
+      ],
+      "samples": 120,
+      "achieved_navigation_velocity": [
+        -0.00014639031724072993,
+        -0.021606452763080597,
+        0.000441049225628376
+      ],
+      "linear_projection_fraction": 0.8642580509185791,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.091666666666667,
+      "toe_contact_occupancy": [
+        0.6833333333333333,
+        0.6635416666666667,
+        0.6854166666666667,
+        0.7020833333333333,
+        0.6572916666666667,
+        0.7
+      ],
+      "joint_rate_rms_rad_s": 0.5592806935310364,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 8,
+      "command": [
+        0.01767767034471035,
+        -0.01767767034471035,
+        0.0
+      ],
+      "samples": 120,
+      "achieved_navigation_velocity": [
+        0.014518718235194683,
+        -0.015145746059715748,
+        0.00010534356988500804
+      ],
+      "linear_projection_fraction": 0.8390377759933472,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.095833333333333,
+      "toe_contact_occupancy": [
+        0.6822916666666666,
+        0.6635416666666667,
+        0.690625,
+        0.7,
+        0.6614583333333334,
+        0.6979166666666666
+      ],
+      "joint_rate_rms_rad_s": 0.5537748336791992,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 9,
+      "command": [
+        0.05000000074505806,
+        0.0,
+        0.0
+      ],
+      "samples": 120,
+      "achieved_navigation_velocity": [
+        0.04181765764951706,
+        0.00019163446268066764,
+        0.00044004680239595473
+      ],
+      "linear_projection_fraction": 0.8363531231880188,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.083333333333333,
+      "toe_contact_occupancy": [
+        0.6791666666666667,
+        0.6604166666666667,
+        0.6947916666666667,
+        0.6979166666666666,
+        0.6583333333333333,
+        0.6927083333333334
+      ],
+      "joint_rate_rms_rad_s": 0.6596778035163879,
+      "worst_joint_saturation": 0.0010416666666666667
+    },
+    {
+      "index": 10,
+      "command": [
+        0.0353553406894207,
+        0.0353553406894207,
+        0.0
+      ],
+      "samples": 60,
+      "achieved_navigation_velocity": [
+        0.029588084667921066,
+        0.031064875423908234,
+        0.00020847753330599517
+      ],
+      "linear_projection_fraction": 0.8577623963356018,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.06875,
+      "toe_contact_occupancy": [
+        0.7,
+        0.65625,
+        0.6958333333333333,
+        0.6729166666666667,
+        0.65625,
+        0.6875
+      ],
+      "joint_rate_rms_rad_s": 0.6632590293884277,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 11,
+      "command": [
+        3.0616169246677665e-18,
+        0.05000000074505806,
+        0.0
+      ],
+      "samples": 60,
+      "achieved_navigation_velocity": [
+        -7.447802636306733e-05,
+        0.043664101511240005,
+        -0.0003145045484416187
+      ],
+      "linear_projection_fraction": 0.8732820153236389,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.102083333333334,
+      "toe_contact_occupancy": [
+        0.6895833333333333,
+        0.6895833333333333,
+        0.6854166666666667,
+        0.6979166666666666,
+        0.66875,
+        0.6708333333333333
+      ],
+      "joint_rate_rms_rad_s": 0.649459719657898,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 12,
+      "command": [
+        -0.0353553406894207,
+        0.0353553406894207,
+        0.0
+      ],
+      "samples": 60,
+      "achieved_navigation_velocity": [
+        -0.029107755050063133,
+        0.030483417212963104,
+        -0.00020591368956957012
+      ],
+      "linear_projection_fraction": 0.8427464962005615,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.077083333333333,
+      "toe_contact_occupancy": [
+        0.7020833333333333,
+        0.6583333333333333,
+        0.7083333333333334,
+        0.68125,
+        0.6666666666666666,
+        0.6604166666666667
+      ],
+      "joint_rate_rms_rad_s": 0.6450960040092468,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 13,
+      "command": [
+        -0.05000000074505806,
+        6.123233849335533e-18,
+        0.0
+      ],
+      "samples": 60,
+      "achieved_navigation_velocity": [
+        -0.04125778377056122,
+        0.00046589632984250784,
+        0.0002493010542821139
+      ],
+      "linear_projection_fraction": 0.8251556754112244,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.089583333333334,
+      "toe_contact_occupancy": [
+        0.69375,
+        0.6583333333333333,
+        0.69375,
+        0.6916666666666667,
+        0.6583333333333333,
+        0.69375
+      ],
+      "joint_rate_rms_rad_s": 0.6313458681106567,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 14,
+      "command": [
+        -0.0353553406894207,
+        -0.0353553406894207,
+        0.0
+      ],
+      "samples": 60,
+      "achieved_navigation_velocity": [
+        -0.02981484681367874,
+        -0.03188806399703026,
+        0.0017405343241989613
+      ],
+      "linear_projection_fraction": 0.8726109266281128,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.114583333333333,
+      "toe_contact_occupancy": [
+        0.6833333333333333,
+        0.6645833333333333,
+        0.7,
+        0.7,
+        0.6729166666666667,
+        0.69375
+      ],
+      "joint_rate_rms_rad_s": 0.6380870342254639,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 15,
+      "command": [
+        -9.184851394388759e-18,
+        -0.05000000074505806,
+        0.0
+      ],
+      "samples": 60,
+      "achieved_navigation_velocity": [
+        -0.0002794550091493875,
+        -0.0432194285094738,
+        0.0006896170089021325
+      ],
+      "linear_projection_fraction": 0.8643885254859924,
+      "yaw_projection_fraction": null,
+      "minimum_support": 2,
+      "mean_support": 4.085416666666666,
+      "toe_contact_occupancy": [
+        0.6729166666666667,
+        0.66875,
+        0.68125,
+        0.6958333333333333,
+        0.6708333333333333,
+        0.6958333333333333
+      ],
+      "joint_rate_rms_rad_s": 0.6734139323234558,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 16,
+      "command": [
+        0.0353553406894207,
+        -0.0353553406894207,
+        0.0
+      ],
+      "samples": 60,
+      "achieved_navigation_velocity": [
+        0.02909155748784542,
+        -0.030577389523386955,
+        0.000558721658308059
+      ],
+      "linear_projection_fraction": 0.8438463807106018,
+      "yaw_projection_fraction": null,
+      "minimum_support": 3,
+      "mean_support": 4.039583333333334,
+      "toe_contact_occupancy": [
+        0.6625,
+        0.6625,
+        0.6666666666666666,
+        0.70625,
+        0.65,
+        0.6916666666666667
+      ],
+      "joint_rate_rms_rad_s": 0.6603745222091675,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 17,
+      "command": [
+        0.0,
+        0.0,
+        -0.20000000298023224
+      ],
+      "samples": 60,
+      "achieved_navigation_velocity": [
+        3.599403498810716e-05,
+        -0.00024894633679650724,
+        -0.14689798653125763
+      ],
+      "linear_projection_fraction": null,
+      "yaw_projection_fraction": 0.734489917755127,
+      "minimum_support": 3,
+      "mean_support": 4.135416666666667,
+      "toe_contact_occupancy": [
+        0.69375,
+        0.6708333333333333,
+        0.7,
+        0.7,
+        0.6729166666666667,
+        0.6979166666666666
+      ],
+      "joint_rate_rms_rad_s": 0.6287788152694702,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 18,
+      "command": [
+        0.0,
+        0.0,
+        0.20000000298023224
+      ],
+      "samples": 60,
+      "achieved_navigation_velocity": [
+        0.00028476238367147744,
+        -5.3583444241667166e-05,
+        0.1476924568414688
+      ],
+      "linear_projection_fraction": null,
+      "yaw_projection_fraction": 0.7384622693061829,
+      "minimum_support": 3,
+      "mean_support": 4.1375,
+      "toe_contact_occupancy": [
+        0.6979166666666666,
+        0.6708333333333333,
+        0.7,
+        0.6958333333333333,
+        0.6708333333333333,
+        0.7020833333333333
+      ],
+      "joint_rate_rms_rad_s": 0.6306513547897339,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 19,
+      "command": [
+        0.03999999910593033,
+        0.0,
+        -0.15000000596046448
+      ],
+      "samples": 60,
+      "achieved_navigation_velocity": [
+        0.033499155193567276,
+        0.0022432231344282627,
+        -0.11183437705039978
+      ],
+      "linear_projection_fraction": 0.8374788761138916,
+      "yaw_projection_fraction": 0.7455624938011169,
+      "minimum_support": 3,
+      "mean_support": 4.083333333333333,
+      "toe_contact_occupancy": [
+        0.68125,
+        0.6645833333333333,
+        0.6979166666666666,
+        0.6979166666666666,
+        0.6479166666666667,
+        0.69375
+      ],
+      "joint_rate_rms_rad_s": 0.6515321731567383,
+      "worst_joint_saturation": 0.0
+    },
+    {
+      "index": 20,
+      "command": [
+        0.03999999910593033,
+        0.0,
+        0.15000000596046448
+      ],
+      "samples": 60,
+      "achieved_navigation_velocity": [
+        0.03425619751214981,
+        -0.0011531371856108308,
+        0.11409458518028259
+      ],
+      "linear_projection_fraction": 0.8564049601554871,
+      "yaw_projection_fraction": 0.7606305480003357,
+      "minimum_support": 3,
+      "mean_support": 4.089583333333334,
+      "toe_contact_occupancy": [
+        0.6833333333333333,
+        0.6541666666666667,
+        0.6958333333333333,
+        0.69375,
+        0.66875,
+        0.69375
+      ],
+      "joint_rate_rms_rad_s": 0.6928679943084717,
+      "worst_joint_saturation": 0.0020833333333333333
+    }
+  ]
+}

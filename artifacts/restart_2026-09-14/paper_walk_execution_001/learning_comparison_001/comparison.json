@@ -1,0 +1,964 @@
+{
+  "scope": "Same200-update fresh32 PPO contrast; initialstd.4 vs.1. Same learner/task physics and seed; output logging/startup changes do not establish causality. Training summaries are not deterministic qualification.",
+  "runs": {
+    "003": {
+      "config": {
+        "num_envs": 32,
+        "rollout_steps": 24,
+        "epochs": 5,
+        "minibatches": 4,
+        "learning_rate": 0.0003,
+        "discriminator_learning_rate": 0.0003,
+        "gamma": 0.99,
+        "gae_lambda": 0.95,
+        "clip": 0.2,
+        "entropy_coefficient": 0.01,
+        "value_coefficient": 1.0,
+        "estimator_coefficient": 1.0,
+        "style_coefficient": 1.0,
+        "gradient_penalty": 10.0,
+        "max_grad_norm": 1.0,
+        "initial_std": 0.4,
+        "seed": 20260914,
+        "actor_hidden": [
+          256,
+          128,
+          64
+        ],
+        "memory_hidden": [
+          512,
+          256,
+          128
+        ],
+        "estimator_hidden": [
+          64,
+          32
+        ],
+        "critic_hidden": [
+          512,
+          256,
+          128
+        ],
+        "discriminator_hidden": [
+          1024,
+          512
+        ]
+      },
+      "final_metrics": {
+        "policy_loss": -0.02240143306553364,
+        "value_loss": 11.698484659194946,
+        "entropy": 10.687623834609985,
+        "estimator_loss": 0.000775715013151057,
+        "discriminator_loss": 0.00572403435362503,
+        "approx_kl": 0.05306450701318681,
+        "actor_grad_norm": 5.071521842479706,
+        "critic_grad_norm": 21.759285467863084,
+        "model_grad_norm": 22.724929165840148,
+        "clip_fraction": 0.40937501466833054,
+        "expert_score": 0.9967651605606079,
+        "policy_score": -0.9973190575838089,
+        "gradient_penalty": 0.0005840876925503835,
+        "discriminator_expert_loss": 0.0002508979814592749,
+        "discriminator_policy_loss": 0.002552698031649925,
+        "update": 200,
+        "transitions": 153600,
+        "episodes": 200,
+        "optimizer_steps": 4000,
+        "discriminator_steps": 4000,
+        "reward": 0.2562733292579651,
+        "task_reward": 0.2409076988697052,
+        "style_reward": 0.015365660190582275,
+        "action_std": 0.4383105933666229,
+        "raw_action_abs_mean": 0.6914876103401184,
+        "raw_action_clip_fraction": 0.24927662312984467,
+        "return_mean": 26.143110275268555,
+        "return_std": 4.971419334411621,
+        "explained_variance": 0.09889137744903564,
+        "terminated": 4,
+        "truncated": 0,
+        "elapsed_s": 456.8011236619204,
+        "transitions_per_s": 336.2513620121471
+      },
+      "cumulative_task": {
+        "environment_controls": 153600,
+        "signed_navigation_velocity_error_mps": [
+          -0.0029529472813010216,
+          -0.0023592854849994183
+        ],
+        "absolute_navigation_velocity_error_mps": [
+          0.04525817185640335,
+          0.04577599838376045
+        ],
+        "achieved_planar_speed_mps": 0.06446308642625809,
+        "requested_planar_speed_mps": 0.029136190190911293,
+        "signed_command_direction_speed_mps": 0.00042310880962759256,
+        "moving_command_rows": 116726,
+        "signed_yaw_error_rad_s": -0.0009391781641170382,
+        "absolute_yaw_error_rad_s": 0.1407584846019745,
+        "requested_saturation_fraction": 0.051391035318374634,
+        "terminations": 92,
+        "truncations": 108,
+        "zero_command_rows": 22444,
+        "nonfoot_event_rows": 0,
+        "moving_signed_command_direction_speed_mps": 0.0005567695027185658,
+        "nonfoot_event_fraction": 0.0,
+        "task_reward_sum": 34754.53067645198,
+        "task_reward_mean": 0.2262664757581509,
+        "reward_components": {
+          "linear_tracking": {
+            "sum": 19079.18597449691,
+            "absolute_sum": 19079.18597449691,
+            "mean": 0.1242134503547976,
+            "mean_absolute": 0.1242134503547976
+          },
+          "yaw_tracking": {
+            "sum": 28929.757208499577,
+            "absolute_sum": 28929.757208499577,
+            "mean": 0.1883447734928358,
+            "mean_absolute": 0.1883447734928358
+          },
+          "quiet_joint_rate": {
+            "sum": -8917.689301222563,
+            "absolute_sum": 8917.689301222563,
+            "mean": -0.05805787305483439,
+            "mean_absolute": 0.05805787305483439
+          },
+          "quiet_target_motion": {
+            "sum": -3063.7591469734907,
+            "absolute_sum": 3063.7591469734907,
+            "mean": -0.019946348613108664,
+            "mean_absolute": 0.019946348613108664
+          },
+          "tilt": {
+            "sum": -56.177605627560474,
+            "absolute_sum": 56.177605627560474,
+            "mean": -0.00036573961997109683,
+            "mean_absolute": 0.00036573961997109683
+          },
+          "roll_pitch_rate": {
+            "sum": -60.382978113441176,
+            "absolute_sum": 60.382978113441176,
+            "mean": -0.000393118347092716,
+            "mean_absolute": 0.000393118347092716
+          },
+          "vertical_velocity": {
+            "sum": -15.675141275811201,
+            "absolute_sum": 15.675141275811201,
+            "mean": -0.00010205170101439584,
+            "mean_absolute": 0.00010205170101439584
+          },
+          "height": {
+            "sum": -39.60335343784082,
+            "absolute_sum": 39.60335343784082,
+            "mean": -0.00025783433227760953,
+            "mean_absolute": 0.00025783433227760953
+          },
+          "effort": {
+            "sum": -263.4856749379542,
+            "absolute_sum": 263.4856749379542,
+            "mean": -0.0017154015295439726,
+            "mean_absolute": 0.0017154015295439726
+          },
+          "target_motion": {
+            "sum": -653.639298576978,
+            "absolute_sum": 653.639298576978,
+            "mean": -0.004255464183443867,
+            "mean_absolute": 0.004255464183443867
+          },
+          "nonfoot_contact": {
+            "sum": 0.0,
+            "absolute_sum": 0.0,
+            "mean": 0.0,
+            "mean_absolute": 0.0
+          },
+          "termination": {
+            "sum": -184.0,
+            "absolute_sum": 184.0,
+            "mean": -0.0011979166666666666,
+            "mean_absolute": 0.0011979166666666666
+          }
+        },
+        "command_classes": {
+          "zero": {
+            "environment_controls": 22444,
+            "time_fraction": 0.14611979166666667,
+            "task_reward_mean": -0.19235313834624454,
+            "reward_component_means": {
+              "linear_tracking": 0.15161988791803793,
+              "yaw_tracking": 0.1984870959621982,
+              "quiet_joint_rate": -0.3973306585823633,
+              "quiet_target_motion": -0.13650682351512614,
+              "tilt": -0.000378278670119305,
+              "roll_pitch_rate": -0.000401164232666403,
+              "vertical_velocity": -0.00010328770071303191,
+              "height": -0.000247608757298456,
+              "effort": -0.001717181787145026,
+              "target_motion": -0.0042602372939609685,
+              "nonfoot_contact": 0.0,
+              "termination": -0.0015148814828016396
+            },
+            "reward_component_mean_absolute": {
+              "linear_tracking": 0.15161988791803793,
+              "yaw_tracking": 0.1984870959621982,
+              "quiet_joint_rate": 0.3973306585823633,
+              "quiet_target_motion": 0.13650682351512614,
+              "tilt": 0.000378278670119305,
+              "roll_pitch_rate": 0.000401164232666403,
+              "vertical_velocity": 0.00010328770071303191,
+              "height": 0.000247608757298456,
+              "effort": 0.001717181787145026,
+              "target_motion": 0.0042602372939609685,
+              "nonfoot_contact": 0.0,
+              "termination": 0.0015148814828016396
+            },
+            "requested_planar_speed_mps": 0.0,
+            "moving_command_rows": 0,
+            "moving_signed_command_direction_speed_mps": null,
+            "nonfoot_event_fraction": 0.0
+          },
+          "linear_0.025": {
+            "environment_controls": 48622,
+            "time_fraction": 0.31654947916666665,
+            "task_reward_mean": 0.3244037995912763,
+            "reward_component_means": {
+              "linear_tracking": 0.134388124920379,
+              "yaw_tracking": 0.1980710438713717,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": -0.00034733171752121143,
+              "roll_pitch_rate": -0.00039402419325017653,
+              "vertical_velocity": -0.00010219771960910727,
+              "height": -0.0002298431098150779,
+              "effort": -0.0017245086061662075,
+              "target_motion": -0.004270256526980744,
+              "nonfoot_contact": 0.0,
+              "termination": -0.0009872074369626919
+            },
+            "reward_component_mean_absolute": {
+              "linear_tracking": 0.134388124920379,
+              "yaw_tracking": 0.1980710438713717,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": 0.00034733171752121143,
+              "roll_pitch_rate": 0.00039402419325017653,
+              "vertical_velocity": 0.00010219771960910727,
+              "height": 0.0002298431098150779,
+              "effort": 0.0017245086061662075,
+              "target_motion": 0.004270256526980744,
+              "nonfoot_contact": 0.0,
+              "termination": 0.0009872074369626919
+            },
+            "requested_planar_speed_mps": 0.02500000037252903,
+            "moving_command_rows": 48622,
+            "moving_signed_command_direction_speed_mps": -6.567867750647398e-05,
+            "nonfoot_event_fraction": 0.0
+          },
+          "linear_0.05": {
+            "environment_controls": 53564,
+            "time_fraction": 0.3487239583333333,
+            "task_reward_mean": 0.2905226818964031,
+            "reward_component_means": {
+              "linear_tracking": 0.09830366099466718,
+              "yaw_tracking": 0.20053780916536804,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": -0.0003943907854737385,
+              "roll_pitch_rate": -0.00039205027173318485,
+              "vertical_velocity": -0.0001015455615777963,
+              "height": -0.00029655131088410263,
+              "effort": -0.0017101269960309768,
+              "target_motion": -0.0042292908135658355,
+              "nonfoot_contact": 0.0,
+              "termination": -0.0011948323500858785
+            },
+            "reward_component_mean_absolute": {
+              "linear_tracking": 0.09830366099466718,
+              "yaw_tracking": 0.20053780916536804,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": 0.0003943907854737385,
+              "roll_pitch_rate": 0.00039205027173318485,
+              "vertical_velocity": 0.0001015455615777963,
+              "height": 0.00029655131088410263,
+              "effort": 0.0017101269960309768,
+              "target_motion": 0.0042292908135658355,
+              "nonfoot_contact": 0.0,
+              "termination": 0.0011948323500858785
+            },
+            "requested_planar_speed_mps": 0.05000000074505806,
+            "moving_command_rows": 53564,
+            "moving_signed_command_direction_speed_mps": 0.0007460582593193777,
+            "nonfoot_event_fraction": 0.0
+          },
+          "yaw": {
+            "environment_controls": 14430,
+            "time_fraction": 0.0939453125,
+            "task_reward_mean": 0.27287400750549345,
+            "reward_component_means": {
+              "linear_tracking": 0.1538428246059205,
+              "yaw_tracking": 0.12769369868266453,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": -0.00038711295745809317,
+              "roll_pitch_rate": -0.00039546483781991305,
+              "vertical_velocity": -0.00010113653531433633,
+              "height": -0.00027604636591564474,
+              "effort": -0.0017263009989759526,
+              "target_motion": -0.004251852886843588,
+              "nonfoot_contact": 0.0,
+              "termination": -0.0015246015246015245
+            },
+            "reward_component_mean_absolute": {
+              "linear_tracking": 0.1538428246059205,
+              "yaw_tracking": 0.12769369868266453,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": 0.00038711295745809317,
+              "roll_pitch_rate": 0.00039546483781991305,
+              "vertical_velocity": 0.00010113653531433633,
+              "height": 0.00027604636591564474,
+              "effort": 0.0017263009989759526,
+              "target_motion": 0.004251852886843588,
+              "nonfoot_contact": 0.0,
+              "termination": 0.0015246015246015245
+            },
+            "requested_planar_speed_mps": 0.0,
+            "moving_command_rows": 0,
+            "moving_signed_command_direction_speed_mps": null,
+            "nonfoot_event_fraction": 0.0
+          },
+          "arc": {
+            "environment_controls": 14540,
+            "time_fraction": 0.09466145833333334,
+            "task_reward_mean": 0.261307710341461,
+            "reward_component_means": {
+              "linear_tracking": 0.11392851056423581,
+              "yaw_tracking": 0.15543846282569018,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": -0.00028118076869675427,
+              "roll_pitch_rate": -0.0003792754736182049,
+              "vertical_velocity": -0.00010242833103403681,
+              "height": -0.000206517697884919,
+              "effort": -0.0016908131793419272,
+              "target_motion": -0.0042986347731407805,
+              "nonfoot_contact": 0.0,
+              "termination": -0.0011004126547455295
+            },
+            "reward_component_mean_absolute": {
+              "linear_tracking": 0.11392851056423581,
+              "yaw_tracking": 0.15543846282569018,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": 0.00028118076869675427,
+              "roll_pitch_rate": 0.0003792754736182049,
+              "vertical_velocity": 0.00010242833103403681,
+              "height": 0.000206517697884919,
+              "effort": 0.0016908131793419272,
+              "target_motion": 0.0042986347731407805,
+              "nonfoot_contact": 0.0,
+              "termination": 0.0011004126547455295
+            },
+            "requested_planar_speed_mps": 0.03999999910593033,
+            "moving_command_rows": 14540,
+            "moving_signed_command_direction_speed_mps": 0.0019409244174596943,
+            "nonfoot_event_fraction": 0.0
+          },
+          "other": {
+            "environment_controls": 0,
+            "time_fraction": 0.0,
+            "task_reward_mean": null,
+            "reward_component_means": {
+              "linear_tracking": null,
+              "yaw_tracking": null,
+              "quiet_joint_rate": null,
+              "quiet_target_motion": null,
+              "tilt": null,
+              "roll_pitch_rate": null,
+              "vertical_velocity": null,
+              "height": null,
+              "effort": null,
+              "target_motion": null,
+              "nonfoot_contact": null,
+              "termination": null
+            },
+            "reward_component_mean_absolute": {
+              "linear_tracking": null,
+              "yaw_tracking": null,
+              "quiet_joint_rate": null,
+              "quiet_target_motion": null,
+              "tilt": null,
+              "roll_pitch_rate": null,
+              "vertical_velocity": null,
+              "height": null,
+              "effort": null,
+              "target_motion": null,
+              "nonfoot_contact": null,
+              "termination": null
+            },
+            "requested_planar_speed_mps": null,
+            "moving_command_rows": 0,
+            "moving_signed_command_direction_speed_mps": null,
+            "nonfoot_event_fraction": null
+          }
+        },
+        "zero_hold_joint_rate_rms_rad_s": [
+          0.6829692052926094,
+          1.1151597949990815,
+          2.087505271319164,
+          0.6480419347707587,
+          0.9865942096358783,
+          1.6439559288926673,
+          0.7209032186574179,
+          1.0939766668347424,
+          2.2408565020202795,
+          0.6818925682635409,
+          1.0750723292739615,
+          1.8116246395332454,
+          0.6438862681417328,
+          1.1970358492358375,
+          2.5171572366321993,
+          0.7156165881264392,
+          1.0343179001981009,
+          2.145676750746765
+        ],
+        "zero_hold_worst_joint_rate_rms_rad_s": 2.5171572366321993,
+        "zero_hold_all_joint_rate_rms_rad_s": 1.4176213345646869,
+        "diagnostic_scope": "Time-weighted 50Hz control endpoints; nonfoot events use each control's maximum 400Hz body/coxa/femur floor force >1N. These are reporting metrics, not Stage2 admission."
+      },
+      "quarters": [
+        {
+          "updates": [
+            1,
+            50
+          ],
+          "terminations": 2,
+          "mean_style_reward": 0.135807231888175,
+          "mean_raw_action_abs": 0.3464521986246109,
+          "mean_action_clip_fraction": 0.022591146025806665,
+          "mean_KL": 0.025640117208257537
+        },
+        {
+          "updates": [
+            51,
+            100
+          ],
+          "terminations": 6,
+          "mean_style_reward": 0.027309055970981717,
+          "mean_raw_action_abs": 0.4986662256717682,
+          "mean_action_clip_fraction": 0.11074508219957352,
+          "mean_KL": 0.07833676065248435
+        },
+        {
+          "updates": [
+            101,
+            150
+          ],
+          "terminations": 17,
+          "mean_style_reward": 0.021071810889989138,
+          "mean_raw_action_abs": 0.5650343233346939,
+          "mean_action_clip_fraction": 0.1561357071995735,
+          "mean_KL": 0.09773044465746111
+        },
+        {
+          "updates": [
+            151,
+            200
+          ],
+          "terminations": 67,
+          "mean_style_reward": 0.013884764835238457,
+          "mean_raw_action_abs": 0.6159524047374725,
+          "mean_action_clip_fraction": 0.19283275693655014,
+          "mean_KL": 0.07967451170952215
+        }
+      ]
+    },
+    "005": {
+      "config": {
+        "num_envs": 32,
+        "rollout_steps": 24,
+        "epochs": 5,
+        "minibatches": 4,
+        "learning_rate": 0.0003,
+        "discriminator_learning_rate": 0.0003,
+        "gamma": 0.99,
+        "gae_lambda": 0.95,
+        "clip": 0.2,
+        "entropy_coefficient": 0.01,
+        "value_coefficient": 1.0,
+        "estimator_coefficient": 1.0,
+        "style_coefficient": 1.0,
+        "gradient_penalty": 10.0,
+        "max_grad_norm": 1.0,
+        "initial_std": 0.1,
+        "seed": 20260914,
+        "actor_hidden": [
+          256,
+          128,
+          64
+        ],
+        "memory_hidden": [
+          512,
+          256,
+          128
+        ],
+        "estimator_hidden": [
+          64,
+          32
+        ],
+        "critic_hidden": [
+          512,
+          256,
+          128
+        ],
+        "discriminator_hidden": [
+          1024,
+          512
+        ]
+      },
+      "final_metrics": {
+        "policy_loss": -0.04321870906278491,
+        "value_loss": 0.9813732385635376,
+        "entropy": -13.792716550827027,
+        "estimator_loss": 0.0002841890229319688,
+        "discriminator_loss": 0.007199185993522405,
+        "approx_kl": 0.24564703927996256,
+        "actor_grad_norm": 8.061751341819763,
+        "critic_grad_norm": 7.372203278541565,
+        "model_grad_norm": 11.883123922348023,
+        "clip_fraction": 0.6653645962476731,
+        "expert_score": 0.9976485878229141,
+        "policy_score": -0.9987150222063065,
+        "gradient_penalty": 0.0007063199154799804,
+        "discriminator_expert_loss": 0.0013940993667347357,
+        "discriminator_policy_loss": 0.0022734869155101476,
+        "update": 200,
+        "transitions": 153600,
+        "episodes": 131,
+        "optimizer_steps": 4000,
+        "discriminator_steps": 4000,
+        "reward": 0.4638546407222748,
+        "task_reward": 0.4476093649864197,
+        "style_reward": 0.016245242208242416,
+        "action_std": 0.1125347912311554,
+        "raw_action_abs_mean": 0.16878658533096313,
+        "raw_action_clip_fraction": 0.0,
+        "return_mean": 46.639862060546875,
+        "return_std": 2.1321911811828613,
+        "explained_variance": 0.542533278465271,
+        "terminated": 0,
+        "truncated": 0,
+        "elapsed_s": 436.74479419807903,
+        "transitions_per_s": 351.6928010144456
+      },
+      "cumulative_task": {
+        "environment_controls": 153600,
+        "signed_navigation_velocity_error_mps": [
+          -0.005023872945457697,
+          -1.956288360815961e-05
+        ],
+        "absolute_navigation_velocity_error_mps": [
+          0.02850215695798397,
+          0.026461277157068253
+        ],
+        "achieved_planar_speed_mps": 0.03109174780547619,
+        "requested_planar_speed_mps": 0.02863919921219349,
+        "signed_command_direction_speed_mps": 0.0005607267376035452,
+        "moving_command_rows": 116517,
+        "signed_yaw_error_rad_s": -0.001791470916941762,
+        "absolute_yaw_error_rad_s": 0.09582814574241638,
+        "requested_saturation_fraction": 0.002415271243080497,
+        "terminations": 3,
+        "truncations": 128,
+        "zero_command_rows": 23626,
+        "nonfoot_event_rows": 0,
+        "moving_signed_command_direction_speed_mps": 0.0007391852043368072,
+        "nonfoot_event_fraction": 0.0,
+        "task_reward_sum": 65531.23964154662,
+        "task_reward_mean": 0.42663567474965247,
+        "reward_components": {
+          "linear_tracking": {
+            "sum": 42198.67357873182,
+            "absolute_sum": 42198.67357873182,
+            "mean": 0.27473094777820195,
+            "mean_absolute": 0.27473094777820195
+          },
+          "yaw_tracking": {
+            "sum": 35171.431409265904,
+            "absolute_sum": 35171.431409265904,
+            "mean": 0.22898067323740823,
+            "mean_absolute": 0.22898067323740823
+          },
+          "quiet_joint_rate": {
+            "sum": -8058.676449865103,
+            "absolute_sum": 8058.676449865103,
+            "mean": -0.05246534147047593,
+            "mean_absolute": 0.05246534147047593
+          },
+          "quiet_target_motion": {
+            "sum": -3092.238272808492,
+            "absolute_sum": 3092.238272808492,
+            "mean": -0.020131759588596955,
+            "mean_absolute": 0.020131759588596955
+          },
+          "tilt": {
+            "sum": -5.831707835221728,
+            "absolute_sum": 5.831707835221728,
+            "mean": -3.7966847885558126e-05,
+            "mean_absolute": 3.7966847885558126e-05
+          },
+          "roll_pitch_rate": {
+            "sum": -28.562705841570978,
+            "absolute_sum": 28.562705841570978,
+            "mean": -0.00018595511615606105,
+            "mean_absolute": 0.00018595511615606105
+          },
+          "vertical_velocity": {
+            "sum": -6.7183081109329095,
+            "absolute_sum": 6.7183081109329095,
+            "mean": -4.373898509721946e-05,
+            "mean_absolute": 4.373898509721946e-05
+          },
+          "height": {
+            "sum": -7.904860921847106,
+            "absolute_sum": 7.904860921847106,
+            "mean": -5.146393829327543e-05,
+            "mean_absolute": 5.146393829327543e-05
+          },
+          "effort": {
+            "sum": -136.13464367788401,
+            "absolute_sum": 136.13464367788401,
+            "mean": -0.0008862932531112241,
+            "mean_absolute": 0.0008862932531112241
+          },
+          "target_motion": {
+            "sum": -496.7983573785168,
+            "absolute_sum": 496.7983573785168,
+            "mean": -0.003234364305849719,
+            "mean_absolute": 0.003234364305849719
+          },
+          "nonfoot_contact": {
+            "sum": 0.0,
+            "absolute_sum": 0.0,
+            "mean": 0.0,
+            "mean_absolute": 0.0
+          },
+          "termination": {
+            "sum": -6.0,
+            "absolute_sum": 6.0,
+            "mean": -3.90625e-05,
+            "mean_absolute": 3.90625e-05
+          }
+        },
+        "command_classes": {
+          "zero": {
+            "environment_controls": 23626,
+            "time_fraction": 0.15381510416666666,
+            "task_reward_mean": 0.19521412977409605,
+            "reward_component_means": {
+              "linear_tracking": 0.4237426743856488,
+              "yaw_tracking": 0.2479866238632477,
+              "quiet_joint_rate": -0.3410935600552401,
+              "quiet_target_motion": -0.13088285248491036,
+              "tilt": -3.7497986876150024e-05,
+              "roll_pitch_rate": -0.0001887489433992555,
+              "vertical_velocity": -4.365852237490822e-05,
+              "height": -5.2117189855153696e-05,
+              "effort": -0.0008819941233075237,
+              "target_motion": -0.0032500850972576397,
+              "nonfoot_contact": 0.0,
+              "termination": -8.465250148141877e-05
+            },
+            "reward_component_mean_absolute": {
+              "linear_tracking": 0.4237426743856488,
+              "yaw_tracking": 0.2479866238632477,
+              "quiet_joint_rate": 0.3410935600552401,
+              "quiet_target_motion": 0.13088285248491036,
+              "tilt": 3.7497986876150024e-05,
+              "roll_pitch_rate": 0.0001887489433992555,
+              "vertical_velocity": 4.365852237490822e-05,
+              "height": 5.2117189855153696e-05,
+              "effort": 0.0008819941233075237,
+              "target_motion": 0.0032500850972576397,
+              "nonfoot_contact": 0.0,
+              "termination": 8.465250148141877e-05
+            },
+            "requested_planar_speed_mps": 0.0,
+            "moving_command_rows": 0,
+            "moving_signed_command_direction_speed_mps": null,
+            "nonfoot_event_fraction": 0.0
+          },
+          "linear_0.025": {
+            "environment_controls": 50374,
+            "time_fraction": 0.32795572916666665,
+            "task_reward_mean": 0.56681250441491,
+            "reward_component_means": {
+              "linear_tracking": 0.32242359093541606,
+              "yaw_tracking": 0.2488164162376163,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": -3.862421991867165e-05,
+              "roll_pitch_rate": -0.00018463953101745977,
+              "vertical_velocity": -4.3120769849196524e-05,
+              "height": -5.1259411490855304e-05,
+              "effort": -0.0008815212603933576,
+              "target_motion": -0.0032283375559364206,
+              "nonfoot_contact": 0.0,
+              "termination": 0.0
+            },
+            "reward_component_mean_absolute": {
+              "linear_tracking": 0.32242359093541606,
+              "yaw_tracking": 0.2488164162376163,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": 3.862421991867165e-05,
+              "roll_pitch_rate": 0.00018463953101745977,
+              "vertical_velocity": 4.3120769849196524e-05,
+              "height": 5.1259411490855304e-05,
+              "effort": 0.0008815212603933576,
+              "target_motion": 0.0032283375559364206,
+              "nonfoot_contact": 0.0,
+              "termination": 0.0
+            },
+            "requested_planar_speed_mps": 0.02500000037252903,
+            "moving_command_rows": 50374,
+            "moving_signed_command_direction_speed_mps": 0.0005388554694278103,
+            "nonfoot_event_fraction": 0.0
+          },
+          "linear_0.05": {
+            "environment_controls": 49395,
+            "time_fraction": 0.32158203125,
+            "task_reward_mean": 0.3802838147745522,
+            "reward_component_means": {
+              "linear_tracking": 0.13686286468877454,
+              "yaw_tracking": 0.24795277880733857,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": -3.9206039721373716e-05,
+              "roll_pitch_rate": -0.00018674553983381888,
+              "vertical_velocity": -4.4271046241908926e-05,
+              "height": -5.699856594060984e-05,
+              "effort": -0.0008955669618619806,
+              "target_motion": -0.0032280606533096117,
+              "nonfoot_contact": 0.0,
+              "termination": -8.097985626075514e-05
+            },
+            "reward_component_mean_absolute": {
+              "linear_tracking": 0.13686286468877454,
+              "yaw_tracking": 0.24795277880733857,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": 3.9206039721373716e-05,
+              "roll_pitch_rate": 0.00018674553983381888,
+              "vertical_velocity": 4.4271046241908926e-05,
+              "height": 5.699856594060984e-05,
+              "effort": 0.0008955669618619806,
+              "target_motion": 0.0032280606533096117,
+              "nonfoot_contact": 0.0,
+              "termination": 8.097985626075514e-05
+            },
+            "requested_planar_speed_mps": 0.05000000074505806,
+            "moving_command_rows": 49395,
+            "moving_signed_command_direction_speed_mps": 0.0010527259621495393,
+            "nonfoot_event_fraction": 0.0
+          },
+          "yaw": {
+            "environment_controls": 13457,
+            "time_fraction": 0.08761067708333334,
+            "task_reward_mean": 0.5513501518495234,
+            "reward_component_means": {
+              "linear_tracking": 0.43015585593181654,
+              "yaw_tracking": 0.12560213792710906,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": -3.444100764502967e-05,
+              "roll_pitch_rate": -0.0001844637800107578,
+              "vertical_velocity": -4.2367914457160646e-05,
+              "height": -5.183790469816515e-05,
+              "effort": -0.0008719421578401166,
+              "target_motion": -0.0032227890645891225,
+              "nonfoot_contact": 0.0,
+              "termination": 0.0
+            },
+            "reward_component_mean_absolute": {
+              "linear_tracking": 0.43015585593181654,
+              "yaw_tracking": 0.12560213792710906,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": 3.444100764502967e-05,
+              "roll_pitch_rate": 0.0001844637800107578,
+              "vertical_velocity": 4.2367914457160646e-05,
+              "height": 5.183790469816515e-05,
+              "effort": 0.0008719421578401166,
+              "target_motion": 0.0032227890645891225,
+              "nonfoot_contact": 0.0,
+              "termination": 0.0
+            },
+            "requested_planar_speed_mps": 0.0,
+            "moving_command_rows": 0,
+            "moving_signed_command_direction_speed_mps": null,
+            "nonfoot_event_fraction": 0.0
+          },
+          "arc": {
+            "environment_controls": 16748,
+            "time_fraction": 0.10903645833333334,
+            "task_reward_mean": 0.36797584725812665,
+            "reward_component_means": {
+              "linear_tracking": 0.20280717872816853,
+              "yaw_tracking": 0.16961821131153182,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": -3.582929132948549e-05,
+              "roll_pitch_rate": -0.00018483798314129456,
+              "vertical_velocity": -4.5244378251181776e-05,
+              "height": -3.4533780256106256e-05,
+              "effort": -0.0008908910228289038,
+              "target_motion": -0.0032582064972272785,
+              "nonfoot_contact": 0.0,
+              "termination": 0.0
+            },
+            "reward_component_mean_absolute": {
+              "linear_tracking": 0.20280717872816853,
+              "yaw_tracking": 0.16961821131153182,
+              "quiet_joint_rate": 0.0,
+              "quiet_target_motion": 0.0,
+              "tilt": 3.582929132948549e-05,
+              "roll_pitch_rate": 0.00018483798314129456,
+              "vertical_velocity": 4.5244378251181776e-05,
+              "height": 3.4533780256106256e-05,
+              "effort": 0.0008908910228289038,
+              "target_motion": 0.0032582064972272785,
+              "nonfoot_contact": 0.0,
+              "termination": 0.0
+            },
+            "requested_planar_speed_mps": 0.03999999910593033,
+            "moving_command_rows": 16748,
+            "moving_signed_command_direction_speed_mps": 0.0004170013217326698,
+            "nonfoot_event_fraction": 0.0
+          },
+          "other": {
+            "environment_controls": 0,
+            "time_fraction": 0.0,
+            "task_reward_mean": null,
+            "reward_component_means": {
+              "linear_tracking": null,
+              "yaw_tracking": null,
+              "quiet_joint_rate": null,
+              "quiet_target_motion": null,
+              "tilt": null,
+              "roll_pitch_rate": null,
+              "vertical_velocity": null,
+              "height": null,
+              "effort": null,
+              "target_motion": null,
+              "nonfoot_contact": null,
+              "termination": null
+            },
+            "reward_component_mean_absolute": {
+              "linear_tracking": null,
+              "yaw_tracking": null,
+              "quiet_joint_rate": null,
+              "quiet_target_motion": null,
+              "tilt": null,
+              "roll_pitch_rate": null,
+              "vertical_velocity": null,
+              "height": null,
+              "effort": null,
+              "target_motion": null,
+              "nonfoot_contact": null,
+              "termination": null
+            },
+            "requested_planar_speed_mps": null,
+            "moving_command_rows": 0,
+            "moving_signed_command_direction_speed_mps": null,
+            "nonfoot_event_fraction": null
+          }
+        },
+        "zero_hold_joint_rate_rms_rad_s": [
+          0.3781985143788627,
+          0.6616037682763926,
+          0.9520361579829874,
+          0.3202846457702359,
+          0.6654074744692579,
+          0.8951951929777455,
+          0.3503949335843082,
+          0.7473838214958636,
+          0.8272562761439846,
+          0.34441873126781886,
+          0.7152167484852253,
+          0.8570119215958673,
+          0.3193879379296059,
+          0.6314048901140166,
+          0.7968650321723487,
+          0.3693593267792879,
+          0.6497966980801807,
+          1.123234622365806
+        ],
+        "zero_hold_worst_joint_rate_rms_rad_s": 1.123234622365806,
+        "zero_hold_all_joint_rate_rms_rad_s": 0.68799967204503,
+        "diagnostic_scope": "Time-weighted 50Hz control endpoints; nonfoot events use each control's maximum 400Hz body/coxa/femur floor force >1N. These are reporting metrics, not Stage2 admission."
+      },
+      "quarters": [
+        {
+          "updates": [
+            1,
+            50
+          ],
+          "terminations": 0,
+          "mean_style_reward": 0.1489471621066332,
+          "mean_raw_action_abs": 0.08842196270823478,
+          "mean_action_clip_fraction": 0.0,
+          "mean_KL": 0.05139941131928935
+        },
+        {
+          "updates": [
+            51,
+            100
+          ],
+          "terminations": 0,
+          "mean_style_reward": 0.041913253664970396,
+          "mean_raw_action_abs": 0.11901894494891167,
+          "mean_action_clip_fraction": 0.0,
+          "mean_KL": 0.16867499739637906
+        },
+        {
+          "updates": [
+            101,
+            150
+          ],
+          "terminations": 2,
+          "mean_style_reward": 0.03201701808720827,
+          "mean_raw_action_abs": 0.15402795433998107,
+          "mean_action_clip_fraction": 2.8935185400769113e-06,
+          "mean_KL": 0.22913114005529006
+        },
+        {
+          "updates": [
+            151,
+            200
+          ],
+          "terminations": 1,
+          "mean_style_reward": 0.02364467735402286,
+          "mean_raw_action_abs": 0.1697029608488083,
+          "mean_action_clip_fraction": 2.8935185400769113e-06,
+          "mean_KL": 0.2554399298227702
+        }
+      ]
+    }
+  },
+  "files": {
+    "results_train_003/standing/learner/metrics.jsonl": "031b8619f7bdb9c2b8c9aac1b73bab890d52934a43babcae0c982688daba5e54",
+    "results_train_003/standing/learner/checkpoint_000200.pt": "27c7ef7c15cc61faf90fdb10d636f2bbd7893f213cc14afdf45ec2656cfaed9d",
+    "results_train_003/standing/task/latest_status.json": "c1d8a698c4cea6e53d1bc45d9e87414b4df3fc2f971873052acecc1e1d46691d",
+    "results_train_005/standing/learner/metrics.jsonl": "65444380cf4564787d5a5e213c8ae253a5170c921369ed4579af076b419a366b",
+    "results_train_005/standing/learner/checkpoint_000200.pt": "43ed0d8291feb028004f843e78b1e01fd3695fd81234d1bef391ff53cef6b035",
+    "results_train_005/standing/task/latest_status.json": "a5afad0399a26092219105e688be26505a1c6b6ad618c5b7276b91925c890cc4"
+  },
+  "stage2_complete": false,
+  "changed_learner_configuration": {
+    "initial_std": [
+      0.4,
+      0.1
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "recorded_at_utc": "2026-09-15T00:31:47.609656+00:00",
+  "scope": "Independent findings completed after original Fable dispatch; original input unchanged. No additional model invocation yet.",
+  "normalizer_artifact": "/Users/andreboufama/Documents/hex/hexapod-cupi/artifacts/restart_2026-09-14/paper_walk_execution_001/normalizer_diagnostic_001",
+  "normalizer_manifest_sha256": "6944858957b1947fd5e72bad17e986967ee3b4dc756de4ce89d2aa89f034862b",
+  "normalizer_result_sha256": "2e2750c1a3984f5bc81b5733b909d80a3ce514df9bf7b4190f41c278ce07131a",
+  "normalizer_readme_sha256": "dbd9c51b95ae9a74f1cd153dc0549a6c9421ae7ad349b1ce010ee1b10cb365d5",
+  "normalizer_facts": {
+    "actual_observation_rows": 24,
+    "scope": "Saved eval012forward pre-policy observations0:23; not train006 update2 observations",
+    "fixed_BC_weights_24row_stats_update_mean_KL": 0.0369895,
+    "statistical_weight_fraction": 0.0063425,
+    "fixed_BC_weights_swap_to_final200_stats_KL": 24.9701,
+    "fixed_final200_weights_same24row_update_KL": 1.54269e-07,
+    "fixed_final200_weights_swap_to_BC_stats_KL": 185.189,
+    "unclamped_BC24row_update_KL_diagnostic_only": 0.15121
+  },
+  "optimizer_math_result_sha256": "744517db2c42ae9f387d1f1ecfad66b39298192ecbb7637be04061c78fd5abf6",
+  "optimizer_math_passed": true,
+  "limitations": [
+    "Counterfactual same-observation normalizer swaps do not reproduce missing training rollout or prove native causal mechanism.",
+    "Synthetic rollback tests do not validate future integrated learner implementation.",
+    "No clearing/restoring BC statistics into final200 network is justified by this diagnostic."
+  ]
+}

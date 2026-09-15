@@ -1,0 +1,27 @@
+{
+  "remote_root": "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001",
+  "required_relative_files": [
+    "verification_batch128_001/audit.json",
+    "verification_batch128_001/audit.log",
+    "diagnostic_batch128_001/launch_binding.json",
+    "diagnostic_batch128_001/standing/state.json",
+    "diagnostic_batch128_001/standing/identity.json",
+    "diagnostic_batch128_001/standing/standing/standing_report.json",
+    "diagnostic_batch128_001/standing/standing/session.json",
+    "diagnostic_batch128_001/standing/standing/initial_reset.json",
+    "diagnostic_batch128_001/standing/standing/native_readback.json",
+    "diagnostic_batch128_001/standing/native/native_readback.json",
+    "diagnostic_batch128_001/standing/native/native_errors.json",
+    "diagnostic_batch128_001/jobs/standing.json",
+    "diagnostic_batch128_001/jobs/standing_contact_data_audit.json",
+    "diagnostic_batch128_001/cleanup.json"
+  ],
+  "optional_new_root_receipt": "Record independent audit unit/invocation, Python+NumPy versions, exit code, completion time and resource state separately.",
+  "raw_files_not_to_download": [
+    "diagnostic_batch128_001/standing/standing/contacts.jsonl",
+    "diagnostic_batch128_001/standing/standing/substeps_*.npz",
+    "diagnostic_batch128_001/standing/standing/control_trace.npz"
+  ],
+  "raw_retention": "Keep complete immutable11.5GB native result on Spark. Actual audit must hash/recompute all raw files there; compact files are transfer receipts, not replacement raw evidence.",
+  "receipt_consistency": "Download only after independent audit completes. Verify each selected native file against audit.json input_sha256 and confirm audited source/input hashes remain exact."
+}

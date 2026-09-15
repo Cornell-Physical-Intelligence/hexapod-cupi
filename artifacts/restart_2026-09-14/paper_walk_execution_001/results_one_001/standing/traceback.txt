@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/source/train.py", line 165, in main
+    env = PaperWalkEnv(cfg, args.asset, args.model, args.geometry, args.output / "native", reference_metadata=metadata)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/source/env.py", line 150, in __init__
+    native_limits = self.get("get_dof_limits")[:, self.joint_index]
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: indices should be either on cpu or on the same device as the indexed tensor (cpu)

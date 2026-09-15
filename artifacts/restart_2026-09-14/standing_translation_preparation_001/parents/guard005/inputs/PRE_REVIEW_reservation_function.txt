@@ -1,0 +1,47 @@
+def verify_reservation():
+    for name,bound in RESERVATION_PINS.items():
+        p=Path(name)
+        if p.is_symlink() or not p.is_file() or sha(p)!=bound:raise RuntimeError('Persistent reservation missing/changed: '+name)
+    policy_path=Path(__file__).resolve().parent/'inputs/reservation_policy.json'
+    if not valid_hash(MASK_POLICY_SHA256)or sha(policy_path)!=MASK_POLICY_SHA256:raise RuntimeError('Reviewed mask/reservation policy pending or changed')
+    policy=json.loads(policy_path.read_text())
+    if policy.get('schema')!='canonical_exclusive_mask_reservation_v1'or policy.get('release_only_on_user_instruction')is not True:raise RuntimeError('Wrong persistent mask policy')
+    for name,bound in policy['files'].items():
+        p=Path(name)
+        if p.is_symlink()or not p.is_file()or sha(p)!=bound:raise RuntimeError('Persistent automation/reconstruction binding changed: '+name)
+    if json.loads((RESERVATION/'ACTIVE').read_text()).get('exclusive')is not True:raise RuntimeError('Exclusive reservation is not active')
+    reload_flags={}
+    for name in policy['mask_paths']:
+        p=Path(name)
+        if not p.is_symlink()or os.readlink(p)!='/dev/null':raise RuntimeError('Exact automation mask missing: '+name)
+        unit=p.name
+        fields=dict(line.split('=',1)for line in call(['systemctl','--user','show',unit,'-p','LoadState','-p','ActiveState','-p','UnitFileState','-p','MainPID','-p','FragmentPath','-p','NeedDaemonReload']).splitlines()if '='in line)
+        if fields.get('LoadState')!='masked'or fields.get('UnitFileState')!='masked'or fields.get('ActiveState')!='inactive'or fields.get('FragmentPath')!=name:raise RuntimeError('Automation unit is not the exact inactive loaded mask: '+unit)
+        if (unit.endswith('.service')and fields.get('MainPID')!='0')or (unit.endswith('.timer')and fields.get('MainPID','0')!='0'):raise RuntimeError('Masked automation unit still has a process: '+unit)
+        # Actual masked units can retain old Condition drop-ins and report yes after reload.
+        # Exact mask bytes, loaded mask state and inactive process checks are authoritative here.
+        if fields.get('NeedDaemonReload')not in ('yes','no'):raise RuntimeError('Mask reload metadata unavailable: '+unit)
+        reload_flags[unit]=fields['NeedDaemonReload']
+    before=json.loads(Path(policy['original_units_before']).read_text())
+    for unit,meta in before['files'].items():
+        p=Path(policy['original_units_backup'])/unit
+        if meta['kind']=='file':
+            if p.is_symlink()or not p.is_file()or sha(p)!=meta['sha256']:raise RuntimeError('Original unit backup changed: '+unit)
+        elif meta['kind']=='symlink':
+            if not p.is_symlink()or os.readlink(p)!=meta['target']:raise RuntimeError('Original unit link backup changed: '+unit)
+        elif meta['kind']!='absent_override':raise RuntimeError('Unknown original unit backup kind')
+    for unit in policy['system_masked_units']:
+        fields=dict(line.split('=',1)for line in call(['systemctl','show',unit,'-p','LoadState','-p','ActiveState','-p','UnitFileState','-p','MainPID']).splitlines()if '='in line)
+        if fields.get('LoadState')!='masked'or fields.get('UnitFileState')!='masked'or fields.get('ActiveState')!='inactive'or (unit.endswith('.service')and fields.get('MainPID')!='0'):raise RuntimeError('System forecast unit no longer masked: '+unit)
+    fields=dict(line.split('=',1)for line in call(['systemctl','--user','show',policy['queue_unit'],'-p','ActiveState','-p','SubState','-p','MainPID','-p','UnitFileState','-p','FragmentPath','-p','NeedDaemonReload','-p','DropInPaths']).splitlines()if '='in line)
+    if fields.get('ActiveState')!='active'or fields.get('SubState')!='running'or fields.get('UnitFileState')!='enabled'or fields.get('NeedDaemonReload')!='no'or fields.get('FragmentPath')!=policy['queue_unit_path']or fields.get('DropInPaths')!='':raise RuntimeError('Exclusive queue-lock service unavailable or overridden')
+    pid=fields.get('MainPID','')
+    if not pid.isdecimal()or int(pid)<=1:raise RuntimeError('Queue-lock owner PID unavailable')
+    lock_record=json.loads(Path(policy['queue_lock_record']).read_text());lock_path=Path(policy['queue_lock_path'])
+    if lock_record.get('pid')!=int(pid)or lock_record.get('lock_path')!=str(lock_path)or lock_record.get('reservation_path')!=str(RESERVATION)or lock_record.get('reservation_sha256')!=policy['marker_sha256']or lock_record.get('queue_mutated')is not False:raise RuntimeError('Queue-lock acquisition record differs from live owner')
+    expected=('/usr/bin/python3\0-B\0'+policy['queue_helper']+'\0').encode()
+    if (Path('/proc')/pid/'cmdline').read_bytes()!=expected:raise RuntimeError('Queue-lock process command changed')
+    stat=lock_path.stat();inode=f'{os.major(stat.st_dev):02x}:{os.minor(stat.st_dev):02x}:{stat.st_ino}'
+    locks=[line.split()for line in Path('/proc/locks').read_text().splitlines()]
+    if not any(len(parts)>=8 and parts[1:5]==['FLOCK','ADVISORY','WRITE',pid]and parts[5]==inode and parts[6:8]==['0','EOF']for parts in locks):raise RuntimeError('Exact queue lock is not held by its live reservation owner')
+    return {'path':str(RESERVATION),'marker_sha256':RESERVATION_PINS[str(RESERVATION/'ACTIVE')],'verified_files':len(RESERVATION_PINS),'reservation_active_at_preflight':True,'release_attempted':False,'mask_policy_sha256':MASK_POLICY_SHA256,'masked_user_units':len(policy['mask_paths']),'mask_reload_flags':reload_flags,'queue_lock_owner_pid':int(pid),'queue_lock_held':True}

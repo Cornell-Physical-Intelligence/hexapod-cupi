@@ -10,6 +10,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = 'configs/source_inventory.json'
 SCOPES = ('tools', 'experiments/c_length_study/tools', 'experiments/terrain/tools')
+# Paper-walk modules live at the experiment root; its tests/ tree is not a tool scope.
+TOP_LEVEL_SCOPES = ('experiments/paper_walk',)
 
 
 def read_inventory(root=ROOT):
@@ -24,6 +26,8 @@ def check(root=ROOT):
         raise ValueError('Duplicate source ownership')
     actual = {str(p.relative_to(root)) for directory in SCOPES
               for p in (root / directory).rglob('*.py') if '__pycache__' not in p.parts}
+    actual.update(str(p.relative_to(root)) for directory in TOP_LEVEL_SCOPES
+                  for p in (root / directory).glob('*.py'))
     if actual != set(paths):
         raise ValueError(f'Source inventory differs: unowned={sorted(actual-set(paths))}; missing={sorted(set(paths)-actual)}')
     for row in rows:

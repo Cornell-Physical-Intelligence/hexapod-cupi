@@ -39,6 +39,8 @@ raw CAD and generated files. Open evidence intentionally when assessing a result
 - `ops/` and `isaaclab/deploy/`: existing guarded operations and release manifests.
 - `experiments/c_length_study/tools/`: historical study runners and analysis.
 - `experiments/terrain/tools/`: terrain/perception prototypes; qualification is separate.
+- `experiments/paper_walk/`: maintained canonical PPO/motion-prior prototype;
+  its top-level modules are inventoried, while `tests/` contains CPU checks.
 - `robot/`: approved models, importers and model-specific conventions.
 - `site/`: the progress registry and static GitHub Pages presentation.
 - `artifacts/`: immutable results and exact replay inputs; never import these copies into new production code.
@@ -65,20 +67,41 @@ retain the exact compatibility constraints and tests.
 
 ## Operations
 
-**Research remains paused for James.** The latest main handoff pauses native
-validation, training, recording and unattended continuation. This user's current
-authorization covers repository cleanup and its checks/publication. It does not
-resume research or release the Spark reservation. Keep the pause until James
-explicitly chooses to resume. [JAMES_HANDOFF](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/62fd7448264c5ebe051ba2de1d9a72844d6b4c3a/docs/JAMES_HANDOFF.md) preserves
-prepared, unexecuted sources and the actual pause receipts.
+**James authorized the canonical qualification restart on 14 September 2026.**
+He confirmed the displayed mass-corrected model and the sequence standing →
+walking/stopping → terrain → survey. Use the URDF selected by
+`robot/active_model.json`, SHA-256
+`9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78`.
+This supersedes the research pause for that sequence; it does not qualify a
+stage, change admission gates or release the Spark reservation. Keep historical
+results and the [JAMES_HANDOFF](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/62fd7448264c5ebe051ba2de1d9a72844d6b4c3a/docs/JAMES_HANDOFF.md)
+pause receipts intact. Fresh attempts need new identities bound to this model.
 
-The Spark mirror `/home/orionh/HEXAPOD` is not a Git repository. This local cleanup
-does not launch training or modify shared compute. For an authorized run read
+**The active user goal is Stage 2 on this confirmed model.** James explicitly
+directed continuing until the existing Stage 2 requirements are satisfied,
+including actual paper-informed PPO training and a video of the trained policy
+running in Isaac Sim. Continue through matching native admission, learning and
+the full existing direction, transition, quiet-stop, torque, contact and visual
+acceptance requirements. Diagnostics, prepared code, checkpoint saves and video
+recording alone do not finish the goal. Preserve the 0.040 rad / 20 ms comparison
+limiter and every existing numerical gate; never transfer historical acceptance
+or substitute prior animation for an actual policy rollout.
+
+**James also granted Codex full Spark compute ownership on 14 September 2026:**
+"you can stop all other processes on the spark" and "take full ownership of the
+spark, you have my permissions". The lead dispatcher may stop or suspend
+competing user compute and its restart triggers without another approval.
+Identify each workload and preserve its source, outputs and recovery state;
+keep SSH, networking, operating-system services and host health available.
+Only the lead dispatcher allocates shared compute or changes its controls.
+
+The Spark mirror `/home/orionh/HEXAPOD` is not a Git repository. Authorization is
+not proof that a job or continuation automation is running. Before dispatch read
 [OPERATIONS](docs/OPERATIONS.md) and the current
 [compute coordination rules](docs/SPARK_COMPUTE_COORDINATION.md), including the
 user's existing HEXAPOD reservation and external-automation blocks. Keep the GPU
 lock, exact process/container ownership, bounded recovery and post-exit checks.
-Preserve reservation controls during cleanup; never act on unidentified jobs.
+Preserve reservation controls between allocations; never act on unidentified jobs.
 Never expose secrets, especially the Spark container's `.env.base`.
 
 ## Verification and publication

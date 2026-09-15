@@ -6,6 +6,232 @@ under [ARCHITECTURE §§2–4 and §8](../ARCHITECTURE.md). Existing thresholds 
 unchanged. [STATUS](../STATUS.md) owns progress; this reference authorizes no run.
 Earlier priority overlays remain in the [documentation archive](archive/README.md).
 
+The current corrected-model PPO/motion-prior implementation is documented in
+[experiments/paper_walk](../experiments/paper_walk/README.md). Its walking neutral,
+native admission, checkpoint identity and evaluation remain separate from the
+historical task contracts below. [STATUS](../STATUS.md) records its latest
+standing, replay and training evidence and the remaining Stage 2 requirements.
+
+The first corrected-model run completed 200 PPO updates and 153,600 native
+transitions on 32 replicas, without behavior cloning. Its
+[completed acquisition](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_001/standing/state.json)
+and [checkpoint receipt](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_001/standing/learner/latest_checkpoint.json)
+bind checkpoint
+`5d48928dd4ba5fdfbd8ff6c6706a5eb8c3951aeaa9aacb8e38ee65383a31a752`
+to frozen paper-walk source004. The native replay reference covers all 21
+commands using 31 accepted demonstrations; one duplicate remains rejected for
+excessive saturation. This records completed learning, not qualified walking or
+quiet stopping. Full evaluation and the existing human visual comparison remain
+required.
+
+A [source007 reporting continuation](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_002/standing/state.json)
+added 30 updates and 23,040 native transitions from checkpoint200, saving
+checkpoint230 with SHA-256
+`fa043b43dc28c41cd8de7f20f53531629662b187230b77c4c2c14ec94acefa61`.
+Its moving-command signed speed remained near zero and four episodes terminated.
+Measured mean quiet penalties of 14.916 dominate the absolute mean reward of
+14.656. [The adopted experiment](../artifacts/restart_2026-09-14/paper_learning_review_001/DECISION_001.json)
+therefore preserves both quiet costs through their existing scales and applies
+`1 + ln(u)` above normalized mean square `u = 1`. It uses fresh learning state,
+leaves all other rewards and acceptance gates unchanged. The reporting
+continuation is not exact physics resume.
+
+Two initial policy-recording attempts failed before producing a frame or policy
+control: the first returned blank RGB and the second stalled during capture and
+was stopped. Their receipts and cleanup remain preserved. Evaluation005 also
+failed before controls because camera source inspection received an unresolved
+SDK type. Later native capture succeeds; recording alone does not qualify gait.
+
+The [fresh quiet-tail run](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_003/standing/state.json)
+completed another independent 200-update, 153,600-transition experiment on
+32 replicas. Checkpoint `27c7ef7c15cc61faf90fdb10d636f2bbd7893f213cc14afdf45ec2656cfaed9d`
+passed serialization and restore checks, but moving-command signed speed was
+only 0.000557 m/s and 92 episodes terminated. These terminations are not all
+classified as falls. Higher training reward does not establish better walking.
+
+Actual deterministic Isaac recordings now exist for the first checkpoint
+([evaluation006](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_006/standing/evaluation/report.json),
+20 seconds) and the fresh quiet-tail checkpoint
+([evaluation007](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_007/standing/evaluation/report.json),
+13.38-second failed prefix). Both fail direction tracking and requested torque
+limits. The latter stopped when the left-middle tibia crossed its lower joint
+limit, while remaining upright; the
+[independent terminal audit](../artifacts/restart_2026-09-14/paper_walk_execution_001/terminal_audit_evaluate_007/README.md)
+confirms the exact event and recorder integrity. Native applied torque stays
+within its cap. The preserved
+[visual review](../artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_001/review.json)
+finds persistent leg jitter without coordinated travel. Unequal record lengths
+do not support a matched full-trial ranking or acceptance.
+
+The [second Fable consultation and adopted decision](../artifacts/restart_2026-09-14/paper_learning_review_002/DECISION_001.json)
+select a fresh 32-replica, 200-update contrast with initial action standard
+deviation 0.1 instead of 0.4, behavior cloning off and unchanged reward, learner,
+physics and gates. This tests an exploration hypothesis; it is not a demonstrated
+cause or fix. Its first allocation, train004, failed simulator startup before
+AppReady or any training, and its cleanup is retained. The
+[prototype reference](../experiments/paper_walk/README.md) links the evidence.
+
+The [train005 retry](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_005/standing/state.json)
+completed 200 updates and 153,600 native transitions with initial standard
+deviation 0.1 and behavior cloning off. Three episodes terminated; moving-command
+signed speed was 0.000739 m/s. In
+[evaluation008](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_008/standing/evaluation/summary.json),
+all four completed direction trials fail planar tracking. A fourth trial
+completed after the stop decision was recorded; the controlled interruption
+leaves nine probes missing. Neither completion nor fewer terminations establishes
+walking, and the saved interruption and cleanup remain part of the evidence.
+
+A separate [CPU behavior-cloning fit](../artifacts/paper_bc_fit_001/REPORT.json)
+completed 1,000 fitting steps on the accepted steady replay rows, with zero PPO
+updates and zero newly simulated training transitions. Its neighboring-cycle
+holdout is not independent gait validation. No onset or stopping examples were
+added. The fitted checkpoint's
+[native forward trial](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_009/standing/evaluation/report.json)
+completes 20 seconds and 500 video frames but fails planar tracking. The
+[direct visual review](../artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_003/review.json)
+records bobbing and lateral drift without useful forward travel. Its separate
+[quiet and stopping trials](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_010/standing/evaluation/summary.json)
+also complete and fail motion, joint-rate, target-motion and six-toe support
+checks. Stopping additionally fails requested-torque saturation; applied torque
+remains capped. These are BC-only policy results, not PPO training results.
+
+A [second data-only BC fit](../artifacts/paper_bc_fit_002/REPORT.json) adds native
+start and zero-command examples. Its
+[evaluation011](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_011/standing/evaluation/summary.json)
+completes all three selected trials without an acquisition failure: 20-second
+forward, 20-second quiet, and uninterrupted 8-second forward plus 13-second stop.
+All three fail. Forward planar error is 0.050192 m/s against 0.025 m/s; quiet
+joint speed reaches 0.180679 rad/s RMS against 0.03 rad/s and also fails joint
+range, target motion and six-toe support. Stopping additionally fails drift,
+heading and requested-torque saturation. Applied torque remains capped and no
+nonfoot contact is recorded. Ten omitted probes and all 96 required Stage 2
+cases remain missing; exact-container cleanup is verified.
+The [direct video/trace review](../artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_004/review.json)
+finds a nearly fixed stance after initial adjustments, with no sustained forward
+stepping. This is a failed policy result, even though its native capture completes.
+
+The separately reviewed [velocity-supervised CPU contrast](../artifacts/paper_bc_fit_003/VERIFICATION.json)
+completes 1,000 BC steps per arm with zero PPO updates or newly simulated
+transitions. Its candidate's aggregate velocity RMSE on the related cycle-three
+holdout is 0.006127 m/s, compared with 0.903256 m/s for the legacy-parity arm.
+That neighboring-cycle comparison is calibration evidence, not independent
+walking validation. Separate BC optimizer state is discarded, PPO state remains
+fresh, and strict checkpoint restoration passes. The new learner's optional
+divergence safeguard and supervised BC settings remain explicit source/config
+identities; previous policies and native results retain their original bytes.
+Its [three-case native evaluation012](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_012/standing/evaluation/summary.json)
+completes all three selected trials and fails each one. Forward planar error is
+0.050608 m/s against 0.025 m/s. Quiet joint speed and target motion still exceed
+their original bounds. Stopping also fails joint range, six-toe support and a
+native velocity bound: one recorded right-front tibia SDK velocity reaches
+-114.842804 rad/s against a 50.265484 rad/s limit. The angle-derived rate differs;
+the simulator/contact cause remains unestablished. Acquisition completes, but
+no failing sample is discarded. The [actual visual review](../artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_005/REVIEW.json)
+finds startup oscillation followed by a nearly fixed stance without sustained
+forward stepping. Ten diagnostic probes and all 96 Stage 2 cases remain missing.
+A separate [fresh CPU fit004](../artifacts/paper_bc_fit_004/REPORT.json)
+records a 128-replica configuration with zero PPO updates. Its model and RNG
+match the fit003 candidate, but it establishes neither native batch admission
+nor simulation resume and does not rewrite the earlier checkpoint.
+
+A separate [128-replica raw audit](../artifacts/restart_2026-09-14/paper_walk_execution_001/verification_batch128_001/audit.json)
+recomputes the original standing gates exactly and passes all 128 replicas,
+including 8,000 native substeps and full contact-packet checks. The lead then
+adopted [admission002](../artifacts/restart_2026-09-14/paper_walk_execution_001/admission_002/verification.json)
+for the exact one- and 128-replica simulation layouts, retaining admission001
+unchanged. Full raw traces remain on Spark, with local hash-bound compact
+metadata and the independent audit. This is simulation standing admission; it
+does not establish walking or permit a
+32-replica checkpoint to resume under a different configuration.
+
+The admitted [train006](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_006/standing/state.json)
+completes 200 PPO updates and 614,400 native transitions from the fresh fit004
+state on 128 replicas. The learner records 637.943 seconds of training and saves
+checkpoint `eb2847e9bce7db0b090debdbc2b0b3395679ff3e2b78f8ecf7407aaa4a8b2d1a`.
+Strict restoration and exact-container cleanup pass. The run records 142
+joint-limit terminations, no height/tilt terminations and no compact nonfoot
+events. Aggregate requested saturation is 1.5613%; moving-command signed speed
+is 0.005313 m/s cumulatively and 0.001116 m/s in the final update. These are
+training diagnostics, not qualification results.
+
+The same [learner trace](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_006/standing/learner/metrics.jsonl)
+shows that every final-50 update stops model optimization after its first step;
+their mean final analytic KL is 0.159151 with target 0.02. The reporting-only
+normalizer-change KL reaches 5.797131 at update two. The post-step safeguard
+retains the crossing step and does not gate normalizer changes. The subsequent
+[Fable review and lead decision](../artifacts/restart_2026-09-14/paper_ppo_stability_review_004/DECISION_001.json)
+adopt source018: roll back a crossing model/Adam proposal and retry its identical
+clipped gradient at the base, half, quarter and eighth learning rate. Every trial
+is compared with the original collected policy on the complete rollout at target
+KL 0.02. Loaded actor normalization remains frozen, while critic/AMP normalization
+and all 20 discriminator steps keep their schedules. Three consecutive updates
+with no accepted model step save a checkpoint and stop this learning diagnostic.
+The task reward, physics, curriculum and physical gates remain unchanged.
+
+[Evaluation013](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_013/standing/evaluation/summary.json)
+now completes its three selected native trials and fails each. Forward tracking
+remains near zero. During the fixed 4–20-second quiet window, joint RMS is
+0.558420 rad/s and all 6,400 physics samples lack six-foot support, predominantly
+holding one fixed tripod. The fixed 10–21-second stop window improves joint RMS
+to 0.005963 rad/s but retains three right-rear support losses and therefore still
+fails. Its preceding forward movement also never tracks the command. All 96
+required Stage 2 cases remain missing. The
+[actual visual review](../artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_006/REVIEW.json)
+finds a nearly fixed posture after initial adjustment, without sustained walking.
+Only the forward trial has RGB; sampled review and full numerical timelines do
+not imply every frame was individually inspected.
+
+The [independent audit](../artifacts/restart_2026-09-14/paper_walk_execution_001/verification_evaluate_013/README.md)
+reproduces all original failed verdicts across 24,400 native substeps and 497,495
+saved contact patches. These trials have no joint-position or SDK speed bound
+violations, internal resets, active nonfoot contacts or applied-torque cap
+breaches. The three stop losses are zero-force right-rear patches with valid
+normals; their underlying cause remains unisolated. Its initial CPU comparison
+failed only on NumPy percentile arithmetic. That failure remains preserved; the
+artifact-only successor explicitly matches native float32 interpolation, changing
+no scorer or gate. Recorded mesh-clearance channels are checked, but the audit
+does not independently transform every mesh vertex again.
+
+The [explicit CPU checkpoint migration](../artifacts/restart_2026-09-14/paper_ppo_migration_001/run_001/VERIFICATION.json)
+preserves learned model/AMP parameters, both Adam states, normalization, serialized
+RNG and counters from actual train006 update200. The migrated checkpoint is
+`eb561e7f99ddd4e4785121f0940f6c0efd5f50428a75e355f6c2d18005b28f84`.
+Own-version strict loaders pass, cross-version loaders reject, and all outputs
+match bitwise for 3,050 actual recorded observations. This adds no training
+updates; preserved CUDA RNG bytes are not a GPU restoration test and PhysX state
+is absent. Source018 is frozen and the separate 549-file v3 source release is
+generated. The [train007 dispatch](../artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_train_007.json)
+records launch at 00:50:01 UTC on 15 September. The
+[completed train007](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_007/standing/state.json)
+adds all 20 updates and 61,440 native transitions, preserving learned lineage in
+checkpoint220 `e608b454abbed24827810dbb91acf6c17fca677447e49e68cd6fc7e981c2de2a`.
+All 17 transferred files verify and exact-container cleanup passes. Its 253
+accepted model steps keep full-rollout KL below 0.02: the maximum final-update
+value is 0.01983755 and the maximum intermediate accepted-step value is 0.01999543.
+Actor-normalizer policy change is zero; all 400 scheduled discriminator steps
+run, with no zero-accepted update. These establish the observed update behavior,
+not a physical-motion bound or a bound on unseen states.
+
+The continuation still records 14 joint-limit terminations and cumulative
+moving-command signed speed of only 0.001242 m/s, with no height/tilt terminations
+or compact nonfoot events. The [matched evaluation014 dispatch](../artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_evaluate_014.json)
+at 00:53:38 UTC starts actual checkpoint220 forward-video, quiet and stopping
+probes. Its results remain pending. Retraining and evaluation are active, while
+all previous failures and the full Stage 2 requirements remain unchanged.
+
+The additional 13-case learning probe suite reuses the original numeric scorers
+and full 400 Hz motor/contact capture in one native app. It preserves the
+20/32-second quiet windows and 8-second move plus 13-second stop case. Each trial
+has one initial reset and no automatic reset within its recorded window. These
+low-speed diagnostics leave all 96 required Stage 2 cases missing; the full
+evaluation and existing human visual acceptance remain necessary.
+An explicitly ordered subset retains all 13 declarations, distinguishes omitted
+from unattempted selected cases, and cannot pass the diagnostic suite unless
+all 13 complete and pass. Video selection must belong to the selected cases.
+Reporting-only termination reasons and actual target-slew occupancy distinguish
+existing predicates and exclude each replica's first control after reset; they
+change neither reward nor physics. The source018 prototype passes 155 CPU tests.
+
 ## 1. Simulator and framework stack
 
 ```text

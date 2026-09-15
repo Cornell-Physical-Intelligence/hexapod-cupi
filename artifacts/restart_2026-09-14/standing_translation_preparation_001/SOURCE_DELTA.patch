@@ -1,0 +1,276 @@
+--- parents/source005/run_standing.py
++++ source/run_standing.py
+@@ -1,13 +1,14 @@
+ #!/usr/bin/env python3
+ """Canonical native provisional standing; one robot, then same-source32. No policy."""
+ from pathlib import Path
++from placement_contract import PLACEMENTS,declaration,author_and_read,validate_reset
+ import argparse,json,sys,time,traceback
+ from standing_contract import verify_inputs,SCHEMA,DT,CONTROLS
+ from native_support import save,finish,sdk_readback,tensor_provider,collect_native,snapshot,legacy_cooking_counter
+ 
+ def main(argv=None):
+  p=argparse.ArgumentParser(allow_abbrev=False);p.add_argument('--asset',type=Path,required=True);p.add_argument('--admission',type=Path,required=True);p.add_argument('--output',type=Path,required=True)
+- p.add_argument('--num-envs',type=int,choices=[1,32],required=True);p.add_argument('--standing-one',type=Path);p.add_argument('--preflight-only',action='store_true')
++ p.add_argument('--num-envs',type=int,choices=[1],required=True);p.add_argument('--standing-one',type=Path);p.add_argument('--placement',choices=tuple(PLACEMENTS),required=True);p.add_argument('--preflight-only',action='store_true')
+  a,_=p.parse_known_args(argv);identity=verify_inputs(a)
+  if a.preflight_only:print(json.dumps(identity,sort_keys=True));return 0
+  from isaaclab.app import AppLauncher
+@@ -23,7 +24,7 @@
+   from isaaclab_physx.physics import PhysxCfg
+   import omni.physics.tensors as tensors
+   import omni.physx
+-  from pxr import UsdGeom,UsdPhysics,UsdShade,PhysxSchema,Gf
++  from pxr import Usd,UsdGeom,UsdPhysics,UsdShade,PhysxSchema,Gf
+   from isaacsim.core.version import get_version
+   from inspect_core import usd_readback,validate_usd,validate_native,validate_native_frames,validate_sdf
+   from standing_math import Geometry
+@@ -37,7 +38,10 @@
+   roots=['/Robot']+[f'/Robot_{i:03d}'for i in range(1,a.num_envs)]
+   for i,root in enumerate(roots):
+    prim=stage.DefinePrim(root,'Xform');prim.GetReferences().AddReference(str(a.asset.resolve()/'robot.usda'))
+-   if i:UsdGeom.Xformable(prim).AddTranslateOp().Set(Gf.Vec3d((i%8)*2.,(i//8)*2.,0.))
++  placement_readback=author_and_read(stage,roots,a.placement,UsdGeom,Gf,Usd)
++  save(out/'placement_readback.json',{'declaration':identity['placement'],'before_warmup':placement_readback})
++  state['checks']['placement_before_warmup']=True
++  baseline=json.loads((Path(__file__).parent/'NATIVE_BASELINE.json').read_text())
+   model=json.loads((a.asset/'source/model.json').read_text());usd=usd_readback(stage);save(out/'usd_readback.json',usd);state['checks']['usd_identity']=validate_usd(usd,model)
+   from solver_recipe import configure as configure_solver,verify as verify_solver
+   solver_record=configure_solver(stage,roots,PhysxSchema);save(out/'solver_readback.json',solver_record)
+@@ -59,11 +63,16 @@
+   solver_record['after_reset']=verify_solver(stage,roots,PhysxSchema);save(out/'solver_readback.json',solver_record)
+   scene_prim=stage.GetPrimAtPath(cfg.physics_prim_path);scene=UsdPhysics.Scene(scene_prim)
+   actual={'gravity_magnitude':scene.GetGravityMagnitudeAttr().Get(),'gravity_direction':list(scene.GetGravityDirectionAttr().Get()),'dt_s':sim.get_physics_dt(),'time_steps_per_second':scene_prim.GetAttribute('physxScene:timeStepsPerSecond').Get(),'external_forces_every_iteration':scene_prim.GetAttribute('physxScene:enableExternalForcesEveryIteration').Get(),'root_self_collisions':{r:stage.GetPrimAtPath(r+'/body').GetAttribute('physxArticulation:enabledSelfCollisions').Get()for r in roots},'floor_points_m':[[float(v)for v in p]for p in floor.GetPointsAttr().Get()],'floor_collision_enabled':UsdPhysics.CollisionAPI(floor.GetPrim()).GetCollisionEnabledAttr().Get(),'floor_approximation':UsdPhysics.MeshCollisionAPI(floor.GetPrim()).GetApproximationAttr().Get(),'material_static_dynamic_restitution':[material.GetStaticFrictionAttr().Get(),material.GetDynamicFrictionAttr().Get(),material.GetRestitutionAttr().Get()],'material_combine_modes':[pm.GetFrictionCombineModeAttr().Get(),pm.GetRestitutionCombineModeAttr().Get()],'material_assumption':'Provisional flat material; not calibrated hardware friction.'}
++  if actual!=baseline['native_scene']:raise ValueError('Recorded source005 scene/floor parameters changed')
+   save(out/'native_scene.json',actual)
++  # Read-only diagnostic census; unknown source005 fields remain unknown.
++  scene_attributes={str(attr.GetName()):repr(attr.Get()) for attr in scene_prim.GetAttributes() if str(attr.GetName()).startswith(('physics:','physxScene:'))}
++  save(out/'physics_scene_attributes.json',{'source':'resolved physics scene attributes after SDK warmup','attributes':scene_attributes,'device':a.device,'native_backend_iteration_introspection':False})
+   if abs(actual['gravity_magnitude']-9.81)>1e-5 or actual['gravity_direction']!=[0.,0.,-1.]or actual['dt_s']!=DT or actual['time_steps_per_second']!=400 or actual['external_forces_every_iteration']is not True or not all(v is True for v in actual['root_self_collisions'].values()):raise ValueError('Native standing scene differs')
+   if actual['floor_points_m']!=[[-40.,-40.,0.],[40.,-40.,0.],[40.,40.,0.],[-40.,40.,0.]]or actual['floor_collision_enabled']is not True or actual['floor_approximation']!='none' or actual['material_static_dynamic_restitution']!=[1.,1.,0.]or actual['material_combine_modes']!=['multiply','multiply']:raise ValueError('Floor/material authored readback differs')
+   state['checks']['native_scene']=True
+   view=sim.physics_sim_view.create_articulation_view('/Robot*/body');native=collect_native(view,out)
++  if native['body_names']!=baseline['body_names'] or native['joint_names']!=baseline['joint_names']:raise ValueError('Native source005 body/joint order changed')
+   from solver_diagnostics import collect_legacy_friction
+   collect_legacy_friction(view,native,out,save);state['checks']['legacy_friction_observed']=True
+   if view.count!=a.num_envs or set(view.prim_paths)!={r+'/body'for r in roots}:raise ValueError('Wrong native replica roots')
+@@ -88,7 +97,8 @@
+   geo=json.loads((Path(__file__).parent/'geometry/geometry.json').read_text())
+   with np.load(Path(__file__).parent/'geometry/geometry_extrema.npz')as z:geometry=Geometry(geo,{k:z[k]for k in z.files},native['body_names'])
+   contact=sim.physics_sim_view.create_rigid_contact_view('/Robot*/*',['/Ground'],max_contact_data_count=1024*a.num_envs)
+-  session=NativeStandingSession(view,contact,sim,model,native,geometry,out,save,a.device);session.reset_canonical()
++  session=NativeStandingSession(view,contact,sim,model,native,geometry,out,save,a.device,placement=a.placement);session.reset_canonical()
++  validate_reset(json.loads((out/'initial_reset.json').read_text()),identity['placement']);state['checks']['placement_at_reset']=True
+   for e in range(a.num_envs):
+    row=session.observe();validate_native_frames({'link_pose_xyzw':row['link_pose_xyzw'][e:e+1],'joint_position':row['joint_position_rad'][e:e+1]},native['body_names'],native['joint_names'],model)
+   state['checks']['all_reset_coordinate_frames']=True
+--- parents/source005/standing_contract.py
++++ source/standing_contract.py
+@@ -6,22 +6,26 @@
+  spec=importlib.util.spec_from_file_location(name,Path(__file__).with_name(file));m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
+ _parent=load('_standing_asset','inspection_contract.py');_b=load('_standing_effort','actuation_contract.py')
+ _diag=load('_standing_solver_diagnostics','solver_diagnostics.py')
++_placement=load('_standing_placement_diagnostic','placement_contract.py')
++declaration=_placement.declaration;validate_evidence=_placement.validate_evidence
+ sha=_parent.sha;read=_parent.read;check_map=_parent.check_map
+-SCHEMA='canonical_native_standing_v1';DT=.0025;CONTROLS=1000;STEPS=8000;SETTLE=200
++SCHEMA='canonical_single_placement_diagnostic_v1';DT=.0025;CONTROLS=1000;STEPS=8000;SETTLE=200
+ ACTUATION_FREEZE='1f02009cb22c1efbe4a0d0c7f7988d9d63b658d78e509ea444b7afafee6178c9'
+ 
+ def inventory(p):return {str(f.relative_to(p)):sha(f)for f in sorted(p.rglob('*'))if f.is_file()}
+ def mapsha(m):return hashlib.sha256(json.dumps(m,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+ def verify_inputs(args):
+  own=Path(__file__).resolve().parent;identity=_parent.verify_inputs(args);n=args.num_envs
+- if type(n)is not int or n not in (1,32):raise ValueError('Only explicit1 then32 standing')
++ if type(n)is not int or n!=1:raise ValueError('Placement diagnosis permits single robots only; no batch admission')
++ placement=declaration(getattr(args,'placement',None))
+  admission=Path(args.admission).resolve();expected=read(own/'ACTUATION_SHA256.json');check_map(admission,expected)
+  if inventory(admission)!=expected:raise ValueError('Exact actual actuation inventory changed')
+  s=read(admission/'state.json');_b.validate_result(admission,s['identity'])
+  if s['identity']['inspector_freeze_sha256']!=ACTUATION_FREEZE:raise ValueError('Unreviewed native effort source')
+  if Path(args.output).resolve().is_relative_to(admission):raise ValueError('Output overlaps effort evidence')
+  identity.update(schema=SCHEMA,num_envs=n,controls=CONTROLS,steps=STEPS,settle_controls=SETTLE,dt=DT,control_dt=.02,substeps_per_control=8,ground=True,gravity=[0.,0.,-9.81],
+-   runtime_binding={'runtime_tree_sha256':identity['inspector_freeze_sha256'],'scope':'canonical_provisional_native_standing_only'},
++   runtime_binding={'runtime_tree_sha256':identity['inspector_freeze_sha256'],'scope':'canonical_single_placement_diagnostic_only'},
++   placement=placement,standing_admission=False,batch_admission=False,stage2_complete=False,
+    actuation_state_sha256=sha(admission/'state.json'),actuation_inventory_sha256=mapsha(inventory(admission)),
+    geometry_sha256=sha(own/'geometry/geometry.json'),servo_sha256=sha(own/'servo_candidate.json'),
+    solver_recipe_sha256=sha(own/'solver_recipe.py'),solver_diagnostics_sha256=sha(own/'solver_diagnostics.py'),solver_recipe={'position_iterations':32,'velocity_iterations':0},
+@@ -44,6 +48,8 @@
+  if any(s.get(k)is not False for k in ['physical_admission','physics_admitted','training_allowed']):raise ValueError('Standing cannot claim broader physics or training admission')
+  if s.get('explicit_steps_completed')!=STEPS:raise ValueError('Incomplete standing steps')
+  if not s.get('checks')or not all(x is True for x in s['checks'].values()):raise ValueError('Missing/rejected native identities')
++ if s['checks'].get('placement_before_warmup')is not True or s['checks'].get('placement_at_reset')is not True:raise ValueError('Missing placement verification')
++ validate_evidence(d,identity)
+  if s['checks'].get('solver_recipe_readback')is not True:raise ValueError('Missing solver recipe readback')
+  solver=read(d/'solver_readback.json')
+  expected_roots={'/Robot'}|{f'/Robot_{i:03d}'for i in range(1,identity['num_envs'])}
+@@ -53,6 +59,7 @@
+   expected=(32,1,[False,False])if phase=='before'else(32,0,[True,True])
+   if any((v.get('position_iterations'),v.get('velocity_iterations'),v.get('authored'))!=expected for v in values.values()):raise ValueError('Solver recipe differs:'+phase)
+  outputs=s.get('outputs',{});check_map(d,outputs)
++ if not {'placement_readback.json','physics_scene_attributes.json'}.issubset(outputs):raise ValueError('Unsealed placement/scene diagnostic evidence')
+  if 'solver_readback.json'not in outputs:raise ValueError('Unsealed solver readback')
+  if s['checks'].get('legacy_friction_observed')is not True or 'legacy_friction_readback.json'not in outputs:raise ValueError('Missing/unsealed legacy friction diagnostics')
+  _diag.validate_legacy(read(d/'legacy_friction_readback.json'),identity['num_envs'],read(d/'native_readback.json')['joint_names'])
+@@ -86,4 +93,4 @@
+   for key,minimum in [('minimum_non_toe_mesh_floor_m',-.001),('minimum_plate_height_m',.055)]:
+    v=p.get(key)
+    if type(v)not in(int,float)or not math.isfinite(v)or v<minimum:raise ValueError('Actual clearance metric contradicts pass')
+- return {'phase':'standing','status':'completed','num_envs':identity['num_envs'],'standing_pass':True,'training_allowed':False,'state_sha256':sha(d/'state.json')}
++ return {'phase':'placement_diagnostic','status':'completed','num_envs':identity['num_envs'],'diagnostic_gate_pass':True,'standing_admission':False,'batch_admission':False,'stage2_complete':False,'training_allowed':False,'placement':identity['placement'],'state_sha256':sha(d/'state.json')}
+--- parents/source005/standing_session.py
++++ source/standing_session.py
+@@ -2,6 +2,7 @@
+ No actor, DirectRLEnv, automatic reset, motor adapter or implicit drive is installed.
+ """
+ from pathlib import Path
++from placement_contract import declaration as placement_declaration,requested_root
+ import json,time
+ import numpy as np
+ from standing_math import servo,classify_contacts
+@@ -20,9 +21,11 @@
+  return result
+ 
+ class NativeStandingSession:
+- def __init__(self,view,contact_view,sim,model,native,geometry,output,save,device='cuda:0'):
++ def __init__(self,view,contact_view,sim,model,native,geometry,output,save,device='cuda:0',*,placement):
+   import warp as wp
+   self.wp=wp;self.device=device;self.view=view;self.contact=contact_view;self.sim=sim;self.model=model;self.native=native;self.geometry=geometry;self.output=Path(output);self.save=save
++  self.placement=placement_declaration(placement)
++  if view.count!=1:raise ValueError('Placement diagnostic permits one robot only')
+   self.n=view.count;self.names=native['joint_names'];self.body_names=native['body_names'];self.roots=[str(x).rsplit('/',1)[0]for x in view.prim_paths]
+   self.ids=wp.array(np.arange(self.n),dtype=wp.uint32,device=device);self.zero=np.zeros((self.n,18),np.float32)
+   gains=json.loads((Path(__file__).parent/'servo_candidate.json').read_text());order=[gains['joint_names'].index(x)for x in self.names]
+@@ -54,14 +57,14 @@
+  def reset_canonical(self):
+   if self.reset_count or self.count:raise ValueError('Standing permits only one initial reset before controlled physics')
+   pre=self.snap();root=pre['root_pose_xyzw'].copy();root[:,:3]=0.;root[:,3:]=[0,0,0,1]
+-  # Authored root is the bottom-plate frame. Grid placement is declared, no yaw changes.
+-  for e,path in enumerate(self.roots):
+-   index=0 if path=='/Robot'else int(path.rsplit('_',1)[1]);root[e,:3]=[(index%8)*2.,(index//8)*2.,self.geometry.meta['reset_plate_m']]
++  # Same bottom-plate frame and height; XY comes from the pre-warmup declaration.
++  if self.roots!=['/Robot']:raise ValueError('Placement root identity changed')
++  root=np.asarray(requested_root(self.placement['placement'],self.geometry.meta['reset_plate_m']),dtype=root.dtype)
+   self.set_force(self.zero);self.view.set_root_transforms(self.array(root),self.ids);self.view.set_root_velocities(self.array(np.zeros((self.n,6))),self.ids)
+   self.view.set_dof_positions(self.array(self.zero),self.ids);self.view.set_dof_velocities(self.array(self.zero),self.ids)
+   self.view.set_dof_position_targets(self.array(self.zero),self.ids);self.view.set_dof_velocity_targets(self.array(self.zero),self.ids)
+   row=self.snap();targets=self.get('get_dof_position_targets');veltarget=self.get('get_dof_velocity_targets');external=self.get('get_dof_actuation_forces')
+-  self.save(self.output/'initial_reset.json',{'scope':'Single generalized state reset after SDK warmup; solver warmstart cache is not claimed cold.', 'counter_before':self.counter,'counter_after':self.sim.get_physics_step_count(),'pre_reset':{k:v.tolist()for k,v in pre.items()},'post_reset':{k:v.tolist()for k,v in row.items()},'position_targets':targets.tolist(),'velocity_targets':veltarget.tolist(),'native_external':external.tolist(),'requested_root':root.tolist()})
++  self.save(self.output/'initial_reset.json',{'placement':self.placement,'placement_readback_source':'physics_articulation_view.get_root_transforms','scope':'Single generalized state reset after SDK warmup; solver warmstart cache is not claimed cold.', 'counter_before':self.counter,'counter_after':self.sim.get_physics_step_count(),'pre_reset':{k:v.tolist()for k,v in pre.items()},'post_reset':{k:v.tolist()for k,v in row.items()},'position_targets':targets.tolist(),'velocity_targets':veltarget.tolist(),'native_external':external.tolist(),'requested_root':root.tolist()})
+   if self.sim.get_physics_step_count()!=self.counter:raise ValueError('Initial reset advanced physics')
+   for key,want in [('joint_position_rad',self.zero),('joint_velocity_rad_s',self.zero),('root_pose_xyzw',root),('root_com_velocity',np.zeros((self.n,6)))]:np.testing.assert_allclose(row[key],want,atol=2e-6,rtol=0)
+   for a in [targets,veltarget,external]:np.testing.assert_allclose(a,self.zero,atol=2e-6,rtol=0)
+--- parents/source005/test_score_contract.py
++++ source/test_score_contract.py
+@@ -6,6 +6,7 @@
+ from standing_contract import validate_result,SCHEMA,sha
+ from solver_diagnostics import declaration,LINK_FIELD,FLOOR_FIELD,SCHEMA as DIAG_SCHEMA
+ from test_standing import NAMES,MODEL,save
++from placement_contract import declaration as placement_declaration,requested_root
+ 
+ class Evidence(unittest.TestCase):
+  def fixture(self,d):
+@@ -45,10 +46,13 @@
+    after={'/Robot':{'position_iterations':32,'velocity_iterations':0,'authored':[True,True]}}
+    solver={'before':before,**{k:copy.deepcopy(after)for k in ['after_authoring','after_reset','after_controlled_steps']}};save(d/'solver_readback.json',solver)
+    save(d/'legacy_friction_readback.json',{'schema':DIAG_SCHEMA,'joint_names':NAMES,'count':1,'shape':[1,18],'getter':'get_dof_friction_coefficients','coefficients':[[.05]*18]})
+-   identity={'num_envs':1};state={'schema':SCHEMA,'identity':identity,'status':'completed','inputs_unchanged':True,'errors':[],'native_error_events':[],'physical_admission':False,'physics_admitted':False,'training_allowed':False,'explicit_steps_completed':8000,'checks':{'test':True,'solver_recipe_readback':True,'legacy_friction_observed':True}}
++   placement=placement_declaration('origin');initial=json.loads((d/'initial_reset.json').read_text());initial.update(placement=placement,placement_readback_source='physics_articulation_view.get_root_transforms',requested_root=requested_root('origin',.08161109101311194));initial['post_reset']['root_pose_xyzw']=initial['requested_root'];save(d/'initial_reset.json',initial)
++   matrix=[[1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,0.,.08161109101311204,1.]]
++   save(d/'placement_readback.json',{'declaration':placement,'before_warmup':{'base_matrix':matrix,'computed_world_matrix':matrix,'xform_op_order':['xformOp:transform','xformOp:translate:diagnosticPlacement'],'translation_m':[0.,0.,0.]}});save(d/'physics_scene_attributes.json',{'fixture':'synthetic metadata only'})
++   identity={'num_envs':1,'placement':placement};state={'schema':SCHEMA,'identity':identity,'status':'completed','inputs_unchanged':True,'errors':[],'native_error_events':[],'physical_admission':False,'physics_admitted':False,'training_allowed':False,'explicit_steps_completed':8000,'checks':{'test':True,'solver_recipe_readback':True,'legacy_friction_observed':True,'placement_before_warmup':True,'placement_at_reset':True}}
+    def seal():
+     state['outputs']={p.name:sha(p)for p in d.iterdir()if p.name not in ['state.json','native_errors.json']};save(d/'state.json',state)
+-   seal();self.assertTrue(validate_result(d,identity)['standing_pass'])
++   seal();accepted=validate_result(d,identity);self.assertTrue(accepted['diagnostic_gate_pass']);self.assertFalse(accepted['standing_admission']);self.assertFalse(accepted['batch_admission']);self.assertFalse(accepted['training_allowed'])
+    solver['after_reset']['/Robot']['velocity_iterations']=1;save(d/'solver_readback.json',solver);seal()
+    with self.assertRaisesRegex(ValueError,'Solver recipe differs'):validate_result(d,identity)
+    solver['after_reset']['/Robot']['velocity_iterations']=0;save(d/'solver_readback.json',solver);seal()
+@@ -59,9 +63,9 @@
+    save(d/'native_errors.json',[])
+    state['outputs'].pop('legacy_friction_readback.json');save(d/'state.json',state)
+    with self.assertRaisesRegex(ValueError,'legacy friction'):validate_result(d,identity)
+-   seal();self.assertTrue(validate_result(d,identity)['standing_pass'])
++   seal();accepted=validate_result(d,identity);self.assertTrue(accepted['diagnostic_gate_pass']);self.assertFalse(accepted['standing_admission']);self.assertFalse(accepted['batch_admission']);self.assertFalse(accepted['training_allowed'])
+    missing=r.pop(LINK_FIELD);self.write_arrays(d,r);seal()
+    with self.assertRaisesRegex(ValueError,'Missing raw diagnostic'):validate_result(d,identity)
+    r[LINK_FIELD]=missing;self.write_arrays(d,r);seal()
+-   self.assertTrue(validate_result(d,identity)['standing_pass'])
++   self.assertTrue(validate_result(d,identity)['diagnostic_gate_pass'])
+ if __name__=='__main__':unittest.main()
+--- parents/source005/test_solver_diagnostics.py
++++ source/test_solver_diagnostics.py
+@@ -33,7 +33,7 @@
+    'native_max_velocity':np.full((1,18),50.26548).tolist(),
+    'limits':[[[joint['lower'],joint['upper']]for joint in fixture.MODEL['joints']]]}
+   geometry=fixture.Geometry(fixture.META,fixture.CLOUDS,fixture.BODIES)
+-  obj=kind(view,contact,sim,fixture.MODEL,native,geometry,directory,save,'cpu')
++  obj=kind(view,contact,sim,fixture.MODEL,native,geometry,directory,save,'cpu',**({'placement':'origin'} if kind is NativeStandingSession else {}))
+   obj.reset_canonical()
+   try:yield obj,view,contact,sim,Path(directory)
+   finally:
+@@ -116,13 +116,14 @@
+   random_after=np.random.get_state()
+   self.assertEqual(random_before[0],random_after[0]);np.testing.assert_array_equal(random_before[1],random_after[1]);self.assertEqual(random_before[2:],random_after[2:])
+ 
+- def test_original_scoring_servo_geometry_and_reset_methods_are_exact(self):
++ def test_original_scoring_servo_geometry_and_unmodified_methods_are_exact(self):
+   self.assertEqual(hashlib.sha256((HERE/'PARENT_STANDING004_FREEZE_SHA256.json').read_bytes()).hexdigest(),'037013353a30c5f3751235634aafdb3f204b676837962b14df72c3051c0a2786')
+   self.assertEqual(hashlib.sha256((HERE/'PARENT_STANDING004_SESSION.py').read_bytes()).hexdigest(),PARENT_HASHES['standing_session.py'])
+   for name in ['standing_math.py','standing_score.py','quiet_metrics.py','servo_candidate.json','geometry/geometry.json','geometry/geometry_extrema.npz','ASSET_SHA256.json','native_support.py']:
+    self.assertEqual(hashlib.sha256((HERE/name).read_bytes()).hexdigest(),PARENT_HASHES[name],name)
+   old=ast.parse((HERE/'PARENT_STANDING004_SESSION.py').read_text());new=ast.parse((HERE/'standing_session.py').read_text())
+-  for name in ['reset_canonical','set_force','observe_control_substeps','flush']:
++  # reset_canonical intentionally adds the declared XY diagnostic; independent fixtures cover it.
++  for name in ['set_force','observe_control_substeps','flush']:
+    get=lambda tree:next(node for node in ast.walk(tree)if isinstance(node,ast.FunctionDef)and node.name==name)
+    self.assertEqual(ast.dump(get(old)),ast.dump(get(new)),name)
+ 
+--- parents/source005/test_standing.py
++++ source/test_standing.py
+@@ -67,7 +67,7 @@
+   for x,want in [(.13,True),(.115,True),(.114999,False),(.132,False)]:
+    source=np.array([x,0,0]);world=pose[:3]+R@(T[:3,:3]@source+T[:3,3]);ok,p=self.geo.cap(s['body'],world,pose);self.assertEqual(ok,want);np.testing.assert_allclose(p,source,atol=1e-15)
+  def test_servo_exact_parent_each_named_row(self):
+-  spec=importlib.util.spec_from_file_location('parent_servo','tmp/updated_native_phase_b_design_002/provisional_actuator.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
++  spec=importlib.util.spec_from_file_location('parent_servo','artifacts/mkii_updated_2026-09-10/actuation_design_001/accepted_proposal/provisional_actuator.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+   q=np.linspace(-.04,.04,18,dtype=np.float32);dq=np.linspace(-52,52,18,dtype=np.float32);target=np.zeros((2,18),np.float32);kp=np.full(18,12,np.float32);kd=np.full(18,.2,np.float32)
+   raw,applied,ceiling=servo(np.tile(q,(2,1)),np.tile(dq,(2,1)),target,kp,kd);old=m.effort(q,dq,target[0],kp,kd)
+   np.testing.assert_allclose(raw[0],old['requested_nm'],atol=1e-6,rtol=0);np.testing.assert_allclose(applied[0],old['software_applied_nm'],atol=1e-7,rtol=0)
+@@ -84,7 +84,7 @@
+   old=sys.modules.get('warp');sys.modules['warp']=types.SimpleNamespace(array=lambda x,**kw:A(x),uint32=np.uint32,float32=np.float32)
+   try:
+    with tempfile.TemporaryDirectory()as d:
+-    v=View();sim=Sim(v);native={'joint_names':NAMES,'body_names':BODIES,'native_max_velocity':np.full((1,18),50.26548).tolist(),'limits':[[[j['lower'],j['upper']]for j in MODEL['joints']]]};session=NativeStandingSession(v,Contact(v),sim,MODEL,native,self.geo,d,save,'cpu')
++    v=View();sim=Sim(v);native={'joint_names':NAMES,'body_names':BODIES,'native_max_velocity':np.full((1,18),50.26548).tolist(),'limits':[[[j['lower'],j['upper']]for j in MODEL['joints']]]};session=NativeStandingSession(v,Contact(v),sim,MODEL,native,self.geo,d,save,'cpu',placement='origin')
+     first=session.reset_canonical();self.assertFalse(first['contact_valid'].any());first['joint_position_rad'][:]=1
+     self.assertTrue((session.observe()['joint_position_rad']==0).all());self.assertEqual(sim.counter,31)
+     with self.assertRaises(ValueError):session.reset_canonical()
+@@ -107,7 +107,7 @@
+   try:
+    with tempfile.TemporaryDirectory()as d:
+     v=View();sim=Sim(v);native={'joint_names':NAMES,'body_names':BODIES,'native_max_velocity':np.full((1,18),50.26548).tolist(),'limits':[[[j['lower'],j['upper']]for j in MODEL['joints']]]}
+-    session=NativeStandingSession(v,Contact(v),sim,MODEL,native,self.geo,d,save,'cpu');session.reset_canonical()
++    session=NativeStandingSession(v,Contact(v),sim,MODEL,native,self.geo,d,save,'cpu',placement='origin');session.reset_canonical()
+     original=v.get_root_velocities
+     def fail_after_step():
+      if sim.counter>31:raise RuntimeError('injected late getter')
+@@ -124,7 +124,7 @@
+   try:
+    with tempfile.TemporaryDirectory()as d:
+     v=View();sim=Sim(v);native={'joint_names':NAMES,'body_names':BODIES,'native_max_velocity':np.full((1,18),50.26548).tolist(),'limits':[[[j['lower'],j['upper']]for j in MODEL['joints']]]}
+-    session=NativeStandingSession(v,Contact(v),sim,MODEL,native,self.geo,d,save,'cpu');session.reset_canonical();original=v.get_dof_velocities;calls=[0]
++    session=NativeStandingSession(v,Contact(v),sim,MODEL,native,self.geo,d,save,'cpu',placement='origin');session.reset_canonical();original=v.get_dof_velocities;calls=[0]
+     def fail_pre_second():
+      calls[0]+=1
+      if calls[0]==3:raise RuntimeError('pre second step')
+@@ -137,7 +137,7 @@
+    if old is None:sys.modules.pop('warp',None)
+    else:sys.modules['warp']=old
+  def test_quiet_scorer_AST_preserved(self):
+-  parent=ast.parse(Path('tmp/reference_physics_adapter_009/source_009/tools/omni_quiet_review.py').read_text());new=ast.parse((HERE/'quiet_metrics.py').read_text())
++  parent=ast.parse(Path('experiments/c_length_study/tools/omni_quiet_review.py').read_text());new=ast.parse((HERE/'quiet_metrics.py').read_text())
+   for name in ['quiet_metrics']:
+    a=next(x for x in parent.body if isinstance(x,ast.FunctionDef)and x.name==name);b=next(x for x in new.body if isinstance(x,ast.FunctionDef)and x.name==name);self.assertEqual(ast.dump(a),ast.dump(b))
+ if __name__=='__main__':unittest.main()

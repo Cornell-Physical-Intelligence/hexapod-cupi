@@ -1,0 +1,43 @@
+{
+  "schema": "bc_velocity_state_validation_supplement_v1",
+  "recorded_at_utc": "2026-09-14T23:44:50.673341+00:00",
+  "parent_review_manifest": "artifacts/restart_2026-09-14/paper_ppo_stability_review_003/SHA256.json",
+  "parent_review_manifest_sha256": "04cb4971ac9317d20e6b380f97ef5cac5026f6ad0e097eb62f757803f7884edb",
+  "parent_manifest_unchanged": true,
+  "reason": "Root adopted independent peer-review correction: supervised velocity targets require native pre-hold states, rather than conditionally checking their convention only when states happened to be included.",
+  "change": "With bc_velocity_coefficient>0 require finite aligned states[M,61] and exact float32 target mapping [-states37,states36,states38]. Missing states fail before normalizers, optimizers, RNG, counters or fitting receipts change.",
+  "previous_learner_sha256": "1bc595119e4605f817c24090688938bf62898748de246b0e7dc89db743420afa",
+  "source_sha256": {
+    "experiments/paper_walk/learner.py": "b0a3cf503a0c710239d0245ef24fb961d0d05f06feaf37fffee7b2c802caf77a",
+    "experiments/paper_walk/tests/test_learner_stability.py": "dfef353f3e6d149a4da8cd2c2359f098d5ee3187cb24c34aac8211d933a4cad6"
+  },
+  "tests": {
+    "command": ".venv/bin/python -m unittest experiments.paper_walk.tests.test_learner_stability experiments.paper_walk.tests.test_learner experiments.paper_walk.tests.test_train_config",
+    "passed": true,
+    "count": 28,
+    "new_negative_cases": [
+      "missing native states",
+      "misaligned native states",
+      "nonfinite native states"
+    ],
+    "no_mutation_assertions": [
+      "complete model state including normalizers",
+      "PPO Adam state",
+      "discriminator Adam state",
+      "all RNG states",
+      "BC step counter",
+      "no behavior_cloning.json or bc_metrics.jsonl created"
+    ]
+  },
+  "dataset002_readonly_check": {
+    "path": "artifacts/paper_bc_data_002/bc_dataset.npz",
+    "sha256": "f016af1acd6278f37ce3c3c35343554fc59fc258ee9dd39913be4a185a70606a",
+    "rows": 3760,
+    "states_finite_aligned": true,
+    "exact_native_mapping": true,
+    "fit_executed": false
+  },
+  "existing_evidence_modified": false,
+  "native_action_taken": false,
+  "stage2_complete": false
+}

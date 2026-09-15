@@ -1,0 +1,297 @@
+{
+  "actual_native_reports": [
+    {
+      "run": "012",
+      "case": [
+        {
+          "case_id": "learning:translate_0.05_0deg",
+          "profile": "omni_static",
+          "command": [
+            0.05,
+            0.0,
+            0.0
+          ],
+          "controls": 1000
+        }
+      ],
+      "checkpoint_sha256": "a48fddf1f73fcaf5b93db44241390184dd36c60e031daaad87d3a63bfd2bd81a",
+      "controls": 1000,
+      "physics_steps": 8000,
+      "failure": null,
+      "results": [
+        {
+          "pass": false,
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "failed_checks": {
+            "planar_error_mps": {
+              "status": "fail",
+              "value": 0.05060753370552226,
+              "bound": 0.025,
+              "operator": "<="
+            }
+          }
+        }
+      ]
+    },
+    {
+      "run": "012",
+      "case": [
+        {
+          "case_id": "learning:quiet_20s",
+          "profile": "quiet_stand",
+          "command": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "controls": 1000
+        }
+      ],
+      "checkpoint_sha256": "a48fddf1f73fcaf5b93db44241390184dd36c60e031daaad87d3a63bfd2bd81a",
+      "controls": 1000,
+      "physics_steps": 8000,
+      "failure": null,
+      "results": [
+        {
+          "pass": false,
+          "failed_bounds": [
+            "max_joint_velocity_rms_rad_s",
+            "max_target_step_abs_p95_rad_per_20ms"
+          ],
+          "failed_checks": {
+            "max_joint_velocity_rms_rad_s": {
+              "status": "fail",
+              "value": 0.04925302788615227,
+              "bound": 0.03,
+              "operator": "<="
+            },
+            "max_target_step_abs_p95_rad_per_20ms": {
+              "status": "fail",
+              "value": 0.0025815069675445557,
+              "bound": 0.002,
+              "operator": "<="
+            }
+          }
+        }
+      ]
+    },
+    {
+      "run": "012",
+      "case": [
+        {
+          "case_id": "learning:forward_0.05_to_stop",
+          "profile": "stop_to_stand",
+          "command": [
+            0.05,
+            0.0,
+            0.0
+          ],
+          "controls": 1050
+        }
+      ],
+      "checkpoint_sha256": "a48fddf1f73fcaf5b93db44241390184dd36c60e031daaad87d3a63bfd2bd81a",
+      "controls": 1050,
+      "physics_steps": 8400,
+      "failure": null,
+      "results": [
+        {
+          "pass": false,
+          "failed_bounds": [
+            "max_joint_velocity_rms_rad_s",
+            "max_joint_position_range_rad",
+            "max_target_step_abs_p95_rad_per_20ms",
+            "missing_six_toe_count_400hz",
+            "native_capture_or_original_physical_bounds"
+          ],
+          "failed_checks": {
+            "max_joint_velocity_rms_rad_s": {
+              "status": "fail",
+              "value": 0.4807165861129761,
+              "bound": 0.03,
+              "operator": "<="
+            },
+            "max_joint_position_range_rad": {
+              "status": "fail",
+              "value": 0.09575113654136658,
+              "bound": 0.02,
+              "operator": "<="
+            },
+            "max_target_step_abs_p95_rad_per_20ms": {
+              "status": "fail",
+              "value": 0.00714675709605217,
+              "bound": 0.002,
+              "operator": "<="
+            },
+            "missing_six_toe_count_400hz": {
+              "status": "fail",
+              "value": 38,
+              "bound": 0,
+              "operator": "<="
+            }
+          }
+        }
+      ]
+    },
+    {
+      "run": "013",
+      "case": [
+        {
+          "case_id": "learning:translate_0.05_0deg",
+          "profile": "omni_static",
+          "command": [
+            0.05,
+            0.0,
+            0.0
+          ],
+          "controls": 1000
+        }
+      ],
+      "checkpoint_sha256": "eb2847e9bce7db0b090debdbc2b0b3395679ff3e2b78f8ecf7407aaa4a8b2d1a",
+      "controls": 1000,
+      "physics_steps": 8000,
+      "failure": null,
+      "results": [
+        {
+          "pass": false,
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "failed_checks": {
+            "planar_error_mps": {
+              "status": "fail",
+              "value": 0.050015923149147073,
+              "bound": 0.025,
+              "operator": "<="
+            }
+          }
+        }
+      ]
+    },
+    {
+      "run": "013",
+      "case": [
+        {
+          "case_id": "learning:quiet_20s",
+          "profile": "quiet_stand",
+          "command": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "controls": 1000
+        }
+      ],
+      "checkpoint_sha256": "eb2847e9bce7db0b090debdbc2b0b3395679ff3e2b78f8ecf7407aaa4a8b2d1a",
+      "controls": 1000,
+      "physics_steps": 8000,
+      "failure": null,
+      "results": [
+        {
+          "pass": false,
+          "failed_bounds": [
+            "max_joint_velocity_rms_rad_s",
+            "max_joint_position_range_rad",
+            "max_target_step_abs_p95_rad_per_20ms",
+            "max_requested_torque_saturation_fraction",
+            "requested_saturation_400hz",
+            "missing_six_toe_count_400hz"
+          ],
+          "failed_checks": {
+            "max_joint_velocity_rms_rad_s": {
+              "status": "fail",
+              "value": 0.5584203600883484,
+              "bound": 0.03,
+              "operator": "<="
+            },
+            "max_joint_position_range_rad": {
+              "status": "fail",
+              "value": 0.11063864827156067,
+              "bound": 0.02,
+              "operator": "<="
+            },
+            "max_target_step_abs_p95_rad_per_20ms": {
+              "status": "fail",
+              "value": 0.03678624704480171,
+              "bound": 0.002,
+              "operator": "<="
+            },
+            "max_requested_torque_saturation_fraction": {
+              "status": "fail",
+              "value": 0.01375,
+              "bound": 0.005,
+              "operator": "<="
+            },
+            "requested_saturation_400hz": {
+              "status": "fail",
+              "value": 0.01296875,
+              "bound": 0.005,
+              "operator": "<="
+            },
+            "missing_six_toe_count_400hz": {
+              "status": "fail",
+              "value": 6400,
+              "bound": 0,
+              "operator": "<="
+            }
+          }
+        }
+      ]
+    },
+    {
+      "run": "013",
+      "case": [
+        {
+          "case_id": "learning:forward_0.05_to_stop",
+          "profile": "stop_to_stand",
+          "command": [
+            0.05,
+            0.0,
+            0.0
+          ],
+          "controls": 1050
+        }
+      ],
+      "checkpoint_sha256": "eb2847e9bce7db0b090debdbc2b0b3395679ff3e2b78f8ecf7407aaa4a8b2d1a",
+      "controls": 1050,
+      "physics_steps": 8400,
+      "failure": null,
+      "results": [
+        {
+          "pass": false,
+          "failed_bounds": [
+            "missing_six_toe_count_400hz"
+          ],
+          "failed_checks": {
+            "missing_six_toe_count_400hz": {
+              "status": "fail",
+              "value": 3,
+              "bound": 0,
+              "operator": "<="
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "train007_window": {
+    "updates": 20,
+    "first_update": 201,
+    "last_update": 220,
+    "largest_accepted_kl": 0.019995431464255684,
+    "normalizer_kl_max": 0.0,
+    "final": {
+      "update": 220,
+      "transitions": 675840,
+      "kl_final": 0.015930585006957453,
+      "accepted_model_steps": 20,
+      "rejected_model_trials": 32,
+      "action_std": 0.10039036720991135,
+      "raw_action_clip_fraction": 0.5549225807189941,
+      "task_reward": 0.45967480540275574,
+      "style_reward": 0.033390872180461884
+    }
+  },
+  "eval014_status": "Root reports running; no outcome available at consultation dispatch. Any next experiment remains root decision pending that recording."
+}

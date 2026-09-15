@@ -1,0 +1,14 @@
+F.....
+======================================================================
+FAIL: test_geometry_points_exact_mask_and_shape_rotation (test_standing.Tests.test_geometry_points_exact_mask_and_shape_rotation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/andreboufama/Documents/CUPI/HEXAPOD/tmp/updated_native_standing_001/test_standing.py", line 66, in test_geometry_points_exact_mask_and_shape_rotation
+    source=np.array([x,0,0]);world=pose[:3]+R@(T[:3,:3]@source+T[:3,3]);ok,p=self.geo.cap(s['body'],world,pose);self.assertEqual(ok,want);np.testing.assert_allclose(p,source,atol=1e-15)
+                                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False != True
+
+----------------------------------------------------------------------
+Ran 6 tests in 1.001s
+
+FAILED (failures=1)

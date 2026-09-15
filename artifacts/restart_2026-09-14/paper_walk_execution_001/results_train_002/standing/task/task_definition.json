@@ -1,0 +1,185 @@
+{
+  "schema": "canonical_paper_walking_task_v1",
+  "config": {
+    "seed": 20260914,
+    "hold_min_seconds": 2.0,
+    "hold_max_seconds": 5.0,
+    "zero_command_fraction": 0.15,
+    "speed_levels_mps": [
+      0.025,
+      0.05
+    ],
+    "maximum_speed_mps": 0.05,
+    "yaw_rate_rad_s": 0.2,
+    "arc_speed_mps": 0.04,
+    "arc_yaw_rate_rad_s": 0.15,
+    "linear_error_variance": 0.0009,
+    "yaw_error_variance": 0.04,
+    "linear_tracking_weight": 1.0,
+    "yaw_tracking_weight": 0.3,
+    "quiet_joint_rate_scale_rad_s": 0.03,
+    "quiet_joint_rate_weight": 0.05,
+    "quiet_target_step_scale_rad": 0.002,
+    "quiet_target_step_weight": 0.02,
+    "tilt_weight": 0.5,
+    "angular_xy_weight": 0.01,
+    "vertical_velocity_weight": 0.05,
+    "height_weight": 5.0,
+    "normalized_effort_weight": 0.01,
+    "target_movement_weight": 0.005,
+    "nonfoot_event_weight": 1.0,
+    "nonfoot_force_weight": 0.02,
+    "terminal_penalty": 2.0
+  },
+  "nonzero_command_bank": [
+    [
+      0.02500000037252903,
+      0.0,
+      0.0
+    ],
+    [
+      0.01767767034471035,
+      0.01767767034471035,
+      0.0
+    ],
+    [
+      1.5308084623338832e-18,
+      0.02500000037252903,
+      0.0
+    ],
+    [
+      -0.01767767034471035,
+      0.01767767034471035,
+      0.0
+    ],
+    [
+      -0.02500000037252903,
+      3.0616169246677665e-18,
+      0.0
+    ],
+    [
+      -0.01767767034471035,
+      -0.01767767034471035,
+      0.0
+    ],
+    [
+      -4.5924256971943795e-18,
+      -0.02500000037252903,
+      0.0
+    ],
+    [
+      0.01767767034471035,
+      -0.01767767034471035,
+      0.0
+    ],
+    [
+      0.05000000074505806,
+      0.0,
+      0.0
+    ],
+    [
+      0.0353553406894207,
+      0.0353553406894207,
+      0.0
+    ],
+    [
+      3.0616169246677665e-18,
+      0.05000000074505806,
+      0.0
+    ],
+    [
+      -0.0353553406894207,
+      0.0353553406894207,
+      0.0
+    ],
+    [
+      -0.05000000074505806,
+      6.123233849335533e-18,
+      0.0
+    ],
+    [
+      -0.0353553406894207,
+      -0.0353553406894207,
+      0.0
+    ],
+    [
+      -9.184851394388759e-18,
+      -0.05000000074505806,
+      0.0
+    ],
+    [
+      0.0353553406894207,
+      -0.0353553406894207,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      -0.20000000298023224
+    ],
+    [
+      0.0,
+      0.0,
+      0.20000000298023224
+    ],
+    [
+      0.03999999910593033,
+      0.0,
+      -0.15000000596046448
+    ],
+    [
+      0.03999999910593033,
+      0.0,
+      0.15000000596046448
+    ]
+  ],
+  "source_sha256": "225c4d66b195fed39e646cfc4ffe9095fe676476e220e5879455d83f5e765754",
+  "command_frame": "navigation forward=-nativeY,left=nativeX,yaw=+Z",
+  "zero_sampling": "Balanced cumulative quota ceil(0.15*draws), shuffled within each draw batch; at least15% of draws, not a guarantee of time occupancy.",
+  "hold_controls_inclusive": [
+    100,
+    250
+  ],
+  "command_columns": [
+    210,
+    213
+  ],
+  "reward_attribution": "Reward uses held c[t]; post-control command fields expose c[t+1].",
+  "nominal_plate_height_m": 0.09780231400684256,
+  "maximum_speed_curriculum": "Explicit configuration; no automatic advance or qualification claim.",
+  "nonfoot_scope": "Native body/coxa/femur floor forces; tibia shaft/toe separation is unavailable in compact training telemetry.",
+  "proximity_guard": {
+    "mesh_radius_m": 0.46988232997647794,
+    "contact_skin_m": 0.0010000000474974513,
+    "radius_m": 0.4708823300239754,
+    "body_radius_bounds_m": {
+      "body": 0.24728297457155823,
+      "lf_coxa": 0.3051103433472523,
+      "lf_femur": 0.3667013438223382,
+      "lf_tibia": 0.46968479691117154,
+      "lm_coxa": 0.2112135874820691,
+      "lm_femur": 0.27280441192069577,
+      "lm_tibia": 0.3757880127583419,
+      "lr_coxa": 0.3052890995728298,
+      "lr_femur": 0.3668800719077929,
+      "lr_tibia": 0.46986364408137526,
+      "rf_coxa": 0.30512919998609517,
+      "rf_femur": 0.3667199492686954,
+      "rf_tibia": 0.46970358225692865,
+      "rm_coxa": 0.2112633086630279,
+      "rm_femur": 0.27285404998079,
+      "rm_tibia": 0.3758377075994742,
+      "rr_coxa": 0.3053079183664647,
+      "rr_femur": 0.3668987265414592,
+      "rr_tibia": 0.46988232997647794
+    },
+    "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+    "buffer_m": 0.2,
+    "collision_filter_present": false,
+    "scope": "Conservative all-pose spheres before/after each control and prospective reset; measured linear root sweep is also checked. This abort guard is not collision filtering, continuous collision detection, or proof of replica independence.",
+    "failure_action": "Save failure and abort entire training attempt; never reset to hide proximity."
+  },
+  "physics_changed": false,
+  "stage2_gates_changed": false,
+  "stage2_complete": false
+}

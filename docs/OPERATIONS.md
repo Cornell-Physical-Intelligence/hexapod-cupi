@@ -1,9 +1,114 @@
 # Spark operations runbook
 
-Research is paused for James. Native validation, training, recording and
-unattended continuation require his explicit resume. The exclusive reservation
-and external automation blocks remain in force. Repository checks and publication
-can continue. [Compute coordination](SPARK_COMPUTE_COORDINATION.md) owns that policy.
+James authorized a fresh canonical qualification sequence on 14 September 2026
+after visually confirming the mass-corrected URDF: standing, walking/stopping,
+terrain, then survey. The selected URDF SHA-256 is
+`9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78`.
+This supersedes the research pause for that sequence. Each stage still needs its
+own admission and evidence; authorization does not establish a running job or a
+passing result. The exclusive reservation and external-automation blocking
+requirements remain policy; verify the live controls before allocating compute.
+[Compute coordination](SPARK_COMPUTE_COORDINATION.md) owns that policy.
+
+On the same date James explicitly authorized Codex to take full ownership of
+Spark compute and stop competing processes. The lead dispatcher may defer
+competing CPU/GPU workloads and their restart triggers without another approval.
+Use the identified service or exact process identity, preserve its source,
+outputs and restart state, and keep SSH, networking and essential host services
+available. This authorization alone does not establish that compute is free.
+
+The active user goal is the existing Stage 2 milestone on the confirmed model,
+including paper-informed PPO training and an actual Isaac Sim policy video.
+Continue beyond diagnostic acquisition through same-source native admission,
+learning, held-out evaluation and the existing numerical and human visual
+acceptance requirements. The maintained prototype is documented in
+[experiments/paper_walk](../experiments/paper_walk/README.md). A native smoke,
+checkpoint or recording is evidence of its own scope; none alone completes
+Stage 2. Preserve full standing/contact checks and the unchanged direction,
+transition, quiet-stop, torque and smoothness requirements. Recorded failed
+attempts keep their original identities and do not become admissions.
+
+The 14 September paper-walk source002 configuration passes the original standing
+gates at one and all 32 replicas with neutral `[0, -0.30, 0.40]` radians per leg.
+[Recomputed standing evidence](../artifacts/restart_2026-09-14/paper_walk_execution_001/admission_001/verification.json)
+binds those scoped passes. The subsequent
+[native replay](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_replay_001/standing/native_replay/report.json)
+retains accepted demonstrations for all 21 commands, with one duplicate excluded
+from 32 demonstrations. The first
+[PPO attempt](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_001/standing/state.json)
+then completed 200 updates and 153,600 transitions without behavior cloning.
+[Cleanup](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_001/cleanup.json)
+confirms that attempt's container is absent and the reservation remains retained.
+These facts establish neither walking/stopping qualification nor current host
+availability. Earlier inspection-zero failures remain unchanged. Read the
+current registry and verify live host state before dispatch.
+
+Later [train005](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_005/standing/state.json)
+completed the lower-exploration 200-update PPO contrast. Its
+[evaluation008](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_008/standing/evaluation/summary.json)
+was deliberately stopped with four complete failed direction trials and nine
+missing probes. A separate [CPU BC fit](../artifacts/paper_bc_fit_001/REPORT.json)
+has zero PPO updates; its complete native forward, quiet and stop trials fail.
+[Training evidence](TRAINING.md) records their exact scope. Ordered probe subsets
+preserve every omitted case as missing, and neither acquisition completion nor
+cleanup advances Stage 2. Preserve the interrupted allocation's final receipts
+as well as the earlier stop-decision snapshot; they record different times.
+
+The subsequent [evaluation011](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_011/standing/evaluation/summary.json)
+completes its three selected forward, quiet and stopping probes; all fail,
+with ten omitted probes and all 96 Stage 2 cases still missing. Acquisition and
+exact-container cleanup pass. The separate
+[fit003 verification](../artifacts/paper_bc_fit_003/VERIFICATION.json) records CPU
+velocity calibration and strict restoration only, with zero PPO updates and no
+native training. The [128-replica raw audit](../artifacts/restart_2026-09-14/paper_walk_execution_001/verification_batch128_001/audit.json)
+passes every replica. The lead separately adopted
+[admission002](../artifacts/restart_2026-09-14/paper_walk_execution_001/admission_002/verification.json)
+for the exact one- and 128-replica simulation layouts; admission001 remains
+unchanged. Require the intended allocation's exact source, model and replica
+configuration. The [completed evaluation012](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_012/standing/evaluation/summary.json)
+records three failed forward, quiet and stopping probes for the velocity-supervised
+BC candidate, including a recorded native joint-velocity bound failure in the
+stop. Full acquisition and cleanup do not turn these failures into acceptance.
+[CPU fit004](../artifacts/paper_bc_fit_004/REPORT.json) separately prepares fresh
+128-replica learning identity, with zero PPO updates and no native actions.
+Neither record authorizes bypassing matching admission or strict checkpoint
+configuration checks.
+
+The subsequent [train006](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_006/standing/state.json)
+completes 200 PPO updates and 614,400 native transitions on the admitted 128
+replicas. Its checkpoint and exact-container cleanup are verified. Training
+records 142 joint-limit terminations and weak commanded-direction movement;
+it does not qualify walking. The separate
+[completed evaluation013](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_013/standing/evaluation/summary.json)
+fails all three actual PPO forward, quiet and stop probes. The
+[independent full-trace audit](../artifacts/restart_2026-09-14/paper_walk_execution_001/verification_evaluate_013/README.md)
+and [actual forward-video review](../artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_006/REVIEW.json)
+confirm the failed scope. Quiet lacks six-foot support throughout its fixed
+window; three remaining support losses still fail the stop. Exact-container
+cleanup passes and establishes only that allocation's terminal state.
+
+The [adopted stability decision](../artifacts/restart_2026-09-14/paper_ppo_stability_review_004/DECISION_001.json)
+selects bounded model/Adam rollback and retries plus frozen loaded actor
+statistics, preserving physics, reward and physical gates. The separately
+[verified CPU migration](../artifacts/restart_2026-09-14/paper_ppo_migration_001/run_001/VERIFICATION.json)
+retains the learned checkpoint's state under an explicit v3 identity. Neither
+CPU inference parity nor preserved RNG bytes constitutes native or PhysX resume.
+Source018 is frozen; the [train007 dispatch](../artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_train_007.json)
+records the lead-owned launch at 00:50:01 UTC. The separately verified
+[completed train007](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_007/standing/state.json)
+adds all 20 updates and 61,440 transitions; its checkpoint and exact-container
+cleanup pass. The bounded update behavior improves as designed on its collected
+rollouts, but 14 joint-limit terminations remain and walking is unqualified.
+The [evaluation014 dispatch](../artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_evaluate_014.json)
+at 00:53:38 UTC starts the matched three-probe native evaluation of checkpoint220.
+Its outcome and cleanup remain pending in this snapshot. Recheck live reservation,
+exact source/configuration and matching admission for each allocation; a saved
+dispatch receipt is not live host telemetry or evidence of evaluation completion.
+
+A [local transport cleanup](../artifacts/restart_2026-09-14/paper_walk_execution_001/local_transport_cleanup_001.json)
+removes only four verified redundant agent-created transfer archives. All
+extracted raw evidence, checkpoints, inventories and complete remote archives
+remain preserved; no unique result or failed attempt is discarded.
 
 The sections below retain verified host conventions and recovery controls.
 Recheck host state before an authorized allocation. [Archived procedures](archive/README.md)
@@ -74,17 +179,18 @@ prelaunch and post-exit receipts with the attempt's evidence.
 
 ## 3. GPU lock and shared-workload protocol
 
-The latest user instruction reserves the Spark for HEXAPOD user compute at all
-times, including between runs. This supersedes earlier weather-only priority
-and sharing-on-request preferences. Read the current header of
+The 14 September full-ownership instruction reserves Spark user compute for
+HEXAPOD at all times, including between runs, and authorizes stopping competing
+workloads. This supersedes earlier weather-only priority and sharing-on-request
+preferences. One lead dispatcher owns these operations. Read the current header of
 `/home/orionh/SPARK_COMPUTE_COORDINATION.md` before dispatch. Identified competing
 producers must remain deferred until a later user instruction releases or
 changes the reservation. Preserve their work and exact recovery state, SSH,
 operating-system services and host health. These admission and cleanup rules
 still apply:
 
-- Hold `/tmp/hexapod-isaac-gpu.lock` for the entire logical run, from before
-  container creation to cleanup.
+- Hold both `/opt/wx/gpu.lock` and `/tmp/hexapod-isaac-gpu.lock` for the entire
+  logical run, from before container creation to cleanup.
 - Defer competing user compute through source-verified producer controls,
   retaining exact identity, outputs and restart state. Never use broad process
   matching to kill work or modify another project's model/data. A stopped or
@@ -138,14 +244,32 @@ PID to the acquisition receipt and command line. That receipt names the full
 directory. These are different fields and must not be compared interchangeably.
 Do not erase request files, completed reconstructions or partial outputs.
 
+Use the [later directory-entry block](../artifacts/operations_2026-09-11/spark_automation_block_002/README.md)
+when checking reconstruction protection. The earlier regular-file gate was
+overwritten. Its successor is the real directory
+`/home/orionh/ithaca-reconstruction/queue-worker.py`, with an unconditional
+`__main__.py` blocker, independently backed by the persistent queue lock.
+Verify its identity and live lock holder; do not restore the superseded file
+gate. Preserve the exact original backups and bind any new controls into a new
+source/guard identity before allocation.
+
 Check actual GitHub workflow inventories before assuming Git is a scheduler.
 Disable identified competing triggers when present; a repository with no
 workflows has nothing to cancel. Preserve HEXAPOD's own jobs, repository CI,
-Pages deployment. The later James handoff pauses continuation automation and all new research allocations; retain the reservation helper. Every native successor must
+Pages deployment and the reservation helper. The 14 September restart supersedes
+the 11 September research pause; external scheduler release remains a separate
+user decision. Every native successor must
 recheck these operational controls without changing its admitted robot source,
 servo, physics or quality gates.
 
-**Handoff pause, 11 September 2026:** `/home/orionh/HEXAPOD_runs/canonical_direct_20260910/james_handoff_pause_001/PAUSED.json` records the user pause. The Codex continuation is PAUSED, and the old `hexapod-restore-forecasting-20260909.timer` is stopped with its transient units absent. No research job is queued. James or the user must explicitly resume project work; external scheduler release remains a separate user decision. Read [JAMES_HANDOFF](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/62fd7448264c5ebe051ba2de1d9a72844d6b4c3a/docs/JAMES_HANDOFF.md) before using historical launchers.
+**Historical handoff pause, 11 September 2026:**
+`/home/orionh/HEXAPOD_runs/canonical_direct_20260910/james_handoff_pause_001/PAUSED.json`
+records the user pause. At that handoff, Codex continuation was PAUSED, the old
+`hexapod-restore-forecasting-20260909.timer` was stopped with its transient units
+absent, and no research job was queued. Preserve those receipts and recheck the
+current continuation, restore timers and producer state before a fresh run.
+Read [JAMES_HANDOFF](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/62fd7448264c5ebe051ba2de1d9a72844d6b4c3a/docs/JAMES_HANDOFF.md)
+before using historical launchers.
 
 ## 8. Evidence handling
 

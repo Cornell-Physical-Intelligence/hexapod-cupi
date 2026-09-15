@@ -1,0 +1,2845 @@
+{
+  "schema": "canonical_native_policy_analysis_v1",
+  "analyzer_sha256": "54c50fe4d411cd73d9cd4ea8157a96bb3ee0169537d9e5618bb6c29ea8b7976d",
+  "recordings": [
+    {
+      "directory": "/Users/andreboufama/Documents/hex/hexapod-cupi/artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_008/standing/evaluation/batch_000",
+      "integrity": {
+        "report_sha256": "d265ea1f81b37426feaa9e208b83565215cbd3936402a4d1dd0f3792405b60d9",
+        "verified_files": {
+          "control_trace.npz": "61d0417ee9d55ce45103fc2bd74aa9a482b3d0ad47f72191b0f6be34ed1890e5",
+          "declaration.json": "5686e5e25e03dea4e0edb73baa12d062da3855f675517106a0a073c25b7b8148",
+          "first_frame.png": "10b4c3bd350288f7dd171e1c714d56176e440215d5966eafd2a8d4c9767bc4ba",
+          "rollout.mp4": "8d9926cbe392f2c9ae1983b91910257e92b8c4e446b517662f0ee5c1bbe63b7f",
+          "native400hz/contacts.jsonl": "da44efb090b72150366a98bb1ab388c52ef5d0f8f1877b05600c759ce5c8eae5",
+          "native400hz/initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+          "native400hz/substeps_000.npz": "4c3510aca85f4576b5c19feb479a4c73bea805d3c9c4a50e0c8517939af0e68b",
+          "native400hz/substeps_001.npz": "40d6c50c78681ee22a6280fc2aea24cdc8efb663432ad623f7f37bfdbcd99601",
+          "native400hz/substeps_002.npz": "0869e0f4dc07432f0d2fc8a42c4192efc3922b26b23a698057a052745aa585cb",
+          "native400hz/substeps_003.npz": "da1a648918537c540fb344b1eabe0737ebb7c40005822547747aff826025876a",
+          "native400hz/substeps_004.npz": "4f31a109975471bc8ba9b4deed0d3b42a7897a62978baca41787980fd41c1c6d",
+          "native400hz/substeps_005.npz": "f035ad6bfab05475c89070cd458cccc1cf2d5e73222872780b6d4a0d9ea67dca",
+          "native400hz/substeps_006.npz": "cd13c2853ced78f88f22632403134a9ca0bdbe0a1a0b706d3f7714e789085f1b",
+          "native400hz/substeps_007.npz": "5c8767fde6cd3ec5db2a87f1d50cc99d8b053c6a9a19bb8ded3a57de30f44ef4",
+          "native400hz/substeps_008.npz": "da490c391f12588971fd4e58b3baedb62590e7d5f46f072b566ee8b0a69d2f9a",
+          "native400hz/substeps_009.npz": "b894744e8a8744836adf0947cbe91989de37651866400798c069369badf110ff"
+        },
+        "capture_manifest_sha256": "b172743273ef305a5c31922c08003dae7fa6d2792cbc758a1a68ff49a08e1c7a",
+        "capture_manifest_bound_by_parent_report": false,
+        "scope": "Listed file bytes verified against saved manifests; manifests are not digital signatures."
+      },
+      "original_results": [
+        {
+          "schema": "canonical_stage2_cpu_evaluation_v1",
+          "profile": "omni_static",
+          "scope": {
+            "source": "experiments/c_length_study/tools/omni_flat_math.py:scenario_gate",
+            "cases": 77,
+            "duration_s": 20.0,
+            "settle_s": 2.0,
+            "scope": "Historical full signed direction, yaw and combined-command numeric screen."
+          },
+          "environment_index": 0,
+          "recorded_controls": 1000,
+          "checks": {
+            "complete_requested_window": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "control_dt_s": {
+              "status": "pass",
+              "value": 0.0,
+              "bound": 1e-12,
+              "operator": "<="
+            },
+            "quaternion_unit_norm": {
+              "status": "pass",
+              "value": 2.384185791015625e-07,
+              "bound": 1e-05,
+              "operator": "<="
+            },
+            "terminated": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "truncated": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "reset": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "contiguous_time": {
+              "status": "pass",
+              "value": 3.1259717037102064e-15,
+              "bound": 1e-09,
+              "operator": "<="
+            },
+            "held_command": {
+              "status": "pass",
+              "value": 7.450580569168253e-10,
+              "bound": 1e-06,
+              "operator": "<="
+            },
+            "planar_error_mps": {
+              "status": "fail",
+              "value": 0.05162748358667503,
+              "bound": 0.025,
+              "operator": "<="
+            },
+            "yaw_error_rad_s": {
+              "status": "pass",
+              "value": 0.028610465184850446,
+              "bound": 0.06,
+              "operator": "<="
+            },
+            "tilt_rms_degrees": {
+              "status": "pass",
+              "value": 0.5954659581184387,
+              "bound": 5.0,
+              "operator": "<="
+            },
+            "vertical_velocity_rms_mps": {
+              "status": "pass",
+              "value": 0.030001776292920113,
+              "bound": 0.04,
+              "operator": "<="
+            },
+            "nonfoot_fraction": {
+              "status": "pass",
+              "value": 0.0,
+              "bound": 0.001,
+              "operator": "<="
+            },
+            "computed_demand_over_rating_fraction": {
+              "status": "pass",
+              "value": 0.0006172839506172839,
+              "bound": 0.005,
+              "operator": "<="
+            }
+          },
+          "metrics": {
+            "base_height_std_m": 0.0010857407469302416,
+            "base_height_peak_to_peak_m": 0.004375264048576355,
+            "tilt_rms_degrees": 0.5954659581184387,
+            "tilt_p95_degrees": 1.042930245399475,
+            "maximum_tilt_degrees": 1.3247079849243164,
+            "vertical_velocity_rms_mps": 0.030001776292920113,
+            "vertical_velocity_abs_p95_mps": 0.04504726082086563,
+            "mean_velocity_mps": [
+              -0.00011078892585140938,
+              -0.0005104245882063248,
+              -0.00021987713966634806
+            ],
+            "planar_error_mps": 0.05162748358667503,
+            "planar_velocity_rmse_mps": 0.05299899454760796,
+            "yaw_error_rad_s": 0.028610465184850446,
+            "yaw_rate_rmse_radps": 0.03978418741719597,
+            "mean_yaw_rate_rad_s": 0.0005215463079074597,
+            "roll_pitch_angular_velocity_rms_radps": 0.20145441561552488,
+            "roll_pitch_angular_velocity_p95_radps": 0.38287229346211665,
+            "requested_saturation_fraction_400hz": 0.0008487654320987654,
+            "maximum_requested_saturation_fraction_400hz": 0.011805555555555555,
+            "computed_demand_over_rating_fraction": 0.0006172839506172839,
+            "maximum_per_joint_computed_demand_over_rating_fraction": 0.0077777777777777776,
+            "maximum_computed_over_rating_burst_s": 0.06,
+            "peak_abs_computed_nm": 2.829172134399414,
+            "max_per_joint_rms_applied_nm": 0.8012228012084961,
+            "nonfoot_fraction": 0.0
+          },
+          "lineage": {
+            "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+            "checkpoint_sha256": "43ed0d8291feb028004f843e78b1e01fd3695fd81234d1bef391ff53cef6b035",
+            "source_sha256": "2d2503caead4111d399134cc4134197e7a175a36b6f99355938a16680bb4fc7b"
+          },
+          "window_start_control": 100,
+          "window_controls": 900,
+          "native_admission": "Separate exact-model native 1/32 standing, solver, geometry, full400Hz and asset receipts are required.",
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "missing_evidence": [],
+          "pass": false,
+          "stage2_complete": false,
+          "case_id": "learning:translate_0.05_0deg",
+          "native_capture_complete": true,
+          "native_motor_and_joint_checks_pass": true,
+          "native_contact_screen": {
+            "schema": "canonical_native_contact_screen_v1",
+            "frequency_hz": 400,
+            "window": "complete trial, including initial settling and every native substep",
+            "recorded_substeps": 8000,
+            "nonfoot_substeps": 0,
+            "nonfoot_fraction": 0.0,
+            "maximum_nonfoot_fraction": 0.001,
+            "pass": true,
+            "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+          },
+          "batch_failure": null,
+          "passed_numeric_screen": false
+        }
+      ],
+      "original_failure": null,
+      "original_acquisition_complete": true,
+      "replicas": [
+        {
+          "case_id": "learning:translate_0.05_0deg",
+          "controls": 1000,
+          "missing_metrics": [],
+          "scope": "Diagnostics of the complete recorded attempt; no acceptance thresholds or verdicts changed.",
+          "status": "measured",
+          "tracking": {
+            "mean_requested_navigation_velocity_mps": [
+              0.05000000074505806,
+              0.0
+            ],
+            "mean_achieved_navigation_velocity_mps": [
+              -5.65484035756036e-05,
+              -0.00039955569450116085
+            ],
+            "mean_signed_velocity_error_mps": [
+              -0.05005654914863369,
+              -0.00039955569450116085
+            ],
+            "mean_absolute_velocity_error_mps": [
+              0.05005654914863369,
+              0.00857237276321568
+            ],
+            "planar_error_rmse_mps": 0.053091949493361344,
+            "mean_requested_speed_mps": 0.05000000074505806,
+            "mean_achieved_speed_mps": 0.01552993208089478,
+            "mean_signed_direction_speed_mps": -5.654840357560357e-05,
+            "mean_signed_yaw_error_rad_s": -0.0002311222624318846,
+            "yaw_error_rmse_rad_s": 0.041548504124175614,
+            "measurement_point": "Native COM for exact evaluator velocity_navigation_mps; estimator is compared separately at root origin."
+          },
+          "deck": {
+            "height_mean_m": 0.09516044955700637,
+            "height_std_m": 0.0010732152328059871,
+            "height_peak_to_peak_m": 0.008643358945846558,
+            "tilt_rms_deg": 0.5876804418281619,
+            "tilt_peak_deg": 1.3246578120567891,
+            "planar_excursion_max_m": 0.00975525966413252
+          },
+          "deck_height_spectrum": {
+            "status": "measured",
+            "samples": 1000,
+            "sample_rate_hz": 50.0,
+            "ac_rms": 0.0010732152328059871,
+            "dominant_frequency_hz": 0.05,
+            "power_above_5hz_fraction": 0.06905023441792014,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "joints": {
+            "names": [
+              "lf_coxa_yaw",
+              "lf_femur_pitch",
+              "lf_tibia_pitch",
+              "lm_coxa_yaw",
+              "lm_femur_pitch",
+              "lm_tibia_pitch",
+              "lr_coxa_yaw",
+              "lr_femur_pitch",
+              "lr_tibia_pitch",
+              "rf_coxa_yaw",
+              "rf_femur_pitch",
+              "rf_tibia_pitch",
+              "rm_coxa_yaw",
+              "rm_femur_pitch",
+              "rm_tibia_pitch",
+              "rr_coxa_yaw",
+              "rr_femur_pitch",
+              "rr_tibia_pitch"
+            ],
+            "position_range_rad": [
+              0.1003673616796732,
+              0.12416326999664307,
+              0.1400863528251648,
+              0.06531602703034878,
+              0.11698667705059052,
+              0.2645496129989624,
+              0.11929566599428654,
+              0.13689588010311127,
+              0.14925295114517212,
+              0.14884876739233732,
+              0.19947274029254913,
+              0.13765454292297363,
+              0.07493283227086067,
+              0.15953096747398376,
+              0.20455828309059143,
+              0.12180504039861262,
+              0.08537770807743073,
+              0.15028810501098633
+            ],
+            "velocity_rms_rad_s": [
+              0.17575356330472278,
+              0.5675217204158826,
+              0.5093577844752268,
+              0.1495663122208287,
+              0.7850734292401201,
+              1.8028000205490875,
+              0.23025952769896965,
+              0.7364291518536137,
+              0.8205073926138687,
+              0.33527654934697015,
+              0.5519441997544664,
+              0.468046237443589,
+              0.1343818765750945,
+              0.7006886212480099,
+              0.5757688488718616,
+              0.2128894744531895,
+              0.5405961880677572,
+              0.8957179376634615
+            ],
+            "target_tracking_rms_rad": [
+              0.025295285766491468,
+              0.0453908388123947,
+              0.04976135442800928,
+              0.028289034024330816,
+              0.045424884899450804,
+              0.02985193499277223,
+              0.024511086564191212,
+              0.035414194989644564,
+              0.02282916802202112,
+              0.021722776253928617,
+              0.030410233502842953,
+              0.036057119741141556,
+              0.03351354444289525,
+              0.043145822878131075,
+              0.05492128186530568,
+              0.02525728549832931,
+              0.0666202237475457,
+              0.02539147710767732
+            ],
+            "target_step_abs_max_rad": [
+              0.03999999999359716,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999992083758,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999999359716,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999999996362,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999997904524,
+              0.03999999165534973,
+              0.03999999165534973
+            ],
+            "target_step_abs_p95_rad": [
+              0.03999999980442226,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.039999999571591616,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.039999999571591616,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973
+            ],
+            "slew_limit_occupancy_fraction": [
+              0.6636636636636637,
+              0.7267267267267268,
+              0.1971971971971972,
+              0.5245245245245245,
+              0.7127127127127127,
+              0.7317317317317318,
+              0.7387387387387387,
+              0.5295295295295295,
+              0.38738738738738737,
+              0.7987987987987988,
+              0.7667667667667668,
+              0.6506506506506506,
+              0.6686686686686687,
+              0.4574574574574575,
+              0.4794794794794795,
+              0.33633633633633636,
+              0.7777777777777778,
+              0.7117117117117117
+            ]
+          },
+          "target_step_spectrum": {
+            "status": "measured",
+            "samples": 999,
+            "sample_rate_hz": 50.0,
+            "ac_rms": 0.03404806228166789,
+            "dominant_frequency_hz": 24.924924924924923,
+            "power_above_5hz_fraction": 0.9945578397202912,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "torque_400hz": {
+            "samples": 8000,
+            "joint_names": [
+              "lf_coxa_yaw",
+              "lf_femur_pitch",
+              "lf_tibia_pitch",
+              "lm_coxa_yaw",
+              "lm_femur_pitch",
+              "lm_tibia_pitch",
+              "lr_coxa_yaw",
+              "lr_femur_pitch",
+              "lr_tibia_pitch",
+              "rf_coxa_yaw",
+              "rf_femur_pitch",
+              "rf_tibia_pitch",
+              "rm_coxa_yaw",
+              "rm_femur_pitch",
+              "rm_tibia_pitch",
+              "rr_coxa_yaw",
+              "rr_femur_pitch",
+              "rr_tibia_pitch"
+            ],
+            "requested_saturation_fraction": [
+              0.0,
+              0.001,
+              0.0,
+              0.0,
+              0.000625,
+              0.001125,
+              0.0,
+              0.001125,
+              0.000125,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.00075,
+              0.0,
+              0.0,
+              0.010625,
+              0.001125
+            ],
+            "requested_saturation_longest_burst_s": [
+              0.0,
+              0.0175,
+              0.0,
+              0.0,
+              0.01,
+              0.015,
+              0.0,
+              0.015,
+              0.0025,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0075,
+              0.0,
+              0.0,
+              0.0225,
+              0.005
+            ],
+            "requested_abs_peak_nm": [
+              0.9263868927955627,
+              1.9089314937591553,
+              1.4383649826049805,
+              1.1460822820663452,
+              4.870319843292236,
+              5.745287895202637,
+              1.4219900369644165,
+              1.913506269454956,
+              1.7472909688949585,
+              0.9208415150642395,
+              1.2215092182159424,
+              1.5375763177871704,
+              1.0042433738708496,
+              1.7887905836105347,
+              1.5791571140289307,
+              1.2022486925125122,
+              2.0701096057891846,
+              2.9947257041931152
+            ],
+            "applied_abs_peak_nm": [
+              0.9263868927955627,
+              1.600000023841858,
+              1.4383649826049805,
+              1.1460822820663452,
+              1.600000023841858,
+              1.600000023841858,
+              1.4219900369644165,
+              1.600000023841858,
+              1.600000023841858,
+              0.9208415150642395,
+              1.2215092182159424,
+              1.5375763177871704,
+              1.0042433738708496,
+              1.600000023841858,
+              1.5791571140289307,
+              1.2022486925125122,
+              1.600000023841858,
+              1.600000023841858
+            ],
+            "applied_rms_nm": [
+              0.31061788178437316,
+              0.5628951999385622,
+              0.604433042018485,
+              0.33483524506133067,
+              0.567852834088471,
+              0.3843690846858713,
+              0.3118070972155057,
+              0.44630609327374055,
+              0.30547783551134666,
+              0.26949278383474057,
+              0.3707754987221978,
+              0.46087645212332334,
+              0.4038145870368804,
+              0.548426408506608,
+              0.6705518772838028,
+              0.2959055599462653,
+              0.805537993128596,
+              0.33152176824077756
+            ],
+            "first_requested_saturation_s": 0.0375
+          },
+          "support_400hz": {
+            "toe_contact_fraction": [
+              0.95475,
+              0.9055,
+              0.812875,
+              0.41125,
+              0.958375,
+              0.93375
+            ],
+            "support_count_histogram": [
+              9,
+              2,
+              2,
+              224,
+              1916,
+              3612,
+              2235
+            ],
+            "no_toe_support_samples": 9
+          },
+          "contact_reference_motion": {
+            "measurement": "World motion of each toe-link reference point during consecutive actual distal contact samples; a slip proxy, not the contact patch velocity.",
+            "eligible_pairs_by_toe": [
+              7533,
+              7013,
+              6076,
+              3216,
+              7551,
+              7172
+            ],
+            "mean_planar_speed_mps": [
+              0.0018274668909793468,
+              0.0014096313303717989,
+              0.0026681555261255994,
+              0.0032815738706603536,
+              0.0011926908503205203,
+              0.002111450330014781
+            ],
+            "p95_planar_speed_mps": [
+              0.003868862132001283,
+              0.0023216926916375447,
+              0.004923509618004564,
+              0.005702357457667516,
+              0.002185587924855289,
+              0.004943654292889189
+            ]
+          },
+          "failures": {
+            "terminated": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            },
+            "truncated": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            },
+            "reset": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            },
+            "nonfoot_contact": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            }
+          },
+          "joint_velocity_rad_s_spectrum_400hz": {
+            "status": "measured",
+            "samples": 8000,
+            "sample_rate_hz": 400.0,
+            "ac_rms": 0.7806818173393488,
+            "dominant_frequency_hz": 24.900000000000002,
+            "power_above_5hz_fraction": 0.9815433125025619,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "joint_position_rad_spectrum_400hz": {
+            "status": "measured",
+            "samples": 8000,
+            "sample_rate_hz": 400.0,
+            "ac_rms": 0.034344628595413255,
+            "dominant_frequency_hz": 0.05,
+            "power_above_5hz_fraction": 0.03918018054083186,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "estimator": {
+            "root_origin_velocity_rmse_mps": [
+              0.010702219178205664,
+              0.017455279952213496,
+              0.01597807550932203
+            ],
+            "measurement_point": "Pre-policy body-root origin navigation velocity in critic[:, -3:], not COM tracking velocity."
+          },
+          "motion_prior_style_reward": {
+            "mean": 0.021185883343219757,
+            "min": 0.0,
+            "max": 0.2168099284172058
+          },
+          "motion_prior_discriminator_score": {
+            "mean": -0.9881838983297349,
+            "min": -1.1089849472045898,
+            "max": -0.7699605226516724
+          }
+        }
+      ],
+      "actor_reconstruction": {
+        "status": "reconstructed",
+        "checkpoint_sha256": "43ed0d8291feb028004f843e78b1e01fd3695fd81234d1bef391ff53cef6b035",
+        "observations": 1000,
+        "actor_state_dict_strict": true,
+        "absolute_tolerance": 1e-05,
+        "relative_tolerance": 1e-05,
+        "within_cpu_float_tolerance": true,
+        "action_error_abs_max": 3.5762786865234375e-07,
+        "action_error_rmse": 4.153840649223639e-08,
+        "scope": "CPU mean-action reconstruction from recorded histories and saved normalizers; no closed-loop or observation-noise trial reproduced."
+      },
+      "plots": {
+        "status": "written",
+        "files": [
+          "recording_000_motion.png",
+          "recording_000_joints_torque_support.png",
+          "recording_000_joint_velocity_spectrum.png"
+        ],
+        "scope": "Replica0 measured timelines and spectra; no smoothing or removed failure samples"
+      }
+    },
+    {
+      "directory": "/Users/andreboufama/Documents/hex/hexapod-cupi/artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_008/standing/evaluation/batch_001",
+      "integrity": {
+        "report_sha256": "da95c33bb400c2564d21c60440cbc14444f300d4a6b9ecd7390eba4ae01a7fbb",
+        "verified_files": {
+          "control_trace.npz": "69e3f33b81d806dd8e814c2eb06a77d1d1a269520ed57b8351f70ecf38be45b2",
+          "declaration.json": "64d8b89f661b2d36a32177598037f593771b1b2a1f444f6d9771ec460ebdf26d",
+          "native400hz/contacts.jsonl": "cd5bce3395d2a1604707af38ec162f511867920f0723d02186417815f3a004a8",
+          "native400hz/initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+          "native400hz/substeps_000.npz": "331f920b655fa4c90a28bb648d0cfb49fe14fa5f2b9d05b4361cc8e31272e2a8",
+          "native400hz/substeps_001.npz": "88620a7d7754dd2c7cb573304edde3322253287c66938dabf9b9b4e798392fff",
+          "native400hz/substeps_002.npz": "a326c1030a1a789e26003cd9eee1d7339ccb2a8048114dd715bc5f9670c915ca",
+          "native400hz/substeps_003.npz": "56474d43231fbcdbc40928fe42a22acacecf6203368ed06284e8fa9fb185d912",
+          "native400hz/substeps_004.npz": "4cf8df00813a102e00a29e99320c48268e8c65d6b0e229b67b8c39489088d9ea",
+          "native400hz/substeps_005.npz": "748825299352f46682e043c5a4a102b8fff7a0b90f580dbb62c5005de485726f",
+          "native400hz/substeps_006.npz": "b9b17f63912a3af0f425757387ac57bdea86fbe6ac28c88f5d0664a5927b0a5d",
+          "native400hz/substeps_007.npz": "01d1bf8606e1f13a0b54069bd1061fcafe7f31210beaf92ccdee72334ebfe6c8",
+          "native400hz/substeps_008.npz": "8a5b232dbaffb3951f7cf4442b863c9319646996d7052b66b656ed7153a3a46b",
+          "native400hz/substeps_009.npz": "38897daa14db44568af284584db60c4383a4790586fc8162981ac31bf7a676fb"
+        },
+        "capture_manifest_sha256": "a44f5cb50a568577acd3c9f46c709268a7f5f9850b3774c003acfab3d7f9454d",
+        "capture_manifest_bound_by_parent_report": false,
+        "scope": "Listed file bytes verified against saved manifests; manifests are not digital signatures."
+      },
+      "original_results": [
+        {
+          "schema": "canonical_stage2_cpu_evaluation_v1",
+          "profile": "omni_static",
+          "scope": {
+            "source": "experiments/c_length_study/tools/omni_flat_math.py:scenario_gate",
+            "cases": 77,
+            "duration_s": 20.0,
+            "settle_s": 2.0,
+            "scope": "Historical full signed direction, yaw and combined-command numeric screen."
+          },
+          "environment_index": 0,
+          "recorded_controls": 1000,
+          "checks": {
+            "complete_requested_window": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "control_dt_s": {
+              "status": "pass",
+              "value": 0.0,
+              "bound": 1e-12,
+              "operator": "<="
+            },
+            "quaternion_unit_norm": {
+              "status": "pass",
+              "value": 2.384185791015625e-07,
+              "bound": 1e-05,
+              "operator": "<="
+            },
+            "terminated": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "truncated": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "reset": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "contiguous_time": {
+              "status": "pass",
+              "value": 3.1259717037102064e-15,
+              "bound": 1e-09,
+              "operator": "<="
+            },
+            "held_command": {
+              "status": "pass",
+              "value": 1.6300933242119342e-09,
+              "bound": 1e-06,
+              "operator": "<="
+            },
+            "planar_error_mps": {
+              "status": "fail",
+              "value": 0.05144240017344699,
+              "bound": 0.025,
+              "operator": "<="
+            },
+            "yaw_error_rad_s": {
+              "status": "pass",
+              "value": 0.03232462723835338,
+              "bound": 0.06,
+              "operator": "<="
+            },
+            "tilt_rms_degrees": {
+              "status": "pass",
+              "value": 0.9061141610145569,
+              "bound": 5.0,
+              "operator": "<="
+            },
+            "vertical_velocity_rms_mps": {
+              "status": "pass",
+              "value": 0.01786462776362896,
+              "bound": 0.04,
+              "operator": "<="
+            },
+            "nonfoot_fraction": {
+              "status": "pass",
+              "value": 0.0,
+              "bound": 0.001,
+              "operator": "<="
+            },
+            "computed_demand_over_rating_fraction": {
+              "status": "pass",
+              "value": 6.17283950617284e-05,
+              "bound": 0.005,
+              "operator": "<="
+            }
+          },
+          "metrics": {
+            "base_height_std_m": 0.0004252651706337929,
+            "base_height_peak_to_peak_m": 0.002665676176548004,
+            "tilt_rms_degrees": 0.9061141610145569,
+            "tilt_p95_degrees": 1.077798843383789,
+            "maximum_tilt_degrees": 1.2146648168563843,
+            "vertical_velocity_rms_mps": 0.01786462776362896,
+            "vertical_velocity_abs_p95_mps": 0.03176511824131012,
+            "mean_velocity_mps": [
+              0.0003238700807004854,
+              -0.00047921091712587035,
+              -0.0004898018172251965
+            ],
+            "planar_error_mps": 0.05144240017344699,
+            "planar_velocity_rmse_mps": 0.05330368434397164,
+            "yaw_error_rad_s": 0.03232462723835338,
+            "yaw_rate_rmse_radps": 0.04183215065758675,
+            "mean_yaw_rate_rad_s": 0.00019549432462501377,
+            "roll_pitch_angular_velocity_rms_radps": 0.30829174193735914,
+            "roll_pitch_angular_velocity_p95_radps": 0.41617397812253315,
+            "requested_saturation_fraction_400hz": 0.00020833333333333335,
+            "maximum_requested_saturation_fraction_400hz": 0.0020833333333333333,
+            "computed_demand_over_rating_fraction": 6.17283950617284e-05,
+            "maximum_per_joint_computed_demand_over_rating_fraction": 0.0011111111111111111,
+            "maximum_computed_over_rating_burst_s": 0.02,
+            "peak_abs_computed_nm": 1.6499279737472534,
+            "max_per_joint_rms_applied_nm": 0.7027389407157898,
+            "nonfoot_fraction": 0.0
+          },
+          "lineage": {
+            "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+            "checkpoint_sha256": "43ed0d8291feb028004f843e78b1e01fd3695fd81234d1bef391ff53cef6b035",
+            "source_sha256": "2d2503caead4111d399134cc4134197e7a175a36b6f99355938a16680bb4fc7b"
+          },
+          "window_start_control": 100,
+          "window_controls": 900,
+          "native_admission": "Separate exact-model native 1/32 standing, solver, geometry, full400Hz and asset receipts are required.",
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "missing_evidence": [],
+          "pass": false,
+          "stage2_complete": false,
+          "case_id": "learning:translate_0.05_45deg",
+          "native_capture_complete": true,
+          "native_motor_and_joint_checks_pass": true,
+          "native_contact_screen": {
+            "schema": "canonical_native_contact_screen_v1",
+            "frequency_hz": 400,
+            "window": "complete trial, including initial settling and every native substep",
+            "recorded_substeps": 8000,
+            "nonfoot_substeps": 0,
+            "nonfoot_fraction": 0.0,
+            "maximum_nonfoot_fraction": 0.001,
+            "pass": true,
+            "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+          },
+          "batch_failure": null,
+          "passed_numeric_screen": false
+        }
+      ],
+      "original_failure": null,
+      "original_acquisition_complete": true,
+      "replicas": [
+        {
+          "case_id": "learning:translate_0.05_45deg",
+          "controls": 1000,
+          "missing_metrics": [],
+          "scope": "Diagnostics of the complete recorded attempt; no acceptance thresholds or verdicts changed.",
+          "status": "measured",
+          "tracking": {
+            "mean_requested_navigation_velocity_mps": [
+              0.0353553406894207,
+              0.0353553406894207
+            ],
+            "mean_achieved_navigation_velocity_mps": [
+              0.00038399423052113416,
+              -0.0004479302899048213
+            ],
+            "mean_signed_velocity_error_mps": [
+              -0.034971346458899585,
+              -0.03580327097932556
+            ],
+            "mean_absolute_velocity_error_mps": [
+              0.03499839647998812,
+              0.03595374635179844
+            ],
+            "planar_error_rmse_mps": 0.05341571472638434,
+            "mean_requested_speed_mps": 0.0500000023053001,
+            "mean_achieved_speed_mps": 0.016241788995464274,
+            "mean_signed_direction_speed_mps": -4.520962115255116e-05,
+            "mean_signed_yaw_error_rad_s": 0.000439356821540851,
+            "yaw_error_rmse_rad_s": 0.04361254012658175,
+            "measurement_point": "Native COM for exact evaluator velocity_navigation_mps; estimator is compared separately at root origin."
+          },
+          "deck": {
+            "height_mean_m": 0.09592031270265579,
+            "height_std_m": 0.0006067053957135947,
+            "height_peak_to_peak_m": 0.008426308631896973,
+            "tilt_rms_deg": 0.8907313860100755,
+            "tilt_peak_deg": 1.2147238719925888,
+            "planar_excursion_max_m": 0.013456655206410519
+          },
+          "deck_height_spectrum": {
+            "status": "measured",
+            "samples": 1000,
+            "sample_rate_hz": 50.0,
+            "ac_rms": 0.0006067053957135947,
+            "dominant_frequency_hz": 0.05,
+            "power_above_5hz_fraction": 0.28004847435395386,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "joints": {
+            "names": [
+              "lf_coxa_yaw",
+              "lf_femur_pitch",
+              "lf_tibia_pitch",
+              "lm_coxa_yaw",
+              "lm_femur_pitch",
+              "lm_tibia_pitch",
+              "lr_coxa_yaw",
+              "lr_femur_pitch",
+              "lr_tibia_pitch",
+              "rf_coxa_yaw",
+              "rf_femur_pitch",
+              "rf_tibia_pitch",
+              "rm_coxa_yaw",
+              "rm_femur_pitch",
+              "rm_tibia_pitch",
+              "rr_coxa_yaw",
+              "rr_femur_pitch",
+              "rr_tibia_pitch"
+            ],
+            "position_range_rad": [
+              0.04843999375589192,
+              0.11615577340126038,
+              0.11504009366035461,
+              0.05428337678313255,
+              0.09283493459224701,
+              0.1868390440940857,
+              0.10495220217853785,
+              0.14125843346118927,
+              0.13631737232208252,
+              0.08022253419039771,
+              0.18858201801776886,
+              0.18618056178092957,
+              0.07667787303216755,
+              0.16395732760429382,
+              0.23207992315292358,
+              0.1193639812991023,
+              0.07726213335990906,
+              0.16105395555496216
+            ],
+            "velocity_rms_rad_s": [
+              0.24447257333330666,
+              0.6480877314601468,
+              0.6087369113221585,
+              0.11458051776496969,
+              1.1362943044033973,
+              0.8567177669439188,
+              0.24696110369791266,
+              0.9928672581404834,
+              0.7724655504422147,
+              0.20284265563044634,
+              0.7389574761630864,
+              0.5559252797284422,
+              0.15463325059574193,
+              0.869701495986845,
+              0.8043501556814484,
+              0.29009745605143183,
+              0.5809562126162964,
+              1.090577885316316
+            ],
+            "target_tracking_rms_rad": [
+              0.02140703139170946,
+              0.022872201437887225,
+              0.023333835336300113,
+              0.020795481813329506,
+              0.03172713363143575,
+              0.03814279201010866,
+              0.02796793619489688,
+              0.05650364162497038,
+              0.029609341890864067,
+              0.02304257102769838,
+              0.04901112373203601,
+              0.04794718167140287,
+              0.023301598900622212,
+              0.02220003726473383,
+              0.031016313353685813,
+              0.028344644222751517,
+              0.04088981130102325,
+              0.024738532416529225
+            ],
+            "target_step_abs_max_rad": [
+              0.03999999999996362,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999997904524,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999997904524,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999992083758,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999999359716,
+              0.03999999165534973,
+              0.03999999165534973
+            ],
+            "target_step_abs_p95_rad": [
+              0.03999999992083758,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973
+            ],
+            "slew_limit_occupancy_fraction": [
+              0.4754754754754755,
+              0.5105105105105106,
+              0.2952952952952953,
+              0.1881881881881882,
+              0.5035035035035035,
+              0.5745745745745746,
+              0.44844844844844844,
+              0.6316316316316316,
+              0.7117117117117117,
+              0.5015015015015015,
+              0.6416416416416416,
+              0.2952952952952953,
+              0.5595595595595596,
+              0.09109109109109109,
+              0.7627627627627628,
+              0.5665665665665666,
+              0.5515515515515516,
+              0.46846846846846846
+            ]
+          },
+          "target_step_spectrum": {
+            "status": "measured",
+            "samples": 999,
+            "sample_rate_hz": 50.0,
+            "ac_rms": 0.03209968355005218,
+            "dominant_frequency_hz": 19.31931931931932,
+            "power_above_5hz_fraction": 0.9875384603981975,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "torque_400hz": {
+            "samples": 8000,
+            "joint_names": [
+              "lf_coxa_yaw",
+              "lf_femur_pitch",
+              "lf_tibia_pitch",
+              "lm_coxa_yaw",
+              "lm_femur_pitch",
+              "lm_tibia_pitch",
+              "lr_coxa_yaw",
+              "lr_femur_pitch",
+              "lr_tibia_pitch",
+              "rf_coxa_yaw",
+              "rf_femur_pitch",
+              "rf_tibia_pitch",
+              "rm_coxa_yaw",
+              "rm_femur_pitch",
+              "rm_tibia_pitch",
+              "rr_coxa_yaw",
+              "rr_femur_pitch",
+              "rr_tibia_pitch"
+            ],
+            "requested_saturation_fraction": [
+              0.0,
+              0.0005,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.004625,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.00125,
+              0.001,
+              0.0,
+              0.000375,
+              0.0005
+            ],
+            "requested_saturation_longest_burst_s": [
+              0.0,
+              0.01,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.04,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0225,
+              0.005,
+              0.0,
+              0.005,
+              0.0025
+            ],
+            "requested_abs_peak_nm": [
+              0.8449123501777649,
+              1.629677414894104,
+              1.3701292276382446,
+              1.0211468935012817,
+              1.5240784883499146,
+              1.33977210521698,
+              1.408657431602478,
+              2.0645840167999268,
+              1.4854636192321777,
+              0.8271448612213135,
+              1.4139255285263062,
+              1.3235173225402832,
+              1.3824517726898193,
+              2.3611435890197754,
+              2.7985143661499023,
+              0.9686247706413269,
+              3.041457414627075,
+              2.691042900085449
+            ],
+            "applied_abs_peak_nm": [
+              0.8449123501777649,
+              1.600000023841858,
+              1.3701292276382446,
+              1.0211468935012817,
+              1.5240784883499146,
+              1.33977210521698,
+              1.408657431602478,
+              1.600000023841858,
+              1.4854636192321777,
+              0.8271448612213135,
+              1.4139255285263062,
+              1.3235173225402832,
+              1.3824517726898193,
+              1.600000023841858,
+              1.600000023841858,
+              0.9686247706413269,
+              1.600000023841858,
+              1.600000023841858
+            ],
+            "applied_rms_nm": [
+              0.25760054269277355,
+              0.3021365075498897,
+              0.3032090121933675,
+              0.25183509163966045,
+              0.4427819896316993,
+              0.48650417427269543,
+              0.36678655101507623,
+              0.7033380806991439,
+              0.38804048326318424,
+              0.2728769697738262,
+              0.6026415803728548,
+              0.5817061269368304,
+              0.2791086663724008,
+              0.33598776567169103,
+              0.4017865257686793,
+              0.3261154650215965,
+              0.4973550449742442,
+              0.31974612840173894
+            ],
+            "first_requested_saturation_s": 0.0375
+          },
+          "support_400hz": {
+            "toe_contact_fraction": [
+              0.857375,
+              0.913625,
+              0.964875,
+              0.989625,
+              0.860125,
+              0.91575
+            ],
+            "support_count_histogram": [
+              9,
+              1,
+              7,
+              109,
+              677,
+              2221,
+              4976
+            ],
+            "no_toe_support_samples": 9
+          },
+          "contact_reference_motion": {
+            "measurement": "World motion of each toe-link reference point during consecutive actual distal contact samples; a slip proxy, not the contact patch velocity.",
+            "eligible_pairs_by_toe": [
+              6544,
+              7028,
+              7556,
+              7897,
+              6470,
+              6986
+            ],
+            "mean_planar_speed_mps": [
+              0.003420147933704988,
+              0.0014612124156321493,
+              0.0028445852408094077,
+              0.002231514774180321,
+              0.001736984720813123,
+              0.003943551557892455
+            ],
+            "p95_planar_speed_mps": [
+              0.004922295327471003,
+              0.0024632966418981555,
+              0.004220930511820773,
+              0.00414859957238888,
+              0.0023143428672542433,
+              0.005870760882296994
+            ]
+          },
+          "failures": {
+            "terminated": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            },
+            "truncated": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            },
+            "reset": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            },
+            "nonfoot_contact": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            }
+          },
+          "joint_velocity_rad_s_spectrum_400hz": {
+            "status": "measured",
+            "samples": 8000,
+            "sample_rate_hz": 400.0,
+            "ac_rms": 0.7610971255408099,
+            "dominant_frequency_hz": 19.3,
+            "power_above_5hz_fraction": 0.9713216456526703,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "joint_position_rad_spectrum_400hz": {
+            "status": "measured",
+            "samples": 8000,
+            "sample_rate_hz": 400.0,
+            "ac_rms": 0.01795019450488209,
+            "dominant_frequency_hz": 0.05,
+            "power_above_5hz_fraction": 0.2998606924484789,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "estimator": {
+            "root_origin_velocity_rmse_mps": [
+              0.010016128516024065,
+              0.011988486729098283,
+              0.009355540779025916
+            ],
+            "measurement_point": "Pre-policy body-root origin navigation velocity in critic[:, -3:], not COM tracking velocity."
+          },
+          "motion_prior_style_reward": {
+            "mean": 0.011524862170219422,
+            "min": 0.0,
+            "max": 0.1583080291748047
+          },
+          "motion_prior_discriminator_score": {
+            "mean": -1.0002998836636543,
+            "min": -1.098357081413269,
+            "max": -0.8348754644393921
+          }
+        }
+      ],
+      "actor_reconstruction": {
+        "status": "reconstructed",
+        "checkpoint_sha256": "43ed0d8291feb028004f843e78b1e01fd3695fd81234d1bef391ff53cef6b035",
+        "observations": 1000,
+        "actor_state_dict_strict": true,
+        "absolute_tolerance": 1e-05,
+        "relative_tolerance": 1e-05,
+        "within_cpu_float_tolerance": true,
+        "action_error_abs_max": 2.086162567138672e-07,
+        "action_error_rmse": 3.457262209849432e-08,
+        "scope": "CPU mean-action reconstruction from recorded histories and saved normalizers; no closed-loop or observation-noise trial reproduced."
+      },
+      "plots": {
+        "status": "written",
+        "files": [
+          "recording_001_motion.png",
+          "recording_001_joints_torque_support.png",
+          "recording_001_joint_velocity_spectrum.png"
+        ],
+        "scope": "Replica0 measured timelines and spectra; no smoothing or removed failure samples"
+      }
+    },
+    {
+      "directory": "/Users/andreboufama/Documents/hex/hexapod-cupi/artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_008/standing/evaluation/batch_002",
+      "integrity": {
+        "report_sha256": "164f1b8ce8e196576889fcfbda0ef67f6a49ac4c62fb2fc564539d3183b902f1",
+        "verified_files": {
+          "control_trace.npz": "4130807a600ce40ad4e297a11fa6664f840af1830c082706638677b7994f6ce9",
+          "declaration.json": "736d551d9c40bd2310131c968c2648da956c80ad59adc74d784d8583296be505",
+          "native400hz/contacts.jsonl": "c69c08351306b8e95815010847c0d4a8ef6a4a734c0290d49f8eed60571e9aa2",
+          "native400hz/initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+          "native400hz/substeps_000.npz": "b8ef1e01c493f811e66cc1a20be22a857c21e61598221c46e0b18b013fc7d171",
+          "native400hz/substeps_001.npz": "c7746419a27e3361289a1921c25bce95128d49861623e9813dc4af1f1c23f785",
+          "native400hz/substeps_002.npz": "b5f72191f9d83b4e4578c3957c790f3b7a4dba29bf7381b03160f7c1c0ff4f6d",
+          "native400hz/substeps_003.npz": "ba2e9fa8502aa5bcc955fd2e58f001b41787d34f795f8f57b3de2527a9c43cdf",
+          "native400hz/substeps_004.npz": "51bbd561e1b9f669400b71f6e1dece2d5592ad626204cfd836657489c3b3e640",
+          "native400hz/substeps_005.npz": "0228feee2e6b713e22d7b99e2fb9776ddf0d2e966d01f9fcdf00d6471e424c8d",
+          "native400hz/substeps_006.npz": "63add79071efd78900e7c6159d6b091d08dc17017ce729de6d92b909a7c99a90",
+          "native400hz/substeps_007.npz": "3a2f1ba04f7793944c3552d425f6e0ea8cd8017fc90e80a78d9d721fb089b5f5",
+          "native400hz/substeps_008.npz": "0a12fedf24d0474a6b521b9a48463a4109deda3c3aad8fa3efb0ca422e8487f6",
+          "native400hz/substeps_009.npz": "10eca066b9a8d756a1e90bd2bda622d89d908fac90fc9453ae23fc627e307df6"
+        },
+        "capture_manifest_sha256": "ed8a67f82ff9c34b6a1ad71ea85ca2ac9f0a7b8be40a3fea3bd318d38f22b41d",
+        "capture_manifest_bound_by_parent_report": false,
+        "scope": "Listed file bytes verified against saved manifests; manifests are not digital signatures."
+      },
+      "original_results": [
+        {
+          "schema": "canonical_stage2_cpu_evaluation_v1",
+          "profile": "omni_static",
+          "scope": {
+            "source": "experiments/c_length_study/tools/omni_flat_math.py:scenario_gate",
+            "cases": 77,
+            "duration_s": 20.0,
+            "settle_s": 2.0,
+            "scope": "Historical full signed direction, yaw and combined-command numeric screen."
+          },
+          "environment_index": 0,
+          "recorded_controls": 1000,
+          "checks": {
+            "complete_requested_window": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "control_dt_s": {
+              "status": "pass",
+              "value": 0.0,
+              "bound": 1e-12,
+              "operator": "<="
+            },
+            "quaternion_unit_norm": {
+              "status": "pass",
+              "value": 2.384185791015625e-07,
+              "bound": 1e-05,
+              "operator": "<="
+            },
+            "terminated": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "truncated": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "reset": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "contiguous_time": {
+              "status": "pass",
+              "value": 3.1259717037102064e-15,
+              "bound": 1e-09,
+              "operator": "<="
+            },
+            "held_command": {
+              "status": "pass",
+              "value": 7.450580569168253e-10,
+              "bound": 1e-06,
+              "operator": "<="
+            },
+            "planar_error_mps": {
+              "status": "fail",
+              "value": 0.051743981294946034,
+              "bound": 0.025,
+              "operator": "<="
+            },
+            "yaw_error_rad_s": {
+              "status": "pass",
+              "value": 0.0357178132891524,
+              "bound": 0.06,
+              "operator": "<="
+            },
+            "tilt_rms_degrees": {
+              "status": "pass",
+              "value": 0.899703323841095,
+              "bound": 5.0,
+              "operator": "<="
+            },
+            "vertical_velocity_rms_mps": {
+              "status": "pass",
+              "value": 0.018330153077840805,
+              "bound": 0.04,
+              "operator": "<="
+            },
+            "nonfoot_fraction": {
+              "status": "pass",
+              "value": 0.0,
+              "bound": 0.001,
+              "operator": "<="
+            },
+            "computed_demand_over_rating_fraction": {
+              "status": "pass",
+              "value": 0.0006172839506172839,
+              "bound": 0.005,
+              "operator": "<="
+            }
+          },
+          "metrics": {
+            "base_height_std_m": 0.0004444715450517833,
+            "base_height_peak_to_peak_m": 0.0025653839111328125,
+            "tilt_rms_degrees": 0.899703323841095,
+            "tilt_p95_degrees": 1.0268105268478394,
+            "maximum_tilt_degrees": 1.1740319728851318,
+            "vertical_velocity_rms_mps": 0.018330153077840805,
+            "vertical_velocity_abs_p95_mps": 0.03547501191496849,
+            "mean_velocity_mps": [
+              0.00023343794342885733,
+              -0.00011398649257938363,
+              -0.000495585611352379
+            ],
+            "planar_error_mps": 0.051743981294946034,
+            "planar_velocity_rmse_mps": 0.052944603324681844,
+            "yaw_error_rad_s": 0.0357178132891524,
+            "yaw_rate_rmse_radps": 0.04433412234797578,
+            "mean_yaw_rate_rad_s": 0.0004027480112582024,
+            "roll_pitch_angular_velocity_rms_radps": 0.25745034773335707,
+            "roll_pitch_angular_velocity_p95_radps": 0.41268197696393033,
+            "requested_saturation_fraction_400hz": 0.002337962962962963,
+            "maximum_requested_saturation_fraction_400hz": 0.03944444444444444,
+            "computed_demand_over_rating_fraction": 0.0006172839506172839,
+            "maximum_per_joint_computed_demand_over_rating_fraction": 0.011111111111111112,
+            "maximum_computed_over_rating_burst_s": 0.04,
+            "peak_abs_computed_nm": 1.83522367477417,
+            "max_per_joint_rms_applied_nm": 1.1296169757843018,
+            "nonfoot_fraction": 0.0
+          },
+          "lineage": {
+            "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+            "checkpoint_sha256": "43ed0d8291feb028004f843e78b1e01fd3695fd81234d1bef391ff53cef6b035",
+            "source_sha256": "2d2503caead4111d399134cc4134197e7a175a36b6f99355938a16680bb4fc7b"
+          },
+          "window_start_control": 100,
+          "window_controls": 900,
+          "native_admission": "Separate exact-model native 1/32 standing, solver, geometry, full400Hz and asset receipts are required.",
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "missing_evidence": [],
+          "pass": false,
+          "stage2_complete": false,
+          "case_id": "learning:translate_0.05_90deg",
+          "native_capture_complete": true,
+          "native_motor_and_joint_checks_pass": true,
+          "native_contact_screen": {
+            "schema": "canonical_native_contact_screen_v1",
+            "frequency_hz": 400,
+            "window": "complete trial, including initial settling and every native substep",
+            "recorded_substeps": 8000,
+            "nonfoot_substeps": 0,
+            "nonfoot_fraction": 0.0,
+            "maximum_nonfoot_fraction": 0.001,
+            "pass": true,
+            "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+          },
+          "batch_failure": null,
+          "passed_numeric_screen": false
+        }
+      ],
+      "original_failure": null,
+      "original_acquisition_complete": true,
+      "replicas": [
+        {
+          "case_id": "learning:translate_0.05_90deg",
+          "controls": 1000,
+          "missing_metrics": [],
+          "scope": "Diagnostics of the complete recorded attempt; no acceptance thresholds or verdicts changed.",
+          "status": "measured",
+          "tracking": {
+            "mean_requested_navigation_velocity_mps": [
+              3.0616169246677665e-18,
+              0.05000000074505806
+            ],
+            "mean_achieved_navigation_velocity_mps": [
+              0.0001324169737879761,
+              -7.703524418114483e-06
+            ],
+            "mean_signed_velocity_error_mps": [
+              0.00013241697378797268,
+              -0.05000770426947618
+            ],
+            "mean_absolute_velocity_error_mps": [
+              0.010463889612694453,
+              0.05001475530939025
+            ],
+            "planar_error_rmse_mps": 0.05324116778494111,
+            "mean_requested_speed_mps": 0.05000000074505806,
+            "mean_achieved_speed_mps": 0.015993193186723625,
+            "mean_signed_direction_speed_mps": -7.703524418114339e-06,
+            "mean_signed_yaw_error_rad_s": -0.00010447675643742574,
+            "yaw_error_rmse_rad_s": 0.04469699122602903,
+            "measurement_point": "Native COM for exact evaluator velocity_navigation_mps; estimator is compared separately at root origin."
+          },
+          "deck": {
+            "height_mean_m": 0.09559763081371785,
+            "height_std_m": 0.0005568372258662409,
+            "height_peak_to_peak_m": 0.008318714797496796,
+            "tilt_rms_deg": 0.881697375659378,
+            "tilt_peak_deg": 1.3770659979044826,
+            "planar_excursion_max_m": 0.010564437858441588
+          },
+          "deck_height_spectrum": {
+            "status": "measured",
+            "samples": 1000,
+            "sample_rate_hz": 50.0,
+            "ac_rms": 0.0005568372258662409,
+            "dominant_frequency_hz": 0.8,
+            "power_above_5hz_fraction": 0.531668273931203,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "joints": {
+            "names": [
+              "lf_coxa_yaw",
+              "lf_femur_pitch",
+              "lf_tibia_pitch",
+              "lm_coxa_yaw",
+              "lm_femur_pitch",
+              "lm_tibia_pitch",
+              "lr_coxa_yaw",
+              "lr_femur_pitch",
+              "lr_tibia_pitch",
+              "rf_coxa_yaw",
+              "rf_femur_pitch",
+              "rf_tibia_pitch",
+              "rm_coxa_yaw",
+              "rm_femur_pitch",
+              "rm_tibia_pitch",
+              "rr_coxa_yaw",
+              "rr_femur_pitch",
+              "rr_tibia_pitch"
+            ],
+            "position_range_rad": [
+              0.09748795907944441,
+              0.12214739620685577,
+              0.10830226540565491,
+              0.05111823417246342,
+              0.06822018325328827,
+              0.16573897004127502,
+              0.08730285987257957,
+              0.14016960561275482,
+              0.17275398969650269,
+              0.06939172884449363,
+              0.17687618732452393,
+              0.20020824670791626,
+              0.12015633983537555,
+              0.17855669558048248,
+              0.2835894376039505,
+              0.13253984786570072,
+              0.09693501889705658,
+              0.1966860592365265
+            ],
+            "velocity_rms_rad_s": [
+              0.29384003995648755,
+              0.5518088811822098,
+              0.528004685263311,
+              0.16911058732131123,
+              0.863045740811187,
+              0.9071321382536264,
+              0.19791489612147914,
+              0.7769785501281753,
+              0.5595343688143938,
+              0.1790391178412856,
+              0.698076892242879,
+              0.5175075376250123,
+              0.15923563590591047,
+              0.8419037836149008,
+              1.219377746991978,
+              0.36382417091205765,
+              0.5343850040759204,
+              1.1612622544868425
+            ],
+            "target_tracking_rms_rad": [
+              0.023529649631165758,
+              0.021317145564834668,
+              0.016539592955144705,
+              0.01970095812600232,
+              0.013547897985410695,
+              0.02502181854182551,
+              0.024470433123973765,
+              0.09140745208470982,
+              0.059582463334437216,
+              0.023228067293096687,
+              0.06064279516727037,
+              0.06459872052141949,
+              0.023187505915125722,
+              0.031712269541273645,
+              0.028227553037353265,
+              0.021200403900531854,
+              0.018808196683392227,
+              0.014122913284610265
+            ],
+            "target_step_abs_max_rad": [
+              0.03999999999999998,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999980442226,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999999359716,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999997904524,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999933876097,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.039999999571591616,
+              0.03999999165534973,
+              0.03999999165534973
+            ],
+            "target_step_abs_p95_rad": [
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999980442226,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.039999999571591616,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973
+            ],
+            "slew_limit_occupancy_fraction": [
+              0.6486486486486487,
+              0.2552552552552553,
+              0.07807807807807808,
+              0.2182182182182182,
+              0.21021021021021022,
+              0.4544544544544545,
+              0.45345345345345345,
+              0.5315315315315315,
+              0.3433433433433433,
+              0.32232232232232233,
+              0.6406406406406406,
+              0.3843843843843844,
+              0.38738738738738737,
+              0.23823823823823823,
+              0.7157157157157157,
+              0.5665665665665666,
+              0.6146146146146146,
+              0.32232232232232233
+            ]
+          },
+          "target_step_spectrum": {
+            "status": "measured",
+            "samples": 999,
+            "sample_rate_hz": 50.0,
+            "ac_rms": 0.030679395499962753,
+            "dominant_frequency_hz": 19.169169169169166,
+            "power_above_5hz_fraction": 0.9908957382523933,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "torque_400hz": {
+            "samples": 8000,
+            "joint_names": [
+              "lf_coxa_yaw",
+              "lf_femur_pitch",
+              "lf_tibia_pitch",
+              "lm_coxa_yaw",
+              "lm_femur_pitch",
+              "lm_tibia_pitch",
+              "lr_coxa_yaw",
+              "lr_femur_pitch",
+              "lr_tibia_pitch",
+              "rf_coxa_yaw",
+              "rf_femur_pitch",
+              "rf_tibia_pitch",
+              "rm_coxa_yaw",
+              "rm_femur_pitch",
+              "rm_tibia_pitch",
+              "rr_coxa_yaw",
+              "rr_femur_pitch",
+              "rr_tibia_pitch"
+            ],
+            "requested_saturation_fraction": [
+              0.0,
+              0.001125,
+              0.0,
+              0.0,
+              0.0,
+              0.0005,
+              0.0,
+              0.03975,
+              0.00075,
+              0.0,
+              0.000125,
+              0.0,
+              0.0005,
+              0.00475,
+              0.000375,
+              0.0,
+              0.00025,
+              0.001
+            ],
+            "requested_saturation_longest_burst_s": [
+              0.0,
+              0.0225,
+              0.0,
+              0.0,
+              0.0,
+              0.0025,
+              0.0,
+              0.035,
+              0.0075,
+              0.0,
+              0.0025,
+              0.0,
+              0.01,
+              0.0525,
+              0.005,
+              0.0,
+              0.005,
+              0.0075
+            ],
+            "requested_abs_peak_nm": [
+              0.9739912152290344,
+              2.1238367557525635,
+              1.5081980228424072,
+              0.8542210459709167,
+              0.9409334659576416,
+              3.189835548400879,
+              1.380019187927246,
+              2.1306185722351074,
+              1.774837851524353,
+              0.855189859867096,
+              1.7342153787612915,
+              1.4771459102630615,
+              2.4802961349487305,
+              2.700899600982666,
+              5.164865970611572,
+              1.5386145114898682,
+              3.0775399208068848,
+              4.060266971588135
+            ],
+            "applied_abs_peak_nm": [
+              0.9739912152290344,
+              1.600000023841858,
+              1.5081980228424072,
+              0.8542210459709167,
+              0.9409334659576416,
+              1.600000023841858,
+              1.380019187927246,
+              1.600000023841858,
+              1.600000023841858,
+              0.855189859867096,
+              1.600000023841858,
+              1.4771459102630615,
+              1.600000023841858,
+              1.600000023841858,
+              1.600000023841858,
+              1.5386145114898682,
+              1.600000023841858,
+              1.600000023841858
+            ],
+            "applied_rms_nm": [
+              0.265715222600292,
+              0.2763683285774561,
+              0.2176993580732287,
+              0.24127958969334626,
+              0.232521929237779,
+              0.3372918605139892,
+              0.32290497980153887,
+              1.0981054968288795,
+              0.7247106605132212,
+              0.28246034609342824,
+              0.732986571652591,
+              0.772597385743102,
+              0.2832611271222011,
+              0.4222054112769509,
+              0.3662207767171514,
+              0.25038128079369715,
+              0.2398522116940648,
+              0.23924430099473976
+            ],
+            "first_requested_saturation_s": 0.035
+          },
+          "support_400hz": {
+            "toe_contact_fraction": [
+              0.84725,
+              0.697375,
+              0.998875,
+              0.98975,
+              0.881875,
+              0.359375
+            ],
+            "support_count_histogram": [
+              9,
+              1,
+              6,
+              423,
+              2513,
+              3426,
+              1622
+            ],
+            "no_toe_support_samples": 9
+          },
+          "contact_reference_motion": {
+            "measurement": "World motion of each toe-link reference point during consecutive actual distal contact samples; a slip proxy, not the contact patch velocity.",
+            "eligible_pairs_by_toe": [
+              6500,
+              5210,
+              7990,
+              7905,
+              6689,
+              1914
+            ],
+            "mean_planar_speed_mps": [
+              0.0037300629645282387,
+              0.0044028378515012815,
+              0.0018866778001776399,
+              0.001863652962344585,
+              0.0016006481316810496,
+              0.007982989464913685
+            ],
+            "p95_planar_speed_mps": [
+              0.009527510181199305,
+              0.010137400681213046,
+              0.003575516857256155,
+              0.0037587843923950056,
+              0.0021788483485130922,
+              0.037380250529358484
+            ]
+          },
+          "failures": {
+            "terminated": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            },
+            "truncated": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            },
+            "reset": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            },
+            "nonfoot_contact": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            }
+          },
+          "joint_velocity_rad_s_spectrum_400hz": {
+            "status": "measured",
+            "samples": 8000,
+            "sample_rate_hz": 400.0,
+            "ac_rms": 0.7961914456439267,
+            "dominant_frequency_hz": 19.200000000000003,
+            "power_above_5hz_fraction": 0.9754714980702819,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "joint_position_rad_spectrum_400hz": {
+            "status": "measured",
+            "samples": 8000,
+            "sample_rate_hz": 400.0,
+            "ac_rms": 0.01654557006976416,
+            "dominant_frequency_hz": 0.05,
+            "power_above_5hz_fraction": 0.38234379116163913,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "estimator": {
+            "root_origin_velocity_rmse_mps": [
+              0.009150574230410583,
+              0.011264192749895818,
+              0.01091794355919314
+            ],
+            "measurement_point": "Pre-policy body-root origin navigation velocity in critic[:, -3:], not COM tracking velocity."
+          },
+          "motion_prior_style_reward": {
+            "mean": 0.005410353362560272,
+            "min": 0.0,
+            "max": 0.20356237888336182
+          },
+          "motion_prior_discriminator_score": {
+            "mean": -1.0168113389611244,
+            "min": -1.1272358894348145,
+            "max": -0.7848670482635498
+          }
+        }
+      ],
+      "actor_reconstruction": {
+        "status": "reconstructed",
+        "checkpoint_sha256": "43ed0d8291feb028004f843e78b1e01fd3695fd81234d1bef391ff53cef6b035",
+        "observations": 1000,
+        "actor_state_dict_strict": true,
+        "absolute_tolerance": 1e-05,
+        "relative_tolerance": 1e-05,
+        "within_cpu_float_tolerance": true,
+        "action_error_abs_max": 2.682209014892578e-07,
+        "action_error_rmse": 3.4872464027557726e-08,
+        "scope": "CPU mean-action reconstruction from recorded histories and saved normalizers; no closed-loop or observation-noise trial reproduced."
+      },
+      "plots": {
+        "status": "written",
+        "files": [
+          "recording_002_motion.png",
+          "recording_002_joints_torque_support.png",
+          "recording_002_joint_velocity_spectrum.png"
+        ],
+        "scope": "Replica0 measured timelines and spectra; no smoothing or removed failure samples"
+      }
+    },
+    {
+      "directory": "/Users/andreboufama/Documents/hex/hexapod-cupi/artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_008/standing/evaluation/batch_003",
+      "integrity": {
+        "report_sha256": "91909d747bb0a5adf71788013dd98d62553a13f819f031ed31c370e51451cc2c",
+        "verified_files": {
+          "control_trace.npz": "5f68517589031c717e2cf1cd5a762d9ff740880d1b71bae16a0b8affb5195028",
+          "declaration.json": "664ed7fc1497a8949dd920f860fec6d73a98da3f407e42a365381c3dbd5c9f49",
+          "native400hz/contacts.jsonl": "de2a6e0ba6783eb180353ffca438bf8908006041f55caa8466d7364b6fb913a3",
+          "native400hz/initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+          "native400hz/substeps_000.npz": "0f37cf392db1773c4b5a274d1aa927942fb224fd75b7955773fd7cafcdc487ff",
+          "native400hz/substeps_001.npz": "ebcacbee56511fcb2651f16eabc17916bcfaf1b6b595e983c70746df6b0799cb",
+          "native400hz/substeps_002.npz": "e8ae6894f56f4ad2e65f64d64cad37652f2b40d84e1ed9b4c3845fb0fa598cb6",
+          "native400hz/substeps_003.npz": "657e2f3a82449434c083a831bd6854e1a7c81eda678df8511cf1461a9eb2ead0",
+          "native400hz/substeps_004.npz": "eb144b44935c981ff7d522b14d39ba07f6b6c1bb661f425326c6a10288397658",
+          "native400hz/substeps_005.npz": "15c181c7617cc57a6ee862e5e4f2493b8d2e01d409eca47b4f1193ed41e848a5",
+          "native400hz/substeps_006.npz": "e4c080c905acd4a29f985f72497429859178b264fbc1e6b5ee7dc36d0d7bbd79",
+          "native400hz/substeps_007.npz": "f387238eb4f7020d4216b36476dc83acdcdd566c9fa4d01a3fae7de2ddb77327",
+          "native400hz/substeps_008.npz": "b0238f478089fffec092cab40e787324813ccb4344f90341b4cfdd0ae8a39ab0",
+          "native400hz/substeps_009.npz": "5af5fbc5b41ba2b3327ac7e2a8c6e6d5cbd5551f8659138ecc3c22eb2bf4efba"
+        },
+        "capture_manifest_sha256": "6e05c0952be9c5336acf8f43db1a678d484d9ecdb018695805f480838b3ccd1d",
+        "capture_manifest_bound_by_parent_report": false,
+        "scope": "Listed file bytes verified against saved manifests; manifests are not digital signatures."
+      },
+      "original_results": [
+        {
+          "schema": "canonical_stage2_cpu_evaluation_v1",
+          "profile": "omni_static",
+          "scope": {
+            "source": "experiments/c_length_study/tools/omni_flat_math.py:scenario_gate",
+            "cases": 77,
+            "duration_s": 20.0,
+            "settle_s": 2.0,
+            "scope": "Historical full signed direction, yaw and combined-command numeric screen."
+          },
+          "environment_index": 0,
+          "recorded_controls": 1000,
+          "checks": {
+            "complete_requested_window": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "control_dt_s": {
+              "status": "pass",
+              "value": 0.0,
+              "bound": 1e-12,
+              "operator": "<="
+            },
+            "quaternion_unit_norm": {
+              "status": "pass",
+              "value": 2.384185791015625e-07,
+              "bound": 1e-05,
+              "operator": "<="
+            },
+            "terminated": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "truncated": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "reset": {
+              "status": "pass",
+              "value": 0,
+              "bound": 0,
+              "operator": "<="
+            },
+            "contiguous_time": {
+              "status": "pass",
+              "value": 3.1259717037102064e-15,
+              "bound": 1e-09,
+              "operator": "<="
+            },
+            "held_command": {
+              "status": "pass",
+              "value": 1.6300933242119342e-09,
+              "bound": 1e-06,
+              "operator": "<="
+            },
+            "planar_error_mps": {
+              "status": "fail",
+              "value": 0.05239570135581484,
+              "bound": 0.025,
+              "operator": "<="
+            },
+            "yaw_error_rad_s": {
+              "status": "pass",
+              "value": 0.034927917557600295,
+              "bound": 0.06,
+              "operator": "<="
+            },
+            "tilt_rms_degrees": {
+              "status": "pass",
+              "value": 0.8714149594306946,
+              "bound": 5.0,
+              "operator": "<="
+            },
+            "vertical_velocity_rms_mps": {
+              "status": "pass",
+              "value": 0.021119091659784317,
+              "bound": 0.04,
+              "operator": "<="
+            },
+            "nonfoot_fraction": {
+              "status": "pass",
+              "value": 0.0,
+              "bound": 0.001,
+              "operator": "<="
+            },
+            "computed_demand_over_rating_fraction": {
+              "status": "pass",
+              "value": 0.003765432098765432,
+              "bound": 0.005,
+              "operator": "<="
+            }
+          },
+          "metrics": {
+            "base_height_std_m": 0.0006753076449967921,
+            "base_height_peak_to_peak_m": 0.0051778629422187805,
+            "tilt_rms_degrees": 0.8714149594306946,
+            "tilt_p95_degrees": 1.0618404150009155,
+            "maximum_tilt_degrees": 1.3917046785354614,
+            "vertical_velocity_rms_mps": 0.021119091659784317,
+            "vertical_velocity_abs_p95_mps": 0.04075716435909271,
+            "mean_velocity_mps": [
+              0.0004093202894257206,
+              -0.0003444463990441657,
+              -0.0002879657390744407
+            ],
+            "planar_error_mps": 0.05239570135581484,
+            "planar_velocity_rmse_mps": 0.05368656235208704,
+            "yaw_error_rad_s": 0.034927917557600295,
+            "yaw_rate_rmse_radps": 0.04412187881643838,
+            "mean_yaw_rate_rad_s": -0.0005526372020140375,
+            "roll_pitch_angular_velocity_rms_radps": 0.2384492789997868,
+            "roll_pitch_angular_velocity_p95_radps": 0.38391156304417134,
+            "requested_saturation_fraction_400hz": 0.005578703703703704,
+            "maximum_requested_saturation_fraction_400hz": 0.09333333333333334,
+            "computed_demand_over_rating_fraction": 0.003765432098765432,
+            "maximum_per_joint_computed_demand_over_rating_fraction": 0.06222222222222222,
+            "maximum_computed_over_rating_burst_s": 0.06,
+            "peak_abs_computed_nm": 5.257861614227295,
+            "max_per_joint_rms_applied_nm": 1.2329288721084595,
+            "nonfoot_fraction": 0.0
+          },
+          "lineage": {
+            "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+            "checkpoint_sha256": "43ed0d8291feb028004f843e78b1e01fd3695fd81234d1bef391ff53cef6b035",
+            "source_sha256": "2d2503caead4111d399134cc4134197e7a175a36b6f99355938a16680bb4fc7b"
+          },
+          "window_start_control": 100,
+          "window_controls": 900,
+          "native_admission": "Separate exact-model native 1/32 standing, solver, geometry, full400Hz and asset receipts are required.",
+          "failed_bounds": [
+            "planar_error_mps",
+            "native_capture_or_original_physical_bounds"
+          ],
+          "missing_evidence": [],
+          "pass": false,
+          "stage2_complete": false,
+          "case_id": "learning:translate_0.05_135deg",
+          "native_capture_complete": true,
+          "native_motor_and_joint_checks_pass": false,
+          "native_contact_screen": {
+            "schema": "canonical_native_contact_screen_v1",
+            "frequency_hz": 400,
+            "window": "complete trial, including initial settling and every native substep",
+            "recorded_substeps": 8000,
+            "nonfoot_substeps": 0,
+            "nonfoot_fraction": 0.0,
+            "maximum_nonfoot_fraction": 0.001,
+            "pass": true,
+            "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+          },
+          "batch_failure": null,
+          "passed_numeric_screen": false
+        }
+      ],
+      "original_failure": null,
+      "original_acquisition_complete": true,
+      "replicas": [
+        {
+          "case_id": "learning:translate_0.05_135deg",
+          "controls": 1000,
+          "missing_metrics": [],
+          "scope": "Diagnostics of the complete recorded attempt; no acceptance thresholds or verdicts changed.",
+          "status": "measured",
+          "tracking": {
+            "mean_requested_navigation_velocity_mps": [
+              -0.0353553406894207,
+              0.0353553406894207
+            ],
+            "mean_achieved_navigation_velocity_mps": [
+              -3.58362514316318e-05,
+              -0.0001480074304304394
+            ],
+            "mean_signed_velocity_error_mps": [
+              0.03531950443798909,
+              -0.035503348119851105
+            ],
+            "mean_absolute_velocity_error_mps": [
+              0.035584378306968034,
+              0.03562469491275826
+            ],
+            "planar_error_rmse_mps": 0.05364380873746942,
+            "mean_requested_speed_mps": 0.0500000023053001,
+            "mean_achieved_speed_mps": 0.016607177890103682,
+            "mean_signed_direction_speed_mps": -7.931700132374675e-05,
+            "mean_signed_yaw_error_rad_s": -0.00013639208122112205,
+            "yaw_error_rmse_rad_s": 0.0453877658544502,
+            "measurement_point": "Native COM for exact evaluator velocity_navigation_mps; estimator is compared separately at root origin."
+          },
+          "deck": {
+            "height_mean_m": 0.09422775231301785,
+            "height_std_m": 0.0007094326483693326,
+            "height_peak_to_peak_m": 0.0093560591340065,
+            "tilt_rms_deg": 0.8499339892692735,
+            "tilt_peak_deg": 1.3916605024182307,
+            "planar_excursion_max_m": 0.0108329536959375
+          },
+          "deck_height_spectrum": {
+            "status": "measured",
+            "samples": 1000,
+            "sample_rate_hz": 50.0,
+            "ac_rms": 0.0007094326483693326,
+            "dominant_frequency_hz": 0.15000000000000002,
+            "power_above_5hz_fraction": 0.346878132928895,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "joints": {
+            "names": [
+              "lf_coxa_yaw",
+              "lf_femur_pitch",
+              "lf_tibia_pitch",
+              "lm_coxa_yaw",
+              "lm_femur_pitch",
+              "lm_tibia_pitch",
+              "lr_coxa_yaw",
+              "lr_femur_pitch",
+              "lr_tibia_pitch",
+              "rf_coxa_yaw",
+              "rf_femur_pitch",
+              "rf_tibia_pitch",
+              "rm_coxa_yaw",
+              "rm_femur_pitch",
+              "rm_tibia_pitch",
+              "rr_coxa_yaw",
+              "rr_femur_pitch",
+              "rr_tibia_pitch"
+            ],
+            "position_range_rad": [
+              0.15264200046658516,
+              0.11394576728343964,
+              0.12180617451667786,
+              0.06608755327761173,
+              0.07007487118244171,
+              0.15471887588500977,
+              0.11257687956094742,
+              0.1426771730184555,
+              0.18371376395225525,
+              0.04544423799961805,
+              0.1810602843761444,
+              0.22973573207855225,
+              0.11176954349502921,
+              0.16966551542282104,
+              0.2614411413669586,
+              0.11832075379788876,
+              0.12336130440235138,
+              0.1509411334991455
+            ],
+            "velocity_rms_rad_s": [
+              0.2745459550500412,
+              0.5115546737356317,
+              0.488027449259205,
+              0.193293137387594,
+              0.7381576387679352,
+              0.8084237790498452,
+              0.1815063901702924,
+              0.745251604309514,
+              0.5375774201848819,
+              0.16667603062765587,
+              0.7053271976087534,
+              0.7152665479245127,
+              0.15355173697661662,
+              0.8268443405076679,
+              0.6268919919221633,
+              0.3833163927153118,
+              0.6119611178411444,
+              0.891426287556526
+            ],
+            "target_tracking_rms_rad": [
+              0.024545875928271045,
+              0.028294388550480873,
+              0.01815328164968176,
+              0.020752423584096354,
+              0.014945583747702837,
+              0.021337162847994844,
+              0.024681314075340834,
+              0.10124294244761009,
+              0.05459488537717911,
+              0.020245935339523565,
+              0.07390657746329879,
+              0.034863364150428185,
+              0.021572997994598123,
+              0.04713180167051151,
+              0.03247802405417203,
+              0.020640217873098,
+              0.021082939873977462,
+              0.010958826471724028
+            ],
+            "target_step_abs_max_rad": [
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.039999999997235136,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999997904524,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999999999998,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999980442226,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999999359716,
+              0.03999999165534973,
+              0.03999999165534973
+            ],
+            "target_step_abs_p95_rad": [
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999980442226,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.039999999571591616,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.03999999910593033,
+              0.03999999165534973,
+              0.03999999165534973,
+              0.039999999571591616,
+              0.03999999165534973,
+              0.03999999165534973
+            ],
+            "slew_limit_occupancy_fraction": [
+              0.6306306306306306,
+              0.2722722722722723,
+              0.07507507507507508,
+              0.26226226226226224,
+              0.1921921921921922,
+              0.4344344344344344,
+              0.4954954954954955,
+              0.4754754754754755,
+              0.2982982982982983,
+              0.3203203203203203,
+              0.6316316316316316,
+              0.41041041041041043,
+              0.2992992992992993,
+              0.25325325325325326,
+              0.6826826826826827,
+              0.5755755755755756,
+              0.5915915915915916,
+              0.3013013013013013
+            ]
+          },
+          "target_step_spectrum": {
+            "status": "measured",
+            "samples": 999,
+            "sample_rate_hz": 50.0,
+            "ac_rms": 0.03050576278417126,
+            "dominant_frequency_hz": 19.26926926926927,
+            "power_above_5hz_fraction": 0.9924186699662568,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "torque_400hz": {
+            "samples": 8000,
+            "joint_names": [
+              "lf_coxa_yaw",
+              "lf_femur_pitch",
+              "lf_tibia_pitch",
+              "lm_coxa_yaw",
+              "lm_femur_pitch",
+              "lm_tibia_pitch",
+              "lr_coxa_yaw",
+              "lr_femur_pitch",
+              "lr_tibia_pitch",
+              "rf_coxa_yaw",
+              "rf_femur_pitch",
+              "rf_tibia_pitch",
+              "rm_coxa_yaw",
+              "rm_femur_pitch",
+              "rm_tibia_pitch",
+              "rr_coxa_yaw",
+              "rr_femur_pitch",
+              "rr_tibia_pitch"
+            ],
+            "requested_saturation_fraction": [
+              0.0,
+              0.001375,
+              0.0,
+              0.0,
+              0.0,
+              0.0005,
+              0.0,
+              0.087,
+              0.002625,
+              0.0,
+              0.002,
+              0.000625,
+              0.0,
+              0.003625,
+              0.000375,
+              0.0,
+              0.0,
+              0.00025
+            ],
+            "requested_saturation_longest_burst_s": [
+              0.0,
+              0.0225,
+              0.0,
+              0.0,
+              0.0,
+              0.005,
+              0.0,
+              0.06,
+              0.02,
+              0.0,
+              0.0075,
+              0.0075,
+              0.0,
+              0.0275,
+              0.005,
+              0.0,
+              0.0,
+              0.0025
+            ],
+            "requested_abs_peak_nm": [
+              0.9529614448547363,
+              2.3160617351531982,
+              1.2507367134094238,
+              1.5207875967025757,
+              1.0103486776351929,
+              3.530489921569824,
+              1.4069805145263672,
+              2.566896677017212,
+              1.8815594911575317,
+              1.337679386138916,
+              3.9981632232666016,
+              7.476499557495117,
+              0.9386451840400696,
+              2.239682197570801,
+              3.8081650733947754,
+              1.3151606321334839,
+              1.4595224857330322,
+              2.6524789333343506
+            ],
+            "applied_abs_peak_nm": [
+              0.9529614448547363,
+              1.600000023841858,
+              1.2507367134094238,
+              1.5207875967025757,
+              1.0103486776351929,
+              1.600000023841858,
+              1.4069805145263672,
+              1.600000023841858,
+              1.600000023841858,
+              1.337679386138916,
+              1.600000023841858,
+              1.600000023841858,
+              0.9386451840400696,
+              1.600000023841858,
+              1.600000023841858,
+              1.3151606321334839,
+              1.4595224857330322,
+              1.600000023841858
+            ],
+            "applied_rms_nm": [
+              0.2742731761261525,
+              0.35186916425645026,
+              0.2302500015668017,
+              0.25114177313441466,
+              0.23113116487654287,
+              0.30114063368576854,
+              0.32320218802806233,
+              1.2004397842602126,
+              0.6637835495127039,
+              0.24773797336454262,
+              0.8898527475611901,
+              0.4105496752585058,
+              0.2629810259260474,
+              0.5960228001593648,
+              0.41171455560787895,
+              0.24303815676814552,
+              0.2658520829149314,
+              0.20229370109655853
+            ],
+            "first_requested_saturation_s": 0.035
+          },
+          "support_400hz": {
+            "toe_contact_fraction": [
+              0.949625,
+              0.595625,
+              0.998875,
+              0.990125,
+              0.96325,
+              0.201625
+            ],
+            "support_count_histogram": [
+              9,
+              2,
+              2,
+              188,
+              2831,
+              4109,
+              859
+            ],
+            "no_toe_support_samples": 9
+          },
+          "contact_reference_motion": {
+            "measurement": "World motion of each toe-link reference point during consecutive actual distal contact samples; a slip proxy, not the contact patch velocity.",
+            "eligible_pairs_by_toe": [
+              7463,
+              4393,
+              7990,
+              7894,
+              7566,
+              1011
+            ],
+            "mean_planar_speed_mps": [
+              0.002696970381360898,
+              0.006174693908007474,
+              0.0016617365591041903,
+              0.0019321269882706874,
+              0.0012581868890420582,
+              0.00882925617434911
+            ],
+            "p95_planar_speed_mps": [
+              0.004827743673866651,
+              0.03187870858513338,
+              0.0031936600032663426,
+              0.0038880151362221454,
+              0.0022122994311038545,
+              0.04269727654052152
+            ]
+          },
+          "failures": {
+            "terminated": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            },
+            "truncated": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            },
+            "reset": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            },
+            "nonfoot_contact": {
+              "samples": 0,
+              "first_time_s": null,
+              "event_start_times_s": []
+            }
+          },
+          "joint_velocity_rad_s_spectrum_400hz": {
+            "status": "measured",
+            "samples": 8000,
+            "sample_rate_hz": 400.0,
+            "ac_rms": 0.7987824480618576,
+            "dominant_frequency_hz": 19.3,
+            "power_above_5hz_fraction": 0.9764693997709463,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "joint_position_rad_spectrum_400hz": {
+            "status": "measured",
+            "samples": 8000,
+            "sample_rate_hz": 400.0,
+            "ac_rms": 0.01862750781078326,
+            "dominant_frequency_hz": 0.05,
+            "power_above_5hz_fraction": 0.24163866741346182,
+            "method": "Full-trial mean removal and Hann-window FFT; no dropped failure or selected quiet suffix."
+          },
+          "estimator": {
+            "root_origin_velocity_rmse_mps": [
+              0.010194709403592688,
+              0.01180228844505097,
+              0.014850171628671555
+            ],
+            "measurement_point": "Pre-policy body-root origin navigation velocity in critic[:, -3:], not COM tracking velocity."
+          },
+          "motion_prior_style_reward": {
+            "mean": 0.011108069360256195,
+            "min": 0.0,
+            "max": 0.34229451417922974
+          },
+          "motion_prior_discriminator_score": {
+            "mean": -1.0057198221683503,
+            "min": -1.10019052028656,
+            "max": -0.6219809055328369
+          }
+        }
+      ],
+      "actor_reconstruction": {
+        "status": "reconstructed",
+        "checkpoint_sha256": "43ed0d8291feb028004f843e78b1e01fd3695fd81234d1bef391ff53cef6b035",
+        "observations": 1000,
+        "actor_state_dict_strict": true,
+        "absolute_tolerance": 1e-05,
+        "relative_tolerance": 1e-05,
+        "within_cpu_float_tolerance": true,
+        "action_error_abs_max": 2.682209014892578e-07,
+        "action_error_rmse": 3.872609966037999e-08,
+        "scope": "CPU mean-action reconstruction from recorded histories and saved normalizers; no closed-loop or observation-noise trial reproduced."
+      },
+      "plots": {
+        "status": "written",
+        "files": [
+          "recording_003_motion.png",
+          "recording_003_joints_torque_support.png",
+          "recording_003_joint_velocity_spectrum.png"
+        ],
+        "scope": "Replica0 measured timelines and spectra; no smoothing or removed failure samples"
+      }
+    }
+  ],
+  "stage2_verdict_changed": false,
+  "historical_reference_scope": "Historical Stage2 videos are visual targets on different models; never a matched quantitative baseline.",
+  "comparison_identity": [
+    {
+      "physics": {
+        "physics_source_files": {
+          "env.py": "a8a74a989c8b3769e8624c651876aed21f7adbdc94d3b65b26d8dcaf671b0dfd",
+          "env_config.py": "906509c0e29cbedb70fd6d58648585f43bb2fd75c2ab57ddbea72c9b7f4b4eea"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "prior_metadata_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce"
+      },
+      "cases": [
+        {
+          "case_id": "learning:translate_0.05_0deg",
+          "profile": "omni_static",
+          "command": [
+            0.05,
+            0.0,
+            0.0
+          ],
+          "controls": 1000
+        }
+      ],
+      "assigned_case_ids": [
+        "learning:translate_0.05_0deg"
+      ],
+      "recorded_controls": 1000,
+      "recorded_physics_steps": 8000,
+      "episode_timeout_seconds": 90.0,
+      "velocity_measurement_point": "native root center_of_mass; actual world velocity rotated into body/navigation"
+    },
+    {
+      "physics": {
+        "physics_source_files": {
+          "env.py": "a8a74a989c8b3769e8624c651876aed21f7adbdc94d3b65b26d8dcaf671b0dfd",
+          "env_config.py": "906509c0e29cbedb70fd6d58648585f43bb2fd75c2ab57ddbea72c9b7f4b4eea"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "prior_metadata_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce"
+      },
+      "cases": [
+        {
+          "case_id": "learning:translate_0.05_45deg",
+          "profile": "omni_static",
+          "command": [
+            0.03535533905932738,
+            0.035355339059327376,
+            0.0
+          ],
+          "controls": 1000
+        }
+      ],
+      "assigned_case_ids": [
+        "learning:translate_0.05_45deg"
+      ],
+      "recorded_controls": 1000,
+      "recorded_physics_steps": 8000,
+      "episode_timeout_seconds": 90.0,
+      "velocity_measurement_point": "native root center_of_mass; actual world velocity rotated into body/navigation"
+    },
+    {
+      "physics": {
+        "physics_source_files": {
+          "env.py": "a8a74a989c8b3769e8624c651876aed21f7adbdc94d3b65b26d8dcaf671b0dfd",
+          "env_config.py": "906509c0e29cbedb70fd6d58648585f43bb2fd75c2ab57ddbea72c9b7f4b4eea"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "prior_metadata_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce"
+      },
+      "cases": [
+        {
+          "case_id": "learning:translate_0.05_90deg",
+          "profile": "omni_static",
+          "command": [
+            3.061616997868383e-18,
+            0.05,
+            0.0
+          ],
+          "controls": 1000
+        }
+      ],
+      "assigned_case_ids": [
+        "learning:translate_0.05_90deg"
+      ],
+      "recorded_controls": 1000,
+      "recorded_physics_steps": 8000,
+      "episode_timeout_seconds": 90.0,
+      "velocity_measurement_point": "native root center_of_mass; actual world velocity rotated into body/navigation"
+    },
+    {
+      "physics": {
+        "physics_source_files": {
+          "env.py": "a8a74a989c8b3769e8624c651876aed21f7adbdc94d3b65b26d8dcaf671b0dfd",
+          "env_config.py": "906509c0e29cbedb70fd6d58648585f43bb2fd75c2ab57ddbea72c9b7f4b4eea"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "prior_metadata_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce"
+      },
+      "cases": [
+        {
+          "case_id": "learning:translate_0.05_135deg",
+          "profile": "omni_static",
+          "command": [
+            -0.035355339059327376,
+            0.03535533905932738,
+            0.0
+          ],
+          "controls": 1000
+        }
+      ],
+      "assigned_case_ids": [
+        "learning:translate_0.05_135deg"
+      ],
+      "recorded_controls": 1000,
+      "recorded_physics_steps": 8000,
+      "episode_timeout_seconds": 90.0,
+      "velocity_measurement_point": "native root center_of_mass; actual world velocity rotated into body/navigation"
+    }
+  ]
+}

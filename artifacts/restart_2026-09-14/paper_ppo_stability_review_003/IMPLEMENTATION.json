@@ -1,0 +1,39 @@
+{
+  "recorded_at_utc": "2026-09-14T23:37:02.845143+00:00",
+  "schema": "fresh_ppo_stability_implementation_v1",
+  "learner_schema": "canonical_paper_walk_ppo_amp_v2",
+  "source_sha256": {
+    "experiments/paper_walk/learner.py": "1bc595119e4605f817c24090688938bf62898748de246b0e7dc89db743420afa",
+    "experiments/paper_walk/tests/test_learner.py": "64dd2a6bd16f8f1509fd3e034a69f9d5488bafedf89dd9dcbc402e69abd2a3dc",
+    "experiments/paper_walk/tests/test_learner_stability.py": "810bd29548bfbb69b9bb0ac59da576cf2f1e09881ce924e579f037e6f843bf63",
+    "experiments/paper_walk/train.py": "d0e1c3352aa4b0a0d229e362b2b5167f3ac93ee5d4ebd1e595e55d18a6d4aa2c",
+    "experiments/paper_walk/tests/test_train_config.py": "f4f06b0d26ee9daecc1e44ae594c9114706e91c7b8285da226ca37797a0fc9d4"
+  },
+  "test_command": ".venv/bin/python -m unittest discover -s experiments/paper_walk/tests",
+  "test_result": {
+    "passed": true,
+    "tests": 148,
+    "seconds": 3.418
+  },
+  "verification": [
+    "Analytic KL formula/direction/18-dimension reduction, finite and invalid inputs",
+    "Guard statistics and RNG invariance, stale-reference failure before mutation",
+    "One retained crossing step; no later model/Adam mutation; unchanged full discriminator state and RNG versus same-input baseline",
+    "Separate pre-step minibatch approximate KL and final full-rollout sampled k3 metrics",
+    "Normalizers remain updated; drift measured on same current N observations and weights",
+    "BC-only velocity detach routes action and velocity gradients correctly without privileged actor input",
+    "Explicit finite aligned pre-hold native velocity target validation, including rejection before optimizer/normalizer mutation",
+    "Separate BC Adam discarded with empty PPO state; new-schema exact model/config/optimizer/RNG restore and old-schema/source/config rejection",
+    "Unsupervised default BC and dedicated-Adam baseline reproduce immutable legacy model/AMP weights and RNG exactly in CPU fixture",
+    "Existing disabled-guard PPO regression preserves frozen source006 rollout/model/optimizer/RNG bytes across two seeds and updates"
+  ],
+  "frozen_source016_equal": {
+    "env.py": true,
+    "env_config.py": true,
+    "task.py": true,
+    "evaluation.py": true
+  },
+  "native_action_taken": false,
+  "existing_checkpoint_mutated": false,
+  "stage2_complete": false
+}

@@ -1,0 +1,37 @@
+{
+  "schema": "root_adopted_fresh_ppo_stability_successor_v1",
+  "recorded_at_utc": "2026-09-14T23:33:41.771348+00:00",
+  "decision_owner": "root dispatcher",
+  "review_session_id": "812d1d51-ed83-4875-9e8c-9f879610ac12",
+  "adopted": {
+    "new_source_schema_config": true,
+    "target_kl": 0.02,
+    "learning_rate": 0.0001,
+    "discriminator_learning_rate": 0.0003,
+    "kl": "analytic old Gaussian || current Gaussian; sum18 action dimensions, mean saved rollout states",
+    "placement": "after each shared-model Adam step; crossing step retained; no further shared-model step in update",
+    "discriminator": "full planned update schedule and RNG draws continue",
+    "rollback": false,
+    "adaptive_learning_rate": false,
+    "bc_optimizer": "separate Adam discarded before PPO",
+    "bc_learning_rate": 0.0003,
+    "bc_velocity_coefficient": 1.0,
+    "bc_detach_velocity": true,
+    "velocity_target": "actual pre-hold native body-origin navigation velocity; [-states37, states36, states38]",
+    "warmup": false
+  },
+  "scope": "Fresh constructed/fitted successor only; existing checkpoint/source identity remains strict; no GPU execution authorized by this artifact",
+  "independent_difference": "Root explicitly adopted a separate discarded BC optimizer beyond the narrower shared-moment recommendation in RECOMMENDATION.md. Preserve the earlier recommendation as advisory history; this record owns the adopted choice.",
+  "caveats": [
+    "Final KL need not exceed the logged mean over minibatches.",
+    "The KL target and LR are engineering choices, not proof of gait or a hard trust region.",
+    "The crossing step can overshoot; no rollback is performed.",
+    "Normalizer-drift measurement is reporting only and does not freeze or gate statistics.",
+    "Loss magnitudes alone do not establish relative gradient dominance.",
+    "No numerical or physical acceptance gate is weakened."
+  ],
+  "code_owner": "restart_registry: learner.py and learner CPU tests",
+  "cli_owner": "stage_restart_readiness: train.py and configuration CPU tests",
+  "root_native_adoption_required": true,
+  "stage2_complete": false
+}

@@ -14,8 +14,13 @@ python3 tools/c_study_runtime.py
 
 The historical check verifies `stage2_pipeline.sha256` against the immutable Git
 revision `81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df`. Fetch repository history first.
-The current check selects `repository_visual_roadmap_20260911_pipeline.sha256`. It covers
-current runtime/source paths, tests and retained release inputs. The two explicitly
+The current check selects `repository_canonical_restart_20260915_v3_pipeline.sha256`.
+It covers current runtime/source paths, tests and retained release inputs,
+including the inventoried top-level `experiments/paper_walk/*.py` prototype
+modules and `experiments/paper_walk/tests/*.py` CPU checks. Nested experiment
+outputs and frozen attempt copies are not scanned as maintained source. CI runs
+the prototype's CPU checks separately; its native Isaac allocations retain their
+own exact source, model, standing-admission and result identities. The two explicitly
 allowed historical packaging changes remain in the checker; frozen package guides
 and all other historical contracts retain their original bytes.
 
@@ -32,13 +37,12 @@ and all other historical contracts retain their original bytes.
 5. Commit the coherent release. Use its pinned checkout for reproduction;
    source relocation does not transfer old admission or checkpoint compatibility.
 
-The documentation cleanup archives historical prose with exact-byte checks and
-keeps old site evidence links pinned to their original revision. It changes no
-robot model, controller, acceptance gate, checkpoint or frozen runtime. The
-preceding `repository_progress_tests_20260911_pipeline.sha256` stays unchanged.
-[Archived release history](archive/README.md) preserves every earlier explanation
-and failed-attempt reference. New release explanations belong in site updates.
-
-The visual-roadmap release updates the page renderer and validates agreed test
-definitions separately from assigned or completed work. The preceding
-`repository_docs_20260911_pipeline.sha256` remains unchanged.
+The canonical-restart v3 release retains both earlier canonical-restart
+manifests and every preceding release unchanged. It binds the optional rollback
+of oversized PPO updates, the separate actor-normalizer freeze and their CPU
+checks. Cross-schema checkpoints require an explicit recorded migration;
+the runtime loader remains strict. Source inclusion does not admit a robot,
+accept a policy or transfer historical checkpoint compatibility. The checker's
+historical header remains a lineage identifier, not a native run's robot model.
+[Archived release history](archive/README.md) preserves earlier explanations and
+failed-attempt references. New release explanations belong in site updates.

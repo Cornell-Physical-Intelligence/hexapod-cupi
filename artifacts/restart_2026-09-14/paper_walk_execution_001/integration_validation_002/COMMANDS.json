@@ -1,0 +1,71 @@
+{
+  "01_uv_sync": [
+    "uv",
+    "sync",
+    "--locked"
+  ],
+  "02_isaaclab": [
+    "uv",
+    "run",
+    "python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "isaaclab/tests"
+  ],
+  "03_robot": [
+    "uv",
+    "run",
+    "python",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "robot/tests"
+  ],
+  "04_inventory": [
+    "uv",
+    "run",
+    "python",
+    "tools/source_inventory.py",
+    "check"
+  ],
+  "05_historical": [
+    "uv",
+    "run",
+    "python",
+    "tools/check_pipeline_lineages.py",
+    "historical"
+  ],
+  "06_current": [
+    "uv",
+    "run",
+    "python",
+    "tools/check_pipeline_lineages.py",
+    "current"
+  ],
+  "07_status": [
+    "uv",
+    "run",
+    "python",
+    "tools/project_site.py",
+    "status"
+  ],
+  "08_site_check": [
+    "uv",
+    "run",
+    "python",
+    "tools/project_site.py",
+    "check",
+    "--base",
+    "e9d5e775b3de76e9836c0139b557e2fcc4af047f"
+  ],
+  "09_site_build": [
+    "uv",
+    "run",
+    "python",
+    "tools/project_site.py",
+    "build"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "20260914T192457_terminal_audit_manifest_correction",
+  "date": "2026-09-14T19:24:57Z",
+  "title": "Preserve and correct the terminal audit's manifest packaging",
+  "summary": "The first audit manifest accidentally included the hash of its own initially empty file. Preserve that original receipt and add an explicit correction plus SHA256_002.json, which excludes self-reference. Every audit script/result/readme byte and all 23 recorded input hashes remain unchanged; the successor manifest and all 22 recorder checks verify.",
+  "areas": [
+    "evidence integrity"
+  ],
+  "changes": [
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/terminal_audit_evaluate_007/MANIFEST_CORRECTION_001.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/terminal_audit_evaluate_007/SHA256_002.json"
+  ],
+  "evidence": [
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/terminal_audit_evaluate_007/MANIFEST_CORRECTION_001.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/terminal_audit_evaluate_007/SHA256_002.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/terminal_audit_evaluate_007/audit.json"
+  ],
+  "next": "Use SHA256_002.json to verify the immutable terminal audit; retain the original manifest and correction record.",
+  "no_project_impact": true,
+  "reason": "This corrects manifest self-reference without changing any measured sample, audit result, native source or qualification outcome."
+}

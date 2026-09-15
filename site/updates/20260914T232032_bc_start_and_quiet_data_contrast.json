@@ -1,0 +1,27 @@
+{
+  "id": "20260914T232032_bc_start_and_quiet_data_contrast",
+  "date": "2026-09-14T23:20:32.027527Z",
+  "title": "Prepare a native comparison of additional start and quiet examples",
+  "summary": "A separate BC-only dataset preserves1860 original steady rows, adds1500 independently screened onset rows and400 real zero-command reset/settle rows. CPU fitting uses unchanged learner, initial weights, config32, std0.1 and1000steps with zero PPO updates. Original AMP data and all native gates remain unchanged. A fresh three-case Isaac evaluation is prepared but not yet dispatched. Separate learning-stability and velocity-supervision consultations remain advisory until explicitly adopted.",
+  "areas": [
+    "training data",
+    "CPU fitting",
+    "native evaluation preparation"
+  ],
+  "changes": [
+    "artifacts/paper_bc_data_002/**",
+    "artifacts/paper_bc_fit_002/**",
+    "artifacts/restart_2026-09-14/paper_ppo_stability_review_003/**",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/**"
+  ],
+  "evidence": [
+    "artifacts/paper_bc_data_002/SELECTION.json",
+    "artifacts/paper_bc_data_002/RECONSTRUCTION.json",
+    "artifacts/paper_bc_fit_002/REPORT.json",
+    "artifacts/paper_bc_fit_002/DATA_CONTRAST.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/PREPARATION_evaluate_011.json"
+  ],
+  "next": "Complete the larger-batch native standing check, then measure the fitted candidate in forward, quiet and stop trials before selecting a PPO handoff.",
+  "no_project_impact": true,
+  "reason": "This records a CPU data contrast and unexecuted native comparison. It establishes no walking, stopping, larger-batch admission or Stage2 acceptance."
+}

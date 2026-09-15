@@ -1,0 +1,51 @@
+{
+  "schema": "canonical_placement_pilot_outcomes_v1",
+  "preregistered": true,
+  "arms": [
+    "origin",
+    "xy14_4"
+  ],
+  "num_envs_per_arm": 1,
+  "primary_event": "A toe has exactly zero resultant normal force for one controlled step, with >1N on preceding and following steps; retain whether all128 tibia records are inactive exactzero tuples. Count across all8000steps and separately postsettle.",
+  "secondary_readout": "All strict<=1N toe samples, original unchanged standing/quiet verdict, event leg/time/patchsignature and raw traces.",
+  "rows": [
+    {
+      "origin": "0",
+      "xy14_4": "nonzero",
+      "conclusion": "Event recurrence differs in this pair. Placement-linked behavior is a hypothesis requiring replication, not a causal finding."
+    },
+    {
+      "origin": "0",
+      "xy14_4": "0",
+      "conclusion": "The historical event was not reproduced in either single-robot arm; batch context and contact marginality remain possible."
+    },
+    {
+      "origin": "nonzero",
+      "xy14_4": "nonzero",
+      "conclusion": "Events reproduce in single-robot topology at both placements. Placement alone does not explain recurrence."
+    },
+    {
+      "origin": "nonzero",
+      "xy14_4": "0",
+      "conclusion": "Single-robot events reproduce at origin only in this pair. No placement attribution is justified without replication."
+    }
+  ],
+  "invalid_or_incomplete": "Preserve the actual failed prefix and errors; do not infer reproduction or absence from missing rows.",
+  "limits": [
+    "One run per arm cannot establish rates or attribute a discordance to placement.",
+    "The80m square floor is two triangles with diagonal y=x. Origin lies on the seam; (14,4) lies inside one triangle. Position relative to tessellation changes too.",
+    "128 is an observed inactive-record signature. Native starts/counts and internal per-pair capacity were not captured in source005, so its physical meaning is unknown.",
+    "New scene attributes absent from historical evidence cannot retrospectively establish identical backend defaults.",
+    "An optional additional origin repeat requires a separately recorded allocation and never follows automatically."
+  ],
+  "standing_admission": false,
+  "batch_admission": false,
+  "training_allowed": false,
+  "stage2_complete": false,
+  "fable_review": {
+    "model": "claude-fable-5-1",
+    "effort": "max",
+    "session_id": "6511ce0d-8efa-420a-83b2-7902f2e1a2e7",
+    "disposition": "Conditional conceptual review; root owns final code review and dispatch. No zero-motion or between-arm equality gate is added."
+  }
+}

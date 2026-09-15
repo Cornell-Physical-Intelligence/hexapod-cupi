@@ -1,0 +1,65 @@
+New bounded handoff review in this same actual Fable5.1max session; ALLTOOLSdisabled, rootsoleGPUdispatcher, noimplementation/nativeactions authorized. Return at most700words, concrete review of belowproposedboundary rather than a newarchitecture. Root ownsfinaldecision; no walking/Stage2claim.
+
+NEW ACTUAL EVIDENCE: rootinspectedtwoactual deterministicPPOrecordings oncorrectmodel; both inplacejitterwithoutcoordinatedwalking. evaluate007FFT7.175Hz,97.15%powerabove5Hz,after2s signedforward−.002321m/s,LF/RRlowcontact,onefemursaturation36.79%; meanreconstructionverified. Fresh lowerstd.1contrast thencompleted200updates32envs:3terminations versus92old, .24%requestedsaturationversus5.14%,butmovingprojection.000739m/s. Its13deterministicprobes are beinginspected, nooutcomeassumption.
+
+CPU FIT ACTUALLY COMPLETED NOW (no native simulation, no source changes): existing exact PPOLearner(env=None, deviceCPU), Confignum_envs32 initial_std.1seed20260914, currentlearnerSHAa99798d7a9b0757292d2c509c02b7b220866102ce62a976f0ef8bd10a24d64ab,1000pretrain_bc Adamstepsbatch512,2CPUthreads,3.809s,300swallbound. ORIGINAL accepted1860steady-only actualobs231/actions18 fileSHA22f7b04b0c7540f7a27cbe4d13e23c09dbd3a2363ee0792f292e6293b16b9515. Noonset/stop/synthetichistoryadded. Savedupdate0bc_steps1000checkpointSHAf9d32d7fdfe132e7f9ba050c08364f641079d02b833548ddf949d2683e542660. Strictserialization, independentfull-datasetdeterministicreload, allmodel/normalizers/Adam/RNGexactpass. Originallearnerbytesunchanged. MeanMSEtrain1.33794e-5,cycle3heldout2.70143e-5,prevactioncopy9.53138e-4,zeropredictor.0642742. Incrementdirectioncosines.9877train/.9809heldout; fittedincrementRMS.03094vstarget.03087normalizedactionunits. Allmovingcommandsbeatcopybaseline (heldout MSEratios.00976–.08316). Zerocommandcopybaselineexact0 whereasBCMSE~7e-7. This provesfittingbeyondpreviouscopy onteacherforceddata, notclosedloop. Heldoutremainsadjacent/selection-conditioned, notindependent. IncrementMSE equalsactionMSEalgebraically, notasecondvalidation.
+
+PROVENANCE:20actorparamtensors inestimator/memory/policyhaveAdamstate step1000. Critic,D,log_stdunchangedfromfreshinit; DAdamempty. PPOoptimizer_stepscounter0 measuresPPOonly, actualBCsteps1000separate. Actornormalizercount1860.0001; critic/AMPnormalizers.0001. EstimatorwasupdatedonlythroughactionMSE, NOTsupervisedasvelocity. Stdremains.1. Python/NumPy/TorchRNGsaved. FirstPPOcollectwillblendnormalizersasexistingcode. NativeBC D/style outputcomesfromFRESHUNTRAINEDD and isnotcomparabletothetrainedPPOdiscriminator orafitnessmetric.
+
+ROOT PROPOSED MINIMAL BOUNDARY: FIRST runexisting13additionallearningprobes onTHISunchangedsteady-onlyBCcheckpoint fromORIGINALcanonicalreset andactualrepeatedmeasuredhistory, deterministicactor,1nativeenv90stimeout. NoPPOupdatesbeforeprobe, nopose/phaseforcing, nowarmupadaptationormeanoverride. 8directionsat.05,±.2yaw,quiet20s(original4ssettle),quiet32s(original2ssettle),forward.05for8sthenzero13s; all400Hzcapture,unchangednumericalscorers,actualvideo+trajectory/FFT/contact/motoranalysis. All96fullStage2cases remainmissing/unqualified regardless13screenresults. This directlymeasureswhethersteadydata generalizes tostart/stop. Iflimited startup/stopfails:extenddatasetscreenwithnewidentity, don'tinventstops. Existingrawcycle1after4ssettling containscorrectcommandchange; CPUexistingreplayscreen passes15/21commands,includingall.025,±.05forwardand±yaw; sixothersfailrequestedsat2% (left.05=22.5%). Preserveoriginal31/32rowselection andfailedonsetrows, noappendwholesaletoacceptedfile. No stopdata exists. Needfreshnativedemoifstopcoveragechosen; no oldgatechange.
+
+IfrootlaterchoosesPPOhandoff: loadEXACTBCcheckpoint withcurrentstrictloader/config32std.1/originalAMPpriorSHA; keepexistingAdamstatesexplicitly ratherthansilentreset, bc_steps1000thenPPOcountersstart0; critic/DremainfreshbeforePPO, noarchitecture/objectivechange, no re-runningBC onload. NewrunandinitcheckpointSHA; freshnativeenvstate, noexactPhysXresumeclaim. Existingtrain.py nowreadsConfigfromcheckpointfortrainaswellaseval; accepts32trainingonlymatchingnum_envs and forbids--initial-stdwithcheckpoint. Existingloadpreservesnormalizers/optimizers/RNG; nolearnercodechangeorloaderrelaxationneeded. Existingreplay/priorbindingstillrequiresacceptedoriginalprior/report. AdditionalBCdatasetlatermustbeseparatelyboundfromAMPdata.
+
+Please assess: (1) IsfirstunchangedBCnative13probe the minimalinterpretablenextstep, despitemissingonset/stops, withfailuretreatedasinformation ratherthanqualifiedgait? Critiqueyourpriorcategorical'onsetrequiredBEFOREanynativeBCprobe' inlightofactualfitandrootexplicitdiagnosticintention. (2) Fatalpitfalls ornecessaryentry/reportbindings beforethisprobe? DistinguishfreshD/velocityestimator interpretationfromactualactorbehavior. (3) Concreteconditionalnextdata/handoffdecision without inventingnumericgates; no mandatorynewBCfit beforeseeingnativefailure. (4) Confirm13probesprioritizelearning butomitfullhighercommand/arcs/continuous96suite. Keepmetadata/counterhonesty; do notassume128admission. NOcodeornativeaction, reviewonly.
+
+
+EXACT CURRENT ENTRY SEAM
+(mode, num_envs, initial_std=None, checkpoint=None):
+    """Fresh exploration is configurable; checkpoint configuration stays exact."""
+    from .learner import Config
+    if initial_std is not None and (mode != "train" or checkpoint is not None):
+        raise ValueError("--initial-std is only for fresh training without --checkpoint")
+    if checkpoint is not None:
+        cfg = Config(**checkpoint["config"])
+        cfg.validate()
+        if mode == "train" and cfg.num_envs != num_envs:
+            raise ValueError("Training checkpoint replica count differs from the native environment")
+        return cfg
+    if mode != "train":
+        raise ValueError("Policy recording/evaluation requires an actual learned checkpoint")
+    cfg = Config(num_envs=num_envs, initial_std=.4 if initial_std is None else initial_std_value(initial_std))
+    cfg.validate()
+    return cfg
+
+
+
+EXACT PRETRAIN IMPLEMENTATION
+(self, prior_path, steps, batch_size=512):
+        """Optional, explicit BC of observation/action pairs; never default or physics.
+
+        Caller must supply real reference history as observations[M,231] and
+        normalized target actions[M,18]. No phase, history or actions are invented.
+        """
+        with np.load(prior_path, allow_pickle=False) as prior:
+            obs = torch.as_tensor(prior["observations"].copy(), dtype=torch.float32, device=self.device)
+            actions = torch.as_tensor(prior["actions"].copy(), dtype=torch.float32, device=self.device)
+        if obs.ndim != 2 or obs.shape[1] != OBS_WIDTH or actions.shape != (len(obs),18) or not torch.isfinite(obs).all() or not torch.isfinite(actions).all():
+            raise ValueError("BC requires explicit finite observations[M,231], actions[M,18]")
+        self.model.obs_normalizer.update(obs)
+        for _ in range(steps):
+            indices = torch.randint(len(obs), (min(batch_size,len(obs)),), device=self.device)
+            mean, _ = self.model.actor(obs[indices])
+            loss = (mean-actions[indices]).square().mean()
+            self.optimizer.zero_grad(set_to_none=True)
+            loss.backward()
+            nn.utils.clip_grad_norm_(self.model.parameters(), self.config.max_grad_norm, error_if_nonfinite=True)
+            self.optimizer.step()
+            self.bc_steps += 1
+        (self.output/"behavior_cloning.json").write_text(json.dumps({"explicitly_enabled":True, "steps":steps,
+            "dataset_sha256":file_sha(prior_path),"is_physics_evidence":False},indent=2)+"\n")
+
+
+
+BEFORE-DISPATCH SUPPLEMENT (supersedes the overly simple PPO-handoff wording above, preserves original preparedinput): Rootnowreports train005final approximateKL.245647 is20-minibatchmean, clipfraction.665365; NOtargetKL/adaptiveLRcurrently. ControllerCPUauditreproducedall669evaluate007targetsbitexact/historyaligned, so no plumbingbugidentified. Rootexplicitlywants13UNCHANGEDnativeBCprobesfirst, THENreview optimizer/LR/velocityestimatorhandoff BEFOREanyPPO; noautomatic200-stepcontinuationdestroyinggait. PreservingAdam is thedefaultprovenancechoice, notproofthatfixedPPOupdategeometryissafe. Thesearehypothesesratherthanidentifiedoptimizerbugs.
+NEWMEASUREDCPUestimatorreadout onthisexactBCcheckpoint: trainRMSvelocityerror.773987m/s, adjacentheldout.774351; trueperaxisRMSvelocity[.02675,.02471,.01669], estimatorperaxisRMS[.53037,.60094,1.08027], maxabsoutput2.1333. ModelestimatorisexplicitlyanuncalibratedactionlatentafterBC, thoughactionMSEisgood. ThisdoesnotproveclosedloopBCfails; actorconsumeslatentconsistently. ButturningonexistingPPOvelocityloss(coef1) mayreshapeitanddamagegait. NoestimatorfitorPPOtesthasbeenrun.
+Refineyourhandoffreview: approve/rejectfirstunchangedBC13probesasdiagnostic separatelyfromPPOhandoff. IfnativeBCisuseful, recommendminimumconcretehandoffverification/control forlargeKL andlatent-to-velocityshift, beforeanylongPPOallocation. Existingfrozenlearnerstrictsourceidentitymustremain; ifrecommendingnewBCvelocity-supervisedobjective,targetKLgate/LRorfreeze/schedule, labelnewlearninginterventionandnewsource/configidentity, notsilentwarmstart. DonotmandatenewBCfittingbeforethefirstdiagnosticnativeprobe. Rootneedsconditionaldecision, notautomaticlaunch.

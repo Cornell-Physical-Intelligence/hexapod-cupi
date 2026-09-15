@@ -1,0 +1,28 @@
+{
+  "attempt": "train_007",
+  "dispatched_at_utc": "2026-09-15T00:50:01.375999+00:00",
+  "unit": "hexapod-paper-ppo-train-007-20260915.service",
+  "systemd_invocation_id": "68ba43ea828c4b3db770f0f4eb429e1a",
+  "systemd_run_returncode": 0,
+  "binding_sha256": "a194d544a8ec65cfd9ba83bf3769dabcc15bc84d34a28a83f7db0824d887d74c",
+  "source_freeze_sha256": "0baf8869effbee16253927363d41e315b43be27444493ac75e648801c7923c3a",
+  "argv": [
+    "systemd-run",
+    "--user",
+    "--unit",
+    "hexapod-paper-ppo-train-007-20260915.service",
+    "--property=RuntimeMaxSec=1320",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=ExecStopPost=python3 -B -S /home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/source_018/launch_spark.py --bindings /home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/bindings/train_007.json --bindings-sha256 a194d544a8ec65cfd9ba83bf3769dabcc15bc84d34a28a83f7db0824d887d74c --cleanup-only",
+    "python3",
+    "-B",
+    "-S",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/source_018/launch_spark.py",
+    "--bindings",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/bindings/train_007.json",
+    "--bindings-sha256",
+    "a194d544a8ec65cfd9ba83bf3769dabcc15bc84d34a28a83f7db0824d887d74c"
+  ],
+  "scope": "Actual20update PPO continuation fromlearned200checkpoint withrollback+actorstatsfreeze; no qualification claim"
+}

@@ -1,0 +1,37 @@
+{
+  "utc": "2026-09-15T00:38:55.019271+00:00",
+  "reviewer": "root",
+  "video": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_013/standing/evaluation/batch_000/rollout.mp4",
+  "video_sha256": "95191af62bd57ec9aed202fa40ab8cd3a38231a7829d6fd08caf509884f9c4b5",
+  "video_frames": 500,
+  "video_seconds": 20,
+  "video_fps": 25,
+  "viewed_samples": {
+    "overview": "20 frames at1fps across full20s",
+    "first_2s": "25frames at12.5fps",
+    "last_2s": "25frames at12.5fps"
+  },
+  "viewed_plots": [
+    "recording_000_motion.png",
+    "recording_001_joints_torque_support.png",
+    "recording_002_joints_torque_support.png"
+  ],
+  "visual_findings": [
+    "Actual RGB native PPO trial shows initial change into lower stance, then visibly near-fixed posture. No sustained stepping or useful translation seen.",
+    "400Hz support plot of separate zero-from-reset trial shows sustained three-leg support with recurring joint motion; this is not quiet six-foot standing. No RGB was acquired for that trial.",
+    "Stop trial settles mostly into six-foot support after the zero command but retains three missing-six-foot substeps in its fixed scoring window. No RGB was acquired for that trial."
+  ],
+  "comparison": {
+    "forward_after_2s_mps": -1.569947203102566e-05,
+    "forward_planar_error_mps": 0.050015923149147073,
+    "quiet_rms_radps": 0.5584203600883484,
+    "stop_rms_radps": 0.005962942261248827,
+    "all_selected_probes_failed": true
+  },
+  "limitations": [
+    "Sampled visual inspection plus complete numerical timelines; does not imply every video frame individually inspected.",
+    "25fps cannot exclude high-frequency joint jitter;400Hz diagnostics retained.",
+    "All96Stage2cases remain unrun; no human visual acceptance or walking qualification."
+  ],
+  "next_decision": "Continue learned200checkpoint with separatelyreviewed boundedPPOsteps and frozenactorstatistics; no success claim."
+}

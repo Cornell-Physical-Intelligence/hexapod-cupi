@@ -1,0 +1,35 @@
+{
+  "recorded_at_utc": "2026-09-15T00:47:44.258268+00:00",
+  "decision_owner": "root",
+  "root_adopted": true,
+  "source_successor": "018",
+  "schema": "canonical_paper_walk_ppo_amp_v3",
+  "lineage_checkpoint_sha256": "eb2847e9bce7db0b090debdbc2b0b3395679ff3e2b78f8ecf7407aaa4a8b2d1a",
+  "lineage": "Actual train006 update200; preserve all learned state through explicitly versioned migration owned by restart_registry and root.",
+  "config_additions": {
+    "rollback_kl_steps": true,
+    "kl_backtrack_halvings": 3,
+    "kl_backtrack_factor": 0.5,
+    "freeze_actor_obs_normalizer": true,
+    "zero_accepted_update_limit": 3
+  },
+  "checkpoint_counter_addition": {
+    "consecutive_zero_accepted_updates": 0
+  },
+  "proposal": "Each scheduled shared-model proposal starts at configured base LR and retries base, half, quarter, eighth. Reuse identical clipped gradients; deep-copy restore all model and Adam state plus RNG before every trial. Accept only full-actor analytic KL(old collected Gaussian || candidate) averaged over the complete fixed rollout <= target .02. Exhaustion restores last accepted state and disables remaining shared-model steps in that rollout. Restore base LR at update end.",
+  "normalizers": "Preserve loaded actor mean/variance/count exactly during collection; critic and AMP statistics continue their original schedules. Do not swap/reset the learned actor statistics.",
+  "discriminator": "Unchanged original schedule, loss, rate and state; all20 scheduled discriminator minibatches continue.",
+  "zero_accepted": "Null PPO-only mean metrics; increment persisted streak; checkpoint and learning diagnostic stop after3 consecutive zero-accepted updates. This is not a physical gate.",
+  "not_adopted": [
+    "Checkpoint100 restart or redundant baseline",
+    "Unsupported100-update escape prediction",
+    "Five-update alternate zero-streak stop",
+    "Discriminator learning-rate change",
+    "Task reward, physics, curriculum, or physical-gate changes"
+  ],
+  "implementation_sha256": "867e0859b6a66ae9226f5838fd71c553795bfce44e75832d45b2c79504c0518a",
+  "focused_test_sha256": "17a0400472a882ca9d6518ec15b9a7b038de2295da931765774bd55db6be5344",
+  "strict_migration": "No silent source/schema loader bypass; root independently reviews and freezes successor before migration/native dispatch.",
+  "physical_admission": false,
+  "stage2_complete": false
+}

@@ -1,0 +1,41 @@
+{
+  "id": "20260914T235219_canonical_restart_source_release_v2",
+  "date": "2026-09-14T23:52:19Z",
+  "title": "Bind reviewed learner safeguards and supervised cloning to a new source release",
+  "summary": "Create a separate v2 current source manifest, select it in the checker and CI, and retain the first canonical-restart manifest unchanged. The reviewed prototype now has explicit fresh-training settings for a full-rollout PPO divergence safeguard, a separate behavior-cloning optimizer and optional native-velocity supervision with BC-only estimator detachment. Strict schema, source and configuration checks preserve checkpoint provenance. CPU checks cover update stopping, discriminator and RNG continuation, gradient routing, native-state validation and default fitting parity. Record the actual Fable reviews and the separate fit003 experiment scope without asserting a completed native candidate evaluation or Stage 2 acceptance.",
+  "areas": [
+    "source identity",
+    "continuous integration",
+    "canonical prototype",
+    "learning review"
+  ],
+  "changes": [
+    "isaaclab/deploy/repository_canonical_restart_20260914_v2_pipeline.sha256",
+    "tools/check_pipeline_lineages.py",
+    ".github/workflows/tests.yml",
+    "docs/PIPELINE_LINEAGES.md",
+    "experiments/paper_walk/learner.py",
+    "experiments/paper_walk/train.py",
+    "experiments/paper_walk/tests/test_learner.py",
+    "experiments/paper_walk/tests/test_learner_stability.py",
+    "experiments/paper_walk/tests/test_train_config.py",
+    "artifacts/restart_2026-09-14/paper_ppo_stability_review_003/**",
+    "artifacts/restart_2026-09-14/paper_ppo_stability_review_003_supplement_001/**",
+    "artifacts/paper_bc_velocity_review_001/**",
+    "artifacts/paper_bc_fit_003/**"
+  ],
+  "evidence": [
+    "isaaclab/deploy/repository_canonical_restart_20260914_v2_pipeline.sha256",
+    "isaaclab/deploy/repository_canonical_restart_20260914_pipeline.sha256",
+    "experiments/paper_walk/tests/test_learner_stability.py",
+    "experiments/paper_walk/tests/test_train_config.py",
+    "artifacts/restart_2026-09-14/paper_ppo_stability_review_003/DECISION_001.json",
+    "artifacts/restart_2026-09-14/paper_ppo_stability_review_003/SHA256.json",
+    "artifacts/restart_2026-09-14/paper_ppo_stability_review_003_supplement_001/RECEIPT.json",
+    "artifacts/paper_bc_velocity_review_001/RECOMMENDATION.md",
+    "artifacts/paper_bc_fit_003/PREPARE.json"
+  ],
+  "next": "Verify the versioned source release and separately assess the new fitting and native policy evidence under the unchanged Stage 2 requirements.",
+  "no_project_impact": true,
+  "reason": "This record binds reviewed prototype source and CPU validation. The new learning settings and reserved fit003 coverage do not provide native policy acceptance, change a qualification gate or advance a project capability. Historical manifests, checkpoints and measured results remain immutable."
+}

@@ -1,0 +1,63 @@
+{
+  "schema": "independent_batch128_remote_cpu_dispatch_v1",
+  "executor": "Root only; preparer performs no Spark operations",
+  "remote_execution_root": "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001",
+  "remote_result": "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/diagnostic_batch128_001",
+  "remote_source": "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/source_016",
+  "proposed_cpu_runtime": "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/audit_cpu_venv/bin/python",
+  "runtime_requirements": "Python3.12 plus NumPy only. Local verification used NumPy2.5.2. No torch/warp/Isaac imports.",
+  "proposed_new_venv_if_required": [
+    "python3.12",
+    "-m",
+    "venv",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/audit_cpu_venv"
+  ],
+  "proposed_numpy_install_if_required": [
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/audit_cpu_venv/bin/python",
+    "-m",
+    "pip",
+    "install",
+    "numpy==2.5.2"
+  ],
+  "runtime_self_test": [
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/audit_cpu_venv/bin/python",
+    "-B",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/verification_batch128_001/audit.py",
+    "--self-test"
+  ],
+  "audit_argv": [
+    "env",
+    "OPENBLAS_NUM_THREADS=1",
+    "MKL_NUM_THREADS=1",
+    "OMP_NUM_THREADS=1",
+    "NUMEXPR_NUM_THREADS=1",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "nice",
+    "-n",
+    "10",
+    "ionice",
+    "-c",
+    "2",
+    "-n",
+    "7",
+    "timeout",
+    "--signal=INT",
+    "--kill-after=60s",
+    "1800",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/audit_cpu_venv/bin/python",
+    "-B",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/verification_batch128_001/audit.py",
+    "--remote-layout",
+    "--result",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/diagnostic_batch128_001"
+  ],
+  "output": "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/verification_batch128_001/audit.json",
+  "preserve_log": "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/verification_batch128_001/audit.log",
+  "raw_paths_are_read_only": true,
+  "gpu_or_container_operations": false,
+  "maximum_seconds": 1800,
+  "memory_scope": "Frozen scorer then additional checks each load only one800-substep NPZ chunk. Contacts stream one JSON line per step. Hashing streams8MiB blocks; it reads the whole11.5GB result twice for unchanged-input verification.",
+  "contention": "One-thread BLAS and lowCPU/IO priority. Prefer execution after native011cleanup. During another native allocation this CPU/IOrun may slow wall-clock capture but does not call physics or GPU APIs.",
+  "required_success": "audit.json all_checks_passed=true plus root lifecycle/resource review. No admission is created by this tool.",
+  "native128_audit_performed": false
+}

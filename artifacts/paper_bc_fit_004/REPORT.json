@@ -1,0 +1,117 @@
+{
+  "schema": "canonical_fresh_bc_batch128_identity_v1",
+  "completed": true,
+  "scope": "Fresh CPU fit, future rollout batch128 metadata only; no simulation, native admission or walking qualification",
+  "config": {
+    "num_envs": 128,
+    "rollout_steps": 24,
+    "epochs": 5,
+    "minibatches": 4,
+    "learning_rate": 0.0001,
+    "discriminator_learning_rate": 0.0003,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip": 0.2,
+    "entropy_coefficient": 0.01,
+    "value_coefficient": 1.0,
+    "estimator_coefficient": 1.0,
+    "style_coefficient": 1.0,
+    "gradient_penalty": 10.0,
+    "max_grad_norm": 1.0,
+    "initial_std": 0.1,
+    "target_kl": 0.02,
+    "bc_optimizer": "separate",
+    "bc_learning_rate": 0.0003,
+    "bc_velocity_coefficient": 1.0,
+    "bc_detach_velocity": true,
+    "seed": 20260914,
+    "actor_hidden": [
+      256,
+      128,
+      64
+    ],
+    "memory_hidden": [
+      512,
+      256,
+      128
+    ],
+    "estimator_hidden": [
+      64,
+      32
+    ],
+    "critic_hidden": [
+      512,
+      256,
+      128
+    ],
+    "discriminator_hidden": [
+      1024,
+      512
+    ]
+  },
+  "config_diff_from_fit003": {
+    "num_envs": {
+      "before": 32,
+      "after": 128
+    }
+  },
+  "fit_seconds": 4.144871292010066,
+  "torch_threads": 2,
+  "device": "cpu",
+  "env": null,
+  "initial_checkpoint": {
+    "path": "/Users/andreboufama/Documents/hex/hexapod-cupi/artifacts/paper_bc_fit_004/initial_fresh_checkpoint.pt",
+    "sha256": "63b75a4d917640df52b3f9e71e37e31d041057ec0ffe0d2bf1a98fd3ca09c581",
+    "update": 0,
+    "strict_serialization_readback": true,
+    "strict_model_optimizer_restore": true,
+    "deterministic_action_exact": true,
+    "rng_preserved": true,
+    "simulation_resume_supported": false
+  },
+  "checkpoint": {
+    "path": "/Users/andreboufama/Documents/hex/hexapod-cupi/artifacts/paper_bc_fit_004/candidate_checkpoint_update000000.pt",
+    "sha256": "6b169d9a406b8a0d6208a3282f59111529b375461b2e86bc391dfb9fe0a2c8f9",
+    "update": 0,
+    "strict_serialization_readback": true,
+    "strict_model_optimizer_restore": true,
+    "deterministic_action_exact": true,
+    "rng_preserved": true,
+    "simulation_resume_supported": false
+  },
+  "learner_sha256": "b0a3cf503a0c710239d0245ef24fb961d0d05f06feaf37fffee7b2c802caf77a",
+  "bc_dataset_sha256": "f016af1acd6278f37ce3c3c35343554fc59fc258ee9dd39913be4a185a70606a",
+  "amp_prior_sha256": "22f7b04b0c7540f7a27cbe4d13e23c09dbd3a2363ee0792f292e6293b16b9515",
+  "reference_candidate_sha256": "a48fddf1f73fcaf5b93db44241390184dd36c60e031daaad87d3a63bfd2bd81a",
+  "reference_initial_sha256": "6caba95dd31dd739b2ad2896b579721f3a9bb6fea1aa44b73900a77cdbfee908",
+  "initial_model_amp_rng_exact_against_fit003": true,
+  "fitted_model_amp_rng_exact_against_fit003": true,
+  "initial_rng_tree_sha256": "20a6efbd2454e20a12b6964f6f2b1521ee70bc57c5adc2b9b4910feb0df3974e",
+  "fitted_rng_tree_sha256": "297e50ed4f4733878495bf183c80ac2860c6100ad00775c1d2b8c5a7cbd58761",
+  "independent_strict_reload_model_amp_optimizers_rng_exact": true,
+  "independent_strict_reload_full_bc_observation_actor_exact": true,
+  "strict_save_preserves_rng": true,
+  "counters": {
+    "updates": 0,
+    "transitions": 0,
+    "optimizer_steps": 0,
+    "discriminator_steps": 0,
+    "episodes": 0,
+    "bc_steps": 1000
+  },
+  "optimizer_provenance": "Fresh dedicated BC Adam3e-4 ran1000 steps and was discarded; PPO Adam1e-4 and discriminator Adam are empty.",
+  "normalizer_counts": {
+    "actor": 3760.0001,
+    "critic": 0.0001,
+    "amp": 0.0001
+  },
+  "diagnostic_reuse_scope": "Fit003 recorded-input action and estimator diagnostics apply exactly because full fitted model/normalizers and AMP are identical; no new native behavior or independent evaluation is claimed.",
+  "fit003_report_sha256": "c8ef4e347121c02dbb564ddb1f5276e5c1e9af28465f6319d1a88f4945d64015",
+  "existing_checkpoint_rewritten": false,
+  "checkpoint_metadata_rewritten": false,
+  "no_native_actions": true,
+  "native128_admission_established_here": false,
+  "simulation_resume_supported": false,
+  "stage2_complete": false,
+  "physical_admission": false
+}

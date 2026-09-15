@@ -139,6 +139,31 @@ class PipelineLineageTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "historical manifest cannot"):
                     lineage.generate_current(root, root / lineage.ARCHIVED_MANIFEST)
 
+    def test_current_covers_top_level_prototype_and_cpu_tests_without_nested_outputs(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            covered = ("experiments/paper_walk/env.py", "experiments/paper_walk/tests/test_env.py")
+            excluded = ("experiments/paper_walk/results/copied_env.py",
+                        "experiments/paper_walk/tests/fixtures/copied_env.py")
+            for relative in covered+excluded:
+                path = root/relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("# Source-coverage fixture\n")
+            with patch.object(lineage, "read_archived_manifest", return_value=(b"fixture", {})), \
+                 patch.object(lineage, "identity", return_value={"files": {}}), \
+                 patch.object(lineage, "CURRENT_EXTRA_PATHS", ()):
+                records, _ = lineage.current_records(root)
+                self.assertEqual(set(records), set(covered))
+                content = lineage.CURRENT_HEADER.encode()+encode(records)
+                (root/covered[0]).write_text("# Changed maintained controller fixture\n")
+                changed, _ = lineage.current_records(root)
+                with self.assertRaisesRegex(ValueError, "hashes differ"):
+                    lineage.compare_current_manifest(content, changed)
+                (root/covered[1]).unlink()
+                (root/covered[1]).symlink_to(root/covered[0])
+                with self.assertRaisesRegex(ValueError, "regular file"):
+                    lineage.current_records(root)
+
     def test_generation_cannot_bypass_failed_history(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory) / "new.sha256"

@@ -1,0 +1,20 @@
+--- standing001/standing_math.py
++++ standing002/standing_math.py
+@@ -48,14 +48,15 @@
+    if k in used:raise ValueError('Overlapping contact-buffer ranges')
+    used.add(k);f=float(force[k,0]);p=point[k];n=normal[k];d=float(sep[k,0])
+    if not np.isfinite(np.r_[f,p,n,d]).all():raise ValueError('Nonfinite used contact patch')
+-   if abs(np.linalg.norm(n)-1)>1e-3:raise ValueError('Invalid patch normal')
++   inactive_zero_normal=bool(f==0. and np.all(n==0.) and d==0.)
++   if abs(np.linalg.norm(n)-1)>1e-3 and not inactive_zero_normal:raise ValueError('Invalid patch normal')
+    local=None
+    if body.endswith('_tibia'):
+     cap,local=geometry.cap(body,p,poses[e,geometry.names.index(body)]);category='toe'if cap else'shaft'
+    else:category='coxa'if body.endswith('_coxa')else'femur'if body.endswith('_femur')else'body'
+    if category=='toe':feet[e,LEGS.index(body[:2])]+=f*n
+    else:other[e,['body','coxa','femur','shaft'].index(category)]+=f*n
+-   patches.append({'buffer_index':k,'env':e,'body':body,'category':category,'normal_force_n':f,'point_world_m':p.tolist(),'normal_world':n.tolist(),'separation_m':d,'shape_point_m':None if local is None else local.tolist()})
++   patches.append({'buffer_index':k,'env':e,'body':body,'category':category,'normal_force_n':f,'point_world_m':p.tolist(),'normal_world':n.tolist(),'separation_m':d,'inactive_zero_normal':inactive_zero_normal,'shape_point_m':None if local is None else local.tolist()})
+  if len(used)>=len(force):raise ValueError('Contact capacity exhausted; completeness is unknown')
+  # Any nonfoot patch with >1N is retained even when vector cancellation would hide it.
+  nonfoot=np.zeros(num_envs,dtype=bool)

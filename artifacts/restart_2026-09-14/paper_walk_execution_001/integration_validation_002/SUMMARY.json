@@ -1,0 +1,51 @@
+{
+  "schema": "canonical_integration_validation_v1",
+  "completed_at_utc": "2026-09-15T00:03:02.380980+00:00",
+  "request": "REQUEST.json",
+  "commands": "COMMANDS.json",
+  "all_commands_passed": true,
+  "exit_codes": {
+    "01_uv_sync": 0,
+    "02_isaaclab": 0,
+    "03_robot": 0,
+    "04_inventory": 0,
+    "05_historical": 0,
+    "06_current": 0,
+    "07_status": 0,
+    "08_site_check": 0,
+    "09_site_build": 0
+  },
+  "test_suites": {
+    "02_isaaclab": {
+      "tests": 981,
+      "reported_test_seconds": 76.112,
+      "final_verdict": "OK"
+    },
+    "03_robot": {
+      "tests": 116,
+      "reported_test_seconds": 5.707,
+      "final_verdict": "OK"
+    }
+  },
+  "prototype_suite": "Not rerun here; root independently reported148 passing tests before this bounded task",
+  "source_sha256_after": {
+    "experiments/paper_walk/learner.py": "b0a3cf503a0c710239d0245ef24fb961d0d05f06feaf37fffee7b2c802caf77a",
+    "experiments/paper_walk/train.py": "d0e1c3352aa4b0a0d229e362b2b5167f3ac93ee5d4ebd1e595e55d18a6d4aa2c",
+    "isaaclab/deploy/repository_canonical_restart_20260914_v2_pipeline.sha256": "a4790caed3f732cd6cb289ac8586cb33727aad6a0ec71124632d39946f276914",
+    "robot/active_model.json": "d11edd466902e2122d6cec7cd1b0c4399b566a6ed1598d6bfe911317197353e4",
+    "pyproject.toml": "b627b774ec0b6a0de258860d27d6ffdd3c3546a5edf28d3ec7ac08d67e96cb6f",
+    "uv.lock": "7d4866bb8cc3411ae9fadbcf1a9e67f0a59ac32d15f3ff3092440ed853534589"
+  },
+  "requested_source_hashes_unchanged": true,
+  "head_after": "e9d5e775b3de76e9836c0139b557e2fcc4af047f",
+  "historical_lineage_files": 112,
+  "current_lineage_files": 547,
+  "inventory_tools": 87,
+  "site_check_base": "e9d5e775b3de76e9836c0139b557e2fcc4af047f",
+  "site_checks_scope": "The exact registry and artifact coverage present at00:01:17UTC; later concurrent evidence additions require the lead final integration check",
+  "stdout_stderr_preserved_exactly": true,
+  "expected_negative_test_output": "Isaaclab stderr contains an argparse rejection exercised by a negative test; final981-test verdict and process exit are successful",
+  "native_actions": false,
+  "committed_or_pushed": false,
+  "stage2_complete": false
+}

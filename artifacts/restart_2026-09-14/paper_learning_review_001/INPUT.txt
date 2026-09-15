@@ -1,0 +1,1095 @@
+You are the required Claude Code Fable 5.1 maximum-effort architecture reviewer. Tools are disabled. Give a substantive readable engineering review directly in your response, not tool-call markup, commands to execute, a plan-file placeholder or a request for additional access. Do not use or invent tools. Do not claim you read anything beyond the complete text supplied below. We will save your response as a review artifact and independently decide changes. No repository editing or native action is authorized for this consultation.
+
+Concrete task: recommend the smallest evidence-driven NEXT learning adjustment only if the current first PPO pilot is inadequate. The current run continues UNCHANGED to its bounded end. Preserve existing Stage 2 numerical/visual acceptance, the selected physical model and PPO/AMP architecture. Do not lower qualification gates, relabel historical weights, force poses, change robot geometry/masses/limits/PD/slew, replace actual policy video with prior animation, or declare walking from unsigned speed. The user goal is the same full Stage 2 milestone on the confirmed mass-corrected URDF, including actual PPO and actual Isaac Sim policy video.
+
+Known scope and actual observations (root-reported telemetry; an interim sample, not a completed evaluation):
+- First real PPO run is on Spark source004, exact source freeze SHA c5ed82792ce28dedcbea0863f1e0d6e809f04b180991fbde26aa1a9b6df3a048, 32 environments, 200-update allocation, behavior cloning OFF. PPO24-step rollouts, 5epochs, 4minibatches, lr3e-4, gamma.99, lambda.95, entropy.01, value coefficient1, combined model gradient clip1. Exact source for task and learner is appended and matches the current maintained files byte-for-byte at review capture.
+- At update37: mean combined reward -14.33, task reward -14.40, style reward .068, action std .4096, value_loss54651; achieved unsigned speed .0676 m/s, signed commanded-direction projected speed -.002 m/s, commanded speed .0246 m/s, requested motor saturation fraction .0295. No falls recorded in this sample. Do not infer directional success from unsigned movement.
+- The task includes -0.05 * quiet * mean((joint_velocity / .03)^2) and a .15 zero-command draw fraction, with 2-5 second command holds. This is an unbounded quadratic cost at an acceptance-scale velocity, possibly large during exploration. The time fraction and per-command reward-component decomposition have not yet been provided, so characterize this as a hypothesis rather than attributing all negative reward to it.
+- One known METRIC-ONLY bug: MotionPrior.loss returns a dictionary with policy_loss=fake discriminator loss, and update constructs {... policy_loss: actual PPO loss, **d_metrics}; the logged policy_loss is overwritten. The optimization variables and backward objective are intact. Also actor_grad_norm is actually the preclip norm over ALL ActorCritic parameters including the separate critic. Review how this affects the strength of any gradient-dominance diagnosis.
+- New walking neutral [0,-.30,.40] per leg passed all original one-robot and32-robot native standing gates. Same exact URDF9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78, 7.466kg,19bodies18joints; 400Hz explicitPD/50Hzpolicy,1.6Nm speed-dependent ceiling,0.040rad/20ms target slew remain fixed.
+- Prior architecture review required realizing analytic tripod targets through actual nativePD to avoid an analytic-vs-realized AMP domain shortcut. Native replay has now supplied model-matched realized transitions for this run. Optional BC implementation consumes actual replay observations[M,231] and normalized joint-target actions[M,18]. BC is currently disabled. Do not assume BC guarantees closed-loop behavior, feasibility at larger commands, or quiet stops.
+- Stage2 includes complete signed movement/yaw/combined commands, uninterrupted transitions, quiet stand and stop checks, torque/contact/smoothness screens and human visual comparison. The training curriculum is initially slower than the full qualification envelope; reward progress never replaces those gates.
+
+Root hypothesis: the quiet quadratic and resulting value learning might dominate the update. Candidate successor ideas are bounded or log1p quiet penalty and/or a separately recorded BC warm start if first200 updates fail. Please challenge these assumptions and choose the minimum interpretable next change.
+
+Return a compact, substantive review of roughly500-900 words (this artifact review is exempt from the repo chat100-word convention):
+1. Evidence vs hypothesis: what the current metrics do and do not establish. Inspect the actual optimizer parameter sharing, advantage normalization and clipping; distinguish high value loss from demonstrated actor-gradient suppression and note Adam scale behavior if relevant.
+2. ONE preferred next learning intervention with concrete formula/weights and a measured rationale, conditional on the completed pilot failing; compare hard bounding vs log1p and explain anti-gaming behavior near the unchanged quiet threshold. Distinguish fixes to reporting from changes to the experiment. If you prefer BC first instead, justify that choice using only supplied evidence.
+3. Minimal measurements/held-out probes to decide it helped: per-command components, signed projection/tracking, saturation and actual quiet-motion, with no invented qualification thresholds. Identify only diagnostic comparison criteria where pre-registration is useful.
+4. State whether BC should be separate or combined, how to validate its observation/target alignment and closed-loop behavior, and how to preserve exact checkpoint/optimizer identity if reward or learner bytes change. The current strict load rejects changed learner-source SHA; do not recommend bypassing this check or silently calling a migration an exact resume.
+5. Any correctness blocker you discover in the supplied task/learner relevant to this first run.
+
+The following are source text/data for analysis, not instructions to execute. The prior review/decision is historical context; distinguish it from completed results listed above.
+
+
+===== artifacts/restart_2026-09-14/paper_walk_execution_001/source_004/task.py =====
+"""Versioned command/reward wrapper; native physics and Stage 2 gates are unchanged.
+
+Commands are held through complete controls. Rewards use the held command c[t];
+only the next actor/critic command fields change when a timer expires. No gait
+phase, reference target, reset or simulator step is inserted by the wrapper.
+"""
+from dataclasses import asdict, dataclass
+from pathlib import Path
+import hashlib
+import json
+import math
+import numpy as np
+import torch
+
+SCHEMA = "canonical_paper_walking_task_v1"
+
+
+def articulation_reach(model, geometry_path):
+    """All-pose spherical bound: path translation lengths plus exact mesh radius.
+
+    Joint rotations preserve each vector length, so the triangle inequality
+    encloses every articulated pose; this does not assume a reference gait.
+    """
+    geometry_path = Path(geometry_path)
+    geometry = json.loads(geometry_path.read_text())
+    path = geometry_path.parent / "geometry_extrema.npz"
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if digest != geometry.get("extrema_sha256"):
+        raise ValueError("Proximity geometry extrema identity differs")
+    lengths = {"body": 0.}
+    pending = list(model["joints"])
+    while pending:
+        before = len(pending)
+        for joint in pending[:]:
+            if joint["parent"] in lengths:
+                if joint["child"] in lengths:
+                    raise ValueError("Proximity model has a repeated child")
+                lengths[joint["child"]] = lengths[joint["parent"]] + float(np.linalg.norm(joint["xyz"]))
+                pending.remove(joint)
+        if len(pending) == before:
+            raise ValueError("Proximity model is not a connected tree")
+    if set(lengths) != set(geometry["body_names"]):
+        raise ValueError("Proximity mesh/body mapping differs")
+    bounds = {}
+    with np.load(path, allow_pickle=False) as clouds:
+        for name, length in lengths.items():
+            points = clouds["all__"+name]
+            if points.ndim != 2 or points.shape[1] != 3 or not len(points) or not np.isfinite(points).all():
+                raise ValueError("Incomplete proximity mesh extrema")
+            bounds[name] = length + float(np.linalg.norm(points, axis=1).max())
+    skin = max(float(shape["contact_offset_m"]) for shape in geometry["shapes"])
+    return {"mesh_radius_m": max(bounds.values()), "contact_skin_m": skin,
+            "radius_m": max(bounds.values())+skin, "body_radius_bounds_m": bounds,
+            "geometry_extrema_sha256": digest}
+
+
+class ProximityGuard:
+    """Abort on conservative world-root sphere proximity; no simulation writes."""
+    buffer_m = .20
+
+    def __init__(self, env, output_dir):
+        self.env, self.output_dir = env, output_dir
+        self.geometry = articulation_reach(env.model, env.geometry_path)
+        self.radius = self.geometry["radius_m"]
+        self.minimum_gap = None
+        self.checks = 0
+        self.failure = None
+        self.check(env.current["root"][:, :3], "initial")
+
+    def declaration(self):
+        return {**self.geometry, "buffer_m": self.buffer_m, "collision_filter_present": False,
+            "scope": "Conservative all-pose spheres before/after each control and prospective reset; measured linear root sweep is also checked. This abort guard is not collision filtering, continuous collision detection, or proof of replica independence.",
+            "failure_action": "Save failure and abort entire training attempt; never reset to hide proximity."}
+
+    def check(self, positions, phase, *, previous=None, speeds=None):
+        if self.failure is not None:
+            raise RuntimeError("Inter-replica proximity attempt already failed")
+        if positions.shape != (self.env.num_envs, 3) or not bool(torch.isfinite(positions).all()):
+            raise ValueError("Invalid native roots for proximity guard")
+        self.checks += 1
+        if self.env.num_envs < 2:
+            return
+        relative = positions[:, None]-positions[None, :]
+        if previous is not None:
+            start = previous[:, None]-previous[None, :]
+            delta = relative-start
+            fraction = (-torch.sum(start*delta, -1)/torch.sum(delta*delta, -1).clamp_min(1e-20)).clamp(0, 1)
+            relative = start+fraction[..., None]*delta
+        gap = torch.linalg.vector_norm(relative, dim=-1)-2*self.radius
+        gap.fill_diagonal_(torch.inf)
+        threshold = torch.full_like(gap, self.buffer_m)
+        if speeds is not None:
+            if speeds.shape != (self.env.num_envs,) or not bool(torch.isfinite(speeds).all()):
+                raise ValueError("Invalid measured speeds for proximity lookahead")
+            threshold += (speeds[:, None]+speeds[None, :])*self.env.cfg.control_dt
+        minimum = float(gap.min())
+        self.minimum_gap = minimum if self.minimum_gap is None else min(self.minimum_gap, minimum)
+        violation = gap <= threshold
+        if bool(violation.any()):
+            pair = violation.nonzero(as_tuple=False)[0]
+            i, j = (int(x) for x in pair)
+            self.failure = {"phase": phase, "pair": [i, j], "sphere_gap_m": float(gap[i, j]),
+                "required_gap_m": float(threshold[i, j]), "root_positions_world_m": positions.detach().cpu().tolist(),
+                "previous_root_positions_world_m": None if previous is None else previous.detach().cpu().tolist(),
+                "controls_completed": getattr(self.env, "total_controls", None),
+                "physics_steps": self.env.sim.get_physics_step_count() if hasattr(self.env, "sim") else None,
+                "declaration": self.declaration(), "contaminated_control_returned_to_learner": False,
+                "stage2_complete": False}
+            if self.output_dir is not None:
+                self.output_dir.mkdir(parents=True, exist_ok=True)
+                (self.output_dir/"proximity_failure.json").write_text(json.dumps(self.failure, indent=2, allow_nan=False)+"\n")
+            raise RuntimeError("Inter-replica proximity guard rejected pair " + str([i, j]) + " during " + phase)
+
+    def status(self):
+        return {"checks": self.checks, "minimum_sphere_gap_m": self.minimum_gap,
+                "failure": self.failure, "collision_filter_present": False}
+
+
+@dataclass(frozen=True)
+class TaskConfig:
+    seed: int = 20260914
+    hold_min_seconds: float = 2.
+    hold_max_seconds: float = 5.
+    zero_command_fraction: float = .15
+    speed_levels_mps: tuple = (.025, .05)
+    maximum_speed_mps: float = .05
+    yaw_rate_rad_s: float = .2
+    arc_speed_mps: float = .04
+    arc_yaw_rate_rad_s: float = .15
+    linear_error_variance: float = .0009
+    yaw_error_variance: float = .04
+    linear_tracking_weight: float = 1.
+    yaw_tracking_weight: float = .3
+    quiet_joint_rate_scale_rad_s: float = .03
+    quiet_joint_rate_weight: float = .05
+    quiet_target_step_scale_rad: float = .002
+    quiet_target_step_weight: float = .02
+    tilt_weight: float = .5
+    angular_xy_weight: float = .01
+    vertical_velocity_weight: float = .05
+    height_weight: float = 5.
+    normalized_effort_weight: float = .01
+    target_movement_weight: float = .005
+    nonfoot_event_weight: float = 1.
+    nonfoot_force_weight: float = .02
+    terminal_penalty: float = 2.
+
+    def validate(self):
+        if self.hold_min_seconds != 2. or self.hold_max_seconds != 5.:
+            raise ValueError("Version1 command holds are fixed at 2 to 5 seconds")
+        if self.zero_command_fraction != .15:
+            raise ValueError("Version1 reserves 15 percent of command draws for zero")
+        if type(self.seed) is not int or self.seed < 0:
+            raise ValueError("Nonnegative integer seed required")
+        if tuple(self.speed_levels_mps) != (.025, .05):
+            raise ValueError("Version1 declares .025/.05 m/s curriculum levels")
+        if self.maximum_speed_mps not in self.speed_levels_mps:
+            raise ValueError("Choose one declared curriculum maximum explicitly")
+        for key, value in asdict(self).items():
+            if isinstance(value, float) and (not math.isfinite(value) or value <= 0):
+                raise ValueError("Positive finite task coefficient required: " + key)
+
+
+def command_bank(config):
+    """Nonzero navigation-frame commands; zero has a separate reserved quota."""
+    config.validate()
+    result = []
+    for speed in config.speed_levels_mps:
+        if speed <= config.maximum_speed_mps:
+            for bearing in range(8):
+                angle = bearing * math.pi / 4
+                result.append([speed * math.cos(angle), speed * math.sin(angle), 0.])
+    result.extend([[0., 0., -config.yaw_rate_rad_s], [0., 0., config.yaw_rate_rad_s]])
+    if config.arc_speed_mps <= config.maximum_speed_mps:
+        result.extend([[config.arc_speed_mps, 0., -config.arc_yaw_rate_rad_s],
+                       [config.arc_speed_mps, 0., config.arc_yaw_rate_rad_s]])
+    return result
+
+
+def measured_reward(telemetry, commands, previous_target, terminated, config, nominal_height):
+    """Actual measured endpoint states and all-eight-substep motor summaries only."""
+    n, device = commands.shape[0], commands.device
+    def field(name, shape):
+        value = telemetry[name]
+        if not torch.is_tensor(value) or tuple(value.shape) != (n, *shape) or not bool(torch.isfinite(value).all()):
+            raise ValueError("Missing/nonfinite task telemetry: " + name)
+        return value.to(device)
+    velocity = field("linear_velocity_nav", (3,))
+    gyro = field("angular_velocity_body", (3,))
+    pose = field("root_pose_xyzw", (7,))
+    rate = field("joint_velocity_rad_s", (18,))
+    target = field("joint_target_rad", (18,))
+    torque_square = field("torque_square_sum_400hz", (18,))
+    other_force = field("other_body_force_max_400hz", ())
+    held = field("command", (3,))
+    if not torch.equal(held, commands):
+        raise ValueError("Reward command differs from the native completed hold")
+    quiet = (commands == 0).all(-1)
+    target_delta = target - previous_target
+    quaternion = pose[:, 3:] / torch.linalg.vector_norm(pose[:, 3:], dim=-1, keepdim=True)
+    x, y, z, w = quaternion.unbind(-1)
+    gravity_xy_square = 4 * ((x*z-w*y).square() + (y*z+w*x).square())
+    components = {
+        "linear_tracking": config.linear_tracking_weight * torch.exp(-(velocity[:, :2]-commands[:, :2]).square().sum(-1)/config.linear_error_variance),
+        "yaw_tracking": config.yaw_tracking_weight * torch.exp(-(gyro[:, 2]-commands[:, 2]).square()/config.yaw_error_variance),
+        "quiet_joint_rate": -config.quiet_joint_rate_weight * quiet * (rate/config.quiet_joint_rate_scale_rad_s).square().mean(-1),
+        "quiet_target_motion": -config.quiet_target_step_weight * quiet * (target_delta/config.quiet_target_step_scale_rad).square().mean(-1),
+        "tilt": -config.tilt_weight * gravity_xy_square,
+        "roll_pitch_rate": -config.angular_xy_weight * gyro[:, :2].square().mean(-1),
+        "vertical_velocity": -config.vertical_velocity_weight * velocity[:, 2].square(),
+        "height": -config.height_weight * (pose[:, 2]-nominal_height).square(),
+        "effort": -config.normalized_effort_weight * torque_square.mean(-1)/(8*1.6**2),
+        "target_motion": -config.target_movement_weight * (target_delta/.04).square().mean(-1),
+        "nonfoot_contact": -config.nonfoot_event_weight * (other_force > 1.) - config.nonfoot_force_weight * other_force.clamp_min(0),
+        "termination": -config.terminal_penalty * terminated.to(torch.float32),
+    }
+    reward = sum(components.values())
+    if not bool(torch.isfinite(reward).all()):
+        raise FloatingPointError("Nonfinite measured task reward")
+    return reward, components
+
+
+class TrainingTask:
+    def __init__(self, env, config=None, output_dir=None):
+        self.env = env
+        self.config = TaskConfig() if config is None else config
+        self.config.validate()
+        if env.cfg.control_dt != .02 or env.cfg.decimation != 8:
+            raise ValueError("Task requires the unchanged 50/400Hz environment")
+        self.bank = torch.tensor(command_bank(self.config), dtype=torch.float32, device=env.device)
+        self.rng = torch.Generator(device="cpu").manual_seed(self.config.seed)
+        self.remaining_controls = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
+        self.previous_target = env.held.detach().clone()
+        self.command_draws = 0
+        self.zero_command_draws = 0
+        self.controls_completed = 0
+        self.last_components = {}
+        self.last_held_command = None
+        self.output_dir = None if output_dir is None else Path(output_dir)
+        self.proximity = ProximityGuard(env, self.output_dir)
+        self.metric_totals, self.metric_interval = {}, {}
+        self.metric_rows = self.metric_interval_rows = 0
+        self.nominal_height = float(env.reference_metadata.get("root_height_m", env.reset_height))
+        if self.output_dir is not None:
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+            path = self.output_dir / "task_definition.json"
+            content = json.dumps(self.declaration(), indent=2, allow_nan=False) + "\n"
+            if path.exists() and path.read_text() != content:
+                raise ValueError("Existing task definition differs")
+            path.write_text(content)
+
+    def __getattr__(self, name):
+        return getattr(self.env, name)
+
+    def declaration(self):
+        return {"schema": SCHEMA, "config": asdict(self.config), "nonzero_command_bank": self.bank.cpu().tolist(),
+            "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            "command_frame": "navigation forward=-nativeY,left=nativeX,yaw=+Z",
+            "zero_sampling": "Balanced cumulative quota ceil(0.15*draws), shuffled within each draw batch; at least15% of draws, not a guarantee of time occupancy.",
+            "hold_controls_inclusive": [100, 250], "command_columns": [210, 213],
+            "reward_attribution": "Reward uses held c[t]; post-control command fields expose c[t+1].",
+            "nominal_plate_height_m": self.nominal_height,
+            "maximum_speed_curriculum": "Explicit configuration; no automatic advance or qualification claim.",
+            "nonfoot_scope": "Native body/coxa/femur floor forces; tibia shaft/toe separation is unavailable in compact training telemetry.",
+            "proximity_guard": self.proximity.declaration(),
+            "physics_changed": False, "stage2_gates_changed": False, "stage2_complete": False}
+
+    def _indices(self, indices):
+        result = torch.arange(self.env.num_envs, device=self.env.device) if indices is None else torch.as_tensor(indices, dtype=torch.long, device=self.env.device)
+        if result.ndim != 1 or bool((result < 0).any()) or bool((result >= self.env.num_envs).any()) or len(result.unique()) != len(result):
+            raise ValueError("Invalid command/reset row indices")
+        return result
+
+    def _resample(self, indices):
+        if not len(indices):
+            return
+        size = len(indices)
+        bank_indices = torch.randint(len(self.bank), (size,), generator=self.rng)
+        values = self.bank[bank_indices.to(self.env.device)].clone()
+        # An integer quota avoids a finite pilot accidentally seeing no stops.
+        before = math.ceil(self.config.zero_command_fraction*self.command_draws)
+        after = math.ceil(self.config.zero_command_fraction*(self.command_draws+size))
+        zero_count = after-before
+        selected_zero = torch.randperm(size, generator=self.rng)[:zero_count].to(self.env.device)
+        values[selected_zero] = 0
+        durations = torch.randint(100, 251, (size,), generator=self.rng, dtype=torch.long).to(self.env.device)
+        self.env.commands[indices] = values
+        self.remaining_controls[indices] = durations
+        self.command_draws += size
+        self.zero_command_draws += zero_count
+
+    def _next_command_observation(self, output):
+        obs, critic = output["obs"].clone(), output["critic"].clone()
+        if obs.shape != (self.env.num_envs, 231) or critic.shape != (self.env.num_envs, 234):
+            raise ValueError("Task actor/critic ABI differs")
+        if not torch.equal(critic[:, :231], obs):
+            raise ValueError("Task received inconsistent actor/critic prefix")
+        obs[:, 210:213] = self.env.commands
+        critic[:, :231] = obs
+        return {**output, "obs": obs, "critic": critic}
+
+    def reset(self, indices=None):
+        selected = self._indices(indices)
+        self.proximity.check(self.env.current["root"][:, :3], "before_reset")
+        prospective = self.env.current["root"][:, :3].clone()
+        prospective[selected] = self.env.origins[selected]
+        prospective[selected, 2] = self.env.reset_height
+        self.proximity.check(prospective, "prospective_reset")
+        output = self.env.reset(selected)
+        self.proximity.check(self.env.current["root"][:, :3], "after_reset")
+        self._resample(selected)
+        self.previous_target[selected] = self.env.held[selected]
+        return self._next_command_observation(output)
+
+    def step(self, action):
+        if bool((self.remaining_controls <= 0).any()):
+            raise RuntimeError("Call task.reset before collecting a rollout")
+        roots_before = self.env.current["root"][:, :3].clone()
+        self.proximity.check(roots_before, "before_control",
+            speeds=torch.linalg.vector_norm(self.env.current["linear"], dim=-1))
+        command = self.env.commands.detach().clone()
+        output = self.env.step(action)
+        self.proximity.check(self.env.current["root"][:, :3], "after_control", previous=roots_before)
+        reward, components = measured_reward(self.env.telemetry, command, self.previous_target,
+                                             output["terminated"], self.config, self.nominal_height)
+        self.previous_target = self.env.telemetry["joint_target_rad"].detach().clone()
+        self.last_held_command = command
+        self.last_components = {key: value.detach().clone() for key, value in components.items()}
+        self.remaining_controls -= 1
+        done = output["terminated"] | output["truncated"]
+        # Terminal observations remain attributed to their final command. The
+        # learner supplies an explicit selected reset before collecting again.
+        expired = ((self.remaining_controls == 0) & ~done).nonzero(as_tuple=False).squeeze(-1)
+        self._resample(expired)
+        self.controls_completed += 1
+        self._metrics(command, output)
+        result = self._next_command_observation(output)
+        result["reward"] = reward
+        return result
+
+    def _metrics(self, command, output):
+        t = self.env.telemetry
+        actual = t["linear_velocity_nav"][:, :2]
+        error = actual-command[:, :2]
+        yaw_error = t["angular_velocity_body"][:, 2]-command[:, 2]
+        requested_speed = torch.linalg.vector_norm(command[:, :2], dim=-1)
+        moving = requested_speed > 1e-8
+        projection = (actual*command[:, :2]).sum(-1)/requested_speed.clamp_min(1e-8)
+        values = {"signed_navigation_velocity_error_mps": error.sum(0),
+            "absolute_navigation_velocity_error_mps": error.abs().sum(0),
+            "achieved_planar_speed_mps": torch.linalg.vector_norm(actual, dim=-1).sum(),
+            "requested_planar_speed_mps": requested_speed.sum(),
+            "signed_command_direction_speed_mps": projection.sum(),
+            "moving_command_rows": moving.sum(), "signed_yaw_error_rad_s": yaw_error.sum(),
+            "absolute_yaw_error_rad_s": yaw_error.abs().sum(),
+            "requested_saturation_fraction": t["saturation_count_400hz"].sum()/(8*18),
+            "terminations": output["terminated"].sum(), "truncations": output["truncated"].sum(),
+            "zero_command_rows": (command == 0).all(-1).sum()}
+        for dest in (self.metric_totals, self.metric_interval):
+            for key, value in values.items():
+                dest[key] = dest.get(key, torch.zeros_like(value)) + value.detach()
+        self.metric_rows += len(command)
+        self.metric_interval_rows += len(command)
+
+    def status(self, *, reset_interval=False):
+        def summary(values, rows):
+            counts = {"moving_command_rows", "terminations", "truncations", "zero_command_rows"}
+            return {"environment_controls": rows, **{key: (value if key in counts else value/max(1, rows)).cpu().tolist()
+                for key, value in values.items()}}
+        result = {"schema": SCHEMA, "controls_completed": self.controls_completed,
+                "command_draws": self.command_draws, "zero_command_draws": self.zero_command_draws,
+                "zero_draw_fraction": self.zero_command_draws/max(1, self.command_draws),
+                "remaining_controls": self.remaining_controls.detach().cpu().tolist(),
+                "commands": self.env.commands.detach().cpu().tolist(), "stage2_complete": False,
+                "proximity": self.proximity.status(),
+                "cumulative_metrics": summary(self.metric_totals, self.metric_rows),
+                "interval_metrics": summary(self.metric_interval, self.metric_interval_rows)}
+        if reset_interval:
+            self.metric_interval, self.metric_interval_rows = {}, 0
+        return result
+
+
+===== artifacts/restart_2026-09-14/paper_walk_execution_001/source_004/learner.py =====
+"""Fresh-model PPO and adversarial motion priors for the canonical robot.
+
+The simulator owns actual physics, position-target limits and terminal states.
+This module never substitutes reference motion for a simulated policy rollout.
+Paper-inspired pilot choices (including flat-ground critic and optimizer values)
+are explicit in Config. Checkpoints restore learning state, not PhysX state.
+"""
+from __future__ import annotations
+
+from dataclasses import asdict, dataclass
+from pathlib import Path
+import hashlib
+import json
+import math
+import random
+import time
+
+import numpy as np
+import torch
+from torch import nn
+from torch.distributions import Normal
+
+OBS_WIDTH = 231
+CRITIC_WIDTH = 234
+AMP_WIDTH = 61
+ACTION_WIDTH = 18
+SCHEMA = "canonical_paper_walk_ppo_amp_v1"
+AMP_FIELDS = ["joint_position:18", "joint_velocity:18", "body_linear_velocity:3",
+              "body_angular_velocity:3", "base_height:1", "body_frame_toe_xyz:18"]
+
+
+@dataclass
+class Config:
+    num_envs: int = 128
+    rollout_steps: int = 24
+    epochs: int = 5
+    minibatches: int = 4
+    learning_rate: float = 3e-4
+    discriminator_learning_rate: float = 3e-4
+    gamma: float = .99
+    gae_lambda: float = .95
+    clip: float = .2
+    entropy_coefficient: float = .01
+    value_coefficient: float = 1.
+    estimator_coefficient: float = 1.
+    style_coefficient: float = 1.
+    gradient_penalty: float = 10.
+    max_grad_norm: float = 1.
+    initial_std: float = .4
+    seed: int = 20260914
+    actor_hidden: tuple = (256, 128, 64)
+    memory_hidden: tuple = (512, 256, 128)
+    estimator_hidden: tuple = (64, 32)
+    critic_hidden: tuple = (512, 256, 128)
+    discriminator_hidden: tuple = (1024, 512)
+
+    def validate(self):
+        for key in ("num_envs", "rollout_steps", "epochs", "minibatches"):
+            if type(getattr(self, key)) is not int or getattr(self, key) <= 0:
+                raise ValueError("Positive integer required: " + key)
+        if self.num_envs * self.rollout_steps < self.minibatches:
+            raise ValueError("More minibatches than rollout samples")
+        for key in ("learning_rate", "discriminator_learning_rate", "initial_std", "max_grad_norm"):
+            if not math.isfinite(getattr(self, key)) or getattr(self, key) <= 0:
+                raise ValueError("Positive finite configuration required: " + key)
+        if not 0 <= self.gamma <= 1 or not 0 <= self.gae_lambda <= 1:
+            raise ValueError("Invalid discount or GAE lambda")
+
+
+class RunningMeanStd(nn.Module):
+    """Statistics change only between rollouts, never during a PPO ratio update."""
+    def __init__(self, width):
+        super().__init__()
+        self.register_buffer("mean", torch.zeros(width))
+        self.register_buffer("var", torch.ones(width))
+        self.register_buffer("count", torch.tensor(1e-4, dtype=torch.float64))
+
+    @torch.no_grad()
+    def update(self, values):
+        values = values.reshape(-1, self.mean.numel())
+        if not len(values) or not torch.isfinite(values).all():
+            raise ValueError("Empty or nonfinite normalizer input")
+        batch_mean = values.mean(0)
+        batch_var = values.var(0, unbiased=False)
+        n = len(values)
+        total = self.count + n
+        delta = batch_mean - self.mean
+        mean = self.mean + delta * (n / total).to(values.dtype)
+        m2 = self.var * self.count + batch_var * n + delta.square() * self.count * n / total
+        self.mean.copy_(mean)
+        self.var.copy_((m2 / total).clamp_min(1e-8))
+        self.count.copy_(total)
+
+    def forward(self, values):
+        return ((values - self.mean) / torch.sqrt(self.var + 1e-6)).clamp(-10., 10.)
+
+
+def mlp(width, hidden, output=None):
+    layers = []
+    for size in hidden:
+        layers.extend((nn.Linear(width, size), nn.ELU()))
+        width = size
+    if output is not None:
+        layers.append(nn.Linear(width, output))
+    return nn.Sequential(*layers)
+
+
+class ActorCritic(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.obs_normalizer = RunningMeanStd(OBS_WIDTH)
+        self.critic_normalizer = RunningMeanStd(CRITIC_WIDTH)
+        self.estimator = mlp(210, config.estimator_hidden, 3)
+        self.memory = mlp(210, config.memory_hidden)
+        self.policy = mlp(42 + 3 + 18 + 3 + config.memory_hidden[-1], config.actor_hidden, 18)
+        self.critic = mlp(CRITIC_WIDTH, config.critic_hidden, 1)
+        self.log_std = nn.Parameter(torch.full((18,), math.log(config.initial_std)))
+        # Fresh near-neutral mean; no historical actor or phase-driven controller.
+        nn.init.normal_(self.policy[-1].weight, std=.01)
+        nn.init.zeros_(self.policy[-1].bias)
+
+    def actor(self, obs):
+        normalized = self.obs_normalizer(obs)
+        history = normalized[:, :210]
+        velocity = self.estimator(history)
+        memory = self.memory(history)
+        current = history[:, -42:]
+        mean = self.policy(torch.cat((current, normalized[:, 210:], velocity, memory), -1))
+        return mean, velocity
+
+    def distribution(self, obs):
+        mean, velocity = self.actor(obs)
+        return Normal(mean, self.log_std.clamp(-5., 1.).exp().expand_as(mean)), velocity
+
+    def value(self, critic):
+        return self.critic(self.critic_normalizer(critic)).squeeze(-1)
+
+
+class MotionPrior(nn.Module):
+    def __init__(self, config):
+        super().__init__()
+        self.normalizer = RunningMeanStd(AMP_WIDTH)
+        self.discriminator = mlp(2 * AMP_WIDTH, config.discriminator_hidden, 1)
+
+    def features(self, first, second):
+        return torch.cat((self.normalizer(first), self.normalizer(second)), -1)
+
+    @torch.no_grad()
+    def style_reward(self, first, second):
+        score = self.discriminator(self.features(first, second)).squeeze(-1)
+        return (1. - .25 * (score - 1.).square()).clamp(0., 1.)
+
+    def loss(self, expert_first, expert_second, policy_first, policy_second, penalty):
+        expert = self.features(expert_first, expert_second).detach().requires_grad_(True)
+        policy = self.features(policy_first, policy_second).detach()
+        real = self.discriminator(expert).squeeze(-1)
+        fake = self.discriminator(policy).squeeze(-1)
+        real_loss = (real - 1.).square().mean()
+        fake_loss = (fake + 1.).square().mean()
+        # Differentiate with respect to normalized expert INPUTS, not parameters.
+        input_gradient = torch.autograd.grad(real.sum(), expert, create_graph=True)[0]
+        gp = input_gradient.square().sum(-1).mean()
+        return real_loss + fake_loss + .5 * penalty * gp, {
+            "expert_score": real.detach().mean(), "policy_score": fake.detach().mean(),
+            "gradient_penalty": gp.detach(), "expert_loss": real_loss.detach(),
+            "policy_loss": fake_loss.detach()}
+
+
+def generalized_advantage(rewards, values, next_values, terminated, truncated, gamma, lam):
+    """Timeouts bootstrap their terminal state but never carry GAE across reset."""
+    advantage = torch.zeros_like(rewards)
+    carry = torch.zeros_like(rewards[-1])
+    for t in reversed(range(len(rewards))):
+        bootstrap = (~terminated[t]).to(rewards.dtype)
+        continuation = (~(terminated[t] | truncated[t])).to(rewards.dtype)
+        delta = rewards[t] + gamma * bootstrap * next_values[t] - values[t]
+        carry = delta + gamma * lam * continuation * carry
+        advantage[t] = carry
+    return advantage, advantage + values
+
+
+def file_sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def exact_equal(a, b):
+    if isinstance(a, torch.Tensor):
+        return isinstance(b, torch.Tensor) and a.dtype == b.dtype and a.shape == b.shape and torch.equal(a.cpu(), b.cpu())
+    if isinstance(a, np.ndarray):
+        return isinstance(b, np.ndarray) and a.dtype == b.dtype and np.array_equal(a, b)
+    if isinstance(a, dict):
+        return isinstance(b, dict) and a.keys() == b.keys() and all(exact_equal(v, b[k]) for k, v in a.items())
+    if isinstance(a, (tuple, list)):
+        return type(a) is type(b) and len(a) == len(b) and all(exact_equal(x, y) for x, y in zip(a, b))
+    return a == b
+
+
+class PPOLearner:
+    """Environment ABI: reset(indices=None), step(actions), dict-shaped results.
+
+    obs: [N,231]; critic: [N,234]; amp: [N,61]. Step additionally returns
+    reward, terminated and truncated [N], and MUST return terminal observations
+    before resetting. reset(indices) returns the full batch and changes only
+    those rows. All states and rewards must come from native simulation.
+    """
+    def __init__(self, env, prior_path, output_dir, config=None, device="cuda:0"):
+        self.config = Config() if config is None else config
+        self.config.validate()
+        self.device = torch.device(device)
+        self.env = env
+        self.output = Path(output_dir)
+        self.output.mkdir(parents=True, exist_ok=True)
+        self.prior_path = Path(prior_path)
+        self.prior_sha256 = file_sha(self.prior_path)
+        random.seed(self.config.seed)
+        np.random.seed(self.config.seed)
+        torch.manual_seed(self.config.seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(self.config.seed)
+        self.model = ActorCritic(self.config).to(self.device)
+        self.amp = MotionPrior(self.config).to(self.device)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.config.learning_rate)
+        self.discriminator_optimizer = torch.optim.Adam(self.amp.discriminator.parameters(), lr=self.config.discriminator_learning_rate)
+        with np.load(self.prior_path, allow_pickle=False) as prior:
+            self.expert_states = torch.as_tensor(prior["states"].copy(), dtype=torch.float32, device=self.device)
+            self.expert_next_states = torch.as_tensor(prior["next_states"].copy(), dtype=torch.float32, device=self.device)
+        if self.expert_states.ndim != 2 or self.expert_states.shape[1] != AMP_WIDTH or self.expert_states.shape != self.expert_next_states.shape or len(self.expert_states) < 2:
+            raise ValueError("Prior must contain aligned states/next_states [M,61]")
+        if not torch.isfinite(self.expert_states).all() or not torch.isfinite(self.expert_next_states).all():
+            raise ValueError("Nonfinite reference motion")
+        self.updates = 0
+        self.transitions = 0
+        self.optimizer_steps = 0
+        self.discriminator_steps = 0
+        self.episodes = 0
+        self.bc_steps = 0
+        self.current = None
+        self.last_rollout = None
+        self.last_metrics = {}
+        protocol = {"schema": SCHEMA, "config": asdict(self.config), "amp_fields": AMP_FIELDS,
+                    "prior_sha256": self.prior_sha256, "learner_sha256": file_sha(__file__),
+                    "actor_observation": "five oldest-to-newest proprio42 frames, command3, previous_action18",
+                    "critic_observation": "actor observation plus privileged native body linear velocity3",
+                    "critic_simplification": "flat-ground pilot; no terrain encoder",
+                    "simulation_resume_supported": False, "behavior_cloning_default": False,
+                    "training_requested_by_user": True, "execution_authorization_owner": "root dispatcher",
+                    "physical_admission": False, "stage2_complete": False}
+        (self.output / "learner_protocol.json").write_text(json.dumps(protocol, indent=2) + "\n")
+
+    def _tensor(self, value, shape, dtype=torch.float32):
+        if dtype == torch.bool and torch.as_tensor(value).dtype != torch.bool:
+            raise ValueError("Native termination/truncation flags must be boolean")
+        result = torch.as_tensor(value, dtype=dtype, device=self.device).detach()
+        if tuple(result.shape) != shape or not torch.isfinite(result).all():
+            raise ValueError(f"Malformed/nonfinite native tensor: {tuple(result.shape)} expected {shape}")
+        return result
+
+    def _state(self, data):
+        n = self.config.num_envs
+        result = {key: self._tensor(data[key], (n, width)).clone()
+                  for key, width in (("obs", OBS_WIDTH), ("critic", CRITIC_WIDTH), ("amp", AMP_WIDTH))}
+        if not torch.equal(result["obs"], result["critic"][:, :OBS_WIDTH]):
+            raise ValueError("Critic prefix must equal actor observation")
+        return result
+
+    def _expert(self, size):
+        index = torch.randint(len(self.expert_states), (size,), device=self.device)
+        return self.expert_states[index], self.expert_next_states[index]
+
+    @torch.no_grad()
+    def _normalizers(self):
+        samples = self.current if self.last_rollout is None else self.last_rollout
+        self.model.obs_normalizer.update(samples["obs"])
+        self.model.critic_normalizer.update(samples["critic"])
+        first, second = self._expert(min(2048, len(self.expert_states)))
+        self.amp.normalizer.update(torch.cat((first, second, samples["amp"].reshape(-1, AMP_WIDTH))))
+
+    @torch.no_grad()
+    def act(self, obs, deterministic=True):
+        obs = torch.as_tensor(obs, dtype=torch.float32, device=self.device)
+        distribution, _ = self.model.distribution(obs)
+        return distribution.mean if deterministic else distribution.sample()
+
+    @torch.no_grad()
+    def collect(self):
+        if self.current is None:
+            self.current = self._state(self.env.reset())
+        self._normalizers()
+        keys = ("obs", "critic", "amp", "amp_next", "actions", "log_prob", "value", "next_value",
+                "reward", "task_reward", "style_reward", "terminated", "truncated")
+        rows = {key: [] for key in keys}
+        n = self.config.num_envs
+        for _ in range(self.config.rollout_steps):
+            before = self.current
+            distribution, _ = self.model.distribution(before["obs"])
+            action = distribution.sample()
+            value = self.model.value(before["critic"])
+            output = self.env.step(action)
+            terminal = self._state(output)
+            reward = self._tensor(output["reward"], (n,))
+            terminated = self._tensor(output["terminated"], (n,), torch.bool)
+            truncated = self._tensor(output["truncated"], (n,), torch.bool)
+            style = self.amp.style_reward(before["amp"], terminal["amp"])
+            record = {**before, "amp_next": terminal["amp"], "actions": action,
+                      "log_prob": distribution.log_prob(action).sum(-1), "value": value,
+                      "next_value": self.model.value(terminal["critic"]),
+                      "reward": reward + self.config.style_coefficient * style,
+                      "task_reward": reward, "style_reward": style,
+                      "terminated": terminated, "truncated": truncated}
+            for key in keys:
+                rows[key].append(record[key].detach().clone())
+            done = terminated | truncated
+            self.current = terminal
+            if done.any():
+                indices = done.nonzero(as_tuple=False).squeeze(-1)
+                reset = self._state(self.env.reset(indices))
+                # A selective reset cannot corrupt another robot's observation history.
+                if any(not torch.equal(reset[key][~done], terminal[key][~done]) for key in terminal):
+                    raise ValueError("Selective reset changed an unaffected environment")
+                self.current = reset
+                self.episodes += len(indices)
+        rollout = {key: torch.stack(value) for key, value in rows.items()}
+        advantage, returns = generalized_advantage(rollout["reward"], rollout["value"], rollout["next_value"],
+                                                  rollout["terminated"], rollout["truncated"], self.config.gamma, self.config.gae_lambda)
+        rollout.update(advantage=advantage, returns=returns)
+        self.transitions += self.config.num_envs * self.config.rollout_steps
+        self.last_rollout = rollout
+        return rollout
+
+    def update(self, rollout):
+        c = self.config
+        data = {key: value.reshape(-1, *value.shape[2:]) for key, value in rollout.items()}
+        advantage = data["advantage"]
+        data["advantage"] = (advantage - advantage.mean()) / (advantage.std(unbiased=False) + 1e-8)
+        totals = {}
+        batches = 0
+        for _ in range(c.epochs):
+            permutation = torch.randperm(len(advantage), device=self.device)
+            for indices in torch.tensor_split(permutation, c.minibatches):
+                distribution, estimated_velocity = self.model.distribution(data["obs"][indices])
+                log_prob = distribution.log_prob(data["actions"][indices]).sum(-1)
+                log_ratio = log_prob - data["log_prob"][indices]
+                ratio = log_ratio.exp()
+                advantages = data["advantage"][indices]
+                policy_loss = -torch.minimum(ratio * advantages, ratio.clamp(1-c.clip, 1+c.clip) * advantages).mean()
+                value = self.model.value(data["critic"][indices])
+                old_value = data["value"][indices]
+                clipped_value = old_value + (value - old_value).clamp(-c.clip, c.clip)
+                target = data["returns"][indices]
+                value_loss = .5 * torch.maximum((value-target).square(), (clipped_value-target).square()).mean()
+                entropy = distribution.entropy().sum(-1).mean()
+                estimator_loss = (estimated_velocity - data["critic"][indices, -3:]).square().mean()
+                loss = policy_loss + c.value_coefficient * value_loss - c.entropy_coefficient * entropy + c.estimator_coefficient * estimator_loss
+                if not torch.isfinite(loss):
+                    raise ValueError("Nonfinite PPO loss")
+                self.optimizer.zero_grad(set_to_none=True)
+                loss.backward()
+                grad_norm = nn.utils.clip_grad_norm_(self.model.parameters(), c.max_grad_norm, error_if_nonfinite=True)
+                self.optimizer.step()
+                self.optimizer_steps += 1
+                expert, expert_next = self._expert(len(indices))
+                d_loss, d_metrics = self.amp.loss(expert, expert_next, data["amp"][indices], data["amp_next"][indices], c.gradient_penalty)
+                if not torch.isfinite(d_loss):
+                    raise ValueError("Nonfinite AMP loss")
+                self.discriminator_optimizer.zero_grad(set_to_none=True)
+                d_loss.backward()
+                nn.utils.clip_grad_norm_(self.amp.discriminator.parameters(), c.max_grad_norm, error_if_nonfinite=True)
+                self.discriminator_optimizer.step()
+                self.discriminator_steps += 1
+                metrics = {"policy_loss": policy_loss, "value_loss": value_loss, "entropy": entropy,
+                           "estimator_loss": estimator_loss, "discriminator_loss": d_loss,
+                           "approx_kl": ((ratio-1)-log_ratio).mean(), "actor_grad_norm": grad_norm,
+                           "clip_fraction": ((ratio-1).abs() > c.clip).float().mean(), **d_metrics}
+                for key, val in metrics.items():
+                    totals[key] = totals.get(key, 0.) + float(val.detach())
+                batches += 1
+        self.updates += 1
+        self.last_metrics = {key: value / batches for key, value in totals.items()}
+        self.last_metrics.update(update=self.updates, transitions=self.transitions, episodes=self.episodes,
+                                 optimizer_steps=self.optimizer_steps, discriminator_steps=self.discriminator_steps,
+                                 reward=float(rollout["reward"].mean()), task_reward=float(rollout["task_reward"].mean()),
+                                 style_reward=float(rollout["style_reward"].mean()), action_std=float(self.model.log_std.detach().clamp(-5.,1.).exp().mean()),
+                                 raw_action_abs_mean=float(rollout["actions"].abs().mean()),
+                                 raw_action_clip_fraction=float((rollout["actions"].abs()>1).float().mean()),
+                                 terminated=int(rollout["terminated"].sum()), truncated=int(rollout["truncated"].sum()))
+        return self.last_metrics
+
+    @staticmethod
+    def _rng():
+        return {"python": random.getstate(), "numpy": np.random.get_state(), "torch": torch.get_rng_state(),
+                "cuda": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else []}
+
+    @staticmethod
+    def _restore_rng(rng):
+        random.setstate(rng["python"])
+        np.random.set_state(rng["numpy"])
+        torch.set_rng_state(rng["torch"].cpu())
+        if rng["cuda"] and torch.cuda.is_available():
+            torch.cuda.set_rng_state_all([state.cpu() for state in rng["cuda"]])
+
+    def save(self, path):
+        path = Path(path)
+        payload = {"schema": SCHEMA, "config": asdict(self.config), "prior_sha256": self.prior_sha256,
+                   "learner_sha256": file_sha(__file__), "model": self.model.state_dict(), "amp": self.amp.state_dict(),
+                   "optimizer": self.optimizer.state_dict(), "discriminator_optimizer": self.discriminator_optimizer.state_dict(),
+                   "rng": self._rng(), "counters": {key: getattr(self, key) for key in ("updates", "transitions", "optimizer_steps", "discriminator_steps", "episodes", "bc_steps")},
+                   "metrics": self.last_metrics, "simulation_resume_supported": False,
+                   "physical_admission": False, "stage2_complete": False}
+        temporary = path.with_suffix(path.suffix + ".tmp")
+        torch.save(payload, temporary)
+        temporary.replace(path)
+        # Real serialization readback includes model, normalizers, optimizers and RNG.
+        reloaded = torch.load(path, map_location=self.device, weights_only=False)
+        if not exact_equal(payload, reloaded):
+            raise ValueError("Checkpoint serialization differs")
+        # Reconstruct independent models and Adam states, then prove inference
+        # equality. Preserve RNG so verification cannot perturb the next rollout.
+        verification_rng = self._rng()
+        try:
+            model = ActorCritic(self.config).to(self.device)
+            amp = MotionPrior(self.config).to(self.device)
+            optimizer = torch.optim.Adam(model.parameters(), lr=self.config.learning_rate)
+            discriminator_optimizer = torch.optim.Adam(amp.discriminator.parameters(), lr=self.config.discriminator_learning_rate)
+            model.load_state_dict(reloaded['model'], strict=True)
+            amp.load_state_dict(reloaded['amp'], strict=True)
+            optimizer.load_state_dict(reloaded['optimizer'])
+            discriminator_optimizer.load_state_dict(reloaded['discriminator_optimizer'])
+            for name, restored in (('model',model),('amp',amp),('optimizer',optimizer),('discriminator_optimizer',discriminator_optimizer)):
+                if not exact_equal(restored.state_dict(),reloaded[name]):
+                    raise ValueError('Independent checkpoint restore differs: '+name)
+            probe = (self.current['obs'][:8] if self.current is not None else
+                     torch.zeros((2,OBS_WIDTH),device=self.device))
+            with torch.no_grad():
+                if not torch.equal(self.model.actor(probe)[0],model.actor(probe)[0]):
+                    raise ValueError('Checkpoint deterministic policy differs')
+                first,second=self.expert_states[:8],self.expert_next_states[:8]
+                if not torch.equal(self.amp.style_reward(first,second),amp.style_reward(first,second)):
+                    raise ValueError('Checkpoint discriminator inference differs')
+        finally:
+            self._restore_rng(verification_rng)
+        return {"path": str(path), "sha256": file_sha(path), "update": self.updates,
+                "strict_serialization_readback": True, "strict_model_optimizer_restore": True,
+                "deterministic_action_exact": True, "rng_preserved": True,
+                "simulation_resume_supported": False}
+
+    def load(self, path, *, restore_rng=True):
+        payload = torch.load(path, map_location=self.device, weights_only=False)
+        if payload.get("schema") != SCHEMA or payload.get("config") != asdict(self.config) or payload.get("prior_sha256") != self.prior_sha256:
+            raise ValueError("Checkpoint model/config/prior identity differs")
+        if payload.get("learner_sha256") != file_sha(__file__):
+            raise ValueError("Checkpoint learner source differs")
+        self.model.load_state_dict(payload["model"], strict=True)
+        self.amp.load_state_dict(payload["amp"], strict=True)
+        self.optimizer.load_state_dict(payload["optimizer"])
+        self.discriminator_optimizer.load_state_dict(payload["discriminator_optimizer"])
+        for key, val in payload["counters"].items():
+            setattr(self, key, val)
+        self.last_metrics = payload["metrics"]
+        if restore_rng:
+            self._restore_rng(payload["rng"])
+        self.current = None
+        self.last_rollout = None
+        for name in ("model", "amp", "optimizer", "discriminator_optimizer"):
+            if not exact_equal(getattr(self, name).state_dict(), payload[name]):
+                raise ValueError("Strict checkpoint restore differs: " + name)
+        return payload
+
+    def pretrain_bc(self, prior_path, steps, batch_size=512):
+        """Optional, explicit BC of observation/action pairs; never default or physics.
+
+        Caller must supply real reference history as observations[M,231] and
+        normalized target actions[M,18]. No phase, history or actions are invented.
+        """
+        with np.load(prior_path, allow_pickle=False) as prior:
+            obs = torch.as_tensor(prior["observations"].copy(), dtype=torch.float32, device=self.device)
+            actions = torch.as_tensor(prior["actions"].copy(), dtype=torch.float32, device=self.device)
+        if obs.ndim != 2 or obs.shape[1] != OBS_WIDTH or actions.shape != (len(obs),18) or not torch.isfinite(obs).all() or not torch.isfinite(actions).all():
+            raise ValueError("BC requires explicit finite observations[M,231], actions[M,18]")
+        self.model.obs_normalizer.update(obs)
+        for _ in range(steps):
+            indices = torch.randint(len(obs), (min(batch_size,len(obs)),), device=self.device)
+            mean, _ = self.model.actor(obs[indices])
+            loss = (mean-actions[indices]).square().mean()
+            self.optimizer.zero_grad(set_to_none=True)
+            loss.backward()
+            nn.utils.clip_grad_norm_(self.model.parameters(), self.config.max_grad_norm, error_if_nonfinite=True)
+            self.optimizer.step()
+            self.bc_steps += 1
+        (self.output/"behavior_cloning.json").write_text(json.dumps({"explicitly_enabled":True, "steps":steps,
+            "dataset_sha256":file_sha(prior_path),"is_physics_evidence":False},indent=2)+"\n")
+
+    def train(self, updates, checkpoint_interval=25, callback=None):
+        if type(updates) is not int or updates <= 0 or checkpoint_interval <= 0:
+            raise ValueError("Positive update allocation/checkpoint interval required")
+        started = time.monotonic()
+        for _ in range(updates):
+            metrics = self.update(self.collect())
+            metrics["elapsed_s"] = time.monotonic()-started
+            metrics["transitions_per_s"] = self.transitions/max(metrics["elapsed_s"],1e-6)
+            with (self.output/"metrics.jsonl").open("a") as stream:
+                stream.write(json.dumps(metrics, allow_nan=False)+"\n")
+            if self.updates == 1 or self.updates % checkpoint_interval == 0:
+                receipt = self.save(self.output/f"checkpoint_{self.updates:06d}.pt")
+                (self.output/"latest_checkpoint.json").write_text(json.dumps(receipt,indent=2)+"\n")
+            if callback is not None:
+                if callback(metrics) is False:
+                    break
+        receipt = self.save(self.output/f"checkpoint_{self.updates:06d}.pt")
+        (self.output/"latest_checkpoint.json").write_text(json.dumps(receipt,indent=2)+"\n")
+        return receipt
+
+
+===== artifacts/restart_2026-09-14/paper_walk_execution_001/source_004/env_config.py =====
+"""Explicit experimental canonical-robot allocation; no historical admission claim."""
+from dataclasses import asdict, dataclass
+from pathlib import Path
+import hashlib
+import json
+import math
+
+LEGS = ("lf", "lm", "lr", "rf", "rm", "rr")
+JOINT_NAMES = tuple(f"{leg}_{joint}" for leg in LEGS for joint in ("coxa_yaw", "femur_pitch", "tibia_pitch"))
+BODY_NAMES = ("body",) + tuple(f"{leg}_{body}" for leg in LEGS for body in ("coxa", "femur", "tibia"))
+URDF_SHA256 = "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78"
+MODEL_SHA256 = "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881"
+USD_SHA256 = "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c"
+MASS_KG = 7.466088235225788
+KD = (0.44197696391810243, 0.2456657243160222, 0.10552064613953134,
+      0.4419789704596685, 0.24566676283633715, 0.10552131615792909,
+      0.441977634689341, 0.24566456721764315, 0.10552100524837532,
+      0.4419765017453795, 0.245667092769639, 0.10552130774083751,
+      0.44197471269634825, 0.24566700905274597, 0.10552141334046235,
+      0.4419772543481437, 0.24566767616660323, 0.10552122889741367)
+
+
+@dataclass(frozen=True)
+class EnvConfig:
+    num_envs: int = 32
+    spacing_m: float = 2.0
+    physics_dt: float = 0.0025
+    decimation: int = 8
+    episode_seconds: float = 20.0
+    action_scale_rad: float = 0.35
+    target_slew_rad: float = 0.040
+    reset_height_m: float = 0.08161108940839767
+    command_forward_mps: float = 0.10
+    command_left_mps: float = 0.0
+    command_yaw_rad_s: float = 0.0
+    seed: int = 20260914
+    render: bool = False
+    device: str = "cuda:0"
+
+    def __post_init__(self):
+        if type(self.num_envs) is not int or not 1 <= self.num_envs <= 128:
+            raise ValueError("Pilot supports 1 through 128 replicas")
+        if self.physics_dt != 0.0025 or self.decimation != 8 or self.target_slew_rad != 0.040:
+            raise ValueError("Canonical 400/50Hz servo and target slew are fixed")
+        if self.spacing_m < 2 or self.device != "cuda:0":
+            raise ValueError("Native CUDA pilot with at least 2m spacing required")
+        if not all(math.isfinite(x) for x in (self.spacing_m, self.episode_seconds,
+                       self.action_scale_rad, self.reset_height_m, self.command_forward_mps,
+                       self.command_left_mps, self.command_yaw_rad_s)):
+            raise ValueError("Configuration contains a nonfinite value")
+        if not 0 < self.action_scale_rad <= 0.5 or not 0 < self.episode_seconds <= 60:
+            raise ValueError("Invalid bounded pilot action scale or episode length")
+
+    @property
+    def control_dt(self):
+        return self.physics_dt * self.decimation
+
+    def declaration(self):
+        return {**asdict(self), "schema": "canonical_paper_walk_experiment_v1",
+                "actor_width": 231, "critic_width": 234, "amp_width": 61,
+                "joint_names": list(JOINT_NAMES), "legs": list(LEGS),
+                "standing_admission": False, "stage2_complete": False,
+                "prior_standing_failure_superseded": False,
+                "authorization": "User explicitly requested experimental paper-based PPO training on the confirmed model.",
+                "telemetry_scope": "Compact native body-force telemetry; no exact toe/shaft patch classification or formal standing admission."}
+
+
+def sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def verify_assets(asset, model_path):
+    asset, model_path = Path(asset), Path(model_path)
+    if sha(asset / "robot.usda") != USD_SHA256 or sha(model_path) != MODEL_SHA256:
+        raise ValueError("Canonical USD/model identity differs")
+    model = json.loads(model_path.read_text())
+    # The JSON retains its earlier CAD import's source hash; bind the actual
+    # corrected URDF shipped with this exact USD asset instead.
+    if sha(asset / "source" / "source.urdf") != URDF_SHA256:
+        raise ValueError("Canonical URDF identity differs")
+    if {x["name"] for x in model["links"]} != set(BODY_NAMES) or {x["name"] for x in model["joints"]} != set(JOINT_NAMES):
+        raise ValueError("Canonical 19-body/18-joint topology differs")
+    if abs(sum(x["mass"] for x in model["links"]) - MASS_KG) > 1e-9:
+        raise ValueError("Canonical mass ledger differs")
+    return model
+
+
+===== artifacts/restart_2026-09-14/paper_stage2_review_001/DECISION.md =====
+# Stage 2 on the corrected robot
+
+James explicitly directs continuing until the existing Stage 2 milestone is
+satisfied on the selected mass-corrected model, with paper-informed PPO and a
+video of its actual Isaac Sim rollout. This is the same behavior/acceptance
+target, not permission to relabel historical weights or weaken numerical gates.
+
+The first Fable 5.1 maximum-effort invocation returned proposed tool calls as
+text, not a usable review. Those calls were not executed. Its response and
+status are preserved. The second invocation returned an actual review, session
+`557db31f-d549-428b-b5e9-79bdf46b1d18`, in `REVIEW_002.md`; full model usage is in
+`RESPONSE_002.json`.
+
+Root adopts the corrected-robot PPO/AMP architecture as an isolated experiment:
+five proprioceptive frames, supervised velocity estimator, privileged critic,
+transition discriminator with least-squares loss and input gradient penalty,
+and real native rollouts with terminal-state timeout bootstrapping. Robot
+geometry, mass, inertia, joint limits, explicit 400 Hz PD, 50 Hz control,
+1.6 N·m speed-dependent ceiling and 0.040 rad/control target limit stay bound.
+
+The original zero inspection stance cannot track the requested vertical foot
+lift inside the knee's lower limit. A proposed walking neutral of
+`[0, -0.30, 0.40]` radians per leg reserves travel. Exact original mesh extrema
+determine its initial height. This is a new declared stance requiring native
+validation; it does not rewrite any failed zero-stance result. The model-specific
+IK prior has 1,260 transitions and a maximum target increment of 0.037510 rad.
+It is a kinematic adaptation, not the paper authors' whole-body trajectory
+optimization dataset. Yaw stance uses a first-order body-velocity approximation.
+
+Root accepts the review's applied-target observation correction, native replay
+to measure actuator/contact feasibility and produce realized AMP references,
+and in-episode command changes including stops. Discriminator fit and held-out
+behavior must be measured; CPU tests cannot establish either. Network size or
+reference diversity changes need their own recorded result and source identity.
+
+Root will first validate this new native environment and stance at one and
+32 replicas with the original complete 400 Hz contact/clearance checks and
+standing thresholds. The full eight-arm floor/layout matrix is deferred:
+the earlier origin/translated failure already has two exact repeats, and
+the immediate question is admission of the new walking configuration. If this
+configuration fails, an analytic-plane fixture is a declared successor test,
+not a change to the robot or acceptance thresholds. The prior mesh failures
+remain preserved. No standing success, learner allocation or Stage 2 success
+is claimed by this design record.
+
+The review's proposed replay/smoke thresholds are engineering suggestions, not
+new project acceptance limits. In particular, its 2% replay saturation screen
+does not replace the existing 0.5% Stage 2 threshold. Physical caps, non-foot
+contact, achieved motion and saturation will be reported separately. Same-source
+native admission, actual learning, held-out evaluation and human visual
+acceptance remain separate evidence. The active goal ends only at the existing
+Stage 2 requirements, not at a checkpoint save or video recording.
+
+
+===== artifacts/restart_2026-09-14/paper_stage2_review_001/REVIEW_002.md =====
+James,
+
+**Verdict.** Structure is sound (native 50/400 Hz PD, unchanged Kp 12, 1.6 N·m cap and 0.04 rad/20 ms limiter, proper resets, no reset-crossing AMP pairs, full checkpoint state, declared new stance rather than relabel). Do not launch the learner yet; four gaps would make the first run uninformative.
+
+**Critical fixes**
+
+1. AMP domain mismatch. The prior transitions are commanded targets; the discriminator sees realized states under Kp 12 sag, the +5 mm reset and contact, separates them by constant offsets, and style reward collapses. Replay the 21 analytic trajectories through the native PD (standalone, no policy, ≥3 cycles each); use recorded realized q/dq/base as the AMP reference, analytic targets only for optional BC. Build discriminator features for both sets through one code path (exact FK on q; drop absolute base height or subtract measured settled height).
+2. Cap feasibility. Tripod support doubles per-foot load to ≈24 N; femur torque scales with foot radius at [0,−0.30,0.40]. The six-leg q=0 pass says nothing about three-leg support. The replay measures it; if torque saturates, revise stance geometry, never actuator parameters.
+3. Prior size. 1260 transitions against a 1024/512 discriminator will memorize. If the smoke check trips, add lift 0.012–0.024 m, period 1.0–1.5 s and stance-radius variants from the same kinematics and shrink D to 256/128; keep the gradient penalty.
+4. Markov state and transitions. Observe the applied post-slew target as "previous action", not the raw sample. Resample commands in-episode (2–5 s holds, ≥15 % zero commands with a strong joint-velocity penalty at zero) or the eval's 14 transitions are never trained. Initialise the frame stack by repetition at reset.
+
+Standing: ground representation is the leading suspect (origin passes, (14,4) fails, floor is two 80 m triangles). Test an analytic plane with the identical asset and scorer, declared as a fixture before running. Unchanged thresholds, window and scorer make this a fixture change, not a gate change; the mesh-floor failure stays a recorded open defect.
+
+**Smallest valid launch sequence** (each step under reservation, both locks, exact container ownership, bounded timeout, post-exit checks; identities bound to URDF 9492fde…, USD 3be9842…, stance, ground fixture, actuator parameters)
+
+1. Standing, new neutral: standalone at origin and (14,4), then 32-batch at current spacing and a compact 2 m layout (separates coordinate magnitude from mesh), on mesh floor and analytic plane, 400 Hz capture, unchanged scorer. Use the passing ground downstream. If neither passes at (14,4), training still proceeds under James's instruction, labelled pre-admission with the defect recorded.
+2. Prior replay (fixes 1–2), 64 envs, one bounded run: realized AMP dataset plus feasibility receipts.
+3. Learner smoke, 64 envs, ~50 updates: throughput, finite reward terms, discriminator generalisation, save/reload/resume.
+4. Scaled run, env count from measured throughput and memory (target ≥1024), periodic checkpoints, bounded wall-clock.
+5. Independent Stage 2 eval (19 tests, exact gates, limiter recorded), deterministic mean action, 25 fps video by rendering only. Experimental evidence; admission and acceptance stay separate human decisions.
+
+**Preregistered checks** (fixed now, never tuned afterwards)
+
+- Standing: existing thresholds — zero missing support after 4 s settle, worst joint-speed RMS ≤0.03 rad/s, no cap breach, no non-foot contact, 16 s window.
+- Replay: no fall or non-foot contact for any command; cap-saturated samples <2 %; realized-vs-target RMS <0.05 rad; peak femur torque reported.
+- Smoke: a replayed held-out prior variant (period 1.3 s) scores real (D>0.5) on ≥90 % of transitions after 50 updates, else fix 3; reload restores all state byte-exactly and the resumed update matches an uninterrupted run within recorded tolerance; throughput recorded.
+- Scaled: per-command tracking error and style reward logged; fall rate rising over three consecutive checkpoints stops the run.
+- Eval: unchanged numeric gates; video illustrates, never admits.
+
+**Scope interpretation.** "Hit the same checkpoint with the new URDF" means reproducing existing Stage 2 behaviour and gates on the exact mass-corrected model, not porting weights. James's instruction authorizes an isolated experimental identity in `experiments/paper_walk` before standing admission completes; it qualifies no stage, alters no gate, repoints no frozen task. Acceptable adaptations: 7.466 kg robot, 42-dim proprio, replayed analytic tripod prior (never called the authors' trajectory-optimization dataset), flat-first without terrain encoders or randomization, bounded tracking reward, LSGAN with gradient penalty, privileged velocity supervision. Not acceptable: pose forcing in rollouts, changing Kp/cap/limiter, relabelling old checkpoints, admission by video or merge.

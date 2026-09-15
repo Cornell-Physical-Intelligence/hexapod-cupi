@@ -1,0 +1,75 @@
+--- source003/run_standing.py
++++ source004/run_standing.py
+@@ -39,6 +39,8 @@
+    prim=stage.DefinePrim(root,'Xform');prim.GetReferences().AddReference(str(a.asset.resolve()/'robot.usda'))
+    if i:UsdGeom.Xformable(prim).AddTranslateOp().Set(Gf.Vec3d((i%8)*2.,(i//8)*2.,0.))
+   model=json.loads((a.asset/'source/model.json').read_text());usd=usd_readback(stage);save(out/'usd_readback.json',usd);state['checks']['usd_identity']=validate_usd(usd,model)
++  from solver_recipe import configure as configure_solver,verify as verify_solver
++  solver_record=configure_solver(stage,roots,PhysxSchema);save(out/'solver_readback.json',solver_record)
+   # Static plane and material are explicit new environmental assumptions; asset meshes unchanged.
+   floor=UsdGeom.Mesh.Define(stage,'/Ground');floor.CreatePointsAttr([(-40.,-40.,0.),(40.,-40.,0.),(40.,40.,0.),(-40.,40.,0.)]);floor.CreateFaceVertexCountsAttr([3,3]);floor.CreateFaceVertexIndicesAttr([0,1,2,0,2,3]);UsdPhysics.CollisionAPI.Apply(floor.GetPrim());UsdPhysics.MeshCollisionAPI.Apply(floor.GetPrim()).CreateApproximationAttr('none')
+   mat=UsdShade.Material.Define(stage,'/StandingMaterial');material=UsdPhysics.MaterialAPI.Apply(mat.GetPrim());material.CreateStaticFrictionAttr(1.);material.CreateDynamicFrictionAttr(1.);material.CreateRestitutionAttr(0.)
+@@ -54,6 +56,7 @@
+   def on_error(e):errors.append({'type':int(e.type),'payload':repr(e.payload)});save(out/'native_errors.json',errors)
+   error_subscription=omni.physx.get_physx_interface().get_error_event_stream().create_subscription_to_pop(on_error)
+   t=time.monotonic();sim.reset();state['initialization_wall_s']=time.monotonic()-t
++  solver_record['after_reset']=verify_solver(stage,roots,PhysxSchema);save(out/'solver_readback.json',solver_record)
+   scene_prim=stage.GetPrimAtPath(cfg.physics_prim_path);scene=UsdPhysics.Scene(scene_prim)
+   actual={'gravity_magnitude':scene.GetGravityMagnitudeAttr().Get(),'gravity_direction':list(scene.GetGravityDirectionAttr().Get()),'dt_s':sim.get_physics_dt(),'time_steps_per_second':scene_prim.GetAttribute('physxScene:timeStepsPerSecond').Get(),'external_forces_every_iteration':scene_prim.GetAttribute('physxScene:enableExternalForcesEveryIteration').Get(),'root_self_collisions':{r:stage.GetPrimAtPath(r+'/body').GetAttribute('physxArticulation:enabledSelfCollisions').Get()for r in roots},'floor_points_m':[[float(v)for v in p]for p in floor.GetPointsAttr().Get()],'floor_collision_enabled':UsdPhysics.CollisionAPI(floor.GetPrim()).GetCollisionEnabledAttr().Get(),'floor_approximation':UsdPhysics.MeshCollisionAPI(floor.GetPrim()).GetApproximationAttr().Get(),'material_static_dynamic_restitution':[material.GetStaticFrictionAttr().Get(),material.GetDynamicFrictionAttr().Get(),material.GetRestitutionAttr().Get()],'material_combine_modes':[pm.GetFrictionCombineModeAttr().Get(),pm.GetRestitutionCombineModeAttr().Get()],'material_assumption':'Provisional flat material; not calibrated hardware friction.'}
+   save(out/'native_scene.json',actual)
+@@ -92,6 +95,8 @@
+    if errors:raise RuntimeError('Native error event')
+    if (control+1)%100==0:print(f'CANONICAL_STANDING control={control+1} replicas={a.num_envs}',flush=True)
+   session.close();session=None
++  solver_record['after_controlled_steps']=verify_solver(stage,roots,PhysxSchema);save(out/'solver_readback.json',solver_record)
++  state['checks']['solver_recipe_readback']=True
+   from standing_score import score
+   report=score(out);save(out/'standing_report.json',report)
+   state['standing_pass']=report['all_pass'];state['status']='completed';state['native_error_events']=errors;state['wall_s']=time.monotonic()-started
+--- source003/standing_contract.py
++++ source004/standing_contract.py
+@@ -23,6 +23,7 @@
+    runtime_binding={'runtime_tree_sha256':identity['inspector_freeze_sha256'],'scope':'canonical_provisional_native_standing_only'},
+    actuation_state_sha256=sha(admission/'state.json'),actuation_inventory_sha256=mapsha(inventory(admission)),
+    geometry_sha256=sha(own/'geometry/geometry.json'),servo_sha256=sha(own/'servo_candidate.json'),
++   solver_recipe_sha256=sha(own/'solver_recipe.py'),solver_recipe={'position_iterations':32,'velocity_iterations':4},
+    model_scope='Uncalibrated provisional48V software effort envelope; no battery confirmation or hardware qualification',
+    physical_admission=False,physics_admitted=False,training_allowed=False)
+  if n==32:
+@@ -42,7 +43,16 @@
+  if any(s.get(k)is not False for k in ['physical_admission','physics_admitted','training_allowed']):raise ValueError('Standing cannot claim broader physics or training admission')
+  if s.get('explicit_steps_completed')!=STEPS:raise ValueError('Incomplete standing steps')
+  if not s.get('checks')or not all(x is True for x in s['checks'].values()):raise ValueError('Missing/rejected native identities')
++ if s['checks'].get('solver_recipe_readback')is not True:raise ValueError('Missing solver recipe readback')
++ solver=read(d/'solver_readback.json')
++ expected_roots={'/Robot'}|{f'/Robot_{i:03d}'for i in range(1,identity['num_envs'])}
++ for phase in ('before','after_authoring','after_reset','after_controlled_steps'):
++  values=solver.get(phase,{})
++  if set(values)!=expected_roots:raise ValueError('Incomplete solver recipe roots')
++  expected=(32,1,[False,False])if phase=='before'else(32,4,[True,True])
++  if any((v.get('position_iterations'),v.get('velocity_iterations'),v.get('authored'))!=expected for v in values.values()):raise ValueError('Solver recipe differs:'+phase)
+  outputs=s.get('outputs',{});check_map(d,outputs)
++ if 'solver_readback.json'not in outputs:raise ValueError('Unsealed solver readback')
+  if not {'control_trace.npz','session.json','standing_report.json','initial_reset.json','native_readback.json','sdf_readback.json','contact_view.json','contacts.jsonl'}.issubset(outputs):raise ValueError('Missing standing raw evidence')
+  session=read(d/'session.json');report=read(d/'standing_report.json')
+  if session.get('captured_steps')!=STEPS or session.get('all_rows_recorded')is not True:raise ValueError('Incomplete captured physics rows')
+--- source003/test_score_contract.py
++++ source004/test_score_contract.py
+@@ -39,10 +39,16 @@
+    d=Path(x);r=self.fixture(d);self.write_arrays(d,r);report=score(d);save(d/'standing_report.json',report)
+    for f in ['contact_view.json','sdf_readback.json']:save(d/f,{})
+    (d/'contacts.jsonl').write_text('');save(d/'native_errors.json',[])
+-   identity={'num_envs':1};state={'schema':SCHEMA,'identity':identity,'status':'completed','inputs_unchanged':True,'errors':[],'native_error_events':[],'physical_admission':False,'physics_admitted':False,'training_allowed':False,'explicit_steps_completed':8000,'checks':{'test':True}}
++   before={'/Robot':{'position_iterations':32,'velocity_iterations':1,'authored':[False,False]}}
++   after={'/Robot':{'position_iterations':32,'velocity_iterations':4,'authored':[True,True]}}
++   solver={'before':before,**{k:copy.deepcopy(after)for k in ['after_authoring','after_reset','after_controlled_steps']}};save(d/'solver_readback.json',solver)
++   identity={'num_envs':1};state={'schema':SCHEMA,'identity':identity,'status':'completed','inputs_unchanged':True,'errors':[],'native_error_events':[],'physical_admission':False,'physics_admitted':False,'training_allowed':False,'explicit_steps_completed':8000,'checks':{'test':True,'solver_recipe_readback':True}}
+    def seal():
+     state['outputs']={p.name:sha(p)for p in d.iterdir()if p.name not in ['state.json','native_errors.json']};save(d/'state.json',state)
+    seal();self.assertTrue(validate_result(d,identity)['standing_pass'])
++   solver['after_reset']['/Robot']['velocity_iterations']=1;save(d/'solver_readback.json',solver);seal()
++   with self.assertRaisesRegex(ValueError,'Solver recipe differs'):validate_result(d,identity)
++   solver['after_reset']['/Robot']['velocity_iterations']=4;save(d/'solver_readback.json',solver);seal()
+    report['replicas'][0]['quiet']['max_joint_velocity_rms_rad_s']=.03001;save(d/'standing_report.json',report);seal()
+    with self.assertRaises(ValueError):validate_result(d,identity)
+    report['replicas'][0]['quiet']['max_joint_velocity_rms_rad_s']=0.;save(d/'standing_report.json',report);seal();save(d/'native_errors.json',[{'late':'error'}])

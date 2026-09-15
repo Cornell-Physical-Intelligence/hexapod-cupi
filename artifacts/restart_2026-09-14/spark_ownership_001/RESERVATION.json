@@ -1,0 +1,57 @@
+{
+  "observed_at": "2026-09-14T15:54:37.650515+00:00",
+  "reservation_path": "/home/orionh/HEXAPOD_runs/restart_20260914/spark_ownership_001",
+  "marker_sha256": "ad5550c0938e954410a2039f40d58f5529e7b49ccfff1dff1fac4e7dab22a2e1",
+  "coordination_sha256": "fc1da7bf07d1db3022b1b9a3ec41d261a69e7a19c562457ea4e4326a043893b0",
+  "policy_sha256": "163f4163f04c6855acde6e014e1ba9a985def5f6ebb95e7323fff8e91996d581",
+  "masked_user_units": 32,
+  "system_masked_units": 4,
+  "queue_unit": {
+    "MainPID": "2560589",
+    "Id": "hexapod-exclusive-reconstruction-queue.service",
+    "LoadState": "loaded",
+    "ActiveState": "active",
+    "SubState": "running",
+    "FragmentPath": "/home/orionh/.config/systemd/user/hexapod-exclusive-reconstruction-queue.service",
+    "DropInPaths": "",
+    "UnitFileState": "enabled",
+    "NeedDaemonReload": "no"
+  },
+  "queue_lock_record": {
+    "pid": 2560589,
+    "acquired_unix": 1789401277.4223282,
+    "lock_path": "/home/orionh/ithaca-reconstruction/queue-worker.lock",
+    "reservation_path": "/home/orionh/HEXAPOD_runs/restart_20260914/spark_ownership_001/ACTIVE",
+    "reservation_sha256": "ad5550c0938e954410a2039f40d58f5529e7b49ccfff1dff1fac4e7dab22a2e1",
+    "queue_mutated": false
+  },
+  "proc_locks": [
+    "5: FLOCK  ADVISORY  WRITE 2560589 103:02:6709775 0 EOF"
+  ],
+  "entry_probe": {
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "HEXAPOD exclusive Spark reservation: reconstruction deferred until explicit user release; original launcher preserved in restart_20260914/spark_ownership_001.\n"
+  },
+  "backups": [
+    {
+      "original": "/home/orionh/ithaca-reconstruction/queue-worker.py",
+      "backup": "/home/orionh/HEXAPOD_runs/restart_20260914/spark_ownership_001/queue-worker.before.py",
+      "sha256": "0c36aaca224eee47350636d5f8b18e5e6bbcb4512213fde4b29cdce790a9c359",
+      "mode": "0o644"
+    },
+    {
+      "original": "/home/orionh/.config/systemd/user/hexapod-exclusive-reconstruction-queue.service",
+      "backup": "/home/orionh/HEXAPOD_runs/restart_20260914/spark_ownership_001/queue-holder.service.before",
+      "sha256": "32524124789638077079eaf48d89fcc8047e55003dbbf444ec836bcb7edfc49b",
+      "mode": "0o644"
+    }
+  ],
+  "queue_outputs_mutated": false,
+  "gpu": {
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "native_run_started": false
+}
