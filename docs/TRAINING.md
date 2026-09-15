@@ -291,16 +291,20 @@ The initial timed-out Fable consultation and its
 also remain intact.
 
 The later [adopted BC comparison](../artifacts/restart_2026-09-14/paper_bc_learning_review_001/ROOT_DECISION_001.json)
-has only an [unintegrated, unexecuted helper](../artifacts/restart_2026-09-14/paper_bc_refit_preparation_001/README.md).
-It specifies 1,000 additional CPU BC steps for each of two arms from the same
-parent and uniform RNG draws: unchanged action MSE versus action-only weight20
-on 23 first-moving-onset rows, divided by fixed mean weight4197/3760. Loaded
-normalizers, velocity supervision, PPO/D state, learner bytes and physical gates
-remain fixed. Preparation has synthetic checks and read-only preflight only;
-the full fitting loop needs independent implementation review and maintained
-integration before execution. No fit or candidate native run has occurred.
-Fitting error cannot qualify walking, and no new research is launched during
-the current dispatcher pause.
+now has an executed result. The helper moved into the maintained prototype as
+`experiments/paper_walk/refit_bc.py` under [protocol 002](../artifacts/restart_2026-09-14/paper_bc_refit_protocol_002/README.md),
+which binds the relocated helper bytes to the unchanged recipe: 1,000 additional
+CPU BC steps for each of two arms from the same parent and identical uniform
+draws, unchanged action MSE versus action-only weight 20 on 23 first-moving-onset
+rows divided by the fixed mean weight 4197/3760. The
+[paired result](../artifacts/paper_bc_refit_001/REVIEW.md) records zero PPO
+updates, identical minibatch and final RNG hashes and strict reloads. The
+onset-weighted arm reduces first-moving-onset target RMSE from 0.026681 to
+0.001857 rad against 0.008535 rad for the uniform arm; its steady-row RMSE is
+0.001653 rad against 0.001262 rad. Velocity errors are identical between arms.
+These are fitting errors on training rows. Neither candidate has a native
+evaluation; the Spark host was unreachable at fitting time. Fitting error cannot
+qualify walking.
 
 The additional 13-case learning probe suite reuses the original numeric scorers
 and full 400 Hz motor/contact capture in one native app. It preserves the

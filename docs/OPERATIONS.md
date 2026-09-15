@@ -154,13 +154,14 @@ currently rejects the Unicode `action_source` channel; its failure is preserved,
 and the audit uses artifact-only typed loaders with all numeric/hash checks.
 Do not strip that channel from the immutable raw record.
 
-The [refit helper](../artifacts/restart_2026-09-14/paper_bc_refit_preparation_001/README.md)
-is prepared only, unintegrated and unexecuted. The adopted comparison is an
-equal-budget uniform versus onset-weighted CPU BC fit, not additional PPO.
-Its synthetic tests and preflight do not validate the full fitting loop. Require
-independent implementation review, maintained integration and exact input/output
-bindings before executing it; candidate fitting and native acceptance remain
-separate. No refit starts as part of this pause.
+The refit helper is integrated as `experiments/paper_walk/refit_bc.py` and
+executed on CPU under [protocol 002](../artifacts/restart_2026-09-14/paper_bc_refit_protocol_002/README.md);
+the [paired result](../artifacts/paper_bc_refit_001/REVIEW.md) holds both
+candidates. The maintained `reservation.py` now binds the pause coordination
+hash `c89c99eb...`; a successor still verifies live ownership, resources and
+both GPU locks on the host, then freezes `source_020` and fresh bindings before
+any native candidate evaluation. Candidate fitting and native acceptance remain
+separate.
 Recheck live reservation, exact source/configuration and matching admission for
 every allocation; a saved dispatch receipt is not live host telemetry or evidence
 of completion. The existing 13 learning probes, 96 full Stage 2 cases and

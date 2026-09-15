@@ -161,6 +161,14 @@ converts them. Learning state is preserved, while each native allocation starts
 a fresh simulation. Consult the progress registry for executed configurations
 and results; implementation availability alone is not a training result.
 
+`refit_bc.py` fits paired CPU behavior-cloning continuation candidates under an
+immutable protocol that binds the helper bytes, parent checkpoint, dataset, AMP
+prior and row weights. It imports only the maintained learner, performs no
+simulator or PPO step, and writes strict-reload candidates with paired RNG and
+minibatch hashes. Protocol 002 and its
+[executed result](../../artifacts/paper_bc_refit_001/REVIEW.md) are recorded
+under `artifacts/`; a fitted candidate needs native evaluation before any claim.
+
 `--mode evaluate --eval-scope startup --startup-arm cold` selects an additional
 20-second deterministic BC forward diagnostic at 0.05 m/s. The `neutral4` arm
 instead issues zero normalized actions and zero command for 200 native controls,

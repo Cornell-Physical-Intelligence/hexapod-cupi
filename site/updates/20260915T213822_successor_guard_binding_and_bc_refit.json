@@ -1,0 +1,40 @@
+{
+  "id": "20260915T213822_successor_guard_binding_and_bc_refit",
+  "date": "2026-09-15T21:38:22Z",
+  "title": "Bind the guard to the pause coordination hash and execute the paired BC refit",
+  "summary": "A successor lead continues the authorized Stage 2 goal under an approved plan. The maintained reservation guard binds the pause coordination hash c89c99eb... with a CPU test. The prepared onset-loss BC refit helper moved into experiments/paper_walk under protocol 002 and ran on CPU: the onset-weighted arm reduces first-moving-onset target RMSE from 0.026681 to 0.001857 rad against 0.008535 rad for the uniform arm, with steady-row RMSE 0.001653 versus 0.001262 rad. Both candidates are fitting results only. The Spark host was unreachable from the executing machine, so the host ownership recheck, source_020 freeze and native candidate evaluation remain pending. The release manifest advances to canonical-restart v7.",
+  "areas": [
+    "operations",
+    "behavior cloning",
+    "prototype source",
+    "release manifest",
+    "documentation"
+  ],
+  "changes": [
+    ".github/workflows/tests.yml",
+    "configs/source_inventory.json",
+    "docs/OPERATIONS.md",
+    "docs/PIPELINE_LINEAGES.md",
+    "docs/TRAINING.md",
+    "experiments/paper_walk/README.md",
+    "experiments/paper_walk/reservation.py",
+    "experiments/paper_walk/refit_bc.py",
+    "experiments/paper_walk/tests/test_refit_bc.py",
+    "experiments/paper_walk/tests/test_reservation_binding.py",
+    "tools/check_pipeline_lineages.py",
+    "artifacts/paper_bc_refit_001/*",
+    "artifacts/restart_2026-09-14/paper_bc_refit_protocol_002/*",
+    "isaaclab/deploy/repository_canonical_restart_20260915_v7_pipeline.sha256",
+    "site/project.json",
+    "STATUS.md"
+  ],
+  "evidence": [
+    "artifacts/paper_bc_refit_001/REVIEW.md",
+    "artifacts/paper_bc_refit_001/RESULT.json",
+    "artifacts/restart_2026-09-14/paper_bc_refit_protocol_002/PROTOCOL.json",
+    "experiments/paper_walk/tests/test_reservation_binding.py",
+    "docs/SPARK_COMPUTE_COORDINATION.md"
+  ],
+  "next": "Recheck live ownership, resources and both GPU locks on the Spark host, freeze source_020 with fresh bindings, evaluate both refit candidates with the cold and settled startup arms, then implement the tripod reference plus residual controller.",
+  "no_project_impact": false
+}

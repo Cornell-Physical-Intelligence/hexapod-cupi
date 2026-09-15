@@ -2,9 +2,9 @@
 
 <!-- Generated from site/project.json by tools/project_site.py status. Do not edit. -->
 
-Evidence snapshot: 2026-09-15T02:02:49.466495+00:00 · source `bd33a46f951ffb5dcdbf40e1386db3a3966a6cd7`.
+Evidence snapshot: 2026-09-15T21:38:22+00:00 · source `52096b4fd487f1d77cae773e758d093fd44cddea`.
 
-James requested a pause for handoff. No native job is active and no new refit was executed. Checkpoint320 fails forward, quiet and recovery; both BC startup arms also fail forward tracking. The paired native audit and video review are complete, and the proposed onset-loss refit is preserved as unintegrated preparation. Stage 2 remains unmet; all 96 full-suite cases and human acceptance remain outstanding.
+A successor continues the authorized Stage 2 goal under an approved four-step plan: coordination and the prepared BC refit, trainer profiling and larger admitted batches, equal-budget objective comparison, then command-range expansion. The maintained guard now binds the pause coordination hash, and the paired CPU BC refit is executed: the onset-weighted arm reduces first-onset target RMSE from 0.026681 to 0.001857 rad against 0.008535 rad for the uniform arm. No native evaluation of either candidate exists because the Spark host was unreachable; checkpoint320 and both BC startup arms still fail forward tracking. Stage 2 remains unmet; all 96 full-suite cases and human acceptance remain outstanding.
 
 [Architecture](ARCHITECTURE.md) · [Visual roadmap](https://cornell-physical-intelligence.github.io/hexapod-cupi/#roadmap)
 
@@ -34,11 +34,11 @@ Scope: Approved detailed robot model. Owner: Platform lead.
 
 Required proof: Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait’s visual quality.
 
-Current limitation: User requested the current dispatcher pause for handoff. Corrected-model walking remains unsuccessful; all 96 full-suite cases and human acceptance are outstanding.
+Current limitation: Corrected-model walking remains unsuccessful; all 96 full-suite cases and human acceptance are outstanding. The successor's native steps wait on Spark host access for the ownership recheck and source_020 freeze.
 
 [Evidence](experiments/paper_walk/README.md) · Architecture: R-04, R-10, R-11.
 
-Next step: **not defined**. Successor lead reviews the preserved results and unexecuted refit preparation, then establishes sole dispatch ownership before resuming.
+Next step: **not defined**. Successor completes the host ownership recheck and fresh guard binding, evaluates both refit candidates natively, then tests the tripod reference plus residual controller before profiling larger batches.
 
 ### Use sensors to cross terrain — Blocked
 
@@ -144,9 +144,11 @@ Assignment pending. Retain M1’s agreed fixture and thresholds; assign its owne
 - **Cold BC startup dispatched; settled arm prepared (inconclusive)** — Guarded startup_cold_001 · source019 · unchanged fit004 policy via explicit migration002. The actual cold-arm receipt records dispatch at 01:33:13 UTC on 15 September under invocation 7a40bb56663643ad9473a82ca4f7db0f. Binding 355048168f5a71e85de9d9cb0f791afdb919d692bb5ae1e44599580024345f69 uses frozen source019 e03583e690492861911e13deafa859efec094a5e09a33f370ebdedfcfd3402b0. The neutral4 arm has a separate preparation and binding only. No native outcome or cleanup is claimed for either arm in this snapshot, and a warm-arm success would not replace cold-start qualification. [Evidence](artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_startup_cold_001.json)
 - **Cold and settled BC startup trials both fail forward tracking (failed)** — Two separate fresh Isaac apps · source019 · identical BCcheckpointdfb6d3 · actual RGB and400Hz evidence. Cold1000controls/8000physicssteps and settled1200controls/9600steps complete with unchanged actor state and no acquisition failure. Their original1000-row policy windows fail only planar tracking, with post-exclusion forward means−0.00004720 and+0.00035890m/s for+0.05m/s. All native physical windows pass. The scripted200-control prefix is explicitly labeled and never qualifies learned quiet standing. All38cold and40warm files verify; independent paired analysis now verifies all 17,600 steps and 394,457 contact patches. Both original planar-only failures reproduce. [Evidence](artifacts/restart_2026-09-14/paper_walk_execution_001/results_startup_neutral4_001/standing/evaluation/startup_result.json)
 - **Research paused for another lead; remaining work preserved (inconclusive)** — User-directed pause with Spark and automation readbacks. At 01:58 UTC the four latest native units report inactive with PID 0; Docker and GPU compute-app lists are empty. The historical continuation heartbeat is already paused. Exclusive HEXAPOD reservation and recovery controls remain retained. Paired startup analysis is sealed; the two-arm BC refit has not been integrated or executed. The current dispatcher relinquishes execution after publication; no successor is assigned and Stage 2 is not complete. [Evidence](artifacts/restart_2026-09-14/pause_20260915_001/RECEIPT.json)
+- **Prototype guard bound to the pause coordination hash; host recheck pending (inconclusive)** — Maintained source and CPU tests; no Spark access from the executing machine. The maintained reservation guard now binds the pause coordination file hash c89c99eb..., with a CPU test pinning the constant to the recorded policy. Live ownership, resource and GPU-lock rechecks on the host, the source_020 freeze and fresh launch bindings remain unexecuted because the Spark Tailscale host did not resolve from the executing machine. No native job was started. [Evidence](experiments/paper_walk/tests/test_reservation_binding.py)
+- **Paired BC refit executed on CPU: onset weighting fits onset rows, no native result (inconclusive)** — CPU behavior-cloning continuation · migrated fit004 parent · protocol 002 · zero PPO updates. Both arms completed 1,000 additional CPU BC steps from the same migrated parent with identical minibatch draws and final sampling RNG, strict reloads and unchanged normalizers, critic, AMP and optimizer states. The onset-weighted arm reduces first-moving-onset target RMSE to 0.001857 rad against 0.008535 rad for the equal-budget uniform arm, while its steady-row RMSE is 0.001653 rad against 0.001262 rad. These are fitting errors on training rows. Neither candidate has a native cold or settled evaluation; Stage 2 gates, the 13 probes and the 96 cases remain unrun for both. [Evidence](artifacts/paper_bc_refit_001/REVIEW.md)
 
 The current dispatcher is paused by James’s latest instruction and will not resume automatically. Another lead may take over the existing authorized Stage 2 goal after fresh ownership and host checks. Preserve the corrected model, full numerical and human visual requirements, all failed evidence and exact source/checkpoint identities. Prepared BC fitting, scripted prefixes, native capture completion and quiet-only passes do not qualify walking. Existing 13 diagnostic and 96 required cases remain unchanged.
 
 Current compute rules and reservation records: [operations](docs/SPARK_COMPUTE_COORDINATION.md). This is not live GPU telemetry.
 
-[Full execution snapshot before consolidation](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/a074f7927b4104d2916e73e1304bfb3d967495f1/STATUS.md). Historical results retain their original evidence and gates.
+[Full execution snapshot before consolidation](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/04e9ede5c79fc0ff80151847fa8251f82cf21b0a/STATUS.md). Historical results retain their original evidence and gates.

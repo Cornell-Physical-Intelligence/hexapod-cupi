@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "title": "Hexapod \u00b7 Development roadmap",
+  "title": "Hexapod · Development roadmap",
   "repository": "Cornell-Physical-Intelligence/hexapod-cupi",
   "mission": "Hexapod MKII: from walking to autonomous surveying",
   "description": "Build a hexapod that surveys an area drawn on a map and returns a 3D map of the ground. It can stop to take measurements and process the finished map afterward.",
@@ -19,7 +19,7 @@
   "checkpoint": {
     "receipt": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/train/training_receipt.json",
     "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md",
-    "label": "Historical C-study PPO \u00b7 500 updates",
+    "label": "Historical C-study PPO · 500 updates",
     "qualification": "Unqualified historical gait; 0/48 quiet trials pass. New detailed CAD requires native admission.",
     "video_matches": true,
     "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/train/policy/final.pt"
@@ -43,7 +43,7 @@
     },
     {
       "id": "benchmark_01_poster",
-      "title": "Forward-walking reference \u2014 preview frame",
+      "title": "Forward-walking reference — preview frame",
       "type": "image",
       "role": "video_poster",
       "path": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/frame_05.png",
@@ -66,7 +66,7 @@
     },
     {
       "id": "direct315_1971_poster",
-      "title": "Earlier controller following five paths \u2014 preview frame",
+      "title": "Earlier controller following five paths — preview frame",
       "type": "image",
       "role": "video_poster",
       "path": "artifacts/omni_flat_2026-09-09/omni_preview_001/frame_33.png",
@@ -111,7 +111,7 @@
     },
     {
       "id": "caps50_preview_poster",
-      "title": "Earlier controller after 50 training updates \u2014 preview frame",
+      "title": "Earlier controller after 50 training updates — preview frame",
       "type": "image",
       "role": "video_poster",
       "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_preview_001/terminal/review/frame_07.png",
@@ -134,7 +134,7 @@
     },
     {
       "id": "caps500_preview_poster",
-      "title": "Earlier controller after 500 training updates \u2014 preview frame",
+      "title": "Earlier controller after 500 training updates — preview frame",
       "type": "image",
       "role": "video_poster",
       "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/terminal/review/frame_07.png",
@@ -151,19 +151,19 @@
       "path": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/hexapod_detailed_cad_showcase_final.mp4",
       "sha256": "d6096b2e0cb32b5527697b8c4fa08e590a77b5e44f14887b913626ca143feb20",
       "caption": "24-second view of the approved assembly with joint movement. This is a CAD animation; it does not simulate balance, foot contact or a walking controller.",
-      "controller": "No controller \u2014 prescribed CAD joint articulation",
+      "controller": "No controller — prescribed CAD joint articulation",
       "evidence": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/README.md",
       "poster_id": "canonical_detailed_cad_poster"
     },
     {
       "id": "canonical_detailed_cad_poster",
-      "title": "Approved robot model: CAD inspection \u2014 preview frame",
+      "title": "Approved robot model: CAD inspection — preview frame",
       "type": "image",
       "role": "video_poster",
       "path": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/poster_final.png",
       "sha256": "3edfa8cf7282445312b3c2a6beb96694cc6310835689f71c10ae8ab9ca01d78a",
       "caption": "Frame from Approved robot model: CAD inspection.",
-      "controller": "No controller \u2014 prescribed CAD joint articulation",
+      "controller": "No controller — prescribed CAD joint articulation",
       "evidence": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/README.md"
     }
   ],
@@ -176,7 +176,7 @@
       "column": 0,
       "row": 0,
       "meaning": "The operator draws the boundary on a map. The boundary and robot position use coordinates relative to the same test site.",
-      "input": "A map and the operator\u2019s boundary",
+      "input": "A map and the operator’s boundary",
       "output": "The area to survey",
       "source": "ARCHITECTURE.md",
       "milestone_id": "mission"
@@ -240,7 +240,7 @@
       "state": "planned",
       "column": 1,
       "row": 1,
-      "meaning": "Combine sensor and movement measurements to track the robot\u2019s position and orientation within the test site.",
+      "meaning": "Combine sensor and movement measurements to track the robot’s position and orientation within the test site.",
       "input": "Laser scans, motion measurements and sensor calibration",
       "output": "Estimated position, orientation, speed and error",
       "source": "ARCHITECTURE.md",
@@ -413,7 +413,7 @@
       "id": "stage2",
       "title": "Stand, walk and stop",
       "description": "Restart qualification on the mass-corrected model confirmed on 14 September 2026. First pass standing admission, then train forward, backward and sideways motion with turning and quiet stops. Compare gait quality with the historical reference.",
-      "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait\u2019s visual quality.",
+      "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait’s visual quality.",
       "source": "experiments/paper_walk/README.md",
       "media_id": "caps500_preview",
       "status": "blocked",
@@ -427,11 +427,11 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "User requested the current dispatcher pause for handoff. Corrected-model walking remains unsuccessful; all 96 full-suite cases and human acceptance are outstanding.",
-      "question": "Successor lead reviews the preserved results and unexecuted refit preparation, then establishes sole dispatch ownership before resuming.",
+      "blocker": "Corrected-model walking remains unsuccessful; all 96 full-suite cases and human acceptance are outstanding. The successor's native steps wait on Spark host access for the ownership recheck and source_020 freeze.",
+      "question": "Successor completes the host ownership recheck and fresh guard binding, evaluates both refit candidates natively, then tests the tripod reference plus residual controller before profiling larger batches.",
       "next_step": null,
       "acceptance": null,
-      "card_text": "Paused for handoff; walking remains unqualified."
+      "card_text": "Successor plan approved; BC refit fitted on CPU, native evaluation pending."
     },
     {
       "id": "stage3",
@@ -480,7 +480,7 @@
         "R-10"
       ],
       "blocker": "Fresh survey qualification depends on canonical movement and terrain qualification, and the physical robot is not built. The agreed independent M1 scan test still needs an owner and reviewer; it does not qualify robot surveying.",
-      "question": "Retain M1\u2019s agreed fixture and thresholds; assign its owner and reviewer without treating it as robot survey qualification. Define the survey increment after its canonical prerequisites qualify.",
+      "question": "Retain M1’s agreed fixture and thresholds; assign its owner and reviewer without treating it as robot survey qualification. Define the survey increment after its canonical prerequisites qualify.",
       "next_step": null,
       "acceptance": null,
       "definition": {
@@ -493,7 +493,7 @@
           "With noise disabled, every expected floor or wall hit must be within 1 mm of its expected position.",
           "With the existing sensor noise enabled, at least 95% of expected hits must be within 7 cm. Missing hits count as failures; report false hits separately."
         ],
-        "fixture": "Sensor height: 0.25 m. Wall: 0.80 m wide \u00d7 0.08 m thick \u00d7 0.50 m high, centred 1 m in front of the sensor. Use 20,000 rays per scan. Fixed random seeds: 360 for the scan pattern and 20260824 for sensor noise and timing."
+        "fixture": "Sensor height: 0.25 m. Wall: 0.80 m wide × 0.08 m thick × 0.50 m high, centred 1 m in front of the sensor. Use 20,000 rays per scan. Fixed random seeds: 360 for the scan pattern and 20260824 for sensor noise and timing."
       },
       "card_text": "Pending canonical qualification; M1 scope retained."
     }
@@ -501,7 +501,7 @@
   "papers": [
     {
       "title": "CAPS",
-      "role": "Smooth the policy\u2019s output across time and nearby observations.",
+      "role": "Smooth the policy’s output across time and nearby observations.",
       "url": "https://ai.bu.edu/caps/"
     },
     {
@@ -524,7 +524,7 @@
   "glossary": [
     {
       "term": "Learned controller (policy)",
-      "meaning": "A trained model that selects joint targets from the requested movement and the robot\u2019s measured state."
+      "meaning": "A trained model that selects joint targets from the requested movement and the robot’s measured state."
     },
     {
       "term": "Training update",
@@ -549,18 +549,18 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-15T02:02:49.466495+00:00",
-    "source_commit": "bd33a46f951ffb5dcdbf40e1386db3a3966a6cd7",
+    "as_of": "2026-09-15T21:38:22+00:00",
+    "source_commit": "52096b4fd487f1d77cae773e758d093fd44cddea",
     "architecture": "ARCHITECTURE.md",
-    "summary": "James requested a pause for handoff. No native job is active and no new refit was executed. Checkpoint320 fails forward, quiet and recovery; both BC startup arms also fail forward tracking. The paired native audit and video review are complete, and the proposed onset-loss refit is preserved as unintegrated preparation. Stage 2 remains unmet; all 96 full-suite cases and human acceptance remain outstanding.",
-    "definition_policy": "The current dispatcher is paused by James\u2019s latest instruction and will not resume automatically. Another lead may take over the existing authorized Stage 2 goal after fresh ownership and host checks. Preserve the corrected model, full numerical and human visual requirements, all failed evidence and exact source/checkpoint identities. Prepared BC fitting, scripted prefixes, native capture completion and quiet-only passes do not qualify walking. Existing 13 diagnostic and 96 required cases remain unchanged.",
+    "summary": "A successor continues the authorized Stage 2 goal under an approved four-step plan: coordination and the prepared BC refit, trainer profiling and larger admitted batches, equal-budget objective comparison, then command-range expansion. The maintained guard now binds the pause coordination hash, and the paired CPU BC refit is executed: the onset-weighted arm reduces first-onset target RMSE from 0.026681 to 0.001857 rad against 0.008535 rad for the uniform arm. No native evaluation of either candidate exists because the Spark host was unreachable; checkpoint320 and both BC startup arms still fail forward tracking. Stage 2 remains unmet; all 96 full-suite cases and human acceptance remain outstanding.",
+    "definition_policy": "The current dispatcher is paused by James’s latest instruction and will not resume automatically. Another lead may take over the existing authorized Stage 2 goal after fresh ownership and host checks. Preserve the corrected model, full numerical and human visual requirements, all failed evidence and exact source/checkpoint identities. Prepared BC fitting, scripted prefixes, native capture completion and quiet-only passes do not qualify walking. Existing 13 diagnostic and 96 required cases remain unchanged.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
-    "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/a074f7927b4104d2916e73e1304bfb3d967495f1/STATUS.md",
+    "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/04e9ede5c79fc0ff80151847fa8251f82cf21b0a/STATUS.md",
     "facts": [
       {
         "id": "canonical-standing",
         "title": "Historical inspection-zero standing: 10 of 32 pass",
-        "backend": "Native simulation \u00b7 approved detailed model \u00b7 inspection-zero stance",
+        "backend": "Native simulation · approved detailed model · inspection-zero stance",
         "result": "failed",
         "text": "In the recorded inspection-zero configuration, 22 of 32 robots fail the foot-support check; eight also exceed the joint-motion limit. This failed result remains unchanged and does not test the later walking-neutral configuration.",
         "source": "artifacts/mkii_updated_2026-09-10/native_standing32_rejected_005/README.md",
@@ -591,7 +591,7 @@
       {
         "id": "historical-quiet",
         "title": "Earlier controller: 0 of 48 stop tests pass",
-        "backend": "Simulation \u00b7 earlier simplified model",
+        "backend": "Simulation · earlier simplified model",
         "result": "failed",
         "text": "The controller shown after 500 training updates moves in some requested directions, but fails every stop test. Its results apply to that earlier robot model.",
         "source": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md"
@@ -599,9 +599,9 @@
       {
         "id": "research-pause",
         "title": "Historical experiment pause: 11 September",
-        "backend": "Team lead\u2019s recorded handoff",
+        "backend": "Team lead’s recorded handoff",
         "result": "passed",
-        "text": "The team lead\u2019s 11 September handoff records stopped research automation and no queued experiment. These pause receipts remain unchanged; the later 14 September user authorization resumes the canonical qualification sequence. Neither record establishes current compute or automation state.",
+        "text": "The team lead’s 11 September handoff records stopped research automation and no queued experiment. These pause receipts remain unchanged; the later 14 September user authorization resumes the canonical qualification sequence. Neither record establishes current compute or automation state.",
         "source": "artifacts/handoff_2026-09-11/james_001/README.md"
       },
       {
@@ -615,7 +615,7 @@
       {
         "id": "standing-placement-20260914",
         "title": "Inspection-zero restart: location-dependent failure",
-        "backend": "Native simulation \u00b7 confirmed mass-corrected model \u00b7 14 September 2026",
+        "backend": "Native simulation · confirmed mass-corrected model · 14 September 2026",
         "result": "failed",
         "text": "At inspection zero, the origin run passes all standing gates. Two runs at (14,4) each lose middle-foot support for five quiet-window steps and reach 0.074617 rad/s joint-speed RMS, above the 0.03 limit. Both translated raw traces are identical. These failures remain unchanged; they neither test nor reject the later walking-neutral configuration.",
         "source": "artifacts/restart_2026-09-14/standing_translation_execution_001/REPORT.md"
@@ -623,7 +623,7 @@
       {
         "id": "walking-neutral-one-20260914",
         "title": "Walking-neutral standing: 1 of 1 pass",
-        "backend": "Native simulation \u00b7 confirmed mass-corrected model \u00b7 paper-walk source002 \u00b7 14 September 2026",
+        "backend": "Native simulation · confirmed mass-corrected model · paper-walk source002 · 14 September 2026",
         "result": "passed",
         "text": "The declared neutral [0, -0.30, 0.40] radians per leg passes every original standing gate on the single robot. The saved 400 Hz traces independently reproduce the full report. This is a scoped standing pass, not learned walking, hardware calibration or Stage 2 acceptance.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_one_002/standing/standing/standing_report.json",
@@ -648,7 +648,7 @@
       {
         "id": "walking-neutral-batch-20260914",
         "title": "Walking-neutral standing: 32 of 32 pass",
-        "backend": "Native simulation \u00b7 confirmed mass-corrected model \u00b7 paper-walk source002 \u00b7 14 September 2026",
+        "backend": "Native simulation · confirmed mass-corrected model · paper-walk source002 · 14 September 2026",
         "result": "passed",
         "text": "The declared neutral [0, -0.30, 0.40] radians per leg passes every original standing gate on all 32 replicas. The saved 400 Hz traces independently reproduce the full report. This is a scoped standing pass, not learned walking, hardware calibration or Stage 2 acceptance.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_batch32_001/standing/standing/standing_report.json",
@@ -673,7 +673,7 @@
       {
         "id": "canonical-native-replay-20260914",
         "title": "Native gait replay: all 21 commands represented",
-        "backend": "Native simulation \u00b7 confirmed mass-corrected model \u00b7 paper-walk source003 \u00b7 14 September 2026",
+        "backend": "Native simulation · confirmed mass-corrected model · paper-walk source003 · 14 September 2026",
         "result": "passed",
         "text": "Native PD replay accepted 31 of 32 complete demonstrations, retaining all 21 commands and producing 1,860 training transitions. One duplicate demonstration remains rejected for 4.896% worst-joint torque saturation against the 2% replay screen. This selected reference dataset is not a walking policy or Stage 2 qualification; the separate 0.5% qualification limit is unchanged.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_replay_001/standing/native_replay/report.json"
@@ -681,7 +681,7 @@
       {
         "id": "canonical-ppo200-20260914",
         "title": "First corrected-model PPO run: 200 updates completed",
-        "backend": "Native simulation \u00b7 confirmed mass-corrected model \u00b7 paper-walk source004 \u00b7 32 replicas \u00b7 14 September 2026",
+        "backend": "Native simulation · confirmed mass-corrected model · paper-walk source004 · 32 replicas · 14 September 2026",
         "result": "passed",
         "text": "The first PPO and motion-prior run completed 200 updates and 153,600 native transitions without behavior cloning. Checkpoint 5d48928dd4ba5fdfbd8ff6c6706a5eb8c3951aeaa9aacb8e38ee65383a31a752 passes strict serialization and model/optimizer reload checks. Run completion, recorded cleanup and a saved controller do not establish walking, quiet stops or Stage 2 acceptance.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_001/standing/state.json",
@@ -702,7 +702,7 @@
       {
         "id": "canonical-ppo230-20260914",
         "title": "Reporting continuation: 30 more updates completed",
-        "backend": "Native simulation \u00b7 confirmed mass-corrected model \u00b7 paper-walk source007 \u00b7 32 replicas \u00b7 14 September 2026",
+        "backend": "Native simulation · confirmed mass-corrected model · paper-walk source007 · 32 replicas · 14 September 2026",
         "result": "passed",
         "text": "The unchanged objective continued from checkpoint200 for 30 updates and 23,040 native transitions, saving checkpoint230 with SHA-256 fa043b43dc28c41cd8de7f20f53531629662b187230b77c4c2c14ec94acefa61. This is learning-state continuation with a fresh simulator and command schedule, not exact physics resume. Four episodes terminated and moving-command signed speed remained near zero; run completion does not qualify walking.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_002/standing/state.json",
@@ -725,15 +725,15 @@
       {
         "id": "canonical-quiet-cost-diagnosis-20260914",
         "title": "Measured quiet penalties dominate the training reward",
-        "backend": "Recorded native training metrics \u00b7 source007 continuation \u00b7 14 September 2026",
+        "backend": "Recorded native training metrics · source007 continuation · 14 September 2026",
         "result": "passed",
-        "text": "Mean quiet costs are 14.916 against an absolute mean task reward of 14.656. Moving-command signed speed is \u22120.0000173 m/s and four episodes terminated. The measured reward breakdown supports a gentler large-error tail; it does not establish a deterministic walking result.",
+        "text": "Mean quiet costs are 14.916 against an absolute mean task reward of 14.656. Moving-command signed speed is −0.0000173 m/s and four episodes terminated. The measured reward breakdown supports a gentler large-error tail; it does not establish a deterministic walking result.",
         "source": "artifacts/restart_2026-09-14/paper_learning_review_001/DECISION_001.json"
       },
       {
         "id": "canonical-camera-empty-20260914",
         "title": "First policy-camera attempt returned blank RGB",
-        "backend": "Native Isaac capture \u00b7 confirmed mass-corrected model \u00b7 source005 \u00b7 14 September 2026",
+        "backend": "Native Isaac capture · confirmed mass-corrected model · source005 · 14 September 2026",
         "result": "failed",
         "text": "The first evaluation returned missing or blank RGB before any policy control or recorded frame. Its failure report and exact cleanup are preserved. This is a recording failure, not a walking verdict.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_001/standing/evaluation/report.json"
@@ -741,7 +741,7 @@
       {
         "id": "canonical-camera-stalled-20260914",
         "title": "Second policy-camera attempt stopped before its first frame",
-        "backend": "Native Isaac capture \u00b7 confirmed mass-corrected model \u00b7 source006 \u00b7 14 September 2026",
+        "backend": "Native Isaac capture · confirmed mass-corrected model · source006 · 14 September 2026",
         "result": "interrupted",
         "text": "The dispatcher stopped the second attempt after capture stalled before producing a policy frame or control. The stopped job and cleanup receipts remain intact. Native camera repair continues; no policy video is established.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_002/jobs/standing.json"
@@ -749,7 +749,7 @@
       {
         "id": "canonical-quiet-tail-prepared-20260914",
         "title": "Fresh quiet-cost experiment approved; outcome pending",
-        "backend": "Recorded Fable 5.1 maximum-effort review and root decision \u00b7 14 September 2026",
+        "backend": "Recorded Fable 5.1 maximum-effort review and root decision · 14 September 2026",
         "result": "inconclusive",
         "text": "The prepared objective retains each quiet cost through its original normalized scale and uses 1 + ln(u) above it, after the existing joint mean. Weights, other rewards, commands, physics and all Stage 2 gates stay unchanged. Fresh initialization, behavior cloning off and an initial 200-update budget are approved; this update records no launch or native result for that experiment.",
         "source": "artifacts/restart_2026-09-14/paper_learning_review_001/DECISION_001.json"
@@ -757,7 +757,7 @@
       {
         "id": "canonical-quiet-tail-trained-20260914",
         "title": "Fresh quiet-tail PPO run completed 200 updates",
-        "backend": "Native simulation \u00b7 confirmed mass-corrected model \u00b7 train 003 \u00b7 32 replicas \u00b7 14 September 2026",
+        "backend": "Native simulation · confirmed mass-corrected model · train 003 · 32 replicas · 14 September 2026",
         "result": "passed",
         "text": "The fresh objective completed 200 updates and 153,600 native transitions without behavior cloning, saving checkpoint 27c7ef7c15cc61faf90fdb10d636f2bbd7893f213cc14afdf45ec2656cfaed9d. Serialization and restore checks pass. This is a separate fresh experiment, not another 200 updates on the earlier policy and not walking acceptance.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_003/standing/state.json",
@@ -778,7 +778,7 @@
       {
         "id": "canonical-quiet-tail-learning-failed-20260914",
         "title": "Higher reward did not produce directional walking",
-        "backend": "Native stochastic training metrics \u00b7 train 003 \u00b7 confirmed model",
+        "backend": "Native stochastic training metrics · train 003 · confirmed model",
         "result": "failed",
         "text": "Moving-command signed speed was 0.000557 m/s, with 92 terminations and 108 timeouts. These recorded terminations are not all classified as falls. The softened quiet penalties remove the earlier reward dominance, but neither the training measurements nor the subsequent deterministic video establish gait acquisition.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_003/standing/task/latest_status.json"
@@ -786,7 +786,7 @@
       {
         "id": "canonical-camera-type-failure-20260914",
         "title": "Evaluation 005 failed before policy control",
-        "backend": "Native Isaac camera startup \u00b7 confirmed model \u00b7 14 September 2026",
+        "backend": "Native Isaac camera startup · confirmed model · 14 September 2026",
         "result": "failed",
         "text": "Camera source inspection received an unresolved SDK type and raised a TypeError before a control or recorded frame. The original failure, zero-step capture and cleanup are preserved. This startup/instrumentation failure is not a learning result.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_005/standing/evaluation/report.json"
@@ -794,7 +794,7 @@
       {
         "id": "canonical-policy-video006-failed-20260914",
         "title": "First actual native policy video fails walking checks",
-        "backend": "Native Isaac simulation \u00b7 confirmed model \u00b7 train 001 checkpoint 200 \u00b7 evaluation 006",
+        "backend": "Native Isaac simulation · confirmed model · train 001 checkpoint 200 · evaluation 006",
         "result": "failed",
         "text": "The deterministic forward 0.05 m/s trial recorded 1,000 controls, 8,000 native steps and 500 video frames. Capture completes without a native recorder error, but direction tracking, yaw error and requested torque-demand gates fail. The original video and full motor/contact evidence are preserved.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_006/standing/evaluation/report.json"
@@ -802,7 +802,7 @@
       {
         "id": "canonical-policy-video007-failed-20260914",
         "title": "Quiet-tail policy terminates at a tibia joint limit",
-        "backend": "Native Isaac simulation \u00b7 confirmed model \u00b7 train 003 checkpoint 200 \u00b7 evaluation 007",
+        "backend": "Native Isaac simulation · confirmed model · train 003 checkpoint 200 · evaluation 007",
         "result": "failed",
         "text": "The deterministic forward 0.05 m/s trial retained 669 controls, 5,352 native steps and 334 video frames before the left-middle tibia crossed its lower joint limit at 13.38 seconds. It remains upright. Tracking, yaw, vertical motion, torque-demand and complete-window checks also fail; the incomplete prefix is preserved without resets.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_007/standing/evaluation/report.json"
@@ -810,15 +810,15 @@
       {
         "id": "canonical-terminal007-audit-20260914",
         "title": "Independent audit separates the joint-limit event from a fall",
-        "backend": "CPU audit of saved native 400 Hz samples \u00b7 evaluation 007",
+        "backend": "CPU audit of saved native 400 Hz samples · evaluation 007",
         "result": "passed",
-        "text": "All 22 recorder checks pass against 23 hashed inputs. The final lm_tibia_pitch angle is \u22120.0877675414 rad against lower \u22120.0872664601 rad, beyond the unchanged 2e\u22126 tolerance. Root height 0.0890876 m and tilt 1.49685 degrees trigger neither fall predicate. Applied torque stays below 1.60001 N\u00b7m; there is no native error, speed-limit violation or recorded nonfoot event. This audit preserves the failed policy verdict.",
+        "text": "All 22 recorder checks pass against 23 hashed inputs. The final lm_tibia_pitch angle is −0.0877675414 rad against lower −0.0872664601 rad, beyond the unchanged 2e−6 tolerance. Root height 0.0890876 m and tilt 1.49685 degrees trigger neither fall predicate. Applied torque stays below 1.60001 N·m; there is no native error, speed-limit violation or recorded nonfoot event. This audit preserves the failed policy verdict.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/terminal_audit_evaluate_007/audit.json"
       },
       {
         "id": "canonical-native-video-review-20260914",
         "title": "Native recordings show jitter rather than coordinated travel",
-        "backend": "Hashed CPU recording analysis and root direct visual review \u00b7 evaluations 006/007",
+        "backend": "Hashed CPU recording analysis and root direct visual review · evaluations 006/007",
         "result": "failed",
         "text": "Direct review finds persistent small leg shakes and little travel in both actual policy recordings, with dominant joint-motion frequencies near 5.10 Hz and 7.18 Hz. The analyses retain their original numeric failures and full traces. The unequal 20-second and 13.38-second windows do not support a matched full-trial ranking. Neither video satisfies the existing smoothness comparison.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_001/review.json"
@@ -826,7 +826,7 @@
       {
         "id": "canonical-low-exploration-decision-20260914",
         "title": "Lower-exploration contrast adopted after actual video review",
-        "backend": "Fable 5.1 maximum-effort consultation, corrected follow-up and root decision \u00b7 14 September 2026",
+        "backend": "Fable 5.1 maximum-effort consultation, corrected follow-up and root decision · 14 September 2026",
         "result": "inconclusive",
         "text": "The recorded decision selects a fresh 32-replica, 200-update contrast with initial standard deviation 0.1 instead of 0.4 and behavior cloning off. Physics, learner, task reward, replay and all gates stay unchanged. This tests whether reduced exploration improves gait acquisition; no causal fix or independent prior validation is claimed. The 13 additional low-speed probes preserve original quiet/stop windows and cannot replace the full 96-case qualification.",
         "source": "artifacts/restart_2026-09-14/paper_learning_review_002/DECISION_001.json"
@@ -834,7 +834,7 @@
       {
         "id": "canonical-train004-startup-failed-20260914",
         "title": "First lower-exploration allocation failed before training",
-        "backend": "Guarded native simulator startup \u00b7 train 004 \u00b7 source 014 \u00b7 14 September 2026",
+        "backend": "Guarded native simulator startup · train 004 · source 014 · 14 September 2026",
         "result": "failed",
         "text": "The allocation did not reach AppReady within 90 seconds and produced no PPO update or policy control. The supervisor preserved the initializing state and failed job, then verified exact-container cleanup at 19:18:22 UTC. The intended std 0.1 experiment has no learning outcome from this attempt; its startup failure is separate from policy performance.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_004/jobs/standing.json"
@@ -842,7 +842,7 @@
       {
         "id": "canonical-low-exploration-completed-20260914",
         "title": "Lower-exploration PPO: 200 updates completed",
-        "backend": "Native simulation \u00b7 confirmed mass-corrected model \u00b7 train 005 \u00b7 source015 \u00b7 32 replicas",
+        "backend": "Native simulation · confirmed mass-corrected model · train 005 · source015 · 32 replicas",
         "result": "passed",
         "text": "The fresh initial-std-0.1 run completed 200 PPO updates and 153,600 native transitions without behavior cloning, saving checkpoint 43ed0d8291feb028004f843e78b1e01fd3695fd81234d1bef391ff53cef6b035. Strict serialization and restore checks pass. Three episodes terminated; moving-command signed speed was 0.000739 m/s. Completion and fewer terminations do not qualify movement.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_005/standing/state.json",
@@ -863,7 +863,7 @@
       {
         "id": "canonical-low-exploration-probes-stopped-20260914",
         "title": "Lower-exploration probes stopped after four failed direction trials",
-        "backend": "Native deterministic simulation \u00b7 train005 checkpoint200 \u00b7 evaluation008",
+        "backend": "Native deterministic simulation · train005 checkpoint200 · evaluation008",
         "result": "interrupted",
         "text": "Four complete 20-second trials at 0, 45, 90 and 135 degrees all fail planar tracking; the fourth also fails an original native physical bound. The stop decision was recorded after three completed trials; a fourth completed before the controlled stop took effect. The final saved summary retains four failures and nine missing probes. Exact-container cleanup is verified. No missing or interrupted trial is treated as passing.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_008/standing/evaluation/summary.json"
@@ -871,7 +871,7 @@
       {
         "id": "canonical-cpu-bc-fit-20260914",
         "title": "CPU imitation fit: 1,000 fitting steps, zero PPO updates",
-        "backend": "Offline CPU fit on accepted native replay rows \u00b7 paper_bc_fit_001",
+        "backend": "Offline CPU fit on accepted native replay rows · paper_bc_fit_001",
         "result": "passed",
         "text": "The separate actor fit completed 1,000 behavior-cloning steps on 1,860 accepted steady replay rows. The checkpoint is f9d32d7fdfe132e7f9ba050c08364f641079d02b833548ddf949d2683e542660, with zero PPO updates and zero newly simulated training transitions. Strict independent reload checks pass. The holdout is a neighboring cycle of the same selected trajectories; it is not independent gait validation. No onset or stopping examples were added.",
         "source": "artifacts/paper_bc_fit_001/REPORT.json",
@@ -894,7 +894,7 @@
       {
         "id": "canonical-bc-forward-failed-20260914",
         "title": "BC-only forward video completes but fails tracking",
-        "backend": "Native Isaac simulation \u00b7 BC1000 checkpoint, zero PPO updates \u00b7 evaluation009",
+        "backend": "Native Isaac simulation · BC1000 checkpoint, zero PPO updates · evaluation009",
         "result": "failed",
         "text": "The complete 20-second forward trial records 1,000 controls, 8,000 native steps and 500 video frames. Planar tracking error is 0.057529 m/s against the unchanged 0.025 limit; it is the sole failed numeric gate in this trial. The native capture completes without termination or acquisition error. This is the BC-only checkpoint, not another PPO-trained policy.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_009/standing/evaluation/report.json"
@@ -902,7 +902,7 @@
       {
         "id": "canonical-bc-native-visual-review-20260914",
         "title": "BC-only video shows bobbing and lateral drift",
-        "backend": "Hashed 400 Hz recording analysis and root direct visual review \u00b7 evaluation009",
+        "backend": "Hashed 400 Hz recording analysis and root direct visual review · evaluation009",
         "result": "failed",
         "text": "Direct review finds rhythmic bobbing, asymmetric leg lifts, lateral drift and no useful forward progression. Dominant joint-motion frequency is 1.85 Hz; the two tripod groups do not sustain balanced alternating support. Lower deck tilt or a different motion frequency does not establish the required smooth walking gait.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_003/review.json"
@@ -910,7 +910,7 @@
       {
         "id": "canonical-bc-quiet-stop-failed-20260914",
         "title": "BC-only quiet and stop trials both complete and fail",
-        "backend": "Native deterministic simulation \u00b7 BC1000 checkpoint, zero PPO updates \u00b7 evaluation010 \u00b7 source016",
+        "backend": "Native deterministic simulation · BC1000 checkpoint, zero PPO updates · evaluation010 · source016",
         "result": "failed",
         "text": "The 20-second quiet trial and uninterrupted 8-second forward plus 13-second stop trial complete 1,000 and 1,050 controls, with full 400 Hz captures and no acquisition failure. Both fail drift, heading, joint-rate/range, target-motion and six-toe support checks. The stop also fails requested-torque saturation; applied torque remains within its cap. This two-case allocation retains eleven missing learning probes and all 96 missing Stage 2 cases.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_010/standing/evaluation/summary.json"
@@ -918,7 +918,7 @@
       {
         "id": "canonical-bc-start-quiet-probes-failed-20260914",
         "title": "Added start/quiet examples: all three native probes fail",
-        "backend": "Native deterministic simulation \u00b7 BC fit002, zero PPO updates \u00b7 evaluation011 \u00b7 confirmed mass-corrected model",
+        "backend": "Native deterministic simulation · BC fit002, zero PPO updates · evaluation011 · confirmed mass-corrected model",
         "result": "failed",
         "text": "All selected trials complete without acquisition failure: 1,000 forward controls, 1,000 quiet controls and 1,050 controls for uninterrupted forward-to-stop. Forward planar error is 0.050192 m/s against 0.025 m/s. Quiet fails joint speed/range, target motion and six-toe support; stopping also fails drift, heading and requested-torque saturation. Applied torque remains capped and no nonfoot contact is recorded. Exact-container cleanup passes. Ten omitted learning probes and all 96 Stage 2 cases remain missing.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_011/standing/evaluation/summary.json"
@@ -926,7 +926,7 @@
       {
         "id": "canonical-velocity-supervised-bc-cpu-20260914",
         "title": "Velocity-supervised CPU calibration completes with zero PPO updates",
-        "backend": "CPU fit003 \u00b7 exact recorded native dataset002 \u00b7 reviewed learner v2 \u00b7 no native training",
+        "backend": "CPU fit003 · exact recorded native dataset002 · reviewed learner v2 · no native training",
         "result": "passed",
         "text": "Both arms complete 1,000 BC fitting steps with zero PPO updates or newly simulated transitions. The candidate uses explicit velocity supervision and BC-only estimator-feature detachment; its related-cycle holdout velocity RMSE is 0.006127 m/s versus 0.903256 m/s for the legacy-parity arm. That temporal neighbor is not independent gait validation. Legacy model/AMP/RNG parity and strict full-dataset checkpoint restoration pass; PPO optimizer state remains fresh.",
         "source": "artifacts/paper_bc_fit_003/VERIFICATION.json"
@@ -934,7 +934,7 @@
       {
         "id": "canonical-batch128-raw-audit-20260914",
         "title": "Raw standing audit passes all 128 replicas",
-        "backend": "Independent CPU recomputation of native batch128 diagnostic \u00b7 confirmed mass-corrected model \u00b7 source016",
+        "backend": "Independent CPU recomputation of native batch128 diagnostic · confirmed mass-corrected model · source016",
         "result": "passed",
         "text": "The audit exactly reproduces the original standing report for all 128 replicas, checks 1,000 controls and 8,000 native substeps, and independently reclassifies all 8,000 contact packets. Recorded lifecycle and cleanup checks pass; sampled/swept separation and finite-floor envelope checks pass. The audit creates no physical admission. The later admission002 adoption is recorded separately; standing does not qualify walking or Stage 2.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/verification_batch128_001/audit.json",
@@ -956,7 +956,7 @@
       {
         "id": "canonical-bc-start-quiet-visual-20260914",
         "title": "Actual forward video shows a nearly fixed stance",
-        "backend": "Root direct visual review and exact native trace analysis \u00b7 evaluation011 \u00b7 BC fit002",
+        "backend": "Root direct visual review and exact native trace analysis · evaluation011 · BC fit002",
         "result": "failed",
         "text": "The root inspected a chronological overview, first and last two-second frame sequences, and three full-trial native plots. Initial settling and small adjustments lead to a nearly fixed stance without useful forward stepping. Scored mean forward speed after settling is -0.000060 m/s. The checkpoint produces actual Isaac video, but its appearance and numerical results do not qualify walking.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_004/REVIEW.json"
@@ -964,7 +964,7 @@
       {
         "id": "canonical-velocity-bc-native-dispatched-20260914",
         "title": "Velocity-supervised candidate: native comparison dispatched",
-        "backend": "Guarded native evaluation012 \u00b7 source017 \u00b7 BC fit003, zero PPO updates",
+        "backend": "Guarded native evaluation012 · source017 · BC fit003, zero PPO updates",
         "result": "inconclusive",
         "text": "The recorded allocation was dispatched at 23:52:07 UTC on 14 September for three matched forward, quiet and stopping probes of checkpoint a48fddf1f73fcaf5b93db44241390184dd36c60e031daaad87d3a63bfd2bd81a. This preserved launch receipt predates the completed failed evaluation, recorded separately below.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_evaluate_012.json"
@@ -972,7 +972,7 @@
       {
         "id": "canonical-fresh-batch128-bc-cpu-20260914",
         "title": "Fresh 128-replica CPU fitting identity; no native admission",
-        "backend": "CPU fit004 \u00b7 fresh configuration \u00b7 no simulator or native training",
+        "backend": "CPU fit004 · fresh configuration · no simulator or native training",
         "result": "passed",
         "text": "The separate CPU experiment completes 1,000 BC steps under an explicit 128-replica configuration, with zero PPO updates and native transitions. Its report records model, normalizer, AMP and RNG equality with the fit003 candidate and strict restoration. It does not rewrite an earlier checkpoint, establish a resumable simulation state or grant 128-replica admission.",
         "source": "artifacts/paper_bc_fit_004/REPORT.json"
@@ -980,7 +980,7 @@
       {
         "id": "canonical-standing128-adopted-20260915",
         "title": "Exact one- and 128-robot standing admission adopted",
-        "backend": "Lead-reviewed simulation standing admission002 \u00b7 confirmed mass-corrected model \u00b7 full independent raw audit",
+        "backend": "Lead-reviewed simulation standing admission002 · confirmed mass-corrected model · full independent raw audit",
         "result": "passed",
         "text": "The lead adopted the unchanged one002 result and all 128 independently rescored batch128 replicas. Exact model/controller/layout identity, full contact classification, recorded lifecycle and cleanup pass. Full native raw traces remain on Spark with local hash-bound compact metadata and audit. This admits only the exact simulation standing layouts; admission001 remains unchanged, and walking, hardware and Stage 2 are unqualified.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/admission_002/verification.json"
@@ -988,7 +988,7 @@
       {
         "id": "canonical-velocity-bc-three-native-failures-20260915",
         "title": "Velocity-supervised BC: three complete native probes, three failures",
-        "backend": "Native deterministic evaluation012 \u00b7 source017 \u00b7 BC fit003, zero PPO updates",
+        "backend": "Native deterministic evaluation012 · source017 · BC fit003, zero PPO updates",
         "result": "failed",
         "text": "All selected forward, quiet and stopping trials complete with 1,000, 1,000 and 1,050 controls. Forward planar error is 0.050608 m/s against 0.025 m/s. Quiet still fails joint speed and target motion. Stop also fails joint range, six-toe support and a native velocity bound: one right-front tibia SDK sample is -114.842804 rad/s against 50.265484 rad/s. Angle-derived velocity differs and the cause remains unestablished. Acquisition and cleanup complete; ten omitted probes and all 96 full Stage 2 cases remain missing.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_012/standing/evaluation/summary.json"
@@ -996,7 +996,7 @@
       {
         "id": "canonical-velocity-bc-native-visual-20260915",
         "title": "Calibrated BC video still shows no sustained forward walking",
-        "backend": "Root direct native video review and independent numerical analysis \u00b7 evaluation012",
+        "backend": "Root direct native video review and independent numerical analysis · evaluation012",
         "result": "failed",
         "text": "Chronological, first and last frame sequences and full native plots show startup body/leg oscillation followed by a nearly fixed stance with small motion. There is no sustained directional stepping. The independent analysis preserves the stop velocity-bound failure, with no endpoint termination/reset, active nonfoot contact, clearance breach or applied-torque cap breach. Better recorded-data calibration does not establish a successful closed-loop gait.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_005/REVIEW.json"
@@ -1004,7 +1004,7 @@
       {
         "id": "canonical-ppo128-completed-20260915",
         "title": "128-robot PPO run: 200 updates and 614,400 transitions completed",
-        "backend": "Actual native training \u00b7 train006 \u00b7 source017 \u00b7 fresh fit004 state and admission002",
+        "backend": "Actual native training · train006 · source017 · fresh fit004 state and admission002",
         "result": "passed",
         "text": "The run completes 200 PPO updates and 614,400 native transitions in 637.943 learner seconds, saving checkpoint eb2847e9bce7db0b090debdbc2b0b3395679ff3e2b78f8ecf7407aaa4a8b2d1a. Strict serialization/restoration and owned cleanup pass. It records 142 joint-limit terminations, no height/tilt terminations and zero compact nonfoot events. Aggregate requested saturation is 1.5613%. Moving-command signed speed is 0.005313 m/s cumulatively and 0.001116 m/s in the last update. These training diagnostics do not qualify walking.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_006/standing/state.json",
@@ -1025,7 +1025,7 @@
       {
         "id": "canonical-ppo128-stability-diagnostics-20260915",
         "title": "PPO updates still show large policy changes",
-        "backend": "Recorded train006 learner metrics \u00b7 same-source training diagnostics",
+        "backend": "Recorded train006 learner metrics · same-source training diagnostics",
         "result": "inconclusive",
         "text": "Each of the final 50 updates takes one model optimizer step before the post-step safeguard stops further model steps; their mean final analytic KL is 0.159151 with target 0.02. The reporting-only policy change from normalizer updates reaches KL 5.797131 at update two. The crossing step is retained and normalizer changes are outside this safeguard. The subsequent Fable review and lead decision adopt versioned rollback/backtracking and frozen loaded actor statistics; these measurements do not establish that the new intervention succeeds.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_006/standing/learner/metrics.jsonl"
@@ -1033,7 +1033,7 @@
       {
         "id": "canonical-ppo128-native-evaluation-dispatched-20260915",
         "title": "Historical dispatch of the actual PPO checkpoint evaluation",
-        "backend": "Guarded native evaluation013 \u00b7 source017 \u00b7 train006 checkpoint200",
+        "backend": "Guarded native evaluation013 · source017 · train006 checkpoint200",
         "result": "inconclusive",
         "text": "The 00:23:07 UTC dispatch on 15 September started forward video, quiet and stopping probes of the actual 128-replica PPO checkpoint. The dispatch receipt remains unchanged; the separately recorded completed evaluation013 result fails all three selected probes.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_evaluate_013.json"
@@ -1041,7 +1041,7 @@
       {
         "id": "canonical-ppo-native-three-probes-failed-20260915",
         "title": "Actual PPO evaluation completes; all three selected probes fail",
-        "backend": "Isaac native evaluation013 \u00b7 source017 \u00b7 train006 checkpoint200",
+        "backend": "Isaac native evaluation013 · source017 · train006 checkpoint200",
         "result": "failed",
         "text": "The three trials retain 1000, 1000 and 1050 controls. Forward mean signed velocity after the fixed two-second settle is -0.0000157 m/s for a +0.05 m/s command. Quiet joint RMS is 0.558420 rad/s and six-toe support is missing at all 6400 substeps in the fixed 16-second quiet window. Stopping improves joint RMS to 0.005963 rad/s but still fails the original zero-loss support gate with three missing samples in 4400 quiet substeps. Ten omitted learning probes and all 96 required Stage 2 cases remain missing. Acquisition completion is not a passed stop or qualified gait.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_013/standing/evaluation/summary.json"
@@ -1057,7 +1057,7 @@
       {
         "id": "canonical-ppo-native-visual-failed-20260915",
         "title": "Actual PPO video shows no sustained forward walking",
-        "backend": "Root sampled native video and complete trace/plot review \u00b7 evaluation013",
+        "backend": "Root sampled native video and complete trace/plot review · evaluation013",
         "result": "failed",
         "text": "The real 20-second, 500-frame Isaac recording shows initial adjustment to a lower stance followed by a nearly fixed posture without useful translation. The reviewer examined full-window and denser startup/end frame samples plus numerical timelines, not every frame individually. Quiet and stop trials have numerical traces but no RGB. The video and all three original failed verdicts remain unqualified; no human gait acceptance is recorded.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_006/REVIEW.json"
@@ -1065,7 +1065,7 @@
       {
         "id": "canonical-ppo-stability004-adopted-20260915",
         "title": "Bounded PPO updates and frozen actor statistics adopted for a continuation",
-        "backend": "Actual Fable review, lead decision and CPU implementation checks \u00b7 source018",
+        "backend": "Actual Fable review, lead decision and CPU implementation checks · source018",
         "result": "passed",
         "text": "The lead adopts rollback of model and Adam state for crossing proposals, with the same clipped gradient retried at base, half, quarter and eighth learning rate against the original complete-rollout KL target 0.02. Loaded actor normalization is held fixed; critic/AMP normalization and all 20 discriminator steps retain their schedules. Three consecutive zero-accepted updates save a checkpoint and stop the learning diagnostic. Task reward, curriculum, physics and physical gates remain unchanged. This records an adopted, CPU-tested intervention and source freeze, not demonstrated native improvement.",
         "source": "artifacts/restart_2026-09-14/paper_ppo_stability_review_004/DECISION_001.json"
@@ -1073,7 +1073,7 @@
       {
         "id": "canonical-ppo-v3-cpu-migration-20260915",
         "title": "Learned checkpoint state preserved by explicit CPU migration",
-        "backend": "Strict v2-to-v3 checkpoint migration \u00b7 no new training or native actions",
+        "backend": "Strict v2-to-v3 checkpoint migration · no new training or native actions",
         "result": "passed",
         "text": "Migration preserves the actual train006 update200 model, AMP network, both Adam states, serialized RNG and counters, producing checkpoint eb561e7f99ddd4e4785121f0940f6c0efd5f50428a75e355f6c2d18005b28f84. Strict own-version loads pass and cross-version loads reject. All outputs match bitwise on 3050 actual recorded observations. CUDA RNG bytes are preserved but GPU restoration was not tested here; PhysX state is absent. The separately recorded train007 dispatch does not turn CPU inference parity into physics resume or native acceptance.",
         "source": "artifacts/restart_2026-09-14/paper_ppo_migration_001/run_001/VERIFICATION.json"
@@ -1097,7 +1097,7 @@
       {
         "id": "canonical-ppo-v3-continuation-dispatched-20260915",
         "title": "Historical dispatch of the versioned continuation",
-        "backend": "Guarded Spark train007 \u00b7 source018 \u00b7 migrated actual train006 update200 state",
+        "backend": "Guarded Spark train007 · source018 · migrated actual train006 update200 state",
         "result": "inconclusive",
         "text": "The lead dispatch receipt records launch at 00:50:01 UTC with source freeze 0baf8869effbee16253927363d41e315b43be27444493ac75e648801c7923c3a and exact binding a194d544a8ec65cfd9ba83bf3769dabcc15bc84d34a28a83f7db0824d887d74c. The bounded allocation requests 20 additional updates, potentially 61,440 transitions, from the preserved learned checkpoint. The dispatch receipt remains unchanged. The separately verified completed train007 result and cleanup are now recorded; policy qualification remains unestablished.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_train_007.json"
@@ -1105,7 +1105,7 @@
       {
         "id": "canonical-ppo-v3-continuation-completed-20260915",
         "title": "Bounded continuation completes 20 updates",
-        "backend": "Actual admitted 128-replica native train007 \u00b7 source018 \u00b7 learned update200-to220 lineage",
+        "backend": "Actual admitted 128-replica native train007 · source018 · learned update200-to220 lineage",
         "result": "passed",
         "text": "All 20 additional updates and 61,440 native transitions complete, saving checkpoint e608b454abbed24827810dbb91acf6c17fca677447e49e68cd6fc7e981c2de2a. Strict checkpoint restoration, all 17 transferred file hashes and exact-container cleanup pass. The run accepts 253 model steps and retains all 400 scheduled discriminator steps. Maximum final-update KL is 0.01983755; maximum intermediate accepted-step KL is 0.01999543, both below 0.02. Actor-normalizer policy change is zero and no update accepts zero model steps. There are 14 joint-limit terminations, no height/tilt terminations and zero compact nonfoot events; moving-command signed speed remains only 0.001242 m/s cumulatively. These are training-stability results, not walking acceptance.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_007/standing/state.json",
@@ -1126,7 +1126,7 @@
       {
         "id": "canonical-ppo220-evaluation-dispatched-20260915",
         "title": "Historical dispatch of checkpoint220 native evaluation",
-        "backend": "Guarded evaluation014 \u00b7 source018 \u00b7 matched three-probe subset with actual forward RGB",
+        "backend": "Guarded evaluation014 · source018 · matched three-probe subset with actual forward RGB",
         "result": "inconclusive",
         "text": "The lead dispatch receipt records launch at 00:53:38 UTC on 15 September under invocation 41799288bb494600be8da5b51f11e71c. The exact saved checkpoint220 is evaluated with unchanged source018 physics, limiter and three-case windows. This launch receipt predates the completed, independently verified evaluation recorded separately; it does not itself establish a result.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_evaluate_014.json"
@@ -1134,7 +1134,7 @@
       {
         "id": "canonical-ppo220-quiet-recovery-20260915",
         "title": "Checkpoint220 passes the original quiet and recovery windows",
-        "backend": "Independent native evaluation014 audit \u00b7 source018 \u00b7 exact checkpoint220 and admitted corrected model",
+        "backend": "Independent native evaluation014 audit · source018 · exact checkpoint220 and admitted corrected model",
         "result": "passed",
         "text": "All 3,050 controls and 24,400 physics steps complete, with 627,468 contact patches independently reclassified. Quiet joint RMS is 0.0113285 rad/s and target-step p95 is 0.000111312 rad/20 ms; the stop window records 0.00661340 rad/s and 0.0000922769 rad/20 ms. Every original numeric/native gate passes in these two windows, with continuous six-toe support in all 6,400 quiet and 4,400 stopping substeps. No termination, reset, nonfoot event or applied-torque cap breach occurs; exact-container cleanup passes. The preceding forward command did not produce successful walking, so stopping is a passed quiet-recovery screen. The separate 32-second quiet case and full Stage 2 requirements remain unrun.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/verification_evaluate_014/RESULT_002.json"
@@ -1142,7 +1142,7 @@
       {
         "id": "canonical-ppo220-forward-failure-20260915",
         "title": "Checkpoint220 remains effectively stationary under a forward command",
-        "backend": "Matched native evaluation014 \u00b7 original forward window \u00b7 exact 400 Hz motor/contact evidence",
+        "backend": "Matched native evaluation014 · original forward window · exact 400 Hz motor/contact evidence",
         "result": "failed",
         "text": "The full 20-second trial completes. After the unchanged two-second settling window, mean forward COM velocity is only +0.00000831 m/s for the +0.05 m/s command; planar error 0.049991749 m/s exceeds the unchanged 0.025 m/s limit. This is the forward trial's only failed bound. Its fixed-window raw action clipping fraction is 61.11%. Ten unselected learning probes and all 96 full Stage 2 cases remain missing. Numeric quiet recovery does not qualify gait, walking or the complete stage.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_014/standing/evaluation/batch_000/report.json"
@@ -1158,7 +1158,7 @@
       {
         "id": "canonical-ppo320-training-completed-20260915",
         "title": "Further PPO continuation reaches checkpoint320; walking remains unqualified",
-        "backend": "Actual admitted 128-replica native train008 \u00b7 unchanged source018 \u00b7 learned update220-to320 lineage",
+        "backend": "Actual admitted 128-replica native train008 · unchanged source018 · learned update220-to320 lineage",
         "result": "passed",
         "text": "All 100 additional updates and 307,200 new transitions complete. Checkpoint 7a694caeab00bc6c23a7724b99c88e6de8cfdbfd88e60d97288df4440c8f0a2a passes strict model/optimizer restoration, deterministic-action equality and serialized RNG preservation; all 20 transferred files and exact-container cleanup verify. Maximum accepted-step KL is 0.01999414, actor-normalizer change is zero, and all 2,000 discriminator batches run. The allocation records 74 joint-limit terminations, 254 timeouts, no height/tilt terminations and no compact nonfoot events. Moving-only signed command projection is 0.000677891 m/s; sampled raw-action clipping averages 51.09% and requested motor saturation 0.625821%. Completion is a training result, not walking acceptance; physical simulation state is not resumed.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_008/standing/state.json",
@@ -1179,7 +1179,7 @@
       {
         "id": "canonical-ppo320-evaluation-dispatched-20260915",
         "title": "Historical dispatch of checkpoint320 native evaluation",
-        "backend": "Guarded evaluation015 \u00b7 unchanged source018 \u00b7 forward video, quiet and stopping probes",
+        "backend": "Guarded evaluation015 · unchanged source018 · forward video, quiet and stopping probes",
         "result": "inconclusive",
         "text": "The lead dispatch receipt records launch at 01:18:35 UTC on 15 September, invocation 9172c52eef284a78bbe3b42949ac3bc7, exact binding a75e6acbc9c117b4fd4115d29da1853a2338e718080819dd2cfc6fdc897f3583. The saved checkpoint320 is 7a694caeab00bc6c23a7724b99c88e6de8cfdbfd88e60d97288df4440c8f0a2a. The three windows, actual forward RGB recording, source018 physics and limiter remain unchanged. This dispatch receipt predates the completed, independently verified failed evaluation recorded separately; it does not itself establish an outcome.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_evaluate_015.json"
@@ -1187,9 +1187,9 @@
       {
         "id": "canonical-ppo320-evaluation-failed-20260915",
         "title": "Checkpoint320 fails forward, quiet and recovery probes",
-        "backend": "Independent native evaluation015 audit \u00b7 source018 \u00b7 exact corrected model and saved checkpoint320",
+        "backend": "Independent native evaluation015 audit · source018 · exact corrected model and saved checkpoint320",
         "result": "failed",
-        "text": "All 3,050 controls and 24,400 physics steps complete. Forward velocity after the original two-second exclusion is \u22120.000799517 m/s for a +0.05 m/s command; planar error 0.051559689 m/s exceeds 0.025 m/s. Quiet and post-command recovery joint-speed RMS values are 0.00616294 and 0.01239261 rad/s, but both fail six-toe support: LF, LR and RM lack contact throughout all 6,400 quiet and 4,400 recovery substeps, while LM, RF and RR remain supported. Independent binding, contact, physical-bound and cleanup checks pass. All three policy verdicts remain failed; the earlier checkpoint220 quiet/recovery passes are preserved. Ten unselected learning probes and all 96 full Stage 2 cases remain missing.",
+        "text": "All 3,050 controls and 24,400 physics steps complete. Forward velocity after the original two-second exclusion is −0.000799517 m/s for a +0.05 m/s command; planar error 0.051559689 m/s exceeds 0.025 m/s. Quiet and post-command recovery joint-speed RMS values are 0.00616294 and 0.01239261 rad/s, but both fail six-toe support: LF, LR and RM lack contact throughout all 6,400 quiet and 4,400 recovery substeps, while LM, RF and RR remain supported. Independent binding, contact, physical-bound and cleanup checks pass. All three policy verdicts remain failed; the earlier checkpoint220 quiet/recovery passes are preserved. Ten unselected learning probes and all 96 full Stage 2 cases remain missing.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/verification_evaluate_015/RESULT.json"
       },
       {
@@ -1211,7 +1211,7 @@
       {
         "id": "canonical-bc-migration002-adopted-20260915",
         "title": "Existing BC policy migrated explicitly without new fitting",
-        "backend": "CPU-only BCfit004 v2-to-v3 migration002 \u00b7 root adopted for the separate startup diagnostic",
+        "backend": "CPU-only BCfit004 v2-to-v3 migration002 · root adopted for the separate startup diagnostic",
         "result": "passed",
         "text": "Checkpoint dfb6d3ecc6ff5fae30c77bbac9056875eec6f19c9cb129917f97542d3b68d52b preserves the original model, discriminator, statistics, optimizer maps, RNG and counters, with explicit new schema/configuration fields. The strict loaders and 3,050 actual recorded-input outputs verify. BC remains at 1,000 prior fitting steps with zero PPO updates and zero newly simulated training transitions; the original checkpoint and failed native BC trials remain intact. This is a compatibility migration, not a new controller fit or native qualification.",
         "source": "artifacts/restart_2026-09-14/paper_bc_migration_002/ROOT_ADOPTION_001.json"
@@ -1219,7 +1219,7 @@
       {
         "id": "canonical-bc-startup-cold-dispatched-20260915",
         "title": "Cold BC startup dispatched; settled arm prepared",
-        "backend": "Guarded startup_cold_001 \u00b7 source019 \u00b7 unchanged fit004 policy via explicit migration002",
+        "backend": "Guarded startup_cold_001 · source019 · unchanged fit004 policy via explicit migration002",
         "result": "inconclusive",
         "text": "The actual cold-arm receipt records dispatch at 01:33:13 UTC on 15 September under invocation 7a40bb56663643ad9473a82ca4f7db0f. Binding 355048168f5a71e85de9d9cb0f791afdb919d692bb5ae1e44599580024345f69 uses frozen source019 e03583e690492861911e13deafa859efec094a5e09a33f370ebdedfcfd3402b0. The neutral4 arm has a separate preparation and binding only. No native outcome or cleanup is claimed for either arm in this snapshot, and a warm-arm success would not replace cold-start qualification.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_startup_cold_001.json"
@@ -1227,9 +1227,9 @@
       {
         "id": "canonical-bc-startup-pair-complete-20260915",
         "title": "Cold and settled BC startup trials both fail forward tracking",
-        "backend": "Two separate fresh Isaac apps \u00b7 source019 \u00b7 identical BCcheckpointdfb6d3 \u00b7 actual RGB and400Hz evidence",
+        "backend": "Two separate fresh Isaac apps · source019 · identical BCcheckpointdfb6d3 · actual RGB and400Hz evidence",
         "result": "failed",
-        "text": "Cold1000controls/8000physicssteps and settled1200controls/9600steps complete with unchanged actor state and no acquisition failure. Their original1000-row policy windows fail only planar tracking, with post-exclusion forward means\u22120.00004720 and+0.00035890m/s for+0.05m/s. All native physical windows pass. The scripted200-control prefix is explicitly labeled and never qualifies learned quiet standing. All38cold and40warm files verify; independent paired analysis now verifies all 17,600 steps and 394,457 contact patches. Both original planar-only failures reproduce.",
+        "text": "Cold1000controls/8000physicssteps and settled1200controls/9600steps complete with unchanged actor state and no acquisition failure. Their original1000-row policy windows fail only planar tracking, with post-exclusion forward means−0.00004720 and+0.00035890m/s for+0.05m/s. All native physical windows pass. The scripted200-control prefix is explicitly labeled and never qualifies learned quiet standing. All38cold and40warm files verify; independent paired analysis now verifies all 17,600 steps and 394,457 contact patches. Both original planar-only failures reproduce.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_startup_neutral4_001/standing/evaluation/startup_result.json"
       },
       {
@@ -1239,6 +1239,43 @@
         "result": "inconclusive",
         "text": "At 01:58 UTC the four latest native units report inactive with PID 0; Docker and GPU compute-app lists are empty. The historical continuation heartbeat is already paused. Exclusive HEXAPOD reservation and recovery controls remain retained. Paired startup analysis is sealed; the two-arm BC refit has not been integrated or executed. The current dispatcher relinquishes execution after publication; no successor is assigned and Stage 2 is not complete.",
         "source": "artifacts/restart_2026-09-14/pause_20260915_001/RECEIPT.json"
+      },
+      {
+        "id": "successor-guard-binding-20260915",
+        "title": "Prototype guard bound to the pause coordination hash; host recheck pending",
+        "backend": "Maintained source and CPU tests; no Spark access from the executing machine",
+        "result": "inconclusive",
+        "text": "The maintained reservation guard now binds the pause coordination file hash c89c99eb..., with a CPU test pinning the constant to the recorded policy. Live ownership, resource and GPU-lock rechecks on the host, the source_020 freeze and fresh launch bindings remain unexecuted because the Spark Tailscale host did not resolve from the executing machine. No native job was started.",
+        "source": "experiments/paper_walk/tests/test_reservation_binding.py"
+      },
+      {
+        "id": "bc-refit-paired-cpu-executed-20260915",
+        "title": "Paired BC refit executed on CPU: onset weighting fits onset rows, no native result",
+        "backend": "CPU behavior-cloning continuation · migrated fit004 parent · protocol 002 · zero PPO updates",
+        "result": "inconclusive",
+        "metric": {
+          "path": "artifacts/paper_bc_refit_001/RESULT.json",
+          "field": [
+            "arms",
+            "onset_weight20",
+            "after",
+            "first_moving_onset",
+            "requested_target_rmse_rad"
+          ],
+          "value": 0.0018571042533125962,
+          "total_field": [
+            "arms",
+            "onset_weight20",
+            "before",
+            "first_moving_onset",
+            "requested_target_rmse_rad"
+          ],
+          "total": 0.02668148167831398,
+          "units": "rad requested-target RMSE on the 23 first-moving-onset rows, after versus before",
+          "window": "All 3,760 dataset rows evaluated deterministically after 1,000 additional CPU BC steps"
+        },
+        "text": "Both arms completed 1,000 additional CPU BC steps from the same migrated parent with identical minibatch draws and final sampling RNG, strict reloads and unchanged normalizers, critic, AMP and optimizer states. The onset-weighted arm reduces first-moving-onset target RMSE to 0.001857 rad against 0.008535 rad for the equal-budget uniform arm, while its steady-row RMSE is 0.001653 rad against 0.001262 rad. These are fitting errors on training rows. Neither candidate has a native cold or settled evaluation; Stage 2 gates, the 13 probes and the 96 cases remain unrun for both.",
+        "source": "artifacts/paper_bc_refit_001/REVIEW.md"
       }
     ]
   },

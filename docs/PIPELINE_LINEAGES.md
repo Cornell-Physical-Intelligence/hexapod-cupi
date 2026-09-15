@@ -14,7 +14,7 @@ python3 tools/c_study_runtime.py
 
 The historical check verifies `stage2_pipeline.sha256` against the immutable Git
 revision `81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df`. Fetch repository history first.
-The current check selects `repository_canonical_restart_20260915_v6_pipeline.sha256`.
+The current check selects `repository_canonical_restart_20260915_v7_pipeline.sha256`.
 It covers current runtime/source paths, tests and retained release inputs,
 including the inventoried top-level `experiments/paper_walk/*.py` prototype
 modules and `experiments/paper_walk/tests/*.py` CPU checks. Nested experiment
@@ -48,5 +48,10 @@ normalizer controls remain unchanged. Cross-schema checkpoints require an explic
 the runtime loader remains strict. Source inclusion does not admit a robot,
 accept a policy or transfer historical checkpoint compatibility. The checker's
 historical header remains a lineage identifier, not a native run's robot model.
+The canonical-restart v7 release retains v6 and every preceding manifest
+unchanged. It binds the prototype guard to the pause coordination hash, adds the
+maintained `refit_bc.py` helper with its CPU tests, and records the executed
+paired BC refit under protocol 002. Source inclusion of a fitted candidate does
+not evaluate it natively.
 [Archived release history](archive/README.md) preserves earlier explanations and
 failed-attempt references. New release explanations belong in site updates.
