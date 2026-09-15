@@ -214,7 +214,7 @@
       "state": "implemented",
       "column": 3,
       "row": 0,
-      "meaning": "Native PPO train007 adds 20 bounded updates to the preserved learned checkpoint, producing checkpoint220. The preceding checkpoint fails all three selected movement/stop probes. Matched evaluation014 is dispatched; the full numerical and human visual walking requirements remain unmet.",
+      "meaning": "Native PPO reached checkpoint320, but all three forward/quiet/recovery probes fail. Earlier checkpoint220 passes only quiet/recovery windows. Both BC startup diagnostics also fail forward tracking. Research is paused for handoff; the next refit remains unexecuted preparation.",
       "input": "Requested motion, joint positions and body motion",
       "output": "18 target joint positions",
       "source": "experiments/paper_walk/README.md",
@@ -416,7 +416,7 @@
       "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait\u2019s visual quality.",
       "source": "experiments/paper_walk/README.md",
       "media_id": "caps500_preview",
-      "status": "active",
+      "status": "blocked",
       "backend": "Approved detailed robot model",
       "owner": "Platform lead",
       "depends_on": [
@@ -427,18 +427,11 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "No learned forward walking on the corrected robot. Both startup arms fail tracking; checkpoint320 also loses six-toe quiet support. All96full-suite cases and human acceptance remain outstanding.",
-      "question": "Test the reviewed onset-loss weighting contrast, then evaluate candidate motion without changing any Stage2 criterion.",
-      "next_step": {
-        "outcome": "Compare two1000-step CPU BC refits from the same preserved model, uniform versus20x first-moving-onset action loss, with fixed normalization and unchanged velocity loss.",
-        "owner": "Platform lead",
-        "reviewer": "Root visual review and independent numerical review",
-        "issue": "artifacts/restart_2026-09-14/paper_bc_learning_review_001/ROOT_DECISION_001.json",
-        "acceptance": "Preserve original model/config/normalizers/PPO and discriminator state; compare onset/steady fitting error and audit identical sampling. Native walking, stopping, full96 and human gates remain separate and unchanged.",
-        "baseline": "Source018 learner867e0859, migrated BCcheckpointdfb6d3 and original3760native-row dataset; source019 matched cold/neutral4 diagnostics both fail forward tracking."
-      },
+      "blocker": "User requested the current dispatcher pause for handoff. Corrected-model walking remains unsuccessful; all 96 full-suite cases and human acceptance are outstanding.",
+      "question": "Successor lead reviews the preserved results and unexecuted refit preparation, then establishes sole dispatch ownership before resuming.",
+      "next_step": null,
       "acceptance": null,
-      "card_text": "Walking still fails; controlled onset refit prepared."
+      "card_text": "Paused for handoff; walking remains unqualified."
     },
     {
       "id": "stage3",
@@ -556,11 +549,11 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-15T01:48:20.290430+00:00",
-    "source_commit": "e9d5e775b3de76e9836c0139b557e2fcc4af047f",
+    "as_of": "2026-09-15T02:02:49.466495+00:00",
+    "source_commit": "bd33a46f951ffb5dcdbf40e1386db3a3966a6cd7",
     "architecture": "ARCHITECTURE.md",
-    "summary": "Checkpoint320 fails all three matched native probes: forward tracking remains near zero and quiet/stop windows retain only LM/RF/RR support. Further continuation from320 is paused. A separate matched BC startup comparison completes both arms with intact native evidence: cold and four-second-settled starts both fail forward tracking. The next controlled CPU refit compares uniform fitting with extra weight on the first moving action; no new policy is trained or accepted by this snapshot. Stage2 and all96full-suite cases remain unqualified.",
-    "definition_policy": "Stage 2 remains the active user goal on the exact confirmed URDF. Preserve separate identities for PPO, CPU behavior cloning, native trials, controlled interruptions and failed startup attempts. Behavior-cloning fit accuracy and actual video do not establish walking or stopping. Ordered low-speed probe subsets retain all 13 declarations and missing cases; they leave all 96 required Stage 2 cases unevaluated. The full direction, transition, long-quiet, stopping, motor, contact and human visual requirements remain mandatory. M1 retains its agreed fixture and pending owner/reviewer. The separate BC startup comparison changes the measured physical/contact onset through actual neutral controls; it changes neither the cold-start qualification cases nor their gates. The scripted prefix is not learned quiet standing, and a warm-arm success would not qualify Stage 2.",
+    "summary": "James requested a pause for handoff. No native job is active and no new refit was executed. Checkpoint320 fails forward, quiet and recovery; both BC startup arms also fail forward tracking. The paired native audit and video review are complete, and the proposed onset-loss refit is preserved as unintegrated preparation. Stage 2 remains unmet; all 96 full-suite cases and human acceptance remain outstanding.",
+    "definition_policy": "The current dispatcher is paused by James\u2019s latest instruction and will not resume automatically. Another lead may take over the existing authorized Stage 2 goal after fresh ownership and host checks. Preserve the corrected model, full numerical and human visual requirements, all failed evidence and exact source/checkpoint identities. Prepared BC fitting, scripted prefixes, native capture completion and quiet-only passes do not qualify walking. Existing 13 diagnostic and 96 required cases remain unchanged.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/a074f7927b4104d2916e73e1304bfb3d967495f1/STATUS.md",
     "facts": [
@@ -1236,8 +1229,16 @@
         "title": "Cold and settled BC startup trials both fail forward tracking",
         "backend": "Two separate fresh Isaac apps \u00b7 source019 \u00b7 identical BCcheckpointdfb6d3 \u00b7 actual RGB and400Hz evidence",
         "result": "failed",
-        "text": "Cold1000controls/8000physicssteps and settled1200controls/9600steps complete with unchanged actor state and no acquisition failure. Their original1000-row policy windows fail only planar tracking, with post-exclusion forward means\u22120.00004720 and+0.00035890m/s for+0.05m/s. All native physical windows pass. The scripted200-control prefix is explicitly labeled and never qualifies learned quiet standing. All38cold and40warm files verify; independent paired analysis remains pending.",
+        "text": "Cold1000controls/8000physicssteps and settled1200controls/9600steps complete with unchanged actor state and no acquisition failure. Their original1000-row policy windows fail only planar tracking, with post-exclusion forward means\u22120.00004720 and+0.00035890m/s for+0.05m/s. All native physical windows pass. The scripted200-control prefix is explicitly labeled and never qualifies learned quiet standing. All38cold and40warm files verify; independent paired analysis now verifies all 17,600 steps and 394,457 contact patches. Both original planar-only failures reproduce.",
         "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_startup_neutral4_001/standing/evaluation/startup_result.json"
+      },
+      {
+        "id": "canonical-pause-handoff-20260915",
+        "title": "Research paused for another lead; remaining work preserved",
+        "backend": "User-directed pause with Spark and automation readbacks",
+        "result": "inconclusive",
+        "text": "At 01:58 UTC the four latest native units report inactive with PID 0; Docker and GPU compute-app lists are empty. The historical continuation heartbeat is already paused. Exclusive HEXAPOD reservation and recovery controls remain retained. Paired startup analysis is sealed; the two-arm BC refit has not been integrated or executed. The current dispatcher relinquishes execution after publication; no successor is assigned and Stage 2 is not complete.",
+        "source": "artifacts/restart_2026-09-14/pause_20260915_001/RECEIPT.json"
       }
     ]
   },

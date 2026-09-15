@@ -1,0 +1,10 @@
+{
+  "utc": "2026-09-15T02:04:13.763667+00:00",
+  "command": "python3 tools/project_site.py build && node site/test_render.mjs",
+  "build_exit": 0,
+  "renderer_exit": 1,
+  "error": "AssertionError: A historical pause must not override the current registry (site/test_render.mjs:32)",
+  "cause": "Old test rejected Research paused anywhere in the rendered page, including a legitimate new pause fact. The actual header already reflects registry status.",
+  "repair": "Assert exact current header text for active/blocked/accepted, scoped to its pause-label span; preserve legitimate evidence prose.",
+  "behavior_or_qualification_changed": false
+}

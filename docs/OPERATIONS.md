@@ -1,10 +1,28 @@
 # Spark operations runbook
 
+**Current dispatcher paused for handoff on 15 September 2026 UTC.** James said:
+“take a pause for now and let someone else continue work, push all non commited
+changes”. Publish the preserved work, then relinquish execution. This supersedes
+the current dispatcher's continuation instruction; another designated lead may
+continue the existing authorized goal without another user permission. No new
+lead or handoff task queue is created. The old heartbeat remains PAUSED.
+
+The [pause receipt](../artifacts/restart_2026-09-14/pause_20260915_001/RECEIPT.json)
+records all four latest native units inactive/PID0, no containers and no GPU
+compute apps at 01:58:15 UTC. The reservation, scheduler masks and reconstruction
+queue lock remain retained. Remote pause receipts are under
+`/home/orionh/HEXAPOD_runs/restart_20260914/pause_20260915_001`.
+The shared coordination file now hashes to
+`c89c99ebdd16941e3f8e7f23ef3525aeb360c78361aa49aa04e766b381a4727c`.
+A successor must verify live resources/ownership and create a fresh guard and
+launch binding to these bytes, preserving all historical identities. A pause
+snapshot is not continuing live telemetry.
+
 James authorized a fresh canonical qualification sequence on 14 September 2026
 after visually confirming the mass-corrected URDF: standing, walking/stopping,
 terrain, then survey. The selected URDF SHA-256 is
 `9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78`.
-This supersedes the research pause for that sequence. Each stage still needs its
+That authorization superseded the earlier research pause for that sequence. Each stage still needs its
 own admission and evidence; authorization does not establish a running job or a
 passing result. The exclusive reservation and external-automation blocking
 requirements remain policy; verify the live controls before allocating compute.
@@ -19,7 +37,7 @@ available. This authorization alone does not establish that compute is free.
 
 The active user goal is the existing Stage 2 milestone on the confirmed model,
 including paper-informed PPO training and an actual Isaac Sim policy video.
-Continue beyond diagnostic acquisition through same-source native admission,
+The successor's remaining scope extends beyond diagnostic acquisition through same-source native admission,
 learning, held-out evaluation and the existing numerical and human visual
 acceptance requirements. The maintained prototype is documented in
 [experiments/paper_walk](../experiments/paper_walk/README.md). A native smoke,
@@ -122,10 +140,27 @@ controls without another reset. Complete video, 400 Hz contacts and substeps,
 initial/handoff readbacks and action-source labels remain part of the receipt.
 The scripted prefix is physically screened separately and cannot qualify
 learned standing or hide a failure behind the policy-window slice.
-The [cold dispatch](../artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_startup_cold_001.json)
-records 01:33:13 UTC on 15 September, invocation
-`7a40bb56663643ad9473a82ca4f7db0f`; the [neutral4 arm](../artifacts/restart_2026-09-14/paper_walk_execution_001/PREPARATION_startup_neutral4_001.json)
-is prepared only. No startup outcome or cleanup is claimed in this snapshot.
+The [completed paired audit](../artifacts/restart_2026-09-14/paper_walk_execution_001/startup_pair_analysis_001/REVIEW.md)
+verifies both complete attempts, all 78 transferred files, 17,600 physics steps
+and 394,457 contact patches, with exact-container cleanup. Both use migrated
+BCfit004 checkpoint `dfb6d3ecc6ff5fae30c77bbac9056875eec6f19c9cb129917f97542d3b68d52b`,
+with zero PPO updates. Both fail only the original planar tracking screen:
+0.050607534 m/s cold and 0.059982400 m/s neutral4 against 0.025 m/s.
+The warm prefix closely matches the recorded teacher onset but does not produce
+sustained walking. Its 200 scripted controls remain separately labeled and
+screened; neither their quietness nor recording completion qualifies the policy.
+Six plots preserve the complete intervals. The maintained generic analyzer
+currently rejects the Unicode `action_source` channel; its failure is preserved,
+and the audit uses artifact-only typed loaders with all numeric/hash checks.
+Do not strip that channel from the immutable raw record.
+
+The [refit helper](../artifacts/restart_2026-09-14/paper_bc_refit_preparation_001/README.md)
+is prepared only, unintegrated and unexecuted. The adopted comparison is an
+equal-budget uniform versus onset-weighted CPU BC fit, not additional PPO.
+Its synthetic tests and preflight do not validate the full fitting loop. Require
+independent implementation review, maintained integration and exact input/output
+bindings before executing it; candidate fitting and native acceptance remain
+separate. No refit starts as part of this pause.
 Recheck live reservation, exact source/configuration and matching admission for
 every allocation; a saved dispatch receipt is not live host telemetry or evidence
 of completion. The existing 13 learning probes, 96 full Stage 2 cases and
@@ -282,8 +317,9 @@ source/guard identity before allocation.
 Check actual GitHub workflow inventories before assuming Git is a scheduler.
 Disable identified competing triggers when present; a repository with no
 workflows has nothing to cancel. Preserve HEXAPOD's own jobs, repository CI,
-Pages deployment and the reservation helper. The 14 September restart supersedes
-the 11 September research pause; external scheduler release remains a separate
+Pages deployment and the reservation helper. The 14 September restart superseded
+the 11 September research pause; the current dispatcher is now paused as stated
+above, and external scheduler release remains a separate
 user decision. Every native successor must
 recheck these operational controls without changing its admitted robot source,
 servo, physics or quality gates.

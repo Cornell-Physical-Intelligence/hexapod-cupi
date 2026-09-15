@@ -1,5 +1,16 @@
 # Historical training contracts and gates
 
+**Current dispatcher paused for handoff — 15 September 2026 UTC.** James said:
+“take a pause for now and let someone else continue work, push all non commited
+changes”. This pauses the current dispatcher's research after publication;
+another designated lead may continue the existing authorized Stage 2 goal
+without another user permission. No successor is named or new task queue
+created. The [pause receipt](../artifacts/restart_2026-09-14/pause_20260915_001/RECEIPT.json)
+records no native job, container or GPU compute app at 01:58:15 UTC. The exclusive
+reservation remains retained and the historical heartbeat is already PAUSED.
+The [operations runbook](OPERATIONS.md) records the changed coordination hash
+and fresh guard/binding requirement. Stage 2 remains unqualified.
+
 These task contracts apply to their named mock, C-study or four-bar lineage.
 The approved direct-drive robot requires its own explicit contracts and admission
 under [ARCHITECTURE §§2–4 and §8](../ARCHITECTURE.md). Existing thresholds remain
@@ -251,13 +262,45 @@ reset or history replacement. Actor means and issued actions are labelled by
 source. Original policy-window scoring is unchanged, and separate full, prefix
 and tail physical checks retain every failure. A scripted neutral prefix is
 not learned quiet standing; neither diagnostic can qualify Stage 2 or replace
-its cold-start cases. The [actual cold dispatch](../artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_startup_cold_001.json)
-is recorded at 01:33:13 UTC on 15 September under frozen source019. The
-[neutral4 arm](../artifacts/restart_2026-09-14/paper_walk_execution_001/PREPARATION_startup_neutral4_001.json)
-is prepared only; neither arm has a result in this snapshot. The initial timed-out
-Fable consultation, shorter actual response and [adopted interpretation caveats](../artifacts/restart_2026-09-14/paper_bc_startup_review_001/CAVEATS_AND_RECOMMENDATION.md)
-remain preserved. The comparison probes physical/contact onset and the actual
-recent five-frame observations, not four seconds of recurrent policy memory.
+its cold-start cases. The [completed paired audit](../artifacts/restart_2026-09-14/paper_walk_execution_001/startup_pair_analysis_001/REVIEW.md)
+verifies 1,000 BC controls in each arm and the additional 200 scripted-neutral
+controls in the warm arm, all 78 result-file hashes, 17,600 native physics steps
+and 394,457 contact patches. Both arms use migrated checkpoint
+`dfb6d3ecc6ff5fae30c77bbac9056875eec6f19c9cb129917f97542d3b68d52b`,
+with unchanged BCfit004 model/normalizers and zero PPO updates. Acquisition,
+handoff identity and exact-container cleanup pass. Both original planar screens
+fail: 0.050607534 m/s cold and 0.059982400 m/s warm against 0.025 m/s. The fixed
+later900-control forward means are -0.000047196 and +0.000358904 m/s; complete
+1,000-control means are -0.000576008 and -0.000280371 m/s. Keep those windows
+distinct. Checkpoint220's earlier quiet/recovery-only passes and checkpoint320's
+three failed probes remain separate PPO evidence, not acceptance of this BC parent.
+
+The first warm BC observation is close to the same native onset row as the cold
+arm: normalized RMS distance 0.009918 versus 0.217287, with current-joint RMS
+difference 0.0853 versus 22.180 mrad. Its first requested teacher-target mismatch
+remains 31.864 mrad; the actually held target differs by 6.671 mrad after the
+unchanged limiter. Later policy observations leave demonstrated feature ranges.
+These are descriptive measurements, not proof of root-height causality or a
+validated off-trajectory teacher. The comparison probes physical/contact onset
+and recent five-frame observations, not four seconds of recurrent policy memory.
+All six plots visibly distinguish the prefix. The generic maintained analyzer's
+rejection of Unicode `action_source` is preserved; artifact-only typed loaders
+retain numeric finiteness, hashes and exact counters without changing raw data.
+The initial timed-out Fable consultation and its
+[interpretation caveats](../artifacts/restart_2026-09-14/paper_bc_startup_review_001/CAVEATS_AND_RECOMMENDATION.md)
+also remain intact.
+
+The later [adopted BC comparison](../artifacts/restart_2026-09-14/paper_bc_learning_review_001/ROOT_DECISION_001.json)
+has only an [unintegrated, unexecuted helper](../artifacts/restart_2026-09-14/paper_bc_refit_preparation_001/README.md).
+It specifies 1,000 additional CPU BC steps for each of two arms from the same
+parent and uniform RNG draws: unchanged action MSE versus action-only weight20
+on 23 first-moving-onset rows, divided by fixed mean weight4197/3760. Loaded
+normalizers, velocity supervision, PPO/D state, learner bytes and physical gates
+remain fixed. Preparation has synthetic checks and read-only preflight only;
+the full fitting loop needs independent implementation review and maintained
+integration before execution. No fit or candidate native run has occurred.
+Fitting error cannot qualify walking, and no new research is launched during
+the current dispatcher pause.
 
 The additional 13-case learning probe suite reuses the original numeric scorers
 and full 400 Hz motor/contact capture in one native app. It preserves the

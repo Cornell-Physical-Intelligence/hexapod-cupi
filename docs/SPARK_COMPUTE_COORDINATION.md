@@ -1,5 +1,25 @@
 # Spark reservation policy
 
+**Current dispatcher paused for handoff — 15 September 2026 UTC.** James said:
+“take a pause for now and let someone else continue work, push all non commited
+changes”. The current dispatcher publishes the preserved work and relinquishes
+research. Another designated lead may take over the existing authorized goal;
+no new user permission or separate handoff queue is required. No successor is
+named. The historical heartbeat remains PAUSED and must not automatically resume.
+
+The [pause receipt](../artifacts/restart_2026-09-14/pause_20260915_001/RECEIPT.json)
+records all four latest native units inactive with PID0, no running containers
+and no GPU compute apps at 01:58:15 UTC. Reservation
+`/home/orionh/HEXAPOD_runs/restart_20260914/spark_ownership_001`, scheduler masks
+and the reconstruction queue lock remain retained; this is not a release.
+The pause record is at
+`/home/orionh/HEXAPOD_runs/restart_20260914/pause_20260915_001`.
+The current `/home/orionh/SPARK_COMPUTE_COORDINATION.md` SHA-256 is
+`c89c99ebdd16941e3f8e7f23ef3525aeb360c78361aa49aa04e766b381a4727c`.
+Before any successor allocation, verify actual ownership, processes, resources
+and both GPU locks, then bind these new coordination bytes into a fresh guard
+and launch identity. Never repoint or overwrite an old admitted source or binding.
+
 James explicitly resumed canonical qualification on 14 September 2026 after
 confirming the mass-corrected model in the viewer. The authorized sequence is
 standing → walking/stopping → terrain → survey, using the URDF selected by

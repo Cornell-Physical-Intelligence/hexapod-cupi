@@ -67,12 +67,31 @@ retain the exact compatibility constraints and tests.
 
 ## Operations
 
+**Current dispatcher paused for handoff on 15 September 2026 UTC.** James said:
+“take a pause for now and let someone else continue work, push all non commited
+changes”. This supersedes the current dispatcher's instruction to continue
+research. Publish the preserved work, then relinquish execution. Another
+designated lead may continue the existing authorized goal without another user
+permission; no successor is named here. Do not automatically resume this
+dispatcher or the historical heartbeat, which is already PAUSED. Do not create
+a separate handoff task queue.
+
+The [pause receipt](artifacts/restart_2026-09-14/pause_20260915_001/RECEIPT.json)
+records no running native jobs, containers or GPU compute apps at 01:58:15 UTC.
+The exclusive reservation and queue lock remain retained. The shared Spark
+coordination file now has SHA-256
+`c89c99ebdd16941e3f8e7f23ef3525aeb360c78361aa49aa04e766b381a4727c`.
+A successor must recheck live ownership/resources and create a fresh guard and
+launch binding to those coordination bytes; preserve every old source and
+binding unchanged. Read the completed startup comparison and unexecuted refit
+scope in [TRAINING](docs/TRAINING.md) before deciding the next increment.
+
 **James authorized the canonical qualification restart on 14 September 2026.**
 He confirmed the displayed mass-corrected model and the sequence standing →
 walking/stopping → terrain → survey. Use the URDF selected by
 `robot/active_model.json`, SHA-256
 `9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78`.
-This supersedes the research pause for that sequence; it does not qualify a
+That authorization superseded the earlier research pause for that sequence; it does not qualify a
 stage, change admission gates or release the Spark reservation. Keep historical
 results and the [JAMES_HANDOFF](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/62fd7448264c5ebe051ba2de1d9a72844d6b4c3a/docs/JAMES_HANDOFF.md)
 pause receipts intact. Fresh attempts need new identities bound to this model.
@@ -80,7 +99,7 @@ pause receipts intact. Fresh attempts need new identities bound to this model.
 **The active user goal is Stage 2 on this confirmed model.** James explicitly
 directed continuing until the existing Stage 2 requirements are satisfied,
 including actual paper-informed PPO training and a video of the trained policy
-running in Isaac Sim. Continue through matching native admission, learning and
+running in Isaac Sim. The successor's remaining scope includes matching native admission, learning and
 the full existing direction, transition, quiet-stop, torque, contact and visual
 acceptance requirements. Diagnostics, prepared code, checkpoint saves and video
 recording alone do not finish the goal. Preserve the 0.040 rad / 20 ms comparison
