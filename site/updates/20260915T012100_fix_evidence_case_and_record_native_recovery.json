@@ -1,0 +1,32 @@
+{
+  "id": "20260915T012100_fix_evidence_case_and_record_native_recovery",
+  "date": "2026-09-15T01:21:00Z",
+  "title": "Correct the published evidence path and record native recovery results",
+  "summary": "Both CI jobs for commit75c9a137 fail because the registry requests lowercase review.json while the preserved visual_review_004 evidence is uppercase REVIEW.json; the Pages deployment is skipped and the served page remains e9d5e775. Correct only maintained consumers and regenerate STATUS. Record independently verified evaluation014 forward failure and original quiet/recovery-window passes, completed train008 with100 new PPO updates and307,200 transitions, and actual evaluation015 dispatch without an outcome. Full Stage2 requirements remain unchanged.",
+  "areas": [
+    "publication verification",
+    "progress record",
+    "native policy evaluation"
+  ],
+  "changes": [
+    "site/project.json",
+    "STATUS.md",
+    "docs/TRAINING.md",
+    "docs/OPERATIONS.md",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/**"
+  ],
+  "evidence": [
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/publication_001/poster_failed_log_001.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/publication_001/tests_failed_log_001.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/publication_001/exact_path_audit_002.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/publication_001/served_version_001.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/verification_evaluate_014/RESULT_002.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/verification_evaluate_014/BINDING_REVIEW.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_008/standing/state.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/analysis_train_008/RESULT.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/VERIFIED_TRANSFER_train_008.json",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_evaluate_015.json"
+  ],
+  "next": "Publish the scoped reference correction and verify both CI and the deployed revision; assess checkpoint320 on the same native windows without changing Stage2 gates.",
+  "no_project_impact": false
+}

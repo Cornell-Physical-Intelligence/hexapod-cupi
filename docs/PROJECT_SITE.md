@@ -42,6 +42,13 @@ files, test totals, training budgets or videos.
 
 ## Every repository change
 
+Every push must include a corresponding paper/Pages update. This is James's
+explicit hard rule, reiterated on 14 September 2026. Validate the complete push
+diff, build the paper and exercise the renderer before pushing. Evidence paths
+must match on-disk capitalization so local macOS checks agree with Linux CI.
+After pushing, verify the exact revision's checks and served Pages version;
+repair failed publication before declaring it complete.
+
 Add a new `site/updates/YYYYMMDDTHHMMSS_name.json` record with:
 
 - `id` matching its filename and ISO-8601 UTC `date`;
@@ -51,7 +58,11 @@ Add a new `site/updates/YYYYMMDDTHHMMSS_name.json` record with:
 - boolean `no_project_impact`; if true, a specific `reason`.
 
 Records are append-only. Do not rewrite an old record or a frozen result to make
-validation pass. A presentation update is not a new experimental result.
+validation pass. A later record may declare `evidence_reference_corrections`: each
+entry pins the older record ID/hash, exact original reference, canonical
+replacement path and its hash. Only that named historical link is resolved for
+presentation; original bytes and provenance remain accessible. Corrections never
+waive exact-case checks for current references. A presentation update is not a new experimental result.
 
 ```sh
 python3 tools/project_site.py status

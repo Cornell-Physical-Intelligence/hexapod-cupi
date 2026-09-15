@@ -25,6 +25,12 @@ async function render(payload, failure=false) {
 }
 const {html, elements} = await render(data);
 assert.ok(!html.includes('could not load'), 'Valid built registry must render');
+for (const [status,label] of [['active','In progress'],['blocked','Blocked'],['accepted','Reference accepted']]) {
+  const snapshot=structuredClone(data);snapshot.milestones.find(m=>m.id==='stage2').status=status;
+  const view=(await render(snapshot)).html;
+  assert.ok(view.includes(`Stage 2: ${label}</span>`),'Header reflects the recorded Stage 2 state');
+  assert.ok(!view.includes('Research paused'),'A historical pause must not override the current registry');
+}
 for (const marker of data.milestones) {
   assert.ok(html.includes(`id="marker-${marker.id}"`));
   assert.ok(html.includes(marker.title));

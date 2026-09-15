@@ -1,0 +1,39 @@
+{
+  "utc": "2026-09-15T01:29:43.371081+00:00",
+  "reviewer": "root",
+  "video": "artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_015/standing/evaluation/batch_000/rollout.mp4",
+  "video_sha256": "b1a1662bad0c5164806a9d23bc3f4cacae4f4a663bf9bed7c2a8ff74252a5e8c",
+  "video_frames": 500,
+  "video_seconds": 20,
+  "video_fps": 25,
+  "viewed_samples": {
+    "overview": "20 frames at1fps across full20s",
+    "first_2s": "25frames at12.5fps",
+    "last_2s": "25frames at12.5fps"
+  },
+  "viewed_plots": [
+    "recording_000_motion.png",
+    "recording_001_joints_torque_support.png",
+    "recording_002_joints_torque_support.png"
+  ],
+  "visual_findings": [
+    "Root inspected 70 sampled actual RGB frames. Front-facing leg folds toward the body during onset, with visible body rocking and subsequent fixed asymmetric stance. No sustained stepping or useful translation.",
+    "400Hz motion plots show several seconds of oscillation followed by near-zero translation, settled root height around0.1066m and2degree tilt.",
+    "Quiet and stop raw support plots show persistent LF/LR/RM contact absence in their fixed quiet windows. Small joint velocity alone cannot meet the six-foot support criterion. Quiet/stop RGB was not recorded."
+  ],
+  "comparison": {
+    "forward_after_2s_mps": -0.000799516922532778,
+    "forward_planar_error_mps": 0.0515596892277278,
+    "quiet_rms_radps": 0.006162939593195915,
+    "stop_rms_radps": 0.012392605654895306,
+    "quiet_missing_six_toe_count": 6400,
+    "stop_missing_six_toe_count": 4400,
+    "all_selected_probes_failed": true
+  },
+  "limitations": [
+    "Sampled visual inspection plus complete numerical timelines; does not imply every video frame individually inspected.",
+    "25fps cannot exclude high-frequency joint jitter;400Hz diagnostics retained.",
+    "All96Stage2cases remain unrun; no human visual acceptance or walking qualification."
+  ],
+  "next_decision": "Stop further continuation from320 after failed motion and loss of220 quiet support. Run reviewed separate cold/settled BC startup diagnostic before another learning intervention."
+}

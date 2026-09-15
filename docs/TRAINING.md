@@ -106,7 +106,7 @@ range, target motion and six-toe support. Stopping additionally fails drift,
 heading and requested-torque saturation. Applied torque remains capped and no
 nonfoot contact is recorded. Ten omitted probes and all 96 required Stage 2
 cases remain missing; exact-container cleanup is verified.
-The [direct video/trace review](../artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_004/review.json)
+The [direct video/trace review](../artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_004/REVIEW.json)
 finds a nearly fixed stance after initial adjustments, with no sustained forward
 stepping. This is a failed policy result, even though its native capture completes.
 
@@ -214,10 +214,50 @@ not a physical-motion bound or a bound on unseen states.
 
 The continuation still records 14 joint-limit terminations and cumulative
 moving-command signed speed of only 0.001242 m/s, with no height/tilt terminations
-or compact nonfoot events. The [matched evaluation014 dispatch](../artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_evaluate_014.json)
-at 00:53:38 UTC starts actual checkpoint220 forward-video, quiet and stopping
-probes. Its results remain pending. Retraining and evaluation are active, while
-all previous failures and the full Stage 2 requirements remain unchanged.
+or compact nonfoot events. The [independent evaluation014 audit](../artifacts/restart_2026-09-14/paper_walk_execution_001/verification_evaluate_014/README.md)
+verifies all three full trials: forward still fails planar tracking, while the
+original 20-second quiet and post-command stop windows pass every numeric and
+native gate. The latter is quiet recovery after an unsuccessful walking command,
+not a demonstrated stop from successful walking. All 24,400 physics steps and
+627,468 contact patches were checked; cleanup passes. The long-quiet case,
+ten other learning probes and all 96 full Stage 2 cases remain missing.
+The [completed train008](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_008/standing/state.json)
+then adds 100 PPO updates and 307,200 transitions on unchanged source018, saving
+checkpoint320 with strict restoration and all 20 transfer hashes verified.
+Maximum accepted-step KL is 0.01999414 and actor-normalizer change is zero, but
+74 joint-limit terminations and moving-only signed projection of 0.000677891 m/s
+remain. Sampled raw-action clipping averages 51.09%; these training statistics
+do not establish improved walking.
+The [completed evaluation015 audit](../artifacts/restart_2026-09-14/paper_walk_execution_001/verification_evaluate_015/RESULT.json)
+verifies all 3,050 controls and 24,400 physics steps, with all three selected
+policy probes failed. Forward speed after the original two-second exclusion is
+−0.000799517 m/s for +0.05 m/s commanded; planar error is 0.051559689 m/s against
+0.025 m/s. Quiet and recovery joint-speed RMS are 0.00616294 and 0.01239261 rad/s,
+but LF, LR and RM lose contact throughout all 6,400 quiet and 4,400 recovery
+substeps; LM, RF and RR remain supported. Physical-bound and cleanup checks
+pass without changing the failed policy verdicts. The [root visual review](../artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_008/REVIEW.json)
+finds rocking followed by a fixed asymmetric stance without sustained walking.
+Further continuation from checkpoint320 is paused; checkpoint220's earlier
+quiet/recovery passes remain historical evidence.
+
+The [root-adopted startup diagnostic](../artifacts/restart_2026-09-14/paper_bc_startup_implementation_001/DECISION_001.json)
+compares the existing BCfit004 policy from the original reset with the same
+policy after four seconds of actual zero-command neutral control, using separate
+fresh native apps. The [explicit migration002](../artifacts/restart_2026-09-14/paper_bc_migration_002/ROOT_ADOPTION_001.json)
+preserves the policy and prior fitting counters; no new fitting or PPO occurs.
+The cold arm records 20 seconds of BC control; the settled arm records its
+complete four-second scripted prefix and 20-second BC tail, without a handoff
+reset or history replacement. Actor means and issued actions are labelled by
+source. Original policy-window scoring is unchanged, and separate full, prefix
+and tail physical checks retain every failure. A scripted neutral prefix is
+not learned quiet standing; neither diagnostic can qualify Stage 2 or replace
+its cold-start cases. The [actual cold dispatch](../artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_startup_cold_001.json)
+is recorded at 01:33:13 UTC on 15 September under frozen source019. The
+[neutral4 arm](../artifacts/restart_2026-09-14/paper_walk_execution_001/PREPARATION_startup_neutral4_001.json)
+is prepared only; neither arm has a result in this snapshot. The initial timed-out
+Fable consultation, shorter actual response and [adopted interpretation caveats](../artifacts/restart_2026-09-14/paper_bc_startup_review_001/CAVEATS_AND_RECOMMENDATION.md)
+remain preserved. The comparison probes physical/contact onset and the actual
+recent five-frame observations, not four seconds of recurrent policy memory.
 
 The additional 13-case learning probe suite reuses the original numeric scorers
 and full 400 Hz motor/contact capture in one native app. It preserves the

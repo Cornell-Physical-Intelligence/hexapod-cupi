@@ -14,7 +14,7 @@ python3 tools/c_study_runtime.py
 
 The historical check verifies `stage2_pipeline.sha256` against the immutable Git
 revision `81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df`. Fetch repository history first.
-The current check selects `repository_canonical_restart_20260915_v3_pipeline.sha256`.
+The current check selects `repository_canonical_restart_20260915_v6_pipeline.sha256`.
 It covers current runtime/source paths, tests and retained release inputs,
 including the inventoried top-level `experiments/paper_walk/*.py` prototype
 modules and `experiments/paper_walk/tests/*.py` CPU checks. Nested experiment
@@ -37,10 +37,14 @@ and all other historical contracts retain their original bytes.
 5. Commit the coherent release. Use its pinned checkout for reproduction;
    source relocation does not transfer old admission or checkpoint compatibility.
 
-The canonical-restart v3 release retains both earlier canonical-restart
-manifests and every preceding release unchanged. It binds the optional rollback
-of oversized PPO updates, the separate actor-normalizer freeze and their CPU
-checks. Cross-schema checkpoints require an explicit recorded migration;
+The canonical-restart v6 release retains the earlier canonical-restart
+manifests and every preceding release unchanged. It adds explicitly labeled
+cold and settled BC startup diagnostics, preserving separate whole/prefix/policy
+physical evidence and all original evaluation cases. It also checks exact
+evidence-path capitalization across macOS and Linux before paper publication.
+Explicit hash-pinned correction records repair historical evidence links while
+retaining original record bytes and visible provenance. The v3 rollback and actor
+normalizer controls remain unchanged. Cross-schema checkpoints require an explicit recorded migration;
 the runtime loader remains strict. Source inclusion does not admit a robot,
 accept a policy or transfer historical checkpoint compatibility. The checker's
 historical header remains a lineage identifier, not a native run's robot model.

@@ -45,6 +45,16 @@ class PosterContractTests(unittest.TestCase):
     def test_references_cannot_escape_or_embed_credentials(self):
         for value in ['../secret','/tmp/secret','https://user:password@example.com/file','javascript:alert(1)']:
             with self.subTest(value=value),self.assertRaises(ValueError):site.reference(value)
+    def test_case_insensitive_host_cannot_admit_a_linux_missing_reference(self):
+        directory = self.root / 'Evidence';directory.mkdir()
+        receipt = directory / 'REVIEW.json';receipt.write_text('{}')
+        self.assertEqual(site.reference('Evidence/REVIEW.json'),receipt)
+        # Simulate the successful exists() lookup that macOS permits; actual
+        # directory entries retain their spelling on both macOS and Linux.
+        with patch.object(Path,'exists',return_value=True):
+            for value in ['Evidence/review.json','evidence/REVIEW.json']:
+                with self.subTest(value=value),self.assertRaisesRegex(ValueError,'capitalization'):
+                    site.reference(value)
     def test_catchall_does_not_waive_changes(self):
         r=self.row();r['changes']=['**'];self.save(r)
         with self.assertRaisesRegex(ValueError,'bounded'):site.records()
@@ -65,6 +75,146 @@ class PosterContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'Matching video'):site.checkpoint_media(project,receipt)
         project['checkpoint']['video_matches']=False
         site.checkpoint_media(project,receipt)
+
+class EvidenceCorrectionTests(unittest.TestCase):
+    setUp = PosterContractTests.setUp
+    tearDown = PosterContractTests.tearDown
+    row = PosterContractTests.row
+    save = PosterContractTests.save
+
+    def fixture(self):
+        receipt = self.root / 'Evidence/REVIEW.json'
+        receipt.parent.mkdir()
+        receipt.write_text('{"result":"failed"}\n')
+        old = self.row()
+        old['evidence'] = ['Evidence/review.json']
+        self.save(old)
+        old_path = self.root / 'site/updates' / (old['id'] + '.json')
+        correction = self.row()
+        correction.update(id='20260910T170000_correction', date='2026-09-10T17:00:00Z',
+                          evidence=['Evidence/REVIEW.json'], evidence_reference_corrections=[{
+                              'old_record_id': old['id'], 'old_record_sha256': site.sha(old_path),
+                              'old_reference': 'Evidence/review.json',
+                              'replacement_reference': 'Evidence/REVIEW.json',
+                              'replacement_sha256': site.sha(receipt)}])
+        self.save(correction)
+        return old, old_path, receipt, correction
+
+    def test_exact_pins_resolve_only_presentation_and_preserve_provenance(self):
+        old, old_path, receipt, correction = self.fixture()
+        before = (old_path.read_bytes(), receipt.read_bytes())
+        rows = site.records()
+        resolved = next(r for r in rows if r['id'] == old['id'])
+        self.assertEqual(resolved['evidence'], ['Evidence/REVIEW.json'])
+        self.assertEqual(resolved['original_evidence'], old['evidence'])
+        self.assertEqual(resolved['original_record'], str(old_path.relative_to(self.root)))
+        self.assertEqual(resolved['original_record_sha256'], site.sha(old_path))
+        self.assertEqual(resolved['evidence_corrections_applied'][0]['correction_record_id'], correction['id'])
+        resolved['evidence'][0] = 'presentation-only'
+        self.assertEqual(site.records()[0]['evidence'], ['Evidence/REVIEW.json'])
+        self.assertEqual(before, (old_path.read_bytes(), receipt.read_bytes()))
+
+    def test_without_correction_bad_reference_still_fails(self):
+        _, _, _, correction = self.fixture()
+        del correction['evidence_reference_corrections']
+        self.save(correction)
+        with self.assertRaises(ValueError):
+            site.records()
+
+    def test_new_record_cannot_borrow_an_old_reference_correction(self):
+        self.fixture()
+        new = self.row()
+        new.update(id='20260910T180000_new', date='2026-09-10T18:00:00Z',
+                   evidence=['Evidence/review.json'])
+        self.save(new)
+        with self.assertRaises(ValueError):
+            site.records()
+
+    def test_registry_reference_does_not_use_record_corrections(self):
+        self.fixture()
+        site.records()
+        (self.root / 'site/project.json').write_text(json.dumps({
+            'schema_version': 2, 'summary_tags': ['Test'],
+            'status_source': 'Evidence/review.json'}))
+        with self.assertRaises(ValueError):
+            site.registry()
+
+    def test_changed_old_record_and_replacement_bytes_reject(self):
+        old, old_path, receipt, _ = self.fixture()
+        old_bytes = old_path.read_bytes()
+        old['summary'] = 'An edited historical conclusion.'
+        self.save(old)
+        with self.assertRaisesRegex(ValueError, 'old record SHA'):
+            site.records()
+        old_path.write_bytes(old_bytes)
+        receipt.write_text('{"result":"passed"}\n')
+        with self.assertRaisesRegex(ValueError, 'replacement file or SHA'):
+            site.records()
+
+    def test_malformed_unknown_stale_or_unmatched_correction_rejects(self):
+        _, _, _, correction = self.fixture()
+        cases = [
+            ('old_record_id', 'nonexistent'),
+            ('old_record_sha256', '0' * 64),
+            ('old_record_sha256', 'malformed'),
+            ('old_reference', 'Evidence/another.json'),
+            ('replacement_sha256', '0' * 64),
+            ('replacement_reference', 'https://example.com/evidence.json'),
+        ]
+        for key, value in cases:
+            with self.subTest(key=key, value=value):
+                edited = json.loads(json.dumps(correction))
+                edited['evidence_reference_corrections'][0][key] = value
+                self.save(edited)
+                with self.assertRaises(ValueError):
+                    site.records()
+        for declarations in [None, {}, [], [{}], [{'unexpected': 'field'}]]:
+            with self.subTest(declarations=declarations):
+                edited = dict(correction, evidence_reference_corrections=declarations)
+                self.save(edited)
+                with self.assertRaises(ValueError):
+                    site.records()
+
+    def test_replacement_requires_exact_case_and_own_canonical_evidence(self):
+        _, _, _, correction = self.fixture()
+        edited = json.loads(json.dumps(correction))
+        edited['evidence'] = []
+        self.save(edited)
+        with self.assertRaisesRegex(ValueError, 'cite its distinct canonical'):
+            site.records()
+        edited = json.loads(json.dumps(correction))
+        edited['evidence'] = ['evidence/REVIEW.json']
+        edited['evidence_reference_corrections'][0]['replacement_reference'] = 'evidence/REVIEW.json'
+        self.save(edited)
+        with patch.object(Path, 'exists', return_value=True):
+            with self.assertRaisesRegex(ValueError, 'capitalization'):
+                site.records()
+
+    def test_duplicate_or_conflicting_declarations_reject(self):
+        _, _, _, correction = self.fixture()
+        other = self.root / 'Evidence/OTHER.json'
+        other.write_text('{"other":"evidence"}\n')
+        for conflict in [False, True]:
+            with self.subTest(conflict=conflict):
+                edited = json.loads(json.dumps(correction))
+                duplicate = dict(edited['evidence_reference_corrections'][0])
+                if conflict:
+                    duplicate['replacement_reference'] = 'Evidence/OTHER.json'
+                    duplicate['replacement_sha256'] = site.sha(other)
+                    edited['evidence'].append('Evidence/OTHER.json')
+                edited['evidence_reference_corrections'].append(duplicate)
+                self.save(edited)
+                with self.assertRaisesRegex(ValueError, 'Duplicate or conflicting'):
+                    site.records()
+
+    def test_correction_cannot_target_same_or_later_timestamp(self):
+        _, _, _, correction = self.fixture()
+        for when in ['2026-09-10T16:00:00Z', '2026-09-10T15:00:00Z']:
+            with self.subTest(when=when):
+                self.save(dict(correction, date=when))
+                with self.assertRaisesRegex(ValueError, 'older update'):
+                    site.records()
+
 
 class ArchivedDocumentTests(unittest.TestCase):
     setUp = PosterContractTests.setUp

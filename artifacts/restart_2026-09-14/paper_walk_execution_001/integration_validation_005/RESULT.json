@@ -1,0 +1,65 @@
+{
+  "utc": "2026-09-15T01:45:51.784299+00:00",
+  "source_release": "repository_canonical_restart_20260915_v6_pipeline.sha256",
+  "results": [
+    {
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "isaaclab/tests"
+      ],
+      "returncode": 0,
+      "seconds": 76.83568470900354
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "tools/check_pipeline_lineages.py",
+        "current"
+      ],
+      "returncode": 0,
+      "seconds": 0.2962341660022503
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "tools/project_site.py",
+        "check",
+        "--base",
+        "75c9a13770e816db203221e739778448477b3c24"
+      ],
+      "returncode": 0,
+      "seconds": 0.748909583009663
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "tools/project_site.py",
+        "build"
+      ],
+      "returncode": 0,
+      "seconds": 0.36505020900222007
+    },
+    {
+      "argv": [
+        "node",
+        "site/test_render.mjs"
+      ],
+      "returncode": 0,
+      "seconds": 0.23429587500868365
+    }
+  ],
+  "pass": true,
+  "unchanged_suites": "integration_validation_004:163prototype/116robot, source inventory, historical; only publication source/test changed after those passes"
+}

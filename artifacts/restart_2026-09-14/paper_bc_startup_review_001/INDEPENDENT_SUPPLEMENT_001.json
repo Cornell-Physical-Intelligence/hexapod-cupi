@@ -1,0 +1,52 @@
+{
+  "recorded_at_utc": "2026-09-15T01:00:00.981466+00:00",
+  "timing": "Independent local follow-up after Fable dispatch; not represented as included in its input.",
+  "selection_sha256": "e6c945baf14d2839b5847a7d68ddfca67247456c7df6a928916a4e66ae8856e1",
+  "accepted_forward_onset": [
+    {
+      "env": 9,
+      "command_index": 9,
+      "command": [
+        0.05000000074505806,
+        0.0,
+        0.0
+      ],
+      "controls": [
+        200,
+        259
+      ],
+      "accepted": true,
+      "failed": [],
+      "actual_target_joint_rms_rad": 0.04142964237400479,
+      "requested_saturation_fraction": 0.004166666666666667,
+      "linear_projection_fraction": 0.6808147430419922,
+      "yaw_projection_fraction": null
+    },
+    {
+      "env": 30,
+      "command_index": 9,
+      "command": [
+        0.05000000074505806,
+        0.0,
+        0.0
+      ],
+      "controls": [
+        200,
+        259
+      ],
+      "accepted": true,
+      "failed": [],
+      "actual_target_joint_rms_rad": 0.04158670351625645,
+      "requested_saturation_fraction": 0.004166666666666667,
+      "linear_projection_fraction": 0.6715714335441589,
+      "yaw_projection_fraction": null
+    }
+  ],
+  "interpretation": "Command0.05 forward does have120 accepted native onset rows after4s neutral settling. Its cold failure is not explained by complete absence of this command from onset data. These scripted native rows are not a BC closed-loop warm-start test.",
+  "actor_source_sha256": "867e0859b6a66ae9226f5838fd71c553795bfce44e75832d45b2c79504c0518a",
+  "history_scope": "Both estimator and memory are feed-forward MLPs on the five42-value proprio samples (210 inputs); no recurrent hidden state is carried. Five50Hz samples span80ms between first and last, with100ms of holds to replace all five. The4s warm-up primarily changes realized physical/contact state and the recent input window; there is no four-second learned memory to fill.",
+  "window_scope": "Existing omni_static scorer uses fixed array indices100..999 after requiring1000 rows, not a floating-point timestamp threshold. For the warm policy-only slice200..1199, use its rows100..999 for the unchanged locomotion metric, while preserving original complete24s evidence and explicit mapping.",
+  "native_actions": false,
+  "source_changes": false,
+  "root_decision_pending": true
+}

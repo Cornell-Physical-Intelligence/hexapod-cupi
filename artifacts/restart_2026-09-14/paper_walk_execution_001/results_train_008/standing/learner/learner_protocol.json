@@ -1,0 +1,74 @@
+{
+  "schema": "canonical_paper_walk_ppo_amp_v3",
+  "config": {
+    "num_envs": 128,
+    "rollout_steps": 24,
+    "epochs": 5,
+    "minibatches": 4,
+    "learning_rate": 0.0001,
+    "discriminator_learning_rate": 0.0003,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip": 0.2,
+    "entropy_coefficient": 0.01,
+    "value_coefficient": 1.0,
+    "estimator_coefficient": 1.0,
+    "style_coefficient": 1.0,
+    "gradient_penalty": 10.0,
+    "max_grad_norm": 1.0,
+    "initial_std": 0.1,
+    "target_kl": 0.02,
+    "rollback_kl_steps": true,
+    "kl_backtrack_halvings": 3,
+    "kl_backtrack_factor": 0.5,
+    "freeze_actor_obs_normalizer": true,
+    "zero_accepted_update_limit": 3,
+    "bc_optimizer": "separate",
+    "bc_learning_rate": 0.0003,
+    "bc_velocity_coefficient": 1.0,
+    "bc_detach_velocity": true,
+    "seed": 20260914,
+    "actor_hidden": [
+      256,
+      128,
+      64
+    ],
+    "memory_hidden": [
+      512,
+      256,
+      128
+    ],
+    "estimator_hidden": [
+      64,
+      32
+    ],
+    "critic_hidden": [
+      512,
+      256,
+      128
+    ],
+    "discriminator_hidden": [
+      1024,
+      512
+    ]
+  },
+  "amp_fields": [
+    "joint_position:18",
+    "joint_velocity:18",
+    "body_linear_velocity:3",
+    "body_angular_velocity:3",
+    "base_height:1",
+    "body_frame_toe_xyz:18"
+  ],
+  "prior_sha256": "22f7b04b0c7540f7a27cbe4d13e23c09dbd3a2363ee0792f292e6293b16b9515",
+  "learner_sha256": "867e0859b6a66ae9226f5838fd71c553795bfce44e75832d45b2c79504c0518a",
+  "actor_observation": "five oldest-to-newest proprio42 frames, command3, previous_action18",
+  "critic_observation": "actor observation plus privileged native body linear velocity3",
+  "critic_simplification": "flat-ground pilot; no terrain encoder",
+  "simulation_resume_supported": false,
+  "behavior_cloning_default": false,
+  "training_requested_by_user": true,
+  "execution_authorization_owner": "root dispatcher",
+  "physical_admission": false,
+  "stage2_complete": false
+}

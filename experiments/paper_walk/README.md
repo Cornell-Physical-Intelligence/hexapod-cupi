@@ -160,3 +160,31 @@ hash-bound migration into the new schema; the runtime loader never silently
 converts them. Learning state is preserved, while each native allocation starts
 a fresh simulation. Consult the progress registry for executed configurations
 and results; implementation availability alone is not a training result.
+
+`--mode evaluate --eval-scope startup --startup-arm cold` selects an additional
+20-second deterministic BC forward diagnostic at 0.05 m/s. The `neutral4` arm
+instead issues zero normalized actions and zero command for 200 native controls,
+then runs the same BC policy for 1,000 controls. The dispatcher runs each arm in a
+separate fresh application allocation with the same checkpoint, seed and physics.
+No new fitting or checkpoint conversion happens in this evaluation path.
+
+The warm arm preserves all 1,200 controls, 9,600 native samples, contact packets
+and 600 video frames when acquisition completes. There is one trial reset before
+capture and none at the handoff. Measured history continues through native steps;
+the held target stays at the existing neutral during the prefix. Each row labels
+`action_source` as `scripted_neutral` or `bc`; `issued_action` and the legacy
+`policy_action` field contain the action actually sent to the environment, while
+`actor_mean_action` separately records the policy proposal. Equality is required
+on every BC row. Analysis must use these explicit labels; treating scripted rows
+as policy outputs would give a misleading actor-reconstruction comparison.
+
+The unchanged scorer receives only the 1,000 recorded BC rows, retaining original
+timestamps and its existing 100-control exclusion. The complete raw trace remains
+intact, and the report identifies both the policy and first-100-control onset
+slices. Prefix, policy and whole-run native physical windows are independently
+checked, with zero non-foot contact permitted in the scripted neutral prefix and
+the original moving fraction in the policy window. An early acquisition, native,
+camera or identity failure cannot be hidden by scoring a later slice. Scripted
+neutral does not establish learned quiet standing or stopping. Both arms remain
+outside the original 13 learning probes and all 96 required Stage 2 cases; neither
+replaces cold-start qualification or the final visual comparison.

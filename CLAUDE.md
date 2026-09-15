@@ -122,6 +122,12 @@ Run focused checks while editing and the required suites before integration.
 Keep dependency changes paired with the lockfile. No new test may merely mirror
 an implementation or replace a failing gate.
 
+**Hard rule: every push includes an update to the public research paper/Pages.**
+James reiterated this on 14 September 2026. Include the corresponding central
+paper update, validate the exact push diff, build the paper and exercise its
+renderer before pushing. Verify the exact pushed revision's CI and Pages
+deployment; a failed build or an older served revision is not completed publication.
+
 Every change follows [docs/PROJECT_SITE.md](docs/PROJECT_SITE.md): update the
 registry for changed progress, regenerate STATUS and add an append-only change
 record. CI checks coverage, evidence, generated status and release identity.

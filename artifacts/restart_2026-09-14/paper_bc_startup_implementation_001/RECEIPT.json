@@ -1,0 +1,44 @@
+{
+  "recorded_at_utc": "2026-09-15T01:30:12.930422+00:00",
+  "source_sha256": {
+    "experiments/paper_walk/evaluate.py": "2600383bc4fa87ab9558d35a7b223d97e62c0aa77de2d59259ce2a1cd3773679",
+    "experiments/paper_walk/train.py": "24ca5aa5597229f86395a01a1ffea560d7b4ca620879b26cf65133392e310b36",
+    "experiments/paper_walk/tests/test_startup_diagnostic.py": "43710bc8fef5b172b3aabe2d3f914d54886bd3a74c694a695872c2431606bb75",
+    "experiments/paper_walk/README.md": "ddb378cd30ddb2ff73aab434f9b5ebe92199eda6462cc8d5b8a1f0c43f41acad",
+    "experiments/paper_walk/learner.py": "867e0859b6a66ae9226f5838fd71c553795bfce44e75832d45b2c79504c0518a"
+  },
+  "command": "PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -B -m unittest experiments.paper_walk.tests.test_startup_diagnostic experiments.paper_walk.tests.test_evaluate experiments.paper_walk.tests.test_train_config",
+  "exit_code": 0,
+  "tests": 38,
+  "elapsed_test_seconds": 3.342,
+  "new_tests": 8,
+  "checks": [
+    "Exact cold1000 and warm1200 controls with one initial reset and complete8000/9600 native records",
+    "Control200 coherent command switch, actual rolling five-frame history and zero held target; explicit handoff state/counter snapshot",
+    "Every BC row actor==issued; scripted-only bypass labeled and unused actor mean retained",
+    "Whole/prefix/tail contacts screened independently: prefix event and9/8000 tail events cannot be diluted by clean whole-trial average",
+    "Native terminal prefix/missing contact packets fail closed",
+    "Model/checkpoint changes fail identity; same-env reuse rejected",
+    "Deadline at prefix and final control cannot produce diagnostic success",
+    "Complete600-frame warm video and video-finalization failure",
+    "Original13/96 manifests unchanged and all cases missing in additional startup result",
+    "CLI scope/arm/command constraints; ordinary command default unchanged"
+  ],
+  "peer_review": {
+    "reviewer": "stage_restart_readiness",
+    "blocking_findings": [],
+    "limitations": [
+      "total_controls==0 checks no prior control history; separate external app/container identity is established by root allocations, not inferred from that field.",
+      "Old actor-reconstruction analysis must explicitly filter BC rows or use action_source/actor_mean_action; scripted rows cannot be treated as BC-issued actions."
+    ]
+  },
+  "initial_state_record": "native400hz/initial_state.json before first action",
+  "policy_handoff_record": "policy_handoff.json at control0 or200, before BC action; native state/current counter/held target/obs/critic/AMP retained without added reset or physics",
+  "cli": "--mode evaluate --eval-scope startup --startup-arm cold|neutral4",
+  "learner_unchanged": true,
+  "native_runs": 0,
+  "checkpoint_migrations": 0,
+  "source_freeze_performed": false,
+  "root_independent_full_suite_pending": true,
+  "stage2_complete": false
+}

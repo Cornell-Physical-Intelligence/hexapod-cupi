@@ -99,11 +99,37 @@ records the lead-owned launch at 00:50:01 UTC. The separately verified
 adds all 20 updates and 61,440 transitions; its checkpoint and exact-container
 cleanup pass. The bounded update behavior improves as designed on its collected
 rollouts, but 14 joint-limit terminations remain and walking is unqualified.
-The [evaluation014 dispatch](../artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_evaluate_014.json)
-at 00:53:38 UTC starts the matched three-probe native evaluation of checkpoint220.
-Its outcome and cleanup remain pending in this snapshot. Recheck live reservation,
-exact source/configuration and matching admission for each allocation; a saved
-dispatch receipt is not live host telemetry or evidence of evaluation completion.
+The [completed evaluation014 audit](../artifacts/restart_2026-09-14/paper_walk_execution_001/verification_evaluate_014/README.md)
+verifies forward tracking failure and original quiet/recovery-window passes,
+with complete native capture and owned-container cleanup. Since forward walking
+did not succeed, recovery is not a demonstrated stop from successful walking.
+The [completed train008](../artifacts/restart_2026-09-14/paper_walk_execution_001/results_train_008/standing/state.json)
+adds 100 updates and 307,200 transitions to checkpoint320. Strict restoration,
+all 20 transferred files and exact-container cleanup verify; walking remains
+unqualified.
+The [completed evaluation015 binding review](../artifacts/restart_2026-09-14/paper_walk_execution_001/verification_evaluate_015/BINDING_REVIEW.json)
+verifies matching physics/checkpoint, complete capture and exact-container
+cleanup, with all three policy probes failed. Forward movement remains near
+zero; LF, LR and RM lack contact throughout the quiet/recovery windows while
+LM, RF and RR stay supported. The [root recording review](../artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_008/REVIEW.json)
+finds no sustained walking. Further continuation from checkpoint320 is paused.
+
+Root adopts the [separate source019 startup protocol](../artifacts/restart_2026-09-14/paper_walk_execution_001/ROOT_REVIEW_source_019.json)
+and [explicit BCfit004 migration002](../artifacts/restart_2026-09-14/paper_bc_migration_002/ROOT_ADOPTION_001.json).
+Each arm uses its own fresh native app and original reset: cold20 is all BC;
+neutral4-plus-policy20 begins with 200 actual neutral controls and then 1,000 BC
+controls without another reset. Complete video, 400 Hz contacts and substeps,
+initial/handoff readbacks and action-source labels remain part of the receipt.
+The scripted prefix is physically screened separately and cannot qualify
+learned standing or hide a failure behind the policy-window slice.
+The [cold dispatch](../artifacts/restart_2026-09-14/paper_walk_execution_001/DISPATCH_startup_cold_001.json)
+records 01:33:13 UTC on 15 September, invocation
+`7a40bb56663643ad9473a82ca4f7db0f`; the [neutral4 arm](../artifacts/restart_2026-09-14/paper_walk_execution_001/PREPARATION_startup_neutral4_001.json)
+is prepared only. No startup outcome or cleanup is claimed in this snapshot.
+Recheck live reservation, exact source/configuration and matching admission for
+every allocation; a saved dispatch receipt is not live host telemetry or evidence
+of completion. The existing 13 learning probes, 96 full Stage 2 cases and
+cold-start qualification requirements remain unchanged.
 
 A [local transport cleanup](../artifacts/restart_2026-09-14/paper_walk_execution_001/local_transport_cleanup_001.json)
 removes only four verified redundant agent-created transfer archives. All

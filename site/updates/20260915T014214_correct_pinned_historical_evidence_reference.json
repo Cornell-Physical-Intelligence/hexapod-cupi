@@ -1,0 +1,34 @@
+{
+  "id": "20260915T014214_correct_pinned_historical_evidence_reference",
+  "date": "2026-09-15T01:42:14Z",
+  "title": "Resolve the pinned historical evidence link without rewriting its record",
+  "summary": "The preserved native BC update names lowercase review.json, while the actual original evidence is uppercase REVIEW.json. Declare one correction pinned to the complete original update bytes, its exact old reference and the exact replacement file bytes. The checker resolves only this old record for presentation and exposes original provenance; stale, duplicate or unrelated corrections fail. Registry and new references still require exact capitalization. The paper header now derives the active Stage 2 status from the registry rather than retaining a historical research-pause label. This publication repair changes no scientific result or qualification gate.",
+  "areas": [
+    "paper publication",
+    "evidence provenance",
+    "research status presentation"
+  ],
+  "changes": [
+    "tools/project_site.py",
+    "isaaclab/tests/test_project_site.py",
+    "site/poster.js",
+    "site/test_render.mjs",
+    "isaaclab/deploy/repository_canonical_restart_20260915_v6_pipeline.sha256"
+  ],
+  "evidence": [
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_004/REVIEW.json",
+    "site/updates/20260914T235629_native_bc_results_and_calibration.json",
+    "site/project.json"
+  ],
+  "evidence_reference_corrections": [
+    {
+      "old_record_id": "20260914T235629_native_bc_results_and_calibration",
+      "old_record_sha256": "cd5c428356d0f9882be836585c016c0cf92508d5bda9c0b5ced417d1ebb69be1",
+      "old_reference": "artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_004/review.json",
+      "replacement_reference": "artifacts/restart_2026-09-14/paper_walk_execution_001/visual_review_004/REVIEW.json",
+      "replacement_sha256": "ed526861cb215b5ba2cd139e182993cc6a4510cd082849005c88310c0204eba3"
+    }
+  ],
+  "next": "Validate the complete paper update and renderer before the next push, preserve previous releases, then verify CI and the exact deployed revision. Native startup diagnostics and Stage 2 qualification remain separate.",
+  "no_project_impact": false
+}

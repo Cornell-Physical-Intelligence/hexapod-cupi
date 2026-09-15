@@ -1,0 +1,83 @@
+{
+  "utc": "2026-09-15T01:35:12.503073+00:00",
+  "source_release": "repository_canonical_restart_20260915_v5_pipeline.sha256",
+  "results": [
+    {
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "experiments/paper_walk/tests"
+      ],
+      "returncode": 0,
+      "seconds": 7.551778167005978
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "isaaclab/tests"
+      ],
+      "returncode": 0,
+      "seconds": 77.27117154200096
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "robot/tests"
+      ],
+      "returncode": 0,
+      "seconds": 7.981928666005842
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "tools/source_inventory.py",
+        "check"
+      ],
+      "returncode": 0,
+      "seconds": 0.15944729100738186
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "tools/check_pipeline_lineages.py",
+        "historical"
+      ],
+      "returncode": 0,
+      "seconds": 0.121608457993716
+    },
+    {
+      "argv": [
+        "uv",
+        "run",
+        "python",
+        "tools/check_pipeline_lineages.py",
+        "current"
+      ],
+      "returncode": 0,
+      "seconds": 0.38166916600312106
+    }
+  ],
+  "pass": true,
+  "site_validation": "pending completed registry edit"
+}

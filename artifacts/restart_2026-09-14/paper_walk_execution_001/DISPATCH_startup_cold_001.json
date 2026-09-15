@@ -1,0 +1,28 @@
+{
+  "attempt": "startup_cold_001",
+  "dispatched_at_utc": "2026-09-15T01:33:13.477844+00:00",
+  "unit": "hexapod-bc-startup-cold-001-20260915.service",
+  "systemd_invocation_id": "7a40bb56663643ad9473a82ca4f7db0f",
+  "systemd_run_returncode": 0,
+  "binding_sha256": "355048168f5a71e85de9d9cb0f791afdb919d692bb5ae1e44599580024345f69",
+  "source_freeze_sha256": "e03583e690492861911e13deafa859efec094a5e09a33f370ebdedfcfd3402b0",
+  "argv": [
+    "systemd-run",
+    "--user",
+    "--unit",
+    "hexapod-bc-startup-cold-001-20260915.service",
+    "--property=RuntimeMaxSec=1620",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=ExecStopPost=python3 -B -S /home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/source_019/launch_spark.py --bindings /home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/bindings/startup_cold_001.json --bindings-sha256 355048168f5a71e85de9d9cb0f791afdb919d692bb5ae1e44599580024345f69 --cleanup-only",
+    "python3",
+    "-B",
+    "-S",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/source_019/launch_spark.py",
+    "--bindings",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/bindings/startup_cold_001.json",
+    "--bindings-sha256",
+    "355048168f5a71e85de9d9cb0f791afdb919d692bb5ae1e44599580024345f69"
+  ],
+  "scope": "Cold BC startupdiagnosticonly; Stage2unqualified"
+}

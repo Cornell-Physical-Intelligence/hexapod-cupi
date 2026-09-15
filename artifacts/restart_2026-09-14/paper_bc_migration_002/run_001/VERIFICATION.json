@@ -1,0 +1,106 @@
+{
+  "schema": "explicit_ppo_checkpoint_migration_verification_v1",
+  "completed": true,
+  "completed_at_utc": "2026-09-15T01:20:49.256298+00:00",
+  "binding_sha256": "3b93642c8aa3e7a3244b1175a21700ca8e5dff166a98e1c2dedb78f4cc33cced",
+  "torch_version": "2.14.0",
+  "numpy_version": "2.5.2",
+  "input_checkpoint_sha256": "6b169d9a406b8a0d6208a3282f59111529b375461b2e86bc391dfb9fe0a2c8f9",
+  "output_checkpoint": "/Users/andreboufama/Documents/hex/hexapod-cupi/artifacts/restart_2026-09-14/paper_bc_migration_002/run_001/checkpoint_update000000_migrated.pt",
+  "output_checkpoint_sha256": "dfb6d3ecc6ff5fae30c77bbac9056875eec6f19c9cb129917f97542d3b68d52b",
+  "source_transition": {
+    "old": "b0a3cf503a0c710239d0245ef24fb961d0d05f06feaf37fffee7b2c802caf77a",
+    "new": "867e0859b6a66ae9226f5838fd71c553795bfce44e75832d45b2c79504c0518a"
+  },
+  "schema_transition": [
+    "canonical_paper_walk_ppo_amp_v2",
+    "canonical_paper_walk_ppo_amp_v3"
+  ],
+  "added_config": {
+    "rollback_kl_steps": true,
+    "kl_backtrack_halvings": 3,
+    "kl_backtrack_factor": 0.5,
+    "freeze_actor_obs_normalizer": true,
+    "zero_accepted_update_limit": 3
+  },
+  "existing_config_unchanged": true,
+  "preserved_counters": {
+    "updates": 0,
+    "transitions": 0,
+    "optimizer_steps": 0,
+    "discriminator_steps": 0,
+    "episodes": 0,
+    "bc_steps": 1000
+  },
+  "new_counter": {
+    "consecutive_zero_accepted_updates": 0
+  },
+  "preserved_payload_fields": [
+    "prior_sha256",
+    "model",
+    "amp",
+    "optimizer",
+    "discriminator_optimizer",
+    "rng",
+    "metrics",
+    "simulation_resume_supported",
+    "physical_admission",
+    "stage2_complete"
+  ],
+  "model_amp_and_both_adam_states_exact": true,
+  "all_serialized_rng_exact_including_cuda": true,
+  "cpu_rng_restoration_exact": true,
+  "ambient_rng_preserved": true,
+  "strict_own_version_loads": true,
+  "cross_version_rejections": {
+    "old_rejects_new": "Checkpoint model/config/prior identity differs",
+    "new_rejects_old": "Checkpoint model/config/prior identity differs"
+  },
+  "recorded_input_probes": [
+    {
+      "path": "/Users/andreboufama/Documents/hex/hexapod-cupi/artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_012/standing/evaluation/batch_000/control_trace.npz",
+      "sha256": "1fc09ea55a1e36fa29a0171c6864313bc76a6726b77601325fc0f453e4890f99",
+      "rows": 1000,
+      "bitwise_equal_outputs": [
+        "actor",
+        "velocity",
+        "critic",
+        "action_std",
+        "discriminator",
+        "style_reward"
+      ]
+    },
+    {
+      "path": "/Users/andreboufama/Documents/hex/hexapod-cupi/artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_012/standing/evaluation/batch_001/control_trace.npz",
+      "sha256": "07c200f3488c6bb034066a4bc1e996e74d87ef8550e8f30574940dec4eb2581e",
+      "rows": 1000,
+      "bitwise_equal_outputs": [
+        "actor",
+        "velocity",
+        "critic",
+        "action_std",
+        "discriminator",
+        "style_reward"
+      ]
+    },
+    {
+      "path": "/Users/andreboufama/Documents/hex/hexapod-cupi/artifacts/restart_2026-09-14/paper_walk_execution_001/results_evaluate_012/standing/evaluation/batch_002/control_trace.npz",
+      "sha256": "7caebec835abf4bdc272b1a24587a7e7036d48492645a41f97125275f969b50b",
+      "rows": 1050,
+      "bitwise_equal_outputs": [
+        "actor",
+        "velocity",
+        "critic",
+        "action_std",
+        "discriminator",
+        "style_reward"
+      ]
+    }
+  ],
+  "cuda_generator_runtime_restoration_tested": false,
+  "limitation": "CPU artifact migration and exact inference only; preserved CUDA RNG bytes are not a GPU continuation test. PhysX state is absent; continuation requires a fresh native reset and matching admission.",
+  "new_training_updates": 0,
+  "simulation_resume_supported": false,
+  "physical_admission": false,
+  "stage2_complete": false
+}

@@ -57,6 +57,11 @@ def reference(value):
     if not p.exists() and historical_source(value):
         return None
     require(p.exists() and not p.is_symlink(), 'Missing or symbolic evidence: ' + value)
+    current = ROOT
+    for part in Path(value).parts:
+        require(any(child.name == part for child in current.iterdir()),
+                'Evidence capitalization differs: ' + value)
+        current = current / part
     return p
 
 def checkpoint_media(project, receipt):
@@ -255,6 +260,7 @@ def write_status():
 
 def records():
     out = []
+    originals = {}
     for path in sorted((SITE / 'updates').glob('*.json')):
         row = read(path)
         required = {'id', 'date', 'title', 'summary', 'areas', 'changes', 'evidence', 'next', 'no_project_impact'}
@@ -268,10 +274,65 @@ def records():
             require(len(row.get('reason', '').strip()) >= 20, 'Explain the specific no-impact reason')
         for pattern in row['changes']:
             require(isinstance(pattern, str) and pattern and not pattern.startswith(('/', '*')) and '..' not in Path(pattern).parts, 'Use bounded changed-path patterns')
-        for value in row['evidence']:
-            reference(value)
+        require(isinstance(row['evidence'], list) and all(nonempty(v) for v in row['evidence']),
+                'Update evidence must be a list of nonempty references')
+        originals[row['id']] = (path, sha(path), when)
         out.append(row)
     require(out, 'A research update record is required')
+    by_id = {row['id']: row for row in out}
+    corrections = {}
+    fields = {'old_record_id', 'old_record_sha256', 'old_reference',
+              'replacement_reference', 'replacement_sha256'}
+    for row in out:
+        if 'evidence_reference_corrections' not in row:
+            continue
+        declarations = row['evidence_reference_corrections']
+        require(isinstance(declarations, list) and declarations,
+                'Evidence corrections must be a nonempty list')
+        for correction in declarations:
+            require(isinstance(correction, dict) and correction.keys() == fields
+                    and all(nonempty(correction[k]) for k in fields),
+                    'Incomplete evidence correction')
+            target = correction['old_record_id']
+            require(target in originals, 'Evidence correction target does not exist')
+            _, old_sha, old_when = originals[target]
+            require(old_when < originals[row['id']][2],
+                    'Evidence correction must target an older update')
+            require(re.fullmatch('[0-9a-f]{64}', correction['old_record_sha256'])
+                    and old_sha == correction['old_record_sha256'],
+                    'Evidence correction old record SHA differs')
+            old_reference = correction['old_reference']
+            require(by_id[target]['evidence'].count(old_reference) == 1,
+                    'Evidence correction must identify one original reference')
+            key = (target, old_reference)
+            require(key not in corrections, 'Duplicate or conflicting evidence correction')
+            replacement = correction['replacement_reference']
+            require(replacement != old_reference and replacement in row['evidence'],
+                    'Correction record must cite its distinct canonical replacement')
+            path = reference(replacement)
+            require(path is not None and path.is_file()
+                    and re.fullmatch('[0-9a-f]{64}', correction['replacement_sha256'])
+                    and sha(path) == correction['replacement_sha256'],
+                    'Evidence correction replacement file or SHA differs')
+            corrections[key] = dict(correction, correction_record_id=row['id'])
+    # Only these freshly read presentation objects change. The pinned original
+    # update files remain immutable, with their evidence and hash exposed below.
+    for row in out:
+        resolved = []
+        applied = []
+        for value in row['evidence']:
+            correction = corrections.get((row['id'], value))
+            replacement = correction['replacement_reference'] if correction else value
+            reference(replacement)
+            resolved.append(replacement)
+            if correction:
+                applied.append(correction)
+        if applied:
+            row['original_evidence'] = row['evidence']
+            row['original_record'] = str(originals[row['id']][0].relative_to(ROOT))
+            row['original_record_sha256'] = originals[row['id']][1]
+            row['evidence_corrections_applied'] = applied
+            row['evidence'] = resolved
     return out
 
 def changed_paths(base):
@@ -337,6 +398,9 @@ def build():
         item['source_url'] = source_url(item['source'])
     for row in updates:
         row['evidence_links'] = [{'label': Path(v).name, 'url': historical_source(v) or source_url(v)} for v in row['evidence']]
+        if 'original_record' in row:
+            row['original_record_url'] = source_url(row['original_record'])
+            row['evidence_links'].append({'label': 'Original update record', 'url': row['original_record_url']})
     for fact in project['progress']['facts']:
         fact['source_url'] = source_url(fact['source'])
     first = project['progress']['summary']
