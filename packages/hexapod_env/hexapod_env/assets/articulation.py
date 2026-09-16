@@ -40,15 +40,18 @@ def articulation_cfg_from_spec(
     usd_path: str | None = None,
     solver_position_iterations: int = 8,
     solver_velocity_iterations: int = 2,
+    enabled_self_collisions: bool = False,
+    soft_joint_pos_limit_factor: float = 0.95,
 ) -> ArticulationCfg:
     """Articulation config for ``spec`` with the shared physics settings.
 
     Mirrors ``asset_cfg.HEXAPOD_CFG`` property for property; a change to the
     shared physics settings belongs in both places until the mock is retired.
 
-    The two solver counts default to the 8/2 pair every existing asset uses, so
-    an unchanged call returns an unchanged config. A model whose task declares
-    its own solver recipe passes them explicitly.
+    The solver counts, the self-collision switch and the soft limit factor
+    default to the values every existing asset uses, so an unchanged call
+    returns an unchanged config. A model whose task declares its own physics
+    recipe passes them explicitly.
     """
 
     return ArticulationCfg(
@@ -65,7 +68,7 @@ def articulation_cfg_from_spec(
                 max_depenetration_velocity=1.0,
             ),
             articulation_props=sim_utils.ArticulationRootPropertiesCfg(
-                enabled_self_collisions=False,
+                enabled_self_collisions=enabled_self_collisions,
                 solver_position_iteration_count=solver_position_iterations,
                 solver_velocity_iteration_count=solver_velocity_iterations,
             ),
@@ -77,7 +80,7 @@ def articulation_cfg_from_spec(
             joint_pos=spec.default_joint_positions(),
             joint_vel={".*": 0.0},
         ),
-        soft_joint_pos_limit_factor=0.95,
+        soft_joint_pos_limit_factor=soft_joint_pos_limit_factor,
         actuators={"legs": actuator_cfg},
     )
 
