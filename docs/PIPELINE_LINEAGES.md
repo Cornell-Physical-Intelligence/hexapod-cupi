@@ -53,5 +53,11 @@ unchanged. It binds the prototype guard to the pause coordination hash, adds the
 maintained `refit_bc.py` helper with its CPU tests, and records the executed
 paired BC refit under protocol 002. Source inclusion of a fitted candidate does
 not evaluate it natively.
+The canonical-restart v8 release retains v7 and every preceding manifest
+unchanged. It adds the RS05 direct task on the approved model: its asset spec,
+the paper-walk actuator, the task modules, the standing capture runner, the
+scratch-only trainer and their CPU tests. Source inclusion registers a new task
+ID; it records no capture, no training and no admission.
+
 [Archived release history](archive/README.md) preserves earlier explanations and
 failed-attempt references. New release explanations belong in site updates.

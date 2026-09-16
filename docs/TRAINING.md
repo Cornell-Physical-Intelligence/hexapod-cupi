@@ -319,6 +319,52 @@ Reporting-only termination reasons and actual target-slew occupancy distinguish
 existing predicates and exclude each replica's first control after reset; they
 change neither reward nor physics. The source018 prototype passes 155 CPU tests.
 
+## Direct task on the approved model: MKII-RS05
+
+`Isaac-Velocity-Flat-Hexapod-MKII-RS05-Direct-v0` carries the model
+`robot/active_model.json` selects into the maintained `hexapod_env` package, so
+RSL-RL can train it at thousands of replicas. It is a new identity beside the
+paper-walk prototype; no historical task, asset, checkpoint or admission moves.
+
+The task repeats the accepted prototype recipe. Physics runs at 400 Hz with
+eight substeps per 50 Hz control step, 32 position solver iterations and no
+velocity iteration, external forces every iteration, self-collision enabled,
+flat ground with friction 1.0 and no restitution, and 2 m spacing. One control
+step emits a joint target from the stance plus 0.35 rad times the action,
+clamped to the exact URDF limits and held within 0.040 rad of the previous
+target. The policy observation holds five 42-value proprioceptive frames, the
+three-value command and the 18 previous executed actions, which is 231 values;
+the critic observation adds the privileged base velocity, which is 234. The
+reward keeps the prototype's tracking, yaw, tilt, torque, slew and vertical
+terms with their original scales, and the episode ends on a low plate, a tilt
+beyond 0.85 rad or a joint limit violation.
+
+The actuator is
+`packages/hexapod_env/hexapod_env/actuators/rs05_paper_walk_model.py`. It
+reproduces `motor_force` value for value: a 12 N*m per radian position gain,
+the 18 damping values bound by joint name, the float64 speed curve over the
+published knots, zero authority at and above 480 rpm and the provisional
+1.6 N*m clamp. The runtime writes efforts alone and keeps the implicit drive,
+armature and joint friction at zero. The 1.6 N*m clamp stays an experimental
+setting from the [RS05 review](RS05_SPEC_REVIEW.md), not a measured limit.
+
+The task's articulation order is the block order PhysX reports, while every
+observation, reward and capture channel uses the canonical per-leg order. The
+environment maps between them by name and refuses to run when the articulation
+disagrees with the declared order or limits.
+
+`isaaclab/admit_mkii_rs05.py` records a standing capture in the layout the
+unchanged `experiments/paper_walk/env.py:score_diagnostic` reads, and that
+scorer grades it. `isaaclab/train_mkii_rs05.py` is scratch-only: it refuses
+every checkpoint and resume option, defaults to 4096 replicas and headless
+startup, and requires a recorded transitions-per-second measurement at 1024
+replicas first. CPU tests compare the action path, the observation widths, the
+reward terms, the terminations and the capture layout with the frozen source.
+CPU agreement is not native behavior, and this task has no capture, training,
+checkpoint or video yet; the
+[prepared runner](../artifacts/restart_2026-09-14/mkii_rs05_admission_prep_001/README.md)
+records why the native steps stayed unexecuted.
+
 ## 1. Simulator and framework stack
 
 ```text

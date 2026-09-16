@@ -1276,6 +1276,14 @@
         },
         "text": "Both arms completed 1,000 additional CPU BC steps from the same migrated parent with identical minibatch draws and final sampling RNG, strict reloads and unchanged normalizers, critic, AMP and optimizer states. The onset-weighted arm reduces first-moving-onset target RMSE to 0.001857 rad against 0.008535 rad for the equal-budget uniform arm, while its steady-row RMSE is 0.001653 rad against 0.001262 rad. These are fitting errors on training rows. Neither candidate has a native cold or settled evaluation; Stage 2 gates, the 13 probes and the 96 cases remain unrun for both.",
         "source": "artifacts/paper_bc_refit_001/REVIEW.md"
+      },
+      {
+        "id": "mkii-rs05-direct-task-ported-20260916",
+        "title": "Corrected RS05 model ported into the Isaac Lab direct task; no native run",
+        "backend": "Maintained source and CPU tests; the Spark host did not resolve from the executing machine",
+        "result": "inconclusive",
+        "text": "A new task ID, Isaac-Velocity-Flat-Hexapod-MKII-RS05-Direct-v0, carries the model robot/active_model.json selects into the Isaac Lab DirectRLEnv package with 400 Hz physics, eight substeps per 50 Hz control step, solver 32/0, the named-damping RS05 servo, the 0.35 rad action scale and the 0.040 rad slew bound. CPU tests compare the action path, the 231 and 234 value observations, the reward terms, the terminations and the capture layout with the frozen paper-walk source and its unchanged scorer. No capture, no training and no video exist for this task: the standing runner is prepared and unexecuted because the host was unreachable. Historical task IDs, assets and admissions keep their own models and results.",
+        "source": "artifacts/restart_2026-09-14/mkii_rs05_admission_prep_001/README.md"
       }
     ]
   },
