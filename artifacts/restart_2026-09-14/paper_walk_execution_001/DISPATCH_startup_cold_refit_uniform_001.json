@@ -1,0 +1,31 @@
+{
+  "attempt": "startup_cold_refit_uniform_001",
+  "dispatched_at_utc": "2026-09-16T17:45:37.093132+00:00",
+  "unit": "hexapod-bc-startup-cold-refit-uniform-001-20260916.service",
+  "systemd_run_returncode": 0,
+  "binding_sha256": "fca0036b0f3addcc2e4a059d95b68ac07e30dfe6c931205b0692653790df0d9b",
+  "source_freeze_sha256": "abff4e293b84c5273993842da995383100e7336367746e9f98e336e7bec8cd03",
+  "argv": [
+    "systemd-run",
+    "--user",
+    "--unit",
+    "hexapod-bc-startup-cold-refit-uniform-001-20260916.service",
+    "--property=RuntimeMaxSec=1620",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=WorkingDirectory=/home/orionh/IsaacLab",
+    "--property=ExecStopPost=python3 -B -S /home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/source_020/launch_spark.py --bindings /home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/bindings/startup_cold_refit_uniform_001.json --bindings-sha256 fca0036b0f3addcc2e4a059d95b68ac07e30dfe6c931205b0692653790df0d9b --cleanup-only",
+    "python3",
+    "-B",
+    "-S",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/source_020/launch_spark.py",
+    "--bindings",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/paper_walk_001/bindings/startup_cold_refit_uniform_001.json",
+    "--bindings-sha256",
+    "fca0036b0f3addcc2e4a059d95b68ac07e30dfe6c931205b0692653790df0d9b"
+  ],
+  "stdout": "",
+  "stderr": "Running as unit: hexapod-bc-startup-cold-refit-uniform-001-20260916.service; invocation ID: 2eb39e1ce86247b2acabee31449dff5f\n",
+  "stage2_complete": false,
+  "systemd_invocation_id": "2eb39e1ce86247b2acabee31449dff5f"
+}

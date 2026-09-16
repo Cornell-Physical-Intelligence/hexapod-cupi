@@ -1,6 +1,52 @@
 # Historical training contracts and gates
 
-**Current dispatcher paused for handoff — 15 September 2026 UTC.** James said:
+## Successor refit comparison, 16 September 2026
+
+The successor completed both cold BC refit trials under frozen source020 and
+matching admission002. Each trial contains 1,000 policy controls and 8,000
+physics steps, with the 0.040 rad per 20 ms limiter. The
+[comparison](../artifacts/restart_2026-09-14/paper_walk_execution_001/bc_refit_analysis_001/RESULT.json)
+verifies 76 new result files and reclassifies 355,109 new contact patches.
+
+| Measurement | Parent cold | Uniform refit | Onset-weight20 refit |
+| --- | ---: | ---: | ---: |
+| First-control requested-target RMS error against nearest onset label (rad) | 0.030758 | 0.006188 | 0.004124 |
+| Later 900 controls: planar RMSE (m/s) | 0.050931 | 0.058028 | 0.049995 |
+| Original planar error, bound 0.025 m/s | 0.050608 | 0.052897 | 0.049994 |
+| Original native physical windows | Pass | Fail: one speed-bound step | Pass |
+
+The original forward gates fail for both candidates. Onset20 settles with mean
+forward velocity 0.00000585 m/s for a 0.05 m/s command. The sampled recordings
+show onset motion followed by a fixed stance. The
+[decision](../artifacts/paper_bc_refit_001/DECISION.json) keeps BC diagnostic.
+Onset20 remains an optional initialization candidate for the later three-probe
+screen; no warm start occurs in this increment. One trial per checkpoint and
+nearest teacher labels cannot establish statistical or causal improvement.
+The uniform allocation overlapped a manual reconstruction container; its
+service failed the final exclusivity check before the successor completed a
+separate cleanup. Do not use that allocation for throughput comparison.
+
+### Next increment after the direct-task review
+
+The [PR 22 review](../artifacts/restart_2026-09-14/mkii_rs05_review_001/ROOT_REVIEW.json)
+finds two contact-capture defects: world contact points reach replica-local
+link poses, and one average point replaces the original per-patch nonfoot
+check. Resolve these defects before direct-task admission. Then bind fresh
+standing captures at one and the intended batch layout to the exact source and
+model. Record the 1024-replica throughput measurement before a larger allocation.
+No direct-task native admission or throughput result exists in this increment.
+
+Keep the approved tripod-reference and bounded-residual design in new maintained
+package modules. Preserve the frozen prototype and existing tests. First screen
+the reference without a learned residual, then run the approved PPO pilot if
+its existing gates pass. At a stop request, retain the last motion reference
+through touchdown and verify measured foot support before freezing phase;
+selecting the neutral table row at once would bypass that transition. Record
+controller state in the new observation and checkpoint identity. These modules
+remain unimplemented. James removed the Fable consultation requirement on
+16 September; the prior failed consultation remains historical evidence.
+
+**Previous dispatcher paused for handoff — 15 September 2026 UTC.** James said:
 “take a pause for now and let someone else continue work, push all non commited
 changes”. This pauses the current dispatcher's research after publication;
 another designated lead may continue the existing authorized Stage 2 goal

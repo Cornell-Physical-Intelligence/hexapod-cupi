@@ -427,11 +427,11 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "Corrected-model walking remains unsuccessful; all 96 full-suite cases and human acceptance are outstanding. The successor's native steps wait on Spark host access for the ownership recheck and source_020 freeze.",
-      "question": "Successor completes the host ownership recheck and fresh guard binding, evaluates both refit candidates natively, then tests the tripod reference plus residual controller before profiling larger batches.",
+      "blocker": "Both BC refits fail native forward tracking. The new direct task needs contact-capture fixes and matching native admission; all 96 full-suite cases and human acceptance remain outstanding.",
+      "question": "Resolve the reviewed direct-task capture defects, obtain one- and batch-replica admission and measure 1024-replica throughput, then screen the tripod reference before residual PPO.",
       "next_step": null,
       "acceptance": null,
-      "card_text": "Successor plan approved; BC refit fitted on CPU, native evaluation pending."
+      "card_text": "Both BC refits fail forward tracking; direct-task contact fixes precede native admission."
     },
     {
       "id": "stage3",
@@ -549,11 +549,11 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-15T21:38:22+00:00",
-    "source_commit": "52096b4fd487f1d77cae773e758d093fd44cddea",
+    "as_of": "2026-09-16T18:04:40.674701+00:00",
+    "source_commit": "706c935be1400c4c641ad5cd31bf8ee6d2f4bb79",
     "architecture": "ARCHITECTURE.md",
-    "summary": "A successor continues the authorized Stage 2 goal under an approved four-step plan: coordination and the prepared BC refit, trainer profiling and larger admitted batches, equal-budget objective comparison, then command-range expansion. The maintained guard now binds the pause coordination hash, and the paired CPU BC refit is executed: the onset-weighted arm reduces first-onset target RMSE from 0.026681 to 0.001857 rad against 0.008535 rad for the uniform arm. No native evaluation of either candidate exists because the Spark host was unreachable; checkpoint320 and both BC startup arms still fail forward tracking. Stage 2 remains unmet; all 96 full-suite cases and human acceptance remain outstanding.",
-    "definition_policy": "The current dispatcher is paused by James’s latest instruction and will not resume automatically. Another lead may take over the existing authorized Stage 2 goal after fresh ownership and host checks. Preserve the corrected model, full numerical and human visual requirements, all failed evidence and exact source/checkpoint identities. Prepared BC fitting, scripted prefixes, native capture completion and quiet-only passes do not qualify walking. Existing 13 diagnostic and 96 required cases remain unchanged.",
+    "summary": "The successor completed both cold BC refit evaluations and verified 76 result files, 16,000 native physics steps and 355,109 contact patches. Both candidates fail forward tracking; the uniform candidate also violates one native joint-speed bound. Onset20 improves the first-control target error but settles near zero forward speed. BC remains diagnostic. Spark cleanup and reservation checks pass after a recorded manual reconstruction overlap. The direct-task review found contact-capture defects that require repair before admission. Stage 2 remains unmet.",
+    "definition_policy": "The successor completed the two authorized refit evaluations and retains the Spark reservation. Preserve the approved model and existing numerical and human visual requirements. New direct-task admission needs the reviewed contact-capture fixes and fresh source bindings. The historical heartbeat remains paused. James removed the Fable consultation requirement on 16 September 2026.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/04e9ede5c79fc0ff80151847fa8251f82cf21b0a/STATUS.md",
     "facts": [
@@ -1276,6 +1276,30 @@
         },
         "text": "Both arms completed 1,000 additional CPU BC steps from the same migrated parent with identical minibatch draws and final sampling RNG, strict reloads and unchanged normalizers, critic, AMP and optimizer states. The onset-weighted arm reduces first-moving-onset target RMSE to 0.001857 rad against 0.008535 rad for the equal-budget uniform arm, while its steady-row RMSE is 0.001653 rad against 0.001262 rad. These are fitting errors on training rows. Neither candidate has a native cold or settled evaluation; Stage 2 gates, the 13 probes and the 96 cases remain unrun for both.",
         "source": "artifacts/paper_bc_refit_001/REVIEW.md"
+      },
+      {
+        "id": "successor-reservation-restored-20260916",
+        "title": "Successor restored reservation controls and completed cleanup",
+        "backend": "Spark user services and exact container identities",
+        "result": "passed",
+        "text": "The successor preserves and masks ten restored Stormscope units. All 32 user masks and four system masks pass. A manual reconstruction container starts eight seconds after uniform dispatch; the uniform service records a failed final resource check. The successor preserves and stops that container, completes cleanup, then runs onset20. The final readback records no active containers or GPU compute apps, PID 0 for both services and both GPU locks available. Reservation controls remain retained.",
+        "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/POST_REFIT_RESERVATION_001.json"
+      },
+      {
+        "id": "bc-refit-cold-native-failed-20260916",
+        "title": "Both BC refits fail native forward tracking",
+        "backend": "Two fresh Isaac Sim apps, source020 and matching admission002; zero PPO updates",
+        "result": "failed",
+        "text": "Both 1,000-control trials complete. The audit verifies 76 new files and 16,000 physics steps, reclassifies 355,109 contact patches and reproduces the original gate checks. Uniform and onset20 first-control target errors fall to 0.006188 and 0.004124 rad from the parent 0.030758 rad. Original planar errors remain 0.052897 and 0.049994 m/s against 0.025 m/s. Uniform also has one speed-bound step. Onset20 passes physical windows but settles near zero forward speed. BC remains diagnostic; no warm start or walking acceptance occurs.",
+        "source": "artifacts/paper_bc_refit_001/DECISION.json"
+      },
+      {
+        "id": "rs05-direct-contact-review-20260916",
+        "title": "Direct-task review identifies contact-capture prerequisites",
+        "backend": "PR 22 source review and CPU coordinate-frame reproduction; no direct-task native run",
+        "result": "failed",
+        "text": "The review reproduces toe misclassification when a world contact point reaches a link pose with its replica origin removed. The capture also replaces per-patch classification with one average contact point, which can hide shaft contact. Resolve both before one- and batch-replica standing admission and the 1024-replica throughput measurement. The reference-residual modules remain a proposal. James removed the Fable consultation requirement; the earlier session ended at a usage limit without a final review.",
+        "source": "artifacts/restart_2026-09-14/mkii_rs05_review_001/ROOT_REVIEW.json"
       }
     ]
   },
