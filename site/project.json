@@ -572,11 +572,11 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-16T19:23:17.057904+00:00",
-    "source_commit": "252db65b0e078e71c381f0d9e924460c56cdead3",
+    "as_of": "2026-09-16T22:11:33.099735+00:00",
+    "source_commit": "8097438576267b9ef64e5a1597e72fcf03d873b1",
     "architecture": "ARCHITECTURE.md",
-    "summary": "The trajectory optimizer produced a forward cycle within its dynamics and actuator constraints. One native Isaac replay moved 0.967614 m in 20 seconds and averaged 0.049464 m/s after settling. Motor, joint and contact checks passed across 8,000 physics steps. Planar tracking error was 0.033271 m/s against the unchanged 0.025 m/s limit. The replay retains its video and actual transitions, with those transitions excluded from the accepted motion-prior pool. Stage 2 remains unmet.",
-    "definition_policy": "James authorized the trajectory-optimizer experiment. The completed run retains the approved model and existing gates. Further reference development and PPO training remain separate work. Spark cleanup passed and the reservation remains retained. The historical heartbeat remains paused; the Fable consultation requirement remains removed.",
+    "summary": "The optimized forward replay moves 0.967614 m in 20 seconds but fails the unchanged speed-tracking gate. New load analysis covers all 400 Hz samples, with startup and commanded locomotion reported apart. During the final 18 seconds, mean vertical support is 73.24269 N and recorded peak support is 108.10469 N. Mean absolute applied torque is 0.314014 N·m per motor; the highest joint RMS torque is 0.745598 N·m at the left-middle femur. No new optimizer or PPO job has started. Stage 2 remains unmet.",
+    "definition_policy": "James requires locomotion load tracking before the next optimizer/PPO sequence. The replay wrapper now produces force_metrics.json. Future PPO evaluations and learning probes must use the wrapper or the analysis command; check summary availability before proceeding. Preserve the approved model, original gait verdicts and all existing gates. The Spark reservation remains retained and the historical heartbeat remains paused.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/04e9ede5c79fc0ff80151847fa8251f82cf21b0a/STATUS.md",
     "facts": [
@@ -1357,6 +1357,14 @@
         },
         "text": "The robot moves 0.967614 m forward over the full 20-second trial. After settling it averages 0.049464 m/s, while speed ranges from -0.014196 to 0.108552 m/s. The original 0.025 m/s tracking gate fails. Native physical checks pass; the audit verifies 35 transferred files and reclassifies 131634 contact patches. The replay saves 1000 actual state transitions but excludes them from the accepted prior dataset. Sampled video frames show repeated foot lifts and floor-grid translation. No learned policy or human gait acceptance results.",
         "source": "artifacts/trajectory_optimizer_20260917/review_001/RESULT.json"
+      },
+      {
+        "id": "locomotion-load-report-20260916",
+        "title": "Track contact loads and motor torque before the next experiments",
+        "backend": "CPU reanalysis of 8000 preserved 400 Hz native samples; no new simulation allocation",
+        "result": "passed",
+        "text": "The new load summary separates startup from commanded locomotion and preserves per-foot and per-joint statistics. Across 7200 walking samples, mean vertical support is 73.24269 N, p95 is 82.42784 N and recorded peak is 108.10469 N. Mean absolute applied torque is 0.314014 N·m per motor; left-middle femur RMS is 0.745598 N·m. Contact data excludes tangential friction. Average support near body weight does not establish gait quality or energy efficiency. The original tracking failure remains unchanged.",
+        "source": "artifacts/locomotion_force_metrics_20260916/forward_replay_001.json"
       }
     ]
   },

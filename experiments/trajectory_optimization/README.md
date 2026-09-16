@@ -89,3 +89,15 @@ The directory suffix `20260917` is an allocation-label error; dispatch and
 terminal records place the experiment on 16 September 2026 UTC. The source
 snapshots bind the executed versions. Later audit additions do not change the
 saved solver or replay files.
+
+## Force and motor-load reports
+
+Future native replays write `force_metrics.json` through the replay wrapper.
+The wrapper preserves the original evaluator and adds a hash-bound sidecar.
+The report separates startup from commanded locomotion and includes contact
+loads in N and motor torque in N·m. Check that the report is available before the
+next experiment in the optimizer/PPO sequence. The
+[load-tracking reference](../../docs/TRAINING.md#locomotion-load-tracking)
+defines the averages and the normal-force-only measurement scope.
+The [derived first-replay report](../../artifacts/locomotion_force_metrics_20260916/forward_replay_001.json)
+preserves the original capture and its failed tracking verdict.

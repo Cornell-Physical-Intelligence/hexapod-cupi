@@ -740,3 +740,52 @@ actual state transitions but excludes them from the accepted motion-prior pool.
 This experiment performs no PPO training and establishes no stopping or
 omnidirectional result. Stage 2 remains incomplete. The next research decision
 concerns speed variation and reference feedback, with the existing gates intact.
+
+## Locomotion load tracking
+
+James requires force tracking before the next optimizer/PPO sequence. The
+replay wrapper now writes `force_metrics.json` beside each native evaluation. For future PPO
+evaluations and learning probes, use the same wrapper or run the analysis
+command below before proceeding to the next experiment. The original
+paper-walk evaluator retains its bytes. The report uses all recorded 400 Hz
+samples and identifies each case and replica. Before the next experiment, check that the summary is
+available. A missing summary records an error; it does not substitute zeros or
+change the existing gait verdict.
+
+You can compare total vertical support force and each foot's contact-normal
+resultant, in newtons. The full-window foot mean includes swing samples. The
+contact-conditioned mean uses samples above 1 N and returns null for an unloaded
+foot. Each measure includes its mean and RMS, plus p95 and recorded peak. The
+recorder captures normal contact forces; these values exclude tangential
+friction. The 400 Hz peak describes the recorded interval force, not an
+unresolved impact peak or a measured hardware load.
+
+You can also compare applied and requested motor torque in N·m. The report uses
+absolute values to prevent opposite torque signs from canceling. It preserves
+per-joint statistics and identifies the joint with the highest RMS torque.
+Torque RMS describes motor loading; it does not establish electrical power or
+thermal safety.
+
+The report separates the full trial from its startup interval. Its locomotion
+window includes samples after two seconds with a nonzero translation or yaw
+command. It keeps samples where the robot fails to move. Empty windows remain
+empty, and incomplete trials retain their sample counts. Startup duration is an
+explicit analysis parameter and does not change any acceptance window.
+
+The [first derived summary](../artifacts/locomotion_force_metrics_20260916/forward_replay_001.json)
+uses the preserved optimized forward replay; no new Spark job was required.
+Its 7,200 locomotion samples cover the final 18 seconds. Mean vertical support
+is 73.24269 N, with a recorded peak of 108.10469 N. Mean absolute applied torque
+across the 18 motors is 0.314014 N·m. The left-middle femur has the highest RMS
+applied torque at 0.745598 N·m. The mean support is close to the nominal model
+weight; foot-load distribution and peaks help distinguish gait loads. The
+original tracking failure remains unchanged.
+
+To analyze an existing recording without changing it, choose a fresh output:
+
+```sh
+uv run python -m experiments.trajectory_optimization.force_metrics --directory artifacts/trajectory_optimizer_20260917/replay_001/standing/evaluation --output tmp/forward_force_metrics.json
+```
+
+The new summary pins the input declaration and capture receipt, plus each native
+chunk it reads. It does not rewrite the old attempt or its published manifest.
