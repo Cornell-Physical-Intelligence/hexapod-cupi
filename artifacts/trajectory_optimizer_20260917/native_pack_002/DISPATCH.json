@@ -1,0 +1,28 @@
+{
+  "utc": "2026-09-16T19:11:26.396231+00:00",
+  "unit": "hexapod-trajectory-replay-001-20260916.service",
+  "argv": [
+    "systemd-run",
+    "--user",
+    "--unit",
+    "hexapod-trajectory-replay-001-20260916.service",
+    "--property=RuntimeMaxSec=1920",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=WorkingDirectory=/home/orionh/IsaacLab",
+    "--property=ExecStopPost=python3 -B -S /home/orionh/HEXAPOD_runs/restart_20260914/trajectory_optimizer_002/source/launch_spark.py --bindings /home/orionh/HEXAPOD_runs/restart_20260914/trajectory_optimizer_002/binding.json --bindings-sha256 6c5eb8d0bd8ca0d1bed81156cb6e1f54a47b540bc4c33be46a89f7aee7a9e164 --cleanup-only",
+    "python3",
+    "-B",
+    "-S",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/trajectory_optimizer_002/source/launch_spark.py",
+    "--bindings",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/trajectory_optimizer_002/binding.json",
+    "--bindings-sha256",
+    "6c5eb8d0bd8ca0d1bed81156cb6e1f54a47b540bc4c33be46a89f7aee7a9e164"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "Running as unit: hexapod-trajectory-replay-001-20260916.service; invocation ID: 8f3614bfc4f5471c9950a4aa4a274649\n",
+  "binding_sha256": "6c5eb8d0bd8ca0d1bed81156cb6e1f54a47b540bc4c33be46a89f7aee7a9e164",
+  "source_freeze_sha256": "cc32eb0d076a5297f9e4874aa9b6b1eded9a9624b0c9cb8be267f833122abe1b"
+}

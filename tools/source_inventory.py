@@ -10,8 +10,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = 'configs/source_inventory.json'
 SCOPES = ('tools', 'experiments/c_length_study/tools', 'experiments/terrain/tools')
-# Paper-walk modules live at the experiment root; its tests/ tree is not a tool scope.
-TOP_LEVEL_SCOPES = ('experiments/paper_walk',)
+# Maintained prototypes keep tests outside their top-level tool scope.
+TOP_LEVEL_SCOPES = ('experiments/paper_walk', 'experiments/trajectory_optimization')
 
 
 def read_inventory(root=ROOT):

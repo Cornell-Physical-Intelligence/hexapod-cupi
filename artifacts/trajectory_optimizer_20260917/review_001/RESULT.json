@@ -1,0 +1,342 @@
+{
+  "schema": "optimized_trajectory_replay_audit_v1",
+  "utc": "2026-09-16T19:20:27.075191+00:00",
+  "source_base": "252db65b0e078e71c381f0d9e924460c56cdead3",
+  "trajectory_sha256": "a76e093075ce471210a66bf4ae3835a1dca94406b930e4a791a028941a502ec1",
+  "remote_files_verified": 35,
+  "physics_steps": 8000,
+  "contact_patches_reclassified": 131634,
+  "servo_and_targets_bitexact": true,
+  "action_cpu_gpu_max_abs": 2.9802322387695312e-08,
+  "scorer_checks_exact": true,
+  "transitions_exact": true,
+  "physical_checks": {
+    "joint_limits": true,
+    "joint_speed": true,
+    "applied_torque": true,
+    "nonfoot_contact": true,
+    "non_toe_clearance": true,
+    "plate_height": true
+  },
+  "expanded_cpu_audit": {
+    "constraint_violation": {
+      "root_force_moment": 9.378760146283582e-08,
+      "position_integration": 1.1059458470547012e-13,
+      "velocity_integration": 6.002143226879753e-16,
+      "periodic_position": 1.6757428777935957e-14,
+      "periodic_velocity": 6.938893903907228e-17,
+      "stance_position": 5.400624392137843e-11,
+      "swing_clearance": 1.0305645226083016e-13,
+      "swing_force": 2.3855058143506942e-17,
+      "negative_normal_force": 1.7317354728872056e-17,
+      "friction": 3.9319368352902544e-17,
+      "torque_cap": 0.0,
+      "pd_target_identity": 5.551115123125783e-17,
+      "stored_torque_identity": 0.0,
+      "joint_speed": 0.0,
+      "root_speed": 0.0,
+      "root_height": 0.0,
+      "root_orientation": 0.0,
+      "normal_force_cap": 0.0,
+      "cyclic_target_slew": 0.0,
+      "target_range": 0.0,
+      "target_joint_limits": 0.0,
+      "joint_position": 0.0
+    },
+    "passed": true,
+    "maximum_motor_torque_nm": 1.2906442233218947,
+    "maximum_target_step_rad": 0.022318212248562397,
+    "mean_root_velocity_native_mps": [
+      3.0475902341495583e-05,
+      -0.049577631178843416,
+      -0.0007111501142799883
+    ],
+    "scope": "CPU collocation feasibility; native 400 Hz replay and mesh contacts remain required."
+  },
+  "original_result": {
+    "schema": "canonical_stage2_cpu_evaluation_v1",
+    "profile": "omni_static",
+    "scope": {
+      "source": "experiments/c_length_study/tools/omni_flat_math.py:scenario_gate",
+      "cases": 77,
+      "duration_s": 20.0,
+      "settle_s": 2.0,
+      "scope": "Historical full signed direction, yaw and combined-command numeric screen."
+    },
+    "environment_index": 0,
+    "recorded_controls": 1000,
+    "checks": {
+      "complete_requested_window": {
+        "status": "pass",
+        "value": 0,
+        "bound": 0,
+        "operator": "<="
+      },
+      "control_dt_s": {
+        "status": "pass",
+        "value": 0.0,
+        "bound": 1e-12,
+        "operator": "<="
+      },
+      "quaternion_unit_norm": {
+        "status": "pass",
+        "value": 1.7881393432617188e-07,
+        "bound": 1e-05,
+        "operator": "<="
+      },
+      "terminated": {
+        "status": "pass",
+        "value": 0,
+        "bound": 0,
+        "operator": "<="
+      },
+      "truncated": {
+        "status": "pass",
+        "value": 0,
+        "bound": 0,
+        "operator": "<="
+      },
+      "reset": {
+        "status": "pass",
+        "value": 0,
+        "bound": 0,
+        "operator": "<="
+      },
+      "contiguous_time": {
+        "status": "pass",
+        "value": 3.1259717037102064e-15,
+        "bound": 1e-09,
+        "operator": "<="
+      },
+      "held_command": {
+        "status": "pass",
+        "value": 7.450580569168253e-10,
+        "bound": 1e-06,
+        "operator": "<="
+      },
+      "planar_error_mps": {
+        "status": "fail",
+        "value": 0.033270814069182066,
+        "bound": 0.025,
+        "operator": "<="
+      },
+      "yaw_error_rad_s": {
+        "status": "pass",
+        "value": 0.007051752860161755,
+        "bound": 0.06,
+        "operator": "<="
+      },
+      "tilt_rms_degrees": {
+        "status": "pass",
+        "value": 0.12668941915035248,
+        "bound": 5.0,
+        "operator": "<="
+      },
+      "vertical_velocity_rms_mps": {
+        "status": "pass",
+        "value": 0.031135056167840958,
+        "bound": 0.04,
+        "operator": "<="
+      },
+      "nonfoot_fraction": {
+        "status": "pass",
+        "value": 0.0,
+        "bound": 0.001,
+        "operator": "<="
+      },
+      "computed_demand_over_rating_fraction": {
+        "status": "pass",
+        "value": 0.0,
+        "bound": 0.005,
+        "operator": "<="
+      }
+    },
+    "metrics": {
+      "base_height_std_m": 0.002749848645180464,
+      "base_height_peak_to_peak_m": 0.007813625037670135,
+      "tilt_rms_degrees": 0.12668941915035248,
+      "tilt_p95_degrees": 0.2157999724149704,
+      "maximum_tilt_degrees": 0.2586878836154938,
+      "vertical_velocity_rms_mps": 0.031135056167840958,
+      "vertical_velocity_abs_p95_mps": 0.05375562235713005,
+      "mean_velocity_mps": [
+        0.04946400570270257,
+        0.00022064365916813711,
+        7.808867722231486e-05
+      ],
+      "planar_error_mps": 0.033270814069182066,
+      "planar_velocity_rmse_mps": 0.03679490666343196,
+      "yaw_error_rad_s": 0.007051752860161755,
+      "yaw_rate_rmse_radps": 0.009139760083156435,
+      "mean_yaw_rate_rad_s": -0.0009939529228764525,
+      "roll_pitch_angular_velocity_rms_radps": 0.02775353051570857,
+      "roll_pitch_angular_velocity_p95_radps": 0.051252810084871515,
+      "requested_saturation_fraction_400hz": 0.0,
+      "maximum_requested_saturation_fraction_400hz": 0.0,
+      "computed_demand_over_rating_fraction": 0.0,
+      "maximum_per_joint_computed_demand_over_rating_fraction": 0.0,
+      "maximum_computed_over_rating_burst_s": 0.0,
+      "peak_abs_computed_nm": 1.4013906717300415,
+      "max_per_joint_rms_applied_nm": 0.7453446388244629,
+      "nonfoot_fraction": 0.0
+    },
+    "lineage": {
+      "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+      "checkpoint_sha256": null,
+      "source_sha256": "0c56f9a463ae7f7b0dc3237be29ceb6db4840b217ec85313facf8df42fae0614"
+    },
+    "window_start_control": 100,
+    "window_controls": 900,
+    "native_admission": "Separate exact-model native 1/32 standing, solver, geometry, full400Hz and asset receipts are required.",
+    "failed_bounds": [
+      "planar_error_mps"
+    ],
+    "missing_evidence": [],
+    "pass": false,
+    "stage2_complete": false,
+    "case_id": "trajectory:forward_0.05",
+    "native_capture_complete": true,
+    "native_motor_and_joint_checks_pass": true,
+    "native_contact_screen": {
+      "schema": "canonical_native_contact_screen_v1",
+      "frequency_hz": 400,
+      "window": "complete trial, including initial settling and every native substep",
+      "recorded_substeps": 8000,
+      "nonfoot_substeps": 0,
+      "nonfoot_fraction": 0.0,
+      "maximum_nonfoot_fraction": 0.001,
+      "pass": true,
+      "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+    },
+    "batch_failure": null,
+    "passed_numeric_screen": false
+  },
+  "root_displacement_world_m": [
+    -0.0021283528840285726,
+    -0.9676139950752258,
+    -0.007527478039264679
+  ],
+  "forward_velocity_range_after_settle_mps": [
+    -0.014195585252582613,
+    0.10855191297792038
+  ],
+  "maximum_actual_target_step_rad": 0.03999999910593033,
+  "support": {
+    "start_sequence": 0,
+    "end_sequence_exclusive": 8000,
+    "samples": 8000,
+    "missing_six_toe_samples": 5529,
+    "zero_toe_samples": 10,
+    "support_count_histogram": [
+      10,
+      0,
+      3,
+      5411,
+      37,
+      68,
+      2471
+    ],
+    "per_toe": [
+      {
+        "toe": "lf",
+        "missing_steps": 2663,
+        "episodes": 22,
+        "longest_missing_s": 0.41500000000000004
+      },
+      {
+        "toe": "lm",
+        "missing_steps": 2814,
+        "episodes": 18,
+        "longest_missing_s": 0.4175
+      },
+      {
+        "toe": "lr",
+        "missing_steps": 2658,
+        "episodes": 21,
+        "longest_missing_s": 0.41500000000000004
+      },
+      {
+        "toe": "rf",
+        "missing_steps": 2802,
+        "episodes": 18,
+        "longest_missing_s": 0.41500000000000004
+      },
+      {
+        "toe": "rm",
+        "missing_steps": 2704,
+        "episodes": 21,
+        "longest_missing_s": 0.435
+      },
+      {
+        "toe": "rr",
+        "missing_steps": 2806,
+        "episodes": 18,
+        "longest_missing_s": 0.41500000000000004
+      }
+    ],
+    "minimum_toe_force_norm_n": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "physics_binding": {
+    "physics_source_files": {
+      "env.py": "a8a74a989c8b3769e8624c651876aed21f7adbdc94d3b65b26d8dcaf671b0dfd",
+      "env_config.py": "906509c0e29cbedb70fd6d58648585f43bb2fd75c2ab57ddbea72c9b7f4b4eea"
+    },
+    "physics_config": {
+      "physics_dt": 0.0025,
+      "decimation": 8,
+      "spacing_m": 2.0,
+      "target_slew_rad": 0.04,
+      "action_scale_rad": 0.35,
+      "solver_position_iterations": 32,
+      "solver_velocity_iterations": 0,
+      "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+      "material_friction": [
+        1.0,
+        1.0
+      ],
+      "restitution": 0.0,
+      "external_forces_every_iteration": true,
+      "neutral_joint_position_rad": [
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4
+      ],
+      "reset_root_height_m": 0.10280231400684256
+    },
+    "prior_metadata_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+    "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+    "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+    "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+    "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce"
+  },
+  "helper_source": "artifacts/restart_2026-09-14/paper_walk_execution_001/verification_evaluate_015/verify.py",
+  "helper_sha256": "94a361ce3c5f337a7fadc8db9de1ce0e59deea2349eb3f2617d3734b4bf6fd4b",
+  "audit_source_sha256": "0f31281798fb0a55268588e2058b572a78da4d3539b5d9b2d351cde9c726144c",
+  "video_sha256": "330a0d0e76a70f8aa37d1aafb15bc8a40e9f971627f58011bcad0eebcb5112c0",
+  "cleanup_verified": true,
+  "learned_policy": false,
+  "eligible_for_motion_prior": false,
+  "stage2_complete": false
+}

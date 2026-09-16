@@ -24,7 +24,7 @@ ARCHIVED_MANIFEST = "isaaclab/deploy/stage2_pipeline.sha256"
 ARCHIVED_REF = "81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df"
 ARCHIVED_MANIFEST_SHA256 = "19fc816cf9c53a79be8e14831daa58a12eba3f7f07c5fca80d03f2dc947ccda1"
 ARCHIVED_ENTRY_COUNT = 112
-CURRENT_MANIFEST = "isaaclab/deploy/repository_canonical_restart_20260915_v7_pipeline.sha256"
+CURRENT_MANIFEST = "isaaclab/deploy/repository_trajectory_optimizer_20260916_v8_pipeline.sha256"
 CURRENT_HEADER = (
     "# hexapod.mkii_fourbar_pipeline.v1\n"
     f"# Archived source commit: {ARCHIVED_REF}\n"
@@ -36,6 +36,11 @@ CURRENT_REVISIONS = {
     "packages/hexapod_env/pyproject.toml": "Package the new actuator and versioned task modules.",
 }
 CURRENT_EXTRA_PATHS = (
+    "isaaclab/deploy/repository_canonical_restart_20260915_v7_pipeline.sha256",
+    "artifacts/trajectory_optimizer_20260917/solve_002/trajectory.npz",
+    "artifacts/trajectory_optimizer_20260917/solve_002/INPUT.json",
+    "artifacts/trajectory_optimizer_20260917/solve_002/RESULT.json",
+    "artifacts/trajectory_optimizer_20260917/solve_002/SOLVER.json",
     "isaaclab/deploy/repository_canonical_restart_20260915_v6_pipeline.sha256",
     "isaaclab/deploy/repository_canonical_restart_20260915_v5_pipeline.sha256",
     "isaaclab/deploy/repository_canonical_restart_20260915_v4_pipeline.sha256",
@@ -229,10 +234,11 @@ def current_records(root=ROOT):
     root = Path(root).resolve()
     _, archived = read_archived_manifest(root)
     records = dict(identity(root)["files"])
-    test_paths = {str(p.relative_to(root)) for directory in ("isaaclab/tests", "robot/tests", "experiments/paper_walk/tests")
+    test_paths = {str(p.relative_to(root)) for directory in ("isaaclab/tests", "robot/tests", "experiments/paper_walk/tests", "experiments/trajectory_optimization/tests")
                   for p in (root / directory).glob("*.py")}
     # Match the inventory's bounded prototype scope; nested evidence is not code.
-    prototype_paths = {str(p.relative_to(root)) for p in (root / "experiments/paper_walk").glob("*.py")}
+    prototype_paths = {str(p.relative_to(root)) for directory in ("experiments/paper_walk", "experiments/trajectory_optimization")
+                       for p in (root / directory).glob("*.py")}
     for relative in set(archived) | set(CURRENT_EXTRA_PATHS) | test_paths | prototype_paths:
         path = root / relative
         if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(root):
