@@ -1,6 +1,32 @@
 # Spark operations runbook
 
-**Current dispatcher paused for handoff on 15 September 2026 UTC.** James said:
+## Successor allocations, 16 September 2026
+
+The successor restored the ten base Stormscope masks after preserving their
+unit bytes and prior states on Spark. The
+[mask receipt](../artifacts/restart_2026-09-14/spark_ownership_002/REMASK.json)
+verifies all 32 user masks, four system masks and the retained queue lock.
+The coordination SHA-256 remains `c89c99ebdd16941e3f8e7f23ef3525aeb360c78361aa49aa04e766b381a4727c`.
+Public copies contain selected states and hashes; foreign unit bytes remain
+in the remote recovery directory.
+
+The uniform refit completed its 1,000 controls, but a manual reconstruction
+container started eight seconds after dispatch and blocked the final resource
+check. The service retains its failed exit. The successor stopped the exact
+container `26deae115bc8ff946464f0ff404379a650b6cf2d01b4ae9b1d6e1a71b9d0ebc5`,
+preserved it and its mounted outputs, then ran the frozen cleanup-only command.
+The [incident receipt](../artifacts/restart_2026-09-14/spark_ownership_003/RECEIPT.json)
+and original failure journal preserve that distinction. Its restart policy is
+`no`; restore it with the recorded command after an explicit reservation release.
+
+The onset20 trial then completed with a successful service exit and cleanup.
+The [final readback](../artifacts/restart_2026-09-14/paper_walk_execution_001/POST_REFIT_RESERVATION_001.json)
+records PID 0 for both services, no GPU compute apps or active containers, and
+both GPU locks available. The reservation remains retained. Recheck those live
+states before another allocation; this receipt records its own timestamp.
+Both native results fail forward tracking and qualify no Stage 2 behavior.
+
+**Previous dispatcher paused for handoff on 15 September 2026 UTC.** James said:
 “take a pause for now and let someone else continue work, push all non commited
 changes”. Publish the preserved work, then relinquish execution. This supersedes
 the current dispatcher's continuation instruction; another designated lead may

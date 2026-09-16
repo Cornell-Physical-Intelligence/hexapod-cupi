@@ -1,0 +1,24 @@
+{
+ "utc": "2026-09-16T17:31:20.516452+00:00",
+ "reviewer": "successor session (Claude Fable 5.1, claude-fable-5-1) under James's standing authorization",
+ "adopted": true,
+ "source_freeze_sha256": "abff4e293b84c5273993842da995383100e7336367746e9f98e336e7bec8cd03",
+ "source_commit": "706c935be1400c4c641ad5cd31bf8ee6d2f4bb79",
+ "changed_modules": [
+  "reservation.py",
+  "refit_bc.py"
+ ],
+ "module_sha256": {
+  "reservation.py": "037162e879e94f6d",
+  "refit_bc.py": "f9cb7250f5c81c44",
+  "learner.py": "867e0859b6a66ae9"
+ },
+ "tests": {
+  "command": "uv run python -m unittest discover -s experiments/paper_walk/tests",
+  "passed": 170,
+  "seconds": 3.73
+ },
+ "decision": "Bind the guard to the pause coordination hash c89c99eb and carry the executed CPU refit helper. No env, learner, task or evaluation change; admission_002 layouts 1 and 128 remain valid. Fresh bindings evaluate the two refit candidates cold at one replica.",
+ "stage2_complete": false,
+ "native_started": false
+}

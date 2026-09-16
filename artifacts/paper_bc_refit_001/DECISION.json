@@ -1,0 +1,50 @@
+{
+  "schema": "canonical_bc_refit_native_decision_v1",
+  "utc": "2026-09-16T18:03:14.668680+00:00",
+  "reviewer": "Codex root",
+  "source_commit": "706c935be1400c4c641ad5cd31bf8ee6d2f4bb79",
+  "comparison": "artifacts/restart_2026-09-14/paper_walk_execution_001/bc_refit_analysis_001/RESULT.json",
+  "comparison_sha256": "d1511ce28ad4d0e38f51d61a85501fbc0dd2e2231f7548321db336197bf5cdab",
+  "decision": "Keep BC as diagnostic evidence. Do not adopt either checkpoint as a walking policy or start PPO from these bytes in this increment.",
+  "arms": {
+    "uniform": {
+      "checkpoint_sha256": "d1ecb388a2b6f642df886ee6585a3346beeb965ffa95638300b7d38385c22a35",
+      "first_onset_requested_target_rms_rad": 0.006188347935676575,
+      "later900_planar_rmse_mps": 0.05802805779440896,
+      "original_planar_error_mps": 0.052896632099500594,
+      "mean_forward_velocity_mps": -0.0004062845437972291,
+      "failed_bounds": [
+        "planar_error_mps",
+        "native_capture_or_original_physical_bounds"
+      ],
+      "physical_windows_pass": false,
+      "optional_warm_start_adopted": false
+    },
+    "onset_weight20": {
+      "checkpoint_sha256": "98bcefd13174961958a1c191ba1baeb3ee32e79a5c23e30e2c420a8e479b329c",
+      "first_onset_requested_target_rms_rad": 0.004124289378523827,
+      "later900_planar_rmse_mps": 0.04999498165137311,
+      "original_planar_error_mps": 0.0499944466021923,
+      "mean_forward_velocity_mps": 5.845266534398281e-06,
+      "failed_bounds": [
+        "planar_error_mps"
+      ],
+      "physical_windows_pass": true,
+      "optional_warm_start_adopted": false
+    }
+  },
+  "optional_initialization_candidate": "onset_weight20",
+  "optional_candidate_scope": "Onset20 improves the first-control requested-target error and later900 planar RMSE against the parent. It remains an optional candidate for the approved later three-probe screen; failed cold forward tracking prevents adoption. Any use in the new reference task also needs an explicit checkpoint and action compatibility decision. No warm start occurs here.",
+  "native_trials": 2,
+  "new_native_controls": 2000,
+  "new_native_physics_steps": 16000,
+  "new_contact_patches_reclassified": 355109,
+  "new_files_verified": 76,
+  "new_ppo_updates": 0,
+  "stage2_complete": false,
+  "limitations": [
+    "One cold trial per checkpoint cannot establish statistical improvement. Nearest demonstration actions are labels at their recorded states, not expert labels for policy-generated states.",
+    "The uniform trial overlapped a manually started reconstruction container. Its native record is complete, but the service failed its final exclusivity check. Preserve the failure and use the separate recovery cleanup receipt; do not use this allocation for throughput comparison."
+  ],
+  "next": "Resolve the PR 22 capture defects, then bind fresh direct-task standing admission at one and the intended batch layout. Measure 1024-replica throughput before larger allocations. Prepare reference-only and residual PPO modules under the maintained package with measured touchdown before phase freeze."
+}

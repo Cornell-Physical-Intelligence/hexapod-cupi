@@ -160,6 +160,12 @@ are not allowed; see [CONTRIBUTING.md](CONTRIBUTING.md). Use forward commits,
 preserve teammates' main changes and never rewrite published history. Subleads
 own ordinary review; James accepts mission changes.
 
-## Architecture partnership and parallel work
+## Review and parallel work
 
-The user requests Claude Code with Fable 5.1 (`claude-fable-5-1`) with maximum reasoning (`--effort max`) as a partner for major architecture decisions and substantial parallel implementation/review work. Consult it on controller/action architecture, learning objectives, terrain/perception interfaces and consequential experiment changes. Give workers bounded work areas and concrete deliverables; keep one owner for Spark execution and integration. Preserve the actual model/session, inputs, findings, disagreements and the resulting engineering decision. Independently review proposed code and run relevant checks before adoption. Report unavailable authentication/model access honestly; do not silently substitute a model or claim a consultation that failed. Routine verified repairs and ongoing authorized jobs can continue while reviews run.
+James removed the Fable review requirement on 16 September 2026. Do not start
+Fable consultations under the former instruction. Preserve prior consultation
+records as historical evidence.
+
+Give workers bounded work areas and concrete deliverables. Keep one owner for
+Spark execution and integration. Review proposed code and run relevant checks
+before adoption. Record the evidence and engineering decision.
