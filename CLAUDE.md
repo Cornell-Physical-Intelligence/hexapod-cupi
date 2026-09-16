@@ -154,9 +154,11 @@ Covered source changes require a new manifest and matching CI selection;
 published manifests stay unchanged. Source snapshots do not admit hardware.
 
 The user's standing publication authorization applies to verified changes:
-commit and push the integrated result with its context and verify the deployed
-revision. Use forward commits, preserve teammates' main changes and never rewrite
-published history. Subleads own ordinary review; James accepts mission changes.
+commit on a `[netid]/[task]` branch, open a pull request to `main`, merge after
+green CI and review, then verify the deployed revision. Direct pushes to `main`
+are not allowed; see [CONTRIBUTING.md](CONTRIBUTING.md). Use forward commits,
+preserve teammates' main changes and never rewrite published history. Subleads
+own ordinary review; James accepts mission changes.
 
 ## Architecture partnership and parallel work
 

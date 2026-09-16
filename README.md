@@ -7,6 +7,7 @@ for a 3D terrain map in local site coordinates.
 - [Progress](https://cornell-physical-intelligence.github.io/hexapod-cupi/#roadmap): the four roadmap markers, evidence and open definitions.
 - [STATUS](STATUS.md): generated text view of the same progress.
 - [Contributor guide](CLAUDE.md): source locations, invariants and commands; `AGENTS.md` points here.
+- [Contributing](CONTRIBUTING.md): team repo standards, branch naming and pull request rules.
 - [Reference documents](docs/README.md): model/gate references, operations and archived history.
 
 The approved robot is selected by [robot/active_model.json](robot/active_model.json).
