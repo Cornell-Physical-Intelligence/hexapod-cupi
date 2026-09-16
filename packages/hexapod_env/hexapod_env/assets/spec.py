@@ -99,6 +99,13 @@ class HexapodAssetSpec:
     #: Documentary total mass and where it comes from; not consumed by physics.
     mass_kg: float
     mass_note: str
+    #: Optional exact ``(joint, lower, upper)`` table in radians, for a model
+    #: whose legs do not share one travel per joint group. ``None`` keeps the
+    #: three group fields above as the only limit source, so every existing
+    #: asset reads exactly as before. When the table is present it lists all
+    #: 18 joints and is the authoritative limit source; the group fields then
+    #: describe the envelope shared by every leg.
+    joint_limits_rad: tuple[tuple[str, float, float], ...] | None = None
 
     def __post_init__(self) -> None:
         groups = (self.coxa_joints, self.femur_joints, self.tibia_joints)
@@ -120,10 +127,31 @@ class HexapodAssetSpec:
         ):
             if not low <= value <= high:
                 raise ValueError(f"{self.name}: {label} stance {value} outside limits {low}..{high}")
+        if self.joint_limits_rad is not None:
+            if any(len(row) != 3 for row in self.joint_limits_rad):
+                raise ValueError(f"{self.name}: a joint limit row is (joint, lower, upper)")
+            table = {row[0]: (row[1], row[2]) for row in self.joint_limits_rad}
+            if len(table) != len(self.joint_limits_rad) or set(table) != set(self.all_joints):
+                raise ValueError(f"{self.name}: the joint limit table must list all 18 declared joints once")
+            for name, value in self.default_joint_positions().items():
+                low, high = table[name]
+                if not low <= value <= high:
+                    raise ValueError(f"{self.name}: {name} stance {value} outside limits {low}..{high}")
 
     @property
     def all_joints(self) -> tuple[str, ...]:
         return self.coxa_joints + self.femur_joints + self.tibia_joints
+
+    def joint_limits(self) -> dict[str, tuple[float, float]]:
+        """``joint -> (lower, upper)`` in radians for all 18 joints."""
+
+        if self.joint_limits_rad is not None:
+            return {name: (lower, upper) for name, lower, upper in self.joint_limits_rad}
+        return {
+            **{name: self.coxa_limits for name in self.coxa_joints},
+            **{name: self.femur_limits for name in self.femur_joints},
+            **{name: self.tibia_limits for name in self.tibia_joints},
+        }
 
     def geometry_root_prim(self, robot_prim_path: str) -> str:
         """Prim path of the root link's geometry under a spawned robot."""

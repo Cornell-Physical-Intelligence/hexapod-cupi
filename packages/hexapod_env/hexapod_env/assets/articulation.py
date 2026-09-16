@@ -38,11 +38,17 @@ def articulation_cfg_from_spec(
     *,
     actuator_cfg: DCMotorCfg = ROBSTRIDE_RS05_CFG,
     usd_path: str | None = None,
+    solver_position_iterations: int = 8,
+    solver_velocity_iterations: int = 2,
 ) -> ArticulationCfg:
     """Articulation config for ``spec`` with the shared physics settings.
 
     Mirrors ``asset_cfg.HEXAPOD_CFG`` property for property; a change to the
     shared physics settings belongs in both places until the mock is retired.
+
+    The two solver counts default to the 8/2 pair every existing asset uses, so
+    an unchanged call returns an unchanged config. A model whose task declares
+    its own solver recipe passes them explicitly.
     """
 
     return ArticulationCfg(
@@ -60,8 +66,8 @@ def articulation_cfg_from_spec(
             ),
             articulation_props=sim_utils.ArticulationRootPropertiesCfg(
                 enabled_self_collisions=False,
-                solver_position_iteration_count=8,
-                solver_velocity_iteration_count=2,
+                solver_position_iteration_count=solver_position_iterations,
+                solver_velocity_iteration_count=solver_velocity_iterations,
             ),
         ),
         init_state=ArticulationCfg.InitialStateCfg(
