@@ -1,0 +1,71 @@
+{
+  "schema": "hexapod.mkii_rs05_admission_preparation.v1",
+  "id": "mkii_rs05_admission_prep_001",
+  "utc": "2026-09-16T00:00:00Z",
+  "status": "PREPARED_NOT_EXECUTED",
+  "task_id": "Isaac-Velocity-Flat-Hexapod-MKII-RS05-Direct-v0",
+  "host_reachability": {
+    "command": "ssh -o BatchMode=yes spark 'echo ok'",
+    "exit_code": 255,
+    "result": "The spark ssh alias did not resolve from the executing machine; the Tailscale client is absent there.",
+    "consequence": "Every native step stayed unexecuted. No job, container or GPU allocation was created."
+  },
+  "prepared_sources": {
+    "packages/hexapod_env/hexapod_env/assets/mkii_rs05.py": "1a08f7c1f6dbf8b098f527eeb8c069b1ec6364dbcc321f369b5c913f56cef233",
+    "packages/hexapod_env/hexapod_env/assets/spec.py": "f3a10137a47d0cf5c881ee1018be65063bb29f9152a84b6139a0136ec15f8d28",
+    "packages/hexapod_env/hexapod_env/assets/articulation.py": "27945c3062dd18e609926ddded49b6e9def9856b6f8d767315b77698b3ed9083",
+    "packages/hexapod_env/hexapod_env/actuators/rs05_paper_walk.py": "a7ab2b12a7706ff5c99281112801cda2f43c15abd1607864962e41e8ea995ef0",
+    "packages/hexapod_env/hexapod_env/actuators/rs05_paper_walk_model.py": "57277acf01a0dafd63f22fdc9abaf85543d5deb71210a076271d4abdfc809951",
+    "packages/hexapod_env/hexapod_env/actuators/rs05_paper_walk_runtime.py": "afa2101aa41f5f67a97e520e81947bf1b1ebf5824fd7bb2eab4c3ff79bb16fb1",
+    "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/__init__.py": "43a1adfe4a2fa0216954df588927f103db6952db3f42e045094cf7c50f597c7a",
+    "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/capture.py": "fbced2e51e4e8384305774695d3839d60b2ea13e1f4c96b32fe34c7cee5251d1",
+    "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/config.py": "f7c7ce09e8f6c9ca166c374e00d88f5a19a116b0046444e796a14ee4dcf026f6",
+    "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/env.py": "eb8dfd9801bea42253798e0d6f75d50b25306edbde11cd0d829cdee9dcb69dbd",
+    "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/math.py": "cdc1f86850b360546f138fa28102e20f77b194b291a6fb62f4aac1a23dd5cc07",
+    "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/register.py": "9f2ca406f74b3ff8d0c7c16d84f3659bb31c8bde91b1fcbf553b9aa7ccef8502",
+    "isaaclab/admit_mkii_rs05.py": "8f3d9e13d35ce49fb0ffc5a6588e9f447e5459b50924fe09bb51845f2c760109",
+    "isaaclab/hexapod_rl/tasks/mkii_rs05.py": "f7c1f55191402bc728d678d16daa7ea6daa079657fdf2d1427977a69b66816ef"
+  },
+  "prepared_tests": {
+    "isaaclab/tests/test_mkii_rs05_asset.py": "6cf304799c57d2aeb1b9768940edb75d812aa2d13dc256add24662706baf3590",
+    "isaaclab/tests/test_rs05_paper_walk_actuator.py": "e7ab7459571afc87b6c99bcf125a3da27dfc9806a0fd57af9d1c7b1b9f5032e3",
+    "isaaclab/tests/test_mkii_rs05_task.py": "58d322c0ad82c73aae90eb35b32014c6a7fb48e793c3a8b8bc7bd10fb65b3e26",
+    "isaaclab/tests/test_mkii_rs05_capture.py": "7749f05583bdf03b704cbe2df8f1f6680117702970fa167326a099ac42814950",
+    "isaaclab/tests/test_admit_mkii_rs05.py": "24e920353f27f4ca9b284540bd6a286db50fe6ee20eb9937d5a205bb3db9afc2"
+  },
+  "bound_inputs": {
+    "robot/active_model.json": "d11edd466902e2122d6cec7cd1b0c4399b566a6ed1598d6bfe911317197353e4",
+    "robot/hexapod_mkii_updated_v1/urdf/hexapod_updated_rs05_mass_corrected.urdf": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+    "robot/hexapod_mkii_updated_v1/model_rs05_mass_corrected.json": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+    "artifacts/mkii_updated_2026-09-10/usd_002/rs05_mass_corrected/robot.usda": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+    "artifacts/restart_2026-09-14/paper_walk_execution_001/prior_001/prior_metadata.json": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+    "artifacts/restart_2026-09-14/standing_translation_preparation_001/source/geometry/geometry.json": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+    "artifacts/restart_2026-09-14/standing_translation_preparation_001/source/geometry/geometry_extrema.npz": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+    "experiments/paper_walk/env.py": "a8a74a989c8b3769e8624c651876aed21f7adbdc94d3b65b26d8dcaf671b0dfd"
+  },
+  "capture_plan": {
+    "controls": 1000,
+    "substeps": 8000,
+    "settle_controls": 200,
+    "physics_dt_s": 0.0025,
+    "decimation": 8,
+    "replica_counts": [
+      1,
+      128
+    ],
+    "neutral_joint_position_rad": [
+      0.0,
+      -0.3,
+      0.4
+    ],
+    "reset_root_height_m": 0.10280231400684256,
+    "scorer": "experiments/paper_walk/env.py:score_diagnostic, unchanged"
+  },
+  "claims": {
+    "standing_admission": false,
+    "training_executed": false,
+    "stage2_complete": false,
+    "compute_allocated": false
+  },
+  "scope": "Prepared source and commands only. CPU equality with the frozen prototype is not native behavior, and no gate, manifest or historical result changed."
+}
