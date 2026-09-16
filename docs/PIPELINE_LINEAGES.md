@@ -14,7 +14,7 @@ python3 tools/c_study_runtime.py
 
 The historical check verifies `stage2_pipeline.sha256` against the immutable Git
 revision `81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df`. Fetch repository history first.
-The current check selects `repository_trajectory_optimizer_20260916_v8_pipeline.sha256`.
+The current check selects `repository_locomotion_force_20260916_v9_pipeline.sha256`.
 It covers current runtime/source paths, tests and retained release inputs,
 including the inventoried top-level modules and CPU tests in
 `experiments/paper_walk/` and `experiments/trajectory_optimization/`. Nested experiment
@@ -60,3 +60,8 @@ The trajectory-optimizer v8 release retains v7 and adds the approved-model
 dynamics solver, native replay packer and independent dynamics checks. It pins
 the saved feasible cycle used by the CPU regression checks. The source release
 does not accept the native replay: the original tracking gate fails.
+
+The locomotion-force v9 release retains v8 and adds normal-contact load and
+motor-torque summaries to native evaluations. It preserves the physics source
+and acceptance gates. The new report also supports separate reanalysis of
+existing captures without changing their bytes.

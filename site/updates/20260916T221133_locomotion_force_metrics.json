@@ -1,0 +1,35 @@
+{
+  "id": "20260916T221133_locomotion_force_metrics",
+  "date": "2026-09-16T22:11:33.100870+00:00",
+  "title": "Add contact-force and motor-load tracking before further locomotion experiments",
+  "summary": "The replay wrapper now emits a hash-bound load summary with startup and locomotion windows. The existing forward replay provides the first force and torque measurements. No optimizer or PPO job starts, and all gait gates retain their original verdicts.",
+  "areas": [
+    "Stage 2 telemetry",
+    "native evaluation",
+    "research paper"
+  ],
+  "changes": [
+    "CLAUDE.md",
+    ".github/workflows/tests.yml",
+    "configs/source_inventory.json",
+    "docs/TRAINING.md",
+    "docs/PIPELINE_LINEAGES.md",
+    "experiments/trajectory_optimization/force_metrics.py",
+    "experiments/trajectory_optimization/tests/test_force_metrics.py",
+    "experiments/trajectory_optimization/README.md",
+    "artifacts/locomotion_force_metrics_20260916/*",
+    "tools/check_pipeline_lineages.py",
+    "isaaclab/deploy/repository_locomotion_force_20260916_v9_pipeline.sha256",
+    "site/project.json",
+    "STATUS.md",
+    "experiments/trajectory_optimization/replay_native.py",
+    "experiments/trajectory_optimization/prepare.py"
+  ],
+  "evidence": [
+    "artifacts/locomotion_force_metrics_20260916/forward_replay_001.json",
+    "experiments/trajectory_optimization/tests/test_force_metrics.py",
+    "docs/TRAINING.md"
+  ],
+  "next": "Review force and torque summaries before proceeding with smoother references and PPO experiments.",
+  "no_project_impact": false
+}

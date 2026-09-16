@@ -127,6 +127,12 @@ Never expose secrets, especially the Spark container's `.env.base`.
 
 ## Verification and publication
 
+James requires locomotion load tracking before the next optimizer/PPO sequence
+(16 September 2026). Native evaluations must include `force_metrics.json` with
+contact-normal loads and motor torque. Check that the summary is available
+before the next experiment; preserve failed or incomplete captures. These are
+descriptive measurements, not new numerical acceptance limits. See TRAINING.
+
 ```sh
 uv sync --locked
 uv run python -m unittest discover -s isaaclab/tests

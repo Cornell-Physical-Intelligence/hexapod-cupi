@@ -28,6 +28,7 @@ def prepare(trajectory_directory, output, remote_root, root=ROOT):
     for path in sorted((root/'experiments/paper_walk').glob('*.py')):
         shutil.copy2(path, source/('paper_train.py' if path.name == 'train.py' else path.name))
     shutil.copy2(Path(__file__).with_name('replay_native.py'), source/'train.py')
+    shutil.copy2(Path(__file__).with_name('force_metrics.py'), source/'force_metrics.py')
     write(source/'FREEZE_SHA256.json', {p.name: digest(p) for p in sorted(source.iterdir())})
     inputs = output/'inputs'; inputs.mkdir()
     original = root/'artifacts/restart_2026-09-14/paper_walk_execution_001/prior_001'

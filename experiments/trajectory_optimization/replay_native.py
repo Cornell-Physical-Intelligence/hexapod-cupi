@@ -125,7 +125,8 @@ def main(argv=None):
         import numpy as np
         import torch
         env_module = importlib.import_module(prefix+'.env')
-        capture_module = importlib.import_module(prefix+'.evaluate')
+        capture_module = importlib.import_module(prefix+'.force_metrics' if prefix != 'experiments.paper_walk'
+            else 'experiments.trajectory_optimization.force_metrics')
         camera_module = importlib.import_module(prefix+'.camera')
         torch.manual_seed(cfg.seed)
         env = env_module.PaperWalkEnv(cfg, args.asset, args.model, args.geometry,
