@@ -380,3 +380,16 @@ have resumed, monitored, evaluated, or recorded live training. In that case,
 return the exact patch plus the exact remote commands, working directory,
 expected output, and required return evidence, and let a session with Spark
 access execute them. Do not request or accept credentials in chat.
+
+## 10. Completed optimizer replay, 16 September 2026
+
+The successor ran `hexapod-trajectory-replay-001-20260916.service` with a fresh
+[source and launch binding](../artifacts/trajectory_optimizer_20260917/native_pack_002/PACK.json).
+The native replay completed 1,000 controls. The
+[terminal readback](../artifacts/trajectory_optimizer_20260917/native_pack_002/REMOTE_INVENTORY.json)
+records PID 0, exit code 0 and no active containers or GPU compute apps.
+The [cleanup receipt](../artifacts/trajectory_optimizer_20260917/replay_001/cleanup.json)
+confirms removal of the exact container and retention of the reservation,
+including 32 user masks and four system masks. This receipt records the end of
+that allocation; it does not release the Spark reservation or describe live host
+state after its timestamp.

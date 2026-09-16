@@ -1,0 +1,94 @@
+{
+  "schema": "canonical_native_policy_camera_v2",
+  "source_sha256": "08638bbcbda961248c375c825e4ae5b9b1b9a38b4844f28fe69ddd418a554603",
+  "camera_prim_path": "/OmniverseKit_Persp",
+  "max_capture_attempts": 16,
+  "capture_timeout_seconds": 120.0,
+  "timeout_action": "faulthandler dumps all Python stacks and exits this process; owned host supervisor performs cleanup",
+  "native_getters_checked": [
+    "get_dof_positions",
+    "get_dof_velocities",
+    "get_root_transforms",
+    "get_root_velocities",
+    "get_link_transforms",
+    "get_dof_actuation_forces"
+  ],
+  "physics_state_comparison": "exact array equality",
+  "robot_pose_writes": false,
+  "simulation_steps": false,
+  "successful_frames": 501,
+  "synchronization": "Regular SimulationContext.render drives initialized KitVisualizer; two render pumps before CPU RGB readback; no orchestrator.step or unguarded app.update",
+  "capture_on_play": true,
+  "annotator_device": "cpu",
+  "frame_timestamp_source": "Native physics counter times configured physics_dt; visual timeline is diagnostic only",
+  "native_step_clock": "Installed PhysxManager.step calls simulate(sim.cfg.dt, 0.0), independently of the Kit visual timeline",
+  "api_reference": "https://github.com/isaac-sim/IsaacLab/blob/release/3.0.0-beta2/source/isaaclab_physx/isaaclab_physx/video_recording/isaacsim_kit_perspective_video.py",
+  "visualizer_inventory": {
+    "configured": [
+      {
+        "cfg_type": "KitVisualizerCfg",
+        "visualizer_type": "kit"
+      }
+    ],
+    "active": [
+      {
+        "type": "KitVisualizer",
+        "module": "isaaclab_visualizers.kit.kit_visualizer",
+        "cfg_type": "KitVisualizerCfg",
+        "visualizer_type": "kit",
+        "initialized": true,
+        "is_running": true,
+        "pumps_app_update": true
+      }
+    ],
+    "settings": {
+      "/isaaclab/visualizer/disable_all": false,
+      "/isaaclab/visualizer/explicit": false,
+      "/isaaclab/visualizer/types": "",
+      "/isaaclab/has_gui": null,
+      "/isaaclab/render/offscreen": true,
+      "/isaaclab/cameras_enabled": true
+    },
+    "visualizer_initialization_requested_by_camera": false,
+    "physics_reset_requested_by_camera": false
+  },
+  "kit_visualizers": [
+    {
+      "type": "KitVisualizer",
+      "initialized": true,
+      "source_sha256": "c4a6b1ee0fecea397e2f0061392348b11554f2d50f3eb51a0a9cf96279dab948"
+    }
+  ],
+  "simulation_context_sha256": "819536a201b525774b4bc04d6bd9a9e3fc11397961b4881e9083eb4502ee958a",
+  "physics_manager_sha256": "79852394dafa48aeb5e9cdb39072dde27c9ab35f6b587a17ce931318ab44fd4a",
+  "last_frame": {
+    "call": 500,
+    "env_index": 0,
+    "attempts": [
+      {
+        "attempt": 1,
+        "shape": [
+          720,
+          1280,
+          4
+        ],
+        "dtype": "uint8",
+        "visual_timeline_after_s": 0.7506479999999782,
+        "rgb_min": 10.0,
+        "rgb_max": 244.0,
+        "rgb_std": 19.52484190552251
+      }
+    ],
+    "physics_counter": 8000,
+    "physics_dt_s": 0.0025,
+    "physics_time_s": 20.0,
+    "visual_timeline": {
+      "before_s": 0.2924859999999782,
+      "diagnostic_only": true,
+      "after_s": 0.7506479999999782,
+      "delta_s": 0.458162
+    },
+    "status": "captured",
+    "wall_seconds": 0.16732188104651868
+  }
+}

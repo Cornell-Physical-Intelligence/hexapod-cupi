@@ -41,6 +41,8 @@ raw CAD and generated files. Open evidence intentionally when assessing a result
 - `experiments/terrain/tools/`: terrain/perception prototypes; qualification is separate.
 - `experiments/paper_walk/`: maintained canonical PPO/motion-prior prototype;
   its top-level modules are inventoried, while `tests/` contains CPU checks.
+- `experiments/trajectory_optimization/`: model-bound forward-cycle optimizer
+  and native replay entry; its tests check dynamics and recorded inputs.
 - `robot/`: approved models, importers and model-specific conventions.
 - `site/`: the progress registry and static GitHub Pages presentation.
 - `artifacts/`: immutable results and exact replay inputs; never import these copies into new production code.

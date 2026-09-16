@@ -716,3 +716,27 @@ The diagnostic 0.03 rad/20 ms target limiter and archived formal 0.04 comparison
 Shared diagnostic capture records the installed SDK's raw `quaternion_world_xyzw` and explicitly reordered `quaternion_world_wxyz` for quiet scoring. Do not infer old payload component order from its label: preserve original traces and perform versioned reanalysis before reusing historical heading passes. The 2° quiet-heading bound is unchanged.
 
 Full-C terrain admission additionally requires a completed-log check with no reported incomplete contact/friction data. A raw contact gate cannot establish support when its buffer overflowed. The adapter reserves at least 128 point/friction records per prim, preserving larger settings; force, support and motor limits remain fixed. Corrected buffer capacity still requires fresh simulator evidence.
+
+## Optimized forward reference experiment, 16 September 2026
+
+James authorized a trajectory-optimization experiment for the approved robot.
+The [maintained implementation](../experiments/trajectory_optimization/README.md)
+solves full-body dynamics with a fixed tripod contact schedule and replays the
+result through the admitted motor controller. It requires no physical robot.
+The first successful solve satisfies its CPU constraints, with 1.29064 N·m
+peak torque and 0.0223182 rad peak cyclic target change.
+
+The [native result](../artifacts/trajectory_optimizer_20260917/review_001/RESULT.json)
+records 0.967614 m of forward displacement in 20 seconds. Mean forward speed is
+0.0494640 m/s after settling, against 0.05 m/s commanded. Speed varies from
+−0.0141956 to 0.108552 m/s; planar tracking error is 0.0332708 m/s and fails the
+unchanged 0.025 m/s limit. The complete 8,000-step capture passes the native
+motor, joint and contact checks. The audit reproduces the servo targets and
+reclassifies 131,634 contact patches.
+
+The [video review](../artifacts/trajectory_optimizer_20260917/review_001/VISUAL_REVIEW.json)
+finds repeated foot lifts and translation in sampled frames. The replay saves
+actual state transitions but excludes them from the accepted motion-prior pool.
+This experiment performs no PPO training and establishes no stopping or
+omnidirectional result. Stage 2 remains incomplete. The next research decision
+concerns speed variation and reference feedback, with the existing gates intact.

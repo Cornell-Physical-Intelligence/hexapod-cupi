@@ -165,6 +165,29 @@
       "caption": "Frame from Approved robot model: CAD inspection.",
       "controller": "No controller — prescribed CAD joint articulation",
       "evidence": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/README.md"
+    },
+    {
+      "id": "optimized_forward_001",
+      "title": "Optimized forward cycle on the approved robot",
+      "type": "video",
+      "role": "trajectory_experiment",
+      "path": "artifacts/trajectory_optimizer_20260917/replay_001/standing/evaluation/rollout.mp4",
+      "sha256": "330a0d0e76a70f8aa37d1aafb15bc8a40e9f971627f58011bcad0eebcb5112c0",
+      "caption": "Approved detailed model. Optimized motor-target replay moves 0.968 m in 20 seconds. Speed variation fails the tracking limit. No learned policy or gait acceptance. Real-time playback.",
+      "controller": "Optimized trajectory a76e093075ce471210a66bf4ae3835a1dca94406b930e4a791a028941a502ec1",
+      "evidence": "artifacts/trajectory_optimizer_20260917/review_001/RESULT.json",
+      "poster_id": "optimized_forward_001_poster"
+    },
+    {
+      "id": "optimized_forward_001_poster",
+      "title": "Optimized forward cycle preview",
+      "type": "image",
+      "role": "video_poster",
+      "path": "artifacts/trajectory_optimizer_20260917/replay_001/standing/evaluation/first_frame.png",
+      "sha256": "4b79bb112449206df09070e14d69a56a520a0a0734110e35fe9c6ebd757150d3",
+      "caption": "First frame of the native optimized-target replay on the approved model.",
+      "controller": "Optimized trajectory a76e093075ce471210a66bf4ae3835a1dca94406b930e4a791a028941a502ec1",
+      "evidence": "artifacts/trajectory_optimizer_20260917/review_001/RESULT.json"
     }
   ],
   "nodes": [
@@ -214,7 +237,7 @@
       "state": "implemented",
       "column": 3,
       "row": 0,
-      "meaning": "Native PPO reached checkpoint320, but all three forward/quiet/recovery probes fail. Earlier checkpoint220 passes only quiet/recovery windows. Both BC startup diagnostics also fail forward tracking. Research is paused for handoff; the next refit remains unexecuted preparation.",
+      "meaning": "The optimized forward cycle moves the approved robot in Isaac. It passes native physical checks but fails speed tracking. Earlier PPO and BC candidates remain unqualified; the optimizer performs no policy training.",
       "input": "Requested motion, joint positions and body motion",
       "output": "18 target joint positions",
       "source": "experiments/paper_walk/README.md",
@@ -415,7 +438,7 @@
       "description": "Restart qualification on the mass-corrected model confirmed on 14 September 2026. First pass standing admission, then train forward, backward and sideways motion with turning and quiet stops. Compare gait quality with the historical reference.",
       "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait’s visual quality.",
       "source": "experiments/paper_walk/README.md",
-      "media_id": "caps500_preview",
+      "media_id": "optimized_forward_001",
       "status": "blocked",
       "backend": "Approved detailed robot model",
       "owner": "Platform lead",
@@ -427,11 +450,11 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "Both BC refits fail native forward tracking. The new direct task needs contact-capture fixes and matching native admission; all 96 full-suite cases and human acceptance remain outstanding.",
-      "question": "Resolve the reviewed direct-task capture defects, obtain one- and batch-replica admission and measure 1024-replica throughput, then screen the tripod reference before residual PPO.",
+      "blocker": "The optimized forward replay fails the 0.025 m/s tracking limit. A learned omnidirectional policy, stopping trials and human gait acceptance remain outstanding.",
+      "question": "Determine how to reduce within-cycle speed variation before accepting optimized references for learning.",
       "next_step": null,
       "acceptance": null,
-      "card_text": "Both BC refits fail forward tracking; direct-task contact fixes precede native admission."
+      "card_text": "Optimized replay moves 0.968 m; speed variation fails tracking."
     },
     {
       "id": "stage3",
@@ -549,11 +572,11 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-16T18:04:40.674701+00:00",
-    "source_commit": "706c935be1400c4c641ad5cd31bf8ee6d2f4bb79",
+    "as_of": "2026-09-16T19:23:17.057904+00:00",
+    "source_commit": "252db65b0e078e71c381f0d9e924460c56cdead3",
     "architecture": "ARCHITECTURE.md",
-    "summary": "The successor completed both cold BC refit evaluations and verified 76 result files, 16,000 native physics steps and 355,109 contact patches. Both candidates fail forward tracking; the uniform candidate also violates one native joint-speed bound. Onset20 improves the first-control target error but settles near zero forward speed. BC remains diagnostic. Spark cleanup and reservation checks pass after a recorded manual reconstruction overlap. The direct-task review found contact-capture defects that require repair before admission. Stage 2 remains unmet.",
-    "definition_policy": "The successor completed the two authorized refit evaluations and retains the Spark reservation. Preserve the approved model and existing numerical and human visual requirements. New direct-task admission needs the reviewed contact-capture fixes and fresh source bindings. The historical heartbeat remains paused. James removed the Fable consultation requirement on 16 September 2026.",
+    "summary": "The trajectory optimizer produced a forward cycle within its dynamics and actuator constraints. One native Isaac replay moved 0.967614 m in 20 seconds and averaged 0.049464 m/s after settling. Motor, joint and contact checks passed across 8,000 physics steps. Planar tracking error was 0.033271 m/s against the unchanged 0.025 m/s limit. The replay retains its video and actual transitions, with those transitions excluded from the accepted motion-prior pool. Stage 2 remains unmet.",
+    "definition_policy": "James authorized the trajectory-optimizer experiment. The completed run retains the approved model and existing gates. Further reference development and PPO training remain separate work. Spark cleanup passed and the reservation remains retained. The historical heartbeat remains paused; the Fable consultation requirement remains removed.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/04e9ede5c79fc0ff80151847fa8251f82cf21b0a/STATUS.md",
     "facts": [
@@ -1300,6 +1323,40 @@
         "result": "failed",
         "text": "The review reproduces toe misclassification when a world contact point reaches a link pose with its replica origin removed. The capture also replaces per-patch classification with one average contact point, which can hide shaft contact. Resolve both before one- and batch-replica standing admission and the 1024-replica throughput measurement. The reference-residual modules remain a proposal. James removed the Fable consultation requirement; the earlier session ended at a usage limit without a final review.",
         "source": "artifacts/restart_2026-09-14/mkii_rs05_review_001/ROOT_REVIEW.json"
+      },
+      {
+        "id": "trajectory-optimizer-cpu-20260916",
+        "title": "Full-body optimizer produces a feasible forward cycle",
+        "backend": "CPU CasADi 3.7.2 / IPOPT; approved 19-body model; one fixed tripod schedule",
+        "result": "passed",
+        "text": "The solver converges after 154 iterations for a 1.2-second cycle at 0.05 m/s. Peak planned motor torque is 1.29064 N·m and peak cyclic target change is 0.0223182 rad per 20 ms. The saved solution passes the expanded dynamics and actuator audit. Point-contact collocation leaves native replay as a separate test.",
+        "source": "artifacts/trajectory_optimizer_20260917/solve_002/RESULT.json"
+      },
+      {
+        "id": "trajectory-optimizer-native-20260916",
+        "title": "Optimized cycle moves forward but fails speed tracking",
+        "backend": "One admitted Isaac Sim replica; 1000 controls at 50 Hz and 8000 motor steps at 400 Hz; no PPO",
+        "result": "failed",
+        "metric": {
+          "path": "artifacts/trajectory_optimizer_20260917/review_001/RESULT.json",
+          "field": [
+            "original_result",
+            "metrics",
+            "planar_error_mps"
+          ],
+          "value": 0.033270814069182066,
+          "units": "m/s planar tracking error against its maximum bound",
+          "window": "900 controls after the unchanged 2-second settling interval",
+          "total": 0.025,
+          "total_field": [
+            "original_result",
+            "checks",
+            "planar_error_mps",
+            "bound"
+          ]
+        },
+        "text": "The robot moves 0.967614 m forward over the full 20-second trial. After settling it averages 0.049464 m/s, while speed ranges from -0.014196 to 0.108552 m/s. The original 0.025 m/s tracking gate fails. Native physical checks pass; the audit verifies 35 transferred files and reclassifies 131634 contact patches. The replay saves 1000 actual state transitions but excludes them from the accepted prior dataset. Sampled video frames show repeated foot lifts and floor-grid translation. No learned policy or human gait acceptance results.",
+        "source": "artifacts/trajectory_optimizer_20260917/review_001/RESULT.json"
       }
     ]
   },

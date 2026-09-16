@@ -14,10 +14,10 @@ python3 tools/c_study_runtime.py
 
 The historical check verifies `stage2_pipeline.sha256` against the immutable Git
 revision `81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df`. Fetch repository history first.
-The current check selects `repository_canonical_restart_20260915_v7_pipeline.sha256`.
+The current check selects `repository_trajectory_optimizer_20260916_v8_pipeline.sha256`.
 It covers current runtime/source paths, tests and retained release inputs,
-including the inventoried top-level `experiments/paper_walk/*.py` prototype
-modules and `experiments/paper_walk/tests/*.py` CPU checks. Nested experiment
+including the inventoried top-level modules and CPU tests in
+`experiments/paper_walk/` and `experiments/trajectory_optimization/`. Nested experiment
 outputs and frozen attempt copies are not scanned as maintained source. CI runs
 the prototype's CPU checks separately; its native Isaac allocations retain their
 own exact source, model, standing-admission and result identities. The two explicitly
@@ -55,3 +55,8 @@ paired BC refit under protocol 002. Source inclusion of a fitted candidate does
 not evaluate it natively.
 [Archived release history](archive/README.md) preserves earlier explanations and
 failed-attempt references. New release explanations belong in site updates.
+
+The trajectory-optimizer v8 release retains v7 and adds the approved-model
+dynamics solver, native replay packer and independent dynamics checks. It pins
+the saved feasible cycle used by the CPU regression checks. The source release
+does not accept the native replay: the original tracking gate fails.

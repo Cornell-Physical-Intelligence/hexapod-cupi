@@ -1,0 +1,38 @@
+{
+  "id": "20260916T192347_trajectory_optimizer",
+  "date": "2026-09-16T19:23:47.731238+00:00",
+  "title": "Implement and replay the full-body forward trajectory optimizer",
+  "summary": "The first optimized cycle moves the approved robot 0.967614 m in a 20-second native replay. Motor, joint and contact checks pass; speed variation fails the unchanged tracking gate. The implementation preserves source-bound solver inputs, actual state transitions and native video. No PPO training or Stage 2 acceptance occurs.",
+  "areas": [
+    "Stage 2 reference generation",
+    "native evidence",
+    "source release",
+    "research paper"
+  ],
+  "changes": [
+    ".github/workflows/tests.yml",
+    "CLAUDE.md",
+    "configs/source_inventory.json",
+    "docs/OPERATIONS.md",
+    "docs/TRAINING.md",
+    "docs/PIPELINE_LINEAGES.md",
+    "pyproject.toml",
+    "uv.lock",
+    "tools/source_inventory.py",
+    "tools/check_pipeline_lineages.py",
+    "experiments/trajectory_optimization/*",
+    "artifacts/trajectory_optimizer_20260917/*",
+    "site/project.json",
+    "STATUS.md",
+    "isaaclab/deploy/repository_trajectory_optimizer_20260916_v8_pipeline.sha256"
+  ],
+  "evidence": [
+    "artifacts/trajectory_optimizer_20260917/solve_002/RESULT.json",
+    "artifacts/trajectory_optimizer_20260917/review_001/RESULT.json",
+    "artifacts/trajectory_optimizer_20260917/review_001/VISUAL_REVIEW.json",
+    "artifacts/trajectory_optimizer_20260917/native_pack_002/REMOTE_INVENTORY.json",
+    "experiments/trajectory_optimization/README.md"
+  ],
+  "next": "Review within-cycle speed variation before accepting optimized references for learning. Keep the existing model, motor limits and acceptance gates.",
+  "no_project_impact": false
+}

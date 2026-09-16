@@ -2,9 +2,9 @@
 
 <!-- Generated from site/project.json by tools/project_site.py status. Do not edit. -->
 
-Evidence snapshot: 2026-09-16T18:04:40.674701+00:00 · source `706c935be1400c4c641ad5cd31bf8ee6d2f4bb79`.
+Evidence snapshot: 2026-09-16T19:23:17.057904+00:00 · source `252db65b0e078e71c381f0d9e924460c56cdead3`.
 
-The successor completed both cold BC refit evaluations and verified 76 result files, 16,000 native physics steps and 355,109 contact patches. Both candidates fail forward tracking; the uniform candidate also violates one native joint-speed bound. Onset20 improves the first-control target error but settles near zero forward speed. BC remains diagnostic. Spark cleanup and reservation checks pass after a recorded manual reconstruction overlap. The direct-task review found contact-capture defects that require repair before admission. Stage 2 remains unmet.
+The trajectory optimizer produced a forward cycle within its dynamics and actuator constraints. One native Isaac replay moved 0.967614 m in 20 seconds and averaged 0.049464 m/s after settling. Motor, joint and contact checks passed across 8,000 physics steps. Planar tracking error was 0.033271 m/s against the unchanged 0.025 m/s limit. The replay retains its video and actual transitions, with those transitions excluded from the accepted motion-prior pool. Stage 2 remains unmet.
 
 [Architecture](ARCHITECTURE.md) · [Visual roadmap](https://cornell-physical-intelligence.github.io/hexapod-cupi/#roadmap)
 
@@ -34,11 +34,11 @@ Scope: Approved detailed robot model. Owner: Platform lead.
 
 Required proof: Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait’s visual quality.
 
-Current limitation: Both BC refits fail native forward tracking. The new direct task needs contact-capture fixes and matching native admission; all 96 full-suite cases and human acceptance remain outstanding.
+Current limitation: The optimized forward replay fails the 0.025 m/s tracking limit. A learned omnidirectional policy, stopping trials and human gait acceptance remain outstanding.
 
 [Evidence](experiments/paper_walk/README.md) · Architecture: R-04, R-10, R-11.
 
-Next step: **not defined**. Resolve the reviewed direct-task capture defects, obtain one- and batch-replica admission and measure 1024-replica throughput, then screen the tripod reference before residual PPO.
+Next step: **not defined**. Determine how to reduce within-cycle speed variation before accepting optimized references for learning.
 
 ### Use sensors to cross terrain — Blocked
 
@@ -149,8 +149,10 @@ Assignment pending. Retain M1’s agreed fixture and thresholds; assign its owne
 - **Successor restored reservation controls and completed cleanup (passed)** — Spark user services and exact container identities. The successor preserves and masks ten restored Stormscope units. All 32 user masks and four system masks pass. A manual reconstruction container starts eight seconds after uniform dispatch; the uniform service records a failed final resource check. The successor preserves and stops that container, completes cleanup, then runs onset20. The final readback records no active containers or GPU compute apps, PID 0 for both services and both GPU locks available. Reservation controls remain retained. [Evidence](artifacts/restart_2026-09-14/paper_walk_execution_001/POST_REFIT_RESERVATION_001.json)
 - **Both BC refits fail native forward tracking (failed)** — Two fresh Isaac Sim apps, source020 and matching admission002; zero PPO updates. Both 1,000-control trials complete. The audit verifies 76 new files and 16,000 physics steps, reclassifies 355,109 contact patches and reproduces the original gate checks. Uniform and onset20 first-control target errors fall to 0.006188 and 0.004124 rad from the parent 0.030758 rad. Original planar errors remain 0.052897 and 0.049994 m/s against 0.025 m/s. Uniform also has one speed-bound step. Onset20 passes physical windows but settles near zero forward speed. BC remains diagnostic; no warm start or walking acceptance occurs. [Evidence](artifacts/paper_bc_refit_001/DECISION.json)
 - **Direct-task review identifies contact-capture prerequisites (failed)** — PR 22 source review and CPU coordinate-frame reproduction; no direct-task native run. The review reproduces toe misclassification when a world contact point reaches a link pose with its replica origin removed. The capture also replaces per-patch classification with one average contact point, which can hide shaft contact. Resolve both before one- and batch-replica standing admission and the 1024-replica throughput measurement. The reference-residual modules remain a proposal. James removed the Fable consultation requirement; the earlier session ended at a usage limit without a final review. [Evidence](artifacts/restart_2026-09-14/mkii_rs05_review_001/ROOT_REVIEW.json)
+- **Full-body optimizer produces a feasible forward cycle (passed)** — CPU CasADi 3.7.2 / IPOPT; approved 19-body model; one fixed tripod schedule. The solver converges after 154 iterations for a 1.2-second cycle at 0.05 m/s. Peak planned motor torque is 1.29064 N·m and peak cyclic target change is 0.0223182 rad per 20 ms. The saved solution passes the expanded dynamics and actuator audit. Point-contact collocation leaves native replay as a separate test. [Evidence](artifacts/trajectory_optimizer_20260917/solve_002/RESULT.json)
+- **Optimized cycle moves forward but fails speed tracking (failed)** — One admitted Isaac Sim replica; 1000 controls at 50 Hz and 8000 motor steps at 400 Hz; no PPO. The robot moves 0.967614 m forward over the full 20-second trial. After settling it averages 0.049464 m/s, while speed ranges from -0.014196 to 0.108552 m/s. The original 0.025 m/s tracking gate fails. Native physical checks pass; the audit verifies 35 transferred files and reclassifies 131634 contact patches. The replay saves 1000 actual state transitions but excludes them from the accepted prior dataset. Sampled video frames show repeated foot lifts and floor-grid translation. No learned policy or human gait acceptance results. [Evidence](artifacts/trajectory_optimizer_20260917/review_001/RESULT.json)
 
-The successor completed the two authorized refit evaluations and retains the Spark reservation. Preserve the approved model and existing numerical and human visual requirements. New direct-task admission needs the reviewed contact-capture fixes and fresh source bindings. The historical heartbeat remains paused. James removed the Fable consultation requirement on 16 September 2026.
+James authorized the trajectory-optimizer experiment. The completed run retains the approved model and existing gates. Further reference development and PPO training remain separate work. Spark cleanup passed and the reservation remains retained. The historical heartbeat remains paused; the Fable consultation requirement remains removed.
 
 Current compute rules and reservation records: [operations](docs/SPARK_COMPUTE_COORDINATION.md). This is not live GPU telemetry.
 
