@@ -34,7 +34,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
     source = output/'source'; source.mkdir()
     for path in sorted((root/'experiments/paper_walk').glob('*.py')):
         shutil.copy2(path, source/('paper_train.py' if path.name == 'train.py' else path.name))
-    for name in ('vanilla.py', 'vanilla_native.py', 'force_metrics.py'):
+    for name in ('vanilla.py', 'vanilla_native.py', 'force_metrics.py', 'forward_experiment.py'):
         shutil.copy2(root/'experiments/trajectory_optimization'/name,
                      source/('train.py' if name == 'vanilla_native.py' else name))
     save(source/'FREEZE_SHA256.json', {p.name: digest(p) for p in sorted(source.iterdir())})

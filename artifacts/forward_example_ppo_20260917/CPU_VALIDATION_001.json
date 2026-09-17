@@ -1,0 +1,65 @@
+{
+  "schema": "canonical_forward_setup_validation_v1",
+  "utc": "2026-09-17T03:36:43.420642+00:00",
+  "scope": "CPU checks against RSL-RL 5.0.1 using recorded observations. No native physics or learned locomotion result.",
+  "upstream_version": "5.0.1",
+  "torch_version": "2.14.0",
+  "tests_passed": 4,
+  "ppo_updates_per_arm": 2,
+  "optimizer_steps_per_parameter": 40,
+  "strict_reload_passed": true,
+  "paired_initialization": [
+    {
+      "after": {
+        "startup_action_mse": 0.069780632853508,
+        "train_action_mse": 0.06968903541564941,
+        "validation_action_mse": 0.0694853812456131
+      },
+      "arm": "scratch",
+      "bc_sample_indices_sha256": null,
+      "bc_updates": 0,
+      "before": {
+        "startup_action_mse": 0.069780632853508,
+        "train_action_mse": 0.06968903541564941,
+        "validation_action_mse": 0.0694853812456131
+      },
+      "final_actor_sha256": "96ee55de507e41f72be6aa46efa366e0909363a618575ad7f2dfb671f7e7876b",
+      "initial_actor_sha256": "70246794c58a7cf267e2b1269f36bf2fdc87645742be8b560cfa5549721ef19a",
+      "ppo_optimizer_empty": true,
+      "ppo_rng_preserved": true,
+      "ppo_transitions": 0,
+      "shared_actor_non_mlp_sha256": "d0e52e0fcac276385f225b1fc91f1ee8b765d09763b946c5480527a86a5ab1b1",
+      "shared_critic_sha256": "ee674bacf6ec12c8d8e9d98da71e8ef97502ddd235cf21760c4f31f7c4543d5c",
+      "stage2_complete": false
+    },
+    {
+      "after": {
+        "startup_action_mse": 1.3954450878372882e-05,
+        "train_action_mse": 8.273583262052853e-06,
+        "validation_action_mse": 1.8394222934148274e-05
+      },
+      "arm": "example",
+      "bc_sample_indices_sha256": "d876e998562a9a64c7c53e8c6e62fbe9630dbbd0b865fce0c0af53ee85e90ad7",
+      "bc_updates": 1000,
+      "before": {
+        "startup_action_mse": 0.069780632853508,
+        "train_action_mse": 0.06968903541564941,
+        "validation_action_mse": 0.0694853812456131
+      },
+      "final_actor_sha256": "25173f0bd98d7ceffd408efa54641edef5d9b774c72d7359a4c0de27848a8056",
+      "initial_actor_sha256": "70246794c58a7cf267e2b1269f36bf2fdc87645742be8b560cfa5549721ef19a",
+      "ppo_optimizer_empty": true,
+      "ppo_rng_preserved": true,
+      "ppo_transitions": 0,
+      "shared_actor_non_mlp_sha256": "d0e52e0fcac276385f225b1fc91f1ee8b765d09763b946c5480527a86a5ab1b1",
+      "shared_critic_sha256": "ee674bacf6ec12c8d8e9d98da71e8ef97502ddd235cf21760c4f31f7c4543d5c",
+      "stage2_complete": false
+    }
+  ],
+  "protocol_sha256": "eda88c9cf9e6c3e35a759409ade04f931704bc930845459dd4dc5da37b631431",
+  "sources": {
+    "experiments/trajectory_optimization/forward_experiment.py": "81f2a07e094848619013ac4b548de789f5445a1b971a96c9a12b9dde7c3385ea",
+    "experiments/trajectory_optimization/tests/test_forward_experiment.py": "5f89b47edda19cab24d21c54bddefcefd81a9385f04e9bc933c5aabb3c977cb8"
+  },
+  "stage2_complete": false
+}

@@ -572,10 +572,10 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-17T02:33:10.084006+00:00",
-    "source_commit": "7eea4c905f93ba61df00d5afbd090584fc0fffdc",
+    "as_of": "2026-09-17T04:09:54.279143+00:00",
+    "source_commit": "fa866a5d7375254f1f7593ab9cb8336c7de073d3",
     "architecture": "ARCHITECTURE.md",
-    "summary": "The improved optimized reference passes the native forward screen at 0.05 m/s and reduces tracking error by 90.9 percent. Standard PPO completes 1200 updates and 3686400 transitions, but its saved policy fails forward, quiet and stop probes. The comparison retains 400 Hz ground-contact and motor-torque measurements plus native videos. Reference-assisted PPO and omnidirectional acceptance remain untested; Stage 2 remains unmet.",
+    "summary": "The improved optimized reference passes the native forward screen at 0.05 m/s. The earlier mixed-command PPO policy fails forward, quiet and stop probes. We froze a paired forward-only experiment to test whether copying the reference before PPO helps learning. Both native interface checks pass. At the recorded 04:09 UTC readback, the scratch arm is running at 208 of 1200 updates; the example arm has not started its full run. The paired learning result and omnidirectional acceptance remain pending.",
     "definition_policy": "James requires locomotion load tracking before the next optimizer/PPO sequence. The replay wrapper now produces force_metrics.json. Future PPO evaluations and learning probes must use the wrapper or the analysis command; check summary availability before proceeding. Preserve the approved model, original gait verdicts and all existing gates. The Spark reservation remains retained and the historical heartbeat remains paused.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/04e9ede5c79fc0ff80151847fa8251f82cf21b0a/STATUS.md",
@@ -1437,6 +1437,38 @@
         "result": "passed",
         "text": "Native training exits with code 0 and saves checkpoint1200. A new COLMAP container starts during the run and blocks the wrapper resource check. The successor preserves its recovery image and mounted outputs, stops that container under the existing authorization, then completes cleanup. The original service exit remains 1. The separate policy evaluation exits with code 0. The reservation remains retained; the shared training interval cannot establish isolated throughput.",
         "source": "artifacts/restart_2026-09-14/spark_ownership_005/RECEIPT.json"
+      },
+      {
+        "id": "forward-example-ppo-protocol-20260917",
+        "title": "Freeze a controlled test of forward-example initialization",
+        "backend": "RSL-RL 5.0.1; fixed 0.05 m/s forward command; one paired seed; admitted 128-replica prototype",
+        "result": "inconclusive",
+        "text": "Both arms receive 1200 PPO updates and 3686400 transitions with the same reward and initial observation statistics. The example arm first fits actor actions from 700 recorded rows with 1000 imitation updates. The fit preserves the critic, action variance and PPO random state. The protocol requires policy evaluations at updates 0, 300, 600 and 1200, including loads and videos. The later 300 example rows test action prediction on the same recording. No learning benefit or Stage 2 acceptance follows from setup.",
+        "source": "artifacts/forward_example_ppo_20260917/protocol_001/PROTOCOL.json"
+      },
+      {
+        "id": "forward-example-native-smoke-20260917",
+        "title": "Both pilot arms pass native interface and checkpoint checks",
+        "backend": "Two separate Isaac Sim runs; source freeze 516cb2cb; 128 replicas per arm",
+        "result": "passed",
+        "text": "Each arm completes two PPO updates, 6144 transitions and 49152 force/torque samples. Each saved optimizer records 40 steps per parameter. Initial critic and observation statistics match; the example arm changes its action-prediction weights. Both native jobs exit with code 0 and complete exact container cleanup. The first two interface failures remain preserved. These checks establish execution and telemetry, without a locomotion conclusion.",
+        "source": "artifacts/forward_example_ppo_20260917/NATIVE_SMOKE_001.json"
+      },
+      {
+        "id": "forward-example-scratch-dispatched-20260917",
+        "title": "Start the full scratch arm under the frozen protocol",
+        "backend": "Guarded Spark systemd service; invocation 46e953ab3a2e4d69a40263959d7f0a3c",
+        "result": "inconclusive",
+        "text": "The 04:09:54 UTC readback records MainPID 3177192 active with 208 updates and 638976 transitions. The run has no recorded acquisition error. This timestamped observation does not establish a terminal result. The example arm remains prepared for its full run; scheduled native evaluations and the paired learning result remain pending.",
+        "source": "artifacts/forward_example_ppo_20260917/LIVE_SCRATCH_001.json"
+      },
+      {
+        "id": "forward-example-producer-recovery-20260917",
+        "title": "Pause identified reconstruction producers and preserve recovery",
+        "backend": "Spark process identities, two preserved container images and retained reservation controls",
+        "result": "passed",
+        "text": "The successor preserves source and process identities for two orphan reconstruction producers, then pauses both under James’s compute authorization. The successor preserves two active COLMAP containers as recovery images before stopping them. Private command bytes and source copies stay on Spark; public receipts retain hashes and output mounts. The final incident readback records empty container and GPU lists. The reservation remains retained.",
+        "source": "artifacts/restart_2026-09-14/spark_ownership_007/RECEIPT.json"
       }
     ]
   },
