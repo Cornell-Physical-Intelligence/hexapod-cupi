@@ -1,0 +1,166 @@
+{
+  "schema": "canonical_stage2_native_batch_v1",
+  "cases": [
+    {
+      "case_id": "learning:forward_0.05_to_stop",
+      "profile": "stop_to_stand",
+      "command": [
+        0.05,
+        0.0,
+        0.0
+      ],
+      "controls": 1050
+    }
+  ],
+  "assigned_case_ids": [
+    "learning:forward_0.05_to_stop"
+  ],
+  "padding_replicas": 0,
+  "seed": 20260914,
+  "episode_timeout_seconds": 60.0,
+  "max_wall_seconds": 5905.364751880057,
+  "checkpoint_sha256": "666a5b5ee9709d774cd4a685802e1a17e67678e7f5ecd5f317f9038d2c2e6bca",
+  "source_sha256": "9efb6003334c25215645e23274f044734bc5c9bb60c11ba84c7242027c4b3d8c",
+  "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+  "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+  "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+  "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+  "contact_classification": "exact_distal_points",
+  "velocity_measurement_point": "native root center_of_mass; actual world velocity rotated into body/navigation",
+  "initial_resets": 1,
+  "resets_during_trial": 0,
+  "pose_forcing": false,
+  "stage2_complete": false,
+  "acquisition_complete": false,
+  "failure": "_NativeTrialTermination('Native terminal/timeout: preserved failed prefix; no automatic reset')",
+  "failure_kind": "native_terminal_prefix",
+  "controls": 467,
+  "allocation_limit_reached": false,
+  "native_capture_failure": null,
+  "recorded_physics_steps": 3736,
+  "results": [
+    {
+      "schema": "canonical_stage2_cpu_evaluation_v1",
+      "profile": "stop_to_stand",
+      "scope": {
+        "source": "experiments/c_length_study/tools/omni_quiet_review.py",
+        "duration_s": 21.0,
+        "moving_until_s": 8.0,
+        "settle_after_zero_s": 2.0,
+        "minimum_quiet_window_s": 10.0,
+        "scope": "No cropping to a convenient quiet suffix; score all samples after the fixed settling allowance."
+      },
+      "environment_index": 0,
+      "recorded_controls": 467,
+      "checks": {
+        "complete_requested_window": {
+          "status": "fail",
+          "value": 583,
+          "bound": 0,
+          "operator": "<="
+        },
+        "control_dt_s": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 1e-12,
+          "operator": "<="
+        },
+        "quaternion_unit_norm": {
+          "status": "pass",
+          "value": 2.384185791015625e-07,
+          "bound": 1e-05,
+          "operator": "<="
+        },
+        "terminated": {
+          "status": "fail",
+          "value": 1,
+          "bound": 0,
+          "operator": "<="
+        },
+        "truncated": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "reset": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "contiguous_time": {
+          "status": "pass",
+          "value": 1.349614864309956e-15,
+          "bound": 1e-09,
+          "operator": "<="
+        },
+        "preceding_command": {
+          "status": "pass",
+          "value": 7.450580569168253e-10,
+          "bound": 1e-06,
+          "operator": "<="
+        },
+        "zero_command_continuous": {
+          "status": "missing",
+          "bound": 1e-06
+        },
+        "quiet_window_controls": {
+          "status": "fail",
+          "value": 0,
+          "bound": 500,
+          "operator": ">="
+        }
+      },
+      "metrics": {},
+      "lineage": {
+        "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+        "checkpoint_sha256": "666a5b5ee9709d774cd4a685802e1a17e67678e7f5ecd5f317f9038d2c2e6bca",
+        "source_sha256": "9efb6003334c25215645e23274f044734bc5c9bb60c11ba84c7242027c4b3d8c"
+      },
+      "preceding_command": [
+        0.05,
+        0.0,
+        0.0
+      ],
+      "preceding_motion_scope": "Quiet recovery only; the matching signed motion case must independently pass.",
+      "window_start_control": 500,
+      "window_controls": 0,
+      "failed_bounds": [
+        "complete_requested_window",
+        "terminated",
+        "quiet_window_controls",
+        "native_capture_or_original_physical_bounds"
+      ],
+      "missing_evidence": [
+        "zero_command_continuous"
+      ],
+      "pass": false,
+      "stage2_complete": false,
+      "case_id": "learning:forward_0.05_to_stop",
+      "native_capture_complete": false,
+      "native_motor_and_joint_checks_pass": false,
+      "native_contact_screen": {
+        "schema": "canonical_native_contact_screen_v1",
+        "frequency_hz": 400,
+        "window": "complete trial, including initial settling and every native substep",
+        "recorded_substeps": 3736,
+        "nonfoot_substeps": 0,
+        "nonfoot_fraction": 0.0,
+        "maximum_nonfoot_fraction": 0.0,
+        "pass": true,
+        "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+      },
+      "batch_failure": "_NativeTrialTermination('Native terminal/timeout: preserved failed prefix; no automatic reset')",
+      "passed_numeric_screen": false
+    }
+  ],
+  "video_frames": 233,
+  "video_case_id": "learning:forward_0.05_to_stop",
+  "files": {
+    "control_trace.npz": "2b58d615aafeeb67b6743e06418acbf2086020f413ea76c6b780ea1459044bf9",
+    "declaration.json": "4ba33788153c14ac5a11789ccbb7c531b2890daaf610b2ba3b7faea8889516eb",
+    "first_frame.png": "28b42e12597598e7bf9941821b55a6cfcb7efcc2a4ffb05238e600faef58d9b7",
+    "rollout.mp4": "a38d3cccbc7c5f56d77dafc9c17def6b69d98574eb7108d816c0cc08726a3763"
+  }
+}

@@ -1,0 +1,699 @@
+{
+  "schema": "canonical_locomotion_force_metrics_v1",
+  "status": "available",
+  "source_directory": "/output/standing/evaluation_01",
+  "source_files": {
+    "declaration.json": "d1249b377289a6482b5528ff8e532c3565c7da065bdece36928a4ef705e28a15",
+    "native400hz/capture.json": "5e1ae9e12f3baae8e135a91c1d46cc8ac684ec4911aa586f537e26654a1737d8",
+    "native400hz/substeps_000.npz": "c77769e97eea57dca9df38e2062851aec7df9def32ef1c6868aa92af8cf88545",
+    "native400hz/substeps_001.npz": "8703709faeb0e4b0bc14112d9d38cb369d586e70bcfcca9b31bd88747ff8c781",
+    "native400hz/substeps_002.npz": "453bd851c12e1d652eb13a4906b1bb84ed9b320526fc5d98a24b41399bb2aa33",
+    "native400hz/substeps_003.npz": "281a99a50d43be5226014fc25367ef075519974e38a4c5deeb12274e5b5dba76",
+    "native400hz/substeps_004.npz": "99d6a570857f0f5b3d6a409d54ce9c192376a92b0f1ccb3e5d8c6f68ccb229c1",
+    "native400hz/substeps_005.npz": "cb3ac52426a8f808bc317cadcca80192a9c91174a1fce84a3c6b72107054cef7",
+    "native400hz/substeps_006.npz": "f58a6abda02b73643325bcf948fb21bce5029981ba36453d369a8b03dab866d1",
+    "native400hz/substeps_007.npz": "fd3533a53c95ea8d3d591e1e82eebe505567ceeb09c00fecb6c17f99ed9dd676",
+    "native400hz/substeps_008.npz": "728bc88539fc5e67c46db409ff1fc2e1c29144f7ad3c0f48c83306c019185604",
+    "native400hz/substeps_009.npz": "b543a8f6086622eb7025e34d92d46f385861dc7986381badac9e78d784c20e4d"
+  },
+  "analysis_source_sha256": "b38987da38bd1a72e4244f2b7d971b6ac1df75d5e78d4b3d7db3c3866c0e33b3",
+  "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+  "checkpoint_sha256": "f77933eb03a1b40259111bfbfbb24c5d18bb57d34c28680c7544830a93159371",
+  "recording_source_sha256": "9efb6003334c25215645e23274f044734bc5c9bb60c11ba84c7242027c4b3d8c",
+  "capture_failure": null,
+  "physics_hz": 400,
+  "settle_seconds": 2.0,
+  "reference_mass_kg": 7.466088235225788,
+  "reference_weight_n": 73.24232558756499,
+  "units": {
+    "contact": "N",
+    "motor": "N*m"
+  },
+  "definitions": {
+    "force": "World-frame sums of recorded patch normal force vectors; tangential friction is not recorded.",
+    "vertical_support": "World +Z component of the sum over all feet and nonfoot categories.",
+    "per_foot": "Magnitude of each foot normal-force resultant; full-window mean includes swing zeros.",
+    "contact_mean": "Conditional mean for foot resultant magnitude > 1 N; empty contact returns null.",
+    "motor": "Absolute applied and requested torque per joint; RMS is a load descriptor, not power or thermal qualification.",
+    "averaging": "Equal-duration 400 Hz samples, float64 reductions and linear p95 interpolation.",
+    "locomotion_window": "Nonzero commanded translation or yaw after the explicit settling interval; achieved speed does not filter rows.",
+    "status": "Available metrics describe captured rows, including failed prefixes; no acceptance gate changes."
+  },
+  "cases": [
+    {
+      "case_id": "learning:quiet_20s",
+      "replica": 0,
+      "expected_samples": 8000,
+      "recorded_samples": 8000,
+      "requested_window_complete": true,
+      "windows": {
+        "full_trial": {
+          "status": "available",
+          "samples": 8000,
+          "duration_s": 20.0,
+          "first_sample_s": 0.0025,
+          "last_sample_s": 20.0,
+          "total_vertical_support_n": {
+            "mean": 73.23657838169743,
+            "rms": 73.93944874211464,
+            "p95": 88.69512750357389,
+            "peak": 226.2329978942871
+          },
+          "mean_vertical_support_body_weights": 0.9999215316304957,
+          "total_normal_resultant_magnitude_n": {
+            "mean": 73.23657838169743,
+            "rms": 73.93944874211465,
+            "p95": 88.69512750357389,
+            "peak": 226.2329978942872
+          },
+          "sum_foot_normal_magnitudes_n": {
+            "mean": 73.2365783816975,
+            "rms": 73.9394487421147,
+            "p95": 88.69512750357394,
+            "peak": 226.2329978942873
+          },
+          "per_foot": {
+            "lf": {
+              "normal_resultant_magnitude_n": {
+                "mean": 16.48997915978997,
+                "rms": 17.509863621297317,
+                "p95": 25.93677673339844,
+                "peak": 53.35628890991212
+              },
+              "contact_fraction": 0.984375,
+              "mean_magnitude_during_contact_n": 16.751268633917093
+            },
+            "lm": {
+              "normal_resultant_magnitude_n": {
+                "mean": 12.517962730513085,
+                "rms": 13.827329377117561,
+                "p95": 21.858172893524166,
+                "peak": 47.80289173126221
+              },
+              "contact_fraction": 0.948125,
+              "mean_magnitude_during_contact_n": 13.200920820408673
+            },
+            "lr": {
+              "normal_resultant_magnitude_n": {
+                "mean": 7.141793397812589,
+                "rms": 8.475953906273903,
+                "p95": 14.840510487556463,
+                "peak": 40.68843078613282
+              },
+              "contact_fraction": 0.85525,
+              "mean_magnitude_during_contact_n": 8.343796861761316
+            },
+            "rf": {
+              "normal_resultant_magnitude_n": {
+                "mean": 8.496405318206882,
+                "rms": 10.460154032595243,
+                "p95": 18.204135513305676,
+                "peak": 151.60679626464852
+              },
+              "contact_fraction": 0.818625,
+              "mean_magnitude_during_contact_n": 10.37470566812499
+            },
+            "rm": {
+              "normal_resultant_magnitude_n": {
+                "mean": 10.763541830181,
+                "rms": 11.767414025977235,
+                "p95": 17.654640245437623,
+                "peak": 53.918489009141965
+              },
+              "contact_fraction": 0.93725,
+              "mean_magnitude_during_contact_n": 11.483199302878033
+            },
+            "rr": {
+              "normal_resultant_magnitude_n": {
+                "mean": 17.826895945193975,
+                "rms": 18.45704019193354,
+                "p95": 25.59885587692261,
+                "peak": 55.94911956787134
+              },
+              "contact_fraction": 0.99825,
+              "mean_magnitude_during_contact_n": 17.858147703675407
+            }
+          },
+          "motor_torque": {
+            "applied": {
+              "mean_abs_across_joints_nm": 0.34469940058858933,
+              "worst_joint_rms_nm": 0.7595007285211923,
+              "worst_joint": "lf_femur_pitch",
+              "per_joint_abs_nm": {
+                "lf_coxa_yaw": {
+                  "mean": 0.2837564468685632,
+                  "rms": 0.3551490601320166,
+                  "p95": 0.6731732755899426,
+                  "peak": 1.358451247215271
+                },
+                "lf_femur_pitch": {
+                  "mean": 0.7020234825965017,
+                  "rms": 0.7595007285211872,
+                  "p95": 1.2042769432067866,
+                  "peak": 1.600000023841858
+                },
+                "lf_tibia_pitch": {
+                  "mean": 0.3373398370325158,
+                  "rms": 0.41929279292893407,
+                  "p95": 0.7940595448017119,
+                  "peak": 1.600000023841858
+                },
+                "lm_coxa_yaw": {
+                  "mean": 0.2685192921881098,
+                  "rms": 0.33843574999267945,
+                  "p95": 0.6873762041330335,
+                  "peak": 1.1502288579940796
+                },
+                "lm_femur_pitch": {
+                  "mean": 0.4163480742793472,
+                  "rms": 0.49145856235455726,
+                  "p95": 0.881383541226387,
+                  "peak": 1.600000023841858
+                },
+                "lm_tibia_pitch": {
+                  "mean": 0.33513618363367276,
+                  "rms": 0.41397909246504533,
+                  "p95": 0.7746193259954453,
+                  "peak": 1.600000023841858
+                },
+                "lr_coxa_yaw": {
+                  "mean": 0.21926214839727617,
+                  "rms": 0.2763917168729052,
+                  "p95": 0.5336902976036071,
+                  "peak": 1.0666195154190063
+                },
+                "lr_femur_pitch": {
+                  "mean": 0.2821333633349568,
+                  "rms": 0.34769676503698704,
+                  "p95": 0.6732414543628692,
+                  "peak": 1.0675220489501953
+                },
+                "lr_tibia_pitch": {
+                  "mean": 0.2035883838494774,
+                  "rms": 0.2720845918071498,
+                  "p95": 0.5660511761903756,
+                  "peak": 1.600000023841858
+                },
+                "rf_coxa_yaw": {
+                  "mean": 0.26094132675553555,
+                  "rms": 0.33382154716230344,
+                  "p95": 0.6511105239391326,
+                  "peak": 1.600000023841858
+                },
+                "rf_femur_pitch": {
+                  "mean": 0.3577915889679862,
+                  "rms": 0.45018269752636686,
+                  "p95": 0.8508051544427871,
+                  "peak": 1.600000023841858
+                },
+                "rf_tibia_pitch": {
+                  "mean": 0.21627182120095675,
+                  "rms": 0.2948513866129155,
+                  "p95": 0.6210493952035904,
+                  "peak": 1.600000023841858
+                },
+                "rm_coxa_yaw": {
+                  "mean": 0.2600444700939115,
+                  "rms": 0.32585070478806133,
+                  "p95": 0.643820559978485,
+                  "peak": 1.1607260704040527
+                },
+                "rm_femur_pitch": {
+                  "mean": 0.43841123064950804,
+                  "rms": 0.5257481998661078,
+                  "p95": 0.9584452927112578,
+                  "peak": 1.600000023841858
+                },
+                "rm_tibia_pitch": {
+                  "mean": 0.2921714385375526,
+                  "rms": 0.36657520508924724,
+                  "p95": 0.7147116154432297,
+                  "peak": 1.600000023841858
+                },
+                "rr_coxa_yaw": {
+                  "mean": 0.24356546831107698,
+                  "rms": 0.30777112838350124,
+                  "p95": 0.6078336566686627,
+                  "peak": 1.400593638420105
+                },
+                "rr_femur_pitch": {
+                  "mean": 0.7033302973806858,
+                  "rms": 0.7531885227055574,
+                  "p95": 1.1406899631023404,
+                  "peak": 1.600000023841858
+                },
+                "rr_tibia_pitch": {
+                  "mean": 0.38395435651697335,
+                  "rms": 0.4536600135951004,
+                  "p95": 0.8183088302612301,
+                  "peak": 1.5503445863723755
+                }
+              }
+            },
+            "requested": {
+              "mean_abs_across_joints_nm": 0.34483212957172005,
+              "worst_joint_rms_nm": 0.7606615355889554,
+              "worst_joint": "lf_femur_pitch",
+              "per_joint_abs_nm": {
+                "lf_coxa_yaw": {
+                  "mean": 0.2837564468685632,
+                  "rms": 0.3551490601320166,
+                  "p95": 0.6731732755899426,
+                  "peak": 1.358451247215271
+                },
+                "lf_femur_pitch": {
+                  "mean": 0.7025272431280464,
+                  "rms": 0.7606615355889502,
+                  "p95": 1.2042769432067866,
+                  "peak": 2.036088466644287
+                },
+                "lf_tibia_pitch": {
+                  "mean": 0.33737894968982435,
+                  "rms": 0.4194566069417579,
+                  "p95": 0.7940595448017119,
+                  "peak": 1.9129012823104858
+                },
+                "lm_coxa_yaw": {
+                  "mean": 0.2685192921881098,
+                  "rms": 0.33843574999267945,
+                  "p95": 0.6873762041330335,
+                  "peak": 1.1502288579940796
+                },
+                "lm_femur_pitch": {
+                  "mean": 0.41635524249784067,
+                  "rms": 0.49148221201553166,
+                  "p95": 0.881383541226387,
+                  "peak": 1.6489098072052002
+                },
+                "lm_tibia_pitch": {
+                  "mean": 0.33517460471318916,
+                  "rms": 0.4141374133512772,
+                  "p95": 0.7746193259954453,
+                  "peak": 1.8486783504486084
+                },
+                "lr_coxa_yaw": {
+                  "mean": 0.21926214839727617,
+                  "rms": 0.2763917168729052,
+                  "p95": 0.5336902976036071,
+                  "peak": 1.0666195154190063
+                },
+                "lr_femur_pitch": {
+                  "mean": 0.2821333633349568,
+                  "rms": 0.34769676503698704,
+                  "p95": 0.6732414543628692,
+                  "peak": 1.0675220489501953
+                },
+                "lr_tibia_pitch": {
+                  "mean": 0.20365358240506612,
+                  "rms": 0.2725003538271694,
+                  "p95": 0.5660511761903756,
+                  "peak": 1.9166135787963867
+                },
+                "rf_coxa_yaw": {
+                  "mean": 0.26094424043918846,
+                  "rms": 0.3338356138192592,
+                  "p95": 0.6511105239391326,
+                  "peak": 1.6233094930648804
+                },
+                "rf_femur_pitch": {
+                  "mean": 0.3582020340918971,
+                  "rms": 0.45236497017480065,
+                  "p95": 0.8508051544427871,
+                  "peak": 3.6723337173461914
+                },
+                "rf_tibia_pitch": {
+                  "mean": 0.21705381265293544,
+                  "rms": 0.30158816542088157,
+                  "p95": 0.6210493952035904,
+                  "peak": 4.258018970489502
+                },
+                "rm_coxa_yaw": {
+                  "mean": 0.2600444700939115,
+                  "rms": 0.32585070478806133,
+                  "p95": 0.643820559978485,
+                  "peak": 1.1607260704040527
+                },
+                "rm_femur_pitch": {
+                  "mean": 0.4384513230730663,
+                  "rms": 0.5258774449241878,
+                  "p95": 0.9584452927112578,
+                  "peak": 1.8303579092025757
+                },
+                "rm_tibia_pitch": {
+                  "mean": 0.29236525961013105,
+                  "rms": 0.36758631419623805,
+                  "p95": 0.7147116154432297,
+                  "peak": 2.3617653846740723
+                },
+                "rr_coxa_yaw": {
+                  "mean": 0.24356546831107698,
+                  "rms": 0.30777112838350124,
+                  "p95": 0.6078336566686627,
+                  "peak": 1.400593638420105
+                },
+                "rr_femur_pitch": {
+                  "mean": 0.7036364942789077,
+                  "rms": 0.7539198490517967,
+                  "p95": 1.1406899631023404,
+                  "peak": 2.175631284713745
+                },
+                "rr_tibia_pitch": {
+                  "mean": 0.38395435651697335,
+                  "rms": 0.4536600135951004,
+                  "p95": 0.8183088302612301,
+                  "peak": 1.5503445863723755
+                }
+              }
+            }
+          }
+        },
+        "startup": {
+          "status": "available",
+          "samples": 800,
+          "duration_s": 2.0,
+          "first_sample_s": 0.0025,
+          "last_sample_s": 2.0,
+          "total_vertical_support_n": {
+            "mean": 73.27364502609875,
+            "rms": 74.65944104600726,
+            "p95": 89.37943540811538,
+            "peak": 195.8132519721985
+          },
+          "mean_vertical_support_body_weights": 1.00042761392791,
+          "total_normal_resultant_magnitude_n": {
+            "mean": 73.27364502609876,
+            "rms": 74.65944104600729,
+            "p95": 89.3794354081154,
+            "peak": 195.8132519721985
+          },
+          "sum_foot_normal_magnitudes_n": {
+            "mean": 73.27364502609882,
+            "rms": 74.65944104600734,
+            "p95": 89.37943540811541,
+            "peak": 195.81325197219854
+          },
+          "per_foot": {
+            "lf": {
+              "normal_resultant_magnitude_n": {
+                "mean": 18.029747342020283,
+                "rms": 18.8928871377714,
+                "p95": 26.890270233154297,
+                "peak": 53.35628890991212
+              },
+              "contact_fraction": 0.98625,
+              "mean_magnitude_during_contact_n": 18.281112640831722
+            },
+            "lm": {
+              "normal_resultant_magnitude_n": {
+                "mean": 11.759693632370327,
+                "rms": 12.79536718481958,
+                "p95": 19.084940052032472,
+                "peak": 47.80289173126221
+              },
+              "contact_fraction": 0.96125,
+              "mean_magnitude_during_contact_n": 12.23320830041017
+            },
+            "lr": {
+              "normal_resultant_magnitude_n": {
+                "mean": 7.075569631556286,
+                "rms": 8.389517083130704,
+                "p95": 14.126598882675166,
+                "peak": 40.68843078613282
+              },
+              "contact_fraction": 0.86625,
+              "mean_magnitude_during_contact_n": 8.15918225659163
+            },
+            "rf": {
+              "normal_resultant_magnitude_n": {
+                "mean": 6.725761007030609,
+                "rms": 8.798257935373103,
+                "p95": 16.626769256591807,
+                "peak": 44.06700563430788
+              },
+              "contact_fraction": 0.74,
+              "mean_magnitude_during_contact_n": 9.083181650500043
+            },
+            "rm": {
+              "normal_resultant_magnitude_n": {
+                "mean": 12.22616561599863,
+                "rms": 12.80905080682564,
+                "p95": 16.910042977333088,
+                "peak": 43.906688690185796
+              },
+              "contact_fraction": 0.98125,
+              "mean_magnitude_during_contact_n": 12.459786615030453
+            },
+            "rr": {
+              "normal_resultant_magnitude_n": {
+                "mean": 17.456707797122682,
+                "rms": 18.235141986576025,
+                "p95": 24.496313571929953,
+                "peak": 55.94911956787134
+              },
+              "contact_fraction": 0.98875,
+              "mean_magnitude_during_contact_n": 17.65533026257667
+            }
+          },
+          "motor_torque": {
+            "applied": {
+              "mean_abs_across_joints_nm": 0.33274775706828225,
+              "worst_joint_rms_nm": 0.7613926114482619,
+              "worst_joint": "rr_femur_pitch",
+              "per_joint_abs_nm": {
+                "lf_coxa_yaw": {
+                  "mean": 0.36804145633243024,
+                  "rms": 0.46153640604245305,
+                  "p95": 0.8755001634359357,
+                  "peak": 1.337425947189331
+                },
+                "lf_femur_pitch": {
+                  "mean": 0.517040350639727,
+                  "rms": 0.5669837371543529,
+                  "p95": 0.8844116061925886,
+                  "peak": 1.39301335811615
+                },
+                "lf_tibia_pitch": {
+                  "mean": 0.5754735171981156,
+                  "rms": 0.6330536895027526,
+                  "p95": 1.0739213705062864,
+                  "peak": 1.2819989919662476
+                },
+                "lm_coxa_yaw": {
+                  "mean": 0.31831268592039125,
+                  "rms": 0.4045694579628918,
+                  "p95": 0.8260763972997663,
+                  "peak": 1.0471482276916504
+                },
+                "lm_femur_pitch": {
+                  "mean": 0.36404781538876707,
+                  "rms": 0.43386029737615023,
+                  "p95": 0.7679845213890075,
+                  "peak": 1.1103408336639404
+                },
+                "lm_tibia_pitch": {
+                  "mean": 0.2968382840979029,
+                  "rms": 0.36212260820658876,
+                  "p95": 0.7222962707281112,
+                  "peak": 1.0713475942611694
+                },
+                "lr_coxa_yaw": {
+                  "mean": 0.20194723551801871,
+                  "rms": 0.2556337356111855,
+                  "p95": 0.5120415449142455,
+                  "peak": 0.6796479225158691
+                },
+                "lr_femur_pitch": {
+                  "mean": 0.25083139071590266,
+                  "rms": 0.3047745910699923,
+                  "p95": 0.5679892182350158,
+                  "peak": 0.8398686647415161
+                },
+                "lr_tibia_pitch": {
+                  "mean": 0.2260313202958787,
+                  "rms": 0.3159692646684683,
+                  "p95": 0.6938757658004759,
+                  "peak": 0.9521992206573486
+                },
+                "rf_coxa_yaw": {
+                  "mean": 0.21095531576080248,
+                  "rms": 0.2583754783787542,
+                  "p95": 0.5186466217041008,
+                  "peak": 0.874509334564209
+                },
+                "rf_femur_pitch": {
+                  "mean": 0.3047880700486712,
+                  "rms": 0.3806473025431285,
+                  "p95": 0.7223849087953567,
+                  "peak": 1.3013889789581299
+                },
+                "rf_tibia_pitch": {
+                  "mean": 0.1443629387218971,
+                  "rms": 0.1989469360994936,
+                  "p95": 0.4230004414916038,
+                  "peak": 0.730272650718689
+                },
+                "rm_coxa_yaw": {
+                  "mean": 0.24983855856582524,
+                  "rms": 0.30948962731248036,
+                  "p95": 0.5910321444272995,
+                  "peak": 0.8936865329742432
+                },
+                "rm_femur_pitch": {
+                  "mean": 0.42584308728342873,
+                  "rms": 0.5052037682547524,
+                  "p95": 0.9571566641330715,
+                  "peak": 1.1101535558700562
+                },
+                "rm_tibia_pitch": {
+                  "mean": 0.29497934840153905,
+                  "rms": 0.36240313544439096,
+                  "p95": 0.6713058680295944,
+                  "peak": 0.863710880279541
+                },
+                "rr_coxa_yaw": {
+                  "mean": 0.17792711607879028,
+                  "rms": 0.22889414595160537,
+                  "p95": 0.4645923420786855,
+                  "peak": 1.1741231679916382
+                },
+                "rr_femur_pitch": {
+                  "mean": 0.7131672059465199,
+                  "rms": 0.7613926114482623,
+                  "p95": 1.1252389192581176,
+                  "peak": 1.600000023841858
+                },
+                "rr_tibia_pitch": {
+                  "mean": 0.34903393031447194,
+                  "rms": 0.4156746328613079,
+                  "p95": 0.778206369280815,
+                  "peak": 1.2154717445373535
+                }
+              }
+            },
+            "requested": {
+              "mean_abs_across_joints_nm": 0.3329178664561833,
+              "worst_joint_rms_nm": 0.7685965062092351,
+              "worst_joint": "rr_femur_pitch",
+              "per_joint_abs_nm": {
+                "lf_coxa_yaw": {
+                  "mean": 0.36804145633243024,
+                  "rms": 0.46153640604245305,
+                  "p95": 0.8755001634359357,
+                  "peak": 1.337425947189331
+                },
+                "lf_femur_pitch": {
+                  "mean": 0.517040350639727,
+                  "rms": 0.5669837371543529,
+                  "p95": 0.8844116061925886,
+                  "peak": 1.39301335811615
+                },
+                "lf_tibia_pitch": {
+                  "mean": 0.5754735171981156,
+                  "rms": 0.6330536895027526,
+                  "p95": 1.0739213705062864,
+                  "peak": 1.2819989919662476
+                },
+                "lm_coxa_yaw": {
+                  "mean": 0.31831268592039125,
+                  "rms": 0.4045694579628918,
+                  "p95": 0.8260763972997663,
+                  "peak": 1.0471482276916504
+                },
+                "lm_femur_pitch": {
+                  "mean": 0.36404781538876707,
+                  "rms": 0.43386029737615023,
+                  "p95": 0.7679845213890075,
+                  "peak": 1.1103408336639404
+                },
+                "lm_tibia_pitch": {
+                  "mean": 0.2968382840979029,
+                  "rms": 0.36212260820658876,
+                  "p95": 0.7222962707281112,
+                  "peak": 1.0713475942611694
+                },
+                "lr_coxa_yaw": {
+                  "mean": 0.20194723551801871,
+                  "rms": 0.2556337356111855,
+                  "p95": 0.5120415449142455,
+                  "peak": 0.6796479225158691
+                },
+                "lr_femur_pitch": {
+                  "mean": 0.25083139071590266,
+                  "rms": 0.3047745910699923,
+                  "p95": 0.5679892182350158,
+                  "peak": 0.8398686647415161
+                },
+                "lr_tibia_pitch": {
+                  "mean": 0.2260313202958787,
+                  "rms": 0.3159692646684683,
+                  "p95": 0.6938757658004759,
+                  "peak": 0.9521992206573486
+                },
+                "rf_coxa_yaw": {
+                  "mean": 0.21095531576080248,
+                  "rms": 0.2583754783787542,
+                  "p95": 0.5186466217041008,
+                  "peak": 0.874509334564209
+                },
+                "rf_femur_pitch": {
+                  "mean": 0.3047880700486712,
+                  "rms": 0.3806473025431285,
+                  "p95": 0.7223849087953567,
+                  "peak": 1.3013889789581299
+                },
+                "rf_tibia_pitch": {
+                  "mean": 0.1443629387218971,
+                  "rms": 0.1989469360994936,
+                  "p95": 0.4230004414916038,
+                  "peak": 0.730272650718689
+                },
+                "rm_coxa_yaw": {
+                  "mean": 0.24983855856582524,
+                  "rms": 0.30948962731248036,
+                  "p95": 0.5910321444272995,
+                  "peak": 0.8936865329742432
+                },
+                "rm_femur_pitch": {
+                  "mean": 0.42584308728342873,
+                  "rms": 0.5052037682547524,
+                  "p95": 0.9571566641330715,
+                  "peak": 1.1101535558700562
+                },
+                "rm_tibia_pitch": {
+                  "mean": 0.29497934840153905,
+                  "rms": 0.36240313544439096,
+                  "p95": 0.6713058680295944,
+                  "peak": 0.863710880279541
+                },
+                "rr_coxa_yaw": {
+                  "mean": 0.17792711607879028,
+                  "rms": 0.22889414595160537,
+                  "p95": 0.4645923420786855,
+                  "peak": 1.1741231679916382
+                },
+                "rr_femur_pitch": {
+                  "mean": 0.7162291749287397,
+                  "rms": 0.7685965062092356,
+                  "p95": 1.1252389192581176,
+                  "peak": 2.175631284713745
+                },
+                "rr_tibia_pitch": {
+                  "mean": 0.34903393031447194,
+                  "rms": 0.4156746328613079,
+                  "p95": 0.778206369280815,
+                  "peak": 1.2154717445373535
+                }
+              }
+            }
+          }
+        },
+        "commanded_locomotion_after_settle": {
+          "status": "empty",
+          "samples": 0,
+          "duration_s": 0.0,
+          "metrics": null
+        }
+      }
+    }
+  ]
+}

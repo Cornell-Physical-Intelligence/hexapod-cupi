@@ -1,0 +1,69 @@
+{
+  "schema": "canonical_forward_training_diagnostics_v1",
+  "utc": "2026-09-17T15:14:07.748218+00:00",
+  "protocol_sha256": "eda88c9cf9e6c3e35a759409ade04f931704bc930845459dd4dc5da37b631431",
+  "method": "Post-hoc descriptive means from the first and last 100 PPO collection updates. Each interval has 3072 environment-controls, so equal-update means equal sample-weighted means. Stochastic training actions and changing policies make these different from deterministic saved-policy evaluations. These diagnostics do not change the declared benefit rule.",
+  "arms": {
+    "scratch": {
+      "first_100_updates": {
+        "first_update": 1,
+        "last_update": 100,
+        "environment_controls": 307200,
+        "means": {
+          "task_reward": 0.36250631738294714,
+          "forward_speed_mps": 0.002186715336232395,
+          "linear_tracking_reward": 0.14126678164669648,
+          "yaw_tracking_reward": 0.22824889139351343,
+          "penalty_sum": -0.007009355674966075
+        }
+      },
+      "last_100_updates": {
+        "first_update": 1101,
+        "last_update": 1200,
+        "environment_controls": 307200,
+        "means": {
+          "task_reward": 0.6626320968367163,
+          "forward_speed_mps": 0.006597288690266455,
+          "linear_tracking_reward": 0.3976567846605951,
+          "yaw_tracking_reward": 0.27072866732323,
+          "penalty_sum": -0.005753355040801933
+        }
+      }
+    },
+    "example": {
+      "first_100_updates": {
+        "first_update": 1,
+        "last_update": 100,
+        "environment_controls": 307200,
+        "means": {
+          "task_reward": 0.3449632360246445,
+          "forward_speed_mps": 0.01804162108207971,
+          "linear_tracking_reward": 0.13033701804880685,
+          "yaw_tracking_reward": 0.22139057583184674,
+          "penalty_sum": -0.006764357857120028
+        }
+      },
+      "last_100_updates": {
+        "first_update": 1101,
+        "last_update": 1200,
+        "environment_controls": 307200,
+        "means": {
+          "task_reward": 0.6771630737069563,
+          "forward_speed_mps": -0.00028183654033066925,
+          "linear_tracking_reward": 0.4098420424407257,
+          "yaw_tracking_reward": 0.2734503456719639,
+          "penalty_sum": -0.006129313925140929
+        }
+      }
+    }
+  },
+  "inputs": {
+    "artifacts/forward_example_ppo_20260917/scratch_train_003/TRANSFER_VERIFICATION_001.json": "2bd6b4596e7443682363da019acf361ed2641070cc8929323a28090326c18f75",
+    "artifacts/forward_example_ppo_20260917/scratch_train_003/run/standing/metrics.jsonl.gz": "e8805609a0ff089f241c1d79b6bccc81bee4f7e2985b40e5ad7eacb0219e7a82",
+    "artifacts/forward_example_ppo_20260917/scratch_train_003/run/standing/metrics.jsonl": "d9ae93197e99c755ee759dfbc18bb86f6becef45ef9a22d313455df9cbf7b274",
+    "artifacts/forward_example_ppo_20260917/example_train_003/TRANSFER_VERIFICATION_001.json": "474ed2b130fa5642afc06b36e3a1965ea73afa4637f5eecb0b741a7cb2677d86",
+    "artifacts/forward_example_ppo_20260917/example_train_003/run/standing/metrics.jsonl.gz": "a550c70d1821e42bfc347c278fd0a520abb84a1703d8ce64f875340568fe9749",
+    "artifacts/forward_example_ppo_20260917/example_train_003/run/standing/metrics.jsonl": "f3df0e2721fc0a2787afcf9ad27593a33b846ef09320c982fb5b4de3ac7ad5a4"
+  },
+  "stage2_complete": false
+}

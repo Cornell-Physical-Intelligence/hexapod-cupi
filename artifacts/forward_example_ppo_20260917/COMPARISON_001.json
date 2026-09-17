@@ -1,0 +1,553 @@
+{
+  "schema": "canonical_forward_example_comparison_v1",
+  "utc": "2026-09-17T18:19:39.672968+00:00",
+  "protocol_sha256": "eda88c9cf9e6c3e35a759409ade04f931704bc930845459dd4dc5da37b631431",
+  "training": {
+    "scratch": {
+      "updates": 1200,
+      "transitions": 3686400,
+      "bc_updates": 0,
+      "final_checkpoint_sha256": "f4403a25ce4c675607ba7f33fec9c2e35c8895f4e72915cb3d8ce2bc4cb6ce5b",
+      "source_freeze_sha256": "516cb2cb26c6b5abfb655a36408f022e684cfeb5621a3b0fe496e72d615253f8"
+    },
+    "example": {
+      "updates": 1200,
+      "transitions": 3686400,
+      "bc_updates": 1000,
+      "final_checkpoint_sha256": "1d039d9d566490398b1b1bd0603f7ff77b1c54228d30a63bd296799f6e1703f9",
+      "source_freeze_sha256": "516cb2cb26c6b5abfb655a36408f022e684cfeb5621a3b0fe496e72d615253f8"
+    }
+  },
+  "scheduled_forward_results": {
+    "scratch": [
+      {
+        "updates": 0,
+        "ppo_transitions": 0,
+        "checkpoint_sha256": "f77933eb03a1b40259111bfbfbb24c5d18bb57d34c28680c7544830a93159371",
+        "evaluation_pack": "artifacts/forward_example_ppo_20260917/scratch_evaluate_update000000_001",
+        "forward_screen_pass": false,
+        "failed_bounds": [
+          "planar_error_mps",
+          "yaw_error_rad_s"
+        ],
+        "mean_forward_speed_mps": -0.0003600124934917894,
+        "planar_error_mps": 0.05749298207111468,
+        "mean_vertical_support_n": 73.22417391892418,
+        "support_p95_n": 90.80060803890227,
+        "mean_abs_applied_motor_torque_nm": 0.35723794461477987,
+        "worst_joint_rms_torque_nm": 0.6764743428792823,
+        "diagnostics": [
+          {
+            "case_id": "learning:quiet_20s",
+            "pass": false,
+            "recorded_controls": 1000,
+            "requested_controls": 1000,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_planar_excursion_m",
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "missing_six_toe_count_400hz"
+            ]
+          },
+          {
+            "case_id": "learning:forward_0.05_to_stop",
+            "pass": false,
+            "recorded_controls": 1050,
+            "requested_controls": 1050,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "missing_six_toe_count_400hz"
+            ]
+          }
+        ],
+        "forward_video": "artifacts/forward_example_ppo_20260917/scratch_evaluate_update000000_001/run/standing/evaluation_00/rollout.mp4",
+        "forward_video_sha256": "efbe1a0ba508158fa9236c2d25144e6ffb1439a4ba192ce762997b346cd6ac00"
+      },
+      {
+        "updates": 300,
+        "ppo_transitions": 921600,
+        "checkpoint_sha256": "f2711cc45ffe3ba969df390257854fa4fb9f84d1991f9bf0def036603cc922f8",
+        "evaluation_pack": "artifacts/forward_example_ppo_20260917/scratch_evaluate_update000300_001",
+        "forward_screen_pass": false,
+        "failed_bounds": [
+          "planar_error_mps",
+          "computed_demand_over_rating_fraction",
+          "native_capture_or_original_physical_bounds"
+        ],
+        "mean_forward_speed_mps": 0.0008413282841623886,
+        "planar_error_mps": 0.07342168473070985,
+        "mean_vertical_support_n": 73.28478497728108,
+        "support_p95_n": 90.8540531218052,
+        "mean_abs_applied_motor_torque_nm": 0.39980933962871634,
+        "worst_joint_rms_torque_nm": 1.2603438399307823,
+        "diagnostics": [
+          {
+            "case_id": "learning:quiet_20s",
+            "pass": false,
+            "recorded_controls": 1000,
+            "requested_controls": 1000,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "max_requested_torque_saturation_fraction",
+              "requested_saturation_400hz",
+              "requested_saturation_mean_400hz",
+              "missing_six_toe_count_400hz"
+            ]
+          },
+          {
+            "case_id": "learning:forward_0.05_to_stop",
+            "pass": false,
+            "recorded_controls": 1050,
+            "requested_controls": 1050,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "requested_saturation_400hz",
+              "missing_six_toe_count_400hz",
+              "native_capture_or_original_physical_bounds"
+            ]
+          }
+        ],
+        "forward_video": "artifacts/forward_example_ppo_20260917/scratch_evaluate_update000300_001/run/standing/evaluation_00/rollout.mp4",
+        "forward_video_sha256": "a3d4c59690a2390609e6b1974447b3621b1759090f35c65b1ca6b536db055c9a"
+      },
+      {
+        "updates": 600,
+        "ppo_transitions": 1843200,
+        "checkpoint_sha256": "8f482bad7865b609158a01aee8a5d7cb9bd235d73038c22d0e1ad2826d3a1382",
+        "evaluation_pack": "artifacts/forward_example_ppo_20260917/scratch_evaluate_update000600_001",
+        "forward_screen_pass": false,
+        "failed_bounds": [
+          "planar_error_mps",
+          "computed_demand_over_rating_fraction",
+          "native_capture_or_original_physical_bounds"
+        ],
+        "mean_forward_speed_mps": 0.003569612311976239,
+        "planar_error_mps": 0.05356173982155305,
+        "mean_vertical_support_n": 73.24036006265042,
+        "support_p95_n": 91.94700716733932,
+        "mean_abs_applied_motor_torque_nm": 0.49011737452785026,
+        "worst_joint_rms_torque_nm": 1.5411732204086355,
+        "diagnostics": [
+          {
+            "case_id": "learning:quiet_20s",
+            "pass": false,
+            "recorded_controls": 1000,
+            "requested_controls": 1000,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_planar_excursion_m",
+              "max_heading_excursion_deg",
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "max_requested_torque_saturation_fraction",
+              "requested_saturation_400hz",
+              "requested_saturation_mean_400hz",
+              "missing_six_toe_count_400hz",
+              "native_capture_or_original_physical_bounds"
+            ]
+          },
+          {
+            "case_id": "learning:forward_0.05_to_stop",
+            "pass": false,
+            "recorded_controls": 1050,
+            "requested_controls": 1050,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_planar_excursion_m",
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "max_requested_torque_saturation_fraction",
+              "requested_saturation_400hz",
+              "requested_saturation_mean_400hz",
+              "missing_six_toe_count_400hz",
+              "native_capture_or_original_physical_bounds"
+            ]
+          }
+        ],
+        "forward_video": "artifacts/forward_example_ppo_20260917/scratch_evaluate_update000600_001/run/standing/evaluation_00/rollout.mp4",
+        "forward_video_sha256": "b0a34335bbe7a5b56f18b3a061da2c2ab5c400c92d6ced36cdb81ecc0407e98b"
+      },
+      {
+        "updates": 1200,
+        "ppo_transitions": 3686400,
+        "checkpoint_sha256": "f4403a25ce4c675607ba7f33fec9c2e35c8895f4e72915cb3d8ce2bc4cb6ce5b",
+        "evaluation_pack": "artifacts/forward_example_ppo_20260917/scratch_evaluate_update001200_001",
+        "forward_screen_pass": false,
+        "failed_bounds": [
+          "planar_error_mps",
+          "computed_demand_over_rating_fraction",
+          "native_capture_or_original_physical_bounds"
+        ],
+        "mean_forward_speed_mps": 0.004810813501006252,
+        "planar_error_mps": 0.05104504483721546,
+        "mean_vertical_support_n": 73.24614918854455,
+        "support_p95_n": 94.06534788478163,
+        "mean_abs_applied_motor_torque_nm": 0.48878164363220117,
+        "worst_joint_rms_torque_nm": 1.5890458594228152,
+        "diagnostics": [
+          {
+            "case_id": "learning:quiet_20s",
+            "pass": false,
+            "recorded_controls": 1000,
+            "requested_controls": 1000,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_planar_excursion_m",
+              "max_heading_excursion_deg",
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "max_requested_torque_saturation_fraction",
+              "requested_saturation_400hz",
+              "requested_saturation_mean_400hz",
+              "missing_six_toe_count_400hz",
+              "native_capture_or_original_physical_bounds"
+            ]
+          },
+          {
+            "case_id": "learning:forward_0.05_to_stop",
+            "pass": false,
+            "recorded_controls": 1050,
+            "requested_controls": 1050,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_planar_excursion_m",
+              "max_heading_excursion_deg",
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "max_requested_torque_saturation_fraction",
+              "requested_saturation_400hz",
+              "requested_saturation_mean_400hz",
+              "missing_six_toe_count_400hz",
+              "native_capture_or_original_physical_bounds"
+            ]
+          }
+        ],
+        "forward_video": "artifacts/forward_example_ppo_20260917/scratch_evaluate_update001200_001/run/standing/evaluation_00/rollout.mp4",
+        "forward_video_sha256": "731abfef892bd0b64125b028f428388a6d1994e083a1d388c7061f03b7e51249"
+      }
+    ],
+    "example": [
+      {
+        "updates": 0,
+        "ppo_transitions": 0,
+        "checkpoint_sha256": "666a5b5ee9709d774cd4a685802e1a17e67678e7f5ecd5f317f9038d2c2e6bca",
+        "evaluation_pack": "artifacts/forward_example_ppo_20260917/example_evaluate_update000000_001",
+        "forward_screen_pass": false,
+        "failed_bounds": [
+          "planar_error_mps"
+        ],
+        "mean_forward_speed_mps": 0.00533756196127018,
+        "planar_error_mps": 0.056366335392279726,
+        "mean_vertical_support_n": 73.24814947703068,
+        "support_p95_n": 79.9940733909607,
+        "mean_abs_applied_motor_torque_nm": 0.35264507937867073,
+        "worst_joint_rms_torque_nm": 1.0600991835182791,
+        "diagnostics": [
+          {
+            "case_id": "learning:quiet_20s",
+            "pass": false,
+            "recorded_controls": 149,
+            "requested_controls": 1000,
+            "acquisition_complete": false,
+            "failure": "_NativeTrialTermination('Native terminal/timeout: preserved failed prefix; no automatic reset')",
+            "failed_bounds": [
+              "complete_requested_window",
+              "terminated",
+              "quiet_window_controls",
+              "native_capture_or_original_physical_bounds"
+            ]
+          },
+          {
+            "case_id": "learning:forward_0.05_to_stop",
+            "pass": false,
+            "recorded_controls": 467,
+            "requested_controls": 1050,
+            "acquisition_complete": false,
+            "failure": "_NativeTrialTermination('Native terminal/timeout: preserved failed prefix; no automatic reset')",
+            "failed_bounds": [
+              "complete_requested_window",
+              "terminated",
+              "quiet_window_controls",
+              "native_capture_or_original_physical_bounds"
+            ]
+          }
+        ],
+        "forward_video": "artifacts/forward_example_ppo_20260917/example_evaluate_update000000_001/run/standing/evaluation_00/rollout.mp4",
+        "forward_video_sha256": "95aaebe8799678d6739b020bb247f2e3baf71bcf1347bb8643531c84d39141ca"
+      },
+      {
+        "updates": 300,
+        "ppo_transitions": 921600,
+        "checkpoint_sha256": "044b5af652d6413f1ea30c75ddf1ef85e4b59891a74fdf97adbbbe020ea900f3",
+        "evaluation_pack": "artifacts/forward_example_ppo_20260917/example_evaluate_update000300_001",
+        "forward_screen_pass": false,
+        "failed_bounds": [
+          "planar_error_mps",
+          "computed_demand_over_rating_fraction",
+          "native_capture_or_original_physical_bounds"
+        ],
+        "mean_forward_speed_mps": 0.0008017967738773662,
+        "planar_error_mps": 0.049866777423443864,
+        "mean_vertical_support_n": 73.25989197759796,
+        "support_p95_n": 107.48730189800256,
+        "mean_abs_applied_motor_torque_nm": 0.6078556320283403,
+        "worst_joint_rms_torque_nm": 1.5918018207899423,
+        "diagnostics": [
+          {
+            "case_id": "learning:quiet_20s",
+            "pass": false,
+            "recorded_controls": 1000,
+            "requested_controls": 1000,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_planar_excursion_m",
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "max_requested_torque_saturation_fraction",
+              "requested_saturation_400hz",
+              "requested_saturation_mean_400hz",
+              "missing_six_toe_count_400hz",
+              "native_capture_or_original_physical_bounds"
+            ]
+          },
+          {
+            "case_id": "learning:forward_0.05_to_stop",
+            "pass": false,
+            "recorded_controls": 1050,
+            "requested_controls": 1050,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_planar_excursion_m",
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "max_requested_torque_saturation_fraction",
+              "requested_saturation_400hz",
+              "requested_saturation_mean_400hz",
+              "missing_six_toe_count_400hz",
+              "native_capture_or_original_physical_bounds"
+            ]
+          }
+        ],
+        "forward_video": "artifacts/forward_example_ppo_20260917/example_evaluate_update000300_001/run/standing/evaluation_00/rollout.mp4",
+        "forward_video_sha256": "ac36fe4a78f6b111d6b4bbdf650e409a3ba2abdf320b4787fb461e5482320643"
+      },
+      {
+        "updates": 600,
+        "ppo_transitions": 1843200,
+        "checkpoint_sha256": "64d426d3368c71a49548fd9a519eea7e32001312e726a8b24453672496524658",
+        "evaluation_pack": "artifacts/forward_example_ppo_20260917/example_evaluate_update000600_002",
+        "forward_screen_pass": false,
+        "failed_bounds": [
+          "planar_error_mps",
+          "computed_demand_over_rating_fraction"
+        ],
+        "mean_forward_speed_mps": 0.0004087319519855487,
+        "planar_error_mps": 0.05335651373435823,
+        "mean_vertical_support_n": 73.25605567805144,
+        "support_p95_n": 91.25082975625986,
+        "mean_abs_applied_motor_torque_nm": 0.4647033367949865,
+        "worst_joint_rms_torque_nm": 1.4518737927741354,
+        "diagnostics": [
+          {
+            "case_id": "learning:quiet_20s",
+            "pass": false,
+            "recorded_controls": 1000,
+            "requested_controls": 1000,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "max_requested_torque_saturation_fraction",
+              "requested_saturation_400hz",
+              "requested_saturation_mean_400hz",
+              "missing_six_toe_count_400hz",
+              "native_capture_or_original_physical_bounds"
+            ]
+          },
+          {
+            "case_id": "learning:forward_0.05_to_stop",
+            "pass": false,
+            "recorded_controls": 1050,
+            "requested_controls": 1050,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_planar_excursion_m",
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "max_requested_torque_saturation_fraction",
+              "requested_saturation_400hz",
+              "requested_saturation_mean_400hz",
+              "missing_six_toe_count_400hz"
+            ]
+          }
+        ],
+        "forward_video": "artifacts/forward_example_ppo_20260917/example_evaluate_update000600_002/run/standing/evaluation_00/rollout.mp4",
+        "forward_video_sha256": "ed7169485899bf9d21ad3c2cf0df3aa91d4df52287701b844d9a8301f0b48641"
+      },
+      {
+        "updates": 1200,
+        "ppo_transitions": 3686400,
+        "checkpoint_sha256": "1d039d9d566490398b1b1bd0603f7ff77b1c54228d30a63bd296799f6e1703f9",
+        "evaluation_pack": "artifacts/forward_example_ppo_20260917/example_evaluate_update001200_001",
+        "forward_screen_pass": false,
+        "failed_bounds": [
+          "planar_error_mps",
+          "computed_demand_over_rating_fraction"
+        ],
+        "mean_forward_speed_mps": 0.0009609619976941743,
+        "planar_error_mps": 0.05332234127322915,
+        "mean_vertical_support_n": 73.2269210305547,
+        "support_p95_n": 87.80770211219786,
+        "mean_abs_applied_motor_torque_nm": 0.40589990365042106,
+        "worst_joint_rms_torque_nm": 1.3736088342748909,
+        "diagnostics": [
+          {
+            "case_id": "learning:quiet_20s",
+            "pass": false,
+            "recorded_controls": 490,
+            "requested_controls": 1000,
+            "acquisition_complete": false,
+            "failure": "_NativeTrialTermination('Native terminal/timeout: preserved failed prefix; no automatic reset')",
+            "failed_bounds": [
+              "complete_requested_window",
+              "terminated",
+              "quiet_window_controls",
+              "max_planar_excursion_m",
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "max_requested_torque_saturation_fraction",
+              "requested_saturation_400hz",
+              "requested_saturation_mean_400hz",
+              "missing_six_toe_count_400hz",
+              "native_capture_or_original_physical_bounds"
+            ]
+          },
+          {
+            "case_id": "learning:forward_0.05_to_stop",
+            "pass": false,
+            "recorded_controls": 1050,
+            "requested_controls": 1050,
+            "acquisition_complete": true,
+            "failure": null,
+            "failed_bounds": [
+              "max_planar_excursion_m",
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "max_requested_torque_saturation_fraction",
+              "requested_saturation_400hz",
+              "requested_saturation_mean_400hz",
+              "missing_six_toe_count_400hz"
+            ]
+          }
+        ],
+        "forward_video": "artifacts/forward_example_ppo_20260917/example_evaluate_update001200_001/run/standing/evaluation_00/rollout.mp4",
+        "forward_video_sha256": "52bd0dca4390cd2c1844df856cbc82493e4bf84b0a683613726dc2399e58cdc9"
+      }
+    ]
+  },
+  "operational_retries": [
+    {
+      "utc": "2026-09-17T17:40:46.931542+00:00",
+      "arm": "example",
+      "updates": 600,
+      "interrupted_pack": "artifacts/forward_example_ppo_20260917/example_evaluate_update000600_001",
+      "retry_pack": "artifacts/forward_example_ppo_20260917/example_evaluate_update000600_002",
+      "reason": "The reservation guard ended the owned job when an unrelated reconstruction CUDA process appeared. The completed forward and quiet reports and unfinished stop capture remain preserved.",
+      "selection": "Repeat all three scheduled cases from a fresh native app with the same checkpoint, seed, source and gates. Use the completed retry for this scheduled checkpoint; retain the interrupted attempt as operational evidence. No training or checkpoint selection changes.",
+      "binding_changed_only_allocation_paths": true,
+      "source_freeze_sha256": "516cb2cb26c6b5abfb655a36408f022e684cfeb5621a3b0fe496e72d615253f8",
+      "checkpoint_sha256": "64d426d3368c71a49548fd9a519eea7e32001312e726a8b24453672496524658",
+      "inputs": {
+        "artifacts/forward_example_ppo_20260917/example_evaluate_update000600_001/FAILED_TRANSFER_VERIFICATION_001.json": "dca359bb45e0c06823cf265df504180cbf91c5389aab8ad33eb9551db9a36e50",
+        "artifacts/forward_example_ppo_20260917/example_evaluate_update000600_001/binding.json": "cfcd08a243cfd9a1dcfe8252f0647215e3b3bb07f02093f2ac47d51fcf687adb",
+        "artifacts/forward_example_ppo_20260917/example_evaluate_update000600_002/binding.json": "1fcd9146f2d0b674bb0465e8de6dbbba23c4587def8c3e8897ea16a539fa91e2",
+        "artifacts/restart_2026-09-14/spark_ownership_010/READBACK.json": "d934ee6691a099116cdebf01a24b593c6e58a60a23e44d2f55b0021215894681",
+        "artifacts/restart_2026-09-14/spark_ownership_010/CLASSIFICATION.json": "00994189dfeccf40b605f0f1cc825fd945f47879676731399cc22038ccf15bce",
+        "artifacts/forward_example_ppo_20260917/review_001/verify.py": "3deaf829949388d3fdee76f2631f1b402a4f678258e3ae7832f1c69a5de0f5a6",
+        "artifacts/forward_example_ppo_20260917/review_001/verify_002.py": "48247bc7f8d53acadc05fb39be4bd27780694e523bd240e577c2f051b624986e"
+      },
+      "audit_change_scope": "The successor audit adds allocation-attempt selection and records the selected pack. All numerical, physical, source and force checks remain byte-identical to the previous audit after those selection/provenance edits are removed.",
+      "stage2_complete": false
+    }
+  ],
+  "extra_work": "Report 1000 imitation updates and the existing demonstration acquisition separately from the equal PPO transition budgets.",
+  "first_passing_scheduled_update": {
+    "scratch": null,
+    "example": null
+  },
+  "declared_benefit_rule": "A passing example-arm final policy with a failing scratch-arm final policy supports benefit in this seed. If both pass, an earlier first passing scheduled checkpoint supports a learning-speed benefit. Other outcomes do not establish this pilot benefit.",
+  "benefit_established_for_this_pair": false,
+  "example_passes_before_ppo": false,
+  "conclusion": "The declared benefit rule does not establish benefit for this paired seed. The copied actor fails the forward screen before PPO.",
+  "load_scope": "Compare loads with achieved speed. These values do not establish energy efficiency at matched motion.",
+  "scope": "One paired seed and one fixed forward command. Validation rows are later cycles of the same recording, not an independent locomotion test. This tests imitation initialization, not AMP or a paper reproduction. Stage 2 remains incomplete.",
+  "inputs": {
+    "artifacts/forward_example_ppo_20260917/protocol_001/PROTOCOL.json": "eda88c9cf9e6c3e35a759409ade04f931704bc930845459dd4dc5da37b631431",
+    "artifacts/forward_example_ppo_20260917/scratch_train_003/run/standing/state.json": "6ff6494adacf3638fcaf5ade63927dceddd9db6c4c7b6c5ff4389b487aa5b91a",
+    "artifacts/forward_example_ppo_20260917/scratch_train_003/run/standing/initialization.json": "8b6e2a7ae78c73007e04e543354fcc1b500fe4f2b90301bb68d5a8e649200b32",
+    "artifacts/forward_example_ppo_20260917/review_001/scratch_update000000.json": "b5c755c071e233b29e94c1c02faa49b350ca6da7280c3f16ed8bdf6d4be7181e",
+    "artifacts/forward_example_ppo_20260917/scratch_evaluate_update000000_001/run/standing/evaluation_00/report.json": "c379c10e7b555fdf5c6a90c5dc24f51be46cb51fa35e5d702d4f987b78189a50",
+    "artifacts/forward_example_ppo_20260917/scratch_evaluate_update000000_001/run/standing/evaluation_00/force_metrics.json": "0ac4165de773c65ee8590a1673dc6f1dc7ac55b5474533718c14945506089dee",
+    "artifacts/forward_example_ppo_20260917/review_001/scratch_update000300.json": "62f192740aee80589befc3da8827160311bc1ecb464ca22b39056c8a2bed44db",
+    "artifacts/forward_example_ppo_20260917/scratch_evaluate_update000300_001/run/standing/evaluation_00/report.json": "a68cc8ebeb668cb1cf516838462ee79351a610934cf7877a6d8dd905f8c453a6",
+    "artifacts/forward_example_ppo_20260917/scratch_evaluate_update000300_001/run/standing/evaluation_00/force_metrics.json": "fef9d1defdc14e2d894db9cb5195d1760b435df484b419e893cd21f9939fa846",
+    "artifacts/forward_example_ppo_20260917/review_001/scratch_update000600.json": "60d905e0f6eb87cedd394be41f78394f38a1210573f1f11054a9942e8c76af37",
+    "artifacts/forward_example_ppo_20260917/scratch_evaluate_update000600_001/run/standing/evaluation_00/report.json": "55abf5bc26fc78cc88e9924868d7f0c42ad1277a66dd863b32917f304574310f",
+    "artifacts/forward_example_ppo_20260917/scratch_evaluate_update000600_001/run/standing/evaluation_00/force_metrics.json": "9db8c9c29f984bef4d854f5531e682d72695abe21970aa462bd726d593367811",
+    "artifacts/forward_example_ppo_20260917/review_001/scratch_update001200.json": "294d0f885d259ecda4b5485e19c3028273ead97e0e3d014e92c634b6ad922860",
+    "artifacts/forward_example_ppo_20260917/scratch_evaluate_update001200_001/run/standing/evaluation_00/report.json": "0b234a63c23dbdb6eb298eb3854d180ebe4c5faa539c2d7a6fec477326f82fbc",
+    "artifacts/forward_example_ppo_20260917/scratch_evaluate_update001200_001/run/standing/evaluation_00/force_metrics.json": "ba29f1481ea7d2290dd5320627adbb7c5fa87ee37e04d884aff484c778e521d5",
+    "artifacts/forward_example_ppo_20260917/example_train_003/run/standing/state.json": "963ea9cdd5c8da3a2ce7034cb0309626ad1d1f1c81ee85bf1d2bdc3897e6c519",
+    "artifacts/forward_example_ppo_20260917/example_train_003/run/standing/initialization.json": "2a70f92cb2eb5c96476e8733e1ab4641979927bd618f1c13a2ec7f3472dedbda",
+    "artifacts/forward_example_ppo_20260917/review_001/example_update000000.json": "b62ba712a158d96c5ecb981d4d8927d66946d2383fd9470b9c0623bd8dc42ca5",
+    "artifacts/forward_example_ppo_20260917/example_evaluate_update000000_001/run/standing/evaluation_00/report.json": "85f05a978c0f1ecf1545968daf0f8bb8a8d9939951005ae1098cc44fc18d4f98",
+    "artifacts/forward_example_ppo_20260917/example_evaluate_update000000_001/run/standing/evaluation_00/force_metrics.json": "d2ac53a9b022e6b34a7303b93e747371e38293e4ff4558e927daa79def6b9883",
+    "artifacts/forward_example_ppo_20260917/review_001/example_update000300.json": "04f906ae23cd5f43583c240fc692e80b2304becdf5aac9f705c03452aa5f0449",
+    "artifacts/forward_example_ppo_20260917/example_evaluate_update000300_001/run/standing/evaluation_00/report.json": "403edb696b224a2a764916c8ad1a26886f8667ca0c806c53d22c325c0463f597",
+    "artifacts/forward_example_ppo_20260917/example_evaluate_update000300_001/run/standing/evaluation_00/force_metrics.json": "7ae54b1339dc72e3c9aac7672b9b0d2c11d3b2b6674c7ec1cc11335acf22181d",
+    "artifacts/forward_example_ppo_20260917/review_001/example_update000600.json": "8b53000f6393f6024886a5a3cf872c3f7e3a21a71435916737c428d5e032f26d",
+    "artifacts/forward_example_ppo_20260917/example_evaluate_update000600_002/run/standing/evaluation_00/report.json": "30c1207321b083c730a6f8b3dd682b8ec04ec6f18f1ff12c2786033ceecc1c05",
+    "artifacts/forward_example_ppo_20260917/example_evaluate_update000600_002/run/standing/evaluation_00/force_metrics.json": "d4897f430cf8989bbe114202d17a161b483809d033f6ed3e75abcd122f7559a5",
+    "artifacts/forward_example_ppo_20260917/review_001/example_update001200.json": "a10f88fa6337aee56b5847a208e633b67cda36219e13892295ebdbeac0462cd6",
+    "artifacts/forward_example_ppo_20260917/example_evaluate_update001200_001/run/standing/evaluation_00/report.json": "067ac8e81e5c1d95ea5470e9624415c85dfd276836b67119493ce0d9e1c4c65c",
+    "artifacts/forward_example_ppo_20260917/example_evaluate_update001200_001/run/standing/evaluation_00/force_metrics.json": "98845f5e9c06463a58e43b0cb44ff9b5fa2a337fd198cdb567be7eb3d1adbd2b",
+    "artifacts/forward_example_ppo_20260917/EVALUATION_RETRY_001.json": "2086dfb267d033529dfa3915b91eba92b1db9094e9ff4763cc878bf8090f4222",
+    "artifacts/forward_example_ppo_20260917/EVALUATION_RETRY_VERIFICATION_001.json": "ce292e3513fb38a50ecadc004ea5754fe30a4e1abf61d0cfdd17410d34c97496",
+    "artifacts/forward_example_ppo_20260917/example_evaluate_update000600_001/run/jobs/standing.json": "951d34a8b89454c2fa8cbcb42cad892dda11046d4bac31fff83ca522eaf20f6d"
+  },
+  "analysis_source_sha256": "69f1363c8e80ed657974fe79453dabd460892c52ae2add859440a5a7fdf0152e",
+  "stage2_complete": false
+}

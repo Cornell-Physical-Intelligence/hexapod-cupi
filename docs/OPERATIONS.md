@@ -25,6 +25,39 @@ binds the successor packs. The coordination hash and reservation remain unchange
 These receipts describe their recorded allocations; recheck live resources
 before another dispatch.
 
+The scratch arm then completed all 1,200 updates and exact cleanup. A new
+reconstruction producer started container
+`638167108e5963302b2cda60c10e1f36173466656fc8169f28082a0b99e573db`
+after that allocation ended. The example-arm preflight rejected the occupied
+host before creating a container. The successor preserved the new producer's
+source and process identity, paused PID 3210795, preserved the container as a
+recovery image and stopped it. The [incident receipt](../artifacts/restart_2026-09-14/spark_ownership_008/RECEIPT.json)
+records empty resources and three paused reconstruction producers. The script
+on disk differs from incident 007; retain each incident's source copy for its
+own recovery. A fresh example-arm preflight passed with the same coordination
+hash and retained reservation controls.
+
+The example arm completed all 1,200 updates and exact cleanup. Before the
+scheduled policy evaluations, the successor found another COLMAP container,
+`edfe87124776a849581201443d252f0e2c5658dd47b130286c996f64339a3d70`,
+that started after training ended. The successor preserved its recovery image
+and the new producer's source, then paused PID 3304563 and stopped that exact
+container. The [recovery receipt](../artifacts/restart_2026-09-14/spark_ownership_009/RECEIPT.json)
+records the result. The first policy-evaluation preflight passes with empty
+resources, all 32 user masks and four system masks. Earlier process states remain
+timestamped evidence; verify process identity before any later restoration.
+
+The guard interrupted example-arm evaluation at update 600 after an unrelated
+reconstruction CUDA process appeared. The [incident readback](../artifacts/restart_2026-09-14/spark_ownership_010/READBACK.json)
+records that the process exited before inspection. The two other inspected
+processes run static HTTP servers; the [classification](../artifacts/restart_2026-09-14/spark_ownership_010/CLASSIFICATION.json)
+records no stop action and clarifies the private recovery contents. We preserved
+all 65 files from the interrupted allocation, including the unfinished stop
+capture. The [retry receipt](../artifacts/forward_example_ppo_20260917/EVALUATION_RETRY_001.json)
+binds a fresh allocation to the same checkpoint, seed and runtime. We repeat
+all scheduled cases under identity `example_evaluate_update000600_002`; the
+original service failure and partial capture retain their identities.
+
 ## PPO comparison allocations, 17 September 2026
 
 The successor identified and stopped the COLMAP container
