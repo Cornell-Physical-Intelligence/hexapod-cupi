@@ -1,5 +1,30 @@
 # Spark operations runbook
 
+## Forward-example pilot allocations, 17 September 2026
+
+The successor identified two orphan reconstruction producers, PIDs 3163647 and
+3167591, that could launch COLMAP despite the retained scheduler masks. Under
+James's compute authorization, the successor preserved their source and process
+identities, then paused both with SIGSTOP. The successor preserved two active
+containers as recovery images before stopping them. The
+[recovery receipt](../artifacts/restart_2026-09-14/spark_ownership_007/RECEIPT.json)
+binds these actions and the output mounts. Raw process arguments and source
+copies remain in the private Spark recovery directory. Restore a producer after
+James releases the reservation and its PID, start time and command hash match.
+An [earlier observed container](../artifacts/restart_2026-09-14/spark_ownership_006/RECEIPT.json)
+exited before intervention; that receipt claims no stop or recovery image.
+
+The first pilot check failed before container creation because its input mount
+used an unsupported destination. The second reached native initialization but
+failed at the update-zero checkpoint save. Fresh source packs correct both
+interfaces and retain the failed attempts. The
+[paired native check](../artifacts/forward_example_ppo_20260917/NATIVE_SMOKE_001.json)
+records completed two-update runs and exact cleanup for both arms. Source freeze
+`516cb2cb26c6b5abfb655a36408f022e684cfeb5621a3b0fe496e72d615253f8`
+binds the successor packs. The coordination hash and reservation remain unchanged.
+These receipts describe their recorded allocations; recheck live resources
+before another dispatch.
+
 ## PPO comparison allocations, 17 September 2026
 
 The successor identified and stopped the COLMAP container

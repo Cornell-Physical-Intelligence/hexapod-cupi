@@ -14,7 +14,7 @@ python3 tools/c_study_runtime.py
 
 The historical check verifies `stage2_pipeline.sha256` against the immutable Git
 revision `81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df`. Fetch repository history first.
-The current check selects `repository_ppo_reference_20260917_v10_pipeline.sha256`.
+The current check selects `repository_forward_example_20260917_v11_pipeline.sha256`.
 It covers current runtime/source paths, tests and retained release inputs,
 including the inventoried top-level modules and CPU tests in
 `experiments/paper_walk/` and `experiments/trajectory_optimization/`. Nested experiment
@@ -79,3 +79,10 @@ repairs per-patch contact classification and replica-coordinate handling in the
 RS05 direct task. That task still needs native admission; the PPO comparison
 uses the existing admitted prototype physics. Source identity does not qualify
 omnidirectional behavior.
+
+The forward-example v11 release retains v10. It adds a fixed-forward command
+sampler and actor-imitation initializer for a paired standard-PPO experiment.
+Both arms share the admitted physics, observation statistics and PPO budget.
+CPU checks and native smoke runs verify the training and checkpoint interfaces.
+The protocol requires separate policy evaluations before a learning conclusion;
+the source release does not qualify walking.

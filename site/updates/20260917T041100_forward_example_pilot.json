@@ -1,0 +1,43 @@
+{
+  "id": "20260917T041100_forward_example_pilot",
+  "date": "2026-09-17T04:11:00Z",
+  "title": "Set up a controlled forward-example PPO comparison",
+  "summary": "We froze one paired-seed experiment with a fixed forward command and equal PPO sample budgets. The example arm fits action predictions before PPO; both arms share initial observation statistics, the admitted simulator and the task reward. Both native checks complete two PPO updates with valid checkpoints and force/torque capture. The full scratch run is active at the recorded readback; the full example run and scheduled policy evaluations remain pending. We preserve the failed interface attempts and reconstruction recovery receipts. We publish compressed telemetry and selected checkpoint identities without changing the raw captures or acceptance gates. This setup establishes no learning benefit or Stage 2 result.",
+  "areas": [
+    "training",
+    "experiment evidence",
+    "compute operations",
+    "public paper"
+  ],
+  "changes": [
+    ".github/workflows/tests.yml",
+    ".gitignore",
+    "STATUS.md",
+    "configs/source_inventory.json",
+    "docs/OPERATIONS.md",
+    "docs/PIPELINE_LINEAGES.md",
+    "docs/TRAINING.md",
+    "experiments/trajectory_optimization/README.md",
+    "experiments/trajectory_optimization/forward_experiment.py",
+    "experiments/trajectory_optimization/prepare_forward.py",
+    "experiments/trajectory_optimization/prepare_vanilla.py",
+    "experiments/trajectory_optimization/vanilla_native.py",
+    "experiments/trajectory_optimization/tests/test_forward_experiment.py",
+    "isaaclab/deploy/repository_forward_example_20260917_v11_pipeline.sha256",
+    "site/project.json",
+    "tools/check_pipeline_lineages.py",
+    "artifacts/forward_example_ppo_20260917/**",
+    "artifacts/restart_2026-09-14/spark_ownership_006/**",
+    "artifacts/restart_2026-09-14/spark_ownership_007/**"
+  ],
+  "evidence": [
+    "artifacts/forward_example_ppo_20260917/protocol_001/PROTOCOL.json",
+    "artifacts/forward_example_ppo_20260917/CPU_VALIDATION_003.json",
+    "artifacts/forward_example_ppo_20260917/NATIVE_SMOKE_001.json",
+    "artifacts/forward_example_ppo_20260917/LIVE_SCRATCH_001.json",
+    "artifacts/forward_example_ppo_20260917/SMOKE_ARCHIVES_001.json",
+    "artifacts/restart_2026-09-14/spark_ownership_007/RECEIPT.json"
+  ],
+  "next": "Complete both declared training budgets, evaluate the scheduled checkpoints and report the paired outcome with loads and policy videos. Keep the Stage 2 gates and reservation controls unchanged.",
+  "no_project_impact": false
+}

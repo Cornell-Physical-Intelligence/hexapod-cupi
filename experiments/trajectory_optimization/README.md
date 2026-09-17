@@ -177,3 +177,46 @@ blocks the launch wrapper's final resource check. Its original failed exit,
 recovery image and successful cleanup remain recorded in OPERATIONS. The policy
 evaluation service completes with exit code 0. Neither receipt releases the
 Spark reservation or changes a behavior gate.
+
+## Controlled forward-example PPO pilot
+
+The [protocol](../../artifacts/forward_example_ppo_20260917/protocol_001/PROTOCOL.json)
+compares a fresh actor with an actor that first copies the passing reference's
+recorded actions. Both arms receive 1,200 PPO updates, with 128 replicas and 24
+controls per update. They use seed 20260914 and a fixed 0.05 m/s forward command.
+The prior mixed-command baseline is outside this paired comparison.
+
+Both arms initialize their observation normalization from the first 700 recorded
+rows. The example arm fits actor MLP weights to those actions for 1,000 Adam
+steps. It keeps the critic and action variance unchanged, then discards the
+imitation optimizer and restores the PPO random state. PPO starts with an empty
+optimizer in both arms. It uses the existing task reward without an imitation
+loss. Report the extra imitation work apart from the equal PPO sample budgets.
+
+Evaluate checkpoints at updates 0, 300, 600 and 1,200. Use the unchanged forward
+screen as the primary outcome and record quiet/stop probes as diagnostics.
+Record force and torque at 400 Hz, plus a native policy video. A pass before
+PPO establishes a copied policy; later passes test its retention during PPO.
+This one-seed pilot cannot establish omnidirectional or statistical robustness.
+The final 300 demonstration rows check action prediction on later cycles of the
+same recording; they are not an independent locomotion trial.
+
+The [CPU check](../../artifacts/forward_example_ppo_20260917/CPU_VALIDATION_003.json)
+verifies actor-only fitting, preserved PPO random state, checkpoint zero and
+40 optimizer steps per parameter in a two-update interface test. That test uses
+recorded observations without physics and makes no walking claim.
+
+To reproduce preparation, choose new local and remote directories:
+
+```sh
+uv run --with rsl-rl-lib==5.0.1 python -m unittest experiments.trajectory_optimization.tests.test_forward_experiment
+uv run python -m experiments.trajectory_optimization.prepare_forward protocol --output tmp/forward-reproduction/protocol
+uv run python -m experiments.trajectory_optimization.prepare_forward pack --protocol tmp/forward-reproduction/protocol/PROTOCOL.json --output tmp/forward-reproduction/scratch --remote-root /home/orionh/HEXAPOD_runs/restart_20260914/forward_reproduction/scratch --arm scratch
+uv run python -m experiments.trajectory_optimization.prepare_forward pack --protocol tmp/forward-reproduction/protocol/PROTOCOL.json --output tmp/forward-reproduction/example --remote-root /home/orionh/HEXAPOD_runs/restart_20260914/forward_reproduction/example --arm example
+```
+
+Use `--smoke` for a separate two-update validation allocation. For evaluation,
+use `pack --mode evaluate` with the exact checkpoint path, its SHA-256 and its
+JSON sidecar SHA-256. The package retains the same arm and protocol identity.
+Follow OPERATIONS for review, live resource checks and guarded dispatch. The
+preparer creates launch inputs; it does not launch jobs or grant admission.

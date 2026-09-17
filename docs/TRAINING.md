@@ -1,5 +1,31 @@
 # Historical training contracts and gates
 
+## Controlled forward-example PPO pilot, 17 September 2026
+
+The successor froze a [paired protocol](../artifacts/forward_example_ppo_20260917/protocol_001/PROTOCOL.json)
+to test action-imitation initialization from the passing forward reference.
+Both arms use seed 20260914 and the same fixed 0.05 m/s forward command. Each
+arm receives 1,200 PPO updates and 3,686,400 transitions on 128 admitted replicas.
+The earlier mixed-command PPO run is a separate baseline, outside this pair.
+
+Both arms initialize their observation statistics from the first 700 example
+rows. The example arm then fits its actor's action predictions with 1,000 Adam
+updates. The scratch arm retains its initial actor weights. The fit preserves
+the critic, action variance and PPO random state; PPO starts with an empty
+optimizer. Both arms use the same task reward during PPO, without an imitation
+reward. The later 300 example rows measure prediction error on the same
+recording; they do not provide an independent locomotion test.
+
+The [native checks](../artifacts/forward_example_ppo_20260917/NATIVE_SMOKE_001.json)
+verify two PPO updates, checkpoint saves and 49,152 force/torque samples per arm.
+They establish the execution interface, without a learning conclusion. The
+protocol requires native evaluations at updates 0, 300, 600 and 1,200, with
+ground-contact force, motor torque and actual policy videos. Forward tracking
+is the primary comparison. Quiet and stop cases are diagnostics because the
+training command stays forward. A pass before PPO would establish imitation
+of the example; later passes would test its retention through PPO. This pilot
+does not reproduce AMP or qualify omnidirectional walking. Stage 2 stays open.
+
 ## Successor refit comparison, 16 September 2026
 
 The successor completed both cold BC refit trials under frozen source020 and

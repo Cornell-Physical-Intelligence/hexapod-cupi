@@ -48,3 +48,16 @@ artifacts/ppo_reference_comparison_20260917/vanilla_train_001/run/standing/check
 !artifacts/ppo_reference_comparison_20260917/vanilla_train_001/run/standing/checkpoint_update001200.pt
 artifacts/ppo_reference_comparison_20260917/vanilla_train_001/run/standing/metrics.jsonl
 artifacts/ppo_reference_comparison_20260917/vanilla_evaluate_001/run/standing/evaluation_*/native400hz/contacts.jsonl
+
+# Keep complete pilot runs on Spark and the local host; publish selected weights
+# and lossless telemetry archives with their byte inventories.
+artifacts/forward_example_ppo_20260917/**/run/standing/learner/
+artifacts/forward_example_ppo_20260917/*_smoke_*/run/standing/checkpoint_update*.pt
+artifacts/forward_example_ppo_20260917/*_train_*/run/standing/checkpoint_update*.pt
+!artifacts/forward_example_ppo_20260917/*_train_003/run/standing/checkpoint_update000000.pt
+!artifacts/forward_example_ppo_20260917/*_train_003/run/standing/checkpoint_update000300.pt
+!artifacts/forward_example_ppo_20260917/*_train_003/run/standing/checkpoint_update000600.pt
+!artifacts/forward_example_ppo_20260917/*_train_003/run/standing/checkpoint_update001200.pt
+artifacts/forward_example_ppo_20260917/**/run/standing/metrics.jsonl
+artifacts/forward_example_ppo_20260917/**/run/standing/native/native_readback.json
+artifacts/forward_example_ppo_20260917/**/evaluation_*/native400hz/contacts.jsonl
