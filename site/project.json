@@ -188,6 +188,52 @@
       "caption": "First frame of the native optimized-target replay on the approved model.",
       "controller": "Optimized trajectory a76e093075ce471210a66bf4ae3835a1dca94406b930e4a791a028941a502ec1",
       "evidence": "artifacts/trajectory_optimizer_20260917/review_001/RESULT.json"
+    },
+    {
+      "id": "forward_ppo_scratch_1200",
+      "title": "PPO from scratch: failed forward test",
+      "type": "video",
+      "role": "controlled_ppo_comparison",
+      "path": "artifacts/forward_example_ppo_20260917/scratch_evaluate_update001200_001/run/standing/evaluation_00/rollout.mp4",
+      "sha256": "731abfef892bd0b64125b028f428388a6d1994e083a1d388c7061f03b7e51249",
+      "caption": "Approved detailed model after 1200 PPO updates. Mean forward speed 0.481 cm/s against 5 cm/s. Forward tracking and motor demand fail. One paired seed; recorded policy rollout at real-time speed.",
+      "controller": "f4403a25ce4c675607ba7f33fec9c2e35c8895f4e72915cb3d8ce2bc4cb6ce5b",
+      "evidence": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json",
+      "poster_id": "forward_ppo_scratch_1200_poster"
+    },
+    {
+      "id": "forward_ppo_scratch_1200_poster",
+      "title": "PPO from scratch: preview",
+      "type": "image",
+      "role": "video_poster",
+      "path": "artifacts/forward_example_ppo_20260917/scratch_evaluate_update001200_001/run/standing/evaluation_00/first_frame.png",
+      "sha256": "3a1e078a9073d98d4f9effcfd3fae8704843f85d22326cf4ef06449966408644",
+      "caption": "First frame of the final policy test on the approved model.",
+      "controller": "f4403a25ce4c675607ba7f33fec9c2e35c8895f4e72915cb3d8ce2bc4cb6ce5b",
+      "evidence": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
+    },
+    {
+      "id": "forward_ppo_example_1200",
+      "title": "PPO after copying the forward example: failed forward test",
+      "type": "video",
+      "role": "controlled_ppo_comparison",
+      "path": "artifacts/forward_example_ppo_20260917/example_evaluate_update001200_001/run/standing/evaluation_00/rollout.mp4",
+      "sha256": "52bd0dca4390cd2c1844df856cbc82493e4bf84b0a683613726dc2399e58cdc9",
+      "caption": "Approved detailed model after 1200 PPO updates. Mean forward speed 0.096 cm/s against 5 cm/s. Forward tracking and motor demand fail. One paired seed; recorded policy rollout at real-time speed.",
+      "controller": "1d039d9d566490398b1b1bd0603f7ff77b1c54228d30a63bd296799f6e1703f9",
+      "evidence": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json",
+      "poster_id": "forward_ppo_example_1200_poster"
+    },
+    {
+      "id": "forward_ppo_example_1200_poster",
+      "title": "PPO after copying the forward example: preview",
+      "type": "image",
+      "role": "video_poster",
+      "path": "artifacts/forward_example_ppo_20260917/example_evaluate_update001200_001/run/standing/evaluation_00/first_frame.png",
+      "sha256": "4696ca134e7fe0c57bc008bbea8faf1cf2235dba741b1c1d09cefae0b32cb6e1",
+      "caption": "First frame of the final policy test on the approved model.",
+      "controller": "1d039d9d566490398b1b1bd0603f7ff77b1c54228d30a63bd296799f6e1703f9",
+      "evidence": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
     }
   ],
   "nodes": [
@@ -438,7 +484,7 @@
       "description": "Restart qualification on the mass-corrected model confirmed on 14 September 2026. First pass standing admission, then train forward, backward and sideways motion with turning and quiet stops. Compare gait quality with the historical reference.",
       "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait’s visual quality.",
       "source": "experiments/paper_walk/README.md",
-      "media_id": "optimized_forward_001",
+      "media_id": "forward_ppo_example_1200",
       "status": "blocked",
       "backend": "Approved detailed robot model",
       "owner": "Platform lead",
@@ -450,11 +496,11 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "The optimized forward replay fails the 0.025 m/s tracking limit. A learned omnidirectional policy, stopping trials and human gait acceptance remain outstanding.",
-      "question": "Determine how to reduce within-cycle speed variation before accepting optimized references for learning.",
+      "blocker": "Both controlled PPO arms fail every scheduled forward test and both final stopping diagnostics. The improved prepared trajectory passes its forward screen. A learned policy still needs to pass direction, transition, quiet-stop, motor and contact tests, followed by human gait acceptance.",
+      "question": "Review the failed example initialization before defining the next learning increment with James and the platform lead.",
       "next_step": null,
       "acceptance": null,
-      "card_text": "Optimized replay moves 0.968 m; speed variation fails tracking."
+      "card_text": "Both PPO arms fail forward walking; this example initialization shows no benefit in the paired test."
     },
     {
       "id": "stage3",
@@ -572,10 +618,10 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-17T04:09:54.279143+00:00",
-    "source_commit": "fa866a5d7375254f1f7593ab9cb8336c7de073d3",
+    "as_of": "2026-09-17T18:19:39.672968+00:00",
+    "source_commit": "94db110e9c362604ce1cf415bd2dfbcc1bca9f03",
     "architecture": "ARCHITECTURE.md",
-    "summary": "The improved optimized reference passes the native forward screen at 0.05 m/s. The earlier mixed-command PPO policy fails forward, quiet and stop probes. We froze a paired forward-only experiment to test whether copying the reference before PPO helps learning. Both native interface checks pass. At the recorded 04:09 UTC readback, the scratch arm is running at 208 of 1200 updates; the example arm has not started its full run. The paired learning result and omnidirectional acceptance remain pending.",
+    "summary": "We completed the controlled forward-example PPO experiment. Each arm received 1200 PPO updates and 3686400 transitions. Both arms fail the forward test at updates 0, 300, 600 and 1200. Final mean forward speeds are 0.004811 m/s from scratch and 0.000961 m/s after example initialization, against a 0.05 m/s command. Both final policies also fail motor-demand and stopping checks. We establish no benefit from this initialization in one paired seed. We preserve force and torque records and publish both final walking videos. Stage 2 remains incomplete.",
     "definition_policy": "James requires locomotion load tracking before the next optimizer/PPO sequence. The replay wrapper now produces force_metrics.json. Future PPO evaluations and learning probes must use the wrapper or the analysis command; check summary availability before proceeding. Preserve the approved model, original gait verdicts and all existing gates. The Spark reservation remains retained and the historical heartbeat remains paused.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/04e9ede5c79fc0ff80151847fa8251f82cf21b0a/STATUS.md",
@@ -1469,6 +1515,38 @@
         "result": "passed",
         "text": "The successor preserves source and process identities for two orphan reconstruction producers, then pauses both under James’s compute authorization. The successor preserves two active COLMAP containers as recovery images before stopping them. Private command bytes and source copies stay on Spark; public receipts retain hashes and output mounts. The final incident readback records empty container and GPU lists. The reservation remains retained.",
         "source": "artifacts/restart_2026-09-14/spark_ownership_007/RECEIPT.json"
+      },
+      {
+        "id": "forward-example-training-complete-20260917",
+        "title": "We complete both controlled PPO training arms",
+        "backend": "RSL-RL 5.0.1; one paired seed; fixed 0.05 m/s forward command; 128 admitted replicas",
+        "result": "passed",
+        "text": "Each arm completes 1200 PPO updates and 3686400 transitions. Each final optimizer records 24000 steps per parameter, and each run records 29491200 force/torque samples. Both native jobs exit with code 0 and complete exact-container cleanup. The initial saved critic and actor normalization state match; both PPO optimizers start empty. These results establish matched training execution. Policy performance requires the scheduled native evaluations.",
+        "source": "artifacts/forward_example_ppo_20260917/README.md"
+      },
+      {
+        "id": "forward-example-initial-policy-failed-20260917",
+        "title": "Copying the example does not pass the initial walking test",
+        "backend": "One admitted Isaac Sim replica; example-arm update zero; unchanged 0.040 rad per 20 ms limiter",
+        "result": "failed",
+        "text": "Before PPO, the copied actor completes the forward trial with mean speed 0.005338 m/s and planar tracking error 0.056366 m/s against the 0.025 m/s bound. The quiet trial ends at control 149 with joint-limit and joint-speed violations. The forward-to-stop trial ends at control 467, before the stop command at control 500. The audit reproduces actions, actuator output and force summaries; videos preserve both failed prefixes. Low action-prediction error on the demonstration does not establish closed-loop walking.",
+        "source": "artifacts/forward_example_ppo_20260917/review_001/example_update000000.json"
+      },
+      {
+        "id": "forward-example-paired-result-20260917",
+        "title": "Example initialization produces no passing forward checkpoint",
+        "backend": "Native Isaac Sim; approved detailed model; one paired seed; equal PPO budgets; unchanged 0.040 rad per 20 ms limiter",
+        "result": "failed",
+        "text": "Both arms fail all four scheduled forward tests. Final mean speeds are 0.004811 m/s from scratch and 0.000961 m/s after example initialization, against 0.05 m/s. Final planar errors are 0.051045 and 0.053322 m/s, above the 0.025 m/s limit. Both final policies fail motor-demand and quiet-stop checks. The final example quiet trial terminates at control 490 of 1000. The declared benefit rule fails for this pair; other seeds and motion-prior methods remain untested.",
+        "source": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
+      },
+      {
+        "id": "forward-example-final-loads-20260917",
+        "title": "We record force and motor load for both final policies",
+        "backend": "400 Hz native captures; 18-second forward window after two seconds of settling",
+        "result": "passed",
+        "text": "Mean vertical ground support is 73.246 N for scratch and 73.227 N for example initialization. Mean absolute applied motor torque is 0.488782 and 0.405900 N·m. Per-foot forces and per-joint requested and applied torque remain in the force summaries. These values describe failed, low-speed motions and do not establish efficiency at matched walking speed.",
+        "source": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
       }
     ]
   },

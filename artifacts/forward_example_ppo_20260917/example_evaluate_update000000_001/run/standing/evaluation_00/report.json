@@ -1,0 +1,209 @@
+{
+  "schema": "canonical_stage2_native_batch_v1",
+  "cases": [
+    {
+      "case_id": "learning:translate_0.05_0deg",
+      "profile": "omni_static",
+      "command": [
+        0.05,
+        0.0,
+        0.0
+      ],
+      "controls": 1000
+    }
+  ],
+  "assigned_case_ids": [
+    "learning:translate_0.05_0deg"
+  ],
+  "padding_replicas": 0,
+  "seed": 20260914,
+  "episode_timeout_seconds": 60.0,
+  "max_wall_seconds": 6180.939821243053,
+  "checkpoint_sha256": "666a5b5ee9709d774cd4a685802e1a17e67678e7f5ecd5f317f9038d2c2e6bca",
+  "source_sha256": "9efb6003334c25215645e23274f044734bc5c9bb60c11ba84c7242027c4b3d8c",
+  "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+  "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+  "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+  "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+  "contact_classification": "exact_distal_points",
+  "velocity_measurement_point": "native root center_of_mass; actual world velocity rotated into body/navigation",
+  "initial_resets": 1,
+  "resets_during_trial": 0,
+  "pose_forcing": false,
+  "stage2_complete": false,
+  "acquisition_complete": true,
+  "failure": null,
+  "failure_kind": null,
+  "controls": 1000,
+  "allocation_limit_reached": false,
+  "native_capture_failure": null,
+  "recorded_physics_steps": 8000,
+  "results": [
+    {
+      "schema": "canonical_stage2_cpu_evaluation_v1",
+      "profile": "omni_static",
+      "scope": {
+        "source": "experiments/c_length_study/tools/omni_flat_math.py:scenario_gate",
+        "cases": 77,
+        "duration_s": 20.0,
+        "settle_s": 2.0,
+        "scope": "Historical full signed direction, yaw and combined-command numeric screen."
+      },
+      "environment_index": 0,
+      "recorded_controls": 1000,
+      "checks": {
+        "complete_requested_window": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "control_dt_s": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 1e-12,
+          "operator": "<="
+        },
+        "quaternion_unit_norm": {
+          "status": "pass",
+          "value": 2.384185791015625e-07,
+          "bound": 1e-05,
+          "operator": "<="
+        },
+        "terminated": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "truncated": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "reset": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "contiguous_time": {
+          "status": "pass",
+          "value": 3.1259717037102064e-15,
+          "bound": 1e-09,
+          "operator": "<="
+        },
+        "held_command": {
+          "status": "pass",
+          "value": 7.450580569168253e-10,
+          "bound": 1e-06,
+          "operator": "<="
+        },
+        "planar_error_mps": {
+          "status": "fail",
+          "value": 0.056366335392279726,
+          "bound": 0.025,
+          "operator": "<="
+        },
+        "yaw_error_rad_s": {
+          "status": "pass",
+          "value": 0.02081067435788895,
+          "bound": 0.06,
+          "operator": "<="
+        },
+        "tilt_rms_degrees": {
+          "status": "pass",
+          "value": 0.26737067103385925,
+          "bound": 5.0,
+          "operator": "<="
+        },
+        "vertical_velocity_rms_mps": {
+          "status": "pass",
+          "value": 0.01800115779042244,
+          "bound": 0.04,
+          "operator": "<="
+        },
+        "nonfoot_fraction": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 0.001,
+          "operator": "<="
+        },
+        "computed_demand_over_rating_fraction": {
+          "status": "pass",
+          "value": 0.0016666666666666668,
+          "bound": 0.005,
+          "operator": "<="
+        }
+      },
+      "metrics": {
+        "base_height_std_m": 0.002359875477850437,
+        "base_height_peak_to_peak_m": 0.011060185730457306,
+        "tilt_rms_degrees": 0.26737067103385925,
+        "tilt_p95_degrees": 0.48890748620033264,
+        "maximum_tilt_degrees": 1.1816743612289429,
+        "vertical_velocity_rms_mps": 0.01800115779042244,
+        "vertical_velocity_abs_p95_mps": 0.04056086018681526,
+        "mean_velocity_mps": [
+          0.00533756196127018,
+          0.00030173445480389144,
+          -0.0004121136848926367
+        ],
+        "planar_error_mps": 0.056366335392279726,
+        "planar_velocity_rmse_mps": 0.06377623805219901,
+        "yaw_error_rad_s": 0.02081067435788895,
+        "yaw_rate_rmse_radps": 0.04359827510561298,
+        "mean_yaw_rate_rad_s": 0.0021972763592888567,
+        "roll_pitch_angular_velocity_rms_radps": 0.0671709861144892,
+        "roll_pitch_angular_velocity_p95_radps": 0.15146495810715396,
+        "requested_saturation_fraction_400hz": 0.002067901234567901,
+        "maximum_requested_saturation_fraction_400hz": 0.014444444444444444,
+        "computed_demand_over_rating_fraction": 0.0016666666666666668,
+        "maximum_per_joint_computed_demand_over_rating_fraction": 0.012222222222222223,
+        "maximum_computed_over_rating_burst_s": 0.1,
+        "peak_abs_computed_nm": 2.141648292541504,
+        "max_per_joint_rms_applied_nm": 1.059205412864685,
+        "nonfoot_fraction": 0.0
+      },
+      "lineage": {
+        "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+        "checkpoint_sha256": "666a5b5ee9709d774cd4a685802e1a17e67678e7f5ecd5f317f9038d2c2e6bca",
+        "source_sha256": "9efb6003334c25215645e23274f044734bc5c9bb60c11ba84c7242027c4b3d8c"
+      },
+      "window_start_control": 100,
+      "window_controls": 900,
+      "native_admission": "Separate exact-model native 1/32 standing, solver, geometry, full400Hz and asset receipts are required.",
+      "failed_bounds": [
+        "planar_error_mps"
+      ],
+      "missing_evidence": [],
+      "pass": false,
+      "stage2_complete": false,
+      "case_id": "learning:translate_0.05_0deg",
+      "native_capture_complete": true,
+      "native_motor_and_joint_checks_pass": true,
+      "native_contact_screen": {
+        "schema": "canonical_native_contact_screen_v1",
+        "frequency_hz": 400,
+        "window": "complete trial, including initial settling and every native substep",
+        "recorded_substeps": 8000,
+        "nonfoot_substeps": 0,
+        "nonfoot_fraction": 0.0,
+        "maximum_nonfoot_fraction": 0.001,
+        "pass": true,
+        "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+      },
+      "batch_failure": null,
+      "passed_numeric_screen": false
+    }
+  ],
+  "video_frames": 500,
+  "video_case_id": "learning:translate_0.05_0deg",
+  "files": {
+    "control_trace.npz": "bdff943f2834a5839b13d17418f5b7e75862f4f8217fbbbbab927cb8a3d359f3",
+    "declaration.json": "f1d2533e48eb63c083e1c369c9bbd45339a36629822e0943bc3a177df54c7317",
+    "first_frame.png": "3a50f8ba9031c5558b43d569622ce9fa0cb06966dbf7220bc1b668b977f91027",
+    "rollout.mp4": "95aaebe8799678d6739b020bb247f2e3baf71bcf1347bb8643531c84d39141ca"
+  }
+}

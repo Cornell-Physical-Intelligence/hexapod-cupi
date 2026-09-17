@@ -1,0 +1,27 @@
+{
+  "utc": "2026-09-17T17:54:32.331253+00:00",
+  "unit": "hexapod-forward-scratch-eval001200-001-20260917.service",
+  "binding_sha256": "ba2954a5ab1f88b96e3f974b4f62acb56190f73ffb3bbd1a23956503578972f3",
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit",
+    "hexapod-forward-scratch-eval001200-001-20260917.service",
+    "--property=RuntimeMaxSec=6780",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=WorkingDirectory=/home/orionh/IsaacLab",
+    "--property=ExecStopPost=python3 -B -S /home/orionh/HEXAPOD_runs/restart_20260914/forward_example_ppo_20260917/scratch_evaluate_update001200_001/source/launch_spark.py --bindings /home/orionh/HEXAPOD_runs/restart_20260914/forward_example_ppo_20260917/scratch_evaluate_update001200_001/binding.json --bindings-sha256 ba2954a5ab1f88b96e3f974b4f62acb56190f73ffb3bbd1a23956503578972f3 --cleanup-only",
+    "python3",
+    "-B",
+    "-S",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/forward_example_ppo_20260917/scratch_evaluate_update001200_001/source/launch_spark.py",
+    "--bindings",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/forward_example_ppo_20260917/scratch_evaluate_update001200_001/binding.json",
+    "--bindings-sha256",
+    "ba2954a5ab1f88b96e3f974b4f62acb56190f73ffb3bbd1a23956503578972f3"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "Running as unit: hexapod-forward-scratch-eval001200-001-20260917.service; invocation ID: 1874eb67b868447b983de4b1bf5cc7c9\n"
+}

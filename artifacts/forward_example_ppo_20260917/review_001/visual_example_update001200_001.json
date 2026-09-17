@@ -1,0 +1,53 @@
+{
+  "utc": "2026-09-17T18:21:01.303669+00:00",
+  "reviewer": "Codex primary agent",
+  "method": "Inspection of six sampled frames from each final example-policy video after full decode.",
+  "video_decode_receipt_sha256": "7467c26377cf13e00257f2c2d5e2704114be5d8d446eb6759f0c2d98b6aea4b6",
+  "cases": [
+    {
+      "case_id": "learning:translate_0.05_0deg",
+      "video_sha256": "52bd0dca4390cd2c1844df856cbc82493e4bf84b0a683613726dc2399e58cdc9",
+      "frame_sheet": "artifacts/forward_example_ppo_20260917/review_001/example_update001200_evaluation_00_frames.png",
+      "frame_sheet_sha256": "14a2662adf2d51ea109739fce60f59ba58d33cd639fe6f7431d670ee55e2b4f1",
+      "selected_frame_indices": [
+        0,
+        99,
+        199,
+        299,
+        399,
+        499
+      ]
+    },
+    {
+      "case_id": "learning:quiet_20s",
+      "video_sha256": "52cd4fe19c5ae3ce981498eb0ad71936d1f6c713e4b4a19dc33bbb7b83d783ca",
+      "frame_sheet": "artifacts/forward_example_ppo_20260917/review_001/example_update001200_evaluation_01_frames.png",
+      "frame_sheet_sha256": "daf9cb65b326ab9995a1561d3cee29455bd905d8789499e87f247ee3dd8485b8",
+      "selected_frame_indices": [
+        0,
+        48,
+        97,
+        146,
+        195,
+        244
+      ]
+    },
+    {
+      "case_id": "learning:forward_0.05_to_stop",
+      "video_sha256": "bd942b55388b75a5cfccbb5c7b0af0aab844f5e8aaddb33e2c8be7a284049b51",
+      "frame_sheet": "artifacts/forward_example_ppo_20260917/review_001/example_update001200_evaluation_02_frames.png",
+      "frame_sheet_sha256": "edda4f8f9d7c4b81991a89f5dc093524741e2beafecd79577f7887f4255d19ed",
+      "selected_frame_indices": [
+        0,
+        104,
+        209,
+        314,
+        419,
+        524
+      ]
+    }
+  ],
+  "observation": "The sampled frames show the complete robot. The robot changes leg posture after reset and keeps a similar stance in later forward and stop frames. The quiet recording ends with a changed rear-leg posture at 9.8 seconds. The raw-trace audit records failed forward tracking and a native termination in the quiet case.",
+  "human_acceptance": false,
+  "stage2_complete": false
+}

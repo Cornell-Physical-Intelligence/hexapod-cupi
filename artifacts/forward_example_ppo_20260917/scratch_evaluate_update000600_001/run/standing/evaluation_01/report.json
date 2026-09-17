@@ -1,0 +1,279 @@
+{
+  "schema": "canonical_stage2_native_batch_v1",
+  "cases": [
+    {
+      "case_id": "learning:quiet_20s",
+      "profile": "quiet_stand",
+      "command": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "controls": 1000
+    }
+  ],
+  "assigned_case_ids": [
+    "learning:quiet_20s"
+  ],
+  "padding_replicas": 0,
+  "seed": 20260914,
+  "episode_timeout_seconds": 60.0,
+  "max_wall_seconds": 5942.643344976939,
+  "checkpoint_sha256": "8f482bad7865b609158a01aee8a5d7cb9bd235d73038c22d0e1ad2826d3a1382",
+  "source_sha256": "9efb6003334c25215645e23274f044734bc5c9bb60c11ba84c7242027c4b3d8c",
+  "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+  "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+  "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+  "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+  "contact_classification": "exact_distal_points",
+  "velocity_measurement_point": "native root center_of_mass; actual world velocity rotated into body/navigation",
+  "initial_resets": 1,
+  "resets_during_trial": 0,
+  "pose_forcing": false,
+  "stage2_complete": false,
+  "acquisition_complete": true,
+  "failure": null,
+  "failure_kind": null,
+  "controls": 1000,
+  "allocation_limit_reached": false,
+  "native_capture_failure": null,
+  "recorded_physics_steps": 8000,
+  "results": [
+    {
+      "schema": "canonical_stage2_cpu_evaluation_v1",
+      "profile": "quiet_stand",
+      "scope": {
+        "source": "canonical standing source005 standing_score.py + inherited quiet_metrics.py",
+        "duration_s": 20.0,
+        "settle_s": 4.0,
+        "quiet_window_s": 16.0,
+        "scope": "Every original 400Hz distal contact, nonfoot, clearance, motor and native admission check remains required."
+      },
+      "environment_index": 0,
+      "recorded_controls": 1000,
+      "checks": {
+        "complete_requested_window": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "control_dt_s": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 1e-12,
+          "operator": "<="
+        },
+        "quaternion_unit_norm": {
+          "status": "pass",
+          "value": 2.384185791015625e-07,
+          "bound": 1e-05,
+          "operator": "<="
+        },
+        "terminated": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "truncated": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "reset": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "contiguous_time": {
+          "status": "pass",
+          "value": 3.1259717037102064e-15,
+          "bound": 1e-09,
+          "operator": "<="
+        },
+        "zero_command_continuous": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 1e-06,
+          "operator": "<="
+        },
+        "quiet_window_controls": {
+          "status": "pass",
+          "value": 800,
+          "bound": 800,
+          "operator": ">="
+        },
+        "max_planar_excursion_m": {
+          "status": "fail",
+          "value": 0.026485327631235123,
+          "bound": 0.01,
+          "operator": "<="
+        },
+        "max_heading_excursion_deg": {
+          "status": "fail",
+          "value": 2.2965757846832275,
+          "bound": 2.0,
+          "operator": "<="
+        },
+        "max_joint_velocity_rms_rad_s": {
+          "status": "fail",
+          "value": 2.90075945854187,
+          "bound": 0.03,
+          "operator": "<="
+        },
+        "max_joint_position_range_rad": {
+          "status": "fail",
+          "value": 0.7035073041915894,
+          "bound": 0.02,
+          "operator": "<="
+        },
+        "max_target_step_abs_p95_rad_per_20ms": {
+          "status": "fail",
+          "value": 0.03999999165534973,
+          "bound": 0.002,
+          "operator": "<="
+        },
+        "max_requested_torque_saturation_fraction": {
+          "status": "fail",
+          "value": 0.66375,
+          "bound": 0.005,
+          "operator": "<="
+        },
+        "max_applied_torque_nm": {
+          "status": "pass",
+          "value": 1.600000023841858,
+          "bound": 1.60001,
+          "operator": "<="
+        },
+        "requested_saturation_400hz": {
+          "status": "fail",
+          "value": 0.63703125,
+          "bound": 0.005,
+          "operator": "<="
+        },
+        "requested_saturation_mean_400hz": {
+          "status": "fail",
+          "value": 0.06190972222222222,
+          "bound": 0.005,
+          "operator": "<="
+        },
+        "applied_cap_all_substeps": {
+          "status": "pass",
+          "value": 1.600000023841858,
+          "bound": 1.60001,
+          "operator": "<="
+        },
+        "missing_six_toe_count_400hz": {
+          "status": "fail",
+          "value": 6399,
+          "bound": 0,
+          "operator": "<="
+        },
+        "nonfoot_contact_count_400hz": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "minimum_non_toe_floor_m": {
+          "status": "pass",
+          "value": 0.007564447363171731,
+          "bound": -0.001,
+          "operator": ">="
+        },
+        "minimum_plate_height_m": {
+          "status": "pass",
+          "value": 0.07921826094388962,
+          "bound": 0.055,
+          "operator": ">="
+        }
+      },
+      "metrics": {
+        "base_height_std_m": 0.001258073141798377,
+        "base_height_peak_to_peak_m": 0.006255313754081726,
+        "tilt_rms_degrees": 0.8039990663528442,
+        "tilt_p95_degrees": 1.1549170017242432,
+        "maximum_tilt_degrees": 1.3393986225128174,
+        "vertical_velocity_rms_mps": 0.034174688160419464,
+        "vertical_velocity_abs_p95_mps": 0.0633884072303772,
+        "mean_velocity_mps": [
+          0.0016436304927272046,
+          -0.0008440025539573743,
+          0.00020378598369276247
+        ],
+        "planar_error_mps": 0.04243903115972323,
+        "planar_velocity_rmse_mps": 0.04775873426825589,
+        "yaw_error_rad_s": 0.04115140253479303,
+        "yaw_rate_rmse_radps": 0.05065296777961763,
+        "mean_yaw_rate_rad_s": -0.003055786305364675,
+        "roll_pitch_angular_velocity_rms_radps": 0.218593314345104,
+        "roll_pitch_angular_velocity_p95_radps": 0.312467549880809,
+        "requested_saturation_fraction_400hz": 0.06190972222222222,
+        "maximum_requested_saturation_fraction_400hz": 0.63703125,
+        "computed_demand_over_rating_fraction": 0.06305555555555556,
+        "maximum_per_joint_computed_demand_over_rating_fraction": 0.66375,
+        "maximum_computed_over_rating_burst_s": 0.9,
+        "peak_abs_computed_nm": 12.278095245361328,
+        "max_per_joint_rms_applied_nm": 1.5262078046798706,
+        "nonfoot_fraction": 0.0,
+        "max_planar_excursion_m": 0.026485327631235123,
+        "max_heading_excursion_deg": 2.2965757846832275,
+        "max_joint_position_range_rad": 0.7035073041915894,
+        "max_joint_velocity_rms_rad_s": 2.90075945854187,
+        "max_target_step_abs_p95_rad_per_20ms": 0.03999999165534973,
+        "max_requested_torque_saturation_fraction": 0.66375,
+        "max_applied_torque_nm": 1.600000023841858
+      },
+      "lineage": {
+        "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+        "checkpoint_sha256": "8f482bad7865b609158a01aee8a5d7cb9bd235d73038c22d0e1ad2826d3a1382",
+        "source_sha256": "9efb6003334c25215645e23274f044734bc5c9bb60c11ba84c7242027c4b3d8c"
+      },
+      "window_start_control": 200,
+      "window_controls": 800,
+      "native_admission": "Separate exact-model native 1/32 standing, solver, geometry, full400Hz and asset receipts are required.",
+      "failed_bounds": [
+        "max_planar_excursion_m",
+        "max_heading_excursion_deg",
+        "max_joint_velocity_rms_rad_s",
+        "max_joint_position_range_rad",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "max_requested_torque_saturation_fraction",
+        "requested_saturation_400hz",
+        "requested_saturation_mean_400hz",
+        "missing_six_toe_count_400hz",
+        "native_capture_or_original_physical_bounds"
+      ],
+      "missing_evidence": [],
+      "pass": false,
+      "stage2_complete": false,
+      "case_id": "learning:quiet_20s",
+      "native_capture_complete": true,
+      "native_motor_and_joint_checks_pass": false,
+      "native_contact_screen": {
+        "schema": "canonical_native_contact_screen_v1",
+        "frequency_hz": 400,
+        "window": "complete trial, including initial settling and every native substep",
+        "recorded_substeps": 8000,
+        "nonfoot_substeps": 0,
+        "nonfoot_fraction": 0.0,
+        "maximum_nonfoot_fraction": 0.0,
+        "pass": true,
+        "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+      },
+      "batch_failure": null,
+      "passed_numeric_screen": false
+    }
+  ],
+  "video_frames": 500,
+  "video_case_id": "learning:quiet_20s",
+  "files": {
+    "control_trace.npz": "8d179d5d10043bad6c6cb49e87738420b544000dca181002dbe68b7028ba5a55",
+    "declaration.json": "ccc540215e60d813176dd8603bdcc720beef803482e996c8cad7d4c3a7020642",
+    "first_frame.png": "a957d3219250b03ca655c532c9aec233ffac6958abefc2909d57d4bd601bcc18",
+    "rollout.mp4": "83ed4cb8302a3476113a56cd343f2848434c3a88d8c07d226d163d2b8673db61"
+  }
+}

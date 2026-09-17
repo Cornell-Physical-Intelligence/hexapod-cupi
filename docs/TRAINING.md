@@ -26,6 +26,35 @@ training command stays forward. A pass before PPO would establish imitation
 of the example; later passes would test its retention through PPO. This pilot
 does not reproduce AMP or qualify omnidirectional walking. Stage 2 stays open.
 
+We completed both full training budgets and verified the
+[initial saved states](../artifacts/forward_example_ppo_20260917/PAIRED_INITIALIZATION_001.json).
+Each run records 29,491,200 force/torque samples and exits with code 0. The
+[experiment record](../artifacts/forward_example_ppo_20260917/README.md) links
+both training receipts and explains raw-file retrieval.
+
+Before PPO, the [copied actor](../artifacts/forward_example_ppo_20260917/review_001/example_update000000.json)
+fails the forward screen with 0.056366 m/s planar error against the unchanged
+0.025 m/s bound. Its mean forward speed is 0.005338 m/s. Its quiet trial ends
+at control 149 with joint-limit and joint-speed violations. Its forward-to-stop
+trial ends at control 467, before the stop command at control 500. We preserve
+the failed prefixes and their original verdicts.
+
+The [completed paired comparison](../artifacts/forward_example_ppo_20260917/COMPARISON_001.json)
+establishes no benefit from this example initialization under the frozen rule.
+Both arms fail their forward screens at updates 0, 300, 600 and 1,200. At the
+final checkpoint, mean forward speed is 0.004811 m/s for scratch and
+0.000961 m/s for example initialization, against the 0.05 m/s command. Planar
+error is 0.051045 and 0.053322 m/s, above the unchanged 0.025 m/s limit. Both
+final policies also fail the motor-demand bound.
+
+The final forward captures record mean vertical support of 73.246 and 73.227 N,
+with mean absolute applied motor torque of 0.488782 and 0.405900 N·m for scratch
+and example initialization. These loads describe failed, low-speed motions;
+they do not establish efficiency at matched walking speed. The experiment
+record preserves the raw captures and final policy videos. One paired seed
+and one initialization method do not establish a result for AMP or other
+motion-prior methods. Stage 2 remains incomplete.
+
 ## Successor refit comparison, 16 September 2026
 
 The successor completed both cold BC refit trials under frozen source020 and
