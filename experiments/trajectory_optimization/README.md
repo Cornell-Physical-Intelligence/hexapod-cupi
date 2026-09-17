@@ -101,3 +101,79 @@ next experiment in the optimizer/PPO sequence. The
 defines the averages and the normal-force-only measurement scope.
 The [derived first-replay report](../../artifacts/locomotion_force_metrics_20260916/forward_replay_001.json)
 preserves the original capture and its failed tracking verdict.
+
+## Improved reference and standard PPO comparison
+
+The [improved native reference](../../artifacts/ppo_reference_comparison_20260917/review_smooth_001/RESULT.json)
+passes the forward screen at 0.05 m/s. Planar error decreases to 0.003029 m/s
+from 0.033271 m/s. The optimizer uses `--root-velocity-weight 1` and
+`--target-curvature-weight 0.1`; the original constraints remain unchanged.
+The target-curvature statistic increases, while speed tracking improves.
+See [TRAINING](../../docs/TRAINING.md#standard-ppo-and-improved-forward-reference-17-september-2026)
+for the motor-load tradeoff and the result's scope.
+
+`vanilla.py` adapts the admitted simulator to RSL-RL 5.0.1. `vanilla_native.py`
+trains standard PPO from scratch, without imitation or a motion-prior reward.
+It uses the existing command bank and task reward. The critic receives measured
+base velocity; the actor receives the existing proprioceptive history. The
+adapter resets selected terminal replicas and preserves their terminal rewards.
+
+`prepare_vanilla.py` freezes a new source pack and guarded binding. Training
+uses the admitted 128-replica layout. A policy evaluation requires its checkpoint
+hash and matching declaration, including learner source and configuration.
+Training load summaries cover 400 Hz body forces and native applied torque.
+The separate evaluation uses the exact contact-patch classifier and records video.
+
+```sh
+uv run python -m experiments.trajectory_optimization.prepare_vanilla --output tmp/vanilla-pack --remote-root /home/orionh/HEXAPOD_runs/restart_20260914/vanilla_reproduction --updates 1200 --seed 20260914
+```
+
+Run the host preflight with `admission_host.json`; the container binding retains
+`admission.json` and its original mounts. A prepared pack starts no compute.
+Dispatch through the existing guard after checking the retained reservation.
+
+The improved replay's contact log has a lossless public gzip copy. The original
+log remains on Spark and in the local result directory. After cloning the public
+record, restore that log before running the saved audit:
+
+```sh
+gzip -dc artifacts/ppo_reference_comparison_20260917/replay_pack_001/contacts.jsonl.gz > artifacts/ppo_reference_comparison_20260917/replay_pack_001/replay_001/standing/evaluation/native400hz/contacts.jsonl
+mkdir artifacts/ppo_reference_comparison_20260917/review_reproduction_001
+cp artifacts/ppo_reference_comparison_20260917/review_smooth_001/verify.py artifacts/ppo_reference_comparison_20260917/review_reproduction_001/verify.py
+uv run python artifacts/ppo_reference_comparison_20260917/review_reproduction_001/verify.py
+```
+
+The audit verifies the original hash. Its result writer refuses to overwrite
+the preserved `RESULT.json`; use a fresh result directory for a new audit record.
+
+The [completed PPO comparison](../../artifacts/ppo_reference_comparison_20260917/COMPARISON_001.json)
+records 1,200 standard PPO updates and 3,686,400 transitions. The final policy
+fails forward walking, quiet standing and stopping. Its forward error is
+0.051091 m/s, compared with 0.003029 m/s for the improved reference. The
+[comparison figure](../../artifacts/ppo_reference_comparison_20260917/review_vanilla_001/forward_comparison.png)
+shows the complete trials. The result supports using the improved reference as
+a motion example; it establishes no benefit from reference-assisted PPO, which
+has not run.
+
+The final checkpoint and the three policy videos have SHA-256 identities in the
+comparison and native audit. Training keeps its 48 intermediate checkpoint
+files on Spark; `vanilla_train_001/REMOTE_INVENTORY.json` records their hashes.
+The local and Spark copies retain the expanded metric and contact logs. Public
+gzip copies preserve those bytes while reducing the repository payload. Restore
+them before running the saved full audit:
+
+```sh
+gzip -dc artifacts/ppo_reference_comparison_20260917/vanilla_train_001/metrics.jsonl.gz > artifacts/ppo_reference_comparison_20260917/vanilla_train_001/run/standing/metrics.jsonl
+gzip -dc artifacts/ppo_reference_comparison_20260917/vanilla_evaluate_001/evaluation_00.contacts.jsonl.gz > artifacts/ppo_reference_comparison_20260917/vanilla_evaluate_001/run/standing/evaluation_00/native400hz/contacts.jsonl
+gzip -dc artifacts/ppo_reference_comparison_20260917/vanilla_evaluate_001/evaluation_01.contacts.jsonl.gz > artifacts/ppo_reference_comparison_20260917/vanilla_evaluate_001/run/standing/evaluation_01/native400hz/contacts.jsonl
+gzip -dc artifacts/ppo_reference_comparison_20260917/vanilla_evaluate_001/evaluation_02.contacts.jsonl.gz > artifacts/ppo_reference_comparison_20260917/vanilla_evaluate_001/run/standing/evaluation_02/native400hz/contacts.jsonl
+mkdir artifacts/ppo_reference_comparison_20260917/review_ppo_reproduction_001
+cp artifacts/ppo_reference_comparison_20260917/review_vanilla_001/verify.py artifacts/ppo_reference_comparison_20260917/review_ppo_reproduction_001/verify.py
+uv run python -B artifacts/ppo_reference_comparison_20260917/review_ppo_reproduction_001/verify.py
+```
+
+The training native process exits with code 0, but a competing COLMAP container
+blocks the launch wrapper's final resource check. Its original failed exit,
+recovery image and successful cleanup remain recorded in OPERATIONS. The policy
+evaluation service completes with exit code 0. Neither receipt releases the
+Spark reservation or changes a behavior gate.

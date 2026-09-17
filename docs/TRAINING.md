@@ -365,6 +365,52 @@ Reporting-only termination reasons and actual target-slew occupancy distinguish
 existing predicates and exclude each replica's first control after reset; they
 change neither reward nor physics. The source018 prototype passes 155 CPU tests.
 
+## Direct task on the approved model: MKII-RS05
+
+`Isaac-Velocity-Flat-Hexapod-MKII-RS05-Direct-v0` carries the model
+`robot/active_model.json` selects into the maintained `hexapod_env` package, so
+RSL-RL can train it at thousands of replicas. It is a new identity beside the
+paper-walk prototype; no historical task, asset, checkpoint or admission moves.
+
+The task repeats the accepted prototype recipe. Physics runs at 400 Hz with
+eight substeps per 50 Hz control step, 32 position solver iterations and no
+velocity iteration, external forces every iteration, self-collision enabled,
+flat ground with friction 1.0 and no restitution, and 2 m spacing. One control
+step emits a joint target from the stance plus 0.35 rad times the action,
+clamped to the exact URDF limits and held within 0.040 rad of the previous
+target. The policy observation holds five 42-value proprioceptive frames, the
+three-value command and the 18 previous executed actions, which is 231 values;
+the critic observation adds the privileged base velocity, which is 234. The
+reward keeps the prototype's tracking, yaw, tilt, torque, slew and vertical
+terms with their original scales, and the episode ends on a low plate, a tilt
+beyond 0.85 rad or a joint limit violation.
+
+The actuator is
+`packages/hexapod_env/hexapod_env/actuators/rs05_paper_walk_model.py`. It
+reproduces `motor_force` value for value: a 12 N*m per radian position gain,
+the 18 damping values bound by joint name, the float64 speed curve over the
+published knots, zero authority at and above 480 rpm and the provisional
+1.6 N*m clamp. The runtime writes efforts alone and keeps the implicit drive,
+armature and joint friction at zero. The 1.6 N*m clamp stays an experimental
+setting from the [RS05 review](RS05_SPEC_REVIEW.md), not a measured limit.
+
+The task's articulation order is the block order PhysX reports, while every
+observation, reward and capture channel uses the canonical per-leg order. The
+environment maps between them by name and refuses to run when the articulation
+disagrees with the declared order or limits.
+
+`isaaclab/admit_mkii_rs05.py` records a standing capture in the layout the
+unchanged `experiments/paper_walk/env.py:score_diagnostic` reads, and that
+scorer grades it. `isaaclab/train_mkii_rs05.py` is scratch-only: it refuses
+every checkpoint and resume option, defaults to 4096 replicas and headless
+startup, and requires a recorded transitions-per-second measurement at 1024
+replicas first. CPU tests compare the action path, the observation widths, the
+reward terms, the terminations and the capture layout with the frozen source.
+CPU agreement is not native behavior, and this task has no capture, training,
+checkpoint or video yet; the
+[prepared runner](../artifacts/restart_2026-09-14/mkii_rs05_admission_prep_001/README.md)
+records why the native steps stayed unexecuted.
+
 ## 1. Simulator and framework stack
 
 ```text
@@ -789,3 +835,95 @@ uv run python -m experiments.trajectory_optimization.force_metrics --directory a
 
 The new summary pins the input declaration and capture receipt, plus each native
 chunk it reads. It does not rewrite the old attempt or its published manifest.
+
+## Standard PPO and improved forward reference, 17 September 2026
+
+James requested a standard PPO baseline and an improved optimized reference,
+followed by a measured comparison. The
+[protocol](../artifacts/ppo_reference_comparison_20260917/PROTOCOL_001.json)
+fixes the model and the 0.040 rad / 20 ms limiter. The baseline uses RSL-RL
+5.0.1 PPO with the existing admitted simulator and command/reward task. It uses
+no imitation loss or motion-prior reward. This keeps the new DirectRLEnv port
+outside the baseline's physics path.
+
+The optimizer adds a root-velocity objective with weight 1 and a target-curvature
+objective with weight 0.1. The defaults remain zero for reproduction of the first
+solve. The new CPU solution passes the same constraints. Its target curvature
+increases despite that penalty; its predicted root-speed error decreases. The
+native outcome determines the value of this combined objective change.
+
+The [native audit](../artifacts/ppo_reference_comparison_20260917/review_smooth_001/RESULT.json)
+verifies 36 transferred files and 8,000 physics samples. It reclassifies 130,821
+contact patches and reproduces the servo targets and original scorer checks.
+Forward displacement reaches 0.974348 m in 20 seconds. Planar tracking error
+decreases from 0.033271 to 0.003029 m/s and passes the unchanged 0.025 m/s bound.
+The full-trial native motor, joint and contact checks pass.
+
+The [load report](../artifacts/ppo_reference_comparison_20260917/replay_pack_001/replay_001/standing/evaluation/force_metrics.json)
+covers 7,200 locomotion samples. Mean absolute motor torque decreases from
+0.314014 to 0.308198 N·m. Support-force p95 decreases from 82.42784 to 76.23228 N;
+mean support remains 73.24 N. The highest joint RMS torque increases from
+0.745598 to 0.761535 N·m. The right-rear foot peak increases from 28.98998 to
+41.79611 N. You can use these values to assess the load tradeoff. They do not
+establish motor efficiency or lower load at each foot.
+
+The [native video](../artifacts/ppo_reference_comparison_20260917/replay_pack_001/replay_001/standing/evaluation/rollout.mp4)
+contains 500 decoded frames. The sampled frames show upright support and changes
+in foot position. This forward-command screen does not qualify stops, turning,
+terrain or Stage 2. Human gait acceptance remains pending.
+
+`experiments/trajectory_optimization/vanilla_native.py` supplies the standard PPO
+entry point. It binds the admitted physics and the installed learner source.
+Training records 400 Hz normal loads by body and native applied torque. Separate
+evaluations retain exact toe/shaft classification and the per-foot summaries.
+The two-update adapter check completes 6,144 transitions and 40 optimizer steps.
+The [full baseline audit](../artifacts/ppo_reference_comparison_20260917/TRAINING_RESULT_001.json)
+verifies 1,200 updates, 3,686,400 transitions and 24,000 optimizer steps. It binds
+checkpoint `e5084b221e64413f89c1ecc33e3a6349d81f8691f4fb97a031da9f032e73972b`.
+The force summary covers 29,491,200 physics samples across the 128 replicas.
+Training records 1,773 physical terminations. Mean movement along nonzero
+translation commands increases from 0.000174 m/s over the first 100 updates to
+0.008328 m/s over the final 100. These training averages include exploration
+noise and mixed commands; they do not qualify walking.
+
+The native training process exits with code 0. A competing COLMAP container
+blocks the wrapper's final resource check after the checkpoint save. The
+successor preserves its recovery image and stops it, then completes the retained
+cleanup command. The service's original failed exit remains in the evidence.
+This interval cannot support an isolated throughput comparison. The separate
+policy evaluation uses the final checkpoint and the declared fixed cases.
+
+The [policy audit](../artifacts/ppo_reference_comparison_20260917/review_vanilla_001/RESULT.json)
+checks 24,400 physics samples and reclassifies 530,534 contact patches across
+the complete forward, quiet and stop trials. CPU inference from the saved
+weights matches the recorded policy actions within 0.00000144. The audit
+reproduces the original scorer verdicts and force summaries. All three probes
+fail. Quiet standing includes three native joint-speed violations; stopping
+includes one nonfoot contact sample. The evaluation service exits with code 0
+and removes its owned container. Completed acquisition does not qualify behavior.
+
+The [comparison](../artifacts/ppo_reference_comparison_20260917/COMPARISON_001.json)
+uses the same 0.05 m/s forward command and the existing limiter. Each force
+average covers the final 18 seconds, including samples with failed movement.
+
+| Measurement | Original reference | Improved reference | Standard PPO |
+| --- | ---: | ---: | ---: |
+| Mean forward speed, m/s | 0.049464 | 0.049468 | 0.000423 |
+| Planar tracking error, m/s | 0.033271 | 0.003029 | 0.051091 |
+| Forward screen | Fail | Pass | Fail |
+| Mean absolute applied torque, N·m | 0.314014 | 0.308198 | 0.491920 |
+| Support-force p95, N | 82.42784 | 76.23228 | 90.87415 |
+| Highest joint RMS torque, N·m | 0.745598 | 0.761535 | 1.263698 |
+
+You can inspect the [complete forward traces](../artifacts/ppo_reference_comparison_20260917/review_vanilla_001/forward_comparison.png)
+and the [actual PPO video](../artifacts/ppo_reference_comparison_20260917/vanilla_evaluate_001/run/standing/evaluation_00/rollout.mp4).
+The improved reference reduces the original tracking error by 90.9 percent.
+Its steady mean speed resembles the original reference, while its speed varies
+less within each gait cycle. The PPO checkpoint makes little forward progress
+and exceeds the requested-torque-demand fraction limit.
+
+This one-seed pilot establishes the recorded baseline at 3,686,400 transitions.
+It does not establish PPO convergence or its best performance. The optimized
+reference covers one command and uses no learned feedback. Reference-assisted
+PPO remains untested. A paired learning comparison and broader direction/stop
+coverage remain the next research questions; Stage 2 remains incomplete.

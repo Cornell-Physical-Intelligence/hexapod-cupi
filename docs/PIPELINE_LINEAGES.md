@@ -14,7 +14,7 @@ python3 tools/c_study_runtime.py
 
 The historical check verifies `stage2_pipeline.sha256` against the immutable Git
 revision `81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df`. Fetch repository history first.
-The current check selects `repository_locomotion_force_20260916_v9_pipeline.sha256`.
+The current check selects `repository_ppo_reference_20260917_v10_pipeline.sha256`.
 It covers current runtime/source paths, tests and retained release inputs,
 including the inventoried top-level modules and CPU tests in
 `experiments/paper_walk/` and `experiments/trajectory_optimization/`. Nested experiment
@@ -53,6 +53,12 @@ unchanged. It binds the prototype guard to the pause coordination hash, adds the
 maintained `refit_bc.py` helper with its CPU tests, and records the executed
 paired BC refit under protocol 002. Source inclusion of a fitted candidate does
 not evaluate it natively.
+The canonical-restart v8 release retains v7 and every preceding manifest
+unchanged. It adds the RS05 direct task on the approved model: its asset spec,
+the paper-walk actuator, the task modules, the standing capture runner, the
+scratch-only trainer and their CPU tests. Source inclusion registers a new task
+ID; it records no capture, no training and no admission.
+
 [Archived release history](archive/README.md) preserves earlier explanations and
 failed-attempt references. New release explanations belong in site updates.
 
@@ -65,3 +71,11 @@ The locomotion-force v9 release retains v8 and adds normal-contact load and
 motor-torque summaries to native evaluations. It preserves the physics source
 and acceptance gates. The new report also supports separate reanalysis of
 existing captures without changing their bytes.
+
+The PPO/reference v10 release retains the preceding v9 manifest and the PR 22
+port manifest. It adds the standard RSL-RL PPO adapter and native load summaries,
+and optional speed/curvature objectives for the reference optimizer. It also
+repairs per-patch contact classification and replica-coordinate handling in the
+RS05 direct task. That task still needs native admission; the PPO comparison
+uses the existing admitted prototype physics. Source identity does not qualify
+omnidirectional behavior.

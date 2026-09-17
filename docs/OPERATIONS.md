@@ -1,5 +1,42 @@
 # Spark operations runbook
 
+## PPO comparison allocations, 17 September 2026
+
+The successor identified and stopped the COLMAP container
+`b58dba529de41d0dd4e8d176712ceaa706abec2de3e9e04bef576fd741a337cc`
+under James's full-compute authorization. The container used automatic removal.
+Before stopping it, the successor preserved a recovery image and the mounted
+output paths. The [verified recovery receipt](../artifacts/restart_2026-09-14/spark_ownership_004/RECOVERY_VERIFIED.json)
+contains the image identity and restore command. The original command receipt
+includes a Docker warning before the image ID; preserve it and use the verified
+receipt for restoration after James releases the reservation.
+
+The first direct-task admission ended at the existing AppReady deadline and
+captured no physics samples. Its [cleanup receipt](../artifacts/ppo_reference_comparison_20260917/admission_pack_001/run/cleanup.json)
+confirms removal of the exact owned container. A second source pack remains
+unlaunched. The standard PPO comparison uses the existing one- and 128-replica
+admission. It leaves the direct-task port's native admission pending.
+
+The improved reference replay completes its native forward screen and exact
+container cleanup. The [audit](../artifacts/ppo_reference_comparison_20260917/review_smooth_001/RESULT.json)
+records the result. Source packs and bindings retain the coordination SHA-256
+`c89c99ebdd16941e3f8e7f23ef3525aeb360c78361aa49aa04e766b381a4727c`.
+Recheck live ownership before another allocation; these receipts retain their
+own terminal states and do not describe current host availability.
+
+The standard PPO baseline completes 1,200 updates and 3,686,400 transitions.
+Its native process exits with code 0. A new COLMAP container,
+`b136f6089ba776b17c117779af212e10bbd5a427143b62f1b65fb64cad9d5008`,
+starts during training and blocks the wrapper's final resource check. The
+successor preserves a recovery image and the mounted reconstruction outputs,
+then stops that container under James's existing authorization. The
+[recovery receipt](../artifacts/restart_2026-09-14/spark_ownership_005/RECEIPT.json)
+and [cleanup command receipt](../artifacts/ppo_reference_comparison_20260917/vanilla_train_001/RECOVERY_CLEANUP.json)
+record the recovery. The original service exit remains 1; the final checkpoint
+and native results retain their bytes. Use the separate native exit and cleanup
+evidence when assessing this attempt. Concurrent reconstruction invalidates an
+isolated throughput claim for the training interval.
+
 ## Successor allocations, 16 September 2026
 
 The successor restored the ten base Stormscope masks after preserving their
