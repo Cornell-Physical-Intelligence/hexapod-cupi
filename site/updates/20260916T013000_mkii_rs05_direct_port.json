@@ -1,0 +1,41 @@
+{
+  "id": "20260916T013000_mkii_rs05_direct_port",
+  "date": "2026-09-16T01:30:00Z",
+  "title": "Port the corrected RS05 model into the Isaac Lab direct task",
+  "summary": "A new task ID, Isaac-Velocity-Flat-Hexapod-MKII-RS05-Direct-v0, carries the model robot/active_model.json selects into the hexapod_env DirectRLEnv package so it can train with RSL-RL at thousands of replicas. The asset spec pins the URDF, model, USD and prior metadata hashes and holds the exact per-leg coxa limits. The actuator reproduces the accepted paper-walk servo and binds its 18 damping values by joint name, and the runtime gives PhysX the applied effort alone. The task keeps 400 Hz physics, eight substeps per control step, solver 32/0, external forces every iteration, friction 1.0 without restitution, the 0.35 rad action scale, the 0.040 rad slew bound and the 231 and 234 value observations. CPU tests compare the action path, reward terms, terminations and capture layout with the frozen prototype source and its unchanged scorer. The standing capture runner and the scratch-only trainer are prepared and unexecuted: the Spark host did not resolve from the executing machine, so no capture, training, checkpoint or video exists for this task.",
+  "areas": [
+    "simulation",
+    "training source",
+    "release identity"
+  ],
+  "changes": [
+    "packages/hexapod_env/hexapod_env/assets/spec.py",
+    "packages/hexapod_env/hexapod_env/assets/articulation.py",
+    "packages/hexapod_env/hexapod_env/assets/mkii_rs05.py",
+    "packages/hexapod_env/hexapod_env/actuators/rs05_paper_walk*.py",
+    "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/*.py",
+    "isaaclab/hexapod_rl/tasks/mkii_rs05.py",
+    "isaaclab/admit_mkii_rs05.py",
+    "isaaclab/train_mkii_rs05.py",
+    "isaaclab/tests/test_mkii_rs05_*.py",
+    "isaaclab/tests/test_rs05_paper_walk_actuator.py",
+    "isaaclab/tests/test_admit_mkii_rs05.py",
+    "isaaclab/tests/test_train_mkii_rs05_wrapper.py",
+    "isaaclab/deploy/repository_canonical_restart_20260915_v8_pipeline.sha256",
+    "artifacts/restart_2026-09-14/mkii_rs05_admission_prep_001/*",
+    "tools/check_pipeline_lineages.py",
+    ".github/workflows/tests.yml",
+    "docs/TRAINING.md",
+    "docs/PIPELINE_LINEAGES.md",
+    "site/project.json",
+    "STATUS.md"
+  ],
+  "evidence": [
+    "artifacts/restart_2026-09-14/mkii_rs05_admission_prep_001/README.md",
+    "artifacts/restart_2026-09-14/mkii_rs05_admission_prep_001/PREPARED.json",
+    "isaaclab/tests/test_mkii_rs05_capture.py",
+    "docs/TRAINING.md"
+  ],
+  "next": "A successor with Spark access records the standing capture at one and at the intended replica count, grades each with the unchanged scorer, then measures transitions per second at 1024 replicas before any run at 4096.",
+  "no_project_impact": false
+}

@@ -1,0 +1,27 @@
+{
+  "utc": "2026-09-17T00:48:56.622006+00:00",
+  "unit": "hexapod-vanilla-smoke-001-20260917.service",
+  "binding_sha256": "7a65e4fe9cedf4e55f543e59a996c80187a95bc952f90e32165222bc126ad314",
+  "command": [
+    "systemd-run",
+    "--user",
+    "--unit",
+    "hexapod-vanilla-smoke-001-20260917.service",
+    "--property=RuntimeMaxSec=6780",
+    "--property=TimeoutStopSec=180",
+    "--property=KillMode=process",
+    "--property=WorkingDirectory=/home/orionh/IsaacLab",
+    "--property=ExecStopPost=python3 -B -S /home/orionh/HEXAPOD_runs/restart_20260914/ppo_reference_comparison_20260917/vanilla_smoke_001/source/launch_spark.py --bindings /home/orionh/HEXAPOD_runs/restart_20260914/ppo_reference_comparison_20260917/vanilla_smoke_001/binding.json --bindings-sha256 7a65e4fe9cedf4e55f543e59a996c80187a95bc952f90e32165222bc126ad314 --cleanup-only",
+    "python3",
+    "-B",
+    "-S",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/ppo_reference_comparison_20260917/vanilla_smoke_001/source/launch_spark.py",
+    "--bindings",
+    "/home/orionh/HEXAPOD_runs/restart_20260914/ppo_reference_comparison_20260917/vanilla_smoke_001/binding.json",
+    "--bindings-sha256",
+    "7a65e4fe9cedf4e55f543e59a996c80187a95bc952f90e32165222bc126ad314"
+  ],
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "Running as unit: hexapod-vanilla-smoke-001-20260917.service; invocation ID: ab624f70e6d740ebadc2ae68d4734de9\n"
+}

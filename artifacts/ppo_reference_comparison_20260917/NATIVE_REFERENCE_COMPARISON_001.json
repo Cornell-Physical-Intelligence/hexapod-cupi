@@ -1,0 +1,46 @@
+{
+  "schema": "canonical_forward_reference_comparison_v1",
+  "conditions": {
+    "command": [
+      0.05,
+      0,
+      0
+    ],
+    "controls": 1000,
+    "limiter_rad_per_control": 0.04,
+    "physics_hz": 400,
+    "seed": 20260914
+  },
+  "rows": {
+    "original": {
+      "planar_tracking_error_mps": 0.033270814069182066,
+      "pass_forward_screen": false,
+      "mean_forward_speed_mps": 0.04946400570270257,
+      "forward_speed_range_mps": [
+        -0.014195585252582613,
+        0.10855191297792038
+      ],
+      "mean_support_n": 73.24269184985894,
+      "support_p95_n": 82.42783985137939,
+      "mean_abs_motor_torque_nm": 0.31401353918900254,
+      "highest_joint_rms_torque_nm": 0.7455975898737564,
+      "right_rear_foot_peak_n": 28.989975929260332
+    },
+    "improved": {
+      "planar_tracking_error_mps": 0.0030289283552134075,
+      "pass_forward_screen": true,
+      "mean_forward_speed_mps": 0.049468289183784556,
+      "forward_speed_range_mps": [
+        0.03641851245201171,
+        0.055189823185524824
+      ],
+      "mean_support_n": 73.24141042552895,
+      "support_p95_n": 76.23227772712707,
+      "mean_abs_motor_torque_nm": 0.30819824778881133,
+      "highest_joint_rms_torque_nm": 0.7615349513594124,
+      "right_rear_foot_peak_n": 41.79611051082616
+    }
+  },
+  "tracking_error_reduction_fraction": 0.9089613993539452,
+  "scope": "One forward command. Motor and foot load changes are mixed. No PPO result in this comparison."
+}

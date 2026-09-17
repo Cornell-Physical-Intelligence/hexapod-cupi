@@ -1,0 +1,45 @@
+{
+  "objective": "Establish standard PPO and measure the improved trajectory against the original trajectory and the learned policy.",
+  "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+  "target_limiter_rad_per_20ms": 0.04,
+  "reference_comparison": {
+    "command_mps": [
+      0.05,
+      0,
+      0
+    ],
+    "controls": 1000,
+    "seed": 20260914,
+    "original": "artifacts/trajectory_optimizer_20260917/review_001/RESULT.json",
+    "improved": "review_smooth_001/RESULT.json"
+  },
+  "ppo": {
+    "library": "rsl-rl-lib 5.0.1",
+    "seed": 20260914,
+    "replicas": 128,
+    "rollout_steps": 24,
+    "updates": 1200,
+    "transitions": 3686400,
+    "motion_prior": false,
+    "behavior_cloning": false,
+    "task_reward": "canonical_quiet_quadratic_log_tail_v2",
+    "training_commands": "Existing 21-command bank including zero, low-speed translation, yaw and arcs",
+    "physics": "Existing admitted one- and 128-replica source",
+    "load_tracking": "400 Hz training aggregates and complete per-foot evaluation capture"
+  },
+  "evaluation": {
+    "seed": 20260914,
+    "cases": [
+      "learning:translate_0.05_0deg",
+      "learning:quiet_20s",
+      "learning:forward_0.05_to_stop"
+    ],
+    "metrics": [
+      "Original tracking and physical gates",
+      "Ground-contact load and absolute motor torque"
+    ],
+    "record_actual_policy_video": true
+  },
+  "interpretation": "This single-seed pilot compares forward tracking and loads. The optimized reference has no RL training steps and covers one command. It cannot establish omnidirectional generalization or a statistical advantage over PPO.",
+  "stage2_complete": false
+}

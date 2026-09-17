@@ -39,3 +39,12 @@ robot/hexapod_leg_v2/meshes/
 
 # Generated public research poster
 /site/dist/
+
+# Publish the lossless contact archive; retain the expanded log on Spark and the local host.
+artifacts/ppo_reference_comparison_20260917/replay_pack_001/replay_001/standing/evaluation/native400hz/contacts.jsonl
+# Preserve intermediate PPO checkpoints on Spark; publish the selected checkpoint.
+artifacts/ppo_reference_comparison_20260917/vanilla_train_001/run/standing/learner/model_*.pt
+artifacts/ppo_reference_comparison_20260917/vanilla_train_001/run/standing/checkpoint_update*.pt
+!artifacts/ppo_reference_comparison_20260917/vanilla_train_001/run/standing/checkpoint_update001200.pt
+artifacts/ppo_reference_comparison_20260917/vanilla_train_001/run/standing/metrics.jsonl
+artifacts/ppo_reference_comparison_20260917/vanilla_evaluate_001/run/standing/evaluation_*/native400hz/contacts.jsonl
