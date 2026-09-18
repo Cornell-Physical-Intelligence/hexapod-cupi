@@ -37,7 +37,7 @@ The catalog's 48 V torque-speed points include 1.6 N·m at 450 rpm and 5.5 N·m 
 
 ## What the current code actually does
 
-The v2 task inherits the archived `ROBSTRIDE_RS05_CFG` through [the articulation builder](../packages/hexapod_env/hexapod_env/assets/articulation.py) and [v2 task config](../packages/hexapod_env/hexapod_env/tasks/mkii_v2/config.py). The [shared config](../packages/hexapod_env/hexapod_env/asset_cfg.py) and [frozen actuator contract](../packages/hexapod_core/hexapod_core/actuator.py) contain these distinct settings:
+The v2 task inherits the archived `ROBSTRIDE_RS05_CFG` through [the articulation builder](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/packages/hexapod_env/hexapod_env/assets/articulation.py) and [v2 task config](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/packages/hexapod_env/hexapod_env/tasks/mkii_v2/config.py). The [shared config](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/packages/hexapod_env/hexapod_env/asset_cfg.py) and [frozen actuator contract](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/packages/hexapod_core/hexapod_core/actuator.py) contain these distinct settings:
 
 | Setting | Actual value / effect | Evidence status |
 |---|---|---|
@@ -63,7 +63,7 @@ This simple envelope allows 1.6 N·m up to approximately 340.36 rpm in the motor
 
 ## Meaning of the standing result
 
-[The hardened standing run](../artifacts/mkii_step2_2026-09-04/standing_003/report.json) measured 0.880025 N·m settled computed peak and 2.364431 N·m startup computed peak, with delivered effort capped at approximately 1.6 N·m. Its `startup_raw_rating_exceeded` flag means above this 1.6 baseline. It is not a peak-capability fault flag. The test proves standing under its stated approximation; changing the cap/model changes the dynamics and requires a new run.
+[The hardened standing run](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/mkii_step2_2026-09-04/standing_003/report.json) measured 0.880025 N·m settled computed peak and 2.364431 N·m startup computed peak, with delivered effort capped at approximately 1.6 N·m. Its `startup_raw_rating_exceeded` flag means above this 1.6 baseline. It is not a peak-capability fault flag. The test proves standing under its stated approximation; changing the cap/model changes the dynamics and requires a new run.
 
 The run does not test delivered 5.5 N·m bursts, a current controller, thermal recovery, the physical four-bar or a real CAN driver. Its 0.880025 N·m settled maximum is below the published 1.2 N·m stall rating, but the 20-second test does not prove thermal endurance or matching cooling. The 1.6 cap must not be described as guaranteed continuous-stall-safe. Existing raw artifacts and historical contracts remain traceable; revised physical behavior belongs in a new actuator/task version.
 

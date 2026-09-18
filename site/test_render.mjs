@@ -40,6 +40,7 @@ for (const marker of data.milestones) {
   const card = roadmap.split(`id="marker-${marker.id}"`)[1].split('</li>')[0];
   assert.equal((card.match(/<p\b/g)||[]).length,1,'Each stage has one summary line');
   assert.ok(!card.includes('<details'), 'Stage details belong in the linked document');
+  if (marker.media_caption) assert.ok(card.includes(marker.media_caption), 'Preserve each recording model label');
   if (!marker.media_id) assert.ok(!/<(?:video|img|svg)\b/.test(card),'Unrecorded stages have no visual');
 }
 assert.ok(!html.includes('mission-figure'));

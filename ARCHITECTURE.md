@@ -52,10 +52,10 @@ Test-area dimensions and quantitative surface tolerances remain to be defined.
 Slopes and obstacle handling are later increments. This initial test setting
 does not define the final terrain envelope.
 
-The lead's [terrain/sensing plan](artifacts/project_review_2026-09-04/TERRAIN_AND_SENSING_PLAN_2026-09-09.md)
+The lead's [terrain/sensing plan](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/project_review_2026-09-04/TERRAIN_AND_SENSING_PLAN_2026-09-09.md)
 uses the existing Mid-360 and its IMU for surrounding geometry and navigation
 odometry, with D455 forward depth added separately. It proposes LiDAR-inertial
-odometry before comparing camera fusion. The [earlier roadmap](artifacts/project_review_2026-09-04/ROADMAP.md)
+odometry before comparing camera fusion. The [earlier roadmap](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/project_review_2026-09-04/ROADMAP.md)
 leaves the specific survey LiDAR unselected and keeps survey acquisition
 independent of navigation. James selected the existing **Livox Mid-360 for the
 first mapping test**. Development starts in simulation: the physical hexapod is
@@ -67,7 +67,7 @@ to the first test; final survey-payload qualification and any shared navigation
 failure behavior require separate evidence and decisions.
 
 The planned first hardware bridge is an instrumented single-leg test stand with
-force sensing and an encoder, following the lead's [stand design](artifacts/project_review_2026-09-04/LEG_TEST_STAND.md)
+force sensing and an encoder, following the lead's [stand design](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/project_review_2026-09-04/LEG_TEST_STAND.md)
 and [hardware reference](docs/LEG_STAND_HARDWARE.md). Match the actual fixture in
 simulation, synchronize commands and measured force/position, then fit model
 parameters and validate them on separate measurements. Use the approved
@@ -104,14 +104,14 @@ The [RS05 review](docs/RS05_SPEC_REVIEW.md) distinguishes 5.5 N·m peak, continu
 stall and rotating ratings. A provisional 1.6 N·m software cap is an experimental
 setting. Actual bus voltage, motor inertia, latency, braking and thermal behavior
 still require measured hardware profiles. The
-[accepted actuation design](artifacts/mkii_updated_2026-09-10/actuation_design_001/README.md)
+[accepted actuation design](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/mkii_updated_2026-09-10/actuation_design_001/README.md)
 defines the existing provisional simulation candidate. This architecture neither
 changes its parameters nor asserts that it passes admission.
 
 Current pass/fail results belong in the progress record. A model import, one
 standing pass, completed training, a kinematic animation and a qualified walking
 policy establish different capabilities. Preserve the accepted historical
-[forward benchmark](artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md)
+[forward benchmark](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md)
 with its actual limitations. Stage 2 requires both numerical gates and the
 accepted smoothness comparison. Every formal comparison retains its recorded
 0.040 rad / 20 ms limiter and exact model/controller lineage.
@@ -133,12 +133,12 @@ flowchart LR
 
 | Boundary | Responsibility | Existing source / implementation status |
 | --- | --- | --- |
-| Core contracts | Named coordinates, units, commands and versioned model-specific observation/action contracts | [hexapod_core](packages/hexapod_core/). Existing layouts are lineage-specific; stdlib only. |
-| Simulation | Model loading, physics, observations, rewards and rollout | [locomotion](locomotion/README.md) owns the canonical loop. [hexapod_env](packages/hexapod_env/) retains historical task contracts. |
+| Core contracts | Named coordinates, units, commands and versioned model-specific observation/action contracts | [contracts](contracts/README.md). Shared types use stdlib; historical observation layouts remain in Git. |
+| Simulation | Model loading, physics, observations, rewards and rollout | [locomotion](locomotion/README.md) owns the canonical loop. Historical task implementations remain in Git. |
 | Training operations | Supervise bounded runs, persist results and own the GPU allocation | [locomotion/launch.py](locomotion/launch.py) and its reservation guard own canonical allocations. Historical launchers retain their original scope. |
-| Evaluation | Reproduce measured screens and model-specific acceptance decisions | [locomotion/evaluate.py](locomotion/evaluate.py) owns canonical acquisition and uses unchanged gates. [hexapod_eval](packages/hexapod_eval/) retains historical contracts. |
-| Motion runtime | Build observations, execute a policy and bound motor targets on time | [hexapod_runtime](packages/hexapod_runtime/). Existing pure runtime utilities need a canonical binding and parity evidence. |
-| Navigation | Turn a qualified pose and route into permitted velocity commands | [hexapod_nav](packages/hexapod_nav/). Current waypoint follower is a protocol example; coverage planning and localization are pending. |
+| Evaluation | Reproduce measured screens and model-specific acceptance decisions | [locomotion/evaluate.py](locomotion/evaluate.py) owns canonical acquisition and uses unchanged gates. Historical evaluation contracts remain in Git. |
+| Motion runtime | Build observations, execute a policy and bound motor targets on time | Canonical hardware binding remains pending; historical runtime utilities remain in Git. |
+| Navigation | Turn a qualified pose and route into permitted velocity commands | [navigation](navigation/README.md). Current waypoint follower is a protocol example; coverage planning and localization are pending. |
 | Mission and operator UI | Boundary review, mission state, authority, progress and operator actions | Pending. The existing [viewer](viewer/) visualizes robot models; it is not a mission operator application. |
 | Survey recording | Durable time/pose/quality association, valid coverage and independent export reading | Pending, with payload-owner inputs. |
 
@@ -205,10 +205,10 @@ program. Each will acquire small approved increments as we define them.
 ### M1: stationary simulated scan export and reload
 
 James approved this as the first mapping milestone. Reuse the existing
-[approximate Mid-360 model](isaaclab/hexapod_phase3/mid360_pattern.py) in a
+[approximate Mid-360 model](mission/sensors/mid360_pattern.py) in a
 sensor-only scene with a fixed sensor, known floor and calibration wall. Export
 one scan's points and sensor pose, reopen it independently, and measure geometric
-error against the scene. The existing [sensor check](isaaclab/phase3_sensor_smoke.py)
+error against the scene. The existing [sensor check](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/isaaclab/phase3_sensor_smoke.py)
 checks returns/timing and prints a report; scan export/reload is the missing step.
 The wall is a calibration reference, not an obstacle-traversal requirement.
 
@@ -309,7 +309,7 @@ they are needed for the work; historical handoffs do not override this design.
 | --- | --- |
 | Physical model | [selector](robot/active_model.json), [import](docs/UPDATED_CAD_IMPORT.md), [mass/inertia](robot/hexapod_mkii_updated_v1/MASS_INERTIA.md) |
 | Motor and leg stand | [RS05 review](docs/RS05_SPEC_REVIEW.md), [leg-stand hardware](docs/LEG_STAND_HARDWARE.md) |
-| Shared contracts | [core](packages/hexapod_core/), [runtime](packages/hexapod_runtime/) and their package guides; verify lineage before reuse |
+| Shared contracts | [core](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/tree/5e65918020dc9ef2d72da8dad0a346016b98728d/packages/hexapod_core), [runtime](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/tree/5e65918020dc9ef2d72da8dad0a346016b98728d/packages/hexapod_runtime) and their package guides; verify lineage before reuse |
 | Training/gate history | [TRAINING](docs/TRAINING.md), [source lineages](docs/PIPELINE_LINEAGES.md) |
 | Spark operation | [OPERATIONS](docs/OPERATIONS.md), [compute coordination](docs/SPARK_COMPUTE_COORDINATION.md); source preparation here never implies permission to launch a job |
 | Paused research and prepared sources | [James handoff](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/62fd7448264c5ebe051ba2de1d9a72844d6b4c3a/docs/JAMES_HANDOFF.md), including unexecuted canonical PPO proposals; these do not assign the next step |

@@ -1,0 +1,19 @@
+{
+  "id": "20260918T162135_publication_diff_base",
+  "date": "2026-09-18T16:21:35Z",
+  "title": "Fetch publication diff metadata without retired payloads",
+  "summary": "The publication check needs the base commit and tree paths to check update coverage. We filter file blobs from that fetch so the consolidation PR does not download the retired artifact tree. Existing source and archive checks remain unchanged.",
+  "areas": [
+    "publication CI"
+  ],
+  "changes": [
+    ".github/workflows/pages.yml"
+  ],
+  "evidence": [
+    ".github/workflows/pages.yml",
+    "tools/project_site.py"
+  ],
+  "next": "Verify the complete diff and deployed Pages revision after green CI.",
+  "no_project_impact": true,
+  "reason": "This changes CI input retrieval and adds no simulation result."
+}

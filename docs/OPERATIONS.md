@@ -28,8 +28,12 @@ coordination SHA-256 is
 Bind those bytes to a fresh source and launch identity. Never alter an admitted
 source pack or reuse an attempt's output directory.
 
-Use [`prepare`](../locomotion/prepare.py) to copy named package files and hash
-explicit inputs. Transport with Python `tarfile` or disable macOS copy metadata;
+Use `python -m locomotion.inputs pack` with a fresh local output and explicit
+remote input root under `/home/orionh/HEXAPOD_runs/restart_20260914/`.
+Transfer that directory, then pass its `inputs.json` to
+[`prepare`](../locomotion/prepare.py). The pack hashes canonical assets and
+starts no compute. The default binding declares `foundation_inputs_001` under the guarded restart
+root. It does not claim those remote files exist. Transport with Python `tarfile` or disable macOS copy metadata;
 extra files fail the frozen-tree check. From the frozen `source` directory,
 invoke `python3 -B -m locomotion.launch` with the binding path and SHA-256.
 The `--preflight-only` flag checks the host without starting native simulation.
@@ -74,10 +78,10 @@ Check loaded masked state, `/dev/null` links, inactive state and service PID 0.
 Some masks retain `NeedDaemonReload=yes`; preserve that field's actual value.
 A manual producer can still bypass scheduling, so continue process checks.
 
-[Recovery receipts 007](../artifacts/restart_2026-09-14/spark_ownership_007/RECEIPT.json),
-[008](../artifacts/restart_2026-09-14/spark_ownership_008/RECEIPT.json) and
-[009](../artifacts/restart_2026-09-14/spark_ownership_009/RECEIPT.json) bind paused
-reconstruction producers and saved images. [Incident 010](../artifacts/restart_2026-09-14/spark_ownership_010/READBACK.json)
+[Recovery receipts 007](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/spark_ownership_007/RECEIPT.json),
+[008](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/spark_ownership_008/RECEIPT.json) and
+[009](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/spark_ownership_009/RECEIPT.json) bind paused
+reconstruction producers and saved images. [Incident 010](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/spark_ownership_010/READBACK.json)
 records a process that exited before intervention. Use each receipt's own PID,
 start time and command hash before restoration. Private source/unit copies stay
 on Spark. The [prior runbook](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/docs/OPERATIONS.md)

@@ -25,9 +25,9 @@ pull request. This file repeats the rules that shape every change here.
   `site/updates/` record. The author must explain every submitted line,
   including agent output.
 - Do not commit secrets, `.env` contents, credentials or Spark paths with
-  credentials. Checkpoints and other files under `artifacts/` belong in Git LFS;
-  this repository has not adopted LFS yet, so keep new artifact payloads small
-  and hash-bound until the leads migrate it.
+  credentials. Keep run payloads outside the checkout. Publish selected media and small
+  reports under `site/assets/`, with hashes and links to the complete run.
+  The archive index preserves historical evidence in Git.
 
 ## Every change
 
@@ -47,3 +47,26 @@ pull request. This file repeats the rules that shape every change here.
   Numbers taken at different limiters never share a table.
 - Frozen artifacts, published manifests, failed attempts and gates are immutable.
   New results get new identities.
+
+## Required checks
+
+```sh
+uv sync --locked
+uv run python -m unittest discover -s contracts/tests
+uv run python -m unittest discover -s navigation/tests
+uv run python -m unittest discover -s mission/tests
+uv run python -m unittest discover -s robot/tests
+uv run python -m unittest discover -s locomotion/tests
+uv run python -m unittest discover -s locomotion/priors/tests
+uv run python -m unittest discover -s tests
+python3 tools/source_inventory.py check
+python3 tools/archive.py check
+python3 tools/check_pipeline_lineages.py current
+python3 tools/project_site.py check
+python3 tools/project_site.py build
+node site/test_render.mjs
+```
+
+Build the viewer from `viewer/` with `npm ci` and `npm run build` after asset or
+viewer changes. Check joint controls in the rendered viewer. Historical archive
+verification is an explicit maintenance action, outside ordinary CI.

@@ -165,7 +165,7 @@ class MotionEvidenceTests(unittest.TestCase):
         self.assertIn("planar_error_mps", score(d, "omni_static", command=[-.1,0.,0.])["failed_bounds"])
 
     def test_original_static_command_matrix_and_transitions_unchanged(self):
-        source = ast.parse((ROOT/"experiments/c_length_study/tools/omni_flat_math.py").read_text())
+        source = ast.parse((ROOT/"locomotion/tests/fixtures/omni_flat_math.py").read_text())
         nodes = [n for n in source.body if isinstance(n, ast.FunctionDef) and n.name in
                  ("evaluation_scenarios", "transition_sequence", "trajectory_command")]
         namespace = {"math": math}
@@ -178,13 +178,13 @@ class MotionEvidenceTests(unittest.TestCase):
                              namespace["trajectory_command"](name, duration*.75, duration, command))
 
     def test_original_quiet_bounds_unchanged(self):
-        source = ast.parse((ROOT/"experiments/c_length_study/tools/omni_quiet_review.py").read_text())
+        source = ast.parse((ROOT/"locomotion/tests/fixtures/omni_quiet_review.py").read_text())
         assignment = next(n for n in source.body if isinstance(n, ast.Assign) and any(
             isinstance(t, ast.Name) and t.id == "QUIET_GATES" for t in n.targets))
         self.assertEqual(ev.QUIET_GATES, ast.literal_eval(assignment.value))
 
     def test_historical_forward_thresholds_and_targets_unchanged(self):
-        source = ast.parse((ROOT/"isaaclab/grade_stage2c_stable_forward.py").read_text())
+        source = ast.parse((ROOT/"locomotion/tests/fixtures/grade_stage2c_stable_forward.py").read_text())
         tables = {}
         for node in source.body:
             if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):

@@ -40,10 +40,6 @@ def main(argv=None):
     parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
     parser.add_argument('--checkpoint', type=Path)
     parser.add_argument('--checkpoint-sha256')
-    parser.add_argument('--experiment-protocol', type=Path)
-    parser.add_argument('--experiment-protocol-sha256')
-    parser.add_argument('--experiment-arm', choices=['scratch', 'example'])
-    parser.add_argument('--experiment-smoke', action='store_true')
     parser.add_argument('--preflight-only', action='store_true')
     if any(flag in (argv if argv is not None else sys.argv[1:]) for flag in ('--preflight-only', '--help', '-h')):
         parser.add_argument('--headless', action='store_true')
@@ -52,17 +48,6 @@ def main(argv=None):
         from isaaclab.app import AppLauncher
         AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args(argv)
-    experiment = demonstration = forward = None
-    experiment_options = (args.experiment_protocol, args.experiment_protocol_sha256, args.experiment_arm)
-    if any(value is not None for value in experiment_options):
-        if not all(value is not None for value in experiment_options):
-            raise ValueError('Experiment protocol, hash and arm must travel together')
-        forward = importlib.import_module('experiments.trajectory_optimization.forward_experiment')
-        experiment, demonstration = forward.load_protocol(args.experiment_protocol,
-            args.experiment_protocol_sha256, arm=args.experiment_arm, seed=args.seed,
-            updates=args.updates, smoke=args.experiment_smoke)
-    elif args.experiment_smoke:
-        raise ValueError('A smoke run requires an experiment protocol')
     configuration.verify_assets(args.asset, args.model)
     if (not args.headless or args.device != 'cuda:0' or not 1 <= args.updates <= 2000
             or not 0 < args.max_wall_seconds <= 6600 or args.seed < 0
@@ -93,17 +78,8 @@ def main(argv=None):
         'reset_root_height_m': metadata['reset_root_height_m']}
     if args.mode != 'diagnostic':
         identity['standing_admission'] = admission.require_admission(args.standing_admission, identity, cfg)
-    compatibility_keys = ('schema', 'model_sha256', 'usd_sha256', 'physics_source_files', 'physics_config',
-        'stance_sha256', 'geometry_sha256', 'geometry_extrema_sha256', 'adapter_sha256', 'entry_sha256', 'seed')
-    if experiment is not None:
-        if experiment['model_sha256'] != identity['model_sha256']:
-            raise ValueError('Experiment model differs from admitted physics')
-        identity.update(schema=forward.SCHEMA, behavior_cloning=args.experiment_arm == 'example',
-            experiment={'protocol_sha256': args.experiment_protocol_sha256, 'arm': args.experiment_arm,
-                'helper_sha256': sha(Path(forward.__file__)), 'smoke': args.experiment_smoke,
-                'command': experiment['command'], 'planned_updates': experiment['updates'],
-                'demonstration_sha256': experiment['demonstration_sha256']})
-        compatibility_keys += ('experiment',)
+    from contracts.release import COMPATIBILITY_KEYS
+    compatibility_keys = COMPATIBILITY_KEYS
     checkpoint_record = None
     if args.mode == 'evaluate':
         if sha(args.checkpoint) != args.checkpoint_sha256:
@@ -166,8 +142,7 @@ def main(argv=None):
         version = importlib.metadata.version('rsl-rl-lib')
         if version != '5.0.1':
             raise ValueError('RSL-RL version differs: '+version)
-        task_class = task_module.TrainingTask if forward is None else forward.forward_task(task_module.TrainingTask)
-        task = task_class(env, task_module.TaskConfig(seed=args.seed), args.output/'task')
+        task = task_module.TrainingTask(env, task_module.TaskConfig(seed=args.seed), args.output/'task')
         wrapped = vanilla.VanillaVecEnv(task)
         config = vanilla.ppo_config(args.seed)
         save(args.output/'ppo_config.json', config)
@@ -176,8 +151,6 @@ def main(argv=None):
         upstream = Path(rsl_rl.__file__).parent
         identity['upstream_source_files'] = {name: sha(upstream/name) for name in (
             'runners/on_policy_runner.py', 'algorithms/ppo.py', 'models/mlp_model.py', 'storage/rollout_storage.py')}
-        if experiment is not None:
-            identity['upstream_source_files']['modules/normalization.py'] = sha(upstream/'modules/normalization.py')
         identity['ppo_config'] = config
         state['status'] = 'running'; save(args.output/'state.json', state)
         if args.mode == 'train':
@@ -187,13 +160,6 @@ def main(argv=None):
                 save(path.with_suffix('.json'), {'identity': identity, 'updates': update,
                     'checkpoint_sha256': sha(path), 'transitions': update*24*env.num_envs})
                 state['checkpoint'] = str(path); state['checkpoint_sha256'] = sha(path)
-            if experiment is not None:
-                init_started = time.monotonic()
-                initialization = forward.initialize(runner, demonstration, experiment, args.experiment_arm)
-                initialization['wall_seconds'] = time.monotonic()-init_started
-                save(args.output/'initialization.json', initialization)
-                save(args.output/'experiment_protocol.json', experiment)
-                checkpoint(0)
             loads = vanilla.TrainingLoads(env)
             env.capture = loads
             original_log = runner.logger.log

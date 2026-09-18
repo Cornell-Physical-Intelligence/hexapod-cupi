@@ -6,6 +6,8 @@ from urllib.parse import quote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / 'site'
+sys.path.insert(0, str(ROOT))
+from tools import archive
 
 def git(*args):
     return subprocess.check_output(['git', *args], cwd=ROOT, text=True).strip()
@@ -25,6 +27,9 @@ def sha(path):
     return h.hexdigest()
 
 def historical_source(value):
+    archived = archive.url(value, ROOT)
+    if archived:
+        return archived
     inventory_path = ROOT / 'configs/source_inventory.json'
     if not inventory_path.exists():
         return None
@@ -65,6 +70,10 @@ def reference(value):
     require(not urlsplit(value).scheme and not value.startswith('/'), 'Use repository-relative references')
     p = ROOT / value
     require(p.resolve().is_relative_to(ROOT) and not any(x == '..' for x in Path(value).parts), 'Reference escapes repository')
+    if not p.exists():
+        retained = archive.retained(value, ROOT)
+        if retained is not None:
+            return retained
     if not p.exists() and historical_source(value):
         return None
     require(p.exists() and not p.is_symlink(), 'Missing or symbolic evidence: ' + value)
@@ -349,8 +358,11 @@ def records():
 def changed_paths(base):
     require(re.fullmatch('[0-9a-fA-F]{7,40}', base), 'Base must be an explicit Git SHA')
     git('rev-parse', '--verify', base + '^{commit}')
-    changed = set(filter(None, git('diff', '--name-only', base).splitlines()))
-    changed.update(filter(None, git('ls-files', '--others', '--exclude-standard').splitlines()))
+    def paths(*args):
+        output = subprocess.check_output(['git', *args], cwd=ROOT, text=True)
+        return filter(None, output.split('\0'))
+    changed = set(paths('diff', '--no-renames', '--name-only', '-z', base))
+    changed.update(paths('ls-files', '-z', '--others', '--exclude-standard'))
     return sorted(changed)
 
 def check(base=None):

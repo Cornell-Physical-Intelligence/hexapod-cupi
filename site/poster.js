@@ -40,7 +40,7 @@ function geometryDiagram() {
 function roadmap() {
   return `<section id="roadmap" class="section first-section" aria-labelledby="roadmap-heading"><div class="section-title"><h2 id="roadmap-heading">Roadmap</h2></div><ol class="major-stages">${data.milestones.map((m,i)=>{
     const item=data.media.find(v=>v.id===m.media_id);
-    return `<li class="major-stage state-${esc(m.status)}" id="marker-${esc(m.id)}"><div class="stage-top"><span class="stage-number">${String(i+1).padStart(2,'0')}</span><span class="status-pill ${esc(m.status)}">${esc(capabilityStates[m.status])}</span></div><h3>${esc(m.title)}</h3>${item?media(item,'','Earlier robot model · real-time playback.'):''}<div class="stage-bottom"><p class="stage-status">${esc(m.card_text)}</p>${link(data.status_url,'Details')}</div></li>`;
+    return `<li class="major-stage state-${esc(m.status)}" id="marker-${esc(m.id)}"><div class="stage-top"><span class="stage-number">${String(i+1).padStart(2,'0')}</span><span class="status-pill ${esc(m.status)}">${esc(capabilityStates[m.status])}</span></div><h3>${esc(m.title)}</h3>${item?media(item,'',m.media_caption || item.caption):''}<div class="stage-bottom"><p class="stage-status">${esc(m.card_text)}</p>${link(data.status_url,'Details')}</div></li>`;
   }).join('')}</ol>${data.milestones.map(definitionCard).join('')}</section>`;
 }
 function connections() {

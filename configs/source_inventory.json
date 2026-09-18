@@ -1,903 +1,280 @@
 {
-  "schema_version": 1,
-  "baseline": "e6fc64444ee6b02c973e454ebe285843dcbe7fc2",
-  "historical_reproduction": "Use the pinned Git source_commit and file hashes in retired_sources for removed code and tests. Keep original frozen source packs and published manifests unchanged. Run new canonical work through locomotion.",
+  "schema_version": 2,
+  "baseline": "5e65918020dc9ef2d72da8dad0a346016b98728d",
   "tools": [
     {
-      "path": "experiments/c_length_study/tools/analyze_omni_policy_loop.py",
-      "previous_path": "tools/analyze_omni_policy_loop.py",
-      "classification": "historical",
+      "path": "tools/archive.py",
+      "previous_path": null,
+      "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Reproduce the standing-loop and observation-noise analysis on saved evidence."
+      "purpose": "Resolve published history and restore a named path from its pinned Git tree."
     },
     {
-      "path": "experiments/c_length_study/tools/audit_length_stances.py",
-      "previous_path": "tools/audit_length_stances.py",
-      "classification": "historical",
+      "path": "tools/assets/prepare_geometry.py",
+      "previous_path": null,
+      "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Audit C/D torque components and omitted lower postures; CPU only."
+      "purpose": "Derive contact mask and exact plane-extrema accelerators from immutable USD meshes."
     },
     {
-      "path": "tools/assets/audit_mkii_fourbar_usd.py",
-      "previous_path": "tools/audit_mkii_fourbar_usd.py",
-      "classification": "historical",
+      "path": "tools/assets/prepare_updated_usd.py",
+      "previous_path": null,
+      "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Dedicated CPU gate for the 31-body / 30-tree / 6-closure physical MKII asset."
-    },
-    {
-      "path": "tools/assets/audit_mkii_linkage.py",
-      "previous_path": "tools/audit_mkii_linkage.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Read-only CPU audit of the CAD tibia four-bar's documented cut hinge."
-    },
-    {
-      "path": "tools/assets/audit_mkii_stance.py",
-      "previous_path": "tools/audit_mkii_stance.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "CPU-only reset geometry gate for the serial CAD asset."
-    },
-    {
-      "path": "tools/c_study_runtime.py",
-      "previous_path": "tools/c_study_runtime.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Pin the C morphology study to its validated, archived Python runtime."
+      "purpose": "Portable, offline USD preparation; no Isaac/PhysX engine is imported."
     },
     {
       "path": "tools/check_pipeline_lineages.py",
-      "previous_path": "tools/check_pipeline_lineages.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Verify the frozen Stage2 Git lineage and a separately versioned current release."
     },
     {
-      "path": "tools/assets/enable_nested_contact_reports.py",
-      "previous_path": "tools/enable_nested_contact_reports.py",
-      "classification": "current",
-      "owner": "Platform lead",
-      "purpose": "Author PhysX contact-report APIs on every rigid body in an imported USD."
-    },
-    {
-      "path": "tools/assets/generate_robstride_urdf.py",
-      "previous_path": "tools/generate_robstride_urdf.py",
-      "classification": "current",
-      "owner": "Platform lead",
-      "purpose": "Generate a physics-ready RobStride RS05 variant of the exported URDF."
-    },
-    {
-      "path": "experiments/c_length_study/tools/hold_length_campaign_after_job.py",
-      "previous_path": "tools/hold_length_campaign_after_job.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Wait behind the active GPU job, then stop its coordinator between jobs."
-    },
-    {
-      "path": "tools/assets/import_urdf_to_usd.py",
-      "previous_path": "tools/import_urdf_to_usd.py",
-      "classification": "current",
-      "owner": "Platform lead",
-      "purpose": "Import and prepare a verified, portable floating-base MKII USD bundle."
-    },
-    {
-      "path": "experiments/c_length_study/tools/launch_candidate_c_spark.py",
-      "previous_path": "tools/launch_candidate_c_spark.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Single-C validation, stepping probe, resumable PPO chunks and real videos."
-    },
-    {
-      "path": "experiments/c_length_study/tools/launch_length_pilot_spark.py",
-      "previous_path": "tools/launch_length_pilot_spark.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Record and evaluate a completed baseline; never enqueue the other sizes."
-    },
-    {
-      "path": "experiments/c_length_study/tools/launch_length_study_spark.py",
-      "previous_path": "tools/launch_length_study_spark.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Bounded, exclusive per-job launcher for the Isaac morphology comparison."
-    },
-    {
-      "path": "experiments/c_length_study/tools/launch_length_training_spark.py",
-      "previous_path": "tools/launch_length_training_spark.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Bounded 49-size campaign; waits for the shared GPU and owns only its jobs."
-    },
-    {
-      "path": "experiments/c_length_study/tools/launch_omni_diagnostics_spark.py",
-      "previous_path": "tools/launch_omni_diagnostics_spark.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Run isolated short comparisons with exact-plan standing admissions and GPU locks."
-    },
-    {
-      "path": "experiments/c_length_study/tools/launch_omni_flat_spark.py",
-      "previous_path": "tools/launch_omni_flat_spark.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Guarded, resumable omni experiment; short pilot exercises all runtime paths."
-    },
-    {
-      "path": "experiments/c_length_study/tools/launch_omni_repair_pair_spark.py",
-      "previous_path": "tools/launch_omni_repair_pair_spark.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Exactly two independent 50-update comparisons; no automatic continuation."
-    },
-    {
-      "path": "experiments/c_length_study/tools/launch_omni_repair_spark.py",
-      "previous_path": "tools/launch_omni_repair_spark.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Bounded PPO repair: matched baseline, short pilots, regression screen, full review."
-    },
-    {
-      "path": "experiments/terrain/tools/launch_terrain_robot_smoke_spark.py",
-      "previous_path": "tools/launch_terrain_robot_smoke_spark.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "Two bounded standing checks; no policy, training, queue or forecast management."
-    },
-    {
-      "path": "experiments/terrain/tools/launch_terrain_smoke_spark.py",
-      "previous_path": "tools/launch_terrain_smoke_spark.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "Bounded fixture-only Isaac validation using the same shared-GPU ownership rules."
-    },
-    {
-      "path": "experiments/c_length_study/tools/length_reference_env.py",
-      "previous_path": "tools/length_reference_env.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Position/velocity stepping prior plus learned bounded joint corrections."
-    },
-    {
-      "path": "experiments/terrain/tools/lidar_placement_study.py",
-      "previous_path": "tools/lidar_placement_study.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "Score candidate Livox Mid-360 mounts on the Hexapod MKII by self-occlusion."
-    },
-    {
-      "path": "tools/assets/mkii_asset_binding.py",
-      "previous_path": "tools/mkii_asset_binding.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Bind CPU/Kit audits and live runtime to the same portable physical bundle."
-    },
-    {
-      "path": "tools/assets/mkii_fourbar_kinematics.py",
-      "previous_path": "tools/mkii_fourbar_kinematics.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "CPU kinematics for the measured, regularized MKII physical four-bar."
-    },
-    {
-      "path": "tools/mkii_training_contract.py",
-      "previous_path": "tools/mkii_training_contract.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Exact source/asset lineage and checkpoint admission for four-bar scratch runs."
-    },
-    {
-      "path": "experiments/c_length_study/tools/omni_action_filter.py",
-      "previous_path": "tools/omni_action_filter.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Hardware-realizable first-order joint-position request filter."
-    },
-    {
-      "path": "experiments/c_length_study/tools/omni_diagnostics.py",
-      "previous_path": "tools/omni_diagnostics.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Short, pre-reset motor/observation probe; does not replace qualification."
-    },
-    {
-      "path": "experiments/c_length_study/tools/omni_flat_env.py",
-      "previous_path": "tools/omni_flat_env.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Flat omnidirectional direct-joint PPO task, isolated from archived rewards."
-    },
-    {
-      "path": "experiments/c_length_study/tools/omni_flat_evaluation.py",
-      "previous_path": "tools/omni_flat_evaluation.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Held-out command matrix, uninterrupted transitions and actual Isaac video."
-    },
-    {
-      "path": "experiments/c_length_study/tools/omni_flat_math.py",
-      "previous_path": "tools/omni_flat_math.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "CPU-testable command, reward and evaluation contracts for omni locomotion."
-    },
-    {
-      "path": "experiments/c_length_study/tools/omni_path_demo.py",
-      "previous_path": "tools/omni_path_demo.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Actual policy-in-the-loop path demos with non-colliding ground annotations."
-    },
-    {
-      "path": "experiments/c_length_study/tools/omni_quiet_review.py",
-      "previous_path": "tools/omni_quiet_review.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Undisturbed quiet-stand and stop-to-stand review, isolated from training."
-    },
-    {
-      "path": "experiments/c_length_study/tools/omni_repair_training.py",
-      "previous_path": "tools/omni_repair_training.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Explicit, checkpoint-bound PPO fine-tune initialization; no simulator imports."
-    },
-    {
-      "path": "experiments/c_length_study/tools/omni_visual_review.py",
-      "previous_path": "tools/omni_visual_review.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Actual-physics visual coverage of bearings, turns, paths and quiet standing."
-    },
-    {
-      "path": "experiments/c_length_study/tools/parallel_length_mechanical_paths.py",
-      "previous_path": "tools/parallel_length_mechanical_paths.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Run independent CPU geometry shards, preserving checked completed results."
-    },
-    {
-      "path": "experiments/terrain/tools/perception_replay.py",
-      "previous_path": "tools/perception_replay.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "CPU depth/point-cloud -> timestamped local terrain contract prototype."
-    },
-    {
-      "path": "experiments/c_length_study/tools/prepare_candidate_c_training.py",
-      "previous_path": "tools/prepare_candidate_c_training.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Prepare separate single-C training inputs and a named-joint stepping reference."
-    },
-    {
-      "path": "tools/assets/prepare_mkii_fourbar_usd.py",
-      "previous_path": "tools/prepare_mkii_fourbar_usd.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Build a NEW 31-body physical four-bar USD directly from measured CAD frames."
-    },
-    {
-      "path": "tools/assets/prepare_mkii_usd.py",
-      "previous_path": "tools/prepare_mkii_usd.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Repair and verify a CAD USD on the CPU, without starting Isaac Sim."
-    },
-    {
-      "path": "experiments/c_length_study/tools/prepare_omni_flat_training.py",
-      "previous_path": "tools/prepare_omni_flat_training.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Version new omni inputs while preserving the selected C benchmark verbatim."
-    },
-    {
-      "path": "experiments/terrain/tools/prepare_terrain_readiness.py",
-      "previous_path": "tools/prepare_terrain_readiness.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "Prepare deterministic terrain fixtures, mount sweep and explicit readiness gates."
-    },
-    {
       "path": "tools/project_site.py",
-      "previous_path": "tools/project_site.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Validate the mandatory research-poster update contract and build GitHub Pages."
     },
     {
-      "path": "tools/assets/qualify_mkii_fourbar.py",
-      "previous_path": "tools/qualify_mkii_fourbar.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Combine two live solver-resolution runs into narrow simulation admission."
-    },
-    {
-      "path": "experiments/c_length_study/tools/queue_omni_preview.py",
-      "previous_path": "tools/queue_omni_preview.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Render a corrected preview at the next free GPU interval, without interrupting PPO."
-    },
-    {
-      "path": "experiments/c_length_study/tools/rank_length_study.py",
-      "previous_path": "tools/rank_length_study.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Summarize completed matched evaluations without inventing a weighted score."
-    },
-    {
-      "path": "experiments/c_length_study/tools/refine_length_mechanical_candidates.py",
-      "previous_path": "tools/refine_length_mechanical_candidates.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Check candidate path loads at finer temporal resolution before review."
-    },
-    {
-      "path": "experiments/terrain/tools/render_terrain_plan_figures.py",
-      "previous_path": "tools/render_terrain_plan_figures.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "Render analytical/concept figures; these are not CAD or Isaac screenshots."
-    },
-    {
-      "path": "experiments/c_length_study/tools/repair_length_study_inertias.py",
-      "previous_path": "tools/repair_length_study_inertias.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Author and numerically verify source URDF inertials on a NEW study USD."
-    },
-    {
-      "path": "experiments/c_length_study/tools/report_length_stage1.py",
-      "previous_path": "tools/report_length_stage1.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Stage-one review figures from exact URDF meshes and completed CPU results."
-    },
-    {
-      "path": "experiments/c_length_study/tools/report_length_stance_audit.py",
-      "previous_path": "tools/report_length_stance_audit.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Refine and illustrate the C/D lower-stance audit without changing URDFs."
-    },
-    {
-      "path": "experiments/c_length_study/tools/report_omni_diagnostics.py",
-      "previous_path": "tools/report_omni_diagnostics.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Fetch completed motor probes and compare matched pre-reset measurements."
-    },
-    {
-      "path": "experiments/c_length_study/tools/report_omni_progress.py",
-      "previous_path": "tools/report_omni_progress.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Summarize completed omni evaluations without changing their acceptance limits."
-    },
-    {
-      "path": "experiments/c_length_study/tools/run_length_mechanical_paths.py",
-      "previous_path": "tools/run_length_mechanical_paths.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Equal-budget inverse-dynamics path screen after all-size static search."
-    },
-    {
-      "path": "experiments/c_length_study/tools/screen_length_mechanics.py",
-      "previous_path": "tools/screen_length_mechanics.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Quasi-static, point-contact geometry screen. No learned policy or GPU."
-    },
-    {
-      "path": "experiments/terrain/tools/screen_sensor_mounts.py",
-      "previous_path": "tools/screen_sensor_mounts.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "Reproducible CPU mount pre-screen. No CAD edits, GPU or robot connections."
-    },
-    {
-      "path": "experiments/terrain/tools/sensor_mount_math.py",
-      "previous_path": "tools/sensor_mount_math.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "CPU geometry for provisional sensor-mount screening (metres, radians)."
-    },
-    {
-      "path": "experiments/c_length_study/tools/simulate_length_study.py",
-      "previous_path": "tools/simulate_length_study.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Run all morphology candidates together and capture an actual Isaac frame."
-    },
-    {
-      "path": "experiments/c_length_study/tools/sync_candidate_c_results.py",
-      "previous_path": "tools/sync_candidate_c_results.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Fetch only a completed, identity-checked C checkpoint recording from Spark."
-    },
-    {
-      "path": "experiments/c_length_study/tools/sync_omni_results.py",
-      "previous_path": "tools/sync_omni_results.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "Fetch completed omni evidence; never present an unfinished or mismatched clip."
-    },
-    {
-      "path": "experiments/terrain/tools/terrain_contact_evidence.py",
-      "previous_path": "tools/terrain_contact_evidence.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "Reject known PhysX contact-data truncation before admitting standing."
-    },
-    {
-      "path": "experiments/terrain/tools/terrain_fixture_checks.py",
-      "previous_path": "tools/terrain_fixture_checks.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "Independent geometry checks shared by CPU and Isaac terrain admission."
-    },
-    {
-      "path": "experiments/terrain/tools/terrain_readiness.py",
-      "previous_path": "tools/terrain_readiness.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "CPU geometry and observation checks for the proposed terrain stage."
-    },
-    {
-      "path": "experiments/c_length_study/tools/test_length_study_usd.py",
-      "previous_path": "tools/test_length_study_usd.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "CPU-only test using the installed OpenUSD library, without SimulationApp."
-    },
-    {
-      "path": "experiments/c_length_study/tools/train_length_study.py",
-      "previous_path": "tools/train_length_study.py",
-      "classification": "historical",
-      "owner": "Platform lead",
-      "purpose": "One isolated morphology: full standing gate, scratch PPO, or matched evaluation."
-    },
-    {
-      "path": "tools/assets/usd_geometry_audit.py",
-      "previous_path": "tools/usd_geometry_audit.py",
-      "classification": "current",
-      "owner": "Platform lead",
-      "purpose": "CPU-only URDF/USD articulation and collision-geometry regression checks."
-    },
-    {
-      "path": "experiments/terrain/tools/validate_terrain_fixtures.py",
-      "previous_path": "tools/validate_terrain_fixtures.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "CPU/USD audit or short Isaac geometry/ray/contact smoke; never starts PPO."
-    },
-    {
-      "path": "experiments/terrain/tools/validate_terrain_robot.py",
-      "previous_path": "tools/validate_terrain_robot.py",
-      "classification": "prototype",
-      "owner": "Survey lead",
-      "purpose": "Hold the exact admitted full C robot on an imported fixture's flat start."
-    },
-    {
       "path": "tools/source_inventory.py",
       "previous_path": null,
       "classification": "current",
-      "owner": "Both leads",
-      "purpose": "List owned tools and verify maintained-source boundaries."
+      "owner": "Platform lead",
+      "purpose": "List owned tools and check the maintained-source boundary without scanning evidence."
     },
     {
-      "path": "tools/mkii_asset_binding.py",
+      "path": "contracts/__init__.py",
       "previous_path": null,
-      "classification": "historical",
+      "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Compatibility entry for the byte-frozen four-bar validator; delegates to tools.assets.mkii_asset_binding."
+      "purpose": "Package namespace."
     },
     {
-      "path": "tools/audit_mkii_stance.py",
+      "path": "contracts/command.py",
       "previous_path": null,
-      "classification": "historical",
+      "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Compatibility entry for the byte-frozen four-bar validator; delegates to tools.assets.audit_mkii_stance."
+      "purpose": "Velocity commands with an explicit caller-supplied envelope."
     },
     {
-      "path": "tools/audit_mkii_fourbar_usd.py",
+      "path": "contracts/frames.py",
       "previous_path": null,
-      "classification": "historical",
+      "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Compatibility entry for the byte-frozen four-bar validator; delegates to tools.assets.audit_mkii_fourbar_usd."
+      "purpose": "Anatomical axes: forward -body Y, left +body X, up +body Z."
     },
     {
-      "path": "tools/mkii_fourbar_kinematics.py",
+      "path": "contracts/pose.py",
       "previous_path": null,
-      "classification": "historical",
+      "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Compatibility entry for the byte-frozen four-bar validator; delegates to tools.assets.mkii_fourbar_kinematics."
+      "purpose": "Finite planar poses in the named navigation frame."
     },
     {
-      "path": "experiments/trajectory_optimization/model.py",
+      "path": "contracts/release.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Identity fields required to load an existing locomotion checkpoint."
+    },
+    {
+      "path": "navigation/__init__.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Command producers: where path planning plugs into the locomotion stack."
+    },
+    {
+      "path": "navigation/producer.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "A non-blocking pose-to-command protocol."
+    },
+    {
+      "path": "navigation/waypoint.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Example waypoint follower without obstacle avoidance or localization."
+    },
+    {
+      "path": "mission/__init__.py",
+      "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Build approved-model full-body dynamics and toe contact kinematics.",
-      "previous_path": "experiments/trajectory_optimization/model.py"
+      "purpose": "Package namespace."
     },
     {
-      "path": "experiments/trajectory_optimization/optimize.py",
+      "path": "mission/sensors/__init__.py",
+      "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Solve and audit a bounded periodic forward motor-target cycle.",
-      "previous_path": "experiments/trajectory_optimization/optimize.py"
+      "purpose": "Package namespace."
     },
     {
-      "path": "experiments/trajectory_optimization/prepare.py",
+      "path": "mission/sensors/mid360_pattern.py",
+      "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Pack fresh replay inputs with unchanged native physics and ownership controls.",
-      "previous_path": "experiments/trajectory_optimization/prepare.py"
+      "purpose": "A bounded Isaac Lab ray-pattern surrogate for the Livox Mid-360."
     },
     {
-      "path": "experiments/trajectory_optimization/replay_native.py",
+      "path": "mission/sensors/sensor_model.py",
+      "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Replay optimized targets and retain native traces and video.",
-      "previous_path": "experiments/trajectory_optimization/replay_native.py"
-    },
-    {
-      "path": "experiments/trajectory_optimization/forward_experiment.py",
-      "previous_path": "experiments/trajectory_optimization/forward_experiment.py",
-      "classification": "prototype",
-      "owner": "Learning lead",
-      "purpose": "Define the paired forward task and action-imitation initialization."
-    },
-    {
-      "path": "experiments/trajectory_optimization/prepare_forward.py",
-      "previous_path": "experiments/trajectory_optimization/prepare_forward.py",
-      "classification": "prototype",
-      "owner": "Learning lead",
-      "purpose": "Bind the passing forward example and prepare matched PPO allocations."
+      "purpose": "Latency, noise, bias, and dropout models for Phase 3 sensor observations."
     },
     {
       "path": "locomotion/__init__.py",
-      "previous_path": "locomotion/__init__.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Locomotion on the approved direct-drive hexapod."
     },
     {
       "path": "locomotion/admission.py",
-      "previous_path": "locomotion/admission.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Bind a run to its model and recorded native standing checks."
     },
     {
       "path": "locomotion/camera.py",
-      "previous_path": "locomotion/camera.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Native Kit perspective RGB capture with audited physics and a hard deadline."
     },
     {
       "path": "locomotion/env.py",
-      "previous_path": "locomotion/env.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Native GPU canonical hexapod environment for a separately qualified AMP pilot."
     },
     {
       "path": "locomotion/env_config.py",
-      "previous_path": "locomotion/env_config.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Explicit experimental canonical-robot allocation; no historical admission claim."
     },
     {
       "path": "locomotion/evaluate.py",
-      "previous_path": "locomotion/evaluate.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Native policy evaluation orchestration; physics and acceptance gates unchanged."
     },
     {
       "path": "locomotion/evaluation.py",
-      "previous_path": "locomotion/evaluation.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "CPU evaluation of the new robot against explicitly named, unchanged screens."
     },
     {
       "path": "locomotion/evaluation_config.py",
-      "previous_path": "locomotion/evaluation_config.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Stdlib-only evaluation timeout recipe; no simulator or learner imports."
     },
     {
       "path": "locomotion/force_metrics.py",
-      "previous_path": "locomotion/force_metrics.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Summarize recorded 400 Hz contact-normal loads and motor torque."
     },
     {
+      "path": "locomotion/inputs.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Verify canonical inputs and package a fresh portable copy without launching compute."
+    },
+    {
       "path": "locomotion/launch.py",
-      "previous_path": "locomotion/launch.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Launch one native allocation with explicit ownership and bounded cleanup."
     },
     {
       "path": "locomotion/ppo.py",
-      "previous_path": "locomotion/ppo.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Adapt the admitted simulator to standard RSL-RL PPO without a motion prior."
     },
     {
       "path": "locomotion/prepare.py",
-      "previous_path": "locomotion/prepare.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Copy a named kernel and explicit inputs into a fresh native allocation."
     },
     {
       "path": "locomotion/reservation.py",
-      "previous_path": "locomotion/reservation.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Spark reservation checks copied unchanged from the recorded Sept14 ownership guard."
     },
     {
       "path": "locomotion/task.py",
-      "previous_path": "locomotion/task.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Versioned command/reward wrapper; native physics and Stage 2 gates are unchanged."
     },
     {
       "path": "locomotion/train.py",
-      "previous_path": "locomotion/train.py",
+      "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Train or evaluate standard PPO on the admitted canonical simulator."
+    },
+    {
+      "path": "locomotion/priors/__init__.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Package namespace."
+    },
+    {
+      "path": "locomotion/priors/model.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Floating-base Newton-Euler dynamics for the approved direct-drive robot."
+    },
+    {
+      "path": "locomotion/priors/optimize.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Optimize a periodic forward tripod cycle with full-body inverse dynamics."
+    },
+    {
+      "path": "locomotion/priors/prepare.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Pack a fresh native replay with unchanged physics and ownership controls."
+    },
+    {
+      "path": "locomotion/priors/replay_native.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Replay an optimized target cycle through the locomotion kernel."
     }
   ],
-  "archived_documents": [
-    {
-      "previous_path": "HANDOFF.md",
-      "path": "docs/archive/2026-09-11-documentation/HANDOFF.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "cf2af4ba57e368283fa1c8579f47e157a66f56a45f82d65fef7286b32ba2290d",
-      "storage": "git"
-    },
-    {
-      "previous_path": "HANDOFF_SHOWCASE.md",
-      "path": "docs/archive/2026-09-11-documentation/HANDOFF_SHOWCASE.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "7ae3de10d5169aa9bb90f2ee0dcaa6ce380dbf4e98ce37cf0ec4297a357a3085",
-      "storage": "git"
-    },
-    {
-      "previous_path": "PROJECT_STATUS.md",
-      "path": "docs/archive/2026-09-11-documentation/PROJECT_STATUS.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "33a98d329918cdbb137068ba49ef8de1066272be984d6688f570e924e8e8984e",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/CAD_ENGINEER_HANDOFF.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/CAD_ENGINEER_HANDOFF.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "6b6aec2ca3873f31867d5683a1207604fa129c0b56ce59a2f5e3d4287deab993",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/JAMES_HANDOFF.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/JAMES_HANDOFF.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "26ce3a77936374f23710e9d1ed5ae5bd5980ebb9fa2877476e06ec572d0a1819",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/MKII_FIRST_POLICY_EVALUATION.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/MKII_FIRST_POLICY_EVALUATION.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "f133342f037742caee7eaf2a6ddd63b9a5f1162aa198fec2df63bbc443131c4d",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/MKII_FOURBAR_TRAINING.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/MKII_FOURBAR_TRAINING.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "ea4bf692f137b9284d1db75b599d4fe0ef35e1920b75559377bb62c56e83e9b5",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/MKII_MOTOR_TARGET_SCHEDULING.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/MKII_MOTOR_TARGET_SCHEDULING.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "9dba81a094ea16ce809c46a75b30ba95e9c44b74761b58d6c888165a18b3fc6f",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/MKII_PHYSICAL_COUPLING_CANDIDATE.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/MKII_PHYSICAL_COUPLING_CANDIDATE.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "25b5df23d6a328a93fe5dee7202acacd866d99cf65bf1864af2c392ec0f167e8",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/MKII_RUNTIME_PROFILING.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/MKII_RUNTIME_PROFILING.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "394524ba5a47113b5acec778f9a3db0d3ad0f137ae96d0617dd60fbe38b009bb",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/MKII_STEP1.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/MKII_STEP1.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "bda7a3cdd4374df5101098e373c34d359e265119ad59f4071d3aa7356f58391b",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/NEXT_RUNS.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/NEXT_RUNS.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "e1f4fb1f21848ebf6202bbdbf2800f0f93c91b44bdb5e64e481b74815335f62f",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/PLAN.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/PLAN.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "e0d5e16dd8ae6a354bf6b355b5f3f4d2ed936b915e4638952a88b4518a14f57f",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/PROJECT_HANDOFF.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/PROJECT_HANDOFF.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "2f2f11ae3b39f2c6e71c0649fcf61dc729ac1deaf81177dbbe4ce357b2883789",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/OPERATIONS.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/OPERATIONS.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "478a659030e108745b5d0ece2e95ea3e1c06f2fe80463cb9b65ab66b185dd1af",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/SPARK_COMPUTE_COORDINATION.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/SPARK_COMPUTE_COORDINATION.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "649ccda1bdef20bc967ae78f68a992cc8001f4ed7009f78cab5133cc67b29d8f",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/PIPELINE_LINEAGES.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/PIPELINE_LINEAGES.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "b0fdb93b345b0cd48d99e3d7d79cb4b182982617571e53ce05dc51d77bb4d5c9",
-      "storage": "git"
-    },
-    {
-      "previous_path": "docs/TRAINING.md",
-      "path": "docs/archive/2026-09-11-documentation/docs/TRAINING.md",
-      "source_commit": "62fd7448264c5ebe051ba2de1d9a72844d6b4c3a",
-      "sha256": "add33d2a0337a8e07db3d13e90cda4c9ba10bfb21b1931c3816ae96eade0005f",
-      "storage": "git"
-    }
-  ],
-  "retired_sources": {
-    "source_commit": "33ec6f16d70c8b0e74a9608d69be7c563c11bfbb",
-    "files": {
-      "artifacts/handoff_2026-09-11/james_001/prepared/canonical_locomotion_training_001/FABLE_DISPOSITION.md": "14577bd1b5457d9bb7886dbaafd605816d96b9aeb03c73e7e5b39bed9838aa06",
-      "artifacts/handoff_2026-09-11/james_001/prepared/canonical_locomotion_training_001/fable/prompt.md": "7fa5b23a07f11ea0e55fd9318ec2868a37106cb3f7dac64ede5d979a9aba6955",
-      "artifacts/handoff_2026-09-11/james_001/prepared/canonical_moving_contact_review_001/FABLE_DISPOSITION.md": "1daf39f675c456326b2cd9fb9f82e7ddd14fa2731bbf70fd99f3a588cca6c790",
-      "artifacts/handoff_2026-09-11/james_001/prepared/canonical_moving_contact_review_001/fable/prompt.md": "57b17e08b73bbe916d3a2b40cc73704516e78f1e43510fe82b0fb7a0d102e174",
-      "artifacts/handoff_2026-09-11/james_001/prepared/canonical_policy_adapter_fable_001/prompt.md": "a0a285723cfff6666ea1b4cbb1b12d98f9f27af487230d8c3c683cab674e4ae8",
-      "artifacts/handoff_2026-09-11/james_001/prepared/canonical_solver32_0_fable_review_001/prompt.md": "9c59c6a24c73fec0cdeeb1ebcd90db011ab44a7af16f3f8b8e28f290fccc27a9",
-      "artifacts/handoff_2026-09-11/james_001/prepared/canonical_solver32_4_fable_review_001/prompt.md": "cf6fa379b9563002840ad308d3c1b6e23715ecdd7e9f1b0ec7a6e1a7f1260c52",
-      "artifacts/handoff_2026-09-11/james_001/prepared/canonical_walk_objective_001/FABLE_DISPOSITION.md": "06a9cc78c205b898be51e580ee515fdbcc73a29bdb97d53a4ddbcf756b256fb8",
-      "artifacts/handoff_2026-09-11/james_001/prepared/canonical_walk_objective_001/fable/prompt.md": "a03e4affd1722efe21b7388d28be9940bd6db800077e5233eb006a967b018fd1",
-      "artifacts/mkii_updated_2026-09-10/import_001/claude_partner/prompt.md": "61d213fb48521f71f6cef2c730296c8f3c768ec0d001c58f24cbe82ddbfbbe32",
-      "artifacts/mkii_updated_2026-09-10/native_inspection_001/partner_review/prompt.md": "6a1666bef802f3aeee2a0d18be7566ef8bae21831a5ce5c5aa2a20384877b5e0",
-      "artifacts/mkii_updated_2026-09-10/standing32_failure_analysis_001/fable_review/prompt.md": "cf6fa379b9563002840ad308d3c1b6e23715ecdd7e9f1b0ec7a6e1a7f1260c52",
-      "artifacts/omni_diagnostics_2026-09-09/direct_omni_quiet_priority_preparation_001/native_004/review/prompt.md": "feb3261c05a3581f50da4d91ba5a6184c6b1c755c518aee4c51bf3e5215c6770",
-      "artifacts/project_review_2026-09-10/claude_partner_review_001/claude_fable_architecture_003/prompt.md": "e310b6f5ad642702f79f0cbdfe1d31715c55c80d3c1b14808041d9e76aca9824",
-      "artifacts/project_review_2026-09-10/claude_partner_review_001/claude_fable_foot_cap_001/prompt.md": "9aa1ade8d5d02103afdd053dd90559012eba4a503119d70eda1ce0d020d27a82",
-      "artifacts/project_review_2026-09-10/claude_partner_review_001/claude_fable_ppo_audit_003/prompt.md": "7aac892332060944d7b3afcd47ab7bddfb30cd9c9e3e7292850869530a582408",
-      "artifacts/project_review_2026-09-10/direct_omni_extended500_interpretation_001/fable_prompt.md": "61ea29b60a6ea2c40652c428666e65871f8ce54404daa05ba8650065acfbcfb4",
-      "artifacts/project_review_2026-09-10/quiet_priority_interpretation_001/pilot/fable_prompt.md": "5ecc974684f9f7e8e73d4ea9325231879fb51a991e50dc26087999bc64a97109",
-      "artifacts/project_review_2026-09-10/quiet_priority_interpretation_001/pilot/physical_followup/fable_prompt.md": "b8821bf3b60aa8e837c5c7a39d80a32a6dc6860cba6f2b01cbd98c150977949a",
-      "artifacts/project_review_2026-09-10/quiet_priority_interpretation_001/smoke/fable_followup/fable_prompt.md": "72aca28d4eff38869f34e7e467b3e528ef533d036570bd2886b09c9eb47bc9ba",
-      "artifacts/project_review_2026-09-10/quiet_priority_interpretation_001/smoke/fable_prompt.md": "6b17ea15bf6dcdf5c39ac016be594ef731ddf497aca6a1727fc2aab6e7930f6a",
-      "docs/archive/2026-09-11-documentation/HANDOFF.md": "cf2af4ba57e368283fa1c8579f47e157a66f56a45f82d65fef7286b32ba2290d",
-      "docs/archive/2026-09-11-documentation/HANDOFF_SHOWCASE.md": "7ae3de10d5169aa9bb90f2ee0dcaa6ce380dbf4e98ce37cf0ec4297a357a3085",
-      "docs/archive/2026-09-11-documentation/PROJECT_STATUS.md": "33a98d329918cdbb137068ba49ef8de1066272be984d6688f570e924e8e8984e",
-      "docs/archive/2026-09-11-documentation/docs/CAD_ENGINEER_HANDOFF.md": "6b6aec2ca3873f31867d5683a1207604fa129c0b56ce59a2f5e3d4287deab993",
-      "docs/archive/2026-09-11-documentation/docs/JAMES_HANDOFF.md": "26ce3a77936374f23710e9d1ed5ae5bd5980ebb9fa2877476e06ec572d0a1819",
-      "docs/archive/2026-09-11-documentation/docs/MKII_FIRST_POLICY_EVALUATION.md": "f133342f037742caee7eaf2a6ddd63b9a5f1162aa198fec2df63bbc443131c4d",
-      "docs/archive/2026-09-11-documentation/docs/MKII_FOURBAR_TRAINING.md": "ea4bf692f137b9284d1db75b599d4fe0ef35e1920b75559377bb62c56e83e9b5",
-      "docs/archive/2026-09-11-documentation/docs/MKII_MOTOR_TARGET_SCHEDULING.md": "9dba81a094ea16ce809c46a75b30ba95e9c44b74761b58d6c888165a18b3fc6f",
-      "docs/archive/2026-09-11-documentation/docs/MKII_PHYSICAL_COUPLING_CANDIDATE.md": "25b5df23d6a328a93fe5dee7202acacd866d99cf65bf1864af2c392ec0f167e8",
-      "docs/archive/2026-09-11-documentation/docs/MKII_RUNTIME_PROFILING.md": "394524ba5a47113b5acec778f9a3db0d3ad0f137ae96d0617dd60fbe38b009bb",
-      "docs/archive/2026-09-11-documentation/docs/MKII_STEP1.md": "bda7a3cdd4374df5101098e373c34d359e265119ad59f4071d3aa7356f58391b",
-      "docs/archive/2026-09-11-documentation/docs/NEXT_RUNS.md": "e1f4fb1f21848ebf6202bbdbf2800f0f93c91b44bdb5e64e481b74815335f62f",
-      "docs/archive/2026-09-11-documentation/docs/OPERATIONS.md": "478a659030e108745b5d0ece2e95ea3e1c06f2fe80463cb9b65ab66b185dd1af",
-      "docs/archive/2026-09-11-documentation/docs/PIPELINE_LINEAGES.md": "b0fdb93b345b0cd48d99e3d7d79cb4b182982617571e53ce05dc51d77bb4d5c9",
-      "docs/archive/2026-09-11-documentation/docs/PLAN.md": "e0d5e16dd8ae6a354bf6b355b5f3f4d2ed936b915e4638952a88b4518a14f57f",
-      "docs/archive/2026-09-11-documentation/docs/PROJECT_HANDOFF.md": "2f2f11ae3b39f2c6e71c0649fcf61dc729ac1deaf81177dbbe4ce357b2883789",
-      "docs/archive/2026-09-11-documentation/docs/SPARK_COMPUTE_COORDINATION.md": "649ccda1bdef20bc967ae78f68a992cc8001f4ed7009f78cab5133cc67b29d8f",
-      "docs/archive/2026-09-11-documentation/docs/TRAINING.md": "add33d2a0337a8e07db3d13e90cda4c9ba10bfb21b1931c3816ae96eade0005f",
-      "docs/archive/DAR-before-autonomy-review-2026-09-04.md": "7faaa3a11bcd8adcdd8e9d27039db8a84a4fe325a6151e5a6fa013228ae47213",
-      "docs/archive/HANDOFF-2026-08-26.md": "f7340b874c375e883fd7153ebab1da98f342a1fea4c7f8f47cd4e5fc00b4de3f",
-      "docs/archive/PLAN-before-autonomy-review-2026-09-04.md": "d07f9c0a27853d513f19aba12d045ea0fba65ab2939d917659e4e0b2142ef6eb",
-      "docs/archive/STATUS-before-autonomy-review-2026-09-04.md": "2999fbf659d72b42d076499ece365b35bb14fab0900b16bceed07e6f57550607",
-      "docs/archive/STATUS_2026-09-08_physical.md": "dc1a0af6321e7c6ed43f36006ba2d729a547225fa1dbb5c2d45c6f26fe0864f4",
-      "experiments/paper_walk/analyze.py": "54c50fe4d411cd73d9cd4ea8157a96bb3ee0169537d9e5618bb6c29ea8b7976d",
-      "experiments/paper_walk/camera.py": "08638bbcbda961248c375c825e4ae5b9b1b9a38b4844f28fe69ddd418a554603",
-      "experiments/paper_walk/env.py": "a8a74a989c8b3769e8624c651876aed21f7adbdc94d3b65b26d8dcaf671b0dfd",
-      "experiments/paper_walk/env_config.py": "906509c0e29cbedb70fd6d58648585f43bb2fd75c2ab57ddbea72c9b7f4b4eea",
-      "experiments/paper_walk/evaluate.py": "2600383bc4fa87ab9558d35a7b223d97e62c0aa77de2d59259ce2a1cd3773679",
-      "experiments/paper_walk/evaluation.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
-      "experiments/paper_walk/evaluation_config.py": "7d55733f4f5a471427b408a4b3a0e834d083a687f7ae0ebc3ceb0d16c23f3cb7",
-      "experiments/paper_walk/generate_prior.py": "011f3d6e25e07480c24f41b58eacad32cdfa0b2342221f789aa859c2c7cfa2d3",
-      "experiments/paper_walk/launch_spark.py": "760f29c6d197e9572f00e045faa1add7608be7038281c16f08323b39e29e1eec",
-      "experiments/paper_walk/learner.py": "867e0859b6a66ae9226f5838fd71c553795bfce44e75832d45b2c79504c0518a",
-      "experiments/paper_walk/refit_bc.py": "f9cb7250f5c81c4452cb8554529fe2a36ca68cb58124b86beac757e90049b439",
-      "experiments/paper_walk/replay.py": "f13e2a57fdec0f2a300b1cd3e0b63c1b75d612a4be8c877d99f689a8f6cd3895",
-      "experiments/paper_walk/reservation.py": "037162e879e94f6dd05210dfb5ee81fc5d1195c65ad6209ecbfd9f1b62df21f7",
-      "experiments/paper_walk/task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
-      "experiments/paper_walk/tests/test_analyze.py": "ea256b98b1ad6994f730b0e2af20c2081a687f92b8fb15b2e1c0bd334eae91a5",
-      "experiments/paper_walk/tests/test_camera.py": "8280dfae591dea806115752120a149d15e6a04522ec88d8e566d68e696b6abeb",
-      "experiments/paper_walk/tests/test_env.py": "19bab0d2cc60a444f6c7a56cfcc3ed332b81323e93f672b8af66668c3a268662",
-      "experiments/paper_walk/tests/test_evaluate.py": "58b1d49be5d870e66431d5ee8e06ab65825ac9ffc1c2659b34dd26f9d9757bd3",
-      "experiments/paper_walk/tests/test_evaluation.py": "9654ca5cd653e1bd8e400c2850e295ca0e7f21079144896a3803c9218758433d",
-      "experiments/paper_walk/tests/test_launch_spark.py": "6698cdfb8fa541f01338f3abdd622a8c8e54fb5fba88b7263225af993e77b98f",
-      "experiments/paper_walk/tests/test_learner.py": "64dd2a6bd16f8f1509fd3e034a69f9d5488bafedf89dd9dcbc402e69abd2a3dc",
-      "experiments/paper_walk/tests/test_learner_rollback.py": "17a0400472a882ca9d6518ec15b9a7b038de2295da931765774bd55db6be5344",
-      "experiments/paper_walk/tests/test_learner_stability.py": "dfef353f3e6d149a4da8cd2c2359f098d5ee3187cb24c34aac8211d933a4cad6",
-      "experiments/paper_walk/tests/test_prior.py": "c8eb9195206cb804d62fad0d037ccf2cb6d308a1f5a9cb801b5c5933de37c124",
-      "experiments/paper_walk/tests/test_refit_bc.py": "93146aa968f6b8acab4eb883c01783743f1a764fdf9f38f1ce5bea362396c8ba",
-      "experiments/paper_walk/tests/test_replay.py": "7fd191344d02e3db2688fc4c63e939b9226695f1145d382cd479c42481809d13",
-      "experiments/paper_walk/tests/test_reservation_binding.py": "4f0da134f39fb8d3006aee2cc857122d4060ded4b1d7791fc248ebf881a45f2b",
-      "experiments/paper_walk/tests/test_startup_diagnostic.py": "43710bc8fef5b172b3aabe2d3f914d54886bd3a74c694a695872c2431606bb75",
-      "experiments/paper_walk/tests/test_task.py": "60c176f741a9f799466b5777e2f844936d87efa804053c0966ec1d3eb5a98344",
-      "experiments/paper_walk/tests/test_train_config.py": "f4f06b0d26ee9daecc1e44ae594c9114706e91c7b8285da226ca37797a0fc9d4",
-      "experiments/paper_walk/tests/test_training_binding.py": "862d87f1a53b335a342cd1fa9fef4507dc2023b32ce9382b864eb45a7229f024",
-      "experiments/paper_walk/train.py": "24ca5aa5597229f86395a01a1ffea560d7b4ca620879b26cf65133392e310b36",
-      "experiments/trajectory_optimization/force_metrics.py": "b38987da38bd1a72e4244f2b7d971b6ac1df75d5e78d4b3d7db3c3866c0e33b3",
-      "experiments/trajectory_optimization/prepare_vanilla.py": "c025c471a1199a401613761d21de4fff9e0c3e7cd8269d5fbcda9536cdcab3f4",
-      "experiments/trajectory_optimization/tests/test_force_metrics.py": "33780e17d96bc5ecc06425a55c4f1723ade9b1fae04a0552e168dfe7a9962171",
-      "experiments/trajectory_optimization/tests/test_vanilla.py": "3fd1f599aaac5c3f27df26916c3198c0808cc864a16916114bf3ddcea51085ca",
-      "experiments/trajectory_optimization/vanilla.py": "bb1b44215580e30786bb16271a2dae996b19a41fc43a0588cc4591b18a5d4a65",
-      "experiments/trajectory_optimization/vanilla_native.py": "9efb6003334c25215645e23274f044734bc5c9bb60c11ba84c7242027c4b3d8c",
-      "hexapod-issue-drafts.md": "04256a624271854a960ef2c8808e38a0598e9f65fbcb05754bd6affe2e09b810",
-      "isaaclab/admit_mkii_rs05.py": "8f3d9e13d35ce49fb0ffc5a6588e9f447e5459b50924fe09bb51845f2c760109",
-      "isaaclab/hexapod_rl/tasks/mkii_rs05.py": "f7c1f55191402bc728d678d16daa7ea6daa079657fdf2d1427977a69b66816ef",
-      "isaaclab/tests/test_admit_mkii_rs05.py": "24e920353f27f4ca9b284540bd6a286db50fe6ee20eb9937d5a205bb3db9afc2",
-      "isaaclab/tests/test_mkii_rs05_asset.py": "6cf304799c57d2aeb1b9768940edb75d812aa2d13dc256add24662706baf3590",
-      "isaaclab/tests/test_mkii_rs05_capture.py": "7749f05583bdf03b704cbe2df8f1f6680117702970fa167326a099ac42814950",
-      "isaaclab/tests/test_mkii_rs05_capture_write.py": "795108b791ea264a82ea448ffe4fc9e1dad0ac6ae46e240317c5769dc7f462d4",
-      "isaaclab/tests/test_mkii_rs05_patch_contacts.py": "b9e602dec2796c882ec587aa2f3cf55935a30d910218db37fdf1f9ffa9137ba7",
-      "isaaclab/tests/test_mkii_rs05_task.py": "58d322c0ad82c73aae90eb35b32014c6a7fb48e793c3a8b8bc7bd10fb65b3e26",
-      "isaaclab/tests/test_rs05_paper_walk_actuator.py": "e7ab7459571afc87b6c99bcf125a3da27dfc9806a0fd57af9d1c7b1b9f5032e3",
-      "isaaclab/tests/test_train_mkii_rs05_wrapper.py": "4cffac432b343f85a6bf3011cdf778dc5ea91bb39e710e4d7694ddb5b9150959",
-      "isaaclab/train_mkii_rs05.py": "dc5acd18f611383e2ba6dad40acd776f79d7aa57114e664fbb2d5c0387e40d73",
-      "packages/hexapod_env/hexapod_env/actuators/rs05_paper_walk.py": "a7ab2b12a7706ff5c99281112801cda2f43c15abd1607864962e41e8ea995ef0",
-      "packages/hexapod_env/hexapod_env/actuators/rs05_paper_walk_model.py": "57277acf01a0dafd63f22fdc9abaf85543d5deb71210a076271d4abdfc809951",
-      "packages/hexapod_env/hexapod_env/actuators/rs05_paper_walk_runtime.py": "afa2101aa41f5f67a97e520e81947bf1b1ebf5824fd7bb2eab4c3ff79bb16fb1",
-      "packages/hexapod_env/hexapod_env/assets/mkii_rs05.py": "1a08f7c1f6dbf8b098f527eeb8c069b1ec6364dbcc321f369b5c913f56cef233",
-      "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/__init__.py": "43a1adfe4a2fa0216954df588927f103db6952db3f42e045094cf7c50f597c7a",
-      "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/capture.py": "fbced2e51e4e8384305774695d3839d60b2ea13e1f4c96b32fe34c7cee5251d1",
-      "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/config.py": "f7c7ce09e8f6c9ca166c374e00d88f5a19a116b0046444e796a14ee4dcf026f6",
-      "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/contacts.py": "3533334d2b6e1168a2333d47cf483b1e54d4ced572dfef36ba777f94211ca4fc",
-      "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/env.py": "6db9480999639205d9b7a0a73e5dd4c0b02161eaabe1994afff725b00c19b189",
-      "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/math.py": "cdc1f86850b360546f138fa28102e20f77b194b291a6fb62f4aac1a23dd5cc07",
-      "packages/hexapod_env/hexapod_env/tasks/mkii_rs05/register.py": "9f2ca406f74b3ff8d0c7c16d84f3659bb31c8bde91b1fcbf553b9aa7ccef8502"
-    }
-  }
+  "archived_documents": []
 }

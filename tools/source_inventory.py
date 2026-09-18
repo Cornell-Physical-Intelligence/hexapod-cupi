@@ -12,9 +12,9 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = 'configs/source_inventory.json'
-SCOPES = ('tools', 'experiments/c_length_study/tools', 'experiments/terrain/tools')
+SCOPES = ('tools', 'contracts', 'navigation', 'mission')
 # Maintained prototypes keep tests outside their top-level tool scope.
-TOP_LEVEL_SCOPES = ('locomotion', 'experiments/trajectory_optimization')
+TOP_LEVEL_SCOPES = ('locomotion', 'locomotion/priors')
 
 
 def read_inventory(root=ROOT):
@@ -28,7 +28,7 @@ def check(root=ROOT):
     if len(paths) != len(set(paths)):
         raise ValueError('Duplicate source ownership')
     actual = {str(p.relative_to(root)) for directory in SCOPES
-              for p in (root / directory).rglob('*.py') if '__pycache__' not in p.parts}
+              for p in (root / directory).rglob('*.py') if '__pycache__' not in p.parts and 'tests' not in p.parts}
     actual.update(str(p.relative_to(root)) for directory in TOP_LEVEL_SCOPES
                   for p in (root / directory).glob('*.py'))
     if actual != set(paths):
@@ -49,8 +49,8 @@ def check(root=ROOT):
         if hashlib.sha256(original).hexdigest() != expected:
             raise ValueError('Retired source bytes differ: '+name)
     # Production code must not import frozen evidence or historical runtimes.
-    for path in [*(root / 'packages').rglob('*.py'), *(root / 'locomotion').glob('*.py')]:
-        if '__pycache__' in path.parts:
+    for path in [p for scope in ('contracts', 'navigation', 'mission', 'locomotion', 'packages') for p in (root / scope).rglob('*.py')]:
+        if '__pycache__' in path.parts or 'tests' in path.parts:
             continue
         tree = ast.parse(path.read_text())
         for node in ast.walk(tree):

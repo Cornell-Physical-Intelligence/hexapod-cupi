@@ -112,7 +112,7 @@ class ConfigTests(unittest.TestCase):
 
     def test_real_canonical_assets(self):
         repo = Path(__file__).resolve().parents[2]
-        model = verify_assets(repo / "artifacts/mkii_updated_2026-09-10/usd_002/rs05_mass_corrected",
+        model = verify_assets(repo / "robot/hexapod_mkii_updated_v1/usd",
                               repo / "robot/hexapod_mkii_updated_v1/model_rs05_mass_corrected.json")
         self.assertEqual(len(model["links"]), 19)
 

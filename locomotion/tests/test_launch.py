@@ -9,7 +9,7 @@ from locomotion import launch, reservation
 
 ROOT = Path(__file__).resolve().parents[2]
 NEW = ROOT / 'locomotion'
-GUARD_PARENT = ROOT / 'artifacts/restart_2026-09-14/standing_translation_guard_001/launch_guarded_diagnostic.py'
+GUARD_PARENT = ROOT / 'locomotion/tests/fixtures/launch_guarded_diagnostic.py'
 
 
 def functions(path):

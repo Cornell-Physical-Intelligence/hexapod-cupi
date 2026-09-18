@@ -1,32 +1,36 @@
 # Hexapod
 
-Survey an operator-drawn region, stopping with a steady deck to collect measurements
-for a 3D terrain map in local site coordinates.
+You develop a robot that surveys an operator-drawn region and stops to collect
+measurements for a terrain map. Start with [ARCHITECTURE](ARCHITECTURE.md) for
+requirements and [STATUS](STATUS.md) for measured progress.
 
-- [Architecture](ARCHITECTURE.md): agreed requirements, boundaries and team workflow.
-- [Progress](https://cornell-physical-intelligence.github.io/hexapod-cupi/#roadmap): the four roadmap markers, evidence and open definitions.
-- [STATUS](STATUS.md): generated text view of the same progress.
-- [Contributor guide](CLAUDE.md): source locations, invariants and commands; `AGENTS.md` points here.
-- [Contributing](CONTRIBUTING.md): team repo standards, branch naming and pull request rules.
-- [Reference documents](docs/README.md): model/gate references, operations and archived history.
+| Directory | Maintained scope |
+| --- | --- |
+| `robot/` | Approved model, portable simulation inputs and CAD inspection. |
+| `locomotion/` | Native simulator, current PPO, evaluation and guarded launch; optional optimizer in `priors/`. |
+| `contracts/` | Velocity commands, planar poses and existing release identity fields. |
+| `navigation/` | Example waypoint follower; planning and localization remain pending. |
+| `mission/` | Sensor-pattern and transport prototypes; survey recording/export remain pending. |
+| `viewer/` | Interactive inspection of the approved robot. |
+| `docs/`, `site/` | Maintained procedures and published progress. |
 
-The approved robot is selected by [robot/active_model.json](robot/active_model.json).
-Historical walking results have their own model and qualification limits.
-
-Start locomotion work at the [kernel guide](locomotion/README.md): one native
-environment, one command/reward task, stock PPO and measured policy evaluation.
-The guide maps each file to its role and explains the larger project boundary.
+Read [TRAINING](docs/TRAINING.md) for your proposed paper-reproduction order and
+its prerequisite review. The foundation preserves the current algorithm.
 
 ```sh
 uv sync --locked
+uv run python -m locomotion.inputs check
 uv run python -m unittest discover -s locomotion/tests
-uv run python -m unittest discover -s isaaclab/tests
-uv run python -m unittest discover -s robot/tests
-python3 tools/source_inventory.py list --classification current
+uv run python -m unittest discover -s tests
 python3 tools/project_site.py check
-python3 tools/project_site.py build
 ```
 
-Start with your issue's architecture section and input fixtures. Evidence and
-historical source copies remain available under `artifacts/`; they are excluded
-from default source search. The CAD viewer is under `viewer/`.
+[CLAUDE](CLAUDE.md) owns contributor instructions. [CONTRIBUTING](CONTRIBUTING.md)
+lists the required checks. Run the viewer with `npm ci` and `npm run dev` from
+`viewer/`. Use the existing [Pages site](https://cornell-physical-intelligence.github.io/hexapod-cupi/)
+for videos and the append-only update history.
+
+The [archive index](configs/archive.json) pins retired results and source in Git.
+Use [source release procedures](docs/PIPELINE_LINEAGES.md) to restore a named path.
+A shallow clone supports normal development; full Git history retains its size.
+Keep new run payloads outside the checkout and publish selected verified files.

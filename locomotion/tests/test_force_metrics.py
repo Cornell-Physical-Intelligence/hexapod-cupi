@@ -15,8 +15,8 @@ from locomotion.evaluate import run_batch
 from locomotion.env_config import JOINT_NAMES, MODEL_SHA256
 from locomotion.force_metrics import report_for, sha, summarize, write_summary
 from locomotion.tests.test_evaluate import FakeCapture, FakeNative
-from experiments.trajectory_optimization.prepare import prepare
-from experiments.trajectory_optimization.model import ROOT
+from locomotion.priors.prepare import prepare
+from locomotion.priors.model import ROOT
 
 
 def fixture():
@@ -54,7 +54,7 @@ class ForceMetricsTests(unittest.TestCase):
     def test_fresh_pack_binds_and_imports_load_reporter_without_repository(self):
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp)/'pack'
-            prepare(ROOT/'artifacts/trajectory_optimizer_20260917/solve_002', output,
+            prepare(ROOT/'locomotion/priors/tests/fixtures/solve', output,
                     '/home/orionh/HEXAPOD_runs/restart_20260914/test_force_metrics')
             source = output/'source'
             manifest = json.loads((source/'FREEZE_SHA256.json').read_text())

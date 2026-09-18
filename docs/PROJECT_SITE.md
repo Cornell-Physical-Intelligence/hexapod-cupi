@@ -83,6 +83,8 @@ unchanged. See [PIPELINE_LINEAGES.md](PIPELINE_LINEAGES.md).
 
 `.github/workflows/pages.yml` validates pushes/PRs and deploys main to
 `https://cornell-physical-intelligence.github.io/hexapod-cupi/`.
+The builder verifies selected files under `site/assets/` and resolves archived
+references through `configs/archive.json` without loading old Git objects.
 Only explicitly selected public files enter `site/dist`; generated output is
 ignored by Git. Verify the deployed revision after publishing the integrated
 change. Preserve the existing GitHub Pages destination and evidence permissions.
