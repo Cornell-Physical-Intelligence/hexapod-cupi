@@ -44,7 +44,7 @@ separate; this robot has mass 7.47 kg against the paper's 25.5 kg.
 
 Declare the actuator adaptation before Step 1. The authors use the CSP law
 `tau = Kp2 * (Kp1 * (q_des - q) - q_dot)`
-([§III, p. 2; Fig. 2, p. 3](../hexapod_locomotion.pdf#page=2)).
+([§III, p. 2; Fig. 2, p. 3](https://arxiv.org/pdf/2511.03167v1#page=2)).
 Retain this project's approved motor model and target-change limiter; document
 their differences from that controller with the new task configuration.
 
@@ -54,21 +54,21 @@ allocation and supplies no native admission.
 
 | Step | Work and prerequisite | Spark |
 | --- | --- | --- |
-| 1. Reward v2 | Audit [Table I, p. 3](../hexapod_locomotion.pdf#page=3), for formulas, units, signs and weights before implementing a versioned paper reward with CPU tests. Resolve its printed positive tracking exponent against the intended decreasing reward. Define command-scaled tracking as a separate adaptation; resolve the stationary-reward criterion below. | No |
+| 1. Reward v2 | Audit [Table I, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3), for formulas, units, signs and weights before implementing a versioned paper reward with CPU tests. Resolve its printed positive tracking exponent against the intended decreasing reward. Define command-scaled tracking as a separate adaptation; resolve the stationary-reward criterion below. | No |
 | 2. Throughput profile | Measure physics, contact, observation and learner cost plus memory across replica counts. The current guards cap replicas at 128 and updates at 2,000; the paper uses 4,096 robots. Extend scale through a named configuration and isolation tests. Change the 153 SDF colliders only if measurements justify an asset variant, then repeat one-robot and batch admission. | Yes |
-| 3. Omni motion dataset | Extend [`optimize.py`](../locomotion/priors/optimize.py) from a forward cycle to eight bearings, both yaw directions and the arcs in `command_bank`. Require alternating tripod demonstrations on the approved URDF, with a consistent gait cycle across directions ([§III-A–B, p. 3](../hexapod_locomotion.pdf#page=3)). | No |
+| 3. Omni motion dataset | Extend [`optimize.py`](../locomotion/priors/optimize.py) from a forward cycle to eight bearings, both yaw directions and the arcs in `command_bank`. Require alternating tripod demonstrations on the approved URDF, with a consistent gait cycle across directions ([§III-A–B, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3)). | No |
 | 4. Native motion validation | Replay each motion with [`replay_native.py`](../locomotion/priors/replay_native.py) and require its matching screen before dataset admission. Construct AMP states from native replay. Match feature order, frames, units and the 20 ms interval; exclude terminal-to-reset pairs. | Yes |
-| 5. Network architecture | Implement Table III's velocity estimator, memory encoder over five proprioception frames, low-level actor, privileged encoder and critic. Train the estimator with supervised simulation velocity labels ([§IV-A–B; Table III, p. 4](../hexapod_locomotion.pdf#page=4)). Supply the full 42-value privileged state, including base height and perturbations, plus collision states ([§III, p. 2](../hexapod_locomotion.pdf#page=2)). Test shapes and gradient paths; keep privileged inputs out of the actor. Add the terrain encoder with Step 8. Current actor/critic networks are plain [256, 256, 128] MLPs. | No |
-| 6. AMP integration | Resolve the gradient-penalty ambiguity below, then implement the least-squares discriminator and style reward from Eqs. (1)–(2). Update PPO and the discriminator together ([§IV-B, p. 4](../hexapod_locomotion.pdf#page=4)). Check integration on flat ground; defer the final reward comparison to Step 9. Use the 13 learning probes as diagnostics and the full gate for qualification. | Yes |
+| 5. Network architecture | Implement Table III's velocity estimator, memory encoder over five proprioception frames, low-level actor, privileged encoder and critic. Train the estimator with supervised simulation velocity labels ([§IV-A–B; Table III, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). Supply the full 42-value privileged state, including base height and perturbations, plus collision states ([§III, p. 2](https://arxiv.org/pdf/2511.03167v1#page=2)). Test shapes and gradient paths; keep privileged inputs out of the actor. Add the terrain encoder with Step 8. Current actor/critic networks are plain [256, 256, 128] MLPs. | No |
+| 6. AMP integration | Resolve the gradient-penalty ambiguity below, then implement the least-squares discriminator and style reward from Eqs. (1)–(2). Update PPO and the discriminator together ([§IV-B, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). Check integration on flat ground; defer the final reward comparison to Step 9. Use the 13 learning probes as diagnostics and the full gate for qualification. | Yes |
 | 7. Domain randomization | Implement Table II with frozen model-specific values. Declare adaptations for the different robot and simulator before comparing runs. | Yes |
 | 8. Terrain curriculum | Add terrain levels, the critic height scan and terrain encoder. Retain admitted flat behavior. | Yes |
-| 9. Reward and robustness comparisons | After Steps 7–8, compare task plus penalty, task plus style, and task plus style plus penalty with matched transitions and five seeds. Assess flat tracking and terrain progression ([§V-A; Figs. 3–4, pp. 4–5](../hexapod_locomotion.pdf#page=4)). Test push disturbances and reproduce the baseline controllers as separate comparisons ([§V-B, p. 5](../hexapod_locomotion.pdf#page=5)). Keep RMA/MPC work separate from the reward ablation. | Yes |
+| 9. Reward and robustness comparisons | After Steps 7–8, compare task plus penalty, task plus style, and task plus style plus penalty with matched transitions and five seeds. Assess flat tracking and terrain progression ([§V-A; Figs. 3–4, pp. 4–5](https://arxiv.org/pdf/2511.03167v1#page=4)). Test push disturbances and reproduce the baseline controllers as separate comparisons ([§V-B, p. 5](https://arxiv.org/pdf/2511.03167v1#page=5)). Keep RMA/MPC work separate from the reward ablation. | Yes |
 
 Freeze the chosen PPO settings and terrain curriculum thresholds in the task
 configuration before training. The authors omit these details from
-[§IV-B–V, p. 4](../hexapod_locomotion.pdf#page=4); label them as implementation
+[§IV-B–V, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4); label them as implementation
 decisions. The authors train with randomization and a terrain curriculum
-([Table II, p. 3; §IV-B, p. 4](../hexapod_locomotion.pdf#page=3)).
+([Table II, p. 3; §IV-B, p. 4](https://arxiv.org/pdf/2511.03167v1#page=3)).
 
 ### Step 1: tracking-reward criterion
 
@@ -83,13 +83,13 @@ The paper's 0.15 kernel and command range require a separate comparison.
 ### Paper ambiguities
 
 The authors print a parameter gradient, `grad_phi D_phi(T_s)`, in
-[Eq. (1), p. 4](../hexapod_locomotion.pdf#page=4). The proposed input-gradient
+[Eq. (1), p. 4](https://arxiv.org/pdf/2511.03167v1#page=4). The proposed input-gradient
 penalty differentiates with respect to the transition instead. Resolve that
 difference against the cited AMP method or author code before implementation;
 record the chosen formula and its source.
 
 The authors call the AMP state 61 values in
-[§III-A, p. 3](../hexapod_locomotion.pdf#page=3), but their foot-height description
+[§III-A, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3), but their foot-height description
 accounts for fewer values. The retained kernel uses six 3D foot positions.
 Declare that interpretation before discriminator training and verify the same features on
 native demonstrations and policy rollouts. The optimizer's point contacts omit
