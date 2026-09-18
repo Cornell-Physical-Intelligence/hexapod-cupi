@@ -2,7 +2,7 @@
 
 Raw CAD and the separate RS05 nominal-mass estimate are listed independently. SI units: mass kg, COM m, inertia kg·m². Each tensor is about the listed COM and expressed in that link’s axes. The off-diagonal entries are the matrix entries used by URDF; they are not negated engineering products of inertia. Values below are rounded for display; JSON and URDF retain full floating-point precision.
 
-Raw source: **5.147603654203134 kg**. Nominal motor corrected candidate: **7.466088235225788 kg**. The correction restores missing catalog mass with a provisional solid housing cylinder; it does not identify rotor, gearbox, friction or reflected inertia. See [correction provenance](RS05_VARIANTS.md) and [full tensors and additions](rs05_mass_correction.json).
+Raw source: **5.147603654203134 kg**. Nominal motor corrected candidate: **7.466088235225788 kg**. The correction restores missing catalog mass with a provisional solid housing cylinder; it does not identify rotor, gearbox, friction or reflected inertia. See [correction provenance](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/3ccfd4a12aa7b95347c0884ac3ca466cad97b8aa/robot/hexapod_mkii_updated_v1/RS05_VARIANTS.md) and [full tensors and additions](rs05_mass_correction.json).
 
 The source has 108 zero-mass vendor components and 1,645 positive-mass components. They are retained as visual parts inside positive-mass rigid bodies. All 19 aggregate tensors are symmetric, positive definite and physically consistent in each variant.
 

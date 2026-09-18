@@ -41,9 +41,9 @@ lf/lm/lr/rf/rm/rr. The approved joint order lives in
 
 [UPDATED_CAD_IMPORT](../../docs/UPDATED_CAD_IMPORT.md) records the recovered
 articulation and joint limits. [MASS_INERTIA](MASS_INERTIA.md) and
-[RS05_VARIANTS](RS05_VARIANTS.md) record the inertias and motor correction.
+[motor correction](rs05_mass_correction.json) record the inertias and motor correction.
 The inspection and raw-CAD URDFs preserve the source comparison; use the
-mass-corrected URDF for training. Read [BUILD_REPORT](BUILD_REPORT.md) for the
+mass-corrected URDF for training. Read [the frozen import report](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/3ccfd4a12aa7b95347c0884ac3ca466cad97b8aa/robot/hexapod_mkii_updated_v1/BUILD_REPORT.md) for the
 import audit and [overlap_review_parts.json](overlap_review_parts.json) for the
 known source screw/tibia overlaps.
 

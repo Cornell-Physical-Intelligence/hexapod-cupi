@@ -17,10 +17,9 @@ loop without reading old experiment launchers or a second environment port.
 
 The controller retains 400 Hz physics, 50 Hz policy actions, a 0.35 rad action
 scale, the 0.040 rad target-change limit per control and the provisional 1.6 N·m
-motor cap. Cleanup preserves the command sampler, reward coefficients and
-numerical evaluation gates. It removes the discarded base reward and omits
-motion-feature allocation during PPO. Evaluation retains those recorded fields
-for comparison with saved traces.
+motor cap. [`task.py`](task.py) owns reward coefficients and command sampling;
+[`evaluation.py`](evaluation.py) owns the numerical gates. Read
+[TRAINING](../docs/TRAINING.md) for the proposed paper-method extensions.
 
 ## Run and verify
 
@@ -63,8 +62,7 @@ binding. Navigation can then consume velocity commands and stopping status;
 survey recording can consume pose and measurement quality. The navigation example consumes shared commands. Historical runtime bindings
 remain in Git until a canonical replacement receives its own parity evidence.
 
-The optional trajectory optimizer and native replay live in `priors/`. The
-completed action-initialization comparison remains in Git. You can package
-canonical inputs with `python -m locomotion.inputs pack --help`; the package
-no longer loads geometry from an old experiment directory. Shared contracts
-live in `contracts/`; hardware runtime binding remains pending.
+The optional trajectory optimizer and native replay live in `priors/`. Package
+canonical inputs with `python -m locomotion.inputs pack --help`. Use the
+[archive guide](../docs/PIPELINE_LINEAGES.md) for historical checkpoints and
+source packs; preserve their original identities.

@@ -1,24 +1,20 @@
-## Behavior and context
+## Change
 
-Link the work packet and R/V IDs. Explain the resulting behavior, affected
-contract/version, and any design decision that changed.
+Explain the resulting behavior and link the issue or requirement that applies.
+Name changed contracts and remaining limits.
 
-## Verification evidence
+## Verification
 
-Record commands/procedures actually run and their results. Link representative
-input/output or experiment artifacts, including relevant failure cases. State
-which checks need simulator or hardware access and remain outstanding.
+Record the checks you ran and their results. Give a reproduction command or
+procedure; identify simulator or hardware checks that remain pending.
 
-## Review and integration
+## Publication
 
-Give the reviewer a short reproduction procedure. Name the required human
-reviewer(s), remaining limitations and dependent work. Shared contracts need
-producer/consumer review; powered changes need the designated hardware checks.
-The author must understand and explain all submitted code, including AI output.
+Link the new `site/updates/` record and evidence. Record the full-diff site check,
+build and renderer results from `docs/PROJECT_SITE.md`. Name the roadmap marker
+when the change affects a capability.
 
-## Roadmap and publication
+## Review
 
-Name the poster milestone (`walking`, `stage2`, `stage3`, or `mission`). Link the
-new `site/updates/` record, evidence, and next action; update `site/project.json`
-when the displayed project changes. Record the contributor check and build
-results required by `docs/PROJECT_SITE.md`.
+Identify required reviewers for shared contracts or hardware changes. Confirm
+that you understand the submitted code, including agent output.

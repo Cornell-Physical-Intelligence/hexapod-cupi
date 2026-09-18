@@ -10,7 +10,7 @@ assigned issue. Read a reference below when its subject is part of your task.
 | [Leg stand](LEG_STAND_HARDWARE.md) | Dated component selection, wiring and unfinished calibration requirements. |
 | [Operations](OPERATIONS.md) | Host access, ownership, launch procedure and recovery controls. |
 | [Compute coordination](SPARK_COMPUTE_COORDINATION.md) | Current reservation policy; release requires James's direction. |
-| [Training contracts](TRAINING.md) | Current kernel contract, decision-relevant results and evaluation scope. |
+| [Training contracts](TRAINING.md) | Kernel contract, proposed paper-reproduction order and evaluation scope. |
 | [Source lineages](PIPELINE_LINEAGES.md) | Verify historical source and publish a new source identity. |
 | [Progress publication](PROJECT_SITE.md) | Update the registry, generate STATUS and publish Pages. |
 
@@ -18,7 +18,5 @@ assigned issue. Read a reference below when its subject is part of your task.
 them to answer a specific historical question; their instructions do not
 authorize current work.
 
-Requirements belong in ARCHITECTURE; progress belongs in `site/project.json`;
-assignments belong in issues; complete results belong outside the checkout; selected public evidence belongs in `site/assets/`. Extend an existing
-reference for a durable procedure. Record one result summary with its raw evidence. Avoid duplicate decision,
-review and handoff narratives.
+Use [CONTRIBUTING](../CONTRIBUTING.md) for documentation ownership and publication.
+Keep one maintained procedure per subject and link its evidence.
