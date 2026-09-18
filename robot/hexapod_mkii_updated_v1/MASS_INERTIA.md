@@ -16,7 +16,7 @@ The source has 108 zero-mass vendor components and 1,645 positive-mass component
 |Vendor motor components|666|1.119515419|
 |Total|1753|5.147603654|
 
-Categories describe identity/grouping, not chemical materials. Source appearance colors do not establish friction, restitution or density. The complete per-instance and per-mesh inventory is in the [mass ledger](../../artifacts/mkii_updated_2026-09-10/import_001/mass_audit/evidence/part_instances.csv).
+Categories describe identity/grouping, not chemical materials. Source appearance colors do not establish friction, restitution or density. The complete per-instance and per-mesh inventory is in the [mass ledger](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/mkii_updated_2026-09-10/import_001/mass_audit/evidence/part_instances.csv).
 
 ## Raw CAD
 

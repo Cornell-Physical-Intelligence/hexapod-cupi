@@ -18,7 +18,7 @@ def save(path, value):
 
 def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
-            checkpoint_declaration_sha=None, experiment=False, root=ROOT):
+            checkpoint_declaration_sha=None, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     if (not remote_root.is_absolute() or REMOTE_ROOT not in remote_root.parents
             or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay')
@@ -46,16 +46,20 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
     package.mkdir(parents=True)
     for path in sorted((root/'locomotion').glob('*.py')):
         shutil.copy2(path, package/path.name)
-    if experiment or mode == 'replay':
-        optional = source/'experiments/trajectory_optimization'
+    contracts = source/'contracts'
+    contracts.mkdir()
+    for name in ('__init__.py', 'release.py'):
+        shutil.copy2(root/'contracts'/name, contracts/name)
+    if mode == 'replay':
+        optional = source/'locomotion/priors'
         optional.mkdir(parents=True)
-        for name in ('forward_experiment.py', 'replay_native.py'):
-            shutil.copy2(root/'experiments/trajectory_optimization'/name, optional/name)
+        for name in ('__init__.py', 'replay_native.py'):
+            shutil.copy2(root/'locomotion/priors'/name, optional/name)
     save(source/'FREEZE_SHA256.json', {p.relative_to(source).as_posix(): sha(p)
         for p in sorted(source.rglob('*.py'))})
     freeze = sha(source/'FREEZE_SHA256.json')
     binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': True,
-        'module': 'experiments.trajectory_optimization.replay_native' if mode == 'replay' else 'locomotion.train',
+        'module': 'locomotion.priors.replay_native' if mode == 'replay' else 'locomotion.train',
         'mode': mode, 'source': str(remote_root/'source'), 'output': str(remote_root/'run'),
         'asset': declared['asset'], 'geometry_source': declared['geometry_source'],
         'prior': str(Path(declared['stance']).parent), 'input_files': declared['input_files'],

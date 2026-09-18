@@ -14,7 +14,7 @@ from locomotion.env_config import JOINT_NAMES
 from locomotion.task import TaskConfig, TrainingTask, command_bank, measured_reward, articulation_reach, quiet_cost_tail, REWARD_VERSION
 
 ROOT = Path(__file__).resolve().parents[2]
-GEOMETRY = ROOT/"artifacts/restart_2026-09-14/standing_translation_preparation_001/source/geometry/geometry.json"
+GEOMETRY = ROOT/"robot/hexapod_mkii_updated_v1/geometry/geometry.json"
 MODEL = json.loads((ROOT/"robot/hexapod_mkii_updated_v1/model_rs05_mass_corrected.json").read_text())
 
 
@@ -338,7 +338,7 @@ class TaskTests(unittest.TestCase):
         self.assertEqual(last[JOINT_NAMES[2]]["beyond_limit_rows"], 1)
 
     def test_reporting_preserves_frozen014_outputs_commands_and_rng_across_resets(self):
-        path = ROOT/"artifacts/restart_2026-09-14/paper_walk_execution_001/source_014/task.py"
+        path = ROOT/"locomotion/tests/fixtures/task_source014.py"
         self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(),
             "55a9517b5f7a8013bc54ba36fcdf0e28e9f306e89693683866a8425c9ceaf4e4")
         name = "paper_task_reporting_equivalence_fixture"

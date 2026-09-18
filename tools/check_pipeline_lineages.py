@@ -19,11 +19,12 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVED_MANIFEST = "isaaclab/deploy/stage2_pipeline.sha256"
+ARCHIVED_MANIFEST = "configs/releases/stage2_pipeline.sha256"
+ARCHIVED_SOURCE_MANIFEST = "isaaclab/deploy/stage2_pipeline.sha256"
 ARCHIVED_REF = "81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df"
 ARCHIVED_MANIFEST_SHA256 = "19fc816cf9c53a79be8e14831daa58a12eba3f7f07c5fca80d03f2dc947ccda1"
 ARCHIVED_ENTRY_COUNT = 112
-CURRENT_MANIFEST = "isaaclab/deploy/locomotion_kernel_20260917_v12_pipeline.sha256"
+CURRENT_MANIFEST = "configs/releases/foundation_20260918_v1.sha256"
 CURRENT_HEADER = (
     "# hexapod.locomotion_kernel.v1\n"
     f"# Archived source commit: {ARCHIVED_REF}\n"
@@ -31,10 +32,11 @@ CURRENT_HEADER = (
     "# Current coverage is independent of historical model dependencies.\n"
 )
 # Cover maintained source and tests, without recursively pinning old releases or results.
-CURRENT_TREES = ("packages", "tools", "isaaclab/tests", "robot/tests")
-CURRENT_TOP_LEVEL = ("locomotion", "locomotion/tests", "experiments/trajectory_optimization",
-                     "experiments/trajectory_optimization/tests")
-CURRENT_FILES = ("robot/active_model.json", "configs/source_inventory.json", "configs/locomotion_spark.json",
+CURRENT_TREES = ("tools", "contracts", "navigation", "mission", "tests", "robot/tests")
+CURRENT_TOP_LEVEL = ("locomotion", "locomotion/tests", "locomotion/priors",
+                     "locomotion/priors/tests")
+CURRENT_FILES = ("robot/active_model.json", "configs/source_inventory.json", "configs/archive.json", "configs/locomotion_spark.json",
+                 "robot/hexapod_mkii_updated_v1/inputs.json",
                  ".github/workflows/tests.yml", "pyproject.toml", "uv.lock", ".python-version")
 SOURCE_SUFFIXES = {".py", ".toml", ".json", ".yaml", ".yml"}
 
@@ -82,12 +84,12 @@ def read_archived_manifest(root, *, expected_sha256=ARCHIVED_MANIFEST_SHA256,
 
 def verify_historical(root=ROOT, *, source_ref=ARCHIVED_REF,
                       expected_manifest_sha256=ARCHIVED_MANIFEST_SHA256,
-                      expected_count=ARCHIVED_ENTRY_COUNT):
+                      expected_count=ARCHIVED_ENTRY_COUNT, source_manifest=ARCHIVED_SOURCE_MANIFEST):
     """Read immutable Git objects into an isolated tar; never check out old code."""
     root = Path(root).resolve()
     content, expected = read_archived_manifest(root,
         expected_sha256=expected_manifest_sha256, expected_count=expected_count)
-    result = subprocess.run(["git", "show", f"{source_ref}:{ARCHIVED_MANIFEST}"], cwd=root,
+    result = subprocess.run(["git", "show", f"{source_ref}:{source_manifest}"], cwd=root,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
     if result.returncode:
         raise ValueError("Pinned historical source is unavailable; fetch its Git history before checking")

@@ -11,40 +11,32 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-        with:
-          # The archived release is checked from its exact immutable Git tree.
-          fetch-depth: 0
-
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-
       - name: Install the pinned interpreter
         run: uv python install
-
       - name: Sync the locked environment
         run: uv sync --locked
-
-      - name: Run the test suite
-        run: uv run python -m unittest discover -s isaaclab/tests
-
-      - name: Run C-study, terrain and perception tests
-        run: uv run python -m unittest discover -s robot/tests
-
-      - name: Run locomotion kernel and recorded parity checks
-        run: uv run python -m unittest discover -s locomotion/tests
-
-      - name: Run trajectory optimizer dynamics and replay-input checks
-        run: uv run python -m unittest discover -s experiments/trajectory_optimization/tests
-
-      - name: Verify owned source boundaries
-        run: uv run python tools/source_inventory.py check
-
-      - name: Verify the pinned C-study runtime
-        run: uv run python tools/c_study_runtime.py
-
-      - name: Verify the frozen Stage2 source lineage
-        run: uv run python tools/check_pipeline_lineages.py historical
-
-      - name: Verify the current integrated release manifest
-        run: uv run python tools/check_pipeline_lineages.py current --manifest isaaclab/deploy/locomotion_kernel_20260917_v12_pipeline.sha256
+      - name: Test maintained packages and archive boundaries
+        run: |
+          for suite in contracts navigation mission robot locomotion locomotion/priors; do
+            uv run python -m unittest discover -s "$suite/tests"
+          done
+          uv run python -m unittest discover -s tests
+      - name: Verify source and canonical input identities
+        run: |
+          uv run python tools/source_inventory.py check
+          uv run python tools/archive.py check
+          uv run python -m locomotion.inputs check
+          uv run python tools/check_pipeline_lineages.py current
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: viewer/package-lock.json
+      - name: Build the approved robot viewer
+        working-directory: viewer
+        run: |
+          npm ci
+          npm run build

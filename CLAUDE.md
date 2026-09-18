@@ -18,19 +18,20 @@ context in Git instead of copying it into new prompts or maintained guides.
 
 ## Source boundaries
 
-- `locomotion/` owns the canonical simulator, reward, stock PPO, evaluation and
-  guarded Spark launcher. `robot/active_model.json` selects its approved robot.
-- `experiments/trajectory_optimization/` owns the optional optimizer and example
-  comparison. Its native packers call the kernel.
-- `packages/` retains shared contracts and historical runtime/navigation code.
-  Core uses stdlib; runtime depends on core and stdlib; navigation depends on
-  core and must not import simulation or runtime.
-- `tools/` owns repository and asset commands. `configs/source_inventory.json`
-  records ownership and the Git identities of retired source and context.
-- `artifacts/` holds results and replay inputs. Production code must not import
-  its frozen source copies. Historical task IDs retain their original semantics.
+- `robot/` holds the approved model and its canonical simulation inputs.
+  `robot/active_model.json` selects the model; `inputs.json` pins input bytes.
+- `locomotion/` owns simulation, reward, stock PPO, evaluation and guarded
+  execution. `locomotion/priors/` retains the optional trajectory optimizer.
+- `contracts/` owns commands, poses and checkpoint identity fields.
+  `navigation/` consumes contracts; `mission/` retains sensor transport.
+  Neither package imports simulation. Planner and survey execution remain open.
+- `tools/` owns asset, archive and publication commands.
+  `configs/source_inventory.json` records maintained source ownership.
+- Keep new results outside the source checkout. `configs/archive.json` pins
+  retired paths to Git objects. Preserve selected public media in `site/assets/`.
+  Historical task IDs retain their original meaning.
 - `site/project.json` owns current progress. Generate `STATUS.md` from it.
-  Retain decision-relevant findings; use Git history for the execution journal.
+  Keep decision-relevant findings; use Git history for the execution journal.
 
 ## Model and result invariants
 
@@ -69,11 +70,15 @@ Run focused checks while editing, then the required checks in
 ```sh
 uv sync --locked
 uv run python -m unittest discover -s locomotion/tests
-uv run python -m unittest discover -s isaaclab/tests
+uv run python -m unittest discover -s tests
+uv run python -m unittest discover -s contracts/tests
+uv run python -m unittest discover -s navigation/tests
+uv run python -m unittest discover -s mission/tests
 uv run python -m unittest discover -s robot/tests
-uv run python -m unittest discover -s experiments/trajectory_optimization/tests
+uv run python -m unittest discover -s locomotion/priors/tests
 python3 tools/source_inventory.py check
-python3 tools/check_pipeline_lineages.py historical
+python3 tools/archive.py check
+uv run python -m locomotion.inputs check
 python3 tools/check_pipeline_lineages.py current
 ```
 

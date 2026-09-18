@@ -1,46 +1,40 @@
-# Source release verification
+# Source release and archive verification
 
-Source identity establishes which files were checked. Robot admission and policy
-acceptance require matching physical/evaluation evidence under [ARCHITECTURE](../ARCHITECTURE.md).
-The checker's historical `mkii_fourbar_v1` label does not qualify the canonical model.
-
-## Verify a checkout
+You verify current code without fetching retired experiments:
 
 ```sh
-python3 tools/check_pipeline_lineages.py historical
 python3 tools/check_pipeline_lineages.py current
-python3 tools/c_study_runtime.py
+python3 tools/archive.py check
 ```
 
-The historical check verifies `stage2_pipeline.sha256` against the immutable Git
-revision `81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df`. Fetch repository history first.
-The current check selects `locomotion_kernel_20260917_v12_pipeline.sha256`.
-It hashes the kernel, its tests, optional optimizer code, repository tools and
-package source, plus the exact model selected by `robot/active_model.json`.
-It has no four-bar asset dependency and does not import an old training contract.
-Nested experiment outputs and frozen attempt copies remain outside maintained
-source coverage. Native allocations carry their own source and input manifests.
+The current manifest is `configs/releases/foundation_20260918_v1.sha256`.
+It covers maintained source and tests, with the selected model identities.
+The fixture manifest and model-input manifest pin required immutable inputs.
+Source identity supplies no native admission or walking acceptance.
 
-The [inventory](../configs/source_inventory.json) records each removed source
-and test at revision `33ec6f16d70c8b0e74a9608d69be7c563c11bfbb` with a SHA-256.
-The inventory check reads those Git objects and verifies their bytes. The Pages
-builder resolves links to removed files against that revision. Existing frozen
-package guides, published manifests and result artifacts retain their bytes.
+## Restore historical work
 
-## Publish a source change
+`configs/archive.json` pins the complete pre-consolidation tree at
+`5e65918020dc9ef2d72da8dad0a346016b98728d`. Published reference mappings retain
+older commits when their files preceded that tree. Existing update records and
+result bytes retain their original identities. Git history has not been rewritten.
 
-1. Preserve all published manifests. Give the successor a new filename.
-2. Update the checker's current manifest and the CI selection to that filename.
-   Keep preceding manifests unchanged; historical verification has its own pinned scope.
-3. After edits and focused checks, generate the new manifest with
-   `python3 tools/check_pipeline_lineages.py generate --manifest <new-path>`.
-   The command rejects overwriting an existing manifest.
-4. Verify historical and current identities, run required suites, and add an
-   append-only site update identifying the change and its qualification limits.
-5. Commit the coherent release. Use its pinned checkout for reproduction;
-   source relocation does not transfer old admission or checkpoint compatibility.
+```sh
+git fetch --unshallow
+python3 tools/archive.py check --git-objects
+python3 tools/archive.py restore artifacts --destination ../hexapod-restored
+python3 tools/check_pipeline_lineages.py historical
+```
 
-The [pre-cleanup release history](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/docs/PIPELINE_LINEAGES.md)
-explains older manifests. Keep their bytes and original model labels. The v12
-kernel release replaces active implementation paths and introduces no new
-walking result or checkpoint compatibility claim.
+Use `git fetch --unshallow` for a shallow clone. Choose a fresh restore destination;
+restore accepts a single file or subtree and refuses to overwrite a directory.
+The historical check uses the unchanged Stage 2 manifest at its original commit.
+Run historical tests from a restored checkout of their source revision.
+
+## Publish current code
+
+Add a fresh manifest under `configs/releases/`, update the checker and CI, then
+run `python3 tools/check_pipeline_lineages.py generate --manifest` with that path.
+Generation rejects overwriting a published manifest. Add an append-only site
+update and validate the complete diff before pushing. Preserve earlier manifests
+in their Git revisions. Verify exact-revision CI and the deployed Pages revision.

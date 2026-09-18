@@ -17,15 +17,14 @@ jobs:
       pages: read
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Test the contributor and evidence checks
-        run: python3 -m unittest discover -s isaaclab/tests -p 'test_project*.py'
+        run: python3 -m unittest discover -s tests -p 'test_project*.py'
       - name: Require a central update for every repository change
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           if [ -n "$BASE_SHA" ] && [ "$BASE_SHA" != "0000000000000000000000000000000000000000" ]; then
+            git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null || git fetch --depth=1 origin "$BASE_SHA"
             python3 tools/project_site.py check --base "$BASE_SHA"
           else
             python3 tools/project_site.py check

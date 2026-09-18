@@ -24,9 +24,9 @@ walking/stopping → terrain → survey sequence. Authorization does not pass
 admission or behavior gates. Cleanup regression checks do not restart the
 open-ended research sequence. The old continuation heartbeat remains paused.
 
-The [reservation receipt](../artifacts/operations_2026-09-10/spark_exclusive_reservation_001/README.md)
-and [automation block](../artifacts/operations_2026-09-11/spark_automation_block_002/README.md)
+The [reservation receipt](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/operations_2026-09-10/spark_exclusive_reservation_001/README.md)
+and [automation block](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/operations_2026-09-11/spark_automation_block_002/README.md)
 retain exact control and recovery evidence. The
-[15 September pause receipt](../artifacts/restart_2026-09-14/pause_20260915_001/RECEIPT.json)
+[15 September pause receipt](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/pause_20260915_001/RECEIPT.json)
 retains its timestamp and historical scope. [The pre-cleanup policy](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/docs/SPARK_COMPUTE_COORDINATION.md)
 preserves earlier authorizations and quotes without adding them to new run context.

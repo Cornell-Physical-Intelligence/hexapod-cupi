@@ -60,14 +60,11 @@ You need this loop to establish walking and stopping before adding terrain.
 The model import and geometry tools remain under `robot/` and `tools/assets/`.
 Hardware execution needs a measured actuator profile and a canonical runtime
 binding. Navigation can then consume velocity commands and stopping status;
-survey recording can consume pose and measurement quality. The existing core,
-runtime and navigation packages retain their historical contract scope until
-those bindings receive their own parity evidence.
+survey recording can consume pose and measurement quality. The navigation example consumes shared commands. Historical runtime bindings
+remain in Git until a canonical replacement receives its own parity evidence.
 
-The trajectory optimizer and example-initialization comparison remain optional
-under `experiments/trajectory_optimization/`. Their packers call this kernel.
-The custom PPO/AMP learner, BC refit/startup tools and unused packaged RS05 port
-have no active implementation. The [source inventory](../configs/source_inventory.json)
-pins their original Git bytes, including their tests. Historical C-study and
-four-bar code, saved checkpoints and failed results retain their own identities.
-Cleanup changes no research conclusion and supplies no walking qualification.
+The optional trajectory optimizer and native replay live in `priors/`. The
+completed action-initialization comparison remains in Git. You can package
+canonical inputs with `python -m locomotion.inputs pack --help`; the package
+no longer loads geometry from an old experiment directory. Shared contracts
+live in `contracts/`; hardware runtime binding remains pending.

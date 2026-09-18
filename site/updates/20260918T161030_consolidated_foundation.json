@@ -1,0 +1,52 @@
+{
+  "id": "20260918T161030_consolidated_foundation",
+  "date": "2026-09-18T16:10:30Z",
+  "title": "Consolidate the foundation for simulation reproduction",
+  "summary": "We keep the approved robot, current locomotion kernel, optional optimizer, shared contracts, waypoint follower and sensor transport in the consolidated layout. We retire old source and run payloads from the checkout after hash verification and restore tests; Git history preserves their identities. We retain selected videos, the CAD viewer and the publication history. Portable input packing and CPU preflight prepare fresh source allocations without launching Spark. The TRAINING review identifies the tracking-reward floor, native motion validation and paper-network prerequisites. No paper algorithm or research run starts in this change. Stage 2 remains incomplete.",
+  "areas": [
+    "repository foundation",
+    "simulation preparation",
+    "public progress"
+  ],
+  "changes": [
+    ".github/workflows/*",
+    ".gitignore",
+    ".ignore",
+    "ARCHITECTURE.md",
+    "CLAUDE.md",
+    "CONTRIBUTING.md",
+    "README.md",
+    "STATUS.md",
+    "artifacts/*",
+    "packages/*",
+    "isaaclab/*",
+    "experiments/*",
+    "ops/*",
+    "robot/*",
+    "locomotion/*",
+    "navigation/*",
+    "mission/*",
+    "contracts/*",
+    "configs/*",
+    "docs/*",
+    "tools/*",
+    "tests/*",
+    "viewer/vite.config.js",
+    "site/project.json",
+    "site/poster.js",
+    "site/test_render.mjs",
+    "site/assets/*",
+    "pyproject.toml",
+    "uv.lock"
+  ],
+  "evidence": [
+    "docs/TRAINING.md",
+    "configs/archive.json",
+    "robot/hexapod_mkii_updated_v1/inputs.json",
+    "configs/releases/foundation_20260918_v1.sha256",
+    "tests/test_archive.py",
+    "locomotion/tests/test_inputs.py"
+  ],
+  "next": "Begin the versioned reward audit in TRAINING. Resolve the translation-reward criterion before implementation; obtain fresh native admission before a Spark training allocation.",
+  "no_project_impact": false
+}

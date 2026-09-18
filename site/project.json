@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "title": "Hexapod · Development roadmap",
+  "title": "Hexapod \u00b7 Development roadmap",
   "repository": "Cornell-Physical-Intelligence/hexapod-cupi",
   "mission": "Hexapod MKII: from walking to autonomous surveying",
   "description": "Build a hexapod that surveys an area drawn on a map and returns a 3D map of the ground. It can stop to take measurements and process the finished map afterward.",
@@ -17,16 +17,16 @@
     "note": "James visually reconfirmed this mass-corrected model on 14 September 2026 for a fresh qualification sequence. Model mass includes nominal motor corrections; added motor inertia is estimated. The 0.5 mm yaw-joint gap and possible collisions at combined joint limits still need physical checks. Earlier walking videos use simplified models."
   },
   "checkpoint": {
-    "receipt": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/train/training_receipt.json",
-    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md",
-    "label": "Historical C-study PPO · 500 updates",
+    "receipt": "site/assets/evidence/artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/train/training_receipt.json",
+    "evidence": "site/assets/evidence/artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md",
+    "label": "Historical C-study PPO \u00b7 500 updates",
     "qualification": "Unqualified historical gait; 0/48 quiet trials pass. New detailed CAD requires native admission.",
     "video_matches": true,
-    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/train/policy/final.pt"
+    "path": "site/assets/evidence/artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/train/policy/final.pt"
   },
   "stop_result": {
-    "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/final_stop/stop_diagnostics.json",
-    "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md"
+    "path": "site/assets/evidence/artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/final_stop/stop_diagnostics.json",
+    "evidence": "site/assets/evidence/artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md"
   },
   "media": [
     {
@@ -34,7 +34,7 @@
       "title": "Forward-walking reference",
       "type": "video",
       "role": "benchmark",
-      "path": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/rollout.mp4",
+      "path": "site/assets/media/benchmark_01.mp4",
       "sha256": "2c65b1f158379ab62c65fec3dd831ca91cf137b4eaa309ae63a7ff65ea7e1513",
       "caption": "Earlier robot model, forward walking only. James selected this gait as the visual reference. The motor-torque test failed. Real-time playback.",
       "controller": "5ecbe978d659413dc050fec93b0e211a3eadf6ce1c807790d87c14044ff245a2",
@@ -43,10 +43,10 @@
     },
     {
       "id": "benchmark_01_poster",
-      "title": "Forward-walking reference — preview frame",
+      "title": "Forward-walking reference \u2014 preview frame",
       "type": "image",
       "role": "video_poster",
-      "path": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/frame_05.png",
+      "path": "site/assets/media/benchmark_01_poster.png",
       "sha256": "d3694c52e5f13c60fabc206f25490ac4431392cf94e704537f493ec706ad3644",
       "caption": "Frame from Forward-walking reference.",
       "controller": "5ecbe978d659413dc050fec93b0e211a3eadf6ce1c807790d87c14044ff245a2",
@@ -57,7 +57,7 @@
       "title": "Earlier controller following five paths",
       "type": "video",
       "role": "historical_capability_demo",
-      "path": "artifacts/omni_flat_2026-09-09/omni_preview_001/rollout.mp4",
+      "path": "site/assets/media/direct315_1971.mp4",
       "sha256": "37b449194dd79f2c7d65106ca1deb97ffe4f401a967c6ff1f54cf22ad5f3849c",
       "caption": "Earlier robot model following five paths using exact position from the simulator. This bypasses sensor-based position estimation. Real-time playback.",
       "controller": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
@@ -66,10 +66,10 @@
     },
     {
       "id": "direct315_1971_poster",
-      "title": "Earlier controller following five paths — preview frame",
+      "title": "Earlier controller following five paths \u2014 preview frame",
       "type": "image",
       "role": "video_poster",
-      "path": "artifacts/omni_flat_2026-09-09/omni_preview_001/frame_33.png",
+      "path": "site/assets/media/direct315_1971_poster.png",
       "sha256": "bd6c1a98026fe690554d052dc9f9ae7523bcf50d2ae8e7e1eb816dfbd5c86f66",
       "caption": "Frame from Earlier controller following five paths.",
       "controller": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
@@ -80,7 +80,7 @@
       "title": "Comparison of 49 robot geometries",
       "type": "image",
       "role": "research_image",
-      "path": "artifacts/length_study_2026-09-09/isaac_length_study.png",
+      "path": "site/assets/media/geometry_sweep.png",
       "sha256": "14a25cbdf22c5ffaacde9d9955402c59b1c3804f7f4b648144531bffbe748898",
       "caption": "49 simulated geometry variants shown together; this is a model comparison.",
       "controller": "No policy qualification; study figure",
@@ -91,7 +91,7 @@
       "title": "Proposed rounded toe",
       "type": "image",
       "role": "research_image",
-      "path": "artifacts/foot_design_2026-09-10/rigid_toe_proposal_001/toe_sketch.png",
+      "path": "site/assets/media/rigid_toe_proposal.png",
       "sha256": "ef911d3950bd2e56bcdb0210b8846cd4dfcee1cc10ee559d85462e7cc28ce768",
       "caption": "Early toe-shape proposal. Dimensions and attachment design still need checking against the robot CAD.",
       "controller": "Engineering schematic; no experiment or policy depicted",
@@ -102,7 +102,7 @@
       "title": "Earlier controller after 50 training updates",
       "type": "video",
       "role": "historical_capability_demo",
-      "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_preview_001/terminal/run/recording/rollout.mp4",
+      "path": "site/assets/media/caps50_preview.mp4",
       "sha256": "b2ccdd62821e58c3d8bfd62150b9272d4d3c47c7d8020dea0df2e8571550547d",
       "caption": "38-second simulation recording at real-time speed. The controller fails the standing test. Recording completed; the job later failed because its final audit record was missing.",
       "controller": "ca0545760f81b8b8fb0cafde4b1ef89bfa5d8765a8b43b578e451f648a954415",
@@ -111,10 +111,10 @@
     },
     {
       "id": "caps50_preview_poster",
-      "title": "Earlier controller after 50 training updates — preview frame",
+      "title": "Earlier controller after 50 training updates \u2014 preview frame",
       "type": "image",
       "role": "video_poster",
-      "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_preview_001/terminal/review/frame_07.png",
+      "path": "site/assets/media/caps50_preview_poster.png",
       "sha256": "306f612d535d76476720e03784342ac8d0c260efde27518117227ff4e1594f6d",
       "caption": "Frame from Earlier controller after 50 training updates.",
       "controller": "ca0545760f81b8b8fb0cafde4b1ef89bfa5d8765a8b43b578e451f648a954415",
@@ -125,7 +125,7 @@
       "title": "Earlier controller after 500 training updates",
       "type": "video",
       "role": "latest_policy_recording",
-      "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/terminal/run/recording/rollout.mp4",
+      "path": "site/assets/media/caps500_preview.mp4",
       "sha256": "1cd2dab2ac5d4c981f4528017febfed0287ac0cdb9e19e2d34cc52704e7f4745",
       "caption": "38-second simulation recording: forward, sideways, curved motion and stop commands. Stopping fails. This uses an earlier robot model. Real-time playback.",
       "controller": "c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf",
@@ -134,10 +134,10 @@
     },
     {
       "id": "caps500_preview_poster",
-      "title": "Earlier controller after 500 training updates — preview frame",
+      "title": "Earlier controller after 500 training updates \u2014 preview frame",
       "type": "image",
       "role": "video_poster",
-      "path": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/terminal/review/frame_07.png",
+      "path": "site/assets/media/caps500_preview_poster.png",
       "sha256": "81a7652c30061697330f059dea2a230af8a9492cb3f4d695c01ba732c7ea63d1",
       "caption": "Frame from Earlier controller after 500 training updates.",
       "controller": "c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf",
@@ -148,22 +148,22 @@
       "title": "Approved robot model: CAD inspection",
       "type": "video",
       "role": "cad_preview",
-      "path": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/hexapod_detailed_cad_showcase_final.mp4",
+      "path": "site/assets/media/canonical_detailed_cad_preview.mp4",
       "sha256": "d6096b2e0cb32b5527697b8c4fa08e590a77b5e44f14887b913626ca143feb20",
       "caption": "24-second view of the approved assembly with joint movement. This is a CAD animation; it does not simulate balance, foot contact or a walking controller.",
-      "controller": "No controller — prescribed CAD joint articulation",
+      "controller": "No controller \u2014 prescribed CAD joint articulation",
       "evidence": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/README.md",
       "poster_id": "canonical_detailed_cad_poster"
     },
     {
       "id": "canonical_detailed_cad_poster",
-      "title": "Approved robot model: CAD inspection — preview frame",
+      "title": "Approved robot model: CAD inspection \u2014 preview frame",
       "type": "image",
       "role": "video_poster",
-      "path": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/poster_final.png",
+      "path": "site/assets/media/canonical_detailed_cad_poster.png",
       "sha256": "3edfa8cf7282445312b3c2a6beb96694cc6310835689f71c10ae8ab9ca01d78a",
       "caption": "Frame from Approved robot model: CAD inspection.",
-      "controller": "No controller — prescribed CAD joint articulation",
+      "controller": "No controller \u2014 prescribed CAD joint articulation",
       "evidence": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/README.md"
     },
     {
@@ -171,7 +171,7 @@
       "title": "Optimized forward cycle on the approved robot",
       "type": "video",
       "role": "trajectory_experiment",
-      "path": "artifacts/trajectory_optimizer_20260917/replay_001/standing/evaluation/rollout.mp4",
+      "path": "site/assets/media/optimized_forward_001.mp4",
       "sha256": "330a0d0e76a70f8aa37d1aafb15bc8a40e9f971627f58011bcad0eebcb5112c0",
       "caption": "Approved detailed model. Optimized motor-target replay moves 0.968 m in 20 seconds. Speed variation fails the tracking limit. No learned policy or gait acceptance. Real-time playback.",
       "controller": "Optimized trajectory a76e093075ce471210a66bf4ae3835a1dca94406b930e4a791a028941a502ec1",
@@ -183,7 +183,7 @@
       "title": "Optimized forward cycle preview",
       "type": "image",
       "role": "video_poster",
-      "path": "artifacts/trajectory_optimizer_20260917/replay_001/standing/evaluation/first_frame.png",
+      "path": "site/assets/media/optimized_forward_001_poster.png",
       "sha256": "4b79bb112449206df09070e14d69a56a520a0a0734110e35fe9c6ebd757150d3",
       "caption": "First frame of the native optimized-target replay on the approved model.",
       "controller": "Optimized trajectory a76e093075ce471210a66bf4ae3835a1dca94406b930e4a791a028941a502ec1",
@@ -194,7 +194,7 @@
       "title": "PPO from scratch: failed forward test",
       "type": "video",
       "role": "controlled_ppo_comparison",
-      "path": "artifacts/forward_example_ppo_20260917/scratch_evaluate_update001200_001/run/standing/evaluation_00/rollout.mp4",
+      "path": "site/assets/media/forward_ppo_scratch_1200.mp4",
       "sha256": "731abfef892bd0b64125b028f428388a6d1994e083a1d388c7061f03b7e51249",
       "caption": "Approved detailed model after 1200 PPO updates. Mean forward speed 0.481 cm/s against 5 cm/s. Forward tracking and motor demand fail. One paired seed; recorded policy rollout at real-time speed.",
       "controller": "f4403a25ce4c675607ba7f33fec9c2e35c8895f4e72915cb3d8ce2bc4cb6ce5b",
@@ -206,7 +206,7 @@
       "title": "PPO from scratch: preview",
       "type": "image",
       "role": "video_poster",
-      "path": "artifacts/forward_example_ppo_20260917/scratch_evaluate_update001200_001/run/standing/evaluation_00/first_frame.png",
+      "path": "site/assets/media/forward_ppo_scratch_1200_poster.png",
       "sha256": "3a1e078a9073d98d4f9effcfd3fae8704843f85d22326cf4ef06449966408644",
       "caption": "First frame of the final policy test on the approved model.",
       "controller": "f4403a25ce4c675607ba7f33fec9c2e35c8895f4e72915cb3d8ce2bc4cb6ce5b",
@@ -217,7 +217,7 @@
       "title": "PPO after copying the forward example: failed forward test",
       "type": "video",
       "role": "controlled_ppo_comparison",
-      "path": "artifacts/forward_example_ppo_20260917/example_evaluate_update001200_001/run/standing/evaluation_00/rollout.mp4",
+      "path": "site/assets/media/forward_ppo_example_1200.mp4",
       "sha256": "52bd0dca4390cd2c1844df856cbc82493e4bf84b0a683613726dc2399e58cdc9",
       "caption": "Approved detailed model after 1200 PPO updates. Mean forward speed 0.096 cm/s against 5 cm/s. Forward tracking and motor demand fail. One paired seed; recorded policy rollout at real-time speed.",
       "controller": "1d039d9d566490398b1b1bd0603f7ff77b1c54228d30a63bd296799f6e1703f9",
@@ -229,7 +229,7 @@
       "title": "PPO after copying the forward example: preview",
       "type": "image",
       "role": "video_poster",
-      "path": "artifacts/forward_example_ppo_20260917/example_evaluate_update001200_001/run/standing/evaluation_00/first_frame.png",
+      "path": "site/assets/media/forward_ppo_example_1200_poster.png",
       "sha256": "4696ca134e7fe0c57bc008bbea8faf1cf2235dba741b1c1d09cefae0b32cb6e1",
       "caption": "First frame of the final policy test on the approved model.",
       "controller": "1d039d9d566490398b1b1bd0603f7ff77b1c54228d30a63bd296799f6e1703f9",
@@ -245,7 +245,7 @@
       "column": 0,
       "row": 0,
       "meaning": "The operator draws the boundary on a map. The boundary and robot position use coordinates relative to the same test site.",
-      "input": "A map and the operator’s boundary",
+      "input": "A map and the operator\u2019s boundary",
       "output": "The area to survey",
       "source": "ARCHITECTURE.md",
       "milestone_id": "mission"
@@ -273,7 +273,7 @@
       "meaning": "Convert the route into forward speed, sideways speed and turning rate, all relative to the robot.",
       "input": "Route and estimated robot position",
       "output": "Forward speed, sideways speed, turning rate and stop",
-      "source": "packages/hexapod_core/",
+      "source": "contracts/README.md",
       "milestone_id": "stage2"
     },
     {
@@ -309,7 +309,7 @@
       "state": "planned",
       "column": 1,
       "row": 1,
-      "meaning": "Combine sensor and movement measurements to track the robot’s position and orientation within the test site.",
+      "meaning": "Combine sensor and movement measurements to track the robot\u2019s position and orientation within the test site.",
       "input": "Laser scans, motion measurements and sensor calibration",
       "output": "Estimated position, orientation, speed and error",
       "source": "ARCHITECTURE.md",
@@ -458,7 +458,7 @@
       "title": "Historical forward-walking reference",
       "description": "Preserve the accepted forward-walking video as a historical gait-quality reference. It shows an earlier, simplified model and does not qualify the confirmed mass-corrected robot.",
       "gate": "Accepted as a visual reference for forward walking. Its motor-torque test failed.",
-      "source": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md",
+      "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md",
       "media_id": "benchmark_01",
       "status": "accepted",
       "backend": "Earlier simplified robot model",
@@ -476,14 +476,15 @@
         "scope": "Forward gait appearance on the earlier robot model. Motor-torque, sideways movement and physical-robot tests remain separate.",
         "source": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md"
       },
-      "card_text": "Historical reference only; canonical walking pending."
+      "card_text": "Historical reference only; canonical walking pending.",
+      "media_caption": "Earlier robot model \u00b7 real-time playback."
     },
     {
       "id": "stage2",
       "title": "Stand, walk and stop",
       "description": "Restart qualification on the mass-corrected model confirmed on 14 September 2026. First pass standing admission, then train forward, backward and sideways motion with turning and quiet stops. Compare gait quality with the historical reference.",
-      "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait’s visual quality.",
-      "source": "locomotion/README.md",
+      "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait\u2019s visual quality.",
+      "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/locomotion/README.md",
       "media_id": "forward_ppo_example_1200",
       "status": "blocked",
       "backend": "Approved detailed robot model",
@@ -500,14 +501,15 @@
       "question": "Review the failed example initialization before defining the next learning increment with James and the platform lead.",
       "next_step": null,
       "acceptance": null,
-      "card_text": "Both PPO arms fail forward walking; this example initialization shows no benefit in the paired test."
+      "card_text": "Both PPO arms fail forward walking; this example initialization shows no benefit in the paired test.",
+      "media_caption": "Approved robot model \u00b7 failed forward test."
     },
     {
       "id": "stage3",
       "title": "Use sensors to cross terrain",
       "description": "After flat-ground walking and stopping qualify on the confirmed mass-corrected model, restart terrain qualification using a map of nearby ground. Preserve admitted flat-ground behavior.",
       "gate": "Agree which slopes and obstacles to test. Pass separate test cases while staying within motor and foot-contact limits.",
-      "source": "artifacts/terrain_readiness_2026-09-09/qualification_plan_001/QUALIFICATION_PLAN.md",
+      "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/terrain_readiness_2026-09-09/qualification_plan_001/QUALIFICATION_PLAN.md",
       "status": "blocked",
       "backend": "Detailed robot model with simulated sensors",
       "owner": "Survey and platform leads",
@@ -530,7 +532,7 @@
       "title": "Survey a drawn area",
       "description": "Follow a route through the requested area, stop with a steady sensor platform to scan, and deliver a 3D terrain map. Start on a level, hard surface with no obstacles.",
       "gate": "On the physical robot, cover the drawn area and deliver the map. Coverage, map-accuracy and platform-motion limits still need agreement.",
-      "source": "ARCHITECTURE.md",
+      "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/ARCHITECTURE.md",
       "status": "blocked",
       "backend": "Physical robot and survey sensor",
       "owner": "James and both leads",
@@ -549,7 +551,7 @@
         "R-10"
       ],
       "blocker": "Fresh survey qualification depends on canonical movement and terrain qualification, and the physical robot is not built. The agreed independent M1 scan test still needs an owner and reviewer; it does not qualify robot surveying.",
-      "question": "Retain M1’s agreed fixture and thresholds; assign its owner and reviewer without treating it as robot survey qualification. Define the survey increment after its canonical prerequisites qualify.",
+      "question": "Retain M1\u2019s agreed fixture and thresholds; assign its owner and reviewer without treating it as robot survey qualification. Define the survey increment after its canonical prerequisites qualify.",
       "next_step": null,
       "acceptance": null,
       "definition": {
@@ -562,7 +564,7 @@
           "With noise disabled, every expected floor or wall hit must be within 1 mm of its expected position.",
           "With the existing sensor noise enabled, at least 95% of expected hits must be within 7 cm. Missing hits count as failures; report false hits separately."
         ],
-        "fixture": "Sensor height: 0.25 m. Wall: 0.80 m wide × 0.08 m thick × 0.50 m high, centred 1 m in front of the sensor. Use 20,000 rays per scan. Fixed random seeds: 360 for the scan pattern and 20260824 for sensor noise and timing."
+        "fixture": "Sensor height: 0.25 m. Wall: 0.80 m wide \u00d7 0.08 m thick \u00d7 0.50 m high, centred 1 m in front of the sensor. Use 20,000 rays per scan. Fixed random seeds: 360 for the scan pattern and 20260824 for sensor noise and timing."
       },
       "card_text": "Pending canonical qualification; M1 scope retained."
     }
@@ -570,7 +572,7 @@
   "papers": [
     {
       "title": "CAPS",
-      "role": "Smooth the policy’s output across time and nearby observations.",
+      "role": "Smooth the policy\u2019s output across time and nearby observations.",
       "url": "https://ai.bu.edu/caps/"
     },
     {
@@ -593,7 +595,7 @@
   "glossary": [
     {
       "term": "Learned controller (policy)",
-      "meaning": "A trained model that selects joint targets from the requested movement and the robot’s measured state."
+      "meaning": "A trained model that selects joint targets from the requested movement and the robot\u2019s measured state."
     },
     {
       "term": "Training update",
@@ -629,10 +631,10 @@
       {
         "id": "canonical-standing128-adopted-20260915",
         "title": "Exact one- and 128-robot standing admission adopted",
-        "backend": "Lead-reviewed simulation standing admission002 · confirmed mass-corrected model · full independent raw audit",
+        "backend": "Lead-reviewed simulation standing admission002 \u00b7 confirmed mass-corrected model \u00b7 full independent raw audit",
         "result": "passed",
         "text": "The lead adopted the unchanged one002 result and all 128 independently rescored batch128 replicas. Exact model/controller/layout identity, full contact classification, recorded lifecycle and cleanup pass. Full native raw traces remain on Spark with local hash-bound compact metadata and audit. This admits only the exact simulation standing layouts; admission001 remains unchanged, and walking, hardware and Stage 2 are unqualified.",
-        "source": "artifacts/restart_2026-09-14/paper_walk_execution_001/admission_002/verification.json"
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/paper_walk_execution_001/admission_002/verification.json"
       },
       {
         "id": "trajectory-speed-objective-native-20260917",
@@ -640,7 +642,7 @@
         "backend": "One admitted Isaac Sim replica; 1000 controls and 8000 recorded physics steps; no PPO",
         "result": "passed",
         "text": "The optimizer adds root-speed tracking and a target-curvature term. Native planar tracking error falls from 0.033271 to 0.003029 m/s against the unchanged 0.025 m/s limit. The robot moves 0.974348 m forward in 20 seconds. The audit verifies 36 transferred files, reproduces servo targets and reclassifies 130821 contact patches. Native motor, joint and contact checks pass. This one-command result does not qualify turning, stopping or Stage 2.",
-        "source": "artifacts/ppo_reference_comparison_20260917/review_smooth_001/RESULT.json"
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/ppo_reference_comparison_20260917/review_smooth_001/RESULT.json"
       },
       {
         "id": "vanilla-ppo-fixed-probes-failed-20260917",
@@ -648,7 +650,7 @@
         "backend": "One admitted Isaac Sim replica; final checkpoint1200; 3050 controls and 24400 physics samples",
         "result": "failed",
         "text": "The audit reproduces the original verdicts and reclassifies 530534 contact patches. CPU inference from the saved weights matches recorded actions within 0.00000144. Forward tracking error is 0.051091 m/s against the unchanged 0.025 m/s bound; mean forward speed is 0.000423 m/s. Quiet includes three native joint-speed violations and stopping includes one nonfoot contact sample. All cases retain complete videos and force summaries. Stage 2 remains incomplete.",
-        "source": "artifacts/ppo_reference_comparison_20260917/review_vanilla_001/RESULT.json"
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/ppo_reference_comparison_20260917/review_vanilla_001/RESULT.json"
       },
       {
         "id": "forward-example-training-complete-20260917",
@@ -656,7 +658,7 @@
         "backend": "RSL-RL 5.0.1; one paired seed; fixed 0.05 m/s forward command; 128 admitted replicas",
         "result": "passed",
         "text": "Each arm completes 1200 PPO updates and 3686400 transitions. Each final optimizer records 24000 steps per parameter, and each run records 29491200 force/torque samples. Both native jobs exit with code 0 and complete exact-container cleanup. The initial saved critic and actor normalization state match; both PPO optimizers start empty. These results establish matched training execution. Policy performance requires the scheduled native evaluations.",
-        "source": "artifacts/forward_example_ppo_20260917/README.md"
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/forward_example_ppo_20260917/README.md"
       },
       {
         "id": "forward-example-initial-policy-failed-20260917",
@@ -664,7 +666,7 @@
         "backend": "One admitted Isaac Sim replica; example-arm update zero; unchanged 0.040 rad per 20 ms limiter",
         "result": "failed",
         "text": "Before PPO, the copied actor completes the forward trial with mean speed 0.005338 m/s and planar tracking error 0.056366 m/s against the 0.025 m/s bound. The quiet trial ends at control 149 with joint-limit and joint-speed violations. The forward-to-stop trial ends at control 467, before the stop command at control 500. The audit reproduces actions, actuator output and force summaries; videos preserve both failed prefixes. Low action-prediction error on the demonstration does not establish closed-loop walking.",
-        "source": "artifacts/forward_example_ppo_20260917/review_001/example_update000000.json"
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/forward_example_ppo_20260917/review_001/example_update000000.json"
       },
       {
         "id": "forward-example-paired-result-20260917",
@@ -672,15 +674,15 @@
         "backend": "Native Isaac Sim; approved detailed model; one paired seed; equal PPO budgets; unchanged 0.040 rad per 20 ms limiter",
         "result": "failed",
         "text": "Both arms fail all four scheduled forward tests. Final mean speeds are 0.004811 m/s from scratch and 0.000961 m/s after example initialization, against 0.05 m/s. Final planar errors are 0.051045 and 0.053322 m/s, above the 0.025 m/s limit. Both final policies fail motor-demand and quiet-stop checks. The final example quiet trial terminates at control 490 of 1000. The declared benefit rule fails for this pair; other seeds and motion-prior methods remain untested.",
-        "source": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
       },
       {
         "id": "forward-example-final-loads-20260917",
         "title": "We record force and motor load for both final policies",
         "backend": "400 Hz native captures; 18-second forward window after two seconds of settling",
         "result": "passed",
-        "text": "Mean vertical ground support is 73.246 N for scratch and 73.227 N for example initialization. Mean absolute applied motor torque is 0.488782 and 0.405900 N·m. Per-foot forces and per-joint requested and applied torque remain in the force summaries. These values describe failed, low-speed motions and do not establish efficiency at matched walking speed.",
-        "source": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
+        "text": "Mean vertical ground support is 73.246 N for scratch and 73.227 N for example initialization. Mean absolute applied motor torque is 0.488782 and 0.405900 N\u00b7m. Per-foot forces and per-joint requested and applied torque remain in the force summaries. These values describe failed, low-speed motions and do not establish efficiency at matched walking speed.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
       }
     ]
   },

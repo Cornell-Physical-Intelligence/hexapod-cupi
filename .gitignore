@@ -2,81 +2,25 @@ node_modules/
 dist/
 .DS_Store
 *.log
-
-# Generated outputs in isaaclab/logs remain excluded so the Spark's complete
-# checkpoint fleet cannot be committed accidentally.  Artifacts copied into
-# artifacts/ are intentional repository deliverables, including models/video.
-*.pt
-*.mp4
-*.mov
-*.webm
-isaaclab/logs/
-!artifacts/**/*.pt
-!artifacts/**/*.mp4
-!artifacts/**/*.mov
-!artifacts/**/*.webm
-
-# Local Python/tooling caches are reproducible and must not become experiment data.
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
 .venv/
-
-# Scratch/reference renders and redundant handoff bundles stay outside Git. The
-# source, curated checkpoints, metrics, logs, and videos they package live below.
-tmp/
-HEXAPOD_CHATGPT_PRO_HANDOFF*.zip
-claude_hexapod_handoff_*.tar.gz
-# Restart transport archives duplicate the extracted, hash-verified evidence.
-# Keep them locally and on Spark; publish the curated files and inventories.
-artifacts/restart_2026-09-14/**/*.tar.gz
-robot/hexapod_leg_v2/meshes/
-
-# setuptools editable-install metadata written by `uv sync`; regenerated on every sync.
 *.egg-info/
-
-# Generated public research poster
+tmp/
+runs/
+artifacts/
+*.pt
+*.mp4
+*.mov
+*.webm
+!site/assets/**/*.pt
+!site/assets/**/*.mp4
+!site/assets/**/*.mov
+!site/assets/**/*.webm
 /site/dist/
 
-# Publish the lossless contact archive; retain the expanded log on Spark and the local host.
-artifacts/ppo_reference_comparison_20260917/replay_pack_001/replay_001/standing/evaluation/native400hz/contacts.jsonl
-# Preserve intermediate PPO checkpoints on Spark; publish the selected checkpoint.
-artifacts/ppo_reference_comparison_20260917/vanilla_train_001/run/standing/learner/model_*.pt
-artifacts/ppo_reference_comparison_20260917/vanilla_train_001/run/standing/checkpoint_update*.pt
-!artifacts/ppo_reference_comparison_20260917/vanilla_train_001/run/standing/checkpoint_update001200.pt
-artifacts/ppo_reference_comparison_20260917/vanilla_train_001/run/standing/metrics.jsonl
-artifacts/ppo_reference_comparison_20260917/vanilla_evaluate_001/run/standing/evaluation_*/native400hz/contacts.jsonl
-
-# Keep complete pilot runs on Spark and the local host; publish selected weights
-# and lossless telemetry archives with their byte inventories.
-artifacts/forward_example_ppo_20260917/**/run/standing/learner/
-artifacts/forward_example_ppo_20260917/*_smoke_*/run/standing/checkpoint_update*.pt
-artifacts/forward_example_ppo_20260917/*_train_*/run/standing/checkpoint_update*.pt
-!artifacts/forward_example_ppo_20260917/*_train_003/run/standing/checkpoint_update000000.pt
-!artifacts/forward_example_ppo_20260917/*_train_003/run/standing/checkpoint_update000300.pt
-!artifacts/forward_example_ppo_20260917/*_train_003/run/standing/checkpoint_update000600.pt
-!artifacts/forward_example_ppo_20260917/*_train_003/run/standing/checkpoint_update001200.pt
-artifacts/forward_example_ppo_20260917/**/run/standing/metrics.jsonl
-artifacts/forward_example_ppo_20260917/**/run/standing/native/native_readback.json
-artifacts/forward_example_ppo_20260917/**/run/standing/native/camera/progress.jsonl
-artifacts/forward_example_ppo_20260917/**/evaluation_*/native400hz/contacts.jsonl
-# Full 400 Hz arrays remain in the verified Spark and local run archives.
-artifacts/forward_example_ppo_20260917/**/evaluation_*/native400hz/*.npz
-# Keep the full recordings in both archives; publish the final paired walk videos.
-artifacts/forward_example_ppo_20260917/*_evaluate_*/run/standing/evaluation_*/rollout.mp4
-!artifacts/forward_example_ppo_20260917/*_evaluate_update001200_001/run/standing/evaluation_00/rollout.mp4
-
-# Cleanup regression archives retain full native captures; publish reports and hashes.
-artifacts/locomotion_cleanup_20260917/**/*.tar.gz
-artifacts/locomotion_cleanup_20260917/**/source/
-artifacts/locomotion_cleanup_20260917/**/run/**/contacts.jsonl
-artifacts/locomotion_cleanup_20260917/**/run/**/substeps_*.npz
-artifacts/locomotion_cleanup_20260917/**/run/**/control_trace.npz
-artifacts/locomotion_cleanup_20260917/**/run/**/native_readback.json
-artifacts/locomotion_cleanup_20260917/**/run/**/initial_reset.json
-artifacts/locomotion_cleanup_20260917/**/run/standing/learner/
-artifacts/locomotion_cleanup_20260917/**/run/standing/native/camera/progress.jsonl
-artifacts/locomotion_cleanup_20260917/**/run/standing/native/camera/frames.jsonl
-artifacts/locomotion_cleanup_20260917/standing_batch128_002/run/standing/standing/standing_report.json
+# Keep the user-provided paper as a local reference.
+/hexapod_locomotion.pdf

@@ -12,8 +12,8 @@ import torch
 from locomotion import env, env_config, evaluation, ppo, task
 
 ROOT = Path(__file__).resolve().parents[2]
-FROZEN = ROOT/'artifacts/forward_example_ppo_20260917/scratch_train_003/source'
-TRACE = ROOT/'artifacts/ppo_reference_comparison_20260917/replay_pack_001/replay_001/standing/evaluation/control_trace.npz'
+FROZEN = ROOT/'locomotion/tests/fixtures/baseline'
+TRACE = ROOT/'locomotion/tests/fixtures/control_trace.npz'
 
 
 class RecordedParityTests(unittest.TestCase):

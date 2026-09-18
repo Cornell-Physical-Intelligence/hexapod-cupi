@@ -1,7 +1,0 @@
-# Root-owned standing placement execution
-
-The user confirmed the corrected-mass robot and explicitly authorized restarting its stage sequence with exclusive Spark compute. Root reviewed the frozen preparation and guard, independently reran10 placement fixtures and11 guard tests, and verified both exact configurations on Spark from `/tmp` without a source PYTHONPATH. PREFLIGHT_001.json records two successful CPU-only checks, unchanged source/host/guard trees, empty GPU/container queries and current reservation controls. The maintained980 simulation tests,116 robot tests,14 progress tests, source inventory and both release lineages also passed before dispatch.
-
-The two authorized diagnostic arms are origin and(14,4), each1 robot,1,000 controls,8,000 physics steps. BINDINGS.json and bindings/ identify their exact new source, host, guard, output paths and ownership units. Their scope is diagnostic only; they cannot admit standing, a batch, physics, training or Stage2. Scorer, servo, geometry and solver parameters remain unchanged. Completed acquisition with failed gates remains a failed result and may still inform the independent second arm.
-
-See ../standing_translation_review_001/DECISION.md for pre-registered interpretation. A location effect also includes the floor triangle seam and cannot by itself establish floating-point or world-distance causation. Native launch/results, when present, are separate receipts; this preflight record does not claim any simulated steps occurred.
