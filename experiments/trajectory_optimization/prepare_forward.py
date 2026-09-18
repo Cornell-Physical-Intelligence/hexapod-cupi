@@ -9,7 +9,7 @@ import shutil
 import numpy as np
 
 from .forward_experiment import ARMS, COMMAND, SCHEMA, load_protocol, sha
-from .prepare_vanilla import ROOT, prepare, save
+from locomotion.prepare import ROOT, prepare, save
 
 REFERENCE = Path('artifacts/ppo_reference_comparison_20260917/replay_pack_001/replay_001/standing/evaluation')
 REFERENCE_REPORT_SHA = '128f43977987afb35139b319ed61052e047f6470576930a03de88c7be94279e4'
@@ -63,13 +63,13 @@ def create_protocol(output, *, root=ROOT):
 
 
 def prepare_arm(protocol_path, output, remote_root, *, arm, mode='train', smoke=False,
-                checkpoint=None, checkpoint_sha=None, checkpoint_declaration_sha=None):
+                checkpoint=None, checkpoint_sha=None, checkpoint_declaration_sha=None, inputs=None):
     protocol_path, output, remote_root = Path(protocol_path), Path(output), Path(remote_root)
     expected = sha(protocol_path)
     protocol = json.loads(protocol_path.read_text())
     updates = 2 if smoke else protocol['updates']
     load_protocol(protocol_path, expected, arm=arm, seed=protocol['seed'], updates=updates, smoke=smoke)
-    binding = prepare(output, remote_root, mode=mode, updates=updates, seed=protocol['seed'],
+    binding = prepare(output, remote_root, mode=mode, updates=updates, seed=protocol['seed'], experiment=True, inputs=inputs,
         checkpoint=checkpoint, checkpoint_sha=checkpoint_sha, checkpoint_declaration_sha=checkpoint_declaration_sha)
     inputs = output/'experiment'; inputs.mkdir()
     for name in ('PROTOCOL.json', 'demonstration.npz'):
@@ -99,6 +99,7 @@ def main():
     pack.add_argument('--protocol', type=Path, required=True)
     pack.add_argument('--output', type=Path, required=True)
     pack.add_argument('--remote-root', required=True)
+    pack.add_argument('--inputs', type=Path, required=True)
     pack.add_argument('--arm', choices=ARMS, required=True)
     pack.add_argument('--mode', choices=['train', 'evaluate'], default='train')
     pack.add_argument('--smoke', action='store_true')
@@ -111,7 +112,8 @@ def main():
     else:
         result = prepare_arm(args.protocol, args.output, args.remote_root, arm=args.arm,
             mode=args.mode, smoke=args.smoke, checkpoint=args.checkpoint,
-            checkpoint_sha=args.checkpoint_sha256, checkpoint_declaration_sha=args.checkpoint_declaration_sha256)
+            checkpoint_sha=args.checkpoint_sha256, checkpoint_declaration_sha=args.checkpoint_declaration_sha256,
+            inputs=args.inputs)
     print(json.dumps({'output': str(args.output), 'schema': result['schema']}))
 
 

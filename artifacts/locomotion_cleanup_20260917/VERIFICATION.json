@@ -1,0 +1,120 @@
+{
+  "schema": "locomotion_cleanup_verification_v1",
+  "scope": "Source and context cleanup regression. No walking or Stage 2 qualification.",
+  "baseline_commit": "33ec6f16d70c8b0e74a9608d69be7c563c11bfbb",
+  "release_manifest": "isaaclab/deploy/locomotion_kernel_20260917_v12_pipeline.sha256",
+  "release_manifest_sha256": "f6483f96e8497169bcd93b84888a3017780a92036f0062d949e6808227d1c1a7",
+  "native_source_freeze_sha256": "301dac961fcc5ac5e2f2006d9c1e966c2eb2196e8a464a109a8ca6369860c589",
+  "net_lines_removed": {
+    "python": 8095,
+    "markdown": 13508
+  },
+  "context": {
+    "retired_markdown_files": 45,
+    "current_findings_before": 89,
+    "current_findings_after": 7,
+    "retired_bytes": "configs/source_inventory.json pins the original Git objects.",
+    "retained": "Approved robot, numerical gates, published manifests, checkpoint bytes, raw results and incident/recovery records."
+  },
+  "cpu_tests": {
+    "isaac": {
+      "tests": 992,
+      "passed": true
+    },
+    "robot": {
+      "tests": 116,
+      "passed": true
+    },
+    "kernel": {
+      "tests": 120,
+      "passed": true
+    },
+    "optimizer": {
+      "tests": 16,
+      "passed": true
+    }
+  },
+  "cpu_tests_total": 1244,
+  "recorded_parity": {
+    "controls": 1000,
+    "targets_actor_critic_inputs": "exact equality against the recorded trace and frozen implementation",
+    "task_and_numerical_evaluator": "original bytes unchanged",
+    "ppo_configuration": "equal to the preceding stock-PPO configuration"
+  },
+  "native_allocations": {
+    "standing_one_002": {
+      "state_sha256": "71f15a8c4e24551f4c3f9733aec0aa45454ea073062c3447cb1312eabf583ba8",
+      "cleanup_sha256": "29e8e9a3a1e9c6a50f3be3bdc52583c0d8f6714294c3f31f5c1519bf5d6d79a7",
+      "inventory_sha256": "10ad01538beecc9d0d6c304e3951677f47b722ba9a185e1d9dc7712e2ebb0ae6",
+      "status": "completed",
+      "cleanup_checked": true,
+      "reservation_released": false
+    },
+    "standing_batch128_002": {
+      "state_sha256": "a5192c83a8cb02341f7d1829bd95950228577cc0e0d28c7ea39bf643febf65c0",
+      "cleanup_sha256": "20cd643a86219fef61f6b1f7b67fb84f36dfaa3739eff181ed3daf40ea5e2f76",
+      "inventory_sha256": "53d5f5ea5b99a8183db0211d027ab0021331d5269209b41d0a4b79075cbc28ee",
+      "status": "completed",
+      "cleanup_checked": true,
+      "reservation_released": false
+    },
+    "ppo_smoke_001": {
+      "state_sha256": "8cb515425551da5600df5d179509167050a087bb0c16cf932286eef2e76bc725",
+      "cleanup_sha256": "8ccb9d9801e0fc1f1313523abb96e8c256a5671167d06c7a00d81d8be506626b",
+      "inventory_sha256": "86b8a3fc5ff68f34a73fc2e2095bea594fc583f54c9a8294276435ece357c7d5",
+      "status": "completed",
+      "cleanup_checked": true,
+      "reservation_released": false
+    },
+    "policy_evaluation_001": {
+      "state_sha256": "0f0ee200865bff698e12736bfe21eaf3a8c0784caf1ead7759b8f295a9ff734a",
+      "cleanup_sha256": "22b84021f0151c17ce452ff6b048e14e9c1778bddd85c6ab27c976148a3b7911",
+      "inventory_sha256": "3a17e91e4c4c37cf79b75effa4224414b93f58becf35083459c88d807619f8db",
+      "status": "completed",
+      "cleanup_checked": true,
+      "reservation_released": false
+    }
+  },
+  "standing": {
+    "one_robot_passed": true,
+    "batch_robots_passed": 128,
+    "controls_per_robot": 1000,
+    "physics_steps_per_robot": 8000,
+    "raw_recomputation": "One robot matches on the workstation. The pinned Isaac image recomputes both captures and creates admission_cpu_001.",
+    "batch_report_gzip": "standing_batch128_002/standing_report.json.gz"
+  },
+  "ppo": {
+    "updates": 2,
+    "transitions": 6144,
+    "checkpoint_sha256": "d9cfdbaf4e71cddb2fd12e10fd09b3edee8bcc31c5c52c38536b1b850ac8b697",
+    "checkpoint_reloaded_in_separate_native_run": true,
+    "robot_physics_samples": 49152
+  },
+  "evaluation": {
+    "cases": [
+      {
+        "case_id": "learning:translate_0.05_0deg",
+        "passed": false
+      },
+      {
+        "case_id": "learning:quiet_20s",
+        "passed": true
+      },
+      {
+        "case_id": "learning:forward_0.05_to_stop",
+        "passed": true
+      }
+    ],
+    "force_reports": 3,
+    "force_recomputation": "All three reports match local recomputation from raw chunks, apart from the source-directory path.",
+    "video": "VISUAL_CHECK.json",
+    "full_stage2_suite_run": false
+  },
+  "verification_passed": true,
+  "stage2_complete": false,
+  "preservation": {
+    "full_archives": "Spark retains each source pack, raw capture and capture.tar.gz. REMOTE_INVENTORY.json binds each file and archive.",
+    "local_mirror": "One-robot, PPO and evaluation archives plus compact batch metadata. The full batch archive remains on Spark.",
+    "failed_transport": "TRANSFER_FAILURE_001.json retains the metadata-file rejection before native launch."
+  }
+}

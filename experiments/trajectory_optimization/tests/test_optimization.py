@@ -80,13 +80,18 @@ class OptimizationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'solved, model-bound'):
                 validate_trajectory(output/'trajectory.npz', TRAJECTORY_SHA, self.model.identity()['model_sha256'])
 
-    def test_native_pack_retains_physics_and_original_entry_point(self):
+    def test_native_pack_retains_physics_and_named_entry_point(self):
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp)/'pack'
-            prepare(FIXTURE, output, '/home/orionh/HEXAPOD_runs/restart_20260914/test_trajectory')
-            for name in ('env.py', 'env_config.py', 'reservation.py', 'launch_spark.py', 'evaluate.py'):
-                self.assertEqual((output/'source'/name).read_bytes(), (ROOT/'experiments/paper_walk'/name).read_bytes())
-            self.assertEqual((output/'source/paper_train.py').read_bytes(), (ROOT/'experiments/paper_walk/train.py').read_bytes())
+            declared = json.loads((ROOT/'configs/locomotion_spark.json').read_text())
+            declared['extra_mounts'].append(['/recorded/batch', '/standing_batch'])
+            inputs = Path(tmp)/'inputs.json'
+            inputs.write_text(json.dumps(declared))
+            binding = prepare(FIXTURE, output, '/home/orionh/HEXAPOD_runs/restart_20260914/test_trajectory', inputs=inputs)
+            self.assertIn(['/recorded/batch', '/standing_batch'], binding['extra_mounts'])
+            for name in ('env.py', 'env_config.py', 'reservation.py', 'launch.py', 'evaluate.py'):
+                self.assertEqual((output/'source/locomotion'/name).read_bytes(), (ROOT/'locomotion'/name).read_bytes())
+            self.assertEqual((output/'source/experiments/trajectory_optimization/replay_native.py').read_bytes(), (ROOT/'experiments/trajectory_optimization/replay_native.py').read_bytes())
             with self.assertRaises(FileExistsError):
                 prepare(FIXTURE, output, '/home/orionh/HEXAPOD_runs/restart_20260914/test_trajectory')
 

@@ -1,0 +1,112 @@
+"""Copy a named kernel and explicit inputs into a fresh native allocation."""
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+import shutil
+
+from .env_config import sha
+
+ROOT = Path(__file__).resolve().parents[1]
+REMOTE_ROOT = Path('/home/orionh/HEXAPOD_runs/restart_20260914')
+
+
+def save(path, value):
+    Path(path).write_text(json.dumps(value, indent=2, allow_nan=False)+'\n')
+
+
+def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
+            num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
+            checkpoint_declaration_sha=None, experiment=False, root=ROOT):
+    output, remote_root, root = map(Path, (output, remote_root, root))
+    if (not remote_root.is_absolute() or REMOTE_ROOT not in remote_root.parents
+            or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay')
+            or type(updates) is not int or not 1 <= updates <= 2000
+            or type(seed) is not int or seed < 0):
+        raise ValueError('Invalid native allocation')
+    num_envs = (128 if mode == 'train' else 1) if num_envs is None else num_envs
+    if (num_envs not in (1, 32, 128) or (mode in ('evaluate', 'replay') and num_envs != 1)
+            or (mode == 'train' and num_envs != 128) or eval_scope not in ('focus', 'probes', 'full')):
+        raise ValueError('Invalid replica count for this mode')
+    supplied = (checkpoint is not None, checkpoint_sha is not None, checkpoint_declaration_sha is not None)
+    if (mode == 'evaluate' and not all(supplied)) or (mode != 'evaluate' and any(supplied)):
+        raise ValueError('Evaluation requires a checkpoint and its two file hashes')
+    inputs = root/'configs/locomotion_spark.json' if inputs is None else Path(inputs)
+    declared = json.loads(inputs.read_text())
+    for key in ('asset', 'geometry_source', 'stance'):
+        path = Path(declared[key])
+        if not path.is_absolute() or '..' in path.parts:
+            raise ValueError('Inputs must use explicit absolute paths')
+    if declared['stance'] not in declared['input_files']:
+        raise ValueError('The stance file needs a recorded hash')
+    output.mkdir(parents=True, exist_ok=False)
+    source = output/'source'
+    package = source/'locomotion'
+    package.mkdir(parents=True)
+    for path in sorted((root/'locomotion').glob('*.py')):
+        shutil.copy2(path, package/path.name)
+    if experiment or mode == 'replay':
+        optional = source/'experiments/trajectory_optimization'
+        optional.mkdir(parents=True)
+        for name in ('forward_experiment.py', 'replay_native.py'):
+            shutil.copy2(root/'experiments/trajectory_optimization'/name, optional/name)
+    save(source/'FREEZE_SHA256.json', {p.relative_to(source).as_posix(): sha(p)
+        for p in sorted(source.rglob('*.py'))})
+    freeze = sha(source/'FREEZE_SHA256.json')
+    binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': True,
+        'module': 'experiments.trajectory_optimization.replay_native' if mode == 'replay' else 'locomotion.train',
+        'mode': mode, 'source': str(remote_root/'source'), 'output': str(remote_root/'run'),
+        'asset': declared['asset'], 'geometry_source': declared['geometry_source'],
+        'prior': str(Path(declared['stance']).parent), 'input_files': declared['input_files'],
+        'extra_mounts': declared.get('extra_mounts', []), 'source_freeze_sha256': freeze,
+        'max_seconds': 6600, 'stage2_complete': False, 'physical_admission': False,
+        'command_args': ['--mode', mode, '--asset', '/asset', '--model', '/asset/source/model.json',
+            '--geometry', '/geometry_source/geometry/geometry.json',
+            '--geometry-extrema', '/geometry_source/geometry/geometry_extrema.npz',
+            '--stance', '/prior/'+Path(declared['stance']).name,
+            '--num-envs', str(num_envs), '--source-freeze-sha256', freeze,
+            '--max-wall-seconds', '6200', '--headless', '--device', 'cuda:0']}
+    if mode != 'diagnostic':
+        binding['command_args'] += ['--standing-admission', '/admission/admission.json']
+    if mode in ('train', 'evaluate'):
+        binding['command_args'] += ['--updates', str(updates), '--seed', str(seed)]
+    if mode == 'evaluate':
+        binding['command_args'] += ['--eval-scope', eval_scope]
+    if checkpoint is not None:
+        checkpoint = Path(checkpoint)
+        if (not checkpoint.is_absolute() or REMOTE_ROOT not in checkpoint.parents
+                or '..' in checkpoint.parts or any(len(h) != 64 or set(h)-set('0123456789abcdef')
+                    for h in (checkpoint_sha, checkpoint_declaration_sha))):
+            raise ValueError('Invalid checkpoint identity')
+        binding['extra_mounts'].append([str(checkpoint.parent), '/checkpoint'])
+        binding['input_files'][str(checkpoint)] = checkpoint_sha
+        binding['input_files'][str(checkpoint.with_suffix('.json'))] = checkpoint_declaration_sha
+        binding['command_args'] += ['--checkpoint', '/checkpoint/'+checkpoint.name, '--checkpoint-sha256', checkpoint_sha]
+    save(output/'binding.json', binding)
+    save(output/'PACK.json', {'remote_root': str(remote_root), 'source_freeze_sha256': freeze,
+        'binding_sha256': sha(output/'binding.json'), 'mode': mode, 'seed': seed,
+        'updates': updates, 'stage2_complete': False, 'files': {
+            p.relative_to(output).as_posix(): sha(p) for p in sorted(output.rglob('*')) if p.is_file()}})
+    return binding
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--remote-root', required=True)
+    parser.add_argument('--inputs', type=Path)
+    parser.add_argument('--mode', choices=('diagnostic', 'train', 'evaluate'), required=True)
+    parser.add_argument('--num-envs', type=int)
+    parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
+    parser.add_argument('--updates', type=int, default=512)
+    parser.add_argument('--seed', type=int, default=20260917)
+    parser.add_argument('--checkpoint', type=Path)
+    parser.add_argument('--checkpoint-sha')
+    parser.add_argument('--checkpoint-declaration-sha')
+    args = parser.parse_args()
+    print(json.dumps(prepare(**vars(args)), indent=2))
+
+
+if __name__ == '__main__':
+    main()

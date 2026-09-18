@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -102,23 +103,28 @@ class PipelineLineageTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "lineage header"):
             lineage.compare_current_manifest(content.replace(lineage.ARCHIVED_REF.encode(), b"0"*40), actual)
 
-    def test_current_retains_all_archived_paths_and_only_allows_named_packaging_revisions(self):
+    def current_fixture(self, root):
+        model = {}
+        for key in ('urdf', 'model', 'usd'):
+            path = root/'robot'/('approved.'+key)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(('approved '+key).encode())
+            model[key] = {'path': path.relative_to(root).as_posix(), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+        model['usd_sha256'] = model['usd']['sha256']
+        model['usd'] = model['usd']['path']
+        (root/'robot/active_model.json').write_text(json.dumps(model))
+        return {'robot/active_model.json', *(('robot/approved.'+key) for key in ('urdf', 'model', 'usd'))}
+
+    def test_current_model_identity_is_independent_of_historical_assets(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            archived = {path: hashlib.sha256(b"old").hexdigest() for path in (*lineage.CURRENT_REVISIONS, "frozen.py")}
-            for relative in archived:
-                path = root / relative
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_bytes(b"new package metadata" if relative in lineage.CURRENT_REVISIONS else b"old")
-            runtime = {"new_model.json": "d"*64}
-            with patch.object(lineage, "read_archived_manifest", return_value=(b"fixture", archived)), \
-                 patch.object(lineage, "identity", return_value={"files": runtime}), \
-                 patch.object(lineage, "CURRENT_EXTRA_PATHS", ()):
+            expected = self.current_fixture(root)
+            with patch.object(lineage, 'CURRENT_FILES', ('robot/active_model.json',)):
                 records, revisions = lineage.current_records(root)
-                self.assertEqual(set(records), set(archived) | set(runtime))
-                self.assertEqual(set(revisions), set(lineage.CURRENT_REVISIONS))
-                (root / "frozen.py").write_bytes(b"changed contract")
-                with self.assertRaisesRegex(ValueError, "outside the explicit packaging revisions"):
+                self.assertEqual(set(records), expected)
+                self.assertEqual(revisions, [])
+                (root/'robot/approved.urdf').write_text('changed model')
+                with self.assertRaisesRegex(ValueError, 'Selected robot identity differs'):
                     lineage.current_records(root)
 
     def test_generation_checks_history_and_refuses_to_overwrite_any_published_destination(self):
@@ -142,18 +148,17 @@ class PipelineLineageTests(unittest.TestCase):
     def test_current_covers_top_level_prototype_and_cpu_tests_without_nested_outputs(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            covered = ("experiments/paper_walk/env.py", "experiments/paper_walk/tests/test_env.py")
-            excluded = ("experiments/paper_walk/results/copied_env.py",
-                        "experiments/paper_walk/tests/fixtures/copied_env.py")
+            covered = ("locomotion/env.py", "locomotion/tests/test_env.py")
+            excluded = ("locomotion/results/copied_env.py",
+                        "locomotion/tests/fixtures/copied_env.py")
             for relative in covered+excluded:
                 path = root/relative
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text("# Source-coverage fixture\n")
-            with patch.object(lineage, "read_archived_manifest", return_value=(b"fixture", {})), \
-                 patch.object(lineage, "identity", return_value={"files": {}}), \
-                 patch.object(lineage, "CURRENT_EXTRA_PATHS", ()):
+            model_paths = self.current_fixture(root)
+            with patch.object(lineage, 'CURRENT_FILES', ('robot/active_model.json',)):
                 records, _ = lineage.current_records(root)
-                self.assertEqual(set(records), set(covered))
+                self.assertEqual(set(records), set(covered) | model_paths)
                 content = lineage.CURRENT_HEADER.encode()+encode(records)
                 (root/covered[0]).write_text("# Changed maintained controller fixture\n")
                 changed, _ = lineage.current_records(root)

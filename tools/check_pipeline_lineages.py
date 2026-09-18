@@ -17,148 +17,26 @@ import tempfile
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from tools.mkii_training_contract import identity
 
 ROOT = Path(__file__).resolve().parents[1]
 ARCHIVED_MANIFEST = "isaaclab/deploy/stage2_pipeline.sha256"
 ARCHIVED_REF = "81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df"
 ARCHIVED_MANIFEST_SHA256 = "19fc816cf9c53a79be8e14831daa58a12eba3f7f07c5fca80d03f2dc947ccda1"
 ARCHIVED_ENTRY_COUNT = 112
-CURRENT_MANIFEST = "isaaclab/deploy/repository_forward_example_20260917_v11_pipeline.sha256"
+CURRENT_MANIFEST = "isaaclab/deploy/locomotion_kernel_20260917_v12_pipeline.sha256"
 CURRENT_HEADER = (
-    "# hexapod.mkii_fourbar_pipeline.v1\n"
+    "# hexapod.locomotion_kernel.v1\n"
     f"# Archived source commit: {ARCHIVED_REF}\n"
     f"# Archived manifest SHA256: {ARCHIVED_MANIFEST_SHA256}\n"
-    "# Current files are a separate release; the archived manifest remains unchanged.\n"
+    "# Current coverage is independent of historical model dependencies.\n"
 )
-CURRENT_REVISIONS = {
-    "packages/hexapod_env/hexapod_env/assets/spec.py":
-        "Add model-specific joint limits while preserving existing asset values.",
-    "packages/hexapod_env/hexapod_env/assets/articulation.py":
-        "Add solver and collision settings with defaults that preserve existing configurations.",
-    "packages/hexapod_core/pyproject.toml": "Package the new RS05 v2 JSON contract.",
-    "packages/hexapod_env/pyproject.toml": "Package the new actuator and versioned task modules.",
-}
-CURRENT_EXTRA_PATHS = (
-    "isaaclab/deploy/repository_ppo_reference_20260917_v10_pipeline.sha256",
-    "isaaclab/deploy/repository_locomotion_force_20260916_v9_pipeline.sha256",
-    "isaaclab/deploy/repository_canonical_restart_20260915_v8_pipeline.sha256",
-    "isaaclab/deploy/repository_trajectory_optimizer_20260916_v8_pipeline.sha256",
-    "isaaclab/deploy/repository_canonical_restart_20260915_v7_pipeline.sha256",
-    "artifacts/trajectory_optimizer_20260917/solve_002/trajectory.npz",
-    "artifacts/trajectory_optimizer_20260917/solve_002/INPUT.json",
-    "artifacts/trajectory_optimizer_20260917/solve_002/RESULT.json",
-    "artifacts/trajectory_optimizer_20260917/solve_002/SOLVER.json",
-    "isaaclab/deploy/repository_canonical_restart_20260915_v6_pipeline.sha256",
-    "isaaclab/deploy/repository_canonical_restart_20260915_v5_pipeline.sha256",
-    "isaaclab/deploy/repository_canonical_restart_20260915_v4_pipeline.sha256",
-    "isaaclab/deploy/repository_canonical_restart_20260915_v3_pipeline.sha256",
-    "isaaclab/deploy/repository_canonical_restart_20260914_v2_pipeline.sha256",
-    "isaaclab/deploy/repository_canonical_restart_20260914_pipeline.sha256",
-    "isaaclab/deploy/repository_visual_roadmap_20260911_pipeline.sha256",
-    "isaaclab/deploy/repository_docs_20260911_pipeline.sha256",
-    "isaaclab/deploy/repository_progress_tests_20260911_pipeline.sha256",
-    "isaaclab/deploy/repository_foundation_20260911_pipeline.sha256",
-    "isaaclab/deploy/stage3_sensor_transport_20260910_pipeline.sha256",
-    "isaaclab/deploy/stage2_research_poster_20260910_pipeline.sha256",
-    "artifacts/perception_readiness_2026-09-09/sensor_transport_002/BUNDLE_SHA256.json",
-    "isaaclab/deploy/stage2_c_contact_telemetry_20260910_pipeline.sha256",
-    "isaaclab/deploy/stage2_c_terrain_entry_20260910_pipeline.sha256",
-    "robot/tests/test_quiet_quaternion_contract.py",
-    "robot/tests/test_terrain_contact_evidence.py",
-    "artifacts/terrain_readiness_2026-09-09/runtime/terrain_robot_reset_diagnostic_001/SHA256SUMS.json",
-    "artifacts/terrain_readiness_2026-09-09/runtime/terrain_robot_smoke_004/SHA256SUMS.json",
-    "artifacts/omni_diagnostics_2026-09-09/velocity_candidate_001/FROZEN_SHA256SUMS.json",
-    "artifacts/omni_diagnostics_2026-09-09/velocity_candidate_001/results/SHA256SUMS.json",
-    "artifacts/omni_diagnostics_2026-09-09/velocity_candidate_001/replay_cpu.py",
-
-    "isaaclab/deploy/stage2_c_repair003_20260909_pipeline.sha256",
-    "robot/tests/test_terrain_config_copy.py",
-    "robot/tests/test_terrain_fixture_reference.py",
-    "robot/tests/test_terrain_robot_launcher.py",
-    "artifacts/omni_diagnostics_2026-09-09/reference_feasibility_001/FROZEN_SHA256SUMS.json",
-    "artifacts/omni_diagnostics_2026-09-09/reference_feasibility_001/replay.py",
-    "artifacts/terrain_readiness_2026-09-09/runtime/terrain_robot_smoke_002/SHA256SUMS.json",
-    "artifacts/terrain_readiness_2026-09-09/runtime/terrain_robot_smoke_003/SHA256SUMS.json",
-    "isaaclab/deploy/stage2_c_priority_20260909_docs_contract_pipeline.sha256",
-    "isaaclab/deploy/hexapod-rl",
-    "robot/tests/test_omni_repair_training.py",
-    "artifacts/omni_diagnostics_2026-09-09/repair_003/results/SHA256SUMS.json",
-    "artifacts/omni_diagnostics_2026-09-09/repair_003/compare_results.py",
-    "isaaclab/deploy/stage2_c_priority_20260909_pipeline.sha256",
-    "isaaclab/tests/test_phase3_sensor_hardware_contract.py",
-    'isaaclab/deploy/mkii_fourbar_v1_1600hz_metrics_pipeline.sha256',
-    'experiments/c_length_study/runtime/SHA256SUMS.json',
-    'robot/tools/generate_length_study.py',
-    'robot/tools/pack_length_study_viewer.py',
-    'robot/tools/prepare_length_study_training.py',
-    'experiments/c_length_study/runtime/hexapod_rl/__init__.py',
-    'experiments/c_length_study/runtime/hexapod_rl/asset_cfg.py',
-    'experiments/c_length_study/runtime/hexapod_rl/command_sampling.py',
-    'experiments/c_length_study/runtime/hexapod_rl/env.py',
-    'experiments/c_length_study/runtime/hexapod_rl/env_cfg.py',
-    'experiments/c_length_study/runtime/hexapod_rl/phase1_v2_cfg.py',
-    'experiments/c_length_study/runtime/hexapod_rl/phase1_v3_cfg.py',
-    'experiments/c_length_study/runtime/hexapod_rl/phase1_v4_cfg.py',
-    'experiments/c_length_study/runtime/hexapod_rl/phase1_v5_cfg.py',
-    'experiments/c_length_study/runtime/hexapod_rl/phase2_cfg.py',
-    'experiments/c_length_study/runtime/hexapod_rl/phase2d_cfg.py',
-    'experiments/c_length_study/runtime/hexapod_rl/phase2e_cfg.py',
-    'experiments/c_length_study/runtime/hexapod_rl/phase2g_cfg.py',
-    'experiments/c_length_study/runtime/hexapod_rl/ppo_cfg.py',
-    'experiments/c_length_study/runtime/hexapod_rl/register.py',
-    'experiments/c_length_study/runtime/hexapod_rl/showcase_sequence.py',
-    'robot/tests/test_c_study_runtime.py',
-    'robot/tests/test_candidate_c_reference.py',
-    'robot/tests/test_length_mechanics.py',
-    'robot/tests/test_length_study.py',
-    'robot/tests/test_length_training.py',
-    'robot/tests/test_omni_diagnostics.py',
-    'robot/tests/test_omni_flat.py',
-    'robot/tests/test_omni_repair_allocation.py',
-    'robot/tests/test_omni_reviews.py',
-    'robot/tests/test_perception_replay.py',
-    'robot/tests/test_sensor_mounts.py',
-    'robot/tests/test_terrain_curriculum.py',
-    'robot/tests/test_terrain_fixtures.py',
-    'robot/tests/test_terrain_readiness.py',
-    'robot/tests/test_terrain_support.py',
-    ARCHIVED_MANIFEST,
-    "isaaclab/deploy/mkii_fourbar_v1_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_tgs_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_800hz_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_diagnostics_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_diagnostic_lifecycle_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_asset_binding_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_physical_mimic_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_target_ramp_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_pd030_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_placement_diagnostics_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_collision_isolation_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_final_velocity4_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_final_velocity16_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_placement_convergence_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_coordination_control_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_motion_prefix_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_coincident_layout_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_rsl501_compat_pipeline.sha256",
-    "isaaclab/deploy/mkii_fourbar_v1_1600hz_pipeline.sha256",
-    "isaaclab/deploy/run-mkii-fourbar",
-    "isaaclab/deploy/run-mkii-fourbar-campaign",
-    ".github/workflows/tests.yml",
-    "docs/PIPELINE_LINEAGES.md",
-    "tools/check_pipeline_lineages.py",
-    "isaaclab/tests/test_pipeline_lineages.py",
-    "isaaclab/tests/test_mkii_fourbar_metrics_equivalence.py",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/compare_complete_metrics.py",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/test_complete_metrics.py",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/baseline_validate_mkii_fourbar.py.txt",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/proposed_validate_mkii_fourbar.py.txt",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/installed_isaaclab_math.py.txt",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/installed_matrix_from_quat.py",
-    "artifacts/mkii_fourbar_2026-09-06/runtime_efficiency_integration_v4/sdk_math_provenance.json",
-    "pyproject.toml", "uv.lock", ".python-version",
-)
+# Cover maintained source and tests, without recursively pinning old releases or results.
+CURRENT_TREES = ("packages", "tools", "isaaclab/tests", "robot/tests")
+CURRENT_TOP_LEVEL = ("locomotion", "locomotion/tests", "experiments/trajectory_optimization",
+                     "experiments/trajectory_optimization/tests")
+CURRENT_FILES = ("robot/active_model.json", "configs/source_inventory.json", "configs/locomotion_spark.json",
+                 ".github/workflows/tests.yml", "pyproject.toml", "uv.lock", ".python-version")
+SOURCE_SUFFIXES = {".py", ".toml", ".json", ".yaml", ".yml"}
 
 
 def digest_bytes(value):
@@ -238,26 +116,29 @@ def verify_historical(root=ROOT, *, source_ref=ARCHIVED_REF,
 
 
 def current_records(root=ROOT):
-    """Keep every historical path covered and add every current runtime identity path."""
+    """Hash current source and the selected robot without loading historical task code."""
     root = Path(root).resolve()
-    _, archived = read_archived_manifest(root)
-    records = dict(identity(root)["files"])
-    test_paths = {str(p.relative_to(root)) for directory in ("isaaclab/tests", "robot/tests", "experiments/paper_walk/tests", "experiments/trajectory_optimization/tests")
-                  for p in (root / directory).glob("*.py")}
-    # Match the inventory's bounded prototype scope; nested evidence is not code.
-    prototype_paths = {str(p.relative_to(root)) for directory in ("experiments/paper_walk", "experiments/trajectory_optimization")
-                       for p in (root / directory).glob("*.py")}
-    for relative in set(archived) | set(CURRENT_EXTRA_PATHS) | test_paths | prototype_paths:
-        path = root / relative
-        if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(root):
+    relative_paths = set(CURRENT_FILES)
+    for directory in CURRENT_TREES:
+        relative_paths.update(p.relative_to(root).as_posix() for p in (root/directory).rglob("*")
+            if p.suffix in SOURCE_SUFFIXES and "__pycache__" not in p.parts and p.is_file())
+    for directory in CURRENT_TOP_LEVEL:
+        relative_paths.update(p.relative_to(root).as_posix() for p in (root/directory).glob("*.py"))
+    model = json.loads((root/"robot/active_model.json").read_text())
+    selected = {model[key]["path"]: model[key]["sha256"] for key in ("urdf", "model")}
+    selected[model["usd"]] = model["usd_sha256"]
+    relative_paths.update(selected)
+    records = {}
+    for relative in sorted(relative_paths):
+        path = root/relative
+        if (Path(relative).is_absolute() or ".." in Path(relative).parts or path.is_symlink()
+                or not path.is_file() or not path.resolve().is_relative_to(root)):
             raise ValueError(f"Current release path is missing or not an in-root regular file: {relative}")
         with path.open("rb") as stream:
             records[relative] = digest_stream(stream)
-    changed = sorted(path for path, digest in archived.items() if records[path] != digest)
-    unauthorized = set(changed) - set(CURRENT_REVISIONS)
-    if unauthorized:
-        raise ValueError(f"Historical contract/source changed outside the explicit packaging revisions: {sorted(unauthorized)}")
-    return records, changed
+        if relative in selected and records[relative] != selected[relative]:
+            raise ValueError("Selected robot identity differs: "+relative)
+    return records, []
 
 
 def compare_current_manifest(content, actual):
@@ -279,10 +160,9 @@ def verify_current(root=ROOT, manifest=None):
     actual, revisions = current_records(root)
     content = path.read_bytes()
     count = compare_current_manifest(content, actual)
-    return {"pass": True, "lineage": "mkii_fourbar_v1", "manifest": str(path),
+    return {"pass": True, "lineage": "locomotion_kernel_v1", "manifest": str(path),
             "manifest_sha256": digest_bytes(content), "files_verified": count,
-            "historical_paths_retained": ARCHIVED_ENTRY_COUNT,
-            "separately_versioned_packaging_revisions": {path: CURRENT_REVISIONS[path] for path in revisions}}
+            "historical_verification": "separate pinned Git lineage"}
 
 
 def generate_current(root=ROOT, output=None):
@@ -297,7 +177,7 @@ def generate_current(root=ROOT, output=None):
     with output.open("x") as stream:
         stream.write(content)
     return {"generated": str(output), "files": len(records), "sha256": digest_bytes(content.encode()),
-            "historical_paths_retained": ARCHIVED_ENTRY_COUNT, "packaging_revisions": revisions}
+            "historical_verification": "separate pinned Git lineage"}
 
 
 def main(argv=None):

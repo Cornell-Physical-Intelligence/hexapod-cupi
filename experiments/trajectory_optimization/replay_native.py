@@ -1,9 +1,4 @@
-"""Replay optimized motor targets through the admitted native controller.
-
-The source pack installs this entry point as train.py and preserves the original
-entry point as paper_train.py. The original launcher and reservation guard keep
-their bytes and retain ownership of locks, the container, and cleanup.
-"""
+"""Replay an optimized target cycle through the locomotion kernel."""
 from __future__ import annotations
 
 import argparse
@@ -22,13 +17,6 @@ def sha(path):
 def save(path, data):
     Path(path).write_text(json.dumps(data, indent=2, allow_nan=False)+'\n')
 
-
-def paper_modules():
-    here = Path(__file__).resolve().parent
-    if (here/'paper_train.py').is_file():
-        sys.path.insert(0, str(here.parent))
-        return here.name, importlib.import_module(here.name+'.paper_train')
-    return 'experiments.paper_walk', importlib.import_module('experiments.paper_walk.train')
 
 
 def validate_trajectory(path, expected_sha, model_sha, *, read_arrays=True):
@@ -57,11 +45,13 @@ def validate_trajectory(path, expected_sha, model_sha, *, read_arrays=True):
 
 
 def main(argv=None):
-    prefix, original = paper_modules()
+    from locomotion import admission as original
+    from locomotion.camera import prepare_policy_scene
+    prefix = 'locomotion'
     env_config = importlib.import_module(prefix+'.env_config')
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--mode', choices=['replay'], required=True)
-    for key in ('asset', 'model', 'geometry', 'geometry-extrema', 'prior', 'prior-metadata',
+    for key in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance',
                 'output', 'standing-admission', 'trajectory'):
         parser.add_argument('--'+key, type=Path, required=True)
     parser.add_argument('--trajectory-sha256', required=True)
@@ -69,7 +59,7 @@ def main(argv=None):
     parser.add_argument('--num-envs', type=int, choices=[1], default=1)
     parser.add_argument('--max-wall-seconds', type=float, default=1500.)
     parser.add_argument('--preflight-only', action='store_true')
-    if '--preflight-only' in (argv if argv is not None else sys.argv[1:]):
+    if any(flag in (argv if argv is not None else sys.argv[1:]) for flag in ('--preflight-only', '--help', '-h')):
         parser.add_argument('--headless', action='store_true')
         parser.add_argument('--device', default='cuda:0')
     else:
@@ -80,13 +70,13 @@ def main(argv=None):
     if not args.headless or not 0 < args.max_wall_seconds <= 3600:
         raise ValueError('Bounded headless allocation required')
     source = Path(__file__).resolve().parent
-    if sha(source/'FREEZE_SHA256.json') != args.source_freeze_sha256:
+    if sha(source.parents[1]/'FREEZE_SHA256.json') != args.source_freeze_sha256:
         raise ValueError('Source-freeze identity differs')
-    metadata = json.loads(args.prior_metadata.read_text())
-    cfg = env_config.EnvConfig(num_envs=1, render=True, episode_seconds=60., device=args.device)
-    identity = {'source_files': original.source_identity(), 'model_sha256': env_config.MODEL_SHA256,
-        'usd_sha256': env_config.USD_SHA256, 'prior_sha256': sha(args.prior),
-        'prior_metadata_sha256': sha(args.prior_metadata), 'geometry_sha256': sha(args.geometry),
+    metadata = json.loads(args.stance.read_text())
+    cfg = env_config.EnvConfig(num_envs=1, render=True, record_motion_features=True, episode_seconds=60., device=args.device)
+    identity = {'source_files': {p.name: sha(p) for p in sorted(Path(original.__file__).parent.glob('*.py'))}, 'model_sha256': env_config.MODEL_SHA256,
+        'usd_sha256': env_config.USD_SHA256,
+        'stance_sha256': sha(args.stance), 'geometry_sha256': sha(args.geometry),
         'geometry_extrema_sha256': sha(args.geometry_extrema), 'config': cfg.declaration()}
     identity['physics_source_files'] = {k: identity['source_files'][k] for k in ('env.py', 'env_config.py')}
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
@@ -125,13 +115,12 @@ def main(argv=None):
         import numpy as np
         import torch
         env_module = importlib.import_module(prefix+'.env')
-        capture_module = importlib.import_module(prefix+'.force_metrics' if prefix != 'experiments.paper_walk'
-            else 'experiments.trajectory_optimization.force_metrics')
+        capture_module = importlib.import_module('locomotion.evaluate')
         camera_module = importlib.import_module(prefix+'.camera')
         torch.manual_seed(cfg.seed)
-        env = env_module.PaperWalkEnv(cfg, args.asset, args.model, args.geometry,
+        env = env_module.LocomotionEnv(cfg, args.asset, args.model, args.geometry,
             args.output/'native', reference_metadata=metadata)
-        original.prepare_policy_scene(env)
+        prepare_policy_scene(env)
         env.render = camera_module.NativePolicyCamera(env)
         target_tensor = torch.as_tensor(targets, dtype=torch.float32, device=env.device)
         control = 0

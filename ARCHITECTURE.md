@@ -134,9 +134,9 @@ flowchart LR
 | Boundary | Responsibility | Existing source / implementation status |
 | --- | --- | --- |
 | Core contracts | Named coordinates, units, commands and versioned model-specific observation/action contracts | [hexapod_core](packages/hexapod_core/). Existing layouts are lineage-specific; stdlib only. |
-| Simulation | Model loading, physics, observations, rewards and rollout | [hexapod_env](packages/hexapod_env/). Historical task IDs stay bound to their original models. Canonical admission is separate. |
-| Training operations | Compose and supervise bounded runs, persist recoverable results and own the GPU queue | [hexapod_train](packages/hexapod_train/) and [ops](ops/). Existing hardened launchers remain the operational authority. |
-| Evaluation | Reproduce measured screens and model-specific acceptance decisions | [hexapod_eval](packages/hexapod_eval/). Existing gates keep their scope; package presence does not establish canonical qualification. |
+| Simulation | Model loading, physics, observations, rewards and rollout | [locomotion](locomotion/README.md) owns the canonical loop. [hexapod_env](packages/hexapod_env/) retains historical task contracts. |
+| Training operations | Supervise bounded runs, persist results and own the GPU allocation | [locomotion/launch.py](locomotion/launch.py) and its reservation guard own canonical allocations. Historical launchers retain their original scope. |
+| Evaluation | Reproduce measured screens and model-specific acceptance decisions | [locomotion/evaluate.py](locomotion/evaluate.py) owns canonical acquisition and uses unchanged gates. [hexapod_eval](packages/hexapod_eval/) retains historical contracts. |
 | Motion runtime | Build observations, execute a policy and bound motor targets on time | [hexapod_runtime](packages/hexapod_runtime/). Existing pure runtime utilities need a canonical binding and parity evidence. |
 | Navigation | Turn a qualified pose and route into permitted velocity commands | [hexapod_nav](packages/hexapod_nav/). Current waypoint follower is a protocol example; coverage planning and localization are pending. |
 | Mission and operator UI | Boundary review, mission state, authority, progress and operator actions | Pending. The existing [viewer](viewer/) visualizes robot models; it is not a mission operator application. |

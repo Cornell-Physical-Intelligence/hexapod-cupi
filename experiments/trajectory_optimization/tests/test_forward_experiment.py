@@ -14,7 +14,7 @@ from experiments.trajectory_optimization.forward_experiment import (
     forward_task, initialize, load_protocol, sha, state_digest,
 )
 from experiments.trajectory_optimization.prepare_forward import create_protocol, prepare_arm
-from experiments.trajectory_optimization.vanilla import ppo_config
+from locomotion.ppo import ppo_config
 
 
 class ForwardProtocolTests(unittest.TestCase):
@@ -37,18 +37,23 @@ class ForwardProtocolTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             create_protocol(root/'protocol')
+            declared = json.loads((Path(__file__).resolve().parents[3]/'configs/locomotion_spark.json').read_text())
+            declared['extra_mounts'].append(['/recorded/standing', '/standing_one'])
+            (root/'inputs.json').write_text(json.dumps(declared))
             bindings = []
             for arm in ('scratch', 'example'):
                 remote = '/home/orionh/HEXAPOD_runs/restart_20260914/test_forward/'+arm
-                bindings.append(prepare_arm(root/'protocol/PROTOCOL.json', root/arm, remote, arm=arm))
+                bindings.append(prepare_arm(root/'protocol/PROTOCOL.json', root/arm, remote,
+                                            arm=arm, inputs=root/'inputs.json'))
             a, b = bindings
+            self.assertIn(['/recorded/standing', '/standing_one'], a['extra_mounts'])
             self.assertEqual(a['source_freeze_sha256'], b['source_freeze_sha256'])
             self.assertEqual(a['command_args'][:-1], b['command_args'][:-1])
             self.assertEqual(a['command_args'][-1], 'scratch')
             self.assertEqual(b['command_args'][-1], 'example')
             self.assertEqual((root/'scratch/experiment/demonstration.npz').read_bytes(),
                              (root/'example/experiment/demonstration.npz').read_bytes())
-            from experiments.paper_walk.tests.test_launch_spark import launch, reservation
+            from locomotion import launch, reservation
             paths = {key: Path(a[key]) for key in ('source', 'output', 'asset', 'prior', 'geometry_source')}
             with patch.object(reservation, 'canonical_path', side_effect=Path):
                 command = launch.command(a, paths, 'test_container')

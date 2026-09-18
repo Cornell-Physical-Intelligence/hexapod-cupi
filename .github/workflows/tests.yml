@@ -31,8 +31,8 @@ jobs:
       - name: Run C-study, terrain and perception tests
         run: uv run python -m unittest discover -s robot/tests
 
-      - name: Run canonical paper-walk CPU contract tests
-        run: uv run python -m unittest discover -s experiments/paper_walk/tests
+      - name: Run locomotion kernel and recorded parity checks
+        run: uv run python -m unittest discover -s locomotion/tests
 
       - name: Run trajectory optimizer dynamics and replay-input checks
         run: uv run python -m unittest discover -s experiments/trajectory_optimization/tests
@@ -47,4 +47,4 @@ jobs:
         run: uv run python tools/check_pipeline_lineages.py historical
 
       - name: Verify the current integrated release manifest
-        run: uv run python tools/check_pipeline_lineages.py current --manifest isaaclab/deploy/repository_forward_example_20260917_v11_pipeline.sha256
+        run: uv run python tools/check_pipeline_lineages.py current --manifest isaaclab/deploy/locomotion_kernel_20260917_v12_pipeline.sha256

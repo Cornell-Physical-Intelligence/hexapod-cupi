@@ -1,179 +1,88 @@
 # Contributor guide
 
-Keep chat responses to 200 words or fewer.
-Use direct language. Preserve other contributors' work.
+Keep replies under 200 words. Give no time estimates. Preserve other contributors' work.
+`AGENTS.md` is a symlink to this file. Edit this source for shared instructions.
 
-Edit this file for shared agent instructions. `AGENTS.md` is a symlink to
-`CLAUDE.md`, so both names read and edit the same source.
+## Read only the context you need
 
-## Context and authority
+Start with [README](README.md) and [locomotion](locomotion/README.md) for walking
+work. [ARCHITECTURE](ARCHITECTURE.md) owns mission requirements and system
+boundaries. Read the affected package guide for its historical contract scope.
+Package guides do not define the approved robot's pending hardware runtime.
 
-Read the assigned issue, its input fixtures and the relevant section of
-[ARCHITECTURE.md](ARCHITECTURE.md). It owns agreed requirements and boundaries.
-`site/project.json` owns progress; `STATUS.md` is its generated text view.
-GitHub issues own assignments. Define the next smallest increment with James
-and the responsible lead before treating a roadmap marker as ready work.
-Do not create another plan, progress document or handoff-based task queue.
+Use explicit search paths. Read raw CAD, frozen source or old decision records
+only to answer a named question. Do not create another plan, handoff, decision
+log or task queue. Use GitHub issues for assignments and PRs for design review.
+Keep durable procedures in the existing reference documents. Preserve historical
+context in Git instead of copying it into new prompts or maintained guides.
 
-During the design review, discuss one decision or milestone at a time. Read the
-team lead's existing design and evidence before asking James to choose. Use that
-design as the default and propose its smallest viable version, explicitly
-separating existing decisions, unimplemented proposals and new simplifications.
-Ask only about consequential gaps or tradeoffs. James's later decisions take
-precedence; historical instructions never resume research or override the
-approved robot model.
+## Source boundaries
 
-Read the affected package's `CLAUDE.md` for local ownership. Those package guides
-are part of the frozen historical release: their 66-value layouts, mock timing
-and gate claims apply to their original models. They do not define the canonical
-robot's pending runtime. Preserve those bytes; this root guide and ARCHITECTURE
-make that scope explicit. Use explicit paths
-for source searches; default search excludes frozen evidence, historical notes,
-raw CAD and generated files. Open evidence intentionally when assessing a result.
+- `locomotion/` owns the canonical simulator, reward, stock PPO, evaluation and
+  guarded Spark launcher. `robot/active_model.json` selects its approved robot.
+- `experiments/trajectory_optimization/` owns the optional optimizer and example
+  comparison. Its native packers call the kernel.
+- `packages/` retains shared contracts and historical runtime/navigation code.
+  Core uses stdlib; runtime depends on core and stdlib; navigation depends on
+  core and must not import simulation or runtime.
+- `tools/` owns repository and asset commands. `configs/source_inventory.json`
+  records ownership and the Git identities of retired source and context.
+- `artifacts/` holds results and replay inputs. Production code must not import
+  its frozen source copies. Historical task IDs retain their original semantics.
+- `site/project.json` owns current progress. Generate `STATUS.md` from it.
+  Retain decision-relevant findings; use Git history for the execution journal.
 
-## Maintained boundaries
+## Model and result invariants
 
-- `packages/`: shared contracts, environment, training, evaluation, runtime and navigation.
-- `tools/`: repository commands; `tools/assets/` owns asset utilities.
-  `configs/source_inventory.json` classifies every tool and records its owner.
-- `ops/` and `isaaclab/deploy/`: existing guarded operations and release manifests.
-- `experiments/c_length_study/tools/`: historical study runners and analysis.
-- `experiments/terrain/tools/`: terrain/perception prototypes; qualification is separate.
-- `experiments/paper_walk/`: maintained canonical PPO/motion-prior prototype;
-  its top-level modules are inventoried, while `tests/` contains CPU checks.
-- `experiments/trajectory_optimization/`: model-bound forward-cycle optimizer
-  and native replay entry; its tests check dynamics and recorded inputs.
-- `robot/`: approved models, importers and model-specific conventions.
-- `site/`: the progress registry and static GitHub Pages presentation.
-- `artifacts/`: immutable results and exact replay inputs; never import these copies into new production code.
-- `docs/`: [maintained reference index](docs/README.md); `docs/archive/` holds superseded prose.
-  Historical prose is not current progress.
+Preserve the approved model and motor corrections in `robot/active_model.json`.
+New work uses the detailed 19-body, 18-joint direct-drive robot after matching
+native admission. Preserve the 0.040 rad / 20 ms comparison limiter and existing
+numerical gates. Do not change tests or thresholds to admit a result.
 
-## Invariants
+Preserve checkpoint bytes, published manifests, raw captures, failed attempts,
+incident/recovery records and the probe ledger. New results need fresh names
+and exact model/source/input hashes. Keep original labels and source revisions.
+A checkpoint save, video or source release does not qualify walking. Stage 2
+still requires direction, transition, stop, torque, contact and visual acceptance.
+Native evaluations must record ground-contact force and motor torque before
+another optimizer/PPO sequence. These measurements add no acceptance limits.
 
-The approved model and motor corrections in `robot/active_model.json` are ground
-truth. New training uses the detailed 19-body/18-joint direct-drive robot after
-matching admission. Historical mock/C-study/four-bar tasks, models and policies
-keep their own semantics. Never repoint a frozen task ID or assume an old
-observation layout defines the canonical runtime.
+James removed the Fable review requirement. Do not start Fable consultations.
+Use bounded independent worker tasks only when the user authorizes delegation.
 
-Checkpoint bytes, published SHA-256 manifests, failed attempts, incident records
-and the probe ledger are immutable. Preserve their original labels and source
-commits. New results and releases get new identities. Never change gates or tests
-to admit a result. Formal comparisons use their common recorded limiter and
-matching configuration. A code merge or video alone cannot qualify behavior.
+## Compute
 
-Core remains stdlib-only; runtime depends on core and stdlib; navigation depends
-on core and must not import simulation or runtime. Model-specific package rules
-retain the exact compatibility constraints and tests.
-
-## Operations
-
-**Current dispatcher paused for handoff on 15 September 2026 UTC.** James said:
-“take a pause for now and let someone else continue work, push all non commited
-changes”. This supersedes the current dispatcher's instruction to continue
-research. Publish the preserved work, then relinquish execution. Another
-designated lead may continue the existing authorized goal without another user
-permission; no successor is named here. Do not automatically resume this
-dispatcher or the historical heartbeat, which is already PAUSED. Do not create
-a separate handoff task queue.
-
-The [pause receipt](artifacts/restart_2026-09-14/pause_20260915_001/RECEIPT.json)
-records no running native jobs, containers or GPU compute apps at 01:58:15 UTC.
-The exclusive reservation and queue lock remain retained. The shared Spark
-coordination file now has SHA-256
-`c89c99ebdd16941e3f8e7f23ef3525aeb360c78361aa49aa04e766b381a4727c`.
-A successor must recheck live ownership/resources and create a fresh guard and
-launch binding to those coordination bytes; preserve every old source and
-binding unchanged. Read the completed startup comparison and unexecuted refit
-scope in [TRAINING](docs/TRAINING.md) before deciding the next increment.
-
-**James authorized the canonical qualification restart on 14 September 2026.**
-He confirmed the displayed mass-corrected model and the sequence standing →
-walking/stopping → terrain → survey. Use the URDF selected by
-`robot/active_model.json`, SHA-256
-`9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78`.
-That authorization superseded the earlier research pause for that sequence; it does not qualify a
-stage, change admission gates or release the Spark reservation. Keep historical
-results and the [JAMES_HANDOFF](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/62fd7448264c5ebe051ba2de1d9a72844d6b4c3a/docs/JAMES_HANDOFF.md)
-pause receipts intact. Fresh attempts need new identities bound to this model.
-
-**The active user goal is Stage 2 on this confirmed model.** James explicitly
-directed continuing until the existing Stage 2 requirements are satisfied,
-including actual paper-informed PPO training and a video of the trained policy
-running in Isaac Sim. The successor's remaining scope includes matching native admission, learning and
-the full existing direction, transition, quiet-stop, torque, contact and visual
-acceptance requirements. Diagnostics, prepared code, checkpoint saves and video
-recording alone do not finish the goal. Preserve the 0.040 rad / 20 ms comparison
-limiter and every existing numerical gate; never transfer historical acceptance
-or substitute prior animation for an actual policy rollout.
-
-**James also granted Codex full Spark compute ownership on 14 September 2026:**
-"you can stop all other processes on the spark" and "take full ownership of the
-spark, you have my permissions". The lead dispatcher may stop or suspend
-competing user compute and its restart triggers without another approval.
-Identify each workload and preserve its source, outputs and recovery state;
-keep SSH, networking, operating-system services and host health available.
-Only the lead dispatcher allocates shared compute or changes its controls.
-
-The Spark mirror `/home/orionh/HEXAPOD` is not a Git repository. Authorization is
-not proof that a job or continuation automation is running. Before dispatch read
-[OPERATIONS](docs/OPERATIONS.md) and the current
-[compute coordination rules](docs/SPARK_COMPUTE_COORDINATION.md), including the
-user's existing HEXAPOD reservation and external-automation blocks. Keep the GPU
-lock, exact process/container ownership, bounded recovery and post-exit checks.
-Preserve reservation controls between allocations; never act on unidentified jobs.
-Never expose secrets, especially the Spark container's `.env.base`.
+Read [OPERATIONS](docs/OPERATIONS.md) and [compute coordination](docs/SPARK_COMPUTE_COORDINATION.md)
+before dispatch. One lead owns Spark. James authorized full compute ownership;
+identify competing workloads and preserve recovery state before stopping them.
+Keep both GPU locks, exact-container cleanup and the retained reservation.
+Preserve SSH, networking and host services. Do not expose `.env.base` or secrets.
+The Spark mirror is not a Git repository. Recheck live state before each run.
+The historical heartbeat remains paused. Cleanup regression checks do not
+restart the open-ended Stage 2 research sequence.
 
 ## Verification and publication
 
-James requires locomotion load tracking before the next optimizer/PPO sequence
-(16 September 2026). Native evaluations must include `force_metrics.json` with
-contact-normal loads and motor torque. Check that the summary is available
-before the next experiment; preserve failed or incomplete captures. These are
-descriptive measurements, not new numerical acceptance limits. See TRAINING.
+Run focused checks while editing, then the required checks in
+[CONTRIBUTING](CONTRIBUTING.md). Keep dependency changes paired with `uv.lock`.
 
 ```sh
 uv sync --locked
+uv run python -m unittest discover -s locomotion/tests
 uv run python -m unittest discover -s isaaclab/tests
 uv run python -m unittest discover -s robot/tests
+uv run python -m unittest discover -s experiments/trajectory_optimization/tests
 python3 tools/source_inventory.py check
-python3 tools/project_site.py status
-python3 tools/project_site.py check --base <integration-base-SHA>
-python3 tools/project_site.py build
 python3 tools/check_pipeline_lineages.py historical
 python3 tools/check_pipeline_lineages.py current
 ```
 
-Run focused checks while editing and the required suites before integration.
-Keep dependency changes paired with the lockfile. No new test may merely mirror
-an implementation or replace a failing gate.
+Every push needs a corresponding paper/Pages update under
+[PROJECT_SITE](docs/PROJECT_SITE.md): one append-only change record, generated
+STATUS, exact-diff validation, build and renderer check. Source changes need a
+new manifest. Published manifests remain unchanged. Verify the exact pushed
+revision's CI and deployed Pages revision.
 
-**Hard rule: every push includes an update to the public research paper/Pages.**
-James reiterated this on 14 September 2026. Include the corresponding central
-paper update, validate the exact push diff, build the paper and exercise its
-renderer before pushing. Verify the exact pushed revision's CI and Pages
-deployment; a failed build or an older served revision is not completed publication.
-
-Every change follows [docs/PROJECT_SITE.md](docs/PROJECT_SITE.md): update the
-registry for changed progress, regenerate STATUS and add an append-only change
-record. CI checks coverage, evidence, generated status and release identity.
-Covered source changes require a new manifest and matching CI selection;
-published manifests stay unchanged. Source snapshots do not admit hardware.
-
-The user's standing publication authorization applies to verified changes:
-commit on a `[netid]/[task]` branch, open a pull request to `main`, merge after
-green CI and review, then verify the deployed revision. Direct pushes to `main`
-are not allowed; see [CONTRIBUTING.md](CONTRIBUTING.md). Use forward commits,
-preserve teammates' main changes and never rewrite published history. Subleads
-own ordinary review; James accepts mission changes.
-
-## Review and parallel work
-
-James removed the Fable review requirement on 16 September 2026. Do not start
-Fable consultations under the former instruction. Preserve prior consultation
-records as historical evidence.
-
-Give workers bounded work areas and concrete deliverables. Keep one owner for
-Spark execution and integration. Review proposed code and run relevant checks
-before adoption. Record the evidence and engineering decision.
+The standing publication authorization permits verified changes on a
+`[netid]/[task]` branch, a PR to `main`, review and merge after green CI. Use
+forward commits and preserve teammates' work. Do not push to `main` directly.
