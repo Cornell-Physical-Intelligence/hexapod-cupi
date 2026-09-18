@@ -24,7 +24,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           if [ -n "$BASE_SHA" ] && [ "$BASE_SHA" != "0000000000000000000000000000000000000000" ]; then
-            git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null || git fetch --depth=1 origin "$BASE_SHA"
+            git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null || git fetch --filter=blob:none --no-tags --depth=1 origin "$BASE_SHA"
             python3 tools/project_site.py check --base "$BASE_SHA"
           else
             python3 tools/project_site.py check
