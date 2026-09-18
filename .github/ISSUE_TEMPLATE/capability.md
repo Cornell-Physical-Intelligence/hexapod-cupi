@@ -1,46 +1,28 @@
 ---
 name: Integrated capability
-about: A sublead-owned outcome demonstrated across its component work packets
+about: An outcome that needs an acceptance demonstration
 title: ""
 labels: ""
 assignees: ""
 ---
 
-## Outcome and owner
+## Outcome and ownership
 
-Describe the observable capability and name its accountable sublead, backup,
-and acceptance reviewer. State contributor availability and any access needs.
+Describe the observable capability. Name its lead and acceptance reviewer.
+Link the relevant R/Q requirements in `ARCHITECTURE.md` and roadmap marker.
 
-## Requirements and design
+## Starting point and dependencies
 
-Link R/Q IDs in ARCHITECTURE.md §1, relevant ARCHITECTURE.md sections, the target
-poster milestone ID and applicable G0–G6 gate, and the current STATUS.md context. Link decisions this depends on.
-
-## Scope and dependencies
-
-State the supported operating case, boundaries, and prerequisites. Distinguish
-software fixtures, walking simulation, restrained hardware and field results.
+Link current code and evidence in `STATUS.md`. State the test backend and
+operating envelope. Identify missing definitions before assigning dependent work.
 
 ## Acceptance demonstration
 
-Specify input, expected behavior, failure scenarios, V IDs, measurement profile,
-and artifacts that prove the capability. Existing gates remain unchanged.
+Declare inputs, expected behavior, failure cases and measurement limits. Give the
+reproduction procedure and evidence required. Preserve existing gates.
 
-## Work packets
+## Integration
 
-Link bounded child issues with owners and dependencies. A design/experiment
-packet must close unresolved interfaces before dependent implementation merges.
-
-## Integration and completion
-
-Record the shared integration command/procedure, result and artifact links.
-Child PRs merged does not mean this capability passed. Close with the accepted
-demonstration or a clearly labelled failed/withdrawn outcome; update STATUS.md
-only with verified project-level progress.
-
-## Roadmap and publication
-
-Name the poster milestone (`walking`, `stage2`, `stage3`, or `mission`). Link the
-new `site/updates/` record, evidence, and next action; update `site/project.json` and regenerate STATUS
-when the displayed project changes. Record the contributor check and build
-results required by `docs/PROJECT_SITE.md`.
+Link child issues and their owners. Close this capability with a reviewed
+demonstration or a stated withdrawn outcome. Merged child PRs alone cannot
+establish acceptance. Follow `CONTRIBUTING.md` for progress publication.

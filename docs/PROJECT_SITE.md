@@ -4,18 +4,6 @@ The static GitHub Pages site is the team's visual progress record against
 [ARCHITECTURE.md](../ARCHITECTURE.md). It is built from `site/project.json`.
 `STATUS.md` is generated from that same registry and must never be edited by hand.
 
-James authorized a fresh qualification sequence on 14 September 2026 after
-confirming the mass-corrected model: standing → walking/stopping → terrain →
-survey. [Compute coordination](SPARK_COMPUTE_COORDINATION.md) records the exact
-URDF and retained reservation policy. Authorization is not a passing result or
-live compute status. [James’s handoff](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/62fd7448264c5ebe051ba2de1d9a72844d6b4c3a/docs/JAMES_HANDOFF.md)
-and its pause receipts remain historical evidence.
-
-James also granted Codex full Spark compute ownership on 14 September, including
-authority to stop competing compute while preserving its recovery state and
-essential host services. Record verified resource changes separately from this
-authorization; it does not by itself advance a qualification stage.
-
 ## Update progress
 
 1. Change a roadmap marker or recorded fact only when its evidence changes.

@@ -22,10 +22,8 @@ Do not print, copy or commit `docker/.env.base`; Compose consumes that file.
 ## Before a run
 
 The lead verifies the shared coordination file, actual processes, GPU use,
-containers, services, producer descendants and both GPU locks. The current
-coordination SHA-256 is
-`c89c99ebdd16941e3f8e7f23ef3525aeb360c78361aa49aa04e766b381a4727c`.
-Bind those bytes to a fresh source and launch identity. Never alter an admitted
+containers, services, producer descendants and both GPU locks. Use the shared policy path and expected hash in
+[compute coordination](SPARK_COMPUTE_COORDINATION.md). Bind those bytes to a fresh source and launch identity. Never alter an admitted
 source pack or reuse an attempt's output directory.
 
 Use `python -m locomotion.inputs pack` with a fresh local output and explicit
@@ -104,3 +102,7 @@ uncompressed identities and retain selected actual policy videos.
 If Spark is unreachable, complete local work and state that native checks remain
 pending. Do not infer live execution from a saved dispatch, preparation directory
 or old receipt. [STATUS](../STATUS.md) records results, not current GPU telemetry.
+
+The [frozen startup-stall incident](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/3ccfd4a12aa7b95347c0884ac3ca466cad97b8aa/docs/incidents/2026-08-26-preappready-stall.md)
+preserves the 26 August attempts and cleanup diagnosis. Use this runbook for
+current execution; restore historical records through the archive guide.

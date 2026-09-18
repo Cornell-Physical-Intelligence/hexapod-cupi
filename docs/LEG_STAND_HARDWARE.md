@@ -24,7 +24,8 @@ Prices checked **8 September 2026**, before tax/shipping. Quantities are for one
 
 Add **$40–70** for enclosure, standoffs, terminals, strain relief, home switch and shielded sensor extension if needed. USB power-conditioning parts, machined fixtures, tools and motor hardware are **not included**.
 
-All listed parts were in stock when checked; Pico with headers had only one remaining. Fallback: [bare Pico 2](https://www.adafruit.com/product/6006) + [standard headers](https://www.adafruit.com/product/4151), adding $3.70. Amazon estimates to Ithaca were **Sep 11–13 for the cells** and **Sep 12–13 for the ADC**; recheck at checkout.
+Recheck prices and availability before purchasing. The original dated selections
+remain in Git; the team has not qualified the assembled sensing chain.
 
 ## Why this encoder
 

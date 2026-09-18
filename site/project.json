@@ -266,11 +266,11 @@
     {
       "id": "commands",
       "title": "Set speed and direction",
-      "label": "Earlier command format exists",
+      "label": "Command types and follower example",
       "state": "implemented",
       "column": 2,
       "row": 0,
-      "meaning": "Convert the route into forward speed, sideways speed and turning rate, all relative to the robot.",
+      "meaning": "You can pass forward speed, sideways speed and yaw rate through shared command types and the waypoint follower example. Route planning and qualified runtime integration remain pending.",
       "input": "Route and estimated robot position",
       "output": "Forward speed, sideways speed, turning rate and stop",
       "source": "contracts/README.md",
@@ -283,7 +283,7 @@
       "state": "implemented",
       "column": 3,
       "row": 0,
-      "meaning": "The optimized forward cycle moves the approved robot in Isaac. It passes native physical checks but fails speed tracking. Earlier PPO and BC candidates remain unqualified; the optimizer performs no policy training.",
+      "meaning": "Researchers replayed an optimized forward trajectory that passes its native screen. The tested PPO policies fail walking acceptance. The current kernel supports stock PPO; the paper motion-prior method remains to be implemented.",
       "input": "Requested motion, joint positions and body motion",
       "output": "18 target joint positions",
       "source": "locomotion/README.md",
@@ -299,7 +299,7 @@
       "meaning": "The first test uses a simulated Mid-360 laser scanner. Save a scan of a known floor and wall, then reload it and check the measured geometry. The physical sensor is not mounted.",
       "input": "Simulated laser distances and sensor position",
       "output": "Recorded 3D points and flags identifying valid measurements",
-      "source": "artifacts/perception_readiness_2026-09-09/",
+      "source": "mission/README.md",
       "milestone_id": "stage3"
     },
     {
@@ -318,11 +318,11 @@
     {
       "id": "terrain",
       "title": "Map the nearby ground",
-      "label": "Synthetic-data prototype",
+      "label": "Historical synthetic-data prototype",
       "state": "prepared",
       "column": 2,
       "row": 1,
-      "meaning": "Combine scans into a ground-height map. Record which areas have measurements, when they were measured and how uncertain the heights are.",
+      "meaning": "Researchers tested synthetic ground-height observations in the archived prototype. Current map assembly and localization remain pending. Mapping issue #19 uses simulator-provided poses for its first combined map.",
       "input": "Scans aligned using the estimated sensor position",
       "output": "Nearby ground heights and measurement uncertainty",
       "source": "artifacts/terrain_readiness_2026-09-09/observation_comparison_cpu_001/README.md",
@@ -344,11 +344,11 @@
     {
       "id": "simulation",
       "title": "Train in simulation",
-      "label": "128-robot standing admitted; PPO result recorded",
+      "label": "Stock PPO kernel; paper implementation pending",
       "state": "implemented",
       "column": 0,
       "row": 2,
-      "meaning": "The declared walking neutral has exact one- and 128-robot admission, with the earlier 32-robot admission preserved. Native replay covers 21 commands and PPO training has completed. These scoped results do not qualify walking or revise historical inspection-zero failures.",
+      "meaning": "Researchers completed one- and 128-robot standing admission and PPO runs on frozen source packs. Use locomotion/ for current code and TRAINING for the reproduction order. A new source allocation needs matching native admission.",
       "input": "Robot model, physics settings and training task",
       "output": "Saved walking controllers",
       "source": "locomotion/README.md",
@@ -361,7 +361,7 @@
       "state": "implemented",
       "column": 1,
       "row": 2,
-      "meaning": "Evaluation014 is dispatched for the same forward-video, quiet and stopping probes after the bounded continuation. Results are pending; evaluation013 remains failed, and all 96 full Stage 2 cases plus human visual acceptance remain outstanding.",
+      "meaning": "Researchers evaluated the paired PPO arms at updates 0, 300, 600 and 1200. Both fail the scheduled forward tests and final quiet-stop diagnostics. The kernel provides 13 diagnostic probes and 96 Stage 2 cases, with contact-force and motor-torque recording. Full qualification and human gait acceptance remain pending.",
       "input": "A saved controller and fixed test cases",
       "output": "Measurements and a pass or fail result",
       "source": "locomotion/evaluation.py",
@@ -482,9 +482,9 @@
     {
       "id": "stage2",
       "title": "Stand, walk and stop",
-      "description": "Restart qualification on the mass-corrected model confirmed on 14 September 2026. First pass standing admission, then train forward, backward and sideways motion with turning and quiet stops. Compare gait quality with the historical reference.",
+      "description": "Qualify signed translation, turns, transitions and quiet stops on the approved model. Historical standing admissions apply to their frozen sources; obtain matching admission for a new allocation.",
       "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait\u2019s visual quality.",
-      "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/locomotion/README.md",
+      "source": "docs/TRAINING.md",
       "media_id": "forward_ppo_example_1200",
       "status": "blocked",
       "backend": "Approved detailed robot model",
@@ -497,8 +497,8 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "Both controlled PPO arms fail every scheduled forward test and both final stopping diagnostics. The improved prepared trajectory passes its forward screen. A learned policy still needs to pass direction, transition, quiet-stop, motor and contact tests, followed by human gait acceptance.",
-      "question": "Review the failed example initialization before defining the next learning increment with James and the platform lead.",
+      "blocker": "Both paired PPO arms fail forward and quiet-stop checks. The optimized trajectory passes one forward screen. A learned policy still needs the full direction, transition, stop, motor and contact suite and human gait acceptance.",
+      "question": "Start the TRAINING reward audit under issue #18. Resolve paper formulas and the stationary tracking criterion before implementing a new reward schema.",
       "next_step": null,
       "acceptance": null,
       "card_text": "Both PPO arms fail forward walking; this example initialization shows no benefit in the paired test.",
@@ -532,7 +532,7 @@
       "title": "Survey a drawn area",
       "description": "Follow a route through the requested area, stop with a steady sensor platform to scan, and deliver a 3D terrain map. Start on a level, hard surface with no obstacles.",
       "gate": "On the physical robot, cover the drawn area and deliver the map. Coverage, map-accuracy and platform-motion limits still need agreement.",
-      "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/ARCHITECTURE.md",
+      "source": "ARCHITECTURE.md",
       "status": "blocked",
       "backend": "Physical robot and survey sensor",
       "owner": "James and both leads",
@@ -550,8 +550,8 @@
         "R-09",
         "R-10"
       ],
-      "blocker": "Fresh survey qualification depends on canonical movement and terrain qualification, and the physical robot is not built. The agreed independent M1 scan test still needs an owner and reviewer; it does not qualify robot surveying.",
-      "question": "Retain M1\u2019s agreed fixture and thresholds; assign its owner and reviewer without treating it as robot survey qualification. Define the survey increment after its canonical prerequisites qualify.",
+      "blocker": "The robot remains unbuilt and walking remains unqualified. Issues #19 and #20 cover independent simulation work; mapping and mission software remain pending.",
+      "question": "Assign owners and reviewers for #19 mapping and #20 survey rehearsal. Preserve the M1 fixture; define combined-map error and mission-rehearsal limits before their tests.",
       "next_step": null,
       "acceptance": null,
       "definition": {
@@ -571,27 +571,12 @@
   ],
   "papers": [
     {
-      "title": "CAPS",
-      "role": "Smooth the policy\u2019s output across time and nearby observations.",
-      "url": "https://ai.bu.edu/caps/"
-    },
-    {
-      "title": "Policies Modulating Trajectory Generators",
-      "role": "Give a learned controller structured, adjustable gait authority.",
-      "url": "https://proceedings.mlr.press/v87/iscen18a.html"
-    },
-    {
-      "title": "Learning robust perceptive locomotion",
-      "role": "Compare privileged terrain training with realistic perception.",
-      "url": "https://leggedrobotics.github.io/rl-perceptiveloco/"
-    },
-    {
-      "title": "SUPER navigation",
-      "role": "Reason about safe paths, known space and the ability to stop.",
-      "url": "https://github.com/hku-mars/SUPER"
+      "title": "Learning Natural and Robust Hexapod Locomotion over Complex Terrains via Motion Priors based on Deep Reinforcement Learning",
+      "role": "Target simulation method: PPO with a motion prior and asymmetric training. Implementation follows the proposed TRAINING sequence.",
+      "url": "https://arxiv.org/abs/2511.03167"
     }
   ],
-  "research_source": "artifacts/project_review_2026-09-10/legged_policy_literature_001/REPORT.md",
+  "research_source": "docs/TRAINING.md",
   "glossary": [
     {
       "term": "Learned controller (policy)",
@@ -623,8 +608,8 @@
     "as_of": "2026-09-17T18:19:39.672968+00:00",
     "source_commit": "94db110e9c362604ce1cf415bd2dfbcc1bca9f03",
     "architecture": "ARCHITECTURE.md",
-    "summary": "The optimized forward reference passes its screen. Standard PPO and the paired action-imitation initialization fail to produce an accepted walking policy. The paired run used 1,200 PPO updates per arm; the copied actor failed before PPO. We found no benefit from that initialization in the tested seed. Stage 2 remains incomplete. Use the locomotion kernel for current code and the linked records for measured results.",
-    "definition_policy": "Use the locomotion kernel for canonical work. Preserve the approved model and numerical gates. Each native evaluation records ground-contact force and motor torque. Treat those loads as descriptive measurements. The Spark reservation remains retained and the historical heartbeat remains paused.",
+    "summary": "Researchers passed the optimized forward-trajectory screen, but the tested PPO policies fail walking acceptance. The paired initialization test found no benefit in its one seed. The consolidated kernel supports the proposed simulation-reproduction order in TRAINING; paper-method implementation and fresh-source native admission remain pending.",
+    "definition_policy": "Use issue #18 for walking, #19 for simulated mapping and #20 for mission rehearsal. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
     "facts": [
@@ -633,7 +618,7 @@
         "title": "Exact one- and 128-robot standing admission adopted",
         "backend": "Lead-reviewed simulation standing admission002 \u00b7 confirmed mass-corrected model \u00b7 full independent raw audit",
         "result": "passed",
-        "text": "The lead adopted the unchanged one002 result and all 128 independently rescored batch128 replicas. Exact model/controller/layout identity, full contact classification, recorded lifecycle and cleanup pass. Full native raw traces remain on Spark with local hash-bound compact metadata and audit. This admits only the exact simulation standing layouts; admission001 remains unchanged, and walking, hardware and Stage 2 are unqualified.",
+        "text": "The lead adopted one002 and all 128 rescored batch128 replicas with matching model/controller/layout identity and contact checks. Raw captures remain on Spark with hash-bound metadata. This standing admission covers its frozen source; the consolidated source requires fresh admission before training.",
         "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/paper_walk_execution_001/admission_002/verification.json"
       },
       {
@@ -653,27 +638,11 @@
         "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/ppo_reference_comparison_20260917/review_vanilla_001/RESULT.json"
       },
       {
-        "id": "forward-example-training-complete-20260917",
-        "title": "We complete both controlled PPO training arms",
-        "backend": "RSL-RL 5.0.1; one paired seed; fixed 0.05 m/s forward command; 128 admitted replicas",
-        "result": "passed",
-        "text": "Each arm completes 1200 PPO updates and 3686400 transitions. Each final optimizer records 24000 steps per parameter, and each run records 29491200 force/torque samples. Both native jobs exit with code 0 and complete exact-container cleanup. The initial saved critic and actor normalization state match; both PPO optimizers start empty. These results establish matched training execution. Policy performance requires the scheduled native evaluations.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/forward_example_ppo_20260917/README.md"
-      },
-      {
-        "id": "forward-example-initial-policy-failed-20260917",
-        "title": "Copying the example does not pass the initial walking test",
-        "backend": "One admitted Isaac Sim replica; example-arm update zero; unchanged 0.040 rad per 20 ms limiter",
-        "result": "failed",
-        "text": "Before PPO, the copied actor completes the forward trial with mean speed 0.005338 m/s and planar tracking error 0.056366 m/s against the 0.025 m/s bound. The quiet trial ends at control 149 with joint-limit and joint-speed violations. The forward-to-stop trial ends at control 467, before the stop command at control 500. The audit reproduces actions, actuator output and force summaries; videos preserve both failed prefixes. Low action-prediction error on the demonstration does not establish closed-loop walking.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/forward_example_ppo_20260917/review_001/example_update000000.json"
-      },
-      {
         "id": "forward-example-paired-result-20260917",
         "title": "Example initialization produces no passing forward checkpoint",
         "backend": "Native Isaac Sim; approved detailed model; one paired seed; equal PPO budgets; unchanged 0.040 rad per 20 ms limiter",
         "result": "failed",
-        "text": "Both arms fail all four scheduled forward tests. Final mean speeds are 0.004811 m/s from scratch and 0.000961 m/s after example initialization, against 0.05 m/s. Final planar errors are 0.051045 and 0.053322 m/s, above the 0.025 m/s limit. Both final policies fail motor-demand and quiet-stop checks. The final example quiet trial terminates at control 490 of 1000. The declared benefit rule fails for this pair; other seeds and motion-prior methods remain untested.",
+        "text": "Each arm completed 1200 updates and 3686400 transitions. Both fail forward tests at updates 0, 300, 600 and 1200; the copied actor fails before PPO. Final mean speeds are 0.004811 m/s from scratch and 0.000961 m/s after initialization against 0.05 m/s. Planar errors are 0.051045 and 0.053322 m/s against the 0.025 m/s bound. Both fail motor-demand and quiet-stop checks. The benefit rule fails for this seed; other seeds and AMP remain untested.",
         "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
       },
       {
