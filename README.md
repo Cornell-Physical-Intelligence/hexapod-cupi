@@ -13,8 +13,13 @@ for a 3D terrain map in local site coordinates.
 The approved robot is selected by [robot/active_model.json](robot/active_model.json).
 Historical walking results have their own model and qualification limits.
 
+Start locomotion work at the [kernel guide](locomotion/README.md): one native
+environment, one command/reward task, stock PPO and measured policy evaluation.
+The guide maps each file to its role and explains the larger project boundary.
+
 ```sh
 uv sync --locked
+uv run python -m unittest discover -s locomotion/tests
 uv run python -m unittest discover -s isaaclab/tests
 uv run python -m unittest discover -s robot/tests
 python3 tools/source_inventory.py list --classification current

@@ -6,12 +6,15 @@ import argparse
 import ast
 import json
 from pathlib import Path
+import hashlib
+import re
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = 'configs/source_inventory.json'
 SCOPES = ('tools', 'experiments/c_length_study/tools', 'experiments/terrain/tools')
 # Maintained prototypes keep tests outside their top-level tool scope.
-TOP_LEVEL_SCOPES = ('experiments/paper_walk', 'experiments/trajectory_optimization')
+TOP_LEVEL_SCOPES = ('locomotion', 'experiments/trajectory_optimization')
 
 
 def read_inventory(root=ROOT):
@@ -36,8 +39,17 @@ def check(root=ROOT):
             raise ValueError('Source must be a regular in-repository file')
         if row['classification'] not in {'current', 'historical', 'prototype'} or not row['owner'] or not row['purpose']:
             raise ValueError('Every source needs classification, ownership and purpose')
-    # Production package imports may never consume frozen evidence copies.
-    for path in (root / 'packages').rglob('*.py'):
+    retired = inventory.get('retired_sources', {})
+    for name, expected in retired.get('files', {}).items():
+        relative = Path(name)
+        if (relative.is_absolute() or '..' in relative.parts or (root / relative).exists()
+                or not re.fullmatch('[0-9a-f]{40}', retired['source_commit'])):
+            raise ValueError('Invalid retired source binding')
+        original = subprocess.check_output(['git', 'show', retired['source_commit']+':'+name], cwd=root)
+        if hashlib.sha256(original).hexdigest() != expected:
+            raise ValueError('Retired source bytes differ: '+name)
+    # Production code must not import frozen evidence or historical runtimes.
+    for path in [*(root / 'packages').rglob('*.py'), *(root / 'locomotion').glob('*.py')]:
         if '__pycache__' in path.parts:
             continue
         tree = ast.parse(path.read_text())

@@ -219,6 +219,31 @@ class EvidenceCorrectionTests(unittest.TestCase):
 class ArchivedDocumentTests(unittest.TestCase):
     setUp = PosterContractTests.setUp
     tearDown = PosterContractTests.tearDown
+    run_git = PosterContractTests.run_git
+    init = PosterContractTests.init
+
+    def test_git_retirement_preserves_links_and_rejects_changed_identity(self):
+        for storage in ('retired_sources', 'archived_documents'):
+            with self.subTest(storage=storage):
+                path = self.root/'old.md'
+                path.write_text('Recorded failed attempt.\n')
+                digest = site.sha(path)
+                commit = self.init()
+                path.unlink()
+                inventory = dict(baseline=commit, tools=[])
+                if storage == 'retired_sources':
+                    inventory[storage] = dict(source_commit=commit, files={'old.md': digest})
+                else:
+                    inventory[storage] = [dict(previous_path='old.md', storage='git',
+                                               source_commit=commit, sha256=digest)]
+                config = self.root/'configs/source_inventory.json'
+                config.parent.mkdir(exist_ok=True)
+                config.write_text(json.dumps(inventory))
+                self.assertEqual(site.historical_source('old.md'),
+                    'https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/'+commit+'/old.md')
+                config.write_text(config.read_text().replace(digest, '0'*64))
+                with self.assertRaisesRegex(ValueError, 'bytes changed'):
+                    site.reference('old.md')
 
     def archive_fixture(self):
         destination = self.root / 'docs/archive/old.md'

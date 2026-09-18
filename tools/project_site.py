@@ -30,12 +30,23 @@ def historical_source(value):
         return None
     inventory = read(inventory_path)
     require(re.fullmatch('[0-9a-f]{40}', inventory['baseline']), 'Invalid historical source baseline')
+    retired = inventory.get('retired_sources', {})
+    if value in retired.get('files', {}) and not (ROOT / value).exists():
+        require(re.fullmatch('[0-9a-f]{40}', retired['source_commit']), 'Invalid retired source commit')
+        content = subprocess.check_output(['git', 'show', retired['source_commit']+':'+value], cwd=ROOT)
+        require(hashlib.sha256(content).hexdigest() == retired['files'][value], 'Retired source bytes changed')
+        return 'https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/' + retired['source_commit'] + '/' + quote(value, safe='/')
     for item in inventory['tools']:
         if value == item['previous_path'] and value != item['path']:
             require((ROOT / item['path']).is_file(), 'Moved source replacement is missing')
             return 'https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/' + inventory['baseline'] + '/' + quote(value, safe='/')
     for item in inventory.get('archived_documents', []):
         if value == item['previous_path'] and not (ROOT / value).exists():
+            if item.get('storage') == 'git':
+                require(re.fullmatch('[0-9a-f]{40}', item['source_commit']), 'Invalid document source commit')
+                content = subprocess.check_output(['git', 'show', item['source_commit']+':'+value], cwd=ROOT)
+                require(hashlib.sha256(content).hexdigest() == item['sha256'], 'Archived document bytes changed')
+                return 'https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/' + item['source_commit'] + '/' + quote(value, safe='/')
             path = ROOT / item['path']
             require(path.resolve().is_relative_to(ROOT) and not path.is_symlink()
                     and path.is_file(), 'Archived document is missing or unsafe')
