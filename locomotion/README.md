@@ -66,3 +66,16 @@ The optional trajectory optimizer and native replay live in `priors/`. Package
 canonical inputs with `python -m locomotion.inputs pack --help`. Use the
 [archive guide](../docs/PIPELINE_LINEAGES.md) for historical checkpoints and
 source packs; preserve their original identities.
+
+## Prescribed tripod controller
+
+You can evaluate the Zhang et al. sinusoidal tripod controller with
+[`tripod_evaluate.py`](tripod_evaluate.py). Read the source-cited
+[reproduction contract](../docs/TRAINING.md#terrain-adaptive-tripod-reproduction-contract)
+for the finite sweep and geometry adaptations. [`tripod.py`](tripod.py) owns
+the equations and contact state; [`tripod_config.py`](tripod_config.py) owns
+parameters. You use `prepare --mode tripod` with matching standing admission.
+CPU checks pass; native walking, stopping and clearance remain incomplete.
+The [result record](../site/assets/tripod_20260921/result.json) gives the scope
+and dispatch blockers. Terrain requires flat qualification and a terrain
+capture extension; this runner supports flat-ground trials.

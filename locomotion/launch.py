@@ -74,9 +74,12 @@ def audit_contact_log(path):
 def verify(binding, own):
     guard.require(binding['schema']=='hexapod_locomotion_launch_v1','Wrong launch schema')
     guard.require(binding['root_review_complete'] is True,'Root review incomplete')
-    guard.require(binding['mode'] in ('diagnostic','replay','train','video','evaluate'),'Unsupported native mode')
+    guard.require(binding['mode'] in ('diagnostic','replay','train','video','evaluate','tripod'),'Unsupported native mode')
     guard.require(type(binding['max_seconds']) is int and 120<=binding['max_seconds']<=7200,'Unbounded allocation')
-    guard.require(binding.get('module') in ('locomotion.train', 'locomotion.priors.replay_native'), 'Unsupported native entry point')
+    guard.require(binding.get('module') in ('locomotion.train', 'locomotion.priors.replay_native',
+                                          'locomotion.tripod_evaluate'), 'Unsupported native entry point')
+    guard.require((binding['mode'] == 'tripod') == (binding['module'] == 'locomotion.tripod_evaluate'),
+                  'Prescribed-controller mode and entry must match')
     paths={k:guard.canonical_path(binding[k]) for k in ('source','asset','prior','geometry_source','output')}
     guard.require(paths['source']==own,'Launcher must belong to its bound source')
     for k in ('source','output','prior'):
@@ -137,7 +140,7 @@ def run_owned(binding, paths):
     locks, process, identity = [], None, None
     name = "hexapod-reference-physics-" + uuid.uuid4().hex
     report = dict(status="starting", phase=phase, container_name=name, started_unix=time.time(),
-                  deadline_seconds=binding["max_seconds"], app_ready_deadline_seconds=90, no_policy_loaded=binding["mode"] in ("diagnostic", "replay"),
+                  deadline_seconds=binding["max_seconds"], app_ready_deadline_seconds=90, no_policy_loaded=binding["mode"] in ("diagnostic", "replay", "tripod"),
                   native_mode=binding["mode"], source_freeze_sha256=binding["source_freeze_sha256"],
                   stage2_complete=False, physical_admission=False)
     report_path = args.output / "jobs" / (phase + ".json")

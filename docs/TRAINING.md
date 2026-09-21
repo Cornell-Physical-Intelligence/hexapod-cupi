@@ -95,6 +95,143 @@ Declare that interpretation before discriminator training and verify the same fe
 native demonstrations and policy rollouts. The optimizer's point contacts omit
 mesh patches and impacts, so native replay remains a prerequisite.
 
+## Terrain-adaptive tripod reproduction contract
+
+You reproduce the prescribed controller in [Zhang et al. (2024), §§3.3.1,
+4.1–4.2](https://www.frontiersin.org/journals/robotics-and-ai/articles/10.3389/frobt.2024.1426269/full).
+The authors state that the gait algorithm “stops when the force sensors detect
+that the leg has touched the ground” (§3.3.1). You interpret this as stopping
+the descending foot trajectory. The authors do not specify debounce or recovery.
+You retain RS05 torque control and the approved geometry. You make no claim
+about their hardware results or Stage 2 completion.
+
+The [supplement, Data Sheet 1, version 3](https://public-pages-files-2025.frontiersin.org/articles/1426269/file/Data_Sheet_1.docx/1426269_data-sheet_1/3)
+has SHA-256 `029f0d0c5edeaff94b75bdd9cac051704f5e7f0323cd79a111570eb24b4f3df1`.
+Its six figures show the prototype and Simscape blocks, including prescribed
+revolute-joint motion in Figure S6. It supplies no controller code or additional
+gait parameters. Its linked Google Drive video was inaccessible through the
+research tool on 21 September 2026; video inspection remains incomplete.
+
+### Equations and geometry adaptation
+
+You implement Eqs. (1)–(3) with phase `u = omega*t + phi`:
+
+```text
+hip   = hip0 + A*sin(u)
+knee  = knee0 + B*g(u)
+ankle = ankle0 + C*g(u)
+g(u)  = (1 + cos(2*u))/2 if cos(u) > 0, else 0
+```
+
+The authors print `2*t` and `4*t`; you expose `omega = 2*pi/period`
+as a parameter. You start at `u = -pi/2`, where the lift and its derivative
+are zero. You use joint order `lf,lm,lr,rf,rm,rr`, with each leg ordered
+`coxa_yaw,femur_pitch,tibia_pitch`. Tripod A (`lf,lr,rm`) has phase 0;
+tripod B (`lm,rf,rr`) has phase pi. The native joint axes define positive
+rotation. Forward means native -Y, left means +X, and left yaw means +Z.
+For forward swing, hip signs are `(-,-,-,+,+,+)`; left turns use positive
+hip amplitudes on both sides. You verify these signs against approved-model
+forward kinematics. The authors describe adjacent phase opposition and
+same-direction hip turning in §4.2; the named mapping is our adaptation.
+
+You use the existing low stance `(0,-0.30,0.40)` rad. The raised stance adds
+`(0,-0.15,+0.15)` rad. Approved-model kinematics predict an 11.0 mm increase
+in root height for fixed foot height, from 97.8 to 108.8 mm. You measure root
+height here; the authors report 60/180 mm chassis clearances (Figure 4).
+You require a measured raised-minus-low root height of at least 8 mm after
+settling. You report chassis clearance from mesh geometry. Low swing offsets
+are `(B,C)=(+0.20,-0.15)` rad; raised offsets are `(+0.25,-0.20)` rad.
+You target at least 12 mm and 16 mm toe lift above each mode's stance plane.
+You keep the 0.35 rad action envelope and 0.040 rad/20 ms limiter.
+
+Eqs. (4)–(5) describe the authors' link geometry and approximate inverse
+relations. You use the approved model transforms to check our offsets before
+dispatch; you solve no inverse kinematics in the control loop. Eqs. (6)–(8)
+hold hip angle and prescribe sinusoidal pitch changes. Their printed
+`delta/T * sin((t-t0)/(2*T))` does not specify a final angle or a hold rule.
+You use endpoint interpolation `h(s)=(1-cos(pi*s))/2`, `s in [0,1]`, over
+one second with six supporting feet and fixed hip targets. You label this
+endpoint rule as an adaptation. Clearance changes come from declared commands;
+you omit Figure 5's obstacle perception and detour logic.
+
+### Controller state and contact adaptation
+
+You retain phase, active command, clearance mode, transition time, per-foot
+contact debounce and touchdown pitch targets. You reset these values per trial.
+You require six contacts before startup and blend to the first sweep endpoint
+over one second. You run each half-cycle with one swing tripod. You accept
+touchdown on descent after measured liftoff, freeze that foot's pitch, and
+continue its hip sweep. You hold the next half-cycle until the landing tripod
+supports the robot. At the next lift, you blend from the retained touchdown
+pitch into the sinusoidal lift to avoid an angle jump.
+
+You use distal contact-normal force from the preceding eight native samples,
+with mean magnitude at least 2 N for contact and at most 1 N for release.
+You require two controls for each change. These are controller thresholds;
+they do not replace the existing contact acceptance checks. At a missing
+touchdown you hold phase and lower the missing foot at 0.10 rad/s, at most
+0.04 rad, for 0.40 s. Failure to land, failure to lift, or sustained support
+loss latches a fault and holds the last target. You require a trial reset
+after a fault. You record the fault as a failed attempt.
+
+You support zero, forward commands in `(0,0.10]` m/s and pure yaw commands
+with magnitude at most 0.20 rad/s. You reject commands outside this envelope.
+You treat a command or clearance change as a stop, complete the current swing,
+return to the mode stance over one second, then start the new command or
+clearance transition. This startup/stop behavior is a project adaptation.
+You declare stopped after six-foot support and completion of the stance return;
+native stop acceptance still requires the unchanged velocity and contact gates.
+
+### Frozen experiment matrix and acceptance
+
+You declare a finite sweep before dispatch: periods 1.2 and 1.6 s crossed
+with hip amplitudes 0.12 and 0.18 rad, four candidates total. At 0.05 m/s
+or 0.20 rad/s you use that amplitude; forward amplitude scales with command
+and caps at 0.30 rad. You screen forward and both yaw signs for each candidate
+on flat ground. You select the first candidate that passes all three screens,
+in the declared order, then freeze it for qualification. You do not expand
+the sweep or change motor/model limits after failure.
+
+| Phase | Cases and unchanged checks |
+| --- | --- |
+| CPU | Named joint mapping, phase opposition, reset determinism, boundary continuity, contact debounce, missed/early touchdown, command changes, faults and geometric reach. |
+| Admission | Fresh one-robot and 32-robot standing runs with matching physics, model, stance and geometry, recomputed by `locomotion.admission`. |
+| Flat screens | Forward 0.05 m/s and pure yaw ±0.20 rad/s; use existing static scorer and full native contact/motor checks. |
+| Flat qualification | Existing forward 0.10 m/s, yaw ±0.20 rad/s, quiet 20/32 s and stand/forward/both-yaw stop cases. Repeat from two independent resets. Report other commands as unsupported or outside this reproduction. |
+| Clearance | Repeat low/raised forward and yaw cases, plus low→raised→low commands while moving; no native joint violations or nonfoot contacts. Require the geometry targets above. Keep all stop checks. |
+| Terrain, after flat pass | One fixed bar, 10 mm high, 40 mm along travel, 0.80 m across, centered 0.60 m ahead. Command raised mode at 2 s and low mode after the full robot crosses. Require crossing within 30 s, 10 s stopped afterward, no nonfoot contact or joint violations, and two reset replicas. Freeze a terrain-specific contact capture before dispatch. |
+
+You record video and 400 Hz ground-contact force plus requested/applied torque
+through the existing evaluation pipeline. You bind source, model, input and
+configuration hashes, retain failures, and report each parameter change.
+You do not infer physical success from CPU checks. Failed flat qualification
+blocks terrain; failed terrain leaves terrain reproduction incomplete.
+You may use accepted native transitions as future AMP demonstrations after
+separate dataset review. This work starts no AMP or learned-control work.
+
+You prepare each allocation with `python -m locomotion.prepare --mode tripod`,
+the admitted `--inputs`, a fresh `--output` and `--remote-root`, plus
+`--candidate 0..3` and `--suite screen|qualification|clearance`.
+You complete the declared screen order before qualification and require its
+two-reset pass before clearance testing. The launcher retains both GPU locks
+and the existing reservation checks. The runner enforces standing admission
+and records one actual video per trial. You must inspect prior suite results
+before dispatch; the runner does not select a candidate for you.
+
+### Reproduction result on 21 September 2026
+
+You can inspect the [source-bound result](../site/assets/tripod_20260921/result.json).
+Seventeen CPU checks pass criterion 1. Approved-model kinematics predict
+15.28 mm low-mode toe lift and 19.09 mm raised-mode toe lift. Criteria 2–7
+remain incomplete because no native trial ran. The host preflight rejected a
+released reservation marker. After authorizing GPU job recovery, the user
+instructed: “Stop the GPU jobs; leave native runs pending.” Both idle jobs
+have preserved restart records; the reservation service remains unchanged.
+The flat-ground runner includes torque/contact capture and video recording,
+but it supplies no measured native evidence yet. Terrain capture and testing
+remain pending behind flat qualification. Future AMP work must wait for
+accepted native demonstrations, including supported turns and stops.
+
 ## Foundation commands
 
 ```sh

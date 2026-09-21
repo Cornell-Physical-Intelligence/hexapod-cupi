@@ -1,0 +1,231 @@
+"""Prescribed tripod targets with measured touchdown, without physics writes.
+
+Zhang et al. (2024), section 4.2, equations (1)-(3) define the waveforms.
+docs/TRAINING.md declares the geometry, contact and transition adaptations.
+"""
+import math
+import numpy as np
+
+from .env_config import JOINT_NAMES, LEGS
+from .tripod_config import TripodConfig
+
+TRIPOD_A = np.array([True, False, True, False, True, False])
+PHASE = np.where(TRIPOD_A, 0., math.pi)
+FORWARD_SIGN = np.array([-1., -1., -1., 1., 1., 1.])
+DT = .02
+
+
+def wave(phase):
+    """Evaluate equations (1)-(3) in radians at the caller's phase."""
+    phase = np.asarray(phase, float)
+    return np.sin(phase), np.where(np.cos(phase) > 0., .5*(1.+np.cos(2.*phase)), 0.)
+
+
+def supported(command):
+    value = np.asarray(command, float)
+    if value.shape != (3,) or not np.isfinite(value).all():
+        return False
+    forward, left, yaw = value
+    return bool(left == 0 and ((yaw == 0 and 0 <= forward <= .10)
+                              or (forward == 0 and abs(yaw) <= .20)))
+
+
+def joint_order(names):
+    """Map a complete external joint list into the approved canonical order."""
+    names = tuple(names)
+    if len(names) != 18 or set(names) != set(JOINT_NAMES):
+        raise ValueError('Expected the 18 distinct approved joint names')
+    return np.array([names.index(name) for name in JOINT_NAMES])
+
+
+class TripodController:
+    def __init__(self, neutral, lower, upper, config=None):
+        self.cfg = config or TripodConfig()
+        self.neutral, self.lower, self.upper = [np.asarray(v, float).reshape(6, 3).copy()
+                                               for v in (neutral, lower, upper)]
+        if not all(np.isfinite(v).all() for v in (self.neutral, self.lower, self.upper)):
+            raise ValueError('Joint geometry must be finite')
+        if not np.allclose(self.neutral, [0., -.30, .40], rtol=0, atol=1e-7):
+            raise ValueError('This adaptation requires the approved walking stance')
+        if np.any(self.lower >= self.upper):
+            raise ValueError('Invalid joint bounds')
+        # Check combinations, including the maximum permitted recovery extension.
+        for mode in ('low', 'raised'):
+            base = self.stance(mode)
+            for lift in (np.zeros(2), self.lift(mode), [-.04, 0.]):
+                for hip in (-.30, .30):
+                    pose = base.copy(); pose[:, 0] += hip; pose[:, 1:] += lift
+                    self._validate_target(pose)
+        self.reset()
+
+    def stance(self, mode):
+        if mode not in ('low', 'raised'):
+            raise ValueError('Unknown clearance mode')
+        value = self.neutral.copy()
+        if mode == 'raised':
+            value[:, 1:] += self.cfg.raised_offset_rad
+        return value
+
+    def lift(self, mode):
+        return np.array(self.cfg.low_lift_rad if mode == 'low' else self.cfg.raised_lift_rad)
+
+    def reset(self):
+        self.mode = 'low'
+        self.state = 'idle'
+        self.fault = None
+        self.target = self.neutral.copy()
+        self.command = np.zeros(3)
+        self.contacts = np.zeros(6, dtype=bool)
+        self.on_count = np.zeros(6, dtype=int)
+        self.off_count = np.zeros(6, dtype=int)
+        self.half = 0
+        self.progress = 0.
+        self.elapsed = 0.
+        self.wait_s = 0.
+        self.support_loss_s = 0.
+        self.seen_off = np.zeros(6, dtype=bool)
+        self.landed = np.zeros(6, dtype=bool)
+        self.pitch_hold = np.zeros((6, 2))
+        self.swing_start = np.zeros((6, 2))
+        self.from_target = self.target.copy()
+        self.to_target = self.target.copy()
+        self.transition_mode = 'low'
+        self.stopping = False
+
+    def _validate_target(self, target):
+        if (not np.isfinite(target).all() or np.any(target < self.lower)
+                or np.any(target > self.upper) or np.max(abs(target-self.neutral)) > .35000001):
+            raise ValueError('Controller target exceeds the unchanged joint/action envelope')
+
+    def _emit(self, desired):
+        self._validate_target(desired)
+        self.target += np.clip(desired-self.target, -.040, .040)
+        return self.target.reshape(18).copy()
+
+    def _fault(self, reason):
+        self.fault = reason
+        self.state = 'fault'
+        return self.target.reshape(18).copy()
+
+    def _contacts(self, force):
+        force = np.asarray(force, float)
+        if force.shape != (6,) or not np.isfinite(force).all() or np.any(force < 0):
+            raise ValueError('Contact feedback requires six finite nonnegative measured forces')
+        self.on_count = np.where(force >= self.cfg.contact_on_n, self.on_count+1, 0)
+        self.off_count = np.where(force <= self.cfg.contact_off_n, self.off_count+1, 0)
+        self.contacts[self.on_count >= self.cfg.debounce_controls] = True
+        self.contacts[self.off_count >= self.cfg.debounce_controls] = False
+
+    @property
+    def swing(self):
+        return TRIPOD_A.copy() if self.half % 2 == 0 else ~TRIPOD_A
+
+    @property
+    def stopped(self):
+        return self.state == 'idle' and bool(self.contacts.all())
+
+    def _begin_blend(self, state, target):
+        self.state, self.elapsed = state, 0.
+        self.from_target, self.to_target = self.target.copy(), target.copy()
+
+    def _hip(self):
+        if self.command[0] > 0:
+            return FORWARD_SIGN*min(.30, self.cfg.hip_amplitude_rad*self.command[0]/.05)
+        return np.full(6, self.cfg.hip_amplitude_rad*self.command[2]/.20)
+
+    def step(self, command, foot_force_n, mode='low'):
+        """Advance one 20 ms control using measured distal-force magnitudes."""
+        if not supported(command):
+            raise ValueError('Unsupported command: forward, pure yaw or zero required')
+        if mode not in ('low', 'raised'):
+            raise ValueError('Unknown clearance mode')
+        self._contacts(foot_force_n)
+        if self.fault:
+            return self.target.reshape(18).copy()
+        requested = np.asarray(command, float)
+        if self.state == 'idle':
+            if not self.contacts.all():
+                self.wait_s += DT
+                if self.wait_s >= self.cfg.initial_support_s-1e-9:
+                    return self._fault('initial_support_timeout')
+                return self.target.reshape(18).copy()
+            self.wait_s = 0.
+            if mode != self.mode:
+                self.transition_mode = mode
+                self._begin_blend('clearance', self.stance(mode))
+            elif requested.any():
+                self.command = requested.copy()
+                self.half, self.progress = 0, 0.
+                self.pitch_hold.fill(0); self.swing_start.fill(0)
+                endpoint = self.stance(self.mode)
+                endpoint[:, 0] += self._hip()*np.sin(-math.pi/2+PHASE)
+                self._begin_blend('start', endpoint)
+            else:
+                return self.target.reshape(18).copy()
+
+        if self.state in ('start', 'settle', 'clearance'):
+            self.elapsed = min(self.elapsed+DT, self.cfg.transition_s)
+            h = .5*(1.-math.cos(math.pi*self.elapsed/self.cfg.transition_s))
+            result = self._emit(self.from_target+h*(self.to_target-self.from_target))
+            self.support_loss_s = 0. if self.contacts.all() else self.support_loss_s+DT
+            if self.support_loss_s > self.cfg.recovery_s+1e-9:
+                return self._fault('support_loss_during_'+self.state)
+            if self.elapsed >= self.cfg.transition_s-1e-9:
+                if self.state == 'clearance':
+                    self.mode = self.transition_mode
+                    self.state = 'idle'
+                elif self.state == 'settle':
+                    self.state = 'idle'; self.command.fill(0)
+                else:
+                    self.state = 'walk'
+                    self.seen_off.fill(False); self.landed.fill(False)
+                    self.stopping = False
+            return result
+
+        self.stopping |= mode != self.mode or not np.array_equal(requested, self.command)
+        swing = self.swing
+        self.seen_off |= swing & ~self.contacts
+        self.support_loss_s = 0. if self.contacts[~swing].all() else self.support_loss_s+DT
+        if self.support_loss_s > self.cfg.recovery_s+1e-9:
+            return self._fault('stance_support_loss')
+        base = self.stance(self.mode)
+        touchdown = swing & self.seen_off & self.contacts & ~self.landed & (self.progress >= .5)
+        self.pitch_hold[touchdown] = (self.target-base)[touchdown, 1:]
+        self.landed |= touchdown
+        self.progress = min(1., self.progress+2.*DT/self.cfg.period_s)
+        phase = -math.pi/2+self.half*math.pi+self.progress*math.pi+PHASE
+        hip, lift = wave(phase)
+        desired = base.copy()
+        desired[:, 0] += self._hip()*hip
+        desired[:, 1:] += self.pitch_hold
+        moving = swing & ~self.landed
+        pitches = lift[:, None]*self.lift(self.mode)
+        if self.progress < .5:
+            pitches += (1.-lift[:, None])*self.swing_start
+        desired[moving, 1:] = base[moving, 1:]+pitches[moving]
+
+        if self.progress >= 1.-1e-9:
+            if not self.seen_off[swing].all():
+                return self._fault('swing_failed_to_lift')
+            if self.contacts[swing].all() and self.landed[swing].all():
+                result = self._emit(desired)
+                self.wait_s = 0.
+                if self.stopping:
+                    self._begin_blend('settle', base)
+                else:
+                    self.half += 1; self.progress = 0.
+                    self.swing_start = self.pitch_hold.copy()
+                    self.seen_off.fill(False); self.landed.fill(False)
+                return result
+            self.wait_s += DT
+            missing = swing & ~self.contacts
+            desired[missing, 1] = base[missing, 1]-min(.04, self.cfg.recovery_rate_rad_s*self.wait_s)
+            if self.wait_s > self.cfg.recovery_s+1e-9:
+                return self._fault('touchdown_timeout')
+        return self._emit(desired)
+
+    def snapshot(self):
+        return {'state': self.state, 'mode': self.mode, 'fault': self.fault,
+                'half': self.half, 'progress': self.progress, 'stopped': self.stopped,
+                'contacts': self.contacts.tolist(), 'landed': self.landed.tolist(),
+                'active_command': self.command.tolist(), 'target_rad': self.target.reshape(18).tolist()}

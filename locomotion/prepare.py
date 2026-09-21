@@ -18,17 +18,19 @@ def save(path, value):
 
 def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
-            checkpoint_declaration_sha=None, root=ROOT):
+            checkpoint_declaration_sha=None, candidate=0, suite='screen', root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     if (not remote_root.is_absolute() or REMOTE_ROOT not in remote_root.parents
-            or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay')
+            or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay', 'tripod')
             or type(updates) is not int or not 1 <= updates <= 2000
             or type(seed) is not int or seed < 0):
         raise ValueError('Invalid native allocation')
     num_envs = (128 if mode == 'train' else 1) if num_envs is None else num_envs
-    if (num_envs not in (1, 32, 128) or (mode in ('evaluate', 'replay') and num_envs != 1)
+    if (num_envs not in (1, 32, 128) or (mode in ('evaluate', 'replay', 'tripod') and num_envs != 1)
             or (mode == 'train' and num_envs != 128) or eval_scope not in ('focus', 'probes', 'full')):
         raise ValueError('Invalid replica count for this mode')
+    if type(candidate) is not int or candidate not in range(4) or suite not in ('screen', 'qualification', 'clearance'):
+        raise ValueError('Select a member of the declared tripod sweep and suite')
     supplied = (checkpoint is not None, checkpoint_sha is not None, checkpoint_declaration_sha is not None)
     if (mode == 'evaluate' and not all(supplied)) or (mode != 'evaluate' and any(supplied)):
         raise ValueError('Evaluation requires a checkpoint and its two file hashes')
@@ -59,7 +61,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         for p in sorted(source.rglob('*.py'))})
     freeze = sha(source/'FREEZE_SHA256.json')
     binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': True,
-        'module': 'locomotion.priors.replay_native' if mode == 'replay' else 'locomotion.train',
+        'module': ('locomotion.priors.replay_native' if mode == 'replay' else
+                   'locomotion.tripod_evaluate' if mode == 'tripod' else 'locomotion.train'),
         'mode': mode, 'source': str(remote_root/'source'), 'output': str(remote_root/'run'),
         'asset': declared['asset'], 'geometry_source': declared['geometry_source'],
         'prior': str(Path(declared['stance']).parent), 'input_files': declared['input_files'],
@@ -75,6 +78,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         binding['command_args'] += ['--standing-admission', '/admission/admission.json']
     if mode in ('train', 'evaluate'):
         binding['command_args'] += ['--updates', str(updates), '--seed', str(seed)]
+    if mode == 'tripod':
+        binding['command_args'] += ['--candidate', str(candidate), '--suite', suite, '--seed', str(seed)]
     if mode == 'evaluate':
         binding['command_args'] += ['--eval-scope', eval_scope]
     if checkpoint is not None:
@@ -100,11 +105,13 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--remote-root', required=True)
     parser.add_argument('--inputs', type=Path)
-    parser.add_argument('--mode', choices=('diagnostic', 'train', 'evaluate'), required=True)
+    parser.add_argument('--mode', choices=('diagnostic', 'train', 'evaluate', 'tripod'), required=True)
     parser.add_argument('--num-envs', type=int)
     parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
     parser.add_argument('--updates', type=int, default=512)
     parser.add_argument('--seed', type=int, default=20260917)
+    parser.add_argument('--candidate', type=int, choices=range(4), default=0)
+    parser.add_argument('--suite', choices=['screen', 'qualification', 'clearance'], default='screen')
     parser.add_argument('--checkpoint', type=Path)
     parser.add_argument('--checkpoint-sha')
     parser.add_argument('--checkpoint-declaration-sha')
