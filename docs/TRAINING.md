@@ -548,6 +548,31 @@ You can inspect the [velocity-feedback declaration](../site/assets/tripod_veloci
 [CPU replay](../site/assets/tripod_velocity_20260922_001/cpu_replay.json) and
 [stance approximation](../site/assets/tripod_velocity_20260922_001/stance_linearization.json).
 
+### Sampled velocity filter declared on 22 September 2026
+
+The completed unfiltered forward trial meets the planar-error gate at
+0.02195 m/s but fails yaw tracking at 0.11454 rad/s. Its yaw spectrum has
+96.3% of power at or above 15 Hz, with a 25 Hz peak. The prior retimed trial
+has 3.1% in that band. The unfiltered velocity feedback introduces this
+oscillation at the 50 Hz controller sample rate.
+
+You check the approved free-leg inertia at the neutral pose with a fixed
+base and an exact 20 ms zero-order hold. The unfiltered linear model has
+spectral radius 1.524. A 5 Hz one-pole filter lowers it to 0.854. This
+model omits contact and saturation; it supplies no native acceptance.
+
+You declare one `velocity_filtered` candidate with the same gain and bounds.
+You filter reference and measured joint velocity with
+`alpha = 1 - exp(-2*pi*5*0.02)` before subtracting them. You reset both
+filter states to zero while the feedback blend is zero. You retain the
+unfiltered candidate and its captures. You test filter attenuation and
+transitions, then run one native screen after the current allocation ends.
+You retain the [completed unfiltered screen](../site/assets/tripod_velocity_native_20260922_001/result.json):
+all three trials fail yaw tracking and pass native motor/contact checks.
+You retain 45 failed completed trials and one interrupted attempt.
+The [filter declaration](../site/assets/tripod_velocity_filtered_20260922_001/declaration.json)
+links its CPU replay and sampled-loop inputs.
+
 ## Foundation commands
 
 ```sh

@@ -56,6 +56,8 @@ class NativeController:
         self.control = 0
         self.previous_reference = self.controller.target.reshape(18).copy()
         self.motor_target = self.previous_reference.copy()
+        self.filtered_reference_velocity = np.zeros(18)
+        self.filtered_measured_velocity = np.zeros(18)
 
     def __call__(self, observation):
         import torch
@@ -89,7 +91,21 @@ class NativeController:
                     blend = feedback_blend(c.state, c.elapsed, c.cfg.transition_s)
                     velocity = (target-self.previous_reference)/.02
                     measured = samples[-1]['joint_velocity_rad_s'][0] if samples else np.zeros(18)
-                    desired, offset, clipped = velocity_feedback_target(desired, velocity, measured,
+                    feedback_velocity = velocity
+                    if c.cfg.joint_velocity_filter_hz:
+                        if not np.isfinite(measured).all():
+                            raise ValueError('Velocity feedback requires finite native velocities')
+                        alpha = 1.-np.exp(-2.*np.pi*c.cfg.joint_velocity_filter_hz*.02)
+                        if blend:
+                            self.filtered_reference_velocity += alpha*(velocity-self.filtered_reference_velocity)
+                            self.filtered_measured_velocity += alpha*(measured-self.filtered_measured_velocity)
+                        else:
+                            self.filtered_reference_velocity.fill(0.)
+                            self.filtered_measured_velocity.fill(0.)
+                        feedback_velocity = self.filtered_reference_velocity
+                        measured = self.filtered_measured_velocity
+                        state['filtered_velocity_error_rad_s'] = (feedback_velocity-measured).tolist()
+                    desired, offset, clipped = velocity_feedback_target(desired, feedback_velocity, measured,
                         c.neutral.reshape(18), c.lower.reshape(18), c.upper.reshape(18),
                         c.cfg.joint_velocity_feedback_gain, blend)
                     state.update(joint_velocity_feedback_blend=blend,

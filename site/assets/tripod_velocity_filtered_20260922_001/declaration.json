@@ -1,0 +1,26 @@
+{
+  "schema": "tripod_filtered_velocity_declaration_v1",
+  "recorded_utc": "2026-09-22T04:37:55.429089+00:00",
+  "scope": "One filtered velocity-feedback candidate after a completed unfiltered forward trial develops 25 Hz yaw oscillation. Other unfiltered screen cases are in progress; this candidate has no native acceptance.",
+  "method": "Filter nominal and measured joint velocities with alpha=1-exp(-2*pi*5*0.02), then retain the gain-2 velocity-error correction. Clear filter state while the feedback blend is zero.",
+  "target_bounds": "Retain the 0.070 rad correction bound, joint limits, neutral plus/minus 0.35 rad and 0.040 rad target slew.",
+  "paper_difference": "Filtered velocity feedback changes closed-loop damping through controller inputs; the paper prescribes joint motion.",
+  "pack": {
+    "name": "velocity_filtered0_screen_011",
+    "binding_sha256": "1298c0645acacd42536d0b178723cb98ec4ac210932a54272421f017070c8fc7",
+    "source_freeze_sha256": "4830161bf5ee20f7d7f560bd0e255a2869b7ccb51b2e0d7261a3abaf863c42a9",
+    "pack_sha256": "e3efab6e548702fe41975447e16fa3b8b57553131cac506fd884e0dbe6de9828"
+  },
+  "input_hashes": {
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/sampled_damping_011/declared_inputs/TRAINING.md": "6321e63e32b75fb7e46a28c2cdf69f88a1f77d54922bd0df1bc4716376446584",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/sampled_damping_011/cpu_replay.json": "bf238533840a5bd57c2e63278cb84fb1580366ede130d870d31d06977a1b9a8a",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/sampled_damping_011/sampled_loop.json": "92bd0fe63129e4b5dfc2cb73d51ad64c626249e6126177a82afaab8b3e6fafed",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/sampled_damping_011/yaw_spectrum.json": "209627b38fd74b49dffa74e681e34244526d4c819844f74891113c88a27fd07d",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/sampled_damping_011/locomotion_tests.log": "03d206aca02e3c563c65809000f21aba31bf769b4e479adb049c1777ab23190d",
+    "/Users/palerider/Desktop/projects/hexapod/locomotion/tests/test_tripod_velocity_filter.py": "6c9d9bf4300c65ad75cae88cd408b03e4e20a76b39a166a7c0151bf2dfc2afef"
+  },
+  "actuator_unchanged": true,
+  "acceptance_unchanged": true,
+  "stage2_complete": false,
+  "terrain_complete": false
+}

@@ -1,0 +1,298 @@
+{
+  "schema": "tripod_sampled_velocity_linearization_v1",
+  "scope": "Fixed-base free leg at neutral pose, using the approved link inertias and exact linear zero-order hold at 20 ms. Omits contact, gravity variation, saturation and whole-body coupling. Spectral radius below one establishes this linear model stability only.",
+  "method": "Sum COM Jacobian mass and rotated inertia terms; discretize M*qdd+KD*qd+12*q=12*target. Add gain-2 sampled velocity error feedback, with and without a 5 Hz one-pole filter.",
+  "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+  "script_sha256": "61af7869ca5e5ca4c930e088f81a70317c02c88606d4fb0be6c00e35da7d4b8f",
+  "control_source_sha256": "06f3bfcd38c59416f060dee7ffde4ce1c31300b5bacb8ba056d7271c63e1a77a",
+  "rows": [
+    {
+      "leg": "lf",
+      "mass_matrix_kg_m2": [
+        [
+          0.006845371363360008,
+          1.2314944922593953e-07,
+          -7.039671675238267e-09
+        ],
+        [
+          1.2314944922592958e-07,
+          0.002430401965593782,
+          0.0004175663673895028
+        ],
+        [
+          -7.039671675258596e-09,
+          0.0004175663673895028,
+          0.00040076478578955995
+        ]
+      ],
+      "unfiltered_spectral_radius": 1.5243053776128506,
+      "filtered_5hz_spectral_radius": 0.8544360189063417,
+      "unfiltered_modes": [
+        {
+          "magnitude": 1.2203236808552953,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 1.5243053776128506,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 0.8325227103105175,
+          "frequency_hz": 0.0
+        },
+        {
+          "magnitude": 0.6379130322577853,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 0.7156208402418265,
+          "frequency_hz": 0.0
+        },
+        {
+          "magnitude": 0.36405255309478246,
+          "frequency_hz": 0.0
+        }
+      ]
+    },
+    {
+      "leg": "lm",
+      "mass_matrix_kg_m2": [
+        [
+          0.006845425481067376,
+          1.231780171126894e-07,
+          -7.013765733031584e-09
+        ],
+        [
+          1.231780171126913e-07,
+          0.0024304300754607773,
+          0.0004175755856011675
+        ],
+        [
+          -7.013765733031584e-09,
+          0.0004175755856011675,
+          0.00040077079045081076
+        ]
+      ],
+      "unfiltered_spectral_radius": 1.5243013164504855,
+      "filtered_5hz_spectral_radius": 0.8544365362610478,
+      "unfiltered_modes": [
+        {
+          "magnitude": 1.2203201031376896,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 1.5243013164504855,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 0.8325234023738158,
+          "frequency_hz": 0.0
+        },
+        {
+          "magnitude": 0.6379220664058824,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 0.7156218942966761,
+          "frequency_hz": 0.0
+        },
+        {
+          "magnitude": 0.36405646921827794,
+          "frequency_hz": 0.0
+        }
+      ]
+    },
+    {
+      "leg": "lr",
+      "mass_matrix_kg_m2": [
+        [
+          0.006845385379796666,
+          1.2474941016081485e-07,
+          -7.414084929815995e-09
+        ],
+        [
+          1.247494101608373e-07,
+          0.002430388281636787,
+          0.0004175708771609251
+        ],
+        [
+          -7.414084929849876e-09,
+          0.00041757087716092514,
+          0.0004007685721079213
+        ]
+      ],
+      "unfiltered_spectral_radius": 1.5243045787060674,
+      "filtered_5hz_spectral_radius": 0.8544361921361395,
+      "unfiltered_modes": [
+        {
+          "magnitude": 1.2203230838151822,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 1.5243045787060674,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 0.8325229434621779,
+          "frequency_hz": 0.0
+        },
+        {
+          "magnitude": 0.6379178889841507,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 0.7156196409690282,
+          "frequency_hz": 0.0
+        },
+        {
+          "magnitude": 0.3640547718242942,
+          "frequency_hz": 0.0
+        }
+      ]
+    },
+    {
+      "leg": "rf",
+      "mass_matrix_kg_m2": [
+        [
+          0.006845353730886464,
+          1.2181440347514577e-07,
+          -8.587908383214627e-09
+        ],
+        [
+          1.218144034751572e-07,
+          0.0024304322123527337,
+          0.00041757318443933405
+        ],
+        [
+          -8.587908383194298e-09,
+          0.00041757318443933405,
+          0.00040077007864610205
+        ]
+      ],
+      "unfiltered_spectral_radius": 1.5243020180749145,
+      "filtered_5hz_spectral_radius": 0.8544359000993567,
+      "unfiltered_modes": [
+        {
+          "magnitude": 1.2203252646090956,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 1.5243020180749145,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 0.8325225531871046,
+          "frequency_hz": 0.0
+        },
+        {
+          "magnitude": 0.6379219599775876,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 0.7156222370121806,
+          "frequency_hz": 0.0
+        },
+        {
+          "magnitude": 0.3640563289315577,
+          "frequency_hz": 0.0
+        }
+      ]
+    },
+    {
+      "leg": "rm",
+      "mass_matrix_kg_m2": [
+        [
+          0.006845299535637152,
+          1.229267720029996e-07,
+          -7.193587186718502e-09
+        ],
+        [
+          1.22926772002996e-07,
+          0.002430432284975254,
+          0.00041757440612164563
+        ],
+        [
+          -7.1935871867218905e-09,
+          0.00041757440612164563,
+          0.000400771060767986
+        ]
+      ],
+      "unfiltered_spectral_radius": 1.5243016390888597,
+      "filtered_5hz_spectral_radius": 0.8544354392287299,
+      "unfiltered_modes": [
+        {
+          "magnitude": 1.2203293282679082,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 1.5243016390888597,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 0.832521938756891,
+          "frequency_hz": 0.0
+        },
+        {
+          "magnitude": 0.6379233774464181,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 0.7156221487328311,
+          "frequency_hz": 0.0
+        },
+        {
+          "magnitude": 0.3640569583311907,
+          "frequency_hz": 0.0
+        }
+      ]
+    },
+    {
+      "leg": "rr",
+      "mass_matrix_kg_m2": [
+        [
+          0.006845379729838482,
+          1.2762268449375538e-07,
+          -4.633402758183176e-09
+        ],
+        [
+          1.2762268449377401e-07,
+          0.0024304405673495383,
+          0.0004175721433713215
+        ],
+        [
+          -4.633402758179788e-09,
+          0.0004175721433713215,
+          0.00040076910535570434
+        ]
+      ],
+      "unfiltered_spectral_radius": 1.5243019796748296,
+      "filtered_5hz_spectral_radius": 0.8544360937522729,
+      "unfiltered_modes": [
+        {
+          "magnitude": 1.2203230844646469,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 1.5243019796748296,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 0.8325228102454355,
+          "frequency_hz": 0.0
+        },
+        {
+          "magnitude": 0.6379208880014282,
+          "frequency_hz": 24.999999999999996
+        },
+        {
+          "magnitude": 0.7156228395526516,
+          "frequency_hz": 0.0
+        },
+        {
+          "magnitude": 0.3640558148795674,
+          "frequency_hz": 0.0
+        }
+      ]
+    }
+  ]
+}

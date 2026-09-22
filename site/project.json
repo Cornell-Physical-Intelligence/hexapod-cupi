@@ -795,6 +795,22 @@
         "result": "inconclusive",
         "text": "One candidate adds velocity-error feedback through motor targets with position feedback off. Each correction stays within 0.070 rad; joint/action bounds and the 0.040 rad slew limit remain active. A scalar stance approximation predicts weak body damping. Native screening must establish whether the added feedback reduces oscillation.",
         "source": "site/assets/tripod_velocity_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-velocity-native-20260922-010",
+        "title": "We retain the sampled-feedback yaw failure",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "failed",
+        "text": "The forward trial meets the planar-error gate at 0.02195 m/s but fails yaw tracking at 0.11454 rad/s. Left/right yaw errors are 0.11713/0.11646 rad/s. All native motor/contact checks pass. The forward yaw spectrum peaks at 25 Hz. We retain 45 failed completed trials and one interrupted attempt.",
+        "source": "site/assets/tripod_velocity_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-velocity-filtered-cpu-20260922-011",
+        "title": "We filter velocity feedback at the control sample rate",
+        "backend": "CPU free-leg sampled model, transition checks and recorded-input replay; native motion unqualified",
+        "result": "inconclusive",
+        "text": "The fixed-base free-leg linearization has spectral radius 1.524 with unfiltered gain-2 feedback and 0.854 with a 5 Hz filter. One candidate filters reference and measured joint velocity before the same bounded correction. CPU checks preserve target bounds; contact, saturation and native acceptance remain outside the linear model.",
+        "source": "site/assets/tripod_velocity_filtered_20260922_001/sampled_loop.json"
       }
     ]
   },

@@ -1,0 +1,35 @@
+{
+  "id": "20260922T044140_tripod_velocity_filtered",
+  "date": "2026-09-22T04:41:40.523240+00:00",
+  "title": "Retain yaw oscillation and filter sampled velocity feedback",
+  "summary": "The unfiltered candidate passes forward planar tracking but fails yaw tracking in all three screens. Declare one filtered candidate after a sampled-loop analysis of the 25 Hz oscillation.",
+  "areas": [
+    "locomotion",
+    "site"
+  ],
+  "next": "Inspect the filtered screen before stop and clearance qualification.",
+  "changes": [
+    "STATUS.md",
+    "docs/PIPELINE_LINEAGES.md",
+    "docs/TRAINING.md",
+    "tools/check_pipeline_lineages.py",
+    "configs/releases/tripod_velocity_filtered_20260922_v1.sha256",
+    "locomotion/tripod_config.py",
+    "locomotion/tripod_evaluate.py",
+    "locomotion/tests/test_tripod_velocity_filter.py",
+    "site/project.json",
+    "site/assets/tripod_velocity_native_20260922_001/result.json",
+    "site/assets/tripod_velocity_filtered_20260922_001/declaration.json",
+    "site/assets/tripod_velocity_filtered_20260922_001/cpu_replay.json",
+    "site/assets/tripod_velocity_filtered_20260922_001/sampled_loop.json",
+    "site/assets/tripod_velocity_filtered_20260922_001/yaw_spectrum.json",
+    "site/updates/20260922T044140_tripod_velocity_filtered.json"
+  ],
+  "evidence": [
+    "site/assets/tripod_velocity_native_20260922_001/result.json",
+    "site/assets/tripod_velocity_filtered_20260922_001/declaration.json",
+    "site/assets/tripod_velocity_filtered_20260922_001/sampled_loop.json",
+    "site/assets/tripod_velocity_filtered_20260922_001/yaw_spectrum.json"
+  ],
+  "no_project_impact": false
+}
