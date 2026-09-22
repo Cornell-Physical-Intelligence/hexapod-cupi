@@ -695,7 +695,7 @@ with a constant return speed between acceleration intervals. You retain the
 You replace the forward vertical-Jacobian lift with joint lift coefficients
 `(0.25, 0)` rad in low mode and `(0.28, -0.10)` rad in raised mode.
 The same cosine lift envelope multiplies these coefficients. The foot moves
-inward during swing. You permit that lateral motion to fit the approved joint
+outward during swing. You permit that lateral motion to fit the approved joint
 envelope; fixed lateral toe position needs more than 0.35 rad in the CPU
 inverse-kinematics probe. You retain geometric clearance targets and measure
 actual toe lift under load. You return touchdown lift residuals through the
@@ -715,6 +715,39 @@ The first trial has 18.9–24.1 mm toe lift in low mode. You retain full
 400 Hz torque/contact captures and the 20-second native video. You proceed
 to motion screens and canonical stop qualification; raised clearance and
 terrain remain pending.
+
+
+### Low-speed lift correction declared on 22 September 2026
+
+You retain the complete forward-overlap screen. Both turns pass with yaw
+errors of 0.03434 and 0.03459 rad/s. Forward motion at 0.05 m/s has
+0.01226 m/s planar error, but its computed torque-demand fraction is 0.03802
+against the unchanged 0.005 limit. The middle femur joints account for most
+of this excess. Their stance normal forces are close to the passing 0.10 m/s
+trial. Normal-contact and gravity moments explain part of the difference;
+the unmeasured tangential forces and inertial terms remain unresolved.
+
+You correct the earlier radial direction label: the forward lift moves feet
+outward. At the low-mode lift peak, the change is 26.1–26.6 mm. You retain
+published declarations and results and record this prose correction.
+
+You declare one `speed_lift` candidate based on `forward_overlap`.
+For low-mode forward commands at or below 0.05 m/s, you use femur/tibia
+lift coefficients `(0.26, -0.20)` rad. This choice reduces the predicted
+radial excursion to 3.8–3.9 mm and retains 19.7 mm nominal toe lift.
+Between 0.05 and 0.10 m/s, you interpolate those coefficients to the passing
+high-speed values `(0.25, 0)` with `w = clip((v - 0.05) / 0.05, 0, 1)`.
+You retain the existing swing and support clocks. This choice tests whether
+reduced radial motion improves low-speed loading; it does not establish the
+unmeasured contact-force cause. You retain raised-mode and yaw targets.
+
+You check the speed interval and contact transitions on the CPU, including
+exact high-speed and yaw target equivalence with the preceding controller.
+You run the three native screens, then canonical qualification if they pass.
+You retain the actuator limits and geometry acceptance targets.
+You retain the [completed screen](../site/assets/tripod_speed_lift_20260922_001/native_result.json),
+[radial direction correction](../site/assets/tripod_speed_lift_20260922_001/radial_direction_correction.json)
+and [new candidate declaration](../site/assets/tripod_speed_lift_20260922_001/declaration.json).
 
 ## Foundation commands
 

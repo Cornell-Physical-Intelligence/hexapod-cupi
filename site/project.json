@@ -968,6 +968,22 @@
         "result": "passed",
         "text": "Both independent resets pass the existing 0.10 m/s case. Mean planar error is 0.01931 m/s against 0.025; the computed torque-demand fraction is 0.00167 against 0.005. Native motor and contact checks pass. The first trial has 18.9\u201324.1 mm toe lift in low mode. Stops, raised clearance and terrain remain pending.",
         "source": "site/assets/tripod_forward_overlap_native_20260922_001/native_result.json"
+      },
+      {
+        "id": "zhang-tripod-forward-overlap-screen-20260922-018",
+        "title": "We pass both turns and retain the low-speed torque failure",
+        "backend": "Isaac Sim; three complete 1000-control screens; approved 19-body robot",
+        "result": "failed",
+        "text": "Both turns pass with yaw errors of 0.03434 and 0.03459 rad/s. Forward 0.05 m/s motion has 0.01226 m/s planar error but 0.03802 computed torque-demand fraction against 0.005. Middle femur joints account for most of the excess. The earlier lift direction label is incorrect: the feet move outward. Published source and captures retain their original identities.",
+        "source": "site/assets/tripod_speed_lift_20260922_001/native_result.json"
+      },
+      {
+        "id": "zhang-tripod-speed-lift-cpu-20260922-019",
+        "title": "We reduce outward swing motion at low speed",
+        "backend": "CPU workspace, endpoint-equivalence and recorded-input checks; native screen pending",
+        "result": "inconclusive",
+        "text": "The candidate reduces predicted low-speed radial foot travel from about 26 mm to 4 mm and retains 19.7 mm nominal lift. It interpolates toward the passing lift at 0.10 m/s. CPU checks preserve high-speed, raised-mode and yaw targets within 180 locomotion tests. This tests the loading hypothesis; contact-force measurements do not isolate its cause.",
+        "source": "site/assets/tripod_speed_lift_20260922_001/declaration.json"
       }
     ]
   },

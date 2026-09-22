@@ -1,0 +1,149 @@
+{
+  "schema": "tripod_speed_lift_cpu_replay_v1",
+  "scope": "CPU replay of prior contacts, commands and endpoint joint velocities. This does not predict the new contact sequence or establish physical acceptance.",
+  "script_sha256": "ce81eac2efd7677e74ca48851b95fa43064cb64bff4729da7ed23820c48fdbef",
+  "summary_hashes": {
+    "forward_overlap0_screen_018": "771c06ca82c771f52a4ef10b0220418118b56c152fcd8b98a422ddb9151a783b",
+    "forward_overlap0_forward_high_017": "b08ded7aae2cd4513364c4a5cdbec487110ebd978aa1e7905fc5f2a7d13d6c51"
+  },
+  "configuration": {
+    "schema": "zhang_tripod_geometry_adaptation_v1",
+    "period_s": 1.2,
+    "hip_amplitude_rad": 0.12,
+    "low_lift_rad": [
+      0.35,
+      -0.3
+    ],
+    "raised_lift_rad": [
+      0.45,
+      -0.35
+    ],
+    "raised_offset_rad": [
+      -0.15,
+      0.1
+    ],
+    "transition_s": 1.0,
+    "contact_on_n": 2.0,
+    "contact_off_n": 1.0,
+    "debounce_controls": 2,
+    "recovery_s": 0.4,
+    "recovery_rate_rad_s": 0.1,
+    "initial_support_s": 2.0,
+    "geometry_sweep_gain": 1.0,
+    "geometry_lift_m": [
+      0.022,
+      0.028
+    ],
+    "damping_compensation": true,
+    "phase_ramp_fraction": 0.1,
+    "joint_feedback_gain": 0.5,
+    "swing_lift_power": 1.0,
+    "joint_velocity_feedback_gain": 2.0,
+    "joint_velocity_filter_hz": 5.0,
+    "support_overlap": true,
+    "startup_stride_ramp": true,
+    "forward_support_overlap": true,
+    "forward_low_lift_rad": [
+      0.25,
+      0.0
+    ],
+    "forward_raised_lift_rad": [
+      0.28,
+      -0.1
+    ],
+    "speed_adapted_lift": true,
+    "forward_slow_lift_rad": [
+      0.26,
+      -0.2
+    ],
+    "trajectory_variant": "speed_lift",
+    "control_dt_s": 0.02,
+    "target_slew_rad": 0.04,
+    "low_root_target_m": 0.0978,
+    "raised_root_target_m": 0.1093,
+    "minimum_root_increase_m": 0.008,
+    "minimum_toe_lift_m": {
+      "low": 0.012,
+      "raised": 0.016
+    },
+    "paper_doi": "10.3389/frobt.2024.1426269",
+    "stage2_complete": false
+  },
+  "results": [
+    {
+      "input_pack": "forward_overlap0_screen_018",
+      "case_id": "tripod:screen:forward",
+      "controls": 1000,
+      "nominal_change_from_prior_rad": 0.2,
+      "maximum_feedback_offset_rad": 0.07,
+      "maximum_position_offset_rad": 0.07,
+      "clipped_controls": 119,
+      "maximum_action_offset_rad": 0.35,
+      "maximum_emitted_delta_rad": 0.040000000000000036,
+      "source_files": {
+        "controller.jsonl": "505b4945d369faeba67b9139071c6f59d3f969113d67df1a93e977663280684e",
+        "control_trace.npz": "539ffbde75b7528f54f9929dcf9d1141cfe048ed51a8cc2e0c63a2d9ff1a4390"
+      }
+    },
+    {
+      "input_pack": "forward_overlap0_screen_018",
+      "case_id": "tripod:screen:left",
+      "controls": 1000,
+      "nominal_change_from_prior_rad": 2.7755575615628914e-16,
+      "maximum_feedback_offset_rad": 0.06954054614320403,
+      "maximum_position_offset_rad": 0.04433948666431111,
+      "clipped_controls": 0,
+      "maximum_action_offset_rad": 0.31521896779552266,
+      "maximum_emitted_delta_rad": 0.04000000000000001,
+      "source_files": {
+        "controller.jsonl": "0f56c1ae9c8d09565c573485980e3748d3ccb899c286520f3b17165949181b56",
+        "control_trace.npz": "c2fdfcfd3af79125d47d0a2f3cecae8d0176a7b482ce2f0fd2abb098f0142d3e"
+      }
+    },
+    {
+      "input_pack": "forward_overlap0_screen_018",
+      "case_id": "tripod:screen:right",
+      "controls": 1000,
+      "nominal_change_from_prior_rad": 2.7755575615628914e-16,
+      "maximum_feedback_offset_rad": 0.059092122055881956,
+      "maximum_position_offset_rad": 0.044868238876377156,
+      "clipped_controls": 0,
+      "maximum_action_offset_rad": 0.31480483066717263,
+      "maximum_emitted_delta_rad": 0.04000000000000001,
+      "source_files": {
+        "controller.jsonl": "be6dd1a69445cdeb49d18b47a057edf7b92e08a9aa5e67174ea3bb50c56b8a05",
+        "control_trace.npz": "45e53eb983e19ca6c07182c22c88afadcb4327f9b8a2086218ee23a808105f62"
+      }
+    },
+    {
+      "input_pack": "forward_overlap0_forward_high_017",
+      "case_id": "static:translate_0.10_0deg",
+      "controls": 1000,
+      "nominal_change_from_prior_rad": 1.942890293094024e-16,
+      "maximum_feedback_offset_rad": 0.06766117001201817,
+      "maximum_position_offset_rad": 0.05049297909459874,
+      "clipped_controls": 60,
+      "maximum_action_offset_rad": 0.35,
+      "maximum_emitted_delta_rad": 0.040000000000000036,
+      "source_files": {
+        "controller.jsonl": "71ca56a48b8f7c44a7609413c92e75b1eb1457a752182cdd13d51ad6777eb587",
+        "control_trace.npz": "aff50cd8384ad26785845fb92f8da2b7486c98bc302a3665bc9aa99d5012484d"
+      }
+    },
+    {
+      "input_pack": "forward_overlap0_forward_high_017",
+      "case_id": "static:translate_0.10_0deg",
+      "controls": 1000,
+      "nominal_change_from_prior_rad": 1.942890293094024e-16,
+      "maximum_feedback_offset_rad": 0.06766117001201817,
+      "maximum_position_offset_rad": 0.05049297909459874,
+      "clipped_controls": 60,
+      "maximum_action_offset_rad": 0.35,
+      "maximum_emitted_delta_rad": 0.040000000000000036,
+      "source_files": {
+        "controller.jsonl": "71ca56a48b8f7c44a7609413c92e75b1eb1457a752182cdd13d51ad6777eb587",
+        "control_trace.npz": "aff50cd8384ad26785845fb92f8da2b7486c98bc302a3665bc9aa99d5012484d"
+      }
+    }
+  ]
+}

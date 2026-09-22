@@ -1,0 +1,34 @@
+{
+  "id": "20260922T151320_tripod_speed_lift",
+  "date": "2026-09-22T15:13:20.116276+00:00",
+  "title": "Correct radial direction and reduce low-speed swing excursion",
+  "summary": "Both turns pass while low-speed forward motion fails torque demand. Correct the outward lift direction and declare one speed-dependent lift candidate that retains the passing high-speed targets.",
+  "areas": [
+    "locomotion",
+    "site"
+  ],
+  "next": "Inspect all three screens before canonical stop and clearance qualification.",
+  "changes": [
+    "locomotion/tripod.py",
+    "locomotion/tripod_config.py",
+    "locomotion/tests/test_tripod_speed_lift.py",
+    "docs/TRAINING.md",
+    "docs/PIPELINE_LINEAGES.md",
+    "tools/check_pipeline_lineages.py",
+    "configs/releases/tripod_speed_lift_20260922_v1.sha256",
+    "site/assets/tripod_speed_lift_20260922_001/contact_moment_summary.json",
+    "site/assets/tripod_speed_lift_20260922_001/cpu_replay.json",
+    "site/assets/tripod_speed_lift_20260922_001/declaration.json",
+    "site/assets/tripod_speed_lift_20260922_001/native_result.json",
+    "site/assets/tripod_speed_lift_20260922_001/radial_direction_correction.json",
+    "site/updates/20260922T151320_tripod_speed_lift.json",
+    "site/project.json",
+    "STATUS.md"
+  ],
+  "evidence": [
+    "site/assets/tripod_speed_lift_20260922_001/native_result.json",
+    "site/assets/tripod_speed_lift_20260922_001/radial_direction_correction.json",
+    "site/assets/tripod_speed_lift_20260922_001/declaration.json"
+  ],
+  "no_project_impact": false
+}

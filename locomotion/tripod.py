@@ -142,6 +142,10 @@ class TripodController:
 
     def lift(self, mode, *, forward=False):
         if self.cfg.forward_support_overlap and forward:
+            if self.cfg.speed_adapted_lift and mode == 'low':
+                blend = np.clip((self.command[0]-.05)/.05, 0., 1.)
+                return ((1.-blend)*np.array(self.cfg.forward_slow_lift_rad)
+                        +blend*np.array(self.cfg.forward_low_lift_rad))
             return np.array(self.cfg.forward_low_lift_rad if mode == 'low'
                             else self.cfg.forward_raised_lift_rad)
         if self.geometry:
