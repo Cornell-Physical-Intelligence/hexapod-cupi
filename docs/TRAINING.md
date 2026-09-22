@@ -130,8 +130,13 @@ sinusoidal targets on this robot.
 
 You can inspect the [three passing motion screens](../site/assets/tripod_speed_lift_native_20260922_001/native_result.json)
 and [six passing stop trials](../site/assets/tripod_stop_stride_native_20260922_001/native_result.json).
-Full qualification, raised clearance and terrain remain pending. The sections
-below retain the equations, declarations and measured failures for each variant.
+You closed this research sequence with full qualification, raised clearance
+and terrain incomplete. We retain four interrupted qualification attempts;
+none completes the required suite. We disabled both task-created Spark pause
+guards at your request and verified that our Isaac container is absent.
+You can inspect the [closeout and selected demo](../site/assets/tripod_reproduction_closeout_20260922_001/closeout.json)
+and [guard shutdown receipt](../site/assets/tripod_reproduction_closeout_20260922_001/spark_guard_shutdown.json).
+The sections below retain the declarations and measured results for each variant.
 You can inspect the [forward comparison](../site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.png)
 and its [source identities and measurements](../site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.json).
 We retain the [qualification interruptions](../site/assets/tripod_qualification_recovery_20260922_001/qualification_interruptions.json).
@@ -812,7 +817,9 @@ and [candidate declaration](../site/assets/tripod_stop_stride_20260922_001/decla
 The [completed stop suite](../site/assets/tripod_stop_stride_native_20260922_001/native_result.json)
 passes all six cases from two resets. Maximum quiet joint-speed RMS is
 0.00518 rad/s against 0.030. All cases have zero quiet torque saturation
-and no missing support substeps. You proceed to full qualification.
+and no missing support substeps. We attempted full qualification; four
+competing CUDA interruptions prevented a complete result. You ended this
+sequence with the remaining qualification incomplete.
 You retain the [prior qualification identities](../site/assets/tripod_stop_stride_native_20260922_001/qualification_identity.json)
 with the unchanged interrupted result.
 
