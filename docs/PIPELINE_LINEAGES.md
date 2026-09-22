@@ -7,7 +7,7 @@ python3 tools/check_pipeline_lineages.py current
 python3 tools/archive.py check
 ```
 
-The current manifest is `configs/releases/tripod_feedback_20260922_v1.sha256`.
+The current manifest is `configs/releases/tripod_liftoff_20260922_v1.sha256`.
 It covers maintained source and tests, with the selected model identities.
 The fixture manifest and model-input manifest pin required immutable inputs.
 Source identity supplies no native admission or walking acceptance.

@@ -15,10 +15,13 @@ FORWARD_SIGN = np.array([-1., -1., -1., 1., 1., 1.])
 DT = .02
 
 
-def wave(phase):
-    """Evaluate equations (1)-(3) in radians at the caller's phase."""
+def wave(phase, lift_power=1.):
+    """Evaluate the paper waveform or the declared cosine-lift adaptation."""
+    if lift_power not in (.75, 1.):
+        raise ValueError('Lift power must be .75 or 1')
     phase = np.asarray(phase, float)
-    return np.sin(phase), np.where(np.cos(phase) > 0., .5*(1.+np.cos(2.*phase)), 0.)
+    lift = np.where(np.cos(phase) > 0., .5*(1.+np.cos(2.*phase)), 0.)
+    return np.sin(phase), lift if lift_power == 1. else lift**lift_power
 
 
 def supported(command):
@@ -263,7 +266,7 @@ class TripodController:
             phase_advance = math.acos(np.clip(1.-2.*displacement, -1., 1.))
             stance_return = 1.-displacement
         phase = -math.pi/2+self.half*math.pi+phase_advance+PHASE
-        hip, lift = wave(phase)
+        hip, lift = wave(phase, self.cfg.swing_lift_power)
         coefficients = self._sweep()
         baseline = base+coefficients*hip[:, None]
         desired = baseline.copy()

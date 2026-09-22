@@ -763,6 +763,22 @@
         "result": "inconclusive",
         "text": "Two candidates add proportional joint-error feedback with gains 0.5 and 1.0. Each correction stays within 0.070 rad. Recorded-input replay preserves the joint/action envelope and 0.040 rad slew limit; it does not establish native stability. Actuator gains, torque-speed limits and acceptance gates remain unchanged.",
         "source": "site/assets/tripod_feedback_20260922_001/cpu_replay.json"
+      },
+      {
+        "id": "zhang-tripod-feedback-native-20260922-008",
+        "title": "We retain three failed feedback screens",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "failed",
+        "text": "Gain 0.5 produces forward error 0.03333 m/s and left/right yaw errors 0.08784/0.08813 rad/s. All three exceed tracking gates. The forward trial also has one speed violation and one nonfoot-contact substep during a 202 N rear-right toe impulse. We retain 39 failed completed trials and one interrupted attempt. Gain 1.0 remains unexecuted.",
+        "source": "site/assets/tripod_feedback_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-liftoff-cpu-20260922-009",
+        "title": "We test lift timing within the target envelope",
+        "backend": "CPU replay of six recorded command/contact sequences and transition fixtures; native motion unqualified",
+        "result": "inconclusive",
+        "text": "One revised candidate uses positive cos(phase)^1.5 swing lift with the same peak, period and hip sweep. Joint feedback stays off. We rejected cos(phase) before dispatch because it exceeded the target envelope at 0.10 m/s. The revised profile passes target checks through both clearance modes and stops; it supplies no native acceptance.",
+        "source": "site/assets/tripod_liftoff_20260922_001/cpu_replay.json"
       }
     ]
   },

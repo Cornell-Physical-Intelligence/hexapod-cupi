@@ -22,12 +22,13 @@ class TripodConfig:
     damping_compensation: bool = False
     phase_ramp_fraction: float = 0.
     joint_feedback_gain: float = 0.
+    swing_lift_power: float = 1.
 
     def __post_init__(self):
         values = (self.period_s, self.hip_amplitude_rad, self.transition_s,
                   self.contact_on_n, self.contact_off_n, self.recovery_s,
                   self.recovery_rate_rad_s, self.initial_support_s,
-                  self.geometry_sweep_gain, self.phase_ramp_fraction, self.joint_feedback_gain,
+                  self.geometry_sweep_gain, self.phase_ramp_fraction, self.joint_feedback_gain, self.swing_lift_power,
                   *self.geometry_lift_m,
                   *self.low_lift_rad, *self.raised_lift_rad, *self.raised_offset_rad)
         if not all(math.isfinite(v) for v in values):
@@ -45,12 +46,15 @@ class TripodConfig:
                 or (self.phase_ramp_fraction and not self.damping_compensation)
                 or not 0 <= self.joint_feedback_gain <= 1.
                 or (self.joint_feedback_gain and not self.phase_ramp_fraction)
+                or self.swing_lift_power not in (.75, 1.)
+                or (self.swing_lift_power != 1. and (not self.phase_ramp_fraction or self.joint_feedback_gain))
                 or any(len(v) != 2 for v in (self.low_lift_rad, self.raised_lift_rad, self.raised_offset_rad))):
             raise ValueError('Controller parameters exceed the declared envelope')
 
     def declaration(self):
         return {'schema': 'zhang_tripod_geometry_adaptation_v1', **asdict(self),
-                'trajectory_variant': ('feedback' if self.joint_feedback_gain else
+                'trajectory_variant': ('liftoff' if self.swing_lift_power != 1. else
+                                       'feedback' if self.joint_feedback_gain else
                                        'retimed' if self.phase_ramp_fraction else
                                        'damping' if self.damping_compensation else
                                        'geometry' if self.geometry_sweep_gain else 'paper'),
@@ -71,3 +75,4 @@ SWEEPS = {'paper': SWEEP, 'geometry': GEOMETRY_SWEEP,
           'damping': (replace(GEOMETRY_SWEEP[0], damping_compensation=True),),
           'retimed': (replace(GEOMETRY_SWEEP[0], damping_compensation=True, phase_ramp_fraction=.10),)}
 SWEEPS['feedback'] = tuple(replace(SWEEPS['retimed'][0], joint_feedback_gain=gain) for gain in (.5, 1.))
+SWEEPS['liftoff'] = (replace(SWEEPS['retimed'][0], swing_lift_power=.75),)

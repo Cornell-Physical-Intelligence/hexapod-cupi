@@ -476,6 +476,40 @@ retain the existing acceptance limits and report unexecuted candidates.
 You can inspect the [feedback declaration](../site/assets/tripod_feedback_20260922_001/declaration.json)
 and [recorded-input replay](../site/assets/tripod_feedback_20260922_001/cpu_replay.json).
 
+### Contact-timing lift declared on 22 September 2026
+
+You retain the [failed gain-0.5 screen](../site/assets/tripod_feedback_native_20260922_001/result.json).
+Forward error rises to 0.03333 m/s; yaw errors remain 0.08784/0.08813 rad/s.
+The forward trial also fails the native speed and contact checks. The
+[contact incident](../site/assets/tripod_feedback_native_20260922_001/contact_incident.json)
+records a 202 N rear-right toe impulse and a tibia speed excursion, with
+the applied-torque cap active. You leave gain 1.0 unexecuted. You retain
+39 failed completed trials and one interrupted attempt.
+
+You rejected an initial `cos(phase)` lift in CPU checks: the 0.10 m/s
+command exceeded the unchanged joint/action envelope. You preserved that
+source and failure outside the checkout and did not dispatch it.
+You declare one revised `liftoff` candidate from the retimed configuration
+with joint feedback disabled. You keep the same maximum lift and replace
+the positive swing lift factor `cos(phase)^2` with `cos(phase)^1.5`, or
+`lift^0.75` in the existing waveform. You retain zero lift outside swing. This changes
+the pitch path from paper §4.2; it is a declared contact-timing adaptation.
+
+The retained cycle shows force on the outgoing tripod during the first
+13–20% of swing and touchdown near 90–93%. During these intervals, swing
+targets move opposite to the planted-foot motion needed for forward travel.
+The new profile raises the foot sooner and lowers it later at the same
+peak height. The retimed phase clock preserves zero endpoint lift velocity.
+Native contact measurements must establish whether this reduces braking;
+the geometric profile supplies no physical acceptance.
+
+You retain the period, hip sweep, damping feedforward and touchdown rules.
+You check both clearance modes against the existing target and slew bounds
+before dispatch. You run one forward/left/right screen with the unchanged
+motor, contact and tracking gates before qualification or terrain work.
+You can inspect the [lift declaration](../site/assets/tripod_liftoff_20260922_001/declaration.json)
+and [recorded-input replay](../site/assets/tripod_liftoff_20260922_001/cpu_replay.json).
+
 ## Foundation commands
 
 ```sh
