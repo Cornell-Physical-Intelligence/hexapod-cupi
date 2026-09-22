@@ -303,6 +303,29 @@
       "caption": "First native frame of the passed left-turn screen on the approved model.",
       "controller": "Prescribed tripod; source 06b0595d9fa54b3c9398fa1c080768f58495d3a4a19f6f74c5140d6c1f473aee",
       "evidence": "site/assets/tripod_overlap_native_20260922_001/result.json"
+    },
+    {
+      "id": "tripod_forward_overlap_native_20260922_001",
+      "title": "Prescribed tripod: passed 0.10 m/s forward case",
+      "type": "video",
+      "role": "trajectory_experiment",
+      "path": "site/assets/tripod_forward_overlap_native_20260922_001/rollout.mp4",
+      "sha256": "25e7f5529b0acdfff1783d2823d326e6f9d3c56c64d6a2cf8a8eb0f09daf7d2e",
+      "caption": "Approved detailed model. Both independent 0.10 m/s forward trials pass. Mean speed 0.1093 m/s; planar error 0.01931 m/s. Stops and raised clearance await qualification; real-time playback.",
+      "controller": "Prescribed tripod; source 94ef3bffaccd8161eba39640db4b390e1fd0f29a375e658b365f97429d64a973",
+      "evidence": "site/assets/tripod_forward_overlap_native_20260922_001/native_result.json",
+      "poster_id": "tripod_forward_overlap_native_20260922_001_poster"
+    },
+    {
+      "id": "tripod_forward_overlap_native_20260922_001_poster",
+      "title": "Forward overlap: first native frame",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/tripod_forward_overlap_native_20260922_001/first_frame.png",
+      "sha256": "f6b1aec7abcd01b9a2d5058d2d630b9d9c01047138f659150b3fdd17b724d96a",
+      "caption": "First native frame of the passing canonical forward trial on the approved robot.",
+      "controller": "Prescribed tripod; source 94ef3bffaccd8161eba39640db4b390e1fd0f29a375e658b365f97429d64a973",
+      "evidence": "site/assets/tripod_forward_overlap_native_20260922_001/native_result.json"
     }
   ],
   "nodes": [
@@ -937,6 +960,14 @@
         "result": "inconclusive",
         "text": "The candidate matches swing and support motion around lift-off and touchdown. It permits inward foot motion during swing to retain joint bounds. It keeps yaw targets, motor limits and acceptance gates. Full-command, clearance, reset and early-touchdown checks pass within 177 locomotion tests. Native testing starts with the canonical 0.10 m/s case from two resets.",
         "source": "site/assets/tripod_forward_overlap_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-forward-overlap-native-20260922-017",
+        "title": "We pass canonical forward walking from two resets",
+        "backend": "Isaac Sim; two 1000-control captures; approved 19-body robot",
+        "result": "passed",
+        "text": "Both independent resets pass the existing 0.10 m/s case. Mean planar error is 0.01931 m/s against 0.025; the computed torque-demand fraction is 0.00167 against 0.005. Native motor and contact checks pass. The first trial has 18.9\u201324.1 mm toe lift in low mode. Stops, raised clearance and terrain remain pending.",
+        "source": "site/assets/tripod_forward_overlap_native_20260922_001/native_result.json"
       }
     ]
   },

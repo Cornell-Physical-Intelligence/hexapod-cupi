@@ -709,6 +709,12 @@ You retain failed native captures and CPU probes with exact identities.
 You retain the [two forward failures](../site/assets/tripod_forward_overlap_20260922_001/forward_high_result.json),
 [cycle figure](../site/assets/tripod_forward_overlap_20260922_001/forward_high_cycle.png) and
 [new declaration](../site/assets/tripod_forward_overlap_20260922_001/declaration.json).
+The [two canonical forward repeats](../site/assets/tripod_forward_overlap_native_20260922_001/native_result.json)
+pass with 0.01931 m/s planar error and 0.00167 computed torque-demand fraction.
+The first trial has 18.9–24.1 mm toe lift in low mode. You retain full
+400 Hz torque/contact captures and the 20-second native video. You proceed
+to motion screens and canonical stop qualification; raised clearance and
+terrain remain pending.
 
 ## Foundation commands
 
