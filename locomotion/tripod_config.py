@@ -20,12 +20,13 @@ class TripodConfig:
     geometry_sweep_gain: float = 0.
     geometry_lift_m: tuple = (.022, .028)
     damping_compensation: bool = False
+    phase_ramp_fraction: float = 0.
 
     def __post_init__(self):
         values = (self.period_s, self.hip_amplitude_rad, self.transition_s,
                   self.contact_on_n, self.contact_off_n, self.recovery_s,
                   self.recovery_rate_rad_s, self.initial_support_s,
-                  self.geometry_sweep_gain, *self.geometry_lift_m,
+                  self.geometry_sweep_gain, self.phase_ramp_fraction, *self.geometry_lift_m,
                   *self.low_lift_rad, *self.raised_lift_rad, *self.raised_offset_rad)
         if not all(math.isfinite(v) for v in values):
             raise ValueError('Controller parameters must be finite')
@@ -38,12 +39,15 @@ class TripodConfig:
                 or len(self.geometry_lift_m) != 2 or any(h <= 0 for h in self.geometry_lift_m)
                 or type(self.damping_compensation) is not bool
                 or (self.damping_compensation and not self.geometry_sweep_gain)
+                or not 0 <= self.phase_ramp_fraction <= .20
+                or (self.phase_ramp_fraction and not self.damping_compensation)
                 or any(len(v) != 2 for v in (self.low_lift_rad, self.raised_lift_rad, self.raised_offset_rad))):
             raise ValueError('Controller parameters exceed the declared envelope')
 
     def declaration(self):
         return {'schema': 'zhang_tripod_geometry_adaptation_v1', **asdict(self),
-                'trajectory_variant': ('damping' if self.damping_compensation else
+                'trajectory_variant': ('retimed' if self.phase_ramp_fraction else
+                                       'damping' if self.damping_compensation else
                                        'geometry' if self.geometry_sweep_gain else 'paper'),
                 'control_dt_s': .02, 'target_slew_rad': .040,
                 'low_root_target_m': .0978,
@@ -59,4 +63,5 @@ SWEEP = tuple(replace(TripodConfig(), period_s=period, hip_amplitude_rad=amplitu
 GEOMETRY_SWEEP = tuple(replace(TripodConfig(), geometry_sweep_gain=gain,
                               raised_offset_rad=(-.15, .10)) for gain in (1., 1.1))
 SWEEPS = {'paper': SWEEP, 'geometry': GEOMETRY_SWEEP,
-          'damping': (replace(GEOMETRY_SWEEP[0], damping_compensation=True),)}
+          'damping': (replace(GEOMETRY_SWEEP[0], damping_compensation=True),),
+          'retimed': (replace(GEOMETRY_SWEEP[0], damping_compensation=True, phase_ramp_fraction=.10),)}

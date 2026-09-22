@@ -382,6 +382,57 @@ Replay uses the first geometry candidate's recorded contact inputs; it does
 not predict the new contact sequence. The maximum added offset is 0.0332 rad,
 and the emitted targets remain within the existing action and slew bounds.
 
+The [three native damping screens](../site/assets/tripod_damping_native_20260922_001/result.json)
+complete 1000 controls each with native motor and contact checks passed.
+Forward mean speed reaches 0.04979 m/s, but planar tracking error remains
+0.04852 m/s against 0.025. Left and right yaw errors remain 0.15315 and
+0.15304 rad/s against 0.06. You retain all 33 failed motion attempts.
+
+### Phase-clock correction declared on 22 September 2026
+
+You retain the uniform-clock variants and declare one `retimed` candidate.
+You retain the geometry path and damping correction, with period 1.2 s and
+sweep gain 1.0. You change the phase clock in Eqs. (1)–(3); this is a method
+adaptation, distinct from a reproduction of the printed time law.
+
+For an ideal rigid stance and exact joint tracking, the uniform-clock speed
+is proportional to `sin(pi*s)` over half-cycle fraction `s`. Its minimum
+mean absolute error against unit speed is `1/3`, even after amplitude
+calibration. At 0.20 rad/s this gives 0.0667 rad/s, above the existing 0.06
+gate. Compliance and nonlinear geometry can change this ideal result; the
+calculation does not establish a bound on native motion.
+
+You define a normalized displacement `h(s)` with cosine acceleration ramps
+over the first and last 10% of each half-cycle, and constant speed between
+them. With `r=0.10` and `v=1/(1-r)`, you use:
+
+```text
+h(s) = v/2 * (s - r/pi*sin(pi*s/r))                  for s < r
+h(s) = v * (s-r/2)                                  for r <= s <= 1-r
+h(s) = 1-v/2 * (1-s-r/pi*sin(pi*(1-s)/r))             for s > 1-r
+phase = -pi/2 + half*pi + acos(1-2*h(s)) + leg_phase
+```
+
+You keep the sine and cosine-squared joint path. You use `1-h(s)` for the
+touchdown-offset return, which preserves the blend to the next stance
+endpoint. Contact thresholds and recovery limits remain unchanged. You
+check emitted targets against the same joint/action and slew bounds.
+
+You screen this single candidate with `--tripod-adaptation retimed --candidate 0`
+after the failed damping screen. You retain the existing forward/yaw
+gates and the qualification, stopping and clearance matrix. Native success
+must establish the effect of the changed clock under load. You can inspect
+the [declaration](../site/assets/tripod_retimed_20260922_001/declaration.json)
+and [ideal-speed calculation](../site/assets/tripod_retimed_20260922_001/error_bound.json).
+
+You retain the [interrupted first attempt](../site/assets/tripod_retimed_20260922_001/interrupted.json).
+The launcher detected unrelated CUDA compute after preflight and removed
+its owned container. The closed native chunk contains 800 substeps over
+controls 0–99; no final motion score exists. A follow-up cleanup check
+verified container absence and the retained reservation. You must resolve
+allocation contention before a fresh attempt. The 33 completed motion
+trials remain failed; this partial attempt supplies no acceptance result.
+
 ## Foundation commands
 
 ```sh

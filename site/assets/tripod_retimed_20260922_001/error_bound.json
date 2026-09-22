@@ -1,0 +1,24 @@
+{
+  "schema": "tripod_uniform_phase_error_analysis_v1",
+  "scope": "Ideal rigid stance and exact joint tracking, with linear geometry mapping. This is an analytical model, not native acceptance or a proof about all compliant dynamics.",
+  "uniform_model": "Normalized stance speed a*sin(pi*s), s in [0,1].",
+  "normalized_error_formula": "For a>=1: (4*asin(1/a)+4*a*sqrt(1-1/a^2)-2*a-pi)/pi. For 0<=a<=1: 1-2*a/pi.",
+  "minimum_error_amplitude": 1.1547005383792517,
+  "minimum_normalized_error": 0.33333333333333354,
+  "numeric_error_at_minimum": 0.3333333333329303,
+  "mean_matched_amplitude": 1.5707963267948966,
+  "mean_matched_normalized_error": 0.4210273247060374,
+  "yaw_command_rad_s": 0.2,
+  "ideal_minimum_yaw_error_rad_s": 0.06666666666666671,
+  "existing_yaw_gate_rad_s": 0.06,
+  "proposal": {
+    "phase_ramp_fraction": 0.1,
+    "speed_profile": "Half-cosine acceleration over each endpoint ramp, constant speed between the ramps. Normalize to unit mean.",
+    "normalized_peak_speed": 1.1111111111111112,
+    "mean_normalized_speed": 0.9999999999999999,
+    "normalized_l1_error": 0.18380438221147063,
+    "ideal_yaw_error_rad_s": 0.03676087644229413,
+    "ideal_forward_error_mps": 0.009190219110573532
+  },
+  "method_change": "Retain the joint path but use a nonuniform phase clock. This changes the time law of paper Eqs. (1)-(3) and must be declared before dispatch."
+}

@@ -731,6 +731,22 @@
         "result": "inconclusive",
         "text": "One candidate adds nominal joint-velocity feedforward through the existing motor-target input. Motor gains and limits remain unchanged. CPU replay adds at most 0.0332 rad and preserves the action envelope and 0.040 rad slew bound. Native qualification remains pending.",
         "source": "site/assets/tripod_damping_20260922_001/cpu_replay.json"
+      },
+      {
+        "id": "zhang-tripod-damping-native-20260922-005",
+        "title": "We complete the damping screen without a tracking pass",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "failed",
+        "text": "Native motor and contact checks pass. Mean forward speed reaches 0.04979 m/s, but tracking error remains 0.04852 m/s against 0.025. Left and right yaw errors remain 0.15315 and 0.15304 rad/s against 0.06. We retain 33 failed completed motion trials.",
+        "source": "site/assets/tripod_damping_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-retimed-20260922-006",
+        "title": "We declare a phase clock and retain an interrupted native attempt",
+        "backend": "CPU path and target checks; partial Isaac Sim capture; native motion unqualified",
+        "result": "interrupted",
+        "text": "The declared clock retains the joint path and changes its timing, with unchanged motor limits and gates. CPU checks cover contact transitions, stops and both clearance modes. The launcher detected unrelated CUDA compute and removed its owned container. We retain 800 substeps from controls 0\u201399 with no final motion score; native launches await allocation coordination.",
+        "source": "site/assets/tripod_retimed_20260922_001/interrupted.json"
       }
     ]
   },

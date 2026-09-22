@@ -45,6 +45,18 @@ def damping_target(reference, previous_reference):
     return reference+np.asarray(KD)*(reference-previous_reference)/(12.*DT)
 
 
+def displacement_clock(progress, ramp):
+    """Integrate cosine endpoint ramps and a constant-speed middle interval."""
+    if not 0 < ramp <= .20 or not 0 <= progress <= 1.:
+        raise ValueError('Phase clock requires bounded progress and endpoint ramps')
+    v = 1./(1.-ramp)
+    if progress < ramp:
+        return .5*v*(progress-ramp/math.pi*math.sin(math.pi*progress/ramp))
+    if progress > 1.-ramp:
+        return 1.-displacement_clock(1.-progress, ramp)
+    return v*(progress-ramp/2.)
+
+
 class TripodController:
     def __init__(self, neutral, lower, upper, config=None, *, model=None, toe_local_points=None):
         self.cfg = config or TripodConfig()
@@ -224,14 +236,19 @@ class TripodController:
         self.pitch_hold[touchdown] = (self.target-base)[touchdown, 1:]
         self.landed |= touchdown
         self.progress = min(1., self.progress+2.*DT/self.cfg.period_s)
-        phase = -math.pi/2+self.half*math.pi+self.progress*math.pi+PHASE
+        phase_advance = self.progress*math.pi
+        stance_return = .5*(1.+math.cos(math.pi*self.progress))
+        if self.cfg.phase_ramp_fraction:
+            displacement = displacement_clock(self.progress, self.cfg.phase_ramp_fraction)
+            phase_advance = math.acos(np.clip(1.-2.*displacement, -1., 1.))
+            stance_return = 1.-displacement
+        phase = -math.pi/2+self.half*math.pi+phase_advance+PHASE
         hip, lift = wave(phase)
         coefficients = self._sweep()
         baseline = base+coefficients*hip[:, None]
         desired = baseline.copy()
         desired[self.landed, 1:] = base[self.landed, 1:]+self.pitch_hold[self.landed]
         # Return a landed leg to the paper's zero-lift stance over its support half-cycle.
-        stance_return = .5*(1.+math.cos(math.pi*self.progress))
         support = ~swing & self.support_from_touchdown
         start_sine = np.sin(-math.pi/2+self.half*math.pi+PHASE)
         residual = self.pitch_hold-coefficients[:, 1:]*start_sine[:, None]
