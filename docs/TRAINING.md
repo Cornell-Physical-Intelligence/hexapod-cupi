@@ -510,6 +510,44 @@ motor, contact and tracking gates before qualification or terrain work.
 You can inspect the [lift declaration](../site/assets/tripod_liftoff_20260922_001/declaration.json)
 and [recorded-input replay](../site/assets/tripod_liftoff_20260922_001/cpu_replay.json).
 
+### Velocity feedback declared on 22 September 2026
+
+You retain [three failed lift screens](../site/assets/tripod_liftoff_native_20260922_001/result.json).
+Forward error is 0.02979 m/s; left
+and right yaw errors are 0.08488 rad/s. Native motor and contact checks
+pass. You retain 42 failed completed trials and one interrupted attempt.
+
+You compare 12 complete forward cycles through measured joint positions,
+root poses and toe positions in the [velocity decomposition](../site/assets/tripod_liftoff_native_20260922_001/velocity_decomposition.json).
+Joint-tracking differences contribute
+0.0318–0.0334 m/s RMS to body speed; planted toe-marker motion contributes
+0.0006–0.0020 m/s. Toe-marker motion includes rotation at the contact.
+These finite-difference RMS values differ from the acceptance scorer's
+mean absolute error and endpoint COM velocity.
+
+You test one velocity-feedback candidate from `retimed`, with position
+feedback off and the original squared-cosine lift. A fixed-height stance
+linearization gives forward damping ratio 0.204 and natural period 0.342 s.
+This approximation omits body rotation, changing support and leg inertia;
+it supports a damping test without proving native behavior.
+
+You add `clip(blend * 2 * KD * (reference_velocity - measured_velocity) / 12,
+-0.070, 0.070)` to the damping-compensated motor target. You compute reference
+velocity from successive nominal targets at 20 ms and read measured velocity
+from the prior native control endpoint. You use the existing startup/settling
+blend and zero correction during idle and clearance changes. You clip targets
+to the existing joint/action envelope and retain the 0.040 rad slew limit.
+You record the correction and target clipping in each controller row.
+
+This feedback changes closed-loop damping through controller inputs. You
+preserve the actuator gains, torque-speed limits, physics and acceptance gates.
+The paper prescribes joint motion; this controller adds velocity feedback to
+track that reference under load. You test CPU motor-law and transition checks,
+then one native forward/left/right screen before qualification.
+You can inspect the [velocity-feedback declaration](../site/assets/tripod_velocity_20260922_001/declaration.json),
+[CPU replay](../site/assets/tripod_velocity_20260922_001/cpu_replay.json) and
+[stance approximation](../site/assets/tripod_velocity_20260922_001/stance_linearization.json).
+
 ## Foundation commands
 
 ```sh

@@ -779,6 +779,22 @@
         "result": "inconclusive",
         "text": "One revised candidate uses positive cos(phase)^1.5 swing lift with the same peak, period and hip sweep. Joint feedback stays off. We rejected cos(phase) before dispatch because it exceeded the target envelope at 0.10 m/s. The revised profile passes target checks through both clearance modes and stops; it supplies no native acceptance.",
         "source": "site/assets/tripod_liftoff_20260922_001/cpu_replay.json"
+      },
+      {
+        "id": "zhang-tripod-liftoff-native-20260922-009",
+        "title": "We isolate joint motion in the failed lift screen",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "failed",
+        "text": "Forward error is 0.02979 m/s and left/right yaw errors are 0.08488/0.08488 rad/s. All three exceed tracking gates; native motor and contact checks pass. Across 12 forward cycles, joint tracking contributes 0.0318\u20130.0334 m/s RMS to body speed and toe-marker motion contributes 0.0006\u20130.0020 m/s. We retain 42 failed completed trials and one interrupted attempt.",
+        "source": "site/assets/tripod_liftoff_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-velocity-cpu-20260922-010",
+        "title": "We declare bounded velocity-error damping",
+        "backend": "CPU motor-law checks, recorded-input replay and stance approximation; native motion unqualified",
+        "result": "inconclusive",
+        "text": "One candidate adds velocity-error feedback through motor targets with position feedback off. Each correction stays within 0.070 rad; joint/action bounds and the 0.040 rad slew limit remain active. A scalar stance approximation predicts weak body damping. Native screening must establish whether the added feedback reduces oscillation.",
+        "source": "site/assets/tripod_velocity_20260922_001/declaration.json"
       }
     ]
   },

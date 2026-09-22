@@ -9,7 +9,8 @@ import traceback
 import numpy as np
 
 from .env_config import EnvConfig, JOINT_NAMES, MODEL_SHA256, USD_SHA256, sha, verify_assets
-from .tripod import TripodController, damping_target, feedback_blend, feedback_target, supported
+from .tripod import (TripodController, damping_target, feedback_blend, feedback_target,
+                     supported, velocity_feedback_target)
 from .tripod_config import SWEEPS
 
 
@@ -83,6 +84,18 @@ class NativeController:
                         c.cfg.joint_feedback_gain, blend)
                     state.update(joint_feedback_blend=blend, joint_feedback_offset_rad=offset.tolist(),
                                  joint_feedback_target_clipped=clipped)
+                if self.controller.cfg.joint_velocity_feedback_gain:
+                    c = self.controller
+                    blend = feedback_blend(c.state, c.elapsed, c.cfg.transition_s)
+                    velocity = (target-self.previous_reference)/.02
+                    measured = samples[-1]['joint_velocity_rad_s'][0] if samples else np.zeros(18)
+                    desired, offset, clipped = velocity_feedback_target(desired, velocity, measured,
+                        c.neutral.reshape(18), c.lower.reshape(18), c.upper.reshape(18),
+                        c.cfg.joint_velocity_feedback_gain, blend)
+                    state.update(joint_velocity_feedback_blend=blend,
+                                 joint_velocity_feedback_offset_rad=offset.tolist(),
+                                 joint_velocity_feedback_target_clipped=clipped,
+                                 nominal_velocity_rad_s=velocity.tolist())
                 try:
                     self.controller._validate_target(desired.reshape(6, 3))
                 except ValueError:

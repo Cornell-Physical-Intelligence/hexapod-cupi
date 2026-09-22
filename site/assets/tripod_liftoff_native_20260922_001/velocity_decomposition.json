@@ -1,0 +1,811 @@
+{
+  "schema": "tripod_liftoff_velocity_decomposition_v2",
+  "scope": "Finite-difference decomposition at 20 ms, using captured root orientation and support legs with contact at both endpoints. These RMS values differ from the acceptance scorer, which uses mean absolute error and endpoint COM velocity.",
+  "selection": "All complete A+B cycles starting at or after control 175; retain detailed rows for the first cycle.",
+  "limits": "Toe markers rotate with the distal link. Their world motion is not material-point slip. Kinematic error decomposition does not prove which controller change will pass.",
+  "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+  "script_sha256": "58a7143efc3bc3d393f67cddaf7bfd5252609e2780e7eaf538325e7d6ee05547",
+  "fk_source_sha256": "7e77b6c74b674cd1d03129eb3542d6b8bb89cad46e326579df1398d6fd8adf01",
+  "input_hashes": {
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/liftoff0_screen_009/run/standing/trial_000/control_trace.npz": "411c57b7ddcff9a665dc217aceb061894f88884d6ca16ff6c17cdfa1993317d9",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/liftoff0_screen_009/run/standing/trial_000/controller.jsonl": "3f726029cadb302c97524cd262bded4feaff6f41f1bb8ebb3ac6e3a085c7d733",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/liftoff_009/forward_progress.json": "e7124c9b11bf8fa595335e647ed82624a06f464ae899e5a2ad5496c0fccbf1ae"
+  },
+  "fk_vs_native_max_position_error_m": 3.5553282629052774e-07,
+  "cycles": [
+    {
+      "controls": [
+        233,
+        292
+      ],
+      "rms_joint_tracking_contribution_mps": 0.03254006731177939,
+      "rms_toe_marker_motion_contribution_mps": 0.0011959872786530081,
+      "rms_nominal_prediction_error_mps": 0.013901460755759976,
+      "rms_measured_error_mps": 0.03652658186799607,
+      "max_closure_error_mps": 2.9823814678990503e-06,
+      "rows": [
+        {
+          "control": 233,
+          "time_in_cycle_s": 0.0,
+          "phase": 0.0,
+          "root_displacement_speed": -0.010905621896422907,
+          "nominal_support_prediction": 0.0006859602780765829,
+          "actual_support_prediction": -0.010419714174804562,
+          "joint_tracking_contribution": -0.011105674452881145,
+          "toe_marker_motion_contribution": -0.0004864446214937266,
+          "closure_error": 5.368998753809535e-07
+        },
+        {
+          "control": 234,
+          "time_in_cycle_s": 0.02,
+          "phase": 0.03333333333333333,
+          "root_displacement_speed": -0.02323542042717385,
+          "nominal_support_prediction": 0.026373790693415652,
+          "actual_support_prediction": -0.02286972332075414,
+          "joint_tracking_contribution": -0.04924351401416979,
+          "toe_marker_motion_contribution": -0.00036580011225962814,
+          "closure_error": 1.0300583991665335e-07
+        },
+        {
+          "control": 235,
+          "time_in_cycle_s": 0.04,
+          "phase": 0.06666666666666667,
+          "root_displacement_speed": -0.026100333806946055,
+          "nominal_support_prediction": 0.051346700442029415,
+          "actual_support_prediction": -0.025731596247977946,
+          "joint_tracking_contribution": -0.07707829669000736,
+          "toe_marker_motion_contribution": -0.000369581718985626,
+          "closure_error": 8.441600175171479e-07
+        },
+        {
+          "control": 236,
+          "time_in_cycle_s": 0.06,
+          "phase": 0.1,
+          "root_displacement_speed": -0.019358886845053967,
+          "nominal_support_prediction": 0.05697523590638868,
+          "actual_support_prediction": -0.01913092132064886,
+          "joint_tracking_contribution": -0.07610615722703754,
+          "toe_marker_motion_contribution": -0.00022952436918112045,
+          "closure_error": 1.558844776014198e-06
+        },
+        {
+          "control": 237,
+          "time_in_cycle_s": 0.08,
+          "phase": 0.13333333333333333,
+          "root_displacement_speed": -0.0020526451672232614,
+          "nominal_support_prediction": 0.05813270738247576,
+          "actual_support_prediction": -0.0022687280623846355,
+          "joint_tracking_contribution": -0.060401435444860395,
+          "toe_marker_motion_contribution": 0.0002182984652168143,
+          "closure_error": -2.215570055440208e-06
+        },
+        {
+          "control": 238,
+          "time_in_cycle_s": 0.1,
+          "phase": 0.16666666666666666,
+          "root_displacement_speed": 0.020467954389767933,
+          "nominal_support_prediction": 0.06069386517046165,
+          "actual_support_prediction": 0.019866534695777052,
+          "joint_tracking_contribution": -0.0408273304746846,
+          "toe_marker_motion_contribution": 0.0006009471334229148,
+          "closure_error": 4.725605679662369e-07
+        },
+        {
+          "control": 239,
+          "time_in_cycle_s": 0.12,
+          "phase": 0.19999999999999998,
+          "root_displacement_speed": 0.043489621692083966,
+          "nominal_support_prediction": 0.058511181243892325,
+          "actual_support_prediction": 0.04252618534561797,
+          "joint_tracking_contribution": -0.015984995898274353,
+          "toe_marker_motion_contribution": 0.0009655698676851854,
+          "closure_error": -2.1335212191925636e-06
+        },
+        {
+          "control": 240,
+          "time_in_cycle_s": 0.14,
+          "phase": 0.2333333333333333,
+          "root_displacement_speed": 0.06418287273117874,
+          "nominal_support_prediction": 0.05495425731799876,
+          "actual_support_prediction": 0.06303497276024418,
+          "joint_tracking_contribution": 0.008080715442245423,
+          "toe_marker_motion_contribution": 0.001145489124782846,
+          "closure_error": 2.4108461517168348e-06
+        },
+        {
+          "control": 241,
+          "time_in_cycle_s": 0.16,
+          "phase": 0.26666666666666666,
+          "root_displacement_speed": 0.08097191434546475,
+          "nominal_support_prediction": 0.052187921355883626,
+          "actual_support_prediction": 0.07978356641775529,
+          "joint_tracking_contribution": 0.027595645061871663,
+          "toe_marker_motion_contribution": 0.0011885390152216759,
+          "closure_error": -1.9108751221868885e-07
+        },
+        {
+          "control": 242,
+          "time_in_cycle_s": 0.18,
+          "phase": 0.3,
+          "root_displacement_speed": 0.0922371728314162,
+          "nominal_support_prediction": 0.051219761652072066,
+          "actual_support_prediction": 0.09100598170241497,
+          "joint_tracking_contribution": 0.03978622005034291,
+          "toe_marker_motion_contribution": 0.0012313968374949025,
+          "closure_error": -2.0570849366963184e-07
+        },
+        {
+          "control": 243,
+          "time_in_cycle_s": 0.2,
+          "phase": 0.3333333333333333,
+          "root_displacement_speed": 0.09829803471784054,
+          "nominal_support_prediction": 0.051543325190870376,
+          "actual_support_prediction": 0.09643212907246462,
+          "joint_tracking_contribution": 0.04488880388159425,
+          "toe_marker_motion_contribution": 0.001867559109608569,
+          "closure_error": -1.653464232648531e-06
+        },
+        {
+          "control": 244,
+          "time_in_cycle_s": 0.22,
+          "phase": 0.36666666666666664,
+          "root_displacement_speed": 0.09988269593252264,
+          "nominal_support_prediction": 0.052277032308069606,
+          "actual_support_prediction": 0.09755721063648494,
+          "joint_tracking_contribution": 0.045280178328415334,
+          "toe_marker_motion_contribution": 0.002324613787541011,
+          "closure_error": 8.715084966856752e-07
+        },
+        {
+          "control": 245,
+          "time_in_cycle_s": 0.24,
+          "phase": 0.39999999999999997,
+          "root_displacement_speed": 0.09783719171920771,
+          "nominal_support_prediction": 0.05279694121029096,
+          "actual_support_prediction": 0.09482771426863748,
+          "joint_tracking_contribution": 0.04203077305834652,
+          "toe_marker_motion_contribution": 0.00301068805113176,
+          "closure_error": -1.210600561529513e-06
+        },
+        {
+          "control": 246,
+          "time_in_cycle_s": 0.26,
+          "phase": 0.4333333333333333,
+          "root_displacement_speed": 0.09285536231279108,
+          "nominal_support_prediction": 0.05303477204263203,
+          "actual_support_prediction": 0.08993784346480149,
+          "joint_tracking_contribution": 0.03690307142216946,
+          "toe_marker_motion_contribution": 0.0029179011520884335,
+          "closure_error": -3.823040988443563e-07
+        },
+        {
+          "control": 247,
+          "time_in_cycle_s": 0.28,
+          "phase": 0.4666666666666666,
+          "root_displacement_speed": 0.08616647482781187,
+          "nominal_support_prediction": 0.05288143762728495,
+          "actual_support_prediction": 0.08343175292061826,
+          "joint_tracking_contribution": 0.03055031529333331,
+          "toe_marker_motion_contribution": 0.002732922063413801,
+          "closure_error": 1.7998437798062532e-06
+        },
+        {
+          "control": 248,
+          "time_in_cycle_s": 0.3,
+          "phase": 0.49999999999999994,
+          "root_displacement_speed": 0.07821223403430545,
+          "nominal_support_prediction": 0.05279164335872155,
+          "actual_support_prediction": 0.07561694506109927,
+          "joint_tracking_contribution": 0.022825301702377718,
+          "toe_marker_motion_contribution": 0.002597176949979785,
+          "closure_error": -1.8879767736015678e-06
+        },
+        {
+          "control": 249,
+          "time_in_cycle_s": 0.32,
+          "phase": 0.5333333333333333,
+          "root_displacement_speed": 0.06987901021111056,
+          "nominal_support_prediction": 0.05278527422823725,
+          "actual_support_prediction": 0.06763099987641757,
+          "joint_tracking_contribution": 0.014845725648180326,
+          "toe_marker_motion_contribution": 0.0022481035814375955,
+          "closure_error": -9.324674460527149e-08
+        },
+        {
+          "control": 250,
+          "time_in_cycle_s": 0.34,
+          "phase": 0.5666666666666667,
+          "root_displacement_speed": 0.06214693570300402,
+          "nominal_support_prediction": 0.05300390442895663,
+          "actual_support_prediction": 0.06026734650825945,
+          "joint_tracking_contribution": 0.007263442079302816,
+          "toe_marker_motion_contribution": 0.0018815201122080237,
+          "closure_error": -1.930917463448126e-06
+        },
+        {
+          "control": 251,
+          "time_in_cycle_s": 0.36,
+          "phase": 0.6,
+          "root_displacement_speed": 0.05569165331919569,
+          "nominal_support_prediction": 0.05346591894186209,
+          "actual_support_prediction": 0.053968803976851214,
+          "joint_tracking_contribution": 0.0005028850349891242,
+          "toe_marker_motion_contribution": 0.0017214008214675078,
+          "closure_error": 1.4485208769698422e-06
+        },
+        {
+          "control": 252,
+          "time_in_cycle_s": 0.38,
+          "phase": 0.6333333333333333,
+          "root_displacement_speed": 0.05100284481851829,
+          "nominal_support_prediction": 0.05399633190847968,
+          "actual_support_prediction": 0.0494435732036536,
+          "joint_tracking_contribution": -0.004552758704826083,
+          "toe_marker_motion_contribution": 0.0015583602426612368,
+          "closure_error": 9.113722034580825e-07
+        },
+        {
+          "control": 253,
+          "time_in_cycle_s": 0.4,
+          "phase": 0.6666666666666666,
+          "root_displacement_speed": 0.04821858689518824,
+          "nominal_support_prediction": 0.054029679627893956,
+          "actual_support_prediction": 0.04673948571281101,
+          "joint_tracking_contribution": -0.007290193915082947,
+          "toe_marker_motion_contribution": 0.0014811100611325737,
+          "closure_error": -2.0088787553457915e-06
+        },
+        {
+          "control": 254,
+          "time_in_cycle_s": 0.42,
+          "phase": 0.7,
+          "root_displacement_speed": 0.04712510356920378,
+          "nominal_support_prediction": 0.053982133619604265,
+          "actual_support_prediction": 0.045722048251473246,
+          "joint_tracking_contribution": -0.008260085368131019,
+          "toe_marker_motion_contribution": 0.001401506959344054,
+          "closure_error": 1.5483583864826875e-06
+        },
+        {
+          "control": 255,
+          "time_in_cycle_s": 0.44,
+          "phase": 0.7333333333333333,
+          "root_displacement_speed": 0.04758001715744741,
+          "nominal_support_prediction": 0.05399959950139906,
+          "actual_support_prediction": 0.046237352144328135,
+          "joint_tracking_contribution": -0.007762247357070928,
+          "toe_marker_motion_contribution": 0.0013421233041197233,
+          "closure_error": 5.417089995530307e-07
+        },
+        {
+          "control": 256,
+          "time_in_cycle_s": 0.46,
+          "phase": 0.7666666666666666,
+          "root_displacement_speed": 0.048887103131984244,
+          "nominal_support_prediction": 0.05405463529517856,
+          "actual_support_prediction": 0.04731822312587104,
+          "joint_tracking_contribution": -0.006736412169307517,
+          "toe_marker_motion_contribution": 0.0015696152583807663,
+          "closure_error": -7.352522675644485e-07
+        },
+        {
+          "control": 257,
+          "time_in_cycle_s": 0.48,
+          "phase": 0.7999999999999999,
+          "root_displacement_speed": 0.05131671479364732,
+          "nominal_support_prediction": 0.05386382065069228,
+          "actual_support_prediction": 0.04970366317538637,
+          "joint_tracking_contribution": -0.00416015747530591,
+          "toe_marker_motion_contribution": 0.0016138195870224624,
+          "closure_error": -7.679687615087718e-07
+        },
+        {
+          "control": 258,
+          "time_in_cycle_s": 0.5,
+          "phase": 0.8333333333333333,
+          "root_displacement_speed": 0.0546018793873487,
+          "nominal_support_prediction": 0.053583261709356775,
+          "actual_support_prediction": 0.053445266032700674,
+          "joint_tracking_contribution": -0.00013799567665610107,
+          "toe_marker_motion_contribution": 0.00115473261583211,
+          "closure_error": 1.8807388159169762e-06
+        },
+        {
+          "control": 259,
+          "time_in_cycle_s": 0.52,
+          "phase": 0.8666666666666666,
+          "root_displacement_speed": 0.05315405676557044,
+          "nominal_support_prediction": 0.0417525303393702,
+          "actual_support_prediction": 0.05291260375553957,
+          "joint_tracking_contribution": 0.01116007341616937,
+          "toe_marker_motion_contribution": 0.0002425300422280987,
+          "closure_error": -1.0770321972310907e-06
+        },
+        {
+          "control": 260,
+          "time_in_cycle_s": 0.54,
+          "phase": 0.8999999999999999,
+          "root_displacement_speed": 0.04222966934406746,
+          "nominal_support_prediction": 0.05723448638480915,
+          "actual_support_prediction": 0.04107855277587574,
+          "joint_tracking_contribution": -0.016155933608933408,
+          "toe_marker_motion_contribution": 0.0011523675318612933,
+          "closure_error": -1.2509636695768114e-06
+        },
+        {
+          "control": 261,
+          "time_in_cycle_s": 0.56,
+          "phase": 0.9333333333333332,
+          "root_displacement_speed": 0.029523210824890792,
+          "nominal_support_prediction": 0.04331732972023801,
+          "actual_support_prediction": 0.027951474601512295,
+          "joint_tracking_contribution": -0.015365855118725714,
+          "toe_marker_motion_contribution": 0.0015687538419105979,
+          "closure_error": 2.9823814678990503e-06
+        },
+        {
+          "control": 262,
+          "time_in_cycle_s": 0.58,
+          "phase": 0.9666666666666666,
+          "root_displacement_speed": 0.007015478411120884,
+          "nominal_support_prediction": 0.0012401733211777465,
+          "actual_support_prediction": 0.007566407075069955,
+          "joint_tracking_contribution": 0.006326233753892209,
+          "toe_marker_motion_contribution": -0.0005508185876121831,
+          "closure_error": -1.1007633688797994e-07
+        },
+        {
+          "control": 263,
+          "time_in_cycle_s": 0.6,
+          "phase": 0.0,
+          "root_displacement_speed": -0.016133788218711344,
+          "nominal_support_prediction": 0.0001440421734499754,
+          "actual_support_prediction": -0.015571794728058596,
+          "joint_tracking_contribution": -0.015715836901508573,
+          "toe_marker_motion_contribution": -0.0005617465376460446,
+          "closure_error": -2.469530067032537e-07
+        },
+        {
+          "control": 264,
+          "time_in_cycle_s": 0.62,
+          "phase": 0.03333333333333333,
+          "root_displacement_speed": -0.026094989240496275,
+          "nominal_support_prediction": 0.028472414378745512,
+          "actual_support_prediction": -0.025654729422888704,
+          "joint_tracking_contribution": -0.05412714380163422,
+          "toe_marker_motion_contribution": -0.0004427366505172673,
+          "closure_error": 2.47683290969695e-06
+        },
+        {
+          "control": 265,
+          "time_in_cycle_s": 0.64,
+          "phase": 0.06666666666666667,
+          "root_displacement_speed": -0.024012535004959177,
+          "nominal_support_prediction": 0.05419488285373945,
+          "actual_support_prediction": -0.023898062059835204,
+          "joint_tracking_contribution": -0.07809294491357466,
+          "toe_marker_motion_contribution": -0.00011189088324111965,
+          "closure_error": -2.582061882853371e-06
+        },
+        {
+          "control": 266,
+          "time_in_cycle_s": 0.66,
+          "phase": 0.1,
+          "root_displacement_speed": -0.014085320283949656,
+          "nominal_support_prediction": 0.060096235219729295,
+          "actual_support_prediction": -0.014202647736341799,
+          "joint_tracking_contribution": -0.0742988829560711,
+          "toe_marker_motion_contribution": 0.00011724444746491812,
+          "closure_error": 8.300492722512407e-08
+        },
+        {
+          "control": 267,
+          "time_in_cycle_s": 0.68,
+          "phase": 0.13333333333333333,
+          "root_displacement_speed": 0.004798409617121346,
+          "nominal_support_prediction": 0.060778409036711646,
+          "actual_support_prediction": 0.004391051338319869,
+          "joint_tracking_contribution": -0.056387357698391774,
+          "toe_marker_motion_contribution": 0.00040713188653762904,
+          "closure_error": 2.2639226384855386e-07
+        },
+        {
+          "control": 268,
+          "time_in_cycle_s": 0.7000000000000001,
+          "phase": 0.16666666666666666,
+          "root_displacement_speed": 0.027483630691987393,
+          "nominal_support_prediction": 0.05832211883979154,
+          "actual_support_prediction": 0.02681930075416341,
+          "joint_tracking_contribution": -0.03150281808562813,
+          "toe_marker_motion_contribution": 0.000663038472023149,
+          "closure_error": 1.2914658008343714e-06
+        },
+        {
+          "control": 269,
+          "time_in_cycle_s": 0.72,
+          "phase": 0.19999999999999998,
+          "root_displacement_speed": 0.05003652386794525,
+          "nominal_support_prediction": 0.05507059535910376,
+          "actual_support_prediction": 0.04973552979664194,
+          "joint_tracking_contribution": -0.00533506556246182,
+          "toe_marker_motion_contribution": 0.00030219985203287813,
+          "closure_error": -1.205780729568776e-06
+        },
+        {
+          "control": 270,
+          "time_in_cycle_s": 0.74,
+          "phase": 0.2333333333333333,
+          "root_displacement_speed": 0.06921876257059568,
+          "nominal_support_prediction": 0.0530139052099508,
+          "actual_support_prediction": 0.07004565468145671,
+          "joint_tracking_contribution": 0.01703174947150591,
+          "toe_marker_motion_contribution": -0.0008274537570707018,
+          "closure_error": 5.616462096773994e-07
+        },
+        {
+          "control": 271,
+          "time_in_cycle_s": 0.76,
+          "phase": 0.26666666666666666,
+          "root_displacement_speed": 0.08377455319586993,
+          "nominal_support_prediction": 0.05157635766450738,
+          "actual_support_prediction": 0.08434013119438104,
+          "joint_tracking_contribution": 0.032763773529873655,
+          "toe_marker_motion_contribution": -0.000564558610244164,
+          "closure_error": -1.0193882669408405e-06
+        },
+        {
+          "control": 272,
+          "time_in_cycle_s": 0.78,
+          "phase": 0.3,
+          "root_displacement_speed": 0.09177057855799202,
+          "nominal_support_prediction": 0.05106760842720335,
+          "actual_support_prediction": 0.09239768501349511,
+          "joint_tracking_contribution": 0.041330076586291765,
+          "toe_marker_motion_contribution": -0.0006276004572836666,
+          "closure_error": 4.940017805707799e-07
+        },
+        {
+          "control": 273,
+          "time_in_cycle_s": 0.8,
+          "phase": 0.3333333333333333,
+          "root_displacement_speed": 0.09536694952474872,
+          "nominal_support_prediction": 0.05129050603843709,
+          "actual_support_prediction": 0.095763621308381,
+          "joint_tracking_contribution": 0.0444731152699439,
+          "toe_marker_motion_contribution": -0.0003967949444673131,
+          "closure_error": 1.2316083504172173e-07
+        },
+        {
+          "control": 274,
+          "time_in_cycle_s": 0.8200000000000001,
+          "phase": 0.36666666666666664,
+          "root_displacement_speed": 0.09529593357085216,
+          "nominal_support_prediction": 0.05201209032159905,
+          "actual_support_prediction": 0.09521768059500074,
+          "joint_tracking_contribution": 0.04320559027340169,
+          "toe_marker_motion_contribution": 7.851976105704853e-05,
+          "closure_error": -2.6678520563408817e-07
+        },
+        {
+          "control": 275,
+          "time_in_cycle_s": 0.84,
+          "phase": 0.39999999999999997,
+          "root_displacement_speed": 0.09125028998650965,
+          "nominal_support_prediction": 0.05233323094436775,
+          "actual_support_prediction": 0.09058517210192683,
+          "joint_tracking_contribution": 0.03825194115755908,
+          "toe_marker_motion_contribution": 0.0006647619613154342,
+          "closure_error": 3.559232673823118e-07
+        },
+        {
+          "control": 276,
+          "time_in_cycle_s": 0.86,
+          "phase": 0.4333333333333333,
+          "root_displacement_speed": 0.0869043999491221,
+          "nominal_support_prediction": 0.052048698870232835,
+          "actual_support_prediction": 0.0861345607451533,
+          "joint_tracking_contribution": 0.034085861874920464,
+          "toe_marker_motion_contribution": 0.0007696560075517956,
+          "closure_error": 1.831964169989389e-07
+        },
+        {
+          "control": 277,
+          "time_in_cycle_s": 0.88,
+          "phase": 0.4666666666666666,
+          "root_displacement_speed": 0.08124194391157957,
+          "nominal_support_prediction": 0.05215750203057446,
+          "actual_support_prediction": 0.08065305913129492,
+          "joint_tracking_contribution": 0.028495557100720457,
+          "toe_marker_motion_contribution": 0.0005918491099683042,
+          "closure_error": -2.964329683650003e-06
+        },
+        {
+          "control": 278,
+          "time_in_cycle_s": 0.9,
+          "phase": 0.49999999999999994,
+          "root_displacement_speed": 0.07460300080421435,
+          "nominal_support_prediction": 0.05244494953824968,
+          "actual_support_prediction": 0.07389760603171572,
+          "joint_tracking_contribution": 0.02145265649346604,
+          "toe_marker_motion_contribution": 0.0007036265520873376,
+          "closure_error": 1.7682204112949833e-06
+        },
+        {
+          "control": 279,
+          "time_in_cycle_s": 0.92,
+          "phase": 0.5333333333333333,
+          "root_displacement_speed": 0.06759224373614167,
+          "nominal_support_prediction": 0.05277310385023048,
+          "actual_support_prediction": 0.0666949223734565,
+          "joint_tracking_contribution": 0.013921818523226027,
+          "toe_marker_motion_contribution": 0.0008972200520430474,
+          "closure_error": 1.0131064211876296e-07
+        },
+        {
+          "control": 280,
+          "time_in_cycle_s": 0.9400000000000001,
+          "phase": 0.5666666666666667,
+          "root_displacement_speed": 0.06127103176135978,
+          "nominal_support_prediction": 0.05317571799664883,
+          "actual_support_prediction": 0.060598273099179326,
+          "joint_tracking_contribution": 0.007422555102530495,
+          "toe_marker_motion_contribution": 0.0006752861549983327,
+          "closure_error": -2.527492817880903e-06
+        },
+        {
+          "control": 281,
+          "time_in_cycle_s": 0.96,
+          "phase": 0.6,
+          "root_displacement_speed": 0.05588452240693036,
+          "nominal_support_prediction": 0.05340127603495685,
+          "actual_support_prediction": 0.05521772798165819,
+          "joint_tracking_contribution": 0.001816451946701346,
+          "toe_marker_motion_contribution": 0.0006659248273502364,
+          "closure_error": 8.695979219335579e-07
+        },
+        {
+          "control": 282,
+          "time_in_cycle_s": 0.98,
+          "phase": 0.6333333333333333,
+          "root_displacement_speed": 0.05179304535044793,
+          "nominal_support_prediction": 0.053644016992388965,
+          "actual_support_prediction": 0.05126394432505751,
+          "joint_tracking_contribution": -0.002380072667331458,
+          "toe_marker_motion_contribution": 0.0005281862774519712,
+          "closure_error": 9.147479384518124e-07
+        },
+        {
+          "control": 283,
+          "time_in_cycle_s": 1.0,
+          "phase": 0.6666666666666666,
+          "root_displacement_speed": 0.049242580437796245,
+          "nominal_support_prediction": 0.05370614608410466,
+          "actual_support_prediction": 0.04880727589292275,
+          "joint_tracking_contribution": -0.00489887019118191,
+          "toe_marker_motion_contribution": 0.00043651612647323035,
+          "closure_error": -1.2115815997323898e-06
+        },
+        {
+          "control": 284,
+          "time_in_cycle_s": 1.02,
+          "phase": 0.7,
+          "root_displacement_speed": 0.048214876971474016,
+          "nominal_support_prediction": 0.05365230811572992,
+          "actual_support_prediction": 0.04795527432628157,
+          "joint_tracking_contribution": -0.005697033789448351,
+          "toe_marker_motion_contribution": 0.00026006161001854145,
+          "closure_error": -4.589648260957006e-07
+        },
+        {
+          "control": 285,
+          "time_in_cycle_s": 1.04,
+          "phase": 0.7333333333333333,
+          "root_displacement_speed": 0.04848912658843662,
+          "nominal_support_prediction": 0.05360083713060558,
+          "actual_support_prediction": 0.0481224442138296,
+          "joint_tracking_contribution": -0.00547839291677598,
+          "toe_marker_motion_contribution": 0.000367423592125813,
+          "closure_error": -7.412175187938418e-07
+        },
+        {
+          "control": 286,
+          "time_in_cycle_s": 1.06,
+          "phase": 0.7666666666666666,
+          "root_displacement_speed": 0.04967517996842751,
+          "nominal_support_prediction": 0.05376369913444833,
+          "actual_support_prediction": 0.04946217271961855,
+          "joint_tracking_contribution": -0.004301526414829782,
+          "toe_marker_motion_contribution": 0.00021051311947789444,
+          "closure_error": 2.4941293310662763e-06
+        },
+        {
+          "control": 287,
+          "time_in_cycle_s": 1.08,
+          "phase": 0.7999999999999999,
+          "root_displacement_speed": 0.05220717778287466,
+          "nominal_support_prediction": 0.053537583549389624,
+          "actual_support_prediction": 0.051700706112140005,
+          "joint_tracking_contribution": -0.001836877437249619,
+          "toe_marker_motion_contribution": 0.000506664551527499,
+          "closure_error": -1.9288079284229473e-07
+        },
+        {
+          "control": 288,
+          "time_in_cycle_s": 1.1,
+          "phase": 0.8333333333333333,
+          "root_displacement_speed": 0.0552981067071596,
+          "nominal_support_prediction": 0.05366639406071766,
+          "actual_support_prediction": 0.054810077149059507,
+          "joint_tracking_contribution": 0.0011436830883418472,
+          "toe_marker_motion_contribution": 0.00048675637211458353,
+          "closure_error": 1.2731859855113201e-06
+        },
+        {
+          "control": 289,
+          "time_in_cycle_s": 1.12,
+          "phase": 0.8666666666666666,
+          "root_displacement_speed": 0.05536357844130656,
+          "nominal_support_prediction": 0.045806849234088336,
+          "actual_support_prediction": 0.05541904503406592,
+          "joint_tracking_contribution": 0.009612195799977581,
+          "toe_marker_motion_contribution": -5.2755795849887415e-05,
+          "closure_error": -2.7107969094720863e-06
+        },
+        {
+          "control": 290,
+          "time_in_cycle_s": 1.1400000000000001,
+          "phase": 0.8999999999999999,
+          "root_displacement_speed": 0.036215928265612846,
+          "nominal_support_prediction": 0.04166903036716173,
+          "actual_support_prediction": 0.036244583974968485,
+          "joint_tracking_contribution": -0.005424446392193243,
+          "toe_marker_motion_contribution": -2.7578269801478152e-05,
+          "closure_error": -1.0774395541610067e-06
+        },
+        {
+          "control": 291,
+          "time_in_cycle_s": 1.16,
+          "phase": 0.9333333333333332,
+          "root_displacement_speed": 0.008738047112294159,
+          "nominal_support_prediction": 0.03920300356985639,
+          "actual_support_prediction": 0.007786286338845074,
+          "joint_tracking_contribution": -0.03141671723101132,
+          "toe_marker_motion_contribution": 0.0009512865556893128,
+          "closure_error": 4.742177597717853e-07
+        },
+        {
+          "control": 292,
+          "time_in_cycle_s": 1.18,
+          "phase": 0.9666666666666666,
+          "root_displacement_speed": -0.005317100296591271,
+          "nominal_support_prediction": 0.006346054918363145,
+          "actual_support_prediction": -0.005285106977733669,
+          "joint_tracking_contribution": -0.011631161896096814,
+          "toe_marker_motion_contribution": -3.4133470069806905e-05,
+          "closure_error": 2.140151212204999e-06
+        }
+      ]
+    },
+    {
+      "controls": [
+        293,
+        352
+      ],
+      "rms_joint_tracking_contribution_mps": 0.03177820098736842,
+      "rms_toe_marker_motion_contribution_mps": 0.0019527517254709361,
+      "rms_nominal_prediction_error_mps": 0.013595686656947836,
+      "rms_measured_error_mps": 0.03733207175863546,
+      "max_closure_error_mps": 4.525945897088102e-06
+    },
+    {
+      "controls": [
+        353,
+        412
+      ],
+      "rms_joint_tracking_contribution_mps": 0.032388099236527544,
+      "rms_toe_marker_motion_contribution_mps": 0.0016598152151571118,
+      "rms_nominal_prediction_error_mps": 0.013846495520579793,
+      "rms_measured_error_mps": 0.03900106550235699,
+      "max_closure_error_mps": 4.071499744538742e-06
+    },
+    {
+      "controls": [
+        413,
+        472
+      ],
+      "rms_joint_tracking_contribution_mps": 0.032665949724746714,
+      "rms_toe_marker_motion_contribution_mps": 0.0011987748597803896,
+      "rms_nominal_prediction_error_mps": 0.013908668224618108,
+      "rms_measured_error_mps": 0.03760871704956499,
+      "max_closure_error_mps": 4.691502798363755e-06
+    },
+    {
+      "controls": [
+        473,
+        532
+      ],
+      "rms_joint_tracking_contribution_mps": 0.03314869075718659,
+      "rms_toe_marker_motion_contribution_mps": 0.0012994221717156401,
+      "rms_nominal_prediction_error_mps": 0.013667392665536729,
+      "rms_measured_error_mps": 0.037640930430304906,
+      "max_closure_error_mps": 6.05757449952468e-06
+    },
+    {
+      "controls": [
+        533,
+        592
+      ],
+      "rms_joint_tracking_contribution_mps": 0.032559649429120256,
+      "rms_toe_marker_motion_contribution_mps": 0.0010884629934330677,
+      "rms_nominal_prediction_error_mps": 0.013564848255257961,
+      "rms_measured_error_mps": 0.037480730562887664,
+      "max_closure_error_mps": 6.577171198500053e-06
+    },
+    {
+      "controls": [
+        593,
+        652
+      ],
+      "rms_joint_tracking_contribution_mps": 0.03270878767922638,
+      "rms_toe_marker_motion_contribution_mps": 0.001331443539398554,
+      "rms_nominal_prediction_error_mps": 0.01346522876370486,
+      "rms_measured_error_mps": 0.03831382637041733,
+      "max_closure_error_mps": 5.85111967323082e-06
+    },
+    {
+      "controls": [
+        653,
+        712
+      ],
+      "rms_joint_tracking_contribution_mps": 0.03250201076921065,
+      "rms_toe_marker_motion_contribution_mps": 0.0012540687740540588,
+      "rms_nominal_prediction_error_mps": 0.013378338642113066,
+      "rms_measured_error_mps": 0.03726499996954864,
+      "max_closure_error_mps": 4.463625730524159e-06
+    },
+    {
+      "controls": [
+        713,
+        772
+      ],
+      "rms_joint_tracking_contribution_mps": 0.03208714066150838,
+      "rms_toe_marker_motion_contribution_mps": 0.0010455967178830375,
+      "rms_nominal_prediction_error_mps": 0.013604974895818252,
+      "rms_measured_error_mps": 0.03732292411979071,
+      "max_closure_error_mps": 5.697958606201128e-06
+    },
+    {
+      "controls": [
+        773,
+        832
+      ],
+      "rms_joint_tracking_contribution_mps": 0.033393822004862336,
+      "rms_toe_marker_motion_contribution_mps": 0.0008658933662744852,
+      "rms_nominal_prediction_error_mps": 0.01388406021756417,
+      "rms_measured_error_mps": 0.03746169614899628,
+      "max_closure_error_mps": 4.8022674859394166e-06
+    },
+    {
+      "controls": [
+        833,
+        892
+      ],
+      "rms_joint_tracking_contribution_mps": 0.032812963108611225,
+      "rms_toe_marker_motion_contribution_mps": 0.0006177518209595399,
+      "rms_nominal_prediction_error_mps": 0.01354351719593721,
+      "rms_measured_error_mps": 0.03783236842805421,
+      "max_closure_error_mps": 7.036620505214246e-06
+    },
+    {
+      "controls": [
+        893,
+        952
+      ],
+      "rms_joint_tracking_contribution_mps": 0.03293248837069941,
+      "rms_toe_marker_motion_contribution_mps": 0.0006260952623250079,
+      "rms_nominal_prediction_error_mps": 0.013266907923726177,
+      "rms_measured_error_mps": 0.037480097063232104,
+      "max_closure_error_mps": 6.968428147493253e-06
+    }
+  ]
+}

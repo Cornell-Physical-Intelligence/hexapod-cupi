@@ -80,6 +80,20 @@ def feedback_target(reference, servo_target, measured, neutral, lower, upper, ga
     return bounded, offset, bool(np.any(bounded != requested))
 
 
+def velocity_feedback_target(servo_target, reference_velocity, measured_velocity,
+                             neutral, lower, upper, gain, blend):
+    """Damp joint-velocity error through the existing motor-target envelope."""
+    reference_velocity, measured_velocity = [np.asarray(v, float)
+                                            for v in (reference_velocity, measured_velocity)]
+    if any(v.shape != (18,) or not np.isfinite(v).all()
+           for v in (reference_velocity, measured_velocity)):
+        raise ValueError('Velocity feedback requires 18 finite joint velocities')
+    offset = np.clip(blend*gain*np.asarray(KD)*(reference_velocity-measured_velocity)/12., -.070, .070)
+    requested = servo_target+offset
+    bounded = np.clip(requested, np.maximum(lower, neutral-.35), np.minimum(upper, neutral+.35))
+    return bounded, offset, bool(np.any(bounded != requested))
+
+
 class TripodController:
     def __init__(self, neutral, lower, upper, config=None, *, model=None, toe_local_points=None):
         self.cfg = config or TripodConfig()
