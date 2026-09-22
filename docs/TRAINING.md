@@ -754,6 +754,37 @@ scored torque-demand excess. Left/right yaw errors are 0.03434/0.03459 rad/s.
 Measured forward toe lift is 15.1–15.9 mm. You proceed to the frozen
 canonical qualification suite and retain the full native captures.
 
+### Stop stride decay declared on 22 September 2026
+
+You retain the failed forward-stop case from `speed_lift0_qualification_020`.
+After the stop command at control 400, you finish the swing at control 412
+and blend all six legs to neutral through control 462. Two tibia joints
+retain position error during the quiet window: the left front joint holds
+near 0.141 rad against a 0.400 rad target and requests 3.10 N m. The right
+rear joint holds near 0.260 rad and requests 1.67 N m. Both reach the 1.6 N m
+actuator cap. Joint velocity, saturation and six-foot support checks fail.
+The left-turn stop also fails six-foot support at one native substep, and
+its left front hip moves 0.0219 rad during the quiet window against 0.020.
+
+You declare one `stop_stride` candidate based on `speed_lift`. For a walking
+stop or command change, you finish the current swing, then reduce stride
+amplitude through one complete tripod cycle with
+`scale = initial_scale * (1 + cos(pi * elapsed / period)) / 2`.
+You retain the swing lift during this cycle so that each tripod can place
+its feet near the standing pose. You enter the existing standing blend
+after the second touchdown. You retain the walking targets.
+This adaptation tests whether alternating support avoids the load from
+returning six planted legs from opposing stride endpoints.
+
+You check stop timing, target bounds, contact faults and reset state on the
+CPU. You run the unchanged forward and both-turn stop cases from two resets,
+then the full qualification suite after a pass. Clearance and terrain
+remain behind qualification. You retain the two-second stop settling
+allowance and the existing motor, contact and quiet-motion checks.
+You retain the [interrupted qualification](../site/assets/tripod_stop_stride_20260922_001/native_result.json),
+[forward-stop diagnosis](../site/assets/tripod_stop_stride_20260922_001/forward_stop_diagnostic.json)
+and [candidate declaration](../site/assets/tripod_stop_stride_20260922_001/declaration.json).
+
 ## Foundation commands
 
 ```sh

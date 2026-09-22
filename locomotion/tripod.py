@@ -166,6 +166,9 @@ class TripodController:
         self.elapsed = 0.
         self.stride_elapsed = 0.
         self.ramping_stride = False
+        self.ramping_stop = False
+        self.stop_stride_elapsed = 0.
+        self.stop_initial_scale = 1.
         self.wait_s = 0.
         self.support_loss_s = 0.
         self.seen_off = np.zeros(6, dtype=bool)
@@ -283,6 +286,7 @@ class TripodController:
                 elif self.state == 'settle':
                     self.state = 'idle'; self.command.fill(0)
                     self.ramping_stride = False
+                    self.ramping_stop = False
                 else:
                     self.state = 'walk'
                     self.seen_off.fill(False); self.landed.fill(False)
@@ -298,7 +302,13 @@ class TripodController:
         base = self.stance(self.mode)
         coefficients = self._sweep()
         previous_coefficients = coefficients
-        if self.ramping_stride:
+        if self.ramping_stop:
+            old_scale = self.stop_initial_scale*.5*(1.+math.cos(math.pi*self.stop_stride_elapsed/self.cfg.period_s))
+            self.stop_stride_elapsed = min(self.cfg.period_s, self.stop_stride_elapsed+DT)
+            scale = self.stop_initial_scale*.5*(1.+math.cos(math.pi*self.stop_stride_elapsed/self.cfg.period_s))
+            previous_coefficients = coefficients*old_scale
+            coefficients = coefficients*scale
+        elif self.ramping_stride:
             old_scale = .5*(1.-math.cos(math.pi*self.stride_elapsed/self.cfg.period_s))
             self.stride_elapsed = min(self.cfg.period_s, self.stride_elapsed+DT)
             scale = .5*(1.-math.cos(math.pi*self.stride_elapsed/self.cfg.period_s))
@@ -354,7 +364,13 @@ class TripodController:
             if self.contacts[swing].all() and self.landed[swing].all():
                 result = self._emit(desired)
                 self.wait_s = 0.
-                if self.stopping:
+                decay_stop = self.cfg.stop_stride_ramp
+                if self.stopping and decay_stop and not self.ramping_stop:
+                    self.ramping_stop = True
+                    self.stop_stride_elapsed = 0.
+                    self.stop_initial_scale = (.5*(1.-math.cos(math.pi*self.stride_elapsed/self.cfg.period_s))
+                                               if self.ramping_stride else 1.)
+                if self.stopping and (not decay_stop or self.stop_stride_elapsed >= self.cfg.period_s-1e-9):
                     self._begin_blend('settle', base)
                 else:
                     self.pitch_hold[~swing] = 0.
@@ -374,5 +390,6 @@ class TripodController:
         return {'state': self.state, 'mode': self.mode, 'fault': self.fault,
                 'half': self.half, 'progress': self.progress, 'stopped': self.stopped,
                 'ramping_stride': self.ramping_stride, 'stride_elapsed_s': self.stride_elapsed,
+                'ramping_stop': self.ramping_stop, 'stop_stride_elapsed_s': self.stop_stride_elapsed,
                 'contacts': self.contacts.tolist(), 'landed': self.landed.tolist(),
                 'active_command': self.command.tolist(), 'target_rad': self.target.reshape(18).tolist()}

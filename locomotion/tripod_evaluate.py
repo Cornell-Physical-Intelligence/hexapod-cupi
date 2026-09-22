@@ -29,6 +29,8 @@ def cases_for(suite):
         return [c for c in case_manifest() if c['profile'] != 'transition' and supported(c['command'])]
     if suite == 'forward_high':
         return [c for c in case_manifest() if c['case_id'] == 'static:translate_0.10_0deg']
+    if suite == 'stops':
+        return [c for c in case_manifest() if c['profile'] == 'stop_to_stand' and any(c['command']) and supported(c['command'])]
     if suite == 'clearance':
         return [{'case_id': 'tripod:'+mode+':'+name, 'profile': 'omni_static',
                  'command': command, 'controls': 1800 if mode == 'switch' else 1000,
@@ -248,7 +250,7 @@ def main(argv=None):
     parser.add_argument('--num-envs', type=int, choices=[1], default=1)
     parser.add_argument('--candidate', type=int, choices=range(4), required=True)
     parser.add_argument('--tripod-adaptation', choices=tuple(SWEEPS), default='paper')
-    parser.add_argument('--suite', choices=['screen', 'qualification', 'clearance', 'forward_high'], required=True)
+    parser.add_argument('--suite', choices=['screen', 'qualification', 'clearance', 'forward_high', 'stops'], required=True)
     parser.add_argument('--seed', type=int, default=27057)
     parser.add_argument('--max-wall-seconds', type=float, default=6200.)
     parser.add_argument('--preflight-only', action='store_true')

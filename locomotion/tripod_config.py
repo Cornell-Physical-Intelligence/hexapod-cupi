@@ -32,6 +32,7 @@ class TripodConfig:
     forward_raised_lift_rad: tuple = (.28, -.10)
     speed_adapted_lift: bool = False
     forward_slow_lift_rad: tuple = (.26, -.20)
+    stop_stride_ramp: bool = False
 
     def __post_init__(self):
         values = (self.period_s, self.hip_amplitude_rad, self.transition_s,
@@ -80,12 +81,15 @@ class TripodConfig:
                 or type(self.speed_adapted_lift) is not bool
                 or (self.speed_adapted_lift and not self.forward_support_overlap)
                 or self.forward_slow_lift_rad != (.26, -.20)
+                or type(self.stop_stride_ramp) is not bool
+                or (self.stop_stride_ramp and not self.speed_adapted_lift)
                 or any(len(v) != 2 for v in (self.low_lift_rad, self.raised_lift_rad, self.raised_offset_rad))):
             raise ValueError('Controller parameters exceed the declared envelope')
 
     def declaration(self):
         return {'schema': 'zhang_tripod_geometry_adaptation_v1', **asdict(self),
-                'trajectory_variant': ('speed_lift' if self.speed_adapted_lift else
+                'trajectory_variant': ('stop_stride' if self.stop_stride_ramp else
+                                       'speed_lift' if self.speed_adapted_lift else
                                        'forward_overlap' if self.forward_support_overlap else
                                        'startup' if self.startup_stride_ramp else
                                        'overlap' if self.support_overlap else
@@ -122,3 +126,4 @@ SWEEPS['overlap'] = (replace(SWEEPS['pd_filtered'][0], support_overlap=True),)
 SWEEPS['startup'] = (replace(SWEEPS['overlap'][0], startup_stride_ramp=True),)
 SWEEPS['forward_overlap'] = (replace(SWEEPS['startup'][0], forward_support_overlap=True),)
 SWEEPS['speed_lift'] = (replace(SWEEPS['forward_overlap'][0], speed_adapted_lift=True),)
+SWEEPS['stop_stride'] = (replace(SWEEPS['speed_lift'][0], stop_stride_ramp=True),)

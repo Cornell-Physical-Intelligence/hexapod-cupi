@@ -1015,6 +1015,22 @@
         "result": "passed",
         "text": "All three commands pass. Forward planar error is 0.01078 m/s with zero scored computed torque-demand excess. Left/right yaw errors are 0.03434/0.03459 rad/s. Forward toe lift is 15.1\u201315.9 mm against the 12 mm low-mode target. Canonical qualification follows; controlled stops and raised clearance remain pending.",
         "source": "site/assets/tripod_speed_lift_native_20260922_001/native_result.json"
+      },
+      {
+        "id": "zhang-tripod-stop-failure-20260922-020",
+        "title": "We pass walking and diagnose forward and left-turn stop failures",
+        "backend": "Isaac Sim; first reset; ten complete cases and one interrupted prefix; approved 19-body robot",
+        "result": "interrupted",
+        "text": "Eight of ten complete cases pass, including canonical forward motion, both turns and the right-turn stop. The forward stop fails quiet joint motion, torque saturation and support. The left-turn stop fails quiet joint range and one support substep. We retain the interrupted formal-standing prefix and block clearance pending qualification.",
+        "source": "site/assets/tripod_stop_stride_20260922_001/native_result.json"
+      },
+      {
+        "id": "zhang-tripod-stop-stride-cpu-20260922-022",
+        "title": "We return each tripod to standing through stride decay",
+        "backend": "CPU; 184 locomotion tests; native stop suite pending",
+        "result": "inconclusive",
+        "text": "The candidate finishes the current swing and reduces stride amplitude over one tripod cycle before holding the standing pose. CPU checks preserve held walking targets and bound stop transitions. Native forward and both-turn stop cases retain their two-second settling allowance and acceptance checks.",
+        "source": "site/assets/tripod_stop_stride_20260922_001/declaration.json"
       }
     ]
   },
