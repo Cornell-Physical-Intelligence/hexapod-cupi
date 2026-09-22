@@ -596,6 +596,38 @@ You retain the [filtered screen](../site/assets/tripod_velocity_filtered_native_
 and its selected forward video. The [combined-feedback declaration](../site/assets/tripod_pd_20260922_001/declaration.json)
 links the CPU replay and sampled-model inputs.
 
+### Support overlap declared on 22 September 2026
+
+The combined-feedback left turn passes motor/contact checks and fails yaw
+tracking at 0.07587 rad/s. Across twelve complete cycles, you measure near-zero
+yaw during six-foot support and 0.22–0.24 rad/s during three-foot support.
+The swing targets reverse horizontal foot motion while the feet retain contact.
+This observation supports a test of compatible motion during support overlap.
+
+You declare one `overlap` candidate based on `pd_filtered`. You retain its
+lift waveform and feedback. You apply the new sweep to pure yaw commands.
+The forward envelope probe exceeds the unchanged 0.35 rad target bound,
+so you retain its failed CPU record and keep the forward targets unchanged.
+For yaw, you use a constant-speed support sweep
+`h_support(p) = 1 - 2p`. You use `h_swing(p) = -1 - 2p + 4S(u)`, with
+`u = clip((p - 0.15) / 0.65, 0, 1)` and `S(u) = 3u² - 2u³`.
+Both horizontal sweeps follow support motion before phase 0.15 and after
+phase 0.80. You choose these intervals from measured release and touchdown.
+You preserve horizontal position and velocity across half-cycle boundaries.
+These sweeps replace the paper's horizontal sine in this declared adaptation.
+
+After touchdown, you hold the pitch lift residual relative to the current
+horizontal baseline. You continue the horizontal baseline through contact
+and return that residual to zero through the next support half-cycle.
+You check the full command/clearance envelope and target limiter before one
+forward/left/right native screen. You retain the model, motor limits and gates.
+You retain the [combined screen](../site/assets/tripod_pd_native_20260922_001/result.json):
+forward passes and both turns fail. The accumulated record contains two passed
+screens, 49 failed completed trials and one interrupted attempt. The
+[yaw cycle](../site/assets/tripod_pd_native_20260922_001/yaw_decomposition.png)
+and [declaration](../site/assets/tripod_overlap_20260922_001/declaration.json)
+bind the diagnosis and next candidate.
+
 ## Foundation commands
 
 ```sh

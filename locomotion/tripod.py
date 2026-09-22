@@ -69,6 +69,14 @@ def feedback_blend(state, elapsed, duration):
     return 0.
 
 
+def overlap_sweep(progress):
+    """Keep swing feet in support motion outside the declared return window."""
+    if not 0 <= progress <= 1.:
+        raise ValueError('Support overlap requires half-cycle progress in [0, 1]')
+    u = np.clip((progress-.15)/.65, 0., 1.)
+    return -1.-2.*progress+4.*u*u*(3.-2.*u), 1.-2.*progress
+
+
 def feedback_target(reference, servo_target, measured, neutral, lower, upper, gain, blend):
     """Bound encoder-error feedback through the existing motor-target envelope."""
     measured = np.asarray(measured, float)
@@ -269,8 +277,15 @@ class TripodController:
         if self.support_loss_s > self.cfg.recovery_s+1e-9:
             return self._fault('stance_support_loss')
         base = self.stance(self.mode)
+        coefficients = self._sweep()
         touchdown = swing & self.seen_off & self.contacts & ~self.landed & (self.progress >= .5)
-        self.pitch_hold[touchdown] = (self.target-base)[touchdown, 1:]
+        touchdown_base = base
+        overlap = self.cfg.support_overlap and self.command[2] != 0.
+        if overlap:
+            swing_shape, support_shape = overlap_sweep(self.progress)
+            shape = np.where(swing, swing_shape, support_shape)
+            touchdown_base = base+coefficients*shape[:, None]
+        self.pitch_hold[touchdown] = (self.target-touchdown_base)[touchdown, 1:]
         self.landed |= touchdown
         self.progress = min(1., self.progress+2.*DT/self.cfg.period_s)
         phase_advance = self.progress*math.pi
@@ -281,14 +296,19 @@ class TripodController:
             stance_return = 1.-displacement
         phase = -math.pi/2+self.half*math.pi+phase_advance+PHASE
         hip, lift = wave(phase, self.cfg.swing_lift_power)
-        coefficients = self._sweep()
+        if overlap:
+            swing_shape, support_shape = overlap_sweep(self.progress)
+            hip = np.where(swing, swing_shape, support_shape)
+            stance_return = 1.-self.progress
         baseline = base+coefficients*hip[:, None]
         desired = baseline.copy()
-        desired[self.landed, 1:] = base[self.landed, 1:]+self.pitch_hold[self.landed]
+        hold_base = baseline if overlap else base
+        desired[self.landed, 1:] = hold_base[self.landed, 1:]+self.pitch_hold[self.landed]
         # Return a landed leg to the paper's zero-lift stance over its support half-cycle.
         support = ~swing & self.support_from_touchdown
         start_sine = np.sin(-math.pi/2+self.half*math.pi+PHASE)
-        residual = self.pitch_hold-coefficients[:, 1:]*start_sine[:, None]
+        residual = (self.pitch_hold if overlap else
+                    self.pitch_hold-coefficients[:, 1:]*start_sine[:, None])
         desired[support, 1:] += stance_return*residual[support]
         moving = swing & ~self.landed
         pitches = lift[:, None]*self.lift(self.mode)

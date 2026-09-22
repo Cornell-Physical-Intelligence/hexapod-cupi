@@ -850,6 +850,22 @@
         "result": "inconclusive",
         "text": "One declared candidate combines position gain 0.5 with velocity gain 2 and a 5 Hz filter. Its sampled-loop spectral radius stays below 0.802 across 2520 pose/leg models. The gain-1 combination fails the neutral-pose stability check and remains excluded. Six captured command replays preserve target and slew bounds. Native contact and saturation remain outside this linear analysis.",
         "source": "site/assets/tripod_pd_20260922_001/sampled_pd.json"
+      },
+      {
+        "id": "zhang-tripod-pd-native-20260922-012",
+        "title": "We retain a forward pass and diagnose contact overlap",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "inconclusive",
+        "text": "Combined position and filtered velocity feedback passes forward motion at 0.02242 m/s planar error. Left/right yaw errors of 0.07587/0.07574 rad/s exceed 0.06. All native motor/contact checks pass. Across twelve left-turn cycles, yaw stops or reverses during six-foot contact. The accumulated record contains two passed screens, 49 failed completed trials and one interrupted attempt.",
+        "source": "site/assets/tripod_pd_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-overlap-cpu-20260922-013",
+        "title": "We align yaw targets through support overlap",
+        "backend": "CPU phasing, command transitions and recorded-input replay; native qualification pending",
+        "result": "inconclusive",
+        "text": "One declared candidate keeps horizontal yaw targets in support motion before phase 0.15 and after phase 0.80. Landed feet retain a pitch lift residual while the horizontal baseline continues. The full forward overlap probe exceeds target bounds and remains excluded; forward targets preserve the preceding candidate. Six recorded-input replays preserve emitted bounds, with target clipping during changed yaw traces.",
+        "source": "site/assets/tripod_overlap_20260922_001/declaration.json"
       }
     ]
   },

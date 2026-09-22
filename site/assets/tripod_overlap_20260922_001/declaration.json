@@ -1,0 +1,25 @@
+{
+  "schema": "tripod_yaw_overlap_declaration_v1",
+  "recorded_utc": "2026-09-22T05:18:11.744647+00:00",
+  "scope": "One pure-yaw overlap candidate after combined-feedback forward passes and both turns fail. Forward targets retain pd_filtered behavior.",
+  "method": "During pure yaw, use constant support sweep 1-2p and swing sweep -1-2p+4S(clip((p-.15)/.65,0,1)); S(u)=3u^2-2u^3. Hold touchdown pitch residual relative to the horizontal baseline. Retain lift and bounded combined joint feedback.",
+  "rejected_scope": "The full forward/yaw overlap probe exceeds the unchanged forward joint-target envelope; preserve its CPU source and record without native dispatch.",
+  "pack": {
+    "name": "overlap0_screen_013",
+    "binding_sha256": "45fe90e837c59bff742be99ccc6fd9851eb922e320c3bfb0448ef71297cf8630",
+    "source_freeze_sha256": "a149280dde8403bb0eef1677a6c4a48a3adb4477e0d4f26aa3b3023615b95610",
+    "pack_sha256": "4d086d83a1a015fc104b1025b6756107e91a48ccb9dbf37909637aa008cc0510"
+  },
+  "input_hashes": {
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/support_overlap_013/declared_inputs/yaw_overlap_TRAINING.md": "e756764d534c6e2896797dd18e48d94be581b89fac6d6e4197ee2e879689f6ab",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/support_overlap_013/cpu_replay.json": "34ca9c4ee4e7beb18d26dd04096544d12e0c659edead45658076ff790e8b93ad",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/support_overlap_013/sampled_overlap.json": "54ad0152a3d4050120bb7853bd5f7cf4c88628d7cfdd0a84c116cc5d35760aef",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/support_overlap_013/locomotion_tests.log": "24357bc9e9c6f15653e014effa800cbcf3906d8e579bf650754f1e18f478689c",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/support_overlap_013/rejected_forward_overlap/rejection.json": "8c715f048673a1c0b1e4222138b7db93cabf54095a3ca813ef6e4cf07a9c8359",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/pd_feedback_012/yaw_decomposition.json": "4c367b0c32c1a15cdaab68930f8c26d13d5d00ac751d7811c1d73c95f7a20f84"
+  },
+  "actuator_unchanged": true,
+  "acceptance_unchanged": true,
+  "stage2_complete": false,
+  "terrain_complete": false
+}

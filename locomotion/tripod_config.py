@@ -25,6 +25,7 @@ class TripodConfig:
     swing_lift_power: float = 1.
     joint_velocity_feedback_gain: float = 0.
     joint_velocity_filter_hz: float = 0.
+    support_overlap: bool = False
 
     def __post_init__(self):
         values = (self.period_s, self.hip_amplitude_rad, self.transition_s,
@@ -59,12 +60,16 @@ class TripodConfig:
                       (self.joint_feedback_gain != .5 or self.joint_velocity_filter_hz != 5.))))
                 or self.joint_velocity_filter_hz not in (0., 5.)
                 or (self.joint_velocity_filter_hz and not self.joint_velocity_feedback_gain)
+                or type(self.support_overlap) is not bool
+                or (self.support_overlap and (self.joint_feedback_gain != .5
+                    or self.joint_velocity_feedback_gain != 2. or self.joint_velocity_filter_hz != 5.))
                 or any(len(v) != 2 for v in (self.low_lift_rad, self.raised_lift_rad, self.raised_offset_rad))):
             raise ValueError('Controller parameters exceed the declared envelope')
 
     def declaration(self):
         return {'schema': 'zhang_tripod_geometry_adaptation_v1', **asdict(self),
-                'trajectory_variant': ('pd_filtered' if self.joint_feedback_gain and self.joint_velocity_feedback_gain else
+                'trajectory_variant': ('overlap' if self.support_overlap else
+                                       'pd_filtered' if self.joint_feedback_gain and self.joint_velocity_feedback_gain else
                                        'velocity_filtered' if self.joint_velocity_filter_hz else
                                        'velocity' if self.joint_velocity_feedback_gain else
                                        'liftoff' if self.swing_lift_power != 1. else
@@ -93,3 +98,4 @@ SWEEPS['liftoff'] = (replace(SWEEPS['retimed'][0], swing_lift_power=.75),)
 SWEEPS['velocity'] = (replace(SWEEPS['retimed'][0], joint_velocity_feedback_gain=2.),)
 SWEEPS['velocity_filtered'] = (replace(SWEEPS['velocity'][0], joint_velocity_filter_hz=5.),)
 SWEEPS['pd_filtered'] = (replace(SWEEPS['velocity_filtered'][0], joint_feedback_gain=.5),)
+SWEEPS['overlap'] = (replace(SWEEPS['pd_filtered'][0], support_overlap=True),)
