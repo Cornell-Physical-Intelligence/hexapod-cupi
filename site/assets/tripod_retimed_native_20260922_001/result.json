@@ -1,0 +1,848 @@
+{
+  "schema": "tripod_native_screen_record_v1",
+  "recorded_utc": "2026-09-22T03:40:01.145256+00:00",
+  "scope": "Three completed motion screens. Screen completion does not qualify stops, clearance, repeatability or terrain.",
+  "prior_trials": {
+    "count": 34,
+    "path": "site/assets/tripod_retimed_20260922_001/interrupted.json",
+    "sha256": "f4dd2e5a67643bd564de6483d5a00d0d543fb76a9dc9c283e9faee1fd31c827b"
+  },
+  "new_trial_count": 3,
+  "new_pass_count": 0,
+  "total_recorded_motion_trials": 37,
+  "packs": [
+    {
+      "name": "retimed0_screen_007",
+      "identity": {
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "source_files": {
+          "__init__.py": "c82a5695bd2575afdaae01eb84bb3c06ddffe42529d201bbe43726ae8859e350",
+          "admission.py": "1391aed5939b882e2ca0967bd8eda6103bf73e46206f8d6c0091f8463b1e70c3",
+          "camera.py": "6c9927cfa747408e3206e170386483791ac696634f1e322e4a6222b32396655d",
+          "env.py": "78bb1cec6bdbc0535a147693fe2d2d0477c61bc49b509dd9461bc8cf6c2d6cfe",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+          "evaluate.py": "5cb686c3daf4eed3b4a96501aa80f9f1a8465376782255a9860e5abb7dfd735c",
+          "evaluation.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
+          "evaluation_config.py": "7d55733f4f5a471427b408a4b3a0e834d083a687f7ae0ebc3ceb0d16c23f3cb7",
+          "force_metrics.py": "5bd228d003d4ab71dbda6acbb9fdbf357a36ec007050b156bdd71ec31c707673",
+          "inputs.py": "0a4ff5170754654dc25ee745b128ae19f5901d6df4005a98e3584dec68b02b96",
+          "launch.py": "a3fee8a65d00ae6946867928974661f796d4bf905ca3dda3be573e75665c34d3",
+          "ppo.py": "bb1b44215580e30786bb16271a2dae996b19a41fc43a0588cc4591b18a5d4a65",
+          "prepare.py": "d4546457d7d936cffb2326841b0224c508378c6d4fd831d7839ae61171ce592b",
+          "reservation.py": "037162e879e94f6dd05210dfb5ee81fc5d1195c65ad6209ecbfd9f1b62df21f7",
+          "task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+          "train.py": "02866cf197673d65a95391f957b1ea8df8192f8b964813641f5ea517b0890c2d",
+          "tripod.py": "f36da4b1613fe7980a5b6ab8f5bf9b70cb5c1741692ac47120da97b6329c70be",
+          "tripod_config.py": "160a205b46fe0d660f6e3d4170954bdf203e25d01bbbece58e5b0424437f36ac",
+          "tripod_evaluate.py": "5145be8ea71b48b056c874c641c9bc470a6ee916898664b54ff431a9e5e4e582",
+          "tripod_kinematics.py": "3db69088e944a3773f16844e07ebebc4700662142770eb1a322ce500f5a016cc"
+        },
+        "source_freeze_sha256": "aafff0e943ff54345e2be7da6bf4b7a0b9fe58fc321fbc22f454a689b259244e",
+        "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+        "config": {
+          "num_envs": 1,
+          "spacing_m": 2.0,
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "episode_seconds": 60.0,
+          "action_scale_rad": 0.35,
+          "target_slew_rad": 0.04,
+          "reset_height_m": 0.08161108940839767,
+          "command_forward_mps": 0.1,
+          "command_left_mps": 0.0,
+          "command_yaw_rad_s": 0.0,
+          "seed": 27057,
+          "record_motion_features": true,
+          "render": true,
+          "device": "cuda:0",
+          "schema": "canonical_paper_walk_experiment_v1",
+          "actor_width": 231,
+          "critic_width": 234,
+          "amp_width": 61,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "legs": [
+            "lf",
+            "lm",
+            "lr",
+            "rf",
+            "rm",
+            "rr"
+          ],
+          "standing_admission": false,
+          "stage2_complete": false,
+          "prior_standing_failure_superseded": false,
+          "authorization": "User explicitly requested experimental paper-based PPO training on the confirmed model.",
+          "telemetry_scope": "Compact native body-force telemetry; no exact toe/shaft patch classification or formal standing admission."
+        },
+        "controller": {
+          "schema": "zhang_tripod_geometry_adaptation_v1",
+          "period_s": 1.2,
+          "hip_amplitude_rad": 0.12,
+          "low_lift_rad": [
+            0.35,
+            -0.3
+          ],
+          "raised_lift_rad": [
+            0.45,
+            -0.35
+          ],
+          "raised_offset_rad": [
+            -0.15,
+            0.1
+          ],
+          "transition_s": 1.0,
+          "contact_on_n": 2.0,
+          "contact_off_n": 1.0,
+          "debounce_controls": 2,
+          "recovery_s": 0.4,
+          "recovery_rate_rad_s": 0.1,
+          "initial_support_s": 2.0,
+          "geometry_sweep_gain": 1.0,
+          "geometry_lift_m": [
+            0.022,
+            0.028
+          ],
+          "damping_compensation": true,
+          "phase_ramp_fraction": 0.1,
+          "trajectory_variant": "retimed",
+          "control_dt_s": 0.02,
+          "target_slew_rad": 0.04,
+          "low_root_target_m": 0.0978,
+          "raised_root_target_m": 0.1093,
+          "minimum_root_increase_m": 0.008,
+          "minimum_toe_lift_m": {
+            "low": 0.012,
+            "raised": 0.016
+          },
+          "paper_doi": "10.3389/frobt.2024.1426269",
+          "stage2_complete": false
+        },
+        "candidate": 0,
+        "controller_kind": "prescribed_tripod",
+        "learned_policy": false,
+        "physics_source_files": {
+          "env.py": "78bb1cec6bdbc0535a147693fe2d2d0477c61bc49b509dd9461bc8cf6c2d6cfe",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "standing_admission": {
+          "schema": "hexapod_locomotion_standing_admission_v1",
+          "num_envs": 32,
+          "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+          "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+          "physics_source_files": {
+            "env.py": "78bb1cec6bdbc0535a147693fe2d2d0477c61bc49b509dd9461bc8cf6c2d6cfe",
+            "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+          },
+          "physics_config": {
+            "physics_dt": 0.0025,
+            "decimation": 8,
+            "spacing_m": 2.0,
+            "target_slew_rad": 0.04,
+            "action_scale_rad": 0.35,
+            "solver_position_iterations": 32,
+            "solver_velocity_iterations": 0,
+            "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+            "material_friction": [
+              1.0,
+              1.0
+            ],
+            "restitution": 0.0,
+            "external_forces_every_iteration": true,
+            "neutral_joint_position_rad": [
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4
+            ],
+            "reset_root_height_m": 0.10280231400684256
+          },
+          "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+          "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+          "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+          "one": {
+            "report_path": "/standing_one/standing/standing_report.json",
+            "report_sha256": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+            "state_path": "/standing_one/state.json",
+            "state_sha256": "25165127903b573755333d92236c779196013b37136fed302d4885ec67d60cb6"
+          },
+          "batch": {
+            "report_path": "/standing_batch/standing/standing_report.json",
+            "report_sha256": "28bf2e36f4081f6dcfbae8ad6bfd5c4992fc3527f7a66ffc54dccef56d7a8e96",
+            "state_path": "/standing_batch/state.json",
+            "state_sha256": "4564a416c05bca79ef8c72375b73d185181adc6ee68f3fb82eb35b127f1ba3e6"
+          }
+        }
+      },
+      "configuration": {
+        "schema": "zhang_tripod_geometry_adaptation_v1",
+        "period_s": 1.2,
+        "hip_amplitude_rad": 0.12,
+        "low_lift_rad": [
+          0.35,
+          -0.3
+        ],
+        "raised_lift_rad": [
+          0.45,
+          -0.35
+        ],
+        "raised_offset_rad": [
+          -0.15,
+          0.1
+        ],
+        "transition_s": 1.0,
+        "contact_on_n": 2.0,
+        "contact_off_n": 1.0,
+        "debounce_controls": 2,
+        "recovery_s": 0.4,
+        "recovery_rate_rad_s": 0.1,
+        "initial_support_s": 2.0,
+        "geometry_sweep_gain": 1.0,
+        "geometry_lift_m": [
+          0.022,
+          0.028
+        ],
+        "damping_compensation": true,
+        "phase_ramp_fraction": 0.1,
+        "trajectory_variant": "retimed",
+        "control_dt_s": 0.02,
+        "target_slew_rad": 0.04,
+        "low_root_target_m": 0.0978,
+        "raised_root_target_m": 0.1093,
+        "minimum_root_increase_m": 0.008,
+        "minimum_toe_lift_m": {
+          "low": 0.012,
+          "raised": 0.016
+        },
+        "paper_doi": "10.3389/frobt.2024.1426269",
+        "stage2_complete": false
+      },
+      "source_freeze_sha256": "aafff0e943ff54345e2be7da6bf4b7a0b9fe58fc321fbc22f454a689b259244e",
+      "binding_sha256": "709da1a743e5ef3a53ac4ba46233dd8d40162c14793948d7ff802586bea52f6a",
+      "summary_sha256": "2c6a23e60ee754e16e382b3fffc02ad7ec2ccaa1327b6a8400f59cd4e8a9dadf",
+      "cleanup_sha256": "b87d5523e5d2cb781a64aa4acea51e4c369bd62f88ba52fb7866732f3959a060",
+      "cleanup": {
+        "container_name": "hexapod-reference-physics-b72e42782a3c45b9ab27243d7e10175a",
+        "container_id": "b3601c714467cc7bb492aa81885cc05c2cde898477080c43bec2e17591fdaff9",
+        "inspections": [
+          {
+            "absent": true
+          }
+        ],
+        "cleanup_checked": true,
+        "reservation_released": false,
+        "reservation": {
+          "policy_sha256": "163f4163f04c6855acde6e014e1ba9a985def5f6ebb95e7323fff8e91996d581",
+          "marker_sha256": "ad5550c0938e954410a2039f40d58f5529e7b49ccfff1dff1fac4e7dab22a2e1",
+          "coordination_sha256": "c89c99ebdd16941e3f8e7f23ef3525aeb360c78361aa49aa04e766b381a4727c",
+          "queue_pid": 3909426,
+          "masked_user_units": 32,
+          "masked_system_units": 4,
+          "mask_reload_flags": {
+            "stormscope-dispatch.timer": "yes",
+            "stormscope-dispatch.service": "yes",
+            "stormscope-scout.timer": "yes",
+            "stormscope-scout.service": "yes",
+            "stormscope-monitor.timer": "yes",
+            "stormscope-monitor.service": "yes",
+            "stormscope-publish.timer": "yes",
+            "stormscope-publish.service": "yes",
+            "stormscope-verify.timer": "yes",
+            "stormscope-verify.service": "yes",
+            "stormscope-private-dispatch.timer": "no",
+            "stormscope-private-dispatch.service": "no",
+            "stormscope-private-scout.timer": "no",
+            "stormscope-private-scout.service": "no",
+            "stormscope-private-monitor.timer": "no",
+            "stormscope-private-monitor.service": "no",
+            "stormscope-private-prepare.timer": "no",
+            "stormscope-private-prepare.service": "no",
+            "stormscope-private-verify.timer": "no",
+            "stormscope-private-verify.service": "no",
+            "stormscope-private-v2-dispatch.timer": "no",
+            "stormscope-private-v2-dispatch.service": "no",
+            "stormscope-private-v2-scout.timer": "no",
+            "stormscope-private-v2-scout.service": "no",
+            "stormscope-private-v2-monitor.timer": "no",
+            "stormscope-private-v2-monitor.service": "no",
+            "stormscope-private-v2-publish.timer": "no",
+            "stormscope-private-v2-publish.service": "no",
+            "stormscope-private-v2-verify.timer": "no",
+            "stormscope-private-v2-verify.service": "no",
+            "ollama.service": "yes",
+            "dsv41-inference.service": "no"
+          },
+          "reservation_released": false
+        },
+        "resources": {
+          "cuda_processes": "",
+          "active_containers": ""
+        }
+      }
+    }
+  ],
+  "trials": [
+    {
+      "pack": "retimed0_screen_007",
+      "case_id": "tripod:screen:forward",
+      "pass": false,
+      "acquisition_complete": true,
+      "controller_fault": null,
+      "failed_bounds": [
+        "planar_error_mps"
+      ],
+      "checks": {
+        "complete_requested_window": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "control_dt_s": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 1e-12,
+          "operator": "<="
+        },
+        "quaternion_unit_norm": {
+          "status": "pass",
+          "value": 1.7881393432617188e-07,
+          "bound": 1e-05,
+          "operator": "<="
+        },
+        "terminated": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "truncated": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "reset": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "contiguous_time": {
+          "status": "pass",
+          "value": 3.1259717037102064e-15,
+          "bound": 1e-09,
+          "operator": "<="
+        },
+        "held_command": {
+          "status": "pass",
+          "value": 7.450580569168253e-10,
+          "bound": 1e-06,
+          "operator": "<="
+        },
+        "planar_error_mps": {
+          "status": "fail",
+          "value": 0.030307281379881975,
+          "bound": 0.025,
+          "operator": "<="
+        },
+        "yaw_error_rad_s": {
+          "status": "pass",
+          "value": 0.01851447588220719,
+          "bound": 0.06,
+          "operator": "<="
+        },
+        "tilt_rms_degrees": {
+          "status": "pass",
+          "value": 0.318713903427124,
+          "bound": 5.0,
+          "operator": "<="
+        },
+        "vertical_velocity_rms_mps": {
+          "status": "pass",
+          "value": 0.026658307760953903,
+          "bound": 0.04,
+          "operator": "<="
+        },
+        "nonfoot_fraction": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 0.001,
+          "operator": "<="
+        },
+        "computed_demand_over_rating_fraction": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 0.005,
+          "operator": "<="
+        }
+      },
+      "metrics": {
+        "base_height_std_m": 0.0013374179834499955,
+        "base_height_peak_to_peak_m": 0.006143294274806976,
+        "tilt_rms_degrees": 0.318713903427124,
+        "tilt_p95_degrees": 0.44199347496032715,
+        "maximum_tilt_degrees": 0.651019811630249,
+        "vertical_velocity_rms_mps": 0.026658307760953903,
+        "vertical_velocity_abs_p95_mps": 0.06530258804559708,
+        "mean_velocity_mps": [
+          0.04543647350767084,
+          4.733137427719491e-05,
+          0.00042140404517953416
+        ],
+        "planar_error_mps": 0.030307281379881975,
+        "planar_velocity_rmse_mps": 0.03722722276255951,
+        "yaw_error_rad_s": 0.01851447588220719,
+        "yaw_rate_rmse_radps": 0.024119031516612332,
+        "mean_yaw_rate_rad_s": 5.354761763106643e-06,
+        "roll_pitch_angular_velocity_rms_radps": 0.06619400099378119,
+        "roll_pitch_angular_velocity_p95_radps": 0.19155640875626884,
+        "requested_saturation_fraction_400hz": 3.08641975308642e-05,
+        "maximum_requested_saturation_fraction_400hz": 0.0002777777777777778,
+        "computed_demand_over_rating_fraction": 0.0,
+        "maximum_per_joint_computed_demand_over_rating_fraction": 0.0,
+        "maximum_computed_over_rating_burst_s": 0.0,
+        "peak_abs_computed_nm": 1.327978491783142,
+        "max_per_joint_rms_applied_nm": 0.6766275763511658,
+        "nonfoot_fraction": 0.0
+      },
+      "native_motor_and_joint_checks_pass": true,
+      "native_contact_screen": {
+        "schema": "canonical_native_contact_screen_v1",
+        "frequency_hz": 400,
+        "window": "complete trial, including initial settling and every native substep",
+        "recorded_substeps": 8000,
+        "nonfoot_substeps": 0,
+        "nonfoot_fraction": 0.0,
+        "maximum_nonfoot_fraction": 0.001,
+        "pass": true,
+        "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+      },
+      "controls": 1000,
+      "native_substeps": 8000,
+      "files_sha256": {
+        "control_trace.npz": "1feeb78c65805f25c92ec7a59b707c8b588af6327d9c953b984584d761102639",
+        "controller.jsonl": "338dce2b6f1c96f066794e7dd7495c5024fe38a09839a0075283ae7ff46681ac",
+        "declaration.json": "6ba78377f705e3faa4d73c1fe936d5089b8cab77f83eef2a00691d6a8db289e2",
+        "first_frame.png": "03f5455973392c6d97a5084e8a49b918d28e580e493d6276bc3ffc1d3df404c8",
+        "force_metrics.json": "b2db2bd6c633a9b095aa62267b76f61b16ace3ff5ec7e32cc5a7b8c42c4ae20a",
+        "native400hz/capture.json": "871e261a9c3f07dc770970632a4127ade76ce3e905545f7c22cdb669a2fb5205",
+        "native400hz/contacts.jsonl": "cebe90809911101ab91f6a644decb074901d2877f92f40e66b076061e33d0300",
+        "native400hz/initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+        "native400hz/substeps_000.npz": "8d7c6167fdba4eb95899996870ac933cdf869f195e38fc7a62f5206c9b6b10f4",
+        "native400hz/substeps_001.npz": "66e7e971df8e9e4602a9a178071c36498f0fcdddb62e5ac9f7d0ac602d65568b",
+        "native400hz/substeps_002.npz": "5d2d2774e459919709620f184f0ad8e5fc1d7fa77c03ef1bc05aacffc40ab2c8",
+        "native400hz/substeps_003.npz": "60e636d4df38ab19aa4b2bb072915a8a115d307bca69b27a3ddffcc45e22bb48",
+        "native400hz/substeps_004.npz": "2d970a544ed4c221b2efa278f70e9d85a82d152f557f84e4ae20fc92a3e6ca18",
+        "native400hz/substeps_005.npz": "6ca1ebb345cfdce6b375f154e918b0dcb17efd235c1f9c540a83d1976968e70b",
+        "native400hz/substeps_006.npz": "450145ce97d4aba311e05fdfae135bb45bf30e725a340713d2c1de533a5141a9",
+        "native400hz/substeps_007.npz": "d1944106d6e18bdc95d6a8eb2e51f3fe0e521cedbbe326aa1445de754bbd6311",
+        "native400hz/substeps_008.npz": "d7b3a026d451c619338ba97e42f192be6c20479ce1768d482b5fdf3be7b32192",
+        "native400hz/substeps_009.npz": "b29edb889b6fdb0d9706baf5e552bec48e9f7379f1ca2239e1c6fa2fe75ad908",
+        "report.json": "9f48536b4b054fa3fc1aa5ee084c8a6de4dc3eb33b16e11e440a6aea01e81208",
+        "rollout.mp4": "6b7bbce40776fdbe8a2e1a52c13da86914c86b9ef400778df3c646ba8dbd49cb"
+      },
+      "remote_trial": "/home/orionh/HEXAPOD_runs/restart_20260914/tripod_20260921_001/retimed0_screen_007/run/standing/trial_000"
+    },
+    {
+      "pack": "retimed0_screen_007",
+      "case_id": "tripod:screen:left",
+      "pass": false,
+      "acquisition_complete": true,
+      "controller_fault": null,
+      "failed_bounds": [
+        "yaw_error_rad_s"
+      ],
+      "checks": {
+        "complete_requested_window": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "control_dt_s": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 1e-12,
+          "operator": "<="
+        },
+        "quaternion_unit_norm": {
+          "status": "pass",
+          "value": 2.384185791015625e-07,
+          "bound": 1e-05,
+          "operator": "<="
+        },
+        "terminated": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "truncated": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "reset": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "contiguous_time": {
+          "status": "pass",
+          "value": 3.1259717037102064e-15,
+          "bound": 1e-09,
+          "operator": "<="
+        },
+        "held_command": {
+          "status": "pass",
+          "value": 2.980232227667301e-09,
+          "bound": 1e-06,
+          "operator": "<="
+        },
+        "planar_error_mps": {
+          "status": "pass",
+          "value": 0.00821641059656199,
+          "bound": 0.025,
+          "operator": "<="
+        },
+        "yaw_error_rad_s": {
+          "status": "fail",
+          "value": 0.08860427429080851,
+          "bound": 0.06,
+          "operator": "<="
+        },
+        "tilt_rms_degrees": {
+          "status": "pass",
+          "value": 0.15946723520755768,
+          "bound": 5.0,
+          "operator": "<="
+        },
+        "vertical_velocity_rms_mps": {
+          "status": "pass",
+          "value": 0.027388663962483406,
+          "bound": 0.04,
+          "operator": "<="
+        },
+        "nonfoot_fraction": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 0.001,
+          "operator": "<="
+        },
+        "computed_demand_over_rating_fraction": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 0.005,
+          "operator": "<="
+        }
+      },
+      "metrics": {
+        "base_height_std_m": 0.0014238811563700438,
+        "base_height_peak_to_peak_m": 0.00633133202791214,
+        "tilt_rms_degrees": 0.15946723520755768,
+        "tilt_p95_degrees": 0.2928852438926697,
+        "maximum_tilt_degrees": 0.3345502018928528,
+        "vertical_velocity_rms_mps": 0.027388663962483406,
+        "vertical_velocity_abs_p95_mps": 0.06788535416126251,
+        "mean_velocity_mps": [
+          -4.5625054368329125e-05,
+          -4.483079369986465e-06,
+          0.00020610267404912492
+        ],
+        "planar_error_mps": 0.00821641059656199,
+        "planar_velocity_rmse_mps": 0.008847173679156361,
+        "yaw_error_rad_s": 0.08860427429080851,
+        "yaw_rate_rmse_radps": 0.11404974111939266,
+        "mean_yaw_rate_rad_s": 0.1815153603642711,
+        "roll_pitch_angular_velocity_rms_radps": 0.048874275545002906,
+        "roll_pitch_angular_velocity_p95_radps": 0.10293032946567003,
+        "requested_saturation_fraction_400hz": 0.0,
+        "maximum_requested_saturation_fraction_400hz": 0.0,
+        "computed_demand_over_rating_fraction": 0.0,
+        "maximum_per_joint_computed_demand_over_rating_fraction": 0.0,
+        "maximum_computed_over_rating_burst_s": 0.0,
+        "peak_abs_computed_nm": 1.278983473777771,
+        "max_per_joint_rms_applied_nm": 0.7268600463867188,
+        "nonfoot_fraction": 0.0
+      },
+      "native_motor_and_joint_checks_pass": true,
+      "native_contact_screen": {
+        "schema": "canonical_native_contact_screen_v1",
+        "frequency_hz": 400,
+        "window": "complete trial, including initial settling and every native substep",
+        "recorded_substeps": 8000,
+        "nonfoot_substeps": 0,
+        "nonfoot_fraction": 0.0,
+        "maximum_nonfoot_fraction": 0.001,
+        "pass": true,
+        "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+      },
+      "controls": 1000,
+      "native_substeps": 8000,
+      "files_sha256": {
+        "control_trace.npz": "c2ae7f38ba089a1ed6a4f08526e27164474789b6a039d19369c36c077fe866c3",
+        "controller.jsonl": "da8c51d1556dff0b7a4672cf7641a80d9355732328150b5eec1768b639e2ed8a",
+        "declaration.json": "1aaccf7d09ca1732ac1feba51b21af0b7aa5a1ea32626b0cfe735802810d071f",
+        "first_frame.png": "d831469834db87ec59afc44391f40e3316353fd7ea5d2f41ee6b69076e03028a",
+        "force_metrics.json": "5cde6f3df1160a39b875076523c56ac5ad76015c85463e7e5da9861f7cc5b796",
+        "native400hz/capture.json": "88fda594b1f926c7d58e59b2eb1631aff806ec80370b0a9fd7fc1414e1684137",
+        "native400hz/contacts.jsonl": "7d41da7e6813715735928d0b978a5ec3b611a8128bf25fe6479d4c5aa65e1757",
+        "native400hz/initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+        "native400hz/substeps_000.npz": "ec4890c82298a56bff82df50c9b56aaea17943f3a0b8ce062bd8c3478772b5f2",
+        "native400hz/substeps_001.npz": "d4128966e61e9f5b195db80ced147f43a3df26960c1277c73ca4d3bbc410d8cd",
+        "native400hz/substeps_002.npz": "5e612d40ea29ce1972ab315dedbeead0897602e4118b65f881516740641a910a",
+        "native400hz/substeps_003.npz": "4664e0d8616eae7524bb63aac3b0e850a26a384cf475390ed72f06fd9746fc24",
+        "native400hz/substeps_004.npz": "5f62b2677d247a5d93776419d46a76cfbbdc5f224d4abdeaa02cd2aeb9a82315",
+        "native400hz/substeps_005.npz": "9d30ad52e9a96aa872e0366ce39ffad8fe7b4851df519d631a646e7fdef4b75b",
+        "native400hz/substeps_006.npz": "0cf51d22244273e116e83e75e7a6b37a28fe52477faa8a183e192a20cf66b128",
+        "native400hz/substeps_007.npz": "fe27936d76d5620d84eb9eda654c62ef545d254a01511f0c2ecd8259a378e1b0",
+        "native400hz/substeps_008.npz": "800e56e4455be6dc085be25b08f419d1a0cea7b43ef117a75fccee692ebc2799",
+        "native400hz/substeps_009.npz": "ff1bd94fb237be1ff2d177d1f384c20485fbcacca777052a3e178e98dac0a050",
+        "report.json": "a2adf215e335135192ee6ecd33c06ad0299536fb4d72f69ca257f1aae0650baf",
+        "rollout.mp4": "a29382b017130b8a3ff123521e3086fc3056474dbe95ea9dc90d3e42f24bab5c"
+      },
+      "remote_trial": "/home/orionh/HEXAPOD_runs/restart_20260914/tripod_20260921_001/retimed0_screen_007/run/standing/trial_001"
+    },
+    {
+      "pack": "retimed0_screen_007",
+      "case_id": "tripod:screen:right",
+      "pass": false,
+      "acquisition_complete": true,
+      "controller_fault": null,
+      "failed_bounds": [
+        "yaw_error_rad_s"
+      ],
+      "checks": {
+        "complete_requested_window": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "control_dt_s": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 1e-12,
+          "operator": "<="
+        },
+        "quaternion_unit_norm": {
+          "status": "pass",
+          "value": 2.384185791015625e-07,
+          "bound": 1e-05,
+          "operator": "<="
+        },
+        "terminated": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "truncated": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "reset": {
+          "status": "pass",
+          "value": 0,
+          "bound": 0,
+          "operator": "<="
+        },
+        "contiguous_time": {
+          "status": "pass",
+          "value": 3.1259717037102064e-15,
+          "bound": 1e-09,
+          "operator": "<="
+        },
+        "held_command": {
+          "status": "pass",
+          "value": 2.980232227667301e-09,
+          "bound": 1e-06,
+          "operator": "<="
+        },
+        "planar_error_mps": {
+          "status": "pass",
+          "value": 0.00826248114614785,
+          "bound": 0.025,
+          "operator": "<="
+        },
+        "yaw_error_rad_s": {
+          "status": "fail",
+          "value": 0.08894254150655775,
+          "bound": 0.06,
+          "operator": "<="
+        },
+        "tilt_rms_degrees": {
+          "status": "pass",
+          "value": 0.16077886521816254,
+          "bound": 5.0,
+          "operator": "<="
+        },
+        "vertical_velocity_rms_mps": {
+          "status": "pass",
+          "value": 0.027375653386116028,
+          "bound": 0.04,
+          "operator": "<="
+        },
+        "nonfoot_fraction": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 0.001,
+          "operator": "<="
+        },
+        "computed_demand_over_rating_fraction": {
+          "status": "pass",
+          "value": 0.0,
+          "bound": 0.005,
+          "operator": "<="
+        }
+      },
+      "metrics": {
+        "base_height_std_m": 0.001425336580723524,
+        "base_height_peak_to_peak_m": 0.00584130734205246,
+        "tilt_rms_degrees": 0.16077886521816254,
+        "tilt_p95_degrees": 0.2993614673614502,
+        "maximum_tilt_degrees": 0.3244549334049225,
+        "vertical_velocity_rms_mps": 0.027375653386116028,
+        "vertical_velocity_abs_p95_mps": 0.068184994161129,
+        "mean_velocity_mps": [
+          4.287326009274771e-05,
+          6.592889867081627e-05,
+          0.0002220767738135477
+        ],
+        "planar_error_mps": 0.00826248114614785,
+        "planar_velocity_rmse_mps": 0.008863023123264717,
+        "yaw_error_rad_s": 0.08894254150655775,
+        "yaw_rate_rmse_radps": 0.11443280757681101,
+        "mean_yaw_rate_rad_s": -0.18098056363951143,
+        "roll_pitch_angular_velocity_rms_radps": 0.04912629375340828,
+        "roll_pitch_angular_velocity_p95_radps": 0.10645429036257496,
+        "requested_saturation_fraction_400hz": 0.0,
+        "maximum_requested_saturation_fraction_400hz": 0.0,
+        "computed_demand_over_rating_fraction": 0.0,
+        "maximum_per_joint_computed_demand_over_rating_fraction": 0.0,
+        "maximum_computed_over_rating_burst_s": 0.0,
+        "peak_abs_computed_nm": 1.2630243301391602,
+        "max_per_joint_rms_applied_nm": 0.72602379322052,
+        "nonfoot_fraction": 0.0
+      },
+      "native_motor_and_joint_checks_pass": true,
+      "native_contact_screen": {
+        "schema": "canonical_native_contact_screen_v1",
+        "frequency_hz": 400,
+        "window": "complete trial, including initial settling and every native substep",
+        "recorded_substeps": 8000,
+        "nonfoot_substeps": 0,
+        "nonfoot_fraction": 0.0,
+        "maximum_nonfoot_fraction": 0.001,
+        "pass": true,
+        "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+      },
+      "controls": 1000,
+      "native_substeps": 8000,
+      "files_sha256": {
+        "control_trace.npz": "9cee5b2215ef030f62edba08af483d39ed4bbcf7dca572906cc16a59856baacd",
+        "controller.jsonl": "b78869005a0317212575cfb6ae8f60923796f472d7c959a9ed1413685f1363ff",
+        "declaration.json": "d1ac1c512ae5ca782fef101ad7f40ebf383a852afd861be044c2daa9d5ca16a9",
+        "first_frame.png": "0ed9e57fb44dbeaa42c2adb35af18dcd2e34fc84d4f538ff419853f5c4deee36",
+        "force_metrics.json": "b93a1d9702eef6bf4aec042eca4c8b8aa4b93c00143359a76586c13dc9220a15",
+        "native400hz/capture.json": "0ffcdca7c8d7e2ca11e0665512f0cd1c27cd9b3e8adfaa95b86f716974dad656",
+        "native400hz/contacts.jsonl": "74fc155769d8965bdbc60bface00d6b92adf06aed0df84d73e08d9ee6297fcd0",
+        "native400hz/initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+        "native400hz/substeps_000.npz": "68c0dd7b9df863b0f1a8b6a1e05f3028d60483a8ce17f60f4aa472b4a94413db",
+        "native400hz/substeps_001.npz": "6265c1a4dcc0c18fd5366e32ee07a5bf3178d0f4c713f578a037eef09b5f3600",
+        "native400hz/substeps_002.npz": "a0942f0c7b48c3209a97afd6af72e38f256a545443daef4cda6ae4c9209cbacc",
+        "native400hz/substeps_003.npz": "88156398a07a058eddb9073d2d49f661329148f1634da3120d01d282dd374ea5",
+        "native400hz/substeps_004.npz": "41a43abab0c851241535269017564ab711f7c900e2be60da44f9b7536dd0bc79",
+        "native400hz/substeps_005.npz": "35c798a12c362397c5e95c4bbeaef667fbdedf4c36786f4059bdcdcf48c146fd",
+        "native400hz/substeps_006.npz": "f7e5e726b3d4ece8d06198f85ed80604540ea5e935c62bc351cbc193cc1fc429",
+        "native400hz/substeps_007.npz": "c183639e23acaff707c6d21c8646843372b50a2c0b6d0a1174fb643ca28eb6e5",
+        "native400hz/substeps_008.npz": "530b12df0d0f8b1a10078fe18ddf7f0c5bd3a87f542bf3df76117551c2fc4e74",
+        "native400hz/substeps_009.npz": "fbad677233bd366add9721ac2d0addb0febdc8a1025c383e37a5945e551aa2c2",
+        "report.json": "4ca0adc2f17939e5fb47c4a3ea78e1c51222bf1baa5276d1df5aa00e23e90f56",
+        "rollout.mp4": "e5bd2f7bf139a391b8dffdcf5f9dfd927c086655a6d0711c1c1318da9e05a39f"
+      },
+      "remote_trial": "/home/orionh/HEXAPOD_runs/restart_20260914/tripod_20260921_001/retimed0_screen_007/run/standing/trial_002"
+    }
+  ],
+  "stage2_complete": false,
+  "terrain_complete": false,
+  "visual_acceptance": false,
+  "analysis_script_sha256": "ffe7c3b95cc34a0e36e0c1f9c41e852beb93c204833c5cbe6af7819c5258dd91"
+}

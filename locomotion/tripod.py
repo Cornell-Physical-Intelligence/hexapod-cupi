@@ -57,6 +57,26 @@ def displacement_clock(progress, ramp):
     return v*(progress-ramp/2.)
 
 
+def feedback_blend(state, elapsed, duration):
+    if state == 'walk':
+        return 1.
+    if state in ('start', 'settle'):
+        blend = .5*(1.-math.cos(math.pi*min(1., elapsed/duration)))
+        return blend if state == 'start' else 1.-blend
+    return 0.
+
+
+def feedback_target(reference, servo_target, measured, neutral, lower, upper, gain, blend):
+    """Bound encoder-error feedback through the existing motor-target envelope."""
+    measured = np.asarray(measured, float)
+    if measured.shape != (18,) or not np.isfinite(measured).all():
+        raise ValueError('Joint feedback requires 18 finite measured positions')
+    offset = np.clip(blend*gain*(reference-measured), -.070, .070)
+    requested = servo_target+offset
+    bounded = np.clip(requested, np.maximum(lower, neutral-.35), np.minimum(upper, neutral+.35))
+    return bounded, offset, bool(np.any(bounded != requested))
+
+
 class TripodController:
     def __init__(self, neutral, lower, upper, config=None, *, model=None, toe_local_points=None):
         self.cfg = config or TripodConfig()

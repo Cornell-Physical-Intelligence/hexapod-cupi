@@ -747,6 +747,22 @@
         "result": "interrupted",
         "text": "The declared clock retains the joint path and changes its timing, with unchanged motor limits and gates. CPU checks cover contact transitions, stops and both clearance modes. The launcher detected unrelated CUDA compute and removed its owned container. We retain 800 substeps from controls 0\u201399 with no final motion score; native launches await allocation coordination.",
         "source": "site/assets/tripod_retimed_20260922_001/interrupted.json"
+      },
+      {
+        "id": "zhang-tripod-retimed-native-20260922-007",
+        "title": "We reduce tracking error with the phase clock",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "failed",
+        "text": "Forward error falls to 0.03031 m/s and left/right yaw errors to 0.08860/0.08894 rad/s, above the unchanged 0.025 and 0.06 gates. Native motor and contact checks pass. The recorded forward cycle has 17% negative-speed controls, with support-joint errors above swing errors. We retain 36 failed completed trials and one interrupted attempt.",
+        "source": "site/assets/tripod_retimed_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-feedback-cpu-20260922-008",
+        "title": "We declare bounded joint feedback through motor targets",
+        "backend": "CPU encoder/contact replay and transition fixtures; native motion unqualified",
+        "result": "inconclusive",
+        "text": "Two candidates add proportional joint-error feedback with gains 0.5 and 1.0. Each correction stays within 0.070 rad. Recorded-input replay preserves the joint/action envelope and 0.040 rad slew limit; it does not establish native stability. Actuator gains, torque-speed limits and acceptance gates remain unchanged.",
+        "source": "site/assets/tripod_feedback_20260922_001/cpu_replay.json"
       }
     ]
   },

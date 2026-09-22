@@ -9,7 +9,7 @@ import traceback
 import numpy as np
 
 from .env_config import EnvConfig, JOINT_NAMES, MODEL_SHA256, USD_SHA256, sha, verify_assets
-from .tripod import TripodController, damping_target, supported
+from .tripod import TripodController, damping_target, feedback_blend, feedback_target, supported
 from .tripod_config import SWEEPS
 
 
@@ -74,6 +74,15 @@ class NativeController:
         if self.controller.cfg.damping_compensation:
             if not self.controller.fault:
                 desired = damping_target(target, self.previous_reference)
+                if self.controller.cfg.joint_feedback_gain:
+                    c = self.controller
+                    blend = feedback_blend(c.state, c.elapsed, c.cfg.transition_s)
+                    measured = samples[-1]['joint_position_rad'][0] if samples else target
+                    desired, offset, clipped = feedback_target(target, desired, measured,
+                        c.neutral.reshape(18), c.lower.reshape(18), c.upper.reshape(18),
+                        c.cfg.joint_feedback_gain, blend)
+                    state.update(joint_feedback_blend=blend, joint_feedback_offset_rad=offset.tolist(),
+                                 joint_feedback_target_clipped=clipped)
                 try:
                     self.controller._validate_target(desired.reshape(6, 3))
                 except ValueError:

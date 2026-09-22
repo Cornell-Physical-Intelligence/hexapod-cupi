@@ -433,6 +433,49 @@ verified container absence and the retained reservation. You must resolve
 allocation contention before a fresh attempt. The 33 completed motion
 trials remain failed; this partial attempt supplies no acceptance result.
 
+### Retimed native result and joint feedback declared on 22 September 2026
+
+You retain the [three completed retimed screens](../site/assets/tripod_retimed_native_20260922_001/result.json)
+and the [measured cycle comparison](../site/assets/tripod_retimed_native_20260922_001/cycle_comparison.json).
+Forward error falls to
+0.03031 m/s, and left/right yaw errors fall to 0.08860/0.08894 rad/s. These
+values exceed the unchanged 0.025 m/s and 0.06 rad/s limits. Native motor
+and contact checks pass. You retain 36 failed completed motion trials and
+one interrupted attempt.
+
+In forward controls 233–292, you measure 17% negative-speed controls. The
+mean support-joint errors are about -2.90° at the femur and +3.83° at the
+tibia; swing errors are smaller. A finite-difference estimate from the
+nominal support feet has 0.00795 m/s error, against 0.03047 m/s from actual
+joint motion. This estimate omits angular correction and uses interval
+velocities. It supports a joint-tracking diagnostic without assigning the
+full error to one cause.
+
+You declare two `feedback` candidates with gains 0.5 and 1.0. Both retain
+the retimed path, period and lift. You add bounded proportional joint-error
+feedback through the existing motor-target input:
+
+```text
+offset = clip(blend * gain * (q_reference - q_measured), -0.070, +0.070)
+target = clip(q_reference + KD*qdot_reference/12 + offset, target_bounds)
+```
+
+You read the last measured joint positions from the preceding native control.
+You ramp `blend` from zero to one during the existing startup cosine blend,
+and from one to zero during settling. You use one during walking and zero
+during idle or clearance changes. You retain the joint limits and neutral
+±0.35 rad target envelope, then apply the 0.040 rad / 20 ms limiter. You
+record the feedback offset and target clipping for each control.
+
+You keep the actuator gains and torque-speed limits unchanged. This outer
+feedback changes closed-loop stiffness and is a declared controller
+adaptation to the prescribed-motion simulation in paper §5.2.1. It does not
+force measured joint positions or change physics. You screen gain 0.5 first,
+then gain 1.0 if needed, before qualification and clearance suites. You
+retain the existing acceptance limits and report unexecuted candidates.
+You can inspect the [feedback declaration](../site/assets/tripod_feedback_20260922_001/declaration.json)
+and [recorded-input replay](../site/assets/tripod_feedback_20260922_001/cpu_replay.json).
+
 ## Foundation commands
 
 ```sh
