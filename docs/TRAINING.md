@@ -255,6 +255,33 @@ predict 25.7 mm and 34.4 mm of lift; native measurement must still establish
 reset requirements. You preserve the original captures and source packs,
 including prepared choices that a source correction supersedes before execution.
 
+### Complete-cycle diagnosis on 22 September 2026
+
+You can inspect the [cycle measurements](../site/assets/tripod_cycle_20260922_001/cycle_metrics.json)
+from candidate 0's larger-lift forward run. Controls 190–262 cover the first
+complete A/B cycle starting after 3.5 seconds. Replay matches all 1,000 logged
+controller targets, and approved-model forward kinematics match the captured
+toe positions within 0.3 micrometres.
+
+We measure a 1.46-second cycle against the 1.2-second setting, including 0.26
+seconds of touchdown waits. Rear-foot touchdown precedes front-foot touchdown;
+the controller extends the front legs during recovery. Median forward speed
+is 0.0081 m/s, and 23.3% of controls have negative forward speed in this cycle.
+Eleven complete cycles retain the surge and recoil pattern.
+
+The commanded support triangle has edge-length ranges of 27.9–28.6 mm on
+two edges per half-cycle. Fixed ground contacts cannot follow these targets
+through rigid body motion. The contact-point calculation estimates median
+tangential speeds of 0.23–0.59 mm/s per foot, with brief spikes. This estimate
+uses consecutive tibia poses and current contact patches; the recorder does
+not supply tangential friction force. Toe-landmark displacement includes
+rotation of the foot shape. We retain joint tracking and touchdown timing as
+coupled contributors; these measurements do not isolate one cause.
+
+Finish the declared slower-period screens before choosing another adaptation.
+Keep any change to the paper's joint equations distinct from a parameter
+calibration. Retain the approved model, actuator limits and acceptance gates.
+
 ## Foundation commands
 
 ```sh

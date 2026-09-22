@@ -315,6 +315,7 @@ def score_case(data, metadata, case):
                                  for key in row['missing_evidence']]}
 
 
+@torch.inference_mode()
 def run_batch(env, policy, cases, output, geometry_extrema, *, checkpoint_sha256, source_sha256,
               seed=27057, video_case_id=None, progress=None, max_wall_seconds=None):
     """One initial reset, full fixed-duration trials; a failure preserves prefixes."""
