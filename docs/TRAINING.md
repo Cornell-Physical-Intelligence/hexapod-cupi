@@ -748,6 +748,11 @@ You retain the actuator limits and geometry acceptance targets.
 You retain the [completed screen](../site/assets/tripod_speed_lift_20260922_001/native_result.json),
 [radial direction correction](../site/assets/tripod_speed_lift_20260922_001/radial_direction_correction.json)
 and [new candidate declaration](../site/assets/tripod_speed_lift_20260922_001/declaration.json).
+The [completed speed-lift screen](../site/assets/tripod_speed_lift_native_20260922_001/native_result.json)
+passes all three commands. Forward planar error is 0.01078 m/s, with zero
+scored torque-demand excess. Left/right yaw errors are 0.03434/0.03459 rad/s.
+Measured forward toe lift is 15.1–15.9 mm. You proceed to the frozen
+canonical qualification suite and retain the full native captures.
 
 ## Foundation commands
 

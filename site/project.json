@@ -326,6 +326,29 @@
       "caption": "First native frame of the passing canonical forward trial on the approved robot.",
       "controller": "Prescribed tripod; source 94ef3bffaccd8161eba39640db4b390e1fd0f29a375e658b365f97429d64a973",
       "evidence": "site/assets/tripod_forward_overlap_native_20260922_001/native_result.json"
+    },
+    {
+      "id": "tripod_speed_lift_native_20260922_001",
+      "title": "Prescribed tripod: passed low-speed forward screen",
+      "type": "video",
+      "role": "trajectory_experiment",
+      "path": "site/assets/tripod_speed_lift_native_20260922_001/rollout.mp4",
+      "sha256": "73675b75e4bcc771e71a6eab579db9d993e7aa1293f1193120a60ae029e6cdee",
+      "caption": "Approved detailed model. Forward 0.05 m/s and both turn screens pass. Forward planar error 0.01078 m/s, with zero scored torque-demand excess. Stops and raised clearance await qualification; real-time playback.",
+      "controller": "Prescribed tripod; source 94ef3bffaccd8161eba39640db4b390e1fd0f29a375e658b365f97429d64a973",
+      "evidence": "site/assets/tripod_speed_lift_native_20260922_001/native_result.json",
+      "poster_id": "tripod_speed_lift_native_20260922_001_poster"
+    },
+    {
+      "id": "tripod_speed_lift_native_20260922_001_poster",
+      "title": "Speed lift: first native frame",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/tripod_speed_lift_native_20260922_001/first_frame.png",
+      "sha256": "a0b65b29965e7de3673a1a4c6e74a0acb06d476d672a8518b13a2a731df7c006",
+      "caption": "First native frame of the passing low-speed forward screen on the approved robot.",
+      "controller": "Prescribed tripod; source 94ef3bffaccd8161eba39640db4b390e1fd0f29a375e658b365f97429d64a973",
+      "evidence": "site/assets/tripod_speed_lift_native_20260922_001/native_result.json"
     }
   ],
   "nodes": [
@@ -984,6 +1007,14 @@
         "result": "inconclusive",
         "text": "The candidate reduces predicted low-speed radial foot travel from about 26 mm to 4 mm and retains 19.7 mm nominal lift. It interpolates toward the passing lift at 0.10 m/s. CPU checks preserve high-speed, raised-mode and yaw targets within 180 locomotion tests. This tests the loading hypothesis; contact-force measurements do not isolate its cause.",
         "source": "site/assets/tripod_speed_lift_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-speed-lift-native-20260922-019",
+        "title": "We pass the revised forward and turn screens",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "passed",
+        "text": "All three commands pass. Forward planar error is 0.01078 m/s with zero scored computed torque-demand excess. Left/right yaw errors are 0.03434/0.03459 rad/s. Forward toe lift is 15.1\u201315.9 mm against the 12 mm low-mode target. Canonical qualification follows; controlled stops and raised clearance remain pending.",
+        "source": "site/assets/tripod_speed_lift_native_20260922_001/native_result.json"
       }
     ]
   },
