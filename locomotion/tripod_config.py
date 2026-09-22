@@ -7,8 +7,8 @@ import math
 class TripodConfig:
     period_s: float = 1.2
     hip_amplitude_rad: float = .12
-    low_lift_rad: tuple = (.20, -.15)
-    raised_lift_rad: tuple = (.25, -.20)
+    low_lift_rad: tuple = (.35, -.30)
+    raised_lift_rad: tuple = (.45, -.35)
     raised_offset_rad: tuple = (-.15, .15)
     transition_s: float = 1.
     contact_on_n: float = 2.

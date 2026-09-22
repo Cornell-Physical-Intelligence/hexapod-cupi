@@ -198,6 +198,9 @@ class TripodController:
         desired = base.copy()
         desired[:, 0] += self._hip()*hip
         desired[:, 1:] += self.pitch_hold
+        # Return a landed leg to the paper's zero-lift stance over its support half-cycle.
+        stance_return = .5*(1.+math.cos(math.pi*self.progress))
+        desired[~swing, 1:] = base[~swing, 1:]+stance_return*self.pitch_hold[~swing]
         moving = swing & ~self.landed
         pitches = lift[:, None]*self.lift(self.mode)
         if self.progress < .5:
@@ -213,6 +216,7 @@ class TripodController:
                 if self.stopping:
                     self._begin_blend('settle', base)
                 else:
+                    self.pitch_hold[~swing] = 0.
                     self.half += 1; self.progress = 0.
                     self.swing_start = self.pitch_hold.copy()
                     self.seen_off.fill(False); self.landed.fill(False)

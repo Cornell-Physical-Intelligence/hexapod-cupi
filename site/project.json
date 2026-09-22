@@ -234,6 +234,29 @@
       "caption": "First frame of the final policy test on the approved model.",
       "controller": "1d039d9d566490398b1b1bd0603f7ff77b1c54228d30a63bd296799f6e1703f9",
       "evidence": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
+    },
+    {
+      "id": "tripod_native_20260922_001",
+      "title": "Prescribed tripod: failed forward screen",
+      "type": "video",
+      "role": "trajectory_experiment",
+      "path": "site/assets/tripod_native_20260922_001/rollout.mp4",
+      "sha256": "68005f69c9f90d7a7b497314fe88bdcdd16e0714d3973685821c190ec1b1b981",
+      "caption": "Approved detailed model. Mean forward speed 3.37 cm/s against 5 cm/s. Tracking and torque demand fail. Prescribed controller with larger lift; real-time playback.",
+      "controller": "Prescribed tripod; source 85499220d5e32bfd8071c24d6a180f26e9672bd66fcb2b0edb3b1508481cc0f5",
+      "evidence": "site/assets/tripod_native_20260922_001/result.json",
+      "poster_id": "tripod_native_20260922_001_poster"
+    },
+    {
+      "id": "tripod_native_20260922_001_poster",
+      "title": "Prescribed tripod: first frame",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/tripod_native_20260922_001/first_frame.png",
+      "sha256": "b35677b7587a05a95a60244aa1ad3171ed4f1f994d56a8de447adc2833f87d7f",
+      "caption": "First native frame of the failed forward screen on the approved model.",
+      "controller": "Prescribed tripod; source 85499220d5e32bfd8071c24d6a180f26e9672bd66fcb2b0edb3b1508481cc0f5",
+      "evidence": "site/assets/tripod_native_20260922_001/result.json"
     }
   ],
   "nodes": [
@@ -660,6 +683,14 @@
         "result": "inconclusive",
         "text": "The prescribed controller passes 17 CPU checks for phasing, contact transitions and stopping. The user deferred native runs after the GPU jobs stopped with preserved restart records. Native admission, terrain and Stage 2 remain incomplete.",
         "source": "site/assets/tripod_20260921/result.json"
+      },
+      {
+        "id": "zhang-tripod-native-20260922-001",
+        "title": "Tripod standing admission passes; motion tracking fails",
+        "backend": "Isaac Sim; approved 19-body robot; native 400 Hz capture",
+        "result": "failed",
+        "text": "One-robot and 32-robot standing admission pass with local raw recomputation. Fifteen motion attempts retain force, torque and video evidence. The first completed forward and turn screens fail tracking. Remaining timing choices and criteria 4\u20135/7 remain pending; Stage 2 and terrain stay incomplete.",
+        "source": "site/assets/tripod_native_20260922_001/result.json"
       }
     ]
   },

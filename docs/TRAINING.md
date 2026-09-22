@@ -140,7 +140,7 @@ in root height for fixed foot height, from 97.8 to 108.8 mm. You measure root
 height here; the authors report 60/180 mm chassis clearances (Figure 4).
 You require a measured raised-minus-low root height of at least 8 mm after
 settling. You report chassis clearance from mesh geometry. Low swing offsets
-are `(B,C)=(+0.20,-0.15)` rad; raised offsets are `(+0.25,-0.20)` rad.
+are `(B,C)=(+0.35,-0.30)` rad; raised offsets are `(+0.45,-0.35)` rad.
 You target at least 12 mm and 16 mm toe lift above each mode's stance plane.
 You keep the 0.35 rad action envelope and 0.040 rad/20 ms limiter.
 
@@ -162,8 +162,9 @@ You require six contacts before startup and blend to the first sweep endpoint
 over one second. You run each half-cycle with one swing tripod. You accept
 touchdown on descent after measured liftoff, freeze that foot's pitch, and
 continue its hip sweep. You hold the next half-cycle until the landing tripod
-supports the robot. At the next lift, you blend from the retained touchdown
-pitch into the sinusoidal lift to avoid an angle jump.
+supports the robot. During that tripod's support half-cycle, you return its
+retained touchdown pitch to the mode stance with a cosine blend. This restores
+the zero-lift part of Eqs. (2)–(3) before its next swing and avoids an angle jump.
 
 You use distal contact-normal force from the preceding eight native samples,
 with mean magnitude at least 2 N for contact and at most 1 N for release.
@@ -189,8 +190,9 @@ with hip amplitudes 0.12 and 0.18 rad, four candidates total. At 0.05 m/s
 or 0.20 rad/s you use that amplitude; forward amplitude scales with command
 and caps at 0.30 rad. You screen forward and both yaw signs for each candidate
 on flat ground. You select the first candidate that passes all three screens,
-in the declared order, then freeze it for qualification. You do not expand
-the sweep or change motor/model limits after failure.
+in the declared order, then freeze it for qualification. You keep these four
+timing/hip choices for each source correction. Before a geometry revision,
+you record its native evidence and declare its offsets. You preserve motor/model limits.
 
 | Phase | Cases and unchanged checks |
 | --- | --- |
@@ -204,6 +206,10 @@ the sweep or change motor/model limits after failure.
 You record video and 400 Hz ground-contact force plus requested/applied torque
 through the existing evaluation pipeline. You bind source, model, input and
 configuration hashes, retain failures, and report each parameter change.
+For the 36-second clearance-switch capture, you apply the unchanged 20-second
+static scorer to controls 0–999 and 800–1799. The overlapping windows cover
+the scored interval after the initial two seconds. Both windows must pass;
+the native contact and motor checks retain the full 36-second capture.
 You do not infer physical success from CPU checks. Failed flat qualification
 blocks terrain; failed terrain leaves terrain reproduction incomplete.
 You may use accepted native transitions as future AMP demonstrations after
@@ -231,6 +237,23 @@ The flat-ground runner includes torque/contact capture and video recording,
 but it supplies no measured native evidence yet. Terrain capture and testing
 remain pending behind flat qualification. Future AMP work must wait for
 accepted native demonstrations, including supported turns and stops.
+
+### Native corrections declared on 22 September 2026
+
+The one-robot and 32-robot standing captures pass after reservation restoration.
+The first controller retained early-touchdown pitch throughout stance; nine
+screens ended with a liftoff fault. You now return that offset to zero during
+the support half-cycle. With this correction and the original lift offsets,
+candidate 0 completed its forward and left-turn screens but failed tracking.
+The forward capture showed 3–11 mm toe-height ranges and 0.051 m/s mean planar
+error against the unchanged 0.025 m/s limit. These are failed native results.
+
+You declare a second geometry adaptation before dispatch: low pitch offsets
+`(+0.35,-0.30)` rad and raised offsets `(+0.45,-0.35)` rad. Forward kinematics
+predict 25.7 mm and 34.4 mm of lift; native measurement must still establish
+12 mm and 16 mm. You retain the four period/hip choices above and independent
+reset requirements. You preserve the original captures and source packs,
+including prepared choices that a source correction supersedes before execution.
 
 ## Foundation commands
 

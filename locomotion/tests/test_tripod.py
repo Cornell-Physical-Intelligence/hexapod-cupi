@@ -149,6 +149,20 @@ class TripodTests(unittest.TestCase):
         np.testing.assert_array_equal(c.target, held)
         c.reset(); self.assertIsNone(c.fault)
 
+    def test_touchdown_offset_returns_to_stance_before_next_lift(self):
+        c = make(); offsets = []
+        for _ in range(145):
+            half = c.half
+            c.step([.05, 0, 0], measured_fixture(c, touchdown=.6))
+            if half == 1:
+                offsets.append((c.target-c.neutral)[TRIPOD_A, 1:].copy())
+        self.assertIsNone(c.fault)
+        self.assertGreater(len(offsets), 10)
+        values = np.asarray(offsets)
+        self.assertGreater(abs(values[0]).max(), .05)
+        self.assertTrue(np.all(np.diff(abs(values), axis=0) <= 1e-12))
+        np.testing.assert_allclose(values[-1], 0., atol=1e-12)
+
     def test_stance_loss_and_absent_initial_contact_fault(self):
         c = make()
         for _ in range(110): c.step([.05, 0, 0], np.zeros(6))
@@ -240,6 +254,42 @@ class TripodTests(unittest.TestCase):
                 for _ in range(130): c.step([0, 0, 0], measured_fixture(c), mode)
                 self.assertTrue(c.stopped, (command, mode, c.snapshot()))
                 np.testing.assert_allclose(c.target, c.stance(mode), atol=1e-12)
+
+
+class ExtendedClearanceScoringTests(unittest.TestCase):
+    def score(self, data, windows=None):
+        from locomotion.evaluate import score_case
+        return score_case(data, {'profile': 'omni_static', 'command': [.05, 0., 0.],
+            'contact_classification': 'exact_distal_points'},
+            {'profile': 'omni_static', 'controls': 1800,
+             'score_control_windows': [[0, 1000], [800, 1800]] if windows is None else windows})
+
+    def test_full_switch_capture_uses_original_static_thresholds(self):
+        from locomotion.tests.test_evaluation import fixture, score
+        data = fixture(1800, (.05, 0., 0.))
+        result = self.score(data)
+        self.assertTrue(result['pass'])
+        for row, (start, end) in zip(result['window_reports'], ((0, 1000), (800, 1800))):
+            expected = score({k: v[start:end] for k, v in data.items()}, 'omni_static', command=[.05, 0., 0.])
+            self.assertEqual(row, expected)
+
+    def test_prefix_or_failure_in_either_window_cannot_pass(self):
+        from locomotion.tests.test_evaluation import fixture
+        for index in (20, 850, 1799):
+            data = fixture(1800, (.05, 0., 0.)); data['terminated'][index] = 1
+            self.assertFalse(self.score(data)['pass'])
+        data = fixture(1500, (.05, 0., 0.))
+        self.assertFalse(self.score(data)['pass'])
+        data = fixture(1800, (.05, 0., 0.)); data['velocity_navigation_mps'][1100:, 0] = -.1
+        self.assertFalse(self.score(data)['pass'])
+
+    def test_window_gap_and_shortened_duration_are_rejected(self):
+        from locomotion.tests.test_evaluation import fixture
+        data = fixture(1800, (.05, 0., 0.))
+        for windows in ([[0, 1000]], [[100, 1100], [800, 1800]], [[0, 900], [800, 1800]],
+                        [[0, 1000], [950, 1950]], [[0, 1000], [800., 1800]], []):
+            with self.assertRaises(ValueError):
+                self.score(data, windows)
 
 
 if __name__ == '__main__':

@@ -29,7 +29,8 @@ def cases_for(suite):
     if suite == 'clearance':
         return [{'case_id': 'tripod:'+mode+':'+name, 'profile': 'omni_static',
                  'command': command, 'controls': 1800 if mode == 'switch' else 1000,
-                 'clearance': mode}
+                 'clearance': mode,
+                 **({'score_control_windows': [[0, 1000], [800, 1800]]} if mode == 'switch' else {})}
                 for mode in ('low', 'raised', 'switch')
                 for name, command in [('forward', [.05, 0., 0.]),
                                        ('left', [0., 0., .2]), ('right', [0., 0., -.2])]]
