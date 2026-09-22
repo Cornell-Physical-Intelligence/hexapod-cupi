@@ -112,7 +112,32 @@ revolute-joint motion in Figure S6. It supplies no controller code or additional
 gait parameters. Its linked Google Drive video was inaccessible through the
 research tool on 21 September 2026; video inspection remains incomplete.
 
-### Equations and geometry adaptation
+### Current evaluated variant
+
+You select the current candidate with `--tripod-adaptation stop_stride
+--candidate 0`. You retain the original equations under `paper` and the
+intermediate variants for replay of their frozen results. The passing screens
+and stop repeats use the adaptations below; they do not validate the original
+sinusoidal targets on this robot.
+
+| Component | Current declared behavior |
+| --- | --- |
+| Geometry | Compute joint sweep coefficients from the approved toe Jacobians, the command and a 1.2 s period. Use low stance `(0,-0.30,0.40)` rad and raised stance `(0,-0.45,0.50)` rad. |
+| Support motion | Use a linear support sweep. Return the swing feet between half-cycle fractions 0.15 and 0.80, with cosine speed ramps for forward motion and a cubic return for yaw. Retain measured touchdown and bounded recovery. |
+| Forward lift | Use pitch offsets `(+0.26,-0.20)` rad at commands through 0.05 m/s, interpolate to `(+0.25,0)` at 0.10 m/s, and use `(+0.28,-0.10)` in raised mode. Yaw retains the geometry-derived lift. |
+| Servo tracking | Add nominal damping compensation, position-error gain 0.5 and velocity-error gain 2 with a 5 Hz filter. Preserve the motor limits, action envelope and target limiter. |
+| Start and stop | For forward starts, hold the stance for one second, then grow stride over one cycle. For yaw starts, blend to the first sweep endpoint. At a stop, finish the current swing and reduce stride over one full cycle before the standing hold. Use this stop for command and mode changes. |
+
+You can inspect the [three passing motion screens](../site/assets/tripod_speed_lift_native_20260922_001/native_result.json)
+and [six passing stop trials](../site/assets/tripod_stop_stride_native_20260922_001/native_result.json).
+Full qualification, raised clearance and terrain remain pending. The sections
+below retain the equations, declarations and measured failures for each variant.
+You can inspect the [forward comparison](../site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.png)
+and its [source identities and measurements](../site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.json).
+We retain the [qualification interruptions](../site/assets/tripod_qualification_recovery_20260922_001/qualification_interruptions.json).
+The completed cases pass; competing CUDA jobs interrupted acquisition.
+
+### Original equations and geometry adaptation
 
 You implement Eqs. (1)–(3) with phase `u = omega*t + phi`:
 

@@ -1,0 +1,528 @@
+{
+  "schema": "tripod_forward_comparison_v1",
+  "controls": [
+    100,
+    999
+  ],
+  "control_period_s": 0.02,
+  "results": [
+    {
+      "pack": "candidate0_screen_003",
+      "trial": "trial_000",
+      "identity": {
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "source_files": {
+          "__init__.py": "c82a5695bd2575afdaae01eb84bb3c06ddffe42529d201bbe43726ae8859e350",
+          "admission.py": "1391aed5939b882e2ca0967bd8eda6103bf73e46206f8d6c0091f8463b1e70c3",
+          "camera.py": "6c9927cfa747408e3206e170386483791ac696634f1e322e4a6222b32396655d",
+          "env.py": "78bb1cec6bdbc0535a147693fe2d2d0477c61bc49b509dd9461bc8cf6c2d6cfe",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+          "evaluate.py": "6158616d3b7d27002fcb35eebc5d006979a6fa15c9904b169e72b39149eecdc8",
+          "evaluation.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
+          "evaluation_config.py": "7d55733f4f5a471427b408a4b3a0e834d083a687f7ae0ebc3ceb0d16c23f3cb7",
+          "force_metrics.py": "5bd228d003d4ab71dbda6acbb9fdbf357a36ec007050b156bdd71ec31c707673",
+          "inputs.py": "0a4ff5170754654dc25ee745b128ae19f5901d6df4005a98e3584dec68b02b96",
+          "launch.py": "a3fee8a65d00ae6946867928974661f796d4bf905ca3dda3be573e75665c34d3",
+          "ppo.py": "bb1b44215580e30786bb16271a2dae996b19a41fc43a0588cc4591b18a5d4a65",
+          "prepare.py": "488245b90a1eea302643132763f219db6311f5d8cab64a7de067f5a50deeb7dc",
+          "reservation.py": "037162e879e94f6dd05210dfb5ee81fc5d1195c65ad6209ecbfd9f1b62df21f7",
+          "task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+          "train.py": "02866cf197673d65a95391f957b1ea8df8192f8b964813641f5ea517b0890c2d",
+          "tripod.py": "3df5f938469ced8f88b56c6c5f7cf2be431c32e5ab35f9a2e87811c046569aa3",
+          "tripod_config.py": "7dea07c858b6c0c4e8683df4d42ae871136009847213750abab7e76bf125acdf",
+          "tripod_evaluate.py": "9b39011ae993c1ca4fda1312c8ae860192bac9d8985dd6ce4d501c360c6e7494"
+        },
+        "source_freeze_sha256": "85499220d5e32bfd8071c24d6a180f26e9672bd66fcb2b0edb3b1508481cc0f5",
+        "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+        "config": {
+          "num_envs": 1,
+          "spacing_m": 2.0,
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "episode_seconds": 60.0,
+          "action_scale_rad": 0.35,
+          "target_slew_rad": 0.04,
+          "reset_height_m": 0.08161108940839767,
+          "command_forward_mps": 0.1,
+          "command_left_mps": 0.0,
+          "command_yaw_rad_s": 0.0,
+          "seed": 20260921,
+          "record_motion_features": true,
+          "render": true,
+          "device": "cuda:0",
+          "schema": "canonical_paper_walk_experiment_v1",
+          "actor_width": 231,
+          "critic_width": 234,
+          "amp_width": 61,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "legs": [
+            "lf",
+            "lm",
+            "lr",
+            "rf",
+            "rm",
+            "rr"
+          ],
+          "standing_admission": false,
+          "stage2_complete": false,
+          "prior_standing_failure_superseded": false,
+          "authorization": "User explicitly requested experimental paper-based PPO training on the confirmed model.",
+          "telemetry_scope": "Compact native body-force telemetry; no exact toe/shaft patch classification or formal standing admission."
+        },
+        "controller": {
+          "schema": "zhang_tripod_geometry_adaptation_v1",
+          "period_s": 1.2,
+          "hip_amplitude_rad": 0.12,
+          "low_lift_rad": [
+            0.35,
+            -0.3
+          ],
+          "raised_lift_rad": [
+            0.45,
+            -0.35
+          ],
+          "raised_offset_rad": [
+            -0.15,
+            0.15
+          ],
+          "transition_s": 1.0,
+          "contact_on_n": 2.0,
+          "contact_off_n": 1.0,
+          "debounce_controls": 2,
+          "recovery_s": 0.4,
+          "recovery_rate_rad_s": 0.1,
+          "initial_support_s": 2.0,
+          "control_dt_s": 0.02,
+          "target_slew_rad": 0.04,
+          "low_root_target_m": 0.0978,
+          "raised_root_target_m": 0.1088,
+          "minimum_root_increase_m": 0.008,
+          "minimum_toe_lift_m": {
+            "low": 0.012,
+            "raised": 0.016
+          },
+          "paper_doi": "10.3389/frobt.2024.1426269",
+          "stage2_complete": false
+        },
+        "candidate": 0,
+        "controller_kind": "prescribed_tripod",
+        "learned_policy": false,
+        "physics_source_files": {
+          "env.py": "78bb1cec6bdbc0535a147693fe2d2d0477c61bc49b509dd9461bc8cf6c2d6cfe",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "standing_admission": {
+          "schema": "hexapod_locomotion_standing_admission_v1",
+          "num_envs": 32,
+          "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+          "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+          "physics_source_files": {
+            "env.py": "78bb1cec6bdbc0535a147693fe2d2d0477c61bc49b509dd9461bc8cf6c2d6cfe",
+            "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+          },
+          "physics_config": {
+            "physics_dt": 0.0025,
+            "decimation": 8,
+            "spacing_m": 2.0,
+            "target_slew_rad": 0.04,
+            "action_scale_rad": 0.35,
+            "solver_position_iterations": 32,
+            "solver_velocity_iterations": 0,
+            "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+            "material_friction": [
+              1.0,
+              1.0
+            ],
+            "restitution": 0.0,
+            "external_forces_every_iteration": true,
+            "neutral_joint_position_rad": [
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4
+            ],
+            "reset_root_height_m": 0.10280231400684256
+          },
+          "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+          "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+          "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+          "one": {
+            "report_path": "/standing_one/standing/standing_report.json",
+            "report_sha256": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+            "state_path": "/standing_one/state.json",
+            "state_sha256": "25165127903b573755333d92236c779196013b37136fed302d4885ec67d60cb6"
+          },
+          "batch": {
+            "report_path": "/standing_batch/standing/standing_report.json",
+            "report_sha256": "28bf2e36f4081f6dcfbae8ad6bfd5c4992fc3527f7a66ffc54dccef56d7a8e96",
+            "state_path": "/standing_batch/state.json",
+            "state_sha256": "4564a416c05bca79ef8c72375b73d185181adc6ee68f3fb82eb35b127f1ba3e6"
+          }
+        }
+      },
+      "trace_sha256": "2a83fb3a47936648d59cbb788ff6e012d4cf3d71123e82e27d9fa401ba962c96",
+      "controller_sha256": "035286f86bd021a728d7f2decd91e711ae6e091f32ae5aef6bc9cc6ef4a9b527",
+      "report_sha256": "4f39afa6921b89019c59a99b0606b8ec2c0b37e96cbd8748b672e6f8205a50b5",
+      "numerical_pass": false,
+      "metrics": {
+        "median_forward_mps": 0.007640626894809979,
+        "forward_percentiles_5_95_mps": [
+          -0.02499033353056715,
+          0.11308922577654021
+        ],
+        "negative_forward_fraction": 0.27,
+        "joint_motor_target_rms_error_deg": 2.882432222366333,
+        "joint_nominal_target_rms_error_deg": 2.8824326085639154,
+        "mean_planar_tracking_error_mps": 0.04821322560187356
+      }
+    },
+    {
+      "pack": "speed_lift0_screen_019",
+      "trial": "trial_000",
+      "identity": {
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "source_files": {
+          "__init__.py": "c82a5695bd2575afdaae01eb84bb3c06ddffe42529d201bbe43726ae8859e350",
+          "admission.py": "1391aed5939b882e2ca0967bd8eda6103bf73e46206f8d6c0091f8463b1e70c3",
+          "camera.py": "6c9927cfa747408e3206e170386483791ac696634f1e322e4a6222b32396655d",
+          "env.py": "78bb1cec6bdbc0535a147693fe2d2d0477c61bc49b509dd9461bc8cf6c2d6cfe",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+          "evaluate.py": "5cb686c3daf4eed3b4a96501aa80f9f1a8465376782255a9860e5abb7dfd735c",
+          "evaluation.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
+          "evaluation_config.py": "7d55733f4f5a471427b408a4b3a0e834d083a687f7ae0ebc3ceb0d16c23f3cb7",
+          "force_metrics.py": "5bd228d003d4ab71dbda6acbb9fdbf357a36ec007050b156bdd71ec31c707673",
+          "inputs.py": "0a4ff5170754654dc25ee745b128ae19f5901d6df4005a98e3584dec68b02b96",
+          "launch.py": "a3fee8a65d00ae6946867928974661f796d4bf905ca3dda3be573e75665c34d3",
+          "ppo.py": "bb1b44215580e30786bb16271a2dae996b19a41fc43a0588cc4591b18a5d4a65",
+          "prepare.py": "dd37f2a200b21dedbff42e851816673b1f44e68432aa015fa00e9f18435dc409",
+          "reservation.py": "037162e879e94f6dd05210dfb5ee81fc5d1195c65ad6209ecbfd9f1b62df21f7",
+          "task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+          "train.py": "02866cf197673d65a95391f957b1ea8df8192f8b964813641f5ea517b0890c2d",
+          "tripod.py": "e028ab53031de6411169d7f7a47e9b418f5d1d1eef0d5cd7f5b4cc3158ded729",
+          "tripod_config.py": "95121f9021841daa6ee133d271dc59ddd74a683195da636e11af526389d1067c",
+          "tripod_evaluate.py": "94ef3bffaccd8161eba39640db4b390e1fd0f29a375e658b365f97429d64a973",
+          "tripod_kinematics.py": "3db69088e944a3773f16844e07ebebc4700662142770eb1a322ce500f5a016cc"
+        },
+        "source_freeze_sha256": "4512377d6c762ec846366acce6d91800a4eeed65fe89976e5c13907e0b93930b",
+        "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+        "config": {
+          "num_envs": 1,
+          "spacing_m": 2.0,
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "episode_seconds": 60.0,
+          "action_scale_rad": 0.35,
+          "target_slew_rad": 0.04,
+          "reset_height_m": 0.08161108940839767,
+          "command_forward_mps": 0.1,
+          "command_left_mps": 0.0,
+          "command_yaw_rad_s": 0.0,
+          "seed": 27057,
+          "record_motion_features": true,
+          "render": true,
+          "device": "cuda:0",
+          "schema": "canonical_paper_walk_experiment_v1",
+          "actor_width": 231,
+          "critic_width": 234,
+          "amp_width": 61,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "legs": [
+            "lf",
+            "lm",
+            "lr",
+            "rf",
+            "rm",
+            "rr"
+          ],
+          "standing_admission": false,
+          "stage2_complete": false,
+          "prior_standing_failure_superseded": false,
+          "authorization": "User explicitly requested experimental paper-based PPO training on the confirmed model.",
+          "telemetry_scope": "Compact native body-force telemetry; no exact toe/shaft patch classification or formal standing admission."
+        },
+        "controller": {
+          "schema": "zhang_tripod_geometry_adaptation_v1",
+          "period_s": 1.2,
+          "hip_amplitude_rad": 0.12,
+          "low_lift_rad": [
+            0.35,
+            -0.3
+          ],
+          "raised_lift_rad": [
+            0.45,
+            -0.35
+          ],
+          "raised_offset_rad": [
+            -0.15,
+            0.1
+          ],
+          "transition_s": 1.0,
+          "contact_on_n": 2.0,
+          "contact_off_n": 1.0,
+          "debounce_controls": 2,
+          "recovery_s": 0.4,
+          "recovery_rate_rad_s": 0.1,
+          "initial_support_s": 2.0,
+          "geometry_sweep_gain": 1.0,
+          "geometry_lift_m": [
+            0.022,
+            0.028
+          ],
+          "damping_compensation": true,
+          "phase_ramp_fraction": 0.1,
+          "joint_feedback_gain": 0.5,
+          "swing_lift_power": 1.0,
+          "joint_velocity_feedback_gain": 2.0,
+          "joint_velocity_filter_hz": 5.0,
+          "support_overlap": true,
+          "startup_stride_ramp": true,
+          "forward_support_overlap": true,
+          "forward_low_lift_rad": [
+            0.25,
+            0.0
+          ],
+          "forward_raised_lift_rad": [
+            0.28,
+            -0.1
+          ],
+          "speed_adapted_lift": true,
+          "forward_slow_lift_rad": [
+            0.26,
+            -0.2
+          ],
+          "trajectory_variant": "speed_lift",
+          "control_dt_s": 0.02,
+          "target_slew_rad": 0.04,
+          "low_root_target_m": 0.0978,
+          "raised_root_target_m": 0.1093,
+          "minimum_root_increase_m": 0.008,
+          "minimum_toe_lift_m": {
+            "low": 0.012,
+            "raised": 0.016
+          },
+          "paper_doi": "10.3389/frobt.2024.1426269",
+          "stage2_complete": false
+        },
+        "candidate": 0,
+        "controller_kind": "prescribed_tripod",
+        "learned_policy": false,
+        "physics_source_files": {
+          "env.py": "78bb1cec6bdbc0535a147693fe2d2d0477c61bc49b509dd9461bc8cf6c2d6cfe",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "standing_admission": {
+          "schema": "hexapod_locomotion_standing_admission_v1",
+          "num_envs": 32,
+          "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+          "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+          "physics_source_files": {
+            "env.py": "78bb1cec6bdbc0535a147693fe2d2d0477c61bc49b509dd9461bc8cf6c2d6cfe",
+            "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+          },
+          "physics_config": {
+            "physics_dt": 0.0025,
+            "decimation": 8,
+            "spacing_m": 2.0,
+            "target_slew_rad": 0.04,
+            "action_scale_rad": 0.35,
+            "solver_position_iterations": 32,
+            "solver_velocity_iterations": 0,
+            "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+            "material_friction": [
+              1.0,
+              1.0
+            ],
+            "restitution": 0.0,
+            "external_forces_every_iteration": true,
+            "neutral_joint_position_rad": [
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4
+            ],
+            "reset_root_height_m": 0.10280231400684256
+          },
+          "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+          "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+          "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+          "one": {
+            "report_path": "/standing_one/standing/standing_report.json",
+            "report_sha256": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+            "state_path": "/standing_one/state.json",
+            "state_sha256": "25165127903b573755333d92236c779196013b37136fed302d4885ec67d60cb6"
+          },
+          "batch": {
+            "report_path": "/standing_batch/standing/standing_report.json",
+            "report_sha256": "28bf2e36f4081f6dcfbae8ad6bfd5c4992fc3527f7a66ffc54dccef56d7a8e96",
+            "state_path": "/standing_batch/state.json",
+            "state_sha256": "4564a416c05bca79ef8c72375b73d185181adc6ee68f3fb82eb35b127f1ba3e6"
+          }
+        }
+      },
+      "trace_sha256": "1c2465cd232b4939874cb95be36f0d06206431f8e62abf3c5066c276e9aa24ff",
+      "controller_sha256": "d41a5808a8e6a1bc7a965092f427a1513a9abec176604765aaa9e857d2a71267",
+      "report_sha256": "d1260d2035ae50913be03186ebae7e9ccfcc927e443982bc0dc80deb8b71f2dc",
+      "numerical_pass": true,
+      "metrics": {
+        "median_forward_mps": 0.05537544883854284,
+        "forward_percentiles_5_95_mps": [
+          0.038324783407577404,
+          0.07107549376376505
+        ],
+        "negative_forward_fraction": 0.0,
+        "joint_motor_target_rms_error_deg": 2.2558882236480713,
+        "joint_nominal_target_rms_error_deg": 1.5292011384145172,
+        "mean_planar_tracking_error_mps": 0.010782832152109277
+      }
+    }
+  ],
+  "figure_sha256": "7e1eac820017c8e8735afa94e28cf72149204f292af763168be6a1c70a95348c",
+  "scope": "Compare complete flat forward captures after the first two seconds. The stop_stride variant retains speed_lift held-walking targets. Joint motor-target error includes the compensation offset; nominal target error measures trajectory tracking. The comparison does not isolate a single cause of improvement.",
+  "stage2_complete": false
+}

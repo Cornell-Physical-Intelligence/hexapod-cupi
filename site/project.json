@@ -1062,6 +1062,22 @@
         "result": "passed",
         "text": "The stride-decay controller passes all six canonical stop cases. Maximum quiet joint-speed RMS is 0.00518 rad/s against 0.030, with zero quiet torque saturation and no missing support substeps. Full qualification follows. Raised clearance and terrain remain pending.",
         "source": "site/assets/tripod_stop_stride_native_20260922_001/native_result.json"
+      },
+      {
+        "id": "zhang-tripod-qualification-interruptions-20260922",
+        "title": "We retain the qualification interruptions and passing prefixes",
+        "backend": "Isaac Sim; three interrupted attempts; approved 19-body robot",
+        "result": "interrupted",
+        "text": "We retain 20 completed passing cases across three interrupted qualification attempts. Competing CUDA jobs interrupted acquisition. We preserve each partial capture and exact-container cleanup. Full qualification remains incomplete.",
+        "source": "site/assets/tripod_qualification_recovery_20260922_001/qualification_interruptions.json"
+      },
+      {
+        "id": "zhang-tripod-forward-comparison-20260922",
+        "title": "We compare the original and adapted forward captures",
+        "backend": "Isaac Sim; controls 100 through 999; 0.05 m/s command; approved 19-body robot",
+        "result": "inconclusive",
+        "text": "Median forward speed increases from 0.0076 to 0.0554 m/s; the fraction of backward controls falls from 27% to zero. Nominal joint-trajectory error decreases from 2.88 to 1.53 degrees RMS. We keep the 2.26-degree motor-target error distinct from nominal trajectory error. These coupled controller changes do not isolate one cause.",
+        "source": "site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.json"
       }
     ]
   },
