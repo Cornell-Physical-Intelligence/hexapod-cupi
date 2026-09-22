@@ -26,6 +26,7 @@ class TripodConfig:
     joint_velocity_feedback_gain: float = 0.
     joint_velocity_filter_hz: float = 0.
     support_overlap: bool = False
+    startup_stride_ramp: bool = False
 
     def __post_init__(self):
         values = (self.period_s, self.hip_amplitude_rad, self.transition_s,
@@ -63,12 +64,15 @@ class TripodConfig:
                 or type(self.support_overlap) is not bool
                 or (self.support_overlap and (self.joint_feedback_gain != .5
                     or self.joint_velocity_feedback_gain != 2. or self.joint_velocity_filter_hz != 5.))
+                or type(self.startup_stride_ramp) is not bool
+                or (self.startup_stride_ramp and not self.support_overlap)
                 or any(len(v) != 2 for v in (self.low_lift_rad, self.raised_lift_rad, self.raised_offset_rad))):
             raise ValueError('Controller parameters exceed the declared envelope')
 
     def declaration(self):
         return {'schema': 'zhang_tripod_geometry_adaptation_v1', **asdict(self),
-                'trajectory_variant': ('overlap' if self.support_overlap else
+                'trajectory_variant': ('startup' if self.startup_stride_ramp else
+                                       'overlap' if self.support_overlap else
                                        'pd_filtered' if self.joint_feedback_gain and self.joint_velocity_feedback_gain else
                                        'velocity_filtered' if self.joint_velocity_filter_hz else
                                        'velocity' if self.joint_velocity_feedback_gain else
@@ -99,3 +103,4 @@ SWEEPS['velocity'] = (replace(SWEEPS['retimed'][0], joint_velocity_feedback_gain
 SWEEPS['velocity_filtered'] = (replace(SWEEPS['velocity'][0], joint_velocity_filter_hz=5.),)
 SWEEPS['pd_filtered'] = (replace(SWEEPS['velocity_filtered'][0], joint_feedback_gain=.5),)
 SWEEPS['overlap'] = (replace(SWEEPS['pd_filtered'][0], support_overlap=True),)
+SWEEPS['startup'] = (replace(SWEEPS['overlap'][0], startup_stride_ramp=True),)

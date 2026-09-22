@@ -635,6 +635,45 @@ interrupted attempt. You proceed to the declared canonical qualification
 cases and independent repeats. Stops, raised clearance and terrain remain
 pending; these screens do not establish Stage 2 or AMP acceptance.
 
+### Startup correction declared on 22 September 2026
+
+The first canonical 0.10 m/s trial fails after 51 controls with
+`support_loss_during_start`. You observe left-front and right-rear support
+loss while the startup blend moves all six feet toward opposing stride
+endpoints. The capture contains no joint-bound or nonfoot-contact violations.
+Requested torque peaks at 4.61 Nm; the motor enforces the unchanged 1.6 Nm limit.
+You stop this qualification allocation and retain its completed cases and
+partial capture before testing a startup correction.
+
+You declare one `startup` candidate based on `overlap`. For forward commands,
+you hold the standing joint reference through the existing one-second startup interval. You then
+start tripod stepping and increase horizontal stride amplitude from zero
+to its declared value over one full gait cycle. You use
+`a(t) = (1 - cos(pi * min(t / T, 1))) / 2`, where `T` is the gait period.
+You retain the lift waveform, touchdown rules and existing stop behavior.
+This adaptation replaces the startup move with six planted feet.
+During the initial standing hold, you accept a changed forward command without
+starting the old command. A stop, turn or clearance change enters the settling blend.
+You retain the passing yaw startup. A CPU early-touchdown probe exposes a
+0.35047 rad target offset with both the preceding overlap candidate and the
+startup candidate. The held pitch lift residual persists while the horizontal
+baseline changes. For the new candidate's yaw motion, you return that residual
+to zero over the remainder of the touchdown half-cycle, in proportion to the
+remaining phase. You retain the failed probes and their corrected diagnosis.
+
+You check startup, reset and interrupted startup on the CPU. You first run
+the unchanged canonical `static:translate_0.10_0deg` case from two independent
+resets in the `forward_high` suite. Broader qualification follows a pass.
+You retain the model, motor limits and numerical acceptance gates.
+You retain the [interrupted qualification](../site/assets/tripod_qualification_interrupted_20260922_001/result.json)
+and [startup diagnosis](../site/assets/tripod_startup_20260922_001/startup_diagnostic.json).
+The [new declaration](../site/assets/tripod_startup_20260922_001/declaration.json)
+binds the failed CPU probe and corrected candidate.
+
+You retain the three-control [recording failure and correction](../site/assets/tripod_startup_20260922_001/recording_correction.json).
+You convert the stride-ramp latch to a Python boolean before JSON recording
+and repeat the same declared method in a fresh pack.
+
 ## Foundation commands
 
 ```sh

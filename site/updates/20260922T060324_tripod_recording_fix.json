@@ -1,0 +1,27 @@
+{
+  "id": "20260922T060324_tripod_recording_fix",
+  "date": "2026-09-22T06:03:24.911254+00:00",
+  "title": "Repair startup JSON recording and retain its failed capture",
+  "summary": "The first startup attempt stops after three controls on a NumPy boolean in its controller log. Convert that field to a Python boolean and bind the same-method retry to fresh source.",
+  "areas": [
+    "locomotion",
+    "site"
+  ],
+  "next": "Inspect both canonical forward results before further qualification.",
+  "changes": [
+    "locomotion/tripod.py",
+    "locomotion/tests/test_tripod_startup.py",
+    "docs/TRAINING.md",
+    "docs/PIPELINE_LINEAGES.md",
+    "tools/check_pipeline_lineages.py",
+    "configs/releases/tripod_startup_20260922_v2.sha256",
+    "site/assets/tripod_startup_20260922_001/recording_correction.json",
+    "site/updates/20260922T060324_tripod_recording_fix.json",
+    "site/project.json",
+    "STATUS.md"
+  ],
+  "evidence": [
+    "site/assets/tripod_startup_20260922_001/recording_correction.json"
+  ],
+  "no_project_impact": false
+}

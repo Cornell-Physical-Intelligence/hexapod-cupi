@@ -897,6 +897,30 @@
         "result": "passed",
         "text": "Forward planar error is 0.02242 m/s. Left/right yaw errors are 0.03448/0.03478 rad/s against the unchanged 0.06 limit. All native motor/contact checks pass. A complete left-turn cycle retains yaw through six-foot contact after the declared overlap change. The accumulated record contains five passed screens, 49 failed completed trials and one interrupted attempt. Canonical 0.10 m/s motion, stops, raised clearance and independent repeats remain pending.",
         "source": "site/assets/tripod_overlap_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-qualification-interrupted-20260922-014",
+        "title": "We retain the canonical forward startup failure",
+        "backend": "Isaac Sim; incomplete canonical qualification; approved 19-body robot",
+        "result": "failed",
+        "text": "The canonical 0.10 m/s forward trial fails after 51 controls with support loss during startup. Left-front and right-rear feet lose support as the six planted feet move toward opposing stride endpoints. Requested torque peaks at 4.61 Nm; the motor retains its 1.6 Nm cap. Standing and the right-turn case pass. The owner stops the allocation during the next turn and retains its partial capture and exact cleanup.",
+        "source": "site/assets/tripod_qualification_interrupted_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-startup-cpu-20260922-015",
+        "title": "We build forward stride during tripod stepping",
+        "backend": "CPU startup, reset, command changes and recorded-input replay; native qualification pending",
+        "result": "inconclusive",
+        "text": "The new candidate holds its standing reference during forward startup, then ramps stride over one gait cycle. It retains yaw startup and returns the yaw touchdown lift offset before the next half-cycle. The preceding controller and initial correction both exceed bounds in an early raised-touchdown fixture; the corrected candidate passes that fixture and 172 locomotion tests. The forward_high suite retains the canonical 0.10 m/s case and two independent resets.",
+        "source": "site/assets/tripod_startup_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-startup-recording-20260922-016",
+        "title": "We correct the startup recording type",
+        "backend": "Isaac Sim recording failure; CPU serialization regression; native retry pending",
+        "result": "failed",
+        "text": "The first startup attempt stops after three controls because its new log field contains a NumPy boolean. It provides no walking result. The correction converts that field to a Python boolean and passes a regression test with a NumPy command. The retry retains the controller method, physics and acceptance limits.",
+        "source": "site/assets/tripod_startup_20260922_001/recording_correction.json"
       }
     ]
   },

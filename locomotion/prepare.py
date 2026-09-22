@@ -33,7 +33,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         raise ValueError('Invalid replica count for this mode')
     if (tripod_adaptation not in SWEEPS or (mode != 'tripod' and tripod_adaptation != 'paper')
             or type(candidate) is not int or candidate not in range(len(SWEEPS[tripod_adaptation]))
-            or suite not in ('screen', 'qualification', 'clearance')):
+            or suite not in ('screen', 'qualification', 'clearance', 'forward_high')):
         raise ValueError('Select a member of the declared tripod sweep and suite')
     supplied = (checkpoint is not None, checkpoint_sha is not None, checkpoint_declaration_sha is not None)
     if (mode == 'evaluate' and not all(supplied)) or (mode != 'evaluate' and any(supplied)):
@@ -117,7 +117,7 @@ def main():
     parser.add_argument('--seed', type=int, default=20260917)
     parser.add_argument('--candidate', type=int, choices=range(4), default=0)
     parser.add_argument('--tripod-adaptation', choices=tuple(SWEEPS), default='paper')
-    parser.add_argument('--suite', choices=['screen', 'qualification', 'clearance'], default='screen')
+    parser.add_argument('--suite', choices=['screen', 'qualification', 'clearance', 'forward_high'], default='screen')
     parser.add_argument('--checkpoint', type=Path)
     parser.add_argument('--checkpoint-sha')
     parser.add_argument('--checkpoint-declaration-sha')

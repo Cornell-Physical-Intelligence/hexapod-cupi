@@ -156,6 +156,8 @@ class TripodController:
         self.half = 0
         self.progress = 0.
         self.elapsed = 0.
+        self.stride_elapsed = 0.
+        self.ramping_stride = False
         self.wait_s = 0.
         self.support_loss_s = 0.
         self.seen_off = np.zeros(6, dtype=bool)
@@ -243,15 +245,23 @@ class TripodController:
             elif requested.any():
                 self.command = requested.copy()
                 self.half, self.progress = 0, 0.
+                self.stride_elapsed = 0.
+                self.ramping_stride = bool(self.cfg.startup_stride_ramp and requested[0] > 0.)
                 self.pitch_hold.fill(0); self.swing_start.fill(0)
                 self.support_from_touchdown.fill(False)
                 endpoint = self.stance(self.mode)
-                endpoint += self._sweep()*np.sin(-math.pi/2+PHASE)[:, None]
+                if not self.ramping_stride:
+                    endpoint += self._sweep()*np.sin(-math.pi/2+PHASE)[:, None]
                 self._begin_blend('start', endpoint)
             else:
                 return self.target.reshape(18).copy()
 
         if self.state in ('start', 'settle', 'clearance'):
+            if self.ramping_stride and self.state == 'start':
+                if mode != self.mode or requested[0] <= 0.:
+                    self._begin_blend('settle', self.stance(self.mode))
+                else:
+                    self.command = requested.copy()
             self.elapsed = min(self.elapsed+DT, self.cfg.transition_s)
             h = .5*(1.-math.cos(math.pi*self.elapsed/self.cfg.transition_s))
             result = self._emit(self.from_target+h*(self.to_target-self.from_target))
@@ -264,6 +274,7 @@ class TripodController:
                     self.state = 'idle'
                 elif self.state == 'settle':
                     self.state = 'idle'; self.command.fill(0)
+                    self.ramping_stride = False
                 else:
                     self.state = 'walk'
                     self.seen_off.fill(False); self.landed.fill(False)
@@ -278,16 +289,28 @@ class TripodController:
             return self._fault('stance_support_loss')
         base = self.stance(self.mode)
         coefficients = self._sweep()
+        previous_coefficients = coefficients
+        if self.ramping_stride:
+            old_scale = .5*(1.-math.cos(math.pi*self.stride_elapsed/self.cfg.period_s))
+            self.stride_elapsed = min(self.cfg.period_s, self.stride_elapsed+DT)
+            scale = .5*(1.-math.cos(math.pi*self.stride_elapsed/self.cfg.period_s))
+            previous_coefficients = coefficients*old_scale
+            coefficients = coefficients*scale
         touchdown = swing & self.seen_off & self.contacts & ~self.landed & (self.progress >= .5)
         touchdown_base = base
         overlap = self.cfg.support_overlap and self.command[2] != 0.
         if overlap:
             swing_shape, support_shape = overlap_sweep(self.progress)
             shape = np.where(swing, swing_shape, support_shape)
-            touchdown_base = base+coefficients*shape[:, None]
+            touchdown_base = base+previous_coefficients*shape[:, None]
         self.pitch_hold[touchdown] = (self.target-touchdown_base)[touchdown, 1:]
         self.landed |= touchdown
+        previous_progress = self.progress
         self.progress = min(1., self.progress+2.*DT/self.cfg.period_s)
+        if self.cfg.startup_stride_ramp and overlap:
+            remaining = (0. if self.progress >= 1.-1e-9 else
+                         (1.-self.progress)/max(1e-12, 1.-previous_progress))
+            self.pitch_hold[self.landed] *= remaining
         phase_advance = self.progress*math.pi
         stance_return = .5*(1.+math.cos(math.pi*self.progress))
         if self.cfg.phase_ramp_fraction:
@@ -341,5 +364,6 @@ class TripodController:
     def snapshot(self):
         return {'state': self.state, 'mode': self.mode, 'fault': self.fault,
                 'half': self.half, 'progress': self.progress, 'stopped': self.stopped,
+                'ramping_stride': self.ramping_stride, 'stride_elapsed_s': self.stride_elapsed,
                 'contacts': self.contacts.tolist(), 'landed': self.landed.tolist(),
                 'active_command': self.command.tolist(), 'target_rad': self.target.reshape(18).tolist()}
