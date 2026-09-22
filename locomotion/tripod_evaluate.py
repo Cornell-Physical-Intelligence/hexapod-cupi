@@ -9,7 +9,7 @@ import traceback
 import numpy as np
 
 from .env_config import EnvConfig, JOINT_NAMES, MODEL_SHA256, USD_SHA256, sha, verify_assets
-from .tripod import TripodController, supported
+from .tripod import TripodController, damping_target, supported
 from .tripod_config import SWEEPS
 
 
@@ -53,6 +53,8 @@ class NativeController:
             model=env.model if config.geometry_sweep_gain else None,
             toe_local_points=env.reference_metadata['toe_local_points_m'] if config.geometry_sweep_gain else None)
         self.control = 0
+        self.previous_reference = self.controller.target.reshape(18).copy()
+        self.motor_target = self.previous_reference.copy()
 
     def __call__(self, observation):
         import torch
@@ -68,8 +70,23 @@ class NativeController:
         # Native command tensors carry float32 rounding at the envelope endpoints.
         command = np.round(command, 7)
         target = self.controller.step(command, force, clearance_at(self.case, self.control))
+        state = self.controller.snapshot()
+        if self.controller.cfg.damping_compensation:
+            if not self.controller.fault:
+                desired = damping_target(target, self.previous_reference)
+                try:
+                    self.controller._validate_target(desired.reshape(6, 3))
+                except ValueError:
+                    self.controller._fault('damping_target_bounds')
+                    state = self.controller.snapshot()
+                else:
+                    self.previous_reference = target.copy()
+                    self.motor_target += np.clip(desired-self.motor_target, -.040, .040)
+            state['nominal_target_rad'] = target.tolist()
+            state['target_rad'] = self.motor_target.tolist()
+            target = self.motor_target.copy()
         self.stream.write(json.dumps({'control': self.control, 'measured_force_n': force.tolist(),
-                                      **self.controller.snapshot()}, allow_nan=False)+'\n')
+                                      **state}, allow_nan=False)+'\n')
         self.stream.flush()
         self.control += 1
         if self.controller.fault:

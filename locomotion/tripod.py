@@ -6,7 +6,7 @@ docs/TRAINING.md declares the geometry, contact and transition adaptations.
 import math
 import numpy as np
 
-from .env_config import JOINT_NAMES, LEGS
+from .env_config import JOINT_NAMES, KD, LEGS
 from .tripod_config import TripodConfig
 
 TRIPOD_A = np.array([True, False, True, False, True, False])
@@ -36,6 +36,13 @@ def joint_order(names):
     if len(names) != 18 or set(names) != set(JOINT_NAMES):
         raise ValueError('Expected the 18 distinct approved joint names')
     return np.array([names.index(name) for name in JOINT_NAMES])
+
+
+def damping_target(reference, previous_reference):
+    """Cancel the approved servo's damping term at nominal joint velocity."""
+    reference = np.asarray(reference, float).reshape(18)
+    previous_reference = np.asarray(previous_reference, float).reshape(18)
+    return reference+np.asarray(KD)*(reference-previous_reference)/(12.*DT)
 
 
 class TripodController:

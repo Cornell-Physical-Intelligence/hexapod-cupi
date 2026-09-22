@@ -715,6 +715,22 @@
         "result": "inconclusive",
         "text": "We declare two geometry candidates with uniform phase and pitch motion during support. The first 0.05 m/s trajectory reduces the maximum stance-edge range to 1.3 mm. Both candidates pass joint bounds and contact-transition fixtures. The 12/16 mm lift gates and native motion thresholds remain unchanged.",
         "source": "site/assets/tripod_geometry_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-geometry-native-20260922-004",
+        "title": "We complete six geometry screens without a tracking pass",
+        "backend": "Isaac Sim; six 1000-control captures; approved 19-body robot",
+        "result": "failed",
+        "text": "Both geometry candidates pass native motor and contact checks but fail forward and yaw tracking. Mean forward speed reaches 0.0466 and 0.0513 m/s; tracking errors remain 0.0490 and 0.0535 m/s against 0.025. The recorded cycle has no touchdown wait and a 1.83 mm stance-edge range, but it retains surge and recoil. We retain thirty failed motion attempts.",
+        "source": "site/assets/tripod_geometry_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-damping-cpu-20260922-005",
+        "title": "We declare a damping correction for joint tracking",
+        "backend": "CPU motor-law and contact-transition checks; native motion unqualified",
+        "result": "inconclusive",
+        "text": "One candidate adds nominal joint-velocity feedforward through the existing motor-target input. Motor gains and limits remain unchanged. CPU replay adds at most 0.0332 rad and preserves the action envelope and 0.040 rad slew bound. Native qualification remains pending.",
+        "source": "site/assets/tripod_damping_20260922_001/cpu_replay.json"
       }
     ]
   },

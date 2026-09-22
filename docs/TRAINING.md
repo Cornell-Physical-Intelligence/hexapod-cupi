@@ -332,6 +332,56 @@ The first candidate's 0.05 m/s trajectory has a maximum stance-edge range of
 across the declared commands and modes. CPU contact fixtures cover early
 touchdown, missed touchdown and stops. Native tracking remains unqualified.
 
+### Geometry correction result on 22 September 2026
+
+You can inspect the [six native screens](../site/assets/tripod_geometry_native_20260922_001/result.json)
+and the [recorded cycle](../site/assets/tripod_geometry_native_20260922_001/cycle_metrics.json).
+Both candidates complete all three captures without controller faults. Their
+native motor, joint and contact checks pass, but all six fail motion tracking.
+The forward mean speeds are 0.0466 and 0.0513 m/s for the 0.05 m/s command;
+their planar errors are 0.0490 and 0.0535 m/s against the 0.025 m/s limit.
+Both turn directions fail the 0.06 rad/s yaw-error limit.
+
+The first candidate's measured cycle lasts 1.20 s without touchdown waits.
+Its target stance-edge range falls to 1.83 mm, while 35% of cycle controls
+retain backward velocity. The controller detects liftoff at 23–27% of the
+swing interval. The feet retain load during the initial forward target sweep.
+You retain these six failures and the preceding 24 attempts. Geometry and
+average speed corrections have not established accepted tracking under load.
+
+### Damping correction declared on 22 September 2026
+
+You declare one `damping` candidate before dispatch. You retain geometry
+candidate 0 and add joint-velocity feedforward to its motor target:
+
+```text
+dq_reference = (reference_now - reference_previous) / 0.02
+motor_target = reference_now + KD * dq_reference / 12
+```
+
+The approved motor law remains `torque = 12*(target-q) - KD*dq`, with the
+same torque-speed limit and native physics. At exact reference tracking,
+this target term cancels the motor's damping demand. It does not compensate
+gravity, inertia or ground forces. You label the term as an RS05 tracking
+adaptation to the prescribed joint motion in paper §5.2.1.
+
+You retain the geometry reference for phase and touchdown state. You record
+that reference and the compensated motor target as separate channels. You
+check the full compensated target against the existing joint/action bounds
+and apply the same 0.040 rad/20 ms slew bound to the emitted motor target.
+You reject an out-of-envelope target; you do not enlarge the action range.
+
+You screen the single candidate with `--tripod-adaptation damping --candidate 0`
+after the two geometry candidates finish. You retain the forward and both-turn
+screens, then the existing qualification and clearance matrix if it passes.
+You require a new evidence-backed declaration before another correction.
+
+You can inspect the [frozen damping declaration](../site/assets/tripod_damping_20260922_001/declaration.json)
+and [CPU replay](../site/assets/tripod_damping_20260922_001/cpu_replay.json).
+Replay uses the first geometry candidate's recorded contact inputs; it does
+not predict the new contact sequence. The maximum added offset is 0.0332 rad,
+and the emitted targets remain within the existing action and slew bounds.
+
 ## Foundation commands
 
 ```sh

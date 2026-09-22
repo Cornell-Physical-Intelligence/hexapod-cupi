@@ -1,0 +1,93 @@
+{
+  "schema": "tripod_damping_correction_declaration_v1",
+  "recorded_utc": "2026-09-22T02:16:09.926197+00:00",
+  "scope": "Single declared controller correction. Dispatch follows completion and cleanup of both geometry screens.",
+  "configuration": {
+    "schema": "zhang_tripod_geometry_adaptation_v1",
+    "period_s": 1.2,
+    "hip_amplitude_rad": 0.12,
+    "low_lift_rad": [
+      0.35,
+      -0.3
+    ],
+    "raised_lift_rad": [
+      0.45,
+      -0.35
+    ],
+    "raised_offset_rad": [
+      -0.15,
+      0.1
+    ],
+    "transition_s": 1.0,
+    "contact_on_n": 2.0,
+    "contact_off_n": 1.0,
+    "debounce_controls": 2,
+    "recovery_s": 0.4,
+    "recovery_rate_rad_s": 0.1,
+    "initial_support_s": 2.0,
+    "geometry_sweep_gain": 1.0,
+    "geometry_lift_m": [
+      0.022,
+      0.028
+    ],
+    "damping_compensation": true,
+    "trajectory_variant": "damping",
+    "control_dt_s": 0.02,
+    "target_slew_rad": 0.04,
+    "low_root_target_m": 0.0978,
+    "raised_root_target_m": 0.1093,
+    "minimum_root_increase_m": 0.008,
+    "minimum_toe_lift_m": {
+      "low": 0.012,
+      "raised": 0.016
+    },
+    "paper_doi": "10.3389/frobt.2024.1426269",
+    "stage2_complete": false
+  },
+  "equation": "reference + KD*(reference-previous_reference)/(12*0.02), followed by the unchanged 0.040 rad target slew limit.",
+  "kd": [
+    0.44197696391810243,
+    0.2456657243160222,
+    0.10552064613953134,
+    0.4419789704596685,
+    0.24566676283633715,
+    0.10552131615792909,
+    0.441977634689341,
+    0.24566456721764315,
+    0.10552100524837532,
+    0.4419765017453795,
+    0.245667092769639,
+    0.10552130774083751,
+    0.44197471269634825,
+    0.24566700905274597,
+    0.10552141334046235,
+    0.4419772543481437,
+    0.24566767616660323,
+    0.10552122889741367
+  ],
+  "motor_kp_unchanged": 12.0,
+  "compensates": "Motor damping at nominal joint velocity. No gravity, inertia or contact-force compensation.",
+  "native_cases": [
+    "forward 0.05 m/s",
+    "left yaw 0.2 rad/s",
+    "right yaw -0.2 rad/s"
+  ],
+  "acceptance": "Existing native and motion gates; qualification and clearance require the complete screen to pass.",
+  "paper_adaptation": "Velocity feedforward for actuator tracking of prescribed joint motion. Preserve uniform phase and the declared geometry variant.",
+  "stage2_complete": false,
+  "binding_sha256": "290c0b526903635086ba3f400db393be5062869c611cab322f615d13ac2ae0cb",
+  "source_freeze_sha256": "f0b9f5e68c21ffaddea76aa386c1bc28735f8a261999476fcc8c4e8e021325a7",
+  "input_hashes": {
+    "/Users/palerider/Desktop/projects/hexapod/locomotion/tripod.py": "2a10cd4fa7c671d77ea60d28f1c2dd05945672ce9091943bb11fb4b229877079",
+    "/Users/palerider/Desktop/projects/hexapod/locomotion/tripod_config.py": "d830b93e71f1d23c15b96066f11a2368503ec71fd77f5ec54481dbede64d1e24",
+    "/Users/palerider/Desktop/projects/hexapod/locomotion/tripod_evaluate.py": "5145be8ea71b48b056c874c641c9bc470a6ee916898664b54ff431a9e5e4e582",
+    "/Users/palerider/Desktop/projects/hexapod/locomotion/tripod_kinematics.py": "3db69088e944a3773f16844e07ebebc4700662142770eb1a322ce500f5a016cc",
+    "/Users/palerider/Desktop/projects/hexapod/locomotion/prepare.py": "d4546457d7d936cffb2326841b0224c508378c6d4fd831d7839ae61171ce592b",
+    "/Users/palerider/Desktop/projects/hexapod/locomotion/env.py": "78bb1cec6bdbc0535a147693fe2d2d0477c61bc49b509dd9461bc8cf6c2d6cfe",
+    "/Users/palerider/Desktop/projects/hexapod/locomotion/env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+    "/Users/palerider/Desktop/projects/hexapod/docs/TRAINING.md": "58318d2a93c43e1f8ea1118fbc78feedf98fd77c652b100e23b3f49030151c64",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/geometry0_screen_004/run/standing/summary.json": "e9ed16a1af174e4d51ad23ada9e329a6665ffd194c33ebc41becccb5102875a0",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/geometry_adaptation_004/declaration.json": "5ef87c73647bfde4c44959e95c37889cb677fe5ee74f1c134912d1f54c97ce90",
+    "/Users/palerider/hexapod-results/terrain-adaptive-gait-20260921/geometry_adaptation_004/cycle_001/cycle_metrics.json": "ab0299f7b6e0e6be4331a499f2050eb3423df839b5fbbb90c22d835f66064c9e"
+  }
+}

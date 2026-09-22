@@ -19,6 +19,7 @@ class TripodConfig:
     initial_support_s: float = 2.
     geometry_sweep_gain: float = 0.
     geometry_lift_m: tuple = (.022, .028)
+    damping_compensation: bool = False
 
     def __post_init__(self):
         values = (self.period_s, self.hip_amplitude_rad, self.transition_s,
@@ -35,12 +36,15 @@ class TripodConfig:
                 or self.initial_support_s < self.recovery_s
                 or not 0 <= self.geometry_sweep_gain <= 1.1
                 or len(self.geometry_lift_m) != 2 or any(h <= 0 for h in self.geometry_lift_m)
+                or type(self.damping_compensation) is not bool
+                or (self.damping_compensation and not self.geometry_sweep_gain)
                 or any(len(v) != 2 for v in (self.low_lift_rad, self.raised_lift_rad, self.raised_offset_rad))):
             raise ValueError('Controller parameters exceed the declared envelope')
 
     def declaration(self):
         return {'schema': 'zhang_tripod_geometry_adaptation_v1', **asdict(self),
-                'trajectory_variant': 'geometry' if self.geometry_sweep_gain else 'paper',
+                'trajectory_variant': ('damping' if self.damping_compensation else
+                                       'geometry' if self.geometry_sweep_gain else 'paper'),
                 'control_dt_s': .02, 'target_slew_rad': .040,
                 'low_root_target_m': .0978,
                 'raised_root_target_m': .1093 if self.geometry_sweep_gain else .1088,
@@ -54,4 +58,5 @@ SWEEP = tuple(replace(TripodConfig(), period_s=period, hip_amplitude_rad=amplitu
 
 GEOMETRY_SWEEP = tuple(replace(TripodConfig(), geometry_sweep_gain=gain,
                               raised_offset_rad=(-.15, .10)) for gain in (1., 1.1))
-SWEEPS = {'paper': SWEEP, 'geometry': GEOMETRY_SWEEP}
+SWEEPS = {'paper': SWEEP, 'geometry': GEOMETRY_SWEEP,
+          'damping': (replace(GEOMETRY_SWEEP[0], damping_compensation=True),)}
