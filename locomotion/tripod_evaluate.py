@@ -81,9 +81,11 @@ class NativeController:
                     c = self.controller
                     blend = feedback_blend(c.state, c.elapsed, c.cfg.transition_s)
                     measured = samples[-1]['joint_position_rad'][0] if samples else target
-                    desired, offset, clipped = feedback_target(target, desired, measured,
+                    bounded, offset, clipped = feedback_target(target, desired, measured,
                         c.neutral.reshape(18), c.lower.reshape(18), c.upper.reshape(18),
                         c.cfg.joint_feedback_gain, blend)
+                    # Combine position and velocity offsets before target clipping.
+                    desired = desired+offset if c.cfg.joint_velocity_feedback_gain else bounded
                     state.update(joint_feedback_blend=blend, joint_feedback_offset_rad=offset.tolist(),
                                  joint_feedback_target_clipped=clipped)
                 if self.controller.cfg.joint_velocity_feedback_gain:
@@ -112,6 +114,9 @@ class NativeController:
                                  joint_velocity_feedback_offset_rad=offset.tolist(),
                                  joint_velocity_feedback_target_clipped=clipped,
                                  nominal_velocity_rad_s=velocity.tolist())
+                    if c.cfg.joint_feedback_gain:
+                        state['joint_feedback_target_clipped'] = clipped
+                        state['combined_feedback_target_clipped'] = clipped
                 try:
                     self.controller._validate_target(desired.reshape(6, 3))
                 except ValueError:

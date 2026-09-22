@@ -54,7 +54,9 @@ class TripodConfig:
                 or (self.swing_lift_power != 1. and (not self.phase_ramp_fraction or self.joint_feedback_gain))
                 or self.joint_velocity_feedback_gain not in (0., 2.)
                 or (self.joint_velocity_feedback_gain and
-                    (not self.phase_ramp_fraction or self.joint_feedback_gain or self.swing_lift_power != 1.))
+                    (not self.phase_ramp_fraction or self.swing_lift_power != 1. or
+                     (self.joint_feedback_gain and
+                      (self.joint_feedback_gain != .5 or self.joint_velocity_filter_hz != 5.))))
                 or self.joint_velocity_filter_hz not in (0., 5.)
                 or (self.joint_velocity_filter_hz and not self.joint_velocity_feedback_gain)
                 or any(len(v) != 2 for v in (self.low_lift_rad, self.raised_lift_rad, self.raised_offset_rad))):
@@ -62,7 +64,8 @@ class TripodConfig:
 
     def declaration(self):
         return {'schema': 'zhang_tripod_geometry_adaptation_v1', **asdict(self),
-                'trajectory_variant': ('velocity_filtered' if self.joint_velocity_filter_hz else
+                'trajectory_variant': ('pd_filtered' if self.joint_feedback_gain and self.joint_velocity_feedback_gain else
+                                       'velocity_filtered' if self.joint_velocity_filter_hz else
                                        'velocity' if self.joint_velocity_feedback_gain else
                                        'liftoff' if self.swing_lift_power != 1. else
                                        'feedback' if self.joint_feedback_gain else
@@ -89,3 +92,4 @@ SWEEPS['feedback'] = tuple(replace(SWEEPS['retimed'][0], joint_feedback_gain=gai
 SWEEPS['liftoff'] = (replace(SWEEPS['retimed'][0], swing_lift_power=.75),)
 SWEEPS['velocity'] = (replace(SWEEPS['retimed'][0], joint_velocity_feedback_gain=2.),)
 SWEEPS['velocity_filtered'] = (replace(SWEEPS['velocity'][0], joint_velocity_filter_hz=5.),)
+SWEEPS['pd_filtered'] = (replace(SWEEPS['velocity_filtered'][0], joint_feedback_gain=.5),)

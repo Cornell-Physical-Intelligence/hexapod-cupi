@@ -257,6 +257,29 @@
       "caption": "First native frame of the failed forward screen on the approved model.",
       "controller": "Prescribed tripod; source 85499220d5e32bfd8071c24d6a180f26e9672bd66fcb2b0edb3b1508481cc0f5",
       "evidence": "site/assets/tripod_native_20260922_001/result.json"
+    },
+    {
+      "id": "tripod_velocity_filtered_native_20260922_001",
+      "title": "Prescribed tripod: passed forward screen",
+      "type": "video",
+      "role": "trajectory_experiment",
+      "path": "site/assets/tripod_velocity_filtered_native_20260922_001/rollout.mp4",
+      "sha256": "a2054ba85d24bb48fdc306e98c4722717dde2cc6bb8a3c34d4d030e1b4d3e523",
+      "caption": "Approved detailed model. Mean speed 4.61 cm/s against 5 cm/s. This forward screen passes; both turns fail yaw tracking. Filtered joint-velocity feedback; real-time playback.",
+      "controller": "Prescribed tripod; source 09dd28fc1750772dfb11823f4d530f81ea8ad648632483d45f44c5cbafeade8c",
+      "evidence": "site/assets/tripod_velocity_filtered_native_20260922_001/result.json",
+      "poster_id": "tripod_velocity_filtered_native_20260922_001_poster"
+    },
+    {
+      "id": "tripod_velocity_filtered_native_20260922_001_poster",
+      "title": "Filtered tripod: first frame",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/tripod_velocity_filtered_native_20260922_001/first_frame.png",
+      "sha256": "ffafa8bd3c7824d77b7fce70234ad6cded42bb38c397ee1973976f12c0e0385d",
+      "caption": "First native frame of the passed forward screen on the approved model.",
+      "controller": "Prescribed tripod; source 09dd28fc1750772dfb11823f4d530f81ea8ad648632483d45f44c5cbafeade8c",
+      "evidence": "site/assets/tripod_velocity_filtered_native_20260922_001/result.json"
     }
   ],
   "nodes": [
@@ -811,6 +834,22 @@
         "result": "inconclusive",
         "text": "The fixed-base free-leg linearization has spectral radius 1.524 with unfiltered gain-2 feedback and 0.854 with a 5 Hz filter. One candidate filters reference and measured joint velocity before the same bounded correction. CPU checks preserve target bounds; contact, saturation and native acceptance remain outside the linear model.",
         "source": "site/assets/tripod_velocity_filtered_20260922_001/sampled_loop.json"
+      },
+      {
+        "id": "zhang-tripod-velocity-filtered-native-20260922-011",
+        "title": "We pass one forward screen and retain two turn failures",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "inconclusive",
+        "text": "Filtered velocity feedback passes the 0.05 m/s forward screen with planar error 0.02292 m/s and yaw error 0.01674 rad/s. Left/right yaw errors of 0.07747/0.07711 rad/s exceed 0.06. All native motor/contact checks pass. Across retained attempts, one completed screen passes, 47 fail and one attempt is interrupted. Stops, clearance and repeats remain pending.",
+        "source": "site/assets/tripod_velocity_filtered_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-pd-cpu-20260922-012",
+        "title": "We combine bounded position and filtered velocity feedback",
+        "backend": "CPU sampled free-leg models and recorded-input replay; native qualification pending",
+        "result": "inconclusive",
+        "text": "One declared candidate combines position gain 0.5 with velocity gain 2 and a 5 Hz filter. Its sampled-loop spectral radius stays below 0.802 across 2520 pose/leg models. The gain-1 combination fails the neutral-pose stability check and remains excluded. Six captured command replays preserve target and slew bounds. Native contact and saturation remain outside this linear analysis.",
+        "source": "site/assets/tripod_pd_20260922_001/sampled_pd.json"
       }
     ]
   },

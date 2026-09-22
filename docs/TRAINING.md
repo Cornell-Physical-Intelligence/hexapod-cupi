@@ -573,6 +573,29 @@ You retain 45 failed completed trials and one interrupted attempt.
 The [filter declaration](../site/assets/tripod_velocity_filtered_20260922_001/declaration.json)
 links its CPU replay and sampled-loop inputs.
 
+### Combined feedback declared on 22 September 2026
+
+The filtered screen passes forward motion at 0.02292 m/s planar error
+and 0.01674 rad/s yaw error. Both turns fail yaw tracking near 0.077 rad/s.
+You retain one passed screen, 47 failed completed trials and one interrupted
+attempt. Support pitch errors remain near 3–4 degrees in the completed
+forward and left trials. Qualification and clearance work remain pending.
+
+You declare one `pd_filtered` candidate that combines position gain 0.5
+with velocity gain 2 and the 5 Hz filter. You add both bounded corrections
+before clipping the combined target to the existing joint/action envelope.
+You retain the 0.070 rad bound on each correction and the 0.040 rad slew limit.
+You use the existing startup and settling blend for both feedback terms.
+
+You check 2,520 fixed-base free-leg models from captured and CPU-generated
+poses. The combined candidate's maximum spectral radius is 0.802. You reject
+position gain 1 in this combination because its neutral-pose spectral radius
+is 1.050. These linear checks omit contact and saturation. You run one native
+forward/left/right screen with unchanged physical and tracking gates.
+You retain the [filtered screen](../site/assets/tripod_velocity_filtered_native_20260922_001/result.json)
+and its selected forward video. The [combined-feedback declaration](../site/assets/tripod_pd_20260922_001/declaration.json)
+links the CPU replay and sampled-model inputs.
+
 ## Foundation commands
 
 ```sh

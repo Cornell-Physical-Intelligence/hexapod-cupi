@@ -1,0 +1,148 @@
+{
+  "schema": "tripod_combined_feedback_cpu_replay_v1",
+  "scope": "CPU replay of prior contacts, commands and endpoint joint velocities. This does not predict the new contact sequence or establish physical acceptance.",
+  "script_sha256": "90dc18c487031274fedc67b5b2d6e820cc5a4bc03a1f9fbd8dace6245d90971f",
+  "summary_hashes": {
+    "retimed0_screen_007": "2c6a23e60ee754e16e382b3fffc02ad7ec2ccaa1327b6a8400f59cd4e8a9dadf",
+    "velocity_filtered0_screen_011": "1159a393680499c093bcbba1735a00b2f9a36048025e6db287ebf2035d7aae77"
+  },
+  "configuration": {
+    "schema": "zhang_tripod_geometry_adaptation_v1",
+    "period_s": 1.2,
+    "hip_amplitude_rad": 0.12,
+    "low_lift_rad": [
+      0.35,
+      -0.3
+    ],
+    "raised_lift_rad": [
+      0.45,
+      -0.35
+    ],
+    "raised_offset_rad": [
+      -0.15,
+      0.1
+    ],
+    "transition_s": 1.0,
+    "contact_on_n": 2.0,
+    "contact_off_n": 1.0,
+    "debounce_controls": 2,
+    "recovery_s": 0.4,
+    "recovery_rate_rad_s": 0.1,
+    "initial_support_s": 2.0,
+    "geometry_sweep_gain": 1.0,
+    "geometry_lift_m": [
+      0.022,
+      0.028
+    ],
+    "damping_compensation": true,
+    "phase_ramp_fraction": 0.1,
+    "joint_feedback_gain": 0.5,
+    "swing_lift_power": 1.0,
+    "joint_velocity_feedback_gain": 2.0,
+    "joint_velocity_filter_hz": 5.0,
+    "trajectory_variant": "pd_filtered",
+    "control_dt_s": 0.02,
+    "target_slew_rad": 0.04,
+    "low_root_target_m": 0.0978,
+    "raised_root_target_m": 0.1093,
+    "minimum_root_increase_m": 0.008,
+    "minimum_toe_lift_m": {
+      "low": 0.012,
+      "raised": 0.016
+    },
+    "paper_doi": "10.3389/frobt.2024.1426269",
+    "stage2_complete": false
+  },
+  "results": [
+    {
+      "input_pack": "retimed0_screen_007",
+      "case_id": "tripod:screen:forward",
+      "controls": 1000,
+      "nominal_replay_error_rad": 3.885780586188048e-16,
+      "maximum_feedback_offset_rad": 0.07,
+      "maximum_position_offset_rad": 0.06573527431102792,
+      "clipped_controls": 0,
+      "maximum_action_offset_rad": 0.31944403012175937,
+      "maximum_emitted_delta_rad": 0.040000000000000036,
+      "source_files": {
+        "controller.jsonl": "338dce2b6f1c96f066794e7dd7495c5024fe38a09839a0075283ae7ff46681ac",
+        "control_trace.npz": "1feeb78c65805f25c92ec7a59b707c8b588af6327d9c953b984584d761102639"
+      }
+    },
+    {
+      "input_pack": "retimed0_screen_007",
+      "case_id": "tripod:screen:left",
+      "controls": 1000,
+      "nominal_replay_error_rad": 3.3306690738754696e-16,
+      "maximum_feedback_offset_rad": 0.07,
+      "maximum_position_offset_rad": 0.0664021701080939,
+      "clipped_controls": 0,
+      "maximum_action_offset_rad": 0.31890442660876656,
+      "maximum_emitted_delta_rad": 0.04000000000000001,
+      "source_files": {
+        "controller.jsonl": "da8c51d1556dff0b7a4672cf7641a80d9355732328150b5eec1768b639e2ed8a",
+        "control_trace.npz": "c2ae7f38ba089a1ed6a4f08526e27164474789b6a039d19369c36c077fe866c3"
+      }
+    },
+    {
+      "input_pack": "retimed0_screen_007",
+      "case_id": "tripod:screen:right",
+      "controls": 1000,
+      "nominal_replay_error_rad": 2.220446049250313e-16,
+      "maximum_feedback_offset_rad": 0.07,
+      "maximum_position_offset_rad": 0.06544279636276738,
+      "clipped_controls": 0,
+      "maximum_action_offset_rad": 0.31891070458982657,
+      "maximum_emitted_delta_rad": 0.04000000000000001,
+      "source_files": {
+        "controller.jsonl": "b78869005a0317212575cfb6ae8f60923796f472d7c959a9ed1413685f1363ff",
+        "control_trace.npz": "9cee5b2215ef030f62edba08af483d39ed4bbcf7dca572906cc16a59856baacd"
+      }
+    },
+    {
+      "input_pack": "velocity_filtered0_screen_011",
+      "case_id": "tripod:screen:forward",
+      "controls": 1000,
+      "nominal_replay_error_rad": null,
+      "maximum_feedback_offset_rad": 0.05620583629497145,
+      "maximum_position_offset_rad": 0.06396662611823106,
+      "clipped_controls": 0,
+      "maximum_action_offset_rad": 0.31456229848650463,
+      "maximum_emitted_delta_rad": 0.040000000000000036,
+      "source_files": {
+        "controller.jsonl": "3817d4126d860909bb750ab0158733f34b71c94b98cac3e5e2239c051d28880b",
+        "control_trace.npz": "ad9ffb6bd09cd36ac2ac82a42d3aee804dddc0ae76d1d8d1fbe60d1344fc1efc"
+      }
+    },
+    {
+      "input_pack": "velocity_filtered0_screen_011",
+      "case_id": "tripod:screen:left",
+      "controls": 1000,
+      "nominal_replay_error_rad": null,
+      "maximum_feedback_offset_rad": 0.06079124773863403,
+      "maximum_position_offset_rad": 0.06271192832540314,
+      "clipped_controls": 0,
+      "maximum_action_offset_rad": 0.31414181328687807,
+      "maximum_emitted_delta_rad": 0.04000000000000001,
+      "source_files": {
+        "controller.jsonl": "10b2fd458d2f78d28d2326606d5655c4887486f7751c48e59887551506c21a34",
+        "control_trace.npz": "4f2ac602c2d76e5a6e5743816ea7ac350285664cdb8551d02191001cecc1b4f9"
+      }
+    },
+    {
+      "input_pack": "velocity_filtered0_screen_011",
+      "case_id": "tripod:screen:right",
+      "controls": 1000,
+      "nominal_replay_error_rad": null,
+      "maximum_feedback_offset_rad": 0.0579213578264618,
+      "maximum_position_offset_rad": 0.06189731578799834,
+      "clipped_controls": 0,
+      "maximum_action_offset_rad": 0.314019625008065,
+      "maximum_emitted_delta_rad": 0.04000000000000001,
+      "source_files": {
+        "controller.jsonl": "d473706c717e1aa79c4377cd550be341637b168c36574e0e677e799125041127",
+        "control_trace.npz": "521f92f7633a738c5a2951f5b6646ad093fa1b0d73b4a43cf1a9873cb9bb95e3"
+      }
+    }
+  ]
+}
