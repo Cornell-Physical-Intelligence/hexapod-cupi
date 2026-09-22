@@ -349,6 +349,29 @@
       "caption": "First native frame of the passing low-speed forward screen on the approved robot.",
       "controller": "Prescribed tripod; source 94ef3bffaccd8161eba39640db4b390e1fd0f29a375e658b365f97429d64a973",
       "evidence": "site/assets/tripod_speed_lift_native_20260922_001/native_result.json"
+    },
+    {
+      "id": "tripod_stop_stride_native_20260922_001",
+      "title": "Prescribed tripod: passed forward stop",
+      "type": "video",
+      "role": "trajectory_experiment",
+      "path": "site/assets/tripod_stop_stride_native_20260922_001/rollout.mp4",
+      "sha256": "cf1fe735862f34f4b40502b514f747bb4d45725e2651b01ba23ba62c43aa917f",
+      "caption": "Approved detailed model. All three stops pass from two resets. The forward stop has zero quiet torque saturation and no missing support substeps. Full qualification remains pending; real-time playback.",
+      "controller": "Prescribed tripod; source 92e077e12ceda9ed1cf6c3d045e73b698b0ad00b3f778c86f9de1e06ed5a25a3",
+      "evidence": "site/assets/tripod_stop_stride_native_20260922_001/native_result.json",
+      "poster_id": "tripod_stop_stride_native_20260922_001_poster"
+    },
+    {
+      "id": "tripod_stop_stride_native_20260922_001_poster",
+      "title": "Stride decay: first native frame",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/tripod_stop_stride_native_20260922_001/first_frame.png",
+      "sha256": "ce97f7ee76aa715f6b6e32af997ba671d29d1c3b34ea0e34b6b76eaaaa6d3581",
+      "caption": "First native frame of the passing forward-stop case on the approved robot.",
+      "controller": "Prescribed tripod; source 92e077e12ceda9ed1cf6c3d045e73b698b0ad00b3f778c86f9de1e06ed5a25a3",
+      "evidence": "site/assets/tripod_stop_stride_native_20260922_001/native_result.json"
     }
   ],
   "nodes": [
@@ -1031,6 +1054,14 @@
         "result": "inconclusive",
         "text": "The candidate finishes the current swing and reduces stride amplitude over one tripod cycle before holding the standing pose. CPU checks preserve held walking targets and bound stop transitions. Native forward and both-turn stop cases retain their two-second settling allowance and acceptance checks.",
         "source": "site/assets/tripod_stop_stride_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-stop-stride-native-20260922-022",
+        "title": "We pass forward and both-turn stops from two resets",
+        "backend": "Isaac Sim; six 1050-control captures; approved 19-body robot",
+        "result": "passed",
+        "text": "The stride-decay controller passes all six canonical stop cases. Maximum quiet joint-speed RMS is 0.00518 rad/s against 0.030, with zero quiet torque saturation and no missing support substeps. Full qualification follows. Raised clearance and terrain remain pending.",
+        "source": "site/assets/tripod_stop_stride_native_20260922_001/native_result.json"
       }
     ]
   },

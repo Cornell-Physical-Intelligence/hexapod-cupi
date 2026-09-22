@@ -784,6 +784,12 @@ allowance and the existing motor, contact and quiet-motion checks.
 You retain the [interrupted qualification](../site/assets/tripod_stop_stride_20260922_001/native_result.json),
 [forward-stop diagnosis](../site/assets/tripod_stop_stride_20260922_001/forward_stop_diagnostic.json)
 and [candidate declaration](../site/assets/tripod_stop_stride_20260922_001/declaration.json).
+The [completed stop suite](../site/assets/tripod_stop_stride_native_20260922_001/native_result.json)
+passes all six cases from two resets. Maximum quiet joint-speed RMS is
+0.00518 rad/s against 0.030. All cases have zero quiet torque saturation
+and no missing support substeps. You proceed to full qualification.
+You retain the [prior qualification identities](../site/assets/tripod_stop_stride_native_20260922_001/qualification_identity.json)
+with the unchanged interrupted result.
 
 ## Foundation commands
 
