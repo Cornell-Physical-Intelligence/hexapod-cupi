@@ -278,9 +278,18 @@ not supply tangential friction force. Toe-landmark displacement includes
 rotation of the foot shape. We retain joint tracking and touchdown timing as
 coupled contributors; these measurements do not isolate one cause.
 
-Finish the declared slower-period screens before choosing another adaptation.
-Keep any change to the paper's joint equations distinct from a parameter
-calibration. Retain the approved model, actuator limits and acceptance gates.
+The [completed sweep](../site/assets/tripod_sweep_20260922_001/result.json)
+retains 24 failed motion trials across the source corrections. Candidate 2
+completed its slower-period forward run with 0.03736 m/s planar error against
+the 0.025 m/s limit. It also exceeded the native joint-speed bound on two
+physics steps. Candidate 3 stopped its forward run at control 615 with
+`touchdown_timeout`. Both slower-period candidates failed both turn screens.
+We verified exact-container cleanup and retained the Spark reservation.
+
+Declare the next geometry correction before another native candidate. Keep
+changes to the paper's joint equations distinct from a parameter calibration.
+Retain the approved model, actuator limits and acceptance gates. Qualification
+and terrain remain pending because no candidate passed the three screens.
 
 ## Foundation commands
 
