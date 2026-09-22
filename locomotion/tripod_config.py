@@ -27,6 +27,9 @@ class TripodConfig:
     joint_velocity_filter_hz: float = 0.
     support_overlap: bool = False
     startup_stride_ramp: bool = False
+    forward_support_overlap: bool = False
+    forward_low_lift_rad: tuple = (.25, 0.)
+    forward_raised_lift_rad: tuple = (.28, -.10)
 
     def __post_init__(self):
         values = (self.period_s, self.hip_amplitude_rad, self.transition_s,
@@ -36,6 +39,7 @@ class TripodConfig:
                   self.joint_velocity_feedback_gain,
                   self.joint_velocity_filter_hz,
                   *self.geometry_lift_m,
+                  *self.forward_low_lift_rad, *self.forward_raised_lift_rad,
                   *self.low_lift_rad, *self.raised_lift_rad, *self.raised_offset_rad)
         if not all(math.isfinite(v) for v in values):
             raise ValueError('Controller parameters must be finite')
@@ -66,12 +70,17 @@ class TripodConfig:
                     or self.joint_velocity_feedback_gain != 2. or self.joint_velocity_filter_hz != 5.))
                 or type(self.startup_stride_ramp) is not bool
                 or (self.startup_stride_ramp and not self.support_overlap)
+                or type(self.forward_support_overlap) is not bool
+                or (self.forward_support_overlap and not self.startup_stride_ramp)
+                or self.forward_low_lift_rad != (.25, 0.)
+                or self.forward_raised_lift_rad != (.28, -.10)
                 or any(len(v) != 2 for v in (self.low_lift_rad, self.raised_lift_rad, self.raised_offset_rad))):
             raise ValueError('Controller parameters exceed the declared envelope')
 
     def declaration(self):
         return {'schema': 'zhang_tripod_geometry_adaptation_v1', **asdict(self),
-                'trajectory_variant': ('startup' if self.startup_stride_ramp else
+                'trajectory_variant': ('forward_overlap' if self.forward_support_overlap else
+                                       'startup' if self.startup_stride_ramp else
                                        'overlap' if self.support_overlap else
                                        'pd_filtered' if self.joint_feedback_gain and self.joint_velocity_feedback_gain else
                                        'velocity_filtered' if self.joint_velocity_filter_hz else
@@ -104,3 +113,4 @@ SWEEPS['velocity_filtered'] = (replace(SWEEPS['velocity'][0], joint_velocity_fil
 SWEEPS['pd_filtered'] = (replace(SWEEPS['velocity_filtered'][0], joint_feedback_gain=.5),)
 SWEEPS['overlap'] = (replace(SWEEPS['pd_filtered'][0], support_overlap=True),)
 SWEEPS['startup'] = (replace(SWEEPS['overlap'][0], startup_stride_ramp=True),)
+SWEEPS['forward_overlap'] = (replace(SWEEPS['startup'][0], forward_support_overlap=True),)

@@ -69,12 +69,13 @@ def feedback_blend(state, elapsed, duration):
     return 0.
 
 
-def overlap_sweep(progress):
+def overlap_sweep(progress, forward=False):
     """Keep swing feet in support motion outside the declared return window."""
     if not 0 <= progress <= 1.:
         raise ValueError('Support overlap requires half-cycle progress in [0, 1]')
     u = np.clip((progress-.15)/.65, 0., 1.)
-    return -1.-2.*progress+4.*u*u*(3.-2.*u), 1.-2.*progress
+    returned = displacement_clock(float(u), .10) if forward else u*u*(3.-2.*u)
+    return -1.-2.*progress+4.*returned, 1.-2.*progress
 
 
 def feedback_target(reference, servo_target, measured, neutral, lower, upper, gain, blend):
@@ -139,7 +140,10 @@ class TripodController:
             value[:, 1:] += self.cfg.raised_offset_rad
         return value
 
-    def lift(self, mode):
+    def lift(self, mode, *, forward=False):
+        if self.cfg.forward_support_overlap and forward:
+            return np.array(self.cfg.forward_low_lift_rad if mode == 'low'
+                            else self.cfg.forward_raised_lift_rad)
         if self.geometry:
             return self.geometry[mode][2].copy()
         return np.array(self.cfg.low_lift_rad if mode == 'low' else self.cfg.raised_lift_rad)
@@ -298,9 +302,10 @@ class TripodController:
             coefficients = coefficients*scale
         touchdown = swing & self.seen_off & self.contacts & ~self.landed & (self.progress >= .5)
         touchdown_base = base
-        overlap = self.cfg.support_overlap and self.command[2] != 0.
+        forward_overlap = self.cfg.forward_support_overlap and self.command[0] > 0.
+        overlap = self.cfg.support_overlap and (self.command[2] != 0. or forward_overlap)
         if overlap:
-            swing_shape, support_shape = overlap_sweep(self.progress)
+            swing_shape, support_shape = overlap_sweep(self.progress, forward_overlap)
             shape = np.where(swing, swing_shape, support_shape)
             touchdown_base = base+previous_coefficients*shape[:, None]
         self.pitch_hold[touchdown] = (self.target-touchdown_base)[touchdown, 1:]
@@ -320,7 +325,7 @@ class TripodController:
         phase = -math.pi/2+self.half*math.pi+phase_advance+PHASE
         hip, lift = wave(phase, self.cfg.swing_lift_power)
         if overlap:
-            swing_shape, support_shape = overlap_sweep(self.progress)
+            swing_shape, support_shape = overlap_sweep(self.progress, forward_overlap)
             hip = np.where(swing, swing_shape, support_shape)
             stance_return = 1.-self.progress
         baseline = base+coefficients*hip[:, None]
@@ -334,7 +339,7 @@ class TripodController:
                     self.pitch_hold-coefficients[:, 1:]*start_sine[:, None])
         desired[support, 1:] += stance_return*residual[support]
         moving = swing & ~self.landed
-        pitches = lift[:, None]*self.lift(self.mode)
+        pitches = lift[:, None]*self.lift(self.mode, forward=forward_overlap)
         if self.progress < .5:
             pitches += (1.-lift[:, None])*self.swing_start
         desired[moving, 1:] = baseline[moving, 1:]+pitches[moving]

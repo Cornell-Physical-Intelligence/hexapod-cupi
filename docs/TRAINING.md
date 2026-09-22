@@ -674,6 +674,42 @@ You retain the three-control [recording failure and correction](../site/assets/t
 You convert the stride-ramp latch to a Python boolean before JSON recording
 and repeat the same declared method in a fresh pack.
 
+
+### Forward support overlap declared on 22 September 2026
+
+You retain both complete startup trials from independent resets. Each trial
+finishes 1,000 controls and fails forward tracking and requested torque demand.
+Mean speed is 0.09346 m/s for the 0.10 m/s command, with 0.05023 m/s mean
+planar error. In the first complete diagnostic cycle, joint tracking contributes
+0.04569 m/s RMS error; toe-marker motion contributes 0.00324 m/s. Speed falls
+near zero during six-foot contact and reaches 0.18 m/s after lift-off.
+
+You declare one `forward_overlap` candidate based on `startup`. For forward
+motion, you use support displacement `H = 1 - 2p`. For swing displacement,
+you use `H = -1 - 2p + 4h(u)`, with `u = clip((p - 0.15) / 0.65, 0, 1)`.
+The function `h` is the existing displacement clock with a 0.10 ramp fraction.
+This choice matches support velocity before lift-off and after touchdown,
+with a constant return speed between acceleration intervals. You retain the
+1.2 s period, stride distance and yaw controller.
+
+You replace the forward vertical-Jacobian lift with joint lift coefficients
+`(0.25, 0)` rad in low mode and `(0.28, -0.10)` rad in raised mode.
+The same cosine lift envelope multiplies these coefficients. The foot moves
+inward during swing. You permit that lateral motion to fit the approved joint
+envelope; fixed lateral toe position needs more than 0.35 rad in the CPU
+inverse-kinematics probe. You retain geometric clearance targets and measure
+actual toe lift under load. You return touchdown lift residuals through the
+remaining half-cycle as in the startup candidate. You retain contact thresholds,
+recovery, actuator limits and the 0.040 rad target limiter.
+
+You check full commands, clearance, early touchdown and target bounds on the
+CPU, then run the unchanged `forward_high` case from two resets. You run the
+three motion screens and full qualification only after this diagnostic passes.
+You retain failed native captures and CPU probes with exact identities.
+You retain the [two forward failures](../site/assets/tripod_forward_overlap_20260922_001/forward_high_result.json),
+[cycle figure](../site/assets/tripod_forward_overlap_20260922_001/forward_high_cycle.png) and
+[new declaration](../site/assets/tripod_forward_overlap_20260922_001/declaration.json).
+
 ## Foundation commands
 
 ```sh

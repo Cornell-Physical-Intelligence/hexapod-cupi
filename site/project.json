@@ -921,6 +921,22 @@
         "result": "failed",
         "text": "The first startup attempt stops after three controls because its new log field contains a NumPy boolean. It provides no walking result. The correction converts that field to a Python boolean and passes a regression test with a NumPy command. The retry retains the controller method, physics and acceptance limits.",
         "source": "site/assets/tripod_startup_20260922_001/recording_correction.json"
+      },
+      {
+        "id": "zhang-tripod-startup-native-20260922-016",
+        "title": "We pass startup and retain two forward tracking failures",
+        "backend": "Isaac Sim; two independent resets; approved 19-body robot",
+        "result": "failed",
+        "text": "Both 0.10 m/s trials complete 1,000 controls without a controller fault. Mean speed is 0.09346 m/s; mean planar error is 0.05023 m/s against 0.025. Computed torque exceeds the unchanged demand-fraction bound. During one complete cycle, six-foot contact coincides with near-zero speed, followed by a surge after lift-off. Joint tracking contributes 0.04569 m/s RMS; toe-marker motion contributes 0.00324 m/s.",
+        "source": "site/assets/tripod_forward_overlap_20260922_001/forward_high_result.json"
+      },
+      {
+        "id": "zhang-tripod-forward-overlap-cpu-20260922-017",
+        "title": "We match forward support motion through ground overlap",
+        "backend": "CPU kinematic checks and recorded-input replay; native diagnostic pending",
+        "result": "inconclusive",
+        "text": "The candidate matches swing and support motion around lift-off and touchdown. It permits inward foot motion during swing to retain joint bounds. It keeps yaw targets, motor limits and acceptance gates. Full-command, clearance, reset and early-touchdown checks pass within 177 locomotion tests. Native testing starts with the canonical 0.10 m/s case from two resets.",
+        "source": "site/assets/tripod_forward_overlap_20260922_001/declaration.json"
       }
     ]
   },
