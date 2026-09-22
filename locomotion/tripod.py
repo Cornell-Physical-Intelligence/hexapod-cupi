@@ -39,7 +39,7 @@ def joint_order(names):
 
 
 class TripodController:
-    def __init__(self, neutral, lower, upper, config=None):
+    def __init__(self, neutral, lower, upper, config=None, *, model=None, toe_local_points=None):
         self.cfg = config or TripodConfig()
         self.neutral, self.lower, self.upper = [np.asarray(v, float).reshape(6, 3).copy()
                                                for v in (neutral, lower, upper)]
@@ -49,6 +49,15 @@ class TripodController:
             raise ValueError('This adaptation requires the approved walking stance')
         if np.any(self.lower >= self.upper):
             raise ValueError('Invalid joint bounds')
+        self.geometry = {}
+        if self.cfg.geometry_sweep_gain:
+            from .tripod_kinematics import stance_geometry
+            if model is None or toe_local_points is None:
+                raise ValueError('Geometry variant requires the admitted model and toe points')
+            for mode, height in zip(('low', 'raised'), self.cfg.geometry_lift_m):
+                points, jacobians = stance_geometry(model, toe_local_points, self.stance(mode))
+                lift = np.array([np.linalg.solve(j, [0., 0., height]) for j in jacobians])
+                self.geometry[mode] = (points, jacobians, lift[:, 1:])
         # Check combinations, including the maximum permitted recovery extension.
         for mode in ('low', 'raised'):
             base = self.stance(mode)
@@ -67,6 +76,8 @@ class TripodController:
         return value
 
     def lift(self, mode):
+        if self.geometry:
+            return self.geometry[mode][2].copy()
         return np.array(self.cfg.low_lift_rad if mode == 'low' else self.cfg.raised_lift_rad)
 
     def reset(self):
@@ -91,6 +102,7 @@ class TripodController:
         self.to_target = self.target.copy()
         self.transition_mode = 'low'
         self.stopping = False
+        self.support_from_touchdown = np.zeros(6, dtype=bool)
 
     def _validate_target(self, target):
         if (not np.isfinite(target).all() or np.any(target < self.lower)
@@ -133,6 +145,17 @@ class TripodController:
             return FORWARD_SIGN*min(.30, self.cfg.hip_amplitude_rad*self.command[0]/.05)
         return np.full(6, self.cfg.hip_amplitude_rad*self.command[2]/.20)
 
+    def _sweep(self):
+        if not self.geometry:
+            result = np.zeros((6, 3)); result[:, 0] = self._hip()
+            return result
+        points, jacobians, _ = self.geometry[self.mode]
+        velocity = np.tile([0., -self.command[0], 0.], (6, 1))
+        velocity[:, 0] -= self.command[2]*points[:, 1]
+        velocity[:, 1] += self.command[2]*points[:, 0]
+        displacement = velocity*self.cfg.period_s*self.cfg.geometry_sweep_gain/4.
+        return np.array([np.linalg.solve(j, d) for j, d in zip(jacobians, displacement)])
+
     def step(self, command, foot_force_n, mode='low'):
         """Advance one 20 ms control using measured distal-force magnitudes."""
         if not supported(command):
@@ -157,8 +180,9 @@ class TripodController:
                 self.command = requested.copy()
                 self.half, self.progress = 0, 0.
                 self.pitch_hold.fill(0); self.swing_start.fill(0)
+                self.support_from_touchdown.fill(False)
                 endpoint = self.stance(self.mode)
-                endpoint[:, 0] += self._hip()*np.sin(-math.pi/2+PHASE)
+                endpoint += self._sweep()*np.sin(-math.pi/2+PHASE)[:, None]
                 self._begin_blend('start', endpoint)
             else:
                 return self.target.reshape(18).copy()
@@ -195,17 +219,21 @@ class TripodController:
         self.progress = min(1., self.progress+2.*DT/self.cfg.period_s)
         phase = -math.pi/2+self.half*math.pi+self.progress*math.pi+PHASE
         hip, lift = wave(phase)
-        desired = base.copy()
-        desired[:, 0] += self._hip()*hip
-        desired[:, 1:] += self.pitch_hold
+        coefficients = self._sweep()
+        baseline = base+coefficients*hip[:, None]
+        desired = baseline.copy()
+        desired[self.landed, 1:] = base[self.landed, 1:]+self.pitch_hold[self.landed]
         # Return a landed leg to the paper's zero-lift stance over its support half-cycle.
         stance_return = .5*(1.+math.cos(math.pi*self.progress))
-        desired[~swing, 1:] = base[~swing, 1:]+stance_return*self.pitch_hold[~swing]
+        support = ~swing & self.support_from_touchdown
+        start_sine = np.sin(-math.pi/2+self.half*math.pi+PHASE)
+        residual = self.pitch_hold-coefficients[:, 1:]*start_sine[:, None]
+        desired[support, 1:] += stance_return*residual[support]
         moving = swing & ~self.landed
         pitches = lift[:, None]*self.lift(self.mode)
         if self.progress < .5:
             pitches += (1.-lift[:, None])*self.swing_start
-        desired[moving, 1:] = base[moving, 1:]+pitches[moving]
+        desired[moving, 1:] = baseline[moving, 1:]+pitches[moving]
 
         if self.progress >= 1.-1e-9:
             if not self.seen_off[swing].all():
@@ -217,13 +245,14 @@ class TripodController:
                     self._begin_blend('settle', base)
                 else:
                     self.pitch_hold[~swing] = 0.
+                    self.support_from_touchdown = swing.copy()
                     self.half += 1; self.progress = 0.
                     self.swing_start = self.pitch_hold.copy()
                     self.seen_off.fill(False); self.landed.fill(False)
                 return result
             self.wait_s += DT
             missing = swing & ~self.contacts
-            desired[missing, 1] = base[missing, 1]-min(.04, self.cfg.recovery_rate_rad_s*self.wait_s)
+            desired[missing, 1] = baseline[missing, 1]-min(.04, self.cfg.recovery_rate_rad_s*self.wait_s)
             if self.wait_s > self.cfg.recovery_s+1e-9:
                 return self._fault('touchdown_timeout')
         return self._emit(desired)

@@ -291,6 +291,47 @@ changes to the paper's joint equations distinct from a parameter calibration.
 Retain the approved model, actuator limits and acceptance gates. Qualification
 and terrain remain pending because no candidate passed the three screens.
 
+### Geometry correction declared on 22 September 2026
+
+You retain the paper-equation variant and declare a separate `geometry`
+variant before native dispatch. You add a sine term to both pitch joints.
+This changes Eqs. (2)–(3); it is a geometry adaptation, not a parameter fit
+of those equations. You retain uniform phase and contact-triggered transitions.
+
+At each mode stance, you compute each toe position `p` and its joint Jacobian
+`J` from the approved model transforms. You solve `J*a = d`, where
+`d = gain*period/4 * ((0,-forward,0) + yaw*(-p_y,p_x,0))`.
+You command `q = stance + a*sin(u) + lift*g(u)`. For pure forward motion,
+the ideal stance displacement gives the requested average speed over a
+half-period. This calculation omits actuator tracking and touchdown waits.
+Native speed measurements must establish the mapping under load.
+
+You derive pitch lift coefficients from `J*lift = (0,0,height)`, then set
+the yaw lift coefficient to zero. You use heights of 22 mm in low mode and
+28 mm in raised mode. You change the raised stance offset to
+`(0,-0.15,+0.10)` rad to leave room for support motion within the action
+envelope. These are kinematic inputs; the measured 12/16 mm toe-lift gates
+and 8 mm root-height-increase gate remain unchanged.
+
+At touchdown, you hold the pitch target through the rest of that swing.
+During support, you blend from that target to the next sweep endpoint with
+the existing cosine rule. You retain the two-control contact debounce and
+bounded recovery. You check trajectory and transition bounds on the CPU
+before any native run. You preserve the original controller variant and tests.
+
+You declare two candidates, in order: gains 1.0 and 1.1 with period 1.2 s.
+You screen forward 0.05 m/s and both yaw signs for each candidate, then use
+the qualification and clearance matrix above for the first complete pass.
+You select this sweep with `--tripod-adaptation geometry`; the default
+`paper` selection retains the four earlier candidates. You retain failed
+attempts and require a new declaration before another parameter revision.
+
+You can inspect the [CPU declaration](../site/assets/tripod_geometry_20260922_001/declaration.json).
+The first candidate's 0.05 m/s trajectory has a maximum stance-edge range of
+1.3 mm. Both candidates remain within 0.341 rad of the low neutral stance
+across the declared commands and modes. CPU contact fixtures cover early
+touchdown, missed touchdown and stops. Native tracking remains unqualified.
+
 ## Foundation commands
 
 ```sh

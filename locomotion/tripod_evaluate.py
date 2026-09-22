@@ -10,7 +10,7 @@ import numpy as np
 
 from .env_config import EnvConfig, JOINT_NAMES, MODEL_SHA256, USD_SHA256, sha, verify_assets
 from .tripod import TripodController, supported
-from .tripod_config import SWEEP
+from .tripod_config import SWEEPS
 
 
 def save(path, value):
@@ -49,7 +49,9 @@ class NativeController:
     def __init__(self, env, case, config, stream):
         self.env, self.case, self.stream = env, case, stream
         self.controller = TripodController(env.neutral.detach().cpu().numpy(),
-            env.lower.detach().cpu().numpy(), env.upper.detach().cpu().numpy(), config)
+            env.lower.detach().cpu().numpy(), env.upper.detach().cpu().numpy(), config,
+            model=env.model if config.geometry_sweep_gain else None,
+            toe_local_points=env.reference_metadata['toe_local_points_m'] if config.geometry_sweep_gain else None)
         self.control = 0
 
     def __call__(self, observation):
@@ -182,7 +184,8 @@ def main(argv=None):
         parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--source-freeze-sha256', required=True)
     parser.add_argument('--num-envs', type=int, choices=[1], default=1)
-    parser.add_argument('--candidate', type=int, choices=range(len(SWEEP)), required=True)
+    parser.add_argument('--candidate', type=int, choices=range(4), required=True)
+    parser.add_argument('--tripod-adaptation', choices=tuple(SWEEPS), default='paper')
     parser.add_argument('--suite', choices=['screen', 'qualification', 'clearance'], required=True)
     parser.add_argument('--seed', type=int, default=27057)
     parser.add_argument('--max-wall-seconds', type=float, default=6200.)
@@ -194,6 +197,10 @@ def main(argv=None):
         from isaaclab.app import AppLauncher
         AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args(argv)
+    sweep = SWEEPS[args.tripod_adaptation]
+    if args.candidate >= len(sweep):
+        raise ValueError('Candidate is outside the declared adaptation sweep')
+    controller_config = sweep[args.candidate]
     if not args.headless or args.device != 'cuda:0' or not 0 < args.max_wall_seconds <= 6200 or args.seed < 0:
         raise ValueError('A bounded headless native evaluation is required')
     verify_assets(args.asset, args.model)
@@ -209,7 +216,7 @@ def main(argv=None):
         'source_freeze_sha256': args.source_freeze_sha256,
         'stance_sha256': sha(args.stance), 'geometry_sha256': sha(args.geometry),
         'geometry_extrema_sha256': sha(args.geometry_extrema), 'config': cfg.declaration(),
-        'controller': SWEEP[args.candidate].declaration(), 'candidate': args.candidate,
+        'controller': controller_config.declaration(), 'candidate': args.candidate,
         'controller_kind': 'prescribed_tripod', 'learned_policy': False}
     identity['physics_source_files'] = {k: identity['source_files'][k] for k in ('env.py', 'env_config.py')}
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
@@ -244,7 +251,7 @@ def main(argv=None):
         env = LocomotionEnv(cfg, args.asset, args.model, args.geometry, args.output/'native', reference_metadata=metadata)
         prepare_policy_scene(env); env.render = NativePolicyCamera(env)
         state['status'] = 'running'; save(args.output/'state.json', state)
-        summary = run_suite(env, args.output, args.geometry_extrema, SWEEP[args.candidate],
+        summary = run_suite(env, args.output, args.geometry_extrema, controller_config,
                             args.suite, args.seed, args.max_wall_seconds, identity)
         state['status'] = 'completed' if summary['acquisition_complete'] else 'failed'
         state['numerical_pass'] = summary['pass']

@@ -17,11 +17,14 @@ class TripodConfig:
     recovery_s: float = .40
     recovery_rate_rad_s: float = .10
     initial_support_s: float = 2.
+    geometry_sweep_gain: float = 0.
+    geometry_lift_m: tuple = (.022, .028)
 
     def __post_init__(self):
         values = (self.period_s, self.hip_amplitude_rad, self.transition_s,
                   self.contact_on_n, self.contact_off_n, self.recovery_s,
                   self.recovery_rate_rad_s, self.initial_support_s,
+                  self.geometry_sweep_gain, *self.geometry_lift_m,
                   *self.low_lift_rad, *self.raised_lift_rad, *self.raised_offset_rad)
         if not all(math.isfinite(v) for v in values):
             raise ValueError('Controller parameters must be finite')
@@ -30,13 +33,17 @@ class TripodConfig:
                 or type(self.debounce_controls) is not int or self.debounce_controls < 1
                 or not 0 < self.recovery_s <= .40 or not 0 < self.recovery_rate_rad_s <= .10
                 or self.initial_support_s < self.recovery_s
+                or not 0 <= self.geometry_sweep_gain <= 1.1
+                or len(self.geometry_lift_m) != 2 or any(h <= 0 for h in self.geometry_lift_m)
                 or any(len(v) != 2 for v in (self.low_lift_rad, self.raised_lift_rad, self.raised_offset_rad))):
             raise ValueError('Controller parameters exceed the declared envelope')
 
     def declaration(self):
         return {'schema': 'zhang_tripod_geometry_adaptation_v1', **asdict(self),
+                'trajectory_variant': 'geometry' if self.geometry_sweep_gain else 'paper',
                 'control_dt_s': .02, 'target_slew_rad': .040,
-                'low_root_target_m': .0978, 'raised_root_target_m': .1088,
+                'low_root_target_m': .0978,
+                'raised_root_target_m': .1093 if self.geometry_sweep_gain else .1088,
                 'minimum_root_increase_m': .008,
                 'minimum_toe_lift_m': {'low': .012, 'raised': .016},
                 'paper_doi': '10.3389/frobt.2024.1426269', 'stage2_complete': False}
@@ -44,3 +51,7 @@ class TripodConfig:
 
 SWEEP = tuple(replace(TripodConfig(), period_s=period, hip_amplitude_rad=amplitude)
               for period in (1.2, 1.6) for amplitude in (.12, .18))
+
+GEOMETRY_SWEEP = tuple(replace(TripodConfig(), geometry_sweep_gain=gain,
+                              raised_offset_rad=(-.15, .10)) for gain in (1., 1.1))
+SWEEPS = {'paper': SWEEP, 'geometry': GEOMETRY_SWEEP}

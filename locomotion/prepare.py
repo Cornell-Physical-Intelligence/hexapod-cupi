@@ -7,6 +7,7 @@ from pathlib import Path
 import shutil
 
 from .env_config import sha
+from .tripod_config import SWEEPS
 
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path('/home/orionh/HEXAPOD_runs/restart_20260914')
@@ -18,7 +19,8 @@ def save(path, value):
 
 def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
-            checkpoint_declaration_sha=None, candidate=0, suite='screen', root=ROOT):
+            checkpoint_declaration_sha=None, candidate=0, suite='screen',
+            tripod_adaptation='paper', root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     if (not remote_root.is_absolute() or REMOTE_ROOT not in remote_root.parents
             or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay', 'tripod')
@@ -29,7 +31,9 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
     if (num_envs not in (1, 32, 128) or (mode in ('evaluate', 'replay', 'tripod') and num_envs != 1)
             or (mode == 'train' and num_envs != 128) or eval_scope not in ('focus', 'probes', 'full')):
         raise ValueError('Invalid replica count for this mode')
-    if type(candidate) is not int or candidate not in range(4) or suite not in ('screen', 'qualification', 'clearance'):
+    if (tripod_adaptation not in SWEEPS or (mode != 'tripod' and tripod_adaptation != 'paper')
+            or type(candidate) is not int or candidate not in range(len(SWEEPS[tripod_adaptation]))
+            or suite not in ('screen', 'qualification', 'clearance')):
         raise ValueError('Select a member of the declared tripod sweep and suite')
     supplied = (checkpoint is not None, checkpoint_sha is not None, checkpoint_declaration_sha is not None)
     if (mode == 'evaluate' and not all(supplied)) or (mode != 'evaluate' and any(supplied)):
@@ -79,7 +83,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
     if mode in ('train', 'evaluate'):
         binding['command_args'] += ['--updates', str(updates), '--seed', str(seed)]
     if mode == 'tripod':
-        binding['command_args'] += ['--candidate', str(candidate), '--suite', suite, '--seed', str(seed)]
+        binding['command_args'] += ['--candidate', str(candidate), '--suite', suite, '--seed', str(seed),
+                                   '--tripod-adaptation', tripod_adaptation]
     if mode == 'evaluate':
         binding['command_args'] += ['--eval-scope', eval_scope]
     if checkpoint is not None:
@@ -111,6 +116,7 @@ def main():
     parser.add_argument('--updates', type=int, default=512)
     parser.add_argument('--seed', type=int, default=20260917)
     parser.add_argument('--candidate', type=int, choices=range(4), default=0)
+    parser.add_argument('--tripod-adaptation', choices=tuple(SWEEPS), default='paper')
     parser.add_argument('--suite', choices=['screen', 'qualification', 'clearance'], default='screen')
     parser.add_argument('--checkpoint', type=Path)
     parser.add_argument('--checkpoint-sha')
