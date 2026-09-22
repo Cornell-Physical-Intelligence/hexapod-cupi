@@ -280,6 +280,29 @@
       "caption": "First native frame of the passed forward screen on the approved model.",
       "controller": "Prescribed tripod; source 09dd28fc1750772dfb11823f4d530f81ea8ad648632483d45f44c5cbafeade8c",
       "evidence": "site/assets/tripod_velocity_filtered_native_20260922_001/result.json"
+    },
+    {
+      "id": "tripod_overlap_native_20260922_001",
+      "title": "Prescribed tripod: passed left-turn screen",
+      "type": "video",
+      "role": "trajectory_experiment",
+      "path": "site/assets/tripod_overlap_native_20260922_001/rollout.mp4",
+      "sha256": "4beef778a23f15000be3cdb3356fd1248f6ca53638e43f1504873d684531c731",
+      "caption": "Approved detailed model. Mean left yaw 0.2088 rad/s against 0.20. Forward and both turn screens pass. Canonical qualification remains pending; real-time playback.",
+      "controller": "Prescribed tripod; source 06b0595d9fa54b3c9398fa1c080768f58495d3a4a19f6f74c5140d6c1f473aee",
+      "evidence": "site/assets/tripod_overlap_native_20260922_001/result.json",
+      "poster_id": "tripod_overlap_native_20260922_001_poster"
+    },
+    {
+      "id": "tripod_overlap_native_20260922_001_poster",
+      "title": "Yaw overlap: first frame",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/tripod_overlap_native_20260922_001/first_frame.png",
+      "sha256": "31219564af46afe36ae1da7220e814b53a5eaa18b180dceb0d502e696c1e2e34",
+      "caption": "First native frame of the passed left-turn screen on the approved model.",
+      "controller": "Prescribed tripod; source 06b0595d9fa54b3c9398fa1c080768f58495d3a4a19f6f74c5140d6c1f473aee",
+      "evidence": "site/assets/tripod_overlap_native_20260922_001/result.json"
     }
   ],
   "nodes": [
@@ -866,6 +889,14 @@
         "result": "inconclusive",
         "text": "One declared candidate keeps horizontal yaw targets in support motion before phase 0.15 and after phase 0.80. Landed feet retain a pitch lift residual while the horizontal baseline continues. The full forward overlap probe exceeds target bounds and remains excluded; forward targets preserve the preceding candidate. Six recorded-input replays preserve emitted bounds, with target clipping during changed yaw traces.",
         "source": "site/assets/tripod_overlap_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-overlap-native-20260922-013",
+        "title": "We pass forward and both turn screens",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "passed",
+        "text": "Forward planar error is 0.02242 m/s. Left/right yaw errors are 0.03448/0.03478 rad/s against the unchanged 0.06 limit. All native motor/contact checks pass. A complete left-turn cycle retains yaw through six-foot contact after the declared overlap change. The accumulated record contains five passed screens, 49 failed completed trials and one interrupted attempt. Canonical 0.10 m/s motion, stops, raised clearance and independent repeats remain pending.",
+        "source": "site/assets/tripod_overlap_native_20260922_001/result.json"
       }
     ]
   },

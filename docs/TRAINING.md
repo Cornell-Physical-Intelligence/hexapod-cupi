@@ -627,6 +627,13 @@ screens, 49 failed completed trials and one interrupted attempt. The
 [yaw cycle](../site/assets/tripod_pd_native_20260922_001/yaw_decomposition.png)
 and [declaration](../site/assets/tripod_overlap_20260922_001/declaration.json)
 bind the diagnosis and next candidate.
+The [completed overlap screen](../site/assets/tripod_overlap_native_20260922_001/result.json)
+passes forward and both turn directions. Forward planar error is 0.02242 m/s;
+left/right yaw errors are 0.03448/0.03478 rad/s. All native motor/contact checks
+pass. You retain five passed screens, 49 failed completed trials and one
+interrupted attempt. You proceed to the declared canonical qualification
+cases and independent repeats. Stops, raised clearance and terrain remain
+pending; these screens do not establish Stage 2 or AMP acceptance.
 
 ## Foundation commands
 
