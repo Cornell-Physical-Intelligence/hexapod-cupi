@@ -138,7 +138,7 @@ then changes by at most 0.040 rad per control. The controller log records
 
 You can inspect the [three passing motion screens](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_native_20260922_001/native_result.json)
 and the [passing stop suite](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_native_20260922_001/native_result.json).
-[STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/STATUS.md) records the native result of each variant. The
+[STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings) records the native result of each variant. The
 [closeout](../site/assets/tripod_reproduction_closeout_20260922_001/closeout.json)
 records four interrupted qualification attempts. Full qualification, raised
 clearance and terrain remain incomplete. You can inspect the
@@ -275,7 +275,7 @@ before dispatch; the runner does not select a candidate for you.
 
 `--tripod-adaptation` selects a frozen variant, so you can replay each recorded
 result. Each variant keeps the changes of its parent. The linked records hold
-the equations, CPU checks and frozen inputs; [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/STATUS.md) holds each
+the equations, CPU checks and frozen inputs; [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings) holds each
 native result. Declare a new variant and its CPU checks before native dispatch.
 Keep changes to the paper equations separate from parameter calibration.
 

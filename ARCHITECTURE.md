@@ -7,7 +7,7 @@ unreached stops with the termination reason. The operator approves the boundary
 and route in the same local site coordinates as the robot. Geographic alignment
 remains optional.
 
-This document owns requirements and system boundaries. [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/STATUS.md)
+This document owns requirements and system boundaries. [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings)
 contains measured progress from `site/project.json`. Use [GitHub issues](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues)
 for assignments and [CONTRIBUTING](CONTRIBUTING.md) for the review workflow.
 

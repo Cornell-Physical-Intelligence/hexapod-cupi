@@ -65,8 +65,10 @@ class OwnedLaunchTests(unittest.TestCase):
             args = launch.command(online, paths, "owned")
         self.assertEqual(args[args.index("WANDB_API_KEY")-1], "-e")
         self.assertFalse(any("k"*40 in value for value in args))
-        with patch.dict(os.environ, {"WANDB_API_KEY": ""}), self.assertRaises(ValueError):
+        with patch.dict(os.environ, {"WANDB_API_KEY": ""}):
             self.verify_without_filesystem(online)
+            with self.assertRaises(ValueError):
+                launch.require_wandb_key(online["command_args"])
         offline = self.binding()
         offline["command_args"] += ["--logger", "wandb", "--wandb-project", "hexapod", "--wandb-mode", "offline"]
         self.assertNotIn("WANDB_API_KEY", launch.command(offline, paths, "owned"))

@@ -70,7 +70,7 @@ checks serialized frames and inertia against the URDF. Omitted internal fastener
 remain in mass and rendering; the simulator does not model their snagging.
 
 Researchers completed native standing and walking experiments on named source
-packs; [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/STATUS.md) records their outcomes. Obtain fresh matching
+packs; [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings) records their outcomes. Obtain fresh matching
 standing admission for a new source allocation. Before hardware deployment,
 measure actuator behavior and encoder mapping, resolve clearance/ownership
 findings, and add the measured sensor/payload inventory. An 18-action historical

@@ -7,7 +7,7 @@ outside this repository. You can inspect the approved robot in the
 on the [progress site](https://cornell-physical-intelligence.github.io/hexapod-cupi/).
 
 The consolidated simulation foundation supports stock PPO and an optional
-trajectory optimizer. [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/STATUS.md) lists measured results; run
+trajectory optimizer. [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings) lists measured results; run
 `python3 tools/project_site.py status` for a local, untracked copy. Paper-method
 implementation remains ahead of you in
 [TRAINING](docs/TRAINING.md#proposed-reproduction-sequence).

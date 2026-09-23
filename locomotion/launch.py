@@ -103,12 +103,15 @@ def verify(binding, own):
         index=argv.index(option)
         guard.require(index+1<len(argv) and argv[index+1]==want,'Native argument differs: '+option)
     guard.require(argv.count('--headless')==1,'Explicit headless allocation required')
-    if online_wandb(argv):
-        guard.require(bool(os.environ.get('WANDB_API_KEY')),'Online W&B logging needs WANDB_API_KEY in the launcher environment')
     return paths
 
 def online_wandb(argv):
     return any(a=='--wandb-mode' and b=='online' for a,b in zip(argv,argv[1:]))
+
+def require_wandb_key(argv):
+    # Launch needs the key; cleanup of a crashed allocation must not.
+    if online_wandb(argv):
+        guard.require(bool(os.environ.get('WANDB_API_KEY')),'Online W&B logging needs WANDB_API_KEY in the launcher environment')
 
 def command(binding, paths, name):
     args=['docker','compose','--env-file','docker/.env.base','-f','docker/docker-compose.yaml','--profile','base',
@@ -266,6 +269,7 @@ def main():
                 guard.save(paths['output']/'cleanup.json', receipt)
         print(json.dumps(receipt, indent=2))
         return
+    require_wandb_key(binding['command_args'])
     guard.require(not paths['output'].exists(), 'Attempt output must be fresh')
     with guard.both_locks():
         snapshot = preflight()

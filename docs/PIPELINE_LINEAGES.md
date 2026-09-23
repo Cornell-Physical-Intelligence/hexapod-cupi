@@ -21,13 +21,14 @@ result bytes retain their original identities. Git history has not been rewritte
 
 ```sh
 git fetch --unshallow
+git fetch origin refs/pull/33/head:refs/archive/pr33
 python3 tools/archive.py check --git-objects
 python3 tools/archive.py restore artifacts --destination ../hexapod-restored
 python3 tools/check_pipeline_lineages.py historical
 ```
 
 Use `git fetch --unshallow` for a shallow clone. Retired tripod evidence from PR #33 pins
-commit `05f706eb`; run `git fetch origin pull/33/head` before you restore it. Choose a fresh restore destination;
+commit `05f706eb`; the second fetch keeps it under a local ref that `git gc` cannot prune. Choose a fresh restore destination;
 restore accepts a single file or subtree and refuses to overwrite a directory.
 The historical check uses the unchanged Stage 2 manifest at its original commit.
 Run historical tests from a restored checkout of their source revision.

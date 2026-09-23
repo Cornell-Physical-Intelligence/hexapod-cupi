@@ -184,7 +184,8 @@ def main(argv=None):
         runner_config = copy.deepcopy(config)
         if args.logger == 'wandb':
             # The logger choice stays out of ppo_config, which checkpoint loading compares.
-            os.environ.update(WANDB_DIR=str(args.output), WANDB_MODE=args.wandb_mode)
+            # Copy saved checkpoints: container paths do not exist where offline runs sync.
+            os.environ.update(WANDB_DIR=str(args.output), WANDB_MODE=args.wandb_mode, WANDB_SYMLINK='false')
             runner_config.update(logger='wandb', wandb_project=args.wandb_project)
             wrapped.cfg = ConfigRecord(wrapped.cfg)
         runner = OnPolicyRunner(wrapped, runner_config, str(args.output/'learner'), device=args.device)
