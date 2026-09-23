@@ -56,15 +56,15 @@ Next step: **not defined**. After canonical walking and stopping qualify, define
 
 ### Survey a drawn area — Blocked
 
-Follow a route through the requested area, stop with a steady sensor platform to scan, and deliver a 3D terrain map. Start on a level, hard surface with no obstacles.
+Follow an approved route through the requested area and stop with a steady sensor platform at each designated location. GeoData owns scanning and the 3D terrain map. Start on a level, hard surface with no obstacles.
 
 Scope: Physical robot and survey sensor. Owner: James and both leads.
 
-Required proof: On the physical robot, cover the drawn area and deliver the map. Coverage, map-accuracy and platform-motion limits still need agreement.
+Required proof: On the physical robot, complete the approved route inside the drawn area with controlled stops. Stop-position and platform-motion limits still need agreement.
 
-Current limitation: The robot remains unbuilt and walking remains unqualified. Issues #19 and #20 cover independent simulation work; mapping and mission software remain pending.
+Current limitation: The robot remains unbuilt and walking remains unqualified. Issue #20 covers route rehearsal in simulation; mission software remains pending. GeoData owns survey data collection, and issue #19 closed as not planned.
 
-[Evidence](ARCHITECTURE.md) · Architecture: R-01, R-03, R-05, R-06, R-07, R-08, R-09, R-10.
+[Evidence](ARCHITECTURE.md) · Architecture: R-01, R-03, R-05, R-06, R-09, R-10.
 
 Defined increment: **M1 — Save and reload one simulated laser scan**. Scope approved by James.
 
@@ -76,7 +76,7 @@ Fixture: Sensor height: 0.25 m. Wall: 0.80 m wide × 0.08 m thick × 0.50 m high
 - With noise disabled, every expected floor or wall hit must be within 1 mm of its expected position.
 - With the existing sensor noise enabled, at least 95% of expected hits must be within 7 cm. Missing hits count as failures; report false hits separately.
 
-Assignment pending. Assign owners and reviewers for #19 mapping and #20 survey rehearsal. Preserve the M1 fixture; define combined-map error and mission-rehearsal limits before their tests.
+Assignment pending. Assign an owner and reviewer for #20 route rehearsal and define its limits before its test. Preserve the M1 fixture as a record; this project schedules no M1 work.
 
 ## Recorded attempts
 
@@ -124,7 +124,7 @@ Assignment pending. Assign owners and reviewers for #19 mapping and #20 survey r
 - **We end native dispatch with qualification incomplete (interrupted)** — Isaac Sim; approved 19-body robot; four interrupted qualification attempts. Motion screens and three stop cases pass; each stop repeat replays its first trace. Four interrupted qualification prefixes do not complete the required 22-case suite. Raised clearance and terrain remain incomplete. We disabled both task-created Spark pause guards when native dispatch ended; no recorded matching process remained paused. We verified that our Isaac container is absent. [Evidence](site/assets/tripod_reproduction_closeout_20260922_001/closeout.json)
 - **We find identical repeat traces and bind the analysis scripts (inconclusive)** — Recorded trace hashes and CPU recomputation; no new native run. The reset writes a fixed pose and the controller draws no random numbers, so each second repeat replays its first trace. The six passing stop trials hold three distinct trajectories, and the 25 completed qualification cases hold seven distinct traces. The published forward metrics recompute exactly from the hash-verified traces. The record binds three figures and the forward comparison to their scripts by hash. [Evidence](site/assets/tripod_review_corrections_20260922_001/repeat_identity.json)
 
-Use issue #18 for walking, #19 for simulated mapping and #20 for mission rehearsal. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.
+Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.
 
 Current compute rules and reservation records: [operations](docs/SPARK_COMPUTE_COORDINATION.md). This is not live GPU telemetry.
 

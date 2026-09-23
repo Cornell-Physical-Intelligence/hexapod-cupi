@@ -1,10 +1,11 @@
 # Hexapod architecture
 
-You survey an operator-drawn region by moving between measurement locations,
-stopping with a steady payload deck, and recording measurements for a 3D terrain
-map. You export coverage and gaps with complete or partial results. The operator
-approves the boundary and route in the same local site coordinates as the robot.
-Geographic alignment and measurement while moving remain optional.
+You move a hexapod through an operator-drawn region and stop at each designated
+location with a steady payload deck. GeoData owns survey data collection, the 3D
+terrain map and its export outside this repository. You report reached and
+unreached stops with the termination reason. The operator approves the boundary
+and route in the same local site coordinates as the robot. Geographic alignment
+remains optional.
 
 This document owns requirements and system boundaries. [STATUS](STATUS.md)
 contains measured progress from `site/project.json`. Use [GitHub issues](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues)
@@ -17,12 +18,12 @@ for assignments and [CONTRIBUTING](CONTRIBUTING.md) for the review workflow.
 | R-01 | Accept an operator-drawn survey polygon and explicit exclusions, with a reviewed route before motion. |
 | R-02 | Work within a demonstrated ground, slope, load and operating-duration envelope. Retain flat-ground behavior when adding terrain. |
 | R-03 | Locate the robot and approved survey boundary in the same local site map and expose uncertainty. Geographic registration is optional for the first delivery. The baseline has no operational RTK base station. |
-| R-04 | Learn useful omnidirectional locomotion: signed translation, both yaw directions, combinations, transitions and quiet stops. Hold a steady payload deck during measurement acquisition. |
+| R-04 | Learn useful omnidirectional locomotion: signed translation, both yaw directions, combinations, transitions and quiet stops. Hold a steady payload deck at each stop. |
 | R-05 | Keep the full moving footprint inside the approved region or entry corridor and outside exclusions, including localization and stopping uncertainty. |
 | R-06 | Support start, pause, resume, abort and hardware emergency stop. Expired control authority or critical sensing failure must stop mission execution. |
-| R-07 | Associate measurements with acquisition time, pose, calibration and quality. Credit coverage only from valid measurements. |
-| R-08 | Deliver a 3D terrain map in local site coordinates for the first completed survey. Export complete or partial measurements, covered and missed areas, and failure reasons. |
-| R-09 | Run control and recording onboard; show stale telemetry and qualify operator-link behavior under loss and reconnection. |
+| R-07 | GeoData owns measurement association and coverage credit. This project keeps the ID and plans no work under it. |
+| R-08 | GeoData owns the 3D terrain map and survey export. This project keeps the ID and plans no work under it. |
+| R-09 | Run control onboard; show stale telemetry and qualify operator-link behavior under loss and reconnection. |
 | R-10 | Use the approved 18-RS05 assembly and owned Jetson Orin Nano within measured payload, power, thermal and compute limits. Mid-360 and D455 are available. |
 | R-11 | Preserve reproducible releases, model-specific contracts, unchanged historical acceptance gates and failed-attempt evidence. |
 | R-12 | Give each work packet an owner, human reviewer and independently reproducible outcome. |
@@ -31,13 +32,13 @@ James selected a level, hard-surfaced, obstacle-free course for the first survey
 Agree on dimensions and surface tolerances before its test. The final terrain
 envelope remains open. Retain [DAR.png](DAR.png) as the original mission slide.
 
-James selected the owned Livox Mid-360 for the first simulated mapping test.
-The physical robot is unbuilt and the sensor is unmounted. Start with the M1
-fixture in §6; defer D455 integration. The survey lead and Geo Data must define
-payload quality and deck-stability limits. They must also define map resolution,
-accuracy, local origin, boundary alignment and export representation.
-Reconstruction can run after acquisition; navigation needs poses during motion.
-Navigation sensing and survey acquisition have separate qualification scopes.
+GeoData owns survey data collection: acquisition, measurement quality, map
+reconstruction and export. The physical robot is unbuilt and the owned Livox
+Mid-360 is unmounted. Defer D455 integration. GeoData must declare the
+deck-stability limits and measurement windows that its acquisition needs; you
+hold them at each stop. Both teams must agree on the local origin and boundary
+alignment. Navigation needs poses during motion. Navigation sensing and GeoData
+acquisition have separate qualification scopes.
 
 You operate one robot with one controlling operator. Multi-robot control,
 self-righting, repair and unattended operation remain outside this baseline.
@@ -70,16 +71,16 @@ Historical simplified and four-bar policies retain their original contracts.
 
 ```mermaid
 flowchart LR
-  Operator[Operator: draw and approve] --> Mission[Mission and coverage planning]
+  Operator[Operator: draw and approve] --> Mission[Mission and route planning]
   Sensors[Navigation sensors] --> Pose[Pose and terrain estimate]
   Pose --> Mission
   Mission -->|velocity command| Control[Qualified motion runtime]
   Control --> Motors[Motor transport and independent stop]
-  Payload[Survey payload] --> Recorder[Pose-associated measurements]
-  Pose --> Recorder
-  Recorder --> Coverage[Valid coverage and export]
-  Coverage --> Operator
+  Mission -->|route progress| Operator
 ```
+
+GeoData acquisition sits outside this diagram. Its interface to pose and stop
+status remains undefined.
 
 | Boundary | Maintained source and remaining implementation |
 | --- | --- |
@@ -87,7 +88,7 @@ flowchart LR
 | Locomotion | `locomotion/` owns simulation, rewards, PPO, evaluation and guarded execution; `priors/` owns optional motion optimization. Hardware runtime and paper-method extensions remain pending. |
 | Contracts | `contracts/` owns commands, planar poses and checkpoint identity fields. Full mission and hardware wire formats remain pending. |
 | Navigation | `navigation/` holds a waypoint follower example. Planner and localization remain pending. |
-| Mission | `mission/sensors/` holds ray-pattern and transport prototypes. Operator controls, recorder, coverage and export remain pending. |
+| Mission | `mission/sensors/` retains ray-pattern and transport prototypes. Operator controls and route-progress reporting remain pending. GeoData owns recording, coverage and export. |
 | Inspection and publication | `viewer/` provides model inspection; `site/` provides progress and recordings. A mission operator interface remains pending. |
 
 Keep planning, networking, storage and rendering outside the motion loop.
@@ -107,10 +108,9 @@ missing-input behavior before dependent implementation.
 | Velocity command | Forward/lateral/yaw rate in named coordinates; validity interval and allowed envelope; expired or invalid authority must not continue motion. |
 | Policy release | Exact robot, source, observation/action ordering, actuator assumptions, timing, weights and qualification evidence. Reject incompatible releases. |
 | Terrain estimate | Height/support information, uncertainty, acquisition age and explicit unknown space. Preserve the existing 250 ms optical lease within its experimental lineage. |
-| Survey request | Polygon, exclusions, coordinate registration, approved entry corridor, payload/profile and request revision. Route clearance includes moving footprint and stopping uncertainty. |
-| Measurement | Acquisition time, pose association, payload/calibration identity, quality and valid footprint. Invalid or duplicated samples cannot inflate coverage. |
+| Survey request | Polygon, exclusions, coordinate registration, approved entry corridor and request revision. Route clearance includes moving footprint and stopping uncertainty. |
 | Operator authority | One controlling session, explicit acknowledgements and stopped transitions, stale/replayed request handling and an independent hardware stop. |
-| Export | Durable complete or partial result, readable independently, with valid coverage, gaps and failure reasons. |
+| GeoData handoff | Undefined. GeoData owns measurement and export formats. Both teams must decide the stop status and pose that GeoData acquisition needs from this project. |
 
 Implement the fields required by the next agreed increment. Both leads review
 shared contracts, including fixtures and migration behavior.
@@ -119,8 +119,8 @@ shared contracts, including fixtures and migration behavior.
 
 | ID | Decision owner | Measurements needed |
 | --- | --- | --- |
-| Q-01 | Survey lead + payload owner | Useful sample quality against a stationary reference; deck roll/pitch, angular and vertical motion; measurement windows and required useful acquisition rate. |
-| Q-02 | Survey lead + payload owner | Actual mounted sensor footprint, overlap, coverage denominator, permitted gaps and independent reference survey. |
+| Q-01 | Survey lead + payload owner | Deck roll/pitch, angular and vertical motion at each stop against the limits and measurement windows that GeoData declares. |
+| Q-02 | Survey lead + payload owner | Stop spacing and overlap that the mounted sensor needs. GeoData owns the coverage denominator, permitted gaps and reference survey. |
 | Q-03 | Survey lead | Map alignment, localization drift, heading and time-association error against independent control points; behavior during resets/dropouts. |
 | Q-04 | Platform lead + mechanical/electrical partners | Loaded mass/COM, joint/motor mapping, bus voltage, actuator response/temperature, stopping distance, permitted terrain and restrained emergency-stop behavior. |
 | Q-05 | Both leads; James owns budget | Assembly readiness, cost, power/endurance, full-load compute deadlines, sensor data/storage rates and measured operator-link behavior. |
@@ -137,9 +137,12 @@ Declare limits before experiments; preserve existing gates after a failure.
 | `walking` | Historical forward gait appearance on the earlier robot; retain its torque failure. |
 | `stage2` | Smooth omnidirectional motion, transitions and quiet stops on the approved model; see [#18](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/18). |
 | `stage3` | Terrain and causal perception while retaining admitted flat behavior. Define the first terrain envelope after flat qualification. |
-| `mission` | Survey an approved region with valid measurements and readable partial/full export. [#19](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/19) covers simulated mapping; [#20](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/20) covers mission rehearsal with ideal poses. Both can proceed before walking integration. |
+| `mission` | Execute an approved route through the drawn region with controlled stops and readable route progress. [#20](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/20) covers route rehearsal with ideal poses and can proceed before walking integration. GeoData owns survey data collection; [#19](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/19) closed as not planned on 2026-09-18. |
 
 ### M1: stationary simulated scan export and reload
+
+GeoData owns survey data collection, and this project schedules no M1 work. The
+approved fixture and limits below remain as a record.
 
 James approved this as the first mapping milestone. Reuse the existing
 [approximate Mid-360 model](mission/sensors/mid360_pattern.py) in a
@@ -179,9 +182,8 @@ Retain the lead's existing noise configuration for the noisy run, including
 the two runs separately and preserve raw observations. Freeze the scene and
 random seed before execution; do not tune noise or thresholds to pass.
 
-James approved the scope, fixture and limits. Track M1 under [mapping issue #19](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/19);
-assign its owner and reviewer before native execution. Implementation must record
-the exact source/configuration and runtime used for each result.
+James approved the scope, fixture and limits. [Mapping issue #19](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/19)
+tracked M1 until its closure as not planned on 2026-09-18.
 These simulation checks do not establish real sensor or final survey accuracy.
 Scope approval establishes no completed capability and does not resume research.
 

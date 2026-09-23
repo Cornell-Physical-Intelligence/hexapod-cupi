@@ -3,7 +3,7 @@
   "title": "Hexapod \u00b7 Development roadmap",
   "repository": "Cornell-Physical-Intelligence/hexapod-cupi",
   "mission": "Hexapod MKII: from walking to autonomous surveying",
-  "description": "Build a hexapod that surveys an area drawn on a map and returns a 3D map of the ground. It can stop to take measurements and process the finished map afterward.",
+  "description": "Build a hexapod that walks an approved route through an area drawn on a map and stops with a steady sensor platform. GeoData owns the measurements and the 3D map.",
   "status_source": "STATUS.md",
   "geometry": {
     "label": "Approved detailed robot model",
@@ -395,9 +395,9 @@
       "state": "planned",
       "column": 1,
       "row": 0,
-      "meaning": "Choose a route and measurement stops that cover the requested area. The first course is level, hard and clear of obstacles.",
+      "meaning": "Choose a route and stops inside the requested area. The first course is level, hard and clear of obstacles.",
       "input": "Survey boundary, ground map and robot position",
-      "output": "A route with measurement stops",
+      "output": "A route with stops",
       "source": "ARCHITECTURE.md",
       "milestone_id": "mission"
     },
@@ -460,7 +460,7 @@
       "state": "prepared",
       "column": 2,
       "row": 1,
-      "meaning": "Researchers tested synthetic ground-height observations in the archived prototype. Current map assembly and localization remain pending. Mapping issue #19 uses simulator-provided poses for its first combined map.",
+      "meaning": "Researchers tested synthetic ground-height observations in the archived prototype. Current map assembly and localization remain pending. GeoData owns survey mapping; issue #19 closed as not planned.",
       "input": "Scans aligned using the estimated sensor position",
       "output": "Nearby ground heights and measurement uncertainty",
       "source": "artifacts/terrain_readiness_2026-09-09/observation_comparison_cpu_001/README.md",
@@ -520,14 +520,14 @@
     },
     {
       "id": "survey",
-      "title": "Produce the survey map",
+      "title": "Execute the survey route",
       "label": "Final goal",
       "state": "planned",
       "column": 3,
       "row": 2,
-      "meaning": "Follow the survey route, stop at measurement locations and hold the sensor platform steady. Combine the measurements into a 3D terrain map after the run.",
-      "input": "Survey route, robot position and recorded scans",
-      "output": "A 3D terrain map covering the requested area",
+      "meaning": "Follow the survey route, stop at each designated location and hold the sensor platform steady. GeoData owns the measurements and the 3D terrain map.",
+      "input": "Survey route and robot position",
+      "output": "Reached and unreached stops with the termination reason",
       "source": "ARCHITECTURE.md",
       "milestone_id": "mission"
     }
@@ -668,8 +668,8 @@
     {
       "id": "mission",
       "title": "Survey a drawn area",
-      "description": "Follow a route through the requested area, stop with a steady sensor platform to scan, and deliver a 3D terrain map. Start on a level, hard surface with no obstacles.",
-      "gate": "On the physical robot, cover the drawn area and deliver the map. Coverage, map-accuracy and platform-motion limits still need agreement.",
+      "description": "Follow an approved route through the requested area and stop with a steady sensor platform at each designated location. GeoData owns scanning and the 3D terrain map. Start on a level, hard surface with no obstacles.",
+      "gate": "On the physical robot, complete the approved route inside the drawn area with controlled stops. Stop-position and platform-motion limits still need agreement.",
       "source": "ARCHITECTURE.md",
       "status": "blocked",
       "backend": "Physical robot and survey sensor",
@@ -683,13 +683,11 @@
         "R-03",
         "R-05",
         "R-06",
-        "R-07",
-        "R-08",
         "R-09",
         "R-10"
       ],
-      "blocker": "The robot remains unbuilt and walking remains unqualified. Issues #19 and #20 cover independent simulation work; mapping and mission software remain pending.",
-      "question": "Assign owners and reviewers for #19 mapping and #20 survey rehearsal. Preserve the M1 fixture; define combined-map error and mission-rehearsal limits before their tests.",
+      "blocker": "The robot remains unbuilt and walking remains unqualified. Issue #20 covers route rehearsal in simulation; mission software remains pending. GeoData owns survey data collection, and issue #19 closed as not planned.",
+      "question": "Assign an owner and reviewer for #20 route rehearsal and define its limits before its test. Preserve the M1 fixture as a record; this project schedules no M1 work.",
       "next_step": null,
       "acceptance": null,
       "definition": {
@@ -704,7 +702,7 @@
         ],
         "fixture": "Sensor height: 0.25 m. Wall: 0.80 m wide \u00d7 0.08 m thick \u00d7 0.50 m high, centred 1 m in front of the sensor. Use 20,000 rays per scan. Fixed random seeds: 360 for the scan pattern and 20260824 for sensor noise and timing."
       },
-      "card_text": "Pending canonical qualification; M1 scope retained."
+      "card_text": "Pending canonical qualification; M1 record retained."
     }
   ],
   "papers": [
@@ -747,7 +745,7 @@
     "source_commit": "e6d9b943b4ab7da62c29e3b01418413ea2a99fd2",
     "architecture": "ARCHITECTURE.md",
     "summary": "Researchers passed the optimized forward-trajectory screen. The tested PPO policies fail walking acceptance, and the paired initialization test found no benefit in its one seed. The prescribed tripod controller passes standing admission and its motion screens on the approved robot. It passes three stop cases; its full qualification remains incomplete. The consolidated kernel supports the proposed simulation-reproduction order in TRAINING; paper-method (AMP) implementation remains pending.",
-    "definition_policy": "Use issue #18 for walking, #19 for simulated mapping and #20 for mission rehearsal. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
+    "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
     "facts": [
@@ -1099,7 +1097,7 @@
   },
   "summary_tags": [
     "Coordinates relative to the test site",
-    "Stop to take measurements",
+    "Stop at designated locations",
     "Simulation first"
   ]
 }

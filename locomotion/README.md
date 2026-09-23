@@ -58,8 +58,8 @@ unrecorded tangential friction. A completed recording does not accept walking.
 You need this loop to establish walking and stopping before adding terrain.
 The model import and geometry tools remain under `robot/` and `tools/assets/`.
 Hardware execution needs a measured actuator profile and a canonical runtime
-binding. Navigation can then consume velocity commands and stopping status;
-survey recording can consume pose and measurement quality. The navigation example consumes shared commands. Historical runtime bindings
+binding. Navigation can then consume velocity commands and stopping status.
+The navigation example consumes shared commands. Historical runtime bindings
 remain in Git until a canonical replacement receives its own parity evidence.
 
 The optional trajectory optimizer and native replay live in `priors/`. Package
