@@ -187,7 +187,11 @@ class TripodController:
             raise ValueError('Controller target exceeds the unchanged joint/action envelope')
 
     def _emit(self, desired):
-        self._validate_target(desired)
+        try:
+            self._validate_target(desired)
+        except ValueError:
+            # An out-of-envelope target is a controller failure, not a capture failure.
+            return self._fault('target_bounds')
         self.target += np.clip(desired-self.target, -.040, .040)
         return self.target.reshape(18).copy()
 
@@ -276,6 +280,8 @@ class TripodController:
             self.elapsed = min(self.elapsed+DT, self.cfg.transition_s)
             h = .5*(1.-math.cos(math.pi*self.elapsed/self.cfg.transition_s))
             result = self._emit(self.from_target+h*(self.to_target-self.from_target))
+            if self.fault:
+                return result
             self.support_loss_s = 0. if self.contacts.all() else self.support_loss_s+DT
             if self.support_loss_s > self.cfg.recovery_s+1e-9:
                 return self._fault('support_loss_during_'+self.state)
@@ -363,6 +369,8 @@ class TripodController:
                 return self._fault('swing_failed_to_lift')
             if self.contacts[swing].all() and self.landed[swing].all():
                 result = self._emit(desired)
+                if self.fault:
+                    return result
                 self.wait_s = 0.
                 decay_stop = self.cfg.stop_stride_ramp
                 if self.stopping and decay_stop and not self.ramping_stop:

@@ -58,6 +58,17 @@ class TripodOverlapTests(unittest.TestCase):
             np.testing.assert_allclose(q-old, coefficient*(new_shape-old_shape)[:, None], atol=1e-12)
             self.assertTrue(c.landed[c.swing].all())
 
+    def test_out_of_envelope_target_latches_a_controller_fault(self):
+        c = make_geometry(SWEEPS['overlap'][0])
+        for _ in range(400):
+            q = c.step([0., 0., .2], measured_fixture(c, touchdown=.51), 'raised')
+            if c.fault:
+                break
+        self.assertEqual((c.fault, c.state), ('target_bounds', 'fault'))
+        c._validate_target(q.reshape(6, 3))
+        np.testing.assert_array_equal(c.step([0., 0., .2], np.full(6, 12.), 'raised'), q)
+        c.reset();self.assertIsNone(c.fault)
+
 
 if __name__ == '__main__':
     unittest.main()

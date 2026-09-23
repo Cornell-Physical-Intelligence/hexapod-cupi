@@ -128,19 +128,45 @@ sinusoidal targets on this robot.
 | Servo tracking | Add nominal damping compensation, position-error gain 0.5 and velocity-error gain 2 with a 5 Hz filter. Preserve the motor limits, action envelope and target limiter. |
 | Start and stop | For forward starts, hold the stance for one second, then grow stride over one cycle. For yaw starts, blend to the first sweep endpoint. At a stop, finish the current swing and reduce stride over one full cycle before the standing hold. Use this stop for command and mode changes. |
 
+The current variant computes each 20 ms target from half-cycle progress `p`,
+which advances by `2*0.02/1.2` per control:
+
+```text
+S_support(p) = 1 - 2p
+S_swing(p)   = -1 - 2p + 4*r(u),   u = clip((p - 0.15)/0.65, 0, 1)
+r(u)         = h(u) for forward motion; 3u^2 - 2u^3 for yaw
+h(s)         = v/2*(s - r0/pi*sin(pi*s/r0))      for s < r0
+             = v*(s - r0/2)                       for r0 <= s <= 1 - r0
+             = 1 - h(1 - s)                       for s > 1 - r0;  r0 = 0.10, v = 1/(1 - r0)
+J*a          = period/4 * ((0, -forward, 0) + yaw*(-y, x, 0))   for each toe at (x, y)
+q_ref        = stance + a*S + c_lift*g(phi)
+phi          = -pi/2 + half*pi + acos(1 - 2*h(p)) + leg_phase
+g(phi)       = (1 + cos(2*phi))/2 if cos(phi) > 0, else 0
+e_p          = clip(0.5*b*(q_ref - q), -0.070, 0.070)
+e_v          = clip(2*b*KD*(F(dq_ref) - F(dq))/12, -0.070, 0.070)
+target       = clip(q_ref + KD*dq_ref/12 + e_p + e_v, joint limits and neutral +/- 0.35)
+```
+
+`J` is the approved toe Jacobian at the mode stance, and `c_lift` is the lift
+row in the table above. The blend `b` is 0 at idle, 1 while walking and a
+one-second cosine ramp during start and settling. `q` and `dq` come from the
+preceding native control. `F` is a 5 Hz one-pole filter with
+`alpha = 1 - exp(-2*pi*5*0.02)`, and its states reset while `b` is 0. A forward
+start scales `a` by `(1 - cos(pi*min(t/T, 1)))/2`, and a stop scales it by
+`s0*(1 + cos(pi*t/T))/2`, where `T` is the 1.2 s period. The emitted target
+then changes by at most 0.040 rad per control. The controller log records
+`nominal_target_rad` and `target_rad` as separate channels.
+
 You can inspect the [three passing motion screens](../site/assets/tripod_speed_lift_native_20260922_001/native_result.json)
-and [six passing stop trials](../site/assets/tripod_stop_stride_native_20260922_001/native_result.json).
-You closed this research sequence with full qualification, raised clearance
-and terrain incomplete. We retain four interrupted qualification attempts;
-none completes the required suite. We disabled both task-created Spark pause
-guards at your request and verified that our Isaac container is absent.
-You can inspect the [closeout and selected demo](../site/assets/tripod_reproduction_closeout_20260922_001/closeout.json)
-and [guard shutdown receipt](../site/assets/tripod_reproduction_closeout_20260922_001/spark_guard_shutdown.json).
-The sections below retain the declarations and measured results for each variant.
-You can inspect the [forward comparison](../site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.png)
+and the [passing stop suite](../site/assets/tripod_stop_stride_native_20260922_001/native_result.json).
+[STATUS](../STATUS.md) records the native result of each variant. The
+[closeout](../site/assets/tripod_reproduction_closeout_20260922_001/closeout.json)
+records four interrupted qualification attempts. Full qualification, raised
+clearance and terrain remain incomplete. You can inspect the
+[forward comparison](../site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.png)
 and its [source identities and measurements](../site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.json).
-We retain the [qualification interruptions](../site/assets/tripod_qualification_recovery_20260922_001/qualification_interruptions.json).
-The completed cases pass; competing CUDA jobs interrupted acquisition.
+The [analysis provenance](../site/assets/tripod_review_corrections_20260922_001/analysis_provenance.json)
+binds that comparison and two diagnostic figures to their scripts and inputs.
 
 ### Original equations and geometry adaptation
 
@@ -202,7 +228,8 @@ You require two controls for each change. These are controller thresholds;
 they do not replace the existing contact acceptance checks. At a missing
 touchdown you hold phase and lower the missing foot at 0.10 rad/s, at most
 0.04 rad, for 0.40 s. Failure to land, failure to lift, or sustained support
-loss latches a fault and holds the last target. You require a trial reset
+loss latches a fault and holds the last target. An out-of-envelope target
+latches the `target_bounds` fault in the same way. You require a trial reset
 after a fault. You record the fault as a failed attempt.
 
 You support zero, forward commands in `(0,0.10]` m/s and pure yaw commands
@@ -233,6 +260,15 @@ you record its native evidence and declare its offsets. You preserve motor/model
 | Clearance | Repeat low/raised forward and yaw cases, plus low→raised→low commands while moving; no native joint violations or nonfoot contacts. Require the geometry targets above. Keep all stop checks. |
 | Terrain, after flat pass | One fixed bar, 10 mm high, 40 mm along travel, 0.80 m across, centered 0.60 m ahead. Command raised mode at 2 s and low mode after the full robot crosses. Require crossing within 30 s, 10 s stopped afterward, no nonfoot contact or joint violations, and two reset replicas. Freeze a terrain-specific contact capture before dispatch. |
 
+The reset writes a fixed pose and zero velocity, and the controller draws no
+random numbers. The recorded seed changes no state, so the second repeat of a
+case replays the first trace. Each repeat pair in the
+[stop suite](../site/assets/tripod_stop_stride_native_20260922_001/native_result.json)
+has identical trace hashes: the six passing trials hold three distinct
+trajectories. The [repeat identity record](../site/assets/tripod_review_corrections_20260922_001/repeat_identity.json)
+lists each pair. Identical replays do not meet the independent-reset requirement.
+A qualifying repeat needs a reset difference declared before dispatch.
+
 You record video and 400 Hz ground-contact force plus requested/applied torque
 through the existing evaluation pipeline. You bind source, model, input and
 configuration hashes, retain failures, and report each parameter change.
@@ -247,581 +283,39 @@ separate dataset review. This work starts no AMP or learned-control work.
 
 You prepare each allocation with `python -m locomotion.prepare --mode tripod`,
 the admitted `--inputs`, a fresh `--output` and `--remote-root`, plus
-`--candidate 0..3` and `--suite screen|qualification|clearance`.
+`--tripod-adaptation stop_stride --candidate 0` for the current variant and
+`--suite screen|forward_high|stops|qualification|clearance`. The default
+`--tripod-adaptation paper` selects the four original candidates.
 You complete the declared screen order before qualification and require its
 two-reset pass before clearance testing. The launcher retains both GPU locks
 and the existing reservation checks. The runner enforces standing admission
 and records one actual video per trial. You must inspect prior suite results
 before dispatch; the runner does not select a candidate for you.
 
-### Reproduction result on 21 September 2026
-
-You can inspect the [source-bound result](../site/assets/tripod_20260921/result.json).
-Seventeen CPU checks pass criterion 1. Approved-model kinematics predict
-15.28 mm low-mode toe lift and 19.09 mm raised-mode toe lift. Criteria 2–7
-remain incomplete because no native trial ran. The host preflight rejected a
-released reservation marker. After authorizing GPU job recovery, the user
-instructed: “Stop the GPU jobs; leave native runs pending.” Both idle jobs
-have preserved restart records; the reservation service remains unchanged.
-The flat-ground runner includes torque/contact capture and video recording,
-but it supplies no measured native evidence yet. Terrain capture and testing
-remain pending behind flat qualification. Future AMP work must wait for
-accepted native demonstrations, including supported turns and stops.
-
-### Native corrections declared on 22 September 2026
-
-The one-robot and 32-robot standing captures pass after reservation restoration.
-The first controller retained early-touchdown pitch throughout stance; nine
-screens ended with a liftoff fault. You now return that offset to zero during
-the support half-cycle. With this correction and the original lift offsets,
-candidate 0 completed its forward and left-turn screens but failed tracking.
-The forward capture showed 3–11 mm toe-height ranges and 0.051 m/s mean planar
-error against the unchanged 0.025 m/s limit. These are failed native results.
-
-You declare a second geometry adaptation before dispatch: low pitch offsets
-`(+0.35,-0.30)` rad and raised offsets `(+0.45,-0.35)` rad. Forward kinematics
-predict 25.7 mm and 34.4 mm of lift; native measurement must still establish
-12 mm and 16 mm. You retain the four period/hip choices above and independent
-reset requirements. You preserve the original captures and source packs,
-including prepared choices that a source correction supersedes before execution.
-
-### Complete-cycle diagnosis on 22 September 2026
-
-You can inspect the [cycle measurements](../site/assets/tripod_cycle_20260922_001/cycle_metrics.json)
-from candidate 0's larger-lift forward run. Controls 190–262 cover the first
-complete A/B cycle starting after 3.5 seconds. Replay matches all 1,000 logged
-controller targets, and approved-model forward kinematics match the captured
-toe positions within 0.3 micrometres.
-
-We measure a 1.46-second cycle against the 1.2-second setting, including 0.26
-seconds of touchdown waits. Rear-foot touchdown precedes front-foot touchdown;
-the controller extends the front legs during recovery. Median forward speed
-is 0.0081 m/s, and 23.3% of controls have negative forward speed in this cycle.
-Eleven complete cycles retain the surge and recoil pattern.
-
-The commanded support triangle has edge-length ranges of 27.9–28.6 mm on
-two edges per half-cycle. Fixed ground contacts cannot follow these targets
-through rigid body motion. The contact-point calculation estimates median
-tangential speeds of 0.23–0.59 mm/s per foot, with brief spikes. This estimate
-uses consecutive tibia poses and current contact patches; the recorder does
-not supply tangential friction force. Toe-landmark displacement includes
-rotation of the foot shape. We retain joint tracking and touchdown timing as
-coupled contributors; these measurements do not isolate one cause.
-
-The [completed sweep](../site/assets/tripod_sweep_20260922_001/result.json)
-retains 24 failed motion trials across the source corrections. Candidate 2
-completed its slower-period forward run with 0.03736 m/s planar error against
-the 0.025 m/s limit. It also exceeded the native joint-speed bound on two
-physics steps. Candidate 3 stopped its forward run at control 615 with
-`touchdown_timeout`. Both slower-period candidates failed both turn screens.
-We verified exact-container cleanup and retained the Spark reservation.
-
-Declare the next geometry correction before another native candidate. Keep
-changes to the paper's joint equations distinct from a parameter calibration.
-Retain the approved model, actuator limits and acceptance gates. Qualification
-and terrain remain pending because no candidate passed the three screens.
-
-### Geometry correction declared on 22 September 2026
-
-You retain the paper-equation variant and declare a separate `geometry`
-variant before native dispatch. You add a sine term to both pitch joints.
-This changes Eqs. (2)–(3); it is a geometry adaptation, not a parameter fit
-of those equations. You retain uniform phase and contact-triggered transitions.
-
-At each mode stance, you compute each toe position `p` and its joint Jacobian
-`J` from the approved model transforms. You solve `J*a = d`, where
-`d = gain*period/4 * ((0,-forward,0) + yaw*(-p_y,p_x,0))`.
-You command `q = stance + a*sin(u) + lift*g(u)`. For pure forward motion,
-the ideal stance displacement gives the requested average speed over a
-half-period. This calculation omits actuator tracking and touchdown waits.
-Native speed measurements must establish the mapping under load.
-
-You derive pitch lift coefficients from `J*lift = (0,0,height)`, then set
-the yaw lift coefficient to zero. You use heights of 22 mm in low mode and
-28 mm in raised mode. You change the raised stance offset to
-`(0,-0.15,+0.10)` rad to leave room for support motion within the action
-envelope. These are kinematic inputs; the measured 12/16 mm toe-lift gates
-and 8 mm root-height-increase gate remain unchanged.
-
-At touchdown, you hold the pitch target through the rest of that swing.
-During support, you blend from that target to the next sweep endpoint with
-the existing cosine rule. You retain the two-control contact debounce and
-bounded recovery. You check trajectory and transition bounds on the CPU
-before any native run. You preserve the original controller variant and tests.
-
-You declare two candidates, in order: gains 1.0 and 1.1 with period 1.2 s.
-You screen forward 0.05 m/s and both yaw signs for each candidate, then use
-the qualification and clearance matrix above for the first complete pass.
-You select this sweep with `--tripod-adaptation geometry`; the default
-`paper` selection retains the four earlier candidates. You retain failed
-attempts and require a new declaration before another parameter revision.
-
-You can inspect the [CPU declaration](../site/assets/tripod_geometry_20260922_001/declaration.json).
-The first candidate's 0.05 m/s trajectory has a maximum stance-edge range of
-1.3 mm. Both candidates remain within 0.341 rad of the low neutral stance
-across the declared commands and modes. CPU contact fixtures cover early
-touchdown, missed touchdown and stops. Native tracking remains unqualified.
-
-### Geometry correction result on 22 September 2026
-
-You can inspect the [six native screens](../site/assets/tripod_geometry_native_20260922_001/result.json)
-and the [recorded cycle](../site/assets/tripod_geometry_native_20260922_001/cycle_metrics.json).
-Both candidates complete all three captures without controller faults. Their
-native motor, joint and contact checks pass, but all six fail motion tracking.
-The forward mean speeds are 0.0466 and 0.0513 m/s for the 0.05 m/s command;
-their planar errors are 0.0490 and 0.0535 m/s against the 0.025 m/s limit.
-Both turn directions fail the 0.06 rad/s yaw-error limit.
-
-The first candidate's measured cycle lasts 1.20 s without touchdown waits.
-Its target stance-edge range falls to 1.83 mm, while 35% of cycle controls
-retain backward velocity. The controller detects liftoff at 23–27% of the
-swing interval. The feet retain load during the initial forward target sweep.
-You retain these six failures and the preceding 24 attempts. Geometry and
-average speed corrections have not established accepted tracking under load.
-
-### Damping correction declared on 22 September 2026
-
-You declare one `damping` candidate before dispatch. You retain geometry
-candidate 0 and add joint-velocity feedforward to its motor target:
-
-```text
-dq_reference = (reference_now - reference_previous) / 0.02
-motor_target = reference_now + KD * dq_reference / 12
-```
-
-The approved motor law remains `torque = 12*(target-q) - KD*dq`, with the
-same torque-speed limit and native physics. At exact reference tracking,
-this target term cancels the motor's damping demand. It does not compensate
-gravity, inertia or ground forces. You label the term as an RS05 tracking
-adaptation to the prescribed joint motion in paper §5.2.1.
-
-You retain the geometry reference for phase and touchdown state. You record
-that reference and the compensated motor target as separate channels. You
-check the full compensated target against the existing joint/action bounds
-and apply the same 0.040 rad/20 ms slew bound to the emitted motor target.
-You reject an out-of-envelope target; you do not enlarge the action range.
-
-You screen the single candidate with `--tripod-adaptation damping --candidate 0`
-after the two geometry candidates finish. You retain the forward and both-turn
-screens, then the existing qualification and clearance matrix if it passes.
-You require a new evidence-backed declaration before another correction.
-
-You can inspect the [frozen damping declaration](../site/assets/tripod_damping_20260922_001/declaration.json)
-and [CPU replay](../site/assets/tripod_damping_20260922_001/cpu_replay.json).
-Replay uses the first geometry candidate's recorded contact inputs; it does
-not predict the new contact sequence. The maximum added offset is 0.0332 rad,
-and the emitted targets remain within the existing action and slew bounds.
-
-The [three native damping screens](../site/assets/tripod_damping_native_20260922_001/result.json)
-complete 1000 controls each with native motor and contact checks passed.
-Forward mean speed reaches 0.04979 m/s, but planar tracking error remains
-0.04852 m/s against 0.025. Left and right yaw errors remain 0.15315 and
-0.15304 rad/s against 0.06. You retain all 33 failed motion attempts.
-
-### Phase-clock correction declared on 22 September 2026
-
-You retain the uniform-clock variants and declare one `retimed` candidate.
-You retain the geometry path and damping correction, with period 1.2 s and
-sweep gain 1.0. You change the phase clock in Eqs. (1)–(3); this is a method
-adaptation, distinct from a reproduction of the printed time law.
-
-For an ideal rigid stance and exact joint tracking, the uniform-clock speed
-is proportional to `sin(pi*s)` over half-cycle fraction `s`. Its minimum
-mean absolute error against unit speed is `1/3`, even after amplitude
-calibration. At 0.20 rad/s this gives 0.0667 rad/s, above the existing 0.06
-gate. Compliance and nonlinear geometry can change this ideal result; the
-calculation does not establish a bound on native motion.
-
-You define a normalized displacement `h(s)` with cosine acceleration ramps
-over the first and last 10% of each half-cycle, and constant speed between
-them. With `r=0.10` and `v=1/(1-r)`, you use:
-
-```text
-h(s) = v/2 * (s - r/pi*sin(pi*s/r))                  for s < r
-h(s) = v * (s-r/2)                                  for r <= s <= 1-r
-h(s) = 1-v/2 * (1-s-r/pi*sin(pi*(1-s)/r))             for s > 1-r
-phase = -pi/2 + half*pi + acos(1-2*h(s)) + leg_phase
-```
-
-You keep the sine and cosine-squared joint path. You use `1-h(s)` for the
-touchdown-offset return, which preserves the blend to the next stance
-endpoint. Contact thresholds and recovery limits remain unchanged. You
-check emitted targets against the same joint/action and slew bounds.
-
-You screen this single candidate with `--tripod-adaptation retimed --candidate 0`
-after the failed damping screen. You retain the existing forward/yaw
-gates and the qualification, stopping and clearance matrix. Native success
-must establish the effect of the changed clock under load. You can inspect
-the [declaration](../site/assets/tripod_retimed_20260922_001/declaration.json)
-and [ideal-speed calculation](../site/assets/tripod_retimed_20260922_001/error_bound.json).
-
-You retain the [interrupted first attempt](../site/assets/tripod_retimed_20260922_001/interrupted.json).
-The launcher detected unrelated CUDA compute after preflight and removed
-its owned container. The closed native chunk contains 800 substeps over
-controls 0–99; no final motion score exists. A follow-up cleanup check
-verified container absence and the retained reservation. You must resolve
-allocation contention before a fresh attempt. The 33 completed motion
-trials remain failed; this partial attempt supplies no acceptance result.
-
-### Retimed native result and joint feedback declared on 22 September 2026
-
-You retain the [three completed retimed screens](../site/assets/tripod_retimed_native_20260922_001/result.json)
-and the [measured cycle comparison](../site/assets/tripod_retimed_native_20260922_001/cycle_comparison.json).
-Forward error falls to
-0.03031 m/s, and left/right yaw errors fall to 0.08860/0.08894 rad/s. These
-values exceed the unchanged 0.025 m/s and 0.06 rad/s limits. Native motor
-and contact checks pass. You retain 36 failed completed motion trials and
-one interrupted attempt.
-
-In forward controls 233–292, you measure 17% negative-speed controls. The
-mean support-joint errors are about -2.90° at the femur and +3.83° at the
-tibia; swing errors are smaller. A finite-difference estimate from the
-nominal support feet has 0.00795 m/s error, against 0.03047 m/s from actual
-joint motion. This estimate omits angular correction and uses interval
-velocities. It supports a joint-tracking diagnostic without assigning the
-full error to one cause.
-
-You declare two `feedback` candidates with gains 0.5 and 1.0. Both retain
-the retimed path, period and lift. You add bounded proportional joint-error
-feedback through the existing motor-target input:
-
-```text
-offset = clip(blend * gain * (q_reference - q_measured), -0.070, +0.070)
-target = clip(q_reference + KD*qdot_reference/12 + offset, target_bounds)
-```
-
-You read the last measured joint positions from the preceding native control.
-You ramp `blend` from zero to one during the existing startup cosine blend,
-and from one to zero during settling. You use one during walking and zero
-during idle or clearance changes. You retain the joint limits and neutral
-±0.35 rad target envelope, then apply the 0.040 rad / 20 ms limiter. You
-record the feedback offset and target clipping for each control.
-
-You keep the actuator gains and torque-speed limits unchanged. This outer
-feedback changes closed-loop stiffness and is a declared controller
-adaptation to the prescribed-motion simulation in paper §5.2.1. It does not
-force measured joint positions or change physics. You screen gain 0.5 first,
-then gain 1.0 if needed, before qualification and clearance suites. You
-retain the existing acceptance limits and report unexecuted candidates.
-You can inspect the [feedback declaration](../site/assets/tripod_feedback_20260922_001/declaration.json)
-and [recorded-input replay](../site/assets/tripod_feedback_20260922_001/cpu_replay.json).
-
-### Contact-timing lift declared on 22 September 2026
-
-You retain the [failed gain-0.5 screen](../site/assets/tripod_feedback_native_20260922_001/result.json).
-Forward error rises to 0.03333 m/s; yaw errors remain 0.08784/0.08813 rad/s.
-The forward trial also fails the native speed and contact checks. The
-[contact incident](../site/assets/tripod_feedback_native_20260922_001/contact_incident.json)
-records a 202 N rear-right toe impulse and a tibia speed excursion, with
-the applied-torque cap active. You leave gain 1.0 unexecuted. You retain
-39 failed completed trials and one interrupted attempt.
-
-You rejected an initial `cos(phase)` lift in CPU checks: the 0.10 m/s
-command exceeded the unchanged joint/action envelope. You preserved that
-source and failure outside the checkout and did not dispatch it.
-You declare one revised `liftoff` candidate from the retimed configuration
-with joint feedback disabled. You keep the same maximum lift and replace
-the positive swing lift factor `cos(phase)^2` with `cos(phase)^1.5`, or
-`lift^0.75` in the existing waveform. You retain zero lift outside swing. This changes
-the pitch path from paper §4.2; it is a declared contact-timing adaptation.
-
-The retained cycle shows force on the outgoing tripod during the first
-13–20% of swing and touchdown near 90–93%. During these intervals, swing
-targets move opposite to the planted-foot motion needed for forward travel.
-The new profile raises the foot sooner and lowers it later at the same
-peak height. The retimed phase clock preserves zero endpoint lift velocity.
-Native contact measurements must establish whether this reduces braking;
-the geometric profile supplies no physical acceptance.
-
-You retain the period, hip sweep, damping feedforward and touchdown rules.
-You check both clearance modes against the existing target and slew bounds
-before dispatch. You run one forward/left/right screen with the unchanged
-motor, contact and tracking gates before qualification or terrain work.
-You can inspect the [lift declaration](../site/assets/tripod_liftoff_20260922_001/declaration.json)
-and [recorded-input replay](../site/assets/tripod_liftoff_20260922_001/cpu_replay.json).
-
-### Velocity feedback declared on 22 September 2026
-
-You retain [three failed lift screens](../site/assets/tripod_liftoff_native_20260922_001/result.json).
-Forward error is 0.02979 m/s; left
-and right yaw errors are 0.08488 rad/s. Native motor and contact checks
-pass. You retain 42 failed completed trials and one interrupted attempt.
-
-You compare 12 complete forward cycles through measured joint positions,
-root poses and toe positions in the [velocity decomposition](../site/assets/tripod_liftoff_native_20260922_001/velocity_decomposition.json).
-Joint-tracking differences contribute
-0.0318–0.0334 m/s RMS to body speed; planted toe-marker motion contributes
-0.0006–0.0020 m/s. Toe-marker motion includes rotation at the contact.
-These finite-difference RMS values differ from the acceptance scorer's
-mean absolute error and endpoint COM velocity.
-
-You test one velocity-feedback candidate from `retimed`, with position
-feedback off and the original squared-cosine lift. A fixed-height stance
-linearization gives forward damping ratio 0.204 and natural period 0.342 s.
-This approximation omits body rotation, changing support and leg inertia;
-it supports a damping test without proving native behavior.
-
-You add `clip(blend * 2 * KD * (reference_velocity - measured_velocity) / 12,
--0.070, 0.070)` to the damping-compensated motor target. You compute reference
-velocity from successive nominal targets at 20 ms and read measured velocity
-from the prior native control endpoint. You use the existing startup/settling
-blend and zero correction during idle and clearance changes. You clip targets
-to the existing joint/action envelope and retain the 0.040 rad slew limit.
-You record the correction and target clipping in each controller row.
-
-This feedback changes closed-loop damping through controller inputs. You
-preserve the actuator gains, torque-speed limits, physics and acceptance gates.
-The paper prescribes joint motion; this controller adds velocity feedback to
-track that reference under load. You test CPU motor-law and transition checks,
-then one native forward/left/right screen before qualification.
-You can inspect the [velocity-feedback declaration](../site/assets/tripod_velocity_20260922_001/declaration.json),
-[CPU replay](../site/assets/tripod_velocity_20260922_001/cpu_replay.json) and
-[stance approximation](../site/assets/tripod_velocity_20260922_001/stance_linearization.json).
-
-### Sampled velocity filter declared on 22 September 2026
-
-The completed unfiltered forward trial meets the planar-error gate at
-0.02195 m/s but fails yaw tracking at 0.11454 rad/s. Its yaw spectrum has
-96.3% of power at or above 15 Hz, with a 25 Hz peak. The prior retimed trial
-has 3.1% in that band. The unfiltered velocity feedback introduces this
-oscillation at the 50 Hz controller sample rate.
-
-You check the approved free-leg inertia at the neutral pose with a fixed
-base and an exact 20 ms zero-order hold. The unfiltered linear model has
-spectral radius 1.524. A 5 Hz one-pole filter lowers it to 0.854. This
-model omits contact and saturation; it supplies no native acceptance.
-
-You declare one `velocity_filtered` candidate with the same gain and bounds.
-You filter reference and measured joint velocity with
-`alpha = 1 - exp(-2*pi*5*0.02)` before subtracting them. You reset both
-filter states to zero while the feedback blend is zero. You retain the
-unfiltered candidate and its captures. You test filter attenuation and
-transitions, then run one native screen after the current allocation ends.
-You retain the [completed unfiltered screen](../site/assets/tripod_velocity_native_20260922_001/result.json):
-all three trials fail yaw tracking and pass native motor/contact checks.
-You retain 45 failed completed trials and one interrupted attempt.
-The [filter declaration](../site/assets/tripod_velocity_filtered_20260922_001/declaration.json)
-links its CPU replay and sampled-loop inputs.
-
-### Combined feedback declared on 22 September 2026
-
-The filtered screen passes forward motion at 0.02292 m/s planar error
-and 0.01674 rad/s yaw error. Both turns fail yaw tracking near 0.077 rad/s.
-You retain one passed screen, 47 failed completed trials and one interrupted
-attempt. Support pitch errors remain near 3–4 degrees in the completed
-forward and left trials. Qualification and clearance work remain pending.
-
-You declare one `pd_filtered` candidate that combines position gain 0.5
-with velocity gain 2 and the 5 Hz filter. You add both bounded corrections
-before clipping the combined target to the existing joint/action envelope.
-You retain the 0.070 rad bound on each correction and the 0.040 rad slew limit.
-You use the existing startup and settling blend for both feedback terms.
-
-You check 2,520 fixed-base free-leg models from captured and CPU-generated
-poses. The combined candidate's maximum spectral radius is 0.802. You reject
-position gain 1 in this combination because its neutral-pose spectral radius
-is 1.050. These linear checks omit contact and saturation. You run one native
-forward/left/right screen with unchanged physical and tracking gates.
-You retain the [filtered screen](../site/assets/tripod_velocity_filtered_native_20260922_001/result.json)
-and its selected forward video. The [combined-feedback declaration](../site/assets/tripod_pd_20260922_001/declaration.json)
-links the CPU replay and sampled-model inputs.
-
-### Support overlap declared on 22 September 2026
-
-The combined-feedback left turn passes motor/contact checks and fails yaw
-tracking at 0.07587 rad/s. Across twelve complete cycles, you measure near-zero
-yaw during six-foot support and 0.22–0.24 rad/s during three-foot support.
-The swing targets reverse horizontal foot motion while the feet retain contact.
-This observation supports a test of compatible motion during support overlap.
-
-You declare one `overlap` candidate based on `pd_filtered`. You retain its
-lift waveform and feedback. You apply the new sweep to pure yaw commands.
-The forward envelope probe exceeds the unchanged 0.35 rad target bound,
-so you retain its failed CPU record and keep the forward targets unchanged.
-For yaw, you use a constant-speed support sweep
-`h_support(p) = 1 - 2p`. You use `h_swing(p) = -1 - 2p + 4S(u)`, with
-`u = clip((p - 0.15) / 0.65, 0, 1)` and `S(u) = 3u² - 2u³`.
-Both horizontal sweeps follow support motion before phase 0.15 and after
-phase 0.80. You choose these intervals from measured release and touchdown.
-You preserve horizontal position and velocity across half-cycle boundaries.
-These sweeps replace the paper's horizontal sine in this declared adaptation.
-
-After touchdown, you hold the pitch lift residual relative to the current
-horizontal baseline. You continue the horizontal baseline through contact
-and return that residual to zero through the next support half-cycle.
-You check the full command/clearance envelope and target limiter before one
-forward/left/right native screen. You retain the model, motor limits and gates.
-You retain the [combined screen](../site/assets/tripod_pd_native_20260922_001/result.json):
-forward passes and both turns fail. The accumulated record contains two passed
-screens, 49 failed completed trials and one interrupted attempt. The
-[yaw cycle](../site/assets/tripod_pd_native_20260922_001/yaw_decomposition.png)
-and [declaration](../site/assets/tripod_overlap_20260922_001/declaration.json)
-bind the diagnosis and next candidate.
-The [completed overlap screen](../site/assets/tripod_overlap_native_20260922_001/result.json)
-passes forward and both turn directions. Forward planar error is 0.02242 m/s;
-left/right yaw errors are 0.03448/0.03478 rad/s. All native motor/contact checks
-pass. You retain five passed screens, 49 failed completed trials and one
-interrupted attempt. You proceed to the declared canonical qualification
-cases and independent repeats. Stops, raised clearance and terrain remain
-pending; these screens do not establish Stage 2 or AMP acceptance.
-
-### Startup correction declared on 22 September 2026
-
-The first canonical 0.10 m/s trial fails after 51 controls with
-`support_loss_during_start`. You observe left-front and right-rear support
-loss while the startup blend moves all six feet toward opposing stride
-endpoints. The capture contains no joint-bound or nonfoot-contact violations.
-Requested torque peaks at 4.61 Nm; the motor enforces the unchanged 1.6 Nm limit.
-You stop this qualification allocation and retain its completed cases and
-partial capture before testing a startup correction.
-
-You declare one `startup` candidate based on `overlap`. For forward commands,
-you hold the standing joint reference through the existing one-second startup interval. You then
-start tripod stepping and increase horizontal stride amplitude from zero
-to its declared value over one full gait cycle. You use
-`a(t) = (1 - cos(pi * min(t / T, 1))) / 2`, where `T` is the gait period.
-You retain the lift waveform, touchdown rules and existing stop behavior.
-This adaptation replaces the startup move with six planted feet.
-During the initial standing hold, you accept a changed forward command without
-starting the old command. A stop, turn or clearance change enters the settling blend.
-You retain the passing yaw startup. A CPU early-touchdown probe exposes a
-0.35047 rad target offset with both the preceding overlap candidate and the
-startup candidate. The held pitch lift residual persists while the horizontal
-baseline changes. For the new candidate's yaw motion, you return that residual
-to zero over the remainder of the touchdown half-cycle, in proportion to the
-remaining phase. You retain the failed probes and their corrected diagnosis.
-
-You check startup, reset and interrupted startup on the CPU. You first run
-the unchanged canonical `static:translate_0.10_0deg` case from two independent
-resets in the `forward_high` suite. Broader qualification follows a pass.
-You retain the model, motor limits and numerical acceptance gates.
-You retain the [interrupted qualification](../site/assets/tripod_qualification_interrupted_20260922_001/result.json)
-and [startup diagnosis](../site/assets/tripod_startup_20260922_001/startup_diagnostic.json).
-The [new declaration](../site/assets/tripod_startup_20260922_001/declaration.json)
-binds the failed CPU probe and corrected candidate.
-
-You retain the three-control [recording failure and correction](../site/assets/tripod_startup_20260922_001/recording_correction.json).
-You convert the stride-ramp latch to a Python boolean before JSON recording
-and repeat the same declared method in a fresh pack.
-
-
-### Forward support overlap declared on 22 September 2026
-
-You retain both complete startup trials from independent resets. Each trial
-finishes 1,000 controls and fails forward tracking and requested torque demand.
-Mean speed is 0.09346 m/s for the 0.10 m/s command, with 0.05023 m/s mean
-planar error. In the first complete diagnostic cycle, joint tracking contributes
-0.04569 m/s RMS error; toe-marker motion contributes 0.00324 m/s. Speed falls
-near zero during six-foot contact and reaches 0.18 m/s after lift-off.
-
-You declare one `forward_overlap` candidate based on `startup`. For forward
-motion, you use support displacement `H = 1 - 2p`. For swing displacement,
-you use `H = -1 - 2p + 4h(u)`, with `u = clip((p - 0.15) / 0.65, 0, 1)`.
-The function `h` is the existing displacement clock with a 0.10 ramp fraction.
-This choice matches support velocity before lift-off and after touchdown,
-with a constant return speed between acceleration intervals. You retain the
-1.2 s period, stride distance and yaw controller.
-
-You replace the forward vertical-Jacobian lift with joint lift coefficients
-`(0.25, 0)` rad in low mode and `(0.28, -0.10)` rad in raised mode.
-The same cosine lift envelope multiplies these coefficients. The foot moves
-outward during swing. You permit that lateral motion to fit the approved joint
-envelope; fixed lateral toe position needs more than 0.35 rad in the CPU
-inverse-kinematics probe. You retain geometric clearance targets and measure
-actual toe lift under load. You return touchdown lift residuals through the
-remaining half-cycle as in the startup candidate. You retain contact thresholds,
-recovery, actuator limits and the 0.040 rad target limiter.
-
-You check full commands, clearance, early touchdown and target bounds on the
-CPU, then run the unchanged `forward_high` case from two resets. You run the
-three motion screens and full qualification only after this diagnostic passes.
-You retain failed native captures and CPU probes with exact identities.
-You retain the [two forward failures](../site/assets/tripod_forward_overlap_20260922_001/forward_high_result.json),
-[cycle figure](../site/assets/tripod_forward_overlap_20260922_001/forward_high_cycle.png) and
-[new declaration](../site/assets/tripod_forward_overlap_20260922_001/declaration.json).
-The [two canonical forward repeats](../site/assets/tripod_forward_overlap_native_20260922_001/native_result.json)
-pass with 0.01931 m/s planar error and 0.00167 computed torque-demand fraction.
-The first trial has 18.9–24.1 mm toe lift in low mode. You retain full
-400 Hz torque/contact captures and the 20-second native video. You proceed
-to motion screens and canonical stop qualification; raised clearance and
-terrain remain pending.
-
-
-### Low-speed lift correction declared on 22 September 2026
-
-You retain the complete forward-overlap screen. Both turns pass with yaw
-errors of 0.03434 and 0.03459 rad/s. Forward motion at 0.05 m/s has
-0.01226 m/s planar error, but its computed torque-demand fraction is 0.03802
-against the unchanged 0.005 limit. The middle femur joints account for most
-of this excess. Their stance normal forces are close to the passing 0.10 m/s
-trial. Normal-contact and gravity moments explain part of the difference;
-the unmeasured tangential forces and inertial terms remain unresolved.
-
-You correct the earlier radial direction label: the forward lift moves feet
-outward. At the low-mode lift peak, the change is 26.1–26.6 mm. You retain
-published declarations and results and record this prose correction.
-
-You declare one `speed_lift` candidate based on `forward_overlap`.
-For low-mode forward commands at or below 0.05 m/s, you use femur/tibia
-lift coefficients `(0.26, -0.20)` rad. This choice reduces the predicted
-radial excursion to 3.8–3.9 mm and retains 19.7 mm nominal toe lift.
-Between 0.05 and 0.10 m/s, you interpolate those coefficients to the passing
-high-speed values `(0.25, 0)` with `w = clip((v - 0.05) / 0.05, 0, 1)`.
-You retain the existing swing and support clocks. This choice tests whether
-reduced radial motion improves low-speed loading; it does not establish the
-unmeasured contact-force cause. You retain raised-mode and yaw targets.
-
-You check the speed interval and contact transitions on the CPU, including
-exact high-speed and yaw target equivalence with the preceding controller.
-You run the three native screens, then canonical qualification if they pass.
-You retain the actuator limits and geometry acceptance targets.
-You retain the [completed screen](../site/assets/tripod_speed_lift_20260922_001/native_result.json),
-[radial direction correction](../site/assets/tripod_speed_lift_20260922_001/radial_direction_correction.json)
-and [new candidate declaration](../site/assets/tripod_speed_lift_20260922_001/declaration.json).
-The [completed speed-lift screen](../site/assets/tripod_speed_lift_native_20260922_001/native_result.json)
-passes all three commands. Forward planar error is 0.01078 m/s, with zero
-scored torque-demand excess. Left/right yaw errors are 0.03434/0.03459 rad/s.
-Measured forward toe lift is 15.1–15.9 mm. You proceed to the frozen
-canonical qualification suite and retain the full native captures.
-
-### Stop stride decay declared on 22 September 2026
-
-You retain the failed forward-stop case from `speed_lift0_qualification_020`.
-After the stop command at control 400, you finish the swing at control 412
-and blend all six legs to neutral through control 462. Two tibia joints
-retain position error during the quiet window: the left front joint holds
-near 0.141 rad against a 0.400 rad target and requests 3.10 N m. The right
-rear joint holds near 0.260 rad and requests 1.67 N m. Both reach the 1.6 N m
-actuator cap. Joint velocity, saturation and six-foot support checks fail.
-The left-turn stop also fails six-foot support at one native substep, and
-its left front hip moves 0.0219 rad during the quiet window against 0.020.
-
-You declare one `stop_stride` candidate based on `speed_lift`. For a walking
-stop or command change, you finish the current swing, then reduce stride
-amplitude through one complete tripod cycle with
-`scale = initial_scale * (1 + cos(pi * elapsed / period)) / 2`.
-You retain the swing lift during this cycle so that each tripod can place
-its feet near the standing pose. You enter the existing standing blend
-after the second touchdown. You retain the walking targets.
-This adaptation tests whether alternating support avoids the load from
-returning six planted legs from opposing stride endpoints.
-
-You check stop timing, target bounds, contact faults and reset state on the
-CPU. You run the unchanged forward and both-turn stop cases from two resets,
-then the full qualification suite after a pass. Clearance and terrain
-remain behind qualification. You retain the two-second stop settling
-allowance and the existing motor, contact and quiet-motion checks.
-You retain the [interrupted qualification](../site/assets/tripod_stop_stride_20260922_001/native_result.json),
-[forward-stop diagnosis](../site/assets/tripod_stop_stride_20260922_001/forward_stop_diagnostic.json)
-and [candidate declaration](../site/assets/tripod_stop_stride_20260922_001/declaration.json).
-The [completed stop suite](../site/assets/tripod_stop_stride_native_20260922_001/native_result.json)
-passes all six cases from two resets. Maximum quiet joint-speed RMS is
-0.00518 rad/s against 0.030. All cases have zero quiet torque saturation
-and no missing support substeps. We attempted full qualification; four
-competing CUDA interruptions prevented a complete result. You ended this
-sequence with the remaining qualification incomplete.
-You retain the [prior qualification identities](../site/assets/tripod_stop_stride_native_20260922_001/qualification_identity.json)
-with the unchanged interrupted result.
+### Declared variants
+
+`--tripod-adaptation` selects a frozen variant, so you can replay each recorded
+result. Each variant keeps the changes of its parent. The linked records hold
+the equations, CPU checks and frozen inputs; [STATUS](../STATUS.md) holds each
+native result. Declare a new variant and its CPU checks before native dispatch.
+Keep changes to the paper equations separate from parameter calibration.
+
+| Variant | Parent | Declared change | Record |
+| --- | --- | --- | --- |
+| `paper` | none | Eqs. (1)–(3) with the four period and hip choices above. Touchdown pitch returns to stance during support; lift offsets `(+0.35,-0.30)` and `(+0.45,-0.35)` rad. | [CPU result](../site/assets/tripod_20260921/result.json), [native corrections](../site/assets/tripod_native_20260922_001/result.json) |
+| `geometry` | `paper` | Jacobian sweep coefficients with gains 1.0 and 1.1, 22/28 mm Jacobian lift and raised offset `(0,-0.15,+0.10)` rad. | [declaration](../site/assets/tripod_geometry_20260922_001/declaration.json) |
+| `damping` | `geometry` gain 1.0 | Motor target adds `KD*dq_ref/12`. | [declaration](../site/assets/tripod_damping_20260922_001/declaration.json) |
+| `retimed` | `damping` | Displacement clock `h` with 0.10 endpoint ramps. | [declaration](../site/assets/tripod_retimed_20260922_001/declaration.json) |
+| `feedback` | `retimed` | Position feedback with gains 0.5 and 1.0, each within ±0.070 rad. | [declaration](../site/assets/tripod_feedback_20260922_001/declaration.json) |
+| `liftoff` | `retimed` | Swing lift `g^0.75` with joint feedback off. | [declaration](../site/assets/tripod_liftoff_20260922_001/declaration.json) |
+| `velocity` | `retimed` | Velocity feedback with gain 2, within ±0.070 rad. | [declaration](../site/assets/tripod_velocity_20260922_001/declaration.json) |
+| `velocity_filtered` | `velocity` | 5 Hz one-pole filter on reference and measured velocity. | [declaration](../site/assets/tripod_velocity_filtered_20260922_001/declaration.json) |
+| `pd_filtered` | `velocity_filtered` | Adds position feedback with gain 0.5. | [declaration](../site/assets/tripod_pd_20260922_001/declaration.json) |
+| `overlap` | `pd_filtered` | Yaw support-overlap sweeps with the cubic return. | [declaration](../site/assets/tripod_overlap_20260922_001/declaration.json) |
+| `startup` | `overlap` | Forward one-second standing hold, then a one-cycle stride ramp. The yaw touchdown residual returns over the rest of its half-cycle. | [declaration](../site/assets/tripod_startup_20260922_001/declaration.json) |
+| `forward_overlap` | `startup` | Forward support-overlap sweeps with `h`; forward lift `(0.25,0)` rad and raised `(0.28,-0.10)` rad. | [declaration](../site/assets/tripod_forward_overlap_20260922_001/declaration.json) |
+| `speed_lift` | `forward_overlap` | Low-mode forward lift `(0.26,-0.20)` rad through 0.05 m/s, interpolated to `(0.25,0)` at 0.10 m/s. | [declaration](../site/assets/tripod_speed_lift_20260922_001/declaration.json) |
+| `stop_stride` | `speed_lift` | Stride decays over one cycle after the current swing, before the standing blend. | [declaration](../site/assets/tripod_stop_stride_20260922_001/declaration.json) |
 
 ## Foundation commands
 

@@ -74,9 +74,11 @@ You can evaluate the Zhang et al. sinusoidal tripod controller with
 [reproduction contract](../docs/TRAINING.md#terrain-adaptive-tripod-reproduction-contract)
 for the finite sweep and geometry adaptations. [`tripod.py`](tripod.py) owns
 the equations and contact state; [`tripod_config.py`](tripod_config.py) owns
-parameters. You use `prepare --mode tripod` with matching standing admission.
-CPU checks and matching one/batch native standing admission pass. The first
-completed motion screens fail tracking; stopping and clearance remain pending.
-The [native result](../site/assets/tripod_native_20260922_001/result.json) preserves
-the first fifteen motion attempts and the measured failure scope. Terrain
-requires flat qualification and a terrain capture extension.
+parameters. You use `prepare --mode tripod --tripod-adaptation stop_stride`
+with matching standing admission. CPU checks and matching one/batch native
+standing admission pass. The current variant passes the
+[forward and both-turn screens](../site/assets/tripod_speed_lift_native_20260922_001/native_result.json)
+and the [three stop cases](../site/assets/tripod_stop_stride_native_20260922_001/native_result.json);
+each stop repeat replays its first trace. Full qualification and clearance
+remain incomplete. Terrain requires flat qualification and a terrain capture
+extension. [STATUS](../STATUS.md) lists each earlier attempt.

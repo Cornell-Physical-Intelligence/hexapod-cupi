@@ -1,0 +1,62 @@
+{
+  "schema": "tripod_analysis_provenance_v1",
+  "results_root": "terrain-adaptive-gait-20260921 in the local results archive, outside the checkout",
+  "artifacts": [
+    {
+      "published": {
+        "site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.json": "9696a6d6f83588ccfb24dc100b06a4dd8ee2a44783190607ee4f2d8f9ed5c54e",
+        "site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.png": "7e1eac820017c8e8735afa94e28cf72149204f292af763168be6a1c70a95348c"
+      },
+      "script": {
+        "path": "qualification_results_025/compare_forward.py",
+        "sha256": "e41eb9c16c46e16497a6d14ab6168c2dd4a64528856812ead4899d644c1b8fea"
+      },
+      "inputs": "control_trace.npz, controller.jsonl and report.json of candidate0_screen_003 and speed_lift0_screen_019 trial_000; the published JSON records their hashes",
+      "metric_definitions": {
+        "window": "controls 100 through 999 (slice 100:1000), 900 controls",
+        "median_forward_mps": "median(velocity_navigation_mps[100:1000, 0, 0])",
+        "forward_percentiles_5_95_mps": "percentile(velocity_navigation_mps[100:1000, 0, 0], [5, 95])",
+        "negative_forward_fraction": "mean(velocity_navigation_mps[100:1000, 0, 0] < 0)",
+        "joint_motor_target_rms_error_deg": "rad2deg(sqrt(mean((joint_target_rad - joint_position_rad)**2)))",
+        "joint_nominal_target_rms_error_deg": "rad2deg(sqrt(mean((nominal_target_rad - joint_position_rad)**2))), nominal_target_rad from controller.jsonl or target_rad when absent",
+        "mean_planar_tracking_error_mps": "mean(norm(velocity_navigation_mps[:, 0, :2] - command[:, 0, :2]))"
+      },
+      "reproduction": "On 2026-09-22 the definitions above, applied to the hash-verified traces, reproduce every published metric exactly: 243 of 900 backward controls for candidate0_screen_003 and 0 of 900 for speed_lift0_screen_019.",
+      "label_correction": "candidate0_screen_003 already carries the touchdown-pitch return and the (+0.35,-0.30) rad lift correction; it is the first corrected candidate, not the paper controller."
+    },
+    {
+      "published": {
+        "site/assets/tripod_pd_native_20260922_001/yaw_decomposition.png": "427bec439b6502d982efd602b58d419673ae07ab0efe7b1655d5ad30dc739b98",
+        "site/assets/tripod_pd_native_20260922_001/yaw_decomposition.json": "4c367b0c32c1a15cdaab68930f8c26d13d5d00ac751d7811c1d73c95f7a20f84"
+      },
+      "script": {
+        "path": "pd_feedback_012/plot_yaw.py",
+        "sha256": "3d4f1cadfce48608be94e64f8d49eb035412e41a62b47474cf4d5a958825e992"
+      },
+      "data_script": {
+        "path": "pd_feedback_012/analyze_yaw.py",
+        "sha256": "6d17f83d206e0aea6d0a6a02e2cbd7107a833592e56fe08b66da2e2c17a4f5d9"
+      },
+      "inputs": "pd_filtered0_screen_012 trial_001 control_trace.npz and controller.jsonl, verified against progress_snapshot.json",
+      "archive_copies_identical": true
+    },
+    {
+      "published": {
+        "site/assets/tripod_liftoff_native_20260922_001/velocity_decomposition.png": "5dbb4b8d043b87115eaa702c3375ac0734486c09e8b84ed157575d295b8cca77",
+        "site/assets/tripod_liftoff_native_20260922_001/velocity_decomposition.json": "d7c2f2ca2167334875a3c3a27c9a6595e5f7f7e847050364fd5f3d7866b91b80"
+      },
+      "script": {
+        "path": "liftoff_009/plot_cycle.py",
+        "sha256": "503c779457cf1e8b7601bc4a299036ae9e1eacb2571f593d177a92b889faac05"
+      },
+      "data_script": {
+        "path": "liftoff_009/decompose_velocity.py",
+        "sha256": "58a7143efc3bc3d393f67cddaf7bfd5252609e2780e7eaf538325e7d6ee05547",
+        "output": "velocity_decomposition_v2.json, published as velocity_decomposition.json"
+      },
+      "inputs": "liftoff0_screen_009 trial_000 control_trace.npz and controller.jsonl, verified against forward_progress.json",
+      "archive_copies_identical": true
+    }
+  ],
+  "scope": "The scripts stay outside the checkout with the raw captures; this record binds each published figure and metric to them by hash."
+}
