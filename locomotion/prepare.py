@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 import shutil
 
 from .env_config import sha
@@ -20,7 +21,8 @@ def save(path, value):
 def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
             checkpoint_declaration_sha=None, candidate=0, suite='screen',
-            tripod_adaptation='paper', root=ROOT):
+            tripod_adaptation='paper', logger='tensorboard', wandb_project=None, wandb_mode='offline',
+            root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     if (not remote_root.is_absolute() or REMOTE_ROOT not in remote_root.parents
             or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay', 'tripod')
@@ -35,6 +37,12 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             or type(candidate) is not int or candidate not in range(len(SWEEPS[tripod_adaptation]))
             or suite not in ('screen', 'qualification', 'clearance', 'forward_high', 'stops')):
         raise ValueError('Select a member of the declared tripod sweep and suite')
+    wandb_valid = (mode == 'train' and wandb_mode in ('offline', 'online')
+                   and re.fullmatch(r'[A-Za-z0-9_.-]{1,128}', wandb_project or '') is not None)
+    if ((logger == 'wandb' and not wandb_valid)
+            or (logger == 'tensorboard' and (wandb_project is not None or wandb_mode != 'offline'))
+            or logger not in ('tensorboard', 'wandb')):
+        raise ValueError('W&B logging needs train mode, a project name and offline or online mode')
     supplied = (checkpoint is not None, checkpoint_sha is not None, checkpoint_declaration_sha is not None)
     if (mode == 'evaluate' and not all(supplied)) or (mode != 'evaluate' and any(supplied)):
         raise ValueError('Evaluation requires a checkpoint and its two file hashes')
@@ -82,6 +90,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         binding['command_args'] += ['--standing-admission', '/admission/admission.json']
     if mode in ('train', 'evaluate'):
         binding['command_args'] += ['--updates', str(updates), '--seed', str(seed)]
+    if logger == 'wandb':
+        binding['command_args'] += ['--logger', 'wandb', '--wandb-project', wandb_project, '--wandb-mode', wandb_mode]
     if mode == 'tripod':
         binding['command_args'] += ['--candidate', str(candidate), '--suite', suite, '--seed', str(seed),
                                    '--tripod-adaptation', tripod_adaptation]
@@ -121,6 +131,9 @@ def main():
     parser.add_argument('--checkpoint', type=Path)
     parser.add_argument('--checkpoint-sha')
     parser.add_argument('--checkpoint-declaration-sha')
+    parser.add_argument('--logger', choices=['tensorboard', 'wandb'], default='tensorboard')
+    parser.add_argument('--wandb-project')
+    parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
     args = parser.parse_args()
     print(json.dumps(prepare(**vars(args)), indent=2))
 

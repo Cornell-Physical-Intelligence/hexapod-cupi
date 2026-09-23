@@ -103,7 +103,12 @@ def verify(binding, own):
         index=argv.index(option)
         guard.require(index+1<len(argv) and argv[index+1]==want,'Native argument differs: '+option)
     guard.require(argv.count('--headless')==1,'Explicit headless allocation required')
+    if online_wandb(argv):
+        guard.require(bool(os.environ.get('WANDB_API_KEY')),'Online W&B logging needs WANDB_API_KEY in the launcher environment')
     return paths
+
+def online_wandb(argv):
+    return any(a=='--wandb-mode' and b=='online' for a,b in zip(argv,argv[1:]))
 
 def command(binding, paths, name):
     args=['docker','compose','--env-file','docker/.env.base','-f','docker/docker-compose.yaml','--profile','base',
@@ -112,6 +117,9 @@ def command(binding, paths, name):
           '-v',str(paths['output'])+':/output:rw','-v',str(paths['source'])+':/source:ro',
           '-v',str(paths['asset'])+':/asset:ro','-v',str(paths['prior'])+':/prior:ro',
           '-v',str(paths['geometry_source'])+':/geometry_source:ro']
+    if online_wandb(binding['command_args']):
+        # Pass the key by name so its value never enters the command line or a record.
+        args+=['-e','WANDB_API_KEY']
     for source,target in binding.get('extra_mounts',[]):
         guard.canonical_path(source)
         guard.require(target in ('/standing_one','/standing_batch','/admission','/checkpoint','/realized_prior'),'Unexpected read-only input mount')

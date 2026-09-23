@@ -76,18 +76,20 @@ decisions. The authors train with randomization and a terrain curriculum
 
 ### Run tracking
 
-Native runs write `metrics.jsonl`, `state.json` and `force_metrics.json`; the
-pinned Spark image does not install wandb. After you retrieve a run, upload it
-from the host:
+Training logs to W&B through RSL-RL when you prepare it with W&B options. The
+Spark image includes wandb 0.28.2, and the `tracking` group pins that version on
+your machine. W&B receives the PPO losses, the task reward components and each
+checkpoint; Git keeps the acceptance summary.
 
 ```sh
-uv run --group tracking wandb login
-uv run --group tracking python tools/wandb_upload.py <run> --project <project>
+uv run python -m locomotion.prepare --mode train ... --logger wandb --wandb-project <project>
+uv run --group tracking wandb sync <allocation>/run/standing/wandb/offline-run-*
 ```
 
-Add `--videos` to attach rollout videos. With `--mode offline`, upload later with
-`uv run --group tracking wandb sync <run>/wandb/offline-run-*`. The W&B run
-records the file hashes it read; Git keeps the acceptance summary.
+Runs default to `--wandb-mode offline` and write their W&B files inside the run
+output; the second command uploads them after you retrieve the run. With
+`--wandb-mode online`, export `WANDB_API_KEY` in the launcher's shell on Spark.
+The launcher passes the key to the container by name and records no value.
 
 ### Step 1: tracking-reward criterion
 

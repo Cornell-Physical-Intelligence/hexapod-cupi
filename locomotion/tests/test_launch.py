@@ -2,6 +2,7 @@
 import ast
 from contextlib import ExitStack
 import copy
+import os
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -53,6 +54,22 @@ class OwnedLaunchTests(unittest.TestCase):
         self.assertEqual(sum(x.endswith(":rw") for x in mounts), 1)
         self.assertIn(str(paths["output"])+":/output:rw", mounts)
         self.assertTrue(all(x.endswith(":ro") for x in mounts if not x.endswith(":rw")))
+
+    def test_online_wandb_passes_the_key_by_name_only(self):
+        paths = {k: Path("/home/orionh/HEXAPOD_runs/restart_20260914") / k
+                 for k in ("source", "output", "asset", "prior", "geometry_source")}
+        online = self.binding()
+        online["command_args"] += ["--logger", "wandb", "--wandb-project", "hexapod", "--wandb-mode", "online"]
+        with patch.dict(os.environ, {"WANDB_API_KEY": "k"*40}):
+            self.verify_without_filesystem(online)
+            args = launch.command(online, paths, "owned")
+        self.assertEqual(args[args.index("WANDB_API_KEY")-1], "-e")
+        self.assertFalse(any("k"*40 in value for value in args))
+        with patch.dict(os.environ, {"WANDB_API_KEY": ""}), self.assertRaises(ValueError):
+            self.verify_without_filesystem(online)
+        offline = self.binding()
+        offline["command_args"] += ["--logger", "wandb", "--wandb-project", "hexapod", "--wandb-mode", "offline"]
+        self.assertNotIn("WANDB_API_KEY", launch.command(offline, paths, "owned"))
 
     def test_extra_mount_rejects_container_control_socket(self):
         paths = {k: Path("/home/orionh/HEXAPOD_runs/restart_20260914") / k

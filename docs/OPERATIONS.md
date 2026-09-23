@@ -12,7 +12,7 @@ container. Read [compute coordination](SPARK_COMPUTE_COORDINATION.md) first.
 | Repository mirror | `/home/orionh/HEXAPOD`; this directory has no Git metadata |
 | Isaac Lab | `/home/orionh/IsaacLab`, version 3.0.0, commit `ffff603eafc6b74264a5261cc0183d6a65390d78` |
 | Container | Compose service `isaac-lab-base`; use `/workspace/isaaclab/_isaac_sim/python.sh` |
-| Simulation | Isaac Sim 6.0.1-rc.7; Python 3.12.13; RSL-RL 5.0.1 |
+| Simulation | Isaac Sim 6.0.1-rc.7; Python 3.12.13; RSL-RL 5.0.1; wandb 0.28.2 |
 | GPU | GB10; recorded PyTorch 2.10.0+cu130 |
 
 Recheck versions from actual run receipts. The laptop/CI uv environment is

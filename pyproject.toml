@@ -19,9 +19,9 @@ dev = [
     "casadi>=3.7,<3.8",
     "rsl-rl-lib==5.0.1",
 ]
-# Host-side upload of retrieved runs; the pinned Spark image does not install wandb.
+# Matches the Spark image, which writes W&B runs; use it to log in and sync offline runs.
 tracking = [
-    "wandb>=0.30.0",
+    "wandb==0.28.2",
 ]
 
 [tool.uv]
