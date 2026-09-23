@@ -62,6 +62,29 @@ class FakeCapture:
 
 
 class EvaluationOrchestrationTests(unittest.TestCase):
+    def test_policy_evaluation_disables_autograd_and_restores_caller(self):
+        native = FakeNative(terminate_at=2)
+        case = {"case_id": "static:stand", "profile": "omni_static",
+                "command": [0., 0., 0.], "controls": 1000}
+        parameter = torch.nn.Parameter(torch.ones(1, 18))
+        observed = []
+
+        def policy(observation):
+            action = parameter * 0.
+            observed.append((torch.is_inference_mode_enabled(), action.requires_grad))
+            return action
+
+        with TemporaryDirectory() as temporary, torch.enable_grad():
+            geometry = Path(temporary)/"geometry.npz"
+            geometry.write_bytes(b"CPU fixture")
+            with patch.object(run, "ExactEvaluationCapture", FakeCapture):
+                report = run.run_batch(native, policy, [case], Path(temporary)/"run", geometry,
+                    checkpoint_sha256="CPU fixture", source_sha256="CPU fixture")
+            self.assertEqual(report["controls"], 2)
+            self.assertEqual(observed, [(True, False), (True, False)])
+            self.assertTrue(torch.is_grad_enabled())
+            self.assertFalse(torch.is_inference_mode_enabled())
+
     def test_long_timeout_changes_no_physical_config(self):
         cfg=run.EvaluationEnvConfig(num_envs=1)
         values=asdict(cfg)

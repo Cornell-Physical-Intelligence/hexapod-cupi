@@ -2,7 +2,8 @@
 
 The static GitHub Pages site is the team's visual progress record against
 [ARCHITECTURE.md](../ARCHITECTURE.md). It is built from `site/project.json`.
-`STATUS.md` is generated from that same registry and must never be edited by hand.
+`python3 tools/project_site.py status` writes an untracked `STATUS.md` from that registry, and each
+Pages build publishes the same text. Git does not track `STATUS.md`.
 
 ## Update progress
 
@@ -60,7 +61,7 @@ python3 tools/project_site.py build
 
 The check validates change coverage, source references, model-labelled media,
 checkpoint/video identity, progress dependencies, accepted/ready definitions,
-measured summary values and exact generated STATUS. Review evidence semantics
+and measured summary values. Review evidence semantics
 as well as these mechanical checks. Run relevant tests for changed behavior.
 
 Source changes covered by the integrated release still require a new versioned

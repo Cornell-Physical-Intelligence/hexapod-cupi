@@ -284,6 +284,38 @@ def _native_contact_screen(receipt, index, case):
 
 
 @torch.inference_mode()
+def score_case(data, metadata, case):
+    """Apply the unchanged scorer to declared windows of an extended trial."""
+    windows = case.get('score_control_windows')
+    if windows is None:
+        return (scoring.score_transitions(data, metadata) if case['profile'] == 'transition'
+                else scoring.score_recording(data, metadata))
+    if case['profile'] != 'omni_static' or not windows:
+        raise ValueError('Extended windows require the static scorer')
+    previous_end = 0
+    for index, window in enumerate(windows):
+        if (len(window) != 2 or any(type(x) is not int for x in window)
+                or window[0] < 0 or window[1]-window[0] != 1000
+                or window[1] > case['controls']
+                or (index == 0 and window[0] != 0)
+                or (index > 0 and (window[0] > previous_end-100 or window[1] <= previous_end))):
+            raise ValueError('Windows must cover the trial with no additional settling gaps')
+        previous_end = window[1]
+    if previous_end != case['controls']:
+        raise ValueError('Windows must include the declared trial endpoint')
+    reports = [scoring.score_recording({key: value[start:end] for key, value in data.items()}, metadata)
+               for start, end in windows]
+    return {'pass': all(row['pass'] for row in reports), 'score_control_windows': windows,
+            'window_reports': reports,
+            'checks': {f'window_{i}:{key}': value for i, row in enumerate(reports)
+                       for key, value in row['checks'].items()},
+            'failed_bounds': [f'window_{i}:{key}' for i, row in enumerate(reports)
+                              for key in row['failed_bounds']],
+            'missing_evidence': [f'window_{i}:{key}' for i, row in enumerate(reports)
+                                 for key in row['missing_evidence']]}
+
+
+@torch.inference_mode()
 def run_batch(env, policy, cases, output, geometry_extrema, *, checkpoint_sha256, source_sha256,
               seed=27057, video_case_id=None, progress=None, max_wall_seconds=None):
     """One initial reset, full fixed-duration trials; a failure preserves prefixes."""
@@ -366,7 +398,7 @@ def run_batch(env, policy, cases, output, geometry_extrema, *, checkpoint_sha256
         try:
             scored=data
             if len(scored.get('time_s',[]))>=2:
-                result=scoring.score_transitions(scored,metadata) if case["profile"]=="transition" else scoring.score_recording(scored,metadata)
+                result=score_case(scored,metadata,case)
             else:
                 result={"pass":False,"checks":{},"failed_bounds":["incomplete_native_prefix"],"missing_evidence":[]}
         except Exception as error:

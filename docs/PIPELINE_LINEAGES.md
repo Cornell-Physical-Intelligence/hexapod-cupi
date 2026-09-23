@@ -7,7 +7,7 @@ python3 tools/check_pipeline_lineages.py current
 python3 tools/archive.py check
 ```
 
-The current manifest is `configs/releases/foundation_20260918_v1.sha256`.
+`CURRENT_MANIFEST` in `tools/check_pipeline_lineages.py` names the current manifest.
 It covers maintained source and tests, with the selected model identities.
 The fixture manifest and model-input manifest pin required immutable inputs.
 Source identity supplies no native admission or walking acceptance.
@@ -21,12 +21,14 @@ result bytes retain their original identities. Git history has not been rewritte
 
 ```sh
 git fetch --unshallow
+git fetch origin refs/pull/33/head:refs/archive/pr33
 python3 tools/archive.py check --git-objects
 python3 tools/archive.py restore artifacts --destination ../hexapod-restored
 python3 tools/check_pipeline_lineages.py historical
 ```
 
-Use `git fetch --unshallow` for a shallow clone. Choose a fresh restore destination;
+Use `git fetch --unshallow` for a shallow clone. Retired tripod evidence from PR #33 pins
+commit `05f706eb`; the second fetch keeps it under a local ref that `git gc` cannot prune. Choose a fresh restore destination;
 restore accepts a single file or subtree and refuses to overwrite a directory.
 The historical check uses the unchanged Stage 2 manifest at its original commit.
 Run historical tests from a restored checkout of their source revision.

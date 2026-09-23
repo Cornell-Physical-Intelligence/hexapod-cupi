@@ -4,8 +4,10 @@ You can reuse the Mid-360 ray pattern and sensor transport/noise prototype under
 `sensors/`. CPU tests preserve the transport regressions. The ray-pattern module
 requires the pinned Isaac Lab runtime.
 
-Survey request handling, recording and export remain pending. The approved M1
-fixture and limits remain in [ARCHITECTURE](../ARCHITECTURE.md#6-roadmap).
+Survey request handling and mission controls remain pending. GeoData owns survey
+recording and export. The approved M1 fixture and limits remain in
+[ARCHITECTURE](../ARCHITECTURE.md#6-roadmap) as a record; this project schedules
+no M1 work.
 Historical robot-mounted sensor scenes remain in the archive; their old model
 and mount assumptions do not define the approved robot.
 

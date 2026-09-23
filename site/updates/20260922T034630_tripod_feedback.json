@@ -1,0 +1,33 @@
+{
+  "id": "20260922T034630_tripod_feedback",
+  "date": "2026-09-22T03:46:30.193884+00:00",
+  "title": "Record retimed failures and test bounded joint feedback",
+  "summary": "Retain three failed retimed screens and the measured support-joint tracking error. Declare two bounded encoder-feedback candidates with unchanged physics and gates.",
+  "areas": [
+    "locomotion",
+    "site"
+  ],
+  "next": "Evaluate the declared feedback screen before stop and clearance qualification.",
+  "changes": [
+    "STATUS.md",
+    "docs/PIPELINE_LINEAGES.md",
+    "docs/TRAINING.md",
+    "tools/check_pipeline_lineages.py",
+    "configs/releases/tripod_feedback_20260922_v1.sha256",
+    "locomotion/tripod.py",
+    "locomotion/tripod_config.py",
+    "locomotion/tripod_evaluate.py",
+    "locomotion/tests/test_tripod_feedback.py",
+    "site/project.json",
+    "site/assets/tripod_retimed_native_20260922_001/result.json",
+    "site/assets/tripod_retimed_native_20260922_001/cycle_comparison.json",
+    "site/assets/tripod_feedback_20260922_001/declaration.json",
+    "site/assets/tripod_feedback_20260922_001/cpu_replay.json",
+    "site/updates/20260922T034630_tripod_feedback.json"
+  ],
+  "evidence": [
+    "site/assets/tripod_retimed_native_20260922_001/result.json",
+    "site/assets/tripod_feedback_20260922_001/declaration.json"
+  ],
+  "no_project_impact": false
+}

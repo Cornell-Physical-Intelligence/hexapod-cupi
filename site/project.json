@@ -3,7 +3,7 @@
   "title": "Hexapod \u00b7 Development roadmap",
   "repository": "Cornell-Physical-Intelligence/hexapod-cupi",
   "mission": "Hexapod MKII: from walking to autonomous surveying",
-  "description": "Build a hexapod that surveys an area drawn on a map and returns a 3D map of the ground. It can stop to take measurements and process the finished map afterward.",
+  "description": "Build a hexapod that walks an approved route through an area drawn on a map and stops with a steady sensor platform. GeoData owns the measurements and the 3D map.",
   "status_source": "STATUS.md",
   "geometry": {
     "label": "Approved detailed robot model",
@@ -234,6 +234,29 @@
       "caption": "First frame of the final policy test on the approved model.",
       "controller": "1d039d9d566490398b1b1bd0603f7ff77b1c54228d30a63bd296799f6e1703f9",
       "evidence": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
+    },
+    {
+      "id": "tripod_speed_lift_native_20260922_001",
+      "title": "Prescribed tripod: passed low-speed forward screen",
+      "type": "video",
+      "role": "trajectory_experiment",
+      "path": "site/assets/tripod_speed_lift_native_20260922_001/rollout.mp4",
+      "sha256": "73675b75e4bcc771e71a6eab579db9d993e7aa1293f1193120a60ae029e6cdee",
+      "caption": "Approved detailed model. Forward 0.05 m/s and both turn screens pass. Forward planar error 0.01078 m/s, with zero scored torque-demand excess. Stops and raised clearance await qualification; real-time playback.",
+      "controller": "Prescribed tripod; source freeze 4512377d6c762ec846366acce6d91800a4eeed65fe89976e5c13907e0b93930b",
+      "evidence": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_native_20260922_001/native_result.json",
+      "poster_id": "tripod_speed_lift_native_20260922_001_poster"
+    },
+    {
+      "id": "tripod_speed_lift_native_20260922_001_poster",
+      "title": "Speed lift: first native frame",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/tripod_speed_lift_native_20260922_001/first_frame.png",
+      "sha256": "a0b65b29965e7de3673a1a4c6e74a0acb06d476d672a8518b13a2a731df7c006",
+      "caption": "First native frame of the passing low-speed forward screen on the approved robot.",
+      "controller": "Prescribed tripod; source freeze 4512377d6c762ec846366acce6d91800a4eeed65fe89976e5c13907e0b93930b",
+      "evidence": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_native_20260922_001/native_result.json"
     }
   ],
   "nodes": [
@@ -257,9 +280,9 @@
       "state": "planned",
       "column": 1,
       "row": 0,
-      "meaning": "Choose a route and measurement stops that cover the requested area. The first course is level, hard and clear of obstacles.",
+      "meaning": "Choose a route and stops inside the requested area. The first course is level, hard and clear of obstacles.",
       "input": "Survey boundary, ground map and robot position",
-      "output": "A route with measurement stops",
+      "output": "A route with stops",
       "source": "ARCHITECTURE.md",
       "milestone_id": "mission"
     },
@@ -322,7 +345,7 @@
       "state": "prepared",
       "column": 2,
       "row": 1,
-      "meaning": "Researchers tested synthetic ground-height observations in the archived prototype. Current map assembly and localization remain pending. Mapping issue #19 uses simulator-provided poses for its first combined map.",
+      "meaning": "Researchers tested synthetic ground-height observations in the archived prototype. Current map assembly and localization remain pending. GeoData owns survey mapping; issue #19 closed as not planned.",
       "input": "Scans aligned using the estimated sensor position",
       "output": "Nearby ground heights and measurement uncertainty",
       "source": "artifacts/terrain_readiness_2026-09-09/observation_comparison_cpu_001/README.md",
@@ -382,14 +405,14 @@
     },
     {
       "id": "survey",
-      "title": "Produce the survey map",
+      "title": "Execute the survey route",
       "label": "Final goal",
       "state": "planned",
       "column": 3,
       "row": 2,
-      "meaning": "Follow the survey route, stop at measurement locations and hold the sensor platform steady. Combine the measurements into a 3D terrain map after the run.",
-      "input": "Survey route, robot position and recorded scans",
-      "output": "A 3D terrain map covering the requested area",
+      "meaning": "Follow the survey route, stop at each designated location and hold the sensor platform steady. GeoData owns the measurements and the 3D terrain map.",
+      "input": "Survey route and robot position",
+      "output": "Reached and unreached stops with the termination reason",
       "source": "ARCHITECTURE.md",
       "milestone_id": "mission"
     }
@@ -530,8 +553,8 @@
     {
       "id": "mission",
       "title": "Survey a drawn area",
-      "description": "Follow a route through the requested area, stop with a steady sensor platform to scan, and deliver a 3D terrain map. Start on a level, hard surface with no obstacles.",
-      "gate": "On the physical robot, cover the drawn area and deliver the map. Coverage, map-accuracy and platform-motion limits still need agreement.",
+      "description": "Follow an approved route through the requested area and stop with a steady sensor platform at each designated location. GeoData owns scanning and the 3D terrain map. Start on a level, hard surface with no obstacles.",
+      "gate": "On the physical robot, complete the approved route inside the drawn area with controlled stops. Stop-position and platform-motion limits still need agreement.",
       "source": "ARCHITECTURE.md",
       "status": "blocked",
       "backend": "Physical robot and survey sensor",
@@ -545,13 +568,11 @@
         "R-03",
         "R-05",
         "R-06",
-        "R-07",
-        "R-08",
         "R-09",
         "R-10"
       ],
-      "blocker": "The robot remains unbuilt and walking remains unqualified. Issues #19 and #20 cover independent simulation work; mapping and mission software remain pending.",
-      "question": "Assign owners and reviewers for #19 mapping and #20 survey rehearsal. Preserve the M1 fixture; define combined-map error and mission-rehearsal limits before their tests.",
+      "blocker": "The robot remains unbuilt and walking remains unqualified. Issue #20 covers route rehearsal in simulation; mission software remains pending. GeoData owns survey data collection, and issue #19 closed as not planned.",
+      "question": "Assign an owner and reviewer for #20 route rehearsal and define its limits before its test. Preserve the M1 fixture as a record; this project schedules no M1 work.",
       "next_step": null,
       "acceptance": null,
       "definition": {
@@ -566,7 +587,7 @@
         ],
         "fixture": "Sensor height: 0.25 m. Wall: 0.80 m wide \u00d7 0.08 m thick \u00d7 0.50 m high, centred 1 m in front of the sensor. Use 20,000 rays per scan. Fixed random seeds: 360 for the scan pattern and 20260824 for sensor noise and timing."
       },
-      "card_text": "Pending canonical qualification; M1 scope retained."
+      "card_text": "Pending canonical qualification; M1 record retained."
     }
   ],
   "papers": [
@@ -605,11 +626,11 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-17T18:19:39.672968+00:00",
-    "source_commit": "94db110e9c362604ce1cf415bd2dfbcc1bca9f03",
+    "as_of": "2026-09-22T20:05:51.982013+00:00",
+    "source_commit": "e6d9b943b4ab7da62c29e3b01418413ea2a99fd2",
     "architecture": "ARCHITECTURE.md",
-    "summary": "Researchers passed the optimized forward-trajectory screen, but the tested PPO policies fail walking acceptance. The paired initialization test found no benefit in its one seed. The consolidated kernel supports the proposed simulation-reproduction order in TRAINING; paper-method implementation and fresh-source native admission remain pending.",
-    "definition_policy": "Use issue #18 for walking, #19 for simulated mapping and #20 for mission rehearsal. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
+    "summary": "Researchers passed the optimized forward-trajectory screen. The tested PPO policies fail walking acceptance, and the paired initialization test found no benefit in its one seed. The prescribed tripod controller passes standing admission and its motion screens on the approved robot. It passes three stop cases; its full qualification remains incomplete. The consolidated kernel supports the proposed simulation-reproduction order in TRAINING; paper-method (AMP) implementation remains pending.",
+    "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
     "facts": [
@@ -652,12 +673,316 @@
         "result": "passed",
         "text": "Mean vertical ground support is 73.246 N for scratch and 73.227 N for example initialization. Mean absolute applied motor torque is 0.488782 and 0.405900 N\u00b7m. Per-foot forces and per-joint requested and applied torque remain in the force summaries. These values describe failed, low-speed motions and do not establish efficiency at matched walking speed.",
         "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
+      },
+      {
+        "id": "zhang-tripod-cpu-20260921",
+        "title": "Prescribed tripod controller passes CPU checks",
+        "backend": "CPU fixtures and approved-model kinematics; no native motion run",
+        "result": "inconclusive",
+        "text": "The prescribed controller passes 17 CPU checks for phasing, contact transitions and stopping. The user deferred native runs after the GPU jobs stopped with preserved restart records. Native admission, terrain and Stage 2 remain incomplete.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_20260921/result.json"
+      },
+      {
+        "id": "zhang-tripod-native-20260922-001",
+        "title": "Tripod standing admission passes; motion tracking fails",
+        "backend": "Isaac Sim; approved 19-body robot; native 400 Hz capture",
+        "result": "failed",
+        "text": "One-robot and 32-robot standing admission pass with local raw recomputation. Fifteen motion attempts retain force, torque and video evidence. The first completed forward and turn screens fail tracking. Remaining timing choices and criteria 4\u20135/7 remain pending; Stage 2 and terrain stay incomplete.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-cycle-20260922-001",
+        "title": "We measure incompatible tripod stance targets",
+        "backend": "Isaac Sim capture; controls 190\u2013262; approved-model forward kinematics",
+        "result": "failed",
+        "text": "The measured cycle lasts 1.46 seconds with 0.26 seconds of touchdown waits. Two target stance-triangle edges vary by 27.9\u201328.6 mm per half-cycle. Median speed is 0.0081 m/s against a 0.05 m/s command. We retain the failed motion and inspect geometry mapping before further adaptations.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_cycle_20260922_001/cycle_metrics.json"
+      },
+      {
+        "id": "zhang-tripod-sweep-20260922-001",
+        "title": "We complete the declared tripod sweep with no passing motion",
+        "backend": "Isaac Sim; 24 native motion trials across recorded source corrections",
+        "result": "failed",
+        "text": "All four candidates fail the corrected larger-lift screens. The slower 0.12 rad choice has 0.03736 m/s forward tracking error and two native speed-bound violations. The slower 0.18 rad choice stops forward motion at control 615 with touchdown_timeout. Both fail both turns. We retain all 24 failed attempts and keep stops, clearance qualification and terrain pending.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_sweep_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-geometry-cpu-20260922-004",
+        "title": "We derive tripod targets from the approved leg geometry",
+        "backend": "CPU kinematics and contact fixtures; native motion unqualified",
+        "result": "inconclusive",
+        "text": "We declare two geometry candidates with uniform phase and pitch motion during support. The first 0.05 m/s trajectory reduces the maximum stance-edge range to 1.3 mm. Both candidates pass joint bounds and contact-transition fixtures. The 12/16 mm lift gates and native motion thresholds remain unchanged.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_geometry_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-geometry-native-20260922-004",
+        "title": "We complete six geometry screens without a tracking pass",
+        "backend": "Isaac Sim; six 1000-control captures; approved 19-body robot",
+        "result": "failed",
+        "text": "Both geometry candidates pass native motor and contact checks but fail forward and yaw tracking. Mean forward speed reaches 0.0466 and 0.0513 m/s; tracking errors remain 0.0490 and 0.0535 m/s against 0.025. The recorded cycle has no touchdown wait and a 1.83 mm stance-edge range, but it retains surge and recoil. We retain thirty failed motion attempts.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_geometry_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-damping-cpu-20260922-005",
+        "title": "We declare a damping correction for joint tracking",
+        "backend": "CPU motor-law and contact-transition checks; native motion unqualified",
+        "result": "inconclusive",
+        "text": "One candidate adds nominal joint-velocity feedforward through the existing motor-target input. Motor gains and limits remain unchanged. CPU replay adds at most 0.0332 rad and preserves the action envelope and 0.040 rad slew bound. Native qualification remains pending.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_damping_20260922_001/cpu_replay.json"
+      },
+      {
+        "id": "zhang-tripod-damping-native-20260922-005",
+        "title": "We complete the damping screen without a tracking pass",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "failed",
+        "text": "Native motor and contact checks pass. Mean forward speed reaches 0.04979 m/s, but tracking error remains 0.04852 m/s against 0.025. Left and right yaw errors remain 0.15315 and 0.15304 rad/s against 0.06. We retain 33 failed completed motion trials.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_damping_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-retimed-20260922-006",
+        "title": "We declare a phase clock and retain an interrupted native attempt",
+        "backend": "CPU path and target checks; partial Isaac Sim capture; native motion unqualified",
+        "result": "interrupted",
+        "text": "The declared clock retains the joint path and changes its timing, with unchanged motor limits and gates. CPU checks cover contact transitions, stops and both clearance modes. The launcher detected unrelated CUDA compute and removed its owned container. We retain 800 substeps from controls 0\u201399 with no final motion score; native launches await allocation coordination.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_retimed_20260922_001/interrupted.json"
+      },
+      {
+        "id": "zhang-tripod-retimed-native-20260922-007",
+        "title": "We reduce tracking error with the phase clock",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "failed",
+        "text": "Forward error falls to 0.03031 m/s and left/right yaw errors to 0.08860/0.08894 rad/s, above the unchanged 0.025 and 0.06 gates. Native motor and contact checks pass. The recorded forward cycle has 17% negative-speed controls, with support-joint errors above swing errors. We retain 36 failed completed trials and one interrupted attempt.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_retimed_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-feedback-cpu-20260922-008",
+        "title": "We declare bounded joint feedback through motor targets",
+        "backend": "CPU encoder/contact replay and transition fixtures; native motion unqualified",
+        "result": "inconclusive",
+        "text": "Two candidates add proportional joint-error feedback with gains 0.5 and 1.0. Each correction stays within 0.070 rad. Recorded-input replay preserves the joint/action envelope and 0.040 rad slew limit; it does not establish native stability. Actuator gains, torque-speed limits and acceptance gates remain unchanged.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_feedback_20260922_001/cpu_replay.json"
+      },
+      {
+        "id": "zhang-tripod-feedback-native-20260922-008",
+        "title": "We retain three failed feedback screens",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "failed",
+        "text": "Gain 0.5 produces forward error 0.03333 m/s and left/right yaw errors 0.08784/0.08813 rad/s. All three exceed tracking gates. The forward trial also has one speed violation and one nonfoot-contact substep during a 202 N rear-right toe impulse. We retain 39 failed completed trials and one interrupted attempt. Gain 1.0 remains unexecuted.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_feedback_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-liftoff-cpu-20260922-009",
+        "title": "We test lift timing within the target envelope",
+        "backend": "CPU replay of six recorded command/contact sequences and transition fixtures; native motion unqualified",
+        "result": "inconclusive",
+        "text": "One revised candidate uses positive cos(phase)^1.5 swing lift with the same peak, period and hip sweep. Joint feedback stays off. We rejected cos(phase) before dispatch because it exceeded the target envelope at 0.10 m/s. The revised profile passes target checks through both clearance modes and stops; it supplies no native acceptance.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_liftoff_20260922_001/cpu_replay.json"
+      },
+      {
+        "id": "zhang-tripod-liftoff-native-20260922-009",
+        "title": "We isolate joint motion in the failed lift screen",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "failed",
+        "text": "Forward error is 0.02979 m/s and left/right yaw errors are 0.08488/0.08488 rad/s. All three exceed tracking gates; native motor and contact checks pass. Across 12 forward cycles, joint tracking contributes 0.0318\u20130.0334 m/s RMS to body speed and toe-marker motion contributes 0.0006\u20130.0020 m/s. We retain 42 failed completed trials and one interrupted attempt.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_liftoff_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-velocity-cpu-20260922-010",
+        "title": "We declare bounded velocity-error damping",
+        "backend": "CPU motor-law checks, recorded-input replay and stance approximation; native motion unqualified",
+        "result": "inconclusive",
+        "text": "One candidate adds velocity-error feedback through motor targets with position feedback off. Each correction stays within 0.070 rad; joint/action bounds and the 0.040 rad slew limit remain active. A scalar stance approximation predicts weak body damping. Native screening must establish whether the added feedback reduces oscillation.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_velocity_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-velocity-native-20260922-010",
+        "title": "We retain the sampled-feedback yaw failure",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "failed",
+        "text": "The forward trial meets the planar-error gate at 0.02195 m/s but fails yaw tracking at 0.11454 rad/s. Left/right yaw errors are 0.11713/0.11646 rad/s. All native motor/contact checks pass. The forward yaw spectrum peaks at 25 Hz. We retain 45 failed completed trials and one interrupted attempt.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_velocity_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-velocity-filtered-cpu-20260922-011",
+        "title": "We filter velocity feedback at the control sample rate",
+        "backend": "CPU free-leg sampled model, transition checks and recorded-input replay; native motion unqualified",
+        "result": "inconclusive",
+        "text": "The fixed-base free-leg linearization has spectral radius 1.524 with unfiltered gain-2 feedback and 0.854 with a 5 Hz filter. One candidate filters reference and measured joint velocity before the same bounded correction. CPU checks preserve target bounds; contact, saturation and native acceptance remain outside the linear model.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_velocity_filtered_20260922_001/sampled_loop.json"
+      },
+      {
+        "id": "zhang-tripod-velocity-filtered-native-20260922-011",
+        "title": "We pass one forward screen and retain two turn failures",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "inconclusive",
+        "text": "Filtered velocity feedback passes the 0.05 m/s forward screen with planar error 0.02292 m/s and yaw error 0.01674 rad/s. Left/right yaw errors of 0.07747/0.07711 rad/s exceed 0.06. All native motor/contact checks pass. Across retained attempts, one completed screen passes, 47 fail and one attempt is interrupted. Stops, clearance and repeats remain pending.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_velocity_filtered_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-pd-cpu-20260922-012",
+        "title": "We combine bounded position and filtered velocity feedback",
+        "backend": "CPU sampled free-leg models and recorded-input replay; native qualification pending",
+        "result": "inconclusive",
+        "text": "One declared candidate combines position gain 0.5 with velocity gain 2 and a 5 Hz filter. Its sampled-loop spectral radius stays below 0.802 across 2520 pose/leg models. The gain-1 combination fails the neutral-pose stability check and remains excluded. Six captured command replays preserve target and slew bounds. Native contact and saturation remain outside this linear analysis.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_pd_20260922_001/sampled_pd.json"
+      },
+      {
+        "id": "zhang-tripod-pd-native-20260922-012",
+        "title": "We retain a forward pass and diagnose contact overlap",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "inconclusive",
+        "text": "Combined position and filtered velocity feedback passes forward motion at 0.02242 m/s planar error. Left/right yaw errors of 0.07587/0.07574 rad/s exceed 0.06. All native motor/contact checks pass. Across twelve left-turn cycles, yaw stops or reverses during six-foot contact. The accumulated record contains two passed screens, 49 failed completed trials and one interrupted attempt.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_pd_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-overlap-cpu-20260922-013",
+        "title": "We align yaw targets through support overlap",
+        "backend": "CPU phasing, command transitions and recorded-input replay; native qualification pending",
+        "result": "inconclusive",
+        "text": "One declared candidate keeps horizontal yaw targets in support motion before phase 0.15 and after phase 0.80. Landed feet retain a pitch lift residual while the horizontal baseline continues. The full forward overlap probe exceeds target bounds and remains excluded; forward targets preserve the preceding candidate. Six recorded-input replays preserve emitted bounds, with target clipping during changed yaw traces.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_overlap_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-overlap-native-20260922-013",
+        "title": "We pass forward and both turn screens",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "passed",
+        "text": "Forward planar error is 0.02242 m/s. Left/right yaw errors are 0.03448/0.03478 rad/s against the unchanged 0.06 limit. All native motor/contact checks pass. A complete left-turn cycle retains yaw through six-foot contact after the declared overlap change. The accumulated record contains five passed screens, 49 failed completed trials and one interrupted attempt. Canonical 0.10 m/s motion, stops, raised clearance and independent repeats remain pending.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_overlap_native_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-qualification-interrupted-20260922-014",
+        "title": "We retain the canonical forward startup failure",
+        "backend": "Isaac Sim; incomplete canonical qualification; approved 19-body robot",
+        "result": "failed",
+        "text": "The canonical 0.10 m/s forward trial fails after 51 controls with support loss during startup. Left-front and right-rear feet lose support as the six planted feet move toward opposing stride endpoints. Requested torque peaks at 4.61 Nm; the motor retains its 1.6 Nm cap. Standing and the right-turn case pass. The owner stops the allocation during the next turn and retains its partial capture and exact cleanup.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_qualification_interrupted_20260922_001/result.json"
+      },
+      {
+        "id": "zhang-tripod-startup-cpu-20260922-015",
+        "title": "We build forward stride during tripod stepping",
+        "backend": "CPU startup, reset, command changes and recorded-input replay; native qualification pending",
+        "result": "inconclusive",
+        "text": "The new candidate holds its standing reference during forward startup, then ramps stride over one gait cycle. It retains yaw startup and returns the yaw touchdown lift offset before the next half-cycle. The preceding controller and initial correction both exceed bounds in an early raised-touchdown fixture; the corrected candidate passes that fixture and 172 locomotion tests. The forward_high suite retains the canonical 0.10 m/s case and two independent resets.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_startup_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-startup-recording-20260922-016",
+        "title": "We correct the startup recording type",
+        "backend": "Isaac Sim recording failure; CPU serialization regression; native retry pending",
+        "result": "failed",
+        "text": "The first startup attempt stops after three controls because its new log field contains a NumPy boolean. It provides no walking result. The correction converts that field to a Python boolean and passes a regression test with a NumPy command. The retry retains the controller method, physics and acceptance limits.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_startup_20260922_001/recording_correction.json"
+      },
+      {
+        "id": "zhang-tripod-startup-native-20260922-016",
+        "title": "We pass startup and retain two forward tracking failures",
+        "backend": "Isaac Sim; two runs from one deterministic reset; approved 19-body robot",
+        "result": "failed",
+        "text": "Both 0.10 m/s runs complete 1,000 controls without a controller fault and record identical metrics. Mean speed is 0.09346 m/s; mean planar error is 0.05023 m/s against 0.025. Computed torque exceeds the unchanged demand-fraction bound. During one complete cycle, six-foot contact coincides with near-zero speed, followed by a surge after lift-off. Joint tracking contributes 0.04569 m/s RMS; toe-marker motion contributes 0.00324 m/s.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_forward_overlap_20260922_001/forward_high_result.json"
+      },
+      {
+        "id": "zhang-tripod-forward-overlap-cpu-20260922-017",
+        "title": "We match forward support motion through ground overlap",
+        "backend": "CPU kinematic checks and recorded-input replay; native diagnostic pending",
+        "result": "inconclusive",
+        "text": "The candidate matches swing and support motion around lift-off and touchdown. It permits inward foot motion during swing to retain joint bounds. It keeps yaw targets, motor limits and acceptance gates. Full-command, clearance, reset and early-touchdown checks pass within 177 locomotion tests. Native testing starts with the canonical 0.10 m/s case from two resets.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_forward_overlap_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-forward-overlap-native-20260922-017",
+        "title": "We pass canonical forward walking at 0.10 m/s",
+        "backend": "Isaac Sim; two 1000-control captures; approved 19-body robot",
+        "result": "passed",
+        "text": "Two runs of the existing 0.10 m/s case pass; the second replays the first trace from the same deterministic reset. Mean planar error is 0.01931 m/s against 0.025; the computed torque-demand fraction is 0.00167 against 0.005. Native motor and contact checks pass. The first trial has 18.9\u201324.1 mm toe lift in low mode. Stops, raised clearance and terrain remain pending.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_forward_overlap_native_20260922_001/native_result.json"
+      },
+      {
+        "id": "zhang-tripod-forward-overlap-screen-20260922-018",
+        "title": "We pass both turns and retain the low-speed torque failure",
+        "backend": "Isaac Sim; three complete 1000-control screens; approved 19-body robot",
+        "result": "failed",
+        "text": "Both turns pass with yaw errors of 0.03434 and 0.03459 rad/s. Forward 0.05 m/s motion has 0.01226 m/s planar error but 0.03802 computed torque-demand fraction against 0.005. Middle femur joints account for most of the excess. The earlier lift direction label is incorrect: the feet move outward. Published source and captures retain their original identities.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_20260922_001/native_result.json"
+      },
+      {
+        "id": "zhang-tripod-speed-lift-cpu-20260922-019",
+        "title": "We reduce outward swing motion at low speed",
+        "backend": "CPU workspace, endpoint-equivalence and recorded-input checks; native screen pending",
+        "result": "inconclusive",
+        "text": "The candidate reduces predicted low-speed radial foot travel from about 26 mm to 4 mm and retains 19.7 mm nominal lift. It interpolates toward the passing lift at 0.10 m/s. CPU checks preserve high-speed, raised-mode and yaw targets within 180 locomotion tests. This tests the loading hypothesis; contact-force measurements do not isolate its cause.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-speed-lift-native-20260922-019",
+        "title": "We pass the revised forward and turn screens",
+        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
+        "result": "passed",
+        "text": "All three commands pass. Forward planar error is 0.01078 m/s with zero scored computed torque-demand excess. Left/right yaw errors are 0.03434/0.03459 rad/s. Forward toe lift is 15.1\u201315.9 mm against the 12 mm low-mode target. Canonical qualification follows; controlled stops and raised clearance remain pending.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_native_20260922_001/native_result.json"
+      },
+      {
+        "id": "zhang-tripod-stop-failure-20260922-020",
+        "title": "We pass walking and diagnose forward and left-turn stop failures",
+        "backend": "Isaac Sim; first reset; ten complete cases and one interrupted prefix; approved 19-body robot",
+        "result": "interrupted",
+        "text": "Eight of ten complete cases pass, including canonical forward motion, both turns and the right-turn stop. The forward stop fails quiet joint motion, torque saturation and support. The left-turn stop fails quiet joint range and one support substep. We retain the interrupted formal-standing prefix and block clearance pending qualification.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_20260922_001/native_result.json"
+      },
+      {
+        "id": "zhang-tripod-stop-stride-cpu-20260922-022",
+        "title": "We return each tripod to standing through stride decay",
+        "backend": "CPU; 184 locomotion tests; native stop suite pending",
+        "result": "inconclusive",
+        "text": "The candidate finishes the current swing and reduces stride amplitude over one tripod cycle before holding the standing pose. CPU checks preserve held walking targets and bound stop transitions. Native forward and both-turn stop cases retain their two-second settling allowance and acceptance checks.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_20260922_001/declaration.json"
+      },
+      {
+        "id": "zhang-tripod-stop-stride-native-20260922-022",
+        "title": "We pass the forward and both-turn stop cases",
+        "backend": "Isaac Sim; six 1050-control captures of three distinct trajectories; approved 19-body robot",
+        "result": "passed",
+        "text": "The stride-decay controller passes the three canonical stop cases. Each second repeat replays its first trace. Maximum quiet joint-speed RMS is 0.00518 rad/s against 0.030, with zero quiet torque saturation and no missing support substeps. Full qualification follows. Raised clearance and terrain remain pending.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_native_20260922_001/native_result.json"
+      },
+      {
+        "id": "zhang-tripod-qualification-interruptions-20260922",
+        "title": "We retain the qualification interruptions and passing prefixes",
+        "backend": "Isaac Sim; three interrupted attempts; approved 19-body robot",
+        "result": "interrupted",
+        "text": "We retain 20 completed passing cases across three interrupted qualification attempts. The 20 completed cases hold seven distinct traces; repeated cases replay identical traces. Competing CUDA jobs interrupted acquisition. We preserve each partial capture and exact-container cleanup. Full qualification remains incomplete.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_qualification_recovery_20260922_001/qualification_interruptions.json"
+      },
+      {
+        "id": "zhang-tripod-forward-comparison-20260922",
+        "title": "We compare the first corrected and adapted forward captures",
+        "backend": "Isaac Sim; controls 100 through 999; 0.05 m/s command; approved 19-body robot",
+        "result": "inconclusive",
+        "text": "The first capture already includes the touchdown-pitch return and the larger lift correction. Median forward speed increases from 0.0076 to 0.0554 m/s; the fraction of backward controls falls from 27% to zero. Nominal joint-trajectory error decreases from 2.88 to 1.53 degrees RMS. We keep the 2.26-degree motor-target error distinct from nominal trajectory error. These coupled controller changes do not isolate one cause.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.json"
+      },
+      {
+        "id": "zhang-tripod-closeout-20260922",
+        "title": "We end native dispatch with qualification incomplete",
+        "backend": "Isaac Sim; approved 19-body robot; four interrupted qualification attempts",
+        "result": "interrupted",
+        "text": "Motion screens and three stop cases pass; each stop repeat replays its first trace. Four interrupted qualification prefixes do not complete the required 22-case suite. Raised clearance and terrain remain incomplete. We disabled both task-created Spark pause guards when native dispatch ended; no recorded matching process remained paused. We verified that our Isaac container is absent.",
+        "source": "site/assets/tripod_reproduction_closeout_20260922_001/closeout.json"
+      },
+      {
+        "id": "zhang-tripod-review-corrections-20260922",
+        "title": "We find identical repeat traces and bind the analysis scripts",
+        "backend": "Recorded trace hashes and CPU recomputation; no new native run",
+        "result": "inconclusive",
+        "text": "The reset writes a fixed pose and the controller draws no random numbers, so each second repeat replays its first trace. The six passing stop trials hold three distinct trajectories, and the 25 completed qualification cases hold seven distinct traces. The published forward metrics recompute exactly from the hash-verified traces. The record binds three figures and the forward comparison to their scripts by hash.",
+        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_review_corrections_20260922_001/repeat_identity.json"
       }
     ]
   },
   "summary_tags": [
     "Coordinates relative to the test site",
-    "Stop to take measurements",
+    "Stop at designated locations",
     "Simulation first"
   ]
 }

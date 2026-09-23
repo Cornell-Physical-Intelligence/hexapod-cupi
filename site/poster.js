@@ -92,5 +92,5 @@ try {
   setInterval(async()=>{try{const r=await fetch(`version.json?t=${Date.now()}`,{cache:'no-store'});if(!r.ok)return;const version=await r.json();if(version.revision!==data.version.revision||version.built_utc!==data.version.built_utc){if(![...document.querySelectorAll('video')].some(v=>!v.paused)){location.reload();return;}$('#update-button').hidden=false;}}catch{}},60000);
   $('#update-button').addEventListener('click',()=>location.reload());
 } catch(error) {
-  $('#poster').innerHTML=`<div class="loading"><h1>The project data could not load.</h1><p>${esc(error.message)}</p><p><a href="https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/main/STATUS.md">Read the current status on GitHub ↗</a></p></div>`;
+  $('#poster').innerHTML=`<div class="loading"><h1>The project data could not load.</h1><p>${esc(error.message)}</p><p><a href="https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/main/site/project.json">Read the project registry on GitHub ↗</a></p></div>`;
 }

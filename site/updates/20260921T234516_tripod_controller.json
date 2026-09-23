@@ -1,0 +1,36 @@
+{
+  "id": "20260921T234516_tripod_controller",
+  "date": "2026-09-21T23:45:16.776414+00:00",
+  "title": "Implement the prescribed terrain-adaptive tripod controller",
+  "summary": "Add the Zhang et al. equations with an approved-geometry adaptation and 17 passing CPU checks. The user deferred native runs after GPU job recovery. Native walking, clearance and terrain remain incomplete.",
+  "areas": [
+    "locomotion",
+    "docs",
+    "site"
+  ],
+  "next": "Review the controller and reproduction contract in the draft PR. Native admission remains pending by user instruction.",
+  "changes": [
+    "locomotion/tripod.py",
+    "locomotion/tripod_config.py",
+    "locomotion/tripod_evaluate.py",
+    "locomotion/tests/test_tripod.py",
+    "locomotion/prepare.py",
+    "locomotion/launch.py",
+    "locomotion/README.md",
+    "docs/TRAINING.md",
+    "docs/PIPELINE_LINEAGES.md",
+    "configs/source_inventory.json",
+    "configs/releases/tripod_20260921_v1.sha256",
+    "tools/check_pipeline_lineages.py",
+    "site/project.json",
+    "STATUS.md",
+    "site/assets/tripod_20260921/*",
+    "site/updates/20260921T234516_tripod_controller.json"
+  ],
+  "evidence": [
+    "docs/TRAINING.md",
+    "locomotion/tests/test_tripod.py",
+    "site/assets/tripod_20260921/result.json"
+  ],
+  "no_project_impact": false
+}

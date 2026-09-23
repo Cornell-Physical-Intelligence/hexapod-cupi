@@ -13,7 +13,7 @@ Link the relevant R/Q requirements in `ARCHITECTURE.md` and roadmap marker.
 
 ## Starting point and dependencies
 
-Link current code and evidence in `STATUS.md`. State the test backend and
+Link current code and evidence in `site/project.json`. State the test backend and
 operating envelope. Identify missing definitions before assigning dependent work.
 
 ## Acceptance demonstration

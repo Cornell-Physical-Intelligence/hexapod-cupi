@@ -6,8 +6,12 @@ import copy
 import hashlib
 import importlib
 import importlib.metadata
+import importlib.util
 import json
+import math
+import os
 from pathlib import Path
+import re
 import sys
 import time
 import traceback
@@ -19,6 +23,24 @@ def sha(path):
 
 def save(path, value):
     Path(path).write_text(json.dumps(value, indent=2, allow_nan=False)+'\n')
+
+
+def scalars(value, prefix):
+    """Return finite numeric leaves of a task status; drop lists, text and missing values."""
+    if isinstance(value, dict):
+        result = {}
+        for key, item in value.items():
+            result.update(scalars(item, f'{prefix}/{key}'))
+        return result
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value):
+        return {prefix: value}
+    return {}
+
+
+class ConfigRecord(dict):
+    """Give RSL-RL's W&B writer the to_dict() it expects from an environment config."""
+    def to_dict(self):
+        return dict(self)
 
 
 def main(argv=None):
@@ -41,6 +63,9 @@ def main(argv=None):
     parser.add_argument('--checkpoint', type=Path)
     parser.add_argument('--checkpoint-sha256')
     parser.add_argument('--preflight-only', action='store_true')
+    parser.add_argument('--logger', choices=['tensorboard', 'wandb'], default='tensorboard')
+    parser.add_argument('--wandb-project')
+    parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
     if any(flag in (argv if argv is not None else sys.argv[1:]) for flag in ('--preflight-only', '--help', '-h')):
         parser.add_argument('--headless', action='store_true')
         parser.add_argument('--device', default='cuda:0')
@@ -48,6 +73,14 @@ def main(argv=None):
         from isaaclab.app import AppLauncher
         AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args(argv)
+    if args.logger == 'wandb':
+        if (args.mode != 'train' or not re.fullmatch(r'[A-Za-z0-9_.-]{1,128}', args.wandb_project or '')
+                or importlib.util.find_spec('wandb') is None
+                or (args.wandb_mode == 'online' and not os.environ.get('WANDB_API_KEY'))):
+            raise ValueError('W&B logging needs train mode, a project name, the wandb package '
+                             'and WANDB_API_KEY when online')
+    elif args.wandb_project is not None or args.wandb_mode != 'offline':
+        raise ValueError('W&B options require --logger wandb')
     configuration.verify_assets(args.asset, args.model)
     if (not args.headless or args.device != 'cuda:0' or not 1 <= args.updates <= 2000
             or not 0 < args.max_wall_seconds <= 6600 or args.seed < 0
@@ -93,7 +126,9 @@ def main(argv=None):
         print(json.dumps(identity, indent=2)); return 0
     args.output.mkdir(parents=True, exist_ok=False)
     state = {'mode': args.mode, 'status': 'initializing', 'identity': identity, 'errors': [], 'stage2_complete': False,
-        'runtime_binding': {'runtime_tree_sha256': args.source_freeze_sha256}}
+        'runtime_binding': {'runtime_tree_sha256': args.source_freeze_sha256},
+        'experiment_logger': {'backend': args.logger, 'wandb_project': args.wandb_project,
+                              'wandb_mode': args.wandb_mode if args.logger == 'wandb' else None}}
     save(args.output/'state.json', state)
     app = env = runner = loads = None
     started = time.monotonic()
@@ -146,7 +181,14 @@ def main(argv=None):
         wrapped = vanilla.VanillaVecEnv(task)
         config = vanilla.ppo_config(args.seed)
         save(args.output/'ppo_config.json', config)
-        runner = OnPolicyRunner(wrapped, copy.deepcopy(config), str(args.output/'learner'), device=args.device)
+        runner_config = copy.deepcopy(config)
+        if args.logger == 'wandb':
+            # The logger choice stays out of ppo_config, which checkpoint loading compares.
+            # Copy saved checkpoints: container paths do not exist where offline runs sync.
+            os.environ.update(WANDB_DIR=str(args.output), WANDB_MODE=args.wandb_mode, WANDB_SYMLINK='false')
+            runner_config.update(logger='wandb', wandb_project=args.wandb_project)
+            wrapped.cfg = ConfigRecord(wrapped.cfg)
+        runner = OnPolicyRunner(wrapped, runner_config, str(args.output/'learner'), device=args.device)
         import rsl_rl
         upstream = Path(rsl_rl.__file__).parent
         identity['upstream_source_files'] = {name: sha(upstream/name) for name in (
@@ -173,6 +215,14 @@ def main(argv=None):
                     'task': task.status(reset_interval=True)}
                 with (args.output/'metrics.jsonl').open('a') as stream:
                     stream.write(json.dumps(row, allow_nan=False)+'\n')
+                if runner.logger.writer is not None:
+                    for tag, value in scalars(row['task'], 'Task').items():
+                        runner.logger.writer.add_scalar(tag, value, values['it'])
+                if args.logger == 'wandb' and update == 1:
+                    # RSL-RL names the run after its log directory; bind it to the frozen source instead.
+                    import wandb
+                    wandb.run.name = f'seed{args.seed}-{args.source_freeze_sha256[:12]}'
+                    wandb.config.update({'identity': identity}, allow_val_change=True)
                 state.update(updates=update, transitions=row['transitions'], wall_seconds=time.monotonic()-started)
                 save(args.output/'state.json', state)
                 if update % 50 == 0 or update == args.updates:
