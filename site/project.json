@@ -3,7 +3,7 @@
   "title": "Hexapod \u00b7 Development roadmap",
   "repository": "Cornell-Physical-Intelligence/hexapod-cupi",
   "mission": "Hexapod MKII: from walking to autonomous surveying",
-  "description": "Build a hexapod that walks an approved route through an area drawn on a map and stops with a steady sensor platform. GeoData owns the measurements and the 3D map.",
+  "description": "Build a hexapod that walks an approved route through an area drawn on an open map, navigating with onboard GPS only, and stops with a steady sensor platform. GeoData owns the measurements and the 3D map.",
   "status_source": "STATUS.md",
   "geometry": {
     "label": "Approved detailed robot model",
@@ -267,8 +267,8 @@
       "state": "planned",
       "column": 0,
       "row": 0,
-      "meaning": "The operator draws the boundary on a map. The boundary and robot position use coordinates relative to the same test site.",
-      "input": "A map and the operator\u2019s boundary",
+      "meaning": "The operator draws the boundary and exclusions on an open map (OpenStreetMap or USGS imagery). The boundary and GPS positions share one local east-north frame.",
+      "input": "An open map and the operator\u2019s boundary",
       "output": "The area to survey",
       "source": "ARCHITECTURE.md",
       "milestone_id": "mission"
@@ -280,8 +280,8 @@
       "state": "planned",
       "column": 1,
       "row": 0,
-      "meaning": "Choose a route and stops inside the requested area. The first course is level, hard and clear of obstacles.",
-      "input": "Survey boundary, ground map and robot position",
+      "meaning": "Place stops in back-and-forth rows inside the boundary, shrunk by the robot footprint and the GPS error bound, and link them around drawn exclusions. The first course is level, hard and clear of obstacles.",
+      "input": "Survey boundary, exclusions and GPS position",
       "output": "A route with stops",
       "source": "ARCHITECTURE.md",
       "milestone_id": "mission"
@@ -315,11 +315,11 @@
     {
       "id": "sensors",
       "title": "Measure the surroundings",
-      "label": "M1: test scope agreed",
+      "label": "M1 record; no navigation role",
       "state": "prepared",
       "column": 0,
       "row": 1,
-      "meaning": "The first test uses a simulated Mid-360 laser scanner. Save a scan of a known floor and wall, then reload it and check the measured geometry. The physical sensor is not mounted.",
+      "meaning": "The agreed M1 test used a simulated Mid-360 laser scanner on a known floor and wall; it remains a record. Navigation uses GPS only, so no laser scanner feeds the robot position.",
       "input": "Simulated laser distances and sensor position",
       "output": "Recorded 3D points and flags identifying valid measurements",
       "source": "mission/README.md",
@@ -328,26 +328,26 @@
     {
       "id": "estimate",
       "title": "Track robot position",
-      "label": "Estimator to build",
+      "label": "GPS estimate to build",
       "state": "planned",
       "column": 1,
       "row": 1,
-      "meaning": "Combine sensor and movement measurements to track the robot\u2019s position and orientation within the test site.",
-      "input": "Laser scans, motion measurements and sensor calibration",
-      "output": "Estimated position, orientation, speed and error",
+      "meaning": "An onboard GPS receiver supplies position, and a second antenna supplies heading at walking speed. Convert each fix into the open map\u2019s local east-north frame with an error bound; the planner widens its margin by that bound.",
+      "input": "GPS fixes and heading from a dual-antenna receiver",
+      "output": "Estimated position, heading and error bound",
       "source": "ARCHITECTURE.md",
-      "milestone_id": "stage3"
+      "milestone_id": "mission"
     },
     {
       "id": "terrain",
-      "title": "Map the nearby ground",
-      "label": "Historical synthetic-data prototype",
+      "title": "Walk uneven ground blind",
+      "label": "Stage 3; no ground map",
       "state": "prepared",
       "column": 2,
       "row": 1,
-      "meaning": "Researchers tested synthetic ground-height observations in the archived prototype. Current map assembly and localization remain pending. GeoData owns survey mapping; issue #19 closed as not planned.",
-      "input": "Scans aligned using the estimated sensor position",
-      "output": "Nearby ground heights and measurement uncertainty",
+      "meaning": "The GPS-only robot builds no ground map. The operator draws known hazards as exclusions, and Stage 3 walking must cross uneven ground from the policy\u2019s own joint and body sensing. The archived synthetic ground-height prototype remains a record.",
+      "input": "Joint positions and body motion",
+      "output": "Walking that tolerates uneven ground",
       "source": "artifacts/terrain_readiness_2026-09-09/observation_comparison_cpu_001/README.md",
       "milestone_id": "stage3"
     },
@@ -435,15 +435,7 @@
       "motors"
     ],
     [
-      "sensors",
-      "estimate"
-    ],
-    [
       "estimate",
-      "terrain"
-    ],
-    [
-      "terrain",
       "coverage"
     ],
     [
@@ -529,8 +521,8 @@
     },
     {
       "id": "stage3",
-      "title": "Use sensors to cross terrain",
-      "description": "After flat-ground walking and stopping qualify on the confirmed mass-corrected model, restart terrain qualification using a map of nearby ground. Preserve admitted flat-ground behavior.",
+      "title": "Cross terrain without a ground map",
+      "description": "After flat-ground walking and stopping qualify on the confirmed mass-corrected model, qualify terrain walking from the robot\u2019s own body sensing; the GPS-only package carries no ground-mapping sensor. Preserve admitted flat-ground behavior.",
       "gate": "Agree which slopes and obstacles to test. Pass separate test cases while staying within motor and foot-contact limits.",
       "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/terrain_readiness_2026-09-09/qualification_plan_001/QUALIFICATION_PLAN.md",
       "status": "blocked",
@@ -544,7 +536,7 @@
         "R-03",
         "R-04"
       ],
-      "blocker": "Canonical flat-ground walking and stopping have not qualified. Sensor and ground-map prototypes remain historical preparation; the first terrain envelope and pass conditions still need definition.",
+      "blocker": "Canonical flat-ground walking and stopping have not qualified. Archived sensor and ground-map prototypes remain a record; the first terrain envelope and pass conditions still need definition.",
       "question": "After canonical walking and stopping qualify, define the first terrain test and its pass conditions.",
       "next_step": null,
       "acceptance": null,
@@ -553,7 +545,7 @@
     {
       "id": "mission",
       "title": "Survey a drawn area",
-      "description": "Follow an approved route through the requested area and stop with a steady sensor platform at each designated location. GeoData owns scanning and the 3D terrain map. Start on a level, hard surface with no obstacles.",
+      "description": "Follow an approved route through the requested area and stop with a steady sensor platform at each designated location. The robot navigates with onboard GPS only on an area drawn over an open map. GeoData owns scanning and the 3D terrain map. Start on a level, hard surface with no obstacles.",
       "gate": "On the physical robot, complete the approved route inside the drawn area with controlled stops. Stop-position and platform-motion limits still need agreement.",
       "source": "ARCHITECTURE.md",
       "status": "blocked",
@@ -572,7 +564,7 @@
         "R-10"
       ],
       "blocker": "The robot remains unbuilt and walking remains unqualified. Issue #20 covers route rehearsal in simulation; mission software remains pending. GeoData owns survey data collection, and issue #19 closed as not planned.",
-      "question": "Assign an owner and reviewer for #20 route rehearsal and define its limits before its test. Preserve the M1 fixture as a record; this project schedules no M1 work.",
+      "question": "Assign an owner and reviewer for #20 route rehearsal and freeze its GPS error bound, heading source and limits before its test. Preserve the M1 fixture as a record; this project schedules no M1 work.",
       "next_step": null,
       "acceptance": null,
       "definition": {
@@ -981,7 +973,7 @@
     ]
   },
   "summary_tags": [
-    "Coordinates relative to the test site",
+    "GPS only, on an open map",
     "Stop at designated locations",
     "Simulation first"
   ]

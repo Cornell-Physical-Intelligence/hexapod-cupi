@@ -1,7 +1,7 @@
 # Hexapod
 
-You develop a robot that walks an approved route through an operator-drawn
-region and stops at designated locations. GeoData owns survey data collection
+You develop a robot that walks an approved route through a region drawn on an
+open map and stops at designated locations. It navigates with onboard GPS only. GeoData owns survey data collection
 outside this repository. You can inspect the approved robot in the
 [viewer](robot/hexapod_mkii_updated_v1/README.md#inspection) and review recordings
 on the [progress site](https://cornell-physical-intelligence.github.io/hexapod-cupi/).
@@ -17,7 +17,7 @@ implementation remains ahead of you in
 | `robot/` | Approved direct-drive model and hash-pinned simulation inputs. |
 | `locomotion/` | Simulation, reward, stock PPO, evaluation and guarded launch; optional optimizer in `priors/`. |
 | `contracts/` | Velocity commands, planar poses and checkpoint identity fields. |
-| `navigation/` | Waypoint follower example; planner and localization remain pending. |
+| `navigation/` | Waypoint follower example; route planner and GPS pose estimate remain pending. |
 | `mission/` | Sensor-pattern and transport prototypes; mission controls remain pending. GeoData owns survey recording and export. |
 | `viewer/` | Joint and part inspection of the approved robot. |
 | `tools/`, `configs/` | Asset preparation, source verification and archive/publication commands. |
