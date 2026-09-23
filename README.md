@@ -24,7 +24,7 @@ implementation remains ahead of you in
 | `docs/`, `site/` | Reference procedures and the published progress record. |
 
 Read [ARCHITECTURE](ARCHITECTURE.md) for requirements and boundaries,
-[CONTRIBUTING](CONTRIBUTING.md) for setup and checks, and [CLAUDE](CLAUDE.md)
+[CONTRIBUTING](CONTRIBUTING.md) for setup and checks, and [AGENTS](AGENTS.md)
 for agent constraints. Start walking work with the [kernel code map](locomotion/README.md).
 Read a reference below when its subject is part of your task.
 
