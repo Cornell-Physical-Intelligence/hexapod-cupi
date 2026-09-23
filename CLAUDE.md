@@ -13,7 +13,7 @@ and mission must not import simulation.
 Use explicit search paths. Read old records to answer a named historical question.
 Keep procedures in existing guides, assignments in GitHub issues, and design
 review in PRs. Do not add another plan, handoff, decision log or task queue.
-Edit `site/project.json` for progress and generate STATUS from it. Preserve
+Edit `site/project.json` for progress; `tools/project_site.py status` writes an untracked STATUS.md. Preserve
 execution history in Git and large new results outside the source checkout.
 
 ## Model and evidence

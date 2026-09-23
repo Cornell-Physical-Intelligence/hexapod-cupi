@@ -136,15 +136,15 @@ start scales `a` by `(1 - cos(pi*min(t/T, 1)))/2`, and a stop scales it by
 then changes by at most 0.040 rad per control. The controller log records
 `nominal_target_rad` and `target_rad` as separate channels.
 
-You can inspect the [three passing motion screens](../site/assets/tripod_speed_lift_native_20260922_001/native_result.json)
-and the [passing stop suite](../site/assets/tripod_stop_stride_native_20260922_001/native_result.json).
-[STATUS](../STATUS.md) records the native result of each variant. The
+You can inspect the [three passing motion screens](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_native_20260922_001/native_result.json)
+and the [passing stop suite](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_native_20260922_001/native_result.json).
+[STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/STATUS.md) records the native result of each variant. The
 [closeout](../site/assets/tripod_reproduction_closeout_20260922_001/closeout.json)
 records four interrupted qualification attempts. Full qualification, raised
 clearance and terrain remain incomplete. You can inspect the
-[forward comparison](../site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.png)
-and its [source identities and measurements](../site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.json).
-The [analysis provenance](../site/assets/tripod_review_corrections_20260922_001/analysis_provenance.json)
+[forward comparison](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.png)
+and its [source identities and measurements](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.json).
+The [analysis provenance](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_review_corrections_20260922_001/analysis_provenance.json)
 binds that comparison and two diagnostic figures to their scripts and inputs.
 
 ### Original equations and geometry adaptation
@@ -242,9 +242,9 @@ you record its native evidence and declare its offsets. You preserve motor/model
 The reset writes a fixed pose and zero velocity, and the controller draws no
 random numbers. The recorded seed changes no state, so the second repeat of a
 case replays the first trace. Each repeat pair in the
-[stop suite](../site/assets/tripod_stop_stride_native_20260922_001/native_result.json)
+[stop suite](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_native_20260922_001/native_result.json)
 has identical trace hashes: the six passing trials hold three distinct
-trajectories. The [repeat identity record](../site/assets/tripod_review_corrections_20260922_001/repeat_identity.json)
+trajectories. The [repeat identity record](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_review_corrections_20260922_001/repeat_identity.json)
 lists each pair. Identical replays do not meet the independent-reset requirement.
 A qualifying repeat needs a reset difference declared before dispatch.
 
@@ -275,23 +275,23 @@ before dispatch; the runner does not select a candidate for you.
 
 `--tripod-adaptation` selects a frozen variant, so you can replay each recorded
 result. Each variant keeps the changes of its parent. The linked records hold
-the equations, CPU checks and frozen inputs; [STATUS](../STATUS.md) holds each
+the equations, CPU checks and frozen inputs; [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/STATUS.md) holds each
 native result. Declare a new variant and its CPU checks before native dispatch.
 Keep changes to the paper equations separate from parameter calibration.
 
 | Variant | Parent | Declared change | Record |
 | --- | --- | --- | --- |
-| `paper` | none | Eqs. (1)–(3) with the four period and hip choices above. Touchdown pitch returns to stance during support; lift offsets `(+0.35,-0.30)` and `(+0.45,-0.35)` rad. | [CPU result](../site/assets/tripod_20260921/result.json), [native corrections](../site/assets/tripod_native_20260922_001/result.json) |
-| `geometry` | `paper` | Jacobian sweep coefficients with gains 1.0 and 1.1, 22/28 mm Jacobian lift and raised offset `(0,-0.15,+0.10)` rad. | [declaration](../site/assets/tripod_geometry_20260922_001/declaration.json) |
-| `damping` | `geometry` gain 1.0 | Motor target adds `KD*dq_ref/12`. | [declaration](../site/assets/tripod_damping_20260922_001/declaration.json) |
-| `retimed` | `damping` | Displacement clock `h` with 0.10 endpoint ramps. | [declaration](../site/assets/tripod_retimed_20260922_001/declaration.json) |
-| `feedback` | `retimed` | Position feedback with gains 0.5 and 1.0, each within ±0.070 rad. | [declaration](../site/assets/tripod_feedback_20260922_001/declaration.json) |
-| `liftoff` | `retimed` | Swing lift `g^0.75` with joint feedback off. | [declaration](../site/assets/tripod_liftoff_20260922_001/declaration.json) |
-| `velocity` | `retimed` | Velocity feedback with gain 2, within ±0.070 rad. | [declaration](../site/assets/tripod_velocity_20260922_001/declaration.json) |
-| `velocity_filtered` | `velocity` | 5 Hz one-pole filter on reference and measured velocity. | [declaration](../site/assets/tripod_velocity_filtered_20260922_001/declaration.json) |
-| `pd_filtered` | `velocity_filtered` | Adds position feedback with gain 0.5. | [declaration](../site/assets/tripod_pd_20260922_001/declaration.json) |
-| `overlap` | `pd_filtered` | Yaw support-overlap sweeps with the cubic return. | [declaration](../site/assets/tripod_overlap_20260922_001/declaration.json) |
-| `startup` | `overlap` | Forward one-second standing hold, then a one-cycle stride ramp. The yaw touchdown residual returns over the rest of its half-cycle. | [declaration](../site/assets/tripod_startup_20260922_001/declaration.json) |
-| `forward_overlap` | `startup` | Forward support-overlap sweeps with `h`; forward lift `(0.25,0)` rad and raised `(0.28,-0.10)` rad. | [declaration](../site/assets/tripod_forward_overlap_20260922_001/declaration.json) |
-| `speed_lift` | `forward_overlap` | Low-mode forward lift `(0.26,-0.20)` rad through 0.05 m/s, interpolated to `(0.25,0)` at 0.10 m/s. | [declaration](../site/assets/tripod_speed_lift_20260922_001/declaration.json) |
-| `stop_stride` | `speed_lift` | Stride decays over one cycle after the current swing, before the standing blend. | [declaration](../site/assets/tripod_stop_stride_20260922_001/declaration.json) |
+| `paper` | none | Eqs. (1)–(3) with the four period and hip choices above. Touchdown pitch returns to stance during support; lift offsets `(+0.35,-0.30)` and `(+0.45,-0.35)` rad. | [CPU result](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_20260921/result.json), [native corrections](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_native_20260922_001/result.json) |
+| `geometry` | `paper` | Jacobian sweep coefficients with gains 1.0 and 1.1, 22/28 mm Jacobian lift and raised offset `(0,-0.15,+0.10)` rad. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_geometry_20260922_001/declaration.json) |
+| `damping` | `geometry` gain 1.0 | Motor target adds `KD*dq_ref/12`. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_damping_20260922_001/declaration.json) |
+| `retimed` | `damping` | Displacement clock `h` with 0.10 endpoint ramps. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_retimed_20260922_001/declaration.json) |
+| `feedback` | `retimed` | Position feedback with gains 0.5 and 1.0, each within ±0.070 rad. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_feedback_20260922_001/declaration.json) |
+| `liftoff` | `retimed` | Swing lift `g^0.75` with joint feedback off. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_liftoff_20260922_001/declaration.json) |
+| `velocity` | `retimed` | Velocity feedback with gain 2, within ±0.070 rad. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_velocity_20260922_001/declaration.json) |
+| `velocity_filtered` | `velocity` | 5 Hz one-pole filter on reference and measured velocity. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_velocity_filtered_20260922_001/declaration.json) |
+| `pd_filtered` | `velocity_filtered` | Adds position feedback with gain 0.5. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_pd_20260922_001/declaration.json) |
+| `overlap` | `pd_filtered` | Yaw support-overlap sweeps with the cubic return. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_overlap_20260922_001/declaration.json) |
+| `startup` | `overlap` | Forward one-second standing hold, then a one-cycle stride ramp. The yaw touchdown residual returns over the rest of its half-cycle. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_startup_20260922_001/declaration.json) |
+| `forward_overlap` | `startup` | Forward support-overlap sweeps with `h`; forward lift `(0.25,0)` rad and raised `(0.28,-0.10)` rad. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_forward_overlap_20260922_001/declaration.json) |
+| `speed_lift` | `forward_overlap` | Low-mode forward lift `(0.26,-0.20)` rad through 0.05 m/s, interpolated to `(0.25,0)` at 0.10 m/s. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_20260922_001/declaration.json) |
+| `stop_stride` | `speed_lift` | Stride decays over one cycle after the current swing, before the standing blend. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_20260922_001/declaration.json) |

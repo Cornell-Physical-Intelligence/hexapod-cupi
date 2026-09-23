@@ -7,7 +7,7 @@ unreached stops with the termination reason. The operator approves the boundary
 and route in the same local site coordinates as the robot. Geographic alignment
 remains optional.
 
-This document owns requirements and system boundaries. [STATUS](STATUS.md)
+This document owns requirements and system boundaries. [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/STATUS.md)
 contains measured progress from `site/project.json`. Use [GitHub issues](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues)
 for assignments and [CONTRIBUTING](CONTRIBUTING.md) for the review workflow.
 
@@ -30,7 +30,7 @@ for assignments and [CONTRIBUTING](CONTRIBUTING.md) for the review workflow.
 
 James selected a level, hard-surfaced, obstacle-free course for the first survey.
 Agree on dimensions and surface tolerances before its test. The final terrain
-envelope remains open. Retain [DAR.png](DAR.png) as the original mission slide.
+envelope remains open. Retain [DAR.png](docs/DAR.png) as the original mission slide.
 
 GeoData owns survey data collection: acquisition, measurement quality, map
 reconstruction and export. The physical robot is unbuilt and the owned Livox
@@ -196,5 +196,5 @@ Keep capability issues open until their acceptance demonstration passes.
 A failed experiment can close its bounded investigation with preserved evidence.
 
 Use [CONTRIBUTING](CONTRIBUTING.md) for checks and publication. Use the
-[reference index](docs/README.md) for specialist procedures. Historical design
+[reference table](README.md) for specialist procedures. Historical design
 drafts retain their original scope in Git and add no current task queue.

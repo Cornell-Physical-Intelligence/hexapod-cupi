@@ -122,9 +122,11 @@ class ProgressTests(unittest.TestCase):
         self.assertIn('10/32', before)
         self.assertIn('Historical', before)
 
-    def test_committed_status_matches_registry(self):
+    def test_generated_status_matches_registry(self):
         project = json.loads((ROOT / 'site/project.json').read_text())
-        self.assertEqual((ROOT / 'STATUS.md').read_text(), site.status_text(project))
+        with tempfile.TemporaryDirectory() as temp, patch.object(site, 'ROOT', ROOT):
+            site.write_status(Path(temp) / 'STATUS.md')
+            self.assertEqual((Path(temp) / 'STATUS.md').read_text(), site.status_text(project))
 
     def test_current_registry_validates_against_its_actual_evidence(self):
         with patch.object(site, 'ROOT', ROOT):

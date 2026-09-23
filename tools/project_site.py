@@ -100,8 +100,9 @@ def registry():
     require(p['schema_version'] == 2, 'Unsupported progress schema')
     require(isinstance(p.get('summary_tags'), list) and p['summary_tags']
             and all(nonempty(t) for t in p['summary_tags']), 'Mission tags are required')
-    for key in ['status_source', 'research_source']:
-        reference(p[key])
+    # STATUS is generated output, never committed; only its file name is validated.
+    require(re.fullmatch(r'[A-Za-z0-9_.-]+\.md', p['status_source']), 'Status output must be a root Markdown file name')
+    reference(p['research_source'])
     for item in p['nodes'] + p['milestones']:
         reference(item['source'])
     ids = [n['id'] for n in p['nodes']]
@@ -234,20 +235,20 @@ def validate_progress(project):
             require(nonempty(metric['units']) and nonempty(metric['window']), 'Metric needs units and window')
 
 
-def status_text(project):
+def status_text(project, link=lambda value: value):
     """Deterministic text projection; STATUS is never an input to this renderer."""
     progress = project['progress']
     lines = ['# Hexapod progress', '',
              '<!-- Generated from site/project.json by tools/project_site.py status. Do not edit. -->', '',
              f"Evidence snapshot: {progress['as_of']} · source `{progress['source_commit']}`.", '',
              progress['summary'], '',
-             '[Architecture](ARCHITECTURE.md) · [Visual roadmap](https://cornell-physical-intelligence.github.io/hexapod-cupi/#roadmap)', '',
+             f"[Architecture]({link('ARCHITECTURE.md')}) · [Visual roadmap](https://cornell-physical-intelligence.github.io/hexapod-cupi/#roadmap)", '',
              '## Roadmap', '']
     for marker in project['milestones']:
         lines.extend([f"### {marker['title']} — {STATE_LABELS[marker['status']]}", '',
                       marker['description'], '', f"Scope: {marker['backend']}. Owner: {marker['owner']}.", '',
                       f"Required proof: {marker['gate']}", '', f"Current limitation: {marker['blocker']}", '',
-                      f"[Evidence]({marker['source']}) · Architecture: {', '.join(marker['requirements'])}.", ''])
+                      f"[Evidence]({link(marker['source'])}) · Architecture: {', '.join(marker['requirements'])}.", ''])
         if marker['acceptance']:
             lines.extend([f"Accepted scope: {marker['acceptance']['scope']}", ''])
         definition = marker.get('definition')
@@ -265,17 +266,18 @@ def status_text(project):
             lines.extend([f"Next step: **not defined**. {marker['question']}", ''])
     lines.extend(['## Recorded attempts', ''])
     for fact in progress['facts']:
-        lines.extend([f"- **{fact['title']} ({fact['result']})** — {fact['backend']}. {fact['text']} [Evidence]({fact['source']})"])
+        lines.extend([f"- **{fact['title']} ({fact['result']})** — {fact['backend']}. {fact['text']} [Evidence]({link(fact['source'])})"])
     lines.extend(['', progress['definition_policy'], '',
-                  f"Current compute rules and reservation records: [operations]({progress['execution_source']}). This is not live GPU telemetry.", '',
+                  f"Current compute rules and reservation records: [operations]({link(progress['execution_source'])}). This is not live GPU telemetry.", '',
                   f"[Full execution snapshot before consolidation]({progress['prior_snapshot']}). Historical results retain their original evidence and gates.", ''])
     return '\n'.join(lines)
 
 
-def write_status():
+def write_status(output=None):
     project, _, _ = registry()
-    (ROOT / project['status_source']).write_text(status_text(project))
-    print('Generated', project['status_source'], 'from site/project.json')
+    path = ROOT / project['status_source'] if output is None else Path(output)
+    path.write_text(status_text(project))
+    print('Generated', path, 'from site/project.json (untracked)')
 
 
 def records():
@@ -368,8 +370,6 @@ def changed_paths(base):
 def check(base=None):
     project, receipt, stop = registry()
     updates = records()
-    if project:
-        require((ROOT / project['status_source']).read_text() == status_text(project), 'Generated STATUS differs; run tools/project_site.py status')
     if base:
         changed = changed_paths(base)
         for name in changed:
@@ -408,6 +408,7 @@ def build():
     for name in ['index.html', 'poster.css', 'poster.js']:
         shutil.copy2(SITE / name, destination / name)
     (destination / '.nojekyll').touch()
+    (destination / project['status_source']).write_text(status_text(project, source_url))
     for item in project['media']:
         target = Path('media') / (item['id'] + Path(item['path']).suffix.lower())
         (destination / target).parent.mkdir(exist_ok=True)
@@ -429,7 +430,7 @@ def build():
     first = project['progress']['summary']
     replicas = [r for scenario in stop['scenarios'] for r in scenario['replicas']]
     project.update(version={'revision': revision, 'commit_date': git('show', '-s', '--format=%cI', 'HEAD'), 'built_utc': dt.datetime.now(dt.timezone.utc).isoformat(), 'commit_url': origin + '/commit/' + revision},
-                   architecture_url=source_url(project['progress']['architecture']), execution_snapshot=first, status_url=source_url(project['status_source']), research_url=source_url(project['research_source']),
+                   architecture_url=source_url(project['progress']['architecture']), execution_snapshot=first, status_url=project['status_source'], research_url=source_url(project['research_source']),
                    checkpoint_data={'sha256': receipt['final_checkpoint_sha256'], 'updates': receipt['updates_completed'], 'reload_passed': receipt['reload']['passed'], 'evidence_url': source_url(project['checkpoint']['evidence'])},
                    stop_data={'passing': sum(r['quiet']['pass'] is True for r in replicas), 'replicas': len(replicas), 'evidence_url': source_url(project['stop_result']['evidence'])},
                    updates=sorted(updates, key=lambda r: r['date'], reverse=True)[:20])

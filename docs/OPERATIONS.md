@@ -101,7 +101,7 @@ uncompressed identities and retain selected actual policy videos.
 
 If Spark is unreachable, complete local work and state that native checks remain
 pending. Do not infer live execution from a saved dispatch, preparation directory
-or old receipt. [STATUS](../STATUS.md) records results, not current GPU telemetry.
+or old receipt. [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/STATUS.md) records results, not current GPU telemetry.
 
 The [frozen startup-stall incident](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/3ccfd4a12aa7b95347c0884ac3ca466cad97b8aa/docs/incidents/2026-08-26-preappready-stall.md)
 preserves the 26 August attempts and cleanup diagnosis. Use this runbook for

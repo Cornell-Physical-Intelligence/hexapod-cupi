@@ -28,7 +28,7 @@ Keep measurements with other limiters in separate comparisons.
 
 Publish selected media and small reports under `site/assets/`. Follow
 [PROJECT_SITE](docs/PROJECT_SITE.md) for each push: add an append-only update,
-change the registry when facts change, generate STATUS, and verify the full diff
+change the registry when facts change, and verify the full diff
 and rendered site. Follow [PIPELINE_LINEAGES](docs/PIPELINE_LINEAGES.md) when
 covered source changes need a new manifest. Register new source commands in
 `configs/source_inventory.json`.
