@@ -3,7 +3,7 @@
 Use [README](README.md) to find the affected package and
 [ARCHITECTURE](ARCHITECTURE.md) for its requirements. The team also maintains
 [onboarding standards](https://wiki.cornellphysicalintelligence.com/#/page/software-onboarding-repo-standards)
-behind Cornell sign-in. Agent constraints live in [CLAUDE](CLAUDE.md).
+behind Cornell sign-in. Agent constraints live in [AGENTS](AGENTS.md).
 
 ## Environment and review
 
