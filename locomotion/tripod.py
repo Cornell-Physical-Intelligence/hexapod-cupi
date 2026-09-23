@@ -1,7 +1,7 @@
 """Prescribed tripod targets with measured touchdown, without physics writes.
 
 Zhang et al. (2024), section 4.2, equations (1)-(3) define the waveforms.
-docs/TRAINING.md declares the geometry, contact and transition adaptations.
+locomotion/README.md declares the geometry, contact and transition adaptations.
 """
 import math
 import numpy as np

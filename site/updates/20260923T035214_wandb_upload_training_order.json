@@ -1,0 +1,32 @@
+{
+  "id": "20260923T035214_wandb_upload_training_order",
+  "date": "2026-09-23T03:52:14.312752+00:00",
+  "title": "Add host W&B upload and reorder the AMP roadmap",
+  "summary": "Add an optional tracking dependency group and a host tool that uploads a retrieved run to W&B with its file hashes; the pinned Spark image and native source stay unchanged. TRAINING runs a flat AMP pilot with the current networks before the Table III networks, lists step dependencies, and moves the tripod contract into the locomotion guide.",
+  "areas": [
+    "locomotion",
+    "site"
+  ],
+  "next": "Assign Steps 1, 2, 3 and 6 through GitHub issues; they have no prerequisite step.",
+  "changes": [
+    "configs/releases/wandb_upload_20260922_v1.sha256",
+    "configs/source_inventory.json",
+    "docs/PIPELINE_LINEAGES.md",
+    "docs/TRAINING.md",
+    "locomotion/README.md",
+    "locomotion/tripod.py",
+    "pyproject.toml",
+    "site/updates/20260923T035214_wandb_upload_training_order.json",
+    "tests/test_wandb_upload.py",
+    "tools/check_pipeline_lineages.py",
+    "tools/wandb_upload.py",
+    "uv.lock"
+  ],
+  "evidence": [
+    "configs/releases/wandb_upload_20260922_v1.sha256",
+    "tests/test_wandb_upload.py",
+    "docs/TRAINING.md"
+  ],
+  "no_project_impact": true,
+  "reason": "Tooling and roadmap order change no measured result, roadmap marker or gate."
+}

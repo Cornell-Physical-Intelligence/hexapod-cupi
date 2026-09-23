@@ -19,6 +19,10 @@ dev = [
     "casadi>=3.7,<3.8",
     "rsl-rl-lib==5.0.1",
 ]
+# Host-side upload of retrieved runs; the pinned Spark image does not install wandb.
+tracking = [
+    "wandb>=0.30.0",
+]
 
 [tool.uv]
 # Import maintained packages from the repository root.
