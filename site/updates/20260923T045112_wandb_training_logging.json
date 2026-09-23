@@ -1,0 +1,38 @@
+{
+  "id": "20260923T045112_wandb_training_logging",
+  "date": "2026-09-23T04:51:12.447610+00:00",
+  "title": "Log training to W&B from the Spark image",
+  "summary": "The Spark image provides wandb 0.28.2, so training can opt in to RSL-RL W&B logging through prepare. Runs default to offline files inside the run output; online runs take WANDB_API_KEY by name from the launcher environment. ppo_config stays unchanged for checkpoint loading. The host uploader is removed, and .gitattributes keeps only rules that match tracked files.",
+  "areas": [
+    "locomotion",
+    "site"
+  ],
+  "next": "Prepare the next training allocation with --logger wandb and a project name.",
+  "changes": [
+    ".gitattributes",
+    "configs/archive.json",
+    "configs/releases/wandb_logging_20260923_v1.sha256",
+    "configs/source_inventory.json",
+    "docs/OPERATIONS.md",
+    "docs/PIPELINE_LINEAGES.md",
+    "docs/TRAINING.md",
+    "locomotion/launch.py",
+    "locomotion/prepare.py",
+    "locomotion/tests/test_launch.py",
+    "locomotion/tests/test_wandb_logging.py",
+    "locomotion/train.py",
+    "pyproject.toml",
+    "site/updates/20260923T045112_wandb_training_logging.json",
+    "tests/test_wandb_upload.py",
+    "tools/check_pipeline_lineages.py",
+    "tools/wandb_upload.py",
+    "uv.lock"
+  ],
+  "evidence": [
+    "configs/releases/wandb_logging_20260923_v1.sha256",
+    "locomotion/tests/test_wandb_logging.py",
+    "locomotion/tests/test_launch.py"
+  ],
+  "no_project_impact": true,
+  "reason": "Run tracking changes no measured result, roadmap marker or gate."
+}
