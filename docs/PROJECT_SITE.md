@@ -17,7 +17,7 @@ Pages build publishes the same text. Git does not track `STATUS.md`.
    Numerical summary fields must match the referenced JSON payload. An accepted
    marker requires a named human acceptance, its scope and evidence. Ready/active
    work requires accepted dependencies and a complete next-step definition.
-4. Define the next smallest step with James and the relevant lead before adding
+4. Define the next smallest step with the program lead and the relevant lead before adding
    it: outcome, owner, reviewer, issue, acceptance and source/fixture baseline.
    Until then `next_step` stays `null`. Do not invent assignments or dates.
 5. Generate the text view with `python3 tools/project_site.py status`.
@@ -31,7 +31,7 @@ files, test totals, training budgets or videos.
 
 ## Every repository change
 
-Every push must include a corresponding paper/Pages update. This is James's
+Every push must include a corresponding paper/Pages update. This is the program lead's
 explicit hard rule, reiterated on 14 September 2026. Validate the complete push
 diff, build the paper and exercise the renderer before pushing. Evidence paths
 must match on-disk capitalization so local macOS checks agree with Linux CI.
@@ -85,7 +85,7 @@ linking its test specification. Do not add explanatory paragraphs between these
 items.
 
 Stages without uploaded progress media show no image, illustration or placeholder.
-James supplies their visuals when progress is available. Keep the interactive
+The program lead supplies their visuals when progress is available. Keep the interactive
 system graph expanded and existing walking videos playable. Preserve historical
 recordings and their model labels; never present a concept image as progress.
 

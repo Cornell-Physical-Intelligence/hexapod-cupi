@@ -1,13 +1,13 @@
 # Approved CAD geometry and import provenance
 
-James approved the detailed direct-drive model and its nominal motor correction
+The program lead approved the detailed direct-drive model and its nominal motor correction
 for training. [`robot/active_model.json`](../robot/active_model.json) selects its
 exact identities: 1,753 source part instances, 59 mesh byte streams, 19 bodies
 and 18 joints. Use the [model guide](../robot/hexapod_mkii_updated_v1/README.md)
 for simulation inputs and viewer controls.
 
 The supplied ZIP contains one rigid link and no exported joints. We recovered
-bearing axes and inferred rigid grouping from the six posed leg copies. James
+bearing axes and inferred rigid grouping from the six posed leg copies. The program lead
 confirmed the serial topology. Mechanical review of fastener, bearing and rotor
 ownership remains open. Preserve the original rounded-square toe and mesh bytes.
 
@@ -15,7 +15,7 @@ ownership remains open. Preserve the original rounded-square toe and mesh bytes.
 
 Use body +X left, −Y forward and +Z up. Positive joint rotation follows local
 +Z. Preserve the viewer pitch zero: femur elevation +20° and knee angle −110°.
-James specified femur travel −120°…+80° and tibia travel −5°…+180° about those
+The program lead specified femur travel −120°…+80° and tibia travel −5°…+180° about those
 zeros. Combined poses can intersect the body, adjacent legs or the ground.
 
 Each coxa zero is the midpoint of its source standoff-clearance interval, using
