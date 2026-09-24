@@ -143,7 +143,15 @@ def initial_trajectory(model, config):
     return q, v, a, f, feet
 
 
-def build_problem(model, config):
+def solver_options(config, mu_strategy):
+    if mu_strategy not in ('monotone', 'adaptive'):
+        raise ValueError('Unknown barrier update strategy')
+    return {'max_iter': config.max_iterations, 'tol': 1e-6, 'constr_viol_tol': 1e-7,
+        'acceptable_tol': 1e-5, 'acceptable_constr_viol_tol': 1e-6,
+        'print_level': 4, 'sb': 'yes', 'linear_solver': 'mumps', 'mu_strategy': mu_strategy}
+
+
+def build_problem(model, config, *, mu_strategy='monotone'):
     config.validate()
     q0, v0, a0, f0, desired_feet = initial_trajectory(model, config)
     n, dt = len(a0), config.control_dt_s
@@ -222,10 +230,7 @@ def build_problem(model, config):
         curvature = targets[:, (k+1) % n]-2*targets[:, k]+targets[:, (k-1) % n]
         objective += config.target_curvature_weight*ca.sumsqr(curvature/.04)
     opt.minimize(objective/n)
-    opt.solver('ipopt', {'expand': True, 'print_time': False}, {
-        'max_iter': config.max_iterations, 'tol': 1e-6, 'constr_viol_tol': 1e-7,
-        'acceptable_tol': 1e-5, 'acceptable_constr_viol_tol': 1e-6,
-        'print_level': 4, 'sb': 'yes', 'linear_solver': 'mumps'})
+    opt.solver('ipopt', {'expand': True, 'print_time': False}, solver_options(config, mu_strategy))
     return opt, {'q': q, 'v': v, 'a': a, 'force': f,
                  'target': targets, 'torque': ca.horzcat(*torques)}, desired_feet
 
@@ -307,7 +312,7 @@ def restart_values(path, config, model):
     return arrays
 
 
-def run(output, config, root=None, *, initial=None):
+def run(output, config, root=None, *, initial=None, mu_strategy='monotone'):
     output = Path(output)
     model = RobotModel() if root is None else RobotModel(root)
     restart = restart_values(initial, config, model) if initial is not None else None
@@ -317,6 +322,7 @@ def run(output, config, root=None, *, initial=None):
         shutil.copy2(path, output/'source'/path.name)
     declaration = {'schema': 'canonical_full_body_trajectory_optimization_v2',
         'config': asdict(config), 'model': model.identity(), 'casadi_version': ca.__version__,
+        'solver_options': solver_options(config, mu_strategy),
         'source_files': {p.name: digest(p) for p in sorted(Path(__file__).parent.glob('*.py'))},
         'method': 'Fixed-contact-schedule midpoint inverse dynamics, ZYX floating root, all 19 rigid bodies.',
         'limitations': ['Point contacts omit mesh deformation and impacts.',
@@ -335,7 +341,7 @@ def run(output, config, root=None, *, initial=None):
     (output/'INPUT.json').write_text(json.dumps(declaration, indent=2)+'\n')
     started = time.monotonic()
     try:
-        opt, variables, feet = build_problem(model, config)
+        opt, variables, feet = build_problem(model, config, mu_strategy=mu_strategy)
         if restart is not None:
             for name, values in restart.items():
                 opt.set_initial(variables[name], values.T)
@@ -376,6 +382,8 @@ def main():
     parser.add_argument('--bank', action='store_true', help='Solve the frozen 20-command coverage bank')
     parser.add_argument('--initial-trajectory', type=Path,
                         help='Restart one command from a saved primal iterate of the same problem')
+    parser.add_argument('--mu-strategy', choices=['monotone', 'adaptive'], default='monotone',
+                        help='Ipopt barrier update; retain the objective and convergence tolerances')
     parser.add_argument('--forward-mps', type=float, default=.05)
     parser.add_argument('--left-mps', type=float, default=0.)
     parser.add_argument('--yaw-rate-rad-s', type=float, default=0.)
@@ -398,14 +406,14 @@ def main():
             forward, left, yaw = case['command']
             directory = f'command_{len(results):02d}'
             result = run(args.output/directory, replace(config, forward_mps=forward,
-                         left_mps=left, yaw_rate_rad_s=yaw))
+                         left_mps=left, yaw_rate_rad_s=yaw), mu_strategy=args.mu_strategy)
             results.append({**case, 'path': directory, 'result': result})
             (args.output/'coverage.json').write_text(json.dumps({
                 'schema': 'hexapod_amp_optimization_bank_v1', 'cases': results,
                 'native_admitted': False}, indent=2, allow_nan=False)+'\n')
         return 0 if all(r['result']['status'] == 'solved'
                         and r['result']['audit']['passed'] for r in results) else 1
-    result = run(args.output, config, initial=args.initial_trajectory)
+    result = run(args.output, config, initial=args.initial_trajectory, mu_strategy=args.mu_strategy)
     return 0 if result['status'] == 'solved' and result['audit']['passed'] else 1
 
 

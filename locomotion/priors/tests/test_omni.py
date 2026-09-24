@@ -14,6 +14,7 @@ from locomotion.priors.commands import motion_cases, command_index
 from locomotion.priors.model import RobotModel
 from locomotion.priors.model import ROOT
 from locomotion.priors.optimize import Config, cycle_state, initial_trajectory, planar_pose, schedule, restart_values
+from locomotion.priors.replay_native import startup_target
 
 
 class OmniTrajectoryTests(unittest.TestCase):
@@ -93,10 +94,23 @@ class OmniTrajectoryTests(unittest.TestCase):
                 '--trajectory-directory', str(ROOT/'locomotion/priors/tests/fixtures/solve'),
                 '--output', str(output), '--remote-root',
                 '/home/orionh/HEXAPOD_runs/restart_20260914/test_amp_half_cycle',
-                '--inputs', str(ROOT/'configs/locomotion_spark.json'), '--start-phase', '0.5'],
+                '--inputs', str(ROOT/'configs/locomotion_spark.json'), '--start-phase', '0.5',
+                '--startup-ramp-controls', '50'],
                 check=True, capture_output=True, text=True)
             args = json.loads((output/'binding.json').read_text())['command_args']
             self.assertEqual(args[args.index('--start-phase')+1], '0.5')
+            self.assertEqual(args[args.index('--startup-ramp-controls')+1], '50')
+
+    def test_startup_ramp_keeps_the_retained_target_cycle(self):
+        neutral = np.tile([0., -.3, .4], 6)
+        target = neutral+.3
+        ramp = np.array([startup_target(target, neutral, i, 50) for i in range(50)])
+        self.assertLess(abs(ramp[0]-neutral).max(), .001)
+        self.assertTrue((np.diff(ramp, axis=0) >= 0).all())
+        np.testing.assert_array_equal(ramp[-1], target)
+        for i in (0, 49, 50, 100):
+            self.assertIs(startup_target(target, neutral, i, 0), target)
+        self.assertIs(startup_target(target, neutral, 100, 50), target)
 
     def test_restart_keeps_problem_and_model_identity(self):
         fixture = ROOT/'locomotion/priors/tests/fixtures/solve/trajectory.npz'

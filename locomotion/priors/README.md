@@ -88,6 +88,10 @@ the iteration budget. The optimizer copies the seed and its input/result records
 into the new attempt and records their hashes. It initializes the primal variables
 through [CasADi `Opti.set_initial`](https://github.com/casadi/casadi/blob/main/docs/users_guide/source/opti.rst).
 The solver tolerances and feasibility gates stay the same; the seed grants no admission.
+You can use `--mu-strategy adaptive` with a restart to select
+[Ipopt's adaptive barrier update](https://github.com/coin-or/Ipopt/blob/stable/3.14/doc/special.dox).
+The default uses its monotone update. Each new input record lists the solver
+options; the objective, physical constraints and convergence tolerances stay fixed.
 
 Follow [OPERATIONS](../../docs/OPERATIONS.md) for same-source one-robot and
 32-robot standing admission, input packing and the guarded native launcher.
@@ -95,6 +99,14 @@ Prepare each solved command with `--start-phase 0` and `--start-phase 0.5`.
 The second phase tests another cold start; it supplies no extra training rows.
 These two phases are a project stress test. They do not represent independent
 random seeds. Match the same physics and gait configuration across the bank.
+If a direct start fails, you can specify `--startup-ramp-controls 50` for both
+phases of that command. This project startup procedure blends from the admitted
+neutral target for one second through `(1-cos(pi*t/1s))/2`. It uses the cosine
+blend form from the [classical startup procedure](../README.md), while the
+optimized target cycle keeps its phase clock. The native kernel still applies
+the 0.040 rad limiter. The recorder stores the ramp length; the exporter requires
+matching startup settings within each command's phase pair. The fixed two-second
+crop excludes the ramp. Full-trial motor and contact checks still include it.
 
 Pass the 40 completed native run directories to `dataset inspect` through
 repeated `--replay` arguments and a fresh `--output`. Inspection recomputes

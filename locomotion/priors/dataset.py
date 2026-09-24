@@ -125,6 +125,9 @@ def audit_replay(directory):
         raise ValueError('Replay lacks completed model-bound optimized motion evidence')
     if identity.get('start_phase') not in (0., .5):
         raise ValueError('Missing declared replay start phase')
+    ramp = identity.get('startup_ramp_controls', 0)
+    if type(ramp) is not int or ramp not in (0, 50):
+        raise ValueError('Unknown startup ramp')
     for key in ('trajectory_sha256', 'optimization_input_sha256', 'optimization_result_sha256'):
         value = identity.get(key, '')
         if len(value) != 64 or set(value)-set('0123456789abcdef'):
@@ -192,11 +195,14 @@ def require_bank_identity(records):
     by_command, state_hashes = {}, {}
     for record in records:
         identity = record['identity']
+        ramp = identity.get('startup_ramp_controls', 0)
+        if type(ramp) is not int or ramp not in (0, 50):
+            raise ValueError('Unknown startup ramp')
         hashes = tuple(identity[key] for key in ('trajectory_sha256', 'optimization_input_sha256',
-                                                 'optimization_result_sha256'))
+                                                 'optimization_result_sha256'))+(ramp,)
         previous = by_command.setdefault(command_index(record['command']), hashes)
         if previous != hashes:
-            raise ValueError('Command phases use different optimized trajectories')
+            raise ValueError('Command phases use different optimized trajectories or startup ramps')
         signatures = state_hashes.setdefault(command_index(record['command']), set())
         if record['native_state_sha256'] in signatures:
             raise ValueError('Duplicate native states cannot establish a second start phase')

@@ -173,6 +173,12 @@ class DatasetTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'different optimized trajectories'):
                 dataset.require_bank_identity(changed)
             changed = copy.deepcopy(list(records.values()))
+            changed[0]['identity']['startup_ramp_controls'] = 50
+            with self.assertRaisesRegex(ValueError, 'startup ramps'):
+                dataset.require_bank_identity(changed)
+            changed[1]['identity']['startup_ramp_controls'] = 50
+            dataset.require_bank_identity(changed)
+            changed = copy.deepcopy(list(records.values()))
             changed[1]['native_state_sha256'] = changed[0]['native_state_sha256']
             with self.assertRaisesRegex(ValueError, 'second start phase'):
                 dataset.require_bank_identity(changed)

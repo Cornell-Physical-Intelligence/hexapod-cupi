@@ -16,9 +16,12 @@ def write(path, data):
     path.write_text(json.dumps(data, indent=2, allow_nan=False)+'\n')
 
 
-def prepare(trajectory_directory, output, remote_root, root=ROOT, *, inputs=None, start_phase=0.):
+def prepare(trajectory_directory, output, remote_root, root=ROOT, *, inputs=None, start_phase=0.,
+            startup_ramp_controls=0):
     if start_phase not in (0., .5):
         raise ValueError('Replay start phase must be 0 or 0.5')
+    if type(startup_ramp_controls) is not int or startup_ramp_controls not in (0, 50):
+        raise ValueError('Startup ramp must contain 0 or 50 controls')
     root, trajectory_directory, output = map(Path, (root, trajectory_directory, output))
     remote_root = Path(remote_root)
     allowed = Path('/home/orionh/HEXAPOD_runs/restart_20260914')
@@ -36,7 +39,8 @@ def prepare(trajectory_directory, output, remote_root, root=ROOT, *, inputs=None
         binding['input_files'][str(remote_root/'trajectory'/name)] = digest(optimized/name)
     binding['extra_mounts'].append([str(remote_root/'trajectory'), '/realized_prior'])
     binding['command_args'] += ['--trajectory', '/realized_prior/trajectory.npz',
-        '--trajectory-sha256', digest(trajectory), '--start-phase', str(start_phase)]
+        '--trajectory-sha256', digest(trajectory), '--start-phase', str(start_phase),
+        '--startup-ramp-controls', str(startup_ramp_controls)]
     binding['max_seconds'] = 1800
     deadline = binding['command_args'].index('--max-wall-seconds')+1
     binding['command_args'][deadline] = '1500'
@@ -57,9 +61,11 @@ def main():
     parser.add_argument('--remote-root', required=True)
     parser.add_argument('--inputs', type=Path, required=True)
     parser.add_argument('--start-phase', type=float, choices=[0., .5], default=0.)
+    parser.add_argument('--startup-ramp-controls', type=int, choices=[0, 50], default=0)
     args = parser.parse_args()
     binding = prepare(args.trajectory_directory, args.output, args.remote_root,
-                      inputs=args.inputs, start_phase=args.start_phase)
+                      inputs=args.inputs, start_phase=args.start_phase,
+                      startup_ramp_controls=args.startup_ramp_controls)
     print(json.dumps({'source': binding['source'], 'output': binding['output'],
                       'source_freeze_sha256': binding['source_freeze_sha256']}))
 
