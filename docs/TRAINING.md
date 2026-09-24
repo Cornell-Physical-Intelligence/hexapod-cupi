@@ -112,7 +112,7 @@ record the chosen formula and its source.
 The authors call the AMP state 61 values in
 [§III-A, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3), but their foot-height description
 accounts for fewer values. The retained kernel uses six 3D foot positions.
-James retained that 61-value interpretation for issue #36.
+The program lead retained that 61-value interpretation for issue #36.
 [`amp.py`](../locomotion/amp.py) specifies the order, frames and units; the dataset
 audit verifies the shared extractor against native telemetry before admission. The optimizer's point contacts omit
 mesh patches and impacts, so native replay remains a prerequisite.

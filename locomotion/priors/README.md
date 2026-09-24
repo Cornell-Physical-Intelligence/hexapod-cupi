@@ -1,8 +1,9 @@
 # AMP demonstration preparation
 
 You can generate optimized tripod candidates for issue [#36](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/36),
-replay them in Isaac and export reviewed transitions. James (`palerdr`) owns
-this work and reviews the motion. CPU feasibility does not admit a dataset.
+replay them in Isaac and export reviewed transitions. The program lead
+(`palerdr`) owns this work and reviews the motion. CPU feasibility does not
+admit a dataset.
 The discriminator and policy comparison belong to #37; this package does not
 require the reward changes in #35.
 
@@ -15,7 +16,7 @@ require the reward changes in #35.
 | Mechanical state | `RobotModel`, `q[61,24]`, `v[61,24]`, `a[60,24]`: six floating-root coordinates and 18 joint coordinates. `force[60,18]`, `torque[60,18]`, `target[60,18]` complete the collocation variables. | Existing approved 19-body URDF, inverse dynamics and 50 Hz optimizer. The 61 nodes here count time samples, separate from AMP feature width. |
 | Turn geometry | `planar_pose()` and `cycle_state()` integrate a constant planar body command and close a cycle through its rigid transform. | Project derivation below; the paper does not specify this optimizer implementation. |
 | Native record | `replay_native.py`: 1,000 controls, 8,000 physics samples, video and force/torque metrics. | Existing `omni_static` screen and `evaluate.run_batch`; unchanged gates. |
-| Feature map | `locomotion.amp.extract_features()`: raw 61-value state shared with `LocomotionEnv._observations()`. | Existing kernel layout, retained by James. [Liu §III-A](https://arxiv.org/html/2511.03167v1#S3.SS1) names 61 values but describes foot heights. Six scalar heights would produce 49 values; this project uses six XYZ toe positions. |
+| Feature map | `locomotion.amp.extract_features()`: raw 61-value state shared with `LocomotionEnv._observations()`. | Existing kernel layout, retained by the program lead. [Liu §III-A](https://arxiv.org/html/2511.03167v1#S3.SS1) names 61 values but describes foot heights. Six scalar heights would produce 49 values; this project uses six XYZ toe positions. |
 | Transition bank | `dataset.export()`, `load()`, `sample()`: native `(s_t, s_next)` pairs, concatenated to 122 values for a learner. | Consecutive-state discriminator input in [Liu §III-B and Table III](https://arxiv.org/html/2511.03167v1); export schema and sampler are project decisions. |
 
 The optimizer retains full-body force balance, midpoint integration and its
@@ -118,14 +119,14 @@ tracking and force metrics, checks file hashes, rejects reset/terminal pairs,
 and reconstructs features from native telemetry. It writes `audit.json` and
 an unsigned `review.json` template. It reports missing commands and phases.
 
-James reviews each video with achieved forward/left/yaw motion and six-foot
-contact changes. He records `direction_accepted` and `tripod_accepted`, bound to
-report and video hashes, and sets `reviewer` to `palerdr`. The low-speed static
-screen can admit standing within its 0.025 m/s error bound, so a numeric pass
-alone cannot establish the requested gait. Force metrics describe loads and
-add no new acceptance limits.
+The program lead reviews each video with achieved forward/left/yaw motion and
+six-foot contact changes, then records `direction_accepted` and
+`tripod_accepted`, bound to report and video hashes, and sets `reviewer` to
+`palerdr`. The low-speed static screen can admit standing within its 0.025 m/s
+error bound, so a numeric pass alone cannot establish the requested gait. Force
+metrics describe loads and add no new acceptance limits.
 
-After James accepts the clips, use `dataset export --review ...` with the same
+After the program lead accepts the clips, use `dataset export --review ...` with the same
 replays and a fresh output directory. The exporter retains controls 100:1000
 from phase zero, matching the existing screen's 2 s settling exclusion. It
 keeps the complete trial for acceptance. Each command contributes 900 pairs:
@@ -144,7 +145,7 @@ uv run --locked python -m unittest locomotion.tests.test_amp
 
 Tests check cycle geometry, retained forward feasibility and native feature
 parity. Synthetic dataset tests exercise rejection and export; they supply no
-motion evidence. Native admission and James's motion review remain required.
+motion evidence. Native admission and the program lead's motion review remain required.
 The classical tripod remains a comparison baseline. This bank uses optimized
 motions alone. Downstream five-seed comparisons belong to #37 and do not block
 construction or inspection of this dataset.

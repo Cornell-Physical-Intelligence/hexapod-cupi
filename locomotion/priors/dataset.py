@@ -90,7 +90,7 @@ def validate_trace(trace, command, root_com_local):
 
 
 def motion_diagnostics(trace, command):
-    """Report achieved motion and contacts; James reviews gait and direction."""
+    """Report achieved motion and contacts; the program lead reviews gait and direction."""
     start, stop = WINDOW
     states = trace['amp_state_after'][start:stop, 0]
     velocity = np.column_stack((-states[:, 37], states[:, 36]))
@@ -235,7 +235,7 @@ def inspect(replays, output):
 
 def reviewed_clips(decision):
     if decision.get('schema') != 'hexapod_amp_motion_review_v1' or decision.get('reviewer') != 'palerdr':
-        raise ValueError('James (palerdr) must review this dataset')
+        raise ValueError('The program lead (palerdr) must review this dataset')
     accepted = {r['report_sha256']: r for r in decision['clips']}
     if len(accepted) != len(decision['clips']):
         raise ValueError('Duplicate report in human review')
