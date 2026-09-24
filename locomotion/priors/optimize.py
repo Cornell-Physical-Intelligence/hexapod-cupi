@@ -158,6 +158,7 @@ def build_problem(model, config, *, mu_strategy='monotone'):
     opt = ca.Opti()
     q, v = opt.variable(24, n+1), opt.variable(24, n+1)
     a, f = opt.variable(24, n), opt.variable(18, n)
+    opt.set_linear_scale(f, model.mass*9.81)
     opt.set_initial(q, q0.T); opt.set_initial(v, v0.T)
     opt.set_initial(a, a0.T); opt.set_initial(f, f0.reshape(n, 18).T)
     opt.subject_to(opt.bounded(.075, q[2, :], .13))
@@ -323,6 +324,7 @@ def run(output, config, root=None, *, initial=None, mu_strategy='monotone'):
     declaration = {'schema': 'canonical_full_body_trajectory_optimization_v2',
         'config': asdict(config), 'model': model.identity(), 'casadi_version': ca.__version__,
         'solver_options': solver_options(config, mu_strategy),
+        'variable_scaling': {'contact_force_n': model.mass*9.81},
         'source_files': {p.name: digest(p) for p in sorted(Path(__file__).parent.glob('*.py'))},
         'method': 'Fixed-contact-schedule midpoint inverse dynamics, ZYX floating root, all 19 rigid bodies.',
         'limitations': ['Point contacts omit mesh deformation and impacts.',

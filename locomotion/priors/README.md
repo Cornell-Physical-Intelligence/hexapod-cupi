@@ -92,6 +92,10 @@ You can use `--mu-strategy adaptive` with a restart to select
 [Ipopt's adaptive barrier update](https://github.com/coin-or/Ipopt/blob/stable/3.14/doc/special.dox).
 The default uses its monotone update. Each new input record lists the solver
 options; the objective, physical constraints and convergence tolerances stay fixed.
+The optimizer uses body weight `mass*9.81` as the internal contact-force scale
+through [CasADi `set_linear_scale`](https://github.com/casadi/casadi/wiki/L_2bs).
+This change of variables uses the same body weight as the root-force balance
+and force bound. Saved forces and feasibility checks retain newtons.
 
 Follow [OPERATIONS](../../docs/OPERATIONS.md) for same-source one-robot and
 32-robot standing admission, input packing and the guarded native launcher.
