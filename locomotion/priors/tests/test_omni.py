@@ -5,6 +5,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+from dataclasses import replace
 
 import numpy as np
 import casadi as ca
@@ -12,7 +13,7 @@ import casadi as ca
 from locomotion.priors.commands import motion_cases, command_index
 from locomotion.priors.model import RobotModel
 from locomotion.priors.model import ROOT
-from locomotion.priors.optimize import Config, cycle_state, initial_trajectory, planar_pose, schedule
+from locomotion.priors.optimize import Config, cycle_state, initial_trajectory, planar_pose, schedule, restart_values
 
 
 class OmniTrajectoryTests(unittest.TestCase):
@@ -96,6 +97,23 @@ class OmniTrajectoryTests(unittest.TestCase):
                 check=True, capture_output=True, text=True)
             args = json.loads((output/'binding.json').read_text())['command_args']
             self.assertEqual(args[args.index('--start-phase')+1], '0.5')
+
+    def test_restart_keeps_problem_and_model_identity(self):
+        fixture = ROOT/'locomotion/priors/tests/fixtures/solve/trajectory.npz'
+        config = Config(max_iterations=1200)
+        values = restart_values(fixture, config, self.model)
+        with np.load(fixture) as original:
+            for name, value in values.items():
+                np.testing.assert_array_equal(value, original[name])
+        with self.assertRaisesRegex(ValueError, 'configuration'):
+            restart_values(fixture, replace(config, left_mps=.01), self.model)
+        with tempfile.TemporaryDirectory() as tmp:
+            copy = Path(tmp)/'trajectory.npz'
+            copy.write_bytes(fixture.read_bytes()+b'changed')
+            for name in ('INPUT.json', 'RESULT.json'):
+                (copy.parent/name).write_bytes((fixture.parent/name).read_bytes())
+            with self.assertRaisesRegex(ValueError, 'bytes'):
+                restart_values(copy, config, self.model)
 
 
 if __name__ == '__main__':

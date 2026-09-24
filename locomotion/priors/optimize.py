@@ -286,10 +286,32 @@ def audit(model, config, arrays, desired_feet):
         'scope': 'CPU collocation feasibility; native 400 Hz replay and mesh contacts remain required.'}
 
 
-def run(output, config, root=None):
+def restart_values(path, config, model):
+    """Read a model-bound primal iterate from the same optimization problem."""
+    path = Path(path)
+    declaration = json.loads(path.with_name('INPUT.json').read_text())
+    result = json.loads(path.with_name('RESULT.json').read_text())
+    previous = Config(**declaration['config'])
+    previous.validate()
+    if (declaration['model'] != model.identity()
+            or replace(previous, max_iterations=config.max_iterations) != config
+            or result.get('trajectory_sha256') != digest(path)):
+        raise ValueError('Restart model, problem configuration or trajectory bytes differ')
+    n = round(config.period_s/config.control_dt_s)
+    shapes = {'q': (n+1, 24), 'v': (n+1, 24), 'a': (n, 24), 'force': (n, 18)}
+    with np.load(path, allow_pickle=False) as archive:
+        arrays = {name: archive[name].copy() for name in shapes}
+    if any(arrays[name].shape != shape or not np.isfinite(arrays[name]).all()
+           for name, shape in shapes.items()):
+        raise ValueError('Restart requires complete finite primal variables')
+    return arrays
+
+
+def run(output, config, root=None, *, initial=None):
     output = Path(output)
-    output.mkdir(parents=True, exist_ok=False)
     model = RobotModel() if root is None else RobotModel(root)
+    restart = restart_values(initial, config, model) if initial is not None else None
+    output.mkdir(parents=True, exist_ok=False)
     (output/'source').mkdir()
     for path in sorted(Path(__file__).parent.glob('*.py')):
         shutil.copy2(path, output/'source'/path.name)
@@ -301,10 +323,22 @@ def run(output, config, root=None):
             'The inverse PD relation holds at collocation midpoints; native held-target replay is separate.'],
         'command': list(config.command),
         'stage2_complete': False, 'native_accepted': False}
+    if initial is not None:
+        initial = Path(initial)
+        (output/'initial').mkdir()
+        shutil.copy2(initial, output/'initial/trajectory.npz')
+        for name in ('INPUT.json', 'RESULT.json'):
+            shutil.copy2(initial.with_name(name), output/'initial'/name)
+        declaration['initialization'] = {'kind': 'saved_primal_iterate',
+            'path': str(initial.resolve()), 'files': {
+                p.name: digest(p) for p in sorted((output/'initial').iterdir())}}
     (output/'INPUT.json').write_text(json.dumps(declaration, indent=2)+'\n')
     started = time.monotonic()
     try:
         opt, variables, feet = build_problem(model, config)
+        if restart is not None:
+            for name, values in restart.items():
+                opt.set_initial(variables[name], values.T)
     except (ValueError, RuntimeError) as error:
         result = {'status': 'initialization_failed', 'error': str(error),
                   'audit': {'passed': False}, 'stage2_complete': False}
@@ -340,6 +374,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--bank', action='store_true', help='Solve the frozen 20-command coverage bank')
+    parser.add_argument('--initial-trajectory', type=Path,
+                        help='Restart one command from a saved primal iterate of the same problem')
     parser.add_argument('--forward-mps', type=float, default=.05)
     parser.add_argument('--left-mps', type=float, default=0.)
     parser.add_argument('--yaw-rate-rad-s', type=float, default=0.)
@@ -348,6 +384,8 @@ def main():
     parser.add_argument('--target-curvature-weight', type=float, default=0.)
     parser.add_argument('--root-velocity-weight', type=float, default=0.)
     args = parser.parse_args()
+    if args.bank and args.initial_trajectory is not None:
+        parser.error('A saved primal iterate applies to one command, not a bank')
     config = Config(forward_mps=args.forward_mps,
         left_mps=args.left_mps, yaw_rate_rad_s=args.yaw_rate_rad_s,
         period_s=args.period_s, max_iterations=args.max_iterations,
@@ -367,7 +405,7 @@ def main():
                 'native_admitted': False}, indent=2, allow_nan=False)+'\n')
         return 0 if all(r['result']['status'] == 'solved'
                         and r['result']['audit']['passed'] for r in results) else 1
-    result = run(args.output, config)
+    result = run(args.output, config, initial=args.initial_trajectory)
     return 0 if result['status'] == 'solved' and result['audit']['passed'] else 1
 
 

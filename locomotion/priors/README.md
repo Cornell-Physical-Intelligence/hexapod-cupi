@@ -82,6 +82,12 @@ uv run --locked python -m locomotion.priors.dataset --help
 You give each attempt a fresh directory. `coverage.json` retains solved and
 failed CPU cases. `INPUT.json`, `RESULT.json` and `SHA256.json` bind source,
 model and trajectory bytes. Preserve failed attempts before changing a candidate.
+To reuse a finite failed iterate, pass `--initial-trajectory /absolute/attempt/trajectory.npz`
+to a single-command solve with the same model and problem settings. You can change
+the iteration budget. The optimizer copies the seed and its input/result records
+into the new attempt and records their hashes. It initializes the primal variables
+through [CasADi `Opti.set_initial`](https://github.com/casadi/casadi/blob/main/docs/users_guide/source/opti.rst).
+The solver tolerances and feasibility gates stay the same; the seed grants no admission.
 
 Follow [OPERATIONS](../../docs/OPERATIONS.md) for same-source one-robot and
 32-robot standing admission, input packing and the guarded native launcher.
