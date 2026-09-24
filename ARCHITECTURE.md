@@ -19,7 +19,7 @@ for assignments and [CONTRIBUTING](CONTRIBUTING.md) for the review workflow.
 | --- | --- |
 | R-01 | Accept an operator-drawn survey polygon and explicit exclusions, with a reviewed route before motion. |
 | R-02 | Work within a demonstrated ground, slope, load and operating-duration envelope. Retain flat-ground behavior when adding terrain. |
-| R-03 | Locate the robot with onboard GPS in the open map's local east-north frame and expose a position and heading error bound. A dual-antenna receiver supplies heading at walking speed. Choose RTK or plain GPS before testing; the baseline has no RTK base station. |
+| R-03 | Locate the robot with onboard GPS in the open map's local east-north frame and expose a position and heading error bound. Use plain GPS with no RTK base station or correction service; its error of several metres sets the R-05 margin. A dual-antenna receiver computes heading between its own antennas without external corrections. |
 | R-04 | Learn useful omnidirectional locomotion: signed translation, both yaw directions, combinations, transitions and quiet stops. Hold a steady payload deck at each stop. |
 | R-05 | Keep the full moving footprint inside the approved region or entry corridor and outside exclusions, including the GPS error bound and stopping uncertainty. |
 | R-06 | Support start, pause, resume, abort and hardware emergency stop. Expired control authority or critical sensing failure, including GPS fix loss or an error bound above its limit, must stop mission execution. |
@@ -33,7 +33,9 @@ for assignments and [CONTRIBUTING](CONTRIBUTING.md) for the review workflow.
 James selected a level, hard-surfaced, obstacle-free course for the first survey.
 Agree on dimensions and surface tolerances before its test. Open maps omit small
 and recent obstacles, and the robot cannot detect them. The operator draws every
-known hazard as an exclusion, and the course stays clear of anything else. The final terrain
+known hazard as an exclusion, and the course stays clear of anything else. Plain
+GPS errs by several metres, so the drawn area must stay large enough that stops
+remain after the margin. The final terrain
 envelope remains open. Retain [DAR.png](docs/DAR.png) as the original mission slide.
 
 GeoData owns survey data collection: acquisition, measurement quality, map
