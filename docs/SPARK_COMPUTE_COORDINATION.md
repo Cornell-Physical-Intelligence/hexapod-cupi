@@ -1,12 +1,12 @@
 # Spark compute policy
 
-James authorized full HEXAPOD compute ownership on 14 September 2026, including
+The program lead authorized full HEXAPOD compute ownership on 14 September 2026, including
 stopping competing user workloads after preserving their recovery state.
 One lead owns allocation and cleanup. Read [OPERATIONS](OPERATIONS.md) for the
 procedure and exact host paths. Keep SSH, networking and host services available.
 
 Reserve user compute for HEXAPOD between allocations. Keep the reservation
-marker, scheduler masks, reconstruction entry block and queue lock until James
+marker, scheduler masks, reconstruction entry block and queue lock until the program lead
 releases or changes the reservation. A competing workload request, completed
 job or reconnect does not grant release. Restore recorded prior states after
 an explicit release and identity checks.
@@ -18,7 +18,7 @@ Its recorded SHA-256 is
 Bind changes into a fresh guard between allocations. Preserve old source packs
 and bindings. This repository document is a policy reference, not live telemetry.
 
-James approved the mass-corrected robot selected by
+The program lead approved the mass-corrected robot selected by
 [`robot/active_model.json`](../robot/active_model.json) and the standing →
 walking/stopping → terrain → survey sequence. Authorization does not pass
 admission or behavior gates. Cleanup regression checks do not restart the

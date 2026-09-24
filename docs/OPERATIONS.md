@@ -56,7 +56,7 @@ after terminating the client to catch a creation race. Keep startup/deadline
 bounds and contact-data truncation checks. Use the frozen launcher's
 `--cleanup-only` path after a failed wrapper, then record its separate receipt.
 
-James authorized the lead to stop competing user compute. Before that action,
+The program lead authorized the Spark lead to stop competing user compute. Before that action,
 record the workload identity, source, outputs and restart state. Preserve a
 recovery image for an auto-removed container. Keep SSH, networking, operating
 system services and host health available. Do not signal unidentified jobs.
@@ -85,7 +85,7 @@ start time and command hash before restoration. Private source/unit copies stay
 on Spark. The [prior runbook](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/docs/OPERATIONS.md)
 links earlier recovery receipts and their original scope.
 
-Only James can release or change this reservation. Job completion and reconnects
+Only the program lead can release or change this reservation. Job completion and reconnects
 do not authorize restarting deferred workloads. Restore the recorded prior
 states after an explicit release and identity checks. The historical heartbeat
 remains paused; do not restart it as part of cleanup.

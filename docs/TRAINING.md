@@ -17,7 +17,7 @@ unbuilt; simulation results do not establish hardware calibration.
 
 The current sampler trains translation commands at 0.025 and 0.05 m/s, yaw and
 combined commands, plus quiet intervals. The 0.05 m/s forward benchmark came
-from the experiment configuration; James did not prescribe that speed. Keep
+from the experiment configuration; the program lead did not prescribe that speed. Keep
 benchmark choice separate from navigation requirements.
 
 The learner predicts joint-position offsets. It receives no gait-phase state
@@ -49,7 +49,7 @@ Retain this project's approved motor model and target-change limiter; document
 their differences from that controller with the new task configuration.
 
 Preserve version 1 and its gates. Give changed tasks, models and results fresh
-identities. James approves native steps. Source preparation starts no research
+identities. The program lead approves native steps. Source preparation starts no research
 allocation and supplies no native admission.
 
 | Step | Work and prerequisite | Depends on | Spark |
