@@ -155,6 +155,13 @@ class DatasetTests(unittest.TestCase):
             manifest = dataset.export(list(records), review, root/'complete')
             arrays, _ = dataset.load(root/'complete')
             self.assertEqual(manifest['transitions'], 18000)
+            self.assertEqual(manifest['processing_identity']['source_files']['locomotion/priors/dataset.py'],
+                             dataset.sha(dataset.__file__))
+            altered = copy.deepcopy(manifest); del altered['processing_identity']
+            dataset.save(root/'complete/manifest.json', altered)
+            with self.assertRaisesRegex(ValueError, 'processing source'):
+                dataset.load(root/'complete')
+            dataset.save(root/'complete/manifest.json', manifest)
             pairs = dataset.sample(arrays, 16, np.random.default_rng(1))
             self.assertEqual(pairs.shape, (16, 122))
             changed = copy.deepcopy(list(records.values()))

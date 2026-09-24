@@ -15,6 +15,8 @@ from .commands import command_index, motion_cases
 
 SCHEMA = 'hexapod_amp_dataset_v1'
 WINDOW = (100, 1000)
+PROCESSING_FILES = ('amp.py', 'env_config.py', 'task.py', 'evaluation.py',
+                    'force_metrics.py', 'priors/commands.py', 'priors/dataset.py')
 
 
 def sha(path):
@@ -23,6 +25,12 @@ def sha(path):
 
 def save(path, value):
     Path(path).write_text(json.dumps(value, indent=2, allow_nan=False)+'\n')
+
+
+def processing_identity():
+    root = Path(__file__).resolve().parents[1]
+    return {'numpy_version': np.__version__, 'source_files': {
+        'locomotion/'+name: sha(root/name) for name in PROCESSING_FILES}}
 
 
 def rotations(quaternion):
@@ -207,6 +215,7 @@ def inspect(replays, output):
             failures.append({'path': str(directory), 'error': str(error)})
     coverage = sorted({r['command_index'] for r in records if r['start_phase'] == 0})
     result = {'schema': SCHEMA, 'feature_contract': feature_contract(), 'clips': records,
+        'processing_identity': processing_identity(),
         'failures': failures, 'missing_command_indices': sorted(set(range(len(motion_cases())))-set(coverage)),
         'missing_command_phases': [[i, phase] for i in range(len(motion_cases())) for phase in (0., .5)
             if (i, phase) not in {(r['command_index'], r['start_phase']) for r in records}],
@@ -264,6 +273,7 @@ def export(replays, review, output):
     arrays = {key: np.concatenate([chunk[key] for chunk in chunks]) for key in chunks[0]}
     np.savez_compressed(output/'transitions.npz', **arrays)
     manifest = {'schema': SCHEMA, 'feature_contract': feature_contract(), 'model_sha256': MODEL_SHA256,
+        'processing_identity': processing_identity(),
         'admitted': True, 'reviewer': decision['reviewer'], 'review_sha256': sha(review),
         'review': decision, 'clips': records, 'coverage': motion_cases(), 'window': list(WINDOW),
         'transitions': len(arrays['states']), 'file_sha256': sha(output/'transitions.npz'),
@@ -298,6 +308,13 @@ def load(directory):
             or not np.issubdtype(arrays['clip_id'].dtype, np.integer)
             or not np.issubdtype(arrays['control_index'].dtype, np.integer)):
         raise ValueError('Invalid review, window or clip-index contract')
+    processing = manifest.get('processing_identity', {})
+    sources = processing.get('source_files', {})
+    if (not processing.get('numpy_version')
+            or set(sources) != {'locomotion/'+name for name in PROCESSING_FILES}
+            or any(not isinstance(value, str) or len(value) != 64
+                   or set(value)-set('0123456789abcdef') for value in sources.values())):
+        raise ValueError('Missing dataset processing source identity')
     accepted = reviewed_clips(manifest['review'])
     seen = set()
     for clip in manifest['clips']:

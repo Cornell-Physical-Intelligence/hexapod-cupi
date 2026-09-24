@@ -166,14 +166,16 @@ def build_problem(model, config):
     objective = 0
     motor_targets, torques = [], []
     for k in range(n+1):
-        feet, _ = model.kinematics(q[:, k])
-        for leg in range(6):
-            target = desired_feet[k, leg]
-            if node_stance[k, leg] or np.isclose(phase[k, leg], config.duty_factor):
-                opt.subject_to(feet[:, leg] == target)
-            else:
-                opt.subject_to(feet[2, leg] >= .85*target[2])
-                objective += 100*ca.sumsqr(feet[:, leg]-target)
+        # Use cycle closure for terminal contacts; avoid duplicate equality rows.
+        if k < n:
+            feet, _ = model.kinematics(q[:, k])
+            for leg in range(6):
+                target = desired_feet[k, leg]
+                if node_stance[k, leg] or np.isclose(phase[k, leg], config.duty_factor):
+                    opt.subject_to(feet[:, leg] == target)
+                else:
+                    opt.subject_to(feet[2, leg] >= .85*target[2])
+                    objective += 100*ca.sumsqr(feet[:, leg]-target)
         objective += 10*ca.sumsqr(q[:3, k]-q0[k, :3]) + 2*ca.sumsqr(q[3:6, k]-q0[k, 3:6])
         objective += .02*ca.sumsqr(q[6:, k]-q0[k, 6:])
         heading = q[5, k]

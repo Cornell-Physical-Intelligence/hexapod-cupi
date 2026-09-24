@@ -7,6 +7,7 @@ import sys
 import tempfile
 
 import numpy as np
+import casadi as ca
 
 from locomotion.priors.commands import motion_cases, command_index
 from locomotion.priors.model import RobotModel
@@ -32,10 +33,30 @@ class OmniTrajectoryTests(unittest.TestCase):
                 self.assertEqual(q.shape, (61, 24))
                 np.testing.assert_allclose(q[-1], cycle_state(config, q[0]), atol=1e-12)
                 np.testing.assert_allclose(v[-1], cycle_state(config, v[0], velocity=True), atol=1e-10)
+                rotation, shift = planar_pose(config, config.period_s)
+                np.testing.assert_allclose(feet[-1], feet[0]@rotation.T+shift, atol=1e-12)
                 phase, support = schedule(config, np.arange(61)*.02)
                 for leg in range(6):
                     continuous = support[1:, leg]&support[:-1, leg]&(phase[1:, leg] >= phase[:-1, leg])
                     np.testing.assert_allclose(np.diff(feet[:, leg], axis=0)[continuous], 0., atol=1e-12)
+
+    def test_terminal_contacts_are_implied_by_cycle_closure(self):
+        config = Config(forward_mps=.04, yaw_rate_rad_s=.15)
+        pair = ca.SX.sym('endpoints', 48)
+        initial, terminal = pair[:24], pair[24:]
+        feet = self.model.kinematics(initial)[0]
+        end_feet = self.model.kinematics(terminal)[0]
+        constraints = ca.vertcat(terminal-cycle_state(config, initial), ca.vec(feet), ca.vec(end_feet))
+        function = ca.Function('endpoint_jac', [pair], [ca.jacobian(constraints, pair)])
+        state = np.r_[0., 0., .1, .03, -.02, .04, np.tile([.03, -.28, .42], 6)]
+        end = cycle_state(config, state)
+        rotation, shift = planar_pose(config, config.period_s)
+        np.testing.assert_allclose(np.asarray(self.model.kinematics(end)[0]),
+            rotation@np.asarray(self.model.kinematics(state)[0])+shift[:, None], atol=1e-12)
+        jacobian = np.asarray(function(np.r_[state, end]))
+        self.assertEqual(jacobian.shape, (60, 48))
+        self.assertEqual(np.linalg.matrix_rank(jacobian, tol=1e-10), 42)
+        self.assertEqual(np.linalg.matrix_rank(jacobian[:-18], tol=1e-10), 42)
 
     def test_forward_left_and_turn_axes(self):
         np.testing.assert_allclose(planar_pose(Config(), 1.)[1], [0, -.05, 0])

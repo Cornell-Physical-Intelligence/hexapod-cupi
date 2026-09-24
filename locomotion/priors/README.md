@@ -32,6 +32,11 @@ close root position through `r(T) = R(T) r(0) + p(T)`, add `yaw*T` to root yaw,
 and rotate world linear velocity through `v(T) = R(T) v(0)`. Joint positions,
 joint velocities and Euler rates repeat. Stance feet stay at fixed world
 anchors. This permits repeating body-relative motor targets through a turn.
+Cycle closure also fixes terminal foot positions from the initial contacts.
+The solver omits those 18 duplicate terminal equalities. At the tested pose,
+the endpoint/contact Jacobian has 60 rows with rank 42 before this reduction,
+and 42 rows with rank 42 after it. The tests verify the rigid-transform identity and target closure;
+the feasible motions and audit limits stay the same.
 For turning commands, the new yaw-rate objective uses
 `root_velocity_weight * ((yaw_rate - commanded_yaw) / 0.2)^2`.
 The 0.2 rad/s scale comes from the existing yaw command envelope. Root
@@ -105,6 +110,8 @@ keeps the complete trial for acceptance. Each command contributes 900 pairs:
 18,000 pairs over 20 commands. It never joins clip endpoints. `load()` verifies
 the manifest and file hash; `sample(arrays, batch_size, rng)` returns `[B,122]`
 raw pairs with equal command weights. Half-phase clips remain audit evidence.
+The audit and dataset manifests record processing-code hashes and the NumPy
+version, in addition to each clip's native and optimizer source identities.
 
 You can test the pipeline before native admission:
 

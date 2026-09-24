@@ -618,8 +618,8 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-22T20:05:51.982013+00:00",
-    "source_commit": "e6d9b943b4ab7da62c29e3b01418413ea2a99fd2",
+    "as_of": "2026-09-24T02:22:43.276679+00:00",
+    "source_commit": "b74161b3d9901a27f5d86879a6d191012625483b",
     "architecture": "ARCHITECTURE.md",
     "summary": "Researchers passed the optimized forward-trajectory screen. The tested PPO policies fail walking acceptance, and the paired initialization test found no benefit in its one seed. The prescribed tripod controller passes standing admission and its motion screens on the approved robot. It passes three stop cases; its full qualification remains incomplete. The AMP demonstration tools support omnidirectional optimization and native dataset audits. Dataset admission and the AMP learner remain pending.",
     "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
@@ -969,6 +969,14 @@
         "result": "inconclusive",
         "text": "The reset writes a fixed pose and the controller draws no random numbers, so each second repeat replays its first trace. The six passing stop trials hold three distinct trajectories, and the 25 completed qualification cases hold seven distinct traces. The published forward metrics recompute exactly from the hash-verified traces. The record binds three figures and the forward comparison to their scripts by hash.",
         "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_review_corrections_20260922_001/repeat_identity.json"
+      },
+      {
+        "id": "amp-initial-native-20260923",
+        "title": "Initial optimized yaw, lateral and arc trials pass",
+        "backend": "Isaac Sim; one robot; 1000 controls and 8000 physics samples per clip; optimized controller; human review pending",
+        "result": "passed",
+        "text": "Four first-phase clips pass their native motion and contact screens after fresh one-robot and 32-robot standing admission. The shared 61-value features match raw native measurements within 3.58e-7. Full command/phase coverage and human motion review remain pending; these clips supply no AMP learning result.",
+        "source": "site/assets/amp_initial_native_20260923_001/evidence.json"
       }
     ]
   },
