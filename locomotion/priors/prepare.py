@@ -16,14 +16,18 @@ def write(path, data):
     path.write_text(json.dumps(data, indent=2, allow_nan=False)+'\n')
 
 
-def prepare(trajectory_directory, output, remote_root, root=ROOT, *, inputs=None):
+def prepare(trajectory_directory, output, remote_root, root=ROOT, *, inputs=None, start_phase=0.):
+    if start_phase not in (0., .5):
+        raise ValueError('Replay start phase must be 0 or 0.5')
     root, trajectory_directory, output = map(Path, (root, trajectory_directory, output))
     remote_root = Path(remote_root)
     allowed = Path('/home/orionh/HEXAPOD_runs/restart_20260914')
     if not remote_root.is_absolute() or allowed not in remote_root.parents or '..' in remote_root.parts:
         raise ValueError('Fresh canonical restart remote root required')
     trajectory = trajectory_directory/'trajectory.npz'
-    validate_trajectory(trajectory, digest(trajectory), MODEL_SHA256)
+    declaration, _ = validate_trajectory(trajectory, digest(trajectory), MODEL_SHA256)
+    if start_phase == .5 and round(declaration['config']['period_s']/.02) % 2:
+        raise ValueError('Half-cycle replay requires an even number of controls')
     binding = prepare_kernel(output, remote_root, mode='replay', root=root, inputs=inputs)
     optimized = output/'trajectory'
     optimized.mkdir()
@@ -32,7 +36,7 @@ def prepare(trajectory_directory, output, remote_root, root=ROOT, *, inputs=None
         binding['input_files'][str(remote_root/'trajectory'/name)] = digest(optimized/name)
     binding['extra_mounts'].append([str(remote_root/'trajectory'), '/realized_prior'])
     binding['command_args'] += ['--trajectory', '/realized_prior/trajectory.npz',
-        '--trajectory-sha256', digest(trajectory)]
+        '--trajectory-sha256', digest(trajectory), '--start-phase', str(start_phase)]
     binding['max_seconds'] = 1800
     deadline = binding['command_args'].index('--max-wall-seconds')+1
     binding['command_args'][deadline] = '1500'
@@ -52,8 +56,10 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--remote-root', required=True)
     parser.add_argument('--inputs', type=Path, required=True)
+    parser.add_argument('--start-phase', type=float, choices=[0., .5], default=0.)
     args = parser.parse_args()
-    binding = prepare(args.trajectory_directory, args.output, args.remote_root, inputs=args.inputs)
+    binding = prepare(args.trajectory_directory, args.output, args.remote_root,
+                      inputs=args.inputs, start_phase=args.start_phase)
     print(json.dumps({'source': binding['source'], 'output': binding['output'],
                       'source_freeze_sha256': binding['source_freeze_sha256']}))
 

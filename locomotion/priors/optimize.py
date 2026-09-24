@@ -1,8 +1,8 @@
-"""Optimize a periodic forward tripod cycle with full-body inverse dynamics."""
+"""Optimize a periodic tripod cycle with full-body inverse dynamics."""
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import json
 from pathlib import Path
 import shutil
@@ -26,15 +26,24 @@ class Config:
     max_iterations: int = 600
     target_curvature_weight: float = 0.
     root_velocity_weight: float = 0.
+    left_mps: float = 0.
+    yaw_rate_rad_s: float = 0.
+
+    @property
+    def command(self):
+        return (self.forward_mps, self.left_mps, self.yaw_rate_rad_s)
 
     def validate(self):
         values = [self.period_s, self.control_dt_s, self.forward_mps,
                   self.duty_factor, self.lift_m, self.friction,
-                  self.target_curvature_weight, self.root_velocity_weight]
+                  self.target_curvature_weight, self.root_velocity_weight,
+                  self.left_mps, self.yaw_rate_rad_s]
         if not np.isfinite(values).all() or self.control_dt_s != .02:
             raise ValueError("Finite configuration and unchanged 50 Hz targets required")
-        if not .4 <= self.period_s <= 3. or not 0 <= self.forward_mps <= .1:
-            raise ValueError("Forward experiment requires period 0.4..3 s and speed 0..0.1 m/s")
+        if (not .4 <= self.period_s <= 3.
+                or np.hypot(self.forward_mps, self.left_mps) > .1000000001
+                or abs(self.yaw_rate_rad_s) > .2):
+            raise ValueError("Motion requires period 0.4..3 s, speed <=0.1 m/s and yaw <=0.2 rad/s")
         if not .5 <= self.duty_factor <= .8 or not .005 <= self.lift_m <= .03:
             raise ValueError("Invalid stance fraction or swing clearance")
         if not 0 < self.friction <= 1. or type(self.max_iterations) is not int or self.max_iterations < 1:
@@ -50,13 +59,39 @@ def schedule(config, times):
     return phase, phase < config.duty_factor
 
 
+def planar_pose(config, time_s):
+    """Integrate a constant body command in native +X-left, -Y-forward axes."""
+    angle = config.yaw_rate_rad_s*time_s
+    cosine, sine = np.cos(angle), np.sin(angle)
+    rotation = np.array([[cosine, -sine, 0.], [sine, cosine, 0.], [0., 0., 1.]])
+    velocity = np.array([config.left_mps, -config.forward_mps, 0.])
+    tangent = np.array([-velocity[1], velocity[0], 0.])
+    displacement = time_s*(np.sinc(angle/np.pi)*velocity
+        + .5*angle*np.sinc(angle/(2*np.pi))**2*tangent)
+    return rotation, displacement
+
+
+def cycle_state(config, state, *, reverse=False, velocity=False):
+    """Transform a root state between adjacent cycles; joint states repeat."""
+    rotation, shift = planar_pose(config, config.period_s)
+    result = state*1.
+    if reverse:
+        result[:3] = rotation.T@(state[:3] if velocity else state[:3]-shift)
+    else:
+        result[:3] = rotation@state[:3] + (0 if velocity else shift)
+    if not velocity:
+        result[5] = state[5] + (-1 if reverse else 1)*config.yaw_rate_rad_s*config.period_s
+    return result
+
+
 def initial_trajectory(model, config):
     n = round(config.period_s/config.control_dt_s)
     times = np.arange(n+1)*config.control_dt_s
     phase, stance = schedule(config, times)
-    velocity = np.array([0., -config.forward_mps, 0.])
+    velocity = np.array([config.left_mps, -config.forward_mps, 0.])
     q = np.tile(np.r_[0, 0, .09780231400684256, 0, 0, 0, NEUTRAL], (n+1, 1))
-    q[:, :3] += times[:, None]*velocity
+    q[:, :3] += np.array([planar_pose(config, t)[1] for t in times])
+    q[:, 5] = times*config.yaw_rate_rad_s
     nominal = np.asarray(model.kinematics(q[0])[0]).T
     nominal[:, 2] = 0
     feet = np.empty((n+1, 6, 3))
@@ -75,6 +110,15 @@ def initial_trajectory(model, config):
                     -(1-config.duty_factor)*u+3*u*u-2*u*u*u)*velocity
                 height = config.lift_m*np.sin(np.pi*u)**2
             feet[k, leg] = nominal[leg] + times[k]*velocity + displacement
+            if config.yaw_rate_rad_s:
+                center = times[k] + config.period_s*(config.duty_factor/2-ph)
+                rotation, origin = planar_pose(config, center)
+                feet[k, leg] = rotation@nominal[leg]+origin
+                if not stance[k, leg]:
+                    next_rotation, next_origin = planar_pose(config, center+config.period_s)
+                    blend = 3*u*u-2*u*u*u
+                    feet[k, leg] = ((1-blend)*feet[k, leg]
+                        + blend*(next_rotation@nominal[leg]+next_origin))
             feet[k, leg, 2] = height
         def pack(joint):
             return np.r_[q[k, :6], joint]
@@ -87,10 +131,10 @@ def initial_trajectory(model, config):
         if np.max(abs(fitted.fun)) > 1e-5:
             raise ValueError("Initial foot path lies outside the joint workspace")
         q[k, 6:] = fitted.x
-    # Periodic finite differences include the translated next cycle.
-    displacement = q[-1]-q[0]
-    q[-1, 2:] = q[0, 2:]
-    extended = np.vstack([q[-2]-displacement, q, q[1]+displacement])
+    # Include the rigid transform across each cycle boundary.
+    q[-1] = cycle_state(config, q[0])
+    extended = np.vstack([cycle_state(config, q[-2], reverse=True), q,
+                          cycle_state(config, q[1])])
     v = (extended[2:]-extended[:-2])/(2*config.control_dt_s)
     a = np.diff(v, axis=0)/config.control_dt_s
     _, force_stance = schedule(config, times[:-1]+config.control_dt_s/2)
@@ -109,15 +153,14 @@ def build_problem(model, config):
     opt.set_initial(q, q0.T); opt.set_initial(v, v0.T)
     opt.set_initial(a, a0.T); opt.set_initial(f, f0.reshape(n, 18).T)
     opt.subject_to(opt.bounded(.075, q[2, :], .13))
-    opt.subject_to(opt.bounded(-.15, q[3:6, :], .15))
+    opt.subject_to(opt.bounded(-.15, q[3:6, :]-q0[:, 3:6].T, .15))
     opt.subject_to(opt.bounded(ca.repmat(ca.DM(model.lower+.005), 1, n+1), q[6:, :],
         ca.repmat(ca.DM(model.upper-.005), 1, n+1)))
     opt.subject_to(opt.bounded(-8., v[6:, :], 8.))
     opt.subject_to(opt.bounded(-1., v[:6, :], 1.))
     opt.subject_to(q[:2, 0] == 0)
-    shift = np.zeros(24); shift[1] = -config.forward_mps*config.period_s
-    opt.subject_to(q[:, -1] == q[:, 0] + shift)
-    opt.subject_to(v[:, -1] == v[:, 0])
+    opt.subject_to(q[:, -1] == cycle_state(config, q[:, 0]))
+    opt.subject_to(v[:, -1] == cycle_state(config, v[:, 0], velocity=True))
     phase, node_stance = schedule(config, np.arange(n+1)*dt)
     _, force_stance = schedule(config, (np.arange(n)+.5)*dt)
     objective = 0
@@ -131,10 +174,17 @@ def build_problem(model, config):
             else:
                 opt.subject_to(feet[2, leg] >= .85*target[2])
                 objective += 100*ca.sumsqr(feet[:, leg]-target)
-        objective += 10*ca.sumsqr(q[:3, k]-q0[k, :3]) + 2*ca.sumsqr(q[3:6, k])
+        objective += 10*ca.sumsqr(q[:3, k]-q0[k, :3]) + 2*ca.sumsqr(q[3:6, k]-q0[k, 3:6])
         objective += .02*ca.sumsqr(q[6:, k]-q0[k, 6:])
-        objective += config.root_velocity_weight*ca.sumsqr(
-            (v[:3, k]-ca.DM([0., -config.forward_mps, 0.]))/.05)
+        heading = q[5, k]
+        desired_velocity = ca.vertcat(
+            config.left_mps*ca.cos(heading)+config.forward_mps*ca.sin(heading),
+            config.left_mps*ca.sin(heading)-config.forward_mps*ca.cos(heading), 0.)
+        if not config.yaw_rate_rad_s:
+            desired_velocity = ca.DM([config.left_mps, -config.forward_mps, 0.])
+        objective += config.root_velocity_weight*ca.sumsqr((v[:3, k]-desired_velocity)/.05)
+        if config.yaw_rate_rad_s:
+            objective += config.root_velocity_weight*((v[5, k]-config.yaw_rate_rad_s)/.2)**2
         if k == n:
             continue
         opt.subject_to(v[:, k+1] == v[:, k]+dt*a[:, k])
@@ -199,13 +249,14 @@ def audit(model, config, arrays, desired_feet):
         contact_errors.extend((feet[stance[k]]-desired_feet[k, stance[k]]).ravel())
         swing_clearance.extend(feet[~stance[k], 2]-.85*desired_feet[k, ~stance[k], 2])
     torque = np.array(torques)
-    shift = np.zeros(24); shift[1] = -config.forward_mps*config.period_s
+    orientation_reference = np.zeros_like(q[:, 3:6])
+    orientation_reference[:, 2] = np.arange(n+1)*dt*config.yaw_rate_rad_s
     violations = {
         'root_force_moment': float(np.max(np.abs(residuals))),
         'position_integration': float(np.max(abs(np.diff(q, axis=0)-dt*(v[:-1]+v[1:])/2))),
         'velocity_integration': float(np.max(abs(np.diff(v, axis=0)-dt*a))),
-        'periodic_position': float(np.max(abs(q[-1]-q[0]-shift))),
-        'periodic_velocity': float(np.max(abs(v[-1]-v[0]))),
+        'periodic_position': float(np.max(abs(q[-1]-cycle_state(config, q[0])))),
+        'periodic_velocity': float(np.max(abs(v[-1]-cycle_state(config, v[0], velocity=True)))),
         'stance_position': float(np.max(np.abs(contact_errors))),
         'swing_clearance': float(max(0, -min(swing_clearance, default=0))),
         'swing_force': float(np.max(abs(forces[~force_stance]), initial=0)),
@@ -218,7 +269,7 @@ def audit(model, config, arrays, desired_feet):
         'joint_speed': float(max(0, abs(v[:, 6:]).max()-8.)),
         'root_speed': float(max(0, abs(v[:, :6]).max()-1.)),
         'root_height': float(max(0, .075-q[:, 2].min(), q[:, 2].max()-.13)),
-        'root_orientation': float(max(0, abs(q[:, 3:6]).max()-.15)),
+        'root_orientation': float(max(0, abs(q[:, 3:6]-orientation_reference).max()-.15)),
         'normal_force_cap': float(max(0, forces[:, :, 2].max()-model.mass*9.81)),
         'cyclic_target_slew': float(max(0, abs(np.roll(target, -1, axis=0)-target).max()-.04)),
         'target_range': float(max(0, abs(target-NEUTRAL).max()-.35)),
@@ -240,16 +291,23 @@ def run(output, config, root=None):
     (output/'source').mkdir()
     for path in sorted(Path(__file__).parent.glob('*.py')):
         shutil.copy2(path, output/'source'/path.name)
-    declaration = {'schema': 'canonical_full_body_trajectory_optimization_v1',
+    declaration = {'schema': 'canonical_full_body_trajectory_optimization_v2',
         'config': asdict(config), 'model': model.identity(), 'casadi_version': ca.__version__,
         'source_files': {p.name: digest(p) for p in sorted(Path(__file__).parent.glob('*.py'))},
         'method': 'Fixed-contact-schedule midpoint inverse dynamics, ZYX floating root, all 19 rigid bodies.',
         'limitations': ['Point contacts omit mesh deformation and impacts.',
             'The inverse PD relation holds at collocation midpoints; native held-target replay is separate.'],
+        'command': list(config.command),
         'stage2_complete': False, 'native_accepted': False}
     (output/'INPUT.json').write_text(json.dumps(declaration, indent=2)+'\n')
     started = time.monotonic()
-    opt, variables, feet = build_problem(model, config)
+    try:
+        opt, variables, feet = build_problem(model, config)
+    except (ValueError, RuntimeError) as error:
+        result = {'status': 'initialization_failed', 'error': str(error),
+                  'audit': {'passed': False}, 'stage2_complete': False}
+        (output/'RESULT.json').write_text(json.dumps(result, indent=2)+'\n')
+        return result
     try:
         solution = opt.solve()
         status = 'solved'
@@ -261,9 +319,13 @@ def run(output, config, root=None):
     np.savez_compressed(output/'trajectory.npz', **arrays)
     (output/'SOLVER.json').write_text(json.dumps({'status': status,
         'return_status': opt.stats()['return_status'], 'iterations': opt.stats()['iter_count']}, indent=2)+'\n')
+    try:
+        checked = audit(model, config, arrays, feet)
+    except ValueError as error:
+        checked = {'passed': False, 'error': str(error)}
     result = {'status': status, 'solver_status': opt.stats()['return_status'],
               'solver_iterations': opt.stats()['iter_count'],
-              'wall_seconds': time.monotonic()-started, 'audit': audit(model, config, arrays, feet),
+              'wall_seconds': time.monotonic()-started, 'audit': checked,
               'trajectory_sha256': digest(output/'trajectory.npz'), 'stage2_complete': False}
     (output/'RESULT.json').write_text(json.dumps(result, indent=2, allow_nan=False)+'\n')
     (output/'SHA256.json').write_text(json.dumps({str(p.relative_to(output)): digest(p) for p in sorted(output.rglob('*'))
@@ -275,15 +337,35 @@ def run(output, config, root=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--bank', action='store_true', help='Solve the frozen 20-command coverage bank')
     parser.add_argument('--forward-mps', type=float, default=.05)
+    parser.add_argument('--left-mps', type=float, default=0.)
+    parser.add_argument('--yaw-rate-rad-s', type=float, default=0.)
     parser.add_argument('--period-s', type=float, default=1.2)
     parser.add_argument('--max-iterations', type=int, default=600)
     parser.add_argument('--target-curvature-weight', type=float, default=0.)
     parser.add_argument('--root-velocity-weight', type=float, default=0.)
     args = parser.parse_args()
-    result = run(args.output, Config(forward_mps=args.forward_mps,
+    config = Config(forward_mps=args.forward_mps,
+        left_mps=args.left_mps, yaw_rate_rad_s=args.yaw_rate_rad_s,
         period_s=args.period_s, max_iterations=args.max_iterations,
-        target_curvature_weight=args.target_curvature_weight, root_velocity_weight=args.root_velocity_weight))
+        target_curvature_weight=args.target_curvature_weight, root_velocity_weight=args.root_velocity_weight)
+    if args.bank:
+        from .commands import motion_cases
+        args.output.mkdir(parents=True, exist_ok=False)
+        results = []
+        for case in motion_cases():
+            forward, left, yaw = case['command']
+            directory = f'command_{len(results):02d}'
+            result = run(args.output/directory, replace(config, forward_mps=forward,
+                         left_mps=left, yaw_rate_rad_s=yaw))
+            results.append({**case, 'path': directory, 'result': result})
+            (args.output/'coverage.json').write_text(json.dumps({
+                'schema': 'hexapod_amp_optimization_bank_v1', 'cases': results,
+                'native_admitted': False}, indent=2, allow_nan=False)+'\n')
+        return 0 if all(r['result']['status'] == 'solved'
+                        and r['result']['audit']['passed'] for r in results) else 1
+    result = run(args.output, config)
     return 0 if result['status'] == 'solved' and result['audit']['passed'] else 1
 
 

@@ -62,7 +62,9 @@ binding. Navigation can then consume velocity commands and stopping status.
 The navigation example consumes shared commands. Historical runtime bindings
 remain in Git until a canonical replacement receives its own parity evidence.
 
-The optional trajectory optimizer and native replay live in `priors/`. Package
+The [AMP demonstration pipeline](priors/README.md) supplies an optimizer and
+native replay with a reviewed dataset exporter. `amp.py` preserves the shared
+61-value feature contract. Package
 canonical inputs with `python -m locomotion.inputs pack --help`. Use the
 [archive guide](../docs/PIPELINE_LINEAGES.md) for historical checkpoints and
 source packs; preserve their original identities.
@@ -74,7 +76,8 @@ You can evaluate the Zhang et al. sinusoidal tripod controller with
 the equations and contact state; [`tripod_config.py`](tripod_config.py) owns
 parameters. You use `prepare --mode tripod --tripod-adaptation stop_stride`
 with matching standing admission. [TRAINING](../docs/TRAINING.md#tripod-baseline)
-uses this controller as an AMP demonstration source and baseline.
+keeps this controller as a comparison baseline. Issue #36 uses optimized
+demonstrations for its motion bank.
 
 You reproduce the prescribed controller in [Zhang et al. (2024), §§3.3.1,
 4.1–4.2](https://www.frontiersin.org/journals/robotics-and-ai/articles/10.3389/frobt.2024.1426269/full).

@@ -5,10 +5,11 @@ work. Claude Code and other coding agents read this file.
 
 ## Context and ownership
 
-Read [README](README.md), then the affected package guide. Use
-[ARCHITECTURE](ARCHITECTURE.md) for requirements and [CONTRIBUTING](CONTRIBUTING.md)
-for checks and publication. Follow the source boundaries in README; navigation
-and mission must not import simulation.
+Read [README](README.md), [CONTRIBUTING](CONTRIBUTING.md), then the affected
+package guide before creating a branch or changing files. Follow CONTRIBUTING
+for branch names, checks and publication. Use [ARCHITECTURE](ARCHITECTURE.md)
+for requirements. Follow the source boundaries in README; navigation and
+mission must not import simulation.
 
 Use explicit search paths. Read old records to answer a named historical question.
 Keep procedures in existing guides, assignments in GitHub issues, and design

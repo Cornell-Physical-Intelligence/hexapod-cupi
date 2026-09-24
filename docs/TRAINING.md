@@ -56,7 +56,7 @@ allocation and supplies no native admission.
 | --- | --- | --- | --- |
 | 1. Reward v2 | Audit [Table I, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3), for formulas, units, signs and weights before implementing a versioned paper reward with CPU tests. Resolve its printed positive tracking exponent against the intended decreasing reward. Define command-scaled tracking as a separate adaptation; resolve the stationary-reward criterion below. | None | No |
 | 2. Throughput profile | Measure physics, contact, observation and learner cost plus memory across replica counts. The current guards cap replicas at 128 and updates at 2,000; the paper uses 4,096 robots. Extend scale through a named configuration and isolation tests. Change the 153 SDF colliders only if measurements justify an asset variant, then repeat one-robot and batch admission. | None | Yes |
-| 3. Omni motion dataset | Extend [`optimize.py`](../locomotion/priors/optimize.py) from a forward cycle to eight bearings, both yaw directions and the arcs in `command_bank`. Require alternating tripod demonstrations on the approved URDF, with a consistent gait cycle across directions ([§III-A–B, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3)). After dataset review, accepted tripod transitions can supply forward and yaw demonstrations ([tripod baseline](#tripod-baseline)). | None | No |
+| 3. Omni motion dataset | Use the [optimizer and dataset pipeline](../locomotion/priors/README.md) for eight bearings, both yaw directions and the arcs in `command_bank`. Require alternating tripod demonstrations on the approved URDF, with a consistent cycle across directions ([§III-A–B, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3)). Issue #36 uses optimized motions alone; native and human review determine admission. | None | No |
 | 4. Native motion validation | Replay each motion with [`replay_native.py`](../locomotion/priors/replay_native.py) and require its matching screen before dataset admission. Construct AMP states from native replay. Match feature order, frames, units and the 20 ms interval; exclude terminal-to-reset pairs. | 3 | Yes |
 | 5. Flat AMP pilot | Resolve the gradient-penalty ambiguity below, then implement the least-squares discriminator and style reward from Eqs. (1)–(2) with the current [256, 256, 128] MLP actor and critic. Update PPO and the discriminator together ([§IV-B, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). Run on flat ground and compare with the tripod baseline through the same scorer and force metrics; defer the final reward comparison to Step 9. Use the 13 learning probes as diagnostics and the full gate for qualification. | 1, 4; 2 for full scale | Yes |
 | 6. Network architecture | Implement Table III's velocity estimator, memory encoder over five proprioception frames, low-level actor, privileged encoder and critic. Train the estimator with supervised simulation velocity labels ([§IV-A–B; Table III, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). Supply the full 42-value privileged state, including base height and perturbations, plus collision states ([§III, p. 2](https://arxiv.org/pdf/2511.03167v1#page=2)). Test shapes and gradient paths; keep privileged inputs out of the actor. Add the terrain encoder with Step 8. Repeat the Step 5 pilot with these networks before Step 7. | None to build; 5 to compare | No |
@@ -112,18 +112,19 @@ record the chosen formula and its source.
 The authors call the AMP state 61 values in
 [§III-A, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3), but their foot-height description
 accounts for fewer values. The retained kernel uses six 3D foot positions.
-Declare that interpretation before discriminator training and verify the same features on
-native demonstrations and policy rollouts. The optimizer's point contacts omit
+James retained that 61-value interpretation for issue #36.
+[`amp.py`](../locomotion/amp.py) specifies the order, frames and units; the dataset
+audit verifies the shared extractor against native telemetry before admission. The optimizer's point contacts omit
 mesh patches and impacts, so native replay remains a prerequisite.
 
 ## Tripod baseline
 
 The prescribed [tripod controller](../locomotion/README.md#prescribed-tripod-controller)
-reproduces Zhang et al. on the approved robot. After dataset review, its accepted
-native transitions can supply forward demonstrations up to 0.10 m/s and yaw
-demonstrations at ±0.20 rad/s for Step 3. Each tripod trial records the 61-value
-AMP state per control. Its screens and force metrics give Step 5 a baseline
-through the same scorer.
+reproduces Zhang et al. on the approved robot. It covers forward commands up
+to 0.10 m/s and yaw commands at ±0.20 rad/s; it does not cover the full
+omnidirectional bank. Each trial records the 61-value AMP state per control.
+Issue #36 uses the optimizer for its demonstrations. The tripod screens and
+force metrics give Step 5 a comparison through the same scorer.
 
 ## Foundation commands
 
