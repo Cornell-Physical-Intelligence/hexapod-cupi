@@ -641,14 +641,22 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-24T05:20:21.048729+00:00",
-    "source_commit": "3dcefc3fe6c69b696c860b27439fbd863410053e",
+    "as_of": "2026-09-24T19:11:59+00:00",
+    "source_commit": "d70dacd4fe74f682c08c4ad636460c4b7c7a78b2",
     "architecture": "ARCHITECTURE.md",
-    "summary": "The optimized motion-prior bank covers 20 commands in 40 native simulation clips on the approved detailed robot. All selected clips pass numerical screens; human gait review, dataset admission and AMP learning remain pending. Stage 2 walking and stopping qualification is incomplete.",
+    "summary": "The optimized motion-prior bank covers 20 commands in 40 native simulation clips on the approved detailed robot. All selected clips pass numerical screens. The program lead accepted direction and alternating-tripod appearance in all 40 clips, which admits the 18000-pair training dataset. AMP learning under issue #37 remains pending. Stage 2 walking and stopping qualification is incomplete.",
     "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
     "facts": [
+      {
+        "id": "amp-dataset-admitted-20260924",
+        "title": "The program lead admits the AMP demonstration dataset",
+        "backend": "Isaac Sim replays on the approved direct-drive model; 20 phase-zero commands; controls 100:1000; raw 61-value state pairs",
+        "result": "passed",
+        "text": "The program lead (palerdr) reviewed all 40 native clips with the team lead and accepted direction and alternating-tripod appearance in each clip. The hash-bound review admits 18000 transition pairs, 900 per command, and CI verifies the committed bytes with dataset check. This acceptance covers dataset admission; Stage 2 qualification stays incomplete. AMP learning under issue #37 has not run.",
+        "source": "locomotion/priors/datasets/amp_demonstrations_001/manifest.json"
+      },
       {
         "id": "amp-native-bank-20260924",
         "title": "We complete numeric coverage for the AMP demonstration bank",
