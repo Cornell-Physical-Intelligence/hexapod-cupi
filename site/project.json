@@ -618,10 +618,10 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-24T04:16:43.842802+00:00",
-    "source_commit": "e9af2f8bdccecca7c2c4aefe83639d0ac1094598",
+    "as_of": "2026-09-24T05:21:35.499011+00:00",
+    "source_commit": "3dcefc3fe6c69b696c860b27439fbd863410053e",
     "architecture": "ARCHITECTURE.md",
-    "summary": "Researchers passed the optimized forward-trajectory screen. The tested PPO policies fail walking acceptance, and the paired initialization test found no benefit in its one seed. The prescribed tripod controller passes standing admission and its motion screens on the approved robot. It passes three stop cases; its full qualification remains incomplete. The AMP demonstration tools support omnidirectional optimization and native dataset audits. Dataset admission and the AMP learner remain pending.",
+    "summary": "Researchers passed the optimized forward-trajectory screen. The tested PPO policies fail walking acceptance, and the paired initialization test found no benefit in its one seed. The prescribed tripod controller passes standing admission and its motion screens on the approved robot. It passes three stop cases; its full qualification remains incomplete. You can review 40 passing native clips across 20 optimized motion commands. James must accept the direction and tripod motion before dataset admission. AMP learning remains pending.",
     "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
@@ -985,6 +985,14 @@
         "result": "passed",
         "text": "The original forward-right trial fails one startup speed check at 0.025 seconds. A replacement trajectory with a one-second target ramp passes both start phases under the same native gates. The archive retains the failed capture. Full bank coverage and human motion review remain pending.",
         "source": "site/assets/amp_startup_20260924_001/evidence.json"
+      },
+      {
+        "id": "amp-native-bank-20260924",
+        "title": "We complete numeric coverage for the AMP demonstration bank",
+        "backend": "Isaac Sim; approved direct-drive model; 20 optimized commands and two start phases; 1000 controls and 8000 physics samples per clip",
+        "result": "passed",
+        "text": "All 40 selected clips pass the unchanged native screens and feature audit. Mean speed along the requested translation reaches 98.47\u201399.87% of the command; mean yaw reaches 101.30\u2013102.17%. Feature reconstruction error stays below 3.58e-7. The archive retains two failed direct starts. James\u2019s direction and tripod review remains pending; the 18000-pair training export and AMP learning have not run.",
+        "source": "site/assets/amp_native_bank_20260924_001/evidence.json"
       }
     ]
   },
