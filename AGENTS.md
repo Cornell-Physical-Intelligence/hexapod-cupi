@@ -10,6 +10,10 @@ Read [README](README.md), then the affected package guide. Use
 for checks and publication. Follow the source boundaries in README; navigation
 and mission must not import simulation.
 
+Several contributors run agents in this repository. The program lead is GitHub
+user `palerdr`; the guides assign approvals to that role. Do not assume the user
+is the program lead, and do not address the user by a name from repository files.
+
 Use explicit search paths. Read old records to answer a named historical question.
 Keep procedures in existing guides, assignments in GitHub issues, and design
 review in PRs. Do not add another plan, handoff, decision log or task queue.
@@ -30,7 +34,7 @@ Stage 2 requires direction, transition, stop, torque, contact and visual
 acceptance. Native evaluations must record ground-contact force and motor torque
 before another optimizer/PPO sequence; these measurements add no acceptance limits.
 
-James removed the Fable review requirement. Do not start Fable consultations.
+The program lead removed the Fable review requirement. Do not start Fable consultations.
 Delegate bounded independent work only when the user authorizes delegation.
 
 ## Compute and publication

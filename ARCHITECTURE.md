@@ -30,7 +30,7 @@ for assignments and [CONTRIBUTING](CONTRIBUTING.md) for the review workflow.
 | R-11 | Preserve reproducible releases, model-specific contracts, unchanged historical acceptance gates and failed-attempt evidence. |
 | R-12 | Give each work packet an owner, human reviewer and independently reproducible outcome. |
 
-James selected a level, hard-surfaced, obstacle-free course for the first survey.
+The program lead selected a level, hard-surfaced, obstacle-free course for the first survey.
 Agree on dimensions and surface tolerances before its test. Open maps omit small
 and recent obstacles, and the robot cannot detect them. The operator draws every
 known hazard as an exclusion, and the course stays clear of anything else. Plain
@@ -63,7 +63,7 @@ You train direct-position PPO in simulation with explicit actuator dynamics.
 paper-reproduction order. A new source allocation needs matching one-robot and
 intended-batch standing admission. A historical admission applies to its exact
 source and inputs. Retain the 0.040 rad / 20 ms comparison limiter and existing
-numerical gates. James must accept gait appearance after the motion tests pass.
+numerical gates. The program lead must accept gait appearance after the motion tests pass.
 
 Use the [RS05 review](docs/RS05_SPEC_REVIEW.md) to distinguish catalog ratings
 from provisional simulation limits. Measure voltage, latency, thermal response
@@ -129,7 +129,7 @@ shared contracts, including fixtures and migration behavior.
 | Q-02 | Survey lead + payload owner | Stop spacing and overlap that the mounted sensor needs. GeoData owns the coverage denominator, permitted gaps and reference survey. |
 | Q-03 | Survey lead | GPS position and heading error and map alignment against surveyed control points; behavior during fix loss and recovery. |
 | Q-04 | Platform lead + mechanical/electrical partners | Loaded mass/COM, joint/motor mapping, bus voltage, actuator response/temperature, stopping distance, permitted terrain and restrained emergency-stop behavior. |
-| Q-05 | Both leads; James owns budget | Assembly readiness, cost, power/endurance, full-load compute deadlines, sensor data/storage rates and measured operator-link behavior. |
+| Q-05 | Both leads; the program lead owns budget | Assembly readiness, cost, power/endurance, full-load compute deadlines, sensor data/storage rates and measured operator-link behavior. |
 
 Bind each qualification profile to values, units, measurement methods, course,
 assembly/payload, evidence and acceptance owner. Keep unknown limits open until
@@ -150,7 +150,7 @@ Declare limits before experiments; preserve existing gates after a failure.
 GeoData owns survey data collection, and this project schedules no M1 work. The
 approved fixture and limits below remain as a record.
 
-James approved this as the first mapping milestone. Reuse the existing
+The program lead approved this as the first mapping milestone. Reuse the existing
 [approximate Mid-360 model](mission/sensors/mid360_pattern.py) in a
 sensor-only scene with a fixed sensor, known floor and calibration wall. Export
 one scan's points and sensor pose, reopen it independently, and measure geometric
@@ -160,7 +160,7 @@ The wall is a calibration reference, not an obstacle-traversal requirement.
 
 This software milestone can proceed independently of robot standing admission.
 Robot-body occlusion, moving acquisition and physical sensing are later scopes.
-James approved this fixed scene for both runs. Use local +X left, -Y forward,
+The program lead approved this fixed scene for both runs. Use local +X left, -Y forward,
 +Z up, with distances in metres:
 
 | Fixture item | Frozen setting |
@@ -175,7 +175,7 @@ The 0.25 m optical height is a test-fixture choice. Physical mounting remains
 separate. These fixed seeds identify this regression fixture; they do not
 establish performance across randomized runs.
 
-James approved the following M1 acceptance limits:
+The program lead approved the following M1 acceptance limits:
 
 | Check | Pass condition |
 | --- | --- |
@@ -188,14 +188,14 @@ Retain the lead's existing noise configuration for the noisy run, including
 the two runs separately and preserve raw observations. Freeze the scene and
 random seed before execution; do not tune noise or thresholds to pass.
 
-James approved the scope, fixture and limits. [Mapping issue #19](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/19)
+The program lead approved the scope, fixture and limits. [Mapping issue #19](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/19)
 tracked M1 until its closure as not planned on 2026-09-18.
 These simulation checks do not establish real sensor or final survey accuracy.
 Scope approval establishes no completed capability and does not resume research.
 
 ## 7. Team workflow
 
-James owns mission scope, cross-team decisions and milestone acceptance.
+The program lead owns mission scope, cross-team decisions and milestone acceptance.
 Platform and survey leads own their boundaries and shared integration. Assign
 an owner and reviewer in each issue; do not infer assignments from old handoffs.
 Keep capability issues open until their acceptance demonstration passes.

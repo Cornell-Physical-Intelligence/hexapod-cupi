@@ -64,7 +64,7 @@ measured joint state with force, bus voltage, current and temperature. Validate
 fitted parameters on held-out loads and trajectories. Characterize installed
 cooling and burst recovery before giving the controller peak authority.
 
-James confirmed a conductive metal mount as a design assumption. Measure its
+The program lead confirmed a conductive metal mount as a design assumption. Measure its
 thermal response; neither vendor cooling plate establishes this assembly's
 rating. Battery voltage and temperature limits remain open. Give a changed
 actuator model a new identity and repeat native admission and motion checks.

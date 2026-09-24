@@ -32,7 +32,7 @@ Read a reference below when its subject is part of your task.
 | --- | --- |
 | [Training](docs/TRAINING.md) | Kernel contract and the paper-reproduction roadmap. |
 | [Operations](docs/OPERATIONS.md) | Host access, ownership, launch procedure and recovery controls. |
-| [Compute coordination](docs/SPARK_COMPUTE_COORDINATION.md) | Current reservation policy; release requires James's direction. |
+| [Compute coordination](docs/SPARK_COMPUTE_COORDINATION.md) | Current reservation policy; release requires the program lead's direction. |
 | [Progress publication](docs/PROJECT_SITE.md) | Registry updates and Pages publication. |
 | [Source lineages](docs/PIPELINE_LINEAGES.md) | Source manifests and archive restoration. |
 | [Updated CAD import](docs/UPDATED_CAD_IMPORT.md) | Approved direct-drive geometry, joint conventions and import review. |
