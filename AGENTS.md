@@ -20,6 +20,7 @@ Keep procedures in existing guides, assignments in GitHub issues, and design
 review in PRs. Do not add another plan, handoff, decision log or task queue.
 Edit `site/project.json` for progress; `tools/project_site.py status` writes an untracked STATUS.md. Preserve
 execution history in Git and large new results outside the source checkout.
+CONTRIBUTING permits admitted training datasets in the checkout.
 
 ## Model and evidence
 

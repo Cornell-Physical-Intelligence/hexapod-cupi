@@ -127,7 +127,10 @@ error bound, so a numeric pass alone cannot establish the requested gait. Force
 metrics describe loads and add no new acceptance limits.
 
 After the program lead accepts the clips, use `dataset export --review ...` with the same
-replays and a fresh output directory. The exporter retains controls 100:1000
+replays and a fresh directory under `locomotion/priors/datasets/`. Commit its
+`transitions.npz`, `manifest.json` and `review.json`; the raw replays stay
+outside the checkout. `dataset check --output <directory>` verifies the
+committed bank. The exporter retains controls 100:1000
 from phase zero, matching the existing screen's 2 s settling exclusion. It
 keeps the complete trial for acceptance. Each command contributes 900 pairs:
 18,000 pairs over 20 commands. It never joins clip endpoints. `load()` verifies
