@@ -1,0 +1,27 @@
+{
+  "id": "20260924T191354_amp_dataset_admitted",
+  "date": "2026-09-24T19:13:54.635398+00:00",
+  "title": "Admit the reviewed AMP demonstration dataset",
+  "summary": "The program lead (palerdr) accepted direction and alternating-tripod appearance in all 40 native clips. The exporter wrote 18000 transition pairs, 900 per phase-zero command, with the hash-bound review and manifest under locomotion/priors/datasets/amp_demonstrations_001. CI now runs dataset check on the committed bank, and source manifest v10 binds the changed workflow and checker. This acceptance covers dataset admission; Stage 2 qualification stays incomplete.",
+  "areas": [
+    "locomotion",
+    "training data",
+    "continuous integration"
+  ],
+  "next": "AMP learning under issue #37 can use the admitted bank. Stage 2 still needs the full direction, transition, stop, motor and contact suite.",
+  "changes": [
+    ".github/workflows/tests.yml",
+    "configs/releases/amp_demonstrations_20260924_v10.sha256",
+    "locomotion/priors/datasets/amp_demonstrations_001/manifest.json",
+    "locomotion/priors/datasets/amp_demonstrations_001/review.json",
+    "locomotion/priors/datasets/amp_demonstrations_001/transitions.npz",
+    "site/project.json",
+    "tools/check_pipeline_lineages.py",
+    "site/updates/20260924T191354_amp_dataset_admitted.json"
+  ],
+  "evidence": [
+    "locomotion/priors/datasets/amp_demonstrations_001/manifest.json",
+    "configs/releases/amp_demonstrations_20260924_v10.sha256"
+  ],
+  "no_project_impact": false
+}

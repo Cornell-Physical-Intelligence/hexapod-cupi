@@ -5,10 +5,11 @@ work. Claude Code and other coding agents read this file.
 
 ## Context and ownership
 
-Read [README](README.md), then the affected package guide. Use
-[ARCHITECTURE](ARCHITECTURE.md) for requirements and [CONTRIBUTING](CONTRIBUTING.md)
-for checks and publication. Follow the source boundaries in README; navigation
-and mission must not import simulation.
+Read [README](README.md), [CONTRIBUTING](CONTRIBUTING.md), then the affected
+package guide before creating a branch or changing files. Follow CONTRIBUTING
+for branch names, checks and publication. Use [ARCHITECTURE](ARCHITECTURE.md)
+for requirements. Follow the source boundaries in README; navigation and
+mission must not import simulation.
 
 Several contributors run agents in this repository. The program lead is GitHub
 user `palerdr`; the guides assign approvals to that role. Do not assume the user
@@ -19,6 +20,7 @@ Keep procedures in existing guides, assignments in GitHub issues, and design
 review in PRs. Do not add another plan, handoff, decision log or task queue.
 Edit `site/project.json` for progress; `tools/project_site.py status` writes an untracked STATUS.md. Preserve
 execution history in Git and large new results outside the source checkout.
+CONTRIBUTING permits admitted training datasets in the checkout.
 
 ## Model and evidence
 
