@@ -33,7 +33,15 @@ def _series(values, digits=5):
     return [float(f"{value:.{digits}g}") for value in array.tolist()]
 
 
-def trace_view(path, rewards, nominal_height, output, *, config=None, com_local=None, replica=0):
+def parse_evaluation(argument):
+    """``ROLE=PATH`` labels a rollout for the scoreboard; a bare path has no role."""
+    role, separator, path = str(argument).partition("=")
+    if separator and role and path and "/" not in role:
+        return role, Path(path)
+    return None, Path(argument)
+
+
+def trace_view(path, rewards, nominal_height, output, *, config=None, com_local=None, replica=0, role=None):
     config = TaskConfig() if config is None else config
     com_local = reward_scorer.root_com_local() if com_local is None else com_local
     path = Path(path)
@@ -59,6 +67,7 @@ def trace_view(path, rewards, nominal_height, output, *, config=None, com_local=
     video = directory / "rollout.mp4"
     return {
         "label": ", ".join(trace.case_ids) or directory.name,
+        "role": role,
         "path": str(trace.path),
         "replica": replica,
         "video": (Path(os.path.relpath(video.resolve(), Path(output).resolve().parent)).as_posix()
@@ -76,8 +85,9 @@ def trace_view(path, rewards, nominal_height, output, *, config=None, com_local=
     }
 
 
-def build_page(paths, rewards, nominal_height, output, *, replica=0):
-    views = [trace_view(path, rewards, nominal_height, output, replica=replica) for path in paths]
+def build_page(evaluations, rewards, nominal_height, output, *, replica=0):
+    views = [trace_view(path, rewards, nominal_height, output, replica=replica, role=role)
+             for role, path in map(parse_evaluation, evaluations)]
     payload = {"legs": list(LEGS), "control_dt_s": CONTROL_DT_S, "video_offset_s": VIDEO_OFFSET_S,
                "nominal_height_m": nominal_height, "rewards": list(rewards),
                "declared_gaps": list(reward_scorer.DECLARED_GAPS), "traces": views}
@@ -88,8 +98,10 @@ def build_page(paths, rewards, nominal_height, output, *, replica=0):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("evaluations", nargs="+", type=Path,
-                        help="Evaluation directories, or control_trace.npz files beside their video.")
+    parser.add_argument("evaluations", nargs="+",
+                        help="Evaluation directories or control_trace.npz files, optionally ROLE=PATH, e.g. "
+                             "walking=... or jittering=...; the first role is the behaviour the scoreboard "
+                             "expects each reward to rank highest.")
     parser.add_argument("--nominal-height", type=float, required=True,
                         help="Nominal root height (m) the reward was trained with; the run's "
                              "task_definition.json records it as nominal_plate_height_m.")
@@ -151,6 +163,24 @@ section.trace{background:var(--panel);border:1px solid var(--line);border-radius
 .key.off{opacity:.35}
 footer{padding:0 20px 24px;color:var(--muted);font-size:12px}
 footer li{margin:2px 0}
+#scoreboard{margin:16px 20px 0;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+#scoreboard h2{font-size:15px;margin:0 0 4px}
+#scoreboard>p{margin:0 0 10px;color:var(--muted);font-size:12px;max-width:80ch}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);margin-bottom:4px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.reward-block{border-top:1px solid var(--line);padding:10px 0 8px}
+.reward-block h3{font-size:13px;margin:0;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.verdict{font-size:12px;font-weight:600;padding:1px 9px;border-radius:999px}
+.verdict.ok{color:var(--good);background:color-mix(in srgb,var(--good) 14%,transparent)}
+.verdict.fail{color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,transparent)}
+.bars{display:grid;grid-template-columns:minmax(110px,260px) minmax(80px,1fr) 56px;gap:5px 10px;align-items:center;margin-top:8px;font-size:12px}
+.bars .name{overflow-wrap:anywhere}.bars .name small{color:var(--muted)}
+@media (max-width:640px){.bars{grid-template-columns:minmax(0,1fr) 56px}.bars .name{grid-column:1/-1;margin-top:4px}}
+.track{position:relative;height:14px;background:var(--grid);border-radius:3px}
+.track .bar{position:absolute;top:0;bottom:0;border-radius:3px}
+.track .zero{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--muted)}
+.bars .value{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.role{font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;color:#fff}
 </style>
 </head>
 <body>
@@ -161,6 +191,7 @@ footer li{margin:2px 0}
   <label><input type="checkbox" id="link" checked> Link timelines</label>
   <label>Components of <select id="rewardSelect"></select></label>
 </header>
+<section id="scoreboard" hidden></section>
 <main id="traces"></main>
 <footer><b>Declared gaps</b><ul id="gaps"></ul>
 The dashed grey line is the same reward for a motionless robot under the same commands.</footer>
@@ -172,6 +203,11 @@ const palette = ['--c1','--c2','--c3','--c4','--c5','--c6','--c7','--c8','--c9',
 const fmt = (v, d=3) => v == null ? '–' : (Math.abs(v) < 1e-4 && v !== 0 ? v.toExponential(1) : v.toFixed(d));
 let selected = D.rewards[0], playing = false, speed = 1, lastFrame = null;
 const panels = [];
+const labeled = D.traces.filter(t => t.role);
+const roles = [...new Set(labeled.map(t => t.role))];
+const roleColor = r => r === roles[0] ? '--good' : ['--bad','--c4','--c6','--c5'][(roles.indexOf(r) - 1) % 4];
+const folder = t => t.path.split('/').slice(-2, -1)[0];
+const describe = t => t.label === folder(t) ? t.label : `${t.label} · ${folder(t)}`;
 
 function el(tag, attrs={}, ...kids){const e=document.createElement(tag);
   for(const [k,v] of Object.entries(attrs)){if(k==='class')e.className=v;else if(k==='text')e.textContent=v;else e.setAttribute(k,v);}
@@ -226,7 +262,10 @@ class Gait extends Chart{
 class Panel{
   constructor(t){this.t=t;this.clock=t.time_s[0];
     const sec=el('section',{class:'trace'});this.sec=sec;
-    sec.append(el('div',{class:'head'},el('h2',{text:t.label}),el('span',{class:'path',text:t.path+(t.replica?` · replica ${t.replica}`:'')})));
+    const head=el('div',{class:'head'});
+    if(t.role){const badge=el('span',{class:'role',text:t.role});badge.style.background=`var(${roleColor(t.role)})`;head.append(badge);}
+    head.append(el('h2',{text:t.label}),el('span',{class:'path',text:t.path+(t.replica?` · replica ${t.replica}`:'')}));
+    sec.append(head);
     const chips=el('div',{class:'chips'});
     D.rewards.forEach(r=>chips.append(el('span',{class:'chip'},document.createTextNode(`${r}: mean `),el('b',{text:fmt(t.summary.totals[r].recorded)}),
       document.createTextNode(` · motionless `),el('b',{text:fmt(t.summary.totals[r].motionless)}))));
@@ -300,6 +339,34 @@ sel.onchange=()=>{selected=sel.value;panels.forEach(p=>p.setReward());render();}
 document.getElementById('play').onclick=()=>setPlaying(!playing);
 document.getElementById('speed').onchange=e=>{speed=+e.target.value;panels.forEach(p=>{if(p.video)p.video.playbackRate=speed;});};
 D.declared_gaps.forEach(g=>document.getElementById('gaps').append(el('li',{text:g})));
+function buildScoreboard(){
+  const board=document.getElementById('scoreboard');
+  if(!labeled.length){board.hidden=true;return;}
+  const target=roles[0],still=labeled.find(t=>t.role===target);
+  board.hidden=false;
+  const legend=el('div',{class:'legend'});
+  [...roles.map(r=>[r,roleColor(r)]),['standing still',"--ghost"]].forEach(([name,color])=>{
+    const swatch=el('i');swatch.style.background=`var(${color})`;legend.append(el('span',{},swatch,document.createTextNode(name)));});
+  board.replaceChildren(el('h2',{text:`Does each reward pay ${target} the most?`}),
+    el('p',{text:`Bars show the mean reward per control step (20 ms) over each rollout. A good reward puts every ${target} bar `+
+      `above standing still and above every other rollout. "Standing still" scores ${describe(still)} `+
+      `with its commands unchanged and the robot not moving. Rewards differ in scale, so compare bars within a row only.`}),legend);
+  D.rewards.forEach(name=>{
+    const rows=[...labeled.map(t=>({name:t.role,detail:describe(t),value:t.summary.totals[name].recorded,color:roleColor(t.role),target:t.role===target})),
+      {name:'standing still',detail:'same commands, not moving',value:still.summary.totals[name].motionless,color:'--ghost',target:false}];
+    const worst=Math.min(...rows.filter(r=>r.target).map(r=>r.value)),rivals=rows.filter(r=>!r.target&&r.value>=worst);
+    const names=[...new Set(rivals.map(r=>r.name))];
+    const verdict=el('span',{class:'verdict '+(names.length?'fail':'ok'),
+      text:names.length?`✗ ${names.join(' and ')} ${names.length>1?'beat':'beats'} ${target}`:`✓ ${target} scores highest`});
+    const lo=Math.min(0,...rows.map(r=>r.value)),hi=Math.max(0,...rows.map(r=>r.value)),span=(hi-lo)||1,x=v=>100*(v-lo)/span;
+    const bars=el('div',{class:'bars'});
+    rows.forEach(r=>{const track=el('div',{class:'track'}),bar=el('div',{class:'bar'}),zero=el('div',{class:'zero'});
+      bar.style.left=`${Math.min(x(0),x(r.value))}%`;bar.style.width=`${Math.abs(x(r.value)-x(0))}%`;bar.style.background=`var(${r.color})`;
+      zero.style.left=`${x(0)}%`;track.append(bar,zero);
+      bars.append(el('div',{class:'name'},document.createTextNode(r.name+' '),el('small',{text:r.detail})),track,el('div',{class:'value',text:fmt(r.value)}));});
+    board.append(el('div',{class:'reward-block'},el('h3',{},document.createTextNode(name),verdict),bars));});
+}
+buildScoreboard();
 const root=document.getElementById('traces');
 D.traces.forEach(t=>{const p=new Panel(t);root.append(p.sec);panels.push(p);});
 panels.forEach(p=>{p.setReward();p.velocityChart.drawBase();p.gait.drawBase();});

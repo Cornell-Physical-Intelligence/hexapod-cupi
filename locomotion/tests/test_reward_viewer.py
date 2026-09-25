@@ -67,6 +67,15 @@ class RewardViewerTests(unittest.TestCase):
         self.assertEqual(payload['legs'], ['lf', 'lm', 'lr', 'rf', 'rm', 'rr'])
         self.assertEqual(payload['rewards'], ['current'])
 
+    def test_role_prefix_labels_a_rollout_for_the_scoreboard(self):
+        self.assertEqual(reward_viewer.parse_evaluation('walking=/runs/a'), ('walking', Path('/runs/a')))
+        self.assertEqual(reward_viewer.parse_evaluation('/runs/x=y'), (None, Path('/runs/x=y')))
+        self.assertEqual(reward_viewer.parse_evaluation(TRACE), (None, TRACE))
+        with tempfile.TemporaryDirectory() as temporary:
+            html = reward_viewer.build_page([f'walking={TRACE}', TRACE], REWARDS, NOMINAL_HEIGHT, Path(temporary)/'page.html')
+        self.assertEqual([t['role'] for t in embedded(html)['traces']], ['walking', None])
+        self.assertIn('id="scoreboard"', html)
+
     def test_command_line_writes_the_page(self):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary)/'viewer.html'
