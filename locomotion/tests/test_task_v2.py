@@ -225,7 +225,7 @@ class RewardV2TaskTests(unittest.TestCase):
         self.assertEqual(reward["config"]["tracking_kernel"], "stride")
         self.assertEqual(reward["kernel_audit_label"], "C")
         self.assertAlmostEqual(reward["stationary_translation_fraction_at_or_above_floor"], math.exp(-2.5))
-        self.assertEqual(reward["review"]["status"], "provisional")
+        self.assertEqual((reward["review"]["status"], reward["review"]["reviewer"]), ("approved", "James"))
         self.assertEqual(len(reward["adaptations"]), len(task_v2.ADAPTATIONS))
         self.assertIn("linear_tracking_weight", declaration["unused_version1_reward_fields"])
         self.assertFalse(declaration["physics_changed"])

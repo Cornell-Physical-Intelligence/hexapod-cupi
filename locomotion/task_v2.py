@@ -11,9 +11,9 @@ training, CPU tests and ``locomotion.reward_scorer`` evaluate one function.
 Score it offline with ``--reward v2=locomotion.task_v2:scorer_default``, or
 override defaults with ``--reward b=locomotion.task_v2:scorer_reward:tracking_kernel=scaled``.
 
-The defaults are provisional. docs/REWARD_V2_TABLE1_AUDIT.md section 8 leaves the
-kernel, ``k``, the command floors, the yaw extension and the penalty weights to
-the named reviewer; ``REVIEW`` records that status in every task definition.
+The reviewer, James, approved the defaults on 2026-09-25: the decisions in
+docs/REWARD_V2_TABLE1_AUDIT.md section 8 except the style term, which still
+waits on the AMP owner. ``REVIEW`` records this in every task definition.
 """
 from dataclasses import asdict, dataclass, fields, replace
 import hashlib
@@ -60,9 +60,10 @@ ACTUATOR = ("Unchanged from version 1: 18 actions at 50 Hz clipped to [-1, 1]; t
             "- K_D q_dot with K_D 0.442/0.246/0.106 N·m·s/rad; applied torque capped by the 48 V "
             "speed curve at 1.6 N·m and zero at 50.27 rad/s; 400 Hz physics, eight substeps. "
             "The paper's cascaded law tau = Kp2 (Kp1 (q_des - q) - q_dot) is not used.")
-REVIEW = {"status": "provisional",
-          "pending": ["tracking kernel B or C", "k", "command floors c_min", "yaw extension of the criterion",
-                      "penalty weights", "style inputs with the AMP owner"],
+REVIEW = {"status": "approved", "reviewer": "James", "date": "2026-09-25",
+          "approved": ["tracking kernel C", "k 0.4", "command floors 0.025 m/s and 0.15 rad/s",
+                       "yaw extension of the criterion", "calibrated penalty weights"],
+          "pending": ["style inputs with the AMP owner"],
           "source": "docs/REWARD_V2_TABLE1_AUDIT.md section 8"}
 
 

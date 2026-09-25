@@ -174,8 +174,8 @@ action-rate term reads raw actions, and neither the 1.6 N·m cap nor the
    unchanged. `test_recorded_parity` freezes `task.py` byte for byte, so version
    2 lives in [`locomotion/task_v2.py`](../locomotion/task_v2.py) as a subclass
    of `TrainingTask`; `train.py --reward-version 2` selects it. Its defaults
-   (variant C, `k` = 0.4, the section 4 floors, calibrated penalties) are
-   provisional until the reviewer decides section 8.
+   (variant C, `k` = 0.4, the section 4 floors, calibrated penalties) were
+   approved by the reviewer, James, on 2026-09-25.
 4. CPU tests for tracking error, the section 4 criterion, zero commands and
    command transitions, including the reset of previous action, previous joint
    velocity and the stride window.
@@ -190,6 +190,11 @@ action-rate term reads raw actions, and neither the 1.6 N·m cap nor the
 - Penalty weights after the tracking decision.
 - Reward inputs agreed with the AMP owner, including the AMP state and whether
   the style term joins reward v2.
+
+On 2026-09-25 the reviewer, James, approved variant C with its 60-control
+window and command-change restart, `k` = 0.4, `c_min` = 0.025 m/s and
+0.15 rad/s, the yaw extension and the calibrated penalty weights. The style
+term remains open with the AMP owner.
 
 ## Reproduce
 
