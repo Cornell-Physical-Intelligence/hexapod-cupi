@@ -14,7 +14,7 @@ penalties by the rule in ``CALIBRATION``; reproduce its weights with
 command-scaled tracking kernels, for example
 ``--reward c=locomotion.paper_reward:variant:kernel=stride,penalties=calibrated``.
 The stride kernel averages each replica's velocity over a contiguous trace;
-training would keep that window per replica in ``task.py``.
+``task_v2.TrainingTaskV2`` keeps that window per replica during training.
 """
 from __future__ import annotations
 

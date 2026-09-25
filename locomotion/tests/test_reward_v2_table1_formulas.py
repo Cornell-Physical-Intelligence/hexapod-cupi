@@ -2,7 +2,7 @@
 
 Version 1 is ``task.measured_reward``; the paper variant is
 ``paper_reward.paper_reward``. The command-scaled kernel below is the audit's
-proposal for reward v2 and is not yet in ``task.py``.
+proposal for reward v2, implemented in ``task_v2.py`` (tested in ``test_task_v2``).
 """
 import math
 from pathlib import Path

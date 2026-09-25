@@ -170,8 +170,12 @@ action-rate term reads raw actions, and neither the 1.6 N·m cap nor the
    rule under test if chosen.
 2. Penalties: Table I forms from section 3, contact force omitted, weights
    recalibrated after tracking is fixed.
-3. A new `REWARD_VERSION` in `task.py` beside version 1, which stays selectable
-   and unchanged.
+3. A new `REWARD_VERSION` beside version 1, which stays selectable and
+   unchanged. `test_recorded_parity` freezes `task.py` byte for byte, so version
+   2 lives in [`locomotion/task_v2.py`](../locomotion/task_v2.py) as a subclass
+   of `TrainingTask`; `train.py --reward-version 2` selects it. Its defaults
+   (variant C, `k` = 0.4, the section 4 floors, calibrated penalties) are
+   provisional until the reviewer decides section 8.
 4. CPU tests for tracking error, the section 4 criterion, zero commands and
    command transitions, including the reset of previous action, previous joint
    velocity and the stride window.
