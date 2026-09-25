@@ -1,199 +1,203 @@
 # Reward v2: Table I audit
 
-Issue #18's first bounded task: audit the current reward against
-[Liu et al., Table I, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3) for
-formulas, units, signs and weights; resolve the printed positive tracking
-exponent against the intended decreasing reward; define command-scaled
-tracking as a separate adaptation; resolve the stationary-reward criterion.
-This document is that audit. It records findings and proposed resolutions. It
-does not implement a new reward schema; per the issue, that follows this
-audit's review and an assigned owner/reviewer.
+This audit covers the first item of issue #18's reward sub-issue. It audits
+[Liu et al., Table I, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3) against
+version 1 of the training reward, resolves the tracking-exponent sign and the
+stationary-translation criterion, declares the actuator adaptation and
+separates the paper reward from command-scaled variants. Every choice below is a
+proposal for the named reviewer; nothing here changes `locomotion/task.py`.
+[`locomotion/tests/test_reward_v2_table1_formulas.py`](../locomotion/tests/test_reward_v2_table1_formulas.py)
+checks each number in sections 4 and 5.
 
-Sources: Table I of arXiv:2511.03167v1 (re-read at 400 DPI from the source PDF
-to confirm exact printed symbols), and the current reward implementation in
-[`locomotion/task.py`](../locomotion/task.py) (`measured_reward`,
-`REWARD_VERSION = "canonical_quiet_quadratic_log_tail_v2"`).
+Sources: Table I, read at 400 DPI from the source PDF; version 1,
+`measured_reward` in [`locomotion/task.py`](../locomotion/task.py)
+(`canonical_quiet_quadratic_log_tail_v2`); the motor model and target limiter in
+[`locomotion/env.py`](../locomotion/env.py) and
+[`locomotion/env_config.py`](../locomotion/env_config.py). The candidate
+[`locomotion/paper_reward.py`](../locomotion/paper_reward.py) implements the
+paper reward with the adaptations in section 3.
 
-## Table I, exactly as printed
+## 1. Table I as printed
 
 ```text
 Task r^g
   Linear velocity   1    * exp( ||v_t,xy - v_t,xy^des||_2 / 0.15 )
   Angular velocity  0.5  * exp( ||omega_t,z - omega_t,z^des||_2 / 0.15 )
-
 Style r^s
   D Score           1    * max[0, 1 - 0.25*(d_t^score - 1)^2]
-
 Penalty r^l
-  Linear velocity (vertical)   -1     * v_t,z^2
-  Angular velocity (roll/pitch) -0.08  * ||omega_t,xy||_2
-  Joint torque                  -2e-6  * ||tau||_2
-  Joint acceleration            -1.5e-7 * ||q_ddot||_2
-  Action rate                   -0.01  * ||a_t - a_t-1||_2
-  Collisions                    -0.05  * n_collision
-  Joint torque limits           -0.05  * ||max(|tau_t| - tau^limit, 0)||_2
-  Joint velocity limits         -0.5   * ||max(|q_dot_t| - q_dot^limit, 0)||_2
-  Contact force                 -0.1   * ||max(|f_t| - f^limit, 0)||_2
+  Linear velocity              -1      * v_t,z^2
+  Angular velocity             -0.08   * ||omega_t,xy||_2
+  Joint torque                 -2e-6   * ||tau||_2
+  Joint acceleration           -1.5e-7 * ||q_ddot||_2
+  Action rate                  -0.01   * ||a_t - a_t-1||_2
+  Collisions                   -0.05   * n_collision
+  Joint torque limits          -0.05   * ||max(|tau_t| - tau^limit, 0)||_2
+  Joint velocity limits        -0.5    * ||max(|q_dot_t| - q_dot^limit, 0)||_2
+  Contact force                -0.1    * ||max(|f_t| - f^limit, 0)||_2
 ```
 
-`||.||_2` on a vector is the (unsquared) Euclidean norm. On the scalar yaw-rate
-error it reduces to absolute value. Style is out of scope for Reward v2 (Step
-5 builds the AMP discriminator that produces `d_t^score`); it is listed here
-only so the full table is on record.
+`||.||_2` is the unsquared Euclidean norm; on the scalar yaw error it is an
+absolute value. The style term needs the AMP discriminator
+([`locomotion/amp.py`](../locomotion/amp.py), Step 5) and stays outside reward v2
+until the AMP owner agrees its inputs.
 
-## Finding 1 — the printed task-tracking exponent has no minus sign
+## 2. Findings on the printed formulas
 
-As printed, `exp(||error||/0.15)` *grows* without bound as tracking error
-grows. That contradicts "task tracking reward" and every other legged-RL
-tracking reward in the literature (Gaussian/exponential kernels that peak at
-zero error and decay outward, e.g. Rudin et al.). This is almost certainly a
-typesetting error in the paper, not an intended reward.
+**Sign.** As printed, `exp(||e||/0.15)` grows with tracking error. Resolution:
+use `exp(-||e||/scale)`, which equals the weight at zero error and decays with
+error, and declare the substitution.
 
-**Proposed resolution:** implement it as a decreasing reward,
-`exp(-||error||/0.15)`, so it equals 1 at zero error and decays toward 0 as
-error grows. Declare this substitution explicitly in the reward's declaration
-metadata (the way `locomotion/task.py` already declares
-`quiet_cost_tail`/`reward_version` adaptations) rather than silently "fixing"
-it — this is exactly the ambiguity the issue asks to be resolved and recorded,
-not quietly assumed.
+**Shape.** Table I divides an unsquared norm by a scale. Version 1 divides a
+squared error by a variance (`exp(-||e||^2/0.0009)`), a different kernel. Several
+penalties differ in the same way; version 1's `effort` is a normalized mean
+square of applied torque, not `||tau||_2` in N·m.
 
-## Finding 2 — squared error vs. unsquared L2 norm
+**Weights.** Version 1 differs from Table I without a declared reason: yaw
+tracking 0.3 against 0.5, vertical velocity 0.05 against 1.0, roll and pitch
+rate 0.01 against 0.08.
 
-The paper's task-tracking terms divide an **unsquared** norm by a fixed scale
-(`||error||_2 / 0.15`). The current implementation instead squares the error
-and divides by a variance-like parameter:
+## 3. What the simulation supplies for each penalty
 
-```python
-"linear_tracking": config.linear_tracking_weight * torch.exp(
-    -(velocity[:, :2]-commands[:, :2]).square().sum(-1) / config.linear_error_variance)
+The reward reads only what `env.py` exports after a control. A change to
+`env.py` voids standing admission; a change confined to `task.py` does not.
+
+| Table I term | Status | Source and adaptation |
+| --- | --- | --- |
+| Vertical velocity | Direct | `linear_velocity_nav[:, 2]` at the root-link origin |
+| Roll and pitch rate | Direct | `angular_velocity_body[:, :2]` |
+| Joint torque | Direct | Per-joint RMS of applied torque over the eight substeps, from `torque_square_sum_400hz` |
+| Joint acceleration | Derived in `task.py` | Joint-velocity change between consecutive controls over 0.02 s; zero after a reset |
+| Action rate | Derived in `task.py` | Raw policy `action` against the previous raw action, before clipping and the limiter |
+| Collisions | Approximated | One event when the largest non-tibia ground force exceeds 1 N; self-collisions are not reported |
+| Torque limits | Direct | Requested torque (`requested_torque_abs_max_400hz`) against the 1.6 N·m cap; applied torque never exceeds the cap |
+| Velocity limits | Direct | Endpoint joint velocity against the URDF limit, 50.27 rad/s |
+| Contact force | Omitted | Control traces record no foot force and the paper states no limit |
+
+## 4. Stationary-translation criterion
+
+[TRAINING](TRAINING.md#step-1-tracking-reward-criterion) asks for an under-10%
+condition on the commanded translation component. Criterion: for every nonzero
+translation command in `command_bank`, a motionless robot earns under 10% of the
+translation tracking term's maximum. The audit applies the same condition to
+commanded yaw as a declared extension.
+
+The condition is on the commanded component, not on combined tracking. For a
+straight translation command, a motionless robot matches the zero yaw command
+exactly, so the combined reward keeps a floor of `w_yaw / (w_lin + w_yaw)`,
+23.1% in version 1, whatever the translation kernel.
+
+Motionless share of each commanded component:
+
+| Command | Version 1 | Paper, fixed 0.15 | Command-scaled, k = 0.4 |
+| --- | ---: | ---: | ---: |
+| Translation 0.025 m/s | 49.9% | 84.6% | 8.2% |
+| Translation 0.05 m/s | 6.2% | 71.7% | 8.2% |
+| Yaw 0.2 rad/s | 36.8% | 26.4% | 8.2% |
+| Arc translation 0.04 m/s | 16.9% | 76.6% | 8.2% |
+| Arc yaw 0.15 rad/s | 57.0% | 36.8% | 8.2% |
+
+Version 1 fails at 0.025 m/s and for yaw. The paper's fixed scale fails
+everywhere here: `exp(-c/0.15) < 0.1` needs `c ≥ 0.15 ln 10 = 0.345 m/s`, a speed
+range this robot is not commanded to reach. The scale suits the paper's robot,
+not this one.
+
+## 5. Tracking variants
+
+Reward v2 names three variants and keeps them distinct.
+
+**A. Paper.** `w · exp(-||v - c|| / 0.15)` per control, Table I weights 1 and 0.5.
+The reproduction baseline; it fails the criterion.
+
+**B. Command-scaled.** `w · exp(-||v - c|| / sigma(c))` with
+`sigma(c) = k · max(|c|, c_min)`. A motionless robot then keeps `exp(-1/k)` of the
+term for every nonzero command, so any `k < 1/ln 10 ≈ 0.434` passes; `k = 0.4`
+gives 8.2%. `c_min` is the smallest nonzero command in `command_bank`: 0.025 m/s
+for translation and 0.15 rad/s for yaw. At a zero command a motionless robot
+earns the full weight, and `sigma` is continuous at the smallest command.
+
+**C. Command-scaled on stride-averaged velocity.** Variant B applied to the mean
+velocity over one 1.2 s tripod period, restarted at each command change and
+reset.
+
+Per-control tracking pays a policy that oscillates at the command's speed each
+time its velocity passes through the kernel, and it penalizes a gait whose
+velocity swings within each stride. Linear tracking at the 0.05 m/s command on
+recorded rollouts:
+
+| Rollout | Mean along command | Forward std | Version 1 | Paper | B, per control | C, 1.2 s average |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Trajectory-optimizer replay (tripod walk) | 0.0488 m/s | 0.038 m/s | 0.364 | 0.802 | 0.254 | 0.967 |
+| Test fixture (smooth tripod walk) | 0.0491 m/s | 0.008 m/s | – | – | 0.858 | 0.970 |
+| PPO example arm, update 1200 | -0.0006 m/s | – | 0.484 | 0.743 | 0.349 | 0.109 |
+| PPO scratch arm, update 1200 | 0.0066 m/s | – | 0.429 | 0.745 | 0.297 | 0.131 |
+
+B ranks the smooth walk well above both failed policies but ranks the
+optimizer replay, whose velocity swings within each stride, below them. C pays
+both walks and separates them from the failed policies by a wide margin. The
+choice is whether in-stride velocity swing should cost reward (B) or only the
+mean velocity counts (C). C also makes the reward depend on up to 60 controls of
+history, beyond the actor's five-frame observation, and delays the tracking
+signal.
+
+**Penalty weights.** Table I's penalties total about 1% of tracking on this
+7.47 kg robot. `paper_reward_calibrated` rescales the continuous penalties to 80%
+of mean tracking; under the paper kernel a motionless robot then outscores the
+walk (1.089 against 0.938 per control). Recalibrate the penalties only after the
+tracking variant is chosen.
+
+## 6. Actuator adaptation
+
+The paper adds 18 policy offsets to a nominal pose and drives each joint with
+the cascaded law `tau = Kp2 * (Kp1 * (q_des - q) - q_dot)`, gains unstated. This
+project keeps its approved motor model and limiter unchanged:
+
+| Stage | This project |
+| --- | --- |
+| Policy output | 18 values at 50 Hz, clipped to [-1, 1] |
+| Joint target | `neutral + 0.35 · a`, clipped to joint limits, then limited to ±0.040 rad per 20 ms control |
+| Motor law | `tau_req = 12 · (q_target - q) - K_D · q_dot`; `K_D` = 0.442, 0.246 and 0.106 N·m·s/rad for coxa, femur and tibia |
+| Torque limit | Applied torque clipped to a speed-dependent ceiling from the 48 V curve, capped at 1.6 N·m and zero at 480 rpm (50.27 rad/s) |
+| Timing | 400 Hz physics, eight substeps per control |
+
+Consequences for reward v2: the torque-limit term reads requested torque, the
+action-rate term reads raw actions, and neither the 1.6 N·m cap nor the
+0.040 rad / 20 ms limiter changes.
+
+## 7. Proposed reward v2
+
+1. Tracking: variant B or C, per the reviewer's decision; C's window and reset
+   rule under test if chosen.
+2. Penalties: Table I forms from section 3, contact force omitted, weights
+   recalibrated after tracking is fixed.
+3. A new `REWARD_VERSION` in `task.py` beside version 1, which stays selectable
+   and unchanged.
+4. CPU tests for tracking error, the section 4 criterion, zero commands and
+   command transitions, including the reset of previous action, previous joint
+   velocity and the stride window.
+5. Offline checks with `locomotion.reward_scorer` and `locomotion.reward_viewer`
+   on the recorded rollouts before any native experiment.
+
+## 8. Decisions for the reviewer
+
+- `k`, `c_min`, and whether the yaw extension of the criterion is adopted.
+- Variant B, which costs in-stride velocity swing, or variant C, which scores
+  only stride-mean velocity; for C, the window length and restart rule.
+- Penalty weights after the tracking decision.
+- Reward inputs agreed with the AMP owner, including the AMP state and whether
+  the style term joins reward v2.
+
+## Reproduce
+
+```sh
+uv run python tools/archive.py restore --destination <dir> artifacts/trajectory_optimizer_20260917/replay_001/standing/evaluation/control_trace.npz
+uv run python tools/archive.py restore --destination <dir> artifacts/forward_example_ppo_20260917/scratch_evaluate_update001200_001/run/standing/evaluation_00/control_trace.npz
+uv run python tools/archive.py restore --destination <dir> artifacts/forward_example_ppo_20260917/example_evaluate_update001200_001/run/standing/evaluation_00/control_trace.npz
+uv run python -m locomotion.reward_scorer <dir>/artifacts/**/control_trace.npz --nominal-height 0.09780231400684256 \
+  --reward paper=locomotion.paper_reward:paper_reward
+uv run python -m unittest locomotion.tests.test_reward_v2_table1_formulas
 ```
 
-`.square().sum(-1)` is `||error||_2^2`, not `||error||_2`. This is a
-*different functional form* from Table I (a squared-exponential/Gaussian
-kernel vs. the paper's linear-in-norm exponential kernel), not just a
-different constant. Both are legitimate reward shapes independently, but they
-are not the same formula, and the difference changes the reward's sensitivity
-profile near zero error (Gaussian kernels are flatter near zero; the paper's
-form has a sharp corner at zero error since `d/dx exp(-x/0.15)` does not
-vanish at `x=0`).
-
-Several penalty rows have the same squared-vs-unsquared discrepancy: `tilt`,
-`roll_pitch_rate`, `vertical_velocity` (squared in both — matches), `effort`
-vs. `Joint torque` (paper: raw, unsquared, un-normalized `||tau||_2` in N*m;
-current: normalized *mean-square* fraction of the 1.6 N*m cap — a materially
-different quantity, not just a rescaling).
-
-**Proposed resolution:** Reward v2's task-tracking and penalty terms should
-match the paper's literal functional form (unsquared L2 norm divided by its
-declared scale, or hinge-then-L2-norm for the limit-violation rows), not
-reuse the existing variance-based Gaussian forms. Where a term is kept in its
-current (non-Table-I) form for a stated reason, declare it as a named
-adaptation rather than presenting it as a reproduction.
-
-## Finding 3 — weight mismatches against Table I
-
-| Term | Table I weight | Current weight | Current field |
-| --- | ---: | ---: | --- |
-| Yaw tracking | 0.5 | 0.3 | `yaw_tracking_weight` |
-| Vertical velocity penalty | 1.0 | 0.05 | `vertical_velocity_weight` |
-| Roll/pitch angular-velocity penalty | 0.08 | 0.01 | `angular_xy_weight` |
-
-None of these are declared anywhere as intentional robot-specific
-adaptations (7.47 kg vs. the paper's 25.5 kg, different actuator envelope).
-They read as pre-existing, independently tuned values from before this repo
-adopted the paper as a reference (`REWARD_VERSION` is
-`canonical_quiet_quadratic_log_tail_v2`, a name with no reference to Table I
-at all). **Reward v2 needs to either match these weights or explicitly declare
-and justify the departure** — undeclared mismatches are exactly what this
-audit exists to surface.
-
-## Finding 4 — terms in Table I that are missing from the current reward
-
-- **Joint acceleration** (`-1.5e-7 * ||q_ddot||_2`): no equivalent term
-  exists. The closest current term, `target_motion`, penalizes joint-*target*
-  rate of change (a policy-smoothness proxy), not measured joint
-  acceleration.
-- **Joint torque limits** (hinge penalty beyond `tau^limit`): the current
-  `effort` term is a smooth normalized mean-square torque cost, not a
-  hinge-at-the-limit penalty. There is no term that specifically fires only
-  when a joint exceeds its torque limit.
-- **Joint velocity limits** (hinge penalty beyond `q_dot^limit`): the current
-  `quiet_joint_rate` term penalizes joint speed, but only during zero-command
-  ("quiet") holds — it is a stillness term, not a general velocity-limit
-  penalty active during motion.
-- **Contact force** (hinge penalty beyond `f^limit`, on **foot** contact
-  force): the current `nonfoot_contact` term penalizes **non-foot** body
-  contact force (an explicit safety/collision guard against the frame or legs
-  touching the ground). These are opposite in subject (foot vs. non-foot) and
-  serve different purposes; neither substitutes for the other.
-- **Collisions** (`-0.05 * n_collision`, a count): no direct counterpart. The
-  current `nonfoot_contact` term is a combined event-indicator-plus-force
-  penalty on a specific contact class, not a generic collision counter.
-
-## Finding 5 — "command-scaled tracking," as the issue names it
-
-The paper's tracking scale (`0.15`) is a fixed constant regardless of
-commanded speed. This repository's command bank tops out at 0.05 m/s forward
-(`speed_levels_mps = (.025, .05)`), a small fraction of whatever speed range
-the 25.5 kg paper robot was commanded at (unstated in the paper text
-extracted so far). A fixed 0.15 scale tuned for a faster robot would make
-*any* achievable cupi velocity error look tiny in relative terms, flattening
-the tracking reward's ability to discriminate near-target performance at
-cupi's speeds.
-
-The current implementation already encodes a per-robot, per-axis error scale
-(`linear_error_variance = 9e-4`, `yaw_error_variance = 4e-2`) rather than the
-paper's one-size-fits-all `0.15`. **Proposed resolution:** keep a per-robot
-tuned tracking scale as the declared "command-scaled tracking" adaptation
-named in the issue, but derive it from the paper's functional form (Finding
-2) rather than the variance-based Gaussian form, and record the chosen scale
-value and its justification explicitly rather than inheriting the existing
-unlabeled constants.
-
-## Finding 6 — the stationary-reward criterion
-
-Table I has no dedicated "stationary" reward row: a zero-velocity command is
-just the ordinary tracking reward with `v^des = 0`, in principle relying on
-the tracking and penalty terms alone to produce stillness. This repository
-instead has two dedicated quiet-only terms (`quiet_joint_rate`,
-`quiet_target_motion`) that activate only when the held command is exactly
-zero, with their own scales and a custom log-tail cost shape
-(`quiet_cost_tail`) that has no Table-I counterpart at all.
-
-Issue #18's own acceptance criteria require demonstrated "stop settling and
-sustained stillness," which is a stronger, more explicit requirement than
-Table I's implicit reliance on tracking-toward-zero. **Proposed resolution:**
-define the stationary-reward criterion as retaining the existing quiet-only
-terms as a declared additive adaptation layered on top of the Table-I-derived
-task and penalty core, rather than dropping them to match the paper exactly
-— they exist to satisfy a project requirement the paper's reward was never
-designed to guarantee.
-
-## Terms with no Table I counterpart to keep regardless
-
-`height` (root-height tracking to the reference stance) and the
-`ProximityGuard`/termination-penalty machinery are simulation- and
-robot-specific safety/stability scaffolding absent from the paper entirely.
-Nothing here suggests removing them; they should simply be declared as
-adaptations, not silently presented as part of a "paper-faithful" reward.
-
-## Summary: what Reward v2 should contain
-
-1. Task tracking (linear, yaw) rebuilt to the paper's functional form —
-   `exp(-||error||/scale)` — with the sign in Finding 1 resolved and a
-   declared, justified tracking scale per Finding 5 (not necessarily 0.15).
-2. Penalty terms rebuilt to match Table I's functional forms and weights
-   (Findings 2–4) for vertical velocity, roll/pitch rate, joint torque,
-   joint acceleration (new), action rate, torque-limit hinge (new),
-   velocity-limit hinge (new, distinct from the existing quiet-only term),
-   and foot-contact-force hinge (new, distinct from the existing
-   non-foot-contact term).
-3. A retained, explicitly declared set of cupi-specific adaptations: the
-   quiet-stationary terms (Finding 6), the height term, non-foot-contact
-   safety term, and termination penalty — none of which come from Table I.
-4. No style term yet — that is Step 5, gated on the AMP discriminator.
-
-Every substitution above is proposed, not committed: per the issue, this
-audit needs an assigned owner and reviewer, and CPU-check formulas (see
-`locomotion/tests/test_reward_v2_table1_formulas.py`) before any change lands
-in the live training reward in `locomotion/task.py`.
+The restored traces carry the SHA-256 values recorded in
+`paper_reward.CALIBRATION`. The nominal height is the training value recorded
+in the paired PPO run's `task_definition.json`.

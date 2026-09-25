@@ -123,6 +123,7 @@ def reward_inputs(trace, com_local, *, motionless=False):
     if "policy_action" in data:
         action = torch.as_tensor(data["policy_action"], dtype=torch.float32)
         telemetry["action"], telemetry["previous_action"] = flat(action[1:]), flat(action[:-1])
+    telemetry["replicas"] = data["command"].shape[1]
     if "amp_state_before" in data:
         telemetry["amp_state"] = flat(torch.as_tensor(data["amp_state_before"][1:], dtype=torch.float32))
         telemetry["next_amp_state"] = flat(torch.as_tensor(data["amp_state_after"][1:], dtype=torch.float32))

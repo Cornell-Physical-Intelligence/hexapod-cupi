@@ -136,6 +136,57 @@ class CalibrationTests(unittest.TestCase):
                                                       paper_config=paper.CALIBRATED_CONFIG)[0])
 
 
+class TrackingKernelTests(unittest.TestCase):
+    def score(self, spec, values):
+        return paper.variant(spec)(values, values['command'], None, None)[1]
+
+    def test_scaled_kernel_leaves_a_motionless_robot_the_same_share_at_every_speed(self):
+        for speed in (.025, .05, .3):
+            c = self.score('kernel=scaled', telemetry(command=torch.tensor([[speed, 0., 0.]])))
+            self.assertAlmostEqual(float(c['linear_tracking']), math.exp(-1/.4), places=6)
+
+    def test_scaled_kernel_pays_standing_still_under_a_zero_command(self):
+        c = self.score('kernel=scaled', telemetry())
+        self.assertAlmostEqual(float(c['linear_tracking']), 1., places=6)
+        self.assertAlmostEqual(float(c['yaw_tracking']), .5, places=6)
+
+    def test_stride_average_restarts_at_a_command_change(self):
+        values = torch.tensor([[1.], [3.], [5.], [7.]])
+        commands = torch.tensor([[1., 0, 0], [1, 0, 0], [2, 0, 0], [2, 0, 0]])
+        torch.testing.assert_close(paper.stride_average(values, commands, 1, 60), torch.tensor([[1.], [2.], [5.], [6.]]))
+        torch.testing.assert_close(paper.stride_average(values, commands[:1].expand(4, 3), 1, 2),
+                                   torch.tensor([[1.], [2.], [4.], [6.]]))
+
+    def test_stride_average_keeps_replicas_apart(self):
+        # Control-major rows: (control 0, replica 0), (0, 1), (1, 0), (1, 1).
+        values = torch.tensor([[1.], [10.], [3.], [30.]])
+        averaged = paper.stride_average(values, torch.zeros(4, 3), 2, 60)
+        torch.testing.assert_close(averaged, torch.tensor([[1.], [10.], [2.], [20.]]))
+
+    def test_stride_kernel_needs_the_replica_count(self):
+        with self.assertRaisesRegex(ValueError, 'replica'):
+            self.score('kernel=stride', telemetry())
+
+    def test_variant_specification(self):
+        config = paper.variant_config('kernel=stride,penalties=calibrated,tracking=4,vertical_velocity_weight=1')
+        self.assertEqual(config.tracking_kernel, 'stride')
+        self.assertEqual((config.linear_tracking_weight, config.yaw_tracking_weight), (4., 2.))
+        self.assertEqual(config.vertical_velocity_weight, 1.)
+        self.assertEqual(config.roll_pitch_weight, paper.CALIBRATED_CONFIG.roll_pitch_weight)
+        self.assertEqual(paper.variant_config(''), paper.PAPER_CONFIG)
+        for bad in ('kernel=wide', 'penalties=other', 'nonsense=1', 'kernel=stride,kernel=paper', 'tracking'):
+            with self.assertRaises(ValueError, msg=bad):
+                paper.variant_config(bad)
+
+    def test_stride_kernel_on_a_recorded_walk(self):
+        trace = reward_scorer.load_trace(TRACE)
+        com = reward_scorer.root_com_local()
+        _, per_control = reward_scorer.evaluate(trace, paper.variant('kernel=scaled'), TaskConfig(), None, com)
+        _, averaged = reward_scorer.evaluate(trace, paper.variant('kernel=stride'), TaskConfig(), None, com)
+        self.assertGreater(float(averaged['linear_tracking'].mean()), float(per_control['linear_tracking'].mean()))
+        self.assertGreater(float(averaged['linear_tracking'].mean()), .9)
+
+
 class RecordedTraceTests(unittest.TestCase):
     def test_scores_a_recorded_trace_and_its_motionless_counterfactual(self):
         trace = reward_scorer.load_trace(TRACE)

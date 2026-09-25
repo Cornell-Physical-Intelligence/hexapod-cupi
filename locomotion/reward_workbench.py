@@ -58,7 +58,7 @@ TERMS = {
 
 def features(telemetry, previous_target, terminated, nominal_height):
     """Per-control inputs to each term before its coefficients apply."""
-    t = {key: value.to(torch.float64) for key, value in telemetry.items()}
+    t = {key: value.to(torch.float64) for key, value in telemetry.items() if torch.is_tensor(value)}
     velocity, gyro, pose, command = t["linear_velocity_nav"], t["angular_velocity_body"], t["root_pose_xyzw"], t["command"]
     delta = t["joint_target_rad"] - previous_target.to(torch.float64)
     x, y, z, w = (pose[:, 3:] / torch.linalg.vector_norm(pose[:, 3:], dim=-1, keepdim=True)).unbind(-1)

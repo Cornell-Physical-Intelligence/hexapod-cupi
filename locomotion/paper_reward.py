@@ -9,11 +9,17 @@ departure from the printed table and ``OMITTED`` every term left out.
 ``paper_reward_calibrated`` keeps the paper's terms but rescales the continuous
 penalties by the rule in ``CALIBRATION``; reproduce its weights with
 ``python -m locomotion.paper_reward <traces...>``.
+
+``variant`` builds any configuration from a spec, including the audit's
+command-scaled tracking kernels, for example
+``--reward c=locomotion.paper_reward:variant:kernel=stride,penalties=calibrated``.
+The stride kernel averages each replica's velocity over a contiguous trace;
+training would keep that window per replica in ``task.py``.
 """
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass, fields, replace
 import json
 
 import torch
@@ -59,9 +65,52 @@ class PaperRewardConfig:
     collision_force_n: float = 1.
     control_dt_s: float = .02
     substeps: int = 8
+    # docs/REWARD_V2_TABLE1_AUDIT.md section 5: "paper" is variant A, "scaled" B, "stride" C.
+    tracking_kernel: str = "paper"
+    scale_k: float = .4
+    minimum_speed_mps: float = .025
+    minimum_yaw_rate_rad_s: float = .15
+    stride_controls: int = 60
 
 
 PAPER_CONFIG = PaperRewardConfig()
+KERNELS = ("paper", "scaled", "stride")
+
+
+def stride_average(values, commands, replicas, window):
+    """Causal mean over each replica's last ``window`` controls, restarted when its command changes.
+
+    Rows arrive control-major, as the scorer flattens them: row = control * replicas + replica.
+    """
+    controls = len(values) // replicas
+    values = values.reshape(controls, replicas, -1)
+    commands = commands.reshape(controls, replicas, -1)
+    result = torch.empty_like(values)
+    start = torch.zeros(replicas, dtype=torch.long)
+    for control in range(controls):
+        if control:
+            changed = (commands[control] != commands[control - 1]).any(-1)
+            start[changed] = control
+        for replica in range(replicas):
+            first = max(int(start[replica]), control - window + 1)
+            result[control, replica] = values[first:control + 1, replica].mean(0)
+    return result.reshape(controls * replicas, -1)
+
+
+def _tracking(velocity_xy, yaw_rate, commands, telemetry, c):
+    if c.tracking_kernel not in KERNELS:
+        raise ValueError(f"Tracking kernel must be one of {KERNELS}, got {c.tracking_kernel!r}")
+    if c.tracking_kernel == "paper":
+        return c.tracking_scale, c.tracking_scale, velocity_xy, yaw_rate
+    if c.tracking_kernel == "stride":
+        if "replicas" not in telemetry:
+            raise ValueError("Stride-averaged tracking needs the telemetry replica count")
+        replicas = int(telemetry["replicas"])
+        velocity_xy = stride_average(velocity_xy, commands, replicas, c.stride_controls)
+        yaw_rate = stride_average(yaw_rate[:, None], commands, replicas, c.stride_controls)[:, 0]
+    linear_scale = c.scale_k * torch.linalg.vector_norm(commands[:, :2], dim=-1).clamp_min(c.minimum_speed_mps)
+    yaw_scale = c.scale_k * commands[:, 2].abs().clamp_min(c.minimum_yaw_rate_rad_s)
+    return linear_scale, yaw_scale, velocity_xy, yaw_rate
 
 
 def paper_reward(telemetry, commands, previous_target, terminated, config=None, nominal_height=None,
@@ -81,9 +130,10 @@ def paper_reward(telemetry, commands, previous_target, terminated, config=None, 
     torque_excess = (t["requested_torque_abs_max_400hz"].abs() - c.torque_limit_nm).clamp_min(0)
     velocity_excess = (t["joint_velocity_rad_s"].abs() - c.velocity_limit_rad_s).clamp_min(0)
     norm = torch.linalg.vector_norm
+    linear_scale, yaw_scale, tracked_xy, tracked_yaw = _tracking(velocity[:, :2], gyro[:, 2], commands, telemetry, c)
     components = {
-        "linear_tracking": c.linear_tracking_weight * torch.exp(-norm(velocity[:, :2] - commands[:, :2], dim=-1) / c.tracking_scale),
-        "yaw_tracking": c.yaw_tracking_weight * torch.exp(-(gyro[:, 2] - commands[:, 2]).abs() / c.tracking_scale),
+        "linear_tracking": c.linear_tracking_weight * torch.exp(-norm(tracked_xy - commands[:, :2], dim=-1) / linear_scale),
+        "yaw_tracking": c.yaw_tracking_weight * torch.exp(-(tracked_yaw - commands[:, 2]).abs() / yaw_scale),
         "vertical_velocity": -c.vertical_velocity_weight * velocity[:, 2].square(),
         "roll_pitch_rate": -c.roll_pitch_weight * norm(gyro[:, :2], dim=-1),
         "joint_torque": -c.torque_weight * norm(rms_torque, dim=-1),
@@ -158,6 +208,43 @@ def paper_reward_calibrated(telemetry, commands, previous_target, terminated, co
     """The paper reward with continuous penalties rescaled by ``CALIBRATION``."""
     return paper_reward(telemetry, commands, previous_target, terminated, config, nominal_height,
                         paper_config=CALIBRATED_CONFIG)
+
+
+def variant_config(spec):
+    """Parse ``kernel=...,penalties=paper|calibrated,tracking=<multiplier>,<field>=<value>,...``."""
+    options = {}
+    for item in filter(None, spec.split(",")):
+        key, separator, value = item.partition("=")
+        if not separator or not key or key in options:
+            raise ValueError(f"Variant options are unique key=value pairs, got {item!r}")
+        options[key] = value
+    penalties = options.pop("penalties", "paper")
+    if penalties not in ("paper", "calibrated"):
+        raise ValueError(f"penalties must be paper or calibrated, got {penalties!r}")
+    base = CALIBRATED_CONFIG if penalties == "calibrated" else PAPER_CONFIG
+    multiplier = float(options.pop("tracking", 1))
+    if "kernel" in options:
+        options["tracking_kernel"] = options.pop("kernel")
+    types = {field.name: {"float": float, "int": int, "str": str}[field.type] for field in fields(PaperRewardConfig)}
+    unknown = sorted(set(options) - set(types))
+    if unknown:
+        raise ValueError(f"Unknown variant options: {unknown}")
+    config = replace(base, **{key: types[key](value) for key, value in options.items()})
+    config = replace(config, linear_tracking_weight=config.linear_tracking_weight * multiplier,
+                     yaw_tracking_weight=config.yaw_tracking_weight * multiplier)
+    if config.tracking_kernel not in KERNELS:
+        raise ValueError(f"Tracking kernel must be one of {KERNELS}, got {config.tracking_kernel!r}")
+    return config
+
+
+def variant(spec):
+    """Reward factory for ``--reward NAME=locomotion.paper_reward:variant:<spec>``."""
+    config = variant_config(spec)
+
+    def reward(telemetry, commands, previous_target, terminated, _config=None, nominal_height=None):
+        return paper_reward(telemetry, commands, previous_target, terminated, paper_config=config)
+    reward.config = config
+    return reward
 
 
 def main(argv=None):
