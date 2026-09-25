@@ -86,11 +86,19 @@ class LossTests(unittest.TestCase):
         self.assertAlmostEqual(terms['policy'], 2.25, places=6)
         self.assertAlmostEqual(terms['gradient_penalty'], 0., places=9)
 
-    def test_gradient_penalty_is_taken_with_respect_to_prior_inputs(self):
+    def test_gradient_penalty_is_taken_with_respect_to_standardized_prior_inputs(self):
         weight = torch.linspace(-1, 1, 122)
         discriminator = linear_discriminator(weight, std=2.)
         _, terms = amp.discriminator_loss(discriminator, torch.randn(8, 122), torch.randn(8, 122), gradient_penalty=10.)
-        self.assertAlmostEqual(terms['gradient_penalty'], .5 * 10 * float((weight/2).square().sum()), places=4)
+        self.assertAlmostEqual(terms['gradient_penalty'], .5 * 10 * float(weight.square().sum()), places=4)
+
+    def test_gradient_penalty_ignores_feature_scale(self):
+        weight = torch.linspace(-1, 1, 122)
+        prior, policy = torch.randn(8, 122), torch.randn(8, 122)
+        unit = amp.discriminator_loss(linear_discriminator(weight, std=1.), prior, policy)[1]['gradient_penalty']
+        tiny = amp.discriminator_loss(linear_discriminator(weight, std=1e-4), prior * 1e-4, policy * 1e-4)[1]['gradient_penalty']
+        self.assertAlmostEqual(unit, tiny, places=4)
+        self.assertAlmostEqual(unit, .5 * 10 * float(weight.square().sum()), places=4)
 
 
 class TrainingTests(unittest.TestCase):

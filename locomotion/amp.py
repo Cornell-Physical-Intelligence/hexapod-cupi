@@ -50,7 +50,8 @@ CONTRACT = {
 AMP_WIDTH = CONTRACT['width']
 DECISIONS = (
     "Gradient penalty: Eq. (1) prints the gradient with respect to discriminator parameters; this "
-    "follows the cited AMP method and penalizes the gradient with respect to prior transitions.",
+    "follows the cited AMP method and penalizes the gradient with respect to prior transitions, "
+    "taken on the standardized transition the network consumes so feature scale cannot inflate it.",
     "The gradient-penalty coefficient is not stated; alpha_gp = 10.",
     "Hidden layers [1024, 512] follow Table III; ELU activations and a linear output are not stated there.",
     "Inputs are standardized with the motion-prior dataset's per-feature mean and standard deviation.",
@@ -121,10 +122,17 @@ def style_reward(scores):
 
 
 def discriminator_loss(discriminator, prior, policy, gradient_penalty=10.):
-    """Eq. (1): least-squares targets +1 for prior and -1 for policy transitions, plus a gradient penalty."""
-    prior = prior.clone().requires_grad_(True)
-    prior_scores = discriminator(prior)
-    gradient, = torch.autograd.grad(prior_scores.sum(), prior, create_graph=True)
+    """Eq. (1): least-squares targets +1 for prior and -1 for policy transitions, plus a gradient penalty.
+
+    The penalty differentiates the score with respect to the standardized prior
+    transition, the tensor the network consumes. Differentiating with respect to
+    the raw transition scales each feature's gradient by 1/std; the admitted
+    bank holds features with std near 1e-4, which made the penalty start near
+    4e3 and drive the score to zero everywhere.
+    """
+    standardized = ((prior - discriminator.mean) / discriminator.std).clone().requires_grad_(True)
+    prior_scores = discriminator.net(standardized).squeeze(-1)
+    gradient, = torch.autograd.grad(prior_scores.sum(), standardized, create_graph=True)
     terms = {"prior": (prior_scores - 1).square().mean(), "policy": (discriminator(policy) + 1).square().mean(),
              "gradient_penalty": .5 * gradient_penalty * gradient.square().sum(-1).mean()}
     return sum(terms.values()), {key: float(value.detach()) for key, value in terms.items()}

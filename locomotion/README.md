@@ -78,7 +78,8 @@ and the Table III networks with `--networks paper` ([TRAINING Steps 5–6](../do
 AMP state before the action with the state after it, before any reset, scores
 the pair with the discriminator and adds the Eq. (2) style reward to the task
 reward with weight 1. Each PPO update first trains the discriminator with the
-Eq. (1) least-squares loss and input-gradient penalty against uniform samples
+Eq. (1) least-squares loss and a gradient penalty on the standardized
+transition the network consumes, against uniform samples
 from the [admitted demonstration bank](priors/datasets/amp_demonstrations_001/manifest.json),
 then runs the unchanged PPO update, then fits the velocity estimator by
 supervised regression on the stored rollout. `test_amp_ppo` checks exact
