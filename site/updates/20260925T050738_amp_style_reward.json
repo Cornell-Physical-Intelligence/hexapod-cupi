@@ -1,0 +1,24 @@
+{
+  "id": "20260925T050738_amp_style_reward",
+  "date": "2026-09-25T05:07:38+00:00",
+  "title": "Add the AMP discriminator and tripod style reward",
+  "summary": "locomotion.amp implements Liu et al.'s discriminator on 61-value AMP transitions with Table III's [1024, 512] layers, the Eq. (1) least-squares loss and the Eq. (2) style reward. It resolves the printed parameter gradient penalty as the cited AMP input-gradient penalty with coefficient 10 and records that and its other unstated choices in DECISIONS. It can fit a frozen discriminator offline from recorded traces and adds the style term to the literal or calibrated Table I rewards for the scorer and viewer through MODULE:FACTORY:CHECKPOINT reward specifications. The offline discriminator is a diagnostic: AMP trains it against the current policy during PPO. Domain randomization (Table II) changes native physics and remains Step 7.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/amp.py",
+    "locomotion/reward_scorer.py",
+    "locomotion/tests/test_amp.py",
+    "configs/source_inventory.json",
+    "configs/releases/reward_workbench_20260923_v1.sha256",
+    "site/updates/20260925T050738_amp_style_reward.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_amp.py",
+    "configs/releases/reward_workbench_20260923_v1.sha256"
+  ],
+  "next": "Implement the Step 5 flat AMP pilot, updating the discriminator with PPO against the current policy, after the motion-prior dataset passes Step 4 review.",
+  "no_project_impact": true,
+  "reason": "An offline discriminator and candidate reward terms change no measured result, roadmap marker, gate or the training reward in locomotion/task.py."
+}

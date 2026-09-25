@@ -66,6 +66,8 @@ def main(argv=None):
     parser.add_argument('--logger', choices=['tensorboard', 'wandb'], default='tensorboard')
     parser.add_argument('--wandb-project')
     parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
+    parser.add_argument('--reward-version', choices=['1', '2'], default='1',
+                        help='Training reward: version 1 in task.py or version 2 in task_v2.py.')
     if any(flag in (argv if argv is not None else sys.argv[1:]) for flag in ('--preflight-only', '--help', '-h')):
         parser.add_argument('--headless', action='store_true')
         parser.add_argument('--device', default='cuda:0')
@@ -81,6 +83,8 @@ def main(argv=None):
                              'and WANDB_API_KEY when online')
     elif args.wandb_project is not None or args.wandb_mode != 'offline':
         raise ValueError('W&B options require --logger wandb')
+    if args.reward_version != '1' and args.mode != 'train':
+        raise ValueError('Reward version 2 applies to training only')
     configuration.verify_assets(args.asset, args.model)
     if (not args.headless or args.device != 'cuda:0' or not 1 <= args.updates <= 2000
             or not 0 < args.max_wall_seconds <= 6600 or args.seed < 0
@@ -100,7 +104,8 @@ def main(argv=None):
         'geometry_sha256': sha(args.geometry), 'geometry_extrema_sha256': sha(args.geometry_extrema),
         'config': cfg.declaration(), 'motion_prior': False, 'behavior_cloning': False,
         'seed': args.seed, 'rsl_rl_required_version': '5.0.1',
-        'adapter_sha256': sha(source/'ppo.py'), 'entry_sha256': sha(__file__)}
+        'adapter_sha256': sha(source/'ppo.py'), 'entry_sha256': sha(__file__),
+        'reward_version': args.reward_version}
     identity['physics_source_files'] = {k: identity['source_files'][k] for k in ('env.py', 'env_config.py')}
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
         'spacing_m': cfg.spacing_m, 'target_slew_rad': cfg.target_slew_rad, 'action_scale_rad': cfg.action_scale_rad,
@@ -177,7 +182,11 @@ def main(argv=None):
         version = importlib.metadata.version('rsl-rl-lib')
         if version != '5.0.1':
             raise ValueError('RSL-RL version differs: '+version)
-        task = task_module.TrainingTask(env, task_module.TaskConfig(seed=args.seed), args.output/'task')
+        task_config = task_module.TaskConfig(seed=args.seed)
+        if args.reward_version == '2':
+            task = importlib.import_module(prefix+'.task_v2').TrainingTaskV2(env, task_config, args.output/'task')
+        else:
+            task = task_module.TrainingTask(env, task_config, args.output/'task')
         wrapped = vanilla.VanillaVecEnv(task)
         config = vanilla.ppo_config(args.seed)
         save(args.output/'ppo_config.json', config)

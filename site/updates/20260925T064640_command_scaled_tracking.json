@@ -1,0 +1,25 @@
+{
+  "id": "20260925T064640_command_scaled_tracking",
+  "date": "2026-09-25T06:46:40+00:00",
+  "title": "Add command-scaled tracking variants to the candidate paper reward",
+  "summary": "locomotion.paper_reward gains the audit's tracking variants: the paper's fixed 0.15 scale, a command-scaled kernel with scale 0.4 times the command, floored at the smallest bank command, and that kernel on each replica's causal 60-control mean velocity, restarted at command changes. A variant factory builds any configuration from a spec for the scorer and viewer, and the scorer now passes the replica count so stride averages stay per replica. Training still uses locomotion/task.py.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/paper_reward.py",
+    "locomotion/reward_scorer.py",
+    "locomotion/reward_workbench.py",
+    "locomotion/tests/test_paper_reward.py",
+    "configs/source_inventory.json",
+    "configs/releases/reward_audit_20260925_v1.sha256",
+    "site/updates/20260925T064640_command_scaled_tracking.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_paper_reward.py",
+    "configs/releases/reward_audit_20260925_v1.sha256"
+  ],
+  "next": "The reviewer chooses between the per-control and stride-averaged command-scaled kernels before reward v2 is implemented in locomotion/task.py.",
+  "no_project_impact": true,
+  "reason": "Candidate tracking variants scored offline change no measured result, roadmap marker, gate or the training reward in locomotion/task.py."
+}
