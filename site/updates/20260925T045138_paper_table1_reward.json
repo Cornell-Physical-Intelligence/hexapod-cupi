@@ -1,0 +1,26 @@
+{
+  "id": "20260925T045138_paper_table1_reward",
+  "date": "2026-09-25T04:51:38+00:00",
+  "title": "Add a candidate Table I task and penalty reward",
+  "summary": "locomotion.paper_reward implements the task-tracking and penalty terms of Liu et al. Table I on this robot's telemetry, beside the unchanged task.measured_reward. It restores the missing minus sign in the tracking exponent, derives joint acceleration from consecutive controls, approximates the collision count by non-foot ground contact above 1 N, and applies the torque limit to requested torque against the 1.6 N·m cap. It omits the style term and the foot contact-force limit. A separate paper_reward_calibrated variant rescales the five continuous penalties so that, on seven recorded focus-case rollouts, they together average 0.8 of the mean tracking reward in equal shares; the limit and collision terms keep the printed weights. python -m locomotion.paper_reward reproduces the calibration from the traces recorded by SHA-256. The scorer and viewer score either variant with --reward and now supply previous joint velocity, raw and previous actions and requested torque from control traces.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/paper_reward.py",
+    "locomotion/reward_scorer.py",
+    "locomotion/reward_viewer.py",
+    "locomotion/tests/test_paper_reward.py",
+    "locomotion/tests/test_reward_scorer.py",
+    "configs/source_inventory.json",
+    "configs/releases/reward_workbench_20260923_v1.sha256",
+    "site/updates/20260925T045138_paper_table1_reward.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_paper_reward.py",
+    "configs/releases/reward_workbench_20260923_v1.sha256"
+  ],
+  "next": "Publish a score report comparing the candidate with the current reward on the paired PPO and optimizer replay traces, including each reward's motionless counterfactual, before proposing it for training.",
+  "no_project_impact": true,
+  "reason": "A candidate reward scored offline changes no measured result, roadmap marker, gate or the training reward in locomotion/task.py."
+}

@@ -7,12 +7,13 @@ simulator is needed. Restore archived traces with ``tools/archive.py restore``.
 
 Candidate rewards share ``measured_reward``'s signature:
 ``fn(telemetry, commands, previous_target, terminated, config, nominal_height)``
-returning ``(reward, components)``.
+returning ``(reward, components)``. Coefficient edits exported by
+``locomotion.reward_workbench`` run through the unchanged ``measured_reward``.
 """
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import hashlib
 import importlib
 import json
@@ -30,14 +31,24 @@ REQUIRED_FIELDS = ("root_pose_xyzw", "velocity_world_mps", "gyro_body_rad_s", "j
                    "joint_target_rad", "applied_torque_squared_sum_400hz", "nonfoot_contact_count_400hz",
                    "command", "terminated")
 RECONSTRUCTION_TOLERANCE_MPS = 1e-5
+# env.LocomotionEnv's AMP state: q, then joint, body linear and body angular velocity.
+AMP_VELOCITY_SLICES = (slice(18, 36), slice(36, 39), slice(39, 42))
 DECLARED_GAPS = (
     "Non-foot contact: training penalizes >1 N floor force on non-tibia bodies; traces keep only "
     "evaluation patch-classified contact counts, so the scorer passes zero force and reports "
     "contact controls separately.",
     "Control 0 is excluded because its previous joint target is not recorded.",
-    "The motionless counterfactual zeroes body and joint velocities and target changes but keeps "
-    "recorded pose, torque and contact; compare its tracking terms, not its penalty terms.",
+    "The motionless counterfactual zeroes body and joint velocities, target changes and action "
+    "changes but keeps recorded pose, torque and contact; compare its tracking terms, not its penalty terms.",
+    "Requested-torque peaks: training reads each joint's largest requested torque over the eight "
+    "substeps; traces keep only the last substep's, so the scorer uses that.",
 )
+REWARD_CONFIG_SCHEMA = "reward_config_v1"
+REWARD_FIELDS = ("linear_tracking_weight", "linear_error_variance", "yaw_tracking_weight", "yaw_error_variance",
+                 "quiet_joint_rate_weight", "quiet_joint_rate_scale_rad_s", "quiet_target_step_weight",
+                 "quiet_target_step_scale_rad", "tilt_weight", "angular_xy_weight", "vertical_velocity_weight",
+                 "height_weight", "normalized_effort_weight", "target_movement_weight", "nonfoot_event_weight",
+                 "nonfoot_force_weight", "terminal_penalty")
 
 
 @dataclass
@@ -97,21 +108,37 @@ def reward_inputs(trace, com_local, *, motionless=False):
 
     data = trace.data
     target = torch.as_tensor(data["joint_target_rad"], dtype=torch.float32)
+    joint_velocity = torch.as_tensor(data["joint_velocity_rad_s"], dtype=torch.float32)
     telemetry = {
         "linear_velocity_nav": flat(origin_velocity_nav(trace, com_local)[1:].to(torch.float32)),
         "angular_velocity_body": flat(torch.as_tensor(data["gyro_body_rad_s"][1:], dtype=torch.float32)),
         "root_pose_xyzw": flat(torch.as_tensor(data["root_pose_xyzw"][1:], dtype=torch.float32)),
-        "joint_velocity_rad_s": flat(torch.as_tensor(data["joint_velocity_rad_s"][1:], dtype=torch.float32)),
+        "joint_velocity_rad_s": flat(joint_velocity[1:]),
+        "previous_joint_velocity_rad_s": flat(joint_velocity[:-1]),
         "joint_target_rad": flat(target[1:]),
         "torque_square_sum_400hz": flat(torch.as_tensor(data["applied_torque_squared_sum_400hz"][1:], dtype=torch.float32)),
+        "requested_torque_abs_max_400hz": flat(torch.as_tensor(data["computed_torque_nm"][1:], dtype=torch.float32).abs()),
         "command": flat(torch.as_tensor(data["command"][1:], dtype=torch.float32)),
     }
+    if "policy_action" in data:
+        action = torch.as_tensor(data["policy_action"], dtype=torch.float32)
+        telemetry["action"], telemetry["previous_action"] = flat(action[1:]), flat(action[:-1])
+    if "amp_state_before" in data:
+        telemetry["amp_state"] = flat(torch.as_tensor(data["amp_state_before"][1:], dtype=torch.float32))
+        telemetry["next_amp_state"] = flat(torch.as_tensor(data["amp_state_after"][1:], dtype=torch.float32))
     telemetry["other_body_force_max_400hz"] = torch.zeros(len(telemetry["command"]))
     previous_target = flat(target[:-1])
     if motionless:
-        for key in ("linear_velocity_nav", "angular_velocity_body", "joint_velocity_rad_s"):
+        for key in ("linear_velocity_nav", "angular_velocity_body", "joint_velocity_rad_s", "previous_joint_velocity_rad_s"):
             telemetry[key] = torch.zeros_like(telemetry[key])
         previous_target = telemetry["joint_target_rad"].clone()
+        if "action" in telemetry:
+            telemetry["previous_action"] = telemetry["action"].clone()
+        if "amp_state" in telemetry:
+            still = telemetry["amp_state"].clone()
+            for columns in AMP_VELOCITY_SLICES:
+                still[:, columns] = 0
+            telemetry["amp_state"], telemetry["next_amp_state"] = still, still.clone()
     terminated = flat(torch.as_tensor(data["terminated"][1:], dtype=torch.bool))
     return telemetry, previous_target, terminated
 
@@ -122,10 +149,56 @@ def evaluate(trace, reward, config, nominal_height, com_local, *, motionless=Fal
 
 
 def load_reward(spec):
-    module, _, attribute = spec.partition(":")
+    """MODULE:FUNCTION, or MODULE:FACTORY:ARGUMENT for rewards built from a file such as a checkpoint."""
+    module, _, rest = spec.partition(":")
+    attribute, _, argument = rest.partition(":")
     if not module or not attribute:
         raise ValueError(f"Reward must be MODULE:FUNCTION, got {spec!r}")
-    return getattr(importlib.import_module(module), attribute)
+    target = getattr(importlib.import_module(module), attribute)
+    return target(argument) if argument else target
+
+
+def config_reward(overrides):
+    """The current measured_reward under edited coefficients that training would accept."""
+    unknown = sorted(set(overrides) - set(REWARD_FIELDS))
+    if unknown:
+        raise ValueError(f"Not reward coefficients: {unknown}")
+    config = replace(TaskConfig(), **{key: float(value) for key, value in overrides.items()})
+    config.validate()
+
+    def reward(telemetry, commands, previous_target, terminated, _config, nominal_height):
+        return measured_reward(telemetry, commands, previous_target, terminated, config, nominal_height)
+    return reward
+
+
+def load_reward_config(path):
+    data = json.loads(Path(path).read_text())
+    if data.get("schema") != REWARD_CONFIG_SCHEMA:
+        raise ValueError(f"{path} is not a {REWARD_CONFIG_SCHEMA} file")
+    if data.get("base_reward_version") != REWARD_VERSION:
+        raise ValueError(f"{path} edits {data.get('base_reward_version')!r}, not the current {REWARD_VERSION!r}")
+    return config_reward(data["overrides"])
+
+
+def add_reward_arguments(parser):
+    parser.add_argument("--reward", action="append", default=[], metavar="NAME=MODULE:FUNCTION",
+                        help="Candidate reward function beside the current one; repeatable.")
+    parser.add_argument("--reward-config", action="append", default=[], metavar="NAME=PATH",
+                        help="Coefficient edits exported by locomotion.reward_workbench; repeatable.")
+
+
+def selected_rewards(parser, args):
+    rewards = {f"current ({REWARD_VERSION})": measured_reward}
+    for option, specs, load in (("--reward", args.reward, load_reward),
+                                ("--reward-config", args.reward_config, load_reward_config)):
+        for spec in specs:
+            name, separator, target = spec.partition("=")
+            if not separator or not name or not target:
+                parser.error(f"{option} must be NAME=..., got {spec!r}")
+            if name in rewards:
+                parser.error(f"Reward name {name!r} is used twice")
+            rewards[name] = load(target)
+    return rewards
 
 
 def _mean(values, mask):
@@ -208,17 +281,10 @@ def main(argv=None):
     parser.add_argument("--nominal-height", type=float, required=True,
                         help="Nominal root height (m) the reward was trained with; the run's "
                              "task_definition.json records it as nominal_plate_height_m.")
-    parser.add_argument("--reward", action="append", default=[], metavar="NAME=MODULE:FUNCTION",
-                        help="Candidate reward to score beside the current one; repeatable.")
+    add_reward_arguments(parser)
     parser.add_argument("--json", type=Path, help="Write the full score report here.")
     args = parser.parse_args(argv)
-    rewards = {f"current ({REWARD_VERSION})": measured_reward}
-    for spec in args.reward:
-        name, separator, target = spec.partition("=")
-        if not separator or not name:
-            parser.error(f"--reward must be NAME=MODULE:FUNCTION, got {spec!r}")
-        rewards[name] = load_reward(target)
-    result = score(args.traces, rewards, args.nominal_height)
+    result = score(args.traces, selected_rewards(parser, args), args.nominal_height)
     if args.json:
         args.json.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
     print(_format(result))

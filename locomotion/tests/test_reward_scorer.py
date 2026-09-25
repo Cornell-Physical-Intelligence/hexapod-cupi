@@ -97,7 +97,7 @@ class RewardScorerTests(unittest.TestCase):
                 reward_scorer.main([str(TRACE), '--nominal-height', str(NOMINAL_HEIGHT), '--json', str(output)])
             report = json.loads(output.read_text())
         self.assertEqual(report['schema'], reward_scorer.SCHEMA)
-        self.assertEqual(len(report['declared_gaps']), 3)
+        self.assertEqual(report['declared_gaps'], list(reward_scorer.DECLARED_GAPS))
         self.assertIn('ranking by mean recorded reward', printed.getvalue())
 
 
