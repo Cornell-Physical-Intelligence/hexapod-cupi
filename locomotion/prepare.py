@@ -22,7 +22,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
             checkpoint_declaration_sha=None, candidate=0, suite='screen',
             tripod_adaptation='paper', logger='tensorboard', wandb_project=None, wandb_mode='offline',
-            reward_version='1', root=ROOT):
+            reward_version='1', learner='ppo', networks='mlp', root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     if (not remote_root.is_absolute() or REMOTE_ROOT not in remote_root.parents
             or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay', 'tripod')
@@ -45,6 +45,9 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         raise ValueError('W&B logging needs train mode, a project name and offline or online mode')
     if reward_version not in ('1', '2') or (mode != 'train' and reward_version != '1'):
         raise ValueError('Reward version 2 applies to training only')
+    if (learner not in ('ppo', 'amp') or networks not in ('mlp', 'paper') or (networks == 'paper' and learner != 'amp')
+            or (learner == 'amp' and mode not in ('train', 'evaluate'))):
+        raise ValueError('The AMP learner trains or evaluates, and the paper networks need the AMP learner')
     supplied = (checkpoint is not None, checkpoint_sha is not None, checkpoint_declaration_sha is not None)
     if (mode == 'evaluate' and not all(supplied)) or (mode != 'evaluate' and any(supplied)):
         raise ValueError('Evaluation requires a checkpoint and its two file hashes')
@@ -71,6 +74,11 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         optional.mkdir(parents=True)
         for name in ('__init__.py', 'replay_native.py'):
             shutil.copy2(root/'locomotion/priors'/name, optional/name)
+    if learner == 'amp':
+        bank = 'locomotion/priors/datasets/amp_demonstrations_001'
+        (source/bank).mkdir(parents=True)
+        for name in ('manifest.json', 'review.json', 'transitions.npz'):
+            shutil.copy2(root/bank/name, source/bank/name)
     save(source/'FREEZE_SHA256.json', {p.relative_to(source).as_posix(): sha(p)
         for p in sorted(source.rglob('*.py'))})
     freeze = sha(source/'FREEZE_SHA256.json')
@@ -94,6 +102,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         binding['command_args'] += ['--updates', str(updates), '--seed', str(seed)]
     if reward_version != '1':
         binding['command_args'] += ['--reward-version', reward_version]
+    if learner != 'ppo':
+        binding['command_args'] += ['--learner', learner, '--networks', networks]
     if logger == 'wandb':
         binding['command_args'] += ['--logger', 'wandb', '--wandb-project', wandb_project, '--wandb-mode', wandb_mode]
     if mode == 'tripod':
@@ -114,6 +124,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
     save(output/'binding.json', binding)
     save(output/'PACK.json', {'remote_root': str(remote_root), 'source_freeze_sha256': freeze,
         'binding_sha256': sha(output/'binding.json'), 'mode': mode, 'seed': seed, 'reward_version': reward_version,
+        'learner': learner, 'networks': networks,
         'updates': updates, 'stage2_complete': False, 'files': {
             p.relative_to(output).as_posix(): sha(p) for p in sorted(output.rglob('*')) if p.is_file()}})
     return binding
@@ -139,6 +150,8 @@ def main():
     parser.add_argument('--wandb-project')
     parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
     parser.add_argument('--reward-version', choices=['1', '2'], default='1')
+    parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo')
+    parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp')
     args = parser.parse_args()
     print(json.dumps(prepare(**vars(args)), indent=2))
 

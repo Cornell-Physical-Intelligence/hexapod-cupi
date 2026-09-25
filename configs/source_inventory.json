@@ -145,9 +145,9 @@
     {
       "path": "locomotion/amp.py",
       "previous_path": null,
-      "classification": "prototype",
-      "owner": "Platform lead",
-      "purpose": "AMP discriminator, Eq. (1) loss and Eq. (2) style reward; offline frozen training is diagnostic only."
+      "classification": "current",
+      "owner": "Program lead",
+      "purpose": "Share the retained 61-value feature order between native policies and demonstrations; AMP discriminator, Eq. (1) loss and Eq. (2) style reward, with offline frozen training as a diagnostic."
     },
     {
       "path": "locomotion/camera.py",
@@ -218,6 +218,20 @@
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Adapt the admitted simulator to standard RSL-RL PPO without a motion prior."
+    },
+    {
+      "path": "locomotion/amp_ppo.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Online adversarial motion prior for RSL-RL PPO: AMP transitions, style reward, discriminator updates, privileged critic state and the supervised velocity estimator; no native pilot yet."
+    },
+    {
+      "path": "locomotion/paper_networks.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Liu et al. Table III actor and critic: velocity estimator, memory encoder, low-level actor and privileged encoder; the terrain encoder waits for Step 8."
     },
     {
       "path": "locomotion/paper_reward.py",
@@ -344,13 +358,6 @@
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Derive toe positions and joint Jacobians from the admitted model."
-    },
-    {
-      "path": "locomotion/amp.py",
-      "previous_path": null,
-      "classification": "current",
-      "owner": "Program lead",
-      "purpose": "Share the retained 61-value feature order between native policies and demonstrations."
     },
     {
       "path": "locomotion/priors/commands.py",
