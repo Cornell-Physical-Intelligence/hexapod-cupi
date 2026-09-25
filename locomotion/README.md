@@ -10,6 +10,7 @@ loop without reading old experiment launchers or a second environment port.
 | [`env.py`](env.py) | Load the native robot, form observations, limit joint targets, apply motor torque and advance eight physics steps. The actor receives 231 values and returns 18 offsets. |
 | [`task.py`](task.py) | Sample held velocity commands, compute the training reward, detect failed episodes and reset selected robots. This file owns the reward. |
 | [`ppo.py`](ppo.py), [`train.py`](train.py) | Adapt the task to stock PPO, record updates and loads, save checkpoints and load them for evaluation. |
+| [`amp.py`](amp.py), [`amp_ppo.py`](amp_ppo.py), [`paper_networks.py`](paper_networks.py) | Share the 61-value AMP feature contract, score transitions with the discriminator, add the style reward inside PPO and supply the Table III networks. See [AMP learner](#amp-learner-and-paper-networks). |
 | [`evaluate.py`](evaluate.py), [`evaluation.py`](evaluation.py) | Record actual policy rollouts and apply the existing walking, stopping, contact and motor gates. Missing cases remain missing. |
 | [`force_metrics.py`](force_metrics.py), [`camera.py`](camera.py) | Report contact-normal force and motor torque, and record an Isaac camera video from the policy rollout. |
 | [`admission.py`](admission.py) | Recompute one-robot and batch standing captures and require matching model, source and geometry before training. |
@@ -62,10 +63,43 @@ binding. Navigation can then consume velocity commands and stopping status.
 The navigation example consumes shared commands. Historical runtime bindings
 remain in Git until a canonical replacement receives its own parity evidence.
 
-The optional trajectory optimizer and native replay live in `priors/`. Package
+The [AMP demonstration pipeline](priors/README.md) supplies an optimizer and
+native replay with a reviewed dataset exporter. `amp.py` preserves the shared
+61-value feature contract. Package
 canonical inputs with `python -m locomotion.inputs pack --help`. Use the
 [archive guide](../docs/PIPELINE_LINEAGES.md) for historical checkpoints and
 source packs; preserve their original identities.
+
+## AMP learner and paper networks
+
+You select the online motion prior with `prepare --mode train --learner amp`
+and the Table III networks with `--networks paper` ([TRAINING Steps 5–6](../docs/TRAINING.md#proposed-reproduction-sequence)).
+[`amp_ppo.py`](amp_ppo.py) subclasses stock RSL-RL PPO. Each control pairs the
+AMP state before the action with the state after it, before any reset, scores
+the pair with the discriminator and adds the Eq. (2) style reward to the task
+reward with weight 1. Each PPO update first trains the discriminator with the
+Eq. (1) least-squares loss and a gradient penalty on the standardized
+transition the network consumes, against uniform samples
+from the [admitted demonstration bank](priors/datasets/amp_demonstrations_001/manifest.json),
+then runs the unchanged PPO update, then fits the velocity estimator by
+supervised regression on the stored rollout. `test_amp_ppo` checks exact
+parameter parity with stock PPO when the style weight and discriminator
+updates are zero.
+
+[`paper_networks.py`](paper_networks.py) implements the estimator [64, 32],
+memory encoder [512, 256, 128], low-level actor [256, 128, 64], privileged
+encoder [64, 32] and critic [512, 256, 128] over the existing 231-value
+observation. The critic reads a 42-value privileged state: body velocity,
+height, declared friction, six toe forces, zero perturbation slots and 13
+non-tibia collision indicators. Friction and perturbations become measured
+values with Step 7; the terrain latent belongs to Step 8. Privileged inputs and
+the velocity label never enter the actor's observation groups.
+
+Checkpoints add the discriminator, its optimizer and the bank identity, and a
+load with another bank fails. `amp_learner.json` in each run records the
+configuration and every declared decision. No native AMP run exists; the pilot
+needs reward version 2, matching standing admission and the program lead's
+approval. `DECISIONS` in each module lists the choices the paper leaves open.
 
 ## Prescribed tripod controller
 
@@ -74,7 +108,8 @@ You can evaluate the Zhang et al. sinusoidal tripod controller with
 the equations and contact state; [`tripod_config.py`](tripod_config.py) owns
 parameters. You use `prepare --mode tripod --tripod-adaptation stop_stride`
 with matching standing admission. [TRAINING](../docs/TRAINING.md#tripod-baseline)
-uses this controller as an AMP demonstration source and baseline.
+keeps this controller as a comparison baseline. Issue #36 uses optimized
+demonstrations for its motion bank.
 
 You reproduce the prescribed controller in [Zhang et al. (2024), §§3.3.1,
 4.1–4.2](https://www.frontiersin.org/journals/robotics-and-ai/articles/10.3389/frobt.2024.1426269/full).

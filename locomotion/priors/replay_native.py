@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import importlib
 import json
+import math
 from pathlib import Path
 import sys
 import traceback
@@ -18,6 +19,14 @@ def save(path, data):
     Path(path).write_text(json.dumps(data, indent=2, allow_nan=False)+'\n')
 
 
+def startup_target(target, neutral, control, ramp_controls):
+    """Blend motor targets from the admitted neutral pose during startup."""
+    if control+1 >= ramp_controls:
+        return target
+    weight = .5*(1-math.cos(math.pi*(control+1)/ramp_controls))
+    return neutral+weight*(target-neutral)
+
+
 
 def validate_trajectory(path, expected_sha, model_sha, *, read_arrays=True):
     path = Path(path)
@@ -25,11 +34,22 @@ def validate_trajectory(path, expected_sha, model_sha, *, read_arrays=True):
         raise ValueError('Trajectory bytes differ')
     declaration = json.loads(path.with_name('INPUT.json').read_text())
     result = json.loads(path.with_name('RESULT.json').read_text())
-    if (declaration.get('schema') != 'canonical_full_body_trajectory_optimization_v1'
+    if (declaration.get('schema') not in ('canonical_full_body_trajectory_optimization_v1',
+                                        'canonical_full_body_trajectory_optimization_v2')
             or declaration['model']['model_sha256'] != model_sha
             or result.get('trajectory_sha256') != expected_sha
             or result.get('status') != 'solved' or result.get('audit', {}).get('passed') is not True):
         raise ValueError('Trajectory lacks a solved, model-bound CPU feasibility result')
+    config = declaration['config']
+    command = [config['forward_mps'], config.get('left_mps', 0.), config.get('yaw_rate_rad_s', 0.)]
+    period = config['period_s']
+    if (config.get('control_dt_s') != .02 or not math.isfinite(period) or not .4 <= period <= 3.
+            or not math.isclose(period/.02, round(period/.02), abs_tol=1e-9)
+            or not all(math.isfinite(value) for value in command)
+            or math.hypot(*command[:2]) > .1000000001 or abs(command[2]) > .2):
+        raise ValueError('Trajectory timing or command envelope differs')
+    if declaration['schema'].endswith('_v2') and declaration.get('command') != command:
+        raise ValueError('Trajectory command differs from its configuration')
     if not read_arrays:
         return declaration, None
     import numpy as np
@@ -57,6 +77,8 @@ def main(argv=None):
     parser.add_argument('--trajectory-sha256', required=True)
     parser.add_argument('--source-freeze-sha256', required=True)
     parser.add_argument('--num-envs', type=int, choices=[1], default=1)
+    parser.add_argument('--start-phase', type=float, choices=[0., .5], default=0.)
+    parser.add_argument('--startup-ramp-controls', type=int, choices=[0, 50], default=0)
     parser.add_argument('--max-wall-seconds', type=float, default=1500.)
     parser.add_argument('--preflight-only', action='store_true')
     if any(flag in (argv if argv is not None else sys.argv[1:]) for flag in ('--preflight-only', '--help', '-h')):
@@ -89,7 +111,15 @@ def main(argv=None):
     identity['standing_admission'] = original.require_admission(args.standing_admission, identity, cfg)
     declaration, targets = validate_trajectory(args.trajectory, args.trajectory_sha256,
         env_config.MODEL_SHA256, read_arrays=not args.preflight_only)
+    if args.start_phase == .5 and round(declaration['config']['period_s']/.02) % 2:
+        raise ValueError('Half-cycle replay requires an even number of controls')
+    from locomotion.amp import feature_contract
+    config = declaration['config']
+    command = [config['forward_mps'], config.get('left_mps', 0.), config.get('yaw_rate_rad_s', 0.)]
     identity.update(controller_kind='optimized_periodic_motor_targets', learned_policy=False,
+        command=command, start_phase=args.start_phase, startup_ramp_controls=args.startup_ramp_controls,
+        amp_feature_contract=feature_contract(),
+        optimization_config=config, optimization_source_files=declaration['source_files'],
         trajectory_sha256=args.trajectory_sha256, optimization_input_sha256=sha(args.trajectory.with_name('INPUT.json')),
         optimization_result_sha256=sha(args.trajectory.with_name('RESULT.json')))
     if args.preflight_only:
@@ -120,17 +150,20 @@ def main(argv=None):
         torch.manual_seed(cfg.seed)
         env = env_module.LocomotionEnv(cfg, args.asset, args.model, args.geometry,
             args.output/'native', reference_metadata=metadata)
+        identity['root_com_local_m'] = env.root_com_local.detach().cpu().tolist()
         prepare_policy_scene(env)
         env.render = camera_module.NativePolicyCamera(env)
         target_tensor = torch.as_tensor(targets, dtype=torch.float32, device=env.device)
-        control = 0
+        start_control = round(args.start_phase*len(target_tensor))
+        control = start_control
         def controller(observation):
             nonlocal control
-            target = target_tensor[control % len(target_tensor)]
+            target = startup_target(target_tensor[control % len(target_tensor)], env.neutral,
+                                    control-start_control, args.startup_ramp_controls)
             control += 1
             return ((target-env.neutral)/env.cfg.action_scale_rad)[None, :]
-        case = {'case_id': f"trajectory:forward_{declaration['config']['forward_mps']:g}", 'profile': 'omni_static',
-                'command': [declaration['config']['forward_mps'], 0., 0.], 'controls': 1000}
+        case = {'case_id': 'trajectory:'+','.join(f'{value:g}' for value in command),
+                'profile': 'omni_static', 'command': command, 'controls': 1000}
         state['status'] = 'running'; save(args.output/'state.json', state)
         def progress(value):
             state['progress'] = value; save(args.output/'state.json', state)

@@ -20,7 +20,9 @@ The author must understand submitted code, including agent output.
 
 ## Results and publication
 
-Keep secrets and full run payloads outside the checkout. Preserve failed attempts
+Keep secrets and full run payloads outside the checkout. You commit an admitted
+training dataset under 20 MB with its manifest and review record; its raw native
+runs stay outside the checkout. Preserve failed attempts
 and immutable checkpoint/manifest bytes. Give new results fresh identities;
 bind measurements and videos to the source, model, inputs and checkpoint hash.
 Use the recorded 0.040 rad / 20 ms limiter for formal motion comparisons.

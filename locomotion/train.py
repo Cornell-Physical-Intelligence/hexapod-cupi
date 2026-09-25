@@ -66,6 +66,12 @@ def main(argv=None):
     parser.add_argument('--logger', choices=['tensorboard', 'wandb'], default='tensorboard')
     parser.add_argument('--wandb-project')
     parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
+    parser.add_argument('--reward-version', choices=['1', '2'], default='1',
+                        help='Training reward: version 1 in task.py or version 2 in task_v2.py.')
+    parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo',
+                        help='Stock PPO in ppo.py or PPO with the online motion prior in amp_ppo.py.')
+    parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp',
+                        help='The existing [256, 256, 128] MLPs or the Table III networks in paper_networks.py.')
     if any(flag in (argv if argv is not None else sys.argv[1:]) for flag in ('--preflight-only', '--help', '-h')):
         parser.add_argument('--headless', action='store_true')
         parser.add_argument('--device', default='cuda:0')
@@ -81,6 +87,10 @@ def main(argv=None):
                              'and WANDB_API_KEY when online')
     elif args.wandb_project is not None or args.wandb_mode != 'offline':
         raise ValueError('W&B options require --logger wandb')
+    if args.reward_version != '1' and args.mode != 'train':
+        raise ValueError('Reward version 2 applies to training only')
+    if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
+        raise ValueError('The paper networks need the AMP learner, and the AMP learner trains or evaluates only')
     configuration.verify_assets(args.asset, args.model)
     if (not args.headless or args.device != 'cuda:0' or not 1 <= args.updates <= 2000
             or not 0 < args.max_wall_seconds <= 6600 or args.seed < 0
@@ -93,14 +103,19 @@ def main(argv=None):
     from .evaluation_config import EvaluationEnvConfig
     config_class = EvaluationEnvConfig if args.mode == 'evaluate' and args.eval_scope == 'full' else configuration.EnvConfig
     cfg = config_class(num_envs=args.num_envs, seed=args.seed,
-        record_motion_features=args.mode == 'evaluate', render=args.mode == 'evaluate', episode_seconds=(90. if args.eval_scope == 'full' else 60.) if args.mode == 'evaluate' else (60. if args.mode == 'diagnostic' else 20.), device=args.device)
+        record_motion_features=args.mode == 'evaluate' or args.learner == 'amp', render=args.mode == 'evaluate', episode_seconds=(90. if args.eval_scope == 'full' else 60.) if args.mode == 'evaluate' else (60. if args.mode == 'diagnostic' else 20.), device=args.device)
     identity = {'schema': 'hexapod_locomotion_ppo_v1', 'source_files': {p.name: sha(p) for p in sorted(source.glob('*.py'))},
         'model_sha256': configuration.MODEL_SHA256, 'usd_sha256': configuration.USD_SHA256,
         'stance_sha256': sha(args.stance),
         'geometry_sha256': sha(args.geometry), 'geometry_extrema_sha256': sha(args.geometry_extrema),
-        'config': cfg.declaration(), 'motion_prior': False, 'behavior_cloning': False,
+        'config': cfg.declaration(), 'motion_prior': args.learner == 'amp', 'behavior_cloning': False,
         'seed': args.seed, 'rsl_rl_required_version': '5.0.1',
-        'adapter_sha256': sha(source/'ppo.py'), 'entry_sha256': sha(__file__)}
+        'adapter_sha256': sha(source/'ppo.py'), 'entry_sha256': sha(__file__),
+        'reward_version': args.reward_version, 'learner': args.learner, 'networks': args.networks}
+    if args.learner == 'amp':
+        amp_module = importlib.import_module(prefix+'.amp_ppo')
+        identity['learner_source_files'] = {name: sha(source/name) for name in ('amp.py', 'amp_ppo.py', 'paper_networks.py')}
+        identity['amp_dataset'] = amp_module.load_demonstrations(source.parent/amp_module.AMPConfig().dataset)[1]
     identity['physics_source_files'] = {k: identity['source_files'][k] for k in ('env.py', 'env_config.py')}
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
         'spacing_m': cfg.spacing_m, 'target_slew_rad': cfg.target_slew_rad, 'action_scale_rad': cfg.action_scale_rad,
@@ -122,6 +137,10 @@ def main(argv=None):
             raise ValueError('Checkpoint declaration differs')
         if any(checkpoint_record['identity'][key] != identity[key] for key in compatibility_keys):
             raise ValueError('Checkpoint model, physics, seed or implementation differs')
+        learner_keys = ('learner', 'networks', 'motion_prior', 'learner_source_files', 'amp_dataset')
+        if any(checkpoint_record['identity'].get(key, {'learner': 'ppo', 'networks': 'mlp', 'motion_prior': False}.get(key))
+               != identity.get(key) for key in learner_keys):
+            raise ValueError('Checkpoint learner, networks or demonstration bank differs')
     if args.preflight_only:
         print(json.dumps(identity, indent=2)); return 0
     args.output.mkdir(parents=True, exist_ok=False)
@@ -177,9 +196,19 @@ def main(argv=None):
         version = importlib.metadata.version('rsl-rl-lib')
         if version != '5.0.1':
             raise ValueError('RSL-RL version differs: '+version)
-        task = task_module.TrainingTask(env, task_module.TaskConfig(seed=args.seed), args.output/'task')
-        wrapped = vanilla.VanillaVecEnv(task)
-        config = vanilla.ppo_config(args.seed)
+        task_config = task_module.TaskConfig(seed=args.seed)
+        if args.reward_version == '2':
+            task = importlib.import_module(prefix+'.task_v2').TrainingTaskV2(env, task_config, args.output/'task')
+        else:
+            task = task_module.TrainingTask(env, task_config, args.output/'task')
+        collision = None
+        if args.learner == 'amp':
+            collision = amp_module.CollisionCapture(env)
+            wrapped = amp_module.AMPVecEnv(task, collision=collision)
+            config = amp_module.amp_ppo_config(args.seed, networks=args.networks)
+        else:
+            wrapped = vanilla.VanillaVecEnv(task)
+            config = vanilla.ppo_config(args.seed)
         save(args.output/'ppo_config.json', config)
         runner_config = copy.deepcopy(config)
         if args.logger == 'wandb':
@@ -194,6 +223,8 @@ def main(argv=None):
         identity['upstream_source_files'] = {name: sha(upstream/name) for name in (
             'runners/on_policy_runner.py', 'algorithms/ppo.py', 'models/mlp_model.py', 'storage/rollout_storage.py')}
         identity['ppo_config'] = config
+        if args.learner == 'amp':
+            save(args.output/'amp_learner.json', runner.alg.declaration())
         state['status'] = 'running'; save(args.output/'state.json', state)
         if args.mode == 'train':
             def checkpoint(update):
@@ -203,7 +234,9 @@ def main(argv=None):
                     'checkpoint_sha256': sha(path), 'transitions': update*24*env.num_envs})
                 state['checkpoint'] = str(path); state['checkpoint_sha256'] = sha(path)
             loads = vanilla.TrainingLoads(env)
-            env.capture = loads
+            if collision is not None:
+                collision.inner = loads
+            env.capture = loads if collision is None else collision
             original_log = runner.logger.log
             def log(**values):
                 original_log(**values)
@@ -243,6 +276,8 @@ def main(argv=None):
             actor = runner.get_inference_policy()
             def policy(observation):
                 with torch.inference_mode():
+                    if args.networks == 'paper':
+                        return actor(importlib.import_module(prefix+'.paper_networks').actor_observation(observation))
                     return actor(TensorDict({'policy': observation}, batch_size=[env.num_envs]))
             evaluation = importlib.import_module(prefix+'.evaluate')
             camera = importlib.import_module(prefix+'.camera')

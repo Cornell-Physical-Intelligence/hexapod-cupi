@@ -143,6 +143,13 @@
       "purpose": "Bind a run to its model and recorded native standing checks."
     },
     {
+      "path": "locomotion/amp.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Program lead",
+      "purpose": "Share the retained 61-value feature order between native policies and demonstrations; AMP discriminator, Eq. (1) loss and Eq. (2) style reward, with offline frozen training as a diagnostic."
+    },
+    {
       "path": "locomotion/camera.py",
       "previous_path": null,
       "classification": "current",
@@ -213,6 +220,27 @@
       "purpose": "Adapt the admitted simulator to standard RSL-RL PPO without a motion prior."
     },
     {
+      "path": "locomotion/amp_ppo.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Online adversarial motion prior for RSL-RL PPO: AMP transitions, style reward, discriminator updates, privileged critic state and the supervised velocity estimator; no native pilot yet."
+    },
+    {
+      "path": "locomotion/paper_networks.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Liu et al. Table III actor and critic: velocity estimator, memory encoder, low-level actor and privileged encoder; the terrain encoder waits for Step 8."
+    },
+    {
+      "path": "locomotion/paper_reward.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Candidate Table I task and penalty reward from Liu et al.: literal, penalty-calibrated and command-scaled tracking variants."
+    },
+    {
       "path": "locomotion/prepare.py",
       "previous_path": null,
       "classification": "current",
@@ -227,11 +255,39 @@
       "purpose": "Spark reservation checks copied unchanged from the recorded Sept14 ownership guard."
     },
     {
+      "path": "locomotion/reward_scorer.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Score recorded native control traces offline under the current and candidate rewards."
+    },
+    {
+      "path": "locomotion/reward_viewer.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Write an HTML page that plays evaluated policies beside their per-control reward."
+    },
+    {
+      "path": "locomotion/reward_workbench.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Explain the training reward and export coefficient edits scored against recorded rollouts."
+    },
+    {
       "path": "locomotion/task.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Versioned command/reward wrapper; native physics and Stage 2 gates are unchanged."
+    },
+    {
+      "path": "locomotion/task_v2.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Reward version 2: Table I task and penalty terms with command-scaled tracking beside the frozen version 1; defaults approved by the reviewer."
     },
     {
       "path": "locomotion/train.py",
@@ -258,21 +314,21 @@
       "path": "locomotion/priors/optimize.py",
       "previous_path": null,
       "classification": "prototype",
-      "owner": "Platform lead",
-      "purpose": "Optimize a periodic forward tripod cycle with full-body inverse dynamics."
+      "owner": "Program lead",
+      "purpose": "Optimize a periodic tripod cycle for translation, yaw and arcs with full-body inverse dynamics."
     },
     {
       "path": "locomotion/priors/prepare.py",
       "previous_path": null,
       "classification": "prototype",
-      "owner": "Platform lead",
+      "owner": "Program lead",
       "purpose": "Pack a fresh native replay with unchanged physics and ownership controls."
     },
     {
       "path": "locomotion/priors/replay_native.py",
       "previous_path": null,
       "classification": "prototype",
-      "owner": "Platform lead",
+      "owner": "Program lead",
       "purpose": "Replay an optimized target cycle through the locomotion kernel."
     },
     {
@@ -302,6 +358,20 @@
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Derive toe positions and joint Jacobians from the admitted model."
+    },
+    {
+      "path": "locomotion/priors/commands.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Program lead",
+      "purpose": "Bind demonstration coverage to the maintained training command bank."
+    },
+    {
+      "path": "locomotion/priors/dataset.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Program lead",
+      "purpose": "Audit native clips and export hash-bound transitions after the program lead reviews motion."
     }
   ],
   "archived_documents": []
