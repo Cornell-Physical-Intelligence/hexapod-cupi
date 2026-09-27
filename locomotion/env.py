@@ -9,6 +9,7 @@ import math
 import numpy as np
 import torch
 from .env_config import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, verify_assets
+from .amp import extract_features
 
 
 def rotate(quaternion, vector):
@@ -281,8 +282,7 @@ class LocomotionEnv:
         critic = torch.cat((obs, navigation(state["linear"])), dim=-1)
         result = {"obs": obs, "critic": critic}
         if self.cfg.record_motion_features:
-            result["amp"] = torch.cat((state["q"], state["dq"], state["linear"], state["angular"],
-                state["root"][:, 2:3], state["toe_body"].flatten(1)), dim=-1)
+            result["amp"] = extract_features(state)
         return result
 
     def reset(self, indices=None):

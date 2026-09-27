@@ -265,7 +265,7 @@
       "role": "trajectory_experiment",
       "path": "site/assets/amp_motion_mosaic_20260924_001/mosaic.mp4",
       "sha256": "dcde479c530e55b1a7f19eef3593c252022915dcee2e4960e66e8ff4b85cc32a",
-      "caption": "20 commands, from forward and sideways motion to diagonals, turns and arcs. One starting phase per command is shown at real-time speed on the approved detailed model. All 40 phase-paired clips pass native numerical screens; human gait review and AMP learning remain pending.",
+      "caption": "20 commands, from forward and sideways motion to diagonals, turns and arcs. One starting phase per command is shown at real-time speed on the approved detailed model. All 40 phase-paired clips pass native numerical screens, and the program lead admitted them as the AMP training dataset. AMP learning remains pending.",
       "poster_id": "amp_motion_mosaic_20260924_001_poster",
       "controller": "Optimized motor-target trajectories replayed in Isaac Sim; no learned policy; source 3dcefc3fe6c69b696c860b27439fbd863410053e",
       "evidence": "site/assets/amp_motion_mosaic_20260924_001/presentation.json"
@@ -535,11 +535,11 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "The 40-clip optimized motion-prior bank passes numerical screens. Human direction and tripod review, training export and AMP learning remain pending. A learned policy still needs the full direction, transition, stop, motor and contact suite.",
+      "blocker": "The program lead admitted the 18000-pair motion-prior dataset from 40 native clips. AMP learning under issue #37 remains pending. A learned policy still needs the full direction, transition, stop, motor and contact suite.",
       "question": "Start the TRAINING reward audit under issue #18. Resolve paper formulas and the stationary tracking criterion before implementing a new reward schema.",
       "next_step": null,
       "acceptance": null,
-      "card_text": "20 optimized commands pass native simulation screens; human gait review and learned walking/stopping remain pending.",
+      "card_text": "Motion-prior dataset admitted; AMP learning and learned walking/stopping remain pending.",
       "media_caption": "Approved robot model \u00b7 failed forward test."
     },
     {
@@ -641,14 +641,22 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-24T05:20:21.048729+00:00",
-    "source_commit": "3dcefc3fe6c69b696c860b27439fbd863410053e",
+    "as_of": "2026-09-24T19:11:59+00:00",
+    "source_commit": "d70dacd4fe74f682c08c4ad636460c4b7c7a78b2",
     "architecture": "ARCHITECTURE.md",
-    "summary": "The optimized motion-prior bank covers 20 commands in 40 native simulation clips on the approved detailed robot. All selected clips pass numerical screens; human gait review, dataset admission and AMP learning remain pending. Stage 2 walking and stopping qualification is incomplete.",
+    "summary": "The optimized motion-prior bank covers 20 commands in 40 native simulation clips on the approved detailed robot. All selected clips pass numerical screens. The program lead accepted direction and alternating-tripod appearance in all 40 clips, which admits the 18000-pair training dataset. AMP learning under issue #37 remains pending. Stage 2 walking and stopping qualification is incomplete.",
     "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
     "facts": [
+      {
+        "id": "amp-dataset-admitted-20260924",
+        "title": "The program lead admits the AMP demonstration dataset",
+        "backend": "Isaac Sim replays on the approved direct-drive model; 20 phase-zero commands; controls 100:1000; raw 61-value state pairs",
+        "result": "passed",
+        "text": "The program lead (palerdr) reviewed all 40 native clips with the team lead and accepted direction and alternating-tripod appearance in each clip. The hash-bound review admits 18000 transition pairs, 900 per command, and CI verifies the committed bytes with dataset check. This acceptance covers dataset admission; Stage 2 qualification stays incomplete. AMP learning under issue #37 has not run.",
+        "source": "locomotion/priors/datasets/amp_demonstrations_001/manifest.json"
+      },
       {
         "id": "amp-native-bank-20260924",
         "title": "We complete numeric coverage for the AMP demonstration bank",
@@ -1000,6 +1008,22 @@
         "result": "inconclusive",
         "text": "The reset writes a fixed pose and the controller draws no random numbers, so each second repeat replays its first trace. The six passing stop trials hold three distinct trajectories, and the 25 completed qualification cases hold seven distinct traces. The published forward metrics recompute exactly from the hash-verified traces. The record binds three figures and the forward comparison to their scripts by hash.",
         "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_review_corrections_20260922_001/repeat_identity.json"
+      },
+      {
+        "id": "amp-initial-native-20260923",
+        "title": "Initial optimized yaw, lateral and arc trials pass",
+        "backend": "Isaac Sim; one robot; 1000 controls and 8000 physics samples per clip; optimized controller; human review pending",
+        "result": "passed",
+        "text": "Four first-phase clips pass their native motion and contact screens after fresh one-robot and 32-robot standing admission. The shared 61-value features match raw native measurements within 3.58e-7. Full command/phase coverage and human motion review remain pending; these clips supply no AMP learning result.",
+        "source": "site/assets/amp_initial_native_20260923_001/evidence.json"
+      },
+      {
+        "id": "amp-startup-diagonal-20260924",
+        "title": "The replacement diagonal passes both native start phases",
+        "backend": "Isaac Sim; optimized controller; 20-second full-trial screens; human review pending",
+        "result": "passed",
+        "text": "The original forward-right trial fails one startup speed check at 0.025 seconds. A replacement trajectory with a one-second target ramp passes both start phases under the same native gates. The archive retains the failed capture. Full bank coverage and human motion review remain pending.",
+        "source": "site/assets/amp_startup_20260924_001/evidence.json"
       }
     ]
   },
