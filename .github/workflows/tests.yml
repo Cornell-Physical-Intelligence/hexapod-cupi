@@ -31,6 +31,18 @@ jobs:
           uv run python -m locomotion.inputs check
           uv run python tools/check_pipeline_lineages.py current
           uv run python -m locomotion.priors.dataset check --output locomotion/priors/datasets/amp_demonstrations_001
+      - name: Generate this revision's source manifest
+        run: |
+          ref=$(uv run python -c "from tools.check_pipeline_lineages import ARCHIVED_REF; print(ARCHIVED_REF)")
+          git fetch --filter=blob:none --no-tags --depth=1 origin "$ref"
+          uv run python tools/check_pipeline_lineages.py generate --manifest "$RUNNER_TEMP/source_manifest_$GITHUB_SHA.sha256"
+      - name: Keep the merged revision's source manifest
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: actions/upload-artifact@v7
+        with:
+          name: source-manifest-${{ github.sha }}
+          path: ${{ runner.temp }}/source_manifest_${{ github.sha }}.sha256
+          if-no-files-found: error
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
