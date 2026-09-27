@@ -1,4 +1,4 @@
-"""AMP discriminator, Eq. (1) loss, Eq. (2) style reward and their use in candidate rewards."""
+"""AMP discriminator, Eq. (1) loss, Eq. (2) style reward and their use in the paper_reward candidates."""
 from pathlib import Path
 import tempfile
 import unittest
@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion import amp, paper_reward, reward_scorer
+from locomotion import amp_discriminator as amp, paper_reward, reward_scorer
 from locomotion.env import inverse_rotate
 from locomotion.task import TaskConfig
 
@@ -107,7 +107,7 @@ class RecordedTraceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary)/'disc.pt'
             amp.save(discriminator, path, {'config': {'hidden': list(SMALL.hidden)}})
-            combined = reward_scorer.load_reward(f'locomotion.amp:calibrated_with_style:{path}')
+            combined = reward_scorer.load_reward(f'locomotion.paper_reward:calibrated_with_style:{path}')
             reward, components = reward_scorer.evaluate(self.trace, combined, TaskConfig(), None, self.com)
             base, base_components = reward_scorer.evaluate(self.trace, paper_reward.paper_reward_calibrated,
                                                            TaskConfig(), None, self.com)
@@ -116,6 +116,15 @@ class RecordedTraceTests(unittest.TestCase):
         torch.testing.assert_close(reward - components['style'], base)
         self.assertTrue(bool(((components['style'] >= 0) & (components['style'] <= 1)).all()))
         self.assertTrue(bool(torch.isfinite(still).all()))
+
+    def test_discriminator_command_trains_and_saves(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary)/'disc.pt'
+            paper_reward.main(['discriminator', '--prior', str(TRACE), '--policy', str(TRACE), '--output', str(path),
+                               '--steps', '2'])
+            discriminator, metadata = amp.load(path)
+        self.assertEqual(metadata['config']['steps'], 2)
+        self.assertEqual(metadata['prior'][0]['sha256'], self.trace.sha256)
 
     def test_motionless_transitions_hold_pose_with_zero_velocity(self):
         telemetry, _, _ = reward_scorer.reward_inputs(self.trace, self.com, motionless=True)

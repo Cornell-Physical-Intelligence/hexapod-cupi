@@ -37,6 +37,14 @@ def scalars(value, prefix):
     return {}
 
 
+def checkpoint_reward_version(record):
+    """The reward a checkpoint was trained with; checkpoints from before the flag trained version 1."""
+    version = record['identity'].get('reward_version', '1')
+    if version not in ('1', '2'):
+        raise ValueError('Unknown checkpoint reward version: '+str(version))
+    return version
+
+
 class ConfigRecord(dict):
     """Give RSL-RL's W&B writer the to_dict() it expects from an environment config."""
     def to_dict(self):
@@ -127,6 +135,8 @@ def main(argv=None):
             raise ValueError('Checkpoint declaration differs')
         if any(checkpoint_record['identity'][key] != identity[key] for key in compatibility_keys):
             raise ValueError('Checkpoint model, physics, seed or implementation differs')
+        # Evaluation computes no training reward; record the one the checkpoint learned from.
+        identity['reward_version'] = checkpoint_reward_version(checkpoint_record)
     if args.preflight_only:
         print(json.dumps(identity, indent=2)); return 0
     args.output.mkdir(parents=True, exist_ok=False)

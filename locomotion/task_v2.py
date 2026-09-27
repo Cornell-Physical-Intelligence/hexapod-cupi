@@ -11,9 +11,9 @@ training, CPU tests and ``locomotion.reward_scorer`` evaluate one function.
 Score it offline with ``--reward v2=locomotion.task_v2:scorer_default``, or
 override defaults with ``--reward b=locomotion.task_v2:scorer_reward:tracking_kernel=scaled``.
 
-The reviewer, James, approved the defaults on 2026-09-25: the decisions in
-docs/REWARD_V2_TABLE1_AUDIT.md section 8 except the style term, which still
-waits on the AMP owner. ``REVIEW`` records this in every task definition.
+The reviewer decides docs/REWARD_V2_TABLE1_AUDIT.md section 8 in the review of
+PR #42; ``REVIEW`` points every task definition at that record. The style term
+still waits on the AMP owner.
 """
 from dataclasses import asdict, dataclass, fields, replace
 import hashlib
@@ -47,24 +47,34 @@ ADAPTATIONS = (
     "motor cap, against the 1.6 N·m software cap; applied torque never exceeds that cap.",
     "The joint-velocity limit is the URDF limit, 50.27 rad/s, checked at each control's end.",
     "Continuous penalty weights follow paper_reward.CALIBRATION: together they average 0.8 of the "
-    "mean tracking reward on seven recorded rollouts, in equal shares.",
+    "mean tracking reward under the paper's fixed 0.15 kernel (audit variant A), not kernel C, on seven "
+    "recorded rollouts, in equal shares.",
+    "Table I has no termination term. PPO bootstraps zero after a termination, so without one a "
+    "policy earning negative reward would gain by falling. termination_weight exceeds the discounted "
+    "value of continuing at the worst recorded mean reward: 0.721 / (1 - 0.99) = 72.1 < 75 "
+    "(TERMINATION_REFERENCE).",
 )
+# Worst mean reward per control under version 2 among the recorded rollouts: the PPO scratch arm
+# at update 1200, evaluation_00 (sha256 in paper_reward.CALIBRATION), scored with scorer_default.
+TERMINATION_REFERENCE = {"worst_mean_reward_per_control": -.721, "ppo_gamma": .99,
+                         "trace": "forward_example_ppo_20260917/scratch_evaluate_update001200_001/evaluation_00"}
 OMITTED = (
     "Style r^s needs the AMP discriminator and the AMP owner's agreement on its inputs "
     "(docs/TRAINING.md Step 5).",
     "The foot contact-force limit: the paper states no limit and the reviewer has not set one.",
-    "Version 1's height, tilt and termination terms: Table I has none.",
+    "Version 1's height and tilt terms: Table I has none.",
 )
 ACTUATOR = ("Unchanged from version 1: 18 actions at 50 Hz clipped to [-1, 1]; targets neutral + 0.35 a, "
             "clipped to joint limits and to +-0.040 rad per 20 ms control; tau_req = 12 (q_target - q) "
             "- K_D q_dot with K_D 0.442/0.246/0.106 N·m·s/rad; applied torque capped by the 48 V "
             "speed curve at 1.6 N·m and zero at 50.27 rad/s; 400 Hz physics, eight substeps. "
             "The paper's cascaded law tau = Kp2 (Kp1 (q_des - q) - q_dot) is not used.")
-REVIEW = {"status": "approved", "reviewer": "James", "date": "2026-09-25",
-          "approved": ["tracking kernel C", "k 0.4", "command floors 0.025 m/s and 0.15 rad/s",
-                       "yaw extension of the criterion", "calibrated penalty weights"],
+REVIEW = {"record": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/42",
+          "reviewer": "James (palerdr)",
+          "decisions": ["tracking kernel C", "k 0.4", "command floors 0.025 m/s and 0.15 rad/s",
+                        "yaw extension of the criterion", "calibrated penalty weights", "termination term"],
           "pending": ["style inputs with the AMP owner"],
-          "source": "docs/REWARD_V2_TABLE1_AUDIT.md section 8"}
+          "questions": "docs/REWARD_V2_TABLE1_AUDIT.md section 8"}
 
 
 @dataclass(frozen=True)
@@ -87,6 +97,7 @@ class RewardV2Config:
     torque_limit_nm: float = 1.6
     velocity_limit_rad_s: float = 50.26548245743669
     collision_force_n: float = 1.
+    termination_weight: float = 75.
 
     def validate(self, task_config=None):
         if self.tracking_kernel not in KERNELS:
@@ -120,16 +131,28 @@ def reward_declaration(config):
             "vertical_velocity": "-w v_z^2", "roll_pitch_rate": "-w ||w_xy||",
             "joint_torque": "-w ||sqrt(sum_substeps tau^2 / 8)||", "joint_acceleration": "-w ||(dq - dq_prev) / 0.02||",
             "action_rate": "-w ||a - a_prev||", "collisions": "-w [max non-tibia floor force > 1 N]",
-            "torque_limit": "-w ||max(|tau_requested| - 1.6, 0)||", "velocity_limit": "-w ||max(|dq| - 50.27, 0)||"},
+            "torque_limit": "-w ||max(|tau_requested| - 1.6, 0)||", "velocity_limit": "-w ||max(|dq| - 50.27, 0)||",
+            "termination": "-w [height, tilt or joint-limit termination this control]"},
+        "termination_reference": TERMINATION_REFERENCE,
         "stationary_translation_fraction_at_or_above_floor": math.exp(-1/config.scale_k),
         "adaptations": list(ADAPTATIONS), "omitted": list(OMITTED), "actuator": ACTUATOR, "review": REVIEW}
 
 
-def measured_reward_v2(telemetry, commands, config=REWARD_V2_CONFIG):
+def tracking_components(tracked_xy, tracked_yaw, commands, config=REWARD_V2_CONFIG):
+    """Command-scaled tracking of already selected velocities (per control for B, stride mean for C)."""
+    c, norm = config, torch.linalg.vector_norm
+    linear_scale = c.scale_k * norm(commands[:, :2], dim=-1).clamp_min(c.minimum_speed_mps)
+    yaw_scale = c.scale_k * commands[:, 2].abs().clamp_min(c.minimum_yaw_rate_rad_s)
+    return {"linear_tracking": c.linear_tracking_weight * torch.exp(-norm(tracked_xy - commands[:, :2], dim=-1) / linear_scale),
+            "yaw_tracking": c.yaw_tracking_weight * torch.exp(-(tracked_yaw - commands[:, 2]).abs() / yaw_scale)}
+
+
+def measured_reward_v2(telemetry, commands, terminated, config=REWARD_V2_CONFIG):
     """Table I terms from one control's telemetry plus the caller's previous-control memory.
 
     ``previous_action`` and ``previous_joint_velocity_rad_s`` are always required;
     ``tracked_planar_velocity_nav`` and ``tracked_yaw_rate_rad_s`` only for the stride kernel.
+    ``terminated`` is the environment's returned physical-termination flag.
     """
     n, device = commands.shape[0], commands.device
     def field(name, shape):
@@ -152,13 +175,13 @@ def measured_reward_v2(telemetry, commands, config=REWARD_V2_CONFIG):
         tracked_xy, tracked_yaw = field("tracked_planar_velocity_nav", (2,)), field("tracked_yaw_rate_rad_s", ())
     else:
         tracked_xy, tracked_yaw = velocity[:, :2], gyro[:, 2]
+    terminated = torch.as_tensor(terminated, device=device)
+    if tuple(terminated.shape) != (n,) or terminated.dtype != torch.bool:
+        raise ValueError("Reward v2 needs one boolean termination flag per row")
     c = config
     norm = torch.linalg.vector_norm
-    linear_scale = c.scale_k * norm(commands[:, :2], dim=-1).clamp_min(c.minimum_speed_mps)
-    yaw_scale = c.scale_k * commands[:, 2].abs().clamp_min(c.minimum_yaw_rate_rad_s)
     components = {
-        "linear_tracking": c.linear_tracking_weight * torch.exp(-norm(tracked_xy - commands[:, :2], dim=-1) / linear_scale),
-        "yaw_tracking": c.yaw_tracking_weight * torch.exp(-(tracked_yaw - commands[:, 2]).abs() / yaw_scale),
+        **tracking_components(tracked_xy, tracked_yaw, commands, c),
         "vertical_velocity": -c.vertical_velocity_weight * velocity[:, 2].square(),
         "roll_pitch_rate": -c.roll_pitch_weight * norm(gyro[:, :2], dim=-1),
         "joint_torque": -c.torque_weight * norm((torque_square / SUBSTEPS).sqrt(), dim=-1),
@@ -167,6 +190,7 @@ def measured_reward_v2(telemetry, commands, config=REWARD_V2_CONFIG):
         "collisions": -c.collision_weight * (other_force > c.collision_force_n).to(torch.float32),
         "torque_limit": -c.torque_limit_weight * norm((requested - c.torque_limit_nm).clamp_min(0), dim=-1),
         "velocity_limit": -c.velocity_limit_weight * norm((rate.abs() - c.velocity_limit_rad_s).clamp_min(0), dim=-1),
+        "termination": -c.termination_weight * terminated.to(torch.float32),
     }
     reward = sum(components.values())
     if not bool(torch.isfinite(reward).all()):
@@ -247,7 +271,8 @@ class TrainingTaskV2(TrainingTask):
         command = self.env.commands.detach().clone()
         output = self.env.step(action)
         self.proximity.check(self.env.current["root"][:, :3], "after_control", previous=roots_before)
-        reward, components = measured_reward_v2(self.reward_telemetry(command), command, self.reward_config)
+        reward, components = measured_reward_v2(self.reward_telemetry(command), command, output["terminated"],
+                                                self.reward_config)
         metric_previous_target = self.previous_target
         self.previous_target = self.env.telemetry["joint_target_rad"].detach().clone()
         self.previous_action = self.env.telemetry["action"].detach().clone().to(self.previous_action)
@@ -296,7 +321,7 @@ def scorer_reward(spec=""):
                                 torch.as_tensor(telemetry["angular_velocity_body"])[:, 2:]), -1)
             tracked = stride_average(values, commands, int(telemetry["replicas"]), config.stride_controls)
             telemetry.update(tracked_planar_velocity_nav=tracked[:, :2], tracked_yaw_rate_rad_s=tracked[:, 2])
-        return measured_reward_v2(telemetry, commands, config)
+        return measured_reward_v2(telemetry, commands, terminated, config)
     reward.config = config
     return reward
 

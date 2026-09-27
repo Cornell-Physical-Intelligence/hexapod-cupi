@@ -1,29 +1,38 @@
 """Checks behind docs/REWARD_V2_TABLE1_AUDIT.md: the sign, the stationary criterion and the tracking variants.
 
 Version 1 is ``task.measured_reward``; the paper variant is
-``paper_reward.paper_reward``. The command-scaled kernel below is the audit's
-proposal for reward v2, implemented in ``task_v2.py`` (tested in ``test_task_v2``).
+``paper_reward.paper_reward``. The command-scaled kernels B and C are evaluated
+through ``task_v2``, the training reward, so a change there fails these checks.
 """
 import math
 from pathlib import Path
 import unittest
 
-import numpy as np
 import torch
 
-from locomotion import paper_reward, reward_scorer
+from locomotion import paper_reward, reward_scorer, task_v2
 from locomotion.task import TaskConfig, command_bank, measured_reward
 
 ROOT = Path(__file__).resolve().parents[2]
 TRACE = ROOT/'locomotion/tests/fixtures/control_trace.npz'
 CRITERION = .10
-K = .4
-C_MIN = {'translation': .025, 'yaw': .15}
+CONFIG = task_v2.REWARD_V2_CONFIG
+K = CONFIG.scale_k
+C_MIN = {'translation': CONFIG.minimum_speed_mps, 'yaw': CONFIG.minimum_yaw_rate_rad_s}
 
 
 def command_scaled(error, command, kind):
-    """Audit variant B: exp(-|e| / (k max(|c|, c_min)))."""
-    return math.exp(-abs(error) / (K * max(abs(command), C_MIN[kind])))
+    """Share of one tracking term that task_v2 pays for a scalar error at a scalar command."""
+    commands = torch.zeros(1, 3, dtype=torch.float64)
+    tracked_xy, tracked_yaw = torch.zeros(1, 2, dtype=torch.float64), torch.zeros(1, dtype=torch.float64)
+    if kind == 'translation':
+        commands[0, 0], tracked_xy[0, 0] = command, command - error
+    else:
+        commands[0, 2], tracked_yaw[0] = command, command - error
+    components = task_v2.tracking_components(tracked_xy, tracked_yaw, commands, CONFIG)
+    name, weight = (('linear_tracking', CONFIG.linear_tracking_weight) if kind == 'translation'
+                    else ('yaw_tracking', CONFIG.yaw_tracking_weight))
+    return float(components[name][0]) / weight
 
 
 def v1_motionless_components(command):
@@ -53,7 +62,7 @@ def translation_commands():
 class SignTests(unittest.TestCase):
     def test_resolved_tracking_kernel_decreases_with_error(self):
         errors = [0., .01, .05, .2]
-        rewards = [math.exp(-e/.15) for e in errors]
+        rewards = [command_scaled(e, .05, 'translation') for e in errors]
         self.assertEqual(rewards, sorted(rewards, reverse=True))
         self.assertEqual(rewards[0], 1.)
         self.assertGreater(math.exp(errors[-1]/.15), 1., 'the printed sign would reward error')
@@ -99,6 +108,7 @@ class CommandScaledTests(unittest.TestCase):
     def test_zero_command_pays_standing_still_in_full(self):
         self.assertEqual(command_scaled(0., 0., 'translation'), 1.)
         self.assertAlmostEqual(command_scaled(.01, 0., 'translation'), math.exp(-1), places=12)
+        self.assertEqual(command_scaled(0., 0., 'yaw'), 1.)
 
     def test_scale_is_continuous_at_the_smallest_command(self):
         below = command_scaled(.02, C_MIN['translation'] - 1e-9, 'translation')
@@ -115,16 +125,15 @@ class RecordedTraceTests(unittest.TestCase):
 
     def test_both_command_scaled_variants_pay_a_smooth_walk(self):
         trace = reward_scorer.load_trace(TRACE)
-        v = reward_scorer.origin_velocity_nav(trace, reward_scorer.root_com_local())[1:, 0, :2].numpy()
-        error = np.linalg.norm(v - [.05, 0.], axis=-1)
-        window = 60
-        mean = np.stack([np.convolve(v[:, i], np.ones(window) / window, 'valid') for i in (0, 1)], -1)
-        mean_error = np.linalg.norm(mean - [.05, 0.], axis=-1)
-        per_control = float(np.exp(-error / (K * .05)).mean())
-        averaged = float(np.exp(-mean_error / (K * .05)).mean())
-        self.assertLess(v[:, 0].std(), .01)
-        self.assertAlmostEqual(per_control, .858, places=3)
-        self.assertAlmostEqual(averaged, .970, places=3)
+        com = reward_scorer.root_com_local()
+        v = reward_scorer.origin_velocity_nav(trace, com)[1:, 0, :2]
+        def linear(spec):
+            _, components = reward_scorer.evaluate(trace, task_v2.scorer_reward(spec), TaskConfig(), None, com)
+            return float(components['linear_tracking'].mean())
+        self.assertLess(float(v[:, 0].std()), .01)
+        self.assertAlmostEqual(linear('tracking_kernel=scaled'), .858, places=3)
+        # Kernel C as implemented: causal 60-control mean since the latest command change.
+        self.assertAlmostEqual(linear('tracking_kernel=stride'), .940, places=3)
 
 
 if __name__ == '__main__':

@@ -7,21 +7,19 @@ PPO, which needs the native trainer (docs/TRAINING.md Step 5). ``train`` fits a
 frozen discriminator offline from recorded traces so the style term can be
 inspected on existing rollouts; that is a diagnostic, not AMP training.
 
-Factories for the scorer and viewer take a checkpoint path, for example
-``--reward style=locomotion.amp:paper_with_style:disc.pt``.
+The style-reward factories for the scorer and viewer and the command that trains
+a discriminator from traces live in ``locomotion.paper_reward``, for example
+``--reward style=locomotion.paper_reward:paper_with_style:disc.pt``.
 """
 from __future__ import annotations
 
-import argparse
-from dataclasses import asdict, dataclass
-import json
-from pathlib import Path
+from dataclasses import dataclass
 
 import torch
 from torch import nn
 
-from . import paper_reward
-
+# The 61-value AMP state (docs/TRAINING.md). PR #39 adds locomotion/amp.py with
+# feature_contract(); once it merges, take this width from there.
 AMP_WIDTH = 61
 DECISIONS = (
     "Gradient penalty: Eq. (1) prints the gradient with respect to discriminator parameters; this "
@@ -116,66 +114,3 @@ def load(path):
     discriminator = Discriminator(state["mean"], state["std"], tuple(checkpoint["hidden"]))
     discriminator.load_state_dict(state)
     return discriminator.eval(), checkpoint["metadata"]
-
-
-def _style_components(telemetry, discriminator):
-    with torch.no_grad():
-        scores = discriminator(transitions(telemetry["amp_state"], telemetry["next_amp_state"]))
-    return {"style": style_reward(scores)}
-
-
-def _with_style(base, path):
-    discriminator, _ = load(path)
-
-    def reward(telemetry, commands, previous_target, terminated, config=None, nominal_height=None):
-        components = {}
-        if base is not None:
-            _, components = base(telemetry, commands, previous_target, terminated, config, nominal_height)
-        components = {**components, **_style_components(telemetry, discriminator)}
-        return sum(components.values()), components
-    return reward
-
-
-def style_only(path):
-    """The style term alone, for inspecting the discriminator."""
-    return _with_style(None, path)
-
-
-def paper_with_style(path):
-    """Table I task + style + printed penalties."""
-    return _with_style(paper_reward.paper_reward, path)
-
-
-def calibrated_with_style(path):
-    """Table I task + style + calibrated penalties."""
-    return _with_style(paper_reward.paper_reward_calibrated, path)
-
-
-def main(argv=None):
-    from . import reward_scorer
-    parser = argparse.ArgumentParser(description="Train a frozen AMP discriminator from recorded traces.")
-    parser.add_argument("--prior", nargs="+", required=True, help="Motion-prior control_trace.npz files.")
-    parser.add_argument("--policy", nargs="+", required=True, help="Policy control_trace.npz files (negatives).")
-    parser.add_argument("--output", type=Path, required=True, help="Discriminator checkpoint to write.")
-    parser.add_argument("--steps", type=int, default=TrainConfig.steps)
-    args = parser.parse_args(argv)
-    config = TrainConfig(steps=args.steps)
-    prior_traces = [reward_scorer.load_trace(path) for path in args.prior]
-    policy_traces = [reward_scorer.load_trace(path) for path in args.policy]
-    prior = torch.cat([trace_transitions(trace) for trace in prior_traces])
-    policy = torch.cat([trace_transitions(trace) for trace in policy_traces])
-    discriminator, history = train(prior, policy, config)
-    metadata = {"config": asdict(config), "decisions": list(DECISIONS), "history": history,
-                "prior": [{"path": str(t.path), "sha256": t.sha256} for t in prior_traces],
-                "policy": [{"path": str(t.path), "sha256": t.sha256} for t in policy_traces],
-                "scope": "Frozen offline discriminator for inspecting recorded rollouts; AMP trains it against "
-                         "the current policy during PPO."}
-    save(discriminator, args.output, metadata)
-    with torch.no_grad():
-        summary = {"prior_style_mean": float(style_reward(discriminator(prior)).mean()),
-                   "policy_style_mean": float(style_reward(discriminator(policy)).mean())}
-    print(json.dumps({"output": str(args.output), **summary, "final": history[-1]}, indent=2))
-
-
-if __name__ == "__main__":
-    main()

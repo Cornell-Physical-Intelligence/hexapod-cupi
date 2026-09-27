@@ -1,0 +1,43 @@
+{
+  "id": "20260927T024308_reward_v2_review_fixes",
+  "date": "2026-09-27T02:43:08+00:00",
+  "title": "Address the reward v2 review: termination term, discriminator rename and implemented kernel C",
+  "summary": "Reward version 2 now charges 75 per terminated control: Table I has no termination term, and because PPO bootstraps zero after a termination, a policy earning negative reward would otherwise gain by falling; 75 exceeds 0.721 / (1 - 0.99), the discounted value of continuing at the worst recorded mean reward. The AMP discriminator moves to locomotion/amp_discriminator.py and its style-reward factories and training command to locomotion/paper_reward.py, clearing the name for the AMP feature contract. The audit's kernel C column and formula tests now come from task_v2's causal window (0.940 on the fixture, not 0.970), evaluation records the reward a checkpoint trained with, and the task definition points its review at PR #42. The recorded rollouts contain no terminations, so the offline scoreboard is unchanged.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/task_v2.py",
+    "locomotion/amp_discriminator.py",
+    "locomotion/paper_reward.py",
+    "locomotion/train.py",
+    "locomotion/README.md",
+    "locomotion/tests/test_task_v2.py",
+    "locomotion/tests/test_amp_discriminator.py",
+    "locomotion/tests/test_reward_v2_table1_formulas.py",
+    "docs/REWARD_V2_TABLE1_AUDIT.md",
+    "docs/TRAINING.md",
+    "configs/source_inventory.json",
+    "configs/releases/reward_v2_review_fixes_20260926_v1.sha256",
+    "tools/check_pipeline_lineages.py",
+    "site/updates/20260927T024308_reward_v2_review_fixes.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_task_v2.py",
+    "locomotion/tests/test_reward_v2_table1_formulas.py",
+    "locomotion/tests/test_amp_discriminator.py",
+    "configs/releases/reward_v2_review_fixes_20260926_v1.sha256"
+  ],
+  "next": "Rebase onto main after PR #39 merges, take the AMP width from amp.feature_contract(), regenerate the manifest, then rebuild the paired run packs from the final commit.",
+  "no_project_impact": true,
+  "reason": "Version 1 stays the default and no native run has used version 2, so no measured result, roadmap marker or gate changes.",
+  "evidence_reference_corrections": [
+    {
+      "old_record_id": "20260925T050738_amp_style_reward",
+      "old_record_sha256": "124960e2aa8a934aaa6cc518d2acc8a9700da7417153ae91b57475db7247ed06",
+      "old_reference": "locomotion/tests/test_amp.py",
+      "replacement_reference": "locomotion/tests/test_amp_discriminator.py",
+      "replacement_sha256": "6ada44a124f3c1c3989162c592497957c8588faa81c722ab8f8c2eecb0ac4193"
+    }
+  ]
+}

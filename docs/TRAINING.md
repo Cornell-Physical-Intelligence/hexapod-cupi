@@ -12,7 +12,7 @@ unbuilt; simulation results do not establish hardware calibration.
 | Control | 400 Hz physics, 50 Hz policy, eight substeps, 0.35 rad action scale and 0.040 rad target-change bound per control. |
 | Motor | Named damping and the existing speed-dependent effort curve, with a provisional 1.6 N·m software cap. Hardware characterization remains open. |
 | Policy input | 231 actor values: five 42-value proprioception frames, the three-value velocity command and 18 executed-action values. The critic adds measured planar/vertical velocity for 234 values. |
-| Learning | Stock RSL-RL 5.0.1 PPO. [`task.py`](../locomotion/task.py) owns command sampling and the measured reward; [`ppo.py`](../locomotion/ppo.py) owns its adapter and settings. |
+| Learning | Stock RSL-RL 5.0.1 PPO. [`task.py`](../locomotion/task.py) owns command sampling and reward version 1, the default; [`task_v2.py`](../locomotion/task_v2.py) owns reward version 2, selected with `train.py --reward-version 2` ([audit](REWARD_V2_TABLE1_AUDIT.md)); [`ppo.py`](../locomotion/ppo.py) owns its adapter and settings. |
 | Admission | Recomputed native standing passes at one robot and the exact intended batch size, bound to the same source, model, neutral stance and geometry. |
 
 The current sampler trains translation commands at 0.025 and 0.05 m/s, yaw and
