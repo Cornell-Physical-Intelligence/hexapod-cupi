@@ -1,0 +1,678 @@
+{
+  "schema": "hexapod_amp_optimizer_evidence_v1",
+  "owner": "palerdr",
+  "human_reviewer": "palerdr",
+  "backend": "CPU CasADi 3.7.2 and IPOPT; native replay pending",
+  "scope": "One rightward 0.025 m/s command; fixed objective, physical constraints and convergence tolerances.",
+  "records": [
+    {
+      "path": "/Users/palerider/hexapod-results/amp_20260923_right025_002",
+      "input": {
+        "schema": "canonical_full_body_trajectory_optimization_v2",
+        "config": {
+          "period_s": 1.2,
+          "control_dt_s": 0.02,
+          "forward_mps": -4.592425496802574e-18,
+          "duty_factor": 0.65,
+          "lift_m": 0.018,
+          "friction": 0.8,
+          "max_iterations": 1200,
+          "target_curvature_weight": 0.1,
+          "root_velocity_weight": 1.0,
+          "left_mps": -0.025,
+          "yaw_rate_rad_s": 0.0
+        },
+        "model": {
+          "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+          "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+          "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+          "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+          "mass_kg": 7.466088235225788,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "contact_point_link_m": [
+            [
+              0.12990434405575818,
+              -0.004019593720063871,
+              0.00229523083332334
+            ],
+            [
+              0.1299050140851941,
+              -0.004019264918122448,
+              0.002295145563169502
+            ],
+            [
+              0.12990476905508694,
+              -0.004019524044506447,
+              0.002294758446546352
+            ],
+            [
+              0.12990494201788033,
+              -0.004019453968884587,
+              0.0022945821983598484
+            ],
+            [
+              0.12990504646410875,
+              -0.004019434004950031,
+              0.002295030513667764
+            ],
+            [
+              0.12990482444212095,
+              -0.004019471017056102,
+              0.002295303812482483
+            ]
+          ],
+          "contact_point_ground_height_m": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "casadi_version": "3.7.2",
+        "source_files": {
+          "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "commands.py": "bb6ca8e6931c4d7a5216acc8f1d5590472be3fed94f5ce08bd929cf131c0dcdb",
+          "dataset.py": "d73a974adae3634103c1363fc468cd4fdd81a3b4d0bdd41a9b2491b64c48e16b",
+          "model.py": "ad49e917655d735b732d4ba136ddea6427b9dc7c440fb0e1f53cb9a6bebaa3fe",
+          "optimize.py": "720f2c1deec3786ee813343d316bf0665640b266b19e615b88d155c3cd8f93e2",
+          "prepare.py": "07ed041a482c90e34c08a805a55a4d378300e2dbf96316085228300e6e8782c8",
+          "replay_native.py": "03bad0df1e79d7aa66e91a20936d6698359b7fc5b52d51a44a2ea0705ecd556e"
+        },
+        "method": "Fixed-contact-schedule midpoint inverse dynamics, ZYX floating root, all 19 rigid bodies.",
+        "limitations": [
+          "Point contacts omit mesh deformation and impacts.",
+          "The inverse PD relation holds at collocation midpoints; native held-target replay is separate."
+        ],
+        "command": [
+          -4.592425496802574e-18,
+          -0.025,
+          0.0
+        ],
+        "stage2_complete": false,
+        "native_accepted": false
+      },
+      "result": {
+        "status": "solver_failed",
+        "solver_status": "Maximum_Iterations_Exceeded",
+        "solver_iterations": 1200,
+        "wall_seconds": 2379.2289657080546,
+        "audit": {
+          "constraint_violation": {
+            "root_force_moment": 6.268196628411715e-09,
+            "position_integration": 9.875850612013452e-13,
+            "velocity_integration": 1.0207112932647533e-14,
+            "periodic_position": 8.784921574911397e-14,
+            "periodic_velocity": 8.622876718211714e-15,
+            "stance_position": 3.424166505894277e-11,
+            "swing_clearance": 5.375422329478852e-13,
+            "swing_force": 1.0191792136641461e-16,
+            "negative_normal_force": 9.335506262570363e-17,
+            "friction": 1.3214051913536998e-16,
+            "torque_cap": 0.0,
+            "pd_target_identity": 5.551115123125783e-17,
+            "stored_torque_identity": 0.0,
+            "joint_speed": 0.0,
+            "root_speed": 0.0,
+            "root_height": 0.0,
+            "root_orientation": 0.0,
+            "normal_force_cap": 0.0,
+            "cyclic_target_slew": 0.0,
+            "target_range": 0.0,
+            "target_joint_limits": 0.0,
+            "joint_position": 0.0
+          },
+          "passed": true,
+          "maximum_motor_torque_nm": 1.5055822110044232,
+          "maximum_target_step_rad": 0.039540720123513284,
+          "mean_root_velocity_native_mps": [
+            -0.025006568102654045,
+            2.141459300939597e-07,
+            -4.410344228000828e-05
+          ],
+          "scope": "CPU collocation feasibility; native 400 Hz replay and mesh contacts remain required."
+        },
+        "trajectory_sha256": "19df3b73fa0d4e2480187021bcb8b1ea3d088ab63b70e1dc35efdc21f747c75b",
+        "stage2_complete": false
+      },
+      "files": {
+        "INPUT.json": "7b930eb782ca1bfbf7ddaf33af4e0654634e668cdf0f19e6df40025b48bcddb4",
+        "RESULT.json": "bb6f41d878639876440c9573245d382392907ea67e4952237789b9df4717550d",
+        "trajectory.npz": "19df3b73fa0d4e2480187021bcb8b1ea3d088ab63b70e1dc35efdc21f747c75b",
+        "SHA256.json": "de5863fb0a2f7f239e2553b86fa9b34c51aa64debd37edfc448273cb7908d54c"
+      }
+    },
+    {
+      "path": "/Users/palerider/hexapod-results/amp_20260924_right025_restart_001",
+      "input": {
+        "schema": "canonical_full_body_trajectory_optimization_v2",
+        "config": {
+          "period_s": 1.2,
+          "control_dt_s": 0.02,
+          "forward_mps": -4.592425496802574e-18,
+          "duty_factor": 0.65,
+          "lift_m": 0.018,
+          "friction": 0.8,
+          "max_iterations": 600,
+          "target_curvature_weight": 0.1,
+          "root_velocity_weight": 1.0,
+          "left_mps": -0.025,
+          "yaw_rate_rad_s": 0.0
+        },
+        "model": {
+          "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+          "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+          "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+          "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+          "mass_kg": 7.466088235225788,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "contact_point_link_m": [
+            [
+              0.12990434405575818,
+              -0.004019593720063871,
+              0.00229523083332334
+            ],
+            [
+              0.1299050140851941,
+              -0.004019264918122448,
+              0.002295145563169502
+            ],
+            [
+              0.12990476905508694,
+              -0.004019524044506447,
+              0.002294758446546352
+            ],
+            [
+              0.12990494201788033,
+              -0.004019453968884587,
+              0.0022945821983598484
+            ],
+            [
+              0.12990504646410875,
+              -0.004019434004950031,
+              0.002295030513667764
+            ],
+            [
+              0.12990482444212095,
+              -0.004019471017056102,
+              0.002295303812482483
+            ]
+          ],
+          "contact_point_ground_height_m": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "casadi_version": "3.7.2",
+        "source_files": {
+          "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "commands.py": "bb6ca8e6931c4d7a5216acc8f1d5590472be3fed94f5ce08bd929cf131c0dcdb",
+          "dataset.py": "d73a974adae3634103c1363fc468cd4fdd81a3b4d0bdd41a9b2491b64c48e16b",
+          "model.py": "ad49e917655d735b732d4ba136ddea6427b9dc7c440fb0e1f53cb9a6bebaa3fe",
+          "optimize.py": "a8c6b5866efafb6a8215ea308ae2b355836f9224234993d3f2b36bf0f0671ef8",
+          "prepare.py": "07ed041a482c90e34c08a805a55a4d378300e2dbf96316085228300e6e8782c8",
+          "replay_native.py": "03bad0df1e79d7aa66e91a20936d6698359b7fc5b52d51a44a2ea0705ecd556e"
+        },
+        "method": "Fixed-contact-schedule midpoint inverse dynamics, ZYX floating root, all 19 rigid bodies.",
+        "limitations": [
+          "Point contacts omit mesh deformation and impacts.",
+          "The inverse PD relation holds at collocation midpoints; native held-target replay is separate."
+        ],
+        "command": [
+          -4.592425496802574e-18,
+          -0.025,
+          0.0
+        ],
+        "stage2_complete": false,
+        "native_accepted": false,
+        "initialization": {
+          "kind": "saved_primal_iterate",
+          "path": "/Users/palerider/hexapod-results/amp_20260923_right025_002/trajectory.npz",
+          "files": {
+            "INPUT.json": "7b930eb782ca1bfbf7ddaf33af4e0654634e668cdf0f19e6df40025b48bcddb4",
+            "RESULT.json": "bb6f41d878639876440c9573245d382392907ea67e4952237789b9df4717550d",
+            "trajectory.npz": "19df3b73fa0d4e2480187021bcb8b1ea3d088ab63b70e1dc35efdc21f747c75b"
+          }
+        }
+      },
+      "result": {
+        "status": "solver_failed",
+        "solver_status": "Maximum_Iterations_Exceeded",
+        "solver_iterations": 600,
+        "wall_seconds": 2371.82344825007,
+        "audit": {
+          "constraint_violation": {
+            "root_force_moment": 1.919699066377234e-09,
+            "position_integration": 7.632783294297951e-17,
+            "velocity_integration": 4.440892098500626e-16,
+            "periodic_position": 0.0,
+            "periodic_velocity": 0.0,
+            "stance_position": 1.33145439118465e-11,
+            "swing_clearance": 8.247291738427975e-13,
+            "swing_force": 1.7291292557204005e-20,
+            "negative_normal_force": 5.1053612401345195e-21,
+            "friction": 5.643554958222655e-21,
+            "torque_cap": 0.0,
+            "pd_target_identity": 2.7755575615628914e-17,
+            "stored_torque_identity": 0.0,
+            "joint_speed": 0.0,
+            "root_speed": 0.0,
+            "root_height": 0.0,
+            "root_orientation": 0.0,
+            "normal_force_cap": 0.0,
+            "cyclic_target_slew": 0.0,
+            "target_range": 0.0,
+            "target_joint_limits": 0.0,
+            "joint_position": 0.0
+          },
+          "passed": true,
+          "maximum_motor_torque_nm": 1.1449169135053194,
+          "maximum_target_step_rad": 0.03712575865275761,
+          "mean_root_velocity_native_mps": [
+            -0.025028209125493802,
+            1.4493038528109766e-07,
+            -0.00018493546442318497
+          ],
+          "scope": "CPU collocation feasibility; native 400 Hz replay and mesh contacts remain required."
+        },
+        "trajectory_sha256": "31d8f8863207b5c08a80b6f0b0f719153778a2fd7269a3031a920833db0bf552",
+        "stage2_complete": false
+      },
+      "files": {
+        "INPUT.json": "858fb152fad5cf878a48461d660ba7392847f6748567fd0f17323adf5bc2b02b",
+        "RESULT.json": "92814f5eb7b204a7267472f916c355caeba020359161504030e63accc51bda29",
+        "trajectory.npz": "31d8f8863207b5c08a80b6f0b0f719153778a2fd7269a3031a920833db0bf552",
+        "SHA256.json": "b847d92e224c98074a8c4e44a0c53e73c191f4d6fe21ab96be246b04089ef177"
+      }
+    },
+    {
+      "path": "/Users/palerider/hexapod-results/amp_20260924_right025_zero_001",
+      "input": {
+        "schema": "canonical_full_body_trajectory_optimization_v2",
+        "config": {
+          "period_s": 1.2,
+          "control_dt_s": 0.02,
+          "forward_mps": 0.0,
+          "duty_factor": 0.65,
+          "lift_m": 0.018,
+          "friction": 0.8,
+          "max_iterations": 600,
+          "target_curvature_weight": 0.1,
+          "root_velocity_weight": 1.0,
+          "left_mps": -0.025,
+          "yaw_rate_rad_s": 0.0
+        },
+        "model": {
+          "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+          "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+          "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+          "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+          "mass_kg": 7.466088235225788,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "contact_point_link_m": [
+            [
+              0.12990434405575818,
+              -0.004019593720063871,
+              0.00229523083332334
+            ],
+            [
+              0.1299050140851941,
+              -0.004019264918122448,
+              0.002295145563169502
+            ],
+            [
+              0.12990476905508694,
+              -0.004019524044506447,
+              0.002294758446546352
+            ],
+            [
+              0.12990494201788033,
+              -0.004019453968884587,
+              0.0022945821983598484
+            ],
+            [
+              0.12990504646410875,
+              -0.004019434004950031,
+              0.002295030513667764
+            ],
+            [
+              0.12990482444212095,
+              -0.004019471017056102,
+              0.002295303812482483
+            ]
+          ],
+          "contact_point_ground_height_m": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "casadi_version": "3.7.2",
+        "source_files": {
+          "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "commands.py": "bb6ca8e6931c4d7a5216acc8f1d5590472be3fed94f5ce08bd929cf131c0dcdb",
+          "dataset.py": "d73a974adae3634103c1363fc468cd4fdd81a3b4d0bdd41a9b2491b64c48e16b",
+          "model.py": "ad49e917655d735b732d4ba136ddea6427b9dc7c440fb0e1f53cb9a6bebaa3fe",
+          "optimize.py": "a8c6b5866efafb6a8215ea308ae2b355836f9224234993d3f2b36bf0f0671ef8",
+          "prepare.py": "07ed041a482c90e34c08a805a55a4d378300e2dbf96316085228300e6e8782c8",
+          "replay_native.py": "03bad0df1e79d7aa66e91a20936d6698359b7fc5b52d51a44a2ea0705ecd556e"
+        },
+        "method": "Fixed-contact-schedule midpoint inverse dynamics, ZYX floating root, all 19 rigid bodies.",
+        "limitations": [
+          "Point contacts omit mesh deformation and impacts.",
+          "The inverse PD relation holds at collocation midpoints; native held-target replay is separate."
+        ],
+        "command": [
+          0.0,
+          -0.025,
+          0.0
+        ],
+        "stage2_complete": false,
+        "native_accepted": false
+      },
+      "result": {
+        "status": "solver_failed",
+        "solver_status": "Maximum_Iterations_Exceeded",
+        "solver_iterations": 600,
+        "wall_seconds": 1011.4073379159672,
+        "audit": {
+          "constraint_violation": {
+            "root_force_moment": 1.203604993449403e-10,
+            "position_integration": 8.326672684688674e-17,
+            "velocity_integration": 2.7755575615628914e-16,
+            "periodic_position": 1.1479437019748901e-41,
+            "periodic_velocity": 0.0,
+            "stance_position": 1.3556933353697787e-12,
+            "swing_clearance": 2.97012414662845e-13,
+            "swing_force": 2.3679613367817682e-23,
+            "negative_normal_force": 5.004497466571823e-24,
+            "friction": 2.3679613367817682e-23,
+            "torque_cap": 0.0,
+            "pd_target_identity": 5.551115123125783e-17,
+            "stored_torque_identity": 0.0,
+            "joint_speed": 0.0,
+            "root_speed": 0.0,
+            "root_height": 0.0,
+            "root_orientation": 0.0,
+            "normal_force_cap": 0.0,
+            "cyclic_target_slew": 0.0,
+            "target_range": 0.0,
+            "target_joint_limits": 0.0,
+            "joint_position": 0.0
+          },
+          "passed": true,
+          "maximum_motor_torque_nm": 1.5954129495514409,
+          "maximum_target_step_rad": 0.038198165130241546,
+          "mean_root_velocity_native_mps": [
+            -0.025005666925475904,
+            3.6312521554605414e-07,
+            7.060931678136917e-06
+          ],
+          "scope": "CPU collocation feasibility; native 400 Hz replay and mesh contacts remain required."
+        },
+        "trajectory_sha256": "3e2147ca4337bd80ab2da52d607639ecc6c4d427fdf4d98b5f2a6a8cc06a5dd4",
+        "stage2_complete": false
+      },
+      "files": {
+        "INPUT.json": "d882c82c44c0ff64659b8848102662b48200d988b97fd2b939d3d714b52766d0",
+        "RESULT.json": "d7dde17cc60104efb20d5de56c13d4f426959666a7baa81f6a4da5803029a083",
+        "trajectory.npz": "3e2147ca4337bd80ab2da52d607639ecc6c4d427fdf4d98b5f2a6a8cc06a5dd4",
+        "SHA256.json": "4e4ddf1bb7f3112085b96581ae7fbe50e258c2b7a42bc42cc5d0f328b47040eb"
+      }
+    },
+    {
+      "path": "/Users/palerider/hexapod-results/amp_20260924_right025_scaled_001",
+      "input": {
+        "schema": "canonical_full_body_trajectory_optimization_v2",
+        "config": {
+          "period_s": 1.2,
+          "control_dt_s": 0.02,
+          "forward_mps": -4.592425496802574e-18,
+          "duty_factor": 0.65,
+          "lift_m": 0.018,
+          "friction": 0.8,
+          "max_iterations": 600,
+          "target_curvature_weight": 0.1,
+          "root_velocity_weight": 1.0,
+          "left_mps": -0.025,
+          "yaw_rate_rad_s": 0.0
+        },
+        "model": {
+          "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+          "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+          "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+          "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+          "mass_kg": 7.466088235225788,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "contact_point_link_m": [
+            [
+              0.12990434405575818,
+              -0.004019593720063871,
+              0.00229523083332334
+            ],
+            [
+              0.1299050140851941,
+              -0.004019264918122448,
+              0.002295145563169502
+            ],
+            [
+              0.12990476905508694,
+              -0.004019524044506447,
+              0.002294758446546352
+            ],
+            [
+              0.12990494201788033,
+              -0.004019453968884587,
+              0.0022945821983598484
+            ],
+            [
+              0.12990504646410875,
+              -0.004019434004950031,
+              0.002295030513667764
+            ],
+            [
+              0.12990482444212095,
+              -0.004019471017056102,
+              0.002295303812482483
+            ]
+          ],
+          "contact_point_ground_height_m": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "casadi_version": "3.7.2",
+        "solver_options": {
+          "max_iter": 600,
+          "tol": 1e-06,
+          "constr_viol_tol": 1e-07,
+          "acceptable_tol": 1e-05,
+          "acceptable_constr_viol_tol": 1e-06,
+          "print_level": 4,
+          "sb": "yes",
+          "linear_solver": "mumps",
+          "mu_strategy": "adaptive"
+        },
+        "variable_scaling": {
+          "contact_force_n": 73.24232558756499
+        },
+        "source_files": {
+          "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "commands.py": "bb6ca8e6931c4d7a5216acc8f1d5590472be3fed94f5ce08bd929cf131c0dcdb",
+          "dataset.py": "86a9416fd48e34354482c50c29f02156626f3ab18d4eacf067546de973f4bdb8",
+          "model.py": "ad49e917655d735b732d4ba136ddea6427b9dc7c440fb0e1f53cb9a6bebaa3fe",
+          "optimize.py": "55b409cb5c43d92dbf19000b186de731ff115f5eded811c4377ca7a7d1bf3afe",
+          "prepare.py": "f511de9a20ff275e1f30e662ed34ae30c2fcf1b2a5ae819b0862d1fe204f4f36",
+          "replay_native.py": "7ae51e575bd2f807439194350b09bf8802f386497901a218e4fa787685f2d681"
+        },
+        "method": "Fixed-contact-schedule midpoint inverse dynamics, ZYX floating root, all 19 rigid bodies.",
+        "limitations": [
+          "Point contacts omit mesh deformation and impacts.",
+          "The inverse PD relation holds at collocation midpoints; native held-target replay is separate."
+        ],
+        "command": [
+          -4.592425496802574e-18,
+          -0.025,
+          0.0
+        ],
+        "stage2_complete": false,
+        "native_accepted": false,
+        "initialization": {
+          "kind": "saved_primal_iterate",
+          "path": "/Users/palerider/hexapod-results/amp_20260923_right025_002/trajectory.npz",
+          "files": {
+            "INPUT.json": "7b930eb782ca1bfbf7ddaf33af4e0654634e668cdf0f19e6df40025b48bcddb4",
+            "RESULT.json": "bb6f41d878639876440c9573245d382392907ea67e4952237789b9df4717550d",
+            "trajectory.npz": "19df3b73fa0d4e2480187021bcb8b1ea3d088ab63b70e1dc35efdc21f747c75b"
+          }
+        }
+      },
+      "result": {
+        "status": "solved",
+        "solver_status": "Solve_Succeeded",
+        "solver_iterations": 27,
+        "wall_seconds": 99.45244695793372,
+        "audit": {
+          "constraint_violation": {
+            "root_force_moment": 6.764320836794013e-08,
+            "position_integration": 7.32920668600201e-17,
+            "velocity_integration": 4.440892098500626e-16,
+            "periodic_position": 1.282669342961899e-30,
+            "periodic_velocity": 0.0,
+            "stance_position": 7.642273480712447e-10,
+            "swing_clearance": 1.0128316792895609e-08,
+            "swing_force": 6.4971980301753816e-18,
+            "negative_normal_force": 1.4773666962896786e-21,
+            "friction": 6.4971980301753816e-18,
+            "torque_cap": 0.0,
+            "pd_target_identity": 4.163336342344337e-17,
+            "stored_torque_identity": 0.0,
+            "joint_speed": 0.0,
+            "root_speed": 0.0,
+            "root_height": 0.0,
+            "root_orientation": 0.0,
+            "normal_force_cap": 0.0,
+            "cyclic_target_slew": 0.0,
+            "target_range": 0.0,
+            "target_joint_limits": 0.0,
+            "joint_position": 0.0
+          },
+          "passed": true,
+          "maximum_motor_torque_nm": 1.1793202430473821,
+          "maximum_target_step_rad": 0.03017269436787151,
+          "mean_root_velocity_native_mps": [
+            -0.025008573349919853,
+            6.243980203594863e-08,
+            -2.8354830832517415e-05
+          ],
+          "scope": "CPU collocation feasibility; native 400 Hz replay and mesh contacts remain required."
+        },
+        "trajectory_sha256": "44d1442202d93d1f4f1a03ce12644aded0a6d90c30f5e288ee376b91adbf0517",
+        "stage2_complete": false
+      },
+      "files": {
+        "INPUT.json": "41eddc790e26f969ddc2bd9c6d97cb4edce74621c14a50ab3d0d9cc23c248297",
+        "RESULT.json": "74d08359ad5078c7b27916275153329bf924b415c4c8a169eac15403063af1f8",
+        "trajectory.npz": "44d1442202d93d1f4f1a03ce12644aded0a6d90c30f5e288ee376b91adbf0517",
+        "SHA256.json": "db6ffe62e6fe595091ea7efb52377dc3f1efe53f0e3e03b07e9734d6991a675d"
+      }
+    }
+  ],
+  "selected_candidate": "/Users/palerider/hexapod-results/amp_20260924_right025_scaled_001",
+  "selected_native_accepted": false,
+  "dataset_admitted": false,
+  "stage2_complete": false,
+  "causal_scope": "The selected solve uses a saved primal iterate, adaptive barrier updates and contact-force variable scaling. This comparison does not isolate the effect of each change.",
+  "source_manifest": {
+    "path": "configs/releases/amp_demonstrations_20260924_v8.sha256",
+    "sha256": "92917fbcafc422a8c43815aea4d6d97dc42a2f61a24b868e3b1d654d82e3de66"
+  }
+}

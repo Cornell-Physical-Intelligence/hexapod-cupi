@@ -30,6 +30,7 @@ jobs:
           uv run python tools/archive.py check
           uv run python -m locomotion.inputs check
           uv run python tools/check_pipeline_lineages.py current
+          uv run python -m locomotion.priors.dataset check --output locomotion/priors/datasets/amp_demonstrations_001
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

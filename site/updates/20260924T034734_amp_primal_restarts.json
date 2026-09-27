@@ -1,0 +1,23 @@
+{
+  "id": "20260924T034734_amp_primal_restarts",
+  "date": "2026-09-24T03:47:34.828561+00:00",
+  "title": "Retain optimizer progress through recorded primal restarts",
+  "summary": "You can restart one command from a saved finite iterate with matching model and problem settings. Each new attempt copies and hashes its seed records. Solver tolerances and native acceptance gates stay the same.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Finish native coverage and let James review the motion before dataset admission.",
+  "changes": [
+    "configs/releases/amp_demonstrations_20260924_v5.sha256",
+    "locomotion/priors/README.md",
+    "locomotion/priors/optimize.py",
+    "locomotion/priors/tests/test_omni.py",
+    "tools/check_pipeline_lineages.py",
+    "site/updates/20260924T034734_amp_primal_restarts.json"
+  ],
+  "evidence": [
+    "locomotion/priors/tests/test_omni.py",
+    "configs/releases/amp_demonstrations_20260924_v5.sha256"
+  ],
+  "no_project_impact": false
+}

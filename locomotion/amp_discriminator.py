@@ -18,9 +18,10 @@ from dataclasses import dataclass
 import torch
 from torch import nn
 
-# The 61-value AMP state (docs/TRAINING.md). PR #39 adds locomotion/amp.py with
-# feature_contract(); once it merges, take this width from there.
-AMP_WIDTH = 61
+from .amp import feature_contract
+
+# The 61-value AMP state; locomotion.amp owns its layout.
+AMP_WIDTH = feature_contract()["width"]
 DECISIONS = (
     "Gradient penalty: Eq. (1) prints the gradient with respect to discriminator parameters; this "
     "follows the cited AMP method and penalizes the gradient with respect to prior transitions.",

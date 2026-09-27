@@ -1,0 +1,1839 @@
+{
+  "schema": "hexapod_amp_startup_comparison_v1",
+  "recorded_at": "2026-09-24T04:16:43.842802+00:00",
+  "implementation_source_commit": "e9af2f8bdccecca7c2c4aefe83639d0ac1094598",
+  "processing_identity": {
+    "numpy_version": "2.5.2",
+    "source_files": {
+      "locomotion/amp.py": "4010cf0e42ea63ca693b0fa311a3fef7ee6bfdfa47b9eba58bf87f7f7cefec5c",
+      "locomotion/env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+      "locomotion/task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+      "locomotion/evaluation.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
+      "locomotion/force_metrics.py": "5bd228d003d4ab71dbda6acbb9fdbf357a36ec007050b156bdd71ec31c707673",
+      "locomotion/priors/commands.py": "bb6ca8e6931c4d7a5216acc8f1d5590472be3fed94f5ce08bd929cf131c0dcdb",
+      "locomotion/priors/dataset.py": "86a9416fd48e34354482c50c29f02156626f3ab18d4eacf067546de973f4bdb8"
+    }
+  },
+  "attempts": [
+    {
+      "attempt": "replay_15_phase0",
+      "local_path": "/Users/palerider/hexapod-results/amp_20260923_native_001/replay_15_phase0/run/standing",
+      "remote_path": "/home/orionh/HEXAPOD_runs/restart_20260914/amp_20260923_001/replay_15_phase0/run/standing",
+      "state_sha256": "11806e2e60bd85eaacfe9c247c8aa6498276e72b8e0281cce0385707caa43e72",
+      "report_sha256": "557c46cad8849db00915b2a5ee5832782b74c154de77c72fc3caf4e0a63291b8",
+      "capture_sha256": "1cafb6d01425be0c94d9eadc99915e607eba530fadc8d7efe1f3134160862975",
+      "native_readback_sha256": "182b7435f883b0f61e889812640db8bfdcdc30afc7e27911d1164834b55df253",
+      "video_sha256": "dc64bee3b367fdea0e9b487ff8a7dd793b16a57216cc5b4cb3db8cc27552c0e6",
+      "identity": {
+        "source_files": {
+          "__init__.py": "c82a5695bd2575afdaae01eb84bb3c06ddffe42529d201bbe43726ae8859e350",
+          "admission.py": "1391aed5939b882e2ca0967bd8eda6103bf73e46206f8d6c0091f8463b1e70c3",
+          "amp.py": "4010cf0e42ea63ca693b0fa311a3fef7ee6bfdfa47b9eba58bf87f7f7cefec5c",
+          "camera.py": "6c9927cfa747408e3206e170386483791ac696634f1e322e4a6222b32396655d",
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+          "evaluate.py": "5cb686c3daf4eed3b4a96501aa80f9f1a8465376782255a9860e5abb7dfd735c",
+          "evaluation.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
+          "evaluation_config.py": "7d55733f4f5a471427b408a4b3a0e834d083a687f7ae0ebc3ceb0d16c23f3cb7",
+          "force_metrics.py": "5bd228d003d4ab71dbda6acbb9fdbf357a36ec007050b156bdd71ec31c707673",
+          "inputs.py": "0a4ff5170754654dc25ee745b128ae19f5901d6df4005a98e3584dec68b02b96",
+          "launch.py": "dfbe4c44552b2519a242ecd91b06da6ac7a643dbf22b90b7b08ffafc1e3b86d7",
+          "ppo.py": "bb1b44215580e30786bb16271a2dae996b19a41fc43a0588cc4591b18a5d4a65",
+          "prepare.py": "880d308510c61ee8f3dbf764a2639aa46af6817f0d8fe2624d24dd55bbbfe100",
+          "reservation.py": "037162e879e94f6dd05210dfb5ee81fc5d1195c65ad6209ecbfd9f1b62df21f7",
+          "task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+          "train.py": "239acaaa598ae2f05dcb2f775f2b191582873ba71ff49fd3fb645a750758111a",
+          "tripod.py": "ed3d34a4c8c5772ec7e1a1bc4703fc5b325bc9dfa56073b071a6fdf1fd9d0dfc",
+          "tripod_config.py": "4d4d20bafb450e37ad45b9d459e72b0318d7b81fd3edfd0117ba588bda13328c",
+          "tripod_evaluate.py": "92e077e12ceda9ed1cf6c3d045e73b698b0ad00b3f778c86f9de1e06ed5a25a3",
+          "tripod_kinematics.py": "3db69088e944a3773f16844e07ebebc4700662142770eb1a322ce500f5a016cc"
+        },
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+        "config": {
+          "num_envs": 1,
+          "spacing_m": 2.0,
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "episode_seconds": 60.0,
+          "action_scale_rad": 0.35,
+          "target_slew_rad": 0.04,
+          "reset_height_m": 0.08161108940839767,
+          "command_forward_mps": 0.1,
+          "command_left_mps": 0.0,
+          "command_yaw_rad_s": 0.0,
+          "seed": 20260914,
+          "record_motion_features": true,
+          "render": true,
+          "device": "cuda:0",
+          "schema": "canonical_paper_walk_experiment_v1",
+          "actor_width": 231,
+          "critic_width": 234,
+          "amp_width": 61,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "legs": [
+            "lf",
+            "lm",
+            "lr",
+            "rf",
+            "rm",
+            "rr"
+          ],
+          "standing_admission": false,
+          "stage2_complete": false,
+          "prior_standing_failure_superseded": false,
+          "authorization": "User explicitly requested experimental paper-based PPO training on the confirmed model.",
+          "telemetry_scope": "Compact native body-force telemetry; no exact toe/shaft patch classification or formal standing admission."
+        },
+        "physics_source_files": {
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "standing_admission": {
+          "schema": "hexapod_locomotion_standing_admission_v1",
+          "num_envs": 32,
+          "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+          "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+          "physics_source_files": {
+            "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+            "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+          },
+          "physics_config": {
+            "physics_dt": 0.0025,
+            "decimation": 8,
+            "spacing_m": 2.0,
+            "target_slew_rad": 0.04,
+            "action_scale_rad": 0.35,
+            "solver_position_iterations": 32,
+            "solver_velocity_iterations": 0,
+            "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+            "material_friction": [
+              1.0,
+              1.0
+            ],
+            "restitution": 0.0,
+            "external_forces_every_iteration": true,
+            "neutral_joint_position_rad": [
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4
+            ],
+            "reset_root_height_m": 0.10280231400684256
+          },
+          "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+          "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+          "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+          "one": {
+            "report_path": "/standing_one/standing/standing_report.json",
+            "report_sha256": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+            "state_path": "/standing_one/state.json",
+            "state_sha256": "5773bf1d220bac30e4ab523a4851a5a04d7939087de6d2032fefdc3ff7fd6c3a"
+          },
+          "batch": {
+            "report_path": "/standing_batch/standing/standing_report.json",
+            "report_sha256": "28bf2e36f4081f6dcfbae8ad6bfd5c4992fc3527f7a66ffc54dccef56d7a8e96",
+            "state_path": "/standing_batch/state.json",
+            "state_sha256": "57796d33d26d6186019514494d527cd0e6bf365a42ae1d9a54bfa1e95e494c56"
+          }
+        },
+        "controller_kind": "optimized_periodic_motor_targets",
+        "learned_policy": false,
+        "command": [
+          0.03535533905932737,
+          -0.03535533905932738,
+          0.0
+        ],
+        "start_phase": 0.0,
+        "amp_feature_contract": {
+          "schema": "hexapod_amp_features_v1",
+          "width": 61,
+          "control_dt_s": 0.02,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "leg_order": [
+            "lf",
+            "lm",
+            "lr",
+            "rf",
+            "rm",
+            "rr"
+          ],
+          "body_axes": [
+            "left",
+            "backward",
+            "up"
+          ],
+          "fields": [
+            {
+              "name": "joint_position",
+              "slice": [
+                0,
+                18
+              ],
+              "unit": "rad",
+              "frame": "native_joint_absolute"
+            },
+            {
+              "name": "joint_velocity",
+              "slice": [
+                18,
+                36
+              ],
+              "unit": "rad/s",
+              "frame": "native_joint"
+            },
+            {
+              "name": "linear_velocity",
+              "slice": [
+                36,
+                39
+              ],
+              "unit": "m/s",
+              "frame": "body_root_origin"
+            },
+            {
+              "name": "angular_velocity",
+              "slice": [
+                39,
+                42
+              ],
+              "unit": "rad/s",
+              "frame": "body"
+            },
+            {
+              "name": "height",
+              "slice": [
+                42,
+                43
+              ],
+              "unit": "m",
+              "frame": "world_z_above_flat_zero_plane"
+            },
+            {
+              "name": "toe_position",
+              "slice": [
+                43,
+                61
+              ],
+              "unit": "m",
+              "frame": "body_root_relative_xyz"
+            }
+          ],
+          "normalization": "none; learner normalization must preserve this raw contract",
+          "interpretation": "James retains six XYZ toe positions; six scalar heights would give 49 values.",
+          "paper": "https://arxiv.org/html/2511.03167v1#S3.SS1"
+        },
+        "optimization_config": {
+          "period_s": 1.2,
+          "control_dt_s": 0.02,
+          "forward_mps": 0.03535533905932737,
+          "duty_factor": 0.65,
+          "lift_m": 0.018,
+          "friction": 0.8,
+          "max_iterations": 600,
+          "target_curvature_weight": 0.1,
+          "root_velocity_weight": 1.0,
+          "left_mps": -0.03535533905932738,
+          "yaw_rate_rad_s": 0.0
+        },
+        "optimization_source_files": {
+          "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "commands.py": "bb6ca8e6931c4d7a5216acc8f1d5590472be3fed94f5ce08bd929cf131c0dcdb",
+          "dataset.py": "d73a974adae3634103c1363fc468cd4fdd81a3b4d0bdd41a9b2491b64c48e16b",
+          "model.py": "ad49e917655d735b732d4ba136ddea6427b9dc7c440fb0e1f53cb9a6bebaa3fe",
+          "optimize.py": "07307ef13efe07c697542b6d9240ad1dd48fa4598c65bbf464d5ef46cf0b36ae",
+          "prepare.py": "07ed041a482c90e34c08a805a55a4d378300e2dbf96316085228300e6e8782c8",
+          "replay_native.py": "03bad0df1e79d7aa66e91a20936d6698359b7fc5b52d51a44a2ea0705ecd556e"
+        },
+        "trajectory_sha256": "23a8e1967772f1768aa6bb348e336bb4e229daf9dfbad166211897fb2126c03e",
+        "optimization_input_sha256": "ba6f3babb36e970b6369510025147dec316fc1deab5660006100f93eb14868c1",
+        "optimization_result_sha256": "0f42bae2f18f4a0c53f160ddef7b8a0c71ccc29dfcbc5f88d7e2165bd8e69c06",
+        "root_com_local_m": [
+          [
+            -2.8658316296059638e-05,
+            6.18705598753877e-05,
+            0.02539987675845623
+          ]
+        ]
+      },
+      "runtime_binding": {
+        "runtime_tree_sha256": "86a2de5140d8553d51fe67da104eb76a1afc1471bfbcc24cda1c8cb885d71d74"
+      },
+      "eligible_for_motion_prior": false,
+      "speed_bound_violation_steps": 1,
+      "peak_joint_speed": {
+        "sequence": 9,
+        "time_s": 0.025,
+        "joint": "lm_tibia_pitch",
+        "velocity_rad_s": -50.520294189453125,
+        "native_limit_rad_s": 50.26548385620117,
+        "comparison_tolerance_rad_s": 2e-06,
+        "raw_file": "substeps_000.npz",
+        "raw_sha256": "4f1d0d0f7d7fa8b462005ece5d4e7afac30084b8d4cc2d940733dda03e55baef"
+      },
+      "native_result": {
+        "schema": "canonical_stage2_cpu_evaluation_v1",
+        "profile": "omni_static",
+        "scope": {
+          "source": "experiments/c_length_study/tools/omni_flat_math.py:scenario_gate",
+          "cases": 77,
+          "duration_s": 20.0,
+          "settle_s": 2.0,
+          "scope": "Historical full signed direction, yaw and combined-command numeric screen."
+        },
+        "environment_index": 0,
+        "recorded_controls": 1000,
+        "checks": {
+          "complete_requested_window": {
+            "status": "pass",
+            "value": 0,
+            "bound": 0,
+            "operator": "<="
+          },
+          "control_dt_s": {
+            "status": "pass",
+            "value": 0.0,
+            "bound": 1e-12,
+            "operator": "<="
+          },
+          "quaternion_unit_norm": {
+            "status": "pass",
+            "value": 2.384185791015625e-07,
+            "bound": 1e-05,
+            "operator": "<="
+          },
+          "terminated": {
+            "status": "pass",
+            "value": 0,
+            "bound": 0,
+            "operator": "<="
+          },
+          "truncated": {
+            "status": "pass",
+            "value": 0,
+            "bound": 0,
+            "operator": "<="
+          },
+          "reset": {
+            "status": "pass",
+            "value": 0,
+            "bound": 0,
+            "operator": "<="
+          },
+          "contiguous_time": {
+            "status": "pass",
+            "value": 3.1259717037102064e-15,
+            "bound": 1e-09,
+            "operator": "<="
+          },
+          "held_command": {
+            "status": "pass",
+            "value": 1.6300933311508281e-09,
+            "bound": 1e-06,
+            "operator": "<="
+          },
+          "planar_error_mps": {
+            "status": "pass",
+            "value": 0.0030637770844177603,
+            "bound": 0.025,
+            "operator": "<="
+          },
+          "yaw_error_rad_s": {
+            "status": "pass",
+            "value": 0.004364718532960161,
+            "bound": 0.06,
+            "operator": "<="
+          },
+          "tilt_rms_degrees": {
+            "status": "pass",
+            "value": 0.2495959848165512,
+            "bound": 5.0,
+            "operator": "<="
+          },
+          "vertical_velocity_rms_mps": {
+            "status": "pass",
+            "value": 0.004617014434188604,
+            "bound": 0.04,
+            "operator": "<="
+          },
+          "nonfoot_fraction": {
+            "status": "pass",
+            "value": 0.0,
+            "bound": 0.001,
+            "operator": "<="
+          },
+          "computed_demand_over_rating_fraction": {
+            "status": "pass",
+            "value": 0.0,
+            "bound": 0.005,
+            "operator": "<="
+          }
+        },
+        "metrics": {
+          "base_height_std_m": 0.00010762595775304362,
+          "base_height_peak_to_peak_m": 0.0006300359964370728,
+          "tilt_rms_degrees": 0.2495959848165512,
+          "tilt_p95_degrees": 0.36959168314933777,
+          "maximum_tilt_degrees": 0.4125943183898926,
+          "vertical_velocity_rms_mps": 0.004617014434188604,
+          "vertical_velocity_abs_p95_mps": 0.008546585217118263,
+          "mean_velocity_mps": [
+            0.035332630462249624,
+            -0.034477120416789596,
+            3.4202578783239172e-06
+          ],
+          "planar_error_mps": 0.0030637770844177603,
+          "planar_velocity_rmse_mps": 0.003566622999089007,
+          "yaw_error_rad_s": 0.004364718532960161,
+          "yaw_rate_rmse_radps": 0.005644699453383026,
+          "mean_yaw_rate_rad_s": -0.00046146555483822196,
+          "roll_pitch_angular_velocity_rms_radps": 0.045653844233676556,
+          "roll_pitch_angular_velocity_p95_radps": 0.06378610881016511,
+          "requested_saturation_fraction_400hz": 0.0,
+          "maximum_requested_saturation_fraction_400hz": 0.0,
+          "computed_demand_over_rating_fraction": 0.0,
+          "maximum_per_joint_computed_demand_over_rating_fraction": 0.0,
+          "maximum_computed_over_rating_burst_s": 0.0,
+          "peak_abs_computed_nm": 1.2103283405303955,
+          "max_per_joint_rms_applied_nm": 0.749734103679657,
+          "nonfoot_fraction": 0.0
+        },
+        "lineage": {
+          "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+          "checkpoint_sha256": null,
+          "source_sha256": "03bad0df1e79d7aa66e91a20936d6698359b7fc5b52d51a44a2ea0705ecd556e"
+        },
+        "window_start_control": 100,
+        "window_controls": 900,
+        "native_admission": "Separate exact-model native 1/32 standing, solver, geometry, full400Hz and asset receipts are required.",
+        "failed_bounds": [
+          "native_capture_or_original_physical_bounds"
+        ],
+        "missing_evidence": [],
+        "pass": false,
+        "stage2_complete": false,
+        "case_id": "trajectory:0.0353553,-0.0353553,0",
+        "native_capture_complete": true,
+        "native_motor_and_joint_checks_pass": false,
+        "native_contact_screen": {
+          "schema": "canonical_native_contact_screen_v1",
+          "frequency_hz": 400,
+          "window": "complete trial, including initial settling and every native substep",
+          "recorded_substeps": 8000,
+          "nonfoot_substeps": 0,
+          "nonfoot_fraction": 0.0,
+          "maximum_nonfoot_fraction": 0.001,
+          "pass": true,
+          "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+        },
+        "batch_failure": null,
+        "passed_numeric_screen": true
+      },
+      "capture": {
+        "schema": "canonical_exact_evaluation_capture_v1",
+        "steps": 8000,
+        "initial_counter": 0,
+        "final_counter": 8000,
+        "failure": null,
+        "substep_files": [
+          "substeps_000.npz",
+          "substeps_001.npz",
+          "substeps_002.npz",
+          "substeps_003.npz",
+          "substeps_004.npz",
+          "substeps_005.npz",
+          "substeps_006.npz",
+          "substeps_007.npz",
+          "substeps_008.npz",
+          "substeps_009.npz"
+        ],
+        "maximum_applied_nm": [
+          1.600000023841858
+        ],
+        "maximum_requested_nm": [
+          6.297134876251221
+        ],
+        "joint_bound_violation_steps": [
+          0
+        ],
+        "speed_bound_violation_steps": [
+          1
+        ],
+        "nonfoot_contact_steps_400hz": [
+          0
+        ],
+        "minimum_non_toe_floor_m": [
+          0.011455634682366031
+        ],
+        "minimum_plate_height_m": [
+          0.09477202594280243
+        ],
+        "body_names": [
+          "body",
+          "lf_coxa",
+          "lm_coxa",
+          "lr_coxa",
+          "rf_coxa",
+          "rm_coxa",
+          "rr_coxa",
+          "lf_femur",
+          "lm_femur",
+          "lr_femur",
+          "rf_femur",
+          "rm_femur",
+          "rr_femur",
+          "lf_tibia",
+          "lm_tibia",
+          "lr_tibia",
+          "rf_tibia",
+          "rm_tibia",
+          "rr_tibia"
+        ],
+        "joint_names": [
+          "lf_coxa_yaw",
+          "lf_femur_pitch",
+          "lf_tibia_pitch",
+          "lm_coxa_yaw",
+          "lm_femur_pitch",
+          "lm_tibia_pitch",
+          "lr_coxa_yaw",
+          "lr_femur_pitch",
+          "lr_tibia_pitch",
+          "rf_coxa_yaw",
+          "rf_femur_pitch",
+          "rf_tibia_pitch",
+          "rm_coxa_yaw",
+          "rm_femur_pitch",
+          "rm_tibia_pitch",
+          "rr_coxa_yaw",
+          "rr_femur_pitch",
+          "rr_tibia_pitch"
+        ],
+        "files": {
+          "contacts.jsonl": "ad8a0a7b2607d64d218b686208fbd8e1e8610beecd89837896d5572fda751374",
+          "initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+          "substeps_000.npz": "4f1d0d0f7d7fa8b462005ece5d4e7afac30084b8d4cc2d940733dda03e55baef",
+          "substeps_001.npz": "8e4c942e3a445d95ed0be6d966467bdd63439068d93f35ef2842d6240ef93adb",
+          "substeps_002.npz": "ec7a10f6d289daaafba9e850aa1527996dc76f714b0e4fa125e09d4e53a8b300",
+          "substeps_003.npz": "77fe3969bfe861bd1234391300de62c11074e3f4ddb7559be0f1e98e1b05ff20",
+          "substeps_004.npz": "dad6b7bd21efc43a5977f580137cd7aac64e37631b5bfdc5488d1c8ac02f6505",
+          "substeps_005.npz": "a1c012b41290c4b0894e6c4ec5dae8deab07c21cee896e0f9326eafc6b591c71",
+          "substeps_006.npz": "a1577b51d7d166a83b1a432c23a931089cc487760b2f537785f280c6fcce184d",
+          "substeps_007.npz": "d30d48d57796dafdf59906aea1c95f6ca1900b8c5b02fb1a5c06ebe475514b35",
+          "substeps_008.npz": "8af627d2a953faa85e68fda1d390a6e162b821b63a8e8500580ddec1714d57c5",
+          "substeps_009.npz": "034489afcf9ce1e4ba4d79f628ea9b05c3d825a48df1b164026a59ca70952cd9"
+        },
+        "contact_classification": "exact_distal_points",
+        "stage2_complete": false
+      }
+    },
+    {
+      "attempt": "replay_15_phase0_continuation004",
+      "local_path": "/Users/palerider/hexapod-results/amp_20260923_native_001/replay_15_phase0_continuation004/run/standing",
+      "remote_path": "/home/orionh/HEXAPOD_runs/restart_20260914/amp_20260923_001/replay_15_phase0_continuation004/run/standing",
+      "state_sha256": "2e40a218430a0490db6caf6bada71012143a9511ae15b82111fc7152045f284c",
+      "report_sha256": "89b366c50ce15b50417c8e2a1d3e3275438c4446b86c6b5c3a493ab52a02a4fd",
+      "capture_sha256": "4f212d2fae928b8a9f2de9482c1a5a0ad3ae7919c78cd20295f555fb9074fb82",
+      "native_readback_sha256": "182b7435f883b0f61e889812640db8bfdcdc30afc7e27911d1164834b55df253",
+      "video_sha256": "2623fcc3cd9c4f92beb1f500e1f8ea8f1c76219bdb33301196321b016b231fe5",
+      "identity": {
+        "source_files": {
+          "__init__.py": "c82a5695bd2575afdaae01eb84bb3c06ddffe42529d201bbe43726ae8859e350",
+          "admission.py": "1391aed5939b882e2ca0967bd8eda6103bf73e46206f8d6c0091f8463b1e70c3",
+          "amp.py": "4010cf0e42ea63ca693b0fa311a3fef7ee6bfdfa47b9eba58bf87f7f7cefec5c",
+          "camera.py": "6c9927cfa747408e3206e170386483791ac696634f1e322e4a6222b32396655d",
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+          "evaluate.py": "5cb686c3daf4eed3b4a96501aa80f9f1a8465376782255a9860e5abb7dfd735c",
+          "evaluation.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
+          "evaluation_config.py": "7d55733f4f5a471427b408a4b3a0e834d083a687f7ae0ebc3ceb0d16c23f3cb7",
+          "force_metrics.py": "5bd228d003d4ab71dbda6acbb9fdbf357a36ec007050b156bdd71ec31c707673",
+          "inputs.py": "0a4ff5170754654dc25ee745b128ae19f5901d6df4005a98e3584dec68b02b96",
+          "launch.py": "dfbe4c44552b2519a242ecd91b06da6ac7a643dbf22b90b7b08ffafc1e3b86d7",
+          "ppo.py": "bb1b44215580e30786bb16271a2dae996b19a41fc43a0588cc4591b18a5d4a65",
+          "prepare.py": "880d308510c61ee8f3dbf764a2639aa46af6817f0d8fe2624d24dd55bbbfe100",
+          "reservation.py": "037162e879e94f6dd05210dfb5ee81fc5d1195c65ad6209ecbfd9f1b62df21f7",
+          "task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+          "train.py": "239acaaa598ae2f05dcb2f775f2b191582873ba71ff49fd3fb645a750758111a",
+          "tripod.py": "ed3d34a4c8c5772ec7e1a1bc4703fc5b325bc9dfa56073b071a6fdf1fd9d0dfc",
+          "tripod_config.py": "4d4d20bafb450e37ad45b9d459e72b0318d7b81fd3edfd0117ba588bda13328c",
+          "tripod_evaluate.py": "92e077e12ceda9ed1cf6c3d045e73b698b0ad00b3f778c86f9de1e06ed5a25a3",
+          "tripod_kinematics.py": "3db69088e944a3773f16844e07ebebc4700662142770eb1a322ce500f5a016cc"
+        },
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+        "config": {
+          "num_envs": 1,
+          "spacing_m": 2.0,
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "episode_seconds": 60.0,
+          "action_scale_rad": 0.35,
+          "target_slew_rad": 0.04,
+          "reset_height_m": 0.08161108940839767,
+          "command_forward_mps": 0.1,
+          "command_left_mps": 0.0,
+          "command_yaw_rad_s": 0.0,
+          "seed": 20260914,
+          "record_motion_features": true,
+          "render": true,
+          "device": "cuda:0",
+          "schema": "canonical_paper_walk_experiment_v1",
+          "actor_width": 231,
+          "critic_width": 234,
+          "amp_width": 61,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "legs": [
+            "lf",
+            "lm",
+            "lr",
+            "rf",
+            "rm",
+            "rr"
+          ],
+          "standing_admission": false,
+          "stage2_complete": false,
+          "prior_standing_failure_superseded": false,
+          "authorization": "User explicitly requested experimental paper-based PPO training on the confirmed model.",
+          "telemetry_scope": "Compact native body-force telemetry; no exact toe/shaft patch classification or formal standing admission."
+        },
+        "physics_source_files": {
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "standing_admission": {
+          "schema": "hexapod_locomotion_standing_admission_v1",
+          "num_envs": 32,
+          "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+          "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+          "physics_source_files": {
+            "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+            "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+          },
+          "physics_config": {
+            "physics_dt": 0.0025,
+            "decimation": 8,
+            "spacing_m": 2.0,
+            "target_slew_rad": 0.04,
+            "action_scale_rad": 0.35,
+            "solver_position_iterations": 32,
+            "solver_velocity_iterations": 0,
+            "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+            "material_friction": [
+              1.0,
+              1.0
+            ],
+            "restitution": 0.0,
+            "external_forces_every_iteration": true,
+            "neutral_joint_position_rad": [
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4
+            ],
+            "reset_root_height_m": 0.10280231400684256
+          },
+          "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+          "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+          "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+          "one": {
+            "report_path": "/standing_one/standing/standing_report.json",
+            "report_sha256": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+            "state_path": "/standing_one/state.json",
+            "state_sha256": "5773bf1d220bac30e4ab523a4851a5a04d7939087de6d2032fefdc3ff7fd6c3a"
+          },
+          "batch": {
+            "report_path": "/standing_batch/standing/standing_report.json",
+            "report_sha256": "28bf2e36f4081f6dcfbae8ad6bfd5c4992fc3527f7a66ffc54dccef56d7a8e96",
+            "state_path": "/standing_batch/state.json",
+            "state_sha256": "57796d33d26d6186019514494d527cd0e6bf365a42ae1d9a54bfa1e95e494c56"
+          }
+        },
+        "controller_kind": "optimized_periodic_motor_targets",
+        "learned_policy": false,
+        "command": [
+          0.03535533905932737,
+          -0.03535533905932738,
+          0.0
+        ],
+        "start_phase": 0.0,
+        "startup_ramp_controls": 50,
+        "amp_feature_contract": {
+          "schema": "hexapod_amp_features_v1",
+          "width": 61,
+          "control_dt_s": 0.02,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "leg_order": [
+            "lf",
+            "lm",
+            "lr",
+            "rf",
+            "rm",
+            "rr"
+          ],
+          "body_axes": [
+            "left",
+            "backward",
+            "up"
+          ],
+          "fields": [
+            {
+              "name": "joint_position",
+              "slice": [
+                0,
+                18
+              ],
+              "unit": "rad",
+              "frame": "native_joint_absolute"
+            },
+            {
+              "name": "joint_velocity",
+              "slice": [
+                18,
+                36
+              ],
+              "unit": "rad/s",
+              "frame": "native_joint"
+            },
+            {
+              "name": "linear_velocity",
+              "slice": [
+                36,
+                39
+              ],
+              "unit": "m/s",
+              "frame": "body_root_origin"
+            },
+            {
+              "name": "angular_velocity",
+              "slice": [
+                39,
+                42
+              ],
+              "unit": "rad/s",
+              "frame": "body"
+            },
+            {
+              "name": "height",
+              "slice": [
+                42,
+                43
+              ],
+              "unit": "m",
+              "frame": "world_z_above_flat_zero_plane"
+            },
+            {
+              "name": "toe_position",
+              "slice": [
+                43,
+                61
+              ],
+              "unit": "m",
+              "frame": "body_root_relative_xyz"
+            }
+          ],
+          "normalization": "none; learner normalization must preserve this raw contract",
+          "interpretation": "James retains six XYZ toe positions; six scalar heights would give 49 values.",
+          "paper": "https://arxiv.org/html/2511.03167v1#S3.SS1"
+        },
+        "optimization_config": {
+          "period_s": 1.2,
+          "control_dt_s": 0.02,
+          "forward_mps": 0.03535533905932737,
+          "duty_factor": 0.65,
+          "lift_m": 0.018,
+          "friction": 0.8,
+          "max_iterations": 600,
+          "target_curvature_weight": 0.1,
+          "root_velocity_weight": 1.0,
+          "left_mps": -0.03535533905932738,
+          "yaw_rate_rad_s": 0.0
+        },
+        "optimization_source_files": {
+          "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "commands.py": "bb6ca8e6931c4d7a5216acc8f1d5590472be3fed94f5ce08bd929cf131c0dcdb",
+          "dataset.py": "d73a974adae3634103c1363fc468cd4fdd81a3b4d0bdd41a9b2491b64c48e16b",
+          "model.py": "ad49e917655d735b732d4ba136ddea6427b9dc7c440fb0e1f53cb9a6bebaa3fe",
+          "optimize.py": "720f2c1deec3786ee813343d316bf0665640b266b19e615b88d155c3cd8f93e2",
+          "prepare.py": "07ed041a482c90e34c08a805a55a4d378300e2dbf96316085228300e6e8782c8",
+          "replay_native.py": "03bad0df1e79d7aa66e91a20936d6698359b7fc5b52d51a44a2ea0705ecd556e"
+        },
+        "trajectory_sha256": "b8b014dbf775dce5f92d62794a190b03b0dcb9bc112a410aa09f593b604cb242",
+        "optimization_input_sha256": "5a94496278f1f604fafbaeef98ad56ee0ee0e89d062f647cd764a426e0577d6b",
+        "optimization_result_sha256": "e47b776b438b51ac82b812b08e30b55fd021e4f4703009eaef262ef8951dd7f9",
+        "root_com_local_m": [
+          [
+            -2.8658316296059638e-05,
+            6.18705598753877e-05,
+            0.02539987675845623
+          ]
+        ]
+      },
+      "runtime_binding": {
+        "runtime_tree_sha256": "c272be2ccc35aab6b44f40ea043bca42cd76b664a56a68f357dcdc24295d84b3"
+      },
+      "eligible_for_motion_prior": true,
+      "speed_bound_violation_steps": 0,
+      "peak_joint_speed": {
+        "sequence": 4140,
+        "time_s": 10.352500000000001,
+        "joint": "lr_tibia_pitch",
+        "velocity_rad_s": -18.05939483642578,
+        "native_limit_rad_s": 50.26548385620117,
+        "comparison_tolerance_rad_s": 2e-06,
+        "raw_file": "substeps_005.npz",
+        "raw_sha256": "f202e0bffcfa4ce286b16d6cda8984d79c876cfebf5b5f44d1d5b9ce96a6f307"
+      },
+      "native_result": {
+        "schema": "canonical_stage2_cpu_evaluation_v1",
+        "profile": "omni_static",
+        "scope": {
+          "source": "experiments/c_length_study/tools/omni_flat_math.py:scenario_gate",
+          "cases": 77,
+          "duration_s": 20.0,
+          "settle_s": 2.0,
+          "scope": "Historical full signed direction, yaw and combined-command numeric screen."
+        },
+        "environment_index": 0,
+        "recorded_controls": 1000,
+        "checks": {
+          "complete_requested_window": {
+            "status": "pass",
+            "value": 0,
+            "bound": 0,
+            "operator": "<="
+          },
+          "control_dt_s": {
+            "status": "pass",
+            "value": 0.0,
+            "bound": 1e-12,
+            "operator": "<="
+          },
+          "quaternion_unit_norm": {
+            "status": "pass",
+            "value": 2.384185791015625e-07,
+            "bound": 1e-05,
+            "operator": "<="
+          },
+          "terminated": {
+            "status": "pass",
+            "value": 0,
+            "bound": 0,
+            "operator": "<="
+          },
+          "truncated": {
+            "status": "pass",
+            "value": 0,
+            "bound": 0,
+            "operator": "<="
+          },
+          "reset": {
+            "status": "pass",
+            "value": 0,
+            "bound": 0,
+            "operator": "<="
+          },
+          "contiguous_time": {
+            "status": "pass",
+            "value": 3.1259717037102064e-15,
+            "bound": 1e-09,
+            "operator": "<="
+          },
+          "held_command": {
+            "status": "pass",
+            "value": 1.6300933311508281e-09,
+            "bound": 1e-06,
+            "operator": "<="
+          },
+          "planar_error_mps": {
+            "status": "pass",
+            "value": 0.00309193618920359,
+            "bound": 0.025,
+            "operator": "<="
+          },
+          "yaw_error_rad_s": {
+            "status": "pass",
+            "value": 0.004450425176179824,
+            "bound": 0.06,
+            "operator": "<="
+          },
+          "tilt_rms_degrees": {
+            "status": "pass",
+            "value": 0.24955153465270996,
+            "bound": 5.0,
+            "operator": "<="
+          },
+          "vertical_velocity_rms_mps": {
+            "status": "pass",
+            "value": 0.00457416009157896,
+            "bound": 0.04,
+            "operator": "<="
+          },
+          "nonfoot_fraction": {
+            "status": "pass",
+            "value": 0.0,
+            "bound": 0.001,
+            "operator": "<="
+          },
+          "computed_demand_over_rating_fraction": {
+            "status": "pass",
+            "value": 0.0,
+            "bound": 0.005,
+            "operator": "<="
+          }
+        },
+        "metrics": {
+          "base_height_std_m": 0.00010198228119406849,
+          "base_height_peak_to_peak_m": 0.0005389675498008728,
+          "tilt_rms_degrees": 0.24955153465270996,
+          "tilt_p95_degrees": 0.36746788024902344,
+          "maximum_tilt_degrees": 0.41684067249298096,
+          "vertical_velocity_rms_mps": 0.00457416009157896,
+          "vertical_velocity_abs_p95_mps": 0.00859393272548914,
+          "mean_velocity_mps": [
+            0.03534487157971892,
+            -0.034466161669394924,
+            -5.787291881468863e-06
+          ],
+          "planar_error_mps": 0.00309193618920359,
+          "planar_velocity_rmse_mps": 0.0035954978285002424,
+          "yaw_error_rad_s": 0.004450425176179824,
+          "yaw_rate_rmse_radps": 0.005620334948709074,
+          "mean_yaw_rate_rad_s": -0.0005351479582444952,
+          "roll_pitch_angular_velocity_rms_radps": 0.046438864547990795,
+          "roll_pitch_angular_velocity_p95_radps": 0.06453453196555223,
+          "requested_saturation_fraction_400hz": 7.71604938271605e-06,
+          "maximum_requested_saturation_fraction_400hz": 0.0001388888888888889,
+          "computed_demand_over_rating_fraction": 0.0,
+          "maximum_per_joint_computed_demand_over_rating_fraction": 0.0,
+          "maximum_computed_over_rating_burst_s": 0.0,
+          "peak_abs_computed_nm": 1.2139836549758911,
+          "max_per_joint_rms_applied_nm": 0.74871426820755,
+          "nonfoot_fraction": 0.0
+        },
+        "lineage": {
+          "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+          "checkpoint_sha256": null,
+          "source_sha256": "7ae51e575bd2f807439194350b09bf8802f386497901a218e4fa787685f2d681"
+        },
+        "window_start_control": 100,
+        "window_controls": 900,
+        "native_admission": "Separate exact-model native 1/32 standing, solver, geometry, full400Hz and asset receipts are required.",
+        "failed_bounds": [],
+        "missing_evidence": [],
+        "pass": true,
+        "stage2_complete": false,
+        "case_id": "trajectory:0.0353553,-0.0353553,0",
+        "native_capture_complete": true,
+        "native_motor_and_joint_checks_pass": true,
+        "native_contact_screen": {
+          "schema": "canonical_native_contact_screen_v1",
+          "frequency_hz": 400,
+          "window": "complete trial, including initial settling and every native substep",
+          "recorded_substeps": 8000,
+          "nonfoot_substeps": 0,
+          "nonfoot_fraction": 0.0,
+          "maximum_nonfoot_fraction": 0.001,
+          "pass": true,
+          "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+        },
+        "batch_failure": null,
+        "passed_numeric_screen": true
+      },
+      "capture": {
+        "schema": "canonical_exact_evaluation_capture_v1",
+        "steps": 8000,
+        "initial_counter": 0,
+        "final_counter": 8000,
+        "failure": null,
+        "substep_files": [
+          "substeps_000.npz",
+          "substeps_001.npz",
+          "substeps_002.npz",
+          "substeps_003.npz",
+          "substeps_004.npz",
+          "substeps_005.npz",
+          "substeps_006.npz",
+          "substeps_007.npz",
+          "substeps_008.npz",
+          "substeps_009.npz"
+        ],
+        "maximum_applied_nm": [
+          1.600000023841858
+        ],
+        "maximum_requested_nm": [
+          2.0711708068847656
+        ],
+        "joint_bound_violation_steps": [
+          0
+        ],
+        "speed_bound_violation_steps": [
+          0
+        ],
+        "nonfoot_contact_steps_400hz": [
+          0
+        ],
+        "minimum_non_toe_floor_m": [
+          0.011478710661313632
+        ],
+        "minimum_plate_height_m": [
+          0.0940563976764679
+        ],
+        "body_names": [
+          "body",
+          "lf_coxa",
+          "lm_coxa",
+          "lr_coxa",
+          "rf_coxa",
+          "rm_coxa",
+          "rr_coxa",
+          "lf_femur",
+          "lm_femur",
+          "lr_femur",
+          "rf_femur",
+          "rm_femur",
+          "rr_femur",
+          "lf_tibia",
+          "lm_tibia",
+          "lr_tibia",
+          "rf_tibia",
+          "rm_tibia",
+          "rr_tibia"
+        ],
+        "joint_names": [
+          "lf_coxa_yaw",
+          "lf_femur_pitch",
+          "lf_tibia_pitch",
+          "lm_coxa_yaw",
+          "lm_femur_pitch",
+          "lm_tibia_pitch",
+          "lr_coxa_yaw",
+          "lr_femur_pitch",
+          "lr_tibia_pitch",
+          "rf_coxa_yaw",
+          "rf_femur_pitch",
+          "rf_tibia_pitch",
+          "rm_coxa_yaw",
+          "rm_femur_pitch",
+          "rm_tibia_pitch",
+          "rr_coxa_yaw",
+          "rr_femur_pitch",
+          "rr_tibia_pitch"
+        ],
+        "files": {
+          "contacts.jsonl": "2a887bc6013b26fea67310efb4c0a4d45d7a704d9fcb9cc5b0cadfe8a6f2b300",
+          "initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+          "substeps_000.npz": "ebceea0e14f5ee9ea9c5669a6d78b83c92607a3a39c3633de1a0bd26980b5c4c",
+          "substeps_001.npz": "a31dca6f8d1f39f61678f85e5ee96c6091efb3db191d372b0565b49855c75996",
+          "substeps_002.npz": "80c892acbcccc906cb108db0c023504b8004a41a5e1f7984a8f55c1bad00376b",
+          "substeps_003.npz": "036e9bcad6f8159787834d6f8f1bc8bc33353ef57e559f77217fef54dc35fc5c",
+          "substeps_004.npz": "9ff77f8dda3e163b252249edfb57e77d9fa04d9ba9bbab2782dd36bed401cd5c",
+          "substeps_005.npz": "f202e0bffcfa4ce286b16d6cda8984d79c876cfebf5b5f44d1d5b9ce96a6f307",
+          "substeps_006.npz": "2a3ebef559c3508746c1a17fd3f686f022b69499c1640924543d2f5bb64e781a",
+          "substeps_007.npz": "b3e67f5bf79c8ff87b1b1a344e7959af3868fb40e3aa774e490dbb09922a5a73",
+          "substeps_008.npz": "302d6f826471905ff0b9e72a1f28e333825c0a898697097a21cf8881057e86cb",
+          "substeps_009.npz": "06f348a5a37fe6ecf2cc09987476ae97377ea660ad96edac34c54b9192791862"
+        },
+        "contact_classification": "exact_distal_points",
+        "stage2_complete": false
+      }
+    },
+    {
+      "attempt": "replay_15_phase05_continuation004",
+      "local_path": "/Users/palerider/hexapod-results/amp_20260923_native_001/replay_15_phase05_continuation004/run/standing",
+      "remote_path": "/home/orionh/HEXAPOD_runs/restart_20260914/amp_20260923_001/replay_15_phase05_continuation004/run/standing",
+      "state_sha256": "85bc7491d9ee65e1abe2fb7a3f78647ea9f0a95cdf82228c02a25467a4790296",
+      "report_sha256": "407cf59b648a7cfc46c30093ba51217cc4bf9a790d09898e9f681794fe66d90a",
+      "capture_sha256": "2f049497f702d1a624e239f10a2bb752094dcf5c4ba0eb6d2cb3c1fb165af144",
+      "native_readback_sha256": "182b7435f883b0f61e889812640db8bfdcdc30afc7e27911d1164834b55df253",
+      "video_sha256": "b50d1eb47d638ec6ffd0af9cb761bebb7640d3baf03f00302d40d6275d8e4746",
+      "identity": {
+        "source_files": {
+          "__init__.py": "c82a5695bd2575afdaae01eb84bb3c06ddffe42529d201bbe43726ae8859e350",
+          "admission.py": "1391aed5939b882e2ca0967bd8eda6103bf73e46206f8d6c0091f8463b1e70c3",
+          "amp.py": "4010cf0e42ea63ca693b0fa311a3fef7ee6bfdfa47b9eba58bf87f7f7cefec5c",
+          "camera.py": "6c9927cfa747408e3206e170386483791ac696634f1e322e4a6222b32396655d",
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+          "evaluate.py": "5cb686c3daf4eed3b4a96501aa80f9f1a8465376782255a9860e5abb7dfd735c",
+          "evaluation.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
+          "evaluation_config.py": "7d55733f4f5a471427b408a4b3a0e834d083a687f7ae0ebc3ceb0d16c23f3cb7",
+          "force_metrics.py": "5bd228d003d4ab71dbda6acbb9fdbf357a36ec007050b156bdd71ec31c707673",
+          "inputs.py": "0a4ff5170754654dc25ee745b128ae19f5901d6df4005a98e3584dec68b02b96",
+          "launch.py": "dfbe4c44552b2519a242ecd91b06da6ac7a643dbf22b90b7b08ffafc1e3b86d7",
+          "ppo.py": "bb1b44215580e30786bb16271a2dae996b19a41fc43a0588cc4591b18a5d4a65",
+          "prepare.py": "880d308510c61ee8f3dbf764a2639aa46af6817f0d8fe2624d24dd55bbbfe100",
+          "reservation.py": "037162e879e94f6dd05210dfb5ee81fc5d1195c65ad6209ecbfd9f1b62df21f7",
+          "task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+          "train.py": "239acaaa598ae2f05dcb2f775f2b191582873ba71ff49fd3fb645a750758111a",
+          "tripod.py": "ed3d34a4c8c5772ec7e1a1bc4703fc5b325bc9dfa56073b071a6fdf1fd9d0dfc",
+          "tripod_config.py": "4d4d20bafb450e37ad45b9d459e72b0318d7b81fd3edfd0117ba588bda13328c",
+          "tripod_evaluate.py": "92e077e12ceda9ed1cf6c3d045e73b698b0ad00b3f778c86f9de1e06ed5a25a3",
+          "tripod_kinematics.py": "3db69088e944a3773f16844e07ebebc4700662142770eb1a322ce500f5a016cc"
+        },
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+        "config": {
+          "num_envs": 1,
+          "spacing_m": 2.0,
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "episode_seconds": 60.0,
+          "action_scale_rad": 0.35,
+          "target_slew_rad": 0.04,
+          "reset_height_m": 0.08161108940839767,
+          "command_forward_mps": 0.1,
+          "command_left_mps": 0.0,
+          "command_yaw_rad_s": 0.0,
+          "seed": 20260914,
+          "record_motion_features": true,
+          "render": true,
+          "device": "cuda:0",
+          "schema": "canonical_paper_walk_experiment_v1",
+          "actor_width": 231,
+          "critic_width": 234,
+          "amp_width": 61,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "legs": [
+            "lf",
+            "lm",
+            "lr",
+            "rf",
+            "rm",
+            "rr"
+          ],
+          "standing_admission": false,
+          "stage2_complete": false,
+          "prior_standing_failure_superseded": false,
+          "authorization": "User explicitly requested experimental paper-based PPO training on the confirmed model.",
+          "telemetry_scope": "Compact native body-force telemetry; no exact toe/shaft patch classification or formal standing admission."
+        },
+        "physics_source_files": {
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "standing_admission": {
+          "schema": "hexapod_locomotion_standing_admission_v1",
+          "num_envs": 32,
+          "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+          "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+          "physics_source_files": {
+            "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+            "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+          },
+          "physics_config": {
+            "physics_dt": 0.0025,
+            "decimation": 8,
+            "spacing_m": 2.0,
+            "target_slew_rad": 0.04,
+            "action_scale_rad": 0.35,
+            "solver_position_iterations": 32,
+            "solver_velocity_iterations": 0,
+            "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+            "material_friction": [
+              1.0,
+              1.0
+            ],
+            "restitution": 0.0,
+            "external_forces_every_iteration": true,
+            "neutral_joint_position_rad": [
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4
+            ],
+            "reset_root_height_m": 0.10280231400684256
+          },
+          "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+          "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+          "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+          "one": {
+            "report_path": "/standing_one/standing/standing_report.json",
+            "report_sha256": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+            "state_path": "/standing_one/state.json",
+            "state_sha256": "5773bf1d220bac30e4ab523a4851a5a04d7939087de6d2032fefdc3ff7fd6c3a"
+          },
+          "batch": {
+            "report_path": "/standing_batch/standing/standing_report.json",
+            "report_sha256": "28bf2e36f4081f6dcfbae8ad6bfd5c4992fc3527f7a66ffc54dccef56d7a8e96",
+            "state_path": "/standing_batch/state.json",
+            "state_sha256": "57796d33d26d6186019514494d527cd0e6bf365a42ae1d9a54bfa1e95e494c56"
+          }
+        },
+        "controller_kind": "optimized_periodic_motor_targets",
+        "learned_policy": false,
+        "command": [
+          0.03535533905932737,
+          -0.03535533905932738,
+          0.0
+        ],
+        "start_phase": 0.5,
+        "startup_ramp_controls": 50,
+        "amp_feature_contract": {
+          "schema": "hexapod_amp_features_v1",
+          "width": 61,
+          "control_dt_s": 0.02,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "leg_order": [
+            "lf",
+            "lm",
+            "lr",
+            "rf",
+            "rm",
+            "rr"
+          ],
+          "body_axes": [
+            "left",
+            "backward",
+            "up"
+          ],
+          "fields": [
+            {
+              "name": "joint_position",
+              "slice": [
+                0,
+                18
+              ],
+              "unit": "rad",
+              "frame": "native_joint_absolute"
+            },
+            {
+              "name": "joint_velocity",
+              "slice": [
+                18,
+                36
+              ],
+              "unit": "rad/s",
+              "frame": "native_joint"
+            },
+            {
+              "name": "linear_velocity",
+              "slice": [
+                36,
+                39
+              ],
+              "unit": "m/s",
+              "frame": "body_root_origin"
+            },
+            {
+              "name": "angular_velocity",
+              "slice": [
+                39,
+                42
+              ],
+              "unit": "rad/s",
+              "frame": "body"
+            },
+            {
+              "name": "height",
+              "slice": [
+                42,
+                43
+              ],
+              "unit": "m",
+              "frame": "world_z_above_flat_zero_plane"
+            },
+            {
+              "name": "toe_position",
+              "slice": [
+                43,
+                61
+              ],
+              "unit": "m",
+              "frame": "body_root_relative_xyz"
+            }
+          ],
+          "normalization": "none; learner normalization must preserve this raw contract",
+          "interpretation": "James retains six XYZ toe positions; six scalar heights would give 49 values.",
+          "paper": "https://arxiv.org/html/2511.03167v1#S3.SS1"
+        },
+        "optimization_config": {
+          "period_s": 1.2,
+          "control_dt_s": 0.02,
+          "forward_mps": 0.03535533905932737,
+          "duty_factor": 0.65,
+          "lift_m": 0.018,
+          "friction": 0.8,
+          "max_iterations": 600,
+          "target_curvature_weight": 0.1,
+          "root_velocity_weight": 1.0,
+          "left_mps": -0.03535533905932738,
+          "yaw_rate_rad_s": 0.0
+        },
+        "optimization_source_files": {
+          "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "commands.py": "bb6ca8e6931c4d7a5216acc8f1d5590472be3fed94f5ce08bd929cf131c0dcdb",
+          "dataset.py": "d73a974adae3634103c1363fc468cd4fdd81a3b4d0bdd41a9b2491b64c48e16b",
+          "model.py": "ad49e917655d735b732d4ba136ddea6427b9dc7c440fb0e1f53cb9a6bebaa3fe",
+          "optimize.py": "720f2c1deec3786ee813343d316bf0665640b266b19e615b88d155c3cd8f93e2",
+          "prepare.py": "07ed041a482c90e34c08a805a55a4d378300e2dbf96316085228300e6e8782c8",
+          "replay_native.py": "03bad0df1e79d7aa66e91a20936d6698359b7fc5b52d51a44a2ea0705ecd556e"
+        },
+        "trajectory_sha256": "b8b014dbf775dce5f92d62794a190b03b0dcb9bc112a410aa09f593b604cb242",
+        "optimization_input_sha256": "5a94496278f1f604fafbaeef98ad56ee0ee0e89d062f647cd764a426e0577d6b",
+        "optimization_result_sha256": "e47b776b438b51ac82b812b08e30b55fd021e4f4703009eaef262ef8951dd7f9",
+        "root_com_local_m": [
+          [
+            -2.8658316296059638e-05,
+            6.18705598753877e-05,
+            0.02539987675845623
+          ]
+        ]
+      },
+      "runtime_binding": {
+        "runtime_tree_sha256": "c272be2ccc35aab6b44f40ea043bca42cd76b664a56a68f357dcdc24295d84b3"
+      },
+      "eligible_for_motion_prior": true,
+      "speed_bound_violation_steps": 0,
+      "peak_joint_speed": {
+        "sequence": 2461,
+        "time_s": 6.155,
+        "joint": "lr_tibia_pitch",
+        "velocity_rad_s": -8.616924285888672,
+        "native_limit_rad_s": 50.26548385620117,
+        "comparison_tolerance_rad_s": 2e-06,
+        "raw_file": "substeps_003.npz",
+        "raw_sha256": "16135e98ed597e73db18c062a345a905a168ad06968e381ab75830e776c6bdac"
+      },
+      "native_result": {
+        "schema": "canonical_stage2_cpu_evaluation_v1",
+        "profile": "omni_static",
+        "scope": {
+          "source": "experiments/c_length_study/tools/omni_flat_math.py:scenario_gate",
+          "cases": 77,
+          "duration_s": 20.0,
+          "settle_s": 2.0,
+          "scope": "Historical full signed direction, yaw and combined-command numeric screen."
+        },
+        "environment_index": 0,
+        "recorded_controls": 1000,
+        "checks": {
+          "complete_requested_window": {
+            "status": "pass",
+            "value": 0,
+            "bound": 0,
+            "operator": "<="
+          },
+          "control_dt_s": {
+            "status": "pass",
+            "value": 0.0,
+            "bound": 1e-12,
+            "operator": "<="
+          },
+          "quaternion_unit_norm": {
+            "status": "pass",
+            "value": 2.384185791015625e-07,
+            "bound": 1e-05,
+            "operator": "<="
+          },
+          "terminated": {
+            "status": "pass",
+            "value": 0,
+            "bound": 0,
+            "operator": "<="
+          },
+          "truncated": {
+            "status": "pass",
+            "value": 0,
+            "bound": 0,
+            "operator": "<="
+          },
+          "reset": {
+            "status": "pass",
+            "value": 0,
+            "bound": 0,
+            "operator": "<="
+          },
+          "contiguous_time": {
+            "status": "pass",
+            "value": 3.1259717037102064e-15,
+            "bound": 1e-09,
+            "operator": "<="
+          },
+          "held_command": {
+            "status": "pass",
+            "value": 1.6300933311508281e-09,
+            "bound": 1e-06,
+            "operator": "<="
+          },
+          "planar_error_mps": {
+            "status": "pass",
+            "value": 0.0031740584755431908,
+            "bound": 0.025,
+            "operator": "<="
+          },
+          "yaw_error_rad_s": {
+            "status": "pass",
+            "value": 0.004459788304735265,
+            "bound": 0.06,
+            "operator": "<="
+          },
+          "tilt_rms_degrees": {
+            "status": "pass",
+            "value": 0.2489461898803711,
+            "bound": 5.0,
+            "operator": "<="
+          },
+          "vertical_velocity_rms_mps": {
+            "status": "pass",
+            "value": 0.004581968300044537,
+            "bound": 0.04,
+            "operator": "<="
+          },
+          "nonfoot_fraction": {
+            "status": "pass",
+            "value": 0.0,
+            "bound": 0.001,
+            "operator": "<="
+          },
+          "computed_demand_over_rating_fraction": {
+            "status": "pass",
+            "value": 0.0,
+            "bound": 0.005,
+            "operator": "<="
+          }
+        },
+        "metrics": {
+          "base_height_std_m": 0.0001119524531532079,
+          "base_height_peak_to_peak_m": 0.0008119195699691772,
+          "tilt_rms_degrees": 0.2489461898803711,
+          "tilt_p95_degrees": 0.36482247710227966,
+          "maximum_tilt_degrees": 0.414014607667923,
+          "vertical_velocity_rms_mps": 0.004581968300044537,
+          "vertical_velocity_abs_p95_mps": 0.00857009831815958,
+          "mean_velocity_mps": [
+            0.035315439971315886,
+            -0.0344844437703003,
+            4.231529801620697e-06
+          ],
+          "planar_error_mps": 0.0031740584755431908,
+          "planar_velocity_rmse_mps": 0.0037199864060867313,
+          "yaw_error_rad_s": 0.004459788304735265,
+          "yaw_rate_rmse_radps": 0.005711169722737623,
+          "mean_yaw_rate_rad_s": -0.0005236829230151925,
+          "roll_pitch_angular_velocity_rms_radps": 0.04568082299081231,
+          "roll_pitch_angular_velocity_p95_radps": 0.0638813203159468,
+          "requested_saturation_fraction_400hz": 0.0,
+          "maximum_requested_saturation_fraction_400hz": 0.0,
+          "computed_demand_over_rating_fraction": 0.0,
+          "maximum_per_joint_computed_demand_over_rating_fraction": 0.0,
+          "maximum_computed_over_rating_burst_s": 0.0,
+          "peak_abs_computed_nm": 1.2192336320877075,
+          "max_per_joint_rms_applied_nm": 0.7513125538825989,
+          "nonfoot_fraction": 0.0
+        },
+        "lineage": {
+          "urdf_sha256": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+          "checkpoint_sha256": null,
+          "source_sha256": "7ae51e575bd2f807439194350b09bf8802f386497901a218e4fa787685f2d681"
+        },
+        "window_start_control": 100,
+        "window_controls": 900,
+        "native_admission": "Separate exact-model native 1/32 standing, solver, geometry, full400Hz and asset receipts are required.",
+        "failed_bounds": [],
+        "missing_evidence": [],
+        "pass": true,
+        "stage2_complete": false,
+        "case_id": "trajectory:0.0353553,-0.0353553,0",
+        "native_capture_complete": true,
+        "native_motor_and_joint_checks_pass": true,
+        "native_contact_screen": {
+          "schema": "canonical_native_contact_screen_v1",
+          "frequency_hz": 400,
+          "window": "complete trial, including initial settling and every native substep",
+          "recorded_substeps": 8000,
+          "nonfoot_substeps": 0,
+          "nonfoot_fraction": 0.0,
+          "maximum_nonfoot_fraction": 0.001,
+          "pass": true,
+          "scope": "Common canonical native contact evidence; historical sampled metrics remain separate."
+        },
+        "batch_failure": null,
+        "passed_numeric_screen": true
+      },
+      "capture": {
+        "schema": "canonical_exact_evaluation_capture_v1",
+        "steps": 8000,
+        "initial_counter": 0,
+        "final_counter": 8000,
+        "failure": null,
+        "substep_files": [
+          "substeps_000.npz",
+          "substeps_001.npz",
+          "substeps_002.npz",
+          "substeps_003.npz",
+          "substeps_004.npz",
+          "substeps_005.npz",
+          "substeps_006.npz",
+          "substeps_007.npz",
+          "substeps_008.npz",
+          "substeps_009.npz"
+        ],
+        "maximum_applied_nm": [
+          1.5074421167373657
+        ],
+        "maximum_requested_nm": [
+          1.5074421167373657
+        ],
+        "joint_bound_violation_steps": [
+          0
+        ],
+        "speed_bound_violation_steps": [
+          0
+        ],
+        "nonfoot_contact_steps_400hz": [
+          0
+        ],
+        "minimum_non_toe_floor_m": [
+          0.0114789207606905
+        ],
+        "minimum_plate_height_m": [
+          0.09403630346059799
+        ],
+        "body_names": [
+          "body",
+          "lf_coxa",
+          "lm_coxa",
+          "lr_coxa",
+          "rf_coxa",
+          "rm_coxa",
+          "rr_coxa",
+          "lf_femur",
+          "lm_femur",
+          "lr_femur",
+          "rf_femur",
+          "rm_femur",
+          "rr_femur",
+          "lf_tibia",
+          "lm_tibia",
+          "lr_tibia",
+          "rf_tibia",
+          "rm_tibia",
+          "rr_tibia"
+        ],
+        "joint_names": [
+          "lf_coxa_yaw",
+          "lf_femur_pitch",
+          "lf_tibia_pitch",
+          "lm_coxa_yaw",
+          "lm_femur_pitch",
+          "lm_tibia_pitch",
+          "lr_coxa_yaw",
+          "lr_femur_pitch",
+          "lr_tibia_pitch",
+          "rf_coxa_yaw",
+          "rf_femur_pitch",
+          "rf_tibia_pitch",
+          "rm_coxa_yaw",
+          "rm_femur_pitch",
+          "rm_tibia_pitch",
+          "rr_coxa_yaw",
+          "rr_femur_pitch",
+          "rr_tibia_pitch"
+        ],
+        "files": {
+          "contacts.jsonl": "87328c924664b037bd97c2b0d88a99d2b0cbc9e25079206d4d5bf393c6f4143a",
+          "initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+          "substeps_000.npz": "be4ff18adbdc2abe2265b309e68b30ed7b9f771a9350c421dbfac56e1ef5bf2f",
+          "substeps_001.npz": "2e62de91c71d13064d0f78e3fa1f45580d7e730a352a3f1a6ace4b2590df9dec",
+          "substeps_002.npz": "782ab1719a19a00f51242046d050bd597e668f3251b44229d9ca2aba5491a69c",
+          "substeps_003.npz": "16135e98ed597e73db18c062a345a905a168ad06968e381ab75830e776c6bdac",
+          "substeps_004.npz": "7f79be29f7d75d357b6c5bdacc641040f2478420375f25e72ba9440ef5eb2b57",
+          "substeps_005.npz": "b59af66657a57acf64b4b804a8efba2f329482d804b6fa1e05929f34f1be6349",
+          "substeps_006.npz": "742254b08ee830f2c714fb580aca0d0fac6715a7892b2ed8f622748b2b765031",
+          "substeps_007.npz": "b34ca8f8cb0246e54e2e0bc02d9448261848d03497128a7ab495166d128b01f8",
+          "substeps_008.npz": "3fc972f46b24f0fbfc6963bbe7997053106d7bc1fb7b380dbf32b59e9bb8ca4c",
+          "substeps_009.npz": "a0c6831a62984704cc89b9daee5afad75f2458076c2d98f22100c3e06d408326"
+        },
+        "contact_classification": "exact_distal_points",
+        "stage2_complete": false
+      }
+    }
+  ],
+  "causal_scope": "The replacement changes the optimized trajectory and startup controller together.",
+  "startup_ramp_controls": 50,
+  "control_dt_s": 0.02,
+  "training_crop_controls": [
+    100,
+    1000
+  ],
+  "human_review_pending": true,
+  "dataset_admitted": false,
+  "stage2_complete": false
+}
