@@ -13,7 +13,7 @@ from tensordict import TensorDict
 
 from rsl_rl.algorithms import PPO
 
-from locomotion import amp, amp_ppo, paper_networks as nets, train
+from locomotion import amp, amp_discriminator as disc, amp_ppo, paper_networks as nets, train
 from locomotion.amp_ppo import (AMPConfig, AMPPPO, AMPVecEnv, CollisionCapture, amp_ppo_config,
                                 load_demonstrations)
 from locomotion.ppo import VanillaVecEnv, ppo_config
@@ -223,8 +223,8 @@ class LearnerTests(unittest.TestCase):
         for _ in range(3):
             losses = synthetic_rollout(alg, env, 4, 3)
         with torch.no_grad():
-            bank_style = float(amp.style_reward(alg.discriminator(bank)).mean())
-            policy_style = float(amp.style_reward(alg.discriminator(alg.policy_transitions.reshape(-1, 122))).mean())
+            bank_style = float(disc.style_reward(alg.discriminator(bank)).mean())
+            policy_style = float(disc.style_reward(alg.discriminator(alg.policy_transitions.reshape(-1, 122))).mean())
         self.assertGreater(bank_style, policy_style)
         self.assertGreater(bank_style, .5)
         for key in ('discriminator_prior', 'discriminator_policy', 'discriminator_gradient_penalty', 'style_reward_mean'):

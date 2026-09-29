@@ -15,12 +15,18 @@ command-scaled tracking kernels, for example
 ``--reward c=locomotion.paper_reward:variant:kernel=stride,penalties=calibrated``.
 The stride kernel averages each replica's velocity over a contiguous trace;
 ``task_v2.TrainingTaskV2`` keeps that window per replica during training.
+
+``style_only``, ``paper_with_style`` and ``calibrated_with_style`` add the Eq. (2)
+style term from a frozen ``locomotion.amp_discriminator`` checkpoint, for example
+``--reward style=locomotion.paper_reward:paper_with_style:disc.pt``; train one with
+``python -m locomotion.paper_reward discriminator --prior ... --policy ... --output disc.pt``.
 """
 from __future__ import annotations
 
 import argparse
 from dataclasses import asdict, dataclass, fields, replace
 import json
+import sys
 
 import torch
 
@@ -247,7 +253,70 @@ def variant(spec):
     return reward
 
 
+def _with_style(base, path):
+    """``base`` plus Eq. (2) style from a frozen discriminator checkpoint (``locomotion.amp_discriminator``)."""
+    from . import amp_discriminator
+    discriminator, _ = amp_discriminator.load(path)
+
+    def reward(telemetry, commands, previous_target, terminated, config=None, nominal_height=None):
+        components = {}
+        if base is not None:
+            _, components = base(telemetry, commands, previous_target, terminated, config, nominal_height)
+        with torch.no_grad():
+            scores = discriminator(amp_discriminator.transitions(telemetry["amp_state"], telemetry["next_amp_state"]))
+        components = {**components, "style": amp_discriminator.style_reward(scores)}
+        return sum(components.values()), components
+    return reward
+
+
+def style_only(path):
+    """The style term alone, for inspecting the discriminator."""
+    return _with_style(None, path)
+
+
+def paper_with_style(path):
+    """Table I task + style + printed penalties."""
+    return _with_style(paper_reward, path)
+
+
+def calibrated_with_style(path):
+    """Table I task + style + calibrated penalties."""
+    return _with_style(paper_reward_calibrated, path)
+
+
+def train_discriminator(argv=None):
+    """``python -m locomotion.paper_reward discriminator ...``: fit a frozen discriminator from traces."""
+    from pathlib import Path
+    from . import amp_discriminator as amp, reward_scorer
+    parser = argparse.ArgumentParser(prog="python -m locomotion.paper_reward discriminator",
+                                     description="Train a frozen AMP discriminator from recorded traces.")
+    parser.add_argument("--prior", nargs="+", required=True, help="Motion-prior control_trace.npz files.")
+    parser.add_argument("--policy", nargs="+", required=True, help="Policy control_trace.npz files (negatives).")
+    parser.add_argument("--output", type=Path, required=True, help="Discriminator checkpoint to write.")
+    parser.add_argument("--steps", type=int, default=amp.TrainConfig.steps)
+    args = parser.parse_args(argv)
+    config = amp.TrainConfig(steps=args.steps)
+    prior_traces = [reward_scorer.load_trace(path) for path in args.prior]
+    policy_traces = [reward_scorer.load_trace(path) for path in args.policy]
+    prior = torch.cat([amp.trace_transitions(trace) for trace in prior_traces])
+    policy = torch.cat([amp.trace_transitions(trace) for trace in policy_traces])
+    discriminator, history = amp.train(prior, policy, config)
+    metadata = {"config": asdict(config), "decisions": list(amp.DECISIONS), "history": history,
+                "prior": [{"path": str(t.path), "sha256": t.sha256} for t in prior_traces],
+                "policy": [{"path": str(t.path), "sha256": t.sha256} for t in policy_traces],
+                "scope": "Frozen offline discriminator for inspecting recorded rollouts; AMP trains it against "
+                         "the current policy during PPO."}
+    amp.save(discriminator, args.output, metadata)
+    with torch.no_grad():
+        summary = {"prior_style_mean": float(amp.style_reward(discriminator(prior)).mean()),
+                   "policy_style_mean": float(amp.style_reward(discriminator(policy)).mean())}
+    print(json.dumps({"output": str(args.output), **summary, "final": history[-1]}, indent=2))
+
+
 def main(argv=None):
+    argv = sys.argv[1:] if argv is None else list(argv)
+    if argv[:1] == ["discriminator"]:
+        return train_discriminator(argv[1:])
     from . import reward_scorer
     parser = argparse.ArgumentParser(description="Recompute the calibrated penalty weights from recorded traces.")
     parser.add_argument("traces", nargs="+", help="Evaluation control_trace.npz files.")

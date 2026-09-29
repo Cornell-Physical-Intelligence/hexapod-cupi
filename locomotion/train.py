@@ -37,6 +37,14 @@ def scalars(value, prefix):
     return {}
 
 
+def checkpoint_reward_version(record):
+    """The reward a checkpoint was trained with; checkpoints from before the flag trained version 1."""
+    version = record['identity'].get('reward_version', '1')
+    if version not in ('1', '2'):
+        raise ValueError('Unknown checkpoint reward version: '+str(version))
+    return version
+
+
 class ConfigRecord(dict):
     """Give RSL-RL's W&B writer the to_dict() it expects from an environment config."""
     def to_dict(self):
@@ -114,7 +122,7 @@ def main(argv=None):
         'reward_version': args.reward_version, 'learner': args.learner, 'networks': args.networks}
     if args.learner == 'amp':
         amp_module = importlib.import_module(prefix+'.amp_ppo')
-        identity['learner_source_files'] = {name: sha(source/name) for name in ('amp.py', 'amp_ppo.py', 'paper_networks.py')}
+        identity['learner_source_files'] = {name: sha(source/name) for name in ('amp.py', 'amp_discriminator.py', 'amp_ppo.py', 'paper_networks.py')}
         identity['amp_dataset'] = amp_module.load_demonstrations(source.parent/amp_module.AMPConfig().dataset)[1]
     identity['physics_source_files'] = {k: identity['source_files'][k] for k in ('env.py', 'env_config.py')}
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
@@ -141,6 +149,8 @@ def main(argv=None):
         if any(checkpoint_record['identity'].get(key, {'learner': 'ppo', 'networks': 'mlp', 'motion_prior': False}.get(key))
                != identity.get(key) for key in learner_keys):
             raise ValueError('Checkpoint learner, networks or demonstration bank differs')
+        # Evaluation computes no training reward; record the one the checkpoint learned from.
+        identity['reward_version'] = checkpoint_reward_version(checkpoint_record)
     if args.preflight_only:
         print(json.dumps(identity, indent=2)); return 0
     args.output.mkdir(parents=True, exist_ok=False)

@@ -8,7 +8,8 @@ loop without reading old experiment launchers or a second environment port.
 | --- | --- |
 | [`../robot/active_model.json`](../robot/active_model.json), [`env_config.py`](env_config.py) | Select the URDF, masses, joint order, motor coefficients and fixed timing. |
 | [`env.py`](env.py) | Load the native robot, form observations, limit joint targets, apply motor torque and advance eight physics steps. The actor receives 231 values and returns 18 offsets. |
-| [`task.py`](task.py) | Sample held velocity commands, compute the training reward, detect failed episodes and reset selected robots. This file owns the reward. |
+| [`task.py`](task.py) | Sample held velocity commands, compute the training reward, detect failed episodes and reset selected robots. This file owns reward version 1, the default. |
+| [`task_v2.py`](task_v2.py) | Reward version 2: Table I task and penalty terms with command-scaled tracking, on version 1's commands and resets. `train.py --reward-version 2` selects it. |
 | [`ppo.py`](ppo.py), [`train.py`](train.py) | Adapt the task to stock PPO, record updates and loads, save checkpoints and load them for evaluation. |
 | [`amp.py`](amp.py), [`amp_ppo.py`](amp_ppo.py), [`paper_networks.py`](paper_networks.py) | Share the 61-value AMP feature contract, score transitions with the discriminator, add the style reward inside PPO and supply the Table III networks. See [AMP learner](#amp-learner-and-paper-networks). |
 | [`evaluate.py`](evaluate.py), [`evaluation.py`](evaluation.py) | Record actual policy rollouts and apply the existing walking, stopping, contact and motor gates. Missing cases remain missing. |
@@ -18,7 +19,8 @@ loop without reading old experiment launchers or a second environment port.
 
 The controller retains 400 Hz physics, 50 Hz policy actions, a 0.35 rad action
 scale, the 0.040 rad target-change limit per control and the provisional 1.6 N·m
-motor cap. [`task.py`](task.py) owns reward coefficients and command sampling;
+motor cap. [`task.py`](task.py) owns command sampling and reward version 1;
+[`task_v2.py`](task_v2.py) owns reward version 2, selected with `--reward-version 2`;
 [`evaluation.py`](evaluation.py) owns the numerical gates. Read
 [TRAINING](../docs/TRAINING.md) for the proposed paper-method extensions.
 

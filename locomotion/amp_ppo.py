@@ -21,7 +21,7 @@ import torch
 
 from rsl_rl.algorithms import PPO
 
-from . import amp
+from . import amp, amp_discriminator as disc
 from .ppo import VanillaVecEnv, ppo_config
 from . import paper_networks as nets
 
@@ -42,6 +42,8 @@ DECISIONS = (
     "Style reward weight 1 follows Table I; the total reward is task plus style plus penalties.",
     "The discriminator trains on this rollout's policy transitions against uniform dataset samples; "
     "no replay buffer of older policy transitions.",
+    "The gradient penalty differentiates the standardized prior transition the network consumes; "
+    "amp_discriminator keeps its raw-input form for the offline diagnostic.",
     "Discriminator updates per PPO iteration equal num_learning_epochs * num_mini_batches; batch 256 "
     "prior and 256 policy transitions; Adam 1e-4; these are not stated in the paper.",
     "A terminal transition pairs the last state with the terminal state before reset; reset-to-first "
@@ -78,6 +80,22 @@ class AMPConfig:
             raise ValueError('Dataset path must be relative to the repository root')
 
 
+def discriminator_loss(discriminator, prior, policy, gradient_penalty=10.):
+    """Eq. (1) with the gradient penalty taken on the standardized prior transition.
+
+    ``amp_discriminator.discriminator_loss`` differentiates the raw transition;
+    the network divides each feature by its spread, so that gradient scales by
+    1/std. This learner differentiates the tensor the network consumes, as the
+    cited AMP method does, so feature scale cannot change the penalty.
+    """
+    standardized = ((prior - discriminator.mean) / discriminator.std).clone().requires_grad_(True)
+    prior_scores = discriminator.net(standardized).squeeze(-1)
+    gradient, = torch.autograd.grad(prior_scores.sum(), standardized, create_graph=True)
+    terms = {"prior": (prior_scores - 1).square().mean(), "policy": (discriminator(policy) + 1).square().mean(),
+             "gradient_penalty": .5 * gradient_penalty * gradient.square().sum(-1).mean()}
+    return sum(terms.values()), {key: float(value.detach()) for key, value in terms.items()}
+
+
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
@@ -94,7 +112,7 @@ def load_demonstrations(directory=DATASET):
         raise ValueError('Demonstration transitions differ from their manifest')
     with np.load(directory/'transitions.npz', allow_pickle=False) as archive:
         states, next_states = archive['states'], archive['next_states']
-    if (states.shape != next_states.shape or states.ndim != 2 or states.shape[1] != amp.AMP_WIDTH
+    if (states.shape != next_states.shape or states.ndim != 2 or states.shape[1] != disc.AMP_WIDTH
             or len(states) != manifest.get('transitions') or not np.isfinite(states).all()
             or not np.isfinite(next_states).all()):
         raise ValueError('Demonstration transitions differ from the 61-value contract')
@@ -102,7 +120,7 @@ def load_demonstrations(directory=DATASET):
                 'manifest_sha256': sha(directory/'manifest.json'), 'transitions_sha256': file_sha,
                 'transitions': int(len(states)), 'model_sha256': manifest.get('model_sha256'),
                 'reviewer': manifest.get('reviewer')}
-    return amp.transitions(states, next_states), identity
+    return disc.transitions(states, next_states), identity
 
 
 class CollisionCapture:
@@ -222,7 +240,7 @@ class AMPPPO(PPO):
         self.demonstrations, self.dataset_identity = load_demonstrations(ROOT/self.amp_config.dataset)
         self.demonstrations = self.demonstrations.to(self.device)
         std = self.demonstrations.std(0).clamp_min(1e-3)
-        self.discriminator = amp.Discriminator(self.demonstrations.mean(0), std,
+        self.discriminator = disc.Discriminator(self.demonstrations.mean(0), std,
                                                self.amp_config.discriminator_hidden).to(self.device)
         self.discriminator_optimizer = torch.optim.Adam(self.discriminator.parameters(),
                                                         lr=self.amp_config.discriminator_learning_rate)
@@ -232,7 +250,7 @@ class AMPPPO(PPO):
                                                         lr=self.amp_config.estimator_learning_rate)
         self.generator = torch.Generator(device='cpu').manual_seed(self.amp_config.seed)
         self.policy_transitions = torch.zeros(storage.num_transitions_per_env, storage.num_envs,
-                                              2 * amp.AMP_WIDTH, device=self.device)
+                                              2 * disc.AMP_WIDTH, device=self.device)
         self.style_rewards = torch.zeros(storage.num_envs, device=self.device)
         self.style_sum, self.style_count = 0., 0
         self._amp_before = None
@@ -244,23 +262,23 @@ class AMPPPO(PPO):
     def process_env_step(self, obs, rewards, dones, extras):
         if self._amp_before is None or 'amp_next' not in extras:
             raise ValueError('AMP transitions need the pre-step state and the pre-reset next state')
-        pair = amp.transitions(self._amp_before, extras['amp_next'].to(self.device))
+        pair = disc.transitions(self._amp_before, extras['amp_next'].to(self.device))
         with torch.no_grad():
-            self.style_rewards = amp.style_reward(self.discriminator(pair))
+            self.style_rewards = disc.style_reward(self.discriminator(pair))
         self.policy_transitions[self.storage.step] = pair
         self.style_sum += float(self.style_rewards.sum())
         self.style_count += int(self.style_rewards.numel())
         super().process_env_step(obs, rewards + self.amp_config.style_weight * self.style_rewards, dones, extras)
 
     def _update_discriminator(self):
-        policy = self.policy_transitions[:self.storage.num_transitions_per_env].reshape(-1, 2 * amp.AMP_WIDTH)
+        policy = self.policy_transitions[:self.storage.num_transitions_per_env].reshape(-1, 2 * disc.AMP_WIDTH)
         totals = {'prior': 0., 'policy': 0., 'gradient_penalty': 0.}
         batch = self.amp_config.discriminator_batch
         self.discriminator.train()
         for _ in range(self.amp_config.discriminator_updates):
             prior_rows = torch.randint(len(self.demonstrations), (batch,), generator=self.generator).to(self.device)
             policy_rows = torch.randint(len(policy), (batch,), generator=self.generator).to(self.device)
-            loss, terms = amp.discriminator_loss(self.discriminator, self.demonstrations[prior_rows],
+            loss, terms = discriminator_loss(self.discriminator, self.demonstrations[prior_rows],
                                                  policy[policy_rows], self.amp_config.gradient_penalty)
             self.discriminator_optimizer.zero_grad()
             loss.backward()
@@ -323,5 +341,5 @@ class AMPPPO(PPO):
     def declaration(self):
         return {'schema': 'hexapod_amp_learner_v1', 'config': asdict(self.amp_config),
                 'dataset': dict(self.dataset_identity), 'feature_contract': amp.feature_contract(),
-                'discriminator_decisions': list(amp.DECISIONS), 'learner_decisions': list(DECISIONS),
+                'discriminator_decisions': list(disc.DECISIONS), 'learner_decisions': list(DECISIONS),
                 'network_decisions': list(nets.DECISIONS), 'stage2_complete': False}

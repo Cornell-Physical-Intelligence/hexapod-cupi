@@ -39,7 +39,7 @@ Penalty r^l
 
 `||.||_2` is the unsquared Euclidean norm; on the scalar yaw error it is an
 absolute value. The style term needs the AMP discriminator
-([`locomotion/amp.py`](../locomotion/amp.py), Step 5) and stays outside reward v2
+([`locomotion/amp_discriminator.py`](../locomotion/amp_discriminator.py), Step 5) and stays outside reward v2
 until the AMP owner agrees its inputs.
 
 ## 2. Findings on the printed formulas
@@ -118,7 +118,9 @@ earns the full weight, and `sigma` is continuous at the smallest command.
 
 **C. Command-scaled on stride-averaged velocity.** Variant B applied to the mean
 velocity over one 1.2 s tripod period, restarted at each command change and
-reset.
+reset. It is implemented causally, as training computes it: before a full
+window has passed since the latest command change, the mean covers only the
+controls so far.
 
 Per-control tracking pays a policy that oscillates at the command's speed each
 time its velocity passes through the kernel, and it penalizes a gait whose
@@ -127,10 +129,13 @@ recorded rollouts:
 
 | Rollout | Mean along command | Forward std | Version 1 | Paper | B, per control | C, 1.2 s average |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Trajectory-optimizer replay (tripod walk) | 0.0488 m/s | 0.038 m/s | 0.364 | 0.802 | 0.254 | 0.967 |
-| Test fixture (smooth tripod walk) | 0.0491 m/s | 0.008 m/s | – | – | 0.858 | 0.970 |
+| Trajectory-optimizer replay (tripod walk) | 0.0488 m/s | 0.038 m/s | 0.364 | 0.802 | 0.254 | 0.932 |
+| Test fixture (smooth tripod walk) | 0.0491 m/s | 0.008 m/s | – | – | 0.858 | 0.940 |
 | PPO example arm, update 1200 | -0.0006 m/s | – | 0.484 | 0.743 | 0.349 | 0.109 |
-| PPO scratch arm, update 1200 | 0.0066 m/s | – | 0.429 | 0.745 | 0.297 | 0.131 |
+| PPO scratch arm, update 1200 | 0.0066 m/s | – | 0.429 | 0.745 | 0.297 | 0.127 |
+
+The B and C columns are `task_v2`'s `linear_tracking` component, scored with
+`locomotion.task_v2:scorer_reward` on each trace.
 
 B ranks the smooth walk well above both failed policies but ranks the
 optimizer replay, whose velocity swings within each stride, below them. C pays
@@ -142,7 +147,8 @@ signal.
 
 **Penalty weights.** Table I's penalties total about 1% of tracking on this
 7.47 kg robot. `paper_reward_calibrated` rescales the continuous penalties to 80%
-of mean tracking; under the paper kernel a motionless robot then outscores the
+of mean tracking under the paper kernel (variant A), and version 2 keeps those
+weights with kernel C; under the paper kernel a motionless robot then outscores the
 walk (1.089 against 0.938 per control). Recalibrate the penalties only after the
 tracking variant is chosen.
 
@@ -169,13 +175,18 @@ action-rate term reads raw actions, and neither the 1.6 N·m cap nor the
 1. Tracking: variant B or C, per the reviewer's decision; C's window and reset
    rule under test if chosen.
 2. Penalties: Table I forms from section 3, contact force omitted, weights
-   recalibrated after tracking is fixed.
+   recalibrated after tracking is fixed. Table I has no termination term, but
+   PPO bootstraps zero after a termination, so a policy earning negative reward
+   would gain by falling; version 2 charges 75 per terminated control, more
+   than the discounted value of continuing at the worst recorded mean reward
+   (0.721 / (1 - 0.99) = 72.1).
 3. A new `REWARD_VERSION` beside version 1, which stays selectable and
    unchanged. `test_recorded_parity` freezes `task.py` byte for byte, so version
    2 lives in [`locomotion/task_v2.py`](../locomotion/task_v2.py) as a subclass
    of `TrainingTask`; `train.py --reward-version 2` selects it. Its defaults
-   (variant C, `k` = 0.4, the section 4 floors, calibrated penalties) were
-   approved by the reviewer, James, on 2026-09-25.
+   (variant C, `k` = 0.4, the section 4 floors, calibrated penalties, the
+   termination term) are decided in the review of
+   [PR #42](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/42).
 4. CPU tests for tracking error, the section 4 criterion, zero commands and
    command transitions, including the reset of previous action, previous joint
    velocity and the stride window.
@@ -191,9 +202,10 @@ action-rate term reads raw actions, and neither the 1.6 N·m cap nor the
 - Reward inputs agreed with the AMP owner, including the AMP state and whether
   the style term joins reward v2.
 
-On 2026-09-25 the reviewer, James, approved variant C with its 60-control
-window and command-change restart, `k` = 0.4, `c_min` = 0.025 m/s and
-0.15 rad/s, the yaw extension and the calibrated penalty weights. The style
+The review of [PR #42](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/42)
+records the reviewer's decisions on variant C with its 60-control window and
+command-change restart, `k` = 0.4, `c_min` = 0.025 m/s and 0.15 rad/s, the yaw
+extension, the calibrated penalty weights and the termination term. The style
 term remains open with the AMP owner.
 
 ## Reproduce

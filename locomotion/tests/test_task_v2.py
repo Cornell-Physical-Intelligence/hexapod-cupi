@@ -8,10 +8,10 @@ import unittest
 
 import torch
 
-from locomotion import paper_reward, reward_scorer, task, task_v2, train
+from locomotion import paper_reward, ppo, reward_scorer, task, task_v2, train
 from locomotion.prepare import prepare
 from locomotion.task import TaskConfig, TrainingTask, command_bank
-from locomotion.task_v2 import RewardV2Config, StrideWindow, TrainingTaskV2, measured_reward_v2
+from locomotion.task_v2 import RewardV2Config, StrideWindow, TrainingTaskV2, measured_reward_v2, tracking_components
 from locomotion.tests.test_task import NativeDouble
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -62,6 +62,10 @@ def telemetry(commands, velocity=None, yaw=None, **overrides):
     return result
 
 
+def alive(commands):
+    return torch.zeros(len(commands), dtype=torch.bool)
+
+
 def run(native, commands, steps, velocity=None):
     reward_task = TrainingTaskV2(native)
     reward_task.reset()
@@ -79,7 +83,7 @@ class RewardV2FormulaTests(unittest.TestCase):
         commands = torch.tensor([[.05, 0., 0.], [.025, 0., 0.], [0., 0., .2], [.04, 0., .15]])
         velocity = torch.tensor([[.04, .0075], [.02, 0.], [0., 0.], [.04, 0.]])
         yaw = torch.tensor([0., 0., .15, .1])
-        _, components = measured_reward_v2(telemetry(commands, velocity, yaw), commands, SCALED)
+        _, components = measured_reward_v2(telemetry(commands, velocity, yaw), commands, alive(commands), SCALED)
         linear = torch.tensor([math.exp(-.0125/(.4*.05)), math.exp(-.005/(.4*.025)), 1., 1.])
         yaw_expected = .5*torch.tensor([math.exp(0.), math.exp(0.), math.exp(-.05/(.4*.2)), math.exp(-.05/(.4*.15))])
         torch.testing.assert_close(components["linear_tracking"], linear)
@@ -88,7 +92,7 @@ class RewardV2FormulaTests(unittest.TestCase):
     def test_motionless_robot_keeps_under_ten_percent_of_every_commanded_component(self):
         bank = torch.tensor(command_bank(TaskConfig()))
         for config in (SCALED, task_v2.REWARD_V2_CONFIG):
-            _, components = measured_reward_v2(telemetry(bank), bank, config)
+            _, components = measured_reward_v2(telemetry(bank), bank, alive(bank), config)
             translating = torch.linalg.vector_norm(bank[:, :2], dim=-1) > 0
             turning = bank[:, 2] != 0
             linear = components["linear_tracking"]/config.linear_tracking_weight
@@ -101,7 +105,7 @@ class RewardV2FormulaTests(unittest.TestCase):
     def test_zero_command_pays_standing_still_and_costs_motion(self):
         commands = torch.zeros(2, 3)
         velocity = torch.tensor([[0., 0.], [.05, 0.]])
-        _, components = measured_reward_v2(telemetry(commands, velocity), commands, SCALED)
+        _, components = measured_reward_v2(telemetry(commands, velocity), commands, alive(commands), SCALED)
         torch.testing.assert_close(components["linear_tracking"], torch.tensor([1., math.exp(-.05/(.4*.025))]))
         torch.testing.assert_close(components["yaw_tracking"], torch.tensor([.5, .5]))
 
@@ -117,7 +121,7 @@ class RewardV2FormulaTests(unittest.TestCase):
                            torque_square_sum_400hz=torch.full((1, 18), 8.), other_body_force_max_400hz=torch.tensor([1.5]))
         values["linear_velocity_nav"][0, 2] = .1
         values["angular_velocity_body"][0, :2] = torch.tensor([.3, .4])
-        _, c = measured_reward_v2(values, commands, SCALED)
+        _, c = measured_reward_v2(values, commands, alive(commands), SCALED)
         w = SCALED
         expected = {"vertical_velocity": -w.vertical_velocity_weight*.01, "roll_pitch_rate": -w.roll_pitch_weight*.5,
                     "joint_torque": -w.torque_weight*math.sqrt(18.), "joint_acceleration": -w.acceleration_weight*rate[0, 0]/.02,
@@ -127,13 +131,48 @@ class RewardV2FormulaTests(unittest.TestCase):
             with self.subTest(term=name):
                 self.assertAlmostEqual(float(c[name]), float(value), places=5)
 
+    def test_termination_costs_more_than_continuing_at_the_worst_recorded_reward(self):
+        commands = torch.zeros(2, 3)
+        _, components = measured_reward_v2(telemetry(commands), commands, torch.tensor([True, False]), SCALED)
+        torch.testing.assert_close(components["termination"], torch.tensor([-SCALED.termination_weight, 0.]))
+        # PPO bootstraps zero after a termination, so falling must cost more than the discounted
+        # value of continuing at the worst recorded mean reward.
+        gamma = ppo.ppo_config(0)["algorithm"]["gamma"]
+        reference = task_v2.TERMINATION_REFERENCE
+        self.assertEqual(reference["ppo_gamma"], gamma)
+        self.assertGreater(task_v2.REWARD_V2_CONFIG.termination_weight, -reference["worst_mean_reward_per_control"]/(1-gamma))
+        with self.assertRaisesRegex(ValueError, "termination"):
+            measured_reward_v2(telemetry(commands), commands, torch.zeros(2), SCALED)
+
+    def test_task_passes_the_environment_termination_flag(self):
+        native = RewardDouble(2)
+        reward_task = TrainingTaskV2(native)
+        reward_task.reset()
+        original = native.step
+        def falling(action):
+            output = original(action)
+            output["terminated"] = torch.tensor([True, False])
+            return output
+        native.step = falling
+        reward_task.step(torch.zeros(2, 18))
+        torch.testing.assert_close(reward_task.last_components["termination"],
+                                   torch.tensor([-task_v2.REWARD_V2_CONFIG.termination_weight, 0.]))
+
+    def test_tracking_function_is_the_one_the_reward_uses(self):
+        commands = torch.tensor([[.05, 0., .2]])
+        values = telemetry(commands, torch.tensor([[.03, .01]]), torch.tensor([.1]))
+        _, components = measured_reward_v2(values, commands, alive(commands), SCALED)
+        direct = tracking_components(values["linear_velocity_nav"][:, :2], values["angular_velocity_body"][:, 2], commands, SCALED)
+        for name in ("linear_tracking", "yaw_tracking"):
+            torch.testing.assert_close(components[name], direct[name])
+
     def test_missing_memory_or_stride_input_is_rejected(self):
         commands = torch.zeros(1, 3)
         for key in ("previous_action", "previous_joint_velocity_rad_s", "tracked_planar_velocity_nav"):
             values = telemetry(commands)
             del values[key]
             with self.subTest(key=key), self.assertRaisesRegex(ValueError, key):
-                measured_reward_v2(values, commands, task_v2.REWARD_V2_CONFIG)
+                measured_reward_v2(values, commands, alive(commands), task_v2.REWARD_V2_CONFIG)
 
     def test_configuration_checks(self):
         for changes in ({"tracking_kernel": "paper"}, {"scale_k": 1/math.log(10)}, {"stride_controls": 0},
@@ -162,7 +201,7 @@ class RewardV2TaskTests(unittest.TestCase):
         self.assertEqual(v1.command_draws, v2.command_draws)
         self.assertNotEqual(v1.status()["reward_version"], v2.status()["reward_version"])
         self.assertEqual(set(v2.last_components), set(paper_reward.CALIBRATED_TERMS) | {
-            "linear_tracking", "yaw_tracking", "collisions", "torque_limit", "velocity_limit"})
+            "linear_tracking", "yaw_tracking", "collisions", "torque_limit", "velocity_limit", "termination"})
 
     def test_command_change_restarts_the_stride_window(self):
         native = RewardDouble(1)
@@ -225,7 +264,8 @@ class RewardV2TaskTests(unittest.TestCase):
         self.assertEqual(reward["config"]["tracking_kernel"], "stride")
         self.assertEqual(reward["kernel_audit_label"], "C")
         self.assertAlmostEqual(reward["stationary_translation_fraction_at_or_above_floor"], math.exp(-2.5))
-        self.assertEqual((reward["review"]["status"], reward["review"]["reviewer"]), ("approved", "James"))
+        self.assertEqual(reward["review"]["record"], "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/42")
+        self.assertNotIn("date", reward["review"])
         self.assertEqual(len(reward["adaptations"]), len(task_v2.ADAPTATIONS))
         self.assertIn("linear_tracking_weight", declaration["unused_version1_reward_fields"])
         self.assertFalse(declaration["physics_changed"])
@@ -268,6 +308,12 @@ class RewardV2LaunchTests(unittest.TestCase):
             for mode, version in (("diagnostic", "2"), ("train", "3")):
                 with self.subTest(mode=mode, version=version), self.assertRaises(ValueError):
                     prepare(Path(temporary)/"bad", REMOTE, mode=mode, reward_version=version)
+
+    def test_evaluation_records_the_checkpoint_reward_version(self):
+        self.assertEqual(train.checkpoint_reward_version({"identity": {"reward_version": "2"}}), "2")
+        self.assertEqual(train.checkpoint_reward_version({"identity": {}}), "1")
+        with self.assertRaises(ValueError):
+            train.checkpoint_reward_version({"identity": {"reward_version": "3"}})
 
     def test_train_rejects_version_two_outside_training(self):
         args = ["--asset", "a", "--model", "m", "--geometry", "g", "--geometry-extrema", "e", "--stance", "s",
