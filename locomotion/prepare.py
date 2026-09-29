@@ -18,14 +18,14 @@ def save(path, value):
     Path(path).write_text(json.dumps(value, indent=2, allow_nan=False)+'\n')
 
 
-def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
+def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=None, seed=20260917,
             num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
             checkpoint_declaration_sha=None, candidate=0, suite='screen',
             tripod_adaptation='paper', logger='tensorboard', wandb_project=None, wandb_mode='offline',
             root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     if (not remote_root.is_absolute() or REMOTE_ROOT not in remote_root.parents
-            or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay', 'tripod')
+            or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay', 'tripod', 'throughput')
             or type(updates) is not int or not 1 <= updates <= 2000
             or type(seed) is not int or seed < 0):
         raise ValueError('Invalid native allocation')
@@ -37,6 +37,9 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             or type(candidate) is not int or candidate not in range(len(SWEEPS[tripod_adaptation]))
             or suite not in ('screen', 'qualification', 'clearance', 'forward_high', 'stops')):
         raise ValueError('Select a member of the declared tripod sweep and suite')
+    if (mode == 'throughput') != (warmup_updates is not None) or (mode == 'throughput' and (
+            type(warmup_updates) is not int or not 2 <= warmup_updates <= 10 or not 1 <= updates <= 20)):
+        raise ValueError('A throughput profile needs 2-10 warmup and 1-20 measured updates per pass')
     wandb_valid = (mode == 'train' and wandb_mode in ('offline', 'online')
                    and re.fullmatch(r'[A-Za-z0-9_.-]{1,128}', wandb_project or '') is not None)
     if ((logger == 'wandb' and not wandb_valid)
@@ -74,7 +77,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
     freeze = sha(source/'FREEZE_SHA256.json')
     binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': True,
         'module': ('locomotion.priors.replay_native' if mode == 'replay' else
-                   'locomotion.tripod_evaluate' if mode == 'tripod' else 'locomotion.train'),
+                   'locomotion.tripod_evaluate' if mode == 'tripod' else
+                   'locomotion.throughput' if mode == 'throughput' else 'locomotion.train'),
         'mode': mode, 'source': str(remote_root/'source'), 'output': str(remote_root/'run'),
         'asset': declared['asset'], 'geometry_source': declared['geometry_source'],
         'prior': str(Path(declared['stance']).parent), 'input_files': declared['input_files'],
@@ -88,7 +92,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             '--max-wall-seconds', '6200', '--headless', '--device', 'cuda:0']}
     if mode != 'diagnostic':
         binding['command_args'] += ['--standing-admission', '/admission/admission.json']
-    if mode in ('train', 'evaluate'):
+    if mode in ('train', 'evaluate', 'throughput'):
         binding['command_args'] += ['--updates', str(updates), '--seed', str(seed)]
     if logger == 'wandb':
         binding['command_args'] += ['--logger', 'wandb', '--wandb-project', wandb_project, '--wandb-mode', wandb_mode]
@@ -97,6 +101,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
                                    '--tripod-adaptation', tripod_adaptation]
     if mode == 'evaluate':
         binding['command_args'] += ['--eval-scope', eval_scope]
+    if mode == 'throughput':
+        binding['command_args'] += ['--warmup-updates', str(warmup_updates)]
     if checkpoint is not None:
         checkpoint = Path(checkpoint)
         if (not checkpoint.is_absolute() or REMOTE_ROOT not in checkpoint.parents
@@ -120,10 +126,11 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--remote-root', required=True)
     parser.add_argument('--inputs', type=Path)
-    parser.add_argument('--mode', choices=('diagnostic', 'train', 'evaluate', 'tripod'), required=True)
+    parser.add_argument('--mode', choices=('diagnostic', 'train', 'evaluate', 'tripod', 'throughput'), required=True)
     parser.add_argument('--num-envs', type=int)
     parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
     parser.add_argument('--updates', type=int, default=512)
+    parser.add_argument('--warmup-updates', type=int)
     parser.add_argument('--seed', type=int, default=20260917)
     parser.add_argument('--candidate', type=int, choices=range(4), default=0)
     parser.add_argument('--tripod-adaptation', choices=tuple(SWEEPS), default='paper')
