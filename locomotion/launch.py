@@ -102,12 +102,14 @@ def audit_contact_log(path):
 def verify(binding, own):
     guard.require(binding['schema']=='hexapod_locomotion_launch_v1','Wrong launch schema')
     guard.require(binding['root_review_complete'] is True,'Root review incomplete')
-    guard.require(binding['mode'] in ('diagnostic','replay','train','video','evaluate','tripod'),'Unsupported native mode')
+    guard.require(binding['mode'] in ('diagnostic','replay','train','video','evaluate','tripod','throughput'),'Unsupported native mode')
     guard.require(type(binding['max_seconds']) is int and 120<=binding['max_seconds']<=7200,'Unbounded allocation')
     guard.require(binding.get('module') in ('locomotion.train', 'locomotion.priors.replay_native',
-                                          'locomotion.tripod_evaluate'), 'Unsupported native entry point')
+                                          'locomotion.tripod_evaluate', 'locomotion.throughput'), 'Unsupported native entry point')
     guard.require((binding['mode'] == 'tripod') == (binding['module'] == 'locomotion.tripod_evaluate'),
                   'Prescribed-controller mode and entry must match')
+    guard.require((binding['mode'] == 'throughput') == (binding['module'] == 'locomotion.throughput'),
+                  'Throughput mode and entry must match')
     paths={k:guard.canonical_path(binding[k]) for k in ('source','asset','prior','geometry_source','output')}
     guard.require(paths['source']==own,'Launcher must belong to its bound source')
     for k in ('source','output','prior'):
