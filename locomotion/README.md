@@ -34,10 +34,13 @@ uv run python -m unittest discover -s locomotion/tests
 uv run python -m locomotion.prepare --help
 uv run python -m locomotion.admission --help
 uv run python -m locomotion.train --help
+uv run python -m locomotion.throughput --help
 ```
 
 Use `prepare` to create a fresh allocation. Diagnostic mode supports one, 32 or
-128 robots. Training uses the existing 128-robot configuration. Evaluation uses
+128 robots. Training uses the existing 128-robot configuration. Throughput mode
+profiles stock PPO at one, 32 or 128 robots; [TRAINING](../docs/TRAINING.md#step-2-throughput-profile)
+gives its commands and report. Evaluation uses
 one robot, with `--eval-scope focus` for the forward/quiet/stop subset, `probes`
 for all 13 learning probes, or `full` for the 96 required Stage 2 cases.
 

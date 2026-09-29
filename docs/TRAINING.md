@@ -102,6 +102,71 @@ Define the proposed under-10% condition for the commanded translation component,
 or declare a further reward adaptation. Test zero commands and transitions.
 The paper's 0.15 kernel and command range require a separate comparison.
 
+### Step 2: throughput profile
+
+[`throughput.py`](../locomotion/throughput.py) profiles training at one
+admitted replica count per allocation. It runs `train.py`'s allocation: task
+version 1, stock PPO, 20-second episodes and the same per-update records. It
+accepts one, 32 or 128 robots with matching one-robot and batch standing
+admission, and it keeps the 128-replica and 2,000-update guards. The program
+lead approves each native profile.
+
+```sh
+uv run python -m locomotion.prepare --mode throughput --num-envs 32 \
+  --warmup-updates 2 --updates 5 --inputs <admitted inputs.json> \
+  --output <fresh local pack> --remote-root <fresh remote root>
+uv run python -m locomotion.throughput summarize --run <allocation>/run/standing \
+  --run <other allocation>/run/standing --output <fresh summary.json>
+```
+
+The profiler discards the warmup updates, which absorb startup allocation and
+the stock runner's first model save. Measured updates then alternate between
+two passes. A throughput update has no hooks and waits for the GPU only at its
+boundaries; it gives transitions per second. A component update waits for the
+GPU at each component boundary. Each label owns its exclusive time, so the
+labels sum to the update's wall time. Parent labels such as `env_control` also
+hold most barrier time. The report counts each label's barriers and subtracts
+an estimate from the measured idle barrier cost; compare shares after that
+correction.
+
+`physics_step` covers PhysX broadphase, SDF contact generation and the solver
+when `platform.cuda_contexts.shared` is true. Otherwise the barriers may not
+wait for PhysX kernels, and you compare the sum of `physics_step`,
+`state_readback` and `contact_readback`. A contact census after the timed
+updates counts reported floor patches against buffer capacity. The report
+records PyTorch allocator peaks, Warp and PhysX GPU heaps where their
+interfaces exist, process memory and host-wide memory. On GB10 unified memory,
+process memory omits CUDA allocations, and host-wide memory includes other
+processes.
+
+`profile.json` binds the frozen source, model, stance, geometry, admission,
+PPO configuration and RSL-RL source hashes. `summarize` needs each run's
+launcher records beside it in `run/`. It rejects changed bytes, failed jobs or
+contact audits, binding arguments that differ from the profile, repeated
+replica counts, and mixed identities, platforms or settings. It extrapolates to
+no unmeasured count. The report labels the learner `stock_ppo`; AMP learner
+costs remain pending until a contributor integrates the AMP learner.
+
+The [29 September profiles](../site/assets/throughput_profile_20260929_001/summary.json)
+ran frozen source `56ebf907` (#44 with the #46 launcher) on the GB10, with 2
+warmup and 20 measured updates per pass. An idle `qwen38-server` shared the
+GPU. PhysX shared the synchronized CUDA context at each count.
+
+| Robots | Transitions/s | Update | PhysX scene step | PhysX share | PPO share |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 12.9 | 1.77 s | 6.4 ms | 70% | 7% |
+| 32 | 319 | 2.17 s | 8.0 ms | 70% | 6% |
+| 128 | 930 | 3.21 s | 13.4 ms | 80% | 3% |
+
+From 32 to 128 robots, each added robot adds about 0.056 ms to the scene step
+and about 1 MB of GPU memory. The measurements support the current 128-robot
+guard. Extend replicas only through a named configuration with isolation
+tests. The 80 m floor mesh holds about 400 robots at 2 m spacing, and the
+128-robot standing capture took 21 minutes and 11 GB, so larger counts need a
+wider floor and a scalable admission capture. Change the 153 SDF colliders
+only when measurements justify an asset variant, then repeat one-robot and
+batch admission.
+
 ### Paper ambiguities
 
 The authors print a parameter gradient, `grad_phi D_phi(T_s)`, in

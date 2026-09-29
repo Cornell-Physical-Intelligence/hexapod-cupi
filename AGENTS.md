@@ -44,7 +44,9 @@ Delegate bounded independent work only when the user authorizes delegation.
 Read [OPERATIONS](docs/OPERATIONS.md) and
 [compute policy](docs/SPARK_COMPUTE_COORDINATION.md) before dispatch. One lead
 owns Spark; preserve competing workloads' recovery state before stopping them.
-Keep both GPU locks, exact-container cleanup and the retained reservation.
+Keep both GPU locks and exact-container cleanup. The launcher shares the GPU
+with other workloads and records them; it checks no host reservation. Keep the
+retained host reservation state until the program lead releases it.
 Preserve SSH, networking and host services. Do not expose `.env.base` or secrets.
 Recheck live state before each run. The mirror has no Git metadata. Keep the
 historical heartbeat paused; cleanup checks do not resume the research sequence.
@@ -52,7 +54,8 @@ historical heartbeat paused; cleanup checks do not resume the research sequence.
 Run focused checks while editing and the required checks in CONTRIBUTING before
 publication. Pair dependency changes with `uv.lock`. Follow
 [PROJECT_SITE](docs/PROJECT_SITE.md) for each push and verify exact-revision CI
-and deployed Pages. Covered source changes need a fresh manifest.
+and deployed Pages. CI generates the source manifest when a change merges;
+do not commit a manifest in a PR.
 
 The standing publication authorization permits verified changes on a
 `[netid]/[task]` branch, a PR to `main`, review and merge after green CI.
