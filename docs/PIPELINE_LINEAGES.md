@@ -7,8 +7,10 @@ python3 tools/check_pipeline_lineages.py current
 python3 tools/archive.py check
 ```
 
-`CURRENT_MANIFEST` in `tools/check_pipeline_lineages.py` names the current manifest.
-It covers maintained source and tests, with the selected model identities.
+`current` hashes maintained source and tests, with the selected model
+identities, and reports the digest of their manifest. Add `--manifest <path>`
+to compare the tree, or a copy without Git metadata such as the Spark mirror
+(`--root`), with a named manifest.
 The fixture manifest and model-input manifest pin required immutable inputs.
 Source identity supplies no native admission or walking acceptance.
 
@@ -35,8 +37,18 @@ Run historical tests from a restored checkout of their source revision.
 
 ## Publish current code
 
-Add a fresh manifest under `configs/releases/`, update the checker and CI, then
-run `python3 tools/check_pipeline_lineages.py generate --manifest` with that path.
-Generation rejects overwriting a published manifest. Add an append-only site
-update and validate the complete diff before pushing. Preserve earlier manifests
-in their Git revisions. Verify exact-revision CI and the deployed Pages revision.
+A pull request adds no manifest. For each revision, CI fetches the archived
+Stage 2 commit and runs `generate`, which verifies the historical lineage and
+writes the manifest. For each push to `main`, CI keeps that manifest as the
+`source-manifest-<revision>` workflow artifact for the repository's artifact
+retention period. After that period, regenerate the manifest from Git:
+
+```sh
+git checkout <revision>
+python3 tools/check_pipeline_lineages.py generate --manifest <fresh path>
+```
+
+Generation rejects overwriting a published manifest. The manifests under
+`configs/releases/` stay unchanged as records of earlier releases. Add an
+append-only site update and validate the complete diff before pushing. Verify
+exact-revision CI and the deployed Pages revision.
