@@ -1,0 +1,26 @@
+{
+  "id": "20260923T232957_reward_workbench",
+  "date": "2026-09-23T23:29:57+00:00",
+  "title": "Add a reward workbench to explain and edit reward coefficients",
+  "summary": "locomotion.reward_workbench writes a page that describes each term of task.measured_reward with its formula, coefficients and share on recorded traces, plots each term's response, and shows the tracking reward a motionless robot keeps under each command against the docs/TRAINING.md under-10% condition. Edited coefficients recompute the reward live on the traces; the page checks its arithmetic against measured_reward on load and exports a reward_config_v1 file. The scorer and viewer accept that file with --reward-config and evaluate it through measured_reward with TaskConfig validation.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/reward_workbench.py",
+    "locomotion/reward_scorer.py",
+    "locomotion/reward_viewer.py",
+    "locomotion/tests/test_reward_workbench.py",
+    "configs/source_inventory.json",
+    "configs/releases/reward_workbench_20260923_v1.sha256",
+    "tools/check_pipeline_lineages.py",
+    "site/updates/20260923T232957_reward_workbench.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_reward_workbench.py",
+    "configs/releases/reward_workbench_20260923_v1.sha256"
+  ],
+  "next": "Use the workbench to propose Reward v2 candidates, then score each exported edit on the paired PPO and optimizer replay traces before any native comparison.",
+  "no_project_impact": true,
+  "reason": "An offline explanation and editing tool changes no measured result, roadmap marker, gate or the training reward in locomotion/task.py."
+}

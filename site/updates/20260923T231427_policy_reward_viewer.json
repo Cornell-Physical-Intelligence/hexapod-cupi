@@ -1,0 +1,24 @@
+{
+  "id": "20260923T231427_policy_reward_viewer",
+  "date": "2026-09-23T23:14:27+00:00",
+  "title": "Add a policy reward viewer for evaluated rollouts",
+  "summary": "locomotion.reward_viewer writes a self-contained HTML page that plays each evaluation's rollout video, or a top-down footprint view when none exists, in sync with the per-control reward, its motionless counterfactual, the reward components, commanded versus achieved velocity and a foot-contact gait diagram. The series come from locomotion.reward_scorer, so the page shows exactly what the scorer computes. Linked timelines let several policies play side by side.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/reward_viewer.py",
+    "locomotion/tests/test_reward_viewer.py",
+    "configs/source_inventory.json",
+    "configs/releases/reward_workbench_20260923_v1.sha256",
+    "tools/check_pipeline_lineages.py",
+    "site/updates/20260923T231427_policy_reward_viewer.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_reward_viewer.py",
+    "configs/releases/reward_workbench_20260923_v1.sha256"
+  ],
+  "next": "Review candidate rewards against the tripod baseline and the paired PPO rollouts in the viewer before proposing a native training comparison.",
+  "no_project_impact": true,
+  "reason": "An offline visualization tool and its tests change no measured result, roadmap marker, gate or training reward."
+}

@@ -1,0 +1,25 @@
+{
+  "id": "20260925T180325_reward_v2_review",
+  "date": "2026-09-25T18:03:25+00:00",
+  "title": "Record the reviewer's approval of reward version 2 defaults",
+  "summary": "The reviewer, James, approved reward version 2's defaults: the stride-mean command-scaled kernel C with its 60-control window and command-change restart, k 0.4, command floors of 0.025 m/s and 0.15 rad/s, the yaw extension of the stationary criterion and the calibrated penalty weights. Each version 2 task definition now records the approval; the style term stays open with the AMP owner.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/task_v2.py",
+    "locomotion/tests/test_task_v2.py",
+    "docs/REWARD_V2_TABLE1_AUDIT.md",
+    "configs/source_inventory.json",
+    "configs/releases/reward_v2_review_20260925_v1.sha256",
+    "tools/check_pipeline_lineages.py",
+    "site/updates/20260925T180325_reward_v2_review.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_task_v2.py",
+    "configs/releases/reward_v2_review_20260925_v1.sha256"
+  ],
+  "next": "Prepare a version 2 training pack with prepare --mode train --reward-version 2 for the approved Spark run.",
+  "no_project_impact": true,
+  "reason": "Recording an approval changes no reward value, measured result, roadmap marker or gate, and version 1 stays the default."
+}
