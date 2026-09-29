@@ -249,7 +249,9 @@ class AMPPPO(PPO):
         # Initialize on a forked generator: the discriminator must not advance the global draws
         # that stock PPO's action sampling and mini-batch order consume.
         with torch.random.fork_rng(devices=[]):
-            torch.manual_seed(self.amp_config.seed)
+            # Seed only the CPU generator: torch.manual_seed also reseeds every CUDA device,
+            # and the fork restores CPU state alone.
+            torch.random.default_generator.manual_seed(self.amp_config.seed)
             self.discriminator = disc.Discriminator(self.demonstrations.mean(0).cpu(), std.cpu(),
                                                    self.amp_config.discriminator_hidden)
         self.discriminator = self.discriminator.to(self.device)

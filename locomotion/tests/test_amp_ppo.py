@@ -6,6 +6,7 @@ import shutil
 import tempfile
 from types import SimpleNamespace
 import unittest
+import unittest.mock
 
 import numpy as np
 import torch
@@ -244,6 +245,13 @@ class LearnerTests(unittest.TestCase):
         torch.manual_seed(5)
         construct(amp_ppo_config(3), AMPVecEnv(TaskDouble(seed=7)))
         torch.testing.assert_close(torch.rand(4), stock_draw, rtol=0, atol=0)
+
+    def test_discriminator_construction_leaves_cuda_generators_untouched(self):
+        with unittest.mock.patch('torch.cuda.manual_seed_all') as seed_all, \
+                unittest.mock.patch('torch.cuda.manual_seed') as seed_one:
+            construct(amp_ppo_config(3), AMPVecEnv(TaskDouble(seed=7)))
+        seed_all.assert_not_called()
+        seed_one.assert_not_called()
 
     def test_parity_with_stock_ppo_from_one_seed_without_reseeding(self):
         off = AMPConfig(style_weight=0., discriminator_updates=0)
