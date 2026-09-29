@@ -1,0 +1,31 @@
+{
+  "id": "20260927T052309_merge_time_manifest",
+  "date": "2026-09-27T05:23:09+00:00",
+  "title": "Generate the source manifest at merge instead of in each pull request",
+  "summary": "A pull request no longer commits a source manifest or edits CURRENT_MANIFEST, so parallel pull requests stop conflicting on that pointer and on stale hashes of shared files. `check_pipeline_lineages.py current` hashes the tree and reports its manifest digest; with --manifest it compares the tree or a mirror without Git metadata against a named manifest. CI fetches the archived Stage 2 commit and runs `generate` for every revision, and it keeps the manifest of each push to main as a workflow artifact. Published manifests keep their bytes.",
+  "areas": [
+    "tools",
+    "ci",
+    "site"
+  ],
+  "next": "Open pull requests that still add a manifest or change CURRENT_MANIFEST drop those edits when they merge after this change.",
+  "changes": [
+    ".github/workflows/tests.yml",
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    "configs/README.md",
+    "configs/source_inventory.json",
+    "docs/PIPELINE_LINEAGES.md",
+    "docs/PROJECT_SITE.md",
+    "site/updates/20260927T052309_merge_time_manifest.json",
+    "tests/test_pipeline_lineages.py",
+    "tools/check_pipeline_lineages.py"
+  ],
+  "evidence": [
+    "tools/check_pipeline_lineages.py",
+    "tests/test_pipeline_lineages.py",
+    ".github/workflows/tests.yml"
+  ],
+  "no_project_impact": true,
+  "reason": "The change moves manifest generation into CI; no roadmap marker, recorded fact, gate or published manifest changes."
+}
