@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Verify the frozen Stage2 Git lineage and a separately versioned current release.
+"""Verify the frozen Stage2 Git lineage and generate the source manifest of any revision.
 
-This checks source integrity only. It does not qualify dynamics, admit training,
+CI generates the manifest when a change merges; pull requests commit none. This
+checks source integrity only. It does not qualify dynamics, admit training,
 load checkpoints, or modify the historical manifest.
 """
 from __future__ import annotations
@@ -24,7 +25,6 @@ ARCHIVED_SOURCE_MANIFEST = "isaaclab/deploy/stage2_pipeline.sha256"
 ARCHIVED_REF = "81d7c6f2a43c7de99f32cd6bb1b7efb0f54874df"
 ARCHIVED_MANIFEST_SHA256 = "19fc816cf9c53a79be8e14831daa58a12eba3f7f07c5fca80d03f2dc947ccda1"
 ARCHIVED_ENTRY_COUNT = 112
-CURRENT_MANIFEST = "configs/releases/throughput_profile_20260927_v1.sha256"
 CURRENT_HEADER = (
     "# hexapod.locomotion_kernel.v1\n"
     f"# Archived source commit: {ARCHIVED_REF}\n"
@@ -156,10 +156,19 @@ def compare_current_manifest(content, actual):
     return len(expected)
 
 
+def manifest_content(records):
+    return CURRENT_HEADER + "".join(f"{records[path]}  {path}\n" for path in sorted(records))
+
+
 def verify_current(root=ROOT, manifest=None):
+    """Hash the covered tree; compare it with a named manifest when you supply one."""
     root = Path(root).resolve()
-    path = Path(manifest) if manifest is not None else root / CURRENT_MANIFEST
     actual, revisions = current_records(root)
+    if manifest is None:
+        return {"pass": True, "lineage": "locomotion_kernel_v1", "manifest": None,
+                "tree_manifest_sha256": digest_bytes(manifest_content(actual).encode()),
+                "files_verified": len(actual), "historical_verification": "separate pinned Git lineage"}
+    path = Path(manifest)
     content = path.read_bytes()
     count = compare_current_manifest(content, actual)
     return {"pass": True, "lineage": "locomotion_kernel_v1", "manifest": str(path),
@@ -167,15 +176,15 @@ def verify_current(root=ROOT, manifest=None):
             "historical_verification": "separate pinned Git lineage"}
 
 
-def generate_current(root=ROOT, output=None):
+def generate_current(root, output):
     root = Path(root).resolve()
-    output = Path(output) if output is not None else root / CURRENT_MANIFEST
+    output = Path(output)
     if output.resolve() == (root / ARCHIVED_MANIFEST).resolve():
         raise ValueError("The historical manifest cannot be a generation destination")
     # Generation requires the pinned lineage to pass, not just matching metadata.
     verify_historical(root)
     records, revisions = current_records(root)
-    content = CURRENT_HEADER + "".join(f"{records[path]}  {path}\n" for path in sorted(records))
+    content = manifest_content(records)
     with output.open("x") as stream:
         stream.write(content)
     return {"generated": str(output), "files": len(records), "sha256": digest_bytes(content.encode()),
@@ -186,10 +195,12 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument("mode", choices=("historical", "current", "generate"))
     parser.add_argument("--root", type=Path, default=ROOT)
-    parser.add_argument("--manifest", type=Path, help="Current manifest to verify, or a new generation destination")
+    parser.add_argument("--manifest", type=Path, help="Manifest to compare with the tree, or a new generation destination")
     args = parser.parse_args(argv)
     if args.mode == "historical" and args.manifest is not None:
         parser.error("Historical verification always uses the pinned manifest and commit")
+    if args.mode == "generate" and args.manifest is None:
+        parser.error("Generation needs an explicit new --manifest destination")
     try:
         result = (verify_historical(args.root) if args.mode == "historical" else
                   verify_current(args.root, args.manifest) if args.mode == "current" else

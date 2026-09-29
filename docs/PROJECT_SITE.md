@@ -64,9 +64,9 @@ checkpoint/video identity, progress dependencies, accepted/ready definitions,
 and measured summary values. Review evidence semantics
 as well as these mechanical checks. Run relevant tests for changed behavior.
 
-Source changes covered by the integrated release still require a new versioned
-manifest, matching checker default and CI selection. Published manifests remain
-unchanged. See [PIPELINE_LINEAGES.md](PIPELINE_LINEAGES.md).
+CI generates the source manifest of each merged revision, so a pull request adds
+no manifest. Published manifests remain unchanged. See
+[PIPELINE_LINEAGES.md](PIPELINE_LINEAGES.md).
 
 ## Publishing and presentation
 

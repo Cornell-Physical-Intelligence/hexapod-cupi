@@ -52,7 +52,8 @@ historical heartbeat paused; cleanup checks do not resume the research sequence.
 Run focused checks while editing and the required checks in CONTRIBUTING before
 publication. Pair dependency changes with `uv.lock`. Follow
 [PROJECT_SITE](docs/PROJECT_SITE.md) for each push and verify exact-revision CI
-and deployed Pages. Covered source changes need a fresh manifest.
+and deployed Pages. CI generates the source manifest when a change merges;
+do not commit a manifest in a PR.
 
 The standing publication authorization permits verified changes on a
 `[netid]/[task]` branch, a PR to `main`, review and merge after green CI.
