@@ -325,11 +325,11 @@
     {
       "id": "policy",
       "title": "Control the gait",
-      "label": "PPO videos recorded; gait still unqualified",
+      "label": "PPO videos recorded; AMP learner merged on CPU; gait still unqualified",
       "state": "implemented",
       "column": 3,
       "row": 0,
-      "meaning": "Researchers replayed an optimized forward trajectory that passes its native screen. The tested PPO policies fail walking acceptance. The current kernel supports stock PPO; the paper motion-prior method remains to be implemented.",
+      "meaning": "Researchers replayed an optimized forward trajectory that passes its native screen. The tested PPO policies fail walking acceptance. The kernel now carries reward version 2, the AMP learner and the Table III networks with CPU tests; no native pilot has run.",
       "input": "Requested motion, joint positions and body motion",
       "output": "18 target joint positions",
       "source": "locomotion/README.md",
@@ -390,11 +390,11 @@
     {
       "id": "simulation",
       "title": "Train in simulation",
-      "label": "Stock PPO kernel; paper implementation pending",
+      "label": "Stock PPO kernel profiled; AMP pilot pending",
       "state": "implemented",
       "column": 0,
       "row": 2,
-      "meaning": "Researchers completed one- and 128-robot standing admission and PPO runs on frozen source packs. Use locomotion/ for current code and TRAINING for the reproduction order. A new source allocation needs matching native admission.",
+      "meaning": "Researchers completed one- and 128-robot standing admission and PPO runs on frozen source packs, and published stock-PPO throughput profiles at 1, 32 and 128 robots. Use locomotion/ for current code and TRAINING for the reproduction order. A new source allocation needs matching native admission.",
       "input": "Robot model, physics settings and training task",
       "output": "Saved walking controllers",
       "source": "locomotion/README.md",
@@ -535,11 +535,11 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "The program lead admitted the 18000-pair motion-prior dataset from 40 native clips. AMP learning under issue #37 remains pending. A learned policy still needs the full direction, transition, stop, motor and contact suite.",
-      "question": "Start the TRAINING reward audit under issue #18. Resolve paper formulas and the stationary tracking criterion before implementing a new reward schema.",
+      "blocker": "The program lead admitted the 18000-pair motion-prior dataset from 40 native clips. Reward version 2, the throughput profiles and the CPU AMP learner are merged; the Step 5 pilot under issue #37 has not run. A learned policy still needs the full direction, transition, stop, motor and contact suite.",
+      "question": "Freeze the Step 5 pilot budget and decision rule under issue #37, and decide whether a named configuration above 128 robots comes first.",
       "next_step": null,
       "acceptance": null,
-      "card_text": "Motion-prior dataset admitted; AMP learning and learned walking/stopping remain pending.",
+      "card_text": "Motion-prior dataset admitted; reward v2, throughput profiles and the CPU AMP learner merged; learned walking and stopping remain pending.",
       "media_caption": "Approved robot model \u00b7 failed forward test."
     },
     {
@@ -641,10 +641,10 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-24T19:11:59+00:00",
-    "source_commit": "d70dacd4fe74f682c08c4ad636460c4b7c7a78b2",
+    "as_of": "2026-09-29T19:40:32+00:00",
+    "source_commit": "97dfc68e0133ce9960d7075c4eba5af7046f38db",
     "architecture": "ARCHITECTURE.md",
-    "summary": "The optimized motion-prior bank covers 20 commands in 40 native simulation clips on the approved detailed robot. All selected clips pass numerical screens. The program lead accepted direction and alternating-tripod appearance in all 40 clips, which admits the 18000-pair training dataset. AMP learning under issue #37 remains pending. Stage 2 walking and stopping qualification is incomplete.",
+    "summary": "The optimized motion-prior bank covers 20 commands in 40 native simulation clips on the approved detailed robot. All selected clips pass numerical screens. The program lead accepted direction and alternating-tripod appearance in all 40 clips, which admits the 18000-pair training dataset. Reward version 2, the stock-PPO throughput profiles at 1, 32 and 128 robots, and the CPU AMP learner with the Table III networks are merged; the Step 5 pilot under issue #37 has not run. Stage 2 walking and stopping qualification is incomplete.",
     "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
@@ -1024,6 +1024,30 @@
         "result": "passed",
         "text": "The original forward-right trial fails one startup speed check at 0.025 seconds. A replacement trajectory with a one-second target ramp passes both start phases under the same native gates. The archive retains the failed capture. Full bank coverage and human motion review remain pending.",
         "source": "site/assets/amp_startup_20260924_001/evidence.json"
+      },
+      {
+        "id": "reward-v2-merged-20260929",
+        "title": "Reward version 2 is merged beside the frozen version 1",
+        "backend": "CPU unit tests; locomotion/task_v2.py; version 1 stays the default; no native run has used version 2",
+        "result": "passed",
+        "text": "The Table I audit resolves the tracking-exponent sign and the stationary criterion and separates the paper kernel from command-scaled kernels. Version 2 uses kernel C with k = 0.4, floors of 0.025 m/s and 0.15 rad/s and a termination charge of 75 per terminated control. train.py and prepare.py select it with --reward-version 2 in train mode only. This merge changes no measured result or gate.",
+        "source": "docs/REWARD_V2_TABLE1_AUDIT.md"
+      },
+      {
+        "id": "throughput-profile-stock-ppo-20260929",
+        "title": "Stock-PPO throughput is measured at 1, 32 and 128 robots",
+        "backend": "Isaac Sim on the GB10; stock RSL-RL 5.0.1 PPO with the MLP networks; frozen source 56ebf907; 20 measured updates per pass",
+        "result": "passed",
+        "text": "Training reached 12.9, 319 and 930 transitions per second at 1, 32 and 128 robots. The PhysX step took 70% of each update at 1 and 32 robots and 80% at 128. From 32 to 128 robots each added robot added about 1 MB of GPU memory. A fresh 128-robot standing capture passed all 128 replicas and supplies the admitted scale. The summary extrapolates to no other count and changes no guard.",
+        "source": "site/assets/throughput_profile_20260929_001/summary.json"
+      },
+      {
+        "id": "amp-learner-cpu-20260929",
+        "title": "The AMP learner and Table III networks pass CPU tests; the pilot has not run",
+        "backend": "CPU unit tests and an offline discriminator fit against one recorded policy trace; no native run",
+        "result": "inconclusive",
+        "text": "The learner adds the style reward to the task reward, trains the discriminator against the admitted bank and keeps checkpoint identity checks. The paper actor rejects privileged inputs. Offline, the standardized-input penalty scores held-out bank transitions 0.94 and the recorded policy trace 0.12. This measures fixed data, not the online learner or a standing policy. The Step 5 pilot needs a frozen budget, standing admission and Spark dispatch.",
+        "source": "site/assets/amp_learner_offline_20260929_001/result.json"
       }
     ]
   },
