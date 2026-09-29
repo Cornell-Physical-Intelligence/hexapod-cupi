@@ -4,6 +4,7 @@ from contextlib import ExitStack
 import copy
 import os
 from pathlib import Path
+import tempfile
 import unittest
 from unittest.mock import patch
 from locomotion import launch, reservation
@@ -105,6 +106,27 @@ class OwnedLaunchTests(unittest.TestCase):
             with self.subTest(seconds=seconds), self.assertRaises(ValueError):
                 self.verify_without_filesystem(b)
 
+
+    def test_preflight_records_other_gpu_work_and_keeps_the_memory_floor(self):
+        with patch.object(launch, "resources", return_value=("999, /app/llama-server", 32*1024**3)), \
+             patch.object(launch.guard, "call", return_value="abc qwen38-server llama:server"):
+            snapshot = launch.preflight()
+        self.assertEqual(snapshot["gpu_processes"], ["999, /app/llama-server"])
+        self.assertEqual(snapshot["containers"], ["abc qwen38-server llama:server"])
+        with patch.object(launch, "resources", return_value=("", 8*1024**3)), \
+             patch.object(launch.guard, "call", return_value=""), self.assertRaisesRegex(ValueError, "16 GiB"):
+            launch.preflight()
+
+    def test_missing_lock_file_is_recreated_and_existing_bytes_stay(self):
+        with tempfile.TemporaryDirectory() as directory:
+            existing, missing = Path(directory)/"held.lock", Path(directory)/"cleaned.lock"
+            existing.write_text("kept")
+            with patch.object(launch.guard, "LOCKS", (str(existing), str(missing))):
+                launch.lock_files()
+                with launch.guard.both_locks():
+                    pass
+            self.assertEqual(existing.read_text(), "kept")
+            self.assertTrue(missing.is_file())
 
 if __name__ == "__main__":
     unittest.main()

@@ -11,12 +11,12 @@ releases or changes the reservation. A competing workload request, completed
 job or reconnect does not grant release. Restore recorded prior states after
 an explicit release and identity checks.
 
-Before dispatch, read `/home/orionh/SPARK_COMPUTE_COORDINATION.md` and verify
-actual resources, processes, containers, producer descendants and both GPU locks.
-Its recorded SHA-256 is
+The launcher no longer pins `/home/orionh/SPARK_COMPUTE_COORDINATION.md` or
+checks this reservation. It shares the GPU with other workloads and records them
+in each job report. The file's last recorded SHA-256 was
 `c89c99ebdd16941e3f8e7f23ef3525aeb360c78361aa49aa04e766b381a4727c`.
-Bind changes into a fresh guard between allocations. Preserve old source packs
-and bindings. This repository document is a policy reference, not live telemetry.
+Preserve old source packs and bindings. This repository document is a policy
+reference, not live telemetry.
 
 The program lead approved the mass-corrected robot selected by
 [`robot/active_model.json`](../robot/active_model.json) and the standing →
