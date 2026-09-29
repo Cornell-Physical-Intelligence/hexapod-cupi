@@ -1,0 +1,23 @@
+{
+  "id": "20260929T165326_amp_learner_cuda_seed",
+  "date": "2026-09-29T16:53:26+00:00",
+  "title": "Seed only the CPU generator when the AMP discriminator initializes",
+  "summary": "The discriminator initialized inside a CPU-only fork with torch.manual_seed, which also reseeds every CUDA device; the fork restores CPU state alone. On a GPU run each AMP learner would leave the CUDA generator at the discriminator seed whatever the run seed, so action noise would repeat across seeds and differ from stock PPO. The learner now seeds the default CPU generator alone, and a test asserts that construction calls no CUDA seeding function. No native run exists; no result changes.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/amp_ppo.py",
+    "locomotion/tests/test_amp_ppo.py",
+    "configs/releases/amp_learner_cuda_seed_20260929_v1.sha256",
+    "tools/check_pipeline_lineages.py",
+    "site/updates/20260929T165326_amp_learner_cuda_seed.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_amp_ppo.py",
+    "configs/releases/amp_learner_cuda_seed_20260929_v1.sha256"
+  ],
+  "next": "Run the Step 5 pilot on Spark with reward version 2 and matching standing admission.",
+  "no_project_impact": true,
+  "reason": "A CPU correction to generator seeding with a test; no native run, checkpoint, roadmap marker or acceptance gate changes."
+}
