@@ -29,6 +29,14 @@ def host_snapshot():
             'available_memory_bytes': available}
 
 
+def cleanup_host_snapshot():
+    """Host state for a cleanup record; a failed query is stored so the record still saves."""
+    try:
+        return host_snapshot()
+    except Exception as error:
+        return {'error': repr(error)}
+
+
 def preflight():
     snapshot = host_snapshot()
     guard.require(snapshot['available_memory_bytes'] >= 16 * 1024**3, 'Host memory below 16 GiB')
@@ -288,7 +296,7 @@ def main():
     if cli.cleanup_only:
         with guard.both_locks():
             receipt = guard.cleanup_owned(paths['output'])
-            receipt['host'] = host_snapshot()
+            receipt['host'] = cleanup_host_snapshot()
             if paths['output'].exists():
                 guard.save(paths['output']/'cleanup.json', receipt)
         print(json.dumps(receipt, indent=2))
@@ -311,7 +319,7 @@ def main():
     finally:
         with guard.both_locks():
             cleanup = guard.cleanup_owned(paths['output'])
-            cleanup['host'] = host_snapshot()
+            cleanup['host'] = cleanup_host_snapshot()
             verify(binding, Path(__file__).resolve().parents[1])
             guard.save(paths['output']/'cleanup.json', cleanup)
 

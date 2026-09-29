@@ -84,6 +84,37 @@ class CleanupTests(unittest.TestCase):
         self.assertEqual(report['other_gpu_processes_seen'], [other])
         self.assertTrue(report['cleanup_checked'])
 
+    def run_main(self, root, argv, run_owned=None):
+        with ExitStack() as stack:
+            stack.enter_context(patch('sys.argv', ['launch', '--bindings', str(root/'binding.json'),
+                                                                  '--bindings-sha256', 'a'*64, *argv]))
+            stack.enter_context(patch.object(launch.guard, 'pinned_file'))
+            stack.enter_context(patch.object(launch.guard, 'read', return_value={'command_args': [], 'mode': 'train'}))
+            stack.enter_context(patch.object(launch, 'verify', return_value={'output': root/'attempt'}))
+            stack.enter_context(patch.object(launch, 'lock_files'))
+            stack.enter_context(patch.object(launch, 'require_wandb_key'))
+            stack.enter_context(patch.object(launch, 'preflight', return_value={}))
+            stack.enter_context(patch.object(launch.signal, 'signal'))
+            stack.enter_context(patch.object(launch.guard, 'both_locks'))
+            stack.enter_context(patch.object(launch.guard, 'cleanup_owned', return_value={'reservation_released': False}))
+            stack.enter_context(patch.object(launch, 'run_owned', side_effect=run_owned))
+            stack.enter_context(patch.object(launch, 'host_snapshot', side_effect=RuntimeError('nvidia-smi failed')))
+            stack.enter_context(patch('builtins.print'))
+            launch.main()
+
+    def test_failed_host_snapshot_still_saves_the_cleanup_record(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with self.assertRaisesRegex(RuntimeError, 'run failed'):
+                self.run_main(root, [], run_owned=RuntimeError('run failed'))
+            cleanup = json.loads((root/'attempt/cleanup.json').read_text())
+            self.assertEqual(cleanup['host'], {'error': repr(RuntimeError('nvidia-smi failed'))})
+            self.assertFalse(cleanup['reservation_released'])
+            (root/'attempt/cleanup.json').unlink()
+            self.run_main(root, ['--cleanup-only'])
+            receipt = json.loads((root/'attempt/cleanup.json').read_text())
+            self.assertEqual(receipt['host'], {'error': repr(RuntimeError('nvidia-smi failed'))})
+
     def test_missing_container_and_inspection_failure_are_distinct(self):
         with patch.object(launch.subprocess, 'run', return_value=SimpleNamespace(
                 returncode=1, stderr='No such object: owned', stdout='')):
