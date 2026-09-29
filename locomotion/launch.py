@@ -35,10 +35,26 @@ def preflight():
     return snapshot
 
 
+def open_lock(path):
+    """Open a lock file read-only; create it only when host cleanup removed it.
+
+    /tmp is sticky and world-writable, and fs.protected_regular refuses an
+    O_CREAT open of a file another account owns there, so an existing file
+    must open without O_CREAT.
+    """
+    try:
+        return os.open(path, os.O_RDONLY)
+    except FileNotFoundError:
+        try:
+            return os.open(path, os.O_RDONLY | os.O_CREAT | os.O_EXCL, 0o644)
+        except FileExistsError:
+            return os.open(path, os.O_RDONLY)
+
+
 def lock_files():
     """Recreate a lock file that host cleanup removed, for example under /tmp."""
     for path in guard.LOCKS:
-        os.close(os.open(path, os.O_RDONLY | os.O_CREAT, 0o644))
+        os.close(open_lock(path))
 
 
 def resources():
@@ -170,7 +186,7 @@ def run_owned(binding, paths):
         if (args.output / "stop.request").exists():
             raise InterruptedError("Stop requested before acquiring a new job")
         for path in guard.LOCKS:
-            fd = os.open(path, os.O_RDONLY | os.O_CREAT, 0o644)
+            fd = open_lock(path)
             locks.append(fd)
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         report["preflight"] = preflight()

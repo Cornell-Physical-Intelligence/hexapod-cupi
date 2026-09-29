@@ -128,5 +128,26 @@ class OwnedLaunchTests(unittest.TestCase):
             self.assertEqual(existing.read_text(), "kept")
             self.assertTrue(missing.is_file())
 
+    def test_lock_file_another_account_owns_opens_without_create(self):
+        """fs.protected_regular refuses O_CREAT on another owner's file in sticky /tmp."""
+        real_open = os.open
+
+        def protected_open(path, flags, *args):
+            if flags & os.O_CREAT and Path(path).exists():
+                raise PermissionError(path)
+            return real_open(path, flags, *args)
+
+        with tempfile.TemporaryDirectory() as directory:
+            existing, missing = Path(directory)/"orionh.lock", Path(directory)/"cleaned.lock"
+            existing.write_text("theirs")
+            with patch.object(launch.guard, "LOCKS", (str(existing), str(missing))), \
+                 patch.object(launch.os, "open", protected_open):
+                launch.lock_files()
+                os.close(launch.open_lock(str(existing)))
+                with launch.guard.both_locks():
+                    pass
+            self.assertEqual(existing.read_text(), "theirs")
+            self.assertTrue(missing.is_file())
+
 if __name__ == "__main__":
     unittest.main()
