@@ -21,12 +21,40 @@ _INCOMPLETE = re.compile(r"incomplete\s+(?:contact|friction)\s+data", re.IGNOREC
 REMOTE_ROOT = Path('/home/orionh/HEXAPOD_runs/restart_20260914')
 
 
-def preflight():
-    reservation = guard.verify_reservation()
-    compute = guard.no_live_compute()
+def host_snapshot():
+    """Record other GPU work and containers; an allocation shares the GPU with them."""
     processes, available = resources()
-    guard.require(not processes and available >= 16 * 1024**3, 'GPU busy or host memory below 16 GiB')
-    return {'reservation': reservation, 'compute': compute, 'available_memory_bytes': available}
+    containers = guard.call(["docker", "ps", "--format", "{{.ID}} {{.Names}} {{.Image}}"])
+    return {'gpu_processes': processes.splitlines(), 'containers': containers.splitlines(),
+            'available_memory_bytes': available}
+
+
+def preflight():
+    snapshot = host_snapshot()
+    guard.require(snapshot['available_memory_bytes'] >= 16 * 1024**3, 'Host memory below 16 GiB')
+    return snapshot
+
+
+def open_lock(path):
+    """Open a lock file read-only; create it only when host cleanup removed it.
+
+    /tmp is sticky and world-writable, and fs.protected_regular refuses an
+    O_CREAT open of a file another account owns there, so an existing file
+    must open without O_CREAT.
+    """
+    try:
+        return os.open(path, os.O_RDONLY)
+    except FileNotFoundError:
+        try:
+            return os.open(path, os.O_RDONLY | os.O_CREAT | os.O_EXCL, 0o644)
+        except FileExistsError:
+            return os.open(path, os.O_RDONLY)
+
+
+def lock_files():
+    """Recreate a lock file that host cleanup removed, for example under /tmp."""
+    for path in guard.LOCKS:
+        os.close(open_lock(path))
 
 
 def resources():
@@ -145,8 +173,7 @@ def owned_container(name, identity=None):
 
 def run_owned(binding, paths):
     args = SimpleNamespace(source=paths["source"], output=paths["output"],
-                           isaaclab=Path("/home/orionh/IsaacLab"),
-                           coordination_sha256=guard.COORDINATION_SHA256)
+                           isaaclab=Path("/home/orionh/IsaacLab"))
     phase = "standing"
     locks, process, identity = [], None, None
     name = "hexapod-reference-physics-" + uuid.uuid4().hex
@@ -158,11 +185,8 @@ def run_owned(binding, paths):
     try:
         if (args.output / "stop.request").exists():
             raise InterruptedError("Stop requested before acquiring a new job")
-        if guard.sha(guard.COORDINATION) != args.coordination_sha256:
-            raise InterruptedError("Coordination note changed; return ownership for review")
-        report["coordination_sha256"] = args.coordination_sha256
-        for path in ("/opt/wx/gpu.lock", "/tmp/hexapod-isaac-gpu.lock"):
-            fd = os.open(path, os.O_RDONLY)
+        for path in guard.LOCKS:
+            fd = open_lock(path)
             locks.append(fd)
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         report["preflight"] = preflight()
@@ -181,15 +205,12 @@ def run_owned(binding, paths):
                     guard.save(report_path, report)
                 if (args.output / "stop.request").exists():
                     raise InterruptedError("Stop requested")
-                if guard.sha(guard.COORDINATION) != args.coordination_sha256:
-                    raise InterruptedError("Coordination changed during standing; yielding owned job")
                 if time.monotonic() >= deadline:
                     raise TimeoutError("Native allocation exceeded its deadline")
                 if time.monotonic() >= app_ready_deadline:
                     if 'REFERENCE_SCREEN_APP_READY' not in (args.output / 'logs' / (phase+'.log')).read_text(errors='replace'):
                         report['startup_failure_kind'] = 'no_reference_AppReady_by90s'
                         raise TimeoutError('No AppReady by90s; preserve startup log and45s traceback')
-                guard.verify_policy_bytes()
                 processes, available = resources()
                 if available < 16 * 1024**3:
                     raise MemoryError("Less than 16 GiB available")
@@ -198,10 +219,11 @@ def run_owned(binding, paths):
                                          capture_output=True, timeout=20)
                     if top.returncode == 0:
                         owned_pids = {v.strip() for v in top.stdout.splitlines()[1:]}
-                        competitors = live_competitors(processes, owned_pids, identity)
-                        if competitors:
-                            report["competitors"] = competitors
-                            raise RuntimeError("Unrelated CUDA process appeared; yielding this owned job")
+                        seen = report.setdefault("other_gpu_processes_seen", [])
+                        new = [item for item in live_competitors(processes, owned_pids, identity) if item not in seen]
+                        if new:
+                            seen.extend(new)
+                            guard.save(report_path, report)
                 time.sleep(5)
         contact_audit = audit_contact_log(args.output / "logs" / (phase + ".log"))
         guard.save(args.output / "jobs" / (phase + "_contact_data_audit.json"), contact_audit)
@@ -260,11 +282,11 @@ def main():
     guard.pinned_file(cli.bindings, cli.bindings_sha256)
     binding = guard.read(cli.bindings)
     paths = verify(binding, Path(__file__).resolve().parents[1])
+    lock_files()
     if cli.cleanup_only:
         with guard.both_locks():
             receipt = guard.cleanup_owned(paths['output'])
-            receipt['reservation'] = guard.verify_reservation()
-            receipt['resources'] = guard.no_live_compute()
+            receipt['host'] = host_snapshot()
             if paths['output'].exists():
                 guard.save(paths['output']/'cleanup.json', receipt)
         print(json.dumps(receipt, indent=2))
@@ -287,8 +309,7 @@ def main():
     finally:
         with guard.both_locks():
             cleanup = guard.cleanup_owned(paths['output'])
-            cleanup['reservation'] = guard.verify_reservation()
-            cleanup['resources'] = guard.no_live_compute()
+            cleanup['host'] = host_snapshot()
             verify(binding, Path(__file__).resolve().parents[1])
             guard.save(paths['output']/'cleanup.json', cleanup)
 

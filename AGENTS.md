@@ -44,7 +44,9 @@ Delegate bounded independent work only when the user authorizes delegation.
 Read [OPERATIONS](docs/OPERATIONS.md) and
 [compute policy](docs/SPARK_COMPUTE_COORDINATION.md) before dispatch. One lead
 owns Spark; preserve competing workloads' recovery state before stopping them.
-Keep both GPU locks, exact-container cleanup and the retained reservation.
+Keep both GPU locks and exact-container cleanup. The launcher shares the GPU
+with other workloads and records them; it checks no host reservation. Keep the
+retained host reservation state until the program lead releases it.
 Preserve SSH, networking and host services. Do not expose `.env.base` or secrets.
 Recheck live state before each run. The mirror has no Git metadata. Keep the
 historical heartbeat paused; cleanup checks do not resume the research sequence.

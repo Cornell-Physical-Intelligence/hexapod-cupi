@@ -21,10 +21,11 @@ Do not print, copy or commit `docker/.env.base`; Compose consumes that file.
 
 ## Before a run
 
-The lead verifies the shared coordination file, actual processes, GPU use,
-containers, services, producer descendants and both GPU locks. Use the shared policy path and expected hash in
-[compute coordination](SPARK_COMPUTE_COORDINATION.md). Bind those bytes to a fresh source and launch identity. Never alter an admitted
-source pack or reuse an attempt's output directory.
+The launcher records other GPU processes, containers and available host
+memory, and it requires 16 GiB of available memory. It checks no host
+reservation or coordination file, so any account with access to the run tree
+and Docker can launch. Never alter an admitted source pack or reuse an
+attempt's output directory.
 
 Use `python -m locomotion.inputs pack` with a fresh local output and explicit
 remote input root under `/home/orionh/HEXAPOD_runs/restart_20260914/`.
@@ -45,10 +46,10 @@ gate or qualify a policy. A source manifest does not grant admission.
 ## Ownership and cleanup
 
 Hold `/opt/wx/gpu.lock` and `/tmp/hexapod-isaac-gpu.lock` from preflight through
-container cleanup. Recheck competing processes after container creation and
-throughout the run. A clean GPU snapshot does not prove that a producer cannot
-launch a new child. Yield the owned allocation if contention or binding changes
-appear, and preserve its partial output.
+container cleanup. The launcher recreates a lock file that host cleanup removed.
+It records each other GPU process it sees during the run under
+`other_gpu_processes_seen` in `jobs/standing.json` and continues. Compare timing
+results with that record, and preserve the partial output of a failed allocation.
 
 Signal a container by the immutable ID bound to this run. Check its name and ID
 before acting. Docker client exit does not prove container exit; inspect again
@@ -63,7 +64,8 @@ system services and host health available. Do not signal unidentified jobs.
 
 ## Retained reservation and recovery
 
-Reservation root:
+The launcher no longer checks this reservation. The host state below stays in
+place until the program lead releases it. Reservation root:
 `/home/orionh/HEXAPOD_runs/restart_20260914/spark_ownership_001`.
 Keep its `ACTIVE` marker and `reservation_policy.json`, the recorded user/system
 masks, and `hexapod-exclusive-reconstruction-queue.service`. Verify its exact
