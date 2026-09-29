@@ -1,0 +1,28 @@
+{
+  "id": "20260929T204937_review_followups",
+  "date": "2026-09-29T20:49:37+00:00",
+  "title": "Bind the AMP discriminator seed to the run seed and keep failed cleanup snapshots",
+  "summary": "Every AMP run seed shared one discriminator initialization and one row-sampling generator because the discriminator seed was the constant 20260925. The learner now uses the run seed plus 8 unless the configuration names a seed, so the default run seed 20260917 keeps the former value. The recorded learner configuration holds the resolved seed. The native launcher also saves cleanup.json when the final host snapshot fails; the record stores the error under the host key.",
+  "areas": [
+    "locomotion",
+    "operations",
+    "site"
+  ],
+  "next": "Review and merge the pull request before the Step 5 flat AMP pilot in issue 37.",
+  "changes": [
+    "locomotion/amp_ppo.py",
+    "locomotion/train.py",
+    "locomotion/tests/test_amp_ppo.py",
+    "locomotion/launch.py",
+    "locomotion/tests/test_launch_cleanup.py",
+    "site/updates/20260929T204937_review_followups.json"
+  ],
+  "evidence": [
+    "locomotion/amp_ppo.py",
+    "locomotion/tests/test_amp_ppo.py",
+    "locomotion/launch.py",
+    "locomotion/tests/test_launch_cleanup.py"
+  ],
+  "no_project_impact": true,
+  "reason": "No native AMP pilot has run, and the launcher change affects only the cleanup record after a failed host query; no roadmap marker, recorded fact, gate or published result changes."
+}
