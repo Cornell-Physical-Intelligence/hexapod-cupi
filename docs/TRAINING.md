@@ -145,11 +145,27 @@ launcher records beside it in `run/`. It rejects changed bytes, failed jobs or
 contact audits, binding arguments that differ from the profile, repeated
 replica counts, and mixed identities, platforms or settings. It extrapolates to
 no unmeasured count. The report labels the learner `stock_ppo`; AMP learner
-costs remain pending until a contributor integrates the AMP learner. Native
-measurements remain pending. After they exist, extend replicas only through a
-named configuration with isolation tests. Change the 153 SDF colliders only
-when measurements justify an asset variant, then repeat one-robot and batch
-admission.
+costs remain pending until a contributor integrates the AMP learner.
+
+The [29 September profiles](../site/assets/throughput_profile_20260929_001/summary.json)
+ran frozen source `56ebf907` (#44 with the #46 launcher) on the GB10, with 2
+warmup and 20 measured updates per pass. An idle `qwen38-server` shared the
+GPU. PhysX shared the synchronized CUDA context at each count.
+
+| Robots | Transitions/s | Update | PhysX scene step | PhysX share | PPO share |
+| --- | --- | --- | --- | --- | --- |
+| 1 | 12.9 | 1.77 s | 6.4 ms | 70% | 7% |
+| 32 | 319 | 2.17 s | 8.0 ms | 70% | 6% |
+| 128 | 930 | 3.21 s | 13.4 ms | 80% | 3% |
+
+From 32 to 128 robots, each added robot adds about 0.056 ms to the scene step
+and about 1 MB of GPU memory. The measurements support the current 128-robot
+guard. Extend replicas only through a named configuration with isolation
+tests. The 80 m floor mesh holds about 400 robots at 2 m spacing, and the
+128-robot standing capture took 21 minutes and 11 GB, so larger counts need a
+wider floor and a scalable admission capture. Change the 153 SDF colliders
+only when measurements justify an asset variant, then repeat one-robot and
+batch admission.
 
 ### Paper ambiguities
 
