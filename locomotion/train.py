@@ -45,6 +45,37 @@ def checkpoint_reward_version(record):
     return version
 
 
+LEARNER_DEFAULTS = {'learner': 'ppo', 'networks': 'mlp', 'motion_prior': False}
+LEARNER_KEYS = ('learner', 'networks', 'motion_prior', 'learner_source_files', 'amp_dataset')
+
+
+def json_shape(value):
+    """The value as a checkpoint record stores it: JSON turns tuples into lists."""
+    return json.loads(json.dumps(value, allow_nan=False))
+
+
+def require_learner_identity(record, identity):
+    """Reject a checkpoint whose learner, networks or demonstration bank differ; older records mean stock PPO."""
+    recorded = record['identity']
+    for key in LEARNER_KEYS:
+        if recorded.get(key, LEARNER_DEFAULTS.get(key)) != json_shape(identity.get(key, LEARNER_DEFAULTS.get(key))):
+            raise ValueError('Checkpoint learner, networks or demonstration bank differs: '+key)
+
+
+def require_learner_configuration(record, identity, config):
+    """Reject a checkpoint trained with other RSL-RL sources or another learner configuration."""
+    recorded = record['identity']
+    if (recorded['upstream_source_files'] != identity['upstream_source_files']
+            or recorded['ppo_config'] != json_shape(config)):
+        raise ValueError('Checkpoint learner dependency or configuration differs')
+
+
+def require_embedded_declaration(infos, record):
+    """The declaration pickled inside the checkpoint must equal its JSON record."""
+    if json_shape(infos) != {'identity': record['identity'], 'updates': record['updates']}:
+        raise ValueError('Embedded checkpoint declaration differs')
+
+
 class ConfigRecord(dict):
     """Give RSL-RL's W&B writer the to_dict() it expects from an environment config."""
     def to_dict(self):
@@ -145,10 +176,7 @@ def main(argv=None):
             raise ValueError('Checkpoint declaration differs')
         if any(checkpoint_record['identity'][key] != identity[key] for key in compatibility_keys):
             raise ValueError('Checkpoint model, physics, seed or implementation differs')
-        learner_keys = ('learner', 'networks', 'motion_prior', 'learner_source_files', 'amp_dataset')
-        if any(checkpoint_record['identity'].get(key, {'learner': 'ppo', 'networks': 'mlp', 'motion_prior': False}.get(key))
-               != identity.get(key) for key in learner_keys):
-            raise ValueError('Checkpoint learner, networks or demonstration bank differs')
+        require_learner_identity(checkpoint_record, identity)
         # Evaluation computes no training reward; record the one the checkpoint learned from.
         identity['reward_version'] = checkpoint_reward_version(checkpoint_record)
     if args.preflight_only:
@@ -277,12 +305,9 @@ def main(argv=None):
             runner.learn(args.updates, init_at_random_ep_len=False)
             save(args.output/'force_metrics.json', loads.report())
         else:
-            if (checkpoint_record['identity']['upstream_source_files'] != identity['upstream_source_files']
-                    or checkpoint_record['identity']['ppo_config'] != config):
-                raise ValueError('Checkpoint learner dependency or configuration differs')
+            require_learner_configuration(checkpoint_record, identity, config)
             infos = runner.load(str(args.checkpoint), strict=True)
-            if infos != {'identity': checkpoint_record['identity'], 'updates': checkpoint_record['updates']}:
-                raise ValueError('Embedded checkpoint declaration differs')
+            require_embedded_declaration(infos, checkpoint_record)
             actor = runner.get_inference_policy()
             def policy(observation):
                 with torch.inference_mode():

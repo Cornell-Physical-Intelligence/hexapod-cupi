@@ -80,6 +80,11 @@ class AMPConfig:
             raise ValueError('Dataset path must be relative to the repository root')
 
 
+def json_shape(value):
+    """The value as JSON stores it, so a saved record compares equal to a fresh configuration."""
+    return json.loads(json.dumps(value, allow_nan=False))
+
+
 def discriminator_loss(discriminator, prior, policy, gradient_penalty=10.):
     """Eq. (1) with the gradient penalty taken on the standardized prior transition.
 
@@ -159,7 +164,7 @@ class AMPVecEnv(VanillaVecEnv):
         super().__init__(task, tensor_dict)
         if 'amp' not in self.current:
             raise ValueError('AMP training needs record_motion_features in the environment configuration')
-        self.cfg.update(motion_prior=True, amp=asdict(self.amp_config), privileged_layout=[
+        self.cfg.update(motion_prior=True, amp=json_shape(asdict(self.amp_config)), privileged_layout=[
             {'name': name, 'width': width, 'source': source} for name, width, source in PRIVILEGED_LAYOUT])
         self.reset_rows[:] = True
 
@@ -215,7 +220,8 @@ def amp_ppo_config(seed, *, networks='mlp', amp_config=None):
     config = ppo_config(seed)
     amp_config = AMPConfig() if amp_config is None else amp_config
     amp_config.validate()
-    config['algorithm'].update(class_name='locomotion.amp_ppo:AMPPPO', amp_cfg=asdict(amp_config))
+    # Checkpoint records pass through JSON; a tuple here would never equal its saved list.
+    config['algorithm'].update(class_name='locomotion.amp_ppo:AMPPPO', amp_cfg=json_shape(asdict(amp_config)))
     if networks == 'paper':
         config['obs_groups'] = {'actor': list(nets.ACTOR_GROUPS), 'critic': list(nets.CRITIC_GROUPS)}
         config['actor'].update(class_name='locomotion.paper_networks:PaperActor', hidden_dims=list(nets.ACTOR_HIDDEN))
@@ -240,8 +246,13 @@ class AMPPPO(PPO):
         self.demonstrations, self.dataset_identity = load_demonstrations(ROOT/self.amp_config.dataset)
         self.demonstrations = self.demonstrations.to(self.device)
         std = self.demonstrations.std(0).clamp_min(1e-3)
-        self.discriminator = disc.Discriminator(self.demonstrations.mean(0), std,
-                                               self.amp_config.discriminator_hidden).to(self.device)
+        # Initialize on a forked generator: the discriminator must not advance the global draws
+        # that stock PPO's action sampling and mini-batch order consume.
+        with torch.random.fork_rng(devices=[]):
+            torch.manual_seed(self.amp_config.seed)
+            self.discriminator = disc.Discriminator(self.demonstrations.mean(0).cpu(), std.cpu(),
+                                                   self.amp_config.discriminator_hidden)
+        self.discriminator = self.discriminator.to(self.device)
         self.discriminator_optimizer = torch.optim.Adam(self.discriminator.parameters(),
                                                         lr=self.amp_config.discriminator_learning_rate)
         self.estimator_optimizer = None
@@ -331,15 +342,16 @@ class AMPPPO(PPO):
         result = super().load(loaded_dict, load_cfg, strict)
         if loaded_dict.get('amp_dataset_identity') != self.dataset_identity:
             raise ValueError('Checkpoint demonstration bank differs')
-        if load_cfg is None or load_cfg.get('discriminator', True):
+        # As stock PPO does, restore only what the caller names; no load_cfg restores everything.
+        if load_cfg is None or load_cfg.get('discriminator'):
             self.discriminator.load_state_dict(loaded_dict['discriminator_state_dict'], strict=strict)
             self.discriminator_optimizer.load_state_dict(loaded_dict['discriminator_optimizer_state_dict'])
-        if self.estimator_optimizer is not None and (load_cfg is None or load_cfg.get('optimizer', True)):
+        if self.estimator_optimizer is not None and (load_cfg is None or load_cfg.get('optimizer')):
             self.estimator_optimizer.load_state_dict(loaded_dict['estimator_optimizer_state_dict'])
         return result
 
     def declaration(self):
-        return {'schema': 'hexapod_amp_learner_v1', 'config': asdict(self.amp_config),
+        return {'schema': 'hexapod_amp_learner_v1', 'config': json_shape(asdict(self.amp_config)),
                 'dataset': dict(self.dataset_identity), 'feature_contract': amp.feature_contract(),
                 'discriminator_decisions': list(disc.DECISIONS), 'learner_decisions': list(DECISIONS),
                 'network_decisions': list(nets.DECISIONS), 'stage2_complete': False}
