@@ -25,6 +25,32 @@ def save(path, value):
     Path(path).write_text(json.dumps(value, indent=2, allow_nan=False)+'\n')
 
 
+ALLOCATION_PROFILES = ('standard', 'flat_pilot_v1')
+CLEANUP_MARGIN_SECONDS = 400
+
+
+def validate_deadline(mode, profile, seconds):
+    """Keep the standard bound; allow the named flat pilot a finite allocation."""
+    if profile not in ALLOCATION_PROFILES:
+        raise ValueError('Unknown allocation profile')
+    if profile == 'flat_pilot_v1' and mode not in ('train', 'evaluate'):
+        raise ValueError('The flat pilot deadline applies to training and evaluation')
+    limit = 21600 if profile == 'flat_pilot_v1' else 6600
+    if (type(seconds) not in (int, float) or not math.isfinite(seconds)
+            or not 0 < seconds <= limit):
+        raise ValueError('Native deadline exceeds the allocation profile')
+
+
+def finish_training_update(update, updates, elapsed, deadline, checkpoint, save_loads):
+    """Save the last complete update before a deadline failure."""
+    expired = elapsed >= deadline
+    if update % 50 == 0 or update == updates or expired:
+        checkpoint(update)
+        save_loads()
+    if expired and update < updates:
+        raise TimeoutError('Training allocation ended after a complete PPO update')
+
+
 def scalars(value, prefix):
     """Return finite numeric leaves of a task status; drop lists, text and missing values."""
     if isinstance(value, dict):
@@ -98,6 +124,7 @@ def main(argv=None):
     parser.add_argument('--seed', type=int, default=20260917)
     parser.add_argument('--updates', type=int, default=512)
     parser.add_argument('--max-wall-seconds', type=float, default=6200.)
+    parser.add_argument('--allocation-profile', choices=ALLOCATION_PROFILES, default='standard')
     parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
     parser.add_argument('--checkpoint', type=Path)
     parser.add_argument('--checkpoint-sha256')
@@ -131,8 +158,9 @@ def main(argv=None):
     if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
         raise ValueError('The paper networks need the AMP learner, and the AMP learner trains or evaluates only')
     configuration.verify_assets(args.asset, args.model)
+    validate_deadline(args.mode, args.allocation_profile, args.max_wall_seconds)
     if (not args.headless or args.device != 'cuda:0' or not 1 <= args.updates <= 2000
-            or not 0 < args.max_wall_seconds <= 6600 or args.seed < 0
+            or args.seed < 0
             or (args.mode == 'train' and (args.num_envs != 128 or args.checkpoint is not None))
             or (args.mode == 'evaluate' and (args.num_envs != 1 or args.checkpoint is None))):
         raise ValueError('A bounded scratch training or single-replica evaluation is required')
@@ -184,6 +212,7 @@ def main(argv=None):
     args.output.mkdir(parents=True, exist_ok=False)
     state = {'mode': args.mode, 'status': 'initializing', 'identity': identity, 'errors': [], 'stage2_complete': False,
         'runtime_binding': {'runtime_tree_sha256': args.source_freeze_sha256},
+        'allocation': {'profile': args.allocation_profile, 'max_wall_seconds': args.max_wall_seconds},
         'experiment_logger': {'backend': args.logger, 'wandb_project': args.wandb_project,
                               'wandb_mode': args.wandb_mode if args.logger == 'wandb' else None}}
     save(args.output/'state.json', state)
@@ -272,6 +301,7 @@ def main(argv=None):
                 save(path.with_suffix('.json'), {'identity': identity, 'updates': update,
                     'checkpoint_sha256': sha(path), 'transitions': update*24*env.num_envs})
                 state['checkpoint'] = str(path); state['checkpoint_sha256'] = sha(path)
+                save(args.output/'state.json', state)
             loads = vanilla.TrainingLoads(env)
             if collision is not None:
                 collision.inner = loads
@@ -297,11 +327,9 @@ def main(argv=None):
                     wandb.config.update({'identity': identity}, allow_val_change=True)
                 state.update(updates=update, transitions=row['transitions'], wall_seconds=time.monotonic()-started)
                 save(args.output/'state.json', state)
-                if update % 50 == 0 or update == args.updates:
-                    checkpoint(update)
-                    save(args.output/'force_metrics.json', loads.report())
-                if time.monotonic()-started >= args.max_wall_seconds:
-                    raise TimeoutError('Training allocation ended after a complete PPO update')
+                finish_training_update(update, args.updates, time.monotonic()-started,
+                    args.max_wall_seconds, checkpoint,
+                    lambda: save(args.output/'force_metrics.json', loads.report()))
             runner.logger.log = log
             runner.learn(args.updates, init_at_random_ep_len=False)
             save(args.output/'force_metrics.json', loads.report())
