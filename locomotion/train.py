@@ -242,8 +242,9 @@ def main(argv=None):
         collision = None
         if args.learner == 'amp':
             collision = amp_module.CollisionCapture(env)
-            wrapped = amp_module.AMPVecEnv(task, collision=collision)
-            config = amp_module.amp_ppo_config(args.seed, networks=args.networks)
+            amp_config = amp_module.AMPConfig().resolve(args.seed)
+            wrapped = amp_module.AMPVecEnv(task, collision=collision, amp_config=amp_config)
+            config = amp_module.amp_ppo_config(args.seed, networks=args.networks, amp_config=amp_config)
         else:
             wrapped = vanilla.VanillaVecEnv(task)
             config = vanilla.ppo_config(args.seed)

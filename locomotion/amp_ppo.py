@@ -11,7 +11,7 @@ parity with plain PPO when the style weight and discriminator updates are zero.
 """
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import hashlib
 import json
 from pathlib import Path
@@ -38,6 +38,8 @@ PRIVILEGED_LAYOUT = (
 )
 PRIVILEGED_WIDTH = sum(width for _, width, _ in PRIVILEGED_LAYOUT)
 COLLISION_FORCE_N = 1.
+# The default run seed 20260917 maps to 20260925, the constant every run used before this binding.
+DISCRIMINATOR_SEED_OFFSET = 8
 DECISIONS = (
     "Style reward weight 1 follows Table I; the total reward is task plus style plus penalties.",
     "The discriminator trains on this rollout's policy transitions against uniform dataset samples; "
@@ -51,6 +53,8 @@ DECISIONS = (
     "The velocity estimator trains after each PPO update on the stored rollout with Adam 1e-3, one "
     "pass over the same mini-batches, against measured body-frame base velocity.",
     "Privileged friction and perturbation slots hold declared constants until Step 7 supplies them.",
+    "The discriminator initialization and its row sampling use the run seed plus 8 unless the "
+    "configuration names a seed; the recorded configuration holds the resolved seed.",
 )
 
 
@@ -64,7 +68,11 @@ class AMPConfig:
     discriminator_batch: int = 256
     discriminator_updates: int = 20
     estimator_learning_rate: float = 1e-3
-    seed: int = 20260925
+    seed: int | None = None
+
+    def resolve(self, run_seed):
+        """This configuration with the discriminator seed bound to the run seed, unless it names one."""
+        return self if self.seed is not None else replace(self, seed=run_seed + DISCRIMINATOR_SEED_OFFSET)
 
     def validate(self):
         if not all(isinstance(v, (int, float)) and np.isfinite(v) and v >= 0 for v in (
@@ -73,7 +81,8 @@ class AMPConfig:
             raise ValueError('AMP coefficients must be finite and nonnegative')
         if (type(self.discriminator_batch) is not int or self.discriminator_batch < 1
                 or type(self.discriminator_updates) is not int or self.discriminator_updates < 0
-                or type(self.seed) is not int or self.seed < 0 or not self.discriminator_hidden):
+                or (self.seed is not None and (type(self.seed) is not int or self.seed < 0))
+                or not self.discriminator_hidden):
             raise ValueError('Invalid AMP discriminator schedule')
         path = Path(self.dataset)
         if path.is_absolute() or '..' in path.parts:
@@ -218,7 +227,7 @@ class AMPVecEnv(VanillaVecEnv):
 def amp_ppo_config(seed, *, networks='mlp', amp_config=None):
     """Stock PPO settings plus the AMP algorithm and the chosen Table III or MLP networks."""
     config = ppo_config(seed)
-    amp_config = AMPConfig() if amp_config is None else amp_config
+    amp_config = (AMPConfig() if amp_config is None else amp_config).resolve(seed)
     amp_config.validate()
     # Checkpoint records pass through JSON; a tuple here would never equal its saved list.
     config['algorithm'].update(class_name='locomotion.amp_ppo:AMPPPO', amp_cfg=json_shape(asdict(amp_config)))
@@ -243,6 +252,8 @@ class AMPPPO(PPO):
             raise ValueError('AMP PPO supports feed-forward models only')
         self.amp_config = AMPConfig(**{**amp_cfg, 'discriminator_hidden': tuple(amp_cfg['discriminator_hidden'])})
         self.amp_config.validate()
+        if self.amp_config.seed is None:
+            raise ValueError('AMP discriminator seed is unresolved; build the configuration with amp_ppo_config')
         self.demonstrations, self.dataset_identity = load_demonstrations(ROOT/self.amp_config.dataset)
         self.demonstrations = self.demonstrations.to(self.device)
         std = self.demonstrations.std(0).clamp_min(1e-3)

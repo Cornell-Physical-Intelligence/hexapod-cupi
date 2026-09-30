@@ -253,6 +253,39 @@ class LearnerTests(unittest.TestCase):
         seed_all.assert_not_called()
         seed_one.assert_not_called()
 
+    def seeded(self, run_seed, seed=None):
+        config = amp_ppo_config(run_seed, amp_config=AMPConfig(discriminator_hidden=(16,), seed=seed))
+        alg = construct(config, AMPVecEnv(TaskDouble(seed=7)))
+        return alg, [value.clone() for value in alg.discriminator.state_dict().values()]
+
+    def test_run_seeds_give_different_discriminator_initializations(self):
+        first, first_weights = self.seeded(3)
+        second, second_weights = self.seeded(4)
+        self.assertEqual(first.amp_config.seed, 3 + amp_ppo.DISCRIMINATOR_SEED_OFFSET)
+        self.assertEqual(second.amp_config.seed, 4 + amp_ppo.DISCRIMINATOR_SEED_OFFSET)
+        self.assertFalse(all(torch.equal(a, b) for a, b in zip(first_weights, second_weights)))
+        self.assertFalse(torch.equal(first.generator.get_state(), second.generator.get_state()))
+
+    def test_one_run_seed_gives_identical_discriminator_initializations(self):
+        first, first_weights = self.seeded(3)
+        again, again_weights = self.seeded(3)
+        for a, b in zip(first_weights, again_weights):
+            torch.testing.assert_close(a, b, rtol=0, atol=0)
+        self.assertTrue(torch.equal(first.generator.get_state(), again.generator.get_state()))
+        self.assertEqual(first.declaration()['config']['seed'], 3 + amp_ppo.DISCRIMINATOR_SEED_OFFSET)
+
+    def test_an_explicit_discriminator_seed_is_honored(self):
+        derived, derived_weights = self.seeded(3)
+        explicit, explicit_weights = self.seeded(4, seed=derived.amp_config.seed)
+        self.assertEqual(explicit.amp_config.seed, derived.amp_config.seed)
+        for a, b in zip(derived_weights, explicit_weights):
+            torch.testing.assert_close(a, b, rtol=0, atol=0)
+        self.assertEqual(amp_ppo_config(4, amp_config=AMPConfig(seed=0))['algorithm']['amp_cfg']['seed'], 0)
+        unresolved = amp_ppo_config(4, amp_config=AMPConfig(discriminator_hidden=(16,)))
+        unresolved['algorithm']['amp_cfg']['seed'] = None
+        with self.assertRaisesRegex(ValueError, 'unresolved'):
+            construct(unresolved, AMPVecEnv(TaskDouble(seed=7)))
+
     def test_parity_with_stock_ppo_from_one_seed_without_reseeding(self):
         off = AMPConfig(style_weight=0., discriminator_updates=0)
         torch.manual_seed(11)
