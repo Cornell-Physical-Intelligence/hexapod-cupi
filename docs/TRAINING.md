@@ -76,6 +76,104 @@ configuration before training. The authors omit these details from
 decisions. The authors train with randomization and a terrain curriculum
 ([Table II, p. 3; §IV-B, p. 4](https://arxiv.org/pdf/2511.03167v1#page=3)).
 
+### Frozen flat pilot: issues #50 and #51
+
+You use protocol `flat_pilot_v1` for the first native comparison. The
+[program lead approved the budget and decision rule](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/37#issuecomment-5920656379).
+You retain reward version 1 as the default outside these packs.
+
+| Arm | Preparation options | Common budget |
+| --- | --- | --- |
+| PPO control | `--learner ppo --networks mlp` | 128 robots, 2000 updates, seed 20260917, reward version 2 |
+| Step 5 AMP | `--learner amp --networks mlp` | Same budget |
+| Step 6 AMP | `--learner amp --networks paper` | Same budget |
+
+You retain 24 controls per update, or 6,144,000 transitions per arm. Freeze
+`ppo.py` and the resolved AMP configuration with the source. The AMP arms use
+the admitted `amp_demonstrations_001` bank, style weight 1, 20 discriminator
+updates per PPO update and discriminator seed 20260925. Keep the approved
+model, motor limits and 0.040 rad / 20 ms target limiter.
+
+You compare checkpoint update 2000 for the decision. Preserve checkpoints at
+50-update intervals and evaluate each through the 13 learning probes; those
+earlier comparisons describe learning progress and cannot replace update 2000.
+Score PPO and Step 5 before Step 6. Record native contact force and torque
+before starting the next training arm. A timeout or learner fix requires a
+fresh attempt; this runner supports no training resume.
+
+#### Tracking and appearance
+
+You use the eight 0.05 m/s translation probes and two 0.20 rad/s yaw probes.
+Read `planar_error_mps` and `yaw_error_rad_s` from the unchanged evaluator,
+which scores controls 100 through 999. Compute the dimensionless error:
+
+```text
+E = (sum(planar_error_mps / 0.05 over eight translations)
+     + sum(yaw_error_rad_s / 0.20 over two turns)) / 10
+```
+
+You give each command equal weight. Report both error channels per command;
+retain the two quiet probes and the stop probe as separate diagnostics. Do not
+mix the reward scorer's reward ranking with this tracking metric.
+
+The program lead reviews each motion video with its checkpoint and video
+hashes. Record `walking` for sustained stepping with commanded progression,
+`standing` for a held stance without steps, and `jittering` for oscillation
+without sustained commanded progression. Record a fall or unsafe motion as
+`failed`; leave an unreviewed or missing video `pending`. Count a walking case
+only when its unchanged numerical motion/contact checks pass and the program
+lead labels it `walking`. Let `W` be this count out of ten. Keep failed cases
+in the denominator. Missing captures or pending reviews block the decision;
+do not compute a primary score from a failed prefix.
+
+#### Contact and motor comparison
+
+You prepare a fresh tripod `stop_stride`, candidate 0, `screen` allocation
+from the same source and admitted inputs. Freeze its binding before dispatch.
+Its commands are forward 0.05 m/s and yaw +/-0.20 rad/s. Record reference
+report, capture and video hashes before scoring a learned checkpoint. Keep
+historical tripod results under their original identities.
+
+You compare the full 400 Hz window `2 < t <= 20` seconds. Include swing zeros.
+Require complete captures and passing motion screens for both controllers.
+Match achieved behavior: the absolute difference in mean along-command speed
+or mean signed yaw rate must be at most 10% of the command magnitude. This
+condition defines comparable load rows; it changes no motion gate. Mark other
+directions and unmatched rows `unavailable`, with a reason.
+
+For each supported command, compare each foot's normal-force p95 and peak,
+and each joint's applied absolute-torque RMS and peak. Require each AMP value
+to be at most its corresponding tripod value, using unrounded values without
+an added tolerance. Report requested torque and total support as diagnostics.
+All supported rows must be comparable and within the reference loads to pass
+this pilot comparison. These relative criteria add no Stage 2 safety limits.
+
+#### Decision and run preparation
+
+You compare each AMP arm with PPO at update 2000. Lower `E`, higher `W` and
+passing load comparisons mean a pilot win. Higher `E` and lower `W` mean a
+loss on both; fix the reward or learner before Step 7. A tie, mixed result,
+load exceedance or unavailable evidence holds Step 7 for review. A Step 5 loss
+on both blocks further research runs until that repair. A pilot win supplies
+no full Stage 2 qualification; the 96-case gate and human acceptance remain.
+
+You prepare training with `--allocation-profile flat_pilot_v1
+--max-wall-seconds 21600`. The supervisor retains a 400-second cleanup margin,
+for a 22000-second cap. These are finite operational limits, not measured AMP
+completion times. The native runner saves the last complete update and load
+summary on a deadline failure. Preserve the failure; do not lower the budget
+or call a shorter checkpoint a completed arm. Standard allocations keep their
+existing bounds. The same profile supports probe evaluation; it extends no
+replica, update or physical gate.
+
+You use W&B project `hexapod-amp` in offline mode for these packs. Freeze the
+input declaration from the 29 September 128-robot admission, including the
+mounted one-robot and batch reports. Verify its physics and asset hashes at
+preflight. Copy this protocol into the run archive with its SHA-256, retain
+`PACK.json` and `binding.json`, and transfer each fresh pack without macOS
+metadata. Use [OPERATIONS](OPERATIONS.md) for host preflight and dispatch.
+Preparation and host preflight start no native training.
+
 ### Run tracking
 
 Training logs to W&B through RSL-RL when you prepare it with W&B options. The

@@ -9,6 +9,7 @@ import shutil
 
 from .env_config import sha
 from .tripod_config import SWEEPS
+from .train import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, validate_deadline
 
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = Path('/home/orionh/HEXAPOD_runs/restart_20260914')
@@ -22,8 +23,12 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
             checkpoint_declaration_sha=None, candidate=0, suite='screen',
             tripod_adaptation='paper', logger='tensorboard', wandb_project=None, wandb_mode='offline',
-            reward_version='1', learner='ppo', networks='mlp', root=ROOT):
+            reward_version='1', learner='ppo', networks='mlp', allocation_profile='standard',
+            max_wall_seconds=6200, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
+    validate_deadline(mode, allocation_profile, max_wall_seconds)
+    if type(max_wall_seconds) is not int:
+        raise ValueError('Preparation requires an integer native deadline')
     if (not remote_root.is_absolute() or REMOTE_ROOT not in remote_root.parents
             or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay', 'tripod', 'throughput')
             or type(updates) is not int or not 1 <= updates <= 2000
@@ -83,7 +88,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         for name in ('manifest.json', 'review.json', 'transitions.npz'):
             shutil.copy2(root/bank/name, source/bank/name)
     save(source/'FREEZE_SHA256.json', {p.relative_to(source).as_posix(): sha(p)
-        for p in sorted(source.rglob('*.py'))})
+        for p in sorted(source.rglob('*')) if p.is_file()})
     freeze = sha(source/'FREEZE_SHA256.json')
     binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': True,
         'module': ('locomotion.priors.replay_native' if mode == 'replay' else
@@ -93,13 +98,17 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         'asset': declared['asset'], 'geometry_source': declared['geometry_source'],
         'prior': str(Path(declared['stance']).parent), 'input_files': declared['input_files'],
         'extra_mounts': declared.get('extra_mounts', []), 'source_freeze_sha256': freeze,
-        'max_seconds': 6600, 'stage2_complete': False, 'physical_admission': False,
+        'allocation_profile': allocation_profile, 'max_wall_seconds': max_wall_seconds,
+        'max_seconds': max_wall_seconds + CLEANUP_MARGIN_SECONDS,
+        'stage2_complete': False, 'physical_admission': False,
         'command_args': ['--mode', mode, '--asset', '/asset', '--model', '/asset/source/model.json',
             '--geometry', '/geometry_source/geometry/geometry.json',
             '--geometry-extrema', '/geometry_source/geometry/geometry_extrema.npz',
             '--stance', '/prior/'+Path(declared['stance']).name,
             '--num-envs', str(num_envs), '--source-freeze-sha256', freeze,
-            '--max-wall-seconds', '6200', '--headless', '--device', 'cuda:0']}
+            '--max-wall-seconds', str(max_wall_seconds), '--headless', '--device', 'cuda:0']}
+    if allocation_profile != 'standard':
+        binding['command_args'] += ['--allocation-profile', allocation_profile]
     if mode != 'diagnostic':
         binding['command_args'] += ['--standing-admission', '/admission/admission.json']
     if mode in ('train', 'evaluate', 'throughput'):
@@ -131,6 +140,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
     save(output/'PACK.json', {'remote_root': str(remote_root), 'source_freeze_sha256': freeze,
         'binding_sha256': sha(output/'binding.json'), 'mode': mode, 'seed': seed, 'reward_version': reward_version,
         'learner': learner, 'networks': networks,
+        'allocation_profile': allocation_profile, 'max_wall_seconds': max_wall_seconds,
         'updates': updates, 'stage2_complete': False, 'files': {
             p.relative_to(output).as_posix(): sha(p) for p in sorted(output.rglob('*')) if p.is_file()}})
     return binding
@@ -159,6 +169,8 @@ def main():
     parser.add_argument('--reward-version', choices=['1', '2'], default='1')
     parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo')
     parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp')
+    parser.add_argument('--allocation-profile', choices=ALLOCATION_PROFILES, default='standard')
+    parser.add_argument('--max-wall-seconds', type=int, default=6200)
     args = parser.parse_args()
     print(json.dumps(prepare(**vars(args)), indent=2))
 

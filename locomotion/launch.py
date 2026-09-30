@@ -108,10 +108,14 @@ def audit_contact_log(path):
         scope="Required absence of reported contact/friction data truncation; raw physical gate must also pass")
 
 def verify(binding, own):
+    from .train import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, validate_deadline
     guard.require(binding['schema']=='hexapod_locomotion_launch_v1','Wrong launch schema')
     guard.require(binding['root_review_complete'] is True,'Root review incomplete')
     guard.require(binding['mode'] in ('diagnostic','replay','train','video','evaluate','tripod','throughput'),'Unsupported native mode')
-    guard.require(type(binding['max_seconds']) is int and 120<=binding['max_seconds']<=7200,'Unbounded allocation')
+    profile = binding.get('allocation_profile', 'standard')
+    guard.require(profile in ALLOCATION_PROFILES, 'Unknown allocation profile')
+    limit = 22000 if profile == 'flat_pilot_v1' else 7200
+    guard.require(type(binding['max_seconds']) is int and 120<=binding['max_seconds']<=limit,'Unbounded allocation')
     guard.require(binding.get('module') in ('locomotion.train', 'locomotion.priors.replay_native',
                                           'locomotion.tripod_evaluate', 'locomotion.throughput'), 'Unsupported native entry point')
     guard.require((binding['mode'] == 'tripod') == (binding['module'] == 'locomotion.tripod_evaluate'),
@@ -133,6 +137,23 @@ def verify(binding, own):
     guard.require(binding['command_args'] and all(isinstance(x,str) for x in binding['command_args']),
                   'Exact native arguments required')
     argv=binding['command_args']
+    if profile != 'standard' or 'max_wall_seconds' in binding:
+        seconds = binding.get('max_wall_seconds')
+        validate_deadline(binding['mode'], profile, seconds)
+        guard.require(binding['max_seconds'] >= seconds + CLEANUP_MARGIN_SECONDS,
+                      'The supervisor must retain the native cleanup margin')
+        options = [('--max-wall-seconds', str(seconds))]
+        if profile != 'standard':
+            guard.require(binding['module'] == 'locomotion.train', 'Pilot requires the training entry point')
+            options.append(('--allocation-profile', profile))
+        for option, want in options:
+            guard.require(argv.count(option) == 1 and not any(x.startswith(option+'=') for x in argv),
+                          'Exact single deadline argument required: '+option)
+            index = argv.index(option)
+            guard.require(index+1 < len(argv) and argv[index+1] == want, 'Native deadline differs: '+option)
+    if profile == 'standard':
+        guard.require(not any(x == '--allocation-profile' or x.startswith('--allocation-profile=') for x in argv),
+                      'Standard allocation cannot override its profile')
     guard.require(not any(x=='--output' or x.startswith('--output=') for x in argv),'Output override rejected')
     for option,want in (('--mode',binding['mode']),('--source-freeze-sha256',binding['source_freeze_sha256']),
                         ('--asset','/asset'),('--model','/asset/source/model.json'),('--device','cuda:0')):
