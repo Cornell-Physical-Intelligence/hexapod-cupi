@@ -153,9 +153,9 @@ this pilot comparison. These relative criteria add no Stage 2 safety limits.
 You compare each AMP arm with PPO at update 2000. Lower `E`, higher `W` and
 passing load comparisons mean a pilot win. Higher `E` and lower `W` mean a
 loss on both; fix the reward or learner before Step 7. A tie, mixed result,
-load exceedance or unavailable evidence holds Step 7 for review. A Step 5 loss
-on both blocks further research runs until that repair. A pilot win supplies
-no full Stage 2 qualification; the 96-case gate and human acceptance remain.
+load exceedance or unavailable evidence holds Step 7 for review. A pilot win
+supplies no full Stage 2 qualification; the 96-case gate and human acceptance
+remain.
 
 You prepare training with `--allocation-profile flat_pilot_v1
 --max-wall-seconds 21600`. The supervisor retains a 400-second cleanup margin,
