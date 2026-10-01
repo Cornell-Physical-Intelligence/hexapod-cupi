@@ -30,6 +30,7 @@ Read a reference below when its subject is part of your task.
 
 | Reference | Maintained purpose |
 | --- | --- |
+| [Spark contributor guide](SPARK.md) | Personal worktrees, frozen attempts, launch and result inspection. |
 | [Training](docs/TRAINING.md) | Kernel contract and the paper-reproduction roadmap. |
 | [Operations](docs/OPERATIONS.md) | Host access, ownership, launch procedure and recovery controls. |
 | [Compute coordination](docs/SPARK_COMPUTE_COORDINATION.md) | Current reservation policy; release requires the program lead's direction. |
