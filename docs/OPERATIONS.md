@@ -1,5 +1,8 @@
 # Spark operations
 
+Start with the [contributor workflow](../SPARK.md) for account access and
+personal worktrees. This guide owns the runtime and recovery details.
+
 You use [`locomotion.launch`](../locomotion/launch.py) for canonical allocations.
 It supervises one named module from a frozen package and cleans its exact
 container. Read [compute coordination](SPARK_COMPUTE_COORDINATION.md) first.
@@ -67,6 +70,14 @@ bytes. Read `preparation.json` for package hashes, `evidence_verification.json`
 for the 40-clip and standing checks, and `preflight.json` for the four package
 checks. The CPU checks start no simulator or training. Coordinate a new host
 check before dispatch.
+
+The administrator completed the inventoried cleanup. All 60 selected legacy
+paths are absent, and `hexapod-rl-training.service` is absent. The account
+checks pass for James, Shaurya and Julian; shared-service identities match
+before and after cleanup. The receipt is `cleanup_result.json` in that
+maintenance directory, with SHA-256
+`eadd4754d6914ac25d91e66bb16654ba05533c9c93745c29a389785ac915f8b5`.
+All four host preflights pass after cleanup. Training has not started.
 
 You can repeat the PPO host check without creating its output directory:
 

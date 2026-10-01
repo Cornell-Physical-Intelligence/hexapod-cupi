@@ -10,7 +10,8 @@ behind Cornell sign-in. Agent constraints live in [AGENTS](AGENTS.md).
 Use `uv sync --locked` and run Python through `uv run`; do not create separate
 pip, conda or venv environments. Add dependencies with `uv add` and commit
 `pyproject.toml` with `uv.lock`. You can run CPU tests and the viewer on your
-laptop. Read [OPERATIONS](docs/OPERATIONS.md) before using Spark for Isaac.
+laptop. Follow [SPARK](SPARK.md) for personal worktrees and frozen runs on Spark;
+read [OPERATIONS](docs/OPERATIONS.md) before using Isaac.
 
 Name branches `[netid]/[task]`. Submit changes through a PR to `main`, review
 the diff and merge after green CI. Use forward commits to preserve published
