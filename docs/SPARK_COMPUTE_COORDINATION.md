@@ -1,5 +1,11 @@
 # Spark compute policy
 
+GeoData and CUPI share the Spark. GeoData owns the installed Slurm setup.
+The CUPI workspace cleanup retains the Isaac/Docker launcher and both GPU
+locks. It changes no GeoData service, Qwen workload or shared Docker storage.
+Workspace permissions do not allocate the GPU. Check live workloads before
+each allocation and use the recorded sharing policy below.
+
 The program lead authorized full HEXAPOD compute ownership on 14 September 2026, including
 stopping competing user workloads after preserving their recovery state.
 One lead owns allocation and cleanup. Read [OPERATIONS](OPERATIONS.md) for the
