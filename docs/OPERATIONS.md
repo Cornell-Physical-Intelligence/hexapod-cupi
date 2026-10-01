@@ -50,6 +50,34 @@ root for historical compatibility; new CUPI runs belong under `runs/<user>`.
 The default `configs/locomotion_spark.json` remains a legacy declaration, so
 pass the new bundle's admitted `inputs.json` through `--inputs`.
 
+### Prepared flat pilot
+
+You can inspect the prepared pilot at
+`/srv/cupi/hexapod/runs/james/flat_pilot_20260930_003/`. Its four packages are
+`ppo_mlp`, `amp_mlp`, `amp_paper` and `tripod_reference`. The preparation receipt
+records source commit `620d9aa9b23e0c9547893c513b57f77335eb4ef3` for these packages.
+The input declaration is
+`/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/admission_128/inputs.json`.
+The learner arguments retain the [frozen pilot constraints](TRAINING.md#frozen-flat-pilot-issues-50-and-51).
+
+You can read the inventory and file relocation map in
+`/srv/cupi/hexapod/maintenance/cleanup_20260930_001/`. Use `relocation.json` to
+find an old evidence path. Historical manifests keep their original paths and
+bytes. Read `preparation.json` for package hashes, `evidence_verification.json`
+for the 40-clip and standing checks, and `preflight.json` for the four package
+checks. The CPU checks start no simulator or training. Coordinate a new host
+check before dispatch.
+
+You can repeat the PPO host check without creating its output directory:
+
+```sh
+cd /srv/cupi/hexapod/runs/james/flat_pilot_20260930_003/ppo_mlp/source
+python3 -B -m locomotion.launch \
+  --bindings ../binding.json \
+  --bindings-sha256 474bb1647dbd0a05f83866511763eaa924c8b9410a84958d88f832c7aa236639 \
+  --preflight-only
+```
+
 ## Before a run
 
 The launcher records other GPU processes, containers and available host
