@@ -15,11 +15,9 @@ from types import SimpleNamespace
 import uuid
 
 from . import reservation as guard
+from .spark_paths import INPUT_ROOTS, RUN_ROOTS, within_roots
 
 _INCOMPLETE = re.compile(r"incomplete\s+(?:contact|friction)\s+data", re.IGNORECASE)
-
-REMOTE_ROOT = Path('/home/orionh/HEXAPOD_runs/restart_20260914')
-
 
 def host_snapshot():
     """Record other GPU work and containers; an allocation shares the GPU with them."""
@@ -124,8 +122,9 @@ def verify(binding, own):
                   'Throughput mode and entry must match')
     paths={k:guard.canonical_path(binding[k]) for k in ('source','asset','prior','geometry_source','output')}
     guard.require(paths['source']==own,'Launcher must belong to its bound source')
-    for k in ('source','output','prior'):
-        guard.require(REMOTE_ROOT in paths[k].parents,'Fresh restart path required')
+    for k in ('source','output'):
+        guard.require(within_roots(paths[k], RUN_ROOTS),'Guarded Spark run path required')
+    guard.require(within_roots(paths['prior'], INPUT_ROOTS),'Guarded Spark input path required')
     for k,v in paths.items():
         if k!='output':
             guard.require(v!=paths['output'] and v not in paths['output'].parents

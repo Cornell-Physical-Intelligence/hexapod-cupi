@@ -53,6 +53,11 @@ admit changed physics source. Checkpoint loads require matching model, physics,
 configuration and implementation; use the original frozen entry for historical
 checkpoints that carry a different identity.
 
+Use `/srv/cupi/hexapod/inputs/` for new CUPI input bundles and
+`/srv/cupi/hexapod/runs/<user>/` for attempts. Preparation also accepts the
+historical restart root. Keep the shared Isaac runtime at its recorded path;
+workspace cleanup changes no physics or container runtime.
+
 Each evaluation saves `control_trace.npz`, 400 Hz capture chunks, `report.json`
 and `force_metrics.json`. A selected video also saves `rollout.mp4`. The reports
 bind the checkpoint and file hashes. Training writes `metrics.jsonl` and load

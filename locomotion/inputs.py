@@ -7,7 +7,7 @@ from pathlib import Path
 import shutil
 
 from .env_config import sha, verify_assets
-from .prepare import REMOTE_ROOT
+from .spark_paths import INPUT_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[1]
 MODEL = 'robot/hexapod_mkii_updated_v1'
@@ -32,8 +32,8 @@ def check(root=ROOT):
 def declaration(remote_root, root=ROOT):
     manifest = check(root)
     remote = Path(remote_root)
-    if not remote.is_absolute() or '..' in remote.parts or REMOTE_ROOT not in remote.parents:
-        raise ValueError('Use a fresh directory under the guarded Spark restart root')
+    if not within_roots(remote, INPUT_ROOTS):
+        raise ValueError('Use a fresh directory under a guarded Spark input root')
     files = {}
     for source in manifest['files']:
         relative = Path(source).relative_to(MODEL)

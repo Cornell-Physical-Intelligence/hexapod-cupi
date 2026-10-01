@@ -10,9 +10,10 @@ import shutil
 from .env_config import sha
 from .tripod_config import SWEEPS
 from .train import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, validate_deadline
+from .spark_paths import LEGACY_ROOT, RUN_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[1]
-REMOTE_ROOT = Path('/home/orionh/HEXAPOD_runs/restart_20260914')
+REMOTE_ROOT = LEGACY_ROOT
 
 
 def save(path, value):
@@ -29,7 +30,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
     validate_deadline(mode, allocation_profile, max_wall_seconds)
     if type(max_wall_seconds) is not int:
         raise ValueError('Preparation requires an integer native deadline')
-    if (not remote_root.is_absolute() or REMOTE_ROOT not in remote_root.parents
+    if (not within_roots(remote_root, RUN_ROOTS)
             or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay', 'tripod', 'throughput')
             or type(updates) is not int or not 1 <= updates <= 2000
             or type(seed) is not int or seed < 0):
@@ -128,7 +129,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         binding['command_args'] += ['--warmup-updates', str(warmup_updates)]
     if checkpoint is not None:
         checkpoint = Path(checkpoint)
-        if (not checkpoint.is_absolute() or REMOTE_ROOT not in checkpoint.parents
+        if (not within_roots(checkpoint, RUN_ROOTS)
                 or '..' in checkpoint.parts or any(len(h) != 64 or set(h)-set('0123456789abcdef')
                     for h in (checkpoint_sha, checkpoint_declaration_sha))):
             raise ValueError('Invalid checkpoint identity')

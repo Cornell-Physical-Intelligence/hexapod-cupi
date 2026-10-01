@@ -1,0 +1,26 @@
+{
+  "id": "20261001T001342_cupi_paths",
+  "date": "2026-10-01T00:13:42+00:00",
+  "title": "Prepare CUPI workspace paths for the flat pilot",
+  "summary": "You can prepare admitted inputs under /srv/cupi/hexapod/inputs and frozen attempts under /srv/cupi/hexapod/runs. The launcher accepts both CUPI and legacy paths and rejects symbolic paths. Contributors use personal clones and separate run directories. The pilot budget and native launcher stay unchanged.",
+  "areas": ["locomotion", "site"],
+  "next": "Verify retained evidence and fresh pilot packages before removing the inventoried legacy copies.",
+  "changes": [
+    "configs/README.md",
+    "configs/source_inventory.json",
+    "docs/OPERATIONS.md",
+    "docs/SPARK_COMPUTE_COORDINATION.md",
+    "docs/TRAINING.md",
+    "locomotion/README.md",
+    "locomotion/spark_paths.py",
+    "locomotion/inputs.py",
+    "locomotion/prepare.py",
+    "locomotion/priors/prepare.py",
+    "locomotion/launch.py",
+    "locomotion/tests/test_spark_paths.py",
+    "site/updates/20261001T001342_cupi_paths.json"
+  ],
+  "evidence": ["docs/OPERATIONS.md", "locomotion/tests/test_spark_paths.py"],
+  "no_project_impact": true,
+  "reason": "You gain workspace support and regression checks. No measured result, training budget or qualification gate changes."
+}

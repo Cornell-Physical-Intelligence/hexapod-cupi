@@ -303,7 +303,7 @@ uv run python -m locomotion.prepare --help
 ```
 
 `inputs pack` requires a fresh local output and an explicit remote input root
-under `/home/orionh/HEXAPOD_runs/restart_20260914/`.
+under `/srv/cupi/hexapod/inputs/`. Historical restart paths remain supported.
 It copies the approved USD, geometry and neutral stance, verifies their hashes,
 and writes `inputs.json`. Transfer the directory to that root, then use the
 file with `prepare --inputs`. Preparation launches no compute. The new frozen
