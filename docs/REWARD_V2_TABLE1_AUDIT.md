@@ -208,7 +208,53 @@ command-change restart, `k` = 0.4, `c_min` = 0.025 m/s and 0.15 rad/s, the yaw
 extension, the calibrated penalty weights and the termination term. The style
 term remains open with the AMP owner.
 
-## Reproduce
+## 9. Failed-policy comparison after the first flat PPO run
+
+You can inspect the [capture audit](../site/assets/ppo_action_audit_20261002_001/reward_audit.json)
+and its [analysis source](../site/assets/ppo_action_audit_20261002_001/reward_audit.py).
+The audit uses reward v2 from commit
+`13f55d4efa40ac8497812a96c7b7af4741fd7666` and four retained native captures
+at a forward command of 0.05 m/s. It verifies 68 input files and matching native
+model and physics identities. Both optimized walks belong to the admitted AMP
+dataset. The tripod and both optimized walks pass their recorded motion screens;
+the PPO capture fails.
+
+| Capture | Mean reward per control, 2 < t <= 20 seconds |
+| --- | ---: |
+| Failed PPO policy | 0.258359 |
+| Same PPO trajectory with recorded actions clipped to [-1, 1] | 0.272557 |
+| Current tripod reference | 0.987156 |
+| Admitted optimized walk, phase 0 | 1.247595 |
+| Admitted optimized walk, phase 0.5 | 1.251683 |
+
+The audit reconstructs the 60-control tracking history from control zero and
+uses the recorded eight torque samples per control. It scores 900 controls after
+the two-second settling window. The original force matrix is absent, so the audit
+allows the full collision penalty range of [-0.05, 0] on each trajectory. The
+smallest walking advantage over the clipped-action PPO trajectory remains 0.664599
+per control under that range.
+
+Clipping the recorded actions reproduces the recorded joint targets without a
+difference. This counterfactual changes the action-rate reward input; it does not
+predict a new policy's motion. CPU float32 reductions can differ from the native
+CUDA runtime. The receipt records the reward components and input hashes.
+
+Retain reward v2 for the bounded-mean PPO comparison. These fixed trajectories
+establish a reward ranking at one command. They do not establish that PPO can
+discover walking or rule out poor exploration and delayed tracking feedback.
+Evaluate the fresh trained policy before proposing a reward revision. Preserve
+the original pilot and its checkpoints as separate evidence.
+
+You can reproduce the audit from a checkout containing the pinned commit. Use
+an external directory for the raw captures; the fetch requires SSH access to
+`spark`. Use a fresh output path for a repeat audit.
+
+```sh
+uv run python -B site/assets/ppo_action_audit_20261002_001/reward_audit.py \
+  --repository . --workspace "$HOME/hexapod-evidence/reward-audit-20261002" --fetch
+```
+
+## Reproduce the Table I audit
 
 ```sh
 uv run python tools/archive.py restore --destination <dir> artifacts/trajectory_optimizer_20260917/replay_001/standing/evaluation/control_trace.npz

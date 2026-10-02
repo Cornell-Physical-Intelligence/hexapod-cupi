@@ -1,0 +1,747 @@
+{
+  "schema": "hexapod_reward_v2_exact_capture_audit_v1",
+  "source_commit": "13f55d4efa40ac8497812a96c7b7af4741fd7666",
+  "analysis_sha256": "d28bf59741ec948cb12f3a42b071ecbe8b90d6cc544ef5412fa0f51e54aa5616",
+  "source_files": {
+    "__init__.py": "c82a5695bd2575afdaae01eb84bb3c06ddffe42529d201bbe43726ae8859e350",
+    "task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+    "task_v2.py": "72f95879e36c2371a20bfc2524fbbabafb060c00d5412391fe0f7be2a8844369",
+    "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+    "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+    "amp.py": "4010cf0e42ea63ca693b0fa311a3fef7ee6bfdfa47b9eba58bf87f7f7cefec5c"
+  },
+  "input_metadata_sha256": {
+    "model.json": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+    "stance.json": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+    "amp_manifest.json": "7501de7a6be975159ff5c7ede32bbe75aed90095826ff2dfd6106347976ed6a1"
+  },
+  "runtime": {
+    "python": "3.12.13 (main, Jun 23 2026, 15:44:24) [Clang 22.1.3 ]",
+    "torch": "2.14.0",
+    "numpy": "2.5.2",
+    "device": "cpu"
+  },
+  "reward": {
+    "version": "paper_table1_command_scaled_v2",
+    "config": {
+      "tracking_kernel": "stride",
+      "scale_k": 0.4,
+      "minimum_speed_mps": 0.025,
+      "minimum_yaw_rate_rad_s": 0.15,
+      "stride_controls": 60,
+      "linear_tracking_weight": 1.0,
+      "yaw_tracking_weight": 0.5,
+      "vertical_velocity_weight": 137.0,
+      "roll_pitch_weight": 1.18,
+      "torque_weight": 0.0691,
+      "acceleration_weight": 0.000741,
+      "action_rate_weight": 0.215,
+      "collision_weight": 0.05,
+      "torque_limit_weight": 0.05,
+      "velocity_limit_weight": 0.5,
+      "torque_limit_nm": 1.6,
+      "velocity_limit_rad_s": 50.26548245743669,
+      "collision_force_n": 1.0,
+      "termination_weight": 75.0
+    },
+    "kernel_audit_label": "C",
+    "formulas": {
+      "linear_tracking": "w_lin exp(-||v_xy - c_xy|| / (k max(||c_xy||, c_min_lin)))",
+      "yaw_tracking": "w_yaw exp(-|w_z - c_yaw| / (k max(|c_yaw|, c_min_yaw)))",
+      "tracked_velocity": "causal per-replica mean over the last stride_controls controls since the latest command change or reset",
+      "vertical_velocity": "-w v_z^2",
+      "roll_pitch_rate": "-w ||w_xy||",
+      "joint_torque": "-w ||sqrt(sum_substeps tau^2 / 8)||",
+      "joint_acceleration": "-w ||(dq - dq_prev) / 0.02||",
+      "action_rate": "-w ||a - a_prev||",
+      "collisions": "-w [max non-tibia floor force > 1 N]",
+      "torque_limit": "-w ||max(|tau_requested| - 1.6, 0)||",
+      "velocity_limit": "-w ||max(|dq| - 50.27, 0)||",
+      "termination": "-w [height, tilt or joint-limit termination this control]"
+    },
+    "termination_reference": {
+      "worst_mean_reward_per_control": -0.721,
+      "ppo_gamma": 0.99,
+      "trace": "forward_example_ppo_20260917/scratch_evaluate_update001200_001/evaluation_00"
+    },
+    "stationary_translation_fraction_at_or_above_floor": 0.0820849986238988,
+    "adaptations": [
+      "Tracking uses exp(-||e||/sigma) with sigma = k * max(|c|, c_min), per component: the printed exponent has no minus sign, and the printed 0.15 scale pays a motionless robot 72 to 85 percent at this robot's commands (audit sections 2 and 4).",
+      "The stride kernel tracks each replica's causal mean velocity over its last stride_controls controls, restarted at every command change and reset.",
+      "Planar and vertical velocity are measured at the root-link origin, as version 1 does.",
+      "||tau|| uses each joint's RMS applied torque over the control's eight physics substeps.",
+      "||q_ddot|| is the joint-velocity change between consecutive 50 Hz controls divided by 0.02 s; the first control after a reset uses the reset state's joint velocity.",
+      "The action rate uses the raw action passed to the environment, before clipping and the 0.040 rad target limiter; the previous action is zero after a reset.",
+      "n_collision counts one event when any non-tibia body presses the ground with more than 1 N during the control; the simulation does not report self-collisions.",
+      "The torque limit applies to the largest requested torque over the eight substeps, before the motor cap, against the 1.6 N\u00b7m software cap; applied torque never exceeds that cap.",
+      "The joint-velocity limit is the URDF limit, 50.27 rad/s, checked at each control's end.",
+      "Continuous penalty weights follow paper_reward.CALIBRATION: together they average 0.8 of the mean tracking reward under the paper's fixed 0.15 kernel (audit variant A), not kernel C, on seven recorded rollouts, in equal shares.",
+      "Table I has no termination term. PPO bootstraps zero after a termination, so without one a policy earning negative reward would gain by falling. termination_weight exceeds the discounted value of continuing at the worst recorded mean reward: 0.721 / (1 - 0.99) = 72.1 < 75 (TERMINATION_REFERENCE)."
+    ],
+    "omitted": [
+      "Style r^s needs the AMP discriminator and the AMP owner's agreement on its inputs (docs/TRAINING.md Step 5).",
+      "The foot contact-force limit: the paper states no limit and the reviewer has not set one.",
+      "Version 1's height and tilt terms: Table I has none."
+    ],
+    "actuator": "Unchanged from version 1: 18 actions at 50 Hz clipped to [-1, 1]; targets neutral + 0.35 a, clipped to joint limits and to +-0.040 rad per 20 ms control; tau_req = 12 (q_target - q) - K_D q_dot with K_D 0.442/0.246/0.106 N\u00b7m\u00b7s/rad; applied torque capped by the 48 V speed curve at 1.6 N\u00b7m and zero at 50.27 rad/s; 400 Hz physics, eight substeps. The paper's cascaded law tau = Kp2 (Kp1 (q_des - q) - q_dot) is not used.",
+    "review": {
+      "record": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/42",
+      "reviewer": "James (palerdr)",
+      "decisions": [
+        "tracking kernel C",
+        "k 0.4",
+        "command floors 0.025 m/s and 0.15 rad/s",
+        "yaw extension of the criterion",
+        "calibrated penalty weights",
+        "termination term"
+      ],
+      "pending": [
+        "style inputs with the AMP owner"
+      ],
+      "questions": "docs/REWARD_V2_TABLE1_AUDIT.md section 8"
+    }
+  },
+  "method": {
+    "history": "Start at control zero. Use recorded actions, previous rates, native AMP velocities and the frozen 60-control stride function; select endpoints 2<t<=20 after computing history.",
+    "torque": "Use each native applied-torque sample and requested-torque sample. Accumulate eight float32 squares in control order; take each joint's absolute requested maximum across all eight substeps.",
+    "collision": "Sum named contact-patch force vectors per non-tibia body, then take the largest body norm across eight substeps. The original force matrix is absent; preserve a full [\u22120.05,0] collision reward interval for every control, regardless of reconstructed events.",
+    "counterfactual": "Clamp recorded raw actions to [\u22121,1], preserving identical target execution. This is a bounded-command reward counterfactual, not a new tanh-policy rollout.",
+    "scope": "These fixed-trajectory rewards test ranking at one command. They do not establish learning success or the flat_pilot_v1 decision.",
+    "precision": "CPU float32 reproduces reward operations. Reduction differences from the original CUDA runtime remain possible; no training reward was recorded for these evaluation trajectories."
+  },
+  "native_identity_matches_failed_ppo": {
+    "failed_ppo": true,
+    "tripod": true,
+    "walk_phase0": true,
+    "walk_phase05": true
+  },
+  "results": {
+    "failed_ppo": {
+      "remote_source": "/srv/cupi/hexapod/runs/james/flat_pilot_20261002_001/ppo_mlp_video_001/run/standing/evaluation/batch_000",
+      "input_sha256": {
+        "native400hz/contacts.jsonl": "9f9f00c7ef7bba516104a2c812ee98523b77ede846d66d6fe2a1f94587e30b8a",
+        "native400hz/initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+        "native400hz/substeps_000.npz": "6c1357b239f060193fde6e26cc7ac20b9cc9600a34cadb60779c358f3b39c565",
+        "native400hz/substeps_001.npz": "c14aac1676490ce22addf8b44e4db11dfc697a511f2ba885d4fc63bbb948326f",
+        "native400hz/substeps_002.npz": "5f7450c52200869f63b832023267f83ea5adbe3fbf430c77853df644e5f1f62d",
+        "native400hz/substeps_003.npz": "c56e133bd6bc1926bb5a3fd5be74c9209beda085ee3a852dbdba33b64ebcb298",
+        "native400hz/substeps_004.npz": "ae39c02114418734fedbc34154792e1b020336470e26a1e2ebe1d3e088154aa2",
+        "native400hz/substeps_005.npz": "ed66685bd29cf10d6f1e346fd63fb6cfb760e3c52baa90d43dc5364a1ab56913",
+        "native400hz/substeps_006.npz": "0888f1f3f212ad68c8fd47bba87347054a95046621a0aa00ad98c00eea7a0c90",
+        "native400hz/substeps_007.npz": "044cfda4e5e6ac3f40428bfd843b4c10ecd60105b98ef9352b5c1e64716c554d",
+        "native400hz/substeps_008.npz": "2d0b83507743a3d0f822c9f9abdbc0947cbf09d66c27a4bc512c382c9520a135",
+        "native400hz/substeps_009.npz": "392feb8fb8710bf397d202e4e329458ec9551f57ef654b716ee947c593aceeb1",
+        "control_trace.npz": "474c935cf0e9072e6877e7189917b21a67c29ecb4e5b986f5fa24e358252704c",
+        "declaration.json": "d504ca51311267ee9582e808cb8f8291dc8225b9de7329ad3355d01c440925a3",
+        "report.json": "559c21f2b9b9a8fda223c39cc4714b6ba36a7b18680ab67b298b2322e9afde4a",
+        "native_state.json": "b4dee68f9c806833017181eb6208bedf4da632cea080decba12fbf8c71c9e224",
+        "native400hz/capture.json": "5ca39c986c99987548b3bafbc51ddd03fcff6d594a069288b092d6cbde576c71"
+      },
+      "admitted_dataset_entry": null,
+      "native_identity": {
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "physics_source_files": {
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce"
+      },
+      "screen_pass": false,
+      "requested_command": [
+        0.05,
+        0,
+        0
+      ],
+      "window_seconds": {
+        "greater_than": 2,
+        "less_than_or_equal": 20
+      },
+      "scored_controls": 900,
+      "history_controls": 1000,
+      "target_recurrence_max_abs_error_rad": {
+        "original_raw": 0.0,
+        "clamped_counterfactual": 0.0
+      },
+      "original_and_clamped_targets_identical": true,
+      "critic_velocity_crosscheck_max_error_mps": 0.0,
+      "gyro_crosscheck_max_error_rad_s": 4.790535967913456e-08,
+      "reconstructed_non_tibia_collision_controls": 0,
+      "nearest_recorded_non_tibia_resultant_to_threshold_n": null,
+      "along_command_speed_mps": -3.366792499036819e-05,
+      "root_height_mean_m": 0.09488278368280993,
+      "representations": {
+        "original_raw": {
+          "component_means": {
+            "linear_tracking": 0.08199280089802212,
+            "yaw_tracking": 0.4924367414911588,
+            "vertical_velocity": -0.0012488659897916259,
+            "roll_pitch_rate": -0.06085847841886183,
+            "joint_torque": -0.15261296952764195,
+            "joint_acceleration": -0.04662290779666768,
+            "action_rate": -0.05451816054474976,
+            "collisions": 0.0,
+            "torque_limit": -0.00020882411135567558,
+            "velocity_limit": 0.0,
+            "termination": 0.0
+          },
+          "reward_mean_reconstructed_collision": 0.25835933668745886,
+          "reward_mean_collision_agnostic_interval": [
+            0.20835933600011242,
+            0.2583593360001124
+          ],
+          "raw_action_abs_max": 1.7734992504119873,
+          "raw_action_outside_unit_fraction": 0.6108641975308642
+        },
+        "clamped_counterfactual": {
+          "component_means": {
+            "linear_tracking": 0.08199280089802212,
+            "yaw_tracking": 0.4924367414911588,
+            "vertical_velocity": -0.0012488659897916259,
+            "roll_pitch_rate": -0.06085847841886183,
+            "joint_torque": -0.15261296952764195,
+            "joint_acceleration": -0.04662290779666768,
+            "action_rate": -0.040320706279534435,
+            "collisions": 0.0,
+            "torque_limit": -0.00020882411135567558,
+            "velocity_limit": 0.0,
+            "termination": 0.0
+          },
+          "reward_mean_reconstructed_collision": 0.2725567911648088,
+          "reward_mean_collision_agnostic_interval": [
+            0.2225567902653277,
+            0.2725567902653277
+          ],
+          "raw_action_abs_max": 1.0,
+          "raw_action_outside_unit_fraction": 0.0
+        }
+      }
+    },
+    "tripod": {
+      "remote_source": "/srv/cupi/hexapod/runs/james/flat_pilot_20261002_001/tripod_reference/run/standing/trial_000",
+      "input_sha256": {
+        "native400hz/contacts.jsonl": "7dcf8703de9d85711bea165243e25cb3588b23642bb92e4f3292f5989b6a7f2f",
+        "native400hz/initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+        "native400hz/substeps_000.npz": "0d214892d8a3faee3ec4b6fae18d36558a9fceb150ce7e4fee1d9e237c042147",
+        "native400hz/substeps_001.npz": "0d50815585b2a4b76aed324b67bc22b47301adb231b3127b0590cf39fe2f6f36",
+        "native400hz/substeps_002.npz": "4aa34ee03432d805bd7f03a2662893ec7bba29c7cbcedb8af63d4353e297ad3d",
+        "native400hz/substeps_003.npz": "a79d983da9d21332db3d747b836c51ae4dc9bd9ee7d33727d1539412916060cb",
+        "native400hz/substeps_004.npz": "19ed784b4106053271623cf4f9078f01b7b32d83e1c38f537e5225f49aa345d9",
+        "native400hz/substeps_005.npz": "7675b1fb32575ad426299732e29c547240366367e517821d5f2af2c04568c22d",
+        "native400hz/substeps_006.npz": "32a09b87d8ee0e18e66493b53e2c4a29e10e6cca71794b9c0bca9d5ad1560485",
+        "native400hz/substeps_007.npz": "c33602dabd001d03f169db0123db455fc490626d93a77c19c5dfa8afb9f4ab2b",
+        "native400hz/substeps_008.npz": "96326fb300c8b64dcdc5629686c9790372b1899ac12664360f8f63bdfd4c342d",
+        "native400hz/substeps_009.npz": "202be1f18e2c090142f38b9853736964a994dd9fe37b52ec95d5f0af25070bad",
+        "control_trace.npz": "1c2465cd232b4939874cb95be36f0d06206431f8e62abf3c5066c276e9aa24ff",
+        "declaration.json": "e65f37f5b0cc5ec0629246af2bebf9dcf5fe0a68518d8bbadabd87faebc381ca",
+        "report.json": "2a6616c564b007870a6321d53a2be12cf8b8efd2805f1fa0c86bee160551180a",
+        "native_state.json": "c8103449b486173c4aa9c30631558d5f72681c85b079c748c5acbcfa8b1f5d02",
+        "native400hz/capture.json": "1c74ff090a91a2404bbbb466e68cc8d6e327376a4c6dfd2568a27b890f45d4e7"
+      },
+      "admitted_dataset_entry": null,
+      "native_identity": {
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "physics_source_files": {
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce"
+      },
+      "screen_pass": true,
+      "requested_command": [
+        0.05,
+        0,
+        0
+      ],
+      "window_seconds": {
+        "greater_than": 2,
+        "less_than_or_equal": 20
+      },
+      "scored_controls": 900,
+      "history_controls": 1000,
+      "target_recurrence_max_abs_error_rad": {
+        "original_raw": 0.0,
+        "clamped_counterfactual": 0.0
+      },
+      "original_and_clamped_targets_identical": true,
+      "critic_velocity_crosscheck_max_error_mps": 0.0,
+      "gyro_crosscheck_max_error_rad_s": 7.38551028667267e-09,
+      "reconstructed_non_tibia_collision_controls": 0,
+      "nearest_recorded_non_tibia_resultant_to_threshold_n": null,
+      "along_command_speed_mps": 0.05430288866783182,
+      "root_height_mean_m": 0.09460059670938385,
+      "representations": {
+        "original_raw": {
+          "component_means": {
+            "linear_tracking": 0.7905333945651849,
+            "yaw_tracking": 0.4967665737536218,
+            "vertical_velocity": -0.05400212680542354,
+            "roll_pitch_rate": -0.030891818827432062,
+            "joint_torque": -0.1353795215818617,
+            "joint_acceleration": -0.04044056623811937,
+            "action_rate": -0.03938573686199056,
+            "collisions": 0.0,
+            "torque_limit": -4.4547996173302335e-05,
+            "velocity_limit": 0.0,
+            "termination": 0.0
+          },
+          "reward_mean_reconstructed_collision": 0.987155649214983,
+          "reward_mean_collision_agnostic_interval": [
+            0.9371556500078061,
+            0.9871556500078061
+          ],
+          "raw_action_abs_max": 0.8382644057273865,
+          "raw_action_outside_unit_fraction": 0.0
+        },
+        "clamped_counterfactual": {
+          "component_means": {
+            "linear_tracking": 0.7905333945651849,
+            "yaw_tracking": 0.4967665737536218,
+            "vertical_velocity": -0.05400212680542354,
+            "roll_pitch_rate": -0.030891818827432062,
+            "joint_torque": -0.1353795215818617,
+            "joint_acceleration": -0.04044056623811937,
+            "action_rate": -0.03938573686199056,
+            "collisions": 0.0,
+            "torque_limit": -4.4547996173302335e-05,
+            "velocity_limit": 0.0,
+            "termination": 0.0
+          },
+          "reward_mean_reconstructed_collision": 0.987155649214983,
+          "reward_mean_collision_agnostic_interval": [
+            0.9371556500078061,
+            0.9871556500078061
+          ],
+          "raw_action_abs_max": 0.8382644057273865,
+          "raw_action_outside_unit_fraction": 0.0
+        }
+      }
+    },
+    "walk_phase0": {
+      "remote_source": "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/amp_20260923_001/replay_08_phase0/run/standing/evaluation",
+      "input_sha256": {
+        "native400hz/contacts.jsonl": "e54b398209378449c1dee4f5278b82df336462998a0ed3102f6b246763da02d2",
+        "native400hz/initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+        "native400hz/substeps_000.npz": "4f173b65c8dc3ca6f1181828ac99961784499c31d5794bc164bcc42bf1efd879",
+        "native400hz/substeps_001.npz": "6d62d20896617e79c6c635c2beefd4e67291391e2f080988a66f546f8b29d1ca",
+        "native400hz/substeps_002.npz": "cf14f5c36b029effc53a62709ba0e1388a769bd87fd0ad3f505162312508069d",
+        "native400hz/substeps_003.npz": "7ff98e5c03359fcc8ed7a69d37306002310e54a1b8d7e75602cd0146b45d8661",
+        "native400hz/substeps_004.npz": "7e0ce4ae4613100d1a9001f02a126581d4b35ac14774b97431c6abd03eb74052",
+        "native400hz/substeps_005.npz": "6c15d296126f6f4752c220cf30ddfa5772f595a6e92dea25e7763ac92ad5101e",
+        "native400hz/substeps_006.npz": "d93e46674f9a4ca088c912c5ef98ab235b3fe5e3c88f5dd9903c9d141cb93f31",
+        "native400hz/substeps_007.npz": "6cd0102eecf02dee663b4a27f066dc830d2aa71b9583559bb97cac359cd4f7e8",
+        "native400hz/substeps_008.npz": "b8408abe6a76c04aec3b4bd23854f70ade4318e1b834af06d965fef63f4da1c4",
+        "native400hz/substeps_009.npz": "33fb8c7b35455580b53de7668cbf5b15ce2cc794e4cd62f47c99cfce6f299dfe",
+        "control_trace.npz": "c4b6ce4e2d1ee7613dd29379adae12bef1b43aaf2b6bc1d1299e190ac4d26720",
+        "declaration.json": "4d5d3f78236c818a1eae3e2f5719897e9a7a3d963ff094a364162a11721ad3bf",
+        "report.json": "b5e80a2ed05ac7522a2806310b84f7d1364737bebb2b8228bb593f010e092d0e",
+        "native_state.json": "680128d8f3ee6e7d90e4dde23bcde8d84bede1815d80aa7cfcd773ada6a58295",
+        "native400hz/capture.json": "2b60c12b1591c28ee02124462d5d80de1cff82a0abde07bff6c5647c4bc126f5"
+      },
+      "admitted_dataset_entry": {
+        "path": "/Users/palerider/hexapod-results/amp_20260923_native_001/replay_08_phase0/run/standing",
+        "trace_sha256": "c4b6ce4e2d1ee7613dd29379adae12bef1b43aaf2b6bc1d1299e190ac4d26720",
+        "report_sha256": "b5e80a2ed05ac7522a2806310b84f7d1364737bebb2b8228bb593f010e092d0e",
+        "state_sha256": "680128d8f3ee6e7d90e4dde23bcde8d84bede1815d80aa7cfcd773ada6a58295",
+        "start_phase": 0.0
+      },
+      "native_identity": {
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "physics_source_files": {
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce"
+      },
+      "screen_pass": true,
+      "requested_command": [
+        0.05,
+        0,
+        0
+      ],
+      "window_seconds": {
+        "greater_than": 2,
+        "less_than_or_equal": 20
+      },
+      "scored_controls": 900,
+      "history_controls": 1000,
+      "target_recurrence_max_abs_error_rad": {
+        "original_raw": 0.0,
+        "clamped_counterfactual": 0.0
+      },
+      "original_and_clamped_targets_identical": true,
+      "critic_velocity_crosscheck_max_error_mps": 0.0,
+      "gyro_crosscheck_max_error_rad_s": 7.694167303284871e-09,
+      "reconstructed_non_tibia_collision_controls": 0,
+      "nearest_recorded_non_tibia_resultant_to_threshold_n": null,
+      "along_command_speed_mps": 0.04968645085891088,
+      "root_height_mean_m": 0.09671520305176576,
+      "representations": {
+        "original_raw": {
+          "component_means": {
+            "linear_tracking": 0.97817166712549,
+            "yaw_tracking": 0.4928204970227347,
+            "vertical_velocity": -0.003112423349486746,
+            "roll_pitch_rate": -0.04815614144447156,
+            "joint_torque": -0.12663161512050364,
+            "joint_acceleration": -0.015300748679243649,
+            "action_rate": -0.030195847774545353,
+            "collisions": 0.0,
+            "torque_limit": 0.0,
+            "velocity_limit": 0.0,
+            "termination": 0.0
+          },
+          "reward_mean_reconstructed_collision": 1.247595379749934,
+          "reward_mean_collision_agnostic_interval": [
+            1.1975953877799737,
+            1.2475953877799737
+          ],
+          "raw_action_abs_max": 0.7048095464706421,
+          "raw_action_outside_unit_fraction": 0.0
+        },
+        "clamped_counterfactual": {
+          "component_means": {
+            "linear_tracking": 0.97817166712549,
+            "yaw_tracking": 0.4928204970227347,
+            "vertical_velocity": -0.003112423349486746,
+            "roll_pitch_rate": -0.04815614144447156,
+            "joint_torque": -0.12663161512050364,
+            "joint_acceleration": -0.015300748679243649,
+            "action_rate": -0.030195847774545353,
+            "collisions": 0.0,
+            "torque_limit": 0.0,
+            "velocity_limit": 0.0,
+            "termination": 0.0
+          },
+          "reward_mean_reconstructed_collision": 1.247595379749934,
+          "reward_mean_collision_agnostic_interval": [
+            1.1975953877799737,
+            1.2475953877799737
+          ],
+          "raw_action_abs_max": 0.7048095464706421,
+          "raw_action_outside_unit_fraction": 0.0
+        }
+      }
+    },
+    "walk_phase05": {
+      "remote_source": "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/amp_20260923_001/replay_08_phase05_continuation004/run/standing/evaluation",
+      "input_sha256": {
+        "native400hz/contacts.jsonl": "3e6c786e0f78e6bf3904744a88d670f5954ed085673f6b79e160c4199a26acbc",
+        "native400hz/initial_state.json": "408f2930411e7a982890edc8d91b4bf0b8a9809e216d25a7e8eecf26a20e17ee",
+        "native400hz/substeps_000.npz": "313f8e565967cdbd05117e55d6a97db7b56021b852aaee1568e9e2ae8237ee18",
+        "native400hz/substeps_001.npz": "8c8cec4ded18a33cd5a7f117c1289e284fa5cd5e2578fe63ac65ad10823264a4",
+        "native400hz/substeps_002.npz": "4345c990a3db7b8fb4cc754045a1b1ac99808673c729769fd2ac1d2b03539326",
+        "native400hz/substeps_003.npz": "d3f5d5cb3e0ac8b0b8a8b004476f55de986fe5573141506713036c25f566c24a",
+        "native400hz/substeps_004.npz": "9cbc2c5fa7d45187fb654c4ea14e954a7ed826bebe28ec20d77f85f5ec1f9779",
+        "native400hz/substeps_005.npz": "83a324f85d168ac4f3ee00648e4e77ad885561bc6fd8be963b2197ea2dd9e3da",
+        "native400hz/substeps_006.npz": "4e5ffe95e3518faf5e66e9027e70bb7a326736ce2fb36cf47705c16dda347194",
+        "native400hz/substeps_007.npz": "3affb1718eafa160c9b7ddb82580a0860311eb964c7c4e30effb9629c0e67271",
+        "native400hz/substeps_008.npz": "f14bc16c4564c6780c78d1028f39f1d38abfa7795b298ba3ed9c1f9cd9c292ea",
+        "native400hz/substeps_009.npz": "18613aa109198677d3bf2526631e181a3b02ba4c8a74ef258baf6fcfa32fd9bc",
+        "control_trace.npz": "8ff49a31959bb94641d963b4870bfa096c468a3468692e1e3d9195ed51b742f1",
+        "declaration.json": "b38e69f5736b1f305f120a675da75f3f3f268d83a985ec7d84e90dd01b717952",
+        "report.json": "75777564a330089b2eca76d3caabb62e4c8194c984367e8e5f00e457c70af7cc",
+        "native_state.json": "426f84f864272b641a59a951013ddf9f7e695ef61cbca6da9f18f22ffe4cac95",
+        "native400hz/capture.json": "50b48eefab65e5a0919cfaade0b0d607acfc03d5fc2556f0af518026ab66450a"
+      },
+      "admitted_dataset_entry": {
+        "path": "/Users/palerider/hexapod-results/amp_20260923_native_001/replay_08_phase05_continuation004/run/standing",
+        "trace_sha256": "8ff49a31959bb94641d963b4870bfa096c468a3468692e1e3d9195ed51b742f1",
+        "report_sha256": "75777564a330089b2eca76d3caabb62e4c8194c984367e8e5f00e457c70af7cc",
+        "state_sha256": "426f84f864272b641a59a951013ddf9f7e695ef61cbca6da9f18f22ffe4cac95",
+        "start_phase": 0.5
+      },
+      "native_identity": {
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "physics_source_files": {
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce"
+      },
+      "screen_pass": true,
+      "requested_command": [
+        0.05,
+        0,
+        0
+      ],
+      "window_seconds": {
+        "greater_than": 2,
+        "less_than_or_equal": 20
+      },
+      "scored_controls": 900,
+      "history_controls": 1000,
+      "target_recurrence_max_abs_error_rad": {
+        "original_raw": 0.0,
+        "clamped_counterfactual": 0.0
+      },
+      "original_and_clamped_targets_identical": true,
+      "critic_velocity_crosscheck_max_error_mps": 0.0,
+      "gyro_crosscheck_max_error_rad_s": 1.044714423303894e-08,
+      "reconstructed_non_tibia_collision_controls": 0,
+      "nearest_recorded_non_tibia_resultant_to_threshold_n": null,
+      "along_command_speed_mps": 0.04977176443156269,
+      "root_height_mean_m": 0.09671044249501493,
+      "representations": {
+        "original_raw": {
+          "component_means": {
+            "linear_tracking": 0.9814327402909597,
+            "yaw_tracking": 0.4930050288637479,
+            "vertical_velocity": -0.002990498454780085,
+            "roll_pitch_rate": -0.04799222120937581,
+            "joint_torque": -0.12662832732829782,
+            "joint_acceleration": -0.014947690286595995,
+            "action_rate": -0.030195847774545353,
+            "collisions": 0.0,
+            "torque_limit": 0.0,
+            "velocity_limit": 0.0,
+            "termination": 0.0
+          },
+          "reward_mean_reconstructed_collision": 1.2516831811269125,
+          "reward_mean_collision_agnostic_interval": [
+            1.2016831841011126,
+            1.2516831841011127
+          ],
+          "raw_action_abs_max": 0.7048095464706421,
+          "raw_action_outside_unit_fraction": 0.0
+        },
+        "clamped_counterfactual": {
+          "component_means": {
+            "linear_tracking": 0.9814327402909597,
+            "yaw_tracking": 0.4930050288637479,
+            "vertical_velocity": -0.002990498454780085,
+            "roll_pitch_rate": -0.04799222120937581,
+            "joint_torque": -0.12662832732829782,
+            "joint_acceleration": -0.014947690286595995,
+            "action_rate": -0.030195847774545353,
+            "collisions": 0.0,
+            "torque_limit": 0.0,
+            "velocity_limit": 0.0,
+            "termination": 0.0
+          },
+          "reward_mean_reconstructed_collision": 1.2516831811269125,
+          "reward_mean_collision_agnostic_interval": [
+            1.2016831841011126,
+            1.2516831841011127
+          ],
+          "raw_action_abs_max": 0.7048095464706421,
+          "raw_action_outside_unit_fraction": 0.0
+        }
+      }
+    }
+  },
+  "comparisons": {
+    "original_raw": {
+      "tripod": {
+        "walk_minus_failed_reward_interval": [
+          0.6787963140076937,
+          0.7787963140076937
+        ],
+        "walking_ranks_above_failure_despite_unknown_collision": true,
+        "failure_ranks_above_walking_despite_unknown_collision": false
+      },
+      "walk_phase0": {
+        "walk_minus_failed_reward_interval": [
+          0.9392360517798612,
+          1.0392360517798613
+        ],
+        "walking_ranks_above_failure_despite_unknown_collision": true,
+        "failure_ranks_above_walking_despite_unknown_collision": false
+      },
+      "walk_phase05": {
+        "walk_minus_failed_reward_interval": [
+          0.9433238481010002,
+          1.0433238481010003
+        ],
+        "walking_ranks_above_failure_despite_unknown_collision": true,
+        "failure_ranks_above_walking_despite_unknown_collision": false
+      }
+    },
+    "clamped_counterfactual": {
+      "tripod": {
+        "walk_minus_failed_reward_interval": [
+          0.6645988597424783,
+          0.7645988597424784
+        ],
+        "walking_ranks_above_failure_despite_unknown_collision": true,
+        "failure_ranks_above_walking_despite_unknown_collision": false
+      },
+      "walk_phase0": {
+        "walk_minus_failed_reward_interval": [
+          0.925038597514646,
+          1.025038597514646
+        ],
+        "walking_ranks_above_failure_despite_unknown_collision": true,
+        "failure_ranks_above_walking_despite_unknown_collision": false
+      },
+      "walk_phase05": {
+        "walk_minus_failed_reward_interval": [
+          0.929126393835785,
+          1.029126393835785
+        ],
+        "walking_ranks_above_failure_despite_unknown_collision": true,
+        "failure_ranks_above_walking_despite_unknown_collision": false
+      }
+    }
+  },
+  "native_started": false
+}

@@ -55,7 +55,8 @@ class DistributionTests(unittest.TestCase):
         torch.manual_seed(31)
         samples = distribution.sample()
         torch.manual_seed(31)
-        expected = Normal(torch.tanh(logits), torch.full_like(logits, .15)).sample()
+        expected_std = torch.log(torch.full((2,), .15)).exp().expand_as(logits)
+        expected = Normal(torch.tanh(logits), expected_std).sample()
         torch.testing.assert_close(samples, expected, rtol=0, atol=1e-7)
         self.assertTrue(bool((samples > 1).any()))
 
