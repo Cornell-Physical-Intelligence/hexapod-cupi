@@ -1,0 +1,26 @@
+{
+  "id": "20261002T053906_ppo_reward_audit",
+  "date": "2026-10-02T05:39:06+00:00",
+  "title": "Retain reward v2 after the recorded-walking comparison",
+  "summary": "A source-bound CPU audit ranks the current tripod and two admitted walks above the failed PPO trajectory under reward v2. The bounded-mean PPO run retains v2 and awaits final evaluation. The sampling test now reconstructs the configured log-space standard deviation for its expected values; its tolerance stays unchanged.",
+  "areas": [
+    "locomotion",
+    "stage2"
+  ],
+  "changes": [
+    "locomotion/tests/test_action_distribution.py",
+    "docs/REWARD_V2_TABLE1_AUDIT.md",
+    "docs/TRAINING.md",
+    "site/assets/ppo_action_audit_20261002_001/*",
+    "site/project.json",
+    "site/updates/20261002T053906_ppo_reward_audit.json"
+  ],
+  "evidence": [
+    "site/assets/ppo_action_audit_20261002_001/reward_audit.json",
+    "site/assets/ppo_action_audit_20261002_001/reward_audit.py",
+    "docs/REWARD_V2_TABLE1_AUDIT.md",
+    "locomotion/tests/test_action_distribution.py"
+  ],
+  "next": "Finish the bounded-mean PPO run, evaluate its final checkpoint and assess learning before changing reward v2.",
+  "no_project_impact": false
+}

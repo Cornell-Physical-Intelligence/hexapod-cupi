@@ -138,6 +138,8 @@ def main(argv=None):
                         help='Stock PPO in ppo.py or PPO with the online motion prior in amp_ppo.py.')
     parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp',
                         help='The existing [256, 256, 128] MLPs or the Table III networks in paper_networks.py.')
+    parser.add_argument('--action-mean', choices=['unbounded', 'tanh'], default='unbounded',
+                        help='Use the historical Gaussian mean or bound the mean with tanh.')
     if any(flag in (argv if argv is not None else sys.argv[1:]) for flag in ('--preflight-only', '--help', '-h')):
         parser.add_argument('--headless', action='store_true')
         parser.add_argument('--device', default='cuda:0')
@@ -155,6 +157,8 @@ def main(argv=None):
         raise ValueError('W&B options require --logger wandb')
     if args.reward_version != '1' and args.mode != 'train':
         raise ValueError('Reward version 2 applies to training only')
+    if args.action_mean != 'unbounded' and args.mode not in ('train', 'evaluate'):
+        raise ValueError('Bounded action means apply to training and evaluation')
     if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
         raise ValueError('The paper networks need the AMP learner, and the AMP learner trains or evaluates only')
     configuration.verify_assets(args.asset, args.model)
@@ -273,10 +277,11 @@ def main(argv=None):
             collision = amp_module.CollisionCapture(env)
             amp_config = amp_module.AMPConfig().resolve(args.seed)
             wrapped = amp_module.AMPVecEnv(task, collision=collision, amp_config=amp_config)
-            config = amp_module.amp_ppo_config(args.seed, networks=args.networks, amp_config=amp_config)
+            config = amp_module.amp_ppo_config(args.seed, networks=args.networks, amp_config=amp_config,
+                                              action_mean=args.action_mean)
         else:
             wrapped = vanilla.VanillaVecEnv(task)
-            config = vanilla.ppo_config(args.seed)
+            config = vanilla.ppo_config(args.seed, action_mean=args.action_mean)
         save(args.output/'ppo_config.json', config)
         runner_config = copy.deepcopy(config)
         if args.logger == 'wandb':
@@ -314,6 +319,7 @@ def main(argv=None):
                     'collection_seconds': values['collect_time'], 'learning_seconds': values['learn_time'],
                     'loss': values['loss_dict'], 'learning_rate': values['learning_rate'],
                     'mean_action_std': float(values['action_std'].mean()),
+                    'actions': vanilla.action_metrics(runner.alg.storage, env.joint_names),
                     'task': task.status(reset_interval=True)}
                 with (args.output/'metrics.jsonl').open('a') as stream:
                     stream.write(json.dumps(row, allow_nan=False)+'\n')

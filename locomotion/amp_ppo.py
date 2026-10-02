@@ -224,9 +224,9 @@ class AMPVecEnv(VanillaVecEnv):
         return self.get_observations(), rewards, done.long(), extras
 
 
-def amp_ppo_config(seed, *, networks='mlp', amp_config=None):
+def amp_ppo_config(seed, *, networks='mlp', amp_config=None, action_mean='unbounded'):
     """Stock PPO settings plus the AMP algorithm and the chosen Table III or MLP networks."""
-    config = ppo_config(seed)
+    config = ppo_config(seed, action_mean=action_mean)
     amp_config = (AMPConfig() if amp_config is None else amp_config).resolve(seed)
     amp_config.validate()
     # Checkpoint records pass through JSON; a tuple here would never equal its saved list.

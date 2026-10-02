@@ -280,6 +280,29 @@
       "caption": "Ten-second frame from the 20-command native simulation mosaic on the approved detailed model.",
       "controller": "Optimized motor-target trajectories replayed in Isaac Sim; no learned policy; source 3dcefc3fe6c69b696c860b27439fbd863410053e",
       "evidence": "site/assets/amp_motion_mosaic_20260924_001/presentation.json"
+    },
+    {
+      "id": "ppo_bounded_mean_2000_20261002",
+      "title": "Bounded-mean PPO: failed forward test",
+      "type": "video",
+      "role": "controlled_ppo_comparison",
+      "path": "site/assets/media/ppo_bounded_mean_2000_20261002.mp4",
+      "sha256": "acbea99e431d278e0ae1302f2a067b51a3b654e555b7a4c87fd19b2df78d8352",
+      "caption": "Approved detailed model after 2000 PPO updates. Mean forward speed 0.00000612 m/s against 0.05 m/s. The policy holds a stance and fails tracking. One seed; real-time playback.",
+      "controller": "8e0ff06ece3ed348129afba633dab1ab35dbd4002a1c68189c6b8538334451c3",
+      "evidence": "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json",
+      "poster_id": "ppo_bounded_mean_2000_20261002_poster"
+    },
+    {
+      "id": "ppo_bounded_mean_2000_20261002_poster",
+      "title": "Bounded-mean PPO: forward test preview",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/media/ppo_bounded_mean_2000_20261002_poster.png",
+      "sha256": "b2cdd2be529b1fed530b9908d775d9f4c1ae58d6606cddb257ea81f218f7764d",
+      "caption": "Frame 375 at 15 seconds from the failed forward test on the approved detailed model.",
+      "controller": "8e0ff06ece3ed348129afba633dab1ab35dbd4002a1c68189c6b8538334451c3",
+      "evidence": "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json"
     }
   ],
   "nodes": [
@@ -329,7 +352,7 @@
       "state": "implemented",
       "column": 3,
       "row": 0,
-      "meaning": "Researchers replayed an optimized forward trajectory that passes its native screen. The tested PPO policies fail walking acceptance. The kernel now carries reward version 2, the AMP learner and the Table III networks with CPU tests; no native pilot has run.",
+      "meaning": "Researchers replayed an optimized forward trajectory that passes its native screen. The original and bounded-mean flat-budget PPO policies fail walking. The bounded-mean policy passes quiet screens; reward v2 remains unchanged. Native AMP learning remains pending.",
       "input": "Requested motion, joint positions and body motion",
       "output": "18 target joint positions",
       "source": "locomotion/README.md",
@@ -407,7 +430,7 @@
       "state": "implemented",
       "column": 1,
       "row": 2,
-      "meaning": "Researchers evaluated the paired PPO arms at updates 0, 300, 600 and 1200. Both fail the scheduled forward tests and final quiet-stop diagnostics. The kernel provides 13 diagnostic probes and 96 Stage 2 cases, with contact-force and motor-torque recording. Full qualification and human gait acceptance remain pending.",
+      "meaning": "Researchers evaluated all 13 probes for the bounded-mean PPO policy at update 2000. All ten movement probes fail tracking; both quiet tests and the stop screen pass. The stop result does not establish a stop from walking. Human gait acceptance and the 96-case Stage 2 qualification remain pending.",
       "input": "A saved controller and fixed test cases",
       "output": "Measurements and a pass or fail result",
       "source": "locomotion/evaluation.py",
@@ -523,7 +546,7 @@
       "description": "Qualify signed translation, turns, transitions and quiet stops on the approved model. Historical standing admissions apply to their frozen sources; obtain matching admission for a new allocation.",
       "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait\u2019s visual quality.",
       "source": "docs/TRAINING.md",
-      "media_id": "forward_ppo_example_1200",
+      "media_id": "ppo_bounded_mean_2000_20261002",
       "status": "blocked",
       "backend": "Approved detailed robot model",
       "owner": "Platform lead",
@@ -535,12 +558,12 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "The program lead admitted the 18000-pair motion-prior dataset from 40 native clips. Reward version 2, the throughput profiles and the CPU AMP learner are merged; the Step 5 pilot under issue #37 has not run. A learned policy still needs the full direction, transition, stop, motor and contact suite.",
-      "question": "Dispatch the prepared CUPI 128-robot flat pilot under issues #50 and #51 with the frozen comparison protocol; retain the full Stage 2 qualification scope.",
+      "blocker": "The original and bounded-mean PPO policies fail walking at update 2000. All ten bounded-mean movement probes fail tracking. Quiet screens pass, but walking and stopping from walking remain unqualified. Native AMP learning and full Stage 2 qualification remain pending.",
+      "question": "Review the failed bounded-mean PPO result and reward audit before defining another learner or reward comparison under issues #50 and #51.",
       "next_step": null,
       "acceptance": null,
-      "card_text": "Motion-prior dataset admitted; reward v2, throughput profiles and the CPU AMP learner merged; learned walking and stopping remain pending.",
-      "media_caption": "Approved robot model \u00b7 failed forward test."
+      "card_text": "Bounded-mean PPO passes quiet screens but fails all ten movement probes. Walking remains unqualified.",
+      "media_caption": "Approved detailed model; bounded-mean PPO at update 2000; failed forward test."
     },
     {
       "id": "stage3",
@@ -641,10 +664,10 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-29T19:40:32+00:00",
-    "source_commit": "97dfc68e0133ce9960d7075c4eba5af7046f38db",
+    "as_of": "2026-10-02T16:27:44+00:00",
+    "source_commit": "13f55d4efa40ac8497812a96c7b7af4741fd7666",
     "architecture": "ARCHITECTURE.md",
-    "summary": "The optimized motion-prior bank covers 20 commands in 40 native simulation clips on the approved detailed robot. All selected clips pass numerical screens. The program lead accepted direction and alternating-tripod appearance in all 40 clips, which admits the 18000-pair training dataset. Reward version 2, the stock-PPO throughput profiles at 1, 32 and 128 robots, and the CPU AMP learner with the Table III networks are merged; the Step 5 pilot under issue #37 has not run. Stage 2 walking and stopping qualification is incomplete.",
+    "summary": "The program lead admitted the 18000-pair AMP dataset from 40 native clips. Both 2000-update PPO trials fail walking. The bounded-mean policy passes quiet screens but fails all ten movement probes. A CPU audit ranks recorded walking above the original failed policy under reward v2; these tests do not isolate a reward defect. Native AMP learning and Stage 2 qualification remain incomplete.",
     "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
@@ -1048,6 +1071,22 @@
         "result": "inconclusive",
         "text": "The learner adds the style reward to the task reward, trains the discriminator against the admitted bank and keeps checkpoint identity checks. The paper actor rejects privileged inputs. Offline, the standardized-input penalty scores held-out bank transitions 0.94 and the recorded policy trace 0.12. This measures fixed data, not the online learner or a standing policy. The Step 5 pilot needs a frozen budget, standing admission and Spark dispatch.",
         "source": "site/assets/amp_learner_offline_20260929_001/result.json"
+      },
+      {
+        "id": "ppo-reward-ranking-20261002",
+        "title": "Reward v2 ranks recorded walking above the failed PPO policy",
+        "backend": "CPU float32 reward reconstruction; four retained Isaac captures on matching approved physics; forward 0.05 m/s; 2 < t <= 20 seconds",
+        "result": "passed",
+        "text": "We verify 68 input files and reconstruct the frozen reward history. Mean reward per control is 0.258359 for the failed PPO trajectory, 0.272557 after clipping its recorded actions, 0.987156 for the current tripod and 1.247595/1.251683 for the admitted phase-0/phase-0.5 walks. The walking advantage remains positive under the full unknown collision penalty range. This tests fixed-trajectory ranking at one command. We retain reward v2 for the bounded-mean learning test; final evaluation is pending.",
+        "source": "site/assets/ppo_action_audit_20261002_001/reward_audit.json"
+      },
+      {
+        "id": "ppo-bounded-mean-evaluation-20261002",
+        "title": "Bounded-mean PPO holds a stance but fails walking",
+        "backend": "Isaac Sim; approved direct-drive model; 128 robots and 2000 updates; seed 20260917; reward v2; all 13 final-checkpoint probes",
+        "result": "failed",
+        "text": "We verify 6144000 training transitions and complete evaluation captures with force and torque records. All ten movement probes fail tracking; both quiet tests and the stop screen pass. Forward speed is 0.00000612 m/s against 0.05 m/s, with zero out-of-range deterministic actions and normalized tracking error E = 1.000132. The stop result does not establish a stop from walking. Ten original probes are missing and human walking labels remain pending. We retain reward v2; these tests do not isolate a reward defect.",
+        "source": "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json"
       }
     ]
   },

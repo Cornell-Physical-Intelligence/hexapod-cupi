@@ -4,13 +4,17 @@ from __future__ import annotations
 import torch
 
 
-def ppo_config(seed):
+def ppo_config(seed, *, action_mean='unbounded'):
+    if action_mean not in ('unbounded', 'tanh'):
+        raise ValueError('Action mean must be unbounded or tanh')
+    distribution = ('GaussianDistribution' if action_mean == 'unbounded'
+                    else 'locomotion.action_distribution:BoundedMeanGaussian')
     return {
         'seed': seed, 'num_steps_per_env': 24, 'save_interval': 50,
         'obs_groups': {'actor': ['policy'], 'critic': ['critic']},
         'actor': {'class_name': 'MLPModel', 'hidden_dims': [256, 256, 128],
             'activation': 'elu', 'obs_normalization': True,
-            'distribution_cfg': {'class_name': 'GaussianDistribution', 'init_std': .15, 'std_type': 'log'}},
+            'distribution_cfg': {'class_name': distribution, 'init_std': .15, 'std_type': 'log'}},
         'critic': {'class_name': 'MLPModel', 'hidden_dims': [256, 256, 128],
             'activation': 'elu', 'obs_normalization': True},
         'algorithm': {'class_name': 'PPO', 'value_loss_coef': 1., 'use_clipped_value_loss': True,
@@ -20,6 +24,24 @@ def ppo_config(seed):
             'rnd_cfg': None, 'symmetry_cfg': None},
         'logger': 'tensorboard', 'check_for_nan': True,
     }
+
+
+def action_metrics(storage, joint_names):
+    """Read the collected rollout; RSL-RL 5.0.1 clear resets its cursor only."""
+    actions = storage.actions.detach()
+    means = storage.distribution_params[0].detach()
+    if actions.ndim != 3 or means.shape != actions.shape or len(joint_names) != actions.shape[-1]:
+        raise ValueError('Action metrics require matching rollout samples, means and joint names')
+    outside = (actions.abs() > 1).float().mean((0, 1)).cpu().tolist()
+    near = (means.abs() >= .95).float().mean((0, 1)).cpu().tolist()
+    maxima = means.abs().amax((0, 1)).cpu().tolist()
+    return {'scope': 'last_collected_rollout_before_optimizer_update',
+        'environment_controls': actions.shape[0] * actions.shape[1],
+        'raw_sample_outside_bounds_fraction': sum(outside) / len(outside),
+        'mean_abs_max': max(maxima), 'mean_near_bound_threshold': .95,
+        'per_joint': {name: {'raw_sample_outside_bounds_fraction': outside[i],
+            'mean_near_bound_fraction': near[i], 'mean_abs_max': maxima[i]}
+            for i, name in enumerate(joint_names)}}
 
 
 class VanillaVecEnv:
