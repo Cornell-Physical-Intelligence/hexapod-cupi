@@ -150,6 +150,15 @@ this pilot comparison. These relative criteria add no Stage 2 safety limits.
 
 #### Decision and run preparation
 
+The action diagnostic selects `--action-mean tanh` to bound the Gaussian mean
+before sampling. You retain reward version 2 and the frozen pilot budget for
+this comparison. The default `--action-mean unbounded` preserves the original
+pilot. Use fresh attempt names and record the selected distribution in the
+checkpoint configuration. Match the option in training and evaluation; an
+existing unbounded checkpoint cannot serve as a bounded-mean training result.
+This diagnostic tests the learner change before any reward revision. It does
+not replace an original pilot arm or change the physical acceptance gates.
+
 You compare each AMP arm with PPO at update 2000. Lower `E`, higher `W` and
 passing load comparisons mean a pilot win. Higher `E` and lower `W` mean a
 loss on both; fix the reward or learner before Step 7. A tie, mixed result,

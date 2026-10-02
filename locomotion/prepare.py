@@ -24,7 +24,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
             checkpoint_declaration_sha=None, candidate=0, suite='screen',
             tripod_adaptation='paper', logger='tensorboard', wandb_project=None, wandb_mode='offline',
-            reward_version='1', learner='ppo', networks='mlp', allocation_profile='standard',
+            reward_version='1', learner='ppo', networks='mlp', action_mean='unbounded', allocation_profile='standard',
             max_wall_seconds=6200, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     validate_deadline(mode, allocation_profile, max_wall_seconds)
@@ -54,6 +54,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         raise ValueError('W&B logging needs train mode, a project name and offline or online mode')
     if reward_version not in ('1', '2') or (mode != 'train' and reward_version != '1'):
         raise ValueError('Reward version 2 applies to training only')
+    if action_mean not in ('unbounded', 'tanh') or (action_mean != 'unbounded' and mode not in ('train', 'evaluate')):
+        raise ValueError('Bounded action means apply to training and evaluation')
     if (learner not in ('ppo', 'amp') or networks not in ('mlp', 'paper') or (networks == 'paper' and learner != 'amp')
             or (learner == 'amp' and mode not in ('train', 'evaluate'))):
         raise ValueError('The AMP learner trains or evaluates, and the paper networks need the AMP learner')
@@ -116,6 +118,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         binding['command_args'] += ['--updates', str(updates), '--seed', str(seed)]
     if reward_version != '1':
         binding['command_args'] += ['--reward-version', reward_version]
+    if action_mean != 'unbounded':
+        binding['command_args'] += ['--action-mean', action_mean]
     if learner != 'ppo':
         binding['command_args'] += ['--learner', learner, '--networks', networks]
     if logger == 'wandb':
@@ -140,7 +144,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
     save(output/'binding.json', binding)
     save(output/'PACK.json', {'remote_root': str(remote_root), 'source_freeze_sha256': freeze,
         'binding_sha256': sha(output/'binding.json'), 'mode': mode, 'seed': seed, 'reward_version': reward_version,
-        'learner': learner, 'networks': networks,
+        'learner': learner, 'networks': networks, 'action_mean': action_mean,
         'allocation_profile': allocation_profile, 'max_wall_seconds': max_wall_seconds,
         'updates': updates, 'stage2_complete': False, 'files': {
             p.relative_to(output).as_posix(): sha(p) for p in sorted(output.rglob('*')) if p.is_file()}})
@@ -170,6 +174,7 @@ def main():
     parser.add_argument('--reward-version', choices=['1', '2'], default='1')
     parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo')
     parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp')
+    parser.add_argument('--action-mean', choices=['unbounded', 'tanh'], default='unbounded')
     parser.add_argument('--allocation-profile', choices=ALLOCATION_PROFILES, default='standard')
     parser.add_argument('--max-wall-seconds', type=int, default=6200)
     args = parser.parse_args()

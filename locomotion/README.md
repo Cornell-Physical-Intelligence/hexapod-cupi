@@ -24,6 +24,14 @@ motor cap. [`task.py`](task.py) owns command sampling and reward version 1;
 [`evaluation.py`](evaluation.py) owns the numerical gates. Read
 [TRAINING](../docs/TRAINING.md) for the proposed paper-method extensions.
 
+You can select `prepare --action-mean tanh` to keep each Gaussian mean within
+the action range. Training, deterministic evaluation and policy export use
+the same mean transform. PPO stores the raw Gaussian sample and computes its
+Gaussian likelihood; the environment retains its action clipping and motor
+limits. Samples can exceed the action range. This option does not bound the
+sample or change the PPO loss. The default `unbounded` retains the frozen
+baseline. Match this option when you prepare evaluation for a checkpoint.
+
 ## Run and verify
 
 From the repository root:
