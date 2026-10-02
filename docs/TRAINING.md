@@ -161,8 +161,10 @@ not replace an original pilot arm or change the physical acceptance gates.
 
 The [retained-capture reward audit](REWARD_V2_TABLE1_AUDIT.md#9-failed-policy-comparison-after-the-first-flat-ppo-run)
 ranks the current tripod and two admitted forward walks above the failed PPO
-trajectory under reward v2. Keep v2 for the action comparison; use the fresh
-policy evaluation to assess learning and any need for a reward revision.
+trajectory under reward v2. The [final bounded-mean evaluation](REWARD_V2_TABLE1_AUDIT.md#11-final-bounded-mean-evaluation)
+fails all ten movement probes and passes the quiet screens. The action change
+does not produce walking at the frozen budget. We retain v2 because these tests
+do not isolate a reward defect or establish a specific replacement.
 
 You compare each AMP arm with PPO at update 2000. Lower `E`, higher `W` and
 passing load comparisons mean a pilot win. Higher `E` and lower `W` mean a

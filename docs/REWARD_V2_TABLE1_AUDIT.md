@@ -254,6 +254,103 @@ uv run python -B site/assets/ppo_action_audit_20261002_001/reward_audit.py \
   --repository . --workspace "$HOME/hexapod-evidence/reward-audit-20261002" --fetch
 ```
 
+## 10. Matched training after bounding the action mean
+
+The bounded-mean PPO run completed 2,000 updates and 6,144,000 transitions with
+128 robots, seed 20260917 and reward v2. Source commit `13f55d4e` supplies the
+action change; the reward and physics files match the original PPO run. Native
+execution and cleanup passed, and the checkpoint hashes match their sidecars.
+
+The [training comparison](../site/assets/ppo_action_audit_20261002_001/training_comparison.json)
+pools the last 200 updates from each run, or 614,400 controls across the robots.
+It uses interval totals and counts; it does not average cumulative prefixes.
+
+| Last 200 updates | Original PPO | Bounded mean |
+| --- | ---: | ---: |
+| Speed along translation commands | -0.000022 m/s | 0.000922 m/s |
+| Requested translation speed | 0.038007 m/s | 0.037517 m/s |
+| Mean reward per control | -0.0341 | -0.1732 |
+| Joint-speed RMS during zero commands | 0.6442 rad/s | 0.7408 rad/s |
+
+The bounded run reached 2.46% of requested translation speed in this window.
+Its means stayed within [-1, 1], but raw Gaussian samples exceeded those bounds
+on 22.53% of sampled joint controls. The last rollout reached 27.53%; eight joints
+spent at least 90% of that rollout at a mean magnitude of 0.95 or more. The
+original run has no matching rollout action statistics.
+
+These measurements describe stochastic training with changing commands. The
+zero-command sample includes transitions and resets. The last recorded rollout
+precedes the final optimizer update. Use the final checkpoint evaluation for
+motion and load comparisons; these measurements establish neither walking nor
+the flat-pilot decision. The trajectory ranking in section 9 does not prove that
+the learner can discover walking under this reward.
+
+You can reproduce the comparison with its
+[analysis source](../site/assets/ppo_action_audit_20261002_001/training_comparison.py):
+
+```sh
+python3 -B site/assets/ppo_action_audit_20261002_001/training_comparison.py \
+  --workspace "$HOME/hexapod-evidence/training-comparison-20261002" --fetch
+```
+
+## 11. Final bounded-mean evaluation
+
+We evaluated checkpoint `8e0ff06ece3ed348129afba633dab1ab35dbd4002a1c68189c6b8538334451c3`
+from the completed run on its frozen source. The
+[evaluation comparison](../site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json)
+covers all 13 probes. The
+[training receipt](../site/assets/ppo_action_audit_20261002_001/training_completion_verification.json)
+and [evaluation receipt](../site/assets/ppo_action_audit_20261002_001/evaluation_completion_verification.json)
+record the source and input checks and owned-container cleanup. We verified
+163 native evaluation files, including captures and force/torque records.
+Both launchers exited with code zero and reported no native errors.
+
+Eight translation probes and both turns fail tracking. The 20-second and
+32-second quiet tests pass their numerical screens. The forward-to-stop screen
+passes, but the policy makes no useful forward progress before the stop command.
+That result does not establish stopping from walking. Three translation probes,
+at 135, 180 and 225 degrees, also fail the computed-demand-over-rating fraction.
+
+| Forward probe | Original PPO | Bounded mean |
+| --- | ---: | ---: |
+| Mean forward speed; command 0.05 m/s | -0.0000383 m/s | 0.00000612 m/s |
+| Planar tracking error; limit 0.025 m/s | 0.050238 m/s | 0.049995 m/s |
+| Body tilt RMS | 5.1779 degrees | 0.7270 degrees |
+| Deterministic joint actions outside [-1, 1] | 61.09% | 0% |
+| Mean per-joint target span, 2 < t <= 20 s | 0.030139 rad | 0.001378 rad |
+
+The bounded policy holds a level stance. Eight of its 18 joint actions stay
+at magnitude 0.95 or more throughout the scored forward window. You can inspect
+the [forward video](../site/assets/media/ppo_bounded_mean_2000_20261002.mp4).
+These deterministic action fractions differ from the sampled training actions
+in section 10; do not compare the two as one measure.
+
+The bounded policy's normalized tracking score `E` is 1.000132. The original
+evaluation lacks ten probes, so its primary `E` remains unavailable. Human
+walking labels remain pending, and we compute no primary `W`. Failed movement
+does not support a load comparison at matched walking speed against the tripod.
+The raw load records remain available. No AMP comparison or Stage 2 acceptance
+follows from this diagnostic.
+
+Bounding the mean removes out-of-range deterministic actions and improves the
+quiet screens, but it does not produce walking at the frozen budget. The reward
+audit still ranks recorded walking above the failed trajectory. These results
+support investigation of exploration and reward credit assignment; they do not
+isolate a reward-weight defect or justify a specific reward revision. We retain
+reward v2. Further learner or reward changes need a separate declared comparison.
+
+You can reproduce the analysis with its
+[source](../site/assets/ppo_action_audit_20261002_001/evaluation_comparison.py).
+The stance metadata comes from the reward audit fetch in section 9. The analysis
+requires complete captures and verifies their recorded hashes; it starts no run.
+
+```sh
+uv run python -B site/assets/ppo_action_audit_20261002_001/evaluation_comparison.py \
+  --workspace "$HOME/hexapod-evidence/evaluation-comparison-20261002" \
+  --stance "$HOME/hexapod-evidence/reward-audit-20261002/reward_audit_inputs/stance.json" \
+  --fetch
+```
+
 ## Reproduce the Table I audit
 
 ```sh
