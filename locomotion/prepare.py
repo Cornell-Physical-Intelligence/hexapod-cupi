@@ -53,8 +53,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             or (logger == 'tensorboard' and (wandb_project is not None or wandb_mode != 'offline'))
             or logger not in ('tensorboard', 'wandb')):
         raise ValueError('W&B logging needs train mode, a project name and offline or online mode')
-    if reward_version not in ('1', '2') or (mode != 'train' and reward_version != '1'):
-        raise ValueError('Reward version 2 applies to training only')
+    if reward_version not in ('1', '2', '3') or (mode != 'train' and reward_version != '1'):
+        raise ValueError('Reward version selection applies to training only')
     if action_mean not in ('unbounded', 'tanh') or (action_mean != 'unbounded' and mode not in ('train', 'evaluate')):
         raise ValueError('Bounded action means apply to training and evaluation')
     if (observation_normalization not in ('empirical', 'none') or
@@ -178,7 +178,7 @@ def main():
     parser.add_argument('--logger', choices=['tensorboard', 'wandb'], default='tensorboard')
     parser.add_argument('--wandb-project')
     parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
-    parser.add_argument('--reward-version', choices=['1', '2'], default='1')
+    parser.add_argument('--reward-version', choices=['1', '2', '3'], default='1')
     parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo')
     parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp')
     parser.add_argument('--action-mean', choices=['unbounded', 'tanh'], default='unbounded')

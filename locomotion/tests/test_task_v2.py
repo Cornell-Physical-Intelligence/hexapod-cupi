@@ -305,7 +305,7 @@ class RewardV2LaunchTests(unittest.TestCase):
             self.assertEqual(json.loads((Path(temporary)/"v2/PACK.json").read_text())["reward_version"], "2")
             self.assertNotIn("--reward-version", prepare(Path(temporary)/"v1", REMOTE, mode="train")["command_args"])
             self.assertTrue((Path(temporary)/"v2/source/locomotion/task_v2.py").exists())
-            for mode, version in (("diagnostic", "2"), ("train", "3")):
+            for mode, version in (("diagnostic", "2"), ("train", "unknown")):
                 with self.subTest(mode=mode, version=version), self.assertRaises(ValueError):
                     prepare(Path(temporary)/"bad", REMOTE, mode=mode, reward_version=version)
 
@@ -313,7 +313,7 @@ class RewardV2LaunchTests(unittest.TestCase):
         self.assertEqual(train.checkpoint_reward_version({"identity": {"reward_version": "2"}}), "2")
         self.assertEqual(train.checkpoint_reward_version({"identity": {}}), "1")
         with self.assertRaises(ValueError):
-            train.checkpoint_reward_version({"identity": {"reward_version": "3"}})
+            train.checkpoint_reward_version({"identity": {"reward_version": "unknown"}})
 
     def test_train_rejects_version_two_outside_training(self):
         args = ["--asset", "a", "--model", "m", "--geometry", "g", "--geometry-extrema", "e", "--stance", "s",

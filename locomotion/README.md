@@ -36,6 +36,15 @@ You can select `prepare --observation-normalization none` for a separate PPO
 diagnostic. This option disables running observation statistics in the actor
 and critic. The default `empirical` retains the baseline. Match the option in
 training and evaluation; the checkpoint configuration rejects a mismatch.
+
+You can select `prepare --reward-version 3` for the experimental immediate
+tracking comparison. Version 3 uses each control's endpoint velocity for
+translation and yaw tracking and keeps version 2's penalty coefficients.
+Version 2 retains its 60-control stride average. Use a fresh attempt and record
+the chosen version; evaluation reads the version from the checkpoint. Native
+walking evidence for version 3 remains pending. Read the
+[reward audit](../docs/REWARD_V2_TABLE1_AUDIT.md#13-experimental-immediate-tracking-reward-version-3)
+before dispatch.
 PPO training records `policy_update` in each metrics row: Gaussian divergence,
 action likelihood ratios and learning rate before and after the stock update.
 The measurements use the same collected rollout and draw no new actions.

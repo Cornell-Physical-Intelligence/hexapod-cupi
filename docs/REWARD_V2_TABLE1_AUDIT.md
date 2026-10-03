@@ -425,6 +425,41 @@ uv run python -B site/assets/ppo_learning_recovery_20261002_001/reward_timing_au
   --output "$HOME/hexapod-evidence/reward-timing-repeat-20261002.json"
 ```
 
+## 13. Experimental immediate tracking reward: version 3
+
+You select `--reward-version 3` to test immediate translation and yaw feedback
+in a fresh PPO attempt. The candidate uses kernel B from section 12 and retains
+version 2's weights and command scale. It uses each completed control's velocity
+instead of the 60-control velocity mean. The model, observations, command
+sampling and physical acceptance gates remain unchanged. Version 2 retains
+its original source and defaults.
+
+This candidate addresses the hidden reward history and delayed feedback in
+section 12. The recorded-trajectory ranking supports a controlled experiment;
+it does not establish that PPO can learn walking with this reward. Keep the
+current no-normalization reward-v2 attempt frozen. Complete its 2000 updates
+and final 13-probe evaluation, including force and torque records, before
+deciding whether to dispatch version 3.
+
+For that comparison, retain 128 robots, 2000 updates and seed 20260917, with
+tanh action means and no running observation normalization. Change the reward
+version alone. Evaluate the final checkpoint from its own frozen source and
+compare the full probe set. Numerical gate results and human gait acceptance
+remain separate requirements.
+
+The candidate calls the existing penalty implementation through
+`TrainingTaskV3`. Its declaration identifies an experiment and retains the
+version 2 review as provenance. It does not claim that the version 2 reviewer
+approved immediate tracking. The termination coefficient remains 75 for this
+comparison; the historical worst-return bound describes version 2 and needs
+reassessment under version 3.
+
+CPU checks cover endpoint feedback after different velocity histories, exact
+penalty and observation parity, and checkpoint reward identity. The existing
+unknown-version tests now use `unknown` because `3` names a supported candidate.
+No assertion tolerance or physical threshold changed. Native version 3 results
+remain pending.
+
 ## Reproduce the Table I audit
 
 ```sh
