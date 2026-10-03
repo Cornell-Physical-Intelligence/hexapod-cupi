@@ -140,6 +140,8 @@ def main(argv=None):
                         help='The existing [256, 256, 128] MLPs or the Table III networks in paper_networks.py.')
     parser.add_argument('--action-mean', choices=['unbounded', 'tanh'], default='unbounded',
                         help='Use the historical Gaussian mean or bound the mean with tanh.')
+    parser.add_argument('--observation-normalization', choices=['empirical', 'none'], default='empirical',
+                        help='Use running observation statistics or retain the raw PPO observations.')
     if any(flag in (argv if argv is not None else sys.argv[1:]) for flag in ('--preflight-only', '--help', '-h')):
         parser.add_argument('--headless', action='store_true')
         parser.add_argument('--device', default='cuda:0')
@@ -159,6 +161,8 @@ def main(argv=None):
         raise ValueError('Reward version 2 applies to training only')
     if args.action_mean != 'unbounded' and args.mode not in ('train', 'evaluate'):
         raise ValueError('Bounded action means apply to training and evaluation')
+    if args.observation_normalization != 'empirical' and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate')):
+        raise ValueError('Observation normalization selection requires PPO training or evaluation')
     if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
         raise ValueError('The paper networks need the AMP learner, and the AMP learner trains or evaluates only')
     configuration.verify_assets(args.asset, args.model)
@@ -281,7 +285,8 @@ def main(argv=None):
                                               action_mean=args.action_mean)
         else:
             wrapped = vanilla.VanillaVecEnv(task)
-            config = vanilla.ppo_config(args.seed, action_mean=args.action_mean)
+            config = vanilla.ppo_config(args.seed, action_mean=args.action_mean,
+                                        observation_normalization=args.observation_normalization)
         save(args.output/'ppo_config.json', config)
         runner_config = copy.deepcopy(config)
         if args.logger == 'wandb':
@@ -300,6 +305,10 @@ def main(argv=None):
             save(args.output/'amp_learner.json', runner.alg.declaration())
         state['status'] = 'running'; save(args.output/'state.json', state)
         if args.mode == 'train':
+            diagnostics = None
+            if args.learner == 'ppo':
+                diagnostics = vanilla.UpdateDiagnostics(runner.alg)
+                runner.alg.update = diagnostics.update
             def checkpoint(update):
                 path = args.output/f'checkpoint_update{update:06d}.pt'
                 runner.save(str(path), infos={'identity': identity, 'updates': update})
@@ -321,6 +330,8 @@ def main(argv=None):
                     'mean_action_std': float(values['action_std'].mean()),
                     'actions': vanilla.action_metrics(runner.alg.storage, env.joint_names),
                     'task': task.status(reset_interval=True)}
+                if diagnostics is not None:
+                    row['policy_update'] = diagnostics.latest
                 with (args.output/'metrics.jsonl').open('a') as stream:
                     stream.write(json.dumps(row, allow_nan=False)+'\n')
                 if runner.logger.writer is not None:

@@ -664,10 +664,10 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-10-02T16:27:44+00:00",
+    "as_of": "2026-10-03T01:19:05+00:00",
     "source_commit": "13f55d4efa40ac8497812a96c7b7af4741fd7666",
     "architecture": "ARCHITECTURE.md",
-    "summary": "The program lead admitted the 18000-pair AMP dataset from 40 native clips. Both 2000-update PPO trials fail walking. The bounded-mean policy passes quiet screens but fails all ten movement probes. A CPU audit ranks recorded walking above the original failed policy under reward v2; these tests do not isolate a reward defect. Native AMP learning and Stage 2 qualification remain incomplete.",
+    "summary": "Both 2000-update PPO trials fail walking. The bounded-mean policy passes quiet screens but fails all ten movement probes. CPU replay shows that running normalization changes the policy with fixed weights; the reward audit ranks recorded walking above the failed policy. The next diagnostic disables normalization and retains reward v2. Native learning with this change and Stage 2 qualification remain pending.",
     "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
@@ -1087,6 +1087,14 @@
         "result": "failed",
         "text": "We verify 6144000 training transitions and complete evaluation captures with force and torque records. All ten movement probes fail tracking; both quiet tests and the stop screen pass. Forward speed is 0.00000612 m/s against 0.05 m/s, with zero out-of-range deterministic actions and normalized tracking error E = 1.000132. The stop result does not establish a stop from walking. Ten original probes are missing and human walking labels remain pending. We retain reward v2; these tests do not isolate a reward defect.",
         "source": "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json"
+      },
+      {
+        "id": "ppo-normalization-credit-audit-20261003",
+        "title": "We measure normalization drift and reward timing before the next PPO trial",
+        "backend": "CPU replay of 13 retained native observation streams and reward reconstruction from four retained forward captures; no new native run",
+        "result": "inconclusive",
+        "text": "With actor weights fixed, running normalization produces mean Gaussian divergence 1.050361 in the first 24-control replay window, above the adaptive schedule threshold 0.02. Mean divergence falls to 0.003022 after 100 controls and 0.000026 after 500; disabling normalization gives zero. Both instantaneous and stride-average rewards rank recorded walking above the failed policy. These replays do not establish the cause of the native learning failure. The next trial retains bounded means and reward v2 while disabling normalization.",
+        "source": "docs/REWARD_V2_TABLE1_AUDIT.md"
       }
     ]
   },

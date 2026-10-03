@@ -166,6 +166,17 @@ fails all ten movement probes and passes the quiet screens. The action change
 does not produce walking at the frozen budget. We retain v2 because these tests
 do not isolate a reward defect or establish a specific replacement.
 
+The next PPO diagnostic selects `--action-mean tanh
+--observation-normalization none`. You retain 128 robots, 2000 updates, seed
+20260917 and reward v2. This tests the effect of disabling running observation
+statistics in both networks. You retain the stock optimizer and adaptive
+learning-rate schedule, and record policy divergence before and after each
+update. The [CPU replay and reward timing audit](REWARD_V2_TABLE1_AUDIT.md#12-separate-normalization-drift-from-reward-timing)
+motivate this test; they supply no native learning result. Use a fresh attempt
+and evaluate its final checkpoint on all 13 probes with force and torque
+records before another training sequence. Preserve the full Stage 2 gate and
+human gait acceptance. Any reward revision needs its own version and trial.
+
 You compare each AMP arm with PPO at update 2000. Lower `E`, higher `W` and
 passing load comparisons mean a pilot win. Higher `E` and lower `W` mean a
 loss on both; fix the reward or learner before Step 7. A tie, mixed result,

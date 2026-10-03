@@ -351,6 +351,80 @@ uv run python -B site/assets/ppo_action_audit_20261002_001/evaluation_comparison
   --fetch
 ```
 
+## 12. Separate normalization drift from reward timing
+
+We will test `--observation-normalization none` first and retain reward v2.
+The bounded-mean policy failed to walk, but neither the training totals nor
+the fixed-trajectory reward ranking identifies the cause. We keep immediate
+tracking as a separate future reward version if further evidence warrants it.
+The model, motor limits and evaluation gates remain unchanged.
+
+We replayed stored actor observations from all 13 completed probes on the CPU
+in the [normalization audit](../site/assets/ppo_learning_recovery_20261002_001/normalization_audit.json).
+For each window, we initialized an actor with seed 20260917 and held its weights
+fixed. We assigned probe `i % 13` to replica `i` across 128 replicas, then updated
+normalization statistics from the next observation after each control. We
+compared the stored Gaussian distributions with distributions from the same
+inputs after the 24-control window. We took no optimizer steps.
+
+| Prior normalization updates | Mean KL, empirical normalization | Mean KL, none |
+| --- | ---: | ---: |
+| 0 | 1.050361 | 0 |
+| 100 | 0.003022 | 0 |
+| 500 | 0.00002642 | 0 |
+
+We measured less drift in the later windows. This replay establishes that
+normalization can change the action distribution while actor weights stay
+fixed. It uses fresh actor weights and retained observations; actions do not
+drive a simulator. It does not measure native training KL or establish why
+later native updates stayed small. A low learning rate remains a symptom.
+You can inspect the [replay source](../site/assets/ppo_learning_recovery_20261002_001/normalization_audit.py)
+and its source/input hashes before reproducing the comparison.
+
+We also compared immediate kernel B with current kernel C using the four
+captures from section 9. We retained the exact penalty means and verified
+81 source/input files in the
+[timing receipt](../site/assets/ppo_learning_recovery_20261002_001/reward_timing_audit.json).
+We computed
+both tracking terms from completed-control native velocity measurements,
+reconstructed C from control zero, then scored the 900 endpoints from 2.02
+through 20 seconds. We allowed the full unknown collision penalty of [-0.05, 0].
+
+| Recorded trajectory with actions clipped to [-1, 1] | Mean reward interval, B | Mean reward interval, C |
+| --- | ---: | ---: |
+| Failed original PPO | [0.064183, 0.114183] | [0.222557, 0.272557] |
+| Current tripod | [0.671832, 0.721832] | [0.937156, 0.987156] |
+| Admitted walk, phase 0 | [1.070787, 1.120787] | [1.197595, 1.247595] |
+| Admitted walk, phase 0.5 | [1.076220, 1.126220] | [1.201683, 1.251683] |
+
+We verified that clipped actions reproduce the recorded targets. These
+comparisons use recorded motion; clipping changes the action-rate reward input. Under both
+kernels, retained walking earns more than failure despite collision uncertainty.
+B costs more reward for speed and yaw oscillation within a stride.
+
+At a 0.05 m/s command, we filled C's 60-control window with zero velocity and
+replaced one endpoint with 0.005 m/s forward motion. B increased linear reward
+by 0.023314; C increased it by 0.000343, a factor of 68.03. This calculation
+changes tracking velocity alone and predicts no physical response to an action.
+PPO collects 24 controls per rollout, while C uses 60 controls of velocity
+history. The actor receives five proprioceptive frames and the current command.
+It also receives the prior held-target offset divided by 0.35 rad, after clipping
+and slew limiting. The critic adds
+current linear velocity. Neither input contains the 60-control reward state.
+This timing difference warrants investigation; it does not prove failed learning.
+
+You can reproduce the timing comparison with its
+[source](../site/assets/ppo_learning_recovery_20261002_001/reward_timing_audit.py).
+Set `--base` to the retained bounded-action audit workspace, including its
+original reward receipt, raw captures and frozen source directories. Use a fresh
+external output path; the script rejects an existing output and starts no run.
+
+```sh
+uv run python -B site/assets/ppo_learning_recovery_20261002_001/reward_timing_audit.py \
+  --base "$HOME/hexapod-evidence/ppo_bounded_actions_20261002_001" \
+  --output "$HOME/hexapod-evidence/reward-timing-repeat-20261002.json"
+```
+
 ## Reproduce the Table I audit
 
 ```sh
