@@ -326,6 +326,29 @@
       "caption": "First native frame from the failed forward evaluation on the approved detailed model.",
       "controller": "d255216e14d7e29a9f62055da0615ac0381b8c995e85a3ded43519f3f3968180",
       "evidence": "site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.json"
+    },
+    {
+      "id": "ppo_reward_v3_2000_20261003",
+      "title": "PPO with immediate tracking: failed forward test",
+      "type": "video",
+      "role": "controlled_ppo_comparison",
+      "path": "site/assets/media/ppo_reward_v3_2000_20261003.mp4",
+      "sha256": "fe86ca0bc7571d2189bba718de6bed823016463a29d972a5be3bcd1ec89e0b28",
+      "caption": "Approved detailed model; reward v3 at update 2000. The policy fails all 13 probes and has near-zero forward speed. One seed; real-time playback.",
+      "controller": "d5413589c31da01cdca7ae3b9499ed80ae4660a4ff2a13f7b75b0c928190a25e",
+      "evidence": "site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation.json",
+      "poster_id": "ppo_reward_v3_2000_20261003_poster"
+    },
+    {
+      "id": "ppo_reward_v3_2000_20261003_poster",
+      "title": "PPO with immediate tracking: first native frame",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/media/ppo_reward_v3_2000_20261003_poster.png",
+      "sha256": "5a9a010cc0e7aa5fd8dc23a2d97d61449bc0faa035c282c0d01e7ca54c9b78ba",
+      "caption": "First native frame from the failed reward-v3 forward evaluation on the approved detailed model.",
+      "controller": "d5413589c31da01cdca7ae3b9499ed80ae4660a4ff2a13f7b75b0c928190a25e",
+      "evidence": "site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation.json"
     }
   ],
   "nodes": [
@@ -569,7 +592,7 @@
       "description": "Qualify signed translation, turns, transitions and quiet stops on the approved model. Historical standing admissions apply to their frozen sources; obtain matching admission for a new allocation.",
       "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait\u2019s visual quality.",
       "source": "docs/TRAINING.md",
-      "media_id": "ppo_no_norm_2000_20261003",
+      "media_id": "ppo_reward_v3_2000_20261003",
       "status": "blocked",
       "backend": "Approved detailed robot model",
       "owner": "Platform lead",
@@ -581,12 +604,12 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "PPO fails walking at update 2000. The no-normalization trial fails all 13 probes and regresses quiet standing and stopping. Native AMP learning and full Stage 2 qualification remain pending.",
-      "question": "Assess the declared immediate-tracking reward comparison against the completed normalization trials.",
+      "blocker": "PPO with immediate tracking fails all 13 probes. The policy converges to near-fixed boundary targets. Native AMP learning and Stage 2 qualification remain pending.",
+      "question": "Assess the recorded exploration and penalty incentives before selecting the next PPO trial.",
       "next_step": null,
       "acceptance": null,
-      "card_text": "PPO without running normalization fails all 13 probes. Walking remains unqualified.",
-      "media_caption": "Approved detailed model; PPO without running normalization at update 2000; failed forward test."
+      "card_text": "PPO with immediate tracking fails all 13 probes. Walking remains unqualified.",
+      "media_caption": "Approved detailed model; reward-v3 PPO at update 2000; failed forward test."
     },
     {
       "id": "stage3",
@@ -687,10 +710,10 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-10-03T05:14:55+00:00",
-    "source_commit": "bc16207b213efafd2ce203225d37f2f076e99f46",
+    "as_of": "2026-10-03T17:46:29+00:00",
+    "source_commit": "6754d1a8982955615c37fef8b91e0e23cf488e55",
     "architecture": "ARCHITECTURE.md",
-    "summary": "Removing running normalization eliminates measured pre-update distribution drift but fails all 13 final-checkpoint probes. Both quiet probes and the stop screen regress from the bounded-mean baseline. A separate reward-timing trial remains experimental. Walking and Stage 2 qualification remain pending.",
+    "summary": "Researchers completed the immediate-tracking reward-v3 trial. The policy fails all 13 probes and holds 16 of 18 forward joint commands near their bounds. Walking and Stage 2 qualification remain pending.",
     "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
@@ -1126,6 +1149,14 @@
         "result": "failed",
         "text": "We verify 6144000 transitions and complete evaluation captures with force and torque records. Pre-update mean Gaussian divergence is zero throughout training. All ten movement probes fail tracking; both quiet probes and the stop screen also fail. Normalized tracking error E is 1.000658, compared with 1.000132 for running normalization. Two translation probes also exceed the native speed bound. Human labels remain pending. These results support a separate reward-timing trial and establish no walking success.",
         "source": "site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.json"
+      },
+      {
+        "id": "ppo-immediate-tracking-evaluation-20261003",
+        "title": "Immediate tracking fails all 13 PPO probes",
+        "backend": "Isaac Sim on the approved direct-drive model; reward v3; final update 2000; all 13 probes",
+        "result": "failed",
+        "text": "We verify 6144000 transitions and full native force/torque captures. Normalized tracking error E is 1.000437. The forward policy holds 16 of 18 joint commands near their bounds and requests 4.160072 Nm RMS at the right-front coxa against a 1.6 Nm applied cap. All movement probes fail tracking and torque demand; quiet and stop probes fail. Human gait labels remain pending.",
+        "source": "site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation.json"
       }
     ]
   },
