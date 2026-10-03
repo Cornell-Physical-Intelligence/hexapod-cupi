@@ -32,6 +32,17 @@ limits. Samples can exceed the action range. This option does not bound the
 sample or change the PPO loss. The default `unbounded` retains the frozen
 baseline. Match this option when you prepare evaluation for a checkpoint.
 
+You can select `prepare --observation-normalization none` for a separate PPO
+diagnostic. This option disables running observation statistics in the actor
+and critic. The default `empirical` retains the baseline. Match the option in
+training and evaluation; the checkpoint configuration rejects a mismatch.
+PPO training records `policy_update` in each metrics row: Gaussian divergence,
+action likelihood ratios and learning rate before and after the stock update.
+The measurements use the same collected rollout and draw no new actions.
+The pre-update values expose policy changes during collection, including
+normalization drift. The post-update values measure the net change from the
+stored behavior policy; they are not the optimizer's minibatch KL averages.
+
 ## Run and verify
 
 From the repository root:

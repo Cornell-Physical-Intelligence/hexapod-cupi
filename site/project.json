@@ -303,6 +303,29 @@
       "caption": "Frame 375 at 15 seconds from the failed forward test on the approved detailed model.",
       "controller": "8e0ff06ece3ed348129afba633dab1ab35dbd4002a1c68189c6b8538334451c3",
       "evidence": "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json"
+    },
+    {
+      "id": "ppo_no_norm_2000_20261003",
+      "title": "PPO without running normalization: failed forward test",
+      "type": "video",
+      "role": "controlled_ppo_comparison",
+      "path": "site/assets/media/ppo_no_norm_2000_20261003.mp4",
+      "sha256": "0cd888ff49b329b2878cd59559d0fb8c379bdd40433cb8d33af33265a6e32e16",
+      "caption": "Approved detailed model after 2000 PPO updates without running normalization. Mean forward speed 0.00002469 m/s against 0.05 m/s. All 13 probes fail. One seed; real-time playback.",
+      "controller": "d255216e14d7e29a9f62055da0615ac0381b8c995e85a3ded43519f3f3968180",
+      "evidence": "site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.json",
+      "poster_id": "ppo_no_norm_2000_20261003_poster"
+    },
+    {
+      "id": "ppo_no_norm_2000_20261003_poster",
+      "title": "PPO without running normalization: first native frame",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/media/ppo_no_norm_2000_20261003_poster.png",
+      "sha256": "12e11d3b85c7ef35751a48ae56b600e4f38689c3c44e9eccfc46057312db2057",
+      "caption": "First native frame from the failed forward evaluation on the approved detailed model.",
+      "controller": "d255216e14d7e29a9f62055da0615ac0381b8c995e85a3ded43519f3f3968180",
+      "evidence": "site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.json"
     }
   ],
   "nodes": [
@@ -352,7 +375,7 @@
       "state": "implemented",
       "column": 3,
       "row": 0,
-      "meaning": "Researchers replayed an optimized forward trajectory that passes its native screen. The original and bounded-mean flat-budget PPO policies fail walking. The bounded-mean policy passes quiet screens; reward v2 remains unchanged. Native AMP learning remains pending.",
+      "meaning": "Researchers replayed an optimized forward trajectory that passes its native screen. The tested PPO policies fail walking. The bounded-mean policy with running normalization passes quiet screens; removing normalization fails all 13 probes. Native AMP learning remains pending.",
       "input": "Requested motion, joint positions and body motion",
       "output": "18 target joint positions",
       "source": "locomotion/README.md",
@@ -430,7 +453,7 @@
       "state": "implemented",
       "column": 1,
       "row": 2,
-      "meaning": "Researchers evaluated all 13 probes for the bounded-mean PPO policy at update 2000. All ten movement probes fail tracking; both quiet tests and the stop screen pass. The stop result does not establish a stop from walking. Human gait acceptance and the 96-case Stage 2 qualification remain pending.",
+      "meaning": "Researchers compared all 13 probes for bounded-mean PPO with and without running normalization at update 2000. Both fail all ten movement probes. Removing normalization also fails both quiet probes and the stop screen. Human gait acceptance and the full Stage 2 qualification remain pending.",
       "input": "A saved controller and fixed test cases",
       "output": "Measurements and a pass or fail result",
       "source": "locomotion/evaluation.py",
@@ -546,7 +569,7 @@
       "description": "Qualify signed translation, turns, transitions and quiet stops on the approved model. Historical standing admissions apply to their frozen sources; obtain matching admission for a new allocation.",
       "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait\u2019s visual quality.",
       "source": "docs/TRAINING.md",
-      "media_id": "ppo_bounded_mean_2000_20261002",
+      "media_id": "ppo_no_norm_2000_20261003",
       "status": "blocked",
       "backend": "Approved detailed robot model",
       "owner": "Platform lead",
@@ -558,12 +581,12 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "The original and bounded-mean PPO policies fail walking at update 2000. All ten bounded-mean movement probes fail tracking. Quiet screens pass, but walking and stopping from walking remain unqualified. Native AMP learning and full Stage 2 qualification remain pending.",
-      "question": "Review the failed bounded-mean PPO result and reward audit before defining another learner or reward comparison under issues #50 and #51.",
+      "blocker": "PPO fails walking at update 2000. The no-normalization trial fails all 13 probes and regresses quiet standing and stopping. Native AMP learning and full Stage 2 qualification remain pending.",
+      "question": "Assess the declared immediate-tracking reward comparison against the completed normalization trials.",
       "next_step": null,
       "acceptance": null,
-      "card_text": "Bounded-mean PPO passes quiet screens but fails all ten movement probes. Walking remains unqualified.",
-      "media_caption": "Approved detailed model; bounded-mean PPO at update 2000; failed forward test."
+      "card_text": "PPO without running normalization fails all 13 probes. Walking remains unqualified.",
+      "media_caption": "Approved detailed model; PPO without running normalization at update 2000; failed forward test."
     },
     {
       "id": "stage3",
@@ -664,10 +687,10 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-10-02T16:27:44+00:00",
-    "source_commit": "13f55d4efa40ac8497812a96c7b7af4741fd7666",
+    "as_of": "2026-10-03T05:14:55+00:00",
+    "source_commit": "bc16207b213efafd2ce203225d37f2f076e99f46",
     "architecture": "ARCHITECTURE.md",
-    "summary": "The program lead admitted the 18000-pair AMP dataset from 40 native clips. Both 2000-update PPO trials fail walking. The bounded-mean policy passes quiet screens but fails all ten movement probes. A CPU audit ranks recorded walking above the original failed policy under reward v2; these tests do not isolate a reward defect. Native AMP learning and Stage 2 qualification remain incomplete.",
+    "summary": "Removing running normalization eliminates measured pre-update distribution drift but fails all 13 final-checkpoint probes. Both quiet probes and the stop screen regress from the bounded-mean baseline. A separate reward-timing trial remains experimental. Walking and Stage 2 qualification remain pending.",
     "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
@@ -1087,6 +1110,22 @@
         "result": "failed",
         "text": "We verify 6144000 training transitions and complete evaluation captures with force and torque records. All ten movement probes fail tracking; both quiet tests and the stop screen pass. Forward speed is 0.00000612 m/s against 0.05 m/s, with zero out-of-range deterministic actions and normalized tracking error E = 1.000132. The stop result does not establish a stop from walking. Ten original probes are missing and human walking labels remain pending. We retain reward v2; these tests do not isolate a reward defect.",
         "source": "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json"
+      },
+      {
+        "id": "ppo-normalization-credit-audit-20261003",
+        "title": "We measure normalization drift and reward timing before the next PPO trial",
+        "backend": "CPU replay of 13 retained native observation streams and reward reconstruction from four retained forward captures; no new native run",
+        "result": "inconclusive",
+        "text": "With actor weights fixed, running normalization produces mean Gaussian divergence 1.050361 in the first 24-control replay window, above the adaptive schedule threshold 0.02. Mean divergence falls to 0.003022 after 100 controls and 0.000026 after 500; disabling normalization gives zero. Both instantaneous and stride-average rewards rank recorded walking above the failed policy. These replays do not establish the cause of the native learning failure. The next trial retains bounded means and reward v2 while disabling normalization.",
+        "source": "docs/REWARD_V2_TABLE1_AUDIT.md"
+      },
+      {
+        "id": "ppo-no-normalization-evaluation-20261003",
+        "title": "PPO without running normalization fails all 13 probes",
+        "backend": "Isaac Sim; approved direct-drive model; 128 robots, 2000 updates, seed 20260917 and reward v2; all 13 final-checkpoint probes",
+        "result": "failed",
+        "text": "We verify 6144000 transitions and complete evaluation captures with force and torque records. Pre-update mean Gaussian divergence is zero throughout training. All ten movement probes fail tracking; both quiet probes and the stop screen also fail. Normalized tracking error E is 1.000658, compared with 1.000132 for running normalization. Two translation probes also exceed the native speed bound. Human labels remain pending. These results support a separate reward-timing trial and establish no walking success.",
+        "source": "site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.json"
       }
     ]
   },

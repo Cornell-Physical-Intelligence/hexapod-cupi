@@ -1,0 +1,95 @@
+{
+  "schema": "ppo_fixed_weight_normalization_audit_v1",
+  "analysis_sha256": "552ebce8f83e46045f6a4292f4e1eb66a9cc02216a59c091f75ae665c0579e9b",
+  "reference_sha256": "dbb10c2e2c9e405405e353ab86181bf15b7982a65a41f0fc9e8342c0acc6f4ed",
+  "capture_sha256": {
+    "batch_000/control_trace.npz": "f8283e3f94c08264a1f02c4cad1f7a5746b6ccb34d9b98367e4ce52012aae013",
+    "batch_001/control_trace.npz": "4aa27955fc05fa0ad7f0c7f6448145fc400d0e58ce6c1744e71e097062be73aa",
+    "batch_002/control_trace.npz": "b31be08a80751d90f1e59b4bd46cc24e97c4f3d5339eb03984a8680272108134",
+    "batch_003/control_trace.npz": "1243d45f97538a66a7862dd231fb4db246218a885320928829077d0612891318",
+    "batch_004/control_trace.npz": "33c5fb63db184d2284edf2acfc64659b798946f0e2e3e2f5041acd45ffb953a6",
+    "batch_005/control_trace.npz": "2a93030a1b2e25361615ca1c4c2111fef6a5fb51c33222bc2f38bb6658fb71b4",
+    "batch_006/control_trace.npz": "1ad5b1a080866e590c472cd46066d4ba2dd18d38f93fd5f760165ff8d6e3daa3",
+    "batch_007/control_trace.npz": "ec66bdb894ea7e1bb40a758c0501988d9eae96502e0e6e006b5f95f0cc77c7d1",
+    "batch_008/control_trace.npz": "bf67d088686a7d86d57f4322821fff5b34a8f00e70760afb8723c34f9fa3e632",
+    "batch_009/control_trace.npz": "6299b24e03b4debe091a5f2a5f079a79eaca931626af47ad3b9022b2df4f042f",
+    "batch_010/control_trace.npz": "62c22fe520bfaa7dcd2aa1c333c455b46fb5c2b701a842d66cf02d2c47c14a56",
+    "batch_011/control_trace.npz": "f1288604a35eebe3abafd3533055cc9d14ccbd72b3c75dcfb83b22391d12a7eb",
+    "batch_012/control_trace.npz": "b7ccded56b403c86fb9d5fbd8d18c6b91723af89c24c95d07dd02810e4c4934c"
+  },
+  "source_sha256": {
+    "locomotion/ppo.py": "26fba873ecaf316eaf08e71168eaeb4a370e06243c1f9a5762f3d8725b4d3b9c",
+    "models/mlp_model.py": "6219ebb3ed4df036dae7ff1c30d0fbb169eaaa659e44a659dd757a292124476b",
+    "modules/normalization.py": "539e1193cebcc472585cd3df100946fb8d788c4aa0f9f5cbcb3387a64d312926",
+    "modules/distribution.py": "4631eae1939dcd6b065d79c3c0128a88ba2c6126d08f46944c8795682a208a1b"
+  },
+  "seed": 20260917,
+  "rsl_rl_version": "5.0.1",
+  "torch_version": "2.14.0",
+  "method": "Replay the first 1000 stored actor observations from each of 13 completed probes. Replica i uses probe i modulo 13. Initialize a fresh actor for each case, retain its weights, update statistics from each following observation, and compare the stored distributions with the final normalizer on the same inputs. Earlier controls supply normalization history.",
+  "scope": "CPU observation replay. Actions do not drive a simulator, so this is no training rollout or measurement of native training KL. Nonzero divergence establishes normalization drift with fixed weights. It does not establish why later native optimizer updates stay small.",
+  "native_started": false,
+  "kl_reduction_threshold": 0.02,
+  "results": [
+    {
+      "observation_normalization": "empirical",
+      "window_start_control": 0,
+      "controls": 24,
+      "replicas": 128,
+      "optimizer_steps": 0,
+      "kl_mean": 1.050360918045044,
+      "kl_max": 3.611417531967163,
+      "rows_above_kl_reduction_threshold_fraction": 0.955078125
+    },
+    {
+      "observation_normalization": "empirical",
+      "window_start_control": 100,
+      "controls": 24,
+      "replicas": 128,
+      "optimizer_steps": 0,
+      "kl_mean": 0.0030222348868846893,
+      "kl_max": 0.021630465984344482,
+      "rows_above_kl_reduction_threshold_fraction": 0.0032552082557231188
+    },
+    {
+      "observation_normalization": "empirical",
+      "window_start_control": 500,
+      "controls": 24,
+      "replicas": 128,
+      "optimizer_steps": 0,
+      "kl_mean": 2.6416595574119128e-05,
+      "kl_max": 0.00030863285064697266,
+      "rows_above_kl_reduction_threshold_fraction": 0.0
+    },
+    {
+      "observation_normalization": "none",
+      "window_start_control": 0,
+      "controls": 24,
+      "replicas": 128,
+      "optimizer_steps": 0,
+      "kl_mean": 0.0,
+      "kl_max": 0.0,
+      "rows_above_kl_reduction_threshold_fraction": 0.0
+    },
+    {
+      "observation_normalization": "none",
+      "window_start_control": 100,
+      "controls": 24,
+      "replicas": 128,
+      "optimizer_steps": 0,
+      "kl_mean": 0.0,
+      "kl_max": 0.0,
+      "rows_above_kl_reduction_threshold_fraction": 0.0
+    },
+    {
+      "observation_normalization": "none",
+      "window_start_control": 500,
+      "controls": 24,
+      "replicas": 128,
+      "optimizer_steps": 0,
+      "kl_mean": 0.0,
+      "kl_max": 0.0,
+      "rows_above_kl_reduction_threshold_fraction": 0.0
+    }
+  ]
+}
