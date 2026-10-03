@@ -1,0 +1,888 @@
+{
+  "verified": true,
+  "at": "2026-10-03T16:06:08.459234+00:00",
+  "attempt": "/srv/cupi/hexapod/runs/james/ppo_immediate_tracking_20261003_001",
+  "source_commit": "6754d1a8982955615c37fef8b91e0e23cf488e55",
+  "binding_sha256": "955c0996b362fa03ecaa48670dbc85e624fbd1b6d53438ad83b37d8c05677ac9",
+  "source_freeze_sha256": "92ce4b99231fcbcc51315f44f3e88f4de8e2215f9999f321206a3d4736b44246",
+  "input_files": {
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/geometry_source/geometry/geometry.json": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/geometry_source/geometry/geometry_extrema.npz": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/prior/stance.json": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/collision_recipe.json": "292242d6498819e5eb0ba44cc98e36fbb508724a841ea842e23c37bf669d2965",
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/geometry.usdc": "9509881e672e1cb52740f468e9f922ec6b590446739a34be7f02c92c7f527c6d",
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/geometry_manifest.json": "b672416910035a83fe9f79979c56cebf43b888e41bc04659a17fefc9bc8b85d0",
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/offline_audit.json": "68cba92eb4cb2154f4aa5635e56dfc1ed6a8ce7a8ec74b9a2faf8608a40e1b5e",
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/preparation_manifest.json": "273244a45897f78c62adb8d2dc3f732ff7400842fdf67eab3de5274cf9eb6d39",
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/robot.usda": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/source/mesh_mapping.json": "fb697959aadff4e77e6e7d1a5ca806a66a01bfb29e94cddf06b4ff0d883d0705",
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/source/model.json": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/source/source.urdf": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+    "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/amp_20260923_001/standing_one/run/standing/standing/standing_report.json": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+    "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/amp_20260923_001/standing_one/run/standing/state.json": "5773bf1d220bac30e4ab523a4851a5a04d7939087de6d2032fefdc3ff7fd6c3a",
+    "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/throughput_20260929_001/standing_batch128/run/standing/standing/standing_report.json": "4f04067c64e043de08187bb1f7821b7ac9d8da3d8409379613ccf00ffb3a4193",
+    "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/throughput_20260929_001/standing_batch128/run/standing/state.json": "f867191d2401f85efc1a058674509451450cff1bb337459dfa1b2de2ca5ae09c",
+    "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/admission_128/admission.json": "b4e3fb5811329f82c7fa2250339fcdef770784a7d673f08507d6e87c7f2e930a"
+  },
+  "updates": 2000,
+  "transitions": 6144000,
+  "metrics_sha256": "9ebac0f9862019cae2fb13c7853209ec3694a17b4c0f214d7b8c019d56151c97",
+  "metrics_finite": true,
+  "maximum_action_mean_magnitude": 1,
+  "checkpoint_pairs": [
+    {
+      "update": 50,
+      "checkpoint_sha256": "d361ce970a051116ad2596184c406eb1a7e720ba13c8974e171e61276a61574c",
+      "sidecar_sha256": "89def1aaeb528a7010cbd11914a767151d02da513c5b8e49ec03220262ab6df2"
+    },
+    {
+      "update": 100,
+      "checkpoint_sha256": "03580972aab4e41ee6675cfbbd79bb8125d8e43c0359b0a6f6798e06a168e93e",
+      "sidecar_sha256": "a46b670431e92e67098c101e1080853bf409eb925b8ae52ab2f089cff22d6111"
+    },
+    {
+      "update": 150,
+      "checkpoint_sha256": "1206e4c07b3d09ac84a87adf898c0c3a020dbdbd17e5c350885a20914bb5fe01",
+      "sidecar_sha256": "da026362db3ee2c25e4db234e5a89d3e2cd4a81eee6d4a80303706933826f5ed"
+    },
+    {
+      "update": 200,
+      "checkpoint_sha256": "1d3c4c5b52b2bcde56c10ecf486f9d073f6b7b14e49f26d7f9d573178ddc681a",
+      "sidecar_sha256": "cd4ed5cbd288fdddb9d9091c216f1cc53394d112856bcef0c56ec3a1d25881ce"
+    },
+    {
+      "update": 250,
+      "checkpoint_sha256": "a49e0dfa7857109f07057e837cc7120c5afd28c3c4de9e2b8614a034bae2cfac",
+      "sidecar_sha256": "9b977560759896b66bdfefce0e45242fe76c9bac38d20c3416c00d14595dd015"
+    },
+    {
+      "update": 300,
+      "checkpoint_sha256": "bd71e6f6dfb43679a2d6dfc498dfbcb8f2eb59f3bdc6ef96e913302f6eea0e9f",
+      "sidecar_sha256": "37fc3ba0db32e99bbc311715dfab568be35fa8e29f4423e4e48dce1433c47221"
+    },
+    {
+      "update": 350,
+      "checkpoint_sha256": "bedd1139fa9dbca537966af352e6004e884d322e20d0958fc93f89451dad6b4c",
+      "sidecar_sha256": "482a888e1961396bf17fee2d6012a564af42a3a4ab82d5267c360d9bc4611305"
+    },
+    {
+      "update": 400,
+      "checkpoint_sha256": "bb53d43ad54a2cf10b17db18b16ff5211e3edc24997e73177a139562d8147ebb",
+      "sidecar_sha256": "e65719e5f27fd0425c7142b3cc13e974ff23768b05fc9ebaeab61b0c1ecb65d6"
+    },
+    {
+      "update": 450,
+      "checkpoint_sha256": "8f6e1dda767389f1091b75feee04c06d6959d97e9487e57ca47a75362e42c3ae",
+      "sidecar_sha256": "d089b2be143726ca1b80a98bab2b328203f22dbe4b15b71048e3708e3decd2d3"
+    },
+    {
+      "update": 500,
+      "checkpoint_sha256": "f1e9960326c047a754532e581b48a69f602b48600f84d14eb29522210918f84d",
+      "sidecar_sha256": "d47b18e5ec87d498536e6257b909fc1ad7656c94da932f44d7357dbd6fa8e285"
+    },
+    {
+      "update": 550,
+      "checkpoint_sha256": "7ca3b485b808d19fe10bd96a459a6ab43c128ce50b5df64ae98b1fdec13173dc",
+      "sidecar_sha256": "df1dbae6b4fc9dbda6d5169d4ddb29e0bb2c78dcfefca89a05584f64b3b8a9b3"
+    },
+    {
+      "update": 600,
+      "checkpoint_sha256": "1c2e303be9b23bf0271c046cbfd543bb8a50832c6dd2eba9725a1ad5dede7c61",
+      "sidecar_sha256": "a4084c086021a75d5c1150b47dfe487712b4072187f7d65068b0b44f85432b94"
+    },
+    {
+      "update": 650,
+      "checkpoint_sha256": "3d3e431c2ffecbae322ad2d71c378a3bd399cbf99cd30ab3f8019c1a2b625ea2",
+      "sidecar_sha256": "ab54e861110fd6ce4fd9355da61023f014003e0fc4275c448ef4a5f52309816a"
+    },
+    {
+      "update": 700,
+      "checkpoint_sha256": "9f35ada91e1dec6e5b278df9751a104055079fd10fae23e86193cfb9a63192ff",
+      "sidecar_sha256": "552391d6358a3a1b970a9e9dc7f5ef2d36715ea7c4a39e22bde6288998fff244"
+    },
+    {
+      "update": 750,
+      "checkpoint_sha256": "42aa685374a3085a0f4dca0f8b0ae2c37c72c8d173dc39bef357c017c5175de8",
+      "sidecar_sha256": "4060e5dc0a2ef40a8a6b4ae1ead19842f800cac2e20b51fce5c6086914fe2084"
+    },
+    {
+      "update": 800,
+      "checkpoint_sha256": "552ad17cd6e18a6c0fa20abc9a3c65c2c18be05cb86df3792ae6cbe8fff826fb",
+      "sidecar_sha256": "ba907fb02923dac01d96085352fefdb44a09e159e68795c6a5793f1e3fb5e3a0"
+    },
+    {
+      "update": 850,
+      "checkpoint_sha256": "c15b95c024e97c294cdeb01629f4c3b25137b4c379236bea63aadc2c8940f133",
+      "sidecar_sha256": "870b6aba9ee93454702824b4495482c50d5b1f164a5053129546d7b54a44e840"
+    },
+    {
+      "update": 900,
+      "checkpoint_sha256": "13fef6c719289e275313ba961f0a3c8a02a4f1ba944baee42d5732a465541d25",
+      "sidecar_sha256": "b322be8da7dbcf88a566d8e269c11bcefd2bdd1b18b0564c4d6fc569dc7b2b2f"
+    },
+    {
+      "update": 950,
+      "checkpoint_sha256": "8742aedc6c8fa04ee42c85378b31562a9226f8fc0f0e68c817c8604ffe9599c2",
+      "sidecar_sha256": "11e9fe852fd76f4078ef88116d51206e21ba727fcd5be40e5029024ed929a2f4"
+    },
+    {
+      "update": 1000,
+      "checkpoint_sha256": "60ce8bd6d5551b1b5ba2b9f2cb85a50a727f12190fd308af67eeae31d88c3873",
+      "sidecar_sha256": "025df1c2ec4eaca1434c747b14cce8a93b91304cac92275859271ad8a3e7ffc9"
+    },
+    {
+      "update": 1050,
+      "checkpoint_sha256": "306c45f86fc2f9e22faed27f2ca524bc64e812004738196846f265b4d5728596",
+      "sidecar_sha256": "6cfe78db64d1419fe838be52c6442c969d27affb07d77fe75eeaa7c684cb98a9"
+    },
+    {
+      "update": 1100,
+      "checkpoint_sha256": "e9f1a0e482f9e766925b627ddafad58ec14c06b6bf5102a3113b4695f254b25d",
+      "sidecar_sha256": "c15f01a5f820ccf9d216620b6616ae1115f936087c0e35c0a6879aff482a0a04"
+    },
+    {
+      "update": 1150,
+      "checkpoint_sha256": "9996d6747e4e05dfc6fef3d8fc21743bd97a033da650786ade078914eaa2d44b",
+      "sidecar_sha256": "6257fe7c3da9c8f165af1958c3757b847c82f0618ff6c15931b61eafdb949516"
+    },
+    {
+      "update": 1200,
+      "checkpoint_sha256": "f0ca2038ecbda241de89b7ad818160ba5137cabd68c68103b891deb0700be768",
+      "sidecar_sha256": "d384ee3c355000a72bc3d481041f664712e421f5bbe6977094bf03e45cb490b8"
+    },
+    {
+      "update": 1250,
+      "checkpoint_sha256": "50f8707b4c9d7eae16a348fef7538fc7bc0f4b14ee79baaeb23d166fd52db119",
+      "sidecar_sha256": "c4a624e2fead8d9c757a52b12bbebf985d28dd97ba2a0c67634a1646d5299f12"
+    },
+    {
+      "update": 1300,
+      "checkpoint_sha256": "208b8df40d3d0e44883bf6b3558e3ece0c82711bedbf94e7609c6e0d7ddb1721",
+      "sidecar_sha256": "0e2bb3c3869601471c6b37a400a269d3e75ae27b8f88c3a7ba056a39a1f54b29"
+    },
+    {
+      "update": 1350,
+      "checkpoint_sha256": "2b2b1ca25e096d95578791135ed7a753955b66d6b726e06b12262104154c5fe8",
+      "sidecar_sha256": "38dbc9f0629b60a52d825ebea2da2ee63a7353600cdf08cf83c02bdbe450d465"
+    },
+    {
+      "update": 1400,
+      "checkpoint_sha256": "cb2e9f2c06dbaba56bb9c7b5cd362e6532deb316ac4294769a2b4cb52d6b0960",
+      "sidecar_sha256": "919fe8f02f67fc4451835474de06dee44defebb32326ffd7d78e0e8d35cd95ab"
+    },
+    {
+      "update": 1450,
+      "checkpoint_sha256": "7d1f7804cacdeb22b19464c8bf6e75717a97ff52e684b8fb3783d49b40f9c9db",
+      "sidecar_sha256": "69c233aeacca8aa29887b9b805f908eb8d11f7beb3e979fe493dea6ed325e45d"
+    },
+    {
+      "update": 1500,
+      "checkpoint_sha256": "be508e0694a627fbf6f17bf2e581d1c39861bdb6c104bd3798f18d1e4df38947",
+      "sidecar_sha256": "1103b5b20736173d96e1b8892ba4b11de6779b8c75174b27d91a3ff6d19c9c65"
+    },
+    {
+      "update": 1550,
+      "checkpoint_sha256": "06d6a1b3e7f03b294e90c6d195af68112a4350e61dec1fca50d8461fa3a4e425",
+      "sidecar_sha256": "391b17105cb5cfe1658c32136e4971e21b61c7773965aef9cdb4db3b6dc6427c"
+    },
+    {
+      "update": 1600,
+      "checkpoint_sha256": "9797f62102220811a1dd53b1048ae36820d21c3d140d9968ea0cec3225fb45fc",
+      "sidecar_sha256": "9ae64a9bbccca2e202c397bb1f850bca25c6ac0e917588aa9d5f621222119182"
+    },
+    {
+      "update": 1650,
+      "checkpoint_sha256": "463771dd230bc9ecc60e08c056bea06b6847fb6ed3b83f59f4a75611e59433ea",
+      "sidecar_sha256": "9afbaeb4e20fda5649e91d61dd2c3cdd4f1c1d0864318623d8ec78afb4435bf6"
+    },
+    {
+      "update": 1700,
+      "checkpoint_sha256": "0d825df429f8b0f081dec85ae21b4b859362a6b51af4eeb23947069be0065ccb",
+      "sidecar_sha256": "161909dc45e64c05020c087a726ce81c7dd8b493548bb10a73ec2ec0c948f916"
+    },
+    {
+      "update": 1750,
+      "checkpoint_sha256": "94af607248a082723e4bf30d06bdc3232d0216d751b4780ba3d4e82d4afb9e1b",
+      "sidecar_sha256": "1386eb969635bacc5414551c4c3ea03739d6da31c131a4dab7e53f9c624f2f28"
+    },
+    {
+      "update": 1800,
+      "checkpoint_sha256": "93c1221ff57e6616071bf9a9f1f88af2e7370c864b23b24546545b1f71098e9c",
+      "sidecar_sha256": "c4fc6b951c32775e80e4c5937278bbaf908fe22831f292c0fbdef9f9bab19cfd"
+    },
+    {
+      "update": 1850,
+      "checkpoint_sha256": "4ce5efd28981e99c14c0d52cc778b9e26241e8a3fb1a6d8d82651ba931a3603e",
+      "sidecar_sha256": "035ab01e69bd1884ccd599c6065fb6d54f7c84c68c9ba7b13977e0339e4ec09a"
+    },
+    {
+      "update": 1900,
+      "checkpoint_sha256": "82358e8eab001099e0f277af61993516e1b51d1c93f8f08c6005115b6f01f2eb",
+      "sidecar_sha256": "16507488b3874bf2914f354254003584454236792a11422a8d59982d739e0325"
+    },
+    {
+      "update": 1950,
+      "checkpoint_sha256": "5caba7580f2b2248072fc2d2a543fbd1880d6bf17dfca92e88ef181658057028",
+      "sidecar_sha256": "50a78b0f9b23c8dcc788563fd2cfd61fd4c1734dec46ec2468c3ab6313dd614f"
+    },
+    {
+      "update": 2000,
+      "checkpoint_sha256": "d5413589c31da01cdca7ae3b9499ed80ae4660a4ff2a13f7b75b0c928190a25e",
+      "sidecar_sha256": "5500b2f311b9c2318db623e1a8b93b5e4bd851cf5e9c60114fee475f6273767f"
+    }
+  ],
+  "force_metrics": {
+    "schema": "canonical_training_loads_v1",
+    "status": "available",
+    "physics_steps": 384000,
+    "physics_hz": 400,
+    "windows": {
+      "full_training": {
+        "samples_across_replicas": 49152000,
+        "metrics": {
+          "total_vertical_support_n": {
+            "mean": 73.24237887943646,
+            "rms": 74.05939144975223,
+            "peak": 545.6004638671875
+          },
+          "body_normal_resultant_n:body": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lf_coxa": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lm_coxa": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lr_coxa": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:rf_coxa": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:rm_coxa": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:rr_coxa": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lf_femur": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lm_femur": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lr_femur": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:rf_femur": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:rm_femur": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:rr_femur": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lf_tibia": {
+            "mean": 13.573213575518285,
+            "rms": 14.968571691701476,
+            "peak": 326.6653747558594
+          },
+          "body_normal_resultant_n:lm_tibia": {
+            "mean": 9.824130625651932,
+            "rms": 12.308518922313578,
+            "peak": 468.1207580566406
+          },
+          "body_normal_resultant_n:lr_tibia": {
+            "mean": 14.019237057929773,
+            "rms": 15.299874052881224,
+            "peak": 449.4574890136719
+          },
+          "body_normal_resultant_n:rf_tibia": {
+            "mean": 12.630026740175943,
+            "rms": 13.764908712540523,
+            "peak": 316.4901123046875
+          },
+          "body_normal_resultant_n:rm_tibia": {
+            "mean": 11.511137906020696,
+            "rms": 12.824927420103831,
+            "peak": 251.74310302734375
+          },
+          "body_normal_resultant_n:rr_tibia": {
+            "mean": 11.684632974304813,
+            "rms": 12.89882507705978,
+            "peak": 295.4755859375
+          },
+          "applied_abs_torque_nm:lf_coxa_yaw": {
+            "mean": 0.23301614688547032,
+            "rms": 0.30159254099372246,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lf_femur_pitch": {
+            "mean": 0.47142375580275087,
+            "rms": 0.5795505041226099,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lf_tibia_pitch": {
+            "mean": 0.3361556407698666,
+            "rms": 0.42569343958258654,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_coxa_yaw": {
+            "mean": 0.22674338806038766,
+            "rms": 0.30160625151276854,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_femur_pitch": {
+            "mean": 0.2939456951418473,
+            "rms": 0.3649889344061446,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_tibia_pitch": {
+            "mean": 0.3362675303309223,
+            "rms": 0.4478484705717577,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_coxa_yaw": {
+            "mean": 0.2571279533772329,
+            "rms": 0.32722086257772987,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_femur_pitch": {
+            "mean": 0.46503487147087685,
+            "rms": 0.569804216695786,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_tibia_pitch": {
+            "mean": 0.3775732410404728,
+            "rms": 0.47451188929707333,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_coxa_yaw": {
+            "mean": 0.29361634013362914,
+            "rms": 0.3879503749144136,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_femur_pitch": {
+            "mean": 0.38935166955792394,
+            "rms": 0.4581897549109521,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_tibia_pitch": {
+            "mean": 0.3408074641012866,
+            "rms": 0.44303464444094065,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_coxa_yaw": {
+            "mean": 0.26519861388705634,
+            "rms": 0.3383853993376657,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_femur_pitch": {
+            "mean": 0.35026782346070473,
+            "rms": 0.4174460700402312,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_tibia_pitch": {
+            "mean": 0.31097277831203773,
+            "rms": 0.40622485824691706,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_coxa_yaw": {
+            "mean": 0.22944757511909747,
+            "rms": 0.2939600117823157,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_femur_pitch": {
+            "mean": 0.36627972528075703,
+            "rms": 0.4365240477101485,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_tibia_pitch": {
+            "mean": 0.3299644749600002,
+            "rms": 0.4327018269639866,
+            "peak": 1.600000023841858
+          },
+          "requested_abs_torque_nm:lf_coxa_yaw": {
+            "mean": 0.23302901164732534,
+            "rms": 0.30167178393457783,
+            "peak": 3.601917266845703
+          },
+          "requested_abs_torque_nm:lf_femur_pitch": {
+            "mean": 0.47151810960474855,
+            "rms": 0.5798679010134898,
+            "peak": 9.2750244140625
+          },
+          "requested_abs_torque_nm:lf_tibia_pitch": {
+            "mean": 0.3369583550261254,
+            "rms": 0.4306987416394547,
+            "peak": 17.3398380279541
+          },
+          "requested_abs_torque_nm:lm_coxa_yaw": {
+            "mean": 0.22680220770827578,
+            "rms": 0.30199813396174263,
+            "peak": 6.784294605255127
+          },
+          "requested_abs_torque_nm:lm_femur_pitch": {
+            "mean": 0.29435956554017606,
+            "rms": 0.3678584696200004,
+            "peak": 8.2457857131958
+          },
+          "requested_abs_torque_nm:lm_tibia_pitch": {
+            "mean": 0.3407712901111787,
+            "rms": 0.47604265010659963,
+            "peak": 18.652490615844727
+          },
+          "requested_abs_torque_nm:lr_coxa_yaw": {
+            "mean": 0.2571375904764458,
+            "rms": 0.3272752913274658,
+            "peak": 6.540333271026611
+          },
+          "requested_abs_torque_nm:lr_femur_pitch": {
+            "mean": 0.46515527127014494,
+            "rms": 0.5702124189251433,
+            "peak": 8.09178352355957
+          },
+          "requested_abs_torque_nm:lr_tibia_pitch": {
+            "mean": 0.3783830160528942,
+            "rms": 0.4790934671902486,
+            "peak": 17.640472412109375
+          },
+          "requested_abs_torque_nm:rf_coxa_yaw": {
+            "mean": 0.31068353200631194,
+            "rms": 0.5125506207781031,
+            "peak": 7.643365859985352
+          },
+          "requested_abs_torque_nm:rf_femur_pitch": {
+            "mean": 0.38938307216792867,
+            "rms": 0.4583275365232071,
+            "peak": 6.080893516540527
+          },
+          "requested_abs_torque_nm:rf_tibia_pitch": {
+            "mean": 0.3418339672077174,
+            "rms": 0.45023561041789795,
+            "peak": 16.08300018310547
+          },
+          "requested_abs_torque_nm:rm_coxa_yaw": {
+            "mean": 0.26521916248891664,
+            "rms": 0.33849070644633594,
+            "peak": 4.444121837615967
+          },
+          "requested_abs_torque_nm:rm_femur_pitch": {
+            "mean": 0.3502881054819456,
+            "rms": 0.41753575024043205,
+            "peak": 4.723304748535156
+          },
+          "requested_abs_torque_nm:rm_tibia_pitch": {
+            "mean": 0.311369850119002,
+            "rms": 0.4087643349493067,
+            "peak": 16.339412689208984
+          },
+          "requested_abs_torque_nm:rr_coxa_yaw": {
+            "mean": 0.22945177162688582,
+            "rms": 0.2939860164468075,
+            "peak": 3.555084466934204
+          },
+          "requested_abs_torque_nm:rr_femur_pitch": {
+            "mean": 0.3663098948426698,
+            "rms": 0.4366580984906924,
+            "peak": 5.311587333679199
+          },
+          "requested_abs_torque_nm:rr_tibia_pitch": {
+            "mean": 0.33134227082036843,
+            "rms": 0.4420534647881338,
+            "peak": 16.849796295166016
+          }
+        }
+      },
+      "commanded_locomotion_after_settle": {
+        "samples_across_replicas": 37627088,
+        "metrics": {
+          "total_vertical_support_n": {
+            "mean": 73.24212816639535,
+            "rms": 73.91731298851435,
+            "peak": 449.5644836425781
+          },
+          "body_normal_resultant_n:body": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lf_coxa": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lm_coxa": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lr_coxa": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:rf_coxa": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:rm_coxa": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:rr_coxa": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lf_femur": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lm_femur": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lr_femur": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:rf_femur": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:rm_femur": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:rr_femur": {
+            "mean": 0,
+            "rms": 0,
+            "peak": 0
+          },
+          "body_normal_resultant_n:lf_tibia": {
+            "mean": 13.494112564031077,
+            "rms": 14.87853826435276,
+            "peak": 326.6653747558594
+          },
+          "body_normal_resultant_n:lm_tibia": {
+            "mean": 9.866845419615043,
+            "rms": 12.317283124261659,
+            "peak": 375.3968811035156
+          },
+          "body_normal_resultant_n:lr_tibia": {
+            "mean": 14.03487898830537,
+            "rms": 15.280831779005268,
+            "peak": 397.5619201660156
+          },
+          "body_normal_resultant_n:rf_tibia": {
+            "mean": 12.69969578705917,
+            "rms": 13.800369389129004,
+            "peak": 316.4901123046875
+          },
+          "body_normal_resultant_n:rm_tibia": {
+            "mean": 11.48991274387381,
+            "rms": 12.789842264452366,
+            "peak": 240.2275848388672
+          },
+          "body_normal_resultant_n:rr_tibia": {
+            "mean": 11.656682663972855,
+            "rms": 12.837748900621499,
+            "peak": 295.4755859375
+          },
+          "applied_abs_torque_nm:lf_coxa_yaw": {
+            "mean": 0.22651776766336984,
+            "rms": 0.29269490580903956,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lf_femur_pitch": {
+            "mean": 0.471391259545991,
+            "rms": 0.5812722698280949,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lf_tibia_pitch": {
+            "mean": 0.3296588040517805,
+            "rms": 0.41847228065111935,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_coxa_yaw": {
+            "mean": 0.21842662621934608,
+            "rms": 0.28842816633023166,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_femur_pitch": {
+            "mean": 0.2881080317330556,
+            "rms": 0.3567706313874794,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_tibia_pitch": {
+            "mean": 0.33974017637938575,
+            "rms": 0.44919699590453543,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_coxa_yaw": {
+            "mean": 0.2506886950311958,
+            "rms": 0.3175504783854885,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_femur_pitch": {
+            "mean": 0.45443532516898566,
+            "rms": 0.5600039582201659,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_tibia_pitch": {
+            "mean": 0.38053220788966113,
+            "rms": 0.47831112556279254,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_coxa_yaw": {
+            "mean": 0.2741366008232181,
+            "rms": 0.34737289201360594,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_femur_pitch": {
+            "mean": 0.38112704988346713,
+            "rms": 0.44872401953494345,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_tibia_pitch": {
+            "mean": 0.34656529527751634,
+            "rms": 0.4493744154181075,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_coxa_yaw": {
+            "mean": 0.24784233188038968,
+            "rms": 0.3114086141657578,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_femur_pitch": {
+            "mean": 0.33884865273606085,
+            "rms": 0.40423424942435604,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_tibia_pitch": {
+            "mean": 0.3157255891541636,
+            "rms": 0.4113083806713613,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_coxa_yaw": {
+            "mean": 0.2186391150603871,
+            "rms": 0.2788933657659673,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_femur_pitch": {
+            "mean": 0.3508698011077133,
+            "rms": 0.41790844795899756,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_tibia_pitch": {
+            "mean": 0.3330610443673517,
+            "rms": 0.4367578724925237,
+            "peak": 1.600000023841858
+          },
+          "requested_abs_torque_nm:lf_coxa_yaw": {
+            "mean": 0.22652160033408916,
+            "rms": 0.29272088998423973,
+            "peak": 3.601917266845703
+          },
+          "requested_abs_torque_nm:lf_femur_pitch": {
+            "mean": 0.471475814518838,
+            "rms": 0.5815601174319479,
+            "peak": 9.2750244140625
+          },
+          "requested_abs_torque_nm:lf_tibia_pitch": {
+            "mean": 0.33043508406197575,
+            "rms": 0.42338507655538077,
+            "peak": 16.62424659729004
+          },
+          "requested_abs_torque_nm:lm_coxa_yaw": {
+            "mean": 0.21845650527193927,
+            "rms": 0.2886386079387659,
+            "peak": 5.118932247161865
+          },
+          "requested_abs_torque_nm:lm_femur_pitch": {
+            "mean": 0.28853241252187456,
+            "rms": 0.3598071133861475,
+            "peak": 8.2457857131958
+          },
+          "requested_abs_torque_nm:lm_tibia_pitch": {
+            "mean": 0.3421790933424595,
+            "rms": 0.46571719788464455,
+            "peak": 14.532094955444336
+          },
+          "requested_abs_torque_nm:lr_coxa_yaw": {
+            "mean": 0.25069092819435523,
+            "rms": 0.31756442136342633,
+            "peak": 3.36722469329834
+          },
+          "requested_abs_torque_nm:lr_femur_pitch": {
+            "mean": 0.45451111295517027,
+            "rms": 0.5602688301652438,
+            "peak": 8.074186325073242
+          },
+          "requested_abs_torque_nm:lr_tibia_pitch": {
+            "mean": 0.38132065128507664,
+            "rms": 0.4826480632927765,
+            "peak": 14.99528694152832
+          },
+          "requested_abs_torque_nm:rf_coxa_yaw": {
+            "mean": 0.2747438568194283,
+            "rms": 0.35269887104643644,
+            "peak": 6.868237495422363
+          },
+          "requested_abs_torque_nm:rf_femur_pitch": {
+            "mean": 0.38115083913237224,
+            "rms": 0.44883098834193214,
+            "peak": 6.080893516540527
+          },
+          "requested_abs_torque_nm:rf_tibia_pitch": {
+            "mean": 0.34776449846358193,
+            "rms": 0.45769364040147104,
+            "peak": 16.08300018310547
+          },
+          "requested_abs_torque_nm:rm_coxa_yaw": {
+            "mean": 0.24784483767432872,
+            "rms": 0.311424636925537,
+            "peak": 4.444121837615967
+          },
+          "requested_abs_torque_nm:rm_femur_pitch": {
+            "mean": 0.3388675178078058,
+            "rms": 0.4043206929709186,
+            "peak": 4.420754432678223
+          },
+          "requested_abs_torque_nm:rm_tibia_pitch": {
+            "mean": 0.31617355270688,
+            "rms": 0.4141993261351626,
+            "peak": 16.339412689208984
+          },
+          "requested_abs_torque_nm:rr_coxa_yaw": {
+            "mean": 0.2186403003995775,
+            "rms": 0.27890212156781086,
+            "peak": 3.555084466934204
+          },
+          "requested_abs_torque_nm:rr_femur_pitch": {
+            "mean": 0.3508870445549502,
+            "rms": 0.4179915778963453,
+            "peak": 5.311587333679199
+          },
+          "requested_abs_torque_nm:rr_tibia_pitch": {
+            "mean": 0.3341535128851807,
+            "rms": 0.443931683855155,
+            "peak": 16.849796295166016
+          }
+        }
+      }
+    },
+    "scope": "Aggregate native normal forces by body; tibia values include toe and shaft contacts. Forces exclude friction. Applied torque uses native effort readback. The locomotion window starts after 2 seconds per episode and includes failed motion. Exact per-foot classification and percentiles come from the separate evaluation capture."
+  },
+  "force_metrics_sha256": "849442a5f5f4a328de0a9c52c9f8ec70e5e00015ec134723825de2bc433049de",
+  "job": {
+    "status": "completed",
+    "phase": "standing",
+    "container_name": "hexapod-reference-physics-3c09ccbbff394a508856d419f5ed7175",
+    "started_unix": 1791004591.798823,
+    "deadline_seconds": 22000,
+    "app_ready_deadline_seconds": 90,
+    "no_policy_loaded": false,
+    "native_mode": "train",
+    "source_freeze_sha256": "92ce4b99231fcbcc51315f44f3e88f4de8e2215f9999f321206a3d4736b44246",
+    "stage2_complete": false,
+    "physical_admission": false,
+    "preflight": {
+      "gpu_processes": [],
+      "containers": [],
+      "available_memory_bytes": 125782052864
+    },
+    "container_id": "a27c23f61ecef7ed7b24adf0c79bcacee3d10ef4a3cfedb53661016184b4220d",
+    "other_gpu_processes_seen": [],
+    "contact_data_completeness": {
+      "log_sha256": "28ea950e69c36abd098ed611050e9556ae6865cc444acc4067a17324861c540c",
+      "incomplete_data_warning_count": 0,
+      "reported_capacities": [],
+      "first_warning": null,
+      "last_warning": null,
+      "passed": true,
+      "scope": "Required absence of reported contact/friction data truncation; raw physical gate must also pass"
+    },
+    "exit_code": 0,
+    "cleanup_checked": true,
+    "finished_unix": 1791012967.0714295
+  },
+  "state": {
+    "mode": "train",
+    "status": "completed",
+    "errors": [],
+    "stage2_complete": false,
+    "runtime_binding": {
+      "runtime_tree_sha256": "92ce4b99231fcbcc51315f44f3e88f4de8e2215f9999f321206a3d4736b44246"
+    },
+    "allocation": {
+      "profile": "flat_pilot_v1",
+      "max_wall_seconds": 21600
+    },
+    "experiment_logger": {
+      "backend": "wandb",
+      "wandb_project": "hexapod-amp",
+      "wandb_mode": "offline"
+    },
+    "updates": 2000,
+    "transitions": 6144000,
+    "wall_seconds": 8371.840307163075,
+    "checkpoint": "/output/standing/checkpoint_update002000.pt",
+    "checkpoint_sha256": "d5413589c31da01cdca7ae3b9499ed80ae4660a4ff2a13f7b75b0c928190a25e"
+  },
+  "cleanup": {
+    "container_name": "hexapod-reference-physics-3c09ccbbff394a508856d419f5ed7175",
+    "container_id": "a27c23f61ecef7ed7b24adf0c79bcacee3d10ef4a3cfedb53661016184b4220d",
+    "inspections": [
+      {
+        "absent": true
+      }
+    ],
+    "cleanup_checked": true,
+    "reservation_released": false,
+    "host": {
+      "gpu_processes": [],
+      "containers": [],
+      "available_memory_bytes": 125840007168
+    }
+  },
+  "container_absent": true,
+  "launcher_exitcode": 0,
+  "before_update_kl_max": 0
+}

@@ -66,7 +66,7 @@ def scalars(value, prefix):
 def checkpoint_reward_version(record):
     """The reward a checkpoint was trained with; checkpoints from before the flag trained version 1."""
     version = record['identity'].get('reward_version', '1')
-    if version not in ('1', '2'):
+    if version not in ('1', '2', '3'):
         raise ValueError('Unknown checkpoint reward version: '+str(version))
     return version
 
@@ -132,8 +132,8 @@ def main(argv=None):
     parser.add_argument('--logger', choices=['tensorboard', 'wandb'], default='tensorboard')
     parser.add_argument('--wandb-project')
     parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
-    parser.add_argument('--reward-version', choices=['1', '2'], default='1',
-                        help='Training reward: version 1 in task.py or version 2 in task_v2.py.')
+    parser.add_argument('--reward-version', choices=['1', '2', '3'], default='1',
+                        help='Training reward: historical v1, stride tracking v2, or experimental immediate tracking v3.')
     parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo',
                         help='Stock PPO in ppo.py or PPO with the online motion prior in amp_ppo.py.')
     parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp',
@@ -158,7 +158,7 @@ def main(argv=None):
     elif args.wandb_project is not None or args.wandb_mode != 'offline':
         raise ValueError('W&B options require --logger wandb')
     if args.reward_version != '1' and args.mode != 'train':
-        raise ValueError('Reward version 2 applies to training only')
+        raise ValueError('Reward version selection applies to training only')
     if args.action_mean != 'unbounded' and args.mode not in ('train', 'evaluate'):
         raise ValueError('Bounded action means apply to training and evaluation')
     if args.observation_normalization != 'empirical' and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate')):
@@ -272,8 +272,9 @@ def main(argv=None):
         if version != '5.0.1':
             raise ValueError('RSL-RL version differs: '+version)
         task_config = task_module.TaskConfig(seed=args.seed)
-        if args.reward_version == '2':
-            task = importlib.import_module(prefix+'.task_v2').TrainingTaskV2(env, task_config, args.output/'task')
+        if args.reward_version in ('2', '3'):
+            module = importlib.import_module(prefix+'.task_v'+args.reward_version)
+            task = getattr(module, 'TrainingTaskV'+args.reward_version)(env, task_config, args.output/'task')
         else:
             task = task_module.TrainingTask(env, task_config, args.output/'task')
         collision = None

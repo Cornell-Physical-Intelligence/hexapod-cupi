@@ -479,6 +479,99 @@ uv run python -B site/assets/ppo_learning_recovery_20261002_001/reward_timing_au
   --output "$HOME/hexapod-evidence/reward-timing-repeat-20261002.json"
 ```
 
+## 13. Experimental immediate tracking reward: version 3
+
+You select `--reward-version 3` to test immediate translation and yaw feedback
+in a fresh PPO attempt. The candidate uses kernel B from section 12 and retains
+version 2's weights and command scale. It uses each completed control's velocity
+instead of the 60-control velocity mean. The model, observations, command
+sampling and physical acceptance gates remain unchanged. Version 2 retains
+its original source and defaults.
+
+This candidate addresses the hidden reward history and delayed feedback in
+section 12. The recorded-trajectory ranking supports a controlled experiment;
+it does not establish that PPO can learn walking with this reward. Keep the
+current no-normalization reward-v2 attempt frozen. Complete its 2000 updates
+and final 13-probe evaluation, including force and torque records, before
+deciding whether to dispatch version 3.
+
+For that comparison, retain 128 robots, 2000 updates and seed 20260917, with
+tanh action means and no running observation normalization. Change the reward
+version alone. Evaluate the final checkpoint from its own frozen source and
+compare the full probe set. Numerical gate results and human gait acceptance
+remain separate requirements.
+
+The candidate calls the existing penalty implementation through
+`TrainingTaskV3`. Its declaration identifies an experiment and retains the
+version 2 review as provenance. It does not claim that the version 2 reviewer
+approved immediate tracking. The termination coefficient remains 75 for this
+comparison; the historical worst-return bound describes version 2 and needs
+reassessment under version 3.
+
+CPU checks cover endpoint feedback after different velocity histories, exact
+penalty and observation parity, and checkpoint reward identity. The existing
+unknown-version tests now use `unknown` because `3` names a supported candidate.
+No assertion tolerance or physical threshold changed. Section 14 records the
+completed version 3 trial.
+
+## 14. Immediate tracking reaches a saturated stationary policy
+
+We completed reward-v3 training and its final evaluation from frozen source
+`6754d1a8982955615c37fef8b91e0e23cf488e55`. We retained 128 robots,
+2000 updates, seed 20260917, tanh means and no running normalization.
+We verified 6,144,000 transitions, 40 checkpoint pairs and the frozen inputs.
+We then verified all 13 probe captures, 230 file hashes and finite native
+400 Hz force/torque arrays. Both launchers exited with code zero; we confirmed
+that both owned containers were absent after cleanup.
+
+The policy fails all 13 probes. All ten movement probes fail tracking and the
+computed torque-demand criterion. Both quiet probes and the stop probe fail.
+You can inspect the [comparison](../site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation.json)
+and [native verification](../site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation_verification.json).
+
+| Configuration at update 2000 | Normalized tracking error E | Passing probes |
+| --- | ---: | ---: |
+| Reward v2, running normalization | 1.000132 | 3/13 |
+| Reward v2, no normalization | 1.000658 | 0/13 |
+| Reward v3, no normalization | 1.000437 | 0/13 |
+
+For the +0.05 m/s forward command, we measure mean X velocity
+-0.000002546 m/s and planar error 0.050002837 m/s against the 0.025 limit.
+Over control endpoints 2 < t <= 20 seconds, 16 of 18 deterministic joint
+commands remain at magnitude at least 0.95. The mean per-joint target span is
+0.000275542 rad. The right-front coxa requests 4.160072 Nm RMS while its
+applied torque stays at the 1.6 Nm cap throughout the scored window.
+The demand-over-rating fraction is 0.055556 against 0.005. This demand failure
+does not imply that applied torque exceeded the cap. Quiet-20s joint-speed
+RMS reaches 1.191079 rad/s against 0.03.
+
+We also inspected all 2000 training metric rows. Pre-update mean Gaussian
+divergence stays zero. During updates 1901–2000, 88.8646% of joint means
+are near a bound, and 44.4530% of raw Gaussian samples exceed [-1, 1].
+The environment clips those samples. Mean action standard deviation is
+0.0930003; mean post-update divergence is 0.0244518. Projected speed along
+moving commands is 0.000018025 m/s, weighted by moving-command controls.
+You can inspect the recorded windows and reward components in the comparison.
+Training samples and deterministic evaluation actions have separate statistics.
+
+We conclude that changing reward timing alone did not recover walking in this
+matched trial. The policy converged to nearly fixed boundary targets. We have
+not established why it chose those targets. The next diagnosis must test
+exploration and penalty incentives before selecting another change. We retain
+human gait labels as pending and preserve the original run's missing probes.
+Failed motion does not support a matched-speed load comparison with the tripod.
+
+You can reproduce the comparison from the retained Spark attempts. The script
+checks capture hashes and the historical analysis helper before computing its
+results; it starts no native run. Use a fresh external workspace and the admitted
+stance metadata with hash `830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c`.
+
+```sh
+uv run python -B site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation.py \
+  --workspace "$HOME/hexapod-evidence/reward-v3-comparison" \
+  --stance "$HOME/hexapod-evidence/stance.json" --fetch
+```
+
 ## Reproduce the Table I audit
 
 ```sh
