@@ -353,11 +353,65 @@ uv run python -B site/assets/ppo_action_audit_20261002_001/evaluation_comparison
 
 ## 12. Separate normalization drift from reward timing
 
-We will test `--observation-normalization none` first and retain reward v2.
+We tested `--observation-normalization none` first and retained reward v2.
 The bounded-mean policy failed to walk, but neither the training totals nor
 the fixed-trajectory reward ranking identifies the cause. We keep immediate
 tracking as a separate future reward version if further evidence warrants it.
 The model, motor limits and evaluation gates remain unchanged.
+
+### Native normalization result
+
+We completed 2000 updates with 128 robots, seed 20260917 and tanh action means
+from source `bc16207b213efafd2ce203225d37f2f076e99f46`. The
+[training receipt](../site/assets/ppo_learning_recovery_20261002_001/no_norm_training_verification.json)
+verifies 6144000 transitions and all 40 checkpoint pairs. The
+[evaluation receipt](../site/assets/ppo_learning_recovery_20261002_001/no_norm_evaluation_verification.json)
+verifies all 13 captures, finite force/torque records, the declared forward
+video and exact-container cleanup. Both launchers exited with code 0.
+
+| Measure at update 2000 | Running normalization | No normalization |
+| --- | ---: | ---: |
+| Movement probes passed | 0/10 | 0/10 |
+| Quiet probes passed | 2/2 | 0/2 |
+| Stop screen passed | 1/1 | 0/1 |
+| Normalized tracking error E | 1.000132 | 1.000658 |
+| Forward speed for a 0.05 m/s command | 0.00000612 m/s | 0.00002469 m/s |
+| Forward deterministic actions outside [-1, 1] | 0% | 0% |
+| Mean per-joint forward target span, 2 < t <= 20 s | 0.001378 rad | 0.017164 rad |
+
+The no-normalization policy fails all 13 probes. Its 20-second quiet probe
+has maximum joint-speed RMS 0.654534 rad/s against the 0.03 rad/s limit.
+The 225-degree translation probe exceeds the native speed bound at six physics
+steps; the 270-degree probe exceeds it at one step. Their captures remain complete;
+capture integrity does not grant physical acceptance. Eight forward joint
+actions remain at magnitude 0.95 or more throughout the scored action window.
+You can inspect the [forward video](../site/assets/media/ppo_no_norm_2000_20261003.mp4).
+
+Pre-update mean Gaussian divergence stays zero across the 2000 collected
+rollouts. Removing normalization eliminates this measured distribution drift.
+The policy still fails walking and regresses quiet standing and stopping.
+One seed does not isolate all causes of learning failure. These results support
+the separate immediate-tracking reward comparison in
+[PR #58](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/58).
+That comparison retains the penalty weights and physics; reward v2 remains
+unchanged. Human gait labels remain pending, and ten original unbounded-policy
+probes remain missing. Failed motion cannot establish a load comparison at
+matched walking speed against the tripod.
+
+The [comparison](../site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.json)
+contains each probe's metrics and force/torque summaries. Its
+[source](../site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.py)
+reuses the hash-pinned action audit and checks the completed capture files.
+Use the admitted stance file fetched in section 9 and a fresh external workspace:
+
+```sh
+uv run python -B site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.py \
+  --workspace "$HOME/hexapod-evidence/normalization-evaluation-20261003" \
+  --stance "$HOME/hexapod-evidence/reward-audit-20261002/reward_audit_inputs/stance.json" \
+  --fetch
+```
+
+### CPU normalization and timing audits
 
 We replayed stored actor observations from all 13 completed probes on the CPU
 in the [normalization audit](../site/assets/ppo_learning_recovery_20261002_001/normalization_audit.json).
