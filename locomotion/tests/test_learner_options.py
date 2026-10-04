@@ -19,7 +19,7 @@ from locomotion.train import require_learner_configuration
 
 REMOTE = '/srv/cupi/hexapod/runs/james/learner_options_fixture'
 OPTIONS = dict(observation_scaling='fixed', command_segments='bootstrap', learning_rate_max=3e-4, action_std=.1,
-               action_noise_correlation=.9, action_std_final=.03)
+               action_noise_correlation=.9, action_std_final=.03, gait_clock=60)
 
 
 class CommandTask:
@@ -70,7 +70,8 @@ class LearnerOptionTests(unittest.TestCase):
         self.assertNotIn('learning_rate_max', base['algorithm'])
         self.assertEqual(base['actor']['distribution_cfg']['init_std'], .15)
         chosen = ppo.ppo_config(7, action_mean='tanh', **OPTIONS)
-        self.assertEqual(chosen['environment_wrapper'], {'observation_scaling': 'fixed', 'command_segments': 'bootstrap'})
+        self.assertEqual(chosen['environment_wrapper'],
+                         {'observation_scaling': 'fixed', 'command_segments': 'bootstrap', 'gait_clock': 60})
         self.assertEqual(chosen['exploration'], {'action_std_final': .03})
         self.assertEqual(chosen['algorithm']['class_name'], ppo.RATE_CLASS)
         self.assertEqual(chosen['algorithm']['learning_rate'], 3e-4)
@@ -196,6 +197,25 @@ class LearnerOptionTests(unittest.TestCase):
             self.assertAlmostEqual(seen, expected, places=6)
         self.assertAlmostEqual(float(parameter.exp()[0]), .03, places=6)
 
+    def test_gait_clock_appends_the_episode_phase_to_actor_and_critic_inputs(self):
+        self.assertEqual(ppo.ppo_config(3, gait_clock=60)['environment_wrapper'], {'gait_clock': 60})
+        for bad in (dict(gait_clock=5), dict(gait_clock=60.), dict(gait_clock=300)):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                ppo.ppo_config(3, **bad)
+        task = CommandTask()
+        task.episode_steps = torch.tensor([0, 15, 75])
+        wrapped = ppo.VanillaVecEnv(task, tensor_dict=lambda value, **kw: value, gait_clock=60)
+        obs = wrapped.get_observations()
+        self.assertEqual((obs['policy'].shape, obs['critic'].shape), ((3, 233), (3, 236)))
+        expected = torch.tensor([[0., 1.], [1., 0.], [1., 0.]])
+        torch.testing.assert_close(obs['policy'][:, 231:], expected, atol=1e-6, rtol=0)
+        torch.testing.assert_close(obs['critic'][:, 234:], expected, atol=1e-6, rtol=0)
+        torch.testing.assert_close(obs['policy'][:, :231], task.output()['obs'])
+        plain = ppo.VanillaVecEnv(CommandTask(), tensor_dict=lambda value, **kw: value)
+        self.assertEqual(plain.get_observations()['policy'].shape, (3, 231))
+        torch.testing.assert_close(ppo.clock_features(torch.tensor([30, 45]), 60),
+                                   torch.tensor([[0., -1.], [-1., 0.]]), atol=1e-6, rtol=0)
+
     def test_value_metrics_score_the_critic_on_the_collected_rollout(self):
         storage = SimpleNamespace(returns=torch.tensor([[1.], [2.], [3.], [4.]]), values=torch.tensor([[1.], [2.], [3.], [4.]]))
         self.assertAlmostEqual(ppo.value_metrics(storage)['explained_variance'], 1.)
@@ -214,21 +234,23 @@ class LearnerOptionTests(unittest.TestCase):
                 args = binding['command_args']
                 for flag, value in (('--observation-scaling', 'fixed'), ('--command-segments', 'bootstrap'),
                                     ('--learning-rate-max', '0.0003'), ('--action-std', '0.1'),
-                                    ('--action-noise-correlation', '0.9'), ('--action-std-final', '0.03')):
+                                    ('--action-noise-correlation', '0.9'), ('--action-std-final', '0.03'),
+                                    ('--gait-clock', '60')):
                     self.assertEqual(args[args.index(flag)+1], value)
                 pack = json.loads((root/mode/'PACK.json').read_text())
                 self.assertEqual({key: pack[key] for key in OPTIONS}, OPTIONS)
                 self.assertIn('locomotion/rate_schedule.py', json.loads((root/mode/'source/FREEZE_SHA256.json').read_text()))
             legacy = prepare(root/'legacy', REMOTE)
             self.assertFalse({'--observation-scaling', '--command-segments', '--learning-rate-max', '--action-std',
-                              '--action-noise-correlation', '--action-std-final', '--video-case'} & set(legacy['command_args']))
+                              '--action-noise-correlation', '--action-std-final', '--gait-clock', '--video-case'}
+                             & set(legacy['command_args']))
             self.assertFalse(set(OPTIONS) & set(json.loads((root/'legacy/PACK.json').read_text())))
             video = prepare(root/'video', REMOTE, mode='evaluate', video_case='learning:forward_0.05_to_stop', **checkpoint)
             position = video['command_args'].index('--video-case')
             self.assertEqual(video['command_args'][position+1], 'learning:forward_0.05_to_stop')
             for index, bad in enumerate((dict(mode='diagnostic', observation_scaling='fixed'), dict(learner='amp', action_std=.1),
                     dict(mode='tripod', command_segments='bootstrap'), dict(learning_rate_max=1.),
-                    dict(action_noise_correlation=.9),
+                    dict(action_noise_correlation=.9), dict(gait_clock=5),
                     dict(video_case='learning:quiet_20s'), dict(mode='evaluate', eval_scope='full', video_case='learning:quiet_20s', **checkpoint),
                     dict(mode='evaluate', video_case='static:stand', **checkpoint))):
                 with self.subTest(bad=bad), self.assertRaises(ValueError):

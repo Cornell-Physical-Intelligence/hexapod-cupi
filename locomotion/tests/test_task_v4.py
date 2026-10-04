@@ -15,6 +15,7 @@ from locomotion.tests.test_task_v2 import RewardDouble
 
 REMOTE = "/srv/cupi/hexapod/runs/test/reward_v4_fixture"
 HEIGHT = .1
+LOADED = torch.tensor([[0., 0., 24.]]).expand(6, -1)
 
 
 class GaitDouble(RewardDouble):
@@ -28,9 +29,11 @@ class GaitDouble(RewardDouble):
         self.world = torch.zeros(n, 6, 3)
         self.current["toe_body"] = self.toes.clone()
         self.current["toe_world"] = self.world.clone()
+        self.episode_steps = torch.zeros(n, dtype=torch.long)
 
     def step(self, action):
         output = super().step(action)
+        self.episode_steps += 1
         self.telemetry["tibia_floor_force_world_n"] = self.forces.clone()
         self.telemetry["toe_xyz_body"] = self.toes.clone()
         self.telemetry["toe_xyz_world"] = self.world.clone()
@@ -40,6 +43,7 @@ class GaitDouble(RewardDouble):
 
 
 def telemetry(commands, **overrides):
+    """One control of a robot at rest on six loaded feet."""
     n = len(commands)
     zeros = torch.zeros(n, 18)
     pose = torch.zeros(n, 7)
@@ -50,7 +54,9 @@ def telemetry(commands, **overrides):
         "requested_torque_abs_max_400hz": zeros, "other_body_force_max_400hz": torch.zeros(n),
         "tracked_velocity_nav": torch.zeros(n, 3), "touchdown": torch.zeros(n, 6, dtype=torch.bool),
         "air_time_s": torch.zeros(n, 6), "swing": torch.zeros(n, 6, dtype=torch.bool),
-        "tibia_floor_force_world_n": torch.zeros(n, 6, 3),
+        "tibia_floor_force_world_n": LOADED.expand(n, -1, -1).clone(), "airborne": torch.zeros(n, 6, dtype=torch.bool),
+        "toe_velocity_nav": torch.zeros(n, 6, 2), "toe_xyz_nav": torch.zeros(n, 6, 2),
+        "scheduled_swing": torch.zeros(n, 6, dtype=torch.bool),
         "command": commands.clone(), "action": zeros}
     result.update(overrides)
     return result
@@ -127,14 +133,14 @@ class RewardV4Tests(unittest.TestCase):
         touchdown[:, 0] = True
         air = torch.zeros(4, 6)
         air[:, 0] = torch.tensor([.3, .02, 5., .3])
-        _, parts = score(commands, touchdown=touchdown, air_time_s=air)
-        c = CONFIG
+        c = replace(CONFIG, air_time_weight=1.)
+        _, parts = score(commands, c, touchdown=touchdown, air_time_s=air)
         expected = torch.tensor([.3 - c.air_time_threshold_s, .02 - c.air_time_threshold_s,
                                  c.air_time_cap_s - c.air_time_threshold_s, 0.]) * c.air_time_weight
         torch.testing.assert_close(parts["air_time"], expected)
         self.assertLess(float(parts["air_time"][1]), 0.)
         # A foot held in the air earns nothing until it lands.
-        _, held = score(commands, air_time_s=air)
+        _, held = score(commands, c, air_time_s=air)
         self.assertEqual(float(held["air_time"].abs().sum()), 0.)
 
     def test_swing_travel_pays_airborne_feet_that_move_with_the_command_up_to_a_ceiling(self):
@@ -253,7 +259,8 @@ class RewardV4Tests(unittest.TestCase):
 class TrainingTaskV4Tests(unittest.TestCase):
     def test_task_times_each_foot_and_restarts_its_memory(self):
         native = GaitDouble(2)
-        task = TrainingTaskV4(native)
+        timed = replace(CONFIG, air_time_weight=1., schedule_weight=0., swing_travel_weight=0., quiet_contact_weight=0.)
+        task = TrainingTaskV4(native, reward_config=timed)
         task.reset()
         native.commands[:] = torch.tensor([[.05, 0., 0.], [0., 0., 0.]])
         task.window.restart(torch.arange(2), native.commands)
@@ -266,7 +273,7 @@ class TrainingTaskV4Tests(unittest.TestCase):
         self.assertEqual(float(task.last_components["air_time"].abs().sum()), 0.)
         native.forces[:, 0, 2] = 12.
         task.step(torch.zeros(2, 18))
-        expected = (.2 - CONFIG.air_time_threshold_s) * CONFIG.air_time_weight
+        expected = (.2 - timed.air_time_threshold_s) * timed.air_time_weight
         self.assertAlmostEqual(float(task.last_components["air_time"][0]), expected, places=6)
         self.assertEqual(float(task.last_components["air_time"][1]), 0.)
         gait = task.status(reset_interval=True)["interval_gait"]
