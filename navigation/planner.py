@@ -1,4 +1,5 @@
 """Shortest-route search between two cells of a cost graph."""
+
 from __future__ import annotations
 
 import math
@@ -7,7 +8,6 @@ from dataclasses import dataclass
 from .grid import Cell, CostGrid
 from .graph import CostGraph
 from .region import Point
-
 
 __all__ = ["Route", "a_star"]
 
@@ -22,6 +22,7 @@ class Route:
     cost: float
     #: Nodes removed from the frontier and expanded. Reported so that the value of
     #: the heuristic is measurable rather than assumed; it is not part of the route.
+    # TODO: Read later
     expansions: int
 
     def __post_init__(self) -> None:
@@ -29,12 +30,16 @@ class Route:
             raise ValueError("cells must hold at least the start cell")
         cost = float(self.cost)
         if not math.isfinite(cost) or cost < 0.0:
-            raise ValueError(f"cost must be finite and non-negative, got {self.cost!r}")
+            raise ValueError(
+                f"cost must be finite and non-negative, got {self.cost!r}"
+            )
         if type(self.expansions) is not int or self.expansions < 0:
             raise ValueError(
                 f"expansions must be a non-negative int, got {self.expansions!r}"
             )
-        object.__setattr__(self, "cells", tuple((int(e), int(n)) for e, n in self.cells))
+        object.__setattr__(
+            self, "cells", tuple((int(e), int(n)) for e, n in self.cells)
+        )
         object.__setattr__(self, "cost", cost)
 
     def waypoints_m(self, grid: CostGrid) -> tuple[Point, ...]:
@@ -85,4 +90,6 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
     #   * An impassable ``start`` or ``goal`` is ``None``, not an exception.
     """
 
-    raise NotImplementedError("CHALLENGE 1+3+4: implement A* over the CostGraph")
+    raise NotImplementedError(
+        "CHALLENGE 1+3+4: implement A* over the CostGraph"
+    )

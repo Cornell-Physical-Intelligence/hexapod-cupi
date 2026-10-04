@@ -1,4 +1,5 @@
 """A rasterised cost grid over an approved survey region."""
+
 from __future__ import annotations
 
 import math
@@ -7,11 +8,12 @@ from typing import Sequence
 
 from .region import PlanMargin, Point, SurveyRegion
 
-
 __all__ = ["Cell", "CostGrid", "PASSABLE_CELL_COST", "RISK_WEIGHT"]
 
 #: An ``(east_index, north_index)`` cell address. Row-major over north.
 Cell = tuple[int, int]
+
+# TODO: Is this sketchy?
 
 #: Cost of a cell with clearance to spare. Every passable cell costs at least this,
 #: which is what makes ``min_cell_cost`` a valid heuristic scale factor.
@@ -38,6 +40,7 @@ class CostGrid:
     ``north * width_cells + east``. ``math.inf`` marks an impassable cell.
     """
 
+    # NOTE: larify definition of origin_m
     origin_m: Point
     cell_size_m: float
     width_cells: int
@@ -63,7 +66,9 @@ class CostGrid:
         for name in ("width_cells", "height_cells"):
             value = getattr(self, name)
             if type(value) is not int or value <= 0:
-                raise ValueError(f"{name} must be a positive int, got {value!r}")
+                raise ValueError(
+                    f"{name} must be a positive int, got {value!r}"
+                )
         expected = self.width_cells * self.height_cells
         values = tuple(float(value) for value in self.costs)
         if len(values) != expected:
@@ -138,8 +143,12 @@ class CostGrid:
     def cell_of(self, point: Point) -> Cell:
         """Cell containing ``point``. May be off-grid; check with :meth:`in_bounds`."""
 
-        east = math.floor((float(point[0]) - self.origin_m[0]) / self.cell_size_m)
-        north = math.floor((float(point[1]) - self.origin_m[1]) / self.cell_size_m)
+        east = math.floor(
+            (float(point[0]) - self.origin_m[0]) / self.cell_size_m
+        )
+        north = math.floor(
+            (float(point[1]) - self.origin_m[1]) / self.cell_size_m
+        )
         return (int(east), int(north))
 
     @classmethod
@@ -179,4 +188,6 @@ class CostGrid:
         # pins the result and not the method.
         """
 
-        raise NotImplementedError("CHALLENGE 6+7: rasterise and inflate the region")
+        raise NotImplementedError(
+            "CHALLENGE 6+7: rasterise and inflate the region"
+        )

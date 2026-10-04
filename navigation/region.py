@@ -1,10 +1,10 @@
 """Survey boundary, exclusions and the clearance margin a route must respect."""
+
 from __future__ import annotations
 
 import math
 from dataclasses import dataclass
 from typing import Sequence
-
 
 __all__ = ["PlanMargin", "Point", "Polygon", "SurveyRegion"]
 
@@ -16,7 +16,7 @@ Point = tuple[float, float]
 class PlanMargin:
     """Clearance a route keeps from every boundary and exclusion edge.
 
-    R-05 requires the full moving footprint to stay inside the approved region
+    It is required that the full moving footprint stay inside the approved region,
     including localization and stopping uncertainty. The three terms stay separate
     because they come from different owners and move independently:
     ``footprint_radius_m`` from the robot, ``stop_tolerance_m`` from the follower,
@@ -82,12 +82,16 @@ class Polygon:
             )
         points: list[Point] = []
         for index, vertex in enumerate(raw):
-            if isinstance(vertex, (str, bytes)) or not isinstance(vertex, Sequence):
+            if isinstance(vertex, (str, bytes)) or not isinstance(
+                vertex, Sequence
+            ):
                 raise TypeError(
                     f"vertices[{index}] must be an (east, north) pair, got {vertex!r}"
                 )
             pair = tuple(float(value) for value in vertex)
-            if len(pair) != 2 or not all(math.isfinite(value) for value in pair):
+            if len(pair) != 2 or not all(
+                math.isfinite(value) for value in pair
+            ):
                 raise ValueError(
                     f"vertices[{index}] must be a finite (east, north) pair, "
                     f"got {vertex!r}"
@@ -107,7 +111,10 @@ class Polygon:
         """Every edge as a ``(start, end)`` pair, including the closing edge."""
 
         points = self.vertices
-        return tuple((points[i], points[(i + 1) % len(points)]) for i in range(len(points)))
+        return tuple(
+            (points[i], points[(i + 1) % len(points)])
+            for i in range(len(points))
+        )
 
     @property
     def bounds_m(self) -> tuple[float, float, float, float]:
@@ -144,7 +151,9 @@ class Polygon:
         # zero-division branch.
         """
 
-        raise NotImplementedError("CHALLENGE 5: implement the simplicity predicate")
+        raise NotImplementedError(
+            "CHALLENGE 5: implement the simplicity predicate"
+        )
 
     def contains(self, point: Point) -> bool:
         """True when ``point`` lies inside this polygon.
@@ -176,7 +185,9 @@ class Polygon:
         # zero-length edge without dividing by zero.
         """
 
-        raise NotImplementedError("CHALLENGE: implement point-to-segment distance")
+        raise NotImplementedError(
+            "CHALLENGE: implement point-to-segment distance"
+        )
 
 
 @dataclass(frozen=True)
@@ -221,8 +232,12 @@ class SurveyRegion:
         min_east, min_north, max_east, max_north = self.boundary.bounds_m
         if self.corridor is not None:
             other = self.corridor.bounds_m
-            min_east, min_north = min(min_east, other[0]), min(min_north, other[1])
-            max_east, max_north = max(max_east, other[2]), max(max_north, other[3])
+            min_east, min_north = min(min_east, other[0]), min(
+                min_north, other[1]
+            )
+            max_east, max_north = max(max_east, other[2]), max(
+                max_north, other[3]
+            )
         return (min_east, min_north, max_east, max_north)
 
     def is_simple(self) -> bool:
@@ -241,7 +256,9 @@ class SurveyRegion:
             inside = self.corridor.contains(point)
         if not inside:
             return False
-        return not any(exclusion.contains(point) for exclusion in self.exclusions)
+        return not any(
+            exclusion.contains(point) for exclusion in self.exclusions
+        )
 
     def clearance_m(self, point: Point) -> float:
         """Distance from ``point`` to the nearest edge it must stay clear of.
@@ -261,6 +278,7 @@ class SurveyRegion:
             if self.corridor.contains(point):
                 distances = [self.corridor.distance_to_boundary_m(point)]
         distances.extend(
-            exclusion.distance_to_boundary_m(point) for exclusion in self.exclusions
+            exclusion.distance_to_boundary_m(point)
+            for exclusion in self.exclusions
         )
         return min(distances)
