@@ -151,6 +151,8 @@ def main(argv=None):
                         help='Ceiling for the adaptive learning rate; the stock schedule allows 1e-2.')
     parser.add_argument('--action-std', type=float, default=.15,
                         help='Initial standard deviation of the Gaussian action distribution.')
+    parser.add_argument('--gait-clock', type=int, default=0,
+                        help='Append the sine and cosine of a gait phase with this period in controls; 0 adds none.')
     parser.add_argument('--action-std-final', type=float,
                         help='Lower the action deviation linearly to this value over the run; PPO then does not learn it.')
     parser.add_argument('--action-noise-correlation', type=float, default=0.,
@@ -181,9 +183,9 @@ def main(argv=None):
     learner_options = dict(observation_scaling=args.observation_scaling, command_segments=args.command_segments,
                            learning_rate_max=args.learning_rate_max, action_std=args.action_std,
                            action_noise_correlation=args.action_noise_correlation,
-                           action_std_final=args.action_std_final)
+                           action_std_final=args.action_std_final, gait_clock=args.gait_clock)
     if (learner_options != dict(observation_scaling='none', command_segments='continuous', learning_rate_max=None,
-                                action_std=.15, action_noise_correlation=0., action_std_final=None)
+                                action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0)
             and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate'))):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
@@ -322,7 +324,10 @@ def main(argv=None):
                                               action_mean=args.action_mean)
         else:
             wrapped = vanilla.VanillaVecEnv(task, observation_scaling=args.observation_scaling,
-                                            command_segments=args.command_segments)
+                                            command_segments=args.command_segments, gait_clock=args.gait_clock)
+            schedule_period = getattr(getattr(task, 'reward_config', None), 'schedule_period_controls', None)
+            if getattr(getattr(task, 'reward_config', None), 'schedule_weight', 0) and args.gait_clock != schedule_period:
+                raise ValueError('The contact-schedule reward needs a gait clock of the same period')
             config = vanilla.ppo_config(args.seed, action_mean=args.action_mean,
                                         observation_normalization=args.observation_normalization, **learner_options)
         save(args.output/'ppo_config.json', config)
@@ -405,6 +410,9 @@ def main(argv=None):
                     if args.networks == 'paper':
                         return actor(importlib.import_module(prefix+'.paper_networks').actor_observation(observation))
                     scaled = vanilla.scale_observation(observation, args.observation_scaling)
+                    if args.gait_clock:
+                        clock = vanilla.clock_features(env.episode_steps, args.gait_clock).to(scaled)
+                        scaled = torch.cat((scaled, clock), -1)
                     return actor(TensorDict({'policy': scaled}, batch_size=[env.num_envs]))
             evaluation = importlib.import_module(prefix+'.evaluate')
             camera = importlib.import_module(prefix+'.camera')

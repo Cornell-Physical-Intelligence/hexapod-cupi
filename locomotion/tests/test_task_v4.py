@@ -50,6 +50,7 @@ def telemetry(commands, **overrides):
         "requested_torque_abs_max_400hz": zeros, "other_body_force_max_400hz": torch.zeros(n),
         "tracked_velocity_nav": torch.zeros(n, 3), "touchdown": torch.zeros(n, 6, dtype=torch.bool),
         "air_time_s": torch.zeros(n, 6), "swing": torch.zeros(n, 6, dtype=torch.bool),
+        "tibia_floor_force_world_n": torch.zeros(n, 6, 3),
         "command": commands.clone(), "action": zeros}
     result.update(overrides)
     return result
@@ -148,7 +149,7 @@ class RewardV4Tests(unittest.TestCase):
         velocity[3, 3:, 0] = .06      # loaded feet earn nothing
         extra = dict(airborne=airborne, toe_velocity_nav=velocity, toe_xyz_nav=torch.zeros(4, 6, 2))
         _, parts = score(commands, config, **extra)
-        unit = 3 * 1.2 / (6 * config.stance_duty)
+        unit = 3 * 1.2 / 6
         torch.testing.assert_close(parts["swing_travel"], torch.tensor([unit, -unit, 1., 0.]), atol=1e-6, rtol=0)
         # A yaw command asks each toe to move along its lever arm.
         turning = torch.tensor([[0., 0., .2]])
@@ -159,9 +160,25 @@ class RewardV4Tests(unittest.TestCase):
         one = torch.zeros(1, 6, dtype=torch.bool)
         one[0, 0] = True
         _, parts = score(turning, config, airborne=one, toe_velocity_nav=tangent, toe_xyz_nav=toe)
-        self.assertAlmostEqual(float(parts["swing_travel"]), 1 / (6 * config.stance_duty), places=5)
+        self.assertAlmostEqual(float(parts["swing_travel"]), 1 / 6, places=5)
         _, parts = score(torch.zeros(1, 3), config, airborne=one, toe_velocity_nav=tangent, toe_xyz_nav=toe)
         self.assertEqual(float(parts["swing_travel"]), 0.)
+
+    def test_contact_schedule_pays_unloaded_swing_feet_and_charges_unloaded_stance_feet(self):
+        config = replace(CONFIG, schedule_weight=1.)
+        wanted = task_v4.scheduled_swing(torch.tensor([0, 23, 24, 30, 53, 54]), config)
+        self.assertEqual(wanted.int().tolist(), [[1, 0, 1, 0, 1, 0]]*2 + [[0]*6] + [[0, 1, 0, 1, 0, 1]]*2 + [[0]*6])
+        commands = torch.tensor([[.05, 0., 0.]]).expand(4, -1).clone()
+        force = torch.zeros(4, 6, 3)
+        force[..., 2] = 2 * config.schedule_load_n                  # every foot loaded
+        force[1, [0, 2, 4], 2] = 0.                                  # scheduled tripod fully lifted
+        force[2, [0, 2, 4], 2] = config.schedule_load_n / 2          # the same feet half unloaded
+        force[3, [1, 3, 5], 2] = 0.                                  # the other tripod lifted instead
+        swing = wanted[:1].expand(4, -1)
+        _, parts = score(commands, config, tibia_floor_force_world_n=force, scheduled_swing=swing)
+        torch.testing.assert_close(parts["gait_schedule"], torch.tensor([0., 1., .5, -1.]), atol=1e-6, rtol=0)
+        _, parts = score(torch.zeros(4, 3), config, tibia_floor_force_world_n=force, scheduled_swing=swing)
+        self.assertEqual(float(parts["gait_schedule"].abs().sum()), 0.)
 
     def test_stance_slip_charges_planted_feet_that_move_over_the_floor(self):
         config = replace(CONFIG, stance_slip_weight=1.)

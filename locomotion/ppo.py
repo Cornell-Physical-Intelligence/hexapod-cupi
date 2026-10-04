@@ -27,15 +27,23 @@ def scale_observation(value, scaling, *, critic=False):
     return value * torch.as_tensor(scales, dtype=value.dtype, device=value.device)
 
 
+def clock_features(episode_steps, period):
+    """Sine and cosine of the gait phase: episode controls modulo the declared period."""
+    phase = 2 * math.pi * (episode_steps.to(torch.float32) % period) / period
+    return torch.stack((torch.sin(phase), torch.cos(phase)), -1)
+
+
 def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empirical',
                observation_scaling='none', command_segments='continuous', learning_rate_max=None,
-               action_std=.15, action_noise_correlation=0., action_std_final=None):
+               action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0):
     if action_mean not in ('unbounded', 'tanh'):
         raise ValueError('Action mean must be unbounded or tanh')
     if observation_normalization not in ('empirical', 'none'):
         raise ValueError('Observation normalization must be empirical or none')
     if observation_scaling not in ('none', 'fixed') or command_segments not in ('continuous', 'bootstrap'):
         raise ValueError('Observation scaling must be none or fixed; command segments continuous or bootstrap')
+    if type(gait_clock) is not int or (gait_clock and not 10 <= gait_clock <= 250):
+        raise ValueError('The gait clock period is zero or 10 to 250 controls')
     if learning_rate_max is not None and not (type(learning_rate_max) is float and 1e-5 <= learning_rate_max <= 1e-2):
         raise ValueError('The learning-rate ceiling must lie inside the stock schedule range')
     if type(action_std) is not float or not .01 <= action_std <= 1.:
@@ -73,7 +81,7 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
         config['exploration'] = {'action_std_final': action_std_final}
     wrapper = {key: value for key, value, default in (
         ('observation_scaling', observation_scaling, 'none'),
-        ('command_segments', command_segments, 'continuous')) if value != default}
+        ('command_segments', command_segments, 'continuous'), ('gait_clock', gait_clock, 0)) if value != default}
     if wrapper:
         config['environment_wrapper'] = wrapper
     return config
@@ -184,7 +192,8 @@ class VanillaVecEnv:
     reset: the critic then values the held command alone and the next draw adds no return noise.
     """
 
-    def __init__(self, task, tensor_dict=None, *, observation_scaling='none', command_segments='continuous'):
+    def __init__(self, task, tensor_dict=None, *, observation_scaling='none', command_segments='continuous',
+                 gait_clock=0):
         if tensor_dict is None:
             from tensordict import TensorDict
             tensor_dict = TensorDict
@@ -192,6 +201,7 @@ class VanillaVecEnv:
             raise ValueError('Unknown observation scaling or command segment option')
         self.task, self.tensor_dict = task, tensor_dict
         self.observation_scaling, self.command_segments = observation_scaling, command_segments
+        self.gait_clock = gait_clock
         self.num_envs, self.num_actions, self.device = task.num_envs, 18, task.device
         self.max_episode_length = round(task.cfg.episode_seconds / task.cfg.control_dt)
         self.cfg = {'physics': task.cfg.declaration(), 'task': task.declaration(),
@@ -203,9 +213,13 @@ class VanillaVecEnv:
         return self.task.episode_steps
 
     def observations(self, output):
-        return self.tensor_dict({'policy': scale_observation(output['obs'], self.observation_scaling),
-            'critic': scale_observation(output['critic'], self.observation_scaling, critic=True)},
-            batch_size=[self.num_envs])
+        policy = scale_observation(output['obs'], self.observation_scaling)
+        critic = scale_observation(output['critic'], self.observation_scaling, critic=True)
+        if self.gait_clock:
+            # The phase restarts with each episode, so evaluation can rebuild it from the control count.
+            clock = clock_features(self.task.episode_steps, self.gait_clock).to(policy)
+            policy, critic = torch.cat((policy, clock), -1), torch.cat((critic, clock), -1)
+        return self.tensor_dict({'policy': policy, 'critic': critic}, batch_size=[self.num_envs])
 
     def get_observations(self):
         return self.observations(self.current)
