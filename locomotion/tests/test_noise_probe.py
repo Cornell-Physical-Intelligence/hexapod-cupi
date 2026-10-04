@@ -31,7 +31,9 @@ class ProbeDouble(RewardDouble):
         output = super().step(action)
         self.actions.append(action.clone())
         self.telemetry.update(tibia_floor_force_world_n=torch.zeros(self.num_envs, 6, 3),
-                              tibia_floor_force_min_norm_400hz=torch.zeros(self.num_envs, 6))
+                              tibia_floor_force_min_norm_400hz=torch.zeros(self.num_envs, 6),
+                              toe_xyz_world=torch.zeros(self.num_envs, 6, 3), toe_xyz_body=torch.zeros(self.num_envs, 6, 3),
+                              computed_torque_nm=torch.zeros(self.num_envs, 18))
         output['terminated'] = torch.arange(self.num_envs) == 5 if len(self.actions) == 3 else output['terminated']
         return output
 

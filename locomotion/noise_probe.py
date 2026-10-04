@@ -33,7 +33,8 @@ POSE_SCOPE = {
 FIELDS = ("linear_velocity_nav", "angular_velocity_body", "root_pose_xyzw", "joint_position_rad",
           "joint_velocity_rad_s", "joint_target_rad", "torque_square_sum_400hz",
           "requested_torque_abs_max_400hz", "saturation_count_400hz", "other_body_force_max_400hz",
-          "tibia_floor_force_world_n", "tibia_floor_force_min_norm_400hz", "action")
+          "tibia_floor_force_world_n", "tibia_floor_force_min_norm_400hz", "toe_xyz_world", "toe_xyz_body",
+          "computed_torque_nm", "action")
 
 
 def plan(num_envs=128):

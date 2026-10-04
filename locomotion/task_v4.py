@@ -1,11 +1,15 @@
-"""Reward version 4: tracking and penalties sized for exploration noise, plus a stepping term.
+"""Reward version 4: noise-sized Table I penalties, windowed tracking and a tripod contact schedule.
 
 Versions 2 and 3 calibrated their penalty weights on deterministic rollouts and paid them on
 rollouts that carry exploration noise. PPO then earned reward by quieting its own noise and never
-moved (docs/REWARD_V2_TABLE1_AUDIT.md section 15). Version 4 keeps Table I's term list and changes
-how each term is measured and weighted; ``DEPARTURES`` lists every change with its reason.
+moved. Versions 1 and 4 without a stepping term move through that noise alone and stand still in
+deterministic evaluation (docs/REWARD_V2_TABLE1_AUDIT.md section 15). Version 4 keeps Table I's
+term list, sizes each penalty on noisy rollouts and adds two terms that pay a tripod stepping
+cycle. ``DEPARTURES`` lists every change from the paper with its reason.
 
-``measured_reward_v4`` is pure: the task passes its per-replica memory in the telemetry.
+The contact schedule needs the gait clock of ``ppo.py`` with the same period
+(``train.py --gait-clock 60``). ``measured_reward_v4`` is pure: the task passes its per-replica
+memory in the telemetry.
 """
 from dataclasses import asdict, dataclass, fields, replace
 import hashlib
@@ -17,42 +21,48 @@ import torch
 from .task import TaskConfig, TrainingTask
 from .task_v2 import ACTUATOR, CONTROL_DT_S, SUBSTEPS, StrideWindow
 
-REWARD_VERSION = "noise_calibrated_stepping_v4"
-KERNELS = ("quadratic", "absolute", "exponential")
-SCALES = ("command", "fixed")
+REWARD_VERSION = "noise_sized_tripod_schedule_v4"
 RATED_TORQUE_NM = 1.6
+# Leg order lf, lm, lr, rf, rm, rr: the first tripod is lf, lr, rm, as in tripod.py.
+TRIPOD_A = (True, False, True, False, True, False)
 DEPARTURES = (
-    "Tracking error uses the mean displacement velocity over the last tracking_window_controls "
-    "controls since the latest command change or reset, in the body frame. Table I tracks the "
-    "instantaneous velocity. At this robot's 0.025 to 0.05 m/s commands, exploration shakes the "
-    "body by about 0.035 m/s per control, which exceeds the command; a position difference removes "
-    "that jitter and a short window keeps the reward close to the action that earned it.",
-    "The quadratic kernel 1 - e^2 replaces exp(-|e| / 0.15). Its expectation under zero-mean "
-    "velocity noise equals the noise-free value minus a constant, so the gain from walking does "
-    "not shrink with noise. The printed exponent has no minus sign and its 0.15 m/s scale pays a "
-    "motionless robot 72 to 85 percent at these commands (audit sections 2 and 4).",
+    "Tracking reads the mean displacement velocity over the last tracking_window_controls controls "
+    "since the latest command change or reset, in the body frame. Table I tracks the instantaneous "
+    "velocity. At this robot's 0.05 m/s command, exploration shakes the body by 0.035 m/s per "
+    "control; the 10-control mean of position differences carries 0.013 m/s (native noise probe).",
+    "The kernel is max(1 - e^2, -floor) instead of exp(-|e| / 0.15). Its expectation under "
+    "zero-mean velocity noise equals the noise-free value minus a constant, so noise does not "
+    "shrink the gain from walking. The printed exponent has no minus sign, and its 0.15 m/s scale "
+    "pays a motionless robot 72 to 85 percent at these commands (audit sections 2 and 4).",
     "The error scale equals the commanded speed or yaw rate, so a motionless robot earns zero "
-    "tracking reward on every moving command. A zero component uses a fixed scale (0.05 m/s, "
-    "0.2 rad/s): version 2's floors (0.025 m/s, 0.15 rad/s with k 0.4) made stillness under a "
-    "zero command the term that exploration noise taxed most.",
-    "A stepping term pays each touchdown its preceding air time minus a threshold, on moving "
-    "commands. Table I has no such term: the paper's gait comes from its adversarial style reward, "
-    "which vanilla PPO omits. The term reads measured foot forces and no reference motion.",
+    "tracking reward on a moving command. A zero component uses a fixed scale (0.05 m/s, 0.2 rad/s).",
+    "A contact schedule pays each tripod for unloading its feet during its swing window and "
+    "charges unloaded feet outside it. Table I has no gait term: the paper's gait comes from its "
+    "adversarial style reward. Without a gait term PPO shuffles on exploration noise and stands "
+    "still in deterministic evaluation. The schedule reads measured toe forces and the episode "
+    "control count; it holds no joint target, pose or recorded motion.",
+    "A swing-travel term pays unloaded feet that advance over the floor in the commanded "
+    "direction, up to the sum a walk at the command produces. It turns a step in place into a stride.",
     "Each continuous penalty is a mean square against a declared scale. Table I prints unsquared "
-    "norms, which charge exploration noise in first order. Weights are set on rollouts that carry "
-    "the training noise, so the noise-driven total stays below a declared share of the tracking "
-    "reward; version 2's weights were 15 to 34,550 times the printed values.",
+    "norms, which charge exploration noise in first order. The weights are set on native rollouts "
+    "that carry training noise; version 2's weights were 15 to 34,550 times the printed values.",
     "The target-rate penalty reads the executed joint target after the action clamp and the "
-    "0.040 rad limiter. Version 2 read the raw sample, which charged the policy for noise that "
-    "never reached the joints.",
+    "0.040 rad limiter. Version 2 read the raw sample and charged noise that never reached a joint.",
+    "An over-rating term ramps from 1.4 to 1.6 N.m of requested torque at the control end, a "
+    "yaw-rate term reads the instantaneous yaw error, and a joint-margin term starts 0.1 rad from a "
+    "joint limit. Table I has a torque-limit term alone. The forward gate bounds the over-rating "
+    "share at 0.5 percent and the yaw error at 0.06 rad/s, and a joint at its limit ends the episode.",
     "A height term keeps the plate near its nominal height. Table I has none; the 400 Hz gate "
     "counts tibia-shaft contact as non-foot contact and compact training telemetry cannot.",
-    "Quiet terms penalize joint rate and target change under a zero command, as version 1 does, "
-    "because the stop gates bound both.",
+    "Quiet terms charge joint rate, target change and unloaded feet under a zero command, because "
+    "the stop gates bound all three.",
     "Any non-tibia floor contact above 1 N costs collision_weight per control; the simulation "
     "reports no self-collision.",
     "Table I has no termination term. PPO bootstraps zero after a termination, so termination_weight "
-    "exceeds the discounted loss of the largest per-control reward.",
+    "exceeds the discounted loss of the largest per-control tracking reward.",
+    "forward_draw_fraction turns that share of the moving command draws into the forward command at "
+    "the maximum speed. With the full 20-command bank and 128 robots the surrogate reaches half the "
+    "commanded speed in 2000 updates; the paper trains 4096 robots.",
 )
 OMITTED = (
     "Style r^s: no discriminator and no demonstration enter vanilla PPO.",
@@ -63,39 +73,26 @@ OMITTED = (
 
 @dataclass(frozen=True)
 class RewardV4Config:
-    tracking_kernel: str = "quadratic"
-    tracking_scale: str = "command"
     tracking_window_controls: int = 10
-    scale_k: float = 1.
     fixed_speed_scale_mps: float = .05
     fixed_yaw_scale_rad_s: float = .2
     tracking_floor: float = 1.
     linear_tracking_weight: float = 1.
     yaw_tracking_weight: float = .5
-    air_time_weight: float = 0.
-    air_time_threshold_s: float = .1
-    air_time_cap_s: float = .5
-    swing_weight: float = 0.
-    swing_feet: int = 3
-    stale_swing_weight: float = 0.
-    quiet_contact_weight: float = 1.
-    swing_travel_weight: float = 1.
-    swing_travel_clip: float = 6.
-    swing_travel_full: float = 6.
-    stance_slip_weight: float = 0.
-    stance_slip_scale_mps: float = .02
     schedule_weight: float = 2.
     schedule_period_controls: int = 60
     schedule_swing_fraction: float = .4
     schedule_load_n: float = 12.2
-    joint_margin_weight: float = 1.
-    joint_margin_rad: float = .1
-    forward_draw_fraction: float = 0.
+    swing_travel_weight: float = 1.
+    swing_travel_clip: float = 6.
+    swing_travel_full: float = 3.5
     contact_force_n: float = 1.
-    vertical_velocity_weight: float = .1
+    vertical_velocity_weight: float = .3
     vertical_velocity_scale_mps: float = .04
     roll_pitch_weight: float = .05
     roll_pitch_scale_rad_s: float = .3
+    yaw_rate_weight: float = .1
+    yaw_rate_scale_rad_s: float = .1
     torque_weight: float = .05
     acceleration_weight: float = .05
     acceleration_scale_rad_s2: float = 100.
@@ -105,42 +102,35 @@ class RewardV4Config:
     height_scale_m: float = .02
     collision_weight: float = 1.
     torque_limit_weight: float = .5
-    over_rating_weight: float = 0.
+    over_rating_weight: float = 5.
     over_rating_onset_nm: float = 1.4
-    yaw_rate_weight: float = 0.
-    yaw_rate_scale_rad_s: float = .1
-    quiet_joint_rate_weight: float = .2
-    quiet_joint_rate_scale_rad_s: float = 1.
-    quiet_target_weight: float = .2
-    quiet_target_scale_rad: float = .04
+    joint_margin_weight: float = 1.
+    joint_margin_rad: float = .1
+    quiet_joint_rate_weight: float = .5
+    quiet_joint_rate_scale_rad_s: float = .5
+    quiet_target_weight: float = .5
+    quiet_target_scale_rad: float = .02
+    quiet_contact_weight: float = 1.
     termination_weight: float = 20.
+    forward_draw_fraction: float = 1.
 
     def validate(self):
-        if self.tracking_kernel not in KERNELS or self.tracking_scale not in SCALES:
-            raise ValueError("Unknown reward v4 tracking kernel or scale")
-        if type(self.tracking_window_controls) is not int or not 1 <= self.tracking_window_controls <= 250:
-            raise ValueError("The tracking window needs 1 to 250 controls")
-        if type(self.swing_feet) is not int or not 1 <= self.swing_feet <= 3:
-            raise ValueError("The swing term counts one to three feet")
-        if type(self.schedule_period_controls) is not int or not 10 <= self.schedule_period_controls <= 250:
-            raise ValueError("The contact schedule period needs 10 to 250 controls")
-        if not 0 < self.schedule_swing_fraction <= .5:
-            raise ValueError("Each tripod swings for at most half the schedule period")
-        if not 0 <= self.forward_draw_fraction <= 1 or self.joint_margin_rad <= 0:
-            raise ValueError("The forward draw fraction lies in [0, 1] and the joint margin is positive")
+        for key, low in (("tracking_window_controls", 1), ("schedule_period_controls", 10)):
+            if type(getattr(self, key)) is not int or not low <= getattr(self, key) <= 250:
+                raise ValueError(f"{key} needs {low} to 250 controls")
         for key, value in asdict(self).items():
             if isinstance(value, float) and (not math.isfinite(value) or value < 0):
                 raise ValueError("Nonnegative finite reward v4 coefficient required: " + key)
-        scales = [key for key in asdict(self) if "_scale_" in key] + ["schedule_load_n", "swing_travel_full"]
-        if not 0 < self.over_rating_onset_nm < RATED_TORQUE_NM:
-            raise ValueError("The over-rating onset lies below the 1.6 N.m rating")
-        if any(getattr(self, key) <= 0 for key in scales + ["scale_k", "air_time_cap_s", "contact_force_n"]):
+        positive = [key for key in asdict(self) if "_scale_" in key] + [
+            "schedule_load_n", "swing_travel_full", "swing_travel_clip", "contact_force_n", "joint_margin_rad"]
+        if any(getattr(self, key) <= 0 for key in positive):
             raise ValueError("Positive reward v4 scales required")
-        if self.air_time_cap_s <= self.air_time_threshold_s:
-            raise ValueError("The air-time cap must exceed its threshold")
-        # A fall must cost more than the discounted loss of the largest per-control reward.
-        ceiling = self.linear_tracking_weight + self.yaw_tracking_weight
-        if self.termination_weight and self.termination_weight < 10 * ceiling:
+        if not 0 < self.schedule_swing_fraction <= .5:
+            raise ValueError("Each tripod swings for at most half the schedule period")
+        if not 0 < self.over_rating_onset_nm < RATED_TORQUE_NM or self.forward_draw_fraction > 1:
+            raise ValueError("The over-rating onset lies below 1.6 N.m and the forward draw share is at most 1")
+        # A fall must cost more than the discounted loss of the largest per-control tracking reward.
+        if self.termination_weight < 10 * (self.linear_tracking_weight + self.yaw_tracking_weight):
             raise ValueError("The termination weight must reach ten times the tracking ceiling")
 
 
@@ -152,36 +142,31 @@ def reward_declaration(config):
         "formulas": {
             "tracked_velocity": "mean over the last tracking_window_controls controls, since the latest command "
                 "change or reset, of the body-frame root displacement and heading change per control divided by 0.02 s",
-            "error": {"command": "e_lin = ||v - c_xy|| / (k ||c_xy||), or / s_lin when c_xy is zero; "
-                                 "e_yaw = |w - c_yaw| / (k |c_yaw|), or / s_yaw when c_yaw is zero",
-                      "fixed": "e_lin = ||v - c_xy|| / s_lin; e_yaw = |w - c_yaw| / s_yaw"}[config.tracking_scale],
-            "kernel": {"quadratic": "max(1 - e^2, -floor)", "absolute": "max(1 - e, -floor)",
-                       "exponential": "exp(-e^2)"}[config.tracking_kernel],
-            "linear_tracking": "w_lin kernel(e_lin)", "yaw_tracking": "w_yaw kernel(e_yaw)",
-            "air_time": "w sum_feet [touchdown this control] (min(t_air, cap) - threshold), moving commands only",
-            "swing": "w min(feet off the floor for at most cap, swing_feet) / swing_feet, moving commands only",
-            "stale_swing": "-w (feet off the floor for longer than cap), moving commands only",
-            "quiet_contact": "-w [zero command] (feet off the floor) / 6",
-            "swing_travel": "w min(sum_feet [off the floor] clip(u_foot . d_foot / |d_foot|^2, -clip, clip) / full, 1), "
-                "with u_foot the toe velocity over the floor, in body axes, and d_foot = c_xy + c_yaw z x r_foot the "
-                "commanded body velocity at that toe; full is the sum that a walk at the command produces; moving commands only",
-            "over_rating": "-w mean_joints(clip((|tau_requested at the control end| - onset) / (1.6 - onset), 0, 1))",
-            "yaw_rate": "-w ((w_z - c_yaw) / s)^2 at the control end",
+            "error": "e_lin = ||v - c_xy|| / ||c_xy||, or / s_lin when c_xy is zero; "
+                     "e_yaw = |w - c_yaw| / |c_yaw|, or / s_yaw when c_yaw is zero",
+            "linear_tracking": "w max(1 - e_lin^2, -floor)", "yaw_tracking": "w max(1 - e_yaw^2, -floor)",
             "gait_schedule": "w (sum over scheduled-swing feet of u - sum over scheduled-stance feet of u) / 3, with "
                 "u = clip(1 - toe force / load, 0, 1) the unloaded share of a foot; tripod lf, lr, rm swings for the "
                 "first swing fraction of the period and tripod lm, rf, rr half a period later; moving commands only",
-            "joint_margin": "-w sum_joints(clip((m - distance to the nearer joint limit) / m, 0, 1)^2)",
-            "stance_slip": "-w mean_feet([on the floor at this and the previous control] (planar toe speed / s)^2)",
+            "swing_travel": "w min(sum_feet [off the floor] clip(u_foot . d_foot / |d_foot|^2, -clip, clip) / full, 1), "
+                "with u_foot the toe velocity over the floor, in body axes, and d_foot = c_xy + c_yaw z x r_foot the "
+                "commanded body velocity at that toe; full is the sum that a walk at the command produces; moving commands only",
             "vertical_velocity": "-w (v_z / s)^2", "roll_pitch_rate": "-w mean((w_xy / s)^2)",
+            "yaw_rate": "-w ((w_z - c_yaw) / s)^2 at the control end",
             "joint_torque": "-w mean(sum_substeps tau^2 / 8) / 1.6^2",
             "joint_acceleration": "-w mean(((dq - dq_prev) / 0.02 / s)^2)",
             "target_rate": "-w mean(((q_target - q_target_prev) / s)^2), executed targets",
             "height": "-w ((z - z_nominal) / s)^2",
             "collisions": "-w [max non-tibia floor force > 1 N]",
-            "torque_limit": "-w mean(max(|tau_requested| - 1.6, 0) / 1.6)",
+            "torque_limit": "-w mean(max(|tau_requested| - 1.6, 0) / 1.6), largest request over the eight substeps",
+            "over_rating": "-w mean_joints(clip((|tau_requested at the control end| - onset) / (1.6 - onset), 0, 1))",
+            "joint_margin": "-w sum_joints(clip((m - distance to the nearer joint limit) / m, 0, 1)^2)",
             "quiet_joint_rate": "-w [zero command] mean((dq / s)^2)",
             "quiet_target_motion": "-w [zero command] mean(((q_target - q_target_prev) / s)^2)",
+            "quiet_contact": "-w [zero command] (feet off the floor) / 6",
             "termination": "-w [height, tilt or joint-limit termination this control]"},
+        "command_draws": "Version 1's sampler; forward_draw_fraction of the moving draws become forward at the maximum speed.",
+        "gait_clock": "Required: ppo.clock_features with period schedule_period_controls, zero under a zero command.",
         "departures_from_table_1": list(DEPARTURES), "omitted": list(OMITTED), "actuator": ACTUATOR,
         "review": {"status": "experimental", "basis": "docs/REWARD_V2_TABLE1_AUDIT.md section 15"}}
 
@@ -201,10 +186,6 @@ def displacement_velocity(pose, previous_pose):
     return torch.cat((planar, (turn / CONTROL_DT_S)[:, None]), -1)
 
 
-# Leg order lf, lm, lr, rf, rm, rr: the first tripod is lf, lr, rm, as in tripod.py.
-TRIPOD_A = (True, False, True, False, True, False)
-
-
 def scheduled_swing(episode_steps, config=REWARD_V4_CONFIG):
     """Six booleans per replica: the feet that the contact schedule wants off the floor at this control."""
     fraction = (episode_steps.to(torch.float32) % config.schedule_period_controls) / config.schedule_period_controls
@@ -216,33 +197,24 @@ def scheduled_swing(episode_steps, config=REWARD_V4_CONFIG):
 
 def tracking_errors(tracked, commands, config=REWARD_V4_CONFIG):
     """Dimensionless planar and yaw errors of already selected velocities."""
-    c, norm = config, torch.linalg.vector_norm
-    linear = torch.full_like(commands[:, 0], c.fixed_speed_scale_mps)
-    yaw = torch.full_like(commands[:, 0], c.fixed_yaw_scale_rad_s)
-    if c.tracking_scale == "command":
-        speed, turn = norm(commands[:, :2], dim=-1), commands[:, 2].abs()
-        linear = torch.where(speed > 0, c.scale_k * speed, linear)
-        yaw = torch.where(turn > 0, c.scale_k * turn, yaw)
-    return norm(tracked[:, :2] - commands[:, :2], dim=-1) / linear, (tracked[:, 2] - commands[:, 2]).abs() / yaw
+    speed, turn = torch.linalg.vector_norm(commands[:, :2], dim=-1), commands[:, 2].abs()
+    linear = torch.where(speed > 0, speed, torch.full_like(speed, config.fixed_speed_scale_mps))
+    yaw = torch.where(turn > 0, turn, torch.full_like(turn, config.fixed_yaw_scale_rad_s))
+    return (torch.linalg.vector_norm(tracked[:, :2] - commands[:, :2], dim=-1) / linear,
+            (tracked[:, 2] - commands[:, 2]).abs() / yaw)
 
 
 def kernel(error, config=REWARD_V4_CONFIG):
-    if config.tracking_kernel == "quadratic":
-        return (1 - error.square()).clamp_min(-config.tracking_floor)
-    if config.tracking_kernel == "absolute":
-        return (1 - error).clamp_min(-config.tracking_floor)
-    return torch.exp(-error.square())
+    return (1 - error.square()).clamp_min(-config.tracking_floor)
 
 
 def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG, nominal_height=None):
     """Version 4 terms from one control's telemetry plus the caller's memory.
 
     Memory fields: ``tracked_velocity_nav`` (planar velocity and yaw rate, already averaged),
-    ``previous_joint_velocity_rad_s``, ``previous_joint_target_rad``, ``touchdown`` (six booleans),
-    ``air_time_s`` (the air time each foot had completed before this control's contact) and
-    ``swing`` (six booleans: off the floor now, for no longer than the air-time cap),
-    ``airborne`` (six booleans: off the floor now), ``toe_velocity_nav`` (planar toe velocity over the floor, in
-    body axes) and ``toe_xyz_nav`` (planar toe position in the body frame).
+    ``previous_joint_velocity_rad_s``, ``previous_joint_target_rad``, ``scheduled_swing`` (six
+    booleans), ``toe_velocity_nav`` (planar toe velocity over the floor, in body axes),
+    ``toe_xyz_nav`` (planar toe position in the body frame) and ``joint_limit_margin_rad``.
     """
     n, device = commands.shape[0], commands.device
     def field(name, shape, dtype=torch.float32):
@@ -259,15 +231,14 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
     previous_target = field("previous_joint_target_rad", (18,))
     torque_square = field("torque_square_sum_400hz", (18,))
     requested = field("requested_torque_abs_max_400hz", (18,))
+    demand = field("computed_torque_nm", (18,)).abs()
     other_force = field("other_body_force_max_400hz", ())
+    toe_force = torch.linalg.vector_norm(field("tibia_floor_force_world_n", (6, 3)), dim=-1)
     tracked = field("tracked_velocity_nav", (3,))
-    touchdown = field("touchdown", (6,), torch.bool)
-    air_time = field("air_time_s", (6,))
-    # Records made before the swing term existed carry no swing field; they score with weight zero alone.
-    swing = (field("swing", (6,), torch.bool) if "swing" in telemetry or config.swing_weight
-             else torch.zeros(n, 6, dtype=torch.bool, device=device))
-    lifted = (field("airborne", (6,), torch.bool) if config.stale_swing_weight or config.quiet_contact_weight
-              else torch.zeros(n, 6, dtype=torch.bool, device=device))
+    wanted_swing = field("scheduled_swing", (6,), torch.bool).to(torch.float32)
+    toe_velocity = field("toe_velocity_nav", (6, 2))
+    toe = field("toe_xyz_nav", (6, 2))
+    margin = field("joint_limit_margin_rad", (18,))
     if not torch.equal(field("command", (3,)), commands):
         raise ValueError("Reward command differs from the native completed hold")
     terminated = torch.as_tensor(terminated, device=device)
@@ -276,52 +247,26 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
     if nominal_height is None:
         raise ValueError("Reward v4 needs the nominal plate height")
     c = config
-    if c.swing_travel_weight:
-        airborne = field("airborne", (6,), torch.bool)
-        toe_velocity = field("toe_velocity_nav", (6, 2))
-        toe = field("toe_xyz_nav", (6, 2))
-        # Commanded body velocity at each toe: translation plus yaw rate times the lever arm.
-        wanted = commands[:, None, :2] + commands[:, None, 2:] * torch.stack((-toe[..., 1], toe[..., 0]), -1)
-        ratio = (toe_velocity * wanted).sum(-1) / wanted.square().sum(-1).clamp_min(1e-8)
-        travel = (ratio.clamp(-c.swing_travel_clip, c.swing_travel_clip) * airborne).sum(-1) / c.swing_travel_full
-    else:
-        travel = torch.zeros(n, device=device)
-    if c.schedule_weight:
-        # A foot that carries less than its even share of the weight counts as partly lifted.
-        toe_force = torch.linalg.vector_norm(field("tibia_floor_force_world_n", (6, 3)), dim=-1)
-        unloaded = (1 - toe_force / c.schedule_load_n).clamp(0, 1)
-        wanted_swing = field("scheduled_swing", (6,), torch.bool).to(torch.float32)
-        schedule = (unloaded * (2 * wanted_swing - 1)).sum(-1) / 3
-    else:
-        schedule = torch.zeros(n, device=device)
-    if c.stance_slip_weight:
-        slip = ((field("toe_slip_mps", (6,)) / c.stance_slip_scale_mps).square() * field("planted", (6,), torch.bool)).mean(-1)
-    else:
-        slip = torch.zeros(n, device=device)
-    if c.over_rating_weight:
-        demand = field("computed_torque_nm", (18,)).abs()
-        over = ((demand - c.over_rating_onset_nm) / (RATED_TORQUE_NM - c.over_rating_onset_nm)).clamp(0, 1).mean(-1)
-    else:
-        over = torch.zeros(n, device=device)
-    margin = field("joint_limit_margin_rad", (18,)) if c.joint_margin_weight else torch.full((n, 18), c.joint_margin_rad, device=device)
     quiet = (commands == 0).all(-1).to(torch.float32)
     moving = 1 - quiet
     linear_error, yaw_error = tracking_errors(tracked, commands, c)
     target_step = target - previous_target
-    stride = (air_time.clamp_max(c.air_time_cap_s) - c.air_time_threshold_s) * touchdown
+    airborne = (toe_force <= c.contact_force_n).to(torch.float32)
+    # A foot that carries less than its even share of the weight counts as partly lifted.
+    unloaded = (1 - toe_force / c.schedule_load_n).clamp(0, 1)
+    # Commanded body velocity at each toe: translation plus yaw rate times the lever arm.
+    wanted = commands[:, None, :2] + commands[:, None, 2:] * torch.stack((-toe[..., 1], toe[..., 0]), -1)
+    ratio = (toe_velocity * wanted).sum(-1) / wanted.square().sum(-1).clamp_min(1e-8)
+    travel = (ratio.clamp(-c.swing_travel_clip, c.swing_travel_clip) * airborne).sum(-1) / c.swing_travel_full
+    over = ((demand - c.over_rating_onset_nm) / (RATED_TORQUE_NM - c.over_rating_onset_nm)).clamp(0, 1).mean(-1)
     components = {
         "linear_tracking": c.linear_tracking_weight * kernel(linear_error, c),
         "yaw_tracking": c.yaw_tracking_weight * kernel(yaw_error, c),
-        "air_time": c.air_time_weight * moving * stride.sum(-1),
-        "swing": c.swing_weight * moving * swing.sum(-1).clamp_max(c.swing_feet) / c.swing_feet,
-        "stale_swing": -c.stale_swing_weight * moving * (lifted & ~swing).sum(-1),
-        "quiet_contact": -c.quiet_contact_weight * quiet * lifted.sum(-1) / 6,
+        "gait_schedule": c.schedule_weight * moving * (unloaded * (2 * wanted_swing - 1)).sum(-1) / 3,
         "swing_travel": c.swing_travel_weight * moving * travel.clamp_max(1.),
-        "gait_schedule": c.schedule_weight * moving * schedule,
-        "joint_margin": -c.joint_margin_weight * ((c.joint_margin_rad - margin) / c.joint_margin_rad).clamp(0, 1).square().sum(-1),
-        "stance_slip": -c.stance_slip_weight * slip,
         "vertical_velocity": -c.vertical_velocity_weight * (velocity[:, 2] / c.vertical_velocity_scale_mps).square(),
         "roll_pitch_rate": -c.roll_pitch_weight * (gyro[:, :2] / c.roll_pitch_scale_rad_s).square().mean(-1),
+        "yaw_rate": -c.yaw_rate_weight * ((gyro[:, 2] - commands[:, 2]) / c.yaw_rate_scale_rad_s).square(),
         "joint_torque": -c.torque_weight * (torque_square / SUBSTEPS).mean(-1) / RATED_TORQUE_NM**2,
         "joint_acceleration": -c.acceleration_weight * ((rate - previous_rate) / CONTROL_DT_S / c.acceleration_scale_rad_s2).square().mean(-1),
         "target_rate": -c.target_rate_weight * (target_step / c.target_rate_scale_rad).square().mean(-1),
@@ -329,9 +274,10 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
         "collisions": -c.collision_weight * (other_force > c.contact_force_n).to(torch.float32),
         "torque_limit": -c.torque_limit_weight * ((requested - RATED_TORQUE_NM).clamp_min(0) / RATED_TORQUE_NM).mean(-1),
         "over_rating": -c.over_rating_weight * over,
-        "yaw_rate": -c.yaw_rate_weight * ((gyro[:, 2] - commands[:, 2]) / c.yaw_rate_scale_rad_s).square(),
+        "joint_margin": -c.joint_margin_weight * ((c.joint_margin_rad - margin) / c.joint_margin_rad).clamp(0, 1).square().sum(-1),
         "quiet_joint_rate": -c.quiet_joint_rate_weight * quiet * (rate / c.quiet_joint_rate_scale_rad_s).square().mean(-1),
         "quiet_target_motion": -c.quiet_target_weight * quiet * (target_step / c.quiet_target_scale_rad).square().mean(-1),
+        "quiet_contact": -c.quiet_contact_weight * quiet * airborne.sum(-1) / 6,
         "termination": -c.termination_weight * terminated.to(torch.float32),
     }
     reward = sum(components.values())
@@ -352,11 +298,10 @@ class TrainingTaskV4(TrainingTask):
         n, device = env.num_envs, env.device
         self.previous_joint_velocity = env.current["dq"].detach().clone().to(device)
         self.previous_pose = env.current["root"].detach().clone().to(device)
+        self.previous_toe_world = env.current["toe_world"].detach().clone().to(device)
         self.window = StrideWindow(n, self.reward_config.tracking_window_controls, 3, device)
         self.air_time = torch.zeros(n, 6, device=device)
         self.in_contact = torch.ones(n, 6, dtype=torch.bool, device=device)
-        self.previous_toe = self._toe_nav(env.current["toe_body"]).to(device)
-        self.previous_toe_world = env.current["toe_world"].detach().clone().to(device)
         self.gait_totals = {}
         super().__init__(env, task_config, output_dir)
 
@@ -369,24 +314,6 @@ class TrainingTaskV4(TrainingTask):
                                            if name.endswith(("_weight", "_variance", "_scale_rad_s", "_scale_rad", "_penalty"))])
         return result
 
-    @staticmethod
-    def _toe_nav(toe_body):
-        """Planar toe positions in the navigation axes of the body frame."""
-        from .env import navigation
-        return navigation(toe_body.detach())[..., :2].clone()
-
-    def reset(self, indices=None):
-        output = super().reset(indices)
-        selected = self._indices(indices)
-        self.previous_toe[selected] = self._toe_nav(self.env.current["toe_body"])[selected].to(self.previous_toe)
-        self.previous_toe_world[selected] = self.env.current["toe_world"][selected].detach().to(self.previous_toe_world)
-        self.previous_joint_velocity[selected] = self.env.current["dq"][selected].to(self.previous_joint_velocity)
-        self.previous_pose[selected] = self.env.current["root"][selected].to(self.previous_pose)
-        self.window.restart(selected, self.env.commands[selected])
-        self.air_time[selected] = 0
-        self.in_contact[selected] = True
-        return output
-
     def _resample(self, indices):
         """Version 1's draw, then a declared share of the moving draws becomes forward at the maximum speed."""
         super()._resample(indices)
@@ -394,39 +321,41 @@ class TrainingTaskV4(TrainingTask):
         if share and len(indices):
             chosen = (torch.rand(len(indices), generator=self.rng) < share).to(self.env.device)
             chosen &= (self.env.commands[indices] != 0).any(-1)
-            rows = indices[chosen]
-            self.env.commands[rows] = self.env.commands.new_tensor([self.config.maximum_speed_mps, 0., 0.])
+            self.env.commands[indices[chosen]] = self.env.commands.new_tensor([self.config.maximum_speed_mps, 0., 0.])
+
+    def reset(self, indices=None):
+        output = super().reset(indices)
+        selected = self._indices(indices)
+        self.previous_joint_velocity[selected] = self.env.current["dq"][selected].to(self.previous_joint_velocity)
+        self.previous_pose[selected] = self.env.current["root"][selected].to(self.previous_pose)
+        self.previous_toe_world[selected] = self.env.current["toe_world"][selected].detach().to(self.previous_toe_world)
+        self.window.restart(selected, self.env.commands[selected])
+        self.air_time[selected] = 0
+        self.in_contact[selected] = True
+        return output
 
     def reward_telemetry(self, command):
         """Current telemetry plus this task's memory; advances the tracking window and foot timers."""
+        from .env import inverse_rotate, navigation
         t = self.env.telemetry
         pose = t["root_pose_xyzw"].to(self.previous_pose)
         tracked = self.window.update(displacement_velocity(pose, self.previous_pose), command)
         contact = torch.linalg.vector_norm(t["tibia_floor_force_world_n"], dim=-1) > self.reward_config.contact_force_n
         touchdown = contact & ~self.in_contact
-        planted = contact & self.in_contact
-        world = t["toe_xyz_world"].detach().to(self.previous_toe_world)
-        previous_world = self.previous_toe_world
-        slip = torch.linalg.vector_norm((world - previous_world)[..., :2], dim=-1) / CONTROL_DT_S
-        self.previous_toe_world = world.clone()
         completed = self.air_time.clone()
         self.air_time = torch.where(contact, torch.zeros_like(self.air_time), self.air_time + CONTROL_DT_S)
         self.in_contact = contact
-        swing = ~contact & (self.air_time <= self.reward_config.air_time_cap_s + 1e-6)
-        # The control just completed started at episode step minus one.
-        wanted = (scheduled_swing(self.env.episode_steps - 1, self.reward_config).to(contact.device)
-                  if self.reward_config.schedule_weight else torch.zeros_like(contact))
-        from .env import inverse_rotate, navigation
-        toe = self._toe_nav(t["toe_xyz_body"]).to(self.previous_toe)
-        self.previous_toe = toe
-        q = t["joint_position_rad"].to(contact.device)
         # Toe velocity over the floor, expressed in the body's navigation axes.
-        heading = pose[:, None, 3:].expand(-1, 6, -1)
-        toe_velocity = navigation(inverse_rotate(heading, (world - previous_world) / CONTROL_DT_S))[..., :2]
+        world = t["toe_xyz_world"].detach().to(self.previous_toe_world)
+        body_axes = pose[:, None, 3:].expand(-1, 6, -1)
+        toe_velocity = navigation(inverse_rotate(body_axes, (world - self.previous_toe_world) / CONTROL_DT_S))[..., :2]
+        self.previous_toe_world = world.clone()
+        q = t["joint_position_rad"].to(contact.device)
+        # The control just completed started at episode step minus one.
         return {**t, "tracked_velocity_nav": tracked, "previous_joint_velocity_rad_s": self.previous_joint_velocity,
                 "previous_joint_target_rad": self.previous_target, "touchdown": touchdown, "air_time_s": completed,
-                "swing": swing, "airborne": ~contact, "toe_velocity_nav": toe_velocity, "toe_xyz_nav": toe,
-                "planted": planted, "toe_slip_mps": slip, "scheduled_swing": wanted,
+                "toe_velocity_nav": toe_velocity, "toe_xyz_nav": navigation(t["toe_xyz_body"].detach())[..., :2],
+                "scheduled_swing": scheduled_swing(self.env.episode_steps - 1, self.reward_config).to(contact.device),
                 "joint_limit_margin_rad": torch.minimum(q - self.env.lower.to(q), self.env.upper.to(q) - q)}
 
     def step(self, action):

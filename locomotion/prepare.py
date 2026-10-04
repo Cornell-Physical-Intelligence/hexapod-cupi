@@ -30,7 +30,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             reward_version='1', learner='ppo', networks='mlp', action_mean='unbounded',
             observation_normalization='empirical', observation_scaling='none',
             command_segments='continuous', learning_rate_max=None, action_std=.15,
-            action_noise_correlation=0., action_std_final=None, gait_clock=0, video_case=None,
+            action_noise_correlation=0., action_std_final=None, gait_clock=0, episode_seconds=20.,
+            video_case=None,
             allocation_profile='standard', max_wall_seconds=6200, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     validate_deadline(mode, allocation_profile, max_wall_seconds)
@@ -82,6 +83,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
                          'the noise correlation require PPO training or evaluation')
     if video_case is not None and (mode != 'evaluate' or eval_scope == 'full' or not video_case.startswith('learning:')):
         raise ValueError('A video case applies to a learning-probe evaluation')
+    if type(episode_seconds) is not float or (episode_seconds != 20. and (mode != 'train' or not 5. <= episode_seconds <= 20.)):
+        raise ValueError('Episode length selection applies to training, between 5 and 20 seconds')
     if (learner not in ('ppo', 'amp') or networks not in ('mlp', 'paper') or (networks == 'paper' and learner != 'amp')
             or (learner == 'amp' and mode not in ('train', 'evaluate'))):
         raise ValueError('The AMP learner trains or evaluates, and the paper networks need the AMP learner')
@@ -163,6 +166,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         binding['command_args'] += ['--eval-scope', eval_scope]
     if video_case is not None:
         binding['command_args'] += ['--video-case', video_case]
+    if episode_seconds != 20.:
+        binding['command_args'] += ['--episode-seconds', str(episode_seconds)]
     if mode == 'throughput':
         binding['command_args'] += ['--warmup-updates', str(warmup_updates)]
     if checkpoint is not None:
@@ -181,6 +186,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         'learner': learner, 'networks': networks, 'action_mean': action_mean,
         'observation_normalization': observation_normalization, **selected_options,
         **({} if video_case is None else {'video_case': video_case}),
+        **({} if episode_seconds == 20. else {'episode_seconds': episode_seconds}),
         'allocation_profile': allocation_profile, 'max_wall_seconds': max_wall_seconds,
         'updates': updates, 'stage2_complete': False, 'files': {
             p.relative_to(output).as_posix(): sha(p) for p in sorted(output.rglob('*')) if p.is_file()}})
@@ -219,6 +225,7 @@ def main():
     parser.add_argument('--action-noise-correlation', type=float, default=0.)
     parser.add_argument('--action-std-final', type=float)
     parser.add_argument('--gait-clock', type=int, default=0)
+    parser.add_argument('--episode-seconds', type=float, default=20.)
     parser.add_argument('--video-case')
     parser.add_argument('--allocation-profile', choices=ALLOCATION_PROFILES, default='standard')
     parser.add_argument('--max-wall-seconds', type=int, default=6200)

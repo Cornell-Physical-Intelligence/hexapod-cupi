@@ -251,12 +251,17 @@ class LearnerOptionTests(unittest.TestCase):
                               '--action-noise-correlation', '--action-std-final', '--gait-clock', '--video-case'}
                              & set(legacy['command_args']))
             self.assertFalse(set(OPTIONS) & set(json.loads((root/'legacy/PACK.json').read_text())))
+            short = prepare(root/'short', REMOTE, mode='train', episode_seconds=10.)
+            self.assertEqual(short['command_args'][-2:], ['--episode-seconds', '10.0'])
+            self.assertEqual(json.loads((root/'short/PACK.json').read_text())['episode_seconds'], 10.)
+            self.assertNotIn('--episode-seconds', legacy['command_args'])
             video = prepare(root/'video', REMOTE, mode='evaluate', video_case='learning:forward_0.05_to_stop', **checkpoint)
             position = video['command_args'].index('--video-case')
             self.assertEqual(video['command_args'][position+1], 'learning:forward_0.05_to_stop')
             for index, bad in enumerate((dict(mode='diagnostic', observation_scaling='fixed'), dict(learner='amp', action_std=.1),
                     dict(mode='tripod', command_segments='bootstrap'), dict(learning_rate_max=1.),
-                    dict(action_noise_correlation=.9), dict(gait_clock=5),
+                    dict(action_noise_correlation=.9), dict(gait_clock=5), dict(episode_seconds=2.), dict(episode_seconds=10),
+                    dict(mode='evaluate', episode_seconds=10., **checkpoint),
                     dict(video_case='learning:quiet_20s'), dict(mode='evaluate', eval_scope='full', video_case='learning:quiet_20s', **checkpoint),
                     dict(mode='evaluate', video_case='static:stand', **checkpoint))):
                 with self.subTest(bad=bad), self.assertRaises(ValueError):

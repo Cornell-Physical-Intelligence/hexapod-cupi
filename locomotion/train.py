@@ -151,6 +151,8 @@ def main(argv=None):
                         help='Ceiling for the adaptive learning rate; the stock schedule allows 1e-2.')
     parser.add_argument('--action-std', type=float, default=.15,
                         help='Initial standard deviation of the Gaussian action distribution.')
+    parser.add_argument('--episode-seconds', type=float, default=20.,
+                        help='Training episode length; 20 s by default. Shorter episodes bound how far a robot walks.')
     parser.add_argument('--gait-clock', type=int, default=0,
                         help='Append the sine and cosine of a gait phase with this period in controls; 0 adds none.')
     parser.add_argument('--action-std-final', type=float,
@@ -191,6 +193,8 @@ def main(argv=None):
                          'the noise correlation require PPO training or evaluation')
     if args.video_case is not None and (args.mode != 'evaluate' or args.eval_scope == 'full'):
         raise ValueError('A video case applies to a learning-probe evaluation')
+    if args.episode_seconds != 20. and (args.mode != 'train' or not 5. <= args.episode_seconds <= 20.):
+        raise ValueError('Episode length selection applies to training, between 5 and 20 seconds')
     if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
         raise ValueError('The paper networks need the AMP learner, and the AMP learner trains or evaluates only')
     configuration.verify_assets(args.asset, args.model)
@@ -206,7 +210,7 @@ def main(argv=None):
     from .evaluation_config import EvaluationEnvConfig
     config_class = EvaluationEnvConfig if args.mode == 'evaluate' and args.eval_scope == 'full' else configuration.EnvConfig
     cfg = config_class(num_envs=args.num_envs, seed=args.seed,
-        record_motion_features=args.mode == 'evaluate' or args.learner == 'amp', render=args.mode == 'evaluate', episode_seconds=(90. if args.eval_scope == 'full' else 60.) if args.mode == 'evaluate' else (60. if args.mode == 'diagnostic' else 20.), device=args.device)
+        record_motion_features=args.mode == 'evaluate' or args.learner == 'amp', render=args.mode == 'evaluate', episode_seconds=(90. if args.eval_scope == 'full' else 60.) if args.mode == 'evaluate' else (60. if args.mode == 'diagnostic' else args.episode_seconds), device=args.device)
     identity = {'schema': 'hexapod_locomotion_ppo_v1', 'source_files': {p.name: sha(p) for p in sorted(source.glob('*.py'))},
         'model_sha256': configuration.MODEL_SHA256, 'usd_sha256': configuration.USD_SHA256,
         'stance_sha256': sha(args.stance),
