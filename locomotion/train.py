@@ -411,7 +411,7 @@ def main(argv=None):
                         return actor(importlib.import_module(prefix+'.paper_networks').actor_observation(observation))
                     scaled = vanilla.scale_observation(observation, args.observation_scaling)
                     if args.gait_clock:
-                        clock = vanilla.clock_features(env.episode_steps, args.gait_clock).to(scaled)
+                        clock = vanilla.clock_features(env.episode_steps, args.gait_clock, observation[:, 210:213]).to(scaled)
                         scaled = torch.cat((scaled, clock), -1)
                     return actor(TensorDict({'policy': scaled}, batch_size=[env.num_envs]))
             evaluation = importlib.import_module(prefix+'.evaluate')

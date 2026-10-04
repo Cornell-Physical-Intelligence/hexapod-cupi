@@ -87,6 +87,9 @@ class RewardV4Config:
     schedule_period_controls: int = 60
     schedule_swing_fraction: float = .4
     schedule_load_n: float = 12.2
+    joint_margin_weight: float = 1.
+    joint_margin_rad: float = .1
+    forward_draw_fraction: float = 0.
     contact_force_n: float = 1.
     vertical_velocity_weight: float = .1
     vertical_velocity_scale_mps: float = .04
@@ -118,6 +121,8 @@ class RewardV4Config:
             raise ValueError("The contact schedule period needs 10 to 250 controls")
         if not 0 < self.schedule_swing_fraction <= .5:
             raise ValueError("Each tripod swings for at most half the schedule period")
+        if not 0 <= self.forward_draw_fraction <= 1 or self.joint_margin_rad <= 0:
+            raise ValueError("The forward draw fraction lies in [0, 1] and the joint margin is positive")
         for key, value in asdict(self).items():
             if isinstance(value, float) and (not math.isfinite(value) or value < 0):
                 raise ValueError("Nonnegative finite reward v4 coefficient required: " + key)
@@ -156,6 +161,7 @@ def reward_declaration(config):
             "gait_schedule": "w (sum over scheduled-swing feet of u - sum over scheduled-stance feet of u) / 3, with "
                 "u = clip(1 - toe force / load, 0, 1) the unloaded share of a foot; tripod lf, lr, rm swings for the "
                 "first swing fraction of the period and tripod lm, rf, rr half a period later; moving commands only",
+            "joint_margin": "-w sum_joints(clip((m - distance to the nearer joint limit) / m, 0, 1)^2)",
             "stance_slip": "-w mean_feet([on the floor at this and the previous control] (planar toe speed / s)^2)",
             "vertical_velocity": "-w (v_z / s)^2", "roll_pitch_rate": "-w mean((w_xy / s)^2)",
             "joint_torque": "-w mean(sum_substeps tau^2 / 8) / 1.6^2",
@@ -283,6 +289,7 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
         slip = ((field("toe_slip_mps", (6,)) / c.stance_slip_scale_mps).square() * field("planted", (6,), torch.bool)).mean(-1)
     else:
         slip = torch.zeros(n, device=device)
+    margin = field("joint_limit_margin_rad", (18,)) if c.joint_margin_weight else torch.full((n, 18), c.joint_margin_rad, device=device)
     quiet = (commands == 0).all(-1).to(torch.float32)
     moving = 1 - quiet
     linear_error, yaw_error = tracking_errors(tracked, commands, c)
@@ -297,6 +304,7 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
         "quiet_contact": -c.quiet_contact_weight * quiet * lifted.sum(-1) / 6,
         "swing_travel": c.swing_travel_weight * moving * travel.clamp_max(1.),
         "gait_schedule": c.schedule_weight * moving * schedule,
+        "joint_margin": -c.joint_margin_weight * ((c.joint_margin_rad - margin) / c.joint_margin_rad).clamp(0, 1).square().sum(-1),
         "stance_slip": -c.stance_slip_weight * slip,
         "vertical_velocity": -c.vertical_velocity_weight * (velocity[:, 2] / c.vertical_velocity_scale_mps).square(),
         "roll_pitch_rate": -c.roll_pitch_weight * (gyro[:, :2] / c.roll_pitch_scale_rad_s).square().mean(-1),
@@ -363,6 +371,16 @@ class TrainingTaskV4(TrainingTask):
         self.in_contact[selected] = True
         return output
 
+    def _resample(self, indices):
+        """Version 1's draw, then a declared share of the moving draws becomes forward at the maximum speed."""
+        super()._resample(indices)
+        share = self.reward_config.forward_draw_fraction
+        if share and len(indices):
+            chosen = (torch.rand(len(indices), generator=self.rng) < share).to(self.env.device)
+            chosen &= (self.env.commands[indices] != 0).any(-1)
+            rows = indices[chosen]
+            self.env.commands[rows] = self.env.commands.new_tensor([self.config.maximum_speed_mps, 0., 0.])
+
     def reward_telemetry(self, command):
         """Current telemetry plus this task's memory; advances the tracking window and foot timers."""
         t = self.env.telemetry
@@ -385,13 +403,15 @@ class TrainingTaskV4(TrainingTask):
         from .env import inverse_rotate, navigation
         toe = self._toe_nav(t["toe_xyz_body"]).to(self.previous_toe)
         self.previous_toe = toe
+        q = t["joint_position_rad"].to(contact.device)
         # Toe velocity over the floor, expressed in the body's navigation axes.
         heading = pose[:, None, 3:].expand(-1, 6, -1)
         toe_velocity = navigation(inverse_rotate(heading, (world - previous_world) / CONTROL_DT_S))[..., :2]
         return {**t, "tracked_velocity_nav": tracked, "previous_joint_velocity_rad_s": self.previous_joint_velocity,
                 "previous_joint_target_rad": self.previous_target, "touchdown": touchdown, "air_time_s": completed,
                 "swing": swing, "airborne": ~contact, "toe_velocity_nav": toe_velocity, "toe_xyz_nav": toe,
-                "planted": planted, "toe_slip_mps": slip, "scheduled_swing": wanted}
+                "planted": planted, "toe_slip_mps": slip, "scheduled_swing": wanted,
+                "joint_limit_margin_rad": torch.minimum(q - self.env.lower.to(q), self.env.upper.to(q) - q)}
 
     def step(self, action):
         # Version 1's step with measured_reward_v4 in place of measured_reward.

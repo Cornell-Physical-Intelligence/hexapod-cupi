@@ -30,6 +30,7 @@ class GaitDouble(RewardDouble):
         self.current["toe_body"] = self.toes.clone()
         self.current["toe_world"] = self.world.clone()
         self.episode_steps = torch.zeros(n, dtype=torch.long)
+        self.lower, self.upper = torch.full((18,), -1.), torch.full((18,), 1.)
 
     def step(self, action):
         output = super().step(action)
@@ -56,7 +57,7 @@ def telemetry(commands, **overrides):
         "air_time_s": torch.zeros(n, 6), "swing": torch.zeros(n, 6, dtype=torch.bool),
         "tibia_floor_force_world_n": LOADED.expand(n, -1, -1).clone(), "airborne": torch.zeros(n, 6, dtype=torch.bool),
         "toe_velocity_nav": torch.zeros(n, 6, 2), "toe_xyz_nav": torch.zeros(n, 6, 2),
-        "scheduled_swing": torch.zeros(n, 6, dtype=torch.bool),
+        "scheduled_swing": torch.zeros(n, 6, dtype=torch.bool), "joint_limit_margin_rad": torch.ones(n, 18),
         "command": commands.clone(), "action": zeros}
     result.update(overrides)
     return result

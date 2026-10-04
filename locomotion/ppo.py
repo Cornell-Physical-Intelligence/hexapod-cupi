@@ -27,10 +27,15 @@ def scale_observation(value, scaling, *, critic=False):
     return value * torch.as_tensor(scales, dtype=value.dtype, device=value.device)
 
 
-def clock_features(episode_steps, period):
-    """Sine and cosine of the gait phase: episode controls modulo the declared period."""
+def clock_features(episode_steps, period, command):
+    """Sine and cosine of the gait phase while a motion command is held; zeros under a zero command.
+
+    The phase is the episode control count modulo the declared period. A stationary input under a
+    zero command lets the policy hold still without learning to ignore an oscillating one.
+    """
     phase = 2 * math.pi * (episode_steps.to(torch.float32) % period) / period
-    return torch.stack((torch.sin(phase), torch.cos(phase)), -1)
+    moving = (command != 0).any(-1, keepdim=True).to(torch.float32)
+    return torch.stack((torch.sin(phase), torch.cos(phase)), -1) * moving.to(phase.device)
 
 
 def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empirical',
@@ -217,7 +222,7 @@ class VanillaVecEnv:
         critic = scale_observation(output['critic'], self.observation_scaling, critic=True)
         if self.gait_clock:
             # The phase restarts with each episode, so evaluation can rebuild it from the control count.
-            clock = clock_features(self.task.episode_steps, self.gait_clock).to(policy)
+            clock = clock_features(self.task.episode_steps, self.gait_clock, output['obs'][:, 210:213]).to(policy)
             policy, critic = torch.cat((policy, clock), -1), torch.cat((critic, clock), -1)
         return self.tensor_dict({'policy': policy, 'critic': critic}, batch_size=[self.num_envs])
 

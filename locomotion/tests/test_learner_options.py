@@ -213,8 +213,14 @@ class LearnerOptionTests(unittest.TestCase):
         torch.testing.assert_close(obs['policy'][:, :231], task.output()['obs'])
         plain = ppo.VanillaVecEnv(CommandTask(), tensor_dict=lambda value, **kw: value)
         self.assertEqual(plain.get_observations()['policy'].shape, (3, 231))
-        torch.testing.assert_close(ppo.clock_features(torch.tensor([30, 45]), 60),
+        moving = torch.tensor([[.05, 0., 0.], [0., 0., .2]])
+        torch.testing.assert_close(ppo.clock_features(torch.tensor([30, 45]), 60, moving),
                                    torch.tensor([[0., -1.], [-1., 0.]]), atol=1e-6, rtol=0)
+        # Under a zero command the clock input rests at zero.
+        self.assertEqual(float(ppo.clock_features(torch.tensor([30, 45]), 60, torch.zeros(2, 3)).abs().sum()), 0.)
+        task.commands = torch.tensor([[.05, 0., 0.], [0., 0., 0.], [0., 0., .2]])
+        gated = wrapped.observations(task.output())['policy'][:, 231:]
+        torch.testing.assert_close(gated, torch.tensor([[0., 1.], [0., 0.], [1., 0.]]), atol=1e-6, rtol=0)
 
     def test_value_metrics_score_the_critic_on_the_collected_rollout(self):
         storage = SimpleNamespace(returns=torch.tensor([[1.], [2.], [3.], [4.]]), values=torch.tensor([[1.], [2.], [3.], [4.]]))
