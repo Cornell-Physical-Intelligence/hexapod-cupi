@@ -93,6 +93,9 @@ class RewardV4Config:
     roll_pitch_scale_rad_s: float = .3
     yaw_rate_weight: float = .1
     yaw_rate_scale_rad_s: float = .1
+    planar_rate_weight: float = 0.
+    tilt_weight: float = .5
+    tilt_scale_rad: float = .0873
     torque_weight: float = .05
     acceleration_weight: float = .05
     acceleration_scale_rad_s2: float = 100.
@@ -153,6 +156,8 @@ def reward_declaration(config):
                 "commanded body velocity at that toe; full is the sum that a walk at the command produces; moving commands only",
             "vertical_velocity": "-w (v_z / s)^2", "roll_pitch_rate": "-w mean((w_xy / s)^2)",
             "yaw_rate": "-w ((w_z - c_yaw) / s)^2 at the control end",
+            "planar_rate": "-w (||v_xy - c_xy|| at the control end / ||c_xy||)^2, moving translation commands only",
+            "tilt": "-w (sin(tilt) / s)^2, from the projected gravity of the root pose",
             "joint_torque": "-w mean(sum_substeps tau^2 / 8) / 1.6^2",
             "joint_acceleration": "-w mean(((dq - dq_prev) / 0.02 / s)^2)",
             "target_rate": "-w mean(((q_target - q_target_prev) / s)^2), executed targets",
@@ -258,6 +263,10 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
     wanted = commands[:, None, :2] + commands[:, None, 2:] * torch.stack((-toe[..., 1], toe[..., 0]), -1)
     ratio = (toe_velocity * wanted).sum(-1) / wanted.square().sum(-1).clamp_min(1e-8)
     travel = (ratio.clamp(-c.swing_travel_clip, c.swing_travel_clip) * airborne).sum(-1) / c.swing_travel_full
+    x, y, z, w = (pose[:, 3:] / torch.linalg.vector_norm(pose[:, 3:], dim=-1, keepdim=True)).unbind(-1)
+    gravity_xy_square = 4 * ((x*z - w*y).square() + (y*z + w*x).square())
+    speed = torch.linalg.vector_norm(commands[:, :2], dim=-1)
+    planar = torch.linalg.vector_norm(velocity[:, :2] - commands[:, :2], dim=-1) / speed.clamp_min(1e-8) * (speed > 0)
     over = ((demand - c.over_rating_onset_nm) / (RATED_TORQUE_NM - c.over_rating_onset_nm)).clamp(0, 1).mean(-1)
     components = {
         "linear_tracking": c.linear_tracking_weight * kernel(linear_error, c),
@@ -267,6 +276,8 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
         "vertical_velocity": -c.vertical_velocity_weight * (velocity[:, 2] / c.vertical_velocity_scale_mps).square(),
         "roll_pitch_rate": -c.roll_pitch_weight * (gyro[:, :2] / c.roll_pitch_scale_rad_s).square().mean(-1),
         "yaw_rate": -c.yaw_rate_weight * ((gyro[:, 2] - commands[:, 2]) / c.yaw_rate_scale_rad_s).square(),
+        "planar_rate": -c.planar_rate_weight * planar.square(),
+        "tilt": -c.tilt_weight * gravity_xy_square / c.tilt_scale_rad**2,
         "joint_torque": -c.torque_weight * (torque_square / SUBSTEPS).mean(-1) / RATED_TORQUE_NM**2,
         "joint_acceleration": -c.acceleration_weight * ((rate - previous_rate) / CONTROL_DT_S / c.acceleration_scale_rad_s2).square().mean(-1),
         "target_rate": -c.target_rate_weight * (target_step / c.target_rate_scale_rad).square().mean(-1),
