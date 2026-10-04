@@ -29,7 +29,7 @@ def scale_observation(value, scaling, *, critic=False):
 
 def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empirical',
                observation_scaling='none', command_segments='continuous', learning_rate_max=None,
-               action_std=.15):
+               action_std=.15, action_noise_correlation=0., action_std_final=None):
     if action_mean not in ('unbounded', 'tanh'):
         raise ValueError('Action mean must be unbounded or tanh')
     if observation_normalization not in ('empirical', 'none'):
@@ -40,6 +40,11 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
         raise ValueError('The learning-rate ceiling must lie inside the stock schedule range')
     if type(action_std) is not float or not .01 <= action_std <= 1.:
         raise ValueError('The initial action standard deviation must lie between 0.01 and 1')
+    if type(action_noise_correlation) is not float or not 0 <= action_noise_correlation < 1 or (
+            action_noise_correlation and action_mean != 'tanh'):
+        raise ValueError('Correlated action noise needs a correlation in [0, 1) and the tanh mean')
+    if action_std_final is not None and not (type(action_std_final) is float and .005 <= action_std_final <= action_std):
+        raise ValueError('The final action deviation must lie between 0.005 and the initial deviation')
     distribution = ('GaussianDistribution' if action_mean == 'unbounded'
                     else 'locomotion.action_distribution:BoundedMeanGaussian')
     config = {
@@ -58,9 +63,14 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
         'logger': 'tensorboard', 'check_for_nan': True,
     }
     # Options appear only when selected, so earlier checkpoints keep their recorded configuration.
+    if action_noise_correlation:
+        config['actor']['distribution_cfg'].update(noise_correlation=action_noise_correlation,
+            class_name='locomotion.action_distribution:CorrelatedBoundedMeanGaussian')
     if learning_rate_max is not None:
         config['algorithm'].update(class_name=RATE_CLASS, learning_rate_max=learning_rate_max,
                                    learning_rate=min(1e-3, learning_rate_max))
+    if action_std_final is not None:
+        config['exploration'] = {'action_std_final': action_std_final}
     wrapper = {key: value for key, value, default in (
         ('observation_scaling', observation_scaling, 'none'),
         ('command_segments', command_segments, 'continuous')) if value != default}
@@ -86,6 +96,36 @@ def policy_change_metrics(actor, storage, clip_param):
             'log_ratio_abs_mean': float(log_ratio.abs().mean()),
             'ratio_outside_clip_fraction': float(((log_ratio < math.log(1 - clip_param))
                 | (log_ratio > math.log(1 + clip_param))).float().mean())}
+
+
+class DeviationSchedule:
+    """Hold the action deviation on a declared linear schedule; PPO no longer learns it.
+
+    A learned deviation rose in every retained run that moved, and those policies stood still
+    once evaluation removed the noise. The schedule lowers the deviation as training proceeds,
+    so the mean action has to produce the motion.
+    """
+
+    def __init__(self, algorithm, start, final, updates):
+        self.algorithm, self.start, self.final, self.updates = algorithm, float(start), float(final), int(updates)
+        self.parameter = algorithm.actor.distribution.log_std_param
+        self.parameter.requires_grad_(False)
+        self.inner_update = algorithm.update
+        self.completed = 0
+        self.apply()
+
+    def value(self):
+        return self.start + (self.final - self.start) * min(1., self.completed / self.updates)
+
+    def apply(self):
+        with torch.no_grad():
+            self.parameter.fill_(math.log(self.value()))
+
+    def update(self):
+        losses = self.inner_update()
+        self.completed += 1
+        self.apply()
+        return losses
 
 
 class UpdateDiagnostics:

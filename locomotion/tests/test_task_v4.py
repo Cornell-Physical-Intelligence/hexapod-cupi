@@ -24,10 +24,18 @@ class GaitDouble(RewardDouble):
         super().__init__(n)
         self.forces = torch.zeros(n, 6, 3)
         self.forces[..., 2] = 12.
+        self.toes = torch.zeros(n, 6, 3)
+        self.world = torch.zeros(n, 6, 3)
+        self.current["toe_body"] = self.toes.clone()
+        self.current["toe_world"] = self.world.clone()
 
     def step(self, action):
         output = super().step(action)
         self.telemetry["tibia_floor_force_world_n"] = self.forces.clone()
+        self.telemetry["toe_xyz_body"] = self.toes.clone()
+        self.telemetry["toe_xyz_world"] = self.world.clone()
+        self.current["toe_body"] = self.toes.clone()
+        self.current["toe_world"] = self.world.clone()
         return output
 
 
@@ -41,7 +49,8 @@ def telemetry(commands, **overrides):
         "joint_target_rad": zeros, "previous_joint_target_rad": zeros, "torque_square_sum_400hz": zeros,
         "requested_torque_abs_max_400hz": zeros, "other_body_force_max_400hz": torch.zeros(n),
         "tracked_velocity_nav": torch.zeros(n, 3), "touchdown": torch.zeros(n, 6, dtype=torch.bool),
-        "air_time_s": torch.zeros(n, 6), "command": commands.clone(), "action": zeros}
+        "air_time_s": torch.zeros(n, 6), "swing": torch.zeros(n, 6, dtype=torch.bool),
+        "command": commands.clone(), "action": zeros}
     result.update(overrides)
     return result
 
@@ -126,6 +135,52 @@ class RewardV4Tests(unittest.TestCase):
         # A foot held in the air earns nothing until it lands.
         _, held = score(commands, air_time_s=air)
         self.assertEqual(float(held["air_time"].abs().sum()), 0.)
+
+    def test_swing_travel_pays_airborne_feet_that_move_with_the_command_up_to_a_ceiling(self):
+        config = replace(CONFIG, swing_travel_weight=1.)
+        commands = torch.tensor([[.05, 0., 0.]]).expand(4, -1).clone()
+        airborne = torch.zeros(4, 6, dtype=torch.bool)
+        airborne[:, :3] = True
+        velocity = torch.zeros(4, 6, 2)
+        velocity[0, :3, 0] = .06      # three feet swing forward at 1.2 times the commanded speed
+        velocity[1, :3, 0] = -.06     # the same feet return through the air
+        velocity[2, :3, 0] = 5.       # a spike saturates at the per-foot clip and the ceiling
+        velocity[3, 3:, 0] = .06      # loaded feet earn nothing
+        extra = dict(airborne=airborne, toe_velocity_nav=velocity, toe_xyz_nav=torch.zeros(4, 6, 2))
+        _, parts = score(commands, config, **extra)
+        unit = 3 * 1.2 / (6 * config.stance_duty)
+        torch.testing.assert_close(parts["swing_travel"], torch.tensor([unit, -unit, 1., 0.]), atol=1e-6, rtol=0)
+        # A yaw command asks each toe to move along its lever arm.
+        turning = torch.tensor([[0., 0., .2]])
+        toe = torch.zeros(1, 6, 2)
+        toe[0, 0] = torch.tensor([.2, 0.])
+        tangent = torch.zeros(1, 6, 2)
+        tangent[0, 0, 1] = .04
+        one = torch.zeros(1, 6, dtype=torch.bool)
+        one[0, 0] = True
+        _, parts = score(turning, config, airborne=one, toe_velocity_nav=tangent, toe_xyz_nav=toe)
+        self.assertAlmostEqual(float(parts["swing_travel"]), 1 / (6 * config.stance_duty), places=5)
+        _, parts = score(torch.zeros(1, 3), config, airborne=one, toe_velocity_nav=tangent, toe_xyz_nav=toe)
+        self.assertEqual(float(parts["swing_travel"]), 0.)
+
+    def test_stance_slip_charges_planted_feet_that_move_over_the_floor(self):
+        config = replace(CONFIG, stance_slip_weight=1.)
+        native = GaitDouble(1)
+        task = TrainingTaskV4(native, reward_config=config)
+        task.reset()
+        native.commands[:] = torch.tensor([[.05, 0., 0.]])
+        task.window.restart(torch.arange(1), native.commands)
+        task.remaining_controls[:] = 1000
+        task.step(torch.zeros(1, 18))
+        self.assertEqual(float(task.last_components["stance_slip"]), 0.)
+        # One planted foot slides one scale per control; an unloaded foot may move freely.
+        native.world[0, 0, 0] += config.stance_slip_scale_mps * .02
+        native.world[0, 1, 0] += 1.
+        native.forces[0, 1] = 0.
+        task.step(torch.zeros(1, 18))
+        self.assertAlmostEqual(float(task.last_components["stance_slip"]), -1 / 6, places=5)
+        task.step(torch.zeros(1, 18))
+        self.assertEqual(float(task.last_components["stance_slip"]), 0.)
 
     def test_penalties_read_executed_motion_and_ignore_the_raw_sample(self):
         commands = torch.tensor([[.05, 0., 0.]])

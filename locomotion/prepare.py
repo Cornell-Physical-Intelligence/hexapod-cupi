@@ -15,7 +15,8 @@ from .spark_paths import LEGACY_ROOT, RUN_ROOTS, within_roots
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = LEGACY_ROOT
 LEARNER_OPTION_DEFAULTS = {'observation_scaling': 'none', 'command_segments': 'continuous',
-                           'learning_rate_max': None, 'action_std': .15}
+                           'learning_rate_max': None, 'action_std': .15, 'action_noise_correlation': 0.,
+                           'action_std_final': None}
 
 
 def save(path, value):
@@ -28,7 +29,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             tripod_adaptation='paper', logger='tensorboard', wandb_project=None, wandb_mode='offline',
             reward_version='1', learner='ppo', networks='mlp', action_mean='unbounded',
             observation_normalization='empirical', observation_scaling='none',
-            command_segments='continuous', learning_rate_max=None, action_std=.15, video_case=None,
+            command_segments='continuous', learning_rate_max=None, action_std=.15,
+            action_noise_correlation=0., action_std_final=None, video_case=None,
             allocation_profile='standard', max_wall_seconds=6200, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     validate_deadline(mode, allocation_profile, max_wall_seconds)
@@ -64,14 +66,18 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             (observation_normalization != 'empirical' and (learner != 'ppo' or mode not in ('train', 'evaluate')))):
         raise ValueError('Observation normalization selection requires PPO training or evaluation')
     learner_options = {'observation_scaling': observation_scaling, 'command_segments': command_segments,
-                       'learning_rate_max': learning_rate_max, 'action_std': action_std}
+                       'learning_rate_max': learning_rate_max, 'action_std': action_std,
+                       'action_noise_correlation': action_noise_correlation, 'action_std_final': action_std_final}
     selected_options = {key: value for key, value in learner_options.items() if value != LEARNER_OPTION_DEFAULTS[key]}
     if (observation_scaling not in ('none', 'fixed') or command_segments not in ('continuous', 'bootstrap')
             or (learning_rate_max is not None and not (type(learning_rate_max) is float and 1e-5 <= learning_rate_max <= 1e-2))
             or type(action_std) is not float or not .01 <= action_std <= 1.
+            or type(action_noise_correlation) is not float or not 0 <= action_noise_correlation < 1
+            or (action_noise_correlation and action_mean != 'tanh')
+            or (action_std_final is not None and not (type(action_std_final) is float and .005 <= action_std_final <= action_std))
             or (selected_options and (learner != 'ppo' or mode not in ('train', 'evaluate')))):
-        raise ValueError('Observation scaling, command segments, the rate ceiling and the action deviation '
-                         'require PPO training or evaluation')
+        raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
+                         'the noise correlation require PPO training or evaluation')
     if video_case is not None and (mode != 'evaluate' or eval_scope == 'full' or not video_case.startswith('learning:')):
         raise ValueError('A video case applies to a learning-probe evaluation')
     if (learner not in ('ppo', 'amp') or networks not in ('mlp', 'paper') or (networks == 'paper' and learner != 'amp')
@@ -208,6 +214,8 @@ def main():
     parser.add_argument('--command-segments', choices=['continuous', 'bootstrap'], default='continuous')
     parser.add_argument('--learning-rate-max', type=float)
     parser.add_argument('--action-std', type=float, default=.15)
+    parser.add_argument('--action-noise-correlation', type=float, default=0.)
+    parser.add_argument('--action-std-final', type=float)
     parser.add_argument('--video-case')
     parser.add_argument('--allocation-profile', choices=ALLOCATION_PROFILES, default='standard')
     parser.add_argument('--max-wall-seconds', type=int, default=6200)

@@ -2,6 +2,7 @@
 from contextlib import redirect_stdout
 import io
 import json
+import math
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
@@ -17,7 +18,8 @@ from locomotion.rate_schedule import CappedRatePPO
 from locomotion.train import require_learner_configuration
 
 REMOTE = '/srv/cupi/hexapod/runs/james/learner_options_fixture'
-OPTIONS = dict(observation_scaling='fixed', command_segments='bootstrap', learning_rate_max=3e-4, action_std=.1)
+OPTIONS = dict(observation_scaling='fixed', command_segments='bootstrap', learning_rate_max=3e-4, action_std=.1,
+               action_noise_correlation=.9, action_std_final=.03)
 
 
 class CommandTask:
@@ -53,6 +55,7 @@ def construct(config):
     obs = TensorDict({'policy': torch.zeros(8, 231), 'critic': torch.zeros(8, 234)}, batch_size=[8])
     config = dict(config, num_steps_per_env=4, multi_gpu=None)
     config.pop('environment_wrapper', None)
+    config.pop('exploration', None)
     for role in ('actor', 'critic'):
         config[role] = dict(config[role], hidden_dims=[8])
     with redirect_stdout(io.StringIO()):
@@ -66,8 +69,9 @@ class LearnerOptionTests(unittest.TestCase):
         self.assertEqual(base['algorithm']['class_name'], 'PPO')
         self.assertNotIn('learning_rate_max', base['algorithm'])
         self.assertEqual(base['actor']['distribution_cfg']['init_std'], .15)
-        chosen = ppo.ppo_config(7, **OPTIONS)
+        chosen = ppo.ppo_config(7, action_mean='tanh', **OPTIONS)
         self.assertEqual(chosen['environment_wrapper'], {'observation_scaling': 'fixed', 'command_segments': 'bootstrap'})
+        self.assertEqual(chosen['exploration'], {'action_std_final': .03})
         self.assertEqual(chosen['algorithm']['class_name'], ppo.RATE_CLASS)
         self.assertEqual(chosen['algorithm']['learning_rate'], 3e-4)
         self.assertEqual(chosen['actor']['distribution_cfg']['init_std'], .1)
@@ -140,6 +144,58 @@ class LearnerOptionTests(unittest.TestCase):
         self.assertEqual(rates['capped'], 3e-4)
         self.assertGreater(rates['stock'], 1e-3)
 
+    def test_correlated_noise_keeps_the_gaussian_marginal_and_carries_noise_between_controls(self):
+        from locomotion.action_distribution import BoundedMeanGaussian, CorrelatedBoundedMeanGaussian
+        config = ppo.ppo_config(3, action_mean='tanh', action_noise_correlation=.9)
+        self.assertEqual(config['actor']['distribution_cfg']['class_name'],
+                         'locomotion.action_distribution:CorrelatedBoundedMeanGaussian')
+        self.assertEqual(config['actor']['distribution_cfg']['noise_correlation'], .9)
+        self.assertNotIn('noise_correlation', ppo.ppo_config(3, action_mean='tanh')['actor']['distribution_cfg'])
+        for bad in (dict(action_noise_correlation=.9), dict(action_mean='tanh', action_noise_correlation=1.),
+                    dict(action_mean='tanh', action_noise_correlation=1)):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                ppo.ppo_config(3, **bad)
+        self.assertIs(type(construct(config).actor.distribution), CorrelatedBoundedMeanGaussian)
+        torch.manual_seed(5)
+        distribution = CorrelatedBoundedMeanGaussian(2, init_std=.15, std_type='log', noise_correlation=.9)
+        samples = []
+        with torch.no_grad():
+            for _ in range(3000):
+                distribution.update(torch.full((32, 2), .3))
+                samples.append(distribution.sample())
+        noise = torch.stack(samples) - math.tanh(.3)
+        self.assertAlmostEqual(float(noise.std()), .15, delta=.01)
+        self.assertAlmostEqual(float((noise[1:] * noise[:-1]).mean() / noise.var()), .9, delta=.02)
+        # The likelihood stays the Gaussian that PPO evaluates for the realized action.
+        distribution.update(torch.full((32, 2), .3))
+        action = distribution.sample()
+        plain = BoundedMeanGaussian(2, init_std=.15, std_type='log')
+        plain.update(torch.full((32, 2), .3))
+        torch.testing.assert_close(distribution.log_prob(action), plain.log_prob(action))
+        with self.assertRaises(ValueError):
+            CorrelatedBoundedMeanGaussian(2, noise_correlation=1.)
+
+    def test_deviation_schedule_replaces_the_learned_deviation(self):
+        config = ppo.ppo_config(3, action_mean='tanh', observation_normalization='none', action_std_final=.03)
+        self.assertEqual(config['exploration'], {'action_std_final': .03})
+        self.assertNotIn('exploration', ppo.ppo_config(3))
+        for bad in (dict(action_std_final=.2), dict(action_std_final=.001), dict(action_std_final=1)):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                ppo.ppo_config(3, **bad)
+        config.pop('exploration')
+        algorithm = construct(config)
+        calls = []
+        algorithm.update = lambda: calls.append(float(algorithm.actor.distribution.log_std_param.exp()[0])) or {'value': 0.}
+        schedule = ppo.DeviationSchedule(algorithm, .15, .03, 4)
+        parameter = algorithm.actor.distribution.log_std_param
+        self.assertFalse(parameter.requires_grad)
+        for _ in range(6):
+            self.assertEqual(schedule.update(), {'value': 0.})
+        # Each update trains with the deviation its rollout used; the value holds after the last scheduled update.
+        for seen, expected in zip(calls, (.15, .12, .09, .06, .03, .03)):
+            self.assertAlmostEqual(seen, expected, places=6)
+        self.assertAlmostEqual(float(parameter.exp()[0]), .03, places=6)
+
     def test_value_metrics_score_the_critic_on_the_collected_rollout(self):
         storage = SimpleNamespace(returns=torch.tensor([[1.], [2.], [3.], [4.]]), values=torch.tensor([[1.], [2.], [3.], [4.]]))
         self.assertAlmostEqual(ppo.value_metrics(storage)['explained_variance'], 1.)
@@ -154,23 +210,25 @@ class LearnerOptionTests(unittest.TestCase):
             checkpoint = {'checkpoint': REMOTE+'/checkpoint.pt', 'checkpoint_sha': 'a'*64, 'checkpoint_declaration_sha': 'b'*64}
             for mode in ('train', 'evaluate'):
                 extra = {} if mode == 'train' else checkpoint
-                binding = prepare(root/mode, REMOTE, mode=mode, **OPTIONS, **extra)
+                binding = prepare(root/mode, REMOTE, mode=mode, action_mean='tanh', **OPTIONS, **extra)
                 args = binding['command_args']
                 for flag, value in (('--observation-scaling', 'fixed'), ('--command-segments', 'bootstrap'),
-                                    ('--learning-rate-max', '0.0003'), ('--action-std', '0.1')):
+                                    ('--learning-rate-max', '0.0003'), ('--action-std', '0.1'),
+                                    ('--action-noise-correlation', '0.9'), ('--action-std-final', '0.03')):
                     self.assertEqual(args[args.index(flag)+1], value)
                 pack = json.loads((root/mode/'PACK.json').read_text())
                 self.assertEqual({key: pack[key] for key in OPTIONS}, OPTIONS)
                 self.assertIn('locomotion/rate_schedule.py', json.loads((root/mode/'source/FREEZE_SHA256.json').read_text()))
             legacy = prepare(root/'legacy', REMOTE)
             self.assertFalse({'--observation-scaling', '--command-segments', '--learning-rate-max', '--action-std',
-                              '--video-case'} & set(legacy['command_args']))
+                              '--action-noise-correlation', '--action-std-final', '--video-case'} & set(legacy['command_args']))
             self.assertFalse(set(OPTIONS) & set(json.loads((root/'legacy/PACK.json').read_text())))
             video = prepare(root/'video', REMOTE, mode='evaluate', video_case='learning:forward_0.05_to_stop', **checkpoint)
             position = video['command_args'].index('--video-case')
             self.assertEqual(video['command_args'][position+1], 'learning:forward_0.05_to_stop')
             for index, bad in enumerate((dict(mode='diagnostic', observation_scaling='fixed'), dict(learner='amp', action_std=.1),
                     dict(mode='tripod', command_segments='bootstrap'), dict(learning_rate_max=1.),
+                    dict(action_noise_correlation=.9),
                     dict(video_case='learning:quiet_20s'), dict(mode='evaluate', eval_scope='full', video_case='learning:quiet_20s', **checkpoint),
                     dict(mode='evaluate', video_case='static:stand', **checkpoint))):
                 with self.subTest(bad=bad), self.assertRaises(ValueError):

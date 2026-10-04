@@ -75,6 +75,13 @@ class RewardV4Config:
     air_time_weight: float = 1.
     air_time_threshold_s: float = .1
     air_time_cap_s: float = .5
+    swing_weight: float = 0.
+    swing_feet: int = 3
+    swing_travel_weight: float = 0.
+    swing_travel_clip: float = 6.
+    stance_duty: float = .6
+    stance_slip_weight: float = 0.
+    stance_slip_scale_mps: float = .02
     contact_force_n: float = 1.
     vertical_velocity_weight: float = .1
     vertical_velocity_scale_mps: float = .04
@@ -100,6 +107,8 @@ class RewardV4Config:
             raise ValueError("Unknown reward v4 tracking kernel or scale")
         if type(self.tracking_window_controls) is not int or not 1 <= self.tracking_window_controls <= 250:
             raise ValueError("The tracking window needs 1 to 250 controls")
+        if type(self.swing_feet) is not int or not 1 <= self.swing_feet <= 3:
+            raise ValueError("The swing term counts one to three feet")
         for key, value in asdict(self).items():
             if isinstance(value, float) and (not math.isfinite(value) or value < 0):
                 raise ValueError("Nonnegative finite reward v4 coefficient required: " + key)
@@ -129,6 +138,11 @@ def reward_declaration(config):
                        "exponential": "exp(-e^2)"}[config.tracking_kernel],
             "linear_tracking": "w_lin kernel(e_lin)", "yaw_tracking": "w_yaw kernel(e_yaw)",
             "air_time": "w sum_feet [touchdown this control] (min(t_air, cap) - threshold), moving commands only",
+            "swing": "w min(feet off the floor for at most cap, swing_feet) / swing_feet, moving commands only",
+            "swing_travel": "w min(sum_feet [off the floor] clip(u_foot . d_foot / |d_foot|^2, -clip, clip) / (6 duty), 1), "
+                "with u_foot the toe velocity in the body frame and d_foot = c_xy + c_yaw z x r_foot the commanded "
+                "body velocity at that toe; moving commands only",
+            "stance_slip": "-w mean_feet([on the floor at this and the previous control] (planar toe speed / s)^2)",
             "vertical_velocity": "-w (v_z / s)^2", "roll_pitch_rate": "-w mean((w_xy / s)^2)",
             "joint_torque": "-w mean(sum_substeps tau^2 / 8) / 1.6^2",
             "joint_acceleration": "-w mean(((dq - dq_prev) / 0.02 / s)^2)",
@@ -182,8 +196,10 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
     """Version 4 terms from one control's telemetry plus the caller's memory.
 
     Memory fields: ``tracked_velocity_nav`` (planar velocity and yaw rate, already averaged),
-    ``previous_joint_velocity_rad_s``, ``previous_joint_target_rad``, ``touchdown`` (six booleans)
-    and ``air_time_s`` (the air time each foot had completed before this control's contact).
+    ``previous_joint_velocity_rad_s``, ``previous_joint_target_rad``, ``touchdown`` (six booleans),
+    ``air_time_s`` (the air time each foot had completed before this control's contact) and
+    ``swing`` (six booleans: off the floor now, for no longer than the air-time cap),
+    ``airborne`` (six booleans: off the floor now) and ``toe_velocity_nav`` (planar toe velocity in the body frame).
     """
     n, device = commands.shape[0], commands.device
     def field(name, shape, dtype=torch.float32):
@@ -204,6 +220,9 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
     tracked = field("tracked_velocity_nav", (3,))
     touchdown = field("touchdown", (6,), torch.bool)
     air_time = field("air_time_s", (6,))
+    # Records made before the swing term existed carry no swing field; they score with weight zero alone.
+    swing = (field("swing", (6,), torch.bool) if "swing" in telemetry or config.swing_weight
+             else torch.zeros(n, 6, dtype=torch.bool, device=device))
     if not torch.equal(field("command", (3,)), commands):
         raise ValueError("Reward command differs from the native completed hold")
     terminated = torch.as_tensor(terminated, device=device)
@@ -212,6 +231,20 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
     if nominal_height is None:
         raise ValueError("Reward v4 needs the nominal plate height")
     c = config
+    if c.swing_travel_weight:
+        airborne = field("airborne", (6,), torch.bool)
+        toe_velocity = field("toe_velocity_nav", (6, 2))
+        toe = field("toe_xyz_nav", (6, 2))
+        # Commanded body velocity at each toe: translation plus yaw rate times the lever arm.
+        wanted = commands[:, None, :2] + commands[:, None, 2:] * torch.stack((-toe[..., 1], toe[..., 0]), -1)
+        ratio = (toe_velocity * wanted).sum(-1) / wanted.square().sum(-1).clamp_min(1e-8)
+        travel = (ratio.clamp(-c.swing_travel_clip, c.swing_travel_clip) * airborne).sum(-1) / (6 * c.stance_duty)
+    else:
+        travel = torch.zeros(n, device=device)
+    if c.stance_slip_weight:
+        slip = ((field("toe_slip_mps", (6,)) / c.stance_slip_scale_mps).square() * field("planted", (6,), torch.bool)).mean(-1)
+    else:
+        slip = torch.zeros(n, device=device)
     quiet = (commands == 0).all(-1).to(torch.float32)
     moving = 1 - quiet
     linear_error, yaw_error = tracking_errors(tracked, commands, c)
@@ -221,6 +254,9 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
         "linear_tracking": c.linear_tracking_weight * kernel(linear_error, c),
         "yaw_tracking": c.yaw_tracking_weight * kernel(yaw_error, c),
         "air_time": c.air_time_weight * moving * stride.sum(-1),
+        "swing": c.swing_weight * moving * swing.sum(-1).clamp_max(c.swing_feet) / c.swing_feet,
+        "swing_travel": c.swing_travel_weight * moving * travel.clamp_max(1.),
+        "stance_slip": -c.stance_slip_weight * slip,
         "vertical_velocity": -c.vertical_velocity_weight * (velocity[:, 2] / c.vertical_velocity_scale_mps).square(),
         "roll_pitch_rate": -c.roll_pitch_weight * (gyro[:, :2] / c.roll_pitch_scale_rad_s).square().mean(-1),
         "joint_torque": -c.torque_weight * (torque_square / SUBSTEPS).mean(-1) / RATED_TORQUE_NM**2,
@@ -254,6 +290,8 @@ class TrainingTaskV4(TrainingTask):
         self.window = StrideWindow(n, self.reward_config.tracking_window_controls, 3, device)
         self.air_time = torch.zeros(n, 6, device=device)
         self.in_contact = torch.ones(n, 6, dtype=torch.bool, device=device)
+        self.previous_toe = self._toe_nav(env.current["toe_body"]).to(device)
+        self.previous_toe_world = env.current["toe_world"].detach().clone().to(device)
         self.gait_totals = {}
         super().__init__(env, task_config, output_dir)
 
@@ -266,9 +304,17 @@ class TrainingTaskV4(TrainingTask):
                                            if name.endswith(("_weight", "_variance", "_scale_rad_s", "_scale_rad", "_penalty"))])
         return result
 
+    @staticmethod
+    def _toe_nav(toe_body):
+        """Planar toe positions in the navigation axes of the body frame."""
+        from .env import navigation
+        return navigation(toe_body.detach())[..., :2].clone()
+
     def reset(self, indices=None):
         output = super().reset(indices)
         selected = self._indices(indices)
+        self.previous_toe[selected] = self._toe_nav(self.env.current["toe_body"])[selected].to(self.previous_toe)
+        self.previous_toe_world[selected] = self.env.current["toe_world"][selected].detach().to(self.previous_toe_world)
         self.previous_joint_velocity[selected] = self.env.current["dq"][selected].to(self.previous_joint_velocity)
         self.previous_pose[selected] = self.env.current["root"][selected].to(self.previous_pose)
         self.window.restart(selected, self.env.commands[selected])
@@ -283,11 +329,21 @@ class TrainingTaskV4(TrainingTask):
         tracked = self.window.update(displacement_velocity(pose, self.previous_pose), command)
         contact = torch.linalg.vector_norm(t["tibia_floor_force_world_n"], dim=-1) > self.reward_config.contact_force_n
         touchdown = contact & ~self.in_contact
+        planted = contact & self.in_contact
+        world = t["toe_xyz_world"].detach().to(self.previous_toe_world)
+        slip = torch.linalg.vector_norm((world - self.previous_toe_world)[..., :2], dim=-1) / CONTROL_DT_S
+        self.previous_toe_world = world.clone()
         completed = self.air_time.clone()
         self.air_time = torch.where(contact, torch.zeros_like(self.air_time), self.air_time + CONTROL_DT_S)
         self.in_contact = contact
+        swing = ~contact & (self.air_time <= self.reward_config.air_time_cap_s + 1e-6)
+        toe = self._toe_nav(t["toe_xyz_body"]).to(self.previous_toe)
+        toe_velocity = (toe - self.previous_toe) / CONTROL_DT_S
+        self.previous_toe = toe
         return {**t, "tracked_velocity_nav": tracked, "previous_joint_velocity_rad_s": self.previous_joint_velocity,
-                "previous_joint_target_rad": self.previous_target, "touchdown": touchdown, "air_time_s": completed}
+                "previous_joint_target_rad": self.previous_target, "touchdown": touchdown, "air_time_s": completed,
+                "swing": swing, "airborne": ~contact, "toe_velocity_nav": toe_velocity, "toe_xyz_nav": toe,
+                "planted": planted, "toe_slip_mps": slip}
 
     def step(self, action):
         # Version 1's step with measured_reward_v4 in place of measured_reward.

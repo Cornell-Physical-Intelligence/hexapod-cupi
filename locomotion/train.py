@@ -151,6 +151,10 @@ def main(argv=None):
                         help='Ceiling for the adaptive learning rate; the stock schedule allows 1e-2.')
     parser.add_argument('--action-std', type=float, default=.15,
                         help='Initial standard deviation of the Gaussian action distribution.')
+    parser.add_argument('--action-std-final', type=float,
+                        help='Lower the action deviation linearly to this value over the run; PPO then does not learn it.')
+    parser.add_argument('--action-noise-correlation', type=float, default=0.,
+                        help='Share of each exploration noise sample carried to the next control (tanh mean only).')
     parser.add_argument('--video-case',
                         help='Learning probe to record on video; the first selected probe by default.')
     if any(flag in (argv if argv is not None else sys.argv[1:]) for flag in ('--preflight-only', '--help', '-h')):
@@ -175,11 +179,14 @@ def main(argv=None):
     if args.observation_normalization != 'empirical' and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate')):
         raise ValueError('Observation normalization selection requires PPO training or evaluation')
     learner_options = dict(observation_scaling=args.observation_scaling, command_segments=args.command_segments,
-                           learning_rate_max=args.learning_rate_max, action_std=args.action_std)
+                           learning_rate_max=args.learning_rate_max, action_std=args.action_std,
+                           action_noise_correlation=args.action_noise_correlation,
+                           action_std_final=args.action_std_final)
     if (learner_options != dict(observation_scaling='none', command_segments='continuous', learning_rate_max=None,
-                                action_std=.15) and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate'))):
-        raise ValueError('Observation scaling, command segments, the rate ceiling and the action deviation '
-                         'require PPO training or evaluation')
+                                action_std=.15, action_noise_correlation=0., action_std_final=None)
+            and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate'))):
+        raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
+                         'the noise correlation require PPO training or evaluation')
     if args.video_case is not None and (args.mode != 'evaluate' or args.eval_scope == 'full'):
         raise ValueError('A video case applies to a learning-probe evaluation')
     if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
@@ -322,6 +329,7 @@ def main(argv=None):
         runner_config = copy.deepcopy(config)
         # The wrapper consumes its own options; the runner receives the stock keys.
         runner_config.pop('environment_wrapper', None)
+        runner_config.pop('exploration', None)
         if args.logger == 'wandb':
             # The logger choice stays out of ppo_config, which checkpoint loading compares.
             # Copy saved checkpoints: container paths do not exist where offline runs sync.
@@ -342,6 +350,10 @@ def main(argv=None):
             if args.learner == 'ppo':
                 diagnostics = vanilla.UpdateDiagnostics(runner.alg)
                 runner.alg.update = diagnostics.update
+                if args.action_std_final is not None:
+                    # The schedule wraps the diagnostic update, so each record reads the deviation it trained with.
+                    runner.alg.update = vanilla.DeviationSchedule(runner.alg, args.action_std, args.action_std_final,
+                                                                  args.updates).update
             def checkpoint(update):
                 path = args.output/f'checkpoint_update{update:06d}.pt'
                 runner.save(str(path), infos={'identity': identity, 'updates': update})
