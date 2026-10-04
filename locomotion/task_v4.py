@@ -31,8 +31,10 @@ DEPARTURES = (
     "velocity noise equals the noise-free value minus a constant, so the gain from walking does "
     "not shrink with noise. The printed exponent has no minus sign and its 0.15 m/s scale pays a "
     "motionless robot 72 to 85 percent at these commands (audit sections 2 and 4).",
-    "The error scale follows the command (floors 0.025 m/s and 0.15 rad/s, as in version 2), so a "
-    "motionless robot earns zero tracking reward on every moving command.",
+    "The error scale equals the commanded speed or yaw rate, so a motionless robot earns zero "
+    "tracking reward on every moving command. A zero component uses a fixed scale (0.05 m/s, "
+    "0.2 rad/s): version 2's floors (0.025 m/s, 0.15 rad/s with k 0.4) made stillness under a "
+    "zero command the term that exploration noise taxed most.",
     "A stepping term pays each touchdown its preceding air time minus a threshold, on moving "
     "commands. Table I has no such term: the paper's gait comes from its adversarial style reward, "
     "which vanilla PPO omits. The term reads measured foot forces and no reference motion.",
@@ -65,8 +67,6 @@ class RewardV4Config:
     tracking_scale: str = "command"
     tracking_window_controls: int = 10
     scale_k: float = 1.
-    minimum_speed_mps: float = .025
-    minimum_yaw_rate_rad_s: float = .15
     fixed_speed_scale_mps: float = .05
     fixed_yaw_scale_rad_s: float = .2
     tracking_floor: float = 1.
@@ -85,14 +85,14 @@ class RewardV4Config:
     acceleration_scale_rad_s2: float = 100.
     target_rate_weight: float = .05
     target_rate_scale_rad: float = .04
-    height_weight: float = .1
+    height_weight: float = .2
     height_scale_m: float = .02
     collision_weight: float = 1.
-    torque_limit_weight: float = .1
+    torque_limit_weight: float = .5
     quiet_joint_rate_weight: float = .2
-    quiet_joint_rate_scale_rad_s: float = .5
+    quiet_joint_rate_scale_rad_s: float = 1.
     quiet_target_weight: float = .2
-    quiet_target_scale_rad: float = .02
+    quiet_target_scale_rad: float = .04
     termination_weight: float = 20.
 
     def validate(self):
@@ -103,7 +103,7 @@ class RewardV4Config:
         for key, value in asdict(self).items():
             if isinstance(value, float) and (not math.isfinite(value) or value < 0):
                 raise ValueError("Nonnegative finite reward v4 coefficient required: " + key)
-        scales = [key for key in asdict(self) if "_scale_" in key or key.startswith(("minimum_", "fixed_"))]
+        scales = [key for key in asdict(self) if "_scale_" in key]
         if any(getattr(self, key) <= 0 for key in scales + ["scale_k", "air_time_cap_s", "contact_force_n"]):
             raise ValueError("Positive reward v4 scales required")
         if self.air_time_cap_s <= self.air_time_threshold_s:
@@ -122,7 +122,8 @@ def reward_declaration(config):
         "formulas": {
             "tracked_velocity": "mean over the last tracking_window_controls controls, since the latest command "
                 "change or reset, of the body-frame root displacement and heading change per control divided by 0.02 s",
-            "error": {"command": "e_lin = ||v - c_xy|| / (k max(||c_xy||, c_min_lin)); e_yaw = |w - c_yaw| / (k max(|c_yaw|, c_min_yaw))",
+            "error": {"command": "e_lin = ||v - c_xy|| / (k ||c_xy||), or / s_lin when c_xy is zero; "
+                                 "e_yaw = |w - c_yaw| / (k |c_yaw|), or / s_yaw when c_yaw is zero",
                       "fixed": "e_lin = ||v - c_xy|| / s_lin; e_yaw = |w - c_yaw| / s_yaw"}[config.tracking_scale],
             "kernel": {"quadratic": "max(1 - e^2, -floor)", "absolute": "max(1 - e, -floor)",
                        "exponential": "exp(-e^2)"}[config.tracking_kernel],
@@ -160,12 +161,12 @@ def displacement_velocity(pose, previous_pose):
 def tracking_errors(tracked, commands, config=REWARD_V4_CONFIG):
     """Dimensionless planar and yaw errors of already selected velocities."""
     c, norm = config, torch.linalg.vector_norm
+    linear = torch.full_like(commands[:, 0], c.fixed_speed_scale_mps)
+    yaw = torch.full_like(commands[:, 0], c.fixed_yaw_scale_rad_s)
     if c.tracking_scale == "command":
-        linear = c.scale_k * norm(commands[:, :2], dim=-1).clamp_min(c.minimum_speed_mps)
-        yaw = c.scale_k * commands[:, 2].abs().clamp_min(c.minimum_yaw_rate_rad_s)
-    else:
-        linear = torch.full_like(commands[:, 0], c.fixed_speed_scale_mps)
-        yaw = torch.full_like(commands[:, 0], c.fixed_yaw_scale_rad_s)
+        speed, turn = norm(commands[:, :2], dim=-1), commands[:, 2].abs()
+        linear = torch.where(speed > 0, c.scale_k * speed, linear)
+        yaw = torch.where(turn > 0, c.scale_k * turn, yaw)
     return norm(tracked[:, :2] - commands[:, :2], dim=-1) / linear, (tracked[:, 2] - commands[:, 2]).abs() / yaw
 
 
