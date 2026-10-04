@@ -156,7 +156,7 @@ class RewardV4Tests(unittest.TestCase):
         velocity[3, 3:, 0] = .06      # loaded feet earn nothing
         extra = dict(airborne=airborne, toe_velocity_nav=velocity, toe_xyz_nav=torch.zeros(4, 6, 2))
         _, parts = score(commands, config, **extra)
-        unit = 3 * 1.2 / 6
+        unit = 3 * 1.2 / config.swing_travel_full
         torch.testing.assert_close(parts["swing_travel"], torch.tensor([unit, -unit, 1., 0.]), atol=1e-6, rtol=0)
         # A yaw command asks each toe to move along its lever arm.
         turning = torch.tensor([[0., 0., .2]])
@@ -167,7 +167,7 @@ class RewardV4Tests(unittest.TestCase):
         one = torch.zeros(1, 6, dtype=torch.bool)
         one[0, 0] = True
         _, parts = score(turning, config, airborne=one, toe_velocity_nav=tangent, toe_xyz_nav=toe)
-        self.assertAlmostEqual(float(parts["swing_travel"]), 1 / 6, places=5)
+        self.assertAlmostEqual(float(parts["swing_travel"]), 1 / config.swing_travel_full, places=5)
         _, parts = score(torch.zeros(1, 3), config, airborne=one, toe_velocity_nav=tangent, toe_xyz_nav=toe)
         self.assertEqual(float(parts["swing_travel"]), 0.)
 

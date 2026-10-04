@@ -81,6 +81,7 @@ class RewardV4Config:
     quiet_contact_weight: float = 1.
     swing_travel_weight: float = 1.
     swing_travel_clip: float = 6.
+    swing_travel_full: float = 6.
     stance_slip_weight: float = 0.
     stance_slip_scale_mps: float = .02
     schedule_weight: float = 2.
@@ -104,6 +105,10 @@ class RewardV4Config:
     height_scale_m: float = .02
     collision_weight: float = 1.
     torque_limit_weight: float = .5
+    over_rating_weight: float = 0.
+    over_rating_onset_nm: float = 1.4
+    yaw_rate_weight: float = 0.
+    yaw_rate_scale_rad_s: float = .1
     quiet_joint_rate_weight: float = .2
     quiet_joint_rate_scale_rad_s: float = 1.
     quiet_target_weight: float = .2
@@ -126,7 +131,9 @@ class RewardV4Config:
         for key, value in asdict(self).items():
             if isinstance(value, float) and (not math.isfinite(value) or value < 0):
                 raise ValueError("Nonnegative finite reward v4 coefficient required: " + key)
-        scales = [key for key in asdict(self) if "_scale_" in key] + ["schedule_load_n"]
+        scales = [key for key in asdict(self) if "_scale_" in key] + ["schedule_load_n", "swing_travel_full"]
+        if not 0 < self.over_rating_onset_nm < RATED_TORQUE_NM:
+            raise ValueError("The over-rating onset lies below the 1.6 N.m rating")
         if any(getattr(self, key) <= 0 for key in scales + ["scale_k", "air_time_cap_s", "contact_force_n"]):
             raise ValueError("Positive reward v4 scales required")
         if self.air_time_cap_s <= self.air_time_threshold_s:
@@ -155,9 +162,11 @@ def reward_declaration(config):
             "swing": "w min(feet off the floor for at most cap, swing_feet) / swing_feet, moving commands only",
             "stale_swing": "-w (feet off the floor for longer than cap), moving commands only",
             "quiet_contact": "-w [zero command] (feet off the floor) / 6",
-            "swing_travel": "w min(sum_feet [off the floor] clip(u_foot . d_foot / |d_foot|^2, -clip, clip) / 6, 1), "
+            "swing_travel": "w min(sum_feet [off the floor] clip(u_foot . d_foot / |d_foot|^2, -clip, clip) / full, 1), "
                 "with u_foot the toe velocity over the floor, in body axes, and d_foot = c_xy + c_yaw z x r_foot the "
-                "commanded body velocity at that toe; a gait that walks at the command scores 1; moving commands only",
+                "commanded body velocity at that toe; full is the sum that a walk at the command produces; moving commands only",
+            "over_rating": "-w mean_joints(clip((|tau_requested at the control end| - onset) / (1.6 - onset), 0, 1))",
+            "yaw_rate": "-w ((w_z - c_yaw) / s)^2 at the control end",
             "gait_schedule": "w (sum over scheduled-swing feet of u - sum over scheduled-stance feet of u) / 3, with "
                 "u = clip(1 - toe force / load, 0, 1) the unloaded share of a foot; tripod lf, lr, rm swings for the "
                 "first swing fraction of the period and tripod lm, rf, rr half a period later; moving commands only",
@@ -274,7 +283,7 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
         # Commanded body velocity at each toe: translation plus yaw rate times the lever arm.
         wanted = commands[:, None, :2] + commands[:, None, 2:] * torch.stack((-toe[..., 1], toe[..., 0]), -1)
         ratio = (toe_velocity * wanted).sum(-1) / wanted.square().sum(-1).clamp_min(1e-8)
-        travel = (ratio.clamp(-c.swing_travel_clip, c.swing_travel_clip) * airborne).sum(-1) / 6
+        travel = (ratio.clamp(-c.swing_travel_clip, c.swing_travel_clip) * airborne).sum(-1) / c.swing_travel_full
     else:
         travel = torch.zeros(n, device=device)
     if c.schedule_weight:
@@ -289,6 +298,11 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
         slip = ((field("toe_slip_mps", (6,)) / c.stance_slip_scale_mps).square() * field("planted", (6,), torch.bool)).mean(-1)
     else:
         slip = torch.zeros(n, device=device)
+    if c.over_rating_weight:
+        demand = field("computed_torque_nm", (18,)).abs()
+        over = ((demand - c.over_rating_onset_nm) / (RATED_TORQUE_NM - c.over_rating_onset_nm)).clamp(0, 1).mean(-1)
+    else:
+        over = torch.zeros(n, device=device)
     margin = field("joint_limit_margin_rad", (18,)) if c.joint_margin_weight else torch.full((n, 18), c.joint_margin_rad, device=device)
     quiet = (commands == 0).all(-1).to(torch.float32)
     moving = 1 - quiet
@@ -314,6 +328,8 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
         "height": -c.height_weight * ((pose[:, 2] - nominal_height) / c.height_scale_m).square(),
         "collisions": -c.collision_weight * (other_force > c.contact_force_n).to(torch.float32),
         "torque_limit": -c.torque_limit_weight * ((requested - RATED_TORQUE_NM).clamp_min(0) / RATED_TORQUE_NM).mean(-1),
+        "over_rating": -c.over_rating_weight * over,
+        "yaw_rate": -c.yaw_rate_weight * ((gyro[:, 2] - commands[:, 2]) / c.yaw_rate_scale_rad_s).square(),
         "quiet_joint_rate": -c.quiet_joint_rate_weight * quiet * (rate / c.quiet_joint_rate_scale_rad_s).square().mean(-1),
         "quiet_target_motion": -c.quiet_target_weight * quiet * (target_step / c.quiet_target_scale_rad).square().mean(-1),
         "termination": -c.termination_weight * terminated.to(torch.float32),
