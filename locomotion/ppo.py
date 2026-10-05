@@ -38,9 +38,20 @@ def clock_features(episode_steps, period, command):
     return torch.stack((torch.sin(phase), torch.cos(phase)), -1) * moving.to(phase.device)
 
 
+def smoothed_action(action, previous, episode_steps):
+    """Mean of this action and the previous one; an episode's first control pairs with the neutral action.
+
+    A two-control mean has no gain at half the control rate. An action that alternates between two
+    values on consecutive controls then leaves the joint target unchanged.
+    """
+    fresh = (episode_steps == 0)[:, None].to(action.device)
+    return .5 * (action + torch.where(fresh, torch.zeros_like(action), previous))
+
+
 def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empirical',
                observation_scaling='none', command_segments='continuous', learning_rate_max=None,
-               action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0):
+               action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0,
+               action_smoothing='none'):
     if action_mean not in ('unbounded', 'tanh'):
         raise ValueError('Action mean must be unbounded or tanh')
     if observation_normalization not in ('empirical', 'none'):
@@ -49,6 +60,8 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
         raise ValueError('Observation scaling must be none or fixed; command segments continuous or bootstrap')
     if type(gait_clock) is not int or (gait_clock and not 10 <= gait_clock <= 250):
         raise ValueError('The gait clock period is zero or 10 to 250 controls')
+    if action_smoothing not in ('none', 'mean2'):
+        raise ValueError('Action smoothing must be none or mean2')
     if learning_rate_max is not None and not (type(learning_rate_max) is float and 1e-5 <= learning_rate_max <= 1e-2):
         raise ValueError('The learning-rate ceiling must lie inside the stock schedule range')
     if type(action_std) is not float or not .01 <= action_std <= 1.:
@@ -86,7 +99,8 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
         config['exploration'] = {'action_std_final': action_std_final}
     wrapper = {key: value for key, value, default in (
         ('observation_scaling', observation_scaling, 'none'),
-        ('command_segments', command_segments, 'continuous'), ('gait_clock', gait_clock, 0)) if value != default}
+        ('command_segments', command_segments, 'continuous'), ('gait_clock', gait_clock, 0),
+        ('action_smoothing', action_smoothing, 'none')) if value != default}
     if wrapper:
         config['environment_wrapper'] = wrapper
     return config
@@ -198,12 +212,16 @@ class VanillaVecEnv:
     """
 
     def __init__(self, task, tensor_dict=None, *, observation_scaling='none', command_segments='continuous',
-                 gait_clock=0):
+                 gait_clock=0, action_smoothing='none'):
         if tensor_dict is None:
             from tensordict import TensorDict
             tensor_dict = TensorDict
         if observation_scaling not in ('none', 'fixed') or command_segments not in ('continuous', 'bootstrap'):
             raise ValueError('Unknown observation scaling or command segment option')
+        if action_smoothing not in ('none', 'mean2'):
+            raise ValueError('Action smoothing must be none or mean2')
+        self.action_smoothing = action_smoothing
+        self.previous_action = torch.zeros(task.num_envs, 18, device=task.device)
         self.task, self.tensor_dict = task, tensor_dict
         self.observation_scaling, self.command_segments = observation_scaling, command_segments
         self.gait_clock = gait_clock
@@ -231,6 +249,11 @@ class VanillaVecEnv:
 
     def step(self, action):
         held = self.task.commands.clone() if self.command_segments == 'bootstrap' else None
+        if self.action_smoothing == 'mean2':
+            # PPO keeps the raw sample; the environment receives the two-control mean.
+            raw = action.detach().clone()
+            action = smoothed_action(action, self.previous_action.to(action), self.task.episode_steps)
+            self.previous_action = raw
         output = self.task.step(action)
         rewards = output['reward'].clone()
         done = output['terminated'] | output['truncated']

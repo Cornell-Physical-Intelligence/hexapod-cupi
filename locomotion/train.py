@@ -153,6 +153,8 @@ def main(argv=None):
                         help='Initial standard deviation of the Gaussian action distribution.')
     parser.add_argument('--episode-seconds', type=float, default=20.,
                         help='Training episode length; 20 s by default. Shorter episodes bound how far a robot walks.')
+    parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none',
+                        help='mean2 sends the mean of each action and the previous one to the environment.')
     parser.add_argument('--gait-clock', type=int, default=0,
                         help='Append the sine and cosine of a gait phase with this period in controls; 0 adds none.')
     parser.add_argument('--action-std-final', type=float,
@@ -185,9 +187,11 @@ def main(argv=None):
     learner_options = dict(observation_scaling=args.observation_scaling, command_segments=args.command_segments,
                            learning_rate_max=args.learning_rate_max, action_std=args.action_std,
                            action_noise_correlation=args.action_noise_correlation,
-                           action_std_final=args.action_std_final, gait_clock=args.gait_clock)
+                           action_std_final=args.action_std_final, gait_clock=args.gait_clock,
+                           action_smoothing=args.action_smoothing)
     if (learner_options != dict(observation_scaling='none', command_segments='continuous', learning_rate_max=None,
-                                action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0)
+                                action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0,
+                                action_smoothing='none')
             and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate'))):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
@@ -328,7 +332,8 @@ def main(argv=None):
                                               action_mean=args.action_mean)
         else:
             wrapped = vanilla.VanillaVecEnv(task, observation_scaling=args.observation_scaling,
-                                            command_segments=args.command_segments, gait_clock=args.gait_clock)
+                                            command_segments=args.command_segments, gait_clock=args.gait_clock,
+                                            action_smoothing=args.action_smoothing)
             schedule_period = getattr(getattr(task, 'reward_config', None), 'schedule_period_controls', None)
             if getattr(getattr(task, 'reward_config', None), 'schedule_weight', 0) and args.gait_clock != schedule_period:
                 raise ValueError('The contact-schedule reward needs a gait clock of the same period')
@@ -409,6 +414,7 @@ def main(argv=None):
             infos = runner.load(str(args.checkpoint), strict=True)
             require_embedded_declaration(infos, checkpoint_record)
             actor = runner.get_inference_policy()
+            previous_action = [None]
             def policy(observation):
                 with torch.inference_mode():
                     if args.networks == 'paper':
@@ -417,7 +423,13 @@ def main(argv=None):
                     if args.gait_clock:
                         clock = vanilla.clock_features(env.episode_steps, args.gait_clock, observation[:, 210:213]).to(scaled)
                         scaled = torch.cat((scaled, clock), -1)
-                    return actor(TensorDict({'policy': scaled}, batch_size=[env.num_envs]))
+                    action = actor(TensorDict({'policy': scaled}, batch_size=[env.num_envs]))
+                    if args.action_smoothing == 'mean2':
+                        # The same two-control mean as the training wrapper, restarted with each episode.
+                        last = torch.zeros_like(action) if previous_action[0] is None else previous_action[0]
+                        previous_action[0] = action.clone()
+                        action = vanilla.smoothed_action(action, last, env.episode_steps)
+                    return action
             evaluation = importlib.import_module(prefix+'.evaluate')
             camera = importlib.import_module(prefix+'.camera')
             env.render = camera.NativePolicyCamera(env)

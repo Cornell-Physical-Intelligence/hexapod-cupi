@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = LEGACY_ROOT
 LEARNER_OPTION_DEFAULTS = {'observation_scaling': 'none', 'command_segments': 'continuous',
                            'learning_rate_max': None, 'action_std': .15, 'action_noise_correlation': 0.,
-                           'action_std_final': None, 'gait_clock': 0}
+                           'action_std_final': None, 'gait_clock': 0, 'action_smoothing': 'none'}
 
 
 def save(path, value):
@@ -30,7 +30,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             reward_version='1', learner='ppo', networks='mlp', action_mean='unbounded',
             observation_normalization='empirical', observation_scaling='none',
             command_segments='continuous', learning_rate_max=None, action_std=.15,
-            action_noise_correlation=0., action_std_final=None, gait_clock=0, episode_seconds=20.,
+            action_noise_correlation=0., action_std_final=None, gait_clock=0, action_smoothing='none',
+            episode_seconds=20.,
             video_case=None,
             allocation_profile='standard', max_wall_seconds=6200, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
@@ -69,7 +70,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
     learner_options = {'observation_scaling': observation_scaling, 'command_segments': command_segments,
                        'learning_rate_max': learning_rate_max, 'action_std': action_std,
                        'action_noise_correlation': action_noise_correlation, 'action_std_final': action_std_final,
-                       'gait_clock': gait_clock}
+                       'gait_clock': gait_clock, 'action_smoothing': action_smoothing}
     selected_options = {key: value for key, value in learner_options.items() if value != LEARNER_OPTION_DEFAULTS[key]}
     if (observation_scaling not in ('none', 'fixed') or command_segments not in ('continuous', 'bootstrap')
             or (learning_rate_max is not None and not (type(learning_rate_max) is float and 1e-5 <= learning_rate_max <= 1e-2))
@@ -77,6 +78,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             or type(action_noise_correlation) is not float or not 0 <= action_noise_correlation < 1
             or (action_noise_correlation and action_mean != 'tanh')
             or type(gait_clock) is not int or (gait_clock and not 10 <= gait_clock <= 250)
+            or action_smoothing not in ('none', 'mean2')
             or (action_std_final is not None and not (type(action_std_final) is float and .005 <= action_std_final <= action_std))
             or (selected_options and (learner != 'ppo' or mode not in ('train', 'evaluate')))):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
@@ -225,6 +227,7 @@ def main():
     parser.add_argument('--action-noise-correlation', type=float, default=0.)
     parser.add_argument('--action-std-final', type=float)
     parser.add_argument('--gait-clock', type=int, default=0)
+    parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none')
     parser.add_argument('--episode-seconds', type=float, default=20.)
     parser.add_argument('--video-case')
     parser.add_argument('--allocation-profile', choices=ALLOCATION_PROFILES, default='standard')

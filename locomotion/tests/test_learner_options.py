@@ -222,6 +222,40 @@ class LearnerOptionTests(unittest.TestCase):
         gated = wrapped.observations(task.output())['policy'][:, 231:]
         torch.testing.assert_close(gated, torch.tensor([[0., 1.], [0., 0.], [1., 0.]]), atol=1e-6, rtol=0)
 
+    def test_action_smoothing_sends_the_two_control_mean_and_restarts_with_each_episode(self):
+        self.assertEqual(ppo.ppo_config(3, action_smoothing='mean2')['environment_wrapper'], {'action_smoothing': 'mean2'})
+        with self.assertRaises(ValueError):
+            ppo.ppo_config(3, action_smoothing='mean3')
+        mean = ppo.smoothed_action(torch.ones(2, 18), torch.full((2, 18), .4), torch.tensor([5, 0]))
+        torch.testing.assert_close(mean[:, 0], torch.tensor([.7, .5]))
+        task, received = CommandTask(), []
+        step = task.step
+        task.step = lambda action: (received.append(action.clone()), step(action))[1]
+        wrapped = ppo.VanillaVecEnv(task, tensor_dict=lambda value, **kw: value, action_smoothing='mean2')
+        # An action that alternates on consecutive controls reaches the task as a constant.
+        for control, sign in enumerate((1., -1., 1., -1.)):
+            task.episode_steps = torch.full((3,), control)
+            wrapped.step(torch.full((3, 18), .2 * sign))
+        torch.testing.assert_close(received[0], torch.full((3, 18), .1))
+        for later in received[1:]:
+            torch.testing.assert_close(later, torch.zeros(3, 18), atol=1e-7, rtol=0)
+        # A new episode pairs its first action with the neutral action, as the evaluation policy does.
+        task.episode_steps = torch.tensor([4, 0, 4])
+        wrapped.step(torch.full((3, 18), .6))
+        torch.testing.assert_close(received[-1][:, 0], torch.tensor([.2, .3, .2]))
+        plain_task, direct = CommandTask(), []
+        plain_step = plain_task.step
+        plain_task.step = lambda action: (direct.append(action.clone()), plain_step(action))[1]
+        ppo.VanillaVecEnv(plain_task, tensor_dict=lambda value, **kw: value).step(torch.full((3, 18), .6))
+        torch.testing.assert_close(direct[0], torch.full((3, 18), .6))
+        with tempfile.TemporaryDirectory() as directory:
+            args = prepare(Path(directory)/'smooth', REMOTE, mode='train', action_mean='tanh',
+                           action_smoothing='mean2')['command_args']
+            self.assertEqual(args[args.index('--action-smoothing')+1], 'mean2')
+            self.assertEqual(json.loads((Path(directory)/'smooth/PACK.json').read_text())['action_smoothing'], 'mean2')
+            with self.assertRaises(ValueError):
+                prepare(Path(directory)/'tripod', REMOTE, mode='tripod', action_smoothing='mean2')
+
     def test_value_metrics_score_the_critic_on_the_collected_rollout(self):
         storage = SimpleNamespace(returns=torch.tensor([[1.], [2.], [3.], [4.]]), values=torch.tensor([[1.], [2.], [3.], [4.]]))
         self.assertAlmostEqual(ppo.value_metrics(storage)['explained_variance'], 1.)
