@@ -46,11 +46,16 @@ DEPARTURES = (
     "speed for 80 percent of the period. It turns a step in place into a stride. A lower ceiling pays "
     "in full for feet that the body carries, and the return stroke then earns nothing.",
     "An action-limit term charges executed targets outside the inner action_limit_onset share of "
-    "the 0.35 rad action range. Table I has none. The environment clips each sample to that range, "
-    "so PPO moves a mean to the bound when reward rises toward the bound, and a tanh mean at the "
-    "bound passes almost no gradient. In a native run without the term the six coxa means reached "
-    "the rear bound between updates 600 and 2000 and the no-noise forward speed fell from 0.042 to "
-    "0.022 m/s (audit section 15).",
+    "the 0.35 rad action range. Table I has none. The environment clips each sample to that range "
+    "(env.py line 44), so a sample past the bound executes the bound target and PPO moves a mean to "
+    "the bound when reward rises toward it. In a native run without the term the six coxa means "
+    "reached the rear bound between updates 600 and 2000 and the no-noise forward speed fell from "
+    "0.042 to 0.022 m/s (audit section 15).",
+    "A planar-rate term charges the squared planar velocity error at each control end under a "
+    "moving translation command. The windowed tracking term averages 10 controls and does not see "
+    "the stall in each all-stance window of the schedule; the forward gate bounds the mean "
+    "instantaneous error at 0.025 m/s. The term needs the action-limit term: without a strong limit "
+    "it holds two of three surrogate seeds at the coxa bounds.",
     "Each continuous penalty is a mean square against a declared scale. Table I prints unsquared "
     "norms, which charge exploration noise in first order. The weights are set on native rollouts "
     "that carry training noise; version 2's weights were 15 to 34,550 times the printed values.",
@@ -101,7 +106,7 @@ class RewardV4Config:
     roll_pitch_scale_rad_s: float = .3
     yaw_rate_weight: float = .1
     yaw_rate_scale_rad_s: float = .1
-    planar_rate_weight: float = 0.
+    planar_rate_weight: float = .3
     tilt_weight: float = .5
     tilt_scale_rad: float = .0873
     torque_weight: float = .05
@@ -117,7 +122,7 @@ class RewardV4Config:
     over_rating_onset_nm: float = 1.4
     joint_margin_weight: float = 1.
     joint_margin_rad: float = .1
-    action_limit_weight: float = 3.
+    action_limit_weight: float = 6.
     action_limit_onset: float = .5
     quiet_joint_rate_weight: float = .5
     quiet_joint_rate_scale_rad_s: float = .5

@@ -81,7 +81,9 @@ class RewardV4Tests(unittest.TestCase):
         torch.testing.assert_close(parts["yaw_tracking"], torch.tensor([1., 1., 0., 1.]) * CONFIG.yaw_tracking_weight)
         # Standing on six loaded feet earns no gait term on any command.
         self.assertEqual(float(parts["gait_schedule"].abs().sum() + parts["swing_travel"].abs().sum()), 0.)
-        torch.testing.assert_close(reward, parts["linear_tracking"] + parts["yaw_tracking"] + parts["yaw_rate"])
+        # A motionless robot pays the whole planar-rate term under a translation command and none of it otherwise.
+        torch.testing.assert_close(parts["planar_rate"], torch.tensor([-1., -1., 0., 0.]) * CONFIG.planar_rate_weight)
+        torch.testing.assert_close(reward, parts["linear_tracking"] + parts["yaw_tracking"] + parts["yaw_rate"] + parts["planar_rate"])
         tracked = torch.cat((commands[:, :2], commands[:, 2:]), -1)
         _, parts = score(commands, tracked_velocity_nav=tracked)
         torch.testing.assert_close(parts["linear_tracking"], torch.full((4,), CONFIG.linear_tracking_weight))
