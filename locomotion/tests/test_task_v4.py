@@ -206,6 +206,12 @@ class RewardV4Tests(unittest.TestCase):
         torch.testing.assert_close(parts["quiet_joint_rate"], torch.tensor([-CONFIG.quiet_joint_rate_weight, 0.]))
         torch.testing.assert_close(parts["quiet_target_motion"], torch.tensor([-CONFIG.quiet_target_weight, 0.]))
         torch.testing.assert_close(parts["quiet_contact"], torch.tensor([-CONFIG.quiet_contact_weight / 2, 0.]))
+        # A foot that carries half of the even load costs half of an airborne foot; a full share costs nothing.
+        force = LOADED.expand(2, -1, -1).clone()
+        force[:, 0, 2] = CONFIG.quiet_load_n / 2
+        force[:, 1, 2] = CONFIG.quiet_load_n
+        _, parts = score(commands, tibia_floor_force_world_n=force)
+        torch.testing.assert_close(parts["quiet_contact"], torch.tensor([-CONFIG.quiet_contact_weight / 12, 0.]))
 
     def test_a_fall_costs_more_than_the_discounted_reward_it_avoids(self):
         commands = torch.tensor([[.05, 0., 0.]])
@@ -216,7 +222,8 @@ class RewardV4Tests(unittest.TestCase):
             replace(CONFIG, termination_weight=1.).validate()
         for bad in (dict(tracking_window_controls=0), dict(schedule_period_controls=5), dict(schedule_swing_fraction=.6),
                     dict(vertical_velocity_scale_mps=0.), dict(torque_weight=-1.), dict(over_rating_onset_nm=1.6),
-                    dict(forward_draw_fraction=1.5), dict(swing_travel_full=0.), dict(action_limit_onset=1.)):
+                    dict(forward_draw_fraction=1.5), dict(swing_travel_full=0.), dict(action_limit_onset=1.),
+                    dict(quiet_load_n=0.)):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 replace(CONFIG, **bad).validate()
 

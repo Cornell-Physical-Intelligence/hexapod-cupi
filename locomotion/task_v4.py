@@ -67,8 +67,11 @@ DEPARTURES = (
     "share at 0.5 percent and the yaw error at 0.06 rad/s, and a joint at its limit ends the episode.",
     "A height term keeps the plate near its nominal height. Table I has none; the 400 Hz gate "
     "counts tibia-shaft contact as non-foot contact and compact training telemetry cannot.",
-    "Quiet terms charge joint rate, target change and unloaded feet under a zero command, because "
-    "the stop gates bound all three.",
+    "Quiet terms charge joint rate, target change and lightly loaded feet under a zero command, "
+    "because the stop gates bound all three. The contact term charges each foot for the share of an "
+    "even load of 12.2 N that it does not carry. With a term that charged airborne feet alone, one "
+    "native policy rested a foot so lightly that it slid 3 mm in the stop probe, and a second "
+    "policy's lightly loaded leg left the floor for a few physics steps.",
     "Any non-tibia floor contact above 1 N costs collision_weight per control; the simulation "
     "reports no self-collision.",
     "Table I has no termination term. PPO bootstraps zero after a termination, so termination_weight "
@@ -118,7 +121,7 @@ class RewardV4Config:
     height_scale_m: float = .02
     collision_weight: float = 1.
     torque_limit_weight: float = .5
-    over_rating_weight: float = 5.
+    over_rating_weight: float = 10.
     over_rating_onset_nm: float = 1.4
     joint_margin_weight: float = 1.
     joint_margin_rad: float = .1
@@ -128,7 +131,8 @@ class RewardV4Config:
     quiet_joint_rate_scale_rad_s: float = .5
     quiet_target_weight: float = .5
     quiet_target_scale_rad: float = .02
-    quiet_contact_weight: float = 1.
+    quiet_contact_weight: float = 3.
+    quiet_load_n: float = 12.2
     termination_weight: float = 20.
     forward_draw_fraction: float = 1.
 
@@ -140,7 +144,8 @@ class RewardV4Config:
             if isinstance(value, float) and (not math.isfinite(value) or value < 0):
                 raise ValueError("Nonnegative finite reward v4 coefficient required: " + key)
         positive = [key for key in asdict(self) if "_scale_" in key] + [
-            "schedule_load_n", "swing_travel_full", "swing_travel_clip", "contact_force_n", "joint_margin_rad"]
+            "schedule_load_n", "swing_travel_full", "swing_travel_clip", "contact_force_n", "joint_margin_rad",
+            "quiet_load_n"]
         if any(getattr(self, key) <= 0 for key in positive):
             raise ValueError("Positive reward v4 scales required")
         if not 0 < self.schedule_swing_fraction <= .5:
@@ -186,7 +191,7 @@ def reward_declaration(config):
             "action_limit": "-w mean_joints((max(|executed target - neutral| / 0.35 - onset, 0) / (1 - onset))^2)",
             "quiet_joint_rate": "-w [zero command] mean((dq / s)^2)",
             "quiet_target_motion": "-w [zero command] mean(((q_target - q_target_prev) / s)^2)",
-            "quiet_contact": "-w [zero command] (feet off the floor) / 6",
+            "quiet_contact": "-w [zero command] mean_feet(clip(1 - toe force / quiet load, 0, 1))",
             "termination": "-w [height, tilt or joint-limit termination this control]"},
         "command_draws": "Version 1's sampler; forward_draw_fraction of the moving draws become forward at the maximum speed.",
         "gait_clock": "Required: ppo.clock_features with period schedule_period_controls, zero under a zero command.",
@@ -308,7 +313,7 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
         "action_limit": -c.action_limit_weight * ((executed - c.action_limit_onset).clamp_min(0) / (1 - c.action_limit_onset)).square().mean(-1),
         "quiet_joint_rate": -c.quiet_joint_rate_weight * quiet * (rate / c.quiet_joint_rate_scale_rad_s).square().mean(-1),
         "quiet_target_motion": -c.quiet_target_weight * quiet * (target_step / c.quiet_target_scale_rad).square().mean(-1),
-        "quiet_contact": -c.quiet_contact_weight * quiet * airborne.sum(-1) / 6,
+        "quiet_contact": -c.quiet_contact_weight * quiet * (1 - toe_force / c.quiet_load_n).clamp(0, 1).mean(-1),
         "termination": -c.termination_weight * terminated.to(torch.float32),
     }
     reward = sum(components.values())
