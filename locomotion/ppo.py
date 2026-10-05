@@ -51,7 +51,7 @@ def smoothed_action(action, previous, episode_steps):
 def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empirical',
                observation_scaling='none', command_segments='continuous', learning_rate_max=None,
                action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0,
-               action_smoothing='none'):
+               action_smoothing='none', velocity_noise=0.):
     if action_mean not in ('unbounded', 'tanh'):
         raise ValueError('Action mean must be unbounded or tanh')
     if observation_normalization not in ('empirical', 'none'):
@@ -62,6 +62,8 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
         raise ValueError('The gait clock period is zero or 10 to 250 controls')
     if action_smoothing not in ('none', 'mean2'):
         raise ValueError('Action smoothing must be none or mean2')
+    if type(velocity_noise) is not float or not 0 <= velocity_noise <= 5:
+        raise ValueError('The joint-velocity observation noise lies between 0 and 5 rad/s')
     if learning_rate_max is not None and not (type(learning_rate_max) is float and 1e-5 <= learning_rate_max <= 1e-2):
         raise ValueError('The learning-rate ceiling must lie inside the stock schedule range')
     if type(action_std) is not float or not .01 <= action_std <= 1.:
@@ -100,7 +102,7 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
     wrapper = {key: value for key, value, default in (
         ('observation_scaling', observation_scaling, 'none'),
         ('command_segments', command_segments, 'continuous'), ('gait_clock', gait_clock, 0),
-        ('action_smoothing', action_smoothing, 'none')) if value != default}
+        ('action_smoothing', action_smoothing, 'none'), ('velocity_noise', velocity_noise, 0.)) if value != default}
     if wrapper:
         config['environment_wrapper'] = wrapper
     return config
@@ -212,7 +214,7 @@ class VanillaVecEnv:
     """
 
     def __init__(self, task, tensor_dict=None, *, observation_scaling='none', command_segments='continuous',
-                 gait_clock=0, action_smoothing='none'):
+                 gait_clock=0, action_smoothing='none', velocity_noise=0.):
         if tensor_dict is None:
             from tensordict import TensorDict
             tensor_dict = TensorDict
@@ -220,7 +222,7 @@ class VanillaVecEnv:
             raise ValueError('Unknown observation scaling or command segment option')
         if action_smoothing not in ('none', 'mean2'):
             raise ValueError('Action smoothing must be none or mean2')
-        self.action_smoothing = action_smoothing
+        self.action_smoothing, self.velocity_noise = action_smoothing, velocity_noise
         self.previous_action = torch.zeros(task.num_envs, 18, device=task.device)
         self.task, self.tensor_dict = task, tensor_dict
         self.observation_scaling, self.command_segments = observation_scaling, command_segments
@@ -238,6 +240,13 @@ class VanillaVecEnv:
     def observations(self, output):
         policy = scale_observation(output['obs'], self.observation_scaling)
         critic = scale_observation(output['critic'], self.observation_scaling, critic=True)
+        if self.velocity_noise:
+            # The actor alone reads noisy joint velocities; evaluation and the critic read the measured values.
+            scale = FRAME_SCALES[-1] if self.observation_scaling == 'fixed' else 1.
+            policy = policy.clone()
+            for frame in range(5):
+                block = policy[:, 42 * frame + 24:42 * frame + 42]
+                block += torch.randn_like(block) * self.velocity_noise * scale
         if self.gait_clock:
             # The phase restarts with each episode, so evaluation can rebuild it from the control count.
             clock = clock_features(self.task.episode_steps, self.gait_clock, output['obs'][:, 210:213]).to(policy)

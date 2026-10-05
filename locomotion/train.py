@@ -155,6 +155,8 @@ def main(argv=None):
                         help='Training episode length; 20 s by default. Shorter episodes bound how far a robot walks.')
     parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none',
                         help='mean2 sends the mean of each action and the previous one to the environment.')
+    parser.add_argument('--velocity-noise', type=float, default=0.,
+                        help='Standard deviation in rad/s of Gaussian noise on the actor joint-velocity inputs in training.')
     parser.add_argument('--gait-clock', type=int, default=0,
                         help='Append the sine and cosine of a gait phase with this period in controls; 0 adds none.')
     parser.add_argument('--action-std-final', type=float,
@@ -188,10 +190,10 @@ def main(argv=None):
                            learning_rate_max=args.learning_rate_max, action_std=args.action_std,
                            action_noise_correlation=args.action_noise_correlation,
                            action_std_final=args.action_std_final, gait_clock=args.gait_clock,
-                           action_smoothing=args.action_smoothing)
+                           action_smoothing=args.action_smoothing, velocity_noise=args.velocity_noise)
     if (learner_options != dict(observation_scaling='none', command_segments='continuous', learning_rate_max=None,
                                 action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0,
-                                action_smoothing='none')
+                                action_smoothing='none', velocity_noise=0.)
             and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate'))):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
@@ -333,7 +335,8 @@ def main(argv=None):
         else:
             wrapped = vanilla.VanillaVecEnv(task, observation_scaling=args.observation_scaling,
                                             command_segments=args.command_segments, gait_clock=args.gait_clock,
-                                            action_smoothing=args.action_smoothing)
+                                            action_smoothing=args.action_smoothing,
+                                            velocity_noise=args.velocity_noise)
             schedule_period = getattr(getattr(task, 'reward_config', None), 'schedule_period_controls', None)
             if getattr(getattr(task, 'reward_config', None), 'schedule_weight', 0) and args.gait_clock != schedule_period:
                 raise ValueError('The contact-schedule reward needs a gait clock of the same period')

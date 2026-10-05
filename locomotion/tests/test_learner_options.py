@@ -256,6 +256,31 @@ class LearnerOptionTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 prepare(Path(directory)/'tripod', REMOTE, mode='tripod', action_smoothing='mean2')
 
+    def test_velocity_noise_reaches_the_actor_joint_velocity_inputs_alone(self):
+        self.assertEqual(ppo.ppo_config(3, velocity_noise=1.)['environment_wrapper'], {'velocity_noise': 1.})
+        for bad in (dict(velocity_noise=1), dict(velocity_noise=-1.), dict(velocity_noise=9.)):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                ppo.ppo_config(3, **bad)
+        torch.manual_seed(5)
+        task = CommandTask()
+        task.num_envs, clean = 3, task.output()
+        wrapped = ppo.VanillaVecEnv(task, tensor_dict=lambda value, **kw: value, observation_scaling='fixed',
+                                    velocity_noise=2.)
+        samples = torch.stack([wrapped.observations(clean)['policy'] for _ in range(4000)])
+        scaled = ppo.scale_observation(clean['obs'], 'fixed')
+        velocity = torch.zeros(231, dtype=torch.bool)
+        for frame in range(5):
+            velocity[42 * frame + 24:42 * frame + 42] = True
+        # Other actor inputs and each critic input keep their measured values.
+        torch.testing.assert_close(samples[:, :, ~velocity], scaled[:, ~velocity].expand(4000, -1, -1))
+        torch.testing.assert_close(wrapped.observations(clean)['critic'], ppo.scale_observation(clean['critic'], 'fixed', critic=True))
+        # The fixed scale multiplies joint velocity by 0.5, so 2 rad/s of noise has unit deviation there.
+        deviation = (samples[:, :, velocity] - scaled[:, velocity]).std()
+        self.assertAlmostEqual(float(deviation), 2. * ppo.FRAME_SCALES[-1], delta=.02)
+        with tempfile.TemporaryDirectory() as directory:
+            args = prepare(Path(directory)/'noise', REMOTE, mode='train', action_mean='tanh', velocity_noise=1.)['command_args']
+            self.assertEqual(args[args.index('--velocity-noise')+1], '1.0')
+
     def test_value_metrics_score_the_critic_on_the_collected_rollout(self):
         storage = SimpleNamespace(returns=torch.tensor([[1.], [2.], [3.], [4.]]), values=torch.tensor([[1.], [2.], [3.], [4.]]))
         self.assertAlmostEqual(ppo.value_metrics(storage)['explained_variance'], 1.)
