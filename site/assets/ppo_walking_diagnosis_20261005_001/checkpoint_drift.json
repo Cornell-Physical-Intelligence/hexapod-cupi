@@ -1,0 +1,572 @@
+{
+  "schema": "hexapod_ppo_checkpoint_drift_v1",
+  "analysis_sha256": "17cb345e0fd2db401d9bfa428751dfcc614dc66d5af5d8677407f18485320375",
+  "training_attempt": "ppo_v4_forward_20261004_001",
+  "seed": 20260917,
+  "cases": {
+    "forward": "learning:translate_0.05_0deg",
+    "quiet_20s": "learning:quiet_20s",
+    "forward_to_stop": "learning:forward_0.05_to_stop"
+  },
+  "methods": {
+    "scope": "Four retained evaluations of one training run and one seed. The evaluator takes the actor mean and adds no sampling noise. Each checkpoint has one forward trial, so the record shows differences between checkpoints and measures no trial-to-trial spread.",
+    "batch": "Take the forward batch index from the position of the forward case in the allocation's selected_case_ids, then require that the batch report names the same case, the same checkpoint and the hash of the control trace.",
+    "screens": "Copy pass, failed_bounds, recorded_controls and the named metrics from summary.json. A null metric means the evaluator wrote no value for that trial.",
+    "actions": "policy_action holds 18 values in the order lf, lm, lr, rf, rm, rr, each coxa, femur, tibia. The share counts samples with absolute value above 0.95 across six legs and all controls in the window. The coxa spread is the population standard deviation of each coxa action over the window.",
+    "toes": "Subtract the root position from each toe position in the world xy plane. Rotate the difference by minus the root yaw, with yaw = atan2(2(wz+xy), 1-2(yy+zz)) from the XYZW quaternion. The fore coordinate is the negative rotated y component because navigation forward is world -Y at zero yaw. The range is maximum minus minimum over the window. The height is the maximum world z of the toe point, which is no clearance measurement.",
+    "contact": "The contact fraction is the mean of distal_contact for each leg over the window.",
+    "limits": "A fore-aft range covers stance and swing travel together. The record establishes no cause for a difference between checkpoints."
+  },
+  "evaluations": [
+    {
+      "update": 600,
+      "evaluation": "ppo_v4_forward_20261004_001_evaluate_u0600",
+      "remote_directory": "/srv/cupi/hexapod/runs/james/ppo_v4_forward_20261004_001_evaluate_u0600",
+      "eval_scope": "focus",
+      "checkpoint_sha256": "82f33e3cd62dc1517a86826b0ae2233750f31e67e13a586aeae21107d6ae4aa7",
+      "forward_batch": "batch_000",
+      "sha256": {
+        "binding.json": "e1beabb0e11d62cca30b5fb0183f7d9e64eb42cf9aedc307ec874cc597b04b14",
+        "run/standing/evaluation/summary.json": "ea0c81fb068436f9ef503fc89d65c9c4f51b421e1c0892149766c0c483548e3d",
+        "run/standing/evaluation/allocation.json": "90b15a88ca29b1f2f487ea74edaeedc30007afd987d7199a7f38fc3d66865a4b",
+        "run/standing/evaluation/batch_000/report.json": "4dea720bda33669fcae2b60e710303711c18d859eb6d51d28ae83bd0bd8376ca",
+        "run/standing/evaluation/batch_000/control_trace.npz": "35c43ce4aad083e1a6bac03c87858afa1feb951f22ba9db7942e69fbb336d83d"
+      },
+      "forward": {
+        "pass": true,
+        "failed_bounds": [],
+        "recorded_controls": 1000,
+        "mean_velocity_mps": [
+          0.04210832216328567,
+          -0.00340855057329416,
+          0.0003976047272458022
+        ],
+        "planar_error_mps": 0.024758523048471585,
+        "yaw_error_rad_s": 0.031718435749766544,
+        "tilt_rms_degrees": 1.3237409591674805,
+        "computed_demand_over_rating_fraction": 0.00018518518518518518
+      },
+      "quiet_20s": {
+        "pass": false,
+        "failed_bounds": [
+          "max_joint_velocity_rms_rad_s",
+          "max_joint_position_range_rad",
+          "max_target_step_abs_p95_rad_per_20ms",
+          "missing_six_toe_count_400hz"
+        ],
+        "recorded_controls": 1000,
+        "max_joint_velocity_rms_rad_s": 0.4402032792568207,
+        "max_target_step_abs_p95_rad_per_20ms": 0.03999999165534973
+      },
+      "forward_to_stop": {
+        "pass": false,
+        "failed_bounds": [
+          "max_joint_velocity_rms_rad_s",
+          "max_joint_position_range_rad",
+          "max_target_step_abs_p95_rad_per_20ms",
+          "missing_six_toe_count_400hz"
+        ],
+        "recorded_controls": 1050,
+        "max_joint_velocity_rms_rad_s": 0.39614954590797424,
+        "max_target_step_abs_p95_rad_per_20ms": 0.03999999910593033
+      },
+      "forward_trace": {
+        "controls_400_999": {
+          "first_control": 400,
+          "last_control": 999,
+          "action_abs_above_0p95_share": {
+            "coxa": 0.40055555555555555,
+            "femur": 0.0,
+            "tibia": 0.0002777777777777778
+          },
+          "coxa_action_std": {
+            "lf": 0.17739717737082766,
+            "lm": 0.0037049670956406703,
+            "lr": 0.1447564776186406,
+            "rf": 0.13630647203995566,
+            "rm": 0.14574200239302304,
+            "rr": 0.0009231202348522797
+          },
+          "toe_fore_aft_range_mm": {
+            "lf": 34.157221504917565,
+            "lm": 23.883554569625154,
+            "lr": 34.943778423085824,
+            "rf": 26.233083227139105,
+            "rm": 31.11236983890754,
+            "rr": 24.82109555329226
+          },
+          "toe_contact_fraction": {
+            "lf": 0.6,
+            "lm": 0.5666666666666667,
+            "lr": 0.5533333333333333,
+            "rf": 0.6516666666666666,
+            "rm": 0.61,
+            "rr": 0.57
+          },
+          "toe_height_max_mm": {
+            "lf": 15.310488641262054,
+            "lm": 15.940278768539429,
+            "lr": 17.807021737098694,
+            "rf": 12.479990720748901,
+            "rm": 12.289382517337799,
+            "rr": 16.330726444721222
+          }
+        },
+        "controls_0_59": {
+          "first_control": 0,
+          "last_control": 59,
+          "action_abs_above_0p95_share": {
+            "coxa": 0.3138888888888889,
+            "femur": 0.0,
+            "tibia": 0.0
+          },
+          "coxa_action_std": {
+            "lf": 0.3073493623021921,
+            "lm": 0.11121209225452919,
+            "lr": 0.23122702012582,
+            "rf": 0.2144437162245604,
+            "rm": 0.3001833996644438,
+            "rr": 0.1502342127467532
+          },
+          "toe_fore_aft_range_mm": {
+            "lf": 53.45082596308393,
+            "lm": 54.91665702564254,
+            "lr": 57.68791063892048,
+            "rf": 61.06337371922588,
+            "rm": 48.83901894610021,
+            "rr": 48.48274727778151
+          },
+          "toe_contact_fraction": {
+            "lf": 0.55,
+            "lm": 0.6166666666666667,
+            "lr": 0.75,
+            "rf": 0.5833333333333334,
+            "rm": 0.6166666666666667,
+            "rr": 0.48333333333333334
+          },
+          "toe_height_max_mm": {
+            "lf": 30.178315937519073,
+            "lm": 11.10927015542984,
+            "lr": 10.908670723438263,
+            "rf": 16.913995146751404,
+            "rm": 15.552632510662079,
+            "rr": 17.704784870147705
+          }
+        }
+      }
+    },
+    {
+      "update": 1000,
+      "evaluation": "ppo_v4_forward_20261004_001_evaluate_u1000",
+      "remote_directory": "/srv/cupi/hexapod/runs/james/ppo_v4_forward_20261004_001_evaluate_u1000",
+      "eval_scope": "focus",
+      "checkpoint_sha256": "56ef1b54beb8cbe0fe61a754c2ac46b96639b4fe606e33e634851966d88e7c26",
+      "forward_batch": "batch_000",
+      "sha256": {
+        "binding.json": "c9cd13a9758a7be9a641df61c279a2a2a5fa131a99adddb46e36853cdb8bc843",
+        "run/standing/evaluation/summary.json": "49537011ef1ca82cbd7757e44e4af585698da59cd331f937d35afce9cb48e78a",
+        "run/standing/evaluation/allocation.json": "50a922cac9404faf87af8a668c7d09cd31354507182162e4826c9863abe7a914",
+        "run/standing/evaluation/batch_000/report.json": "f5a33167a03e6993211810b8e2383ce99e918bae75b3b91d69e57cd9815be268",
+        "run/standing/evaluation/batch_000/control_trace.npz": "f000461c48ecc4fa97a028df1c4f5b32a47a706ce7cf1f7ca0a61e7549ebb8ba"
+      },
+      "forward": {
+        "pass": false,
+        "failed_bounds": [
+          "planar_error_mps",
+          "computed_demand_over_rating_fraction",
+          "native_capture_or_original_physical_bounds"
+        ],
+        "recorded_controls": 1000,
+        "mean_velocity_mps": [
+          0.032225661197909594,
+          -0.004735506806648307,
+          0.00037801337215033216
+        ],
+        "planar_error_mps": 0.03070233878139214,
+        "yaw_error_rad_s": 0.045091926093621705,
+        "tilt_rms_degrees": 1.6019248962402344,
+        "computed_demand_over_rating_fraction": 0.010617283950617284
+      },
+      "quiet_20s": {
+        "pass": false,
+        "failed_bounds": [
+          "max_joint_velocity_rms_rad_s",
+          "max_target_step_abs_p95_rad_per_20ms"
+        ],
+        "recorded_controls": 1000,
+        "max_joint_velocity_rms_rad_s": 0.04533908888697624,
+        "max_target_step_abs_p95_rad_per_20ms": 0.011062213219702244
+      },
+      "forward_to_stop": {
+        "pass": false,
+        "failed_bounds": [
+          "max_target_step_abs_p95_rad_per_20ms",
+          "native_capture_or_original_physical_bounds"
+        ],
+        "recorded_controls": 1050,
+        "max_joint_velocity_rms_rad_s": 0.011703657917678356,
+        "max_target_step_abs_p95_rad_per_20ms": 0.0022688917815685272
+      },
+      "forward_trace": {
+        "controls_400_999": {
+          "first_control": 400,
+          "last_control": 999,
+          "action_abs_above_0p95_share": {
+            "coxa": 0.5588888888888889,
+            "femur": 0.0,
+            "tibia": 0.16666666666666666
+          },
+          "coxa_action_std": {
+            "lf": 0.1488221514319978,
+            "lm": 0.008789550288288674,
+            "lr": 0.12937917746904823,
+            "rf": 0.053409746626483255,
+            "rm": 0.043777566979263965,
+            "rr": 0.00036058640686127024
+          },
+          "toe_fore_aft_range_mm": {
+            "lf": 32.306221841700896,
+            "lm": 21.35691256286385,
+            "lr": 24.900682132605212,
+            "rf": 16.823944129036956,
+            "rm": 28.35983086669326,
+            "rr": 19.408271177194237
+          },
+          "toe_contact_fraction": {
+            "lf": 0.6166666666666667,
+            "lm": 0.5883333333333334,
+            "lr": 0.5033333333333333,
+            "rf": 0.7283333333333334,
+            "rm": 0.585,
+            "rr": 0.6666666666666666
+          },
+          "toe_height_max_mm": {
+            "lf": 12.568071484565735,
+            "lm": 14.132373034954071,
+            "lr": 20.540595054626465,
+            "rf": 11.768892407417297,
+            "rm": 14.535687863826752,
+            "rr": 12.20974326133728
+          }
+        },
+        "controls_0_59": {
+          "first_control": 0,
+          "last_control": 59,
+          "action_abs_above_0p95_share": {
+            "coxa": 0.3472222222222222,
+            "femur": 0.0,
+            "tibia": 0.09444444444444444
+          },
+          "coxa_action_std": {
+            "lf": 0.36149696849787727,
+            "lm": 0.15726406005565538,
+            "lr": 0.23836600208028783,
+            "rf": 0.2324186651353138,
+            "rm": 0.33973997611131745,
+            "rr": 0.14700268002237818
+          },
+          "toe_fore_aft_range_mm": {
+            "lf": 41.707411236399814,
+            "lm": 54.485932798954195,
+            "lr": 52.47897455747891,
+            "rf": 59.82375103038831,
+            "rm": 47.33423620315448,
+            "rr": 46.563520259422674
+          },
+          "toe_contact_fraction": {
+            "lf": 0.6,
+            "lm": 0.7,
+            "lr": 0.8,
+            "rf": 0.5166666666666667,
+            "rm": 0.6333333333333333,
+            "rr": 0.48333333333333334
+          },
+          "toe_height_max_mm": {
+            "lf": 27.837418019771576,
+            "lm": 11.70697808265686,
+            "lr": 9.578660130500793,
+            "rf": 20.596086978912354,
+            "rm": 16.424939036369324,
+            "rr": 11.597111821174622
+          }
+        }
+      }
+    },
+    {
+      "update": 1400,
+      "evaluation": "ppo_v4_forward_20261004_001_evaluate_u1400",
+      "remote_directory": "/srv/cupi/hexapod/runs/james/ppo_v4_forward_20261004_001_evaluate_u1400",
+      "eval_scope": "focus",
+      "checkpoint_sha256": "feac0ad3e83bea38ea683d58115dee043b9ebc95cae77ef499484fb7f966dbda",
+      "forward_batch": "batch_000",
+      "sha256": {
+        "binding.json": "a0caf200488ee2522ee54d10b3c34bfdb80946ce111afdb5c4aff5a43c67073f",
+        "run/standing/evaluation/summary.json": "800423a4ebad0d96e503c3830b8b095ec8208960f7320abf1de256ed2b91467d",
+        "run/standing/evaluation/allocation.json": "1fa0ded1a294c118d8de854a8b35c581766c3f4b98c701a3c83844bcc36a44ca",
+        "run/standing/evaluation/batch_000/report.json": "374a7cce13d4134de830f0c33fb69a994e0b8ac12b0d7bfee7bd0efa4e6b3659",
+        "run/standing/evaluation/batch_000/control_trace.npz": "1b6056db25aed20f31e5b290a52a1ef9cac63b9575895c75828383afda190754"
+      },
+      "forward": {
+        "pass": false,
+        "failed_bounds": [
+          "planar_error_mps",
+          "computed_demand_over_rating_fraction"
+        ],
+        "recorded_controls": 1000,
+        "mean_velocity_mps": [
+          0.029836686161498302,
+          0.0006889270904071595,
+          0.0009621013670731842
+        ],
+        "planar_error_mps": 0.029179740832980774,
+        "yaw_error_rad_s": 0.049227053220223874,
+        "tilt_rms_degrees": 2.3546504974365234,
+        "computed_demand_over_rating_fraction": 0.010061728395061729
+      },
+      "quiet_20s": {
+        "pass": false,
+        "failed_bounds": [
+          "max_joint_velocity_rms_rad_s",
+          "max_joint_position_range_rad",
+          "max_target_step_abs_p95_rad_per_20ms",
+          "missing_six_toe_count_400hz"
+        ],
+        "recorded_controls": 1000,
+        "max_joint_velocity_rms_rad_s": 0.4782790541648865,
+        "max_target_step_abs_p95_rad_per_20ms": 0.005175228696316481
+      },
+      "forward_to_stop": {
+        "pass": false,
+        "failed_bounds": [
+          "max_joint_velocity_rms_rad_s",
+          "max_target_step_abs_p95_rad_per_20ms",
+          "missing_six_toe_count_400hz"
+        ],
+        "recorded_controls": 1050,
+        "max_joint_velocity_rms_rad_s": 0.03837364539504051,
+        "max_target_step_abs_p95_rad_per_20ms": 0.002505325712263584
+      },
+      "forward_trace": {
+        "controls_400_999": {
+          "first_control": 400,
+          "last_control": 999,
+          "action_abs_above_0p95_share": {
+            "coxa": 0.6875,
+            "femur": 0.0,
+            "tibia": 0.22777777777777777
+          },
+          "coxa_action_std": {
+            "lf": 0.04517561264767681,
+            "lm": 0.0017381314001859102,
+            "lr": 0.10580187273319591,
+            "rf": 0.02798464298833306,
+            "rm": 0.07304745133869019,
+            "rr": 0.0002531440534671076
+          },
+          "toe_fore_aft_range_mm": {
+            "lf": 18.32335510627142,
+            "lm": 22.344460284134414,
+            "lr": 19.09326822981916,
+            "rf": 15.381755399961506,
+            "rm": 28.098249970490762,
+            "rr": 17.52610440508573
+          },
+          "toe_contact_fraction": {
+            "lf": 0.6533333333333333,
+            "lm": 0.5733333333333334,
+            "lr": 0.5516666666666666,
+            "rf": 0.6966666666666667,
+            "rm": 0.605,
+            "rr": 0.6116666666666667
+          },
+          "toe_height_max_mm": {
+            "lf": 11.119335889816284,
+            "lm": 15.041820704936981,
+            "lr": 19.659437239170074,
+            "rf": 12.835048139095306,
+            "rm": 15.496522188186646,
+            "rr": 11.723123490810394
+          }
+        },
+        "controls_0_59": {
+          "first_control": 0,
+          "last_control": 59,
+          "action_abs_above_0p95_share": {
+            "coxa": 0.3416666666666667,
+            "femur": 0.0,
+            "tibia": 0.09166666666666666
+          },
+          "coxa_action_std": {
+            "lf": 0.37414022885773746,
+            "lm": 0.15052067188705803,
+            "lr": 0.324409669980531,
+            "rf": 0.24178939715041997,
+            "rm": 0.3373391330099554,
+            "rr": 0.18911739928752472
+          },
+          "toe_fore_aft_range_mm": {
+            "lf": 47.24998295447575,
+            "lm": 44.54376656920634,
+            "lr": 55.887507720261745,
+            "rf": 53.76944071046027,
+            "rm": 56.00657368576407,
+            "rr": 49.726641869449026
+          },
+          "toe_contact_fraction": {
+            "lf": 0.6,
+            "lm": 0.5833333333333334,
+            "lr": 0.8666666666666667,
+            "rf": 0.5,
+            "rm": 0.6666666666666666,
+            "rr": 0.55
+          },
+          "toe_height_max_mm": {
+            "lf": 29.162496328353882,
+            "lm": 17.681926488876343,
+            "lr": 9.516008198261261,
+            "rf": 28.679877519607544,
+            "rm": 16.780897974967957,
+            "rr": 12.727819383144379
+          }
+        }
+      }
+    },
+    {
+      "update": 2000,
+      "evaluation": "ppo_v4_forward_20261004_001_evaluate",
+      "remote_directory": "/srv/cupi/hexapod/runs/james/ppo_v4_forward_20261004_001_evaluate",
+      "eval_scope": "probes",
+      "checkpoint_sha256": "f8cc3937f0e7c47c24311db00a71a237d5658c7ebe995c31935b95f31f15dced",
+      "forward_batch": "batch_000",
+      "sha256": {
+        "binding.json": "48afeeb57eeef3e01def7cb83465066679f9442eaf63efa05228454305b4e4ae",
+        "run/standing/evaluation/summary.json": "b5531d4fc77cf22fd6c897195f3dadb0b9850f54517cdbf789d027f3bfe1b5d7",
+        "run/standing/evaluation/allocation.json": "0771e460f0b0a4144d153ad7454ac26d235658ebab04080239b8a2c3396965ed",
+        "run/standing/evaluation/batch_000/report.json": "5b3951a6fb4ab044d92dfcf150010ce7ba4e79ceee141e28e8e9e12ae927489d",
+        "run/standing/evaluation/batch_000/control_trace.npz": "89212933eb96aa718897ea2bfa9d1cfec7ceab8867298fada16e1ea49549fa2d"
+      },
+      "forward": {
+        "pass": false,
+        "failed_bounds": [
+          "planar_error_mps"
+        ],
+        "recorded_controls": 1000,
+        "mean_velocity_mps": [
+          0.021539297720912814,
+          -0.002467150430045152,
+          0.0010020210075590275
+        ],
+        "planar_error_mps": 0.03137631867350403,
+        "yaw_error_rad_s": 0.04077370788003165,
+        "tilt_rms_degrees": 3.3557302951812744,
+        "computed_demand_over_rating_fraction": 0.0038888888888888888
+      },
+      "quiet_20s": {
+        "pass": false,
+        "failed_bounds": [
+          "complete_requested_window",
+          "terminated",
+          "quiet_window_controls",
+          "native_capture_or_original_physical_bounds"
+        ],
+        "recorded_controls": 60,
+        "max_joint_velocity_rms_rad_s": null,
+        "max_target_step_abs_p95_rad_per_20ms": null
+      },
+      "forward_to_stop": {
+        "pass": false,
+        "failed_bounds": [
+          "max_joint_velocity_rms_rad_s"
+        ],
+        "recorded_controls": 1050,
+        "max_joint_velocity_rms_rad_s": 0.034500010311603546,
+        "max_target_step_abs_p95_rad_per_20ms": 0.0016243635909631848
+      },
+      "forward_trace": {
+        "controls_400_999": {
+          "first_control": 400,
+          "last_control": 999,
+          "action_abs_above_0p95_share": {
+            "coxa": 0.8816666666666667,
+            "femur": 0.07388888888888889,
+            "tibia": 0.4697222222222222
+          },
+          "coxa_action_std": {
+            "lf": 0.029971795117473547,
+            "lm": 0.00033017537001477716,
+            "lr": 0.027799240940372918,
+            "rf": 0.01832115123030448,
+            "rm": 0.02367013214145171,
+            "rr": 0.0018312595333596757
+          },
+          "toe_fore_aft_range_mm": {
+            "lf": 13.289315187779483,
+            "lm": 21.649044058501232,
+            "lr": 14.077861894156385,
+            "rf": 13.404269834974503,
+            "rm": 19.918186934227982,
+            "rr": 15.035511001652957
+          },
+          "toe_contact_fraction": {
+            "lf": 0.695,
+            "lm": 0.5566666666666666,
+            "lr": 0.6616666666666666,
+            "rf": 0.6583333333333333,
+            "rm": 0.635,
+            "rr": 0.6783333333333333
+          },
+          "toe_height_max_mm": {
+            "lf": 10.858535766601562,
+            "lm": 12.975022196769714,
+            "lr": 12.97105848789215,
+            "rf": 14.354348182678223,
+            "rm": 12.48151808977127,
+            "rr": 11.36334240436554
+          }
+        },
+        "controls_0_59": {
+          "first_control": 0,
+          "last_control": 59,
+          "action_abs_above_0p95_share": {
+            "coxa": 0.3055555555555556,
+            "femur": 0.013888888888888888,
+            "tibia": 0.12777777777777777
+          },
+          "coxa_action_std": {
+            "lf": 0.43762570724548944,
+            "lm": 0.22080663025612943,
+            "lr": 0.37944988583172246,
+            "rf": 0.3087494936044693,
+            "rm": 0.4512659012479834,
+            "rr": 0.3720024838266298
+          },
+          "toe_fore_aft_range_mm": {
+            "lf": 68.58961010861047,
+            "lm": 55.029699740343325,
+            "lr": 75.1341680578615,
+            "rf": 60.689151289120225,
+            "rm": 56.049644375435896,
+            "rr": 50.266882515023035
+          },
+          "toe_contact_fraction": {
+            "lf": 0.48333333333333334,
+            "lm": 0.5833333333333334,
+            "lr": 0.7,
+            "rf": 0.5666666666666667,
+            "rm": 0.6333333333333333,
+            "rr": 0.45
+          },
+          "toe_height_max_mm": {
+            "lf": 44.95316743850708,
+            "lm": 19.251957535743713,
+            "lr": 84.82006192207336,
+            "rf": 36.738499999046326,
+            "rm": 12.89311796426773,
+            "rr": 17.013713717460632
+          }
+        }
+      }
+    }
+  ],
+  "native_started_by_analysis": false
+}
