@@ -31,6 +31,8 @@ class GaitDouble(RewardDouble):
         self.current["toe_world"] = self.world.clone()
         self.episode_steps = torch.zeros(n, dtype=torch.long)
         self.lower, self.upper = torch.full((18,), -1.), torch.full((18,), 1.)
+        self.neutral = torch.zeros(18)
+        self.cfg.action_scale_rad = .35
 
     def step(self, action):
         output = super().step(action)
@@ -55,7 +57,7 @@ def telemetry(commands, **overrides):
         "other_body_force_max_400hz": torch.zeros(n), "tibia_floor_force_world_n": LOADED.expand(n, -1, -1).clone(),
         "tracked_velocity_nav": torch.zeros(n, 3), "scheduled_swing": torch.zeros(n, 6, dtype=torch.bool),
         "toe_velocity_nav": torch.zeros(n, 6, 2), "toe_xyz_nav": torch.zeros(n, 6, 2),
-        "joint_limit_margin_rad": torch.ones(n, 18), "command": commands.clone(), "action": zeros}
+        "joint_limit_margin_rad": torch.ones(n, 18), "executed_action": zeros, "command": commands.clone(), "action": zeros}
     result.update(overrides)
     return result
 
@@ -177,18 +179,21 @@ class RewardV4Tests(unittest.TestCase):
         _, parts = score(commands, linear_velocity_nav=torch.tensor([[0., 0., c.vertical_velocity_scale_mps]]),
             angular_velocity_body=gyro, torque_square_sum_400hz=torch.full((1, 18), 8 * 1.6**2),
             other_body_force_max_400hz=torch.tensor([2.]), requested_torque_abs_max_400hz=torch.full((1, 18), 3.2),
-            computed_torque_nm=torch.full((1, 18), -1.5), joint_limit_margin_rad=torch.full((1, 18), c.joint_margin_rad / 2))
+            computed_torque_nm=torch.full((1, 18), -1.5), joint_limit_margin_rad=torch.full((1, 18), c.joint_margin_rad / 2),
+            executed_action=torch.full((1, 18), -(1 + c.action_limit_onset) / 2))
         for name, weight in (("vertical_velocity", c.vertical_velocity_weight), ("roll_pitch_rate", c.roll_pitch_weight),
                              ("yaw_rate", c.yaw_rate_weight), ("joint_torque", c.torque_weight),
                              ("collisions", c.collision_weight), ("torque_limit", c.torque_limit_weight),
-                             ("over_rating", c.over_rating_weight / 2), ("joint_margin", c.joint_margin_weight * 18 / 4)):
+                             ("over_rating", c.over_rating_weight / 2), ("joint_margin", c.joint_margin_weight * 18 / 4),
+                             ("action_limit", c.action_limit_weight / 4)):
             self.assertAlmostEqual(float(parts[name]), -weight, places=5, msg=name)
         pose = telemetry(commands)["root_pose_xyzw"]
         pose[:, 2] = HEIGHT + c.height_scale_m
         self.assertAlmostEqual(float(score(commands, root_pose_xyzw=pose)[1]["height"]), -c.height_weight, places=5)
-        # Requested torque below the onset and joints far from their limits cost nothing.
-        _, parts = score(commands, computed_torque_nm=torch.full((1, 18), 1.39))
-        self.assertEqual(float(parts["over_rating"] + parts["joint_margin"]), 0.)
+        # Requested torque below the onset, joints far from their limits and targets inside the onset cost nothing.
+        _, parts = score(commands, computed_torque_nm=torch.full((1, 18), 1.39),
+                         executed_action=torch.full((1, 18), c.action_limit_onset))
+        self.assertEqual(float(parts["over_rating"] + parts["joint_margin"] + parts["action_limit"]), 0.)
 
     def test_quiet_terms_apply_to_the_zero_command_alone(self):
         commands = torch.tensor([[0., 0., 0.], [.05, 0., 0.]])
@@ -209,7 +214,7 @@ class RewardV4Tests(unittest.TestCase):
             replace(CONFIG, termination_weight=1.).validate()
         for bad in (dict(tracking_window_controls=0), dict(schedule_period_controls=5), dict(schedule_swing_fraction=.6),
                     dict(vertical_velocity_scale_mps=0.), dict(torque_weight=-1.), dict(over_rating_onset_nm=1.6),
-                    dict(forward_draw_fraction=1.5), dict(swing_travel_full=0.)):
+                    dict(forward_draw_fraction=1.5), dict(swing_travel_full=0.), dict(action_limit_onset=1.)):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 replace(CONFIG, **bad).validate()
 

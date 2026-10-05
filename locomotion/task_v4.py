@@ -42,7 +42,15 @@ DEPARTURES = (
     "still in deterministic evaluation. The schedule reads measured toe forces and the episode "
     "control count; it holds no joint target, pose or recorded motion.",
     "A swing-travel term pays unloaded feet that advance over the floor in the commanded "
-    "direction, up to the sum a walk at the command produces. It turns a step in place into a stride.",
+    "direction, up to the sum a walk at the command produces: three feet at 2.5 times the commanded "
+    "speed for 80 percent of the period. It turns a step in place into a stride. A lower ceiling pays "
+    "in full for feet that the body carries, and the return stroke then earns nothing.",
+    "An action-limit term charges executed targets outside the inner action_limit_onset share of "
+    "the 0.35 rad action range. Table I has none. The environment clips each sample to that range, "
+    "so PPO moves a mean to the bound when reward rises toward the bound, and a tanh mean at the "
+    "bound passes almost no gradient. In a native run without the term the six coxa means reached "
+    "the rear bound between updates 600 and 2000 and the no-noise forward speed fell from 0.042 to "
+    "0.022 m/s (audit section 15).",
     "Each continuous penalty is a mean square against a declared scale. Table I prints unsquared "
     "norms, which charge exploration noise in first order. The weights are set on native rollouts "
     "that carry training noise; version 2's weights were 15 to 34,550 times the printed values.",
@@ -85,7 +93,7 @@ class RewardV4Config:
     schedule_load_n: float = 12.2
     swing_travel_weight: float = 1.
     swing_travel_clip: float = 6.
-    swing_travel_full: float = 3.5
+    swing_travel_full: float = 6.
     contact_force_n: float = 1.
     vertical_velocity_weight: float = .3
     vertical_velocity_scale_mps: float = .04
@@ -109,6 +117,8 @@ class RewardV4Config:
     over_rating_onset_nm: float = 1.4
     joint_margin_weight: float = 1.
     joint_margin_rad: float = .1
+    action_limit_weight: float = 3.
+    action_limit_onset: float = .5
     quiet_joint_rate_weight: float = .5
     quiet_joint_rate_scale_rad_s: float = .5
     quiet_target_weight: float = .5
@@ -130,6 +140,8 @@ class RewardV4Config:
             raise ValueError("Positive reward v4 scales required")
         if not 0 < self.schedule_swing_fraction <= .5:
             raise ValueError("Each tripod swings for at most half the schedule period")
+        if not 0 < self.action_limit_onset < 1:
+            raise ValueError("The action-limit onset lies inside the action range")
         if not 0 < self.over_rating_onset_nm < RATED_TORQUE_NM or self.forward_draw_fraction > 1:
             raise ValueError("The over-rating onset lies below 1.6 N.m and the forward draw share is at most 1")
         # A fall must cost more than the discounted loss of the largest per-control tracking reward.
@@ -166,6 +178,7 @@ def reward_declaration(config):
             "torque_limit": "-w mean(max(|tau_requested| - 1.6, 0) / 1.6), largest request over the eight substeps",
             "over_rating": "-w mean_joints(clip((|tau_requested at the control end| - onset) / (1.6 - onset), 0, 1))",
             "joint_margin": "-w sum_joints(clip((m - distance to the nearer joint limit) / m, 0, 1)^2)",
+            "action_limit": "-w mean_joints((max(|executed target - neutral| / 0.35 - onset, 0) / (1 - onset))^2)",
             "quiet_joint_rate": "-w [zero command] mean((dq / s)^2)",
             "quiet_target_motion": "-w [zero command] mean(((q_target - q_target_prev) / s)^2)",
             "quiet_contact": "-w [zero command] (feet off the floor) / 6",
@@ -244,6 +257,7 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
     toe_velocity = field("toe_velocity_nav", (6, 2))
     toe = field("toe_xyz_nav", (6, 2))
     margin = field("joint_limit_margin_rad", (18,))
+    executed = field("executed_action", (18,)).abs()
     if not torch.equal(field("command", (3,)), commands):
         raise ValueError("Reward command differs from the native completed hold")
     terminated = torch.as_tensor(terminated, device=device)
@@ -286,6 +300,7 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
         "torque_limit": -c.torque_limit_weight * ((requested - RATED_TORQUE_NM).clamp_min(0) / RATED_TORQUE_NM).mean(-1),
         "over_rating": -c.over_rating_weight * over,
         "joint_margin": -c.joint_margin_weight * ((c.joint_margin_rad - margin) / c.joint_margin_rad).clamp(0, 1).square().sum(-1),
+        "action_limit": -c.action_limit_weight * ((executed - c.action_limit_onset).clamp_min(0) / (1 - c.action_limit_onset)).square().mean(-1),
         "quiet_joint_rate": -c.quiet_joint_rate_weight * quiet * (rate / c.quiet_joint_rate_scale_rad_s).square().mean(-1),
         "quiet_target_motion": -c.quiet_target_weight * quiet * (target_step / c.quiet_target_scale_rad).square().mean(-1),
         "quiet_contact": -c.quiet_contact_weight * quiet * airborne.sum(-1) / 6,
@@ -367,7 +382,8 @@ class TrainingTaskV4(TrainingTask):
                 "previous_joint_target_rad": self.previous_target, "touchdown": touchdown, "air_time_s": completed,
                 "toe_velocity_nav": toe_velocity, "toe_xyz_nav": navigation(t["toe_xyz_body"].detach())[..., :2],
                 "scheduled_swing": scheduled_swing(self.env.episode_steps - 1, self.reward_config).to(contact.device),
-                "joint_limit_margin_rad": torch.minimum(q - self.env.lower.to(q), self.env.upper.to(q) - q)}
+                "joint_limit_margin_rad": torch.minimum(q - self.env.lower.to(q), self.env.upper.to(q) - q),
+                "executed_action": (t["joint_target_rad"].to(q) - self.env.neutral.to(q)) / self.env.cfg.action_scale_rad}
 
     def step(self, action):
         # Version 1's step with measured_reward_v4 in place of measured_reward.
