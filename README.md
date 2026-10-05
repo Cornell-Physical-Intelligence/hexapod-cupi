@@ -15,7 +15,7 @@ implementation remains ahead of you in
 | Directory | Maintained scope |
 | --- | --- |
 | `robot/` | Approved direct-drive model and hash-pinned simulation inputs. |
-| `locomotion/` | Simulation, reward, stock PPO, evaluation and guarded launch; optional optimizer in `priors/`. |
+| `locomotion/` | Simulation, reward, stock PPO, evaluation and guarded launch; optional optimizer in `priors/`; CPU design surrogate in `surrogate/`. |
 | `contracts/` | Velocity commands, planar poses and checkpoint identity fields. |
 | `navigation/` | Waypoint follower example; route planner and GPS pose estimate remain pending. |
 | `mission/` | Sensor-pattern and transport prototypes; mission controls remain pending. GeoData owns survey recording and export. |

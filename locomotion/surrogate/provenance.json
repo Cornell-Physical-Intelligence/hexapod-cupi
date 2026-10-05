@@ -1,0 +1,293 @@
+{
+ "schema": "hexapod_surrogate_provenance_v2",
+ "date": "2026-10-05",
+ "scratch_sources": {
+  "location": "The session scratch directory scratchpad/sim, outside the repository.",
+  "ported": [
+   {
+    "scratch_file": "surrogate_env.py",
+    "sha256": "2d752812edc233853d480b2188723e44094ae6e10b83ef5a37f79c1e78c6d911",
+    "module": "env.py"
+   },
+   {
+    "scratch_file": "train_surrogate.py",
+    "sha256": "bc2e80a4a68a491b68a79b776ac2c948c88f3d87d8edc7e754479763e322e267",
+    "module": "train.py"
+   },
+   {
+    "scratch_file": "runs/design/train_design.py",
+    "sha256": "f227181c550af6ae0a4b487bdcdabf8e5d9a73b3e08994c7d9be535e3a998ee9",
+    "module": "train.py"
+   },
+   {
+    "scratch_file": "evaluate_surrogate.py",
+    "sha256": "2fcbb0d644c6aab96faa513d7d4d426332ffa8bafd272e5ce20eaa454cbaa308",
+    "module": "evaluate.py"
+   },
+   {
+    "scratch_file": "runs/design/eval_design.py",
+    "sha256": "e748fff550a742e3185a3d878778892769875195ee79d9b5e4b0edf2b5be3376",
+    "module": "evaluate.py"
+   },
+   {
+    "scratch_file": "replay.py",
+    "sha256": "ee54e026dbb70db517b1c2a388234cce83c535e0c18aea2d186d399fe77735d1",
+    "module": "replay.py"
+   },
+   {
+    "scratch_file": "calibrate.py",
+    "sha256": "6b96550d18187ba051229e65193bea775591f1f04f804bd508ffc17329e0b251",
+    "module": "calibrate.py"
+   },
+   {
+    "scratch_file": "probe_compare.py",
+    "sha256": "994824bf4a68fc46f8f0d38ec1e85cf4cbef61c60b488ffd763feb2c7219acd3",
+    "module": "calibrate.py"
+   },
+   {
+    "scratch_file": "compare_training_start.py",
+    "sha256": "927cec50a417c2e9ed5cbd0120baeee69c962a3703fe22497f13490ad631a685",
+    "module": "calibrate.py"
+   },
+   {
+    "scratch_file": "sweep_contact.py",
+    "sha256": "605adebe2ecf33c1305ef15f41e54652d3e10b42cc03b1df87ffb0ba97c7ccde",
+    "module": "calibrate.py"
+   },
+   {
+    "scratch_file": "self_check.py",
+    "sha256": "bbf99395cff71befe5df5fb5368b076182c6b34f5922026c0a886b421438dbb1",
+    "module": "self_check.py"
+   },
+   {
+    "scratch_file": "example_task.py",
+    "sha256": "aec757c4de95410e7a6da43fbd1fa34f4467acb8e9002c4da620692f2f6f59ed",
+    "module": "tests/test_learner.py"
+   },
+   {
+    "scratch_file": "README.md",
+    "sha256": "5d49d66472356fbfe3818c251bbf52c2969ba0fdccd45948dd90c8422afff29f",
+    "module": "README.md"
+   }
+  ],
+  "not_ported": [
+   {
+    "scratch_file": "tripod_closed_loop.py",
+    "sha256": "2baf4484ee9709b7f427cd9cbca297e0c16f5226c151db38c276bd7c1ecdc38c",
+    "reason": "Closed-loop tripod controller on the surrogate; the port holds no copy."
+   },
+   {
+    "scratch_file": "compare_training_runs.py",
+    "sha256": "e3ab3217923e1d667e20f3eaea6e73e0417e5e2a9fe7b713fedd6c671cfd908b",
+    "reason": "Windowed comparison of 800-update trainings with a native run; the port holds no copy."
+   },
+   {
+    "scratch_file": "validation/tripod-gates/verdict_agreement.py",
+    "sha256": "e0822682ef2a52653f4d9e44633577317bec81debbc2314eff898e7597f37b39",
+    "reason": "Verdicts of 54 probes of eight native checkpoints on both simulators."
+   },
+   {
+    "scratch_file": "validation/tripod-gates/training_terminations.py",
+    "sha256": "e729a577780a806441811009352fbe9bd95c3ea72692406bdddfa1d0df4abd13",
+    "reason": "Termination counts of the 800-update and 2000-update trainings."
+   },
+   {
+    "scratch_file": "validation/tripod-gates/tripod_closed.py",
+    "sha256": "61f21b69323ad94c107bb758e781c5dbd0cdb3312d24ccef685c38703d8c23ed",
+    "reason": "Closed-loop tripod speeds and over-rating fraction."
+   },
+   {
+    "scratch_file": "validation/fix-surrogate/evidence/native_touchdown_phase.py",
+    "sha256": "d19e435baebec44f6372978b6d3af092f11bcc6df7ce339f2579abd2eedb5c22",
+    "reason": "Overshoot share against arrival phase for each native touchdown."
+   }
+  ],
+  "validation_directories": {
+   "scope": "Each entry counts the .py and .sh files below one scratch validation directory and digests their sha256 and relative path lines in path order. The port holds no copy and reran none.",
+   "rows": [
+    {
+     "directory": "validation/statics-reset-kinematics",
+     "scripts": 11,
+     "tree_sha256": "5fcd4f7fd9b667b9aaf76e3dbb1e327637102cd4c9b649f481ed0ca5d9780df3"
+    },
+    {
+     "directory": "validation/tripod-gates",
+     "scripts": 14,
+     "tree_sha256": "ed4b9326164e4f8846de2c0d14d7cff214fdcc774d5412f691cf6d51fbece70d"
+    },
+    {
+     "directory": "validation/noise-reward-api",
+     "scripts": 14,
+     "tree_sha256": "4c3e4b24786ee8a78375c06953c1eb731efc77a06a6705def553d1f594c9d6f0"
+    },
+    {
+     "directory": "validation/fix-surrogate",
+     "scripts": 7,
+     "tree_sha256": "0c63eb1031a76ebbe3d6df2bc283dc20434e8d068d1ad3be5b9a5dbfc8023085"
+    },
+    {
+     "directory": "validation/recheck",
+     "scripts": 160,
+     "tree_sha256": "b11695670629b04d7d15996a58602bdea8309f4dc47a48d5debae62ae3c2cd06"
+    }
+   ]
+  }
+ },
+ "port_sha256": {
+  "__init__.py": "f13b1f6af122568c5327a70ffe2c2713568a9757b82e1a6e39f846229d2b66af",
+  "calibrate.py": "caa72f54b1321d0436254b616cfc512534cc3336f26ead2afe00b9a597583686",
+  "env.py": "88c56ef4ba3ae7d089fa07b44bffac1b4fba5eb6e01968bc27786f2cc255812c",
+  "evaluate.py": "e930ad6ce9b9bfd03ba486e109c3f63819f391eca57ee0a70cee04bd613b902e",
+  "replay.py": "3188d7b630b54958060236606342113e102c7a6ed298af3a8b540e9522685b8b",
+  "self_check.py": "49662d93b4a5824ef9f5226789ad1319d0ca6c41039efe1c992bfad06db848d5",
+  "train.py": "c21930faf023713bb81812ad9cb803a53b494c12220bb7f47fe32834484aa709"
+ },
+ "changes": [
+  "Each module resolves the repository root from its own location. No module edits sys.path or holds an absolute path, and the HEXAPOD_REPO variable of the scratch environment has no effect.",
+  "Thread defaults are 2. The scratch defaults were 6. Each tool accepts 1 to 6 threads and passes one checked count to torch and to the MuJoCo pool. The trainer and the evaluator restore the caller's thread settings.",
+  "The trainer takes --action-smoothing and --velocity-noise from train_design.py, records both in the identity and adds a backend label.",
+  "The trainer continues the deviation schedule after --resume. train_design.py restarts it (equivalence record, check resume).",
+  "The trainer stops a reward with a contact-schedule term that lacks its gait clock, as locomotion/train.py does. train_design.py holds no such guard (equivalence record, check gait-clock guard).",
+  "The trainer reads the initial and the final deviation of the schedule from the merged PPO configuration. train_design.py reads the two flags. The override case has no run.",
+  "The evaluator builds the policy input as eval_design.py and the evaluation branch of locomotion/train.py do: it adds no velocity noise and applies the recorded two-control mean. The scratch evaluate_surrogate.py read VanillaVecEnv.observations and sent the action without the mean.",
+  "The flags --velocity-input-gain, --action-mean2 and --foot-load replace STRESS_DQ_GAIN, STRESS_MEAN2 and FOOT_LOAD, which have no effect on the port. A foot-load row follows each control. The scratch rows read the control before, so each probe after the first began with a row of the probe before it (equivalence record, check foot load).",
+  "The evaluator summary names gait.toe_point_height_max_mm where eval_design.py names gait.toe_lift_max_mm, and holds the speed, clamp and touchdown counters per probe under physical_bounds where eval_design.py holds one speed_clamp_events value. The evaluator zeroes those counters at each probe start.",
+  "The evaluator refuses the two stress flags for a wrapper with policy_for_evaluation and records the path that ran. Its consensus scope states that agreement of the three contact models is no native verdict.",
+  "calibrate.py computes four native reference values from the reference files in place of typed constants, takes the reference and output paths as arguments, runs sweep variants in one process in turn, and names a reward version that a record cannot support. Its standing check adds the joint-angle gap to native.",
+  "calibrate extract writes the two training extracts from native metrics.jsonl files. The scratch directory held both extracts without a writer.",
+  "calibrate.py and replay score refuse an existing result file. The scratch scripts replaced it.",
+  "self_check.py runs the trainer and the evaluator in its own process, deletes no directory, requires --output and measures throughput behind a flag. Its learner-option smoke uses a reward v4 variant at a default value, since RewardV4Config holds no air_time_weight at this revision.",
+  "self_check.py exits 1 on a failed check, writes its record after each stage and keeps machine paths out of the record.",
+  "contact_overrides replaces five copies of the FIELD=VALUE parser and raises ValueError for an unknown field.",
+  "repository_state returns None values on a machine without git.",
+  "Recorded scope strings changed wording. The evaluator schema is hexapod_surrogate_evaluation_v3 and the self-check schema is hexapod_surrogate_self_check_v3."
+ ],
+ "records": {
+  "scope": "Each record ran on 2026-10-05 at the port hashes above, with 2 threads.",
+  "repository": {
+   "revision": "b9c261eca0bbc322251160847259169ddfc02805",
+   "branch": "jcc463/ppo-walking-diagnosis",
+   "dirty": true,
+   "uncommitted_paths": [
+    ".github/workflows/tests.yml",
+    "CONTRIBUTING.md",
+    "configs/source_inventory.json",
+    "docs/REWARD_V2_TABLE1_AUDIT.md",
+    "locomotion/README.md",
+    "pyproject.toml",
+    "uv.lock",
+    "locomotion/surrogate/",
+    "site/assets/ppo_walking_diagnosis_20261005_001/surrogate_parity.json",
+    "site/assets/ppo_walking_diagnosis_20261005_001/surrogate_parity.py"
+   ]
+  },
+  "self_check": {
+   "path": "locomotion/surrogate/records/self_check.json",
+   "sha256": "a1c61726a52b8d756fae2b722c355de707aa57d6aa0d6772559f45392f2e7767",
+   "bytes": 65559,
+   "exit_status": 0,
+   "command": "python -m locomotion.surrogate.self_check --output <new dir> --native-ref <reference dir> --threads 2"
+  },
+  "equivalence": {
+   "path": "locomotion/surrogate/records/equivalence.json",
+   "sha256": "84ab7a490ada7818cac09dc2f6ce99b11373585c770b7b8ca15620d721c11e5e",
+   "bytes": 7531,
+   "scope": "One run of scratch and ported code on equal inputs. The driver script stays outside the repository."
+  },
+  "parity": {
+   "path": "site/assets/ppo_walking_diagnosis_20261005_001/surrogate_parity.json",
+   "sha256": "cb5dab25d25ccc4b5bd50865e24fded8b5eaba4f095b0fba0d5583fe30ac8818",
+   "bytes": 48195,
+   "analysis_sha256": "a556b0dec9ee59e325cd98b9814f98c9e2bda8d3fd19296cea0bf59cc70c46a7",
+   "command": "python site/assets/ppo_walking_diagnosis_20261005_001/surrogate_parity.py --workspace <new dir> --fetch"
+  }
+ },
+ "native_references": {
+  "spark_root": "/srv/cupi/hexapod",
+  "scope": "sha256sum on Spark over read-only ssh confirmed each origin hash on 2026-10-05. The two extracts come from calibrate extract on copies of the four metrics files.",
+  "files": [
+   {
+    "file": "standing_one/standing/substeps_000.npz",
+    "sha256": "5facc9eeeac4cbc69a417ee5386b65b10044493568e38ebae09dfb440607cf64",
+    "bytes": 746508,
+    "origin": "evidence/legacy_runs/restart_20260914/amp_20260923_001/standing_one/run/standing/standing/substeps_000.npz",
+    "origin_sha256_equal": true
+   },
+   {
+    "file": "standing_one/standing/substeps_009.npz",
+    "sha256": "30d60ab376832b4f3aac19d41f957a397d108de252204f8df977dc1432c53c2e",
+    "bytes": 714742,
+    "origin": "evidence/legacy_runs/restart_20260914/amp_20260923_001/standing_one/run/standing/standing/substeps_009.npz",
+    "origin_sha256_equal": true
+   },
+   {
+    "file": "tripod_trial_000/control_trace.npz",
+    "sha256": "1c2465cd232b4939874cb95be36f0d06206431f8e62abf3c5066c276e9aa24ff",
+    "bytes": 1566937,
+    "origin": "runs/james/flat_pilot_20261002_001/tripod_reference/run/standing/trial_000/control_trace.npz",
+    "origin_sha256_equal": true
+   },
+   {
+    "file": "noise_probe/plan.json",
+    "sha256": "96a4d6015a4d557a8683175115b939c8083b3bb9e545319a63d50a784bd58662",
+    "bytes": 47448,
+    "origin": "runs/james/ppo_noise_probe_20261004_001/run/standing/probe/plan.json",
+    "origin_sha256_equal": true
+   },
+   {
+    "file": "noise_probe/telemetry.npz",
+    "sha256": "2033946d0d57f2c87cb022c5f84101dc6c4215dae07aeab7fc2fbcde0f2f588f",
+    "bytes": 37561328,
+    "origin": "runs/james/ppo_noise_probe_20261004_001/run/standing/probe/telemetry.npz",
+    "origin_sha256_equal": true
+   },
+   {
+    "file": "metrics_A.jsonl",
+    "sha256": "85edcc53fdc93564cf6cd1c670bcc0a64c030f4f6f6dd38a96b1aefb02be14be",
+    "bytes": 1298032,
+    "written_by": "calibrate extract",
+    "sources": [
+     {
+      "run": "A",
+      "origin": "runs/james/flat_pilot_20261002_001/ppo_mlp/run/standing/metrics.jsonl",
+      "sha256": "c672fa6aea911a665d001ef2d8bdf1e59e71c78019323a0506c3bdf94a76abfa"
+     }
+    ],
+    "scratch_extract_sha256": "07f7ef7b3e1520387012a1373e3dd1dbf5d3460d578db9409850d00ce2dfc6d6",
+    "largest_gap_to_scratch_extract": 2.220446049250313e-16,
+    "compared": "each field of the 2000 written rows"
+   },
+   {
+    "file": "native_noise_updates_6_20.json",
+    "sha256": "33dfa7af4a63b1585801a92bfb191514d9a48f70385ad83467ebf4ddd0e5ea34",
+    "bytes": 4734,
+    "written_by": "calibrate extract",
+    "sources": [
+     {
+      "run": "A",
+      "origin": "runs/james/flat_pilot_20261002_001/ppo_mlp/run/standing/metrics.jsonl",
+      "sha256": "c672fa6aea911a665d001ef2d8bdf1e59e71c78019323a0506c3bdf94a76abfa"
+     },
+     {
+      "run": "B",
+      "origin": "runs/james/ppo_bounded_mean_20261002_001/run/standing/metrics.jsonl",
+      "sha256": "df7b4fba3581eff323dc732e2a83f43ae807580b8485d539cf8bb647043d9b0d"
+     },
+     {
+      "run": "C",
+      "origin": "runs/james/ppo_no_running_norm_20261003_001/run/standing/metrics.jsonl",
+      "sha256": "e48362e8e525dde8f89055b9ea66ff086597cef85604b3f8a23a9042a2d6078d"
+     },
+     {
+      "run": "D",
+      "origin": "runs/james/ppo_immediate_tracking_20261003_001/run/standing/metrics.jsonl",
+      "sha256": "9ebac0f9862019cae2fb13c7853209ec3694a17b4c0f214d7b8c019d56151c97"
+     }
+    ],
+    "scratch_extract_sha256": "f0331c86c7d7e493d9451e0bd1e7b5e9af0616744978234282fccc80a37b2829",
+    "largest_gap_to_scratch_extract": 1.1102230246251565e-16,
+    "compared": "each written field of runs A to D"
+   }
+  ]
+ }
+}

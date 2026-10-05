@@ -19,6 +19,7 @@ loop without reading old experiment launchers or a second environment port.
 | [`force_metrics.py`](force_metrics.py), [`camera.py`](camera.py) | Report contact-normal force and motor torque, and record an Isaac camera video from the policy rollout. |
 | [`admission.py`](admission.py) | Recompute one-robot and batch standing captures and require matching model, source and geometry before training. |
 | [`prepare.py`](prepare.py), [`launch.py`](launch.py), [`reservation.py`](reservation.py) | Freeze named package files and explicit inputs, hold the existing Spark locks, supervise one container and verify its cleanup. |
+| [`surrogate/`](surrogate/README.md) | Run this task, reward, PPO adapter and gate code on CPU MuJoCo physics for design work. Native runs are the only acceptance evidence, and no native pack copies the subpackage. |
 
 The controller retains 400 Hz physics, 50 Hz policy actions, a 0.35 rad action
 scale, the 0.040 rad target-change limit per control and the provisional 1.6 N·m

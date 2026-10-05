@@ -48,6 +48,7 @@ uv run python -m unittest discover -s mission/tests
 uv run python -m unittest discover -s robot/tests
 uv run python -m unittest discover -s locomotion/tests
 uv run python -m unittest discover -s locomotion/priors/tests
+uv run python -m unittest discover -s locomotion/surrogate/tests
 uv run python -m unittest discover -s tests
 python3 tools/source_inventory.py check
 python3 tools/archive.py check
