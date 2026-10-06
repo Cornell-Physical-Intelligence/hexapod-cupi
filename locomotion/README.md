@@ -10,7 +10,7 @@ loop without reading old experiment launchers or a second environment port.
 | [`env.py`](env.py) | Load the native robot, form observations, limit joint targets, apply motor torque and advance eight physics steps. The actor receives 231 values and returns 18 offsets. |
 | [`task.py`](task.py) | Sample held velocity commands, compute the training reward, detect failed episodes and reset selected robots. This file owns reward version 1, the default. |
 | [`task_v2.py`](task_v2.py) | Reward version 2: Table I task and penalty terms with command-scaled tracking, on version 1's commands and resets. `train.py --reward-version 2` selects it. |
-| [`task_v4.py`](task_v4.py) | Reward version 4: windowed tracking, a tripod contact schedule, noise-sized Table I penalties and an action-limit term, on version 1's commands and resets. `DEPARTURES` lists each change from the paper. |
+| [`task_v4.py`](task_v4.py) | Reward version 4: windowed tracking, a tripod contact schedule, noise-sized Table I penalties and an action-limit term, on version 1's resets, with forward and zero command draws alone. `DEPARTURES` lists each change from the paper. |
 | [`ppo.py`](ppo.py), [`train.py`](train.py) | Adapt the task to stock PPO, record updates and loads, save checkpoints and load them for evaluation. |
 | [`rate_schedule.py`](rate_schedule.py), [`action_distribution.py`](action_distribution.py) | Cap the stock adaptive learning rate and bound the Gaussian action mean. |
 | [`noise_probe.py`](noise_probe.py) | Hold fixed action means under graded exploration noise with no optimizer, so a workstation can score any reward version on the same native rollout. |
@@ -50,8 +50,9 @@ walking evidence for version 3 remains pending. Read the
 [reward audit](../docs/REWARD_V2_TABLE1_AUDIT.md#13-experimental-immediate-tracking-reward-version-3)
 before dispatch.
 You can select `prepare --reward-version 4` with the learner options below.
-Each option keeps its baseline default and enters the pack, the checkpoint
-record and the evaluation command; evaluation rejects a mismatch. Read
+Each option keeps its baseline default and enters the pack and the checkpoint
+record. Each one except `--episode-seconds` also enters the evaluation command,
+and evaluation rejects a mismatch. Read
 [reward audit section 15](../docs/REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)
 for the failure that each option prevents.
 
@@ -62,7 +63,9 @@ for the failure that each option prevents.
 | `--learning-rate-max 0.0003` | Cap the stock adaptive schedule, which reached 0.01 once the tanh means saturated. |
 | `--action-std 0.15 --action-std-final 0.05` | Hold the action deviation on a linear schedule. PPO no longer learns it. |
 | `--gait-clock 60` | Append the sine and cosine of the episode phase to both observations; both are zero under a zero command. Reward version 4 requires the period of its contact schedule. |
-| `--episode-seconds 10` | Shorten training episodes. Forward-only walkers with 20 s episodes reach a neighbour's reset origin and stop the run at the proximity guard. Training alone accepts it. |
+| `--action-smoothing mean2` | Send the mean of each action and the previous one to the environment, in training and in evaluation. That mean has no gain at half the control rate, where a rest oscillation sat. |
+| `--velocity-noise 0.5` | Add Gaussian noise in rad/s to the actor's joint-velocity inputs in training. The critic and evaluation read measured values. Without it the policy's velocity feedback grows until the robot oscillates at rest. |
+| `--episode-seconds 10` | Shorten training episodes. A forward walker covers 1.0 m in a 20 s episode, toward a neighbour's reset origin 2.0 m away, and the proximity guard then stops the run. Training alone accepts it. |
 | `--video-case <probe id>` | Choose the probe that the evaluation camera records. |
 
 `prepare --mode probe` runs [`noise_probe.py`](noise_probe.py) through the
