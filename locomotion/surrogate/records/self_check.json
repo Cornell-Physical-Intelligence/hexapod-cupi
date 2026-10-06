@@ -1,0 +1,2377 @@
+{
+  "schema": "hexapod_surrogate_self_check_v3",
+  "surrogate": true,
+  "complete": true,
+  "pass": true,
+  "failures": [],
+  "backend": "mujoco 3.14.0",
+  "repository": {
+    "revision": "b9c261eca0bbc322251160847259169ddfc02805",
+    "branch": "jcc463/ppo-walking-diagnosis",
+    "dirty": true,
+    "uncommitted_paths": [
+      ".github/workflows/tests.yml",
+      "CONTRIBUTING.md",
+      "configs/source_inventory.json",
+      "docs/REWARD_V2_TABLE1_AUDIT.md",
+      "locomotion/README.md",
+      "pyproject.toml",
+      "uv.lock",
+      "locomotion/surrogate/",
+      "site/assets/ppo_walking_diagnosis_20261005_001/surrogate_parity.json",
+      "site/assets/ppo_walking_diagnosis_20261005_001/surrogate_parity.py"
+    ]
+  },
+  "surrogate_files": {
+    "__init__.py": "f13b1f6af122568c5327a70ffe2c2713568a9757b82e1a6e39f846229d2b66af",
+    "calibrate.py": "caa72f54b1321d0436254b616cfc512534cc3336f26ead2afe00b9a597583686",
+    "env.py": "88c56ef4ba3ae7d089fa07b44bffac1b4fba5eb6e01968bc27786f2cc255812c",
+    "evaluate.py": "e930ad6ce9b9bfd03ba486e109c3f63819f391eca57ee0a70cee04bd613b902e",
+    "replay.py": "3188d7b630b54958060236606342113e102c7a6ed298af3a8b540e9522685b8b",
+    "self_check.py": "49662d93b4a5824ef9f5226789ad1319d0ca6c41039efe1c992bfad06db848d5",
+    "train.py": "c21930faf023713bb81812ad9cb803a53b494c12220bb7f47fe32834484aa709"
+  },
+  "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+  "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+  "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+  "contact_model": {
+    "solref": [
+      0.005,
+      1.0
+    ],
+    "solimp": [
+      0.9,
+      0.95,
+      0.001,
+      0.5,
+      2.0
+    ],
+    "friction": [
+      1.0,
+      0.005,
+      0.0001
+    ],
+    "condim": 3,
+    "cone": "elliptic",
+    "impratio": 1.0,
+    "noslip_iterations": 4,
+    "noslip_tolerance": 1e-06,
+    "refsafe": true,
+    "position_blend": 0.515625,
+    "impact_euler": true,
+    "solver": "Newton",
+    "iterations": 100,
+    "tolerance": 1e-08,
+    "integrator": "Euler",
+    "limit_margin": 0.0,
+    "limit_solref": [
+      0.005,
+      1.0
+    ],
+    "limit_solimp": [
+      0.99,
+      0.999,
+      0.001,
+      0.5,
+      2.0
+    ],
+    "touchdown_overshoot": true,
+    "overshoot_phase": [
+      0.75,
+      0.9
+    ],
+    "overshoot_gain": 15.0,
+    "joint_speed_clamp": true
+  },
+  "total_mass_kg": 7.466088235225789,
+  "native_total_mass_kg": 7.466088235225788,
+  "bodies": 19,
+  "joints": 18,
+  "observation_widths": [
+    231,
+    234
+  ],
+  "shaft_contact_classification": {
+    "pass": true,
+    "leg_pose_femur_tibia_rad": [
+      -1.4,
+      3.0
+    ],
+    "patch_categories_with_force": [
+      "femur",
+      "shaft"
+    ],
+    "shaft_force_n": 51.088649050175064,
+    "nonfoot_contact": true,
+    "toe_cap_force_n": 0.0
+  },
+  "native_reference_files": {
+    "standing_one/standing/substeps_000.npz": {
+      "sha256": "5facc9eeeac4cbc69a417ee5386b65b10044493568e38ebae09dfb440607cf64",
+      "bytes": 746508
+    },
+    "standing_one/standing/substeps_009.npz": {
+      "sha256": "30d60ab376832b4f3aac19d41f957a397d108de252204f8df977dc1432c53c2e",
+      "bytes": 714742
+    },
+    "tripod_trial_000/control_trace.npz": {
+      "sha256": "1c2465cd232b4939874cb95be36f0d06206431f8e62abf3c5066c276e9aa24ff",
+      "bytes": 1566937
+    },
+    "noise_probe/plan.json": {
+      "sha256": "96a4d6015a4d557a8683175115b939c8083b3bb9e545319a63d50a784bd58662",
+      "bytes": 47448
+    },
+    "noise_probe/telemetry.npz": {
+      "sha256": "2033946d0d57f2c87cb022c5f84101dc6c4215dae07aeab7fc2fbcde0f2f588f",
+      "bytes": 37561328
+    },
+    "native_noise_updates_6_20.json": {
+      "sha256": "33dfa7af4a63b1585801a92bfb191514d9a48f70385ad83467ebf4ddd0e5ea34",
+      "bytes": 4734
+    },
+    "metrics_A.jsonl": {
+      "sha256": "85edcc53fdc93564cf6cd1c670bcc0a64c030f4f6f6dd38a96b1aefb02be14be",
+      "bytes": 1298032
+    }
+  },
+  "standing": {
+    "initial_toe_height_mm": 12.769236229360104,
+    "settled_toe_height_mm": 7.7459062449634075,
+    "toe_drop_mm": 5.023329984396696,
+    "first_contact_ms": 35.0,
+    "native_first_contact_ms": 32.5,
+    "root_z_rmse_first_200_substeps_mm": 0.10716966979724547,
+    "root_z_min_mm": 93.6616063117981,
+    "native_root_z_min_mm": 94.12329643964767,
+    "settled_root_z_m": 0.09575281292200089,
+    "native_settled_root_z_m": 0.09576310217380524,
+    "femur_q": -0.27249494194984436,
+    "native_femur_q": -0.27234652638435364,
+    "tibia_q": 0.3731914460659027,
+    "native_tibia_q": 0.37332966923713684,
+    "joint_position_gap_to_native_rad": {
+      "largest": 0.00017628073692321777,
+      "mean": 0.00013615016359835863
+    },
+    "foot_load_n": [
+      12.21269416809082,
+      12.208293914794922,
+      12.199835777282715,
+      12.20149040222168,
+      12.207771301269531,
+      12.212236404418945
+    ],
+    "torque_norm_nm": 1.1289912462234497,
+    "native_torque_norm_nm": 1.129264485820935,
+    "planar_drift_mm": 0.00012406360383465653,
+    "yaw_drift_deg": 0.0038766858633607626,
+    "joint_speed_rms_last_200": 6.460816592834817e-08
+  },
+  "tripod_open_loop_replay": {
+    "controls": 1000,
+    "terminated": false,
+    "mean_forward_speed_mps": 0.05434822663664818,
+    "native_mean_forward_speed_mps": 0.054237820896804706,
+    "mean_left_speed_mps": 9.162593050859869e-05,
+    "mean_yaw_rate_rad_s": 5.790518116555177e-05,
+    "planar_error_mps": 0.010351227692181223,
+    "native_planar_error_mps": 0.010782832378305489,
+    "yaw_error_rad_s": 0.01207003928720951,
+    "native_yaw_error_rad_s": 0.012803865772470276,
+    "vertical_velocity_rms_mps": 0.0195317305624485,
+    "native_vertical_velocity_rms_mps": 0.019854525212496088,
+    "tilt_rms_deg": 0.12427588552236557,
+    "root_height_mean_m": 0.09457184374332428,
+    "native_root_height_mean_m": 0.09460059553384781,
+    "torque_rms_coxa_femur_tibia_nm": [
+      0.15765565633773804,
+      0.6014401316642761,
+      0.5202855467796326
+    ],
+    "native_torque_rms_coxa_femur_tibia_nm": [
+      0.15548570454120636,
+      0.6029573082923889,
+      0.5179479718208313
+    ],
+    "toe_contact_fraction": [
+      0.5813888888888888,
+      0.5941666666666666,
+      0.5902777777777778,
+      0.5861111111111111,
+      0.5934722222222222,
+      0.5890277777777778
+    ],
+    "native_toe_contact_fraction": [
+      0.6111111111111112,
+      0.6166666666666667,
+      0.6,
+      0.6155555555555555,
+      0.6166666666666667,
+      0.6
+    ],
+    "toe_height_max_mm": [
+      23.177936553955078,
+      24.039348602294922,
+      23.806062698364258,
+      23.294086456298828,
+      23.725000381469727,
+      23.7098331451416
+    ],
+    "native_toe_height_max_mm": [
+      23.097694396972656,
+      23.69743537902832,
+      23.765310287475586,
+      22.957012176513672,
+      23.707836151123047,
+      23.600540161132812
+    ],
+    "joint_position_rmse_to_native_rad": 0.0030871210619807243,
+    "nonfoot_controls": 0,
+    "final_displacement_forward_left_m": [
+      0.9860585331916809,
+      0.0024225881788879633
+    ],
+    "native_final_displacement_forward_left_m": [
+      0.9846222996711731,
+      -0.001344902440905571
+    ]
+  },
+  "noise_zero_mean_v2": {
+    "update_1": {
+      "achieved_planar_speed_mps": 0.039483290165662766,
+      "requested_saturation_fraction": 0.0042227283120155334,
+      "limiter_fraction_coxa_femur_tibia": [
+        0.5217391304347826,
+        0.5194180253623188,
+        0.5196444746376812
+      ],
+      "terminations": 0,
+      "termination_reasons": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 0,
+        "timeout": 0
+      },
+      "nonfoot_event_fraction": 0.0,
+      "task_reward_mean": -0.979845476884293,
+      "components": {
+        "linear_tracking": 0.17333006430044406,
+        "yaw_tracking": 0.30855214621412114,
+        "vertical_velocity": -0.7673268670728817,
+        "roll_pitch_rate": -0.194454526660896,
+        "joint_torque": -0.14021802402930916,
+        "joint_acceleration": -0.16730254941224607,
+        "action_rate": -0.18805131244395548,
+        "collisions": 0.0,
+        "torque_limit": -0.00437441070699407,
+        "velocity_limit": 0.0,
+        "termination": 0.0
+      }
+    },
+    "updates_6_20": {
+      "achieved_planar_speed_mps": 0.0447351448237896,
+      "requested_saturation_fraction": 0.0009406949975527823,
+      "limiter_fraction_coxa_femur_tibia": [
+        0.5201859085648147,
+        0.5200267650462963,
+        0.5188657407407408
+      ],
+      "terminations": 0,
+      "termination_reasons": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 0,
+        "timeout": 0
+      },
+      "nonfoot_event_fraction": 0.0,
+      "task_reward_mean": -0.17193855352670653,
+      "components": {
+        "linear_tracking": 0.20437868705686707,
+        "yaw_tracking": 0.3907751217786982,
+        "vertical_velocity": -0.12260260710583909,
+        "roll_pitch_rate": -0.18842304177183247,
+        "joint_torque": -0.13793169526422086,
+        "joint_acceleration": -0.1272872669306202,
+        "action_rate": -0.19044125796968325,
+        "collisions": 0.0,
+        "torque_limit": -0.0004064936645306025,
+        "velocity_limit": 0.0,
+        "termination": 0.0
+      }
+    },
+    "planar_velocity_std_xy_mps": [
+      0.034255269914865494,
+      0.036993883550167084
+    ],
+    "vertical_velocity_rms_mps": 0.029915038496255875,
+    "yaw_rate_std_rad_s": 0.1140344962477684,
+    "speed_clamp_events": 0
+  },
+  "noise_zero_mean_v3": {
+    "update_1": {
+      "achieved_planar_speed_mps": 0.039483290165662766,
+      "requested_saturation_fraction": 0.0042227283120155334,
+      "limiter_fraction_coxa_femur_tibia": [
+        0.5217391304347826,
+        0.5194180253623188,
+        0.5196444746376812
+      ],
+      "terminations": 0,
+      "termination_reasons": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 0,
+        "timeout": 0
+      },
+      "nonfoot_event_fraction": 0.0,
+      "task_reward_mean": -1.218378988012167,
+      "components": {
+        "linear_tracking": 0.08519656823997686,
+        "yaw_tracking": 0.1581521320289312,
+        "vertical_velocity": -0.7673268670728817,
+        "roll_pitch_rate": -0.194454526660896,
+        "joint_torque": -0.14021802402930916,
+        "joint_acceleration": -0.16730254941224607,
+        "action_rate": -0.18805131244395548,
+        "collisions": 0.0,
+        "torque_limit": -0.00437441070699407,
+        "velocity_limit": 0.0,
+        "termination": 0.0
+      }
+    },
+    "updates_6_20": {
+      "achieved_planar_speed_mps": 0.044532615691423416,
+      "requested_saturation_fraction": 0.000969328626524657,
+      "limiter_fraction_coxa_femur_tibia": [
+        0.5193684895833334,
+        0.5186414930555556,
+        0.5172092013888889
+      ],
+      "terminations": 0,
+      "termination_reasons": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 0,
+        "timeout": 0
+      },
+      "nonfoot_event_fraction": 0.0,
+      "task_reward_mean": -0.5297230269630745,
+      "components": {
+        "linear_tracking": 0.0752673496588122,
+        "yaw_tracking": 0.16146532478242837,
+        "vertical_velocity": -0.1218287521033209,
+        "roll_pitch_rate": -0.18896594528556912,
+        "joint_torque": -0.13774942588643171,
+        "joint_acceleration": -0.12697340726663242,
+        "action_rate": -0.19051384774114316,
+        "collisions": 0.0,
+        "torque_limit": -0.0004243232519158369,
+        "velocity_limit": 0.0,
+        "termination": 0.0
+      }
+    },
+    "planar_velocity_std_xy_mps": [
+      0.03398797661066055,
+      0.03687933459877968
+    ],
+    "vertical_velocity_rms_mps": 0.029820479452610016,
+    "yaw_rate_std_rad_s": 0.11361568421125412,
+    "speed_clamp_events": 0
+  },
+  "native_noise_ranges": {
+    "runs": [
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "tracking_runs": {
+      "v2": [
+        "A",
+        "B",
+        "C"
+      ],
+      "v3": [
+        "D"
+      ]
+    },
+    "updates_6_20": {
+      "achieved_planar_speed_mps": [
+        0.043459680924812956,
+        0.04792367294430733
+      ],
+      "requested_saturation_fraction": [
+        0.0011815200947845976,
+        0.0021805375659217437
+      ],
+      "components": {
+        "vertical_velocity": [
+          -0.11574872765608941,
+          -0.1150201003906962
+        ],
+        "roll_pitch_rate": [
+          -0.1945255603240058,
+          -0.18377006218762076
+        ],
+        "joint_torque": [
+          -0.14572443515692912,
+          -0.14007711754432722
+        ],
+        "joint_acceleration": [
+          -0.1378413809076139,
+          -0.13053355377948417
+        ],
+        "action_rate": [
+          -0.20372502922594624,
+          -0.19991214453119838
+        ]
+      },
+      "tracking_v2": {
+        "linear_tracking": [
+          0.19935408424936307,
+          0.21074957686703158
+        ],
+        "yaw_tracking": [
+          0.3839373725801326,
+          0.3873575840053491
+        ]
+      },
+      "tracking_v3": {
+        "linear_tracking": [
+          0.07592283499763898,
+          0.07592283499763898
+        ],
+        "yaw_tracking": [
+          0.1638124401550693,
+          0.1638124401550693
+        ]
+      }
+    },
+    "update_1": {
+      "achieved_planar_speed_mps": [
+        0.04186725243926048,
+        0.04532937705516815
+      ],
+      "requested_saturation_fraction": [
+        0.003499349346384406,
+        0.0047923908568918705
+      ],
+      "components": {
+        "vertical_velocity": [
+          -0.6594296283615109,
+          -0.6548797856012368
+        ],
+        "joint_acceleration": [
+          -0.1655226992752432,
+          -0.16133858253548775
+        ]
+      }
+    }
+  },
+  "noise_probe_vs_native": {
+    "max_abs_action_difference": 1.1920928955078125e-07,
+    "reward_versions": [
+      "v1",
+      "v2",
+      "v3"
+    ],
+    "rewards_unscored": {
+      "native": {
+        "v4": "Missing/nonfinite reward v4 telemetry: computed_torque_nm"
+      },
+      "surrogate": {}
+    },
+    "ratio_spread_over_12_noisy_cells": {
+      "planar_speed_rms_mps": {
+        "min_ratio": 1.0190102690251595,
+        "max_ratio": 1.0648100713631026,
+        "mean_abs_log_ratio": 0.03181609198665822
+      },
+      "vertical_velocity_rms_mps": {
+        "min_ratio": 0.9430029379313511,
+        "max_ratio": 1.015623321982252,
+        "mean_abs_log_ratio": 0.014260546655312407
+      },
+      "roll_pitch_rate_rms_rad_s": {
+        "min_ratio": 0.9071078539934564,
+        "max_ratio": 1.0172869204589001,
+        "mean_abs_log_ratio": 0.028819496965043486
+      },
+      "yaw_rate_rms_rad_s": {
+        "min_ratio": 0.9982876941185229,
+        "max_ratio": 1.0603501195820257,
+        "mean_abs_log_ratio": 0.02144613224235985
+      },
+      "joint_velocity_rms_rad_s": {
+        "min_ratio": 0.31080899440451115,
+        "max_ratio": 0.9911479405928051,
+        "mean_abs_log_ratio": 0.4238151770345027
+      },
+      "executed_target_step_rms_rad": {
+        "min_ratio": 0.9999999997730423,
+        "max_ratio": 1.000000000111637,
+        "mean_abs_log_ratio": 1.1403482788451725e-10
+      },
+      "root_height_mean_m": {
+        "min_ratio": 0.9965294923544334,
+        "max_ratio": 1.0105585658560363,
+        "mean_abs_log_ratio": 0.0041769198674552485
+      },
+      "applied_torque_rms_nm": {
+        "min_ratio": 0.8772001146219691,
+        "max_ratio": 1.0050219854228202,
+        "mean_abs_log_ratio": 0.0439174784678856
+      }
+    },
+    "cells": [
+      {
+        "pose": "neutral",
+        "standard_deviation": 0.0,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          2.563528943124698e-09,
+          0.00012973386020152767
+        ],
+        "vertical_velocity_rms_mps": [
+          3.3519915989608715e-09,
+          4.159580124171583e-06
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          3.959054334031021e-08,
+          0.0008032140573278979
+        ],
+        "yaw_rate_rms_rad_s": [
+          2.984719917521976e-09,
+          0.0010051852729160203
+        ],
+        "joint_velocity_rms_rad_s": [
+          9.275233947410685e-08,
+          0.0024728032606382852
+        ],
+        "executed_target_step_rms_rad": [
+          0.0,
+          0.0
+        ],
+        "root_height_mean_m": [
+          0.09575280547142029,
+          0.09576276960223913
+        ],
+        "applied_torque_rms_nm": [
+          0.2661057971469913,
+          0.2661660202193643
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          9.724122857254523e-08,
+          0.0019069550461313927
+        ],
+        "limiter_fraction": [
+          0.0,
+          0.0
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          1.0,
+          1.0
+        ],
+        "reward_v2_joint_acceleration": [
+          -1.4507398837793062e-08,
+          -0.00041983387200161815
+        ],
+        "reward_v1_total": [
+          0.361878901720047,
+          0.36186158657073975
+        ],
+        "reward_v2_total": [
+          0.5040717124938965,
+          0.4970703125
+        ],
+        "reward_v3_total": [
+          0.5040717124938965,
+          0.4961807429790497
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.0,
+          0.0
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          1.9578134792965914e-05,
+          0.5665773935443431
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          5.291719275931686e-06,
+          0.1468430402090266
+        ],
+        "touchdowns_per_foot_per_second": [
+          0.0,
+          0.0
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.0
+        ],
+        "requested_saturation_fraction_400hz": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "pose": "neutral",
+        "standard_deviation": 0.05,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          0.022162776838815155,
+          0.02081383096841277
+        ],
+        "vertical_velocity_rms_mps": [
+          0.01756138406481594,
+          0.017568342058376697
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          0.1052993556762361,
+          0.10375258325219852
+        ],
+        "yaw_rate_rms_rad_s": [
+          0.06555763188659361,
+          0.06336697295537534
+        ],
+        "joint_velocity_rms_rad_s": [
+          0.32504070294210985,
+          0.3279436798786094
+        ],
+        "executed_target_step_rms_rad": [
+          0.02198034667523283,
+          0.02198034667277901
+        ],
+        "root_height_mean_m": [
+          0.0959583894815296,
+          0.09536043750680984
+        ],
+        "applied_torque_rms_nm": [
+          0.33833596744956657,
+          0.3393359996835759
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          0.354716797731403,
+          0.36921974832926646
+        ],
+        "limiter_fraction": [
+          0.0946337118681808,
+          0.0946337118681808
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          0.9908333333333333,
+          0.9855
+        ],
+        "reward_v2_joint_acceleration": [
+          -0.0739283412694931,
+          -0.07447980344295502
+        ],
+        "reward_v1_total": [
+          0.3751511871814728,
+          0.37165868282318115
+        ],
+        "reward_v2_total": [
+          0.1812257021665573,
+          0.18196403980255127
+        ],
+        "reward_v3_total": [
+          -0.04413096234202385,
+          -0.04016883671283722
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          8.333333333333333e-05,
+          8.333333333333333e-05
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          99.76834525329326,
+          100.51255612853248
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          25.020140005303887,
+          25.290254441002983
+        ],
+        "touchdowns_per_foot_per_second": [
+          0.0375,
+          0.035416666666666666
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.0
+        ],
+        "requested_saturation_fraction_400hz": [
+          1.7361111111111112e-06,
+          0.0
+        ]
+      },
+      {
+        "pose": "neutral",
+        "standard_deviation": 0.1,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          0.039542251756164444,
+          0.03880456650745307
+        ],
+        "vertical_velocity_rms_mps": [
+          0.02600556622919732,
+          0.025886778908955466
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          0.15363581321085362,
+          0.15102505509610623
+        ],
+        "yaw_rate_rms_rad_s": [
+          0.09514883791404637,
+          0.09468631836541863
+        ],
+        "joint_velocity_rms_rad_s": [
+          0.5143847735250976,
+          0.5406729318908459
+        ],
+        "executed_target_step_rms_rad": [
+          0.029642673876053127,
+          0.029642673880971193
+        ],
+        "root_height_mean_m": [
+          0.0959501758813858,
+          0.09548987992852927
+        ],
+        "applied_torque_rms_nm": [
+          0.415102082706702,
+          0.41302786280049936
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          0.6041150414984344,
+          0.6747717031786087
+        ],
+        "limiter_fraction": [
+          0.36197394789579157,
+          0.36197394789579157
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          0.8887083333333333,
+          0.8895
+        ],
+        "reward_v2_joint_acceleration": [
+          -0.10544504225254059,
+          -0.1090613305568695
+        ],
+        "reward_v1_total": [
+          0.37400782108306885,
+          0.3722612261772156
+        ],
+        "reward_v2_total": [
+          -0.048301130533218384,
+          -0.048562388867139816
+        ],
+        "reward_v3_total": [
+          -0.30461615324020386,
+          -0.30523681640625
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.0025833333333333333,
+          0.0032083333333333334
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          142.30100083266007,
+          147.18128573941456
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          36.07375311154324,
+          38.33122355118814
+        ],
+        "touchdowns_per_foot_per_second": [
+          1.34375,
+          1.11875
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.0
+        ],
+        "requested_saturation_fraction_400hz": [
+          9.027777777777777e-05,
+          7.465277777777777e-05
+        ]
+      },
+      {
+        "pose": "neutral",
+        "standard_deviation": 0.15,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          0.05034306167283097,
+          0.04875877981073142
+        ],
+        "vertical_velocity_rms_mps": [
+          0.029951491587164935,
+          0.02990272008405129
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          0.17956117419606035,
+          0.17707133044479234
+        ],
+        "yaw_rate_rms_rad_s": [
+          0.11436298731937007,
+          0.11455914762161958
+        ],
+        "joint_velocity_rms_rad_s": [
+          0.6600210671219665,
+          0.8362304514436715
+        ],
+        "executed_target_step_rms_rad": [
+          0.03268863281851908,
+          0.03268863281714143
+        ],
+        "root_height_mean_m": [
+          0.09578421189449728,
+          0.09525108960643411
+        ],
+        "applied_torque_rms_nm": [
+          0.4746960602472664,
+          0.48024353568646927
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          0.8296578748035719,
+          1.220005902976102
+        ],
+        "limiter_fraction": [
+          0.5159763972389223,
+          0.5159763972389223
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          0.7889583333333333,
+          0.7842916666666667
+        ],
+        "reward_v2_joint_acceleration": [
+          -0.12846951186656952,
+          -0.14733633399009705
+        ],
+        "reward_v1_total": [
+          0.3459313213825226,
+          0.34639012813568115
+        ],
+        "reward_v2_total": [
+          -0.22261035442352295,
+          -0.2501281797885895
+        ],
+        "reward_v3_total": [
+          -0.49988648295402527,
+          -0.5253344178199768
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.007791666666666666,
+          0.015375
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          173.37314968929732,
+          198.83445856590603
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          44.51827635936928,
+          58.65855923150781
+        ],
+        "touchdowns_per_foot_per_second": [
+          2.7708333333333335,
+          2.80625
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          1.5
+        ],
+        "requested_saturation_fraction_400hz": [
+          0.0008125,
+          0.002935763888888889
+        ]
+      },
+      {
+        "pose": "femur_raised",
+        "standard_deviation": 0.0,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          9.060786119914242e-08,
+          0.0003082156095132534
+        ],
+        "vertical_velocity_rms_mps": [
+          6.851761724305736e-09,
+          0.00014211607006759576
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          6.075658871462196e-07,
+          0.002024443972396816
+        ],
+        "yaw_rate_rms_rad_s": [
+          5.714087918254395e-07,
+          0.001319391120378399
+        ],
+        "joint_velocity_rms_rad_s": [
+          1.4049197596236724e-06,
+          0.025792507953395334
+        ],
+        "executed_target_step_rms_rad": [
+          0.0,
+          0.0
+        ],
+        "root_height_mean_m": [
+          0.10619090098142624,
+          0.10602184486761689
+        ],
+        "applied_torque_rms_nm": [
+          1.0699781721452404,
+          1.0704725981183032
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          8.775166785511682e-07,
+          0.043163356988349874
+        ],
+        "limiter_fraction": [
+          0.0,
+          0.0
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          1.0,
+          0.999875
+        ],
+        "reward_v2_joint_acceleration": [
+          -2.8343865210445074e-07,
+          -0.0011521982960402966
+        ],
+        "reward_v1_total": [
+          0.35735276341438293,
+          0.3573695123195648
+        ],
+        "reward_v2_total": [
+          0.11351167410612106,
+          0.10399249196052551
+        ],
+        "reward_v3_total": [
+          0.11350893974304199,
+          0.09865571558475494
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.0,
+          8.333333333333333e-05
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          0.00038250829525717634,
+          1.5549234296810348
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          0.00012919659960435511,
+          1.8068844786129432
+        ],
+        "touchdowns_per_foot_per_second": [
+          0.0,
+          0.0020833333333333333
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.0
+        ],
+        "requested_saturation_fraction_400hz": [
+          0.3333333333333333,
+          0.3333333333333333
+        ]
+      },
+      {
+        "pose": "femur_raised",
+        "standard_deviation": 0.05,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          0.021396049423747215,
+          0.020929803608940072
+        ],
+        "vertical_velocity_rms_mps": [
+          0.014687021535318005,
+          0.015405500057728047
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          0.0823799196957139,
+          0.09081601414103528
+        ],
+        "yaw_rate_rms_rad_s": [
+          0.052025326379438776,
+          0.04996086885413365
+        ],
+        "joint_velocity_rms_rad_s": [
+          0.29023215085507587,
+          0.933795855590154
+        ],
+        "executed_target_step_rms_rad": [
+          0.01956511576171517,
+          0.019565115765754905
+        ],
+        "root_height_mean_m": [
+          0.11815147509612144,
+          0.11846708867326379
+        ],
+        "applied_torque_rms_nm": [
+          0.3414924429021574,
+          0.3892982196534757
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          0.336562522661429,
+          1.5412594867566043
+        ],
+        "limiter_fraction": [
+          0.06500501002004008,
+          0.06500501002004008
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          0.9894583333333333,
+          0.936625
+        ],
+        "reward_v2_joint_acceleration": [
+          -0.06495114415884018,
+          -0.13010141253471375
+        ],
+        "reward_v1_total": [
+          0.3805708587169647,
+          0.38114434480667114
+        ],
+        "reward_v2_total": [
+          0.22963440418243408,
+          0.1257205605506897
+        ],
+        "reward_v3_total": [
+          0.03029547818005085,
+          -0.06410356611013412
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.00025,
+          0.021916666666666668
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          87.65336427545931,
+          175.57545839624265
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          22.05901864654758,
+          65.3885800894612
+        ],
+        "touchdowns_per_foot_per_second": [
+          0.06666666666666667,
+          0.6749999999999999
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          2.25
+        ],
+        "requested_saturation_fraction_400hz": [
+          1.5625e-05,
+          0.0075138888888888885
+        ]
+      },
+      {
+        "pose": "femur_raised",
+        "standard_deviation": 0.1,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          0.035730594961820614,
+          0.03503235757644233
+        ],
+        "vertical_velocity_rms_mps": [
+          0.021906519269202226,
+          0.022244694324938124
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          0.12876843140273617,
+          0.1323366695440948
+        ],
+        "yaw_rate_rms_rad_s": [
+          0.0731562673573198,
+          0.07214029412231833
+        ],
+        "joint_velocity_rms_rad_s": [
+          0.47253009306079274,
+          0.7403754276922236
+        ],
+        "executed_target_step_rms_rad": [
+          0.027482460955049595,
+          0.02748246096128695
+        ],
+        "root_height_mean_m": [
+          0.11854900473169983,
+          0.11858704096823931
+        ],
+        "applied_torque_rms_nm": [
+          0.40022053679850056,
+          0.4146430860979332
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          0.5721607659232056,
+          1.076724116061583
+        ],
+        "limiter_fraction": [
+          0.2923207526163438,
+          0.2923207526163438
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          0.91175,
+          0.8421666666666666
+        ],
+        "reward_v2_joint_acceleration": [
+          -0.09846203774213791,
+          -0.1358281373977661
+        ],
+        "reward_v1_total": [
+          0.38435038924217224,
+          0.38439440727233887
+        ],
+        "reward_v2_total": [
+          0.020361987873911858,
+          -0.02991976961493492
+        ],
+        "reward_v3_total": [
+          -0.21195238828659058,
+          -0.25884294509887695
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.0019166666666666666,
+          0.022625
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          132.87723548182134,
+          183.30382310089004
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          33.48694309297423,
+          52.07285990277371
+        ],
+        "touchdowns_per_foot_per_second": [
+          0.975,
+          1.4625000000000001
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.75
+        ],
+        "requested_saturation_fraction_400hz": [
+          5.208333333333334e-05,
+          0.0014340277777777778
+        ]
+      },
+      {
+        "pose": "femur_raised",
+        "standard_deviation": 0.15,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          0.04506443487372503,
+          0.04419519101075217
+        ],
+        "vertical_velocity_rms_mps": [
+          0.02586913376581804,
+          0.026216768831328487
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          0.1513714090260543,
+          0.15826740431408212
+        ],
+        "yaw_rate_rms_rad_s": [
+          0.08708284762132969,
+          0.08573833874516933
+        ],
+        "joint_velocity_rms_rad_s": [
+          0.6326759578283359,
+          1.0945026257521777
+        ],
+        "executed_target_step_rms_rad": [
+          0.030806129808364904,
+          0.03080612981088207
+        ],
+        "root_height_mean_m": [
+          0.11837496409192681,
+          0.1184175210930407
+        ],
+        "applied_torque_rms_nm": [
+          0.4593719468153339,
+          0.47701327735280685
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          0.8185171381187735,
+          1.6824590071971806
+        ],
+        "limiter_fraction": [
+          0.4450011133377867,
+          0.4450011133377867
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          0.8114583333333333,
+          0.7090833333333333
+        ],
+        "reward_v2_joint_acceleration": [
+          -0.1251751184463501,
+          -0.20004427433013916
+        ],
+        "reward_v1_total": [
+          0.37003323435783386,
+          0.37093859910964966
+        ],
+        "reward_v2_total": [
+          -0.14775723218917847,
+          -0.244953453540802
+        ],
+        "reward_v3_total": [
+          -0.39421430230140686,
+          -0.48584187030792236
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.009708333333333333,
+          0.05629166666666666
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          168.92729138285594,
+          269.9652843757841
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          43.38688563418578,
+          78.15675816525915
+        ],
+        "touchdowns_per_foot_per_second": [
+          2.466666666666667,
+          3.464583333333333
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.0
+        ],
+        "requested_saturation_fraction_400hz": [
+          0.0009045138888888888,
+          0.004043402777777778
+        ]
+      },
+      {
+        "pose": "crouch",
+        "standard_deviation": 0.0,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          8.537038472830855e-09,
+          0.0002518276657236059
+        ],
+        "vertical_velocity_rms_mps": [
+          1.92447935475556e-09,
+          1.7122486241034503e-05
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          2.147629857665009e-08,
+          0.0009803969568437517
+        ],
+        "yaw_rate_rms_rad_s": [
+          1.3474253645289623e-08,
+          0.0009074991743061594
+        ],
+        "joint_velocity_rms_rad_s": [
+          7.584062147800544e-08,
+          0.0041982138011224645
+        ],
+        "executed_target_step_rms_rad": [
+          0.0,
+          0.0
+        ],
+        "root_height_mean_m": [
+          0.06972877846658229,
+          0.06963687968626618
+        ],
+        "applied_torque_rms_nm": [
+          0.2998826008523756,
+          0.30541983460586875
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          6.08212497259965e-08,
+          0.002554294890214646
+        ],
+        "limiter_fraction": [
+          0.0,
+          0.0
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          1.0,
+          1.0
+        ],
+        "reward_v2_joint_acceleration": [
+          -5.034561656458436e-09,
+          -0.0008205057238228619
+        ],
+        "reward_v1_total": [
+          0.3578847348690033,
+          0.3578416705131531
+        ],
+        "reward_v2_total": [
+          0.49416929483413696,
+          0.4890383780002594
+        ],
+        "reward_v3_total": [
+          0.49416932463645935,
+          0.4849889874458313
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.0,
+          0.0
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          6.79427957861479e-06,
+          1.1072951228027332
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          1.7871586798802135e-06,
+          0.2893472653980991
+        ],
+        "touchdowns_per_foot_per_second": [
+          0.0,
+          0.0
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.0
+        ],
+        "requested_saturation_fraction_400hz": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "pose": "crouch",
+        "standard_deviation": 0.05,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          0.019092113010886095,
+          0.017974782030422843
+        ],
+        "vertical_velocity_rms_mps": [
+          0.010561496303758145,
+          0.010589003620138744
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          0.06885698565959866,
+          0.06902394992149412
+        ],
+        "yaw_rate_rms_rad_s": [
+          0.06343696016218835,
+          0.06162025287520697
+        ],
+        "joint_velocity_rms_rad_s": [
+          0.21819688323103642,
+          0.22213764381271536
+        ],
+        "executed_target_step_rms_rad": [
+          0.01711687571724024,
+          0.017116875719011715
+        ],
+        "root_height_mean_m": [
+          0.07029343762993813,
+          0.06988357677310705
+        ],
+        "applied_torque_rms_nm": [
+          0.33208478509554756,
+          0.35138729752842995
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          0.20311332375754187,
+          0.2205028317661031
+        ],
+        "limiter_fraction": [
+          0.03873023825428635,
+          0.03873023825428635
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          1.0,
+          0.9998333333333334
+        ],
+        "reward_v2_joint_acceleration": [
+          -0.04853843152523041,
+          -0.049217063933610916
+        ],
+        "reward_v1_total": [
+          0.36945194005966187,
+          0.3665185272693634
+        ],
+        "reward_v2_total": [
+          0.27531713247299194,
+          0.26865413784980774
+        ],
+        "reward_v3_total": [
+          0.052406780421733856,
+          0.04853301867842674
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.0,
+          4.1666666666666665e-05
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          65.5039581614932,
+          66.41979073498068
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          16.37796835374474,
+          16.71487179057733
+        ],
+        "touchdowns_per_foot_per_second": [
+          0.0,
+          0.0
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.0
+        ],
+        "requested_saturation_fraction_400hz": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "pose": "crouch",
+        "standard_deviation": 0.1,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          0.035248906137312436,
+          0.03392966516416414
+        ],
+        "vertical_velocity_rms_mps": [
+          0.01725878678191525,
+          0.017323942425566424
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          0.1133426603897873,
+          0.11403959448611277
+        ],
+        "yaw_rate_rms_rad_s": [
+          0.09326473747607342,
+          0.092492695011712
+        ],
+        "joint_velocity_rms_rad_s": [
+          0.35767341637423006,
+          0.3790181881453267
+        ],
+        "executed_target_step_rms_rad": [
+          0.025122219528815146,
+          0.02512221953341757
+        ],
+        "root_height_mean_m": [
+          0.07094291811063885,
+          0.07020168895460666
+        ],
+        "applied_torque_rms_nm": [
+          0.37799721885290816,
+          0.4047531196269446
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          0.33918453526105463,
+          0.4051395372063403
+        ],
+        "limiter_fraction": [
+          0.22404531284791807,
+          0.22404531284791807
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          0.9944166666666666,
+          0.9822083333333333
+        ],
+        "reward_v2_joint_acceleration": [
+          -0.07573449611663818,
+          -0.07832541316747665
+        ],
+        "reward_v1_total": [
+          0.37428441643714905,
+          0.3713560998439789
+        ],
+        "reward_v2_total": [
+          0.08890081942081451,
+          0.07725109159946442
+        ],
+        "reward_v3_total": [
+          -0.17125611007213593,
+          -0.18278443813323975
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.0,
+          0.0004583333333333333
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          102.20580481514445,
+          105.70231442010807
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          25.426921732683425,
+          27.09459158853946
+        ],
+        "touchdowns_per_foot_per_second": [
+          0.016666666666666666,
+          0.10416666666666666
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.0
+        ],
+        "requested_saturation_fraction_400hz": [
+          0.0,
+          6.944444444444445e-06
+        ]
+      },
+      {
+        "pose": "crouch",
+        "standard_deviation": 0.15,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          0.04409923653205083,
+          0.043056979882799225
+        ],
+        "vertical_velocity_rms_mps": [
+          0.020963721791604457,
+          0.020953793289879077
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          0.13559457204991496,
+          0.1363654977117439
+        ],
+        "yaw_rate_rms_rad_s": [
+          0.11132584789155633,
+          0.11148124636137478
+        ],
+        "joint_velocity_rms_rad_s": [
+          0.44719948868439013,
+          0.5415729895444363
+        ],
+        "executed_target_step_rms_rad": [
+          0.028674600236534207,
+          0.02867460023858484
+        ],
+        "root_height_mean_m": [
+          0.0716721827108413,
+          0.07096643423475325
+        ],
+        "applied_torque_rms_nm": [
+          0.4119909054389525,
+          0.42973477898917967
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          0.44971555858758616,
+          0.6866388007646063
+        ],
+        "limiter_fraction": [
+          0.3673040525495435,
+          0.3673040525495435
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          0.96275,
+          0.9415833333333333
+        ],
+        "reward_v2_joint_acceleration": [
+          -0.08994980156421661,
+          -0.0976586788892746
+        ],
+        "reward_v1_total": [
+          0.3579147458076477,
+          0.3563012182712555
+        ],
+        "reward_v2_total": [
+          -0.0494084469974041,
+          -0.06399346888065338
+        ],
+        "reward_v3_total": [
+          -0.32699933648109436,
+          -0.3414945900440216
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.0007083333333333334,
+          0.0033333333333333335
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          121.38974709714168,
+          131.79307857570612
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          30.40577078972792,
+          37.74406686294177
+        ],
+        "touchdowns_per_foot_per_second": [
+          0.3416666666666667,
+          0.48125
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.0
+        ],
+        "requested_saturation_fraction_400hz": [
+          1.2152777777777777e-05,
+          8.680555555555556e-05
+        ]
+      },
+      {
+        "pose": "beyond_bound",
+        "standard_deviation": 0.0,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          9.060786119914242e-08,
+          0.0003917574396984153
+        ],
+        "vertical_velocity_rms_mps": [
+          6.851761724305736e-09,
+          9.564862596865991e-05
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          6.075658871462196e-07,
+          0.0020977831805306
+        ],
+        "yaw_rate_rms_rad_s": [
+          5.714087918254395e-07,
+          0.0014950702317283915
+        ],
+        "joint_velocity_rms_rad_s": [
+          1.4049197596236724e-06,
+          0.019999362988398547
+        ],
+        "executed_target_step_rms_rad": [
+          0.0,
+          0.0
+        ],
+        "root_height_mean_m": [
+          0.10619090098142624,
+          0.1060809351745993
+        ],
+        "applied_torque_rms_nm": [
+          1.0699781721452404,
+          1.070463320436913
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          8.775166785511682e-07,
+          0.0330017583956956
+        ],
+        "limiter_fraction": [
+          0.0,
+          0.0
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          1.0,
+          0.9999583333333333
+        ],
+        "reward_v2_joint_acceleration": [
+          -2.8343865210445074e-07,
+          -0.0012724139960482717
+        ],
+        "reward_v1_total": [
+          0.35735276341438293,
+          0.3574666678905487
+        ],
+        "reward_v2_total": [
+          0.11351167410612106,
+          0.10539048910140991
+        ],
+        "reward_v3_total": [
+          0.11350893974304199,
+          0.0980302020907402
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.0,
+          4.1666666666666665e-05
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          0.00038250829525717634,
+          1.7171577324660858
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          0.00012919659960435511,
+          1.4107008999283865
+        ],
+        "touchdowns_per_foot_per_second": [
+          0.0,
+          0.0020833333333333333
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.0
+        ],
+        "requested_saturation_fraction_400hz": [
+          0.3333333333333333,
+          0.3333333333333333
+        ]
+      },
+      {
+        "pose": "beyond_bound",
+        "standard_deviation": 0.05,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          0.021099178969205157,
+          0.020557153286564638
+        ],
+        "vertical_velocity_rms_mps": [
+          0.012909471762380779,
+          0.013689747129208375
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          0.06995649993621363,
+          0.07666438247487892
+        ],
+        "yaw_rate_rms_rad_s": [
+          0.052887735414664024,
+          0.04987761536303838
+        ],
+        "joint_velocity_rms_rad_s": [
+          0.26122145919198614,
+          0.8054112254994342
+        ],
+        "executed_target_step_rms_rad": [
+          0.017964577830314812,
+          0.017964577832917775
+        ],
+        "root_height_mean_m": [
+          0.11833864561840891,
+          0.11875077107734978
+        ],
+        "applied_torque_rms_nm": [
+          0.3582320031104251,
+          0.370769152659941
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          0.29941748135996105,
+          1.294889079928561
+        ],
+        "limiter_fraction": [
+          0.062277332442663105,
+          0.062277332442663105
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          0.993375,
+          0.9580833333333333
+        ],
+        "reward_v2_joint_acceleration": [
+          -0.05782939866185188,
+          -0.10072526335716248
+        ],
+        "reward_v1_total": [
+          0.3782489597797394,
+          0.3787683844566345
+        ],
+        "reward_v2_total": [
+          0.2508530020713806,
+          0.18746109306812286
+        ],
+        "reward_v3_total": [
+          0.04938598722219467,
+          -0.005134676117449999
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.00016666666666666666,
+          0.012041666666666668
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          78.04237565639828,
+          135.9315315774533
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          19.530359574720674,
+          57.378543905040246
+        ],
+        "touchdowns_per_foot_per_second": [
+          0.058333333333333334,
+          0.43750000000000006
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.75
+        ],
+        "requested_saturation_fraction_400hz": [
+          1.736111111111111e-05,
+          0.003880208333333333
+        ]
+      },
+      {
+        "pose": "beyond_bound",
+        "standard_deviation": 0.1,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          0.03533803970368121,
+          0.034394440240726555
+        ],
+        "vertical_velocity_rms_mps": [
+          0.018847890007618832,
+          0.01871523958831804
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          0.1069435229634319,
+          0.10772502042260963
+        ],
+        "yaw_rate_rms_rad_s": [
+          0.07084004754657612,
+          0.06895825690013875
+        ],
+        "joint_velocity_rms_rad_s": [
+          0.40758752834472145,
+          0.7378381802356269
+        ],
+        "executed_target_step_rms_rad": [
+          0.024209691068348003,
+          0.024209691068754723
+        ],
+        "root_height_mean_m": [
+          0.11924358161911368,
+          0.11925920566730201
+        ],
+        "applied_torque_rms_nm": [
+          0.42324481541364434,
+          0.4419682633511888
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          0.4864213311985498,
+          1.1591141881016378
+        ],
+        "limiter_fraction": [
+          0.2398825428635048,
+          0.2398825428635048
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          0.9523333333333334,
+          0.8988333333333334
+        ],
+        "reward_v2_joint_acceleration": [
+          -0.08260960131883621,
+          -0.12184938788414001
+        ],
+        "reward_v1_total": [
+          0.3831360340118408,
+          0.3849352300167084
+        ],
+        "reward_v2_total": [
+          0.07036682218313217,
+          0.023059241473674774
+        ],
+        "reward_v3_total": [
+          -0.15873560309410095,
+          -0.2011784017086029
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.0012083333333333334,
+          0.021708333333333333
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          111.48394278850131,
+          164.43911782466128
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          27.99209492049557,
+          50.731431521746835
+        ],
+        "touchdowns_per_foot_per_second": [
+          0.5041666666666667,
+          0.8854166666666666
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          0.0
+        ],
+        "requested_saturation_fraction_400hz": [
+          3.993055555555556e-05,
+          0.0018506944444444445
+        ]
+      },
+      {
+        "pose": "beyond_bound",
+        "standard_deviation": 0.15,
+        "terminations": {
+          "native": 0,
+          "surrogate": 0
+        },
+        "planar_speed_rms_mps": [
+          0.04498633714516128,
+          0.04359196724947275
+        ],
+        "vertical_velocity_rms_mps": [
+          0.021222584287419348,
+          0.02089611751529886
+        ],
+        "roll_pitch_rate_rms_rad_s": [
+          0.12557416686655842,
+          0.12778980948593668
+        ],
+        "yaw_rate_rms_rad_s": [
+          0.08274247095966224,
+          0.08090487416523635
+        ],
+        "joint_velocity_rms_rad_s": [
+          0.5249293815004332,
+          0.9934261353189466
+        ],
+        "executed_target_step_rms_rad": [
+          0.02669313958410486,
+          0.026693139583739738
+        ],
+        "root_height_mean_m": [
+          0.11926795814558863,
+          0.11930133210867644
+        ],
+        "applied_torque_rms_nm": [
+          0.4806105619579889,
+          0.5096064579843688
+        ],
+        "tibia_joint_velocity_rms_rad_s": [
+          0.6643863354538443,
+          1.5611602535225721
+        ],
+        "limiter_fraction": [
+          0.3463454687152082,
+          0.3463454687152082
+        ],
+        "tibia_loaded_all_substeps_fraction": [
+          0.874875,
+          0.7669583333333333
+        ],
+        "reward_v2_joint_acceleration": [
+          -0.10006241500377655,
+          -0.17434042692184448
+        ],
+        "reward_v1_total": [
+          0.371670663356781,
+          0.372420996427536
+        ],
+        "reward_v2_total": [
+          -0.06853552162647247,
+          -0.1573834866285324
+        ],
+        "reward_v3_total": [
+          -0.313673734664917,
+          -0.39675605297088623
+        ],
+        "tibia_rate_above_3_rad_s_fraction": [
+          0.005,
+          0.05491666666666667
+        ],
+        "joint_acceleration_norm_mean_rad_s2": [
+          135.0370022238008,
+          235.27722262236384
+        ],
+        "joint_acceleration_rms_rad_s2": [
+          34.537565476737804,
+          68.83078767659613
+        ],
+        "touchdowns_per_foot_per_second": [
+          1.5625,
+          2.3083333333333336
+        ],
+        "tibia_collapse_events_per_robot_minute": [
+          0.0,
+          2.25
+        ],
+        "requested_saturation_fraction_400hz": [
+          0.0013368055555555555,
+          0.004432291666666667
+        ]
+      }
+    ],
+    "touchdown_events": 32000,
+    "touchdown_overshoot_events": 7450,
+    "peak_joint_speed_rad_s": 43.03004153619747,
+    "speed_clamp_events": 0,
+    "order": "each pair is [surrogate, native]",
+    "table": "probe/compare.txt"
+  },
+  "training_smoke_v2": {
+    "status": "completed",
+    "expected_status": "completed",
+    "errors": [],
+    "updates": 3,
+    "returncode": 0,
+    "wall_seconds": 3.42742583299696,
+    "collection_seconds_per_update": 0.8517560958862305,
+    "learning_seconds_per_update": 0.09482896327972412,
+    "task_reward_mean_last": -0.19489345387773938,
+    "reward_version": "paper_table1_command_scaled_v2",
+    "metrics_row_keys": [
+      "actions",
+      "collection_seconds",
+      "learning_rate",
+      "learning_seconds",
+      "loss",
+      "mean_action_std",
+      "policy_update",
+      "task",
+      "transitions",
+      "update"
+    ],
+    "files": [
+      "checkpoint_update000003.json",
+      "checkpoint_update000003.pt",
+      "force_metrics.json",
+      "metrics.jsonl",
+      "native",
+      "ppo_config.json",
+      "state.json",
+      "task"
+    ],
+    "collection_controls_per_second": 3606.6662919549317
+  },
+  "training_smoke_v3": {
+    "status": "completed",
+    "expected_status": "completed",
+    "errors": [],
+    "updates": 3,
+    "returncode": 0,
+    "wall_seconds": 2.9471818749880185,
+    "collection_seconds_per_update": 0.8123370409011841,
+    "learning_seconds_per_update": 0.09405946731567383,
+    "task_reward_mean_last": -0.55445710969506,
+    "reward_version": "paper_table1_immediate_v3",
+    "metrics_row_keys": [
+      "actions",
+      "collection_seconds",
+      "learning_rate",
+      "learning_seconds",
+      "loss",
+      "mean_action_std",
+      "policy_update",
+      "task",
+      "transitions",
+      "update"
+    ],
+    "files": [
+      "checkpoint_update000003.json",
+      "checkpoint_update000003.pt",
+      "force_metrics.json",
+      "metrics.jsonl",
+      "native",
+      "ppo_config.json",
+      "state.json",
+      "task"
+    ],
+    "collection_controls_per_second": 3781.681550052191
+  },
+  "training_smoke_v4": {
+    "status": "completed",
+    "expected_status": "completed",
+    "errors": [],
+    "updates": 3,
+    "returncode": 0,
+    "wall_seconds": 3.0150906250055414,
+    "collection_seconds_per_update": 0.8529936075210571,
+    "learning_seconds_per_update": 0.09613537788391113,
+    "task_reward_mean_last": -1.177535119842787,
+    "reward_version": "noise_sized_tripod_schedule_v4",
+    "metrics_row_keys": [
+      "actions",
+      "collection_seconds",
+      "learning_rate",
+      "learning_seconds",
+      "loss",
+      "mean_action_std",
+      "policy_update",
+      "task",
+      "transitions",
+      "update"
+    ],
+    "files": [
+      "checkpoint_update000003.json",
+      "checkpoint_update000003.pt",
+      "force_metrics.json",
+      "metrics.jsonl",
+      "native",
+      "ppo_config.json",
+      "state.json",
+      "task"
+    ],
+    "collection_controls_per_second": 3601.4337890851825
+  },
+  "training_smoke_v4_without_clock": {
+    "status": "failed",
+    "expected_status": "failed",
+    "errors": [
+      "ValueError('The contact-schedule reward needs a gait clock of the same period: pass --gait-clock 60 or set schedule_weight=0 in the task')"
+    ],
+    "updates": 0,
+    "returncode": 1,
+    "wall_seconds": 0.18317024999123532,
+    "collection_seconds_per_update": null,
+    "learning_seconds_per_update": null,
+    "task_reward_mean_last": null,
+    "reward_version": null,
+    "metrics_row_keys": null,
+    "files": [
+      "native",
+      "ppo_config.json",
+      "state.json",
+      "task"
+    ]
+  },
+  "training_smoke_learner_options": {
+    "status": "completed",
+    "expected_status": "completed",
+    "errors": [],
+    "updates": 3,
+    "returncode": 0,
+    "wall_seconds": 2.478714750002837,
+    "collection_seconds_per_update": 0.651115894317627,
+    "learning_seconds_per_update": 0.09322202205657959,
+    "task_reward_mean_last": -0.3136614283128362,
+    "reward_version": "noise_sized_tripod_schedule_v4",
+    "metrics_row_keys": [
+      "actions",
+      "collection_seconds",
+      "learning_rate",
+      "learning_seconds",
+      "loss",
+      "mean_action_std",
+      "policy_update",
+      "task",
+      "transitions",
+      "update"
+    ],
+    "files": [
+      "checkpoint_update000003.json",
+      "checkpoint_update000003.pt",
+      "force_metrics.json",
+      "metrics.jsonl",
+      "native",
+      "ppo_config.json",
+      "state.json",
+      "task"
+    ],
+    "ppo_config": {
+      "actor": {
+        "class_name": "MLPModel",
+        "hidden_dims": [
+          256,
+          256,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": false,
+        "distribution_cfg": {
+          "class_name": "locomotion.action_distribution:CorrelatedBoundedMeanGaussian",
+          "init_std": 0.1,
+          "std_type": "log",
+          "noise_correlation": 0.5
+        }
+      },
+      "algorithm": {
+        "class_name": "locomotion.rate_schedule:CappedRatePPO",
+        "value_loss_coef": 1.0,
+        "use_clipped_value_loss": true,
+        "clip_param": 0.2,
+        "entropy_coef": 0.01,
+        "num_learning_epochs": 5,
+        "num_mini_batches": 4,
+        "learning_rate": 0.0003,
+        "schedule": "adaptive",
+        "gamma": 0.99,
+        "lam": 0.95,
+        "desired_kl": 0.01,
+        "max_grad_norm": 1.0,
+        "rnd_cfg": null,
+        "symmetry_cfg": null,
+        "learning_rate_max": 0.0003
+      },
+      "exploration": {
+        "action_std_final": 0.05
+      },
+      "environment_wrapper": {
+        "observation_scaling": "fixed",
+        "command_segments": "bootstrap",
+        "gait_clock": 60,
+        "action_smoothing": "mean2",
+        "velocity_noise": 0.5
+      }
+    },
+    "action_std_by_update": [
+      0.10000035166740417,
+      0.083333320915699,
+      0.06666712462902069
+    ],
+    "collection_controls_per_second": 4718.054077330538
+  },
+  "evaluation_smoke_learner_options": {
+    "returncode": 0,
+    "wall_seconds": 45.89737079200859,
+    "observation_scaling": "fixed",
+    "task": "locomotion.task_v4:variant(schedule_weight=2.0)",
+    "policy_path": {
+      "source": "evaluation branch of locomotion/train.py",
+      "velocity_input_gain": 1.0,
+      "action_mean2_forced": false,
+      "action_smoothing_applied": "mean2",
+      "velocity_noise_recorded": 0.5,
+      "velocity_noise_applied": 0.0,
+      "scope": "Scales, gait clock, actor mean and two-control mean as the evaluation branch of locomotion/train.py; the gain and the forced mean are stress options."
+    },
+    "cases": {
+      "learning:translate_0.05_0deg": {
+        "pass": false,
+        "failed_bounds": [
+          "planar_error_mps"
+        ],
+        "consensus": null,
+        "planar_error_mps": 0.0500072573936349
+      },
+      "learning:quiet_20s": {
+        "pass": true,
+        "failed_bounds": [],
+        "consensus": "pass",
+        "planar_error_mps": 8.651523634253887e-08
+      },
+      "learning:forward_0.05_to_stop": {
+        "pass": true,
+        "failed_bounds": [],
+        "consensus": "pass",
+        "planar_error_mps": 0.05000003957325482
+      }
+    }
+  },
+  "training_start_vs_native_run_A": {
+    "run": {
+      "status": "completed",
+      "expected_status": "completed",
+      "errors": [],
+      "updates": 20,
+      "returncode": 0,
+      "wall_seconds": 19.959861000010278,
+      "collection_seconds_per_update": 0.8840089095266241,
+      "learning_seconds_per_update": 0.10241056743421052,
+      "task_reward_mean_last": -0.1975293212277999,
+      "reward_version": "paper_table1_command_scaled_v2",
+      "metrics_row_keys": [
+        "actions",
+        "collection_seconds",
+        "learning_rate",
+        "learning_seconds",
+        "loss",
+        "mean_action_std",
+        "policy_update",
+        "task",
+        "transitions",
+        "update"
+      ],
+      "files": [
+        "checkpoint_update000020.json",
+        "checkpoint_update000020.pt",
+        "force_metrics.json",
+        "metrics.jsonl",
+        "native",
+        "ppo_config.json",
+        "state.json",
+        "task"
+      ]
+    },
+    "update_1": {
+      "surrogate": {
+        "std": 0.150100439786911,
+        "r": -1.020788953529215,
+        "sat": 0.005784775596112013,
+        "aspd": 0.04507732391357422,
+        "slew_c": 0.5381567028985507,
+        "slew_f": 0.5462522644927537,
+        "slew_t": 0.5452898550724639,
+        "comp.linear_tracking": 0.16162740368027548,
+        "comp.yaw_tracking": 0.2657503750606338,
+        "comp.vertical_velocity": -0.7203864215752535,
+        "comp.roll_pitch_rate": -0.20393496960862953,
+        "comp.joint_torque": -0.14666248846212207,
+        "comp.joint_acceleration": -0.173211174421643,
+        "comp.action_rate": -0.19884890504181385,
+        "comp.collisions": 0.0,
+        "comp.torque_limit": -0.005122771598916387,
+        "comp.velocity_limit": 0.0,
+        "comp.termination": 0.0
+      },
+      "native": {
+        "std": 0.15001097321510315,
+        "r": -0.9474425315393091,
+        "sat": 0.0047923908568918705,
+        "aspd": 0.04532937705516815,
+        "slew_c": 0.544327445652174,
+        "slew_f": 0.5534986413043478,
+        "slew_t": 0.5481770833333334,
+        "comp.linear_tracking": 0.154560313720566,
+        "comp.yaw_tracking": 0.2678527870036002,
+        "comp.vertical_velocity": -0.6548797856012368,
+        "comp.roll_pitch_rate": -0.19914505249115186,
+        "comp.joint_torque": -0.14649098043810227,
+        "comp.joint_acceleration": -0.1649159779214339,
+        "comp.action_rate": -0.20084955380783262,
+        "comp.collisions": 0.0,
+        "comp.torque_limit": -0.0035740956126453227,
+        "comp.velocity_limit": -1.856436332066854e-07,
+        "comp.termination": 0.0
+      }
+    },
+    "updates_6_20": {
+      "surrogate": {
+        "std": 0.15013087590535482,
+        "r": -0.21601130480847183,
+        "sat": 0.0024105117811510962,
+        "aspd": 0.04893999695777893,
+        "slew_c": 0.5450267650462963,
+        "slew_f": 0.5433485243055556,
+        "slew_t": 0.5511537905092592,
+        "comp.linear_tracking": 0.19893384310433268,
+        "comp.yaw_tracking": 0.3872671933135633,
+        "comp.vertical_velocity": -0.11585680547445217,
+        "comp.roll_pitch_rate": -0.2005618078168532,
+        "comp.joint_torque": -0.14634555516741884,
+        "comp.joint_acceleration": -0.13593587718383382,
+        "comp.action_rate": -0.20259924661141768,
+        "comp.collisions": 0.0,
+        "comp.torque_limit": -0.0009130489226905417,
+        "comp.velocity_limit": 0.0,
+        "comp.termination": 0.0
+      },
+      "native": {
+        "std": 0.15002583265304564,
+        "r": -0.21135039675638534,
+        "sat": 0.0021360798040404917,
+        "aspd": 0.04792367294430733,
+        "slew_c": 0.5491138599537038,
+        "slew_f": 0.5441225405092591,
+        "slew_t": 0.5517975983796295,
+        "comp.linear_tracking": 0.19935408424936307,
+        "comp.yaw_tracking": 0.38462592678067214,
+        "comp.vertical_velocity": -0.11505435960157472,
+        "comp.roll_pitch_rate": -0.19315412974473248,
+        "comp.joint_torque": -0.14545767094225284,
+        "comp.joint_acceleration": -0.1367769290811945,
+        "comp.action_rate": -0.20355462778922329,
+        "comp.collisions": 0.0,
+        "comp.torque_limit": -0.0013326906190599176,
+        "comp.velocity_limit": 0.0,
+        "comp.termination": 0.0
+      }
+    }
+  }
+}

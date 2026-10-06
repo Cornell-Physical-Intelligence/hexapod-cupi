@@ -572,6 +572,286 @@ uv run python -B site/assets/ppo_learning_recovery_20261002_001/reward_v3_evalua
   --stance "$HOME/hexapod-evidence/stance.json" --fetch
 ```
 
+## 15. Vanilla PPO stability and reward version 4
+
+Sections 9 to 14 end with four native runs that hold saturated, static poses.
+This section names six causes, the comparison that isolates each one, and the
+change that removes it. Each table and each linked number comes from a retained
+Spark attempt through a script in
+[`site/assets/ppo_walking_diagnosis_20261005_001`](../site/assets/ppo_walking_diagnosis_20261005_001/).
+The other numbers come from the retained captures and metric files of the
+attempts that the run ledger names. Every native training run and noise probe
+uses 128 robots, each evaluation uses one, and all keep the approved robot,
+limiter and gates.
+A CPU MuJoCo surrogate, [`locomotion/surrogate`](../locomotion/surrogate/README.md),
+guided the choices between native runs. Its numbers carry no acceptance weight
+and we label each one. Its forward probes match native on four checkpoints; its
+default contact model passes five of the eight quiet and stop probes that
+native fails
+([parity record](../site/assets/ppo_walking_diagnosis_20261005_001/surrogate_parity.json)).
+
+### Cause 1: penalties sized without noise pay PPO to quiet its own exploration
+
+Reward versions 2 and 3 weight five Table I penalties at 15 to 34,550 times
+the printed values (`locomotion/task_v2.py` lines 89 to 93 against
+`locomotion/paper_reward.py` lines 61 to 65). We set those weights on rollouts
+that take the actor mean (`locomotion/evaluate.py` line 357). Training adds
+Gaussian action noise with standard deviation 0.15, and the action-rate term
+reads the raw sample (`locomotion/task_v2.py` line 189).
+
+The [noise ledger](../site/assets/ppo_walking_diagnosis_20261005_001/noise_ledger.json) separates pose from noise with no
+optimizer. One native probe holds four fixed poses under four deviations
+([`noise_probe.py`](../locomotion/noise_probe.py)); the ledger scores the same
+rollout under each reward version. For a motionless robot under the forward
+0.05 m/s command:
+
+| Reward | Neutral pose, no noise | Neutral pose, deviation 0.15 | Crouch at the bounds minus neutral, deviation 0.15 |
+| --- | ---: | ---: | ---: |
+| Version 1 | 0.362 | 0.348 | +0.009 |
+| Version 2 | 0.497 | -0.254 | +0.190 |
+| Version 3 | 0.496 | -0.528 | +0.186 |
+| Version 4 | 0.196 | -0.811 | -3.295 |
+
+Under versions 2 and 3 noise costs a standing robot 0.75 to 1.02 per control,
+against at most 0.92 that perfect tracking adds, and a pose at the action
+bounds recovers 0.19 of it. Version 4 also charges noise. It removes the
+recovery: the bound pose loses 3.3. In native training the forward command
+class earns 3.1 per control over updates 1801 to 2000, against 0.2 for a
+motionless robot with no noise.
+
+The [training comparison](../site/assets/ppo_walking_diagnosis_20261005_001/training_windows.json) crosses reward version
+with learner path at seed 20260917. Within each learner path the first rollout
+is identical bit for bit, so the reward is the one difference. Speed along the
+0.05 m/s command over updates 701 to 800:
+
+| | Stock learner | Five options: tanh mean, no normalization, fixed scales, bootstrap, rate cap |
+| --- | ---: | ---: |
+| Reward version 1 | 10.32 mm/s | 11.94 mm/s |
+| Reward version 2 | 0.23 mm/s | 2.33 mm/s |
+
+The reward accounts for 10 mm/s of the gap and the learner path for 2 mm/s.
+The stock version 2 run comes from an earlier commit and a 2000-update attempt.
+
+### Cause 2: the action clamp makes a bound pay
+
+The environment clips each action sample to [-1, 1] before the limiter
+(`locomotion/env.py` line 44). PPO stores the raw sample. A sample past the
+bound then executes the bound target, and noise past the bound reaches no
+joint. The ledger compares a mean at the bound with a mean 0.5 units past it.
+At deviation 0.15 the mean past the bound scores +0.085 under version 2,
++0.088 under version 3, +0.001 under version 1 and -0.262 under version 4.
+
+### Cause 3: exploration noise moves the robot, and evaluation removes the noise
+
+Reward version 1 reaches 10 to 12 mm/s in training rollouts. Neither
+deterministic evaluation walks: the stock-learner trial terminates after 167
+controls at 0.004 m/s, and the other stands at 0.000 m/s, with a planar error
+of 0.049 and 0.050 m/s ([run ledger](../site/assets/ppo_walking_diagnosis_20261005_001/run_ledger.json)).
+The policy has no stepping cycle; noise shuffles the feet. PPO also raises the
+learned action deviation in those runs, from 0.150 to 0.161 and 0.165. Table I
+has no gait term, and the paper obtains its gait from the adversarial style
+reward that vanilla PPO omits; its own arm with the task and penalty terms alone
+"exhibits significant jitter" (`papers/hexapod_locomotion.pdf`, section V).
+Version 4 adds a tripod contact schedule and a gait clock, described below.
+
+### Cause 4: an unpaid return stroke lets the coxa means drift to the bound
+
+The first version 4 run with these terms, `ppo_v4_forward_20261004_001`, fails
+all 13 probes at update 2000. Its own earlier checkpoints walk faster with
+noise off ([checkpoint record](../site/assets/ppo_walking_diagnosis_20261005_001/checkpoint_drift.json)):
+
+| Update | Forward speed | Planar error | Coxa actions above 0.95 | Toe stroke per leg |
+| ---: | ---: | ---: | ---: | --- |
+| 600 | 42.1 mm/s | 0.0248 (pass) | 0.40 | 23.9 to 34.9 mm |
+| 1000 | 32.2 mm/s | 0.0307 | 0.56 | 16.8 to 32.3 mm |
+| 1400 | 29.8 mm/s | 0.0292 | 0.69 | 15.4 to 28.1 mm |
+| 2000 | 21.5 mm/s | 0.0314 | 0.88 | 13.3 to 21.6 mm |
+
+One run and one seed produce the four rows, so the update count is the one
+difference. The stance push earns tracking reward at once. The swing-travel
+ceiling of 3.5 paid 86 percent for three feet that the body carries, so the
+return stroke could add 14 percent at most, and its absence costs speed many
+cycles later. Cause 2 then holds each coxa mean at the rear bound.
+
+Version 4 now charges executed targets outside the inner half of the action
+range and raises the swing-travel ceiling to 6.0, the sum that a walk at the
+command produces. `ppo_v4_action_wall_20261005_001` repeats the run at the same
+seed and with a byte-identical learner configuration, with those two changes
+([training comparison](../site/assets/ppo_walking_diagnosis_20261005_001/training_windows.json)).
+The share of coxa means near a bound peaks at 0.14 over updates 401 to 600 and
+reads 0.03 over updates 801 to 1000 and 0.00 after update 1000. The earlier
+run reads 0.47 over updates 801 to 1000 and 0.81 over updates 1801 to 2000.
+The forward-class reward rises from 1.00 to 3.22 across the ten 200-update
+windows without the earlier decline, and the forward probe passes at
+46.8 mm/s with a planar error of 0.0222 m/s.
+
+### Cause 5: velocity feedback oscillates at rest once the noise is gone
+
+That run fails the quiet and stop probes. At rest its action alternates on
+consecutive controls: the largest swing sits on the right-front coxa at
+24.8 Hz with a lag-1 autocorrelation of -0.92
+([rest record](../site/assets/ppo_walking_diagnosis_20261005_001/rest_oscillation.json)). The replayed actor matches the
+recorded actions to 4e-7. At the hold state it moves each joint target against
+that joint's latest velocity, by 0.062 action units per rad/s on average and
+0.169 on the right-front coxa. The gain on the previous executed target lies
+between -0.07 and +0.02, so the policy holds no integrator.
+
+On the surrogate the same native checkpoint walks at 47.0 mm/s (46.8 native)
+and shows the same oscillation. Under the surrogate's default contact model,
+scaling its joint-velocity inputs by 0.9 stops the oscillation and 1.0
+restores it; the two other contact models pass at 1.0
+([parity record](../site/assets/ppo_walking_diagnosis_20261005_001/surrogate_parity.json)).
+We infer the mechanism from those two facts: feedback on velocity damps the
+motion that exploration noise causes, the motion penalties pay for it, and
+deterministic evaluation shows the loop at its stability edge. Exploration
+noise is five times the oscillation, so the reward does not show it to PPO.
+Three other surrogate trials came first: a lower final deviation, the
+two-control action mean alone, and changed zero-command terms. None removed
+it, and this record retains none of those runs.
+
+Gaussian noise on the actor's joint-velocity inputs in training makes a
+response to velocity move joint targets and earn nothing. The three seeds that
+follow add 0.5 rad/s of that noise, the two-control action mean and the final
+action-limit and planar-rate weights in one step, so no run isolates the noise.
+No later native policy moves its targets at rest: the largest target step stays
+at 0.0001 to 0.0010 rad against the 0.002 bound.
+
+### Cause 6: the policy froze at the stop with one foot unloaded and the hips strained
+
+With the oscillation gone, three seeds pass the forward probe at a planar
+error of 0.008 m/s and fail the stop probe on the floor contact of one foot.
+In seed 20260917 a lightly loaded toe slides 3 mm during the hold and one joint
+drifts 0.022 rad against the 0.020 bound. In seeds 20260918 and 20260919 a
+lightly loaded leg leaves the floor for 10 and 4 physics steps of the stop
+probe and its joint velocity reaches 0.08 and 0.06 rad/s against 0.03. The zero-command contact
+term charged airborne feet alone. It now charges each foot for the share of an
+even 12.2 N load that it does not carry.
+
+Two seeds with that term keep each toe on the floor and still fail the stop
+probe: joint velocity 0.041 and 0.034 rad/s against 0.03, and in seed 20260918
+a joint range of 0.057 rad against 0.020. The targets are still. The rest
+poses of all five seeds hold 1.1 to 1.5 N.m on a coxa, and one toe creeps under
+that sideways load. Two reward properties cause the pose. The zero-command
+motion terms charged target motion from the first control after the command
+change, which pays the policy to freeze at once with the stance thrust locked
+in. No term charged the strain itself. The motion terms now start 50 controls
+after a command change or reset; the stop gate allows 100. A quiet-strain term
+charges coxa torque under a zero command, since gravity loads no coxa joint.
+The [run ledger](../site/assets/ppo_walking_diagnosis_20261005_001/run_ledger.json) lists each of these seeds with its
+probe values.
+
+### Learner options
+
+Each option keeps its baseline default and enters the pack and the checkpoint
+record. Each one except `--episode-seconds` also enters the evaluation command.
+
+| Option | Failure it prevents |
+| --- | --- |
+| `--action-mean tanh`, `--observation-normalization none` | Retained from sections 10 and 12. |
+| `--observation-scaling fixed` | Without running normalization the 0.05 m/s command enters at its raw scale and the retained actor and critic did not respond to it. |
+| `--command-segments bootstrap` | Under version 2 a zero command pays a standing robot and an arc command charges it, so command changes set the value target. PPO now bootstraps the held command's value at each change. |
+| `--learning-rate-max 0.0003` | With 18 tanh means saturated the stock schedule read a small divergence and raised the rate to 0.01 at update 1438 of the version 3 run. |
+| `--action-std 0.15 --action-std-final 0.05` | A learned deviation rose from 0.150 to 0.161 and 0.165 under version 1 and to 0.166 under the first version 4 draft, where noise is the source of motion. The deviation now follows a linear schedule. |
+| `--gait-clock 60` | The contact schedule needs a phase input. Both inputs are zero under a zero command, which stops the stepping. |
+| `--action-smoothing mean2` | A two-control mean has no gain at half the control rate, where the rest oscillation sits. |
+| `--velocity-noise 0.5` | Cause 5. Training alone adds the noise; the critic and evaluation read measured values. |
+| `--episode-seconds 10` | A forward walker covers 1.0 m in a 20 s episode, toward a neighbour's reset origin 2.0 m away, and the proximity guard then stops the run. We saw the stop on the surrogate and tested no native run with 20 s episodes. Training alone accepts the option. |
+
+### Reward version 4 and its departures from the paper
+
+[`task_v4.py`](../locomotion/task_v4.py) holds the formulas, and each run copies
+them into its task definition. `DEPARTURES` in that file states each change
+from Table I with its reason:
+
+| Departure | Reason |
+| --- | --- |
+| Tracking reads the 10-control mean of root displacement | Exploration shakes the body by 0.035 m/s per axis and control (0.049 m/s planar) at a 0.05 m/s command. |
+| Kernel `max(1 - e^2, -1)` with the commanded speed as scale | Its expectation under zero-mean noise keeps the gain from walking, and a motionless robot earns zero linear tracking on a translation command. |
+| Tripod contact schedule and swing travel | Cause 3. Both read measured toe forces and toe motion; neither holds a joint target or a recorded motion. |
+| Mean-square penalties sized on noisy rollouts; target rate reads the executed target | Cause 1. |
+| Action-limit term | Causes 2 and 4. |
+| Planar-rate term on the instantaneous velocity error | The forward gate bounds that error, and the tracking window hides the stall in each all-stance window. |
+| Over-rating, yaw-rate, tilt, joint-margin and height terms | Each matches one existing gate or termination. |
+| Quiet terms under a zero command, with a 50-control settle window, a graded foot-load term and a coxa-strain term | The stop gates bound joint rate, target change and toe contact. Cause 6 gives the reason for each part. |
+| Termination term | PPO bootstraps zero after a fall. The weight is 20 against a per-control tracking ceiling of 1.5. |
+| Forward-only command draws | The paper trains 4096 robots (`papers/hexapod_locomotion.pdf`, section V); this work trains 128. An unretained surrogate trial with the 20-command bank reached about half the commanded speed in 2000 updates. |
+
+The style reward stays out: no discriminator and no demonstration enter.
+The network sizes, the 24-control rollout, the discount and the clip range
+keep their stock values.
+
+### Native result
+
+Two seeds train 2000 updates from one frozen source (commit `cd691ff0`) with
+the learner options above. The evaluator takes the actor mean. Each row reads
+the 13-probe evaluation at update 2000:
+
+| Probe | Bound | Seed 20260917 | Seed 20260918 |
+| --- | --- | --- | --- |
+| Forward 0.05 m/s: mean speed | | 0.0512 m/s | 0.0494 m/s |
+| Forward: planar error | 0.025 m/s | 0.0100, pass | 0.0111, pass |
+| Forward: yaw error | 0.06 rad/s | 0.0196, pass | 0.0277, pass |
+| Forward then stop: joint velocity RMS | 0.03 rad/s | 0.0067, pass | 0.0159, pass |
+| Forward then stop: target step, 95th percentile | 0.002 rad | 0.0001, pass | 0.0004, pass |
+| Quiet 20 s and 32 s | six toes down at 400 Hz | pass | fail: 4 and 5 physics steps without six toes |
+| Passing probes | | 4 of 13 | 2 of 13 |
+
+Both seeds pass the forward probe and the forward-to-stop probe. The
+[verification records](../site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260917_evaluation_verification.json)
+hold every capture hash, the hash, peak and finite-and-sequential check of each
+400 Hz contact-force and motor-torque array, and the per-probe verdicts. The media directory holds a forward and a stop video
+for each seed. The [run ledger](../site/assets/ppo_walking_diagnosis_20261005_001/run_ledger.json) lists all 46 native
+attempts of this work (17 trainings, 27 evaluations, 2 noise probes) in launch
+order, with the two stopped ones. Six earlier policies, five with the final
+learner options and one before the action mean and the velocity noise, show the
+order in which the causes fell: the forward probe passes from cause 4 onward, and the stop probe
+passes after cause 6 alone. [Power and load figures](../site/assets/ppo_walking_diagnosis_20261005_001/power_loads.json)
+come from the same captures.
+
+### Limits
+
+- **Forward commands alone.** Training draws the forward command and the zero
+  command. The seven other translation probes and both yaw probes fail in each
+  seed. Stage 2 stays incomplete.
+- **Quiet probe in one seed.** Seed 20260918 loses right-front toe contact for
+  4 and 5 single physics steps spread over the quiet stand from reset. Its
+  joint velocity and target motion pass.
+- **One trial per probe and two seeds.** The table shows two policies and
+  measures no trial-to-trial spread.
+- **Simulation.** The motor model keeps its provisional 1.6 N.m cap, and the
+  floor is flat.
+- **Surrogate.** Its default contact model passes five of the eight quiet and
+  stop probes that native fails. We used it to rank walking designs and to
+  measure rest loads.
+- **Cause 5 mechanism.** The link from noise damping to the feedback gain is
+  an inference from the gain measurements and the gain sweep.
+
+### Reproduce section 15
+
+Each script fetches the retained Spark files that it pins and refuses an
+existing output. Use a fresh workspace outside the checkout.
+
+```sh
+for name in training_windows checkpoint_drift noise_ledger rest_oscillation surrogate_parity run_ledger power_loads; do
+  PYTHONPATH="$PWD" uv run python -B site/assets/ppo_walking_diagnosis_20261005_001/$name.py \
+    --workspace "$HOME/hexapod-evidence/section-15/$name" --fetch
+done
+for seed in 20260917 20260918; do
+  uv run python -B site/assets/ppo_walking_diagnosis_20261005_001/final_verification.py \
+    --attempt ppo_v4_settle_seed${seed}_20261006_001 \
+    --workspace "$HOME/hexapod-evidence/section-15/verification_$seed" --fetch
+done
+uv run python -m unittest discover -s locomotion/tests
+uv run python -m unittest discover -s locomotion/surrogate/tests
+```
+
+A native rerun uses `prepare --mode train --reward-version 4 --updates 2000
+--num-envs 128` with the learner options of the table above, then
+`--mode evaluate --eval-scope probes` on the update-2000 checkpoint with the
+same options except the reward version and the episode length; evaluation
+reads the reward version from the checkpoint.
+[OPERATIONS](OPERATIONS.md) gives the launch procedure.
+
 ## Reproduce the Table I audit
 
 ```sh

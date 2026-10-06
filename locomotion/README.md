@@ -10,12 +10,16 @@ loop without reading old experiment launchers or a second environment port.
 | [`env.py`](env.py) | Load the native robot, form observations, limit joint targets, apply motor torque and advance eight physics steps. The actor receives 231 values and returns 18 offsets. |
 | [`task.py`](task.py) | Sample held velocity commands, compute the training reward, detect failed episodes and reset selected robots. This file owns reward version 1, the default. |
 | [`task_v2.py`](task_v2.py) | Reward version 2: Table I task and penalty terms with command-scaled tracking, on version 1's commands and resets. `train.py --reward-version 2` selects it. |
+| [`task_v4.py`](task_v4.py) | Reward version 4: windowed tracking, a tripod contact schedule, noise-sized Table I penalties and an action-limit term, on version 1's resets, with forward and zero command draws alone. `DEPARTURES` lists each change from the paper. |
 | [`ppo.py`](ppo.py), [`train.py`](train.py) | Adapt the task to stock PPO, record updates and loads, save checkpoints and load them for evaluation. |
+| [`rate_schedule.py`](rate_schedule.py), [`action_distribution.py`](action_distribution.py) | Cap the stock adaptive learning rate and bound the Gaussian action mean. |
+| [`noise_probe.py`](noise_probe.py) | Hold fixed action means under graded exploration noise with no optimizer, so a workstation can score any reward version on the same native rollout. |
 | [`amp.py`](amp.py), [`amp_discriminator.py`](amp_discriminator.py), [`amp_ppo.py`](amp_ppo.py), [`paper_networks.py`](paper_networks.py) | Share the 61-value AMP feature contract, score transitions with the discriminator, add the style reward inside PPO and supply the Table III networks. See [AMP learner](#amp-learner-and-paper-networks). |
 | [`evaluate.py`](evaluate.py), [`evaluation.py`](evaluation.py) | Record actual policy rollouts and apply the existing walking, stopping, contact and motor gates. Missing cases remain missing. |
 | [`force_metrics.py`](force_metrics.py), [`camera.py`](camera.py) | Report contact-normal force and motor torque, and record an Isaac camera video from the policy rollout. |
 | [`admission.py`](admission.py) | Recompute one-robot and batch standing captures and require matching model, source and geometry before training. |
 | [`prepare.py`](prepare.py), [`launch.py`](launch.py), [`reservation.py`](reservation.py) | Freeze named package files and explicit inputs, hold the existing Spark locks, supervise one container and verify its cleanup. |
+| [`surrogate/`](surrogate/README.md) | Run this task, reward, PPO adapter and gate code on CPU MuJoCo physics for design work. Native runs are the only acceptance evidence, and no native pack copies the subpackage. |
 
 The controller retains 400 Hz physics, 50 Hz policy actions, a 0.35 rad action
 scale, the 0.040 rad target-change limit per control and the provisional 1.6 N·m
@@ -45,6 +49,28 @@ the chosen version; evaluation reads the version from the checkpoint. Native
 walking evidence for version 3 remains pending. Read the
 [reward audit](../docs/REWARD_V2_TABLE1_AUDIT.md#13-experimental-immediate-tracking-reward-version-3)
 before dispatch.
+You can select `prepare --reward-version 4` with the learner options below.
+Each option keeps its baseline default and enters the pack and the checkpoint
+record. Each one except `--episode-seconds` also enters the evaluation command,
+and evaluation rejects a mismatch. Read
+[reward audit section 15](../docs/REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)
+for the failure that each option prevents.
+
+| Option | Effect |
+| --- | --- |
+| `--observation-scaling fixed` | Multiply each observation by a declared constant. Without running normalization the 0.05 m/s command enters at its raw scale, and the retained actor and critic did not respond to it. |
+| `--command-segments bootstrap` | Treat a command change as a time-out, so PPO bootstraps the old command's value across the change. |
+| `--learning-rate-max 0.0003` | Cap the stock adaptive schedule, which reached 0.01 once the tanh means saturated. |
+| `--action-std 0.15 --action-std-final 0.05` | Hold the action deviation on a linear schedule. PPO no longer learns it. |
+| `--gait-clock 60` | Append the sine and cosine of the episode phase to both observations; both are zero under a zero command. Reward version 4 requires the period of its contact schedule. |
+| `--action-smoothing mean2` | Send the mean of each action and the previous one to the environment, in training and in evaluation. That mean has no gain at half the control rate, where a rest oscillation sat. |
+| `--velocity-noise 0.5` | Add Gaussian noise in rad/s to the actor's joint-velocity inputs in training. The critic and evaluation read measured values. Without it the policy's velocity feedback grows until the robot oscillates at rest. |
+| `--episode-seconds 10` | Shorten training episodes. A forward walker covers 1.0 m in a 20 s episode, toward a neighbour's reset origin 2.0 m away, and the proximity guard then stops the run. Training alone accepts it. |
+| `--video-case <probe id>` | Choose the probe that the evaluation camera records. |
+
+`prepare --mode probe` runs [`noise_probe.py`](noise_probe.py) through the
+training entry with 128 robots and no learner.
+
 PPO training records `policy_update` in each metrics row: Gaussian divergence,
 action likelihood ratios and learning rate before and after the stock update.
 The measurements use the same collected rollout and draw no new actions.

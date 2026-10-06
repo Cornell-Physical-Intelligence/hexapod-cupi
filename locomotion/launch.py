@@ -109,7 +109,7 @@ def verify(binding, own):
     from .train import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, validate_deadline
     guard.require(binding['schema']=='hexapod_locomotion_launch_v1','Wrong launch schema')
     guard.require(binding['root_review_complete'] is True,'Root review incomplete')
-    guard.require(binding['mode'] in ('diagnostic','replay','train','video','evaluate','tripod','throughput'),'Unsupported native mode')
+    guard.require(binding['mode'] in ('diagnostic','replay','train','video','evaluate','tripod','throughput','probe'),'Unsupported native mode')
     profile = binding.get('allocation_profile', 'standard')
     guard.require(profile in ALLOCATION_PROFILES, 'Unknown allocation profile')
     limit = 22000 if profile == 'flat_pilot_v1' else 7200

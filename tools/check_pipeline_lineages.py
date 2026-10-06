@@ -34,7 +34,7 @@ CURRENT_HEADER = (
 # Cover maintained source and tests, without recursively pinning old releases or results.
 CURRENT_TREES = ("tools", "contracts", "navigation", "mission", "tests", "robot/tests")
 CURRENT_TOP_LEVEL = ("locomotion", "locomotion/tests", "locomotion/priors",
-                     "locomotion/priors/tests")
+                     "locomotion/priors/tests", "locomotion/surrogate", "locomotion/surrogate/tests")
 CURRENT_FILES = ("robot/active_model.json", "configs/source_inventory.json", "configs/archive.json", "configs/locomotion_spark.json",
                  "robot/hexapod_mkii_updated_v1/inputs.json",
                  ".github/workflows/tests.yml", "pyproject.toml", "uv.lock", ".python-version")

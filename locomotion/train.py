@@ -66,7 +66,7 @@ def scalars(value, prefix):
 def checkpoint_reward_version(record):
     """The reward a checkpoint was trained with; checkpoints from before the flag trained version 1."""
     version = record['identity'].get('reward_version', '1')
-    if version not in ('1', '2', '3'):
+    if version not in ('1', '2', '3', '4'):
         raise ValueError('Unknown checkpoint reward version: '+str(version))
     return version
 
@@ -115,7 +115,7 @@ def main(argv=None):
     from .camera import prepare_policy_scene
     configuration = importlib.import_module(prefix+'.env_config')
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
-    parser.add_argument('--mode', choices=['diagnostic', 'train', 'evaluate'], required=True)
+    parser.add_argument('--mode', choices=['diagnostic', 'train', 'evaluate', 'probe'], required=True)
     for name in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--standing-admission', type=Path)
@@ -132,8 +132,9 @@ def main(argv=None):
     parser.add_argument('--logger', choices=['tensorboard', 'wandb'], default='tensorboard')
     parser.add_argument('--wandb-project')
     parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
-    parser.add_argument('--reward-version', choices=['1', '2', '3'], default='1',
-                        help='Training reward: historical v1, stride tracking v2, or experimental immediate tracking v3.')
+    parser.add_argument('--reward-version', choices=['1', '2', '3', '4'], default='1',
+                        help='Training reward: historical v1, stride tracking v2, immediate tracking v3, '
+                             'or noise-calibrated stepping v4.')
     parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo',
                         help='Stock PPO in ppo.py or PPO with the online motion prior in amp_ppo.py.')
     parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp',
@@ -142,6 +143,28 @@ def main(argv=None):
                         help='Use the historical Gaussian mean or bound the mean with tanh.')
     parser.add_argument('--observation-normalization', choices=['empirical', 'none'], default='empirical',
                         help='Use running observation statistics or retain the raw PPO observations.')
+    parser.add_argument('--observation-scaling', choices=['none', 'fixed'], default='none',
+                        help='Pass raw observations or apply the fixed input scales declared in ppo.py.')
+    parser.add_argument('--command-segments', choices=['continuous', 'bootstrap'], default='continuous',
+                        help='Carry returns across command changes or bootstrap the return at each change.')
+    parser.add_argument('--learning-rate-max', type=float,
+                        help='Ceiling for the adaptive learning rate; the stock schedule allows 1e-2.')
+    parser.add_argument('--action-std', type=float, default=.15,
+                        help='Initial standard deviation of the Gaussian action distribution.')
+    parser.add_argument('--episode-seconds', type=float, default=20.,
+                        help='Training episode length; 20 s by default. Shorter episodes bound how far a robot walks.')
+    parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none',
+                        help='mean2 sends the mean of each action and the previous one to the environment.')
+    parser.add_argument('--velocity-noise', type=float, default=0.,
+                        help='Standard deviation in rad/s of Gaussian noise on the actor joint-velocity inputs in training.')
+    parser.add_argument('--gait-clock', type=int, default=0,
+                        help='Append the sine and cosine of a gait phase with this period in controls; 0 adds none.')
+    parser.add_argument('--action-std-final', type=float,
+                        help='Lower the action deviation linearly to this value over the run; PPO then does not learn it.')
+    parser.add_argument('--action-noise-correlation', type=float, default=0.,
+                        help='Share of each exploration noise sample carried to the next control (tanh mean only).')
+    parser.add_argument('--video-case',
+                        help='Learning probe to record on video; the first selected probe by default.')
     if any(flag in (argv if argv is not None else sys.argv[1:]) for flag in ('--preflight-only', '--help', '-h')):
         parser.add_argument('--headless', action='store_true')
         parser.add_argument('--device', default='cuda:0')
@@ -163,22 +186,37 @@ def main(argv=None):
         raise ValueError('Bounded action means apply to training and evaluation')
     if args.observation_normalization != 'empirical' and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate')):
         raise ValueError('Observation normalization selection requires PPO training or evaluation')
+    learner_options = dict(observation_scaling=args.observation_scaling, command_segments=args.command_segments,
+                           learning_rate_max=args.learning_rate_max, action_std=args.action_std,
+                           action_noise_correlation=args.action_noise_correlation,
+                           action_std_final=args.action_std_final, gait_clock=args.gait_clock,
+                           action_smoothing=args.action_smoothing, velocity_noise=args.velocity_noise)
+    if (learner_options != dict(observation_scaling='none', command_segments='continuous', learning_rate_max=None,
+                                action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0,
+                                action_smoothing='none', velocity_noise=0.)
+            and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate'))):
+        raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
+                         'the noise correlation require PPO training or evaluation')
+    if args.video_case is not None and (args.mode != 'evaluate' or args.eval_scope == 'full'):
+        raise ValueError('A video case applies to a learning-probe evaluation')
+    if args.episode_seconds != 20. and (args.mode != 'train' or not 5. <= args.episode_seconds <= 20.):
+        raise ValueError('Episode length selection applies to training, between 5 and 20 seconds')
     if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
         raise ValueError('The paper networks need the AMP learner, and the AMP learner trains or evaluates only')
     configuration.verify_assets(args.asset, args.model)
     validate_deadline(args.mode, args.allocation_profile, args.max_wall_seconds)
     if (not args.headless or args.device != 'cuda:0' or not 1 <= args.updates <= 2000
             or args.seed < 0
-            or (args.mode == 'train' and (args.num_envs != 128 or args.checkpoint is not None))
+            or (args.mode in ('train', 'probe') and (args.num_envs != 128 or args.checkpoint is not None))
             or (args.mode == 'evaluate' and (args.num_envs != 1 or args.checkpoint is None))):
-        raise ValueError('A bounded scratch training or single-replica evaluation is required')
+        raise ValueError('A bounded scratch training, a 128-replica probe or single-replica evaluation is required')
     if sha(source.parent/'FREEZE_SHA256.json') != args.source_freeze_sha256:
         raise ValueError('Frozen source identity differs')
     metadata = json.loads(args.stance.read_text())
     from .evaluation_config import EvaluationEnvConfig
     config_class = EvaluationEnvConfig if args.mode == 'evaluate' and args.eval_scope == 'full' else configuration.EnvConfig
     cfg = config_class(num_envs=args.num_envs, seed=args.seed,
-        record_motion_features=args.mode == 'evaluate' or args.learner == 'amp', render=args.mode == 'evaluate', episode_seconds=(90. if args.eval_scope == 'full' else 60.) if args.mode == 'evaluate' else (60. if args.mode == 'diagnostic' else 20.), device=args.device)
+        record_motion_features=args.mode == 'evaluate' or args.learner == 'amp', render=args.mode == 'evaluate', episode_seconds=(90. if args.eval_scope == 'full' else 60.) if args.mode == 'evaluate' else (60. if args.mode == 'diagnostic' else args.episode_seconds), device=args.device)
     identity = {'schema': 'hexapod_locomotion_ppo_v1', 'source_files': {p.name: sha(p) for p in sorted(source.glob('*.py'))},
         'model_sha256': configuration.MODEL_SHA256, 'usd_sha256': configuration.USD_SHA256,
         'stance_sha256': sha(args.stance),
@@ -266,13 +304,23 @@ def main(argv=None):
             env.verify_native_recipe('after_controlled_steps')
             state['status'] = 'completed'
             return 0
+        if args.mode == 'probe':
+            probe = importlib.import_module(prefix+'.noise_probe')
+            guard = task_module.ProximityGuard(env, args.output/'probe_guard')
+            summary = probe.run(env, args.output/'probe', seed=args.seed, guard=guard,
+                max_wall_seconds=max(.001, args.max_wall_seconds-(time.monotonic()-started)),
+                progress=lambda value: print(json.dumps(value), flush=True))
+            state['probe'] = {key: value for key, value in summary.items() if key != 'cells'}
+            env.verify_native_recipe('after_controlled_steps')
+            state['status'] = 'completed'
+            return 0
         from rsl_rl.runners import OnPolicyRunner
         from tensordict import TensorDict
         version = importlib.metadata.version('rsl-rl-lib')
         if version != '5.0.1':
             raise ValueError('RSL-RL version differs: '+version)
         task_config = task_module.TaskConfig(seed=args.seed)
-        if args.reward_version in ('2', '3'):
+        if args.reward_version in ('2', '3', '4'):
             module = importlib.import_module(prefix+'.task_v'+args.reward_version)
             task = getattr(module, 'TrainingTaskV'+args.reward_version)(env, task_config, args.output/'task')
         else:
@@ -285,11 +333,20 @@ def main(argv=None):
             config = amp_module.amp_ppo_config(args.seed, networks=args.networks, amp_config=amp_config,
                                               action_mean=args.action_mean)
         else:
-            wrapped = vanilla.VanillaVecEnv(task)
+            wrapped = vanilla.VanillaVecEnv(task, observation_scaling=args.observation_scaling,
+                                            command_segments=args.command_segments, gait_clock=args.gait_clock,
+                                            action_smoothing=args.action_smoothing,
+                                            velocity_noise=args.velocity_noise)
+            schedule_period = getattr(getattr(task, 'reward_config', None), 'schedule_period_controls', None)
+            if getattr(getattr(task, 'reward_config', None), 'schedule_weight', 0) and args.gait_clock != schedule_period:
+                raise ValueError('The contact-schedule reward needs a gait clock of the same period')
             config = vanilla.ppo_config(args.seed, action_mean=args.action_mean,
-                                        observation_normalization=args.observation_normalization)
+                                        observation_normalization=args.observation_normalization, **learner_options)
         save(args.output/'ppo_config.json', config)
         runner_config = copy.deepcopy(config)
+        # The wrapper consumes its own options; the runner receives the stock keys.
+        runner_config.pop('environment_wrapper', None)
+        runner_config.pop('exploration', None)
         if args.logger == 'wandb':
             # The logger choice stays out of ppo_config, which checkpoint loading compares.
             # Copy saved checkpoints: container paths do not exist where offline runs sync.
@@ -310,6 +367,10 @@ def main(argv=None):
             if args.learner == 'ppo':
                 diagnostics = vanilla.UpdateDiagnostics(runner.alg)
                 runner.alg.update = diagnostics.update
+                if args.action_std_final is not None:
+                    # The schedule wraps the diagnostic update, so each record reads the deviation it trained with.
+                    runner.alg.update = vanilla.DeviationSchedule(runner.alg, args.action_std, args.action_std_final,
+                                                                  args.updates).update
             def checkpoint(update):
                 path = args.output/f'checkpoint_update{update:06d}.pt'
                 runner.save(str(path), infos={'identity': identity, 'updates': update})
@@ -356,11 +417,22 @@ def main(argv=None):
             infos = runner.load(str(args.checkpoint), strict=True)
             require_embedded_declaration(infos, checkpoint_record)
             actor = runner.get_inference_policy()
+            previous_action = [None]
             def policy(observation):
                 with torch.inference_mode():
                     if args.networks == 'paper':
                         return actor(importlib.import_module(prefix+'.paper_networks').actor_observation(observation))
-                    return actor(TensorDict({'policy': observation}, batch_size=[env.num_envs]))
+                    scaled = vanilla.scale_observation(observation, args.observation_scaling)
+                    if args.gait_clock:
+                        clock = vanilla.clock_features(env.episode_steps, args.gait_clock, observation[:, 210:213]).to(scaled)
+                        scaled = torch.cat((scaled, clock), -1)
+                    action = actor(TensorDict({'policy': scaled}, batch_size=[env.num_envs]))
+                    if args.action_smoothing == 'mean2':
+                        # The same two-control mean as the training wrapper, restarted with each episode.
+                        last = torch.zeros_like(action) if previous_action[0] is None else previous_action[0]
+                        previous_action[0] = action.clone()
+                        action = vanilla.smoothed_action(action, last, env.episode_steps)
+                    return action
             evaluation = importlib.import_module(prefix+'.evaluate')
             camera = importlib.import_module(prefix+'.camera')
             env.render = camera.NativePolicyCamera(env)
@@ -374,7 +446,7 @@ def main(argv=None):
                     'learning:forward_0.05_to_stop'] if args.eval_scope == 'focus' else None)
                 result = evaluation.run_learning_probe_suite(env, policy, args.output/'evaluation',
                     args.geometry_extrema, args.checkpoint, selected_case_ids=selected,
-                    record_video=True, seed=args.seed, **options)
+                    record_video=True, video_case_id=args.video_case, seed=args.seed, **options)
             state['evaluation'] = result
             summaries = list((args.output/'evaluation').rglob('force_metrics.json'))
             if not summaries or any(json.loads(p.read_text())['status'] != 'available' for p in summaries):

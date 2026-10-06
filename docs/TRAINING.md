@@ -12,7 +12,7 @@ unbuilt; simulation results do not establish hardware calibration.
 | Control | 400 Hz physics, 50 Hz policy, eight substeps, 0.35 rad action scale and 0.040 rad target-change bound per control. |
 | Motor | Named damping and the existing speed-dependent effort curve, with a provisional 1.6 N·m software cap. Hardware characterization remains open. |
 | Policy input | 231 actor values: five 42-value proprioception frames, the three-value velocity command and 18 executed-action values. The critic adds measured planar/vertical velocity for 234 values. |
-| Learning | Stock RSL-RL 5.0.1 PPO. [`task.py`](../locomotion/task.py) owns command sampling and reward version 1, the default; [`task_v2.py`](../locomotion/task_v2.py) owns reward version 2, selected with `train.py --reward-version 2` ([audit](REWARD_V2_TABLE1_AUDIT.md)); [`ppo.py`](../locomotion/ppo.py) owns its adapter and settings. |
+| Learning | Stock RSL-RL 5.0.1 PPO. [`task.py`](../locomotion/task.py) owns command sampling and reward version 1, the default; [`task_v2.py`](../locomotion/task_v2.py) owns reward version 2, selected with `train.py --reward-version 2` ([audit](REWARD_V2_TABLE1_AUDIT.md)); [`task_v4.py`](../locomotion/task_v4.py) owns reward version 4, the first version with a native walking and stopping result ([audit section 15](REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)); [`ppo.py`](../locomotion/ppo.py) owns its adapter and settings. |
 | Admission | Recomputed native standing passes at one robot and the exact intended batch size, bound to the same source, model, neutral stance and geometry. |
 
 The current sampler trains translation commands at 0.025 and 0.05 m/s, yaw and
@@ -20,18 +20,31 @@ combined commands, plus quiet intervals. The 0.05 m/s forward benchmark came
 from the experiment configuration; the program lead did not prescribe that speed. Keep
 benchmark choice separate from navigation requirements.
 
-The learner predicts joint-position offsets. It receives no gait-phase state
-or optimized reference target. The reference-plus-residual design remains an
-unimplemented proposal. Cleanup preserves the existing learning problem and
-adds no curriculum, reward redesign or motion-prior algorithm.
+The learner predicts joint-position offsets. With the baseline options it
+receives no gait-phase state or optimized reference target. The
+reference-plus-residual design remains an unimplemented proposal.
+
+Reward version 4 is an opt-in path with its own learner options: a gait clock
+input, a scheduled action deviation, fixed observation scales, a two-control
+action mean and noise on the actor's joint-velocity inputs. It draws forward
+commands and zero commands alone and trains 10 s episodes. It uses no
+demonstration, no discriminator and no optimized reference target.
 
 ## Results and research order
 
 Read [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings) for measured results and original evidence. The
-optimized forward target sequence passes its native screen. The tested PPO
-policies remain unqualified; the paired action-initialization experiment found
-no benefit in its one seed. That result does not identify the failure cause or
-evaluate AMP. More replicas or updates have not established a walking solution.
+optimized forward target sequence passes its native screen. The paired
+action-initialization experiment found no benefit in its one seed, and that
+result does not evaluate AMP.
+
+Vanilla PPO with reward version 4 passes the forward probe and the
+forward-to-stop probe in native simulation on seeds 20260917 and 20260918 at
+update 2000. Seed 20260917 also passes both quiet probes; seed 20260918 fails
+them on one toe-contact check. The nine probes in other directions and in yaw
+fail, because training draws forward commands alone. These policies remain
+unqualified for Stage 2. [Audit section 15](REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)
+gives the causes of the earlier failures, the controlled evidence and each
+departure from the paper.
 
 ## Proposed reproduction sequence
 

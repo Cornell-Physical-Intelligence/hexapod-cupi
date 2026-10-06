@@ -14,6 +14,10 @@ from .spark_paths import LEGACY_ROOT, RUN_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[1]
 REMOTE_ROOT = LEGACY_ROOT
+LEARNER_OPTION_DEFAULTS = {'observation_scaling': 'none', 'command_segments': 'continuous',
+                           'learning_rate_max': None, 'action_std': .15, 'action_noise_correlation': 0.,
+                           'action_std_final': None, 'gait_clock': 0, 'action_smoothing': 'none',
+                           'velocity_noise': 0.}
 
 
 def save(path, value):
@@ -25,20 +29,24 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             checkpoint_declaration_sha=None, candidate=0, suite='screen',
             tripod_adaptation='paper', logger='tensorboard', wandb_project=None, wandb_mode='offline',
             reward_version='1', learner='ppo', networks='mlp', action_mean='unbounded',
-            observation_normalization='empirical', allocation_profile='standard',
-            max_wall_seconds=6200, root=ROOT):
+            observation_normalization='empirical', observation_scaling='none',
+            command_segments='continuous', learning_rate_max=None, action_std=.15,
+            action_noise_correlation=0., action_std_final=None, gait_clock=0, action_smoothing='none',
+            velocity_noise=0., episode_seconds=20.,
+            video_case=None,
+            allocation_profile='standard', max_wall_seconds=6200, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     validate_deadline(mode, allocation_profile, max_wall_seconds)
     if type(max_wall_seconds) is not int:
         raise ValueError('Preparation requires an integer native deadline')
     if (not within_roots(remote_root, RUN_ROOTS)
-            or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay', 'tripod', 'throughput')
+            or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay', 'tripod', 'throughput', 'probe')
             or type(updates) is not int or not 1 <= updates <= 2000
             or type(seed) is not int or seed < 0):
         raise ValueError('Invalid native allocation')
-    num_envs = (128 if mode == 'train' else 1) if num_envs is None else num_envs
+    num_envs = (128 if mode in ('train', 'probe') else 1) if num_envs is None else num_envs
     if (num_envs not in (1, 32, 128) or (mode in ('evaluate', 'replay', 'tripod') and num_envs != 1)
-            or (mode == 'train' and num_envs != 128) or eval_scope not in ('focus', 'probes', 'full')):
+            or (mode in ('train', 'probe') and num_envs != 128) or eval_scope not in ('focus', 'probes', 'full')):
         raise ValueError('Invalid replica count for this mode')
     if (tripod_adaptation not in SWEEPS or (mode != 'tripod' and tripod_adaptation != 'paper')
             or type(candidate) is not int or candidate not in range(len(SWEEPS[tripod_adaptation]))
@@ -53,13 +61,35 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             or (logger == 'tensorboard' and (wandb_project is not None or wandb_mode != 'offline'))
             or logger not in ('tensorboard', 'wandb')):
         raise ValueError('W&B logging needs train mode, a project name and offline or online mode')
-    if reward_version not in ('1', '2', '3') or (mode != 'train' and reward_version != '1'):
+    if reward_version not in ('1', '2', '3', '4') or (mode != 'train' and reward_version != '1'):
         raise ValueError('Reward version selection applies to training only')
     if action_mean not in ('unbounded', 'tanh') or (action_mean != 'unbounded' and mode not in ('train', 'evaluate')):
         raise ValueError('Bounded action means apply to training and evaluation')
     if (observation_normalization not in ('empirical', 'none') or
             (observation_normalization != 'empirical' and (learner != 'ppo' or mode not in ('train', 'evaluate')))):
         raise ValueError('Observation normalization selection requires PPO training or evaluation')
+    learner_options = {'observation_scaling': observation_scaling, 'command_segments': command_segments,
+                       'learning_rate_max': learning_rate_max, 'action_std': action_std,
+                       'action_noise_correlation': action_noise_correlation, 'action_std_final': action_std_final,
+                       'gait_clock': gait_clock, 'action_smoothing': action_smoothing,
+                       'velocity_noise': velocity_noise}
+    selected_options = {key: value for key, value in learner_options.items() if value != LEARNER_OPTION_DEFAULTS[key]}
+    if (observation_scaling not in ('none', 'fixed') or command_segments not in ('continuous', 'bootstrap')
+            or (learning_rate_max is not None and not (type(learning_rate_max) is float and 1e-5 <= learning_rate_max <= 1e-2))
+            or type(action_std) is not float or not .01 <= action_std <= 1.
+            or type(action_noise_correlation) is not float or not 0 <= action_noise_correlation < 1
+            or (action_noise_correlation and action_mean != 'tanh')
+            or type(gait_clock) is not int or (gait_clock and not 10 <= gait_clock <= 250)
+            or action_smoothing not in ('none', 'mean2')
+            or type(velocity_noise) is not float or not 0 <= velocity_noise <= 5
+            or (action_std_final is not None and not (type(action_std_final) is float and .005 <= action_std_final <= action_std))
+            or (selected_options and (learner != 'ppo' or mode not in ('train', 'evaluate')))):
+        raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
+                         'the noise correlation require PPO training or evaluation')
+    if video_case is not None and (mode != 'evaluate' or eval_scope == 'full' or not video_case.startswith('learning:')):
+        raise ValueError('A video case applies to a learning-probe evaluation')
+    if type(episode_seconds) is not float or (episode_seconds != 20. and (mode != 'train' or not 5. <= episode_seconds <= 20.)):
+        raise ValueError('Episode length selection applies to training, between 5 and 20 seconds')
     if (learner not in ('ppo', 'amp') or networks not in ('mlp', 'paper') or (networks == 'paper' and learner != 'amp')
             or (learner == 'amp' and mode not in ('train', 'evaluate'))):
         raise ValueError('The AMP learner trains or evaluates, and the paper networks need the AMP learner')
@@ -120,12 +150,16 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         binding['command_args'] += ['--standing-admission', '/admission/admission.json']
     if mode in ('train', 'evaluate', 'throughput'):
         binding['command_args'] += ['--updates', str(updates), '--seed', str(seed)]
+    if mode == 'probe':
+        binding['command_args'] += ['--seed', str(seed)]
     if reward_version != '1':
         binding['command_args'] += ['--reward-version', reward_version]
     if action_mean != 'unbounded':
         binding['command_args'] += ['--action-mean', action_mean]
     if observation_normalization != 'empirical':
         binding['command_args'] += ['--observation-normalization', observation_normalization]
+    for key, value in selected_options.items():
+        binding['command_args'] += ['--'+key.replace('_', '-'), str(value)]
     if learner != 'ppo':
         binding['command_args'] += ['--learner', learner, '--networks', networks]
     if logger == 'wandb':
@@ -135,6 +169,10 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
                                    '--tripod-adaptation', tripod_adaptation]
     if mode == 'evaluate':
         binding['command_args'] += ['--eval-scope', eval_scope]
+    if video_case is not None:
+        binding['command_args'] += ['--video-case', video_case]
+    if episode_seconds != 20.:
+        binding['command_args'] += ['--episode-seconds', str(episode_seconds)]
     if mode == 'throughput':
         binding['command_args'] += ['--warmup-updates', str(warmup_updates)]
     if checkpoint is not None:
@@ -151,7 +189,9 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
     save(output/'PACK.json', {'remote_root': str(remote_root), 'source_freeze_sha256': freeze,
         'binding_sha256': sha(output/'binding.json'), 'mode': mode, 'seed': seed, 'reward_version': reward_version,
         'learner': learner, 'networks': networks, 'action_mean': action_mean,
-        'observation_normalization': observation_normalization,
+        'observation_normalization': observation_normalization, **selected_options,
+        **({} if video_case is None else {'video_case': video_case}),
+        **({} if episode_seconds == 20. else {'episode_seconds': episode_seconds}),
         'allocation_profile': allocation_profile, 'max_wall_seconds': max_wall_seconds,
         'updates': updates, 'stage2_complete': False, 'files': {
             p.relative_to(output).as_posix(): sha(p) for p in sorted(output.rglob('*')) if p.is_file()}})
@@ -163,7 +203,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--remote-root', required=True)
     parser.add_argument('--inputs', type=Path)
-    parser.add_argument('--mode', choices=('diagnostic', 'train', 'evaluate', 'tripod', 'throughput'), required=True)
+    parser.add_argument('--mode', choices=('diagnostic', 'train', 'evaluate', 'tripod', 'throughput', 'probe'), required=True)
     parser.add_argument('--num-envs', type=int)
     parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
     parser.add_argument('--updates', type=int, default=512)
@@ -178,11 +218,22 @@ def main():
     parser.add_argument('--logger', choices=['tensorboard', 'wandb'], default='tensorboard')
     parser.add_argument('--wandb-project')
     parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
-    parser.add_argument('--reward-version', choices=['1', '2', '3'], default='1')
+    parser.add_argument('--reward-version', choices=['1', '2', '3', '4'], default='1')
     parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo')
     parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp')
     parser.add_argument('--action-mean', choices=['unbounded', 'tanh'], default='unbounded')
     parser.add_argument('--observation-normalization', choices=['empirical', 'none'], default='empirical')
+    parser.add_argument('--observation-scaling', choices=['none', 'fixed'], default='none')
+    parser.add_argument('--command-segments', choices=['continuous', 'bootstrap'], default='continuous')
+    parser.add_argument('--learning-rate-max', type=float)
+    parser.add_argument('--action-std', type=float, default=.15)
+    parser.add_argument('--action-noise-correlation', type=float, default=0.)
+    parser.add_argument('--action-std-final', type=float)
+    parser.add_argument('--gait-clock', type=int, default=0)
+    parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none')
+    parser.add_argument('--velocity-noise', type=float, default=0.)
+    parser.add_argument('--episode-seconds', type=float, default=20.)
+    parser.add_argument('--video-case')
     parser.add_argument('--allocation-profile', choices=ALLOCATION_PROFILES, default='standard')
     parser.add_argument('--max-wall-seconds', type=int, default=6200)
     args = parser.parse_args()

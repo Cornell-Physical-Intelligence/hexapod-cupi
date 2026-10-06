@@ -20,7 +20,7 @@ jobs:
         run: uv sync --locked
       - name: Test maintained packages and archive boundaries
         run: |
-          for suite in contracts navigation mission robot locomotion locomotion/priors; do
+          for suite in contracts navigation mission robot locomotion locomotion/priors locomotion/surrogate; do
             uv run python -m unittest discover -s "$suite/tests"
           done
           uv run python -m unittest discover -s tests

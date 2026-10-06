@@ -318,6 +318,27 @@
       "purpose": "Experimental immediate tracking feedback with unchanged version 2 penalty coefficients and motion gates."
     },
     {
+      "path": "locomotion/task_v4.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Reward version 4: noise-calibrated tracking and penalties plus a measured stepping term, beside versions 1 to 3."
+    },
+    {
+      "path": "locomotion/rate_schedule.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Cap the adaptive learning rate of stock RSL-RL PPO for a named learner option."
+    },
+    {
+      "path": "locomotion/noise_probe.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Hold fixed action means under graded exploration noise and record reward inputs without an optimizer."
+    },
+    {
       "path": "locomotion/throughput.py",
       "previous_path": null,
       "classification": "current",
@@ -414,6 +435,55 @@
       "classification": "prototype",
       "owner": "Program lead",
       "purpose": "Audit native clips and export hash-bound transitions after the program lead reviews motion."
+    },
+    {
+      "path": "locomotion/surrogate/__init__.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Package namespace."
+    },
+    {
+      "path": "locomotion/surrogate/env.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Run the interface of the native locomotion environment on CPU MuJoCo physics for design work; native runs remain the acceptance evidence."
+    },
+    {
+      "path": "locomotion/surrogate/train.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Train PPO on the MuJoCo surrogate through the training path of the native trainer."
+    },
+    {
+      "path": "locomotion/surrogate/evaluate.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Evaluate a checkpoint's no-noise policy on the learning probes, on the surrogate."
+    },
+    {
+      "path": "locomotion/surrogate/replay.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Replay actions open loop on the surrogate and score stored telemetry under any reward."
+    },
+    {
+      "path": "locomotion/surrogate/calibrate.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Compare the surrogate with retained native captures."
+    },
+    {
+      "path": "locomotion/surrogate/self_check.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Check the surrogate on this machine and measure it against native reference copies."
     }
   ],
   "archived_documents": []
