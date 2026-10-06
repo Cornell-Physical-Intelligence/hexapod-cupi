@@ -46,7 +46,14 @@ uv run python -m unittest discover -s locomotion/surrogate/tests
   `metrics.jsonl` row per update and a checkpoint pair every 50 updates. `--task` takes
   `module:Class` or `module:factory(text)`. `--contact FIELD=VALUE` overrides one
   `ContactModel` field. `--resume` continues the update count and the deviation schedule of a
-  checkpoint.
+  checkpoint. Resume checks the checkpoint hash and its paired JSON record
+  before loading weights. The source hashes and training configuration must
+  match, including the task, wrapper, contact model and replica count. The
+  record pins the parent checkpoint and identity. The deviation schedule keeps
+  its original horizon; additional updates hold its final value after that
+  horizon. The simulator and random generators restart from the recorded seed,
+  so resume does not replay an uninterrupted trajectory. Use the original source
+  checkout for a historical checkpoint.
 - A reward with a contact-schedule term needs `--gait-clock` equal to its period. The trainer
   stops otherwise, as `locomotion/train.py` does.
 - The evaluator reads the checkpoint's JSON record, so a native checkpoint needs no learner

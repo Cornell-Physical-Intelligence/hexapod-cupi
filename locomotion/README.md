@@ -54,22 +54,31 @@ Each option keeps its baseline default and enters the pack and the checkpoint
 record. Each one except `--episode-seconds` also enters the evaluation command,
 and evaluation rejects a mismatch. Read
 [reward audit section 15](../docs/REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)
-for the failure that each option prevents.
+for the motivation and evidence limits of each option.
 
 | Option | Effect |
 | --- | --- |
 | `--observation-scaling fixed` | Multiply each observation by a declared constant. Without running normalization the 0.05 m/s command enters at its raw scale, and the retained actor and critic did not respond to it. |
-| `--command-segments bootstrap` | Treat a command change as a time-out, so PPO bootstraps the old command's value across the change. |
+| `--command-segments bootstrap` | Cut the return at a command change and bootstrap the post-action state under the held command before any reset. |
 | `--learning-rate-max 0.0003` | Cap the stock adaptive schedule, which reached 0.01 once the tanh means saturated. |
 | `--action-std 0.15 --action-std-final 0.05` | Hold the action deviation on a linear schedule. PPO no longer learns it. |
 | `--gait-clock 60` | Append the sine and cosine of the episode phase to both observations; both are zero under a zero command. Reward version 4 requires the period of its contact schedule. |
 | `--action-smoothing mean2` | Send the mean of each action and the previous one to the environment, in training and in evaluation. That mean has no gain at half the control rate, where a rest oscillation sat. |
-| `--velocity-noise 0.5` | Add Gaussian noise in rad/s to the actor's joint-velocity inputs in training. The critic and evaluation read measured values. Without it the policy's velocity feedback grows until the robot oscillates at rest. |
+| `--velocity-noise 0.5` | Add Gaussian noise in rad/s to the actor's joint-velocity inputs in training. The critic and evaluation read measured values. Retained runs combine this option with smoothing and reward changes; they do not isolate its effect. |
 | `--episode-seconds 10` | Shorten training episodes. A forward walker covers 1.0 m in a 20 s episode, toward a neighbour's reset origin 2.0 m away, and the proximity guard then stops the run. Training alone accepts it. |
 | `--video-case <probe id>` | Choose the probe that the evaluation camera records. |
 
 `prepare --mode probe` runs [`noise_probe.py`](noise_probe.py) through the
 training entry with 128 robots and no learner.
+On a Python exception or interruption, the probe saves completed controls and
+the failure in `summary.json` before it propagates the error. It retains
+nonfinite samples in the raw archive and omits summary statistics for them.
+The record excludes any control for which the environment step did not return
+complete telemetry. A process kill can bypass this final write.
+
+Reward versions 2–4 share `task_v2.RewardTask.step` for command resampling and
+guard checks. Each version implements `_reward` for its formula and private
+history. Reward version 1 retains its frozen source.
 
 PPO training records `policy_update` in each metrics row: Gaussian divergence,
 action likelihood ratios and learning rate before and after the stock update.

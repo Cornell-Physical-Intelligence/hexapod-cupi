@@ -18,8 +18,8 @@ from pathlib import Path
 
 import torch
 
-from .task import TaskConfig, TrainingTask
-from .task_v2 import ACTUATOR, CONTROL_DT_S, SUBSTEPS, StrideWindow
+from .task import TaskConfig
+from .task_v2 import ACTUATOR, CONTROL_DT_S, SUBSTEPS, RewardTask, StrideWindow
 
 REWARD_VERSION = "noise_sized_tripod_schedule_v4"
 RATED_TORQUE_NM = 1.6
@@ -31,9 +31,9 @@ DEPARTURES = (
     "velocity. At this robot's 0.05 m/s command, exploration shakes the body by 0.035 m/s per axis "
     "and control; the 10-control mean of position differences carries 0.013 m/s per axis (native "
     "noise probe).",
-    "The kernel is max(1 - e^2, -floor) instead of exp(-|e| / 0.15). Its expectation under "
-    "zero-mean velocity noise equals the noise-free value minus a constant, so noise does not "
-    "shrink the gain from walking. The printed exponent has no minus sign, and its 0.15 m/s scale "
+    "The kernel is max(1 - e^2, -floor) instead of exp(-|e| / 0.15). For the unclipped quadratic, "
+    "zero-mean velocity noise with fixed variance subtracts a constant in expectation. The floor "
+    "breaks that identity where clipping occurs. The printed exponent has no minus sign, and its 0.15 m/s scale "
     "pays a motionless robot 72 to 85 percent at these commands (audit sections 2 and 4).",
     "The error scale equals the commanded speed or yaw rate, so a motionless robot earns zero "
     "linear tracking on a translation command and zero yaw tracking on a yaw command. A zero "
@@ -342,7 +342,7 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
     return reward, components
 
 
-class TrainingTaskV4(TrainingTask):
+class TrainingTaskV4(RewardTask):
     """Version 1's command, guard and reporting task with reward version 4."""
 
     reward_config = REWARD_V4_CONFIG
@@ -420,35 +420,14 @@ class TrainingTaskV4(TrainingTask):
                 "executed_action": (t["joint_target_rad"].to(q) - self.env.neutral.to(q)) / self.env.cfg.action_scale_rad,
                 "command_age_controls": self.command_age.clone()}
 
-    def step(self, action):
-        # Version 1's step with measured_reward_v4 in place of measured_reward.
-        if bool((self.remaining_controls <= 0).any()):
-            raise RuntimeError("Call task.reset before collecting a rollout")
-        roots_before = self.env.current["root"][:, :3].clone()
-        self.proximity.check(roots_before, "before_control",
-            speeds=torch.linalg.vector_norm(self.env.current["linear"], dim=-1))
-        command = self.env.commands.detach().clone()
-        output = self.env.step(action)
-        self.proximity.check(self.env.current["root"][:, :3], "after_control", previous=roots_before)
+    def _reward(self, command, terminated):
         telemetry = self.reward_telemetry(command)
-        reward, components = measured_reward_v4(telemetry, command, output["terminated"], self.reward_config,
+        reward, components = measured_reward_v4(telemetry, command, terminated, self.reward_config,
                                                 self.nominal_height)
-        metric_previous_target = self.previous_target
-        self.previous_target = self.env.telemetry["joint_target_rad"].detach().clone()
         self.previous_joint_velocity = self.env.telemetry["joint_velocity_rad_s"].detach().clone().to(self.previous_joint_velocity)
         self.previous_pose = self.env.telemetry["root_pose_xyzw"].detach().clone().to(self.previous_pose)
-        self.last_held_command = command
-        self.last_components = {key: value.detach().clone() for key, value in components.items()}
-        self.remaining_controls -= 1
-        done = output["terminated"] | output["truncated"]
-        expired = ((self.remaining_controls == 0) & ~done).nonzero(as_tuple=False).squeeze(-1)
-        self._resample(expired)
-        self.controls_completed += 1
-        self._metrics(command, output, reward, components, previous_target=metric_previous_target)
         self._gait_metrics(command, telemetry)
-        result = self._next_command_observation(output)
-        result["reward"] = reward
-        return result
+        return reward, components
 
     def _gait_metrics(self, command, telemetry):
         """Reporting accumulators for stepping; these values never enter the learning objective."""

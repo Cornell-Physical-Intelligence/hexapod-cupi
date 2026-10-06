@@ -575,8 +575,8 @@ uv run python -B site/assets/ppo_learning_recovery_20261002_001/reward_v3_evalua
 ## 15. Vanilla PPO stability and reward version 4
 
 Sections 9 to 14 end with four native runs that hold saturated, static poses.
-This section names six causes, the comparison that isolates each one, and the
-change that removes it. Each table and each linked number comes from a retained
+This section describes six failure mechanisms and the changes tested against them.
+Several comparisons combine changes and do not isolate each mechanism. Each table and each linked number comes from a retained
 Spark attempt through a script in
 [`site/assets/ppo_walking_diagnosis_20261005_001`](../site/assets/ppo_walking_diagnosis_20261005_001/).
 The other numbers come from the retained captures and metric files of the
@@ -745,14 +745,14 @@ probe values.
 Each option keeps its baseline default and enters the pack and the checkpoint
 record. Each one except `--episode-seconds` also enters the evaluation command.
 
-| Option | Failure it prevents |
+| Option | Motivation and evidence |
 | --- | --- |
 | `--action-mean tanh`, `--observation-normalization none` | Retained from sections 10 and 12. |
 | `--observation-scaling fixed` | Without running normalization the 0.05 m/s command enters at its raw scale and the retained actor and critic did not respond to it. |
-| `--command-segments bootstrap` | Under version 2 a zero command pays a standing robot and an arc command charges it, so command changes set the value target. PPO now bootstraps the held command's value at each change. |
+| `--command-segments bootstrap` | Under version 2 a zero command pays a standing robot and an arc command charges it. The option cuts the return at each change. The post-PR-59 fix evaluates the post-action state under the held command; the retained runs used the pre-action value. |
 | `--learning-rate-max 0.0003` | With 18 tanh means saturated the stock schedule read a small divergence and raised the rate to 0.01 at update 1438 of the version 3 run. |
 | `--action-std 0.15 --action-std-final 0.05` | A learned deviation rose from 0.150 to 0.161 and 0.165 under version 1 and to 0.166 under the first version 4 draft, where noise is the source of motion. The deviation now follows a linear schedule. |
-| `--gait-clock 60` | The contact schedule needs a phase input. Both inputs are zero under a zero command, which stops the stepping. |
+| `--gait-clock 60` | The selected contact schedule reads episode phase. The two added inputs expose that phase and become zero under a zero command. This requirement follows from the schedule design. |
 | `--action-smoothing mean2` | A two-control mean has no gain at half the control rate, where the rest oscillation sits. |
 | `--velocity-noise 0.5` | Cause 5. Training alone adds the noise; the critic and evaluation read measured values. |
 | `--episode-seconds 10` | A forward walker covers 1.0 m in a 20 s episode, toward a neighbour's reset origin 2.0 m away, and the proximity guard then stops the run. We saw the stop on the surrogate and tested no native run with 20 s episodes. Training alone accepts the option. |
@@ -766,7 +766,7 @@ from Table I with its reason:
 | Departure | Reason |
 | --- | --- |
 | Tracking reads the 10-control mean of root displacement | Exploration shakes the body by 0.035 m/s per axis and control (0.049 m/s planar) at a 0.05 m/s command. |
-| Kernel `max(1 - e^2, -1)` with the commanded speed as scale | Its expectation under zero-mean noise keeps the gain from walking, and a motionless robot earns zero linear tracking on a translation command. |
+| Kernel `max(1 - e^2, -1)` with the commanded speed as scale | The unclipped quadratic retains the walking gain under zero-mean noise of fixed variance. Clipping breaks that identity. A motionless robot earns zero linear tracking on a translation command. |
 | Tripod contact schedule and swing travel | Cause 3. Both read measured toe forces and toe motion; neither holds a joint target or a recorded motion. |
 | Mean-square penalties sized on noisy rollouts; target rate reads the executed target | Cause 1. |
 | Action-limit term | Causes 2 and 4. |
@@ -825,6 +825,43 @@ come from the same captures.
   measure rest loads.
 - **Cause 5 mechanism.** The link from noise damping to the feedback gain is
   an inference from the gain measurements and the gain sweep.
+
+### Method and evidence audit after PR 59
+
+You can use the retained runs as an adapted PPO baseline. The paper supplies gait
+structure through the AMP discriminator and demonstration transitions
+([sections III-B and V-A](https://arxiv.org/html/2511.03167v1#S3.SS2)).
+These runs use a prescribed tripod contact schedule and swing-travel reward.
+The native AMP comparison remains pending in [TRAINING](TRAINING.md#proposed-reproduction-sequence).
+Forward and stop passes establish those probe results; they do not establish the
+necessity of each added reward or learner option.
+
+| Choice | Supported conclusion and open comparison |
+| --- | --- |
+| Reward scaling and tracking window | Fixed-pose noise probes show incentives to crouch under versions 2–3. They support correcting those incentives. They do not select a unique kernel or prove that each version 4 weight is required. |
+| Action-limit penalty and swing-travel ceiling | Cause 4 changes both in one run. The comparison supports the pair; separate removals must establish each contribution. |
+| Velocity noise and action smoothing | Cause 5 combines both with reward-weight changes. The gain sweep supports a feedback hypothesis; it does not isolate the native benefit of noise. |
+| Quiet contact and coxa strain | Stop failures motivate these terms. The final comparison combines the strain term with a settling window. Their effects need separate comparisons. |
+
+The actor grows from 231 to 233 entries and the critic from 234 to 236 through
+the sine/cosine clock. Both entries are zero under a zero command. Scaling and
+joint-velocity noise change existing values and add no entries. Five-frame
+proprioception history predates PR 59 and follows the paper's section IV-A;
+the flattened stock MLP still differs from its estimator and memory networks.
+The paper lists no clock input. The clock is an adaptation to the scheduled
+reward, with no measured claim that paper reproduction needs it.
+
+For a method comparison, keep the approved model and gates fixed. Compare AMP
+with clocked shaping at matched transition budgets and seeds, then remove one
+adaptation per comparison. Treat forward-only command sampling as a restricted
+training task: the cited full-command surrogate trial has no retained record.
+These comparisons require native admission; this audit starts no runs.
+
+The command-boundary fix changes future learning targets. RSL-RL 5.0.1 uses the
+value saved before the action for its timeout correction. PR 59 marked command
+changes as timeouts and inherited that behavior. The corrected adapter retains
+the post-action observation under the held command and adds its value once.
+Retained checkpoints and measurements keep their original source identities.
 
 ### Reproduce section 15
 
