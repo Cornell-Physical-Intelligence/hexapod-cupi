@@ -13,6 +13,7 @@ COMMAND_SCALES = (20., 20., 5.)
 ACTOR_SCALES = FRAME_SCALES*5 + COMMAND_SCALES + (1.,)*18
 CRITIC_SCALES = ACTOR_SCALES + (20.,)*3
 RATE_CLASS = 'locomotion.rate_schedule:CappedRatePPO'
+SEGMENT_CLASS = 'locomotion.rate_schedule:CommandBootstrapPPO'
 
 
 def scale_observation(value, scaling, *, critic=False):
@@ -94,6 +95,8 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
     if action_noise_correlation:
         config['actor']['distribution_cfg'].update(noise_correlation=action_noise_correlation,
             class_name='locomotion.action_distribution:CorrelatedBoundedMeanGaussian')
+    if command_segments == 'bootstrap':
+        config['algorithm']['class_name'] = SEGMENT_CLASS
     if learning_rate_max is not None:
         config['algorithm'].update(class_name=RATE_CLASS, learning_rate_max=learning_rate_max,
                                    learning_rate=min(1e-3, learning_rate_max))
@@ -268,12 +271,22 @@ class VanillaVecEnv:
         done = output['terminated'] | output['truncated']
         # A physical termination overrides a coincident episode timeout.
         extras = {'time_outs': output['truncated'] & ~output['terminated']}
+        if held is not None:
+            switched = (output['obs'][:, 210:213] != held).any(-1) & ~done
+            if bool(switched.any()):
+                # Capture the post-action state under the held command before any selected reset.
+                critic = output['critic'].clone()
+                critic[:, 210:213] = held
+                critic = scale_observation(critic, self.observation_scaling, critic=True)
+                if self.gait_clock:
+                    clock = clock_features(self.task.episode_steps, self.gait_clock, held).to(critic)
+                    critic = torch.cat((critic, clock), -1)
+                extras['command_time_outs'] = switched
+                extras['command_bootstrap_observation'] = self.tensor_dict({'critic': critic}, batch_size=[self.num_envs])
+            extras['time_outs'] = extras['time_outs'] | switched
         selected = done.nonzero(as_tuple=False).flatten()
         self.current = self.task.reset(selected) if len(selected) else output
         if held is not None:
-            # The next command reaches the actor now; the return of the finished hold bootstraps here.
-            switched = (output['obs'][:, 210:213] != held).any(-1) & ~done
-            extras['time_outs'] = extras['time_outs'] | switched
             done = done | switched
         return self.get_observations(), rewards, done.long(), extras
 

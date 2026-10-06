@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 import torch
@@ -39,6 +40,40 @@ class ProbeDouble(RewardDouble):
 
 
 class NoiseProbeTests(unittest.TestCase):
+    def test_failure_retains_completed_controls_and_failure_reason(self):
+        for failure in ('timeout', 'guard', 'physics', 'nonfinite', 'interrupt', 'before_first'):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as directory:
+                env = ProbeDouble()
+                step = env.step
+                def failing_step(action):
+                    if failure == 'before_first' or failure == 'physics' and len(env.actions) == 1:
+                        raise RuntimeError('physics fixture')
+                    output = step(action)
+                    if failure == 'nonfinite':
+                        env.telemetry['linear_velocity_nav'][0, 0] = float('nan')
+                    return output
+                class Guard:
+                    def check(self, roots, stage, **kwargs):
+                        if stage == 'after_control':
+                            if failure == 'interrupt':
+                                raise KeyboardInterrupt('interrupt fixture')
+                            raise RuntimeError('guard fixture')
+                destination = Path(directory) / 'probe'
+                guard = Guard() if failure in ('guard', 'interrupt') else None
+                with patch.object(env, 'step', side_effect=failing_step), self.assertRaises(BaseException):
+                    noise_probe.run(env, destination, seed=11, guard=guard,
+                                    max_wall_seconds=0 if failure == 'timeout' else None)
+                summary = json.loads((destination / 'summary.json').read_text())
+                completed = 0 if failure == 'before_first' else 1
+                self.assertEqual((summary['status'], summary['controls_completed']), ('failed', completed))
+                self.assertTrue(summary['error'])
+                self.assertEqual(summary['cells'], [])
+                self.assertEqual(summary['telemetry_finite'], failure != 'nonfinite')
+                with np.load(destination / 'telemetry.npz') as arrays:
+                    self.assertEqual(arrays['terminated'].shape, (completed, 128))
+                    if completed:
+                        np.testing.assert_array_equal(arrays['action'], torch.stack(env.actions).numpy())
+
     def test_plan_crosses_each_pose_with_each_deviation(self):
         rows = noise_probe.plan(128)
         cells = {(row['pose'], row['standard_deviation']) for row in rows}

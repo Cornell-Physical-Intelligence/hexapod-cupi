@@ -223,7 +223,40 @@ class StrideWindow:
         return (self.values * recent[..., None]).sum(1) / self.count[:, None]
 
 
-class TrainingTaskV2(TrainingTask):
+class RewardTask(TrainingTask):
+    """Share the control loop for reward versions 2–4; retain version 1 as a frozen baseline."""
+
+    def _reward(self, command, terminated):
+        raise NotImplementedError('Reward tasks must implement _reward')
+
+    def step(self, action):
+        if bool((self.remaining_controls <= 0).any()):
+            raise RuntimeError("Call task.reset before collecting a rollout")
+        roots_before = self.env.current["root"][:, :3].clone()
+        self.proximity.check(roots_before, "before_control",
+            speeds=torch.linalg.vector_norm(self.env.current["linear"], dim=-1))
+        command = self.env.commands.detach().clone()
+        output = self.env.step(action)
+        self.proximity.check(self.env.current["root"][:, :3], "after_control", previous=roots_before)
+        reward, components = self._reward(command, output["terminated"])
+        metric_previous_target = self.previous_target
+        self.previous_target = self.env.telemetry["joint_target_rad"].detach().clone()
+        self.last_held_command = command
+        self.last_components = {key: value.detach().clone() for key, value in components.items()}
+        self.remaining_controls -= 1
+        done = output["terminated"] | output["truncated"]
+        # Terminal observations remain attributed to their final command. The
+        # learner supplies an explicit selected reset before collecting again.
+        expired = ((self.remaining_controls == 0) & ~done).nonzero(as_tuple=False).squeeze(-1)
+        self._resample(expired)
+        self.controls_completed += 1
+        self._metrics(command, output, reward, components, previous_target=metric_previous_target)
+        result = self._next_command_observation(output)
+        result["reward"] = reward
+        return result
+
+
+class TrainingTaskV2(RewardTask):
     """Version 1's command, guard and reporting task with reward version 2."""
 
     def __init__(self, env, config=None, output_dir=None, reward_config=None):
@@ -261,33 +294,12 @@ class TrainingTaskV2(TrainingTask):
         return {**t, "previous_action": self.previous_action, "previous_joint_velocity_rad_s": self.previous_joint_velocity,
                 "tracked_planar_velocity_nav": tracked[:, :2], "tracked_yaw_rate_rad_s": tracked[:, 2]}
 
-    def step(self, action):
-        # Version 1's step with measured_reward_v2 in place of measured_reward.
-        if bool((self.remaining_controls <= 0).any()):
-            raise RuntimeError("Call task.reset before collecting a rollout")
-        roots_before = self.env.current["root"][:, :3].clone()
-        self.proximity.check(roots_before, "before_control",
-            speeds=torch.linalg.vector_norm(self.env.current["linear"], dim=-1))
-        command = self.env.commands.detach().clone()
-        output = self.env.step(action)
-        self.proximity.check(self.env.current["root"][:, :3], "after_control", previous=roots_before)
-        reward, components = measured_reward_v2(self.reward_telemetry(command), command, output["terminated"],
+    def _reward(self, command, terminated):
+        reward, components = measured_reward_v2(self.reward_telemetry(command), command, terminated,
                                                 self.reward_config)
-        metric_previous_target = self.previous_target
-        self.previous_target = self.env.telemetry["joint_target_rad"].detach().clone()
         self.previous_action = self.env.telemetry["action"].detach().clone().to(self.previous_action)
         self.previous_joint_velocity = self.env.telemetry["joint_velocity_rad_s"].detach().clone().to(self.previous_joint_velocity)
-        self.last_held_command = command
-        self.last_components = {key: value.detach().clone() for key, value in components.items()}
-        self.remaining_controls -= 1
-        done = output["terminated"] | output["truncated"]
-        expired = ((self.remaining_controls == 0) & ~done).nonzero(as_tuple=False).squeeze(-1)
-        self._resample(expired)
-        self.controls_completed += 1
-        self._metrics(command, output, reward, components, previous_target=metric_previous_target)
-        result = self._next_command_observation(output)
-        result["reward"] = reward
-        return result
+        return reward, components
 
     def status(self, *, reset_interval=False):
         return {**super().status(reset_interval=reset_interval), "reward_version": REWARD_VERSION}
