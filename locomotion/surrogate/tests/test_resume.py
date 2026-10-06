@@ -1,12 +1,13 @@
 """Check resume compatibility and checkpoint lineage with short CPU training runs."""
 import copy
+import inspect
 import json
 from pathlib import Path
 import tempfile
 import unittest
 
 from locomotion.surrogate import train
-from locomotion.surrogate.tests.test_learner import run, train_sha
+from locomotion.surrogate.tests.test_learner import HalfActionRateTask, run, train_sha
 
 
 class ResumeTests(unittest.TestCase):
@@ -71,6 +72,19 @@ class ResumeTests(unittest.TestCase):
                 path.with_suffix('.json').write_text(json.dumps(record))
                 with self.assertRaisesRegex(ValueError, message):
                     train.resume_record(path, identity)
+
+    def test_task_source_outside_the_hashed_packages_enters_the_contract(self):
+        module = HalfActionRateTask.__module__
+        code, output, state = run(self.temporary.name, 'external', '--task', f'{module}:HalfActionRateTask')
+        self.assertEqual(code, 0, state.get('traceback'))
+        source = train_sha(Path(inspect.getsourcefile(HalfActionRateTask)))
+        self.assertEqual(state['identity']['external_class_files'], {module: source})
+        self.assertEqual(self.state['identity']['external_class_files'], {})
+        # An edit to that module between the checkpoint and its resume changes the hash.
+        identity = copy.deepcopy(state['identity'])
+        identity['external_class_files'][module] = '0' * 64
+        with self.assertRaisesRegex(ValueError, 'external_class_files'):
+            train.resume_record(output / 'checkpoint_update000001.pt', identity)
 
 
 if __name__ == '__main__':

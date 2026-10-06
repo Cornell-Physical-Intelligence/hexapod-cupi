@@ -131,6 +131,58 @@ def check_gait_schedule(task, config):
                          f"{getattr(reward, 'schedule_period_controls', None)} or set schedule_weight=0 in the task")
 
 
+def check_command_bootstrap(options, config):
+    """The bootstrap wrapper needs the algorithm that values a finished hold at its post-action state.
+
+    Stock PPO reads ``time_outs`` alone and adds the value saved before the action, so that pair
+    trains the earlier target under a ``command_segments: bootstrap`` record.
+    """
+    if options.get("command_segments") != "bootstrap":
+        return
+    from rsl_rl.utils import resolve_callable
+    from locomotion.rate_schedule import CommandBootstrapPPO
+    algorithm = resolve_callable(config["algorithm"]["class_name"])
+    if not (inspect.isclass(algorithm) and issubclass(algorithm, CommandBootstrapPPO)):
+        raise ValueError("The bootstrap wrapper option needs an algorithm class derived from "
+                         "locomotion.rate_schedule:CommandBootstrapPPO")
+
+
+def external_class_files(task_class, wrapper_class, config):
+    """Source hashes of the selected classes that ``source_files`` and ``surrogate_files`` omit.
+
+    Those lists cover ``locomotion/*.py`` and this package. A task, wrapper, distribution, network or
+    algorithm class from another module could change between a checkpoint and its resume under an
+    equal identity. Each key is a module name, so a moved checkout compares equal. Installed
+    packages keep their version pin.
+    """
+    import sysconfig
+    from rsl_rl.utils import resolve_callable
+    from locomotion.surrogate.env import ROOT, sha
+
+    def named(value):
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if key == "class_name" and isinstance(item, str):
+                    yield resolve_callable(item)
+                else:
+                    yield from named(item)
+
+    hashed = {path.resolve() for path in (*(ROOT / "locomotion").glob("*.py"), *PACKAGE.glob("*.py"))}
+    installed = [Path(sysconfig.get_path(name)).resolve() for name in ("stdlib", "platstdlib", "purelib", "platlib")]
+    files = {}
+    for selected in (task_class, wrapper_class, *named(config)):
+        for part in inspect.getmro(selected) if inspect.isclass(selected) else (selected,):
+            try:
+                source = inspect.getsourcefile(part)
+            except TypeError:  # A built-in class has no source file.
+                continue
+            path = Path(source).resolve() if source else None
+            if path is not None and path.is_file() and path not in hashed and not any(
+                    root in path.parents for root in installed):
+                files[part.__module__] = sha(path)
+    return dict(sorted(files.items()))
+
+
 def merge(base, override):
     """Recursive dictionary update for --ppo-config-overrides."""
     for key, value in override.items():
@@ -293,7 +345,9 @@ def run(args, argv=None):
                            reference_metadata=metadata, threads=args.threads, contact=contact, substep_state=False)
         task = task_class(env, task_module.TaskConfig(seed=args.seed), args.output / "task")
         identity['task_definition'] = task.declaration()
+        identity['external_class_files'] = external_class_files(task_class, wrapper_class, config)
         check_gait_schedule(task, config)
+        check_command_bootstrap(options, config)
         parent = resume_record(args.resume, identity) if args.resume is not None else None
         if parent is not None:
             identity['exploration_schedule_updates'] = parent['identity'].get('exploration_schedule_updates')

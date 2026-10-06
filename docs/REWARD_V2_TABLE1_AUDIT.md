@@ -888,6 +888,10 @@ A native rerun uses `prepare --mode train --reward-version 4 --updates 2000
 same options except the reward version and the episode length; evaluation
 reads the reward version from the checkpoint.
 [OPERATIONS](OPERATIONS.md) gives the launch procedure.
+A reproduction of the native result table needs the frozen source of commit
+`cd691ff0`, where a command change bootstraps the pre-action value. The same
+options from a later source train the post-action target. Such a run is a
+fresh attempt and has no retained native result.
 
 ## Reproduce the Table I audit
 

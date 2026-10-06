@@ -106,6 +106,23 @@ class TrainerTests(unittest.TestCase):
         row = json.loads((output / "metrics.jsonl").read_text().splitlines()[0])
         self.assertTrue(.05 - 1e-6 <= row["mean_action_std"] <= .1 + 1e-6)
 
+    def test_bootstrap_wrapper_requires_the_command_target_algorithm(self):
+        for options in ({"command_segments": "bootstrap"}, {"command_segments": "bootstrap", "learning_rate_max": 3e-4}):
+            config = train.learner_configuration(ppo, 7, options)
+            train.check_command_bootstrap(train.wrapper_options(config), config)
+        override = {"environment_wrapper": {"command_segments": "bootstrap"}}
+        stock = train.merge(train.learner_configuration(ppo, 7, {}), override)
+        replaced = train.merge(train.learner_configuration(ppo, 7, {"command_segments": "bootstrap"}),
+                               {"algorithm": {"class_name": "PPO"}})
+        for config in (stock, replaced):
+            with self.assertRaisesRegex(ValueError, "CommandBootstrapPPO"):
+                train.check_command_bootstrap(train.wrapper_options(config), config)
+        # Stock PPO would train the pre-action target under a bootstrap record; the trainer stops first.
+        code, output, state = run(self.temporary.name, "stock_bootstrap", "--ppo-config-overrides", json.dumps(override))
+        self.assertEqual(code, 1)
+        self.assertIn("CommandBootstrapPPO", state["errors"][0])
+        self.assertFalse((output / "metrics.jsonl").exists())
+
     def test_schedule_reward_requires_its_gait_clock(self):
         if not REWARD_V4_CONFIG.schedule_weight:
             self.skipTest("Reward version 4 holds no contact-schedule term at this revision")
