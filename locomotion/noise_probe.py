@@ -70,39 +70,52 @@ def run(env, output, *, seed, guard=None, max_wall_seconds=None, progress=None):
     mean = torch.tensor([row["mean"] for row in rows], dtype=torch.float32, device=env.device)
     std = torch.tensor([row["standard_deviation"] for row in rows], dtype=torch.float32, device=env.device)[:, None]
     generator = torch.Generator(device="cpu").manual_seed(seed)
-    env.commands.zero_()
-    env.reset()
     started = time.monotonic()
     saved = {name: [] for name in FIELDS}
     flags = {"terminated": [], "truncated": []}
-    for control in range(CONTROLS):
-        roots = env.current["root"][:, :3].clone()
-        if guard is not None:
-            guard.check(roots, "before_control", speeds=torch.linalg.vector_norm(env.current["linear"], dim=-1))
-        noise = torch.randn((env.num_envs, 18), generator=generator).to(env.device)
-        result = env.step(mean + std * noise)
-        if guard is not None:
-            guard.check(env.current["root"][:, :3], "after_control", previous=roots)
-        for name in FIELDS:
-            saved[name].append(env.telemetry[name].detach().to("cpu", torch.float32).numpy())
-        for name in flags:
-            flags[name].append(result[name].detach().cpu().numpy())
-        # A fallen replica restarts at neutral; its rows stay in the record with the flag set.
-        fallen = result["terminated"].nonzero(as_tuple=False).flatten()
-        if len(fallen):
-            env.reset(fallen)
-        if progress is not None and (control + 1) % 100 == 0:
-            progress({"probe_controls": control + 1, "replicas": env.num_envs})
-        if max_wall_seconds is not None and time.monotonic() - started >= max_wall_seconds:
-            raise TimeoutError("Noise probe exceeded its deadline")
-    arrays = {name: np.stack(values) for name, values in saved.items()}
-    arrays.update({name: np.stack(values) for name, values in flags.items()})
-    if not all(np.isfinite(value).all() for value in arrays.values()):
-        raise FloatingPointError("Nonfinite noise-probe telemetry")
-    np.savez_compressed(output/"telemetry.npz", **arrays)
-    summary = {**record, "controls_completed": CONTROLS, "terminations": int(arrays["terminated"].sum()),
-               "cells": summarize(arrays, rows)}
-    (output/"summary.json").write_text(json.dumps(summary, indent=2, allow_nan=False)+"\n")
+    failure = None
+    try:
+        env.commands.zero_()
+        env.reset()
+        for control in range(CONTROLS):
+            roots = env.current["root"][:, :3].clone()
+            if guard is not None:
+                guard.check(roots, "before_control", speeds=torch.linalg.vector_norm(env.current["linear"], dim=-1))
+            noise = torch.randn((env.num_envs, 18), generator=generator).to(env.device)
+            result = env.step(mean + std * noise)
+            # Copy a whole completed control before the guard or a selected reset can stop the run.
+            sample = {name: env.telemetry[name].detach().to("cpu", torch.float32).numpy().copy() for name in FIELDS}
+            sample_flags = {name: result[name].detach().cpu().numpy().copy() for name in flags}
+            for name in saved:
+                saved[name].append(sample[name])
+            for name in flags:
+                flags[name].append(sample_flags[name])
+            if not all(np.isfinite(value).all() for value in sample.values()):
+                raise FloatingPointError("Nonfinite noise-probe telemetry")
+            if guard is not None:
+                guard.check(env.current["root"][:, :3], "after_control", previous=roots)
+            fallen = result["terminated"].nonzero(as_tuple=False).flatten()
+            if len(fallen):
+                env.reset(fallen)
+            if progress is not None and (control + 1) % 100 == 0:
+                progress({"probe_controls": control + 1, "replicas": env.num_envs})
+            if max_wall_seconds is not None and time.monotonic() - started >= max_wall_seconds:
+                raise TimeoutError("Noise probe exceeded its deadline")
+    except BaseException as error:
+        failure = error
+        raise
+    finally:
+        arrays = {name: np.stack(values) for name, values in saved.items() if values}
+        arrays.update({name: np.stack(values) if values else np.empty((0, env.num_envs), dtype=bool)
+                       for name, values in flags.items()})
+        np.savez_compressed(output/"telemetry.npz", **arrays)
+        completed = len(flags['terminated'])
+        finite = all(np.isfinite(value).all() for value in arrays.values())
+        summary = {**record, "status": "completed" if failure is None else "failed",
+            "error": None if failure is None else repr(failure), "controls_completed": completed,
+            "telemetry_finite": finite, "terminations": int(arrays["terminated"].sum()),
+            "cells": summarize(arrays, rows) if finite and completed > SETTLE_CONTROLS + 1 else []}
+        (output/"summary.json").write_text(json.dumps(summary, indent=2, allow_nan=False)+"\n")
     return summary
 
 

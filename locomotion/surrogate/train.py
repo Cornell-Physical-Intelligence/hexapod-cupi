@@ -141,6 +141,39 @@ def merge(base, override):
     return base
 
 
+def resume_record(path, identity):
+    """Check the checkpoint bytes and training contract before loading learner state."""
+    import torch
+    from locomotion.surrogate.env import sha
+
+    path = Path(path)
+    identity = json.loads(json.dumps(identity, allow_nan=False))
+    record = json.loads(path.with_suffix('.json').read_text())
+    if record.get('checkpoint_sha256') != sha(path):
+        raise ValueError('Resume checkpoint hash differs from its record')
+    parent = record['identity']
+    # Run location and execution threads do not change the training contract.
+    excluded = {'repository', 'threads', 'scope', 'resume', 'exploration_schedule_updates'}
+    different = sorted(key for key in (parent.keys() | identity.keys()) - excluded
+                       if parent.get(key) != identity.get(key))
+    if different:
+        raise ValueError('Resume configuration differs: ' + ', '.join(different))
+    updates = record.get('updates')
+    if type(updates) is not int or updates < 1:
+        raise ValueError('Resume checkpoint needs a positive completed update count')
+    transitions = updates * parent['ppo_config']['num_steps_per_env'] * parent['config']['num_envs']
+    if record.get('transitions') != transitions:
+        raise ValueError('Resume transition count differs from its training contract')
+    if identity['action_std_final'] is not None:
+        horizon = parent.get('exploration_schedule_updates')
+        if type(horizon) is not int or horizon < 1:
+            raise ValueError('Resume checkpoint needs the original exploration schedule horizon')
+    stored = torch.load(path, map_location='cpu', weights_only=False)
+    if json.loads(json.dumps(stored.get('infos'), allow_nan=False)) != {'identity': parent, 'updates': updates}:
+        raise ValueError('Resume checkpoint metadata differs from its record')
+    return record
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--output", type=Path, required=True, help="New run directory.")
@@ -240,6 +273,7 @@ def run(args, argv=None):
         "action_smoothing": options.get("action_smoothing", "none"), "velocity_noise": options.get("velocity_noise", 0.),
         "learning_rate_max": args.learning_rate_max, "action_std": args.action_std,
         "action_std_final": config.get("exploration", {}).get("action_std_final"),
+        "exploration_schedule_updates": args.updates if config.get("exploration") else None,
         "action_noise_correlation": args.action_noise_correlation,
         "repository": repository_state(),
         "ppo_config_overrides": overrides, "rsl_rl_required_version": "5.0.1", "ppo_config": config,
@@ -258,7 +292,15 @@ def run(args, argv=None):
         env = SurrogateEnv(cfg, None, DEFAULT_MODEL, DEFAULT_GEOMETRY, args.output / "native",
                            reference_metadata=metadata, threads=args.threads, contact=contact, substep_state=False)
         task = task_class(env, task_module.TaskConfig(seed=args.seed), args.output / "task")
+        identity['task_definition'] = task.declaration()
         check_gait_schedule(task, config)
+        parent = resume_record(args.resume, identity) if args.resume is not None else None
+        if parent is not None:
+            identity['exploration_schedule_updates'] = parent['identity'].get('exploration_schedule_updates')
+            identity['resume'] = {'checkpoint_sha256': parent['checkpoint_sha256'],
+                'record_sha256': sha(args.resume.with_suffix('.json')), 'identity': parent['identity'],
+                'updates': parent['updates'], 'transitions': parent['transitions'],
+                'state_scope': 'Learner and optimizer resume; simulator and random generators restart from the seed.'}
         wrapped = build_wrapper(wrapper_class, task, options)
         runner_config = copy.deepcopy(config)
         # The wrapper consumes its own options; the runner receives the stock keys.
@@ -268,8 +310,13 @@ def run(args, argv=None):
         runner = OnPolicyRunner(wrapped, runner_config, log_dir, device="cpu")
         if args.resume is not None:
             infos = runner.load(str(args.resume), strict=True, map_location="cpu")
+            if (json.loads(json.dumps(infos, allow_nan=False)) != {'identity': parent['identity'], 'updates': parent['updates']}
+                    or sha(args.resume) != parent['checkpoint_sha256']):
+                raise ValueError('Resume checkpoint changed during loading')
             # RSL-RL stores the last iteration index; continue update numbering after it.
             runner.current_learning_iteration = int(infos["updates"])
+            # RSL-RL restores optimizer groups but leaves the adaptive schedule's rate at its initial value.
+            runner.alg.learning_rate = runner.alg.optimizer.param_groups[0]['lr']
         first = runner.current_learning_iteration
         state.update(status="running", tensorboard=log_dir is not None)
         save(args.output / "state.json", state)
@@ -279,10 +326,9 @@ def run(args, argv=None):
             runner.alg.update = diagnostics.update
         final_std = config.get("exploration", {}).get("action_std_final")
         if final_std is not None:
-            # As locomotion/train.py: the schedule wraps the diagnostic update, so each record reads the
-            # deviation it trained with. A resumed run continues the schedule toward its last update.
+            # Keep the original schedule horizon when adding updates to a resumed run.
             schedule = vanilla.DeviationSchedule(runner.alg, config["actor"]["distribution_cfg"]["init_std"],
-                                                 final_std, first + args.updates)
+                                                 final_std, identity['exploration_schedule_updates'])
             schedule.completed = first
             schedule.apply()
             runner.alg.update = schedule.update
