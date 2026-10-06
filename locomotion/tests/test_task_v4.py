@@ -213,6 +213,27 @@ class RewardV4Tests(unittest.TestCase):
         _, parts = score(commands, tibia_floor_force_world_n=force)
         torch.testing.assert_close(parts["quiet_contact"], torch.tensor([-CONFIG.quiet_contact_weight / 12, 0.]))
 
+    def test_quiet_strain_reads_coxa_torque_and_motion_terms_wait_for_the_settle_window(self):
+        commands = torch.tensor([[0., 0., 0.], [.05, 0., 0.]])
+        torque = torch.zeros(2, 18)
+        torque[:, 0::3] = 8 * 1.6**2      # each coxa at the rated torque through eight substeps
+        _, parts = score(commands, torque_square_sum_400hz=torque)
+        torch.testing.assert_close(parts["quiet_strain"], torch.tensor([-CONFIG.quiet_strain_weight, 0.]))
+        torque = torch.zeros(2, 18)
+        torque[:, 1::3] = 8 * 1.6**2      # femur and tibia torque carries the body and costs no strain
+        torque[:, 2::3] = 8 * 1.6**2
+        self.assertEqual(float(score(commands, torque_square_sum_400hz=torque)[1]["quiet_strain"].abs().sum()), 0.)
+        rate = torch.full((2, 18), CONFIG.quiet_joint_rate_scale_rad_s)
+        step = torch.full((2, 18), CONFIG.quiet_target_scale_rad)
+        moving = dict(joint_velocity_rad_s=rate, previous_joint_velocity_rad_s=rate, joint_target_rad=step)
+        grace = CONFIG.quiet_grace_controls
+        for age, charged in ((1, 0.), (grace, 0.), (grace + 1, 1.)):
+            _, parts = score(commands, command_age_controls=torch.full((2,), age), **moving)
+            torch.testing.assert_close(parts["quiet_joint_rate"], torch.tensor([-CONFIG.quiet_joint_rate_weight * charged, 0.]))
+            torch.testing.assert_close(parts["quiet_target_motion"], torch.tensor([-CONFIG.quiet_target_weight * charged, 0.]))
+        with self.assertRaises(ValueError):
+            replace(CONFIG, quiet_grace_controls=300).validate()
+
     def test_a_fall_costs_more_than_the_discounted_reward_it_avoids(self):
         commands = torch.tensor([[.05, 0., 0.]])
         _, parts = score(commands, terminated=torch.tensor([True]))
@@ -249,6 +270,17 @@ class TrainingTaskV4Tests(unittest.TestCase):
         task.window.restart(torch.arange(n), native.commands)
         task.remaining_controls[:] = 1000
         return native, task
+
+    def test_task_counts_controls_since_the_latest_command_change_or_reset(self):
+        native, task = self.moving_task(2)
+        for _ in range(3):
+            task.step(torch.zeros(2, 18))
+        self.assertEqual(task.command_age.tolist(), [3, 3])
+        native.commands[0] = torch.tensor([0., 0., .2])
+        task.step(torch.zeros(2, 18))
+        self.assertEqual(task.command_age.tolist(), [1, 4])
+        task.reset(torch.tensor([1]))
+        self.assertEqual(task.command_age.tolist(), [1, 0])
 
     def test_task_follows_the_schedule_times_each_foot_and_restarts_its_memory(self):
         native, task = self.moving_task()

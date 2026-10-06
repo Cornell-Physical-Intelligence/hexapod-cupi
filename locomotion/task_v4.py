@@ -72,6 +72,12 @@ DEPARTURES = (
     "even load of 12.2 N that it does not carry. With a term that charged airborne feet alone, one "
     "native policy rested a foot so lightly that it slid 3 mm in the stop probe, and a second "
     "policy's lightly loaded leg left the floor for a few physics steps.",
+    "A quiet-strain term charges coxa torque under a zero command. Gravity loads no coxa joint, so "
+    "each coxa torque at rest is strain between planted feet. Each native rest pose held 1.0 to "
+    "1.3 N.m on a coxa, and the stop probe failed on a foot that crept under that load.",
+    "The quiet joint-rate and target-motion terms start 50 controls after a command change or "
+    "reset. Charged from the first control, they pay the policy to freeze at once with the stance "
+    "thrust locked in as strain. The stop gate allows 100 controls before its quiet window.",
     "Any non-tibia floor contact above 1 N costs collision_weight per control; the simulation "
     "reports no self-collision.",
     "Table I has no termination term. PPO bootstraps zero after a termination, so termination_weight "
@@ -133,11 +139,13 @@ class RewardV4Config:
     quiet_target_scale_rad: float = .02
     quiet_contact_weight: float = 3.
     quiet_load_n: float = 12.2
+    quiet_strain_weight: float = 10.
+    quiet_grace_controls: int = 50
     termination_weight: float = 20.
     forward_draw_fraction: float = 1.
 
     def validate(self):
-        for key, low in (("tracking_window_controls", 1), ("schedule_period_controls", 10)):
+        for key, low in (("tracking_window_controls", 1), ("schedule_period_controls", 10), ("quiet_grace_controls", 0)):
             if type(getattr(self, key)) is not int or not low <= getattr(self, key) <= 250:
                 raise ValueError(f"{key} needs {low} to 250 controls")
         for key, value in asdict(self).items():
@@ -189,9 +197,12 @@ def reward_declaration(config):
             "over_rating": "-w mean_joints(clip((|tau_requested at the control end| - onset) / (1.6 - onset), 0, 1))",
             "joint_margin": "-w sum_joints(clip((m - distance to the nearer joint limit) / m, 0, 1)^2)",
             "action_limit": "-w mean_joints((max(|executed target - neutral| / 0.35 - onset, 0) / (1 - onset))^2)",
-            "quiet_joint_rate": "-w [zero command] mean((dq / s)^2)",
-            "quiet_target_motion": "-w [zero command] mean(((q_target - q_target_prev) / s)^2)",
+            "quiet_joint_rate": "-w [zero command, settled] mean((dq / s)^2); settled means more than "
+                "quiet_grace_controls controls since the latest command change or reset",
+            "quiet_target_motion": "-w [zero command, settled] mean(((q_target - q_target_prev) / s)^2)",
             "quiet_contact": "-w [zero command] mean_feet(clip(1 - toe force / quiet load, 0, 1))",
+            "quiet_strain": "-w [zero command] mean_coxa(sum_substeps tau^2 / 8) / 1.6^2; gravity loads no coxa, "
+                "so each coxa torque at rest is strain between planted feet",
             "termination": "-w [height, tilt or joint-limit termination this control]"},
         "command_draws": "Version 1's sampler; forward_draw_fraction of the moving draws become forward at the maximum speed.",
         "gait_clock": "Required: ppo.clock_features with period schedule_period_controls, zero under a zero command.",
@@ -268,6 +279,8 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
     toe = field("toe_xyz_nav", (6, 2))
     margin = field("joint_limit_margin_rad", (18,))
     executed = field("executed_action", (18,)).abs()
+    # A record without the command age scores every control as settled.
+    age = telemetry.get("command_age_controls")
     if not torch.equal(field("command", (3,)), commands):
         raise ValueError("Reward command differs from the native completed hold")
     terminated = torch.as_tensor(terminated, device=device)
@@ -278,6 +291,7 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
     c = config
     quiet = (commands == 0).all(-1).to(torch.float32)
     moving = 1 - quiet
+    still = quiet if age is None else quiet * (age.to(device) > c.quiet_grace_controls).to(torch.float32)
     linear_error, yaw_error = tracking_errors(tracked, commands, c)
     target_step = target - previous_target
     airborne = (toe_force <= c.contact_force_n).to(torch.float32)
@@ -311,9 +325,10 @@ def measured_reward_v4(telemetry, commands, terminated, config=REWARD_V4_CONFIG,
         "over_rating": -c.over_rating_weight * over,
         "joint_margin": -c.joint_margin_weight * ((c.joint_margin_rad - margin) / c.joint_margin_rad).clamp(0, 1).square().sum(-1),
         "action_limit": -c.action_limit_weight * ((executed - c.action_limit_onset).clamp_min(0) / (1 - c.action_limit_onset)).square().mean(-1),
-        "quiet_joint_rate": -c.quiet_joint_rate_weight * quiet * (rate / c.quiet_joint_rate_scale_rad_s).square().mean(-1),
-        "quiet_target_motion": -c.quiet_target_weight * quiet * (target_step / c.quiet_target_scale_rad).square().mean(-1),
+        "quiet_joint_rate": -c.quiet_joint_rate_weight * still * (rate / c.quiet_joint_rate_scale_rad_s).square().mean(-1),
+        "quiet_target_motion": -c.quiet_target_weight * still * (target_step / c.quiet_target_scale_rad).square().mean(-1),
         "quiet_contact": -c.quiet_contact_weight * quiet * (1 - toe_force / c.quiet_load_n).clamp(0, 1).mean(-1),
+        "quiet_strain": -c.quiet_strain_weight * quiet * (torque_square[:, 0::3] / SUBSTEPS).mean(-1) / RATED_TORQUE_NM**2,
         "termination": -c.termination_weight * terminated.to(torch.float32),
     }
     reward = sum(components.values())
@@ -338,6 +353,7 @@ class TrainingTaskV4(TrainingTask):
         self.window = StrideWindow(n, self.reward_config.tracking_window_controls, 3, device)
         self.air_time = torch.zeros(n, 6, device=device)
         self.in_contact = torch.ones(n, 6, dtype=torch.bool, device=device)
+        self.command_age = torch.zeros(n, dtype=torch.long, device=device)
         self.gait_totals = {}
         super().__init__(env, task_config, output_dir)
 
@@ -366,6 +382,7 @@ class TrainingTaskV4(TrainingTask):
         self.previous_pose[selected] = self.env.current["root"][selected].to(self.previous_pose)
         self.previous_toe_world[selected] = self.env.current["toe_world"][selected].detach().to(self.previous_toe_world)
         self.window.restart(selected, self.env.commands[selected])
+        self.command_age[selected] = 0
         self.air_time[selected] = 0
         self.in_contact[selected] = True
         return output
@@ -375,6 +392,8 @@ class TrainingTaskV4(TrainingTask):
         from .env import inverse_rotate, navigation
         t = self.env.telemetry
         pose = t["root_pose_xyzw"].to(self.previous_pose)
+        changed = (command.to(self.window.command) != self.window.command).any(-1)
+        self.command_age = torch.where(changed.to(self.command_age.device), torch.zeros_like(self.command_age), self.command_age) + 1
         tracked = self.window.update(displacement_velocity(pose, self.previous_pose), command)
         contact = torch.linalg.vector_norm(t["tibia_floor_force_world_n"], dim=-1) > self.reward_config.contact_force_n
         touchdown = contact & ~self.in_contact
@@ -393,7 +412,8 @@ class TrainingTaskV4(TrainingTask):
                 "toe_velocity_nav": toe_velocity, "toe_xyz_nav": navigation(t["toe_xyz_body"].detach())[..., :2],
                 "scheduled_swing": scheduled_swing(self.env.episode_steps - 1, self.reward_config).to(contact.device),
                 "joint_limit_margin_rad": torch.minimum(q - self.env.lower.to(q), self.env.upper.to(q) - q),
-                "executed_action": (t["joint_target_rad"].to(q) - self.env.neutral.to(q)) / self.env.cfg.action_scale_rad}
+                "executed_action": (t["joint_target_rad"].to(q) - self.env.neutral.to(q)) / self.env.cfg.action_scale_rad,
+                "command_age_controls": self.command_age.clone()}
 
     def step(self, action):
         # Version 1's step with measured_reward_v4 in place of measured_reward.
