@@ -1,12 +1,12 @@
 {
  "schema": "hexapod_noise_probe_reward_ledger_v2",
- "analysis_sha256": "d1e90168e1402f73d7445ef0625621dabe6590c077127e8ff226fe33db363c55",
- "source_commit": "d55f7ad9b395e4cd4472e596590e841a10546a6f",
+ "analysis_sha256": "d675d74204646c2987ee038d5055a40f03f8622e1f70d719d97d79e28665a43c",
+ "source_commit": "c860763be0b7c94ff0cd32a0c920ecf619046f8c",
  "source_sha256": {
   "locomotion/task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
   "locomotion/task_v2.py": "72f95879e36c2371a20bfc2524fbbabafb060c00d5412391fe0f7be2a8844369",
   "locomotion/task_v3.py": "b641f3c4e3439ad7670d166737a2e7cc0b1df929a8d984d44a67f5eee31b5a66",
-  "locomotion/task_v4.py": "63480d80bd631ebceda97a043173ee15403303c32ada9ae037ce4e4b0606f907",
+  "locomotion/task_v4.py": "aec0afa9155cf6e0b32d9f3fbf5485b6c395371b99a241d299da5e41a3166ba7",
   "locomotion/env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
   "locomotion/env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
   "locomotion/noise_probe.py": "802fd6b90eacd2808e56d0518dd9f45bd7f3c5eee2c313777c112c476b2f9648"
@@ -49,7 +49,7 @@
    ]
   }
  },
- "method": "Replay the recorded telemetry through measured_reward (version 1), measured_reward_v2 with the default stride kernel (version 2) and with task_v3.REWARD_V3_CONFIG (version 3), and measured_reward_v4 with the default RewardV4Config (version 4). Rebuild each task's memory from the previous recorded control. Version 4 reads executed_action = (joint_target_rad - neutral) / 0.35 with the stance file's nominal joint positions as neutral. Array row t holds the control that started at episode step t, and the contact schedule reads that step. Hold each listed command for all 600 controls, average each replica over controls 160 to 599, then average the eight replicas of a cell.",
+ "method": "Replay the recorded telemetry through measured_reward (version 1), measured_reward_v2 with the default stride kernel (version 2) and with task_v3.REWARD_V3_CONFIG (version 3), and measured_reward_v4 with the default RewardV4Config (version 4). Rebuild each task's memory from the previous recorded control. Version 4 reads executed_action = (joint_target_rad - neutral) / 0.35 with the stance file's nominal joint positions as neutral. Array row t holds the control that started at episode step t, and the contact schedule reads that step. Version 4 reads command_age_controls = t + 1 at row t, the count that TrainingTaskV4 keeps for one command held since the reset. That age exceeds quiet_grace_controls at each scored control, so under the zero command the quiet joint-rate and target-motion terms charge each scored control. Hold each listed command for all 600 controls, average each replica over controls 160 to 599, then average the eight replicas of a cell.",
  "scope": "The probe held a zero command and fixed action means, and it ran no policy. A scored command changes the reward and leaves the recorded motion unchanged, so these values compare fixed poses under noise. They do not measure a trained policy, and one seed gives eight replicas per cell.",
  "native_started_by_analysis": false,
  "settle_controls": 160,
@@ -110,7 +110,7 @@
   "height_scale_m": 0.02,
   "collision_weight": 1.0,
   "torque_limit_weight": 0.5,
-  "over_rating_weight": 5.0,
+  "over_rating_weight": 10.0,
   "over_rating_onset_nm": 1.4,
   "joint_margin_weight": 1.0,
   "joint_margin_rad": 0.1,
@@ -120,7 +120,10 @@
   "quiet_joint_rate_scale_rad_s": 0.5,
   "quiet_target_weight": 0.5,
   "quiet_target_scale_rad": 0.02,
-  "quiet_contact_weight": 1.0,
+  "quiet_contact_weight": 3.0,
+  "quiet_load_n": 12.2,
+  "quiet_strain_weight": 10.0,
+  "quiet_grace_controls": 50,
   "termination_weight": 20.0,
   "forward_draw_fraction": 1.0
  },
@@ -141,20 +144,20 @@
    },
    "v4": {
     "std_0.00": 0.19627839172766967,
-    "std_0.15": -0.7926623877201399
+    "std_0.15": -0.810657159740698
    }
   },
   "crouch_minus_neutral_std_0.15": {
    "v1": 0.009143147734258394,
    "v2": 0.1895946291813413,
    "v3": 0.18587006979426152,
-   "v4": -3.312034453682348
+   "v4": -3.294652085520582
   },
   "beyond_bound_minus_femur_raised_std_0.15": {
    "v1": 0.0007499783405695015,
    "v2": 0.08523514777576069,
    "v3": 0.08761778046973634,
-   "v4": -0.2591306726363576
+   "v4": -0.2619239440187813
   },
   "v4_action_limit_std_0.00": {
    "neutral": 0.0,
@@ -205,6 +208,7 @@
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -235,6 +239,7 @@
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -265,6 +270,7 @@
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -272,7 +278,7 @@
      "v1": 1.2993376260454004,
      "v2": 1.413458740677346,
      "v3": 1.4039103193039244,
-     "v4": 1.4965139340270648,
+     "v4": 1.4956786447627977,
      "v4_components": {
       "linear_tracking": 0.9999999218874357,
       "yaw_tracking": 0.5,
@@ -294,7 +300,8 @@
       "action_limit": 0.0,
       "quiet_joint_rate": -1.2182271719081554e-05,
       "quiet_target_motion": 0.0,
-      "quiet_contact": 0.0,
+      "quiet_contact": -0.0008249533955346454,
+      "quiet_strain": -1.0337068053477661e-05,
       "termination": 0.0
      }
     }
@@ -341,6 +348,7 @@
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -371,6 +379,7 @@
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -401,6 +410,7 @@
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -408,7 +418,7 @@
      "v1": 0.5547512750789544,
      "v2": 1.0146505962549286,
      "v3": 0.09963569810338826,
-     "v4": 0.5366202202329242,
+     "v4": 0.08999880973292007,
      "v4_components": {
       "linear_tracking": 0.9857355218211358,
       "yaw_tracking": 0.49852427405897864,
@@ -430,7 +440,8 @@
       "action_limit": 0.0,
       "quiet_joint_rate": -0.21588221870836358,
       "quiet_target_motion": -0.6056344804438678,
-      "quiet_contact": -0.0006628788076341153,
+      "quiet_contact": -0.29589068567041643,
+      "quiet_strain": -0.1513936029618807,
       "termination": 0.0
      }
     }
@@ -454,7 +465,7 @@
      "v1": 0.37254722474291074,
      "v2": -0.046376521703363816,
      "v3": -0.30264570684362707,
-     "v4": -0.4584163663004967,
+     "v4": -0.45890748692019606,
      "v4_components": {
       "linear_tracking": -0.06781419527462937,
       "yaw_tracking": 0.49465498698197985,
@@ -471,12 +482,13 @@
       "height": -0.0028959593392158924,
       "collisions": 0.0,
       "torque_limit": -7.308544643985277e-05,
-      "over_rating": -0.0004911206797590818,
+      "over_rating": -0.0009822413595181635,
       "joint_margin": 0.0,
       "action_limit": 0.0,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -484,7 +496,7 @@
      "v1": 0.5320855214070022,
      "v2": -0.0460666699282063,
      "v3": -0.3335309763364917,
-     "v4": -1.119588561654051,
+     "v4": -1.1200796823224333,
      "v4_components": {
       "linear_tracking": -0.18143033065240494,
       "yaw_tracking": 0.49465498698197985,
@@ -501,12 +513,13 @@
       "height": -0.0028959593392158924,
       "collisions": 0.0,
       "torque_limit": -7.308544643985277e-05,
-      "over_rating": -0.0004911206797590818,
+      "over_rating": -0.0009822413595181635,
       "joint_margin": 0.0,
       "action_limit": 0.0,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -514,7 +527,7 @@
      "v1": 0.50389979113064,
      "v2": 0.25620177114403553,
      "v3": -0.4258410068144175,
-     "v4": 0.12515597372780163,
+     "v4": 0.12466485303401978,
      "v4_components": {
       "linear_tracking": 0.9331176873635162,
       "yaw_tracking": -0.005406237452883612,
@@ -531,12 +544,13 @@
       "height": -0.0028959593392158924,
       "collisions": 0.0,
       "torque_limit": -7.308544643985277e-05,
-      "over_rating": -0.0004911206797590818,
+      "over_rating": -0.0009822413595181635,
       "joint_margin": 0.0,
       "action_limit": 0.0,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -544,7 +558,7 @@
      "v1": 0.1788449124238303,
      "v2": 0.6917535877680745,
      "v3": -0.3005730235716328,
-     "v4": -0.5434730096296831,
+     "v4": -1.362913231580222,
      "v4_components": {
       "linear_tracking": 0.9331176873635162,
       "yaw_tracking": 0.49465498698197985,
@@ -561,12 +575,13 @@
       "height": -0.0028959593392158924,
       "collisions": 0.0,
       "torque_limit": -7.308544643985277e-05,
-      "over_rating": -0.0004911206797590818,
+      "over_rating": -0.0009822413595181635,
       "joint_margin": 0.0,
       "action_limit": 0.0,
       "quiet_joint_rate": -0.5818975915026385,
       "quiet_target_motion": -1.0998885896056891,
-      "quiet_contact": -0.025852273497730494,
+      "quiet_contact": -0.48027780746025117,
+      "quiet_strain": -0.3645235679535703,
       "termination": 0.0
      }
     }
@@ -590,7 +605,7 @@
      "v1": 0.34782568205026276,
      "v2": -0.2542730218829754,
      "v3": -0.527943874774924,
-     "v4": -0.7926623877201399,
+     "v4": -0.810657159740698,
      "v4_components": {
       "linear_tracking": -0.13112053629010917,
       "yaw_tracking": 0.4869424980472435,
@@ -607,12 +622,13 @@
       "height": -0.003644622179639248,
       "collisions": 0.0,
       "torque_limit": -0.003551706706649571,
-      "over_rating": -0.017994771889392393,
+      "over_rating": -0.035989543778784785,
       "joint_margin": -0.0063017935496736234,
       "action_limit": 0.0,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -620,7 +636,7 @@
      "v1": 0.4522846464926922,
      "v2": -0.2541714537720757,
      "v3": -0.5683033206267283,
-     "v4": -1.8071011541454935,
+     "v4": -1.8250959275794396,
      "v4_components": {
       "linear_tracking": -0.29097250129350205,
       "yaw_tracking": 0.4869424980472435,
@@ -637,12 +653,13 @@
       "height": -0.003644622179639248,
       "collisions": 0.0,
       "torque_limit": -0.003551706706649571,
-      "over_rating": -0.017994771889392393,
+      "over_rating": -0.035989543778784785,
       "joint_margin": -0.0063017935496736234,
       "action_limit": 0.0,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -650,7 +667,7 @@
      "v1": 0.39707258862029204,
      "v2": -0.02231251036877934,
      "v3": -0.6439298384447201,
-     "v4": -0.0923447219134356,
+     "v4": -0.1103394935418857,
      "v4_components": {
       "linear_tracking": 0.85914685274051,
       "yaw_tracking": -0.007926761646839706,
@@ -667,12 +684,13 @@
       "height": -0.003644622179639248,
       "collisions": 0.0,
       "torque_limit": -0.003551706706649571,
-      "over_rating": -0.017994771889392393,
+      "over_rating": -0.035989543778784785,
       "joint_margin": -0.0063017935496736234,
       "action_limit": 0.0,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -680,7 +698,7 @@
      "v1": 0.021622083876652386,
      "v2": 0.3972432376519547,
      "v3": -0.5545480954688339,
-     "v4": -1.914591805564917,
+     "v4": -3.0544116478032346,
      "v4_components": {
       "linear_tracking": 0.85914685274051,
       "yaw_tracking": 0.4869424980472435,
@@ -697,12 +715,13 @@
       "height": -0.003644622179639248,
       "collisions": 0.0,
       "torque_limit": -0.003551706706649571,
-      "over_rating": -0.017994771889392393,
+      "over_rating": -0.035989543778784785,
       "joint_margin": -0.0063017935496736234,
       "action_limit": 0.0,
       "quiet_joint_rate": -1.446384343835102,
       "quiet_target_motion": -1.338004063154486,
-      "quiet_contact": -0.07973485079339959,
+      "quiet_contact": -0.6339973963966423,
+      "quiet_strain": -0.5675625306839885,
       "termination": 0.0
      }
     }
@@ -726,7 +745,7 @@
      "v1": 0.357370180408047,
      "v2": 0.10406621082008562,
      "v3": 0.09884604877707634,
-     "v4": -3.6667575581507252,
+     "v4": -5.333424302258274,
      "v4_components": {
       "linear_tracking": 2.833213657140732e-05,
       "yaw_tracking": 0.49999989599666816,
@@ -743,12 +762,13 @@
       "height": -0.033832617418374865,
       "collisions": 0.0,
       "torque_limit": -0.13472812645221977,
-      "over_rating": -1.6666667461395264,
+      "over_rating": -3.3333334922790527,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -756,7 +776,7 @@
      "v1": 0.7945480268448591,
      "v2": 0.10407376562414522,
      "v3": 0.09886081164533442,
-     "v4": -3.6667560279369353,
+     "v4": -5.333422777056693,
      "v4_components": {
       "linear_tracking": 5.221055312590166e-05,
       "yaw_tracking": 0.49999989599666816,
@@ -773,12 +793,13 @@
       "height": -0.033832617418374865,
       "collisions": 0.0,
       "torque_limit": -0.13472812645221977,
-      "over_rating": -1.6666667461395264,
+      "over_rating": -3.3333334922790527,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -786,7 +807,7 @@
      "v1": 1.105638401210308,
      "v2": 0.5629193708131259,
      "v3": 0.5433813361324031,
-     "v4": -3.266121818599376,
+     "v4": -4.932788560471751,
      "v4_components": {
       "linear_tracking": 0.9999977766112849,
       "yaw_tracking": -2.0107440650463105e-05,
@@ -803,12 +824,13 @@
       "height": -0.033832617418374865,
       "collisions": 0.0,
       "torque_limit": -0.13472812645221977,
-      "over_rating": -1.6666667461395264,
+      "over_rating": -3.3333334922790527,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -816,7 +838,7 @@
      "v1": 1.2927054014395583,
      "v2": 1.0189154278148305,
      "v3": 0.9941496451808647,
-     "v4": -2.3592996470630174,
+     "v4": -4.057202622565356,
      "v4_components": {
       "linear_tracking": 0.9999977766112849,
       "yaw_tracking": 0.49999989599666816,
@@ -833,12 +855,13 @@
       "height": -0.033832617418374865,
       "collisions": 0.0,
       "torque_limit": -0.13472812645221977,
-      "over_rating": -1.6666667461395264,
+      "over_rating": -3.3333334922790527,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": -0.0014994719346483605,
       "quiet_target_motion": 0.0,
-      "quiet_contact": -4.734848625957966e-05,
+      "quiet_contact": -0.030964541646905923,
+      "quiet_strain": -0.00031903925869404375,
       "termination": 0.0
      }
     }
@@ -862,7 +885,7 @@
      "v1": 0.38222575882788407,
      "v2": 0.1353459231435078,
      "v3": -0.05639005500997882,
-     "v4": -2.1709359883923423,
+     "v4": -2.2130576833235946,
      "v4_components": {
       "linear_tracking": -0.009160201166841117,
       "yaw_tracking": 0.4991222122176127,
@@ -879,12 +902,13 @@
       "height": -0.21450870044275439,
       "collisions": 0.0,
       "torque_limit": -0.004417072167240638,
-      "over_rating": -0.04212169487731113,
+      "over_rating": -0.08424338975462226,
       "joint_margin": 0.0,
       "action_limit": -1.8517063961787659,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -892,7 +916,7 @@
      "v1": 0.6990991845388304,
      "v2": 0.1353542189162743,
      "v3": -0.04846397993592705,
-     "v4": -2.3617604249919,
+     "v4": -2.403882121125405,
      "v4_components": {
       "linear_tracking": -0.03972340373491699,
       "yaw_tracking": 0.4991222122176127,
@@ -909,12 +933,13 @@
       "height": -0.21450870044275439,
       "collisions": 0.0,
       "torque_limit": -0.004417072167240638,
-      "over_rating": -0.04212169487731113,
+      "over_rating": -0.08424338975462226,
       "joint_margin": 0.0,
       "action_limit": -1.8517063961787659,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -922,7 +947,7 @@
      "v1": 0.7836040212455291,
      "v2": 0.5243409864240676,
      "v3": -0.15547702589564408,
-     "v4": -1.7173878534104339,
+     "v4": -1.7595095484940844,
      "v4_components": {
       "linear_tracking": 0.989226524243978,
       "yaw_tracking": -0.0008499333550306884,
@@ -939,12 +964,13 @@
       "height": -0.21450870044275439,
       "collisions": 0.0,
       "torque_limit": -0.004417072167240638,
-      "over_rating": -0.04212169487731113,
+      "over_rating": -0.08424338975462226,
       "joint_margin": 0.0,
       "action_limit": -1.8517063961787659,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -952,7 +978,7 @@
      "v1": 0.5434220930837413,
      "v2": 0.9731775483889082,
      "v3": 0.08005622678994603,
-     "v4": -2.8645979902961036,
+     "v4": -3.3750405315817757,
      "v4_components": {
       "linear_tracking": 0.989226524243978,
       "yaw_tracking": 0.4991222122176127,
@@ -969,12 +995,13 @@
       "height": -0.21450870044275439,
       "collisions": 0.0,
       "torque_limit": -0.004417072167240638,
-      "over_rating": -0.04212169487731113,
+      "over_rating": -0.08424338975462226,
       "joint_margin": 0.0,
       "action_limit": -1.8517063961787659,
       "quiet_joint_rate": -1.6350745151263915,
       "quiet_target_motion": -0.47864917814943264,
-      "quiet_contact": -0.019554924820973114,
+      "quiet_contact": -0.30563939915631305,
+      "quiet_strain": -0.18223636483016892,
       "termination": 0.0
      }
     }
@@ -998,7 +1025,7 @@
      "v1": 0.38477686019402674,
      "v2": -0.025539547327471983,
      "v3": -0.2538212859301976,
-     "v4": -2.2456305129114877,
+     "v4": -2.252244552919133,
      "v4_components": {
       "linear_tracking": -0.04221450244499878,
       "yaw_tracking": 0.4964455291713503,
@@ -1015,12 +1042,13 @@
       "height": -0.2164202890443531,
       "collisions": 0.0,
       "torque_limit": -0.0007476145663510827,
-      "over_rating": -0.006614040077891497,
+      "over_rating": -0.013228080155782994,
       "joint_margin": 0.0,
       "action_limit": -1.7330846467478709,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1028,7 +1056,7 @@
      "v1": 0.5703534506875174,
      "v2": -0.025350468071966052,
      "v3": -0.2769859995293452,
-     "v4": -2.7912371003661645,
+     "v4": -2.7978511404754087,
      "v4_components": {
       "linear_tracking": -0.14430910375985234,
       "yaw_tracking": 0.4964455291713503,
@@ -1045,12 +1073,13 @@
       "height": -0.2164202890443531,
       "collisions": 0.0,
       "torque_limit": -0.0007476145663510827,
-      "over_rating": -0.006614040077891497,
+      "over_rating": -0.013228080155782994,
       "joint_margin": 0.0,
       "action_limit": -1.7330846467478709,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1058,7 +1087,7 @@
      "v1": 0.5425500716758755,
      "v2": 0.30595843641759446,
      "v3": -0.4126248147380962,
-     "v4": -1.7047639344734224,
+     "v4": -1.7113779748197306,
      "v4_components": {
       "linear_tracking": 0.9564124596559189,
       "yaw_tracking": -0.004944052064621991,
@@ -1075,12 +1104,13 @@
       "height": -0.2164202890443531,
       "collisions": 0.0,
       "torque_limit": -0.0007476145663510827,
-      "over_rating": -0.006614040077891497,
+      "over_rating": -0.013228080155782994,
       "joint_margin": 0.0,
       "action_limit": -1.7330846467478709,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1088,7 +1118,7 @@
      "v1": 0.23436213724182214,
      "v2": 0.7461499745539517,
      "v3": -0.238820693542948,
-     "v4": -2.6508043043992737,
+     "v4": -3.3937540316107597,
      "v4_components": {
       "linear_tracking": 0.9564124596559189,
       "yaw_tracking": 0.4964455291713503,
@@ -1105,12 +1135,13 @@
       "height": -0.2164202890443531,
       "collisions": 0.0,
       "torque_limit": -0.0007476145663510827,
-      "over_rating": -0.006614040077891497,
+      "over_rating": -0.013228080155782994,
       "joint_margin": 0.0,
       "action_limit": -1.7330846467478709,
       "quiet_joint_rate": -0.9805954546159641,
       "quiet_target_motion": -0.9441607949916613,
-      "quiet_contact": -0.03210227367552844,
+      "quiet_contact": -0.4413773267191242,
+      "quiet_strain": -0.32706063186845064,
       "termination": 0.0
      }
     }
@@ -1134,7 +1165,7 @@
      "v1": 0.37074277804296635,
      "v2": -0.24707908151973573,
      "v3": -0.4887101653014807,
-     "v4": -2.4539124421098015,
+     "v4": -2.482682014883242,
      "v4_components": {
       "linear_tracking": -0.07922175187956204,
       "yaw_tracking": 0.49271538404070514,
@@ -1151,12 +1182,13 @@
       "height": -0.21272087357091632,
       "collisions": 0.0,
       "torque_limit": -0.0025023533286387917,
-      "over_rating": -0.028769572443442568,
+      "over_rating": -0.057539144886885135,
       "joint_margin": 0.0,
       "action_limit": -1.6400718218223616,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1164,7 +1196,7 @@
      "v1": 0.49688568486493423,
      "v2": -0.24610235275613376,
      "v3": -0.5261414530067916,
-     "v4": -3.2974532404406505,
+     "v4": -3.3262228118255734,
      "v4_components": {
       "linear_tracking": -0.21999927415427836,
       "yaw_tracking": 0.49271538404070514,
@@ -1181,12 +1213,13 @@
       "height": -0.21272087357091632,
       "collisions": 0.0,
       "torque_limit": -0.0025023533286387917,
-      "over_rating": -0.028769572443442568,
+      "over_rating": -0.057539144886885135,
       "joint_margin": 0.0,
       "action_limit": -1.6400718218223616,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1194,7 +1227,7 @@
      "v1": 0.4377272447536763,
      "v2": 0.020039232091816798,
      "v3": -0.6455440484664657,
-     "v4": -1.821026347848502,
+     "v4": -1.8497959207574075,
      "v4_components": {
       "linear_tracking": 0.914305840077048,
       "yaw_tracking": -0.006569799755445935,
@@ -1211,12 +1244,13 @@
       "height": -0.21272087357091632,
       "collisions": 0.0,
       "torque_limit": -0.0025023533286387917,
-      "over_rating": -0.028769572443442568,
+      "over_rating": -0.057539144886885135,
       "joint_margin": 0.0,
       "action_limit": -1.6400718218223616,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1224,7 +1258,7 @@
      "v1": 0.07320647614264586,
      "v2": 0.44649014620835337,
      "v3": -0.5033352359798631,
-     "v4": -4.3782688626511534,
+     "v4": -5.395175420255823,
      "v4_components": {
       "linear_tracking": 0.914305840077048,
       "yaw_tracking": 0.49271538404070514,
@@ -1241,12 +1275,13 @@
       "height": -0.21272087357091632,
       "collisions": 0.0,
       "torque_limit": -0.0025023533286387917,
-      "over_rating": -0.028769572443442568,
+      "over_rating": -0.057539144886885135,
       "joint_margin": 0.0,
       "action_limit": -1.6400718218223616,
       "quiet_joint_rate": -2.3531850246905712,
       "quiet_target_motion": -1.1865235961973668,
-      "quiet_contact": -0.08593750243413856,
+      "quiet_contact": -0.5937476641752503,
+      "quiet_strain": -0.4803268365744523,
       "termination": 0.0
      }
     }
@@ -1293,6 +1328,7 @@
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1323,6 +1359,7 @@
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1353,6 +1390,7 @@
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1360,7 +1398,7 @@
      "v1": 1.2946101961488075,
      "v2": 1.4041725714775648,
      "v3": 1.3817475371401418,
-     "v4": -2.898525926538489,
+     "v4": -2.901677970181812,
      "v4_components": {
       "linear_tracking": 0.999999695813114,
       "yaw_tracking": 0.499999998958612,
@@ -1382,7 +1420,8 @@
       "action_limit": -4.0,
       "quiet_joint_rate": -3.5361034681891117e-05,
       "quiet_target_motion": 0.0,
-      "quiet_contact": 0.0,
+      "quiet_contact": -0.0031122292730618607,
+      "quiet_strain": -3.981599621622226e-05,
       "termination": 0.0
      }
     }
@@ -1429,6 +1468,7 @@
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1459,6 +1499,7 @@
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1489,6 +1530,7 @@
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1496,7 +1538,7 @@
      "v1": 0.6655904653349187,
      "v2": 1.1192424404350194,
      "v3": 0.23239167626915413,
-     "v4": -3.1411573168228974,
+     "v4": -3.449732126227834,
      "v4_components": {
       "linear_tracking": 0.990487791326913,
       "yaw_tracking": 0.4986985499547286,
@@ -1518,7 +1560,8 @@
       "action_limit": -3.703266274387186,
       "quiet_joint_rate": -0.09643197754683736,
       "quiet_target_motion": -0.3665739205284891,
-      "quiet_contact": 0.0,
+      "quiet_contact": -0.1626880739053542,
+      "quiet_strain": -0.1458867365461298,
       "termination": 0.0
      }
     }
@@ -1542,7 +1585,7 @@
      "v1": 0.37162327519882554,
      "v2": 0.07773974033241922,
      "v3": -0.18240492785645818,
-     "v4": -4.082764486562122,
+     "v4": -4.082811359790239,
      "v4_components": {
       "linear_tracking": -0.04462966688654639,
       "yaw_tracking": 0.49504044519060036,
@@ -1559,12 +1602,13 @@
       "height": -0.3819077898494222,
       "collisions": 0.0,
       "torque_limit": -6.125698035413569e-06,
-      "over_rating": -4.6873231055790464e-05,
+      "over_rating": -9.374646211158093e-05,
       "joint_margin": 0.0,
       "action_limit": -3.4643680572509767,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1572,7 +1616,7 @@
      "v1": 0.5700400544595058,
      "v2": 0.07794371395033192,
      "v3": -0.20456490388394077,
-     "v4": -4.589213532141664,
+     "v4": -4.58926040536978,
      "v4_components": {
       "linear_tracking": -0.13695893043821505,
       "yaw_tracking": 0.49504044519060036,
@@ -1589,12 +1633,13 @@
       "height": -0.3819077898494222,
       "collisions": 0.0,
       "torque_limit": -6.125698035413569e-06,
-      "over_rating": -4.6873231055790464e-05,
+      "over_rating": -9.374646211158093e-05,
       "joint_margin": 0.0,
       "action_limit": -3.4643680572509767,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1602,7 +1647,7 @@
      "v1": 0.5659136229283335,
      "v2": 0.4194636968684129,
      "v3": -0.282963240977419,
-     "v4": -3.543852468004281,
+     "v4": -3.54389934130013,
      "v4_components": {
       "linear_tracking": 0.956588049876419,
       "yaw_tracking": -0.004927310288291086,
@@ -1619,12 +1664,13 @@
       "height": -0.3819077898494222,
       "collisions": 0.0,
       "torque_limit": -6.125698035413569e-06,
-      "over_rating": -4.6873231055790464e-05,
+      "over_rating": -9.374646211158093e-05,
       "joint_margin": 0.0,
       "action_limit": -3.4643680572509767,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1632,7 +1678,7 @@
      "v1": 0.28112660479250323,
      "v2": 0.8574945512185381,
      "v3": -0.1598813555288044,
-     "v4": -3.638127951933579,
+     "v4": -4.270642654800957,
      "v4_components": {
       "linear_tracking": 0.956588049876419,
       "yaw_tracking": 0.49504044519060036,
@@ -1649,12 +1695,13 @@
       "height": -0.3819077898494222,
       "collisions": 0.0,
       "torque_limit": -6.125698035413569e-06,
-      "over_rating": -4.6873231055790464e-05,
+      "over_rating": -9.374646211158093e-05,
       "joint_margin": 0.0,
       "action_limit": -3.4643680572509767,
       "quiet_joint_rate": -0.27924831024931995,
       "quiet_target_motion": -0.7890980641230603,
-      "quiet_contact": -0.0023200758267194034,
+      "quiet_contact": -0.27828133511780334,
+      "quiet_strain": -0.3565065662408332,
       "termination": 0.0
      }
     }
@@ -1678,7 +1725,7 @@
      "v1": 0.35696882978452116,
      "v2": -0.06467839270163413,
      "v3": -0.3420738049806625,
-     "v4": -4.104696841402488,
+     "v4": -4.10530924526128,
      "v4_components": {
       "linear_tracking": -0.08181581036611037,
       "yaw_tracking": 0.48960136926140296,
@@ -1695,12 +1742,13 @@
       "height": -0.36071002727205104,
       "collisions": 0.0,
       "torque_limit": -0.00011507598626808018,
-      "over_rating": -0.0006124035624617879,
+      "over_rating": -0.0012248071249235759,
       "joint_margin": -0.000715783838760328,
       "action_limit": -3.2768340779299088,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1708,7 +1756,7 @@
      "v1": 0.49144714711345094,
      "v2": -0.06435018603912215,
      "v3": -0.378384927848608,
-     "v4": -4.88505111228336,
+     "v4": -4.885663516142151,
      "v4_components": {
       "linear_tracking": -0.20283336476846175,
       "yaw_tracking": 0.48960136926140296,
@@ -1725,12 +1773,13 @@
       "height": -0.36071002727205104,
       "collisions": 0.0,
       "torque_limit": -0.00011507598626808018,
-      "over_rating": -0.0006124035624617879,
+      "over_rating": -0.0012248071249235759,
       "joint_margin": -0.000715783838760328,
       "action_limit": -3.2768340779299088,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1738,7 +1787,7 @@
      "v1": 0.45640023928691253,
      "v2": 0.23617690229862504,
      "v3": -0.4471654659772123,
-     "v4": -3.483019035580483,
+     "v4": -3.4836314391006122,
      "v4_components": {
       "linear_tracking": 0.9174025048586456,
       "yaw_tracking": -0.010413243308324705,
@@ -1755,12 +1804,13 @@
       "height": -0.36071002727205104,
       "collisions": 0.0,
       "torque_limit": -0.00011507598626808018,
-      "over_rating": -0.0006124035624617879,
+      "over_rating": -0.0012248071249235759,
       "joint_margin": -0.000715783838760328,
       "action_limit": -3.2768340779299088,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1768,7 +1818,7 @@
      "v1": 0.12517695749282376,
      "v2": 0.6663170503388921,
      "v3": -0.3568862412304787,
-     "v4": -4.125408187508583,
+     "v4": -5.003118350289084,
      "v4_components": {
       "linear_tracking": 0.9174025048586456,
       "yaw_tracking": 0.48960136926140296,
@@ -1785,12 +1835,13 @@
       "height": -0.36071002727205104,
       "collisions": 0.0,
       "torque_limit": -0.00011507598626808018,
-      "over_rating": -0.0006124035624617879,
+      "over_rating": -0.0012248071249235759,
       "joint_margin": -0.000715783838760328,
       "action_limit": -3.2768340779299088,
       "quiet_joint_rate": -0.6070665809058647,
       "quiet_target_motion": -1.0271001965569502,
-      "quiet_contact": -0.01103219729848206,
+      "quiet_contact": -0.37416929143734956,
+      "quiet_strain": -0.5139606648182962,
       "termination": 0.0
      }
     }
@@ -1814,7 +1865,7 @@
      "v1": 0.3574633004990491,
      "v2": 0.10563794940456071,
      "v3": 0.09838266799819062,
-     "v4": -3.671282929046588,
+     "v4": -5.337949672612277,
      "v4_components": {
       "linear_tracking": 3.393984992395748e-05,
       "yaw_tracking": 0.4999998301013627,
@@ -1831,12 +1882,13 @@
       "height": -0.03434560968942771,
       "collisions": 0.0,
       "torque_limit": -0.13374457170932808,
-      "over_rating": -1.6666667461395264,
+      "over_rating": -3.3333334922790527,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1844,7 +1896,7 @@
      "v1": 0.7948968754742634,
      "v2": 0.10570093627426436,
      "v3": 0.09846210531805727,
-     "v4": -3.6711492741649803,
+     "v4": -5.337816022201018,
      "v4_components": {
       "linear_tracking": 6.039288233626971e-05,
       "yaw_tracking": 0.4999998301013627,
@@ -1861,12 +1913,13 @@
       "height": -0.03434560968942771,
       "collisions": 0.0,
       "torque_limit": -0.13374457170932808,
-      "over_rating": -1.6666667461395264,
+      "over_rating": -3.3333334922790527,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1874,7 +1927,7 @@
      "v1": 1.1054562112147157,
      "v2": 0.5625045654279265,
      "v3": 0.5349193731746212,
-     "v4": -3.27122115526687,
+     "v4": -4.9378879029642455,
      "v4_components": {
       "linear_tracking": 0.999996259893206,
       "yaw_tracking": -3.066307611086152e-05,
@@ -1891,12 +1944,13 @@
       "height": -0.03434560968942771,
       "collisions": 0.0,
       "torque_limit": -0.13374457170932808,
-      "over_rating": -1.6666667461395264,
+      "over_rating": -3.3333334922790527,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1904,7 +1958,7 @@
      "v1": 1.292557812786915,
      "v2": 1.0191621581092476,
      "v3": 0.9843133195049383,
-     "v4": -2.3579070849852126,
+     "v4": -4.0764523759484295,
      "v4_components": {
       "linear_tracking": 0.999996259893206,
       "yaw_tracking": 0.4999998301013627,
@@ -1921,12 +1975,13 @@
       "height": -0.03434560968942771,
       "collisions": 0.0,
       "torque_limit": -0.13374457170932808,
-      "over_rating": -1.6666667461395264,
+      "over_rating": -3.3333334922790527,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": -0.0006186278785688256,
       "quiet_target_motion": 0.0,
-      "quiet_contact": -4.734848625957966e-05,
+      "quiet_contact": -0.05123591441661119,
+      "quiet_strain": -0.0006899758362950788,
       "termination": 0.0
      }
     }
@@ -1950,7 +2005,7 @@
      "v1": 0.37901907160200854,
      "v2": 0.1937500111052941,
      "v3": 0.0012399833904716828,
-     "v4": -2.2657394855198536,
+     "v4": -2.2862864515659487,
      "v4_components": {
       "linear_tracking": -0.012678542682393032,
       "yaw_tracking": 0.4990485401739451,
@@ -1967,12 +2022,13 @@
       "height": -0.22033191719939085,
       "collisions": 0.0,
       "torque_limit": -0.002651539098824494,
-      "over_rating": -0.020546965839589988,
+      "over_rating": -0.041093931679179976,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -1980,7 +2036,7 @@
      "v1": 0.6996081581677902,
      "v2": 0.19360358468104757,
      "v3": 0.008678773266067513,
-     "v4": -2.4532662584361704,
+     "v4": -2.473813224279068,
      "v4_components": {
       "linear_tracking": -0.047139902683821594,
       "yaw_tracking": 0.4990485401739451,
@@ -1997,12 +2053,13 @@
       "height": -0.22033191719939085,
       "collisions": 0.0,
       "torque_limit": -0.002651539098824494,
-      "over_rating": -0.020546965839589988,
+      "over_rating": -0.041093931679179976,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -2010,7 +2067,7 @@
      "v1": 0.7973851894515313,
      "v2": 0.5841754568904766,
      "v3": -0.08901314423379848,
-     "v4": -1.811050737716935,
+     "v4": -1.8315977026793089,
      "v4_components": {
       "linear_tracking": 0.9890028753063895,
       "yaw_tracking": -0.0017236891710622744,
@@ -2027,12 +2084,13 @@
       "height": -0.22033191719939085,
       "collisions": 0.0,
       "torque_limit": -0.002651539098824494,
-      "over_rating": -0.020546965839589988,
+      "over_rating": -0.041093931679179976,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -2040,7 +2098,7 @@
      "v1": 0.5827102000401283,
      "v2": 1.0330541166995484,
      "v3": 0.147479270166183,
-     "v4": -2.3740286047655075,
+     "v4": -2.83487764315849,
      "v4_components": {
       "linear_tracking": 0.9890028753063895,
       "yaw_tracking": 0.4990485401739451,
@@ -2057,12 +2115,13 @@
       "height": -0.22033191719939085,
       "collisions": 0.0,
       "torque_limit": -0.002651539098824494,
-      "over_rating": -0.020546965839589988,
+      "over_rating": -0.041093931679179976,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": -1.1135910181900146,
       "quiet_target_motion": -0.40355899921110405,
-      "quiet_contact": -0.012831439776346088,
+      "quiet_contact": -0.2700750517150895,
+      "quiet_strain": -0.18305845987289848,
       "termination": 0.0
      }
     }
@@ -2086,7 +2145,7 @@
      "v1": 0.3836535077531483,
      "v2": 0.025421559966806936,
      "v3": -0.20159500921403048,
-     "v4": -2.4830271159722046,
+     "v4": -2.4934912346980784,
      "v4_components": {
       "linear_tracking": -0.035646086744964126,
       "yaw_tracking": 0.4967644373293627,
@@ -2103,12 +2162,13 @@
       "height": -0.23068746749142352,
       "collisions": 0.0,
       "torque_limit": -0.0009999501913346815,
-      "over_rating": -0.010464119146159977,
+      "over_rating": -0.020928238292319955,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -2116,7 +2176,7 @@
      "v1": 0.5776745585216718,
      "v2": 0.025604281704793473,
      "v3": -0.2215954304933389,
-     "v4": -2.998907667533918,
+     "v4": -3.0093717878853736,
      "v4_components": {
       "linear_tracking": -0.12765682312575252,
       "yaw_tracking": 0.4967644373293627,
@@ -2133,12 +2193,13 @@
       "height": -0.23068746749142352,
       "collisions": 0.0,
       "torque_limit": -0.0009999501913346815,
-      "over_rating": -0.010464119146159977,
+      "over_rating": -0.020928238292319955,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -2146,7 +2207,7 @@
      "v1": 0.5486084371871336,
      "v2": 0.3637768781302095,
      "v3": -0.3617611961476293,
-     "v4": -1.941581798649647,
+     "v4": -1.9520459172739226,
      "v4_components": {
       "linear_tracking": 0.9621017626740715,
       "yaw_tracking": -0.0016844771717759697,
@@ -2163,12 +2224,13 @@
       "height": -0.23068746749142352,
       "collisions": 0.0,
       "torque_limit": -0.0009999501913346815,
-      "over_rating": -0.010464119146159977,
+      "over_rating": -0.020928238292319955,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -2176,7 +2238,7 @@
      "v1": 0.26055985364801015,
      "v2": 0.8063046764688228,
      "v3": -0.1804399344292919,
-     "v4": -2.67603065320714,
+     "v4": -3.383793499253013,
      "v4_components": {
       "linear_tracking": 0.9621017626740715,
       "yaw_tracking": 0.4967644373293627,
@@ -2193,12 +2255,13 @@
       "height": -0.23068746749142352,
       "collisions": 0.0,
       "torque_limit": -0.0009999501913346815,
-      "over_rating": -0.010464119146159977,
+      "over_rating": -0.020928238292319955,
       "joint_margin": 0.0,
       "action_limit": -1.999999761581421,
       "quiet_joint_rate": -0.9886788092458366,
       "quiet_target_motion": -0.7328996063718064,
-      "quiet_contact": -0.020738636977462605,
+      "quiet_contact": -0.39651224429465154,
+      "quiet_strain": -0.32152512206203854,
       "termination": 0.0
      }
     }
@@ -2222,7 +2285,7 @@
      "v1": 0.37149275638353585,
      "v2": -0.16184393374397504,
      "v3": -0.40109238483174436,
-     "v4": -2.713043114746159,
+     "v4": -2.744605958902023,
      "v4_components": {
       "linear_tracking": -0.0803876964544708,
       "yaw_tracking": 0.4935005254366181,
@@ -2239,12 +2302,13 @@
       "height": -0.23131239040416074,
       "collisions": 0.0,
       "torque_limit": -0.002072426233389344,
-      "over_rating": -0.03156284429546345,
+      "over_rating": -0.0631256885909269,
       "joint_margin": 0.0,
       "action_limit": -1.999849983711134,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -2252,7 +2316,7 @@
      "v1": 0.5083969397904267,
      "v2": -0.16183929900911279,
      "v3": -0.433155519184286,
-     "v4": -3.5469900142401456,
+     "v4": -3.578552859445865,
      "v4_components": {
       "linear_tracking": -0.22881772734902123,
       "yaw_tracking": 0.4935005254366181,
@@ -2269,12 +2333,13 @@
       "height": -0.23131239040416074,
       "collisions": 0.0,
       "torque_limit": -0.002072426233389344,
-      "over_rating": -0.03156284429546345,
+      "over_rating": -0.0631256885909269,
       "joint_margin": 0.0,
       "action_limit": -1.999849983711134,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -2282,7 +2347,7 @@
      "v1": 0.4421680957032632,
      "v2": 0.1222956777114384,
      "v3": -0.5661045016543622,
-     "v4": -2.079125951128927,
+     "v4": -2.110688795725053,
      "v4_components": {
       "linear_tracking": 0.9212415206161412,
       "yaw_tracking": -0.006753000947223469,
@@ -2299,12 +2364,13 @@
       "height": -0.23131239040416074,
       "collisions": 0.0,
       "torque_limit": -0.002072426233389344,
-      "over_rating": -0.03156284429546345,
+      "over_rating": -0.0631256885909269,
       "joint_margin": 0.0,
       "action_limit": -1.999849983711134,
       "quiet_joint_rate": 0.0,
       "quiet_target_motion": 0.0,
       "quiet_contact": 0.0,
+      "quiet_strain": 0.0,
       "termination": 0.0
      }
     },
@@ -2312,7 +2378,7 @@
      "v1": 0.10205202728148752,
      "v2": 0.5535903821111953,
      "v3": -0.4124148382956099,
-     "v4": -4.053042446043003,
+     "v4": -5.016021658175371,
      "v4_components": {
       "linear_tracking": 0.9212415206161412,
       "yaw_tracking": 0.4935005254366181,
@@ -2329,12 +2395,13 @@
       "height": -0.23131239040416074,
       "collisions": 0.0,
       "torque_limit": -0.002072426233389344,
-      "over_rating": -0.03156284429546345,
+      "over_rating": -0.0631256885909269,
       "joint_margin": 0.0,
       "action_limit": -1.999849983711134,
       "quiet_joint_rate": -2.051267106008229,
       "quiet_target_motion": -0.8898546562360768,
-      "quiet_contact": -0.0586647744205865,
+      "quiet_contact": -0.5229805338450454,
+      "quiet_strain": -0.4671006125524979,
       "termination": 0.0
      }
     }

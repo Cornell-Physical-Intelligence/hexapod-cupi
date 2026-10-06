@@ -80,6 +80,8 @@ def score(arrays, command, neutral, lower, upper, height):
             toe_xyz_nav=navigation(field("toe_xyz_body", t))[..., :2],
             # Array row t holds the control that started at episode step t.
             scheduled_swing=task_v4.scheduled_swing(torch.full((n,), t), v4),
+            # The task counts the first control after a reset as command age 1, so row t has age t + 1.
+            command_age_controls=torch.full((n,), t + 1),
             joint_limit_margin_rad=torch.minimum(q - lower, upper - q),
             executed_action=(tel["joint_target_rad"] - neutral) / ACTION_SCALE_RAD), commands, fallen, v4, height)
         if t < SETTLE:
@@ -114,8 +116,8 @@ def main():
     assert all(sha(inputs / name) == digest for name, digest in INPUTS.items())
     assert all(sha(ROOT / name) == digest for name, digest in ROBOT.items())
     git = lambda *words: subprocess.run(["git", "-C", str(ROOT), *words], capture_output=True, text=True)
-    # The record names one commit, so the reward sources and the robot files must match it.
-    assert git("diff", "--quiet", "HEAD", "--", "locomotion", "robot").returncode == 0
+    # The record names one commit, so the reward sources and the robot files must match it. The scorer reads no Markdown.
+    assert git("diff", "--quiet", "HEAD", "--", "locomotion", "robot", ":(exclude)*.md").returncode == 0
     stance_path, model_path = (ROOT / name for name in ROBOT)
     stance = json.loads(stance_path.read_text())
     assert tuple(stance["joint_names"]) == JOINT_NAMES
@@ -129,6 +131,8 @@ def main():
     assert plan["replicas"] == noise_probe.plan(128) and arrays["action"].shape == (noise_probe.CONTROLS, 128, 18)
     # The scorer carries no reset memory, so it needs a probe without a fall.
     assert summary["terminations"] == 0 and not arrays["terminated"].any()
+    # The method text states that the quiet settle window ends before the first scored control.
+    assert SETTLE >= task_v4.REWARD_V4_CONFIG.quiet_grace_controls
     cells = {}
     for row in plan["replicas"]:
         cells.setdefault((row["pose"], row["standard_deviation"]), []).append(row["replica"])
@@ -164,7 +168,10 @@ def main():
             "with the default RewardV4Config (version 4). Rebuild each task's memory from the previous recorded "
             "control. Version 4 reads executed_action = (joint_target_rad - neutral) / 0.35 with the stance file's "
             "nominal joint positions as neutral. Array row t holds the control that started at episode step t, "
-            "and the contact schedule reads that step. Hold each listed command for all 600 controls, average "
+            "and the contact schedule reads that step. Version 4 reads command_age_controls = t + 1 at row t, the "
+            "count that TrainingTaskV4 keeps for one command held since the reset. That age exceeds "
+            "quiet_grace_controls at each scored control, so under the zero command the quiet joint-rate and "
+            "target-motion terms charge each scored control. Hold each listed command for all 600 controls, average "
             "each replica over controls 160 to 599, then average the eight replicas of a cell.",
         "scope": "The probe held a zero command and fixed action means, and it ran no policy. A scored command changes the "
             "reward and leaves the recorded motion unchanged, so these values compare fixed poses under noise. "

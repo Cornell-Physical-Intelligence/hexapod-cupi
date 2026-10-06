@@ -20,6 +20,7 @@ ATTEMPTS = {
     "reward_v1_corrected": "ppo_v1_corrected_path_20261004_001",
     "reward_v2_corrected": "ppo_v2_corrected_path_20261004_001",
     "reward_v4_forward": "ppo_v4_forward_20261004_001",
+    "reward_v4_action_wall": "ppo_v4_action_wall_20261005_001",
 }
 METRICS, CONFIG, TASK = "/run/standing/metrics.jsonl", "/run/standing/ppo_config.json", "source/locomotion/task.py"
 SHA256 = {
@@ -44,6 +45,10 @@ SHA256 = {
     "ppo_v4_forward_20261004_001/preparation.json": "96debb3fe9925069e1237c446efc12a61025ec619d9eec7f46be872276b592f6",
     "ppo_v4_forward_20261004_001" + CONFIG: "c425bcc9ee5ed1b7e70e460f56a66672a0fd47787940eaea00793808c6aa9161",
     "ppo_v4_forward_20261004_001" + METRICS: "5ea4ebcb38324c8d269999bd68401654e86787709d9a793423aed799ec956e96",
+    "ppo_v4_action_wall_20261005_001/PACK.json": "0161ffe214cb8e33654ae43835f535ec83b764de18f8a0f1ae11de5405aee051",
+    "ppo_v4_action_wall_20261005_001/preparation.json": "3185788cdfa5c0d54e939021470883ab722918fa555648aeaaf28ab7ed6fb45b",
+    "ppo_v4_action_wall_20261005_001" + CONFIG: "c425bcc9ee5ed1b7e70e460f56a66672a0fd47787940eaea00793808c6aa9161",
+    "ppo_v4_action_wall_20261005_001" + METRICS: "808b33bede64c726c0f99a3cafc409a433d5623713f5aab7f0f0df75456035e0",
 }
 OPTIONS = ("learner", "networks", "action_mean", "observation_normalization", "observation_scaling", "command_segments",
            "learning_rate_max", "action_std_final", "gait_clock", "episode_seconds", "allocation_profile")
@@ -141,26 +146,32 @@ def main():
                       "learner_path": records[key]["learner_path"], "linear_0.05_speed_mps": mean(speeds),
                       "updates_with_speed": sum(value is not None for value in speeds),
                       "linear_0.05_controls": sum(classes(selected, "linear_0.05", "environment_controls"))}
-    rows, windows = history["reward_v4_forward"], []
-    assert all(row["actions"]["mean_near_bound_threshold"] == .95 for row in rows)
-    assert records["reward_v4_forward"]["command_classes_drawn"] == ["zero", "linear_0.05"]
-    for first in range(1, 2001, 200):
-        selected = rows[first - 1:first + 199]
-        intervals = [row["task"]["interval_metrics"] for row in selected]
-        updates = [row["policy_update"] for row in selected]
-        windows.append({
-            "first_update": first, "last_update": first + 199,
-            "linear_0.05_speed_mps": mean(classes(selected, "linear_0.05", SPEED)),
-            "linear_0.05_task_reward_mean": mean(classes(selected, "linear_0.05", "task_reward_mean")),
-            "zero_task_reward_mean": mean(classes(selected, "zero", "task_reward_mean")),
-            "mean_near_bound_fraction": {part: near_bound(selected, part) for part in ("coxa", "femur", "tibia")},
-            "terminations": sum(row["terminations"] for row in intervals),
-            "termination_reason_rows": {reason: sum(row["termination_reasons"]["rows"][reason] for row in intervals)
-                                        for reason in intervals[0]["termination_reasons"]["rows"]},
-            "learning_rate_mean": mean([row["learning_rate"] for row in selected]),
-            "after_update_kl_mean": mean([update["after"]["kl_mean"] for update in updates]),
-            "value_explained_variance_mean": mean([update["value"]["explained_variance"] for update in updates]),
-        })
+    # The action-wall attempt repeats the forward attempt with one learner configuration and one seed.
+    assert records["reward_v4_action_wall"]["ppo_config_sha256"] == records["reward_v4_forward"]["ppo_config_sha256"]
+    by_run = {}
+    for run in ("reward_v4_forward", "reward_v4_action_wall"):
+      rows, windows = history[run], []
+      by_run[run] = windows
+      assert all(row["actions"]["mean_near_bound_threshold"] == .95 for row in rows)
+      assert records[run]["command_classes_drawn"] == ["zero", "linear_0.05"]
+      for first in range(1, 2001, 200):
+          selected = rows[first - 1:first + 199]
+          intervals = [row["task"]["interval_metrics"] for row in selected]
+          updates = [row["policy_update"] for row in selected]
+          windows.append({
+              "first_update": first, "last_update": first + 199,
+              "linear_0.05_speed_mps": mean(classes(selected, "linear_0.05", SPEED)),
+              "linear_0.05_task_reward_mean": mean(classes(selected, "linear_0.05", "task_reward_mean")),
+              "zero_task_reward_mean": mean(classes(selected, "zero", "task_reward_mean")),
+              "mean_near_bound_fraction": {part: near_bound(selected, part) for part in ("coxa", "femur", "tibia")},
+              "terminations": sum(row["terminations"] for row in intervals),
+              "termination_reason_rows": {reason: sum(row["termination_reasons"]["rows"][reason] for row in intervals)
+                                          for reason in intervals[0]["termination_reasons"]["rows"]},
+              "learning_rate_mean": mean([row["learning_rate"] for row in selected]),
+              "after_update_kl_mean": mean([update["after"]["kl_mean"] for update in updates]),
+              "value_explained_variance_mean": mean([update["value"]["explained_variance"] for update in updates]),
+          })
+    rows, windows = history["reward_v4_forward"], by_run["reward_v4_forward"]
     speed_400 = [mean(classes(rows[first:first + 400], "linear_0.05", SPEED)) for first in range(0, 2000, 400)]
     report = {
         "schema": "ppo_training_windows_v1", "analysis_sha256": sha(__file__), "remote_root": ROOT,
@@ -177,7 +188,8 @@ def main():
                  "probe and establishes no Stage 2 result. The stock reward-v2 cell uses updates 701 to 800 of a 2000-update "
                  "attempt from an earlier source commit; the other three cells ran 800 updates. The reward-v4 forward "
                  "attempt draws two command classes, zero and linear_0.05; each attempt record lists its drawn classes. "
-                 "One task.py computes the speed in all five attempts.",
+                 "The action-wall attempt repeats it with one seed and one learner configuration; its reward adds the "
+                 "action-limit term and the higher swing-travel ceiling. One task.py computes the speed in all six attempts.",
         "identification": {
             "selected": ATTEMPTS["reward_v2_stock"], "rejected": UNLAUNCHED,
             "basis": "Both packs request PPO with MLP networks, reward version 2, 2000 updates, seed 20260917 and one "
@@ -189,6 +201,7 @@ def main():
             "layout": "The selected attempt keeps its run under ppo_mlp/run/standing."},
         "attempts": records, "two_by_two": {"first_update": 701, "last_update": 800, "cells": cells},
         "reward_v4_forward_windows": windows, "reward_v4_forward_speed_400_update_windows_mps": speed_400,
+        "reward_v4_action_wall_windows": by_run["reward_v4_action_wall"],
         "native_started_by_analysis": False}
     output.write_text(json.dumps(report, indent=2, allow_nan=False) + "\n")
     print(json.dumps({"two_by_two_mm_s": {key: round(cell["linear_0.05_speed_mps"] * 1000, 2) for key, cell in cells.items()},

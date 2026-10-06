@@ -1,6 +1,6 @@
 {
   "schema": "ppo_training_windows_v1",
-  "analysis_sha256": "7af51cc77571c06dd4602565a196b3f333be514933ab26fea32df10a8d3f5bc5",
+  "analysis_sha256": "0f5ac12ae333c620a372698a27b1935f5d0e9f0609bb8d38abbf4a2d8a28745d",
   "remote_root": "/srv/cupi/hexapod/runs/james",
   "input_sha256": {
     "flat_pilot_20260930_003/ppo_mlp/PACK.json": "fb16fce9c3b3d41934510866b4ca32274f784c9cf81c742a432f2c69d9c3155a",
@@ -23,7 +23,11 @@
     "ppo_v4_forward_20261004_001/PACK.json": "fc6b54f9c507b87a0499684c36d7a5e5e1e062047fdb91df55178e67e8d59fa8",
     "ppo_v4_forward_20261004_001/preparation.json": "96debb3fe9925069e1237c446efc12a61025ec619d9eec7f46be872276b592f6",
     "ppo_v4_forward_20261004_001/run/standing/ppo_config.json": "c425bcc9ee5ed1b7e70e460f56a66672a0fd47787940eaea00793808c6aa9161",
-    "ppo_v4_forward_20261004_001/run/standing/metrics.jsonl": "5ea4ebcb38324c8d269999bd68401654e86787709d9a793423aed799ec956e96"
+    "ppo_v4_forward_20261004_001/run/standing/metrics.jsonl": "5ea4ebcb38324c8d269999bd68401654e86787709d9a793423aed799ec956e96",
+    "ppo_v4_action_wall_20261005_001/PACK.json": "0161ffe214cb8e33654ae43835f535ec83b764de18f8a0f1ae11de5405aee051",
+    "ppo_v4_action_wall_20261005_001/preparation.json": "3185788cdfa5c0d54e939021470883ab722918fa555648aeaaf28ab7ed6fb45b",
+    "ppo_v4_action_wall_20261005_001/run/standing/ppo_config.json": "c425bcc9ee5ed1b7e70e460f56a66672a0fd47787940eaea00793808c6aa9161",
+    "ppo_v4_action_wall_20261005_001/run/standing/metrics.jsonl": "808b33bede64c726c0f99a3cafc409a433d5623713f5aab7f0f0df75456035e0"
   },
   "metric_source_sha256": {
     "source/locomotion/task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244"
@@ -35,7 +39,7 @@
     "terminations": "Sum interval terminations and termination_reasons.rows over the updates of a window.",
     "robots": "Each metric row holds 128 times num_steps_per_env environment controls."
   },
-  "scope": "The record measures training rollouts with exploration noise, one seed per cell. It holds no evaluation probe and establishes no Stage 2 result. The stock reward-v2 cell uses updates 701 to 800 of a 2000-update attempt from an earlier source commit; the other three cells ran 800 updates. The reward-v4 forward attempt draws two command classes, zero and linear_0.05; each attempt record lists its drawn classes. One task.py computes the speed in all five attempts.",
+  "scope": "The record measures training rollouts with exploration noise, one seed per cell. It holds no evaluation probe and establishes no Stage 2 result. The stock reward-v2 cell uses updates 701 to 800 of a 2000-update attempt from an earlier source commit; the other three cells ran 800 updates. The reward-v4 forward attempt draws two command classes, zero and linear_0.05; each attempt record lists its drawn classes. The action-wall attempt repeats it with one seed and one learner configuration; its reward adds the action-limit term and the higher swing-travel ceiling. One task.py computes the speed in all six attempts.",
   "identification": {
     "selected": "flat_pilot_20261002_001/ppo_mlp",
     "rejected": "flat_pilot_20260930_003/ppo_mlp",
@@ -218,6 +222,53 @@
       "source_commit": "ae3e27e19c0b96a81704d8a3555c614524fcbd73",
       "source_commit_record": "ppo_v4_forward_20261004_001/preparation.json",
       "source_freeze_sha256": "e53605b008767bbd564518cbc6f68a8f3f936cd80623417512a0f8f11db290ba",
+      "ppo_config_sha256": "c425bcc9ee5ed1b7e70e460f56a66672a0fd47787940eaea00793808c6aa9161",
+      "command_classes_drawn": [
+        "zero",
+        "linear_0.05"
+      ],
+      "pack_options": {
+        "learner": "ppo",
+        "networks": "mlp",
+        "action_mean": "tanh",
+        "observation_normalization": "none",
+        "observation_scaling": "fixed",
+        "command_segments": "bootstrap",
+        "learning_rate_max": 0.0003,
+        "action_std_final": 0.05,
+        "gait_clock": 60,
+        "episode_seconds": 10.0,
+        "allocation_profile": "flat_pilot_v1"
+      },
+      "ppo_config": {
+        "observation_normalization": false,
+        "algorithm": "locomotion.rate_schedule:CappedRatePPO",
+        "action_distribution": "locomotion.action_distribution:BoundedMeanGaussian",
+        "learning_rate": 0.0003,
+        "learning_rate_max": 0.0003,
+        "exploration": {
+          "action_std_final": 0.05
+        },
+        "environment_wrapper": {
+          "observation_scaling": "fixed",
+          "command_segments": "bootstrap",
+          "gait_clock": 60
+        }
+      }
+    },
+    "reward_v4_action_wall": {
+      "attempt": "ppo_v4_action_wall_20261005_001",
+      "metrics_sha256": "808b33bede64c726c0f99a3cafc409a433d5623713f5aab7f0f0df75456035e0",
+      "metrics_rows": 2000,
+      "seed": 20260917,
+      "robots": 128,
+      "updates": 2000,
+      "reward_version": "4",
+      "reward_label_in_metric_rows": "noise_sized_tripod_schedule_v4",
+      "learner_path": "corrected",
+      "source_commit": "450f4c3c91a9cc59e34a8e45ae31a73b4e544d2f",
+      "source_commit_record": "ppo_v4_action_wall_20261005_001/preparation.json",
+      "source_freeze_sha256": "b24aa44502f03534f61fee55499281e16f86d44b13eb54512464940c21766ba1",
       "ppo_config_sha256": "c425bcc9ee5ed1b7e70e460f56a66672a0fd47787940eaea00793808c6aa9161",
       "command_classes_drawn": [
         "zero",
@@ -519,6 +570,228 @@
     0.03955391216460952,
     0.03319552820747812,
     0.030160290588697337
+  ],
+  "reward_v4_action_wall_windows": [
+    {
+      "first_update": 1,
+      "last_update": 200,
+      "linear_0.05_speed_mps": 0.021345628007015224,
+      "linear_0.05_task_reward_mean": 0.9997411874526511,
+      "zero_task_reward_mean": -1.681581565156751,
+      "mean_near_bound_fraction": {
+        "coxa": 6.239149345977542e-06,
+        "femur": 0.0,
+        "tibia": 0.0
+      },
+      "terminations": 4,
+      "termination_reason_rows": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 4,
+        "timeout": 1150
+      },
+      "learning_rate_mean": 3.122890625000001e-05,
+      "after_update_kl_mean": 0.015346852124202996,
+      "value_explained_variance_mean": 0.6461736184358596
+    },
+    {
+      "first_update": 201,
+      "last_update": 400,
+      "linear_0.05_speed_mps": 0.051142488344899394,
+      "linear_0.05_task_reward_mean": 1.7248178339662246,
+      "zero_task_reward_mean": -2.361443054764893,
+      "mean_near_bound_fraction": {
+        "coxa": 0.12544813664925944,
+        "femur": 1.8988715843685593e-06,
+        "tibia": 7.05295159908322e-06
+      },
+      "terminations": 12,
+      "termination_reason_rows": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 12,
+        "timeout": 1270
+      },
+      "learning_rate_mean": 4.250937500000002e-05,
+      "after_update_kl_mean": 0.014156457888893782,
+      "value_explained_variance_mean": 0.9844758358597755
+    },
+    {
+      "first_update": 401,
+      "last_update": 600,
+      "linear_0.05_speed_mps": 0.044871081644095305,
+      "linear_0.05_task_reward_mean": 2.0249940833893074,
+      "zero_task_reward_mean": -1.9032893046556172,
+      "mean_near_bound_fraction": {
+        "coxa": 0.14255886829671605,
+        "femur": 2.1701389535640676e-06,
+        "tibia": 7.866753706669746e-06
+      },
+      "terminations": 0,
+      "termination_reason_rows": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 0,
+        "timeout": 1160
+      },
+      "learning_rate_mean": 3.5251562500000014e-05,
+      "after_update_kl_mean": 0.014689938363153488,
+      "value_explained_variance_mean": 0.9950352355837822
+    },
+    {
+      "first_update": 601,
+      "last_update": 800,
+      "linear_0.05_speed_mps": 0.046158034757894484,
+      "linear_0.05_task_reward_mean": 2.3979901126792997,
+      "zero_task_reward_mean": -1.282424201562507,
+      "mean_near_bound_fraction": {
+        "coxa": 0.08690619813654242,
+        "femur": 2.7126736919550845e-06,
+        "tibia": 9.223090552647288e-06
+      },
+      "terminations": 0,
+      "termination_reason_rows": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 0,
+        "timeout": 1275
+      },
+      "learning_rate_mean": 3.2684375000000013e-05,
+      "after_update_kl_mean": 0.014489911545533687,
+      "value_explained_variance_mean": 0.996635527908802
+    },
+    {
+      "first_update": 801,
+      "last_update": 1000,
+      "linear_0.05_speed_mps": 0.04896097331965575,
+      "linear_0.05_task_reward_mean": 2.6912223205632086,
+      "zero_task_reward_mean": -1.2862115409120187,
+      "mean_near_bound_fraction": {
+        "coxa": 0.0313224291405398,
+        "femur": 1.1935764244602373e-05,
+        "tibia": 1.8174913711845876e-05
+      },
+      "terminations": 0,
+      "termination_reason_rows": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 0,
+        "timeout": 1274
+      },
+      "learning_rate_mean": 2.723125000000001e-05,
+      "after_update_kl_mean": 0.014807622246444226,
+      "value_explained_variance_mean": 0.9963110733032227
+    },
+    {
+      "first_update": 1001,
+      "last_update": 1200,
+      "linear_0.05_speed_mps": 0.04923203893865957,
+      "linear_0.05_task_reward_mean": 2.8824613338755034,
+      "zero_task_reward_mean": -1.1317972130358884,
+      "mean_near_bound_fraction": {
+        "coxa": 4.557291783081989e-05,
+        "femur": 3.7977431687371185e-06,
+        "tibia": 1.3020833721384406e-05
+      },
+      "terminations": 0,
+      "termination_reason_rows": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 0,
+        "timeout": 1159
+      },
+      "learning_rate_mean": 2.2709375000000008e-05,
+      "after_update_kl_mean": 0.014681618609465659,
+      "value_explained_variance_mean": 0.9954934746026993
+    },
+    {
+      "first_update": 1201,
+      "last_update": 1400,
+      "linear_0.05_speed_mps": 0.049279216832047695,
+      "linear_0.05_task_reward_mean": 3.0240432533014308,
+      "zero_task_reward_mean": -0.5128460415814209,
+      "mean_near_bound_fraction": {
+        "coxa": 9.494357921842796e-06,
+        "femur": 5.425347383910169e-07,
+        "tibia": 5.9678821223011865e-06
+      },
+      "terminations": 0,
+      "termination_reason_rows": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 0,
+        "timeout": 1276
+      },
+      "learning_rate_mean": 2.2778125000000006e-05,
+      "after_update_kl_mean": 0.01500116741284728,
+      "value_explained_variance_mean": 0.9983158472180367
+    },
+    {
+      "first_update": 1401,
+      "last_update": 1600,
+      "linear_0.05_speed_mps": 0.0478841429809205,
+      "linear_0.05_task_reward_mean": 3.070746191658738,
+      "zero_task_reward_mean": -0.39474197347843754,
+      "mean_near_bound_fraction": {
+        "coxa": 1.1664496899660055e-05,
+        "femur": 2.7126736919550844e-07,
+        "tibia": 1.193576422034918e-05
+      },
+      "terminations": 1,
+      "termination_reason_rows": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 1,
+        "timeout": 1160
+      },
+      "learning_rate_mean": 1.9118750000000004e-05,
+      "after_update_kl_mean": 0.015329136308282613,
+      "value_explained_variance_mean": 0.9982530823349953
+    },
+    {
+      "first_update": 1601,
+      "last_update": 1800,
+      "linear_0.05_speed_mps": 0.048899615434688515,
+      "linear_0.05_task_reward_mean": 3.1595487169736973,
+      "zero_task_reward_mean": -0.18151150681776787,
+      "mean_near_bound_fraction": {
+        "coxa": 1.6276042151730508e-06,
+        "femur": 2.7126736919550844e-07,
+        "tibia": 4.611545252070452e-06
+      },
+      "terminations": 3,
+      "termination_reason_rows": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 3,
+        "timeout": 1273
+      },
+      "learning_rate_mean": 1.6659375000000003e-05,
+      "after_update_kl_mean": 0.014572061882354319,
+      "value_explained_variance_mean": 0.9993480479717255
+    },
+    {
+      "first_update": 1801,
+      "last_update": 2000,
+      "linear_0.05_speed_mps": 0.04961959072177577,
+      "linear_0.05_task_reward_mean": 3.218787475231528,
+      "zero_task_reward_mean": -0.023838653533362533,
+      "mean_near_bound_fraction": {
+        "coxa": 2.1701389535640676e-06,
+        "femur": 0.0,
+        "tibia": 2.4414063227595763e-06
+      },
+      "terminations": 1,
+      "termination_reason_rows": {
+        "height": 0,
+        "tilt": 0,
+        "joint_limit": 1,
+        "timeout": 1271
+      },
+      "learning_rate_mean": 1.5450000000000003e-05,
+      "after_update_kl_mean": 0.014767711784224957,
+      "value_explained_variance_mean": 0.9996361991763115
+    }
   ],
   "native_started_by_analysis": false
 }
