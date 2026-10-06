@@ -28,14 +28,16 @@ TRIPOD_A = (True, False, True, False, True, False)
 DEPARTURES = (
     "Tracking reads the mean displacement velocity over the last tracking_window_controls controls "
     "since the latest command change or reset, in the body frame. Table I tracks the instantaneous "
-    "velocity. At this robot's 0.05 m/s command, exploration shakes the body by 0.035 m/s per "
-    "control; the 10-control mean of position differences carries 0.013 m/s (native noise probe).",
+    "velocity. At this robot's 0.05 m/s command, exploration shakes the body by 0.035 m/s per axis "
+    "and control; the 10-control mean of position differences carries 0.013 m/s per axis (native "
+    "noise probe).",
     "The kernel is max(1 - e^2, -floor) instead of exp(-|e| / 0.15). Its expectation under "
     "zero-mean velocity noise equals the noise-free value minus a constant, so noise does not "
     "shrink the gain from walking. The printed exponent has no minus sign, and its 0.15 m/s scale "
     "pays a motionless robot 72 to 85 percent at these commands (audit sections 2 and 4).",
     "The error scale equals the commanded speed or yaw rate, so a motionless robot earns zero "
-    "tracking reward on a moving command. A zero component uses a fixed scale (0.05 m/s, 0.2 rad/s).",
+    "linear tracking on a translation command and zero yaw tracking on a yaw command. A zero "
+    "component uses a fixed scale (0.05 m/s, 0.2 rad/s) and pays its weight to a motionless robot.",
     "A contact schedule pays each tripod for unloading its feet during its swing window and "
     "charges unloaded feet outside it. Table I has no gait term: the paper's gait comes from its "
     "adversarial style reward. Without a gait term PPO shuffles on exploration noise and stands "
@@ -43,8 +45,8 @@ DEPARTURES = (
     "control count; it holds no joint target, pose or recorded motion.",
     "A swing-travel term pays unloaded feet that advance over the floor in the commanded "
     "direction, up to the sum a walk at the command produces: three feet at 2.5 times the commanded "
-    "speed for 80 percent of the period. It turns a step in place into a stride. A lower ceiling pays "
-    "in full for feet that the body carries, and the return stroke then earns nothing.",
+    "speed for 80 percent of the period. It turns a step in place into a stride. A ceiling of 3.5 "
+    "pays 86 percent for three feet that the body carries, so the return stroke adds 14 percent at most.",
     "An action-limit term charges executed targets outside the inner action_limit_onset share of "
     "the 0.35 rad action range. Table I has none. The environment clips each sample to that range "
     "(env.py line 44), so a sample past the bound executes the bound target and PPO moves a mean to "
@@ -54,9 +56,9 @@ DEPARTURES = (
     "A planar-rate term charges the squared planar velocity error at each control end under a "
     "moving translation command. The windowed tracking term averages 10 controls and does not see "
     "the stall in each all-stance window of the schedule; the forward gate bounds the mean "
-    "instantaneous error at 0.025 m/s. The term needs the action-limit term: without a strong limit "
-    "it holds two of three surrogate seeds at the coxa bounds.",
-    "Each continuous penalty is a mean square against a declared scale. Table I prints unsquared "
+    "instantaneous error at 0.025 m/s. The native runs pair the term with an action-limit weight of 6.",
+    "Each continuous penalty except the torque-limit, over-rating and quiet-contact ramps is a "
+    "mean square against a declared scale. Table I prints unsquared "
     "norms, which charge exploration noise in first order. The weights are set on native rollouts "
     "that carry training noise; version 2's weights were 15 to 34,550 times the printed values.",
     "The target-rate penalty reads the executed joint target after the action clamp and the "
@@ -65,6 +67,8 @@ DEPARTURES = (
     "yaw-rate term reads the instantaneous yaw error, and a joint-margin term starts 0.1 rad from a "
     "joint limit. Table I has a torque-limit term alone. The forward gate bounds the over-rating "
     "share at 0.5 percent and the yaw error at 0.06 rad/s, and a joint at its limit ends the episode.",
+    "A tilt term charges the squared sine of the body tilt. Table I has none. The forward gate "
+    "bounds the tilt RMS at 5 degrees.",
     "A height term keeps the plate near its nominal height. Table I has none; the 400 Hz gate "
     "counts tibia-shaft contact as non-foot contact and compact training telemetry cannot.",
     "Quiet terms charge joint rate, target change and lightly loaded feet under a zero command, "
@@ -73,18 +77,19 @@ DEPARTURES = (
     "native policy rested a foot so lightly that it slid 3 mm in the stop probe, and a second "
     "policy's lightly loaded leg left the floor for a few physics steps.",
     "A quiet-strain term charges coxa torque under a zero command. Gravity loads no coxa joint, so "
-    "each coxa torque at rest is strain between planted feet. Each native rest pose held 1.0 to "
-    "1.3 N.m on a coxa, and the stop probe failed on a foot that crept under that load.",
+    "each coxa torque at rest is strain between planted feet. The native rest poses of five seeds "
+    "held 1.1 to 1.5 N.m on a coxa, and the stop probe failed on a foot that crept under that load.",
     "The quiet joint-rate and target-motion terms start 50 controls after a command change or "
     "reset. Charged from the first control, they pay the policy to freeze at once with the stance "
     "thrust locked in as strain. The stop gate allows 100 controls before its quiet window.",
     "Any non-tibia floor contact above 1 N costs collision_weight per control; the simulation "
     "reports no self-collision.",
-    "Table I has no termination term. PPO bootstraps zero after a termination, so termination_weight "
-    "exceeds the discounted loss of the largest per-control tracking reward.",
+    "Table I has no termination term. PPO bootstraps zero after a termination, so a fall would "
+    "end the penalties at no cost. termination_weight is at least ten times the per-control "
+    "tracking ceiling (20 against 1.5).",
     "forward_draw_fraction turns that share of the moving command draws into the forward command at "
-    "the maximum speed. With the full 20-command bank and 128 robots the surrogate reaches half the "
-    "commanded speed in 2000 updates; the paper trains 4096 robots.",
+    "the maximum speed. The paper trains 4096 robots (section V); this task trains 128, and an "
+    "unretained surrogate trial with the full 20-command bank reached about half the commanded speed.",
 )
 OMITTED = (
     "Style r^s: no discriminator and no demonstration enter vanilla PPO.",
