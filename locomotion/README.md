@@ -51,7 +51,7 @@ walking evidence for version 3 remains pending. Read the
 before dispatch.
 You can select `prepare --reward-version 4` with the learner options below.
 Each option keeps its baseline default and enters the pack and the checkpoint
-record. Each one except `--episode-seconds` also enters the evaluation command,
+record. Each one except `--episode-seconds` and `--reward-options` also enters the evaluation command,
 and evaluation rejects a mismatch. Read
 [reward audit section 15](../docs/REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)
 for the motivation and evidence limits of each option.
@@ -65,6 +65,7 @@ for the motivation and evidence limits of each option.
 | `--gait-clock 60` | Append the sine and cosine of the episode phase to both observations; both are zero under a zero command. Reward version 4 requires the period of its contact schedule. |
 | `--action-smoothing mean2` | Send the mean of each action and the previous one to the environment, in training and in evaluation. That mean has no gain at half the control rate, where a rest oscillation sat. |
 | `--velocity-noise 0.5` | Add Gaussian noise in rad/s to the actor's joint-velocity inputs in training. The critic and evaluation read measured values. Retained runs combine this option with smoothing and reward changes; they do not isolate its effect. |
+| `--reward-options forward_draw_fraction=0` | Override reward v4 coefficients as `key=value` pairs. `forward_draw_fraction=0` restores version 1's 20-command bank; the default draws forward and zero commands alone. Training alone accepts it, and the container preflight rejects an unknown key. |
 | `--episode-seconds 10` | Shorten training episodes. A forward walker covers 1.0 m in a 20 s episode, toward a neighbour's reset origin 2.0 m away, and the proximity guard then stops the run. Training alone accepts it. |
 | `--video-case <probe id>` | Choose the probe that the evaluation camera records. |
 

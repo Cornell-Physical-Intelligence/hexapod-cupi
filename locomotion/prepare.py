@@ -24,6 +24,15 @@ def save(path, value):
     Path(path).write_text(json.dumps(value, indent=2, allow_nan=False)+'\n')
 
 
+def valid_reward_options(spec):
+    """Unique ``key=value`` pairs; the trainer checks the keys against ``RewardV4Config`` in the container."""
+    pairs = [item.partition('=') for item in spec.split(',')]
+    keys = [key for key, _, _ in pairs]
+    return (len(set(keys)) == len(keys)
+            and all(re.fullmatch(r'[a-z][a-z0-9_]*', key) and re.fullmatch(r'[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?', value)
+                    for key, separator, value in pairs))
+
+
 def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=None, seed=20260917,
             num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
             checkpoint_declaration_sha=None, candidate=0, suite='screen',
@@ -32,7 +41,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             observation_normalization='empirical', observation_scaling='none',
             command_segments='continuous', learning_rate_max=None, action_std=.15,
             action_noise_correlation=0., action_std_final=None, gait_clock=0, action_smoothing='none',
-            velocity_noise=0., episode_seconds=20.,
+            velocity_noise=0., episode_seconds=20., reward_options='',
             video_case=None,
             allocation_profile='standard', max_wall_seconds=6200, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
@@ -90,6 +99,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         raise ValueError('A video case applies to a learning-probe evaluation')
     if type(episode_seconds) is not float or (episode_seconds != 20. and (mode != 'train' or not 5. <= episode_seconds <= 20.)):
         raise ValueError('Episode length selection applies to training, between 5 and 20 seconds')
+    if reward_options and (mode != 'train' or reward_version != '4' or not valid_reward_options(reward_options)):
+        raise ValueError('Reward options apply to reward version 4 training as unique key=value pairs')
     if (learner not in ('ppo', 'amp') or networks not in ('mlp', 'paper') or (networks == 'paper' and learner != 'amp')
             or (learner == 'amp' and mode not in ('train', 'evaluate'))):
         raise ValueError('The AMP learner trains or evaluates, and the paper networks need the AMP learner')
@@ -173,6 +184,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         binding['command_args'] += ['--video-case', video_case]
     if episode_seconds != 20.:
         binding['command_args'] += ['--episode-seconds', str(episode_seconds)]
+    if reward_options:
+        binding['command_args'] += ['--reward-options', reward_options]
     if mode == 'throughput':
         binding['command_args'] += ['--warmup-updates', str(warmup_updates)]
     if checkpoint is not None:
@@ -192,6 +205,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         'observation_normalization': observation_normalization, **selected_options,
         **({} if video_case is None else {'video_case': video_case}),
         **({} if episode_seconds == 20. else {'episode_seconds': episode_seconds}),
+        **({} if not reward_options else {'reward_options': reward_options}),
         'allocation_profile': allocation_profile, 'max_wall_seconds': max_wall_seconds,
         'updates': updates, 'stage2_complete': False, 'files': {
             p.relative_to(output).as_posix(): sha(p) for p in sorted(output.rglob('*')) if p.is_file()}})
@@ -233,6 +247,7 @@ def main():
     parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none')
     parser.add_argument('--velocity-noise', type=float, default=0.)
     parser.add_argument('--episode-seconds', type=float, default=20.)
+    parser.add_argument('--reward-options', default='')
     parser.add_argument('--video-case')
     parser.add_argument('--allocation-profile', choices=ALLOCATION_PROFILES, default='standard')
     parser.add_argument('--max-wall-seconds', type=int, default=6200)

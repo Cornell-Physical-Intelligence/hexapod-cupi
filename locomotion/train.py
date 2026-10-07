@@ -153,6 +153,9 @@ def main(argv=None):
                         help='Initial standard deviation of the Gaussian action distribution.')
     parser.add_argument('--episode-seconds', type=float, default=20.,
                         help='Training episode length; 20 s by default. Shorter episodes bound how far a robot walks.')
+    parser.add_argument('--reward-options', default='',
+                        help='Reward version 4 coefficient overrides as key=value pairs, for example '
+                             'forward_draw_fraction=0 for the full command bank. Training only.')
     parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none',
                         help='mean2 sends the mean of each action and the previous one to the environment.')
     parser.add_argument('--velocity-noise', type=float, default=0.,
@@ -201,6 +204,11 @@ def main(argv=None):
         raise ValueError('A video case applies to a learning-probe evaluation')
     if args.episode_seconds != 20. and (args.mode != 'train' or not 5. <= args.episode_seconds <= 20.):
         raise ValueError('Episode length selection applies to training, between 5 and 20 seconds')
+    if args.reward_options and (args.mode != 'train' or args.reward_version != '4'):
+        raise ValueError('Reward options apply to reward version 4 training only')
+    if args.reward_options:
+        # Rejects an unknown key or an invalid value before the GPU launch; the container preflight runs this.
+        importlib.import_module(prefix+'.task_v4').reward_config(args.reward_options)
     if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
         raise ValueError('The paper networks need the AMP learner, and the AMP learner trains or evaluates only')
     configuration.verify_assets(args.asset, args.model)
@@ -225,6 +233,8 @@ def main(argv=None):
         'seed': args.seed, 'rsl_rl_required_version': '5.0.1',
         'adapter_sha256': sha(source/'ppo.py'), 'entry_sha256': sha(__file__),
         'reward_version': args.reward_version, 'learner': args.learner, 'networks': args.networks}
+    if args.reward_options:
+        identity['reward_options'] = args.reward_options
     if args.learner == 'amp':
         amp_module = importlib.import_module(prefix+'.amp_ppo')
         identity['learner_source_files'] = {name: sha(source/name) for name in ('amp.py', 'amp_discriminator.py', 'amp_ppo.py', 'paper_networks.py')}
@@ -322,7 +332,10 @@ def main(argv=None):
         task_config = task_module.TaskConfig(seed=args.seed)
         if args.reward_version in ('2', '3', '4'):
             module = importlib.import_module(prefix+'.task_v'+args.reward_version)
-            task = getattr(module, 'TrainingTaskV'+args.reward_version)(env, task_config, args.output/'task')
+            task_class = getattr(module, 'TrainingTaskV'+args.reward_version)
+            if args.reward_options:
+                task_class = module.variant(args.reward_options)
+            task = task_class(env, task_config, args.output/'task')
         else:
             task = task_module.TrainingTask(env, task_config, args.output/'task')
         collision = None

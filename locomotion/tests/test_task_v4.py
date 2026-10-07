@@ -367,6 +367,34 @@ class TrainingTaskV4Tests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "training only"):
                 prepare(Path(directory)/"bad", REMOTE, mode="diagnostic", reward_version="4")
 
+    def test_reward_options_reach_version_four_training_alone(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            binding = prepare(root/"omni", REMOTE, mode="train", reward_version="4", gait_clock=60,
+                              reward_options="forward_draw_fraction=0")
+            args = binding["command_args"]
+            self.assertEqual(args[args.index("--reward-options")+1], "forward_draw_fraction=0")
+            self.assertEqual(json.loads((root/"omni/PACK.json").read_text())["reward_options"], "forward_draw_fraction=0")
+            self.assertNotIn("--reward-options", prepare(root/"plain", REMOTE, mode="train", reward_version="4")["command_args"])
+            self.assertNotIn("reward_options", json.loads((root/"plain/PACK.json").read_text()))
+            for index, bad in enumerate((dict(reward_version="2", reward_options="forward_draw_fraction=0"),
+                                         dict(reward_version="4", reward_options="forward_draw_fraction"),
+                                         dict(reward_version="4", reward_options="schedule_weight=0,schedule_weight=1"),
+                                         dict(reward_version="4", reward_options="Schedule=0"),
+                                         dict(reward_version="4", reward_options="schedule_weight=none"),
+                                         dict(reward_version="4", reward_options="schedule_weight=0,"))):
+                with self.subTest(bad=bad), self.assertRaisesRegex(ValueError, "key=value"):
+                    prepare(root/f"bad{index}", REMOTE, mode="train", **bad)
+        base = ["--asset", "a", "--model", "m", "--geometry", "g", "--geometry-extrema", "e", "--stance", "s",
+                "--output", "o", "--source-freeze-sha256", "f"*64, "--num-envs", "1", "--preflight-only"]
+        with self.assertRaisesRegex(ValueError, "training only"):
+            train.main(base + ["--mode", "evaluate", "--reward-options", "forward_draw_fraction=0"])
+        with self.assertRaisesRegex(ValueError, "training only"):
+            train.main(base + ["--mode", "train", "--reward-version", "2", "--reward-options", "forward_draw_fraction=0"])
+        with self.assertRaisesRegex(ValueError, "unique RewardV4Config"):
+            train.main(base + ["--mode", "train", "--reward-version", "4", "--reward-options", "not_a_field=0"])
+        self.assertEqual(task_v4.variant("forward_draw_fraction=0").reward_config.forward_draw_fraction, 0.)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,23 @@
+{
+  "id": "20261007T053019_reward_options_flag",
+  "date": "2026-10-07T05:30:19Z",
+  "title": "Add a reward-options flag for reward v4 training",
+  "summary": "The trainer and the pack preparer accept --reward-options as key=value overrides of the reward v4 coefficients. The pack records the string, the checkpoint identity carries it, and the container preflight rejects an unknown key before a GPU launch. forward_draw_fraction=0 restores version 1's 20-command sampler, which the retained forward-only runs never drew. The program lead authorized two reward v4 seeds on the full command bank; their results belong to a later record.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Score the two full-command-bank reward v4 seeds through the 13 probes and record them with their checkpoint, source and input hashes.",
+  "changes": [
+    "docs/TRAINING.md",
+    "locomotion/README.md",
+    "locomotion/prepare.py",
+    "locomotion/tests/test_task_v4.py",
+    "locomotion/train.py"
+  ],
+  "evidence": [
+    "locomotion/tests/test_task_v4.py",
+    "locomotion/README.md"
+  ],
+  "no_project_impact": true,
+  "reason": "The flag adds a training option and establishes no native result or accepted capability."
+}
