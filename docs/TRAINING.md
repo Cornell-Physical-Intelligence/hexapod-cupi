@@ -26,9 +26,11 @@ reference-plus-residual design remains an unimplemented proposal.
 
 Reward version 4 is an opt-in path with its own learner options: a gait clock
 input, a scheduled action deviation, fixed observation scales, a two-control
-action mean and noise on the actor's joint-velocity inputs. It draws forward
-commands and zero commands alone and trains 10 s episodes. It uses no
-demonstration, no discriminator and no optimized reference target.
+action mean and noise on the actor's joint-velocity inputs. By default it draws
+forward commands and zero commands alone, and `--reward-options
+forward_draw_fraction=0` restores the full command bank. It trains 10 s
+episodes and uses no demonstration, no discriminator and no optimized
+reference target.
 
 ## Results and research order
 
