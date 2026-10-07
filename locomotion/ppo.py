@@ -52,7 +52,7 @@ def smoothed_action(action, previous, episode_steps):
 def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empirical',
                observation_scaling='none', command_segments='continuous', learning_rate_max=None,
                action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0,
-               action_smoothing='none', velocity_noise=0.):
+               action_smoothing='none', velocity_noise=0., action_std_decay_updates=None):
     if action_mean not in ('unbounded', 'tanh'):
         raise ValueError('Action mean must be unbounded or tanh')
     if observation_normalization not in ('empirical', 'none'):
@@ -74,6 +74,9 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
         raise ValueError('Correlated action noise needs a correlation in [0, 1) and the tanh mean')
     if action_std_final is not None and not (type(action_std_final) is float and .005 <= action_std_final <= action_std):
         raise ValueError('The final action deviation must lie between 0.005 and the initial deviation')
+    if action_std_decay_updates is not None and not (
+            action_std_final is not None and type(action_std_decay_updates) is int and action_std_decay_updates >= 1):
+        raise ValueError('The deviation decay length needs a final deviation and at least one update')
     distribution = ('GaussianDistribution' if action_mean == 'unbounded'
                     else 'locomotion.action_distribution:BoundedMeanGaussian')
     config = {
@@ -102,6 +105,8 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
                                    learning_rate=min(1e-3, learning_rate_max))
     if action_std_final is not None:
         config['exploration'] = {'action_std_final': action_std_final}
+    if action_std_decay_updates is not None:
+        config['exploration']['action_std_decay_updates'] = action_std_decay_updates
     wrapper = {key: value for key, value, default in (
         ('observation_scaling', observation_scaling, 'none'),
         ('command_segments', command_segments, 'continuous'), ('gait_clock', gait_clock, 0),
@@ -135,7 +140,8 @@ class DeviationSchedule:
 
     A learned deviation rose in every retained run that moved, and those policies stood still
     once evaluation removed the noise. The schedule lowers the deviation as training proceeds,
-    so the mean action has to produce the motion.
+    so the mean action has to produce the motion. ``updates`` is the decay length; the
+    deviation holds its final value after that many updates, however long training continues.
     """
 
     def __init__(self, algorithm, start, final, updates):

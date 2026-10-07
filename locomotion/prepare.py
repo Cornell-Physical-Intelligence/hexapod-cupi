@@ -9,7 +9,7 @@ import shutil
 
 from .env_config import sha
 from .tripod_config import SWEEPS
-from .train import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, validate_deadline
+from .train import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline
 from .spark_paths import LEGACY_ROOT, RUN_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,7 +17,7 @@ REMOTE_ROOT = LEGACY_ROOT
 LEARNER_OPTION_DEFAULTS = {'observation_scaling': 'none', 'command_segments': 'continuous',
                            'learning_rate_max': None, 'action_std': .15, 'action_noise_correlation': 0.,
                            'action_std_final': None, 'gait_clock': 0, 'action_smoothing': 'none',
-                           'velocity_noise': 0.}
+                           'velocity_noise': 0., 'action_std_decay_updates': None}
 
 
 def save(path, value):
@@ -42,15 +42,18 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             command_segments='continuous', learning_rate_max=None, action_std=.15,
             action_noise_correlation=0., action_std_final=None, gait_clock=0, action_smoothing='none',
             velocity_noise=0., episode_seconds=20., reward_options='',
-            video_case=None,
+            video_case=None, extended_updates=False, action_std_decay_updates=None,
             allocation_profile='standard', max_wall_seconds=6200, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     validate_deadline(mode, allocation_profile, max_wall_seconds)
     if type(max_wall_seconds) is not int:
         raise ValueError('Preparation requires an integer native deadline')
+    if type(extended_updates) is not bool:
+        raise ValueError('Extended updates is an explicit opt-in')
+    limit = update_limit(mode, extended_updates)
     if (not within_roots(remote_root, RUN_ROOTS)
             or '..' in remote_root.parts or mode not in ('diagnostic', 'train', 'evaluate', 'replay', 'tripod', 'throughput', 'probe')
-            or type(updates) is not int or not 1 <= updates <= 2000
+            or type(updates) is not int or not 1 <= updates <= limit
             or type(seed) is not int or seed < 0):
         raise ValueError('Invalid native allocation')
     num_envs = (128 if mode in ('train', 'probe') else 1) if num_envs is None else num_envs
@@ -81,7 +84,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
                        'learning_rate_max': learning_rate_max, 'action_std': action_std,
                        'action_noise_correlation': action_noise_correlation, 'action_std_final': action_std_final,
                        'gait_clock': gait_clock, 'action_smoothing': action_smoothing,
-                       'velocity_noise': velocity_noise}
+                       'velocity_noise': velocity_noise, 'action_std_decay_updates': action_std_decay_updates}
     selected_options = {key: value for key, value in learner_options.items() if value != LEARNER_OPTION_DEFAULTS[key]}
     if (observation_scaling not in ('none', 'fixed') or command_segments not in ('continuous', 'bootstrap')
             or (learning_rate_max is not None and not (type(learning_rate_max) is float and 1e-5 <= learning_rate_max <= 1e-2))
@@ -92,9 +95,11 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             or action_smoothing not in ('none', 'mean2')
             or type(velocity_noise) is not float or not 0 <= velocity_noise <= 5
             or (action_std_final is not None and not (type(action_std_final) is float and .005 <= action_std_final <= action_std))
+            or (action_std_decay_updates is not None and action_std_final is None)
             or (selected_options and (learner != 'ppo' or mode not in ('train', 'evaluate')))):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
+    validate_decay(mode, updates, action_std_decay_updates)
     if video_case is not None and (mode != 'evaluate' or eval_scope == 'full' or not video_case.startswith('learning:')):
         raise ValueError('A video case applies to a learning-probe evaluation')
     if type(episode_seconds) is not float or (episode_seconds != 20. and (mode != 'train' or not 5. <= episode_seconds <= 20.)):
@@ -161,6 +166,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         binding['command_args'] += ['--standing-admission', '/admission/admission.json']
     if mode in ('train', 'evaluate', 'throughput'):
         binding['command_args'] += ['--updates', str(updates), '--seed', str(seed)]
+    if extended_updates:
+        binding['command_args'] += ['--extended-updates']
     if mode == 'probe':
         binding['command_args'] += ['--seed', str(seed)]
     if reward_version != '1':
@@ -206,6 +213,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         **({} if video_case is None else {'video_case': video_case}),
         **({} if episode_seconds == 20. else {'episode_seconds': episode_seconds}),
         **({} if not reward_options else {'reward_options': reward_options}),
+        **({'extended_updates': True} if extended_updates else {}),
         'allocation_profile': allocation_profile, 'max_wall_seconds': max_wall_seconds,
         'updates': updates, 'stage2_complete': False, 'files': {
             p.relative_to(output).as_posix(): sha(p) for p in sorted(output.rglob('*')) if p.is_file()}})
@@ -221,6 +229,8 @@ def main():
     parser.add_argument('--num-envs', type=int)
     parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
     parser.add_argument('--updates', type=int, default=512)
+    parser.add_argument('--extended-updates', action='store_true',
+                        help='Accept up to 5000 training updates; without this opt-in the limit stays 2000.')
     parser.add_argument('--warmup-updates', type=int)
     parser.add_argument('--seed', type=int, default=20260917)
     parser.add_argument('--candidate', type=int, choices=range(4), default=0)
@@ -243,6 +253,7 @@ def main():
     parser.add_argument('--action-std', type=float, default=.15)
     parser.add_argument('--action-noise-correlation', type=float, default=0.)
     parser.add_argument('--action-std-final', type=float)
+    parser.add_argument('--action-std-decay-updates', type=int)
     parser.add_argument('--gait-clock', type=int, default=0)
     parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none')
     parser.add_argument('--velocity-noise', type=float, default=0.)

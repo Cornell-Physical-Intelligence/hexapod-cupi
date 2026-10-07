@@ -27,6 +27,27 @@ def save(path, value):
 
 ALLOCATION_PROFILES = ('standard', 'flat_pilot_v1')
 CLEANUP_MARGIN_SECONDS = 400
+# Training stops at UPDATE_LIMIT; a training pack that opts in to extended updates may run to the larger limit.
+UPDATE_LIMIT, EXTENDED_UPDATE_LIMIT = 2000, 5000
+
+
+def update_limit(mode, extended):
+    """The largest update count a native allocation accepts; only training can opt in to the extended limit."""
+    if extended and mode != 'train':
+        raise ValueError('Extended updates apply to training only')
+    return EXTENDED_UPDATE_LIMIT if extended else UPDATE_LIMIT
+
+
+def decay_updates(updates, decay):
+    """Updates over which the action deviation falls to its final value; the whole run unless declared."""
+    return updates if decay is None else decay
+
+
+def validate_decay(mode, updates, decay):
+    """A training decay length that ends after the run would never reach the final deviation."""
+    if decay is not None and (type(decay) is not int or not 1 <= decay <= EXTENDED_UPDATE_LIMIT
+                              or (mode == 'train' and decay > updates)):
+        raise ValueError('The deviation decay length lies between 1 update and the training updates')
 
 
 def validate_deadline(mode, profile, seconds):
@@ -123,6 +144,8 @@ def main(argv=None):
     parser.add_argument('--num-envs', type=int, choices=[1, 32, 128], required=True)
     parser.add_argument('--seed', type=int, default=20260917)
     parser.add_argument('--updates', type=int, default=512)
+    parser.add_argument('--extended-updates', action='store_true',
+                        help='Accept up to 5000 training updates; without this opt-in training stops at 2000.')
     parser.add_argument('--max-wall-seconds', type=float, default=6200.)
     parser.add_argument('--allocation-profile', choices=ALLOCATION_PROFILES, default='standard')
     parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
@@ -164,6 +187,8 @@ def main(argv=None):
                         help='Append the sine and cosine of a gait phase with this period in controls; 0 adds none.')
     parser.add_argument('--action-std-final', type=float,
                         help='Lower the action deviation linearly to this value over the run; PPO then does not learn it.')
+    parser.add_argument('--action-std-decay-updates', type=int,
+                        help='Reach the final action deviation after this many updates and hold it; the run length by default.')
     parser.add_argument('--action-noise-correlation', type=float, default=0.,
                         help='Share of each exploration noise sample carried to the next control (tanh mean only).')
     parser.add_argument('--video-case',
@@ -193,10 +218,11 @@ def main(argv=None):
                            learning_rate_max=args.learning_rate_max, action_std=args.action_std,
                            action_noise_correlation=args.action_noise_correlation,
                            action_std_final=args.action_std_final, gait_clock=args.gait_clock,
-                           action_smoothing=args.action_smoothing, velocity_noise=args.velocity_noise)
+                           action_smoothing=args.action_smoothing, velocity_noise=args.velocity_noise,
+                           action_std_decay_updates=args.action_std_decay_updates)
     if (learner_options != dict(observation_scaling='none', command_segments='continuous', learning_rate_max=None,
                                 action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0,
-                                action_smoothing='none', velocity_noise=0.)
+                                action_smoothing='none', velocity_noise=0., action_std_decay_updates=None)
             and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate'))):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
@@ -211,9 +237,13 @@ def main(argv=None):
         importlib.import_module(prefix+'.task_v4').reward_config(args.reward_options)
     if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
         raise ValueError('The paper networks need the AMP learner, and the AMP learner trains or evaluates only')
+    if args.action_std_decay_updates is not None and args.action_std_final is None:
+        raise ValueError('The deviation decay length needs a final action deviation')
+    validate_decay(args.mode, args.updates, args.action_std_decay_updates)
+    limit = update_limit(args.mode, args.extended_updates)
     configuration.verify_assets(args.asset, args.model)
     validate_deadline(args.mode, args.allocation_profile, args.max_wall_seconds)
-    if (not args.headless or args.device != 'cuda:0' or not 1 <= args.updates <= 2000
+    if (not args.headless or args.device != 'cuda:0' or not 1 <= args.updates <= limit
             or args.seed < 0
             or (args.mode in ('train', 'probe') and (args.num_envs != 128 or args.checkpoint is not None))
             or (args.mode == 'evaluate' and (args.num_envs != 1 or args.checkpoint is None))):
@@ -235,6 +265,9 @@ def main(argv=None):
         'reward_version': args.reward_version, 'learner': args.learner, 'networks': args.networks}
     if args.reward_options:
         identity['reward_options'] = args.reward_options
+    if args.extended_updates:
+        # The exploration decay length enters ppo_config; the opt-in records the requested run length beside it.
+        identity['training_updates'] = args.updates
     if args.learner == 'amp':
         amp_module = importlib.import_module(prefix+'.amp_ppo')
         identity['learner_source_files'] = {name: sha(source/name) for name in ('amp.py', 'amp_discriminator.py', 'amp_ppo.py', 'paper_networks.py')}
@@ -383,7 +416,7 @@ def main(argv=None):
                 if args.action_std_final is not None:
                     # The schedule wraps the diagnostic update, so each record reads the deviation it trained with.
                     runner.alg.update = vanilla.DeviationSchedule(runner.alg, args.action_std, args.action_std_final,
-                                                                  args.updates).update
+                        decay_updates(args.updates, args.action_std_decay_updates)).update
             def checkpoint(update):
                 path = args.output/f'checkpoint_update{update:06d}.pt'
                 runner.save(str(path), infos={'identity': identity, 'updates': update})
