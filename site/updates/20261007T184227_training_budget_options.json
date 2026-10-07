@@ -1,0 +1,26 @@
+{
+  "id": "20261007T184227_training_budget_options",
+  "date": "2026-10-07T18:42:27Z",
+  "title": "Add an explicit 5000-update opt-in and a separate exploration decay length",
+  "summary": "Training and pack preparation keep the 2000-update limit unless the training pack passes --extended-updates, which accepts up to 5000 updates and records training_updates in the checkpoint identity. --action-std-decay-updates sets how many updates the action deviation takes to reach its final value; the deviation then holds. Without it the decay spans the run, so existing packs and checkpoints keep their configuration. Deterministic fixtures trace both yaw command signs through the command bank, the observation, reward v4 and the evaluator, and find no sign inversion.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Run the program lead's controlled reward v4 comparison: budget, joint-margin and yaw-weight arms at 5000 updates with the deviation decay held at 2000 updates, two seeds each.",
+  "changes": [
+    "locomotion/README.md",
+    "locomotion/ppo.py",
+    "locomotion/prepare.py",
+    "locomotion/train.py",
+    "locomotion/tests/test_training_budget.py",
+    "locomotion/tests/test_yaw_sign.py",
+    "site/updates/20261007T184227_training_budget_options.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_training_budget.py",
+    "locomotion/tests/test_yaw_sign.py",
+    "locomotion/README.md"
+  ],
+  "no_project_impact": true,
+  "reason": "The options add a training budget and a schedule length; they establish no native result or accepted capability."
+}

@@ -51,8 +51,8 @@ walking evidence for version 3 remains pending. Read the
 before dispatch.
 You can select `prepare --reward-version 4` with the learner options below.
 Each option keeps its baseline default and enters the pack and the checkpoint
-record. Each one except `--episode-seconds` and `--reward-options` also enters the evaluation command,
-and evaluation rejects a mismatch. Read
+record. Each one except `--episode-seconds`, `--reward-options` and `--extended-updates` also enters the
+evaluation command, and evaluation rejects a mismatch. Read
 [reward audit section 15](../docs/REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)
 for the motivation and evidence limits of each option.
 
@@ -62,6 +62,8 @@ for the motivation and evidence limits of each option.
 | `--command-segments bootstrap` | Cut the return at a command change and bootstrap the post-action state under the held command before any reset. |
 | `--learning-rate-max 0.0003` | Cap the stock adaptive schedule, which reached 0.01 once the tanh means saturated. |
 | `--action-std 0.15 --action-std-final 0.05` | Hold the action deviation on a linear schedule. PPO no longer learns it. |
+| `--action-std-decay-updates 2000` | Reach the final deviation after this many updates and hold it for the rest of the run. Without it the decay spans the run. The value enters `ppo_config` under `exploration`. |
+| `--extended-updates` | Accept up to 5000 training updates. Without it, `prepare` and the training entry reject more than 2000. Training alone accepts it, and the checkpoint identity records `training_updates`. |
 | `--gait-clock 60` | Append the sine and cosine of the episode phase to both observations; both are zero under a zero command. Reward version 4 requires the period of its contact schedule. |
 | `--action-smoothing mean2` | Send the mean of each action and the previous one to the environment, in training and in evaluation. That mean has no gain at half the control rate, where a rest oscillation sat. |
 | `--velocity-noise 0.5` | Add Gaussian noise in rad/s to the actor's joint-velocity inputs in training. The critic and evaluation read measured values. Retained runs combine this option with smoothing and reward changes; they do not isolate its effect. |
