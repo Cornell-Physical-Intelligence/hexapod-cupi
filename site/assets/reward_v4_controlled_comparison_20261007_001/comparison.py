@@ -89,6 +89,75 @@ PINS = {
     "ppo_v4_omni_seed20260918_20261007_001_evaluate/run/standing/evaluation/batch_010/native400hz/capture.json": "5405ce19ddb1392accac97006287a13f65795f28539bc11b1f809e3eaea2abdc",
     "ppo_v4_omni_seed20260918_20261007_001_evaluate/run/standing/evaluation/batch_011/native400hz/capture.json": "03baea7bc5e09e119a66c471e72a4a07087698e00d0430a7c94114b3c17da278",
     "ppo_v4_omni_seed20260918_20261007_001_evaluate/run/standing/evaluation/batch_012/native400hz/capture.json": "0c93ed389bd0c0b2033232af8bc251693405f8048a12f22d3566135d4352a1b4",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001/PACK.json": "dd9d1bfa41098d9cccb8775efdbae0dc055e1a549b5366ca1de12153adeb55e6",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001/preparation.json": "adb27d8f91c1bcec6329106160f04eb1ebb29589e57b8456e0c261bf110bbcc4",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001/launcher.exitcode": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001/run/cleanup.json": "d62129fdaad13eba6b32bd74b4c7f636c3fea70a138ea07113f4e3e8d0bbfb24",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001/run/standing/state.json": "fde818f4f8724b20c9055800cf0621c6a2523e62e18a5361bfae8d6d0fa7dd4e",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001/run/standing/metrics.jsonl": "bbd134eb32094b73363e14926b65a11ca61546adfe6a1a3ec6d3b1889537a5ac",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001/run/standing/checkpoint_update002000.json": "de40e21fbbfef6beb158fbbf598965ff49e94ca9ce6f80e005109d69fc01e336",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001/run/standing/checkpoint_update003500.json": "3bc77a1021e37643916b041fee3366e473300305571e207353b5f29dabc23686",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001/run/standing/checkpoint_update005000.json": "578d30b27c59a05570f91f6f5fc78c28088a3c959f79fc4fa18177eb1f919387",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/PACK.json": "ee5c23aadd7a8a594ef69f70844ab2444470badf93c4ff4b07d1fd359269744d",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/preparation.json": "c62d429d65e73b76b2e101d0ae465c585ac1c30d8a6fac82730f566d323e68c8",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/launcher.exitcode": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/cleanup.json": "a64bf47370823cf52509e7bcfe2db470aad5dd9fd8cce7c0d63c9d45d7205731",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/state.json": "d089aec8a34e8d599bf88510eda6de4819f002c9e2fdf0e8166cf7b5162d93b2",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/summary.json": "4646ac3e83e6d42371c779606f417dae6ae901d75556787ccacfc1144191e550",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/allocation.json": "c5f439a5bf2d41ca4d02044357c8fbe8963f79c5c778d1f68b9d484fbf28641a",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_000/native400hz/capture.json": "9ebad5ce31996d762525c3b62832a166b6e6988f6b2986e749143805611eebf0",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_001/native400hz/capture.json": "8d22afcedb7b22e334bc897c6cea0a3d2f9c2a2eec33130f2e3a4dc6e8c76e0c",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_002/native400hz/capture.json": "a1ea24238c08381883abdcdca523b1b7468a152649c1b65620d194ec42fe1d58",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_003/native400hz/capture.json": "43ff02a12581d6be5ba665bf7d4a19cca2613a19cb070597cf2697312d36a52f",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_004/native400hz/capture.json": "af48cb131dff3f05c9803c3b04eccc80e13f7b4fc1ea612767e0aa6a93bc5a3e",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_005/native400hz/capture.json": "f789c29d9975f52ec8367311dd80f482fa7ff6e573d049f9f4fc844399e9d03e",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_006/native400hz/capture.json": "c8c6f225819c88b9a63440c5fab91385f09fb280e15fbb7026117412beda4e81",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_007/native400hz/capture.json": "fb187a89939398002b8fca7d491a671e9a73ff9951455227fb7195dcafd043d4",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_008/native400hz/capture.json": "aade8ad1a2059ae464287d4dcd7af1cded98db3521b60e69634304bc37ea8bcd",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_009/native400hz/capture.json": "45f29eac69998cb528483665c10cfeed2df6802a2f2a99fc537d11f036e27f16",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_010/native400hz/capture.json": "8be43505a48e86ffa55269054995e3350f8ec7152ddc3efe6189c0adef52b371",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_011/native400hz/capture.json": "c70699cb15b6af03da31b494e01454d7738be3a9573d9b45143ad002c945898f",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000/run/standing/evaluation/batch_012/native400hz/capture.json": "20ddc19c2083e1babf036edd21529e90f8bb8d248c3c808de179a0c852b4b1c7",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/PACK.json": "cedb07c3738be28d2a4186fa5c3f016b05dc5e6f13591eed60d55bd065552f96",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/preparation.json": "c89d92ee74ad07a3498aff1cbf73bc960f56a15e86fcfd1760124e8e574dceda",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/launcher.exitcode": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/cleanup.json": "8e51ddcc1edbf862a0b00649cfb508e447bf647058467268d9da1dfc47ea10a0",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/state.json": "40b2c0f573e649a1086231935e0ed0fb1991c86bcd47e3264d80b4d3f6d823f7",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/summary.json": "1f84818e9bc355eb3a2967d8ae3b268037389227e6cf8e6eb48a14600960c43e",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/allocation.json": "53bafe38389df26c8e1457a713733396b889c6f11e1489ae7faa6bc6716ce1af",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_000/native400hz/capture.json": "ae7569c60c5fc9bd6fe03ba9475fe68dd212ae8bc67e8c23dc0772bff90347a7",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_001/native400hz/capture.json": "52363c73621bc8b446d09568f8878ff9badd962891f5dce760bc3ed8648fb658",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_002/native400hz/capture.json": "a154a9cc7481941caaf47f1290c8cc87683c5afe4b52efaa3158273d16511888",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_003/native400hz/capture.json": "74cf5c1e3d32b156c414a34ef2b7b970e51234a378cd79076f43f4def964c325",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_004/native400hz/capture.json": "766d0cb1e79e4ba55ec26bc9981b11a63bc22586647e7f86000faa2860f6188f",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_005/native400hz/capture.json": "fe188cb48ad26634b1b6d3b0a6245e925ebe4fa22b9816ca07c24925ebd1b84a",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_006/native400hz/capture.json": "6ada1819f382783541b4588df8e1d6a2e3fa376fe25514ef182dc05d4956829b",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_007/native400hz/capture.json": "ebabd822d675a9b8f8fb5be23e152f76c3c581f398886976fbfb13991d4da158",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_008/native400hz/capture.json": "5d0487c64db4e8728af98f06b52b59f8f8a6f7b84c8e0ea93322f4115b390cd0",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_009/native400hz/capture.json": "d90a6a822c60981f005afa38d0b2665be798838100c87a371dddf2098c6a2fa8",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_010/native400hz/capture.json": "b05ce7c889b950912d83e5b7fa49891789296673ef4a96b75d0d89a27d57d837",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_011/native400hz/capture.json": "faf4d49cb427532e0f93609b4c69c19c96c3fbce73de778b12d0dea52b8a37c0",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500/run/standing/evaluation/batch_012/native400hz/capture.json": "d68c9233df6b14080e4201f2881c114ff29145723bbc3f43d7195088c50f4bad",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/PACK.json": "a5936041d276899a71ebf4dfa5c638b230cb454a8df151d7af4d5ac6f9101637",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/preparation.json": "499636e6ba648397a26d17c5c59de799ab046177882d5ccca2c2c10eb4691cef",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/launcher.exitcode": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/cleanup.json": "9c4a2afaa7a9963263c98a1639bb6d960a65390e71f6c2f1cabe1e35a02e37a8",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/state.json": "f87767660be082ad62a1da201934bc4058754b34c4d45acc4017a43a4d61c56e",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/summary.json": "6080a5fda8c9e9859935b309d5047b3186ac60b7e97e210ffeafbb82d2b06053",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/allocation.json": "32cb2125e6151f2aa66ca6139af39a85993a2b86eb626dea8c66d91aa291b089",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_000/native400hz/capture.json": "d6590a750bb213907df62c448a5ec628dcf3f6adfb6a93dcb427d77729433289",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_001/native400hz/capture.json": "35f3b00297cfad2e454b0d5531049b583d97f764876a39b1d13633a704fbcbd2",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_002/native400hz/capture.json": "58acd783123207f9e24ab795a40e093d39117632681fb728d09212f31a6fd361",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_003/native400hz/capture.json": "8dc1034db688dac170b3e227264ca87d6c3fcf0680a1ee98b8f17aca1df02426",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_004/native400hz/capture.json": "738fa3a2492079a8e78f7775c25a5de73ee3e4f44df141c63ee360b3b1746e7a",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_005/native400hz/capture.json": "22b0712148950429f99b23c2190bbc45b097a807b5eedf0b0e7ba9d7007d345a",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_006/native400hz/capture.json": "2501bfbd8233fc67afadf98541f7c9245eb4b8cf1472986604a137a00d4d716a",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_007/native400hz/capture.json": "7db8e960455ff006d5d46af958d3f55002c00405f8108550bbca30cff672a7a2",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_008/native400hz/capture.json": "9ac3baa6e1d486679f43272ccfda421a853bc6371f6f25042128b6081454c0bc",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_009/native400hz/capture.json": "049db96a0d44d0bd3749df8a386c8fc4a91f3a355d65087213b4c62dedbec3e3",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_010/native400hz/capture.json": "ddd555afe653f860802c6b5ec9b96f7fef2ea1c0acf2c6080b1284210238ff47",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_011/native400hz/capture.json": "7e952a7080c058dc117682f920f7e11a2ea2bdc49e4f7467a3d3240698c704fe",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000/run/standing/evaluation/batch_012/native400hz/capture.json": "1688221e47f51210ab8b7c81f865f2d930ce6ae715ae700bb061197d24d84500",
 }
 METHODS = {
     "translation_passes": "Count of the eight 0.05 m/s translation probes whose evaluator result passes every existing check.",
@@ -121,6 +190,9 @@ METHODS = {
                 "no requirement other than the guard and no per-term or per-sign part of one, is met in either seed. "
                 "mixed: any other complete result, including seeds that disagree. inconclusive: a required attempt or "
                 "evaluation is missing or failed.",
+    "deviation_parity": "mean_action_std of each packet attempt over updates 1-2000 against the reference attempt of the "
+                        "same seed, whose decay spanned its 2000 updates, and its largest departure from 0.05 afterwards. "
+                        "Each metric row records the deviation that its update trained with.",
     "claim_limits": ["Reward totals do not establish gradient competition.",
                      "Lower terminations alone do not establish a speed benefit.",
                      "Two seeds establish no confidence interval.",
@@ -224,6 +296,7 @@ def training(workspace, attempt):
     record["windows"] = {name: window(rows, *span) for name, span in WINDOWS.items()}
     record["deviation_at"] = {str(update): rows[update - 1]["mean_action_std"] for update in (1, 2000, 2001, 5000)
                               if update <= len(rows)}
+    record["_deviation"] = [row["mean_action_std"] for row in rows]
     sidecars = {}
     for update in UPDATES:
         name = "run/standing/checkpoint_update%06d.json" % update
@@ -417,6 +490,16 @@ def main():
                        for update in UPDATES}
         attempts.setdefault(arm, {})[str(seed)] = {"reward_options": ARMS[arm], "training": train,
                                                    "evaluations": evaluations}
+    for seed in map(str, SEEDS):
+        reference = (references[seed]["training"] or {}).pop("_deviation", None)
+        for arm in ARMS:
+            train = attempts[arm][seed]["training"]
+            deviation = None if train is None else train.pop("_deviation")
+            if deviation is not None and reference is not None and len(deviation) >= 2000:
+                train["deviation_schedule_parity"] = {
+                    "max_abs_difference_updates_1_2000": max(abs(a - b) for a, b in zip(deviation[:2000], reference)),
+                    "max_abs_departure_from_0_05_after_2000": max((abs(value - .05) for value in deviation[2000:]),
+                                                                   default=None)}
     hypotheses = {"H1_budget": {}, "H2_margin": {}, "H3_yaw": {}}
     for seed in map(str, SEEDS):
         b, j, y = (attempts[arm][seed] for arm in "BJY")

@@ -33,6 +33,10 @@ PINS = {
     "ppo_v4_omni_seed20260917_20261007_001_evaluate": "5a72ac18bbd0ccc712f0f3e3f6a12a475b7754af44a95f656512ea3b9f4a4798",
     "ppo_v4_omni_seed20260918_20261007_001": "abc7bbaebfd1dac11b495aaf0da217b38f7e64fcbddee7058f6761387a1b5019",
     "ppo_v4_omni_seed20260918_20261007_001_evaluate": "e3aa528e58ee1db831d1099f7c44857a11299fc263ac7d2a77ceb0cb71626fce",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001": "778f975621d591be05b1707c1c8871a073f8361b7fb05ffeb67129d411b47360",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000": "45f8c006c1ab93d012bec8296e047f9fc1b5e96a1c072a19f813959b8c4f7f19",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500": "2fa380ed329162b12224dd30f7189c2c322f368615ad506fb3811dd6656156e1",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000": "a612305674b4633b3d209986d5227e5514223d658d02e161f63354e79383ab5d",
 }
 METHODS = {
     "scope": "One training attempt and its retained 13-probe evaluations, one deterministic trial per probe (actor mean "
