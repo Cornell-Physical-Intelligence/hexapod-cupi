@@ -48,6 +48,26 @@ unqualified for Stage 2. [Audit section 15](REWARD_V2_TABLE1_AUDIT.md#15-vanilla
 gives the causes of the earlier failures, the controlled evidence and each
 departure from the paper.
 
+## Parallel-training reference
+
+[Rudin et al. 2022](https://proceedings.mlr.press/v164/rudin22a.html) is the
+recipe behind RSL-RL: on-policy PPO with time-out bootstrapping, 24 steps per
+robot and update, and thousands of robots on one GPU. The table states this
+repository's parity with it. Read it before you change a learner setting.
+
+| Setting | Rudin et al. | This repository |
+| --- | --- | --- |
+| Algorithm | PPO with GAE, time-out bootstrapping, an adaptive rate at KL 0.01, clip 0.2, 5 epochs and 4 mini-batches | The same values through RSL-RL 5.0.1. The rate cap and the command-boundary bootstrap are additions. |
+| Batch per update | 4096 robots and 24 steps, 98,304 samples. 128 robots is the smallest count in the authors' sweep and gives their lowest final reward. | 128 robots and 24 controls, 3,072 samples. The standing admission fixes the replica count. |
+| Observations | Base linear and angular velocity, gravity, joint positions and velocities, the previous action and 108 terrain heights | Five proprioception frames without base linear velocity, the command and the executed action. The critic adds measured velocity. |
+| Actions | Joint position targets to a PD controller with an action-rate penalty and no rate clamp | Joint offsets with a 0.35 rad scale and the 0.040 rad per control limiter |
+| Reward | Nine gait-free terms with an exponential tracking kernel and a feet air-time term. The policy converges to a trot. | Reward v4 adds a tripod schedule, swing travel and quiet terms. Version 1 is the gait-free baseline. |
+| Curriculum and randomization | Terrain and command curricula, friction in [0.5, 1.25], pushes every 10 s and measured observation noise | Flat ground, fixed friction and no pushes. Joint-velocity noise on the actor is the one noise channel. |
+
+The batch row is the largest gap. With the replica count fixed, the paper's
+lever is more controls per robot and update. That changes the frozen
+24-control budget and needs a program-lead decision.
+
 ## Proposed reproduction sequence
 
 [Liu et al.](https://arxiv.org/abs/2511.03167) use PPO with an adversarial motion
