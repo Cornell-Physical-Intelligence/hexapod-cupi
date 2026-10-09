@@ -27,6 +27,12 @@ command, the failing probes' level, loses 42 percent of it at the default scale.
 stride and took about 40 percent of the schedule pay from replayed walks with no mean drift. A
 full-stride mean cancels that wobble and keeps drift and a missing turn.
 
+``turn_draw_fraction`` turns that share of the moving command draws into a turn in place at
+version 1's yaw rate (0.2 rad/s), with a random sign; it draws from the task's generator only when
+nonzero, so the default leaves earlier runs' command sequences unchanged. The 20-command bank holds
+two turns in place, so a policy otherwise sees one in ten moving commands as a pure turn.
+``yaw_gate_on="none"`` switches the gate off to test turn-heavy sampling alone.
+
 Every other term is reward v4 unchanged. Train or score it with ``variant`` on the surrogate first
 (locomotion/surrogate/README.md); it is not a reviewed reward version.
 """
@@ -47,6 +53,7 @@ class RewardV4YawGateConfig(task_v4.RewardV4Config):
     yaw_gate_scale_rad_s: float = .1
     gate_window_controls: int = 60
     yaw_gate_on: str = "turn"
+    turn_draw_fraction: float = 0.
 
     def validate(self):
         super().validate()
@@ -54,8 +61,10 @@ class RewardV4YawGateConfig(task_v4.RewardV4Config):
             raise ValueError("The yaw gate needs a positive finite scale")
         if type(self.gate_window_controls) is not int or not 1 <= self.gate_window_controls <= 250:
             raise ValueError("gate_window_controls needs 1 to 250 controls")
-        if self.yaw_gate_on not in ("turn", "all"):
-            raise ValueError("yaw_gate_on is turn or all")
+        if self.yaw_gate_on not in ("turn", "all", "none"):
+            raise ValueError("yaw_gate_on is turn, all or none")
+        if not 0 <= self.turn_draw_fraction <= 1:
+            raise ValueError("turn_draw_fraction is a share from 0 to 1")
 
 
 REWARD_V4_YAW_GATE_CONFIG = RewardV4YawGateConfig()
@@ -82,7 +91,8 @@ def measured_reward_v4_yaw_gate(telemetry, commands, terminated, config=REWARD_V
     toe_force = torch.linalg.vector_norm(telemetry["tibia_floor_force_world_n"].to(device, torch.float32), dim=-1)
     unloaded = (1 - toe_force / config.schedule_load_n).clamp(0, 1)
     swing = telemetry["scheduled_swing"].to(device, torch.bool).to(torch.float32)
-    active = (commands[:, 2] != 0) if config.yaw_gate_on == "turn" else (commands != 0).any(-1)
+    active = {"turn": commands[:, 2] != 0, "all": (commands != 0).any(-1),
+              "none": torch.zeros(len(commands), dtype=torch.bool, device=device)}[config.yaw_gate_on]
     earned = config.schedule_weight * active.to(torch.float32) * (unloaded * swing).sum(-1) / 3
     gate = yaw_gate(stride_yaw.to(device, torch.float32), commands, config)
     components["schedule_yaw_gate"] = -(1 - gate) * earned
@@ -101,6 +111,18 @@ class TrainingTaskV4YawGate(task_v4.TrainingTaskV4):
         window = (type(self).reward_config if reward_config is None else reward_config).gate_window_controls
         self.gate_window = task_v4.StrideWindow(env.num_envs, window, 1, env.device)
         super().__init__(env, config, output_dir, reward_config)
+
+    def _resample(self, indices):
+        """Reward v4's draw, then a declared share of the moving draws becomes a turn in place."""
+        super()._resample(indices)
+        share = self.reward_config.turn_draw_fraction
+        if share and len(indices):
+            chosen = (torch.rand(len(indices), generator=self.rng) < share).to(self.env.device)
+            chosen &= (self.env.commands[indices] != 0).any(-1)
+            sign = (torch.randint(0, 2, (len(indices),), generator=self.rng) * 2 - 1).to(self.env.commands)
+            turns = torch.zeros(len(indices), 3, device=self.env.device, dtype=self.env.commands.dtype)
+            turns[:, 2] = sign * self.config.yaw_rate_rad_s
+            self.env.commands[indices[chosen]] = turns[chosen]
 
     def reset(self, indices=None):
         output = super().reset(indices)

@@ -128,6 +128,31 @@ class YawGateTests(unittest.TestCase):
         self.assertEqual(declared["reward"]["config"]["yaw_gate_scale_rad_s"], CONFIG.yaw_gate_scale_rad_s)
         self.assertEqual(task.status()["reward_version"], gated.REWARD_VERSION)
 
+    def test_gate_off_adds_nothing(self):
+        commands = torch.tensor([[0., 0., .2], [.05, 0., 0.]])
+        (v4_reward, _), (reward, parts) = scores(commands, torch.zeros(2), config=replace(CONFIG, yaw_gate_on="none"))
+        self.assertEqual(parts["schedule_yaw_gate"].tolist(), [0., 0.])
+        torch.testing.assert_close(reward, v4_reward)
+
+    def test_turn_draws_replace_a_share_of_moving_draws_and_keep_the_zero_quota(self):
+        def draws(share, n=400):
+            native = GaitDouble(n)
+            task = gated.variant(f"forward_draw_fraction=0,turn_draw_fraction={share}")(native)
+            task.reset()
+            return native.commands.clone(), task
+        base, _ = draws(0.)
+        turned, task = draws(.5)
+        zero = (base == 0).all(-1)
+        self.assertTrue(torch.equal((turned == 0).all(-1), zero))
+        pure_turn = (turned[:, :2] == 0).all(-1) & (turned[:, 2] != 0)
+        share = float(pure_turn[~zero].float().mean())
+        self.assertGreater(share, .45)
+        self.assertEqual({round(x, 6) for x in turned[pure_turn, 2].tolist()}, {-.2, .2})
+        default, _ = draws(0.)
+        self.assertTrue(torch.equal(default, base))  # no extra generator draws at the default
+        with self.assertRaises(ValueError):
+            gated.reward_config("turn_draw_fraction=1.5")
+
     def test_variants_override_v4_and_gate_options(self):
         variant = gated.variant("yaw_gate_scale_rad_s=0.05,forward_draw_fraction=0")
         self.assertEqual((variant.reward_config.yaw_gate_scale_rad_s, variant.reward_config.forward_draw_fraction), (.05, 0.))
