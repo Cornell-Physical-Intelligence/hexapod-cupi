@@ -33,6 +33,30 @@ PINS = {
     "ppo_v4_omni_seed20260917_20261007_001_evaluate": "5a72ac18bbd0ccc712f0f3e3f6a12a475b7754af44a95f656512ea3b9f4a4798",
     "ppo_v4_omni_seed20260918_20261007_001": "abc7bbaebfd1dac11b495aaf0da217b38f7e64fcbddee7058f6761387a1b5019",
     "ppo_v4_omni_seed20260918_20261007_001_evaluate": "e3aa528e58ee1db831d1099f7c44857a11299fc263ac7d2a77ceb0cb71626fce",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001": "778f975621d591be05b1707c1c8871a073f8361b7fb05ffeb67129d411b47360",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u002000": "45f8c006c1ab93d012bec8296e047f9fc1b5e96a1c072a19f813959b8c4f7f19",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u003500": "2fa380ed329162b12224dd30f7189c2c322f368615ad506fb3811dd6656156e1",
+    "ppo_v4_omni5k_B_seed20260917_20261007_001_evaluate_u005000": "a612305674b4633b3d209986d5227e5514223d658d02e161f63354e79383ab5d",
+    "ppo_v4_omni5k_B_seed20260918_20261007_001": "f1d61cc0f28f9608c4f01af51ee1e19219d6bdf63e70313cc35b730c71f3a0b3",
+    "ppo_v4_omni5k_B_seed20260918_20261007_001_evaluate_u002000": "4f6b58ac59e464b7adcd5cc2edef9caaea9988113b8ba967b3c72e5de0a42fb2",
+    "ppo_v4_omni5k_B_seed20260918_20261007_001_evaluate_u003500": "6f195ba976e16b8e1f023213b41fbdf34a3221a72adbaee132f559fb10104c4f",
+    "ppo_v4_omni5k_B_seed20260918_20261007_001_evaluate_u005000": "a29c68b23f5efdbd16b8f5a01b91977f88ff99443c8bd0e337dacf928f92abd0",
+    "ppo_v4_omni5k_J_seed20260917_20261007_001": "fb5abeaa9424bd9da2148e86c2fd2c3518facecad2ffe6ea346fa76e86a7236a",
+    "ppo_v4_omni5k_J_seed20260917_20261007_001_evaluate_u002000": "33d8ef93daa68498d55694b8632f1401bf67ac225bd2f56659a1c312593b9624",
+    "ppo_v4_omni5k_J_seed20260917_20261007_001_evaluate_u003500": "a2305f803d97baf0a90c18461ca57ae6dc2c5f6e4f5fe60df0384b1f4734b085",
+    "ppo_v4_omni5k_J_seed20260917_20261007_001_evaluate_u005000": "89d01f47c21ea6861d8eca01f40a719639f9c3b351a043957cc394f8b14bc9c7",
+    "ppo_v4_omni5k_J_seed20260918_20261007_001": "e374f63486b3f2eb0eb63fd8ebaee062cd84156a3ee5d748dcb5929e79b04292",
+    "ppo_v4_omni5k_J_seed20260918_20261007_001_evaluate_u002000": "1eec44814401d31598afc148ebfad7e652e903d8dfbe447eb36d55ccc0828d62",
+    "ppo_v4_omni5k_J_seed20260918_20261007_001_evaluate_u003500": "a8c33ca8c6c4fa1b128669a3ed1ba05e9b1143982e5c54995f0bb50781c0fb7c",
+    "ppo_v4_omni5k_J_seed20260918_20261007_001_evaluate_u005000": "a7c00669c471ae83570962a499dc0b1f4a28b0798ef705622aba05259da46916",
+    "ppo_v4_omni5k_Y_seed20260917_20261007_001": "d376e6feb2dacf2bb871696fcd75cea4c293e4757040a7efc699f98cc0aea398",
+    "ppo_v4_omni5k_Y_seed20260917_20261007_001_evaluate_u002000": "457087e27a416cdd9dfd68964ecb6e788ed037bf45482981c01894a43526d232",
+    "ppo_v4_omni5k_Y_seed20260917_20261007_001_evaluate_u003500": "cc86b864ac2862555aad972ef731b8ad9b5cbdc272e38551e25a2ac748b5c09a",
+    "ppo_v4_omni5k_Y_seed20260917_20261007_001_evaluate_u005000": "5f638284ad1ebe4481c100d11e3c6236aaa6710519f42f07959fbc4243d820f7",
+    "ppo_v4_omni5k_Y_seed20260918_20261007_001": "26cf6e38c2a73aeb4898e23aea4ea9918d2809c0feb50d0c5be601b491e40254",
+    "ppo_v4_omni5k_Y_seed20260918_20261007_001_evaluate_u002000": "887ac794fc363a462e9110172bc691afde2884e518958352d6b62d241e62d278",
+    "ppo_v4_omni5k_Y_seed20260918_20261007_001_evaluate_u003500": "9b014431592af7a5a69415c601fde00153628e183ac913b5549bd717daec9c29",
+    "ppo_v4_omni5k_Y_seed20260918_20261007_001_evaluate_u005000": "a30170ac966a253ab0f1f8025524c3fc05af7528c7c84ee81e67085326391e00",
 }
 METHODS = {
     "scope": "One training attempt and its retained 13-probe evaluations, one deterministic trial per probe (actor mean "
@@ -54,7 +78,10 @@ METHODS = {
                   "each initial counter must equal the sum of the earlier batches' steps; time_s must equal (sequence + 1) * "
                   "physics_dt. Every float array must be finite.",
     "completeness": "Each probe must record its profile's full control count, the capture must hold eight physics steps per "
-                    "control, and the load summary must mark the requested window complete.",
+                    "control, and the load summary must mark the requested window complete. A probe that ends in a native "
+                    "terminal state (failure_kind native_terminal_prefix) keeps its recorded prefix: it must fail with the "
+                    "terminated and complete_requested_window checks, its capture and load summary must cover exactly the "
+                    "recorded controls, and the record lists it under terminated_probe_cases with an incomplete window.",
     "loads": "locomotion/force_metrics.py report_for recomputes each probe's load summary from the substep chunks after it "
              "checks each chunk's sha256 against capture.json. The recomputed cases must equal the retained "
              "force_metrics.json within a relative tolerance of 1e-9. Forces are contact-normal forces and exclude "
@@ -256,15 +283,21 @@ def evaluation(attempt, trained, state, trained_source, checkpoints):
         assert force["source_files"] == {"declaration.json": report["files"]["declaration.json"],
                                          "native400hz/capture.json": files[base + "native400hz/capture.json"], **substeps}
         assert (report["assigned_case_ids"], report["results"], report["checkpoint_sha256"]) == ([case], [result], checkpoint)
-        assert report["acquisition_complete"] and report["failure"] is None and report["native_capture_failure"] is None
-        controls = EXPECTED_CONTROLS[result["profile"]]
-        assert report["controls"] == result["recorded_controls"] == controls and result["checks"]["complete_requested_window"]["status"] == "pass"
+        # A native terminal state (a fall or a joint-limit violation) ends the trial and keeps its prefix; the
+        # probe then fails with an incomplete requested window. Any other acquisition failure stops verification.
+        terminated = report["failure_kind"] == "native_terminal_prefix"
+        assert report["native_capture_failure"] is None and capture["failure"] is None
+        assert report["acquisition_complete"] == (report["failure"] is None) == (not terminated)
+        assert not terminated or (result["checks"]["terminated"]["status"] == "fail" and not result["pass"])
+        expected, controls = EXPECTED_CONTROLS[result["profile"]], report["controls"]
+        assert report["controls"] == result["recorded_controls"] and (controls == expected) == (not terminated)
+        assert result["checks"]["complete_requested_window"]["status"] == ("fail" if terminated else "pass")
         assert report["recorded_physics_steps"] == capture["steps"] == physics["decimation"] * controls
         assert capture["initial_counter"] == sum(batch["native_steps"] for batch in batches)
-        assert result["native_capture_complete"] and capture["failure"] is None and report["seed"] == allocation["seed"] == seed
+        assert result["native_capture_complete"] == (not terminated) and report["seed"] == allocation["seed"] == seed
         assert force["status"] == "available" and force["capture_failure"] is None and force["checkpoint_sha256"] == checkpoint
         assert [(row["case_id"], row["recorded_samples"], row["expected_samples"], row["requested_window_complete"])
-                for row in force["cases"]] == [(case, capture["steps"], capture["steps"], True)]
+                for row in force["cases"]] == [(case, capture["steps"], physics["decimation"] * expected, not terminated)]
         recomputed = force_metrics.report_for(attempt.local / base)
         gap = difference(json.loads(json.dumps(recomputed["cases"])), force["cases"])
         assert gap is not None and gap <= RELATIVE_TOLERANCE, (case, gap)
@@ -275,7 +308,8 @@ def evaluation(attempt, trained, state, trained_source, checkpoints):
             "batch": base[-10:-1], "case_id": case, "pass": result["pass"], "failed_bounds": result["failed_bounds"],
             "report_sha256": files[base + "report.json"], "capture_sha256": files[base + "native400hz/capture.json"],
             "force_metrics_sha256": files[base + "force_metrics.json"], "native_steps": capture["steps"],
-            "controls": controls, "requested_window_complete": True,
+            "controls": controls, "requested_controls": expected, "requested_window_complete": not terminated,
+            "native_terminal_prefix": terminated,
             "native_bounds": {key: capture[key] for key in BOUNDS}, "native_peaks": arrays(attempt.local / base, controls,
                                                                                          capture, physics),
             "recomputed_load_relative_difference": gap, "loads_full_trial": loads(force)})
@@ -284,7 +318,9 @@ def evaluation(attempt, trained, state, trained_source, checkpoints):
             "passes": sum(batch["pass"] for batch in batches), "failed_probe_cases": summary["failed_probe_cases"],
             "batches": batches, "unique_files_hash_verified": verified,
             "largest_recomputed_load_relative_difference": largest,
-            "native_force_arrays_finite_and_sequential": True, "requested_windows_complete": True}
+            "native_force_arrays_finite_and_sequential": True,
+            "terminated_probe_cases": [batch["case_id"] for batch in batches if batch["native_terminal_prefix"]],
+            "requested_windows_complete": all(batch["requested_window_complete"] for batch in batches)}
 
 
 def main():

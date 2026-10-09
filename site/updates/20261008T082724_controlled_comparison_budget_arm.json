@@ -1,0 +1,22 @@
+{
+  "id": "20261008T082724_controlled_comparison_budget_arm",
+  "date": "2026-10-08T08:27:24Z",
+  "title": "Record the budget arm of the controlled reward v4 comparison",
+  "summary": "Both budget-arm seeds trained 5000 updates with the deviation decay held at 2000 updates, and each checkpoint at updates 2000, 3500 and 5000 ran the 13 learning probes. Through update 2000 each run matches its full-command-bank reference: the same deviation schedule, the same training windows and the same update-2000 probe metrics. At update 5000 seed 20260917 passes 7 of 13 probes and seed 20260918 passes 5; translation passes rise from 0 to 4 and from 0 to 3. Seed 20260917 meets every budget requirement. Seed 20260918 lowers quiet joint rate by 6.2 percent against the 10 percent requirement and adds a requested-torque failure on two translation probes that end at a joint limit, so the budget hypothesis is mixed. The verification records recompute every probe's contact-normal force and torque summary from the raw 400 Hz chunks without difference.",
+  "areas": [
+    "locomotion",
+    "research"
+  ],
+  "next": "Run the joint-margin and yaw-weight arms with both seeds, then compute the margin and yaw verdicts against the matched budget arm.",
+  "changes": [
+    "site/assets/reward_v4_controlled_comparison_20261007_001/*",
+    "site/updates/20261008T082724_controlled_comparison_budget_arm.json"
+  ],
+  "evidence": [
+    "site/assets/reward_v4_controlled_comparison_20261007_001/comparison_after_budget_arm.json",
+    "site/assets/reward_v4_controlled_comparison_20261007_001/B_seed20260917_verification.json",
+    "site/assets/reward_v4_controlled_comparison_20261007_001/B_seed20260918_verification.json"
+  ],
+  "no_project_impact": true,
+  "reason": "The budget arm leaves Stage 2 incomplete and changes no capability state; the margin and yaw comparisons remain pending."
+}

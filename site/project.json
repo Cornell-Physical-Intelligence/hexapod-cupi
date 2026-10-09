@@ -696,11 +696,11 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "Two reward-v4 PPO seeds pass the forward and forward-to-stop probes in native simulation. Training draws forward and zero commands alone, and the seven other translation probes and both yaw probes fail in each seed. Seed 20260918 fails both quiet probes on one toe-contact check. Each pass is one trial, and each evaluation leaves all 96 required Stage 2 cases unevaluated. Stage 2 still needs direction, transition, stop, torque, contact and visual acceptance. Native AMP learning remains pending.",
-      "question": "Widen the command draws beyond forward and remove the seed 20260918 toe miss in the quiet probes before any Stage 2 claim.",
+      "blocker": "Two reward-v4 PPO seeds that train on the full 20-command bank (source ca1e2137, freeze 8c69f4c01a91e378) pass 1 and 0 of 13 learning probes at update 2000. A controlled comparison from source a798095b (freeze 00cafc0582aeb43c) extends both seeds to 5000 updates with the action-deviation decay held at 2000 updates. At update 5000 the budget arm passes 7 and 5 of 13 probes (checkpoints 747095766e7f7178 and 58e2b91081b2179e), including 4 and 3 of 8 translations, and both yaw probes fail in each seed. Seed 20260918 fails the forward-to-stop probe, which ends at a joint limit. The budget, joint-margin and yaw-weight hypotheses are each mixed; site/assets/reward_v4_controlled_comparison_20261007_001/comparison_after_yaw.json (sha256 c9da744d32dd64d9) holds every per-seed number and hash. Each evaluation leaves all 96 required Stage 2 cases unevaluated. Stage 2 still needs direction, transition, stop, torque, contact and visual acceptance. Native AMP learning remains pending.",
+      "question": "Choose the next comparison with the program lead: no tested budget, joint-margin or yaw weight met every predicted outcome in both seeds, and both yaw probes still fail.",
       "next_step": null,
       "acceptance": null,
-      "card_text": "Two reward-v4 PPO seeds pass the forward and stop probes in simulation; nine direction and yaw probes fail. Walking remains unqualified.",
+      "card_text": "Full-command-bank reward-v4 PPO passes 7 and 5 of 13 probes after 5000 updates in simulation; yaw probes fail in both seeds. Walking remains unqualified.",
       "media_caption": "Approved detailed model; reward-v4 PPO, seed 20260917, update 2000; forward-to-stop probe passed with noise off."
     },
     {
