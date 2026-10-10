@@ -52,9 +52,12 @@ def open_lock(path):
         return os.open(path, os.O_RDONLY)
     except FileNotFoundError:
         try:
-            return os.open(path, os.O_RDONLY | os.O_CREAT | os.O_EXCL, 0o644)
+            fd = os.open(path, os.O_RDONLY | os.O_CREAT | os.O_EXCL, 0o644)
         except FileExistsError:
             return os.open(path, os.O_RDONLY)
+        # The creating account's umask trims the mode at creation; every account must open the lock.
+        os.fchmod(fd, 0o644)
+        return fd
 
 
 def lock_files():
