@@ -194,6 +194,9 @@ def main(argv=None):
                         help='Reach the final action deviation after this many updates and hold it; the run length by default.')
     parser.add_argument('--action-noise-correlation', type=float, default=0.,
                         help='Share of each exploration noise sample carried to the next control (tanh mean only).')
+    parser.add_argument('--steps-per-env', type=int, default=24,
+                        help='Controls each robot collects per PPO update, a multiple of 6 from 12 to 96; '
+                             'mini-batches scale with it.')
     parser.add_argument('--video-case',
                         help='Learning probe to record on video; the first selected probe by default.')
     if any(flag in (argv if argv is not None else sys.argv[1:]) for flag in ('--preflight-only', '--help', '-h')):
@@ -222,13 +225,16 @@ def main(argv=None):
                            action_noise_correlation=args.action_noise_correlation,
                            action_std_final=args.action_std_final, gait_clock=args.gait_clock,
                            action_smoothing=args.action_smoothing, velocity_noise=args.velocity_noise,
-                           action_std_decay_updates=args.action_std_decay_updates)
+                           action_std_decay_updates=args.action_std_decay_updates, steps_per_env=args.steps_per_env)
     if (learner_options != dict(observation_scaling='none', command_segments='continuous', learning_rate_max=None,
                                 action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0,
-                                action_smoothing='none', velocity_noise=0., action_std_decay_updates=None)
+                                action_smoothing='none', velocity_noise=0., action_std_decay_updates=None,
+                                steps_per_env=24)
             and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate'))):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
+    if not 12 <= args.steps_per_env <= 96 or args.steps_per_env % 6:
+        raise ValueError('The rollout length is a multiple of 6 from 12 to 96 controls per robot')
     if args.video_case is not None and (args.mode != 'evaluate' or args.eval_scope == 'full'):
         raise ValueError('A video case applies to a learning-probe evaluation')
     if args.episode_seconds != 20. and (args.mode != 'train' or not 5. <= args.episode_seconds <= 20.):

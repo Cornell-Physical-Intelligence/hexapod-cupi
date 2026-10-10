@@ -52,7 +52,7 @@ def smoothed_action(action, previous, episode_steps):
 def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empirical',
                observation_scaling='none', command_segments='continuous', learning_rate_max=None,
                action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0,
-               action_smoothing='none', velocity_noise=0., action_std_decay_updates=None):
+               action_smoothing='none', velocity_noise=0., action_std_decay_updates=None, steps_per_env=24):
     if action_mean not in ('unbounded', 'tanh'):
         raise ValueError('Action mean must be unbounded or tanh')
     if observation_normalization not in ('empirical', 'none'):
@@ -77,6 +77,8 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
     if action_std_decay_updates is not None and not (
             action_std_final is not None and type(action_std_decay_updates) is int and action_std_decay_updates >= 1):
         raise ValueError('The deviation decay length needs a final deviation and at least one update')
+    if type(steps_per_env) is not int or not 12 <= steps_per_env <= 96 or steps_per_env % 6:
+        raise ValueError('The rollout length is a multiple of 6 from 12 to 96 controls per robot')
     distribution = ('GaussianDistribution' if action_mean == 'unbounded'
                     else 'locomotion.action_distribution:BoundedMeanGaussian')
     config = {
@@ -107,6 +109,10 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
         config['exploration'] = {'action_std_final': action_std_final}
     if action_std_decay_updates is not None:
         config['exploration']['action_std_decay_updates'] = action_std_decay_updates
+    if steps_per_env != 24:
+        # Mini-batches grow with the rollout so each keeps the 768 samples of 128 robots x 24 controls / 4.
+        config['num_steps_per_env'] = steps_per_env
+        config['algorithm']['num_mini_batches'] = steps_per_env // 6
     wrapper = {key: value for key, value, default in (
         ('observation_scaling', observation_scaling, 'none'),
         ('command_segments', command_segments, 'continuous'), ('gait_clock', gait_clock, 0),

@@ -17,7 +17,8 @@ REMOTE_ROOT = LEGACY_ROOT
 LEARNER_OPTION_DEFAULTS = {'observation_scaling': 'none', 'command_segments': 'continuous',
                            'learning_rate_max': None, 'action_std': .15, 'action_noise_correlation': 0.,
                            'action_std_final': None, 'gait_clock': 0, 'action_smoothing': 'none',
-                           'velocity_noise': 0., 'action_std_decay_updates': None}
+                           'velocity_noise': 0., 'action_std_decay_updates': None,
+                           'steps_per_env': 24}
 
 
 def save(path, value):
@@ -42,7 +43,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             command_segments='continuous', learning_rate_max=None, action_std=.15,
             action_noise_correlation=0., action_std_final=None, gait_clock=0, action_smoothing='none',
             velocity_noise=0., episode_seconds=20., reward_options='', reward_task='v4',
-            video_case=None, extended_updates=False, action_std_decay_updates=None,
+            video_case=None, extended_updates=False, action_std_decay_updates=None, steps_per_env=24,
             allocation_profile='standard', max_wall_seconds=6200, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     validate_deadline(mode, allocation_profile, max_wall_seconds)
@@ -84,7 +85,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
                        'learning_rate_max': learning_rate_max, 'action_std': action_std,
                        'action_noise_correlation': action_noise_correlation, 'action_std_final': action_std_final,
                        'gait_clock': gait_clock, 'action_smoothing': action_smoothing,
-                       'velocity_noise': velocity_noise, 'action_std_decay_updates': action_std_decay_updates}
+                       'velocity_noise': velocity_noise, 'action_std_decay_updates': action_std_decay_updates,
+                       'steps_per_env': steps_per_env}
     selected_options = {key: value for key, value in learner_options.items() if value != LEARNER_OPTION_DEFAULTS[key]}
     if (observation_scaling not in ('none', 'fixed') or command_segments not in ('continuous', 'bootstrap')
             or (learning_rate_max is not None and not (type(learning_rate_max) is float and 1e-5 <= learning_rate_max <= 1e-2))
@@ -96,6 +98,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             or type(velocity_noise) is not float or not 0 <= velocity_noise <= 5
             or (action_std_final is not None and not (type(action_std_final) is float and .005 <= action_std_final <= action_std))
             or (action_std_decay_updates is not None and action_std_final is None)
+            or type(steps_per_env) is not int or not 12 <= steps_per_env <= 96 or steps_per_env % 6
             or (selected_options and (learner != 'ppo' or mode not in ('train', 'evaluate')))):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
@@ -259,6 +262,7 @@ def main():
     parser.add_argument('--action-noise-correlation', type=float, default=0.)
     parser.add_argument('--action-std-final', type=float)
     parser.add_argument('--action-std-decay-updates', type=int)
+    parser.add_argument('--steps-per-env', type=int, default=24)
     parser.add_argument('--gait-clock', type=int, default=0)
     parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none')
     parser.add_argument('--velocity-noise', type=float, default=0.)
