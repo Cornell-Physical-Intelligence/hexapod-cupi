@@ -100,8 +100,11 @@ class LocomotionEnv:
             self.save("native_errors.json", self.native_errors)
         self.save("native_errors.json", self.native_errors)
         self._error_subscription = omni.physx.get_physx_interface().get_error_event_stream().create_subscription_to_pop(native_error)
+        # A grid centred on the origin keeps every replica on the 80 m floor mesh up to 1024 robots; a grid
+        # that starts at the origin leaves the 80 m mesh beyond 441 robots at 2 m spacing.
         side = math.ceil(math.sqrt(cfg.num_envs))
-        origins = [(i % side * cfg.spacing_m, i // side * cfg.spacing_m, 0.) for i in range(cfg.num_envs)]
+        half = (side - 1) / 2
+        origins = [((i % side - half) * cfg.spacing_m, (i // side - half) * cfg.spacing_m, 0.) for i in range(cfg.num_envs)]
         self.origins = self.torch(origins)
         self.roots = [f"/Robot_{i:03d}" for i in range(cfg.num_envs)]
         for root, origin in zip(self.roots, origins):
