@@ -128,6 +128,40 @@ class YawGateTests(unittest.TestCase):
         self.assertEqual(declared["reward"]["config"]["yaw_gate_scale_rad_s"], CONFIG.yaw_gate_scale_rad_s)
         self.assertEqual(task.status()["reward_version"], gated.REWARD_VERSION)
 
+    def test_command_threshold_leaves_arcs_and_keeps_turns_in_place(self):
+        commands = torch.tensor([[.04, 0., .15], [0., 0., .2], [0., 0., -.2]])
+        _, (_, parts) = scores(commands, torch.zeros(3), config=replace(CONFIG, yaw_gate_min_command_rad_s=.18))
+        torch.testing.assert_close(parts["schedule_yaw_gate"], torch.tensor([0., -1., -1.]) * CONFIG.schedule_weight)
+
+    def test_bonus_pays_a_matched_turn_above_v4_and_nothing_without_a_turn(self):
+        bonus = replace(CONFIG, yaw_gate_bonus=.5)
+        commands = torch.tensor([[0., 0., .2]]).expand(4, -1).clone()
+        (v4_reward, v4_parts), (reward, parts) = scores(commands, torch.tensor([.2, .2*(1-(1/3)**.5), .1, 0.]), config=bonus)
+        pay = CONFIG.schedule_weight
+        # gate 1 -> +50 %; gate 2/3 (the break-even 1/(1+b)) -> 0; gate 0.75 -> +12.5 %; no turn -> -100 %.
+        torch.testing.assert_close(parts["schedule_yaw_gate"], torch.tensor([.5, 0., .125, -1.]) * pay, atol=1e-5, rtol=0)
+        torch.testing.assert_close(reward - v4_reward, parts["schedule_yaw_gate"])
+        torch.testing.assert_close(v4_parts["gait_schedule"] + parts["schedule_yaw_gate"], torch.tensor([1.5, 1., 1.125, 0.]) * pay, atol=1e-5, rtol=0)
+
+    def test_floor_keeps_part_of_the_pay_and_still_rewards_turning_more(self):
+        floor = replace(CONFIG, yaw_gate_bonus=.5, yaw_gate_floor=.5)
+        commands = torch.tensor([[0., 0., .2]]).expand(3, -1).clone()
+        (v4_reward, v4_parts), (_, parts) = scores(commands, torch.tensor([0., .1, .2]), config=floor)
+        pay = CONFIG.schedule_weight
+        # gate 0 -> half the v4 pay; gate 0.75 -> 0.5 + 1.0 * 0.75 = 1.25; gate 1 -> 1.5.
+        torch.testing.assert_close(v4_parts["gait_schedule"] + parts["schedule_yaw_gate"], torch.tensor([.5, 1.25, 1.5]) * pay, atol=1e-5, rtol=0)
+        self.assertEqual(CONFIG.yaw_gate_floor, 0.)
+        for bad in ("yaw_gate_floor=-0.1", "yaw_gate_floor=1.5"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                gated.reward_config(bad)
+
+    def test_new_options_default_to_the_withholding_gate(self):
+        self.assertEqual((CONFIG.yaw_gate_min_command_rad_s, CONFIG.yaw_gate_bonus, CONFIG.gate_window_controls), (0., 0., 60))
+        for bad in ("yaw_gate_bonus=-1", "yaw_gate_min_command_rad_s=-0.1", "gate_window_controls=300"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                gated.reward_config(bad)
+        self.assertEqual(gated.reward_config("gate_window_controls=120").gate_window_controls, 120)
+
     def test_gate_off_adds_nothing(self):
         commands = torch.tensor([[0., 0., .2], [.05, 0., 0.]])
         (v4_reward, _), (reward, parts) = scores(commands, torch.zeros(2), config=replace(CONFIG, yaw_gate_on="none"))

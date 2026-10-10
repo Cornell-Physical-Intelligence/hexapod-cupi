@@ -7,13 +7,27 @@ turn rate. This variant adds one term, ``schedule_yaw_gate``, that takes back pa
 when the body's stride-mean yaw rate misses its command:
 
     gate = clip(1 - e^2, 0, 1),  e = |w_stride - c_yaw| / max(|c_yaw|, yaw_gate_scale_rad_s)
-    schedule_yaw_gate = -(1 - gate) * w_schedule * active * sum_feet(u * swing) / 3
+    pay = yaw_gate_floor + (1 + yaw_gate_bonus - yaw_gate_floor) * gate
+    schedule_yaw_gate = (pay - 1) * w_schedule * active * sum_feet(u * swing) / 3
 
 ``active`` marks the commands the gate covers. With ``yaw_gate_on="turn"``, the default, it covers
 commands with a nonzero yaw rate (turns in place and arcs) and leaves translations to reward v4.
 A surrogate run that gated every moving command walked slower and fell more at update 2000: no
 policy holds its heading early in training, so the gate withheld schedule pay from every command
-while the gait formed. ``yaw_gate_on="all"`` restores that version.
+while the gait formed. ``yaw_gate_on="all"`` restores that version. ``yaw_gate_min_command_rad_s``
+narrows the covered commands to those turning at least that fast; 0.18 keeps the 0.2 rad/s turns
+in place and leaves the 0.15 rad/s arcs to reward v4.
+
+``yaw_gate_bonus`` turns the gate from a withholding into a reward: on covered commands the
+schedule pays ``gate * (1 + bonus)`` of its v4 value, so a turn that matches its command earns
+``1 + bonus`` times v4's schedule pay, stepping without turning earns none, and the break-even gate
+is ``1 / (1 + bonus)``. The default 0 keeps the withholding-only term.
+
+``yaw_gate_floor`` keeps that share of v4's schedule pay on a covered command whatever the turn,
+so a direction that does not turn yet still earns while it improves; the pay rises linearly with
+the gate from the floor to ``1 + bonus``. Two gated surrogate runs turned well in one direction
+and poorly in the other, consistent with the weak direction losing its schedule pay. The
+default 0 keeps the earlier behaviour.
 
 ``u`` and ``swing`` are v4's unloaded share and scheduled swing. The term removes only the
 positive part of ``gait_schedule``: unloaded stance feet keep their full charge, so a yaw error
@@ -54,6 +68,9 @@ class RewardV4YawGateConfig(task_v4.RewardV4Config):
     gate_window_controls: int = 60
     yaw_gate_on: str = "turn"
     turn_draw_fraction: float = 0.
+    yaw_gate_min_command_rad_s: float = 0.
+    yaw_gate_bonus: float = 0.
+    yaw_gate_floor: float = 0.
 
     def validate(self):
         super().validate()
@@ -65,6 +82,11 @@ class RewardV4YawGateConfig(task_v4.RewardV4Config):
             raise ValueError("yaw_gate_on is turn, all or none")
         if not 0 <= self.turn_draw_fraction <= 1:
             raise ValueError("turn_draw_fraction is a share from 0 to 1")
+        for key in ("yaw_gate_min_command_rad_s", "yaw_gate_bonus"):
+            if not math.isfinite(getattr(self, key)) or getattr(self, key) < 0:
+                raise ValueError(key + " must be finite and nonnegative")
+        if not 0 <= self.yaw_gate_floor <= 1:
+            raise ValueError("yaw_gate_floor is a share of the schedule pay from 0 to 1")
 
 
 REWARD_V4_YAW_GATE_CONFIG = RewardV4YawGateConfig()
@@ -91,11 +113,13 @@ def measured_reward_v4_yaw_gate(telemetry, commands, terminated, config=REWARD_V
     toe_force = torch.linalg.vector_norm(telemetry["tibia_floor_force_world_n"].to(device, torch.float32), dim=-1)
     unloaded = (1 - toe_force / config.schedule_load_n).clamp(0, 1)
     swing = telemetry["scheduled_swing"].to(device, torch.bool).to(torch.float32)
-    active = {"turn": commands[:, 2] != 0, "all": (commands != 0).any(-1),
+    turning = (commands[:, 2] != 0) & (commands[:, 2].abs() >= config.yaw_gate_min_command_rad_s)
+    active = {"turn": turning, "all": (commands != 0).any(-1),
               "none": torch.zeros(len(commands), dtype=torch.bool, device=device)}[config.yaw_gate_on]
     earned = config.schedule_weight * active.to(torch.float32) * (unloaded * swing).sum(-1) / 3
     gate = yaw_gate(stride_yaw.to(device, torch.float32), commands, config)
-    components["schedule_yaw_gate"] = -(1 - gate) * earned
+    pay = config.yaw_gate_floor + (1 + config.yaw_gate_bonus - config.yaw_gate_floor) * gate
+    components["schedule_yaw_gate"] = (pay - 1) * earned
     reward = reward + components["schedule_yaw_gate"]
     if not bool(torch.isfinite(reward).all()):
         raise FloatingPointError("Nonfinite yaw-gated reward v4")
@@ -154,8 +178,10 @@ class TrainingTaskV4YawGate(task_v4.TrainingTaskV4):
         reward = result["reward"]
         reward["version"] = REWARD_VERSION
         reward["formulas"]["schedule_yaw_gate"] = (
-            "-(1 - clip(1 - e^2, 0, 1)) * w_schedule * sum over scheduled-swing feet of u / 3, on commands with a "
-            "nonzero yaw rate (yaw_gate_on=turn) or every moving command (yaw_gate_on=all), "
+            "(floor + (1 + yaw_gate_bonus - floor) * clip(1 - e^2, 0, 1) - 1) * w_schedule * sum over scheduled-swing "
+            "feet of u / 3 with floor = yaw_gate_floor, "
+            "on commands with |c_yaw| >= yaw_gate_min_command_rad_s and nonzero (yaw_gate_on=turn) or every moving "
+            "command (yaw_gate_on=all), "
             "with e = |stride-mean yaw rate - c_yaw| / max(|c_yaw|, yaw_gate_scale_rad_s); the stride mean covers the "
             "last gate_window_controls controls since the latest command change or reset")
         reward["review"] = {"status": "experimental", "basis": "locomotion/task_v4_yaw_gate.py docstring"}
