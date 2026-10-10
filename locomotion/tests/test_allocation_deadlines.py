@@ -64,8 +64,8 @@ class AllocationDeadlineTests(unittest.TestCase):
 
     def test_profile_bounds_reject_invalid_deadlines_before_preparation(self):
         cases = [('standard', 'train', value) for value in (True, 0, -1, 6601, float('nan'), float('inf'))]
-        cases += [('flat_pilot_v1', 'train', 21601), ('flat_pilot_v1', 'diagnostic', 6200),
-                  ('flat_pilot_v1', 'throughput', 6200), ('unknown', 'train', 6200)]
+        cases += [('flat_pilot_v1', 'train', 21601), ('flat_pilot_v1', 'diagnostic', 21601),
+                  ('flat_pilot_v1', 'probe', 6200), ('flat_pilot_v1', 'throughput', 6200), ('unknown', 'train', 6200)]
         with tempfile.TemporaryDirectory() as directory:
             for profile, mode, seconds in cases:
                 output = Path(directory)/'invalid'
