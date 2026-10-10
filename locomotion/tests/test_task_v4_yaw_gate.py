@@ -197,6 +197,170 @@ class YawGateTests(unittest.TestCase):
                 gated.reward_config(bad)
 
 
+class StrideTrackingTests(unittest.TestCase):
+    def test_stride_term_pays_the_kernel_of_the_stride_mean_on_moving_commands(self):
+        config = replace(CONFIG, stride_tracking_weight=.3)
+        commands = torch.tensor([[.05, 0., 0.], [.05, 0., 0.], [0., 0., .2], [0., 0., 0.]])
+        stride = torch.tensor([[.05, 0., 0.], [.025, 0., 0.], [0., 0., .1], [.01, 0., .05]])
+        values = telemetry(commands, gate_yaw_rate_rad_s=commands[:, 2].clone(), stride_velocity_nav=stride)
+        alive = torch.zeros(4, dtype=torch.bool)
+        v4_reward, v4_parts = task_v4.measured_reward_v4(values, commands, alive, config, HEIGHT)
+        reward, parts = measured_reward_v4_yaw_gate(values, commands, alive, config, HEIGHT)
+        # Full speed 1.5; half speed: linear 0.75, yaw 1; half turn: linear 1, yaw 0.75; zero command unpaid.
+        torch.testing.assert_close(parts["stride_tracking"], .3 * torch.tensor([1.5, 1.25, 1.375, 0.]))
+        torch.testing.assert_close(reward - v4_reward - parts["schedule_yaw_gate"], parts["stride_tracking"])
+        for name, value in v4_parts.items():
+            torch.testing.assert_close(parts[name], value, msg=name)
+
+    def test_stride_term_peaks_at_the_command_and_not_above_it(self):
+        config = replace(CONFIG, stride_tracking_weight=.3)
+        commands = torch.tensor([[.05, 0., 0.]]).expand(3, -1).clone()
+        stride = torch.tensor([[.04, 0., 0.], [.05, 0., 0.], [.06, 0., 0.]])
+        values = telemetry(commands, gate_yaw_rate_rad_s=torch.zeros(3), stride_velocity_nav=stride)
+        _, parts = measured_reward_v4_yaw_gate(values, commands, torch.zeros(3, dtype=torch.bool), config, HEIGHT)
+        paid = parts["stride_tracking"].tolist()
+        self.assertGreater(paid[1], paid[0])
+        self.assertAlmostEqual(paid[0], paid[2], places=5)
+
+    def test_default_weight_adds_no_term_and_reads_no_stride_telemetry(self):
+        self.assertEqual((CONFIG.stride_tracking_weight, CONFIG.stride_window_controls), (0., 60))
+        commands = torch.tensor([[.05, 0., 0.]])
+        _, parts = measured_reward_v4_yaw_gate(telemetry(commands, gate_yaw_rate_rad_s=torch.zeros(1)), commands,
+                                               torch.zeros(1, dtype=torch.bool), CONFIG, HEIGHT)
+        self.assertNotIn("stride_tracking", parts)
+        with self.assertRaisesRegex(ValueError, "stride_velocity_nav"):
+            measured_reward_v4_yaw_gate(telemetry(commands, gate_yaw_rate_rad_s=torch.zeros(1)), commands,
+                                        torch.zeros(1, dtype=torch.bool), replace(CONFIG, stride_tracking_weight=.3), HEIGHT)
+
+    def test_fall_cost_covers_the_stride_term(self):
+        self.assertEqual(gated.reward_config("stride_tracking_weight=0.3").stride_tracking_weight, .3)
+        for bad in ("stride_tracking_weight=1", "stride_tracking_weight=-0.1", "stride_window_controls=0",
+                    "stride_window_controls=300"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                gated.reward_config(bad)
+        config = gated.reward_config("stride_tracking_weight=1,termination_weight=30,stride_window_controls=100")
+        self.assertEqual((config.stride_tracking_weight, config.stride_window_controls), (1., 100))
+
+    def test_task_averages_velocity_over_the_stride_window_and_declares_the_term(self):
+        native = GaitDouble(1)
+        task = gated.variant("forward_draw_fraction=0,stride_tracking_weight=0.3")(native)
+        task.reset()
+        native.commands[:] = torch.tensor([[.05, 0., 0.]])
+        task.window.restart(torch.arange(1), native.commands)
+        task.gate_window.restart(torch.arange(1), native.commands)
+        task.stride_window.restart(torch.arange(1), native.commands)
+        task.remaining_controls[:] = 1000
+        original, x = native.step, torch.zeros(1)
+        def surging(action):
+            output = original(action)
+            # 0.1 m/s for the first half of each 60-control stride, still for the second: mean 0.05 m/s.
+            x.add_((.1 if native.steps % 60 < 30 else 0.) * .02)
+            pose = native.current["root"].clone()
+            pose[:, 0], pose[:, 3:] = x, torch.tensor([0., 0., 0., 1.])
+            native.current["root"] = pose
+            native.telemetry["root_pose_xyzw"] = pose.clone()
+            return output
+        native.step = surging
+        for _ in range(120):
+            task.step(torch.zeros(1, 18))
+        stride = task.stride_window.update(torch.tensor([[0., .1, 0.]]), native.commands)
+        # The double's identity pose maps world x to the navigation frame's lateral axis; read the planar speed.
+        self.assertAlmostEqual(float(torch.linalg.vector_norm(stride[0, :2])), .05, delta=.003)
+        self.assertIn("stride_tracking", task.last_components)
+        with tempfile.TemporaryDirectory() as directory:
+            gated.variant("stride_tracking_weight=0.3")(GaitDouble(1), output_dir=directory)
+            declared = json.loads((Path(directory)/"task_definition.json").read_text())
+        self.assertIn("stride_tracking", declared["reward"]["formulas"])
+
+
+class StrideLengthTests(unittest.TestCase):
+    TOES = torch.tensor([[.2, .15], [0., .25], [-.2, .15], [.2, -.15], [0., -.25], [-.2, -.15]])
+
+    def paid(self, commands, travel, landed, config=None):
+        config = replace(CONFIG, stride_length_weight=1.) if config is None else config
+        n = len(commands)
+        values = telemetry(commands, gate_yaw_rate_rad_s=commands[:, 2].clone(), toe_xyz_nav=self.TOES.expand(n, -1, -1).clone(),
+                           stride_touchdown=landed, stride_displacement_nav=travel)
+        return measured_reward_v4_yaw_gate(values, commands, torch.zeros(n, dtype=torch.bool), config, HEIGHT)[1]
+
+    def test_a_full_stride_pays_the_weight_and_short_backward_or_long_strides_less_or_capped(self):
+        full = .05 * 1.2  # commanded speed times the 60-control schedule period
+        commands = torch.tensor([[.05, 0., 0.]]).expand(5, -1).clone()
+        travel = torch.zeros(5, 6, 2)
+        travel[:, 0, 0] = torch.tensor([full, full / 2, -full, 2 * full, full])
+        landed = torch.zeros(5, 6, dtype=torch.bool)
+        landed[:4, 0] = True  # the last row's foot is still in the air
+        parts = self.paid(commands, travel, landed)
+        torch.testing.assert_close(parts["stride_length"], torch.tensor([1., .25, 0., 1., 0.]))
+
+    def test_two_taps_earn_half_of_one_stride_and_turns_use_the_lever_arm(self):
+        commands = torch.tensor([[.05, 0., 0.], [0., 0., .2]])
+        travel = torch.zeros(2, 6, 2)
+        travel[0, :2, 0] = .05 * 1.2 / 2  # two feet each land half a stride
+        wanted = .2 * torch.stack((-self.TOES[:, 1], self.TOES[:, 0]), -1) * 1.2
+        travel[1] = wanted  # every foot lands a full turning stride
+        landed = torch.zeros(2, 6, dtype=torch.bool)
+        landed[0, :2] = True
+        landed[1] = True
+        parts = self.paid(commands, travel, landed)
+        torch.testing.assert_close(parts["stride_length"], torch.tensor([.5, 6.]))
+
+    def test_zero_command_and_the_default_pay_nothing(self):
+        travel = torch.ones(1, 6, 2)
+        landed = torch.ones(1, 6, dtype=torch.bool)
+        self.assertEqual(float(self.paid(torch.zeros(1, 3), travel, landed)["stride_length"][0]), 0.)
+        commands = torch.tensor([[.05, 0., 0.]])
+        _, parts = measured_reward_v4_yaw_gate(telemetry(commands, gate_yaw_rate_rad_s=torch.zeros(1)), commands,
+                                               torch.zeros(1, dtype=torch.bool), CONFIG, HEIGHT)
+        self.assertNotIn("stride_length", parts)
+        with self.assertRaisesRegex(ValueError, "stride_touchdown"):
+            measured_reward_v4_yaw_gate(telemetry(commands, gate_yaw_rate_rad_s=torch.zeros(1)), commands,
+                                        torch.zeros(1, dtype=torch.bool), replace(CONFIG, stride_length_weight=1.), HEIGHT)
+
+    def test_fall_cost_counts_the_average_stride_pay(self):
+        # Ceiling 1.5 * 1.3 + 6 * 2 / 60 = 2.15 needs a termination weight above 21.5.
+        with self.assertRaises(ValueError):
+            gated.reward_config("stride_tracking_weight=0.3,stride_length_weight=2")
+        config = gated.reward_config("stride_tracking_weight=0.3,stride_length_weight=2,termination_weight=21.6")
+        self.assertEqual(config.stride_length_weight, 2.)
+        with self.assertRaises(ValueError):
+            gated.reward_config("stride_length_weight=-1")
+
+    def test_task_measures_each_stride_from_liftoff_to_touchdown(self):
+        native = GaitDouble(1)
+        task = gated.variant("forward_draw_fraction=0,stride_length_weight=1")(native)
+        task.reset()
+        # The double's identity pose maps world x to the navigation frame's left axis.
+        native.commands[:] = torch.tensor([[0., .05, 0.]])
+        pose = native.current["root"].clone()
+        pose[:, 3:] = torch.tensor([0., 0., 0., 1.])
+        native.current["root"] = pose
+        native.telemetry["root_pose_xyzw"] = pose.clone()
+        task.previous_pose = pose.clone()
+        for window in (task.window, task.gate_window, task.stride_window):
+            window.restart(torch.arange(1), native.commands)
+        task.remaining_controls[:] = 1000
+        loaded = native.forces.clone()
+        task.step(torch.zeros(1, 18))  # all feet planted
+        native.forces[:, 0] = 0.  # foot 0 lifts off
+        task.step(torch.zeros(1, 18))
+        world = native.world.clone()
+        world[0, 0, 0] += .03  # it travels 3 cm in world x while in the air
+        native.world = world
+        task.step(torch.zeros(1, 18))
+        native.forces = loaded.clone()  # and lands
+        task.step(torch.zeros(1, 18))
+        # 3 cm against the 6 cm stride of 0.05 m/s over 1.2 s: r = 0.5 pays 0.25.
+        self.assertAlmostEqual(float(task.last_components["stride_length"][0]), .25, places=4)
+        self.assertFalse(bool(task.lifted[0, 0]))
+        task.step(torch.zeros(1, 18))  # standing on it pays nothing more
+        self.assertEqual(float(task.last_components["stride_length"][0]), 0.)
+        with tempfile.TemporaryDirectory() as directory:
+            gated.variant("stride_length_weight=1")(GaitDouble(1), output_dir=directory)
+            declared = json.loads((Path(directory)/"task_definition.json").read_text())
+        self.assertIn("stride_length", declared["reward"]["formulas"])
+
+
 class NativeSelectionTests(unittest.TestCase):
     OPTIONS = "forward_draw_fraction=0,turn_draw_fraction=0.3,gate_window_controls=120,yaw_gate_bonus=0.25"
 

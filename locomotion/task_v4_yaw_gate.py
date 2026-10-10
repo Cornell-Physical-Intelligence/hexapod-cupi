@@ -47,6 +47,33 @@ nonzero, so the default leaves earlier runs' command sequences unchanged. The 20
 two turns in place, so a policy otherwise sees one in ten moving commands as a pure turn.
 ``yaw_gate_on="none"`` switches the gate off to test turn-heavy sampling alone.
 
+``stride_tracking_weight`` adds a second tracking term on a longer window, for moving commands:
+
+    stride_tracking = s * (w_lin * max(1 - e_lin^2, -floor) + w_yaw * max(1 - e_yaw^2, -floor))
+
+with v4's errors, scales and kernel applied to the mean displacement velocity over the last
+``stride_window_controls`` controls (60, one schedule period) since the latest command change or
+reset. v4's 10-control window averages less than a stride and pays a burst within each stride;
+a full-stride mean pays the progress the robot keeps. The kernel peaks at the command, so the
+term pays reaching the commanded speed and not exceeding it. v4's rule that a fall costs ten
+times the tracking ceiling covers this term too, so a weight above 1/3 needs a higher
+``termination_weight``. The default 0 adds nothing.
+
+``stride_length_weight`` pays each foot's stride at touchdown, on moving commands:
+
+    stride_length = l * sum over feet touching down of min(r, 1)^2
+    r = (toe displacement over the floor since liftoff) . d / (|d|^2 * T)
+
+``d`` is the commanded body velocity at that toe (translation plus yaw rate times the lever arm,
+in body axes at touchdown) and ``T`` the schedule period, so r = 1 is the stride that carries the
+command at the gait clock's rate. Surrogate policies trained with 30 percent turn draws swung their
+joints half as far as v4's (0.17 against 0.36 rad peak to peak), touched down 1.2 to 1.5 times per
+foot per schedule period against v4's 1.0 and walked at 0.70 to 0.85 of the command against 0.91. The square pays
+two half strides half of one full stride, so a tap earns little and a step that carries the body
+earns most; nothing beyond r = 1 is paid. A foot that has not lifted since its reset earns nothing.
+A full stride per foot and period averages ``6 l / schedule_period_controls`` per control, which
+the fall-cost rule counts beside the tracking ceiling. The default 0 adds nothing.
+
 Every other term is reward v4 unchanged. Train or score it with ``variant`` on the surrogate first
 (locomotion/surrogate/README.md); it is not a reviewed reward version.
 """
@@ -71,6 +98,9 @@ class RewardV4YawGateConfig(task_v4.RewardV4Config):
     yaw_gate_min_command_rad_s: float = 0.
     yaw_gate_bonus: float = 0.
     yaw_gate_floor: float = 0.
+    stride_tracking_weight: float = 0.
+    stride_window_controls: int = 60
+    stride_length_weight: float = 0.
 
     def validate(self):
         super().validate()
@@ -87,6 +117,16 @@ class RewardV4YawGateConfig(task_v4.RewardV4Config):
                 raise ValueError(key + " must be finite and nonnegative")
         if not 0 <= self.yaw_gate_floor <= 1:
             raise ValueError("yaw_gate_floor is a share of the schedule pay from 0 to 1")
+        if not math.isfinite(self.stride_tracking_weight) or self.stride_tracking_weight < 0:
+            raise ValueError("stride_tracking_weight must be finite and nonnegative")
+        if type(self.stride_window_controls) is not int or not 1 <= self.stride_window_controls <= 250:
+            raise ValueError("stride_window_controls needs 1 to 250 controls")
+        if not math.isfinite(self.stride_length_weight) or self.stride_length_weight < 0:
+            raise ValueError("stride_length_weight must be finite and nonnegative")
+        ceiling = ((self.linear_tracking_weight + self.yaw_tracking_weight) * (1 + self.stride_tracking_weight)
+                   + 6 * self.stride_length_weight / self.schedule_period_controls)
+        if self.termination_weight < 10 * ceiling:
+            raise ValueError("The termination weight must reach ten times the tracking ceiling, stride term included")
 
 
 REWARD_V4_YAW_GATE_CONFIG = RewardV4YawGateConfig()
@@ -103,6 +143,8 @@ def measured_reward_v4_yaw_gate(telemetry, commands, terminated, config=REWARD_V
     """Reward v4 plus ``schedule_yaw_gate``; the v4 components are returned unchanged.
 
     ``gate_yaw_rate_rad_s`` is the caller's stride-mean heading rate, one value per row.
+    ``stride_velocity_nav`` is the caller's ``stride_window_controls`` mean of planar velocity and
+    yaw rate; it is read only when ``stride_tracking_weight`` is positive.
     """
     reward, components = task_v4.measured_reward_v4(telemetry, commands, terminated, config, nominal_height)
     device = commands.device
@@ -121,6 +163,31 @@ def measured_reward_v4_yaw_gate(telemetry, commands, terminated, config=REWARD_V
     pay = config.yaw_gate_floor + (1 + config.yaw_gate_bonus - config.yaw_gate_floor) * gate
     components["schedule_yaw_gate"] = (pay - 1) * earned
     reward = reward + components["schedule_yaw_gate"]
+    if config.stride_tracking_weight > 0:
+        stride = telemetry.get("stride_velocity_nav")
+        if (not torch.is_tensor(stride) or tuple(stride.shape) != (len(commands), 3)
+                or not bool(torch.isfinite(stride).all())):
+            raise ValueError("Missing/nonfinite stride-tracking telemetry: stride_velocity_nav")
+        linear_error, yaw_error = task_v4.tracking_errors(stride.to(device, torch.float32), commands, config)
+        moving = (commands != 0).any(-1).to(torch.float32)
+        components["stride_tracking"] = config.stride_tracking_weight * moving * (
+            config.linear_tracking_weight * task_v4.kernel(linear_error, config)
+            + config.yaw_tracking_weight * task_v4.kernel(yaw_error, config))
+        reward = reward + components["stride_tracking"]
+    if config.stride_length_weight > 0:
+        landed = telemetry.get("stride_touchdown")
+        travel = telemetry.get("stride_displacement_nav")
+        if (not torch.is_tensor(landed) or tuple(landed.shape) != (len(commands), 6) or not torch.is_tensor(travel)
+                or tuple(travel.shape) != (len(commands), 6, 2) or not bool(torch.isfinite(travel).all())):
+            raise ValueError("Missing/nonfinite stride-length telemetry: stride_touchdown, stride_displacement_nav")
+        toe = telemetry["toe_xyz_nav"].to(device, torch.float32)
+        wanted = commands[:, None, :2] + commands[:, None, 2:] * torch.stack((-toe[..., 1], toe[..., 0]), -1)
+        period = config.schedule_period_controls * task_v4.CONTROL_DT_S
+        ratio = (travel.to(device, torch.float32) * wanted).sum(-1) / (wanted.square().sum(-1).clamp_min(1e-8) * period)
+        moving = (commands != 0).any(-1).to(torch.float32)
+        paid = landed.to(device, torch.bool).to(torch.float32) * ratio.clamp(0, 1).square()
+        components["stride_length"] = config.stride_length_weight * moving * paid.sum(-1)
+        reward = reward + components["stride_length"]
     if not bool(torch.isfinite(reward).all()):
         raise FloatingPointError("Nonfinite yaw-gated reward v4")
     return reward, components
@@ -132,8 +199,11 @@ class TrainingTaskV4YawGate(task_v4.TrainingTaskV4):
     reward_config = REWARD_V4_YAW_GATE_CONFIG
 
     def __init__(self, env, config=None, output_dir=None, reward_config=None):
-        window = (type(self).reward_config if reward_config is None else reward_config).gate_window_controls
-        self.gate_window = task_v4.StrideWindow(env.num_envs, window, 1, env.device)
+        chosen = type(self).reward_config if reward_config is None else reward_config
+        self.gate_window = task_v4.StrideWindow(env.num_envs, chosen.gate_window_controls, 1, env.device)
+        self.stride_window = task_v4.StrideWindow(env.num_envs, chosen.stride_window_controls, 3, env.device)
+        self.liftoff_world = torch.zeros(env.num_envs, 6, 3, device=env.device)
+        self.lifted = torch.zeros(env.num_envs, 6, dtype=torch.bool, device=env.device)
         super().__init__(env, config, output_dir, reward_config)
 
     def _resample(self, indices):
@@ -150,15 +220,31 @@ class TrainingTaskV4YawGate(task_v4.TrainingTaskV4):
 
     def reset(self, indices=None):
         output = super().reset(indices)
-        self.gate_window.restart(self._indices(indices), self.env.commands[self._indices(indices)])
+        selected = self._indices(indices)
+        self.gate_window.restart(selected, self.env.commands[selected])
+        self.stride_window.restart(selected, self.env.commands[selected])
+        self.lifted[selected] = False
         return output
 
     def reward_telemetry(self, command):
-        """v4's telemetry plus the stride-mean heading rate; reads the pose before v4 advances it."""
-        turn = task_v4.displacement_velocity(self.env.telemetry["root_pose_xyzw"].to(self.previous_pose),
-                                             self.previous_pose)[:, 2:]
-        stride_yaw = self.gate_window.update(turn, command)[:, 0]
-        return {**super().reward_telemetry(command), "gate_yaw_rate_rad_s": stride_yaw}
+        """v4's telemetry plus the stride-mean heading rate and velocity; reads the pose before v4 advances it."""
+        velocity = task_v4.displacement_velocity(self.env.telemetry["root_pose_xyzw"].to(self.previous_pose),
+                                                 self.previous_pose)
+        stride_yaw = self.gate_window.update(velocity[:, 2:], command)[:, 0]
+        stride = self.stride_window.update(velocity, command)
+        # Liftoff and touchdown by the same contact threshold as v4, read before v4 advances its contact state.
+        from .env import inverse_rotate, navigation
+        t = self.env.telemetry
+        contact = torch.linalg.vector_norm(t["tibia_floor_force_world_n"], dim=-1).to(self.lifted.device) > self.reward_config.contact_force_n
+        world = t["toe_xyz_world"].detach().to(self.liftoff_world)
+        liftoff = ~contact & self.in_contact.to(contact.device)
+        landed = contact & ~self.in_contact.to(contact.device) & self.lifted
+        pose = t["root_pose_xyzw"].to(self.liftoff_world)
+        travel = navigation(inverse_rotate(pose[:, None, 3:].expand(-1, 6, -1), world - self.liftoff_world))[..., :2]
+        self.liftoff_world = torch.where(liftoff[..., None], world, self.liftoff_world)
+        self.lifted = (self.lifted | liftoff) & ~(contact & ~self.in_contact.to(contact.device))
+        return {**super().reward_telemetry(command), "gate_yaw_rate_rad_s": stride_yaw, "stride_velocity_nav": stride,
+                "stride_touchdown": landed, "stride_displacement_nav": torch.where(landed[..., None], travel, torch.zeros_like(travel))}
 
     def _reward(self, command, terminated):
         # TrainingTaskV4._reward with the gated reward in place of measured_reward_v4.
@@ -184,6 +270,15 @@ class TrainingTaskV4YawGate(task_v4.TrainingTaskV4):
             "command (yaw_gate_on=all), "
             "with e = |stride-mean yaw rate - c_yaw| / max(|c_yaw|, yaw_gate_scale_rad_s); the stride mean covers the "
             "last gate_window_controls controls since the latest command change or reset")
+        if self.reward_config.stride_tracking_weight > 0:
+            reward["formulas"]["stride_tracking"] = (
+                "stride_tracking_weight * moving * (w_lin max(1 - e_lin^2, -floor) + w_yaw max(1 - e_yaw^2, -floor)), "
+                "v4's errors of the mean displacement velocity over the last stride_window_controls controls since "
+                "the latest command change or reset")
+        if self.reward_config.stride_length_weight > 0:
+            reward["formulas"]["stride_length"] = (
+                "stride_length_weight * moving * sum over feet touching down of min(r, 1)^2, r = toe displacement over "
+                "the floor since liftoff . d / (|d|^2 * schedule period), d the commanded body velocity at that toe")
         reward["review"] = {"status": "experimental", "basis": "locomotion/task_v4_yaw_gate.py docstring"}
         return result
 
