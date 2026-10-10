@@ -39,8 +39,8 @@ class EnvConfig:
     device: str = "cuda:0"
 
     def __post_init__(self):
-        if type(self.num_envs) is not int or not 1 <= self.num_envs <= 128:
-            raise ValueError("Pilot supports 1 through 128 replicas")
+        if type(self.num_envs) is not int or not 1 <= self.num_envs <= 1024:
+            raise ValueError("Pilot supports 1 through 1024 replicas")
         if self.physics_dt != 0.0025 or self.decimation != 8 or self.target_slew_rad != 0.040:
             raise ValueError("Canonical 400/50Hz servo and target slew are fixed")
         if self.spacing_m < 2 or self.device != "cuda:0":

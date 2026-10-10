@@ -106,7 +106,7 @@ class ResetTests(unittest.TestCase):
 class ConfigTests(unittest.TestCase):
     def test_fixed_physics_contract(self):
         self.assertEqual(EnvConfig().control_dt, .02)
-        for kwargs in ({"physics_dt": .005}, {"decimation": 4}, {"target_slew_rad": .05}, {"num_envs": 129}):
+        for kwargs in ({"physics_dt": .005}, {"decimation": 4}, {"target_slew_rad": .05}, {"num_envs": 1025}, {"num_envs": 0}):
             with self.assertRaises(ValueError): EnvConfig(**kwargs)
         self.assertEqual(len(JOINT_NAMES), 18)
 

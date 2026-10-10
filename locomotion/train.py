@@ -141,7 +141,8 @@ def main(argv=None):
         parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--standing-admission', type=Path)
     parser.add_argument('--source-freeze-sha256', required=True)
-    parser.add_argument('--num-envs', type=int, choices=[1, 32, 128], required=True)
+    parser.add_argument('--num-envs', type=int, choices=[1, 32, 128, 512, 1024], required=True,
+                        help='Replica count. Training and probes accept 128; diagnostics and profiles accept each listed count.')
     parser.add_argument('--seed', type=int, default=20260917)
     parser.add_argument('--updates', type=int, default=512)
     parser.add_argument('--extended-updates', action='store_true',

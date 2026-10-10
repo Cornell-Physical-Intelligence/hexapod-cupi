@@ -16,7 +16,7 @@ from unittest.mock import patch
 import numpy as np
 import torch
 
-from locomotion import launch, reservation, throughput
+from locomotion import train, launch, reservation, throughput
 from locomotion import task as task_module
 from locomotion.env import LocomotionEnv
 from locomotion.env_config import BODY_NAMES, EnvConfig, JOINT_NAMES, sha
@@ -476,9 +476,10 @@ class GuardTests(unittest.TestCase):
         return SimpleNamespace(**values)
 
     def test_profile_keeps_replica_and_update_guards(self):
-        self.assertEqual(throughput.REPLICA_COUNTS, (1, 32, 128))
+        self.assertEqual(throughput.REPLICA_COUNTS, (1, 32, 128, 512, 1024))
+        self.assertEqual(EnvConfig(num_envs=1024).num_envs, 1024)
         with self.assertRaises(ValueError):
-            EnvConfig(num_envs=129)
+            EnvConfig(num_envs=1025)
         parser = throughput.parser_for(['--preflight-only'])
         required = ['--mode', 'throughput', '--preflight-only', '--source-freeze-sha256', 'a'*64]
         for name in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance', 'output', 'standing-admission'):
@@ -492,6 +493,30 @@ class GuardTests(unittest.TestCase):
                           {'headless': False}, {'device': 'cuda:1'}, {'max_wall_seconds': 7000.}, {'seed': -1}):
             with self.subTest(**overrides), self.assertRaises(ValueError):
                 throughput.validate(self.args(**overrides))
+
+    def test_large_counts_reach_diagnostics_and_profiles_alone(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for index, count in enumerate((512, 1024)):
+                diagnostic = prepare(root/f'diag{index}', REMOTE, mode='diagnostic', num_envs=count)
+                self.assertEqual(diagnostic['command_args'][diagnostic['command_args'].index('--num-envs')+1], str(count))
+                profile = prepare(root/f'profile{index}', REMOTE, mode='throughput', num_envs=count, updates=5, warmup_updates=2)
+                self.assertEqual(profile['module'], 'locomotion.throughput')
+                self.assertEqual(profile['command_args'][profile['command_args'].index('--num-envs')+1], str(count))
+            for index, bad in enumerate((dict(mode='train', num_envs=512), dict(mode='probe', num_envs=1024),
+                                         dict(mode='diagnostic', num_envs=256), dict(mode='throughput', num_envs=2048, updates=5, warmup_updates=2))):
+                with self.subTest(bad=bad), self.assertRaisesRegex(ValueError, 'replica count'):
+                    prepare(root/f'bad{index}', REMOTE, **bad)
+
+    def test_trainer_parses_large_counts_for_diagnostics(self):
+        base = ['--asset', 'a', '--model', 'm', '--geometry', 'g', '--geometry-extrema', 'e', '--stance', 's',
+                '--output', 'o', '--source-freeze-sha256', 'f'*64, '--preflight-only', '--mode', 'diagnostic']
+        with self.assertRaises(SystemExit), patch('sys.stderr', io.StringIO()):
+            train.main(base + ['--num-envs', '256'])
+        for count in ('512', '1024'):
+            with self.subTest(count=count), self.assertRaises((ValueError, OSError)):
+                # The count parses; the fake asset paths fail the later asset check.
+                train.main(base + ['--num-envs', count])
 
     def test_prepare_binds_a_profile_with_admission_and_bounded_updates(self):
         with tempfile.TemporaryDirectory() as directory:

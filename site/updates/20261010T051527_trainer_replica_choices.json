@@ -1,0 +1,20 @@
+{
+  "id": "20261010T051527_trainer_replica_choices",
+  "date": "2026-10-10T05:15:27Z",
+  "title": "Let the trainer parse 512 and 1024 replicas for diagnostics",
+  "summary": "The trainer's replica argument listed 1, 32 and 128, so the container preflight of the first 512-robot standing diagnostic failed at argument parsing. The argument now lists 512 and 1024 as well, and training and probes keep their 128 guard. The failed attempt stays retained under its name. A test checks that the trainer parses the new counts for diagnostics and rejects 256.",
+  "areas": [
+    "locomotion",
+    "compute"
+  ],
+  "next": "Rerun the 512 and 1024 standing diagnostics under fresh attempt names from this source.",
+  "changes": [
+    "locomotion/tests/test_throughput.py",
+    "locomotion/train.py"
+  ],
+  "evidence": [
+    "locomotion/tests/test_throughput.py"
+  ],
+  "no_project_impact": true,
+  "reason": "An argument-parsing fix establishes no native result or accepted capability."
+}
