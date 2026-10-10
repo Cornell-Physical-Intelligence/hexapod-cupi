@@ -54,8 +54,8 @@ def validate_deadline(mode, profile, seconds):
     """Keep the standard bound; allow the named flat pilot a finite allocation."""
     if profile not in ALLOCATION_PROFILES:
         raise ValueError('Unknown allocation profile')
-    if profile == 'flat_pilot_v1' and mode not in ('train', 'evaluate'):
-        raise ValueError('The flat pilot deadline applies to training and evaluation')
+    if profile == 'flat_pilot_v1' and mode not in ('train', 'evaluate', 'diagnostic'):
+        raise ValueError('The flat pilot deadline applies to training, evaluation and standing diagnostics')
     limit = 21600 if profile == 'flat_pilot_v1' else 6600
     if (type(seconds) not in (int, float) or not math.isfinite(seconds)
             or not 0 < seconds <= limit):

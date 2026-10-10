@@ -110,7 +110,8 @@ Keep `PYTHONDONTWRITEBYTECODE=1` so imports cannot mutate the frozen tree.
 
 For the [frozen flat pilot](TRAINING.md#frozen-flat-pilot-issues-50-and-51),
 prepare training and probe evaluation with `--allocation-profile flat_pilot_v1
---max-wall-seconds 21600`. Preparation binds that native deadline and the
+--max-wall-seconds 21600`. A standing diagnostic above 128 robots takes the
+same profile, since its capture grows at about 9 s per robot. Preparation binds that native deadline and the
 22000-second supervisor cap. The launcher checks both values and retains the
 400-second cleanup margin. Standard packs keep the 6200-second default native
 deadline and 6600-second default supervisor cap. The pilot profile changes no

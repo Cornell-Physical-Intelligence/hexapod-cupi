@@ -27,6 +27,21 @@ class AllocationDeadlineTests(unittest.TestCase):
                         reservation.verify_tree(source, binding['source_freeze_sha256'])
                     path.write_bytes(before)
 
+    def test_standing_diagnostics_accept_the_pilot_deadline_and_probes_do_not(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            remote = str(prepare.REMOTE_ROOT/'deadline_fixture')
+            binding = prepare.prepare(root/'capture', remote, mode='diagnostic', num_envs=1024,
+                                      allocation_profile='flat_pilot_v1', max_wall_seconds=21600)
+            self.assertEqual(binding['max_seconds'], 22000)
+            self.assertIn('--allocation-profile', binding['command_args'])
+            train.validate_deadline('diagnostic', 'flat_pilot_v1', 21600)
+            for mode in ('probe', 'tripod', 'throughput'):
+                with self.subTest(mode=mode), self.assertRaisesRegex(ValueError, 'standing diagnostics'):
+                    train.validate_deadline(mode, 'flat_pilot_v1', 21600)
+            with self.assertRaises(ValueError):
+                train.validate_deadline('diagnostic', 'standard', 9500)
+
     def test_prepare_propagates_pilot_deadline_and_preserves_standard(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
