@@ -25,8 +25,8 @@ import traceback
 
 SCHEMA = 'hexapod_locomotion_throughput_v1'
 SUMMARY_SCHEMA = 'hexapod_locomotion_throughput_summary_v1'
-# The profiler measures the existing replica guards; it adds no scale.
-REPLICA_COUNTS = (1, 32, 128)
+# Each count needs matching one-robot and batch standing admission; training keeps its own 128 guard.
+REPLICA_COUNTS = (1, 32, 128, 512, 1024)
 WARMUP_UPDATES = (2, 10)
 MEASURED_UPDATES = (1, 20)
 CENSUS_CONTROLS = 50

@@ -13,6 +13,9 @@ from .train import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, va
 from .spark_paths import LEGACY_ROOT, RUN_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[1]
+# Standing diagnostics and throughput profiles accept each count; training and probes keep 128 until a
+# count gains standing admission and the program lead approves its budget.
+REPLICA_COUNTS = (1, 32, 128, 512, 1024)
 REMOTE_ROOT = LEGACY_ROOT
 LEARNER_OPTION_DEFAULTS = {'observation_scaling': 'none', 'command_segments': 'continuous',
                            'learning_rate_max': None, 'action_std': .15, 'action_noise_correlation': 0.,
@@ -57,7 +60,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             or type(seed) is not int or seed < 0):
         raise ValueError('Invalid native allocation')
     num_envs = (128 if mode in ('train', 'probe') else 1) if num_envs is None else num_envs
-    if (num_envs not in (1, 32, 128) or (mode in ('evaluate', 'replay', 'tripod') and num_envs != 1)
+    if (num_envs not in REPLICA_COUNTS or (mode in ('evaluate', 'replay', 'tripod') and num_envs != 1)
             or (mode in ('train', 'probe') and num_envs != 128) or eval_scope not in ('focus', 'probes', 'full')):
         raise ValueError('Invalid replica count for this mode')
     if (tripod_adaptation not in SWEEPS or (mode != 'tripod' and tripod_adaptation != 'paper')

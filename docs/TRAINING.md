@@ -248,9 +248,10 @@ The paper's 0.15 kernel and command range require a separate comparison.
 [`throughput.py`](../locomotion/throughput.py) profiles training at one
 admitted replica count per allocation. It runs `train.py`'s allocation: task
 version 1, stock PPO, 20-second episodes and the same per-update records. It
-accepts one, 32 or 128 robots with matching one-robot and batch standing
-admission, and it keeps the 128-replica and 2,000-update guards. The program
-lead approves each native profile.
+accepts one, 32, 128, 512 or 1024 robots with matching one-robot and batch
+standing admission. Training and probes keep the 128-replica guard until a
+count gains admission and an approved budget, and the 2,000-update guard keeps
+its opt-in. The program lead approves each native profile.
 
 ```sh
 uv run python -m locomotion.prepare --mode throughput --num-envs 32 \
