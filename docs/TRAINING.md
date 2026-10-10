@@ -251,7 +251,10 @@ version 1, stock PPO, 20-second episodes and the same per-update records. It
 accepts one, 32, 128, 512 or 1024 robots with matching one-robot and batch
 standing admission. Training and probes keep the 128-replica guard until a
 count gains admission and an approved budget, and the 2,000-update guard keeps
-its opt-in. The program lead approves each native profile.
+its opt-in. The program lead approves each native profile. The 10 October
+profiles from the centred-grid source measure 840 transitions per second at
+128 robots and 1,581 at 512, with the update taking 3.66 and 7.77 s
+([record](../site/assets/throughput_profile_20261010_001/summary.json)).
 
 ```sh
 uv run python -m locomotion.prepare --mode throughput --num-envs 32 \
