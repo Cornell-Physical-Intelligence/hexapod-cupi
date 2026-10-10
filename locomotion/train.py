@@ -158,6 +158,9 @@ def main(argv=None):
     parser.add_argument('--reward-version', choices=['1', '2', '3', '4'], default='1',
                         help='Training reward: historical v1, stride tracking v2, immediate tracking v3, '
                              'or noise-calibrated stepping v4.')
+    parser.add_argument('--reward-task', choices=['v4', 'v4_yaw_gate'], default='v4',
+                        help='Reward version 4 task: v4, or the experimental yaw-gated schedule with turn-heavy '
+                             'sampling in task_v4_yaw_gate.py. Training only.')
     parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo',
                         help='Stock PPO in ppo.py or PPO with the online motion prior in amp_ppo.py.')
     parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp',
@@ -232,9 +235,11 @@ def main(argv=None):
         raise ValueError('Episode length selection applies to training, between 5 and 20 seconds')
     if args.reward_options and (args.mode != 'train' or args.reward_version != '4'):
         raise ValueError('Reward options apply to reward version 4 training only')
+    if args.reward_task != 'v4' and (args.mode != 'train' or args.reward_version != '4'):
+        raise ValueError('The reward task selection applies to reward version 4 training only')
     if args.reward_options:
         # Rejects an unknown key or an invalid value before the GPU launch; the container preflight runs this.
-        importlib.import_module(prefix+'.task_v4').reward_config(args.reward_options)
+        importlib.import_module(prefix+'.task_'+args.reward_task).reward_config(args.reward_options)
     if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
         raise ValueError('The paper networks need the AMP learner, and the AMP learner trains or evaluates only')
     if args.action_std_decay_updates is not None and args.action_std_final is None:
@@ -265,6 +270,8 @@ def main(argv=None):
         'reward_version': args.reward_version, 'learner': args.learner, 'networks': args.networks}
     if args.reward_options:
         identity['reward_options'] = args.reward_options
+    if args.reward_task != 'v4':
+        identity['reward_task'] = args.reward_task
     if args.extended_updates:
         # The exploration decay length enters ppo_config; the opt-in records the requested run length beside it.
         identity['training_updates'] = args.updates
@@ -363,7 +370,13 @@ def main(argv=None):
         if version != '5.0.1':
             raise ValueError('RSL-RL version differs: '+version)
         task_config = task_module.TaskConfig(seed=args.seed)
-        if args.reward_version in ('2', '3', '4'):
+        if args.reward_task == 'v4_yaw_gate':
+            module = importlib.import_module(prefix+'.task_v4_yaw_gate')
+            task_class = module.TrainingTaskV4YawGate
+            if args.reward_options:
+                task_class = module.variant(args.reward_options)
+            task = task_class(env, task_config, args.output/'task')
+        elif args.reward_version in ('2', '3', '4'):
             module = importlib.import_module(prefix+'.task_v'+args.reward_version)
             task_class = getattr(module, 'TrainingTaskV'+args.reward_version)
             if args.reward_options:

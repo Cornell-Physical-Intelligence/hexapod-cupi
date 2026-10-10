@@ -197,5 +197,41 @@ class YawGateTests(unittest.TestCase):
                 gated.reward_config(bad)
 
 
+class NativeSelectionTests(unittest.TestCase):
+    OPTIONS = "forward_draw_fraction=0,turn_draw_fraction=0.3,gate_window_controls=120,yaw_gate_bonus=0.25"
+
+    def test_prepare_selects_the_yaw_gate_task_for_version_four_training_alone(self):
+        from locomotion.prepare import prepare
+        from locomotion.tests.test_task_v4 import REMOTE
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = prepare(root/"gate", REMOTE, mode="train", reward_version="4", gait_clock=60,
+                           reward_options=self.OPTIONS, reward_task="v4_yaw_gate")["command_args"]
+            self.assertEqual(args[args.index("--reward-task")+1], "v4_yaw_gate")
+            pack = json.loads((root/"gate/PACK.json").read_text())
+            self.assertEqual((pack["reward_task"], pack["reward_options"]), ("v4_yaw_gate", self.OPTIONS))
+            self.assertIn("locomotion/task_v4_yaw_gate.py", json.loads((root/"gate/source/FREEZE_SHA256.json").read_text()))
+            plain = prepare(root/"plain", REMOTE, mode="train", reward_version="4")["command_args"]
+            self.assertNotIn("--reward-task", plain)
+            self.assertNotIn("reward_task", json.loads((root/"plain/PACK.json").read_text()))
+            for index, bad in enumerate((dict(reward_version="2", reward_task="v4_yaw_gate"),
+                                         dict(reward_version="4", reward_task="v5"))):
+                with self.subTest(bad=bad), self.assertRaisesRegex(ValueError, "reward task"):
+                    prepare(root/f"bad{index}", REMOTE, mode="train", **bad)
+
+    def test_train_checks_the_task_and_its_options_before_launch(self):
+        from locomotion import train
+        base = ["--asset", "a", "--model", "m", "--geometry", "g", "--geometry-extrema", "e", "--stance", "s",
+                "--output", "o", "--source-freeze-sha256", "f"*64, "--num-envs", "1", "--preflight-only"]
+        with self.assertRaisesRegex(ValueError, "reward task"):
+            train.main(base + ["--mode", "train", "--reward-version", "2", "--reward-task", "v4_yaw_gate"])
+        with self.assertRaisesRegex(ValueError, "unique RewardV4YawGateConfig"):
+            train.main(base + ["--mode", "train", "--reward-version", "4", "--reward-task", "v4_yaw_gate",
+                               "--reward-options", "not_a_field=0"])
+        # Gate options name no RewardV4Config field, so plain v4 refuses them.
+        with self.assertRaisesRegex(ValueError, "unique RewardV4Config"):
+            train.main(base + ["--mode", "train", "--reward-version", "4", "--reward-options", "turn_draw_fraction=0.3"])
+
+
 if __name__ == "__main__":
     unittest.main()
