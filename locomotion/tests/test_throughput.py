@@ -16,7 +16,7 @@ from unittest.mock import patch
 import numpy as np
 import torch
 
-from locomotion import launch, reservation, throughput
+from locomotion import train, launch, reservation, throughput
 from locomotion import task as task_module
 from locomotion.env import LocomotionEnv
 from locomotion.env_config import BODY_NAMES, EnvConfig, JOINT_NAMES, sha
@@ -507,6 +507,16 @@ class GuardTests(unittest.TestCase):
                                          dict(mode='diagnostic', num_envs=256), dict(mode='throughput', num_envs=2048, updates=5, warmup_updates=2))):
                 with self.subTest(bad=bad), self.assertRaisesRegex(ValueError, 'replica count'):
                     prepare(root/f'bad{index}', REMOTE, **bad)
+
+    def test_trainer_parses_large_counts_for_diagnostics(self):
+        base = ['--asset', 'a', '--model', 'm', '--geometry', 'g', '--geometry-extrema', 'e', '--stance', 's',
+                '--output', 'o', '--source-freeze-sha256', 'f'*64, '--preflight-only', '--mode', 'diagnostic']
+        with self.assertRaises(SystemExit), patch('sys.stderr', io.StringIO()):
+            train.main(base + ['--num-envs', '256'])
+        for count in ('512', '1024'):
+            with self.subTest(count=count), self.assertRaises((ValueError, OSError)):
+                # The count parses; the fake asset paths fail the later asset check.
+                train.main(base + ['--num-envs', count])
 
     def test_prepare_binds_a_profile_with_admission_and_bounded_updates(self):
         with tempfile.TemporaryDirectory() as directory:
