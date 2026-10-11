@@ -1,0 +1,24 @@
+{
+  "id": "20261009T144000_controlled_comparison_final",
+  "date": "2026-10-09T14:40:00Z",
+  "title": "Close the controlled reward v4 comparison: budget, joint-margin and yaw-weight hypotheses are each mixed",
+  "summary": "All six launches of the program lead's controlled comparison completed 5000 updates from source a798095b with the deviation decay held at 2000 updates, and each checkpoint at updates 2000, 3500 and 5000 ran the 13 learning probes. The budget hypothesis is mixed: seed 20260917 meets every requirement, and seed 20260918 lowers quiet joint rate by only 6.2 percent and adds two torque failures. The joint-margin hypothesis is mixed: each seed meets one or two of three outcomes and both fail the regression guard. The yaw-weight hypothesis is mixed under the rule declared before the runs: both yaw-weight seeds turn in the commanded direction in both yaw probes, but the budget arm does too, and the yaw errors rise in both seeds (seed 20260917: +14.8 and +20.1 percent; seed 20260918: +6.1 and +5.2 percent), and both fail the regression guard. A reading that requires improvement over the budget arm on every outcome would call the yaw hypothesis unsupported at the tested setting. Two seeds establish no confidence interval, and no failed comparison disproves other weights or budgets. The stop diagnosis of the reference policies shows drifting joints that follow their own targets, with slow action changes below 1 Hz; it proposes mechanisms and tests none. Stage 2 stays blocked.",
+  "areas": [
+    "locomotion",
+    "research",
+    "site"
+  ],
+  "next": "Choose the next comparison with the program lead; no tested setting met every predicted outcome in both seeds.",
+  "changes": [
+    "site/assets/reward_v4_controlled_comparison_20261007_001/*",
+    "site/project.json",
+    "site/updates/20261009T144000_controlled_comparison_final.json"
+  ],
+  "evidence": [
+    "site/assets/reward_v4_controlled_comparison_20261007_001/comparison_after_yaw.json",
+    "site/assets/reward_v4_controlled_comparison_20261007_001/stop_diagnosis.json",
+    "site/assets/reward_v4_controlled_comparison_20261007_001/Y_seed20260917_verification.json",
+    "site/assets/reward_v4_controlled_comparison_20261007_001/Y_seed20260918_verification.json"
+  ],
+  "no_project_impact": false
+}
