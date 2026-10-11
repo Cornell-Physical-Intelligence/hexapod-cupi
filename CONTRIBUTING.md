@@ -10,7 +10,8 @@ behind Cornell sign-in. Agent constraints live in [AGENTS](AGENTS.md).
 Use `uv sync --locked` and run Python through `uv run`; do not create separate
 pip, conda or venv environments. Add dependencies with `uv add` and commit
 `pyproject.toml` with `uv.lock`. You can run CPU tests and the viewer on your
-laptop. Read [OPERATIONS](docs/OPERATIONS.md) before using Spark for Isaac.
+laptop. Follow [SPARK](SPARK.md) for personal worktrees and frozen runs on Spark;
+read [OPERATIONS](docs/OPERATIONS.md) before using Isaac.
 
 Name branches `[netid]/[task]`. Submit changes through a PR to `main`, review
 the diff and merge after green CI. Use forward commits to preserve published
@@ -31,8 +32,8 @@ Keep measurements with other limiters in separate comparisons.
 Publish selected media and small reports under `site/assets/`. Follow
 [PROJECT_SITE](docs/PROJECT_SITE.md) for each push: add an append-only update,
 change the registry when facts change, and verify the full diff
-and rendered site. Follow [PIPELINE_LINEAGES](docs/PIPELINE_LINEAGES.md) when
-covered source changes need a new manifest. Register new source commands in
+and rendered site. CI generates the source manifest when a change merges; see
+[PIPELINE_LINEAGES](docs/PIPELINE_LINEAGES.md). Register new source commands in
 `configs/source_inventory.json`.
 
 ## Required checks
@@ -47,6 +48,7 @@ uv run python -m unittest discover -s mission/tests
 uv run python -m unittest discover -s robot/tests
 uv run python -m unittest discover -s locomotion/tests
 uv run python -m unittest discover -s locomotion/priors/tests
+uv run python -m unittest discover -s locomotion/surrogate/tests
 uv run python -m unittest discover -s tests
 python3 tools/source_inventory.py check
 python3 tools/archive.py check

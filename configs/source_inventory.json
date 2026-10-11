@@ -28,7 +28,7 @@
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Verify the frozen Stage2 Git lineage and a separately versioned current release."
+      "purpose": "Verify the frozen Stage2 Git lineage and generate the source manifest of any revision."
     },
     {
       "path": "tools/project_site.py",
@@ -171,6 +171,13 @@
       "purpose": "Bind a run to its model and recorded native standing checks."
     },
     {
+      "path": "locomotion/amp_discriminator.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "AMP discriminator, Eq. (1) loss and Eq. (2) style reward; offline frozen training is diagnostic only."
+    },
+    {
       "path": "locomotion/camera.py",
       "previous_path": null,
       "classification": "current",
@@ -234,11 +241,46 @@
       "purpose": "Launch one native allocation with explicit ownership and bounded cleanup."
     },
     {
+      "path": "locomotion/action_distribution.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Bound Gaussian action means for a named PPO diagnostic while preserving raw sample likelihoods."
+    },
+    {
       "path": "locomotion/ppo.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Adapt the admitted simulator to standard RSL-RL PPO without a motion prior."
+    },
+    {
+      "path": "locomotion/amp_diagnostic.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Offline CPU fit of the AMP discriminator to the admitted bank against a recorded trace; reports held-out style rewards bound to input and source hashes."
+    },
+    {
+      "path": "locomotion/amp_ppo.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Online adversarial motion prior for RSL-RL PPO: AMP transitions, style reward, discriminator updates, privileged critic state and the supervised velocity estimator; no native pilot yet."
+    },
+    {
+      "path": "locomotion/paper_networks.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Liu et al. Table III actor and critic: velocity estimator, memory encoder, low-level actor and privileged encoder; the terrain encoder waits for Step 8."
+    },
+    {
+      "path": "locomotion/paper_reward.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Candidate Table I task and penalty reward from Liu et al.: literal, penalty-calibrated and command-scaled tracking variants."
     },
     {
       "path": "locomotion/prepare.py",
@@ -252,7 +294,35 @@
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Spark reservation checks copied unchanged from the recorded Sept14 ownership guard."
+      "purpose": "Frozen-tree, pinned-input, GPU-lock and owned-container helpers kept from the Sept 14 launcher."
+    },
+    {
+      "path": "locomotion/spark_paths.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Bound CUPI inputs and runs while retaining historical Spark paths."
+    },
+    {
+      "path": "locomotion/reward_scorer.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Score recorded native control traces offline under the current and candidate rewards."
+    },
+    {
+      "path": "locomotion/reward_viewer.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Write an HTML page that plays evaluated policies beside their per-control reward."
+    },
+    {
+      "path": "locomotion/reward_workbench.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Explain the training reward and export coefficient edits scored against recorded rollouts."
     },
     {
       "path": "locomotion/task.py",
@@ -260,6 +330,48 @@
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Versioned command/reward wrapper; native physics and Stage 2 gates are unchanged."
+    },
+    {
+      "path": "locomotion/task_v2.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Reward version 2: Table I task and penalty terms with command-scaled tracking beside the frozen version 1; defaults approved by the reviewer."
+    },
+    {
+      "path": "locomotion/task_v3.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Experimental immediate tracking feedback with unchanged version 2 penalty coefficients and motion gates."
+    },
+    {
+      "path": "locomotion/task_v4.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Reward version 4: noise-calibrated tracking and penalties plus a measured stepping term, beside versions 1 to 3."
+    },
+    {
+      "path": "locomotion/rate_schedule.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Value command boundaries at the post-action state and cap the adaptive learning rate of stock RSL-RL PPO."
+    },
+    {
+      "path": "locomotion/noise_probe.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Hold fixed action means under graded exploration noise and record reward inputs without an optimizer."
+    },
+    {
+      "path": "locomotion/throughput.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Profile stock-PPO training cost, throughput and memory at one admitted replica count."
     },
     {
       "path": "locomotion/train.py",
@@ -351,6 +463,55 @@
       "classification": "prototype",
       "owner": "Program lead",
       "purpose": "Audit native clips and export hash-bound transitions after the program lead reviews motion."
+    },
+    {
+      "path": "locomotion/surrogate/__init__.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Package namespace."
+    },
+    {
+      "path": "locomotion/surrogate/env.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Run the interface of the native locomotion environment on CPU MuJoCo physics for design work; native runs remain the acceptance evidence."
+    },
+    {
+      "path": "locomotion/surrogate/train.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Train PPO on the MuJoCo surrogate through the training path of the native trainer."
+    },
+    {
+      "path": "locomotion/surrogate/evaluate.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Evaluate a checkpoint's no-noise policy on the learning probes, on the surrogate."
+    },
+    {
+      "path": "locomotion/surrogate/replay.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Replay actions open loop on the surrogate and score stored telemetry under any reward."
+    },
+    {
+      "path": "locomotion/surrogate/calibrate.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Compare the surrogate with retained native captures."
+    },
+    {
+      "path": "locomotion/surrogate/self_check.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Check the surrogate on this machine and measure it against native reference copies."
     }
   ],
   "archived_documents": []

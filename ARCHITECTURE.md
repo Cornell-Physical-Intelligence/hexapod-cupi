@@ -91,7 +91,7 @@ status remains undefined.
 | Boundary | Maintained source and remaining implementation |
 | --- | --- |
 | Model | `robot/` selects the approved asset and portable simulation inputs. |
-| Locomotion | `locomotion/` owns simulation, rewards, PPO, evaluation and guarded execution; `priors/` owns optional motion optimization. Hardware runtime and paper-method extensions remain pending. |
+| Locomotion | `locomotion/` owns simulation, rewards, PPO, evaluation and guarded execution; `priors/` owns optional motion optimization; `surrogate/` holds a CPU MuJoCo design surrogate that carries no acceptance weight. Hardware runtime and paper-method extensions remain pending. |
 | Contracts | `contracts/` owns commands, planar poses and checkpoint identity fields. Full mission and hardware wire formats remain pending. |
 | Navigation | `navigation/` holds a waypoint follower example. The route planner and GPS pose estimate remain pending. |
 | Mission | `mission/sensors/` retains ray-pattern and transport prototypes. Operator controls and route-progress reporting remain pending. GeoData owns recording, coverage and export. |

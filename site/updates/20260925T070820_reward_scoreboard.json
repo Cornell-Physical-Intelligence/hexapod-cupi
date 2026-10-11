@@ -1,0 +1,23 @@
+{
+  "id": "20260925T070820_reward_scoreboard",
+  "date": "2026-09-25T07:08:20+00:00",
+  "title": "Add a walking, standing and jittering scoreboard to the reward viewer",
+  "summary": "locomotion.reward_viewer accepts ROLE=PATH evaluations and opens with a scoreboard: for each reward, bars show every labelled rollout's mean reward per control beside the first target rollout scored motionless under its own commands, with a verdict naming any rollout or standing still that ties or beats the target role. Rollout panels carry their role.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/reward_viewer.py",
+    "locomotion/tests/test_reward_viewer.py",
+    "configs/releases/reward_scoreboard_20260925_v1.sha256",
+    "tools/check_pipeline_lineages.py",
+    "site/updates/20260925T070820_reward_scoreboard.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_reward_viewer.py",
+    "configs/releases/reward_scoreboard_20260925_v1.sha256"
+  ],
+  "next": "Use the scoreboard to review candidate reward v2 settings with the named reviewer before implementation in locomotion/task.py.",
+  "no_project_impact": true,
+  "reason": "A visualization change to an offline tool changes no measured result, roadmap marker, gate or training reward."
+}

@@ -1,0 +1,203 @@
+{
+  "scratch_directory_sha256": {
+    "calibrate.py": "6b96550d18187ba051229e65193bea775591f1f04f804bd508ffc17329e0b251",
+    "compare_training_runs.py": "e3ab3217923e1d667e20f3eaea6e73e0417e5e2a9fe7b713fedd6c671cfd908b",
+    "compare_training_start.py": "927cec50a417c2e9ed5cbd0120baeee69c962a3703fe22497f13490ad631a685",
+    "evaluate_surrogate.py": "2fcbb0d644c6aab96faa513d7d4d426332ffa8bafd272e5ce20eaa454cbaa308",
+    "example_task.py": "aec757c4de95410e7a6da43fbd1fa34f4467acb8e9002c4da620692f2f6f59ed",
+    "probe_compare.py": "994824bf4a68fc46f8f0d38ec1e85cf4cbef61c60b488ffd763feb2c7219acd3",
+    "replay.py": "ee54e026dbb70db517b1c2a388234cce83c535e0c18aea2d186d399fe77735d1",
+    "self_check.py": "bbf99395cff71befe5df5fb5368b076182c6b34f5922026c0a886b421438dbb1",
+    "surrogate_env.py": "2d752812edc233853d480b2188723e44094ae6e10b83ef5a37f79c1e78c6d911",
+    "sweep_contact.py": "605adebe2ecf33c1305ef15f41e54652d3e10b42cc03b1df87ffb0ba97c7ccde",
+    "train_surrogate.py": "bc2e80a4a68a491b68a79b776ac2c948c88f3d87d8edc7e754479763e322e267",
+    "tripod_closed_loop.py": "2baf4484ee9709b7f427cd9cbca297e0c16f5226c151db38c276bd7c1ecdc38c",
+    "train_design.py": "f227181c550af6ae0a4b487bdcdabf8e5d9a73b3e08994c7d9be535e3a998ee9",
+    "eval_design.py": "e748fff550a742e3185a3d878778892769875195ee79d9b5e4b0edf2b5be3376"
+  },
+  "port_sha256": {
+    "__init__.py": "f13b1f6af122568c5327a70ffe2c2713568a9757b82e1a6e39f846229d2b66af",
+    "calibrate.py": "caa72f54b1321d0436254b616cfc512534cc3336f26ead2afe00b9a597583686",
+    "env.py": "88c56ef4ba3ae7d089fa07b44bffac1b4fba5eb6e01968bc27786f2cc255812c",
+    "evaluate.py": "e930ad6ce9b9bfd03ba486e109c3f63819f391eca57ee0a70cee04bd613b902e",
+    "replay.py": "3188d7b630b54958060236606342113e102c7a6ed298af3a8b540e9522685b8b",
+    "self_check.py": "49662d93b4a5824ef9f5226789ad1319d0ca6c41039efe1c992bfad06db848d5",
+    "train.py": "c21930faf023713bb81812ad9cb803a53b494c12220bb7f47fe32834484aa709"
+  },
+  "checks": [
+    {
+      "check": "environment",
+      "inputs": "8 replicas, 120 controls, Gaussian actions at std 0.3 with seed 7, command 0.05 m/s forward, 2 threads",
+      "compared": "state, actor and critic observations, each telemetry key, touchdown and clamp counters, MJCF text, ContactModel defaults, declaration",
+      "result": {
+        "scratch_equals_port": true,
+        "threads_2_equals_threads_0": true,
+        "counters": [
+          1695,
+          437,
+          0,
+          43.58967230997576
+        ],
+        "mjcf_equal": true,
+        "contact_model_equal": true,
+        "declaration_equal": true
+      }
+    },
+    {
+      "check": "evaluator",
+      "compared": "each array of control_trace.npz, default contact model",
+      "checkpoints": {
+        "wall_u2000": "fe3eb69ef3ee4675d49373e8803a0f4207a387c85be4abf80ddcc163ece30371",
+        "vnoise_seed20260917_u2000": "54bf83cb4b5cfea042df32db5a9476685be43401ba9a9d0cc58de8c6adcab023"
+      },
+      "result": {
+        "eval_design.py with STRESS_DQ_GAIN=1.5 STRESS_MEAN2=1 equals --velocity-input-gain 1.5 --action-mean2 (wall u2000, stop probe)": [
+          true
+        ],
+        "evaluate_surrogate.py equals the port (wall u2000, forward and stop probes)": [
+          true,
+          true
+        ],
+        "eval_design.py equals the port (vnoise seed 20260917 u2000, stop probe)": [
+          true
+        ],
+        "evaluate_surrogate.py equals the port (vnoise seed 20260917 u2000, stop probe)": [
+          false
+        ]
+      },
+      "verdicts": {
+        "old_vnoise_design": [
+          [
+            "learning:forward_0.05_to_stop",
+            true,
+            []
+          ]
+        ],
+        "old_vnoise_v2": [
+          [
+            "learning:forward_0.05_to_stop",
+            false,
+            [
+              "max_joint_velocity_rms_rad_s",
+              "max_joint_position_range_rad",
+              "max_target_step_abs_p95_rad_per_20ms",
+              "missing_six_toe_count_400hz"
+            ]
+          ]
+        ],
+        "new_vnoise": [
+          [
+            "learning:forward_0.05_to_stop",
+            true,
+            []
+          ]
+        ]
+      }
+    },
+    {
+      "check": "calibration",
+      "compared": "each value of the scratch calibrate.py result (standing, tripod replay, noise v2, noise v3)",
+      "differing_paths": [
+        "/standing/native_torque_norm_nm",
+        "/tripod_replay/native_planar_error_mps",
+        "/tripod_replay/native_yaw_error_rad_s",
+        "/tripod_replay/native_vertical_velocity_rms_mps"
+      ]
+    },
+    {
+      "check": "trainer",
+      "inputs": "2 updates, 8 replicas, 2 threads, seed 20260917",
+      "result": {
+        "train_surrogate.py equals the port at default options: metrics rows without timing": true,
+        "train_surrogate.py equals the port at default options: checkpoint tensors": true,
+        "train_design.py equals the port with the newest learner options: metrics rows without timing": true,
+        "train_design.py equals the port with the newest learner options: checkpoint tensors": true
+      }
+    },
+    {
+      "check": "resume",
+      "inputs": "the newest learner options, 8 replicas, 2 threads; 2 updates, then 2 more from the checkpoint",
+      "mean_action_std_updates_3_4": {
+        "port_uninterrupted": [
+          0.10000001639127731,
+          0.07499996572732925
+        ],
+        "port_resumed": [
+          0.10000001639127731,
+          0.07499996572732925
+        ],
+        "train_design.py_resumed": [
+          0.1499999314546585,
+          0.10000001639127731
+        ]
+      },
+      "result": {
+        "port resumed equals port uninterrupted": true,
+        "train_design.py resumed equals port uninterrupted": false
+      }
+    },
+    {
+      "check": "gait-clock guard",
+      "inputs": "default TrainingTaskV4, gait clock 0, 1 update, 8 replicas",
+      "result": {
+        "train_design.py": {
+          "returncode": 0,
+          "status": "completed",
+          "errors": []
+        },
+        "port": {
+          "returncode": 1,
+          "status": "failed",
+          "errors": [
+            "ValueError('The contact-schedule reward needs a gait clock of the same period: pass --gait-clock 60 or set schedule_weight=0 in the task')"
+          ]
+        }
+      }
+    },
+    {
+      "check": "foot load",
+      "inputs": "wall u2000, forward then stop probe, default contact model",
+      "result": {
+        "row_counts": {
+          "eval_design.py": {
+            "learning:translate_0.05_0deg": 999,
+            "learning:forward_0.05_to_stop": 1050
+          },
+          "port": {
+            "learning:translate_0.05_0deg": 1000,
+            "learning:forward_0.05_to_stop": 1050
+          }
+        },
+        "eval_design.py first stop row equals the port's last forward row": true,
+        "port first stop row": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "traces equal": [
+          true,
+          true
+        ],
+        "summary keys": {
+          "eval_design.py": {
+            "schema": "hexapod_surrogate_evaluation_v1",
+            "gait toe height key": [
+              "toe_lift_max_mm"
+            ],
+            "speed_clamp_events at top level": true
+          },
+          "port": {
+            "schema": "hexapod_surrogate_evaluation_v3",
+            "gait toe height key": [
+              "toe_point_height_max_mm"
+            ],
+            "speed_clamp_events at top level": false
+          }
+        }
+      }
+    }
+  ]
+}

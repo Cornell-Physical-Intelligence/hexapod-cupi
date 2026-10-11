@@ -1,0 +1,272 @@
+{
+  "schema": "hexapod_ppo_rest_oscillation_v1",
+  "analysis_sha256": "c6803943cfb2148a26b30e4f8d212e3b6c2e4d8da24f5516108c05ff90df31fb",
+  "training_attempt": "ppo_v4_action_wall_20261005_001",
+  "remote_directory": "/srv/cupi/hexapod/runs/james/",
+  "seed": 20260917,
+  "update": 2000,
+  "checkpoint_sha256": "fe3eb69ef3ee4675d49373e8803a0f4207a387c85be4abf80ddcc163ece30371",
+  "cases": {
+    "forward": "learning:translate_0.05_0deg",
+    "quiet_20s": "learning:quiet_20s",
+    "forward_to_stop": "learning:forward_0.05_to_stop"
+  },
+  "sha256": {
+    "ppo_v4_action_wall_20261005_001/run/standing/checkpoint_update002000.pt": "fe3eb69ef3ee4675d49373e8803a0f4207a387c85be4abf80ddcc163ece30371",
+    "ppo_v4_action_wall_20261005_001/run/standing/checkpoint_update002000.json": "8fa2c812fe31f7f50abdcd029d6bafcba878fd1afc7f7c58b32847fff15f2859",
+    "ppo_v4_action_wall_20261005_001_evaluate_stop_video/run/standing/evaluation/summary.json": "835dc7c3bc7bc2df4ceec08b7fc21d7c0024d7a680586c0f5dfe67c52e3a499e",
+    "ppo_v4_action_wall_20261005_001_evaluate_stop_video/run/standing/evaluation/allocation.json": "a987c286624aaba15d8d08218a15f83d36bf3e40e3af0fc942ce00582ebccee9",
+    "ppo_v4_action_wall_20261005_001_evaluate_stop_video/run/standing/evaluation/batch_000/report.json": "87a3a31c46eb914e5b5a1a49d89166f082f804625b6e5f9942b459ae75e3dfd2",
+    "ppo_v4_action_wall_20261005_001_evaluate_stop_video/run/standing/evaluation/batch_001/report.json": "663d9e6913bb629f448f863b0cd4d89ffa5d5cd5bb88b9033c9e19b800b19339",
+    "ppo_v4_action_wall_20261005_001_evaluate_stop_video/run/standing/evaluation/batch_001/control_trace.npz": "402a1bab5b127446ddfc4481eacfc807a6f41ad108eefd19c87ffdf0f4fc35c8",
+    "ppo_v4_action_wall_20261005_001_evaluate_stop_video/run/standing/evaluation/batch_002/report.json": "0a2a1e7f2f47f041348a1c72420374407a8847a2fa54153897ee193113f64646",
+    "ppo_v4_action_wall_20261005_001_evaluate_stop_video/run/standing/evaluation/batch_002/control_trace.npz": "f33a278fc95204a150a81e30a25ad4a8458e1d160f406ee62394c4a9d5ff83f1"
+  },
+  "methods": {
+    "scope": "One checkpoint, one seed and one retained evaluation with one trial per case. The evaluator takes the actor mean and adds no sampling noise, so the record measures no trial-to-trial spread.",
+    "batch": "Each case's batch index is its position in the allocation's selected_case_ids. Its report must name that case alone, the pinned checkpoint, the summary result and, for stop and quiet, the pinned trace.",
+    "screens": "Copy pass, failed_bounds, the score window and four metrics from summary.json. A null metric means the evaluator wrote no value. The summary scores from window_start_control, before each rest window starts.",
+    "rest_motion": "The script asserts a zero command over stop controls 550 to 1049 and quiet controls 300 to 999. action_std is the population standard deviation of policy_action per joint. For the joint with the largest one, x is the action minus its window mean, the lag-1 autocorrelation is sum(x[t] x[t+1]) / sum(x[t]^2), the peak is the largest rFFT power bin above DC at bin * 50 / controls Hz, and its share divides by the sum of those bins. As in locomotion/evaluation.py, the target step is the largest per-joint 95th percentile of |diff(joint_target_rad)| and the joint velocity is the largest per-joint RMS.",
+    "replay": "The script asserts the checkpoint record's hidden sizes 256, 256, 128, ELU, no observation normalization, BoundedMeanGaussian, fixed observation scaling, gait clock and no action smoothing. The actor is linear layers mlp.0, mlp.2, mlp.4, mlp.6 with ELU after the first three and tanh after the last. Its input is scale_observation(policy_observation, 'fixed') plus two zero columns, because the evaluation policy in locomotion/train.py appends clock_features, which a zero command sets to zero. Over the rest window |replayed mean - policy_action| must stay below 1e-5.",
+    "layout": "locomotion/env.py builds the observation as cat(history.flatten(1), commands, previous_action) from five 42-value frames. LocomotionEnv.step sets history = cat(history[:, 1:], new frame), so frame 4 is the latest. _proprio orders a frame as body rates (3), gravity (3), q - neutral (18), dq (18). previous_action holds (target - neutral) / 0.35 of the previous control. The script asserts ACTOR_SCALES of locomotion/ppo.py: 1/0.35 for q - neutral, 0.5 for dq, 1 for previous_action. layout_check holds the largest gaps between frame f of observation row t and joint state row t - 5 + f, and between previous_action and target row t - 1.",
+    "gains": "Take the Jacobian of the replayed mean with respect to the scaled 233-value input at the middle control of the stop window. In row j the previous-target gain is column 213 + j, the position gain of frame f is column 42f + 6 + j per action unit of joint offset, and the velocity gain is 0.5 times column 42f + 24 + j in action units per rad/s. Each frame reports the mean, minimum and maximum over the 18 joints. two_control_mean evaluates |cos(pi f / 50)|, the gain of a mean of two consecutive actions, at the peak frequency of the stop window.",
+    "limits": "The gains use the same-joint Jacobian entries at one state. The record holds no model of the motor and joint response, so it establishes no cause for the oscillation."
+  },
+  "screens": {
+    "forward": {
+      "pass": true,
+      "failed_bounds": [],
+      "window_start_control": 100,
+      "window_controls": 900,
+      "planar_error_mps": 0.02220003158212538,
+      "mean_velocity_mps": [
+        0.04675216971166803,
+        -0.0034707840024154495,
+        9.078298630950415e-05
+      ],
+      "max_joint_velocity_rms_rad_s": null,
+      "max_target_step_abs_p95_rad_per_20ms": null
+    },
+    "quiet_20s": {
+      "pass": false,
+      "failed_bounds": [
+        "max_target_step_abs_p95_rad_per_20ms"
+      ],
+      "window_start_control": 200,
+      "window_controls": 800,
+      "planar_error_mps": 0.0005687602234073505,
+      "mean_velocity_mps": [
+        -7.620747304936335e-06,
+        1.1046459339606724e-06,
+        -9.606835656931632e-07
+      ],
+      "max_joint_velocity_rms_rad_s": 0.016925107687711716,
+      "max_target_step_abs_p95_rad_per_20ms": 0.0038106318097561598
+    },
+    "forward_to_stop": {
+      "pass": false,
+      "failed_bounds": [
+        "max_joint_velocity_rms_rad_s",
+        "max_target_step_abs_p95_rad_per_20ms",
+        "missing_six_toe_count_400hz"
+      ],
+      "window_start_control": 500,
+      "window_controls": 550,
+      "planar_error_mps": 0.04998076423393847,
+      "mean_velocity_mps": [
+        3.679398378860304e-05,
+        -1.8858150340861926e-05,
+        -2.699302284920175e-06
+      ],
+      "max_joint_velocity_rms_rad_s": 0.04339047521352768,
+      "max_target_step_abs_p95_rad_per_20ms": 0.012204138562083244
+    }
+  },
+  "rest_motion": {
+    "forward_to_stop": {
+      "first_control": 550,
+      "last_control": 1049,
+      "command_zero_from_control": 400,
+      "action_std": {
+        "lf_coxa_yaw": 0.004662520987789496,
+        "lf_femur_pitch": 0.0037390302788325334,
+        "lf_tibia_pitch": 0.005871705066112539,
+        "lm_coxa_yaw": 0.002176621699296492,
+        "lm_femur_pitch": 0.0014448777799055486,
+        "lm_tibia_pitch": 0.007674473092127939,
+        "lr_coxa_yaw": 0.002090844736624158,
+        "lr_femur_pitch": 0.0016103620903172517,
+        "lr_tibia_pitch": 0.0018318440260143083,
+        "rf_coxa_yaw": 0.010350927625902796,
+        "rf_femur_pitch": 0.002115429720091005,
+        "rf_tibia_pitch": 0.00319413896665314,
+        "rm_coxa_yaw": 0.004602166728004834,
+        "rm_femur_pitch": 0.002934112192155188,
+        "rm_tibia_pitch": 0.005398520323873456,
+        "rr_coxa_yaw": 0.004749343122236618,
+        "rr_femur_pitch": 0.001618527460274969,
+        "rr_tibia_pitch": 0.0036227607708129903
+      },
+      "largest_action_std": 0.010350927625902796,
+      "largest_action_std_joint": "rf_coxa_yaw",
+      "lag1_autocorrelation": -0.9194646383245454,
+      "peak_frequency_hz": 24.8,
+      "peak_share_of_non_dc_power": 0.3241792672446357,
+      "max_target_step_abs_p95_rad_per_20ms": 0.01233399361371994,
+      "max_target_step_joint": "rf_coxa_yaw",
+      "max_joint_velocity_rms_rad_s": 0.04373454183170611,
+      "max_joint_velocity_rms_joint": "rr_coxa_yaw",
+      "policy_replay_max_abs_error": 3.5762786865234375e-07,
+      "layout_check": {
+        "previous_executed_target": 5.960464477539063e-08,
+        "frame_position_rad": 2.0861625649182258e-08,
+        "frame_velocity_rad_s": 0.0
+      }
+    },
+    "quiet_20s": {
+      "first_control": 300,
+      "last_control": 999,
+      "command_zero_from_control": 0,
+      "action_std": {
+        "lf_coxa_yaw": 0.0012365564899593467,
+        "lf_femur_pitch": 0.0014230472651913166,
+        "lf_tibia_pitch": 0.0022291170144583053,
+        "lm_coxa_yaw": 0.0008718032371957189,
+        "lm_femur_pitch": 0.0007708353156669328,
+        "lm_tibia_pitch": 0.0017743473468246605,
+        "lr_coxa_yaw": 0.0011224842034493995,
+        "lr_femur_pitch": 0.0008237060565665614,
+        "lr_tibia_pitch": 0.0010280483517552405,
+        "rf_coxa_yaw": 0.0028303889565267143,
+        "rf_femur_pitch": 0.0011704171468216857,
+        "rf_tibia_pitch": 0.0014535225391552838,
+        "rm_coxa_yaw": 0.0017039179052386723,
+        "rm_femur_pitch": 0.0014126092076660096,
+        "rm_tibia_pitch": 0.001952995547489956,
+        "rr_coxa_yaw": 0.002043577944815745,
+        "rr_femur_pitch": 0.0010740856567866223,
+        "rr_tibia_pitch": 0.0013722252439921625
+      },
+      "largest_action_std": 0.0028303889565267143,
+      "largest_action_std_joint": "rf_coxa_yaw",
+      "lag1_autocorrelation": -0.760858180392763,
+      "peak_frequency_hz": 22.428571428571427,
+      "peak_share_of_non_dc_power": 0.05118532218479598,
+      "max_target_step_abs_p95_rad_per_20ms": 0.0034859940409660345,
+      "max_target_step_joint": "rf_coxa_yaw",
+      "max_joint_velocity_rms_rad_s": 0.017038478699771986,
+      "max_joint_velocity_rms_joint": "rr_coxa_yaw",
+      "policy_replay_max_abs_error": 3.8743019104003906e-07,
+      "layout_check": {
+        "previous_executed_target": 4.6832220906845023e-08,
+        "frame_position_rad": 1.1920928966180355e-08,
+        "frame_velocity_rad_s": 0.0
+      }
+    }
+  },
+  "gains": {
+    "control": 800,
+    "previous_executed_target_gain": {
+      "mean": -0.015020937141444948,
+      "min": -0.06820905953645706,
+      "max": 0.022854944691061974,
+      "by_joint": {
+        "lf_coxa_yaw": -0.016236431896686554,
+        "lf_femur_pitch": -0.004470141604542732,
+        "lf_tibia_pitch": -0.012536093592643738,
+        "lm_coxa_yaw": 0.0008995477110147476,
+        "lm_femur_pitch": 0.022854944691061974,
+        "lm_tibia_pitch": -0.044087015092372894,
+        "lr_coxa_yaw": -0.0036117900162935257,
+        "lr_femur_pitch": 0.010062545537948608,
+        "lr_tibia_pitch": 0.021432511508464813,
+        "rf_coxa_yaw": 0.009339318610727787,
+        "rf_femur_pitch": 0.0015638917684555054,
+        "rf_tibia_pitch": -0.03386475145816803,
+        "rm_coxa_yaw": -0.011028806678950787,
+        "rm_femur_pitch": -0.038477823138237,
+        "rm_tibia_pitch": -0.021869761869311333,
+        "rr_coxa_yaw": -0.06820905953645706,
+        "rr_femur_pitch": -0.024586975574493408,
+        "rr_tibia_pitch": -0.057550977915525436
+      }
+    },
+    "history_frames": [
+      {
+        "frame": 0,
+        "controls_before_latest_frame": 4,
+        "position_gain": {
+          "mean": 0.05152886523865163,
+          "min": 0.0013659177348017693,
+          "max": 0.09955370426177979
+        },
+        "velocity_gain_action_per_rad_s": {
+          "mean": -0.0028030159171774155,
+          "min": -0.030708592385053635,
+          "max": 0.011894098483026028
+        }
+      },
+      {
+        "frame": 1,
+        "controls_before_latest_frame": 3,
+        "position_gain": {
+          "mean": 0.05720933878587352,
+          "min": 0.00417629349976778,
+          "max": 0.12405049055814743
+        },
+        "velocity_gain_action_per_rad_s": {
+          "mean": -0.00018052793004446558,
+          "min": -0.02995905466377735,
+          "max": 0.01420227438211441
+        }
+      },
+      {
+        "frame": 2,
+        "controls_before_latest_frame": 2,
+        "position_gain": {
+          "mean": 0.05399883921361632,
+          "min": -0.009517993777990341,
+          "max": 0.10381506383419037
+        },
+        "velocity_gain_action_per_rad_s": {
+          "mean": -0.004521882704769571,
+          "min": -0.037522345781326294,
+          "max": 0.02614389918744564
+        }
+      },
+      {
+        "frame": 3,
+        "controls_before_latest_frame": 1,
+        "position_gain": {
+          "mean": 0.05881249151813487,
+          "min": -0.002025244291871786,
+          "max": 0.15757793188095093
+        },
+        "velocity_gain_action_per_rad_s": {
+          "mean": -0.0005876899877977041,
+          "min": -0.03229905664920807,
+          "max": 0.031261034309864044
+        }
+      },
+      {
+        "frame": 4,
+        "controls_before_latest_frame": 0,
+        "position_gain": {
+          "mean": 0.04270460645461248,
+          "min": -0.012130362913012505,
+          "max": 0.1158519759774208
+        },
+        "velocity_gain_action_per_rad_s": {
+          "mean": -0.06194944596952862,
+          "min": -0.16909649968147278,
+          "max": -0.013630067929625511
+        }
+      }
+    ]
+  },
+  "two_control_mean": {
+    "frequency_hz": 24.8,
+    "gain": 0.012566039883352776
+  },
+  "native_started_by_analysis": false
+}

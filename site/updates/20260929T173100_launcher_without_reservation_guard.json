@@ -1,0 +1,31 @@
+{
+  "id": "20260929T173100_launcher_without_reservation_guard",
+  "date": "2026-09-29T17:31:00+00:00",
+  "title": "Remove the reservation guard from the Spark launcher",
+  "summary": "The program lead directed removal of the launcher's reservation guard. locomotion.launch no longer checks the systemd masks, the queue-lock helper or the pinned coordination file, and it no longer refuses other GPU processes or containers. Those checks passed only under Orion's account. The launcher now records other GPU processes, containers and available memory in each job report and continues when another process appears. It keeps both GPU locks, recreates a lock file that host cleanup removed, and keeps the 16 GiB memory floor and exact-container cleanup. The host reservation state stays unchanged.",
+  "areas": [
+    "locomotion",
+    "operations",
+    "site"
+  ],
+  "next": "Launch the Step 2 standing capture and throughput profiles as james.",
+  "changes": [
+    "AGENTS.md",
+    "configs/source_inventory.json",
+    "docs/OPERATIONS.md",
+    "docs/SPARK_COMPUTE_COORDINATION.md",
+    "locomotion/launch.py",
+    "locomotion/reservation.py",
+    "locomotion/tests/test_launch.py",
+    "locomotion/tests/test_launch_cleanup.py",
+    "locomotion/tests/test_reservation_binding.py",
+    "site/updates/20260929T173100_launcher_without_reservation_guard.json"
+  ],
+  "evidence": [
+    "locomotion/launch.py",
+    "locomotion/tests/test_launch.py",
+    "locomotion/tests/test_launch_cleanup.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The change alters launch preconditions only; no roadmap marker, recorded fact, gate or published result changes."
+}

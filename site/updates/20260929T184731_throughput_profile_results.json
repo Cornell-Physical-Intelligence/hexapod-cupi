@@ -1,0 +1,24 @@
+{
+  "id": "20260929T184731_throughput_profile_results",
+  "date": "2026-09-29T18:47:31+00:00",
+  "title": "Measure stock-PPO throughput at 1, 32 and 128 robots",
+  "summary": "Native profiles on the GB10 ran frozen source 56ebf907 with 20 measured updates per pass. Training reached 12.9, 319 and 930 transitions per second at 1, 32 and 128 robots. The PhysX step took 70% of each update at 1 and 32 robots and 80% at 128, and its scene step grew from 6.4 to 8.0 to 13.4 ms. PPO took 7% or less. From 32 to 128 robots, each added robot added about 1 MB of GPU memory. A fresh 128-robot standing capture passed all 128 replicas and supplied the 128-robot admission. An idle qwen38-server shared the GPU, and each job record lists it.",
+  "areas": [
+    "locomotion",
+    "site"
+  ],
+  "next": "Decide whether a named configuration above 128 robots, with a wider floor and a scalable admission capture, should come before Step 5 training.",
+  "changes": [
+    "docs/TRAINING.md",
+    "site/assets/throughput_profile_20260929_001/*.json",
+    "site/updates/20260929T184731_throughput_profile_results.json"
+  ],
+  "evidence": [
+    "site/assets/throughput_profile_20260929_001/summary.json",
+    "site/assets/throughput_profile_20260929_001/provenance.json",
+    "site/assets/throughput_profile_20260929_001/profile_128.json",
+    "site/assets/throughput_profile_20260929_001/admission_128.json"
+  ],
+  "no_project_impact": true,
+  "reason": "The profiles measure training cost; no roadmap marker, recorded fact, gate or qualification changes."
+}

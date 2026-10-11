@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = 'configs/source_inventory.json'
 SCOPES = ('tools', 'contracts', 'navigation', 'mission')
 # Maintained prototypes keep tests outside their top-level tool scope.
-TOP_LEVEL_SCOPES = ('locomotion', 'locomotion/priors')
+TOP_LEVEL_SCOPES = ('locomotion', 'locomotion/priors', 'locomotion/surrogate')
 
 
 def read_inventory(root=ROOT):

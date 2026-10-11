@@ -1,0 +1,29 @@
+{
+  "id": "20260925T172012_reward_v2_task",
+  "date": "2026-09-25T17:20:12+00:00",
+  "title": "Add selectable training reward version 2 beside the frozen version 1",
+  "summary": "locomotion.task_v2 implements reward version 2 from the Table I audit: command-scaled tracking (per-control kernel B or stride-mean kernel C), the Table I penalties and a TrainingTaskV2 that keeps each replica's previous raw action, previous joint velocity and velocity window, restarted at command changes and resets. task.py stays byte-identical, and train.py and prepare.py select version 2 only with --reward-version 2. Its defaults, kernel C with k 0.4 and calibrated penalties, are recorded as provisional pending review. Offline, version 2 reproduces the audited candidate scores and ranks both recorded walkers above standing still and both jittering policies.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/task_v2.py",
+    "locomotion/train.py",
+    "locomotion/prepare.py",
+    "locomotion/paper_reward.py",
+    "locomotion/tests/test_task_v2.py",
+    "locomotion/tests/test_reward_v2_table1_formulas.py",
+    "docs/REWARD_V2_TABLE1_AUDIT.md",
+    "configs/source_inventory.json",
+    "configs/releases/reward_v2_task_20260925_v1.sha256",
+    "tools/check_pipeline_lineages.py",
+    "site/updates/20260925T172012_reward_v2_task.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_task_v2.py",
+    "configs/releases/reward_v2_task_20260925_v1.sha256"
+  ],
+  "next": "The named reviewer confirms the kernel, k, command floors, yaw extension and penalty weights; a version 2 training run then needs the program lead's approval and matching standing admission.",
+  "no_project_impact": true,
+  "reason": "Version 1 remains the unchanged default and no training run used version 2, so no measured result, roadmap marker or gate changes."
+}

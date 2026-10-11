@@ -1,0 +1,24 @@
+{
+  "id": "20260923T225518_offline_reward_scorer",
+  "date": "2026-09-23T22:55:18+00:00",
+  "title": "Add an offline reward scorer for recorded native traces",
+  "summary": "locomotion.reward_scorer rebuilds the training reward's telemetry from evaluation control traces and scores the current reward and any candidate beside a motionless counterfactual under the same commands. It measures velocity at the root-link origin, as training does, and rejects a trace when that reconstruction disagrees with the recorded critic observation. Non-foot contact force and the first control's previous target are not recorded; the report declares both gaps.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/reward_scorer.py",
+    "locomotion/tests/test_reward_scorer.py",
+    "configs/source_inventory.json",
+    "configs/releases/reward_scorer_20260923_v1.sha256",
+    "tools/check_pipeline_lineages.py",
+    "site/updates/20260923T225518_offline_reward_scorer.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_reward_scorer.py",
+    "configs/releases/reward_scorer_20260923_v1.sha256"
+  ],
+  "next": "Score the paired PPO and optimizer replay traces and publish the report as evidence before citing any reward ranking.",
+  "no_project_impact": true,
+  "reason": "An offline analysis tool and its tests change no measured result, roadmap marker, gate or training reward."
+}

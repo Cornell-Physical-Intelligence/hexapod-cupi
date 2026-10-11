@@ -1,0 +1,23 @@
+{
+  "id": "20261003T183000_immediate_tracking_result",
+  "date": "2026-10-03T18:30:00Z",
+  "title": "Record the failed immediate-tracking PPO trial",
+  "summary": "We verify the completed reward-v3 budget and all 13 failed probes. The policy holds 16 of 18 forward joint commands near their bounds. We retain native loads and the failed forward video.",
+  "areas": [
+    "locomotion",
+    "research"
+  ],
+  "next": "Test exploration and penalty incentives against the recorded action saturation before selecting another controlled trial.",
+  "changes": [
+    "docs/REWARD_V2_TABLE1_AUDIT.md",
+    "site/project.json",
+    "site/assets/ppo_learning_recovery_20261002_001/reward_v3_*",
+    "site/assets/media/ppo_reward_v3_2000_20261003*"
+  ],
+  "evidence": [
+    "site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation.json",
+    "site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation_verification.json"
+  ],
+  "no_project_impact": false,
+  "reason": "The completed trial changes the recorded Stage 2 blocker; walking remains unqualified."
+}

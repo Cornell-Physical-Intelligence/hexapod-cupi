@@ -1,0 +1,2103 @@
+{
+  "schema": "hexapod_matched_training_windows_v1",
+  "analysis_sha256": "a4d388f11649b95516c461668209c51b29dbeb0efd886d2fe7d756d345796eba",
+  "methods": {
+    "windows": "Updates 1\u2013200 and 1801\u20132000. Each contains 614,400 environment-controls. Use interval_metrics, never overlapping cumulative prefixes.",
+    "weighting": "Pool reward sums and count-weighted means. Weight moving projection by moving-command rows and requested speed by all controls before dividing by moving rows. Pool command classes by class counts.",
+    "quiet_rms": "Pool per-joint squared RMS weighted by zero-command counts, then take square root. Compute overall and worst joint only after pooling. Quiet rows include transitions and reset transients.",
+    "terminations": "Counts per 1,000 controls; reasons can overlap, and physical termination can coincide with timeout. These are not episode failure probabilities.",
+    "actions": "Raw Gaussian samples may exceed [\u22121, 1] although their learned means use tanh. Fractions count sampled joint-controls, not robots. Telemetry describes rollout data before its optimizer update. Original run lacks these fields.",
+    "forces": "Final summaries pool the full changing training history. They cannot give first/last-window loads, matched achieved behavior or the flat_pilot_v1 load decision.",
+    "limits": "Training has stochastic exploration and changing commands. Projection is not a gait label or held-out tracking score. These results cannot determine final-checkpoint evaluation, pilot E/W, or causal performance across seeds."
+  },
+  "reward_and_physics_sources_match": true,
+  "native_started": false,
+  "runs": {
+    "original": {
+      "remote_root": "/srv/cupi/hexapod/runs/james/flat_pilot_20261002_001/ppo_mlp",
+      "input_sha256": {
+        "run/standing/metrics.jsonl": "c672fa6aea911a665d001ef2d8bdf1e59e71c78019323a0506c3bdf94a76abfa",
+        "run/standing/state.json": "62a09d8b5878033510fa6ee4dbeff39ea14e282c2606a7a9237793d1ee534a8a",
+        "run/standing/force_metrics.json": "008192888597c495b80c16532b1396dd81766007548106ccf0e3997fbc1d023c",
+        "binding.json": "69452f7af475e604943345ed771b828692bde119a342704084164008b55f773e",
+        "PACK.json": "9f0160071b769b076aa2d9cb6b832d98a550efde1042193f9195b530c5b04388",
+        "source/FREEZE_SHA256.json": "e4871ea1d037b511a105e29e86b432efe2c19cfe9974b4c07ecb0d7cbb4a82f7",
+        "source/locomotion/ppo.py": "bb1b44215580e30786bb16271a2dae996b19a41fc43a0588cc4591b18a5d4a65",
+        "source/locomotion/train.py": "794f15abb306b67a413fce310aa93686f52e552d501dffb04adc3864c032af89",
+        "source/locomotion/task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+        "source/locomotion/task_v2.py": "72f95879e36c2371a20bfc2524fbbabafb060c00d5412391fe0f7be2a8844369",
+        "source/locomotion/env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+        "source/locomotion/env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+      },
+      "source_freeze_sha256": "e4871ea1d037b511a105e29e86b432efe2c19cfe9974b4c07ecb0d7cbb4a82f7",
+      "source_sha256": {
+        "locomotion/ppo.py": "bb1b44215580e30786bb16271a2dae996b19a41fc43a0588cc4591b18a5d4a65",
+        "locomotion/train.py": "794f15abb306b67a413fce310aa93686f52e552d501dffb04adc3864c032af89",
+        "locomotion/task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+        "locomotion/task_v2.py": "72f95879e36c2371a20bfc2524fbbabafb060c00d5412391fe0f7be2a8844369",
+        "locomotion/env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+        "locomotion/env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+      },
+      "identity": {
+        "schema": "hexapod_locomotion_ppo_v1",
+        "source_files": {
+          "__init__.py": "c82a5695bd2575afdaae01eb84bb3c06ddffe42529d201bbe43726ae8859e350",
+          "admission.py": "1391aed5939b882e2ca0967bd8eda6103bf73e46206f8d6c0091f8463b1e70c3",
+          "amp.py": "4010cf0e42ea63ca693b0fa311a3fef7ee6bfdfa47b9eba58bf87f7f7cefec5c",
+          "amp_diagnostic.py": "4fefe977563073f09a5e0b592b87b55f466e272c5b4fee62fbe4133869150f51",
+          "amp_discriminator.py": "a9c0c27f575bb07b5379b56e1c3fb64fec1574506702e02e66f0866c8bedf694",
+          "amp_ppo.py": "876d09312403c858c65db34d17dc78d3e4b6ac7aa9cf130126764a584f6f812c",
+          "camera.py": "6c9927cfa747408e3206e170386483791ac696634f1e322e4a6222b32396655d",
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+          "evaluate.py": "5cb686c3daf4eed3b4a96501aa80f9f1a8465376782255a9860e5abb7dfd735c",
+          "evaluation.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
+          "evaluation_config.py": "7d55733f4f5a471427b408a4b3a0e834d083a687f7ae0ebc3ceb0d16c23f3cb7",
+          "force_metrics.py": "5bd228d003d4ab71dbda6acbb9fdbf357a36ec007050b156bdd71ec31c707673",
+          "inputs.py": "d4ed35be0d49728bcf78edb8be346158c1434bbf8e00105fcb865b5f5e01c588",
+          "launch.py": "18efb9c3fd069c443c58f6e9a7b47b87d9c9e596c5806fed6b4ea3f75ccc8b21",
+          "paper_networks.py": "d53ff59b51b11dfceeb743ee37a817c238b977ad333c7793b2a9581aa5e8c86a",
+          "paper_reward.py": "1df0d4f410840814ebec9dbe4ea5bbd1787ad90cf04068839f7b8e85b19ba03b",
+          "ppo.py": "bb1b44215580e30786bb16271a2dae996b19a41fc43a0588cc4591b18a5d4a65",
+          "prepare.py": "7f9478b6dfa710e88eb6b0e049dc7c31746ebed2abeedaa3b3975fd7b67561fb",
+          "reservation.py": "8e3682cccb29cd3f3d53625de1276bdd56ca6643c54ada001b3bd1fb69b95c2e",
+          "reward_scorer.py": "bf365b6cc00d7ce8d7c308c69f425d586f79111039cbd4eaddf6c5c2bbf919f1",
+          "reward_viewer.py": "4666a1c952e2f8af7564dfcd4649d9ce3943a0e5e2c9ff3d263f0d03724907f0",
+          "reward_workbench.py": "ea95a6052fe1d3fb2210b9608d9ce92ef5b48a600d53cf884fdf7d54cb8e6afc",
+          "spark_paths.py": "7200cde3c80f9593e5b37abfc4d76307e223c4444658f5674f341e30aaf997f3",
+          "task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+          "task_v2.py": "72f95879e36c2371a20bfc2524fbbabafb060c00d5412391fe0f7be2a8844369",
+          "throughput.py": "0226fd7e43307913fde1a45fedc5d02e3effc7afd6f18c482cfd81d5db4e7c50",
+          "train.py": "794f15abb306b67a413fce310aa93686f52e552d501dffb04adc3864c032af89",
+          "tripod.py": "ed3d34a4c8c5772ec7e1a1bc4703fc5b325bc9dfa56073b071a6fdf1fd9d0dfc",
+          "tripod_config.py": "4d4d20bafb450e37ad45b9d459e72b0318d7b81fd3edfd0117ba588bda13328c",
+          "tripod_evaluate.py": "92e077e12ceda9ed1cf6c3d045e73b698b0ad00b3f778c86f9de1e06ed5a25a3",
+          "tripod_kinematics.py": "3db69088e944a3773f16844e07ebebc4700662142770eb1a322ce500f5a016cc"
+        },
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+        "config": {
+          "num_envs": 128,
+          "spacing_m": 2.0,
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "episode_seconds": 20.0,
+          "action_scale_rad": 0.35,
+          "target_slew_rad": 0.04,
+          "reset_height_m": 0.08161108940839767,
+          "command_forward_mps": 0.1,
+          "command_left_mps": 0.0,
+          "command_yaw_rad_s": 0.0,
+          "seed": 20260917,
+          "record_motion_features": false,
+          "render": false,
+          "device": "cuda:0",
+          "schema": "canonical_paper_walk_experiment_v1",
+          "actor_width": 231,
+          "critic_width": 234,
+          "amp_width": 61,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "legs": [
+            "lf",
+            "lm",
+            "lr",
+            "rf",
+            "rm",
+            "rr"
+          ],
+          "standing_admission": false,
+          "stage2_complete": false,
+          "prior_standing_failure_superseded": false,
+          "authorization": "User explicitly requested experimental paper-based PPO training on the confirmed model.",
+          "telemetry_scope": "Compact native body-force telemetry; no exact toe/shaft patch classification or formal standing admission."
+        },
+        "motion_prior": false,
+        "behavior_cloning": false,
+        "seed": 20260917,
+        "rsl_rl_required_version": "5.0.1",
+        "adapter_sha256": "bb1b44215580e30786bb16271a2dae996b19a41fc43a0588cc4591b18a5d4a65",
+        "entry_sha256": "794f15abb306b67a413fce310aa93686f52e552d501dffb04adc3864c032af89",
+        "reward_version": "2",
+        "learner": "ppo",
+        "networks": "mlp",
+        "physics_source_files": {
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "standing_admission": {
+          "schema": "hexapod_locomotion_standing_admission_v1",
+          "num_envs": 128,
+          "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+          "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+          "physics_source_files": {
+            "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+            "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+          },
+          "physics_config": {
+            "physics_dt": 0.0025,
+            "decimation": 8,
+            "spacing_m": 2.0,
+            "target_slew_rad": 0.04,
+            "action_scale_rad": 0.35,
+            "solver_position_iterations": 32,
+            "solver_velocity_iterations": 0,
+            "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+            "material_friction": [
+              1.0,
+              1.0
+            ],
+            "restitution": 0.0,
+            "external_forces_every_iteration": true,
+            "neutral_joint_position_rad": [
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4
+            ],
+            "reset_root_height_m": 0.10280231400684256
+          },
+          "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+          "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+          "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+          "one": {
+            "report_path": "/standing_one/standing/standing_report.json",
+            "report_sha256": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+            "state_path": "/standing_one/state.json",
+            "state_sha256": "5773bf1d220bac30e4ab523a4851a5a04d7939087de6d2032fefdc3ff7fd6c3a"
+          },
+          "batch": {
+            "report_path": "/standing_batch/standing/standing_report.json",
+            "report_sha256": "4f04067c64e043de08187bb1f7821b7ac9d8da3d8409379613ccf00ffb3a4193",
+            "state_path": "/standing_batch/state.json",
+            "state_sha256": "f867191d2401f85efc1a058674509451450cff1bb337459dfa1b2de2ca5ae09c"
+          }
+        },
+        "upstream_source_files": {
+          "runners/on_policy_runner.py": "39358a0a60219fdb360df7acddf80f6a382837aa58e2ec0ccf875df4afee4825",
+          "algorithms/ppo.py": "a2d35e7ad7b884c80b7434e7d2ce785a6da1e18d93c96f1179fbd3a208669f8c",
+          "models/mlp_model.py": "6219ebb3ed4df036dae7ff1c30d0fbb169eaaa659e44a659dd757a292124476b",
+          "storage/rollout_storage.py": "ececf28e7412d24867066829cc443acae811f034f8e63975b90343947779918d"
+        },
+        "ppo_config": {
+          "seed": 20260917,
+          "num_steps_per_env": 24,
+          "save_interval": 50,
+          "obs_groups": {
+            "actor": [
+              "policy"
+            ],
+            "critic": [
+              "critic"
+            ]
+          },
+          "actor": {
+            "class_name": "MLPModel",
+            "hidden_dims": [
+              256,
+              256,
+              128
+            ],
+            "activation": "elu",
+            "obs_normalization": true,
+            "distribution_cfg": {
+              "class_name": "GaussianDistribution",
+              "init_std": 0.15,
+              "std_type": "log"
+            }
+          },
+          "critic": {
+            "class_name": "MLPModel",
+            "hidden_dims": [
+              256,
+              256,
+              128
+            ],
+            "activation": "elu",
+            "obs_normalization": true
+          },
+          "algorithm": {
+            "class_name": "PPO",
+            "value_loss_coef": 1.0,
+            "use_clipped_value_loss": true,
+            "clip_param": 0.2,
+            "entropy_coef": 0.01,
+            "num_learning_epochs": 5,
+            "num_mini_batches": 4,
+            "learning_rate": 0.001,
+            "schedule": "adaptive",
+            "gamma": 0.99,
+            "lam": 0.95,
+            "desired_kl": 0.01,
+            "max_grad_norm": 1.0,
+            "rnd_cfg": null,
+            "symmetry_cfg": null
+          },
+          "logger": "tensorboard",
+          "check_for_nan": true
+        }
+      },
+      "completion": {
+        "status": "completed",
+        "updates": 2000,
+        "transitions": 6144000,
+        "wall_seconds": 8030.285014171153
+      },
+      "early_200": {
+        "updates_inclusive": [
+          1,
+          200
+        ],
+        "update_count": 200,
+        "environment_controls": 614400,
+        "moving_controls": 469250,
+        "quiet_controls": 92194,
+        "reward_mean": -0.16189764524122505,
+        "reward_component_means": {
+          "linear_tracking": 0.22229596658542689,
+          "yaw_tracking": 0.37434166541877373,
+          "vertical_velocity": -0.10108116730696666,
+          "roll_pitch_rate": -0.17185001640470313,
+          "joint_torque": -0.14014279730579196,
+          "joint_acceleration": -0.12379576779907363,
+          "action_rate": -0.22040291305642312,
+          "collisions": 0.0,
+          "torque_limit": -0.000995855013425806,
+          "velocity_limit": -2.2619773323337236e-05,
+          "termination": -0.000244140625
+        },
+        "moving_signed_command_direction_speed_mps": 0.00011544357135437943,
+        "moving_requested_speed_mps": 0.037661173357630764,
+        "moving_projection_to_requested_ratio": 0.0030653206223323548,
+        "achieved_planar_speed_mps_all_controls": 0.03812409810721874,
+        "absolute_navigation_velocity_error_mps_by_axis": [
+          0.031208964912220836,
+          0.031154224406927822
+        ],
+        "absolute_yaw_error_rad_s": 0.10227962628006936,
+        "requested_saturation_fraction": 0.0011976454456453212,
+        "nonfoot_event_fraction": 0.0,
+        "terminations": 2,
+        "terminations_per_1000_controls": 0.0032552083333333335,
+        "truncations": 512,
+        "termination_reason_counts": {
+          "height": 0,
+          "tilt": 0,
+          "joint_limit": 2,
+          "timeout": 512
+        },
+        "termination_flag_mismatch_rows": 0,
+        "quiet_all_joint_rate_rms_rad_s": 0.6263409934774257,
+        "quiet_worst_joint_rate_rms_rad_s": 0.9272346972097744,
+        "quiet_by_joint_rate_rms_rad_s": [
+          0.4103516569476415,
+          0.6360258864697396,
+          0.7771536432070166,
+          0.3823103094073248,
+          0.5748369190782789,
+          0.7933700392732423,
+          0.388030020801455,
+          0.6173763658572256,
+          0.764111938710702,
+          0.4030834006016333,
+          0.6068912789000059,
+          0.6511998740043178,
+          0.3660527358711369,
+          0.5622463018305186,
+          0.9028180367641693,
+          0.4192415237410072,
+          0.6382545242988038,
+          0.9272346972097744
+        ],
+        "actual_target_slew": {
+          "valid_controls": 613758,
+          "mean_joint_at_limit_fraction": 0.570511957119545,
+          "per_joint": {
+            "lf_coxa_yaw": {
+              "at_limit_fraction": 0.5537768957797699,
+              "beyond_limit_rows": 0
+            },
+            "lf_femur_pitch": {
+              "at_limit_fraction": 0.5664252034189371,
+              "beyond_limit_rows": 0
+            },
+            "lf_tibia_pitch": {
+              "at_limit_fraction": 0.5603853636123683,
+              "beyond_limit_rows": 0
+            },
+            "lm_coxa_yaw": {
+              "at_limit_fraction": 0.5613075511846689,
+              "beyond_limit_rows": 0
+            },
+            "lm_femur_pitch": {
+              "at_limit_fraction": 0.5676064507509474,
+              "beyond_limit_rows": 0
+            },
+            "lm_tibia_pitch": {
+              "at_limit_fraction": 0.5683543025101099,
+              "beyond_limit_rows": 0
+            },
+            "lr_coxa_yaw": {
+              "at_limit_fraction": 0.583537811319771,
+              "beyond_limit_rows": 0
+            },
+            "lr_femur_pitch": {
+              "at_limit_fraction": 0.5860322798236438,
+              "beyond_limit_rows": 0
+            },
+            "lr_tibia_pitch": {
+              "at_limit_fraction": 0.578891028711642,
+              "beyond_limit_rows": 0
+            },
+            "rf_coxa_yaw": {
+              "at_limit_fraction": 0.5722516040524115,
+              "beyond_limit_rows": 0
+            },
+            "rf_femur_pitch": {
+              "at_limit_fraction": 0.5644798112611159,
+              "beyond_limit_rows": 0
+            },
+            "rf_tibia_pitch": {
+              "at_limit_fraction": 0.5799028281505089,
+              "beyond_limit_rows": 0
+            },
+            "rm_coxa_yaw": {
+              "at_limit_fraction": 0.5614884042244663,
+              "beyond_limit_rows": 0
+            },
+            "rm_femur_pitch": {
+              "at_limit_fraction": 0.5599405628928665,
+              "beyond_limit_rows": 0
+            },
+            "rm_tibia_pitch": {
+              "at_limit_fraction": 0.5797301216440356,
+              "beyond_limit_rows": 0
+            },
+            "rr_coxa_yaw": {
+              "at_limit_fraction": 0.579860466177223,
+              "beyond_limit_rows": 0
+            },
+            "rr_femur_pitch": {
+              "at_limit_fraction": 0.568280983710192,
+              "beyond_limit_rows": 0
+            },
+            "rr_tibia_pitch": {
+              "at_limit_fraction": 0.5769635589271341,
+              "beyond_limit_rows": 0
+            }
+          }
+        },
+        "mean_action_std_mean": 0.1499308606237173,
+        "learning_rate_first_last": [
+          1e-05,
+          1e-05
+        ],
+        "command_classes": {
+          "zero": {
+            "environment_controls": 92194,
+            "time_fraction": 0.15005533854166667,
+            "task_reward_mean": 0.35193326640570743,
+            "requested_planar_speed_mps": 0.0,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": null,
+            "reward_component_means": {
+              "linear_tracking": 0.6653361461000066,
+              "yaw_tracking": 0.44551308348170476,
+              "vertical_velocity": -0.10161324621427871,
+              "roll_pitch_rate": -0.1713028839709518,
+              "joint_torque": -0.14008185779903132,
+              "joint_acceleration": -0.12343263279888249,
+              "action_rate": -0.22044125584591354,
+              "collisions": 0.0,
+              "torque_limit": -0.0011993835545548895,
+              "velocity_limit": -3.120093748342278e-05,
+              "termination": -0.0008135019632514046
+            }
+          },
+          "linear_0.025": {
+            "environment_controls": 210077,
+            "time_fraction": 0.34192220052083333,
+            "task_reward_mean": -0.22750762612980463,
+            "requested_planar_speed_mps": 0.02500000037252903,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": 8.515421904653741e-05,
+            "reward_component_means": {
+              "linear_tracking": 0.08705287825059012,
+              "yaw_tracking": 0.44395812755518016,
+              "vertical_velocity": -0.10122261017166582,
+              "roll_pitch_rate": -0.1717695066917098,
+              "joint_torque": -0.14015746863820655,
+              "joint_acceleration": -0.12392934265655953,
+              "action_rate": -0.22029168515670566,
+              "collisions": 0.0,
+              "torque_limit": -0.0010966419466309889,
+              "velocity_limit": -5.1376705291067754e-05,
+              "termination": 0.0
+            }
+          },
+          "linear_0.05": {
+            "environment_controls": 205366,
+            "time_fraction": 0.33425455729166664,
+            "task_reward_mean": -0.23023346863471195,
+            "requested_planar_speed_mps": 0.05000000074505806,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": 0.00010210626755209928,
+            "reward_component_means": {
+              "linear_tracking": 0.08502932469690713,
+              "yaw_tracking": 0.4435247271360907,
+              "vertical_velocity": -0.10076425273291956,
+              "roll_pitch_rate": -0.17241864015685937,
+              "joint_torque": -0.14027228907499706,
+              "joint_acceleration": -0.12433865326311562,
+              "action_rate": -0.22002612174632752,
+              "collisions": 0.0,
+              "torque_limit": -0.000966453398317279,
+              "velocity_limit": -1.1101418057520629e-06,
+              "termination": 0.0
+            }
+          },
+          "yaw": {
+            "environment_controls": 52956,
+            "time_fraction": 0.08619140625,
+            "task_reward_mean": -0.058626185567713096,
+            "requested_planar_speed_mps": 0.0,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": null,
+            "reward_component_means": {
+              "linear_tracking": 0.6587633009495174,
+              "yaw_tracking": 0.04254073497087932,
+              "vertical_velocity": -0.10163322286516302,
+              "roll_pitch_rate": -0.17133988736805714,
+              "joint_torque": -0.13996263160175781,
+              "joint_acceleration": -0.12355121821820367,
+              "action_rate": -0.2213100623784007,
+              "collisions": 0.0,
+              "torque_limit": -0.0007169291306836906,
+              "velocity_limit": 0.0,
+              "termination": -0.0014162701110355766
+            }
+          },
+          "arc": {
+            "environment_controls": 53807,
+            "time_fraction": 0.08757649739583333,
+            "task_reward_mean": -0.6269666478745409,
+            "requested_planar_speed_mps": 0.03999999910593033,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": 0.0002846060408738396,
+            "reward_component_means": {
+              "linear_tracking": 0.08555080289749264,
+              "yaw_tracking": 0.04309491661353404,
+              "vertical_velocity": -0.10028350991677167,
+              "roll_pitch_rate": -0.17143360170685865,
+              "joint_torque": -0.13987301448450262,
+              "joint_acceleration": -0.1220651010506516,
+              "action_rate": -0.2213167824981151,
+              "collisions": 0.0,
+              "torque_limit": -0.0006403578522213033,
+              "velocity_limit": 0.0,
+              "termination": 0.0
+            }
+          },
+          "other": {
+            "environment_controls": 0,
+            "time_fraction": 0.0,
+            "task_reward_mean": null,
+            "requested_planar_speed_mps": null,
+            "nonfoot_event_fraction": null,
+            "moving_signed_command_direction_speed_mps": null,
+            "reward_component_means": {
+              "linear_tracking": null,
+              "yaw_tracking": null,
+              "vertical_velocity": null,
+              "roll_pitch_rate": null,
+              "joint_torque": null,
+              "joint_acceleration": null,
+              "action_rate": null,
+              "collisions": null,
+              "torque_limit": null,
+              "velocity_limit": null,
+              "termination": null
+            }
+          }
+        },
+        "actions": {
+          "available": false,
+          "reason": "Original source recorded no rollout action-bound telemetry."
+        }
+      },
+      "late_200": {
+        "updates_inclusive": [
+          1801,
+          2000
+        ],
+        "update_count": 200,
+        "environment_controls": 614400,
+        "moving_controls": 475596,
+        "quiet_controls": 92220,
+        "reward_mean": -0.03408654178752433,
+        "reward_component_means": {
+          "linear_tracking": 0.2375010441960157,
+          "yaw_tracking": 0.3849234380153109,
+          "vertical_velocity": -0.05284122986300086,
+          "roll_pitch_rate": -0.12049657085382826,
+          "joint_torque": -0.14457718120166344,
+          "joint_acceleration": -0.0991262111328706,
+          "action_rate": -0.23284028282791647,
+          "collisions": 0.0,
+          "torque_limit": -0.0033339158000442923,
+          "velocity_limit": -0.0001218042771021525,
+          "termination": -0.003173828125
+        },
+        "moving_signed_command_direction_speed_mps": -2.177810264428387e-05,
+        "moving_requested_speed_mps": 0.03800668140852493,
+        "moving_projection_to_requested_ratio": -0.0005730072144472741,
+        "achieved_planar_speed_mps_all_controls": 0.02610958126373589,
+        "absolute_navigation_velocity_error_mps_by_axis": [
+          0.026592188999056816,
+          0.025415538428351283
+        ],
+        "absolute_yaw_error_rad_s": 0.08576841168105602,
+        "requested_saturation_fraction": 0.003416262177925091,
+        "nonfoot_event_fraction": 0.0,
+        "terminations": 26,
+        "terminations_per_1000_controls": 0.042317708333333336,
+        "truncations": 572,
+        "termination_reason_counts": {
+          "height": 0,
+          "tilt": 0,
+          "joint_limit": 26,
+          "timeout": 572
+        },
+        "termination_flag_mismatch_rows": 0,
+        "quiet_all_joint_rate_rms_rad_s": 0.6441742237280303,
+        "quiet_worst_joint_rate_rms_rad_s": 1.1942664671069265,
+        "quiet_by_joint_rate_rms_rad_s": [
+          0.26898297208586286,
+          0.4064709335745369,
+          0.4916749107865562,
+          0.2950380656192591,
+          0.7880606445252181,
+          0.7367269479471824,
+          0.38353825746695575,
+          1.0828156623942666,
+          1.1942664671069265,
+          0.3256211653030107,
+          0.41678135660889587,
+          0.8018259063112289,
+          0.5465068074538237,
+          0.4613143848246679,
+          0.6449897104527154,
+          0.33694216645536246,
+          0.490932296511037,
+          0.8880079616973041
+        ],
+        "actual_target_slew": {
+          "valid_controls": 613816,
+          "mean_joint_at_limit_fraction": 0.2914456449489749,
+          "per_joint": {
+            "lf_coxa_yaw": {
+              "at_limit_fraction": 0.0580124988595931,
+              "beyond_limit_rows": 0
+            },
+            "lf_femur_pitch": {
+              "at_limit_fraction": 0.06739641847068177,
+              "beyond_limit_rows": 0
+            },
+            "lf_tibia_pitch": {
+              "at_limit_fraction": 0.019810496956742737,
+              "beyond_limit_rows": 0
+            },
+            "lm_coxa_yaw": {
+              "at_limit_fraction": 0.15337821105999191,
+              "beyond_limit_rows": 0
+            },
+            "lm_femur_pitch": {
+              "at_limit_fraction": 0.5722187104930467,
+              "beyond_limit_rows": 0
+            },
+            "lm_tibia_pitch": {
+              "at_limit_fraction": 0.5505591252101607,
+              "beyond_limit_rows": 0
+            },
+            "lr_coxa_yaw": {
+              "at_limit_fraction": 0.38737178568170266,
+              "beyond_limit_rows": 0
+            },
+            "lr_femur_pitch": {
+              "at_limit_fraction": 0.04684954448890221,
+              "beyond_limit_rows": 0
+            },
+            "lr_tibia_pitch": {
+              "at_limit_fraction": 0.6142117507526685,
+              "beyond_limit_rows": 0
+            },
+            "rf_coxa_yaw": {
+              "at_limit_fraction": 0.6032947984412267,
+              "beyond_limit_rows": 0
+            },
+            "rf_femur_pitch": {
+              "at_limit_fraction": 0.20843705605588644,
+              "beyond_limit_rows": 0
+            },
+            "rf_tibia_pitch": {
+              "at_limit_fraction": 0.05389400080805974,
+              "beyond_limit_rows": 0
+            },
+            "rm_coxa_yaw": {
+              "at_limit_fraction": 0.602628474982731,
+              "beyond_limit_rows": 0
+            },
+            "rm_femur_pitch": {
+              "at_limit_fraction": 0.0448619781823869,
+              "beyond_limit_rows": 0
+            },
+            "rm_tibia_pitch": {
+              "at_limit_fraction": 0.03293169288516428,
+              "beyond_limit_rows": 0
+            },
+            "rr_coxa_yaw": {
+              "at_limit_fraction": 0.5894877292217864,
+              "beyond_limit_rows": 0
+            },
+            "rr_femur_pitch": {
+              "at_limit_fraction": 0.04643085224236579,
+              "beyond_limit_rows": 0
+            },
+            "rr_tibia_pitch": {
+              "at_limit_fraction": 0.5942464842884513,
+              "beyond_limit_rows": 0
+            }
+          }
+        },
+        "mean_action_std_mean": 0.16369952142238617,
+        "learning_rate_first_last": [
+          1e-05,
+          1e-05
+        ],
+        "command_classes": {
+          "zero": {
+            "environment_controls": 92220,
+            "time_fraction": 0.15009765625,
+            "task_reward_mean": 0.5476130954515723,
+            "requested_planar_speed_mps": 0.0,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": null,
+            "reward_component_means": {
+              "linear_tracking": 0.7533768320108296,
+              "yaw_tracking": 0.4553351288620864,
+              "vertical_velocity": -0.05364376673451103,
+              "roll_pitch_rate": -0.12151836259123439,
+              "joint_torque": -0.1447901763565268,
+              "joint_acceleration": -0.10109141622390255,
+              "action_rate": -0.23356835006273083,
+              "collisions": 0.0,
+              "torque_limit": -0.004001152404478711,
+              "velocity_limit": -4.582329598871288e-05,
+              "termination": -0.002439817826935589
+            }
+          },
+          "linear_0.025": {
+            "environment_controls": 205083,
+            "time_fraction": 0.3337939453125,
+            "task_reward_mean": -0.11767449278953698,
+            "requested_planar_speed_mps": 0.02500000037252903,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": 2.348373797433742e-05,
+            "reward_component_means": {
+              "linear_tracking": 0.08710177205058069,
+              "yaw_tracking": 0.4540924693808231,
+              "vertical_velocity": -0.05405013849274335,
+              "roll_pitch_rate": -0.12113072494891958,
+              "joint_torque": -0.14463526925713718,
+              "joint_acceleration": -0.0991373828877524,
+              "action_rate": -0.23280932188535697,
+              "collisions": 0.0,
+              "torque_limit": -0.0033479983196290837,
+              "velocity_limit": -0.00010084261770786859,
+              "termination": -0.003657055923699185
+            }
+          },
+          "linear_0.05": {
+            "environment_controls": 212823,
+            "time_fraction": 0.3463916015625,
+            "task_reward_mean": -0.11193068708831817,
+            "requested_planar_speed_mps": 0.05000000074505806,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": 0.00017707145173421866,
+            "reward_component_means": {
+              "linear_tracking": 0.08576499024914952,
+              "yaw_tracking": 0.45559456026648076,
+              "vertical_velocity": -0.05158109474186487,
+              "roll_pitch_rate": -0.11983072818330215,
+              "joint_torque": -0.14428815102780315,
+              "joint_acceleration": -0.0988792665206568,
+              "action_rate": -0.23265353608198794,
+              "collisions": 0.0,
+              "torque_limit": -0.0031902046523469953,
+              "velocity_limit": -4.801232149249409e-05,
+              "termination": -0.0028192441606405324
+            }
+          },
+          "yaw": {
+            "environment_controls": 46584,
+            "time_fraction": 0.0758203125,
+            "task_reward_mean": 0.16139238419747062,
+            "requested_planar_speed_mps": 0.0,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": null,
+            "reward_component_means": {
+              "linear_tracking": 0.7670842522332955,
+              "yaw_tracking": 0.04176052705218035,
+              "vertical_velocity": -0.04890741288187195,
+              "roll_pitch_rate": -0.11816465682407502,
+              "joint_torque": -0.14430963603637967,
+              "joint_acceleration": -0.09538995228835262,
+              "action_rate": -0.23182055140792218,
+              "collisions": 0.0,
+              "torque_limit": -0.0023920585421516685,
+              "velocity_limit": -2.8147763778474267e-05,
+              "termination": -0.006439979392065945
+            }
+          },
+          "arc": {
+            "environment_controls": 57690,
+            "time_fraction": 0.093896484375,
+            "task_reward_mean": -0.537484679135035,
+            "requested_planar_speed_mps": 0.03999999910593033,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": -0.0009162518896278989,
+            "reward_component_means": {
+              "linear_tracking": 0.07964156808309089,
+              "yaw_tracking": 0.04286592725127523,
+              "vertical_velocity": -0.05508602286577931,
+              "roll_pitch_rate": -0.12094816834948086,
+              "joint_torque": -0.14531249593227227,
+              "joint_acceleration": -0.09987301343338734,
+              "action_rate": -0.23329884364896206,
+              "collisions": 0.0,
+              "torque_limit": -0.003507947193060446,
+              "velocity_limit": -0.0006656310487648999,
+              "termination": -0.0013000520020800832
+            }
+          },
+          "other": {
+            "environment_controls": 0,
+            "time_fraction": 0.0,
+            "task_reward_mean": null,
+            "requested_planar_speed_mps": null,
+            "nonfoot_event_fraction": null,
+            "moving_signed_command_direction_speed_mps": null,
+            "reward_component_means": {
+              "linear_tracking": null,
+              "yaw_tracking": null,
+              "vertical_velocity": null,
+              "roll_pitch_rate": null,
+              "joint_torque": null,
+              "joint_acceleration": null,
+              "action_rate": null,
+              "collisions": null,
+              "torque_limit": null,
+              "velocity_limit": null,
+              "termination": null
+            }
+          }
+        },
+        "actions": {
+          "available": false,
+          "reason": "Original source recorded no rollout action-bound telemetry."
+        }
+      },
+      "latest_rollout_actions": null,
+      "force_history_summary": {
+        "status": "available",
+        "physics_steps": 384000,
+        "windows": {
+          "full_training": {
+            "samples_across_replicas": 49152000,
+            "total_vertical_support_n": {
+              "mean": 73.24284437761783,
+              "rms": 74.15027162697488,
+              "peak": 852.1710815429688
+            },
+            "applied_worst_joint_rms_nm": 0.691680641263553,
+            "applied_peak_nm": 1.600000023841858,
+            "requested_peak_nm": 40.03070831298828
+          },
+          "commanded_locomotion_after_settle": {
+            "samples_across_replicas": 37446624,
+            "total_vertical_support_n": {
+              "mean": 73.24287699984026,
+              "rms": 74.00375306351705,
+              "peak": 803.7025756835938
+            },
+            "applied_worst_joint_rms_nm": 0.7086051482251035,
+            "applied_peak_nm": 1.600000023841858,
+            "requested_peak_nm": 40.03070831298828
+          }
+        }
+      }
+    },
+    "bounded_mean": {
+      "remote_root": "/srv/cupi/hexapod/runs/james/ppo_bounded_mean_20261002_001",
+      "input_sha256": {
+        "run/standing/metrics.jsonl": "df7b4fba3581eff323dc732e2a83f43ae807580b8485d539cf8bb647043d9b0d",
+        "run/standing/state.json": "00f9c007f8ecaa97c69804c5cd9a2b38b40bd24820cb6e128be79c06f117da04",
+        "run/standing/force_metrics.json": "e863cd3d33b04906d37670b8923b50ed4c82ce1b3e3538fbd87fa3e335099385",
+        "binding.json": "16d9f484cc108ffdd58b6ebf15b37d94b45b73b5f76ca13e6a665c08d769cb30",
+        "PACK.json": "92d36a83f068822da9dc95e7921ccd639f14026d7b894d1352340c5f5194b173",
+        "source/FREEZE_SHA256.json": "0dfec66ede2d7498f9b0f3cc87f7015039368523d89a0c4c5b28ace0108101e4",
+        "source/locomotion/ppo.py": "a82a75f7f8be24d37de64d68bd672283700b306699b9c0a5c2fb7927ff9aaf23",
+        "source/locomotion/train.py": "244d9846855a73091632c7f8e9eaa2b1f5cef703a4678fe7117661fda0e84570",
+        "source/locomotion/task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+        "source/locomotion/task_v2.py": "72f95879e36c2371a20bfc2524fbbabafb060c00d5412391fe0f7be2a8844369",
+        "source/locomotion/env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+        "source/locomotion/env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+        "source/locomotion/action_distribution.py": "3b196b4c355b261d17af08d0b130b24a673953b84cf65ac66b831bc083c03cdf"
+      },
+      "source_freeze_sha256": "0dfec66ede2d7498f9b0f3cc87f7015039368523d89a0c4c5b28ace0108101e4",
+      "source_sha256": {
+        "locomotion/ppo.py": "a82a75f7f8be24d37de64d68bd672283700b306699b9c0a5c2fb7927ff9aaf23",
+        "locomotion/train.py": "244d9846855a73091632c7f8e9eaa2b1f5cef703a4678fe7117661fda0e84570",
+        "locomotion/task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+        "locomotion/task_v2.py": "72f95879e36c2371a20bfc2524fbbabafb060c00d5412391fe0f7be2a8844369",
+        "locomotion/env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+        "locomotion/env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+      },
+      "identity": {
+        "schema": "hexapod_locomotion_ppo_v1",
+        "source_files": {
+          "__init__.py": "c82a5695bd2575afdaae01eb84bb3c06ddffe42529d201bbe43726ae8859e350",
+          "action_distribution.py": "3b196b4c355b261d17af08d0b130b24a673953b84cf65ac66b831bc083c03cdf",
+          "admission.py": "1391aed5939b882e2ca0967bd8eda6103bf73e46206f8d6c0091f8463b1e70c3",
+          "amp.py": "4010cf0e42ea63ca693b0fa311a3fef7ee6bfdfa47b9eba58bf87f7f7cefec5c",
+          "amp_diagnostic.py": "4fefe977563073f09a5e0b592b87b55f466e272c5b4fee62fbe4133869150f51",
+          "amp_discriminator.py": "a9c0c27f575bb07b5379b56e1c3fb64fec1574506702e02e66f0866c8bedf694",
+          "amp_ppo.py": "eaeb95bfbe332e0cd46fd42d731dcce6bb08ed31459abedfdf056922dea686e9",
+          "camera.py": "6c9927cfa747408e3206e170386483791ac696634f1e322e4a6222b32396655d",
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+          "evaluate.py": "5cb686c3daf4eed3b4a96501aa80f9f1a8465376782255a9860e5abb7dfd735c",
+          "evaluation.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
+          "evaluation_config.py": "7d55733f4f5a471427b408a4b3a0e834d083a687f7ae0ebc3ceb0d16c23f3cb7",
+          "force_metrics.py": "5bd228d003d4ab71dbda6acbb9fdbf357a36ec007050b156bdd71ec31c707673",
+          "inputs.py": "d4ed35be0d49728bcf78edb8be346158c1434bbf8e00105fcb865b5f5e01c588",
+          "launch.py": "18efb9c3fd069c443c58f6e9a7b47b87d9c9e596c5806fed6b4ea3f75ccc8b21",
+          "paper_networks.py": "d53ff59b51b11dfceeb743ee37a817c238b977ad333c7793b2a9581aa5e8c86a",
+          "paper_reward.py": "1df0d4f410840814ebec9dbe4ea5bbd1787ad90cf04068839f7b8e85b19ba03b",
+          "ppo.py": "a82a75f7f8be24d37de64d68bd672283700b306699b9c0a5c2fb7927ff9aaf23",
+          "prepare.py": "d225c8bd36a5d0b9d26c87512caf6e1296d828369a5e391fab1de756f149c345",
+          "reservation.py": "8e3682cccb29cd3f3d53625de1276bdd56ca6643c54ada001b3bd1fb69b95c2e",
+          "reward_scorer.py": "bf365b6cc00d7ce8d7c308c69f425d586f79111039cbd4eaddf6c5c2bbf919f1",
+          "reward_viewer.py": "4666a1c952e2f8af7564dfcd4649d9ce3943a0e5e2c9ff3d263f0d03724907f0",
+          "reward_workbench.py": "ea95a6052fe1d3fb2210b9608d9ce92ef5b48a600d53cf884fdf7d54cb8e6afc",
+          "spark_paths.py": "7200cde3c80f9593e5b37abfc4d76307e223c4444658f5674f341e30aaf997f3",
+          "task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+          "task_v2.py": "72f95879e36c2371a20bfc2524fbbabafb060c00d5412391fe0f7be2a8844369",
+          "throughput.py": "0226fd7e43307913fde1a45fedc5d02e3effc7afd6f18c482cfd81d5db4e7c50",
+          "train.py": "244d9846855a73091632c7f8e9eaa2b1f5cef703a4678fe7117661fda0e84570",
+          "tripod.py": "ed3d34a4c8c5772ec7e1a1bc4703fc5b325bc9dfa56073b071a6fdf1fd9d0dfc",
+          "tripod_config.py": "4d4d20bafb450e37ad45b9d459e72b0318d7b81fd3edfd0117ba588bda13328c",
+          "tripod_evaluate.py": "92e077e12ceda9ed1cf6c3d045e73b698b0ad00b3f778c86f9de1e06ed5a25a3",
+          "tripod_kinematics.py": "3db69088e944a3773f16844e07ebebc4700662142770eb1a322ce500f5a016cc"
+        },
+        "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+        "config": {
+          "num_envs": 128,
+          "spacing_m": 2.0,
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "episode_seconds": 20.0,
+          "action_scale_rad": 0.35,
+          "target_slew_rad": 0.04,
+          "reset_height_m": 0.08161108940839767,
+          "command_forward_mps": 0.1,
+          "command_left_mps": 0.0,
+          "command_yaw_rad_s": 0.0,
+          "seed": 20260917,
+          "record_motion_features": false,
+          "render": false,
+          "device": "cuda:0",
+          "schema": "canonical_paper_walk_experiment_v1",
+          "actor_width": 231,
+          "critic_width": 234,
+          "amp_width": 61,
+          "joint_names": [
+            "lf_coxa_yaw",
+            "lf_femur_pitch",
+            "lf_tibia_pitch",
+            "lm_coxa_yaw",
+            "lm_femur_pitch",
+            "lm_tibia_pitch",
+            "lr_coxa_yaw",
+            "lr_femur_pitch",
+            "lr_tibia_pitch",
+            "rf_coxa_yaw",
+            "rf_femur_pitch",
+            "rf_tibia_pitch",
+            "rm_coxa_yaw",
+            "rm_femur_pitch",
+            "rm_tibia_pitch",
+            "rr_coxa_yaw",
+            "rr_femur_pitch",
+            "rr_tibia_pitch"
+          ],
+          "legs": [
+            "lf",
+            "lm",
+            "lr",
+            "rf",
+            "rm",
+            "rr"
+          ],
+          "standing_admission": false,
+          "stage2_complete": false,
+          "prior_standing_failure_superseded": false,
+          "authorization": "User explicitly requested experimental paper-based PPO training on the confirmed model.",
+          "telemetry_scope": "Compact native body-force telemetry; no exact toe/shaft patch classification or formal standing admission."
+        },
+        "motion_prior": false,
+        "behavior_cloning": false,
+        "seed": 20260917,
+        "rsl_rl_required_version": "5.0.1",
+        "adapter_sha256": "a82a75f7f8be24d37de64d68bd672283700b306699b9c0a5c2fb7927ff9aaf23",
+        "entry_sha256": "244d9846855a73091632c7f8e9eaa2b1f5cef703a4678fe7117661fda0e84570",
+        "reward_version": "2",
+        "learner": "ppo",
+        "networks": "mlp",
+        "physics_source_files": {
+          "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+          "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+        },
+        "physics_config": {
+          "physics_dt": 0.0025,
+          "decimation": 8,
+          "spacing_m": 2.0,
+          "target_slew_rad": 0.04,
+          "action_scale_rad": 0.35,
+          "solver_position_iterations": 32,
+          "solver_velocity_iterations": 0,
+          "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+          "material_friction": [
+            1.0,
+            1.0
+          ],
+          "restitution": 0.0,
+          "external_forces_every_iteration": true,
+          "neutral_joint_position_rad": [
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4,
+            0.0,
+            -0.3,
+            0.4
+          ],
+          "reset_root_height_m": 0.10280231400684256
+        },
+        "standing_admission": {
+          "schema": "hexapod_locomotion_standing_admission_v1",
+          "num_envs": 128,
+          "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+          "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+          "physics_source_files": {
+            "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+            "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+          },
+          "physics_config": {
+            "physics_dt": 0.0025,
+            "decimation": 8,
+            "spacing_m": 2.0,
+            "target_slew_rad": 0.04,
+            "action_scale_rad": 0.35,
+            "solver_position_iterations": 32,
+            "solver_velocity_iterations": 0,
+            "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+            "material_friction": [
+              1.0,
+              1.0
+            ],
+            "restitution": 0.0,
+            "external_forces_every_iteration": true,
+            "neutral_joint_position_rad": [
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4,
+              0.0,
+              -0.3,
+              0.4
+            ],
+            "reset_root_height_m": 0.10280231400684256
+          },
+          "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+          "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+          "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+          "one": {
+            "report_path": "/standing_one/standing/standing_report.json",
+            "report_sha256": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+            "state_path": "/standing_one/state.json",
+            "state_sha256": "5773bf1d220bac30e4ab523a4851a5a04d7939087de6d2032fefdc3ff7fd6c3a"
+          },
+          "batch": {
+            "report_path": "/standing_batch/standing/standing_report.json",
+            "report_sha256": "4f04067c64e043de08187bb1f7821b7ac9d8da3d8409379613ccf00ffb3a4193",
+            "state_path": "/standing_batch/state.json",
+            "state_sha256": "f867191d2401f85efc1a058674509451450cff1bb337459dfa1b2de2ca5ae09c"
+          }
+        },
+        "upstream_source_files": {
+          "runners/on_policy_runner.py": "39358a0a60219fdb360df7acddf80f6a382837aa58e2ec0ccf875df4afee4825",
+          "algorithms/ppo.py": "a2d35e7ad7b884c80b7434e7d2ce785a6da1e18d93c96f1179fbd3a208669f8c",
+          "models/mlp_model.py": "6219ebb3ed4df036dae7ff1c30d0fbb169eaaa659e44a659dd757a292124476b",
+          "storage/rollout_storage.py": "ececf28e7412d24867066829cc443acae811f034f8e63975b90343947779918d"
+        },
+        "ppo_config": {
+          "seed": 20260917,
+          "num_steps_per_env": 24,
+          "save_interval": 50,
+          "obs_groups": {
+            "actor": [
+              "policy"
+            ],
+            "critic": [
+              "critic"
+            ]
+          },
+          "actor": {
+            "class_name": "MLPModel",
+            "hidden_dims": [
+              256,
+              256,
+              128
+            ],
+            "activation": "elu",
+            "obs_normalization": true,
+            "distribution_cfg": {
+              "class_name": "locomotion.action_distribution:BoundedMeanGaussian",
+              "init_std": 0.15,
+              "std_type": "log"
+            }
+          },
+          "critic": {
+            "class_name": "MLPModel",
+            "hidden_dims": [
+              256,
+              256,
+              128
+            ],
+            "activation": "elu",
+            "obs_normalization": true
+          },
+          "algorithm": {
+            "class_name": "PPO",
+            "value_loss_coef": 1.0,
+            "use_clipped_value_loss": true,
+            "clip_param": 0.2,
+            "entropy_coef": 0.01,
+            "num_learning_epochs": 5,
+            "num_mini_batches": 4,
+            "learning_rate": 0.001,
+            "schedule": "adaptive",
+            "gamma": 0.99,
+            "lam": 0.95,
+            "desired_kl": 0.01,
+            "max_grad_norm": 1.0,
+            "rnd_cfg": null,
+            "symmetry_cfg": null
+          },
+          "logger": "tensorboard",
+          "check_for_nan": true
+        }
+      },
+      "completion": {
+        "status": "completed",
+        "updates": 2000,
+        "transitions": 6144000,
+        "wall_seconds": 8828.779216650873
+      },
+      "early_200": {
+        "updates_inclusive": [
+          1,
+          200
+        ],
+        "update_count": 200,
+        "environment_controls": 614400,
+        "moving_controls": 469181,
+        "quiet_controls": 93570,
+        "reward_mean": -0.16310425768267187,
+        "reward_component_means": {
+          "linear_tracking": 0.2230864958060607,
+          "yaw_tracking": 0.3750176275450741,
+          "vertical_velocity": -0.10137396189799898,
+          "roll_pitch_rate": -0.1731781986701197,
+          "joint_torque": -0.14044396912183704,
+          "joint_acceleration": -0.124907749578515,
+          "action_rate": -0.219682970519425,
+          "collisions": 0.0,
+          "torque_limit": -0.0011701467247075756,
+          "velocity_limit": -8.517357520759105e-05,
+          "termination": -0.0003662109375
+        },
+        "moving_signed_command_direction_speed_mps": 9.472383712511579e-05,
+        "moving_requested_speed_mps": 0.03754865538994392,
+        "moving_projection_to_requested_ratio": 0.0025226958499953165,
+        "achieved_planar_speed_mps_all_controls": 0.03809466814622283,
+        "absolute_navigation_velocity_error_mps_by_axis": [
+          0.03146085252054036,
+          0.03077854473143816
+        ],
+        "absolute_yaw_error_rad_s": 0.10225164521485568,
+        "requested_saturation_fraction": 0.0014699752849992366,
+        "nonfoot_event_fraction": 0.0,
+        "terminations": 3,
+        "terminations_per_1000_controls": 0.0048828125,
+        "truncations": 511,
+        "termination_reason_counts": {
+          "height": 0,
+          "tilt": 0,
+          "joint_limit": 3,
+          "timeout": 511
+        },
+        "termination_flag_mismatch_rows": 0,
+        "quiet_all_joint_rate_rms_rad_s": 0.635799038951117,
+        "quiet_worst_joint_rate_rms_rad_s": 1.010616249662024,
+        "quiet_by_joint_rate_rms_rad_s": [
+          0.4173262684743843,
+          0.6329960373913495,
+          0.7196821081361967,
+          0.37103420481335747,
+          0.5691312550284668,
+          0.7887293941873814,
+          0.3989863554782171,
+          0.6222323745646156,
+          0.8102961419335375,
+          0.41637309941228284,
+          0.6116997731952957,
+          0.7233217003974418,
+          0.38254657071676673,
+          0.580468190865551,
+          0.8632644012417715,
+          0.4030221193655826,
+          0.6433552484226562,
+          1.010616249662024
+        ],
+        "actual_target_slew": {
+          "valid_controls": 613758,
+          "mean_joint_at_limit_fraction": 0.5712266796431891,
+          "per_joint": {
+            "lf_coxa_yaw": {
+              "at_limit_fraction": 0.5636586407020356,
+              "beyond_limit_rows": 0
+            },
+            "lf_femur_pitch": {
+              "at_limit_fraction": 0.5681962597636202,
+              "beyond_limit_rows": 0
+            },
+            "lf_tibia_pitch": {
+              "at_limit_fraction": 0.5740145138637704,
+              "beyond_limit_rows": 0
+            },
+            "lm_coxa_yaw": {
+              "at_limit_fraction": 0.5626989790764438,
+              "beyond_limit_rows": 0
+            },
+            "lm_femur_pitch": {
+              "at_limit_fraction": 0.5705815647209487,
+              "beyond_limit_rows": 0
+            },
+            "lm_tibia_pitch": {
+              "at_limit_fraction": 0.5748340551161859,
+              "beyond_limit_rows": 0
+            },
+            "lr_coxa_yaw": {
+              "at_limit_fraction": 0.5899996415525337,
+              "beyond_limit_rows": 0
+            },
+            "lr_femur_pitch": {
+              "at_limit_fraction": 0.5748096155162132,
+              "beyond_limit_rows": 0
+            },
+            "lr_tibia_pitch": {
+              "at_limit_fraction": 0.5790344076981482,
+              "beyond_limit_rows": 0
+            },
+            "rf_coxa_yaw": {
+              "at_limit_fraction": 0.5727990510917984,
+              "beyond_limit_rows": 0
+            },
+            "rf_femur_pitch": {
+              "at_limit_fraction": 0.5743517803433926,
+              "beyond_limit_rows": 0
+            },
+            "rf_tibia_pitch": {
+              "at_limit_fraction": 0.57226789711906,
+              "beyond_limit_rows": 0
+            },
+            "rm_coxa_yaw": {
+              "at_limit_fraction": 0.5633930637156664,
+              "beyond_limit_rows": 0
+            },
+            "rm_femur_pitch": {
+              "at_limit_fraction": 0.5629254527028569,
+              "beyond_limit_rows": 0
+            },
+            "rm_tibia_pitch": {
+              "at_limit_fraction": 0.5723200349323349,
+              "beyond_limit_rows": 0
+            },
+            "rr_coxa_yaw": {
+              "at_limit_fraction": 0.5624285141700801,
+              "beyond_limit_rows": 0
+            },
+            "rr_femur_pitch": {
+              "at_limit_fraction": 0.5712349166935502,
+              "beyond_limit_rows": 0
+            },
+            "rr_tibia_pitch": {
+              "at_limit_fraction": 0.5725318447987643,
+              "beyond_limit_rows": 0
+            }
+          }
+        },
+        "mean_action_std_mean": 0.14988180585205554,
+        "learning_rate_first_last": [
+          1e-05,
+          3.375000000000001e-05
+        ],
+        "command_classes": {
+          "zero": {
+            "environment_controls": 93570,
+            "time_fraction": 0.152294921875,
+            "task_reward_mean": 0.35518793577213964,
+            "requested_planar_speed_mps": 0.0,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": null,
+            "reward_component_means": {
+              "linear_tracking": 0.6679093029597203,
+              "yaw_tracking": 0.44687189608648353,
+              "vertical_velocity": -0.101376737104929,
+              "roll_pitch_rate": -0.1727768299574325,
+              "joint_torque": -0.14009343151791814,
+              "joint_acceleration": -0.12458556622823752,
+              "action_rate": -0.21975188753018715,
+              "collisions": 0.0,
+              "torque_limit": -0.000991481898390975,
+              "velocity_limit": -1.7328925834477196e-05,
+              "termination": 0.0
+            }
+          },
+          "linear_0.025": {
+            "environment_controls": 211771,
+            "time_fraction": 0.34467936197916665,
+            "task_reward_mean": -0.23064576841086873,
+            "requested_planar_speed_mps": 0.02500000037252903,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": 7.567159071103284e-05,
+            "reward_component_means": {
+              "linear_tracking": 0.0870082096674877,
+              "yaw_tracking": 0.44454208286327435,
+              "vertical_velocity": -0.10128695288954451,
+              "roll_pitch_rate": -0.17322638782262254,
+              "joint_torque": -0.14058770783385133,
+              "joint_acceleration": -0.12515708615479804,
+              "action_rate": -0.21972360331550805,
+              "collisions": 0.0,
+              "torque_limit": -0.0012665576819739209,
+              "velocity_limit": -0.00023945288550940362,
+              "termination": -0.000708312280718323
+            }
+          },
+          "linear_0.05": {
+            "environment_controls": 202644,
+            "time_fraction": 0.32982421875,
+            "task_reward_mean": -0.23278618937534187,
+            "requested_planar_speed_mps": 0.05000000074505806,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": 0.00014013043182168537,
+            "reward_component_means": {
+              "linear_tracking": 0.0850703632384807,
+              "yaw_tracking": 0.44385422746661096,
+              "vertical_velocity": -0.10168727094683264,
+              "roll_pitch_rate": -0.17370744166751478,
+              "joint_torque": -0.14048873358494274,
+              "joint_acceleration": -0.12507781773220547,
+              "action_rate": -0.21927680875630629,
+              "collisions": 0.0,
+              "torque_limit": -0.0011026002468815233,
+              "velocity_limit": 0.0,
+              "termination": -0.0003701071830402084
+            }
+          },
+          "yaw": {
+            "environment_controls": 51649,
+            "time_fraction": 0.08406412760416666,
+            "task_reward_mean": -0.05498306392394207,
+            "requested_planar_speed_mps": 0.0,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": null,
+            "reward_component_means": {
+              "linear_tracking": 0.663038478277483,
+              "yaw_tracking": 0.04215156713160188,
+              "vertical_velocity": -0.10250585943601345,
+              "roll_pitch_rate": -0.17224587509954123,
+              "joint_torque": -0.14046917193158823,
+              "joint_acceleration": -0.12411204230488726,
+              "action_rate": -0.21980811417098198,
+              "collisions": 0.0,
+              "torque_limit": -0.0010320465649528677,
+              "velocity_limit": 0.0,
+              "termination": 0.0
+            }
+          },
+          "arc": {
+            "environment_controls": 54766,
+            "time_fraction": 0.08913736979166667,
+            "task_reward_mean": -0.6315882339391258,
+            "requested_planar_speed_mps": 0.03999999910593033,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": 3.8317502938323936e-07,
+            "reward_component_means": {
+              "linear_tracking": 0.08505242163307014,
+              "yaw_tracking": 0.042625410935959826,
+              "vertical_velocity": -0.09947889440693176,
+              "roll_pitch_rate": -0.1725985811622522,
+              "joint_torque": -0.14029765869263439,
+              "joint_acceleration": -0.12461520738132284,
+              "action_rate": -0.22079295275858513,
+              "collisions": 0.0,
+              "torque_limit": -0.0014827721961852543,
+              "velocity_limit": 0.0,
+              "termination": 0.0
+            }
+          },
+          "other": {
+            "environment_controls": 0,
+            "time_fraction": 0.0,
+            "task_reward_mean": null,
+            "requested_planar_speed_mps": null,
+            "nonfoot_event_fraction": null,
+            "moving_signed_command_direction_speed_mps": null,
+            "reward_component_means": {
+              "linear_tracking": null,
+              "yaw_tracking": null,
+              "vertical_velocity": null,
+              "roll_pitch_rate": null,
+              "joint_torque": null,
+              "joint_acceleration": null,
+              "action_rate": null,
+              "collisions": null,
+              "torque_limit": null,
+              "velocity_limit": null,
+              "termination": null
+            }
+          }
+        },
+        "actions": {
+          "available": true,
+          "scope": "rollouts collected before the associated optimizer update",
+          "environment_controls": 614400,
+          "raw_sample_outside_bounds_fraction": 2.4414063227595763e-06,
+          "mean_near_bound_threshold": 0.95,
+          "mean_near_bound_fraction_across_joint_controls": 0.0,
+          "mean_abs_max": 0.9331615567207336,
+          "per_joint": {
+            "lf_coxa_yaw": {
+              "raw_sample_outside_bounds_fraction": 0.0,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.7189301252365112
+            },
+            "lf_femur_pitch": {
+              "raw_sample_outside_bounds_fraction": 6.510416860692203e-06,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.7016584277153015
+            },
+            "lf_tibia_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.0,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.7257345914840698
+            },
+            "lm_coxa_yaw": {
+              "raw_sample_outside_bounds_fraction": 0.0,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.6104086637496948
+            },
+            "lm_femur_pitch": {
+              "raw_sample_outside_bounds_fraction": 8.138021075865254e-06,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.917885959148407
+            },
+            "lm_tibia_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.0,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.8579398393630981
+            },
+            "lr_coxa_yaw": {
+              "raw_sample_outside_bounds_fraction": 1.6276042151730508e-06,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.7993981838226318
+            },
+            "lr_femur_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.0,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.7326366901397705
+            },
+            "lr_tibia_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.0,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.8044551610946655
+            },
+            "rf_coxa_yaw": {
+              "raw_sample_outside_bounds_fraction": 0.0,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.6783661246299744
+            },
+            "rf_femur_pitch": {
+              "raw_sample_outside_bounds_fraction": 1.4648437936557457e-05,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.9331615567207336
+            },
+            "rf_tibia_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.0,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.7667866349220276
+            },
+            "rm_coxa_yaw": {
+              "raw_sample_outside_bounds_fraction": 0.0,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.7635567784309387
+            },
+            "rm_femur_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.0,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.7205142974853516
+            },
+            "rm_tibia_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.0,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.6713632941246033
+            },
+            "rr_coxa_yaw": {
+              "raw_sample_outside_bounds_fraction": 1.6276042151730508e-06,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.5810171961784363
+            },
+            "rr_femur_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.0,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.6351542472839355
+            },
+            "rr_tibia_pitch": {
+              "raw_sample_outside_bounds_fraction": 1.1393229506211356e-05,
+              "mean_near_bound_fraction": 0.0,
+              "mean_abs_max": 0.7884682416915894
+            }
+          }
+        }
+      },
+      "late_200": {
+        "updates_inclusive": [
+          1801,
+          2000
+        ],
+        "update_count": 200,
+        "environment_controls": 614400,
+        "moving_controls": 472201,
+        "quiet_controls": 91443,
+        "reward_mean": -0.17317076378785998,
+        "reward_component_means": {
+          "linear_tracking": 0.21958410873972298,
+          "yaw_tracking": 0.3624340334055095,
+          "vertical_velocity": -0.09561076539801343,
+          "roll_pitch_rate": -0.15346268856522152,
+          "joint_torque": -0.1338509163045031,
+          "joint_acceleration": -0.134614668596793,
+          "action_rate": -0.23232226125032562,
+          "collisions": 0.0,
+          "torque_limit": -0.003875942335314204,
+          "velocity_limit": -0.00010889003053307533,
+          "termination": -0.0013427734375
+        },
+        "moving_signed_command_direction_speed_mps": 0.0009215037766406392,
+        "moving_requested_speed_mps": 0.03751710661981916,
+        "moving_projection_to_requested_ratio": 0.024562229331241563,
+        "achieved_planar_speed_mps_all_controls": 0.037841274701058865,
+        "absolute_navigation_velocity_error_mps_by_axis": [
+          0.031052943291142582,
+          0.030437796134501694
+        ],
+        "absolute_yaw_error_rad_s": 0.10307484928518534,
+        "requested_saturation_fraction": 0.00306261994788656,
+        "nonfoot_event_fraction": 0.0,
+        "terminations": 11,
+        "terminations_per_1000_controls": 0.017903645833333332,
+        "truncations": 627,
+        "termination_reason_counts": {
+          "height": 0,
+          "tilt": 0,
+          "joint_limit": 11,
+          "timeout": 627
+        },
+        "termination_flag_mismatch_rows": 0,
+        "quiet_all_joint_rate_rms_rad_s": 0.7407638754480529,
+        "quiet_worst_joint_rate_rms_rad_s": 1.5269095363337433,
+        "quiet_by_joint_rate_rms_rad_s": [
+          0.42586640653045305,
+          0.5902152951602987,
+          1.2187083935029404,
+          0.3699588188465511,
+          0.5192542274244822,
+          0.6632338723998994,
+          0.4681098997417295,
+          0.6073212774030126,
+          0.8023814336450634,
+          0.49590422033828807,
+          0.8287799787572826,
+          1.5269095363337433,
+          0.37647843807340037,
+          0.5448569454931634,
+          0.7338467039615462,
+          0.4093257002508977,
+          0.5787709643262046,
+          1.0198669762533499
+        ],
+        "actual_target_slew": {
+          "valid_controls": 613848,
+          "mean_joint_at_limit_fraction": 0.49830332590478427,
+          "per_joint": {
+            "lf_coxa_yaw": {
+              "at_limit_fraction": 0.5667803755978679,
+              "beyond_limit_rows": 0
+            },
+            "lf_femur_pitch": {
+              "at_limit_fraction": 0.4215783060301573,
+              "beyond_limit_rows": 0
+            },
+            "lf_tibia_pitch": {
+              "at_limit_fraction": 0.35050533682605467,
+              "beyond_limit_rows": 0
+            },
+            "lm_coxa_yaw": {
+              "at_limit_fraction": 0.6425336565403813,
+              "beyond_limit_rows": 0
+            },
+            "lm_femur_pitch": {
+              "at_limit_fraction": 0.34377402874978824,
+              "beyond_limit_rows": 0
+            },
+            "lm_tibia_pitch": {
+              "at_limit_fraction": 0.5652490518825507,
+              "beyond_limit_rows": 0
+            },
+            "lr_coxa_yaw": {
+              "at_limit_fraction": 0.6147417601751574,
+              "beyond_limit_rows": 0
+            },
+            "lr_femur_pitch": {
+              "at_limit_fraction": 0.34837777430243316,
+              "beyond_limit_rows": 0
+            },
+            "lr_tibia_pitch": {
+              "at_limit_fraction": 0.5285200896638907,
+              "beyond_limit_rows": 0
+            },
+            "rf_coxa_yaw": {
+              "at_limit_fraction": 0.6094293701372326,
+              "beyond_limit_rows": 0
+            },
+            "rf_femur_pitch": {
+              "at_limit_fraction": 0.3823389503590465,
+              "beyond_limit_rows": 0
+            },
+            "rf_tibia_pitch": {
+              "at_limit_fraction": 0.6106397674994462,
+              "beyond_limit_rows": 0
+            },
+            "rm_coxa_yaw": {
+              "at_limit_fraction": 0.4596691689147802,
+              "beyond_limit_rows": 0
+            },
+            "rm_femur_pitch": {
+              "at_limit_fraction": 0.41473459227691545,
+              "beyond_limit_rows": 0
+            },
+            "rm_tibia_pitch": {
+              "at_limit_fraction": 0.5904556176773403,
+              "beyond_limit_rows": 0
+            },
+            "rr_coxa_yaw": {
+              "at_limit_fraction": 0.513721637929911,
+              "beyond_limit_rows": 0
+            },
+            "rr_femur_pitch": {
+              "at_limit_fraction": 0.39024644537409914,
+              "beyond_limit_rows": 0
+            },
+            "rr_tibia_pitch": {
+              "at_limit_fraction": 0.6161639363490636,
+              "beyond_limit_rows": 0
+            }
+          }
+        },
+        "mean_action_std_mean": 0.1668791715055704,
+        "learning_rate_first_last": [
+          1e-05,
+          3.3750000000000014e-05
+        ],
+        "command_classes": {
+          "zero": {
+            "environment_controls": 91443,
+            "time_fraction": 0.1488330078125,
+            "task_reward_mean": 0.31400480953619875,
+            "requested_planar_speed_mps": 0.0,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": null,
+            "reward_component_means": {
+              "linear_tracking": 0.637473704997454,
+              "yaw_tracking": 0.430216328648477,
+              "vertical_velocity": -0.09631675811655863,
+              "roll_pitch_rate": -0.1530596343545476,
+              "joint_torque": -0.13367142636750706,
+              "joint_acceleration": -0.13380320775395896,
+              "action_rate": -0.23165726514916046,
+              "collisions": 0.0,
+              "torque_limit": -0.0034814328731860834,
+              "velocity_limit": -5.51332489377775e-05,
+              "termination": -0.0016403661297201535
+            }
+          },
+          "linear_0.025": {
+            "environment_controls": 213795,
+            "time_fraction": 0.3479736328125,
+            "task_reward_mean": -0.23018153305765257,
+            "requested_planar_speed_mps": 0.02500000037252903,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": 0.0006316191796111221,
+            "reward_component_means": {
+              "linear_tracking": 0.09533255709887331,
+              "yaw_tracking": 0.42869840273603543,
+              "vertical_velocity": -0.09495302796866817,
+              "roll_pitch_rate": -0.15318325538979463,
+              "joint_torque": -0.1335744653995827,
+              "joint_acceleration": -0.13456065966196976,
+              "action_rate": -0.23193959826523597,
+              "collisions": 0.0,
+              "torque_limit": -0.004133731575523593,
+              "velocity_limit": -0.00011373792133685032,
+              "termination": -0.0017540166982389672
+            }
+          },
+          "linear_0.05": {
+            "environment_controls": 203450,
+            "time_fraction": 0.3311360677083333,
+            "task_reward_mean": -0.2286779521081405,
+            "requested_planar_speed_mps": 0.05000000074505806,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": 0.001106939370738217,
+            "reward_component_means": {
+              "linear_tracking": 0.09331884564142158,
+              "yaw_tracking": 0.42838655557800553,
+              "vertical_velocity": -0.09444025634575076,
+              "roll_pitch_rate": -0.152712311281374,
+              "joint_torque": -0.13357286266231821,
+              "joint_acceleration": -0.13334524205822884,
+              "action_rate": -0.23212431301822178,
+              "collisions": 0.0,
+              "torque_limit": -0.0033754275083980193,
+              "velocity_limit": -7.565859056099183e-05,
+              "termination": -0.0007372818874416319
+            }
+          },
+          "yaw": {
+            "environment_controls": 50756,
+            "time_fraction": 0.08261067708333333,
+            "task_reward_mean": -0.07822127190089599,
+            "requested_planar_speed_mps": 0.0,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": null,
+            "reward_component_means": {
+              "linear_tracking": 0.6321880889102723,
+              "yaw_tracking": 0.04233989605911636,
+              "vertical_velocity": -0.09441338168660754,
+              "roll_pitch_rate": -0.15383530680203686,
+              "joint_torque": -0.13348111170306257,
+              "joint_acceleration": -0.13358929038855294,
+              "action_rate": -0.2320154333069236,
+              "collisions": 0.0,
+              "torque_limit": -0.0037274739528295386,
+              "velocity_limit": -0.0002096009523143854,
+              "termination": -0.0014776578138545196
+            }
+          },
+          "arc": {
+            "environment_controls": 54956,
+            "time_fraction": 0.08944661458333333,
+            "task_reward_mean": -0.6442111867060176,
+            "requested_planar_speed_mps": 0.03999999910593033,
+            "nonfoot_event_fraction": 0.0,
+            "moving_signed_command_direction_speed_mps": 0.0013627477864443633,
+            "reward_component_means": {
+              "linear_tracking": 0.09398949290656117,
+              "yaw_tracking": 0.04333239089580642,
+              "vertical_velocity": -0.10243399408794536,
+              "roll_pitch_rate": -0.15765421540665892,
+              "joint_torque": -0.13659596207529084,
+              "joint_acceleration": -0.14182149186777565,
+              "action_rate": -0.23593363395381445,
+              "collisions": 0.0,
+              "torque_limit": -0.005519556879536944,
+              "velocity_limit": -0.00020948831791596273,
+              "termination": -0.0013647281461532863
+            }
+          },
+          "other": {
+            "environment_controls": 0,
+            "time_fraction": 0.0,
+            "task_reward_mean": null,
+            "requested_planar_speed_mps": null,
+            "nonfoot_event_fraction": null,
+            "moving_signed_command_direction_speed_mps": null,
+            "reward_component_means": {
+              "linear_tracking": null,
+              "yaw_tracking": null,
+              "vertical_velocity": null,
+              "roll_pitch_rate": null,
+              "joint_torque": null,
+              "joint_acceleration": null,
+              "action_rate": null,
+              "collisions": null,
+              "torque_limit": null,
+              "velocity_limit": null,
+              "termination": null
+            }
+          }
+        },
+        "actions": {
+          "available": true,
+          "scope": "rollouts collected before the associated optimizer update",
+          "environment_controls": 614400,
+          "raw_sample_outside_bounds_fraction": 0.22533077091440243,
+          "mean_near_bound_threshold": 0.95,
+          "mean_near_bound_fraction_across_joint_controls": 0.35036432041386434,
+          "mean_abs_max": 0.9999947547912598,
+          "per_joint": {
+            "lf_coxa_yaw": {
+              "raw_sample_outside_bounds_fraction": 0.16308919763192534,
+              "mean_near_bound_fraction": 0.004467773539072368,
+              "mean_abs_max": 0.9895886182785034
+            },
+            "lf_femur_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.3480013107508421,
+              "mean_near_bound_fraction": 0.5705973451212049,
+              "mean_abs_max": 0.9997141361236572
+            },
+            "lf_tibia_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.448613291233778,
+              "mean_near_bound_fraction": 0.8957454632222652,
+              "mean_abs_max": 0.9999224543571472
+            },
+            "lm_coxa_yaw": {
+              "raw_sample_outside_bounds_fraction": 0.0037125652165559586,
+              "mean_near_bound_fraction": 3.2552084303461015e-06,
+              "mean_abs_max": 0.9543157815933228
+            },
+            "lm_femur_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.47230469599366187,
+              "mean_near_bound_fraction": 0.9196370649337768,
+              "mean_abs_max": 0.9999939799308777
+            },
+            "lm_tibia_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.041557618342339994,
+              "mean_near_bound_fraction": 0.0008593750231375452,
+              "mean_abs_max": 0.9820607900619507
+            },
+            "lr_coxa_yaw": {
+              "raw_sample_outside_bounds_fraction": 0.051495769600151106,
+              "mean_near_bound_fraction": 1.6276042151730508e-06,
+              "mean_abs_max": 0.9605963230133057
+            },
+            "lr_femur_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.46707357808947564,
+              "mean_near_bound_fraction": 0.9468131718039513,
+              "mean_abs_max": 0.9999947547912598
+            },
+            "lr_tibia_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.18116211427375675,
+              "mean_near_bound_fraction": 0.0273193367474596,
+              "mean_abs_max": 0.9984045028686523
+            },
+            "rf_coxa_yaw": {
+              "raw_sample_outside_bounds_fraction": 0.03643554808106273,
+              "mean_near_bound_fraction": 1.1393229506211356e-05,
+              "mean_abs_max": 0.9791617393493652
+            },
+            "rf_femur_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.4100716245174408,
+              "mean_near_bound_fraction": 0.862742532491684,
+              "mean_abs_max": 0.999775767326355
+            },
+            "rf_tibia_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.00027832032006699594,
+              "mean_near_bound_fraction": 1.6276042151730508e-06,
+              "mean_abs_max": 0.9648271799087524
+            },
+            "rm_coxa_yaw": {
+              "raw_sample_outside_bounds_fraction": 0.32753256149590015,
+              "mean_near_bound_fraction": 0.461349297715351,
+              "mean_abs_max": 0.9981637001037598
+            },
+            "rm_femur_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.3625699971988797,
+              "mean_near_bound_fraction": 0.6422151845693588,
+              "mean_abs_max": 0.9989712834358215
+            },
+            "rm_tibia_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.046775717427954076,
+              "mean_near_bound_fraction": 5.3710938955191524e-05,
+              "mean_abs_max": 0.9993057250976562
+            },
+            "rr_coxa_yaw": {
+              "raw_sample_outside_bounds_fraction": 0.23674968110397457,
+              "mean_near_bound_fraction": 0.10667969104950316,
+              "mean_abs_max": 0.996446967124939
+            },
+            "rr_femur_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.4077587993815541,
+              "mean_near_bound_fraction": 0.8679769088327884,
+              "mean_abs_max": 0.9995200037956238
+            },
+            "rr_tibia_pitch": {
+              "raw_sample_outside_bounds_fraction": 0.05077148579992354,
+              "mean_near_bound_fraction": 8.300781468278728e-05,
+              "mean_abs_max": 0.989983081817627
+            }
+          }
+        }
+      },
+      "latest_rollout_actions": {
+        "scope": "last_collected_rollout_before_optimizer_update",
+        "environment_controls": 3072,
+        "raw_sample_outside_bounds_fraction": 0.2753182951774862,
+        "mean_abs_max": 0.999968945980072,
+        "mean_near_bound_threshold": 0.95,
+        "per_joint": {
+          "lf_coxa_yaw": {
+            "raw_sample_outside_bounds_fraction": 0.15234375,
+            "mean_near_bound_fraction": 0.001953125,
+            "mean_abs_max": 0.9606683254241943
+          },
+          "lf_femur_pitch": {
+            "raw_sample_outside_bounds_fraction": 0.4521484375,
+            "mean_near_bound_fraction": 0.9609375,
+            "mean_abs_max": 0.998313844203949
+          },
+          "lf_tibia_pitch": {
+            "raw_sample_outside_bounds_fraction": 0.4869791865348816,
+            "mean_near_bound_fraction": 0.9482421875,
+            "mean_abs_max": 0.9995549321174622
+          },
+          "lm_coxa_yaw": {
+            "raw_sample_outside_bounds_fraction": 0.00390625,
+            "mean_near_bound_fraction": 0.0,
+            "mean_abs_max": 0.8555530309677124
+          },
+          "lm_femur_pitch": {
+            "raw_sample_outside_bounds_fraction": 0.505859375,
+            "mean_near_bound_fraction": 0.9749349355697632,
+            "mean_abs_max": 0.9999477863311768
+          },
+          "lm_tibia_pitch": {
+            "raw_sample_outside_bounds_fraction": 0.0738932341337204,
+            "mean_near_bound_fraction": 0.0,
+            "mean_abs_max": 0.9453952312469482
+          },
+          "lr_coxa_yaw": {
+            "raw_sample_outside_bounds_fraction": 0.1686197966337204,
+            "mean_near_bound_fraction": 0.0,
+            "mean_abs_max": 0.9380252957344055
+          },
+          "lr_femur_pitch": {
+            "raw_sample_outside_bounds_fraction": 0.4778645932674408,
+            "mean_near_bound_fraction": 0.9876302480697632,
+            "mean_abs_max": 0.999968945980072
+          },
+          "lr_tibia_pitch": {
+            "raw_sample_outside_bounds_fraction": 0.2932942807674408,
+            "mean_near_bound_fraction": 0.1272786557674408,
+            "mean_abs_max": 0.987082302570343
+          },
+          "rf_coxa_yaw": {
+            "raw_sample_outside_bounds_fraction": 0.0797526091337204,
+            "mean_near_bound_fraction": 0.0,
+            "mean_abs_max": 0.91773521900177
+          },
+          "rf_femur_pitch": {
+            "raw_sample_outside_bounds_fraction": 0.4664713740348816,
+            "mean_near_bound_fraction": 0.9410807490348816,
+            "mean_abs_max": 0.9980583190917969
+          },
+          "rf_tibia_pitch": {
+            "raw_sample_outside_bounds_fraction": 0.0,
+            "mean_near_bound_fraction": 0.0,
+            "mean_abs_max": 0.7999254465103149
+          },
+          "rm_coxa_yaw": {
+            "raw_sample_outside_bounds_fraction": 0.4293619990348816,
+            "mean_near_bound_fraction": 0.9326171875,
+            "mean_abs_max": 0.9954933524131775
+          },
+          "rm_femur_pitch": {
+            "raw_sample_outside_bounds_fraction": 0.4166666865348816,
+            "mean_near_bound_fraction": 0.9130859375,
+            "mean_abs_max": 0.9939151406288147
+          },
+          "rm_tibia_pitch": {
+            "raw_sample_outside_bounds_fraction": 0.064453125,
+            "mean_near_bound_fraction": 0.0,
+            "mean_abs_max": 0.9342806339263916
+          },
+          "rr_coxa_yaw": {
+            "raw_sample_outside_bounds_fraction": 0.3460286557674408,
+            "mean_near_bound_fraction": 0.3854166865348816,
+            "mean_abs_max": 0.9937807321548462
+          },
+          "rr_femur_pitch": {
+            "raw_sample_outside_bounds_fraction": 0.4547526240348816,
+            "mean_near_bound_fraction": 0.9622396230697632,
+            "mean_abs_max": 0.9975511431694031
+          },
+          "rr_tibia_pitch": {
+            "raw_sample_outside_bounds_fraction": 0.0833333358168602,
+            "mean_near_bound_fraction": 0.0,
+            "mean_abs_max": 0.9416854977607727
+          }
+        }
+      },
+      "force_history_summary": {
+        "status": "available",
+        "physics_steps": 384000,
+        "windows": {
+          "full_training": {
+            "samples_across_replicas": 49152000,
+            "total_vertical_support_n": {
+              "mean": 73.24255577050454,
+              "rms": 74.34250115335017,
+              "peak": 747.4630126953125
+            },
+            "applied_worst_joint_rms_nm": 0.56107274655387,
+            "applied_peak_nm": 1.600000023841858,
+            "requested_peak_nm": 39.86492156982422
+          },
+          "commanded_locomotion_after_settle": {
+            "samples_across_replicas": 37569096,
+            "total_vertical_support_n": {
+              "mean": 73.24189440183564,
+              "rms": 74.23950495629016,
+              "peak": 627.857177734375
+            },
+            "applied_worst_joint_rms_nm": 0.5704929023924308,
+            "applied_peak_nm": 1.600000023841858,
+            "requested_peak_nm": 39.86492156982422
+          }
+        }
+      }
+    }
+  }
+}

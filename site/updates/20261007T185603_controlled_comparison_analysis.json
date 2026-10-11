@@ -1,0 +1,22 @@
+{
+  "id": "20261007T185603_controlled_comparison_analysis",
+  "date": "2026-10-07T18:56:03Z",
+  "title": "Diagnose drift at rest in the reward v4 full-command-bank policies and add the comparison scripts",
+  "summary": "In the stop and quiet probes of both full-command-bank reward v4 policies at update 2000, the drifting joints follow their targets: target and joint drift share a sign on 62 of 64 drifting joints, and at least 89 percent of each stop-probe drifting joint's non-DC action power lies below 1 Hz. Lightly loaded feet show brief contact-normal force losses. The scripts that compute the controlled comparison's metrics, verdicts and verification records are pinned to the retained files; they reproduce the reference tracking errors of 0.640 and 0.696 and recompute each probe's load summary from the raw 400 Hz chunks without difference. A Spark queue runs the six 5000-update launches in the packet order.",
+  "areas": [
+    "locomotion",
+    "research"
+  ],
+  "next": "Record the B, J and Y launches with their 2000, 3500 and 5000 evaluations and compute the three hypothesis verdicts per seed.",
+  "changes": [
+    "site/assets/reward_v4_controlled_comparison_20261007_001/*",
+    "site/updates/20261007T185603_controlled_comparison_analysis.json"
+  ],
+  "evidence": [
+    "site/assets/reward_v4_controlled_comparison_20261007_001/stop_diagnosis.json",
+    "site/assets/reward_v4_controlled_comparison_20261007_001/reference_seed20260917_verification.json",
+    "site/assets/reward_v4_controlled_comparison_20261007_001/reference_seed20260918_verification.json"
+  ],
+  "no_project_impact": true,
+  "reason": "The record diagnoses retained probes and adds analysis scripts; it changes no capability state and admits no result."
+}

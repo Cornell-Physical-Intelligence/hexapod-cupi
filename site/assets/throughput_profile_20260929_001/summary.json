@@ -1,0 +1,585 @@
+{
+  "schema": "hexapod_locomotion_throughput_summary_v1",
+  "learner": {
+    "label": "stock_ppo",
+    "algorithm": "RSL-RL 5.0.1 PPO",
+    "adapter": "ppo.py",
+    "networks": "MLP [256, 256, 128] actor and critic",
+    "motion_prior": false
+  },
+  "amp_learner": {
+    "status": "pending",
+    "measured": false,
+    "scope": "This source has no AMP discriminator or style reward; their learner cost remains unmeasured."
+  },
+  "identity": {
+    "source_files": {
+      "__init__.py": "c82a5695bd2575afdaae01eb84bb3c06ddffe42529d201bbe43726ae8859e350",
+      "admission.py": "1391aed5939b882e2ca0967bd8eda6103bf73e46206f8d6c0091f8463b1e70c3",
+      "amp.py": "4010cf0e42ea63ca693b0fa311a3fef7ee6bfdfa47b9eba58bf87f7f7cefec5c",
+      "camera.py": "6c9927cfa747408e3206e170386483791ac696634f1e322e4a6222b32396655d",
+      "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+      "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430",
+      "evaluate.py": "5cb686c3daf4eed3b4a96501aa80f9f1a8465376782255a9860e5abb7dfd735c",
+      "evaluation.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
+      "evaluation_config.py": "7d55733f4f5a471427b408a4b3a0e834d083a687f7ae0ebc3ceb0d16c23f3cb7",
+      "force_metrics.py": "5bd228d003d4ab71dbda6acbb9fdbf357a36ec007050b156bdd71ec31c707673",
+      "inputs.py": "0a4ff5170754654dc25ee745b128ae19f5901d6df4005a98e3584dec68b02b96",
+      "launch.py": "e2226315fd50452874decab14eab2a1e5a997f930b84643e64a2f6c0f346c78e",
+      "ppo.py": "bb1b44215580e30786bb16271a2dae996b19a41fc43a0588cc4591b18a5d4a65",
+      "prepare.py": "4ef50bd07b69ed3ffc0309e9fe90b4319bb76e771feccd9ad5bbc6e061129e5d",
+      "reservation.py": "8e3682cccb29cd3f3d53625de1276bdd56ca6643c54ada001b3bd1fb69b95c2e",
+      "task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+      "throughput.py": "0226fd7e43307913fde1a45fedc5d02e3effc7afd6f18c482cfd81d5db4e7c50",
+      "train.py": "239acaaa598ae2f05dcb2f775f2b191582873ba71ff49fd3fb645a750758111a",
+      "tripod.py": "ed3d34a4c8c5772ec7e1a1bc4703fc5b325bc9dfa56073b071a6fdf1fd9d0dfc",
+      "tripod_config.py": "4d4d20bafb450e37ad45b9d459e72b0318d7b81fd3edfd0117ba588bda13328c",
+      "tripod_evaluate.py": "92e077e12ceda9ed1cf6c3d045e73b698b0ad00b3f778c86f9de1e06ed5a25a3",
+      "tripod_kinematics.py": "3db69088e944a3773f16844e07ebebc4700662142770eb1a322ce500f5a016cc"
+    },
+    "source_freeze_sha256": "56ebf907b727c4a48658143341327addf8b7e57f5de55c29c3dc60af6d331ae4",
+    "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+    "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+    "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+    "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+    "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+    "physics_source_files": {
+      "env.py": "4a33f98a3f5bfb93e5348b8dde97394cf79f1507e80882b96a34898eb85474c6",
+      "env_config.py": "2a3678de2a56ce6832b0548860d6aefa4fad7cdc373bb66d778cf0ab13d3b430"
+    },
+    "physics_config": {
+      "physics_dt": 0.0025,
+      "decimation": 8,
+      "spacing_m": 2.0,
+      "target_slew_rad": 0.04,
+      "action_scale_rad": 0.35,
+      "solver_position_iterations": 32,
+      "solver_velocity_iterations": 0,
+      "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+      "material_friction": [
+        1.0,
+        1.0
+      ],
+      "restitution": 0.0,
+      "external_forces_every_iteration": true,
+      "neutral_joint_position_rad": [
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4
+      ],
+      "reset_root_height_m": 0.10280231400684256
+    },
+    "seed": 20260917,
+    "learner": {
+      "label": "stock_ppo",
+      "algorithm": "RSL-RL 5.0.1 PPO",
+      "adapter": "ppo.py",
+      "networks": "MLP [256, 256, 128] actor and critic",
+      "motion_prior": false
+    },
+    "ppo_config": {
+      "seed": 20260917,
+      "num_steps_per_env": 24,
+      "save_interval": 50,
+      "obs_groups": {
+        "actor": [
+          "policy"
+        ],
+        "critic": [
+          "critic"
+        ]
+      },
+      "actor": {
+        "class_name": "MLPModel",
+        "hidden_dims": [
+          256,
+          256,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": true,
+        "distribution_cfg": {
+          "class_name": "GaussianDistribution",
+          "init_std": 0.15,
+          "std_type": "log"
+        }
+      },
+      "critic": {
+        "class_name": "MLPModel",
+        "hidden_dims": [
+          256,
+          256,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": true
+      },
+      "algorithm": {
+        "class_name": "PPO",
+        "value_loss_coef": 1.0,
+        "use_clipped_value_loss": true,
+        "clip_param": 0.2,
+        "entropy_coef": 0.01,
+        "num_learning_epochs": 5,
+        "num_mini_batches": 4,
+        "learning_rate": 0.001,
+        "schedule": "adaptive",
+        "gamma": 0.99,
+        "lam": 0.95,
+        "desired_kl": 0.01,
+        "max_grad_norm": 1.0,
+        "rnd_cfg": null,
+        "symmetry_cfg": null
+      },
+      "logger": "tensorboard",
+      "check_for_nan": true
+    },
+    "upstream_source_files": {
+      "runners/on_policy_runner.py": "39358a0a60219fdb360df7acddf80f6a382837aa58e2ec0ccf875df4afee4825",
+      "algorithms/ppo.py": "a2d35e7ad7b884c80b7434e7d2ce785a6da1e18d93c96f1179fbd3a208669f8c",
+      "models/mlp_model.py": "6219ebb3ed4df036dae7ff1c30d0fbb169eaaa659e44a659dd757a292124476b",
+      "storage/rollout_storage.py": "ececf28e7412d24867066829cc443acae811f034f8e63975b90343947779918d",
+      "utils/logger.py": "d9822d8317724507a7c817e85399db0db9e56a4eae959435138e75cf92e44b8d"
+    }
+  },
+  "platform": {
+    "python": "3.12.13",
+    "machine": "aarch64",
+    "torch": "2.10.0+cu130",
+    "rsl-rl-lib": "5.0.1",
+    "tensordict": "0.14.0",
+    "warp-lang": "1.13.0",
+    "isaacsim": null,
+    "isaaclab": "6.1.14",
+    "cuda_device": "NVIDIA GB10",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_runtime": "13.0"
+  },
+  "settings": {
+    "warmup_updates": 2,
+    "measured_updates_per_pass": 20,
+    "census_controls": 50,
+    "steps_per_update": 24
+  },
+  "runs": [
+    {
+      "num_envs": 1,
+      "directory": "profile_001_u20/run/standing",
+      "profile_sha256": "179068cce9976e68c9bf79c242c4abc19de4d2e0dfef2b017fc3cec180eeb034",
+      "state_sha256": "bcf4d0eec65c205daf9f4664a32f5e42198bd22e690c4ea215d46900ffd3c86f",
+      "allocation_files": {
+        "launch_binding.json": "606c20f53dc9261de0315de2fee737dfa28977d65b148d2056dc96e9c044706f",
+        "jobs/standing.json": "baf97438ac54b31232a8f7e443e6577842949493c69839fc76b4978a88dbc5b8",
+        "jobs/standing_contact_data_audit.json": "34d9df6bf92c414743145ed51920596a479a9c656df4d508f5370128ebb8a4be",
+        "cleanup.json": "66aeed7e5086cace2a3a63d1f60d3b710cf1b47965a7e866de86e89df235fcf8"
+      },
+      "standing_admission_num_envs": 32,
+      "component_split_verified": true,
+      "training_transitions_per_second": 12.886653724030804,
+      "collection_transitions_per_second": 13.855480562626408,
+      "robot_physics_steps_per_second": 103.09322979224643,
+      "update_wall_seconds": {
+        "count": 20,
+        "sum": 37.24783875467256,
+        "mean": 1.8623919377336278,
+        "median": 1.7742074767593294,
+        "min": 1.6907486449927092,
+        "max": 3.0525194071233273,
+        "stdev": 0.298247039526942,
+        "coefficient_of_variation": 0.1601419301083762
+      },
+      "synchronization_overhead_ratio": 0.997089759526417,
+      "barrier_cost_seconds": 5.971989594399929e-06,
+      "category_microseconds_per_transition": {
+        "physics_contact": 54191.24433925996,
+        "observation": 7271.045751986094,
+        "simulation_other": 6140.09570563212,
+        "task": 2866.6003316175193,
+        "learner": 5346.699456761901,
+        "bookkeeping": 1558.1448038574308
+      },
+      "category_microseconds_per_transition_less_barriers": {
+        "physics_contact": 54047.91658899436,
+        "observation": 7211.2885311071295,
+        "simulation_other": 5936.936084617628,
+        "task": 2800.871121144155,
+        "learner": 5334.257811773568,
+        "bookkeeping": 1515.0842705528096
+      },
+      "component_microseconds_per_transition": {
+        "physics_step": 51449.62174623894,
+        "contact_readback": 421.09108859828365,
+        "training_loads": 2320.531504422737,
+        "state_readback": 7173.34679599541,
+        "observation": 97.69895599068452,
+        "env_control": 6130.960246082395,
+        "reset": 9.135459549725056,
+        "proximity_guard": 92.33021410182118,
+        "reward": 734.8910032305866,
+        "task_metrics": 1773.3591540794198,
+        "task_other": 266.0199602056916,
+        "policy_inference": 476.97323413255316,
+        "rollout_storage": 390.4937155311927,
+        "returns": 56.59556579000006,
+        "ppo_update": 4422.636941308156,
+        "vec_env_other": 98.35032687988132,
+        "episode_logging": 100.1828156101207,
+        "update_logging": 1173.9863470817606,
+        "runner_other": 185.62531428566822
+      },
+      "memory_peaks": {
+        "throughput": {
+          "physx_gpu_mem_heap": 1610612736,
+          "physx_gpu_mem_heap_articulation": 12376,
+          "physx_gpu_mem_heap_broadphase": 1182970084,
+          "physx_gpu_mem_heap_narrowphase": 91394460,
+          "physx_gpu_mem_heap_other": 0,
+          "physx_gpu_mem_heap_simulation": 41860,
+          "physx_gpu_mem_heap_simulation_articulation": 846200,
+          "physx_gpu_mem_heap_solver": 228352280,
+          "process_peak_rss_bytes": 5499957248,
+          "process_rss_bytes": 5499957248,
+          "system_used_bytes": 16325439488,
+          "torch_allocated_bytes": 23333376,
+          "torch_peak_allocated_bytes": 24653312,
+          "torch_peak_reserved_bytes": 29360128,
+          "torch_reserved_bytes": 29360128,
+          "warp_pool_peak_bytes": 1032,
+          "warp_pool_used_bytes": 1032,
+          "accounted_gpu_peak_bytes": 1639973896
+        },
+        "components": {
+          "physx_gpu_mem_heap": 1610612736,
+          "physx_gpu_mem_heap_articulation": 12376,
+          "physx_gpu_mem_heap_broadphase": 1182970084,
+          "physx_gpu_mem_heap_narrowphase": 91394460,
+          "physx_gpu_mem_heap_other": 0,
+          "physx_gpu_mem_heap_simulation": 41860,
+          "physx_gpu_mem_heap_simulation_articulation": 846200,
+          "physx_gpu_mem_heap_solver": 228352288,
+          "process_peak_rss_bytes": 5501964288,
+          "process_rss_bytes": 5501964288,
+          "system_used_bytes": 16128090112,
+          "torch_allocated_bytes": 23333376,
+          "torch_peak_allocated_bytes": 24653312,
+          "torch_peak_reserved_bytes": 29360128,
+          "torch_reserved_bytes": 29360128,
+          "warp_pool_peak_bytes": 1036,
+          "warp_pool_used_bytes": 1032,
+          "accounted_gpu_peak_bytes": 1639973900
+        }
+      },
+      "system_used_above_launch_bytes": 9681461248,
+      "contact_census": {
+        "capacity_patches": 1024,
+        "max_capacity_fraction": 0.02734375,
+        "reported_patches_per_robot": {
+          "count": 50,
+          "sum": 1319.0,
+          "mean": 26.38,
+          "median": 26.0,
+          "min": 26.0,
+          "max": 28.0,
+          "stdev": 0.5674864018868916,
+          "coefficient_of_variation": 0.021511994006326446
+        },
+        "policy": "deterministic actor mean after the measured updates",
+        "scope": "Patches reported by the floor contact view at each control end; the census runs after all timed updates."
+      }
+    },
+    {
+      "num_envs": 32,
+      "directory": "profile_032_u20/run/standing",
+      "profile_sha256": "2a920a987c6ed97467184730992bbae2d4d2ed67b04b7dde0585652c576ae5e1",
+      "state_sha256": "f019eb5d2e2e9777219e9e27288449cc8c5e5f5306229bc59c7bc2fd467fa8c8",
+      "allocation_files": {
+        "launch_binding.json": "efd7a2b19e70b1eed768fab8d4fd01f93ec6399d0f4d1f5b74e724dc2b27ad0f",
+        "jobs/standing.json": "5fe9c1fdfad419ac210abbaff3dea7118e0afb983e89e138ce1927c2fdc8fbf8",
+        "jobs/standing_contact_data_audit.json": "70cdd672ec66a5b04f098af52ab0f3f8e70859cab6785baa649add90ac3135d2",
+        "cleanup.json": "c9443703de26b5c172b213ee3eb132e800658a5f36bacf5ac64725427269e6a1"
+      },
+      "standing_admission_num_envs": 32,
+      "component_split_verified": true,
+      "training_transitions_per_second": 319.11649019049986,
+      "collection_transitions_per_second": 343.73071820051285,
+      "robot_physics_steps_per_second": 2552.931921523999,
+      "update_wall_seconds": {
+        "count": 20,
+        "sum": 48.13289338583127,
+        "mean": 2.4066446692915635,
+        "median": 2.174781240755692,
+        "min": 2.060792436823249,
+        "max": 3.463345630094409,
+        "stdev": 0.47758281458357843,
+        "coefficient_of_variation": 0.1984434265172029
+      },
+      "synchronization_overhead_ratio": 0.9695465047122497,
+      "barrier_cost_seconds": 6.136135198175907e-06,
+      "category_microseconds_per_transition": {
+        "physics_contact": 2125.8787127711307,
+        "observation": 284.21005242004566,
+        "simulation_other": 241.9841291460519,
+        "task": 126.88869116270023,
+        "learner": 181.00317517261524,
+        "bookkeeping": 78.25649869725264
+      },
+      "category_microseconds_per_transition_less_barriers": {
+        "physics_contact": 2121.276611372499,
+        "observation": 282.2913117067098,
+        "simulation_other": 235.46089010627233,
+        "task": 124.77819622442136,
+        "learner": 180.603687203984,
+        "bookkeeping": 76.8738708378199
+      },
+      "component_microseconds_per_transition": {
+        "physics_step": 2012.7540548855904,
+        "contact_readback": 15.5271595758677,
+        "training_loads": 97.59749830967242,
+        "state_readback": 280.34738164327183,
+        "observation": 3.8626707767737876,
+        "env_control": 241.7193742682381,
+        "reset": 0.2647548778137813,
+        "proximity_guard": 14.120719970378559,
+        "reward": 28.94999752243166,
+        "task_metrics": 72.75644078011585,
+        "task_other": 11.061532889774147,
+        "policy_inference": 19.960598001489416,
+        "rollout_storage": 15.392608990320392,
+        "returns": 3.066813436210699,
+        "ppo_update": 142.58315474459474,
+        "vec_env_other": 3.670283937632727,
+        "episode_logging": 3.8077280502572344,
+        "update_logging": 63.90570818742466,
+        "runner_other": 6.872778521938017
+      },
+      "memory_peaks": {
+        "throughput": {
+          "physx_gpu_mem_heap": 1610612736,
+          "physx_gpu_mem_heap_articulation": 289640,
+          "physx_gpu_mem_heap_broadphase": 1187731808,
+          "physx_gpu_mem_heap_narrowphase": 92666052,
+          "physx_gpu_mem_heap_other": 0,
+          "physx_gpu_mem_heap_simulation": 1321128,
+          "physx_gpu_mem_heap_simulation_articulation": 1720152,
+          "physx_gpu_mem_heap_solver": 238549780,
+          "process_peak_rss_bytes": 5756510208,
+          "process_rss_bytes": 5547704320,
+          "system_used_bytes": 13368094720,
+          "torch_allocated_bytes": 25077760,
+          "torch_peak_allocated_bytes": 27951616,
+          "torch_peak_reserved_bytes": 33554432,
+          "torch_reserved_bytes": 33554432,
+          "warp_pool_peak_bytes": 33028,
+          "warp_pool_used_bytes": 33024,
+          "accounted_gpu_peak_bytes": 1644200196
+        },
+        "components": {
+          "physx_gpu_mem_heap": 1610612736,
+          "physx_gpu_mem_heap_articulation": 289640,
+          "physx_gpu_mem_heap_broadphase": 1187731808,
+          "physx_gpu_mem_heap_narrowphase": 92934852,
+          "physx_gpu_mem_heap_other": 0,
+          "physx_gpu_mem_heap_simulation": 1321128,
+          "physx_gpu_mem_heap_simulation_articulation": 1720152,
+          "physx_gpu_mem_heap_solver": 241050040,
+          "process_peak_rss_bytes": 5756510208,
+          "process_rss_bytes": 5547724800,
+          "system_used_bytes": 13379305472,
+          "torch_allocated_bytes": 25077760,
+          "torch_peak_allocated_bytes": 27951616,
+          "torch_peak_reserved_bytes": 33554432,
+          "torch_reserved_bytes": 33554432,
+          "warp_pool_peak_bytes": 33148,
+          "warp_pool_used_bytes": 33024,
+          "accounted_gpu_peak_bytes": 1644200316
+        }
+      },
+      "system_used_above_launch_bytes": 6599696384,
+      "contact_census": {
+        "capacity_patches": 32768,
+        "max_capacity_fraction": 0.026947021484375,
+        "reported_patches_per_robot": {
+          "count": 50,
+          "sum": 1181.28125,
+          "mean": 23.625625,
+          "median": 23.46875,
+          "min": 23.03125,
+          "max": 27.59375,
+          "stdev": 0.7998298308332944,
+          "coefficient_of_variation": 0.033854335317406184
+        },
+        "policy": "deterministic actor mean after the measured updates",
+        "scope": "Patches reported by the floor contact view at each control end; the census runs after all timed updates."
+      }
+    },
+    {
+      "num_envs": 128,
+      "directory": "profile_128_u20/run/standing",
+      "profile_sha256": "a26119839b8421084e466072b92651ecde65721d28e05544eb689de9fb523195",
+      "state_sha256": "a57bcd7ad5f2b9e1621d965723d70187d1df03692e2f8389baa095f954c6837c",
+      "allocation_files": {
+        "launch_binding.json": "f06eb1e3301cd6817f1144b7cd837372c9b2c645cadc866a00ba02bc73f76c2a",
+        "jobs/standing.json": "fbe6eba057723304d1bcc4e8847f7bcaca40ab60760cba6f8f4ac25b9c737e30",
+        "jobs/standing_contact_data_audit.json": "34700ad6f96a1d5a5fef7643c9ba2d19797f443a06a7af55018a7dbc7a9b0ecd",
+        "cleanup.json": "58cc6efb2d6b9f3648839095ab4bd1a61d7963c7a26a82614dff799ae5230155"
+      },
+      "standing_admission_num_envs": 128,
+      "component_split_verified": true,
+      "training_transitions_per_second": 930.0427439679896,
+      "collection_transitions_per_second": 962.488971060418,
+      "robot_physics_steps_per_second": 7440.341951743917,
+      "update_wall_seconds": {
+        "count": 20,
+        "sum": 66.06147986045107,
+        "mean": 3.3030739930225534,
+        "median": 3.210683722514659,
+        "min": 2.9387276242487133,
+        "max": 4.460049626883119,
+        "stdev": 0.34721139384222743,
+        "coefficient_of_variation": 0.10511765542512225
+      },
+      "synchronization_overhead_ratio": 1.0178344848351262,
+      "barrier_cost_seconds": 6.032409146428108e-06,
+      "category_microseconds_per_transition": {
+        "physics_contact": 873.9519212364636,
+        "observation": 75.9701334421455,
+        "simulation_other": 64.05256519125639,
+        "task": 34.78850849205628,
+        "learner": 31.386896239382622,
+        "bookkeeping": 14.245358230861408
+      },
+      "category_microseconds_per_transition_less_barriers": {
+        "physics_contact": 872.8208445215083,
+        "observation": 75.4982623751251,
+        "simulation_other": 62.4484392043693,
+        "task": 34.26950922857941,
+        "learner": 31.288712496764976,
+        "bookkeeping": 13.90544611391912
+      },
+      "component_microseconds_per_transition": {
+        "physics_step": 837.1397423464563,
+        "contact_readback": 4.466575910555548,
+        "training_loads": 32.34560297945185,
+        "state_readback": 74.94479031417238,
+        "observation": 1.0253431279731255,
+        "env_control": 64.01116285511914,
+        "reset": 0.04140233613725286,
+        "proximity_guard": 3.7478966305570793,
+        "reward": 7.649783515262243,
+        "task_metrics": 20.188647992351132,
+        "task_other": 3.202180353885827,
+        "policy_inference": 5.099415390456367,
+        "rollout_storage": 4.024911360526555,
+        "returns": 0.8422511200478766,
+        "ppo_update": 21.420318368351825,
+        "vec_env_other": 0.9582166664282946,
+        "episode_logging": 0.9941342568708933,
+        "update_logging": 10.486226218138958,
+        "runner_other": 1.8067810894232632
+      },
+      "memory_peaks": {
+        "throughput": {
+          "physx_gpu_mem_heap": 1677721600,
+          "physx_gpu_mem_heap_articulation": 1154408,
+          "physx_gpu_mem_heap_broadphase": 1202477336,
+          "physx_gpu_mem_heap_narrowphase": 97671404,
+          "physx_gpu_mem_heap_other": 0,
+          "physx_gpu_mem_heap_simulation": 5282088,
+          "physx_gpu_mem_heap_simulation_articulation": 6879960,
+          "physx_gpu_mem_heap_solver": 251331692,
+          "process_peak_rss_bytes": 7494266880,
+          "process_rss_bytes": 5935083520,
+          "system_used_bytes": 14080143360,
+          "torch_allocated_bytes": 30513664,
+          "torch_peak_allocated_bytes": 41931264,
+          "torch_peak_reserved_bytes": 67108864,
+          "torch_reserved_bytes": 67108864,
+          "warp_pool_peak_bytes": 132100,
+          "warp_pool_used_bytes": 132096,
+          "accounted_gpu_peak_bytes": 1744962564
+        },
+        "components": {
+          "physx_gpu_mem_heap": 1677721600,
+          "physx_gpu_mem_heap_articulation": 1154408,
+          "physx_gpu_mem_heap_broadphase": 1202477336,
+          "physx_gpu_mem_heap_narrowphase": 97676524,
+          "physx_gpu_mem_heap_other": 0,
+          "physx_gpu_mem_heap_simulation": 5282088,
+          "physx_gpu_mem_heap_simulation_articulation": 6879960,
+          "physx_gpu_mem_heap_solver": 251332332,
+          "process_peak_rss_bytes": 7494266880,
+          "process_rss_bytes": 5935116288,
+          "system_used_bytes": 14018134016,
+          "torch_allocated_bytes": 30513664,
+          "torch_peak_allocated_bytes": 41931264,
+          "torch_peak_reserved_bytes": 67108864,
+          "torch_reserved_bytes": 67108864,
+          "warp_pool_peak_bytes": 132600,
+          "warp_pool_used_bytes": 132096,
+          "accounted_gpu_peak_bytes": 1744963064
+        }
+      },
+      "system_used_above_launch_bytes": 7467274240,
+      "contact_census": {
+        "capacity_patches": 131072,
+        "max_capacity_fraction": 0.02404022216796875,
+        "reported_patches_per_robot": {
+          "count": 50,
+          "sum": 1183.4140625,
+          "mean": 23.66828125,
+          "median": 23.55859375,
+          "min": 23.1171875,
+          "max": 24.6171875,
+          "stdev": 0.38430541747193475,
+          "coefficient_of_variation": 0.016237149348220407
+        },
+        "policy": "deterministic actor mean after the measured updates",
+        "scope": "Patches reported by the floor contact view at each control end; the census runs after all timed updates."
+      }
+    }
+  ],
+  "scaling": [
+    {
+      "from_num_envs": 1,
+      "to_num_envs": 32,
+      "training_transitions_per_second_ratio": 24.763332438693304,
+      "update_wall_seconds_ratio": 1.2922331870810422,
+      "torch_peak_reserved_bytes_per_added_robot": 135300.12903225806,
+      "accounted_gpu_peak_bytes_per_added_robot": 136332.25806451612,
+      "physx_gpu_mem_heap_per_added_robot": 0.0,
+      "system_used_above_launch_bytes_per_added_robot": -99411769.80645162
+    },
+    {
+      "from_num_envs": 32,
+      "to_num_envs": 128,
+      "training_transitions_per_second_ratio": 2.9144302239373183,
+      "update_wall_seconds_ratio": 1.3724809628813501,
+      "torch_peak_reserved_bytes_per_added_robot": 349525.3333333333,
+      "accounted_gpu_peak_bytes_per_added_robot": 1049608.0,
+      "physx_gpu_mem_heap_per_added_robot": 699050.6666666666,
+      "system_used_above_launch_bytes_per_added_robot": 9037269.333333334
+    }
+  ],
+  "memory_scope": "PyTorch allocator peaks reset before each update. The Warp pool high-water mark and process peak RSS span the process. PhysX heap groups hold live allocations; gpu_mem_heap is heap capacity. system_used_bytes is MemTotal minus MemAvailable for the whole host and includes other processes. On GB10 unified memory, process RSS omits CUDA allocations. No per-process counter isolates the CUDA context or tensor-API staging buffers.",
+  "scope": "Measured admitted replica counts only. The summary extrapolates to no other count and changes no guard. Host memory slopes use each allocation's own post-launch baseline and still include other processes. A row without component_split_verified may place PhysX GPU time in state_readback or contact_readback.",
+  "stage2_complete": false,
+  "physical_admission": false
+}

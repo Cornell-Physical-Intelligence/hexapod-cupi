@@ -1,0 +1,29 @@
+{
+  "id": "20261002T052726_bounded_action_mean",
+  "date": "2026-10-02T05:27:26+00:00",
+  "title": "Add a bounded action mean for PPO diagnostics",
+  "summary": "You can select a tanh-bounded Gaussian mean for PPO or AMP while retaining raw sampled actions and the stock PPO loss. The default retains the frozen unbounded baseline. Training records clipping and mean statistics from each collected rollout. The new configuration preserves reward version 2 and the approved physical limits.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/action_distribution.py",
+    "locomotion/ppo.py",
+    "locomotion/amp_ppo.py",
+    "locomotion/train.py",
+    "locomotion/prepare.py",
+    "locomotion/tests/test_action_distribution.py",
+    "locomotion/README.md",
+    "docs/TRAINING.md",
+    "configs/source_inventory.json",
+    "site/updates/20261002T052726_bounded_action_mean.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_action_distribution.py",
+    "locomotion/action_distribution.py",
+    "docs/TRAINING.md"
+  ],
+  "next": "Run the action-only comparison with reward version 2, then compare measured returns for walking and the failed stationary policy.",
+  "no_project_impact": true,
+  "reason": "This commit adds a learner option and CPU checks. It changes no native result, capability status or acceptance gate."
+}

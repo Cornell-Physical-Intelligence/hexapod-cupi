@@ -1,0 +1,26 @@
+{
+  "id": "20261003T040108_immediate_tracking_candidate",
+  "date": "2026-10-03T04:01:08Z",
+  "title": "Prepare an immediate tracking reward comparison",
+  "summary": "Add experimental reward version 3 with immediate velocity tracking and the version 2 penalty coefficients. Preserve the ongoing version 2 run and require its final evaluation before dispatching another training trial.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Complete the reward-v2 normalization trial and evaluate its final checkpoint before deciding whether to run the reward-v3 comparison.",
+  "changes": [
+    "locomotion/task_v3.py",
+    "locomotion/train.py",
+    "locomotion/prepare.py",
+    "locomotion/tests/test_task_v3.py",
+    "locomotion/tests/test_task_v2.py",
+    "locomotion/README.md",
+    "configs/source_inventory.json",
+    "docs/REWARD_V2_TABLE1_AUDIT.md"
+  ],
+  "evidence": [
+    "docs/REWARD_V2_TABLE1_AUDIT.md",
+    "site/assets/ppo_learning_recovery_20261002_001/reward_timing_audit.json"
+  ],
+  "no_project_impact": true,
+  "reason": "This opt-in candidate has no native result and changes no capability acceptance or physical gate."
+}

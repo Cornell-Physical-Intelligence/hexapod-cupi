@@ -10,6 +10,7 @@ from .model import ROOT, digest
 from locomotion.prepare import prepare as prepare_kernel
 from .replay_native import validate_trajectory
 from locomotion.env_config import MODEL_SHA256
+from locomotion.spark_paths import RUN_ROOTS, within_roots
 
 
 def write(path, data):
@@ -24,9 +25,8 @@ def prepare(trajectory_directory, output, remote_root, root=ROOT, *, inputs=None
         raise ValueError('Startup ramp must contain 0 or 50 controls')
     root, trajectory_directory, output = map(Path, (root, trajectory_directory, output))
     remote_root = Path(remote_root)
-    allowed = Path('/home/orionh/HEXAPOD_runs/restart_20260914')
-    if not remote_root.is_absolute() or allowed not in remote_root.parents or '..' in remote_root.parts:
-        raise ValueError('Fresh canonical restart remote root required')
+    if not within_roots(remote_root, RUN_ROOTS):
+        raise ValueError('Fresh guarded Spark run root required')
     trajectory = trajectory_directory/'trajectory.npz'
     declaration, _ = validate_trajectory(trajectory, digest(trajectory), MODEL_SHA256)
     if start_phase == .5 and round(declaration['config']['period_s']/.02) % 2:

@@ -1,0 +1,162 @@
+{
+  "schema": "hexapod_amp_offline_diagnostic_v1",
+  "scope": "Offline CPU fit against one recorded policy trace. It measures the discriminator on fixed data; it does not measure the online learner, a standing policy or any native behavior.",
+  "native_evidence": false,
+  "stage2_complete": false,
+  "command": "uv run python -m locomotion.amp_diagnostic --policy-trace locomotion/tests/fixtures/control_trace.npz --output site/assets/amp_learner_offline_20260929_001/result.json --steps 1500 --seed 0",
+  "config": {
+    "seed": 0,
+    "steps": 1500,
+    "batch": 256,
+    "learning_rate": 0.0001,
+    "gradient_penalty": 10.0,
+    "hidden": [
+      1024,
+      512
+    ],
+    "std_floor": 0.001,
+    "holdout_fraction": 0.1,
+    "evaluation_rows": 2000
+  },
+  "inputs": {
+    "demonstration_bank": {
+      "path": "locomotion/priors/datasets/amp_demonstrations_001",
+      "manifest_sha256": "7501de7a6be975159ff5c7ede32bbe75aed90095826ff2dfd6106347976ed6a1",
+      "transitions_sha256": "745211585ca567af8159540e1621ea847774236db0449f119b844d9b717febcc",
+      "transitions": 18000,
+      "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+      "reviewer": "palerdr"
+    },
+    "policy_trace": {
+      "path": "locomotion/tests/fixtures/control_trace.npz",
+      "sha256": "15d89c43a9537a0d45bac58b1f94e99d67804b45d5198e8f08d51441eeadb9ad",
+      "transitions": 1000
+    }
+  },
+  "source_files": {
+    "locomotion/amp.py": "4010cf0e42ea63ca693b0fa311a3fef7ee6bfdfa47b9eba58bf87f7f7cefec5c",
+    "locomotion/amp_discriminator.py": "a9c0c27f575bb07b5379b56e1c3fb64fec1574506702e02e66f0866c8bedf694",
+    "locomotion/amp_ppo.py": "8d1445c98b0233405717c0da8ea083e9b9c83e12cbdccc4f22d2da1713ea560e",
+    "locomotion/amp_diagnostic.py": "4fefe977563073f09a5e0b592b87b55f466e272c5b4fee62fbe4133869150f51"
+  },
+  "platform": {
+    "python": "3.12.14",
+    "torch": "2.14.0",
+    "numpy": "2.5.2",
+    "machine": "arm64",
+    "device": "cpu"
+  },
+  "feature_contract_schema": "hexapod_amp_features_v1",
+  "results": {
+    "rows": {
+      "bank_training": 16200,
+      "bank_held_out": 1800,
+      "policy_trace_training": 900,
+      "policy_trace_held_out": 100,
+      "standing_held_out": 1800
+    },
+    "bank_feature_spread": {
+      "fields": {
+        "joint_position": {
+          "unit": "rad",
+          "min_std": 0.06135917082428932,
+          "median_std": 0.07048729807138443,
+          "max_std": 0.07331627607345581
+        },
+        "joint_velocity": {
+          "unit": "rad/s",
+          "min_std": 0.20578138530254364,
+          "median_std": 0.40877029299736023,
+          "max_std": 0.4810548722743988
+        },
+        "linear_velocity": {
+          "unit": "m/s",
+          "min_std": 0.004219149239361286,
+          "median_std": 0.02484147809445858,
+          "max_std": 0.027625758200883865
+        },
+        "angular_velocity": {
+          "unit": "rad/s",
+          "min_std": 0.01896972954273224,
+          "median_std": 0.03292333707213402,
+          "max_std": 0.08091850578784943
+        },
+        "height": {
+          "unit": "m",
+          "min_std": 0.0001334609987679869,
+          "median_std": 0.0001334609987679869,
+          "max_std": 0.0001334609987679869
+        },
+        "toe_position": {
+          "unit": "m",
+          "min_std": 0.00466862553730607,
+          "median_std": 0.0076098511926829815,
+          "max_std": 0.008804498240351677
+        }
+      },
+      "min_std": 0.0001334609987679869,
+      "std_floor": 0.001,
+      "features_below_floor": 1,
+      "features": 61
+    },
+    "variants": {
+      "raw_input_penalty": {
+        "negatives": 900,
+        "first_update_loss_terms": {
+          "prior": 0.9918606281280518,
+          "policy": 0.9494472742080688,
+          "gradient_penalty": 3886.14208984375
+        },
+        "last_update_loss_terms": {
+          "prior": 0.9608298540115356,
+          "policy": 0.9606848955154419,
+          "gradient_penalty": 14.490376472473145
+        },
+        "mean_style_reward": {
+          "bank_training": 0.7597813606262207,
+          "bank_held_out": 0.759351372718811,
+          "policy_trace_held_out": 0.7403303384780884,
+          "standing_held_out": 0.7615990042686462
+        }
+      },
+      "standardized_input_penalty": {
+        "negatives": 900,
+        "first_update_loss_terms": {
+          "prior": 0.9918606281280518,
+          "policy": 0.9494472742080688,
+          "gradient_penalty": 0.09458184987306595
+        },
+        "last_update_loss_terms": {
+          "prior": 0.189114511013031,
+          "policy": 0.027611808851361275,
+          "gradient_penalty": 0.06780362874269485
+        },
+        "mean_style_reward": {
+          "bank_training": 0.9555960297584534,
+          "bank_held_out": 0.9434967637062073,
+          "policy_trace_held_out": 0.11602524667978287,
+          "standing_held_out": 0.9893383979797363
+        }
+      },
+      "standardized_input_penalty_with_standing_negatives": {
+        "negatives": 17100,
+        "first_update_loss_terms": {
+          "prior": 0.9918606281280518,
+          "policy": 1.0441702604293823,
+          "gradient_penalty": 0.09458184987306595
+        },
+        "last_update_loss_terms": {
+          "prior": 0.06908484548330307,
+          "policy": 0.09783065319061279,
+          "gradient_penalty": 0.11378830671310425
+        },
+        "mean_style_reward": {
+          "bank_training": 0.9830452799797058,
+          "bank_held_out": 0.9811732172966003,
+          "policy_trace_held_out": 0.8537548780441284,
+          "standing_held_out": 0.11232562363147736
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "20260927T025032_reward_v2_amp_contract",
+  "date": "2026-09-27T02:50:32+00:00",
+  "title": "Take the reward v2 discriminator width from the merged AMP feature contract",
+  "summary": "With the AMP demonstration pipeline merged, locomotion.amp_discriminator takes its 61-value input width from locomotion.amp.feature_contract() instead of its own constant, so the AMP feature layout has one owner. The reward v2 branch merges main and records a fresh manifest.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/amp_discriminator.py",
+    "locomotion/tests/test_amp_discriminator_width.py",
+    "configs/releases/reward_v2_merge_20260927_v1.sha256",
+    "tools/check_pipeline_lineages.py",
+    "site/updates/20260927T025032_reward_v2_amp_contract.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_amp_discriminator_width.py",
+    "configs/releases/reward_v2_merge_20260927_v1.sha256"
+  ],
+  "next": "Rebuild the paired reward v2 run packs from the merged commit, with termination rate in the protocol, for the reviewer's approval.",
+  "no_project_impact": true,
+  "reason": "The width is unchanged at 61 and the discriminator is an offline diagnostic, so no measured result, roadmap marker or gate changes."
+}

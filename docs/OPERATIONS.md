@@ -1,5 +1,8 @@
 # Spark operations
 
+Start with the [contributor workflow](../SPARK.md) for account access and
+personal worktrees. This guide owns the runtime and recovery details.
+
 You use [`locomotion.launch`](../locomotion/launch.py) for canonical allocations.
 It supervises one named module from a frozen package and cleans its exact
 container. Read [compute coordination](SPARK_COMPUTE_COORDINATION.md) first.
@@ -8,8 +11,8 @@ container. Read [compute coordination](SPARK_COMPUTE_COORDINATION.md) first.
 
 | Item | Recorded configuration |
 | --- | --- |
-| SSH | `orionh@spark-e26c`, Tailscale address `100.82.166.9` |
-| Repository mirror | `/home/orionh/HEXAPOD`; this directory has no Git metadata |
+| SSH | Use your own account at `spark-e26c.tailf4bbf2.ts.net`; the current laptop alias `spark` selects `james` |
+| CUPI workspace | `/srv/cupi/hexapod`; personal clones belong under `/home/<user>/src/hexapod` |
 | Isaac Lab | `/home/orionh/IsaacLab`, version 3.0.0, commit `ffff603eafc6b74264a5261cc0183d6a65390d78` |
 | Container | Compose service `isaac-lab-base`; use `/workspace/isaaclab/_isaac_sim/python.sh` |
 | Simulation | Isaac Sim 6.0.1-rc.7; Python 3.12.13; RSL-RL 5.0.1; wandb 0.28.2 |
@@ -19,15 +22,83 @@ Recheck versions from actual run receipts. The laptop/CI uv environment is
 separate from the Isaac image. Do not sync `.venv` or run `uv sync` in the mirror.
 Do not print, copy or commit `docker/.env.base`; Compose consumes that file.
 
+## CUPI workspace
+
+You edit your own clone and worktrees. The `cupi` group grants James, Shaurya
+and Julian access to shared evidence. Add future users to that group and give
+each user a run directory with the same access rules.
+
+| Directory under `/srv/cupi/hexapod` | Access and purpose |
+| --- | --- |
+| `inputs/` | The workspace maintainer publishes admitted bundles; CUPI reads frozen files. |
+| `evidence/` | CUPI reads retained native captures and their unchanged manifests. |
+| `runs/<user>/` | The submitting user writes attempts; CUPI reads them. |
+| `maintenance/` | CUPI reads cleanup inventories and relocation receipts. |
+
+The workspace maintainer owns `inputs`, `evidence` and `maintenance`. Each run
+parent inherits a default ACL that grants its submitting user write access to
+container-created files and CUPI read access. Preserve that ACL when you copy
+a pack. Reconnect SSH after an administrator changes group membership.
+
+Use a fresh input bundle and attempt name. Pack a committed worktree, transfer
+the frozen source, then run its launcher. You can edit the worktree after that
+copy. The launcher verifies the frozen copy before execution and cleanup.
+Keep `source`, `binding.json` and `PACK.json` with the attempt's `run` output.
+Do not launch from a shared checkout or a symlink to a run directory.
+
+Keep historical manifests unchanged when you relocate evidence. A maintenance
+receipt maps each old path to its new path and records matching file hashes.
+Prepare new bindings for new paths. The launcher accepts the legacy restart
+root for historical compatibility; new CUPI runs belong under `runs/<user>`.
+The default `configs/locomotion_spark.json` remains a legacy declaration, so
+pass the new bundle's admitted `inputs.json` through `--inputs`.
+
+### Prepared flat pilot
+
+You can inspect the prepared pilot at
+`/srv/cupi/hexapod/runs/james/flat_pilot_20260930_003/`. Its four packages are
+`ppo_mlp`, `amp_mlp`, `amp_paper` and `tripod_reference`. The preparation receipt
+records source commit `620d9aa9b23e0c9547893c513b57f77335eb4ef3` for these packages.
+The input declaration is
+`/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/admission_128/inputs.json`.
+The learner arguments retain the [frozen pilot constraints](TRAINING.md#frozen-flat-pilot-issues-50-and-51).
+
+You can read the inventory and file relocation map in
+`/srv/cupi/hexapod/maintenance/cleanup_20260930_001/`. Use `relocation.json` to
+find an old evidence path. Historical manifests keep their original paths and
+bytes. Read `preparation.json` for package hashes, `evidence_verification.json`
+for the 40-clip and standing checks, and `preflight.json` for the four package
+checks. The CPU checks start no simulator or training. Coordinate a new host
+check before dispatch.
+
+The administrator completed the inventoried cleanup. All 60 selected legacy
+paths are absent, and `hexapod-rl-training.service` is absent. The account
+checks pass for James, Shaurya and Julian; shared-service identities match
+before and after cleanup. The receipt is `cleanup_result.json` in that
+maintenance directory, with SHA-256
+`eadd4754d6914ac25d91e66bb16654ba05533c9c93745c29a389785ac915f8b5`.
+All four host preflights pass after cleanup. Training has not started.
+
+You can repeat the PPO host check without creating its output directory:
+
+```sh
+cd /srv/cupi/hexapod/runs/james/flat_pilot_20260930_003/ppo_mlp/source
+python3 -B -m locomotion.launch \
+  --bindings ../binding.json \
+  --bindings-sha256 474bb1647dbd0a05f83866511763eaa924c8b9410a84958d88f832c7aa236639 \
+  --preflight-only
+```
+
 ## Before a run
 
-The lead verifies the shared coordination file, actual processes, GPU use,
-containers, services, producer descendants and both GPU locks. Use the shared policy path and expected hash in
-[compute coordination](SPARK_COMPUTE_COORDINATION.md). Bind those bytes to a fresh source and launch identity. Never alter an admitted
-source pack or reuse an attempt's output directory.
+The launcher records other GPU processes, containers and available host
+memory, and it requires 16 GiB of available memory. It checks no host
+reservation or coordination file, so any account with access to the run tree
+and Docker can launch. Never alter an admitted source pack or reuse an
+attempt's output directory.
 
 Use `python -m locomotion.inputs pack` with a fresh local output and explicit
-remote input root under `/home/orionh/HEXAPOD_runs/restart_20260914/`.
+remote input root under `/srv/cupi/hexapod/inputs/`.
 Transfer that directory, then pass its `inputs.json` to
 [`prepare`](../locomotion/prepare.py). The pack hashes canonical assets and
 starts no compute. The default binding declares `foundation_inputs_001` under the guarded restart
@@ -37,6 +108,15 @@ invoke `python3 -B -m locomotion.launch` with the binding path and SHA-256.
 The `--preflight-only` flag checks the host without starting native simulation.
 Keep `PYTHONDONTWRITEBYTECODE=1` so imports cannot mutate the frozen tree.
 
+For the [frozen flat pilot](TRAINING.md#frozen-flat-pilot-issues-50-and-51),
+prepare training and probe evaluation with `--allocation-profile flat_pilot_v1
+--max-wall-seconds 21600`. Preparation binds that native deadline and the
+22000-second supervisor cap. The launcher checks both values and retains the
+400-second cleanup margin. Standard packs keep the 6200-second default native
+deadline and 6600-second default supervisor cap. The pilot profile changes no
+locks or cleanup targets. A timeout retains its last complete training update
+and fails the allocation unless the requested update count has completed.
+
 Training and evaluation require matching one-robot and batch standing admission.
 Use [`admission`](../locomotion/admission.py) to recompute the captures and create
 the subsequent input declaration. A launcher success does not pass a physical
@@ -45,10 +125,10 @@ gate or qualify a policy. A source manifest does not grant admission.
 ## Ownership and cleanup
 
 Hold `/opt/wx/gpu.lock` and `/tmp/hexapod-isaac-gpu.lock` from preflight through
-container cleanup. Recheck competing processes after container creation and
-throughout the run. A clean GPU snapshot does not prove that a producer cannot
-launch a new child. Yield the owned allocation if contention or binding changes
-appear, and preserve its partial output.
+container cleanup. The launcher recreates a lock file that host cleanup removed.
+It records each other GPU process it sees during the run under
+`other_gpu_processes_seen` in `jobs/standing.json` and continues. Compare timing
+results with that record, and preserve the partial output of a failed allocation.
 
 Signal a container by the immutable ID bound to this run. Check its name and ID
 before acting. Docker client exit does not prove container exit; inspect again
@@ -63,7 +143,13 @@ system services and host health available. Do not signal unidentified jobs.
 
 ## Retained reservation and recovery
 
-Reservation root:
+GeoData shares this Spark with CUPI and owns its Slurm configuration. CUPI
+workspace cleanup changes no scheduler or foreign workload. Keep recovery
+payloads in place even when their parent directory has a Hexapod name. Treat
+the records below as historical state; check the host before any recovery.
+
+The launcher no longer checks this reservation. The host state below stays in
+place until the program lead releases it. Reservation root:
 `/home/orionh/HEXAPOD_runs/restart_20260914/spark_ownership_001`.
 Keep its `ACTIVE` marker and `reservation_policy.json`, the recorded user/system
 masks, and `hexapod-exclusive-reconstruction-queue.service`. Verify its exact

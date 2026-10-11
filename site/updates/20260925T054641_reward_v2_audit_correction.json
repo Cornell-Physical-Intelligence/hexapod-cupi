@@ -1,0 +1,24 @@
+{
+  "id": "20260925T054641_reward_v2_audit_correction",
+  "date": "2026-09-25T05:46:41+00:00",
+  "title": "Correct the reward v2 Table I audit",
+  "summary": "docs/REWARD_V2_TABLE1_AUDIT.md now states the TRAINING stationary-translation criterion as under 10% of the commanded tracking component for a motionless robot, and reports version 1, the paper's fixed 0.15 scale and a command-scaled kernel against it. It declares the actuator adaptation, lists which Table I penalties the simulation supplies, and separates three tracking variants: the paper's fixed scale, a command-scaled kernel and the command-scaled kernel on stride-averaged velocity. Its CPU checks replace the earlier reference functions, which used the paper's 0.15 scale as the proposal.",
+  "areas": [
+    "locomotion",
+    "documentation"
+  ],
+  "changes": [
+    "docs/REWARD_V2_TABLE1_AUDIT.md",
+    "locomotion/tests/test_reward_v2_table1_formulas.py",
+    "configs/releases/reward_audit_20260925_v1.sha256",
+    "tools/check_pipeline_lineages.py",
+    "site/updates/20260925T054641_reward_v2_audit_correction.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_reward_v2_table1_formulas.py",
+    "configs/releases/reward_audit_20260925_v1.sha256"
+  ],
+  "next": "The named reviewer chooses the tracking variant, k, c_min and the yaw extension; then implement reward v2 in locomotion/task.py beside version 1.",
+  "no_project_impact": true,
+  "reason": "An audit and its CPU checks change no measured result, roadmap marker, gate or the training reward in locomotion/task.py."
+}

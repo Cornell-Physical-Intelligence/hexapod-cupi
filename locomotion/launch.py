@@ -15,18 +15,55 @@ from types import SimpleNamespace
 import uuid
 
 from . import reservation as guard
+from .spark_paths import INPUT_ROOTS, RUN_ROOTS, within_roots
 
 _INCOMPLETE = re.compile(r"incomplete\s+(?:contact|friction)\s+data", re.IGNORECASE)
 
-REMOTE_ROOT = Path('/home/orionh/HEXAPOD_runs/restart_20260914')
+def host_snapshot():
+    """Record other GPU work and containers; an allocation shares the GPU with them."""
+    processes, available = resources()
+    containers = guard.call(["docker", "ps", "--format", "{{.ID}} {{.Names}} {{.Image}}"])
+    return {'gpu_processes': processes.splitlines(), 'containers': containers.splitlines(),
+            'available_memory_bytes': available}
+
+
+def cleanup_host_snapshot():
+    """Host state for a cleanup record; a failed query is stored so the record still saves."""
+    try:
+        return host_snapshot()
+    except Exception as error:
+        return {'error': repr(error)}
 
 
 def preflight():
-    reservation = guard.verify_reservation()
-    compute = guard.no_live_compute()
-    processes, available = resources()
-    guard.require(not processes and available >= 16 * 1024**3, 'GPU busy or host memory below 16 GiB')
-    return {'reservation': reservation, 'compute': compute, 'available_memory_bytes': available}
+    snapshot = host_snapshot()
+    guard.require(snapshot['available_memory_bytes'] >= 16 * 1024**3, 'Host memory below 16 GiB')
+    return snapshot
+
+
+def open_lock(path):
+    """Open a lock file read-only; create it only when host cleanup removed it.
+
+    /tmp is sticky and world-writable, and fs.protected_regular refuses an
+    O_CREAT open of a file another account owns there, so an existing file
+    must open without O_CREAT.
+    """
+    try:
+        return os.open(path, os.O_RDONLY)
+    except FileNotFoundError:
+        try:
+            fd = os.open(path, os.O_RDONLY | os.O_CREAT | os.O_EXCL, 0o644)
+        except FileExistsError:
+            return os.open(path, os.O_RDONLY)
+        # The creating account's umask trims the mode at creation; every account must open the lock.
+        os.fchmod(fd, 0o644)
+        return fd
+
+
+def lock_files():
+    """Recreate a lock file that host cleanup removed, for example under /tmp."""
+    for path in guard.LOCKS:
+        os.close(open_lock(path))
 
 
 def resources():
@@ -72,18 +109,25 @@ def audit_contact_log(path):
         scope="Required absence of reported contact/friction data truncation; raw physical gate must also pass")
 
 def verify(binding, own):
+    from .train import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, validate_deadline
     guard.require(binding['schema']=='hexapod_locomotion_launch_v1','Wrong launch schema')
     guard.require(binding['root_review_complete'] is True,'Root review incomplete')
-    guard.require(binding['mode'] in ('diagnostic','replay','train','video','evaluate','tripod'),'Unsupported native mode')
-    guard.require(type(binding['max_seconds']) is int and 120<=binding['max_seconds']<=7200,'Unbounded allocation')
+    guard.require(binding['mode'] in ('diagnostic','replay','train','video','evaluate','tripod','throughput','probe'),'Unsupported native mode')
+    profile = binding.get('allocation_profile', 'standard')
+    guard.require(profile in ALLOCATION_PROFILES, 'Unknown allocation profile')
+    limit = 22000 if profile == 'flat_pilot_v1' else 7200
+    guard.require(type(binding['max_seconds']) is int and 120<=binding['max_seconds']<=limit,'Unbounded allocation')
     guard.require(binding.get('module') in ('locomotion.train', 'locomotion.priors.replay_native',
-                                          'locomotion.tripod_evaluate'), 'Unsupported native entry point')
+                                          'locomotion.tripod_evaluate', 'locomotion.throughput'), 'Unsupported native entry point')
     guard.require((binding['mode'] == 'tripod') == (binding['module'] == 'locomotion.tripod_evaluate'),
                   'Prescribed-controller mode and entry must match')
+    guard.require((binding['mode'] == 'throughput') == (binding['module'] == 'locomotion.throughput'),
+                  'Throughput mode and entry must match')
     paths={k:guard.canonical_path(binding[k]) for k in ('source','asset','prior','geometry_source','output')}
     guard.require(paths['source']==own,'Launcher must belong to its bound source')
-    for k in ('source','output','prior'):
-        guard.require(REMOTE_ROOT in paths[k].parents,'Fresh restart path required')
+    for k in ('source','output'):
+        guard.require(within_roots(paths[k], RUN_ROOTS),'Guarded Spark run path required')
+    guard.require(within_roots(paths['prior'], INPUT_ROOTS),'Guarded Spark input path required')
     for k,v in paths.items():
         if k!='output':
             guard.require(v!=paths['output'] and v not in paths['output'].parents
@@ -95,6 +139,23 @@ def verify(binding, own):
     guard.require(binding['command_args'] and all(isinstance(x,str) for x in binding['command_args']),
                   'Exact native arguments required')
     argv=binding['command_args']
+    if profile != 'standard' or 'max_wall_seconds' in binding:
+        seconds = binding.get('max_wall_seconds')
+        validate_deadline(binding['mode'], profile, seconds)
+        guard.require(binding['max_seconds'] >= seconds + CLEANUP_MARGIN_SECONDS,
+                      'The supervisor must retain the native cleanup margin')
+        options = [('--max-wall-seconds', str(seconds))]
+        if profile != 'standard':
+            guard.require(binding['module'] == 'locomotion.train', 'Pilot requires the training entry point')
+            options.append(('--allocation-profile', profile))
+        for option, want in options:
+            guard.require(argv.count(option) == 1 and not any(x.startswith(option+'=') for x in argv),
+                          'Exact single deadline argument required: '+option)
+            index = argv.index(option)
+            guard.require(index+1 < len(argv) and argv[index+1] == want, 'Native deadline differs: '+option)
+    if profile == 'standard':
+        guard.require(not any(x == '--allocation-profile' or x.startswith('--allocation-profile=') for x in argv),
+                      'Standard allocation cannot override its profile')
     guard.require(not any(x=='--output' or x.startswith('--output=') for x in argv),'Output override rejected')
     for option,want in (('--mode',binding['mode']),('--source-freeze-sha256',binding['source_freeze_sha256']),
                         ('--asset','/asset'),('--model','/asset/source/model.json'),('--device','cuda:0')):
@@ -145,8 +206,7 @@ def owned_container(name, identity=None):
 
 def run_owned(binding, paths):
     args = SimpleNamespace(source=paths["source"], output=paths["output"],
-                           isaaclab=Path("/home/orionh/IsaacLab"),
-                           coordination_sha256=guard.COORDINATION_SHA256)
+                           isaaclab=Path("/home/orionh/IsaacLab"))
     phase = "standing"
     locks, process, identity = [], None, None
     name = "hexapod-reference-physics-" + uuid.uuid4().hex
@@ -158,11 +218,8 @@ def run_owned(binding, paths):
     try:
         if (args.output / "stop.request").exists():
             raise InterruptedError("Stop requested before acquiring a new job")
-        if guard.sha(guard.COORDINATION) != args.coordination_sha256:
-            raise InterruptedError("Coordination note changed; return ownership for review")
-        report["coordination_sha256"] = args.coordination_sha256
-        for path in ("/opt/wx/gpu.lock", "/tmp/hexapod-isaac-gpu.lock"):
-            fd = os.open(path, os.O_RDONLY)
+        for path in guard.LOCKS:
+            fd = open_lock(path)
             locks.append(fd)
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
         report["preflight"] = preflight()
@@ -181,15 +238,12 @@ def run_owned(binding, paths):
                     guard.save(report_path, report)
                 if (args.output / "stop.request").exists():
                     raise InterruptedError("Stop requested")
-                if guard.sha(guard.COORDINATION) != args.coordination_sha256:
-                    raise InterruptedError("Coordination changed during standing; yielding owned job")
                 if time.monotonic() >= deadline:
                     raise TimeoutError("Native allocation exceeded its deadline")
                 if time.monotonic() >= app_ready_deadline:
                     if 'REFERENCE_SCREEN_APP_READY' not in (args.output / 'logs' / (phase+'.log')).read_text(errors='replace'):
                         report['startup_failure_kind'] = 'no_reference_AppReady_by90s'
                         raise TimeoutError('No AppReady by90s; preserve startup log and45s traceback')
-                guard.verify_policy_bytes()
                 processes, available = resources()
                 if available < 16 * 1024**3:
                     raise MemoryError("Less than 16 GiB available")
@@ -198,10 +252,11 @@ def run_owned(binding, paths):
                                          capture_output=True, timeout=20)
                     if top.returncode == 0:
                         owned_pids = {v.strip() for v in top.stdout.splitlines()[1:]}
-                        competitors = live_competitors(processes, owned_pids, identity)
-                        if competitors:
-                            report["competitors"] = competitors
-                            raise RuntimeError("Unrelated CUDA process appeared; yielding this owned job")
+                        seen = report.setdefault("other_gpu_processes_seen", [])
+                        new = [item for item in live_competitors(processes, owned_pids, identity) if item not in seen]
+                        if new:
+                            seen.extend(new)
+                            guard.save(report_path, report)
                 time.sleep(5)
         contact_audit = audit_contact_log(args.output / "logs" / (phase + ".log"))
         guard.save(args.output / "jobs" / (phase + "_contact_data_audit.json"), contact_audit)
@@ -260,11 +315,11 @@ def main():
     guard.pinned_file(cli.bindings, cli.bindings_sha256)
     binding = guard.read(cli.bindings)
     paths = verify(binding, Path(__file__).resolve().parents[1])
+    lock_files()
     if cli.cleanup_only:
         with guard.both_locks():
             receipt = guard.cleanup_owned(paths['output'])
-            receipt['reservation'] = guard.verify_reservation()
-            receipt['resources'] = guard.no_live_compute()
+            receipt['host'] = cleanup_host_snapshot()
             if paths['output'].exists():
                 guard.save(paths['output']/'cleanup.json', receipt)
         print(json.dumps(receipt, indent=2))
@@ -287,8 +342,7 @@ def main():
     finally:
         with guard.both_locks():
             cleanup = guard.cleanup_owned(paths['output'])
-            cleanup['reservation'] = guard.verify_reservation()
-            cleanup['resources'] = guard.no_live_compute()
+            cleanup['host'] = cleanup_host_snapshot()
             verify(binding, Path(__file__).resolve().parents[1])
             guard.save(paths['output']/'cleanup.json', cleanup)
 

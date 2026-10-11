@@ -1,5 +1,11 @@
 # Spark compute policy
 
+GeoData and CUPI share the Spark. GeoData owns the installed Slurm setup.
+The CUPI workspace cleanup retains the Isaac/Docker launcher and both GPU
+locks. It changes no GeoData service, Qwen workload or shared Docker storage.
+Workspace permissions do not allocate the GPU. Check live workloads before
+each allocation and use the recorded sharing policy below.
+
 The program lead authorized full HEXAPOD compute ownership on 14 September 2026, including
 stopping competing user workloads after preserving their recovery state.
 One lead owns allocation and cleanup. Read [OPERATIONS](OPERATIONS.md) for the
@@ -11,12 +17,12 @@ releases or changes the reservation. A competing workload request, completed
 job or reconnect does not grant release. Restore recorded prior states after
 an explicit release and identity checks.
 
-Before dispatch, read `/home/orionh/SPARK_COMPUTE_COORDINATION.md` and verify
-actual resources, processes, containers, producer descendants and both GPU locks.
-Its recorded SHA-256 is
+The launcher no longer pins `/home/orionh/SPARK_COMPUTE_COORDINATION.md` or
+checks this reservation. It shares the GPU with other workloads and records them
+in each job report. The file's last recorded SHA-256 was
 `c89c99ebdd16941e3f8e7f23ef3525aeb360c78361aa49aa04e766b381a4727c`.
-Bind changes into a fresh guard between allocations. Preserve old source packs
-and bindings. This repository document is a policy reference, not live telemetry.
+Preserve old source packs and bindings. This repository document is a policy
+reference, not live telemetry.
 
 The program lead approved the mass-corrected robot selected by
 [`robot/active_model.json`](../robot/active_model.json) and the standing →

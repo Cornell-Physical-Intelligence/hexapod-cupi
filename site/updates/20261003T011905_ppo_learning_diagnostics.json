@@ -1,0 +1,30 @@
+{
+  "id": "20261003T011905_ppo_learning_diagnostics",
+  "date": "2026-10-03T01:19:05+00:00",
+  "title": "Measure PPO policy drift and isolate observation normalization",
+  "summary": "We add measurements before and after stock PPO updates and an explicit option to disable running observation statistics. CPU replay establishes policy drift with fixed weights; a separate reward audit measures delayed movement credit. We retain reward v2 and define a fresh native comparison. Walking remains unqualified.",
+  "areas": [
+    "locomotion",
+    "stage2"
+  ],
+  "changes": [
+    "locomotion/ppo.py",
+    "locomotion/train.py",
+    "locomotion/prepare.py",
+    "locomotion/README.md",
+    "locomotion/tests/test_ppo_observability.py",
+    "docs/TRAINING.md",
+    "docs/REWARD_V2_TABLE1_AUDIT.md",
+    "site/assets/ppo_learning_recovery_20261002_001/*",
+    "site/project.json",
+    "site/updates/20261003T011905_ppo_learning_diagnostics.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_ppo_observability.py",
+    "site/assets/ppo_learning_recovery_20261002_001/normalization_audit.json",
+    "site/assets/ppo_learning_recovery_20261002_001/reward_timing_audit.json",
+    "docs/REWARD_V2_TABLE1_AUDIT.md"
+  ],
+  "next": "Run the fresh normalization comparison after host and input preflights pass, then evaluate all 13 probes with native force and torque records. Use that result to decide whether a separate reward revision is needed.",
+  "no_project_impact": false
+}

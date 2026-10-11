@@ -1,0 +1,1398 @@
+{
+  "schema": "hexapod_reward_v4_comparison_verification_v1",
+  "verified": true,
+  "native_started_by_analysis": false,
+  "checked_utc": "2026-10-07T18:55:52.526966+00:00",
+  "analysis_sha256": "ca75b5fb17d9525c9a2f6894d2904ad2941dfa87324af09721e4d4445890f0b5",
+  "force_metrics_sha256": "5bd228d003d4ab71dbda6acbb9fdbf357a36ec007050b156bdd71ec31c707673",
+  "methods": {
+    "scope": "One training attempt and its retained 13-probe evaluations, one deterministic trial per probe (actor mean without sampling noise). The record verifies bytes and copies the evaluator's verdicts; it adds no acceptance limit and each summary must report Stage 2 as incomplete.",
+    "hashes": "Records, traces and 400 Hz arrays come to the workspace through tar streams and the script hashes the copies. Frozen source files, input files, checkpoint weights, contacts.jsonl and videos stay on Spark, where sha256sum hashes them; a workspace file caches those digests. Each pin covers the sha256 of each checked file of one attempt.",
+    "launch": "Each attempt must hold launcher exit code 0, a completed job and state with no errors, and a cleanup record whose inspections all report the owned container absent. binding.json must match PACK.json, preparation.json and the launch copy; one source freeze hash must appear in each record.",
+    "training": "metrics.jsonl must hold one row per update in order with transitions = update * 128 * 24. Each saved update must hold a sidecar that names it, its transitions, the state's identity and its weights' sha256. The identity must record training_updates and the exploration decay length of the pack. force_metrics.json must hold available training loads over every physics step.",
+    "continuity": "Over a batch's substep files, sequence must run from 0 to the capture's step count minus 1 and equal control_index * 8 + substep_index; explicit_counter must equal the capture's initial counter + sequence + 1; each initial counter must equal the sum of the earlier batches' steps; time_s must equal (sequence + 1) * physics_dt. Every float array must be finite.",
+    "completeness": "Each probe must record its profile's full control count, the capture must hold eight physics steps per control, and the load summary must mark the requested window complete.",
+    "loads": "locomotion/force_metrics.py report_for recomputes each probe's load summary from the substep chunks after it checks each chunk's sha256 against capture.json. The recomputed cases must equal the retained force_metrics.json within a relative tolerance of 1e-9. Forces are contact-normal forces and exclude tangential friction; requested torque (before the effort ceiling) and applied torque stay separate fields."
+  },
+  "training": {
+    "attempt": "/srv/cupi/hexapod/runs/james/ppo_v4_omni_seed20260917_20261007_001",
+    "source_commit": "ca1e21379372c2d18e151206712d3359b816f283",
+    "binding_sha256": "4a8bc131726fab74cf74b3b60e237cd429abdd64066c50471b3af97b3f1980e2",
+    "source_freeze_sha256": "8c69f4c01a91e378f4b1238fba4568f2073dcbf1f33cb2634f8dcf083556ac03",
+    "arguments": [
+      "--mode",
+      "train",
+      "--asset",
+      "/asset",
+      "--model",
+      "/asset/source/model.json",
+      "--geometry",
+      "/geometry_source/geometry/geometry.json",
+      "--geometry-extrema",
+      "/geometry_source/geometry/geometry_extrema.npz",
+      "--stance",
+      "/prior/stance.json",
+      "--num-envs",
+      "128",
+      "--source-freeze-sha256",
+      "8c69f4c01a91e378f4b1238fba4568f2073dcbf1f33cb2634f8dcf083556ac03",
+      "--max-wall-seconds",
+      "21600",
+      "--headless",
+      "--device",
+      "cuda:0",
+      "--allocation-profile",
+      "flat_pilot_v1",
+      "--standing-admission",
+      "/admission/admission.json",
+      "--updates",
+      "2000",
+      "--seed",
+      "20260917",
+      "--reward-version",
+      "4",
+      "--action-mean",
+      "tanh",
+      "--observation-normalization",
+      "none",
+      "--observation-scaling",
+      "fixed",
+      "--command-segments",
+      "bootstrap",
+      "--learning-rate-max",
+      "0.0003",
+      "--action-std-final",
+      "0.05",
+      "--gait-clock",
+      "60",
+      "--action-smoothing",
+      "mean2",
+      "--velocity-noise",
+      "0.5",
+      "--episode-seconds",
+      "10.0",
+      "--reward-options",
+      "forward_draw_fraction=0"
+    ],
+    "source_files_verified": 40,
+    "input_hashes_verified": 17,
+    "input_files": {
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/geometry_source/geometry/geometry.json": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/geometry_source/geometry/geometry_extrema.npz": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/prior/stance.json": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/collision_recipe.json": "292242d6498819e5eb0ba44cc98e36fbb508724a841ea842e23c37bf669d2965",
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/geometry.usdc": "9509881e672e1cb52740f468e9f922ec6b590446739a34be7f02c92c7f527c6d",
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/geometry_manifest.json": "b672416910035a83fe9f79979c56cebf43b888e41bc04659a17fefc9bc8b85d0",
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/offline_audit.json": "68cba92eb4cb2154f4aa5635e56dfc1ed6a8ce7a8ec74b9a2faf8608a40e1b5e",
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/preparation_manifest.json": "273244a45897f78c62adb8d2dc3f732ff7400842fdf67eab3de5274cf9eb6d39",
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/robot.usda": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/source/mesh_mapping.json": "fb697959aadff4e77e6e7d1a5ca806a66a01bfb29e94cddf06b4ff0d883d0705",
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/source/model.json": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/source/source.urdf": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+      "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/amp_20260923_001/standing_one/run/standing/standing/standing_report.json": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+      "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/amp_20260923_001/standing_one/run/standing/state.json": "5773bf1d220bac30e4ab523a4851a5a04d7939087de6d2032fefdc3ff7fd6c3a",
+      "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/throughput_20260929_001/standing_batch128/run/standing/standing/standing_report.json": "4f04067c64e043de08187bb1f7821b7ac9d8da3d8409379613ccf00ffb3a4193",
+      "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/throughput_20260929_001/standing_batch128/run/standing/state.json": "f867191d2401f85efc1a058674509451450cff1bb337459dfa1b2de2ca5ae09c",
+      "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/admission_128/admission.json": "b4e3fb5811329f82c7fa2250339fcdef770784a7d673f08507d6e87c7f2e930a"
+    },
+    "launcher_exitcode": 0,
+    "container_absent": true,
+    "job": {
+      "container_id": "2102aff4e7eea0310a49a6a699813ddbed862b6e05b8c45608cde97f3b6eaf1d",
+      "container_name": "hexapod-reference-physics-fc83923faf35425c8388819639538aed",
+      "status": "completed",
+      "exit_code": 0,
+      "other_gpu_processes_seen": [
+        {
+          "process": "3289, /app/llama-server",
+          "cgroup": "0::/system.slice/docker-775b0e09edb057eb1c3e25475a4a2530d50f1567020b21bb6c399c794b8bede6.scope"
+        }
+      ]
+    },
+    "wall_seconds": 6853.526079647003,
+    "seed": 20260917,
+    "updates": 2000,
+    "reward_version": "4",
+    "reward_options": "forward_draw_fraction=0",
+    "training_updates": null,
+    "exploration": {
+      "action_std_final": 0.05
+    },
+    "transitions": 6144000,
+    "metrics_sha256": "12606ba07f5d2989f2bb765f997d015ddd86b545a046adedbec1b27355012ec2",
+    "metrics_rows": 2000,
+    "force_metrics_sha256": "594876d02d463badbf3046f1fce6726d1bbc846a368463d5e566e5f3d396a3a9",
+    "checkpoint_pairs_verified": 40,
+    "checkpoint_pairs_sha256": "732460f4012bcab17fc86a58cb4b19cd481cacfddf0912b0b1c367d86eeb171d",
+    "evaluated_checkpoints": {
+      "2000": {
+        "update": 2000,
+        "checkpoint_sha256": "3ab0f2822e90b5a465d7131d140d913671d8fe14ae65605ad0468cb6f7b3e404",
+        "sidecar_sha256": "fd1a692d2332c256a6471f7e1a7338b10c397be0e15faaef401b23d7276330a5"
+      }
+    },
+    "training_loads": {
+      "scope": "Aggregate native normal forces by body; tibia values include toe and shaft contacts. Forces exclude friction. Applied torque uses native effort readback. The locomotion window starts after 2 seconds per episode and includes failed motion. Exact per-foot classification and percentiles come from the separate evaluation capture.",
+      "full_training": {
+        "samples_across_replicas": 49152000,
+        "metrics": {
+          "total_vertical_support_n": {
+            "mean": 73.23226383359909,
+            "rms": 74.3773499380849,
+            "peak": 869.0519409179688
+          },
+          "body_normal_resultant_n:body": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lf_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lm_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lr_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rf_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rm_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rr_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lf_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lm_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lr_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rf_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rm_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rr_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lf_tibia": {
+            "mean": 10.237874734126208,
+            "rms": 14.31008895395403,
+            "peak": 452.93597412109375
+          },
+          "body_normal_resultant_n:lm_tibia": {
+            "mean": 14.125129828209149,
+            "rms": 18.774393442224202,
+            "peak": 556.9056396484375
+          },
+          "body_normal_resultant_n:lr_tibia": {
+            "mean": 11.466973952634469,
+            "rms": 15.303061858031663,
+            "peak": 618.7874755859375
+          },
+          "body_normal_resultant_n:rf_tibia": {
+            "mean": 12.744698405010428,
+            "rms": 16.575425221073818,
+            "peak": 624.7540893554688
+          },
+          "body_normal_resultant_n:rm_tibia": {
+            "mean": 13.571415276676653,
+            "rms": 18.4051299969149,
+            "peak": 822.0422973632812
+          },
+          "body_normal_resultant_n:rr_tibia": {
+            "mean": 11.086171636575774,
+            "rms": 14.980202294591246,
+            "peak": 694.7392578125
+          },
+          "applied_abs_torque_nm:lf_coxa_yaw": {
+            "mean": 0.26817179964377996,
+            "rms": 0.3560880822821587,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lf_femur_pitch": {
+            "mean": 0.4588016776090138,
+            "rms": 0.5847551517829521,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lf_tibia_pitch": {
+            "mean": 0.33732198574596806,
+            "rms": 0.49994103258296824,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_coxa_yaw": {
+            "mean": 0.3146242396507386,
+            "rms": 0.4242820828561871,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_femur_pitch": {
+            "mean": 0.5426764677559033,
+            "rms": 0.6782398832764562,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_tibia_pitch": {
+            "mean": 0.48141852986208017,
+            "rms": 0.6763128017841178,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_coxa_yaw": {
+            "mean": 0.296294119124926,
+            "rms": 0.3936809966617496,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_femur_pitch": {
+            "mean": 0.6072052376078023,
+            "rms": 0.7536268062053685,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_tibia_pitch": {
+            "mean": 0.3035714435602553,
+            "rms": 0.43976760061038295,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_coxa_yaw": {
+            "mean": 0.30050752026144145,
+            "rms": 0.39684816852422733,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_femur_pitch": {
+            "mean": 0.5869749099863215,
+            "rms": 0.719207316877473,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_tibia_pitch": {
+            "mean": 0.3686848653340419,
+            "rms": 0.5177558721039667,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_coxa_yaw": {
+            "mean": 0.2944690242246374,
+            "rms": 0.39618855375083967,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_femur_pitch": {
+            "mean": 0.5378366153356184,
+            "rms": 0.6765602864737555,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_tibia_pitch": {
+            "mean": 0.45621328964648605,
+            "rms": 0.6466550661905428,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_coxa_yaw": {
+            "mean": 0.3052234095708732,
+            "rms": 0.4096101651204132,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_femur_pitch": {
+            "mean": 0.5911427614041764,
+            "rms": 0.7443824966043423,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_tibia_pitch": {
+            "mean": 0.2812776951685934,
+            "rms": 0.4107384991455893,
+            "peak": 1.600000023841858
+          },
+          "requested_abs_torque_nm:lf_coxa_yaw": {
+            "mean": 0.26822523561287365,
+            "rms": 0.3563730382536745,
+            "peak": 4.9398274421691895
+          },
+          "requested_abs_torque_nm:lf_femur_pitch": {
+            "mean": 0.4613708184991315,
+            "rms": 0.5931164118223429,
+            "peak": 14.640048027038574
+          },
+          "requested_abs_torque_nm:lf_tibia_pitch": {
+            "mean": 0.34434022361931804,
+            "rms": 0.5329536085143566,
+            "peak": 21.581769943237305
+          },
+          "requested_abs_torque_nm:lm_coxa_yaw": {
+            "mean": 0.31498030149214107,
+            "rms": 0.4258633742786227,
+            "peak": 9.702640533447266
+          },
+          "requested_abs_torque_nm:lm_femur_pitch": {
+            "mean": 0.5504711613067,
+            "rms": 0.7006427604471885,
+            "peak": 15.705911636352539
+          },
+          "requested_abs_torque_nm:lm_tibia_pitch": {
+            "mean": 0.5024827129936038,
+            "rms": 0.742069518336751,
+            "peak": 23.953187942504883
+          },
+          "requested_abs_torque_nm:lr_coxa_yaw": {
+            "mean": 0.2965605486800579,
+            "rms": 0.39506699833289627,
+            "peak": 6.335752487182617
+          },
+          "requested_abs_torque_nm:lr_femur_pitch": {
+            "mean": 0.6176969680086735,
+            "rms": 0.7808727812508376,
+            "peak": 11.8892240524292
+          },
+          "requested_abs_torque_nm:lr_tibia_pitch": {
+            "mean": 0.3068882303591876,
+            "rms": 0.45809590537032135,
+            "peak": 22.937429428100586
+          },
+          "requested_abs_torque_nm:rf_coxa_yaw": {
+            "mean": 0.3006948722055387,
+            "rms": 0.3977749521263339,
+            "peak": 7.58643913269043
+          },
+          "requested_abs_torque_nm:rf_femur_pitch": {
+            "mean": 0.5969804570398094,
+            "rms": 0.7465891239443844,
+            "peak": 21.64239501953125
+          },
+          "requested_abs_torque_nm:rf_tibia_pitch": {
+            "mean": 0.37258370062694174,
+            "rms": 0.5361536656494493,
+            "peak": 25.428468704223633
+          },
+          "requested_abs_torque_nm:rm_coxa_yaw": {
+            "mean": 0.29475570633554515,
+            "rms": 0.3976440290359123,
+            "peak": 7.543806552886963
+          },
+          "requested_abs_torque_nm:rm_femur_pitch": {
+            "mean": 0.5442098934885716,
+            "rms": 0.6957174269207504,
+            "peak": 24.27788734436035
+          },
+          "requested_abs_torque_nm:rm_tibia_pitch": {
+            "mean": 0.47058138570391184,
+            "rms": 0.6924203866771171,
+            "peak": 20.849281311035156
+          },
+          "requested_abs_torque_nm:rr_coxa_yaw": {
+            "mean": 0.30555756166934195,
+            "rms": 0.411212191744623,
+            "peak": 6.577414512634277
+          },
+          "requested_abs_torque_nm:rr_femur_pitch": {
+            "mean": 0.6025567590405808,
+            "rms": 0.7742605984655251,
+            "peak": 17.27188491821289
+          },
+          "requested_abs_torque_nm:rr_tibia_pitch": {
+            "mean": 0.2840333354784923,
+            "rms": 0.42757808331893915,
+            "peak": 23.98151397705078
+          }
+        }
+      }
+    },
+    "inventory_sha256": "ca38dd6be326c5d8afc46bd101c8bf808f2acc5b681a7fa9b30b91361a2d11ca",
+    "inventory_files": 148
+  },
+  "evaluations": [
+    {
+      "attempt": "/srv/cupi/hexapod/runs/james/ppo_v4_omni_seed20260917_20261007_001_evaluate",
+      "source_commit": "ca1e21379372c2d18e151206712d3359b816f283",
+      "binding_sha256": "ef23d98ab06fc7885afbfb35569c10f459ca8d76a98adfa1a58c181e86b41c95",
+      "source_freeze_sha256": "8c69f4c01a91e378f4b1238fba4568f2073dcbf1f33cb2634f8dcf083556ac03",
+      "arguments": [
+        "--mode",
+        "evaluate",
+        "--asset",
+        "/asset",
+        "--model",
+        "/asset/source/model.json",
+        "--geometry",
+        "/geometry_source/geometry/geometry.json",
+        "--geometry-extrema",
+        "/geometry_source/geometry/geometry_extrema.npz",
+        "--stance",
+        "/prior/stance.json",
+        "--num-envs",
+        "1",
+        "--source-freeze-sha256",
+        "8c69f4c01a91e378f4b1238fba4568f2073dcbf1f33cb2634f8dcf083556ac03",
+        "--max-wall-seconds",
+        "21600",
+        "--headless",
+        "--device",
+        "cuda:0",
+        "--allocation-profile",
+        "flat_pilot_v1",
+        "--standing-admission",
+        "/admission/admission.json",
+        "--updates",
+        "2000",
+        "--seed",
+        "20260917",
+        "--action-mean",
+        "tanh",
+        "--observation-normalization",
+        "none",
+        "--observation-scaling",
+        "fixed",
+        "--command-segments",
+        "bootstrap",
+        "--learning-rate-max",
+        "0.0003",
+        "--action-std-final",
+        "0.05",
+        "--gait-clock",
+        "60",
+        "--action-smoothing",
+        "mean2",
+        "--velocity-noise",
+        "0.5",
+        "--eval-scope",
+        "probes",
+        "--checkpoint",
+        "/checkpoint/checkpoint_update002000.pt",
+        "--checkpoint-sha256",
+        "3ab0f2822e90b5a465d7131d140d913671d8fe14ae65605ad0468cb6f7b3e404"
+      ],
+      "source_files_verified": 40,
+      "input_hashes_verified": 19,
+      "input_files": {
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/geometry_source/geometry/geometry.json": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/geometry_source/geometry/geometry_extrema.npz": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/prior/stance.json": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/collision_recipe.json": "292242d6498819e5eb0ba44cc98e36fbb508724a841ea842e23c37bf669d2965",
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/geometry.usdc": "9509881e672e1cb52740f468e9f922ec6b590446739a34be7f02c92c7f527c6d",
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/geometry_manifest.json": "b672416910035a83fe9f79979c56cebf43b888e41bc04659a17fefc9bc8b85d0",
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/offline_audit.json": "68cba92eb4cb2154f4aa5635e56dfc1ed6a8ce7a8ec74b9a2faf8608a40e1b5e",
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/preparation_manifest.json": "273244a45897f78c62adb8d2dc3f732ff7400842fdf67eab3de5274cf9eb6d39",
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/robot.usda": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/source/mesh_mapping.json": "fb697959aadff4e77e6e7d1a5ca806a66a01bfb29e94cddf06b4ff0d883d0705",
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/source/model.json": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/asset/source/source.urdf": "9492fde54c50170e940b49ccb3037d7b413743a5b77bc1d8707a539d44349e78",
+        "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/amp_20260923_001/standing_one/run/standing/standing/standing_report.json": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+        "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/amp_20260923_001/standing_one/run/standing/state.json": "5773bf1d220bac30e4ab523a4851a5a04d7939087de6d2032fefdc3ff7fd6c3a",
+        "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/throughput_20260929_001/standing_batch128/run/standing/standing/standing_report.json": "4f04067c64e043de08187bb1f7821b7ac9d8da3d8409379613ccf00ffb3a4193",
+        "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/throughput_20260929_001/standing_batch128/run/standing/state.json": "f867191d2401f85efc1a058674509451450cff1bb337459dfa1b2de2ca5ae09c",
+        "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/admission_128/admission.json": "b4e3fb5811329f82c7fa2250339fcdef770784a7d673f08507d6e87c7f2e930a",
+        "/srv/cupi/hexapod/runs/james/ppo_v4_omni_seed20260917_20261007_001/run/standing/checkpoint_update002000.pt": "3ab0f2822e90b5a465d7131d140d913671d8fe14ae65605ad0468cb6f7b3e404",
+        "/srv/cupi/hexapod/runs/james/ppo_v4_omni_seed20260917_20261007_001/run/standing/checkpoint_update002000.json": "fd1a692d2332c256a6471f7e1a7338b10c397be0e15faaef401b23d7276330a5"
+      },
+      "launcher_exitcode": 0,
+      "container_absent": true,
+      "job": {
+        "container_id": "52d55b2650ed927b98b0de603efbc7222ab5b6c5b9a7cf9a98163d8faa7b5412",
+        "container_name": "hexapod-reference-physics-3582be1caf1d4d4daf0317036ba0cf04",
+        "status": "completed",
+        "exit_code": 0,
+        "other_gpu_processes_seen": [
+          {
+            "process": "3289, /app/llama-server",
+            "cgroup": "0::/system.slice/docker-775b0e09edb057eb1c3e25475a4a2530d50f1567020b21bb6c399c794b8bede6.scope"
+          }
+        ]
+      },
+      "wall_seconds": 1716.3244074530012,
+      "update": 2000,
+      "eval_scope": "probes",
+      "checkpoint_sha256": "3ab0f2822e90b5a465d7131d140d913671d8fe14ae65605ad0468cb6f7b3e404",
+      "summary_sha256": "6be9f20470bdcd3f8b84483283364ecac2b558d3d00fcc6dd393ac19c952d9b1",
+      "allocation_sha256": "bcaa1e514410285120bc52aa914049ab4febdef48102a454ecd7d7081f49d07b",
+      "passes": 1,
+      "failed_probe_cases": [
+        "learning:translate_0.05_0deg",
+        "learning:translate_0.05_45deg",
+        "learning:translate_0.05_90deg",
+        "learning:translate_0.05_135deg",
+        "learning:translate_0.05_180deg",
+        "learning:translate_0.05_225deg",
+        "learning:translate_0.05_270deg",
+        "learning:translate_0.05_315deg",
+        "learning:yaw_-1",
+        "learning:yaw_+1",
+        "learning:quiet_32s",
+        "learning:forward_0.05_to_stop"
+      ],
+      "batches": [
+        {
+          "batch": "batch_000",
+          "case_id": "learning:translate_0.05_0deg",
+          "pass": false,
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "report_sha256": "82da876ba05e2921044b4c8da3202bc80749a1a21b3710afafdd857ec6086663",
+          "capture_sha256": "9ebad5ce31996d762525c3b62832a166b6e6988f6b2986e749143805611eebf0",
+          "force_metrics_sha256": "898e99c6d656dd73d5eb415b7d91bd60143ffcacd80b55485229833533115470",
+          "native_steps": 8000,
+          "controls": 1000,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              0
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.600000023841858
+            ],
+            "maximum_requested_nm": [
+              2.466149091720581
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 60.21706771850586,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 2.466149091720581,
+            "applied_torque_nm": 1.600000023841858
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.24777305361395,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 9.536558996398474,
+              "lm": 12.216514125615854,
+              "lr": 13.000671617774424,
+              "rf": 16.87496309416641,
+              "rm": 12.768046882107905,
+              "rr": 8.851018337550963
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.50325,
+              "lm": 0.516125,
+              "lr": 0.65925,
+              "rf": 0.737875,
+              "rm": 0.51725,
+              "rr": 0.495
+            },
+            "requested_torque": {
+              "worst_joint": "rf_tibia_pitch",
+              "worst_joint_rms_nm": 0.7038104402442454,
+              "mean_abs_across_joints_nm": 0.3702583400347417
+            },
+            "applied_torque": {
+              "worst_joint": "rf_tibia_pitch",
+              "worst_joint_rms_nm": 0.7036290273794253,
+              "mean_abs_across_joints_nm": 0.3700795031724955
+            }
+          }
+        },
+        {
+          "batch": "batch_001",
+          "case_id": "learning:translate_0.05_45deg",
+          "pass": false,
+          "failed_bounds": [
+            "planar_error_mps",
+            "native_capture_or_original_physical_bounds"
+          ],
+          "report_sha256": "85a480bd28d4bc1f99a8663f655a811c62d59af7f1c168951beb6ef11e2ea48d",
+          "capture_sha256": "8d22afcedb7b22e334bc897c6cea0a3d2f9c2a2eec33130f2e3a4dc6e8c76e0c",
+          "force_metrics_sha256": "2ec900ead41b02e35a1badf12c1a58647ef7272b038e8d03b16f5eb1eed5c0c0",
+          "native_steps": 8000,
+          "controls": 1000,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              2
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.600000023841858
+            ],
+            "maximum_requested_nm": [
+              5.694550514221191
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 172.24834823608398,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 5.694550514221191,
+            "applied_torque_nm": 1.600000023841858
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.25236979985631,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 11.398178728260575,
+              "lm": 17.713237980472652,
+              "lr": 9.265685929279142,
+              "rf": 12.162317934839242,
+              "rm": 12.569884895098117,
+              "rr": 10.143064331906652
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.49825,
+              "lm": 0.640375,
+              "lr": 0.482375,
+              "rf": 0.58025,
+              "rm": 0.50875,
+              "rr": 0.5455
+            },
+            "requested_torque": {
+              "worst_joint": "rf_femur_pitch",
+              "worst_joint_rms_nm": 0.8487519786922064,
+              "mean_abs_across_joints_nm": 0.37180021756702364
+            },
+            "applied_torque": {
+              "worst_joint": "rf_femur_pitch",
+              "worst_joint_rms_nm": 0.8462056214428377,
+              "mean_abs_across_joints_nm": 0.3695290300852428
+            }
+          }
+        },
+        {
+          "batch": "batch_002",
+          "case_id": "learning:translate_0.05_90deg",
+          "pass": false,
+          "failed_bounds": [
+            "planar_error_mps",
+            "vertical_velocity_rms_mps",
+            "computed_demand_over_rating_fraction"
+          ],
+          "report_sha256": "e5d0e4dda21c3134b2b892ff5910c9c6e552aa9b1bb53325fc1ea7626b812181",
+          "capture_sha256": "a1ea24238c08381883abdcdca523b1b7468a152649c1b65620d194ec42fe1d58",
+          "force_metrics_sha256": "e3a2ec14905e8ec9a27eff7b52844aa101925df423521665f1da621c06eea1d4",
+          "native_steps": 8000,
+          "controls": 1000,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              0
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.600000023841858
+            ],
+            "maximum_requested_nm": [
+              4.5450286865234375
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 194.3018283843994,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 4.5450286865234375,
+            "applied_torque_nm": 1.600000023841858
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.2461097771294,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 9.414515484611515,
+              "lm": 18.759289608034774,
+              "lr": 10.892925260291532,
+              "rf": 9.462851302759097,
+              "rm": 15.620611436427666,
+              "rr": 9.095916685004884
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.458,
+              "lm": 0.596,
+              "lr": 0.51475,
+              "rf": 0.506875,
+              "rm": 0.59575,
+              "rr": 0.5
+            },
+            "requested_torque": {
+              "worst_joint": "lm_tibia_pitch",
+              "worst_joint_rms_nm": 0.9898274876055092,
+              "mean_abs_across_joints_nm": 0.36425731990305676
+            },
+            "applied_torque": {
+              "worst_joint": "lm_tibia_pitch",
+              "worst_joint_rms_nm": 0.983351499244375,
+              "mean_abs_across_joints_nm": 0.361921177939257
+            }
+          }
+        },
+        {
+          "batch": "batch_003",
+          "case_id": "learning:translate_0.05_135deg",
+          "pass": false,
+          "failed_bounds": [
+            "yaw_error_rad_s",
+            "vertical_velocity_rms_mps"
+          ],
+          "report_sha256": "0af33c610ec48b6898c28f79de49fb90ec6f52f4829ed0cd2c280033ad723a6c",
+          "capture_sha256": "43ff02a12581d6be5ba665bf7d4a19cca2613a19cb070597cf2697312d36a52f",
+          "force_metrics_sha256": "f15466fbd73f223fbe628495e93692a296153b76d42bad5f3a82e30fa72bc4ce",
+          "native_steps": 8000,
+          "controls": 1000,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              0
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.600000023841858
+            ],
+            "maximum_requested_nm": [
+              3.4811246395111084
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 66.95172882080078,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 3.4811246395111084,
+            "applied_torque_nm": 1.600000023841858
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.24289115500432,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 9.559023093820793,
+              "lm": 15.665658716299811,
+              "lr": 12.54885719989134,
+              "rf": 9.749858600220687,
+              "rm": 15.483882603266268,
+              "rr": 10.235610941505483
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.491125,
+              "lm": 0.535375,
+              "lr": 0.548125,
+              "rf": 0.526375,
+              "rm": 0.56425,
+              "rr": 0.485875
+            },
+            "requested_torque": {
+              "worst_joint": "rr_femur_pitch",
+              "worst_joint_rms_nm": 0.8741666154661283,
+              "mean_abs_across_joints_nm": 0.37018207291990257
+            },
+            "applied_torque": {
+              "worst_joint": "rr_femur_pitch",
+              "worst_joint_rms_nm": 0.8737436118318329,
+              "mean_abs_across_joints_nm": 0.36995582128875526
+            }
+          }
+        },
+        {
+          "batch": "batch_004",
+          "case_id": "learning:translate_0.05_180deg",
+          "pass": false,
+          "failed_bounds": [
+            "planar_error_mps",
+            "vertical_velocity_rms_mps"
+          ],
+          "report_sha256": "6ff629543688cb26ea3ccf38076f68620729f94b6e42bed40235aed220deb991",
+          "capture_sha256": "af48cb131dff3f05c9803c3b04eccc80e13f7b4fc1ea612767e0aa6a93bc5a3e",
+          "force_metrics_sha256": "33a529e73c3b994d3ddc729f037f734d8e4716f72a033c067068bf976e52ae02",
+          "native_steps": 8000,
+          "controls": 1000,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              0
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.600000023841858
+            ],
+            "maximum_requested_nm": [
+              3.410740375518799
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 134.46152305603027,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 3.410740375518799,
+            "applied_torque_nm": 1.600000023841858
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.2442691255386,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 9.829491067592066,
+              "lm": 13.588585454094188,
+              "lr": 12.081856974833212,
+              "rf": 10.413739540324503,
+              "rm": 15.047518029135206,
+              "rr": 12.283078059559493
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.54125,
+              "lm": 0.498625,
+              "lr": 0.54325,
+              "rf": 0.52275,
+              "rm": 0.53325,
+              "rr": 0.556875
+            },
+            "requested_torque": {
+              "worst_joint": "lr_femur_pitch",
+              "worst_joint_rms_nm": 0.9644294012875236,
+              "mean_abs_across_joints_nm": 0.39509113114214617
+            },
+            "applied_torque": {
+              "worst_joint": "lr_femur_pitch",
+              "worst_joint_rms_nm": 0.9498220709169488,
+              "mean_abs_across_joints_nm": 0.39448308477272603
+            }
+          }
+        },
+        {
+          "batch": "batch_005",
+          "case_id": "learning:translate_0.05_225deg",
+          "pass": false,
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "report_sha256": "7184065d2fd139d918c69d466097ed6c7bd138254d47924c30d6e3174a6de86c",
+          "capture_sha256": "f789c29d9975f52ec8367311dd80f482fa7ff6e573d049f9f4fc844399e9d03e",
+          "force_metrics_sha256": "f0deb0cffe846bb05e1af25e4d7e765ba8fd643376725a795dcc22e3ef5ad024",
+          "native_steps": 8000,
+          "controls": 1000,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              0
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.600000023841858
+            ],
+            "maximum_requested_nm": [
+              3.872243881225586
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 63.28385543823242,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 3.872243881225586,
+            "applied_torque_nm": 1.600000023841858
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.24517861938885,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 9.590068952107107,
+              "lm": 13.058723697790901,
+              "lr": 10.716297678942214,
+              "rf": 11.49317153878349,
+              "rm": 14.93692526403114,
+              "rr": 13.449991487734078
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.5265,
+              "lm": 0.514375,
+              "lr": 0.529125,
+              "rf": 0.5465,
+              "rm": 0.501125,
+              "rr": 0.615
+            },
+            "requested_torque": {
+              "worst_joint": "lr_femur_pitch",
+              "worst_joint_rms_nm": 0.9777532863369085,
+              "mean_abs_across_joints_nm": 0.38858139975695566
+            },
+            "applied_torque": {
+              "worst_joint": "lr_femur_pitch",
+              "worst_joint_rms_nm": 0.9766746732974259,
+              "mean_abs_across_joints_nm": 0.3882804261826352
+            }
+          }
+        },
+        {
+          "batch": "batch_006",
+          "case_id": "learning:translate_0.05_270deg",
+          "pass": false,
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "report_sha256": "6cddda022185105b86a485ac4b2c71ad4bfbdb5e7b3a069f7b1ac3e5cd2530a3",
+          "capture_sha256": "c8c6f225819c88b9a63440c5fab91385f09fb280e15fbb7026117412beda4e81",
+          "force_metrics_sha256": "c2faa93729e03be6f8b8461825933d800ca26c117091b8d3f6a411202caa6a79",
+          "native_steps": 8000,
+          "controls": 1000,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              0
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.600000023841858
+            ],
+            "maximum_requested_nm": [
+              5.016542434692383
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 106.67978286743164,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 5.016542434692383,
+            "applied_torque_nm": 1.600000023841858
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.24075709045498,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 8.541530527480418,
+              "lm": 13.545753877108218,
+              "lr": 9.873973821670562,
+              "rf": 13.807883092759742,
+              "rm": 16.454361647642887,
+              "rr": 11.017254123793233
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.453625,
+              "lm": 0.578,
+              "lr": 0.554875,
+              "rf": 0.69075,
+              "rm": 0.573625,
+              "rr": 0.5315
+            },
+            "requested_torque": {
+              "worst_joint": "rr_femur_pitch",
+              "worst_joint_rms_nm": 0.9288338994169963,
+              "mean_abs_across_joints_nm": 0.3930232546275727
+            },
+            "applied_torque": {
+              "worst_joint": "rr_femur_pitch",
+              "worst_joint_rms_nm": 0.9269341499439686,
+              "mean_abs_across_joints_nm": 0.39180092277088485
+            }
+          }
+        },
+        {
+          "batch": "batch_007",
+          "case_id": "learning:translate_0.05_315deg",
+          "pass": false,
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "report_sha256": "29f911cd3f67a1c87e151774b2e6f4e31396fa81be3a220a9f18f4ca0b5becb0",
+          "capture_sha256": "fb187a89939398002b8fca7d491a671e9a73ff9951455227fb7195dcafd043d4",
+          "force_metrics_sha256": "d5da8499920450a5ced2396d178915dd0b4b6afef8932d7f195dd91c440ded42",
+          "native_steps": 8000,
+          "controls": 1000,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              0
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.600000023841858
+            ],
+            "maximum_requested_nm": [
+              2.9322030544281006
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 68.84817504882812,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 2.9322030544281006,
+            "applied_torque_nm": 1.600000023841858
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.23844759469976,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 8.752353596044243,
+              "lm": 11.363310279699085,
+              "lr": 12.615400385333809,
+              "rf": 17.297522197025092,
+              "rm": 14.091826631498781,
+              "rr": 9.118034505098835
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.49675,
+              "lm": 0.50925,
+              "lr": 0.6425,
+              "rf": 0.827,
+              "rm": 0.5745,
+              "rr": 0.474875
+            },
+            "requested_torque": {
+              "worst_joint": "rf_tibia_pitch",
+              "worst_joint_rms_nm": 0.8430544684647565,
+              "mean_abs_across_joints_nm": 0.3855043671328785
+            },
+            "applied_torque": {
+              "worst_joint": "rf_tibia_pitch",
+              "worst_joint_rms_nm": 0.8415575222675209,
+              "mean_abs_across_joints_nm": 0.38503495193759224
+            }
+          }
+        },
+        {
+          "batch": "batch_008",
+          "case_id": "learning:yaw_-1",
+          "pass": false,
+          "failed_bounds": [
+            "yaw_error_rad_s",
+            "vertical_velocity_rms_mps"
+          ],
+          "report_sha256": "6b528e79ecd498c422831d719713d3260db26b2f038c0ff537115258a79836a6",
+          "capture_sha256": "aade8ad1a2059ae464287d4dcd7af1cded98db3521b60e69634304bc37ea8bcd",
+          "force_metrics_sha256": "43b256fcd5d664bb7796b478eba487346b26c9b9e7e3cfd8948fabd90d456d38",
+          "native_steps": 8000,
+          "controls": 1000,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              0
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.600000023841858
+            ],
+            "maximum_requested_nm": [
+              2.747763156890869
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 59.614662170410156,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 2.747763156890869,
+            "applied_torque_nm": 1.600000023841858
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.24630345298968,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 9.713630666892287,
+              "lm": 13.767061544049593,
+              "lr": 12.254834896431305,
+              "rf": 11.299479556632116,
+              "rm": 14.966021307593671,
+              "rr": 11.245275481390783
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.50825,
+              "lm": 0.512375,
+              "lr": 0.554375,
+              "rf": 0.542375,
+              "rm": 0.534875,
+              "rr": 0.511875
+            },
+            "requested_torque": {
+              "worst_joint": "lf_tibia_pitch",
+              "worst_joint_rms_nm": 0.8504729259342035,
+              "mean_abs_across_joints_nm": 0.37538303156818
+            },
+            "applied_torque": {
+              "worst_joint": "lf_tibia_pitch",
+              "worst_joint_rms_nm": 0.8496609600149803,
+              "mean_abs_across_joints_nm": 0.3751787689166769
+            }
+          }
+        },
+        {
+          "batch": "batch_009",
+          "case_id": "learning:yaw_+1",
+          "pass": false,
+          "failed_bounds": [
+            "yaw_error_rad_s",
+            "vertical_velocity_rms_mps"
+          ],
+          "report_sha256": "971be185896a3cf3eedf9c3c50ec63e246eeefe1b000e87eb0764573f1e39ed4",
+          "capture_sha256": "45f29eac69998cb528483665c10cfeed2df6802a2f2a99fc537d11f036e27f16",
+          "force_metrics_sha256": "f67ef84412a3619043018442f0af2483893f020758a11b14c6272b55bee03a54",
+          "native_steps": 8000,
+          "controls": 1000,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              0
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.600000023841858
+            ],
+            "maximum_requested_nm": [
+              2.582674264907837
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 121.62725830078125,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 2.582674264907837,
+            "applied_torque_nm": 1.600000023841858
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.24973780715105,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 9.52579395561887,
+              "lm": 14.051670159987173,
+              "lr": 10.859599199380064,
+              "rf": 12.686369311004663,
+              "rm": 14.970502104103593,
+              "rr": 11.15580307705676
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.467375,
+              "lm": 0.53675,
+              "lr": 0.53775,
+              "rf": 0.578125,
+              "rm": 0.523,
+              "rr": 0.512625
+            },
+            "requested_torque": {
+              "worst_joint": "lm_tibia_pitch",
+              "worst_joint_rms_nm": 0.9467854743715188,
+              "mean_abs_across_joints_nm": 0.35312403483298305
+            },
+            "applied_torque": {
+              "worst_joint": "lm_tibia_pitch",
+              "worst_joint_rms_nm": 0.9467751433762646,
+              "mean_abs_across_joints_nm": 0.3527550082366355
+            }
+          }
+        },
+        {
+          "batch": "batch_010",
+          "case_id": "learning:quiet_20s",
+          "pass": true,
+          "failed_bounds": [],
+          "report_sha256": "f2c1f3144358c9efe6e5e858773f4f2492164d00c41f10ef251badab5cab580d",
+          "capture_sha256": "8be43505a48e86ffa55269054995e3350f8ec7152ddc3efe6189c0adef52b371",
+          "force_metrics_sha256": "75c954c502713b0f5dbed05fd78631609a40f2f9455003c570850332abb8d498",
+          "native_steps": 8000,
+          "controls": 1000,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              0
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.4801075458526611
+            ],
+            "maximum_requested_nm": [
+              1.4801075458526611
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 57.21812057495117,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 1.4801075458526611,
+            "applied_torque_nm": 1.4801075458526611
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.24235008419122,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 7.011729053319726,
+              "lm": 14.200088414830155,
+              "lr": 14.309127802520997,
+              "rf": 17.164901685511925,
+              "rm": 8.149974727206875,
+              "rr": 12.406528400801607
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.998625,
+              "lm": 0.998625,
+              "lr": 0.99875,
+              "rf": 0.99875,
+              "rm": 0.998625,
+              "rr": 0.99875
+            },
+            "requested_torque": {
+              "worst_joint": "lr_tibia_pitch",
+              "worst_joint_rms_nm": 1.0021346729723726,
+              "mean_abs_across_joints_nm": 0.38913280116963317
+            },
+            "applied_torque": {
+              "worst_joint": "lr_tibia_pitch",
+              "worst_joint_rms_nm": 1.0021346729723726,
+              "mean_abs_across_joints_nm": 0.38913280116963317
+            }
+          }
+        },
+        {
+          "batch": "batch_011",
+          "case_id": "learning:quiet_32s",
+          "pass": false,
+          "failed_bounds": [
+            "max_joint_velocity_rms_rad_s",
+            "max_joint_position_range_rad",
+            "missing_six_toe_count_400hz"
+          ],
+          "report_sha256": "1a78952f41b6c5d974d699c4e49d372f15455fb33bc34d317d3facdebf1df598",
+          "capture_sha256": "c70699cb15b6af03da31b494e01454d7738be3a9573d9b45143ad002c945898f",
+          "force_metrics_sha256": "846c8a715e4a1f9969b91da9694da8e1bdd20de593d3f8c56eb385ef1b6e48b3",
+          "native_steps": 12800,
+          "controls": 1600,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              0
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.4801075458526611
+            ],
+            "maximum_requested_nm": [
+              1.4801075458526611
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 57.21812057495117,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 1.4801075458526611,
+            "applied_torque_nm": 1.4801075458526611
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.24231636933217,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 7.345179828141886,
+              "lm": 13.947685698185232,
+              "lr": 14.286680136836372,
+              "rf": 16.932098577229926,
+              "rm": 8.139058420423545,
+              "rr": 12.59161370851527
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.999140625,
+              "lm": 0.999140625,
+              "lr": 0.9990625,
+              "rf": 0.99921875,
+              "rm": 0.999140625,
+              "rr": 0.99921875
+            },
+            "requested_torque": {
+              "worst_joint": "lr_tibia_pitch",
+              "worst_joint_rms_nm": 0.9905299030368011,
+              "mean_abs_across_joints_nm": 0.38334865151055003
+            },
+            "applied_torque": {
+              "worst_joint": "lr_tibia_pitch",
+              "worst_joint_rms_nm": 0.9905299030368011,
+              "mean_abs_across_joints_nm": 0.38334865151055003
+            }
+          }
+        },
+        {
+          "batch": "batch_012",
+          "case_id": "learning:forward_0.05_to_stop",
+          "pass": false,
+          "failed_bounds": [
+            "max_joint_velocity_rms_rad_s",
+            "max_joint_position_range_rad",
+            "missing_six_toe_count_400hz"
+          ],
+          "report_sha256": "dda1cd9e02d210e4f55cec84e0b8dab7d36c7714434e559391e7b585187c56b8",
+          "capture_sha256": "20ddc19c2083e1babf036edd21529e90f8bb8d248c3c808de179a0c852b4b1c7",
+          "force_metrics_sha256": "e3e01a81120d9a0ab0264f7f280fd197fcf72a34c4b143bd533cbe7d1d9aca91",
+          "native_steps": 8400,
+          "controls": 1050,
+          "requested_window_complete": true,
+          "native_bounds": {
+            "joint_bound_violation_steps": [
+              0
+            ],
+            "speed_bound_violation_steps": [
+              0
+            ],
+            "maximum_applied_nm": [
+              1.600000023841858
+            ],
+            "maximum_requested_nm": [
+              2.466149091720581
+            ]
+          },
+          "native_peaks": {
+            "contact_normal_distal_n": 60.21706771850586,
+            "contact_normal_nonfoot_n": 0.0,
+            "requested_torque_nm": 2.466149091720581,
+            "applied_torque_nm": 1.600000023841858
+          },
+          "recomputed_load_relative_difference": 0.0,
+          "loads_full_trial": {
+            "total_vertical_support_n_mean": 73.24233150199942,
+            "contact_normal_force_per_foot_mean_n": {
+              "lf": 6.293015095400557,
+              "lm": 12.431798091363161,
+              "lr": 15.879697011827965,
+              "rf": 20.324655592689975,
+              "rm": 10.822521743872361,
+              "rr": 7.490643966845471
+            },
+            "contact_fraction_per_foot": {
+              "lf": 0.8003571428571429,
+              "lm": 0.8129761904761905,
+              "lr": 0.8655952380952381,
+              "rf": 0.8977380952380952,
+              "rm": 0.8104761904761905,
+              "rr": 0.804404761904762
+            },
+            "requested_torque": {
+              "worst_joint": "rf_femur_pitch",
+              "worst_joint_rms_nm": 0.7738143000830927,
+              "mean_abs_across_joints_nm": 0.34013878321582747
+            },
+            "applied_torque": {
+              "worst_joint": "rf_femur_pitch",
+              "worst_joint_rms_nm": 0.7710328706452647,
+              "mean_abs_across_joints_nm": 0.33997318870631543
+            }
+          }
+        }
+      ],
+      "unique_files_hash_verified": 230,
+      "largest_recomputed_load_relative_difference": 0.0,
+      "native_force_arrays_finite_and_sequential": true,
+      "requested_windows_complete": true,
+      "inventory_sha256": "5a72ac18bbd0ccc712f0f3e3f6a12a475b7754af44a95f656512ea3b9f4a4798",
+      "inventory_files": 300
+    }
+  ],
+  "stage2_complete": false,
+  "unique_files_hash_verified": 230,
+  "largest_recomputed_load_relative_difference": 0.0
+}

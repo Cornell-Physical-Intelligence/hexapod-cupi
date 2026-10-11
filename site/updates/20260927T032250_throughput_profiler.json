@@ -1,0 +1,30 @@
+{
+  "id": "20260927T032250_throughput_profiler",
+  "date": "2026-09-27T03:22:50+00:00",
+  "title": "Add a stock-PPO throughput profiler for Step 2",
+  "summary": "locomotion.throughput profiles training at one admitted replica count per allocation: one, 32 or 128 robots under the training settings and stock RSL-RL PPO. After warmup it alternates boundary-timed updates, which give transitions per second, with component updates whose exclusive times partition each update. It records allocator, Warp pool, PhysX heap and host memory, runs a contact census after timing, and binds each result to its frozen source, model, inputs and admission. A CPU summarize command compares allocations. Prepare and launch accept the new throughput mode; the replica and update guards, model, limiter and colliders stay unchanged. Native measurements remain pending, and AMP learner costs remain unmeasured.",
+  "areas": [
+    "locomotion",
+    "site"
+  ],
+  "next": "With program-lead approval and matching one-robot and batch admission, profile one, 32 and 128 robots on Spark and publish the summary under #35.",
+  "changes": [
+    "configs/releases/throughput_profile_20260927_v1.sha256",
+    "configs/source_inventory.json",
+    "docs/TRAINING.md",
+    "locomotion/README.md",
+    "locomotion/launch.py",
+    "locomotion/prepare.py",
+    "locomotion/tests/test_throughput.py",
+    "locomotion/throughput.py",
+    "site/updates/20260927T032250_throughput_profiler.json",
+    "tools/check_pipeline_lineages.py"
+  ],
+  "evidence": [
+    "locomotion/throughput.py",
+    "locomotion/tests/test_throughput.py",
+    "configs/releases/throughput_profile_20260927_v1.sha256"
+  ],
+  "no_project_impact": true,
+  "reason": "The profiler adds CPU-tested tooling with no native measurement; no roadmap marker, recorded fact or gate changes."
+}

@@ -179,6 +179,30 @@ class PipelineLineageTests(unittest.TestCase):
                 records.assert_not_called()
                 self.assertFalse(output.exists())
 
+    def test_current_reports_the_tree_digest_that_generation_writes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root/"locomotion").mkdir()
+            (root/"locomotion/env.py").write_text("# Merge-time manifest fixture\n")
+            self.current_fixture(root)
+            output = root/"generated.sha256"
+            with patch.object(lineage, 'CURRENT_FILES', ('robot/active_model.json',)), \
+                 patch.object(lineage, "verify_historical", return_value={"pass": True}):
+                tree = lineage.verify_current(root)
+                generated = lineage.generate_current(root, output)
+                self.assertIsNone(tree["manifest"])
+                self.assertEqual(tree["tree_manifest_sha256"], generated["sha256"])
+                self.assertEqual(tree["files_verified"], generated["files"])
+                self.assertEqual(lineage.verify_current(root, output)["files_verified"], generated["files"])
+                (root/"locomotion/env.py").write_text("# Changed after generation\n")
+                self.assertNotEqual(lineage.verify_current(root)["tree_manifest_sha256"], generated["sha256"])
+                with self.assertRaisesRegex(ValueError, "hashes differ"):
+                    lineage.verify_current(root, output)
+
+    def test_generation_needs_an_explicit_destination(self):
+        with patch("sys.stderr"), self.assertRaises(SystemExit):
+            lineage.main(["generate"])
+
 
 if __name__ == "__main__":
     unittest.main()

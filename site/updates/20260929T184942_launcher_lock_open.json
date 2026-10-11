@@ -1,0 +1,24 @@
+{
+  "id": "20260929T184942_launcher_lock_open",
+  "date": "2026-09-29T18:49:42+00:00",
+  "title": "Open an existing lock file without O_CREAT",
+  "summary": "Review of the launcher without the reservation guard found that both lock opens used O_CREAT. fs.protected_regular refuses an O_CREAT open of a file another account owns under sticky /tmp, so a launch by any account other than the lock owner failed before preflight. The launcher now opens an existing lock read-only and creates one with O_EXCL only when host cleanup removed it. A test simulates the refusal. AGENTS.md keeps the retained host reservation state until the program lead releases it.",
+  "areas": [
+    "locomotion",
+    "operations",
+    "site"
+  ],
+  "next": "Merge the launcher change and launch the Step 2 captures as james.",
+  "changes": [
+    "AGENTS.md",
+    "locomotion/launch.py",
+    "locomotion/tests/test_launch.py",
+    "site/updates/20260929T184942_launcher_lock_open.json"
+  ],
+  "evidence": [
+    "locomotion/launch.py",
+    "locomotion/tests/test_launch.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The change alters how the launcher opens a lock file; no roadmap marker, recorded fact, gate or published result changes."
+}

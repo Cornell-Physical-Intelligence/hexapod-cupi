@@ -1,0 +1,35 @@
+{
+  "id": "20260929T155514_amp_learner_review",
+  "date": "2026-09-29T15:55:14+00:00",
+  "title": "Address the AMP learner review and retain the offline discriminator evidence",
+  "summary": "The program lead's review of the AMP learner found that every AMP checkpoint would fail evaluation: the learner configuration held a tuple that its JSON record stores as a list. The configuration is now JSON-shaped, and the evaluate checks are functions with tests for matching, mismatched and pre-learner records. The discriminator initializes on a forked generator, so parity with stock PPO holds from one seed. A partial load restores only what the caller names. The learner tests use bank-scale states. The reward pull request's discriminator and its test are restored unchanged; the learner owns its standardized-input gradient penalty. A retained offline report replaces the unbound numbers in update 20260925T204923_amp_learner: on the admitted bank the raw-input penalty starts at 3886 and leaves every style reward near 0.76, while the standardized penalty scores held-out bank transitions 0.94 and the recorded policy trace 0.12. The earlier statement that the task reward must penalize standing is withdrawn: a discriminator that never saw standing transitions scores them 0.99, and one trained with them as negatives scores them 0.11. Neither measures the online learner.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/amp_ppo.py",
+    "locomotion/amp_diagnostic.py",
+    "locomotion/train.py",
+    "locomotion/README.md",
+    "locomotion/tests/test_amp_ppo.py",
+    "locomotion/tests/test_amp_diagnostic.py",
+    "locomotion/amp.py",
+    "locomotion/amp_discriminator.py",
+    "locomotion/tests/test_amp.py",
+    "locomotion/tests/test_amp_discriminator.py",
+    "configs/source_inventory.json",
+    "configs/releases/amp_learner_review_20260929_v1.sha256",
+    "tools/check_pipeline_lineages.py",
+    "site/assets/amp_learner_offline_20260929_001/result.json",
+    "site/updates/20260929T155514_amp_learner_review.json"
+  ],
+  "evidence": [
+    "site/assets/amp_learner_offline_20260929_001/result.json",
+    "locomotion/tests/test_amp_ppo.py",
+    "locomotion/tests/test_amp_diagnostic.py",
+    "configs/releases/amp_learner_review_20260929_v1.sha256"
+  ],
+  "next": "Ask the reward pull request's author whether amp_discriminator should adopt the standardized-input penalty. Measure a standing policy against the online discriminator in the first native pilot before deciding how the task reward treats standing.",
+  "no_project_impact": true,
+  "reason": "CPU corrections, tests and an offline diagnostic; no native run, checkpoint, roadmap marker or acceptance gate changes."
+}

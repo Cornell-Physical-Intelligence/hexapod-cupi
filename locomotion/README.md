@@ -8,18 +8,87 @@ loop without reading old experiment launchers or a second environment port.
 | --- | --- |
 | [`../robot/active_model.json`](../robot/active_model.json), [`env_config.py`](env_config.py) | Select the URDF, masses, joint order, motor coefficients and fixed timing. |
 | [`env.py`](env.py) | Load the native robot, form observations, limit joint targets, apply motor torque and advance eight physics steps. The actor receives 231 values and returns 18 offsets. |
-| [`task.py`](task.py) | Sample held velocity commands, compute the training reward, detect failed episodes and reset selected robots. This file owns the reward. |
+| [`task.py`](task.py) | Sample held velocity commands, compute the training reward, detect failed episodes and reset selected robots. This file owns reward version 1, the default. |
+| [`task_v2.py`](task_v2.py) | Reward version 2: Table I task and penalty terms with command-scaled tracking, on version 1's commands and resets. `train.py --reward-version 2` selects it. |
+| [`task_v4.py`](task_v4.py) | Reward version 4: windowed tracking, a tripod contact schedule, noise-sized Table I penalties and an action-limit term, on version 1's resets, with forward and zero command draws alone. `DEPARTURES` lists each change from the paper. |
 | [`ppo.py`](ppo.py), [`train.py`](train.py) | Adapt the task to stock PPO, record updates and loads, save checkpoints and load them for evaluation. |
+| [`rate_schedule.py`](rate_schedule.py), [`action_distribution.py`](action_distribution.py) | Cap the stock adaptive learning rate and bound the Gaussian action mean. |
+| [`noise_probe.py`](noise_probe.py) | Hold fixed action means under graded exploration noise with no optimizer, so a workstation can score any reward version on the same native rollout. |
+| [`amp.py`](amp.py), [`amp_discriminator.py`](amp_discriminator.py), [`amp_ppo.py`](amp_ppo.py), [`paper_networks.py`](paper_networks.py) | Share the 61-value AMP feature contract, score transitions with the discriminator, add the style reward inside PPO and supply the Table III networks. See [AMP learner](#amp-learner-and-paper-networks). |
 | [`evaluate.py`](evaluate.py), [`evaluation.py`](evaluation.py) | Record actual policy rollouts and apply the existing walking, stopping, contact and motor gates. Missing cases remain missing. |
 | [`force_metrics.py`](force_metrics.py), [`camera.py`](camera.py) | Report contact-normal force and motor torque, and record an Isaac camera video from the policy rollout. |
 | [`admission.py`](admission.py) | Recompute one-robot and batch standing captures and require matching model, source and geometry before training. |
 | [`prepare.py`](prepare.py), [`launch.py`](launch.py), [`reservation.py`](reservation.py) | Freeze named package files and explicit inputs, hold the existing Spark locks, supervise one container and verify its cleanup. |
+| [`surrogate/`](surrogate/README.md) | Run this task, reward, PPO adapter and gate code on CPU MuJoCo physics for design work. Native runs are the only acceptance evidence, and no native pack copies the subpackage. |
 
 The controller retains 400 Hz physics, 50 Hz policy actions, a 0.35 rad action
 scale, the 0.040 rad target-change limit per control and the provisional 1.6 N·m
-motor cap. [`task.py`](task.py) owns reward coefficients and command sampling;
+motor cap. [`task.py`](task.py) owns command sampling and reward version 1;
+[`task_v2.py`](task_v2.py) owns reward version 2, selected with `--reward-version 2`;
 [`evaluation.py`](evaluation.py) owns the numerical gates. Read
 [TRAINING](../docs/TRAINING.md) for the proposed paper-method extensions.
+
+You can select `prepare --action-mean tanh` to keep each Gaussian mean within
+the action range. Training, deterministic evaluation and policy export use
+the same mean transform. PPO stores the raw Gaussian sample and computes its
+Gaussian likelihood; the environment retains its action clipping and motor
+limits. Samples can exceed the action range. This option does not bound the
+sample or change the PPO loss. The default `unbounded` retains the frozen
+baseline. Match this option when you prepare evaluation for a checkpoint.
+
+You can select `prepare --observation-normalization none` for a separate PPO
+diagnostic. This option disables running observation statistics in the actor
+and critic. The default `empirical` retains the baseline. Match the option in
+training and evaluation; the checkpoint configuration rejects a mismatch.
+
+You can select `prepare --reward-version 3` for the experimental immediate
+tracking comparison. Version 3 uses each control's endpoint velocity for
+translation and yaw tracking and keeps version 2's penalty coefficients.
+Version 2 retains its 60-control stride average. Use a fresh attempt and record
+the chosen version; evaluation reads the version from the checkpoint. Native
+walking evidence for version 3 remains pending. Read the
+[reward audit](../docs/REWARD_V2_TABLE1_AUDIT.md#13-experimental-immediate-tracking-reward-version-3)
+before dispatch.
+You can select `prepare --reward-version 4` with the learner options below.
+Each option keeps its baseline default and enters the pack and the checkpoint
+record. Each one except `--episode-seconds`, `--reward-options` and `--extended-updates` also enters the
+evaluation command, and evaluation rejects a mismatch. Read
+[reward audit section 15](../docs/REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)
+for the motivation and evidence limits of each option.
+
+| Option | Effect |
+| --- | --- |
+| `--observation-scaling fixed` | Multiply each observation by a declared constant. Without running normalization the 0.05 m/s command enters at its raw scale, and the retained actor and critic did not respond to it. |
+| `--command-segments bootstrap` | Cut the return at a command change and bootstrap the post-action state under the held command before any reset. |
+| `--learning-rate-max 0.0003` | Cap the stock adaptive schedule, which reached 0.01 once the tanh means saturated. |
+| `--action-std 0.15 --action-std-final 0.05` | Hold the action deviation on a linear schedule. PPO no longer learns it. |
+| `--action-std-decay-updates 2000` | Reach the final deviation after this many updates and hold it for the rest of the run. Without it the decay spans the run. The value enters `ppo_config` under `exploration`. |
+| `--extended-updates` | Accept up to 5000 training updates. Without it, `prepare` and the training entry reject more than 2000. Training alone accepts it, and the checkpoint identity records `training_updates`. |
+| `--gait-clock 60` | Append the sine and cosine of the episode phase to both observations; both are zero under a zero command. Reward version 4 requires the period of its contact schedule. |
+| `--action-smoothing mean2` | Send the mean of each action and the previous one to the environment, in training and in evaluation. That mean has no gain at half the control rate, where a rest oscillation sat. |
+| `--velocity-noise 0.5` | Add Gaussian noise in rad/s to the actor's joint-velocity inputs in training. The critic and evaluation read measured values. Retained runs combine this option with smoothing and reward changes; they do not isolate its effect. |
+| `--reward-options forward_draw_fraction=0` | Override reward v4 coefficients as `key=value` pairs. `forward_draw_fraction=0` restores version 1's 20-command bank; the default draws forward and zero commands alone. Training alone accepts it, and the container preflight rejects an unknown key. |
+| `--episode-seconds 10` | Shorten training episodes. A forward walker covers 1.0 m in a 20 s episode, toward a neighbour's reset origin 2.0 m away, and the proximity guard then stops the run. Training alone accepts it. |
+| `--video-case <probe id>` | Choose the probe that the evaluation camera records. |
+
+`prepare --mode probe` runs [`noise_probe.py`](noise_probe.py) through the
+training entry with 128 robots and no learner.
+On a Python exception or interruption, the probe saves completed controls and
+the failure in `summary.json` before it propagates the error. It retains
+nonfinite samples in the raw archive and omits summary statistics for them.
+The record excludes any control for which the environment step did not return
+complete telemetry. A process kill can bypass this final write.
+
+Reward versions 2–4 share `task_v2.RewardTask.step` for command resampling and
+guard checks. Each version implements `_reward` for its formula and private
+history. Reward version 1 retains its frozen source.
+
+PPO training records `policy_update` in each metrics row: Gaussian divergence,
+action likelihood ratios and learning rate before and after the stock update.
+The measurements use the same collected rollout and draw no new actions.
+The pre-update values expose policy changes during collection, including
+normalization drift. The post-update values measure the net change from the
+stored behavior policy; they are not the optimizer's minibatch KL averages.
 
 ## Run and verify
 
@@ -31,10 +100,13 @@ uv run python -m unittest discover -s locomotion/tests
 uv run python -m locomotion.prepare --help
 uv run python -m locomotion.admission --help
 uv run python -m locomotion.train --help
+uv run python -m locomotion.throughput --help
 ```
 
 Use `prepare` to create a fresh allocation. Diagnostic mode supports one, 32 or
-128 robots. Training uses the existing 128-robot configuration. Evaluation uses
+128 robots. Training uses the existing 128-robot configuration. Throughput mode
+profiles stock PPO at one, 32 or 128 robots; [TRAINING](../docs/TRAINING.md#step-2-throughput-profile)
+gives its commands and report. Evaluation uses
 one robot, with `--eval-scope focus` for the forward/quiet/stop subset, `probes`
 for all 13 learning probes, or `full` for the 96 required Stage 2 cases.
 
@@ -46,6 +118,11 @@ produce the input declaration for a subsequent pack. Existing admissions cannot
 admit changed physics source. Checkpoint loads require matching model, physics,
 configuration and implementation; use the original frozen entry for historical
 checkpoints that carry a different identity.
+
+Use `/srv/cupi/hexapod/inputs/` for new CUPI input bundles and
+`/srv/cupi/hexapod/runs/<user>/` for attempts. Preparation also accepts the
+historical restart root. Keep the shared Isaac runtime at its recorded path;
+workspace cleanup changes no physics or container runtime.
 
 Each evaluation saves `control_trace.npz`, 400 Hz capture chunks, `report.json`
 and `force_metrics.json`. A selected video also saves `rollout.mp4`. The reports
@@ -68,6 +145,47 @@ native replay with a reviewed dataset exporter. `amp.py` preserves the shared
 canonical inputs with `python -m locomotion.inputs pack --help`. Use the
 [archive guide](../docs/PIPELINE_LINEAGES.md) for historical checkpoints and
 source packs; preserve their original identities.
+
+## AMP learner and paper networks
+
+You select the online motion prior with `prepare --mode train --learner amp`
+and the Table III networks with `--networks paper` ([TRAINING Steps 5–6](../docs/TRAINING.md#proposed-reproduction-sequence)).
+[`amp_ppo.py`](amp_ppo.py) subclasses stock RSL-RL PPO. Each control pairs the
+AMP state before the action with the state after it, before any reset, scores
+the pair with the discriminator and adds the Eq. (2) style reward to the task
+reward with weight 1. Each PPO update first trains the discriminator with the
+Eq. (1) least-squares loss and a gradient penalty on the standardized
+transition the network consumes, against uniform samples
+from the [admitted demonstration bank](priors/datasets/amp_demonstrations_001/manifest.json),
+then runs the unchanged PPO update, then fits the velocity estimator by
+supervised regression on the stored rollout. The discriminator initializes on a
+forked generator, so `test_amp_ppo` checks exact action and parameter parity
+with stock PPO from one seed when the style weight and discriminator updates
+are zero. [`amp_discriminator.py`](amp_discriminator.py) keeps its raw-input
+penalty for the offline scorer; the learner's loss lives in `amp_ppo.py`.
+
+[`paper_networks.py`](paper_networks.py) implements the estimator [64, 32],
+memory encoder [512, 256, 128], low-level actor [256, 128, 64], privileged
+encoder [64, 32] and critic [512, 256, 128] over the existing 231-value
+observation. The critic reads a 42-value privileged state: body velocity,
+height, declared friction, six toe forces, zero perturbation slots and 13
+non-tibia collision indicators. Friction and perturbations become measured
+values with Step 7; the terrain latent belongs to Step 8. Privileged inputs and
+the velocity label never enter the actor's observation groups.
+
+Checkpoints add the discriminator, its optimizer and the bank identity, and a
+load with another bank fails. Evaluation compares learner, networks, bank and
+configuration with the checkpoint's JSON record; a record without learner
+fields means stock PPO. `amp_learner.json` in each run records the
+configuration and every declared decision. No native AMP run exists; the pilot
+needs reward version 2, matching standing admission and the program lead's
+approval. `DECISIONS` in each module lists the choices the paper leaves open.
+
+[`amp_diagnostic.py`](amp_diagnostic.py) fits the discriminator offline to the
+bank against a recorded policy trace under both penalty forms and scores
+held-out transitions. Its [report](../site/assets/amp_learner_offline_20260929_001/result.json)
+binds each number to the bank, the trace and the source hashes. It measures
+fixed data; it does not measure the online learner or a standing policy.
 
 ## Prescribed tripod controller
 

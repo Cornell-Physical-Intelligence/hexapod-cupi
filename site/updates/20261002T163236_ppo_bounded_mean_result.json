@@ -1,0 +1,27 @@
+{
+  "id": "20261002T163236_ppo_bounded_mean_result",
+  "date": "2026-10-02T16:32:36+00:00",
+  "title": "Record the bounded-mean PPO failure to walk",
+  "summary": "The run completes 2000 updates. Its final policy stays within deterministic action bounds and passes quiet screens, but fails all ten movement probes. We preserve complete captures, force records and a forward video. Reward v2 remains unchanged; the fixed-trajectory audit does not establish learnability.",
+  "areas": [
+    "locomotion",
+    "stage2"
+  ],
+  "changes": [
+    "docs/REWARD_V2_TABLE1_AUDIT.md",
+    "docs/TRAINING.md",
+    "site/project.json",
+    "site/assets/ppo_action_audit_20261002_001/*",
+    "site/assets/media/ppo_bounded_mean_2000_20261002*",
+    "site/updates/20261002T163236_ppo_bounded_mean_result.json"
+  ],
+  "evidence": [
+    "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json",
+    "site/assets/ppo_action_audit_20261002_001/training_comparison.json",
+    "site/assets/ppo_action_audit_20261002_001/evaluation_completion_verification.json",
+    "site/assets/ppo_action_audit_20261002_001/training_completion_verification.json",
+    "docs/REWARD_V2_TABLE1_AUDIT.md"
+  ],
+  "next": "Review the failed movement result and reward audit before defining another learner or reward comparison. Human walking labels and the AMP comparison remain pending.",
+  "no_project_impact": false
+}

@@ -280,6 +280,167 @@
       "caption": "Ten-second frame from the 20-command native simulation mosaic on the approved detailed model.",
       "controller": "Optimized motor-target trajectories replayed in Isaac Sim; no learned policy; source 3dcefc3fe6c69b696c860b27439fbd863410053e",
       "evidence": "site/assets/amp_motion_mosaic_20260924_001/presentation.json"
+    },
+    {
+      "id": "ppo_bounded_mean_2000_20261002",
+      "title": "Bounded-mean PPO: failed forward test",
+      "type": "video",
+      "role": "controlled_ppo_comparison",
+      "path": "site/assets/media/ppo_bounded_mean_2000_20261002.mp4",
+      "sha256": "acbea99e431d278e0ae1302f2a067b51a3b654e555b7a4c87fd19b2df78d8352",
+      "caption": "Approved detailed model after 2000 PPO updates. Mean forward speed 0.00000612 m/s against 0.05 m/s. The policy holds a stance and fails tracking. One seed; real-time playback.",
+      "controller": "8e0ff06ece3ed348129afba633dab1ab35dbd4002a1c68189c6b8538334451c3",
+      "evidence": "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json",
+      "poster_id": "ppo_bounded_mean_2000_20261002_poster"
+    },
+    {
+      "id": "ppo_bounded_mean_2000_20261002_poster",
+      "title": "Bounded-mean PPO: forward test preview",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/media/ppo_bounded_mean_2000_20261002_poster.png",
+      "sha256": "b2cdd2be529b1fed530b9908d775d9f4c1ae58d6606cddb257ea81f218f7764d",
+      "caption": "Frame 375 at 15 seconds from the failed forward test on the approved detailed model.",
+      "controller": "8e0ff06ece3ed348129afba633dab1ab35dbd4002a1c68189c6b8538334451c3",
+      "evidence": "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json"
+    },
+    {
+      "id": "ppo_no_norm_2000_20261003",
+      "title": "PPO without running normalization: failed forward test",
+      "type": "video",
+      "role": "controlled_ppo_comparison",
+      "path": "site/assets/media/ppo_no_norm_2000_20261003.mp4",
+      "sha256": "0cd888ff49b329b2878cd59559d0fb8c379bdd40433cb8d33af33265a6e32e16",
+      "caption": "Approved detailed model after 2000 PPO updates without running normalization. Mean forward speed 0.00002469 m/s against 0.05 m/s. All 13 probes fail. One seed; real-time playback.",
+      "controller": "d255216e14d7e29a9f62055da0615ac0381b8c995e85a3ded43519f3f3968180",
+      "evidence": "site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.json",
+      "poster_id": "ppo_no_norm_2000_20261003_poster"
+    },
+    {
+      "id": "ppo_no_norm_2000_20261003_poster",
+      "title": "PPO without running normalization: first native frame",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/media/ppo_no_norm_2000_20261003_poster.png",
+      "sha256": "12e11d3b85c7ef35751a48ae56b600e4f38689c3c44e9eccfc46057312db2057",
+      "caption": "First native frame from the failed forward evaluation on the approved detailed model.",
+      "controller": "d255216e14d7e29a9f62055da0615ac0381b8c995e85a3ded43519f3f3968180",
+      "evidence": "site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.json"
+    },
+    {
+      "id": "ppo_reward_v3_2000_20261003",
+      "title": "PPO with immediate tracking: failed forward test",
+      "type": "video",
+      "role": "controlled_ppo_comparison",
+      "path": "site/assets/media/ppo_reward_v3_2000_20261003.mp4",
+      "sha256": "fe86ca0bc7571d2189bba718de6bed823016463a29d972a5be3bcd1ec89e0b28",
+      "caption": "Approved detailed model; reward v3 at update 2000. The policy fails all 13 probes and has near-zero forward speed. One seed; real-time playback.",
+      "controller": "d5413589c31da01cdca7ae3b9499ed80ae4660a4ff2a13f7b75b0c928190a25e",
+      "evidence": "site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation.json",
+      "poster_id": "ppo_reward_v3_2000_20261003_poster"
+    },
+    {
+      "id": "ppo_reward_v3_2000_20261003_poster",
+      "title": "PPO with immediate tracking: first native frame",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/media/ppo_reward_v3_2000_20261003_poster.png",
+      "sha256": "5a9a010cc0e7aa5fd8dc23a2d97d61449bc0faa035c282c0d01e7ca54c9b78ba",
+      "caption": "First native frame from the failed reward-v3 forward evaluation on the approved detailed model.",
+      "controller": "d5413589c31da01cdca7ae3b9499ed80ae4660a4ff2a13f7b75b0c928190a25e",
+      "evidence": "site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation.json"
+    },
+    {
+      "id": "ppo_v4_settle_seed20260917_forward_20261006",
+      "title": "Reward v4 PPO, seed 20260917: passed forward probe",
+      "type": "video",
+      "role": "controlled_ppo_comparison",
+      "path": "site/assets/media/ppo_v4_settle_seed20260917_forward_20261006.mp4",
+      "sha256": "d69efb7d0cbeeb4d9e3bdc521ad4805b8c918c2b07201e7aa91ad47cd5b76718",
+      "caption": "Approved detailed model in native Isaac simulation. Vanilla PPO with reward v4, seed 20260917, update 2000. The policy passes the forward probe at 0.05 m/s. This seed passes both quiet probes. Evaluation runs the actor mean with noise off. One trial.",
+      "controller": "695b1839a17976f34d40ebcf9057c47b0eaa1015d1d0d84a2ea96c8b8a781217",
+      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260917_evaluation_verification.json",
+      "poster_id": "ppo_v4_settle_seed20260917_forward_20261006_poster"
+    },
+    {
+      "id": "ppo_v4_settle_seed20260917_forward_20261006_poster",
+      "title": "Reward v4 PPO, seed 20260917: first frame of the forward probe",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/media/ppo_v4_settle_seed20260917_forward_20261006_poster.png",
+      "sha256": "dba6c2c981c35599257e85f6c4077f0883e0f97f1c4fbb6d3b2caf4ae1b8d453",
+      "caption": "First native frame of the forward probe recording. Reward v4 PPO, seed 20260917, update 2000, native Isaac simulation, noise off.",
+      "controller": "695b1839a17976f34d40ebcf9057c47b0eaa1015d1d0d84a2ea96c8b8a781217",
+      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260917_evaluation_verification.json"
+    },
+    {
+      "id": "ppo_v4_settle_seed20260917_stop_20261006",
+      "title": "Reward v4 PPO, seed 20260917: passed forward-to-stop probe",
+      "type": "video",
+      "role": "controlled_ppo_comparison",
+      "path": "site/assets/media/ppo_v4_settle_seed20260917_stop_20261006.mp4",
+      "sha256": "6cad1c0614f6a11d792ca6742ee7f94d11821d8f500488f538998a55ffdd1b4d",
+      "caption": "Approved detailed model in native Isaac simulation. Vanilla PPO with reward v4, seed 20260917, update 2000. The policy passes the forward-to-stop probe, which commands 0.05 m/s forward for 8 s and then zero. This seed passes both quiet probes. Evaluation runs the actor mean with noise off. One trial.",
+      "controller": "695b1839a17976f34d40ebcf9057c47b0eaa1015d1d0d84a2ea96c8b8a781217",
+      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260917_evaluation_verification.json",
+      "poster_id": "ppo_v4_settle_seed20260917_stop_20261006_poster"
+    },
+    {
+      "id": "ppo_v4_settle_seed20260917_stop_20261006_poster",
+      "title": "Reward v4 PPO, seed 20260917: first frame of the forward-to-stop probe",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/media/ppo_v4_settle_seed20260917_stop_20261006_poster.png",
+      "sha256": "a57eecc298c13a573e6bf9f4c5e6f5280f4a89ec982cec4e9198798da93ec2f3",
+      "caption": "First native frame of the forward-to-stop probe recording. Reward v4 PPO, seed 20260917, update 2000, native Isaac simulation, noise off.",
+      "controller": "695b1839a17976f34d40ebcf9057c47b0eaa1015d1d0d84a2ea96c8b8a781217",
+      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260917_evaluation_verification.json"
+    },
+    {
+      "id": "ppo_v4_settle_seed20260918_forward_20261006",
+      "title": "Reward v4 PPO, seed 20260918: passed forward probe",
+      "type": "video",
+      "role": "controlled_ppo_comparison",
+      "path": "site/assets/media/ppo_v4_settle_seed20260918_forward_20261006.mp4",
+      "sha256": "bf33d6453ed842ff5087e6610a58dc93b81f9a383824363fcf88064f0ce5be26",
+      "caption": "Approved detailed model in native Isaac simulation. Vanilla PPO with reward v4, seed 20260918, update 2000. The policy passes the forward probe at 0.05 m/s. This seed fails both quiet probes on one toe-contact check. Evaluation runs the actor mean with noise off. One trial.",
+      "controller": "f1de435d107ded705e9c51524699484b3a6be0652cc991362d764ae73f0c8387",
+      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260918_evaluation_verification.json",
+      "poster_id": "ppo_v4_settle_seed20260918_forward_20261006_poster"
+    },
+    {
+      "id": "ppo_v4_settle_seed20260918_forward_20261006_poster",
+      "title": "Reward v4 PPO, seed 20260918: first frame of the forward probe",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/media/ppo_v4_settle_seed20260918_forward_20261006_poster.png",
+      "sha256": "f6c180dcc52ab044a973959f71ab27595f84a0f65cb5c0a8f816744c7c670b22",
+      "caption": "First native frame of the forward probe recording. Reward v4 PPO, seed 20260918, update 2000, native Isaac simulation, noise off.",
+      "controller": "f1de435d107ded705e9c51524699484b3a6be0652cc991362d764ae73f0c8387",
+      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260918_evaluation_verification.json"
+    },
+    {
+      "id": "ppo_v4_settle_seed20260918_stop_20261006",
+      "title": "Reward v4 PPO, seed 20260918: passed forward-to-stop probe",
+      "type": "video",
+      "role": "controlled_ppo_comparison",
+      "path": "site/assets/media/ppo_v4_settle_seed20260918_stop_20261006.mp4",
+      "sha256": "0cd89d32a15d5b23107a5b9c1084a52a82fc3b577ddd438cf39e5ccf5918f5cd",
+      "caption": "Approved detailed model in native Isaac simulation. Vanilla PPO with reward v4, seed 20260918, update 2000. The policy passes the forward-to-stop probe, which commands 0.05 m/s forward for 8 s and then zero. This seed fails both quiet probes on one toe-contact check. Evaluation runs the actor mean with noise off. One trial.",
+      "controller": "f1de435d107ded705e9c51524699484b3a6be0652cc991362d764ae73f0c8387",
+      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260918_evaluation_verification.json",
+      "poster_id": "ppo_v4_settle_seed20260918_stop_20261006_poster"
+    },
+    {
+      "id": "ppo_v4_settle_seed20260918_stop_20261006_poster",
+      "title": "Reward v4 PPO, seed 20260918: first frame of the forward-to-stop probe",
+      "type": "image",
+      "role": "video_poster",
+      "path": "site/assets/media/ppo_v4_settle_seed20260918_stop_20261006_poster.png",
+      "sha256": "935cfca4e7285b40538733e57e1bc71ba799dbe9e98311e0e4bc15a267d908e8",
+      "caption": "First native frame of the forward-to-stop probe recording. Reward v4 PPO, seed 20260918, update 2000, native Isaac simulation, noise off.",
+      "controller": "f1de435d107ded705e9c51524699484b3a6be0652cc991362d764ae73f0c8387",
+      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260918_evaluation_verification.json"
     }
   ],
   "nodes": [
@@ -325,11 +486,11 @@
     {
       "id": "policy",
       "title": "Control the gait",
-      "label": "PPO videos recorded; gait still unqualified",
+      "label": "PPO videos recorded; AMP learner merged on CPU; gait still unqualified",
       "state": "implemented",
       "column": 3,
       "row": 0,
-      "meaning": "Researchers replayed an optimized forward trajectory that passes its native screen. The tested PPO policies fail walking acceptance. The current kernel supports stock PPO; the paper motion-prior method remains to be implemented.",
+      "meaning": "Researchers replayed an optimized forward trajectory that passes its native screen. The tested PPO policies fail walking. The bounded-mean policy with running normalization passes quiet screens; removing normalization fails all 13 probes. Native AMP learning remains pending.",
       "input": "Requested motion, joint positions and body motion",
       "output": "18 target joint positions",
       "source": "locomotion/README.md",
@@ -390,11 +551,11 @@
     {
       "id": "simulation",
       "title": "Train in simulation",
-      "label": "Stock PPO kernel; paper implementation pending",
+      "label": "Stock PPO kernel profiled; AMP pilot pending",
       "state": "implemented",
       "column": 0,
       "row": 2,
-      "meaning": "Researchers completed one- and 128-robot standing admission and PPO runs on frozen source packs. Use locomotion/ for current code and TRAINING for the reproduction order. A new source allocation needs matching native admission.",
+      "meaning": "Researchers completed one- and 128-robot standing admission and PPO runs on frozen source packs, and published stock-PPO throughput profiles at 1, 32 and 128 robots. Use locomotion/ for current code and TRAINING for the reproduction order. A new source allocation needs matching native admission.",
       "input": "Robot model, physics settings and training task",
       "output": "Saved walking controllers",
       "source": "locomotion/README.md",
@@ -407,7 +568,7 @@
       "state": "implemented",
       "column": 1,
       "row": 2,
-      "meaning": "Researchers evaluated the paired PPO arms at updates 0, 300, 600 and 1200. Both fail the scheduled forward tests and final quiet-stop diagnostics. The kernel provides 13 diagnostic probes and 96 Stage 2 cases, with contact-force and motor-torque recording. Full qualification and human gait acceptance remain pending.",
+      "meaning": "Researchers compared all 13 probes for bounded-mean PPO with and without running normalization at update 2000. Both fail all ten movement probes. Removing normalization also fails both quiet probes and the stop screen. Human gait acceptance and the full Stage 2 qualification remain pending.",
       "input": "A saved controller and fixed test cases",
       "output": "Measurements and a pass or fail result",
       "source": "locomotion/evaluation.py",
@@ -523,7 +684,7 @@
       "description": "Qualify signed translation, turns, transitions and quiet stops on the approved model. Historical standing admissions apply to their frozen sources; obtain matching admission for a new allocation.",
       "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait\u2019s visual quality.",
       "source": "docs/TRAINING.md",
-      "media_id": "forward_ppo_example_1200",
+      "media_id": "ppo_v4_settle_seed20260917_stop_20261006",
       "status": "blocked",
       "backend": "Approved detailed robot model",
       "owner": "Platform lead",
@@ -535,12 +696,12 @@
         "R-10",
         "R-11"
       ],
-      "blocker": "The program lead admitted the 18000-pair motion-prior dataset from 40 native clips. AMP learning under issue #37 remains pending. A learned policy still needs the full direction, transition, stop, motor and contact suite.",
-      "question": "Start the TRAINING reward audit under issue #18. Resolve paper formulas and the stationary tracking criterion before implementing a new reward schema.",
+      "blocker": "Two reward-v4 PPO seeds pass the forward and forward-to-stop probes in native simulation. Training draws forward and zero commands alone, and the seven other translation probes and both yaw probes fail in each seed. Seed 20260918 fails both quiet probes on one toe-contact check. Each pass is one trial, and each evaluation leaves all 96 required Stage 2 cases unevaluated. Stage 2 still needs direction, transition, stop, torque, contact and visual acceptance. Native AMP learning remains pending.",
+      "question": "Widen the command draws beyond forward and remove the seed 20260918 toe miss in the quiet probes before any Stage 2 claim.",
       "next_step": null,
       "acceptance": null,
-      "card_text": "Motion-prior dataset admitted; AMP learning and learned walking/stopping remain pending.",
-      "media_caption": "Approved robot model \u00b7 failed forward test."
+      "card_text": "Two reward-v4 PPO seeds pass the forward and stop probes in simulation; nine direction and yaw probes fail. Walking remains unqualified.",
+      "media_caption": "Approved detailed model; reward-v4 PPO, seed 20260917, update 2000; forward-to-stop probe passed with noise off."
     },
     {
       "id": "stage3",
@@ -641,10 +802,10 @@
   ],
   "primary_video_id": "caps500_preview",
   "progress": {
-    "as_of": "2026-09-24T19:11:59+00:00",
-    "source_commit": "d70dacd4fe74f682c08c4ad636460c4b7c7a78b2",
+    "as_of": "2026-10-06T05:19:40+00:00",
+    "source_commit": "cd691ff0f2e7353d53b4bdd24365bfd8ee8bc3f6",
     "architecture": "ARCHITECTURE.md",
-    "summary": "The optimized motion-prior bank covers 20 commands in 40 native simulation clips on the approved detailed robot. All selected clips pass numerical screens. The program lead accepted direction and alternating-tripod appearance in all 40 clips, which admits the 18000-pair training dataset. AMP learning under issue #37 remains pending. Stage 2 walking and stopping qualification is incomplete.",
+    "summary": "Researchers trained two seeds of vanilla PPO with reward version 4 in native simulation. At update 2000 both seeds pass the forward and forward-to-stop probes. Seed 20260917 passes both quiet probes; seed 20260918 fails both on one toe-contact check. Nine direction and yaw probes fail in each seed. Walking and Stage 2 qualification remain pending.",
     "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
     "execution_source": "docs/SPARK_COMPUTE_COORDINATION.md",
     "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
@@ -1024,6 +1185,102 @@
         "result": "passed",
         "text": "The original forward-right trial fails one startup speed check at 0.025 seconds. A replacement trajectory with a one-second target ramp passes both start phases under the same native gates. The archive retains the failed capture. Full bank coverage and human motion review remain pending.",
         "source": "site/assets/amp_startup_20260924_001/evidence.json"
+      },
+      {
+        "id": "reward-v2-merged-20260929",
+        "title": "Reward version 2 is merged beside the frozen version 1",
+        "backend": "CPU unit tests; locomotion/task_v2.py; version 1 stays the default; no native run has used version 2",
+        "result": "passed",
+        "text": "The Table I audit resolves the tracking-exponent sign and the stationary criterion and separates the paper kernel from command-scaled kernels. Version 2 uses kernel C with k = 0.4, floors of 0.025 m/s and 0.15 rad/s and a termination charge of 75 per terminated control. train.py and prepare.py select it with --reward-version 2 in train mode only. This merge changes no measured result or gate.",
+        "source": "docs/REWARD_V2_TABLE1_AUDIT.md"
+      },
+      {
+        "id": "throughput-profile-stock-ppo-20260929",
+        "title": "Stock-PPO throughput is measured at 1, 32 and 128 robots",
+        "backend": "Isaac Sim on the GB10; stock RSL-RL 5.0.1 PPO with the MLP networks; frozen source 56ebf907; 20 measured updates per pass",
+        "result": "passed",
+        "text": "Training reached 12.9, 319 and 930 transitions per second at 1, 32 and 128 robots. The PhysX step took 70% of each update at 1 and 32 robots and 80% at 128. From 32 to 128 robots each added robot added about 1 MB of GPU memory. A fresh 128-robot standing capture passed all 128 replicas and supplies the admitted scale. The summary extrapolates to no other count and changes no guard.",
+        "source": "site/assets/throughput_profile_20260929_001/summary.json"
+      },
+      {
+        "id": "amp-learner-cpu-20260929",
+        "title": "The AMP learner and Table III networks pass CPU tests; the pilot has not run",
+        "backend": "CPU unit tests and an offline discriminator fit against one recorded policy trace; no native run",
+        "result": "inconclusive",
+        "text": "The learner adds the style reward to the task reward, trains the discriminator against the admitted bank and keeps checkpoint identity checks. The paper actor rejects privileged inputs. Offline, the standardized-input penalty scores held-out bank transitions 0.94 and the recorded policy trace 0.12. This measures fixed data, not the online learner or a standing policy. The Step 5 pilot needs a frozen budget, standing admission and Spark dispatch.",
+        "source": "site/assets/amp_learner_offline_20260929_001/result.json"
+      },
+      {
+        "id": "ppo-reward-ranking-20261002",
+        "title": "Reward v2 ranks recorded walking above the failed PPO policy",
+        "backend": "CPU float32 reward reconstruction; four retained Isaac captures on matching approved physics; forward 0.05 m/s; 2 < t <= 20 seconds",
+        "result": "passed",
+        "text": "We verify 68 input files and reconstruct the frozen reward history. Mean reward per control is 0.258359 for the failed PPO trajectory, 0.272557 after clipping its recorded actions, 0.987156 for the current tripod and 1.247595/1.251683 for the admitted phase-0/phase-0.5 walks. The walking advantage remains positive under the full unknown collision penalty range. This tests fixed-trajectory ranking at one command. We retain reward v2 for the bounded-mean learning test; final evaluation is pending.",
+        "source": "site/assets/ppo_action_audit_20261002_001/reward_audit.json"
+      },
+      {
+        "id": "ppo-bounded-mean-evaluation-20261002",
+        "title": "Bounded-mean PPO holds a stance but fails walking",
+        "backend": "Isaac Sim; approved direct-drive model; 128 robots and 2000 updates; seed 20260917; reward v2; all 13 final-checkpoint probes",
+        "result": "failed",
+        "text": "We verify 6144000 training transitions and complete evaluation captures with force and torque records. All ten movement probes fail tracking; both quiet tests and the stop screen pass. Forward speed is 0.00000612 m/s against 0.05 m/s, with zero out-of-range deterministic actions and normalized tracking error E = 1.000132. The stop result does not establish a stop from walking. Ten original probes are missing and human walking labels remain pending. We retain reward v2; these tests do not isolate a reward defect.",
+        "source": "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json"
+      },
+      {
+        "id": "ppo-normalization-credit-audit-20261003",
+        "title": "We measure normalization drift and reward timing before the next PPO trial",
+        "backend": "CPU replay of 13 retained native observation streams and reward reconstruction from four retained forward captures; no new native run",
+        "result": "inconclusive",
+        "text": "With actor weights fixed, running normalization produces mean Gaussian divergence 1.050361 in the first 24-control replay window, above the adaptive schedule threshold 0.02. Mean divergence falls to 0.003022 after 100 controls and 0.000026 after 500; disabling normalization gives zero. Both instantaneous and stride-average rewards rank recorded walking above the failed policy. These replays do not establish the cause of the native learning failure. The next trial retains bounded means and reward v2 while disabling normalization.",
+        "source": "docs/REWARD_V2_TABLE1_AUDIT.md"
+      },
+      {
+        "id": "ppo-no-normalization-evaluation-20261003",
+        "title": "PPO without running normalization fails all 13 probes",
+        "backend": "Isaac Sim; approved direct-drive model; 128 robots, 2000 updates, seed 20260917 and reward v2; all 13 final-checkpoint probes",
+        "result": "failed",
+        "text": "We verify 6144000 transitions and complete evaluation captures with force and torque records. Pre-update mean Gaussian divergence is zero throughout training. All ten movement probes fail tracking; both quiet probes and the stop screen also fail. Normalized tracking error E is 1.000658, compared with 1.000132 for running normalization. Two translation probes also exceed the native speed bound. Human labels remain pending. These results support a separate reward-timing trial and establish no walking success.",
+        "source": "site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.json"
+      },
+      {
+        "id": "ppo-immediate-tracking-evaluation-20261003",
+        "title": "Immediate tracking fails all 13 PPO probes",
+        "backend": "Isaac Sim on the approved direct-drive model; reward v3; final update 2000; all 13 probes",
+        "result": "failed",
+        "text": "We verify 6144000 transitions and full native force/torque captures. Normalized tracking error E is 1.000437. The forward policy holds 16 of 18 joint commands near their bounds and requests 4.160072 Nm RMS at the right-front coxa against a 1.6 Nm applied cap. All movement probes fail tracking and torque demand; quiet and stop probes fail. Human gait labels remain pending.",
+        "source": "site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation.json"
+      },
+      {
+        "id": "ppo-v4-forward-stop-two-seeds-20261006",
+        "title": "Two reward-v4 PPO seeds pass the forward and forward-to-stop probes",
+        "backend": "Native Isaac simulation on the approved direct-drive model; vanilla PPO with reward v4 from source commit cd691ff0; seeds 20260917 and 20260918; final update 2000; one trial per probe with the actor mean and noise off",
+        "result": "passed",
+        "text": "We verify 6144000 training transitions per seed and the retained captures with their 400 Hz contact-force and motor-torque arrays. The forward probe commands 0.05 m/s for 20 s and scores 900 controls after a 2 s settle. Planar error is 0.00996394498203808 m/s for seed 20260917 and 0.011130753192090545 m/s for seed 20260918 against a 0.025 m/s bound. The forward-to-stop probe commands 0.05 m/s for 8 s and then zero, and scores the 550 controls that follow a 2 s settle. Joint velocity RMS is 0.006655412260442972 rad/s and 0.015937643125653267 rad/s against a 0.03 rad/s bound. Each pass is one trial and measures no spread. Visual acceptance remains pending.",
+        "source": "site/assets/ppo_walking_diagnosis_20261005_001/run_ledger.json"
+      },
+      {
+        "id": "ppo-v4-quiet-seed20260917-20261006",
+        "title": "Seed 20260917 passes both quiet probes",
+        "backend": "Native Isaac simulation on the approved direct-drive model; vanilla PPO with reward v4 from source commit cd691ff0; seed 20260917; final update 2000; one trial per probe with the actor mean and noise off",
+        "result": "passed",
+        "text": "The 20 s quiet probe scores 800 controls after a 4 s settle, and the 32 s probe scores 1500 controls after a 2 s settle. Joint velocity RMS is 0.005631701089441776 rad/s and 0.005186597816646099 rad/s against a 0.03 rad/s bound. The 400 Hz six-toe contact check counts zero missing physics steps in both probes. Each pass is one trial.",
+        "source": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260917_evaluation_verification.json"
+      },
+      {
+        "id": "ppo-v4-quiet-seed20260918-20261006",
+        "title": "Seed 20260918 fails both quiet probes on toe contact",
+        "backend": "Native Isaac simulation on the approved direct-drive model; vanilla PPO with reward v4 from source commit cd691ff0; seed 20260918; final update 2000; one trial per probe with the actor mean and noise off",
+        "result": "failed",
+        "text": "The 400 Hz six-toe contact check, missing_six_toe_count_400hz, counts 4 physics steps in the 20 s quiet probe and 5 in the 32 s probe against a bound of 0. Each other check of the two probes passes; joint velocity RMS is 0.009713666513562202 rad/s and 0.009115087799727917 rad/s against a 0.03 rad/s bound. The same seed passes the forward and forward-to-stop probes.",
+        "source": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260918_evaluation_verification.json"
+      },
+      {
+        "id": "ppo-v4-direction-yaw-probes-20261006",
+        "title": "Nine direction and yaw probes fail in both reward-v4 seeds",
+        "backend": "Native Isaac simulation on the approved direct-drive model; vanilla PPO with reward v4 from source commit cd691ff0; seeds 20260917 and 20260918; final update 2000; all 13 probes, one trial each, with the actor mean and noise off",
+        "result": "failed",
+        "text": "Seed 20260917 passes 4 of 13 probes and seed 20260918 passes 2 of 13. In each seed the seven translation probes from 45 to 315 degrees fail the planar error bound, and both yaw probes fail the planar and yaw error bounds. Training draws forward and zero commands alone. Each evaluation leaves all 96 required Stage 2 cases unevaluated and reports Stage 2 as incomplete.",
+        "source": "site/assets/ppo_walking_diagnosis_20261005_001/run_ledger.json"
       }
     ]
   },
