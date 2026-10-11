@@ -17,15 +17,12 @@ class PlanMargin:
     """Clearance a route keeps from every boundary and exclusion edge.
 
     It is required that the full moving footprint stay inside the approved region,
-    including localization and stopping uncertainty. The three terms stay separate
-    because they come from different owners and move independently:
-    ``footprint_radius_m`` from the robot, ``stop_tolerance_m`` from the follower,
-    ``position_error_bound_m`` from R-03's GPS bound.
+    including localization and stopping uncertainty.
 
-    ``position_error_bound_m`` is an **input, never a constant**. A rehearsal with
-    ideal poses passes ``0.0``; the plain-GPS bound of several metres is what makes
-    a small drawn area infeasible, and the caller -- not this module -- owns that
-    number.
+    Args:
+        ``footprint_radius_m``: Length of largest line fitting across the hexapod.
+        ``stop_tolerance_m``: Perscribed by the specifications of the controller + robot build.
+        ``position_error_bound_m``: the specificed GPS bound.
     """
 
     footprint_radius_m: float
@@ -61,14 +58,15 @@ class PlanMargin:
 
 @dataclass(frozen=True)
 class Polygon:
-    """A closed polygon in the local east-north frame.
+    """A closed, potentially self-interesecting polygon in the local east-north frame.
 
-    ``vertices`` are ``(east, north)`` metre pairs in order. The closing edge from
-    the last vertex back to the first is implicit and must not be repeated.
+    Args:
+        ``vertices`` are ``(east, north)`` metre pairs in order. The closing edge from
+        the last vertex back to the first is implicit and must not be repeated.
 
-    Simplicity is **not** checked on construction, deliberately: an operator's
-    drawing has to be *reported* as invalid rather than raise while a request is
-    being parsed. Callers check :meth:`is_simple` before approving a request.
+    Notes:
+        Simplicity (whether the polygon is not self-intersecting) is **not** checked on construction.
+        Callers should check :meth:`is_simple` to this.
     """
 
     vertices: tuple[Point, ...]
@@ -101,9 +99,6 @@ class Polygon:
             raise ValueError(
                 f"vertices must hold at least three points, got {len(points)}"
             )
-        # Normalise to an immutable tuple of float pairs. A frozen dataclass that
-        # stored the caller's list would be mutable through the back door and
-        # unhashable, so the value is replaced rather than merely validated.
         object.__setattr__(self, "vertices", tuple(points))
 
     @property
@@ -118,7 +113,7 @@ class Polygon:
 
     @property
     def bounds_m(self) -> tuple[float, float, float, float]:
-        """Axis-aligned bounds as ``(min_east, min_north, max_east, max_north)``."""
+        """Returns the axis-aligned bounds in form ``(min_east, min_north, max_east, max_north)``."""
 
         easts = [point[0] for point in self.vertices]
         norths = [point[1] for point in self.vertices]
@@ -126,7 +121,12 @@ class Polygon:
 
     @property
     def signed_area_m2(self) -> float:
-        """Shoelace area; positive when the vertices wind counterclockwise."""
+        """
+        Area of Polygon; positive when the vertices wind counterclockwise.
+
+        Note:
+            This area is calculated via the shoelace formula.
+        """
 
         total = 0.0
         for (x0, y0), (x1, y1) in self.edges:
@@ -192,13 +192,7 @@ class Polygon:
 
 @dataclass(frozen=True)
 class SurveyRegion:
-    """An approved survey area: one boundary, optional exclusions and a corridor.
-
-    Exclusions are the operator's drawn no-go areas of R-01. This type models the
-    *request*, so it holds no sensed obstacle: under the GPS-only architecture
-    (`ARCHITECTURE.md` R-10, and #20's out-of-scope list) obstacles are drawn
-    before motion, not discovered during it.
-    """
+    """An approved survey area: Region Boundary, optional exclusions and an entry corridor."""
 
     boundary: Polygon
     exclusions: tuple[Polygon, ...] = ()
@@ -272,8 +266,6 @@ class SurveyRegion:
             return 0.0
         distances = [self.boundary.distance_to_boundary_m(point)]
         if self.corridor is not None:
-            # Inside the corridor the boundary edge it shares is not a wall, so the
-            # corridor's own edges are the binding constraint there.
             distances.append(self.corridor.distance_to_boundary_m(point))
             if self.corridor.contains(point):
                 distances = [self.corridor.distance_to_boundary_m(point)]

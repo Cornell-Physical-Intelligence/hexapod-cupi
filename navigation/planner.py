@@ -42,8 +42,9 @@ class Route:
         )
         object.__setattr__(self, "cost", cost)
 
+    # NOTE: Check this spec definition
     def waypoints_m(self, grid: CostGrid) -> tuple[Point, ...]:
-        """Cell centres as world points, ready for ``WaypointFollower``.
+        """Cell centres as (x, y) coordinates in the local frame, ready for ``WaypointFollower``.
 
         The follower takes ``(x, y)`` pairs and this returns them in order, so the
         seam to execution needs no adapter. Thinning the list is the executor's

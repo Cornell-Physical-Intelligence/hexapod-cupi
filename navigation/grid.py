@@ -30,17 +30,14 @@ RISK_WEIGHT = 1.0
 class CostGrid:
     """Per-cell traversal cost for one region at one margin.
 
-    A grid is **immutable and margin-specific**: a different
-    ``position_error_bound_m`` is a different grid, not a mutation of this one.
-    That is why there is no change-tracking here -- nothing mutates, so nothing
-    needs a delta. Incremental replanning arrives with its own graph type when a
-    consumer exists for it.
+    A grid is immutable and specific to a given margin (e.g. see `PathMargin` in
+    region.py).
 
     ``costs`` is row-major over north: cell ``(east, north)`` lives at index
-    ``north * width_cells + east``. ``math.inf`` marks an impassable cell.
+    ``north * width_cells + east``, with ``(0,0)`` reprsenting the southwestern most cell.
+    Impassable cells are marked via ``math.inf``.
     """
 
-    # NOTE: larify definition of origin_m
     origin_m: Point
     cell_size_m: float
     width_cells: int
@@ -90,12 +87,11 @@ class CostGrid:
 
     @property
     def min_cell_cost(self) -> float:
-        """Structural lower bound on any cell's cost, for scaling the heuristic.
+        """Minimum possible cell cost, used for scaling the heuristic.
 
-        This is the constant floor, **not** the smallest cost actually present. A
-        heuristic scaled by an observed minimum stops being a lower bound the moment
-        the grid changes, which is exactly the kind of bug that produces paths that
-        look fine and are not optimal.
+        This is the constant floor, **not** the smallest cost actually present.
+        # NOTE: clarify why we don't want this to be the smallest observed cost.
+        Maybe its 
         """
 
         return PASSABLE_CELL_COST
