@@ -256,7 +256,10 @@ profiles from one source measure 866, 1,597 and 1,812 transitions per second
 at 128, 512 and 1024 robots, with the update taking 3.55, 7.70 and 13.57 s
 ([record](../site/assets/throughput_profile_20261011_001/summary.json)). The
 step from 512 to 1024 robots buys 13 percent more samples per second for 76
-percent more time per update.
+percent more time per update. On 11 October the program lead opened a
+512-robot training budget for the reward v4 arms: 512 robots, 24 controls per
+robot and update, 2000 updates and the pilot deadline. Training and probes
+accept 128 and 512 robots; 1024 stays a profiling count.
 
 ```sh
 uv run python -m locomotion.prepare --mode throughput --num-envs 32 \

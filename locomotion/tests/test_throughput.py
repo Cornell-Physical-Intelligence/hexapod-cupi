@@ -503,7 +503,11 @@ class GuardTests(unittest.TestCase):
                 profile = prepare(root/f'profile{index}', REMOTE, mode='throughput', num_envs=count, updates=5, warmup_updates=2)
                 self.assertEqual(profile['module'], 'locomotion.throughput')
                 self.assertEqual(profile['command_args'][profile['command_args'].index('--num-envs')+1], str(count))
-            for index, bad in enumerate((dict(mode='train', num_envs=512), dict(mode='probe', num_envs=1024),
+            training = prepare(root/'train512', REMOTE, mode='train', num_envs=512, updates=2000, reward_version='4', gait_clock=60,
+                               allocation_profile='flat_pilot_v1', max_wall_seconds=21600)
+            self.assertEqual(training['command_args'][training['command_args'].index('--num-envs')+1], '512')
+            self.assertEqual(json.loads((root/'train512/PACK.json').read_text())['updates'], 2000)
+            for index, bad in enumerate((dict(mode='train', num_envs=1024), dict(mode='probe', num_envs=1024),
                                          dict(mode='diagnostic', num_envs=256), dict(mode='throughput', num_envs=2048, updates=5, warmup_updates=2))):
                 with self.subTest(bad=bad), self.assertRaisesRegex(ValueError, 'replica count'):
                     prepare(root/f'bad{index}', REMOTE, **bad)
