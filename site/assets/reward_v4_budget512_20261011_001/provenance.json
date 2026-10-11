@@ -1,0 +1,89 @@
+{
+  "schema": "hexapod_reward_v4_budget512_provenance_v1",
+  "source": {
+    "commit": "a45f5cda6b2727053a44739e66429e8ec007c610",
+    "branch": "jcc463/replica-counts-512-1024",
+    "source_freeze_sha256": "6e88381c56e96d612e10187f50a9353919106bca2554714fc3374e168ba65013"
+  },
+  "authorization": "The program lead opened the 512-robot training budget in chat on 2026-10-11 and asked for the queued runs to start when Spark became available; a Spark-side waiter started them after another account's queue finished.",
+  "budget": {
+    "num_envs": 512,
+    "controls_per_robot_per_update": 24,
+    "updates": 2000,
+    "transitions_per_seed": 24576000,
+    "allocation_profile": "flat_pilot_v1",
+    "max_wall_seconds": 21600,
+    "reward_version": "4",
+    "reward_options": "forward_draw_fraction=0",
+    "episode_seconds": 10.0,
+    "learner_options": "--action-mean tanh --observation-normalization none --observation-scaling fixed --command-segments bootstrap --learning-rate-max 0.0003 --action-std-final 0.05 --gait-clock 60 --action-smoothing mean2 --velocity-noise 0.5",
+    "exploration_decay": "over the whole 2000-update run, the default"
+  },
+  "standing_admission": "/srv/cupi/hexapod/inputs/replicas_20261010_001/admission_512/inputs.json (see site/assets/throughput_profile_20261010_001/provenance.json)",
+  "attempts": {
+    "20260917": {
+      "training": "ppo_v4_omni512_seed20260917_20261011_001",
+      "binding_sha256": "5258945e63cf6173505b1aa4a3361c093ad371cd782d71f537fb69e9c3e42783",
+      "wall_seconds": 14682,
+      "evaluations": {
+        "1000": {
+          "attempt": "ppo_v4_omni512_seed20260917_20261011_001_evaluate_u001000_r2",
+          "checkpoint_sha256": "d73c9d2e5028b147ff8624c7c10283ff80524ef0b591d5098272ca087f95c1d6"
+        },
+        "2000": {
+          "attempt": "ppo_v4_omni512_seed20260917_20261011_001_evaluate_u002000_r2",
+          "checkpoint_sha256": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21"
+        }
+      }
+    },
+    "20260918": {
+      "training": "ppo_v4_omni512_seed20260918_20261011_001",
+      "binding_sha256": "e82ad1985e39e59b50efdbc75a2b33192a9943fa212f577492a06b7963f52a03",
+      "wall_seconds": 14557,
+      "evaluations": {
+        "1000": {
+          "attempt": "ppo_v4_omni512_seed20260918_20261011_001_evaluate_u001000_r2",
+          "checkpoint_sha256": "9f51cda083b569b62732cc324fb6f55efca2e38d1a461373af8f5492259c6ab2"
+        },
+        "2000": {
+          "attempt": "ppo_v4_omni512_seed20260918_20261011_001_evaluate_u002000_r2",
+          "checkpoint_sha256": "96b716e57b17bf7557ec2fc4ec65bf490dee5fe1cdb5445b269d981c9cac5709"
+        }
+      }
+    }
+  },
+  "stop_video": {
+    "20260917": "ppo_v4_omni512_seed20260917_20261011_001_evaluate_stop_video_r2, published as site/assets/media/ppo_v4_omni512_seed20260917_stop_20261011.mp4",
+    "20260918": "ppo_v4_omni512_seed20260918_20261011_001_evaluate_stop_video_r2 lost the GPU lock race to another account's launch at 18:43Z and exited before any native step; a retry (_r3) waits for an idle GPU"
+  },
+  "retained_failures": [
+    {
+      "attempts": [
+        "ppo_v4_omni512_seed20260917_20261011_001_evaluate_u001000",
+        "ppo_v4_omni512_seed20260917_20261011_001_evaluate_u002000",
+        "ppo_v4_omni512_seed20260918_20261011_001_evaluate_u001000",
+        "ppo_v4_omni512_seed20260918_20261011_001_evaluate_u002000",
+        "ppo_v4_omni512_seed20260917_20261011_001_evaluate_stop_video",
+        "ppo_v4_omni512_seed20260918_20261011_001_evaluate_stop_video"
+      ],
+      "outcome": "prepared packs whose starter rejected a one-robot evaluation against the 512-robot admission before any native step; the starter check was corrected and the evaluations reran under _r2 names"
+    }
+  ],
+  "files": {
+    "results.json": "0768ee83bf82118f6f50d44dbd3db84ee012694c26c937c02c66fe4e5c25a90b",
+    "seed20260917_verification.json": "5e2f1f3bbd657fa0ddc2b50b59e9cb249c9fa0e362942b952561a684f3811123",
+    "seed20260918_verification.json": "7bc66876cd1d3c32debd73363066a8c004c1ed55b31e9af3ee8f06deec6e1fc4",
+    "verification.py": "bfd6d985561bcc0f4be0557f6f7ea2e75a82c12b9caeec50e70cc5f617f070e7"
+  },
+  "verification": {
+    "20260917": {
+      "verified": true,
+      "largest_recomputed_load_relative_difference": 0.0
+    },
+    "20260918": {
+      "verified": true,
+      "largest_recomputed_load_relative_difference": 0.0
+    }
+  },
+  "reproduce": "PYTHONPATH=. uv run --no-sync python site/assets/reward_v4_budget512_20261011_001/verification.py --attempt <training> --evaluation <training>_evaluate_u001000_r2 --evaluation <training>_evaluate_u002000_r2 --workspace <fresh> --output <fresh>.json --fetch"
+}
