@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 from pathlib import Path
 import re
@@ -31,11 +32,14 @@ def save(path, value):
 
 
 def valid_reward_options(spec):
-    """Unique ``key=value`` pairs; the trainer checks the keys against ``RewardV4Config`` in the container."""
+    """Unique ``key=value`` pairs with numeric or lowercase-word values, such as ``yaw_gate_on=none``.
+
+    ``prepare`` then checks each key and value against the selected task's reward configuration."""
+    word, number = r'[a-z][a-z0-9_]*', r'[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?'
     pairs = [item.partition('=') for item in spec.split(',')]
     keys = [key for key, _, _ in pairs]
     return (len(set(keys)) == len(keys)
-            and all(re.fullmatch(r'[a-z][a-z0-9_]*', key) and re.fullmatch(r'[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?', value)
+            and all(re.fullmatch(word, key) and (re.fullmatch(number, value) or re.fullmatch(word, value))
                     for key, separator, value in pairs))
 
 
@@ -116,6 +120,13 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         raise ValueError('Reward options apply to reward version 4 training as unique key=value pairs')
     if reward_task not in ('v4', 'v4_yaw_gate') or (reward_task != 'v4' and (mode != 'train' or reward_version != '4')):
         raise ValueError('The reward task selection applies to reward version 4 training only')
+    if reward_options:
+        # The selected task's reward configuration checks each key and value, as the trainer does before launch.
+        try:
+            importlib.import_module(f'{__package__ or "locomotion"}.task_{reward_task}').reward_config(reward_options)
+        except ValueError as error:
+            raise ValueError('Reward options apply to reward version 4 training as unique key=value pairs: '
+                             + str(error)) from error
     if (learner not in ('ppo', 'amp') or networks not in ('mlp', 'paper') or (networks == 'paper' and learner != 'amp')
             or (learner == 'amp' and mode not in ('train', 'evaluate'))):
         raise ValueError('The AMP learner trains or evaluates, and the paper networks need the AMP learner')

@@ -383,6 +383,26 @@ class NativeSelectionTests(unittest.TestCase):
                 with self.subTest(bad=bad), self.assertRaisesRegex(ValueError, "reward task"):
                     prepare(root/f"bad{index}", REMOTE, mode="train", **bad)
 
+    def test_prepare_accepts_word_values_for_the_gate_switch(self):
+        from locomotion.prepare import prepare, valid_reward_options
+        from locomotion.tests.test_task_v4 import REMOTE
+        for spec in ("yaw_gate_on=none", "yaw_gate_on=all", "yaw_gate_bonus=0.25,yaw_gate_on=turn"):
+            self.assertTrue(valid_reward_options(spec), spec)
+            self.assertEqual(gated.reward_config(spec).yaw_gate_on, spec.rpartition("=")[2])
+        for spec in ("yaw_gate_on=None", "yaw_gate_on=no ne", "yaw_gate_on=", "yaw_gate_on=none,yaw_gate_on=all"):
+            self.assertFalse(valid_reward_options(spec), spec)
+        with tempfile.TemporaryDirectory() as directory:
+            options = self.OPTIONS + ",yaw_gate_on=none"
+            args = prepare(Path(directory)/"control", REMOTE, mode="train", reward_version="4", gait_clock=60,
+                           reward_options=options, reward_task="v4_yaw_gate")["command_args"]
+            self.assertEqual(args[args.index("--reward-options")+1], options)
+            # A word value for a numeric field, or the gate switch under plain v4, still stops preparation.
+            for index, (task, bad) in enumerate((("v4_yaw_gate", "yaw_gate_bonus=none"), ("v4", "yaw_gate_on=none"),
+                                                 ("v4_yaw_gate", "yaw_gate_on=sometimes"))):
+                with self.subTest(bad=bad), self.assertRaisesRegex(ValueError, "key=value"):
+                    prepare(Path(directory)/f"bad{index}", REMOTE, mode="train", reward_version="4", reward_options=bad,
+                            reward_task=task)
+
     def test_train_checks_the_task_and_its_options_before_launch(self):
         from locomotion import train
         base = ["--asset", "a", "--model", "m", "--geometry", "g", "--geometry-extrema", "e", "--stance", "s",

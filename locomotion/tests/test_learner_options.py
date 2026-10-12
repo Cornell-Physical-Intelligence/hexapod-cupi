@@ -352,6 +352,10 @@ class LearnerOptionTests(unittest.TestCase):
                 with self.subTest(bad=bad), self.assertRaises(ValueError):
                     prepare(root/f'bad{index}', REMOTE, **bad)
         from locomotion import train
+        # Metrics rows, state and checkpoint sidecars count the configured rollout, not a fixed 24 controls.
+        for steps, updates, collected in ((24, 2000, 6_144_000), (36, 1333, 6_142_464), (48, 2500, 15_360_000)):
+            self.assertEqual(train.collected_transitions(updates, ppo.ppo_config(7, steps_per_env=steps), 128), collected)
+        self.assertNotIn('*24*', Path(train.__file__).read_text())
         base = ['--asset', 'a', '--model', 'm', '--geometry', 'g', '--geometry-extrema', 'e', '--stance', 's',
                 '--output', 'o', '--source-freeze-sha256', 'f'*64, '--num-envs', '1', '--preflight-only', '--mode', 'train']
         with self.assertRaisesRegex(ValueError, 'rollout length'):

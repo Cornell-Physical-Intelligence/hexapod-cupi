@@ -72,6 +72,11 @@ def finish_training_update(update, updates, elapsed, deadline, checkpoint, save_
         raise TimeoutError('Training allocation ended after a complete PPO update')
 
 
+def collected_transitions(update, config, num_envs):
+    """Environment controls collected through ``update``: each update gathers the configured rollout per replica."""
+    return update * config['num_steps_per_env'] * num_envs
+
+
 def scalars(value, prefix):
     """Return finite numeric leaves of a task status; drop lists, text and missing values."""
     if isinstance(value, dict):
@@ -441,7 +446,7 @@ def main(argv=None):
                 path = args.output/f'checkpoint_update{update:06d}.pt'
                 runner.save(str(path), infos={'identity': identity, 'updates': update})
                 save(path.with_suffix('.json'), {'identity': identity, 'updates': update,
-                    'checkpoint_sha256': sha(path), 'transitions': update*24*env.num_envs})
+                    'checkpoint_sha256': sha(path), 'transitions': collected_transitions(update, config, env.num_envs)})
                 state['checkpoint'] = str(path); state['checkpoint_sha256'] = sha(path)
                 save(args.output/'state.json', state)
             loads = vanilla.TrainingLoads(env)
@@ -452,7 +457,7 @@ def main(argv=None):
             def log(**values):
                 original_log(**values)
                 update = values['it']+1
-                row = {'update': update, 'transitions': update*24*env.num_envs,
+                row = {'update': update, 'transitions': collected_transitions(update, config, env.num_envs),
                     'collection_seconds': values['collect_time'], 'learning_seconds': values['learn_time'],
                     'loss': values['loss_dict'], 'learning_rate': values['learning_rate'],
                     'mean_action_std': float(values['action_std'].mean()),

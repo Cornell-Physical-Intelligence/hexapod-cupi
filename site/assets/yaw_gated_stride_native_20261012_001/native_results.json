@@ -1,5 +1,5 @@
 {
-  "collector_sha256": "a73383172028261aa4235efab91495afbd6ba125d9d98d5b1adc93f444e4c500",
+  "collector_sha256": "c21e88e3e7a759441b841226add7a7543a0feea827ec090d3e46776b31a0e9dc",
   "evaluations": {
     "c24": {
       "binding_file_sha256": "515103717922f165502881e127c60fb7f83cdf6ef5d54fe37100f336507d8e73",
@@ -1536,11 +1536,13 @@
   "native_started_by_collection": false,
   "remote_root": "/srv/cupi/hexapod/runs/julian",
   "schema": "hexapod_yaw_gated_stride_native_v1",
-  "scope": "Four native training launches and their 13 learning probes, seed 20260917, one deterministic trial per probe. Learning probes are diagnostics; Stage 2 remains incomplete and needs transition, torque, contact and visual acceptance. Derived drift values come from the retained traces and set no limit.",
+  "scope": "Four native training launches and their 13 learning probes, seed 20260917, one deterministic trial per probe. Learning probes are diagnostics; Stage 2 remains incomplete and needs transition, torque, contact and visual acceptance. Derived drift values come from the retained traces and set no limit. Source 1b4d67a1 records transitions as update x 24 x robots whatever the rollout length, so recorded_transitions understates the 36- and 48-control runs; collected_transitions is update x steps_per_env x robots, the experience each run gathered.",
   "training": {
     "c24": {
       "binding_file_sha256": "b897d9996f22318f8e6a606cb4c5f888041b44500b6609f5dfbd0670b82aed52",
       "binding_sha256": "b897d9996f22318f8e6a606cb4c5f888041b44500b6609f5dfbd0670b82aed52",
+      "checkpoint_recorded_transitions": 6144000,
+      "collected_transitions": 6144000,
       "command_args": [
         "--mode",
         "train",
@@ -1606,12 +1608,15 @@
       "last_update": 2000,
       "launcher_exit_code": 0,
       "metrics_sha256": "30ba5e0e78a3b0d45985344dfc5bebed017521f2a9b7d6dbfdaaa78d002c59f6",
+      "num_envs": 128,
       "pack": "ppo_v4_stride_c24_u2000_seed20260917_20261010_002",
+      "recorded_transitions": 6144000,
       "rows": 2000,
       "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
       "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
       "state_errors": [],
       "state_status": "completed",
+      "steps_per_env": 24,
       "training_quarters": [
         {
           "mean_tracked_speed_ratio": 0.37300831425074354,
@@ -1646,12 +1651,13 @@
           ]
         }
       ],
-      "transitions": 6144000,
       "updates": 2000
     },
     "c36": {
       "binding_file_sha256": "98be0276e345347d9f6b173ac625ea6ca6a4cc6bab764c5fe9060d91af2a8af9",
       "binding_sha256": "98be0276e345347d9f6b173ac625ea6ca6a4cc6bab764c5fe9060d91af2a8af9",
+      "checkpoint_recorded_transitions": 4094976,
+      "collected_transitions": 6142464,
       "command_args": [
         "--mode",
         "train",
@@ -1719,12 +1725,15 @@
       "last_update": 1333,
       "launcher_exit_code": 0,
       "metrics_sha256": "4b35313f0dd9aff36618d642ad510b1d657b7891738d263aa92edf5e1cfa5099",
+      "num_envs": 128,
       "pack": "ppo_v4_stride_c36_u1333_seed20260917_20261010_001",
+      "recorded_transitions": 4094976,
       "rows": 1333,
       "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
       "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
       "state_errors": [],
       "state_status": "completed",
+      "steps_per_env": 36,
       "training_quarters": [
         {
           "mean_tracked_speed_ratio": 0.34518054286514166,
@@ -1759,12 +1768,13 @@
           ]
         }
       ],
-      "transitions": 4094976,
       "updates": 1333
     },
     "c48": {
       "binding_file_sha256": "27ef9f84aefd7e6ab31158a8b12fd55cc331c262c04f601517f672828abef129",
       "binding_sha256": "27ef9f84aefd7e6ab31158a8b12fd55cc331c262c04f601517f672828abef129",
+      "checkpoint_recorded_transitions": 3072000,
+      "collected_transitions": 6144000,
       "command_args": [
         "--mode",
         "train",
@@ -1832,12 +1842,15 @@
       "last_update": 1000,
       "launcher_exit_code": 0,
       "metrics_sha256": "666a37f70b2a2201662ddc87882248f8cab412b7cae8b36cc3877691372cb3db",
+      "num_envs": 128,
       "pack": "ppo_v4_stride_c48_u1000_seed20260917_20261010_001",
+      "recorded_transitions": 3072000,
       "rows": 1000,
       "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
       "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
       "state_errors": [],
       "state_status": "completed",
+      "steps_per_env": 48,
       "training_quarters": [
         {
           "mean_tracked_speed_ratio": 0.2873418635582636,
@@ -1872,12 +1885,13 @@
           ]
         }
       ],
-      "transitions": 3072000,
       "updates": 1000
     },
     "c48_long": {
       "binding_file_sha256": "92f4868d8d924c34e2a8c4a21187c0bb839cf5f96a8f85680e77335fb923cd20",
       "binding_sha256": "92f4868d8d924c34e2a8c4a21187c0bb839cf5f96a8f85680e77335fb923cd20",
+      "checkpoint_recorded_transitions": 7680000,
+      "collected_transitions": 15360000,
       "command_args": [
         "--mode",
         "train",
@@ -1946,12 +1960,15 @@
       "last_update": 2500,
       "launcher_exit_code": 0,
       "metrics_sha256": "8683c371c3ab5f519e8bb66b258e6b1ba038afa07944a1929cd22b017939366e",
+      "num_envs": 128,
       "pack": "ppo_v4_stride_c48_u2500_seed20260917_20261011_001",
+      "recorded_transitions": 7680000,
       "rows": 2500,
       "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
       "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
       "state_errors": [],
       "state_status": "completed",
+      "steps_per_env": 48,
       "training_quarters": [
         {
           "mean_tracked_speed_ratio": 0.49559549564461874,
@@ -1986,7 +2003,6 @@
           ]
         }
       ],
-      "transitions": 7680000,
       "updates": 2500
     }
   }

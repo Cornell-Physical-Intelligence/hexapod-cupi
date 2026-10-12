@@ -66,8 +66,16 @@ for key, (name, updates) in training.items():
                 "mean_tracked_speed_ratio": sum(r["task"]["interval_gait"].get("tracked_speed_ratio") or 0 for r in sel) / len(sel)}
     final = s / f"checkpoint_update{updates:06d}"
     state = json.loads((s / "state.json").read_text())
-    out["training"][key] = {**pack(name), "updates": updates, "rows": len(rows), "last_update": rows[-1]["update"],
-        "transitions": rows[-1].get("transitions"), "state_status": state.get("status"), "state_errors": state.get("errors"),
+    record = pack(name)
+    args = record["command_args"]
+    steps = int(args[args.index("--steps-per-env") + 1]) if "--steps-per-env" in args else 24
+    replicas = int(args[args.index("--num-envs") + 1])
+    out["training"][key] = {**record, "updates": updates, "rows": len(rows), "last_update": rows[-1]["update"],
+        "steps_per_env": steps, "num_envs": replicas,
+        "recorded_transitions": rows[-1].get("transitions"),
+        "checkpoint_recorded_transitions": json.loads(final.with_suffix(".json").read_text()).get("transitions"),
+        "collected_transitions": rows[-1]["update"] * steps * replicas,
+        "state_status": state.get("status"), "state_errors": state.get("errors"),
         "metrics_sha256": sha(s / "metrics.jsonl"),
         "final_checkpoint": {"path": str(final.with_suffix(".pt").relative_to(root)), "sha256": sha(final.with_suffix(".pt")),
                              "declaration_sha256": sha(final.with_suffix(".json"))},
@@ -144,7 +152,10 @@ def main(host):
               "remote_root": ROOT, "collector_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "scope": ("Four native training launches and their 13 learning probes, seed 20260917, one deterministic trial "
                         "per probe. Learning probes are diagnostics; Stage 2 remains incomplete and needs transition, torque, "
-                        "contact and visual acceptance. Derived drift values come from the retained traces and set no limit."),
+                        "contact and visual acceptance. Derived drift values come from the retained traces and set no limit. "
+                        "Source 1b4d67a1 records transitions as update x 24 x robots whatever the rollout length, so "
+                        "recorded_transitions understates the 36- and 48-control runs; collected_transitions is update x "
+                        "steps_per_env x robots, the experience each run gathered."),
               **remote}
     OUTPUT.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
     print(OUTPUT, {k: v["passed"] for k, v in result["evaluations"].items()})
