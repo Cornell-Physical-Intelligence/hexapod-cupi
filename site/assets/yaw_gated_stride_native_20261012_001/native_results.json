@@ -1,0 +1,1993 @@
+{
+  "collector_sha256": "a73383172028261aa4235efab91495afbd6ba125d9d98d5b1adc93f444e4c500",
+  "evaluations": {
+    "c24": {
+      "binding_file_sha256": "515103717922f165502881e127c60fb7f83cdf6ef5d54fe37100f336507d8e73",
+      "binding_sha256": "515103717922f165502881e127c60fb7f83cdf6ef5d54fe37100f336507d8e73",
+      "command_args": [
+        "--mode",
+        "evaluate",
+        "--asset",
+        "/asset",
+        "--model",
+        "/asset/source/model.json",
+        "--geometry",
+        "/geometry_source/geometry/geometry.json",
+        "--geometry-extrema",
+        "/geometry_source/geometry/geometry_extrema.npz",
+        "--stance",
+        "/prior/stance.json",
+        "--num-envs",
+        "1",
+        "--source-freeze-sha256",
+        "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+        "--max-wall-seconds",
+        "21600",
+        "--headless",
+        "--device",
+        "cuda:0",
+        "--allocation-profile",
+        "flat_pilot_v1",
+        "--standing-admission",
+        "/admission/admission.json",
+        "--updates",
+        "512",
+        "--seed",
+        "20260917",
+        "--action-mean",
+        "tanh",
+        "--observation-normalization",
+        "none",
+        "--observation-scaling",
+        "fixed",
+        "--command-segments",
+        "bootstrap",
+        "--learning-rate-max",
+        "0.0003",
+        "--action-std-final",
+        "0.05",
+        "--gait-clock",
+        "60",
+        "--action-smoothing",
+        "mean2",
+        "--velocity-noise",
+        "0.5",
+        "--eval-scope",
+        "probes",
+        "--checkpoint",
+        "/checkpoint/checkpoint_update002000.pt",
+        "--checkpoint-sha256",
+        "b89c5dd45b86c3e7a1f78352d1dd7e4bba8a6a321a65a5bc5307dc251c6beebc"
+      ],
+      "failed_probe_cases": [
+        "learning:translate_0.05_0deg",
+        "learning:translate_0.05_45deg",
+        "learning:translate_0.05_90deg",
+        "learning:translate_0.05_135deg",
+        "learning:translate_0.05_180deg",
+        "learning:translate_0.05_225deg",
+        "learning:translate_0.05_270deg",
+        "learning:translate_0.05_315deg",
+        "learning:yaw_-1",
+        "learning:yaw_+1",
+        "learning:quiet_20s",
+        "learning:quiet_32s",
+        "learning:forward_0.05_to_stop"
+      ],
+      "launcher_exit_code": 0,
+      "pack": "eval_v4_stride_c24_u2000_seed20260917_20261011_001",
+      "passed": 0,
+      "probes": {
+        "learning:forward_0.05_to_stop": {
+          "batch": "batch_012",
+          "control_trace_sha256": "132ff74afa5fb430f44ac00c9991f33e0a0bfd48806013d0984d3610e98af04f",
+          "failed_bounds": [
+            "max_joint_velocity_rms_rad_s",
+            "max_joint_position_range_rad",
+            "missing_six_toe_count_400hz"
+          ],
+          "force_metrics_sha256": "3c033c098b118df6aed98ca135da3f5492a6e4fd122ac6eef21ab7a7642daf81",
+          "mean_velocity_mps": [
+            -7.282038039692877e-05,
+            0.00016686435392712477,
+            -6.62507201501241e-07
+          ],
+          "mean_yaw_rate_rad_s": 0.0018360022124969037,
+          "pass": false,
+          "planar_error_mps": 0.05007505222237852,
+          "report_sha256": "79808525d5ff6e9308a3297a13350bfa68f792b3ccf46f23b883cd0cdbc65b3e",
+          "yaw_error_rad_s": 0.001906020856514855
+        },
+        "learning:quiet_20s": {
+          "batch": "batch_010",
+          "control_trace_sha256": "09ef250ac2d918788047aa741eedb3ce4b2ded31b23b2dc603a4c73f8cb1b2aa",
+          "failed_bounds": [
+            "max_joint_velocity_rms_rad_s",
+            "max_joint_position_range_rad",
+            "missing_six_toe_count_400hz"
+          ],
+          "force_metrics_sha256": "3e97f6b2c3ae143e9c1e8352aef4c01337e59122bd55fd9557ee675bb66ed865",
+          "mean_velocity_mps": [
+            0.00015895969669420338,
+            -0.00022643589352951073,
+            1.2004927106479078e-05
+          ],
+          "mean_yaw_rate_rad_s": -0.0012931153367109472,
+          "pass": false,
+          "planar_error_mps": 0.0004535661875934854,
+          "report_sha256": "bdfdd10213e966a8f56a1467e3b55273c34f689dbf088858a8d775f1a76aff71",
+          "yaw_error_rad_s": 0.0015546059370107278
+        },
+        "learning:quiet_32s": {
+          "batch": "batch_011",
+          "control_trace_sha256": "5eddd7fe465a3f2a45d4683fcb25f5e2a6f4fc1fb8bf3db54868d7be19759146",
+          "failed_bounds": [
+            "max_joint_velocity_rms_rad_s",
+            "max_joint_position_range_rad",
+            "missing_six_toe_count_400hz"
+          ],
+          "force_metrics_sha256": "1d3ff7b90478cec6fcb382bd6e46fd271a54cd84e12097d96323f759d8acab78",
+          "mean_velocity_mps": [
+            1.884819077029373e-05,
+            -0.00026353465823973594,
+            6.490466172953245e-06
+          ],
+          "mean_yaw_rate_rad_s": -0.0012213869939453714,
+          "pass": false,
+          "planar_error_mps": 0.0004582242242317695,
+          "report_sha256": "5ed95276eea662565d6e53eed9923ea3927b2700486afc159f75142058edadf7",
+          "yaw_error_rad_s": 0.0013971910267586418
+        },
+        "learning:translate_0.05_0deg": {
+          "batch": "batch_000",
+          "control_trace_sha256": "30cae3cf06fa0a26bf5d2d578579dbc0788692301bd1d92f1cfc007ee80626be",
+          "derived": {
+            "facing_drift_deg": 21.92522430419922,
+            "off_course_m": 0.0517086386680603,
+            "path_angle_deg": 10.233443260192871,
+            "speed_along_command_ratio": 0.3182501925362481
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "aa478c7953a5ae8eaba928d5517d827886610754cb2501f5b4e94e3f5f33a9f4",
+          "mean_velocity_mps": [
+            0.01623212454764429,
+            -0.00019563137060783878,
+            -0.000244373996670779
+          ],
+          "mean_yaw_rate_rad_s": 0.022112693261227685,
+          "pass": false,
+          "planar_error_mps": 0.03861037036499419,
+          "report_sha256": "6818aa3a082539d59482d00cc654f94cc36f80cf8e42f3ad178009b685b7f982",
+          "yaw_error_rad_s": 0.0273934946366882
+        },
+        "learning:translate_0.05_135deg": {
+          "batch": "batch_003",
+          "control_trace_sha256": "9617ff46abb702a74459e5ffaf893877eb4d613f8f45f27f5755b9b3e66570ba",
+          "derived": {
+            "facing_drift_deg": 27.783279418945312,
+            "off_course_m": -0.005100622773170471,
+            "path_angle_deg": -0.8659687042236328,
+            "speed_along_command_ratio": 0.37494540214538574
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "d349bcff5e8fffb5313bc974abb3402ed533d42d987825833a1f00869e377bbd",
+          "mean_velocity_mps": [
+            -0.009499470228387069,
+            0.016302655638142982,
+            0.00010541732469570747
+          ],
+          "mean_yaw_rate_rad_s": 0.02770358740999149,
+          "pass": false,
+          "planar_error_mps": 0.036085010888669763,
+          "report_sha256": "a703f5730592acf6215eb221fde2cfef138baa54e3b5da90bcdca27b1ee5dd57",
+          "yaw_error_rad_s": 0.030476863850448916
+        },
+        "learning:translate_0.05_180deg": {
+          "batch": "batch_004",
+          "control_trace_sha256": "f61bff30b5d8f6d76ed2c1a6eba07b93165c136855f18625732520958dffd8f1",
+          "derived": {
+            "facing_drift_deg": 33.84309387207031,
+            "off_course_m": 0.03144042193889618,
+            "path_angle_deg": 6.376201629638672,
+            "speed_along_command_ratio": 0.31261397732628715
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "1a2f06b8e4aa5a43e3ce1262a3fcc2435ae2b73c21576a6a9b92973717339b9e",
+          "mean_velocity_mps": [
+            -0.015696838019215432,
+            0.002860453452685611,
+            1.424720912794049e-05
+          ],
+          "mean_yaw_rate_rad_s": 0.033716738617873644,
+          "pass": false,
+          "planar_error_mps": 0.0368759970723905,
+          "report_sha256": "6e6b9cd33ef145c63bae5896ec6f013168dc7ca9f98f597569376a731ff6e617",
+          "yaw_error_rad_s": 0.03963039264330715
+        },
+        "learning:translate_0.05_225deg": {
+          "batch": "batch_005",
+          "control_trace_sha256": "401fee34e339f9b3875e9d2c9c45b14a52f1e66377203a6f2503a79615d1c836",
+          "derived": {
+            "facing_drift_deg": 26.943878173828125,
+            "off_course_m": 0.01724264770746231,
+            "path_angle_deg": 3.673726797103882,
+            "speed_along_command_ratio": 0.2983880705303616
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "8b59986b22b95e1cccb49ccf0b5942f2c9ac461cab49b807e8af85e44b922a8b",
+          "mean_velocity_mps": [
+            -0.01219169885367983,
+            -0.0087894637516901,
+            0.00010469659251906883
+          ],
+          "mean_yaw_rate_rad_s": 0.026433489945409273,
+          "pass": false,
+          "planar_error_mps": 0.03905917166080717,
+          "report_sha256": "5c2791e4f0b855ebbf6db625b4237b257ebf26325ad391c839b9ae7b6d4ef087",
+          "yaw_error_rad_s": 0.04297679328049213
+        },
+        "learning:translate_0.05_270deg": {
+          "batch": "batch_006",
+          "control_trace_sha256": "7a91167662e8c6c1d07b48dfbbdd44e7223f0c70890f37ecf0451b0d56a78ccf",
+          "derived": {
+            "facing_drift_deg": 19.389833450317383,
+            "off_course_m": 0.1058821827173233,
+            "path_angle_deg": 16.089262008666992,
+            "speed_along_command_ratio": 0.40788398848639595
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "8acc4aeab86d9c0909ae5eb4e7576455a758c4e7bf9f88a4b54a934f63572763",
+          "mean_velocity_mps": [
+            0.00244752558137915,
+            -0.021148062943540623,
+            0.00033644354263761585
+          ],
+          "mean_yaw_rate_rad_s": 0.019549469495584088,
+          "pass": false,
+          "planar_error_mps": 0.035562197712867595,
+          "report_sha256": "f222c6bd75ca8663abe13cd0ba0d14d179229f2bfe43292af5865c299002298c",
+          "yaw_error_rad_s": 0.023833829962149247
+        },
+        "learning:translate_0.05_315deg": {
+          "batch": "batch_007",
+          "control_trace_sha256": "ea68d37db9a5ab40509097534daaaf1af2725a5cacbfbc49f441c046a2d55548",
+          "derived": {
+            "facing_drift_deg": 12.367244720458984,
+            "off_course_m": 0.05156378448009491,
+            "path_angle_deg": 7.276138782501221,
+            "speed_along_command_ratio": 0.44872522354125977
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "e735e635506db4f63ddb96930a7670ec5984076855893ffd6ff045a7864dc9fd",
+          "mean_velocity_mps": [
+            0.016244960049478865,
+            -0.01575628611093213,
+            -0.00043942211891024956
+          ],
+          "mean_yaw_rate_rad_s": 0.012611417828743766,
+          "pass": false,
+          "planar_error_mps": 0.03644330541423749,
+          "report_sha256": "e690ca4840b60b714fbc6a1bee68ec3fc41f7c20986a107b19e2e1526759c992",
+          "yaw_error_rad_s": 0.026582532253727347
+        },
+        "learning:translate_0.05_45deg": {
+          "batch": "batch_001",
+          "control_trace_sha256": "5ba69a1183b93756cf4f923708c1c985a57add1e1aa9d4d8360e3d7caa23f42a",
+          "derived": {
+            "facing_drift_deg": 40.68827819824219,
+            "off_course_m": 0.11461672931909561,
+            "path_angle_deg": 16.79778289794922,
+            "speed_along_command_ratio": 0.42186889383527965
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "11125ad31c0679c5f100c633cbe5cc62e7abb30c14a1876640ebff8373fe9102",
+          "mean_velocity_mps": [
+            0.016866996362141316,
+            0.014769699380488244,
+            -0.00024201279791747992
+          ],
+          "mean_yaw_rate_rad_s": 0.04029888731226734,
+          "pass": false,
+          "planar_error_mps": 0.037310578128656575,
+          "report_sha256": "a44a0b931ab0bdaf459ff77f100133e9bedbad890fb111d145b6304dbc473e89",
+          "yaw_error_rad_s": 0.045974601445692244
+        },
+        "learning:translate_0.05_90deg": {
+          "batch": "batch_002",
+          "control_trace_sha256": "9cf761a7a53aece2d8e3d56e5b8eb292f26ec7a423f076092379af930cd2adfd",
+          "derived": {
+            "facing_drift_deg": 31.463376998901367,
+            "off_course_m": 0.028261397033929825,
+            "path_angle_deg": 3.893176555633545,
+            "speed_along_command_ratio": 0.4614243573612637
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "88331393e5c4893a2c89ee8959eea67cea2bcdc064b9eca920c12f6ebb9a9397",
+          "mean_velocity_mps": [
+            0.004862131337289567,
+            0.022882263707122808,
+            -0.0003330230140434356
+          ],
+          "mean_yaw_rate_rad_s": 0.031180162691492524,
+          "pass": false,
+          "planar_error_mps": 0.03340813222644971,
+          "report_sha256": "c19211f2ba0db453a2d1a4bde0161d50e2370ce90d9c06955a76ee10a5b21dcc",
+          "yaw_error_rad_s": 0.037315517032765054
+        },
+        "learning:yaw_+1": {
+          "batch": "batch_009",
+          "control_trace_sha256": "c38a3db18210e0d279b116617059ae54415dc5a9bb1a346c4284c2dd2c1601dd",
+          "failed_bounds": [
+            "yaw_error_rad_s"
+          ],
+          "force_metrics_sha256": "f45ebb6f3534c915e98ded8879e8b4b6757b2927cd5e81d15efa2bebd0d6cea9",
+          "mean_velocity_mps": [
+            -0.0058841768120366155,
+            0.006007316530079982,
+            -0.00014623765000568308
+          ],
+          "mean_yaw_rate_rad_s": 0.061900730941412754,
+          "pass": false,
+          "planar_error_mps": 0.020404077413599078,
+          "report_sha256": "2f01e1cedb9df52022af54467df5c796f1f679875468ef55b9f0a71692856984",
+          "yaw_error_rad_s": 0.13845665170991453
+        },
+        "learning:yaw_-1": {
+          "batch": "batch_008",
+          "control_trace_sha256": "e368c1e4431b9d44b066dc39c0ee9eece53103d682f1f2ac67b3f2607204ddd4",
+          "failed_bounds": [
+            "yaw_error_rad_s"
+          ],
+          "force_metrics_sha256": "ed1a2e4f1e3279ee9298169a3e10b6a088dd23accba058f1bcd8855d1d5d978a",
+          "mean_velocity_mps": [
+            0.0011359626835588965,
+            -0.002121249344047164,
+            -6.62925618605779e-06
+          ],
+          "mean_yaw_rate_rad_s": -0.004680989155389175,
+          "pass": false,
+          "planar_error_mps": 0.006892134203652234,
+          "report_sha256": "558abd6f8d521c54d77942dad8a8ecbb98661b73b289b02e773422aff9722177",
+          "yaw_error_rad_s": 0.19531901084461084
+        }
+      },
+      "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
+      "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+      "stage2_complete": false,
+      "summary_sha256": "dc10dbdbcaaa62fe7e658a5025505571d623f666ef0e1c2d2e479d58e70d3aef",
+      "walk_summary": {
+        "facing_drift_max_deg": 40.68827819824219,
+        "facing_drift_mean_deg": 26.80052614212036,
+        "path_angle_max_deg": 16.79778289794922,
+        "path_angle_mean_deg": 8.150712579488754
+      }
+    },
+    "c36": {
+      "binding_file_sha256": "5cfba410023ecb90591f77f6470718c3a82cce10b2881f568324f38f0de24011",
+      "binding_sha256": "5cfba410023ecb90591f77f6470718c3a82cce10b2881f568324f38f0de24011",
+      "command_args": [
+        "--mode",
+        "evaluate",
+        "--asset",
+        "/asset",
+        "--model",
+        "/asset/source/model.json",
+        "--geometry",
+        "/geometry_source/geometry/geometry.json",
+        "--geometry-extrema",
+        "/geometry_source/geometry/geometry_extrema.npz",
+        "--stance",
+        "/prior/stance.json",
+        "--num-envs",
+        "1",
+        "--source-freeze-sha256",
+        "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+        "--max-wall-seconds",
+        "21600",
+        "--headless",
+        "--device",
+        "cuda:0",
+        "--allocation-profile",
+        "flat_pilot_v1",
+        "--standing-admission",
+        "/admission/admission.json",
+        "--updates",
+        "512",
+        "--seed",
+        "20260917",
+        "--action-mean",
+        "tanh",
+        "--observation-normalization",
+        "none",
+        "--observation-scaling",
+        "fixed",
+        "--command-segments",
+        "bootstrap",
+        "--learning-rate-max",
+        "0.0003",
+        "--action-std-final",
+        "0.05",
+        "--gait-clock",
+        "60",
+        "--action-smoothing",
+        "mean2",
+        "--velocity-noise",
+        "0.5",
+        "--steps-per-env",
+        "36",
+        "--eval-scope",
+        "probes",
+        "--checkpoint",
+        "/checkpoint/checkpoint_update001333.pt",
+        "--checkpoint-sha256",
+        "488cba636dd835953c683c84df9a3b045ba7817565eafa610d8e62338b97aedb"
+      ],
+      "failed_probe_cases": [
+        "learning:translate_0.05_0deg",
+        "learning:translate_0.05_45deg",
+        "learning:translate_0.05_90deg",
+        "learning:translate_0.05_135deg",
+        "learning:translate_0.05_180deg",
+        "learning:translate_0.05_225deg",
+        "learning:translate_0.05_270deg",
+        "learning:translate_0.05_315deg",
+        "learning:yaw_-1",
+        "learning:yaw_+1",
+        "learning:quiet_20s",
+        "learning:quiet_32s",
+        "learning:forward_0.05_to_stop"
+      ],
+      "launcher_exit_code": 0,
+      "pack": "eval_v4_stride_c36_u1333_seed20260917_20261011_001",
+      "passed": 0,
+      "probes": {
+        "learning:forward_0.05_to_stop": {
+          "batch": "batch_012",
+          "control_trace_sha256": "122086938ccec21d3623c444b3da5ba10d3e08bf8e97f795362e361329b44941",
+          "failed_bounds": [
+            "max_planar_excursion_m",
+            "max_heading_excursion_deg",
+            "max_joint_velocity_rms_rad_s",
+            "max_joint_position_range_rad",
+            "max_target_step_abs_p95_rad_per_20ms",
+            "missing_six_toe_count_400hz"
+          ],
+          "force_metrics_sha256": "5967def7075d2f14bb63071412b2b78032fc0325780f819e8f47b9d3970db186",
+          "mean_velocity_mps": [
+            -0.002832399940473388,
+            0.0011076620088760478,
+            0.00012531666936823848
+          ],
+          "mean_yaw_rate_rad_s": 0.004294967441672654,
+          "pass": false,
+          "planar_error_mps": 0.05298840249880238,
+          "report_sha256": "001a44907fb2b212d16848e854254341166e93a030af2b17297c3fcaf5417cdb",
+          "yaw_error_rad_s": 0.008441556054190454
+        },
+        "learning:quiet_20s": {
+          "batch": "batch_010",
+          "control_trace_sha256": "c87752fb00e5be873632cb1fb93c593b726eda71cd6dd84abd7bc9d30ad2329a",
+          "failed_bounds": [
+            "max_joint_velocity_rms_rad_s",
+            "max_joint_position_range_rad",
+            "max_target_step_abs_p95_rad_per_20ms",
+            "missing_six_toe_count_400hz"
+          ],
+          "force_metrics_sha256": "bab44b8e8c6811296d461d31ff5e5c8b05e3af547dddb4a06f4ae82b326fb1da",
+          "mean_velocity_mps": [
+            1.819384027017336e-05,
+            0.00016286191172336674,
+            3.063843325765466e-05
+          ],
+          "mean_yaw_rate_rad_s": -4.866579542203705e-05,
+          "pass": false,
+          "planar_error_mps": 0.0012580637178251307,
+          "report_sha256": "95a79335a681419bcc4ae3e5d0660a2fbb9c8ecafd5472091690ba978a68b1b9",
+          "yaw_error_rad_s": 0.0030513224117074533
+        },
+        "learning:quiet_32s": {
+          "batch": "batch_011",
+          "control_trace_sha256": "e65a122e74ba849081e7aa41c035add159799e0127bfef9812270d1c928cb9a6",
+          "failed_bounds": [
+            "max_planar_excursion_m",
+            "max_joint_velocity_rms_rad_s",
+            "max_joint_position_range_rad",
+            "max_target_step_abs_p95_rad_per_20ms",
+            "missing_six_toe_count_400hz"
+          ],
+          "force_metrics_sha256": "642ec059bd705c6e9805ec806f874a2482b719e559efe0c265ba4caefe3f3b4f",
+          "mean_velocity_mps": [
+            -0.00010019089012153128,
+            0.000506681665364599,
+            9.914467434520134e-06
+          ],
+          "mean_yaw_rate_rad_s": 0.0005979341353975712,
+          "pass": false,
+          "planar_error_mps": 0.0011996385078132167,
+          "report_sha256": "b68a55b16fbd9f365c249a814bb27c273658b6586e5a9a7ea055ae32cc2a47f6",
+          "yaw_error_rad_s": 0.002781868825481645
+        },
+        "learning:translate_0.05_0deg": {
+          "batch": "batch_000",
+          "control_trace_sha256": "2da018366bf3d18c7e7ae584b5d36a1fd8e7ba80a0bdde0db1291767f186dc81",
+          "derived": {
+            "facing_drift_deg": -1.1764469146728516,
+            "off_course_m": -0.015710558742284775,
+            "path_angle_deg": -2.3072257041931152,
+            "speed_along_command_ratio": 0.43325824870003593
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "2657e5524639243de3b372bc93524988140723880dd4bbbe0fd6c4783ffa1f62",
+          "mean_velocity_mps": [
+            0.021765048875450284,
+            -0.0006843976481710673,
+            0.00015085694573166236
+          ],
+          "mean_yaw_rate_rad_s": -0.0009511285485659308,
+          "pass": false,
+          "planar_error_mps": 0.032949920857684174,
+          "report_sha256": "8099c8f321349a79af4fe4389abf5448ec55445c521f679b4a02d3be3d84c722",
+          "yaw_error_rad_s": 0.02967968683346473
+        },
+        "learning:translate_0.05_135deg": {
+          "batch": "batch_003",
+          "control_trace_sha256": "b808e2053deb69655eb2b6cc2cd53072becd5c55d90326860d0b350ab7800809",
+          "derived": {
+            "facing_drift_deg": 6.131949424743652,
+            "off_course_m": 0.02844579517841339,
+            "path_angle_deg": 4.536025524139404,
+            "speed_along_command_ratio": 0.398395127720303
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "cb9c40a2e320888fa641920553d8a20eebaa8f67fcad5aeac9932257a84537e4",
+          "mean_velocity_mps": [
+            -0.014473410195693093,
+            0.013804350951619452,
+            -0.00018028571508133827
+          ],
+          "mean_yaw_rate_rad_s": 0.005877952009615315,
+          "pass": false,
+          "planar_error_mps": 0.03433077995640678,
+          "report_sha256": "eae4ab9113176b77f40f62d0b1c73561be8f9cc5568f37e6d6beac7b221251ef",
+          "yaw_error_rad_s": 0.02191304394444732
+        },
+        "learning:translate_0.05_180deg": {
+          "batch": "batch_004",
+          "control_trace_sha256": "eebb8827ab5695ac29a439c61481de26e6a9e96c49fc930794772d8a0e373cc1",
+          "derived": {
+            "facing_drift_deg": 12.461342811584473,
+            "off_course_m": 0.006129199638962746,
+            "path_angle_deg": 0.9323756098747253,
+            "speed_along_command_ratio": 0.41846063401963973
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "1808c028a91295c6c2693b0f5426d5546d8c11057043ee27d36ac1ccbde2de13",
+          "mean_velocity_mps": [
+            -0.02093517431857849,
+            0.0019936440727395094,
+            -5.090483235895881e-05
+          ],
+          "mean_yaw_rate_rad_s": 0.012779348246912976,
+          "pass": false,
+          "planar_error_mps": 0.033952487354542184,
+          "report_sha256": "dffd8b2313e9b4f19bd7697eab80c0b6f6790a605e4c598664872a33a9d5908c",
+          "yaw_error_rad_s": 0.01855653056200158
+        },
+        "learning:translate_0.05_225deg": {
+          "batch": "batch_005",
+          "control_trace_sha256": "93a36a6db6327a055aa35301ff866c0cafb66ff29da1a2633a2662385eec9478",
+          "derived": {
+            "facing_drift_deg": 13.773716926574707,
+            "off_course_m": 0.03428497910499573,
+            "path_angle_deg": 5.838844299316406,
+            "speed_along_command_ratio": 0.3725204202863905
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "03dd423ded8c9b0415b95c16a282c022ff4e8494966bb27678bf56f9cdd891e2",
+          "mean_velocity_mps": [
+            -0.013524246668532792,
+            -0.01297879303081539,
+            -0.00015726709912273953
+          ],
+          "mean_yaw_rate_rad_s": 0.014060681996172966,
+          "pass": false,
+          "planar_error_mps": 0.03479014965206068,
+          "report_sha256": "30f7f4bf5518fb3a8421098eddd77be0456d9f82355804c2f8f9f898944b659a",
+          "yaw_error_rad_s": 0.02771938212185819
+        },
+        "learning:translate_0.05_270deg": {
+          "batch": "batch_006",
+          "control_trace_sha256": "4c0779d8f93e08f2dfb1b6a6e529d3db1d428e8ac5f283bd662e019268a10ca1",
+          "derived": {
+            "facing_drift_deg": 2.9891574382781982,
+            "off_course_m": 0.027412086725234985,
+            "path_angle_deg": 4.460883140563965,
+            "speed_along_command_ratio": 0.39041151603062946
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "d55e478ed5b331a72355323eafcdb88989ee3cf0864f6c478b8e0a9cc8433cbf",
+          "mean_velocity_mps": [
+            0.0010319778410542435,
+            -0.019526524898956604,
+            -0.00014197913507211436
+          ],
+          "mean_yaw_rate_rad_s": 0.003073059993263318,
+          "pass": false,
+          "planar_error_mps": 0.03495554550658849,
+          "report_sha256": "075a2317604e836be3658f9147baa7b905bae601870db2c1c858ec163760ec01",
+          "yaw_error_rad_s": 0.019906582217668462
+        },
+        "learning:translate_0.05_315deg": {
+          "batch": "batch_007",
+          "control_trace_sha256": "6c7c5ef4650274b47f72b4e3221441d2a2eade6940def904115eccd753b7ec4f",
+          "derived": {
+            "facing_drift_deg": -11.617413520812988,
+            "off_course_m": 0.04292277991771698,
+            "path_angle_deg": 5.490142345428467,
+            "speed_along_command_ratio": 0.49619489245944554
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "0c811a8cd39a2e181c3717935d73b25b885cc7c77691900013b1b41eecaee988",
+          "mean_velocity_mps": [
+            0.020777184191004345,
+            -0.013866681226994026,
+            -9.068673768508305e-05
+          ],
+          "mean_yaw_rate_rad_s": -0.011842214997858688,
+          "pass": false,
+          "planar_error_mps": 0.0317496959167571,
+          "report_sha256": "8ca0d11870ea63f583ed718940c186ef00cf97a7bf0496e74b3adab93457463f",
+          "yaw_error_rad_s": 0.02087716618501749
+        },
+        "learning:translate_0.05_45deg": {
+          "batch": "batch_001",
+          "control_trace_sha256": "0dc30a5bc29f49187eec64f61079831e6eec48b18a05c4ca3e4e61fed8982c14",
+          "derived": {
+            "facing_drift_deg": 19.503211975097656,
+            "off_course_m": 0.10494004189968109,
+            "path_angle_deg": 14.652517318725586,
+            "speed_along_command_ratio": 0.44595830970340306
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "3a2692543941430d19d2af53601c99e84f16761b304620f23aa00bea2cb1fe1e",
+          "mean_velocity_mps": [
+            0.014945613932996215,
+            0.017731087545077635,
+            -2.563580188776701e-05
+          ],
+          "mean_yaw_rate_rad_s": 0.019389986079508932,
+          "pass": false,
+          "planar_error_mps": 0.03517758786020109,
+          "report_sha256": "2a9106528979efad35e67d02f7d188699f57feaa747e8b52c39e86148f8877e4",
+          "yaw_error_rad_s": 0.026316500869663865
+        },
+        "learning:translate_0.05_90deg": {
+          "batch": "batch_002",
+          "control_trace_sha256": "7c9ab6750dca4c041b02c88cc63195e575fd0631d873232345993b70bfbf5e81",
+          "derived": {
+            "facing_drift_deg": 1.2373639345169067,
+            "off_course_m": 0.11782907694578171,
+            "path_angle_deg": 21.275897979736328,
+            "speed_along_command_ratio": 0.33621331055959064
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "4b0d9bcebbdd3331f1a442609a79f789886cbc0547b3544ab464b40ed87cccd5",
+          "mean_velocity_mps": [
+            -0.006461467709905586,
+            0.01691195682661433,
+            -0.00015599802633399056
+          ],
+          "mean_yaw_rate_rad_s": 0.0012149057959921791,
+          "pass": false,
+          "planar_error_mps": 0.03730590446303627,
+          "report_sha256": "b653b83c872b8cfd4951ae5330b039a7f6df1431481c75ef2d400b087a36bfe9",
+          "yaw_error_rad_s": 0.02063034316045013
+        },
+        "learning:yaw_+1": {
+          "batch": "batch_009",
+          "control_trace_sha256": "2cbdbf0b98e1e64fa46d2cb188df1854d0f44e1460aef51fa037da544484153a",
+          "failed_bounds": [
+            "yaw_error_rad_s"
+          ],
+          "force_metrics_sha256": "c23e2cf6d2f02db4c24f02e9fc60b6fc438e152e554837205222f66bc858c394",
+          "mean_velocity_mps": [
+            -0.011047872416821864,
+            0.0034933731615639355,
+            -5.178847057629487e-05
+          ],
+          "mean_yaw_rate_rad_s": 0.04108090079856199,
+          "pass": false,
+          "planar_error_mps": 0.014387731974938478,
+          "report_sha256": "7f81e2c67bc661dbf37e5b8cea9f3903a57f6d9294036d9e9dad5b4f15914711",
+          "yaw_error_rad_s": 0.15891909920143804
+        },
+        "learning:yaw_-1": {
+          "batch": "batch_008",
+          "control_trace_sha256": "400821e481bf20467d2891e8b42096b215faa4571dc746edbe128736836ebeb0",
+          "failed_bounds": [
+            "yaw_error_rad_s"
+          ],
+          "force_metrics_sha256": "2b7fe483bc10a1b7e430ac475b2b260432ebe689c95e282ba285384ad1a7e74c",
+          "mean_velocity_mps": [
+            0.0020440266376886497,
+            -0.0068286821809502175,
+            -5.6004553980783895e-05
+          ],
+          "mean_yaw_rate_rad_s": -0.03508149047688614,
+          "pass": false,
+          "planar_error_mps": 0.009816203933549362,
+          "report_sha256": "28686e9f09b6919bd054a498684e342b78caa4d4b2628002796b32e4e44300bc",
+          "yaw_error_rad_s": 0.16491850952311385
+        }
+      },
+      "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
+      "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+      "stage2_complete": false,
+      "summary_sha256": "86e6dec7a7f3f7354a06695bf1f1c13beb093d37659ba2e87bcc5f3a54d7a65e",
+      "walk_summary": {
+        "facing_drift_max_deg": 19.503211975097656,
+        "facing_drift_mean_deg": 8.61132536828518,
+        "path_angle_max_deg": 21.275897979736328,
+        "path_angle_mean_deg": 7.43673899024725
+      }
+    },
+    "c48": {
+      "binding_file_sha256": "c2e92c698e454875f36b9e0abb1d96568b999a7163c1ae08557dd3e2a14bbe95",
+      "binding_sha256": "c2e92c698e454875f36b9e0abb1d96568b999a7163c1ae08557dd3e2a14bbe95",
+      "command_args": [
+        "--mode",
+        "evaluate",
+        "--asset",
+        "/asset",
+        "--model",
+        "/asset/source/model.json",
+        "--geometry",
+        "/geometry_source/geometry/geometry.json",
+        "--geometry-extrema",
+        "/geometry_source/geometry/geometry_extrema.npz",
+        "--stance",
+        "/prior/stance.json",
+        "--num-envs",
+        "1",
+        "--source-freeze-sha256",
+        "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+        "--max-wall-seconds",
+        "21600",
+        "--headless",
+        "--device",
+        "cuda:0",
+        "--allocation-profile",
+        "flat_pilot_v1",
+        "--standing-admission",
+        "/admission/admission.json",
+        "--updates",
+        "512",
+        "--seed",
+        "20260917",
+        "--action-mean",
+        "tanh",
+        "--observation-normalization",
+        "none",
+        "--observation-scaling",
+        "fixed",
+        "--command-segments",
+        "bootstrap",
+        "--learning-rate-max",
+        "0.0003",
+        "--action-std-final",
+        "0.05",
+        "--gait-clock",
+        "60",
+        "--action-smoothing",
+        "mean2",
+        "--velocity-noise",
+        "0.5",
+        "--steps-per-env",
+        "48",
+        "--eval-scope",
+        "probes",
+        "--checkpoint",
+        "/checkpoint/checkpoint_update001000.pt",
+        "--checkpoint-sha256",
+        "afa3110fa18dc54257fcffb35270144f995c98324987b5f7d6630fcb1c753e6c"
+      ],
+      "failed_probe_cases": [
+        "learning:translate_0.05_0deg",
+        "learning:translate_0.05_45deg",
+        "learning:translate_0.05_90deg",
+        "learning:translate_0.05_135deg",
+        "learning:translate_0.05_180deg",
+        "learning:translate_0.05_225deg",
+        "learning:translate_0.05_270deg",
+        "learning:translate_0.05_315deg",
+        "learning:yaw_-1",
+        "learning:yaw_+1",
+        "learning:forward_0.05_to_stop"
+      ],
+      "launcher_exit_code": 0,
+      "pack": "eval_v4_stride_c48_u1000_seed20260917_20261011_001",
+      "passed": 2,
+      "probes": {
+        "learning:forward_0.05_to_stop": {
+          "batch": "batch_012",
+          "control_trace_sha256": "906c5212b7150ffc09cd8d193623352440991c5323d0cc3c3b1186a73cb26917",
+          "failed_bounds": [
+            "max_joint_position_range_rad"
+          ],
+          "force_metrics_sha256": "149601580b9f13bab72a1f247e787650f289b7975322f5e2fc7bc744352ec430",
+          "mean_velocity_mps": [
+            -0.0003767146747860654,
+            -0.00031213781625063976,
+            2.314407084152112e-05
+          ],
+          "mean_yaw_rate_rad_s": -0.002982114871348585,
+          "pass": false,
+          "planar_error_mps": 0.05037894600959697,
+          "report_sha256": "ac76019b13282d10a48236e750b8d32ac160a69997c778fadf726a9559d7be44",
+          "yaw_error_rad_s": 0.003077836450490061
+        },
+        "learning:quiet_20s": {
+          "batch": "batch_010",
+          "control_trace_sha256": "88d7ec6b4b8cc526b2caf5fad3ec350af50ad00c67c674ce2e1f8fdab90c1326",
+          "failed_bounds": [],
+          "force_metrics_sha256": "ac3933668bba7d4639cd181002fa2f16a1ed81aaf25a84ccc877146090babc8e",
+          "mean_velocity_mps": [
+            -5.102551002837232e-06,
+            -1.7319016902871272e-05,
+            -1.9054533417350717e-07
+          ],
+          "mean_yaw_rate_rad_s": -0.0020382693021734686,
+          "pass": true,
+          "planar_error_mps": 7.22957744562264e-05,
+          "report_sha256": "5df5bc00d377100c783658858c74f7da0f7759a6b13813ff499d0fde1088ed5b",
+          "yaw_error_rad_s": 0.0020382693021734686
+        },
+        "learning:quiet_32s": {
+          "batch": "batch_011",
+          "control_trace_sha256": "f762304e9c73c8a021ebea744296d917d517eb71e2092665069f1b7d09c7adff",
+          "failed_bounds": [],
+          "force_metrics_sha256": "486b0f9b712e9c4070e96928e209c67f55973fede16e4d946ba59bb9d5b78177",
+          "mean_velocity_mps": [
+            -2.718589346347916e-06,
+            6.803887836454497e-06,
+            5.911042001863091e-07
+          ],
+          "mean_yaw_rate_rad_s": -0.001997027834678663,
+          "pass": true,
+          "planar_error_mps": 8.723108526134419e-05,
+          "report_sha256": "057172e4c2e3df7b14825a374bdfd6567f7bb2dc0f129686fbac4d73c021abc0",
+          "yaw_error_rad_s": 0.001997027834678663
+        },
+        "learning:translate_0.05_0deg": {
+          "batch": "batch_000",
+          "control_trace_sha256": "0a424b4cc14aa4b0f6ba145cd6a656eccb7af7548a10ef9ed8c80c8245b3c2be",
+          "derived": {
+            "facing_drift_deg": 23.945083618164062,
+            "off_course_m": 0.03130052238702774,
+            "path_angle_deg": 3.680746078491211,
+            "speed_along_command_ratio": 0.5406271086798774
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "5c988828435374dcd6e5ea693d3995e588c2026fd7bc5351e14f0c07042891d0",
+          "mean_velocity_mps": [
+            0.027119034160760842,
+            -0.003965695726192508,
+            0.00017097878392942128
+          ],
+          "mean_yaw_rate_rad_s": 0.023474017205702226,
+          "pass": false,
+          "planar_error_mps": 0.028738181872680103,
+          "report_sha256": "6ed2daeff2c1c391fed5cd1bb3fc605580d27dc6545105f2551d69e29cc38ff7",
+          "yaw_error_rad_s": 0.04034815220082652
+        },
+        "learning:translate_0.05_135deg": {
+          "batch": "batch_003",
+          "control_trace_sha256": "84cfea1684eceb772ecbb52fcab4265224d137a86d795d65fe9a1ab33dfd5535",
+          "derived": {
+            "facing_drift_deg": 1.9927970170974731,
+            "off_course_m": 0.00021637976169586182,
+            "path_angle_deg": 0.03013426996767521,
+            "speed_along_command_ratio": 0.45712610085805255
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "22ca867f1221710f7bb48ac528a28c164a26c5adfc007a7463a4cde93dceb8f6",
+          "mean_velocity_mps": [
+            -0.01596487722139971,
+            0.016460076782093203,
+            -0.0003460999092862148
+          ],
+          "mean_yaw_rate_rad_s": 0.002078408362359535,
+          "pass": false,
+          "planar_error_mps": 0.03271305800630795,
+          "report_sha256": "a6a6a89cad57a0c9bf536ec4952871f1af0b240f1523d2f940934e0369d2c517",
+          "yaw_error_rad_s": 0.01506591503846667
+        },
+        "learning:translate_0.05_180deg": {
+          "batch": "batch_004",
+          "control_trace_sha256": "92c18e2f45d0e45390458838cedb33558fbe20312c1e433f17a2ac8a010ec9d8",
+          "derived": {
+            "facing_drift_deg": 20.751182556152344,
+            "off_course_m": 0.17248933017253876,
+            "path_angle_deg": 25.583086013793945,
+            "speed_along_command_ratio": 0.4003176755375332
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "080ecf774ed158b3b2a85c3a080909d139dd2bfdb74b6ddc740ceb21f1b09fb8",
+          "mean_velocity_mps": [
+            -0.02156665652076439,
+            -0.005936773873812278,
+            -3.7089785190630285e-05
+          ],
+          "mean_yaw_rate_rad_s": 0.020621036380079293,
+          "pass": false,
+          "planar_error_mps": 0.03232509900159932,
+          "report_sha256": "9d4d0b415051144e1e21869171b366a8d710423bb966a2836adea54338100c69",
+          "yaw_error_rad_s": 0.03189130473000577
+        },
+        "learning:translate_0.05_225deg": {
+          "batch": "batch_005",
+          "control_trace_sha256": "529cb5133e1232663532c1f95ae0a68327051839500c4e4f7db75b9aee255c4b",
+          "derived": {
+            "facing_drift_deg": 31.03623390197754,
+            "off_course_m": 0.07326577603816986,
+            "path_angle_deg": 9.548260688781738,
+            "speed_along_command_ratio": 0.48396097289191353
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "adc90c8c897a801db8ad46e4eae2368f568deb17e1230f2d34439429a05f6957",
+          "mean_velocity_mps": [
+            -0.019297480484148574,
+            -0.015744689850305648,
+            3.5517285747185054e-05
+          ],
+          "mean_yaw_rate_rad_s": 0.030962988531791552,
+          "pass": false,
+          "planar_error_mps": 0.028980375022232142,
+          "report_sha256": "ed0a806abf447ea7b3726a6f67aa9d45b8272517d9f4f5316259ce5e29dce078",
+          "yaw_error_rad_s": 0.03804553338381366
+        },
+        "learning:translate_0.05_270deg": {
+          "batch": "batch_006",
+          "control_trace_sha256": "f481d5f4ba15284dbdf3894cb7fe7e5c72dbe2dd224b5b43c8610b401ed76a64",
+          "derived": {
+            "facing_drift_deg": 17.958385467529297,
+            "off_course_m": 0.14149466156959534,
+            "path_angle_deg": 18.61697006225586,
+            "speed_along_command_ratio": 0.4667013883590698
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "4e7c3de85a3cfc788eca8d501fffeb740496607da8b0867664dccb504cccf74b",
+          "mean_velocity_mps": [
+            0.004227568570585489,
+            -0.024459576048534954,
+            0.0005080828282563554
+          ],
+          "mean_yaw_rate_rad_s": 0.018109251873668214,
+          "pass": false,
+          "planar_error_mps": 0.027401797876468282,
+          "report_sha256": "570b640e9399adfbf6bfc57c2448d10920401c6d2631c7005c4d6d9260da28f9",
+          "yaw_error_rad_s": 0.029528618753143183
+        },
+        "learning:translate_0.05_315deg": {
+          "batch": "batch_007",
+          "control_trace_sha256": "1cee83a086145e2301b9542164fbda8a2e043e5b334d554a27578f62f50215ca",
+          "derived": {
+            "facing_drift_deg": 22.55548095703125,
+            "off_course_m": 0.20589017868041992,
+            "path_angle_deg": 19.200544357299805,
+            "speed_along_command_ratio": 0.6569088167614406
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "048ada6b25f907eefdbd9900edac41a120ab93e5defc2679db9c964285855def",
+          "mean_velocity_mps": [
+            0.02791855628458458,
+            -0.021334264413295258,
+            0.0002986538073266147
+          ],
+          "mean_yaw_rate_rad_s": 0.02254904804372006,
+          "pass": false,
+          "planar_error_mps": 0.02517567467432621,
+          "report_sha256": "86350c62502eb138e90968f3abe44eff48396cd2078dd71a08f31e95f05ffae5",
+          "yaw_error_rad_s": 0.031870994363076846
+        },
+        "learning:translate_0.05_45deg": {
+          "batch": "batch_001",
+          "control_trace_sha256": "35d2c103d8f6759201e672d473c5d01159c26fd5fcb42a08f2b0e9cbcd6f55eb",
+          "derived": {
+            "facing_drift_deg": 34.18319320678711,
+            "off_course_m": 0.10093353688716888,
+            "path_angle_deg": 10.528697967529297,
+            "speed_along_command_ratio": 0.603411595026652
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "b72ab5e91362618caff4d95ad43d5f43db82479b54b2e0a7007f8c17f317911e",
+          "mean_velocity_mps": [
+            0.02473937686595458,
+            0.019480197505362114,
+            -6.97499008079044e-05
+          ],
+          "mean_yaw_rate_rad_s": 0.03413540015543943,
+          "pass": false,
+          "planar_error_mps": 0.030297905499907445,
+          "report_sha256": "8d0bbf0878697b39038d65073f83cda965b01e6e54a748b06381f7da273e8871",
+          "yaw_error_rad_s": 0.054190574654670406
+        },
+        "learning:translate_0.05_90deg": {
+          "batch": "batch_002",
+          "control_trace_sha256": "e32e64939f14fb5fb649d3ab060f6a776581f5745472858b1015e8d34c22931d",
+          "derived": {
+            "facing_drift_deg": 8.062994956970215,
+            "off_course_m": -0.019610796123743057,
+            "path_angle_deg": -2.6810264587402344,
+            "speed_along_command_ratio": 0.4653257462713453
+          },
+          "failed_bounds": [
+            "planar_error_mps"
+          ],
+          "force_metrics_sha256": "739021fabc79958aceef2509bafaaef9dd3424fb49119708c21916a90825bfea",
+          "mean_velocity_mps": [
+            0.0027688689285267987,
+            0.023196280561525708,
+            -0.0002765722900904219
+          ],
+          "mean_yaw_rate_rad_s": 0.008441287311715617,
+          "pass": false,
+          "planar_error_mps": 0.033522890828292934,
+          "report_sha256": "9c1e7bd3b5ddc2b76bf1f13bba80968bb51941a4ba3e92736329833502b1a7e1",
+          "yaw_error_rad_s": 0.018755331287731887
+        },
+        "learning:yaw_+1": {
+          "batch": "batch_009",
+          "control_trace_sha256": "8f9fdf3a7498c96eea085513cdfca74d5228183a8e649a06c08be9649755d1cc",
+          "failed_bounds": [
+            "yaw_error_rad_s"
+          ],
+          "force_metrics_sha256": "bcf32a628e99bc0e764ea963879c952c2512ab612f6a864417136157aefd8bb9",
+          "mean_velocity_mps": [
+            0.0064396759707540715,
+            -0.008274350357295464,
+            7.176875662989652e-05
+          ],
+          "mean_yaw_rate_rad_s": 0.07270905065972155,
+          "pass": false,
+          "planar_error_mps": 0.015643070813380698,
+          "report_sha256": "10d1735766c73e158cc0b001219b67fc3df1df9c12a0c708d2c18d4c26b52d74",
+          "yaw_error_rad_s": 0.12729094934027846
+        },
+        "learning:yaw_-1": {
+          "batch": "batch_008",
+          "control_trace_sha256": "bb10f4d4515bfef6441ad9faa0ae51bbd02515089ecf7e643cc167766c3d9b9a",
+          "failed_bounds": [
+            "yaw_error_rad_s"
+          ],
+          "force_metrics_sha256": "285b23894f046c0f9ab1371cfee21615d71801c7d9734a2a01992c27aa2f725a",
+          "mean_velocity_mps": [
+            -0.0013557365017555579,
+            -0.005502086384490357,
+            -1.2314782785444575e-05
+          ],
+          "mean_yaw_rate_rad_s": -0.01924810484115374,
+          "pass": false,
+          "planar_error_mps": 0.006716264631570789,
+          "report_sha256": "e7a887c114399238be9f9f5cb6eca0b0c3603ca0206b1a37c226db22d8ba7f46",
+          "yaw_error_rad_s": 0.18075189515884624
+        }
+      },
+      "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
+      "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+      "stage2_complete": false,
+      "summary_sha256": "7db609761f28c5d580bb3f471a91e4aeb7446b7d5aa90e55c6546a068c49f54c",
+      "walk_summary": {
+        "facing_drift_max_deg": 34.18319320678711,
+        "facing_drift_mean_deg": 20.06066896021366,
+        "path_angle_max_deg": 25.583086013793945,
+        "path_angle_mean_deg": 11.23368323710747
+      }
+    },
+    "c48_long": {
+      "binding_file_sha256": "b4ae5f6518a1bf0f660c945328ad740192ad54f49f0921d6aa3dd632dc6e97ab",
+      "binding_sha256": "b4ae5f6518a1bf0f660c945328ad740192ad54f49f0921d6aa3dd632dc6e97ab",
+      "command_args": [
+        "--mode",
+        "evaluate",
+        "--asset",
+        "/asset",
+        "--model",
+        "/asset/source/model.json",
+        "--geometry",
+        "/geometry_source/geometry/geometry.json",
+        "--geometry-extrema",
+        "/geometry_source/geometry/geometry_extrema.npz",
+        "--stance",
+        "/prior/stance.json",
+        "--num-envs",
+        "1",
+        "--source-freeze-sha256",
+        "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+        "--max-wall-seconds",
+        "21600",
+        "--headless",
+        "--device",
+        "cuda:0",
+        "--allocation-profile",
+        "flat_pilot_v1",
+        "--standing-admission",
+        "/admission/admission.json",
+        "--updates",
+        "512",
+        "--seed",
+        "20260917",
+        "--action-mean",
+        "tanh",
+        "--observation-normalization",
+        "none",
+        "--observation-scaling",
+        "fixed",
+        "--command-segments",
+        "bootstrap",
+        "--learning-rate-max",
+        "0.0003",
+        "--action-std-final",
+        "0.05",
+        "--gait-clock",
+        "60",
+        "--action-smoothing",
+        "mean2",
+        "--velocity-noise",
+        "0.5",
+        "--steps-per-env",
+        "48",
+        "--eval-scope",
+        "probes",
+        "--checkpoint",
+        "/checkpoint/checkpoint_update002500.pt",
+        "--checkpoint-sha256",
+        "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9"
+      ],
+      "failed_probe_cases": [],
+      "launcher_exit_code": 0,
+      "pack": "eval_v4_stride_c48_u2500_seed20260917_20261011_001",
+      "passed": 13,
+      "probes": {
+        "learning:forward_0.05_to_stop": {
+          "batch": "batch_012",
+          "control_trace_sha256": "7fdab7d8a49c4124cd776c78270ad90ec7797c50242857a10bc9087d86a728ea",
+          "failed_bounds": [],
+          "force_metrics_sha256": "57aa3f05afe6a80aaf339705aec02a253619d09e05ca7c51e190bf563eb86780",
+          "mean_velocity_mps": [
+            -2.618765894252712e-05,
+            -5.3627631710839515e-05,
+            -1.617941027942718e-06
+          ],
+          "mean_yaw_rate_rad_s": -0.0007574602370709889,
+          "pass": true,
+          "planar_error_mps": 0.05002664939047229,
+          "report_sha256": "9618e8b9921e6b9d4aadb54dc1a50dbc85992ab32b2bc76e80c0303ea8a70a05",
+          "yaw_error_rad_s": 0.003035672096227341
+        },
+        "learning:quiet_20s": {
+          "batch": "batch_010",
+          "control_trace_sha256": "11dae2cf17de5c16090a0252219189f25c8133c9326e2011b23ce978afce325d",
+          "failed_bounds": [],
+          "force_metrics_sha256": "c1c6141e0141d92ff15615e845ffd7e26715c1b7e33e1e68ba67a467c7fbef67",
+          "mean_velocity_mps": [
+            3.353630257659909e-06,
+            -2.2040343173460073e-06,
+            -2.732386225520821e-06
+          ],
+          "mean_yaw_rate_rad_s": -0.0002916769287495234,
+          "pass": true,
+          "planar_error_mps": 0.00020179803355431896,
+          "report_sha256": "9c3d925eee9e75d5586745f3f106134215dc6ddb08ea3051e4fce6f62d207ffc",
+          "yaw_error_rad_s": 0.0013460648681289467
+        },
+        "learning:quiet_32s": {
+          "batch": "batch_011",
+          "control_trace_sha256": "066f855238cbf3f7feeaf887cac5699cb494f864c8d94c47f8de8d5198a9e8c0",
+          "failed_bounds": [],
+          "force_metrics_sha256": "d6b77627480341f519d27ad7bb4d162035e625343b23f0bc83e81a4ee324555d",
+          "mean_velocity_mps": [
+            5.328014594586669e-06,
+            -2.4439243144168117e-06,
+            -4.4075027650049775e-06
+          ],
+          "mean_yaw_rate_rad_s": -0.0003240134863193823,
+          "pass": true,
+          "planar_error_mps": 0.00020519065976377422,
+          "report_sha256": "a31375322cc17d2a27a0f4631e6858c8c63c619ea25320ad3564a54eb9b0d73e",
+          "yaw_error_rad_s": 0.0013403733949265894
+        },
+        "learning:translate_0.05_0deg": {
+          "batch": "batch_000",
+          "control_trace_sha256": "54855d84fa6594a90c1ac8f4e3e5ebf6f4530abd96915ac29e19eb66623e068d",
+          "derived": {
+            "facing_drift_deg": 12.267485618591309,
+            "off_course_m": 0.1089937835931778,
+            "path_angle_deg": 7.0038533210754395,
+            "speed_along_command_ratio": 0.9857665167914497
+          },
+          "failed_bounds": [],
+          "force_metrics_sha256": "f3deef326cf3ff301c6a88d7f9b05ce4d37811aa9cad92e80f5dc52dac7170bb",
+          "mean_velocity_mps": [
+            0.049947262665828836,
+            0.001139267358766948,
+            0.0003340335705112232
+          ],
+          "mean_yaw_rate_rad_s": 0.01275359870643299,
+          "pass": true,
+          "planar_error_mps": 0.008557326732652833,
+          "report_sha256": "d325e74ff190cff8342c3d4da2b47e73d6bedcfad23fac67848a9d6f00d841eb",
+          "yaw_error_rad_s": 0.028582070180126533
+        },
+        "learning:translate_0.05_135deg": {
+          "batch": "batch_003",
+          "control_trace_sha256": "e0ac54baba97d78300b0148fdef6ad98a03802c935e4db359ecc2d0667ed719b",
+          "derived": {
+            "facing_drift_deg": -32.64257049560547,
+            "off_course_m": -0.24669161438941956,
+            "path_angle_deg": -15.531710624694824,
+            "speed_along_command_ratio": 0.9862591160668267
+          },
+          "failed_bounds": [],
+          "force_metrics_sha256": "80bac7cf51fb61e507ad7be39449880ac05184c9506fc3a1edc51c9dbfda120c",
+          "mean_velocity_mps": [
+            -0.03723332611415745,
+            0.03653684574268991,
+            0.00024748453017718093
+          ],
+          "mean_yaw_rate_rad_s": -0.03194951763530688,
+          "pass": true,
+          "planar_error_mps": 0.013218456043583768,
+          "report_sha256": "5feaac62cbe1218960071701deae15646ed0925444ad83017fdcbad268b87222",
+          "yaw_error_rad_s": 0.04706173444264034
+        },
+        "learning:translate_0.05_180deg": {
+          "batch": "batch_004",
+          "control_trace_sha256": "6b35de382a89a6af18e0c81a5a6800edc5023624f2b78162ba3de06e2a52a3ff",
+          "derived": {
+            "facing_drift_deg": -6.389681816101074,
+            "off_course_m": -0.010733824223279953,
+            "path_angle_deg": -0.7166863083839417,
+            "speed_along_command_ratio": 0.9534168243408203
+          },
+          "failed_bounds": [],
+          "force_metrics_sha256": "c67fc3f0dfcebbfb5d241ddef1be48f468d475513eac7d08f89be0f8cd634960",
+          "mean_velocity_mps": [
+            -0.04793274928113781,
+            -0.0019073756532640338,
+            0.0006506055309525324
+          ],
+          "mean_yaw_rate_rad_s": -0.006100131234507445,
+          "pass": true,
+          "planar_error_mps": 0.013478376720647643,
+          "report_sha256": "dbcc4f127db1e3504b06b92a72fcaba286c2d76d3eb484fc7c7fc93b42bef808",
+          "yaw_error_rad_s": 0.040488529145726294
+        },
+        "learning:translate_0.05_225deg": {
+          "batch": "batch_005",
+          "control_trace_sha256": "ffe532966da8eb0474925c7f70e99581b1bcd41a3c34141063a5935d72052541",
+          "derived": {
+            "facing_drift_deg": -21.896312713623047,
+            "off_course_m": -0.10113906860351562,
+            "path_angle_deg": -6.89006233215332,
+            "speed_along_command_ratio": 0.9299837218390571
+          },
+          "failed_bounds": [],
+          "force_metrics_sha256": "edd4225fdbf6a3ac424dde71c898dfb9c23c38399d6c9574b836d07c6b37762c",
+          "mean_velocity_mps": [
+            -0.030957172218184125,
+            -0.035701414242640034,
+            0.0005054273809834681
+          ],
+          "mean_yaw_rate_rad_s": -0.02131649606817575,
+          "pass": true,
+          "planar_error_mps": 0.01394963425739583,
+          "report_sha256": "1ad5b8934717dfe15a30eec35540f8663593049b72ae0833c988fbf1b72a3104",
+          "yaw_error_rad_s": 0.03917030533707013
+        },
+        "learning:translate_0.05_270deg": {
+          "batch": "batch_006",
+          "control_trace_sha256": "35f16e6e78676ee598e56bc2dfde3cc0b1fad546065e90224b092b2721b8859c",
+          "derived": {
+            "facing_drift_deg": -8.294344902038574,
+            "off_course_m": -0.06260824203491211,
+            "path_angle_deg": -4.0862908363342285,
+            "speed_along_command_ratio": 0.973744789759318
+          },
+          "failed_bounds": [],
+          "force_metrics_sha256": "c6df5a96769928665b5278d589b1176426fe18928b297913cb00c058ceb57c7c",
+          "mean_velocity_mps": [
+            -0.00018253741696643095,
+            -0.04900346696508413,
+            0.0008414195712536234
+          ],
+          "mean_yaw_rate_rad_s": -0.008146894347445255,
+          "pass": true,
+          "planar_error_mps": 0.0127172280647241,
+          "report_sha256": "c64fb55e8f47bf6d68fec1d1071ab2f70ad241654901b626f3b99a7f448f8d29",
+          "yaw_error_rad_s": 0.01496149617160706
+        },
+        "learning:translate_0.05_315deg": {
+          "batch": "batch_007",
+          "control_trace_sha256": "3fa3bde7c9114572a8d590c9fd3ddbe06e624ae88e832bfc226c5a450a6d5ffc",
+          "derived": {
+            "facing_drift_deg": 13.027129173278809,
+            "off_course_m": 0.13852381706237793,
+            "path_angle_deg": 8.952326774597168,
+            "speed_along_command_ratio": 0.9770441055297852
+          },
+          "failed_bounds": [],
+          "force_metrics_sha256": "ff30a2e8ce6c007a3b24c31c282d2eeb7b186fd8fc210891ed566a8aaacc7251",
+          "mean_velocity_mps": [
+            0.03687252240164125,
+            -0.033479575480020826,
+            0.0011332386647243788
+          ],
+          "mean_yaw_rate_rad_s": 0.01350629919688552,
+          "pass": true,
+          "planar_error_mps": 0.010829450638391892,
+          "report_sha256": "74c030778c24fc27bf6e46d1b65ccbbd8d5391b64880c84b663b7f3019fa634a",
+          "yaw_error_rad_s": 0.019813632078167352
+        },
+        "learning:translate_0.05_45deg": {
+          "batch": "batch_001",
+          "control_trace_sha256": "ea7aef4de7732c435ca72dbdb421ee81bc9da783c664a2ce1e86659eb124da28",
+          "derived": {
+            "facing_drift_deg": -5.60982608795166,
+            "off_course_m": -0.19099968671798706,
+            "path_angle_deg": -12.805109977722168,
+            "speed_along_command_ratio": 0.9337125884162055
+          },
+          "failed_bounds": [],
+          "force_metrics_sha256": "9872c3bd766aef4f150bc00095f40314fe101033fe12987bb36be56ccc75ee3a",
+          "mean_velocity_mps": [
+            0.03937280162111314,
+            0.027624728851834795,
+            -0.0002328185377068985
+          ],
+          "mean_yaw_rate_rad_s": -0.005094254228076437,
+          "pass": true,
+          "planar_error_mps": 0.01416517550902859,
+          "report_sha256": "19a929a421b2bc80b4f5d35195c5a40b7b79e2883ec16500ef217164028fc619",
+          "yaw_error_rad_s": 0.02234208693906564
+        },
+        "learning:translate_0.05_90deg": {
+          "batch": "batch_002",
+          "control_trace_sha256": "19cff5e72f6a3a9a8b8198aad674971e5d04420fe5c9d06c190017d2cd442c61",
+          "derived": {
+            "facing_drift_deg": -27.627216339111328,
+            "off_course_m": -0.18377818167209625,
+            "path_angle_deg": -14.036064147949219,
+            "speed_along_command_ratio": 0.8168027136060927
+          },
+          "failed_bounds": [],
+          "force_metrics_sha256": "1e44b17b9d85458d6e58c3fb6ccc813cf89638b44758498dc22d29a64fe0f8fb",
+          "mean_velocity_mps": [
+            8.660562817833776e-05,
+            0.04265791226114725,
+            -0.00017245676566193547
+          ],
+          "mean_yaw_rate_rad_s": -0.027000780587919247,
+          "pass": true,
+          "planar_error_mps": 0.017432041118072433,
+          "report_sha256": "188dc50ede61e20e7a7b9501390eb428988ed49ddd7266d07521d01fb891a8c8",
+          "yaw_error_rad_s": 0.03149891001098545
+        },
+        "learning:yaw_+1": {
+          "batch": "batch_009",
+          "control_trace_sha256": "82f638d2a059a5b4688dfefef3270576f27af06733982dd77cc15486a9746888",
+          "failed_bounds": [],
+          "force_metrics_sha256": "3f06bd25327d00dd36573124435b7714210cb870dcf8fbdb2ae8b0583c9f4eec",
+          "mean_velocity_mps": [
+            -0.001303858107122779,
+            -0.0009660307322390976,
+            2.1946313754060622e-06
+          ],
+          "mean_yaw_rate_rad_s": 0.1988582500304015,
+          "pass": true,
+          "planar_error_mps": 0.01089788812215603,
+          "report_sha256": "358dbe6fc8cdab5302c3be7894db02b49755a174797709c115357567d7958138",
+          "yaw_error_rad_s": 0.032851930102024834
+        },
+        "learning:yaw_-1": {
+          "batch": "batch_008",
+          "control_trace_sha256": "41890a26ee261d1cb217f390b23ea7c1a3b6479fabe1c987558ba5fed8082130",
+          "failed_bounds": [],
+          "force_metrics_sha256": "27df07c61d9213b71d24209ceaf454432ac8a17bb0f202a79988f10d4da0af26",
+          "mean_velocity_mps": [
+            -0.0015559023096557486,
+            -0.0017428841386108122,
+            2.114920654125905e-06
+          ],
+          "mean_yaw_rate_rad_s": -0.22647813018159602,
+          "pass": true,
+          "planar_error_mps": 0.011464664012407389,
+          "report_sha256": "33064d1a3beb6e55de08faa15630f6a4c38a214b20099db6c28f6ae6688aaa37",
+          "yaw_error_rad_s": 0.04637881272812651
+        }
+      },
+      "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
+      "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+      "stage2_complete": false,
+      "summary_sha256": "213903a6d16414663df317eea59431445e7c2514c165b135e6adec8198d26ada",
+      "walk_summary": {
+        "facing_drift_max_deg": 32.64257049560547,
+        "facing_drift_mean_deg": 15.969320893287659,
+        "path_angle_max_deg": 15.531710624694824,
+        "path_angle_mean_deg": 8.752763040363789
+      }
+    }
+  },
+  "failed": {
+    "c24_permission": {
+      "binding_file_sha256": "781eacc10d507b2b17bf699edaaa4be6f2a560340a76703574a6f58585cb669c",
+      "binding_sha256": "781eacc10d507b2b17bf699edaaa4be6f2a560340a76703574a6f58585cb669c",
+      "command_args": [
+        "--mode",
+        "train",
+        "--asset",
+        "/asset",
+        "--model",
+        "/asset/source/model.json",
+        "--geometry",
+        "/geometry_source/geometry/geometry.json",
+        "--geometry-extrema",
+        "/geometry_source/geometry/geometry_extrema.npz",
+        "--stance",
+        "/prior/stance.json",
+        "--num-envs",
+        "128",
+        "--source-freeze-sha256",
+        "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+        "--max-wall-seconds",
+        "21600",
+        "--headless",
+        "--device",
+        "cuda:0",
+        "--allocation-profile",
+        "flat_pilot_v1",
+        "--standing-admission",
+        "/admission/admission.json",
+        "--updates",
+        "2000",
+        "--seed",
+        "20260917",
+        "--reward-version",
+        "4",
+        "--action-mean",
+        "tanh",
+        "--observation-normalization",
+        "none",
+        "--observation-scaling",
+        "fixed",
+        "--command-segments",
+        "bootstrap",
+        "--learning-rate-max",
+        "0.0003",
+        "--action-std-final",
+        "0.05",
+        "--gait-clock",
+        "60",
+        "--action-smoothing",
+        "mean2",
+        "--velocity-noise",
+        "0.5",
+        "--episode-seconds",
+        "10.0",
+        "--reward-options",
+        "forward_draw_fraction=0,joint_margin_weight=1.0,yaw_tracking_weight=0.5,turn_draw_fraction=0.3,gate_window_controls=120,yaw_gate_min_command_rad_s=0.18,yaw_gate_bonus=0.25,yaw_gate_floor=0.5,stride_tracking_weight=0.3,stride_length_weight=2,termination_weight=22",
+        "--reward-task",
+        "v4_yaw_gate"
+      ],
+      "error": "RuntimeError('standing standing did not complete; inspect its state and log')",
+      "launcher_exit_code": 1,
+      "pack": "ppo_v4_stride_c24_u2000_seed20260917_20261010_001",
+      "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
+      "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+      "status": "failed"
+    }
+  },
+  "native_started_by_collection": false,
+  "remote_root": "/srv/cupi/hexapod/runs/julian",
+  "schema": "hexapod_yaw_gated_stride_native_v1",
+  "scope": "Four native training launches and their 13 learning probes, seed 20260917, one deterministic trial per probe. Learning probes are diagnostics; Stage 2 remains incomplete and needs transition, torque, contact and visual acceptance. Derived drift values come from the retained traces and set no limit.",
+  "training": {
+    "c24": {
+      "binding_file_sha256": "b897d9996f22318f8e6a606cb4c5f888041b44500b6609f5dfbd0670b82aed52",
+      "binding_sha256": "b897d9996f22318f8e6a606cb4c5f888041b44500b6609f5dfbd0670b82aed52",
+      "command_args": [
+        "--mode",
+        "train",
+        "--asset",
+        "/asset",
+        "--model",
+        "/asset/source/model.json",
+        "--geometry",
+        "/geometry_source/geometry/geometry.json",
+        "--geometry-extrema",
+        "/geometry_source/geometry/geometry_extrema.npz",
+        "--stance",
+        "/prior/stance.json",
+        "--num-envs",
+        "128",
+        "--source-freeze-sha256",
+        "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+        "--max-wall-seconds",
+        "21600",
+        "--headless",
+        "--device",
+        "cuda:0",
+        "--allocation-profile",
+        "flat_pilot_v1",
+        "--standing-admission",
+        "/admission/admission.json",
+        "--updates",
+        "2000",
+        "--seed",
+        "20260917",
+        "--reward-version",
+        "4",
+        "--action-mean",
+        "tanh",
+        "--observation-normalization",
+        "none",
+        "--observation-scaling",
+        "fixed",
+        "--command-segments",
+        "bootstrap",
+        "--learning-rate-max",
+        "0.0003",
+        "--action-std-final",
+        "0.05",
+        "--gait-clock",
+        "60",
+        "--action-smoothing",
+        "mean2",
+        "--velocity-noise",
+        "0.5",
+        "--episode-seconds",
+        "10.0",
+        "--reward-options",
+        "forward_draw_fraction=0,joint_margin_weight=1.0,yaw_tracking_weight=0.5,turn_draw_fraction=0.3,gate_window_controls=120,yaw_gate_min_command_rad_s=0.18,yaw_gate_bonus=0.25,yaw_gate_floor=0.5,stride_tracking_weight=0.3,stride_length_weight=2,termination_weight=22",
+        "--reward-task",
+        "v4_yaw_gate"
+      ],
+      "final_checkpoint": {
+        "declaration_sha256": "0e852fcd7fb6e1d40c6223a5aea5bef18eb35b08807c266d935f767e153feb43",
+        "path": "ppo_v4_stride_c24_u2000_seed20260917_20261010_002/run/standing/checkpoint_update002000.pt",
+        "sha256": "b89c5dd45b86c3e7a1f78352d1dd7e4bba8a6a321a65a5bc5307dc251c6beebc"
+      },
+      "last_update": 2000,
+      "launcher_exit_code": 0,
+      "metrics_sha256": "30ba5e0e78a3b0d45985344dfc5bebed017521f2a9b7d6dbfdaaa78d002c59f6",
+      "pack": "ppo_v4_stride_c24_u2000_seed20260917_20261010_002",
+      "rows": 2000,
+      "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
+      "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+      "state_errors": [],
+      "state_status": "completed",
+      "training_quarters": [
+        {
+          "mean_tracked_speed_ratio": 0.37300831425074354,
+          "terminations": 19,
+          "updates": [
+            1,
+            500
+          ]
+        },
+        {
+          "mean_tracked_speed_ratio": 0.610876556786447,
+          "terminations": 113,
+          "updates": [
+            501,
+            1000
+          ]
+        },
+        {
+          "mean_tracked_speed_ratio": 0.6559199911861954,
+          "terminations": 66,
+          "updates": [
+            1001,
+            1500
+          ]
+        },
+        {
+          "mean_tracked_speed_ratio": 0.674483184600492,
+          "terminations": 49,
+          "updates": [
+            1501,
+            2000
+          ]
+        }
+      ],
+      "transitions": 6144000,
+      "updates": 2000
+    },
+    "c36": {
+      "binding_file_sha256": "98be0276e345347d9f6b173ac625ea6ca6a4cc6bab764c5fe9060d91af2a8af9",
+      "binding_sha256": "98be0276e345347d9f6b173ac625ea6ca6a4cc6bab764c5fe9060d91af2a8af9",
+      "command_args": [
+        "--mode",
+        "train",
+        "--asset",
+        "/asset",
+        "--model",
+        "/asset/source/model.json",
+        "--geometry",
+        "/geometry_source/geometry/geometry.json",
+        "--geometry-extrema",
+        "/geometry_source/geometry/geometry_extrema.npz",
+        "--stance",
+        "/prior/stance.json",
+        "--num-envs",
+        "128",
+        "--source-freeze-sha256",
+        "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+        "--max-wall-seconds",
+        "21600",
+        "--headless",
+        "--device",
+        "cuda:0",
+        "--allocation-profile",
+        "flat_pilot_v1",
+        "--standing-admission",
+        "/admission/admission.json",
+        "--updates",
+        "1333",
+        "--seed",
+        "20260917",
+        "--reward-version",
+        "4",
+        "--action-mean",
+        "tanh",
+        "--observation-normalization",
+        "none",
+        "--observation-scaling",
+        "fixed",
+        "--command-segments",
+        "bootstrap",
+        "--learning-rate-max",
+        "0.0003",
+        "--action-std-final",
+        "0.05",
+        "--gait-clock",
+        "60",
+        "--action-smoothing",
+        "mean2",
+        "--velocity-noise",
+        "0.5",
+        "--steps-per-env",
+        "36",
+        "--episode-seconds",
+        "10.0",
+        "--reward-options",
+        "forward_draw_fraction=0,joint_margin_weight=1.0,yaw_tracking_weight=0.5,turn_draw_fraction=0.3,gate_window_controls=120,yaw_gate_min_command_rad_s=0.18,yaw_gate_bonus=0.25,yaw_gate_floor=0.5,stride_tracking_weight=0.3,stride_length_weight=2,termination_weight=22",
+        "--reward-task",
+        "v4_yaw_gate"
+      ],
+      "final_checkpoint": {
+        "declaration_sha256": "f4058feaad50b1201813cc3538dee149da01fba7b16609715103a6fdce893ccb",
+        "path": "ppo_v4_stride_c36_u1333_seed20260917_20261010_001/run/standing/checkpoint_update001333.pt",
+        "sha256": "488cba636dd835953c683c84df9a3b045ba7817565eafa610d8e62338b97aedb"
+      },
+      "last_update": 1333,
+      "launcher_exit_code": 0,
+      "metrics_sha256": "4b35313f0dd9aff36618d642ad510b1d657b7891738d263aa92edf5e1cfa5099",
+      "pack": "ppo_v4_stride_c36_u1333_seed20260917_20261010_001",
+      "rows": 1333,
+      "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
+      "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+      "state_errors": [],
+      "state_status": "completed",
+      "training_quarters": [
+        {
+          "mean_tracked_speed_ratio": 0.34518054286514166,
+          "terminations": 14,
+          "updates": [
+            1,
+            333
+          ]
+        },
+        {
+          "mean_tracked_speed_ratio": 0.5846192047647161,
+          "terminations": 13,
+          "updates": [
+            334,
+            666
+          ]
+        },
+        {
+          "mean_tracked_speed_ratio": 0.6542706051476116,
+          "terminations": 8,
+          "updates": [
+            667,
+            999
+          ]
+        },
+        {
+          "mean_tracked_speed_ratio": 0.6965331212289158,
+          "terminations": 3,
+          "updates": [
+            1000,
+            1333
+          ]
+        }
+      ],
+      "transitions": 4094976,
+      "updates": 1333
+    },
+    "c48": {
+      "binding_file_sha256": "27ef9f84aefd7e6ab31158a8b12fd55cc331c262c04f601517f672828abef129",
+      "binding_sha256": "27ef9f84aefd7e6ab31158a8b12fd55cc331c262c04f601517f672828abef129",
+      "command_args": [
+        "--mode",
+        "train",
+        "--asset",
+        "/asset",
+        "--model",
+        "/asset/source/model.json",
+        "--geometry",
+        "/geometry_source/geometry/geometry.json",
+        "--geometry-extrema",
+        "/geometry_source/geometry/geometry_extrema.npz",
+        "--stance",
+        "/prior/stance.json",
+        "--num-envs",
+        "128",
+        "--source-freeze-sha256",
+        "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+        "--max-wall-seconds",
+        "21600",
+        "--headless",
+        "--device",
+        "cuda:0",
+        "--allocation-profile",
+        "flat_pilot_v1",
+        "--standing-admission",
+        "/admission/admission.json",
+        "--updates",
+        "1000",
+        "--seed",
+        "20260917",
+        "--reward-version",
+        "4",
+        "--action-mean",
+        "tanh",
+        "--observation-normalization",
+        "none",
+        "--observation-scaling",
+        "fixed",
+        "--command-segments",
+        "bootstrap",
+        "--learning-rate-max",
+        "0.0003",
+        "--action-std-final",
+        "0.05",
+        "--gait-clock",
+        "60",
+        "--action-smoothing",
+        "mean2",
+        "--velocity-noise",
+        "0.5",
+        "--steps-per-env",
+        "48",
+        "--episode-seconds",
+        "10.0",
+        "--reward-options",
+        "forward_draw_fraction=0,joint_margin_weight=1.0,yaw_tracking_weight=0.5,turn_draw_fraction=0.3,gate_window_controls=120,yaw_gate_min_command_rad_s=0.18,yaw_gate_bonus=0.25,yaw_gate_floor=0.5,stride_tracking_weight=0.3,stride_length_weight=2,termination_weight=22",
+        "--reward-task",
+        "v4_yaw_gate"
+      ],
+      "final_checkpoint": {
+        "declaration_sha256": "8332151e3da21fce4d749d1a89e88818f98dc6c65e5a0ff550567664e549a35d",
+        "path": "ppo_v4_stride_c48_u1000_seed20260917_20261010_001/run/standing/checkpoint_update001000.pt",
+        "sha256": "afa3110fa18dc54257fcffb35270144f995c98324987b5f7d6630fcb1c753e6c"
+      },
+      "last_update": 1000,
+      "launcher_exit_code": 0,
+      "metrics_sha256": "666a37f70b2a2201662ddc87882248f8cab412b7cae8b36cc3877691372cb3db",
+      "pack": "ppo_v4_stride_c48_u1000_seed20260917_20261010_001",
+      "rows": 1000,
+      "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
+      "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+      "state_errors": [],
+      "state_status": "completed",
+      "training_quarters": [
+        {
+          "mean_tracked_speed_ratio": 0.2873418635582636,
+          "terminations": 15,
+          "updates": [
+            1,
+            250
+          ]
+        },
+        {
+          "mean_tracked_speed_ratio": 0.5523667459368157,
+          "terminations": 23,
+          "updates": [
+            251,
+            500
+          ]
+        },
+        {
+          "mean_tracked_speed_ratio": 0.6289583007415261,
+          "terminations": 8,
+          "updates": [
+            501,
+            750
+          ]
+        },
+        {
+          "mean_tracked_speed_ratio": 0.7098573586955937,
+          "terminations": 3,
+          "updates": [
+            751,
+            1000
+          ]
+        }
+      ],
+      "transitions": 3072000,
+      "updates": 1000
+    },
+    "c48_long": {
+      "binding_file_sha256": "92f4868d8d924c34e2a8c4a21187c0bb839cf5f96a8f85680e77335fb923cd20",
+      "binding_sha256": "92f4868d8d924c34e2a8c4a21187c0bb839cf5f96a8f85680e77335fb923cd20",
+      "command_args": [
+        "--mode",
+        "train",
+        "--asset",
+        "/asset",
+        "--model",
+        "/asset/source/model.json",
+        "--geometry",
+        "/geometry_source/geometry/geometry.json",
+        "--geometry-extrema",
+        "/geometry_source/geometry/geometry_extrema.npz",
+        "--stance",
+        "/prior/stance.json",
+        "--num-envs",
+        "128",
+        "--source-freeze-sha256",
+        "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+        "--max-wall-seconds",
+        "21600",
+        "--headless",
+        "--device",
+        "cuda:0",
+        "--allocation-profile",
+        "flat_pilot_v1",
+        "--standing-admission",
+        "/admission/admission.json",
+        "--updates",
+        "2500",
+        "--seed",
+        "20260917",
+        "--extended-updates",
+        "--reward-version",
+        "4",
+        "--action-mean",
+        "tanh",
+        "--observation-normalization",
+        "none",
+        "--observation-scaling",
+        "fixed",
+        "--command-segments",
+        "bootstrap",
+        "--learning-rate-max",
+        "0.0003",
+        "--action-std-final",
+        "0.05",
+        "--gait-clock",
+        "60",
+        "--action-smoothing",
+        "mean2",
+        "--velocity-noise",
+        "0.5",
+        "--steps-per-env",
+        "48",
+        "--episode-seconds",
+        "10.0",
+        "--reward-options",
+        "forward_draw_fraction=0,joint_margin_weight=1.0,yaw_tracking_weight=0.5,turn_draw_fraction=0.3,gate_window_controls=120,yaw_gate_min_command_rad_s=0.18,yaw_gate_bonus=0.25,yaw_gate_floor=0.5,stride_tracking_weight=0.3,stride_length_weight=2,termination_weight=22",
+        "--reward-task",
+        "v4_yaw_gate"
+      ],
+      "final_checkpoint": {
+        "declaration_sha256": "8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3",
+        "path": "ppo_v4_stride_c48_u2500_seed20260917_20261011_001/run/standing/checkpoint_update002500.pt",
+        "sha256": "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9"
+      },
+      "last_update": 2500,
+      "launcher_exit_code": 0,
+      "metrics_sha256": "8683c371c3ab5f519e8bb66b258e6b1ba038afa07944a1929cd22b017939366e",
+      "pack": "ppo_v4_stride_c48_u2500_seed20260917_20261011_001",
+      "rows": 2500,
+      "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
+      "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+      "state_errors": [],
+      "state_status": "completed",
+      "training_quarters": [
+        {
+          "mean_tracked_speed_ratio": 0.49559549564461874,
+          "terminations": 47,
+          "updates": [
+            1,
+            625
+          ]
+        },
+        {
+          "mean_tracked_speed_ratio": 0.8081363752033962,
+          "terminations": 93,
+          "updates": [
+            626,
+            1250
+          ]
+        },
+        {
+          "mean_tracked_speed_ratio": 0.9541079415020945,
+          "terminations": 42,
+          "updates": [
+            1251,
+            1875
+          ]
+        },
+        {
+          "mean_tracked_speed_ratio": 1.0051334765865276,
+          "terminations": 22,
+          "updates": [
+            1876,
+            2500
+          ]
+        }
+      ],
+      "transitions": 7680000,
+      "updates": 2500
+    }
+  }
+}
