@@ -248,9 +248,18 @@ The paper's 0.15 kernel and command range require a separate comparison.
 [`throughput.py`](../locomotion/throughput.py) profiles training at one
 admitted replica count per allocation. It runs `train.py`'s allocation: task
 version 1, stock PPO, 20-second episodes and the same per-update records. It
-accepts one, 32 or 128 robots with matching one-robot and batch standing
-admission, and it keeps the 128-replica and 2,000-update guards. The program
-lead approves each native profile.
+accepts one, 32, 128, 512 or 1024 robots with matching one-robot and batch
+standing admission. Training and probes keep the 128-replica guard until a
+count gains admission and an approved budget, and the 2,000-update guard keeps
+its opt-in. The program lead approves each native profile. The 11 October
+profiles from one source measure 866, 1,597 and 1,812 transitions per second
+at 128, 512 and 1024 robots, with the update taking 3.55, 7.70 and 13.57 s
+([record](../site/assets/throughput_profile_20261011_001/summary.json)). The
+step from 512 to 1024 robots buys 13 percent more samples per second for 76
+percent more time per update. On 11 October the program lead opened a
+512-robot training budget for the reward v4 arms: 512 robots, 24 controls per
+robot and update, 2000 updates and the pilot deadline. Training and probes
+accept 128 and 512 robots; 1024 stays a profiling count.
 
 ```sh
 uv run python -m locomotion.prepare --mode throughput --num-envs 32 \

@@ -1,0 +1,20 @@
+{
+  "id": "20261010T052059_centred_replica_grid",
+  "date": "2026-10-10T05:20:59Z",
+  "title": "Centre the replica grid on the origin so 512 and 1024 robots stay on the floor",
+  "summary": "The first 512-robot standing diagnostic failed its clearance gate at control 2: the replica grid started at the origin and reached 44 m while the floor mesh spans plus and minus 40 m, so the column at 40 m stood on the mesh edge. The grid is now centred on the origin, which keeps every replica on the mesh up to 1024 robots at 2 m spacing and leaves the single evaluation robot at the origin. The edit changes a physics source file, so the one-robot, 128 and 512 standing diagnostics rerun from this source. The failed attempt stays retained.",
+  "areas": [
+    "locomotion",
+    "compute"
+  ],
+  "next": "Rerun the standing diagnostics at 1, 128 and 512 robots from this source and decide the deadline for a 1024-robot capture.",
+  "changes": [
+    "locomotion/env.py"
+  ],
+  "evidence": [
+    "locomotion/env.py",
+    "locomotion/tests/test_env.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A placement fix establishes no native result or accepted capability."
+}

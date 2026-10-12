@@ -1,0 +1,25 @@
+{
+  "id": "20261010T044900_replica_counts_for_profiles",
+  "date": "2026-10-10T04:49:00Z",
+  "title": "Accept 512 and 1024 robots for standing diagnostics and throughput profiles",
+  "summary": "The environment configuration accepts up to 1024 replicas, and the pack preparer and profiler accept 512 and 1024 robots for standing diagnostics and throughput profiles. Training and probes keep the 128-replica guard until a count gains standing admission and an approved budget. The change edits a physics source file, so every count, including 128, needs fresh one-robot and batch standing admission from this source before training or profiling. The program lead requested throughput measurements at 512 and 1024 robots; those runs and their admissions belong to a later record.",
+  "areas": [
+    "locomotion",
+    "compute"
+  ],
+  "next": "Record fresh standing admissions at 1, 128, 512 and 1024 robots from this source, then profile throughput at 128, 512 and 1024.",
+  "changes": [
+    "docs/TRAINING.md",
+    "locomotion/env_config.py",
+    "locomotion/prepare.py",
+    "locomotion/tests/test_env.py",
+    "locomotion/tests/test_throughput.py",
+    "locomotion/throughput.py"
+  ],
+  "evidence": [
+    "locomotion/tests/test_throughput.py",
+    "locomotion/tests/test_env.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The guard change establishes no native result or accepted capability."
+}
