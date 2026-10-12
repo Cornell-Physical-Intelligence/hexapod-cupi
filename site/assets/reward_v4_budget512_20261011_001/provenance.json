@@ -54,7 +54,7 @@
   },
   "stop_video": {
     "20260917": "ppo_v4_omni512_seed20260917_20261011_001_evaluate_stop_video_r2, published as site/assets/media/ppo_v4_omni512_seed20260917_stop_20261011.mp4",
-    "20260918": "ppo_v4_omni512_seed20260918_20261011_001_evaluate_stop_video_r2 lost the GPU lock race to another account's launch at 18:43Z and exited before any native step; a retry (_r3) waits for an idle GPU"
+    "20260918": "ppo_v4_omni512_seed20260918_20261011_001_evaluate_stop_video_r3 passed on the retry at 23:33Z and is published as site/assets/media/ppo_v4_omni512_seed20260918_stop_20261011.mp4; the _r2 launch lost the GPU lock race and is retained"
   },
   "retained_failures": [
     {
@@ -85,5 +85,11 @@
       "largest_recomputed_load_relative_difference": 0.0
     }
   },
-  "reproduce": "PYTHONPATH=. uv run --no-sync python site/assets/reward_v4_budget512_20261011_001/verification.py --attempt <training> --evaluation <training>_evaluate_u001000_r2 --evaluation <training>_evaluate_u002000_r2 --workspace <fresh> --output <fresh>.json --fetch"
+  "reproduce": "PYTHONPATH=. uv run --no-sync python site/assets/reward_v4_budget512_20261011_001/verification.py --attempt <training> --evaluation <training>_evaluate_u001000_r2 --evaluation <training>_evaluate_u002000_r2 --workspace <fresh> --output <fresh>.json --fetch",
+  "probe_videos_seed20260917": {
+    "evaluate_video_yaw_plus_r2": "full 13-probe evaluation with the camera on learning:yaw_+1; verdicts equal the first trial (10 of 13, same yaw errors 0.047 and 0.072); video site/assets/media/ppo_v4_omni512_seed20260917_turn_plus020_u2000.mp4",
+    "evaluate_video_left90_r2": "full 13-probe evaluation with the camera on learning:translate_0.05_90deg; verdicts equal the first trial; video site/assets/media/ppo_v4_omni512_seed20260917_left90_u2000.mp4",
+    "retained_failures": "evaluate_video_yaw_plus and evaluate_video_left90 used the focus scope, which excludes those probes; the evaluator refused the video case before any native step"
+  },
+  "repeat_trials": "The two video evaluations repeat all 13 probes of seed 20260917 at update 2000. Every verdict and the yaw metrics match the first trial, so the evaluation is deterministic at a fixed seed; it measures no trial-to-trial spread."
 }
