@@ -1,0 +1,24 @@
+{
+  "schema": "hexapod_record_erratum_v1",
+  "date": "2026-10-12T22:26:56Z",
+  "corrects": {
+    "field": "methods.training",
+    "source_line": "verification.py line 53",
+    "files": {
+      "seed20260917_verification.json": "5e2f1f3bbd657fa0ddc2b50b59e9cb249c9fa0e362942b952561a684f3811123",
+      "seed20260918_verification.json": "7bc66876cd1d3c32debd73363066a8c004c1ed55b31e9af3ee8f06deec6e1fc4",
+      "verification.py": "bfd6d985561bcc0f4be0557f6f7ea2e75a82c12b9caeec50e70cc5f617f070e7"
+    }
+  },
+  "published_text": "metrics.jsonl must hold one row per update in order with transitions = update * 128 * 24.",
+  "correct_text": "metrics.jsonl must hold one row per update in order with transitions = update * 512 * 24, where 512 is the replica count in the checkpoint identity and 24 is num_steps_per_env.",
+  "executed_check": "verification.py lines 141 to 161 read the replica count from identity[\"config\"][\"num_envs\"] and the rollout length from the PPO configuration, then assert transitions == update * per_update for the state, each checkpoint sidecar and each metrics row. The executed check was correct; the method text kept the 128 of the script it came from.",
+  "values": {
+    "robots": 512,
+    "controls_per_update": 24,
+    "updates": 2000,
+    "transitions": 24576000
+  },
+  "published_bytes": "Unchanged. provenance.json pins the sha256 of verification.py and of both verification records, so this file carries the correction and the three files keep their bytes.",
+  "result_effect": "None. No verified value, verdict or hash changes."
+}
