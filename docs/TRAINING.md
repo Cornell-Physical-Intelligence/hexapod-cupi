@@ -231,9 +231,13 @@ existing bounds. The same profile supports probe evaluation; it extends no
 replica, update or physical gate.
 
 You use W&B project `hexapod-amp` in offline mode for these packs. Freeze the
-input declaration from the 29 September 128-robot admission, including the
-mounted one-robot and batch reports. Verify its physics and asset hashes at
-preflight. Copy this protocol into the run archive with its SHA-256, retain
+input declaration from the 128-robot standing admission that matches the
+pack's physics source, including the mounted one-robot and batch reports. The
+four [prepared packages](OPERATIONS.md#prepared-flat-pilot) hold source
+`620d9aa9` and keep the 29 September admission. A pack from current `main`
+takes the [10 October admission](../site/assets/throughput_profile_20261010_001/admission_128.json),
+because PR 65 changed `env.py` and `env_config.py`. Verify its physics and
+asset hashes at preflight. Copy this protocol into the run archive with its SHA-256, retain
 `PACK.json` and `binding.json`, and transfer each fresh pack without macOS
 metadata. Use [OPERATIONS](OPERATIONS.md) for host preflight and dispatch.
 Preparation and host preflight start no native training.
