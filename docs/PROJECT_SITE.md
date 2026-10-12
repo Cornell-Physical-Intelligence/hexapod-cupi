@@ -24,7 +24,7 @@ Pages build publishes the same text. Git does not track `STATUS.md`.
 
 The registry's evidence timestamp and source revision describe measured results;
 the build revision describes the published page. Neither is live GPU telemetry.
-Current compute instructions remain in `docs/SPARK_COMPUTE_COORDINATION.md`.
+Current compute instructions remain in `docs/OPERATIONS.md`.
 Historical walking, canonical standing, CAD animation and physical qualification
 must remain distinguishable. Do not infer progress percentages from commits,
 files, test totals, training budgets or videos.

@@ -41,9 +41,10 @@ Delegate bounded independent work only when the user authorizes delegation.
 
 ## Compute and publication
 
-Read [OPERATIONS](docs/OPERATIONS.md) and
-[compute policy](docs/SPARK_COMPUTE_COORDINATION.md) before dispatch. One lead
-owns Spark; preserve competing workloads' recovery state before stopping them.
+Read [OPERATIONS](docs/OPERATIONS.md) and its
+[compute policy](docs/OPERATIONS.md#retained-reservation-and-recovery) before
+dispatch. One lead owns Spark; preserve competing workloads' recovery state
+before stopping them.
 Keep both GPU locks and exact-container cleanup. The launcher shares the GPU
 with other workloads and records them; it checks no host reservation. Keep the
 retained host reservation state until the program lead releases it.
