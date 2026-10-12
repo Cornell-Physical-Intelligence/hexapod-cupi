@@ -58,15 +58,17 @@ repository's parity with it. Read it before you change a learner setting.
 | Setting | Rudin et al. | This repository |
 | --- | --- | --- |
 | Algorithm | PPO with GAE, time-out bootstrapping, an adaptive rate at KL 0.01, clip 0.2, 5 epochs and 4 mini-batches | The same values through RSL-RL 5.0.1. The rate cap and the command-boundary bootstrap are additions. |
-| Batch per update | 4096 robots and 24 steps, 98,304 samples. 128 robots is the smallest count in the authors' sweep and gives their lowest final reward. | 128 robots and 24 controls, 3,072 samples. The standing admission fixes the replica count. |
+| Batch per update | 4096 robots and 24 steps, 98,304 samples. 128 robots is the smallest count in the authors' sweep. They report a slow decrease in final reward with fewer robots and a sharp drop when a high count leaves each robot too few steps. | 128 robots and 24 controls, 3,072 samples, or 512 robots and 24 controls, 12,288 samples, under the 11 October budget for the reward v4 arms. Training accepts those two counts. |
 | Observations | Base linear and angular velocity, gravity, joint positions and velocities, the previous action and 108 terrain heights | Five proprioception frames without base linear velocity, the command and the executed action. The critic adds measured velocity. |
 | Actions | Joint position targets to a PD controller with an action-rate penalty and no rate clamp | Joint offsets with a 0.35 rad scale and the 0.040 rad per control limiter |
 | Reward | Nine gait-free terms with an exponential tracking kernel and a feet air-time term. The policy converges to a trot. | Reward v4 adds a tripod schedule, swing travel and quiet terms. Version 1 is the gait-free baseline. |
-| Curriculum and randomization | Terrain and command curricula, friction in [0.5, 1.25], pushes every 10 s and measured observation noise | Flat ground, fixed friction and no pushes. Joint-velocity noise on the actor is the one noise channel. |
+| Curriculum and randomization | A terrain curriculum with random commands held constant for each episode, friction in [0.5, 1.25], pushes every 10 s and measured observation noise | Flat ground, fixed friction and no pushes. Joint-velocity noise on the actor is the one noise channel. |
 
-The batch row is the largest gap. With the replica count fixed, the paper's
-lever is more controls per robot and update. That changes the frozen
-24-control budget and needs a program-lead decision.
+The batch row is the largest gap. The 512-robot budget raises the batch
+fourfold, to one eighth of the paper's. One lever beyond it is more robots: a
+count above 512 needs standing admission and an approved budget, as Step 2
+states. The other lever is more controls per robot and update. That changes
+the frozen 24-control budget and needs a program-lead decision.
 
 ## Proposed reproduction sequence
 
@@ -91,10 +93,10 @@ allocation and supplies no native admission.
 | Step | Work and prerequisite | Depends on | Spark | Issue | Status (29 Sep 2026) |
 | --- | --- | --- | --- | --- | --- |
 | 1. Reward v2 | Audit [Table I, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3), for formulas, units, signs and weights before implementing a versioned paper reward with CPU tests. Resolve its printed positive tracking exponent against the intended decreasing reward. Define command-scaled tracking as a separate adaptation; resolve the stationary-reward criterion below. | None | No | [#35](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/35) | Done: #42 merged reward version 2 in `task_v2.py`; version 1 stays the default. |
-| 2. Throughput profile | Measure physics, contact, observation and learner cost plus memory across replica counts. The current guards cap replicas at 128 and updates at 2,000; the paper uses 4,096 robots. Extend scale through a named configuration and isolation tests. Change the 153 SDF colliders only if measurements justify an asset variant, then repeat one-robot and batch admission. | None | Yes | [#35](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/35) | Done to the 128-robot guard: #44 merged the profiler and the 1, 32 and 128 profiles; AMP costs pending. |
+| 2. Throughput profile | Measure physics, contact, observation and learner cost plus memory across replica counts. The guards admit 128 or 512 robots for training and up to 1,024 for profiles, and cap updates at 2,000, or 5,000 with the extended-updates option; the paper uses 4,096 robots. Extend scale through a named configuration and isolation tests. Change the 153 SDF colliders only if measurements justify an asset variant, then repeat one-robot and batch admission. | None | Yes | [#35](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/35) | Done to the 128-robot guard: #44 merged the profiler and the 1, 32 and 128 profiles; AMP costs pending. |
 | 3. Omni motion dataset | Use the [optimizer and dataset pipeline](../locomotion/priors/README.md) for eight bearings, both yaw directions and the arcs in `command_bank`. Require alternating tripod demonstrations on the approved URDF, with a consistent cycle across directions ([§III-A–B, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3)). Issue #36 uses optimized motions alone; native and human review determine admission. | None | No | [#36](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/36) | Done: #36 closed. |
 | 4. Native motion validation | Replay each motion with [`replay_native.py`](../locomotion/priors/replay_native.py) and require its matching screen before dataset admission. Construct AMP states from native replay. Match feature order, frames, units and the 20 ms interval; exclude terminal-to-reset pairs. | 3 | Yes | [#36](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/36) | Done: 18000 pairs admitted; #36 closed. |
-| 5. Flat AMP pilot | Resolve the gradient-penalty ambiguity below, then implement the least-squares discriminator and style reward from Eqs. (1)–(2) with the current [256, 256, 128] MLP actor and critic. Update PPO and the discriminator together ([§IV-B, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). The [AMP learner](../locomotion/README.md#amp-learner-and-paper-networks) implements this with CPU tests; no native pilot has run. Run on flat ground and compare with the tripod baseline through the same scorer and force metrics; defer the final reward comparison to Step 9. Use the 13 learning probes as diagnostics and the full gate for qualification. | 1, 4; 2 for full scale | Yes | [#37](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/37), [#50](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/50), [#51](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/51) | CPU done in #43. The native pilot runs under #50; #51 holds the reward v2 control record. The [flat pilot v2 protocol](#frozen-flat-pilot-v2-issue-50) moves new arms to reward v4 without its gait terms; the 29 September standing admission covers the physics source. |
+| 5. Flat AMP pilot | Resolve the gradient-penalty ambiguity below, then implement the least-squares discriminator and style reward from Eqs. (1)–(2) with the current [256, 256, 128] MLP actor and critic. Update PPO and the discriminator together ([§IV-B, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). The [AMP learner](../locomotion/README.md#amp-learner-and-paper-networks) implements this with CPU tests; no native pilot has run. Run on flat ground and compare with the tripod baseline through the same scorer and force metrics; defer the final reward comparison to Step 9. Use the 13 learning probes as diagnostics and the full gate for qualification. | 1, 4; 2 for full scale | Yes | [#37](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/37), [#50](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/50), [#51](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/51) | CPU done in #43. The native pilot runs under #50; #51 holds the reward v2 control record. The [flat pilot v2 protocol](#frozen-flat-pilot-v2-issue-50) moves new arms to reward v4 without its gait terms; the [10 October 128-robot standing admission](../site/assets/throughput_profile_20261010_001/admission_128.json) covers the physics source. |
 | 6. Network architecture | Implement Table III's velocity estimator, memory encoder over five proprioception frames, low-level actor, privileged encoder and critic. Train the estimator with supervised simulation velocity labels ([§IV-A–B; Table III, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). Supply the full 42-value privileged state, including base height and perturbations, plus collision states ([§III, p. 2](https://arxiv.org/pdf/2511.03167v1#page=2)). Test shapes and gradient paths; keep privileged inputs out of the actor. [`paper_networks.py`](../locomotion/paper_networks.py) implements these networks with CPU tests; friction and perturbation slots hold declared constants until Step 7. Add the terrain encoder with Step 8. Repeat the Step 5 pilot with these networks before Step 7. | None to build; 5 to compare | No | [#37](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/37), [#50](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/50) | CPU done in #43. The paper-network run follows the pilot under #50; #51 scores both. |
 | 7. Domain randomization | Implement Table II with frozen model-specific values. Declare adaptations for the different robot and simulator before comparing runs. | 5, 6 | Yes | — | Not started; no issue. |
 | 8. Terrain curriculum | Add terrain levels, the critic height scan and terrain encoder. Both stay critic-only: the GPS-only robot carries no terrain sensor. Retain admitted flat behavior. | 7 | Yes | — | Not started; no issue. |
@@ -408,11 +410,16 @@ GPU. PhysX shared the synchronized CUDA context at each count.
 | 128 | 930 | 3.21 s | 13.4 ms | 80% | 3% |
 
 From 32 to 128 robots, each added robot adds about 0.056 ms to the scene step
-and about 1 MB of GPU memory. The measurements support the current 128-robot
-guard. Extend replicas only through a named configuration with isolation
-tests. The 80 m floor mesh holds about 400 robots at 2 m spacing, and the
-128-robot standing capture took 21 minutes and 11 GB, so larger counts need a
-wider floor and a scalable admission capture. Change the 153 SDF colliders
+and about 1 MB of GPU memory. These measurements supported the 128-robot guard
+of 29 September. Extend replicas only through a named configuration with
+isolation tests. A replica grid that starts at the origin holds 400 robots
+clear of the edge of the 80 m floor mesh at 2 m spacing; from 401 robots a
+column stands on the edge at 40 m, where a 512-robot standing diagnostic
+failed clearance. The grid centred on the origin keeps 1024 robots on that
+mesh. The 128-robot standing capture took 21 minutes and 11 GB, and the
+capture grows at about 9 s per robot, so a standing diagnostic above 128
+robots takes the `flat_pilot_v1` allocation profile in
+[OPERATIONS](OPERATIONS.md#before-a-run). Change the 153 SDF colliders
 only when measurements justify an asset variant, then repeat one-robot and
 batch admission.
 

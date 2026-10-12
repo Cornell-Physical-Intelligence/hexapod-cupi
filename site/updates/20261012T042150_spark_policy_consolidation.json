@@ -1,0 +1,27 @@
+{
+  "id": "20261012T042150_spark_policy_consolidation",
+  "date": "2026-10-12T04:21:50Z",
+  "title": "Fold the Spark compute policy into the operations guide",
+  "summary": "docs/SPARK_COMPUTE_COORDINATION.md repeated the reservation policy that docs/OPERATIONS.md holds. We move its remaining statements into the operations guide: the 14 September 2026 authorization, the launcher's former pin of the host policy file with its last recorded hash, the approved model and sequence scope, and the receipt links. We delete the separate file and point AGENTS, README, SPARK, PROJECT_SITE and the registry's execution_source at the operations guide. SPARK.md keeps the single listing of the /srv/cupi/hexapod directories, and the operations guide links to it. No policy statement changes.",
+  "areas": [
+    "compute",
+    "documentation"
+  ],
+  "next": "Review the merged policy text against the deleted file, then merge. A merge of SPARK.md into the operations guide waits until PR 65 merges, because PR 65 edits docs/OPERATIONS.md.",
+  "changes": [
+    "AGENTS.md",
+    "README.md",
+    "SPARK.md",
+    "docs/OPERATIONS.md",
+    "docs/PROJECT_SITE.md",
+    "docs/SPARK_COMPUTE_COORDINATION.md",
+    "site/project.json"
+  ],
+  "evidence": [
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/main/docs/OPERATIONS.md#retained-reservation-and-recovery",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/b8bd271cf64399ea67465bcea9132b328b8c7df1/docs/SPARK_COMPUTE_COORDINATION.md",
+    "SPARK.md"
+  ],
+  "no_project_impact": true,
+  "reason": "A documentation consolidation establishes no native result or accepted capability; the registry change replaces one source path."
+}

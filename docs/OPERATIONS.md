@@ -5,7 +5,8 @@ personal worktrees. This guide owns the runtime and recovery details.
 
 You use [`locomotion.launch`](../locomotion/launch.py) for canonical allocations.
 It supervises one named module from a frozen package and cleans its exact
-container. Read [compute coordination](SPARK_COMPUTE_COORDINATION.md) first.
+container. Read [ownership](#ownership-and-cleanup) and the
+[retained reservation](#retained-reservation-and-recovery) first.
 
 ## Environment
 
@@ -26,14 +27,9 @@ Do not print, copy or commit `docker/.env.base`; Compose consumes that file.
 
 You edit your own clone and worktrees. The `cupi` group grants James, Shaurya
 and Julian access to shared evidence. Add future users to that group and give
-each user a run directory with the same access rules.
-
-| Directory under `/srv/cupi/hexapod` | Access and purpose |
-| --- | --- |
-| `inputs/` | The workspace maintainer publishes admitted bundles; CUPI reads frozen files. |
-| `evidence/` | CUPI reads retained native captures and their unchanged manifests. |
-| `runs/<user>/` | The submitting user writes attempts; CUPI reads them. |
-| `maintenance/` | CUPI reads cleanup inventories and relocation receipts. |
+each user a run directory with the same access rules. The
+[contributor workflow](../SPARK.md#know-where-your-files-belong) lists the
+directories under `/srv/cupi/hexapod` and their access.
 
 The workspace maintainer owns `inputs`, `evidence` and `maintenance`. Each run
 parent inherits a default ACL that grants its submitting user write access to
@@ -137,20 +133,31 @@ after terminating the client to catch a creation race. Keep startup/deadline
 bounds and contact-data truncation checks. Use the frozen launcher's
 `--cleanup-only` path after a failed wrapper, then record its separate receipt.
 
-The program lead authorized the Spark lead to stop competing user compute. Before that action,
-record the workload identity, source, outputs and restart state. Preserve a
-recovery image for an auto-removed container. Keep SSH, networking, operating
-system services and host health available. Do not signal unidentified jobs.
+One lead owns allocation and cleanup. On 14 September 2026 the program lead
+authorized full HEXAPOD compute ownership, including the Spark lead stopping
+competing user compute after preserving its recovery state. Before that
+action, record the workload identity, source, outputs and restart state.
+Preserve a recovery image for an auto-removed container. Keep SSH, networking,
+operating system services and host health available. Do not signal
+unidentified jobs.
 
 ## Retained reservation and recovery
 
 GeoData shares this Spark with CUPI and owns its Slurm configuration. CUPI
-workspace cleanup changes no scheduler or foreign workload. Keep recovery
-payloads in place even when their parent directory has a Hexapod name. Treat
-the records below as historical state; check the host before any recovery.
+workspace cleanup retains the Isaac/Docker launcher and both GPU locks. It
+changes no scheduler, GeoData service, Qwen workload, other foreign workload
+or shared Docker storage. Workspace permissions do not allocate the GPU. Check
+live workloads before each allocation and use the sharing policy recorded in
+this guide. Keep recovery payloads in place even when their parent directory
+has a Hexapod name. Treat the records below as historical state, not live
+telemetry; check the host before any recovery.
 
-The launcher no longer checks this reservation. The host state below stays in
-place until the program lead releases it. Reservation root:
+The launcher no longer pins `/home/orionh/SPARK_COMPUTE_COORDINATION.md` or
+checks this reservation. It shares the GPU with other workloads and records
+them in each job report. That host file's last recorded SHA-256 was
+`c89c99ebdd16941e3f8e7f23ef3525aeb360c78361aa49aa04e766b381a4727c`. Preserve
+old source packs and bindings. The host state below stays in place until the
+program lead releases it. Reservation root:
 `/home/orionh/HEXAPOD_runs/restart_20260914/spark_ownership_001`.
 Keep its `ACTIVE` marker and `reservation_policy.json`, the recorded user/system
 masks, and `hexapod-exclusive-reconstruction-queue.service`. Verify its exact
@@ -172,10 +179,27 @@ start time and command hash before restoration. Private source/unit copies stay
 on Spark. The [prior runbook](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/docs/OPERATIONS.md)
 links earlier recovery receipts and their original scope.
 
-Only the program lead can release or change this reservation. Job completion and reconnects
-do not authorize restarting deferred workloads. Restore the recorded prior
-states after an explicit release and identity checks. The historical heartbeat
-remains paused; do not restart it as part of cleanup.
+Reserve user compute for HEXAPOD between allocations. Only the program lead
+can release or change this reservation. A competing workload request, job
+completion or a reconnect grants no release and does not authorize restarting
+deferred workloads. Restore the recorded prior states after an explicit
+release and identity checks. The historical continuation heartbeat remains
+paused; do not restart it as part of cleanup.
+
+The program lead approved the mass-corrected robot selected by
+[`robot/active_model.json`](../robot/active_model.json) and the standing →
+walking/stopping → terrain → survey sequence. Authorization does not pass
+admission or behavior gates. Cleanup regression checks do not restart the
+open-ended research sequence.
+
+The [reservation receipt](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/operations_2026-09-10/spark_exclusive_reservation_001/README.md)
+and [automation block](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/operations_2026-09-11/spark_automation_block_002/README.md)
+retain exact control and recovery evidence. The
+[15 September pause receipt](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/pause_20260915_001/RECEIPT.json)
+retains its timestamp and historical scope. This guide replaces the
+[compute policy file](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/b8bd271cf64399ea67465bcea9132b328b8c7df1/docs/SPARK_COMPUTE_COORDINATION.md).
+[The pre-cleanup policy](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/docs/SPARK_COMPUTE_COORDINATION.md)
+preserves earlier authorizations and quotes without adding them to new run context.
 
 ## Evidence and access failure
 

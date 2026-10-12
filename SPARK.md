@@ -56,9 +56,9 @@ The shell variables below remain in that terminal session.
 
 /srv/cupi/hexapod/
 ├── inputs/                              Admitted bundles; CUPI reads
-├── evidence/                            Retained captures and unchanged manifests
+├── evidence/                            Retained captures and unchanged manifests; CUPI reads
 ├── runs/<user>/<attempt>/               Your frozen package and outputs
-└── maintenance/                         Inventories and migration receipts
+└── maintenance/                         Inventories and migration receipts; CUPI reads
 ```
 
 You can write your own run directory and read other CUPI runs. James owns the
@@ -189,11 +189,11 @@ Agree on the assigned arm and dispatch order with the Spark run lead before
 using the GPU. Contributors can edit separate worktrees at the same time.
 One owner dispatches each native allocation and checks its cleanup.
 
-GeoData owns the installed Slurm setup. CUPI uses the guarded Isaac/Docker
-launcher and its two GPU locks. Those locks coordinate CUPI launchers; they
-provide no host-wide queue or GPU exclusivity. Leave GeoData jobs and Qwen to
-their owners. Follow [compute coordination](docs/SPARK_COMPUTE_COORDINATION.md)
-for reservation changes and preserve the recorded recovery state.
+CUPI uses the guarded Isaac/Docker launcher and its two GPU locks. Those locks
+coordinate CUPI launchers; they provide no host-wide queue or GPU exclusivity.
+Leave GeoData jobs and Qwen to their owners. Follow the
+[compute policy](docs/OPERATIONS.md#retained-reservation-and-recovery) for
+reservation changes and preserve the recorded recovery state.
 
 From your frozen source directory, check the package and live host:
 
