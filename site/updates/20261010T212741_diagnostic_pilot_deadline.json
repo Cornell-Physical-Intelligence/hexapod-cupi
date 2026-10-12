@@ -1,0 +1,21 @@
+{
+  "id": "20261010T212741_diagnostic_pilot_deadline",
+  "date": "2026-10-10T21:27:41Z",
+  "title": "Let standing diagnostics use the flat-pilot deadline",
+  "summary": "A standing capture grows at about 9 s per robot, so a 1024-robot capture projects to about 9500 s against the 6600 s standard bound. The program lead approved the longer deadline for that capture. The flat-pilot profile, 21600 s native and 22000 s supervisor, now applies to standing diagnostics as well as training and evaluation. Probes, tripod runs and throughput profiles keep the standard bound. A test covers the accepted and rejected modes.",
+  "areas": [
+    "locomotion",
+    "compute"
+  ],
+  "next": "Run the 1024-robot standing capture under the pilot deadline, create its admission and profile throughput at 1024.",
+  "changes": [
+    "docs/OPERATIONS.md",
+    "locomotion/tests/test_allocation_deadlines.py",
+    "locomotion/train.py"
+  ],
+  "evidence": [
+    "locomotion/tests/test_allocation_deadlines.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A deadline-profile extension establishes no native result or accepted capability."
+}

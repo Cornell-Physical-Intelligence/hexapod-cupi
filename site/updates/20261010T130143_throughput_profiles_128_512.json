@@ -1,0 +1,23 @@
+{
+  "id": "20261010T130143_throughput_profiles_128_512",
+  "date": "2026-10-10T13:01:43Z",
+  "title": "Profile training throughput at 128 and 512 robots from the centred-grid source",
+  "summary": "Fresh standing captures at 1, 128 and 512 robots passed from source e09bd17e in 122, 1236 and 4744 s, and admission records for 128 and 512 robots now exist under the replicas input root. Throughput profiles with 20 measured updates per pass reach 840 transitions per second at 128 robots and 1,581 at 512. One update takes 3.66 s at 128 robots and 7.77 s at 512, so four times the robots cost 2.1 times the update time. The PhysX step falls from 821 to 522 microseconds per transition, accounted GPU memory rises from 1.75 to 2.10 GB, and process memory from 7.5 to 17.0 GB. A 1024-robot capture projects to about 9500 s, above the 6600 s diagnostic deadline, and waits for the program lead's decision. The idle Qwen server shared the GPU, and each host preflight lists it.",
+  "areas": [
+    "locomotion",
+    "compute"
+  ],
+  "next": "Decide the deadline for a 1024-robot standing capture, then decide whether a 512-robot training budget replaces the 128-robot one.",
+  "changes": [
+    "docs/TRAINING.md",
+    "site/assets/throughput_profile_20261010_001/*.json"
+  ],
+  "evidence": [
+    "site/assets/throughput_profile_20261010_001/summary.json",
+    "site/assets/throughput_profile_20261010_001/provenance.json",
+    "site/assets/throughput_profile_20261010_001/profile_512.json",
+    "site/assets/throughput_profile_20261010_001/admission_512.json"
+  ],
+  "no_project_impact": true,
+  "reason": "A throughput measurement and its admissions establish no walking result or accepted capability."
+}

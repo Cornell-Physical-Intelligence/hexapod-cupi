@@ -48,6 +48,26 @@ unqualified for Stage 2. [Audit section 15](REWARD_V2_TABLE1_AUDIT.md#15-vanilla
 gives the causes of the earlier failures, the controlled evidence and each
 departure from the paper.
 
+## Parallel-training reference
+
+[Rudin et al. 2022](https://proceedings.mlr.press/v164/rudin22a.html) is the
+recipe behind RSL-RL: on-policy PPO with time-out bootstrapping, 24 steps per
+robot and update, and thousands of robots on one GPU. The table states this
+repository's parity with it. Read it before you change a learner setting.
+
+| Setting | Rudin et al. | This repository |
+| --- | --- | --- |
+| Algorithm | PPO with GAE, time-out bootstrapping, an adaptive rate at KL 0.01, clip 0.2, 5 epochs and 4 mini-batches | The same values through RSL-RL 5.0.1. The rate cap and the command-boundary bootstrap are additions. |
+| Batch per update | 4096 robots and 24 steps, 98,304 samples. 128 robots is the smallest count in the authors' sweep and gives their lowest final reward. | 128 robots and 24 controls, 3,072 samples. The standing admission fixes the replica count. |
+| Observations | Base linear and angular velocity, gravity, joint positions and velocities, the previous action and 108 terrain heights | Five proprioception frames without base linear velocity, the command and the executed action. The critic adds measured velocity. |
+| Actions | Joint position targets to a PD controller with an action-rate penalty and no rate clamp | Joint offsets with a 0.35 rad scale and the 0.040 rad per control limiter |
+| Reward | Nine gait-free terms with an exponential tracking kernel and a feet air-time term. The policy converges to a trot. | Reward v4 adds a tripod schedule, swing travel and quiet terms. Version 1 is the gait-free baseline. |
+| Curriculum and randomization | Terrain and command curricula, friction in [0.5, 1.25], pushes every 10 s and measured observation noise | Flat ground, fixed friction and no pushes. Joint-velocity noise on the actor is the one noise channel. |
+
+The batch row is the largest gap. With the replica count fixed, the paper's
+lever is more controls per robot and update. That changes the frozen
+24-control budget and needs a program-lead decision.
+
 ## Proposed reproduction sequence
 
 [Liu et al.](https://arxiv.org/abs/2511.03167) use PPO with an adversarial motion
@@ -74,7 +94,7 @@ allocation and supplies no native admission.
 | 2. Throughput profile | Measure physics, contact, observation and learner cost plus memory across replica counts. The current guards cap replicas at 128 and updates at 2,000; the paper uses 4,096 robots. Extend scale through a named configuration and isolation tests. Change the 153 SDF colliders only if measurements justify an asset variant, then repeat one-robot and batch admission. | None | Yes | [#35](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/35) | Done to the 128-robot guard: #44 merged the profiler and the 1, 32 and 128 profiles; AMP costs pending. |
 | 3. Omni motion dataset | Use the [optimizer and dataset pipeline](../locomotion/priors/README.md) for eight bearings, both yaw directions and the arcs in `command_bank`. Require alternating tripod demonstrations on the approved URDF, with a consistent cycle across directions ([§III-A–B, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3)). Issue #36 uses optimized motions alone; native and human review determine admission. | None | No | [#36](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/36) | Done: #36 closed. |
 | 4. Native motion validation | Replay each motion with [`replay_native.py`](../locomotion/priors/replay_native.py) and require its matching screen before dataset admission. Construct AMP states from native replay. Match feature order, frames, units and the 20 ms interval; exclude terminal-to-reset pairs. | 3 | Yes | [#36](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/36) | Done: 18000 pairs admitted; #36 closed. |
-| 5. Flat AMP pilot | Resolve the gradient-penalty ambiguity below, then implement the least-squares discriminator and style reward from Eqs. (1)–(2) with the current [256, 256, 128] MLP actor and critic. Update PPO and the discriminator together ([§IV-B, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). The [AMP learner](../locomotion/README.md#amp-learner-and-paper-networks) implements this with CPU tests; no native pilot has run. Run on flat ground and compare with the tripod baseline through the same scorer and force metrics; defer the final reward comparison to Step 9. Use the 13 learning probes as diagnostics and the full gate for qualification. | 1, 4; 2 for full scale | Yes | [#37](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/37), [#50](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/50), [#51](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/51) | CPU done in #43. The native pilot runs under #50 and its baseline and scoring under #51; the 29 September standing admission covers the physics source. |
+| 5. Flat AMP pilot | Resolve the gradient-penalty ambiguity below, then implement the least-squares discriminator and style reward from Eqs. (1)–(2) with the current [256, 256, 128] MLP actor and critic. Update PPO and the discriminator together ([§IV-B, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). The [AMP learner](../locomotion/README.md#amp-learner-and-paper-networks) implements this with CPU tests; no native pilot has run. Run on flat ground and compare with the tripod baseline through the same scorer and force metrics; defer the final reward comparison to Step 9. Use the 13 learning probes as diagnostics and the full gate for qualification. | 1, 4; 2 for full scale | Yes | [#37](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/37), [#50](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/50), [#51](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/51) | CPU done in #43. The native pilot runs under #50; #51 holds the reward v2 control record. The [flat pilot v2 protocol](#frozen-flat-pilot-v2-issue-50) moves new arms to reward v4 without its gait terms; the 29 September standing admission covers the physics source. |
 | 6. Network architecture | Implement Table III's velocity estimator, memory encoder over five proprioception frames, low-level actor, privileged encoder and critic. Train the estimator with supervised simulation velocity labels ([§IV-A–B; Table III, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). Supply the full 42-value privileged state, including base height and perturbations, plus collision states ([§III, p. 2](https://arxiv.org/pdf/2511.03167v1#page=2)). Test shapes and gradient paths; keep privileged inputs out of the actor. [`paper_networks.py`](../locomotion/paper_networks.py) implements these networks with CPU tests; friction and perturbation slots hold declared constants until Step 7. Add the terrain encoder with Step 8. Repeat the Step 5 pilot with these networks before Step 7. | None to build; 5 to compare | No | [#37](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/37), [#50](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/50) | CPU done in #43. The paper-network run follows the pilot under #50; #51 scores both. |
 | 7. Domain randomization | Implement Table II with frozen model-specific values. Declare adaptations for the different robot and simulator before comparing runs. | 5, 6 | Yes | — | Not started; no issue. |
 | 8. Terrain curriculum | Add terrain levels, the critic height scan and terrain encoder. Both stay critic-only: the GPS-only robot carries no terrain sensor. Retain admitted flat behavior. | 7 | Yes | — | Not started; no issue. |
@@ -216,6 +236,85 @@ preflight. Copy this protocol into the run archive with its SHA-256, retain
 metadata. Use [OPERATIONS](OPERATIONS.md) for host preflight and dispatch.
 Preparation and host preflight start no native training.
 
+### Frozen flat pilot v2: issue #50
+
+You use protocol `flat_pilot_v2` for the native comparison of the style reward
+against the hand-made gait terms. It replaces `flat_pilot_v1` for new arms; the
+v1 section above and its reward v2 control remain the record of #51. The
+program lead records the approval of this budget and decision rule in
+[#50](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/50)
+before dispatch.
+
+The reward v2 control failed for the penalty-sizing and learner causes in
+[audit section 15](REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4),
+which are unrelated to gait, so an AMP failure under reward v2 would not test
+the style reward. Reward v4 walks forward, and its contact schedule and
+swing-travel terms are the hand-made stand-in for that style reward. Every arm
+therefore trains reward v4 with those two terms off and the full command bank:
+
+```sh
+--reward-version 4 --reward-options schedule_weight=0,swing_travel_weight=0,forward_draw_fraction=0
+```
+
+| Arm | Preparation options | Common budget |
+| --- | --- | --- |
+| PPO control (task plus penalty) | `--learner ppo --networks mlp` | 128 robots, 2000 updates, seeds 20260917 and 20260918 |
+| Step 5 AMP (task plus style plus penalty) | `--learner amp --networks mlp` | Same budget |
+| Step 6 AMP | `--learner amp --networks paper` | Same budget |
+| Reference: reward v4 with its gait terms | Retained `ppo_v4_settle_seed20260917_20261006_001` and its seed 20260918 run | No new run |
+
+Every arm uses the learner options of the retained reward v4 runs except the
+gait clock: `--action-mean tanh --observation-normalization none
+--observation-scaling fixed --command-segments bootstrap --learning-rate-max
+3e-4 --action-std-final 0.05 --action-smoothing mean2 --velocity-noise 0.5
+--episode-seconds 10 --gait-clock 0`. The clock is off in all arms: the paper's
+actor has no clock, the contact schedule that needed it is off, and
+`paper_networks.actor_observation` takes the 231-value observation alone.
+Declare this as a departure from the retained v4 runs.
+
+Prerequisite: the AMP path takes `--action-mean` alone today. `AMPVecEnv`
+rebuilds observations without scaling, velocity noise or action smoothing, and
+`amp_ppo_config` keeps running observation normalization and sets the
+algorithm class to `AMPPPO`, which drops the bootstrap segments and the capped
+learning rate. Before any pack, extend the AMP wrapper and configuration to the
+same options, give `AMPPPO` the bootstrap and rate behaviour, and extend
+`test_parity_with_stock_ppo_from_one_seed_without_reseeding` to each option.
+The arms then differ in nothing but the learner and networks.
+
+Keep 24 controls per update, the approved model, the motor cap and the
+0.040 rad / 20 ms limiter. The AMP arms use the admitted
+`amp_demonstrations_001` bank, style weight 1, 20 discriminator updates per PPO
+update and the resolved discriminator seed. Compare checkpoint update 2000 for
+the decision; keep 50-update checkpoints as diagnostics. Score the control
+before the AMP arms. Record native contact force and motor torque before
+starting the next arm.
+
+Decision rule, fixed before any checkpoint is scored:
+
+- Tracking and appearance follow the v1 definitions of `E` and `W` over the
+  eight translations and two yaw probes, with the quiet and stop probes as
+  separate diagnostics.
+- A Step 5 win needs lower `E` and higher `W` than the control at update 2000
+  on seed 20260917, and passing load comparisons against the tripod reference.
+- Report the same metrics against the reward v4 reference. Its yaw probes
+  fail, so a Step 5 arm that achieves both commanded yaw signs with lower yaw
+  error than the reference is the result this pilot looks for. It is a
+  finding, not a gate.
+- Seed 20260918 replicates the decision; a split between seeds holds Step 7
+  for review.
+- Higher `E` and lower `W` than the control on both seeds mean a loss: fix the
+  reward or learner before Step 7. A tie, mixed result, load exceedance or
+  missing evidence holds Step 7 for review.
+- A pilot win supplies no Stage 2 qualification; the 96-case gate and human
+  acceptance remain.
+
+Use the `flat_pilot_v1` allocation profile and its 21600-second deadline; the
+profile fixes compute limits, not the reward. Use W&B project `hexapod-amp`
+offline. Freeze the input declaration from the admitted 128-robot standing,
+verify its hashes at preflight, copy this protocol into the run archive with
+its SHA-256, and follow [OPERATIONS](OPERATIONS.md) for host preflight and
+dispatch.
+
 ### Run tracking
 
 Training logs to W&B through RSL-RL when you prepare it with W&B options. The
@@ -248,9 +347,18 @@ The paper's 0.15 kernel and command range require a separate comparison.
 [`throughput.py`](../locomotion/throughput.py) profiles training at one
 admitted replica count per allocation. It runs `train.py`'s allocation: task
 version 1, stock PPO, 20-second episodes and the same per-update records. It
-accepts one, 32 or 128 robots with matching one-robot and batch standing
-admission, and it keeps the 128-replica and 2,000-update guards. The program
-lead approves each native profile.
+accepts one, 32, 128, 512 or 1024 robots with matching one-robot and batch
+standing admission. Training and probes keep the 128-replica guard until a
+count gains admission and an approved budget, and the 2,000-update guard keeps
+its opt-in. The program lead approves each native profile. The 11 October
+profiles from one source measure 866, 1,597 and 1,812 transitions per second
+at 128, 512 and 1024 robots, with the update taking 3.55, 7.70 and 13.57 s
+([record](../site/assets/throughput_profile_20261011_001/summary.json)). The
+step from 512 to 1024 robots buys 13 percent more samples per second for 76
+percent more time per update. On 11 October the program lead opened a
+512-robot training budget for the reward v4 arms: 512 robots, 24 controls per
+robot and update, 2000 updates and the pilot deadline. Training and probes
+accept 128 and 512 robots; 1024 stays a profiling count.
 
 ```sh
 uv run python -m locomotion.prepare --mode throughput --num-envs 32 \

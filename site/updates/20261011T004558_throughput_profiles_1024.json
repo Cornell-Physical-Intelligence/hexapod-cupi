@@ -1,0 +1,23 @@
+{
+  "id": "20261011T004558_throughput_profiles_1024",
+  "date": "2026-10-11T00:45:58Z",
+  "title": "Profile training throughput at 128, 512 and 1024 robots from one source",
+  "summary": "The 1024-robot standing capture passed under the flat-pilot deadline in 9401 s and 87 GB, and its admission record exists under the replicas input root. Three throughput profiles from source 4e5c42be reach 866, 1,597 and 1,812 transitions per second at 128, 512 and 1024 robots, with one update taking 3.55, 7.70 and 13.57 s. The step from 512 to 1024 buys 13 percent more samples per second for 76 percent more time per update, and the PhysX step per transition falls from 520 to 487 microseconds. Accounted GPU memory rises to 2.47 GB and process memory to 29.9 GB at 1024 robots. A 2000-update run projects to 4.3 h at 512 robots and 7.5 h at 1024, against the 6 h pilot deadline. Two retained 1024 attempts failed before this one: a stale pack launched by a name collision and stopped, and an Isaac startup crash.",
+  "areas": [
+    "locomotion",
+    "compute"
+  ],
+  "next": "Decide whether a 512-robot training budget replaces the 128-robot one; training and probes still keep the 128 guard.",
+  "changes": [
+    "docs/TRAINING.md",
+    "site/assets/throughput_profile_20261011_001/*.json"
+  ],
+  "evidence": [
+    "site/assets/throughput_profile_20261011_001/summary.json",
+    "site/assets/throughput_profile_20261011_001/provenance.json",
+    "site/assets/throughput_profile_20261011_001/profile_1024.json",
+    "site/assets/throughput_profile_20261011_001/admission_1024.json"
+  ],
+  "no_project_impact": true,
+  "reason": "A throughput measurement and its admission establish no walking result or accepted capability."
+}
