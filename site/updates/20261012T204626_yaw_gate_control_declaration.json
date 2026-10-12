@@ -1,0 +1,21 @@
+{
+  "id": "20261012T204626_yaw_gate_control_declaration",
+  "date": "2026-10-12T20:46:26Z",
+  "title": "Declare the yaw-gate control packet before its native runs",
+  "summary": "PR 71 reports 13 of 13 learning probes for the yaw-gated stride setup at one seed, 48 controls per update and 2500 updates. Plain reward v4 at the same experience, 5000 updates of 24 controls, passed 7 and 5 of 13, and the PR 71 run changed several settings at once. This packet trains two arms from one source freeze of PR 71 head 55bfbe7f at 128 robots, 48 controls per update and 2500 updates: the PR 71 setup and plain reward v4, each at seeds 20260917 and 20260918. The declaration fixes the attempts, their binding hashes, the launch order, the measure and two verdict rules before the first launch.",
+  "areas": [
+    "training",
+    "compute"
+  ],
+  "next": "Run the four launches and their 13-probe evaluations on Spark in the declared order, then record the results against the two verdict rules.",
+  "changes": [
+    "site/assets/yaw_gate_control_20261012_001/declaration.json"
+  ],
+  "evidence": [
+    "site/assets/yaw_gate_control_20261012_001/declaration.json",
+    "site/assets/reward_v4_controlled_comparison_20261007_001/comparison_after_yaw.json",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/71"
+  ],
+  "no_project_impact": true,
+  "reason": "A declaration starts no result and changes no capability state."
+}
