@@ -54,8 +54,8 @@ def validate_deadline(mode, profile, seconds):
     """Keep the standard bound; allow the named flat pilot a finite allocation."""
     if profile not in ALLOCATION_PROFILES:
         raise ValueError('Unknown allocation profile')
-    if profile == 'flat_pilot_v1' and mode not in ('train', 'evaluate'):
-        raise ValueError('The flat pilot deadline applies to training and evaluation')
+    if profile == 'flat_pilot_v1' and mode not in ('train', 'evaluate', 'diagnostic'):
+        raise ValueError('The flat pilot deadline applies to training, evaluation and standing diagnostics')
     limit = 21600 if profile == 'flat_pilot_v1' else 6600
     if (type(seconds) not in (int, float) or not math.isfinite(seconds)
             or not 0 < seconds <= limit):
@@ -141,7 +141,8 @@ def main(argv=None):
         parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--standing-admission', type=Path)
     parser.add_argument('--source-freeze-sha256', required=True)
-    parser.add_argument('--num-envs', type=int, choices=[1, 32, 128], required=True)
+    parser.add_argument('--num-envs', type=int, choices=[1, 32, 128, 512, 1024], required=True,
+                        help='Replica count. Training and probes accept 128 and 512; diagnostics and profiles accept each listed count.')
     parser.add_argument('--seed', type=int, default=20260917)
     parser.add_argument('--updates', type=int, default=512)
     parser.add_argument('--extended-updates', action='store_true',
@@ -256,7 +257,7 @@ def main(argv=None):
     validate_deadline(args.mode, args.allocation_profile, args.max_wall_seconds)
     if (not args.headless or args.device != 'cuda:0' or not 1 <= args.updates <= limit
             or args.seed < 0
-            or (args.mode in ('train', 'probe') and (args.num_envs != 128 or args.checkpoint is not None))
+            or (args.mode in ('train', 'probe') and (args.num_envs not in (128, 512) or args.checkpoint is not None))
             or (args.mode == 'evaluate' and (args.num_envs != 1 or args.checkpoint is None))):
         raise ValueError('A bounded scratch training, a 128-replica probe or single-replica evaluation is required')
     if sha(source.parent/'FREEZE_SHA256.json') != args.source_freeze_sha256:

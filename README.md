@@ -32,8 +32,7 @@ Read a reference below when its subject is part of your task.
 | --- | --- |
 | [Spark contributor guide](SPARK.md) | Personal worktrees, frozen attempts, launch and result inspection. |
 | [Training](docs/TRAINING.md) | Kernel contract and the paper-reproduction roadmap. |
-| [Operations](docs/OPERATIONS.md) | Host access, ownership, launch procedure and recovery controls. |
-| [Compute coordination](docs/SPARK_COMPUTE_COORDINATION.md) | Current reservation policy; release requires the program lead's direction. |
+| [Operations](docs/OPERATIONS.md) | Host access, ownership, launch procedure, recovery controls and the reservation policy; release requires the program lead's direction. |
 | [Progress publication](docs/PROJECT_SITE.md) | Registry updates and Pages publication. |
 | [Source lineages](docs/PIPELINE_LINEAGES.md) | Source manifests and archive restoration. |
 | [Updated CAD import](docs/UPDATED_CAD_IMPORT.md) | Approved direct-drive geometry, joint conventions and import review. |

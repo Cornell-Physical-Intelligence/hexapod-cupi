@@ -1,0 +1,22 @@
+{
+  "id": "20261012T050422_training_guide_corrections",
+  "date": "2026-10-12T05:04:22Z",
+  "title": "Correct the training guide after the 512-robot merge",
+  "summary": "docs/TRAINING.md held statements that the merged code or the cited paper contradicts. The parity table said the standing admission fixes the replica count at 128; training accepts 128 and 512 robots under the 11 October budget, 3,072 and 12,288 samples per update. The table said 128 robots give the lowest final reward in Rudin et al.; the authors report a slow decrease with fewer robots and a sharp drop at high counts (Section 4.1, Fig. 4a). The table credited the paper with a command curriculum; Section 3.1 describes a terrain curriculum and random commands held constant for each episode. The Step 2 row and the profile paragraph kept the 128-robot guard and a floor limit of about 400 robots; the grid centred on the origin keeps 1024 robots on the 80 m floor mesh. The Step 5 row named the 29 September standing admission; the 10 October 128-robot admission matches the merged physics source.",
+  "areas": [
+    "documentation",
+    "training"
+  ],
+  "next": "The frozen flat_pilot_v1 section of docs/TRAINING.md still names the 29 September 128-robot admission, and that record's physics source hashes differ from the merged env.py and env_config.py; the program lead decides that section. Probe mode accepts 512 robots while locomotion/noise_probe.py plans 128 alone; a code PR corrects that.",
+  "changes": [
+    "docs/TRAINING.md"
+  ],
+  "evidence": [
+    "https://proceedings.mlr.press/v164/rudin22a.html",
+    "locomotion/prepare.py",
+    "locomotion/env.py",
+    "site/assets/throughput_profile_20261010_001/admission_128.json"
+  ],
+  "no_project_impact": true,
+  "reason": "A documentation correction establishes no native result or accepted capability."
+}

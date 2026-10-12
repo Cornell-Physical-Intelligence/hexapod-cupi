@@ -1,0 +1,19 @@
+{
+  "id": "20261010T212801_gpu_lock_permissions",
+  "date": "2026-10-10T21:28:01Z",
+  "title": "Keep the GPU lock files readable by every account",
+  "summary": "The launcher creates its lock files under /tmp with mode 644, and the creating account's umask trimmed that to 640, which locked other accounts out of the launcher until the owner ran chmod. The launcher now sets the mode after creation, so the first launch after a reboot leaves a lock every account can open. A test creates the lock under umask 027 and checks the mode.",
+  "areas": [
+    "compute"
+  ],
+  "next": "Merge so each contributor's launcher opens the shared locks after the next /tmp reset.",
+  "changes": [
+    "locomotion/launch.py",
+    "locomotion/tests/test_launch_lock.py"
+  ],
+  "evidence": [
+    "locomotion/tests/test_launch_lock.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A launcher permission fix establishes no native result or accepted capability."
+}

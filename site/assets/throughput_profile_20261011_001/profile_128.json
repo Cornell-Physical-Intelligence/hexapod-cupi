@@ -1,0 +1,2271 @@
+{
+  "schema": "hexapod_locomotion_throughput_v1",
+  "status": "completed",
+  "learner": {
+    "label": "stock_ppo",
+    "algorithm": "RSL-RL 5.0.1 PPO",
+    "adapter": "ppo.py",
+    "networks": "MLP [256, 256, 128] actor and critic",
+    "motion_prior": false
+  },
+  "amp_learner": {
+    "status": "pending",
+    "measured": false,
+    "scope": "This source has no AMP discriminator or style reward; their learner cost remains unmeasured."
+  },
+  "identity": {
+    "schema": "hexapod_locomotion_throughput_v1",
+    "source_files": {
+      "__init__.py": "c82a5695bd2575afdaae01eb84bb3c06ddffe42529d201bbe43726ae8859e350",
+      "action_distribution.py": "89451099c733e247ece1b31babc9cf1260329b71169846d0b4cab38bd8e807bf",
+      "admission.py": "1391aed5939b882e2ca0967bd8eda6103bf73e46206f8d6c0091f8463b1e70c3",
+      "amp.py": "4010cf0e42ea63ca693b0fa311a3fef7ee6bfdfa47b9eba58bf87f7f7cefec5c",
+      "amp_diagnostic.py": "4fefe977563073f09a5e0b592b87b55f466e272c5b4fee62fbe4133869150f51",
+      "amp_discriminator.py": "a9c0c27f575bb07b5379b56e1c3fb64fec1574506702e02e66f0866c8bedf694",
+      "amp_ppo.py": "eaeb95bfbe332e0cd46fd42d731dcce6bb08ed31459abedfdf056922dea686e9",
+      "camera.py": "6c9927cfa747408e3206e170386483791ac696634f1e322e4a6222b32396655d",
+      "env.py": "3f50d3d585ae58c005637f32c8a3054e56954787ccdec9d4dc5738d2722af454",
+      "env_config.py": "bfad5368bce1895e8505899025c6ce60267c8aef12a0359e62f0a5e6635068fe",
+      "evaluate.py": "5cb686c3daf4eed3b4a96501aa80f9f1a8465376782255a9860e5abb7dfd735c",
+      "evaluation.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
+      "evaluation_config.py": "7d55733f4f5a471427b408a4b3a0e834d083a687f7ae0ebc3ceb0d16c23f3cb7",
+      "force_metrics.py": "5bd228d003d4ab71dbda6acbb9fdbf357a36ec007050b156bdd71ec31c707673",
+      "inputs.py": "d4ed35be0d49728bcf78edb8be346158c1434bbf8e00105fcb865b5f5e01c588",
+      "launch.py": "cc9196f62f50df818ab64d5e8d095894f210ec0a5720ffb40f0742f562c33c40",
+      "noise_probe.py": "b2a3dc5ea62c1f3c7297279bc79e88ca60e55e23a9bd5c49cf3db7705a26a962",
+      "paper_networks.py": "d53ff59b51b11dfceeb743ee37a817c238b977ad333c7793b2a9581aa5e8c86a",
+      "paper_reward.py": "1df0d4f410840814ebec9dbe4ea5bbd1787ad90cf04068839f7b8e85b19ba03b",
+      "ppo.py": "f29885dd9daad82ed993c50446a8267e9be44c71038c62c3101e1fba5dbd4611",
+      "prepare.py": "602452dd77277bae5f8aae468b89ea5fbd89802cf4cd8cf618042831ca3d216c",
+      "rate_schedule.py": "0433711977012118938bbe830ea60eb121f3b47500e687843d2d3fc733f4b6f9",
+      "reservation.py": "8e3682cccb29cd3f3d53625de1276bdd56ca6643c54ada001b3bd1fb69b95c2e",
+      "reward_scorer.py": "bf365b6cc00d7ce8d7c308c69f425d586f79111039cbd4eaddf6c5c2bbf919f1",
+      "reward_viewer.py": "4666a1c952e2f8af7564dfcd4649d9ce3943a0e5e2c9ff3d263f0d03724907f0",
+      "reward_workbench.py": "ea95a6052fe1d3fb2210b9608d9ce92ef5b48a600d53cf884fdf7d54cb8e6afc",
+      "spark_paths.py": "7200cde3c80f9593e5b37abfc4d76307e223c4444658f5674f341e30aaf997f3",
+      "task.py": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244",
+      "task_v2.py": "24fcae86ffbbdd053cfb2cc2753f12ce443920e159e3b2e01ebaf12587b533b3",
+      "task_v3.py": "b641f3c4e3439ad7670d166737a2e7cc0b1df929a8d984d44a67f5eee31b5a66",
+      "task_v4.py": "587b6bbd1f820c2b3229a7b567235db21a5782f6021aad8c0da2daac0f23094f",
+      "throughput.py": "ca4bbccb3ee20e415c2a1b885306b8f81c639eec1c6138d1bfe75b7dab7fdcd6",
+      "train.py": "6a56aef2174bb4030bef677f12a2d01bbd58570356e6a8bff9ac0eec305af6e1",
+      "tripod.py": "ed3d34a4c8c5772ec7e1a1bc4703fc5b325bc9dfa56073b071a6fdf1fd9d0dfc",
+      "tripod_config.py": "4d4d20bafb450e37ad45b9d459e72b0318d7b81fd3edfd0117ba588bda13328c",
+      "tripod_evaluate.py": "92e077e12ceda9ed1cf6c3d045e73b698b0ad00b3f778c86f9de1e06ed5a25a3",
+      "tripod_kinematics.py": "3db69088e944a3773f16844e07ebebc4700662142770eb1a322ce500f5a016cc"
+    },
+    "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+    "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+    "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+    "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+    "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+    "config": {
+      "num_envs": 128,
+      "spacing_m": 2.0,
+      "physics_dt": 0.0025,
+      "decimation": 8,
+      "episode_seconds": 20.0,
+      "action_scale_rad": 0.35,
+      "target_slew_rad": 0.04,
+      "reset_height_m": 0.08161108940839767,
+      "command_forward_mps": 0.1,
+      "command_left_mps": 0.0,
+      "command_yaw_rad_s": 0.0,
+      "seed": 20260917,
+      "record_motion_features": false,
+      "render": false,
+      "device": "cuda:0",
+      "schema": "canonical_paper_walk_experiment_v1",
+      "actor_width": 231,
+      "critic_width": 234,
+      "amp_width": 61,
+      "joint_names": [
+        "lf_coxa_yaw",
+        "lf_femur_pitch",
+        "lf_tibia_pitch",
+        "lm_coxa_yaw",
+        "lm_femur_pitch",
+        "lm_tibia_pitch",
+        "lr_coxa_yaw",
+        "lr_femur_pitch",
+        "lr_tibia_pitch",
+        "rf_coxa_yaw",
+        "rf_femur_pitch",
+        "rf_tibia_pitch",
+        "rm_coxa_yaw",
+        "rm_femur_pitch",
+        "rm_tibia_pitch",
+        "rr_coxa_yaw",
+        "rr_femur_pitch",
+        "rr_tibia_pitch"
+      ],
+      "legs": [
+        "lf",
+        "lm",
+        "lr",
+        "rf",
+        "rm",
+        "rr"
+      ],
+      "standing_admission": false,
+      "stage2_complete": false,
+      "prior_standing_failure_superseded": false,
+      "authorization": "User explicitly requested experimental paper-based PPO training on the confirmed model.",
+      "telemetry_scope": "Compact native body-force telemetry; no exact toe/shaft patch classification or formal standing admission."
+    },
+    "motion_prior": false,
+    "behavior_cloning": false,
+    "seed": 20260917,
+    "rsl_rl_required_version": "5.0.1",
+    "adapter_sha256": "f29885dd9daad82ed993c50446a8267e9be44c71038c62c3101e1fba5dbd4611",
+    "entry_sha256": "ca4bbccb3ee20e415c2a1b885306b8f81c639eec1c6138d1bfe75b7dab7fdcd6",
+    "source_freeze_sha256": "8b1eacb3c5207ee05883b28ebfdf2ae6dcdd544f2964177e46ea8e1bcf1c9b3e",
+    "learner": {
+      "label": "stock_ppo",
+      "algorithm": "RSL-RL 5.0.1 PPO",
+      "adapter": "ppo.py",
+      "networks": "MLP [256, 256, 128] actor and critic",
+      "motion_prior": false
+    },
+    "physics_source_files": {
+      "env.py": "3f50d3d585ae58c005637f32c8a3054e56954787ccdec9d4dc5738d2722af454",
+      "env_config.py": "bfad5368bce1895e8505899025c6ce60267c8aef12a0359e62f0a5e6635068fe"
+    },
+    "physics_config": {
+      "physics_dt": 0.0025,
+      "decimation": 8,
+      "spacing_m": 2.0,
+      "target_slew_rad": 0.04,
+      "action_scale_rad": 0.35,
+      "solver_position_iterations": 32,
+      "solver_velocity_iterations": 0,
+      "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+      "material_friction": [
+        1.0,
+        1.0
+      ],
+      "restitution": 0.0,
+      "external_forces_every_iteration": true,
+      "neutral_joint_position_rad": [
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4,
+        0.0,
+        -0.3,
+        0.4
+      ],
+      "reset_root_height_m": 0.10280231400684256
+    },
+    "standing_admission": {
+      "schema": "hexapod_locomotion_standing_admission_v1",
+      "num_envs": 128,
+      "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+      "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+      "physics_source_files": {
+        "env.py": "3f50d3d585ae58c005637f32c8a3054e56954787ccdec9d4dc5738d2722af454",
+        "env_config.py": "bfad5368bce1895e8505899025c6ce60267c8aef12a0359e62f0a5e6635068fe"
+      },
+      "physics_config": {
+        "physics_dt": 0.0025,
+        "decimation": 8,
+        "spacing_m": 2.0,
+        "target_slew_rad": 0.04,
+        "action_scale_rad": 0.35,
+        "solver_position_iterations": 32,
+        "solver_velocity_iterations": 0,
+        "floor": "80m_two_triangle_mesh_y_equals_x_seam",
+        "material_friction": [
+          1.0,
+          1.0
+        ],
+        "restitution": 0.0,
+        "external_forces_every_iteration": true,
+        "neutral_joint_position_rad": [
+          0.0,
+          -0.3,
+          0.4,
+          0.0,
+          -0.3,
+          0.4,
+          0.0,
+          -0.3,
+          0.4,
+          0.0,
+          -0.3,
+          0.4,
+          0.0,
+          -0.3,
+          0.4,
+          0.0,
+          -0.3,
+          0.4
+        ],
+        "reset_root_height_m": 0.10280231400684256
+      },
+      "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+      "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+      "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+      "one": {
+        "report_path": "/standing_one/standing/standing_report.json",
+        "report_sha256": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+        "state_path": "/standing_one/state.json",
+        "state_sha256": "7f9c0542930aafd47e30bbfda373adf1926430c21833a4858a3da99bab1030ce"
+      },
+      "batch": {
+        "report_path": "/standing_batch/standing/standing_report.json",
+        "report_sha256": "89e371772efa0439868e6ac5252c97d29edee05902639a8c708624ff6155252d",
+        "state_path": "/standing_batch/state.json",
+        "state_sha256": "51c340b89e98b6b7d5b57ccd7f26596c9d34deba0297e71a41e67c76bcc391e2"
+      }
+    },
+    "upstream_source_files": {
+      "runners/on_policy_runner.py": "39358a0a60219fdb360df7acddf80f6a382837aa58e2ec0ccf875df4afee4825",
+      "algorithms/ppo.py": "a2d35e7ad7b884c80b7434e7d2ce785a6da1e18d93c96f1179fbd3a208669f8c",
+      "models/mlp_model.py": "6219ebb3ed4df036dae7ff1c30d0fbb169eaaa659e44a659dd757a292124476b",
+      "storage/rollout_storage.py": "ececf28e7412d24867066829cc443acae811f034f8e63975b90343947779918d",
+      "utils/logger.py": "d9822d8317724507a7c817e85399db0db9e56a4eae959435138e75cf92e44b8d"
+    },
+    "ppo_config": {
+      "seed": 20260917,
+      "num_steps_per_env": 24,
+      "save_interval": 50,
+      "obs_groups": {
+        "actor": [
+          "policy"
+        ],
+        "critic": [
+          "critic"
+        ]
+      },
+      "actor": {
+        "class_name": "MLPModel",
+        "hidden_dims": [
+          256,
+          256,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": true,
+        "distribution_cfg": {
+          "class_name": "GaussianDistribution",
+          "init_std": 0.15,
+          "std_type": "log"
+        }
+      },
+      "critic": {
+        "class_name": "MLPModel",
+        "hidden_dims": [
+          256,
+          256,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": true
+      },
+      "algorithm": {
+        "class_name": "PPO",
+        "value_loss_coef": 1.0,
+        "use_clipped_value_loss": true,
+        "clip_param": 0.2,
+        "entropy_coef": 0.01,
+        "num_learning_epochs": 5,
+        "num_mini_batches": 4,
+        "learning_rate": 0.001,
+        "schedule": "adaptive",
+        "gamma": 0.99,
+        "lam": 0.95,
+        "desired_kl": 0.01,
+        "max_grad_norm": 1.0,
+        "rnd_cfg": null,
+        "symmetry_cfg": null
+      },
+      "logger": "tensorboard",
+      "check_for_nan": true
+    }
+  },
+  "settings": {
+    "num_envs": 128,
+    "seed": 20260917,
+    "warmup_updates": 2,
+    "measured_updates_per_pass": 20,
+    "pass_order": "warmup, then alternating throughput and components",
+    "census_controls": 50,
+    "max_wall_seconds": 6200.0,
+    "device": "cuda:0",
+    "steps_per_update": 24,
+    "transitions_per_update": 3072
+  },
+  "platform": {
+    "python": "3.12.13",
+    "machine": "aarch64",
+    "torch": "2.10.0+cu130",
+    "rsl-rl-lib": "5.0.1",
+    "tensordict": "0.14.0",
+    "warp-lang": "1.13.0",
+    "isaacsim": null,
+    "isaaclab": "6.1.14",
+    "cuda_device": "NVIDIA GB10",
+    "cuda_capability": [
+      12,
+      1
+    ],
+    "cuda_runtime": "13.0",
+    "device_total_memory_bytes": 130662940672,
+    "integrated_memory": true,
+    "warp_memory": "available; Warp 1.13.0",
+    "cuda_contexts": {
+      "physx_context": "0xc67834cb4600",
+      "primary_context": "0xc67834cb4600",
+      "shared": true
+    },
+    "physx_statistics": {
+      "status": "available",
+      "reads": 94,
+      "unanswered_reads": 0
+    }
+  },
+  "startup_seconds": {
+    "app_launch_seconds": 13.142824215989094,
+    "environment_seconds": 19.548567190999165,
+    "task_seconds": 0.009971856023184955,
+    "learner_seconds": 0.008334284997545183
+  },
+  "startup_memory": {
+    "after_app_launch": {
+      "process_peak_rss_bytes": 1833603072,
+      "process_rss_bytes": 1833603072,
+      "system_used_bytes": 15444537344,
+      "torch_allocated_bytes": 0,
+      "torch_reserved_bytes": 0,
+      "torch_peak_allocated_bytes": 0,
+      "torch_peak_reserved_bytes": 0,
+      "warp_pool_used_bytes": 0,
+      "warp_pool_peak_bytes": 1
+    },
+    "after_environment": {
+      "process_peak_rss_bytes": 7222984704,
+      "process_rss_bytes": 7222984704,
+      "system_used_bytes": 23620878336,
+      "torch_allocated_bytes": 366080,
+      "torch_reserved_bytes": 2097152,
+      "torch_peak_allocated_bytes": 1582592,
+      "torch_peak_reserved_bytes": 2097152,
+      "warp_pool_used_bytes": 102912,
+      "warp_pool_peak_bytes": 103424
+    },
+    "after_task": {
+      "process_peak_rss_bytes": 7224201216,
+      "process_rss_bytes": 7224201216,
+      "system_used_bytes": 23620878336,
+      "torch_allocated_bytes": 377344,
+      "torch_reserved_bytes": 2097152,
+      "torch_peak_allocated_bytes": 1582592,
+      "torch_peak_reserved_bytes": 2097152,
+      "warp_pool_used_bytes": 102912,
+      "warp_pool_peak_bytes": 103424,
+      "physx_gpu_mem_heap": 1610612736,
+      "physx_gpu_mem_heap_broadphase": 1202477336,
+      "physx_gpu_mem_heap_narrowphase": 96578908,
+      "physx_gpu_mem_heap_solver": 230547816,
+      "physx_gpu_mem_heap_articulation": 60776,
+      "physx_gpu_mem_heap_simulation": 5282088,
+      "physx_gpu_mem_heap_simulation_articulation": 6879960,
+      "physx_gpu_mem_heap_other": 0
+    },
+    "after_learner": {
+      "process_peak_rss_bytes": 7227756544,
+      "process_rss_bytes": 7227756544,
+      "system_used_bytes": 23644332032,
+      "torch_allocated_bytes": 7911424,
+      "torch_reserved_bytes": 25165824,
+      "torch_peak_allocated_bytes": 7911424,
+      "torch_peak_reserved_bytes": 25165824,
+      "warp_pool_used_bytes": 102912,
+      "warp_pool_peak_bytes": 103424,
+      "physx_gpu_mem_heap": 1610612736,
+      "physx_gpu_mem_heap_broadphase": 1202477336,
+      "physx_gpu_mem_heap_narrowphase": 96578908,
+      "physx_gpu_mem_heap_solver": 230547816,
+      "physx_gpu_mem_heap_articulation": 60776,
+      "physx_gpu_mem_heap_simulation": 5282088,
+      "physx_gpu_mem_heap_simulation_articulation": 6879960,
+      "physx_gpu_mem_heap_other": 0
+    }
+  },
+  "warmup": {
+    "excluded_from_statistics": true,
+    "wall_seconds": [
+      4.943756597000174,
+      3.5618839469971135
+    ],
+    "stock_runner_save_update_windows": [
+      2
+    ],
+    "stock_runner_saves_after_final_update": 1
+  },
+  "throughput": {
+    "synchronization": "Device synchronization at update boundaries only; no component hooks.",
+    "updates": 20,
+    "transitions": 61440,
+    "wall_seconds": {
+      "count": 20,
+      "sum": 70.94549008598551,
+      "mean": 3.5472745042992755,
+      "median": 3.4740244939748663,
+      "min": 3.0303823439753614,
+      "max": 4.375167827995028,
+      "stdev": 0.41458882695128435,
+      "coefficient_of_variation": 0.11687531552711954
+    },
+    "rsl_collection_seconds": {
+      "count": 20,
+      "sum": 68.50077605247498,
+      "mean": 3.4250388026237486,
+      "median": 3.3298200368881226,
+      "min": 2.944032907485962,
+      "max": 4.223352909088135,
+      "stdev": 0.40662594564616045,
+      "coefficient_of_variation": 0.11872155881406801
+    },
+    "rsl_learning_seconds": {
+      "count": 20,
+      "sum": 1.5758450031280518,
+      "mean": 0.0787922501564026,
+      "median": 0.06285417079925537,
+      "min": 0.057569026947021484,
+      "max": 0.12656664848327637,
+      "stdev": 0.02489989009274761,
+      "coefficient_of_variation": 0.3160195329276843
+    },
+    "training_transitions_per_second": 866.0169931243704,
+    "collection_transitions_per_second": 896.9241451065303,
+    "scene_physics_steps_per_second": 54.12606207027315,
+    "robot_physics_steps_per_second": 6928.135944994963,
+    "simulated_robot_seconds_per_wall_second": 17.320339862487405,
+    "memory_peaks": {
+      "physx_gpu_mem_heap": 1677721600,
+      "physx_gpu_mem_heap_articulation": 1154408,
+      "physx_gpu_mem_heap_broadphase": 1202477336,
+      "physx_gpu_mem_heap_narrowphase": 97671404,
+      "physx_gpu_mem_heap_other": 0,
+      "physx_gpu_mem_heap_simulation": 5282088,
+      "physx_gpu_mem_heap_simulation_articulation": 6879960,
+      "physx_gpu_mem_heap_solver": 251331696,
+      "process_peak_rss_bytes": 7511846912,
+      "process_rss_bytes": 6071799808,
+      "system_used_bytes": 23531016192,
+      "torch_allocated_bytes": 30522880,
+      "torch_peak_allocated_bytes": 41940480,
+      "torch_peak_reserved_bytes": 69206016,
+      "torch_reserved_bytes": 69206016,
+      "warp_pool_peak_bytes": 132100,
+      "warp_pool_used_bytes": 132096,
+      "accounted_gpu_peak_bytes": 1747059716
+    }
+  },
+  "components": {
+    "synchronization": "Device synchronization at every component boundary; exclusive times partition each update. platform.cuda_contexts records whether the barriers also wait for PhysX kernels.",
+    "updates": 20,
+    "transitions": 61440,
+    "wall_seconds": {
+      "count": 20,
+      "sum": 73.91118482704042,
+      "mean": 3.695559241352021,
+      "median": 3.649958889000118,
+      "min": 3.079240309947636,
+      "max": 4.718415406008717,
+      "stdev": 0.4474685852865396,
+      "coefficient_of_variation": 0.12108277964523528
+    },
+    "rsl_collection_seconds": {
+      "count": 20,
+      "sum": 71.61473894119263,
+      "mean": 3.5807369470596315,
+      "median": 3.5404621362686157,
+      "min": 2.9756972789764404,
+      "max": 4.579427480697632,
+      "stdev": 0.4350779212792456,
+      "coefficient_of_variation": 0.12150513363918437
+    },
+    "rsl_learning_seconds": {
+      "count": 20,
+      "sum": 1.6018531322479248,
+      "mean": 0.08009265661239624,
+      "median": 0.07216489315032959,
+      "min": 0.05554485321044922,
+      "max": 0.11923670768737793,
+      "stdev": 0.02113305617838111,
+      "coefficient_of_variation": 0.26385760033723576
+    },
+    "training_transitions_per_second": 831.2679622681704,
+    "collection_transitions_per_second": 857.9239540404142,
+    "scene_physics_steps_per_second": 51.95424764176065,
+    "robot_physics_steps_per_second": 6650.1436981453635,
+    "simulated_robot_seconds_per_wall_second": 16.625359245363406,
+    "memory_peaks": {
+      "physx_gpu_mem_heap": 1677721600,
+      "physx_gpu_mem_heap_articulation": 1154408,
+      "physx_gpu_mem_heap_broadphase": 1202477336,
+      "physx_gpu_mem_heap_narrowphase": 97676524,
+      "physx_gpu_mem_heap_other": 0,
+      "physx_gpu_mem_heap_simulation": 5282088,
+      "physx_gpu_mem_heap_simulation_articulation": 6879960,
+      "physx_gpu_mem_heap_solver": 251332340,
+      "process_peak_rss_bytes": 7511846912,
+      "process_rss_bytes": 6071980032,
+      "system_used_bytes": 23632470016,
+      "torch_allocated_bytes": 30522880,
+      "torch_peak_allocated_bytes": 41940480,
+      "torch_peak_reserved_bytes": 69206016,
+      "torch_reserved_bytes": 69206016,
+      "warp_pool_peak_bytes": 132600,
+      "warp_pool_used_bytes": 132096,
+      "accounted_gpu_peak_bytes": 1747060216
+    },
+    "components": {
+      "physics_step": {
+        "category": "physics_contact",
+        "description": "PhysX step: broadphase, SDF contact generation, solver and integration; GPU work counts here only when PhysX shares the synchronized CUDA context",
+        "seconds": 50.0857831586618,
+        "share": 0.6776482243637083,
+        "microseconds_per_transition": 815.198293598011,
+        "calls": 3840,
+        "barriers": 3840,
+        "estimated_barrier_seconds": 0.02334706485271454,
+        "microseconds_per_transition_less_barriers": 814.8182957976738
+      },
+      "contact_readback": {
+        "category": "physics_contact",
+        "description": "Floor contact-force matrix query",
+        "seconds": 0.33721432083984837,
+        "share": 0.004562426128453544,
+        "microseconds_per_transition": 5.488514336586074,
+        "calls": 3840,
+        "barriers": 3840,
+        "estimated_barrier_seconds": 0.02334706485271454,
+        "microseconds_per_transition_less_barriers": 5.108516536248923
+      },
+      "training_loads": {
+        "category": "physics_contact",
+        "description": "Training accumulation of 400 Hz contact force and motor torque",
+        "seconds": 2.8653517115162686,
+        "share": 0.038767498021057015,
+        "microseconds_per_transition": 46.63658384629343,
+        "calls": 3840,
+        "barriers": 3840,
+        "estimated_barrier_seconds": 0.02334706485271454,
+        "microseconds_per_transition_less_barriers": 46.25658604595628
+      },
+      "state_readback": {
+        "category": "observation",
+        "description": "Articulation kinematics, state getters and frame transforms",
+        "seconds": 7.116007335833274,
+        "share": 0.09627781441314254,
+        "microseconds_per_transition": 115.82043189832802,
+        "calls": 3842,
+        "barriers": 3842,
+        "estimated_barrier_seconds": 0.023359224782325327,
+        "microseconds_per_transition_less_barriers": 115.44023618246986
+      },
+      "observation": {
+        "category": "observation",
+        "description": "Actor/critic assembly and next-command fields",
+        "seconds": 0.10733310878276825,
+        "share": 0.0014521903421510355,
+        "microseconds_per_transition": 1.746958150761202,
+        "calls": 964,
+        "barriers": 964,
+        "estimated_barrier_seconds": 0.005861086072400212,
+        "microseconds_per_transition_less_barriers": 1.6515628696348965
+      },
+      "env_control": {
+        "category": "simulation_other",
+        "description": "Target limiter, motor model, actuation I/O, force checks and termination",
+        "seconds": 6.215218163095415,
+        "share": 0.08409036031068436,
+        "microseconds_per_transition": 101.15914978996443,
+        "calls": 480,
+        "barriers": 16320,
+        "estimated_barrier_seconds": 0.09922502562403679,
+        "microseconds_per_transition_less_barriers": 99.54415913853154
+      },
+      "reset": {
+        "category": "simulation_other",
+        "description": "Selected replica resets and their command draws",
+        "seconds": 0.002530548954382539,
+        "share": 3.423769975145544e-05,
+        "microseconds_per_transition": 0.04118732022106997,
+        "calls": 4,
+        "barriers": 18,
+        "estimated_barrier_seconds": 0.0001094393664970994,
+        "microseconds_per_transition_less_barriers": 0.039406080531989574
+      },
+      "proximity_guard": {
+        "category": "task",
+        "description": "Inter-replica proximity checks",
+        "seconds": 0.3787612752057612,
+        "share": 0.005124546116965931,
+        "microseconds_per_transition": 6.16473429696877,
+        "calls": 966,
+        "barriers": 966,
+        "estimated_barrier_seconds": 0.005873246002011001,
+        "microseconds_per_transition_less_barriers": 6.069141100321455
+      },
+      "reward": {
+        "category": "task",
+        "description": "Measured task reward",
+        "seconds": 0.7999037633417174,
+        "share": 0.010822499533914554,
+        "microseconds_per_transition": 13.019266981473265,
+        "calls": 480,
+        "barriers": 480,
+        "estimated_barrier_seconds": 0.0029183831065893173,
+        "microseconds_per_transition_less_barriers": 12.971767256431121
+      },
+      "task_metrics": {
+        "category": "task",
+        "description": "Task reporting accumulators",
+        "seconds": 2.110650736489333,
+        "share": 0.02855658100229982,
+        "microseconds_per_transition": 34.353039330881074,
+        "calls": 480,
+        "barriers": 480,
+        "estimated_barrier_seconds": 0.0029183831065893173,
+        "microseconds_per_transition_less_barriers": 34.30553960583893
+      },
+      "task_other": {
+        "category": "task",
+        "description": "Command holds and task bookkeeping",
+        "seconds": 0.325664201809559,
+        "share": 0.004406155882518267,
+        "microseconds_per_transition": 5.300524117994125,
+        "calls": 480,
+        "barriers": 3360,
+        "estimated_barrier_seconds": 0.02042868174612522,
+        "microseconds_per_transition_less_barriers": 4.968026042699118
+      },
+      "policy_inference": {
+        "category": "learner",
+        "description": "Actor sample and critic value during collection",
+        "seconds": 0.5042416704818606,
+        "share": 0.0068222647446639735,
+        "microseconds_per_transition": 8.207058438832368,
+        "calls": 480,
+        "barriers": 480,
+        "estimated_barrier_seconds": 0.0029183831065893173,
+        "microseconds_per_transition_less_barriers": 8.159558713790224
+      },
+      "rollout_storage": {
+        "category": "learner",
+        "description": "Observation normalizers and transition storage",
+        "seconds": 0.4090375246014446,
+        "share": 0.005534176262478182,
+        "microseconds_per_transition": 6.657511793643304,
+        "calls": 480,
+        "barriers": 480,
+        "estimated_barrier_seconds": 0.0029183831065893173,
+        "microseconds_per_transition_less_barriers": 6.6100120686011605
+      },
+      "returns": {
+        "category": "learner",
+        "description": "Generalized advantage estimation",
+        "seconds": 0.08552383806090802,
+        "share": 0.001157116318200586,
+        "microseconds_per_transition": 1.3919895517725915,
+        "calls": 20,
+        "barriers": 20,
+        "estimated_barrier_seconds": 0.00012159929610788822,
+        "microseconds_per_transition_less_barriers": 1.3900103965625021
+      },
+      "ppo_update": {
+        "category": "learner",
+        "description": "PPO epochs: forward, backward and optimizer steps",
+        "seconds": 1.5152864750707522,
+        "share": 0.02050145020157199,
+        "microseconds_per_transition": 24.662865805188023,
+        "calls": 20,
+        "barriers": 20,
+        "estimated_barrier_seconds": 0.00012159929610788822,
+        "microseconds_per_transition_less_barriers": 24.660886649977936
+      },
+      "vec_env_other": {
+        "category": "bookkeeping",
+        "description": "Done mask and observation wrapper",
+        "seconds": 0.0926720566349104,
+        "share": 0.0012538299426774488,
+        "microseconds_per_transition": 1.5083342551254948,
+        "calls": 480,
+        "barriers": 962,
+        "estimated_barrier_seconds": 0.0058489261427894235,
+        "microseconds_per_transition_less_barriers": 1.4131368895201983
+      },
+      "episode_logging": {
+        "category": "bookkeeping",
+        "description": "RSL-RL episode reward and length buffers",
+        "seconds": 0.09977879823418334,
+        "share": 0.0013499823939729248,
+        "microseconds_per_transition": 1.6240038775094945,
+        "calls": 480,
+        "barriers": 480,
+        "estimated_barrier_seconds": 0.0029183831065893173,
+        "microseconds_per_transition_less_barriers": 1.5765041524673507
+      },
+      "update_logging": {
+        "category": "bookkeeping",
+        "description": "RSL-RL logger plus the training metrics row, scalars and state file",
+        "seconds": 0.6935744740185328,
+        "share": 0.009383890620094464,
+        "microseconds_per_transition": 11.288647038062058,
+        "calls": 20,
+        "barriers": 20,
+        "estimated_barrier_seconds": 0.00012159929610788822,
+        "microseconds_per_transition_less_barriers": 11.286667882851967
+      },
+      "runner_other": {
+        "category": "bookkeeping",
+        "description": "Runner loop, NaN checks and device transfers",
+        "seconds": 0.1666516654076986,
+        "share": 0.0022547557016935962,
+        "microseconds_per_transition": 2.7124294499950943,
+        "calls": 20,
+        "barriers": 2000,
+        "estimated_barrier_seconds": 0.012159929610788822,
+        "microseconds_per_transition_less_barriers": 2.5145139289861618
+      }
+    },
+    "categories": {
+      "physics_contact": {
+        "seconds": 53.288349191017915,
+        "share": 0.7209781485132188,
+        "microseconds_per_transition": 867.3233917808905,
+        "estimated_barrier_seconds": 0.07004119455814362,
+        "microseconds_per_transition_less_barriers": 866.183398379879
+      },
+      "observation": {
+        "seconds": 7.223340444616042,
+        "share": 0.09773000475529357,
+        "microseconds_per_transition": 117.56739004908923,
+        "estimated_barrier_seconds": 0.02922031085472554,
+        "microseconds_per_transition_less_barriers": 117.09179905210476
+      },
+      "simulation_other": {
+        "seconds": 6.217748712049797,
+        "share": 0.0841245980104358,
+        "microseconds_per_transition": 101.2003371101855,
+        "estimated_barrier_seconds": 0.09933446499053389,
+        "microseconds_per_transition_less_barriers": 99.58356521906353
+      },
+      "task": {
+        "seconds": 3.614979976846371,
+        "share": 0.048909782535698575,
+        "microseconds_per_transition": 58.837564727317236,
+        "estimated_barrier_seconds": 0.03213869396131486,
+        "microseconds_per_transition_less_barriers": 58.31447400529063
+      },
+      "learner": {
+        "seconds": 2.5140895082149655,
+        "share": 0.03401500752691473,
+        "microseconds_per_transition": 40.91942558943629,
+        "estimated_barrier_seconds": 0.006079964805394411,
+        "microseconds_per_transition_less_barriers": 40.82046782893182
+      },
+      "bookkeeping": {
+        "seconds": 1.0526769942953251,
+        "share": 0.014242458658438433,
+        "microseconds_per_transition": 17.13341462069214,
+        "estimated_barrier_seconds": 0.02104883815627545,
+        "microseconds_per_transition_less_barriers": 16.790822853825677
+      }
+    },
+    "component_sum_seconds": 73.91118482704042,
+    "barrier_cost_seconds": {
+      "count": 20,
+      "sum": 0.00013851193943992257,
+      "mean": 6.925596971996129e-06,
+      "median": 6.079964805394411e-06,
+      "min": 6.008020136505365e-06,
+      "max": 1.4159973943606019e-05,
+      "stdev": 2.4128296299706792e-06,
+      "coefficient_of_variation": 0.34839301791990385
+    },
+    "barrier_scope": "Each barrier waits for PyTorch and Warp work. The estimate multiplies each label's barrier count by the median idle barrier cost measured before each component update; Python hook overhead stays in the parent labels."
+  },
+  "contact_census": {
+    "controls": 50,
+    "policy": "deterministic actor mean after the measured updates",
+    "capacity_patches": 131072,
+    "max_capacity_fraction": 0.02519989013671875,
+    "reported_patches_per_robot": {
+      "count": 50,
+      "sum": 1163.421875,
+      "mean": 23.2684375,
+      "median": 22.88671875,
+      "min": 22.4375,
+      "max": 25.8046875,
+      "stdev": 0.8141490697339919,
+      "coefficient_of_variation": 0.03498941730548052
+    },
+    "nonzero_force_patches_per_robot": {
+      "count": 50,
+      "sum": 295.859375,
+      "mean": 5.9171875,
+      "median": 5.9140625,
+      "min": 5.7421875,
+      "max": 6.09375,
+      "stdev": 0.07703318717293481,
+      "coefficient_of_variation": 0.013018547607784071
+    },
+    "physx_scene_statistics": [
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 111,
+        "physx_nb_lost_pairs": 142,
+        "physx_nb_new_touches": 3,
+        "physx_nb_lost_touches": 4,
+        "physx_gpu_mem_rigid_contact_count": 3130,
+        "physx_gpu_mem_rigid_patch_count": 1003,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 129,
+        "physx_nb_lost_pairs": 124,
+        "physx_nb_new_touches": 4,
+        "physx_nb_lost_touches": 3,
+        "physx_gpu_mem_rigid_contact_count": 3130,
+        "physx_gpu_mem_rigid_patch_count": 1003,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 97,
+        "physx_nb_lost_pairs": 114,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 2,
+        "physx_gpu_mem_rigid_contact_count": 3130,
+        "physx_gpu_mem_rigid_patch_count": 1003,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 106,
+        "physx_nb_lost_pairs": 123,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 2,
+        "physx_gpu_mem_rigid_contact_count": 3174,
+        "physx_gpu_mem_rigid_patch_count": 1015,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 132,
+        "physx_nb_lost_pairs": 88,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 1,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 110,
+        "physx_nb_lost_pairs": 85,
+        "physx_nb_new_touches": 1,
+        "physx_nb_lost_touches": 2,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 86,
+        "physx_nb_lost_pairs": 102,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 3,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 88,
+        "physx_nb_lost_pairs": 109,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 0,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 92,
+        "physx_nb_lost_pairs": 94,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 1,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 117,
+        "physx_nb_lost_pairs": 100,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 0,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 126,
+        "physx_nb_lost_pairs": 95,
+        "physx_nb_new_touches": 1,
+        "physx_nb_lost_touches": 2,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 83,
+        "physx_nb_lost_pairs": 61,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 2,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 67,
+        "physx_nb_lost_pairs": 84,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 1,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 80,
+        "physx_nb_lost_pairs": 81,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 3,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 132,
+        "physx_nb_lost_pairs": 75,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 3,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 116,
+        "physx_nb_lost_pairs": 72,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 1,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 99,
+        "physx_nb_lost_pairs": 80,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 5,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 94,
+        "physx_nb_lost_pairs": 97,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 3,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 95,
+        "physx_nb_lost_pairs": 119,
+        "physx_nb_new_touches": 1,
+        "physx_nb_lost_touches": 3,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 115,
+        "physx_nb_lost_pairs": 78,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 5,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 131,
+        "physx_nb_lost_pairs": 79,
+        "physx_nb_new_touches": 1,
+        "physx_nb_lost_touches": 0,
+        "physx_gpu_mem_rigid_contact_count": 3184,
+        "physx_gpu_mem_rigid_patch_count": 1018,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251332340,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 87,
+        "physx_nb_lost_pairs": 99,
+        "physx_nb_new_touches": 2,
+        "physx_nb_lost_touches": 4,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 102,
+        "physx_nb_lost_pairs": 120,
+        "physx_nb_new_touches": 2,
+        "physx_nb_lost_touches": 3,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 72,
+        "physx_nb_lost_pairs": 117,
+        "physx_nb_new_touches": 2,
+        "physx_nb_lost_touches": 1,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 124,
+        "physx_nb_lost_pairs": 109,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 9,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 137,
+        "physx_nb_lost_pairs": 93,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 1,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 95,
+        "physx_nb_lost_pairs": 79,
+        "physx_nb_new_touches": 2,
+        "physx_nb_lost_touches": 1,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 83,
+        "physx_nb_lost_pairs": 130,
+        "physx_nb_new_touches": 2,
+        "physx_nb_lost_touches": 2,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 88,
+        "physx_nb_lost_pairs": 120,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 2,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 122,
+        "physx_nb_lost_pairs": 87,
+        "physx_nb_new_touches": 1,
+        "physx_nb_lost_touches": 7,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 133,
+        "physx_nb_lost_pairs": 81,
+        "physx_nb_new_touches": 1,
+        "physx_nb_lost_touches": 6,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 121,
+        "physx_nb_lost_pairs": 94,
+        "physx_nb_new_touches": 1,
+        "physx_nb_lost_touches": 3,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 88,
+        "physx_nb_lost_pairs": 116,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 1,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 100,
+        "physx_nb_lost_pairs": 100,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 5,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 125,
+        "physx_nb_lost_pairs": 96,
+        "physx_nb_new_touches": 1,
+        "physx_nb_lost_touches": 2,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 143,
+        "physx_nb_lost_pairs": 85,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 2,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 85,
+        "physx_nb_lost_pairs": 119,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 2,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 119,
+        "physx_nb_lost_pairs": 137,
+        "physx_nb_new_touches": 1,
+        "physx_nb_lost_touches": 4,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 126,
+        "physx_nb_lost_pairs": 108,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 4,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 111,
+        "physx_nb_lost_pairs": 89,
+        "physx_nb_new_touches": 1,
+        "physx_nb_lost_touches": 7,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 134,
+        "physx_nb_lost_pairs": 102,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 5,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 135,
+        "physx_nb_lost_pairs": 85,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 5,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 110,
+        "physx_nb_lost_pairs": 137,
+        "physx_nb_new_touches": 2,
+        "physx_nb_lost_touches": 5,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 86,
+        "physx_nb_lost_pairs": 110,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 5,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 117,
+        "physx_nb_lost_pairs": 99,
+        "physx_nb_new_touches": 1,
+        "physx_nb_lost_touches": 7,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 128,
+        "physx_nb_lost_pairs": 90,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 8,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 123,
+        "physx_nb_lost_pairs": 96,
+        "physx_nb_new_touches": 2,
+        "physx_nb_lost_touches": 7,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 83,
+        "physx_nb_lost_pairs": 108,
+        "physx_nb_new_touches": 1,
+        "physx_nb_lost_touches": 2,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 78,
+        "physx_nb_lost_pairs": 129,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 4,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      },
+      {
+        "physx_nb_discrete_contact_pairs_total": 0,
+        "physx_nb_new_pairs": 110,
+        "physx_nb_lost_pairs": 115,
+        "physx_nb_new_touches": 0,
+        "physx_nb_lost_touches": 5,
+        "physx_gpu_mem_rigid_contact_count": 3303,
+        "physx_gpu_mem_rigid_patch_count": 1142,
+        "physx_gpu_mem_heap": 1677721600,
+        "physx_gpu_mem_heap_broadphase": 1202477336,
+        "physx_gpu_mem_heap_narrowphase": 97676524,
+        "physx_gpu_mem_heap_solver": 251369204,
+        "physx_gpu_mem_heap_articulation": 1154408,
+        "physx_gpu_mem_heap_simulation": 5282088,
+        "physx_gpu_mem_heap_simulation_articulation": 6879960,
+        "physx_gpu_mem_heap_other": 0
+      }
+    ],
+    "scope": "Patches reported by the floor contact view at each control end; the census runs after all timed updates."
+  },
+  "training_loads": {
+    "schema": "canonical_training_loads_v1",
+    "status": "available",
+    "physics_steps": 8064,
+    "physics_hz": 400,
+    "windows": {
+      "full_training": {
+        "samples_across_replicas": 1032192,
+        "metrics": {
+          "total_vertical_support_n": {
+            "mean": 73.24263981859166,
+            "rms": 74.89753688103006,
+            "peak": 470.6451721191406
+          },
+          "body_normal_resultant_n:body": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lf_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lm_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lr_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rf_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rm_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rr_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lf_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lm_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lr_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rf_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rm_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rr_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lf_tibia": {
+            "mean": 11.198737666293205,
+            "rms": 13.644457725448692,
+            "peak": 292.5389404296875
+          },
+          "body_normal_resultant_n:lm_tibia": {
+            "mean": 8.637096633630314,
+            "rms": 11.711847358980789,
+            "peak": 145.87600708007812
+          },
+          "body_normal_resultant_n:lr_tibia": {
+            "mean": 16.94928117230027,
+            "rms": 18.84962807460608,
+            "peak": 326.2630310058594
+          },
+          "body_normal_resultant_n:rf_tibia": {
+            "mean": 16.809209920671762,
+            "rms": 18.55110834791712,
+            "peak": 390.9551086425781
+          },
+          "body_normal_resultant_n:rm_tibia": {
+            "mean": 8.608243333948932,
+            "rms": 11.593358713210488,
+            "peak": 322.294677734375
+          },
+          "body_normal_resultant_n:rr_tibia": {
+            "mean": 11.040071094968802,
+            "rms": 13.750272496052292,
+            "peak": 330.8355712890625
+          },
+          "applied_abs_torque_nm:lf_coxa_yaw": {
+            "mean": 0.32792751523167735,
+            "rms": 0.41288091053413234,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lf_femur_pitch": {
+            "mean": 0.4136479030525001,
+            "rms": 0.5133366834386037,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lf_tibia_pitch": {
+            "mean": 0.3861140162773027,
+            "rms": 0.5155621976662621,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_coxa_yaw": {
+            "mean": 0.30677214472525755,
+            "rms": 0.3908546509532459,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_femur_pitch": {
+            "mean": 0.35312537805649596,
+            "rms": 0.45250318959984265,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_tibia_pitch": {
+            "mean": 0.32774452636737583,
+            "rms": 0.4613856272841408,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_coxa_yaw": {
+            "mean": 0.34218960275042626,
+            "rms": 0.4286038260958779,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_femur_pitch": {
+            "mean": 0.653841114550808,
+            "rms": 0.763495583397293,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_tibia_pitch": {
+            "mean": 0.5092319390999879,
+            "rms": 0.6426645516560118,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_coxa_yaw": {
+            "mean": 0.3412903229178603,
+            "rms": 0.42717806059237917,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_femur_pitch": {
+            "mean": 0.6769560016209621,
+            "rms": 0.788849872132764,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_tibia_pitch": {
+            "mean": 0.471311085754751,
+            "rms": 0.5928523386057709,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_coxa_yaw": {
+            "mean": 0.309458670928788,
+            "rms": 0.39382220074102714,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_femur_pitch": {
+            "mean": 0.3742598367868504,
+            "rms": 0.4719316477080736,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_tibia_pitch": {
+            "mean": 0.30462390002289874,
+            "rms": 0.4291124150276377,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_coxa_yaw": {
+            "mean": 0.3261827042163419,
+            "rms": 0.41231136947302327,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_femur_pitch": {
+            "mean": 0.4863618817157172,
+            "rms": 0.6026707543292119,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_tibia_pitch": {
+            "mean": 0.35959073236775174,
+            "rms": 0.4888691784780711,
+            "peak": 1.600000023841858
+          },
+          "requested_abs_torque_nm:lf_coxa_yaw": {
+            "mean": 0.3279650715684265,
+            "rms": 0.41304985622941554,
+            "peak": 2.6603240966796875
+          },
+          "requested_abs_torque_nm:lf_femur_pitch": {
+            "mean": 0.4139439177210217,
+            "rms": 0.5145968266372548,
+            "peak": 5.819420337677002
+          },
+          "requested_abs_torque_nm:lf_tibia_pitch": {
+            "mean": 0.3896277436516887,
+            "rms": 0.5323407361029016,
+            "peak": 12.230293273925781
+          },
+          "requested_abs_torque_nm:lm_coxa_yaw": {
+            "mean": 0.30679092750081466,
+            "rms": 0.390939095463355,
+            "peak": 2.574209213256836
+          },
+          "requested_abs_torque_nm:lm_femur_pitch": {
+            "mean": 0.35337081968508277,
+            "rms": 0.4534844816058118,
+            "peak": 3.612046003341675
+          },
+          "requested_abs_torque_nm:lm_tibia_pitch": {
+            "mean": 0.32898724242202293,
+            "rms": 0.4679983723191995,
+            "peak": 14.47864818572998
+          },
+          "requested_abs_torque_nm:lr_coxa_yaw": {
+            "mean": 0.3422170235415925,
+            "rms": 0.428718569022542,
+            "peak": 2.726174831390381
+          },
+          "requested_abs_torque_nm:lr_femur_pitch": {
+            "mean": 0.6568914669327521,
+            "rms": 0.7706408177656442,
+            "peak": 4.688050746917725
+          },
+          "requested_abs_torque_nm:lr_tibia_pitch": {
+            "mean": 0.514206533778337,
+            "rms": 0.6610057331226833,
+            "peak": 12.323417663574219
+          },
+          "requested_abs_torque_nm:rf_coxa_yaw": {
+            "mean": 0.3413864060245875,
+            "rms": 0.4276454574191486,
+            "peak": 4.291140079498291
+          },
+          "requested_abs_torque_nm:rf_femur_pitch": {
+            "mean": 0.6835902429120437,
+            "rms": 0.8045888816078332,
+            "peak": 6.675363540649414
+          },
+          "requested_abs_torque_nm:rf_tibia_pitch": {
+            "mean": 0.47335006292887055,
+            "rms": 0.6005646236442193,
+            "peak": 9.678006172180176
+          },
+          "requested_abs_torque_nm:rm_coxa_yaw": {
+            "mean": 0.3095600262738605,
+            "rms": 0.394338003301742,
+            "peak": 3.4268555641174316
+          },
+          "requested_abs_torque_nm:rm_femur_pitch": {
+            "mean": 0.37463318166855347,
+            "rms": 0.47376298722229493,
+            "peak": 6.40947151184082
+          },
+          "requested_abs_torque_nm:rm_tibia_pitch": {
+            "mean": 0.30675083110049367,
+            "rms": 0.4417153903448136,
+            "peak": 11.751001358032227
+          },
+          "requested_abs_torque_nm:rr_coxa_yaw": {
+            "mean": 0.326306669283485,
+            "rms": 0.41295266376894496,
+            "peak": 4.479752540588379
+          },
+          "requested_abs_torque_nm:rr_femur_pitch": {
+            "mean": 0.48765894873466087,
+            "rms": 0.6067681623144662,
+            "peak": 5.803816795349121
+          },
+          "requested_abs_torque_nm:rr_tibia_pitch": {
+            "mean": 0.36292820847160123,
+            "rms": 0.5068977656970709,
+            "peak": 17.570539474487305
+          }
+        }
+      },
+      "commanded_locomotion_after_settle": {
+        "samples_across_replicas": 780632,
+        "metrics": {
+          "total_vertical_support_n": {
+            "mean": 73.24143447279765,
+            "rms": 74.73311376319843,
+            "peak": 470.6451721191406
+          },
+          "body_normal_resultant_n:body": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lf_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lm_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lr_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rf_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rm_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rr_coxa": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lf_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lm_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lr_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rf_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rm_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:rr_femur": {
+            "mean": 0.0,
+            "rms": 0.0,
+            "peak": 0.0
+          },
+          "body_normal_resultant_n:lf_tibia": {
+            "mean": 11.18142033280856,
+            "rms": 13.63793065775972,
+            "peak": 292.5389404296875
+          },
+          "body_normal_resultant_n:lm_tibia": {
+            "mean": 8.870046635274335,
+            "rms": 11.900392868154272,
+            "peak": 145.87600708007812
+          },
+          "body_normal_resultant_n:lr_tibia": {
+            "mean": 16.6736774823788,
+            "rms": 18.57027056985862,
+            "peak": 160.36328125
+          },
+          "body_normal_resultant_n:rf_tibia": {
+            "mean": 16.743977916327744,
+            "rms": 18.464957715108127,
+            "peak": 390.9551086425781
+          },
+          "body_normal_resultant_n:rm_tibia": {
+            "mean": 8.514248432397476,
+            "rms": 11.480158151734983,
+            "peak": 322.294677734375
+          },
+          "body_normal_resultant_n:rr_tibia": {
+            "mean": 11.258063675200464,
+            "rms": 13.928697136981409,
+            "peak": 330.8355712890625
+          },
+          "applied_abs_torque_nm:lf_coxa_yaw": {
+            "mean": 0.32880020800699344,
+            "rms": 0.41386085203574596,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lf_femur_pitch": {
+            "mean": 0.41244733852425647,
+            "rms": 0.5111084826104474,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lf_tibia_pitch": {
+            "mean": 0.38773695982149753,
+            "rms": 0.5185394116265325,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_coxa_yaw": {
+            "mean": 0.3098378683552441,
+            "rms": 0.3944630469933555,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_femur_pitch": {
+            "mean": 0.3611479671881169,
+            "rms": 0.4624412502992056,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lm_tibia_pitch": {
+            "mean": 0.3330317573667903,
+            "rms": 0.4663820874454849,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_coxa_yaw": {
+            "mean": 0.3425904568385441,
+            "rms": 0.42918060866037233,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_femur_pitch": {
+            "mean": 0.6471377261459177,
+            "rms": 0.756738102857274,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:lr_tibia_pitch": {
+            "mean": 0.5020588762069451,
+            "rms": 0.6349636514039594,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_coxa_yaw": {
+            "mean": 0.34261355421702633,
+            "rms": 0.42888537448841896,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_femur_pitch": {
+            "mean": 0.6922366319024457,
+            "rms": 0.803297006401471,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rf_tibia_pitch": {
+            "mean": 0.4584247193574991,
+            "rms": 0.5779317103327699,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_coxa_yaw": {
+            "mean": 0.31023271657838775,
+            "rms": 0.39511016781491093,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_femur_pitch": {
+            "mean": 0.37616635606319226,
+            "rms": 0.4734518718408948,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rm_tibia_pitch": {
+            "mean": 0.2984443162861657,
+            "rms": 0.4199457664307812,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_coxa_yaw": {
+            "mean": 0.32821663403167584,
+            "rms": 0.4145829199940911,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_femur_pitch": {
+            "mean": 0.4983198472673421,
+            "rms": 0.6143097347648194,
+            "peak": 1.600000023841858
+          },
+          "applied_abs_torque_nm:rr_tibia_pitch": {
+            "mean": 0.36167821585166526,
+            "rms": 0.490557785983864,
+            "peak": 1.600000023841858
+          },
+          "requested_abs_torque_nm:lf_coxa_yaw": {
+            "mean": 0.32883664131557067,
+            "rms": 0.41402683223589526,
+            "peak": 2.6603240966796875
+          },
+          "requested_abs_torque_nm:lf_femur_pitch": {
+            "mean": 0.41272826542488045,
+            "rms": 0.5123501517725706,
+            "peak": 5.819420337677002
+          },
+          "requested_abs_torque_nm:lf_tibia_pitch": {
+            "mean": 0.3901245915490124,
+            "rms": 0.528547752661624,
+            "peak": 8.172656059265137
+          },
+          "requested_abs_torque_nm:lm_coxa_yaw": {
+            "mean": 0.30985742644030223,
+            "rms": 0.39455048662427006,
+            "peak": 2.574209213256836
+          },
+          "requested_abs_torque_nm:lm_femur_pitch": {
+            "mean": 0.36140279188903796,
+            "rms": 0.46343343923299224,
+            "peak": 3.612046003341675
+          },
+          "requested_abs_torque_nm:lm_tibia_pitch": {
+            "mean": 0.3341516654534022,
+            "rms": 0.4713755538953056,
+            "peak": 8.184070587158203
+          },
+          "requested_abs_torque_nm:lr_coxa_yaw": {
+            "mean": 0.3426151887349219,
+            "rms": 0.42928282015181374,
+            "peak": 2.5081100463867188
+          },
+          "requested_abs_torque_nm:lr_femur_pitch": {
+            "mean": 0.6499055430870133,
+            "rms": 0.7632287184231995,
+            "peak": 3.714294910430908
+          },
+          "requested_abs_torque_nm:lr_tibia_pitch": {
+            "mean": 0.5063424599939673,
+            "rms": 0.6498246268090594,
+            "peak": 8.802363395690918
+          },
+          "requested_abs_torque_nm:rf_coxa_yaw": {
+            "mean": 0.3427061206336661,
+            "rms": 0.42932277141422226,
+            "peak": 3.5317177772521973
+          },
+          "requested_abs_torque_nm:rf_femur_pitch": {
+            "mean": 0.6996517769887574,
+            "rms": 0.8206264251356529,
+            "peak": 6.675363540649414
+          },
+          "requested_abs_torque_nm:rf_tibia_pitch": {
+            "mean": 0.46036439670570845,
+            "rms": 0.5857207279701111,
+            "peak": 9.678006172180176
+          },
+          "requested_abs_torque_nm:rm_coxa_yaw": {
+            "mean": 0.3103479344117394,
+            "rms": 0.39568950583466544,
+            "peak": 3.20524263381958
+          },
+          "requested_abs_torque_nm:rm_femur_pitch": {
+            "mean": 0.37656864634182813,
+            "rms": 0.4754722995315525,
+            "peak": 6.40947151184082
+          },
+          "requested_abs_torque_nm:rm_tibia_pitch": {
+            "mean": 0.3004757135197014,
+            "rms": 0.4326489043817955,
+            "peak": 11.751001358032227
+          },
+          "requested_abs_torque_nm:rr_coxa_yaw": {
+            "mean": 0.32833502272001086,
+            "rms": 0.4151768275252139,
+            "peak": 4.479752540588379
+          },
+          "requested_abs_torque_nm:rr_femur_pitch": {
+            "mean": 0.4997461001150285,
+            "rms": 0.6187618474249801,
+            "peak": 5.803816795349121
+          },
+          "requested_abs_torque_nm:rr_tibia_pitch": {
+            "mean": 0.3653838155689637,
+            "rms": 0.5110482207048253,
+            "peak": 17.570539474487305
+          }
+        }
+      }
+    },
+    "scope": "Aggregate native normal forces by body; tibia values include toe and shaft contacts. Forces exclude friction. Applied torque uses native effort readback. The locomotion window starts after 2 seconds per episode and includes failed motion. Exact per-foot classification and percentiles come from the separate evaluation capture."
+  },
+  "memory_scope": "PyTorch allocator peaks reset before each update. The Warp pool high-water mark and process peak RSS span the process. PhysX heap groups hold live allocations; gpu_mem_heap is heap capacity. system_used_bytes is MemTotal minus MemAvailable for the whole host and includes other processes. On GB10 unified memory, process RSS omits CUDA allocations. No per-process counter isolates the CUDA context or tensor-API staging buffers.",
+  "excluded": [
+    "Project checkpoints, which train.py writes every 50 updates and at the end.",
+    "W&B logging, policy evaluation and video capture.",
+    "The contact census controls, which run after training_loads is reported."
+  ],
+  "stage2_complete": false,
+  "physical_admission": false
+}
