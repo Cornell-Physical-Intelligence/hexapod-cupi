@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 import argparse
-import importlib
 import json
 from pathlib import Path
 import re
 import shutil
 
 from .env_config import sha
+from . import reward_options as reward_option_schema
 from .tripod_config import SWEEPS
 from .train import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline
 from .spark_paths import LEGACY_ROOT, RUN_ROOTS, within_roots
@@ -34,7 +34,8 @@ def save(path, value):
 def valid_reward_options(spec):
     """Unique ``key=value`` pairs with numeric or lowercase-word values, such as ``yaw_gate_on=none``.
 
-    ``prepare`` then checks each key and value against the selected task's reward configuration."""
+    ``prepare`` then checks each key, value type and word choice against the selected task's reward configuration
+    with ``locomotion.reward_options``."""
     word, number = r'[a-z][a-z0-9_]*', r'[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?'
     pairs = [item.partition('=') for item in spec.split(',')]
     keys = [key for key, _, _ in pairs]
@@ -121,9 +122,10 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
     if reward_task not in ('v4', 'v4_yaw_gate') or (reward_task != 'v4' and (mode != 'train' or reward_version != '4')):
         raise ValueError('The reward task selection applies to reward version 4 training only')
     if reward_options:
-        # The selected task's reward configuration checks each key and value, as the trainer does before launch.
+        # Each key, value type and word choice against the selected task's configuration, without importing Torch;
+        # the trainer applies the task's reward_config before launch.
         try:
-            importlib.import_module(f'{__package__ or "locomotion"}.task_{reward_task}').reward_config(reward_options)
+            reward_option_schema.check(reward_task, reward_options)
         except ValueError as error:
             raise ValueError('Reward options apply to reward version 4 training as unique key=value pairs: '
                              + str(error)) from error
