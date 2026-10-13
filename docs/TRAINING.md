@@ -98,13 +98,13 @@ allocation and supplies no native admission.
 | 4. Native motion validation | Replay each motion with [`replay_native.py`](../locomotion/priors/replay_native.py) and require its matching screen before dataset admission. Construct AMP states from native replay. Match feature order, frames, units and the 20 ms interval; exclude terminal-to-reset pairs. | 3 | Yes | [#36](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/36) | Done: 18000 pairs admitted; #36 closed. |
 | 5. Flat AMP pilot | Resolve the gradient-penalty ambiguity below, then implement the least-squares discriminator and style reward from Eqs. (1)–(2) with the current [256, 256, 128] MLP actor and critic. Update PPO and the discriminator together ([§IV-B, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). The [AMP learner](../locomotion/README.md#amp-learner-and-paper-networks) implements this with CPU tests; no native pilot has run. Run on flat ground and compare with the tripod baseline through the same scorer and force metrics; defer the final reward comparison to Step 9. Use the 13 learning probes as diagnostics and the full gate for qualification. | 1, 4; 2 for full scale | Yes | [#37](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/37), [#50](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/50), [#51](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/51) | CPU done in #43. The native pilot runs under #50; #51 holds the reward v2 control record. The [flat pilot v2 protocol](#frozen-flat-pilot-v2-issue-50) moves new arms to reward v4 without its gait terms; the [10 October 128-robot standing admission](../site/assets/throughput_profile_20261010_001/admission_128.json) covers the physics source. |
 | 6. Network architecture | Implement Table III's velocity estimator, memory encoder over five proprioception frames, low-level actor, privileged encoder and critic. Train the estimator with supervised simulation velocity labels ([§IV-A–B; Table III, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). Supply the full 42-value privileged state, including base height and perturbations, plus collision states ([§III, p. 2](https://arxiv.org/pdf/2511.03167v1#page=2)). Test shapes and gradient paths; keep privileged inputs out of the actor. [`paper_networks.py`](../locomotion/paper_networks.py) implements these networks with CPU tests; friction and perturbation slots hold declared constants until Step 7. Add the terrain encoder with Step 8. Repeat the Step 5 pilot with these networks before Step 7. | None to build; 5 to compare | No | [#37](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/37), [#50](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/50) | CPU done in #43. The paper-network run follows the pilot under #50; #51 scores both. |
-| 7. Domain randomization | Implement Table II with frozen model-specific values. Declare adaptations for the different robot and simulator before comparing runs. | 5, 6 | Yes | — | Not started; no issue. |
+| 7. Domain randomization | Implement Table II with frozen model-specific values. Declare adaptations for the different robot and simulator before comparing runs. | 5, 6 | Yes | [#67](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67) | Declaration drafted in `randomization.py` ([Step 7 section](#step-7-domain-randomization-declaration)); surrogate and native implementations pending; no run. |
 | 8. Terrain curriculum | Add terrain levels, the critic height scan and terrain encoder. Both stay critic-only: the GPS-only robot carries no terrain sensor. Retain admitted flat behavior. | 7 | Yes | — | Not started; no issue. |
 | 9. Reward and robustness comparisons | After Steps 7–8, compare task plus penalty, task plus style, and task plus style plus penalty with matched transitions and five seeds. Assess flat tracking and terrain progression ([§V-A; Figs. 3–4, pp. 4–5](https://arxiv.org/pdf/2511.03167v1#page=4)). Test push disturbances and reproduce the baseline controllers as separate comparisons ([§V-B, p. 5](https://arxiv.org/pdf/2511.03167v1#page=5)). Keep RMA/MPC work separate from the reward ablation. | 7, 8 | Yes | — | Not started; no issue. |
 
 Steps 1, 2, 3 and 6 need no earlier step, so you can assign them in parallel
 through GitHub issues. Each linked issue records its step's progress in its checkboxes;
-Steps 7–9 have no issue yet. The Step 5 pilot keeps the current MLPs: if it fails, the
+Steps 8 and 9 have no issue yet. The Step 5 pilot keeps the current MLPs: if it fails, the
 Table III networks cannot be the cause.
 
 Freeze the chosen PPO settings and terrain curriculum thresholds in the task
@@ -426,6 +426,69 @@ robots takes the `flat_pilot_v1` allocation profile in
 [OPERATIONS](OPERATIONS.md#before-a-run). Change the 153 SDF colliders
 only when measurements justify an asset variant, then repeat one-robot and
 batch admission.
+
+### Step 7: domain randomization declaration
+
+[`randomization.py`](../locomotion/randomization.py) declares `table2_v1` for
+[issue #67](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67):
+one field per Table II row with its status, this project's range, the draw
+granularity and the reason. `declaration("table2_v1")` returns the canonical
+JSON and its SHA-256, `533c9a4161a67867ffd5ab32a5dc480d2f73d78dc1b27fcdde95ea219f7d71c0`.
+Run identities, packs and admission bind that hash; `none` declares the nominal
+properties and draws nothing. The first milestone-1 review freezes these ranges
+with the push schedule. No row is excluded.
+
+| Table II row | Paper | Project range | Draw | Status |
+| --- | --- | --- | --- | --- |
+| Joint stiffness | 0.8–1.2 × 100 | 0.8–1.2 × the explicit servo Kp 12 | one factor per replica | kept |
+| Joint damping | 0.8–1.2 × 2 | 0.8–1.2 × the 18 named KD values | one factor per replica | kept |
+| Joint position | 0.6–1.4 × nominal | additive reset-pose offset: coxa ±0.12, femur ±0.12, tibia ±0.16 rad | per joint | adapted |
+| Link mass | 0.9–1.1 × nominal | 0.9–1.1 × each ledger mass, inertia scaled with it | per link | kept |
+| Payload mass | 0–5 kg | 0–1.464 kg, the paper's share of a 7.466 kg robot | per replica | adapted |
+| Payload position | ±0.15 m | X and Y ±0.15 m; Z fixed 0.04 m above the base origin | per replica | kept |
+| Foot friction | 0.1–2.5 | 0.1–2.5 effective coefficient on the toes and that replica's floor | per replica | kept |
+| Motor strength | 0.8–1.2 | 0.8–1.2 × the speed-dependent ceiling, capped at 1.6 N·m | per joint | kept |
+
+- **Joint position.** The paper scales the default pose at reset. The six coxa
+  yaw joints have a 0.0 rad nominal angle, so a factor never moves them. Each
+  joint adds an offset instead: 0.4 × |nominal| keeps the paper's extent on the
+  femur (0.3 rad) and tibia (0.4 rad), and the coxa takes the femur half-width.
+  Every offset stays inside the named travel limits, so nothing is clipped. The
+  reset root height places the lowest drawn toe at the nominal 5 mm clearance.
+  The actor's pose reference, the held target and the executed-action feature
+  keep the nominal pose.
+- **Payload.** A point mass on the base link changes its mass, centre of mass
+  and parallel-axis inertia; no body is added, so the 19-body topology stays.
+  The 0.04 m height is a declared deck assumption above the base centre of mass.
+- **Motor strength under the cap.** The ceiling becomes
+  `min(factor × curve(speed), 1.6 N·m)`. The nominal curve exceeds 1.6 N·m
+  below 450 rpm, so a factor of 1.2 changes nothing below about 456 rpm, and a
+  factor of 0.8 lowers the cap to 1.28 N·m everywhere. The row is asymmetric.
+  The saturation counter and the over-rating reward terms keep their nominal
+  1.6 N·m reference.
+- **Foot friction.** MuJoCo takes the larger of the two geom coefficients, so
+  the floor and toe geoms of a replica both carry the draw. PhysX multiplies
+  the toe material by the floor material 1.0. Each gives the drawn value.
+- **Gains.** Both factors act through the explicit motor law. The implicit
+  PhysX drive and the MuJoCo joint damping stay at zero.
+- **Pushes, adapted.** Section V-B applies velocity perturbations at
+  one-second intervals for robustness evaluation and gives no training
+  schedule. Training applies a force at the base centre of mass, so it adds no
+  torque: the first push 1–10 s after a reset, then every 5–10 s, each 0.2 s
+  (10 controls) at 0–15 N with a uniform heading in the body XY plane and no
+  vertical component. 15 N over 0.2 s changes the velocity of this robot by
+  0.40 m/s, half the paper's 0.803 m/s tolerance. The six privileged values are
+  the body-frame XYZ force in N, then the XYZ torque in N·m, each the mean over
+  the eight physics steps of the control; they read zero outside a push and
+  after a reset.
+- **Draws.** Uniform. Each replica owns one generator seeded from the run
+  seed, the replica index and the declaration hash. A reset redraws that
+  replica alone and advances no task or learner generator. The 0.040 rad /
+  20 ms limiter, the 0.35 rad action scale and the 1.6 N·m cap stay fixed.
+
+The surrogate and native implementations, the privileged telemetry and the
+`none` against `table2_v1` comparison follow under #67. This declaration
+trains nothing and admits nothing.
 
 ### Paper ambiguities
 
