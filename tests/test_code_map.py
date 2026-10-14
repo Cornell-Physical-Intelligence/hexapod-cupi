@@ -22,6 +22,10 @@ class CodeMapTests(unittest.TestCase):
             self.assertEqual(native['sha256'], hashlib.sha256(source.read_bytes()).hexdigest())
             self.assertEqual(native['area'], 'backends')
             self.assertTrue(any('backends.isaac' in row['text'] for row in rows['locomotion/env.py']['imports']))
+            # The compatibility file resolves to the module it forwards to.
+            self.assertIn('locomotion/backends/isaac/env.py', rows['locomotion/env.py']['depends_on'])
+            self.assertTrue(all(target in rows for row in rows.values() for target in row['depends_on']))
+            self.assertEqual(rows['locomotion/tests/test_native_ranges.py']['area'], 'tests')
             self.assertFalse(any('/fixtures/' in path for path in rows))
             self.assertTrue((Path(tmp)/'code-map.json').is_file())
             html = (Path(tmp)/'index.html').read_text()

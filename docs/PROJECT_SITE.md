@@ -28,8 +28,10 @@ shows more than 650 words.
 You can inspect the separate [locomotion code map](https://cornell-physical-intelligence.github.io/hexapod-cupi/code/).
 The Pages build generates its HTML and JSON from Python syntax and the source inventory.
 You can search definitions and open source lines without importing the simulator.
-The map uses the progress site's `poster.css`, header and type. Keep the package index
-plain, with full-size text. Leave out grey explanation text, cards and metadata blocks.
+The map uses the progress site's `poster.css`, header and type. It draws each package
+as a square sized by its lines, with arrows for imports between packages. A selected
+package shows its files as tiles sized by lines, and a selected file shows its classes
+and functions as blocks along one bar. Search marks matches in red.
 You can download the JSON index for hashes and import references. The index records
 the build revision and excludes frozen fixtures. Keep generated map files out of Git.
 

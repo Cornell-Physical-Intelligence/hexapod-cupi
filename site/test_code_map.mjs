@@ -1,4 +1,4 @@
-// Test generated map interactions without a browser dependency.
+// Test the generated map's drawings and interactions without a browser dependency.
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 
@@ -9,46 +9,70 @@ assert.ok(markup.includes('class="masthead"'));
 assert.ok(markup.includes('class="brand"'));
 assert.ok(markup.includes('class="intro"'));
 assert.ok(!/<small\b|class="muted"|class="badge"/.test(page));
-assert.ok(!/#[a-f\d]{3,8}\b|font-size\s*:/.test(markup));
+assert.ok(!/#[a-f\d]{3,8}\b|font-size\s*:/.test(markup), 'Colours and type come from poster.css');
+assert.ok(!/box-shadow|border-radius|border-left\s*:/.test(markup), 'No card styles');
 const code = page.match(/<script>([\s\S]*?)<\/script>/)[1];
 const elements = new Map();
 const document = {
   getElementById(id) {
     if (!elements.has(id)) elements.set(id, {value:'', checked:false, textContent:'', innerHTML:'', events:{},
-      append(){}, addEventListener(name, callback){this.events[name]=callback;}});
+      setAttribute(){}, addEventListener(name, callback){(this.events[name] ||= []).push(callback);}});
     return elements.get(id);
   },
-  createElement(){return {};},
 };
 new Function('document', code)(document);
-const results = () => elements.get('results').innerHTML;
+const html = (id) => elements.get(id).innerHTML;
+const fire = (id, name, event={}) => elements.get(id).events[name].forEach((f) => f(event));
 const input = (id, value) => {
   const element = elements.get(id);
   if (typeof value === 'boolean') element.checked = value;
   else element.value = value;
-  element.events.input();
+  fire(id, 'input');
 };
-assert.ok(results().includes('locomotion/backends/isaac/env.py'));
-assert.ok(!results().includes('Compatibility import'));
-assert.ok(!results().includes('Source identity'));
-assert.ok(!results().includes('No docstring.'));
+const click = (id, data) => fire(id, 'click', {target:{closest:() => ({dataset:data})}});
+
+// Packages: one square each, sized and labelled, with arrows for imports between packages.
+for (const name of ['core', 'backends', 'tasks', 'learning', 'evaluation', 'runs']) {
+  assert.ok(html('packages').includes(`data-package="${name}"`), `Missing package ${name}`);
+}
+assert.ok(!html('packages').includes('data-package="tests"'), 'Tests stay hidden by default');
+assert.ok(/class="use[^"]*" data-edge="[^"]+&gt;[^"]+"/.test(html('packages')), 'Package arrows are drawn');
+assert.ok(html('packages').includes('data-edge="backends&gt;core"'), 'The Isaac backend imports core');
+assert.ok(/<rect x="[\d.]+" y="[\d.]+" width="[\d.]+" height="[\d.]+"\/>/.test(html('packages')));
+
+// Selecting a package draws its files; selecting a file draws its definitions bar.
+click('packages', {package:'tasks'});
+assert.ok(html('packages').includes('class="pkg selected" data-package="tasks"'));
+assert.ok(html('files').includes('data-module="locomotion/tasks/task.py"'));
+click('files', {module:'locomotion/tasks/task.py'});
+assert.equal(elements.get('file-heading').textContent, 'tasks/task.py');
+assert.ok(/class="sym class[^"]*"/.test(html('strip')), 'Classes appear as blocks');
+assert.ok(/blob\/[a-f0-9]{40}\/locomotion\/tasks\/task.py#L\d+/.test(html('strip')), 'Blocks link to source lines');
+assert.ok(html('file').includes('Imported by:') && html('file').includes('Imports:'));
+
+// Search marks matches in red and opens the first matching file.
 input('query', 'ProximityGuard');
-assert.ok(results().includes('locomotion/tasks/task.py'));
-assert.ok(results().includes('ProximityGuard'));
-assert.ok(/blob\/[a-f0-9]{40}\/locomotion\/tasks\/task.py#L\d+/.test(results()));
-input('area', 'learning');
-assert.ok(results().includes('No matching modules.'));
+assert.ok(elements.get('count').textContent.startsWith('1 file matches'));
+assert.ok(html('results').includes('data-file="locomotion/tasks/task.py"'));
+assert.ok(/class="pkg[^"]* hit" data-package="tasks"/.test(html('packages')));
+assert.ok(/class="file[^"]* hit" data-module="locomotion\/tasks\/task.py"/.test(html('files')));
+assert.ok(/class="sym class hit"/.test(html('strip')), 'The matching class block turns red');
 input('query', 'VanillaVecEnv');
-assert.ok(results().includes('locomotion/learning/ppo.py'));
-input('area', '');
+assert.ok(html('results').includes('locomotion/learning/ppo.py'));
+assert.equal(elements.get('file-heading').textContent, 'learning/ppo.py');
+click('results', {file:'locomotion/core/motor.py'});
+assert.equal(elements.get('file-heading').textContent, 'core/motor.py');
+
+// Compatibility files and tests appear only behind their toggles.
 input('query', 'Compatibility import for ppo');
-assert.ok(results().includes('No matching modules.'));
+assert.ok(html('results').includes('No matching files.'));
 input('compatibility', true);
-assert.ok(results().includes('locomotion/ppo.py'));
+assert.ok(html('results').includes('locomotion/ppo.py'));
 input('query', 'test_native_ranges');
-assert.ok(results().includes('No matching modules.'));
+assert.ok(html('results').includes('No matching files.'));
 input('tests', true);
-assert.ok(results().includes('locomotion/tests/test_native_ranges.py'));
+assert.ok(html('results').includes('locomotion/tests/test_native_ranges.py'));
+assert.ok(html('packages').includes('data-package="tests"'));
 input('query', 'emitted_target');
-assert.ok(results().includes('locomotion/core/motor.py'));
-console.log('Code-map class search, function search, filters and revision links verified');
+assert.ok(html('results').includes('locomotion/core/motor.py'));
+console.log('Code-map package squares, import arrows, file tiles, definition bar, search marking and toggles verified');
