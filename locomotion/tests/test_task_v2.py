@@ -186,7 +186,7 @@ class RewardV2FormulaTests(unittest.TestCase):
 
 class RewardV2TaskTests(unittest.TestCase):
     def test_version_one_remains_the_frozen_default(self):
-        self.assertEqual((ROOT/"locomotion/task.py").read_bytes(), (ROOT/"locomotion/tests/fixtures/baseline/task.py").read_bytes())
+        self.assertEqual((ROOT/"locomotion/tasks/task.py").read_bytes(), (ROOT/"locomotion/tests/fixtures/baseline/task.py").read_bytes())
         self.assertEqual(TrainingTask(NativeDouble(1)).declaration()["reward_version"], task.REWARD_VERSION)
         self.assertNotEqual(task_v2.REWARD_VERSION, task.REWARD_VERSION)
 

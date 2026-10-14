@@ -1,0 +1,23 @@
+{
+  "id": "20261014T183356_native_parity_receipts",
+  "date": "2026-10-14T18:33:56.357387+00:00",
+  "title": "Verify native parity from host receipts",
+  "summary": "We verified the first baseline replay at 13/13 probes. Kit exits before a Python footer can write a receipt, so the comparison tool checks the frozen pack and the host launch and cleanup records. Regression tests reject changed source and checkpoint bindings.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "changes": [
+    "locomotion/README.md",
+    "locomotion/tests/native_parity.py",
+    "locomotion/tests/native_ranges.py",
+    "locomotion/tests/test_native_ranges.py"
+  ],
+  "evidence": [
+    "locomotion/tests/test_native_ranges.py",
+    "locomotion/tests/native_ranges.py"
+  ],
+  "next": "Complete the baseline replays and candidate parity before merge.",
+  "no_project_impact": true,
+  "reason": "This test harness fix changes no production code or numerical gate."
+}

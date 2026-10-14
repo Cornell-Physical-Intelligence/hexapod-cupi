@@ -12,7 +12,7 @@ unbuilt; simulation results do not establish hardware calibration.
 | Control | 400 Hz physics, 50 Hz policy, eight substeps, 0.35 rad action scale and 0.040 rad target-change bound per control. |
 | Motor | Named damping and the existing speed-dependent effort curve, with a provisional 1.6 N·m software cap. Hardware characterization remains open. |
 | Policy input | 231 actor values: five 42-value proprioception frames, the three-value velocity command and 18 executed-action values. The critic adds measured planar/vertical velocity for 234 values. |
-| Learning | Stock RSL-RL 5.0.1 PPO. [`task.py`](../locomotion/task.py) owns command sampling and reward version 1, the default; [`task_v2.py`](../locomotion/task_v2.py) owns reward version 2, selected with `train.py --reward-version 2` ([audit](REWARD_V2_TABLE1_AUDIT.md)); [`task_v4.py`](../locomotion/task_v4.py) owns reward version 4, the first version with a native walking and stopping result ([audit section 15](REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)); [`ppo.py`](../locomotion/ppo.py) owns its adapter and settings. |
+| Learning | Stock RSL-RL 5.0.1 PPO. [`tasks/task.py`](../locomotion/tasks/task.py) owns command sampling and reward version 1, the default; [`tasks/task_v2.py`](../locomotion/tasks/task_v2.py) owns reward version 2, selected with `train.py --reward-version 2` ([audit](REWARD_V2_TABLE1_AUDIT.md)); [`tasks/task_v4.py`](../locomotion/tasks/task_v4.py) owns reward version 4, the first version with a native walking and stopping result ([audit section 15](REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)); [`learning/ppo.py`](../locomotion/learning/ppo.py) owns its adapter and settings. |
 | Admission | Recomputed native standing passes at one robot and the exact intended batch size, bound to the same source, model, neutral stance and geometry. |
 
 The current sampler trains translation commands at 0.025 and 0.05 m/s, yaw and
@@ -475,7 +475,7 @@ training. Historical admissions and checkpoints retain their original sources.
 
 ## Acceptance and measurements
 
-[`evaluation.py`](../locomotion/evaluation.py) owns the unchanged numerical
+[`evaluation/scoring.py`](../locomotion/evaluation/scoring.py) owns the unchanged numerical
 gates. [`evaluate.py`](../locomotion/evaluate.py) records actual policy actions
 and native responses. The 13 learning probes are additional diagnostics. The
 full Stage 2 manifest has 96 cases, including signed directions, turns,

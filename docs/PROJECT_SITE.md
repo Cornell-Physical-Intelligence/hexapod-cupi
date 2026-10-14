@@ -23,6 +23,18 @@ The site, the README and the other pages we publish follow this standard.
 `site/test_render.mjs` fails when a removed section returns or when the page
 shows more than 650 words.
 
+## Developer code map
+
+You can inspect the separate [locomotion code map](https://cornell-physical-intelligence.github.io/hexapod-cupi/code/).
+The Pages build generates its HTML and JSON from Python syntax and the source inventory.
+You can search definitions and open source lines without importing the simulator.
+The map uses the progress site's `poster.css`, header and type. It draws each package
+as a square sized by its lines, with arrows for imports between packages. A selected
+package shows its files as tiles sized by lines, and a selected file shows its classes
+and functions as blocks along one bar. Search marks matches in red.
+You can download the JSON index for hashes and import references. The index records
+the build revision and excludes frozen fixtures. Keep generated map files out of Git.
+
 ## Update the page
 
 Change `site/project.json` when a result changes:
@@ -63,6 +75,7 @@ python3 tools/project_site.py status
 python3 tools/project_site.py check --base <integration-base-SHA>
 python3 tools/project_site.py build
 node site/test_render.mjs
+node site/test_code_map.mjs
 ```
 
 `.github/workflows/pages.yml` runs these checks on each push and pull request

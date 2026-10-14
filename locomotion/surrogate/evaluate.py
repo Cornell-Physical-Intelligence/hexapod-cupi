@@ -18,6 +18,8 @@ Run from the repository root:
 """
 from __future__ import annotations
 
+from locomotion.runs.sources import runtime_paths, source_files
+
 import argparse
 from dataclasses import asdict, replace
 import json
@@ -401,7 +403,7 @@ def evaluate_checkpoint(args):
         "policy_path": policy_path,
         "foot_load": foot_load,
         "seed": seed, "selected_case_ids": selected, "contact_model": asdict(contact), "repository": repository_state(),
-        "identity": {"source_files": {p.name: sha(p) for p in sorted((ROOT / "locomotion").glob("*.py"))},
+        "identity": {"source_files": source_files(ROOT / "locomotion"),
                      "surrogate_files": {p.name: sha(p) for p in sorted(Path(__file__).resolve().parent.glob("*.py"))},
                      "model_sha256": sha(DEFAULT_MODEL), "stance_sha256": sha(DEFAULT_STANCE),
                      "geometry_sha256": sha(DEFAULT_GEOMETRY),

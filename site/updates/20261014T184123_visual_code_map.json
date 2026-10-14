@@ -1,0 +1,23 @@
+{
+  "id": "20261014T184123_visual_code_map",
+  "date": "2026-10-14T18:41:23Z",
+  "title": "Draw the locomotion code map as packages, file tiles and definition bars",
+  "summary": "The code map draws each package as a black square sized by its lines, with arrows for the imports between packages; the packages that others build on sit to the right. A selected package shows its files as tiles sized by lines, and a selected file shows its classes and functions as blocks along one bar that link to their source lines. Search marks matches in red in all three drawings. The generator now resolves each import to a repository file, and the arrows follow hidden compatibility files to the modules they forward to. Seventy-three imports in 29 production files still pass through those compatibility files.",
+  "areas": [
+    "site",
+    "documentation"
+  ],
+  "changes": [
+    "tools/code_map.py",
+    "tests/test_code_map.py",
+    "site/test_code_map.mjs",
+    "docs/PROJECT_SITE.md"
+  ],
+  "evidence": [
+    "tools/code_map.py",
+    "site/test_code_map.mjs"
+  ],
+  "next": "Rebase onto main after the black and white restyle merges, so the map takes its colours from site/poster.css.",
+  "no_project_impact": true,
+  "reason": "The change edits the developer code map page and its generator; it changes no experiment, model, gate or recorded result."
+}

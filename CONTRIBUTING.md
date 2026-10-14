@@ -57,6 +57,7 @@ python3 tools/check_pipeline_lineages.py current
 python3 tools/project_site.py check --base <integration-base-SHA>
 python3 tools/project_site.py build
 node site/test_render.mjs
+node site/test_code_map.mjs
 ```
 
 Use the actual integration-base commit for the site check. After asset or viewer

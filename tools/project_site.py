@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / 'site'
 SITE_URL = 'https://cornell-physical-intelligence.github.io/hexapod-cupi/'
 sys.path.insert(0, str(ROOT))
-from tools import archive
+from tools import archive, code_map
 
 def git(*args):
     return subprocess.check_output(['git', *args], cwd=ROOT, text=True).strip()
@@ -357,6 +357,7 @@ def build():
     page.update(media=media, version=version)
     (destination / 'project-data.json').write_text(json.dumps(page, indent=2) + '\n')
     (destination / 'version.json').write_text(json.dumps(version) + '\n')
+    code_map.build(ROOT, destination/'code')
     print('Built progress site:', destination)
     print('Revision:', revision, '| selected media:', len(media))
 
