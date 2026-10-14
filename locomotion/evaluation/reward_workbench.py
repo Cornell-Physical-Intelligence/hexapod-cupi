@@ -270,7 +270,7 @@ footer{padding:0 24px 24px;color:var(--muted);font-size:12px}
       <div class="buttons"><button id="copy">Copy</button><a id="download" download="reward_edit.json"><button>Download reward_edit.json</button></a></div>
       <p>Score it exactly, through <code>measured_reward</code>:</p>
       <textarea id="commands" readonly style="min-height:70px"></textarea>
-      <p>Training still uses <code>locomotion/task.py</code>. To train with an edit, add it there as a new reward version and keep version 1 (docs/TRAINING.md).</p>
+      <p>You add a reward version under <code>locomotion/tasks/</code> and retain version 1 (docs/TRAINING.md).</p>
     </section>
   </main>
 </div>
@@ -401,7 +401,7 @@ function selfCheck(){let worst=0,rows=0;D.traces.forEach(tr=>{[[tr.recorded,tr.p
   b.textContent=ok?`Live arithmetic matches task.measured_reward on ${rows} controls (largest difference ${worst.toExponential(1)})`:
     `Live arithmetic differs from task.measured_reward by up to ${worst.toExponential(2)}; trust only exported, re-scored edits`;}
 
-$('subtitle').textContent=`${D.reward_version} · locomotion/task.py measured_reward · nominal height ${D.nominal_height_m} m · ${D.traces.length} trace(s)`;
+$('subtitle').textContent=`${D.reward_version} · locomotion/tasks/task.py measured_reward · nominal height ${D.nominal_height_m} m · ${D.traces.length} trace(s)`;
 $('footer').append(el('b',{text:'Declared gaps. '}),document.createTextNode(D.declared_gaps.join(' ')));
 $('reset').onclick=()=>{edited={...D.defaults};for(const f in inputs){inputs[f].input.value=String(D.defaults[f]);inputs[f].row.classList.remove('changed','invalid');}update();};
 $('exportButton').onclick=()=>{exportEdit();$('exportSection').scrollIntoView({behavior:'smooth'});};

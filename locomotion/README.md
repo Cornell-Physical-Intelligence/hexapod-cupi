@@ -20,7 +20,8 @@ and download its JSON index for imports and ownership.
 You run commands through their packages: `python -m locomotion.runs.prepare`,
 `locomotion.runs.launch`, `locomotion.runs.train` and `locomotion.runs.inputs`.
 Historical frozen packs retain their original commands and source. New checkouts
-use package imports. `tasks/env.py` preserves the imports inside frozen reward bytes.
+use package imports. `tasks/env.py` preserves the imports inside frozen reward bytes. Frozen reward
+docstrings retain their historical commands; use `locomotion.tasks` in this checkout.
 The `priors/` and `surrogate/` packages retain their separate guides and runtime boundaries.
 
 You freeze nested runtime dependencies in `RUNTIME_SOURCES.json` with schema
@@ -167,8 +168,8 @@ Start the frozen launcher on Spark from its `source` directory with
 its exact source and inputs. Use `admission` on complete one/batch results to
 produce the input declaration for a subsequent pack. Existing admissions cannot
 admit changed physics source. Checkpoint loads require matching model, physics,
-configuration and implementation; use the original frozen entry for historical
-checkpoints that carry a different identity.
+configuration and implementation. Use the certified receipt above for `c48_long`
+evaluation, or the original frozen runtime for other historical checkpoints.
 
 Use `/srv/cupi/hexapod/inputs/` for new CUPI input bundles and
 `/srv/cupi/hexapod/runs/<user>/` for attempts. Preparation also accepts the
@@ -191,7 +192,7 @@ The navigation example consumes shared commands. Historical runtime bindings
 remain in Git until a canonical replacement receives its own parity evidence.
 
 The [AMP demonstration pipeline](priors/README.md) supplies an optimizer and
-native replay with a reviewed dataset exporter. `amp.py` preserves the shared
+native replay with a reviewed dataset exporter. `core/features.py` preserves the
 61-value feature contract. Package
 canonical inputs with `python -m locomotion.runs.inputs pack --help`. Use the
 [archive guide](../docs/PIPELINE_LINEAGES.md) for historical checkpoints and

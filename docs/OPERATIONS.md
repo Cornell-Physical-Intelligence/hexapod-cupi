@@ -36,6 +36,18 @@ parent inherits a default ACL that grants its submitting user write access to
 container-created files and CUPI read access. Preserve that ACL when you copy
 a pack. Reconnect SSH after an administrator changes group membership.
 
+The recorded Isaac image runs as UID 1000, which maps to `orionh` on Spark.
+That account has no `cupi` group membership. On a fresh attempt, grant that UID
+read access to the frozen pack and a default write ACL for new output files:
+
+```sh
+setfacl -R -m u:1000:rX "$attempt"
+setfacl -m d:u:1000:rwx "$attempt"
+```
+
+Check the image UID before use. Preserve the existing CUPI ACL entries. The
+launcher mounts source and inputs read-only; the output mount permits writes.
+
 Use a fresh input bundle and attempt name. Pack a committed worktree, transfer
 the frozen source, then run its launcher. You can edit the worktree after that
 copy. The launcher verifies the frozen copy before execution and cleanup.

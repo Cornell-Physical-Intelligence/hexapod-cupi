@@ -5,9 +5,10 @@ native run. It runs this repository's task, reward, PPO adapter and gate code an
 Isaac's rigid-body dynamics and floor contact with MuJoCo 3.14.0. **Native runs are the only
 acceptance evidence.** A surrogate result supports a design choice and admits no checkpoint.
 
-`locomotion/runs/prepare.py` freezes `locomotion/*.py` without descent, so no native pack copies
-this directory and no native source hash changes. The kernel imports nothing from it. The unit
-suite checks both facts.
+You pack nested runtime modules through `locomotion.runs.prepare`. The source selector
+excludes `surrogate/`, `priors/` and `tests/`; explicit replay and AMP packs add their
+required prior files. Surrogate edits leave native source identities unchanged.
+The native runtime imports no surrogate modules. The unit suite checks this boundary.
 
 | File | Purpose |
 | --- | --- |
