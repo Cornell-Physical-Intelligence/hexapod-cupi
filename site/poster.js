@@ -87,6 +87,18 @@ function terms() {
   return `<section id="terms" class="section" aria-labelledby="terms-heading"><h2 id="terms-heading">Terms used on this page</h2><dl class="terms">${data.glossary.map((g) => `<div><dt>${esc(g.term)}</dt><dd>${esc(g.meaning)}</dd></div>`).join('')}</dl></section>`;
 }
 
+// Between the phone breakpoint and the full canvas width, scale the diagram down so no box is cut off.
+function fit() {
+  const scroll = $('.graph-scroll'), canvas = $('.graph-canvas');
+  if (!scroll?.clientWidth || !canvas?.style) return;
+  const width = parseFloat(canvas.style.width), height = parseFloat(canvas.style.height);
+  const scale = Math.min(1, scroll.clientWidth / width);
+  canvas.style.transformOrigin = '0 0';
+  canvas.style.transform = scale < 1 ? `scale(${scale})` : '';
+  scroll.style.height = scale < 1 ? `${Math.ceil(height * scale)}px` : '';
+  scroll.style.overflowX = scale < 1 ? 'hidden' : '';
+}
+
 function render() {
   $('#poster').innerHTML = `<section class="intro"><h1>${esc(data.title)}</h1><p>${esc(data.mission)}</p></section>${latest()}${roadmap()}${system()}${robot()}${terms()}`;
   $('#graph').addEventListener('click', (e) => {
@@ -95,9 +107,12 @@ function render() {
     selected = button.dataset.node;
     $('#graph').innerHTML = graph();
     $('#detail').innerHTML = detail();
+    fit();
     $(`[data-node="${selected}"]`).focus({preventScroll: true});
   });
-  narrow.addEventListener('change', () => { $('#graph').innerHTML = graph(); });
+  narrow.addEventListener('change', () => { $('#graph').innerHTML = graph(); fit(); });
+  globalThis.addEventListener?.('resize', fit);
+  fit();
 }
 
 try {

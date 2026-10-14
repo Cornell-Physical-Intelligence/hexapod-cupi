@@ -88,6 +88,8 @@ marker path {fill:var(--grey)}
 .detail h3 {display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
 
 .robot-grid {display:grid;grid-template-columns:1.3fr 1fr;gap:24px;align-items:start}
+/* The CAD clip carries a title block and captions in its frames; the crop keeps only the robot. */
+.robot-grid video {aspect-ratio:64/25;object-fit:cover;object-position:50% 61%}
 .leg svg {width:100%;height:auto}
 .leg .limb {fill:none;stroke:var(--ink);stroke-width:3;stroke-linecap:round}
 .leg circle {fill:#fff;stroke:var(--ink);stroke-width:3}
