@@ -1,5 +1,7 @@
 """Hash the runtime closure, including nested implementation modules."""
+import ast
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 
@@ -14,11 +16,8 @@ def digest(path):
 
 def runtime_paths(package):
     package = Path(package)
-    paths = list(package.glob('*.py'))
-    for name in PACKAGES:
-        paths.extend((package/name).rglob('*.py'))
-    return sorted(path for path in paths if 'tests' not in path.relative_to(package).parts
-                  and '__pycache__' not in path.parts)
+    return sorted(path for path in package.rglob('*.py')
+                  if not set(path.relative_to(package).parts) & {'tests', 'priors', 'surrogate', '__pycache__'})
 
 
 def source_files(package):
@@ -26,10 +25,33 @@ def source_files(package):
     return {path.relative_to(package).as_posix(): digest(path) for path in runtime_paths(package)}
 
 
-def physics_files(files):
-    return {name: value for name, value in files.items()
-            if name in ('env.py', 'env_config.py', 'amp.py')
-            or name.startswith(('core/', 'backends/'))}
+def physics_files(files, package=None):
+    """Follow project imports from the native environment, including capture and scorer imports."""
+    package = Path(package) if package is not None else Path(__file__).resolve().parents[1]
+    pending, seen = ['env.py', 'env_config.py'], set()
+    while pending:
+        name = pending.pop()
+        if name in seen or name not in files:
+            continue
+        seen.add(name)
+        path = Path(name)
+        parent = 'locomotion.' + '.'.join(path.parent.parts) if path.parent.parts else 'locomotion'
+        for directory in (path.parent, *path.parent.parents):
+            pending.append((directory/'__init__.py').as_posix())
+        for node in ast.walk(ast.parse((package/name).read_text())):
+            modules = []
+            if isinstance(node, ast.Import):
+                modules = [alias.name for alias in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                base = importlib.util.resolve_name('.'*node.level + (node.module or ''), parent)
+                modules = [base, *(base+'.'+alias.name for alias in node.names)]
+            for module in modules:
+                if module == 'locomotion':
+                    pending.append('__init__.py')
+                elif module.startswith('locomotion.'):
+                    relative = module.removeprefix('locomotion.').replace('.', '/')
+                    pending.extend((relative+'.py', relative+'/__init__.py'))
+    return {name: files[name] for name in sorted(seen)}
 
 
 def runtime_manifest(source):

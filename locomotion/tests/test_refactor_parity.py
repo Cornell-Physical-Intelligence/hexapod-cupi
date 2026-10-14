@@ -102,6 +102,13 @@ class RefactorParityTests(unittest.TestCase):
                             algorithm.optimizer.state_dict(), loss, torch.get_rng_state()))
         self.exact(results[1], results[0])
 
+    def test_versioned_reward_and_scorer_bytes_match_the_frozen_main(self):
+        root = Path(__file__).resolve().parents[1]
+        with tarfile.open(FIXTURE) as archive:
+            for name in ('task', 'task_v2', 'task_v3', 'task_v4', 'task_v4_yaw_gate'):
+                self.assertEqual((root/'tasks'/(name+'.py')).read_bytes(), archive.extractfile(name+'.py').read())
+            self.assertEqual((root/'evaluation/scoring.py').read_bytes(), archive.extractfile('evaluation.py').read())
+
 
 class RefactorBoundaryTests(unittest.TestCase):
     def test_compatibility_imports_keep_class_identity(self):
@@ -140,6 +147,38 @@ class RefactorBoundaryTests(unittest.TestCase):
         for name in ('update_limit', 'validate_decay', 'validate_deadline'):
             self.assertIs(getattr(prepare, name), getattr(validation, name))
             self.assertIs(getattr(train, name), getattr(validation, name))
+
+    def test_nested_physics_dependencies_cannot_reuse_standing_identity(self):
+        from locomotion.runs.sources import physics_files, source_files
+        root = Path(__file__).resolve().parents[1]
+        files = source_files(root)
+        physics = physics_files(files)
+        for name in ('core/motor.py', 'core/transforms.py', 'backends/isaac/scene.py',
+                     'evaluation/capture.py', 'evaluation/scoring.py'):
+            self.assertIn(name, physics)
+            changed = dict(files, **{name: '0'*64})
+            self.assertNotEqual(physics, physics_files(changed))
+        self.assertNotIn('learning/config.py', physics)
+
+    def test_legacy_identity_checks_remain_strict(self):
+        from copy import deepcopy
+        from contracts.release import COMPATIBILITY_KEYS
+        from locomotion.runs.identity import require_checkpoint_identity
+        identity = dict.fromkeys(COMPATIBILITY_KEYS, 'same')
+        identity['schema'] = 'hexapod_locomotion_ppo_v1'
+        require_checkpoint_identity({'identity': deepcopy(identity)}, identity)
+        for key in COMPATIBILITY_KEYS:
+            record = {'identity': deepcopy(identity)}
+            record['identity'][key] = 'changed'
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                require_checkpoint_identity(record, identity)
+        identity.update(schema='hexapod_locomotion_ppo_v2', runtime_sources={'schema': 'hexapod_runtime_sources_v2',
+                        'files': {'locomotion/core/motor.py': 'a'*64}})
+        record = {'identity': deepcopy(identity)}
+        require_checkpoint_identity(record, identity)
+        record['identity']['runtime_sources']['files']['locomotion/core/motor.py'] = 'b'*64
+        with self.assertRaisesRegex(ValueError, 'runtime dependencies'):
+            require_checkpoint_identity(record, identity)
 
 
 if __name__ == '__main__':
