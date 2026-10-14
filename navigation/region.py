@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Sequence
+import shapely  # TODO: Check if we can get away w/ just shapely.geometry
 
 __all__ = ["PlanMargin", "Point", "Polygon", "SurveyRegion"]
 
@@ -70,6 +71,9 @@ class Polygon:
     """
 
     vertices: tuple[Point, ...]
+    polygon: shapely.Polygon = field(
+        init=False, repr=False, compare=False
+    )  # NOTE: check flags...
 
     def __post_init__(self) -> None:
         raw = self.vertices
@@ -100,6 +104,7 @@ class Polygon:
                 f"vertices must hold at least three points, got {len(points)}"
             )
         object.__setattr__(self, "vertices", tuple(points))
+        object.__setattr__(self, "polygon", shapely.Polygon(points))
 
     @property
     def edges(self) -> tuple[tuple[Point, Point], ...]:
@@ -150,10 +155,7 @@ class Polygon:
         # intersection point; dividing invites both precision loss and a
         # zero-division branch.
         """
-
-        raise NotImplementedError(
-            "CHALLENGE 5: implement the simplicity predicate"
-        )
+        return self.polygon.is_valid
 
     def contains(self, point: Point) -> bool:
         """True when ``point`` lies inside this polygon.
@@ -171,7 +173,7 @@ class Polygon:
         # it, and the clearance margin makes the ambiguity unreachable in practice.
         """
 
-        raise NotImplementedError("CHALLENGE: implement point-in-polygon")
+        return shapely.contains_xy(self.polygon, point[0], point[1])
 
     def distance_to_boundary_m(self, point: Point) -> float:
         """Shortest distance from ``point`` to any edge of this polygon.
