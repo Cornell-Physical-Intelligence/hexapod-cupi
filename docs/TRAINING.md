@@ -34,7 +34,9 @@ reference target.
 
 ## Results and research order
 
-Read [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings) for measured results and original evidence. The
+The [progress site](https://cornell-physical-intelligence.github.io/hexapod-cupi/) shows the latest result; the
+[registry of 13 October 2026](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/9d819c68f7311477fc5d1fd61b00026a146656a0/site/project.json)
+lists earlier results with their original evidence. The
 optimized forward target sequence passes its native screen. The paired
 action-initialization experiment found no benefit in its one seed, and that
 result does not evaluate AMP.
@@ -502,4 +504,4 @@ C-study, mock, four-bar and custom PPO/AMP runs keep their original model,
 observation layout, source and gates. Use their frozen source packs or the
 [pinned pre-cleanup training reference](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/docs/TRAINING.md).
 The [archive index](../configs/archive.json) identifies retired source and context. Historical decisions do not authorize new work or override
-the approved robot. The current status lives in [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings).
+the approved robot. The [progress site](https://cornell-physical-intelligence.github.io/hexapod-cupi/) shows the current status.

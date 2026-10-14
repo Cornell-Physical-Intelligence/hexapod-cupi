@@ -11,8 +11,8 @@ procedure; identify simulator or hardware checks that remain pending.
 ## Publication
 
 Link the new `site/updates/` record and evidence. Record the full-diff site check,
-build and renderer results from `docs/PROJECT_SITE.md`. Name the roadmap marker
-when the change affects a capability.
+build and renderer results from `docs/PROJECT_SITE.md`. Name the roadmap step
+when the change affects one.
 
 ## Review
 

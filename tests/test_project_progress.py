@@ -1,4 +1,4 @@
-"""Progress cannot promote evidence, invent ready work, or drift between outputs."""
+"""Progress cannot promote evidence, misplace the roadmap, or drift between outputs."""
 import copy
 import importlib.util
 import json
@@ -18,127 +18,156 @@ class ProgressTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         root = Path(self.temp.name).resolve()
-        (root / 'ARCHITECTURE.md').write_text('R-01 fixture requirement')
-        (root / 'evidence.json').write_text(json.dumps({'passed': 10, 'total': 32}))
+        (root / 'evidence.json').write_text(json.dumps(
+            {'passed': 10, 'probes': {str(i): {} for i in range(13)}, 'count': 13}))
         (root / 'evidence.md').write_text('Fixture evidence')
         patcher = patch.object(site, 'ROOT', root)
         patcher.start()
         self.addCleanup(patcher.stop)
-        self.project = {'progress': {
-            'as_of': '2026-09-11T00:00:00Z', 'source_commit': 'a'*40,
-            'architecture': 'ARCHITECTURE.md', 'execution_source': 'evidence.md',
-            'prior_snapshot': 'https://example.com/snapshot', 'summary': 'Fixture: 10/32.',
-            'definition_policy': 'Define the next step with the team.',
-            'facts': [dict(id='fixture', title='Fixture', backend='Synthetic test',
-                          result='failed', text='Fixture result', source='evidence.md',
-                          metric=dict(path='evidence.json', field=['passed'], value=10,
-                                      total_field=['total'], total=32, units='cases', window='fixture window'))]},
-            'milestones': []}
-        for identifier, dependencies in [('walking', []), ('stage2', ['walking']),
-                                          ('stage3', ['stage2']), ('mission', ['stage2', 'stage3'])]:
-            self.project['milestones'].append(dict(
-                id=identifier, title='Historical fixture' if identifier=='walking' else identifier,
-                status='accepted' if identifier=='walking' else 'blocked',
-                description='Fixture description', gate='Fixture proof', backend='Synthetic test',
-                owner='Fixture owner', question='What next?', depends_on=dependencies,
-                requirements=['R-01'], source='evidence.md', blocker='Fixture blocker',
-                next_step=None, acceptance=dict(by='Fixture reviewer', scope='Fixture only',
-                                               source='evidence.md') if identifier=='walking' else None))
+        self.project = {
+            'mission': 'Fixture mission.',
+            'latest': {'date': '2026-10-11', 'title': 'Fixture result', 'text': 'Fixture text.',
+                       'next': 'Fixture next step.', 'media_ids': ['clip'],
+                       'metric': {'value': 10, 'total': 13, 'label': 'tests passed',
+                                  'sources': [{'path': 'evidence.json', 'field': ['passed'],
+                                               'total_field': ['probes']}]}},
+            'roadmap': [dict(id='design', title='Design', state='done', accepted_by='Fixture reviewer', source='evidence.md'),
+                        dict(id='stage2', title='Walk', state='now'),
+                        dict(id='stage3', title='Terrain', state='next'),
+                        dict(id='mission', title='Survey', state='later')],
+            'accomplishments': [dict(date='2026-10-11', text='Newest.', source='evidence.md'),
+                                dict(date='2026-09-14', text='Oldest.', source='evidence.md')],
+            'nodes': [dict(id='a', title='A', text='Part A.', state='working', column=0, row=0, source='evidence.md'),
+                      dict(id='b', title='B', text='Part B.', state='not_started', column=1, row=0, source='evidence.md')],
+            'edges': [['a', 'b']],
+            'robot': dict(media_id='clip', caption='It has 18 motors and weighs 7.47 kg.',
+                          mass_kg=7.466088235225788, motors=18, source='evidence.md'),
+            'media': [dict(id='clip', type='video', caption='Fixture clip.')],
+            'glossary': [dict(term='Term', meaning='Meaning.')]}
 
-    def marker(self, identifier):
-        return next(m for m in self.project['milestones'] if m['id'] == identifier)
+    def test_fixture_is_valid(self):
+        site.validate_progress(self.project)
 
     def test_progress_cannot_promote_a_failed_payload(self):
-        site.validate_progress(self.project)
-        metric = self.project['progress']['facts'][0]['metric']
-        metric['value'] = metric['total']
+        self.project['latest']['metric']['value'] = 13
         with self.assertRaisesRegex(ValueError, 'differs from source'):
             site.validate_progress(self.project)
 
-    def test_accepted_marker_requires_human_and_scope(self):
-        self.marker('walking')['acceptance'] = None
-        with self.assertRaisesRegex(ValueError, 'human acceptance'):
+    def test_total_counts_the_named_table_or_reads_the_number(self):
+        metric = self.project['latest']['metric']
+        metric['total'] = 12
+        with self.assertRaisesRegex(ValueError, 'differs from source'):
             site.validate_progress(self.project)
-
-    def test_implementation_cannot_be_marked_ready_without_defined_step(self):
-        self.marker('stage2')['status'] = 'ready'
-        with self.assertRaisesRegex(ValueError, 'defined next step'):
-            site.validate_progress(self.project)
-
-    def test_approved_scope_is_visible_but_does_not_assign_or_accept_work(self):
-        marker = self.marker('mission')
-        marker['definition'] = dict(id='M1', title='Scan reload', by='Reviewer',
-                                    summary='Save and independently reload a scan.',
-                                    fixture='Known floor and wall.', criteria=['Preserve points exactly.'])
+        metric['total'] = 13
+        metric['sources'][0]['total_field'] = ['count']
         site.validate_progress(self.project)
-        output = site.status_text(self.project)
-        self.assertIn('M1 — Scan reload', output)
-        self.assertIn('Preserve points exactly.', output)
-        self.assertIn('Assignment pending.', output)
-        marker['status'] = 'ready'
-        with self.assertRaisesRegex(ValueError, 'defined next step'):
+
+    def test_every_metric_source_must_agree(self):
+        (site.ROOT / 'other.json').write_text(json.dumps({'passed': 9, 'probes': list(range(13))}))
+        self.project['latest']['metric']['sources'].append(
+            {'path': 'other.json', 'field': ['passed'], 'total_field': ['probes']})
+        with self.assertRaisesRegex(ValueError, 'differs from source'):
             site.validate_progress(self.project)
 
-    def test_approved_definition_requires_explicit_acceptance_checks(self):
-        self.marker('mission')['definition'] = dict(id='M1', title='Scan reload', by='Reviewer',
-                                                    summary='Reload scan.', fixture='Known scene.', criteria=[])
-        with self.assertRaisesRegex(ValueError, 'acceptance criteria'):
-            site.validate_progress(self.project)
-
-    def test_unknown_requirements_and_dependencies_reject(self):
-        for key, value, message in [('requirements', ['R-99'], 'architecture'),
-                                    ('depends_on', ['missing'], 'dependency')]:
-            with self.subTest(key=key):
+    def test_roadmap_needs_exactly_one_current_step(self):
+        for states in (['done', 'next', 'next', 'later'], ['done', 'now', 'now', 'later']):
+            with self.subTest(states=states):
                 project = copy.deepcopy(self.project)
-                project['milestones'][1][key] = value
-                with self.assertRaisesRegex(ValueError, message):
+                for step, state in zip(project['roadmap'], states):
+                    step['state'] = state
+                with self.assertRaisesRegex(ValueError, 'exactly one current step'):
                     site.validate_progress(project)
 
-    def test_cycles_reject_even_when_no_work_is_ready(self):
-        for m in self.project['milestones']:
-            m['status'] = 'needs_definition'
-        self.marker('walking')['depends_on'] = ['mission']
-        with self.assertRaisesRegex(ValueError, 'cycle'):
+    def test_completed_steps_come_before_the_current_step(self):
+        for states in (['next', 'now', 'done', 'later'], ['done', 'now', 'done', 'later']):
+            with self.subTest(states=states):
+                project = copy.deepcopy(self.project)
+                for step, state in zip(project['roadmap'], states):
+                    step['state'] = state
+                with self.assertRaisesRegex(ValueError, 'Completed steps'):
+                    site.validate_progress(project)
+
+    def test_done_step_requires_human_acceptance_and_evidence(self):
+        for key in ('accepted_by', 'source'):
+            with self.subTest(missing=key):
+                project = copy.deepcopy(self.project)
+                project['roadmap'][0].pop(key)
+                with self.assertRaisesRegex(ValueError, 'human acceptance'):
+                    site.validate_progress(project)
+        self.project['roadmap'][0]['source'] = 'missing.md'
+        with self.assertRaisesRegex(ValueError, 'Missing'):
+            site.validate_progress(self.project)
+        # A step that moves to done must carry its own acceptance.
+        project = copy.deepcopy(self.project)
+        project['roadmap'][0]['source'] = 'evidence.md'
+        project['roadmap'][1]['state'] = 'done'
+        project['roadmap'][2]['state'] = 'now'
+        with self.assertRaisesRegex(ValueError, 'human acceptance'):
+            site.validate_progress(project)
+
+    def test_unknown_states_reject(self):
+        self.project['roadmap'][2]['state'] = 'blocked'
+        with self.assertRaisesRegex(ValueError, 'roadmap state'):
+            site.validate_progress(self.project)
+        self.project['roadmap'][2]['state'] = 'next'
+        self.project['nodes'][0]['state'] = 'implemented'
+        with self.assertRaisesRegex(ValueError, 'system state'):
             site.validate_progress(self.project)
 
-    def test_ready_step_cannot_bypass_blocked_dependencies(self):
-        m = self.marker('mission')
-        m['status'] = 'ready'
-        m['next_step'] = dict(outcome='fixture', owner='owner', reviewer='reviewer',
-                              issue='https://example.com/issue', acceptance='recorded output', baseline='fixture')
-        with self.assertRaisesRegex(ValueError, 'unmet dependencies'):
+    def test_graph_rejects_unknown_endpoints_and_shared_positions(self):
+        self.project['edges'].append(['a', 'missing'])
+        with self.assertRaisesRegex(ValueError, 'graph endpoint'):
+            site.validate_progress(self.project)
+        self.project['edges'].pop()
+        self.project['nodes'][1]['column'] = 0
+        with self.assertRaisesRegex(ValueError, 'share a position'):
             site.validate_progress(self.project)
 
-    def test_attempt_status_is_distinct_from_capability_state(self):
-        self.project['progress']['facts'][0]['result'] = 'accepted'
-        with self.assertRaisesRegex(ValueError, 'attempt result'):
+    def test_accomplishments_are_newest_first(self):
+        self.project['accomplishments'].reverse()
+        with self.assertRaisesRegex(ValueError, 'newest first'):
+            site.validate_progress(self.project)
+
+    def test_latest_and_robot_media_must_exist(self):
+        self.project['latest']['media_ids'] = ['missing']
+        with self.assertRaisesRegex(ValueError, 'known media'):
+            site.validate_progress(self.project)
+        self.project['latest']['media_ids'] = ['clip']
+        self.project['robot']['media_id'] = 'missing'
+        with self.assertRaisesRegex(ValueError, 'Robot section'):
+            site.validate_progress(self.project)
+
+    def test_robot_caption_states_the_recorded_mass_and_motors(self):
+        self.project['robot']['caption'] = 'It has 18 motors and weighs 7.5 kg.'
+        with self.assertRaisesRegex(ValueError, 'mass and motor count'):
             site.validate_progress(self.project)
 
     def test_generated_status_is_deterministic_and_does_not_read_status(self):
         before = site.status_text(self.project)
         with patch.object(Path, 'read_text', side_effect=AssertionError('STATUS cannot be an input')):
             self.assertEqual(before, site.status_text(self.project))
-        self.assertIn('Next step: **not defined**', before)
-        self.assertIn('10/32', before)
-        self.assertIn('Historical', before)
+        self.assertIn('10 of 13 tests passed', before)
+        self.assertIn('- Walk: Now', before)
+        self.assertIn('Fixture next step.', before)
 
     def test_generated_status_matches_registry(self):
-        project = json.loads((ROOT / 'site/project.json').read_text())
-        with tempfile.TemporaryDirectory() as temp, patch.object(site, 'ROOT', ROOT):
+        with tempfile.TemporaryDirectory() as temp, patch.object(site, 'ROOT', ROOT), \
+                patch.object(site, 'SITE', ROOT / 'site'):
+            project = site.registry()
             site.write_status(Path(temp) / 'STATUS.md')
             self.assertEqual((Path(temp) / 'STATUS.md').read_text(), site.status_text(project))
 
     def test_current_registry_validates_against_its_actual_evidence(self):
-        with patch.object(site, 'ROOT', ROOT):
-            site.validate_progress(json.loads((ROOT / 'site/project.json').read_text()))
+        with patch.object(site, 'ROOT', ROOT), patch.object(site, 'SITE', ROOT / 'site'):
+            site.registry()
 
     def test_unknown_fields_in_source_are_errors_not_zeroes(self):
-        self.project['progress']['facts'][0]['metric']['field'] = ['unavailable']
+        self.project['latest']['metric']['sources'][0]['field'] = ['unavailable']
         with self.assertRaisesRegex(ValueError, 'Missing metric field'):
             site.validate_progress(self.project)
 
     def test_nonfinite_metric_is_rejected(self):
-        self.project['progress']['facts'][0]['metric']['value'] = float('nan')
+        self.project['latest']['metric']['value'] = float('nan')
         with self.assertRaisesRegex(ValueError, 'finite'):
             site.validate_progress(self.project)
 

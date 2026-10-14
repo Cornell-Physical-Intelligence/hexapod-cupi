@@ -9,8 +9,8 @@ boundary and exclusions on an open map (OpenStreetMap or USGS imagery) and
 approves the route. The boundary, route and robot share one local east-north
 frame. No UAV, SLAM or ground map supports navigation.
 
-This document owns requirements and system boundaries. [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings)
-contains measured progress from `site/project.json`. Use [GitHub issues](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues)
+This document owns requirements and system boundaries. The [progress site](https://cornell-physical-intelligence.github.io/hexapod-cupi/)
+shows the latest measured result from `site/project.json`. Use [GitHub issues](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues)
 for assignments and [CONTRIBUTING](CONTRIBUTING.md) for the review workflow.
 
 ## 1. Mission requirements
@@ -138,9 +138,11 @@ Declare limits before experiments; preserve existing gates after a failure.
 
 ## 6. Roadmap
 
+Each marker below except `walking` is also a step on the progress site.
+
 | Marker | Required scope |
 | --- | --- |
-| `walking` | Historical forward gait appearance on the earlier robot; retain its torque failure. |
+| `walking` | Historical forward gait appearance on the earlier robot, with its torque failure. The progress site no longer shows this step; the [registry of 13 October 2026](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/9d819c68f7311477fc5d1fd61b00026a146656a0/site/project.json) keeps its record. |
 | `stage2` | Smooth omnidirectional motion, transitions and quiet stops on the approved model; see [#18](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/18). |
 | `stage3` | Terrain walking from the robot's own body sensing while retaining admitted flat behavior; the GPS-only package carries no ground-mapping sensor. Define the first terrain envelope after flat qualification. |
 | `mission` | Execute an approved route through the drawn region with controlled stops and readable route progress. [#20](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/20) covers route rehearsal with simulated GPS and can proceed before walking integration. GeoData owns survey data collection; [#19](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/19) closed as not planned on 2026-09-18. |
