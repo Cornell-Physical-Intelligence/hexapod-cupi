@@ -9,6 +9,7 @@ import shutil
 
 from .env_config import sha
 from .runs.sources import runtime_paths, write_runtime
+from .learning.config import ppo_config
 from . import reward_options as reward_option_schema
 from .tripod_config import SWEEPS
 from .runs.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline
@@ -99,18 +100,13 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
                        'velocity_noise': velocity_noise, 'action_std_decay_updates': action_std_decay_updates,
                        'steps_per_env': steps_per_env}
     selected_options = {key: value for key, value in learner_options.items() if value != LEARNER_OPTION_DEFAULTS[key]}
-    if (observation_scaling not in ('none', 'fixed') or command_segments not in ('continuous', 'bootstrap')
-            or (learning_rate_max is not None and not (type(learning_rate_max) is float and 1e-5 <= learning_rate_max <= 1e-2))
-            or type(action_std) is not float or not .01 <= action_std <= 1.
-            or type(action_noise_correlation) is not float or not 0 <= action_noise_correlation < 1
-            or (action_noise_correlation and action_mean != 'tanh')
-            or type(gait_clock) is not int or (gait_clock and not 10 <= gait_clock <= 250)
-            or action_smoothing not in ('none', 'mean2')
-            or type(velocity_noise) is not float or not 0 <= velocity_noise <= 5
-            or (action_std_final is not None and not (type(action_std_final) is float and .005 <= action_std_final <= action_std))
-            or (action_std_decay_updates is not None and action_std_final is None)
-            or type(steps_per_env) is not int or not 12 <= steps_per_env <= 96 or steps_per_env % 6
-            or (selected_options and (learner != 'ppo' or mode not in ('train', 'evaluate')))):
+    try:
+        ppo_config(seed, action_mean=action_mean, observation_normalization=observation_normalization,
+                   **learner_options)
+    except ValueError as error:
+        raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
+                         'the noise correlation require PPO training or evaluation') from error
+    if selected_options and (learner != 'ppo' or mode not in ('train', 'evaluate')):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
     validate_decay(mode, updates, action_std_decay_updates)
