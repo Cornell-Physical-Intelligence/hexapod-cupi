@@ -10,6 +10,8 @@ Run from the repository root:
 """
 from __future__ import annotations
 
+from locomotion.runs.sources import runtime_paths, source_files
+
 import argparse
 import contextlib
 import copy
@@ -150,7 +152,7 @@ def check_command_bootstrap(options, config):
 def external_class_files(task_class, wrapper_class, config):
     """Source hashes of the selected classes that ``source_files`` and ``surrogate_files`` omit.
 
-    Those lists cover ``locomotion/*.py`` and this package. A task, wrapper, distribution, network or
+    Those lists cover the nested locomotion runtime and this package. A task, wrapper, distribution, network or
     algorithm class from another module could change between a checkpoint and its resume under an
     equal identity. Each key is a module name, so a moved checkout compares equal. Installed
     packages keep their version pin.
@@ -167,7 +169,7 @@ def external_class_files(task_class, wrapper_class, config):
                 else:
                     yield from named(item)
 
-    hashed = {path.resolve() for path in (*(ROOT / "locomotion").glob("*.py"), *PACKAGE.glob("*.py"))}
+    hashed = {path.resolve() for path in (*runtime_paths(ROOT / "locomotion"), *PACKAGE.glob("*.py"))}
     installed = [Path(sysconfig.get_path(name)).resolve() for name in ("stdlib", "platstdlib", "purelib", "platlib")]
     files = {}
     for selected in (task_class, wrapper_class, *named(config)):
@@ -314,7 +316,7 @@ def run(args, argv=None):
     args.output.mkdir(parents=True, exist_ok=False)
     cfg = SurrogateConfig(num_envs=args.num_envs, seed=args.seed, episode_seconds=args.episode_seconds)
     identity = {"schema": "hexapod_surrogate_ppo_v1", "surrogate": True, "backend": "mujoco " + mujoco.__version__,
-        "source_files": {p.name: sha(p) for p in sorted((ROOT / "locomotion").glob("*.py"))},
+        "source_files": source_files(ROOT / "locomotion"),
         "surrogate_files": {p.name: sha(p) for p in sorted(PACKAGE.glob("*.py"))},
         "model_sha256": sha(DEFAULT_MODEL), "stance_sha256": sha(DEFAULT_STANCE), "geometry_sha256": sha(DEFAULT_GEOMETRY),
         "config": cfg.declaration(), "contact_model": asdict(contact), "seed": args.seed,
