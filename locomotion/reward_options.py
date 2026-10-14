@@ -9,7 +9,7 @@ the other checks of ``validate`` stay with the trainer, which applies ``reward_c
 import ast
 from pathlib import Path
 
-PACKAGE = Path(__file__).resolve().parent
+PACKAGE = Path(__file__).resolve().parent / "tasks"
 TASKS = {"v4": ("task_v4", "RewardV4Config"), "v4_yaw_gate": ("task_v4_yaw_gate", "RewardV4YawGateConfig")}
 TYPES = {"float": float, "int": int, "str": str}
 
