@@ -1,11 +1,11 @@
 """A searchable cost graph and its eight-connected grid implementation."""
+
 from __future__ import annotations
 
 import math
 from typing import Iterable, Protocol, runtime_checkable
 
-from .grid import Cell, CostGrid
-
+from .grid import Cell, OccupancyGrid
 
 __all__ = ["CostGraph", "GridGraph", "STEPS"]
 
@@ -27,7 +27,11 @@ class CostGraph(Protocol):
     """
 
     def neighbors(self, node: Cell) -> Iterable[Cell]:
-        """Yield the nodes reachable from ``node`` in one step."""
+        """Yield the nodes reachable from ``node`` in one step.
+
+        Exactly the nodes ``b`` with a finite ``edge_cost(node, b)``: nothing
+        untraversable is yielded, and nothing traversable is left out.
+        """
         ...
 
     def edge_cost(self, a: Cell, b: Cell) -> float:
@@ -45,72 +49,61 @@ class CostGraph(Protocol):
 
 
 class GridGraph:
-    """An eight-connected :class:`CostGraph` over a :class:`CostGrid`."""
+    """An eight-connected :class:`CostGraph` over an :class:`OccupancyGrid`.
 
-    def __init__(self, grid: CostGrid) -> None:
-        if not isinstance(grid, CostGrid):
-            raise TypeError(f"grid must be a CostGrid, got {type(grid).__name__}")
+    Costs are distances in metres: every passable cell is equally good to cross.
+    """
+
+    def __init__(self, grid: OccupancyGrid) -> None:
+        if not isinstance(grid, OccupancyGrid):
+            raise TypeError(
+                f"grid must be an OccupancyGrid, got {type(grid).__name__}"
+            )
         self.grid = grid
 
     def neighbors(self, node: Cell) -> Iterable[Cell]:
-        """Yield on-grid neighbours of ``node`` in the fixed :data:`STEPS` order.
+        """Yield the cells one finite step from ``node``, in the fixed :data:`STEPS` order.
 
-        Passability is not filtered here -- an impassable neighbour is reported and
-        priced at ``math.inf`` by :meth:`edge_cost`. Keeping the two separate means
-        there is exactly one place where traversability is decided.
+        Traversability is decided only by :meth:`edge_cost`; this asks it, so
+        off-grid cells, blocked cells and corner-cutting diagonals are all dropped.
         """
 
         east, north = node
         for d_east, d_north in STEPS:
             candidate = (east + d_east, north + d_north)
-            if self.grid.in_bounds(candidate):
+            if math.isfinite(self.edge_cost(node, candidate)):
                 yield candidate
 
     def edge_cost(self, a: Cell, b: Cell) -> float:
-        """Cost of the step ``a`` -> ``b``.
+        """Length in metres of the step ``a`` -> ``b``, or ``math.inf``.
 
-        # CHALLENGE 2 -- pinned by ``test_diagonal_moves_do_not_cut_blocked_corners``.
-        #
-        # Required result:
-        #   * math.inf unless ``b`` is one of the eight steps from ``a``.
-        #   * math.inf if either cell is impassable.
-        #   * For a diagonal step, math.inf if *either* shared orthogonal neighbour
-        #     -- ``(a_east, b_north)`` and ``(b_east, a_north)`` -- is impassable.
-        #     Without this the robot squeezes between two diagonally touching
-        #     blocked cells through a gap of exactly zero width. It looks right on
-        #     screen and it is the single most common grid-planner bug.
-        #   * Otherwise the mean of the two cells' costs, times the straight-line
-        #     distance between their centres:
-        #       0.5 * (cost(a) + cost(b)) * hypot(d_east, d_north) * cell_size_m
-        #
-        # Pricing by distance is what keeps the metric heuristic comparable: cost
-        # is then in metre-equivalents, and the cheapest possible metre costs
-        # exactly ``grid.min_cell_cost``.
+        Infinite unless ``b`` is one of the eight steps from ``a`` and both cells are
+        passable. A diagonal step is also infinite if *either* shared orthogonal
+        neighbour is impassable: otherwise the robot would squeeze between two
+        diagonally touching blocked cells through a gap of zero width.
         """
 
-        raise NotImplementedError("CHALLENGE 2: implement edge cost with corner rules")
+        d_east, d_north = b[0] - a[0], b[1] - a[1]
+        if (d_east, d_north) not in STEPS:
+            return math.inf
+        if not (self.grid.is_passable(a) and self.grid.is_passable(b)):
+            return math.inf
+        if (
+            d_east
+            and d_north
+            and not (
+                self.grid.is_passable((a[0], b[1]))
+                and self.grid.is_passable((b[0], a[1]))
+            )
+        ):
+            return math.inf
+        return math.hypot(d_east, d_north) * self.grid.cell_size_m
 
     def heuristic(self, a: Cell, b: Cell) -> float:
-        """Admissible underestimate of the remaining cost from ``a`` to ``b``.
+        """Octile distance in metres: the shortest eight-connected path, ignoring walls."""
 
-        # CHALLENGE 1 -- pinned by
-        # ``test_astar_cost_matches_dijkstra_on_weighted_grid``.
-        #
-        # The shortest achievable path on an eight-connected grid is the octile
-        # distance, not the Euclidean one:
-        #   d_east, d_north = |a - b| per axis
-        #   octile_cells = max(d) + (sqrt(2) - 1) * min(d)
-        #
-        # Then -- and this is the whole point of the challenge -- convert to the
-        # same units ``edge_cost`` returns, and scale by the *cheapest* cell:
-        #   grid.min_cell_cost * octile_cells * grid.cell_size_m
-        #
-        # Drop the ``min_cell_cost`` factor and the heuristic stays admissible only
-        # while every cell happens to cost the floor. Raise the risk weight, or set
-        # a non-zero position error bound, and it starts overestimating: A\\* then
-        # returns paths that are cheap-looking and not optimal, with no error and no
-        # crash. That is why the test compares against Dijkstra rather than against
-        # a stored expected path.
-        """
-
-        raise NotImplementedError("CHALLENGE 1: implement the scaled octile heuristic")
+        d_east, d_north = abs(a[0] - b[0]), abs(a[1] - b[1])
+        octile_cells = max(d_east, d_north) + (math.sqrt(2.0) - 1.0) * min(
+            d_east, d_north
+        )
+        return octile_cells * self.grid.cell_size_m

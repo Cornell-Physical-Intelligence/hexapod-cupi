@@ -16,34 +16,36 @@ import math
 import unittest
 
 from navigation.graph import STEPS, CostGraph, GridGraph
-from navigation.grid import CostGrid
+from navigation.grid import OccupancyGrid
 from navigation.planner import Route, a_star
 
 
-def _grid(rows: tuple[str, ...], *, cell_size_m: float = 1.0) -> CostGrid:
+def _grid(rows: tuple[str, ...], *, cell_size_m: float = 1.0) -> OccupancyGrid:
     """Build a grid from ASCII rows, ``rows[0]`` being the **northernmost**.
 
-    ``.`` is a minimum-cost cell, ``#`` is impassable, and a digit is that cost.
+    ``.`` is passable and ``#`` is impassable.
     """
 
     height = len(rows)
     width = len(rows[0])
     if any(len(row) != width for row in rows):
         raise ValueError("rows must all be the same width")
-    costs: list[float] = []
+    passable: list[bool] = []
     for row in reversed(rows):  # north is the last index, so fill from the south row
         for char in row:
-            costs.append(math.inf if char == "#" else 1.0 if char == "." else float(char))
-    return CostGrid(
+            if char not in ".#":
+                raise ValueError(f"unknown cell {char!r}")
+            passable.append(char == ".")
+    return OccupancyGrid(
         origin_m=(0.0, 0.0),
         cell_size_m=cell_size_m,
         width_cells=width,
         height_cells=height,
-        costs=tuple(costs),
+        passable=tuple(passable),
     )
 
 
-def _open_grid(width: int, height: int) -> CostGrid:
+def _open_grid(width: int, height: int) -> OccupancyGrid:
     return _grid(tuple("." * width for _ in range(height)))
 
 
@@ -104,7 +106,7 @@ class _ReversedNeighbors:
 
 
 class SeamTests(unittest.TestCase):
-    """CHALLENGE 9 -- structural conformance, mirroring ``test_producer.py``."""
+    """Structural conformance, mirroring ``test_producer.py``."""
 
     def test_grid_graph_satisfies_the_cost_graph_protocol(self) -> None:
         graph = GridGraph(_open_grid(3, 3))
@@ -130,6 +132,20 @@ class SeamTests(unittest.TestCase):
         # A corner has only the three in-bounds steps.
         self.assertEqual(set(graph.neighbors((0, 0))), {(1, 0), (0, 1), (1, 1)})
 
+    def test_neighbours_are_exactly_the_finite_cost_steps(self) -> None:
+        # East of (0, 0) is blocked, which also forbids the north-east diagonal.
+        graph = GridGraph(_grid(("..", ".#")))
+        self.assertEqual(tuple(graph.neighbors((0, 0))), ((0, 1),))
+        self.assertEqual(tuple(graph.neighbors((1, 0))), (), "a blocked cell has none")
+        for node in ((0, 0), (0, 1), (1, 1)):
+            for de, dn in STEPS:
+                other = (node[0] + de, node[1] + dn)
+                with self.subTest(node=node, other=other):
+                    self.assertEqual(
+                        other in tuple(graph.neighbors(node)),
+                        math.isfinite(graph.edge_cost(node, other)),
+                    )
+
 
 class RouteTests(unittest.TestCase):
     """The result type, which depends on no unimplemented method."""
@@ -153,7 +169,7 @@ class RouteTests(unittest.TestCase):
 
 
 class CornerRuleTests(unittest.TestCase):
-    """CHALLENGE 2 -- ``GridGraph.edge_cost``."""
+    """``GridGraph.edge_cost``."""
 
     def test_an_open_diagonal_costs_its_euclidean_length(self) -> None:
         graph = GridGraph(_open_grid(2, 2))
@@ -164,11 +180,6 @@ class CornerRuleTests(unittest.TestCase):
     def test_an_orthogonal_step_costs_one_cell_size(self) -> None:
         graph = GridGraph(_open_grid(2, 2))
         self.assertAlmostEqual(graph.edge_cost((0, 0), (1, 0)), 1.0, places=12)
-
-    def test_cost_is_the_mean_of_the_two_cells(self) -> None:
-        # East cell costs 3, west cell costs 1, so the step between them costs 2.
-        graph = GridGraph(_grid((".3",)))
-        self.assertAlmostEqual(graph.edge_cost((0, 0), (1, 0)), 2.0, places=12)
 
     def test_cost_scales_with_cell_size(self) -> None:
         graph = GridGraph(_grid(("..",), cell_size_m=0.25))
@@ -211,20 +222,19 @@ class CornerRuleTests(unittest.TestCase):
 
 
 class OptimalityTests(unittest.TestCase):
-    """CHALLENGE 1 -- the heuristic must stay admissible under weighted cells."""
+    """A* must return an optimal cost, checked against an independent Dijkstra."""
 
-    def test_astar_cost_matches_dijkstra_on_weighted_grid(self) -> None:
-        # A cheap corridor through expensive terrain. A heuristic that forgets to
-        # scale by the cheapest cell overestimates here and A* takes the expensive
-        # direct route while reporting a lower cost than is achievable.
+    def test_astar_cost_matches_dijkstra_through_a_maze(self) -> None:
+        # A winding corridor whose straight-line direction is walled off, so the
+        # heuristic is a poor guide and the search must still find the true optimum.
         rows = (
-            "99999999",
-            "91111119",
-            "99999919",
-            "91111119",
-            "91999999",
-            "91111119",
-            "99999999",
+            "########",
+            "#......#",
+            "######.#",
+            "#......#",
+            "#.######",
+            "#......#",
+            "########",
         )
         graph = GridGraph(_grid(rows))
         start, goal = (1, 1), (6, 5)
@@ -245,7 +255,7 @@ class OptimalityTests(unittest.TestCase):
         fixtures = (
             (("...", "...", "..."), (0, 0), (2, 2)),
             ((".#.", ".#.", "..."), (0, 2), (2, 2)),
-            (("1234", "2345", "3456"), (0, 0), (3, 2)),
+            (("....", ".##.", "...."), (0, 0), (3, 2)),
             (("..#..", "..#..", ".....", "#####".replace("#", "."), "....."), (0, 4), (4, 4)),
         )
         for rows, start, goal in fixtures:
@@ -261,7 +271,7 @@ class OptimalityTests(unittest.TestCase):
                 self.assertAlmostEqual(route.cost, oracle[0], places=12)
 
     def test_route_cells_are_contiguous_passable_and_priced_correctly(self) -> None:
-        graph = GridGraph(_grid(("1234", "2345", "3456")))
+        graph = GridGraph(_grid(("....", ".##.", "....")))
         route = a_star(graph, (0, 0), (3, 2))
         self.assertIsNotNone(route)
         assert route is not None
@@ -278,7 +288,7 @@ class OptimalityTests(unittest.TestCase):
 
 
 class DeterminismTests(unittest.TestCase):
-    """CHALLENGE 3 -- approval requires the same request to yield the same route."""
+    """Approval requires the same request to yield the same route."""
 
     # On an open grid, (0,0) -> (2,1) has two distinct optimal paths: diagonal then
     # east, or east then diagonal. Both cost 1 + sqrt(2).
@@ -313,7 +323,7 @@ class DeterminismTests(unittest.TestCase):
 
 
 class HeuristicValueTests(unittest.TestCase):
-    """CHALLENGE 4 -- a heuristic that returns zero is admissible and useless."""
+    """A heuristic that returns zero is admissible and useless."""
 
     def test_heuristic_reduces_expansions_versus_dijkstra(self) -> None:
         graph = GridGraph(_open_grid(40, 40))

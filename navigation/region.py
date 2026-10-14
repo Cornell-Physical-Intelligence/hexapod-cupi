@@ -5,9 +5,12 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from typing import Sequence
-import shapely  # TODO: Check if we can get away w/ just shapely.geometry
 
-__all__ = ["PlanMargin", "Point", "Polygon", "SurveyRegion"]
+import shapely
+from shapely.geometry.base import BaseGeometry
+from shapely.validation import explain_validity
+
+__all__ = ["PlanMargin", "Point", "SurveyRegion"]
 
 #: An ``(east, north)`` pair in metres, in the open map's local east-north frame.
 Point = tuple[float, float]
@@ -58,221 +61,63 @@ class PlanMargin:
 
 
 @dataclass(frozen=True)
-class Polygon:
-    """A closed, potentially self-interesecting polygon in the local east-north frame.
+class SurveyRegion:
+    """An approved survey area: Region Boundary, optional exclusions and an entry corridor.
 
-    Args:
-        ``vertices`` are ``(east, north)`` metre pairs in order. The closing edge from
-        the last vertex back to the first is implicit and must not be repeated.
-
-    Notes:
-        Simplicity (whether the polygon is not self-intersecting) is **not** checked on construction.
-        Callers should check :meth:`is_simple` to this.
+    Every part is a :class:`shapely.Polygon` in the local east-north frame, and must be
+    valid (in particular, not self-intersecting); an invalid drawing is rejected here,
+    before approval, rather than after motion.
     """
 
-    vertices: tuple[Point, ...]
-    polygon: shapely.Polygon = field(
-        init=False, repr=False, compare=False
-    )  # NOTE: check flags...
+    boundary: shapely.Polygon
+    exclusions: tuple[shapely.Polygon, ...] = ()
+    corridor: shapely.Polygon | None = None
+    #: Boundary plus corridor, minus every exclusion: everywhere the robot may be.
+    free_space: BaseGeometry = field(init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
-        raw = self.vertices
-        if isinstance(raw, (str, bytes)) or not isinstance(raw, Sequence):
-            raise TypeError(
-                f"vertices must be a sequence of (east, north) pairs, "
-                f"got {type(raw).__name__}"
-            )
-        points: list[Point] = []
-        for index, vertex in enumerate(raw):
-            if isinstance(vertex, (str, bytes)) or not isinstance(
-                vertex, Sequence
-            ):
-                raise TypeError(
-                    f"vertices[{index}] must be an (east, north) pair, got {vertex!r}"
-                )
-            pair = tuple(float(value) for value in vertex)
-            if len(pair) != 2 or not all(
-                math.isfinite(value) for value in pair
-            ):
-                raise ValueError(
-                    f"vertices[{index}] must be a finite (east, north) pair, "
-                    f"got {vertex!r}"
-                )
-            points.append((pair[0], pair[1]))
-        if len(points) < 3:
-            raise ValueError(
-                f"vertices must hold at least three points, got {len(points)}"
-            )
-        object.__setattr__(self, "vertices", tuple(points))
-        object.__setattr__(self, "polygon", shapely.Polygon(points))
-
-    @property
-    def edges(self) -> tuple[tuple[Point, Point], ...]:
-        """Every edge as a ``(start, end)`` pair, including the closing edge."""
-
-        points = self.vertices
-        return tuple(
-            (points[i], points[(i + 1) % len(points)])
-            for i in range(len(points))
-        )
-
-    @property
-    def bounds_m(self) -> tuple[float, float, float, float]:
-        """Returns the axis-aligned bounds in form ``(min_east, min_north, max_east, max_north)``."""
-
-        easts = [point[0] for point in self.vertices]
-        norths = [point[1] for point in self.vertices]
-        return (min(easts), min(norths), max(easts), max(norths))
-
-    @property
-    def signed_area_m2(self) -> float:
-        """
-        Area of Polygon; positive when the vertices wind counterclockwise.
-
-        Note:
-            This area is calculated via the shoelace formula.
-        """
-
-        total = 0.0
-        for (x0, y0), (x1, y1) in self.edges:
-            total += x0 * y1 - x1 * y0
-        return 0.5 * total
-
-    def is_simple(self) -> bool:
-        """True when no two non-adjacent edges intersect and no edge is degenerate.
-
-        # CHALLENGE 5 -- pinned by ``test_self_crossing_polygon_is_rejected``.
-        #
-        # Write a segment-intersection predicate and apply it to every pair of
-        # edges. Two points to get right, because they are what the naive version
-        # misses:
-        #   * Adjacent edges legitimately touch at their shared vertex, so they
-        #     must be exempt -- but only at that vertex. An adjacent pair that
-        #     overlaps along a length is still self-crossing.
-        #   * Collinear overlap is an intersection even though the usual
-        #     orientation test reports zero for every combination.
-        # Prefer exact orientation signs (cross products) over computing an
-        # intersection point; dividing invites both precision loss and a
-        # zero-division branch.
-        """
-        return self.polygon.is_valid
-
-    def contains(self, point: Point) -> bool:
-        """True when ``point`` lies inside this polygon.
-
-        # CHALLENGE -- exercised throughout ``test_grid.py`` and ``test_region.py``.
-        #
-        # Ray casting is the usual approach: count boundary crossings of a ray from
-        # the point and return True on an odd count. The cases that decide whether
-        # this is correct are the degenerate ones -- a ray that passes exactly
-        # through a vertex must not be counted twice, and a horizontal edge at the
-        # ray's height must not be counted at all. Using a half-open rule on each
-        # edge's north span handles both without special-casing.
-        #
-        # Points exactly on an edge may return either answer; no test depends on
-        # it, and the clearance margin makes the ambiguity unreachable in practice.
-        """
-
-        return shapely.contains_xy(self.polygon, point[0], point[1])
-
-    def distance_to_boundary_m(self, point: Point) -> float:
-        """Shortest distance from ``point`` to any edge of this polygon.
-
-        # CHALLENGE -- pinned by ``test_inflation_matches_a_brute_force_distance_check``.
-        #
-        # The minimum over edges of the point-to-segment distance. The part people
-        # get wrong is the segment, not the line: project onto the segment and
-        # clamp the parameter to ``[0, 1]`` before measuring, or points beyond an
-        # endpoint report the distance to the infinite line instead. Handle a
-        # zero-length edge without dividing by zero.
-        """
-
-        raise NotImplementedError(
-            "CHALLENGE: implement point-to-segment distance"
-        )
-
-
-@dataclass(frozen=True)
-class SurveyRegion:
-    """An approved survey area: Region Boundary, optional exclusions and an entry corridor."""
-
-    boundary: Polygon
-    exclusions: tuple[Polygon, ...] = ()
-    corridor: Polygon | None = None
-
-    def __post_init__(self) -> None:
-        if not isinstance(self.boundary, Polygon):
-            raise TypeError(
-                f"boundary must be a Polygon, got {type(self.boundary).__name__}"
-            )
         raw = self.exclusions
         if isinstance(raw, (str, bytes)) or not isinstance(raw, Sequence):
             raise TypeError(
-                f"exclusions must be a sequence of Polygon, got {type(raw).__name__}"
+                f"exclusions must be a sequence of shapely.Polygon, got {type(raw).__name__}"
             )
-        for index, exclusion in enumerate(raw):
-            if not isinstance(exclusion, Polygon):
+        exclusions = tuple(raw)
+        parts = {"boundary": self.boundary, "corridor": self.corridor}
+        parts.update(
+            (f"exclusions[{index}]", exclusion)
+            for index, exclusion in enumerate(exclusions)
+        )
+        for name, polygon in parts.items():
+            if polygon is None and name == "corridor":
+                continue
+            if not isinstance(polygon, shapely.Polygon):
                 raise TypeError(
-                    f"exclusions[{index}] must be a Polygon, got {exclusion!r}"
+                    f"{name} must be a shapely.Polygon, got {type(polygon).__name__}"
                 )
-        if self.corridor is not None and not isinstance(self.corridor, Polygon):
-            raise TypeError(
-                f"corridor must be a Polygon or None, got {type(self.corridor).__name__}"
-            )
-        object.__setattr__(self, "exclusions", tuple(raw))
+            if not polygon.is_valid:
+                raise ValueError(f"{name} is not valid: {explain_validity(polygon)}")
+        object.__setattr__(self, "exclusions", exclusions)
+
+        area = self.boundary
+        if self.corridor is not None:
+            area = area.union(self.corridor)
+        object.__setattr__(
+            self, "free_space", area.difference(shapely.union_all(exclusions))
+        )
 
     @property
     def bounds_m(self) -> tuple[float, float, float, float]:
-        """Axis-aligned bounds of the boundary, plus the corridor when present."""
+        """``(min_east, min_north, max_east, max_north)`` of the boundary and corridor."""
 
-        min_east, min_north, max_east, max_north = self.boundary.bounds_m
-        if self.corridor is not None:
-            other = self.corridor.bounds_m
-            min_east, min_north = min(min_east, other[0]), min(
-                min_north, other[1]
-            )
-            max_east, max_north = max(max_east, other[2]), max(
-                max_north, other[3]
-            )
-        return (min_east, min_north, max_east, max_north)
+        bounds = shapely.total_bounds([self.boundary, self.corridor])
+        return tuple(float(value) for value in bounds)
 
-    def is_simple(self) -> bool:
-        """True when the boundary, every exclusion and the corridor are simple."""
+    def feasible(self, margin: PlanMargin) -> BaseGeometry:
+        """Where the robot's centre may go: free space shrunk by ``margin.total_m``.
 
-        parts = [self.boundary, *self.exclusions]
-        if self.corridor is not None:
-            parts.append(self.corridor)
-        return all(part.is_simple() for part in parts)
-
-    def contains(self, point: Point) -> bool:
-        """True when ``point`` is inside the boundary or corridor, outside exclusions."""
-
-        inside = self.boundary.contains(point)
-        if not inside and self.corridor is not None:
-            inside = self.corridor.contains(point)
-        if not inside:
-            return False
-        return not any(
-            exclusion.contains(point) for exclusion in self.exclusions
-        )
-
-    def clearance_m(self, point: Point) -> float:
-        """Distance from ``point`` to the nearest edge it must stay clear of.
-
-        Returns ``0.0`` for a point that is not inside the region at all, so that
-        "passable" is uniformly ``clearance_m(point) >= margin.total_m`` and no
-        caller has to special-case being outside.
+        Shrinking the free space and inflating every edge by the margin are the same
+        operation. A margin too large for the area gives an empty geometry -- reported
+        rather than raised.
         """
 
-        if not self.contains(point):
-            return 0.0
-        distances = [self.boundary.distance_to_boundary_m(point)]
-        if self.corridor is not None:
-            distances.append(self.corridor.distance_to_boundary_m(point))
-            if self.corridor.contains(point):
-                distances = [self.corridor.distance_to_boundary_m(point)]
-        distances.extend(
-            exclusion.distance_to_boundary_m(point)
-            for exclusion in self.exclusions
-        )
-        return min(distances)
+        return self.free_space.buffer(-margin.total_m)

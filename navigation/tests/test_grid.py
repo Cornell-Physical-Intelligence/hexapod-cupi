@@ -11,19 +11,25 @@ Everything is closed-form. No search, no simulator, no randomness.
 
 from __future__ import annotations
 
-import math
 import unittest
 
-from navigation.grid import PASSABLE_CELL_COST, RISK_WEIGHT, CostGrid
-from navigation.region import PlanMargin, Polygon, SurveyRegion
+from shapely import Point, box
+
+from navigation.grid import OccupancyGrid
+from navigation.region import PlanMargin, SurveyRegion
 
 
-DEMONSTRATION_AREA = ((0.0, 0.0), (6.0, 0.0), (6.0, 4.0), (0.0, 4.0))
+DEMONSTRATION_AREA = box(0.0, 0.0, 6.0, 4.0)
 
 # Unfrozen placeholders. #20's "Before implementation" block still has to freeze
 # these; they are written here so the arithmetic is reproducible, not to pre-empt it.
 FOOTPRINT_RADIUS_M = 0.40
 STOP_TOLERANCE_M = 0.15
+
+# Shapely approximates the rounded corners of an inflated exclusion with straight
+# segments, so a cell centre within this distance of the exact margin may go either
+# way. Well under a cell width at every margin used here.
+BUFFER_TOLERANCE_M = 0.02
 
 
 def _margin(position_error_bound_m: float) -> PlanMargin:
@@ -38,158 +44,113 @@ def _demonstration_region(with_exclusion: bool = False) -> SurveyRegion:
     exclusions = ()
     if with_exclusion:
         # #20's second map: the same area with one blocked region.
-        exclusions = (Polygon(((2.5, 1.5), (3.5, 1.5), (3.5, 2.5), (2.5, 2.5))),)
-    return SurveyRegion(boundary=Polygon(DEMONSTRATION_AREA), exclusions=exclusions)
+        exclusions = (box(2.5, 1.5, 3.5, 2.5),)
+    return SurveyRegion(boundary=DEMONSTRATION_AREA, exclusions=exclusions)
 
 
-def _expected_cost(region: SurveyRegion, margin: PlanMargin, centre) -> float:
-    """The specification of one cell's cost, independent of how the grid builds it.
+def _clearance_m(region: SurveyRegion, centre) -> float:
+    """Exact distance from ``centre`` to the nearest edge, 0.0 outside free space.
 
-    This is the oracle: it is deliberately the slow, obvious form, so that a faster
-    implementation is checked against the definition rather than against itself.
+    This is the oracle: the slow, obvious definition, independent of ``buffer``.
     """
 
-    clearance = region.clearance_m(centre)
-    if clearance < margin.total_m:
-        return math.inf
-    span = margin.position_error_bound_m
-    if span <= 0.0:
-        return PASSABLE_CELL_COST
-    excess = clearance - margin.total_m
-    if excess >= span:
-        return PASSABLE_CELL_COST
-    return PASSABLE_CELL_COST * (1.0 + RISK_WEIGHT * (1.0 - excess / span))
+    point = Point(centre)
+    if not region.free_space.contains(point):
+        return 0.0
+    return region.free_space.boundary.distance(point)
 
 
 class GridStructureTests(unittest.TestCase):
-    """Construction and addressing, which depend on no unimplemented method."""
+    """Construction and addressing, independent of any region."""
 
-    def _flat_grid(self, width: int, height: int, cost: float = 1.0) -> CostGrid:
-        return CostGrid(
+    def _open_grid(self, width: int, height: int) -> OccupancyGrid:
+        return OccupancyGrid(
             origin_m=(0.0, 0.0),
             cell_size_m=1.0,
             width_cells=width,
             height_cells=height,
-            costs=tuple([cost] * (width * height)),
+            passable=(True,) * (width * height),
         )
 
-    def test_costs_must_match_the_cell_count(self) -> None:
+    def test_passable_must_match_the_cell_count(self) -> None:
         with self.assertRaises(ValueError):
-            CostGrid(
+            OccupancyGrid(
                 origin_m=(0.0, 0.0),
                 cell_size_m=1.0,
                 width_cells=3,
                 height_cells=2,
-                costs=(1.0, 1.0, 1.0),
-            )
-
-    def test_infinite_cost_is_legal_but_nan_is_not(self) -> None:
-        CostGrid(
-            origin_m=(0.0, 0.0),
-            cell_size_m=1.0,
-            width_cells=2,
-            height_cells=1,
-            costs=(1.0, math.inf),
-        )
-        with self.assertRaises(ValueError):
-            CostGrid(
-                origin_m=(0.0, 0.0),
-                cell_size_m=1.0,
-                width_cells=2,
-                height_cells=1,
-                costs=(1.0, float("nan")),
-            )
-
-    def test_a_cost_below_the_structural_floor_is_rejected(self) -> None:
-        # A cell cheaper than the floor would break heuristic admissibility silently,
-        # so it is refused at construction instead.
-        with self.assertRaises(ValueError):
-            CostGrid(
-                origin_m=(0.0, 0.0),
-                cell_size_m=1.0,
-                width_cells=2,
-                height_cells=1,
-                costs=(PASSABLE_CELL_COST - 0.5, 1.0),
+                passable=(True, True, True),
             )
 
     def test_cell_size_and_extent_must_be_positive(self) -> None:
         for bad_size in (0.0, -1.0, float("inf"), float("nan")):
             with self.subTest(cell_size_m=bad_size), self.assertRaises(ValueError):
-                CostGrid(
+                OccupancyGrid(
                     origin_m=(0.0, 0.0),
                     cell_size_m=bad_size,
                     width_cells=1,
                     height_cells=1,
-                    costs=(1.0,),
+                    passable=(True,),
                 )
         for bad_extent in (0, -2, 1.5, True):
             with self.subTest(width_cells=bad_extent), self.assertRaises(ValueError):
-                CostGrid(
+                OccupancyGrid(
                     origin_m=(0.0, 0.0),
                     cell_size_m=1.0,
                     width_cells=bad_extent,
                     height_cells=1,
-                    costs=(1.0,),
+                    passable=(True,),
                 )
 
-    def test_min_cell_cost_is_the_constant_floor_not_the_observed_minimum(self) -> None:
-        grid = self._flat_grid(2, 2, cost=5.0)
-        self.assertEqual(
-            grid.min_cell_cost,
-            PASSABLE_CELL_COST,
-            "the heuristic scale must be a structural bound, not a sample",
-        )
-
     def test_cell_centres_round_trip_through_cell_of(self) -> None:
-        grid = self._flat_grid(6, 4)
+        grid = self._open_grid(6, 4)
         for east in range(6):
             for north in range(4):
                 with self.subTest(cell=(east, north)):
                     centre = grid.cell_center_m((east, north))
                     self.assertEqual(grid.cell_of(centre), (east, north))
 
-    def test_costs_are_row_major_over_north(self) -> None:
-        grid = CostGrid(
+    def test_passable_is_row_major_over_north(self) -> None:
+        grid = OccupancyGrid(
             origin_m=(0.0, 0.0),
             cell_size_m=1.0,
             width_cells=2,
             height_cells=2,
-            costs=(1.0, 2.0, 3.0, 4.0),
+            passable=(True, False, False, True),
         )
-        self.assertAlmostEqual(grid.cost((0, 0)), 1.0, places=12)
-        self.assertAlmostEqual(grid.cost((1, 0)), 2.0, places=12)
-        self.assertAlmostEqual(grid.cost((0, 1)), 3.0, places=12)
-        self.assertAlmostEqual(grid.cost((1, 1)), 4.0, places=12)
+        self.assertTrue(grid.is_passable((0, 0)))
+        self.assertFalse(grid.is_passable((1, 0)))
+        self.assertFalse(grid.is_passable((0, 1)))
+        self.assertTrue(grid.is_passable((1, 1)))
 
     def test_off_grid_cells_are_impassable_rather_than_an_error(self) -> None:
-        grid = self._flat_grid(2, 2)
+        grid = self._open_grid(2, 2)
         for outside in ((-1, 0), (2, 0), (0, -1), (0, 2)):
             with self.subTest(cell=outside):
                 self.assertFalse(grid.in_bounds(outside))
-                self.assertEqual(grid.cost(outside), math.inf)
                 self.assertFalse(grid.is_passable(outside))
 
     def test_passable_cell_count_ignores_impassable_cells(self) -> None:
-        grid = CostGrid(
+        grid = OccupancyGrid(
             origin_m=(0.0, 0.0),
             cell_size_m=1.0,
             width_cells=2,
             height_cells=2,
-            costs=(1.0, math.inf, 1.0, math.inf),
+            passable=(True, False, True, False),
         )
         self.assertEqual(grid.cell_count, 4)
         self.assertEqual(grid.passable_cell_count, 2)
 
 
 class EmptyFeasibleRegionTests(unittest.TestCase):
-    """CHALLENGE 6 -- the #20 margin arithmetic, as an executable fact."""
+    """The #20 margin arithmetic, as an executable fact."""
 
     def test_margin_larger_than_area_leaves_no_feasible_region(self) -> None:
         # 0.40 + 0.15 + 3.00 = 3.55 m of required clearance. Shrinking 6 x 4 m by
         # that on every side leaves nothing at all: 6 - 7.1 and 4 - 7.1 are both
         # negative. This is the plain-GPS decision of #38 meeting the 6 x 4 m
         # demonstration of #20, and it is why one of the two has to move.
-        grid = CostGrid.from_region(
+        grid = OccupancyGrid.from_region(
             _demonstration_region(), _margin(3.0), cell_size_m=0.25
         )
         self.assertEqual(
@@ -201,7 +162,7 @@ class EmptyFeasibleRegionTests(unittest.TestCase):
     def test_an_empty_region_is_reported_not_raised(self) -> None:
         # The grid still exists and still describes the area; it simply has nowhere
         # to go. Callers report that, so no exception may escape.
-        grid = CostGrid.from_region(
+        grid = OccupancyGrid.from_region(
             _demonstration_region(), _margin(3.0), cell_size_m=0.5
         )
         self.assertGreater(grid.cell_count, 0)
@@ -210,7 +171,7 @@ class EmptyFeasibleRegionTests(unittest.TestCase):
     def test_ideal_poses_leave_a_usable_region(self) -> None:
         # With the GPS term at zero the margin is 0.55 m, leaving a 4.9 x 2.9 m
         # interior. This is the rehearsal case #20 actually specifies.
-        grid = CostGrid.from_region(
+        grid = OccupancyGrid.from_region(
             _demonstration_region(), _margin(0.0), cell_size_m=0.25
         )
         self.assertGreater(
@@ -218,13 +179,13 @@ class EmptyFeasibleRegionTests(unittest.TestCase):
         )
 
     def test_larger_error_bound_never_adds_passable_cells(self) -> None:
-        # CHALLENGE 8. Clearance is fixed by geometry, so raising the bound can only
-        # raise the required clearance: feasibility shrinks monotonically and the
-        # passable set of a larger bound is a subset of a smaller one's.
-        region = _demonstration_region()
+        # Clearance is fixed by geometry, so raising the bound can only raise the
+        # required clearance: feasibility shrinks monotonically and the passable set
+        # of a larger bound is a subset of a smaller one's.
+        region = _demonstration_region(with_exclusion=True)
         previous: set[tuple[int, int]] | None = None
         for bound in (0.0, 0.25, 0.5, 1.0, 1.5):
-            grid = CostGrid.from_region(region, _margin(bound), cell_size_m=0.25)
+            grid = OccupancyGrid.from_region(region, _margin(bound), cell_size_m=0.25)
             passable = {
                 (east, north)
                 for north in range(grid.height_cells)
@@ -240,86 +201,49 @@ class EmptyFeasibleRegionTests(unittest.TestCase):
 
 
 class RasterisationTests(unittest.TestCase):
-    """CHALLENGE 6 + 7 -- ``CostGrid.from_region`` against its definition."""
+    """``OccupancyGrid.from_region`` against its definition."""
 
     def test_grid_covers_the_region_bounds(self) -> None:
         region = _demonstration_region()
-        grid = CostGrid.from_region(region, _margin(0.0), cell_size_m=0.25)
+        grid = OccupancyGrid.from_region(region, _margin(0.0), cell_size_m=0.25)
         self.assertEqual(grid.origin_m, (0.0, 0.0))
         self.assertEqual((grid.width_cells, grid.height_cells), (24, 16))
 
     def test_a_partial_cell_is_still_covered(self) -> None:
         # 4 / 0.3 is 13.33 cells of north span, so 14 are needed to reach the top.
         region = _demonstration_region()
-        grid = CostGrid.from_region(region, _margin(0.0), cell_size_m=0.3)
+        grid = OccupancyGrid.from_region(region, _margin(0.0), cell_size_m=0.3)
         self.assertEqual((grid.width_cells, grid.height_cells), (20, 14))
 
     def test_inflation_matches_a_brute_force_distance_check(self) -> None:
-        # CHALLENGE 7. Every cell's cost must equal the definition computed directly
-        # from the region's own clearance. An implementation may be optimised later;
-        # this pins the result rather than the method.
+        # Every cell must agree with the exact clearance computed directly from the
+        # region, except within BUFFER_TOLERANCE_M of the margin itself.
         for bound in (0.0, 0.5):
             for with_exclusion in (False, True):
                 region = _demonstration_region(with_exclusion=with_exclusion)
                 margin = _margin(bound)
-                grid = CostGrid.from_region(region, margin, cell_size_m=0.25)
+                grid = OccupancyGrid.from_region(region, margin, cell_size_m=0.25)
                 for north in range(grid.height_cells):
                     for east in range(grid.width_cells):
                         cell = (east, north)
-                        expected = _expected_cost(
-                            region, margin, grid.cell_center_m(cell)
-                        )
-                        actual = grid.cost(cell)
+                        clearance = _clearance_m(region, grid.cell_center_m(cell))
                         with self.subTest(
                             bound=bound, exclusion=with_exclusion, cell=cell
                         ):
-                            if math.isinf(expected):
-                                self.assertEqual(actual, math.inf)
-                            else:
-                                self.assertAlmostEqual(actual, expected, places=12)
+                            if clearance >= margin.total_m + BUFFER_TOLERANCE_M:
+                                self.assertTrue(grid.is_passable(cell))
+                            elif clearance < margin.total_m - BUFFER_TOLERANCE_M:
+                                self.assertFalse(grid.is_passable(cell))
 
     def test_a_drawn_exclusion_blocks_its_own_cells(self) -> None:
         region = _demonstration_region(with_exclusion=True)
-        grid = CostGrid.from_region(region, _margin(0.0), cell_size_m=0.25)
+        grid = OccupancyGrid.from_region(region, _margin(0.0), cell_size_m=0.25)
         # The exclusion spans 2.5..3.5 m east, 1.5..2.5 m north; its centre must be
         # impassable, and so must a ring of cells one footprint radius around it.
         self.assertFalse(grid.is_passable(grid.cell_of((3.0, 2.0))))
         self.assertFalse(
             grid.is_passable(grid.cell_of((2.5 - FOOTPRINT_RADIUS_M / 2.0, 2.0))),
             "cells within the margin of an exclusion are inflated away",
-        )
-
-
-class RiskCostTests(unittest.TestCase):
-    """CHALLENGE 6 -- the error-bound-scaled risk field."""
-
-    def test_zero_error_bound_gives_uniform_cost(self) -> None:
-        # With no position uncertainty there is nothing to be risk-averse about, so
-        # every passable cell costs the floor and the route is purely geometric.
-        grid = CostGrid.from_region(
-            _demonstration_region(), _margin(0.0), cell_size_m=0.25
-        )
-        costs = {cost for cost in grid.costs if math.isfinite(cost)}
-        self.assertEqual(costs, {PASSABLE_CELL_COST})
-
-    def test_a_positive_error_bound_prices_bare_clearance_higher(self) -> None:
-        # A cell with clearance to spare costs the floor; one that only just clears
-        # the margin costs the floor times (1 + RISK_WEIGHT).
-        region = _demonstration_region()
-        margin = _margin(0.5)
-        grid = CostGrid.from_region(region, margin, cell_size_m=0.25)
-        middle = grid.cell_of((3.0, 2.0))
-        self.assertAlmostEqual(grid.cost(middle), PASSABLE_CELL_COST, places=12)
-        finite = [cost for cost in grid.costs if math.isfinite(cost)]
-        self.assertGreater(
-            max(finite),
-            PASSABLE_CELL_COST,
-            "cells near an edge must cost more once position error is admitted",
-        )
-        self.assertLessEqual(
-            max(finite),
-            PASSABLE_CELL_COST * (1.0 + RISK_WEIGHT) + 1.0e-12,
-            "risk cost is bounded by RISK_WEIGHT",
         )
 
 
