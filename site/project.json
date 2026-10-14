@@ -1,734 +1,233 @@
 {
-  "schema_version": 2,
-  "title": "Hexapod · Development roadmap",
+  "schema_version": 3,
+  "title": "Hexapod",
   "repository": "Cornell-Physical-Intelligence/hexapod-cupi",
-  "mission": "Hexapod MKII: from walking to autonomous surveying",
-  "description": "Build a hexapod that walks an approved route through an area drawn on an open map, navigating with onboard GPS only, and stops with a steady sensor platform. GeoData owns the measurements and the 3D map.",
   "status_source": "STATUS.md",
-  "geometry": {
-    "label": "Approved detailed robot model",
-    "coxa_joint_centers_mm": 49.0,
-    "femur_hip_to_knee_mm": 73.502,
-    "tibia_knee_to_distal_reference_mm": 130.0,
-    "mass_kg": 7.466088235225788,
-    "raw_cad_mass_kg": 5.147603654203134,
-    "motors": 18,
-    "source": "docs/UPDATED_CAD_IMPORT.md",
-    "note": "James visually reconfirmed this mass-corrected model on 14 September 2026 for a fresh qualification sequence. Model mass includes nominal motor corrections; added motor inertia is estimated. The 0.5 mm yaw-joint gap and possible collisions at combined joint limits still need physical checks. Earlier walking videos use simplified models."
+  "mission": "We are building a six-legged robot that walks a planned route across an area drawn on a map, finds its way with GPS alone and stops at each survey point.",
+  "latest": {
+    "date": "2026-10-12",
+    "title": "One training run passes all 13 movement tests",
+    "text": "With a reward change for turning, one training run passed all 13 tests: walking in eight directions, turning both ways, standing still and stopping. Its heading still drifts during walks, by 16 degrees on average. The videos show our 11 October controller, which passed 10 of the 13.",
+    "metric": {
+      "value": 13,
+      "total": 13,
+      "label": "movement tests passed in one training run",
+      "sources": [
+        {
+          "path": "site/assets/yaw_gated_stride_native_20261012_001/native_results.json",
+          "field": [
+            "evaluations",
+            "c48_long",
+            "passed"
+          ],
+          "total_field": [
+            "evaluations",
+            "c48_long",
+            "probes"
+          ]
+        }
+      ]
+    },
+    "media_ids": [
+      "ppo_v4_omni512_seed20260917_left90_u2000",
+      "ppo_v4_omni512_seed20260917_turn_plus020_u2000",
+      "ppo_v4_omni512_seed20260917_stop_20261011"
+    ],
+    "next": "We are repeating that run in four controlled training runs to check that the result holds. Then we compare it with a controller that learns from our demonstration motions."
   },
-  "checkpoint": {
-    "receipt": "site/assets/evidence/artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/train/training_receipt.json",
-    "evidence": "site/assets/evidence/artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md",
-    "label": "Historical C-study PPO · 500 updates",
-    "qualification": "Unqualified historical gait; 0/48 quiet trials pass. New detailed CAD requires native admission.",
-    "video_matches": true,
-    "path": "site/assets/evidence/artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/train/policy/final.pt"
-  },
-  "stop_result": {
-    "path": "site/assets/evidence/artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/curated/raw/run/final_stop/stop_diagnostics.json",
-    "evidence": "site/assets/evidence/artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_caps_002/cpu_analysis/remote/analysis/REPORT.md"
-  },
-  "media": [
+  "roadmap": [
     {
-      "id": "benchmark_01",
-      "title": "Forward-walking reference",
-      "type": "video",
-      "role": "benchmark",
-      "path": "site/assets/media/benchmark_01.mp4",
-      "sha256": "2c65b1f158379ab62c65fec3dd831ca91cf137b4eaa309ae63a7ff65ea7e1513",
-      "caption": "Earlier robot model, forward walking only. James selected this gait as the visual reference. The motor-torque test failed. Real-time playback.",
-      "controller": "5ecbe978d659413dc050fec93b0e211a3eadf6ce1c807790d87c14044ff245a2",
-      "evidence": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md",
-      "poster_id": "benchmark_01_poster"
+      "id": "design",
+      "title": "Robot design",
+      "state": "done"
     },
     {
-      "id": "benchmark_01_poster",
-      "title": "Forward-walking reference — preview frame",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/benchmark_01_poster.png",
-      "sha256": "d3694c52e5f13c60fabc206f25490ac4431392cf94e704537f493ec706ad3644",
-      "caption": "Frame from Forward-walking reference.",
-      "controller": "5ecbe978d659413dc050fec93b0e211a3eadf6ce1c807790d87c14044ff245a2",
-      "evidence": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md"
+      "id": "standing",
+      "title": "Stand",
+      "state": "done"
     },
     {
-      "id": "direct315_1971",
-      "title": "Earlier controller following five paths",
-      "type": "video",
-      "role": "historical_capability_demo",
-      "path": "site/assets/media/direct315_1971.mp4",
-      "sha256": "37b449194dd79f2c7d65106ca1deb97ffe4f401a967c6ff1f54cf22ad5f3849c",
-      "caption": "Earlier robot model following five paths using exact position from the simulator. This bypasses sensor-based position estimation. Real-time playback.",
-      "controller": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
-      "evidence": "artifacts/omni_flat_2026-09-09/omni_preview_001/recording_audit.json",
-      "poster_id": "direct315_1971_poster"
+      "id": "stage2",
+      "title": "Walk and stop",
+      "state": "now"
     },
     {
-      "id": "direct315_1971_poster",
-      "title": "Earlier controller following five paths — preview frame",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/direct315_1971_poster.png",
-      "sha256": "bd6c1a98026fe690554d052dc9f9ae7523bcf50d2ae8e7e1eb816dfbd5c86f66",
-      "caption": "Frame from Earlier controller following five paths.",
-      "controller": "1971b782327408f8446b3271cc665dad8c9c515523cf8c87303141dc487d06e8",
-      "evidence": "artifacts/omni_flat_2026-09-09/omni_preview_001/recording_audit.json"
+      "id": "stage3",
+      "title": "Rough ground",
+      "state": "next"
     },
     {
-      "id": "geometry_sweep",
-      "title": "Comparison of 49 robot geometries",
-      "type": "image",
-      "role": "research_image",
-      "path": "site/assets/media/geometry_sweep.png",
-      "sha256": "14a25cbdf22c5ffaacde9d9955402c59b1c3804f7f4b648144531bffbe748898",
-      "caption": "49 simulated geometry variants shown together; this is a model comparison.",
-      "controller": "No policy qualification; study figure",
-      "evidence": "robot/hexapod_mkii_length_study/README.md"
+      "id": "hardware",
+      "title": "Build the robot",
+      "state": "later"
     },
     {
-      "id": "rigid_toe_proposal",
-      "title": "Proposed rounded toe",
-      "type": "image",
-      "role": "research_image",
-      "path": "site/assets/media/rigid_toe_proposal.png",
-      "sha256": "ef911d3950bd2e56bcdb0210b8846cd4dfcee1cc10ee559d85462e7cc28ce768",
-      "caption": "Early toe-shape proposal. Dimensions and attachment design still need checking against the robot CAD.",
-      "controller": "Engineering schematic; no experiment or policy depicted",
-      "evidence": "artifacts/foot_design_2026-09-10/rigid_toe_proposal_001/README.md"
+      "id": "mission",
+      "title": "Survey an area",
+      "state": "later"
+    }
+  ],
+  "accomplishments": [
+    {
+      "date": "2026-10-12",
+      "text": "With a reward change for turning, one training run passes all 13 movement tests for the first time.",
+      "source": "site/assets/yaw_gated_stride_native_20261012_001/native_results.json"
     },
     {
-      "id": "caps50_preview",
-      "title": "Earlier controller after 50 training updates",
-      "type": "video",
-      "role": "historical_capability_demo",
-      "path": "site/assets/media/caps50_preview.mp4",
-      "sha256": "b2ccdd62821e58c3d8bfd62150b9272d4d3c47c7d8020dea0df2e8571550547d",
-      "caption": "38-second simulation recording at real-time speed. The controller fails the standing test. Recording completed; the job later failed because its final audit record was missing.",
-      "controller": "ca0545760f81b8b8fb0cafde4b1ef89bfa5d8765a8b43b578e451f648a954415",
-      "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_preview_001/README.md",
-      "poster_id": "caps50_preview_poster"
+      "date": "2026-10-11",
+      "text": "With 512 simulated robots, the learned controller passes 10 of 13 movement tests.",
+      "source": "site/assets/reward_v4_budget512_20261011_001/results.json"
     },
     {
-      "id": "caps50_preview_poster",
-      "title": "Earlier controller after 50 training updates — preview frame",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/caps50_preview_poster.png",
-      "sha256": "306f612d535d76476720e03784342ac8d0c260efde27518117227ff4e1594f6d",
-      "caption": "Frame from Earlier controller after 50 training updates.",
-      "controller": "ca0545760f81b8b8fb0cafde4b1ef89bfa5d8765a8b43b578e451f648a954415",
-      "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_preview_001/README.md"
+      "date": "2026-10-06",
+      "text": "The learned controller walks forward and stops on command for the first time.",
+      "source": "site/assets/ppo_walking_diagnosis_20261005_001/run_ledger.json"
     },
     {
-      "id": "caps500_preview",
-      "title": "Earlier controller after 500 training updates",
-      "type": "video",
-      "role": "latest_policy_recording",
-      "path": "site/assets/media/caps500_preview.mp4",
-      "sha256": "1cd2dab2ac5d4c981f4528017febfed0287ac0cdb9e19e2d34cc52704e7f4745",
-      "caption": "38-second simulation recording: forward, sideways, curved motion and stop commands. Stopping fails. This uses an earlier robot model. Real-time playback.",
-      "controller": "c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf",
-      "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/README.md",
-      "poster_id": "caps500_preview_poster"
+      "date": "2026-09-24",
+      "text": "We built demonstration motions for 20 commands: walking in each direction, turns and arcs.",
+      "source": "locomotion/priors/datasets/amp_demonstrations_001/manifest.json"
     },
     {
-      "id": "caps500_preview_poster",
-      "title": "Earlier controller after 500 training updates — preview frame",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/caps500_preview_poster.png",
-      "sha256": "81a7652c30061697330f059dea2a230af8a9492cb3f4d695c01ba732c7ea63d1",
-      "caption": "Frame from Earlier controller after 500 training updates.",
-      "controller": "c376a0a4eb04d54396b4fd6171fe173167767463245213cce7c2cc1d3a2877cf",
-      "evidence": "artifacts/omni_diagnostics_2026-09-09/direct_omni_extended_preview_001/README.md"
+      "date": "2026-09-22",
+      "text": "A hand-designed tripod gait walks forward, turns both ways and stops in simulation tests.",
+      "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_native_20260922_001/native_result.json"
     },
     {
-      "id": "canonical_detailed_cad_preview",
-      "title": "Approved robot model: CAD inspection",
-      "type": "video",
-      "role": "cad_preview",
-      "path": "site/assets/media/canonical_detailed_cad_preview.mp4",
-      "sha256": "d6096b2e0cb32b5527697b8c4fa08e590a77b5e44f14887b913626ca143feb20",
-      "caption": "24-second view of the approved assembly with joint movement. This is a CAD animation; it does not simulate balance, foot contact or a walking controller.",
-      "controller": "No controller — prescribed CAD joint articulation",
-      "evidence": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/README.md",
-      "poster_id": "canonical_detailed_cad_poster"
+      "date": "2026-09-15",
+      "text": "The approved robot model stands steadily in simulation, alone and in groups of 128.",
+      "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/paper_walk_execution_001/admission_002/verification.json"
     },
     {
-      "id": "canonical_detailed_cad_poster",
-      "title": "Approved robot model: CAD inspection — preview frame",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/canonical_detailed_cad_poster.png",
-      "sha256": "3edfa8cf7282445312b3c2a6beb96694cc6310835689f71c10ae8ab9ca01d78a",
-      "caption": "Frame from Approved robot model: CAD inspection.",
-      "controller": "No controller — prescribed CAD joint articulation",
-      "evidence": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/README.md"
-    },
-    {
-      "id": "optimized_forward_001",
-      "title": "Optimized forward cycle on the approved robot",
-      "type": "video",
-      "role": "trajectory_experiment",
-      "path": "site/assets/media/optimized_forward_001.mp4",
-      "sha256": "330a0d0e76a70f8aa37d1aafb15bc8a40e9f971627f58011bcad0eebcb5112c0",
-      "caption": "Approved detailed model. Optimized motor-target replay moves 0.968 m in 20 seconds. Speed variation fails the tracking limit. No learned policy or gait acceptance. Real-time playback.",
-      "controller": "Optimized trajectory a76e093075ce471210a66bf4ae3835a1dca94406b930e4a791a028941a502ec1",
-      "evidence": "artifacts/trajectory_optimizer_20260917/review_001/RESULT.json",
-      "poster_id": "optimized_forward_001_poster"
-    },
-    {
-      "id": "optimized_forward_001_poster",
-      "title": "Optimized forward cycle preview",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/optimized_forward_001_poster.png",
-      "sha256": "4b79bb112449206df09070e14d69a56a520a0a0734110e35fe9c6ebd757150d3",
-      "caption": "First frame of the native optimized-target replay on the approved model.",
-      "controller": "Optimized trajectory a76e093075ce471210a66bf4ae3835a1dca94406b930e4a791a028941a502ec1",
-      "evidence": "artifacts/trajectory_optimizer_20260917/review_001/RESULT.json"
-    },
-    {
-      "id": "forward_ppo_scratch_1200",
-      "title": "PPO from scratch: failed forward test",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/forward_ppo_scratch_1200.mp4",
-      "sha256": "731abfef892bd0b64125b028f428388a6d1994e083a1d388c7061f03b7e51249",
-      "caption": "Approved detailed model after 1200 PPO updates. Mean forward speed 0.481 cm/s against 5 cm/s. Forward tracking and motor demand fail. One paired seed; recorded policy rollout at real-time speed.",
-      "controller": "f4403a25ce4c675607ba7f33fec9c2e35c8895f4e72915cb3d8ce2bc4cb6ce5b",
-      "evidence": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json",
-      "poster_id": "forward_ppo_scratch_1200_poster"
-    },
-    {
-      "id": "forward_ppo_scratch_1200_poster",
-      "title": "PPO from scratch: preview",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/forward_ppo_scratch_1200_poster.png",
-      "sha256": "3a1e078a9073d98d4f9effcfd3fae8704843f85d22326cf4ef06449966408644",
-      "caption": "First frame of the final policy test on the approved model.",
-      "controller": "f4403a25ce4c675607ba7f33fec9c2e35c8895f4e72915cb3d8ce2bc4cb6ce5b",
-      "evidence": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
-    },
-    {
-      "id": "forward_ppo_example_1200",
-      "title": "PPO after copying the forward example: failed forward test",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/forward_ppo_example_1200.mp4",
-      "sha256": "52bd0dca4390cd2c1844df856cbc82493e4bf84b0a683613726dc2399e58cdc9",
-      "caption": "Approved detailed model after 1200 PPO updates. Mean forward speed 0.096 cm/s against 5 cm/s. Forward tracking and motor demand fail. One paired seed; recorded policy rollout at real-time speed.",
-      "controller": "1d039d9d566490398b1b1bd0603f7ff77b1c54228d30a63bd296799f6e1703f9",
-      "evidence": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json",
-      "poster_id": "forward_ppo_example_1200_poster"
-    },
-    {
-      "id": "forward_ppo_example_1200_poster",
-      "title": "PPO after copying the forward example: preview",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/forward_ppo_example_1200_poster.png",
-      "sha256": "4696ca134e7fe0c57bc008bbea8faf1cf2235dba741b1c1d09cefae0b32cb6e1",
-      "caption": "First frame of the final policy test on the approved model.",
-      "controller": "1d039d9d566490398b1b1bd0603f7ff77b1c54228d30a63bd296799f6e1703f9",
-      "evidence": "artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
-    },
-    {
-      "id": "tripod_speed_lift_native_20260922_001",
-      "title": "Prescribed tripod: passed low-speed forward screen",
-      "type": "video",
-      "role": "trajectory_experiment",
-      "path": "site/assets/tripod_speed_lift_native_20260922_001/rollout.mp4",
-      "sha256": "73675b75e4bcc771e71a6eab579db9d993e7aa1293f1193120a60ae029e6cdee",
-      "caption": "Approved detailed model. Forward 0.05 m/s and both turn screens pass. Forward planar error 0.01078 m/s, with zero scored torque-demand excess. Stops and raised clearance await qualification; real-time playback.",
-      "controller": "Prescribed tripod; source freeze 4512377d6c762ec846366acce6d91800a4eeed65fe89976e5c13907e0b93930b",
-      "evidence": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_native_20260922_001/native_result.json",
-      "poster_id": "tripod_speed_lift_native_20260922_001_poster"
-    },
-    {
-      "id": "tripod_speed_lift_native_20260922_001_poster",
-      "title": "Speed lift: first native frame",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/tripod_speed_lift_native_20260922_001/first_frame.png",
-      "sha256": "a0b65b29965e7de3673a1a4c6e74a0acb06d476d672a8518b13a2a731df7c006",
-      "caption": "First native frame of the passing low-speed forward screen on the approved robot.",
-      "controller": "Prescribed tripod; source freeze 4512377d6c762ec846366acce6d91800a4eeed65fe89976e5c13907e0b93930b",
-      "evidence": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_native_20260922_001/native_result.json"
-    },
-    {
-      "id": "amp_motion_mosaic_20260924_001",
-      "title": "20 optimized motions on the approved hexapod",
-      "type": "video",
-      "role": "trajectory_experiment",
-      "path": "site/assets/amp_motion_mosaic_20260924_001/mosaic.mp4",
-      "sha256": "dcde479c530e55b1a7f19eef3593c252022915dcee2e4960e66e8ff4b85cc32a",
-      "caption": "20 commands, from forward and sideways motion to diagonals, turns and arcs. One starting phase per command is shown at real-time speed on the approved detailed model. All 40 phase-paired clips pass native numerical screens, and the program lead admitted them as the AMP training dataset. AMP learning remains pending.",
-      "poster_id": "amp_motion_mosaic_20260924_001_poster",
-      "controller": "Optimized motor-target trajectories replayed in Isaac Sim; no learned policy; source 3dcefc3fe6c69b696c860b27439fbd863410053e",
-      "evidence": "site/assets/amp_motion_mosaic_20260924_001/presentation.json"
-    },
-    {
-      "id": "amp_motion_mosaic_20260924_001_poster",
-      "title": "Optimized motion-prior mosaic preview",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/amp_motion_mosaic_20260924_001/poster.jpg",
-      "sha256": "d8f1a422cbb8739d2acdf273db12fe8542041924434a916490e24f2ee0bf4b27",
-      "caption": "Ten-second frame from the 20-command native simulation mosaic on the approved detailed model.",
-      "controller": "Optimized motor-target trajectories replayed in Isaac Sim; no learned policy; source 3dcefc3fe6c69b696c860b27439fbd863410053e",
-      "evidence": "site/assets/amp_motion_mosaic_20260924_001/presentation.json"
-    },
-    {
-      "id": "ppo_bounded_mean_2000_20261002",
-      "title": "Bounded-mean PPO: failed forward test",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_bounded_mean_2000_20261002.mp4",
-      "sha256": "acbea99e431d278e0ae1302f2a067b51a3b654e555b7a4c87fd19b2df78d8352",
-      "caption": "Approved detailed model after 2000 PPO updates. Mean forward speed 0.00000612 m/s against 0.05 m/s. The policy holds a stance and fails tracking. One seed; real-time playback.",
-      "controller": "8e0ff06ece3ed348129afba633dab1ab35dbd4002a1c68189c6b8538334451c3",
-      "evidence": "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json",
-      "poster_id": "ppo_bounded_mean_2000_20261002_poster"
-    },
-    {
-      "id": "ppo_bounded_mean_2000_20261002_poster",
-      "title": "Bounded-mean PPO: forward test preview",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/ppo_bounded_mean_2000_20261002_poster.png",
-      "sha256": "b2cdd2be529b1fed530b9908d775d9f4c1ae58d6606cddb257ea81f218f7764d",
-      "caption": "Frame 375 at 15 seconds from the failed forward test on the approved detailed model.",
-      "controller": "8e0ff06ece3ed348129afba633dab1ab35dbd4002a1c68189c6b8538334451c3",
-      "evidence": "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json"
-    },
-    {
-      "id": "ppo_no_norm_2000_20261003",
-      "title": "PPO without running normalization: failed forward test",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_no_norm_2000_20261003.mp4",
-      "sha256": "0cd888ff49b329b2878cd59559d0fb8c379bdd40433cb8d33af33265a6e32e16",
-      "caption": "Approved detailed model after 2000 PPO updates without running normalization. Mean forward speed 0.00002469 m/s against 0.05 m/s. All 13 probes fail. One seed; real-time playback.",
-      "controller": "d255216e14d7e29a9f62055da0615ac0381b8c995e85a3ded43519f3f3968180",
-      "evidence": "site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.json",
-      "poster_id": "ppo_no_norm_2000_20261003_poster"
-    },
-    {
-      "id": "ppo_no_norm_2000_20261003_poster",
-      "title": "PPO without running normalization: first native frame",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/ppo_no_norm_2000_20261003_poster.png",
-      "sha256": "12e11d3b85c7ef35751a48ae56b600e4f38689c3c44e9eccfc46057312db2057",
-      "caption": "First native frame from the failed forward evaluation on the approved detailed model.",
-      "controller": "d255216e14d7e29a9f62055da0615ac0381b8c995e85a3ded43519f3f3968180",
-      "evidence": "site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.json"
-    },
-    {
-      "id": "ppo_reward_v3_2000_20261003",
-      "title": "PPO with immediate tracking: failed forward test",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_reward_v3_2000_20261003.mp4",
-      "sha256": "fe86ca0bc7571d2189bba718de6bed823016463a29d972a5be3bcd1ec89e0b28",
-      "caption": "Approved detailed model; reward v3 at update 2000. The policy fails all 13 probes and has near-zero forward speed. One seed; real-time playback.",
-      "controller": "d5413589c31da01cdca7ae3b9499ed80ae4660a4ff2a13f7b75b0c928190a25e",
-      "evidence": "site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation.json",
-      "poster_id": "ppo_reward_v3_2000_20261003_poster"
-    },
-    {
-      "id": "ppo_reward_v3_2000_20261003_poster",
-      "title": "PPO with immediate tracking: first native frame",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/ppo_reward_v3_2000_20261003_poster.png",
-      "sha256": "5a9a010cc0e7aa5fd8dc23a2d97d61449bc0faa035c282c0d01e7ca54c9b78ba",
-      "caption": "First native frame from the failed reward-v3 forward evaluation on the approved detailed model.",
-      "controller": "d5413589c31da01cdca7ae3b9499ed80ae4660a4ff2a13f7b75b0c928190a25e",
-      "evidence": "site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation.json"
-    },
-    {
-      "id": "ppo_v4_settle_seed20260917_forward_20261006",
-      "title": "Reward v4 PPO, seed 20260917: passed forward probe",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_v4_settle_seed20260917_forward_20261006.mp4",
-      "sha256": "d69efb7d0cbeeb4d9e3bdc521ad4805b8c918c2b07201e7aa91ad47cd5b76718",
-      "caption": "Approved detailed model in native Isaac simulation. Vanilla PPO with reward v4, seed 20260917, update 2000. The policy passes the forward probe at 0.05 m/s. This seed passes both quiet probes. Evaluation runs the actor mean with noise off. One trial.",
-      "controller": "695b1839a17976f34d40ebcf9057c47b0eaa1015d1d0d84a2ea96c8b8a781217",
-      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260917_evaluation_verification.json",
-      "poster_id": "ppo_v4_settle_seed20260917_forward_20261006_poster"
-    },
-    {
-      "id": "ppo_v4_settle_seed20260917_forward_20261006_poster",
-      "title": "Reward v4 PPO, seed 20260917: first frame of the forward probe",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/ppo_v4_settle_seed20260917_forward_20261006_poster.png",
-      "sha256": "dba6c2c981c35599257e85f6c4077f0883e0f97f1c4fbb6d3b2caf4ae1b8d453",
-      "caption": "First native frame of the forward probe recording. Reward v4 PPO, seed 20260917, update 2000, native Isaac simulation, noise off.",
-      "controller": "695b1839a17976f34d40ebcf9057c47b0eaa1015d1d0d84a2ea96c8b8a781217",
-      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260917_evaluation_verification.json"
-    },
-    {
-      "id": "ppo_v4_settle_seed20260917_stop_20261006",
-      "title": "Reward v4 PPO, seed 20260917: passed forward-to-stop probe",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_v4_settle_seed20260917_stop_20261006.mp4",
-      "sha256": "6cad1c0614f6a11d792ca6742ee7f94d11821d8f500488f538998a55ffdd1b4d",
-      "caption": "Approved detailed model in native Isaac simulation. Vanilla PPO with reward v4, seed 20260917, update 2000. The policy passes the forward-to-stop probe, which commands 0.05 m/s forward for 8 s and then zero. This seed passes both quiet probes. Evaluation runs the actor mean with noise off. One trial.",
-      "controller": "695b1839a17976f34d40ebcf9057c47b0eaa1015d1d0d84a2ea96c8b8a781217",
-      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260917_evaluation_verification.json",
-      "poster_id": "ppo_v4_settle_seed20260917_stop_20261006_poster"
-    },
-    {
-      "id": "ppo_v4_settle_seed20260917_stop_20261006_poster",
-      "title": "Reward v4 PPO, seed 20260917: first frame of the forward-to-stop probe",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/ppo_v4_settle_seed20260917_stop_20261006_poster.png",
-      "sha256": "a57eecc298c13a573e6bf9f4c5e6f5280f4a89ec982cec4e9198798da93ec2f3",
-      "caption": "First native frame of the forward-to-stop probe recording. Reward v4 PPO, seed 20260917, update 2000, native Isaac simulation, noise off.",
-      "controller": "695b1839a17976f34d40ebcf9057c47b0eaa1015d1d0d84a2ea96c8b8a781217",
-      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260917_evaluation_verification.json"
-    },
-    {
-      "id": "ppo_v4_settle_seed20260918_forward_20261006",
-      "title": "Reward v4 PPO, seed 20260918: passed forward probe",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_v4_settle_seed20260918_forward_20261006.mp4",
-      "sha256": "bf33d6453ed842ff5087e6610a58dc93b81f9a383824363fcf88064f0ce5be26",
-      "caption": "Approved detailed model in native Isaac simulation. Vanilla PPO with reward v4, seed 20260918, update 2000. The policy passes the forward probe at 0.05 m/s. This seed fails both quiet probes on one toe-contact check. Evaluation runs the actor mean with noise off. One trial.",
-      "controller": "f1de435d107ded705e9c51524699484b3a6be0652cc991362d764ae73f0c8387",
-      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260918_evaluation_verification.json",
-      "poster_id": "ppo_v4_settle_seed20260918_forward_20261006_poster"
-    },
-    {
-      "id": "ppo_v4_settle_seed20260918_forward_20261006_poster",
-      "title": "Reward v4 PPO, seed 20260918: first frame of the forward probe",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/ppo_v4_settle_seed20260918_forward_20261006_poster.png",
-      "sha256": "f6c180dcc52ab044a973959f71ab27595f84a0f65cb5c0a8f816744c7c670b22",
-      "caption": "First native frame of the forward probe recording. Reward v4 PPO, seed 20260918, update 2000, native Isaac simulation, noise off.",
-      "controller": "f1de435d107ded705e9c51524699484b3a6be0652cc991362d764ae73f0c8387",
-      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260918_evaluation_verification.json"
-    },
-    {
-      "id": "ppo_v4_settle_seed20260918_stop_20261006",
-      "title": "Reward v4 PPO, seed 20260918: passed forward-to-stop probe",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_v4_settle_seed20260918_stop_20261006.mp4",
-      "sha256": "0cd89d32a15d5b23107a5b9c1084a52a82fc3b577ddd438cf39e5ccf5918f5cd",
-      "caption": "Approved detailed model in native Isaac simulation. Vanilla PPO with reward v4, seed 20260918, update 2000. The policy passes the forward-to-stop probe, which commands 0.05 m/s forward for 8 s and then zero. This seed fails both quiet probes on one toe-contact check. Evaluation runs the actor mean with noise off. One trial.",
-      "controller": "f1de435d107ded705e9c51524699484b3a6be0652cc991362d764ae73f0c8387",
-      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260918_evaluation_verification.json",
-      "poster_id": "ppo_v4_settle_seed20260918_stop_20261006_poster"
-    },
-    {
-      "id": "ppo_v4_settle_seed20260918_stop_20261006_poster",
-      "title": "Reward v4 PPO, seed 20260918: first frame of the forward-to-stop probe",
-      "type": "image",
-      "role": "video_poster",
-      "path": "site/assets/media/ppo_v4_settle_seed20260918_stop_20261006_poster.png",
-      "sha256": "935cfca4e7285b40538733e57e1bc71ba799dbe9e98311e0e4bc15a267d908e8",
-      "caption": "First native frame of the forward-to-stop probe recording. Reward v4 PPO, seed 20260918, update 2000, native Isaac simulation, noise off.",
-      "controller": "f1de435d107ded705e9c51524699484b3a6be0652cc991362d764ae73f0c8387",
-      "evidence": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260918_evaluation_verification.json"
-    },
-    {
-      "id": "ppo_v4_omni512_seed20260917_stop_20261011",
-      "title": "Reward v4 PPO at 512 robots, seed 20260917: passed forward-to-stop probe",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_v4_omni512_seed20260917_stop_20261011.mp4",
-      "sha256": "77809b6efc13f921151596f4c2bf81480f2b693424fc7399347f980edba1eb9e",
-      "caption": "Approved detailed model in native Isaac simulation. Vanilla PPO with reward v4 on the full 20-command bank at 512 robots, seed 20260917, update 2000. The policy passes the forward-to-stop probe, which commands 0.05 m/s forward for 8 s and then zero. At update 2000 this seed passes 10 of 13 probes: all eight translations, the +0.20 rad/s turn and the stop; it fails the -0.20 rad/s turn by 0.012 rad/s and both quiet probes on joint position range. Evaluation runs the actor mean with noise off. One trial.",
-      "controller": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21",
-      "evidence": "site/assets/reward_v4_budget512_20261011_001/seed20260917_verification.json",
-      "poster_id": "ppo_v4_omni512_seed20260917_stop_20261011_poster"
-    },
-    {
-      "id": "ppo_v4_omni512_seed20260917_stop_20261011_poster",
-      "title": "First frame of the 512-robot seed 20260917 stop probe",
-      "type": "image",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_v4_omni512_seed20260917_stop_20261011_poster.png",
-      "sha256": "dbf2662d4bbf57e5c3613a6a420fcb6cb94dcd83b9b87c068c4aaaff0ce2bdf2",
-      "caption": "First frame of the forward-to-stop probe video for the 512-robot reward v4 seed 20260917 at update 2000.",
-      "controller": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21",
-      "evidence": "site/assets/reward_v4_budget512_20261011_001/seed20260917_verification.json"
-    },
-    {
-      "id": "ppo_v4_omni512_seed20260918_stop_20261011",
-      "title": "Reward v4 PPO at 512 robots, seed 20260918: passed forward-to-stop probe",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_v4_omni512_seed20260918_stop_20261011.mp4",
-      "sha256": "2bb75135c6e1766de89488320a9aaf7bbca278139ea58f084e273a12ff115cf7",
-      "caption": "Approved detailed model in native Isaac simulation. Vanilla PPO with reward v4 on the full 20-command bank at 512 robots, seed 20260918, update 2000. The policy passes the forward-to-stop probe, 0.05 m/s forward for 8 s and then zero. At update 2000 this seed passes 10 of 13 probes. Evaluation runs the actor mean with noise off. One trial.",
-      "controller": "96b716e57b17bf7557ec2fc4ec65bf490dee5fe1cdb5445b269d981c9cac5709",
-      "evidence": "site/assets/reward_v4_budget512_20261011_001/seed20260918_verification.json",
-      "poster_id": "ppo_v4_omni512_seed20260918_stop_20261011_poster"
-    },
-    {
-      "id": "ppo_v4_omni512_seed20260918_stop_20261011_poster",
-      "title": "First frame: Reward v4 PPO at 512 robots, seed 20260918: passed forward-to-stop probe",
-      "type": "image",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_v4_omni512_seed20260918_stop_20261011_poster.png",
-      "sha256": "f1701c985847bfe9c9f4aafd3af57516d9bf5162f2f788583e3e3303c40b9ca7",
-      "caption": "First frame of the video ppo_v4_omni512_seed20260918_stop_20261011.",
-      "controller": "96b716e57b17bf7557ec2fc4ec65bf490dee5fe1cdb5445b269d981c9cac5709",
-      "evidence": "site/assets/reward_v4_budget512_20261011_001/seed20260918_verification.json"
-    },
-    {
-      "id": "ppo_v4_omni512_seed20260917_turn_plus020_u2000",
-      "title": "Reward v4 PPO at 512 robots, seed 20260917: passed +0.20 rad/s turn probe",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_v4_omni512_seed20260917_turn_plus020_u2000.mp4",
-      "sha256": "df55522c9fb464664f90b1707f50116fea04d6b1ae60f32f8135a782b6966229",
-      "caption": "Approved detailed model in native Isaac simulation. Vanilla PPO with reward v4 on the full 20-command bank at 512 robots, seed 20260917, update 2000. The policy passes the +0.20 rad/s yaw probe at 0.159 rad/s with yaw error 0.047 rad/s against the 0.06 bound, the first turn pass of the program. Recorded in a repeat of the 13-probe evaluation whose verdicts equal the first trial. Actor mean with noise off.",
-      "controller": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21",
-      "evidence": "site/assets/reward_v4_budget512_20261011_001/provenance.json",
-      "poster_id": "ppo_v4_omni512_seed20260917_turn_plus020_u2000_poster"
-    },
-    {
-      "id": "ppo_v4_omni512_seed20260917_turn_plus020_u2000_poster",
-      "title": "First frame: Reward v4 PPO at 512 robots, seed 20260917: passed +0.20 rad/s turn probe",
-      "type": "image",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_v4_omni512_seed20260917_turn_plus020_u2000_poster.png",
-      "sha256": "003f6bc549a46578868ed8424dc4dbe7d7a32d33a01f984f73d63cc0fa13ba8c",
-      "caption": "First frame of the video ppo_v4_omni512_seed20260917_turn_plus020_u2000.",
-      "controller": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21",
-      "evidence": "site/assets/reward_v4_budget512_20261011_001/provenance.json"
-    },
-    {
-      "id": "ppo_v4_omni512_seed20260917_left90_u2000",
-      "title": "Reward v4 PPO at 512 robots, seed 20260917: passed 90-degree translation probe",
-      "type": "video",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_v4_omni512_seed20260917_left90_u2000.mp4",
-      "sha256": "6234131dc2ce171fcf1da3613a7e59815c7a390d1ab86b235e5e92dc4b0f4fd0",
-      "caption": "Approved detailed model in native Isaac simulation. Vanilla PPO with reward v4 on the full 20-command bank at 512 robots, seed 20260917, update 2000. The policy passes the 0.05 m/s translation at 90 degrees, a sideways walk. Recorded in a repeat of the 13-probe evaluation whose verdicts equal the first trial. Actor mean with noise off.",
-      "controller": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21",
-      "evidence": "site/assets/reward_v4_budget512_20261011_001/provenance.json",
-      "poster_id": "ppo_v4_omni512_seed20260917_left90_u2000_poster"
-    },
-    {
-      "id": "ppo_v4_omni512_seed20260917_left90_u2000_poster",
-      "title": "First frame: Reward v4 PPO at 512 robots, seed 20260917: passed 90-degree translation probe",
-      "type": "image",
-      "role": "controlled_ppo_comparison",
-      "path": "site/assets/media/ppo_v4_omni512_seed20260917_left90_u2000_poster.png",
-      "sha256": "27199aa6f2de9ece4e89495c146fe50a356b03c205cee1eba7c73a4a32df479c",
-      "caption": "First frame of the video ppo_v4_omni512_seed20260917_left90_u2000.",
-      "controller": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21",
-      "evidence": "site/assets/reward_v4_budget512_20261011_001/provenance.json"
+      "date": "2026-09-14",
+      "text": "We confirmed the approved robot design: 18 motors and 7.47 kg.",
+      "source": "docs/UPDATED_CAD_IMPORT.md"
     }
   ],
   "nodes": [
     {
-      "id": "boundary",
+      "id": "area",
       "title": "Draw the survey area",
-      "label": "Interface to build",
-      "state": "planned",
+      "text": "An operator outlines the area to survey on an open map.",
+      "state": "not_started",
       "column": 0,
       "row": 0,
-      "meaning": "The operator draws the boundary and exclusions on an open map (OpenStreetMap or USGS imagery). The boundary and GPS positions share one local east-north frame.",
-      "input": "An open map and the operator’s boundary",
-      "output": "The area to survey",
-      "source": "ARCHITECTURE.md",
-      "milestone_id": "mission"
+      "source": "ARCHITECTURE.md"
     },
     {
-      "id": "coverage",
-      "title": "Plan the survey route",
-      "label": "Planner to build",
-      "state": "planned",
+      "id": "route",
+      "title": "Plan the route",
+      "text": "Software turns the area into a walking route with survey stops.",
+      "state": "not_started",
       "column": 1,
       "row": 0,
-      "meaning": "Place stops in back-and-forth rows inside the boundary, shrunk by the robot footprint and the GPS error bound, and link them around drawn exclusions. The first course is level, hard and clear of obstacles.",
-      "input": "Survey boundary, exclusions and GPS position",
-      "output": "A route with stops",
-      "source": "ARCHITECTURE.md",
-      "milestone_id": "mission"
+      "source": "ARCHITECTURE.md"
     },
     {
       "id": "commands",
       "title": "Set speed and direction",
-      "label": "Command types and follower example",
-      "state": "implemented",
+      "text": "A route follower tells the walking controller how fast to move and turn. An example follower exists.",
+      "state": "in_progress",
       "column": 2,
       "row": 0,
-      "meaning": "You can pass forward speed, sideways speed and yaw rate through shared command types and the waypoint follower example. Route planning and qualified runtime integration remain pending.",
-      "input": "Route and estimated robot position",
-      "output": "Forward speed, sideways speed, turning rate and stop",
-      "source": "contracts/README.md",
-      "milestone_id": "stage2"
+      "source": "navigation/README.md"
     },
     {
-      "id": "policy",
-      "title": "Control the gait",
-      "label": "PPO videos recorded; AMP learner merged on CPU; gait still unqualified",
-      "state": "implemented",
+      "id": "controller",
+      "title": "Control the legs",
+      "text": "The learned controller turns each speed and direction request into targets for the 18 joints.",
+      "state": "in_progress",
       "column": 3,
       "row": 0,
-      "meaning": "Researchers replayed an optimized forward trajectory that passes its native screen. The tested PPO policies fail walking. The bounded-mean policy with running normalization passes quiet screens; removing normalization fails all 13 probes. Native AMP learning remains pending.",
-      "input": "Requested motion, joint positions and body motion",
-      "output": "18 target joint positions",
-      "source": "locomotion/README.md",
-      "milestone_id": "stage2"
-    },
-    {
-      "id": "sensors",
-      "title": "Measure the surroundings",
-      "label": "M1 record; no navigation role",
-      "state": "prepared",
-      "column": 0,
-      "row": 1,
-      "meaning": "The agreed M1 test used a simulated Mid-360 laser scanner on a known floor and wall; it remains a record. Navigation uses GPS only, so no laser scanner feeds the robot position.",
-      "input": "Simulated laser distances and sensor position",
-      "output": "Recorded 3D points and flags identifying valid measurements",
-      "source": "mission/README.md",
-      "milestone_id": "stage3"
-    },
-    {
-      "id": "estimate",
-      "title": "Track robot position",
-      "label": "GPS estimate to build",
-      "state": "planned",
-      "column": 1,
-      "row": 1,
-      "meaning": "An onboard plain GPS receiver without RTK supplies position within several metres, and a second antenna supplies heading at walking speed. Convert each fix into the open map’s local east-north frame with an error bound; the planner widens its margin by that bound.",
-      "input": "GPS fixes and heading from a dual-antenna receiver",
-      "output": "Estimated position, heading and error bound",
-      "source": "ARCHITECTURE.md",
-      "milestone_id": "mission"
-    },
-    {
-      "id": "terrain",
-      "title": "Walk uneven ground blind",
-      "label": "Stage 3; no ground map",
-      "state": "prepared",
-      "column": 2,
-      "row": 1,
-      "meaning": "The GPS-only robot builds no ground map. The operator draws known hazards as exclusions, and Stage 3 walking must cross uneven ground from the policy’s own joint and body sensing. The archived synthetic ground-height prototype remains a record.",
-      "input": "Joint positions and body motion",
-      "output": "Walking that tolerates uneven ground",
-      "source": "artifacts/terrain_readiness_2026-09-09/observation_comparison_cpu_001/README.md",
-      "milestone_id": "stage3"
+      "source": "locomotion/README.md"
     },
     {
       "id": "motors",
       "title": "Drive the joints",
-      "label": "Simulation model prepared",
-      "state": "prepared",
-      "column": 3,
+      "text": "Eighteen RS05 motors move the joints. Today they exist as a simulation model.",
+      "state": "in_progress",
+      "column": 4,
+      "row": 0,
+      "source": "docs/RS05_SPEC_REVIEW.md"
+    },
+    {
+      "id": "position",
+      "title": "Track position",
+      "text": "GPS tells the route follower where the robot is on the map.",
+      "state": "not_started",
+      "column": 1,
       "row": 1,
-      "meaning": "Apply limits to joint movement and motor torque before sending targets to the motors. Check the simulated response against measurements from the planned leg test stand.",
-      "input": "18 target joint positions",
-      "output": "Motor commands and measured joint movement",
-      "source": "docs/UPDATED_CAD_IMPORT.md",
-      "milestone_id": "stage2"
+      "source": "ARCHITECTURE.md"
+    },
+    {
+      "id": "terrain",
+      "title": "Feel rough ground",
+      "text": "The controller will sense uneven ground through its legs, with no ground map.",
+      "state": "not_started",
+      "column": 2,
+      "row": 1,
+      "source": "ARCHITECTURE.md"
     },
     {
       "id": "simulation",
-      "title": "Train in simulation",
-      "label": "Stock PPO kernel profiled; AMP pilot pending",
-      "state": "implemented",
-      "column": 0,
-      "row": 2,
-      "meaning": "Researchers completed one- and 128-robot standing admission and PPO runs on frozen source packs, and published stock-PPO throughput profiles at 1, 32 and 128 robots. Use locomotion/ for current code and TRAINING for the reproduction order. A new source allocation needs matching native admission.",
-      "input": "Robot model, physics settings and training task",
-      "output": "Saved walking controllers",
-      "source": "locomotion/README.md",
-      "milestone_id": "stage2"
-    },
-    {
-      "id": "evaluation",
-      "title": "Test movement and stops",
-      "label": "Policy tests recorded; walking still unqualified",
-      "state": "implemented",
-      "column": 1,
-      "row": 2,
-      "meaning": "Researchers compared all 13 probes for bounded-mean PPO with and without running normalization at update 2000. Both fail all ten movement probes. Removing normalization also fails both quiet probes and the stop screen. Human gait acceptance and the full Stage 2 qualification remain pending.",
-      "input": "A saved controller and fixed test cases",
-      "output": "Measurements and a pass or fail result",
-      "source": "locomotion/evaluation.py",
-      "milestone_id": "stage2"
+      "title": "Train and test in simulation",
+      "text": "Hundreds of simulated robots train the controller, and 13 movement tests score it.",
+      "state": "working",
+      "column": 3,
+      "row": 1,
+      "source": "locomotion/README.md"
     },
     {
       "id": "hardware",
-      "title": "Test a physical leg",
-      "label": "Test stand planned",
-      "state": "planned",
-      "column": 2,
-      "row": 2,
-      "meaning": "Measure force and joint position on a single-leg test stand. Compare those measurements with the same setup in simulation before testing a complete robot.",
-      "input": "Leg test stand, force sensor and joint encoder",
-      "output": "Measured differences between the physical leg and simulation",
-      "source": "docs/UPDATED_CAD_IMPORT.md",
-      "milestone_id": "mission"
+      "title": "Build the robot",
+      "text": "A single-leg test stand comes first, then the full robot.",
+      "state": "not_started",
+      "column": 4,
+      "row": 1,
+      "source": "docs/LEG_STAND_HARDWARE.md"
     },
     {
       "id": "survey",
-      "title": "Execute the survey route",
-      "label": "Final goal",
-      "state": "planned",
-      "column": 3,
+      "title": "Survey the area",
+      "text": "The robot walks the route and stops at each survey point.",
+      "state": "not_started",
+      "column": 4,
       "row": 2,
-      "meaning": "Follow the survey route, stop at each designated location and hold the sensor platform steady. GeoData owns the measurements and the 3D terrain map.",
-      "input": "Survey route and robot position",
-      "output": "Reached and unreached stops with the termination reason",
-      "source": "ARCHITECTURE.md",
-      "milestone_id": "mission"
+      "source": "ARCHITECTURE.md"
     }
   ],
   "edges": [
     [
-      "boundary",
-      "coverage"
+      "area",
+      "route"
     ],
     [
-      "coverage",
+      "route",
       "commands"
     ],
     [
       "commands",
-      "policy"
+      "controller"
     ],
     [
-      "policy",
+      "controller",
       "motors"
     ],
     [
-      "estimate",
-      "coverage"
+      "position",
+      "route"
     ],
     [
-      "estimate",
+      "position",
       "commands"
     ],
     [
       "terrain",
-      "policy"
+      "controller"
     ],
     [
       "simulation",
-      "evaluation"
-    ],
-    [
-      "evaluation",
-      "policy"
+      "controller"
     ],
     [
       "motors",
@@ -737,657 +236,120 @@
     [
       "hardware",
       "survey"
-    ],
-    [
-      "coverage",
-      "survey"
     ]
   ],
-  "milestones": [
+  "robot": {
+    "media_id": "canonical_detailed_cad_preview",
+    "caption": "Our approved design has 18 motors and weighs 7.47 kg. This is a CAD animation; we have not built the physical robot yet.",
+    "coxa_mm": 49.0,
+    "femur_mm": 73.502,
+    "tibia_mm": 130.0,
+    "mass_kg": 7.466088235225788,
+    "motors": 18,
+    "source": "docs/UPDATED_CAD_IMPORT.md"
+  },
+  "media": [
     {
-      "id": "walking",
-      "title": "Historical forward-walking reference",
-      "description": "Preserve the accepted forward-walking video as a historical gait-quality reference. It shows an earlier, simplified model and does not qualify the confirmed mass-corrected robot.",
-      "gate": "Accepted as a visual reference for forward walking. Its motor-torque test failed.",
-      "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md",
-      "media_id": "benchmark_01",
-      "status": "accepted",
-      "backend": "Earlier simplified robot model",
-      "owner": "James",
-      "depends_on": [],
-      "requirements": [
-        "R-04",
-        "R-11"
-      ],
-      "blocker": "The gait is accepted as a reference. It still exceeds the tested motor-torque limit.",
-      "question": "Compare future walking results with this video and their measured test results.",
-      "next_step": null,
-      "acceptance": {
-        "by": "James",
-        "scope": "Forward gait appearance on the earlier robot model. Motor-torque, sideways movement and physical-robot tests remain separate.",
-        "source": "artifacts/length_study_2026-09-09/benchmarks/benchmark_01_c_300/README.md"
-      },
-      "card_text": "Historical reference only; canonical walking pending.",
-      "media_caption": "Earlier robot model · real-time playback."
+      "id": "ppo_v4_omni512_seed20260917_left90_u2000",
+      "type": "video",
+      "path": "site/assets/media/ppo_v4_omni512_seed20260917_left90_u2000.mp4",
+      "sha256": "6234131dc2ce171fcf1da3613a7e59815c7a390d1ab86b235e5e92dc4b0f4fd0",
+      "caption": "Walks sideways to the left at 5 cm/s.",
+      "controller": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21",
+      "evidence": "site/assets/reward_v4_budget512_20261011_001/provenance.json",
+      "poster_id": "ppo_v4_omni512_seed20260917_left90_u2000_poster"
     },
     {
-      "id": "stage2",
-      "title": "Stand, walk and stop",
-      "description": "Qualify signed translation, turns, transitions and quiet stops on the approved model. Historical standing admissions apply to their frozen sources; obtain matching admission for a new allocation.",
-      "gate": "Pass standing admission on the exact confirmed model before walking training. Then pass direction, stopping, motor-torque and foot-contact tests, and match the accepted historical reference gait’s visual quality.",
-      "source": "docs/TRAINING.md",
-      "media_id": "ppo_v4_omni512_seed20260917_stop_20261011",
-      "status": "blocked",
-      "backend": "Approved detailed robot model",
-      "owner": "Platform lead",
-      "depends_on": [
-        "walking"
-      ],
-      "requirements": [
-        "R-04",
-        "R-10",
-        "R-11"
-      ],
-      "blocker": "Two reward-v4 PPO seeds on the full 20-command bank at 512 robots (source a45f5cda, freeze 6e88381c56e96d61, 2000 updates, 24.6 million transitions each) pass 10 of 13 learning probes at update 2000 (checkpoints f64ad44d733a2d9c and 96b716e57b17bf75): all eight 0.05 m/s translations, the +0.20 rad/s turn and the forward-to-stop probe. Tracking error E is 0.267 and 0.222. Both seeds fail the -0.20 rad/s turn, by 0.012 and 0.004 rad/s against the 0.06 bound, and both quiet probes on the 0.020 rad joint position range alone. The 128-robot budget arm at update 5000 passed 7 and 5 of 13. Each pass is one trial, and each evaluation leaves all 96 required Stage 2 cases unevaluated. Stage 2 still needs direction, transition, stop, torque, contact and visual acceptance. Native AMP learning remains pending.",
-      "question": "Decide the next arm on the 512-robot budget: close the -0.20 rad/s turn and the quiet joint drift, or run the AMP comparison at 512 robots first.",
-      "next_step": null,
-      "acceptance": null,
-      "card_text": "Reward-v4 PPO at 512 robots passes 10 of 13 probes in both seeds, with all eight translations and the +0.20 rad/s turn; the -0.20 rad/s turn and the quiet probes still fail. Walking remains unqualified.",
-      "media_caption": "Approved detailed model; reward-v4 PPO at 512 robots, seed 20260917, update 2000; forward-to-stop probe passed with noise off."
+      "id": "ppo_v4_omni512_seed20260917_left90_u2000_poster",
+      "type": "image",
+      "path": "site/assets/media/ppo_v4_omni512_seed20260917_left90_u2000_poster.png",
+      "sha256": "27199aa6f2de9ece4e89495c146fe50a356b03c205cee1eba7c73a4a32df479c",
+      "caption": "First frame of the sideways walk.",
+      "controller": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21",
+      "evidence": "site/assets/reward_v4_budget512_20261011_001/provenance.json"
     },
     {
-      "id": "stage3",
-      "title": "Cross terrain without a ground map",
-      "description": "After flat-ground walking and stopping qualify on the confirmed mass-corrected model, qualify terrain walking from the robot’s own body sensing; the GPS-only package carries no ground-mapping sensor. Preserve admitted flat-ground behavior.",
-      "gate": "Agree which slopes and obstacles to test. Pass separate test cases while staying within motor and foot-contact limits.",
-      "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/terrain_readiness_2026-09-09/qualification_plan_001/QUALIFICATION_PLAN.md",
-      "status": "blocked",
-      "backend": "Detailed robot model with simulated sensors",
-      "owner": "Survey and platform leads",
-      "depends_on": [
-        "stage2"
-      ],
-      "requirements": [
-        "R-02",
-        "R-03",
-        "R-04"
-      ],
-      "blocker": "Canonical flat-ground walking and stopping have not qualified. Archived sensor and ground-map prototypes remain a record; the first terrain envelope and pass conditions still need definition.",
-      "question": "After canonical walking and stopping qualify, define the first terrain test and its pass conditions.",
-      "next_step": null,
-      "acceptance": null,
-      "card_text": "Pending canonical walking and stopping."
+      "id": "ppo_v4_omni512_seed20260917_turn_plus020_u2000",
+      "type": "video",
+      "path": "site/assets/media/ppo_v4_omni512_seed20260917_turn_plus020_u2000.mp4",
+      "sha256": "df55522c9fb464664f90b1707f50116fea04d6b1ae60f32f8135a782b6966229",
+      "caption": "Turns left on the spot.",
+      "controller": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21",
+      "evidence": "site/assets/reward_v4_budget512_20261011_001/provenance.json",
+      "poster_id": "ppo_v4_omni512_seed20260917_turn_plus020_u2000_poster"
     },
     {
-      "id": "mission",
-      "title": "Survey a drawn area",
-      "description": "Follow an approved route through the requested area and stop with a steady sensor platform at each designated location. The robot navigates with onboard GPS only on an area drawn over an open map. GeoData owns scanning and the 3D terrain map. Start on a level, hard surface with no obstacles.",
-      "gate": "On the physical robot, complete the approved route inside the drawn area with controlled stops. Stop-position and platform-motion limits still need agreement.",
-      "source": "ARCHITECTURE.md",
-      "status": "blocked",
-      "backend": "Physical robot and survey sensor",
-      "owner": "James and both leads",
-      "depends_on": [
-        "stage2",
-        "stage3"
-      ],
-      "requirements": [
-        "R-01",
-        "R-03",
-        "R-05",
-        "R-06",
-        "R-09",
-        "R-10"
-      ],
-      "blocker": "The robot remains unbuilt and walking remains unqualified. Issue #20 covers route rehearsal in simulation; mission software remains pending. GeoData owns survey data collection, and issue #19 closed as not planned.",
-      "question": "Assign an owner and reviewer for #20 route rehearsal and freeze its plain-GPS error bound, heading source, demonstration area and limits before its test. Preserve the M1 fixture as a record; this project schedules no M1 work.",
-      "next_step": null,
-      "acceptance": null,
-      "definition": {
-        "id": "M1",
-        "title": "Save and reload one simulated laser scan",
-        "by": "James",
-        "summary": "Use a stationary Mid-360 laser scanner in simulation to measure a known floor and wall. Save the 3D points, reload them in a separate check, and compare them with the scene. This task can start before walking works.",
-        "criteria": [
-          "Reload the points, validity flags and sensor position and orientation without changing their values.",
-          "With noise disabled, every expected floor or wall hit must be within 1 mm of its expected position.",
-          "With the existing sensor noise enabled, at least 95% of expected hits must be within 7 cm. Missing hits count as failures; report false hits separately."
-        ],
-        "fixture": "Sensor height: 0.25 m. Wall: 0.80 m wide × 0.08 m thick × 0.50 m high, centred 1 m in front of the sensor. Use 20,000 rays per scan. Fixed random seeds: 360 for the scan pattern and 20260824 for sensor noise and timing."
-      },
-      "card_text": "Pending canonical qualification; M1 record retained."
+      "id": "ppo_v4_omni512_seed20260917_turn_plus020_u2000_poster",
+      "type": "image",
+      "path": "site/assets/media/ppo_v4_omni512_seed20260917_turn_plus020_u2000_poster.png",
+      "sha256": "003f6bc549a46578868ed8424dc4dbe7d7a32d33a01f984f73d63cc0fa13ba8c",
+      "caption": "First frame of the left turn.",
+      "controller": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21",
+      "evidence": "site/assets/reward_v4_budget512_20261011_001/provenance.json"
+    },
+    {
+      "id": "ppo_v4_omni512_seed20260917_stop_20261011",
+      "type": "video",
+      "path": "site/assets/media/ppo_v4_omni512_seed20260917_stop_20261011.mp4",
+      "sha256": "77809b6efc13f921151596f4c2bf81480f2b693424fc7399347f980edba1eb9e",
+      "caption": "Walks forward, then stops when told to.",
+      "controller": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21",
+      "evidence": "site/assets/reward_v4_budget512_20261011_001/seed20260917_verification.json",
+      "poster_id": "ppo_v4_omni512_seed20260917_stop_20261011_poster"
+    },
+    {
+      "id": "ppo_v4_omni512_seed20260917_stop_20261011_poster",
+      "type": "image",
+      "path": "site/assets/media/ppo_v4_omni512_seed20260917_stop_20261011_poster.png",
+      "sha256": "dbf2662d4bbf57e5c3613a6a420fcb6cb94dcd83b9b87c068c4aaaff0ce2bdf2",
+      "caption": "First frame of the walk and stop.",
+      "controller": "f64ad44d733a2d9c4ffa2434ad53571567d3097269f46c903a36e8d818bb2c21",
+      "evidence": "site/assets/reward_v4_budget512_20261011_001/seed20260917_verification.json"
+    },
+    {
+      "id": "canonical_detailed_cad_preview",
+      "type": "video",
+      "path": "site/assets/media/canonical_detailed_cad_preview.mp4",
+      "sha256": "d6096b2e0cb32b5527697b8c4fa08e590a77b5e44f14887b913626ca143feb20",
+      "caption": "CAD animation of the approved design, moving each joint.",
+      "controller": "No controller: prescribed CAD joint motion",
+      "evidence": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/README.md",
+      "poster_id": "canonical_detailed_cad_poster"
+    },
+    {
+      "id": "canonical_detailed_cad_poster",
+      "type": "image",
+      "path": "site/assets/media/canonical_detailed_cad_poster.png",
+      "sha256": "3edfa8cf7282445312b3c2a6beb96694cc6310835689f71c10ae8ab9ca01d78a",
+      "caption": "First frame of the CAD animation.",
+      "controller": "No controller: prescribed CAD joint motion",
+      "evidence": "artifacts/mkii_updated_2026-09-10/cad_showcase_001/README.md"
     }
   ],
-  "papers": [
-    {
-      "title": "Learning Natural and Robust Hexapod Locomotion over Complex Terrains via Motion Priors based on Deep Reinforcement Learning",
-      "role": "Target simulation method: PPO with a motion prior and asymmetric training. Implementation follows the proposed TRAINING sequence.",
-      "url": "https://arxiv.org/abs/2511.03167"
-    }
-  ],
-  "research_source": "docs/TRAINING.md",
   "glossary": [
     {
-      "term": "Learned controller (policy)",
-      "meaning": "A trained model that selects joint targets from the requested movement and the robot’s measured state."
+      "term": "Learned controller",
+      "meaning": "A neural network, trained in simulation, that turns a requested speed and direction into targets for the 18 joints."
     },
     {
-      "term": "Training update",
-      "meaning": "One adjustment to the controller based on its simulated experience. Update count alone does not measure walking quality."
+      "term": "Simulation",
+      "meaning": "A physics model of the robot and the ground on a computer. We train and test there before we build hardware."
     },
     {
-      "term": "Point cloud",
-      "meaning": "A collection of 3D points measured by a laser scanner."
+      "term": "Movement test",
+      "meaning": "One fixed command, such as walking sideways at 5 cm/s or standing still, with limits on how closely the robot must follow it. We use 13."
     },
     {
-      "term": "Local coordinates",
-      "meaning": "Positions measured relative to a reference at the test site, rather than latitude and longitude."
+      "term": "Training run",
+      "meaning": "One complete training of the controller from scratch, started from one random seed."
     },
     {
-      "term": "Pass conditions",
-      "meaning": "The measurements and limits a test must satisfy before its result is accepted."
+      "term": "Tripod gait",
+      "meaning": "A walking pattern that lifts three legs at a time while the other three carry the body."
     },
     {
-      "term": "Mid-360",
-      "meaning": "The laser scanner selected for the first mapping test. M1 uses its simulation model."
+      "term": "CAD",
+      "meaning": "Computer-aided design: the 3D model of each part of the robot."
     }
-  ],
-  "primary_video_id": "caps500_preview",
-  "progress": {
-    "as_of": "2026-10-11T18:43:57+00:00",
-    "source_commit": "a45f5cda6b2727053a44739e66429e8ec007c610",
-    "architecture": "ARCHITECTURE.md",
-    "summary": "Researchers trained two seeds of vanilla PPO with reward version 4 on the full 20-command bank at 512 robots for 2000 updates in native simulation. At update 2000 both seeds pass 10 of 13 learning probes: all eight translations, the +0.20 rad/s turn and the forward-to-stop probe, with tracking error 0.267 and 0.222. Both fail the -0.20 rad/s turn by 0.012 and 0.004 rad/s and both quiet probes on joint position range. Walking and Stage 2 qualification remain pending.",
-    "definition_policy": "Use issue #18 for walking and #20 for route rehearsal. GeoData owns survey data collection; issue #19 closed as not planned. Preserve the approved model and numerical gates. Record contact force and motor torque in native evaluations; these loads add no acceptance limits. Follow TRAINING for the proposed reproduction order.",
-    "execution_source": "docs/OPERATIONS.md",
-    "prior_snapshot": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/STATUS.md",
-    "facts": [
-      {
-        "id": "reward-v4-512-robots-20261011",
-        "title": "Reward-v4 PPO at 512 robots passes 10 of 13 probes in both seeds",
-        "backend": "Native Isaac simulation on the approved direct-drive model; vanilla PPO with reward v4 on the full 20-command bank from source a45f5cda; 512 robots; seeds 20260917 and 20260918; 2000 updates; one trial per probe with the actor mean and noise off",
-        "result": "passed",
-        "text": "At update 2000 both seeds pass all eight 0.05 m/s translation probes, the +0.20 rad/s turn and the forward-to-stop probe, with tracking error E 0.2671 and 0.2219. Both fail the -0.20 rad/s turn, with yaw error 0.072 and 0.064 rad/s against 0.06, and both quiet probes on the 0.020 rad joint position range alone. At update 1000 the seeds passed 5 and 6 probes. The best 128-robot policy passed 7 of 13. Each pass is one trial; Stage 2 remains incomplete.",
-        "source": "site/assets/reward_v4_budget512_20261011_001/results.json"
-      },
-      {
-        "id": "amp-dataset-admitted-20260924",
-        "title": "The program lead admits the AMP demonstration dataset",
-        "backend": "Isaac Sim replays on the approved direct-drive model; 20 phase-zero commands; controls 100:1000; raw 61-value state pairs",
-        "result": "passed",
-        "text": "The program lead (palerdr) reviewed all 40 native clips with the team lead and accepted direction and alternating-tripod appearance in each clip. The hash-bound review admits 18000 transition pairs, 900 per command, and CI verifies the committed bytes with dataset check. This acceptance covers dataset admission; Stage 2 qualification stays incomplete. AMP learning under issue #37 has not run.",
-        "source": "locomotion/priors/datasets/amp_demonstrations_001/manifest.json"
-      },
-      {
-        "id": "amp-native-bank-20260924",
-        "title": "We complete numeric coverage for the AMP demonstration bank",
-        "backend": "Isaac Sim; approved direct-drive model; 20 optimized commands and two start phases; 1000 controls and 8000 physics samples per clip",
-        "result": "passed",
-        "text": "All 40 selected clips pass the unchanged native screens and feature audit. Mean speed along the requested translation reaches 98.47–99.87% of the command; mean yaw reaches 101.30–102.17%. Feature reconstruction error stays below 3.58e-7. The archive retains two failed direct starts. Human direction and tripod review remains pending; the 18000-pair training export and AMP learning have not run.",
-        "source": "site/assets/amp_native_bank_20260924_001/evidence.json"
-      },
-      {
-        "id": "canonical-standing128-adopted-20260915",
-        "title": "Exact one- and 128-robot standing admission adopted",
-        "backend": "Lead-reviewed simulation standing admission002 · confirmed mass-corrected model · full independent raw audit",
-        "result": "passed",
-        "text": "The lead adopted one002 and all 128 rescored batch128 replicas with matching model/controller/layout identity and contact checks. Raw captures remain on Spark with hash-bound metadata. This standing admission covers its frozen source; the consolidated source requires fresh admission before training.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/paper_walk_execution_001/admission_002/verification.json"
-      },
-      {
-        "id": "trajectory-speed-objective-native-20260917",
-        "title": "Improved optimized reference passes the forward screen",
-        "backend": "One admitted Isaac Sim replica; 1000 controls and 8000 recorded physics steps; no PPO",
-        "result": "passed",
-        "text": "The optimizer adds root-speed tracking and a target-curvature term. Native planar tracking error falls from 0.033271 to 0.003029 m/s against the unchanged 0.025 m/s limit. The robot moves 0.974348 m forward in 20 seconds. The audit verifies 36 transferred files, reproduces servo targets and reclassifies 130821 contact patches. Native motor, joint and contact checks pass. This one-command result does not qualify turning, stopping or Stage 2.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/ppo_reference_comparison_20260917/review_smooth_001/RESULT.json"
-      },
-      {
-        "id": "vanilla-ppo-fixed-probes-failed-20260917",
-        "title": "The saved PPO policy fails forward, quiet and stop probes",
-        "backend": "One admitted Isaac Sim replica; final checkpoint1200; 3050 controls and 24400 physics samples",
-        "result": "failed",
-        "text": "The audit reproduces the original verdicts and reclassifies 530534 contact patches. CPU inference from the saved weights matches recorded actions within 0.00000144. Forward tracking error is 0.051091 m/s against the unchanged 0.025 m/s bound; mean forward speed is 0.000423 m/s. Quiet includes three native joint-speed violations and stopping includes one nonfoot contact sample. All cases retain complete videos and force summaries. Stage 2 remains incomplete.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/ppo_reference_comparison_20260917/review_vanilla_001/RESULT.json"
-      },
-      {
-        "id": "forward-example-paired-result-20260917",
-        "title": "Example initialization produces no passing forward checkpoint",
-        "backend": "Native Isaac Sim; approved detailed model; one paired seed; equal PPO budgets; unchanged 0.040 rad per 20 ms limiter",
-        "result": "failed",
-        "text": "Each arm completed 1200 updates and 3686400 transitions. Both fail forward tests at updates 0, 300, 600 and 1200; the copied actor fails before PPO. Final mean speeds are 0.004811 m/s from scratch and 0.000961 m/s after initialization against 0.05 m/s. Planar errors are 0.051045 and 0.053322 m/s against the 0.025 m/s bound. Both fail motor-demand and quiet-stop checks. The benefit rule fails for this seed; other seeds and AMP remain untested.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
-      },
-      {
-        "id": "forward-example-final-loads-20260917",
-        "title": "We record force and motor load for both final policies",
-        "backend": "400 Hz native captures; 18-second forward window after two seconds of settling",
-        "result": "passed",
-        "text": "Mean vertical ground support is 73.246 N for scratch and 73.227 N for example initialization. Mean absolute applied motor torque is 0.488782 and 0.405900 N·m. Per-foot forces and per-joint requested and applied torque remain in the force summaries. These values describe failed, low-speed motions and do not establish efficiency at matched walking speed.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/forward_example_ppo_20260917/COMPARISON_001.json"
-      },
-      {
-        "id": "zhang-tripod-cpu-20260921",
-        "title": "Prescribed tripod controller passes CPU checks",
-        "backend": "CPU fixtures and approved-model kinematics; no native motion run",
-        "result": "inconclusive",
-        "text": "The prescribed controller passes 17 CPU checks for phasing, contact transitions and stopping. The user deferred native runs after the GPU jobs stopped with preserved restart records. Native admission, terrain and Stage 2 remain incomplete.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_20260921/result.json"
-      },
-      {
-        "id": "zhang-tripod-native-20260922-001",
-        "title": "Tripod standing admission passes; motion tracking fails",
-        "backend": "Isaac Sim; approved 19-body robot; native 400 Hz capture",
-        "result": "failed",
-        "text": "One-robot and 32-robot standing admission pass with local raw recomputation. Fifteen motion attempts retain force, torque and video evidence. The first completed forward and turn screens fail tracking. Remaining timing choices and criteria 4–5/7 remain pending; Stage 2 and terrain stay incomplete.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_native_20260922_001/result.json"
-      },
-      {
-        "id": "zhang-tripod-cycle-20260922-001",
-        "title": "We measure incompatible tripod stance targets",
-        "backend": "Isaac Sim capture; controls 190–262; approved-model forward kinematics",
-        "result": "failed",
-        "text": "The measured cycle lasts 1.46 seconds with 0.26 seconds of touchdown waits. Two target stance-triangle edges vary by 27.9–28.6 mm per half-cycle. Median speed is 0.0081 m/s against a 0.05 m/s command. We retain the failed motion and inspect geometry mapping before further adaptations.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_cycle_20260922_001/cycle_metrics.json"
-      },
-      {
-        "id": "zhang-tripod-sweep-20260922-001",
-        "title": "We complete the declared tripod sweep with no passing motion",
-        "backend": "Isaac Sim; 24 native motion trials across recorded source corrections",
-        "result": "failed",
-        "text": "All four candidates fail the corrected larger-lift screens. The slower 0.12 rad choice has 0.03736 m/s forward tracking error and two native speed-bound violations. The slower 0.18 rad choice stops forward motion at control 615 with touchdown_timeout. Both fail both turns. We retain all 24 failed attempts and keep stops, clearance qualification and terrain pending.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_sweep_20260922_001/result.json"
-      },
-      {
-        "id": "zhang-tripod-geometry-cpu-20260922-004",
-        "title": "We derive tripod targets from the approved leg geometry",
-        "backend": "CPU kinematics and contact fixtures; native motion unqualified",
-        "result": "inconclusive",
-        "text": "We declare two geometry candidates with uniform phase and pitch motion during support. The first 0.05 m/s trajectory reduces the maximum stance-edge range to 1.3 mm. Both candidates pass joint bounds and contact-transition fixtures. The 12/16 mm lift gates and native motion thresholds remain unchanged.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_geometry_20260922_001/declaration.json"
-      },
-      {
-        "id": "zhang-tripod-geometry-native-20260922-004",
-        "title": "We complete six geometry screens without a tracking pass",
-        "backend": "Isaac Sim; six 1000-control captures; approved 19-body robot",
-        "result": "failed",
-        "text": "Both geometry candidates pass native motor and contact checks but fail forward and yaw tracking. Mean forward speed reaches 0.0466 and 0.0513 m/s; tracking errors remain 0.0490 and 0.0535 m/s against 0.025. The recorded cycle has no touchdown wait and a 1.83 mm stance-edge range, but it retains surge and recoil. We retain thirty failed motion attempts.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_geometry_native_20260922_001/result.json"
-      },
-      {
-        "id": "zhang-tripod-damping-cpu-20260922-005",
-        "title": "We declare a damping correction for joint tracking",
-        "backend": "CPU motor-law and contact-transition checks; native motion unqualified",
-        "result": "inconclusive",
-        "text": "One candidate adds nominal joint-velocity feedforward through the existing motor-target input. Motor gains and limits remain unchanged. CPU replay adds at most 0.0332 rad and preserves the action envelope and 0.040 rad slew bound. Native qualification remains pending.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_damping_20260922_001/cpu_replay.json"
-      },
-      {
-        "id": "zhang-tripod-damping-native-20260922-005",
-        "title": "We complete the damping screen without a tracking pass",
-        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
-        "result": "failed",
-        "text": "Native motor and contact checks pass. Mean forward speed reaches 0.04979 m/s, but tracking error remains 0.04852 m/s against 0.025. Left and right yaw errors remain 0.15315 and 0.15304 rad/s against 0.06. We retain 33 failed completed motion trials.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_damping_native_20260922_001/result.json"
-      },
-      {
-        "id": "zhang-tripod-retimed-20260922-006",
-        "title": "We declare a phase clock and retain an interrupted native attempt",
-        "backend": "CPU path and target checks; partial Isaac Sim capture; native motion unqualified",
-        "result": "interrupted",
-        "text": "The declared clock retains the joint path and changes its timing, with unchanged motor limits and gates. CPU checks cover contact transitions, stops and both clearance modes. The launcher detected unrelated CUDA compute and removed its owned container. We retain 800 substeps from controls 0–99 with no final motion score; native launches await allocation coordination.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_retimed_20260922_001/interrupted.json"
-      },
-      {
-        "id": "zhang-tripod-retimed-native-20260922-007",
-        "title": "We reduce tracking error with the phase clock",
-        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
-        "result": "failed",
-        "text": "Forward error falls to 0.03031 m/s and left/right yaw errors to 0.08860/0.08894 rad/s, above the unchanged 0.025 and 0.06 gates. Native motor and contact checks pass. The recorded forward cycle has 17% negative-speed controls, with support-joint errors above swing errors. We retain 36 failed completed trials and one interrupted attempt.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_retimed_native_20260922_001/result.json"
-      },
-      {
-        "id": "zhang-tripod-feedback-cpu-20260922-008",
-        "title": "We declare bounded joint feedback through motor targets",
-        "backend": "CPU encoder/contact replay and transition fixtures; native motion unqualified",
-        "result": "inconclusive",
-        "text": "Two candidates add proportional joint-error feedback with gains 0.5 and 1.0. Each correction stays within 0.070 rad. Recorded-input replay preserves the joint/action envelope and 0.040 rad slew limit; it does not establish native stability. Actuator gains, torque-speed limits and acceptance gates remain unchanged.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_feedback_20260922_001/cpu_replay.json"
-      },
-      {
-        "id": "zhang-tripod-feedback-native-20260922-008",
-        "title": "We retain three failed feedback screens",
-        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
-        "result": "failed",
-        "text": "Gain 0.5 produces forward error 0.03333 m/s and left/right yaw errors 0.08784/0.08813 rad/s. All three exceed tracking gates. The forward trial also has one speed violation and one nonfoot-contact substep during a 202 N rear-right toe impulse. We retain 39 failed completed trials and one interrupted attempt. Gain 1.0 remains unexecuted.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_feedback_native_20260922_001/result.json"
-      },
-      {
-        "id": "zhang-tripod-liftoff-cpu-20260922-009",
-        "title": "We test lift timing within the target envelope",
-        "backend": "CPU replay of six recorded command/contact sequences and transition fixtures; native motion unqualified",
-        "result": "inconclusive",
-        "text": "One revised candidate uses positive cos(phase)^1.5 swing lift with the same peak, period and hip sweep. Joint feedback stays off. We rejected cos(phase) before dispatch because it exceeded the target envelope at 0.10 m/s. The revised profile passes target checks through both clearance modes and stops; it supplies no native acceptance.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_liftoff_20260922_001/cpu_replay.json"
-      },
-      {
-        "id": "zhang-tripod-liftoff-native-20260922-009",
-        "title": "We isolate joint motion in the failed lift screen",
-        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
-        "result": "failed",
-        "text": "Forward error is 0.02979 m/s and left/right yaw errors are 0.08488/0.08488 rad/s. All three exceed tracking gates; native motor and contact checks pass. Across 12 forward cycles, joint tracking contributes 0.0318–0.0334 m/s RMS to body speed and toe-marker motion contributes 0.0006–0.0020 m/s. We retain 42 failed completed trials and one interrupted attempt.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_liftoff_native_20260922_001/result.json"
-      },
-      {
-        "id": "zhang-tripod-velocity-cpu-20260922-010",
-        "title": "We declare bounded velocity-error damping",
-        "backend": "CPU motor-law checks, recorded-input replay and stance approximation; native motion unqualified",
-        "result": "inconclusive",
-        "text": "One candidate adds velocity-error feedback through motor targets with position feedback off. Each correction stays within 0.070 rad; joint/action bounds and the 0.040 rad slew limit remain active. A scalar stance approximation predicts weak body damping. Native screening must establish whether the added feedback reduces oscillation.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_velocity_20260922_001/declaration.json"
-      },
-      {
-        "id": "zhang-tripod-velocity-native-20260922-010",
-        "title": "We retain the sampled-feedback yaw failure",
-        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
-        "result": "failed",
-        "text": "The forward trial meets the planar-error gate at 0.02195 m/s but fails yaw tracking at 0.11454 rad/s. Left/right yaw errors are 0.11713/0.11646 rad/s. All native motor/contact checks pass. The forward yaw spectrum peaks at 25 Hz. We retain 45 failed completed trials and one interrupted attempt.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_velocity_native_20260922_001/result.json"
-      },
-      {
-        "id": "zhang-tripod-velocity-filtered-cpu-20260922-011",
-        "title": "We filter velocity feedback at the control sample rate",
-        "backend": "CPU free-leg sampled model, transition checks and recorded-input replay; native motion unqualified",
-        "result": "inconclusive",
-        "text": "The fixed-base free-leg linearization has spectral radius 1.524 with unfiltered gain-2 feedback and 0.854 with a 5 Hz filter. One candidate filters reference and measured joint velocity before the same bounded correction. CPU checks preserve target bounds; contact, saturation and native acceptance remain outside the linear model.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_velocity_filtered_20260922_001/sampled_loop.json"
-      },
-      {
-        "id": "zhang-tripod-velocity-filtered-native-20260922-011",
-        "title": "We pass one forward screen and retain two turn failures",
-        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
-        "result": "inconclusive",
-        "text": "Filtered velocity feedback passes the 0.05 m/s forward screen with planar error 0.02292 m/s and yaw error 0.01674 rad/s. Left/right yaw errors of 0.07747/0.07711 rad/s exceed 0.06. All native motor/contact checks pass. Across retained attempts, one completed screen passes, 47 fail and one attempt is interrupted. Stops, clearance and repeats remain pending.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_velocity_filtered_native_20260922_001/result.json"
-      },
-      {
-        "id": "zhang-tripod-pd-cpu-20260922-012",
-        "title": "We combine bounded position and filtered velocity feedback",
-        "backend": "CPU sampled free-leg models and recorded-input replay; native qualification pending",
-        "result": "inconclusive",
-        "text": "One declared candidate combines position gain 0.5 with velocity gain 2 and a 5 Hz filter. Its sampled-loop spectral radius stays below 0.802 across 2520 pose/leg models. The gain-1 combination fails the neutral-pose stability check and remains excluded. Six captured command replays preserve target and slew bounds. Native contact and saturation remain outside this linear analysis.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_pd_20260922_001/sampled_pd.json"
-      },
-      {
-        "id": "zhang-tripod-pd-native-20260922-012",
-        "title": "We retain a forward pass and diagnose contact overlap",
-        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
-        "result": "inconclusive",
-        "text": "Combined position and filtered velocity feedback passes forward motion at 0.02242 m/s planar error. Left/right yaw errors of 0.07587/0.07574 rad/s exceed 0.06. All native motor/contact checks pass. Across twelve left-turn cycles, yaw stops or reverses during six-foot contact. The accumulated record contains two passed screens, 49 failed completed trials and one interrupted attempt.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_pd_native_20260922_001/result.json"
-      },
-      {
-        "id": "zhang-tripod-overlap-cpu-20260922-013",
-        "title": "We align yaw targets through support overlap",
-        "backend": "CPU phasing, command transitions and recorded-input replay; native qualification pending",
-        "result": "inconclusive",
-        "text": "One declared candidate keeps horizontal yaw targets in support motion before phase 0.15 and after phase 0.80. Landed feet retain a pitch lift residual while the horizontal baseline continues. The full forward overlap probe exceeds target bounds and remains excluded; forward targets preserve the preceding candidate. Six recorded-input replays preserve emitted bounds, with target clipping during changed yaw traces.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_overlap_20260922_001/declaration.json"
-      },
-      {
-        "id": "zhang-tripod-overlap-native-20260922-013",
-        "title": "We pass forward and both turn screens",
-        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
-        "result": "passed",
-        "text": "Forward planar error is 0.02242 m/s. Left/right yaw errors are 0.03448/0.03478 rad/s against the unchanged 0.06 limit. All native motor/contact checks pass. A complete left-turn cycle retains yaw through six-foot contact after the declared overlap change. The accumulated record contains five passed screens, 49 failed completed trials and one interrupted attempt. Canonical 0.10 m/s motion, stops, raised clearance and independent repeats remain pending.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_overlap_native_20260922_001/result.json"
-      },
-      {
-        "id": "zhang-tripod-qualification-interrupted-20260922-014",
-        "title": "We retain the canonical forward startup failure",
-        "backend": "Isaac Sim; incomplete canonical qualification; approved 19-body robot",
-        "result": "failed",
-        "text": "The canonical 0.10 m/s forward trial fails after 51 controls with support loss during startup. Left-front and right-rear feet lose support as the six planted feet move toward opposing stride endpoints. Requested torque peaks at 4.61 Nm; the motor retains its 1.6 Nm cap. Standing and the right-turn case pass. The owner stops the allocation during the next turn and retains its partial capture and exact cleanup.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_qualification_interrupted_20260922_001/result.json"
-      },
-      {
-        "id": "zhang-tripod-startup-cpu-20260922-015",
-        "title": "We build forward stride during tripod stepping",
-        "backend": "CPU startup, reset, command changes and recorded-input replay; native qualification pending",
-        "result": "inconclusive",
-        "text": "The new candidate holds its standing reference during forward startup, then ramps stride over one gait cycle. It retains yaw startup and returns the yaw touchdown lift offset before the next half-cycle. The preceding controller and initial correction both exceed bounds in an early raised-touchdown fixture; the corrected candidate passes that fixture and 172 locomotion tests. The forward_high suite retains the canonical 0.10 m/s case and two independent resets.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_startup_20260922_001/declaration.json"
-      },
-      {
-        "id": "zhang-tripod-startup-recording-20260922-016",
-        "title": "We correct the startup recording type",
-        "backend": "Isaac Sim recording failure; CPU serialization regression; native retry pending",
-        "result": "failed",
-        "text": "The first startup attempt stops after three controls because its new log field contains a NumPy boolean. It provides no walking result. The correction converts that field to a Python boolean and passes a regression test with a NumPy command. The retry retains the controller method, physics and acceptance limits.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_startup_20260922_001/recording_correction.json"
-      },
-      {
-        "id": "zhang-tripod-startup-native-20260922-016",
-        "title": "We pass startup and retain two forward tracking failures",
-        "backend": "Isaac Sim; two runs from one deterministic reset; approved 19-body robot",
-        "result": "failed",
-        "text": "Both 0.10 m/s runs complete 1,000 controls without a controller fault and record identical metrics. Mean speed is 0.09346 m/s; mean planar error is 0.05023 m/s against 0.025. Computed torque exceeds the unchanged demand-fraction bound. During one complete cycle, six-foot contact coincides with near-zero speed, followed by a surge after lift-off. Joint tracking contributes 0.04569 m/s RMS; toe-marker motion contributes 0.00324 m/s.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_forward_overlap_20260922_001/forward_high_result.json"
-      },
-      {
-        "id": "zhang-tripod-forward-overlap-cpu-20260922-017",
-        "title": "We match forward support motion through ground overlap",
-        "backend": "CPU kinematic checks and recorded-input replay; native diagnostic pending",
-        "result": "inconclusive",
-        "text": "The candidate matches swing and support motion around lift-off and touchdown. It permits inward foot motion during swing to retain joint bounds. It keeps yaw targets, motor limits and acceptance gates. Full-command, clearance, reset and early-touchdown checks pass within 177 locomotion tests. Native testing starts with the canonical 0.10 m/s case from two resets.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_forward_overlap_20260922_001/declaration.json"
-      },
-      {
-        "id": "zhang-tripod-forward-overlap-native-20260922-017",
-        "title": "We pass canonical forward walking at 0.10 m/s",
-        "backend": "Isaac Sim; two 1000-control captures; approved 19-body robot",
-        "result": "passed",
-        "text": "Two runs of the existing 0.10 m/s case pass; the second replays the first trace from the same deterministic reset. Mean planar error is 0.01931 m/s against 0.025; the computed torque-demand fraction is 0.00167 against 0.005. Native motor and contact checks pass. The first trial has 18.9–24.1 mm toe lift in low mode. Stops, raised clearance and terrain remain pending.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_forward_overlap_native_20260922_001/native_result.json"
-      },
-      {
-        "id": "zhang-tripod-forward-overlap-screen-20260922-018",
-        "title": "We pass both turns and retain the low-speed torque failure",
-        "backend": "Isaac Sim; three complete 1000-control screens; approved 19-body robot",
-        "result": "failed",
-        "text": "Both turns pass with yaw errors of 0.03434 and 0.03459 rad/s. Forward 0.05 m/s motion has 0.01226 m/s planar error but 0.03802 computed torque-demand fraction against 0.005. Middle femur joints account for most of the excess. The earlier lift direction label is incorrect: the feet move outward. Published source and captures retain their original identities.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_20260922_001/native_result.json"
-      },
-      {
-        "id": "zhang-tripod-speed-lift-cpu-20260922-019",
-        "title": "We reduce outward swing motion at low speed",
-        "backend": "CPU workspace, endpoint-equivalence and recorded-input checks; native screen pending",
-        "result": "inconclusive",
-        "text": "The candidate reduces predicted low-speed radial foot travel from about 26 mm to 4 mm and retains 19.7 mm nominal lift. It interpolates toward the passing lift at 0.10 m/s. CPU checks preserve high-speed, raised-mode and yaw targets within 180 locomotion tests. This tests the loading hypothesis; contact-force measurements do not isolate its cause.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_20260922_001/declaration.json"
-      },
-      {
-        "id": "zhang-tripod-speed-lift-native-20260922-019",
-        "title": "We pass the revised forward and turn screens",
-        "backend": "Isaac Sim; three 1000-control captures; approved 19-body robot",
-        "result": "passed",
-        "text": "All three commands pass. Forward planar error is 0.01078 m/s with zero scored computed torque-demand excess. Left/right yaw errors are 0.03434/0.03459 rad/s. Forward toe lift is 15.1–15.9 mm against the 12 mm low-mode target. Canonical qualification follows; controlled stops and raised clearance remain pending.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_native_20260922_001/native_result.json"
-      },
-      {
-        "id": "zhang-tripod-stop-failure-20260922-020",
-        "title": "We pass walking and diagnose forward and left-turn stop failures",
-        "backend": "Isaac Sim; first reset; ten complete cases and one interrupted prefix; approved 19-body robot",
-        "result": "interrupted",
-        "text": "Eight of ten complete cases pass, including canonical forward motion, both turns and the right-turn stop. The forward stop fails quiet joint motion, torque saturation and support. The left-turn stop fails quiet joint range and one support substep. We retain the interrupted formal-standing prefix and block clearance pending qualification.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_20260922_001/native_result.json"
-      },
-      {
-        "id": "zhang-tripod-stop-stride-cpu-20260922-022",
-        "title": "We return each tripod to standing through stride decay",
-        "backend": "CPU; 184 locomotion tests; native stop suite pending",
-        "result": "inconclusive",
-        "text": "The candidate finishes the current swing and reduces stride amplitude over one tripod cycle before holding the standing pose. CPU checks preserve held walking targets and bound stop transitions. Native forward and both-turn stop cases retain their two-second settling allowance and acceptance checks.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_20260922_001/declaration.json"
-      },
-      {
-        "id": "zhang-tripod-stop-stride-native-20260922-022",
-        "title": "We pass the forward and both-turn stop cases",
-        "backend": "Isaac Sim; six 1050-control captures of three distinct trajectories; approved 19-body robot",
-        "result": "passed",
-        "text": "The stride-decay controller passes the three canonical stop cases. Each second repeat replays its first trace. Maximum quiet joint-speed RMS is 0.00518 rad/s against 0.030, with zero quiet torque saturation and no missing support substeps. Full qualification follows. Raised clearance and terrain remain pending.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_native_20260922_001/native_result.json"
-      },
-      {
-        "id": "zhang-tripod-qualification-interruptions-20260922",
-        "title": "We retain the qualification interruptions and passing prefixes",
-        "backend": "Isaac Sim; three interrupted attempts; approved 19-body robot",
-        "result": "interrupted",
-        "text": "We retain 20 completed passing cases across three interrupted qualification attempts. The 20 completed cases hold seven distinct traces; repeated cases replay identical traces. Competing CUDA jobs interrupted acquisition. We preserve each partial capture and exact-container cleanup. Full qualification remains incomplete.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_qualification_recovery_20260922_001/qualification_interruptions.json"
-      },
-      {
-        "id": "zhang-tripod-forward-comparison-20260922",
-        "title": "We compare the first corrected and adapted forward captures",
-        "backend": "Isaac Sim; controls 100 through 999; 0.05 m/s command; approved 19-body robot",
-        "result": "inconclusive",
-        "text": "The first capture already includes the touchdown-pitch return and the larger lift correction. Median forward speed increases from 0.0076 to 0.0554 m/s; the fraction of backward controls falls from 27% to zero. Nominal joint-trajectory error decreases from 2.88 to 1.53 degrees RMS. We keep the 2.26-degree motor-target error distinct from nominal trajectory error. These coupled controller changes do not isolate one cause.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.json"
-      },
-      {
-        "id": "zhang-tripod-closeout-20260922",
-        "title": "We end native dispatch with qualification incomplete",
-        "backend": "Isaac Sim; approved 19-body robot; four interrupted qualification attempts",
-        "result": "interrupted",
-        "text": "Motion screens and three stop cases pass; each stop repeat replays its first trace. Four interrupted qualification prefixes do not complete the required 22-case suite. Raised clearance and terrain remain incomplete. We disabled both task-created Spark pause guards when native dispatch ended; no recorded matching process remained paused. We verified that our Isaac container is absent.",
-        "source": "site/assets/tripod_reproduction_closeout_20260922_001/closeout.json"
-      },
-      {
-        "id": "zhang-tripod-review-corrections-20260922",
-        "title": "We find identical repeat traces and bind the analysis scripts",
-        "backend": "Recorded trace hashes and CPU recomputation; no new native run",
-        "result": "inconclusive",
-        "text": "The reset writes a fixed pose and the controller draws no random numbers, so each second repeat replays its first trace. The six passing stop trials hold three distinct trajectories, and the 25 completed qualification cases hold seven distinct traces. The published forward metrics recompute exactly from the hash-verified traces. The record binds three figures and the forward comparison to their scripts by hash.",
-        "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_review_corrections_20260922_001/repeat_identity.json"
-      },
-      {
-        "id": "amp-initial-native-20260923",
-        "title": "Initial optimized yaw, lateral and arc trials pass",
-        "backend": "Isaac Sim; one robot; 1000 controls and 8000 physics samples per clip; optimized controller; human review pending",
-        "result": "passed",
-        "text": "Four first-phase clips pass their native motion and contact screens after fresh one-robot and 32-robot standing admission. The shared 61-value features match raw native measurements within 3.58e-7. Full command/phase coverage and human motion review remain pending; these clips supply no AMP learning result.",
-        "source": "site/assets/amp_initial_native_20260923_001/evidence.json"
-      },
-      {
-        "id": "amp-startup-diagonal-20260924",
-        "title": "The replacement diagonal passes both native start phases",
-        "backend": "Isaac Sim; optimized controller; 20-second full-trial screens; human review pending",
-        "result": "passed",
-        "text": "The original forward-right trial fails one startup speed check at 0.025 seconds. A replacement trajectory with a one-second target ramp passes both start phases under the same native gates. The archive retains the failed capture. Full bank coverage and human motion review remain pending.",
-        "source": "site/assets/amp_startup_20260924_001/evidence.json"
-      },
-      {
-        "id": "reward-v2-merged-20260929",
-        "title": "Reward version 2 is merged beside the frozen version 1",
-        "backend": "CPU unit tests; locomotion/task_v2.py; version 1 stays the default; no native run has used version 2",
-        "result": "passed",
-        "text": "The Table I audit resolves the tracking-exponent sign and the stationary criterion and separates the paper kernel from command-scaled kernels. Version 2 uses kernel C with k = 0.4, floors of 0.025 m/s and 0.15 rad/s and a termination charge of 75 per terminated control. train.py and prepare.py select it with --reward-version 2 in train mode only. This merge changes no measured result or gate.",
-        "source": "docs/REWARD_V2_TABLE1_AUDIT.md"
-      },
-      {
-        "id": "throughput-profile-stock-ppo-20260929",
-        "title": "Stock-PPO throughput is measured at 1, 32 and 128 robots",
-        "backend": "Isaac Sim on the GB10; stock RSL-RL 5.0.1 PPO with the MLP networks; frozen source 56ebf907; 20 measured updates per pass",
-        "result": "passed",
-        "text": "Training reached 12.9, 319 and 930 transitions per second at 1, 32 and 128 robots. The PhysX step took 70% of each update at 1 and 32 robots and 80% at 128. From 32 to 128 robots each added robot added about 1 MB of GPU memory. A fresh 128-robot standing capture passed all 128 replicas and supplies the admitted scale. The summary extrapolates to no other count and changes no guard.",
-        "source": "site/assets/throughput_profile_20260929_001/summary.json"
-      },
-      {
-        "id": "amp-learner-cpu-20260929",
-        "title": "The AMP learner and Table III networks pass CPU tests; the pilot has not run",
-        "backend": "CPU unit tests and an offline discriminator fit against one recorded policy trace; no native run",
-        "result": "inconclusive",
-        "text": "The learner adds the style reward to the task reward, trains the discriminator against the admitted bank and keeps checkpoint identity checks. The paper actor rejects privileged inputs. Offline, the standardized-input penalty scores held-out bank transitions 0.94 and the recorded policy trace 0.12. This measures fixed data, not the online learner or a standing policy. The Step 5 pilot needs a frozen budget, standing admission and Spark dispatch.",
-        "source": "site/assets/amp_learner_offline_20260929_001/result.json"
-      },
-      {
-        "id": "ppo-reward-ranking-20261002",
-        "title": "Reward v2 ranks recorded walking above the failed PPO policy",
-        "backend": "CPU float32 reward reconstruction; four retained Isaac captures on matching approved physics; forward 0.05 m/s; 2 < t <= 20 seconds",
-        "result": "passed",
-        "text": "We verify 68 input files and reconstruct the frozen reward history. Mean reward per control is 0.258359 for the failed PPO trajectory, 0.272557 after clipping its recorded actions, 0.987156 for the current tripod and 1.247595/1.251683 for the admitted phase-0/phase-0.5 walks. The walking advantage remains positive under the full unknown collision penalty range. This tests fixed-trajectory ranking at one command. We retain reward v2 for the bounded-mean learning test; final evaluation is pending.",
-        "source": "site/assets/ppo_action_audit_20261002_001/reward_audit.json"
-      },
-      {
-        "id": "ppo-bounded-mean-evaluation-20261002",
-        "title": "Bounded-mean PPO holds a stance but fails walking",
-        "backend": "Isaac Sim; approved direct-drive model; 128 robots and 2000 updates; seed 20260917; reward v2; all 13 final-checkpoint probes",
-        "result": "failed",
-        "text": "We verify 6144000 training transitions and complete evaluation captures with force and torque records. All ten movement probes fail tracking; both quiet tests and the stop screen pass. Forward speed is 0.00000612 m/s against 0.05 m/s, with zero out-of-range deterministic actions and normalized tracking error E = 1.000132. The stop result does not establish a stop from walking. Ten original probes are missing and human walking labels remain pending. We retain reward v2; these tests do not isolate a reward defect.",
-        "source": "site/assets/ppo_action_audit_20261002_001/evaluation_comparison.json"
-      },
-      {
-        "id": "ppo-normalization-credit-audit-20261003",
-        "title": "We measure normalization drift and reward timing before the next PPO trial",
-        "backend": "CPU replay of 13 retained native observation streams and reward reconstruction from four retained forward captures; no new native run",
-        "result": "inconclusive",
-        "text": "With actor weights fixed, running normalization produces mean Gaussian divergence 1.050361 in the first 24-control replay window, above the adaptive schedule threshold 0.02. Mean divergence falls to 0.003022 after 100 controls and 0.000026 after 500; disabling normalization gives zero. Both instantaneous and stride-average rewards rank recorded walking above the failed policy. These replays do not establish the cause of the native learning failure. The next trial retains bounded means and reward v2 while disabling normalization.",
-        "source": "docs/REWARD_V2_TABLE1_AUDIT.md"
-      },
-      {
-        "id": "ppo-no-normalization-evaluation-20261003",
-        "title": "PPO without running normalization fails all 13 probes",
-        "backend": "Isaac Sim; approved direct-drive model; 128 robots, 2000 updates, seed 20260917 and reward v2; all 13 final-checkpoint probes",
-        "result": "failed",
-        "text": "We verify 6144000 transitions and complete evaluation captures with force and torque records. Pre-update mean Gaussian divergence is zero throughout training. All ten movement probes fail tracking; both quiet probes and the stop screen also fail. Normalized tracking error E is 1.000658, compared with 1.000132 for running normalization. Two translation probes also exceed the native speed bound. Human labels remain pending. These results support a separate reward-timing trial and establish no walking success.",
-        "source": "site/assets/ppo_learning_recovery_20261002_001/normalization_evaluation.json"
-      },
-      {
-        "id": "ppo-immediate-tracking-evaluation-20261003",
-        "title": "Immediate tracking fails all 13 PPO probes",
-        "backend": "Isaac Sim on the approved direct-drive model; reward v3; final update 2000; all 13 probes",
-        "result": "failed",
-        "text": "We verify 6144000 transitions and full native force/torque captures. Normalized tracking error E is 1.000437. The forward policy holds 16 of 18 joint commands near their bounds and requests 4.160072 Nm RMS at the right-front coxa against a 1.6 Nm applied cap. All movement probes fail tracking and torque demand; quiet and stop probes fail. Human gait labels remain pending.",
-        "source": "site/assets/ppo_learning_recovery_20261002_001/reward_v3_evaluation.json"
-      },
-      {
-        "id": "ppo-v4-forward-stop-two-seeds-20261006",
-        "title": "Two reward-v4 PPO seeds pass the forward and forward-to-stop probes",
-        "backend": "Native Isaac simulation on the approved direct-drive model; vanilla PPO with reward v4 from source commit cd691ff0; seeds 20260917 and 20260918; final update 2000; one trial per probe with the actor mean and noise off",
-        "result": "passed",
-        "text": "We verify 6144000 training transitions per seed and the retained captures with their 400 Hz contact-force and motor-torque arrays. The forward probe commands 0.05 m/s for 20 s and scores 900 controls after a 2 s settle. Planar error is 0.00996394498203808 m/s for seed 20260917 and 0.011130753192090545 m/s for seed 20260918 against a 0.025 m/s bound. The forward-to-stop probe commands 0.05 m/s for 8 s and then zero, and scores the 550 controls that follow a 2 s settle. Joint velocity RMS is 0.006655412260442972 rad/s and 0.015937643125653267 rad/s against a 0.03 rad/s bound. Each pass is one trial and measures no spread. Visual acceptance remains pending.",
-        "source": "site/assets/ppo_walking_diagnosis_20261005_001/run_ledger.json"
-      },
-      {
-        "id": "ppo-v4-quiet-seed20260917-20261006",
-        "title": "Seed 20260917 passes both quiet probes",
-        "backend": "Native Isaac simulation on the approved direct-drive model; vanilla PPO with reward v4 from source commit cd691ff0; seed 20260917; final update 2000; one trial per probe with the actor mean and noise off",
-        "result": "passed",
-        "text": "The 20 s quiet probe scores 800 controls after a 4 s settle, and the 32 s probe scores 1500 controls after a 2 s settle. Joint velocity RMS is 0.005631701089441776 rad/s and 0.005186597816646099 rad/s against a 0.03 rad/s bound. The 400 Hz six-toe contact check counts zero missing physics steps in both probes. Each pass is one trial.",
-        "source": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260917_evaluation_verification.json"
-      },
-      {
-        "id": "ppo-v4-quiet-seed20260918-20261006",
-        "title": "Seed 20260918 fails both quiet probes on toe contact",
-        "backend": "Native Isaac simulation on the approved direct-drive model; vanilla PPO with reward v4 from source commit cd691ff0; seed 20260918; final update 2000; one trial per probe with the actor mean and noise off",
-        "result": "failed",
-        "text": "The 400 Hz six-toe contact check, missing_six_toe_count_400hz, counts 4 physics steps in the 20 s quiet probe and 5 in the 32 s probe against a bound of 0. Each other check of the two probes passes; joint velocity RMS is 0.009713666513562202 rad/s and 0.009115087799727917 rad/s against a 0.03 rad/s bound. The same seed passes the forward and forward-to-stop probes.",
-        "source": "site/assets/ppo_walking_diagnosis_20261005_001/settle_seed20260918_evaluation_verification.json"
-      },
-      {
-        "id": "ppo-v4-direction-yaw-probes-20261006",
-        "title": "Nine direction and yaw probes fail in both reward-v4 seeds",
-        "backend": "Native Isaac simulation on the approved direct-drive model; vanilla PPO with reward v4 from source commit cd691ff0; seeds 20260917 and 20260918; final update 2000; all 13 probes, one trial each, with the actor mean and noise off",
-        "result": "failed",
-        "text": "Seed 20260917 passes 4 of 13 probes and seed 20260918 passes 2 of 13. In each seed the seven translation probes from 45 to 315 degrees fail the planar error bound, and both yaw probes fail the planar and yaw error bounds. Training draws forward and zero commands alone. Each evaluation leaves all 96 required Stage 2 cases unevaluated and reports Stage 2 as incomplete.",
-        "source": "site/assets/ppo_walking_diagnosis_20261005_001/run_ledger.json"
-      }
-    ]
-  },
-  "summary_tags": [
-    "GPS only, on an open map",
-    "Stop at designated locations",
-    "Simulation first"
-  ],
-  "featured_media_id": "amp_motion_mosaic_20260924_001"
+  ]
 }

@@ -1,48 +1,39 @@
 # Hexapod
 
-You develop a robot that walks an approved route through a region drawn on an
-open map and stops at designated locations. It navigates with onboard GPS only. GeoData owns survey data collection
-outside this repository. You can inspect the approved robot in the
-[viewer](robot/hexapod_mkii_updated_v1/README.md#inspection) and review recordings
-on the [progress site](https://cornell-physical-intelligence.github.io/hexapod-cupi/).
+We are building a six-legged robot that walks a planned route across an area
+drawn on a map, finds its way with GPS alone and stops at each survey point.
+GeoData collects the survey data; this repository covers the robot.
 
-The consolidated simulation foundation supports stock PPO and an optional
-trajectory optimizer. [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings) lists measured results; run
-`python3 tools/project_site.py status` for a local, untracked copy. Paper-method
-implementation remains ahead of you in
-[TRAINING](docs/TRAINING.md#proposed-reproduction-sequence).
+**Where we are (12 October 2026):** in simulation, one training run of our
+learned walking controller passed all 13 movement tests: walking in eight
+directions, turning both ways, standing still and stopping. We are repeating
+that run in four controlled training runs to check that the result holds. The
+[progress site](https://cornell-physical-intelligence.github.io/hexapod-cupi/)
+shows the videos and the roadmap, and the [viewer](robot/hexapod_mkii_updated_v1/README.md#inspection)
+shows each part and joint of the approved robot.
 
-| Directory | Maintained scope |
+## What is here
+
+| Directory | Contents |
 | --- | --- |
-| `robot/` | Approved direct-drive model and hash-pinned simulation inputs. |
-| `locomotion/` | Simulation, reward, stock PPO, evaluation and guarded launch; optional optimizer in `priors/`; CPU design surrogate in `surrogate/`. |
-| `contracts/` | Velocity commands, planar poses and checkpoint identity fields. |
-| `navigation/` | Waypoint follower example; route planner and GPS pose estimate remain pending. |
-| `mission/` | Sensor-pattern and transport prototypes; mission controls remain pending. GeoData owns survey recording and export. |
-| `viewer/` | Joint and part inspection of the approved robot. |
-| `tools/`, `configs/` | Asset preparation, source verification and archive/publication commands. |
-| `docs/`, `site/` | Reference procedures and the published progress record. |
+| `robot/` | The approved robot model: 18 motors, 7.47 kg, with hash-pinned simulation inputs. |
+| `locomotion/` | Simulation, rewards, training, the movement tests and the guarded Spark launcher. |
+| `navigation/` | A waypoint follower example; the route planner and GPS position come later. |
+| `contracts/` | Shared types: speed and direction commands, planar poses, checkpoint identity. |
+| `mission/` | Sensor-pattern and transport prototypes. |
+| `viewer/` | The browser viewer for the robot's parts and joints. |
+| `site/`, `docs/`, `tools/`, `configs/` | The progress site, guides, checks and archive records. |
 
-Read [ARCHITECTURE](ARCHITECTURE.md) for requirements and boundaries,
-[CONTRIBUTING](CONTRIBUTING.md) for setup and checks, and [AGENTS](AGENTS.md)
-for agent constraints. Start walking work with the [kernel code map](locomotion/README.md).
-Read a reference below when its subject is part of your task.
+`navigation/` and `mission/` do not import simulation code.
 
-| Reference | Maintained purpose |
-| --- | --- |
-| [Spark contributor guide](SPARK.md) | Personal worktrees, frozen attempts, launch and result inspection. |
-| [Training](docs/TRAINING.md) | Kernel contract and the paper-reproduction roadmap. |
-| [Operations](docs/OPERATIONS.md) | Host access, ownership, launch procedure, recovery controls and the reservation policy; release requires the program lead's direction. |
-| [Progress publication](docs/PROJECT_SITE.md) | Registry updates and Pages publication. |
-| [Source lineages](docs/PIPELINE_LINEAGES.md) | Source manifests and archive restoration. |
-| [Updated CAD import](docs/UPDATED_CAD_IMPORT.md) | Approved direct-drive geometry, joint conventions and import review. |
-| [RS05 review](docs/RS05_SPEC_REVIEW.md) | Motor specification provenance and unmeasured hardware assumptions. |
-| [Leg stand](docs/LEG_STAND_HARDWARE.md) | Component selection, wiring and open calibration requirements. |
+## Guides
 
-Git history retains superseded plans and handoffs. Load them to answer a specific
-historical question; their instructions do not authorize current work.
+- [Contributing](CONTRIBUTING.md): setup and the checks we run before each push.
+- [Architecture](ARCHITECTURE.md): requirements and system boundaries.
+- [Locomotion code map](locomotion/README.md) and [training](docs/TRAINING.md).
+- [Spark](SPARK.md) and [operations](docs/OPERATIONS.md): jobs on the shared GPU server.
+- [Progress site](docs/PROJECT_SITE.md): how we update the page.
+- Hardware: [CAD import](docs/UPDATED_CAD_IMPORT.md), [RS05 motors](docs/RS05_SPEC_REVIEW.md) and the [leg stand](docs/LEG_STAND_HARDWARE.md).
+- [Source lineages](docs/PIPELINE_LINEAGES.md): retired files and how to restore them. A shallow clone skips their history.
 
-Use the [open issues](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues)
-for assignments. Keep new run payloads outside this checkout and selected public
-media in `site/assets/`. The [archive guide](docs/PIPELINE_LINEAGES.md) explains
-restoration from Git. A shallow clone avoids downloading retired payload history.
+We track assignments in [GitHub issues](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues).

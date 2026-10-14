@@ -9,8 +9,8 @@ boundary and exclusions on an open map (OpenStreetMap or USGS imagery) and
 approves the route. The boundary, route and robot share one local east-north
 frame. No UAV, SLAM or ground map supports navigation.
 
-This document owns requirements and system boundaries. [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings)
-contains measured progress from `site/project.json`. Use [GitHub issues](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues)
+This document owns requirements and system boundaries. The [progress site](https://cornell-physical-intelligence.github.io/hexapod-cupi/)
+shows the latest measured result from `site/project.json`. Use [GitHub issues](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues)
 for assignments and [CONTRIBUTING](CONTRIBUTING.md) for the review workflow.
 
 ## 1. Mission requirements

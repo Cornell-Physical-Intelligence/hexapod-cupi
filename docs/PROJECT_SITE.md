@@ -1,94 +1,69 @@
-# Progress page contributor contract
+# Progress site
 
-The static GitHub Pages site is the team's visual progress record against
-[ARCHITECTURE.md](../ARCHITECTURE.md). It is built from `site/project.json`.
-`python3 tools/project_site.py status` writes an untracked `STATUS.md` from that registry, and each
-Pages build publishes the same text. Git does not track `STATUS.md`.
+The [progress site](https://cornell-physical-intelligence.github.io/hexapod-cupi/)
+shows where the project stands. `python3 tools/project_site.py build` builds it
+from `site/project.json`; `python3 tools/project_site.py status` writes the same
+content to an untracked `STATUS.md`, and each Pages build publishes that file.
 
-## Update progress
+## Presentation standard
 
-1. Change a roadmap marker or recorded fact only when its evidence changes.
-   Keep the stable IDs `walking`, `stage2`, `stage3`, `mission`.
-2. Distinguish capability state (`needs_definition`, `ready`, `active`, `blocked`,
-   `accepted`) from attempt result (`passed`, `failed`, `interrupted`,
-   `inconclusive`). A failed investigation can close its issue while the
-   capability stays blocked.
-3. Keep backend, model scope, source reference and measurement window explicit.
-   Numerical summary fields must match the referenced JSON payload. An accepted
-   marker requires a named human acceptance, its scope and evidence. Ready/active
-   work requires accepted dependencies and a complete next-step definition.
-4. Define the next smallest step with the program lead and the relevant lead before adding
-   it: outcome, owner, reviewer, issue, acceptance and source/fixture baseline.
-   Until then `next_step` stays `null`. Do not invent assignments or dates.
-5. Generate the text view with `python3 tools/project_site.py status`.
+The site, the README and every other page we publish follow this standard.
 
-The registry's evidence timestamp and source revision describe measured results;
-the build revision describes the published page. Neither is live GPU telemetry.
-Current compute instructions remain in `docs/OPERATIONS.md`.
-Historical walking, canonical standing, CAD animation and physical qualification
-must remain distinguishable. Do not infer progress percentages from commits,
-files, test totals, training budgets or videos.
+- Lead with the visual result. Give each video or image one short caption in
+  plain words for a reader outside the team.
+- Write as the team describing its work ("We trained…"), in current terms.
+- Keep the page to five sections: latest progress, roadmap, system
+  connections, the robot and the terms used on the page.
+- Leave out small grey explanation text, evidence lists, status cards, test
+  result tables, earlier work and change history. Evidence stays in
+  `site/assets/` and in the update records.
+- Add each technical word the page uses to the terms list.
+
+`site/test_render.mjs` fails when a removed section returns or when the page
+shows more than 650 words.
+
+## Update the page
+
+Change `site/project.json` when a result changes:
+
+1. `latest`: the date, a one-line title, at most three sentences, the headline
+   number and up to three videos. The check compares the number with each JSON
+   field in `metric.sources`.
+2. `accomplishments`: one line per result, newest first, with its evidence path.
+3. `roadmap`: move `now` when a step finishes; completed steps come first.
+4. `nodes`: a part's one sentence and its state (`working`, `in_progress`,
+   `not_started`).
+
+Register each new video in `media` with its SHA-256, caption, controller
+identity, evidence path and a first-frame poster. Earlier results and their
+evidence links stay in the
+[registry of 13 October 2026](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/9d819c68f7311477fc5d1fd61b00026a146656a0/site/project.json).
 
 ## Every repository change
 
-Every push must include a corresponding paper/Pages update. This is the program lead's
-explicit hard rule, reiterated on 14 September 2026. Validate the complete push
-diff, build the paper and exercise the renderer before pushing. Evidence paths
-must match on-disk capitalization so local macOS checks agree with Linux CI.
-After pushing, verify the exact revision's checks and served Pages version;
-repair failed publication before declaring it complete.
+Every push includes a matching Pages update; the program lead set this rule on
+14 September 2026. Add a new `site/updates/YYYYMMDDTHHMMSS_name.json` record with:
 
-Add a new `site/updates/YYYYMMDDTHHMMSS_name.json` record with:
-
-- `id` matching its filename and ISO-8601 UTC `date`;
-- plain-English `title`, `summary`, affected `areas`, and the next decision/action;
+- `id` matching its filename and an ISO-8601 UTC `date`;
+- a plain-English `title`, `summary`, affected `areas` and the `next` action;
 - `changes`: exact repository-relative paths or bounded globs covering the diff;
-- `evidence`: existing repository paths or explicit public HTTPS references;
-- boolean `no_project_impact`; if true, a specific `reason`.
+- `evidence`: existing repository paths or public HTTPS references;
+- boolean `no_project_impact`, and a specific `reason` when it is true.
 
-Records are append-only. Do not rewrite an old record or a frozen result to make
-validation pass. A later record may declare `evidence_reference_corrections`: each
-entry pins the older record ID/hash, exact original reference, canonical
-replacement path and its hash. Only that named historical link is resolved for
-presentation; original bytes and provenance remain accessible. Corrections never
-waive exact-case checks for current references. A presentation update is not a new experimental result.
+Records are append-only. A later record may declare
+`evidence_reference_corrections`, each pinning the older record ID and hash, the
+original reference, and the replacement path and hash. Evidence paths must match
+on-disk capitalization so macOS checks agree with Linux CI.
 
 ```sh
 python3 tools/project_site.py status
 python3 tools/project_site.py check --base <integration-base-SHA>
 python3 tools/project_site.py build
+node site/test_render.mjs
 ```
 
-The check validates change coverage, source references, model-labelled media,
-checkpoint/video identity, progress dependencies, accepted/ready definitions,
-and measured summary values. Review evidence semantics
-as well as these mechanical checks. Run relevant tests for changed behavior.
-
-CI generates the source manifest of each merged revision, so a pull request adds
-no manifest. Published manifests remain unchanged. See
-[PIPELINE_LINEAGES.md](PIPELINE_LINEAGES.md).
-
-## Publishing and presentation
-
-`.github/workflows/pages.yml` validates pushes/PRs and deploys main to
-`https://cornell-physical-intelligence.github.io/hexapod-cupi/`.
-The builder verifies selected files under `site/assets/` and resolves archived
-references through `configs/archive.json` without loading old Git objects.
-Only explicitly selected public files enter `site/dist`; generated output is
-ignored by Git. Verify the deployed revision after publishing the integrated
-change. Preserve the existing GitHub Pages destination and evidence permissions.
-
-Keep each roadmap stage to a title, status, optional recorded media with one short
-caption, one summary line and a Details link. Full criteria, ownership and next-task
-context remain in the linked status/design documents. Keep M1 to a single row
-linking its test specification. Do not add explanatory paragraphs between these
-items.
-
-Stages without uploaded progress media show no image, illustration or placeholder.
-The program lead supplies their visuals when progress is available. Keep the interactive
-system graph expanded and existing walking videos playable. Preserve historical
-recordings and their model labels; never present a concept image as progress.
-
-Write for a teammate opening the page for the first time. Use concrete results
-and actions, explain necessary technical terms, and remove repeated descriptions.
-Keep keyboard access, mobile layout and reduced-motion support.
+`.github/workflows/pages.yml` runs these checks on each push and pull request
+and deploys `main`. Only the media listed in the registry enter `site/dist`.
+After a merge, confirm that the deployed `version.json` names the merged
+revision. CI generates each merged revision's source manifest, so a pull request
+adds none; see [PIPELINE_LINEAGES.md](PIPELINE_LINEAGES.md).

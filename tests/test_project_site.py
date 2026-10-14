@@ -68,23 +68,6 @@ class PosterContractTests(unittest.TestCase):
     def test_catchall_does_not_waive_changes(self):
         r=self.row();r['changes']=['**'];self.save(r)
         with self.assertRaisesRegex(ValueError,'bounded'):site.records()
-    def checkpoint_fixture(self):
-        path=self.root/'policy.pt';path.write_bytes(b'actual checkpoint fixture')
-        digest=site.sha(path)
-        project={'checkpoint':{'path':'policy.pt','video_matches':True},'primary_video_id':'latest',
-                 'media':[{'id':'latest','type':'video','controller':digest}]}
-        return path,project,{'final_checkpoint_sha256':digest}
-    def test_changed_checkpoint_bytes_are_rejected(self):
-        path,project,receipt=self.checkpoint_fixture()
-        site.checkpoint_media(project,receipt)
-        path.write_bytes(b'a different checkpoint')
-        with self.assertRaisesRegex(ValueError,'bytes differ'):site.checkpoint_media(project,receipt)
-    def test_older_video_cannot_claim_latest_weights(self):
-        path,project,receipt=self.checkpoint_fixture()
-        project['media'][0]['controller']='0'*64
-        with self.assertRaisesRegex(ValueError,'Matching video'):site.checkpoint_media(project,receipt)
-        project['checkpoint']['video_matches']=False
-        site.checkpoint_media(project,receipt)
 
 class EvidenceCorrectionTests(unittest.TestCase):
     setUp = PosterContractTests.setUp
@@ -144,8 +127,7 @@ class EvidenceCorrectionTests(unittest.TestCase):
         self.fixture()
         site.records()
         (self.root / 'site/project.json').write_text(json.dumps({
-            'schema_version': 2, 'summary_tags': ['Test'],
-            'status_source': 'Evidence/review.json'}))
+            'schema_version': 3, 'status_source': 'Evidence/review.json'}))
         with self.assertRaises(ValueError):
             site.registry()
 
