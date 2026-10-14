@@ -144,8 +144,9 @@ retains historical paths that the cleanup relocated.
 
 The current pilot has four prepared packages in James's run directory;
 use [their recorded bindings](docs/OPERATIONS.md#prepared-flat-pilot) for that
-dispatch. For a new assigned attempt, the following example prepares a PPO
-control from your committed worktree and starts no training:
+dispatch. For a new assigned attempt, the following example prepares the PPO
+control of [pilot v2](docs/TRAINING.md#frozen-flat-pilot-v2-issue-50) from your
+committed worktree and starts no training:
 
 ```sh
 umask 027
@@ -156,7 +157,13 @@ python3 -B -m locomotion.prepare \
   --output "$attempt" --remote-root "$attempt" \
   --inputs "$admitted_inputs" --mode train \
   --learner ppo --networks mlp --num-envs 128 \
-  --updates 2000 --seed 20260917 --reward-version 2 \
+  --updates 2000 --seed 20260917 --reward-version 4 \
+  --reward-options schedule_weight=0,swing_travel_weight=0,forward_draw_fraction=0 \
+  --action-mean tanh --observation-normalization none \
+  --observation-scaling fixed --command-segments bootstrap \
+  --learning-rate-max 3e-4 --action-std-final 0.05 \
+  --action-smoothing mean2 --velocity-noise 0.5 \
+  --episode-seconds 10 --gait-clock 0 \
   --allocation-profile flat_pilot_v1 --max-wall-seconds 21600 \
   --logger wandb --wandb-project hexapod-amp --wandb-mode offline
 
@@ -173,10 +180,12 @@ Using the same path for `--output` and `--remote-root` removes the transfer
 step. Preparation refuses an existing destination. Keep each retry under a
 fresh name, including retries after a timeout or learner fix.
 
-For AMP, choose a fresh `amp_mlp_...` or `amp_paper_...` attempt name and replace
-the learner/network options with `--learner amp --networks mlp` or
-`--learner amp --networks paper`. Keep the other learner budget options. The
-tripod reference uses its separate prescribed-controller options in
+The AMP arms take a fresh `amp_mlp_...` or `amp_paper_...` attempt name with
+`--learner amp --networks mlp` or `--learner amp --networks paper`. Preparation
+rejects an AMP arm with the learner options above until the AMP path supports
+them; [pilot v2](docs/TRAINING.md#frozen-flat-pilot-v2-issue-50) lists that
+prerequisite. The tripod reference uses its separate prescribed-controller
+options in
 [TRAINING](docs/TRAINING.md#contact-and-motor-comparison).
 
 Record the attempt path and binding hash in its issue with the source commit.
