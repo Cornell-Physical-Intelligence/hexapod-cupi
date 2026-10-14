@@ -77,14 +77,36 @@ def compare(limits, summary):
 
 
 def read_run(root, role):
+    from locomotion.runs.reservation import verify_tree
+    from locomotion.tests.native_parity import CHECKPOINT_SHA, DECLARATION_SHA
     root = Path(root)
+    pack = root.parents[1]
+    read = lambda path: json.loads(path.read_text())
     state = json.loads((root/'state.json').read_text())
-    receipt = json.loads((root/'parity_receipt.json').read_text())
-    job = json.loads((root.parent/'jobs/standing.json').read_text())
-    if (state['status'] != 'completed' or state['errors'] or receipt['role'] != role
-            or receipt['exit_code'] != 0 or job['status'] != 'completed' or not job['cleanup_checked']):
+    proof = read(pack/'source/PARITY.json')
+    binding = read(pack/'binding.json')
+    packed = read(pack/'PACK.json')
+    job = read(root.parent/'jobs/standing.json')
+    cleanup = read(root.parent/'cleanup.json')
+    freeze = binding['source_freeze_sha256']
+    verify_tree(pack/'source', freeze)
+    if (proof['schema'] != 'hexapod_refactor_parity_v1' or proof['role'] != role
+            or proof['baseline_commit'] != 'b2a6168c35156dfe0a8202201aa574b8d9e43fb1'
+            or packed.get('test_only_parity') is not True
+            or packed['binding_sha256'] != sha(pack/'binding.json')
+            or read(root.parent/'launch_binding.json') != binding
+            or state['runtime_binding']['runtime_tree_sha256'] != freeze
+            or job['source_freeze_sha256'] != freeze
+            or not {CHECKPOINT_SHA, DECLARATION_SHA} <= set(binding['input_files'].values())):
+        raise ValueError('Native source or checkpoint provenance differs')
+    # The host writes cleanup.json after rechecking source and input hashes. Kit can exit at app.close().
+    if (state['status'] != 'completed' or state['errors'] or job['exit_code'] != 0
+            or job['status'] != 'completed' or not job['cleanup_checked']
+            or not cleanup['cleanup_checked'] or cleanup['container_id'] != job['container_id']):
         raise ValueError('Native attempt or cleanup did not complete')
     summary = json.loads((root/'evaluation/summary.json').read_text())
+    if summary['allocation']['checkpoint_sha256'] != CHECKPOINT_SHA:
+        raise ValueError('Native checkpoint provenance differs')
     loads = sorted((root/'evaluation').glob('batch_*/force_metrics.json'))
     if len(loads) != 13:
         raise ValueError('Require contact and motor loads from all 13 probes')
@@ -96,7 +118,11 @@ def read_run(root, role):
         summary['loads'][path.parent.name] = value
     summary['provenance'] = {'run': str(root), 'state_sha256': sha(root/'state.json'),
                              'summary_sha256': sha(root/'evaluation/summary.json'),
-                             'receipt_sha256': sha(root/'parity_receipt.json')}
+                             'source_freeze_sha256': freeze,
+                             'source_declaration_sha256': sha(pack/'source/PARITY.json'),
+                             'binding_sha256': sha(pack/'binding.json'),
+                             'job_sha256': sha(root.parent/'jobs/standing.json'),
+                             'cleanup_sha256': sha(root.parent/'cleanup.json')}
     return summary
 
 

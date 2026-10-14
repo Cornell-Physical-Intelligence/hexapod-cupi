@@ -109,6 +109,8 @@ You use `tests/native_parity.py` in a frozen test pack to replay the pinned
 renew standing admission for its physics sources. The harness retains model,
 learner and embedded checkpoint checks; it separates source provenance from
 weight compatibility. You must use the guarded launcher with `--launch`.
+You verify provenance from the frozen pack and the host's launch and cleanup
+records. Kit can exit inside `app.close()` before a Python footer runs.
 
 You freeze comparison ranges before the candidate replay with
 `python -m locomotion.tests.native_ranges freeze`, three `--baseline` run

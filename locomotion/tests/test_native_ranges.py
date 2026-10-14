@@ -1,5 +1,8 @@
 """Keep native comparison ranges fixed before candidate scoring."""
 from copy import deepcopy
+import json
+from pathlib import Path
+import tempfile
 import unittest
 
 
@@ -32,6 +35,64 @@ class NativeRangeTests(unittest.TestCase):
         candidate = self.suite(1.)
         candidate['diagnostic_screens_passed'] = False
         self.assertFalse(compare(limits, candidate)['pass'])
+
+    def test_host_receipts_survive_native_process_exit_and_reject_tampering(self):
+        from locomotion.tests.native_ranges import read_run, sha
+        from locomotion.tests.native_parity import CHECKPOINT_SHA, DECLARATION_SHA
+        with tempfile.TemporaryDirectory() as tmp:
+            pack = Path(tmp)
+            root = pack/'run/standing'
+            def save(path, value):
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(json.dumps(value))
+            proof = pack/'source/PARITY.json'
+            save(proof, {'schema': 'hexapod_refactor_parity_v1', 'role': 'baseline',
+                         'baseline_commit': 'b2a6168c35156dfe0a8202201aa574b8d9e43fb1'})
+            save(pack/'source/FREEZE_SHA256.json', {'PARITY.json': sha(proof)})
+            freeze = sha(pack/'source/FREEZE_SHA256.json')
+            binding = {'source_freeze_sha256': freeze, 'input_files': {
+                '/retained/checkpoint.pt': CHECKPOINT_SHA, '/retained/checkpoint.json': DECLARATION_SHA}}
+            save(pack/'binding.json', binding)
+            save(pack/'PACK.json', {'binding_sha256': sha(pack/'binding.json'), 'test_only_parity': True})
+            save(pack/'run/launch_binding.json', binding)
+            save(root/'state.json', {'status': 'completed', 'errors': [],
+                                    'runtime_binding': {'runtime_tree_sha256': freeze}})
+            job = {'status': 'completed', 'cleanup_checked': True, 'exit_code': 0,
+                   'container_id': 'container', 'source_freeze_sha256': freeze}
+            save(pack/'run/jobs/standing.json', job)
+            cleanup = {'cleanup_checked': True, 'container_id': 'container'}
+            save(pack/'run/cleanup.json', cleanup)
+            summary = self.suite(1.)
+            summary['allocation']['checkpoint_sha256'] = CHECKPOINT_SHA
+            save(root/'evaluation/summary.json', summary)
+            for index in range(13):
+                save(root/f'evaluation/batch_{index:03d}/force_metrics.json', {'status': 'available'})
+            # Kit can terminate Python during app.close(); the host still verifies the completed run.
+            self.assertFalse((root/'parity_receipt.json').exists())
+            self.assertEqual(len(read_run(root, 'baseline')['results']), 13)
+            with self.assertRaises(ValueError):
+                read_run(root, 'candidate')
+            cleanup['cleanup_checked'] = False
+            save(pack/'run/cleanup.json', cleanup)
+            with self.assertRaises(ValueError):
+                read_run(root, 'baseline')
+            cleanup['cleanup_checked'] = True
+            save(pack/'run/cleanup.json', cleanup)
+            binding['input_files']['/retained/checkpoint.pt'] = 'changed'
+            save(pack/'run/launch_binding.json', binding)
+            with self.assertRaises(ValueError):
+                read_run(root, 'baseline')
+            save(pack/'binding.json', binding)
+            save(pack/'PACK.json', {'binding_sha256': sha(pack/'binding.json'), 'test_only_parity': True})
+            with self.assertRaises(ValueError):
+                read_run(root, 'baseline')
+            binding['input_files']['/retained/checkpoint.pt'] = CHECKPOINT_SHA
+            save(pack/'binding.json', binding)
+            save(pack/'PACK.json', {'binding_sha256': sha(pack/'binding.json'), 'test_only_parity': True})
+            save(pack/'run/launch_binding.json', binding)
+            proof.write_text(proof.read_text() + '\n')
+            with self.assertRaises(ValueError):
+                read_run(root, 'baseline')
 
 
 if __name__ == '__main__':

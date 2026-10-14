@@ -42,7 +42,7 @@ def replay():
         raise ValueError('Parity requires all 13 c48_long probes with the retained seed')
     checkpoint = Path(option('--checkpoint'))
     verify_weights(checkpoint)
-    receipt = proof()
+    proof()
     keys = tuple(key for key in release.COMPATIBILITY_KEYS if key not in SOURCE_KEYS)
     def compare_weight_abi(record, identity):
         if any(record['identity'][key] != identity[key] for key in keys):
@@ -52,14 +52,8 @@ def replay():
     # Keep model, physics settings, inputs, seed, upstream code and embedded metadata checks.
     with patch.object(release, 'COMPATIBILITY_KEYS', keys), patch.object(
             train, 'require_checkpoint_identity', compare_weight_abi, create=True):
-        result = train.main(args)
-    verify_weights(checkpoint)
-    output = Path(option('--output'))
-    receipt.update(checkpoint_sha256=CHECKPOINT_SHA, declaration_sha256=DECLARATION_SHA,
-                   compared_weight_abi_keys=list(keys), source_fields_compared_separately=sorted(SOURCE_KEYS),
-                   exit_code=result, test_only=True, production_checkpoint_admission=False)
-    (output/'parity_receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
-    return result
+        # The host supervisor verifies frozen sources and checkpoint inputs after Kit exits.
+        return train.main(args)
 
 
 def launch():
