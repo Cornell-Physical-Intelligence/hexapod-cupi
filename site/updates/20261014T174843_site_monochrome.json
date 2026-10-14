@@ -1,13 +1,18 @@
 {
   "id": "20261014T174843_site_monochrome",
   "date": "2026-10-14T17:48:43Z",
-  "title": "Restyle the progress site in black and white with red accents",
-  "summary": "The progress site drops its blue, green and amber colours. Pages now use black and white, and red marks the logo, section titles and the current or selected item. The presentation standard in docs/PROJECT_SITE.md records this palette and asks each page to show structure as a picture. Pages that load site/poster.css, such as the planned code map, take the same colours.",
-  "areas": ["site", "documentation"],
+  "title": "Restyle the progress site in black and white with red accents and no cards",
+  "summary": "The progress site drops its blue, green and amber colours. Pages now use black and white, and red marks the logo, section titles and the current or selected item. Text and diagrams sit straight on the white page: the grey boxes, the coloured side tab, the pill badges and the drop shadows are gone, and the render test rejects them in site/poster.css. The presentation standard in docs/PROJECT_SITE.md records this palette, the no-cards rule and the picture-first rule. Pages that load site/poster.css, such as the planned code map, take the same styles.",
+  "areas": [
+    "site",
+    "documentation"
+  ],
   "changes": [
-    "site/poster.css",
+    "docs/PROJECT_SITE.md",
     "site/index.html",
-    "docs/PROJECT_SITE.md"
+    "site/poster.css",
+    "site/poster.js",
+    "site/test_render.mjs"
   ],
   "evidence": [
     "site/poster.css",
