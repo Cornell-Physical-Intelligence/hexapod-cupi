@@ -6,6 +6,8 @@ update. `summarize` compares completed allocations on a CPU host.
 """
 from __future__ import annotations
 
+from .runs.sources import source_files, physics_files, verify_runtime
+
 import argparse
 from collections import defaultdict
 import copy
@@ -523,14 +525,14 @@ def main(argv=None):
     # The profile uses the training allocation: 20-second episodes, no motion features or rendering.
     cfg = configuration.EnvConfig(num_envs=args.num_envs, seed=args.seed, record_motion_features=False,
                                   render=False, episode_seconds=20., device=args.device)
-    identity = {'schema': SCHEMA, 'source_files': {p.name: sha(p) for p in sorted(source.glob('*.py'))},
+    identity = {'schema': SCHEMA, 'source_files': source_files(source), 'runtime_sources': verify_runtime(source.parent),
         'model_sha256': configuration.MODEL_SHA256, 'usd_sha256': configuration.USD_SHA256,
         'stance_sha256': sha(args.stance), 'geometry_sha256': sha(args.geometry),
         'geometry_extrema_sha256': sha(args.geometry_extrema), 'config': cfg.declaration(),
         'motion_prior': False, 'behavior_cloning': False, 'seed': args.seed,
         'rsl_rl_required_version': '5.0.1', 'adapter_sha256': sha(source/'ppo.py'),
         'entry_sha256': sha(__file__), 'source_freeze_sha256': args.source_freeze_sha256, 'learner': LEARNER}
-    identity['physics_source_files'] = {k: identity['source_files'][k] for k in ('env.py', 'env_config.py')}
+    identity['physics_source_files'] = physics_files(identity['source_files'])
     identity['physics_config'] = physics_config(cfg, metadata)
     identity['standing_admission'] = admission.require_admission(args.standing_admission, identity, cfg)
     settings = {'num_envs': args.num_envs, 'seed': args.seed, 'warmup_updates': args.warmup_updates,

@@ -8,9 +8,10 @@ import re
 import shutil
 
 from .env_config import sha
+from .runs.sources import runtime_paths, write_runtime
 from . import reward_options as reward_option_schema
 from .tripod_config import SWEEPS
-from .train import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline
+from .runs.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline
 from .spark_paths import LEGACY_ROOT, RUN_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -147,8 +148,10 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
     source = output/'source'
     package = source/'locomotion'
     package.mkdir(parents=True)
-    for path in sorted((root/'locomotion').glob('*.py')):
-        shutil.copy2(path, package/path.name)
+    for path in runtime_paths(root/'locomotion'):
+        destination = package/path.relative_to(root/'locomotion')
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, destination)
     contracts = source/'contracts'
     contracts.mkdir()
     for name in ('__init__.py', 'release.py'):
@@ -163,6 +166,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         (source/bank).mkdir(parents=True)
         for name in ('manifest.json', 'review.json', 'transitions.npz'):
             shutil.copy2(root/bank/name, source/bank/name)
+    write_runtime(source)
     save(source/'FREEZE_SHA256.json', {p.relative_to(source).as_posix(): sha(p)
         for p in sorted(source.rglob('*')) if p.is_file()})
     freeze = sha(source/'FREEZE_SHA256.json')

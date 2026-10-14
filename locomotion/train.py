@@ -25,56 +25,9 @@ def save(path, value):
     Path(path).write_text(json.dumps(value, indent=2, allow_nan=False)+'\n')
 
 
-ALLOCATION_PROFILES = ('standard', 'flat_pilot_v1')
-CLEANUP_MARGIN_SECONDS = 400
-# Training stops at UPDATE_LIMIT; a training pack that opts in to extended updates may run to the larger limit.
-UPDATE_LIMIT, EXTENDED_UPDATE_LIMIT = 2000, 5000
-
-
-def update_limit(mode, extended):
-    """The largest update count a native allocation accepts; only training can opt in to the extended limit."""
-    if extended and mode != 'train':
-        raise ValueError('Extended updates apply to training only')
-    return EXTENDED_UPDATE_LIMIT if extended else UPDATE_LIMIT
-
-
-def decay_updates(updates, decay):
-    """Updates over which the action deviation falls to its final value; the whole run unless declared."""
-    return updates if decay is None else decay
-
-
-def validate_decay(mode, updates, decay):
-    """A training decay length that ends after the run would never reach the final deviation."""
-    if decay is not None and (type(decay) is not int or not 1 <= decay <= EXTENDED_UPDATE_LIMIT
-                              or (mode == 'train' and decay > updates)):
-        raise ValueError('The deviation decay length lies between 1 update and the training updates')
-
-
-def validate_deadline(mode, profile, seconds):
-    """Keep the standard bound; allow the named flat pilot a finite allocation."""
-    if profile not in ALLOCATION_PROFILES:
-        raise ValueError('Unknown allocation profile')
-    if profile == 'flat_pilot_v1' and mode not in ('train', 'evaluate', 'diagnostic'):
-        raise ValueError('The flat pilot deadline applies to training, evaluation and standing diagnostics')
-    limit = 21600 if profile == 'flat_pilot_v1' else 6600
-    if (type(seconds) not in (int, float) or not math.isfinite(seconds)
-            or not 0 < seconds <= limit):
-        raise ValueError('Native deadline exceeds the allocation profile')
-
-
-def finish_training_update(update, updates, elapsed, deadline, checkpoint, save_loads):
-    """Save the last complete update before a deadline failure."""
-    expired = elapsed >= deadline
-    if update % 50 == 0 or update == updates or expired:
-        checkpoint(update)
-        save_loads()
-    if expired and update < updates:
-        raise TimeoutError('Training allocation ended after a complete PPO update')
-
-
-def collected_transitions(update, config, num_envs):
-    """Environment controls collected through ``update``: each update gathers the configured rollout per replica."""
-    return update * config['num_steps_per_env'] * num_envs
+from .runs.validation import (ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, UPDATE_LIMIT,
+    EXTENDED_UPDATE_LIMIT, update_limit, decay_updates, validate_decay, validate_deadline,
+    finish_training_update, collected_transitions)
 
 
 def scalars(value, prefix):
@@ -89,43 +42,10 @@ def scalars(value, prefix):
     return {}
 
 
-def checkpoint_reward_version(record):
-    """The reward a checkpoint was trained with; checkpoints from before the flag trained version 1."""
-    version = record['identity'].get('reward_version', '1')
-    if version not in ('1', '2', '3', '4'):
-        raise ValueError('Unknown checkpoint reward version: '+str(version))
-    return version
-
-
-LEARNER_DEFAULTS = {'learner': 'ppo', 'networks': 'mlp', 'motion_prior': False}
-LEARNER_KEYS = ('learner', 'networks', 'motion_prior', 'learner_source_files', 'amp_dataset')
-
-
-def json_shape(value):
-    """The value as a checkpoint record stores it: JSON turns tuples into lists."""
-    return json.loads(json.dumps(value, allow_nan=False))
-
-
-def require_learner_identity(record, identity):
-    """Reject a checkpoint whose learner, networks or demonstration bank differ; older records mean stock PPO."""
-    recorded = record['identity']
-    for key in LEARNER_KEYS:
-        if recorded.get(key, LEARNER_DEFAULTS.get(key)) != json_shape(identity.get(key, LEARNER_DEFAULTS.get(key))):
-            raise ValueError('Checkpoint learner, networks or demonstration bank differs: '+key)
-
-
-def require_learner_configuration(record, identity, config):
-    """Reject a checkpoint trained with other RSL-RL sources or another learner configuration."""
-    recorded = record['identity']
-    if (recorded['upstream_source_files'] != identity['upstream_source_files']
-            or recorded['ppo_config'] != json_shape(config)):
-        raise ValueError('Checkpoint learner dependency or configuration differs')
-
-
-def require_embedded_declaration(infos, record):
-    """The declaration pickled inside the checkpoint must equal its JSON record."""
-    if json_shape(infos) != {'identity': record['identity'], 'updates': record['updates']}:
-        raise ValueError('Embedded checkpoint declaration differs')
+from .runs.sources import source_files, physics_files, verify_runtime
+from .runs.identity import (checkpoint_reward_version, LEARNER_DEFAULTS, LEARNER_KEYS,
+    json_shape, require_learner_identity, require_learner_configuration,
+    require_embedded_declaration, require_checkpoint_identity)
 
 
 class ConfigRecord(dict):
@@ -272,7 +192,8 @@ def main(argv=None):
     config_class = EvaluationEnvConfig if args.mode == 'evaluate' and args.eval_scope == 'full' else configuration.EnvConfig
     cfg = config_class(num_envs=args.num_envs, seed=args.seed,
         record_motion_features=args.mode == 'evaluate' or args.learner == 'amp', render=args.mode == 'evaluate', episode_seconds=(90. if args.eval_scope == 'full' else 60.) if args.mode == 'evaluate' else (60. if args.mode == 'diagnostic' else args.episode_seconds), device=args.device)
-    identity = {'schema': 'hexapod_locomotion_ppo_v1', 'source_files': {p.name: sha(p) for p in sorted(source.glob('*.py'))},
+    identity = {'schema': 'hexapod_locomotion_ppo_v2', 'source_files': source_files(source),
+        'runtime_sources': verify_runtime(source.parent),
         'model_sha256': configuration.MODEL_SHA256, 'usd_sha256': configuration.USD_SHA256,
         'stance_sha256': sha(args.stance),
         'geometry_sha256': sha(args.geometry), 'geometry_extrema_sha256': sha(args.geometry_extrema),
@@ -291,7 +212,7 @@ def main(argv=None):
         amp_module = importlib.import_module(prefix+'.amp_ppo')
         identity['learner_source_files'] = {name: sha(source/name) for name in ('amp.py', 'amp_discriminator.py', 'amp_ppo.py', 'paper_networks.py')}
         identity['amp_dataset'] = amp_module.load_demonstrations(source.parent/amp_module.AMPConfig().dataset)[1]
-    identity['physics_source_files'] = {k: identity['source_files'][k] for k in ('env.py', 'env_config.py')}
+    identity['physics_source_files'] = physics_files(identity['source_files'])
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
         'spacing_m': cfg.spacing_m, 'target_slew_rad': cfg.target_slew_rad, 'action_scale_rad': cfg.action_scale_rad,
         'solver_position_iterations': 32, 'solver_velocity_iterations': 0,
@@ -310,9 +231,7 @@ def main(argv=None):
         checkpoint_record = json.loads(args.checkpoint.with_suffix('.json').read_text())
         if checkpoint_record['checkpoint_sha256'] != args.checkpoint_sha256:
             raise ValueError('Checkpoint declaration differs')
-        if any(checkpoint_record['identity'][key] != identity[key] for key in compatibility_keys):
-            raise ValueError('Checkpoint model, physics, seed or implementation differs')
-        require_learner_identity(checkpoint_record, identity)
+        require_checkpoint_identity(checkpoint_record, identity)
         # Evaluation computes no training reward; record the one the checkpoint learned from.
         identity['reward_version'] = checkpoint_reward_version(checkpoint_record)
     if args.preflight_only:

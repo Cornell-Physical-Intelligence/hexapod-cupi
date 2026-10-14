@@ -1,4 +1,6 @@
 """Evaluate the finite prescribed-controller sweep through native capture."""
+from .runs.sources import source_files, physics_files, verify_runtime
+
 import argparse
 import json
 from pathlib import Path
@@ -276,13 +278,13 @@ def main(argv=None):
         raise ValueError('Stance joint order differs')
     cfg = EnvConfig(num_envs=1, render=True, record_motion_features=True, episode_seconds=60., seed=args.seed)
     identity = {'model_sha256': MODEL_SHA256, 'usd_sha256': USD_SHA256,
-        'source_files': {p.name: sha(p) for p in sorted(source.glob('*.py'))},
+        'source_files': source_files(source), 'runtime_sources': verify_runtime(source.parent),
         'source_freeze_sha256': args.source_freeze_sha256,
         'stance_sha256': sha(args.stance), 'geometry_sha256': sha(args.geometry),
         'geometry_extrema_sha256': sha(args.geometry_extrema), 'config': cfg.declaration(),
         'controller': controller_config.declaration(), 'candidate': args.candidate,
         'controller_kind': 'prescribed_tripod', 'learned_policy': False}
-    identity['physics_source_files'] = {k: identity['source_files'][k] for k in ('env.py', 'env_config.py')}
+    identity['physics_source_files'] = physics_files(identity['source_files'])
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
         'spacing_m': cfg.spacing_m, 'target_slew_rad': cfg.target_slew_rad, 'action_scale_rad': cfg.action_scale_rad,
         'solver_position_iterations': 32, 'solver_velocity_iterations': 0,
