@@ -327,5 +327,41 @@ class LearnerOptionTests(unittest.TestCase):
                     prepare(root/f'bad{index}', REMOTE, **bad)
 
 
+    def test_rollout_length_scales_the_mini_batches_and_appears_only_when_selected(self):
+        base = ppo.ppo_config(7)
+        longer = ppo.ppo_config(7, steps_per_env=36)
+        self.assertEqual((base['num_steps_per_env'], base['algorithm']['num_mini_batches']), (24, 4))
+        self.assertEqual((longer['num_steps_per_env'], longer['algorithm']['num_mini_batches']), (36, 6))
+        self.assertEqual(ppo.ppo_config(7, steps_per_env=24), base)
+        longer['num_steps_per_env'], longer['algorithm']['num_mini_batches'] = 24, 4
+        self.assertEqual(longer, base)
+        for bad in (32, 6, 102, 36., '36'):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                ppo.ppo_config(7, steps_per_env=bad)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            checkpoint = {'checkpoint': REMOTE+'/checkpoint.pt', 'checkpoint_sha': 'a'*64, 'checkpoint_declaration_sha': 'b'*64}
+            for mode in ('train', 'evaluate'):
+                args = prepare(root/mode, REMOTE, mode=mode, steps_per_env=36, **({} if mode == 'train' else checkpoint))['command_args']
+                self.assertEqual(args[args.index('--steps-per-env')+1], '36')
+                self.assertEqual(json.loads((root/mode/'PACK.json').read_text())['steps_per_env'], 36)
+            self.assertNotIn('--steps-per-env', prepare(root/'plain', REMOTE, mode='train')['command_args'])
+            self.assertNotIn('steps_per_env', json.loads((root/'plain/PACK.json').read_text()))
+            for index, bad in enumerate((dict(steps_per_env=32), dict(learner='amp', steps_per_env=36),
+                                         dict(mode='tripod', steps_per_env=36))):
+                with self.subTest(bad=bad), self.assertRaises(ValueError):
+                    prepare(root/f'bad{index}', REMOTE, **bad)
+        from locomotion import train
+        # Metrics rows, state and checkpoint sidecars count the configured rollout, not a fixed 24 controls.
+        for steps, updates, collected in ((24, 2000, 6_144_000), (36, 1333, 6_142_464), (48, 2500, 15_360_000)):
+            self.assertEqual(train.collected_transitions(updates, ppo.ppo_config(7, steps_per_env=steps), 128), collected)
+        self.assertNotIn('*24*', Path(train.__file__).read_text())
+        base = ['--asset', 'a', '--model', 'm', '--geometry', 'g', '--geometry-extrema', 'e', '--stance', 's',
+                '--output', 'o', '--source-freeze-sha256', 'f'*64, '--num-envs', '1', '--preflight-only', '--mode', 'train']
+        with self.assertRaisesRegex(ValueError, 'rollout length'):
+            train.main(base + ['--steps-per-env', '32'])
+        with self.assertRaisesRegex(ValueError, 'require PPO training or evaluation'):
+            train.main(base + ['--steps-per-env', '36', '--learner', 'amp', '--networks', 'mlp'])
+
 if __name__ == '__main__':
     unittest.main()

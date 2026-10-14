@@ -8,6 +8,7 @@ import re
 import shutil
 
 from .env_config import sha
+from . import reward_options as reward_option_schema
 from .tripod_config import SWEEPS
 from .train import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline
 from .spark_paths import LEGACY_ROOT, RUN_ROOTS, within_roots
@@ -22,7 +23,8 @@ REMOTE_ROOT = LEGACY_ROOT
 LEARNER_OPTION_DEFAULTS = {'observation_scaling': 'none', 'command_segments': 'continuous',
                            'learning_rate_max': None, 'action_std': .15, 'action_noise_correlation': 0.,
                            'action_std_final': None, 'gait_clock': 0, 'action_smoothing': 'none',
-                           'velocity_noise': 0., 'action_std_decay_updates': None}
+                           'velocity_noise': 0., 'action_std_decay_updates': None,
+                           'steps_per_env': 24}
 
 
 def save(path, value):
@@ -30,11 +32,15 @@ def save(path, value):
 
 
 def valid_reward_options(spec):
-    """Unique ``key=value`` pairs; the trainer checks the keys against ``RewardV4Config`` in the container."""
+    """Unique ``key=value`` pairs with numeric or lowercase-word values, such as ``yaw_gate_on=none``.
+
+    ``prepare`` then checks each key, value type and word choice against the selected task's reward configuration
+    with ``locomotion.reward_options``."""
+    word, number = r'[a-z][a-z0-9_]*', r'[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?'
     pairs = [item.partition('=') for item in spec.split(',')]
     keys = [key for key, _, _ in pairs]
     return (len(set(keys)) == len(keys)
-            and all(re.fullmatch(r'[a-z][a-z0-9_]*', key) and re.fullmatch(r'[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?', value)
+            and all(re.fullmatch(word, key) and (re.fullmatch(number, value) or re.fullmatch(word, value))
                     for key, separator, value in pairs))
 
 
@@ -46,8 +52,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             observation_normalization='empirical', observation_scaling='none',
             command_segments='continuous', learning_rate_max=None, action_std=.15,
             action_noise_correlation=0., action_std_final=None, gait_clock=0, action_smoothing='none',
-            velocity_noise=0., episode_seconds=20., reward_options='',
-            video_case=None, extended_updates=False, action_std_decay_updates=None,
+            velocity_noise=0., episode_seconds=20., reward_options='', reward_task='v4',
+            video_case=None, extended_updates=False, action_std_decay_updates=None, steps_per_env=24,
             allocation_profile='standard', max_wall_seconds=6200, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     validate_deadline(mode, allocation_profile, max_wall_seconds)
@@ -89,7 +95,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
                        'learning_rate_max': learning_rate_max, 'action_std': action_std,
                        'action_noise_correlation': action_noise_correlation, 'action_std_final': action_std_final,
                        'gait_clock': gait_clock, 'action_smoothing': action_smoothing,
-                       'velocity_noise': velocity_noise, 'action_std_decay_updates': action_std_decay_updates}
+                       'velocity_noise': velocity_noise, 'action_std_decay_updates': action_std_decay_updates,
+                       'steps_per_env': steps_per_env}
     selected_options = {key: value for key, value in learner_options.items() if value != LEARNER_OPTION_DEFAULTS[key]}
     if (observation_scaling not in ('none', 'fixed') or command_segments not in ('continuous', 'bootstrap')
             or (learning_rate_max is not None and not (type(learning_rate_max) is float and 1e-5 <= learning_rate_max <= 1e-2))
@@ -101,6 +108,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             or type(velocity_noise) is not float or not 0 <= velocity_noise <= 5
             or (action_std_final is not None and not (type(action_std_final) is float and .005 <= action_std_final <= action_std))
             or (action_std_decay_updates is not None and action_std_final is None)
+            or type(steps_per_env) is not int or not 12 <= steps_per_env <= 96 or steps_per_env % 6
             or (selected_options and (learner != 'ppo' or mode not in ('train', 'evaluate')))):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
@@ -111,6 +119,16 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         raise ValueError('Episode length selection applies to training, between 5 and 20 seconds')
     if reward_options and (mode != 'train' or reward_version != '4' or not valid_reward_options(reward_options)):
         raise ValueError('Reward options apply to reward version 4 training as unique key=value pairs')
+    if reward_task not in ('v4', 'v4_yaw_gate') or (reward_task != 'v4' and (mode != 'train' or reward_version != '4')):
+        raise ValueError('The reward task selection applies to reward version 4 training only')
+    if reward_options:
+        # Each key, value type and word choice against the selected task's configuration, without importing Torch;
+        # the trainer applies the task's reward_config before launch.
+        try:
+            reward_option_schema.check(reward_task, reward_options)
+        except ValueError as error:
+            raise ValueError('Reward options apply to reward version 4 training as unique key=value pairs: '
+                             + str(error)) from error
     if (learner not in ('ppo', 'amp') or networks not in ('mlp', 'paper') or (networks == 'paper' and learner != 'amp')
             or (learner == 'amp' and mode not in ('train', 'evaluate'))):
         raise ValueError('The AMP learner trains or evaluates, and the paper networks need the AMP learner')
@@ -198,6 +216,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         binding['command_args'] += ['--episode-seconds', str(episode_seconds)]
     if reward_options:
         binding['command_args'] += ['--reward-options', reward_options]
+    if reward_task != 'v4':
+        binding['command_args'] += ['--reward-task', reward_task]
     if mode == 'throughput':
         binding['command_args'] += ['--warmup-updates', str(warmup_updates)]
     if checkpoint is not None:
@@ -218,6 +238,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         **({} if video_case is None else {'video_case': video_case}),
         **({} if episode_seconds == 20. else {'episode_seconds': episode_seconds}),
         **({} if not reward_options else {'reward_options': reward_options}),
+        **({} if reward_task == 'v4' else {'reward_task': reward_task}),
         **({'extended_updates': True} if extended_updates else {}),
         'allocation_profile': allocation_profile, 'max_wall_seconds': max_wall_seconds,
         'updates': updates, 'stage2_complete': False, 'files': {
@@ -259,11 +280,13 @@ def main():
     parser.add_argument('--action-noise-correlation', type=float, default=0.)
     parser.add_argument('--action-std-final', type=float)
     parser.add_argument('--action-std-decay-updates', type=int)
+    parser.add_argument('--steps-per-env', type=int, default=24)
     parser.add_argument('--gait-clock', type=int, default=0)
     parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none')
     parser.add_argument('--velocity-noise', type=float, default=0.)
     parser.add_argument('--episode-seconds', type=float, default=20.)
     parser.add_argument('--reward-options', default='')
+    parser.add_argument('--reward-task', choices=['v4', 'v4_yaw_gate'], default='v4')
     parser.add_argument('--video-case')
     parser.add_argument('--allocation-profile', choices=ALLOCATION_PROFILES, default='standard')
     parser.add_argument('--max-wall-seconds', type=int, default=6200)

@@ -72,6 +72,11 @@ def finish_training_update(update, updates, elapsed, deadline, checkpoint, save_
         raise TimeoutError('Training allocation ended after a complete PPO update')
 
 
+def collected_transitions(update, config, num_envs):
+    """Environment controls collected through ``update``: each update gathers the configured rollout per replica."""
+    return update * config['num_steps_per_env'] * num_envs
+
+
 def scalars(value, prefix):
     """Return finite numeric leaves of a task status; drop lists, text and missing values."""
     if isinstance(value, dict):
@@ -159,6 +164,9 @@ def main(argv=None):
     parser.add_argument('--reward-version', choices=['1', '2', '3', '4'], default='1',
                         help='Training reward: historical v1, stride tracking v2, immediate tracking v3, '
                              'or noise-calibrated stepping v4.')
+    parser.add_argument('--reward-task', choices=['v4', 'v4_yaw_gate'], default='v4',
+                        help='Reward version 4 task: v4, or the experimental yaw-gated schedule with turn-heavy '
+                             'sampling in task_v4_yaw_gate.py. Training only.')
     parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo',
                         help='Stock PPO in ppo.py or PPO with the online motion prior in amp_ppo.py.')
     parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp',
@@ -192,6 +200,9 @@ def main(argv=None):
                         help='Reach the final action deviation after this many updates and hold it; the run length by default.')
     parser.add_argument('--action-noise-correlation', type=float, default=0.,
                         help='Share of each exploration noise sample carried to the next control (tanh mean only).')
+    parser.add_argument('--steps-per-env', type=int, default=24,
+                        help='Controls each robot collects per PPO update, a multiple of 6 from 12 to 96; '
+                             'mini-batches scale with it.')
     parser.add_argument('--video-case',
                         help='Learning probe to record on video; the first selected probe by default.')
     if any(flag in (argv if argv is not None else sys.argv[1:]) for flag in ('--preflight-only', '--help', '-h')):
@@ -220,22 +231,27 @@ def main(argv=None):
                            action_noise_correlation=args.action_noise_correlation,
                            action_std_final=args.action_std_final, gait_clock=args.gait_clock,
                            action_smoothing=args.action_smoothing, velocity_noise=args.velocity_noise,
-                           action_std_decay_updates=args.action_std_decay_updates)
+                           action_std_decay_updates=args.action_std_decay_updates, steps_per_env=args.steps_per_env)
     if (learner_options != dict(observation_scaling='none', command_segments='continuous', learning_rate_max=None,
                                 action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0,
-                                action_smoothing='none', velocity_noise=0., action_std_decay_updates=None)
+                                action_smoothing='none', velocity_noise=0., action_std_decay_updates=None,
+                                steps_per_env=24)
             and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate'))):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
+    if not 12 <= args.steps_per_env <= 96 or args.steps_per_env % 6:
+        raise ValueError('The rollout length is a multiple of 6 from 12 to 96 controls per robot')
     if args.video_case is not None and (args.mode != 'evaluate' or args.eval_scope == 'full'):
         raise ValueError('A video case applies to a learning-probe evaluation')
     if args.episode_seconds != 20. and (args.mode != 'train' or not 5. <= args.episode_seconds <= 20.):
         raise ValueError('Episode length selection applies to training, between 5 and 20 seconds')
     if args.reward_options and (args.mode != 'train' or args.reward_version != '4'):
         raise ValueError('Reward options apply to reward version 4 training only')
+    if args.reward_task != 'v4' and (args.mode != 'train' or args.reward_version != '4'):
+        raise ValueError('The reward task selection applies to reward version 4 training only')
     if args.reward_options:
         # Rejects an unknown key or an invalid value before the GPU launch; the container preflight runs this.
-        importlib.import_module(prefix+'.task_v4').reward_config(args.reward_options)
+        importlib.import_module(prefix+'.task_'+args.reward_task).reward_config(args.reward_options)
     if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
         raise ValueError('The paper networks need the AMP learner, and the AMP learner trains or evaluates only')
     if args.action_std_decay_updates is not None and args.action_std_final is None:
@@ -266,6 +282,8 @@ def main(argv=None):
         'reward_version': args.reward_version, 'learner': args.learner, 'networks': args.networks}
     if args.reward_options:
         identity['reward_options'] = args.reward_options
+    if args.reward_task != 'v4':
+        identity['reward_task'] = args.reward_task
     if args.extended_updates:
         # The exploration decay length enters ppo_config; the opt-in records the requested run length beside it.
         identity['training_updates'] = args.updates
@@ -364,7 +382,13 @@ def main(argv=None):
         if version != '5.0.1':
             raise ValueError('RSL-RL version differs: '+version)
         task_config = task_module.TaskConfig(seed=args.seed)
-        if args.reward_version in ('2', '3', '4'):
+        if args.reward_task == 'v4_yaw_gate':
+            module = importlib.import_module(prefix+'.task_v4_yaw_gate')
+            task_class = module.TrainingTaskV4YawGate
+            if args.reward_options:
+                task_class = module.variant(args.reward_options)
+            task = task_class(env, task_config, args.output/'task')
+        elif args.reward_version in ('2', '3', '4'):
             module = importlib.import_module(prefix+'.task_v'+args.reward_version)
             task_class = getattr(module, 'TrainingTaskV'+args.reward_version)
             if args.reward_options:
@@ -422,7 +446,7 @@ def main(argv=None):
                 path = args.output/f'checkpoint_update{update:06d}.pt'
                 runner.save(str(path), infos={'identity': identity, 'updates': update})
                 save(path.with_suffix('.json'), {'identity': identity, 'updates': update,
-                    'checkpoint_sha256': sha(path), 'transitions': update*24*env.num_envs})
+                    'checkpoint_sha256': sha(path), 'transitions': collected_transitions(update, config, env.num_envs)})
                 state['checkpoint'] = str(path); state['checkpoint_sha256'] = sha(path)
                 save(args.output/'state.json', state)
             loads = vanilla.TrainingLoads(env)
@@ -433,7 +457,7 @@ def main(argv=None):
             def log(**values):
                 original_log(**values)
                 update = values['it']+1
-                row = {'update': update, 'transitions': update*24*env.num_envs,
+                row = {'update': update, 'transitions': collected_transitions(update, config, env.num_envs),
                     'collection_seconds': values['collect_time'], 'learning_seconds': values['learn_time'],
                     'loss': values['loss_dict'], 'learning_rate': values['learning_rate'],
                     'mean_action_std': float(values['action_std'].mean()),
