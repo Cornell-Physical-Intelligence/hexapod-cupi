@@ -26,11 +26,12 @@ class CostGraph(Protocol):
     later would break every implementation that lacks it.
     """
 
-    def neighbors(self, node: Cell) -> Iterable[Cell]:
-        """Yield the nodes reachable from ``node`` in one step.
+    def successors(self, node: Cell) -> Iterable[tuple[Cell, float]]:
+        """Yield ``(b, edge_cost(node, b))`` for each node ``b`` one step from ``node``.
 
-        Exactly the nodes ``b`` with a finite ``edge_cost(node, b)``: nothing
-        untraversable is yielded, and nothing traversable is left out.
+        Exactly the nodes with a finite cost: nothing untraversable is yielded, and
+        nothing traversable is left out. The cost travels with the node so a search
+        never prices the same step twice.
         """
         ...
 
@@ -61,8 +62,8 @@ class GridGraph:
             )
         self.grid = grid
 
-    def neighbors(self, node: Cell) -> Iterable[Cell]:
-        """Yield the cells one finite step from ``node``, in the fixed :data:`STEPS` order.
+    def successors(self, node: Cell) -> Iterable[tuple[Cell, float]]:
+        """Yield ``(cell, cost)`` for each finite step from ``node``, in :data:`STEPS` order.
 
         Traversability is decided only by :meth:`edge_cost`; this asks it, so
         off-grid cells, blocked cells and corner-cutting diagonals are all dropped.
@@ -71,8 +72,9 @@ class GridGraph:
         east, north = node
         for d_east, d_north in STEPS:
             candidate = (east + d_east, north + d_north)
-            if math.isfinite(self.edge_cost(node, candidate)):
-                yield candidate
+            cost = self.edge_cost(node, candidate)
+            if math.isfinite(cost):
+                yield candidate, cost
 
     def edge_cost(self, a: Cell, b: Cell) -> float:
         """Length in metres of the step ``a`` -> ``b``, or ``math.inf``.

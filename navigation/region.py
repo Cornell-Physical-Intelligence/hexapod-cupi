@@ -27,6 +27,10 @@ class PlanMargin:
         ``footprint_radius_m``: Length of largest line fitting across the hexapod.
         ``stop_tolerance_m``: Perscribed by the specifications of the controller + robot build.
         ``position_error_bound_m``: the specificed GPS bound.
+
+    Raises:
+        ValueError: A term is negative or not finite, or ``footprint_radius_m`` is
+            zero. The message names the term and the value given.
     """
 
     footprint_radius_m: float
@@ -67,6 +71,13 @@ class SurveyRegion:
     Every part is a :class:`shapely.Polygon` in the local east-north frame, and must be
     valid (in particular, not self-intersecting); an invalid drawing is rejected here,
     before approval, rather than after motion.
+
+    Raises:
+        TypeError: ``exclusions`` is not a sequence (a generator, say), or a part is
+            not a ``shapely.Polygon``.
+        ValueError: A part is not valid, for example self-intersecting. The message
+            names the part (``boundary``, ``corridor`` or ``exclusions[i]``) and
+            gives shapely's reason.
     """
 
     boundary: shapely.Polygon

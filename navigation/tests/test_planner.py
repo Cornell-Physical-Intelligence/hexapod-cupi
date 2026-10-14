@@ -72,11 +72,8 @@ def _dijkstra(graph, start, goal) -> tuple[float, int] | None:
         expansions += 1
         if node == goal:
             return cost, expansions
-        for neighbour in graph.neighbors(node):
+        for neighbour, step in graph.successors(node):
             if neighbour in closed:
-                continue
-            step = graph.edge_cost(node, neighbour)
-            if not math.isfinite(step):
                 continue
             candidate = cost + step
             if candidate < best.get(neighbour, math.inf):
@@ -85,8 +82,8 @@ def _dijkstra(graph, start, goal) -> tuple[float, int] | None:
     return None
 
 
-class _ReversedNeighbors:
-    """A :class:`CostGraph` that offers neighbours in the opposite order.
+class _ReversedSuccessors:
+    """A :class:`CostGraph` that offers successors in the opposite order.
 
     Used to prove the planner's tie-break is a total order on something intrinsic to
     the nodes, not on the order they happened to be discovered in.
@@ -95,8 +92,8 @@ class _ReversedNeighbors:
     def __init__(self, inner) -> None:
         self.inner = inner
 
-    def neighbors(self, node):
-        return tuple(reversed(tuple(self.inner.neighbors(node))))
+    def successors(self, node):
+        return tuple(reversed(tuple(self.inner.successors(node))))
 
     def edge_cost(self, a, b) -> float:
         return self.inner.edge_cost(a, b)
@@ -115,36 +112,40 @@ class SeamTests(unittest.TestCase):
     def test_a_wrapper_also_satisfies_the_protocol(self) -> None:
         # The Protocol is satisfied structurally, so a teammate's graph needs no
         # base class. This is what keeps the seam cheap to implement against.
-        graph = _ReversedNeighbors(GridGraph(_open_grid(3, 3)))
+        graph = _ReversedSuccessors(GridGraph(_open_grid(3, 3)))
         self.assertIsInstance(graph, CostGraph)
 
     def test_a_graph_must_be_built_on_a_grid(self) -> None:
         with self.assertRaises(TypeError):
             GridGraph(object())
 
-    def test_neighbours_are_on_grid_and_in_a_fixed_order(self) -> None:
+    def test_successors_are_on_grid_and_in_a_fixed_order(self) -> None:
         graph = GridGraph(_open_grid(3, 3))
         self.assertEqual(
-            tuple(graph.neighbors((1, 1))),
+            tuple(cell for cell, _ in graph.successors((1, 1))),
             tuple((1 + de, 1 + dn) for de, dn in STEPS),
-            "neighbour order is part of the contract",
+            "successor order is part of the contract",
         )
         # A corner has only the three in-bounds steps.
-        self.assertEqual(set(graph.neighbors((0, 0))), {(1, 0), (0, 1), (1, 1)})
+        self.assertEqual(
+            {cell for cell, _ in graph.successors((0, 0))}, {(1, 0), (0, 1), (1, 1)}
+        )
 
-    def test_neighbours_are_exactly_the_finite_cost_steps(self) -> None:
+    def test_successors_are_exactly_the_finite_cost_steps(self) -> None:
         # East of (0, 0) is blocked, which also forbids the north-east diagonal.
         graph = GridGraph(_grid(("..", ".#")))
-        self.assertEqual(tuple(graph.neighbors((0, 0))), ((0, 1),))
-        self.assertEqual(tuple(graph.neighbors((1, 0))), (), "a blocked cell has none")
+        self.assertEqual(tuple(graph.successors((0, 0))), (((0, 1), 1.0),))
+        self.assertEqual(tuple(graph.successors((1, 0))), (), "a blocked cell has none")
         for node in ((0, 0), (0, 1), (1, 1)):
+            yielded = dict(graph.successors(node))
             for de, dn in STEPS:
                 other = (node[0] + de, node[1] + dn)
+                cost = graph.edge_cost(node, other)
                 with self.subTest(node=node, other=other):
-                    self.assertEqual(
-                        other in tuple(graph.neighbors(node)),
-                        math.isfinite(graph.edge_cost(node, other)),
-                    )
+                    if math.isfinite(cost):
+                        self.assertEqual(yielded.get(other), cost)
+                    else:
+                        self.assertNotIn(other, yielded)
 
 
 class RouteTests(unittest.TestCase):
@@ -299,7 +300,7 @@ class DeterminismTests(unittest.TestCase):
         grid = _open_grid(3, 2)
         forward = a_star(GridGraph(grid), self.TIE_START, self.TIE_GOAL)
         reversed_order = a_star(
-            _ReversedNeighbors(GridGraph(grid)), self.TIE_START, self.TIE_GOAL
+            _ReversedSuccessors(GridGraph(grid)), self.TIE_START, self.TIE_GOAL
         )
         self.assertIsNotNone(forward)
         self.assertIsNotNone(reversed_order)

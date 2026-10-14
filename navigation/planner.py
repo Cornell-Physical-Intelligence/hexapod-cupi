@@ -74,7 +74,8 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
       :attr:`Route.expansions`.
     * Skip a popped node already closed -- a lazy-deletion heap holds stale entries,
       and re-expanding them is what turns A\\* quadratic.
-    * Treat ``math.inf`` edges as absent; never push an infinite ``f``.
+    * Take each step's cost from ``graph.successors``, which yields only finite
+      steps; do not call ``edge_cost`` again. Still never push an infinite ``f``.
     * ``start == goal`` returns a one-cell Route of cost 0.0 -- but only if the cell
       is passable, otherwise ``None``.
     * An impassable or off-grid ``start`` or ``goal`` is ``None``, not an exception.
