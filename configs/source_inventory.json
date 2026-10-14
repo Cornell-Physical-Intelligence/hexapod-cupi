@@ -154,7 +154,7 @@
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Native Kit perspective RGB capture with audited physics and a hard deadline."
+      "purpose": "Compatibility import for camera."
     },
     {
       "path": "locomotion/env.py",
@@ -189,14 +189,14 @@
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Stdlib-only evaluation timeout recipe; no simulator or learner imports."
+      "purpose": "Compatibility import for evaluation_config."
     },
     {
       "path": "locomotion/force_metrics.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Summarize recorded 400 Hz contact-normal loads and motor torque."
+      "purpose": "Compatibility import for force_metrics."
     },
     {
       "path": "locomotion/inputs.py",
@@ -231,7 +231,7 @@
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Offline CPU fit of the AMP discriminator to the admitted bank against a recorded trace; reports held-out style rewards bound to input and source hashes."
+      "purpose": "Compatibility import for amp_diagnostic."
     },
     {
       "path": "locomotion/amp_ppo.py",
@@ -252,7 +252,7 @@
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Candidate Table I task and penalty reward from Liu et al.: literal, penalty-calibrated and command-scaled tracking variants."
+      "purpose": "Compatibility import for paper_reward."
     },
     {
       "path": "locomotion/prepare.py",
@@ -266,7 +266,7 @@
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Check reward option keys, value types and word choices against a task's reward configuration with the standard library for pack preparation."
+      "purpose": "Compatibility import for reward_options."
     },
     {
       "path": "locomotion/reservation.py",
@@ -287,21 +287,21 @@
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Score recorded native control traces offline under the current and candidate rewards."
+      "purpose": "Compatibility import for reward_scorer."
     },
     {
       "path": "locomotion/reward_viewer.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Write an HTML page that plays evaluated policies beside their per-control reward."
+      "purpose": "Compatibility import for reward_viewer."
     },
     {
       "path": "locomotion/reward_workbench.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Explain the training reward and export coefficient edits scored against recorded rollouts."
+      "purpose": "Compatibility import for reward_workbench."
     },
     {
       "path": "locomotion/task.py",
@@ -350,14 +350,14 @@
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Hold fixed action means under graded exploration noise and record reward inputs without an optimizer."
+      "purpose": "Compatibility import for noise_probe."
     },
     {
       "path": "locomotion/throughput.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Profile stock-PPO training cost, throughput and memory at one admitted replica count."
+      "purpose": "Compatibility import for throughput."
     },
     {
       "path": "locomotion/train.py",
@@ -406,28 +406,28 @@
       "previous_path": null,
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Prescribe sinusoidal tripod targets with measured touchdown and controlled stops."
+      "purpose": "Compatibility import for tripod."
     },
     {
       "path": "locomotion/tripod_config.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Declare finite tripod geometry and servo corrections."
+      "purpose": "Compatibility import for tripod_config."
     },
     {
       "path": "locomotion/tripod_evaluate.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Record admitted native tripod trials through the existing evaluation pipeline."
+      "purpose": "Compatibility import for tripod_evaluate."
     },
     {
       "path": "locomotion/tripod_kinematics.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Derive toe positions and joint Jacobians from the admitted model."
+      "purpose": "Compatibility import for tripod_kinematics."
     },
     {
       "path": "locomotion/amp.py",
@@ -785,6 +785,104 @@
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Generate a source map from a Git revision without importing project code."
+    },
+    {
+      "path": "locomotion/core/tripod_kinematics.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Derive tripod coefficients from the admitted model's joint transforms."
+    },
+    {
+      "path": "locomotion/evaluation/amp_diagnostic.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Offline CPU diagnostic of the AMP discriminator on the admitted demonstration bank."
+    },
+    {
+      "path": "locomotion/evaluation/camera.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Native Kit perspective RGB capture with audited physics and a hard deadline."
+    },
+    {
+      "path": "locomotion/evaluation/evaluation_config.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Stdlib-only evaluation timeout recipe; no simulator or learner imports."
+    },
+    {
+      "path": "locomotion/evaluation/force_metrics.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Summarize recorded 400 Hz contact-normal loads and motor torque."
+    },
+    {
+      "path": "locomotion/evaluation/noise_probe.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Hold fixed action means under graded exploration noise and record the reward inputs."
+    },
+    {
+      "path": "locomotion/evaluation/reward_scorer.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Score recorded native rollouts offline under the current and candidate rewards."
+    },
+    {
+      "path": "locomotion/evaluation/reward_viewer.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Build a self-contained HTML page that plays evaluated policies beside their reward."
+    },
+    {
+      "path": "locomotion/evaluation/reward_workbench.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Explain the current training reward and edit its coefficients against recorded rollouts."
+    },
+    {
+      "path": "locomotion/evaluation/throughput.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Profile stock-PPO training cost, throughput and memory at one admitted replica count."
+    },
+    {
+      "path": "locomotion/evaluation/tripod_evaluate.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Evaluate the finite prescribed-controller sweep through native capture."
+    },
+    {
+      "path": "locomotion/tasks/reward_options.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Check reward option keys, value types and word choices with the standard library."
+    },
+    {
+      "path": "locomotion/tasks/tripod.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Prescribed tripod targets with measured touchdown, without physics writes."
+    },
+    {
+      "path": "locomotion/tasks/tripod_config.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Declared geometry adaptation and finite Zhang et al. controller sweep."
     }
   ],
   "archived_documents": []
