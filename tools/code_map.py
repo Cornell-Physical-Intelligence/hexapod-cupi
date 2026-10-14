@@ -55,7 +55,7 @@ def generate(repo, ref="HEAD"):
         imports = [{"line": n.lineno, "text": ast.unparse(n)} for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom))]
         dynamic = sorted({n.value for n in ast.walk(tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)
                           and n.value.startswith("locomotion.") and len(n.value) < 160})
-        rows.append({"path": path, "area": area(path), "test": "/tests/" in path,
+        rows.append({"path": path, "area": area(path), "test": "/tests/" in path, "compatibility": (ast.get_docstring(tree) or "").startswith("Compatibility"),
                      "lines": len(text.splitlines()), "sha256": hashlib.sha256(raw).hexdigest(),
                      "owner": meta.get("owner", "Test module"), "classification": meta.get("classification", "test"),
                      "purpose": meta.get("purpose", (ast.get_docstring(tree) or "").split("\n\n")[0]),
@@ -74,23 +74,63 @@ def generate(repo, ref="HEAD"):
             "scope": "Static definitions and imports, including nested definitions. Import strings and factory expressions can remain unresolved. This is not a runtime call graph or a test-coverage report.", "modules": rows}
 
 
-PAGE = r'''<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hexapod locomotion code map</title><style>
-:root{color-scheme:light}*{box-sizing:border-box}body{margin:0;background:#f3f5f7;color:#18232e;font:16px/1.55 system-ui,sans-serif}main{max-width:1200px;margin:auto;padding:38px 24px}a{color:#145e97}h1{font-size:32px;margin:4px 0}small,.muted{color:#536779}code{font:13px ui-monospace,monospace;overflow-wrap:anywhere}nav{position:sticky;top:0;background:#f3f5f7;padding:14px 0;display:flex;gap:12px;flex-wrap:wrap;align-items:center;z-index:1}input[type=search]{flex:1;min-width:240px}input,select{padding:10px;border:1px solid #a6b6c7;border-radius:6px;font:inherit}article{background:white;margin:14px 0;border:1px solid #d4dde5;border-radius:10px;padding:20px}h2{font-size:18px;margin:0 0 6px}.badge{font-size:12px;border-radius:4px;background:#e4edf4;padding:3px 6px}table{width:100%;border-collapse:collapse}td,th{padding:9px;text-align:left;vertical-align:top;border-bottom:1px solid #e0e6ec}td:first-child{width:38%}.imports{white-space:pre-wrap;font:13px/1.65 ui-monospace,monospace;overflow-wrap:anywhere}details{margin:12px 0}footer{margin:30px 0}#empty{padding:25px;background:#fff}a:focus,input:focus,select:focus,summary:focus{outline:3px solid #db8c24;outline-offset:3px}@media(max-width:700px){td,th{display:block;width:100%!important}th{display:none}}@media print{nav{position:static}article{break-inside:avoid}}
-</style><main><a href="../">Project progress</a><h1>Locomotion code map</h1><p id="meta"></p><p class="muted">Search a class, function, filename or purpose. Source links point to the build commit. You can include tests and inspect imports without loading Isaac, Torch or MuJoCo.</p><nav aria-label="Code map filters"><input id="query" type="search" aria-label="Search code map" placeholder="Search, for example ProximityGuard"><select id="area" aria-label="Area"><option value="">All areas</option></select><label><input type="checkbox" id="tests"> Include tests</label><label><input type="checkbox" id="functions"> Include functions and methods</label></nav><p id="count" aria-live="polite"></p><div id="results"></div><footer id="scope" class="muted"></footer></main>
+PAGE = r'''<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hexapod · Locomotion code</title>
+<link rel="stylesheet" href="../poster.css">
+<style>
+.filters {display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:24px 0}
+.filters input[type=search] {flex:1;min-width:220px}
+.filters input[type=search],.filters select {font:inherit;color:inherit;background:transparent;border:1px solid var(--line);padding:10px 12px}
+.filters input::placeholder {color:var(--ink);opacity:1}
+.filters label {display:flex;align-items:center;gap:8px}
+.module {padding:14px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.module summary {cursor:pointer;font-weight:700;line-height:1.55}
+.module > p {margin:12px 0}
+.definitions {margin:12px 0;padding-left:24px;columns:2;column-gap:32px}
+.definitions li {padding:5px 0;break-inside:avoid;line-height:1.55}
+@media(max-width:760px) {.definitions {columns:1}}
+</style>
+</head>
+<body>
+<a class="skip" href="#code">Skip to the code</a>
+<header class="masthead"><a class="brand" href="../"><span class="brand-mark" aria-hidden="true">H/6</span><span>Hexapod · Cornell Physical Intelligence</span></a><nav aria-label="Pages"><a href="../">Progress</a><a href="#code" aria-current="page">Code</a></nav><a class="repo-link" href="https://github.com/Cornell-Physical-Intelligence/hexapod-cupi">GitHub ↗</a></header>
+<main id="code">
+<section class="intro"><h1>Locomotion code map</h1><p>Choose a file to see its classes and functions, or search for a name.</p></section>
+<div class="filters" role="search" aria-label="Code map filters"><input id="query" type="search" aria-label="Search code map" placeholder="Search code"><select id="area" aria-label="Package"><option value="">All packages</option></select><label><input type="checkbox" id="tests"> Tests</label><label><input type="checkbox" id="compatibility"> Compatibility imports</label></div>
+<p id="count" role="status"></p>
+<div id="results"></div>
+<footer class="section"><p id="revision"></p><p><a href="code-map.json">Download the source index</a></p></footer>
+</main>
 <script>const DATA=__DATA__;
+const PACKAGES=[
+['core','Core','Motor arithmetic, transforms and features.'],
+['backends','Isaac backend','Scene construction and environment stepping.'],
+['tasks','Tasks','Episode handling, reward versions and prescribed control.'],
+['learning','Learning','Learner configuration and adapters.'],
+['evaluation','Evaluation','Capture, scoring and diagnostics.'],
+['runs','Runs','Validation, packaging and source identity.'],
+['priors','Priors','Motion data and AMP datasets.'],
+['surrogate','Surrogate','MuJoCo training and evaluation.'],
+['entry points and experiments','Entry points and experiments','Command entry points and compatibility imports.']
+];
 const el=id=>document.getElementById(id), esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const link=(url,text)=>`<a href="${esc(url)}">${esc(text)}</a>`;
-const t=DATA.totals.production;el('meta').textContent=`${DATA.revision.slice(0,8)}${DATA.working_tree_changed?' (local changes)':''} · ${t.files} production modules · ${t.classes} class definitions · ${t.functions_and_methods} functions and methods · ${t.physical_lines.toLocaleString()} physical lines`;
-el('scope').textContent=DATA.scope;
-for(const name of [...new Set(DATA.modules.map(m=>m.area))].sort()){const option=document.createElement('option');option.value=name;option.textContent=name;el('area').append(option)}
-function render(){const query=el('query').value.trim().toLowerCase(), chosen=el('area').value, tests=el('tests').checked, functions=el('functions').checked;
-const rows=DATA.modules.filter(m=>(tests||!m.test)&&(!chosen||m.area===chosen)&&(!query||[m.path,m.purpose,m.owner,...m.symbols.map(s=>s.name+' '+s.doc)].join(' ').toLowerCase().includes(query)));
-el('count').textContent=`${rows.length} modules shown`;
-el('results').innerHTML=rows.map(m=>{const symbols=m.symbols.filter(s=>(functions||s.kind==='class'||query)&&(!query||m.path.toLowerCase().includes(query)||s.name.toLowerCase().includes(query)||s.doc.toLowerCase().includes(query)||m.purpose.toLowerCase().includes(query)));
-return `<article><span class="badge">${esc(m.area)}${m.test?' · test':''}</span><h2>${link(m.url,m.path)}</h2><p>${esc(m.purpose)}</p><p class="muted">${esc(m.owner)} · ${esc(m.classification)} · ${m.lines} physical lines</p>${symbols.length?`<table><thead><tr><th>Definition</th><th>Source docstring</th></tr></thead><tbody>${symbols.map(s=>`<tr><td><code>${link(s.url,s.name)}</code><br><small>${s.kind} · line ${s.line}</small></td><td>${esc(s.doc||'No docstring.')}<details><summary>Signature or bases</summary><code>${esc(s.signature)}</code></details></td></tr>`).join('')}</tbody></table>`:'<p class="muted">No matching class definitions. Enable functions to inspect the functional API.</p>'}<details><summary>Imports and declared dynamic references</summary><div class="imports">${esc(m.imports.map(i=>i.line+': '+i.text).join('\n'))}</div><div class="imports">${esc(m.dynamic_references.join('\n'))}</div></details><details><summary>Source identity</summary><code>${esc(m.sha256)}</code></details></article>`}).join('')||'<p id="empty">No matching modules.</p>'}
-for(const id of ['query','area','tests','functions'])el(id).addEventListener('input',render);render();
-</script></html>'''
+el('revision').innerHTML=link(`https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/tree/${DATA.revision}`,`Source ${DATA.revision.slice(0,8)}`)+(DATA.working_tree_changed?' · Local preview includes uncommitted changes.':'');
+for(const [value,name] of PACKAGES){const option=document.createElement('option');option.value=value;option.textContent=name;el('area').append(option)}
+function render(){const query=el('query').value.trim().toLowerCase(), chosen=el('area').value, tests=el('tests').checked, compatibility=el('compatibility').checked;
+const matches=(m)=>[m.path,m.purpose,...m.symbols.map(s=>s.name+' '+s.doc)].join(' ').toLowerCase().includes(query);
+const rows=DATA.modules.filter(m=>(tests||!m.test)&&(compatibility||!m.compatibility)&&(!chosen||m.area===chosen)&&(!query||matches(m)));
+el('count').textContent=query?`${rows.length} files match “${el('query').value.trim()}”`:'';
+el('results').innerHTML=PACKAGES.map(([area,title,purpose])=>{const modules=rows.filter(m=>m.area===area);if(!modules.length)return '';
+return `<section class="section"><h2>${esc(title)}</h2><p>${esc(purpose)}</p>${modules.map(m=>{const symbols=m.symbols.filter(s=>!query||m.path.toLowerCase().includes(query)||s.name.toLowerCase().includes(query)||s.doc.toLowerCase().includes(query));
+return `<details class="module"${query?' open':''}><summary>${esc(m.path.replace('locomotion/',''))}</summary><p>${link(m.url,'Open source file')}</p>${symbols.length?`<ul class="definitions">${symbols.map(s=>`<li>${link(s.url,s.name)}</li>`).join('')}</ul>`:''}</details>`}).join('')}</section>`}).join('')||'<p class="section">No matching modules.</p>'}
+for(const id of ['query','area','tests','compatibility'])el(id).addEventListener('input',render);render();
+</script>
+</body>
+</html>'''
 
 
 def build(repo, output, ref='HEAD'):
