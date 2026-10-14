@@ -17,16 +17,19 @@ You can search classes and functions in the
 [developer code map](https://cornell-physical-intelligence.github.io/hexapod-cupi/code/).
 Pages rebuilds the map from the build revision. You can open source lines from the map
 and download its JSON index for imports and ownership.
-You keep the existing `python -m locomotion.train`, `prepare`, `launch` and `inputs`
-commands. Top-level compatibility modules preserve imports and serialized learner names.
+You run commands through their packages: `python -m locomotion.runs.prepare`,
+`locomotion.runs.launch`, `locomotion.runs.train` and `locomotion.runs.inputs`.
+Historical frozen packs retain their original commands and source. New checkouts
+use package imports. `tasks/env.py` preserves the imports inside frozen reward bytes.
 The `priors/` and `surrogate/` packages retain their separate guides and runtime boundaries.
 
 You freeze nested runtime dependencies in `RUNTIME_SOURCES.json` with schema
 `hexapod_runtime_sources_v2`. The outer `FREEZE_SHA256.json` retains its file-hash
 format. New checkpoints use `hexapod_locomotion_ppo_v2` and require an exact runtime
-manifest match. Production evaluation retains the legacy identity checks and rejects
-cross-revision checkpoint loads. The test-only replay harness records source differences
-apart from unchanged checkpoint bytes; it grants no production admission.
+manifest match. Evaluation retains strict identity checks by default. An explicit
+compatibility receipt permits the certified `c48_long` checkpoint to run its 13
+probes on the exact candidate source named in that receipt. Historical packs keep
+their original source and commands.
 
 
 The controller retains 400 Hz physics, 50 Hz policy actions, a 0.35 rad action
@@ -79,7 +82,7 @@ for the motivation and evidence limits of each option.
 | `--episode-seconds 10` | Shorten training episodes. A forward walker covers 1.0 m in a 20 s episode, toward a neighbour's reset origin 2.0 m away, and the proximity guard then stops the run. Training alone accepts it. |
 | `--video-case <probe id>` | Choose the probe that the evaluation camera records. |
 
-`prepare --mode probe` runs [`noise_probe.py`](noise_probe.py) through the
+`prepare --mode probe` runs [`noise_probe.py`](evaluation/noise_probe.py) through the
 training entry with 128 robots and no learner.
 On a Python exception or interruption, the probe saves completed controls and
 the failure in `summary.json` before it propagates the error. It retains
@@ -100,8 +103,9 @@ stored behavior policy; they are not the optimizer's minibatch KL averages.
 
 ## Run and verify
 
-For this refactor, you compare CPU outputs against the frozen `b2a6168c` sources
-in `tests/fixtures/refactor_b2a6168c.tar.gz`. Run `tests/test_refactor_parity.py`
+For this migration, you compare CPU outputs against both frozen baselines:
+`tests/fixtures/refactor_b2a6168c.tar.gz` and
+`tests/fixtures/packages_02f551fd.tar.gz`. Run `tests/test_refactor_parity.py`
 and the recorded-control tests before native evaluation.
 
 You use `tests/native_parity.py` in a frozen test pack to replay the pinned
@@ -119,26 +123,46 @@ the frozen `--ranges-sha256` and another fresh `--output`. Each replay must
 complete 13/13 probes with unchanged gates and contact/torque captures.
 Preserve a failed comparison and block merge; do not widen the frozen ranges.
 
+After a candidate passes, create a compatibility bundle with
+`python -m locomotion.tests.native_ranges certify`. Supply `--candidate` with its
+`run/standing` directory, `--ranges` and `--ranges-sha256` with the bounds frozen
+before replay, and `--checkpoint` with the unchanged checkpoint. Supply `--source`
+with a production pack's source directory and `--output` with a fresh bundle path.
+The command checks native completion and cleanup. It requires the production
+files to match the tested candidate, apart from the declared test harness.
+
+Copy that bundle outside frozen source. Prepare evaluation with
+`--eval-scope probes --checkpoint-compatibility` and the receipt's absolute Spark
+path, plus `--checkpoint-compatibility-sha256` and its SHA-256. Retain the existing
+checkpoint and declaration hash arguments. The launcher mounts the bundle read-only.
+The loader checks the native ranges and load reports, then checks the original
+checkpoint identity and exact candidate runtime. It translates the reviewed class
+names and compares the remaining learner configuration without changes. It records
+the original identity beside the new execution identity in `state.json`.
+
+Use an original frozen runtime for other historical checkpoints. This receipt
+covers evaluation; native optimizer resume remains outside this migration.
+
 From the repository root:
 
 ```sh
 uv sync --locked
 uv run python -m unittest discover -s locomotion/tests
-uv run python -m locomotion.prepare --help
-uv run python -m locomotion.admission --help
-uv run python -m locomotion.train --help
-uv run python -m locomotion.throughput --help
+uv run python -m locomotion.runs.prepare --help
+uv run python -m locomotion.runs.admission --help
+uv run python -m locomotion.runs.train --help
+uv run python -m locomotion.evaluation.throughput --help
 ```
 
-Use `prepare` to create a fresh allocation. Diagnostic mode supports one, 32 or
-128 robots. Training uses the existing 128-robot configuration. Throughput mode
-profiles stock PPO at one, 32 or 128 robots; [TRAINING](../docs/TRAINING.md#step-2-throughput-profile)
+Use `prepare` to create a fresh allocation. Diagnostic mode supports 1, 32, 128,
+512 and 1024 robots. Training accepts 128 or 512 robots with matching admission. Throughput mode
+profiles stock PPO at 1, 32, 128, 512 or 1024 robots; [TRAINING](../docs/TRAINING.md#step-2-throughput-profile)
 gives its commands and report. Evaluation uses
 one robot, with `--eval-scope focus` for the forward/quiet/stop subset, `probes`
 for all 13 learning probes, or `full` for the 96 required Stage 2 cases.
 
 Start the frozen launcher on Spark from its `source` directory with
-`python3 -B -m locomotion.launch`, the binding path and its SHA-256. Read
+`python3 -B -m locomotion.runs.launch`, the binding path and its SHA-256. Read
 [OPERATIONS](../docs/OPERATIONS.md) before dispatch. Each native result records
 its exact source and inputs. Use `admission` on complete one/batch results to
 produce the input declaration for a subsequent pack. Existing admissions cannot
@@ -169,7 +193,7 @@ remain in Git until a canonical replacement receives its own parity evidence.
 The [AMP demonstration pipeline](priors/README.md) supplies an optimizer and
 native replay with a reviewed dataset exporter. `amp.py` preserves the shared
 61-value feature contract. Package
-canonical inputs with `python -m locomotion.inputs pack --help`. Use the
+canonical inputs with `python -m locomotion.runs.inputs pack --help`. Use the
 [archive guide](../docs/PIPELINE_LINEAGES.md) for historical checkpoints and
 source packs; preserve their original identities.
 
@@ -177,7 +201,7 @@ source packs; preserve their original identities.
 
 You select the online motion prior with `prepare --mode train --learner amp`
 and the Table III networks with `--networks paper` ([TRAINING Steps 5–6](../docs/TRAINING.md#proposed-reproduction-sequence)).
-[`amp_ppo.py`](amp_ppo.py) subclasses stock RSL-RL PPO. Each control pairs the
+[`amp_ppo.py`](learning/amp_ppo.py) subclasses stock RSL-RL PPO. Each control pairs the
 AMP state before the action with the state after it, before any reset, scores
 the pair with the discriminator and adds the Eq. (2) style reward to the task
 reward with weight 1. Each PPO update first trains the discriminator with the
@@ -188,10 +212,10 @@ then runs the unchanged PPO update, then fits the velocity estimator by
 supervised regression on the stored rollout. The discriminator initializes on a
 forked generator, so `test_amp_ppo` checks exact action and parameter parity
 with stock PPO from one seed when the style weight and discriminator updates
-are zero. [`amp_discriminator.py`](amp_discriminator.py) keeps its raw-input
+are zero. [`amp_discriminator.py`](learning/amp_discriminator.py) keeps its raw-input
 penalty for the offline scorer; the learner's loss lives in `amp_ppo.py`.
 
-[`paper_networks.py`](paper_networks.py) implements the estimator [64, 32],
+[`paper_networks.py`](learning/paper_networks.py) implements the estimator [64, 32],
 memory encoder [512, 256, 128], low-level actor [256, 128, 64], privileged
 encoder [64, 32] and critic [512, 256, 128] over the existing 231-value
 observation. The critic reads a 42-value privileged state: body velocity,
@@ -208,7 +232,7 @@ configuration and every declared decision. No native AMP run exists; the pilot
 needs reward version 2, matching standing admission and the program lead's
 approval. `DECISIONS` in each module lists the choices the paper leaves open.
 
-[`amp_diagnostic.py`](amp_diagnostic.py) fits the discriminator offline to the
+[`amp_diagnostic.py`](evaluation/amp_diagnostic.py) fits the discriminator offline to the
 bank against a recorded policy trace under both penalty forms and scores
 held-out transitions. Its [report](../site/assets/amp_learner_offline_20260929_001/result.json)
 binds each number to the bank, the trace and the source hashes. It measures
@@ -217,8 +241,8 @@ fixed data; it does not measure the online learner or a standing policy.
 ## Prescribed tripod controller
 
 You can evaluate the Zhang et al. sinusoidal tripod controller with
-[`tripod_evaluate.py`](tripod_evaluate.py). [`tripod.py`](tripod.py) owns
-the equations and contact state; [`tripod_config.py`](tripod_config.py) owns
+[`tripod_evaluate.py`](evaluation/tripod_evaluate.py). [`tripod.py`](tasks/tripod.py) owns
+the equations and contact state; [`tripod_config.py`](tasks/tripod_config.py) owns
 parameters. You use `prepare --mode tripod --tripod-adaptation stop_stride`
 with matching standing admission. [TRAINING](../docs/TRAINING.md#tripod-baseline)
 keeps this controller as a comparison baseline. Issue #36 uses optimized
@@ -381,7 +405,7 @@ you record its native evidence and declare its offsets. You preserve motor/model
 | Phase | Cases and unchanged checks |
 | --- | --- |
 | CPU | Named joint mapping, phase opposition, reset determinism, boundary continuity, contact debounce, missed/early touchdown, command changes, faults and geometric reach. |
-| Admission | Fresh one-robot and 32-robot standing runs with matching physics, model, stance and geometry, recomputed by `locomotion.admission`. |
+| Admission | Fresh one-robot and 32-robot standing runs with matching physics, model, stance and geometry, recomputed by `locomotion.runs.admission`. |
 | Flat screens | Forward 0.05 m/s and pure yaw ±0.20 rad/s; use existing static scorer and full native contact/motor checks. |
 | Flat qualification | Existing forward 0.10 m/s, yaw ±0.20 rad/s, quiet 20/32 s and stand/forward/both-yaw stop cases. Repeat from two independent resets. Report other commands as unsupported or outside this reproduction. |
 | Clearance | Repeat low/raised forward and yaw cases, plus low→raised→low commands while moving; no native joint violations or nonfoot contacts. Require the geometry targets above. Keep all stop checks. |
@@ -408,7 +432,7 @@ blocks terrain; failed terrain leaves terrain reproduction incomplete.
 You may use accepted native transitions as future AMP demonstrations after
 separate dataset review. This work starts no AMP or learned-control work.
 
-You prepare each allocation with `python -m locomotion.prepare --mode tripod`,
+You prepare each allocation with `python -m locomotion.runs.prepare --mode tripod`,
 the admitted `--inputs`, a fresh `--output` and `--remote-root`, plus
 `--tripod-adaptation stop_stride --candidate 0` for the current variant and
 `--suite screen|forward_high|stops|qualification|clearance`. The default

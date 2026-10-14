@@ -4,7 +4,7 @@ The probe schedules, the 400 Hz capture, the contact classification and the scor
 repository's own code: this module calls ``locomotion.evaluation.runner.run_learning_probe_suite`` on a
 one-robot ``SurrogateEnv``. The checkpoint can come from ``locomotion.surrogate.train`` or from a
 native run; its JSON record supplies the PPO configuration. ``DeterministicPolicy`` builds the
-policy input and the action as the evaluation branch of ``locomotion/train.py`` does. A result is
+policy input and the action as the evaluation branch of ``locomotion/runs/train.py`` does. A result is
 design evidence. Native runs are the only acceptance evidence.
 
 Quiet and stop probes run three times: with the default contact model, with a pyramidal friction
@@ -46,7 +46,7 @@ REST_CONTROLS = 300
 
 
 class DeterministicPolicy:
-    """The no-noise policy path of ``locomotion/train.py``: fixed scales, gait clock, actor mean, two-control mean.
+    """The no-noise policy path of ``locomotion/runs/train.py``: fixed scales, gait clock, actor mean, two-control mean.
 
     ``options`` holds the wrapper options that the checkpoint recorded. ``velocity_input_gain``
     multiplies the 90 joint-velocity inputs, and ``action_mean2`` applies the two-control mean to a
@@ -76,12 +76,12 @@ class DeterministicPolicy:
                     "action_smoothing_applied": None, "velocity_noise_recorded": options.get("velocity_noise", 0.),
                     "velocity_noise_applied": None,
                     "scope": "The wrapper builds the policy input and the action; this module applies no option to them."}
-        return {"source": "evaluation branch of locomotion/train.py", "velocity_input_gain": self.gain,
+        return {"source": "evaluation branch of locomotion/runs/train.py", "velocity_input_gain": self.gain,
                 "action_mean2_forced": self.forced,
                 "action_smoothing_applied": "mean2" if self.mean2 else "none",
                 "velocity_noise_recorded": options.get("velocity_noise", 0.), "velocity_noise_applied": 0.,
                 "scope": "Scales, gait clock, actor mean and two-control mean as the evaluation branch of "
-                         "locomotion/train.py; the gain and the forced mean are stress options."}
+                         "locomotion/runs/train.py; the gain and the forced mean are stress options."}
 
     def inputs(self, observation):
         """The actor input for raw 231-value environment observations."""

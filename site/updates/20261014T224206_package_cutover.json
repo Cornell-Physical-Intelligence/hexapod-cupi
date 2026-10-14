@@ -1,0 +1,33 @@
+{
+  "id": "20261014T224206_package_cutover",
+  "date": "2026-10-14T22:42:06+00:00",
+  "title": "Move locomotion commands and imports into packages",
+  "summary": "We removed the flat wrappers and updated Spark entry points. We added hash-pinned evaluation receipts and retained historical source references. Native admission and checkpoint parity remain pending.",
+  "areas": [
+    "locomotion",
+    "platform"
+  ],
+  "changes": [
+    "locomotion/**",
+    "tools/**",
+    "tests/**",
+    "site/test_code_map.mjs",
+    "site/updates/20261014T224206_package_cutover.json",
+    "configs/source_inventory.json",
+    "CONTRIBUTING.md",
+    "SPARK.md",
+    "docs/OPERATIONS.md",
+    "docs/TRAINING.md",
+    "docs/PROJECT_SITE.md",
+    ".github/workflows/tests.yml",
+    ".github/workflows/pages.yml"
+  ],
+  "evidence": [
+    "locomotion/README.md",
+    "locomotion/tests/test_package_cutover.py",
+    "locomotion/tests/test_checkpoint_compat.py"
+  ],
+  "next": "Complete standing admission and certify the unchanged c48_long weights before merge.",
+  "no_project_impact": true,
+  "reason": "This source migration adds no walking result or qualification claim. Native checks remain in progress."
+}

@@ -100,7 +100,7 @@ def read_receipt(path, digest):
     if sha(path) != digest:
         raise ValueError('Compatibility receipt hash differs')
     receipt = json.loads(path.read_text())
-    if (receipt.get('schema') != SCHEMA or receipt.get('mode') != 'evaluate'
+    if (receipt.get('schema') != SCHEMA or receipt.get('mode') != 'evaluate' or receipt.get('eval_scope') != 'probes'
             or receipt.get('checkpoint_sha256') != CHECKPOINT_SHA
             or receipt.get('declaration_sha256') != DECLARATION_SHA):
         raise ValueError('Unsupported checkpoint compatibility receipt')
@@ -114,6 +114,12 @@ def read_receipt(path, digest):
         evidence[name] = json.loads(entry.read_text())
     if evidence['ranges.json']['identity']['checkpoint_sha256'] != CHECKPOINT_SHA:
         raise ValueError('Compatibility evidence checkpoint differs')
+    summary = evidence['summary.json']
+    if (len(summary.get('loads', {})) != 13
+            or any(row.get('status') != 'available' for row in summary['loads'].values())
+            or len(evidence['ranges.json'].get('baseline_provenance', [])) != 3
+            or summary['allocation']['evaluator_sha256'] != receipt['candidate_runtime_sources']['files'].get('locomotion/evaluation/scoring.py')):
+        raise ValueError('Compatibility provenance or load evidence differs')
     if not compare(evidence['ranges.json'], evidence['summary.json'])['pass']:
         raise ValueError('Compatibility native parity failed')
     return receipt

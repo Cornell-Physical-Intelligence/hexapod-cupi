@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CodeMapTests(unittest.TestCase):
-    def test_map_contains_nested_definitions_and_compatibility_imports(self):
+    def test_map_contains_nested_definitions_without_retired_wrappers(self):
         with tempfile.TemporaryDirectory() as tmp:
             value = code_map.build(ROOT, tmp)
             rows = {row['path']: row for row in value['modules']}
@@ -21,9 +21,8 @@ class CodeMapTests(unittest.TestCase):
             self.assertIn('/'+value['revision']+'/', method['url'])
             self.assertEqual(native['sha256'], hashlib.sha256(source.read_bytes()).hexdigest())
             self.assertEqual(native['area'], 'backends')
-            self.assertTrue(any('backends.isaac' in row['text'] for row in rows['locomotion/env.py']['imports']))
-            # The compatibility file resolves to the module it forwards to.
-            self.assertIn('locomotion/backends/isaac/env.py', rows['locomotion/env.py']['depends_on'])
+            self.assertNotIn('locomotion/env.py', rows)
+            self.assertIn('locomotion/core/motor.py', native['depends_on'])
             self.assertTrue(all(target in rows for row in rows.values() for target in row['depends_on']))
             self.assertEqual(rows['locomotion/tests/test_native_ranges.py']['area'], 'tests')
             self.assertFalse(any('/fixtures/' in path for path in rows))
@@ -31,6 +30,7 @@ class CodeMapTests(unittest.TestCase):
             html = (Path(tmp)/'index.html').read_text()
             self.assertNotIn('__DATA__', html)
             self.assertNotIn('audit.html', html)
+            self.assertNotIn('id="compatibility"', html)
             self.assertIn('aria-label="Search code map"', html)
 
 

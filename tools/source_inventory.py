@@ -36,6 +36,14 @@ def check(root=ROOT):
         if row['classification'] not in {'current', 'historical', 'prototype'} or not row['owner'] or not row['purpose']:
             raise ValueError('Every source needs classification, ownership and purpose')
     retired = inventory.get('retired_sources', {})
+    for name, binding in inventory.get('source_archives', {}).items():
+        relative = Path(name)
+        if (relative.is_absolute() or '..' in relative.parts
+                or not re.fullmatch('[0-9a-f]{40}', binding['source_commit'])):
+            raise ValueError('Invalid archived source binding')
+        original = subprocess.check_output(['git', 'show', binding['source_commit']+':'+name], cwd=root)
+        if hashlib.sha256(original).hexdigest() != binding['sha256']:
+            raise ValueError('Archived source bytes differ: '+name)
     for name, expected in retired.get('files', {}).items():
         relative = Path(name)
         if (relative.is_absolute() or '..' in relative.parts or (root / relative).exists()

@@ -89,7 +89,7 @@ class OptimizationTests(unittest.TestCase):
             inputs.write_text(json.dumps(declared))
             binding = prepare(FIXTURE, output, '/home/orionh/HEXAPOD_runs/restart_20260914/test_trajectory', inputs=inputs)
             self.assertIn(['/recorded/batch', '/standing_batch'], binding['extra_mounts'])
-            for name in ('env.py', 'env_config.py', 'reservation.py', 'launch.py', 'evaluate.py'):
+            for name in ('backends/isaac/env.py', 'backends/isaac/config.py', 'runs/reservation.py', 'runs/launch.py', 'evaluation/runner.py'):
                 self.assertEqual((output/'source/locomotion'/name).read_bytes(), (ROOT/'locomotion'/name).read_bytes())
             self.assertEqual((output/'source/locomotion/priors/replay_native.py').read_bytes(), (ROOT/'locomotion/priors/replay_native.py').read_bytes())
             with self.assertRaises(FileExistsError):

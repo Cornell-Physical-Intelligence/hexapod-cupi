@@ -137,7 +137,7 @@ def main(argv=None):
     args = parser.parse_args(argv)
     compatibility = None
     if args.checkpoint_compatibility is not None or args.checkpoint_compatibility_sha256 is not None:
-        if args.mode != 'evaluate' or args.checkpoint_compatibility is None or args.checkpoint_compatibility_sha256 is None:
+        if args.mode != 'evaluate' or args.eval_scope != 'probes' or args.num_envs != 1 or args.checkpoint_compatibility is None or args.checkpoint_compatibility_sha256 is None:
             raise ValueError('Compatibility requires evaluation and both receipt arguments')
         compatibility = compat.read_receipt(args.checkpoint_compatibility, args.checkpoint_compatibility_sha256)
     if args.logger == 'wandb':

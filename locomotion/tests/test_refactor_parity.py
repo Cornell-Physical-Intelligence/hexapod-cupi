@@ -20,14 +20,22 @@ FIXTURE_SHA = 'f0afe51e180bc1d5c5f6099b8225e77cd63afdbed78e4830dd837767ae43b6fc'
 
 
 class RefactorParityTests(unittest.TestCase):
+    fixture = FIXTURE
+    fixture_sha = FIXTURE_SHA
     @classmethod
     def setUpClass(cls):
-        if hashlib.sha256(FIXTURE.read_bytes()).hexdigest() != FIXTURE_SHA:
+        if hashlib.sha256(cls.fixture.read_bytes()).hexdigest() != cls.fixture_sha:
             raise ValueError('Frozen b2a6168c source changed')
         cls.directory = tempfile.TemporaryDirectory()
         cls.addClassCleanup(cls.directory.cleanup)
-        with tarfile.open(FIXTURE) as archive:
+        with tarfile.open(cls.fixture) as archive:
             archive.extractall(cls.directory.name, filter='data')
+        def clear_modules():
+            for name in list(sys.modules):
+                if name == '_refactor_baseline' or name.startswith('_refactor_baseline.'):
+                    del sys.modules[name]
+        clear_modules()
+        cls.addClassCleanup(clear_modules)
         package = types.ModuleType('_refactor_baseline')
         package.__path__ = [cls.directory.name]
         sys.modules[package.__name__] = package

@@ -1,7 +1,7 @@
 # Work on the Spark
 
 You develop in your own checkout, freeze a source copy for each attempt, and
-launch that copy through `locomotion.launch`. You can keep editing your
+launch that copy through `locomotion.runs.launch`. You can keep editing your
 checkout while the attempt runs. Retain the frozen copy with its results.
 Stop on a command error before you continue to the next step.
 
@@ -153,7 +153,7 @@ umask 027
 attempt="/srv/cupi/hexapod/runs/$(id -un)/ppo_mlp_$(date -u +%Y%m%dT%H%M%SZ)"
 admitted_inputs=/srv/cupi/hexapod/inputs/replicas_20261010_001/admission_128/inputs.json
 
-python3 -B -m locomotion.prepare \
+python3 -B -m locomotion.runs.prepare \
   --output "$attempt" --remote-root "$attempt" \
   --inputs "$admitted_inputs" --mode train \
   --learner ppo --networks mlp --num-envs 128 \
@@ -210,7 +210,7 @@ From your frozen source directory, check the package and live host:
 
 ```sh
 cd "$attempt/source"
-python3 -B -m locomotion.launch \
+python3 -B -m locomotion.runs.launch \
   --bindings "$attempt/binding.json" --bindings-sha256 "$binding_sha" \
   --preflight-only
 ```
@@ -225,7 +225,7 @@ After the run lead confirms dispatch, start the allocation in the same tmux
 session:
 
 ```sh
-python3 -B -m locomotion.launch \
+python3 -B -m locomotion.runs.launch \
   --bindings "$attempt/binding.json" --bindings-sha256 "$binding_sha"
 ```
 
@@ -256,7 +256,7 @@ attempt. Keep the launcher running until it records cleanup. After a wrapper
 failure, return to its frozen `source/` and use the same reviewed binding:
 
 ```sh
-python3 -B -m locomotion.launch \
+python3 -B -m locomotion.runs.launch \
   --bindings "$attempt/binding.json" --bindings-sha256 "$binding_sha" \
   --cleanup-only
 ```

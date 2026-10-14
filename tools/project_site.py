@@ -27,15 +27,26 @@ def sha(path):
             h.update(block)
     return h.hexdigest()
 
-def historical_source(value):
+def historical_source(value, expected_sha=None):
     archived = archive.url(value, ROOT)
-    if archived:
+    if archived and expected_sha is None:
         return archived
     inventory_path = ROOT / 'configs/source_inventory.json'
     if not inventory_path.exists():
         return None
     inventory = read(inventory_path)
     require(re.fullmatch('[0-9a-f]{40}', inventory['baseline']), 'Invalid historical source baseline')
+    archived_source = inventory.get('source_archives', {}).get(value)
+    if archived_source and (expected_sha is not None or not (ROOT/value).exists()):
+        commit = archived_source['source_commit']
+        require(re.fullmatch('[0-9a-f]{40}', commit), 'Invalid archived source commit')
+        content = subprocess.check_output(['git', 'show', commit+':'+value], cwd=ROOT)
+        digest = hashlib.sha256(content).hexdigest()
+        require(digest == archived_source['sha256'] and (expected_sha is None or digest == expected_sha),
+                'Archived source bytes changed')
+        return 'https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/' + commit + '/' + quote(value, safe='/')
+    if expected_sha is not None:
+        return None
     retired = inventory.get('retired_sources', {})
     if value in retired.get('files', {}) and not (ROOT / value).exists():
         require(re.fullmatch('[0-9a-f]{40}', retired['source_commit']), 'Invalid retired source commit')
@@ -261,11 +272,15 @@ def records():
             require(replacement != old_reference and replacement in row['evidence'],
                     'Correction record must cite its distinct canonical replacement')
             path = reference(replacement)
-            require(path is not None and path.is_file()
-                    and re.fullmatch('[0-9a-f]{64}', correction['replacement_sha256'])
-                    and sha(path) == correction['replacement_sha256'],
+            expected = correction['replacement_sha256']
+            require(re.fullmatch('[0-9a-f]{64}', expected), 'Evidence correction replacement file or SHA differs')
+            current_matches = path is not None and path.is_file() and sha(path) == expected
+            archived = None if current_matches else historical_source(replacement, expected)
+            require(current_matches or archived,
                     'Evidence correction replacement file or SHA differs')
             corrections[key] = dict(correction, correction_record_id=row['id'])
+            if archived:
+                corrections[key]['resolved_reference'] = archived
     # Only these freshly read presentation objects change. The pinned original
     # update files remain immutable, with their evidence and hash exposed below.
     for row in out:
@@ -273,7 +288,7 @@ def records():
         applied = []
         for value in row['evidence']:
             correction = corrections.get((row['id'], value))
-            replacement = correction['replacement_reference'] if correction else value
+            replacement = correction.get('resolved_reference', correction['replacement_reference']) if correction else value
             reference(replacement)
             resolved.append(replacement)
             if correction:

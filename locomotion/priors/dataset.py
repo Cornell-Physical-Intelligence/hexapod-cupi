@@ -18,7 +18,7 @@ SCHEMA = 'hexapod_amp_dataset_v1'
 WINDOW = (100, 1000)
 PROCESSING_FILES = ('amp.py', 'env_config.py', 'task.py', 'evaluation.py',
                     'force_metrics.py', 'priors/commands.py', 'priors/dataset.py')
-PROCESSING_SCHEMA = 'hexapod_processing_sources_v2'
+PROCESSING_SCHEMA = 'hexapod_processing_sources_v3'
 
 
 def sha(path):
@@ -33,7 +33,24 @@ def processing_identity():
     root = Path(__file__).resolve().parents[1]
     return {'schema': PROCESSING_SCHEMA, 'numpy_version': np.__version__, 'source_files': {
         **{'locomotion/'+name: digest for name, digest in source_files(root).items()},
-        **{'locomotion/'+name: sha(root/name) for name in ('priors/commands.py', 'priors/dataset.py')}}}
+        **{'locomotion/'+name: sha(root/name) for name in ('priors/commands.py', 'priors/dataset.py', 'priors/processing_sources_v2.json')}}}
+
+
+def validate_processing_identity(processing):
+    sources = processing.get('source_files', {})
+    schema = processing.get('schema')
+    if schema is None:
+        expected = {'locomotion/'+name for name in PROCESSING_FILES}
+    elif schema == 'hexapod_processing_sources_v2':
+        expected = set(json.loads(Path(__file__).with_name('processing_sources_v2.json').read_text())['files'])
+    elif schema == PROCESSING_SCHEMA:
+        expected = set(processing_identity()['source_files'])
+    else:
+        raise ValueError('Unknown dataset processing source identity')
+    if (not processing.get('numpy_version') or set(sources) != expected
+            or any(not isinstance(value, str) or len(value) != 64
+                   or set(value)-set('0123456789abcdef') for value in sources.values())):
+        raise ValueError('Missing dataset processing source identity')
 
 
 def rotations(quaternion):
@@ -317,16 +334,7 @@ def load(directory):
             or not np.issubdtype(arrays['clip_id'].dtype, np.integer)
             or not np.issubdtype(arrays['control_index'].dtype, np.integer)):
         raise ValueError('Invalid review, window or clip-index contract')
-    processing = manifest.get('processing_identity', {})
-    sources = processing.get('source_files', {})
-    expected_sources = ({'locomotion/'+name for name in PROCESSING_FILES}
-                        if 'schema' not in processing else set(processing_identity()['source_files']))
-    if (processing.get('schema', PROCESSING_SCHEMA) != PROCESSING_SCHEMA
-            or not processing.get('numpy_version')
-            or set(sources) != expected_sources
-            or any(not isinstance(value, str) or len(value) != 64
-                   or set(value)-set('0123456789abcdef') for value in sources.values())):
-        raise ValueError('Missing dataset processing source identity')
+    validate_processing_identity(manifest.get('processing_identity', {}))
     accepted = reviewed_clips(manifest['review'])
     seen = set()
     for clip in manifest['clips']:

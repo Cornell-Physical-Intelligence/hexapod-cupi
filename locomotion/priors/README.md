@@ -11,12 +11,12 @@ require the reward changes in #35.
 
 | Object | Code and definition | Source |
 | --- | --- | --- |
-| Motion command | `commands.motion_cases()`: eight bearings at 0.025 and 0.05 m/s, yaw ±0.2 rad/s, arcs (0.04, 0, ±0.15). | Existing `locomotion.task.command_bank(TaskConfig())`; these 20 commands are project coverage choices. |
+| Motion command | `commands.motion_cases()`: eight bearings at 0.025 and 0.05 m/s, yaw ±0.2 rad/s, arcs (0.04, 0, ±0.15). | Existing `locomotion.tasks.task.command_bank(TaskConfig())`; these 20 commands are project coverage choices. |
 | Cycle | `optimize.Config`: 1.2 s, 0.65 stance fraction, 0.018 m swing lift, two alternating tripods. | Retained optimizer defaults; [accepted forward experiment](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/ppo_reference_comparison_20260917/solve_smooth_001/INPUT.json). Use smoothing weight 0.1 and root-velocity weight 1 from that experiment. |
 | Mechanical state | `RobotModel`, `q[61,24]`, `v[61,24]`, `a[60,24]`: six floating-root coordinates and 18 joint coordinates. `force[60,18]`, `torque[60,18]`, `target[60,18]` complete the collocation variables. | Existing approved 19-body URDF, inverse dynamics and 50 Hz optimizer. The 61 nodes here count time samples, separate from AMP feature width. |
 | Turn geometry | `planar_pose()` and `cycle_state()` integrate a constant planar body command and close a cycle through its rigid transform. | Project derivation below; the paper does not specify this optimizer implementation. |
 | Native record | `replay_native.py`: 1,000 controls, 8,000 physics samples, video and force/torque metrics. | Existing `omni_static` screen and `evaluate.run_batch`; unchanged gates. |
-| Feature map | `locomotion.amp.extract_features()`: raw 61-value state shared with `LocomotionEnv._observations()`. | Existing kernel layout, retained by the program lead. [Liu §III-A](https://arxiv.org/html/2511.03167v1#S3.SS1) names 61 values but describes foot heights. Six scalar heights would produce 49 values; this project uses six XYZ toe positions. |
+| Feature map | `locomotion.core.features.extract_features()`: raw 61-value state shared with `LocomotionEnv._observations()`. | Existing kernel layout, retained by the program lead. [Liu §III-A](https://arxiv.org/html/2511.03167v1#S3.SS1) names 61 values but describes foot heights. Six scalar heights would produce 49 values; this project uses six XYZ toe positions. |
 | Transition bank | `dataset.export()`, `load()`, `sample()`: native `(s_t, s_next)` pairs, concatenated to 122 values for a learner. | Consecutive-state discriminator input in [Liu §III-B and Table III](https://arxiv.org/html/2511.03167v1); export schema and sampler are project decisions. |
 
 The optimizer retains full-body force balance, midpoint integration and its

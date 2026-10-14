@@ -1,4 +1,4 @@
-"""Train PPO on the MuJoCo surrogate through the training path of ``locomotion/train.py``.
+"""Train PPO on the MuJoCo surrogate through the training path of ``locomotion/runs/train.py``.
 
 The trainer uses the pieces of native training: ``ppo.ppo_config``, ``VanillaVecEnv``, RSL-RL
 ``OnPolicyRunner``, ``UpdateDiagnostics``, ``TrainingLoads``, one ``metrics.jsonl`` row per
@@ -97,7 +97,7 @@ def wrapper_options(config):
 
 
 def build_wrapper(wrapper_class, task, options):
-    """Construct the RSL-RL wrapper with its recorded keywords, as ``locomotion/train.py`` does.
+    """Construct the RSL-RL wrapper with its recorded keywords, as ``locomotion/runs/train.py`` does.
 
     A constructor that lacks a recorded keyword is an error unless the keyword holds its default,
     so a substitute wrapper with the plain ``(task)`` constructor works at the default options.
@@ -125,7 +125,7 @@ def learner_configuration(vanilla, seed, options):
 
 
 def check_gait_schedule(task, config):
-    """The contact-schedule reward reads the phase that the gait clock shows the policy (``locomotion/train.py``)."""
+    """The contact-schedule reward reads the phase that the gait clock shows the policy (``locomotion/runs/train.py``)."""
     reward = getattr(task, "reward_config", None)
     if getattr(reward, "schedule_weight", 0) and (
             config.get("environment_wrapper", {}).get("gait_clock", 0) != getattr(reward, "schedule_period_controls", None)):

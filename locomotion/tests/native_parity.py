@@ -43,6 +43,7 @@ def replay():
     checkpoint = Path(option('--checkpoint'))
     verify_weights(checkpoint)
     proof()
+    from locomotion.runs.compat import require_configuration
     keys = tuple(key for key in release.COMPATIBILITY_KEYS if key not in SOURCE_KEYS)
     def compare_weight_abi(record, identity):
         if any(record['identity'][key] != identity[key] for key in keys):
@@ -51,7 +52,8 @@ def replay():
     # Baseline main uses the contract tuple; candidate main calls the extracted helper.
     # Keep model, physics settings, inputs, seed, upstream code and embedded metadata checks.
     with patch.object(release, 'COMPATIBILITY_KEYS', keys), patch.object(
-            train, 'require_checkpoint_identity', compare_weight_abi, create=True):
+            train, 'require_checkpoint_identity', compare_weight_abi, create=True), patch.object(
+            train, 'require_learner_configuration', require_configuration):
         # The host supervisor verifies frozen sources and checkpoint inputs after Kit exits.
         return train.main(args)
 

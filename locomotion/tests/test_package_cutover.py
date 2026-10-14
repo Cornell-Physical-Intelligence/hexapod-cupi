@@ -33,5 +33,13 @@ class PackageCutoverTests(unittest.TestCase):
         self.assertEqual(before, sys.meta_path)
 
 
+from locomotion.tests import test_refactor_parity as baseline_tests
+
+
+class PackageSnapshotParityTests(baseline_tests.RefactorParityTests):
+    fixture = ROOT/'tests/fixtures/packages_02f551fd.tar.gz'
+    fixture_sha = '5857bb0e60f1785e770b6c35dc01cdb1737fe24f70d029b6da61331f74bb16d2'
+
+
 if __name__ == '__main__':
     unittest.main()

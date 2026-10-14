@@ -65,11 +65,13 @@ def read_run(root, role):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=('freeze', 'compare'))
+    parser.add_argument('command', choices=('freeze', 'compare', 'certify'))
     parser.add_argument('--baseline', type=Path, action='append', default=[])
     parser.add_argument('--candidate', type=Path)
     parser.add_argument('--ranges', type=Path)
     parser.add_argument('--ranges-sha256')
+    parser.add_argument('--checkpoint', type=Path)
+    parser.add_argument('--source', type=Path)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     if args.command == 'freeze':
@@ -82,6 +84,36 @@ def main():
         candidate = read_run(args.candidate, 'candidate')
         value = compare(json.loads(args.ranges.read_text()), candidate)
         value.update(ranges_sha256=args.ranges_sha256, candidate_provenance=candidate['provenance'])
+        if args.command == 'certify':
+            from locomotion.runs import compat
+            from locomotion.runs.sources import verify_runtime
+            from locomotion.tests.native_parity import verify_weights
+            if not value['pass']:
+                raise ValueError('Cannot certify failed native parity')
+            verify_weights(args.checkpoint)
+            runtime = verify_runtime(args.source)
+            recorded_source = args.candidate.parents[1]/'source'
+            candidate_runtime = verify_runtime(recorded_source)
+            harness = {'locomotion/tests/__init__.py', 'locomotion/tests/native_parity.py'}
+            production = {name: digest for name, digest in candidate_runtime['files'].items() if name not in harness}
+            if production != runtime['files']:
+                raise ValueError('Certified production sources differ from the tested candidate')
+            proof = json.loads((recorded_source/'PARITY.json').read_text())
+            if proof.get('ranges_sha256') != args.ranges_sha256:
+                raise ValueError('Candidate did not pin these baseline ranges before replay')
+            record = json.loads(args.checkpoint.with_suffix('.json').read_text())
+            args.output.mkdir(exist_ok=False)
+            (args.output/'ranges.json').write_bytes(args.ranges.read_bytes())
+            (args.output/'summary.json').write_text(json.dumps(candidate, indent=2, allow_nan=False)+'\n')
+            receipt = {'schema': compat.SCHEMA, 'mode': 'evaluate', 'eval_scope': 'probes',
+                       'checkpoint_sha256': compat.CHECKPOINT_SHA, 'declaration_sha256': compat.DECLARATION_SHA,
+                       'original_identity': record['identity'], 'candidate_runtime_sources': runtime,
+                       'files': {name: sha(args.output/name) for name in ('ranges.json', 'summary.json')}}
+            path = args.output/'receipt.json'
+            path.write_text(json.dumps(receipt, indent=2, allow_nan=False)+'\n')
+            compat.read_receipt(path, sha(path))
+            print(json.dumps({'receipt': str(path), 'sha256': sha(path)}))
+            return 0
     with args.output.open('x') as stream:
         stream.write(json.dumps(value, indent=2, allow_nan=False) + '\n')
     print(json.dumps({'output': str(args.output), 'pass': value.get('pass')}))

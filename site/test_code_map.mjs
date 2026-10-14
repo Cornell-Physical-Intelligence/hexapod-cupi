@@ -63,11 +63,10 @@ assert.equal(elements.get('file-heading').textContent, 'learning/ppo.py');
 click('results', {file:'locomotion/core/motor.py'});
 assert.equal(elements.get('file-heading').textContent, 'core/motor.py');
 
-// Compatibility files and tests appear only behind their toggles.
+// Retired wrappers have no filter; tests retain their toggle.
+assert.ok(!markup.includes('id="compatibility"'));
 input('query', 'Compatibility import for ppo');
 assert.ok(html('results').includes('No matching files.'));
-input('compatibility', true);
-assert.ok(html('results').includes('locomotion/ppo.py'));
 input('query', 'test_native_ranges');
 assert.ok(html('results').includes('No matching files.'));
 input('tests', true);

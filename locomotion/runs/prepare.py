@@ -133,7 +133,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
     if (mode == 'evaluate' and not all(supplied)) or (mode != 'evaluate' and any(supplied)):
         raise ValueError('Evaluation requires a checkpoint and its two file hashes')
     compatibility = (checkpoint_compatibility is not None, checkpoint_compatibility_sha256 is not None)
-    if any(compatibility) and (mode != 'evaluate' or not all(compatibility)):
+    if any(compatibility) and (mode != 'evaluate' or eval_scope != 'probes' or not all(compatibility)):
         raise ValueError('Compatibility requires evaluation and both receipt arguments')
     if all(compatibility):
         receipt = Path(checkpoint_compatibility)
