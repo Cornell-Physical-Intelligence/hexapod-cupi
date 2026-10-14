@@ -23,6 +23,15 @@ The site, the README and the other pages we publish follow this standard.
 `site/test_render.mjs` fails when a removed section returns or when the page
 shows more than 650 words.
 
+## Developer code map
+
+You can inspect the separate [locomotion code map](https://cornell-physical-intelligence.github.io/hexapod-cupi/code/).
+The Pages build generates its HTML and JSON from Python syntax and the source inventory.
+You can search definitions and inspect import references without importing the simulator.
+The map records the build revision and links to source lines. It excludes frozen fixtures.
+The five-section presentation standard applies to the progress homepage; the developer
+map uses a searchable source index. Keep generated map files out of Git.
+
 ## Update the page
 
 Change `site/project.json` when a result changes:

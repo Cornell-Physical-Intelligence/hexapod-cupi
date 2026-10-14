@@ -4,28 +4,35 @@ You run canonical locomotion through this package. The package uses the approved
 19-body, 18-joint robot and stock RSL-RL 5.0.1 PPO. You can inspect its control
 loop without reading old experiment launchers or a second environment port.
 
-| Read in this order | Responsibility |
+| Package | Responsibility |
 | --- | --- |
-| [`../robot/active_model.json`](../robot/active_model.json), [`env_config.py`](env_config.py) | Select the URDF, masses, joint order, motor coefficients and fixed timing. |
-| [`env.py`](env.py) | Load the native robot, form observations, limit joint targets, apply motor torque and advance eight physics steps. The actor receives 231 values and returns 18 offsets. |
-| [`task.py`](task.py) | Sample held velocity commands, compute the training reward, detect failed episodes and reset selected robots. This file owns reward version 1, the default. |
-| [`task_v2.py`](task_v2.py) | Reward version 2: Table I task and penalty terms with command-scaled tracking, on version 1's commands and resets. `train.py --reward-version 2` selects it. |
-| [`task_v4.py`](task_v4.py) | Reward version 4: windowed tracking, a tripod contact schedule, noise-sized Table I penalties and an action-limit term, on version 1's resets, with forward and zero command draws alone. `DEPARTURES` lists each change from the paper. |
-| [`ppo.py`](ppo.py), [`train.py`](train.py) | Adapt the task to stock PPO, record updates and loads, save checkpoints and load them for evaluation. |
-| [`rate_schedule.py`](rate_schedule.py), [`action_distribution.py`](action_distribution.py) | Cap the stock adaptive learning rate and bound the Gaussian action mean. |
-| [`noise_probe.py`](noise_probe.py) | Hold fixed action means under graded exploration noise with no optimizer, so a workstation can score any reward version on the same native rollout. |
-| [`amp.py`](amp.py), [`amp_discriminator.py`](amp_discriminator.py), [`amp_ppo.py`](amp_ppo.py), [`paper_networks.py`](paper_networks.py) | Share the 61-value AMP feature contract, score transitions with the discriminator, add the style reward inside PPO and supply the Table III networks. See [AMP learner](#amp-learner-and-paper-networks). |
-| [`evaluate.py`](evaluate.py), [`evaluation.py`](evaluation.py) | Record actual policy rollouts and apply the existing walking, stopping, contact and motor gates. Missing cases remain missing. |
-| [`force_metrics.py`](force_metrics.py), [`camera.py`](camera.py) | Report contact-normal force and motor torque, and record an Isaac camera video from the policy rollout. |
-| [`admission.py`](admission.py) | Recompute one-robot and batch standing captures and require matching model, source and geometry before training. |
-| [`prepare.py`](prepare.py), [`launch.py`](launch.py), [`reservation.py`](reservation.py) | Freeze named package files and explicit inputs, hold the existing Spark locks, supervise one container and verify its cleanup. |
-| [`surrogate/`](surrogate/README.md) | Run this task, reward, PPO adapter and gate code on CPU MuJoCo physics for design work. Native runs are the only acceptance evidence, and no native pack copies the subpackage. |
+| [`core/`](core/) | Compute motor forces, targets, frame transforms and motion features. |
+| [`backends/isaac/`](backends/isaac/) | Construct the scene and step the native environment. |
+| [`tasks/`](tasks/) | Sample commands, handle episodes and retain versioned rewards. |
+| [`learning/`](learning/) | Configure PPO and AMP, adapt observations and preserve learner state. |
+| [`evaluation/`](evaluation/) | Capture rollouts, summarize forces and apply the frozen scorer. |
+| [`runs/`](runs/) | Validate arguments, freeze inputs and sources, enforce identity and supervise runs. |
+
+You can search classes, functions and imports in the
+[developer code map](https://cornell-physical-intelligence.github.io/hexapod-cupi/code/).
+Pages rebuilds the map from the build revision. The map includes source links and ownership.
+You keep the existing `python -m locomotion.train`, `prepare`, `launch` and `inputs`
+commands. Top-level compatibility modules preserve imports and serialized learner names.
+The `priors/` and `surrogate/` packages retain their separate guides and runtime boundaries.
+
+You freeze nested runtime dependencies in `RUNTIME_SOURCES.json` with schema
+`hexapod_runtime_sources_v2`. The outer `FREEZE_SHA256.json` retains its file-hash
+format. New checkpoints use `hexapod_locomotion_ppo_v2` and require an exact runtime
+manifest match. Production evaluation retains the legacy identity checks and rejects
+cross-revision checkpoint loads. The test-only replay harness records source differences
+apart from unchanged checkpoint bytes; it grants no production admission.
+
 
 The controller retains 400 Hz physics, 50 Hz policy actions, a 0.35 rad action
 scale, the 0.040 rad target-change limit per control and the provisional 1.6 N·m
-motor cap. [`task.py`](task.py) owns command sampling and reward version 1;
-[`task_v2.py`](task_v2.py) owns reward version 2, selected with `--reward-version 2`;
-[`evaluation.py`](evaluation.py) owns the numerical gates. Read
+motor cap. [`tasks/task.py`](tasks/task.py) owns command sampling and reward version 1;
+[`tasks/task_v2.py`](tasks/task_v2.py) owns reward version 2, selected with `--reward-version 2`;
+[`evaluation/scoring.py`](evaluation/scoring.py) owns the numerical gates. Read
 [TRAINING](../docs/TRAINING.md) for the proposed paper-method extensions.
 
 You can select `prepare --action-mean tanh` to keep each Gaussian mean within
