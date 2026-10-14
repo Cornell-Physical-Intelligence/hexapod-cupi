@@ -5,7 +5,7 @@ import {readFile} from 'node:fs/promises';
 const code = await readFile(new URL('./poster.js', import.meta.url), 'utf8');
 const data = JSON.parse(await readFile(new URL('./dist/project-data.json', import.meta.url), 'utf8'));
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-async function render(payload, failure=false) {
+async function render(payload, failure=false, phone=false) {
   const elements = new Map();
   const document = {
     querySelector(selector) {
@@ -18,8 +18,9 @@ async function render(payload, failure=false) {
     },
     querySelectorAll() { return []; },
   };
-  await new AsyncFunction('document','fetch','setInterval',code)(
-    document, async () => ({ok:!failure, status:failure?503:200, json:async()=>payload}), () => {});
+  const matchMedia = () => ({matches:phone, addEventListener(){}});
+  await new AsyncFunction('document','matchMedia','fetch','setInterval',code)(
+    document, matchMedia, async () => ({ok:!failure, status:failure?503:200, json:async()=>payload}), () => {});
   return {html:elements.get('#poster').innerHTML, elements};
 }
 const {html, elements} = await render(data);
@@ -49,16 +50,27 @@ for (const step of data.roadmap) assert.ok(html.includes(`id="step-${step.id}"`)
 assert.equal((html.match(/We are here/g) || []).length, 1, 'Exactly one current step');
 for (const item of data.accomplishments) assert.ok(html.includes(item.text));
 
-// System diagram: each box selects, shows its sentence and source, and lights its arrows.
+// System diagram: each box selects, shows its sentence, source and connections in text, and lights its arrows.
+const title = (id) => data.nodes.find((n) => n.id === id).title;
 for (const node of data.nodes) {
   elements.get('#graph').events.click({target:{closest:()=>({dataset:{node:node.id}})}});
-  assert.ok(elements.get('#detail').innerHTML.includes(node.text));
-  assert.ok(elements.get('#detail').innerHTML.includes(node.source_url));
+  const panel = elements.get('#detail').innerHTML;
+  assert.ok(panel.includes(node.text) && panel.includes(node.source_url));
+  for (const [a,b] of data.edges) {
+    if (b === node.id) assert.ok(panel.split('Needed by:')[0].includes(title(a)), `${node.id} must name its input ${a}`);
+    if (a === node.id) assert.ok(panel.split('Needed by:')[1].includes(title(b)), `${node.id} must name its output ${b}`);
+  }
   assert.ok(elements.get('#graph').innerHTML.includes(`data-node="${node.id}" aria-pressed="true"`));
   for (const [a,b] of data.edges.filter(([a,b])=>a===node.id||b===node.id)) {
     assert.ok(elements.get('#graph').innerHTML.includes(`class="edge active" data-edge="${a}:${b}"`));
   }
 }
+
+// On a phone the diagram turns on its side and fits a 390-pixel screen without scrolling.
+const {html:phone} = await render(data, false, true);
+const canvas = phone.match(/graph-canvas" style="width:(\d+)px/);
+assert.ok(canvas && Number(canvas[1]) <= 358, `Phone diagram is ${canvas?.[1]} px wide`);
+for (const node of data.nodes) assert.ok(phone.includes(`data-node="${node.id}"`));
 
 // Robot and terms.
 const cad = data.media.find((m) => m.id === data.robot.media_id);

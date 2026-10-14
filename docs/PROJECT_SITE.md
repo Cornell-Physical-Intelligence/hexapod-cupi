@@ -2,12 +2,13 @@
 
 The [progress site](https://cornell-physical-intelligence.github.io/hexapod-cupi/)
 shows where the project stands. `python3 tools/project_site.py build` builds it
-from `site/project.json`; `python3 tools/project_site.py status` writes the same
-content to an untracked `STATUS.md`, and each Pages build publishes that file.
+from `site/project.json`. `python3 tools/project_site.py status` writes the latest
+result, roadmap and accomplishments to an untracked `STATUS.md`, and each Pages
+build publishes that file.
 
 ## Presentation standard
 
-The site, the README and every other page we publish follow this standard.
+The site, the README and the other pages we publish follow this standard.
 
 - Lead with the visual result. Give each video or image one short caption in
   plain words for a reader outside the team.
@@ -30,7 +31,9 @@ Change `site/project.json` when a result changes:
    number and up to three videos. The check compares the number with each JSON
    field in `metric.sources`.
 2. `accomplishments`: one line per result, newest first, with its evidence path.
-3. `roadmap`: move `now` when a step finishes; completed steps come first.
+3. `roadmap`: move `now` when a step finishes; completed steps come first. A
+   step becomes `done` only with `accepted_by` (the person who accepted it) and
+   a `source` path.
 4. `nodes`: a part's one sentence and its state (`working`, `in_progress`,
    `not_started`).
 
@@ -41,8 +44,8 @@ evidence links stay in the
 
 ## Every repository change
 
-Every push includes a matching Pages update; the program lead set this rule on
-14 September 2026. Add a new `site/updates/YYYYMMDDTHHMMSS_name.json` record with:
+Every push includes a matching Pages update. The program lead set this rule on
+10 September 2026 and restated it on 14 September 2026. Add a new `site/updates/YYYYMMDDTHHMMSS_name.json` record with:
 
 - `id` matching its filename and an ISO-8601 UTC `date`;
 - a plain-English `title`, `summary`, affected `areas` and the `next` action;
@@ -51,8 +54,8 @@ Every push includes a matching Pages update; the program lead set this rule on
 - boolean `no_project_impact`, and a specific `reason` when it is true.
 
 Records are append-only. A later record may declare
-`evidence_reference_corrections`, each pinning the older record ID and hash, the
-original reference, and the replacement path and hash. Evidence paths must match
+`evidence_reference_corrections`. Each entry pins the older record by ID and
+hash, and it names the original reference with its replacement path and hash. Evidence paths must match
 on-disk capitalization so macOS checks agree with Linux CI.
 
 ```sh

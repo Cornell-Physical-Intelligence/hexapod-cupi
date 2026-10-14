@@ -3,11 +3,11 @@
   "title": "Hexapod",
   "repository": "Cornell-Physical-Intelligence/hexapod-cupi",
   "status_source": "STATUS.md",
-  "mission": "We are building a six-legged robot that walks a planned route across an area drawn on a map, finds its way with GPS alone and stops at each survey point.",
+  "mission": "We are building a six-legged robot that walks a planned route across a mapped area and stops at each survey point. It finds its way with GPS alone.",
   "latest": {
     "date": "2026-10-12",
     "title": "One training run passes all 13 movement tests",
-    "text": "With a reward change for turning, one training run passed all 13 tests: walking in eight directions, turning both ways, standing still and stopping. Its heading still drifts during walks, by 16 degrees on average. The videos show our 11 October controller, which passed 10 of the 13.",
+    "text": "The run added reward terms for turning and stride length, and it trained longer. Its heading still drifts during walks, by 16 degrees on average. The videos show our 11 October controller, which passed 10 of the 13.",
     "metric": {
       "value": 13,
       "total": 13,
@@ -33,18 +33,22 @@
       "ppo_v4_omni512_seed20260917_turn_plus020_u2000",
       "ppo_v4_omni512_seed20260917_stop_20261011"
     ],
-    "next": "We are repeating that run in four controlled training runs to check that the result holds. Then we compare it with a controller that learns from our demonstration motions."
+    "next": "We are training that setup twice more, and twice without the new terms for comparison, to check that the result holds and that the new terms cause it. Then we compare it with a controller that learns from our demonstration motions."
   },
   "roadmap": [
     {
       "id": "design",
       "title": "Robot design",
-      "state": "done"
+      "state": "done",
+      "accepted_by": "Program lead",
+      "source": "docs/UPDATED_CAD_IMPORT.md"
     },
     {
       "id": "standing",
       "title": "Stand",
-      "state": "done"
+      "state": "done",
+      "accepted_by": "Program lead",
+      "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/paper_walk_execution_001/admission_002/verification.json"
     },
     {
       "id": "stage2",
@@ -70,7 +74,7 @@
   "accomplishments": [
     {
       "date": "2026-10-12",
-      "text": "With a reward change for turning, one training run passes all 13 movement tests for the first time.",
+      "text": "A training run with new reward terms for turning and stride length passes all 13 movement tests.",
       "source": "site/assets/yaw_gated_stride_native_20261012_001/native_results.json"
     },
     {
@@ -80,22 +84,22 @@
     },
     {
       "date": "2026-10-06",
-      "text": "The learned controller walks forward and stops on command for the first time.",
+      "text": "The learned controller walks forward and stops on command.",
       "source": "site/assets/ppo_walking_diagnosis_20261005_001/run_ledger.json"
     },
     {
       "date": "2026-09-24",
-      "text": "We built demonstration motions for 20 commands: walking in each direction, turns and arcs.",
+      "text": "We built demonstration motions for 20 commands, covering walks in each direction and turns.",
       "source": "locomotion/priors/datasets/amp_demonstrations_001/manifest.json"
     },
     {
       "date": "2026-09-22",
-      "text": "A hand-designed tripod gait walks forward, turns both ways and stops in simulation tests.",
+      "text": "A hand-designed tripod gait walks forward and turns both ways in simulation tests, and it stops on command.",
       "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_native_20260922_001/native_result.json"
     },
     {
       "date": "2026-09-15",
-      "text": "The approved robot model stands steadily in simulation, alone and in groups of 128.",
+      "text": "The approved robot model stands without falling in simulation, alone and in groups of 128.",
       "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/paper_walk_execution_001/admission_002/verification.json"
     },
     {
@@ -332,16 +336,24 @@
       "meaning": "A neural network, trained in simulation, that turns a requested speed and direction into targets for the 18 joints."
     },
     {
+      "term": "Reward",
+      "meaning": "The score that training gives the controller for following a command. We change it to teach a behaviour such as turning."
+    },
+    {
+      "term": "Demonstration motions",
+      "meaning": "Example walks, computed in advance, that a controller can learn to copy."
+    },
+    {
       "term": "Simulation",
       "meaning": "A physics model of the robot and the ground on a computer. We train and test there before we build hardware."
     },
     {
       "term": "Movement test",
-      "meaning": "One fixed command, such as walking sideways at 5 cm/s or standing still, with limits on how closely the robot must follow it. We use 13."
+      "meaning": "One fixed command, such as walking sideways at 5 cm/s, with limits on how near the robot must stay to it. We check 13 during training; walk and stop needs all 96 and a review of the videos and motor loads."
     },
     {
       "term": "Training run",
-      "meaning": "One complete training of the controller from scratch, started from one random seed."
+      "meaning": "One complete training of the controller from scratch."
     },
     {
       "term": "Tripod gait",

@@ -31,7 +31,7 @@ class ProgressTests(unittest.TestCase):
                        'metric': {'value': 10, 'total': 13, 'label': 'tests passed',
                                   'sources': [{'path': 'evidence.json', 'field': ['passed'],
                                                'total_field': ['probes']}]}},
-            'roadmap': [dict(id='design', title='Design', state='done'),
+            'roadmap': [dict(id='design', title='Design', state='done', accepted_by='Fixture reviewer', source='evidence.md'),
                         dict(id='stage2', title='Walk', state='now'),
                         dict(id='stage3', title='Terrain', state='next'),
                         dict(id='mission', title='Survey', state='later')],
@@ -86,6 +86,24 @@ class ProgressTests(unittest.TestCase):
                     step['state'] = state
                 with self.assertRaisesRegex(ValueError, 'Completed steps'):
                     site.validate_progress(project)
+
+    def test_done_step_requires_human_acceptance_and_evidence(self):
+        for key in ('accepted_by', 'source'):
+            with self.subTest(missing=key):
+                project = copy.deepcopy(self.project)
+                project['roadmap'][0].pop(key)
+                with self.assertRaisesRegex(ValueError, 'human acceptance'):
+                    site.validate_progress(project)
+        self.project['roadmap'][0]['source'] = 'missing.md'
+        with self.assertRaisesRegex(ValueError, 'Missing'):
+            site.validate_progress(self.project)
+        # A step that moves to done must carry its own acceptance.
+        project = copy.deepcopy(self.project)
+        project['roadmap'][0]['source'] = 'evidence.md'
+        project['roadmap'][1]['state'] = 'done'
+        project['roadmap'][2]['state'] = 'now'
+        with self.assertRaisesRegex(ValueError, 'human acceptance'):
+            site.validate_progress(project)
 
     def test_unknown_states_reject(self):
         self.project['roadmap'][2]['state'] = 'blocked'

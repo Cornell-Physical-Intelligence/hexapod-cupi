@@ -158,6 +158,11 @@ def validate_progress(project):
     current = states.index('now')
     require(all(s == 'done' for s in states[:current]) and 'done' not in states[current:],
             'Completed steps must come before the current step')
+    for step in steps:
+        if step['state'] == 'done':
+            require(nonempty(step.get('accepted_by')) and nonempty(step.get('source')),
+                    'A done roadmap step needs a named human acceptance and evidence')
+            reference(step['source'])
     accomplishments = project['accomplishments']
     require(accomplishments, 'Accomplishments are required')
     dates = [dt.date.fromisoformat(a['date']) for a in accomplishments]
