@@ -9,7 +9,11 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion import env, env_config, evaluation, ppo, task
+from locomotion.backends.isaac import env as env
+from locomotion.backends.isaac import config as env_config
+from locomotion import evaluation
+from locomotion.learning import ppo as ppo
+from locomotion.tasks import task as task
 
 ROOT = Path(__file__).resolve().parents[2]
 FROZEN = ROOT/'locomotion/tests/fixtures/baseline'

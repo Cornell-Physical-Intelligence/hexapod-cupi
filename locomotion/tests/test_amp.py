@@ -4,8 +4,8 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion.amp import extract_features, feature_contract
-from locomotion.env import LocomotionEnv
+from locomotion.core.features import extract_features, feature_contract
+from locomotion.backends.isaac.env import LocomotionEnv
 
 
 class AMPFeatureTests(unittest.TestCase):

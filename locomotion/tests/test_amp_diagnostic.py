@@ -6,7 +6,9 @@ import unittest
 
 import torch
 
-from locomotion import amp_diagnostic, amp_discriminator as disc, amp_ppo
+from locomotion.evaluation import amp_diagnostic as amp_diagnostic
+from locomotion.learning import amp_discriminator as disc
+from locomotion.learning import amp_ppo as amp_ppo
 
 ROOT = Path(__file__).resolve().parents[2]
 TRACE = ROOT/'locomotion/tests/fixtures/control_trace.npz'

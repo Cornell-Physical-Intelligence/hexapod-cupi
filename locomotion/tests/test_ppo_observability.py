@@ -12,9 +12,9 @@ import torch
 from tensordict import TensorDict
 from rsl_rl.algorithms import PPO
 
-from locomotion.ppo import ppo_config, policy_change_metrics, UpdateDiagnostics
-from locomotion.prepare import prepare
-from locomotion.train import require_learner_configuration
+from locomotion.learning.ppo import ppo_config, policy_change_metrics, UpdateDiagnostics
+from locomotion.runs.prepare import prepare
+from locomotion.runs.train import require_learner_configuration
 
 
 def observation(value):

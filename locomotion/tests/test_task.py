@@ -10,8 +10,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 import torch
-from locomotion.env_config import JOINT_NAMES
-from locomotion.task import TaskConfig, TrainingTask, command_bank, measured_reward, articulation_reach, quiet_cost_tail, REWARD_VERSION
+from locomotion.backends.isaac.config import JOINT_NAMES
+from locomotion.tasks.task import TaskConfig, TrainingTask, command_bank, measured_reward, articulation_reach, quiet_cost_tail, REWARD_VERSION
 
 ROOT = Path(__file__).resolve().parents[2]
 GEOMETRY = ROOT/"robot/hexapod_mkii_updated_v1/geometry/geometry.json"
@@ -404,7 +404,7 @@ class TaskTests(unittest.TestCase):
         terminated=torch.ones(4,dtype=torch.bool)
         args=(telemetry,native.commands,torch.zeros(4,18),terminated,TaskConfig(),.1)
         new_reward,new=measured_reward(*args)
-        with patch("locomotion.task.quiet_cost_tail",side_effect=lambda u:u):
+        with patch("locomotion.tasks.task.quiet_cost_tail",side_effect=lambda u:u):
             old_reward,old=measured_reward(*args)
         for key in new:
             if key in ("quiet_joint_rate","quiet_target_motion"):

@@ -7,10 +7,10 @@ from pathlib import Path
 import shutil
 
 from .model import ROOT, digest
-from locomotion.prepare import prepare as prepare_kernel
+from locomotion.runs.prepare import prepare as prepare_kernel
 from .replay_native import validate_trajectory
-from locomotion.env_config import MODEL_SHA256
-from locomotion.spark_paths import RUN_ROOTS, within_roots
+from locomotion.backends.isaac.config import MODEL_SHA256
+from locomotion.runs.spark_paths import RUN_ROOTS, within_roots
 
 
 def write(path, data):

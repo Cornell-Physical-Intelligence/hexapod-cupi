@@ -7,11 +7,11 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion.env import motor_force
-from locomotion.env_config import KD
-from locomotion.tripod import feedback_blend, feedback_target
-from locomotion.tripod_config import SWEEPS
-from locomotion.tripod_evaluate import NativeController
+from locomotion.backends.isaac.env import motor_force
+from locomotion.backends.isaac.config import KD
+from locomotion.tasks.tripod import feedback_blend, feedback_target
+from locomotion.tasks.tripod_config import SWEEPS
+from locomotion.evaluation.tripod_evaluate import NativeController
 from locomotion.tests.test_tripod import MODEL, STANCE, measured_fixture
 from locomotion.tests.test_tripod_geometry import make_geometry
 

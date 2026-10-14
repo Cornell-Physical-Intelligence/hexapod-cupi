@@ -10,8 +10,10 @@ import unittest
 
 import torch
 
-from locomotion import paper_reward, reward_scorer, task_v2
-from locomotion.task import TaskConfig, command_bank, measured_reward
+from locomotion.tasks import paper_reward as paper_reward
+from locomotion.evaluation import reward_scorer as reward_scorer
+from locomotion.tasks import task_v2 as task_v2
+from locomotion.tasks.task import TaskConfig, command_bank, measured_reward
 
 ROOT = Path(__file__).resolve().parents[2]
 TRACE = ROOT/'locomotion/tests/fixtures/control_trace.npz'

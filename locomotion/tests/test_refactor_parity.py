@@ -33,7 +33,10 @@ class RefactorParityTests(unittest.TestCase):
         sys.modules[package.__name__] = package
 
     def module(self, name, baseline=False):
-        return importlib.import_module(('_refactor_baseline.' if baseline else 'locomotion.') + name)
+        if baseline:
+            return importlib.import_module('_refactor_baseline.' + name)
+        path = 'learning.ppo' if name == 'ppo' else 'tasks.' + name
+        return importlib.import_module('locomotion.' + path)
 
     def exact(self, actual, expected):
         if isinstance(expected, torch.Tensor):
@@ -111,7 +114,7 @@ class RefactorParityTests(unittest.TestCase):
 
 
 class RefactorBoundaryTests(unittest.TestCase):
-    def test_compatibility_imports_keep_class_identity(self):
+    def test_implementations_replace_retired_import_paths(self):
         for old, new, name in (
             ('env', 'backends.isaac.env', 'LocomotionEnv'),
             ('task', 'tasks.task', 'TrainingTask'),
@@ -120,11 +123,11 @@ class RefactorBoundaryTests(unittest.TestCase):
             ('evaluate', 'evaluation.runner', 'ExactEvaluationCapture'),
             ('prepare', 'runs.prepare', 'prepare')):
             with self.subTest(module=old):
-                self.assertIs(getattr(importlib.import_module('locomotion.' + old), name),
-                              getattr(importlib.import_module('locomotion.' + new), name))
+                self.assertIsNone(importlib.util.find_spec('locomotion.' + old))
+                self.assertTrue(hasattr(importlib.import_module('locomotion.' + new), name))
 
     def test_nested_pack_is_complete_and_detects_dependency_tampering(self):
-        from locomotion.prepare import prepare
+        from locomotion.runs.prepare import prepare
         from locomotion.runs.sources import verify_runtime
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp)/'pack'
@@ -142,7 +145,8 @@ class RefactorBoundaryTests(unittest.TestCase):
                 verify_runtime(source)
 
     def test_prepare_and_training_use_shared_validation(self):
-        from locomotion import prepare, train
+        from locomotion.runs import prepare as prepare
+        from locomotion.runs import train as train
         from locomotion.runs import validation
         for name in ('update_limit', 'validate_decay', 'validate_deadline'):
             self.assertIs(getattr(prepare, name), getattr(validation, name))

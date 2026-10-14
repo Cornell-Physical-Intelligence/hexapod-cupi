@@ -4,7 +4,7 @@ import json
 import math
 import numpy as np
 import torch
-from ..env_config import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, verify_assets
+from locomotion.backends.isaac.config import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, verify_assets
 
 
 def _diagnostic_rotation(q):

@@ -7,10 +7,11 @@ import unittest
 
 import torch
 
-from locomotion import task_v4, task_v4_yaw_gate as gated
+from locomotion.tasks import task_v4 as task_v4
+from locomotion.tasks import task_v4_yaw_gate as gated
 from dataclasses import replace
 
-from locomotion.task_v4_yaw_gate import REWARD_V4_YAW_GATE_CONFIG as CONFIG, measured_reward_v4_yaw_gate, yaw_gate
+from locomotion.tasks.task_v4_yaw_gate import REWARD_V4_YAW_GATE_CONFIG as CONFIG, measured_reward_v4_yaw_gate, yaw_gate
 
 ALL = replace(CONFIG, yaw_gate_on="all")
 from locomotion.tests.test_task_v4 import HEIGHT, LOADED, GaitDouble, telemetry
@@ -365,7 +366,7 @@ class NativeSelectionTests(unittest.TestCase):
     OPTIONS = "forward_draw_fraction=0,turn_draw_fraction=0.3,gate_window_controls=120,yaw_gate_bonus=0.25"
 
     def test_prepare_selects_the_yaw_gate_task_for_version_four_training_alone(self):
-        from locomotion.prepare import prepare
+        from locomotion.runs.prepare import prepare
         from locomotion.tests.test_task_v4 import REMOTE
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -374,7 +375,7 @@ class NativeSelectionTests(unittest.TestCase):
             self.assertEqual(args[args.index("--reward-task")+1], "v4_yaw_gate")
             pack = json.loads((root/"gate/PACK.json").read_text())
             self.assertEqual((pack["reward_task"], pack["reward_options"]), ("v4_yaw_gate", self.OPTIONS))
-            self.assertIn("locomotion/task_v4_yaw_gate.py", json.loads((root/"gate/source/FREEZE_SHA256.json").read_text()))
+            self.assertIn("locomotion/tasks/task_v4_yaw_gate.py", json.loads((root/"gate/source/FREEZE_SHA256.json").read_text()))
             plain = prepare(root/"plain", REMOTE, mode="train", reward_version="4")["command_args"]
             self.assertNotIn("--reward-task", plain)
             self.assertNotIn("reward_task", json.loads((root/"plain/PACK.json").read_text()))
@@ -384,7 +385,7 @@ class NativeSelectionTests(unittest.TestCase):
                     prepare(root/f"bad{index}", REMOTE, mode="train", **bad)
 
     def test_prepare_accepts_word_values_for_the_gate_switch(self):
-        from locomotion.prepare import prepare, valid_reward_options
+        from locomotion.runs.prepare import prepare, valid_reward_options
         from locomotion.tests.test_task_v4 import REMOTE
         for spec in ("yaw_gate_on=none", "yaw_gate_on=all", "yaw_gate_bonus=0.25,yaw_gate_on=turn"):
             self.assertTrue(valid_reward_options(spec), spec)
@@ -404,7 +405,7 @@ class NativeSelectionTests(unittest.TestCase):
                             reward_task=task)
 
     def test_train_checks_the_task_and_its_options_before_launch(self):
-        from locomotion import train
+        from locomotion.runs import train as train
         base = ["--asset", "a", "--model", "m", "--geometry", "g", "--geometry-extrema", "e", "--stance", "s",
                 "--output", "o", "--source-freeze-sha256", "f"*64, "--num-envs", "1", "--preflight-only"]
         with self.assertRaisesRegex(ValueError, "reward task"):

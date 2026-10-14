@@ -43,6 +43,7 @@ def scalars(value, prefix):
 
 
 from .sources import source_files, physics_files, verify_runtime
+from . import compat
 from .identity import (checkpoint_reward_version, LEARNER_DEFAULTS, LEARNER_KEYS,
     json_shape, require_learner_identity, require_learner_configuration,
     require_embedded_declaration, require_checkpoint_identity)
@@ -58,8 +59,8 @@ def main(argv=None):
     source = Path(__file__).resolve().parents[1]
     prefix = 'locomotion'
     from . import admission
-    from ..camera import prepare_policy_scene
-    configuration = importlib.import_module(prefix+'.env_config')
+    from locomotion.evaluation.camera import prepare_policy_scene
+    configuration = importlib.import_module(prefix+'.backends.isaac.config')
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--mode', choices=['diagnostic', 'train', 'evaluate', 'probe'], required=True)
     for name in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance', 'output'):
@@ -77,6 +78,8 @@ def main(argv=None):
     parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
     parser.add_argument('--checkpoint', type=Path)
     parser.add_argument('--checkpoint-sha256')
+    parser.add_argument('--checkpoint-compatibility', type=Path)
+    parser.add_argument('--checkpoint-compatibility-sha256')
     parser.add_argument('--preflight-only', action='store_true')
     parser.add_argument('--logger', choices=['tensorboard', 'wandb'], default='tensorboard')
     parser.add_argument('--wandb-project')
@@ -132,6 +135,11 @@ def main(argv=None):
         from isaaclab.app import AppLauncher
         AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args(argv)
+    compatibility = None
+    if args.checkpoint_compatibility is not None or args.checkpoint_compatibility_sha256 is not None:
+        if args.mode != 'evaluate' or args.checkpoint_compatibility is None or args.checkpoint_compatibility_sha256 is None:
+            raise ValueError('Compatibility requires evaluation and both receipt arguments')
+        compatibility = compat.read_receipt(args.checkpoint_compatibility, args.checkpoint_compatibility_sha256)
     if args.logger == 'wandb':
         if (args.mode != 'train' or not re.fullmatch(r'[A-Za-z0-9_.-]{1,128}', args.wandb_project or '')
                 or importlib.util.find_spec('wandb') is None
@@ -171,7 +179,7 @@ def main(argv=None):
         raise ValueError('The reward task selection applies to reward version 4 training only')
     if args.reward_options:
         # Rejects an unknown key or an invalid value before the GPU launch; the container preflight runs this.
-        importlib.import_module(prefix+'.task_'+args.reward_task).reward_config(args.reward_options)
+        importlib.import_module(prefix+'.tasks.task_'+args.reward_task).reward_config(args.reward_options)
     if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
         raise ValueError('The paper networks need the AMP learner, and the AMP learner trains or evaluates only')
     if args.action_std_decay_updates is not None and args.action_std_final is None:
@@ -188,7 +196,7 @@ def main(argv=None):
     if sha(source.parent/'FREEZE_SHA256.json') != args.source_freeze_sha256:
         raise ValueError('Frozen source identity differs')
     metadata = json.loads(args.stance.read_text())
-    from ..evaluation_config import EvaluationEnvConfig
+    from locomotion.evaluation.evaluation_config import EvaluationEnvConfig
     config_class = EvaluationEnvConfig if args.mode == 'evaluate' and args.eval_scope == 'full' else configuration.EnvConfig
     cfg = config_class(num_envs=args.num_envs, seed=args.seed,
         record_motion_features=args.mode == 'evaluate' or args.learner == 'amp', render=args.mode == 'evaluate', episode_seconds=(90. if args.eval_scope == 'full' else 60.) if args.mode == 'evaluate' else (60. if args.mode == 'diagnostic' else args.episode_seconds), device=args.device)
@@ -199,7 +207,7 @@ def main(argv=None):
         'geometry_sha256': sha(args.geometry), 'geometry_extrema_sha256': sha(args.geometry_extrema),
         'config': cfg.declaration(), 'motion_prior': args.learner == 'amp', 'behavior_cloning': False,
         'seed': args.seed, 'rsl_rl_required_version': '5.0.1',
-        'adapter_sha256': sha(source/'ppo.py'), 'entry_sha256': sha(__file__),
+        'adapter_sha256': sha(source/'learning/ppo.py'), 'entry_sha256': sha(__file__),
         'reward_version': args.reward_version, 'learner': args.learner, 'networks': args.networks}
     if args.reward_options:
         identity['reward_options'] = args.reward_options
@@ -209,8 +217,8 @@ def main(argv=None):
         # The exploration decay length enters ppo_config; the opt-in records the requested run length beside it.
         identity['training_updates'] = args.updates
     if args.learner == 'amp':
-        amp_module = importlib.import_module(prefix+'.amp_ppo')
-        identity['learner_source_files'] = {name: sha(source/name) for name in ('amp.py', 'amp_discriminator.py', 'amp_ppo.py', 'paper_networks.py')}
+        amp_module = importlib.import_module(prefix+'.learning.amp_ppo')
+        identity['learner_source_files'] = {name: sha(source/name) for name in ('core/features.py', 'learning/amp_discriminator.py', 'learning/amp_ppo.py', 'learning/paper_networks.py')}
         identity['amp_dataset'] = amp_module.load_demonstrations(source.parent/amp_module.AMPConfig().dataset)[1]
     identity['physics_source_files'] = physics_files(identity['source_files'])
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
@@ -229,7 +237,12 @@ def main(argv=None):
         checkpoint_record = json.loads(args.checkpoint.with_suffix('.json').read_text())
         if checkpoint_record['checkpoint_sha256'] != args.checkpoint_sha256:
             raise ValueError('Checkpoint declaration differs')
-        require_checkpoint_identity(checkpoint_record, identity)
+        if compatibility is None:
+            require_checkpoint_identity(checkpoint_record, identity)
+        else:
+            if sha(args.checkpoint.with_suffix('.json')) != compat.DECLARATION_SHA:
+                raise ValueError('Compatibility checkpoint declaration differs')
+            compat.require_identity(compatibility, checkpoint_record, identity)
         # Evaluation computes no training reward; record the one the checkpoint learned from.
         identity['reward_version'] = checkpoint_reward_version(checkpoint_record)
     if args.preflight_only:
@@ -240,6 +253,9 @@ def main(argv=None):
         'allocation': {'profile': args.allocation_profile, 'max_wall_seconds': args.max_wall_seconds},
         'experiment_logger': {'backend': args.logger, 'wandb_project': args.wandb_project,
                               'wandb_mode': args.wandb_mode if args.logger == 'wandb' else None}}
+    if compatibility is not None:
+        state['checkpoint_compatibility'] = {'receipt_sha256': args.checkpoint_compatibility_sha256,
+            'original_identity': checkpoint_record['identity'], 'checkpoint_sha256': args.checkpoint_sha256}
     save(args.output/'state.json', state)
     app = env = runner = loads = None
     started = time.monotonic()
@@ -257,9 +273,9 @@ def main(argv=None):
         print('REFERENCE_SCREEN_APP_READY', flush=True)
         import torch
         import numpy as np
-        vanilla = importlib.import_module(prefix+'.ppo')
-        native = importlib.import_module(prefix+'.env')
-        task_module = importlib.import_module(prefix+'.task')
+        vanilla = importlib.import_module(prefix+'.learning.ppo')
+        native = importlib.import_module(prefix+'.backends.isaac.env')
+        task_module = importlib.import_module(prefix+'.tasks.task')
         torch.manual_seed(args.seed); np.random.seed(args.seed)
         env = native.LocomotionEnv(cfg, args.asset, args.model, args.geometry,
             args.output/'native', reference_metadata=metadata)
@@ -284,7 +300,7 @@ def main(argv=None):
             state['status'] = 'completed'
             return 0
         if args.mode == 'probe':
-            probe = importlib.import_module(prefix+'.noise_probe')
+            probe = importlib.import_module(prefix+'.evaluation.noise_probe')
             guard = task_module.ProximityGuard(env, args.output/'probe_guard')
             summary = probe.run(env, args.output/'probe', seed=args.seed, guard=guard,
                 max_wall_seconds=max(.001, args.max_wall_seconds-(time.monotonic()-started)),
@@ -300,13 +316,13 @@ def main(argv=None):
             raise ValueError('RSL-RL version differs: '+version)
         task_config = task_module.TaskConfig(seed=args.seed)
         if args.reward_task == 'v4_yaw_gate':
-            module = importlib.import_module(prefix+'.task_v4_yaw_gate')
+            module = importlib.import_module(prefix+'.tasks.task_v4_yaw_gate')
             task_class = module.TrainingTaskV4YawGate
             if args.reward_options:
                 task_class = module.variant(args.reward_options)
             task = task_class(env, task_config, args.output/'task')
         elif args.reward_version in ('2', '3', '4'):
-            module = importlib.import_module(prefix+'.task_v'+args.reward_version)
+            module = importlib.import_module(prefix+'.tasks.task_v'+args.reward_version)
             task_class = getattr(module, 'TrainingTaskV'+args.reward_version)
             if args.reward_options:
                 task_class = module.variant(args.reward_options)
@@ -401,7 +417,7 @@ def main(argv=None):
             runner.learn(args.updates, init_at_random_ep_len=False)
             save(args.output/'force_metrics.json', loads.report())
         else:
-            require_learner_configuration(checkpoint_record, identity, config)
+            (compat.require_configuration if compatibility is not None else require_learner_configuration)(checkpoint_record, identity, config)
             infos = runner.load(str(args.checkpoint), strict=True)
             require_embedded_declaration(infos, checkpoint_record)
             actor = runner.get_inference_policy()
@@ -409,7 +425,7 @@ def main(argv=None):
             def policy(observation):
                 with torch.inference_mode():
                     if args.networks == 'paper':
-                        return actor(importlib.import_module(prefix+'.paper_networks').actor_observation(observation))
+                        return actor(importlib.import_module(prefix+'.learning.paper_networks').actor_observation(observation))
                     scaled = vanilla.scale_observation(observation, args.observation_scaling)
                     if args.gait_clock:
                         clock = vanilla.clock_features(env.episode_steps, args.gait_clock, observation[:, 210:213]).to(scaled)
@@ -421,8 +437,8 @@ def main(argv=None):
                         previous_action[0] = action.clone()
                         action = vanilla.smoothed_action(action, last, env.episode_steps)
                     return action
-            evaluation = importlib.import_module(prefix+'.evaluate')
-            camera = importlib.import_module(prefix+'.camera')
+            evaluation = importlib.import_module(prefix+'.evaluation.runner')
+            camera = importlib.import_module(prefix+'.evaluation.camera')
             env.render = camera.NativePolicyCamera(env)
             remaining = max(.001, args.max_wall_seconds-(time.monotonic()-started))
             options = dict(progress=lambda value: print(json.dumps(value), flush=True), max_wall_seconds=remaining)

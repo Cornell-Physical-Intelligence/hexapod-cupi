@@ -5,7 +5,7 @@ import stat
 import tempfile
 import unittest
 
-from locomotion import launch
+from locomotion.runs import launch as launch
 
 
 class LockPermissionTests(unittest.TestCase):

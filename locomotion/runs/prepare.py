@@ -7,11 +7,11 @@ from pathlib import Path
 import re
 import shutil
 
-from ..env_config import sha
+from locomotion.backends.isaac.config import sha
 from .sources import runtime_paths, write_runtime
 from ..learning.config import ppo_config
-from .. import reward_options as reward_option_schema
-from ..tripod_config import SWEEPS
+from locomotion.tasks import reward_options as reward_option_schema
+from locomotion.tasks.tripod_config import SWEEPS
 from .validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline
 from .spark_paths import LEGACY_ROOT, RUN_ROOTS, within_roots
 
@@ -37,7 +37,7 @@ def valid_reward_options(spec):
     """Unique ``key=value`` pairs with numeric or lowercase-word values, such as ``yaw_gate_on=none``.
 
     ``prepare`` then checks each key, value type and word choice against the selected task's reward configuration
-    with ``locomotion.reward_options``."""
+    with ``locomotion.tasks.reward_options``."""
     word, number = r'[a-z][a-z0-9_]*', r'[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?'
     pairs = [item.partition('=') for item in spec.split(',')]
     keys = [key for key, _, _ in pairs]
@@ -48,7 +48,7 @@ def valid_reward_options(spec):
 
 def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=None, seed=20260917,
             num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
-            checkpoint_declaration_sha=None, candidate=0, suite='screen',
+            checkpoint_declaration_sha=None, checkpoint_compatibility=None, checkpoint_compatibility_sha256=None, candidate=0, suite='screen',
             tripod_adaptation='paper', logger='tensorboard', wandb_project=None, wandb_mode='offline',
             reward_version='1', learner='ppo', networks='mlp', action_mean='unbounded',
             observation_normalization='empirical', observation_scaling='none',
@@ -132,6 +132,15 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
     supplied = (checkpoint is not None, checkpoint_sha is not None, checkpoint_declaration_sha is not None)
     if (mode == 'evaluate' and not all(supplied)) or (mode != 'evaluate' and any(supplied)):
         raise ValueError('Evaluation requires a checkpoint and its two file hashes')
+    compatibility = (checkpoint_compatibility is not None, checkpoint_compatibility_sha256 is not None)
+    if any(compatibility) and (mode != 'evaluate' or not all(compatibility)):
+        raise ValueError('Compatibility requires evaluation and both receipt arguments')
+    if all(compatibility):
+        receipt = Path(checkpoint_compatibility)
+        if (not within_roots(receipt, RUN_ROOTS) or '..' in receipt.parts
+                or len(checkpoint_compatibility_sha256) != 64
+                or set(checkpoint_compatibility_sha256) - set('0123456789abcdef')):
+            raise ValueError('Invalid checkpoint compatibility path or hash')
     inputs = root/'configs/locomotion_spark.json' if inputs is None else Path(inputs)
     declared = json.loads(inputs.read_text())
     for key in ('asset', 'geometry_source', 'stance'):
@@ -168,8 +177,8 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
     freeze = sha(source/'FREEZE_SHA256.json')
     binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': True,
         'module': ('locomotion.priors.replay_native' if mode == 'replay' else
-                   'locomotion.tripod_evaluate' if mode == 'tripod' else
-                   'locomotion.throughput' if mode == 'throughput' else 'locomotion.train'),
+                   'locomotion.evaluation.tripod_evaluate' if mode == 'tripod' else
+                   'locomotion.evaluation.throughput' if mode == 'throughput' else 'locomotion.runs.train'),
         'mode': mode, 'source': str(remote_root/'source'), 'output': str(remote_root/'run'),
         'asset': declared['asset'], 'geometry_source': declared['geometry_source'],
         'prior': str(Path(declared['stance']).parent), 'input_files': declared['input_files'],
@@ -230,6 +239,11 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         binding['input_files'][str(checkpoint)] = checkpoint_sha
         binding['input_files'][str(checkpoint.with_suffix('.json'))] = checkpoint_declaration_sha
         binding['command_args'] += ['--checkpoint', '/checkpoint/'+checkpoint.name, '--checkpoint-sha256', checkpoint_sha]
+    if all(compatibility):
+        binding['extra_mounts'].append([str(receipt.parent), '/compatibility'])
+        binding['input_files'][str(receipt)] = checkpoint_compatibility_sha256
+        binding['command_args'] += ['--checkpoint-compatibility', '/compatibility/'+receipt.name,
+                                    '--checkpoint-compatibility-sha256', checkpoint_compatibility_sha256]
     save(output/'binding.json', binding)
     save(output/'PACK.json', {'remote_root': str(remote_root), 'source_freeze_sha256': freeze,
         'binding_sha256': sha(output/'binding.json'), 'mode': mode, 'seed': seed, 'reward_version': reward_version,
@@ -265,6 +279,8 @@ def main():
     parser.add_argument('--checkpoint', type=Path)
     parser.add_argument('--checkpoint-sha')
     parser.add_argument('--checkpoint-declaration-sha')
+    parser.add_argument('--checkpoint-compatibility', type=Path)
+    parser.add_argument('--checkpoint-compatibility-sha256')
     parser.add_argument('--logger', choices=['tensorboard', 'wandb'], default='tensorboard')
     parser.add_argument('--wandb-project')
     parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')

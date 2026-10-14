@@ -8,10 +8,15 @@ import unittest
 
 import torch
 
-from locomotion import paper_reward, ppo, reward_scorer, task, task_v2, train
-from locomotion.prepare import prepare
-from locomotion.task import TaskConfig, TrainingTask, command_bank
-from locomotion.task_v2 import RewardV2Config, StrideWindow, TrainingTaskV2, measured_reward_v2, tracking_components
+from locomotion.tasks import paper_reward as paper_reward
+from locomotion.learning import ppo as ppo
+from locomotion.evaluation import reward_scorer as reward_scorer
+from locomotion.tasks import task as task
+from locomotion.tasks import task_v2 as task_v2
+from locomotion.runs import train as train
+from locomotion.runs.prepare import prepare
+from locomotion.tasks.task import TaskConfig, TrainingTask, command_bank
+from locomotion.tasks.task_v2 import RewardV2Config, StrideWindow, TrainingTaskV2, measured_reward_v2, tracking_components
 from locomotion.tests.test_task import NativeDouble
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -294,7 +299,7 @@ class RewardV2ScorerTests(unittest.TestCase):
                 ours, _ = reward_scorer.evaluate(trace, task_v2.scorer_reward(spec), TaskConfig(), None, com)
                 theirs, _ = reward_scorer.evaluate(trace, paper_reward.variant(variant), TaskConfig(), None, com)
                 torch.testing.assert_close(ours, theirs)
-        self.assertIs(reward_scorer.load_reward("locomotion.task_v2:scorer_default"), task_v2.scorer_default)
+        self.assertIs(reward_scorer.load_reward("locomotion.tasks.task_v2:scorer_default"), task_v2.scorer_default)
 
 
 class RewardV2LaunchTests(unittest.TestCase):
@@ -304,7 +309,7 @@ class RewardV2LaunchTests(unittest.TestCase):
             self.assertEqual(args[args.index("--reward-version")+1], "2")
             self.assertEqual(json.loads((Path(temporary)/"v2/PACK.json").read_text())["reward_version"], "2")
             self.assertNotIn("--reward-version", prepare(Path(temporary)/"v1", REMOTE, mode="train")["command_args"])
-            self.assertTrue((Path(temporary)/"v2/source/locomotion/task_v2.py").exists())
+            self.assertTrue((Path(temporary)/"v2/source/locomotion/tasks/task_v2.py").exists())
             for mode, version in (("diagnostic", "2"), ("train", "unknown")):
                 with self.subTest(mode=mode, version=version), self.assertRaises(ValueError):
                     prepare(Path(temporary)/"bad", REMOTE, mode=mode, reward_version=version)

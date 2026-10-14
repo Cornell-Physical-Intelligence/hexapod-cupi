@@ -12,10 +12,10 @@ import unittest
 
 import torch
 
-from locomotion import ppo
+from locomotion.learning import ppo as ppo
 from locomotion.surrogate import calibrate, evaluate, train
-from locomotion.task_v2 import REWARD_V2_CONFIG, TrainingTaskV2
-from locomotion.task_v4 import REWARD_V4_CONFIG
+from locomotion.tasks.task_v2 import REWARD_V2_CONFIG, TrainingTaskV2
+from locomotion.tasks.task_v4 import REWARD_V4_CONFIG
 
 NATIVE_ROW_KEYS = {"update", "transitions", "collection_seconds", "learning_seconds", "loss", "learning_rate",
                    "mean_action_std", "actions", "task", "policy_update"}
@@ -90,7 +90,7 @@ class TrainerTests(unittest.TestCase):
     def test_newest_learner_options_reach_the_wrapper(self):
         clock = REWARD_V4_CONFIG.schedule_period_controls if REWARD_V4_CONFIG.schedule_weight else 60
         code, output, state = run(
-            self.temporary.name, "options", "--task", "locomotion.task_v4:TrainingTaskV4", "--gait-clock", str(clock),
+            self.temporary.name, "options", "--task", "locomotion.tasks.task_v4:TrainingTaskV4", "--gait-clock", str(clock),
             "--action-mean", "tanh", "--observation-normalization", "none", "--observation-scaling", "fixed",
             "--command-segments", "bootstrap", "--learning-rate-max", "3e-4", "--action-std", "0.1",
             "--action-std-final", "0.05", "--action-smoothing", "mean2", "--velocity-noise", "0.5")
@@ -126,7 +126,7 @@ class TrainerTests(unittest.TestCase):
     def test_schedule_reward_requires_its_gait_clock(self):
         if not REWARD_V4_CONFIG.schedule_weight:
             self.skipTest("Reward version 4 holds no contact-schedule term at this revision")
-        code, _, state = run(self.temporary.name, "no_clock", "--task", "locomotion.task_v4:TrainingTaskV4")
+        code, _, state = run(self.temporary.name, "no_clock", "--task", "locomotion.tasks.task_v4:TrainingTaskV4")
         self.assertEqual((code, state["status"]), (1, "failed"))
         self.assertIn("gait clock", state["errors"][0])
 
@@ -159,12 +159,12 @@ class TrainerTests(unittest.TestCase):
     def test_documented_factory_example_resolves(self):
         example = re.search(r"``(locomotion\.task_v4:variant\([^`]*\))``", train.resolve.__doc__)
         self.assertIsNotNone(example)
-        self.assertTrue(issubclass(train.resolve(example.group(1)), train.resolve("locomotion.task_v4:TrainingTaskV4")))
+        self.assertTrue(issubclass(train.resolve(example.group(1)), train.resolve("locomotion.tasks.task_v4:TrainingTaskV4")))
 
     def test_example_task_and_factory_resolve(self):
-        self.assertIs(train.resolve("locomotion.task_v2:TrainingTaskV2"), TrainingTaskV2)
+        self.assertIs(train.resolve("locomotion.tasks.task_v2:TrainingTaskV2"), TrainingTaskV2)
         self.assertIs(train.resolve(f"{__name__}:task_factory(half)"), HalfActionRateTask)
-        for bad in ("locomotion.task_v2", f"{__name__}:task_factory(half", f"{__name__}:run"):
+        for bad in ("locomotion.tasks.task_v2", f"{__name__}:task_factory(half", f"{__name__}:run"):
             with self.assertRaises(ValueError):
                 train.resolve(bad)
         code, _, state = run(self.temporary.name, "example", "--task", f"{__name__}:HalfActionRateTask")

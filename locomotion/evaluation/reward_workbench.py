@@ -5,8 +5,8 @@ Writes a self-contained HTML page. It describes every term of
 on the given evaluation traces, and plots each term's response. Edited
 coefficients recompute the reward live on those traces; the page checks its
 arithmetic against ``measured_reward`` when it loads and exports the edit as a
-``reward_config_v1`` file. ``locomotion.reward_scorer`` and
-``locomotion.reward_viewer`` accept that file with ``--reward-config`` and
+``reward_config_v1`` file. ``locomotion.evaluation.reward_scorer`` and
+``locomotion.evaluation.reward_viewer`` accept that file with ``--reward-config`` and
 evaluate it through ``measured_reward`` itself.
 """
 from __future__ import annotations
@@ -19,8 +19,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from .. import reward_scorer
-from ..task import REWARD_VERSION, TaskConfig, measured_reward
+from locomotion.evaluation import reward_scorer as reward_scorer
+from locomotion.tasks.task import REWARD_VERSION, TaskConfig, measured_reward
 
 # Component: (what it measures, formula, when it applies, coefficients).
 TERMS = {
@@ -390,8 +390,8 @@ function exportEdit(){const overrides={};for(const f in edited)if(edited[f]!==D.
   $('exportText').value=text;$('download').href=URL.createObjectURL(new Blob([text],{type:'application/json'}));
   $('exportNote').textContent=(Object.keys(overrides).length?`${Object.keys(overrides).length} coefficient(s) changed from ${D.reward_version}.`:'No coefficients changed yet.')+
     (zero.length?` Training requires every coefficient above zero, so the scorer rejects this edit: ${zero.join(', ')}.`:'');
-  $('commands').value=`uv run python -m locomotion.reward_scorer <traces...> --nominal-height ${D.nominal_height_m} --reward-config edited=reward_edit.json\n`+
-    `uv run python -m locomotion.reward_viewer <evaluation dirs...> --nominal-height ${D.nominal_height_m} --reward-config edited=reward_edit.json --output viewer.html`;
+  $('commands').value=`uv run python -m locomotion.evaluation.reward_scorer <traces...> --nominal-height ${D.nominal_height_m} --reward-config edited=reward_edit.json\n`+
+    `uv run python -m locomotion.evaluation.reward_viewer <evaluation dirs...> --nominal-height ${D.nominal_height_m} --reward-config edited=reward_edit.json --output viewer.html`;
   $('exportSection').hidden=false;}
 
 function selfCheck(){let worst=0,rows=0;D.traces.forEach(tr=>{[[tr.recorded,tr.python_reward],[tr.motionless,tr.python_motionless_reward]].forEach(([f,py])=>{

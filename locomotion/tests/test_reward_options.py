@@ -7,7 +7,9 @@ import sys
 import tempfile
 import unittest
 
-from locomotion import reward_options, task_v4, task_v4_yaw_gate
+from locomotion.tasks import reward_options as reward_options
+from locomotion.tasks import task_v4 as task_v4
+from locomotion.tasks import task_v4_yaw_gate as task_v4_yaw_gate
 from locomotion.tests.test_task_v4 import REMOTE
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -40,7 +42,7 @@ class RewardOptionTests(unittest.TestCase):
     def test_preparation_runs_without_site_packages(self):
         # python -S leaves out site-packages, so Torch cannot load; preparation must still build the pack.
         with tempfile.TemporaryDirectory() as directory:
-            code = ("import json, sys; from locomotion.prepare import prepare; "
+            code = ("import json, sys; from locomotion.runs.prepare import prepare; "
                     f"args = prepare({str(Path(directory) / 'pack')!r}, {REMOTE!r}, mode='train', reward_version='4', "
                     "gait_clock=60, reward_task='v4_yaw_gate', reward_options='yaw_gate_on=none,turn_draw_fraction=0.3')"
                     "['command_args']; print(json.dumps({'torch': 'torch' in sys.modules, "

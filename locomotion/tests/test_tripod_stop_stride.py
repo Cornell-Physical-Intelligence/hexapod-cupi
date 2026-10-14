@@ -5,11 +5,11 @@ import unittest
 
 import numpy as np
 
-from locomotion.evaluate import case_manifest
+from locomotion.evaluation.runner import case_manifest
 from locomotion.tests.test_tripod import measured_fixture
 from locomotion.tests.test_tripod_geometry import make_geometry
-from locomotion.tripod_config import SWEEPS
-from locomotion.tripod_evaluate import cases_for
+from locomotion.tasks.tripod_config import SWEEPS
+from locomotion.evaluation.tripod_evaluate import cases_for
 
 
 class StopStrideTests(unittest.TestCase):

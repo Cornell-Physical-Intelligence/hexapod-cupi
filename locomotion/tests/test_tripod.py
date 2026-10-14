@@ -11,10 +11,10 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion.env_config import JOINT_NAMES, LEGS, MODEL_SHA256, sha
-from locomotion.tripod import PHASE, TRIPOD_A, TripodController, joint_order, supported, wave
-from locomotion.tripod_config import SWEEP, TripodConfig
-from locomotion.tripod_evaluate import NativeController, cases_for, clearance_at
+from locomotion.backends.isaac.config import JOINT_NAMES, LEGS, MODEL_SHA256, sha
+from locomotion.tasks.tripod import PHASE, TRIPOD_A, TripodController, joint_order, supported, wave
+from locomotion.tasks.tripod_config import SWEEP, TripodConfig
+from locomotion.evaluation.tripod_evaluate import NativeController, cases_for, clearance_at
 
 ROOT = Path(__file__).resolve().parents[2]
 MODEL_PATH = ROOT/'robot/hexapod_mkii_updated_v1/model_rs05_mass_corrected.json'
@@ -209,7 +209,7 @@ class TripodTests(unittest.TestCase):
         with self.assertRaises(ValueError): policy(None)
 
     def test_matrix_preserves_existing_cases_and_clearance_schedule(self):
-        from locomotion.evaluate import case_manifest
+        from locomotion.evaluation.runner import case_manifest
         full = {c['case_id']: c for c in case_manifest()}
         for case in cases_for('qualification'):
             self.assertEqual(case, full[case['case_id']]); self.assertTrue(supported(case['command']))
@@ -219,17 +219,17 @@ class TripodTests(unittest.TestCase):
         with self.assertRaises(ValueError): cases_for('terrain')
 
     def test_prepare_freezes_tripod_source_and_requires_single_robot(self):
-        from locomotion.prepare import prepare
+        from locomotion.runs.prepare import prepare
         with tempfile.TemporaryDirectory() as temp:
             output = Path(temp)/'pack'
             binding = prepare(output, '/home/orionh/HEXAPOD_runs/restart_20260914/tripod_cpu_fixture',
                               mode='tripod', candidate=3, suite='clearance')
-            self.assertEqual(binding['module'], 'locomotion.tripod_evaluate')
+            self.assertEqual(binding['module'], 'locomotion.evaluation.tripod_evaluate')
             self.assertIn('--standing-admission', binding['command_args'])
             self.assertNotIn('--updates', binding['command_args'])
             frozen = json.loads((output/'source/FREEZE_SHA256.json').read_text())
-            self.assertEqual(frozen['locomotion/tripod.py'], sha(ROOT/'locomotion/tripod.py'))
-            self.assertEqual(frozen['locomotion/tripod_config.py'], sha(ROOT/'locomotion/tripod_config.py'))
+            self.assertEqual(frozen['locomotion/tasks/tripod.py'], sha(ROOT/'locomotion/tasks/tripod.py'))
+            self.assertEqual(frozen['locomotion/tasks/tripod_config.py'], sha(ROOT/'locomotion/tasks/tripod_config.py'))
             with self.assertRaises(ValueError):
                 prepare(Path(temp)/'bad', '/home/orionh/HEXAPOD_runs/restart_20260914/tripod_cpu_fixture',
                         mode='tripod', num_envs=32)
@@ -240,7 +240,7 @@ class TripodTests(unittest.TestCase):
         binding = fixture.binding(); binding['mode'] = 'tripod'
         binding['command_args'][1] = 'tripod'
         with self.assertRaises(ValueError): fixture.verify_without_filesystem(binding)
-        binding['module'] = 'locomotion.tripod_evaluate'
+        binding['module'] = 'locomotion.evaluation.tripod_evaluate'
         fixture.verify_without_filesystem(binding)
         binding['mode'] = 'train'; binding['command_args'][1] = 'train'
         with self.assertRaises(ValueError): fixture.verify_without_filesystem(binding)
@@ -258,7 +258,7 @@ class TripodTests(unittest.TestCase):
 
 class ExtendedClearanceScoringTests(unittest.TestCase):
     def score(self, data, windows=None):
-        from locomotion.evaluate import score_case
+        from locomotion.evaluation.runner import score_case
         return score_case(data, {'profile': 'omni_static', 'command': [.05, 0., 0.],
             'contact_classification': 'exact_distal_points'},
             {'profile': 'omni_static', 'controls': 1800,

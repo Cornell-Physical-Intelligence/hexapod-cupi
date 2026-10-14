@@ -8,8 +8,10 @@ import unittest
 
 import torch
 
-from locomotion import task_v2, task_v3, train
-from locomotion.prepare import prepare
+from locomotion.tasks import task_v2 as task_v2
+from locomotion.tasks import task_v3 as task_v3
+from locomotion.runs import train as train
+from locomotion.runs.prepare import prepare
 from locomotion.tests.test_task_v2 import RewardDouble
 
 
@@ -88,7 +90,7 @@ class ImmediateTrackingTests(unittest.TestCase):
             args = binding["command_args"]
             self.assertEqual(args[args.index("--reward-version")+1], "3")
             self.assertEqual(json.loads((output/"PACK.json").read_text())["reward_version"], "3")
-            self.assertTrue((output/"source/locomotion/task_v3.py").is_file())
+            self.assertTrue((output/"source/locomotion/tasks/task_v3.py").is_file())
             with self.assertRaisesRegex(ValueError, "training only"):
                 prepare(Path(directory)/"evaluate", REMOTE, mode="evaluate", reward_version="3")
         self.assertEqual(train.checkpoint_reward_version({"identity": {"reward_version": "3"}}), "3")

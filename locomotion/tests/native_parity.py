@@ -31,7 +31,7 @@ def verify_weights(checkpoint):
 
 def replay():
     from contracts import release
-    from locomotion import train
+    from locomotion.runs import train as train
     args = sys.argv[1:]
     def option(name):
         if args.count(name) != 1:
@@ -57,15 +57,15 @@ def replay():
 
 
 def launch():
-    from locomotion import launch as supervisor
+    from locomotion.runs import launch as supervisor
     proof()
     original = supervisor.command
     def command(binding, paths, name):
-        if binding['module'] != 'locomotion.train' or binding['mode'] != 'evaluate':
+        if binding['module'] != 'locomotion.runs.train' or binding['mode'] != 'evaluate':
             raise ValueError('The parity launcher accepts evaluation only')
         argv = original(binding, paths, name)
         index = argv.index('-m') + 1
-        if argv[index] != 'locomotion.train':
+        if argv[index] != 'locomotion.runs.train':
             raise ValueError('Unexpected parity entry point')
         argv[index] = 'locomotion.tests.native_parity'
         return argv

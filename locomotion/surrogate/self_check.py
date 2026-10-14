@@ -29,13 +29,13 @@ import mujoco
 import numpy as np
 import torch
 
-from locomotion.env_config import MASS_KG
+from locomotion.backends.isaac.config import MASS_KG
 from locomotion.surrogate import calibrate, evaluate as evaluator, train as trainer
 from locomotion.surrogate.env import (DEFAULT_GEOMETRY, DEFAULT_MODEL, DEFAULT_STANCE, LEGS, ROOT, ContactModel,
                                       make_env, repository_state, sha)
 from locomotion.surrogate.train import thread_count
-from locomotion.task_v2 import TrainingTaskV2
-from locomotion.task_v3 import TrainingTaskV3
+from locomotion.tasks.task_v2 import TrainingTaskV2
+from locomotion.tasks.task_v3 import TrainingTaskV3
 
 # The native reference files that the comparisons read, relative to --native-ref.
 REFERENCE_FILES = ("standing_one/standing/substeps_000.npz", "standing_one/standing/substeps_009.npz",
@@ -68,7 +68,7 @@ def shaft_contact():
     not to a toe cap, sets every leg to it with that point 0.3 mm inside the floor, and advances
     one substep with zero torque. ``_classify_patches`` must then report shaft force and no toe force.
     """
-    from locomotion.env import _DiagnosticGeometry, _classify_patches
+    from locomotion.backends.isaac.env import _DiagnosticGeometry, _classify_patches
     env = make_env(1, threads=0)
     m, d = env.mj_model, mujoco.MjData(env.mj_model)
     shaft, toe = {}, {}
@@ -258,21 +258,21 @@ def main(argv=None):
                                                   "env_1_replica": throughput(1, 0, 400)})
     if not args.skip_training:
         record("training_smoke_v2", train(args.output / "smoke_v2", 3, threads))
-        record("training_smoke_v3", train(args.output / "smoke_v3", 3, threads, "--task", "locomotion.task_v3:TrainingTaskV3",
+        record("training_smoke_v3", train(args.output / "smoke_v3", 3, threads, "--task", "locomotion.tasks.task_v3:TrainingTaskV3",
                                           "--action-mean", "tanh", "--observation-normalization", "none"))
         # The default reward v4 holds a contact-schedule term, which needs the gait clock of its period.
-        from locomotion.task_v4 import REWARD_V4_CONFIG
+        from locomotion.tasks.task_v4 import REWARD_V4_CONFIG
         clock = str(REWARD_V4_CONFIG.schedule_period_controls) if REWARD_V4_CONFIG.schedule_weight else "0"
-        record("training_smoke_v4", train(args.output / "smoke_v4", 3, threads, "--task", "locomotion.task_v4:TrainingTaskV4",
+        record("training_smoke_v4", train(args.output / "smoke_v4", 3, threads, "--task", "locomotion.tasks.task_v4:TrainingTaskV4",
                                           "--gait-clock", clock))
         # Without the clock the trainer must stop a reward that holds the schedule term.
         record("training_smoke_v4_without_clock", train(
-            args.output / "smoke_v4_no_clock", 1, threads, "--task", "locomotion.task_v4:TrainingTaskV4",
+            args.output / "smoke_v4_no_clock", 1, threads, "--task", "locomotion.tasks.task_v4:TrainingTaskV4",
             expected="failed" if REWARD_V4_CONFIG.schedule_weight else "completed"))
         options = train(
             args.output / "smoke_options", 3, threads,
             # A variant at the default of a field that this check reads, so the factory form runs at any revision.
-            "--task", f"locomotion.task_v4:variant(schedule_weight={REWARD_V4_CONFIG.schedule_weight})",
+            "--task", f"locomotion.tasks.task_v4:variant(schedule_weight={REWARD_V4_CONFIG.schedule_weight})",
             "--action-mean", "tanh", "--observation-normalization", "none", "--observation-scaling", "fixed",
             "--command-segments", "bootstrap", "--learning-rate-max", "3e-4", "--action-std", "0.1",
             "--gait-clock", clock, "--action-std-final", "0.05", "--action-noise-correlation", "0.5",

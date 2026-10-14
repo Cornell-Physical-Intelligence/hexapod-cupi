@@ -4,8 +4,9 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from locomotion import ppo, train
-from locomotion.prepare import prepare
+from locomotion.learning import ppo as ppo
+from locomotion.runs import train as train
+from locomotion.runs.prepare import prepare
 from locomotion.tests.test_learner_options import construct
 
 REMOTE = '/srv/cupi/hexapod/runs/james/training_budget_fixture'

@@ -8,10 +8,12 @@ import unittest
 
 import torch
 
-from locomotion import task_v2, task_v4, train
-from locomotion.prepare import prepare
-from locomotion.task import TaskConfig
-from locomotion.task_v4 import REWARD_V4_CONFIG as CONFIG, TrainingTaskV4, measured_reward_v4
+from locomotion.tasks import task_v2 as task_v2
+from locomotion.tasks import task_v4 as task_v4
+from locomotion.runs import train as train
+from locomotion.runs.prepare import prepare
+from locomotion.tasks.task import TaskConfig
+from locomotion.tasks.task_v4 import REWARD_V4_CONFIG as CONFIG, TrainingTaskV4, measured_reward_v4
 from locomotion.tests.test_task_v2 import RewardDouble
 
 REMOTE = "/srv/cupi/hexapod/runs/test/reward_v4_fixture"
@@ -363,7 +365,7 @@ class TrainingTaskV4Tests(unittest.TestCase):
             args = binding["command_args"]
             self.assertEqual(args[args.index("--reward-version")+1], "4")
             self.assertEqual(args[args.index("--gait-clock")+1], "60")
-            self.assertIn("locomotion/task_v4.py", json.loads((Path(directory)/"v4/source/FREEZE_SHA256.json").read_text()))
+            self.assertIn("locomotion/tasks/task_v4.py", json.loads((Path(directory)/"v4/source/FREEZE_SHA256.json").read_text()))
             with self.assertRaisesRegex(ValueError, "training only"):
                 prepare(Path(directory)/"bad", REMOTE, mode="diagnostic", reward_version="4")
 

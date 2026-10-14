@@ -1,7 +1,7 @@
 """Evaluate a checkpoint's no-noise policy on the learning probes, on the surrogate.
 
 The probe schedules, the 400 Hz capture, the contact classification and the scoring are the
-repository's own code: this module calls ``locomotion.evaluate.run_learning_probe_suite`` on a
+repository's own code: this module calls ``locomotion.evaluation.runner.run_learning_probe_suite`` on a
 one-robot ``SurrogateEnv``. The checkpoint can come from ``locomotion.surrogate.train`` or from a
 native run; its JSON record supplies the PPO configuration. ``DeterministicPolicy`` builds the
 policy input and the action as the evaluation branch of ``locomotion/train.py`` does. A result is
@@ -30,12 +30,12 @@ import time
 import numpy as np
 import torch
 
-from locomotion import ppo as vanilla
+from locomotion.learning import ppo as vanilla
 from locomotion.surrogate.train import build_wrapper, process_threads, resolve, wrapper_options
 
 FOCUS = ["learning:translate_0.05_0deg", "learning:quiet_20s", "learning:forward_0.05_to_stop"]
-REWARD_TASKS = {"1": "locomotion.task:TrainingTask", "2": "locomotion.task_v2:TrainingTaskV2",
-                "3": "locomotion.task_v3:TrainingTaskV3", "4": "locomotion.task_v4:TrainingTaskV4"}
+REWARD_TASKS = {"1": "locomotion.tasks.task:TrainingTask", "2": "locomotion.tasks.task_v2:TrainingTaskV2",
+                "3": "locomotion.tasks.task_v3:TrainingTaskV3", "4": "locomotion.tasks.task_v4:TrainingTaskV4"}
 # Profiles whose verdict rests on a static pose.
 STATIC_PROFILES = ("quiet_stand", "stage2_long_quiet", "stop_to_stand")
 CONSENSUS_VARIANTS = {"pyramidal_cone": {"cone": "pyramidal"}, "friction_0.9": {"friction": (.9, .005, .0001)}}
@@ -281,8 +281,8 @@ def evaluate_checkpoint(args):
     from rsl_rl.runners import OnPolicyRunner
     from locomotion.surrogate.env import (DEFAULT_GEOMETRY, DEFAULT_MODEL, DEFAULT_STANCE, LEGS, ROOT, Renderer,
                                           SurrogateConfig, SurrogateEnv, contact_overrides, repository_state, sha)
-    from locomotion import evaluate as evaluation
-    from locomotion import task as task_module
+    from locomotion.evaluation import runner as evaluation
+    from locomotion.tasks import task as task_module
 
     record_path = args.checkpoint.with_suffix(".json")
     record = json.loads(record_path.read_text()) if record_path.exists() else {"identity": {}}
@@ -292,7 +292,7 @@ def evaluate_checkpoint(args):
         raise ValueError("The checkpoint has no JSON record; pass --ppo-config")
     seed = args.seed if args.seed is not None else int(identity.get("seed", 20260917))
     task_spec = args.task or identity.get("task") or REWARD_TASKS[str(identity.get("reward_version", "1"))]
-    wrapper_spec = args.wrapper or identity.get("wrapper") or "locomotion.ppo:VanillaVecEnv"
+    wrapper_spec = args.wrapper or identity.get("wrapper") or "locomotion.learning.ppo:VanillaVecEnv"
     profiles = {case["case_id"]: case["profile"] for case in evaluation.learning_probe_cases()}
     probes = list(profiles)
     selected = FOCUS if args.cases == "focus" else probes if args.cases == "all" else args.cases.split(",")

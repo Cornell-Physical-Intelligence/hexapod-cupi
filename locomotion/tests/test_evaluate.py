@@ -7,9 +7,9 @@ from unittest.mock import patch
 import unittest
 import numpy as np
 import torch
-from locomotion import evaluate as run
+from locomotion.evaluation import runner as run
 from locomotion import evaluation as scoring
-from locomotion.env_config import EnvConfig
+from locomotion.backends.isaac.config import EnvConfig
 
 
 class FakeNative:

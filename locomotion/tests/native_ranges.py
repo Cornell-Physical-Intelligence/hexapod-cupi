@@ -10,70 +10,7 @@ def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def numbers(value, path=''):
-    if isinstance(value, dict):
-        return {key: item for name, child in value.items() for key, item in numbers(child, path+'/'+name).items()}
-    if isinstance(value, list):
-        return {key: item for i, child in enumerate(value) for key, item in numbers(child, path+'/'+str(i)).items()}
-    if type(value) in (int, float):
-        if not math.isfinite(value):
-            raise ValueError('Nonfinite native metric: '+path)
-        return {path: value}
-    return {}
-
-
-def measurements(summary):
-    rows = summary['results']
-    if (summary['diagnostic_screens_passed'] is not True or summary['missing_probe_cases']
-            or summary['failed_probe_cases'] or len(rows) != 13
-            or len({row['case_id'] for row in rows}) != 13 or not all(row['pass'] for row in rows)):
-        raise ValueError('Require 13/13 unchanged native probes')
-    values, gates = {}, {}
-    for row in rows:
-        name = row['case_id']
-        values.update(numbers(row['metrics'], name+'/metrics'))
-        for key, check in row['checks'].items():
-            values.update(numbers(check.get('value'), name+'/checks/'+key))
-            gates[name+'/'+key] = {field: value for field, value in check.items() if field != 'value'}
-    values.update(numbers(summary.get('loads', {}), 'loads'))
-    return values, gates
-
-
-def freeze(summaries):
-    if len(summaries) != 3:
-        raise ValueError('Freeze exactly three baseline replays')
-    measured = [measurements(summary) for summary in summaries]
-    values, gates = measured[0]
-    identity = {key: summaries[0]['allocation'][key] for key in ('checkpoint_sha256', 'evaluator_sha256')}
-    if any(set(other) != set(values) or other_gates != gates for other, other_gates in measured[1:]):
-        raise ValueError('Baseline metric schema or gate definitions differ')
-    if any(any(summary['allocation'][key] != value for key, value in identity.items()) for summary in summaries):
-        raise ValueError('Baseline weights or scorer differ')
-    return {'schema': 'hexapod_refactor_ranges_v1', 'identity': identity, 'gates': gates,
-            'ranges': {key: [min(row[0][key] for row in measured), max(row[0][key] for row in measured)]
-                       for key in sorted(values)}, 'baseline_count': 3,
-            'scope': 'Observed baseline ranges; no statistical coverage claim or changed qualification gate.'}
-
-
-def compare(limits, summary):
-    failures = []
-    try:
-        if limits['schema'] != 'hexapod_refactor_ranges_v1' or limits['baseline_count'] != 3:
-            raise ValueError('Invalid frozen comparison ranges')
-        values, gates = measurements(summary)
-        if gates != limits['gates']:
-            failures.append('Gate definitions differ')
-        if any(summary['allocation'][key] != value for key, value in limits['identity'].items()):
-            failures.append('Weights or scorer differ')
-        if set(values) != set(limits['ranges']):
-            failures.append('Metric schema differs')
-        for key, bounds in limits['ranges'].items():
-            if key in values and not bounds[0] <= values[key] <= bounds[1]:
-                failures.append({'metric': key, 'candidate': values[key], 'baseline_range': bounds})
-    except (ValueError, KeyError) as error:
-        failures.append(str(error))
-    return {'schema': 'hexapod_refactor_comparison_v1', 'pass': not failures, 'failures': failures,
-            'stage2_complete': False}
+from locomotion.runs.compat import numbers, measurements, freeze, compare
 
 
 def read_run(root, role):

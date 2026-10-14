@@ -10,8 +10,9 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion import reward_scorer, reward_workbench
-from locomotion.task import REWARD_VERSION, TaskConfig, measured_reward
+from locomotion.evaluation import reward_scorer as reward_scorer
+from locomotion.evaluation import reward_workbench as reward_workbench
+from locomotion.tasks.task import REWARD_VERSION, TaskConfig, measured_reward
 
 ROOT = Path(__file__).resolve().parents[2]
 TRACE = ROOT/'locomotion/tests/fixtures/control_trace.npz'
@@ -112,7 +113,7 @@ class RewardConfigTests(unittest.TestCase):
             path = edit_file(temporary, {'tilt_weight': .7})
             args = parser.parse_args(['--reward-config', f'tilt={path}'])
             self.assertEqual(list(reward_scorer.selected_rewards(parser, args)), [f'current ({REWARD_VERSION})', 'tilt'])
-            args = parser.parse_args(['--reward-config', f'x={path}', '--reward', 'x=locomotion.task:measured_reward'])
+            args = parser.parse_args(['--reward-config', f'x={path}', '--reward', 'x=locomotion.tasks.task:measured_reward'])
             with self.assertRaises(SystemExit):
                 reward_scorer.selected_rewards(parser, args)
 

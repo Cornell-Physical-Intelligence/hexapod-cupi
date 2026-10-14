@@ -5,7 +5,7 @@ import unittest
 import torch
 from tensordict import TensorDict
 
-from locomotion import paper_networks as nets
+from locomotion.learning import paper_networks as nets
 
 N = 5
 GROUPS = {'actor': list(nets.ACTOR_GROUPS), 'critic': list(nets.CRITIC_GROUPS)}

@@ -1,8 +1,0 @@
-"""Compatibility entry point for launch."""
-import sys
-from .runs import launch as _implementation
-
-if __name__ == '__main__':
-    raise SystemExit(_implementation.main())
-else:
-    sys.modules[__name__] = _implementation

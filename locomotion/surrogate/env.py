@@ -1,9 +1,9 @@
-"""Run the interface of ``locomotion.env.LocomotionEnv`` on CPU MuJoCo physics.
+"""Run the interface of ``locomotion.backends.isaac.env.LocomotionEnv`` on CPU MuJoCo physics.
 
 You use this environment to iterate on reward and learner design before a native run. Native
 Isaac runs are the only acceptance evidence. The module imports the action path
 (``emitted_target``, ``motor_force``, ``executed_action_feature``) and the frame helpers
-(``navigation``, ``rotate``, ``inverse_rotate``) from ``locomotion.env``, so the surrogate
+(``navigation``, ``rotate``, ``inverse_rotate``) from ``locomotion.backends.isaac.env``, so the surrogate
 executes the same code as the native environment. MuJoCo replaces rigid-body dynamics and
 floor contact. The module adds two measured native effects: the solver's position update
 (``ContactModel.position_blend``) and the friction overshoot of a late toe touchdown
@@ -24,9 +24,9 @@ import numpy as np
 from scipy.spatial import ConvexHull
 import torch
 
-from locomotion.amp import extract_features
-from locomotion.env import emitted_target, executed_action_feature, inverse_rotate, motor_force, navigation, rotate
-from locomotion.env_config import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, MODEL_SHA256
+from locomotion.core.features import extract_features
+from locomotion.backends.isaac.env import emitted_target, executed_action_feature, inverse_rotate, motor_force, navigation, rotate
+from locomotion.backends.isaac.config import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, MODEL_SHA256
 
 # The package resolves repository data from its own location.
 ROOT = Path(__file__).resolve().parents[2]

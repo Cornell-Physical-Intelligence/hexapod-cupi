@@ -32,13 +32,13 @@ import time
 import numpy as np
 import torch
 
-from locomotion import noise_probe
+from locomotion.evaluation import noise_probe as noise_probe
 from locomotion.surrogate import replay
 from locomotion.surrogate.env import contact_overrides, make_env, repository_state
 from locomotion.surrogate.train import thread_count
-from locomotion.task import ProximityGuard, TaskConfig
-from locomotion.task_v2 import TrainingTaskV2
-from locomotion.task_v3 import TrainingTaskV3
+from locomotion.tasks.task import ProximityGuard, TaskConfig
+from locomotion.tasks.task_v2 import TrainingTaskV2
+from locomotion.tasks.task_v3 import TrainingTaskV3
 
 # The native extract holds runs A to D. Runs A to C trained reward v2 and run D trained reward v3,
 # so the tracking terms of each reward version compare with its own runs.
@@ -537,7 +537,7 @@ def probe(native, output, contact, *, threads=2):
     native_plan = json.loads((native / "plan.json").read_text())
     seed = int(native_plan["seed"])
     if native_plan["replicas"] != noise_probe.plan(len(native_plan["replicas"])):
-        raise ValueError("The native plan differs from locomotion.noise_probe.plan at this revision")
+        raise ValueError("The native plan differs from locomotion.evaluation.noise_probe.plan at this revision")
     output.mkdir(parents=True, exist_ok=False)
     started = time.perf_counter()
     # Native probe mode: 128 replicas, 20 s episodes, zero command, reset by noise_probe.run.

@@ -16,12 +16,13 @@ from rsl_rl.algorithms import PPO
 from rsl_rl.models import MLPModel
 from rsl_rl.utils import resolve_callable
 
-from locomotion.action_distribution import BoundedMeanGaussian
-from locomotion.amp_ppo import amp_ppo_config
-from locomotion import paper_networks, train
-from locomotion.env_config import JOINT_NAMES
-from locomotion.ppo import action_metrics, ppo_config
-from locomotion.prepare import prepare
+from locomotion.learning.action_distribution import BoundedMeanGaussian
+from locomotion.learning.amp_ppo import amp_ppo_config
+from locomotion.learning import paper_networks as paper_networks
+from locomotion.runs import train as train
+from locomotion.backends.isaac.config import JOINT_NAMES
+from locomotion.learning.ppo import action_metrics, ppo_config
+from locomotion.runs.prepare import prepare
 
 
 def observations(count=8):
@@ -189,7 +190,7 @@ class IntegrationTests(unittest.TestCase):
                 pack = json.loads((root / mode / 'PACK.json').read_text())
                 self.assertEqual(pack['action_mean'], 'tanh')
                 manifest = json.loads((root / mode / 'source/FREEZE_SHA256.json').read_text())
-                self.assertIn('locomotion/action_distribution.py', manifest)
+                self.assertIn('locomotion/learning/action_distribution.py', manifest)
             legacy = prepare(root / 'legacy', remote)
             self.assertNotIn('--action-mean', legacy['command_args'])
             for options in ({'action_mean': 'other'}, {'mode': 'diagnostic', 'action_mean': 'tanh'},

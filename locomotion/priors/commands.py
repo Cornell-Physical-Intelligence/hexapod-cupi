@@ -3,7 +3,7 @@ import numpy as np
 
 
 def motion_cases():
-    from locomotion.task import TaskConfig, command_bank
+    from locomotion.tasks.task import TaskConfig, command_bank
     return [{'case_id': f'amp:command_{i:02d}', 'profile': 'omni_static',
              'command': command, 'controls': 1000}
             for i, command in enumerate(command_bank(TaskConfig()))]

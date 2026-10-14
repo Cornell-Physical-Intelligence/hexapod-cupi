@@ -13,8 +13,8 @@ import math
 import time
 import numpy as np
 import torch
-from ..env_config import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256
-from ..evaluation_config import EvaluationEnvConfig
+from locomotion.backends.isaac.config import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256
+from locomotion.evaluation.evaluation_config import EvaluationEnvConfig
 from .capture import _DiagnosticGeometry, _classify_patches, _diagnostic_rotation, _diagnostic_servo
 from . import scoring
 
@@ -427,7 +427,7 @@ def run_batch(env, policy, cases, output, geometry_extrema, *, checkpoint_sha256
             "recorded_physics_steps":receipt["steps"],"results":results,"video_frames":frames,
             "video_case_id":video_case_id if video_index is not None else None,
             "files":{p.name:_sha(p) for p in sorted(out.iterdir()) if p.is_file()}}
-    from ..force_metrics import write_summary
+    from locomotion.evaluation.force_metrics import write_summary
     load_path = out/'force_metrics.json'
     loads = write_summary(out, load_path)
     report['force_metrics'] = {'path': load_path.name, 'status': loads['status']}

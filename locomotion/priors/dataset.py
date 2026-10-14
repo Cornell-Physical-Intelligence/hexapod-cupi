@@ -8,8 +8,8 @@ from pathlib import Path
 
 import numpy as np
 
-from locomotion.amp import extract_features, feature_contract
-from locomotion.env_config import MODEL_SHA256, USD_SHA256
+from locomotion.core.features import extract_features, feature_contract
+from locomotion.backends.isaac.config import MODEL_SHA256, USD_SHA256
 from locomotion.evaluation import score_recording
 from locomotion.runs.sources import source_files
 from .commands import command_index, motion_cases
@@ -157,7 +157,7 @@ def audit_replay(directory):
     for name in ('control_trace.npz', 'force_metrics.json', 'rollout.mp4'):
         if name not in report['files']:
             raise ValueError('Missing bound native evidence: '+name)
-    from locomotion.force_metrics import report_for
+    from locomotion.evaluation.force_metrics import report_for
     saved_loads = json.loads((report_path.parent/'force_metrics.json').read_text())
     computed_loads = report_for(report_path.parent)
     for key in ('cases', 'source_files', 'capture_failure', 'model_sha256'):
