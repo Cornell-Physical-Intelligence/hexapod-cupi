@@ -13,9 +13,10 @@ loop without reading old experiment launchers or a second environment port.
 | [`evaluation/`](evaluation/) | Capture rollouts, summarize forces and apply the frozen scorer. |
 | [`runs/`](runs/) | Validate arguments, freeze inputs and sources, enforce identity and supervise runs. |
 
-You can search classes, functions and imports in the
+You can search classes and functions in the
 [developer code map](https://cornell-physical-intelligence.github.io/hexapod-cupi/code/).
-Pages rebuilds the map from the build revision. The map includes source links and ownership.
+Pages rebuilds the map from the build revision. You can open source lines from the map
+and download its JSON index for imports and ownership.
 You keep the existing `python -m locomotion.train`, `prepare`, `launch` and `inputs`
 commands. Top-level compatibility modules preserve imports and serialized learner names.
 The `priors/` and `surrogate/` packages retain their separate guides and runtime boundaries.
@@ -98,6 +99,23 @@ normalization drift. The post-update values measure the net change from the
 stored behavior policy; they are not the optimizer's minibatch KL averages.
 
 ## Run and verify
+
+For this refactor, you compare CPU outputs against the frozen `b2a6168c` sources
+in `tests/fixtures/refactor_b2a6168c.tar.gz`. Run `tests/test_refactor_parity.py`
+and the recorded-control tests before native evaluation.
+
+You use `tests/native_parity.py` in a frozen test pack to replay the pinned
+`c48_long` weights. Include the pack's `PARITY.json` source declaration and
+renew standing admission for its physics sources. The harness retains model,
+learner and embedded checkpoint checks; it separates source provenance from
+weight compatibility. You must use the guarded launcher with `--launch`.
+
+You freeze comparison ranges before the candidate replay with
+`python -m locomotion.tests.native_ranges freeze`, three `--baseline` run
+directories and a fresh `--output`. Use `compare` with `--candidate`, `--ranges`,
+the frozen `--ranges-sha256` and another fresh `--output`. Each replay must
+complete 13/13 probes with unchanged gates and contact/torque captures.
+Preserve a failed comparison and block merge; do not widen the frozen ranges.
 
 From the repository root:
 
