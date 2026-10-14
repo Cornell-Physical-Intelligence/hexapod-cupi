@@ -1,0 +1,20 @@
+{
+  "id": "20261010T172912_stride_length",
+  "date": "2026-10-10T17:29:12+00:00",
+  "title": "Restore the stride tracking term and add a stride-length term to the experimental yaw-gated reward",
+  "summary": "locomotion.task_v4_yaw_gate again offers stride_tracking_weight and stride_window_controls, removed earlier for heading drift, and adds stride_length_weight. The stride-length term pays each foot at touchdown min(r, 1)^2, where r is its toe travel over the floor since liftoff along the commanded toe velocity divided by the stride the command needs at the schedule period; two half strides earn half of one full stride and nothing beyond a full stride is paid. The fall-cost rule counts its average pay. On the surrogate, with 30 percent turn draws, the bonus-and-floor gate, stride tracking 0.3, stride length 2 and termination weight 22: at 24 controls per robot per update and 5000 updates, seeds 20260917 and 20260918 passed 13 and 12 of 13 learning probes at a median 0.91 and 0.94 of the commanded speed; at 36 controls per update and 3350 updates, the same experience, they passed 13 and 12 of 13 at 1.06, turned within 5 percent of 0.2 rad/s both ways, held heading within 16 and 21 degrees on every translation and fell 17.4 and 4.9 times per million controls against 26.0 and 30.6. The defaults add nothing; native runs remain the acceptance evidence.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/task_v4_yaw_gate.py",
+    "locomotion/tests/test_task_v4_yaw_gate.py",
+    "site/updates/20261010T172912_stride_length.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_task_v4_yaw_gate.py"
+  ],
+  "next": "Add a rollout-length option to native training and train the 36-control configuration natively, with run-lead approval.",
+  "no_project_impact": true,
+  "reason": "Opt-in options of an experimental task with surrogate design evidence change no native result, gate or default reward."
+}

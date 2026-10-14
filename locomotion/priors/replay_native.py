@@ -1,6 +1,8 @@
 """Replay an optimized target cycle through the locomotion kernel."""
 from __future__ import annotations
 
+from ..runs.sources import source_files, physics_files
+
 import argparse
 import hashlib
 import importlib
@@ -96,11 +98,11 @@ def main(argv=None):
         raise ValueError('Source-freeze identity differs')
     metadata = json.loads(args.stance.read_text())
     cfg = env_config.EnvConfig(num_envs=1, render=True, record_motion_features=True, episode_seconds=60., device=args.device)
-    identity = {'source_files': {p.name: sha(p) for p in sorted(Path(original.__file__).parent.glob('*.py'))}, 'model_sha256': env_config.MODEL_SHA256,
+    identity = {'source_files': source_files(Path(__file__).resolve().parents[1]), 'model_sha256': env_config.MODEL_SHA256,
         'usd_sha256': env_config.USD_SHA256,
         'stance_sha256': sha(args.stance), 'geometry_sha256': sha(args.geometry),
         'geometry_extrema_sha256': sha(args.geometry_extrema), 'config': cfg.declaration()}
-    identity['physics_source_files'] = {k: identity['source_files'][k] for k in ('env.py', 'env_config.py')}
+    identity['physics_source_files'] = physics_files(identity['source_files'])
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
         'spacing_m': cfg.spacing_m, 'target_slew_rad': cfg.target_slew_rad, 'action_scale_rad': cfg.action_scale_rad,
         'solver_position_iterations': 32, 'solver_velocity_iterations': 0,

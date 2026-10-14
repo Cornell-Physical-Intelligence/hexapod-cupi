@@ -1,0 +1,21 @@
+{
+  "id": "20261010T074954_yaw_gate_native_selection",
+  "date": "2026-10-10T07:49:54+00:00",
+  "title": "Let native reward v4 training select the experimental yaw-gated task",
+  "summary": "locomotion/train.py and locomotion/prepare.py gain --reward-task, with v4 by default and v4_yaw_gate for the yaw-gated schedule with turn-heavy sampling in locomotion/task_v4_yaw_gate.py. It applies to reward version 4 training only; --reward-options then names RewardV4YawGateConfig fields and is checked against them before launch. The option enters the binding, PACK.json and the run identity only when selected, so existing packages and checkpoints keep their recorded configuration. It prepares a native run of the surrogate's turn-heavy bonus-and-floor configuration, which kept heading within 18 degrees on every translation probe at 5000 surrogate updates.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/train.py",
+    "locomotion/prepare.py",
+    "locomotion/tests/test_task_v4_yaw_gate.py",
+    "site/updates/20261010T074954_yaw_gate_native_selection.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_task_v4_yaw_gate.py"
+  ],
+  "next": "With reviewer and run-lead approval, train the turn-heavy bonus-and-floor configuration natively for 5000 updates on seed 20260917 with the arm B learner options, and compare its probes and heading drift with arm B.",
+  "no_project_impact": true,
+  "reason": "An opt-in training option changes no default, gate, existing package or result."
+}

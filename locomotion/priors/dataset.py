@@ -11,12 +11,14 @@ import numpy as np
 from locomotion.amp import extract_features, feature_contract
 from locomotion.env_config import MODEL_SHA256, USD_SHA256
 from locomotion.evaluation import score_recording
+from locomotion.runs.sources import source_files
 from .commands import command_index, motion_cases
 
 SCHEMA = 'hexapod_amp_dataset_v1'
 WINDOW = (100, 1000)
 PROCESSING_FILES = ('amp.py', 'env_config.py', 'task.py', 'evaluation.py',
                     'force_metrics.py', 'priors/commands.py', 'priors/dataset.py')
+PROCESSING_SCHEMA = 'hexapod_processing_sources_v2'
 
 
 def sha(path):
@@ -29,8 +31,9 @@ def save(path, value):
 
 def processing_identity():
     root = Path(__file__).resolve().parents[1]
-    return {'numpy_version': np.__version__, 'source_files': {
-        'locomotion/'+name: sha(root/name) for name in PROCESSING_FILES}}
+    return {'schema': PROCESSING_SCHEMA, 'numpy_version': np.__version__, 'source_files': {
+        **{'locomotion/'+name: digest for name, digest in source_files(root).items()},
+        **{'locomotion/'+name: sha(root/name) for name in ('priors/commands.py', 'priors/dataset.py')}}}
 
 
 def rotations(quaternion):
@@ -316,8 +319,11 @@ def load(directory):
         raise ValueError('Invalid review, window or clip-index contract')
     processing = manifest.get('processing_identity', {})
     sources = processing.get('source_files', {})
-    if (not processing.get('numpy_version')
-            or set(sources) != {'locomotion/'+name for name in PROCESSING_FILES}
+    expected_sources = ({'locomotion/'+name for name in PROCESSING_FILES}
+                        if 'schema' not in processing else set(processing_identity()['source_files']))
+    if (processing.get('schema', PROCESSING_SCHEMA) != PROCESSING_SCHEMA
+            or not processing.get('numpy_version')
+            or set(sources) != expected_sources
             or any(not isinstance(value, str) or len(value) != 64
                    or set(value)-set('0123456789abcdef') for value in sources.values())):
         raise ValueError('Missing dataset processing source identity')

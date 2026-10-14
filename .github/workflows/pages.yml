@@ -32,7 +32,9 @@ jobs:
       - name: Build the verified research poster
         run: python3 tools/project_site.py build
       - name: Exercise the built roadmap renderer
-        run: node site/test_render.mjs
+        run: |
+          node site/test_render.mjs
+          node site/test_code_map.mjs
       - name: Configure GitHub Pages
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/configure-pages@v5

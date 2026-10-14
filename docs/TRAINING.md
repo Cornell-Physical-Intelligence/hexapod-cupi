@@ -12,7 +12,7 @@ unbuilt; simulation results do not establish hardware calibration.
 | Control | 400 Hz physics, 50 Hz policy, eight substeps, 0.35 rad action scale and 0.040 rad target-change bound per control. |
 | Motor | Named damping and the existing speed-dependent effort curve, with a provisional 1.6 N·m software cap. Hardware characterization remains open. |
 | Policy input | 231 actor values: five 42-value proprioception frames, the three-value velocity command and 18 executed-action values. The critic adds measured planar/vertical velocity for 234 values. |
-| Learning | Stock RSL-RL 5.0.1 PPO. [`task.py`](../locomotion/task.py) owns command sampling and reward version 1, the default; [`task_v2.py`](../locomotion/task_v2.py) owns reward version 2, selected with `train.py --reward-version 2` ([audit](REWARD_V2_TABLE1_AUDIT.md)); [`task_v4.py`](../locomotion/task_v4.py) owns reward version 4, the first version with a native walking and stopping result ([audit section 15](REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)); [`ppo.py`](../locomotion/ppo.py) owns its adapter and settings. |
+| Learning | Stock RSL-RL 5.0.1 PPO. [`tasks/task.py`](../locomotion/tasks/task.py) owns command sampling and reward version 1, the default; [`tasks/task_v2.py`](../locomotion/tasks/task_v2.py) owns reward version 2, selected with `train.py --reward-version 2` ([audit](REWARD_V2_TABLE1_AUDIT.md)); [`tasks/task_v4.py`](../locomotion/tasks/task_v4.py) owns reward version 4, the first version with a native walking and stopping result ([audit section 15](REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)); [`learning/ppo.py`](../locomotion/learning/ppo.py) owns its adapter and settings. |
 | Admission | Recomputed native standing passes at one robot and the exact intended batch size, bound to the same source, model, neutral stance and geometry. |
 
 The current sampler trains translation commands at 0.025 and 0.05 m/s, yaw and
@@ -34,7 +34,9 @@ reference target.
 
 ## Results and research order
 
-Read [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings) for measured results and original evidence. The
+The [progress site](https://cornell-physical-intelligence.github.io/hexapod-cupi/) shows the latest result; the
+[registry of 13 October 2026](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/9d819c68f7311477fc5d1fd61b00026a146656a0/site/project.json)
+lists earlier results with their original evidence. The
 optimized forward target sequence passes its native screen. The paired
 action-initialization experiment found no benefit in its one seed, and that
 result does not evaluate AMP.
@@ -536,7 +538,7 @@ training. Historical admissions and checkpoints retain their original sources.
 
 ## Acceptance and measurements
 
-[`evaluation.py`](../locomotion/evaluation.py) owns the unchanged numerical
+[`evaluation/scoring.py`](../locomotion/evaluation/scoring.py) owns the unchanged numerical
 gates. [`evaluate.py`](../locomotion/evaluate.py) records actual policy actions
 and native responses. The 13 learning probes are additional diagnostics. The
 full Stage 2 manifest has 96 cases, including signed directions, turns,
@@ -565,4 +567,4 @@ C-study, mock, four-bar and custom PPO/AMP runs keep their original model,
 observation layout, source and gates. Use their frozen source packs or the
 [pinned pre-cleanup training reference](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/33ec6f16d70c8b0e74a9608d69be7c563c11bfbb/docs/TRAINING.md).
 The [archive index](../configs/archive.json) identifies retired source and context. Historical decisions do not authorize new work or override
-the approved robot. The current status lives in [STATUS](https://cornell-physical-intelligence.github.io/hexapod-cupi/#findings).
+the approved robot. The [progress site](https://cornell-physical-intelligence.github.io/hexapod-cupi/) shows the current status.
