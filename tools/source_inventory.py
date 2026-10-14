@@ -13,8 +13,6 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = 'configs/source_inventory.json'
 SCOPES = ('tools', 'contracts', 'navigation', 'mission', 'locomotion')
-# Maintained prototypes keep tests outside their top-level tool scope.
-TOP_LEVEL_SCOPES = ()
 
 
 def read_inventory(root=ROOT):
@@ -29,8 +27,6 @@ def check(root=ROOT):
         raise ValueError('Duplicate source ownership')
     actual = {str(p.relative_to(root)) for directory in SCOPES
               for p in (root / directory).rglob('*.py') if '__pycache__' not in p.parts and 'tests' not in p.parts}
-    actual.update(str(p.relative_to(root)) for directory in TOP_LEVEL_SCOPES
-                  for p in (root / directory).glob('*.py'))
     if actual != set(paths):
         raise ValueError(f'Source inventory differs: unowned={sorted(actual-set(paths))}; missing={sorted(set(paths)-actual)}')
     for row in rows:

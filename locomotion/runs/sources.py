@@ -7,7 +7,6 @@ from pathlib import Path
 
 SCHEMA = 'hexapod_runtime_sources_v2'
 MANIFEST = 'RUNTIME_SOURCES.json'
-PACKAGES = ('core', 'backends', 'tasks', 'learning', 'evaluation', 'runs')
 
 
 def digest(path):

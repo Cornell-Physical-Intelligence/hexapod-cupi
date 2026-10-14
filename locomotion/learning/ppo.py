@@ -12,8 +12,6 @@ FRAME_SCALES = (2.,)*3 + (1.,)*3 + (1/.35,)*18 + (.5,)*18
 COMMAND_SCALES = (20., 20., 5.)
 ACTOR_SCALES = FRAME_SCALES*5 + COMMAND_SCALES + (1.,)*18
 CRITIC_SCALES = ACTOR_SCALES + (20.,)*3
-RATE_CLASS = 'locomotion.rate_schedule:CappedRatePPO'
-SEGMENT_CLASS = 'locomotion.rate_schedule:CommandBootstrapPPO'
 
 
 def scale_observation(value, scaling, *, critic=False):
@@ -49,7 +47,7 @@ def smoothed_action(action, previous, episode_steps):
     return .5 * (action + torch.where(fresh, torch.zeros_like(action), previous))
 
 
-from .config import ppo_config
+from .config import ppo_config, RATE_CLASS, SEGMENT_CLASS
 
 
 def policy_change_metrics(actor, storage, clip_param):

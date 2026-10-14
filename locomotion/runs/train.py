@@ -222,8 +222,6 @@ def main(argv=None):
         'reset_root_height_m': metadata['reset_root_height_m']}
     if args.mode != 'diagnostic':
         identity['standing_admission'] = admission.require_admission(args.standing_admission, identity, cfg)
-    from contracts.release import COMPATIBILITY_KEYS
-    compatibility_keys = COMPATIBILITY_KEYS
     checkpoint_record = None
     if args.mode == 'evaluate':
         if sha(args.checkpoint) != args.checkpoint_sha256:
