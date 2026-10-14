@@ -1,4 +1,9 @@
 """Check that the surrogate applies Table II draws per replica, isolates replicas and keeps ``none`` unchanged."""
+import contextlib
+import io
+import json
+from pathlib import Path
+import tempfile
 import unittest
 
 import mujoco
@@ -8,6 +13,7 @@ import torch
 from locomotion import randomization as rnd
 from locomotion.env import motor_force
 from locomotion.env_config import BODY_NAMES, KD, MASS_KG
+from locomotion.surrogate import evaluate, train
 from locomotion.surrogate.env import make_env
 
 
@@ -137,6 +143,43 @@ class RandomizedEnvTests(unittest.TestCase):
         low, high = (env._steps(x) for x in rnd.TABLE2_V1.push.interval_s)
         self.assertTrue(end + low <= env._push_start[2] <= end + high)
         self.assertEqual(env._push_end[2] - env._push_start[2], 80)
+
+
+class CommandTests(unittest.TestCase):
+    def test_both_commands_offer_the_declared_names_and_default_to_none(self):
+        for parser in (train.build_parser(), evaluate.build_parser()):
+            action = next(a for a in parser._actions if a.dest == "randomization")
+            self.assertEqual((tuple(action.choices), action.default), (rnd.NAMES, "none"))
+
+    def test_training_identity_binds_the_declaration_and_its_ranges(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "run"
+            with contextlib.redirect_stdout(io.StringIO()):
+                code = train.main(["--output", str(output), "--num-envs", "2", "--threads", "1", "--updates", "1",
+                                   "--randomization", "table2_v1"])
+            state = json.loads((output / "state.json").read_text())
+            self.assertEqual(code, 0, state.get("traceback"))
+            recorded = state["identity"]["randomization"]
+            declaration = rnd.declaration("table2_v1")
+            self.assertEqual(recorded["declaration_sha256"], declaration["sha256"])
+            self.assertEqual(rnd.canonical(recorded["declaration"]), declaration["json"])
+            self.assertEqual(recorded["declaration"]["table"]["foot_friction"]["high"], 2.5)
+            readback = json.loads((output / "native/native_readback.json").read_text())
+            self.assertEqual(readback["randomization"], rnd.identity("table2_v1"))
+            # The run records the declaration, never a replica's drawn values.
+            for path in output.rglob("*"):
+                if path.is_file() and path.suffix in (".json", ".jsonl"):
+                    self.assertNotIn("link_mass_scale", path.read_text(), path.name)
+
+    def test_randomized_evaluation_refuses_the_friction_consensus(self):
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            checkpoint.with_suffix(".json").write_text(json.dumps({"identity": {"ppo_config": {}}}))
+            args = evaluate.build_parser().parse_args(["--checkpoint", str(checkpoint), "--output",
+                                                       str(Path(directory) / "out"), "--randomization", "table2_v1"])
+            with self.assertRaisesRegex(ValueError, "no-contact-consensus"):
+                evaluate.evaluate_checkpoint(args)
+            self.assertFalse((Path(directory) / "out").exists())
 
 
 class MotorDrawTests(unittest.TestCase):

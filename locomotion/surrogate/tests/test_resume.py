@@ -44,7 +44,8 @@ class ResumeTests(unittest.TestCase):
     def test_changed_training_contract_fails_before_an_update(self):
         variants = [('--action-mean', 'tanh'), ('--observation-scaling', 'fixed'), ('--num-envs', '8'),
                     ('--task', 'locomotion.task_v3:TrainingTaskV3'), ('--contact', 'noslip_iterations=0'),
-                    ('--ppo-config-overrides', '{"num_steps_per_env":12}'), ('--episode-seconds', '10')]
+                    ('--ppo-config-overrides', '{"num_steps_per_env":12}'), ('--episode-seconds', '10'),
+                    ('--randomization', 'table2_v1')]
         for index, arguments in enumerate(variants):
             with self.subTest(arguments=arguments):
                 code, output, state = run(self.temporary.name, f'mismatch{index}', '--resume', str(self.checkpoint),

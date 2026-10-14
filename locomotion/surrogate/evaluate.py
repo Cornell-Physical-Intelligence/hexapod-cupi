@@ -31,7 +31,7 @@ import numpy as np
 import torch
 
 from locomotion import ppo as vanilla
-from locomotion.surrogate.train import build_wrapper, process_threads, resolve, wrapper_options
+from locomotion.surrogate.train import build_wrapper, process_threads, randomization_identity, resolve, wrapper_options
 
 FOCUS = ["learning:translate_0.05_0deg", "learning:quiet_20s", "learning:forward_0.05_to_stop"]
 REWARD_TASKS = {"1": "locomotion.task:TrainingTask", "2": "locomotion.task_v2:TrainingTaskV2",
@@ -260,6 +260,9 @@ def build_parser():
     parser.add_argument("--foot-load", action="store_true",
                         help="Write foot_load.json: the floor force on each foot after each control, by probe.")
     parser.add_argument("--contact", action="append", default=[], metavar="FIELD=VALUE")
+    parser.add_argument("--randomization", choices=["none", "table2_v1"], default="none",
+                        help="Step 7 declaration for the probes, independent of the checkpoint's training; "
+                             "each probe reset draws new conditions.")
     parser.add_argument("--no-contact-consensus", action="store_true",
                         help="Skip the two extra contact models on quiet and stop probes.")
     parser.add_argument("--keep-variant-captures", action="store_true",
@@ -282,6 +285,7 @@ def evaluate_checkpoint(args):
     from locomotion.surrogate.env import (DEFAULT_GEOMETRY, DEFAULT_MODEL, DEFAULT_STANCE, LEGS, ROOT, Renderer,
                                           SurrogateConfig, SurrogateEnv, contact_overrides, repository_state, sha)
     from locomotion import evaluate as evaluation
+    from locomotion import randomization as rnd
     from locomotion import task as task_module
 
     record_path = args.checkpoint.with_suffix(".json")
@@ -300,6 +304,9 @@ def evaluate_checkpoint(args):
     if any(case not in probes for case in selected) or any(case not in selected for case in video):
         raise ValueError("Unknown probe id, or a video case outside the selected probes")
     contact = contact_overrides(args.contact)
+    if args.randomization != "none" and not args.no_contact_consensus:
+        # The draw sets the toe and floor friction, so the friction variant would not change the toe contact.
+        raise ValueError("The contact consensus varies friction, which the randomization draws; pass --no-contact-consensus")
     # The checkpoint's PPO configuration records the wrapper options of its training.
     options = wrapper_options(config)
     if args.observation_scaling is not None:
@@ -318,7 +325,8 @@ def evaluate_checkpoint(args):
         np.random.seed(seed)
         cfg = SurrogateConfig(num_envs=1, seed=seed, episode_seconds=60., record_motion_features=True)
         env = SurrogateEnv(cfg, None, DEFAULT_MODEL, DEFAULT_GEOMETRY, directory / "native",
-                           reference_metadata=json.loads(DEFAULT_STANCE.read_text()), threads=0, contact=model)
+                           reference_metadata=json.loads(DEFAULT_STANCE.read_text()), threads=0, contact=model,
+                           randomization=args.randomization)
         task = resolve(task_spec)(env, task_module.TaskConfig(seed=seed), None)
         wrapped = build_wrapper(resolve(wrapper_spec), task, options)
         # The runner consumes its configuration, so each run receives a copy.
@@ -403,6 +411,8 @@ def evaluate_checkpoint(args):
         "policy_path": policy_path,
         "foot_load": foot_load,
         "seed": seed, "selected_case_ids": selected, "contact_model": asdict(contact), "repository": repository_state(),
+        "randomization": randomization_identity(rnd, args.randomization),
+        "checkpoint_randomization": identity.get("randomization"),
         "identity": {"source_files": source_files(ROOT / "locomotion"),
                      "surrogate_files": {p.name: sha(p) for p in sorted(Path(__file__).resolve().parent.glob("*.py"))},
                      "model_sha256": sha(DEFAULT_MODEL), "stance_sha256": sha(DEFAULT_STANCE),

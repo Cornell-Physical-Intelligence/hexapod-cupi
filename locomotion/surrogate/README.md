@@ -57,6 +57,15 @@ uv run python -m unittest discover -s locomotion/surrogate/tests
   horizon. The simulator and random generators restart from the recorded seed,
   so resume does not replay an uninterrupted trajectory. Use the original source
   checkout for a historical checkpoint.
+- `--randomization table2_v1` trains under the Step 7 declaration in
+  [`randomization.py`](../randomization.py); the default `none` keeps the
+  nominal robot. Each reset redraws that replica's masses, payload, friction,
+  gains, motor strength and reset pose, and schedules its pushes. The identity
+  records the declaration, its ranges and its SHA-256, so resume refuses a
+  different declaration. Runs log no drawn values. The evaluator's
+  `--randomization` sets the probe conditions apart from the checkpoint's
+  training; it needs `--no-contact-consensus`, because the draw sets the
+  friction that the consensus varies.
 - A reward with a contact-schedule term needs `--gait-clock` equal to its period. The trainer
   stops otherwise, as `locomotion/train.py` does.
 - The wrapper option `command_segments: bootstrap` needs an algorithm class derived from

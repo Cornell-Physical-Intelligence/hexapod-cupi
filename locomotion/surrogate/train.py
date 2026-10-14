@@ -195,6 +195,11 @@ def merge(base, override):
     return base
 
 
+def randomization_identity(rnd, name):
+    """The declaration a run trains under: its name and hash, and the canonical declaration with its ranges."""
+    return {**rnd.identity(name), "declaration": json.loads(rnd.declaration(name)["json"])}
+
+
 def resume_record(path, identity):
     """Check the checkpoint bytes and training contract before loading learner state."""
     import torch
@@ -267,6 +272,8 @@ def build_parser():
     parser.add_argument("--max-wall-seconds", type=float, default=86400.)
     parser.add_argument("--contact", action="append", default=[], metavar="FIELD=VALUE",
                         help="ContactModel override for sensitivity runs, e.g. noslip_iterations=0.")
+    parser.add_argument("--randomization", choices=["none", "table2_v1"], default="none",
+                        help="Step 7 declaration in locomotion/randomization.py; each reset redraws that replica.")
     parser.add_argument("--resume", type=Path, help="Checkpoint to continue from (same configuration).")
     parser.add_argument("--no-loads", action="store_true", help="Skip the 400 Hz TrainingLoads accumulator.")
     parser.add_argument("--no-update-diagnostics", action="store_true", help="Skip UpdateDiagnostics (needed for non-Gaussian actors).")
@@ -292,6 +299,7 @@ def run(args, argv=None):
     from locomotion.surrogate.env import (DEFAULT_GEOMETRY, DEFAULT_MODEL, DEFAULT_STANCE, ROOT, SurrogateConfig,
                                           SurrogateEnv, contact_overrides, repository_state, sha)
     from locomotion import ppo as vanilla
+    from locomotion import randomization as rnd
     from locomotion import task as task_module
     from locomotion.train import save, scalars
 
@@ -320,6 +328,7 @@ def run(args, argv=None):
         "surrogate_files": {p.name: sha(p) for p in sorted(PACKAGE.glob("*.py"))},
         "model_sha256": sha(DEFAULT_MODEL), "stance_sha256": sha(DEFAULT_STANCE), "geometry_sha256": sha(DEFAULT_GEOMETRY),
         "config": cfg.declaration(), "contact_model": asdict(contact), "seed": args.seed,
+        "randomization": randomization_identity(rnd, args.randomization),
         "task": args.task, "wrapper": args.wrapper, "action_mean": args.action_mean,
         "observation_normalization": args.observation_normalization, "distribution": args.distribution,
         "observation_scaling": options.get("observation_scaling", "none"),
@@ -344,7 +353,8 @@ def run(args, argv=None):
         np.random.seed(args.seed)
         metadata = json.loads(DEFAULT_STANCE.read_text())
         env = SurrogateEnv(cfg, None, DEFAULT_MODEL, DEFAULT_GEOMETRY, args.output / "native",
-                           reference_metadata=metadata, threads=args.threads, contact=contact, substep_state=False)
+                           reference_metadata=metadata, threads=args.threads, contact=contact, substep_state=False,
+                           randomization=args.randomization)
         task = task_class(env, task_module.TaskConfig(seed=args.seed), args.output / "task")
         identity['task_definition'] = task.declaration()
         identity['external_class_files'] = external_class_files(task_class, wrapper_class, config)
