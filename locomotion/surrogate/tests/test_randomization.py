@@ -11,10 +11,12 @@ import numpy as np
 import torch
 
 from locomotion import randomization as rnd
+from locomotion.amp_ppo import AMPVecEnv
 from locomotion.env import motor_force
 from locomotion.env_config import BODY_NAMES, KD, MASS_KG
 from locomotion.surrogate import evaluate, train
 from locomotion.surrogate.env import make_env
+from locomotion.task_v4 import TrainingTaskV4
 
 
 def first_draws(env):
@@ -143,6 +145,58 @@ class RandomizedEnvTests(unittest.TestCase):
         low, high = (env._steps(x) for x in rnd.TABLE2_V1.push.interval_s)
         self.assertTrue(end + low <= env._push_start[2] <= end + high)
         self.assertEqual(env._push_end[2] - env._push_start[2], 80)
+
+
+class PrivilegedStateTests(unittest.TestCase):
+    """The AMP adapter's friction and perturbation slots on the surrogate, as the paper critic reads them."""
+
+    @staticmethod
+    def adapter(randomization):
+        env = make_env(3, threads=0, randomization=randomization, record_motion_features=True)
+        return env, AMPVecEnv(TrainingTaskV4(env))
+
+    def test_none_keeps_the_declared_constants(self):
+        env, adapter = self.adapter("none")
+        try:
+            for _ in range(2):
+                privileged = adapter.step(torch.zeros(3, 18))[0]["privileged"]
+                self.assertTrue(bool((privileged[:, 4] == 1.).all()))
+                self.assertEqual(float(privileged[:, 23:29].abs().sum()), 0.)
+        finally:
+            env.close()
+
+    def test_slots_follow_the_draw_the_push_and_a_selected_reset(self):
+        env, adapter = self.adapter("table2_v1")
+        try:
+            privileged = adapter.get_observations()["privileged"]
+            torch.testing.assert_close(privileged[:, 4], env.ground_friction)
+            self.assertEqual(float(privileged[:, 23:29].abs().sum()), 0.)
+            # A push on replica 0 alone that lasts beyond the next two controls.
+            env._push_start[:] = 10 ** 9
+            env._push_end[:] = 10 ** 9 + 1
+            env._push_start[0], env._push_end[0] = env._since_reset[0], env._since_reset[0] + 80
+            env._push_force[0] = (6., -8., 0.)
+            privileged = adapter.step(torch.zeros(3, 18))[0]["privileged"]
+            torch.testing.assert_close(privileged[0, 23:29], torch.tensor([6., -8., 0., 0., 0., 0.]))
+            self.assertEqual(float(privileged[1:, 23:29].abs().sum()), 0.)
+            # Terminate replica 0 mid-push: its slots show the new draw and no push, not the telemetry before the reset.
+            task, step = adapter.task, adapter.task.step
+            def terminate_first(action):
+                output = step(action)
+                output["terminated"] = output["terminated"].clone()
+                output["terminated"][0] = True
+                return output
+            task.step = terminate_first
+            before = env.ground_friction.clone()
+            privileged = adapter.step(torch.zeros(3, 18))[0]["privileged"]
+            self.assertTrue(bool(adapter.reset_rows[0]) and not bool(adapter.reset_rows[1:].any()))
+            self.assertNotEqual(float(env.ground_friction[0]), float(before[0]))
+            self.assertEqual(float(env.telemetry["ground_friction"][0]), float(before[0]))
+            torch.testing.assert_close(privileged[:, 4], env.ground_friction)
+            torch.testing.assert_close(privileged[1:, 4], before[1:])
+            self.assertEqual(float(privileged[0, 23:29].abs().sum()), 0.)
+        finally:
+            env.close()
 
 
 class CommandTests(unittest.TestCase):

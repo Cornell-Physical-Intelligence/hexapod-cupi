@@ -195,10 +195,13 @@ penalty for the offline scorer; the learner's loss lives in `amp_ppo.py`.
 memory encoder [512, 256, 128], low-level actor [256, 128, 64], privileged
 encoder [64, 32] and critic [512, 256, 128] over the existing 231-value
 observation. The critic reads a 42-value privileged state: body velocity,
-height, declared friction, six toe forces, zero perturbation slots and 13
-non-tibia collision indicators. Friction and perturbations become measured
-values with Step 7; the terrain latent belongs to Step 8. Privileged inputs and
-the velocity label never enter the actor's observation groups.
+height, ground friction, six toe forces, the external wrench and 13 non-tibia
+collision indicators. Friction and wrench come from the environment's
+`ground_friction` and `external_wrench_body`: the Step 7 draw and the mean push
+over the control, zero after a reset. An environment without them, such as
+native training before Step 7, gives 1.0 and zeros. The terrain latent belongs
+to Step 8. Privileged inputs and the velocity label never enter the actor's
+observation groups.
 
 Checkpoints add the discriminator, its optimizer and the bank identity, and a
 load with another bank fails. Evaluation compares learner, networks, bank and

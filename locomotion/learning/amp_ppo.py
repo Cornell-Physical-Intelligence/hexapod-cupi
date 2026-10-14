@@ -32,9 +32,10 @@ OBSERVATION_WIDTH = nets.HISTORY_WIDTH + nets.COMMAND_WIDTH + nets.ACTION_WIDTH
 PRIVILEGED_LAYOUT = (
     ('base_linear_velocity_body', 3, 'telemetry linear_velocity_body, m/s'),
     ('base_height', 1, 'telemetry root_pose_xyzw z, m above the flat floor'),
-    ('ground_friction', 1, 'declared constant 1.0 until Table II randomization (Step 7)'),
+    ('ground_friction', 1, 'environment ground_friction, the drawn Table II coefficient; 1.0 without randomization'),
     ('foot_contact_force', 18, 'telemetry tibia_floor_force_world_n, six XYZ normal forces, N'),
-    ('external_perturbation', 6, 'zeros until Table II perturbations (Step 7)'),
+    ('external_perturbation', 6, 'environment external_wrench_body, mean body-frame push force N and torque N m over '
+     'the control; zeros without randomization and after a reset'),
     ('collision_state', 13, 'max floor-force norm > 1 N on body, six coxae and six femurs over the control'),
 )
 PRIVILEGED_WIDTH = sum(width for _, width, _ in PRIVILEGED_LAYOUT)
@@ -53,7 +54,9 @@ DECISIONS = (
     "pairs are never formed because the AMP state after a reset starts the next pair.",
     "The velocity estimator trains after each PPO update on the stored rollout with Adam 1e-3, one "
     "pass over the same mini-batches, against measured body-frame base velocity.",
-    "Privileged friction and perturbation slots hold declared constants until Step 7 supplies them.",
+    "Privileged friction and perturbation read the environment's current Table II draw and push; an environment "
+    "that declares neither supplies 1.0 and zeros. They are read from the environment, not telemetry, because "
+    "telemetry still holds the pre-reset draw of a reset row.",
     "The discriminator initialization and its row sampling use the run seed plus 8 unless the "
     "configuration names a seed; the recorded configuration holds the resolved seed.",
 )
@@ -187,6 +190,13 @@ class AMPVecEnv(VanillaVecEnv):
         height = torch.full((n, 1), float(env.reset_height), device=self.device)
         forces = torch.zeros(n, 18, device=self.device)
         collision = torch.zeros(n, 13, device=self.device)
+        # Current per-replica values: a reset row already carries its new draw and a zero push.
+        friction = getattr(env, 'ground_friction', None)
+        friction = (torch.ones(n, 1, device=self.device) if friction is None
+                    else friction.reshape(n, 1).to(self.device, torch.float32))
+        wrench = getattr(env, 'external_wrench_body', None)
+        wrench = (torch.zeros(n, 6, device=self.device) if wrench is None
+                  else wrench.reshape(n, 6).to(self.device, torch.float32))
         if telemetry:
             height = telemetry['root_pose_xyzw'][:, 2:3].clone()
             forces = telemetry['tibia_floor_force_world_n'].reshape(n, 18).clone()
@@ -196,8 +206,8 @@ class AMPVecEnv(VanillaVecEnv):
         height = torch.where(fresh, torch.full_like(height, float(env.reset_height)), height)
         forces = torch.where(fresh, torch.zeros_like(forces), forces)
         collision = torch.where(fresh, torch.zeros_like(collision), collision)
-        state = torch.cat((body_velocity, height, torch.ones(n, 1, device=self.device), forces,
-                           torch.zeros(n, 6, device=self.device), collision), dim=-1)
+        wrench = torch.where(fresh, torch.zeros_like(wrench), wrench)
+        state = torch.cat((body_velocity, height, friction, forces, wrench, collision), dim=-1)
         if state.shape != (n, PRIVILEGED_WIDTH) or not bool(torch.isfinite(state).all()):
             raise ValueError('Privileged state shape/finite check failed')
         return state

@@ -196,6 +196,20 @@ class AdapterTests(unittest.TestCase):
         velocity = env.get_observations()['velocity_label']
         torch.testing.assert_close(stepped[:, :3], torch.stack((velocity[:, 1], -velocity[:, 0], velocity[:, 2]), -1))
 
+    def test_privileged_friction_and_push_read_the_environment(self):
+        task = TaskDouble()
+        task.env.ground_friction = torch.tensor([.5, 1.5, 2.5])
+        task.env.external_wrench_body = torch.arange(18.).reshape(3, 6) + 1.
+        env = AMPVecEnv(task)
+        fresh = env.get_observations()['privileged']
+        torch.testing.assert_close(fresh[:, 4], task.env.ground_friction)
+        self.assertEqual(float(fresh[:, 23:29].abs().sum()), 0.)
+        task.terminate_next = torch.tensor([False, True, False])
+        stepped = env.step(torch.zeros(3, 18))[0]['privileged']
+        torch.testing.assert_close(stepped[:, 4], task.env.ground_friction)
+        torch.testing.assert_close(stepped[[0, 2], 23:29], task.env.external_wrench_body[[0, 2]])
+        self.assertEqual(float(stepped[1, 23:29].abs().sum()), 0.)
+
     def test_terminal_pairs_use_the_state_before_reset(self):
         task = TaskDouble()
         env = AMPVecEnv(task)
