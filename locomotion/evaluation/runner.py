@@ -272,7 +272,7 @@ def _set_command(env, commands):
     env.commands.copy_(torch.as_tensor(commands, dtype=torch.float32, device=env.device))
     # History contains proprio only; update command-bearing observations before
     # the actor, without inserting a history sample or native physics step.
-    return env._observations(env.current)
+    return env.observations(env.current)
 
 
 def _native_contact_screen(receipt, index, case):

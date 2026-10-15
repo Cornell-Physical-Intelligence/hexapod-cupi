@@ -1,4 +1,4 @@
-"""Check candidate CPU arithmetic; these tests do not qualify native physics."""
+"""Check motor force arithmetic on the CPU; these tests do not qualify native physics."""
 import math
 import unittest
 import torch
@@ -10,7 +10,7 @@ def named_motor_force(names, q, dq, target):
     return motor_force(q, dq, target, q.new_tensor(motor_damping(names)))
 
 
-class DirectMotorArithmeticTests(unittest.TestCase):
+class MotorForceTests(unittest.TestCase):
     def test_permuted_native_order_preserves_exact_named_gains(self):
         generator = torch.Generator().manual_seed(713)
         q, dq, target = [torch.randn((7, 18), generator=generator) for _ in range(3)]

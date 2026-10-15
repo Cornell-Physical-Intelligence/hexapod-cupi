@@ -7,7 +7,7 @@ import numpy as np
 import torch
 
 import locomotion.evaluation.noise_probe as noise_probe
-from locomotion.omni.env import LocomotionEnv
+from locomotion.omni.env import OmniEnv
 from locomotion.omni.env_cfg import EnvConfig
 from locomotion.omni.motor import emitted_target
 from locomotion.omni.robot import MASS_KG
@@ -43,7 +43,7 @@ class EnvTests(unittest.TestCase):
     def test_interface_matches_the_native_environment(self):
         env = self.env
         for name in ("num_actions", "observation_width", "critic_width", "amp_width"):
-            self.assertEqual(getattr(SurrogateEnv, name), getattr(LocomotionEnv, name))
+            self.assertEqual(getattr(SurrogateEnv, name), getattr(OmniEnv, name))
         output = env.reset()
         self.assertEqual((tuple(output["obs"].shape), tuple(output["critic"].shape)), ((3, 231), (3, 234)))
         self.assertTrue(torch.equal(output["obs"][:, 210:213], env.commands))

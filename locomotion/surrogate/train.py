@@ -1,6 +1,7 @@
 """Train PPO on the MuJoCo surrogate through the training path of ``locomotion/omni/train.py``."""
 from __future__ import annotations
 
+from locomotion.omni.commands import GAIT_CLOCK_CONTROLS
 from locomotion.spark.sources import runtime_paths, source_files
 
 import argparse
@@ -222,7 +223,7 @@ def build_parser():
                         help="Ceiling for the adaptive learning rate; the stock schedule allows 1e-2.")
     parser.add_argument("--action-std", type=float, default=.15,
                         help="Initial standard deviation of the Gaussian action distribution.")
-    parser.add_argument("--gait-clock", type=int, default=60,
+    parser.add_argument("--gait-clock", type=int, default=GAIT_CLOCK_CONTROLS,
                         help="Append the sine and cosine of a gait phase with this period in controls; 0 adds none.")
     parser.add_argument("--action-std-final", type=float,
                         help="Lower the action deviation on a linear schedule to this value; PPO then does not learn it.")

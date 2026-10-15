@@ -16,6 +16,7 @@ from rsl_rl.algorithms import PPO
 from rsl_rl.models import MLPModel
 from rsl_rl.utils import resolve_callable
 
+from locomotion.evaluation.checkpoint import require_learner_configuration
 from locomotion.omni.ppo import BoundedMeanGaussian, action_metrics
 from locomotion.omni.ppo_cfg import ppo_config
 from locomotion.omni.robot import JOINT_NAMES
@@ -119,9 +120,9 @@ class IntegrationTests(unittest.TestCase):
         exported = torch.jit.script(restored.as_jit())
         torch.testing.assert_close(exported(obs['policy']), expected)
         record = {'identity': {'upstream_source_files': {}, 'ppo_config': config}}
-        train.require_learner_configuration(record, {'upstream_source_files': {}}, config)
+        require_learner_configuration(record, {'upstream_source_files': {}}, config)
         with self.assertRaisesRegex(ValueError, 'configuration differs'):
-            train.require_learner_configuration(record, {'upstream_source_files': {}}, ppo_config(3))
+            require_learner_configuration(record, {'upstream_source_files': {}}, ppo_config(3))
 
     def test_stock_ppo_keeps_raw_actions_and_updates_the_bounded_actor(self):
         torch.manual_seed(17)

@@ -2,15 +2,13 @@
 import argparse
 import hashlib
 import json
-import math
 from pathlib import Path
+
+from locomotion.evaluation.checkpoint import compare, freeze
 
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
-from locomotion.evaluation.checkpoint import numbers, measurements, freeze, compare
 
 
 def read_run(root, role):

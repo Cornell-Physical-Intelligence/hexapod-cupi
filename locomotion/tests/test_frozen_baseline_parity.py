@@ -1,7 +1,6 @@
-"""Compare candidate arithmetic with source frozen from main b2a6168c."""
+"""Compare task, wrapper and optimizer arithmetic with frozen source archives."""
 import hashlib
 import importlib
-import json
 from pathlib import Path
 import sys
 import tarfile
@@ -18,32 +17,33 @@ from locomotion.tests.test_task import SPEC
 
 FIXTURE = Path(__file__).parent / 'fixtures/refactor_b2a6168c.tar.gz'
 FIXTURE_SHA = 'f0afe51e180bc1d5c5f6099b8225e77cd63afdbed78e4830dd837767ae43b6fc'
+BASELINE = '_frozen_baseline'
 
 
-class RefactorParityTests(unittest.TestCase):
+class FrozenBaselineParityTests(unittest.TestCase):
     fixture = FIXTURE
     fixture_sha = FIXTURE_SHA
     @classmethod
     def setUpClass(cls):
         if hashlib.sha256(cls.fixture.read_bytes()).hexdigest() != cls.fixture_sha:
-            raise ValueError('Frozen b2a6168c source changed')
+            raise ValueError('Frozen baseline source changed')
         cls.directory = tempfile.TemporaryDirectory()
         cls.addClassCleanup(cls.directory.cleanup)
         with tarfile.open(cls.fixture) as archive:
             archive.extractall(cls.directory.name, filter='data')
         def clear_modules():
             for name in list(sys.modules):
-                if name == '_refactor_baseline' or name.startswith('_refactor_baseline.'):
+                if name == BASELINE or name.startswith(BASELINE + '.'):
                     del sys.modules[name]
         clear_modules()
         cls.addClassCleanup(clear_modules)
-        package = types.ModuleType('_refactor_baseline')
+        package = types.ModuleType(BASELINE)
         package.__path__ = [cls.directory.name]
         sys.modules[package.__name__] = package
 
     def module(self, name, baseline=False):
         if baseline:
-            return importlib.import_module('_refactor_baseline.' + name)
+            return importlib.import_module(BASELINE + '.' + name)
         path = 'omni.ppo' if name == 'ppo' else 'omni.' + name
         return importlib.import_module('locomotion.' + path)
 
@@ -61,7 +61,7 @@ class RefactorParityTests(unittest.TestCase):
         else:
             self.assertEqual(actual, expected)
 
-    def test_active_reward_command_rng_and_selected_resets_match_frozen_c48(self):
+    def test_active_reward_command_rng_and_selected_resets_match_frozen_baseline(self):
         traces = []
         for baseline in (True, False):
             module = self.module('task_v4_yaw_gate', True) if baseline else self.module('task')
@@ -99,7 +99,7 @@ class RefactorParityTests(unittest.TestCase):
                 observation_normalization='none', learning_rate_max=.0003, action_noise_correlation=.5)
             if baseline:
                 for node in (config['algorithm'], config['actor']['distribution_cfg']):
-                    node['class_name'] = node['class_name'].replace('locomotion.', '_refactor_baseline.')
+                    node['class_name'] = node['class_name'].replace('locomotion.', BASELINE + '.')
             algorithm = construct(config)
             algorithm.num_learning_epochs, algorithm.num_mini_batches = 1, 2
             obs = TensorDict({'policy': torch.randn(8, 231), 'critic': torch.randn(8, 234)}, batch_size=[8])
@@ -113,7 +113,7 @@ class RefactorParityTests(unittest.TestCase):
                             algorithm.optimizer.state_dict(), loss, torch.get_rng_state()))
         self.exact(results[1], results[0])
 
-    def test_historical_reward_archive_and_numerical_gate_bytes_remain_frozen(self):
+    def test_reward_archive_and_numerical_gate_bytes_remain_frozen(self):
         root = Path(__file__).resolve().parents[1]
         with tarfile.open(FIXTURE) as archive:
             # The immutable archive holds retired reward source bytes.
@@ -121,75 +121,9 @@ class RefactorParityTests(unittest.TestCase):
             self.assertEqual((root/'evaluation/scoring.py').read_bytes(), archive.extractfile('evaluation.py').read())
 
 
-class RefactorBoundaryTests(unittest.TestCase):
-    def test_implementations_replace_retired_import_paths(self):
-        for old, new, name in (
-            ('env', 'omni.env', 'LocomotionEnv'),
-            ('task', 'omni.task', 'TrainingTask'),
-            ('ppo', 'omni.wrapper', 'OmniVecEnv'),
-            ('evaluate', 'evaluation.runner', 'ExactEvaluationCapture'),
-            ('prepare', 'spark.prepare', 'prepare')):
-            with self.subTest(module=old):
-                self.assertIsNone(importlib.util.find_spec('locomotion.' + old))
-                self.assertTrue(hasattr(importlib.import_module('locomotion.' + new), name))
-
-    def test_nested_pack_is_complete_and_detects_dependency_tampering(self):
-        from locomotion.spark.prepare import prepare
-        from locomotion.spark.sources import verify_runtime
-        with tempfile.TemporaryDirectory() as tmp:
-            output = Path(tmp)/'pack'
-            prepare(output, '/srv/cupi/hexapod/runs/james/refactor_fixture', updates=2)
-            source = output/'source'
-            manifest = verify_runtime(source)
-            self.assertEqual(manifest['schema'], 'hexapod_runtime_sources_v2')
-            for path in ('locomotion/omni/motor.py', 'locomotion/omni/task.py',
-                         'locomotion/omni/env.py', 'locomotion/omni/ppo.py'):
-                self.assertIn(path, manifest['files'])
-            self.assertFalse(any('/tests/' in name for name in manifest['files']))
-            path = source/'locomotion/omni/motor.py'
-            path.write_text(path.read_text() + '\n# tampered\n')
-            with self.assertRaisesRegex(ValueError, 'Runtime dependency'):
-                verify_runtime(source)
-
-    def test_prepare_and_training_use_shared_validation(self):
-        import locomotion.spark.prepare as prepare
-        import locomotion.omni.train as train
-        import locomotion.spark.validation as validation
-        for name in ('update_limit', 'validate_decay', 'validate_deadline'):
-            self.assertIs(getattr(prepare, name), getattr(validation, name))
-            self.assertIs(getattr(train, name), getattr(validation, name))
-
-    def test_nested_physics_dependencies_cannot_reuse_standing_identity(self):
-        from locomotion.spark.sources import physics_files, source_files
-        root = Path(__file__).resolve().parents[1]
-        files = source_files(root)
-        physics = physics_files(files)
-        for name in ('omni/motor.py', 'omni/frames.py', 'omni/native.py', 'omni/actuator.py',
-                     'evaluation/capture.py', 'evaluation/scoring.py'):
-            self.assertIn(name, physics)
-            changed = dict(files, **{name: '0'*64})
-            self.assertNotEqual(physics, physics_files(changed))
-        self.assertNotIn('omni/ppo.py', physics)
-
-    def test_legacy_identity_checks_remain_strict(self):
-        from copy import deepcopy
-        from contracts.release import COMPATIBILITY_KEYS
-        from locomotion.evaluation.checkpoint import require_checkpoint_identity
-        identity = dict.fromkeys(COMPATIBILITY_KEYS, 'same')
-        identity['schema'] = 'hexapod_locomotion_ppo_v1'
-        require_checkpoint_identity({'identity': deepcopy(identity)}, identity)
-        for key in COMPATIBILITY_KEYS:
-            record = {'identity': deepcopy(identity)}
-            record['identity'][key] = 'changed'
-            with self.subTest(key=key), self.assertRaises(ValueError):
-                require_checkpoint_identity(record, identity)
-        identity.update(schema='hexapod_locomotion_ppo_v2', runtime_sources={'schema': 'hexapod_runtime_sources_v2',
-                        'files': {'locomotion/omni/control.py': 'a'*64}})
-        record = {'identity': deepcopy(identity)}
-        require_checkpoint_identity(record, identity)
-        record['identity']['runtime_sources']['files']['locomotion/omni/control.py'] = 'b'*64
-        with self.assertRaisesRegex(ValueError, 'runtime dependencies'):
-            require_checkpoint_identity(record, identity)
+class PackageSnapshotParityTests(FrozenBaselineParityTests):
+    fixture = Path(__file__).parent / 'fixtures/packages_02f551fd.tar.gz'
+    fixture_sha = '5857bb0e60f1785e770b6c35dc01cdb1737fe24f70d029b6da61331f74bb16d2'
 
 
 if __name__ == '__main__':

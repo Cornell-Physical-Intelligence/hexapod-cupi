@@ -1,4 +1,4 @@
-"""Check candidate selection and frozen source identity without Isaac."""
+"""Check the prepared pack entry point, modes, reward record and source tampering without Isaac."""
 import json
 from pathlib import Path
 import tempfile
@@ -8,10 +8,10 @@ from locomotion.spark.prepare import prepare
 from locomotion.spark.sources import physics_files, source_files, verify_runtime
 
 ROOT = Path(__file__).resolve().parents[2]
-REMOTE = '/srv/cupi/hexapod/runs/jcc463/direct_binding_fixture'
+REMOTE = '/srv/cupi/hexapod/runs/jcc463/pack_binding_fixture'
 
 
-class DirectBindingTests(unittest.TestCase):
+class PackBindingTests(unittest.TestCase):
     def test_pack_uses_one_backend_and_keeps_review_gate(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -50,7 +50,7 @@ class DirectBindingTests(unittest.TestCase):
             record = json.loads((output/'PACK.json').read_text())
             self.assertEqual((record['reward_version'], record['reward_task']), ('4', 'v4_yaw_gate'))
 
-    def test_c48_pack_rejects_the_removed_hybrid_bc_option(self):
+    def test_pack_rejects_the_removed_hybrid_bc_option(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)/'rejected'
             with self.assertRaises(TypeError):

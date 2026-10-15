@@ -1,4 +1,4 @@
-"""Run the interface of ``locomotion.omni.env.LocomotionEnv`` on CPU MuJoCo physics."""
+"""Run the interface of ``locomotion.omni.env.OmniEnv`` on CPU MuJoCo physics."""
 from __future__ import annotations
 
 import ast
@@ -630,7 +630,7 @@ class SurrogateEnv:
         return torch.cat((navigation(state["angular"]), navigation(state["gravity"]),
                           state["q"] - self.neutral, state["dq"]), dim=-1)
 
-    def _observations(self, state):
+    def observations(self, state):
         obs = torch.cat((self.history.flatten(1), self.commands, self.previous_action), dim=-1)
         critic = torch.cat((obs, navigation(state["linear"])), dim=-1)
         result = {"obs": obs, "critic": critic}
@@ -638,7 +638,7 @@ class SurrogateEnv:
             result["amp"] = extract_features(state)
         return result
 
-    # ----- LocomotionEnv interface ---------------------------------------------------------
+    # ----- OmniEnv interface ---------------------------------------------------------------
     def reset(self, indices=None):
         if self.native_errors:
             raise RuntimeError("Cannot reset across a physics error")
@@ -663,7 +663,7 @@ class SurrogateEnv:
         else:
             state = self._read()
         self.current = state
-        return self._observations(state)
+        return self.observations(state)
 
     def step(self, action):
         action = torch.as_tensor(action, dtype=torch.float32, device=self.device)
@@ -729,7 +729,7 @@ class SurrogateEnv:
             "terminated": terminated.clone(), "truncated": truncated.clone(),
             # Keys that the surrogate adds: the native compact telemetry does not separate toe cap from shaft.
             "surrogate_toe_cap_force_min_400hz": toe_cap_min, "surrogate_shaft_force_max_400hz": shaft_max}
-        result = self._observations(state)
+        result = self.observations(state)
         result.update(terminated=terminated, truncated=truncated)
         return result
 

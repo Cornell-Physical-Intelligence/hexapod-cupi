@@ -385,7 +385,8 @@ class TrainingTask:
         return {"schema": SCHEMA, "config": asdict(self.config), "reward_version": REWARD_VERSION,
                 "reward": {"version": REWARD_VERSION, "config": asdict(self.reward_config)},
                 "nonzero_command_bank": self.bank.cpu().tolist(),
-                "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+                "source_sha256": hashlib.sha256(b"".join((Path(__file__).parent / name).read_bytes()
+                    for name in ("task.py", "reward.py", "commands.py"))).hexdigest(),
                 "physics_changed": True, "stage2_gates_changed": False, "stage2_complete": False}
 
     def __getattr__(self, name):

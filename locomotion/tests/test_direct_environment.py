@@ -1,13 +1,49 @@
 """Check CPU adapter contracts, without claiming Isaac Lab native parity."""
 import ast
+import importlib
 from pathlib import Path
+import sys
+from types import SimpleNamespace
 import unittest
+from unittest import mock
 import torch
 from locomotion.omni.env import reset_rows
-from locomotion.omni.env import LocomotionEnv
+from locomotion.omni.features import observations, proprio
 from locomotion.omni.motor import emitted_target, executed_action_feature
 
 BACKEND = Path(__file__).resolve().parents[1] / "omni"
+ISAAC_MODULES = ("warp", "pxr", "omni", "omni.physx", "isaaclab", "isaaclab.envs", "isaaclab.sim",
+                 "isaaclab.sim.utils", "isaaclab_physx", "isaaclab_physx.assets",
+                 "isaaclab_physx.assets.articulation", "isaaclab_physx.sim", "isaaclab_physx.sim.spawners",
+                 "isaaclab_physx.sim.spawners.materials")
+
+
+def load_isaac(direct_env=object, articulation=object):
+    """Import isaac.py over stand-ins for Isaac Lab, PhysX, USD and Warp, which this CPU host lacks."""
+    stubs = {name: mock.MagicMock(name=name) for name in ISAAC_MODULES}
+    stubs["isaaclab.envs"].DirectRLEnv = direct_env
+    stubs["isaaclab_physx.assets.articulation"].Articulation = articulation
+    package = importlib.import_module("locomotion.omni")
+    saved = {name: sys.modules.get(name) for name in (*ISAAC_MODULES, "locomotion.omni.isaac")}
+    bound = package.__dict__.get("isaac")
+    sys.modules.update(stubs)
+    sys.modules.pop("locomotion.omni.isaac", None)
+    try:
+        return importlib.import_module("locomotion.omni.isaac")
+    finally:
+        for name, module in saved.items():
+            if module is None:
+                sys.modules.pop(name, None)
+            else:
+                sys.modules[name] = module
+        if bound is None:
+            package.__dict__.pop("isaac", None)
+        else:
+            package.isaac = bound
+
+
+def class_node(path, name):
+    return next(n for n in ast.parse(path.read_text()).body if isinstance(n, ast.ClassDef) and n.name == name)
 
 
 class DirectEnvironmentContractTests(unittest.TestCase):
@@ -20,54 +56,56 @@ class DirectEnvironmentContractTests(unittest.TestCase):
                 reset_rows(rows, 4, "cpu")
 
     def test_candidate_reuses_current_frames_history_and_observation_order(self):
-        tree = ast.parse((BACKEND / "env.py").read_text())
-        candidate = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "LocomotionEnv")
-        self.assertEqual(candidate.bases, [])
-        self.assertFalse((BACKEND / "direct_env.py").exists())
         # Exercise the shared tensor path with distinct values in each field.
-        env = LocomotionEnv.__new__(LocomotionEnv)
-        env.neutral = torch.arange(18, dtype=torch.float32) / 100
-        env.history = torch.arange(2 * 5 * 42, dtype=torch.float32).reshape(2, 5, 42)
-        env.commands = torch.tensor([[1., 2., 3.], [4., 5., 6.]])
-        env.previous_action = torch.arange(36, dtype=torch.float32).reshape(2, 18)
-        from types import SimpleNamespace
-        env.cfg = SimpleNamespace(record_motion_features=False)
+        history = torch.arange(2 * 5 * 42, dtype=torch.float32).reshape(2, 5, 42)
+        commands = torch.tensor([[1., 2., 3.], [4., 5., 6.]])
+        previous_action = torch.arange(36, dtype=torch.float32).reshape(2, 18)
         state = {"linear": torch.tensor([[2., -1., 3.], [5., -4., 6.]])}
-        obs = env._observations(state)
+        obs = observations(history, commands, previous_action, state, False)
+        self.assertEqual(set(obs), {"obs", "critic"})
         self.assertEqual(obs["obs"].shape, (2, 231))
         self.assertEqual(obs["critic"].shape, (2, 234))
-        self.assertTrue(torch.equal(obs["obs"][:, :210], env.history.flatten(1)))
-        self.assertTrue(torch.equal(obs["obs"][:, 210:213], env.commands))
-        self.assertTrue(torch.equal(obs["obs"][:, 213:], env.previous_action))
+        self.assertTrue(torch.equal(obs["obs"][:, :210], history.flatten(1)))
+        self.assertTrue(torch.equal(obs["obs"][:, 210:213], commands))
+        self.assertTrue(torch.equal(obs["obs"][:, 213:], previous_action))
         self.assertTrue(torch.equal(obs["critic"][:, -3:], torch.tensor([[1., 2., 3.], [4., 5., 6.]])))
+        # One frame: navigation body rates, navigation gravity, joint offsets, joint rates.
+        frame_state = {"angular": torch.tensor([[1., 2., 3.]]), "gravity": torch.tensor([[4., 5., 6.]]),
+                       "q": torch.full((1, 18), .5), "dq": torch.full((1, 18), 2.)}
+        neutral = torch.arange(18, dtype=torch.float32) / 100
+        frame = proprio(frame_state, neutral)
+        self.assertEqual(frame.shape, (1, 42))
+        self.assertTrue(torch.equal(frame[0, :6], torch.tensor([-2., 1., 3., -5., 4., 6.])))
+        self.assertTrue(torch.equal(frame[0, 6:24], .5 - neutral))
+        self.assertTrue(torch.equal(frame[0, 24:], torch.full((18,), 2.)))
 
     def test_stock_loop_owns_steps_and_task_owns_resets(self):
-        tree = ast.parse((BACKEND / "native.py").read_text())
-        native = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "NativeEnv")
-        self.assertEqual(ast.unparse(native.bases[0]), "DirectRLEnv")
-        self.assertNotIn("step", {n.name for n in native.body if isinstance(n, ast.FunctionDef)})
-        calls = [ast.unparse(n.func) for n in ast.walk(tree) if isinstance(n, ast.Call)]
+        isaac = class_node(BACKEND / "isaac.py", "IsaacEnv")
+        self.assertEqual(ast.unparse(isaac.bases[0]), "DirectRLEnv")
+        self.assertNotIn("step", {n.name for n in isaac.body if isinstance(n, ast.FunctionDef)})
+        calls = [ast.unparse(n.func) for n in ast.walk(ast.parse((BACKEND / "isaac.py").read_text())) if isinstance(n, ast.Call)]
         self.assertNotIn("self.sim.step", calls)
         self.assertNotIn("self.scene.update", calls)
+        self.assertIn("super()._reset_idx", calls)
+        self.assertIn("self._reset_idx", calls)
+        self.assertIn("self.robot.write_joint_position_to_sim_index", calls)
         adapter = ast.parse((BACKEND / "env.py").read_text())
         adapter_calls = [ast.unparse(n.func) for n in ast.walk(adapter) if isinstance(n, ast.Call)]
-        self.assertIn("self.native._reset_idx", adapter_calls)
-        self.assertIn("self.robot.write_joint_position_to_sim_index", adapter_calls)
+        self.assertIn("self.isaac.step", adapter_calls)
+        self.assertIn("self.isaac.reset_selected", adapter_calls)
 
     def test_episode_clock_reuses_the_stock_buffer(self):
-        tree = ast.parse((BACKEND / "env.py").read_text())
-        bindings = [n for n in ast.walk(tree) if isinstance(n, ast.Assign)
-                    and any(ast.unparse(t) == "self.episode_steps" for t in n.targets)]
+        def writes(name, target):
+            return [n for n in ast.walk(ast.parse((BACKEND / name).read_text())) if isinstance(n, (ast.Assign, ast.AugAssign))
+                    and target in {ast.unparse(t) for t in (n.targets if isinstance(n, ast.Assign) else [n.target])}]
+        bindings = writes("env.py", "self.episode_steps")
         self.assertEqual(len(bindings), 1)
-        self.assertEqual(ast.unparse(bindings[0].value), "self.native.episode_length_buf")
-        writes = [n for n in ast.walk(tree) if isinstance(n, ast.AugAssign)
-                  and ast.unparse(n.target) == "self.episode_steps"]
-        self.assertEqual(writes, [])
+        self.assertEqual(ast.unparse(bindings[0].value), "isaac.episode_length_buf")
+        self.assertEqual(writes("isaac.py", "self.episode_length_buf"), [])
 
     def test_stock_collision_filter_keeps_the_shared_ground(self):
-        tree = ast.parse((BACKEND / "native.py").read_text())
-        native = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "NativeEnv")
-        setup = next(n for n in native.body if isinstance(n, ast.FunctionDef) and n.name == "_setup_scene")
+        setup = next(n for n in class_node(BACKEND / "isaac.py", "IsaacEnv").body
+                     if isinstance(n, ast.FunctionDef) and n.name == "_setup_scene")
         filters = [n for n in ast.walk(setup) if isinstance(n, ast.Call)
                    and ast.unparse(n.func) == "self.scene.filter_collisions"]
         self.assertEqual(len(filters), 1)
@@ -91,36 +129,54 @@ class DirectEnvironmentContractTests(unittest.TestCase):
             self.assertEqual(values, {"replicate_physics": False, "filter_collisions": True})
 
     def test_force_readback_brackets_physics_at_articulation_hooks(self):
-        # Execute the production hook methods against a call recorder. This
-        # verifies hook order, not PhysX contact or torque behavior.
-        tree = ast.parse((BACKEND / "native.py").read_text())
-        hook = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "CaptureArticulation")
+        # Run the production hooks against a call recorder. This verifies
+        # hook order, not PhysX contact or torque behavior.
         events = []
         class Articulation:
             def write_data_to_sim(self): events.append("submit")
             def update(self, dt): events.append("update")
-        namespace = {"Articulation": Articulation}
-        exec(compile(ast.Module(body=[hook], type_ignores=[]), str(BACKEND / "native.py"), "exec"), namespace)
-        robot = namespace["CaptureArticulation"]()
-        from types import SimpleNamespace
+        isaac = load_isaac(articulation=Articulation)
+        env = isaac.IsaacEnv.__new__(isaac.IsaacEnv)
         def read_force(name):
             self.assertEqual(name, "get_dof_actuation_forces")
             events.append("read_submitted")
             return torch.tensor([[.5, 1.]])
         def capture():
             events.append("capture")
-            self.assertTrue(torch.equal(robot.owner.native_pre, torch.tensor([[1., .5]])))
-        robot.owner = SimpleNamespace(_control_active=True, capture=object(), get=read_force,
-                                      joint_index=torch.tensor([1, 0]), _collect_substep=capture)
+            self.assertTrue(torch.equal(env.native_pre, torch.tensor([[1., .5]])))
+        env.control_active, env.capture, env.joint_index = True, object(), torch.tensor([1, 0])
+        env.get, env.collect_substep = read_force, capture
+        robot = isaac.CaptureArticulation()
+        robot.env = env
         robot.write_data_to_sim()
         events.append("physics")
         robot.update(.0025)
         self.assertEqual(events, ["submit", "read_submitted", "physics", "update", "capture"])
         events.clear()
-        robot.owner._control_active = False
+        env.control_active = False
         robot.write_data_to_sim()
         robot.update(.0025)
         self.assertEqual(events, ["submit", "update"])
+
+    def test_capture_hooks_receive_the_task_environment(self):
+        from locomotion.omni.env import OmniEnv
+        env = OmniEnv.__new__(OmniEnv)
+        env.device, env.num_envs = "cpu", 1
+        received = []
+        def step(action):
+            env.isaac.capture("state", "q")
+            env.isaac.current, env.isaac.telemetry = {"q": 1}, {"terminated": "t", "truncated": "f"}
+            return {"policy": "obs", "critic": "critic"}, None, None, None, None
+        env.isaac = SimpleNamespace(step=step, total_controls=4)
+        env.capture = lambda *args: received.append(args)
+        result = env.step(torch.zeros(1, 18))
+        self.assertEqual(received, [(env, "state", "q")])
+        self.assertEqual(result, {"obs": "obs", "critic": "critic", "terminated": "t", "truncated": "f"})
+        self.assertEqual((env.current, env.total_controls), ({"q": 1}, 4))
+        env.capture = None
+        env.isaac.step = lambda action: ({"policy": "obs"}, None, None, None, None)
+        env.step(torch.zeros(1, 18))
+        self.assertIsNone(env.isaac.capture)
 
     def test_slew_and_action_feature_share_current_arithmetic(self):
         q = torch.zeros((2, 18))

@@ -3,8 +3,9 @@ from __future__ import annotations
 
 import argparse
 import copy
+import faulthandler
+from functools import partial
 import hashlib
-import importlib
 import importlib.metadata
 import importlib.util
 import json
@@ -16,17 +17,23 @@ import sys
 import time
 import traceback
 
-from locomotion.evaluation.checkpoint import (DECLARATION_SHA, LEARNER_DEFAULTS, LEARNER_KEYS,
-    checkpoint_reward_version, json_shape, read_receipt, require_checkpoint_identity, require_configuration,
-    require_embedded_declaration, require_identity, require_learner_configuration, require_learner_identity)
+import numpy as np
+
+from locomotion.evaluation.admission import require_admission
+from locomotion.evaluation.camera import NativePolicyCamera, prepare_policy_scene
+# locomotion/tests/native_parity.py calls require_learner_identity through this module.
+from locomotion.evaluation.checkpoint import (DECLARATION_SHA, checkpoint_reward_version, read_receipt,
+    require_checkpoint_identity, require_configuration, require_embedded_declaration, require_identity,
+    require_learner_configuration, require_learner_identity)
 from locomotion.omni.commands import GAIT_CLOCK_CONTROLS, TaskConfig
 from locomotion.omni.env_cfg import EnvConfig
 from locomotion.omni.ppo_cfg import ppo_config
 from locomotion.omni.robot import MODEL_SHA256, USD_SHA256, verify_assets
 from locomotion.spark.sources import physics_files, source_files, verify_runtime
-from locomotion.spark.validation import (ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, EXTENDED_UPDATE_LIMIT,
-    LEARNER_OPTION_DEFAULTS, UPDATE_LIMIT, collected_transitions, decay_updates, finish_training_update,
-    update_limit, validate_deadline, validate_decay)
+from locomotion.spark.validation import (ALLOCATION_PROFILES, LEARNER_OPTION_DEFAULTS, collected_transitions,
+    decay_updates, finish_training_update, update_limit, validate_deadline, validate_decay)
+
+SOURCE = Path(__file__).resolve().parents[1]
 
 
 def sha(path):
@@ -49,17 +56,21 @@ def scalars(value, prefix):
     return {}
 
 
+def print_progress(value):
+    print(json.dumps(value), flush=True)
+
+
 class ConfigRecord(dict):
     """Give RSL-RL's W&B writer the to_dict() it expects from an environment config."""
     def to_dict(self):
         return dict(self)
 
 
-def main(argv=None):
-    source = Path(__file__).resolve().parents[1]
-    prefix = 'locomotion'
-    import locomotion.evaluation.admission as admission
-    from locomotion.evaluation.camera import prepare_policy_scene
+def parse_args(argv=None):
+    """Parse the command line and resolve the gait-clock default for the mode.
+
+    A preflight or help run declares the two launcher options itself, so it needs no Isaac installation.
+    """
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--mode', choices=['diagnostic', 'train', 'evaluate', 'probe'], required=True)
     for name in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance', 'output'):
@@ -124,10 +135,28 @@ def main(argv=None):
         from isaaclab.app import AppLauncher
         AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args(argv)
-    if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode not in ('train', 'evaluate')):
-        raise ValueError('The paper networks need the AMP learner for training or evaluation')
     if args.gait_clock is None:
         args.gait_clock = GAIT_CLOCK_CONTROLS if args.mode == 'train' and args.networks == 'mlp' else 0
+    return args
+
+
+def learner_options(args):
+    """Return the learner options that ppo_config records, in its keyword order."""
+    return dict(observation_scaling=args.observation_scaling, command_segments=args.command_segments,
+                learning_rate_max=args.learning_rate_max, action_std=args.action_std,
+                action_noise_correlation=args.action_noise_correlation,
+                action_std_final=args.action_std_final, gait_clock=args.gait_clock,
+                action_smoothing=args.action_smoothing, velocity_noise=args.velocity_noise,
+                action_std_decay_updates=args.action_std_decay_updates, steps_per_env=args.steps_per_env)
+
+
+def validate(args):
+    """Reject option combinations, changed assets and a changed frozen source.
+
+    Return the compatibility receipt, or None when the run names no receipt.
+    """
+    if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode not in ('train', 'evaluate')):
+        raise ValueError('The paper networks need the AMP learner for training or evaluation')
     if args.mode == 'train' and args.networks == 'mlp' and args.gait_clock != GAIT_CLOCK_CONTROLS:
         raise ValueError(f'The active reward requires the {GAIT_CLOCK_CONTROLS}-control gait clock')
     compatibility = None
@@ -145,16 +174,9 @@ def main(argv=None):
         raise ValueError('W&B options require --logger wandb')
     if args.action_mean != 'unbounded' and args.mode not in ('train', 'evaluate'):
         raise ValueError('Bounded action means apply to training and evaluation')
-    if args.observation_normalization != 'empirical' and (args.mode not in ('train', 'evaluate')):
+    if args.observation_normalization != 'empirical' and args.mode not in ('train', 'evaluate'):
         raise ValueError('Observation normalization selection requires PPO training or evaluation')
-    learner_options = dict(observation_scaling=args.observation_scaling, command_segments=args.command_segments,
-                           learning_rate_max=args.learning_rate_max, action_std=args.action_std,
-                           action_noise_correlation=args.action_noise_correlation,
-                           action_std_final=args.action_std_final, gait_clock=args.gait_clock,
-                           action_smoothing=args.action_smoothing, velocity_noise=args.velocity_noise,
-                           action_std_decay_updates=args.action_std_decay_updates, steps_per_env=args.steps_per_env)
-    if (learner_options != LEARNER_OPTION_DEFAULTS
-            and (args.mode not in ('train', 'evaluate'))):
+    if learner_options(args) != LEARNER_OPTION_DEFAULTS and args.mode not in ('train', 'evaluate'):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
     if not 12 <= args.steps_per_env <= 96 or args.steps_per_env % 6:
@@ -174,31 +196,43 @@ def main(argv=None):
             or (args.mode in ('train', 'probe') and (args.num_envs not in (128, 512) or args.checkpoint is not None))
             or (args.mode == 'evaluate' and (args.num_envs != 1 or args.checkpoint is None))):
         raise ValueError('A bounded scratch training, a 128-replica probe or single-replica evaluation is required')
-    if sha(source.parent/'FREEZE_SHA256.json') != args.source_freeze_sha256:
+    if sha(SOURCE.parent/'FREEZE_SHA256.json') != args.source_freeze_sha256:
         raise ValueError('Frozen source identity differs')
-    metadata = json.loads(args.stance.read_text())
+    return compatibility
+
+
+def environment_config(args):
+    """Build the environment configuration for the mode; full evaluation uses the evaluation configuration."""
     from locomotion.evaluation.runner import EvaluationEnvConfig
     config_class = EvaluationEnvConfig if args.mode == 'evaluate' and args.eval_scope == 'full' else EnvConfig
-    cfg = config_class(num_envs=args.num_envs, seed=args.seed,
-        record_motion_features=args.mode == 'evaluate' or args.learner == 'amp', render=args.mode == 'evaluate', episode_seconds=(90. if args.eval_scope == 'full' else 60.) if args.mode == 'evaluate' else (60. if args.mode == 'diagnostic' else args.episode_seconds), device=args.device)
-    identity = {'schema': 'hexapod_locomotion_ppo_v2', 'source_files': source_files(source),
-        'runtime_sources': verify_runtime(source.parent),
+    if args.mode == 'evaluate':
+        episode_seconds = 90. if args.eval_scope == 'full' else 60.
+    else:
+        episode_seconds = 60. if args.mode == 'diagnostic' else args.episode_seconds
+    return config_class(num_envs=args.num_envs, seed=args.seed,
+        record_motion_features=args.mode == 'evaluate' or args.learner == 'amp', render=args.mode == 'evaluate',
+        episode_seconds=episode_seconds, device=args.device)
+
+
+def build_identity(args, cfg, metadata):
+    """Record the sources, inputs, physics and learner that the run and its checkpoints bind."""
+    identity = {'schema': 'hexapod_locomotion_ppo_v2', 'source_files': source_files(SOURCE),
+        'runtime_sources': verify_runtime(SOURCE.parent),
         'model_sha256': MODEL_SHA256, 'usd_sha256': USD_SHA256,
         'stance_sha256': sha(args.stance),
         'geometry_sha256': sha(args.geometry), 'geometry_extrema_sha256': sha(args.geometry_extrema),
         'config': cfg.declaration(), 'motion_prior': args.learner == 'amp', 'behavior_cloning': False,
         'seed': args.seed, 'rsl_rl_required_version': '5.0.1',
-        'adapter_sha256': sha(source/'omni/wrapper.py'), 'entry_sha256': sha(__file__),
+        'adapter_sha256': sha(SOURCE/'omni/wrapper.py'), 'entry_sha256': sha(__file__),
         'reward_version': '4', 'reward_task': 'v4_yaw_gate', 'learner': args.learner, 'networks': args.networks}
     if args.extended_updates:
         # The exploration decay length enters ppo_config; the opt-in records the requested run length beside it.
         identity['training_updates'] = args.updates
-    amp_module = None
     if args.learner == 'amp':
-        amp_module = importlib.import_module(prefix+'.priors.amp')
-        identity['learner_source_files'] = {name: sha(source/name) for name in (
+        from locomotion.priors.amp import AMPConfig, load_demonstrations
+        identity['learner_source_files'] = {name: sha(SOURCE/name) for name in (
             'omni/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
-        identity['amp_dataset'] = amp_module.load_demonstrations(source.parent/amp_module.AMPConfig().dataset)[1]
+        identity['amp_dataset'] = load_demonstrations(SOURCE.parent/AMPConfig().dataset)[1]
     identity['physics_source_files'] = physics_files(identity['source_files'])
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
         'spacing_m': cfg.spacing_m, 'target_slew_rad': cfg.target_slew_rad, 'action_scale_rad': cfg.action_scale_rad,
@@ -208,32 +242,40 @@ def main(argv=None):
         'neutral_joint_position_rad': metadata['nominal_joint_position_rad'],
         'reset_root_height_m': metadata['reset_root_height_m']}
     if args.mode != 'diagnostic':
-        identity['standing_admission'] = admission.require_admission(args.standing_admission, identity, cfg)
-    checkpoint_record = None
-    if args.mode == 'evaluate':
-        if sha(args.checkpoint) != args.checkpoint_sha256:
-            raise ValueError('Checkpoint bytes differ')
-        checkpoint_record = json.loads(args.checkpoint.with_suffix('.json').read_text())
-        if checkpoint_record['checkpoint_sha256'] != args.checkpoint_sha256:
-            raise ValueError('Checkpoint declaration differs')
-        if compatibility is None:
-            require_checkpoint_identity(checkpoint_record, identity)
-        else:
-            if sha(args.checkpoint.with_suffix('.json')) != DECLARATION_SHA:
-                raise ValueError('Compatibility checkpoint declaration differs')
-            require_identity(compatibility, checkpoint_record, identity)
-        # Evaluation computes no training reward; record the one the checkpoint learned from.
-        identity['reward_version'] = checkpoint_reward_version(checkpoint_record)
-        for key in ('reward_task', 'reward_options'):
-            identity.pop(key, None)
-            if key in checkpoint_record['identity']:
-                identity[key] = checkpoint_record['identity'][key]
-        identity['behavior_cloning'] = checkpoint_record['identity'].get('behavior_cloning', False)
-        if 'bc' in checkpoint_record['identity']:
-            identity['bc'] = checkpoint_record['identity']['bc']
-    if args.preflight_only:
-        print(json.dumps(identity, indent=2)); return 0
-    args.output.mkdir(parents=True, exist_ok=False)
+        identity['standing_admission'] = require_admission(args.standing_admission, identity, cfg)
+    return identity
+
+
+def bind_checkpoint(args, identity, compatibility):
+    """Check the checkpoint bytes and declaration, then record the reward it learned from.
+
+    Return the checkpoint declaration.
+    """
+    if sha(args.checkpoint) != args.checkpoint_sha256:
+        raise ValueError('Checkpoint bytes differ')
+    record = json.loads(args.checkpoint.with_suffix('.json').read_text())
+    if record['checkpoint_sha256'] != args.checkpoint_sha256:
+        raise ValueError('Checkpoint declaration differs')
+    if compatibility is None:
+        require_checkpoint_identity(record, identity)
+    else:
+        if sha(args.checkpoint.with_suffix('.json')) != DECLARATION_SHA:
+            raise ValueError('Compatibility checkpoint declaration differs')
+        require_identity(compatibility, record, identity)
+    # Evaluation computes no training reward; record the one the checkpoint learned from.
+    identity['reward_version'] = checkpoint_reward_version(record)
+    for key in ('reward_task', 'reward_options'):
+        identity.pop(key, None)
+        if key in record['identity']:
+            identity[key] = record['identity'][key]
+    identity['behavior_cloning'] = record['identity'].get('behavior_cloning', False)
+    if 'bc' in record['identity']:
+        identity['bc'] = record['identity']['bc']
+    return record
+
+
+def initial_state(args, identity, compatibility, checkpoint_record):
+    """Return the first state.json record of the run."""
     state = {'mode': args.mode, 'status': 'initializing', 'identity': identity, 'errors': [], 'stage2_complete': False,
         'runtime_binding': {'runtime_tree_sha256': args.source_freeze_sha256},
         'allocation': {'profile': args.allocation_profile, 'max_wall_seconds': args.max_wall_seconds},
@@ -242,205 +284,293 @@ def main(argv=None):
     if compatibility is not None:
         state['checkpoint_compatibility'] = {'receipt_sha256': args.checkpoint_compatibility_sha256,
             'original_identity': checkpoint_record['identity'], 'checkpoint_sha256': args.checkpoint_sha256}
+    return state
+
+
+def launch_app(args):
+    """Start Isaac Sim; a stalled start writes the thread stacks to the output every 45 s."""
+    from isaaclab.app import AppLauncher
+    args.enable_cameras = args.mode == 'evaluate'
+    args.headless_explicit = False
+    with (args.output/'startup_tracebacks.log').open('w') as stream:
+        faulthandler.enable(file=stream)
+        faulthandler.dump_traceback_later(45., repeat=True, file=stream)
+        try:
+            return AppLauncher(args).app
+        finally:
+            faulthandler.cancel_dump_traceback_later()
+            faulthandler.disable()
+
+
+def create_env(args, cfg, metadata):
+    """Seed torch and NumPy, then build the native environment; evaluation adds the policy camera scene."""
+    import torch
+    from locomotion.omni.env import OmniEnv
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+    env = OmniEnv(cfg, args.asset, args.model, args.geometry,
+        args.output/'native', reference_metadata=metadata)
+    if args.mode == 'evaluate':
+        prepare_policy_scene(env)
+    return env
+
+
+def run_diagnostic(env, args, state, started):
+    """Hold a zero command for 1000 controls, capture the standing robot and score it."""
+    import torch
+    from locomotion.evaluation.capture import DiagnosticCapture, score_diagnostic
+    env.commands.zero_()
+    capture = DiagnosticCapture(env, args.output/'standing', args.geometry_extrema)
+    try:
+        for control in range(1000):
+            env.step(torch.zeros((env.num_envs, 18), device=env.device))
+            if (control+1) % 100 == 0:
+                print(f"STANDING controls={control+1} replicas={env.num_envs}", flush=True)
+            if time.monotonic()-started >= args.max_wall_seconds:
+                raise TimeoutError('Standing allocation exceeded its deadline')
+    finally:
+        capture.close()
+    report = score_diagnostic(args.output/'standing')
+    save(args.output/'standing'/'standing_report.json', report)
+    state['standing_gate_pass'] = report['all_pass']
+
+
+def run_probe(env, args, state, started):
+    """Run the noise probe inside the remaining allocation and record its summary without the cells."""
+    from locomotion.evaluation import noise_probe
+    summary = noise_probe.run(env, args.output/'probe', seed=args.seed,
+        max_wall_seconds=max(.001, args.max_wall_seconds-(time.monotonic()-started)),
+        progress=print_progress)
+    state['probe'] = {key: value for key, value in summary.items() if key != 'cells'}
+
+
+def learner_config(args, identity, state):
+    """Check RSL-RL, write ppo_config.json and record the upstream sources the learner runs."""
+    import rsl_rl
+    version = importlib.metadata.version('rsl-rl-lib')
+    if version != '5.0.1':
+        raise ValueError('RSL-RL version differs: '+version)
+    factory, options = ppo_config, {}
+    if args.learner == 'amp':
+        from locomotion.priors.amp import amp_ppo_config
+        factory, options = amp_ppo_config, {'networks': args.networks}
+    config = factory(args.seed, **options, action_mean=args.action_mean,
+                     observation_normalization=args.observation_normalization, **learner_options(args))
+    save(args.output/'ppo_config.json', config)
+    upstream = Path(rsl_rl.__file__).parent
+    identity['upstream_source_files'] = {name: sha(upstream/name) for name in (
+        'runners/on_policy_runner.py', 'algorithms/ppo.py', 'models/mlp_model.py', 'storage/rollout_storage.py')}
+    identity['ppo_config'] = config
+    state['status'] = 'running'
     save(args.output/'state.json', state)
-    app = env = runner = loads = None
+    return config
+
+
+def training_wrapper(env, args, task):
+    """Wrap the task for RSL-RL; AMP adds collision capture and the discriminator configuration."""
+    from locomotion.omni.wrapper import OmniVecEnv
+    wrapper, options = OmniVecEnv, {}
+    if args.learner == 'amp':
+        from locomotion.priors.amp import AMPConfig, AMPVecEnv, CollisionCapture
+        wrapper = AMPVecEnv
+        options = {'collision': CollisionCapture(env), 'amp_config': AMPConfig().resolve(args.seed)}
+    return wrapper(task, **options, observation_scaling=args.observation_scaling,
+        command_segments=args.command_segments, gait_clock=args.gait_clock,
+        action_smoothing=args.action_smoothing, velocity_noise=args.velocity_noise)
+
+
+def write_checkpoint(runner, args, config, identity, state, num_envs, update):
+    """Save the runner with its identity, write the JSON declaration and name the checkpoint in state.json."""
+    path = args.output/f'checkpoint_update{update:06d}.pt'
+    runner.save(str(path), infos={'identity': identity, 'updates': update})
+    save(path.with_suffix('.json'), {'identity': identity, 'updates': update,
+        'checkpoint_sha256': sha(path), 'transitions': collected_transitions(update, config, num_envs)})
+    state['checkpoint'] = str(path)
+    state['checkpoint_sha256'] = sha(path)
+    save(args.output/'state.json', state)
+
+
+def metrics_row(values, runner, env, task, diagnostics, config):
+    """Return the metrics.jsonl row for the values RSL-RL logs after one update."""
+    from locomotion.omni.ppo import action_metrics
+    update = values['it']+1
+    return {'update': update, 'transitions': collected_transitions(update, config, env.num_envs),
+        'collection_seconds': values['collect_time'], 'learning_seconds': values['learn_time'],
+        'loss': values['loss_dict'], 'learning_rate': values['learning_rate'],
+        'mean_action_std': float(values['action_std'].mean()),
+        'actions': action_metrics(runner.alg.storage, env.joint_names),
+        'task': task.status(reset_interval=True), 'policy_update': diagnostics.latest}
+
+
+def name_wandb_run(args, identity):
+    """Name the W&B run after the seed and the frozen source; RSL-RL names it after its log directory."""
+    import wandb
+    wandb.run.name = f'seed{args.seed}-{args.source_freeze_sha256[:12]}'
+    wandb.config.update({'identity': identity}, allow_val_change=True)
+
+
+def training_runner(env, args, config, identity, state, started):
+    """Build the RSL-RL runner with update diagnostics, load capture and a record after each update.
+
+    Return the runner and the load accumulator.
+    """
+    from rsl_rl.runners import OnPolicyRunner
+    from locomotion.evaluation.loads import TrainingLoads
+    from locomotion.omni.ppo import DeviationSchedule, UpdateDiagnostics
+    from locomotion.omni.task import TrainingTask
+    task = TrainingTask(env, TaskConfig(seed=args.seed), args.output/'task')
+    wrapped = training_wrapper(env, args, task)
+    if args.networks == 'mlp' and args.gait_clock != task.reward_config.schedule_period_controls:
+        raise ValueError('The contact-schedule reward needs a gait clock of the same period')
+    runner_config = copy.deepcopy(config)
+    # The wrapper consumes its own options; the runner receives the stock keys.
+    runner_config.pop('environment_wrapper', None)
+    runner_config.pop('exploration', None)
+    if args.logger == 'wandb':
+        # The logger choice stays out of ppo_config, which checkpoint loading compares.
+        # Copy saved checkpoints: container paths do not exist where offline runs sync.
+        os.environ.update(WANDB_DIR=str(args.output), WANDB_MODE=args.wandb_mode, WANDB_SYMLINK='false')
+        runner_config.update(logger='wandb', wandb_project=args.wandb_project)
+        wrapped.cfg = ConfigRecord(wrapped.cfg)
+    runner = OnPolicyRunner(wrapped, runner_config, str(args.output/'learner'), device=args.device)
+    diagnostics = UpdateDiagnostics(runner.alg)
+    runner.alg.update = diagnostics.update
+    if args.action_std_final is not None:
+        # The schedule wraps the diagnostic update, so each record reads the deviation it trained with.
+        runner.alg.update = DeviationSchedule(runner.alg, args.action_std, args.action_std_final,
+            decay_updates(args.updates, args.action_std_decay_updates)).update
+    loads = TrainingLoads(env)
+    if args.learner == 'amp':
+        wrapped.collision.inner = loads
+        env.capture = wrapped.collision
+    else:
+        env.capture = loads
+    checkpoint = partial(write_checkpoint, runner, args, config, identity, state, env.num_envs)
+    log_update = runner.logger.log
+
+    def log(**values):
+        log_update(**values)
+        row = metrics_row(values, runner, env, task, diagnostics, config)
+        with (args.output/'metrics.jsonl').open('a') as stream:
+            stream.write(json.dumps(row, allow_nan=False)+'\n')
+        if runner.logger.writer is not None:
+            for tag, value in scalars(row['task'], 'Task').items():
+                runner.logger.writer.add_scalar(tag, value, values['it'])
+        if args.logger == 'wandb' and row['update'] == 1:
+            name_wandb_run(args, identity)
+        state.update(updates=row['update'], transitions=row['transitions'], wall_seconds=time.monotonic()-started)
+        save(args.output/'state.json', state)
+        finish_training_update(row['update'], args.updates, time.monotonic()-started,
+            args.max_wall_seconds, checkpoint,
+            lambda: save(args.output/'force_metrics.json', loads.report()))
+    runner.logger.log = log
+    return runner, loads
+
+
+def actor_input(env, args, observation):
+    """Scale the actor observation and append the gait clock, as the training wrapper does."""
+    import torch
+    from locomotion.omni.wrapper import clock_features, scale_observation
+    scaled = scale_observation(observation, args.observation_scaling)
+    if args.gait_clock:
+        clock = clock_features(env.episode_steps, args.gait_clock, observation[:, 210:213]).to(scaled)
+        scaled = torch.cat((scaled, clock), -1)
+    return scaled
+
+
+def evaluation_policy(env, args, config, identity, checkpoint_record, compatibility):
+    """Check the checkpoint configuration, load its actor and return the policy that the evaluator calls."""
+    import torch
+    from tensordict import TensorDict
+    from locomotion.omni.ppo import load_actor
+    from locomotion.omni.wrapper import smoothed_action
+    check = require_configuration if compatibility is not None else require_learner_configuration
+    check(checkpoint_record, identity, config)
+    observation = env.observations(env.current)['obs']
+    scaled = actor_input(env, args, observation)
+    if args.networks == 'paper':
+        from locomotion.priors.networks import actor_observation
+        observations = actor_observation(observation)
+    else:
+        observations = TensorDict({'policy': scaled}, batch_size=[env.num_envs])
+    payload = torch.load(args.checkpoint, map_location=args.device, weights_only=False)
+    require_embedded_declaration(payload.get('infos'), checkpoint_record)
+    actor, _ = load_actor(payload, config, observations, args.device)
+    previous = None
+
+    def policy(observation):
+        nonlocal previous
+        with torch.inference_mode():
+            if args.networks == 'paper':
+                return actor(actor_observation(observation))
+            action = actor(TensorDict({'policy': actor_input(env, args, observation)}, batch_size=[env.num_envs]))
+            if args.action_smoothing == 'mean2':
+                # The same two-control mean as the training wrapper, restarted with each episode.
+                last = torch.zeros_like(action) if previous is None else previous
+                previous = action.clone()
+                action = smoothed_action(action, last, env.episode_steps)
+            return action
+    return policy
+
+
+def run_evaluation(env, args, policy, state, started):
+    """Score the policy on the selected cases, then require a complete set of load summaries."""
+    from locomotion.evaluation.runner import evaluate_suite, run_learning_probe_suite
+    env.render = NativePolicyCamera(env)
+    remaining = max(.001, args.max_wall_seconds-(time.monotonic()-started))
+    options = dict(progress=print_progress, max_wall_seconds=remaining)
+    if args.eval_scope == 'full':
+        result = evaluate_suite(env, policy, args.output/'evaluation',
+            args.geometry_extrema, args.checkpoint, **options)
+    else:
+        selected = (['learning:translate_0.05_0deg', 'learning:quiet_20s',
+            'learning:forward_0.05_to_stop'] if args.eval_scope == 'focus' else None)
+        result = run_learning_probe_suite(env, policy, args.output/'evaluation',
+            args.geometry_extrema, args.checkpoint, selected_case_ids=selected,
+            record_video=True, video_case_id=args.video_case, seed=args.seed, **options)
+    state['evaluation'] = result
+    summaries = list((args.output/'evaluation').rglob('force_metrics.json'))
+    if not summaries or any(json.loads(p.read_text())['status'] != 'available' for p in summaries):
+        raise ValueError('Evaluation has no complete set of load summaries')
+
+
+def main(argv=None):
+    args = parse_args(argv)
+    compatibility = validate(args)
+    metadata = json.loads(args.stance.read_text())
+    cfg = environment_config(args)
+    identity = build_identity(args, cfg, metadata)
+    checkpoint_record = bind_checkpoint(args, identity, compatibility) if args.mode == 'evaluate' else None
+    if args.preflight_only:
+        print(json.dumps(identity, indent=2))
+        return 0
+    args.output.mkdir(parents=True, exist_ok=False)
+    state = initial_state(args, identity, compatibility, checkpoint_record)
+    save(args.output/'state.json', state)
+    app = loads = None
     started = time.monotonic()
     try:
-        import faulthandler
-        args.enable_cameras = args.mode == 'evaluate'
-        args.headless_explicit = False
-        with (args.output/'startup_tracebacks.log').open('w') as stream:
-            faulthandler.enable(file=stream)
-            faulthandler.dump_traceback_later(45., repeat=True, file=stream)
-            try:
-                app = AppLauncher(args).app
-            finally:
-                faulthandler.cancel_dump_traceback_later(); faulthandler.disable()
+        app = launch_app(args)
         print('REFERENCE_SCREEN_APP_READY', flush=True)
-        import torch
-        import numpy as np
-        algorithms = importlib.import_module(prefix+'.omni.ppo')
-        adapter = importlib.import_module(prefix+'.omni.wrapper')
-        native = importlib.import_module(prefix+'.omni.env')
-        from locomotion.evaluation.capture import DiagnosticCapture, score_diagnostic
-        from locomotion.evaluation.loads import TrainingLoads
-        if args.mode in ('train', 'probe'):
-            task_module = importlib.import_module(prefix+'.omni.task')
-        torch.manual_seed(args.seed); np.random.seed(args.seed)
-        env = native.LocomotionEnv(cfg, args.asset, args.model, args.geometry,
-            args.output/'native', reference_metadata=metadata)
-        if args.mode == 'evaluate':
-            prepare_policy_scene(env)
+        env = create_env(args, cfg, metadata)
         if args.mode == 'diagnostic':
-            env.commands.zero_()
-            capture = DiagnosticCapture(env, args.output/'standing', args.geometry_extrema)
-            try:
-                for control in range(1000):
-                    env.step(torch.zeros((env.num_envs, 18), device=env.device))
-                    if (control+1) % 100 == 0:
-                        print(f"STANDING controls={control+1} replicas={env.num_envs}", flush=True)
-                    if time.monotonic()-started >= args.max_wall_seconds:
-                        raise TimeoutError('Standing allocation exceeded its deadline')
-            finally:
-                capture.close()
-            report = score_diagnostic(args.output/'standing')
-            save(args.output/'standing'/'standing_report.json', report)
-            state['standing_gate_pass'] = report['all_pass']
-            env.verify_native_recipe('after_controlled_steps')
-            state['status'] = 'completed'
-            return 0
-        if args.mode == 'probe':
-            probe = importlib.import_module(prefix+'.evaluation.noise_probe')
-            summary = probe.run(env, args.output/'probe', seed=args.seed,
-                max_wall_seconds=max(.001, args.max_wall_seconds-(time.monotonic()-started)),
-                progress=lambda value: print(json.dumps(value), flush=True))
-            state['probe'] = {key: value for key, value in summary.items() if key != 'cells'}
-            env.verify_native_recipe('after_controlled_steps')
-            state['status'] = 'completed'
-            return 0
-        from tensordict import TensorDict
-        version = importlib.metadata.version('rsl-rl-lib')
-        if version != '5.0.1':
-            raise ValueError('RSL-RL version differs: '+version)
-        config_factory = amp_module.amp_ppo_config if amp_module is not None else ppo_config
-        config_options = {'networks': args.networks} if amp_module is not None else {}
-        config = config_factory(args.seed, **config_options, action_mean=args.action_mean,
-                                    observation_normalization=args.observation_normalization, **learner_options)
-        save(args.output/'ppo_config.json', config)
-        import rsl_rl
-        upstream = Path(rsl_rl.__file__).parent
-        identity['upstream_source_files'] = {name: sha(upstream/name) for name in (
-            'runners/on_policy_runner.py', 'algorithms/ppo.py', 'models/mlp_model.py', 'storage/rollout_storage.py')}
-        identity['ppo_config'] = config
-        state['status'] = 'running'; save(args.output/'state.json', state)
-        if args.mode == 'train':
-            from rsl_rl.runners import OnPolicyRunner
-            task = task_module.TrainingTask(env, TaskConfig(seed=args.seed), args.output/'task')
-            wrapper = adapter.OmniVecEnv
-            wrapper_options = {}
-            if amp_module is not None:
-                wrapper = amp_module.AMPVecEnv
-                wrapper_options = {'collision': amp_module.CollisionCapture(env),
-                                   'amp_config': amp_module.AMPConfig().resolve(args.seed)}
-            wrapped = wrapper(task, **wrapper_options, observation_scaling=args.observation_scaling,
-                command_segments=args.command_segments, gait_clock=args.gait_clock,
-                action_smoothing=args.action_smoothing, velocity_noise=args.velocity_noise)
-            if args.networks == 'mlp' and args.gait_clock != task.reward_config.schedule_period_controls:
-                raise ValueError('The contact-schedule reward needs a gait clock of the same period')
-            runner_config = copy.deepcopy(config)
-            # The wrapper consumes its own options; the runner receives the stock keys.
-            runner_config.pop('environment_wrapper', None)
-            runner_config.pop('exploration', None)
-            if args.logger == 'wandb':
-                # The logger choice stays out of ppo_config, which checkpoint loading compares.
-                # Copy saved checkpoints: container paths do not exist where offline runs sync.
-                os.environ.update(WANDB_DIR=str(args.output), WANDB_MODE=args.wandb_mode, WANDB_SYMLINK='false')
-                runner_config.update(logger='wandb', wandb_project=args.wandb_project)
-                wrapped.cfg = ConfigRecord(wrapped.cfg)
-            runner = OnPolicyRunner(wrapped, runner_config, str(args.output/'learner'), device=args.device)
-            diagnostics = algorithms.UpdateDiagnostics(runner.alg)
-            runner.alg.update = diagnostics.update
-            if args.action_std_final is not None:
-                # The schedule wraps the diagnostic update, so each record reads the deviation it trained with.
-                runner.alg.update = algorithms.DeviationSchedule(runner.alg, args.action_std, args.action_std_final,
-                    decay_updates(args.updates, args.action_std_decay_updates)).update
-            def checkpoint(update):
-                path = args.output/f'checkpoint_update{update:06d}.pt'
-                runner.save(str(path), infos={'identity': identity, 'updates': update})
-                save(path.with_suffix('.json'), {'identity': identity, 'updates': update,
-                    'checkpoint_sha256': sha(path), 'transitions': collected_transitions(update, config, env.num_envs)})
-                state['checkpoint'] = str(path); state['checkpoint_sha256'] = sha(path)
-                save(args.output/'state.json', state)
-            loads = TrainingLoads(env)
-            if amp_module is not None:
-                wrapped.collision.inner = loads
-                env.capture = wrapped.collision
-            else:
-                env.capture = loads
-            original_log = runner.logger.log
-            def log(**values):
-                original_log(**values)
-                update = values['it']+1
-                row = {'update': update, 'transitions': collected_transitions(update, config, env.num_envs),
-                    'collection_seconds': values['collect_time'], 'learning_seconds': values['learn_time'],
-                    'loss': values['loss_dict'], 'learning_rate': values['learning_rate'],
-                    'mean_action_std': float(values['action_std'].mean()),
-                    'actions': algorithms.action_metrics(runner.alg.storage, env.joint_names),
-                    'task': task.status(reset_interval=True)}
-                if diagnostics is not None:
-                    row['policy_update'] = diagnostics.latest
-                with (args.output/'metrics.jsonl').open('a') as stream:
-                    stream.write(json.dumps(row, allow_nan=False)+'\n')
-                if runner.logger.writer is not None:
-                    for tag, value in scalars(row['task'], 'Task').items():
-                        runner.logger.writer.add_scalar(tag, value, values['it'])
-                if args.logger == 'wandb' and update == 1:
-                    # RSL-RL names the run after its log directory; bind it to the frozen source instead.
-                    import wandb
-                    wandb.run.name = f'seed{args.seed}-{args.source_freeze_sha256[:12]}'
-                    wandb.config.update({'identity': identity}, allow_val_change=True)
-                state.update(updates=update, transitions=row['transitions'], wall_seconds=time.monotonic()-started)
-                save(args.output/'state.json', state)
-                finish_training_update(update, args.updates, time.monotonic()-started,
-                    args.max_wall_seconds, checkpoint,
-                    lambda: save(args.output/'force_metrics.json', loads.report()))
-            runner.logger.log = log
-            runner.learn(args.updates, init_at_random_ep_len=False)
-            save(args.output/'force_metrics.json', loads.report())
+            run_diagnostic(env, args, state, started)
+        elif args.mode == 'probe':
+            run_probe(env, args, state, started)
         else:
-            (require_configuration if compatibility is not None else require_learner_configuration)(checkpoint_record, identity, config)
-            observation = env._observations(env.current)['obs']
-            observations = adapter.scale_observation(observation, args.observation_scaling)
-            if args.gait_clock:
-                clock = adapter.clock_features(env.episode_steps, args.gait_clock, observation[:, 210:213]).to(observations)
-                observations = torch.cat((observations, clock), -1)
-            if args.networks == 'paper':
-                networks = importlib.import_module(prefix+'.priors.networks')
-                observations = networks.actor_observation(observation)
+            config = learner_config(args, identity, state)
+            if args.mode == 'train':
+                runner, loads = training_runner(env, args, config, identity, state, started)
+                runner.learn(args.updates, init_at_random_ep_len=False)
+                save(args.output/'force_metrics.json', loads.report())
             else:
-                observations = TensorDict({'policy': observations}, batch_size=[env.num_envs])
-            payload = torch.load(args.checkpoint, map_location=args.device, weights_only=False)
-            require_embedded_declaration(payload.get('infos'), checkpoint_record)
-            actor, _ = algorithms.load_actor(payload, config,
-                observations, args.device)
-            previous_action = [None]
-            def policy(observation):
-                with torch.inference_mode():
-                    if args.networks == 'paper':
-                        return actor(networks.actor_observation(observation))
-                    scaled = adapter.scale_observation(observation, args.observation_scaling)
-                    if args.gait_clock:
-                        clock = adapter.clock_features(env.episode_steps, args.gait_clock, observation[:, 210:213]).to(scaled)
-                        scaled = torch.cat((scaled, clock), -1)
-                    action = actor(TensorDict({'policy': scaled}, batch_size=[env.num_envs]))
-                    if args.action_smoothing == 'mean2':
-                        # The same two-control mean as the training wrapper, restarted with each episode.
-                        last = torch.zeros_like(action) if previous_action[0] is None else previous_action[0]
-                        previous_action[0] = action.clone()
-                        action = adapter.smoothed_action(action, last, env.episode_steps)
-                    return action
-            evaluation = importlib.import_module(prefix+'.evaluation.runner')
-            camera = importlib.import_module(prefix+'.evaluation.camera')
-            env.render = camera.NativePolicyCamera(env)
-            remaining = max(.001, args.max_wall_seconds-(time.monotonic()-started))
-            options = dict(progress=lambda value: print(json.dumps(value), flush=True), max_wall_seconds=remaining)
-            if args.eval_scope == 'full':
-                result = evaluation.evaluate_suite(env, policy, args.output/'evaluation',
-                    args.geometry_extrema, args.checkpoint, **options)
-            else:
-                selected = (['learning:translate_0.05_0deg', 'learning:quiet_20s',
-                    'learning:forward_0.05_to_stop'] if args.eval_scope == 'focus' else None)
-                result = evaluation.run_learning_probe_suite(env, policy, args.output/'evaluation',
-                    args.geometry_extrema, args.checkpoint, selected_case_ids=selected,
-                    record_video=True, video_case_id=args.video_case, seed=args.seed, **options)
-            state['evaluation'] = result
-            summaries = list((args.output/'evaluation').rglob('force_metrics.json'))
-            if not summaries or any(json.loads(p.read_text())['status'] != 'available' for p in summaries):
-                raise ValueError('Evaluation has no complete set of load summaries')
+                policy = evaluation_policy(env, args, config, identity, checkpoint_record, compatibility)
+                run_evaluation(env, args, policy, state, started)
         env.verify_native_recipe('after_controlled_steps')
         state['status'] = 'completed'
     except BaseException as error:
-        state['status'] = 'failed'; state['errors'].append(repr(error))
+        state['status'] = 'failed'
+        state['errors'].append(repr(error))
         state['traceback'] = traceback.format_exc()
         print(state['traceback'], flush=True)
     finally:

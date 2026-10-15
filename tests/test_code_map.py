@@ -15,14 +15,13 @@ class CodeMapTests(unittest.TestCase):
             value = code_map.build(ROOT, tmp)
             rows = {row['path']: row for row in value['modules']}
             native = rows['locomotion/omni/env.py']
-            method = next(row for row in native['symbols'] if row['name'] == 'LocomotionEnv.step')
+            method = next(row for row in native['symbols'] if row['name'] == 'OmniEnv.step')
             source = ROOT/native['path']
             self.assertIn('def step(', source.read_text().splitlines()[method['line']-1])
             self.assertIn('/'+value['revision']+'/', method['url'])
             self.assertEqual(native['sha256'], hashlib.sha256(source.read_bytes()).hexdigest())
             self.assertEqual(native['area'], 'omni')
-            self.assertNotIn('locomotion/env.py', rows)
-            self.assertIn('locomotion/omni/motor.py', native['depends_on'])
+            self.assertIn('locomotion/omni/isaac.py', native['depends_on'])
             self.assertTrue(all(target in rows for row in rows.values() for target in row['depends_on']))
             self.assertEqual(rows['locomotion/tests/test_native_ranges.py']['area'], 'tests')
             self.assertFalse(any('/fixtures/' in path for path in rows))

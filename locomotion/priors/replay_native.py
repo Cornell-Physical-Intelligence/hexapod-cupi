@@ -151,7 +151,7 @@ def main(argv=None):
         capture_module = importlib.import_module('locomotion.evaluation.runner')
         camera_module = importlib.import_module(prefix+'.evaluation.camera')
         torch.manual_seed(cfg.seed)
-        env = env_module.LocomotionEnv(cfg, args.asset, args.model, args.geometry,
+        env = env_module.OmniEnv(cfg, args.asset, args.model, args.geometry,
             args.output/'native', reference_metadata=metadata)
         identity['root_com_local_m'] = env.root_com_local.detach().cpu().tolist()
         prepare_policy_scene(env)

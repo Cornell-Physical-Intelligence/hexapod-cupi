@@ -19,6 +19,8 @@ import locomotion.omni.features as amp
 from locomotion.priors import discriminator as disc
 from locomotion.priors import amp as amp_ppo
 from locomotion.priors import networks as nets
+from locomotion.evaluation.checkpoint import (json_shape, require_embedded_declaration,
+    require_learner_configuration, require_learner_identity)
 import locomotion.omni.train as train
 from locomotion.priors.amp import AMPConfig, AMPPPO, AMPVecEnv, CollisionCapture, amp_ppo_config, load_demonstrations
 from locomotion.omni.ppo_cfg import ppo_config
@@ -369,7 +371,7 @@ class LearnerTests(unittest.TestCase):
         self.assertFalse(declaration['stage2_complete'])
         self.assertEqual(declaration['dataset'], BANK_IDENTITY)
         self.assertEqual(declaration['config']['style_weight'], 1.)
-        self.assertEqual(train.json_shape(declaration), declaration)
+        self.assertEqual(json_shape(declaration), declaration)
 
 
 class CheckpointTests(unittest.TestCase):
@@ -432,14 +434,14 @@ class EvaluationIdentityTests(unittest.TestCase):
         return json.loads(json.dumps({'identity': identity, 'updates': updates, 'checkpoint_sha256': 'b' * 64}))
 
     def accept(self, record, identity):
-        train.require_learner_identity(record, identity)
-        train.require_learner_configuration(record, identity, identity['ppo_config'])
+        require_learner_identity(record, identity)
+        require_learner_configuration(record, identity, identity['ppo_config'])
 
     def test_learner_configuration_is_json_shaped(self):
         for networks in ('mlp', 'paper'):
             config = amp_ppo_config(1, networks=networks)
             self.assertFalse(contains_tuple(config))
-            self.assertEqual(train.json_shape(config), config)
+            self.assertEqual(json_shape(config), config)
         self.assertFalse(contains_tuple(AMPVecEnv(TaskDouble()).cfg['amp']))
 
     def test_amp_checkpoint_record_matches_after_a_json_round_trip(self):
@@ -455,12 +457,12 @@ class EvaluationIdentityTests(unittest.TestCase):
             path = Path(temporary)/'checkpoint.pt'
             torch.save({'infos': {'identity': identity, 'updates': 50}}, path)
             infos = torch.load(path, weights_only=False)['infos']
-        train.require_embedded_declaration(infos, record)
+        require_embedded_declaration(infos, record)
         with self.assertRaisesRegex(ValueError, 'Embedded'):
-            train.require_embedded_declaration({**infos, 'updates': 51}, record)
+            require_embedded_declaration({**infos, 'updates': 51}, record)
         tupled = copy.deepcopy(identity)
         tupled['ppo_config']['algorithm']['amp_cfg']['discriminator_hidden'] = (1024, 512)
-        train.require_embedded_declaration({'identity': tupled, 'updates': 50}, record)
+        require_embedded_declaration({'identity': tupled, 'updates': 50}, record)
 
     def test_mismatched_learner_networks_or_bank_are_rejected(self):
         identity = self.identity()
@@ -471,32 +473,32 @@ class EvaluationIdentityTests(unittest.TestCase):
             with self.subTest(key=key):
                 record = self.record({**identity, key: value})
                 with self.assertRaisesRegex(ValueError, 'differs: ' + key):
-                    train.require_learner_identity(record, identity)
+                    require_learner_identity(record, identity)
         missing = self.record({key: value for key, value in identity.items() if key != 'amp_dataset'})
         with self.assertRaisesRegex(ValueError, 'differs: amp_dataset'):
-            train.require_learner_identity(missing, identity)
+            require_learner_identity(missing, identity)
 
     def test_changed_configuration_or_upstream_source_is_rejected(self):
         identity = self.identity()
         other = copy.deepcopy(identity)
         other['ppo_config']['algorithm']['amp_cfg']['style_weight'] = 2.
         with self.assertRaisesRegex(ValueError, 'configuration differs'):
-            train.require_learner_configuration(self.record(other), identity, identity['ppo_config'])
+            require_learner_configuration(self.record(other), identity, identity['ppo_config'])
         other = copy.deepcopy(identity)
         other['upstream_source_files']['algorithms/ppo.py'] = 'c' * 64
         with self.assertRaisesRegex(ValueError, 'configuration differs'):
-            train.require_learner_configuration(self.record(other), identity, identity['ppo_config'])
+            require_learner_configuration(self.record(other), identity, identity['ppo_config'])
         with self.assertRaisesRegex(ValueError, 'configuration differs'):
-            train.require_learner_configuration(self.record(self.identity(networks='mlp')), identity, identity['ppo_config'])
+            require_learner_configuration(self.record(self.identity(networks='mlp')), identity, identity['ppo_config'])
 
-    def test_legacy_ppo_record_without_learner_keys(self):
+    def test_ppo_record_without_learner_keys(self):
         current = self.identity(learner='ppo', networks='mlp')
         legacy = {key: value for key, value in current.items() if key not in ('learner', 'networks')}
         self.accept(self.record(legacy), current)
         bare = {key: value for key, value in legacy.items() if key != 'motion_prior'}
         self.accept(self.record(bare), current)
         with self.assertRaisesRegex(ValueError, 'differs: learner'):
-            train.require_learner_identity(self.record(legacy), self.identity())
+            require_learner_identity(self.record(legacy), self.identity())
 
 
 class LaunchTests(unittest.TestCase):

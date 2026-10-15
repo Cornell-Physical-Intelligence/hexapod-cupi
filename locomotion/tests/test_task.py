@@ -1,4 +1,4 @@
-"""Compare the active c48 task against the retained b2a6168c source archive."""
+"""Compare the active task with the frozen baseline source archive."""
 from dataclasses import asdict
 import hashlib
 import importlib

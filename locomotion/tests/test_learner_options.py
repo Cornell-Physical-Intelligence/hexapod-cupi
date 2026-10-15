@@ -12,12 +12,14 @@ import torch
 from tensordict import TensorDict
 from rsl_rl.algorithms import PPO
 
+from locomotion.evaluation.checkpoint import require_learner_configuration
 import locomotion.omni.ppo as ppo
 import locomotion.omni.ppo_cfg as ppo_cfg
 import locomotion.omni.wrapper as wrapper
 from locomotion.spark.prepare import prepare
 from locomotion.omni.ppo import CappedRatePPO
-from locomotion.omni.train import require_learner_configuration
+import locomotion.omni.train as train
+from locomotion.spark.validation import collected_transitions
 
 REMOTE = '/srv/cupi/hexapod/runs/james/learner_options_fixture'
 OPTIONS = dict(observation_scaling='fixed', command_segments='bootstrap', learning_rate_max=3e-4, action_std=.1,
@@ -355,11 +357,9 @@ class LearnerOptionTests(unittest.TestCase):
                                          dict(mode='tripod', steps_per_env=36))):
                 with self.subTest(bad=bad), self.assertRaises(ValueError):
                     prepare(root/f'bad{index}', REMOTE, **bad)
-        import locomotion.omni.train as train
         # Metrics rows, state and checkpoint sidecars count the configured rollout, not a fixed 24 controls.
         for steps, updates, collected in ((24, 2000, 6_144_000), (36, 1333, 6_142_464), (48, 2500, 15_360_000)):
-            self.assertEqual(train.collected_transitions(updates, ppo_cfg.ppo_config(7, steps_per_env=steps), 128), collected)
-        self.assertNotIn('*24*', Path(train.__file__).read_text())
+            self.assertEqual(collected_transitions(updates, ppo_cfg.ppo_config(7, steps_per_env=steps), 128), collected)
         base = ['--asset', 'a', '--model', 'm', '--geometry', 'g', '--geometry-extrema', 'e', '--stance', 's',
                 '--output', 'o', '--source-freeze-sha256', 'f'*64, '--num-envs', '1', '--preflight-only', '--mode', 'train']
         with self.assertRaisesRegex(ValueError, 'rollout length'):

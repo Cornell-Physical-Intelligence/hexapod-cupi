@@ -21,16 +21,16 @@ class FakeNative:
 
     def reset(self):
         self.reset_count+=1
-        return self._observations(self.current)
+        return self.observations(self.current)
 
-    def _observations(self, state):
+    def observations(self, state):
         obs=torch.zeros(1,231);obs[:,210:213]=self.commands
         return {"obs":obs,"critic":torch.cat((obs,torch.zeros(1,3)),-1),"amp":torch.zeros(1,61)}
 
     def step(self, action):
         self.steps+=1;self.counter+=8
         self.capture.count+=8
-        return {**self._observations(self.current),"terminated":torch.tensor([self.steps==self.terminate_at]),"truncated":torch.zeros(1,dtype=torch.bool)}
+        return {**self.observations(self.current),"terminated":torch.tensor([self.steps==self.terminate_at]),"truncated":torch.zeros(1,dtype=torch.bool)}
 
     def verify_native_recipe(self, phase):
         pass

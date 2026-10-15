@@ -4,8 +4,7 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion.omni.features import extract_features, feature_contract
-from locomotion.omni.env import LocomotionEnv
+from locomotion.omni.features import extract_features, feature_contract, observations
 
 
 class AMPFeatureTests(unittest.TestCase):
@@ -21,13 +20,8 @@ class AMPFeatureTests(unittest.TestCase):
         state = self.state()
         expected = np.concatenate((state['q'], state['dq'], state['linear'], state['angular'],
                                    state['root'][:, 2:3], state['toe_body'].reshape(2, 18)), axis=1)
-        env = LocomotionEnv.__new__(LocomotionEnv)
-        env.cfg = type('Config', (), {'record_motion_features': True})()
-        env.history = torch.zeros(2, 5, 42)
-        env.commands = torch.zeros(2, 3)
-        env.previous_action = torch.zeros(2, 18)
         tensors = {name: torch.from_numpy(value) for name, value in state.items()}
-        observed = env._observations(tensors)['amp']
+        observed = observations(torch.zeros(2, 5, 42), torch.zeros(2, 3), torch.zeros(2, 18), tensors, True)['amp']
         np.testing.assert_array_equal(observed.numpy(), expected)
         np.testing.assert_array_equal(extract_features(state), expected)
         self.assertEqual(observed.dtype, torch.float32)

@@ -67,7 +67,7 @@ class TelemetryPlayer(SurrogateEnv):
         self.previous_action[indices] = 0
         self.episode_steps[indices] = 0
         self.history[indices] = self._proprio(self.current)[indices, None].expand(-1, 5, -1)
-        return self._observations(self.current)
+        return self.observations(self.current)
 
     def step(self, action):
         row = self.cursor
@@ -96,7 +96,7 @@ class TelemetryPlayer(SurrogateEnv):
         self.previous_action = executed_action_feature(self.held, self.neutral, self.cfg.action_scale_rad).clone()
         self.history = torch.cat((self.history[:, 1:], self._proprio(current)[:, None]), dim=1)
         self.episode_steps = torch.from_numpy(self._episode_steps_at[row].copy())
-        result = self._observations(current)
+        result = self.observations(current)
         result.update(terminated=terminated, truncated=truncated)
         return result
 

@@ -1,4 +1,4 @@
-"""Compare the kernel with recorded native controls and frozen source arithmetic."""
+"""Compare motor targets and observations with a recorded native trace and frozen source."""
 import importlib
 import json
 from pathlib import Path
@@ -9,7 +9,6 @@ import unittest
 import numpy as np
 import torch
 
-import locomotion.evaluation as evaluation
 import locomotion.omni.commands as commands
 import locomotion.omni.env as env
 import locomotion.omni.env_cfg as env_config
@@ -22,13 +21,13 @@ FROZEN = ROOT/'locomotion/tests/fixtures/baseline'
 TRACE = ROOT/'locomotion/tests/fixtures/control_trace.npz'
 
 
-class RecordedParityTests(unittest.TestCase):
+class RecordedTraceTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         if robot.sha(TRACE) != '15d89c43a9537a0d45bac58b1f94e99d67804b45d5198e8f08d51441eeadb9ad':
             raise ValueError('Native regression recording changed')
         expected = json.loads((FROZEN/'FREEZE_SHA256.json').read_text())
-        package = types.ModuleType('_kernel_recorded_baseline')
+        package = types.ModuleType('_recorded_baseline')
         package.__path__ = [str(FROZEN)]
         sys.modules[package.__name__] = package
         cls.old = {}
@@ -56,9 +55,9 @@ class RecordedParityTests(unittest.TestCase):
         for current, old in zip(motor.motor_force(*args), self.old['env'].motor_force(*args)):
             torch.testing.assert_close(current, old, rtol=0, atol=0)
 
-    def test_recorded_actor_and_critic_inputs_survive_observation_cleanup(self):
+    def test_recorded_actor_and_critic_inputs_match_the_trace(self):
         trace = self.trace
-        native = env.LocomotionEnv.__new__(env.LocomotionEnv)
+        native = env.OmniEnv.__new__(env.OmniEnv)
         native.history = trace['policy_observation'][:, :210].reshape(-1, 5, 42)
         native.commands = trace['policy_observation'][:, 210:213]
         native.previous_action = trace['policy_observation'][:, 213:]
@@ -67,14 +66,14 @@ class RecordedParityTests(unittest.TestCase):
         state = {'q': amp[:, :18], 'dq': amp[:, 18:36], 'linear': amp[:, 36:39],
                  'angular': amp[:, 39:42], 'root': torch.cat((torch.zeros(len(amp), 2), amp[:, 42:43]), -1),
                  'toe_body': amp[:, 43:].reshape(-1, 6, 3)}
-        actual = native._observations(state)
+        actual = native.observations(state)
         baseline = self.old['env'].PaperWalkEnv._observations(native, state)
         for key in ('obs', 'critic', 'amp'):
             torch.testing.assert_close(actual[key], baseline[key], atol=0, rtol=0)
         torch.testing.assert_close(actual['obs'], trace['policy_observation'], atol=0, rtol=0)
         torch.testing.assert_close(actual['critic'], trace['critic_observation'], atol=0, rtol=0)
         native.cfg = env_config.EnvConfig(record_motion_features=False)
-        training = native._observations(state)
+        training = native.observations(state)
         self.assertEqual(set(training), {'obs', 'critic'})
         for key in training:
             torch.testing.assert_close(training[key], actual[key], atol=0, rtol=0)

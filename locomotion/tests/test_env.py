@@ -3,12 +3,13 @@ from pathlib import Path
 import unittest
 import numpy as np
 import torch
-from locomotion.omni.env import LocomotionEnv
+from locomotion.omni.env import OmniEnv
 from locomotion.omni.env_cfg import EnvConfig
 from locomotion.omni.frames import inverse_rotate, rotate
 from locomotion.omni.motor import emitted_target, executed_action_feature, motor_force
 from locomotion.omni.robot import JOINT_NAMES, KD, verify_assets
 from locomotion.evaluation.capture import _diagnostic_servo
+from locomotion.tests.test_direct_environment import load_isaac
 
 
 class MotorTests(unittest.TestCase):
@@ -59,28 +60,27 @@ class MotorTests(unittest.TestCase):
 class ResetTests(unittest.TestCase):
     def test_selected_reset_preserves_other_physics_and_history_rows(self):
         # Exercise real reset against a backend double that enforces selected writes.
-        env = LocomotionEnv.__new__(LocomotionEnv)
-        env.device = "cpu"; env.num_envs = 3; env.cfg = EnvConfig(record_motion_features=True)
-        env.native_errors = []
-        env.torch = lambda x: torch.as_tensor(x, dtype=torch.float32)
-        env.neutral = torch.tensor([0., -.3, .4] * 6)
-        env.reset_height = .1
-        env.origins = torch.tensor([[0., 0., 0.], [2., 0., 0.], [4., 0., 0.]])
-        env.inverse_joint_index = torch.arange(18)
-        env.held = torch.ones(3, 18); env.previous_action = torch.ones(3, 18)
-        env.episode_steps = torch.tensor([7, 8, 9])
-        env.history = torch.arange(3*5*42, dtype=torch.float32).reshape(3, 5, 42)
-        env.commands = torch.zeros(3, 3)
-        env.native_array = lambda x: x
+        class DirectRLEnv:
+            def _reset_idx(self, env_ids):
+                self.episode_length_buf[env_ids] = 0
+        module = load_isaac(direct_env=DirectRLEnv)
         class Warp:
             uint32 = None
             @staticmethod
             def array(x, **kwargs): return torch.as_tensor(x, dtype=torch.long)
-        env.wp = Warp()
-        class Sim:
-            @staticmethod
-            def get_physics_step_count(): return 17
-        env.sim = Sim()
+        module.wp = Warp()
+        isaac = module.IsaacEnv.__new__(module.IsaacEnv)
+        isaac.device = "cpu"; isaac.num_envs = 3
+        isaac.torch = lambda x: torch.as_tensor(x, dtype=torch.float32)
+        isaac.neutral = torch.tensor([0., -.3, .4] * 6)
+        isaac.reset_height = .1
+        isaac.origins = torch.tensor([[0., 0., 0.], [2., 0., 0.], [4., 0., 0.]])
+        isaac.inverse_joint_index = torch.arange(18)
+        isaac.held = torch.ones(3, 18); isaac.previous_action = torch.ones(3, 18)
+        isaac.episode_length_buf = torch.tensor([7, 8, 9])
+        isaac.history = torch.arange(3*5*42, dtype=torch.float32).reshape(3, 5, 42)
+        isaac.commands = torch.zeros(3, 3)
+        isaac.native_array = lambda x: x
         values = {"get_root_transforms": torch.tensor([[1., 2., .2, 0., 0., 0., 1.]]).repeat(3, 1),
                   "get_root_velocities": torch.ones(3, 6), "get_dof_positions": torch.ones(3, 18),
                   "get_dof_velocities": torch.ones(3, 18), "get_dof_actuation_forces": torch.ones(3, 18)}
@@ -90,7 +90,7 @@ class ResetTests(unittest.TestCase):
                 if getter in values:
                     return lambda data, ids: values[getter].__setitem__(ids, data[ids])
                 return lambda data, ids: None
-        env.view = View(); env.get = lambda name: values[name].clone()
+        isaac.view = View(); isaac.get = lambda name: values[name].clone()
         class Robot:
             def write_root_link_pose_to_sim_index(self, *, root_pose, env_ids):
                 values["get_root_transforms"][env_ids] = root_pose
@@ -103,16 +103,21 @@ class ResetTests(unittest.TestCase):
             def set_joint_position_target_index(self, **kwargs): pass
             def set_joint_velocity_target_index(self, **kwargs): pass
             def set_joint_effort_target_index(self, **kwargs): pass
-        from types import SimpleNamespace
-        env.robot = Robot()
-        def stock_reset(rows):
-            env.native.episode_length_buf[rows] = 0
-            env._write_reset(rows)
-        env.native = SimpleNamespace(_reset_idx=stock_reset, episode_length_buf=env.episode_steps)
-
-        env._read = lambda: {"q": values["get_dof_positions"].clone(), "dq": values["get_dof_velocities"].clone(),
+        isaac.robot = Robot()
+        isaac.read_state = lambda: {"q": values["get_dof_positions"].clone(), "dq": values["get_dof_velocities"].clone(),
             "root": values["get_root_transforms"].clone(), "angular": torch.zeros(3, 3), "linear": torch.zeros(3, 3),
             "gravity": torch.tensor([[0., 0., -1.]]).repeat(3, 1), "toe_body": torch.zeros(3, 6, 3)}
+        env = OmniEnv.__new__(OmniEnv)
+        env.isaac = isaac
+        env.device = "cpu"; env.num_envs = 3; env.cfg = EnvConfig(record_motion_features=True)
+        env.native_errors = []
+        env.torch, env.neutral, env.reset_height, env.origins = isaac.torch, isaac.neutral, isaac.reset_height, isaac.origins
+        env.held, env.previous_action, env.episode_steps = isaac.held, isaac.previous_action, isaac.episode_length_buf
+        env.history, env.commands = isaac.history, isaac.commands
+        class Sim:
+            @staticmethod
+            def get_physics_step_count(): return 17
+        env.sim = Sim()
         before = {k: v.clone() for k, v in values.items()}; history = env.history.clone()
         result = env.reset(torch.tensor([1]))
         for name in values:
@@ -121,6 +126,7 @@ class ResetTests(unittest.TestCase):
         torch.testing.assert_close(env.history[1, 0], env.history[1, -1], rtol=0, atol=0)
         torch.testing.assert_close(env.held[1], env.neutral, rtol=0, atol=0)
         self.assertEqual(env.episode_steps.tolist(), [7, 0, 9])
+        self.assertIs(env.current, isaac.current)
         self.assertEqual(result["obs"].shape, (3, 231))
         self.assertEqual(result["critic"].shape, (3, 234))
         self.assertEqual(result["amp"].shape, (3, 61))

@@ -7,6 +7,7 @@ import unittest
 import locomotion.omni.ppo as ppo
 import locomotion.omni.ppo_cfg as ppo_cfg
 import locomotion.omni.train as train
+import locomotion.spark.validation as validation
 from locomotion.spark.prepare import prepare
 from locomotion.tests.test_learner_options import construct
 
@@ -39,13 +40,13 @@ def schedule_values(start, final, decay, updates):
 
 class UpdateLimitTests(unittest.TestCase):
     def test_training_keeps_2000_updates_without_the_opt_in(self):
-        self.assertEqual((train.UPDATE_LIMIT, train.EXTENDED_UPDATE_LIMIT), (2000, 5000))
-        self.assertEqual(train.update_limit('train', False), 2000)
-        self.assertEqual(train.update_limit('evaluate', False), 2000)
-        self.assertEqual(train.update_limit('train', True), 5000)
+        self.assertEqual((validation.UPDATE_LIMIT, validation.EXTENDED_UPDATE_LIMIT), (2000, 5000))
+        self.assertEqual(validation.update_limit('train', False), 2000)
+        self.assertEqual(validation.update_limit('evaluate', False), 2000)
+        self.assertEqual(validation.update_limit('train', True), 5000)
         for mode in ('evaluate', 'diagnostic', 'probe', 'throughput', 'tripod'):
             with self.subTest(mode=mode), self.assertRaisesRegex(ValueError, 'training only'):
-                train.update_limit(mode, True)
+                validation.update_limit(mode, True)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             plain = prepare(root/'plain', REMOTE, mode='train', updates=2000)
@@ -86,8 +87,8 @@ class UpdateLimitTests(unittest.TestCase):
 
 class DecayLengthTests(unittest.TestCase):
     def test_default_decay_spans_the_run_and_configuration_is_unchanged(self):
-        self.assertEqual(train.decay_updates(2000, None), 2000)
-        self.assertEqual(train.decay_updates(5000, 2000), 2000)
+        self.assertEqual(validation.decay_updates(2000, None), 2000)
+        self.assertEqual(validation.decay_updates(5000, 2000), 2000)
         base = ppo_cfg.ppo_config(3, action_mean='tanh', observation_normalization='none', action_std_final=.05)
         self.assertEqual(base['exploration'], {'action_std_final': .05})
         decoupled = ppo_cfg.ppo_config(3, action_mean='tanh', observation_normalization='none', action_std_final=.05,

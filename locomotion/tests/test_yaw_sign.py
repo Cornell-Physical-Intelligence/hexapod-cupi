@@ -4,7 +4,6 @@ Positive yaw is a left turn: counterclockwise about native +Z seen from above. E
 level body at a known world rate, so a sign inversion anywhere in the chain fails one of these tests.
 """
 import math
-from types import SimpleNamespace
 import unittest
 
 import numpy as np
@@ -13,7 +12,7 @@ import torch
 import locomotion.evaluation as evaluation
 import locomotion.omni.reward as walking
 import locomotion.omni.wrapper as wrapper
-from locomotion.omni.env import LocomotionEnv
+from locomotion.omni.features import observations, proprio
 from locomotion.omni.frames import inverse_rotate, navigation
 from locomotion.evaluation.capture import _diagnostic_rotation
 from locomotion.evaluation.runner import learning_probe_cases
@@ -74,12 +73,11 @@ class YawSignTests(unittest.TestCase):
                     world = torch.tensor([[0., 0., sign * RATE]])
                     state = {"angular": inverse_rotate(quaternion, world), "gravity": torch.tensor([[0., 0., -1.]]),
                              "q": torch.zeros(1, 18), "dq": torch.zeros(1, 18), "linear": torch.zeros(1, 3)}
-                    env = SimpleNamespace(neutral=torch.zeros(18), commands=torch.tensor([[0., 0., sign * RATE]]),
-                                          previous_action=torch.zeros(1, 18), cfg=SimpleNamespace(record_motion_features=False))
-                    frame = LocomotionEnv._proprio(env, state)
+                    commands = torch.tensor([[0., 0., sign * RATE]])
+                    frame = proprio(state, torch.zeros(18))
                     self.assertAlmostEqual(float(frame[0, 2]), sign * RATE, places=6)
-                    env.history = frame[:, None].expand(-1, 5, -1).clone()
-                    observation = LocomotionEnv._observations(env, state)["obs"]
+                    history = frame[:, None].expand(-1, 5, -1).clone()
+                    observation = observations(history, commands, torch.zeros(1, 18), state, False)["obs"]
                     self.assertEqual(observation.shape, (1, 231))
                     torch.testing.assert_close(observation[0, 210:213], torch.tensor([0., 0., sign * RATE]))
                     scaled = wrapper.scale_observation(observation, "fixed")

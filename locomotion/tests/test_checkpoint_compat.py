@@ -60,7 +60,7 @@ class CheckpointCompatibilityTests(unittest.TestCase):
         recorded = dict.fromkeys(COMPATIBILITY_KEYS, 'original')
         candidate = deepcopy(recorded)
         candidate.update(schema='hexapod_locomotion_ppo_v2', adapter_sha256='new', entry_sha256='new',
-                         runtime_sources={'files': {'locomotion/omni/control.py': 'a'*64}})
+                         runtime_sources={'files': {'locomotion/omni/motor.py': 'a'*64}})
         record = {'identity': recorded, 'checkpoint_sha256': compat.CHECKPOINT_SHA}
         receipt = {'original_identity': deepcopy(recorded),
                    'candidate_runtime_sources': deepcopy(candidate['runtime_sources'])}
@@ -70,7 +70,7 @@ class CheckpointCompatibilityTests(unittest.TestCase):
             changed[key] = 'different'
             with self.subTest(key=key), self.assertRaises(ValueError):
                 compat.require_identity(receipt, record, changed)
-        candidate['runtime_sources']['files']['locomotion/omni/control.py'] = 'b'*64
+        candidate['runtime_sources']['files']['locomotion/omni/motor.py'] = 'b'*64
         with self.assertRaisesRegex(ValueError, 'candidate runtime'):
             compat.require_identity(receipt, record, candidate)
         record['identity']['entry_sha256'] = 'altered declaration'

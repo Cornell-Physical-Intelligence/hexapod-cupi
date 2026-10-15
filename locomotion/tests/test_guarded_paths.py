@@ -1,4 +1,4 @@
-"""Check CUPI packaging and preserve the historical launch boundary."""
+"""Check guarded run and input roots, CUPI packs and the frozen CPU preflight."""
 from contextlib import ExitStack
 import copy
 import json
@@ -16,7 +16,7 @@ import locomotion.spark.safety as reservation
 from locomotion.spark.safety import CUPI_ROOT, LEGACY_ROOT, INPUT_ROOTS, RUN_ROOTS, within_roots
 
 
-class SparkWorkspaceTests(unittest.TestCase):
+class GuardedPathTests(unittest.TestCase):
     def test_cupi_input_pack_and_frozen_cpu_preflight(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -38,7 +38,7 @@ class SparkWorkspaceTests(unittest.TestCase):
             self.assertFalse((root / 'unused').exists())
             reservation.verify_tree(root / 'attempt/source', binding['source_freeze_sha256'])
 
-    def test_path_roles_and_legacy_compatibility(self):
+    def test_path_roles_and_remote_root(self):
         for prefix in RUN_ROOTS:
             self.assertTrue(within_roots(prefix / 'attempt', RUN_ROOTS))
         for prefix in INPUT_ROOTS:
