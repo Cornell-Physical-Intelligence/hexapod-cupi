@@ -65,6 +65,8 @@ def main(argv=None):
     parser.add_argument('--mode', choices=['diagnostic', 'train', 'evaluate', 'probe'], required=True)
     for name in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
+    parser.add_argument('--backend', choices=('legacy', 'direct'), default='legacy')
+    parser.add_argument('--bc-warmstart', action='store_true', help='Clone the scripted teacher before PPO on the Direct candidate.')
     parser.add_argument('--standing-admission', type=Path)
     parser.add_argument('--source-freeze-sha256', required=True)
     parser.add_argument('--num-envs', type=int, choices=[1, 32, 128, 512, 1024], required=True,
@@ -135,6 +137,9 @@ def main(argv=None):
         from isaaclab.app import AppLauncher
         AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args(argv)
+    if args.bc_warmstart and (args.mode != 'train' or args.backend != 'direct' or args.learner != 'ppo'
+            or args.reward_version not in ('1', '2', '3') or not 10 <= args.gait_clock <= 250):
+        raise ValueError('BC warmstart requires Direct PPO training, reward 1-3 and a gait clock of 10-250 controls')
     compatibility = None
     if args.checkpoint_compatibility is not None or args.checkpoint_compatibility_sha256 is not None:
         if args.mode != 'evaluate' or args.eval_scope != 'probes' or args.num_envs != 1 or args.checkpoint_compatibility is None or args.checkpoint_compatibility_sha256 is None:
@@ -205,7 +210,7 @@ def main(argv=None):
         'model_sha256': configuration.MODEL_SHA256, 'usd_sha256': configuration.USD_SHA256,
         'stance_sha256': sha(args.stance),
         'geometry_sha256': sha(args.geometry), 'geometry_extrema_sha256': sha(args.geometry_extrema),
-        'config': cfg.declaration(), 'motion_prior': args.learner == 'amp', 'behavior_cloning': False,
+        'config': cfg.declaration(), 'motion_prior': args.learner == 'amp', 'behavior_cloning': args.bc_warmstart,
         'seed': args.seed, 'rsl_rl_required_version': '5.0.1',
         'adapter_sha256': sha(source/'learning/ppo.py'), 'entry_sha256': sha(__file__),
         'reward_version': args.reward_version, 'learner': args.learner, 'networks': args.networks}
@@ -220,7 +225,9 @@ def main(argv=None):
         amp_module = importlib.import_module(prefix+'.learning.amp_ppo')
         identity['learner_source_files'] = {name: sha(source/name) for name in ('core/features.py', 'learning/amp_discriminator.py', 'learning/amp_ppo.py', 'learning/paper_networks.py')}
         identity['amp_dataset'] = amp_module.load_demonstrations(source.parent/amp_module.AMPConfig().dataset)[1]
-    identity['physics_source_files'] = physics_files(identity['source_files'])
+    identity['physics_source_files'] = physics_files(identity['source_files'], backend=args.backend)
+    if args.backend != 'legacy':
+        identity['backend'] = args.backend
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
         'spacing_m': cfg.spacing_m, 'target_slew_rad': cfg.target_slew_rad, 'action_scale_rad': cfg.action_scale_rad,
         'solver_position_iterations': 32, 'solver_velocity_iterations': 0,
@@ -245,6 +252,9 @@ def main(argv=None):
             compat.require_identity(compatibility, checkpoint_record, identity)
         # Evaluation computes no training reward; record the one the checkpoint learned from.
         identity['reward_version'] = checkpoint_reward_version(checkpoint_record)
+        identity['behavior_cloning'] = checkpoint_record['identity'].get('behavior_cloning', False)
+        if 'bc' in checkpoint_record['identity']:
+            identity['bc'] = checkpoint_record['identity']['bc']
     if args.preflight_only:
         print(json.dumps(identity, indent=2)); return 0
     args.output.mkdir(parents=True, exist_ok=False)
@@ -277,7 +287,9 @@ def main(argv=None):
         native = importlib.import_module(prefix+'.backends.isaac.env')
         task_module = importlib.import_module(prefix+'.tasks.task')
         torch.manual_seed(args.seed); np.random.seed(args.seed)
-        env = native.LocomotionEnv(cfg, args.asset, args.model, args.geometry,
+        environment = (importlib.import_module(prefix+'.backends.isaac.direct_env').DirectLocomotionEnv
+                       if args.backend == 'direct' else native.LocomotionEnv)
+        env = environment(cfg, args.asset, args.model, args.geometry,
             args.output/'native', reference_metadata=metadata)
         if args.mode == 'evaluate':
             prepare_policy_scene(env)
@@ -386,6 +398,16 @@ def main(argv=None):
             if collision is not None:
                 collision.inner = loads
             env.capture = loads if collision is None else collision
+            if args.bc_warmstart:
+                from locomotion.learning.bc import run_bc
+                def bc_deadline():
+                    if time.monotonic()-started >= args.max_wall_seconds:
+                        raise TimeoutError('BC allocation exceeded its deadline')
+                state['bc'] = run_bc(runner, wrapped, check_deadline=bc_deadline)
+                identity['bc'] = state['bc']
+                save(args.output/'bc.json', state['bc'])
+                save(args.output/'bc_force_metrics.json', loads.report())
+                checkpoint(0)
             original_log = runner.logger.log
             def log(**values):
                 original_log(**values)

@@ -56,8 +56,14 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             action_noise_correlation=0., action_std_final=None, gait_clock=0, action_smoothing='none',
             velocity_noise=0., episode_seconds=20., reward_options='', reward_task='v4',
             video_case=None, extended_updates=False, action_std_decay_updates=None, steps_per_env=24,
-            allocation_profile='standard', max_wall_seconds=6200, root=ROOT):
+            allocation_profile='standard', max_wall_seconds=6200, backend='legacy', bc_warmstart=False, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
+    if backend not in ('legacy', 'direct') or (backend == 'direct' and mode not in ('diagnostic', 'train', 'evaluate', 'probe')):
+        raise ValueError('Direct backend supports diagnostic, train, evaluate and probe modes')
+    if type(bc_warmstart) is not bool or (bc_warmstart and (
+            mode != 'train' or backend != 'direct' or learner != 'ppo'
+            or reward_version not in ('1', '2', '3') or not 10 <= gait_clock <= 250)):
+        raise ValueError('BC warmstart requires Direct PPO training, reward 1-3 and a gait clock of 10-250 controls')
     validate_deadline(mode, allocation_profile, max_wall_seconds)
     if type(max_wall_seconds) is not int:
         raise ValueError('Preparation requires an integer native deadline')
@@ -175,7 +181,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
     save(source/'FREEZE_SHA256.json', {p.relative_to(source).as_posix(): sha(p)
         for p in sorted(source.rglob('*')) if p.is_file()})
     freeze = sha(source/'FREEZE_SHA256.json')
-    binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': True,
+    binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': backend == 'legacy',
         'module': ('locomotion.priors.replay_native' if mode == 'replay' else
                    'locomotion.evaluation.tripod_evaluate' if mode == 'tripod' else
                    'locomotion.evaluation.throughput' if mode == 'throughput' else 'locomotion.runs.train'),
@@ -192,6 +198,10 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
             '--stance', '/prior/'+Path(declared['stance']).name,
             '--num-envs', str(num_envs), '--source-freeze-sha256', freeze,
             '--max-wall-seconds', str(max_wall_seconds), '--headless', '--device', 'cuda:0']}
+    if backend != 'legacy':
+        binding['command_args'] += ['--backend', backend]
+    if bc_warmstart:
+        binding['command_args'] += ['--bc-warmstart']
     if allocation_profile != 'standard':
         binding['command_args'] += ['--allocation-profile', allocation_profile]
     if mode != 'diagnostic':
@@ -246,7 +256,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
                                     '--checkpoint-compatibility-sha256', checkpoint_compatibility_sha256]
     save(output/'binding.json', binding)
     save(output/'PACK.json', {'remote_root': str(remote_root), 'source_freeze_sha256': freeze,
-        'binding_sha256': sha(output/'binding.json'), 'mode': mode, 'seed': seed, 'reward_version': reward_version,
+        'binding_sha256': sha(output/'binding.json'), 'backend': backend, 'mode': mode, 'seed': seed, 'reward_version': reward_version,
         'learner': learner, 'networks': networks, 'action_mean': action_mean,
         'observation_normalization': observation_normalization, **selected_options,
         **({} if video_case is None else {'video_case': video_case}),
@@ -254,6 +264,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, warmup_updates=No
         **({} if not reward_options else {'reward_options': reward_options}),
         **({} if reward_task == 'v4' else {'reward_task': reward_task}),
         **({'extended_updates': True} if extended_updates else {}),
+        **({'bc_warmstart': True} if bc_warmstart else {}),
         'allocation_profile': allocation_profile, 'max_wall_seconds': max_wall_seconds,
         'updates': updates, 'stage2_complete': False, 'files': {
             p.relative_to(output).as_posix(): sha(p) for p in sorted(output.rglob('*')) if p.is_file()}})
@@ -266,6 +277,8 @@ def main():
     parser.add_argument('--remote-root', required=True)
     parser.add_argument('--inputs', type=Path)
     parser.add_argument('--mode', choices=('diagnostic', 'train', 'evaluate', 'tripod', 'throughput', 'probe'), required=True)
+    parser.add_argument('--backend', choices=('legacy', 'direct'), default='legacy')
+    parser.add_argument('--bc-warmstart', action='store_true', help='Clone the scripted teacher before PPO on the Direct candidate.')
     parser.add_argument('--num-envs', type=int)
     parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
     parser.add_argument('--updates', type=int, default=512)

@@ -139,6 +139,13 @@ def verify(binding, own):
     guard.require(binding['command_args'] and all(isinstance(x,str) for x in binding['command_args']),
                   'Exact native arguments required')
     argv=binding['command_args']
+    guard.require(not any(x.startswith('--backend=') for x in argv), 'Use an explicit backend argument')
+    if '--backend' in argv:
+        guard.require(argv.count('--backend') == 1, 'One native backend argument required')
+        index = argv.index('--backend')
+        guard.require(index+1 < len(argv) and argv[index+1] in ('legacy', 'direct'), 'Unknown native backend')
+        guard.require(binding['module'] == 'locomotion.runs.train' and binding['mode'] in
+                      ('diagnostic', 'train', 'evaluate', 'probe'), 'Backend selection requires the training entry point')
     if profile != 'standard' or 'max_wall_seconds' in binding:
         seconds = binding.get('max_wall_seconds')
         validate_deadline(binding['mode'], profile, seconds)

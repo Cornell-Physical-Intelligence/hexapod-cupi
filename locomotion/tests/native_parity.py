@@ -42,7 +42,12 @@ def replay():
         raise ValueError('Parity requires all 13 c48_long probes with the retained seed')
     checkpoint = Path(option('--checkpoint'))
     verify_weights(checkpoint)
-    proof()
+    declaration = proof()
+    backend = option('--backend') if '--backend' in args else 'legacy'
+    if backend != declaration.get('backend', 'legacy'):
+        raise ValueError('Parity backend differs from its source declaration')
+    if backend == 'direct' and declaration['role'] != 'candidate':
+        raise ValueError('Direct parity requires a candidate source declaration')
     from locomotion.runs.compat import require_configuration
     keys = tuple(key for key in release.COMPATIBILITY_KEYS if key not in SOURCE_KEYS)
     def compare_weight_abi(record, identity):

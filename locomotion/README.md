@@ -102,31 +102,34 @@ The pre-update values expose policy changes during collection, including
 normalization drift. The post-update values measure the net change from the
 stored behavior policy; they are not the optimizer's minibatch KL averages.
 
-## Manager-based environment style
+## Direct environment candidate
 
-Use this style for the planned manager-based migration. The current runtime
-and its acceptance contracts remain in force until a replacement passes review.
-Follow Isaac Lab's [manager-based RL tutorial](https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_manager_rl_env.html).
+Use the stock `DirectRLEnv` workflow for this migration. Follow
+[Isaac Lab's Direct tutorial](https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_direct_rl_env.html)
+and Shaurya's [source structure](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/tree/969ea5bc942df3122b2662650f29acd11644a41c/hexapod).
+The runtime pins Isaac Lab 3.0.0 at `ffff603e` with Isaac Sim 6.
 
-- Configure `ManagerBasedRLEnv` with `@configclass` and named manager terms.
-  Let Isaac Lab own scene cloning and the step/reset loop.
-- Keep the task configuration in `tasks/velocity/`, robot and actuator code in
-  `backends/isaac/`, and BC/PPO configuration in `learning/`. Keep root files sparse.
-- Reference stock MDP terms through `mdp`. Add a local term for a documented
-  difference in behavior; put its units and tensor shape in its docstring.
-- Use functions for stateless terms. Use `ManagerTermBase` or the matching
-  action/command base for state, with a reset that touches the selected rows.
-- Keep defaults in one config. Derive play settings from it. Add terrain or
-  learner variants when a named experiment needs them.
-- Apply the target limiter once per control through an action term. Apply the
-  motor curve each physics step through an explicit actuator. Preserve approved
-  arithmetic and separate changes to physical behavior from framework wiring.
-- Declare observation order and frames. Keep privileged velocity in the critic
-  for the current contract. Let the reward manager apply `dt` once; test history
-  updates and terminal observations at reset boundaries.
-- Use stock RSL-RL through the guarded run entry. Keep admission and source
-  identity in `runs/`, and retain the scorer and contact/torque capture in
-  `evaluation/`. Record the Isaac Lab revision and resolved task configuration.
+Keep scene configuration and the explicit motor in `backends/isaac/`. Use stock
+scene cloning and physics stepping. Retain the current task/reward interface
+and `learning/ppo.py`; keep BC in `learning/bc.py`. Reuse `evaluation/` for
+capture and scoring. Add custom code for a named behavior that stock code lacks.
+
+Preserve observation order, frame history and selected-row resets. Apply the
+0.040 rad target limiter at 50 Hz and the approved torque curve at 400 Hz.
+Keep terminal observations available until the task and learner finish their
+reward and timeout calculations. Change geometry and physics in separate work.
+
+Select the candidate with `prepare --backend direct`. The default retains the
+admitted backend. Candidate packs set `root_review_complete=False`; the launcher
+rejects them until you authorize full review and the review clears the binding.
+Use fresh standing admission and the existing unchanged-weight replay gates
+before replacing the admitted backend. CPU checks establish no native parity.
+
+For a separate BC experiment, add `--bc-warmstart --gait-clock 40` to Direct PPO
+training with reward version 1, 2 or 3. The shared actor clones a scripted
+forward/backward teacher, then PPO trains with the original command bank.
+The run saves its BC configuration and a checkpoint at update zero. Sideways
+motion and turning require their own evaluation; BC supplies no acceptance claim.
 
 ## Run and verify
 
