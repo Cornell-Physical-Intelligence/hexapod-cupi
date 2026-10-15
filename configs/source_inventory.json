@@ -49,14 +49,14 @@
       "previous_path": "locomotion/tools/__init__.py",
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Expose the frozen scorer through the existing evaluation import."
+      "purpose": "Describe the evaluation package and expose the scorer names at package level."
     },
     {
       "path": "locomotion/evaluation/admission.py",
       "previous_path": "locomotion/tools/admission.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Check the native scene and bind a run to its model and recorded native standing checks."
+      "purpose": "Check the native scene, recompute standing admission and bind a run to its model and recorded standing checks."
     },
     {
       "path": "locomotion/evaluation/camera.py",
@@ -147,14 +147,14 @@
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Declare the learner configuration package of the omni task."
+      "purpose": "Hold the learner configuration and the named training recipes of the omni task."
     },
     {
       "path": "locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
       "previous_path": "locomotion/omniwalk/ppo_cfg.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Build the RSL-RL learner configuration without importing Torch and name the admitted c48_long recipe."
+      "purpose": "Build the RSL-RL learner configuration without importing Torch and name the admitted c48_long recipe, the default of the native scripts."
     },
     {
       "path": "locomotion/omniwalk/env.py",
@@ -203,7 +203,7 @@
       "previous_path": "locomotion/priors/features.py",
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Build policy observations from measured state."
+      "purpose": "Build the 42-value proprioception frame, the 231-value actor observation and the 234-value critic observation."
     },
     {
       "path": "locomotion/omniwalk/mdp/rewards.py",
@@ -298,14 +298,14 @@
       "previous_path": "locomotion/gait_clock/ppo.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Extend stock RSL-RL PPO with command bootstraps, a rate cap, bounded means and a deviation schedule."
+      "purpose": "Extend stock RSL-RL PPO with command bootstraps, a rate cap, bounded means and a deviation schedule, and load a recorded actor."
     },
     {
       "path": "locomotion/rl/wrapper.py",
       "previous_path": "locomotion/omni/ppo.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Wrap the walking task as an RSL-RL vector environment with input scales and a gait clock."
+      "purpose": "Wrap the walking task as an RSL-RL vector environment with fixed input scales, the gait clock, action smoothing, velocity noise and command segments."
     },
     {
       "path": "locomotion/robots/__init__.py",
@@ -333,7 +333,7 @@
       "previous_path": "locomotion/omniwalk/mdp/motor.py",
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Compute RS05 motor forces under the speed-dependent torque curve."
+      "purpose": "Hold the RS05 PD stiffness and rated torque and compute motor forces under the speed-dependent torque curve."
     },
     {
       "path": "locomotion/scripts/__init__.py",
@@ -347,7 +347,7 @@
       "previous_path": "locomotion/scripts/train.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Share the arguments, validation, identity binding and run lifecycle of the native locomotion scripts."
+      "purpose": "Share the arguments, validation, identity binding, Isaac launch and run lifecycle of the native locomotion scripts."
     },
     {
       "path": "locomotion/scripts/diagnose.py",
@@ -396,7 +396,7 @@
       "previous_path": "locomotion/tools/prepare.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Copy a named kernel and explicit inputs into a fresh native allocation."
+      "purpose": "Write a fresh native allocation pack with frozen sources, explicit inputs and a binding that names the script of its mode."
     },
     {
       "path": "locomotion/spark/safety.py",
@@ -410,14 +410,14 @@
       "previous_path": "locomotion/tools/sources.py",
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Hash the runtime sources and the physics import closure of the environment, standing capture and scorer."
+      "purpose": "Hash the runtime sources and the physics import closure of the environment, its scene checks, the standing capture and the scorer."
     },
     {
       "path": "locomotion/spark/validation.py",
       "previous_path": "locomotion/tools/validation.py",
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Keep allocation bounds and completed-update behavior shared across entry points."
+      "purpose": "Share allocation bounds, completed-update behavior, the script of each mode and learner-option resolution across the scripts and pack preparation."
     },
     {
       "path": "locomotion/surrogate/__init__.py",

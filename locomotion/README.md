@@ -1,6 +1,6 @@
 # Locomotion
 
-You can run two Isaac Lab Direct experiments on one robot; compare each under
+You run two Isaac Lab Direct experiments on one robot; compare each under
 its own settings. [TRAINING](../docs/TRAINING.md) defines the goal and
 acceptance, and the
 [code map](https://cornell-physical-intelligence.github.io/hexapod-cupi/code/)
@@ -8,32 +8,33 @@ shows definitions and imports.
 
 | Package | Purpose | Start here |
 | --- | --- | --- |
-| `omniwalk/` | Omnidirectional walking task and PPO. | `env.py`, `task.py` |
-| `tripod/` | Original tripod task with BC and PPO fine-tuning. | `hexapod_env.py` |
-| `priors/` | Motion demonstrations and AMP learning. | [README](priors/README.md) |
-| `surrogate/` | CPU MuJoCo training and trace replay. | [README](surrogate/README.md) |
-| `evaluation/` | Native capture, scene checks, checkpoint identity, motion scoring, task metrics and PPO diagnostics. | `runner.py` |
+| `robots/` | Robot identity, RS05 motor model and Isaac actuator. | `hexapod.py` |
+| `omniwalk/` | Omnidirectional walking task, Direct environment and learner recipe. | `env.py`, `task.py` |
+| `rl/` | RSL-RL wrapper, PPO subclasses and action distributions. | `wrapper.py` |
+| `scripts/` | Container entry points: train, play and diagnose. | `train.py` |
+| `evaluation/` | Native capture, scene checks, admission, scoring and training diagnostics. | `runner.py` |
 | `spark/` | Prepare, launch and bind native allocations. | `prepare.py` |
+| `priors/` | Motion demonstrations, motion features and AMP learning. | [README](priors/README.md) |
+| `surrogate/` | CPU MuJoCo training and trace replay. | [README](surrogate/README.md) |
+| `tripod/` | Original tripod task with BC and PPO fine-tuning. | `hexapod_env.py` |
 | `tests/` | CPU, parity and native replay tests. | [Verification](#verification) |
 
-## Omni files
+## Omniwalk files
 
-- `robot.py`: joint names, body names, asset hashes and damping.
-- `rs05.py`: PD torque curve, in `robots/`.
-- `actions.py`: slew limiter and executed-action feature.
-- `actuator.py`: Isaac actuator for that curve.
-- `frames.py`: quaternion and navigation frames.
-- `env_cfg.py`: `EnvConfig` and `DirectRLEnvCfg` factory.
-- `isaac.py`: `IsaacEnv`, its scene, views, layout guards, capture and resets.
-- `env.py`: `OmniEnv`, the task-facing surface.
-- `observations.py`: policy observations; `priors/features.py` packs the motion features.
-- `commands.py`: command bank and gait-clock period.
-- `reward.py`: recorded yaw-gated reward.
-- `task.py`: `TrainingTask` for command holds, reward memory, resets and an optional metrics observer.
-- `wrapper.py`: `OmniVecEnv` with input scales, gait clock, smoothing and noise.
-- `agents/rsl_rl_ppo_cfg.py`: Torch-free learner configuration and the `c48_long` recipe.
-- `ppo.py`: PPO subclasses, distributions and deviation schedule.
-- `train.py`: entry point, one function per mode.
+- `env.py`: `IsaacEnv`: scene, views, layout guards, substep capture, telemetry and stock reset hooks.
+- `adapter.py`: `OmniEnv`, the task-facing surface.
+- `env_cfg.py`: `EnvConfig` and the `DirectRLEnvCfg` factory.
+- `task.py`: `TrainingTask`: command holds, reward memory, selected resets and an observer hook.
+- `mdp/actions.py`: slew limiter and executed-action feature.
+- `mdp/frames.py`: quaternion and navigation frames.
+- `mdp/observations.py`: proprioception frame and 231-value actor input.
+- `mdp/commands.py`: command bank and gait-clock period.
+- `mdp/rewards.py`: recorded yaw-gated reward.
+- `agents/rsl_rl_ppo_cfg.py`: Torch-free `ppo_config` and the default `RECIPES['c48_long']`.
+
+The layout mirrors Isaac Lab: `robots/` is `isaaclab_assets`, `omniwalk/` a
+`tasks/direct/<task>` package with `agents/`, `rl/` is `isaaclab_rl` and `scripts/`
+is `scripts/reinforcement_learning/rsl_rl/`, with `cli.py` as `cli_args.py`.
 
 ## Experiment contracts
 
@@ -49,44 +50,44 @@ Both use 400 Hz physics with eight substeps; keep their checkpoints separate.
 
 ## Stock code and custom code
 
-`IsaacEnv` in `isaac.py` is the omni task's one `DirectRLEnv` subclass. It uses
-`InteractiveScene` for clones and collision filtering. `OmniEnv` wraps it for
-the task, wrapper and evaluation; the MuJoCo surrogate implements the same
-surface. Pin RSL-RL 5.0.1 and Isaac Lab `ffff603e`, and follow the
-[Direct tutorial](https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_direct_rl_env.html).
+On `IsaacEnv`, the one `DirectRLEnv` subclass, `step`, `reset` and `cfg` keep
+their stock meaning. Callers need a selected-row reset, a dictionary step and
+`EnvConfig` as `cfg`. `OmniEnv` supplies that surface, and so does the MuJoCo
+surrogate.
 
-Keep custom code for a named contract, such as the motor curve or per-substep
-capture. `IsaacEnv` keeps one raw PhysX contact view because the stock sensor
-averages the patches that tell toe from shaft contact. State reads use raw PhysX
-views until native parity on Spark admits `robot.data`. Keep the check in
-`evaluation/camera.py` that rendering leaves physics state unchanged.
+Pin RSL-RL 5.0.1 and Isaac Lab `ffff603e`, and follow the
+[Direct tutorial](https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_direct_rl_env.html).
+Keep custom code for a named contract. The stock contact sensor averages the
+patches that tell toe from shaft contact, so `IsaacEnv` keeps one raw PhysX
+contact view. State reads use raw PhysX views until native parity admits
+`robot.data`.
 
 ## Import direction
 
-Reviewers enforce this rule: "`evaluation` → `omniwalk`; `spark` → `omniwalk`; `priors`
-→ `omniwalk`, and `priors` → `evaluation`/`spark` from its command modules
-(`dataset.py`, `prepare.py`, `replay_native.py`); `surrogate` → `omniwalk`,
-`evaluation`, `spark`, `priors`; `omniwalk` imports the other packages only from
-`train.py`. No package imports `tripod`." A grep for `from locomotion.spark` or
-`from locomotion.evaluation` inside `omniwalk/` other than `train.py` is a review
-failure.
+Reviewers enforce the AST import audit: "`omniwalk -> [robots]`;
+`evaluation -> [omniwalk, robots]`; `spark -> [omniwalk, robots]`; `rl -> []`;
+`priors -> [evaluation, omniwalk, rl, robots, spark]`;
+`scripts -> [evaluation, omniwalk, priors, rl, robots, spark]`;
+`surrogate -> [evaluation, omniwalk, priors, rl, robots, scripts, spark]`;
+no cycles." `robots` imports no package, and no package imports `tripod`. A new
+edge is a review failure.
 
 ## Commands
 
 ```sh
-uv run python -m unittest discover -s locomotion/tests
 uv run python -m locomotion.spark.prepare --help
 uv run python -m locomotion.scripts.train --help
 uv run python -m locomotion.scripts.play --help
 uv run python -m locomotion.scripts.diagnose --help
 uv run python -m locomotion.evaluation.admission --help
+uv run python -m locomotion.surrogate.train --help
 ```
 
-PPO training and evaluation start from `--recipe c48_long`, the admitted
-checkpoint's options in `omniwalk/agents/rsl_rl_ppo_cfg.py`; `test_recipe.py`
-checks them against its receipt. Option flags replace recipe values, and
-`--recipe none` keeps the option defaults. `--learner amp` adds the motion prior;
-`--networks paper` selects paper networks without a gait clock.
+`prepare --mode` picks the script a pack runs (`ENTRY_POINTS` in
+`spark/validation.py`). The default command line reproduces the recorded
+configuration of the `c48_long` checkpoint. Option flags replace recipe values,
+and `--recipe none` keeps the plain defaults. `test_recipe.py` proves the
+recipe against the checkpoint's compatibility receipt.
 
 For tripod, put this repository on `PYTHONPATH` in the pinned Isaac Lab
 checkout. Use stock train/play scripts with callback
@@ -94,26 +95,25 @@ checkout. Use stock train/play scripts with callback
 `Hexapod-Rough-Direct-v0`. Run BC with
 `./isaaclab.sh -p -m locomotion.tripod.tools.bc_clone` and the
 [original recipe](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/969ea5bc942df3122b2662650f29acd11644a41c/hexapod/METHOD.md#3-how-to-reproduce-inside-the-container)
-overrides. Its speed diagnostic keeps the reset-time direction; use the common
-evaluator for acceptance.
+overrides. Use the common evaluator for acceptance.
 
 ## Verification
 
 Keep the numeric oracles in `tests/fixtures/baseline/` and the gates intact.
 `test_frozen_baseline_parity.py` and `test_recorded_trace.py` check frozen
 arithmetic and a recorded native trace. `test_direct_environment.py` guards the
-stock lifecycle; `test_dependency_identity.py` checks the physics closure.
-`test_motor_force.py`, `test_wrapper.py`, `test_guarded_paths.py`,
-`test_pack_binding.py`, `test_tripod_environment.py` and `test_tripod_bc.py`
+stock lifecycle; `test_dependency_identity.py` checks the physics closure and
+the shared entry hash. `test_motor_force.py`, `test_wrapper.py`,
+`test_pack_binding.py`, `test_launch.py` and `test_tripod_*.py`
 cover motors, transitions, packs and tripod sources.
 
 ## Native admission
 
-The physics identity hashes the import closure of `omniwalk/adapter.py`,
-`omniwalk/env_cfg.py`, `omniwalk/env.py`, `evaluation/capture.py` and
-`evaluation/scoring.py`. The refactor changed that closure; no native run has
-used it. Any new result needs fresh standing admission at one robot and batch
-size. The unchanged `c48_long` checkpoint must then pass its 13 probes with
-torque and contact inside three-baseline ranges (`tests/native_parity.py`,
-`tests/native_ranges.py`). Stage 2 also requires the 96-case suite and visual
-acceptance. Preserve checkpoint and evidence bytes.
+The physics identity hashes the import closure of `adapter.py`, `env_cfg.py`
+and `env.py` in `omniwalk/`, with `admission.py`, `capture.py` and `scoring.py`
+in `evaluation/`. The new layout changed those identities; no native run has
+used them. Any result first needs fresh standing admission at one robot and
+batch size. The unchanged `c48_long` checkpoint must then pass its 13 probes
+through its compatibility receipt, with torque and contact inside
+three-baseline ranges (`tests/native_parity.py`, `tests/native_ranges.py`).
+Stage 2 adds the 96-case suite and visual acceptance.

@@ -1,6 +1,6 @@
 # CPU surrogate
 
-You can run the omni task on MuJoCo 3.14.0 for CPU diagnostics.
+You run the omni task on MuJoCo 3.14.0 for CPU diagnostics.
 The surrogate shares control arithmetic, task rewards and stock RSL-RL PPO with
 the native experiment. You use native Isaac runs for acceptance.
 
@@ -21,11 +21,11 @@ uv run python -m locomotion.surrogate.replay --help
 uv run python -m unittest discover -s locomotion/surrogate/tests
 ```
 
-You keep output directories outside the source checkout. The trainer defaults to
+Keep output directories outside the source checkout. The trainer defaults to
 task `locomotion.omniwalk.task:TrainingTask` and wrapper
 `locomotion.rl.wrapper:OmniVecEnv` with the 60-control gait clock. Its learner
-options include fixed observation scaling, command-boundary bootstrap and action
-smoothing.
+flags start from the plain `ppo_config` defaults. To match the `c48_long`
+checkpoint, pass its recipe values as flags and `--ppo-config-overrides`.
 `--resume` checks checkpoint bytes, the paired record and source/configuration
 identity. The update count and deviation schedule continue; simulator state and
 random generators restart from the recorded seed.
@@ -38,7 +38,7 @@ agreement grants no native acceptance.
 `replay score --telemetry ... --rewards v4_yaw_gate --output ...` runs
 `locomotion.omniwalk.task:TrainingTask` against recorded telemetry, including its
 reward memory. You can supply a `module:Class` task or a `module:function` reward
-for a comparison. The replay command accepts recorded policy actions or motor
+to compare. The replay command accepts recorded policy actions or motor
 targets.
 
 ## Limits and retained evidence
@@ -52,6 +52,6 @@ captures. Native source packs exclude this package and its MuJoCo dependency.
 `provenance.json` and `records/` retain the historical calibration identities
 and results. Those records used their recorded reward versions and sources.
 Git revision `077b98b1` retains the calibration and machine self-check commands;
-the current package omits those commands because they depend on retired reward
-implementations and native extract formats. Current tests retain control gates,
-exercise stock PPO updates/resume and compare live versus replay reward values.
+they depend on retired reward implementations and native extract formats.
+Current tests retain control gates, exercise stock PPO updates/resume and
+compare live versus replay reward values.

@@ -166,14 +166,14 @@ PAGE = r'''<!doctype html>
 </main>
 <script>const DATA=__DATA__;
 const PACKAGES=[
-['omniwalk','omniwalk','Omnidirectional walking task and PPO.'],
+['omniwalk','omniwalk','Omnidirectional walking task, Direct environment and learner recipe.'],
 ['tripod','tripod','Original tripod task with BC and PPO fine-tuning.'],
-['priors','priors','Motion demonstrations and AMP learning.'],
+['priors','priors','Motion demonstrations, motion features and AMP learning.'],
 ['surrogate','surrogate','CPU MuJoCo training and trace replay.'],
-['evaluation','evaluation','Native capture, checkpoint identity and motion scoring.'],
-['robots','robots','Robot identity and the explicit RS05 actuator.'],
-['rl','rl','RSL-RL wrapper, PPO subclasses and distributions.'],
-['scripts','scripts','Container entry points for training, evaluation and diagnostics.'],
+['evaluation','evaluation','Native capture, scene checks, admission, scoring and training diagnostics.'],
+['robots','robots','Robot identity, RS05 motor model and Isaac actuator.'],
+['rl','rl','RSL-RL wrapper, PPO subclasses and action distributions.'],
+['scripts','scripts','Container entry points: train, play and diagnose.'],
 ['spark','spark','Prepare, launch and bind native allocations.'],
 ['package','Locomotion','Package initialization.'],
 ['tests','tests','CPU, parity and native replay tests.']
