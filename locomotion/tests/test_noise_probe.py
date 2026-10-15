@@ -10,7 +10,7 @@ import torch
 
 from locomotion.evaluation import noise_probe as noise_probe
 from locomotion.runs.prepare import prepare
-from locomotion.tests.test_task_v2 import RewardDouble
+from locomotion.tests.task_double import RewardDouble
 
 REMOTE = '/srv/cupi/hexapod/runs/james/noise_probe_fixture'
 
@@ -125,7 +125,7 @@ class NoiseProbeTests(unittest.TestCase):
             self.assertEqual(args[args.index('--seed')+1], '7')
             self.assertNotIn('--updates', args)
             self.assertIn('locomotion/evaluation/noise_probe.py', json.loads((Path(directory)/'probe/source/FREEZE_SHA256.json').read_text()))
-            for index, bad in enumerate((dict(num_envs=32), dict(reward_version='4'), dict(action_mean='tanh'),
+            for index, bad in enumerate((dict(num_envs=32), dict(action_mean='tanh'),
                                          dict(observation_scaling='fixed'))):
                 with self.subTest(bad=bad), self.assertRaises(ValueError):
                     prepare(Path(directory)/f'bad{index}', REMOTE, mode='probe', **bad)

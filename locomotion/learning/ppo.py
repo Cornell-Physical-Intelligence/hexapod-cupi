@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+import copy
 import torch
 
 # Fixed input scales, selected with observation_scaling='fixed'. Each proprioception frame holds
@@ -48,6 +49,21 @@ def smoothed_action(action, previous, episode_steps):
 
 
 from .config import ppo_config, RATE_CLASS, SEGMENT_CLASS
+
+
+def load_actor(checkpoint, config, observations, device):
+    """Load the recorded stock actor without constructing a learner."""
+    from rsl_rl.utils import resolve_callable
+
+    settings = copy.deepcopy(config['actor'])
+    model = resolve_callable(settings.pop('class_name'))
+    target = torch.device(device)
+    devices = [target.index if target.index is not None else torch.cuda.current_device()] if target.type == 'cuda' else []
+    with torch.random.fork_rng(devices=devices):
+        actor = model(observations, config['obs_groups'], 'actor', 18, **settings).to(device)
+    actor.load_state_dict(checkpoint['actor_state_dict'], strict=True)
+    actor.eval()
+    return actor, checkpoint.get('infos')
 
 
 def policy_change_metrics(actor, storage, clip_param):

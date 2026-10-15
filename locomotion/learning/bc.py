@@ -6,6 +6,7 @@ This experiment supplies no omnidirectional walking or native acceptance evidenc
 from __future__ import annotations
 
 import math
+from dataclasses import replace
 import torch
 
 from locomotion.backends.isaac.config import JOINT_NAMES, LEGS
@@ -101,8 +102,11 @@ def run_bc(runner, env, *, steps=600, epochs=30, dagger_rounds=2, noise=.05, lea
     actor = runner.alg.actor
     initial_training = actor.training
     original_bank = env.task.bank
+    original_reward = getattr(env.task, 'reward_config', None)
     env.task.bank = original_bank.new_tensor([[.05, 0., 0.], [-.05, 0., 0.], [0., 0., 0.]])
     try:
+        if original_reward is not None and hasattr(original_reward, 'turn_draw_fraction'):
+            env.task.reward_config = replace(original_reward, turn_draw_fraction=0.)
         actor.eval()
         observations, labels = collect(env, actor, teacher, steps, noise, check_deadline=check_deadline)
         losses = [fit(actor, observations, labels, epochs, learning_rate, check_deadline)]
@@ -114,6 +118,8 @@ def run_bc(runner, env, *, steps=600, epochs=30, dagger_rounds=2, noise=.05, lea
     finally:
         actor.train(initial_training)
         env.task.bank = original_bank
+        if original_reward is not None:
+            env.task.reward_config = original_reward
         env.current = env.task.reset()
         env.previous_action.zero_()
     reset_ppo_optimizer(runner)

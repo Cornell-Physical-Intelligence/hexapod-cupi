@@ -31,7 +31,7 @@ full-body hardware trials.
 | Actions | Joint-position offsets, baseline scale 0.35 rad; retain the 0.040 rad per 20 ms target-change limit for comparisons. |
 | Motors | Named damping and the approved speed-dependent effort curve; provisional 1.6 N·m software cap. |
 | Observations | Baseline actor: 231 values from five proprioception frames, velocity command and executed action. Critic: 234 values with measured velocity. Record optional inputs, including gait-clock values, in the task configuration. |
-| Learning | RSL-RL PPO with versioned rewards. Record learner options and reward version with each result. |
+| Learning | RSL-RL PPO with the c48_long reward configuration. Record learner options and exact reward coefficients with each result. |
 | Admission | Native standing passes at one robot and the intended batch size, matching the source and model/input identities. |
 
 You can change the implementation through reviewed experiments. Give changed

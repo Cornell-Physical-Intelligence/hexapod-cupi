@@ -13,7 +13,8 @@ import torch
 from tensordict import TensorDict
 
 from locomotion.tests.test_learner_options import CommandTask, construct
-from locomotion.tests.test_task_v4 import GaitDouble
+from locomotion.tests.task_double import GaitDouble
+from locomotion.tests.test_task import SPEC
 
 FIXTURE = Path(__file__).parent / 'fixtures/refactor_b2a6168c.tar.gz'
 FIXTURE_SHA = 'f0afe51e180bc1d5c5f6099b8225e77cd63afdbed78e4830dd837767ae43b6fc'
@@ -60,26 +61,24 @@ class RefactorParityTests(unittest.TestCase):
         else:
             self.assertEqual(actual, expected)
 
-    def test_reward_command_rng_and_selected_resets_match_all_versions(self):
-        for name, class_name in (('task', 'TrainingTask'), ('task_v2', 'TrainingTaskV2'),
-                                 ('task_v3', 'TrainingTaskV3'), ('task_v4', 'TrainingTaskV4'),
-                                 ('task_v4_yaw_gate', 'TrainingTaskV4YawGate')):
-            with self.subTest(task=name):
-                traces = []
-                for baseline in (True, False):
-                    task = getattr(self.module(name, baseline), class_name)(GaitDouble(3))
-                    task.reset()
-                    trace = []
-                    for step in range(12):
-                        task.remaining_controls[step % 3] = 1
-                        if step == 6:
-                            task.reset(torch.tensor([1]))
-                        output = task.step(torch.full((3, 18), step / 20.))
-                        trace.append(({key: value.clone() for key, value in output.items()},
-                                      task.rng.get_state().clone(), task.remaining_controls.clone(),
-                                      {key: value.clone() for key, value in task.last_components.items()}))
-                    traces.append(trace)
-                self.exact(traces[1], traces[0])
+    def test_active_reward_command_rng_and_selected_resets_match_frozen_c48(self):
+        traces = []
+        for baseline in (True, False):
+            module = self.module('task_v4_yaw_gate', True) if baseline else self.module('task')
+            task = (module.variant(SPEC)(GaitDouble(3), module.task_v4.TaskConfig(seed=20260917)) if baseline else
+                    module.TrainingTask(GaitDouble(3), module.TaskConfig(seed=20260917)))
+            task.reset()
+            trace = []
+            for step in range(12):
+                task.remaining_controls[step % 3] = 1
+                if step == 6:
+                    task.reset(torch.tensor([1]))
+                output = task.step(torch.full((3, 18), step / 20.))
+                trace.append(({key: value.clone() for key, value in output.items()},
+                              task.rng.get_state().clone(), task.remaining_controls.clone(),
+                              {key: value.clone() for key, value in task.last_components.items()}))
+            traces.append(trace)
+        self.exact(traces[1], traces[0])
 
     def test_adapter_noise_bootstrap_and_reset_rng_match(self):
         traces = []
@@ -113,11 +112,11 @@ class RefactorParityTests(unittest.TestCase):
                             algorithm.optimizer.state_dict(), loss, torch.get_rng_state()))
         self.exact(results[1], results[0])
 
-    def test_versioned_reward_and_scorer_bytes_match_the_frozen_main(self):
+    def test_historical_reward_archive_and_numerical_gate_bytes_remain_frozen(self):
         root = Path(__file__).resolve().parents[1]
         with tarfile.open(FIXTURE) as archive:
-            for name in ('task', 'task_v2', 'task_v3', 'task_v4', 'task_v4_yaw_gate'):
-                self.assertEqual((root/'tasks'/(name+'.py')).read_bytes(), archive.extractfile(name+'.py').read())
+            # The immutable archive holds retired reward source bytes.
+            self.assertEqual(hashlib.sha256(FIXTURE.read_bytes()).hexdigest(), FIXTURE_SHA)
             self.assertEqual((root/'evaluation/scoring.py').read_bytes(), archive.extractfile('evaluation.py').read())
 
 
@@ -126,7 +125,6 @@ class RefactorBoundaryTests(unittest.TestCase):
         for old, new, name in (
             ('env', 'backends.isaac.env', 'LocomotionEnv'),
             ('task', 'tasks.task', 'TrainingTask'),
-            ('task_v4_yaw_gate', 'tasks.task_v4_yaw_gate', 'TrainingTaskV4YawGate'),
             ('ppo', 'learning.ppo', 'VanillaVecEnv'),
             ('evaluate', 'evaluation.runner', 'ExactEvaluationCapture'),
             ('prepare', 'runs.prepare', 'prepare')):
@@ -143,7 +141,7 @@ class RefactorBoundaryTests(unittest.TestCase):
             source = output/'source'
             manifest = verify_runtime(source)
             self.assertEqual(manifest['schema'], 'hexapod_runtime_sources_v2')
-            for path in ('locomotion/core/motor.py', 'locomotion/tasks/task_v4_yaw_gate.py',
+            for path in ('locomotion/core/motor.py', 'locomotion/tasks/task.py',
                          'locomotion/backends/isaac/env.py', 'locomotion/learning/ppo.py'):
                 self.assertIn(path, manifest['files'])
             self.assertFalse(any('/tests/' in name for name in manifest['files']))

@@ -14,7 +14,7 @@ REPO = Path(__file__).resolve().parents[2]
 ASSET = REPO/'robot/hexapod_mkii_updated_v1/usd'
 MODEL = REPO/'robot/hexapod_mkii_updated_v1/model_rs05_mass_corrected.json'
 # The retained reward v4 full-command-bank learner options, as recorded in the reference packs.
-REFERENCE = dict(reward_version='4', action_mean='tanh', observation_normalization='none',
+REFERENCE = dict(action_mean='tanh', observation_normalization='none',
                  observation_scaling='fixed', command_segments='bootstrap', learning_rate_max=3e-4,
                  action_std_final=.05, gait_clock=60, action_smoothing='mean2', velocity_noise=.5)
 
@@ -132,7 +132,7 @@ class DecayLengthTests(unittest.TestCase):
             freeze = reference_args.index('--source-freeze-sha256')+1
             reference_args[freeze] = stripped[freeze]
             self.assertEqual(stripped, reference_args)
-            evaluation = {key: value for key, value in REFERENCE.items() if key != 'reward_version'}
+            evaluation = dict(REFERENCE)
             evaluated = prepare(root/'evaluate', REMOTE, mode='evaluate', updates=2000, action_std_decay_updates=2000,
                                 checkpoint=REMOTE+'/checkpoint.pt', checkpoint_sha='a'*64,
                                 checkpoint_declaration_sha='b'*64, **evaluation)['command_args']

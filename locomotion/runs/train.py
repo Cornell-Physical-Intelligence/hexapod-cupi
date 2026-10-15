@@ -65,7 +65,7 @@ def main(argv=None):
     parser.add_argument('--mode', choices=['diagnostic', 'train', 'evaluate', 'probe'], required=True)
     for name in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
-    parser.add_argument('--bc-warmstart', action='store_true', help='Clone the scripted teacher before PPO on the Direct candidate.')
+    parser.add_argument('--bc-warmstart', action='store_true', help='Clone the scripted teacher before PPO with the active walking task.')
     parser.add_argument('--standing-admission', type=Path)
     parser.add_argument('--source-freeze-sha256', required=True)
     parser.add_argument('--num-envs', type=int, choices=[1, 32, 128, 512, 1024], required=True,
@@ -85,12 +85,6 @@ def main(argv=None):
     parser.add_argument('--logger', choices=['tensorboard', 'wandb'], default='tensorboard')
     parser.add_argument('--wandb-project')
     parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
-    parser.add_argument('--reward-version', choices=['1', '2', '3', '4'], default='1',
-                        help='Training reward: historical v1, stride tracking v2, immediate tracking v3, '
-                             'or noise-calibrated stepping v4.')
-    parser.add_argument('--reward-task', choices=['v4', 'v4_yaw_gate'], default='v4',
-                        help='Reward version 4 task: v4, or the experimental yaw-gated schedule with turn-heavy '
-                             'sampling in task_v4_yaw_gate.py. Training only.')
     parser.add_argument('--action-mean', choices=['unbounded', 'tanh'], default='unbounded',
                         help='Use the historical Gaussian mean or bound the mean with tanh.')
     parser.add_argument('--observation-normalization', choices=['empirical', 'none'], default='empirical',
@@ -105,15 +99,12 @@ def main(argv=None):
                         help='Initial standard deviation of the Gaussian action distribution.')
     parser.add_argument('--episode-seconds', type=float, default=20.,
                         help='Training episode length; 20 s by default. Shorter episodes bound how far a robot walks.')
-    parser.add_argument('--reward-options', default='',
-                        help='Reward version 4 coefficient overrides as key=value pairs, for example '
-                             'forward_draw_fraction=0 for the full command bank. Training only.')
     parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none',
                         help='mean2 sends the mean of each action and the previous one to the environment.')
     parser.add_argument('--velocity-noise', type=float, default=0.,
                         help='Standard deviation in rad/s of Gaussian noise on the actor joint-velocity inputs in training.')
-    parser.add_argument('--gait-clock', type=int, default=0,
-                        help='Append the sine and cosine of a gait phase with this period in controls; 0 adds none.')
+    parser.add_argument('--gait-clock', type=int,
+                        help='Append gait phase with this period in controls; training defaults to 60, other modes to 0.')
     parser.add_argument('--action-std-final', type=float,
                         help='Lower the action deviation linearly to this value over the run; PPO then does not learn it.')
     parser.add_argument('--action-std-decay-updates', type=int,
@@ -132,9 +123,13 @@ def main(argv=None):
         from isaaclab.app import AppLauncher
         AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args(argv)
+    if args.gait_clock is None:
+        args.gait_clock = 60 if args.mode == 'train' else 0
     if args.bc_warmstart and (args.mode != 'train'
-            or args.reward_version not in ('1', '2', '3') or not 10 <= args.gait_clock <= 250):
-        raise ValueError('BC warmstart requires Direct PPO training, reward 1-3 and a gait clock of 10-250 controls')
+            or args.gait_clock != 60):
+        raise ValueError('BC warmstart requires PPO training and the 60-control gait clock')
+    if args.mode == 'train' and args.gait_clock != 60:
+        raise ValueError('The active reward requires the 60-control gait clock')
     compatibility = None
     if args.checkpoint_compatibility is not None or args.checkpoint_compatibility_sha256 is not None:
         if args.mode != 'evaluate' or args.eval_scope != 'probes' or args.num_envs != 1 or args.checkpoint_compatibility is None or args.checkpoint_compatibility_sha256 is None:
@@ -148,8 +143,6 @@ def main(argv=None):
                              'and WANDB_API_KEY when online')
     elif args.wandb_project is not None or args.wandb_mode != 'offline':
         raise ValueError('W&B options require --logger wandb')
-    if args.reward_version != '1' and args.mode != 'train':
-        raise ValueError('Reward version selection applies to training only')
     if args.action_mean != 'unbounded' and args.mode not in ('train', 'evaluate'):
         raise ValueError('Bounded action means apply to training and evaluation')
     if args.observation_normalization != 'empirical' and (args.mode not in ('train', 'evaluate')):
@@ -173,13 +166,6 @@ def main(argv=None):
         raise ValueError('A video case applies to a learning-probe evaluation')
     if args.episode_seconds != 20. and (args.mode != 'train' or not 5. <= args.episode_seconds <= 20.):
         raise ValueError('Episode length selection applies to training, between 5 and 20 seconds')
-    if args.reward_options and (args.mode != 'train' or args.reward_version != '4'):
-        raise ValueError('Reward options apply to reward version 4 training only')
-    if args.reward_task != 'v4' and (args.mode != 'train' or args.reward_version != '4'):
-        raise ValueError('The reward task selection applies to reward version 4 training only')
-    if args.reward_options:
-        # Rejects an unknown key or an invalid value before the GPU launch; the container preflight runs this.
-        importlib.import_module(prefix+'.tasks.task_'+args.reward_task).reward_config(args.reward_options)
     if args.action_std_decay_updates is not None and args.action_std_final is None:
         raise ValueError('The deviation decay length needs a final action deviation')
     validate_decay(args.mode, args.updates, args.action_std_decay_updates)
@@ -206,11 +192,7 @@ def main(argv=None):
         'config': cfg.declaration(), 'motion_prior': False, 'behavior_cloning': args.bc_warmstart,
         'seed': args.seed, 'rsl_rl_required_version': '5.0.1',
         'adapter_sha256': sha(source/'learning/ppo.py'), 'entry_sha256': sha(__file__),
-        'reward_version': args.reward_version, 'learner': 'ppo', 'networks': 'mlp'}
-    if args.reward_options:
-        identity['reward_options'] = args.reward_options
-    if args.reward_task != 'v4':
-        identity['reward_task'] = args.reward_task
+        'reward_version': '4', 'reward_task': 'v4_yaw_gate', 'learner': 'ppo', 'networks': 'mlp'}
     if args.extended_updates:
         # The exploration decay length enters ppo_config; the opt-in records the requested run length beside it.
         identity['training_updates'] = args.updates
@@ -239,6 +221,10 @@ def main(argv=None):
             compat.require_identity(compatibility, checkpoint_record, identity)
         # Evaluation computes no training reward; record the one the checkpoint learned from.
         identity['reward_version'] = checkpoint_reward_version(checkpoint_record)
+        for key in ('reward_task', 'reward_options'):
+            identity.pop(key, None)
+            if key in checkpoint_record['identity']:
+                identity[key] = checkpoint_record['identity'][key]
         identity['behavior_cloning'] = checkpoint_record['identity'].get('behavior_cloning', False)
         if 'bc' in checkpoint_record['identity']:
             identity['bc'] = checkpoint_record['identity']['bc']
@@ -272,7 +258,8 @@ def main(argv=None):
         import numpy as np
         vanilla = importlib.import_module(prefix+'.learning.ppo')
         native = importlib.import_module(prefix+'.backends.isaac.env')
-        task_module = importlib.import_module(prefix+'.tasks.task')
+        if args.mode in ('train', 'probe'):
+            task_module = importlib.import_module(prefix+'.tasks.task')
         torch.manual_seed(args.seed); np.random.seed(args.seed)
         env = native.LocomotionEnv(cfg, args.asset, args.model, args.geometry,
             args.output/'native', reference_metadata=metadata)
@@ -306,47 +293,13 @@ def main(argv=None):
             env.verify_native_recipe('after_controlled_steps')
             state['status'] = 'completed'
             return 0
-        from rsl_rl.runners import OnPolicyRunner
         from tensordict import TensorDict
         version = importlib.metadata.version('rsl-rl-lib')
         if version != '5.0.1':
             raise ValueError('RSL-RL version differs: '+version)
-        task_config = task_module.TaskConfig(seed=args.seed)
-        if args.reward_task == 'v4_yaw_gate':
-            module = importlib.import_module(prefix+'.tasks.task_v4_yaw_gate')
-            task_class = module.TrainingTaskV4YawGate
-            if args.reward_options:
-                task_class = module.variant(args.reward_options)
-            task = task_class(env, task_config, args.output/'task')
-        elif args.reward_version in ('2', '3', '4'):
-            module = importlib.import_module(prefix+'.tasks.task_v'+args.reward_version)
-            task_class = getattr(module, 'TrainingTaskV'+args.reward_version)
-            if args.reward_options:
-                task_class = module.variant(args.reward_options)
-            task = task_class(env, task_config, args.output/'task')
-        else:
-            task = task_module.TrainingTask(env, task_config, args.output/'task')
-        wrapped = vanilla.VanillaVecEnv(task, observation_scaling=args.observation_scaling,
-                                        command_segments=args.command_segments, gait_clock=args.gait_clock,
-                                        action_smoothing=args.action_smoothing,
-                                        velocity_noise=args.velocity_noise)
-        schedule_period = getattr(getattr(task, 'reward_config', None), 'schedule_period_controls', None)
-        if getattr(getattr(task, 'reward_config', None), 'schedule_weight', 0) and args.gait_clock != schedule_period:
-            raise ValueError('The contact-schedule reward needs a gait clock of the same period')
         config = vanilla.ppo_config(args.seed, action_mean=args.action_mean,
                                     observation_normalization=args.observation_normalization, **learner_options)
         save(args.output/'ppo_config.json', config)
-        runner_config = copy.deepcopy(config)
-        # The wrapper consumes its own options; the runner receives the stock keys.
-        runner_config.pop('environment_wrapper', None)
-        runner_config.pop('exploration', None)
-        if args.logger == 'wandb':
-            # The logger choice stays out of ppo_config, which checkpoint loading compares.
-            # Copy saved checkpoints: container paths do not exist where offline runs sync.
-            os.environ.update(WANDB_DIR=str(args.output), WANDB_MODE=args.wandb_mode, WANDB_SYMLINK='false')
-            runner_config.update(logger='wandb', wandb_project=args.wandb_project)
-            wrapped.cfg = ConfigRecord(wrapped.cfg)
-        runner = OnPolicyRunner(wrapped, runner_config, str(args.output/'learner'), device=args.device)
         import rsl_rl
         upstream = Path(rsl_rl.__file__).parent
         identity['upstream_source_files'] = {name: sha(upstream/name) for name in (
@@ -354,6 +307,24 @@ def main(argv=None):
         identity['ppo_config'] = config
         state['status'] = 'running'; save(args.output/'state.json', state)
         if args.mode == 'train':
+            from rsl_rl.runners import OnPolicyRunner
+            task = task_module.TrainingTask(env, task_module.TaskConfig(seed=args.seed), args.output/'task')
+            wrapped = vanilla.VanillaVecEnv(task, observation_scaling=args.observation_scaling,
+                command_segments=args.command_segments, gait_clock=args.gait_clock,
+                action_smoothing=args.action_smoothing, velocity_noise=args.velocity_noise)
+            if args.gait_clock != task.reward_config.schedule_period_controls:
+                raise ValueError('The contact-schedule reward needs a gait clock of the same period')
+            runner_config = copy.deepcopy(config)
+            # The wrapper consumes its own options; the runner receives the stock keys.
+            runner_config.pop('environment_wrapper', None)
+            runner_config.pop('exploration', None)
+            if args.logger == 'wandb':
+                # The logger choice stays out of ppo_config, which checkpoint loading compares.
+                # Copy saved checkpoints: container paths do not exist where offline runs sync.
+                os.environ.update(WANDB_DIR=str(args.output), WANDB_MODE=args.wandb_mode, WANDB_SYMLINK='false')
+                runner_config.update(logger='wandb', wandb_project=args.wandb_project)
+                wrapped.cfg = ConfigRecord(wrapped.cfg)
+            runner = OnPolicyRunner(wrapped, runner_config, str(args.output/'learner'), device=args.device)
             diagnostics = vanilla.UpdateDiagnostics(runner.alg)
             runner.alg.update = diagnostics.update
             if args.action_std_final is not None:
@@ -411,9 +382,15 @@ def main(argv=None):
             save(args.output/'force_metrics.json', loads.report())
         else:
             (compat.require_configuration if compatibility is not None else require_learner_configuration)(checkpoint_record, identity, config)
-            infos = runner.load(str(args.checkpoint), strict=True)
-            require_embedded_declaration(infos, checkpoint_record)
-            actor = runner.get_inference_policy()
+            observation = env._observations(env.current)['obs']
+            observations = vanilla.scale_observation(observation, args.observation_scaling)
+            if args.gait_clock:
+                clock = vanilla.clock_features(env.episode_steps, args.gait_clock, observation[:, 210:213]).to(observations)
+                observations = torch.cat((observations, clock), -1)
+            payload = torch.load(args.checkpoint, map_location=args.device, weights_only=False)
+            require_embedded_declaration(payload.get('infos'), checkpoint_record)
+            actor, _ = vanilla.load_actor(payload, config,
+                TensorDict({'policy': observations}, batch_size=[env.num_envs]), args.device)
             previous_action = [None]
             def policy(observation):
                 with torch.inference_mode():

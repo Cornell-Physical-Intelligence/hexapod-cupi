@@ -346,53 +346,11 @@
       "purpose": "Preserve versioned rewards and episode handling."
     },
     {
-      "path": "locomotion/tasks/env.py",
-      "previous_path": "locomotion/env.py",
-      "classification": "current",
-      "owner": "Platform lead",
-      "purpose": "Preserve frame imports used by frozen reward sources."
-    },
-    {
-      "path": "locomotion/tasks/paper_reward.py",
-      "previous_path": "locomotion/paper_reward.py",
-      "classification": "prototype",
-      "owner": "Platform lead",
-      "purpose": "Preserve offline stride scoring imports used by frozen reward sources."
-    },
-    {
       "path": "locomotion/tasks/task.py",
       "previous_path": "locomotion/task.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Versioned command/reward wrapper; native physics and Stage 2 gates are unchanged."
-    },
-    {
-      "path": "locomotion/tasks/task_v2.py",
-      "previous_path": "locomotion/task_v2.py",
-      "classification": "current",
-      "owner": "Platform lead",
-      "purpose": "Reward version 2: Liu et al. Table I task and penalty terms beside version 1."
-    },
-    {
-      "path": "locomotion/tasks/task_v3.py",
-      "previous_path": "locomotion/task_v3.py",
-      "classification": "prototype",
-      "owner": "Platform lead",
-      "purpose": "Experimental immediate tracking feedback with the version 2 penalty coefficients."
-    },
-    {
-      "path": "locomotion/tasks/task_v4.py",
-      "previous_path": "locomotion/task_v4.py",
-      "classification": "prototype",
-      "owner": "Platform lead",
-      "purpose": "Reward version 4: noise-sized Table I penalties, windowed tracking and a tripod contact schedule."
-    },
-    {
-      "path": "locomotion/tasks/task_v4_yaw_gate.py",
-      "previous_path": "locomotion/task_v4_yaw_gate.py",
-      "classification": "prototype",
-      "owner": "Platform lead",
-      "purpose": "Experimental reward v4 variant: pay the contact schedule only while the body turns as commanded."
+      "purpose": "Run the c48_long command sampler, reward and episode handling."
     },
     {
       "path": "tools/code_map.py",
@@ -428,20 +386,6 @@
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Hold fixed action means under graded exploration noise and record the reward inputs."
-    },
-    {
-      "path": "locomotion/evaluation/reward_scorer.py",
-      "previous_path": "locomotion/reward_scorer.py",
-      "classification": "prototype",
-      "owner": "Platform lead",
-      "purpose": "Score recorded native rollouts offline under the current and candidate rewards."
-    },
-    {
-      "path": "locomotion/tasks/reward_options.py",
-      "previous_path": "locomotion/reward_options.py",
-      "classification": "current",
-      "owner": "Platform lead",
-      "purpose": "Check reward option keys, value types and word choices with the standard library."
     },
     {
       "path": "locomotion/runs/compat.py",
@@ -976,6 +920,90 @@
     "tools/code_map.py": {
       "source_commit": "077b98b1b6150e8cc54ad233c90198fdece0d7bb",
       "sha256": "14568d5c2ed73fba50c085359d466ceb31d95ca4cdcfd97f25c550d08176e3aa"
+    },
+    "locomotion/learning/ppo.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "81338abcbd70bfe5c26da486e48b00868269575ca13d7612fcd75eb141b74927"
+    },
+    "locomotion/tasks/env.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "0474c2a892edabb43882e937a63516180f55c75f3e885abc99f84f96e0e04d1a"
+    },
+    "locomotion/tasks/reward_options.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "923371c1b1ddb4a77dcf115af0626efc11c4ae8b1d47f3fa5e364eaf561cbd28"
+    },
+    "locomotion/tasks/task.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "ffaa502a1ec2a4ca762b9a54c75ae9c9d40533600cd9c17043e2a28d24f92244"
+    },
+    "locomotion/tasks/task_v2.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "24fcae86ffbbdd053cfb2cc2753f12ce443920e159e3b2e01ebaf12587b533b3"
+    },
+    "locomotion/tasks/task_v3.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "b641f3c4e3439ad7670d166737a2e7cc0b1df929a8d984d44a67f5eee31b5a66"
+    },
+    "locomotion/tasks/task_v4.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "587b6bbd1f820c2b3229a7b567235db21a5782f6021aad8c0da2daac0f23094f"
+    },
+    "locomotion/tasks/task_v4_yaw_gate.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "e78d7ad3b70f0bc5fbc3d0f85c8edce246f81270cf6fcb54a822d995221c298c"
+    },
+    "locomotion/tests/test_noise_probe.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "16a09966ea4ee8d3c4e66b329e0ef3baaf861b2f08f9795b0b067a7040245b4d"
+    },
+    "locomotion/tests/test_paper_reward.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "d152f0bba68991d3e4c48d4242e34b4e13b78403469233bb8a8537d70f3379ef"
+    },
+    "locomotion/tests/test_recorded_parity.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "2f93f8a4e5226f76f69935764771ef1ece714d8970dc20d8de18d9331a48c1bc"
+    },
+    "locomotion/tests/test_reward_options.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "29c07bb6044e94038c924ed0ecf83f8c07f61351eaae66d4396fdb2d79d36a6b"
+    },
+    "locomotion/tests/test_reward_v2_table1_formulas.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "0b9b64f82eef83fc6b6d707cffbd86f6a63997dff5fc1150d50e08c866beb328"
+    },
+    "locomotion/tests/test_task.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "a5b579951e4b5aa589c924f279e396589790583efa874c3d88ab1c2e92c64fd3"
+    },
+    "locomotion/tests/test_task_v2.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "e69efc619ae56df1f7b448f5abc4e8e32a12b09d01c2a5902ed430833f64816f"
+    },
+    "locomotion/tests/test_task_v3.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "8093ab341c6565a3cc6c736af1695c9e770da5f9b9c17c2c0156315ed4fb3482"
+    },
+    "locomotion/tests/test_task_v4.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "873fb37d5b4d33a2ebdaf8c61968a77e1297b7ab07d97afb3b0d298db84df289"
+    },
+    "locomotion/tests/test_task_v4_yaw_gate.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "9f6f86b41f3e12d40a9a308e74ae4004ef048d3fb1735d4f860265879a269c22"
+    },
+    "locomotion/tests/test_training_budget.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "22fd4a2e6e7e0b1ecfc16fc0e7a44f0a9b4fc6df1f8fec7b2cd79105c6b6c846"
+    },
+    "locomotion/tests/test_yaw_sign.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "4cf89faf4e1cdd899b7520397d080771051db753c726566aaa699f6b4c9d0539"
+    },
+    "locomotion/runs/reservation.py": {
+      "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
+      "sha256": "8e3682cccb29cd3f3d53625de1276bdd56ca6643c54ada001b3bd1fb69b95c2e"
     }
   }
 }

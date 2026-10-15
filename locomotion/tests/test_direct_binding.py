@@ -33,10 +33,25 @@ class DirectBindingTests(unittest.TestCase):
                     prepare(output, REMOTE, mode=mode)
                 self.assertFalse(output.exists())
 
+    def test_active_reward_retires_version_switches_and_requires_matching_clock(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)/'pack'
+            for option, value in (('reward_version', '2'), ('reward_task', 'v4'), ('reward_options', 'yaw_gate_floor=0')):
+                with self.subTest(option=option), self.assertRaises(TypeError):
+                    prepare(output, REMOTE, **{option: value})
+                self.assertFalse(output.exists())
+            with self.assertRaisesRegex(ValueError, '60-control'):
+                prepare(output, REMOTE, gait_clock=40)
+            self.assertFalse(output.exists())
+            binding = prepare(output, REMOTE)
+            self.assertFalse(any(value.startswith('--reward-') for value in binding['command_args']))
+            record = json.loads((output/'PACK.json').read_text())
+            self.assertEqual((record['reward_version'], record['reward_task']), ('4', 'v4_yaw_gate'))
+
     def test_bc_pack_binds_warmstart_and_keeps_review_gate(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)/'bc'
-            binding = prepare(path, REMOTE, bc_warmstart=True, gait_clock=40)
+            binding = prepare(path, REMOTE, bc_warmstart=True, gait_clock=60)
             self.assertIn('--bc-warmstart', binding['command_args'])
             self.assertFalse(binding['root_review_complete'])
             self.assertTrue(json.loads((path/'PACK.json').read_text())['bc_warmstart'])
@@ -44,8 +59,8 @@ class DirectBindingTests(unittest.TestCase):
     def test_bc_rejects_unsupported_combinations_before_pack_creation(self):
         with tempfile.TemporaryDirectory() as directory:
             for overrides in ({'mode': 'diagnostic'},
-                              {'gait_clock': 0}, {'reward_version': '4'}):
-                options = dict(bc_warmstart=True, gait_clock=40)
+                              {'gait_clock': 0}, {'gait_clock': 40}):
+                options = dict(bc_warmstart=True, gait_clock=60)
                 options.update(overrides)
                 output = Path(directory)/'rejected'
                 with self.subTest(overrides=overrides), self.assertRaisesRegex(ValueError, 'BC warmstart'):

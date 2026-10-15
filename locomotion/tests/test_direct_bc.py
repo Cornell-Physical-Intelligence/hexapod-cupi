@@ -1,5 +1,6 @@
 """CPU contracts for the Direct candidate's shared-actor BC experiment."""
 import copy
+from dataclasses import replace
 from types import SimpleNamespace
 import unittest
 
@@ -10,9 +11,54 @@ from rsl_rl.models import MLPModel
 from locomotion.backends.isaac.config import JOINT_NAMES
 from locomotion.learning.bc import ScriptedTripodTeacher, collect, fit, reset_ppo_optimizer, run_bc
 from locomotion.learning.config import ppo_config
+from locomotion.learning.ppo import VanillaVecEnv
+from locomotion.tasks.task import TrainingTask, REWARD_CONFIG
+from locomotion.tests.task_double import GaitDouble
 
 
 class DirectBCTests(unittest.TestCase):
+    def active_env(self, reward_config=REWARD_CONFIG):
+        native = GaitDouble(3)
+        native.cfg.episode_seconds = 20.
+        native.cfg.declaration = lambda: {}
+        return VanillaVecEnv(TrainingTask(native, reward_config=reward_config), gait_clock=60)
+
+    def test_active_reward_bc_restores_turn_draws_and_optimizer(self):
+        torch.manual_seed(31)
+        reward_config = replace(REWARD_CONFIG, turn_draw_fraction=1.)
+        env = self.active_env(reward_config)
+        task = env.task
+        config = ppo_config(31, action_mean='tanh', gait_clock=60)
+        settings = copy.deepcopy(config['actor'])
+        settings.pop('class_name')
+        actor = MLPModel(env.get_observations(), config['obs_groups'], 'actor', 18, **settings)
+        optimizer = torch.optim.Adam(actor.parameters())
+        runner = SimpleNamespace(alg=SimpleNamespace(actor=actor, optimizer=optimizer), current_learning_iteration=4)
+        original_bank = task.bank
+        record = run_bc(runner, env, steps=2, epochs=1, dagger_rounds=1)
+        self.assertEqual(record['samples'], 12)
+        self.assertIs(task.reward_config, reward_config)
+        self.assertIs(task.bank, original_bank)
+        self.assertFalse(optimizer.state)
+        self.assertEqual(runner.current_learning_iteration, 0)
+        moving = task.commands.abs().sum(-1) > 0
+        self.assertTrue(bool(moving.any()))
+        self.assertTrue(bool((task.commands[moving, 2].abs() == task.config.yaw_rate_rad_s).all()))
+
+    def test_active_reward_deadline_restores_turn_draws(self):
+        env = self.active_env()
+        task = env.task
+        original_reward, original_bank = task.reward_config, task.bank
+        runner = SimpleNamespace(alg=SimpleNamespace(actor=torch.nn.Linear(1, 1)))
+        def expired():
+            self.assertEqual(task.reward_config.turn_draw_fraction, 0.)
+            self.assertEqual(float(task.commands[:, 1:].abs().sum()), 0.)
+            raise TimeoutError('BC wall limit')
+        with self.assertRaises(TimeoutError):
+            run_bc(runner, env, check_deadline=expired)
+        self.assertIs(task.reward_config, original_reward)
+        self.assertIs(task.bank, original_bank)
+
     def test_teacher_command_and_reset_rows(self):
         teacher = ScriptedTripodTeacher(JOINT_NAMES, 60)
         commands = torch.tensor([[.05, 0., 0.], [-.05, 0., 0.], [0., 0., 0.]])

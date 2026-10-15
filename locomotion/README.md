@@ -10,9 +10,9 @@ You train and evaluate the approved hexapod through Isaac Lab's stock
 | --- | --- |
 | `backends/isaac/config.py` | CPU-safe control settings and the native scene configuration. |
 | `backends/isaac/native.py` | Stock Direct environment hooks and Articulation capture hooks. |
-| `backends/isaac/env.py` | Named state readback, observations and the interface used by frozen tasks. |
+| `backends/isaac/env.py` | Named state readback, observations and the current task interface. |
 | `backends/isaac/motor.py`, `core/` | Explicit actuator and shared control arithmetic. |
-| `tasks/` | Command sampling and versioned reward formulas. |
+| `tasks/task.py` | The c48_long reward, command sampler and episode handling. |
 | `learning/config.py`, `learning/ppo.py`, `learning/bc.py` | Shared actor configuration, learner adapter and scripted BC. |
 | `evaluation/` | Rollout capture, video and unchanged numerical gates. |
 | `runs/` | Input validation, source packs, checkpoint identity and guarded execution. |
@@ -36,9 +36,9 @@ submitted torque before physics and ground contact after physics.
 
 Keep actor observations at 231 values and critic observations at 234, before
 optional gait-clock inputs. Preserve frame order and selected-row reset
-isolation. Frozen tasks own episode rewards and resets so the learner can read
-terminal observations before reset. Keep numerical gates and frozen reward
-bytes unchanged; `tasks/env.py` supports their retained imports.
+isolation. The task owns rewards and resets so the learner can read terminal
+observations before reset. Preserve numerical gates. Git and the frozen test
+fixture retain historical reward implementations; the runtime imports none of them.
 
 Use one actor configuration for PPO and BC. Keep evaluators outside the training
 loop and source identity outside the environment. Geometry, collision filtering
@@ -63,9 +63,13 @@ standing admission. Diagnostics support 1/32/128/512/1024 robots. Evaluation
 uses one robot; `--eval-scope probes` runs 13 learning probes and `full` runs
 the 96-case Stage 2 suite. Use `--help` for learner options and deadline limits.
 
-Add `--bc-warmstart --gait-clock 40` to PPO training with reward version 1, 2 or
-3 to clone the scripted forward/backward teacher before PPO. BC restores the
-original command bank, resets the optimizer and saves checkpoint update zero.
+Training uses one reward configuration: the recorded `c48_long` yaw-gated
+reward. Training defaults to its 60-control gait clock. Set learner options
+from the chosen experiment; the reward configuration does not select them.
+
+Add `--bc-warmstart` to clone the scripted forward/backward teacher before PPO.
+BC suppresses turn draws during teacher collection, restores the command sampler
+and resets the optimizer before it saves checkpoint update zero.
 The source and result identify this experiment. Sideways motion and turning
 still require evaluation; BC supplies no acceptance evidence.
 
@@ -89,6 +93,9 @@ sources; production loading requires matching model, configuration and source
 identities. The existing compatibility receipt binds its original runtime and
 cannot authorize this migration. Create new proof through the test-only replay
 harness before issuing a receipt. Native optimizer resume remains out of scope.
+
+Evaluation loads the actor without constructing a training task, critic or
+optimizer. Checkpoint identity checks still apply.
 
 Each evaluation retains its control trace, 400 Hz capture chunks, report and
 force metrics. Selected video cases also save `rollout.mp4`. Keep checkpoint

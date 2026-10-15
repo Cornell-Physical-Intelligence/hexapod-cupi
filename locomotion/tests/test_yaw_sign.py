@@ -1,4 +1,4 @@
-"""Trace both yaw command signs from the command bank through observations, reward v4 and evaluation.
+"""Trace both yaw command signs from the command bank through observations, walking reward and evaluation.
 
 Positive yaw is a left turn: counterclockwise about native +Z seen from above. Each fixture turns a
 level body at a known world rate, so a sign inversion anywhere in the chain fails one of these tests.
@@ -12,13 +12,13 @@ import torch
 
 from locomotion import evaluation
 from locomotion.learning import ppo as ppo
-from locomotion.tasks import task_v4 as task_v4
+from locomotion.tasks import task as walking
 from locomotion.backends.isaac.env import LocomotionEnv, _diagnostic_rotation, inverse_rotate, navigation
 from locomotion.evaluation.runner import learning_probe_cases
 from locomotion.tasks.task import TaskConfig, command_bank
-from locomotion.tasks.task_v4 import REWARD_V4_CONFIG as CONFIG, TrainingTaskV4
+from locomotion.tasks.task import REWARD_CONFIG as CONFIG, TrainingTask as TrainingTaskV4
 from locomotion.tests.test_evaluation import fixture, score
-from locomotion.tests.test_task_v4 import GaitDouble
+from locomotion.tests.task_double import GaitDouble
 
 RATE = .2
 SIGNS = (-1., 1.)
@@ -90,7 +90,7 @@ class YawSignTests(unittest.TestCase):
         for sign in SIGNS:
             # Start near +pi so that a left turn crosses the heading wrap; start near -pi for a right turn.
             native = YawDouble(2, heading=sign * (math.pi - .002))
-            task = TrainingTaskV4(native, reward_config=CONFIG.__class__(forward_draw_fraction=0.))
+            task = TrainingTaskV4(native)
             task.reset()
             native.commands[:] = torch.tensor([0., 0., sign * RATE])
             task.window.restart(torch.arange(2), native.commands)
@@ -100,7 +100,7 @@ class YawSignTests(unittest.TestCase):
                 task.step(torch.zeros(2, 18))
             parts = task.last_components
             with self.subTest(sign=sign):
-                self.assertLess(float(task_v4.heading(native.current["root"][:1, 3:])[0]) * sign, 0., "the turn crossed the wrap")
+                self.assertLess(float(walking.heading(native.current["root"][:1, 3:])[0]) * sign, 0., "the turn crossed the wrap")
                 torch.testing.assert_close(task.window.values.mean(1)[:, 2], torch.tensor([sign * RATE, -sign * RATE]),
                                            atol=1e-4, rtol=0)
                 self.assertAlmostEqual(float(parts["yaw_tracking"][0]), CONFIG.yaw_tracking_weight, places=3)
@@ -120,10 +120,10 @@ class YawSignTests(unittest.TestCase):
             commands = torch.tensor([[0., 0., sign * RATE]])
             wanted = commands[:, None, :2] + commands[:, None, 2:] * torch.stack((-toes[..., 1], toes[..., 0]), -1)
             lifted = torch.zeros(1, 6, 3)
-            forward = task_v4.measured_reward_v4(
+            forward = walking.measured_reward(
                 {**_telemetry(commands), "toe_xyz_nav": toes, "toe_velocity_nav": wanted,
                  "tibia_floor_force_world_n": lifted}, commands, torch.zeros(1, dtype=torch.bool), CONFIG, .1)[1]
-            backward = task_v4.measured_reward_v4(
+            backward = walking.measured_reward(
                 {**_telemetry(commands), "toe_xyz_nav": toes, "toe_velocity_nav": -wanted,
                  "tibia_floor_force_world_n": lifted}, commands, torch.zeros(1, dtype=torch.bool), CONFIG, .1)[1]
             with self.subTest(sign=sign):
@@ -153,8 +153,11 @@ class YawSignTests(unittest.TestCase):
 
 
 def _telemetry(commands):
-    from locomotion.tests.test_task_v4 import telemetry
-    return telemetry(commands)
+    from locomotion.tests.task_double import telemetry
+    return {**telemetry(commands), "gate_yaw_rate_rad_s": torch.zeros(len(commands)),
+            "stride_velocity_nav": torch.zeros(len(commands), 3),
+            "stride_touchdown": torch.zeros(len(commands), 6, dtype=torch.bool),
+            "stride_displacement_nav": torch.zeros(len(commands), 6, 2)}
 
 
 if __name__ == "__main__":

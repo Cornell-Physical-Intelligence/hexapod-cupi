@@ -77,8 +77,7 @@ class RecordedParityTests(unittest.TestCase):
         for key in training:
             torch.testing.assert_close(training[key], actual[key], atol=0, rtol=0)
 
-    def test_reward_commands_ppo_settings_and_numerical_gates_keep_their_bytes(self):
-        self.assertEqual((ROOT/'locomotion/tasks/task.py').read_bytes(), (FROZEN/'task.py').read_bytes())
+    def test_command_bank_ppo_settings_and_numerical_gate_bytes_remain_frozen(self):
         self.assertEqual((ROOT/'locomotion/evaluation/scoring.py').read_bytes(), (FROZEN/'evaluation.py').read_bytes())
         self.assertEqual(ppo.ppo_config(20260914), self.old['vanilla'].ppo_config(20260914))
         self.assertEqual(task.command_bank(task.TaskConfig()),

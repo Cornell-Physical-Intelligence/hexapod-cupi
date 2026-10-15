@@ -15,7 +15,7 @@ class AllocationDeadlineTests(unittest.TestCase):
     def test_frozen_runtime_rejects_nested_source_changes(self):
         with tempfile.TemporaryDirectory() as directory:
             pack = Path(directory)/'ppo'
-            binding = prepare.prepare(pack, str(prepare.REMOTE_ROOT/'deadline_fixture'), reward_version='2')
+            binding = prepare.prepare(pack, str(prepare.REMOTE_ROOT/'deadline_fixture'))
             source = pack/'source'
             reservation.verify_tree(source, binding['source_freeze_sha256'])
             for name in ('core/motor.py', 'learning/config.py', 'runs/train.py'):
@@ -49,7 +49,7 @@ class AllocationDeadlineTests(unittest.TestCase):
             self.assertEqual(standard['max_seconds'], 6600)
             for name in ('ppo',):
                 pack = root/name
-                binding = prepare.prepare(pack, remote, updates=2000, reward_version='2',
+                binding = prepare.prepare(pack, remote, updates=2000,
                     allocation_profile='flat_pilot_v1',
                     max_wall_seconds=21600)
                 self.assertEqual(binding['max_seconds'], 22000)

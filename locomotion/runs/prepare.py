@@ -10,7 +10,6 @@ import shutil
 from locomotion.backends.isaac.config import sha
 from .sources import runtime_paths, write_runtime
 from ..learning.config import ppo_config
-from locomotion.tasks import reward_options as reward_option_schema
 from .validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline
 from .spark_paths import LEGACY_ROOT, RUN_ROOTS, within_roots
 
@@ -31,35 +30,26 @@ def save(path, value):
     Path(path).write_text(json.dumps(value, indent=2, allow_nan=False)+'\n')
 
 
-def valid_reward_options(spec):
-    """Unique ``key=value`` pairs with numeric or lowercase-word values, such as ``yaw_gate_on=none``.
-
-    ``prepare`` then checks each key, value type and word choice against the selected task's reward configuration
-    with ``locomotion.tasks.reward_options``."""
-    word, number = r'[a-z][a-z0-9_]*', r'[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?'
-    pairs = [item.partition('=') for item in spec.split(',')]
-    keys = [key for key, _, _ in pairs]
-    return (len(set(keys)) == len(keys)
-            and all(re.fullmatch(word, key) and (re.fullmatch(number, value) or re.fullmatch(word, value))
-                    for key, separator, value in pairs))
-
-
 def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
             checkpoint_declaration_sha=None, checkpoint_compatibility=None, checkpoint_compatibility_sha256=None,
             logger='tensorboard', wandb_project=None, wandb_mode='offline',
-            reward_version='1', action_mean='unbounded',
+            action_mean='unbounded',
             observation_normalization='empirical', observation_scaling='none',
             command_segments='continuous', learning_rate_max=None, action_std=.15,
-            action_noise_correlation=0., action_std_final=None, gait_clock=0, action_smoothing='none',
-            velocity_noise=0., episode_seconds=20., reward_options='', reward_task='v4',
+            action_noise_correlation=0., action_std_final=None, gait_clock=None, action_smoothing='none',
+            velocity_noise=0., episode_seconds=20.,
             video_case=None, extended_updates=False, action_std_decay_updates=None, steps_per_env=24,
             allocation_profile='standard', max_wall_seconds=6200, bc_warmstart=False, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
+    if gait_clock is None:
+        gait_clock = 60 if mode == 'train' else 0
     if type(bc_warmstart) is not bool or (bc_warmstart and (
             mode != 'train'
-            or reward_version not in ('1', '2', '3') or not 10 <= gait_clock <= 250)):
-        raise ValueError('BC warmstart requires Direct PPO training, reward 1-3 and a gait clock of 10-250 controls')
+            or gait_clock != 60)):
+        raise ValueError('BC warmstart requires PPO training and the 60-control gait clock')
+    if mode == 'train' and gait_clock != 60:
+        raise ValueError('The active reward requires the 60-control gait clock')
     validate_deadline(mode, allocation_profile, max_wall_seconds)
     if type(max_wall_seconds) is not int:
         raise ValueError('Preparation requires an integer native deadline')
@@ -81,8 +71,6 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             or (logger == 'tensorboard' and (wandb_project is not None or wandb_mode != 'offline'))
             or logger not in ('tensorboard', 'wandb')):
         raise ValueError('W&B logging needs train mode, a project name and offline or online mode')
-    if reward_version not in ('1', '2', '3', '4') or (mode != 'train' and reward_version != '1'):
-        raise ValueError('Reward version selection applies to training only')
     if action_mean not in ('unbounded', 'tanh') or (action_mean != 'unbounded' and mode not in ('train', 'evaluate')):
         raise ValueError('Bounded action means apply to training and evaluation')
     if (observation_normalization not in ('empirical', 'none') or
@@ -109,18 +97,6 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         raise ValueError('A video case applies to a learning-probe evaluation')
     if type(episode_seconds) is not float or (episode_seconds != 20. and (mode != 'train' or not 5. <= episode_seconds <= 20.)):
         raise ValueError('Episode length selection applies to training, between 5 and 20 seconds')
-    if reward_options and (mode != 'train' or reward_version != '4' or not valid_reward_options(reward_options)):
-        raise ValueError('Reward options apply to reward version 4 training as unique key=value pairs')
-    if reward_task not in ('v4', 'v4_yaw_gate') or (reward_task != 'v4' and (mode != 'train' or reward_version != '4')):
-        raise ValueError('The reward task selection applies to reward version 4 training only')
-    if reward_options:
-        # Each key, value type and word choice against the selected task's configuration, without importing Torch;
-        # the trainer applies the task's reward_config before launch.
-        try:
-            reward_option_schema.check(reward_task, reward_options)
-        except ValueError as error:
-            raise ValueError('Reward options apply to reward version 4 training as unique key=value pairs: '
-                             + str(error)) from error
     supplied = (checkpoint is not None, checkpoint_sha is not None, checkpoint_declaration_sha is not None)
     if (mode == 'evaluate' and not all(supplied)) or (mode != 'evaluate' and any(supplied)):
         raise ValueError('Evaluation requires a checkpoint and its two file hashes')
@@ -184,8 +160,6 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         binding['command_args'] += ['--extended-updates']
     if mode == 'probe':
         binding['command_args'] += ['--seed', str(seed)]
-    if reward_version != '1':
-        binding['command_args'] += ['--reward-version', reward_version]
     if action_mean != 'unbounded':
         binding['command_args'] += ['--action-mean', action_mean]
     if observation_normalization != 'empirical':
@@ -200,10 +174,6 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         binding['command_args'] += ['--video-case', video_case]
     if episode_seconds != 20.:
         binding['command_args'] += ['--episode-seconds', str(episode_seconds)]
-    if reward_options:
-        binding['command_args'] += ['--reward-options', reward_options]
-    if reward_task != 'v4':
-        binding['command_args'] += ['--reward-task', reward_task]
     if checkpoint is not None:
         checkpoint = Path(checkpoint)
         if (not within_roots(checkpoint, RUN_ROOTS)
@@ -221,13 +191,11 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
                                     '--checkpoint-compatibility-sha256', checkpoint_compatibility_sha256]
     save(output/'binding.json', binding)
     save(output/'PACK.json', {'remote_root': str(remote_root), 'source_freeze_sha256': freeze,
-        'binding_sha256': sha(output/'binding.json'), 'mode': mode, 'seed': seed, 'reward_version': reward_version,
+        'binding_sha256': sha(output/'binding.json'), 'mode': mode, 'seed': seed, 'reward_version': '4', 'reward_task': 'v4_yaw_gate',
         'action_mean': action_mean,
         'observation_normalization': observation_normalization, **selected_options,
         **({} if video_case is None else {'video_case': video_case}),
         **({} if episode_seconds == 20. else {'episode_seconds': episode_seconds}),
-        **({} if not reward_options else {'reward_options': reward_options}),
-        **({} if reward_task == 'v4' else {'reward_task': reward_task}),
         **({'extended_updates': True} if extended_updates else {}),
         **({'bc_warmstart': True} if bc_warmstart else {}),
         'allocation_profile': allocation_profile, 'max_wall_seconds': max_wall_seconds,
@@ -242,7 +210,7 @@ def main():
     parser.add_argument('--remote-root', required=True)
     parser.add_argument('--inputs', type=Path)
     parser.add_argument('--mode', choices=('diagnostic', 'train', 'evaluate', 'probe'), required=True)
-    parser.add_argument('--bc-warmstart', action='store_true', help='Clone the scripted teacher before PPO on the Direct candidate.')
+    parser.add_argument('--bc-warmstart', action='store_true', help='Clone the scripted teacher before PPO with the active walking task.')
     parser.add_argument('--num-envs', type=int)
     parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
     parser.add_argument('--updates', type=int, default=512)
@@ -257,7 +225,6 @@ def main():
     parser.add_argument('--logger', choices=['tensorboard', 'wandb'], default='tensorboard')
     parser.add_argument('--wandb-project')
     parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
-    parser.add_argument('--reward-version', choices=['1', '2', '3', '4'], default='1')
     parser.add_argument('--action-mean', choices=['unbounded', 'tanh'], default='unbounded')
     parser.add_argument('--observation-normalization', choices=['empirical', 'none'], default='empirical')
     parser.add_argument('--observation-scaling', choices=['none', 'fixed'], default='none')
@@ -268,12 +235,10 @@ def main():
     parser.add_argument('--action-std-final', type=float)
     parser.add_argument('--action-std-decay-updates', type=int)
     parser.add_argument('--steps-per-env', type=int, default=24)
-    parser.add_argument('--gait-clock', type=int, default=0)
+    parser.add_argument('--gait-clock', type=int)
     parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none')
     parser.add_argument('--velocity-noise', type=float, default=0.)
     parser.add_argument('--episode-seconds', type=float, default=20.)
-    parser.add_argument('--reward-options', default='')
-    parser.add_argument('--reward-task', choices=['v4', 'v4_yaw_gate'], default='v4')
     parser.add_argument('--video-case')
     parser.add_argument('--allocation-profile', choices=ALLOCATION_PROFILES, default='standard')
     parser.add_argument('--max-wall-seconds', type=int, default=6200)

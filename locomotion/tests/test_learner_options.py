@@ -307,9 +307,11 @@ class LearnerOptionTests(unittest.TestCase):
                 self.assertIn('locomotion/learning/rate_schedule.py', json.loads((root/mode/'source/FREEZE_SHA256.json').read_text()))
             legacy = prepare(root/'legacy', REMOTE)
             self.assertFalse({'--observation-scaling', '--command-segments', '--learning-rate-max', '--action-std',
-                              '--action-noise-correlation', '--action-std-final', '--gait-clock', '--video-case'}
+                              '--action-noise-correlation', '--action-std-final', '--video-case'}
                              & set(legacy['command_args']))
-            self.assertFalse(set(OPTIONS) & set(json.loads((root/'legacy/PACK.json').read_text())))
+            index = legacy['command_args'].index('--gait-clock')
+            self.assertEqual(legacy['command_args'][index+1], '60')
+            self.assertFalse((set(OPTIONS) - {'gait_clock'}) & set(json.loads((root/'legacy/PACK.json').read_text())))
             short = prepare(root/'short', REMOTE, mode='train', episode_seconds=10.)
             self.assertEqual(short['command_args'][-2:], ['--episode-seconds', '10.0'])
             self.assertEqual(json.loads((root/'short/PACK.json').read_text())['episode_seconds'], 10.)
