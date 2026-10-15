@@ -11,13 +11,15 @@ import numpy as np
 import torch
 
 import locomotion.evaluation as evaluation
-import locomotion.omni.ppo as ppo
-import locomotion.omni.task as walking
-from locomotion.omni.env import LocomotionEnv, inverse_rotate, navigation
+import locomotion.omni.reward as walking
+import locomotion.omni.wrapper as wrapper
+from locomotion.omni.env import LocomotionEnv
+from locomotion.omni.frames import inverse_rotate, navigation
 from locomotion.evaluation.capture import _diagnostic_rotation
 from locomotion.evaluation.runner import learning_probe_cases
-from locomotion.omni.task import TaskConfig, command_bank
-from locomotion.omni.task import REWARD_CONFIG as CONFIG, TrainingTask as TrainingTaskV4
+from locomotion.omni.commands import TaskConfig, command_bank
+from locomotion.omni.reward import REWARD_CONFIG as CONFIG
+from locomotion.omni.task import TrainingTask as TrainingTaskV4
 from locomotion.tests.test_evaluation import fixture, score
 from locomotion.tests.task_double import GaitDouble
 
@@ -80,11 +82,11 @@ class YawSignTests(unittest.TestCase):
                     observation = LocomotionEnv._observations(env, state)["obs"]
                     self.assertEqual(observation.shape, (1, 231))
                     torch.testing.assert_close(observation[0, 210:213], torch.tensor([0., 0., sign * RATE]))
-                    scaled = ppo.scale_observation(observation, "fixed")
-                    self.assertAlmostEqual(float(scaled[0, 212]), sign * RATE * ppo.COMMAND_SCALES[2], places=6)
-                    self.assertAlmostEqual(float(scaled[0, 168 + 2]), sign * RATE * ppo.FRAME_SCALES[2], places=5)
+                    scaled = wrapper.scale_observation(observation, "fixed")
+                    self.assertAlmostEqual(float(scaled[0, 212]), sign * RATE * wrapper.COMMAND_SCALES[2], places=6)
+                    self.assertAlmostEqual(float(scaled[0, 168 + 2]), sign * RATE * wrapper.FRAME_SCALES[2], places=5)
                     # A yaw command counts as motion, so the gait clock runs for both signs.
-                    clock = ppo.clock_features(torch.tensor([15]), 60, observation[:, 210:213])
+                    clock = wrapper.clock_features(torch.tensor([15]), 60, observation[:, 210:213])
                     torch.testing.assert_close(clock, torch.tensor([[1., 0.]]), atol=1e-6, rtol=0)
 
     def test_reward_pays_the_commanded_turn_and_charges_the_opposite_turn(self):

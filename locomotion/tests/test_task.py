@@ -11,6 +11,8 @@ import types
 import unittest
 
 import torch
+from locomotion.omni.commands import TaskConfig, command_bank
+import locomotion.omni.reward as reward
 import locomotion.omni.task as task
 from locomotion.tests.task_double import NativeDouble, GaitDouble, telemetry
 
@@ -64,15 +66,15 @@ class ActiveTaskTests(unittest.TestCase):
         expected = asdict(self.old.reward_config(SPEC))
         del expected['forward_draw_fraction']
         del expected['yaw_gate_on']
-        self.assertEqual(asdict(task.REWARD_CONFIG), expected)
+        self.assertEqual(asdict(reward.REWARD_CONFIG), expected)
         baseline = importlib.import_module('_active_task_baseline.task')
-        self.assertEqual(task.command_bank(task.TaskConfig()), baseline.command_bank(baseline.TaskConfig()))
+        self.assertEqual(command_bank(TaskConfig()), baseline.command_bank(baseline.TaskConfig()))
 
     def test_reward_rng_episode_reset_and_reporting_match(self):
         traces = []
         for current in (False, True):
             env = GaitDouble(3)
-            wrapped = (task.TrainingTask(env, task.TaskConfig(seed=20260917)) if current else
+            wrapped = (task.TrainingTask(env, TaskConfig(seed=20260917)) if current else
                        self.old.variant(SPEC)(env, self.old.task_v4.TaskConfig(seed=20260917)))
             wrapped.reset()
             trace = []
@@ -94,7 +96,7 @@ class ActiveTaskTests(unittest.TestCase):
 
     def test_pure_reward_components_match_randomized_telemetry(self):
         generator = torch.Generator().manual_seed(20260917)
-        commands = torch.tensor(task.command_bank(task.TaskConfig()) + [[0., 0., 0.]])
+        commands = torch.tensor(command_bank(TaskConfig()) + [[0., 0., 0.]])
         n = len(commands)
         values = telemetry(commands)
         for key, value in list(values.items()):
@@ -107,7 +109,7 @@ class ActiveTaskTests(unittest.TestCase):
         terminated = torch.arange(n) % 2 == 0
         expected = self.old.measured_reward_v4_yaw_gate(values, commands, terminated,
                                                        self.old.reward_config(SPEC), .1)
-        actual = task.measured_reward(values, commands, terminated, task.REWARD_CONFIG, .1)
+        actual = reward.measured_reward(values, commands, terminated, reward.REWARD_CONFIG, .1)
         self.exact(actual, expected)
 
     def test_terminal_rows_keep_the_final_command_until_selected_reset(self):

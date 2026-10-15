@@ -59,10 +59,10 @@ SCHEMA = 'hexapod_checkpoint_compatibility_v1'
 CHECKPOINT_SHA = 'bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9'
 DECLARATION_SHA = '8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3'
 CLASS_NAMES = {
-    'locomotion.rate_schedule:CappedRatePPO': 'locomotion.omni.algorithm:CappedRatePPO',
-    'locomotion.rate_schedule:CommandBootstrapPPO': 'locomotion.omni.algorithm:CommandBootstrapPPO',
-    'locomotion.action_distribution:BoundedMeanGaussian': 'locomotion.omni.algorithm:BoundedMeanGaussian',
-    'locomotion.action_distribution:CorrelatedBoundedMeanGaussian': 'locomotion.omni.algorithm:CorrelatedBoundedMeanGaussian',
+    'locomotion.rate_schedule:CappedRatePPO': 'locomotion.omni.ppo:CappedRatePPO',
+    'locomotion.rate_schedule:CommandBootstrapPPO': 'locomotion.omni.ppo:CommandBootstrapPPO',
+    'locomotion.action_distribution:BoundedMeanGaussian': 'locomotion.omni.ppo:BoundedMeanGaussian',
+    'locomotion.action_distribution:CorrelatedBoundedMeanGaussian': 'locomotion.omni.ppo:CorrelatedBoundedMeanGaussian',
 }
 SOURCE_KEYS = {'schema', 'physics_source_files', 'adapter_sha256', 'entry_sha256'}
 

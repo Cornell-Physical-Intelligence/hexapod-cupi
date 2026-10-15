@@ -9,11 +9,13 @@ import unittest
 import numpy as np
 import torch
 
-import locomotion.omni.env as env
-import locomotion.omni.config as env_config
 import locomotion.evaluation as evaluation
-import locomotion.omni.ppo as ppo
-import locomotion.omni.task as task
+import locomotion.omni.commands as commands
+import locomotion.omni.env as env
+import locomotion.omni.env_cfg as env_config
+import locomotion.omni.motor as motor
+import locomotion.omni.ppo_cfg as ppo_cfg
+import locomotion.omni.robot as robot
 
 ROOT = Path(__file__).resolve().parents[2]
 FROZEN = ROOT/'locomotion/tests/fixtures/baseline'
@@ -23,7 +25,7 @@ TRACE = ROOT/'locomotion/tests/fixtures/control_trace.npz'
 class RecordedParityTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        if env_config.sha(TRACE) != '15d89c43a9537a0d45bac58b1f94e99d67804b45d5198e8f08d51441eeadb9ad':
+        if robot.sha(TRACE) != '15d89c43a9537a0d45bac58b1f94e99d67804b45d5198e8f08d51441eeadb9ad':
             raise ValueError('Native regression recording changed')
         expected = json.loads((FROZEN/'FREEZE_SHA256.json').read_text())
         package = types.ModuleType('_kernel_recorded_baseline')
@@ -31,7 +33,7 @@ class RecordedParityTests(unittest.TestCase):
         sys.modules[package.__name__] = package
         cls.old = {}
         for name in ('env_config', 'env', 'task', 'vanilla'):
-            if env_config.sha(FROZEN/(name+'.py')) != expected[name+'.py']:
+            if robot.sha(FROZEN/(name+'.py')) != expected[name+'.py']:
                 raise ValueError('Frozen source changed: '+name)
             cls.old[name] = importlib.import_module(package.__name__+'.'+name)
         with np.load(TRACE, allow_pickle=False) as data:
@@ -41,17 +43,17 @@ class RecordedParityTests(unittest.TestCase):
         trace = self.trace
         model = json.loads((ROOT/'robot/hexapod_mkii_updated_v1/model_rs05_mass_corrected.json').read_text())
         joints = {joint['name']: joint for joint in model['joints']}
-        lower = torch.tensor([joints[name]['lower'] for name in env_config.JOINT_NAMES])
-        upper = torch.tensor([joints[name]['upper'] for name in env_config.JOINT_NAMES])
+        lower = torch.tensor([joints[name]['lower'] for name in robot.JOINT_NAMES])
+        upper = torch.tensor([joints[name]['upper'] for name in robot.JOINT_NAMES])
         neutral = torch.tensor([0., -.3, .4]*6)
         held = torch.cat((neutral[None], trace['joint_target_rad'][:-1]))
         args = (trace['policy_action'], held, neutral, lower, upper)
-        actual = env.emitted_target(*args)
+        actual = motor.emitted_target(*args)
         torch.testing.assert_close(actual, trace['joint_target_rad'], rtol=0, atol=0)
         torch.testing.assert_close(actual, self.old['env'].emitted_target(*args), rtol=0, atol=0)
         state = trace['amp_state_before']
-        args = (state[:, :18], state[:, 18:36], actual, torch.tensor(env_config.KD))
-        for current, old in zip(env.motor_force(*args), self.old['env'].motor_force(*args)):
+        args = (state[:, :18], state[:, 18:36], actual, torch.tensor(robot.KD))
+        for current, old in zip(motor.motor_force(*args), self.old['env'].motor_force(*args)):
             torch.testing.assert_close(current, old, rtol=0, atol=0)
 
     def test_recorded_actor_and_critic_inputs_survive_observation_cleanup(self):
@@ -79,8 +81,8 @@ class RecordedParityTests(unittest.TestCase):
 
     def test_command_bank_ppo_settings_and_numerical_gate_bytes_remain_frozen(self):
         self.assertEqual((ROOT/'locomotion/evaluation/scoring.py').read_bytes(), (FROZEN/'evaluation.py').read_bytes())
-        self.assertEqual(ppo.ppo_config(20260914), self.old['vanilla'].ppo_config(20260914))
-        self.assertEqual(task.command_bank(task.TaskConfig()),
+        self.assertEqual(ppo_cfg.ppo_config(20260914), self.old['vanilla'].ppo_config(20260914))
+        self.assertEqual(commands.command_bank(commands.TaskConfig()),
                          self.old['task'].command_bank(self.old['task'].TaskConfig()))
 
 

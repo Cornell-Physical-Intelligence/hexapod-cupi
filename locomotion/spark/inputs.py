@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import shutil
 
-from locomotion.omni.config import sha, verify_assets
+from locomotion.omni.robot import sha, verify_assets
 from locomotion.spark.safety import INPUT_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[2]

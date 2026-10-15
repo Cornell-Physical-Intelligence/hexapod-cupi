@@ -53,15 +53,15 @@ assert.ok(html('file').includes('Imported by:') && html('file').includes('Import
 // Search marks matches in red and opens the first matching file.
 input('query', 'StrideWindow');
 assert.ok(elements.get('count').textContent.startsWith('1 file matches'));
-assert.ok(html('results').includes('data-file="locomotion/omni/task.py"'));
+assert.ok(html('results').includes('data-file="locomotion/omni/reward.py"'));
 assert.ok(/class="pkg[^"]* hit" data-package="omni"/.test(html('packages')));
-assert.ok(/class="file[^"]* hit" data-module="locomotion\/omni\/task.py"/.test(html('files')));
+assert.ok(/class="file[^"]* hit" data-module="locomotion\/omni\/reward.py"/.test(html('files')));
 assert.ok(/class="sym class hit"/.test(html('strip')), 'The matching class block turns red');
-input('query', 'VanillaVecEnv');
-assert.ok(html('results').includes('locomotion/omni/ppo.py'));
-assert.equal(elements.get('file-heading').textContent, 'omni/ppo.py');
-click('results', {file:'locomotion/omni/control.py'});
-assert.equal(elements.get('file-heading').textContent, 'omni/control.py');
+input('query', 'OmniVecEnv');
+assert.ok(html('results').includes('locomotion/omni/wrapper.py'));
+assert.equal(elements.get('file-heading').textContent, 'omni/wrapper.py');
+click('results', {file:'locomotion/omni/motor.py'});
+assert.equal(elements.get('file-heading').textContent, 'omni/motor.py');
 
 // Retired wrappers have no filter; tests retain their toggle.
 assert.ok(!markup.includes('id="compatibility"'));
@@ -73,5 +73,5 @@ input('tests', true);
 assert.ok(html('results').includes('locomotion/tests/test_native_ranges.py'));
 assert.ok(html('packages').includes('data-package="tests"'));
 input('query', 'emitted_target');
-assert.ok(html('results').includes('locomotion/omni/control.py'));
+assert.ok(html('results').includes('locomotion/omni/motor.py'));
 console.log('Code-map package squares, import arrows, file tiles, definition bar, search marking and toggles verified');

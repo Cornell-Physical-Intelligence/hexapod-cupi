@@ -70,7 +70,8 @@ def main(argv=None):
     import locomotion.evaluation.admission as original
     from locomotion.evaluation.camera import prepare_policy_scene
     prefix = 'locomotion'
-    env_config = importlib.import_module(prefix+'.omni.config')
+    env_config = importlib.import_module(prefix+'.omni.env_cfg')
+    robot = importlib.import_module(prefix+'.omni.robot')
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--mode', choices=['replay'], required=True)
     for key in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance',
@@ -90,7 +91,7 @@ def main(argv=None):
         from isaaclab.app import AppLauncher
         AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args(argv)
-    env_config.verify_assets(args.asset, args.model)
+    robot.verify_assets(args.asset, args.model)
     if not args.headless or not 0 < args.max_wall_seconds <= 3600:
         raise ValueError('Bounded headless allocation required')
     source = Path(__file__).resolve().parent
@@ -98,8 +99,8 @@ def main(argv=None):
         raise ValueError('Source-freeze identity differs')
     metadata = json.loads(args.stance.read_text())
     cfg = env_config.EnvConfig(num_envs=1, render=True, record_motion_features=True, episode_seconds=60., device=args.device)
-    identity = {'source_files': source_files(Path(__file__).resolve().parents[1]), 'model_sha256': env_config.MODEL_SHA256,
-        'usd_sha256': env_config.USD_SHA256,
+    identity = {'source_files': source_files(Path(__file__).resolve().parents[1]), 'model_sha256': robot.MODEL_SHA256,
+        'usd_sha256': robot.USD_SHA256,
         'stance_sha256': sha(args.stance), 'geometry_sha256': sha(args.geometry),
         'geometry_extrema_sha256': sha(args.geometry_extrema), 'config': cfg.declaration()}
     identity['physics_source_files'] = physics_files(identity['source_files'])
@@ -112,7 +113,7 @@ def main(argv=None):
         'reset_root_height_m': metadata['reset_root_height_m']}
     identity['standing_admission'] = original.require_admission(args.standing_admission, identity, cfg)
     declaration, targets = validate_trajectory(args.trajectory, args.trajectory_sha256,
-        env_config.MODEL_SHA256, read_arrays=not args.preflight_only)
+        robot.MODEL_SHA256, read_arrays=not args.preflight_only)
     if args.start_phase == .5 and round(declaration['config']['period_s']/.02) % 2:
         raise ValueError('Half-cycle replay requires an even number of controls')
     from locomotion.omni.features import feature_contract

@@ -13,7 +13,8 @@ import time
 import numpy as np
 import torch
 
-import locomotion.omni.ppo as vanilla
+import locomotion.omni.ppo as algorithms
+import locomotion.omni.wrapper as omni_wrapper
 from locomotion.surrogate.train import build_wrapper, process_threads, resolve, wrapper_options
 
 FOCUS = ["learning:translate_0.05_0deg", "learning:quiet_20s", "learning:forward_0.05_to_stop"]
@@ -58,13 +59,13 @@ class DeterministicPolicy:
 
     def inputs(self, observation):
         """The actor input for raw 231-value environment observations."""
-        scaled = vanilla.scale_observation(observation, self.scaling)
+        scaled = omni_wrapper.scale_observation(observation, self.scaling)
         if self.gain != 1.:
             scaled = scaled.clone()
             for frame in range(5):
                 scaled[:, 42 * frame + 24:42 * frame + 42] *= self.gain
         if self.period:
-            clock = vanilla.clock_features(self.env.episode_steps, self.period, observation[:, 210:213]).to(scaled)
+            clock = omni_wrapper.clock_features(self.env.episode_steps, self.period, observation[:, 210:213]).to(scaled)
             scaled = torch.cat((scaled, clock), -1)
         return scaled
 
@@ -83,7 +84,7 @@ class DeterministicPolicy:
                 # The same two-control mean as the training wrapper, restarted with each episode.
                 last = torch.zeros_like(action) if self.previous is None else self.previous
                 self.previous = action.clone()
-                action = vanilla.smoothed_action(action, last, self.env.episode_steps)
+                action = omni_wrapper.smoothed_action(action, last, self.env.episode_steps)
             return action
 
 
@@ -222,7 +223,7 @@ def build_parser():
     parser.add_argument("--view", choices=["three_quarter", "side"], default="three_quarter")
     parser.add_argument("--seed", type=int, help="Defaults to the checkpoint record's seed.")
     parser.add_argument("--task", help="module:Class used to build the actor; defaults to the checkpoint record.")
-    parser.add_argument("--wrapper", help="module:Class; defaults to the checkpoint record or VanillaVecEnv.")
+    parser.add_argument("--wrapper", help="module:Class; defaults to the checkpoint record or OmniVecEnv.")
     parser.add_argument("--ppo-config", type=Path, help="ppo_config.json when the checkpoint has no JSON record.")
     parser.add_argument("--observation-scaling", choices=["none", "fixed"],
                         help="Defaults to the checkpoint's recorded PPO configuration.")
@@ -267,7 +268,7 @@ def evaluate_checkpoint(args):
         raise ValueError("The checkpoint has no JSON record; pass --ppo-config")
     seed = args.seed if args.seed is not None else int(identity.get("seed", 20260917))
     task_spec = args.task or identity.get("task") or DEFAULT_TASK
-    wrapper_spec = args.wrapper or identity.get("wrapper") or "locomotion.omni.ppo:VanillaVecEnv"
+    wrapper_spec = args.wrapper or identity.get("wrapper") or "locomotion.omni.wrapper:OmniVecEnv"
     profiles = {case["case_id"]: case["profile"] for case in evaluation.learning_probe_cases()}
     probes = list(profiles)
     selected = FOCUS if args.cases == "focus" else probes if args.cases == "all" else args.cases.split(",")
@@ -297,7 +298,7 @@ def evaluate_checkpoint(args):
         if 'proprio_history' in config['obs_groups']['actor']:
             from locomotion.priors.networks import actor_observation
             observations.update(actor_observation(wrapped.current['obs']))
-        actor, _ = vanilla.load_actor(checkpoint, config, observations, 'cpu')
+        actor, _ = algorithms.load_actor(checkpoint, config, observations, 'cpu')
         # A wrapper that changes the action or observation path can supply its own deterministic policy.
         deterministic = DeterministicPolicy(actor, env, options,
                                             velocity_input_gain=args.velocity_input_gain, action_mean2=args.action_mean2,

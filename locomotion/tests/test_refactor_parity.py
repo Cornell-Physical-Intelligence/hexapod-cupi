@@ -66,7 +66,7 @@ class RefactorParityTests(unittest.TestCase):
         for baseline in (True, False):
             module = self.module('task_v4_yaw_gate', True) if baseline else self.module('task')
             task = (module.variant(SPEC)(GaitDouble(3), module.task_v4.TaskConfig(seed=20260917)) if baseline else
-                    module.TrainingTask(GaitDouble(3), module.TaskConfig(seed=20260917)))
+                    module.TrainingTask(GaitDouble(3), self.module('commands').TaskConfig(seed=20260917)))
             task.reset()
             trace = []
             for step in range(12):
@@ -84,7 +84,8 @@ class RefactorParityTests(unittest.TestCase):
         traces = []
         for baseline in (True, False):
             torch.manual_seed(239)
-            wrapper = self.module('ppo', baseline).VanillaVecEnv(
+            vec_env = self.module('ppo', True).VanillaVecEnv if baseline else self.module('wrapper').OmniVecEnv
+            wrapper = vec_env(
                 CommandTask(), tensor_dict=lambda data, **kw: data, observation_scaling='fixed',
                 command_segments='bootstrap', gait_clock=60, action_smoothing='mean2', velocity_noise=.5)
             traces.append(([wrapper.step(torch.full((3, 18), .2)) for _ in range(4)], torch.get_rng_state()))
@@ -94,7 +95,7 @@ class RefactorParityTests(unittest.TestCase):
         results = []
         for baseline in (True, False):
             torch.manual_seed(20260917)
-            config = self.module('ppo', baseline).ppo_config(20260917, action_mean='tanh',
+            config = (self.module('ppo', True) if baseline else self.module('ppo_cfg')).ppo_config(20260917, action_mean='tanh',
                 observation_normalization='none', learning_rate_max=.0003, action_noise_correlation=.5)
             if baseline:
                 for node in (config['algorithm'], config['actor']['distribution_cfg']):
@@ -125,7 +126,7 @@ class RefactorBoundaryTests(unittest.TestCase):
         for old, new, name in (
             ('env', 'omni.env', 'LocomotionEnv'),
             ('task', 'omni.task', 'TrainingTask'),
-            ('ppo', 'omni.ppo', 'VanillaVecEnv'),
+            ('ppo', 'omni.wrapper', 'OmniVecEnv'),
             ('evaluate', 'evaluation.runner', 'ExactEvaluationCapture'),
             ('prepare', 'spark.prepare', 'prepare')):
             with self.subTest(module=old):
@@ -141,11 +142,11 @@ class RefactorBoundaryTests(unittest.TestCase):
             source = output/'source'
             manifest = verify_runtime(source)
             self.assertEqual(manifest['schema'], 'hexapod_runtime_sources_v2')
-            for path in ('locomotion/omni/control.py', 'locomotion/omni/task.py',
+            for path in ('locomotion/omni/motor.py', 'locomotion/omni/task.py',
                          'locomotion/omni/env.py', 'locomotion/omni/ppo.py'):
                 self.assertIn(path, manifest['files'])
             self.assertFalse(any('/tests/' in name for name in manifest['files']))
-            path = source/'locomotion/omni/control.py'
+            path = source/'locomotion/omni/motor.py'
             path.write_text(path.read_text() + '\n# tampered\n')
             with self.assertRaisesRegex(ValueError, 'Runtime dependency'):
                 verify_runtime(source)
@@ -163,12 +164,12 @@ class RefactorBoundaryTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         files = source_files(root)
         physics = physics_files(files)
-        for name in ('omni/control.py', 'omni/control.py', 'omni/native.py', 'omni/actuator.py',
+        for name in ('omni/motor.py', 'omni/frames.py', 'omni/native.py', 'omni/actuator.py',
                      'evaluation/capture.py', 'evaluation/scoring.py'):
             self.assertIn(name, physics)
             changed = dict(files, **{name: '0'*64})
             self.assertNotEqual(physics, physics_files(changed))
-        self.assertNotIn('omni/algorithm.py', physics)
+        self.assertNotIn('omni/ppo.py', physics)
 
     def test_legacy_identity_checks_remain_strict(self):
         from copy import deepcopy

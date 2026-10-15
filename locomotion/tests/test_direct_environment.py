@@ -5,7 +5,7 @@ import unittest
 import torch
 from locomotion.omni.env import reset_rows
 from locomotion.omni.env import LocomotionEnv
-from locomotion.omni.control import emitted_target, executed_action_feature
+from locomotion.omni.motor import emitted_target, executed_action_feature
 
 BACKEND = Path(__file__).resolve().parents[1] / "omni"
 
@@ -81,7 +81,7 @@ class DirectEnvironmentContractTests(unittest.TestCase):
         self.assertEqual({k.arg: ast.literal_eval(k.value) for k in material.keywords},
                          {"static_friction": 1., "dynamic_friction": 1., "restitution": 0.,
                           "friction_combine_mode": "multiply", "restitution_combine_mode": "multiply"})
-        config = ast.parse((BACKEND / "config.py").read_text())
+        config = ast.parse((BACKEND / "env_cfg.py").read_text())
         scenes = [n for n in ast.walk(config) if isinstance(n, ast.Call)
                   and ast.unparse(n.func) == "InteractiveSceneCfg"]
         self.assertEqual(len(scenes), 2)

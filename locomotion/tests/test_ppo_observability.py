@@ -12,7 +12,8 @@ import torch
 from tensordict import TensorDict
 from rsl_rl.algorithms import PPO
 
-from locomotion.omni.ppo import ppo_config, policy_change_metrics, UpdateDiagnostics
+from locomotion.omni.ppo import policy_change_metrics, UpdateDiagnostics
+from locomotion.omni.ppo_cfg import ppo_config
 from locomotion.spark.prepare import prepare
 from locomotion.omni.train import require_learner_configuration
 

@@ -10,8 +10,9 @@ import time
 import numpy as np
 import torch
 
-import locomotion.omni.task as task_v1
-from locomotion.omni.env import executed_action_feature, rotate
+from locomotion.omni.commands import TaskConfig
+from locomotion.omni.frames import rotate
+from locomotion.omni.motor import executed_action_feature
 from locomotion.surrogate.env import Renderer, SurrogateConfig, SurrogateEnv, contact_overrides, make_env
 from locomotion.surrogate.train import resolve, thread_count
 
@@ -135,7 +136,7 @@ def score_arrays(data, names, nominal_height=None, neutral=None):
         target = reward_task(name)
         if isinstance(target, type):
             player.commands[:] = commands[0]
-            scorers[name] = target(player, task_v1.TaskConfig(), None)
+            scorers[name] = target(player, TaskConfig(), None)
         else:
             scorers[name] = FunctionScorer(target, replicas, player.neutral)
     rows = {name: [] for name in names}

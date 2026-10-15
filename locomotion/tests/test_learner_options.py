@@ -13,8 +13,10 @@ from tensordict import TensorDict
 from rsl_rl.algorithms import PPO
 
 import locomotion.omni.ppo as ppo
+import locomotion.omni.ppo_cfg as ppo_cfg
+import locomotion.omni.wrapper as wrapper
 from locomotion.spark.prepare import prepare
-from locomotion.omni.algorithm import CappedRatePPO
+from locomotion.omni.ppo import CappedRatePPO
 from locomotion.omni.train import require_learner_configuration
 
 REMOTE = '/srv/cupi/hexapod/runs/james/learner_options_fixture'
@@ -64,16 +66,16 @@ def construct(config):
 
 class LearnerOptionTests(unittest.TestCase):
     def test_options_appear_in_the_configuration_only_when_selected(self):
-        base = ppo.ppo_config(7)
+        base = ppo_cfg.ppo_config(7)
         self.assertNotIn('environment_wrapper', base)
         self.assertEqual(base['algorithm']['class_name'], 'PPO')
         self.assertNotIn('learning_rate_max', base['algorithm'])
         self.assertEqual(base['actor']['distribution_cfg']['init_std'], .15)
-        chosen = ppo.ppo_config(7, action_mean='tanh', **OPTIONS)
+        chosen = ppo_cfg.ppo_config(7, action_mean='tanh', **OPTIONS)
         self.assertEqual(chosen['environment_wrapper'],
                          {'observation_scaling': 'fixed', 'command_segments': 'bootstrap', 'gait_clock': 60})
         self.assertEqual(chosen['exploration'], {'action_std_final': .03})
-        self.assertEqual(chosen['algorithm']['class_name'], ppo.RATE_CLASS)
+        self.assertEqual(chosen['algorithm']['class_name'], ppo_cfg.RATE_CLASS)
         self.assertEqual(chosen['algorithm']['learning_rate'], 3e-4)
         self.assertEqual(chosen['actor']['distribution_cfg']['init_std'], .1)
         record = {'identity': {'upstream_source_files': {}, 'ppo_config': chosen}}
@@ -83,28 +85,28 @@ class LearnerOptionTests(unittest.TestCase):
         for bad in (dict(observation_scaling='unit'), dict(command_segments='cut'),
                     dict(learning_rate_max=1.), dict(learning_rate_max=1), dict(action_std=0.), dict(action_std=1)):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
-                ppo.ppo_config(7, **bad)
+                ppo_cfg.ppo_config(7, **bad)
 
     def test_fixed_scales_bring_each_input_group_to_unit_size(self):
         actor = torch.zeros(1, 231)
         actor[0, 0], actor[0, 3], actor[0, 6], actor[0, 24] = .5, 1., .35, 2.
         actor[0, 210:213] = torch.tensor([.05, -.05, .2])
         actor[0, 213] = .7
-        scaled = ppo.scale_observation(actor, 'fixed')
+        scaled = wrapper.scale_observation(actor, 'fixed')
         self.assertEqual([round(float(scaled[0, i]), 6) for i in (0, 3, 6, 24, 213)], [1., 1., 1., 1., .7])
         torch.testing.assert_close(scaled[0, 210:213], torch.tensor([1., -1., 1.]))
         critic = torch.cat((actor, torch.tensor([[.05, 0., -.05]])), -1)
-        torch.testing.assert_close(ppo.scale_observation(critic, 'fixed', critic=True)[0, 231:], torch.tensor([1., 0., -1.]))
-        self.assertIs(ppo.scale_observation(actor, 'none'), actor)
+        torch.testing.assert_close(wrapper.scale_observation(critic, 'fixed', critic=True)[0, 231:], torch.tensor([1., 0., -1.]))
+        self.assertIs(wrapper.scale_observation(actor, 'none'), actor)
         # Every proprioception frame uses the same scales.
-        self.assertEqual(ppo.ACTOR_SCALES[:42], ppo.ACTOR_SCALES[168:210])
+        self.assertEqual(wrapper.ACTOR_SCALES[:42], wrapper.ACTOR_SCALES[168:210])
         with self.assertRaises(ValueError):
-            ppo.scale_observation(actor, 'fixed', critic=True)
+            wrapper.scale_observation(actor, 'fixed', critic=True)
 
     def test_bootstrap_segments_end_the_return_at_a_command_change_without_a_reset(self):
         plain_task, segment_task = CommandTask(), CommandTask()
-        plain = ppo.VanillaVecEnv(plain_task, tensor_dict=lambda value, **kw: value)
-        segments = ppo.VanillaVecEnv(segment_task, tensor_dict=lambda value, **kw: value,
+        plain = wrapper.OmniVecEnv(plain_task, tensor_dict=lambda value, **kw: value)
+        segments = wrapper.OmniVecEnv(segment_task, tensor_dict=lambda value, **kw: value,
                                      observation_scaling='fixed', command_segments='bootstrap')
         _, reward, done, extras = plain.step(torch.zeros(3, 18))
         self.assertEqual(done.tolist(), [0, 0, 1])
@@ -119,11 +121,11 @@ class LearnerOptionTests(unittest.TestCase):
         self.assertEqual(obs['critic'].shape, (3, 234))
 
     def test_rate_ceiling_holds_through_the_stock_schedule(self):
-        capped = construct(ppo.ppo_config(3, action_mean='tanh', observation_normalization='none', learning_rate_max=3e-4))
+        capped = construct(ppo_cfg.ppo_config(3, action_mean='tanh', observation_normalization='none', learning_rate_max=3e-4))
         self.assertIs(type(capped), CappedRatePPO)
         self.assertEqual(capped.learning_rate, 3e-4)
         self.assertEqual({group['lr'] for group in capped.optimizer.param_groups}, {3e-4})
-        stock = construct(ppo.ppo_config(3, action_mean='tanh', observation_normalization='none'))
+        stock = construct(ppo_cfg.ppo_config(3, action_mean='tanh', observation_normalization='none'))
         self.assertIs(type(stock), PPO)
         rates = {}
         for name, algorithm in (('capped', capped), ('stock', stock)):
@@ -146,16 +148,16 @@ class LearnerOptionTests(unittest.TestCase):
         self.assertGreater(rates['stock'], 1e-3)
 
     def test_correlated_noise_keeps_the_gaussian_marginal_and_carries_noise_between_controls(self):
-        from locomotion.omni.algorithm import BoundedMeanGaussian, CorrelatedBoundedMeanGaussian
-        config = ppo.ppo_config(3, action_mean='tanh', action_noise_correlation=.9)
+        from locomotion.omni.ppo import BoundedMeanGaussian, CorrelatedBoundedMeanGaussian
+        config = ppo_cfg.ppo_config(3, action_mean='tanh', action_noise_correlation=.9)
         self.assertEqual(config['actor']['distribution_cfg']['class_name'],
-                         'locomotion.omni.algorithm:CorrelatedBoundedMeanGaussian')
+                         'locomotion.omni.ppo:CorrelatedBoundedMeanGaussian')
         self.assertEqual(config['actor']['distribution_cfg']['noise_correlation'], .9)
-        self.assertNotIn('noise_correlation', ppo.ppo_config(3, action_mean='tanh')['actor']['distribution_cfg'])
+        self.assertNotIn('noise_correlation', ppo_cfg.ppo_config(3, action_mean='tanh')['actor']['distribution_cfg'])
         for bad in (dict(action_noise_correlation=.9), dict(action_mean='tanh', action_noise_correlation=1.),
                     dict(action_mean='tanh', action_noise_correlation=1)):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
-                ppo.ppo_config(3, **bad)
+                ppo_cfg.ppo_config(3, **bad)
         self.assertIs(type(construct(config).actor.distribution), CorrelatedBoundedMeanGaussian)
         torch.manual_seed(5)
         distribution = CorrelatedBoundedMeanGaussian(2, init_std=.15, std_type='log', noise_correlation=.9)
@@ -177,12 +179,12 @@ class LearnerOptionTests(unittest.TestCase):
             CorrelatedBoundedMeanGaussian(2, noise_correlation=1.)
 
     def test_deviation_schedule_replaces_the_learned_deviation(self):
-        config = ppo.ppo_config(3, action_mean='tanh', observation_normalization='none', action_std_final=.03)
+        config = ppo_cfg.ppo_config(3, action_mean='tanh', observation_normalization='none', action_std_final=.03)
         self.assertEqual(config['exploration'], {'action_std_final': .03})
-        self.assertNotIn('exploration', ppo.ppo_config(3))
+        self.assertNotIn('exploration', ppo_cfg.ppo_config(3))
         for bad in (dict(action_std_final=.2), dict(action_std_final=.001), dict(action_std_final=1)):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
-                ppo.ppo_config(3, **bad)
+                ppo_cfg.ppo_config(3, **bad)
         config.pop('exploration')
         algorithm = construct(config)
         calls = []
@@ -198,40 +200,40 @@ class LearnerOptionTests(unittest.TestCase):
         self.assertAlmostEqual(float(parameter.exp()[0]), .03, places=6)
 
     def test_gait_clock_appends_the_episode_phase_to_actor_and_critic_inputs(self):
-        self.assertEqual(ppo.ppo_config(3, gait_clock=60)['environment_wrapper'], {'gait_clock': 60})
+        self.assertEqual(ppo_cfg.ppo_config(3, gait_clock=60)['environment_wrapper'], {'gait_clock': 60})
         for bad in (dict(gait_clock=5), dict(gait_clock=60.), dict(gait_clock=300)):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
-                ppo.ppo_config(3, **bad)
+                ppo_cfg.ppo_config(3, **bad)
         task = CommandTask()
         task.episode_steps = torch.tensor([0, 15, 75])
-        wrapped = ppo.VanillaVecEnv(task, tensor_dict=lambda value, **kw: value, gait_clock=60)
+        wrapped = wrapper.OmniVecEnv(task, tensor_dict=lambda value, **kw: value, gait_clock=60)
         obs = wrapped.get_observations()
         self.assertEqual((obs['policy'].shape, obs['critic'].shape), ((3, 233), (3, 236)))
         expected = torch.tensor([[0., 1.], [1., 0.], [1., 0.]])
         torch.testing.assert_close(obs['policy'][:, 231:], expected, atol=1e-6, rtol=0)
         torch.testing.assert_close(obs['critic'][:, 234:], expected, atol=1e-6, rtol=0)
         torch.testing.assert_close(obs['policy'][:, :231], task.output()['obs'])
-        plain = ppo.VanillaVecEnv(CommandTask(), tensor_dict=lambda value, **kw: value)
+        plain = wrapper.OmniVecEnv(CommandTask(), tensor_dict=lambda value, **kw: value)
         self.assertEqual(plain.get_observations()['policy'].shape, (3, 231))
         moving = torch.tensor([[.05, 0., 0.], [0., 0., .2]])
-        torch.testing.assert_close(ppo.clock_features(torch.tensor([30, 45]), 60, moving),
+        torch.testing.assert_close(wrapper.clock_features(torch.tensor([30, 45]), 60, moving),
                                    torch.tensor([[0., -1.], [-1., 0.]]), atol=1e-6, rtol=0)
         # Under a zero command the clock input rests at zero.
-        self.assertEqual(float(ppo.clock_features(torch.tensor([30, 45]), 60, torch.zeros(2, 3)).abs().sum()), 0.)
+        self.assertEqual(float(wrapper.clock_features(torch.tensor([30, 45]), 60, torch.zeros(2, 3)).abs().sum()), 0.)
         task.commands = torch.tensor([[.05, 0., 0.], [0., 0., 0.], [0., 0., .2]])
         gated = wrapped.observations(task.output())['policy'][:, 231:]
         torch.testing.assert_close(gated, torch.tensor([[0., 1.], [0., 0.], [1., 0.]]), atol=1e-6, rtol=0)
 
     def test_action_smoothing_sends_the_two_control_mean_and_restarts_with_each_episode(self):
-        self.assertEqual(ppo.ppo_config(3, action_smoothing='mean2')['environment_wrapper'], {'action_smoothing': 'mean2'})
+        self.assertEqual(ppo_cfg.ppo_config(3, action_smoothing='mean2')['environment_wrapper'], {'action_smoothing': 'mean2'})
         with self.assertRaises(ValueError):
-            ppo.ppo_config(3, action_smoothing='mean3')
-        mean = ppo.smoothed_action(torch.ones(2, 18), torch.full((2, 18), .4), torch.tensor([5, 0]))
+            ppo_cfg.ppo_config(3, action_smoothing='mean3')
+        mean = wrapper.smoothed_action(torch.ones(2, 18), torch.full((2, 18), .4), torch.tensor([5, 0]))
         torch.testing.assert_close(mean[:, 0], torch.tensor([.7, .5]))
         task, received = CommandTask(), []
         step = task.step
         task.step = lambda action: (received.append(action.clone()), step(action))[1]
-        wrapped = ppo.VanillaVecEnv(task, tensor_dict=lambda value, **kw: value, action_smoothing='mean2')
+        wrapped = wrapper.OmniVecEnv(task, tensor_dict=lambda value, **kw: value, action_smoothing='mean2')
         # An action that alternates on consecutive controls reaches the task as a constant.
         for control, sign in enumerate((1., -1., 1., -1.)):
             task.episode_steps = torch.full((3,), control)
@@ -246,7 +248,7 @@ class LearnerOptionTests(unittest.TestCase):
         plain_task, direct = CommandTask(), []
         plain_step = plain_task.step
         plain_task.step = lambda action: (direct.append(action.clone()), plain_step(action))[1]
-        ppo.VanillaVecEnv(plain_task, tensor_dict=lambda value, **kw: value).step(torch.full((3, 18), .6))
+        wrapper.OmniVecEnv(plain_task, tensor_dict=lambda value, **kw: value).step(torch.full((3, 18), .6))
         torch.testing.assert_close(direct[0], torch.full((3, 18), .6))
         with tempfile.TemporaryDirectory() as directory:
             args = prepare(Path(directory)/'smooth', REMOTE, mode='train', action_mean='tanh',
@@ -257,26 +259,26 @@ class LearnerOptionTests(unittest.TestCase):
                 prepare(Path(directory)/'tripod', REMOTE, mode='tripod', action_smoothing='mean2')
 
     def test_velocity_noise_reaches_the_actor_joint_velocity_inputs_alone(self):
-        self.assertEqual(ppo.ppo_config(3, velocity_noise=1.)['environment_wrapper'], {'velocity_noise': 1.})
+        self.assertEqual(ppo_cfg.ppo_config(3, velocity_noise=1.)['environment_wrapper'], {'velocity_noise': 1.})
         for bad in (dict(velocity_noise=1), dict(velocity_noise=-1.), dict(velocity_noise=9.)):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
-                ppo.ppo_config(3, **bad)
+                ppo_cfg.ppo_config(3, **bad)
         torch.manual_seed(5)
         task = CommandTask()
         task.num_envs, clean = 3, task.output()
-        wrapped = ppo.VanillaVecEnv(task, tensor_dict=lambda value, **kw: value, observation_scaling='fixed',
+        wrapped = wrapper.OmniVecEnv(task, tensor_dict=lambda value, **kw: value, observation_scaling='fixed',
                                     velocity_noise=2.)
         samples = torch.stack([wrapped.observations(clean)['policy'] for _ in range(4000)])
-        scaled = ppo.scale_observation(clean['obs'], 'fixed')
+        scaled = wrapper.scale_observation(clean['obs'], 'fixed')
         velocity = torch.zeros(231, dtype=torch.bool)
         for frame in range(5):
             velocity[42 * frame + 24:42 * frame + 42] = True
         # Other actor inputs and each critic input keep their measured values.
         torch.testing.assert_close(samples[:, :, ~velocity], scaled[:, ~velocity].expand(4000, -1, -1))
-        torch.testing.assert_close(wrapped.observations(clean)['critic'], ppo.scale_observation(clean['critic'], 'fixed', critic=True))
+        torch.testing.assert_close(wrapped.observations(clean)['critic'], wrapper.scale_observation(clean['critic'], 'fixed', critic=True))
         # The fixed scale multiplies joint velocity by 0.5, so 2 rad/s of noise has unit deviation there.
         deviation = (samples[:, :, velocity] - scaled[:, velocity]).std()
-        self.assertAlmostEqual(float(deviation), 2. * ppo.FRAME_SCALES[-1], delta=.02)
+        self.assertAlmostEqual(float(deviation), 2. * wrapper.FRAME_SCALES[-1], delta=.02)
         with tempfile.TemporaryDirectory() as directory:
             args = prepare(Path(directory)/'noise', REMOTE, mode='train', action_mean='tanh', velocity_noise=1.)['command_args']
             self.assertEqual(args[args.index('--velocity-noise')+1], '1.0')
@@ -304,7 +306,7 @@ class LearnerOptionTests(unittest.TestCase):
                     self.assertEqual(args[args.index(flag)+1], value)
                 pack = json.loads((root/mode/'PACK.json').read_text())
                 self.assertEqual({key: pack[key] for key in OPTIONS}, OPTIONS)
-                self.assertIn('locomotion/omni/algorithm.py', json.loads((root/mode/'source/FREEZE_SHA256.json').read_text()))
+                self.assertIn('locomotion/omni/ppo.py', json.loads((root/mode/'source/FREEZE_SHA256.json').read_text()))
             legacy = prepare(root/'legacy', REMOTE)
             self.assertFalse({'--observation-scaling', '--command-segments', '--learning-rate-max', '--action-std',
                               '--action-noise-correlation', '--action-std-final', '--video-case'}
@@ -330,16 +332,16 @@ class LearnerOptionTests(unittest.TestCase):
 
 
     def test_rollout_length_scales_the_mini_batches_and_appears_only_when_selected(self):
-        base = ppo.ppo_config(7)
-        longer = ppo.ppo_config(7, steps_per_env=36)
+        base = ppo_cfg.ppo_config(7)
+        longer = ppo_cfg.ppo_config(7, steps_per_env=36)
         self.assertEqual((base['num_steps_per_env'], base['algorithm']['num_mini_batches']), (24, 4))
         self.assertEqual((longer['num_steps_per_env'], longer['algorithm']['num_mini_batches']), (36, 6))
-        self.assertEqual(ppo.ppo_config(7, steps_per_env=24), base)
+        self.assertEqual(ppo_cfg.ppo_config(7, steps_per_env=24), base)
         longer['num_steps_per_env'], longer['algorithm']['num_mini_batches'] = 24, 4
         self.assertEqual(longer, base)
         for bad in (32, 6, 102, 36., '36'):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
-                ppo.ppo_config(7, steps_per_env=bad)
+                ppo_cfg.ppo_config(7, steps_per_env=bad)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             checkpoint = {'checkpoint': REMOTE+'/checkpoint.pt', 'checkpoint_sha': 'a'*64, 'checkpoint_declaration_sha': 'b'*64}
@@ -356,7 +358,7 @@ class LearnerOptionTests(unittest.TestCase):
         import locomotion.omni.train as train
         # Metrics rows, state and checkpoint sidecars count the configured rollout, not a fixed 24 controls.
         for steps, updates, collected in ((24, 2000, 6_144_000), (36, 1333, 6_142_464), (48, 2500, 15_360_000)):
-            self.assertEqual(train.collected_transitions(updates, ppo.ppo_config(7, steps_per_env=steps), 128), collected)
+            self.assertEqual(train.collected_transitions(updates, ppo_cfg.ppo_config(7, steps_per_env=steps), 128), collected)
         self.assertNotIn('*24*', Path(train.__file__).read_text())
         base = ['--asset', 'a', '--model', 'm', '--geometry', 'g', '--geometry-extrema', 'e', '--stance', 's',
                 '--output', 'o', '--source-freeze-sha256', 'f'*64, '--num-envs', '1', '--preflight-only', '--mode', 'train']

@@ -3,7 +3,7 @@ from pathlib import Path
 import argparse
 import json
 
-from locomotion.omni.config import MODEL_SHA256, USD_SHA256, sha
+from locomotion.omni.robot import MODEL_SHA256, USD_SHA256, sha
 
 
 def require_admission(path, identity, cfg):
@@ -71,7 +71,7 @@ def validate_admission(value, identity, cfg, mounts=None):
 def create(one, batch, output, inputs):
     """Recompute both native captures before writing admission and launch inputs."""
     from locomotion.evaluation.capture import score_diagnostic
-    from locomotion.omni.config import EnvConfig
+    from locomotion.omni.env_cfg import EnvConfig
     one, batch, output, inputs = map(Path, (one, batch, output, inputs))
     roots = {'one': one.resolve(), 'batch': batch.resolve()}
     states = {name: json.loads((root/'state.json').read_text()) for name, root in roots.items()}

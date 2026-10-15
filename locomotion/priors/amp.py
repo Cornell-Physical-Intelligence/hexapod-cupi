@@ -8,11 +8,12 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from locomotion.omni.algorithm import CappedRatePPO, CommandBootstrapPPO
+from locomotion.omni.ppo import CappedRatePPO, CommandBootstrapPPO
 
 import locomotion.omni.features as amp
 from . import discriminator as disc
-from locomotion.omni.ppo import VanillaVecEnv, ppo_config, scale_observation, clock_features, smoothed_action
+from locomotion.omni.ppo_cfg import ppo_config
+from locomotion.omni.wrapper import OmniVecEnv, scale_observation, clock_features, smoothed_action
 from . import networks as nets
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -125,8 +126,8 @@ class CollisionCapture:
         return getattr(self.inner, name)
 
 
-class AMPVecEnv(VanillaVecEnv):
-    """Vanilla adapter plus AMP states, named actor groups and the critic's privileged state."""
+class AMPVecEnv(OmniVecEnv):
+    """The omni task adapter plus AMP states, named actor groups and the critic's privileged state."""
 
     def __init__(self, task, tensor_dict=None, *, collision=None, amp_config=None, **wrapper_options):
         self.collision = collision

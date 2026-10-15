@@ -5,6 +5,7 @@ import tempfile
 import unittest
 
 import locomotion.omni.ppo as ppo
+import locomotion.omni.ppo_cfg as ppo_cfg
 import locomotion.omni.train as train
 from locomotion.spark.prepare import prepare
 from locomotion.tests.test_learner_options import construct
@@ -27,7 +28,7 @@ def entry(*extra):
 
 def schedule_values(start, final, decay, updates):
     """The deviation each update trains with, read through DeviationSchedule."""
-    algorithm = construct(ppo.ppo_config(3, action_mean='tanh', observation_normalization='none'))
+    algorithm = construct(ppo_cfg.ppo_config(3, action_mean='tanh', observation_normalization='none'))
     seen = []
     algorithm.update = lambda: seen.append(float(algorithm.actor.distribution.log_std_param.exp()[0])) or {}
     schedule = ppo.DeviationSchedule(algorithm, start, final, decay)
@@ -87,9 +88,9 @@ class DecayLengthTests(unittest.TestCase):
     def test_default_decay_spans_the_run_and_configuration_is_unchanged(self):
         self.assertEqual(train.decay_updates(2000, None), 2000)
         self.assertEqual(train.decay_updates(5000, 2000), 2000)
-        base = ppo.ppo_config(3, action_mean='tanh', observation_normalization='none', action_std_final=.05)
+        base = ppo_cfg.ppo_config(3, action_mean='tanh', observation_normalization='none', action_std_final=.05)
         self.assertEqual(base['exploration'], {'action_std_final': .05})
-        decoupled = ppo.ppo_config(3, action_mean='tanh', observation_normalization='none', action_std_final=.05,
+        decoupled = ppo_cfg.ppo_config(3, action_mean='tanh', observation_normalization='none', action_std_final=.05,
                                    action_std_decay_updates=2000)
         self.assertEqual(decoupled['exploration'], {'action_std_final': .05, 'action_std_decay_updates': 2000})
         self.assertEqual({k: v for k, v in decoupled.items() if k != 'exploration'},
@@ -97,7 +98,7 @@ class DecayLengthTests(unittest.TestCase):
         for bad in (dict(action_std_decay_updates=2000), dict(action_std_final=.05, action_std_decay_updates=0),
                     dict(action_std_final=.05, action_std_decay_updates=2000.)):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
-                ppo.ppo_config(3, **bad)
+                ppo_cfg.ppo_config(3, **bad)
 
     def test_decoupled_schedule_matches_the_original_through_its_decay_then_holds(self):
         original = schedule_values(.15, .05, 20, 20)

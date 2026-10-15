@@ -12,18 +12,18 @@ class PackageCutoverTests(unittest.TestCase):
                          ['README.md', '__init__.py'])
 
     def test_learner_configuration_uses_package_classes(self):
-        from locomotion.omni.config import ppo_config
+        from locomotion.omni.ppo_cfg import ppo_config
         config = ppo_config(17, action_mean='tanh', learning_rate_max=.0003)
         self.assertEqual(config['algorithm']['class_name'],
-                         'locomotion.omni.algorithm:CappedRatePPO')
+                         'locomotion.omni.ppo:CappedRatePPO')
         self.assertEqual(config['actor']['distribution_cfg']['class_name'],
-                         'locomotion.omni.algorithm:BoundedMeanGaussian')
+                         'locomotion.omni.ppo:BoundedMeanGaussian')
 
     def test_dependency_roots_use_implementations(self):
         from locomotion.spark.sources import physics_files, source_files
         paths = physics_files(source_files(ROOT))
         self.assertIn('omni/env.py', paths)
-        self.assertIn('omni/config.py', paths)
+        self.assertIn('omni/env_cfg.py', paths)
         self.assertNotIn('env.py', paths)
 
     def test_compatibility_has_no_global_import_hook(self):

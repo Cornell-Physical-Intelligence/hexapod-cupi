@@ -6,7 +6,7 @@ those settings. [TRAINING](../docs/TRAINING.md) defines the goal and acceptance.
 
 | Package | Start here |
 | --- | --- |
-| `omni/` | The omnidirectional PPO experiment that produced `c48_long`. Read `config.py`, `env.py` and `task.py`. |
+| `omni/` | The omnidirectional PPO experiment that produced `c48_long`. Read `robot.py`, `env_cfg.py`, `env.py`, `reward.py` and `task.py`. |
 | `tripod/` | Shaurya's original Direct task, scripted BC and PPO fine-tuning. Read its three `hexapod_*.py` files. |
 | `priors/` | Generate and review demonstration trajectories; train the AMP discriminator and optional paper networks. |
 | `surrogate/` | Run CPU MuJoCo experiments, resume training and replay traces without Spark. |

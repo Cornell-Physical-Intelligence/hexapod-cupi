@@ -12,9 +12,11 @@ import unittest
 
 import torch
 
-import locomotion.omni.ppo as ppo
+import locomotion.omni.ppo_cfg as ppo_cfg
+import locomotion.omni.wrapper as wrapper
 from locomotion.surrogate import evaluate, train
-from locomotion.omni.task import REWARD_CONFIG as REWARD_V2_CONFIG, REWARD_CONFIG as REWARD_V4_CONFIG, TrainingTask as TrainingTaskV2
+from locomotion.omni.reward import REWARD_CONFIG as REWARD_V2_CONFIG, REWARD_CONFIG as REWARD_V4_CONFIG
+from locomotion.omni.task import TrainingTask as TrainingTaskV2
 
 NATIVE_ROW_KEYS = {"update", "transitions", "collection_seconds", "learning_seconds", "loss", "learning_rate",
                    "mean_action_std", "actions", "task", "policy_update"}
@@ -107,11 +109,11 @@ class TrainerTests(unittest.TestCase):
 
     def test_bootstrap_wrapper_requires_the_command_target_algorithm(self):
         for options in ({"command_segments": "bootstrap"}, {"command_segments": "bootstrap", "learning_rate_max": 3e-4}):
-            config = train.learner_configuration(ppo, 7, options)
+            config = train.learner_configuration(ppo_cfg, 7, options)
             train.check_command_bootstrap(train.wrapper_options(config), config)
         override = {"environment_wrapper": {"command_segments": "bootstrap"}}
-        stock = train.merge(train.learner_configuration(ppo, 7, {}), override)
-        replaced = train.merge(train.learner_configuration(ppo, 7, {"command_segments": "bootstrap"}),
+        stock = train.merge(train.learner_configuration(ppo_cfg, 7, {}), override)
+        replaced = train.merge(train.learner_configuration(ppo_cfg, 7, {"command_segments": "bootstrap"}),
                                {"algorithm": {"class_name": "PPO"}})
         for config in (stock, replaced):
             with self.assertRaisesRegex(ValueError, "CommandBootstrapPPO"):
@@ -171,7 +173,7 @@ class TrainerTests(unittest.TestCase):
                          {"seed": 3, "action_std": .2})
         with self.assertRaisesRegex(ValueError, "velocity_noise"):
             train.learner_configuration(old, 3, {"velocity_noise": .5})
-        config = train.learner_configuration(ppo, 3, {"action_smoothing": "mean2", "velocity_noise": .5})
+        config = train.learner_configuration(ppo_cfg, 3, {"action_smoothing": "mean2", "velocity_noise": .5})
         self.assertEqual(config["environment_wrapper"], {"action_smoothing": "mean2", "velocity_noise": .5})
 
     def test_wrapper_receives_recorded_options(self):
@@ -216,8 +218,8 @@ class PolicyTests(unittest.TestCase):
         options = {"observation_scaling": "fixed", "gait_clock": 60}
         inputs = self.policy(options).inputs(self.observation)
         self.assertEqual(tuple(inputs.shape), (2, 233))
-        self.assertTrue(torch.equal(inputs[:, :231], ppo.scale_observation(self.observation, "fixed")))
-        clock = ppo.clock_features(self.env.episode_steps, 60, self.observation[:, 210:213])
+        self.assertTrue(torch.equal(inputs[:, :231], wrapper.scale_observation(self.observation, "fixed")))
+        clock = wrapper.clock_features(self.env.episode_steps, 60, self.observation[:, 210:213])
         self.assertTrue(torch.equal(inputs[:, 231:], clock))
         self.assertEqual(clock[1].tolist(), [0., 0.])
 
@@ -225,7 +227,7 @@ class PolicyTests(unittest.TestCase):
         policy = self.policy({"velocity_noise": .5, "observation_scaling": "fixed"})
         first, second = policy.inputs(self.observation), policy.inputs(self.observation)
         self.assertTrue(torch.equal(first, second))
-        self.assertTrue(torch.equal(first, ppo.scale_observation(self.observation, "fixed")))
+        self.assertTrue(torch.equal(first, wrapper.scale_observation(self.observation, "fixed")))
 
     def test_two_control_mean_cancels_an_alternating_action(self):
         a = torch.full((2, 18), .4)

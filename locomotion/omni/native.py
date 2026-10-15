@@ -68,7 +68,7 @@ class NativeEnv(DirectRLEnv):
         return zeros, zeros.clone()
 
     def _get_rewards(self):
-        # RewardTask computes the selected frozen reward after the native return.
+        # TrainingTask computes the walking reward after the native step returns.
         return torch.zeros(self.num_envs, device=self.device)
 
     def _get_observations(self):

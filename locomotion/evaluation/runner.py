@@ -13,7 +13,8 @@ import math
 import time
 import numpy as np
 import torch
-from locomotion.omni.config import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256, EnvConfig
+from locomotion.omni.env_cfg import EnvConfig
+from locomotion.omni.robot import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256
 from locomotion.evaluation.capture import _DiagnosticGeometry, _classify_patches, _diagnostic_rotation, _diagnostic_servo
 import locomotion.evaluation.scoring as scoring
 

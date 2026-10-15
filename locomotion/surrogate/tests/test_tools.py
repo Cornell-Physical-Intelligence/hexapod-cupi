@@ -14,7 +14,8 @@ import torch
 from locomotion.spark.prepare import prepare
 from locomotion.surrogate import replay
 from locomotion.surrogate.env import ROOT, make_env
-from locomotion.omni.task import TaskConfig, TrainingTask
+from locomotion.omni.commands import TaskConfig
+from locomotion.omni.task import TrainingTask
 
 PACKAGE = ROOT / "locomotion/surrogate"
 REMOTE = Path("/home/orionh/HEXAPOD_runs/restart_20260914/test_surrogate_boundary")

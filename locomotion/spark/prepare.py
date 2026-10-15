@@ -7,9 +7,10 @@ from pathlib import Path
 import re
 import shutil
 
-from locomotion.omni.config import sha
+from locomotion.omni.commands import GAIT_CLOCK_CONTROLS
+from locomotion.omni.ppo_cfg import ppo_config
+from locomotion.omni.robot import sha
 from locomotion.spark.sources import runtime_paths, write_runtime
-from locomotion.omni.config import ppo_config
 from locomotion.spark.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline, LEARNER_OPTION_DEFAULTS
 from locomotion.spark.safety import LEGACY_ROOT, RUN_ROOTS, within_roots
 
@@ -40,9 +41,9 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
     if learner not in ('ppo', 'amp') or networks not in ('mlp', 'paper') or (networks == 'paper' and learner != 'amp') or (learner == 'amp' and mode not in ('train', 'evaluate')):
         raise ValueError('The paper networks need the AMP learner for training or evaluation')
     if gait_clock is None:
-        gait_clock = 60 if mode == 'train' and networks == 'mlp' else 0
-    if mode == 'train' and networks == 'mlp' and gait_clock != 60:
-        raise ValueError('The active reward requires the 60-control gait clock')
+        gait_clock = GAIT_CLOCK_CONTROLS if mode == 'train' and networks == 'mlp' else 0
+    if mode == 'train' and networks == 'mlp' and gait_clock != GAIT_CLOCK_CONTROLS:
+        raise ValueError(f'The active reward requires the {GAIT_CLOCK_CONTROLS}-control gait clock')
     validate_deadline(mode, allocation_profile, max_wall_seconds)
     if type(max_wall_seconds) is not int:
         raise ValueError('Preparation requires an integer native deadline')

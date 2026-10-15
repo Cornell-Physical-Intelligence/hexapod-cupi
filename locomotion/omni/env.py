@@ -1,4 +1,4 @@
-"""c48 observations and terminal state over the stock DirectRLEnv lifecycle.
+"""Build the omnidirectional observation history and terminal state over the stock DirectRLEnv lifecycle.
 
 The task reads terminal observations before selected resets.
 """
@@ -7,10 +7,11 @@ import json
 import math
 import numpy as np
 import torch
-from locomotion.omni.config import BODY_NAMES, JOINT_NAMES, LEGS, MASS_KG, verify_assets, make_config, ISAACLAB_REVISION
-from locomotion.omni.control import motor_force, emitted_target, executed_action_feature
-from locomotion.omni.control import rotate, inverse_rotate, navigation
+from locomotion.omni.env_cfg import make_config
 from locomotion.omni.features import extract_features
+from locomotion.omni.frames import inverse_rotate, navigation, rotate
+from locomotion.omni.motor import emitted_target, executed_action_feature
+from locomotion.omni.robot import BODY_NAMES, ISAACLAB_REVISION, JOINT_NAMES, LEGS, MASS_KG, verify_assets
 
 
 def reset_rows(indices, num_envs, device):

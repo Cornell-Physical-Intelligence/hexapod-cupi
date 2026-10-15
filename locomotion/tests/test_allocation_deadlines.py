@@ -18,7 +18,7 @@ class AllocationDeadlineTests(unittest.TestCase):
             binding = prepare.prepare(pack, str(prepare.REMOTE_ROOT/'deadline_fixture'))
             source = pack/'source'
             reservation.verify_tree(source, binding['source_freeze_sha256'])
-            for name in ('omni/control.py', 'omni/config.py', 'omni/train.py'):
+            for name in ('omni/motor.py', 'omni/env_cfg.py', 'omni/train.py'):
                 path = source/'locomotion'/name
                 before = path.read_bytes()
                 path.write_bytes(before+b'changed')

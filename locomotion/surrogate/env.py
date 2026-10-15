@@ -15,8 +15,9 @@ from scipy.spatial import ConvexHull
 import torch
 
 from locomotion.omni.features import extract_features
-from locomotion.omni.env import emitted_target, executed_action_feature, inverse_rotate, motor_force, navigation, rotate
-from locomotion.omni.config import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, MODEL_SHA256
+from locomotion.omni.frames import inverse_rotate, navigation, rotate
+from locomotion.omni.motor import emitted_target, executed_action_feature, motor_force
+from locomotion.omni.robot import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, MODEL_SHA256
 
 # The package resolves repository data from its own location.
 ROOT = Path(__file__).resolve().parents[2]

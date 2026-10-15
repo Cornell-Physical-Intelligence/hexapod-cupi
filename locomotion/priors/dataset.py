@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 
 from locomotion.omni.features import extract_features, feature_contract
-from locomotion.omni.config import MODEL_SHA256, USD_SHA256
+from locomotion.omni.robot import MODEL_SHA256, USD_SHA256
 from locomotion.evaluation import score_recording
 from locomotion.spark.sources import source_files
 
@@ -23,7 +23,7 @@ PROCESSING_SCHEMA = 'hexapod_processing_sources_v3'
 
 
 def motion_cases():
-    from locomotion.omni.task import TaskConfig, command_bank
+    from locomotion.omni.commands import TaskConfig, command_bank
     return [{'case_id': f'amp:command_{i:02d}', 'profile': 'omni_static',
              'command': command, 'controls': 1000}
             for i, command in enumerate(command_bank(TaskConfig()))]

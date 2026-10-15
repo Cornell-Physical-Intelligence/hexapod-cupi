@@ -2,8 +2,8 @@
 import torch
 from isaaclab.actuators import ActuatorBase, ActuatorBaseCfg
 from isaaclab.utils import configclass
-from locomotion.omni.config import JOINT_NAMES, motor_damping
-from locomotion.omni.control import motor_force
+from locomotion.omni.motor import RATED_TORQUE_NM, STIFFNESS_NM_PER_RAD, motor_force
+from locomotion.omni.robot import JOINT_NAMES, motor_damping
 
 
 class Motor(ActuatorBase):
@@ -30,8 +30,8 @@ class Motor(ActuatorBase):
 class MotorCfg(ActuatorBaseCfg):
     class_type = Motor
     joint_names_expr = [".*"]
-    stiffness = 12.0
+    stiffness = STIFFNESS_NM_PER_RAD
     damping = dict(zip(JOINT_NAMES, motor_damping(JOINT_NAMES)))
     armature = 0.0
-    effort_limit = 1.6
-    effort_limit_sim = 1.6
+    effort_limit = RATED_TORQUE_NM
+    effort_limit_sim = RATED_TORQUE_NM

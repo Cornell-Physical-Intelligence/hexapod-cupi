@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
-from locomotion.omni.config import JOINT_NAMES, LEGS, MASS_KG, MODEL_SHA256
+from locomotion.omni.robot import JOINT_NAMES, LEGS, MASS_KG, MODEL_SHA256
 
 DT = .0025
 FIELDS = ('time_s', 'sequence', 'explicit_counter', 'command', 'distal_force_world_n',

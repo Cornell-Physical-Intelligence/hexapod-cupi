@@ -1,1 +1,1 @@
-"""Omnidirectional gait-clock PPO environment and learner."""
+"""Omnidirectional walking task on stock Isaac Lab Direct and RSL-RL PPO."""

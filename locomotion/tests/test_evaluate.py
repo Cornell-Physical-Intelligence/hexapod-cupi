@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import locomotion.evaluation.runner as run
 import locomotion.evaluation as scoring
-from locomotion.omni.config import EnvConfig
+from locomotion.omni.env_cfg import EnvConfig
 
 
 class FakeNative:

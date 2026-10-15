@@ -16,10 +16,10 @@ from rsl_rl.algorithms import PPO
 from rsl_rl.models import MLPModel
 from rsl_rl.utils import resolve_callable
 
-from locomotion.omni.algorithm import BoundedMeanGaussian
+from locomotion.omni.ppo import BoundedMeanGaussian, action_metrics
+from locomotion.omni.ppo_cfg import ppo_config
+from locomotion.omni.robot import JOINT_NAMES
 import locomotion.omni.train as train
-from locomotion.omni.config import JOINT_NAMES
-from locomotion.omni.ppo import action_metrics, ppo_config
 from locomotion.spark.prepare import prepare
 
 
@@ -186,7 +186,7 @@ class IntegrationTests(unittest.TestCase):
                 pack = json.loads((root / mode / 'PACK.json').read_text())
                 self.assertEqual(pack['action_mean'], 'tanh')
                 manifest = json.loads((root / mode / 'source/FREEZE_SHA256.json').read_text())
-                self.assertIn('locomotion/omni/algorithm.py', manifest)
+                self.assertIn('locomotion/omni/ppo.py', manifest)
             legacy = prepare(root / 'legacy', remote)
             self.assertNotIn('--action-mean', legacy['command_args'])
             for options in ({'action_mean': 'other'}, {'mode': 'diagnostic', 'action_mean': 'tanh'}):

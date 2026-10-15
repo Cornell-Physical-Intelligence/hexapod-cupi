@@ -21,7 +21,8 @@ from locomotion.priors import amp as amp_ppo
 from locomotion.priors import networks as nets
 import locomotion.omni.train as train
 from locomotion.priors.amp import AMPConfig, AMPPPO, AMPVecEnv, CollisionCapture, amp_ppo_config, load_demonstrations
-from locomotion.omni.ppo import VanillaVecEnv, ppo_config
+from locomotion.omni.ppo_cfg import ppo_config
+from locomotion.omni.wrapper import OmniVecEnv
 from locomotion.spark.prepare import prepare
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -245,7 +246,7 @@ class AdapterTests(unittest.TestCase):
 class LearnerTests(unittest.TestCase):
     def test_discriminator_construction_leaves_the_global_generator_untouched(self):
         torch.manual_seed(5)
-        construct(ppo_config(3), VanillaVecEnv(TaskDouble(seed=7)))
+        construct(ppo_config(3), OmniVecEnv(TaskDouble(seed=7)))
         stock_draw = torch.rand(4)
         torch.manual_seed(5)
         construct(amp_ppo_config(3), AMPVecEnv(TaskDouble(seed=7)))
@@ -294,8 +295,8 @@ class LearnerTests(unittest.TestCase):
     def test_parity_with_stock_ppo_from_one_seed_without_reseeding(self):
         off = AMPConfig(style_weight=0., discriminator_updates=0)
         torch.manual_seed(11)
-        stock = construct(ppo_config(3), VanillaVecEnv(TaskDouble(seed=7)))
-        stock_losses = synthetic_rollout(stock, VanillaVecEnv(TaskDouble(seed=9)))
+        stock = construct(ppo_config(3), OmniVecEnv(TaskDouble(seed=7)))
+        stock_losses = synthetic_rollout(stock, OmniVecEnv(TaskDouble(seed=9)))
         torch.manual_seed(11)
         ours = construct(amp_ppo_config(3, amp_config=off), AMPVecEnv(TaskDouble(seed=7)))
         self.assertIsInstance(ours, AMPPPO)

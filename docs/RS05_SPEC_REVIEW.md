@@ -38,10 +38,10 @@ The catalog's 48 V torque-speed points include 1.6 N·m at 450 rpm and 5.5 N·m 
 
 ## Current direct-drive implementation
 
-Use [`motor_force`](../locomotion/omni/control.py) and [`EnvConfig`](../locomotion/omni/config.py)
+Use [`motor_force`](../locomotion/omni/motor.py) and [`EnvConfig`](../locomotion/omni/env_cfg.py)
 for the maintained implementation. At each 400 Hz physics step, the controller
 computes `12 * (target - position) - kd * velocity`, using the per-joint `KD`
-values in `config.py`. It clips that demand against a provisional 48 V
+values in `robot.py`. It clips that demand against a provisional 48 V
 speed curve and the 1.6 N·m cap. The curve reaches zero at 480 rpm. The native
 readback checks zero implicit drive and armature; this controller applies effort.
 

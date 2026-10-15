@@ -22,7 +22,7 @@ class CodeMapTests(unittest.TestCase):
             self.assertEqual(native['sha256'], hashlib.sha256(source.read_bytes()).hexdigest())
             self.assertEqual(native['area'], 'omni')
             self.assertNotIn('locomotion/env.py', rows)
-            self.assertIn('locomotion/omni/control.py', native['depends_on'])
+            self.assertIn('locomotion/omni/motor.py', native['depends_on'])
             self.assertTrue(all(target in rows for row in rows.values() for target in row['depends_on']))
             self.assertEqual(rows['locomotion/tests/test_native_ranges.py']['area'], 'tests')
             self.assertFalse(any('/fixtures/' in path for path in rows))

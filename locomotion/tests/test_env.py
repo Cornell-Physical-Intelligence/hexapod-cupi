@@ -3,8 +3,11 @@ from pathlib import Path
 import unittest
 import numpy as np
 import torch
-from locomotion.omni.config import EnvConfig, JOINT_NAMES, KD, verify_assets
-from locomotion.omni.env import LocomotionEnv, emitted_target, executed_action_feature, motor_force, inverse_rotate, rotate
+from locomotion.omni.env import LocomotionEnv
+from locomotion.omni.env_cfg import EnvConfig
+from locomotion.omni.frames import inverse_rotate, rotate
+from locomotion.omni.motor import emitted_target, executed_action_feature, motor_force
+from locomotion.omni.robot import JOINT_NAMES, KD, verify_assets
 from locomotion.evaluation.capture import _diagnostic_servo
 
 

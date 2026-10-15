@@ -73,7 +73,7 @@ WRAPPER_DEFAULTS = {"observation_scaling": "none", "command_segments": "continuo
 
 def wrapper_options(config):
     """The wrapper keywords of a PPO configuration: the two original options at their recorded or
-    default values, and every other key the configuration records (``ppo.ppo_config`` omits defaults)."""
+    default values, and every other key the configuration records (``ppo_cfg.ppo_config`` omits defaults)."""
     return {"observation_scaling": "none", "command_segments": "continuous", **config.get("environment_wrapper", {})}
 
 
@@ -93,16 +93,16 @@ def build_wrapper(wrapper_class, task, options):
     return wrapper_class(task, **accepted)
 
 
-def learner_configuration(vanilla, seed, options):
-    """``ppo.ppo_config`` with the learner options; an option the checked-out revision lacks must hold its default."""
-    accepted = inspect.signature(vanilla.ppo_config).parameters
+def learner_configuration(config_module, seed, options):
+    """``ppo_cfg.ppo_config`` with the learner options; an option the checked-out revision lacks must hold its default."""
+    accepted = inspect.signature(config_module.ppo_config).parameters
     defaults = {"observation_scaling": "none", "command_segments": "continuous", "learning_rate_max": None,
                 "action_std": .15, "action_noise_correlation": 0., "action_std_final": None, "gait_clock": 0,
                 "action_smoothing": "none", "velocity_noise": 0.}
     missing = [key for key, value in options.items() if key not in accepted and value != defaults.get(key)]
     if missing:
-        raise ValueError(f"locomotion.omni.ppo.ppo_config at this revision has no option {missing}")
-    return vanilla.ppo_config(seed, **{key: value for key, value in options.items() if key in accepted})
+        raise ValueError(f"locomotion.omni.ppo_cfg.ppo_config at this revision has no option {missing}")
+    return config_module.ppo_config(seed, **{key: value for key, value in options.items() if key in accepted})
 
 
 def check_gait_schedule(task, config):
@@ -123,11 +123,11 @@ def check_command_bootstrap(options, config):
     if options.get("command_segments") != "bootstrap":
         return
     from rsl_rl.utils import resolve_callable
-    from locomotion.omni.algorithm import CommandBootstrapPPO
+    from locomotion.omni.ppo import CommandBootstrapPPO
     algorithm = resolve_callable(config["algorithm"]["class_name"])
     if not (inspect.isclass(algorithm) and issubclass(algorithm, CommandBootstrapPPO)):
         raise ValueError("The bootstrap wrapper option needs an algorithm class derived from "
-                         "locomotion.omni.algorithm:CommandBootstrapPPO")
+                         "locomotion.omni.ppo:CommandBootstrapPPO")
 
 
 def external_class_files(task_class, wrapper_class, config):
@@ -209,8 +209,8 @@ def build_parser():
     parser.add_argument("--task", default="locomotion.omni.task:TrainingTask",
                         help="module:Class or module:factory(text) that gives a class with the TrainingTask "
                              "interface: Class(env, TaskConfig, output_dir).")
-    parser.add_argument("--wrapper", default="locomotion.omni.ppo:VanillaVecEnv", help="module:Class that wraps the task for RSL-RL.")
-    parser.add_argument("--ppo-config-overrides", default="{}", help="JSON merged into ppo.ppo_config(...), or @file.json.")
+    parser.add_argument("--wrapper", default="locomotion.omni.wrapper:OmniVecEnv", help="module:Class that wraps the task for RSL-RL.")
+    parser.add_argument("--ppo-config-overrides", default="{}", help="JSON merged into ppo_cfg.ppo_config(...), or @file.json.")
     parser.add_argument("--distribution", help="Actor distribution class_name (RSL-RL name or module:Class); overrides --action-mean.")
     parser.add_argument("--action-mean", choices=["unbounded", "tanh"], default="unbounded")
     parser.add_argument("--observation-normalization", choices=["empirical", "none"], default="empirical")
@@ -266,7 +266,8 @@ def run(args, argv=None):
     import mujoco
     from locomotion.surrogate.env import (DEFAULT_GEOMETRY, DEFAULT_MODEL, DEFAULT_STANCE, ROOT, SurrogateConfig,
                                           SurrogateEnv, contact_overrides, repository_state, sha)
-    import locomotion.omni.ppo as vanilla
+    import locomotion.omni.ppo as algorithms
+    import locomotion.omni.ppo_cfg as ppo_cfg
     import locomotion.omni.task as task_module
     from locomotion.omni.train import save, scalars
 
@@ -277,7 +278,7 @@ def run(args, argv=None):
     overrides = json.loads(Path(overrides[1:]).read_text() if overrides.startswith("@") else overrides)
     contact = contact_overrides(args.contact)
     task_class, wrapper_class = resolve(args.task), resolve(args.wrapper)
-    config = learner_configuration(vanilla, args.seed, dict(
+    config = learner_configuration(ppo_cfg, args.seed, dict(
         action_mean=args.action_mean, observation_normalization=args.observation_normalization,
         observation_scaling=args.observation_scaling, command_segments=args.command_segments,
         learning_rate_max=args.learning_rate_max, action_std=args.action_std,
@@ -353,12 +354,12 @@ def run(args, argv=None):
         save(args.output / "state.json", state)
         diagnostics = None
         if not args.no_update_diagnostics:
-            diagnostics = vanilla.UpdateDiagnostics(runner.alg)
+            diagnostics = algorithms.UpdateDiagnostics(runner.alg)
             runner.alg.update = diagnostics.update
         final_std = config.get("exploration", {}).get("action_std_final")
         if final_std is not None:
             # Keep the original schedule horizon when adding updates to a resumed run.
-            schedule = vanilla.DeviationSchedule(runner.alg, config["actor"]["distribution_cfg"]["init_std"],
+            schedule = algorithms.DeviationSchedule(runner.alg, config["actor"]["distribution_cfg"]["init_std"],
                                                  final_std, identity['exploration_schedule_updates'])
             schedule.completed = first
             schedule.apply()
@@ -398,7 +399,7 @@ def run(args, argv=None):
                    "collection_seconds": values["collect_time"], "learning_seconds": values["learn_time"],
                    "loss": values["loss_dict"], "learning_rate": values["learning_rate"],
                    "mean_action_std": float(values["action_std"].detach().mean()),
-                   "actions": vanilla.action_metrics(runner.alg.storage, env.joint_names),
+                   "actions": algorithms.action_metrics(runner.alg.storage, env.joint_names),
                    "task": status}
             if diagnostics is not None:
                 row["policy_update"] = diagnostics.latest

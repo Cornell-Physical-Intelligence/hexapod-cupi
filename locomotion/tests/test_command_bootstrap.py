@@ -8,7 +8,8 @@ from unittest.mock import patch
 import torch
 from rsl_rl.algorithms import PPO
 
-import locomotion.omni.ppo as ppo
+import locomotion.omni.ppo_cfg as ppo_cfg
+import locomotion.omni.wrapper as wrapper
 
 
 class MixedTask:
@@ -51,9 +52,9 @@ class CommandBootstrapTests(unittest.TestCase):
         for ceiling in (None, 3e-4):
             with self.subTest(ceiling=ceiling):
                 task = MixedTask()
-                wrapped = ppo.VanillaVecEnv(task, command_segments='bootstrap',
+                wrapped = wrapper.OmniVecEnv(task, command_segments='bootstrap',
                     observation_scaling='fixed', gait_clock=60, velocity_noise=.5)
-                config = ppo.ppo_config(7, command_segments='bootstrap', learning_rate_max=ceiling,
+                config = ppo_cfg.ppo_config(7, command_segments='bootstrap', learning_rate_max=ceiling,
                     observation_normalization='none')
                 config.pop('environment_wrapper')
                 config.update(num_steps_per_env=1, multi_gpu=None)
@@ -81,7 +82,7 @@ class CommandBootstrapTests(unittest.TestCase):
                 self.assertEqual(next_obs['critic'][1, -2:].tolist(), [0., 0.])
                 terminal = extras['command_bootstrap_observation']['critic']
                 torch.testing.assert_close(terminal[1, -2:],
-                    ppo.clock_features(torch.tensor([1]), 60, torch.tensor([[.05, 0., 0.]]))[0])
+                    wrapper.clock_features(torch.tensor([1]), 60, torch.tensor([[.05, 0., 0.]]))[0])
 
 
 if __name__ == '__main__':

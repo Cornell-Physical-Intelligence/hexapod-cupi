@@ -8,9 +8,9 @@ import unittest
 import torch
 
 from locomotion.spark.prepare import ROOT
-from locomotion.omni.config import sha as digest
+from locomotion.omni.robot import sha as digest
 from locomotion.spark.prepare import prepare
-from locomotion.omni.ppo import VanillaVecEnv
+from locomotion.omni.wrapper import OmniVecEnv
 from locomotion.evaluation.loads import TrainingLoads
 
 
@@ -43,10 +43,10 @@ class Task:
             'truncated': torch.tensor([False, True, True])}
 
 
-class VanillaTests(unittest.TestCase):
+class WrapperTests(unittest.TestCase):
     def test_selected_resets_preserve_terminal_rewards_and_running_observation(self):
         task = Task()
-        wrapped = VanillaVecEnv(task, tensor_dict=lambda value, **kw: value)
+        wrapped = OmniVecEnv(task, tensor_dict=lambda value, **kw: value)
         obs, reward, done, extras = wrapped.step(torch.zeros(3, 18))
         self.assertEqual(task.resets, [[0, 1, 2], [1, 2]])
         self.assertEqual(obs['policy'].tolist(), [[1., 1.], [0., 0.], [0., 0.]])
@@ -77,13 +77,13 @@ class VanillaTests(unittest.TestCase):
     def test_fresh_pack_keeps_admitted_physics_and_refuses_reuse(self):
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp)/'pack'
-            remote = '/home/orionh/HEXAPOD_runs/restart_20260914/test_vanilla'
+            remote = '/home/orionh/HEXAPOD_runs/restart_20260914/test_wrapper'
             binding = prepare(output, remote, updates=2)
             source = output/'source'
             manifest = json.loads((source/'FREEZE_SHA256.json').read_text())
             for name, expected in manifest.items():
                 self.assertEqual(digest(source/name), expected)
-            for name in ('omni/env.py', 'omni/config.py', 'omni/task.py', 'evaluation/runner.py', 'spark/launch.py', 'spark/safety.py'):
+            for name in ('omni/env.py', 'omni/env_cfg.py', 'omni/task.py', 'evaluation/runner.py', 'spark/launch.py', 'spark/safety.py'):
                 self.assertEqual(digest(source/'locomotion'/name), digest(ROOT/'locomotion'/name))
             self.assertEqual(binding['mode'], 'train')
             self.assertNotIn('--checkpoint', binding['command_args'])
