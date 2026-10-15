@@ -13,7 +13,7 @@ from tensordict import TensorDict
 from rsl_rl.algorithms import PPO
 
 from locomotion.evaluation.checkpoint import require_learner_configuration
-from locomotion.rl.ppo import policy_change_metrics, UpdateDiagnostics
+from locomotion.evaluation.ppo_diagnostics import policy_change_metrics, UpdateDiagnostics
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
 from locomotion.spark.prepare import prepare
 

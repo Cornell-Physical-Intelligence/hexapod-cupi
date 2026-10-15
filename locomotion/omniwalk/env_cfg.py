@@ -8,6 +8,11 @@ from locomotion.robots.hexapod import JOINT_NAMES, LEGS
 
 @dataclass(frozen=True)
 class EnvConfig:
+    """Native environment settings that each record declares.
+
+    ``record_motion_features`` has no effect on the environment, which emits no motion features. Records
+    keep the field, and the AMP wrapper requires it to be True before it computes the features itself.
+    """
     num_envs: int = 32
     spacing_m: float = 2.0
     physics_dt: float = 0.0025

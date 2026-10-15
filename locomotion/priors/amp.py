@@ -10,8 +10,8 @@ import torch
 
 from locomotion.rl.ppo import CappedRatePPO, CommandBootstrapPPO
 
-import locomotion.omniwalk.mdp.observations as amp
 from . import discriminator as disc
+from .features import extract_features, feature_contract
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
 from locomotion.rl.wrapper import OmniVecEnv, scale_observation, clock_features, smoothed_action
 from . import networks as nets
@@ -135,7 +135,7 @@ class AMPVecEnv(OmniVecEnv):
         self.amp_config.validate()
         self.reset_rows = torch.zeros(task.num_envs, dtype=torch.bool, device=task.device)
         super().__init__(task, tensor_dict, **wrapper_options)
-        if 'amp' not in self.current:
+        if not task.cfg.record_motion_features:
             raise ValueError('AMP training needs record_motion_features in the environment configuration')
         self.cfg.update(motion_prior=True, amp=json_shape(asdict(self.amp_config)), privileged_layout=[
             {'name': name, 'width': width, 'source': source} for name, width, source in PRIVILEGED_LAYOUT])
@@ -166,9 +166,10 @@ class AMPVecEnv(OmniVecEnv):
         return state
 
     def observations(self, output):
+        """Policy groups for ``output``, which the task returned for the environment's current state."""
         obs = output['obs']
         groups = dict(super().observations(output).items())
-        groups.update({'amp': output['amp'],
+        groups.update({'amp': extract_features(self.task.env.current),
                   'velocity_label': output['critic'][:, OBSERVATION_WIDTH:OBSERVATION_WIDTH + 3],
                   'privileged': self.privileged_state(output)})
         groups.update(nets.actor_observation(obs).items())
@@ -185,7 +186,8 @@ class AMPVecEnv(OmniVecEnv):
         rewards = output['reward'].clone()
         done = output['terminated'] | output['truncated']
         # A physical termination overrides a coincident episode timeout.
-        extras = {'time_outs': output['truncated'] & ~output['terminated'], 'amp_next': output['amp'].clone()}
+        extras = {'time_outs': output['truncated'] & ~output['terminated'],
+                  'amp_next': extract_features(self.task.env.current)}
         if held is not None:
             switched = (output['obs'][:, 210:213] != held).any(-1) & ~done
             if bool(switched.any()):
@@ -353,5 +355,5 @@ class AMPPPO(CappedRatePPO):
 
     def declaration(self):
         return {'schema': 'hexapod_amp_learner_v1', 'config': json_shape(asdict(self.amp_config)),
-                'dataset': dict(self.dataset_identity), 'feature_contract': amp.feature_contract(),
+                'dataset': dict(self.dataset_identity), 'feature_contract': feature_contract(),
                 'stage2_complete': False}

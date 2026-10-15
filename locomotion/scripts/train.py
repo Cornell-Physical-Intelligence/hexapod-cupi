@@ -19,7 +19,7 @@ import traceback
 
 import numpy as np
 
-from locomotion.evaluation.admission import require_admission
+from locomotion.evaluation.admission import require_admission, verify_native_recipe, verify_scene
 from locomotion.evaluation.camera import NativePolicyCamera, prepare_policy_scene
 # locomotion/tests/native_parity.py calls require_learner_identity through this module.
 from locomotion.evaluation.checkpoint import (DECLARATION_SHA, checkpoint_reward_version, read_compatibility_receipt,
@@ -235,7 +235,7 @@ def build_identity(args, cfg, metadata):
     if args.learner == 'amp':
         from locomotion.priors.amp import AMPConfig, load_demonstrations
         identity['learner_source_files'] = {name: sha(SOURCE/name) for name in (
-            'omniwalk/mdp/observations.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
+            'priors/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
         identity['amp_dataset'] = load_demonstrations(SOURCE.parent/AMPConfig().dataset)[1]
     identity['physics_source_files'] = physics_files(identity['source_files'])
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
@@ -307,13 +307,14 @@ def launch_app(args):
 
 
 def create_env(args, cfg, metadata):
-    """Seed torch and NumPy, then build the native environment; evaluation adds the policy camera scene."""
+    """Seed torch and NumPy, build the native environment and check its scene; evaluation adds the policy camera scene."""
     import torch
     from locomotion.omniwalk.adapter import OmniEnv
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     env = OmniEnv(cfg, args.asset, args.model, args.geometry,
         args.output/'native', reference_metadata=metadata)
+    verify_scene(env)
     if args.mode == 'evaluate':
         prepare_policy_scene(env)
     return env
@@ -394,16 +395,16 @@ def write_checkpoint(runner, args, config, identity, state, num_envs, update):
     save(args.output/'state.json', state)
 
 
-def metrics_row(values, runner, env, task, diagnostics, config):
+def metrics_row(values, runner, env, metrics, diagnostics, config):
     """Return the metrics.jsonl row for the values RSL-RL logs after one update."""
-    from locomotion.rl.ppo import action_metrics
+    from locomotion.evaluation.ppo_diagnostics import action_metrics
     update = values['it']+1
     return {'update': update, 'transitions': collected_transitions(update, config, env.num_envs),
         'collection_seconds': values['collect_time'], 'learning_seconds': values['learn_time'],
         'loss': values['loss_dict'], 'learning_rate': values['learning_rate'],
         'mean_action_std': float(values['action_std'].mean()),
         'actions': action_metrics(runner.alg.storage, env.joint_names),
-        'task': task.status(reset_interval=True), 'policy_update': diagnostics.latest}
+        'task': metrics.status(reset_interval=True), 'policy_update': diagnostics.latest}
 
 
 def name_wandb_run(args, identity):
@@ -420,9 +421,12 @@ def training_runner(env, args, config, identity, state, started):
     """
     from rsl_rl.runners import OnPolicyRunner
     from locomotion.evaluation.loads import TrainingLoads
-    from locomotion.rl.ppo import DeviationSchedule, UpdateDiagnostics
+    from locomotion.evaluation.ppo_diagnostics import UpdateDiagnostics
+    from locomotion.evaluation.task_metrics import TaskMetrics
+    from locomotion.rl.ppo import DeviationSchedule
     from locomotion.omniwalk.task import TrainingTask
     task = TrainingTask(env, TaskConfig(seed=args.seed), args.output/'task')
+    metrics = TaskMetrics(task)
     wrapped = training_wrapper(env, args, task)
     if args.networks == 'mlp' and args.gait_clock != task.reward_config.schedule_period_controls:
         raise ValueError('The contact-schedule reward needs a gait clock of the same period')
@@ -454,7 +458,7 @@ def training_runner(env, args, config, identity, state, started):
 
     def log(**values):
         log_update(**values)
-        row = metrics_row(values, runner, env, task, diagnostics, config)
+        row = metrics_row(values, runner, env, metrics, diagnostics, config)
         with (args.output/'metrics.jsonl').open('a') as stream:
             stream.write(json.dumps(row, allow_nan=False)+'\n')
         if runner.logger.writer is not None:
@@ -520,9 +524,10 @@ def evaluation_policy(env, args, config, identity, checkpoint_record, compatibil
 def run_evaluation(env, args, policy, state, started):
     """Score the policy on the selected cases, then require a complete set of load summaries."""
     from locomotion.evaluation.runner import evaluate_suite, run_learning_probe_suite
+    from locomotion.priors.features import extract_features
     env.render = NativePolicyCamera(env)
     remaining = max(.001, args.max_wall_seconds-(time.monotonic()-started))
-    options = dict(progress=print_progress, max_wall_seconds=remaining)
+    options = dict(progress=print_progress, max_wall_seconds=remaining, motion_features=extract_features)
     if args.eval_scope == 'full':
         result = evaluate_suite(env, policy, args.output/'evaluation',
             args.geometry_extrema, args.checkpoint, **options)
@@ -570,7 +575,7 @@ def main(argv=None):
             else:
                 policy = evaluation_policy(env, args, config, identity, checkpoint_record, compatibility)
                 run_evaluation(env, args, policy, state, started)
-        env.verify_native_recipe('after_controlled_steps')
+        verify_native_recipe(env, 'after_controlled_steps')
         state['status'] = 'completed'
     except BaseException as error:
         state['status'] = 'failed'

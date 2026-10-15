@@ -2,7 +2,7 @@
 import math
 import unittest
 import torch
-from locomotion.omniwalk.mdp.motor import motor_force
+from locomotion.robots.rs05 import motor_force
 from locomotion.robots.hexapod import JOINT_NAMES, KD, motor_damping
 
 

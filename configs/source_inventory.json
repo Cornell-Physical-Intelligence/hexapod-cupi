@@ -56,7 +56,7 @@
       "previous_path": "locomotion/tools/admission.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Bind a run to its model and recorded native standing checks."
+      "purpose": "Check the native scene and bind a run to its model and recorded native standing checks."
     },
     {
       "path": "locomotion/evaluation/camera.py",
@@ -101,6 +101,13 @@
       "purpose": "Hold fixed action means under graded exploration noise and record the reward inputs."
     },
     {
+      "path": "locomotion/evaluation/ppo_diagnostics.py",
+      "previous_path": "locomotion/rl/ppo.py",
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Measure PPO policy change, critic fit and action bounds around each update without changing the update."
+    },
+    {
       "path": "locomotion/evaluation/runner.py",
       "previous_path": "locomotion/tools/runner.py",
       "classification": "current",
@@ -113,6 +120,13 @@
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "CPU evaluation of the new robot against explicitly named, unchanged screens."
+    },
+    {
+      "path": "locomotion/evaluation/task_metrics.py",
+      "previous_path": "locomotion/omniwalk/task.py",
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Accumulate the training task's reporting metrics; no value enters the learning objective."
     },
     {
       "path": "locomotion/omniwalk/__init__.py",
@@ -147,7 +161,7 @@
       "previous_path": "locomotion/omni/native.py",
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Subclass DirectRLEnv to own the scene, native views and checks, substep capture, telemetry and reset writes."
+      "purpose": "Subclass DirectRLEnv to own the scene, native views and their layout guards, substep capture, telemetry and reset writes."
     },
     {
       "path": "locomotion/omniwalk/env_cfg.py",
@@ -164,6 +178,13 @@
       "purpose": "Package namespace for the task mathematics."
     },
     {
+      "path": "locomotion/omniwalk/mdp/actions.py",
+      "previous_path": "locomotion/omniwalk/mdp/motor.py",
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Turn policy actions into slew-limited held targets and the executed-action feature."
+    },
+    {
       "path": "locomotion/omniwalk/mdp/commands.py",
       "previous_path": "locomotion/omni/task.py",
       "classification": "current",
@@ -178,18 +199,11 @@
       "purpose": "Use the canonical XYZW quaternion and navigation frames."
     },
     {
-      "path": "locomotion/omniwalk/mdp/motor.py",
-      "previous_path": "locomotion/omni/control.py",
-      "classification": "current",
-      "owner": "Locomotion lead",
-      "purpose": "Compute motor forces under the speed-dependent torque curve and the slew-limited held targets."
-    },
-    {
       "path": "locomotion/omniwalk/mdp/observations.py",
       "previous_path": "locomotion/priors/features.py",
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Build policy observations and the shared 61-value flat-ground motion features."
+      "purpose": "Build policy observations from measured state."
     },
     {
       "path": "locomotion/omniwalk/mdp/rewards.py",
@@ -203,7 +217,7 @@
       "previous_path": "locomotion/gait_clock/task.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Sample commands, apply the walking reward and report metrics around selected episode resets."
+      "purpose": "Sample commands, apply the walking reward and notify an optional observer around selected episode resets."
     },
     {
       "path": "locomotion/priors/__init__.py",
@@ -230,6 +244,13 @@
       "classification": "current",
       "owner": "Locomotion",
       "purpose": "Fit a least-squares discriminator and score paired 61-value motion states."
+    },
+    {
+      "path": "locomotion/priors/features.py",
+      "previous_path": "locomotion/omniwalk/mdp/observations.py",
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Pack the shared 61-value flat-ground motion features from measured state."
     },
     {
       "path": "locomotion/priors/model.py",
@@ -277,7 +298,7 @@
       "previous_path": "locomotion/gait_clock/ppo.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Extend stock RSL-RL PPO with command bootstraps, a rate cap, bounded means and update diagnostics."
+      "purpose": "Extend stock RSL-RL PPO with command bootstraps, a rate cap, bounded means and a deviation schedule."
     },
     {
       "path": "locomotion/rl/wrapper.py",
@@ -291,7 +312,7 @@
       "previous_path": null,
       "classification": "current",
       "owner": "Locomotion",
-      "purpose": "Package namespace for the robot identity and actuator."
+      "purpose": "Package namespace for the robot identity, motor model and actuator."
     },
     {
       "path": "locomotion/robots/actuator.py",
@@ -306,6 +327,13 @@
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Name the robot's joints and bodies, pin its asset hashes and resolve motor damping."
+    },
+    {
+      "path": "locomotion/robots/rs05.py",
+      "previous_path": "locomotion/omniwalk/mdp/motor.py",
+      "classification": "current",
+      "owner": "Locomotion lead",
+      "purpose": "Compute RS05 motor forces under the speed-dependent torque curve."
     },
     {
       "path": "locomotion/scripts/__init__.py",

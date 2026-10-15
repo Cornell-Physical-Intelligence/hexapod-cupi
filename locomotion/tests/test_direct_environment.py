@@ -9,7 +9,7 @@ from unittest import mock
 import torch
 from locomotion.omniwalk.adapter import OmniEnv, reset_rows
 from locomotion.omniwalk.mdp.observations import observations, proprio
-from locomotion.omniwalk.mdp.motor import emitted_target, executed_action_feature
+from locomotion.omniwalk.mdp.actions import emitted_target, executed_action_feature
 from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, LEGS
 
 BACKEND = Path(__file__).resolve().parents[1] / "omniwalk"
@@ -62,7 +62,7 @@ class DirectEnvironmentContractTests(unittest.TestCase):
         commands = torch.tensor([[1., 2., 3.], [4., 5., 6.]])
         previous_action = torch.arange(36, dtype=torch.float32).reshape(2, 18)
         state = {"linear": torch.tensor([[2., -1., 3.], [5., -4., 6.]])}
-        obs = observations(history, commands, previous_action, state, False)
+        obs = observations(history, commands, previous_action, state)
         self.assertEqual(set(obs), {"obs", "critic"})
         self.assertEqual(obs["obs"].shape, (2, 231))
         self.assertEqual(obs["critic"].shape, (2, 234))
@@ -239,7 +239,7 @@ class DirectEnvironmentContractTests(unittest.TestCase):
                 self.held, self.commands = neutral.expand(n, -1).clone(), torch.zeros(n, 3)
                 self.episode_length_buf = torch.zeros(n, dtype=torch.long)
                 self.total_controls, self.telemetry, self.capture, self.control_active = 0, {}, None, False
-                self.native_errors, self.native_readback = [], {}
+                self.native_errors = []
                 # OmniEnv aliases these; this control reads none of them.
                 for name in ("output", "model", "reference_metadata", "geometry_path", "geometry_meta", "sensor_map", "roots",
                              "joint_names", "body_names", "native_joint_names", "body_index", "toe_local", "root_com_local"):
@@ -265,7 +265,7 @@ class DirectEnvironmentContractTests(unittest.TestCase):
         torch.testing.assert_close(env.previous_action, executed_action_feature(target, neutral, .35), rtol=0, atol=0)
         shifted = torch.cat((history[:, 1:], proprio(moved, neutral)[:, None]), dim=1)
         torch.testing.assert_close(env.history, shifted, rtol=0, atol=0)
-        expected = observations(shifted, env.commands, executed_action_feature(target, neutral, .35), moved, False)
+        expected = observations(shifted, env.commands, executed_action_feature(target, neutral, .35), moved)
         for key in ("obs", "critic"):
             torch.testing.assert_close(result[key], expected[key], rtol=0, atol=0)
             torch.testing.assert_close(env.observations(env.current)[key], expected[key], rtol=0, atol=0)

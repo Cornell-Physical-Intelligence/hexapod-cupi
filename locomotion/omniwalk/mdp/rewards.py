@@ -6,7 +6,7 @@ import torch
 
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS
 from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation
-from locomotion.omniwalk.mdp.motor import RATED_TORQUE_NM
+from locomotion.robots.rs05 import RATED_TORQUE_NM
 
 SCHEMA = "canonical_paper_walking_task_v1"
 REWARD_VERSION = "noise_sized_tripod_schedule_v4_yaw_gate_experimental"

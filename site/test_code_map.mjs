@@ -60,8 +60,8 @@ assert.ok(/class="sym class hit"/.test(html('strip')), 'The matching class block
 input('query', 'OmniVecEnv');
 assert.ok(html('results').includes('locomotion/rl/wrapper.py'));
 assert.equal(elements.get('file-heading').textContent, 'rl/wrapper.py');
-click('results', {file:'locomotion/omniwalk/mdp/motor.py'});
-assert.equal(elements.get('file-heading').textContent, 'omniwalk/mdp/motor.py');
+click('results', {file:'locomotion/omniwalk/mdp/actions.py'});
+assert.equal(elements.get('file-heading').textContent, 'omniwalk/mdp/actions.py');
 
 // Retired wrappers have no filter; tests retain their toggle.
 assert.ok(!markup.includes('id="compatibility"'));
@@ -73,5 +73,5 @@ input('tests', true);
 assert.ok(html('results').includes('locomotion/tests/test_native_ranges.py'));
 assert.ok(html('packages').includes('data-package="tests"'));
 input('query', 'emitted_target');
-assert.ok(html('results').includes('locomotion/omniwalk/mdp/motor.py'));
+assert.ok(html('results').includes('locomotion/omniwalk/mdp/actions.py'));
 console.log('Code-map package squares, import arrows, file tiles, definition bar, search marking and toggles verified');

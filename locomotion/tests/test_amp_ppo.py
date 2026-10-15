@@ -15,8 +15,8 @@ import torch
 
 from rsl_rl.algorithms import PPO
 
-import locomotion.omniwalk.mdp.observations as amp
 from locomotion.priors import discriminator as disc
+from locomotion.priors import features as amp
 from locomotion.priors import amp as amp_ppo
 from locomotion.priors import networks as nets
 from locomotion.evaluation.checkpoint import (json_shape, require_embedded_declaration,
@@ -53,13 +53,20 @@ class EnvDouble:
     def draw(self, *shape):
         return torch.randn(*shape, generator=self.generator)
 
+    @property
+    def current(self):
+        """Measured fields whose motion features are the state ``amp``."""
+        amp, n = self.amp, self.num_envs
+        return {'q': amp[:, :18], 'dq': amp[:, 18:36], 'linear': amp[:, 36:39], 'angular': amp[:, 39:42],
+                'root': torch.cat((torch.zeros(n, 2), amp[:, 42:43]), -1), 'toe_body': amp[:, 43:].reshape(n, 6, 3)}
+
     def bank_scale_states(self):
         rows = torch.randint(len(BANK_STATES), (self.num_envs,), generator=self.generator)
         return BANK_STATES[rows] + self.noise * BANK_STD * self.draw(self.num_envs, 61)
 
     def state(self):
         obs = self.draw(self.num_envs, 231)
-        return {'obs': obs, 'critic': torch.cat((obs, self.draw(self.num_envs, 3)), -1), 'amp': self.amp.clone()}
+        return {'obs': obs, 'critic': torch.cat((obs, self.draw(self.num_envs, 3)), -1)}
 
     def reset(self, indices):
         self.amp[indices] = RESET_STATE
@@ -222,7 +229,7 @@ class AdapterTests(unittest.TestCase):
 
     def test_motion_features_are_required(self):
         task = TaskDouble()
-        task.env.state = lambda: {'obs': torch.zeros(3, 231), 'critic': torch.zeros(3, 234)}
+        task.env.cfg.record_motion_features = False
         with self.assertRaisesRegex(ValueError, 'record_motion_features'):
             AMPVecEnv(task)
 
@@ -426,7 +433,7 @@ class EvaluationIdentityTests(unittest.TestCase):
                     'ppo_config': amp_ppo_config(seed, networks=networks) if learner == 'amp' else ppo_config(seed)}
         if learner == 'amp':
             identity['learner_source_files'] = {name: amp_ppo.sha(ROOT/'locomotion'/name) for name in (
-                'omniwalk/mdp/observations.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
+                'priors/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
             identity['amp_dataset'] = dict(BANK_IDENTITY)
         return identity
 
@@ -512,7 +519,7 @@ class LaunchTests(unittest.TestCase):
             self.assertEqual((pack['learner'], pack['networks']), ('amp', 'paper'))
             bank = Path(temporary)/'amp/source/locomotion/priors/datasets/amp_demonstrations_001'
             self.assertEqual(amp_ppo.sha(bank/'transitions.npz'), amp_ppo.sha(amp_ppo.DATASET/'transitions.npz'))
-            for name in ('omniwalk/mdp/observations.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py'):
+            for name in ('priors/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py'):
                 self.assertTrue((Path(temporary)/'amp/source/locomotion'/name).exists(), name)
             source = Path(temporary)/'amp/source'
             result = subprocess.run([sys.executable, '-c',

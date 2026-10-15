@@ -44,9 +44,8 @@ class OmniEnv:
         self.joint_index, self.inverse_joint_index = isaac.joint_index, isaac.inverse_joint_index
         self.body_index, self.toe_index, self.toe_local = isaac.body_index, isaac.toe_index, isaac.toe_local
         self.root_com_local = isaac.root_com_local
-        self.native_readback, self.native_errors = isaac.native_readback, isaac.native_errors
+        self.native_errors = isaac.native_errors
         self.get, self.native_array, self.save = isaac.get, isaac.native_array, isaac.save
-        self.verify_native_recipe = isaac.verify_native_recipe
         self.telemetry, self.total_controls = isaac.telemetry, isaac.total_controls
         self.capture = None
         self.reset()
@@ -83,5 +82,4 @@ class OmniEnv:
                 "terminated": self.telemetry["terminated"], "truncated": self.telemetry["truncated"]}
 
     def observations(self, state):
-        return assemble_observations(self.history, self.commands, self.previous_action, state,
-                                     self.cfg.record_motion_features)
+        return assemble_observations(self.history, self.commands, self.previous_action, state)

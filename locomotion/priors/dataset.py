@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
-from locomotion.omniwalk.mdp.observations import extract_features, feature_contract
+from locomotion.priors.features import extract_features, feature_contract
 from locomotion.robots.hexapod import MODEL_SHA256, USD_SHA256
 from locomotion.evaluation import score_recording
 from locomotion.spark.sources import source_files
@@ -52,7 +52,7 @@ def processing_identity():
     root = Path(__file__).resolve().parents[1]
     return {'schema': PROCESSING_SCHEMA, 'numpy_version': np.__version__, 'source_files': {
         **{'locomotion/'+name: digest for name, digest in source_files(root).items()},
-        **{'locomotion/'+name: sha(root/name) for name in ('omniwalk/mdp/observations.py', 'priors/dataset.py', 'priors/processing_sources_v2.json')}}}
+        **{'locomotion/'+name: sha(root/name) for name in ('priors/features.py', 'priors/dataset.py', 'priors/processing_sources_v2.json')}}}
 
 
 def validate_processing_identity(processing):

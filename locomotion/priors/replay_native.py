@@ -5,7 +5,6 @@ from locomotion.spark.sources import source_files, physics_files
 
 import argparse
 import hashlib
-import importlib
 import json
 import math
 from pathlib import Path
@@ -69,9 +68,8 @@ def validate_trajectory(path, expected_sha, model_sha, *, read_arrays=True):
 def main(argv=None):
     import locomotion.evaluation.admission as original
     from locomotion.evaluation.camera import prepare_policy_scene
-    prefix = 'locomotion'
-    env_config = importlib.import_module(prefix+'.omni.env_cfg')
-    robot = importlib.import_module(prefix+'.omni.robot')
+    import locomotion.omniwalk.env_cfg as env_config
+    import locomotion.robots.hexapod as robot
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--mode', choices=['replay'], required=True)
     for key in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance',
@@ -116,7 +114,7 @@ def main(argv=None):
         robot.MODEL_SHA256, read_arrays=not args.preflight_only)
     if args.start_phase == .5 and round(declaration['config']['period_s']/.02) % 2:
         raise ValueError('Half-cycle replay requires an even number of controls')
-    from locomotion.omniwalk.mdp.observations import feature_contract
+    from locomotion.priors.features import extract_features, feature_contract
     config = declaration['config']
     command = [config['forward_mps'], config.get('left_mps', 0.), config.get('yaw_rate_rad_s', 0.)]
     identity.update(controller_kind='optimized_periodic_motor_targets', learned_policy=False,
@@ -147,12 +145,13 @@ def main(argv=None):
         print('REFERENCE_SCREEN_APP_READY', flush=True)
         import numpy as np
         import torch
-        env_module = importlib.import_module(prefix+'.omni.env')
-        capture_module = importlib.import_module('locomotion.evaluation.runner')
-        camera_module = importlib.import_module(prefix+'.evaluation.camera')
+        from locomotion.omniwalk import adapter as env_module
+        import locomotion.evaluation.runner as capture_module
+        import locomotion.evaluation.camera as camera_module
         torch.manual_seed(cfg.seed)
         env = env_module.OmniEnv(cfg, args.asset, args.model, args.geometry,
             args.output/'native', reference_metadata=metadata)
+        original.verify_scene(env)
         identity['root_com_local_m'] = env.root_com_local.detach().cpu().tolist()
         prepare_policy_scene(env)
         env.render = camera_module.NativePolicyCamera(env)
@@ -174,7 +173,7 @@ def main(argv=None):
         report = capture_module.run_batch(env, controller, [case], args.output/'evaluation',
             args.geometry_extrema, checkpoint_sha256=None, source_sha256=sha(__file__),
             seed=cfg.seed, video_case_id=case['case_id'], progress=progress,
-            max_wall_seconds=args.max_wall_seconds)
+            max_wall_seconds=args.max_wall_seconds, motion_features=extract_features)
         with np.load(args.output/'evaluation/control_trace.npz', allow_pickle=False) as trace:
             # Retain the whole native record, including the cold-start prefix.
             np.savez_compressed(args.output/'recorded_transitions.npz',

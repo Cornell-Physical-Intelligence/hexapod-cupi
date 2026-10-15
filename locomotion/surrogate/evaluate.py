@@ -13,6 +13,7 @@ import time
 import numpy as np
 import torch
 
+from locomotion.priors.features import extract_features
 import locomotion.rl.ppo as algorithms
 import locomotion.rl.wrapper as omni_wrapper
 from locomotion.surrogate.train import build_wrapper, process_threads, resolve, wrapper_options
@@ -331,7 +332,7 @@ def evaluate_checkpoint(args):
 
         summary = evaluation.run_learning_probe_suite(env, policy, directory / "evaluation", env.geometry_extrema_path,
             args.checkpoint, selected_case_ids=cases, record_video=False, seed=seed,
-            progress=lambda value: print(json.dumps(value), flush=True))
+            progress=lambda value: print(json.dumps(value), flush=True), motion_features=extract_features)
         close_case()
         for writer in writers.values():
             writer.close()

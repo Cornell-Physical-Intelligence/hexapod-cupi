@@ -6,8 +6,10 @@ import torch
 from locomotion.omniwalk.adapter import OmniEnv
 from locomotion.omniwalk.env_cfg import EnvConfig
 from locomotion.omniwalk.mdp.frames import inverse_rotate, rotate
-from locomotion.omniwalk.mdp.motor import emitted_target, executed_action_feature, motor_force
+from locomotion.omniwalk.mdp.actions import emitted_target, executed_action_feature
+from locomotion.priors.features import extract_features
 from locomotion.robots.hexapod import JOINT_NAMES, KD, verify_assets
+from locomotion.robots.rs05 import motor_force
 from locomotion.evaluation.capture import diagnostic_servo
 from locomotion.tests.test_direct_environment import load_isaac
 
@@ -129,7 +131,8 @@ class ResetTests(unittest.TestCase):
         self.assertIs(env.current, isaac.current)
         self.assertEqual(result["obs"].shape, (3, 231))
         self.assertEqual(result["critic"].shape, (3, 234))
-        self.assertEqual(result["amp"].shape, (3, 61))
+        self.assertNotIn("amp", result)
+        self.assertEqual(extract_features(env.current).shape, (3, 61))
         torch.testing.assert_close(result["critic"][:, :231], result["obs"], rtol=0, atol=0)
 
 

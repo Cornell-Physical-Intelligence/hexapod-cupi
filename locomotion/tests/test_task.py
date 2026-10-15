@@ -14,6 +14,7 @@ import torch
 from locomotion.omniwalk.mdp.commands import TaskConfig, command_bank
 import locomotion.omniwalk.mdp.rewards as reward
 import locomotion.omniwalk.task as task
+from locomotion.evaluation.task_metrics import TaskMetrics
 from locomotion.tests.task_double import NativeDouble, GaitDouble, telemetry
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -76,6 +77,8 @@ class ActiveTaskTests(unittest.TestCase):
             env = GaitDouble(3)
             wrapped = (task.TrainingTask(env, TaskConfig(seed=20260917)) if current else
                        self.old.variant(SPEC)(env, self.old.task_v4.TaskConfig(seed=20260917)))
+            # The active task reports through its metrics observer; the frozen task reports itself.
+            reporter = TaskMetrics(wrapped) if current else wrapped
             wrapped.reset()
             trace = []
             for step in range(300):
@@ -89,7 +92,7 @@ class ActiveTaskTests(unittest.TestCase):
                 trace.append(({key: value.clone() for key, value in output.items()},
                     wrapped.rng.get_state().clone(), wrapped.remaining_controls.clone(),
                     {key: value.clone() for key, value in wrapped.last_components.items()},
-                    {key: value for key, value in wrapped.status(reset_interval=step % 17 == 0).items()
+                    {key: value for key, value in reporter.status(reset_interval=step % 17 == 0).items()
                      if key != "proximity"}))
             traces.append(trace)
         self.exact(traces[1], traces[0])

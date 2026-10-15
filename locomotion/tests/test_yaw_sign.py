@@ -15,6 +15,7 @@ import locomotion.rl.wrapper as wrapper
 from locomotion.omniwalk.mdp.observations import observations, proprio
 from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation
 from locomotion.evaluation.capture import diagnostic_rotation
+from locomotion.evaluation.task_metrics import TaskMetrics
 from locomotion.evaluation.runner import learning_probe_cases
 from locomotion.omniwalk.mdp.commands import TaskConfig, command_bank
 from locomotion.omniwalk.mdp.rewards import REWARD_CONFIG as CONFIG
@@ -77,7 +78,7 @@ class YawSignTests(unittest.TestCase):
                     frame = proprio(state, torch.zeros(18))
                     self.assertAlmostEqual(float(frame[0, 2]), sign * RATE, places=6)
                     history = frame[:, None].expand(-1, 5, -1).clone()
-                    observation = observations(history, commands, torch.zeros(1, 18), state, False)["obs"]
+                    observation = observations(history, commands, torch.zeros(1, 18), state)["obs"]
                     self.assertEqual(observation.shape, (1, 231))
                     torch.testing.assert_close(observation[0, 210:213], torch.tensor([0., 0., sign * RATE]))
                     scaled = wrapper.scale_observation(observation, "fixed")
@@ -92,6 +93,7 @@ class YawSignTests(unittest.TestCase):
             # Start near +pi so that a left turn crosses the heading wrap; start near -pi for a right turn.
             native = YawDouble(2, heading=sign * (math.pi - .002))
             task = TrainingTaskV4(native)
+            metrics = TaskMetrics(task)
             task.reset()
             native.commands[:] = torch.tensor([0., 0., sign * RATE])
             task.window.restart(torch.arange(2), native.commands)
@@ -110,7 +112,7 @@ class YawSignTests(unittest.TestCase):
                 self.assertAlmostEqual(float(parts["yaw_rate"][1]),
                                        -CONFIG.yaw_rate_weight * (2 * RATE / CONFIG.yaw_rate_scale_rad_s) ** 2, places=3)
                 # The training record reads gyro minus command: zero for the commanded turn, twice the rate otherwise.
-                interval = task.status(reset_interval=True)["interval_metrics"]
+                interval = metrics.status(reset_interval=True)["interval_metrics"]
                 self.assertGreater(interval["command_classes"]["yaw"]["environment_controls"], 0)
                 self.assertAlmostEqual(interval["signed_yaw_error_rad_s"], -sign * RATE, places=5)
 

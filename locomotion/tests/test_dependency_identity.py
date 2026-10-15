@@ -23,11 +23,11 @@ class DependencyIdentityTests(unittest.TestCase):
             source = output/'source'
             manifest = verify_runtime(source)
             self.assertEqual(manifest['schema'], 'hexapod_runtime_sources_v2')
-            for path in ('locomotion/omniwalk/mdp/motor.py', 'locomotion/omniwalk/task.py',
+            for path in ('locomotion/robots/rs05.py', 'locomotion/omniwalk/task.py',
                          'locomotion/omniwalk/adapter.py', 'locomotion/rl/ppo.py'):
                 self.assertIn(path, manifest['files'])
             self.assertFalse(any('/tests/' in name for name in manifest['files']))
-            path = source/'locomotion/omniwalk/mdp/motor.py'
+            path = source/'locomotion/robots/rs05.py'
             path.write_text(path.read_text() + '\n# tampered\n')
             with self.assertRaisesRegex(ValueError, 'Runtime dependency'):
                 verify_runtime(source)
@@ -35,7 +35,7 @@ class DependencyIdentityTests(unittest.TestCase):
     def test_nested_physics_dependencies_cannot_reuse_standing_identity(self):
         files = source_files(ROOT)
         physics = physics_files(files)
-        for name in ('omniwalk/mdp/motor.py', 'omniwalk/mdp/frames.py', 'omniwalk/env.py', 'robots/actuator.py',
+        for name in ('robots/rs05.py', 'omniwalk/mdp/actions.py', 'omniwalk/mdp/frames.py', 'omniwalk/env.py', 'robots/actuator.py',
                      'evaluation/capture.py', 'evaluation/scoring.py'):
             self.assertIn(name, physics)
             changed = dict(files, **{name: '0'*64})
@@ -57,10 +57,10 @@ class DependencyIdentityTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 require_checkpoint_identity(record, identity)
         identity.update(schema='hexapod_locomotion_ppo_v2', runtime_sources={'schema': 'hexapod_runtime_sources_v2',
-                        'files': {'locomotion/omniwalk/mdp/motor.py': 'a'*64}})
+                        'files': {'locomotion/robots/rs05.py': 'a'*64}})
         record = {'identity': deepcopy(identity)}
         require_checkpoint_identity(record, identity)
-        record['identity']['runtime_sources']['files']['locomotion/omniwalk/mdp/motor.py'] = 'b'*64
+        record['identity']['runtime_sources']['files']['locomotion/robots/rs05.py'] = 'b'*64
         with self.assertRaisesRegex(ValueError, 'runtime dependencies'):
             require_checkpoint_identity(record, identity)
 

@@ -17,7 +17,8 @@ from rsl_rl.models import MLPModel
 from rsl_rl.utils import resolve_callable
 
 from locomotion.evaluation.checkpoint import require_learner_configuration
-from locomotion.rl.ppo import BoundedMeanGaussian, action_metrics
+from locomotion.evaluation.ppo_diagnostics import action_metrics
+from locomotion.rl.ppo import BoundedMeanGaussian
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
 from locomotion.robots.hexapod import JOINT_NAMES
 import locomotion.scripts.train as train

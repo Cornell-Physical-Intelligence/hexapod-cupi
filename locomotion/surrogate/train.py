@@ -267,6 +267,8 @@ def run(args, argv=None):
     import mujoco
     from locomotion.surrogate.env import (DEFAULT_GEOMETRY, DEFAULT_MODEL, DEFAULT_STANCE, ROOT, SurrogateConfig,
                                           SurrogateEnv, contact_overrides, repository_state, sha)
+    import locomotion.evaluation.ppo_diagnostics as diagnostics_module
+    from locomotion.evaluation.task_metrics import TaskMetrics
     import locomotion.rl.ppo as algorithms
     import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
     import locomotion.omniwalk.task as task_module
@@ -323,6 +325,9 @@ def run(args, argv=None):
         env = SurrogateEnv(cfg, None, DEFAULT_MODEL, DEFAULT_GEOMETRY, args.output / "native",
                            reference_metadata=metadata, threads=args.threads, contact=contact, substep_state=False)
         task = task_class(env, task_module.TaskConfig(seed=args.seed), args.output / "task")
+        # A task class outside TrainingTask may report its own status.
+        reporter = (TaskMetrics(task) if isinstance(task, task_module.TrainingTask)
+                    else task if hasattr(task, "status") else None)
         identity['task_definition'] = task.declaration()
         identity['external_class_files'] = external_class_files(task_class, wrapper_class, config)
         check_gait_schedule(task, config)
@@ -355,7 +360,7 @@ def run(args, argv=None):
         save(args.output / "state.json", state)
         diagnostics = None
         if not args.no_update_diagnostics:
-            diagnostics = algorithms.UpdateDiagnostics(runner.alg)
+            diagnostics = diagnostics_module.UpdateDiagnostics(runner.alg)
             runner.alg.update = diagnostics.update
         final_std = config.get("exploration", {}).get("action_std_final")
         if final_std is not None:
@@ -395,12 +400,12 @@ def run(args, argv=None):
                 with contextlib.redirect_stdout(io.StringIO()):
                     original_log(**values)
             update = values["it"] + 1
-            status = task.status(reset_interval=True) if hasattr(task, "status") else None
+            status = reporter.status(reset_interval=True) if reporter is not None else None
             row = {"update": update, "transitions": update * config["num_steps_per_env"] * env.num_envs,
                    "collection_seconds": values["collect_time"], "learning_seconds": values["learn_time"],
                    "loss": values["loss_dict"], "learning_rate": values["learning_rate"],
                    "mean_action_std": float(values["action_std"].detach().mean()),
-                   "actions": algorithms.action_metrics(runner.alg.storage, env.joint_names),
+                   "actions": diagnostics_module.action_metrics(runner.alg.storage, env.joint_names),
                    "task": status}
             if diagnostics is not None:
                 row["policy_update"] = diagnostics.latest

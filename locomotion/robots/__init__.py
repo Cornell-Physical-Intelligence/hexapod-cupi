@@ -1,1 +1,1 @@
-"""Robot identity and the explicit RS05 actuator shared by the locomotion tasks."""
+"""Robot identity, the RS05 motor model and its explicit actuator, shared by the locomotion tasks."""

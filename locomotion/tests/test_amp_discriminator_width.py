@@ -2,7 +2,7 @@
 import unittest
 
 from locomotion.priors import discriminator as amp_discriminator
-from locomotion.omniwalk.mdp.observations import feature_contract
+from locomotion.priors.features import feature_contract
 
 
 class ContractWidthTests(unittest.TestCase):

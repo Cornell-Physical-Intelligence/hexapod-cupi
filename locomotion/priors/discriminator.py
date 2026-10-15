@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import torch
 from torch import nn
 
-from locomotion.omniwalk.mdp.observations import feature_contract
+from locomotion.priors.features import feature_contract
 
 # The 61-value AMP state; locomotion.omniwalk.mdp.observations owns its layout.
 AMP_WIDTH = feature_contract()["width"]

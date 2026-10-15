@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from locomotion.omniwalk.mdp.observations import feature_contract
+from locomotion.priors.features import feature_contract
 from locomotion.priors import dataset
 from locomotion.priors.dataset import motion_cases
 from locomotion.robots.hexapod import JOINT_NAMES, MODEL_SHA256, USD_SHA256

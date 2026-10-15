@@ -14,8 +14,9 @@ import time
 import numpy as np
 import torch
 from locomotion.omniwalk.env_cfg import EnvConfig
-from locomotion.omniwalk.mdp.motor import STIFFNESS_NM_PER_RAD
 from locomotion.robots.hexapod import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256
+from locomotion.robots.rs05 import STIFFNESS_NM_PER_RAD
+from locomotion.evaluation.admission import verify_native_recipe
 from locomotion.evaluation.capture import DiagnosticGeometry, classify_patches, diagnostic_rotation, diagnostic_servo
 from locomotion.evaluation.force_metrics import write_summary
 import locomotion.evaluation.scoring as scoring
@@ -338,8 +339,12 @@ def score_case(data, metadata, case):
 
 @torch.inference_mode()
 def run_batch(env, policy, cases, output, geometry_extrema, *, checkpoint_sha256, source_sha256,
-              seed=27057, video_case_id=None, progress=None, max_wall_seconds=None):
-    """One initial reset, full fixed-duration trials; a failure preserves prefixes."""
+              seed=27057, video_case_id=None, progress=None, max_wall_seconds=None, motion_features=None):
+    """One initial reset, full fixed-duration trials; a failure preserves prefixes.
+
+    ``motion_features`` maps the environment state to the motion features that the trace records
+    before and after each control. Without it, the trace holds no motion features.
+    """
     if not cases or len(cases) > env.num_envs or len({x["controls"] for x in cases}) != 1:
         raise ValueError("Batch cases must fit the environment and have one fixed duration")
     duration = cases[0]["controls"] * .02
@@ -384,6 +389,7 @@ def run_batch(env, policy, cases, output, geometry_extrema, *, checkpoint_sha256
                 raise RuntimeError("Evaluation wall-clock allocation exhausted; preserved prefix")
             requested = [command_at(c, control) for c in assignments]
             observation = _set_command(env, requested)
+            before = None if motion_features is None else motion_features(env.current)
             action = (policy.act(observation["obs"], deterministic=True) if hasattr(policy, "act")
                       else policy(observation["obs"]))
             result = env.step(action)
@@ -391,8 +397,9 @@ def run_batch(env, policy, cases, output, geometry_extrema, *, checkpoint_sha256
             row["policy_action"] = _cpu(action)
             row["policy_observation"] = _cpu(observation["obs"])
             row["critic_observation"] = _cpu(observation["critic"])
-            row["amp_state_before"] = _cpu(observation["amp"])
-            row["amp_state_after"] = _cpu(result["amp"])
+            if motion_features is not None:
+                row["amp_state_before"] = _cpu(before)
+                row["amp_state_after"] = _cpu(motion_features(env.current))
             row["toe_xyz_world_m"] = _cpu(env.current["toe_world"])
             row["distal_contact"] = capture.last_control[-1]["distal_contact"].copy()
             if hasattr(policy, "model"):
@@ -412,7 +419,7 @@ def run_batch(env, policy, cases, output, geometry_extrema, *, checkpoint_sha256
                           "requested_controls": cases[0]["controls"]})
             if bool(result["terminated"].any() or result["truncated"].any()):
                 raise _NativeTrialTermination("Native terminal/timeout: preserved failed prefix; no automatic reset")
-        env.verify_native_recipe("after_stage2_evaluation")
+        verify_native_recipe(env, "after_stage2_evaluation")
     except BaseException as error:
         failure = repr(error)
         failure_kind = ("native_terminal_prefix" if isinstance(error, _NativeTrialTermination) else
@@ -477,7 +484,7 @@ def run_batch(env, policy, cases, output, geometry_extrema, *, checkpoint_sha256
 
 
 def evaluate_suite(env, policy, output, geometry_extrema, checkpoint, *, config=None, evidence=None,
-                   progress=None, max_wall_seconds=None):
+                   progress=None, max_wall_seconds=None, motion_features=None):
     """Run selected cases while always reporting against the complete96-case manifest.
 
     Default is one robot to avoid inter-replica collision contamination. A
@@ -530,7 +537,8 @@ def evaluate_suite(env, policy, output, geometry_extrema, checkpoint, *, config=
                                seed=60 if profile == "stage2c_formal" else config.seed,
                                video_case_id=config.video_case_id if config.record_video else None,
                                progress=progress,
-                               max_wall_seconds=None if not math.isfinite(remaining) else remaining)
+                               max_wall_seconds=None if not math.isfinite(remaining) else remaining,
+                               motion_features=motion_features)
             reports.append(report)
             results.extend(report["results"])
             _save(out / "progress.json", {
@@ -568,7 +576,7 @@ def evaluate_suite(env, policy, output, geometry_extrema, checkpoint, *, config=
 
 def run_diagnostic_trial(env, policy, output, geometry_extrema, checkpoint, *,
                          command=(.05, 0., 0.), record_video=True, seed=27057, progress=None,
-                         max_wall_seconds=None):
+                         max_wall_seconds=None, motion_features=None):
     """An explicitly additional20-second command screen; never substitutes a case.
 
     This supports early learning inspection at a training command such as.05m/s.
@@ -587,7 +595,7 @@ def run_diagnostic_trial(env, policy, output, geometry_extrema, checkpoint, *,
     report = run_batch(env, policy, [case], output, geometry_extrema,
                        checkpoint_sha256=_sha(checkpoint), source_sha256=_sha(__file__), seed=seed,
                        video_case_id=case["case_id"] if record_video else None, progress=progress,
-                       max_wall_seconds=max_wall_seconds)
+                       max_wall_seconds=max_wall_seconds, motion_features=motion_features)
     report.update(schema="canonical_policy_diagnostic_trial_v1", stage2_complete=False,
                   scope="Additional command inspection only; no required Stage2 case is replaced or admitted.",
                   required_case_count=len(case_manifest()),
@@ -615,7 +623,7 @@ def learning_probe_cases():
 
 def run_learning_probe_suite(env, policy, output, geometry_extrema, checkpoint, *,
                              record_video=False, video_case_id=None, seed=27057,
-                             progress=None, max_wall_seconds=None, selected_case_ids=None):
+                             progress=None, max_wall_seconds=None, selected_case_ids=None, motion_features=None):
     """Run all 13 probes, or an ordered subset, without admitting Stage2.
 
     Each trial uses run_batch's one initial reset and unchanged numeric scorer.
@@ -713,7 +721,8 @@ def run_learning_probe_suite(env, policy, output, geometry_extrema, checkpoint, 
                                checkpoint_sha256=checkpoint_sha, source_sha256=source_sha, seed=seed,
                                video_case_id=video_case_id if case["case_id"] == video_case_id else None,
                                progress=trial_progress,
-                               max_wall_seconds=None if not math.isfinite(remaining) else remaining)
+                               max_wall_seconds=None if not math.isfinite(remaining) else remaining,
+                               motion_features=motion_features)
         except Exception as error:
             acquisition_failure = repr(error)
             _save(out / "acquisition_exception.json",

@@ -16,13 +16,14 @@ def digest(path):
 def runtime_paths(package):
     """Select the files a native allocation runs.
 
-    The tripod task runs through stock Isaac Lab entry points, and prepare copies
-    the prior modules it needs for AMP or replay.
+    The tripod task runs through stock Isaac Lab entry points. Evaluation and AMP
+    read the motion features in priors/features.py, and prepare copies the other
+    prior modules it needs for AMP or replay.
     """
     package = Path(package)
     return sorted(path for path in package.rglob('*.py')
                   if not set(path.relative_to(package).parts) & {'tests', '__pycache__', 'tripod', 'surrogate'}
-                  and ('priors' not in path.relative_to(package).parts or path.name in {'__init__.py'}))
+                  and ('priors' not in path.relative_to(package).parts or path.name in {'__init__.py', 'features.py'}))
 
 
 def source_files(package):
@@ -31,9 +32,10 @@ def source_files(package):
 
 
 def physics_files(files, package=None):
-    """Follow project imports from the native environment, the standing capture and the scorer."""
+    """Follow project imports from the native environment, its scene checks, the standing capture and the scorer."""
     package = Path(package) if package is not None else Path(__file__).resolve().parents[1]
-    pending, seen = ['omniwalk/adapter.py', 'omniwalk/env_cfg.py', 'omniwalk/env.py', 'evaluation/capture.py', 'evaluation/scoring.py'], set()
+    pending, seen = ['omniwalk/adapter.py', 'omniwalk/env_cfg.py', 'omniwalk/env.py', 'evaluation/admission.py',
+                     'evaluation/capture.py', 'evaluation/scoring.py'], set()
     while pending:
         name = pending.pop()
         if name in seen or name not in files:

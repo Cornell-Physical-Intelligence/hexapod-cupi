@@ -17,8 +17,9 @@ from pxr import PhysxSchema, UsdPhysics
 from locomotion.omniwalk.env_cfg import make_config
 from locomotion.omniwalk.mdp.observations import observations, proprio
 from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation, rotate
-from locomotion.omniwalk.mdp.motor import RATED_TORQUE_NM, emitted_target, executed_action_feature
-from locomotion.robots.hexapod import BODY_NAMES, ISAACLAB_REVISION, JOINT_NAMES, LEGS, MASS_KG, USD_SHA256, verify_assets
+from locomotion.omniwalk.mdp.actions import emitted_target, executed_action_feature
+from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, LEGS, USD_SHA256, verify_assets
+from locomotion.robots.rs05 import RATED_TORQUE_NM
 
 
 class CaptureArticulation(Articulation):
@@ -36,7 +37,7 @@ class CaptureArticulation(Articulation):
 
 
 class IsaacEnv(DirectRLEnv):
-    """Use stock decimation and reset hooks; hold the scene, native views, checks and per-control loads.
+    """Use stock decimation and reset hooks; hold the scene, native views, their layout guards and per-control loads.
 
     ``cfg`` is the stock DirectRLEnvCfg and ``config`` the EnvConfig. This class owns ``commands``,
     ``history``, ``held`` and ``previous_action`` and updates them in place. ``capture`` is None or a
@@ -83,25 +84,9 @@ class IsaacEnv(DirectRLEnv):
         self.inverse_joint_index = torch.argsort(self.joint_index)
         self.body_index = self.native_body_names.index("body")
         self.toe_index = torch.tensor([self.native_body_names.index(l + "_tibia") for l in LEGS], device=self.device)
-        native_limits = self.get("get_dof_limits")[:, self.joint_index]
         named = {j["name"]: j for j in self.model["joints"]}
         expected_limits = self.torch([[named[n]["lower"], named[n]["upper"]] for n in JOINT_NAMES])
-        if not torch.allclose(native_limits, expected_limits.expand(config.num_envs, -1, -1), atol=2e-6, rtol=0):
-            raise ValueError("Actual native limits differ from the canonical model")
         self.lower, self.upper = expected_limits[:, 0], expected_limits[:, 1]
-        if torch.any(self.neutral < self.lower) or torch.any(self.neutral > self.upper):
-            raise ValueError("Reference neutral violates named canonical limits")
-        masses = self.get("get_masses")
-        named_links = {b["name"]: b for b in self.model["links"]}
-        expected_masses = self.torch([named_links[n]["mass"] for n in self.native_body_names])
-        if not torch.allclose(masses, expected_masses.expand(config.num_envs, -1), atol=1e-6, rtol=0):
-            raise ValueError("Native body mass differs from canonical mass ledger")
-        for getter in ("get_dof_stiffnesses", "get_dof_dampings", "get_dof_armatures"):
-            if torch.any(self.get(getter) != 0):
-                raise ValueError("Unexpected implicit drive or armature: " + getter)
-        sdf = self.sim.physics_sim_view.create_sdf_shape_view("/World/envs/env_*/Robot/*/collisions/part_*", 1)
-        if sdf.count != config.num_envs * 153 or not sdf.check():
-            raise ValueError("Detailed collision shapes absent or changed")
         self.root_com_local = self.get("get_coms")[:, self.body_index, :3]
         self.contact = self.sim.physics_sim_view.create_rigid_contact_view("/World/envs/env_*/Robot/*", [self.ground_collision_path], max_contact_data_count=1024 * config.num_envs)
         paths = list(self.contact.sensor_paths)
@@ -126,18 +111,6 @@ class IsaacEnv(DirectRLEnv):
         self.total_controls = 0
         self.telemetry = {}
         self.capture = None
-        self.native_readback = {"native_joint_names": self.native_joint_names, "native_body_names": self.native_body_names,
-            "canonical_joint_names": self.joint_names, "root_paths": self.roots, "mass_per_replica_kg": masses.sum(-1).cpu().tolist(),
-            "masses": masses.cpu().tolist(), "limits": native_limits.cpu().tolist(), "native_max_velocity": self.get("get_dof_max_velocities")[:, self.joint_index].cpu().tolist(), "sdf_shapes": sdf.count,
-            "solver_iterations_requested": [32, 0], "implicit_drive_and_armature_zero": True,
-            "asset_mass_target_kg": MASS_KG, "config": config.declaration()}
-        self.save("native_readback.json", self.native_readback)
-        self.verify_native_recipe("after_sdk_reset")
-        self.native_readback["backend"] = "direct"
-        self.native_readback["isaaclab_revision_expected"] = ISAACLAB_REVISION
-        self.native_readback["episode_owner"] = "external RewardTask; stock done flags are zero"
-        self.native_readback["force_readback_phase"] = "native force after stock write before physics; state and contact after stock update"
-        self.save("native_readback.json", self.native_readback)
 
     def _setup_scene(self):
         self.robot = CaptureArticulation(self.robot_cfg)
@@ -261,8 +234,7 @@ class IsaacEnv(DirectRLEnv):
         return torch.zeros(self.num_envs, device=self.device)
 
     def _get_observations(self):
-        result = observations(self.history, self.commands, self.previous_action, self.current,
-                              self.config.record_motion_features)
+        result = observations(self.history, self.commands, self.previous_action, self.current)
         return {"policy": result.pop("obs"), **result}
 
     def _reset_idx(self, env_ids):
@@ -297,39 +269,6 @@ class IsaacEnv(DirectRLEnv):
         self.view.set_dof_actuation_forces(self.native_array(force), wp.array(rows.cpu().numpy(), dtype=wp.uint32, device=self.device))
         self.held[rows] = self.neutral
         self.previous_action[rows] = 0
-
-    def verify_native_recipe(self, phase):
-        """Read actual scene/articulation/material values, not only authored intent."""
-        solver = {}
-        for root in self.roots:
-            prim = self.sim.stage.GetPrimAtPath(root + "/body")
-            api = PhysxSchema.PhysxArticulationAPI(prim)
-            values = [api.GetSolverPositionIterationCountAttr().Get(), api.GetSolverVelocityIterationCountAttr().Get()]
-            if values != [32, 0]:
-                raise ValueError("Actual solver attributes differ: " + root)
-            if prim.GetAttribute("physxArticulation:enabledSelfCollisions").Get() is not True:
-                raise ValueError("Canonical self-collision setting differs")
-            solver[root] = values
-        scene = self.sim.stage.GetPrimAtPath(self.scene_prim_path)
-        scene_values = {name: scene.GetAttribute(name).Get() for name in
-                        ("physxScene:timeStepsPerSecond", "physxScene:enableExternalForcesEveryIteration")}
-        if scene_values["physxScene:timeStepsPerSecond"] != 400 or scene_values["physxScene:enableExternalForcesEveryIteration"] is not True:
-            raise ValueError("Actual simulation timing/external-force configuration differs")
-        material = self.get("get_material_properties")
-        offsets = self.get("get_contact_offsets")
-        rests = self.get("get_rest_offsets")
-        if material.shape != (self.num_envs, 153, 3) or not torch.allclose(material, self.torch([1., 1., 0.]).expand_as(material), atol=1e-7, rtol=0):
-            raise ValueError("Actual native materials differ")
-        if offsets.shape != (self.num_envs, 153) or not torch.allclose(offsets, torch.full_like(offsets, .001), atol=1e-9, rtol=0) or torch.any(rests != 0):
-            raise ValueError("Actual native contact/rest offsets differ")
-        if self.native_errors:
-            raise RuntimeError("Native physics errors prevent acceptance")
-        self.native_readback.setdefault("recipe_readbacks", {})[phase] = {
-            "solver_attributes": solver, "scene_attributes": scene_values,
-            "material_properties": material.cpu().tolist(), "contact_offsets": offsets.cpu().tolist(),
-            "rest_offsets": rests.cpu().tolist(), "backend_iteration_introspection": False,
-            "native_error_events": list(self.native_errors)}
-        self.save("native_readback.json", self.native_readback)
 
     def save(self, name, value):
         (self.output / name).write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")

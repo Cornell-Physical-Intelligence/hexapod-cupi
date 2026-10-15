@@ -13,6 +13,7 @@ from tensordict import TensorDict
 from rsl_rl.algorithms import PPO
 
 from locomotion.evaluation.checkpoint import require_learner_configuration
+from locomotion.evaluation.ppo_diagnostics import value_metrics
 import locomotion.rl.ppo as ppo
 import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
 import locomotion.rl.wrapper as wrapper
@@ -287,11 +288,11 @@ class LearnerOptionTests(unittest.TestCase):
 
     def test_value_metrics_score_the_critic_on_the_collected_rollout(self):
         storage = SimpleNamespace(returns=torch.tensor([[1.], [2.], [3.], [4.]]), values=torch.tensor([[1.], [2.], [3.], [4.]]))
-        self.assertAlmostEqual(ppo.value_metrics(storage)['explained_variance'], 1.)
+        self.assertAlmostEqual(value_metrics(storage)['explained_variance'], 1.)
         storage.values = torch.full((4, 1), 2.5)
-        self.assertAlmostEqual(ppo.value_metrics(storage)['explained_variance'], 0.)
+        self.assertAlmostEqual(value_metrics(storage)['explained_variance'], 0.)
         storage.returns = torch.ones(4, 1)
-        self.assertIsNone(ppo.value_metrics(storage)['explained_variance'])
+        self.assertIsNone(value_metrics(storage)['explained_variance'])
 
     def test_packs_declare_selected_options_and_reject_other_learners(self):
         with tempfile.TemporaryDirectory() as directory:

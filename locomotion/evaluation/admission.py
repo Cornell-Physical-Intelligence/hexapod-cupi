@@ -1,10 +1,99 @@
-"""Bind a run to its model and recorded native standing checks."""
+"""Check the native scene and bind a run to its model and recorded native standing checks.
+
+Each entry point calls ``verify_scene`` as its first step after it constructs ``OmniEnv``. The
+``after_sdk_reset`` readback follows the first task reset, and ``OmniEnv.reset`` proves that this reset
+advanced no physics step.
+"""
 from pathlib import Path
 import argparse
 import json
 
 from locomotion.omniwalk.env_cfg import EnvConfig
-from locomotion.robots.hexapod import MODEL_SHA256, USD_SHA256, sha
+from locomotion.robots.hexapod import ISAACLAB_REVISION, JOINT_NAMES, MASS_KG, MODEL_SHA256, USD_SHA256, sha
+
+
+def verify_scene(env):
+    """Check the native scene against the canonical model, then save and return its readback.
+
+    ``IsaacEnv`` guards the layout that its bindings index: decimation, articulation count, names, root
+    order, contact matrix and toe points. This function checks the evidence against the canonical model.
+    The environment holds the readback as ``native_readback``; captures and the evaluator read it there.
+    """
+    import torch
+    cfg = env.cfg
+    native_limits = env.get("get_dof_limits")[:, env.joint_index]
+    named = {j["name"]: j for j in env.model["joints"]}
+    expected_limits = env.torch([[named[n]["lower"], named[n]["upper"]] for n in JOINT_NAMES])
+    if not torch.allclose(native_limits, expected_limits.expand(cfg.num_envs, -1, -1), atol=2e-6, rtol=0):
+        raise ValueError("Actual native limits differ from the canonical model")
+    if torch.any(env.neutral < env.lower) or torch.any(env.neutral > env.upper):
+        raise ValueError("Reference neutral violates named canonical limits")
+    masses = env.get("get_masses")
+    named_links = {b["name"]: b for b in env.model["links"]}
+    expected_masses = env.torch([named_links[n]["mass"] for n in env.native_body_names])
+    if not torch.allclose(masses, expected_masses.expand(cfg.num_envs, -1), atol=1e-6, rtol=0):
+        raise ValueError("Native body mass differs from canonical mass ledger")
+    for getter in ("get_dof_stiffnesses", "get_dof_dampings", "get_dof_armatures"):
+        if torch.any(env.get(getter) != 0):
+            raise ValueError("Unexpected implicit drive or armature: " + getter)
+    sdf = env.sim.physics_sim_view.create_sdf_shape_view("/World/envs/env_*/Robot/*/collisions/part_*", 1)
+    if sdf.count != cfg.num_envs * 153 or not sdf.check():
+        raise ValueError("Detailed collision shapes absent or changed")
+    readback = {"native_joint_names": env.native_joint_names, "native_body_names": env.native_body_names,
+        "canonical_joint_names": env.joint_names, "root_paths": env.roots, "mass_per_replica_kg": masses.sum(-1).cpu().tolist(),
+        "masses": masses.cpu().tolist(), "limits": native_limits.cpu().tolist(), "native_max_velocity": env.get("get_dof_max_velocities")[:, env.joint_index].cpu().tolist(), "sdf_shapes": sdf.count,
+        "solver_iterations_requested": [32, 0], "implicit_drive_and_armature_zero": True,
+        "asset_mass_target_kg": MASS_KG, "config": cfg.declaration()}
+    env.native_readback = readback
+    env.save("native_readback.json", readback)
+    verify_native_recipe(env, "after_sdk_reset")
+    readback["backend"] = "direct"
+    readback["isaaclab_revision_expected"] = ISAACLAB_REVISION
+    readback["episode_owner"] = "external RewardTask; stock done flags are zero"
+    readback["force_readback_phase"] = "native force after stock write before physics; state and contact after stock update"
+    env.save("native_readback.json", readback)
+    return readback
+
+
+def verify_native_recipe(env, phase):
+    """Read actual scene/articulation/material values, not only authored intent.
+
+    The MuJoCo surrogate has no PhysX scene; it checks its own fixed recipe with its method of this name.
+    """
+    if hasattr(env, "verify_native_recipe"):
+        return env.verify_native_recipe(phase)
+    import torch
+    from pxr import PhysxSchema
+    solver = {}
+    for root in env.roots:
+        prim = env.sim.stage.GetPrimAtPath(root + "/body")
+        api = PhysxSchema.PhysxArticulationAPI(prim)
+        values = [api.GetSolverPositionIterationCountAttr().Get(), api.GetSolverVelocityIterationCountAttr().Get()]
+        if values != [32, 0]:
+            raise ValueError("Actual solver attributes differ: " + root)
+        if prim.GetAttribute("physxArticulation:enabledSelfCollisions").Get() is not True:
+            raise ValueError("Canonical self-collision setting differs")
+        solver[root] = values
+    scene = env.sim.stage.GetPrimAtPath(env.isaac.scene_prim_path)
+    scene_values = {name: scene.GetAttribute(name).Get() for name in
+                    ("physxScene:timeStepsPerSecond", "physxScene:enableExternalForcesEveryIteration")}
+    if scene_values["physxScene:timeStepsPerSecond"] != 400 or scene_values["physxScene:enableExternalForcesEveryIteration"] is not True:
+        raise ValueError("Actual simulation timing/external-force configuration differs")
+    material = env.get("get_material_properties")
+    offsets = env.get("get_contact_offsets")
+    rests = env.get("get_rest_offsets")
+    if material.shape != (env.num_envs, 153, 3) or not torch.allclose(material, env.torch([1., 1., 0.]).expand_as(material), atol=1e-7, rtol=0):
+        raise ValueError("Actual native materials differ")
+    if offsets.shape != (env.num_envs, 153) or not torch.allclose(offsets, torch.full_like(offsets, .001), atol=1e-9, rtol=0) or torch.any(rests != 0):
+        raise ValueError("Actual native contact/rest offsets differ")
+    if env.native_errors:
+        raise RuntimeError("Native physics errors prevent acceptance")
+    env.native_readback.setdefault("recipe_readbacks", {})[phase] = {
+        "solver_attributes": solver, "scene_attributes": scene_values,
+        "material_properties": material.cpu().tolist(), "contact_offsets": offsets.cpu().tolist(),
+        "rest_offsets": rests.cpu().tolist(), "backend_iteration_introspection": False,
+        "native_error_events": list(env.native_errors)}
+    env.save("native_readback.json", env.native_readback)
 
 
 def require_admission(path, identity, cfg):

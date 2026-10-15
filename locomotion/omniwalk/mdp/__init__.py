@@ -1,1 +1,1 @@
-"""Task mathematics: motor model, frames, observations, commands and rewards."""
+"""Task mathematics: actions, frames, observations, commands and rewards."""

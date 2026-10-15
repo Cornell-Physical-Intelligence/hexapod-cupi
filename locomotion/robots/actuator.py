@@ -2,8 +2,8 @@
 import torch
 from isaaclab.actuators import ActuatorBase, ActuatorBaseCfg
 from isaaclab.utils import configclass
-from locomotion.omniwalk.mdp.motor import RATED_TORQUE_NM, STIFFNESS_NM_PER_RAD, motor_force
 from locomotion.robots.hexapod import JOINT_NAMES, motor_damping
+from locomotion.robots.rs05 import RATED_TORQUE_NM, STIFFNESS_NM_PER_RAD, motor_force
 
 
 class Motor(ActuatorBase):

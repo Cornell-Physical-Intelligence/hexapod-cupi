@@ -12,26 +12,27 @@ shows definitions and imports.
 | `tripod/` | Original tripod task with BC and PPO fine-tuning. | `hexapod_env.py` |
 | `priors/` | Motion demonstrations and AMP learning. | [README](priors/README.md) |
 | `surrogate/` | CPU MuJoCo training and trace replay. | [README](surrogate/README.md) |
-| `evaluation/` | Native capture, checkpoint identity and motion scoring. | `runner.py` |
+| `evaluation/` | Native capture, scene checks, checkpoint identity, motion scoring, task metrics and PPO diagnostics. | `runner.py` |
 | `spark/` | Prepare, launch and bind native allocations. | `prepare.py` |
 | `tests/` | CPU, parity and native replay tests. | [Verification](#verification) |
 
 ## Omni files
 
 - `robot.py`: joint names, body names, asset hashes and damping.
-- `motor.py`: PD torque curve and slew limiter.
+- `rs05.py`: PD torque curve, in `robots/`.
+- `actions.py`: slew limiter and executed-action feature.
 - `actuator.py`: Isaac actuator for that curve.
 - `frames.py`: quaternion and navigation frames.
 - `env_cfg.py`: `EnvConfig` and `DirectRLEnvCfg` factory.
-- `isaac.py`: `IsaacEnv`, its scene, views, checks, capture and resets.
+- `isaac.py`: `IsaacEnv`, its scene, views, layout guards, capture and resets.
 - `env.py`: `OmniEnv`, the task-facing surface.
-- `features.py`: observations and motion features.
+- `observations.py`: policy observations; `priors/features.py` packs the motion features.
 - `commands.py`: command bank and gait-clock period.
 - `reward.py`: recorded yaw-gated reward.
-- `task.py`: `TrainingTask` for command holds, reward memory, resets and metrics.
+- `task.py`: `TrainingTask` for command holds, reward memory, resets and an optional metrics observer.
 - `wrapper.py`: `OmniVecEnv` with input scales, gait clock, smoothing and noise.
 - `agents/rsl_rl_ppo_cfg.py`: Torch-free learner configuration and the `c48_long` recipe.
-- `ppo.py`: PPO subclasses, distributions, deviation schedule and diagnostics.
+- `ppo.py`: PPO subclasses, distributions and deviation schedule.
 - `train.py`: entry point, one function per mode.
 
 ## Experiment contracts

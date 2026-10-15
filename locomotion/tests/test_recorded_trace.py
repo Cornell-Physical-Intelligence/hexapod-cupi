@@ -12,9 +12,11 @@ import torch
 import locomotion.omniwalk.mdp.commands as commands
 import locomotion.omniwalk.adapter as env
 import locomotion.omniwalk.env_cfg as env_config
-import locomotion.omniwalk.mdp.motor as motor
+import locomotion.omniwalk.mdp.actions as actions
 import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
+from locomotion.priors.features import extract_features
 import locomotion.robots.hexapod as robot
+import locomotion.robots.rs05 as rs05
 
 ROOT = Path(__file__).resolve().parents[2]
 FROZEN = ROOT/'locomotion/tests/fixtures/baseline'
@@ -47,12 +49,12 @@ class RecordedTraceTests(unittest.TestCase):
         neutral = torch.tensor([0., -.3, .4]*6)
         held = torch.cat((neutral[None], trace['joint_target_rad'][:-1]))
         args = (trace['policy_action'], held, neutral, lower, upper)
-        actual = motor.emitted_target(*args)
+        actual = actions.emitted_target(*args)
         torch.testing.assert_close(actual, trace['joint_target_rad'], rtol=0, atol=0)
         torch.testing.assert_close(actual, self.old['env'].emitted_target(*args), rtol=0, atol=0)
         state = trace['amp_state_before']
         args = (state[:, :18], state[:, 18:36], actual, torch.tensor(robot.KD))
-        for current, old in zip(motor.motor_force(*args), self.old['env'].motor_force(*args)):
+        for current, old in zip(rs05.motor_force(*args), self.old['env'].motor_force(*args)):
             torch.testing.assert_close(current, old, rtol=0, atol=0)
 
     def test_recorded_actor_and_critic_inputs_match_the_trace(self):
@@ -68,12 +70,15 @@ class RecordedTraceTests(unittest.TestCase):
                  'toe_body': amp[:, 43:].reshape(-1, 6, 3)}
         actual = native.observations(state)
         baseline = self.old['env'].PaperWalkEnv._observations(native, state)
-        for key in ('obs', 'critic', 'amp'):
+        for key in ('obs', 'critic'):
             torch.testing.assert_close(actual[key], baseline[key], atol=0, rtol=0)
+        # The AMP side packs the motion features from the same state.
+        torch.testing.assert_close(extract_features(state), baseline['amp'], atol=0, rtol=0)
         torch.testing.assert_close(actual['obs'], trace['policy_observation'], atol=0, rtol=0)
         torch.testing.assert_close(actual['critic'], trace['critic_observation'], atol=0, rtol=0)
         native.cfg = env_config.EnvConfig(record_motion_features=False)
         training = native.observations(state)
+        self.assertEqual(set(actual), {'obs', 'critic'})
         self.assertEqual(set(training), {'obs', 'critic'})
         for key in training:
             torch.testing.assert_close(training[key], actual[key], atol=0, rtol=0)

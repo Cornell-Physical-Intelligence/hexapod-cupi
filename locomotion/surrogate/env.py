@@ -14,10 +14,10 @@ import numpy as np
 from scipy.spatial import ConvexHull
 import torch
 
-from locomotion.omniwalk.mdp.observations import extract_features
+from locomotion.omniwalk.mdp.actions import emitted_target, executed_action_feature
 from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation, rotate
-from locomotion.omniwalk.mdp.motor import emitted_target, executed_action_feature, motor_force
 from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, MODEL_SHA256
+from locomotion.robots.rs05 import motor_force
 
 # The package resolves repository data from its own location.
 ROOT = Path(__file__).resolve().parents[2]
@@ -633,10 +633,7 @@ class SurrogateEnv:
     def observations(self, state):
         obs = torch.cat((self.history.flatten(1), self.commands, self.previous_action), dim=-1)
         critic = torch.cat((obs, navigation(state["linear"])), dim=-1)
-        result = {"obs": obs, "critic": critic}
-        if self.cfg.record_motion_features:
-            result["amp"] = extract_features(state)
-        return result
+        return {"obs": obs, "critic": critic}
 
     # ----- OmniEnv interface ---------------------------------------------------------------
     def reset(self, indices=None):
