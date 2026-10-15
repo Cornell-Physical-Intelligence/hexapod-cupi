@@ -1,5 +1,6 @@
 """Check that the c48_long recipe reproduces the learner and reward options of its compatibility receipt."""
 from dataclasses import fields, replace
+import importlib
 import json
 from pathlib import Path
 import tempfile
@@ -12,6 +13,8 @@ from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import RECIPES, ppo_config
 from locomotion.omniwalk.mdp.commands import TaskConfig
 from locomotion.omniwalk.mdp.rewards import RewardConfig
 from locomotion.omniwalk.task import TrainingTask
+import locomotion.scripts.diagnose as diagnose
+import locomotion.scripts.play as play
 import locomotion.scripts.train as train
 from locomotion.spark.prepare import prepare
 from locomotion.spark.validation import OPTION_DEFAULTS
@@ -31,8 +34,8 @@ def recorded_identity():
         for key, value in row.items()})['original_identity']
 
 
-def parsed_options(argv):
-    args = train.parse_args(argv)
+def parsed_options(script, argv):
+    args = script.parse_args(argv)
     return {key: getattr(args, key) for key in OPTION_DEFAULTS}
 
 
@@ -61,19 +64,21 @@ class RecipeTests(unittest.TestCase):
 
     def test_command_lines_start_ppo_training_and_evaluation_from_the_recipe(self):
         recipe = RECIPES['c48_long']
-        for mode in ('train', 'evaluate'):
-            self.assertEqual(parsed_options(ENTRY + ['--mode', mode]), recipe)
-        self.assertEqual(parsed_options(ENTRY + ['--mode', 'train', '--steps-per-env', '24']), {**recipe, 'steps_per_env': 24})
-        self.assertEqual(parsed_options(ENTRY + ['--mode', 'train', '--recipe', 'none']), {**OPTION_DEFAULTS, 'gait_clock': 60})
-        self.assertEqual(parsed_options(ENTRY + ['--mode', 'diagnostic']), OPTION_DEFAULTS)
+        for script in (train, play):
+            self.assertEqual(parsed_options(script, ENTRY), recipe)
+        self.assertEqual(parsed_options(train, ENTRY + ['--steps-per-env', '24']), {**recipe, 'steps_per_env': 24})
+        self.assertEqual(parsed_options(train, ENTRY + ['--recipe', 'none']), {**OPTION_DEFAULTS, 'gait_clock': 60})
+        self.assertEqual(parsed_options(diagnose, ENTRY), OPTION_DEFAULTS)
         with tempfile.TemporaryDirectory() as directory:
             for index, (options, expected) in enumerate((
                     ({}, recipe), ({'recipe': 'none'}, {**OPTION_DEFAULTS, 'gait_clock': 60}),
                     ({'action_mean': 'unbounded'}, {**recipe, 'action_mean': 'unbounded'}))):
                 with self.subTest(options=options):
-                    command = prepare(Path(directory)/f'pack{index}', REMOTE, **options)['command_args']
-                    # The trainer resolves the pack's command line to the options the pack declares.
-                    self.assertEqual(parsed_options(command + ['--output', 'o', '--preflight-only']), expected)
+                    binding = prepare(Path(directory)/f'pack{index}', REMOTE, **options)
+                    # The pack's script resolves the pack's command line to the options the pack declares.
+                    script = importlib.import_module(binding['module'])
+                    self.assertEqual(parsed_options(script, binding['command_args'] + ['--output', 'o', '--preflight-only']),
+                                     expected)
 
 
 if __name__ == '__main__':

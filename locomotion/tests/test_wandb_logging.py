@@ -5,6 +5,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
+import locomotion.scripts.cli as cli
+import locomotion.scripts.play as play
 import locomotion.scripts.train as train
 from locomotion.spark.prepare import prepare
 
@@ -15,14 +17,14 @@ ROOT = '/home/orionh/HEXAPOD_runs/restart_20260914/wandb_fixture'
 
 class WandbLoggingTests(unittest.TestCase):
     def test_train_rejects_incomplete_or_misplaced_wandb_options(self):
-        for extra in (['--mode', 'evaluate', '--logger', 'wandb', '--wandb-project', 'hexapod'],
-                      ['--mode', 'train', '--logger', 'wandb'],
-                      ['--mode', 'train', '--logger', 'wandb', '--wandb-project', 'bad name'],
-                      ['--mode', 'train', '--wandb-project', 'hexapod'],
-                      ['--mode', 'train', '--wandb-mode', 'online']):
-            with self.subTest(extra=extra), self.assertRaisesRegex(ValueError, 'W&B'):
-                train.main(ARGS+extra)
-        online = ARGS+['--mode', 'train', '--logger', 'wandb', '--wandb-project', 'hexapod', '--wandb-mode', 'online']
+        for main, extra in ((play.main, ['--logger', 'wandb', '--wandb-project', 'hexapod']),
+                            (train.main, ['--logger', 'wandb']),
+                            (train.main, ['--logger', 'wandb', '--wandb-project', 'bad name']),
+                            (train.main, ['--wandb-project', 'hexapod']),
+                            (train.main, ['--wandb-mode', 'online'])):
+            with self.subTest(script=main.__module__, extra=extra), self.assertRaisesRegex(ValueError, 'W&B'):
+                main(ARGS+extra)
+        online = ARGS+['--logger', 'wandb', '--wandb-project', 'hexapod', '--wandb-mode', 'online']
         with patch('importlib.util.find_spec', return_value=object()), patch.dict(os.environ, {'WANDB_API_KEY': ''}):
             with self.assertRaisesRegex(ValueError, 'W&B'):
                 train.main(online)
@@ -31,14 +33,13 @@ class WandbLoggingTests(unittest.TestCase):
         with patch('importlib.util.find_spec', return_value=object()), patch.dict(os.environ, {'WANDB_API_KEY': 'k'}):
             for mode in ('offline', 'online'):
                 with self.subTest(mode=mode), self.assertRaises(Exception) as caught:
-                    train.main(ARGS+['--mode', 'train', '--logger', 'wandb', '--wandb-project', 'hexapod',
-                                     '--wandb-mode', mode])
+                    train.main(ARGS+['--logger', 'wandb', '--wandb-project', 'hexapod', '--wandb-mode', mode])
                 self.assertNotIn('W&B', str(caught.exception))
 
     def test_task_scalars_keep_finite_numbers_only(self):
         status = {'a': 1, 'b': {'c': .5, 'd': None, 'e': 'text', 'f': [1., 2.], 'g': float('nan'), 'h': True}}
-        self.assertEqual(train.scalars(status, 'Task'), {'Task/a': 1, 'Task/b/c': .5})
-        self.assertEqual(train.ConfigRecord({'x': 1}).to_dict(), {'x': 1})
+        self.assertEqual(cli.scalars(status, 'Task'), {'Task/a': 1, 'Task/b/c': .5})
+        self.assertEqual(cli.ConfigRecord({'x': 1}).to_dict(), {'x': 1})
 
     def test_prepare_binds_wandb_arguments_for_training_only(self):
         with tempfile.TemporaryDirectory() as temp:

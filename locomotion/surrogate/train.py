@@ -272,7 +272,7 @@ def run(args, argv=None):
     import locomotion.rl.ppo as algorithms
     import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
     import locomotion.omniwalk.task as task_module
-    from locomotion.scripts.train import save, scalars
+    from locomotion.scripts.cli import save, scalars
 
     version = importlib.metadata.version("rsl-rl-lib")
     if version != "5.0.1":

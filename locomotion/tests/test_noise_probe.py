@@ -116,11 +116,12 @@ class NoiseProbeTests(unittest.TestCase):
             with self.assertRaises(FileExistsError):
                 noise_probe.run(ProbeDouble(), Path(directory)/'probe', seed=11)
 
-    def test_pack_runs_the_training_entry_with_128_replicas_and_no_learner_flags(self):
+    def test_pack_runs_the_diagnostic_entry_with_128_replicas_and_no_learner_flags(self):
         with tempfile.TemporaryDirectory() as directory:
             binding = prepare(Path(directory)/'probe', REMOTE, mode='probe', seed=7)
             args = binding['command_args']
-            self.assertEqual((binding['mode'], binding['module']), ('probe', 'locomotion.scripts.train'))
+            self.assertEqual((binding['mode'], binding['module']), ('probe', 'locomotion.scripts.diagnose'))
+            self.assertEqual(args[:2], ['--probe', 'noise'])
             self.assertEqual(args[args.index('--num-envs')+1], '128')
             self.assertEqual(args[args.index('--seed')+1], '7')
             self.assertNotIn('--updates', args)

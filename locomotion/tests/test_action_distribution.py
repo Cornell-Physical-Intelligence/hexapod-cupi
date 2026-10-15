@@ -21,7 +21,7 @@ from locomotion.evaluation.ppo_diagnostics import action_metrics
 from locomotion.rl.ppo import BoundedMeanGaussian
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
 from locomotion.robots.hexapod import JOINT_NAMES
-import locomotion.scripts.train as train
+import locomotion.scripts.diagnose as diagnose
 from locomotion.spark.prepare import prepare
 
 
@@ -196,12 +196,12 @@ class IntegrationTests(unittest.TestCase):
                     prepare(root / 'bad', remote, **options)
 
     def test_entry_rejects_bounded_means_without_a_policy(self):
-        args = ['--preflight-only', '--headless', '--mode', 'diagnostic', '--num-envs', '1',
+        args = ['--preflight-only', '--headless', '--num-envs', '1',
                 '--source-freeze-sha256', 'a' * 64, '--action-mean', 'tanh']
         for name in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance', 'output'):
             args += ['--' + name, 'unused']
         with self.assertRaisesRegex(ValueError, 'Bounded action means'):
-            train.main(args)
+            diagnose.main(args)
 
 
 if __name__ == '__main__':

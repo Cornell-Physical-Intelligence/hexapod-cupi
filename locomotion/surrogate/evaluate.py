@@ -30,7 +30,7 @@ REST_CONTROLS = 300
 
 
 class DeterministicPolicy:
-    """The no-noise policy path of ``locomotion/scripts/train.py``: fixed scales, gait clock, actor mean, two-control mean."""
+    """The no-noise policy path of ``locomotion/scripts/play.py``: fixed scales, gait clock, actor mean, two-control mean."""
 
     def __init__(self, actor, env, options, *, velocity_input_gain=1., action_mean2=False, adapter=None):
         self.actor, self.env, self.adapter = actor, env, adapter

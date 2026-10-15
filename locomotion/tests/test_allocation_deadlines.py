@@ -7,6 +7,7 @@ import unittest
 
 import locomotion.spark.prepare as prepare
 import locomotion.spark.safety as reservation
+import locomotion.scripts.cli as cli
 import locomotion.scripts.train as train
 from locomotion.tests import test_launch
 
@@ -34,12 +35,12 @@ class AllocationDeadlineTests(unittest.TestCase):
                                       allocation_profile='flat_pilot_v1', max_wall_seconds=21600)
             self.assertEqual(binding['max_seconds'], 22000)
             self.assertIn('--allocation-profile', binding['command_args'])
-            train.validate_deadline('diagnostic', 'flat_pilot_v1', 21600)
+            cli.validate_deadline('diagnostic', 'flat_pilot_v1', 21600)
             for mode in ('probe', 'tripod', 'throughput'):
                 with self.subTest(mode=mode), self.assertRaisesRegex(ValueError, 'standing diagnostics'):
-                    train.validate_deadline(mode, 'flat_pilot_v1', 21600)
+                    cli.validate_deadline(mode, 'flat_pilot_v1', 21600)
             with self.assertRaises(ValueError):
-                train.validate_deadline('diagnostic', 'standard', 9500)
+                cli.validate_deadline('diagnostic', 'standard', 9500)
 
     def test_prepare_propagates_pilot_deadline_and_preserves_standard(self):
         with tempfile.TemporaryDirectory() as directory:

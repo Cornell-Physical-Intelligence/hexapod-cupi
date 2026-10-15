@@ -21,6 +21,7 @@ from locomotion.priors import amp as amp_ppo
 from locomotion.priors import networks as nets
 from locomotion.evaluation.checkpoint import (json_shape, require_embedded_declaration,
     require_learner_configuration, require_learner_identity)
+import locomotion.scripts.diagnose as diagnose
 import locomotion.scripts.train as train
 from locomotion.priors.amp import AMPConfig, AMPPPO, AMPVecEnv, CollisionCapture, amp_ppo_config, load_demonstrations
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
@@ -541,9 +542,9 @@ class LaunchTests(unittest.TestCase):
         base = ['--asset', 'a', '--model', 'm', '--geometry', 'g', '--geometry-extrema', 'e', '--stance', 's',
                 '--output', 'o', '--source-freeze-sha256', 'f'*64, '--num-envs', '1', '--preflight-only']
         with self.assertRaisesRegex(ValueError, 'AMP learner'):
-            train.main(base + ['--mode', 'train', '--networks', 'paper'])
+            train.main(base + ['--networks', 'paper'])
         with self.assertRaisesRegex(ValueError, 'AMP learner'):
-            train.main(base + ['--mode', 'diagnostic', '--learner', 'amp'])
+            diagnose.main(base + ['--learner', 'amp'])
 
 
 if __name__ == '__main__':

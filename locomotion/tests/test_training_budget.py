@@ -6,6 +6,7 @@ import unittest
 
 import locomotion.rl.ppo as ppo
 import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
+import locomotion.scripts.play as play
 import locomotion.scripts.train as train
 import locomotion.spark.validation as validation
 from locomotion.spark.prepare import prepare
@@ -24,7 +25,7 @@ REFERENCE = dict(action_mean='tanh', observation_normalization='none',
 def entry(*extra):
     return ['--asset', str(ASSET), '--model', str(MODEL), '--geometry', 'g', '--geometry-extrema', 'e',
             '--stance', 's', '--output', 'o', '--source-freeze-sha256', 'f'*64, '--num-envs', '128',
-            '--mode', 'train', '--preflight-only', *extra]
+            '--preflight-only', *extra]
 
 
 def schedule_values(start, final, decay, updates):
@@ -80,9 +81,8 @@ class UpdateLimitTests(unittest.TestCase):
         with self.assertRaises(FileNotFoundError) as caught:
             train.main(entry('--updates', '5000', '--extended-updates', '--device', 'cuda:0', '--headless'))
         self.assertIn('FREEZE_SHA256.json', str(caught.exception))
-        evaluate = [x if x != 'train' else 'evaluate' for x in entry('--updates', '2000', '--extended-updates')]
         with self.assertRaisesRegex(ValueError, 'training only'):
-            train.main(evaluate)
+            play.main(entry('--updates', '2000', '--extended-updates'))
 
 
 class DecayLengthTests(unittest.TestCase):

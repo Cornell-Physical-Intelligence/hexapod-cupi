@@ -16,7 +16,7 @@ import uuid
 
 import locomotion.spark.safety as guard
 from locomotion.spark.safety import INPUT_ROOTS, RUN_ROOTS, within_roots
-from locomotion.spark.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, validate_deadline
+from locomotion.spark.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, ENTRY_POINTS, validate_deadline
 
 _INCOMPLETE = re.compile(r"incomplete\s+(?:contact|friction)\s+data", re.IGNORECASE)
 
@@ -117,7 +117,7 @@ def verify(binding, own):
     guard.require(profile in ALLOCATION_PROFILES, 'Unknown allocation profile')
     limit = 22000 if profile == 'flat_pilot_v1' else 7200
     guard.require(type(binding['max_seconds']) is int and 120<=binding['max_seconds']<=limit,'Unbounded allocation')
-    module = 'locomotion.priors.replay_native' if binding['mode'] == 'replay' else 'locomotion.scripts.train'
+    module, selection = ENTRY_POINTS[binding['mode']]
     guard.require(binding.get('module') == module, 'Unsupported native entry point')
     paths={k:guard.canonical_path(binding[k]) for k in ('source','asset','prior','geometry_source','output')}
     guard.require(paths['source']==own,'Launcher must belong to its bound source')
@@ -142,7 +142,7 @@ def verify(binding, own):
                       'The supervisor must retain the native cleanup margin')
         options = [('--max-wall-seconds', str(seconds))]
         if profile != 'standard':
-            guard.require(binding['module'] == 'locomotion.scripts.train', 'Pilot requires the training entry point')
+            guard.require(binding['module'].startswith('locomotion.scripts.'), 'Pilot requires a locomotion script entry point')
             options.append(('--allocation-profile', profile))
         for option, want in options:
             guard.require(argv.count(option) == 1 and not any(x.startswith(option+'=') for x in argv),
@@ -153,7 +153,13 @@ def verify(binding, own):
         guard.require(not any(x == '--allocation-profile' or x.startswith('--allocation-profile=') for x in argv),
                       'Standard allocation cannot override its profile')
     guard.require(not any(x=='--output' or x.startswith('--output=') for x in argv),'Output override rejected')
-    for option,want in (('--mode',binding['mode']),('--source-freeze-sha256',binding['source_freeze_sha256']),
+    # Only the selection that the entry point map names may choose a mode inside the module.
+    selected = [tuple(selection)] if selection else []
+    for option in ('--mode', '--probe'):
+        guard.require(any(option == name for name, _ in selected)
+                      or not any(x == option or x.startswith(option+'=') for x in argv),
+                      'Native mode selection differs: '+option)
+    for option,want in (*selected,('--source-freeze-sha256',binding['source_freeze_sha256']),
                         ('--asset','/asset'),('--model','/asset/source/model.json'),('--device','cuda:0')):
         guard.require(argv.count(option)==1 and not any(x.startswith(option+'=') for x in argv),
                       'Exact single native argument required: '+option)

@@ -11,8 +11,8 @@ from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import RECIPES, ppo_config
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS
 from locomotion.robots.hexapod import sha
 from locomotion.spark.sources import runtime_paths, write_runtime
-from locomotion.spark.validation import (ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, LEARNER_OPTION_DEFAULTS,
-    resolve_learner_options, update_limit, validate_decay, validate_deadline)
+from locomotion.spark.validation import (ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, ENTRY_POINTS,
+    LEARNER_OPTION_DEFAULTS, resolve_learner_options, update_limit, validate_decay, validate_deadline)
 from locomotion.spark.safety import HOME_ROOT, RUN_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -144,8 +144,9 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
     save(source/'FREEZE_SHA256.json', {p.relative_to(source).as_posix(): sha(p)
         for p in sorted(source.rglob('*')) if p.is_file()})
     freeze = sha(source/'FREEZE_SHA256.json')
+    module, selection = ENTRY_POINTS[mode]
     binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': False,
-        'module': 'locomotion.priors.replay_native' if mode == 'replay' else 'locomotion.scripts.train',
+        'module': module,
         'mode': mode, 'source': str(remote_root/'source'), 'output': str(remote_root/'run'),
         'asset': declared['asset'], 'geometry_source': declared['geometry_source'],
         'prior': str(Path(declared['stance']).parent), 'input_files': declared['input_files'],
@@ -153,7 +154,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         'allocation_profile': allocation_profile, 'max_wall_seconds': max_wall_seconds,
         'max_seconds': max_wall_seconds + CLEANUP_MARGIN_SECONDS,
         'stage2_complete': False, 'physical_admission': False,
-        'command_args': ['--mode', mode, '--asset', '/asset', '--model', '/asset/source/model.json',
+        'command_args': [*selection, '--asset', '/asset', '--model', '/asset/source/model.json',
             '--geometry', '/geometry_source/geometry/geometry.json',
             '--geometry-extrema', '/geometry_source/geometry/geometry_extrema.npz',
             '--stance', '/prior/'+Path(declared['stance']).name,

@@ -42,32 +42,32 @@ def require_comparison_physics(recorded, candidate):
 
 def replay():
     from contracts import release
-    import locomotion.scripts.train as train
+    import locomotion.scripts.cli as cli
+    import locomotion.scripts.play as play
     args = sys.argv[1:]
     def option(name):
         if args.count(name) != 1:
             raise ValueError('One explicit parity argument required: ' + name)
         return args[args.index(name)+1]
-    if (option('--mode') != 'evaluate' or option('--eval-scope') != 'probes'
-            or option('--num-envs') != '1' or option('--seed') != '20260917'):
+    if (option('--eval-scope') != 'probes' or option('--num-envs') != '1' or option('--seed') != '20260917'):
         raise ValueError('Parity requires all 13 c48_long probes with the retained seed')
     checkpoint = Path(option('--checkpoint'))
     verify_weights(checkpoint)
     proof()
-    from locomotion.evaluation.checkpoint import require_compatibility_configuration
+    from locomotion.evaluation.checkpoint import require_compatibility_configuration, require_learner_identity
     keys = tuple(key for key in release.COMPATIBILITY_KEYS if key not in SOURCE_KEYS | {'physics_config'})
     def compare_weight_abi(record, identity):
         require_comparison_physics(record['identity']['physics_config'], identity['physics_config'])
         if any(record['identity'][key] != identity[key] for key in keys):
             raise ValueError('Parity weight ABI differs')
-        train.require_learner_identity(record, identity)
+        require_learner_identity(record, identity)
     # Baseline main uses the contract tuple; candidate main calls the extracted helper.
     # Keep model, servo settings, inputs, seed, upstream code and embedded metadata checks.
     with patch.object(release, 'COMPATIBILITY_KEYS', keys), patch.object(
-            train, 'require_checkpoint_identity', compare_weight_abi, create=True), patch.object(
-            train, 'require_learner_configuration', require_compatibility_configuration):
+            cli, 'require_checkpoint_identity', compare_weight_abi, create=True), patch.object(
+            play, 'require_learner_configuration', require_compatibility_configuration):
         # The host supervisor verifies frozen sources and checkpoint inputs after Kit exits.
-        return train.main(args)
+        return play.main(args)
 
 
 def launch():
@@ -75,11 +75,11 @@ def launch():
     proof()
     original = supervisor.command
     def command(binding, paths, name):
-        if binding['module'] != 'locomotion.scripts.train' or binding['mode'] != 'evaluate':
+        if binding['module'] != 'locomotion.scripts.play' or binding['mode'] != 'evaluate':
             raise ValueError('The parity launcher accepts evaluation only')
         argv = original(binding, paths, name)
         index = argv.index('-m') + 1
-        if argv[index] != 'locomotion.scripts.train':
+        if argv[index] != 'locomotion.scripts.play':
             raise ValueError('Unexpected parity entry point')
         argv[index] = 'locomotion.tests.native_parity'
         return argv

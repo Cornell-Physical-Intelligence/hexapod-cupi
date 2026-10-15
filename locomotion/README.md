@@ -77,6 +77,8 @@ failure.
 uv run python -m unittest discover -s locomotion/tests
 uv run python -m locomotion.spark.prepare --help
 uv run python -m locomotion.scripts.train --help
+uv run python -m locomotion.scripts.play --help
+uv run python -m locomotion.scripts.diagnose --help
 uv run python -m locomotion.evaluation.admission --help
 ```
 

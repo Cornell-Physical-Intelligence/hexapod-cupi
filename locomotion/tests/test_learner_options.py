@@ -362,7 +362,7 @@ class LearnerOptionTests(unittest.TestCase):
         for steps, updates, collected in ((24, 2000, 6_144_000), (36, 1333, 6_142_464), (48, 2500, 15_360_000)):
             self.assertEqual(collected_transitions(updates, ppo_cfg.ppo_config(7, steps_per_env=steps), 128), collected)
         base = ['--asset', 'a', '--model', 'm', '--geometry', 'g', '--geometry-extrema', 'e', '--stance', 's',
-                '--output', 'o', '--source-freeze-sha256', 'f'*64, '--num-envs', '1', '--preflight-only', '--mode', 'train']
+                '--output', 'o', '--source-freeze-sha256', 'f'*64, '--num-envs', '1', '--preflight-only']
         with self.assertRaisesRegex(ValueError, 'rollout length'):
             train.main(base + ['--steps-per-env', '32'])
 

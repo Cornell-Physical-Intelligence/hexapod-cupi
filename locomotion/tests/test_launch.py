@@ -23,11 +23,11 @@ class OwnedLaunchTests(unittest.TestCase):
     def binding(self):
         root = "/home/orionh/HEXAPOD_runs/restart_20260914/launcher_fixture"
         return {"schema": "hexapod_locomotion_launch_v1", "root_review_complete": True,
-                "mode": "diagnostic", "module": "locomotion.scripts.train", "max_seconds": 7200,
+                "mode": "diagnostic", "module": "locomotion.scripts.diagnose", "max_seconds": 7200,
                 **{key: root+"/"+key for key in ("source", "output", "asset", "prior", "geometry_source")},
                 "source_freeze_sha256": "a"*64, "input_files": {}, "stage2_complete": False,
                 "physical_admission": False,
-                "command_args": ["--mode", "diagnostic", "--source-freeze-sha256", "a"*64,
+                "command_args": ["--source-freeze-sha256", "a"*64,
                                  "--asset", "/asset", "--model", "/asset/source/model.json",
                                  "--device", "cuda:0", "--headless"]}
 
@@ -49,9 +49,9 @@ class OwnedLaunchTests(unittest.TestCase):
     def test_output_and_readonly_inputs_match_supervisor(self):
         paths = {k: Path("/home/orionh/HEXAPOD_runs/restart_20260914") / k
                  for k in ("source", "output", "asset", "prior", "geometry_source")}
-        binding = {"module": "locomotion.scripts.train", "command_args": ["--mode", "diagnostic", "--headless"], "extra_mounts": []}
+        binding = {"module": "locomotion.scripts.diagnose", "command_args": ["--headless"], "extra_mounts": []}
         args = launch.command(binding, paths, "hexapod-reference-physics-" + "a"*32)
-        self.assertEqual(args[-7:], ["-m", "locomotion.scripts.train", "--output", "/output/standing", "--mode", "diagnostic", "--headless"])
+        self.assertEqual(args[-5:], ["-m", "locomotion.scripts.diagnose", "--output", "/output/standing", "--headless"])
         mounts = [args[i+1] for i, value in enumerate(args) if value == "-v"]
         self.assertEqual(sum(x.endswith(":rw") for x in mounts), 1)
         self.assertIn(str(paths["output"])+":/output:rw", mounts)
@@ -79,16 +79,30 @@ class OwnedLaunchTests(unittest.TestCase):
         paths = {k: Path("/home/orionh/HEXAPOD_runs/restart_20260914") / k
                  for k in ("source", "output", "asset", "prior", "geometry_source")}
         with self.assertRaises(ValueError):
-            launch.command({"command_args": ["--mode", "diagnostic"],
+            launch.command({"command_args": ["--headless"],
                             "extra_mounts": [["/var/run/docker.sock", "/var/run/docker.sock"]]}, paths, "owned")
 
     def test_exact_mode_source_and_output_arguments_are_bound(self):
         base = self.binding()
         self.verify_without_filesystem(base)
         for suffix in (["--output", "/unreviewed"], ["--output=/unreviewed"],
-                       ["--mode", "train"], ["--mode=train"], ["--source-freeze-sha256", "b"*64]):
+                       ["--mode", "train"], ["--mode=train"], ["--probe", "noise"], ["--probe=noise"],
+                       ["--source-freeze-sha256", "b"*64]):
             b = copy.deepcopy(base); b["command_args"] += suffix
             with self.subTest(suffix=suffix), self.assertRaises(ValueError):
+                self.verify_without_filesystem(b)
+
+    def test_each_mode_runs_its_script_and_probe_selection(self):
+        wrong = self.binding(); wrong["module"] = "locomotion.scripts.train"
+        with self.assertRaises(ValueError):
+            self.verify_without_filesystem(wrong)
+        probe = self.binding(); probe.update(mode="probe")
+        probe["command_args"] = ["--probe", "noise", *probe["command_args"]]
+        self.verify_without_filesystem(probe)
+        rest = probe["command_args"][2:]
+        for args in (rest, ["--probe", "standing", *rest], ["--probe=noise", *rest], ["--probe", "noise", "--probe", "noise", *rest]):
+            b = copy.deepcopy(probe); b["command_args"] = args
+            with self.subTest(args=args[:4]), self.assertRaises(ValueError):
                 self.verify_without_filesystem(b)
 
     def test_missing_or_mismatched_native_freeze_rejected_before_launch(self):
