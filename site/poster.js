@@ -31,13 +31,8 @@ function roadmap() {
 const layout = () => narrow.matches ? NARROW : WIDE;
 const place = (n) => narrow.matches ? {c: n.row, r: n.column} : {c: n.column, r: n.row};
 const box = (n) => { const l = layout(), p = place(n); return {x: l.pad + p.c * l.gx, y: l.pad + p.r * l.gy}; };
-function adjacent() {
-  const near = new Set([selected]);
-  for (const [a, b] of data.edges) if (a === selected || b === selected) { near.add(a); near.add(b); }
-  return near;
-}
 function graph() {
-  const near = adjacent(), l = layout(), W = l.w, H = l.h;
+  const l = layout(), W = l.w, H = l.h;
   const width = l.pad * 2 + Math.max(...data.nodes.map((n) => place(n).c)) * l.gx + W;
   const height = l.pad * 2 + Math.max(...data.nodes.map((n) => place(n).r)) * l.gy + H;
   const paths = data.edges.map(([a, b]) => {
@@ -58,7 +53,7 @@ function graph() {
   const markers = ['', '-active'].map((s) => `<marker id="arrow${s}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8"/></marker>`).join('');
   const buttons = data.nodes.map((n) => {
     const {x, y} = box(n);
-    const role = n.id === selected ? 'selected' : near.has(n.id) ? 'connected' : '';
+    const role = n.id === selected ? 'selected' : '';
     return `<button class="node ${esc(n.state)} ${role}" style="left:${x}px;top:${y}px;width:${W}px;height:${H}px" data-node="${esc(n.id)}" aria-pressed="${n.id === selected}" aria-controls="detail" aria-label="${esc(n.title)}, ${esc(nodeStates[n.state])}">${esc(n.title)}</button>`;
   }).join('');
   return `<div class="graph-canvas" style="width:${width}px;height:${height}px"><svg class="wires" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" aria-hidden="true"><defs>${markers}</defs>${paths}</svg>${buttons}</div>`;
@@ -96,7 +91,7 @@ function fit() {
   canvas.style.transformOrigin = '0 0';
   canvas.style.transform = scale < 1 ? `scale(${scale})` : '';
   scroll.style.height = scale < 1 ? `${Math.ceil(height * scale)}px` : '';
-  scroll.style.overflowX = scale < 1 ? 'hidden' : '';
+  scroll.style.overflow = scale < 1 ? 'hidden' : '';  // Both axes: the scaled canvas keeps its layout height.
 }
 
 function render() {
