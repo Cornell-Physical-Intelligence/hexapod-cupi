@@ -14,7 +14,7 @@ from rsl_rl.algorithms import PPO
 
 from locomotion.evaluation.checkpoint import require_learner_configuration
 import locomotion.omniwalk.ppo as ppo
-import locomotion.omniwalk.ppo_cfg as ppo_cfg
+import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
 import locomotion.omniwalk.wrapper as wrapper
 from locomotion.spark.prepare import prepare
 from locomotion.omniwalk.ppo import CappedRatePPO
@@ -309,7 +309,7 @@ class LearnerOptionTests(unittest.TestCase):
                 pack = json.loads((root/mode/'PACK.json').read_text())
                 self.assertEqual({key: pack[key] for key in OPTIONS}, OPTIONS)
                 self.assertIn('locomotion/omniwalk/ppo.py', json.loads((root/mode/'source/FREEZE_SHA256.json').read_text()))
-            defaults = prepare(root/'defaults', REMOTE)
+            defaults = prepare(root/'defaults', REMOTE, recipe='none')
             self.assertFalse({'--observation-scaling', '--command-segments', '--learning-rate-max', '--action-std',
                               '--action-noise-correlation', '--action-std-final', '--video-case'}
                              & set(defaults['command_args']))
@@ -325,7 +325,7 @@ class LearnerOptionTests(unittest.TestCase):
             self.assertEqual(video['command_args'][position+1], 'learning:forward_0.05_to_stop')
             for index, bad in enumerate((dict(mode='diagnostic', observation_scaling='fixed'),
                     dict(mode='tripod', command_segments='bootstrap'), dict(learning_rate_max=1.),
-                    dict(action_noise_correlation=.9), dict(gait_clock=5), dict(episode_seconds=2.), dict(episode_seconds=10),
+                    dict(recipe='none', action_noise_correlation=.9), dict(gait_clock=5), dict(episode_seconds=2.), dict(episode_seconds=10),
                     dict(mode='evaluate', episode_seconds=10., **checkpoint),
                     dict(video_case='learning:quiet_20s'), dict(mode='evaluate', eval_scope='full', video_case='learning:quiet_20s', **checkpoint),
                     dict(mode='evaluate', video_case='static:stand', **checkpoint))):
@@ -351,7 +351,7 @@ class LearnerOptionTests(unittest.TestCase):
                 args = prepare(root/mode, REMOTE, mode=mode, steps_per_env=36, **({} if mode == 'train' else checkpoint))['command_args']
                 self.assertEqual(args[args.index('--steps-per-env')+1], '36')
                 self.assertEqual(json.loads((root/mode/'PACK.json').read_text())['steps_per_env'], 36)
-            self.assertNotIn('--steps-per-env', prepare(root/'plain', REMOTE, mode='train')['command_args'])
+            self.assertNotIn('--steps-per-env', prepare(root/'plain', REMOTE, mode='train', recipe='none')['command_args'])
             self.assertNotIn('steps_per_env', json.loads((root/'plain/PACK.json').read_text()))
             for index, bad in enumerate((dict(steps_per_env=32),
                                          dict(mode='tripod', steps_per_env=36))):

@@ -18,7 +18,7 @@ from rsl_rl.utils import resolve_callable
 
 from locomotion.evaluation.checkpoint import require_learner_configuration
 from locomotion.omniwalk.ppo import BoundedMeanGaussian, action_metrics
-from locomotion.omniwalk.ppo_cfg import ppo_config
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
 from locomotion.omniwalk.robot import JOINT_NAMES
 import locomotion.omniwalk.train as train
 from locomotion.spark.prepare import prepare
@@ -188,7 +188,7 @@ class IntegrationTests(unittest.TestCase):
                 self.assertEqual(pack['action_mean'], 'tanh')
                 manifest = json.loads((root / mode / 'source/FREEZE_SHA256.json').read_text())
                 self.assertIn('locomotion/omniwalk/ppo.py', manifest)
-            legacy = prepare(root / 'legacy', remote)
+            legacy = prepare(root / 'legacy', remote, recipe='none')
             self.assertNotIn('--action-mean', legacy['command_args'])
             for options in ({'action_mean': 'other'}, {'mode': 'diagnostic', 'action_mean': 'tanh'}):
                 with self.subTest(options=options), self.assertRaisesRegex(ValueError, 'Bounded action means'):

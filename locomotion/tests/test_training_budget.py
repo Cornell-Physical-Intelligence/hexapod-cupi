@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 import locomotion.omniwalk.ppo as ppo
-import locomotion.omniwalk.ppo_cfg as ppo_cfg
+import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
 import locomotion.omniwalk.train as train
 import locomotion.spark.validation as validation
 from locomotion.spark.prepare import prepare
@@ -139,7 +139,7 @@ class DecayLengthTests(unittest.TestCase):
                                 checkpoint=REMOTE+'/checkpoint.pt', checkpoint_sha='a'*64,
                                 checkpoint_declaration_sha='b'*64, **evaluation)['command_args']
             self.assertEqual(evaluated[evaluated.index('--action-std-decay-updates')+1], '2000')
-            for index, bad in enumerate((dict(mode='train', updates=2000, action_std_decay_updates=2000),
+            for index, bad in enumerate((dict(mode='train', updates=2000, action_std_decay_updates=2000, recipe='none'),
                                          dict(mode='train', updates=1000, action_std_final=.05, action_std_decay_updates=2000),
                                          dict(mode='train', updates=2000, action_std_final=.05, action_std_decay_updates=0))):
                 with self.subTest(bad=bad), self.assertRaises(ValueError):
@@ -147,7 +147,7 @@ class DecayLengthTests(unittest.TestCase):
 
     def test_entry_requires_a_final_deviation_and_a_decay_inside_the_run(self):
         with self.assertRaisesRegex(ValueError, 'final action deviation'):
-            train.main(entry('--updates', '2000', '--action-std-decay-updates', '2000'))
+            train.main(entry('--updates', '2000', '--action-std-decay-updates', '2000', '--recipe', 'none'))
         with self.assertRaisesRegex(ValueError, 'decay length'):
             train.main(entry('--updates', '1000', '--action-std-final', '0.05', '--action-std-decay-updates', '2000'))
 

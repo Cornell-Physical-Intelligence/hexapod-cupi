@@ -13,7 +13,7 @@ import locomotion.omniwalk.commands as commands
 import locomotion.omniwalk.env as env
 import locomotion.omniwalk.env_cfg as env_config
 import locomotion.omniwalk.motor as motor
-import locomotion.omniwalk.ppo_cfg as ppo_cfg
+import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
 import locomotion.omniwalk.robot as robot
 
 ROOT = Path(__file__).resolve().parents[2]

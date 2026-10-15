@@ -30,7 +30,7 @@ shows definitions and imports.
 - `reward.py`: recorded yaw-gated reward.
 - `task.py`: `TrainingTask` for command holds, reward memory, resets and metrics.
 - `wrapper.py`: `OmniVecEnv` with input scales, gait clock, smoothing and noise.
-- `ppo_cfg.py`: Torch-free learner configuration.
+- `agents/rsl_rl_ppo_cfg.py`: Torch-free learner configuration and the `c48_long` recipe.
 - `ppo.py`: PPO subclasses, distributions, deviation schedule and diagnostics.
 - `train.py`: entry point, one function per mode.
 
@@ -79,8 +79,11 @@ uv run python -m locomotion.omniwalk.train --help
 uv run python -m locomotion.evaluation.admission --help
 ```
 
-`--learner amp` adds the motion prior; `--networks paper` selects paper
-networks without a gait clock.
+PPO training and evaluation start from `--recipe c48_long`, the admitted
+checkpoint's options in `omniwalk/agents/rsl_rl_ppo_cfg.py`; `test_recipe.py`
+checks them against its receipt. Option flags replace recipe values, and
+`--recipe none` keeps the option defaults. `--learner amp` adds the motion prior;
+`--networks paper` selects paper networks without a gait clock.
 
 For tripod, put this repository on `PYTHONPATH` in the pinned Isaac Lab
 checkout. Use stock train/play scripts with callback

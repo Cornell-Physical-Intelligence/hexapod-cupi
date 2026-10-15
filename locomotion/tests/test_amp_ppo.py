@@ -23,7 +23,7 @@ from locomotion.evaluation.checkpoint import (json_shape, require_embedded_decla
     require_learner_configuration, require_learner_identity)
 import locomotion.omniwalk.train as train
 from locomotion.priors.amp import AMPConfig, AMPPPO, AMPVecEnv, CollisionCapture, amp_ppo_config, load_demonstrations
-from locomotion.omniwalk.ppo_cfg import ppo_config
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
 from locomotion.omniwalk.wrapper import OmniVecEnv
 from locomotion.spark.prepare import prepare
 

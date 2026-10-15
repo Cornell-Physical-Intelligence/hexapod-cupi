@@ -74,7 +74,7 @@ WRAPPER_DEFAULTS = {"observation_scaling": "none", "command_segments": "continuo
 
 def wrapper_options(config):
     """The wrapper keywords of a PPO configuration: the two original options at their recorded or
-    default values, and every other key the configuration records (``ppo_cfg.ppo_config`` omits defaults)."""
+    default values, and every other key the configuration records (``rsl_rl_ppo_cfg.ppo_config`` omits defaults)."""
     return {"observation_scaling": "none", "command_segments": "continuous", **config.get("environment_wrapper", {})}
 
 
@@ -95,14 +95,14 @@ def build_wrapper(wrapper_class, task, options):
 
 
 def learner_configuration(config_module, seed, options):
-    """``ppo_cfg.ppo_config`` with the learner options; an option the checked-out revision lacks must hold its default."""
+    """``rsl_rl_ppo_cfg.ppo_config`` with the learner options; an option the checked-out revision lacks must hold its default."""
     accepted = inspect.signature(config_module.ppo_config).parameters
     defaults = {"observation_scaling": "none", "command_segments": "continuous", "learning_rate_max": None,
                 "action_std": .15, "action_noise_correlation": 0., "action_std_final": None, "gait_clock": 0,
                 "action_smoothing": "none", "velocity_noise": 0.}
     missing = [key for key, value in options.items() if key not in accepted and value != defaults.get(key)]
     if missing:
-        raise ValueError(f"locomotion.omniwalk.ppo_cfg.ppo_config at this revision has no option {missing}")
+        raise ValueError(f"locomotion.omniwalk.agents.rsl_rl_ppo_cfg.ppo_config at this revision has no option {missing}")
     return config_module.ppo_config(seed, **{key: value for key, value in options.items() if key in accepted})
 
 
@@ -211,7 +211,7 @@ def build_parser():
                         help="module:Class or module:factory(text) that gives a class with the TrainingTask "
                              "interface: Class(env, TaskConfig, output_dir).")
     parser.add_argument("--wrapper", default="locomotion.omniwalk.wrapper:OmniVecEnv", help="module:Class that wraps the task for RSL-RL.")
-    parser.add_argument("--ppo-config-overrides", default="{}", help="JSON merged into ppo_cfg.ppo_config(...), or @file.json.")
+    parser.add_argument("--ppo-config-overrides", default="{}", help="JSON merged into rsl_rl_ppo_cfg.ppo_config(...), or @file.json.")
     parser.add_argument("--distribution", help="Actor distribution class_name (RSL-RL name or module:Class); overrides --action-mean.")
     parser.add_argument("--action-mean", choices=["unbounded", "tanh"], default="unbounded")
     parser.add_argument("--observation-normalization", choices=["empirical", "none"], default="empirical")
@@ -268,7 +268,7 @@ def run(args, argv=None):
     from locomotion.surrogate.env import (DEFAULT_GEOMETRY, DEFAULT_MODEL, DEFAULT_STANCE, ROOT, SurrogateConfig,
                                           SurrogateEnv, contact_overrides, repository_state, sha)
     import locomotion.omniwalk.ppo as algorithms
-    import locomotion.omniwalk.ppo_cfg as ppo_cfg
+    import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
     import locomotion.omniwalk.task as task_module
     from locomotion.omniwalk.train import save, scalars
 

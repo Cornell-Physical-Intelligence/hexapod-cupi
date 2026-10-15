@@ -1,6 +1,9 @@
 """Keep allocation bounds and completed-update behavior shared across entry points."""
 import math
 
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import recipe_options
+from locomotion.omniwalk.commands import default_gait_clock
+
 ALLOCATION_PROFILES = ('standard', 'flat_pilot_v1')
 CLEANUP_MARGIN_SECONDS = 400
 # Training stops at UPDATE_LIMIT; a training pack that opts in to extended updates may run to the larger limit.
@@ -61,3 +64,14 @@ LEARNER_OPTION_DEFAULTS = {
     'action_std_final': None, 'gait_clock': 0, 'action_smoothing': 'none',
     'velocity_noise': 0., 'action_std_decay_updates': None, 'steps_per_env': 24,
 }
+# Every ppo_config option at its default; default_gait_clock sets the clock of each mode.
+OPTION_DEFAULTS = {'action_mean': 'unbounded', 'observation_normalization': 'empirical', **LEARNER_OPTION_DEFAULTS}
+
+
+def resolve_learner_options(recipe, mode, learner, networks, options):
+    """Return every learner option of a run: PPO training and evaluation start from the recipe, other runs
+    from the defaults, and each option that is not None replaces the start value."""
+    if mode not in ('train', 'evaluate') or learner != 'ppo':
+        recipe = 'none'
+    explicit = {key: value for key, value in options.items() if value is not None}
+    return {**OPTION_DEFAULTS, 'gait_clock': default_gait_clock(mode, networks), **recipe_options(recipe, **explicit)}

@@ -12,7 +12,7 @@ import unittest
 
 import torch
 
-import locomotion.omniwalk.ppo_cfg as ppo_cfg
+import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
 import locomotion.omniwalk.wrapper as wrapper
 from locomotion.surrogate import evaluate, train
 from locomotion.omniwalk.reward import REWARD_CONFIG as REWARD_V2_CONFIG, REWARD_CONFIG as REWARD_V4_CONFIG

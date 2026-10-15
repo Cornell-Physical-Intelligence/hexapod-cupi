@@ -12,7 +12,7 @@ from locomotion.omniwalk.ppo import CappedRatePPO, CommandBootstrapPPO
 
 import locomotion.omniwalk.features as amp
 from . import discriminator as disc
-from locomotion.omniwalk.ppo_cfg import ppo_config
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
 from locomotion.omniwalk.wrapper import OmniVecEnv, scale_observation, clock_features, smoothed_action
 from . import networks as nets
 

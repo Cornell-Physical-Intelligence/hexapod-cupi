@@ -1,4 +1,4 @@
-"""Build the RSL-RL learner configuration without importing Torch."""
+"""Build the RSL-RL learner configuration and name the admitted recipes without importing Torch."""
 RATE_CLASS = 'locomotion.omniwalk.ppo:CappedRatePPO'
 SEGMENT_CLASS = 'locomotion.omniwalk.ppo:CommandBootstrapPPO'
 
@@ -74,3 +74,20 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
     if wrapper:
         config['environment_wrapper'] = wrapper
     return config
+
+
+# The ppo_config options of each admitted checkpoint, named after that checkpoint;
+# locomotion/tests/test_recipe.py compares each entry with the checkpoint's compatibility receipt.
+RECIPES = {
+    'c48_long': {
+        'action_mean': 'tanh', 'observation_normalization': 'none', 'observation_scaling': 'fixed',
+        'command_segments': 'bootstrap', 'gait_clock': 60, 'action_smoothing': 'mean2', 'velocity_noise': .5,
+        'learning_rate_max': 3e-4, 'action_std': .15, 'action_noise_correlation': 0., 'action_std_final': .05,
+        'action_std_decay_updates': None, 'steps_per_env': 48,
+    },
+}
+
+
+def recipe_options(name, **overrides):
+    """Return the options of a named recipe with the overrides in place of its values; 'none' names no options."""
+    return {**({} if name == 'none' else RECIPES[name]), **overrides}

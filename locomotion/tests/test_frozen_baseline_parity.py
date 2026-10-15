@@ -95,7 +95,7 @@ class FrozenBaselineParityTests(unittest.TestCase):
         results = []
         for baseline in (True, False):
             torch.manual_seed(20260917)
-            config = (self.module('ppo', True) if baseline else self.module('ppo_cfg')).ppo_config(20260917, action_mean='tanh',
+            config = (self.module('ppo', True) if baseline else self.module('agents.rsl_rl_ppo_cfg')).ppo_config(20260917, action_mean='tanh',
                 observation_normalization='none', learning_rate_max=.0003, action_noise_correlation=.5)
             if baseline:
                 for node in (config['algorithm'], config['actor']['distribution_cfg']):

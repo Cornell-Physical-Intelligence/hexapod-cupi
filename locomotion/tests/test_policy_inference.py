@@ -7,7 +7,7 @@ import torch
 from rsl_rl.models import MLPModel
 from tensordict import TensorDict
 
-from locomotion.omniwalk.ppo_cfg import ppo_config
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
 import locomotion.omniwalk.ppo as ppo
 
 

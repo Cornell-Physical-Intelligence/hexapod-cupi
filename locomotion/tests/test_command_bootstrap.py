@@ -8,7 +8,7 @@ from unittest.mock import patch
 import torch
 from rsl_rl.algorithms import PPO
 
-import locomotion.omniwalk.ppo_cfg as ppo_cfg
+import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
 import locomotion.omniwalk.wrapper as wrapper
 
 

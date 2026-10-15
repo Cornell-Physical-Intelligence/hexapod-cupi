@@ -14,7 +14,7 @@ from rsl_rl.algorithms import PPO
 
 from locomotion.evaluation.checkpoint import require_learner_configuration
 from locomotion.omniwalk.ppo import policy_change_metrics, UpdateDiagnostics
-from locomotion.omniwalk.ppo_cfg import ppo_config
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
 from locomotion.spark.prepare import prepare
 
 

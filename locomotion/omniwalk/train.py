@@ -25,13 +25,14 @@ from locomotion.evaluation.camera import NativePolicyCamera, prepare_policy_scen
 from locomotion.evaluation.checkpoint import (DECLARATION_SHA, checkpoint_reward_version, read_compatibility_receipt,
     require_checkpoint_identity, require_compatibility_configuration, require_compatibility_identity,
     require_embedded_declaration, require_learner_configuration, require_learner_identity)
-from locomotion.omniwalk.commands import GAIT_CLOCK_CONTROLS, TaskConfig, default_gait_clock
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import RECIPES, ppo_config
+from locomotion.omniwalk.commands import GAIT_CLOCK_CONTROLS, TaskConfig
 from locomotion.omniwalk.env_cfg import EnvConfig
-from locomotion.omniwalk.ppo_cfg import ppo_config
 from locomotion.omniwalk.robot import MODEL_SHA256, USD_SHA256, verify_assets
 from locomotion.spark.sources import physics_files, source_files, verify_runtime
-from locomotion.spark.validation import (ALLOCATION_PROFILES, LEARNER_OPTION_DEFAULTS, collected_transitions,
-    decay_updates, finish_training_update, update_limit, validate_deadline, validate_decay)
+from locomotion.spark.validation import (ALLOCATION_PROFILES, LEARNER_OPTION_DEFAULTS, OPTION_DEFAULTS,
+    collected_transitions, decay_updates, finish_training_update, resolve_learner_options, update_limit,
+    validate_deadline, validate_decay)
 
 SOURCE = Path(__file__).resolve().parents[1]
 
@@ -67,7 +68,7 @@ class ConfigRecord(dict):
 
 
 def parse_args(argv=None):
-    """Parse the command line and resolve the gait-clock default for the mode.
+    """Parse the command line and resolve the recipe and the gait-clock default for the mode.
 
     A preflight or help run declares the two launcher options itself, so it needs no Isaac installation.
     """
@@ -96,34 +97,37 @@ def parse_args(argv=None):
     parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
     parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo')
     parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp')
-    parser.add_argument('--action-mean', choices=['unbounded', 'tanh'], default='unbounded',
+    parser.add_argument('--recipe', choices=[*RECIPES, 'none'], default='c48_long',
+                        help='Learner options of PPO training and evaluation (%(default)s by default) from omniwalk/agents/'
+                             'rsl_rl_ppo_cfg.py; option flags replace its values. Other runs and the recipe none keep the defaults.')
+    parser.add_argument('--action-mean', choices=['unbounded', 'tanh'],
                         help='Use the historical Gaussian mean or bound the mean with tanh.')
-    parser.add_argument('--observation-normalization', choices=['empirical', 'none'], default='empirical',
+    parser.add_argument('--observation-normalization', choices=['empirical', 'none'],
                         help='Use running observation statistics or retain the raw PPO observations.')
-    parser.add_argument('--observation-scaling', choices=['none', 'fixed'], default='none',
+    parser.add_argument('--observation-scaling', choices=['none', 'fixed'],
                         help='Pass raw observations or apply the fixed input scales declared in wrapper.py.')
-    parser.add_argument('--command-segments', choices=['continuous', 'bootstrap'], default='continuous',
+    parser.add_argument('--command-segments', choices=['continuous', 'bootstrap'],
                         help='Carry returns across command changes or bootstrap the return at each change.')
     parser.add_argument('--learning-rate-max', type=float,
                         help='Ceiling for the adaptive learning rate; the stock schedule allows 1e-2.')
-    parser.add_argument('--action-std', type=float, default=.15,
+    parser.add_argument('--action-std', type=float,
                         help='Initial standard deviation of the Gaussian action distribution.')
     parser.add_argument('--episode-seconds', type=float, default=20.,
                         help='Training episode length; 20 s by default. Shorter episodes bound how far a robot walks.')
-    parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none',
+    parser.add_argument('--action-smoothing', choices=['none', 'mean2'],
                         help='mean2 sends the mean of each action and the previous one to the environment.')
-    parser.add_argument('--velocity-noise', type=float, default=0.,
+    parser.add_argument('--velocity-noise', type=float,
                         help='Standard deviation in rad/s of Gaussian noise on the actor joint-velocity inputs in training.')
     parser.add_argument('--gait-clock', type=int,
-                        help=f'Append gait phase with this period in controls; training defaults to '
-                             f'{GAIT_CLOCK_CONTROLS}, other modes to 0.')
+                        help=f'Append gait phase with this period in controls; without a recipe value, training '
+                             f'defaults to {GAIT_CLOCK_CONTROLS}, other modes to 0.')
     parser.add_argument('--action-std-final', type=float,
                         help='Lower the action deviation linearly to this value over the run; PPO then does not learn it.')
     parser.add_argument('--action-std-decay-updates', type=int,
                         help='Reach the final action deviation after this many updates and hold it; the run length by default.')
-    parser.add_argument('--action-noise-correlation', type=float, default=0.,
+    parser.add_argument('--action-noise-correlation', type=float,
                         help='Share of each exploration noise sample carried to the next control (tanh mean only).')
-    parser.add_argument('--steps-per-env', type=int, default=24,
+    parser.add_argument('--steps-per-env', type=int,
                         help='Controls each robot collects per PPO update, a multiple of 6 from 12 to 96; '
                              'mini-batches scale with it.')
     parser.add_argument('--video-case',
@@ -135,8 +139,8 @@ def parse_args(argv=None):
         from isaaclab.app import AppLauncher
         AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args(argv)
-    if args.gait_clock is None:
-        args.gait_clock = default_gait_clock(args.mode, args.networks)
+    vars(args).update(resolve_learner_options(args.recipe, args.mode, args.learner, args.networks,
+                                              {key: getattr(args, key) for key in OPTION_DEFAULTS}))
     return args
 
 

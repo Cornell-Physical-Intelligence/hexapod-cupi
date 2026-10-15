@@ -7,11 +7,12 @@ from pathlib import Path
 import re
 import shutil
 
-from locomotion.omniwalk.commands import GAIT_CLOCK_CONTROLS, default_gait_clock
-from locomotion.omniwalk.ppo_cfg import ppo_config
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import RECIPES, ppo_config
+from locomotion.omniwalk.commands import GAIT_CLOCK_CONTROLS
 from locomotion.omniwalk.robot import sha
 from locomotion.spark.sources import runtime_paths, write_runtime
-from locomotion.spark.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline, LEARNER_OPTION_DEFAULTS
+from locomotion.spark.validation import (ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, LEARNER_OPTION_DEFAULTS,
+    resolve_learner_options, update_limit, validate_decay, validate_deadline)
 from locomotion.spark.safety import HOME_ROOT, RUN_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -30,18 +31,28 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             num_envs=None, inputs=None, eval_scope='focus', checkpoint=None, checkpoint_sha=None,
             checkpoint_declaration_sha=None, checkpoint_compatibility=None, checkpoint_compatibility_sha256=None,
             logger='tensorboard', wandb_project=None, wandb_mode='offline',
-            action_mean='unbounded', learner='ppo', networks='mlp',
-            observation_normalization='empirical', observation_scaling='none',
-            command_segments='continuous', learning_rate_max=None, action_std=.15,
-            action_noise_correlation=0., action_std_final=None, gait_clock=None, action_smoothing='none',
-            velocity_noise=0., episode_seconds=20.,
-            video_case=None, extended_updates=False, action_std_decay_updates=None, steps_per_env=24,
+            action_mean=None, learner='ppo', networks='mlp', recipe='c48_long',
+            observation_normalization=None, observation_scaling=None,
+            command_segments=None, learning_rate_max=None, action_std=None,
+            action_noise_correlation=None, action_std_final=None, gait_clock=None, action_smoothing=None,
+            velocity_noise=None, episode_seconds=20.,
+            video_case=None, extended_updates=False, action_std_decay_updates=None, steps_per_env=None,
             allocation_profile='standard', max_wall_seconds=6200, root=ROOT):
+    """Write a native allocation pack. PPO training and evaluation start from the named recipe; a learner
+    option that is not None replaces the recipe value."""
     output, remote_root, root = map(Path, (output, remote_root, root))
     if learner not in ('ppo', 'amp') or networks not in ('mlp', 'paper') or (networks == 'paper' and learner != 'amp') or (learner == 'amp' and mode not in ('train', 'evaluate')):
         raise ValueError('The paper networks need the AMP learner for training or evaluation')
-    if gait_clock is None:
-        gait_clock = default_gait_clock(mode, networks)
+    if recipe not in (*RECIPES, 'none'):
+        raise ValueError('Unknown learner recipe')
+    learner_options = resolve_learner_options(recipe, mode, learner, networks, dict(
+        action_mean=action_mean, observation_normalization=observation_normalization,
+        observation_scaling=observation_scaling, command_segments=command_segments,
+        learning_rate_max=learning_rate_max, action_std=action_std, action_noise_correlation=action_noise_correlation,
+        action_std_final=action_std_final, gait_clock=gait_clock, action_smoothing=action_smoothing,
+        velocity_noise=velocity_noise, action_std_decay_updates=action_std_decay_updates, steps_per_env=steps_per_env))
+    action_mean, observation_normalization = learner_options.pop('action_mean'), learner_options.pop('observation_normalization')
+    gait_clock = learner_options['gait_clock']
     if mode == 'train' and networks == 'mlp' and gait_clock != GAIT_CLOCK_CONTROLS:
         raise ValueError(f'The active reward requires the {GAIT_CLOCK_CONTROLS}-control gait clock')
     validate_deadline(mode, allocation_profile, max_wall_seconds)
@@ -70,12 +81,6 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
     if (observation_normalization not in ('empirical', 'none') or
             (observation_normalization != 'empirical' and (mode not in ('train', 'evaluate')))):
         raise ValueError('Observation normalization selection requires PPO training or evaluation')
-    learner_options = {'observation_scaling': observation_scaling, 'command_segments': command_segments,
-                       'learning_rate_max': learning_rate_max, 'action_std': action_std,
-                       'action_noise_correlation': action_noise_correlation, 'action_std_final': action_std_final,
-                       'gait_clock': gait_clock, 'action_smoothing': action_smoothing,
-                       'velocity_noise': velocity_noise, 'action_std_decay_updates': action_std_decay_updates,
-                       'steps_per_env': steps_per_env}
     selected_options = {key: value for key, value in learner_options.items() if value != LEARNER_OPTION_DEFAULTS[key]}
     try:
         ppo_config(seed, action_mean=action_mean, observation_normalization=observation_normalization,
@@ -86,9 +91,10 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
     if selected_options and (mode not in ('train', 'evaluate')):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
-    if networks == 'paper' and (gait_clock or observation_scaling != 'none' or velocity_noise):
+    if networks == 'paper' and (gait_clock or learner_options['observation_scaling'] != 'none'
+                                or learner_options['velocity_noise']):
         raise ValueError('Paper networks require their recorded raw observation groups without gait-clock inputs')
-    validate_decay(mode, updates, action_std_decay_updates)
+    validate_decay(mode, updates, learner_options['action_std_decay_updates'])
     if video_case is not None and (mode != 'evaluate' or eval_scope == 'full' or not video_case.startswith('learning:')):
         raise ValueError('A video case applies to a learning-probe evaluation')
     if type(episode_seconds) is not float or (episode_seconds != 20. and (mode != 'train' or not 5. <= episode_seconds <= 20.)):
@@ -165,6 +171,9 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         binding['command_args'] += ['--extended-updates']
     if mode == 'probe':
         binding['command_args'] += ['--seed', str(seed)]
+    if mode in ('train', 'evaluate') and learner == 'ppo':
+        # The flags below name each option that differs from its default, so the trainer applies no recipe.
+        binding['command_args'] += ['--recipe', 'none']
     if action_mean != 'unbounded':
         binding['command_args'] += ['--action-mean', action_mean]
     if observation_normalization != 'empirical':
@@ -230,19 +239,22 @@ def main():
     parser.add_argument('--wandb-mode', choices=['offline', 'online'], default='offline')
     parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo')
     parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp')
-    parser.add_argument('--action-mean', choices=['unbounded', 'tanh'], default='unbounded')
-    parser.add_argument('--observation-normalization', choices=['empirical', 'none'], default='empirical')
-    parser.add_argument('--observation-scaling', choices=['none', 'fixed'], default='none')
-    parser.add_argument('--command-segments', choices=['continuous', 'bootstrap'], default='continuous')
+    parser.add_argument('--recipe', choices=[*RECIPES, 'none'], default='c48_long',
+                        help='Learner options of PPO training and evaluation (%(default)s by default) from omniwalk/agents/'
+                             'rsl_rl_ppo_cfg.py; option flags replace its values. Other runs and the recipe none keep the defaults.')
+    parser.add_argument('--action-mean', choices=['unbounded', 'tanh'])
+    parser.add_argument('--observation-normalization', choices=['empirical', 'none'])
+    parser.add_argument('--observation-scaling', choices=['none', 'fixed'])
+    parser.add_argument('--command-segments', choices=['continuous', 'bootstrap'])
     parser.add_argument('--learning-rate-max', type=float)
-    parser.add_argument('--action-std', type=float, default=.15)
-    parser.add_argument('--action-noise-correlation', type=float, default=0.)
+    parser.add_argument('--action-std', type=float)
+    parser.add_argument('--action-noise-correlation', type=float)
     parser.add_argument('--action-std-final', type=float)
     parser.add_argument('--action-std-decay-updates', type=int)
-    parser.add_argument('--steps-per-env', type=int, default=24)
+    parser.add_argument('--steps-per-env', type=int)
     parser.add_argument('--gait-clock', type=int)
-    parser.add_argument('--action-smoothing', choices=['none', 'mean2'], default='none')
-    parser.add_argument('--velocity-noise', type=float, default=0.)
+    parser.add_argument('--action-smoothing', choices=['none', 'mean2'])
+    parser.add_argument('--velocity-noise', type=float)
     parser.add_argument('--episode-seconds', type=float, default=20.)
     parser.add_argument('--video-case')
     parser.add_argument('--allocation-profile', choices=ALLOCATION_PROFILES, default='standard')

@@ -8,7 +8,7 @@ import unittest
 
 from contracts.release import COMPATIBILITY_KEYS
 from locomotion.evaluation.checkpoint import require_checkpoint_identity
-from locomotion.omniwalk.ppo_cfg import ppo_config
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
 from locomotion.spark.prepare import prepare
 from locomotion.spark.sources import physics_files, source_files, verify_runtime
 
