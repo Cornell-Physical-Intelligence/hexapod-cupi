@@ -5,7 +5,9 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from locomotion import prepare, reservation, train
+from locomotion.runs import prepare as prepare
+from locomotion.runs import reservation as reservation
+from locomotion.runs import train as train
 from locomotion.tests import test_launch
 
 

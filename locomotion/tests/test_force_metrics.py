@@ -10,10 +10,10 @@ from unittest.mock import patch
 import numpy as np
 import torch
 
-from locomotion import evaluate
-from locomotion.evaluate import run_batch
-from locomotion.env_config import JOINT_NAMES, MODEL_SHA256
-from locomotion.force_metrics import report_for, sha, summarize, write_summary
+from locomotion.evaluation import runner as evaluate
+from locomotion.evaluation.runner import run_batch
+from locomotion.backends.isaac.config import JOINT_NAMES, MODEL_SHA256
+from locomotion.evaluation.force_metrics import report_for, sha, summarize, write_summary
 from locomotion.tests.test_evaluate import FakeCapture, FakeNative
 from locomotion.priors.prepare import prepare
 from locomotion.priors.model import ROOT
@@ -58,9 +58,9 @@ class ForceMetricsTests(unittest.TestCase):
                     '/home/orionh/HEXAPOD_runs/restart_20260914/test_force_metrics')
             source = output/'source'
             manifest = json.loads((source/'FREEZE_SHA256.json').read_text())
-            self.assertEqual(manifest['locomotion/force_metrics.py'], sha(source/'locomotion/force_metrics.py'))
+            self.assertEqual(manifest['locomotion/evaluation/force_metrics.py'], sha(source/'locomotion/evaluation/force_metrics.py'))
             result = subprocess.run([sys.executable, '-c',
-                'from locomotion.force_metrics import MODEL_SHA256; print(MODEL_SHA256)'],
+                'from locomotion.evaluation.force_metrics import MODEL_SHA256; print(MODEL_SHA256)'],
                 cwd=source, text=True, capture_output=True, check=True)
             self.assertEqual(result.stdout.strip(), MODEL_SHA256)
 

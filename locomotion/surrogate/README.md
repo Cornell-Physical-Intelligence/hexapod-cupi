@@ -5,15 +5,16 @@ native run. It runs this repository's task, reward, PPO adapter and gate code an
 Isaac's rigid-body dynamics and floor contact with MuJoCo 3.14.0. **Native runs are the only
 acceptance evidence.** A surrogate result supports a design choice and admits no checkpoint.
 
-`locomotion/prepare.py` freezes `locomotion/*.py` without descent, so no native pack copies
-this directory and no native source hash changes. The kernel imports nothing from it. The unit
-suite checks both facts.
+You pack nested runtime modules through `locomotion.runs.prepare`. The source selector
+excludes `surrogate/`, `priors/` and `tests/`; explicit replay and AMP packs add their
+required prior files. Surrogate edits leave native source identities unchanged.
+The native runtime imports no surrogate modules. The unit suite checks this boundary.
 
 | File | Purpose |
 | --- | --- |
 | [`env.py`](env.py) | `SurrogateEnv` with the interface of `LocomotionEnv`, `ContactModel`, the touchdown model and an offscreen renderer. |
-| [`train.py`](train.py) | PPO through `ppo.ppo_config`, `VanillaVecEnv` and RSL-RL, with the learner flags of `locomotion/train.py`. |
-| [`evaluate.py`](evaluate.py) | The learning probes through `locomotion.evaluate`, a contact-model consensus for static probes and three stress flags. |
+| [`train.py`](train.py) | PPO through `ppo.ppo_config`, `VanillaVecEnv` and RSL-RL, with the learner flags of `locomotion/runs/train.py`. |
+| [`evaluate.py`](evaluate.py) | The learning probes through `locomotion.evaluation.runner`, a contact-model consensus for static probes and three stress flags. |
 | [`replay.py`](replay.py) | Open-loop trace replay, scripted noise and reward scoring of a stored surrogate or native record. |
 | [`calibrate.py`](calibrate.py), [`self_check.py`](self_check.py) | Comparisons with native reference copies that you supply, the writer of the two training extracts and a check of your machine. |
 | [`provenance.json`](provenance.json) | The scratch sources of this port with their hashes, the changes of the port, the origin of each native reference and the hash of each record. |
@@ -26,7 +27,7 @@ outside the checkout.
 
 ```sh
 # Reward v4 with the learner options of the native runs of 2026-10-05.
-uv run python -m locomotion.surrogate.train --output <new dir> --task locomotion.task_v4:TrainingTaskV4 \
+uv run python -m locomotion.surrogate.train --output <new dir> --task locomotion.tasks.task_v4:TrainingTaskV4 \
     --action-mean tanh --observation-normalization none --observation-scaling fixed \
     --command-segments bootstrap --learning-rate-max 3e-4 --action-std 0.15 --action-std-final 0.05 \
     --gait-clock 60 --action-smoothing mean2 --velocity-noise 0.5 --updates 2000 --threads 2
@@ -58,13 +59,15 @@ uv run python -m unittest discover -s locomotion/surrogate/tests
   so resume does not replay an uninterrupted trajectory. Use the original source
   checkout for a historical checkpoint.
 - A reward with a contact-schedule term needs `--gait-clock` equal to its period. The trainer
-  stops otherwise, as `locomotion/train.py` does.
+  stops otherwise, as `locomotion/runs/train.py` does.
 - The wrapper option `command_segments: bootstrap` needs an algorithm class derived from
-  `locomotion.rate_schedule:CommandBootstrapPPO`. The trainer stops when a
+  `locomotion.learning.rate_schedule:CommandBootstrapPPO`. The trainer stops when a
   `--ppo-config-overrides` value pairs that option with another algorithm: stock PPO would
   train the pre-action target under a bootstrap record.
 - The evaluator reads the checkpoint's JSON record, so a native checkpoint needs no learner
-  flag. It builds the policy input as the evaluation branch of `locomotion/train.py` does:
+  flag. Use the original source checkout for checkpoints with retired module names.
+  The native compatibility receipt does not certify surrogate evaluation. The evaluator
+  builds the policy input as the evaluation branch of `locomotion/runs/train.py` does:
   fixed scales, gait clock, actor mean and the recorded two-control mean, with no velocity noise.
 - `--velocity-input-gain` multiplies the 90 joint-velocity inputs. `--action-mean2` applies the
   two-control mean to a checkpoint that trained without it. `--foot-load` writes the floor

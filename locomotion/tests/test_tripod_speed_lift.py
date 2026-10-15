@@ -6,7 +6,7 @@ import numpy as np
 
 from locomotion.tests.test_tripod import feet, measured_fixture
 from locomotion.tests.test_tripod_geometry import make_geometry
-from locomotion.tripod_config import SWEEPS
+from locomotion.tasks.tripod_config import SWEEPS
 
 
 class SpeedLiftTests(unittest.TestCase):

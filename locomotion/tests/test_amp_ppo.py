@@ -13,11 +13,14 @@ import torch
 
 from rsl_rl.algorithms import PPO
 
-from locomotion import amp, amp_discriminator as disc, amp_ppo, paper_networks as nets, train
-from locomotion.amp_ppo import (AMPConfig, AMPPPO, AMPVecEnv, CollisionCapture, amp_ppo_config,
-                                load_demonstrations)
-from locomotion.ppo import VanillaVecEnv, ppo_config
-from locomotion.prepare import prepare
+from locomotion.core import features as amp
+from locomotion.learning import amp_discriminator as disc
+from locomotion.learning import amp_ppo as amp_ppo
+from locomotion.learning import paper_networks as nets
+from locomotion.runs import train as train
+from locomotion.learning.amp_ppo import AMPConfig, AMPPPO, AMPVecEnv, CollisionCapture, amp_ppo_config, load_demonstrations
+from locomotion.learning.ppo import VanillaVecEnv, ppo_config
+from locomotion.runs.prepare import prepare
 
 ROOT = Path(__file__).resolve().parents[2]
 REMOTE = Path('/home/orionh/HEXAPOD_runs/restart_20260914/test_amp_learner')
@@ -350,8 +353,8 @@ class LearnerTests(unittest.TestCase):
 
     def test_config_and_declaration_record_decisions(self):
         config = amp_ppo_config(0, networks='paper')
-        self.assertEqual(config['algorithm']['class_name'], 'locomotion.amp_ppo:AMPPPO')
-        self.assertEqual(config['actor']['class_name'], 'locomotion.paper_networks:PaperActor')
+        self.assertEqual(config['algorithm']['class_name'], 'locomotion.learning.amp_ppo:AMPPPO')
+        self.assertEqual(config['actor']['class_name'], 'locomotion.learning.paper_networks:PaperActor')
         self.assertEqual(config['obs_groups']['critic'][-1], 'privileged')
         self.assertEqual(config['networks'], 'paper')
         self.assertEqual(amp_ppo_config(0)['actor']['class_name'], 'MLPModel')
@@ -417,7 +420,7 @@ class EvaluationIdentityTests(unittest.TestCase):
                     'ppo_config': amp_ppo_config(seed, networks=networks) if learner == 'amp' else ppo_config(seed)}
         if learner == 'amp':
             identity['learner_source_files'] = {name: amp_ppo.sha(ROOT/'locomotion'/name) for name in (
-                'amp.py', 'amp_discriminator.py', 'amp_ppo.py', 'paper_networks.py')}
+                'core/features.py', 'learning/amp_discriminator.py', 'learning/amp_ppo.py', 'learning/paper_networks.py')}
             identity['amp_dataset'] = dict(BANK_IDENTITY)
         return identity
 
@@ -458,7 +461,7 @@ class EvaluationIdentityTests(unittest.TestCase):
     def test_mismatched_learner_networks_or_bank_are_rejected(self):
         identity = self.identity()
         changes = {'learner': 'ppo', 'networks': 'mlp', 'motion_prior': False,
-                   'learner_source_files': {**identity['learner_source_files'], 'amp_ppo.py': '0' * 64},
+                   'learner_source_files': {**identity['learner_source_files'], 'learning/amp_ppo.py': '0' * 64},
                    'amp_dataset': {**identity['amp_dataset'], 'transitions_sha256': '0' * 64}}
         for key, value in changes.items():
             with self.subTest(key=key):
@@ -503,7 +506,7 @@ class LaunchTests(unittest.TestCase):
             self.assertEqual((pack['learner'], pack['networks']), ('amp', 'paper'))
             bank = Path(temporary)/'amp/source/locomotion/priors/datasets/amp_demonstrations_001'
             self.assertEqual(amp_ppo.sha(bank/'transitions.npz'), amp_ppo.sha(amp_ppo.DATASET/'transitions.npz'))
-            for name in ('amp.py', 'amp_discriminator.py', 'amp_ppo.py', 'paper_networks.py'):
+            for name in ('core/features.py', 'learning/amp_discriminator.py', 'learning/amp_ppo.py', 'learning/paper_networks.py'):
                 self.assertTrue((Path(temporary)/'amp/source/locomotion'/name).exists(), name)
             plain = prepare(Path(temporary)/'ppo', REMOTE, mode='train')
             self.assertNotIn('--learner', plain['command_args'])

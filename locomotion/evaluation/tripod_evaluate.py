@@ -10,10 +10,9 @@ import traceback
 
 import numpy as np
 
-from ..env_config import EnvConfig, JOINT_NAMES, MODEL_SHA256, USD_SHA256, sha, verify_assets
-from ..tripod import (TripodController, damping_target, feedback_blend, feedback_target,
-                     supported, velocity_feedback_target)
-from ..tripod_config import SWEEPS
+from locomotion.backends.isaac.config import EnvConfig, JOINT_NAMES, MODEL_SHA256, USD_SHA256, sha, verify_assets
+from locomotion.tasks.tripod import TripodController, damping_target, feedback_blend, feedback_target, supported, velocity_feedback_target
+from locomotion.tasks.tripod_config import SWEEPS
 
 
 def save(path, value):
@@ -21,7 +20,7 @@ def save(path, value):
 
 
 def cases_for(suite):
-    from ..evaluate import case_manifest
+    from locomotion.evaluation.runner import case_manifest
     if suite == 'screen':
         return [{'case_id': 'tripod:screen:'+name, 'profile': 'omni_static',
                  'command': command, 'controls': 1000, 'clearance': 'low'}
@@ -192,7 +191,7 @@ def clearance_metrics(directory, case):
 
 
 def run_suite(env, output, geometry, config, suite, seed, max_seconds, identity):
-    from ..evaluate import case_manifest, run_batch
+    from locomotion.evaluation.runner import case_manifest, run_batch
     output = Path(output)
     cases = cases_for(suite)
     full = case_manifest()
@@ -243,7 +242,7 @@ def run_suite(env, output, geometry, config, suite, seed, max_seconds, identity)
 
 
 def main(argv=None):
-    from .. import admission
+    from locomotion.runs import admission as admission
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--mode', choices=['tripod'], required=True)
     for name in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance', 'output', 'standing-admission'):
@@ -312,8 +311,8 @@ def main(argv=None):
             finally:
                 faulthandler.cancel_dump_traceback_later(); faulthandler.disable()
         print('REFERENCE_SCREEN_APP_READY', flush=True)
-        from ..env import LocomotionEnv
-        from ..camera import NativePolicyCamera, prepare_policy_scene
+        from locomotion.backends.isaac.env import LocomotionEnv
+        from locomotion.evaluation.camera import NativePolicyCamera, prepare_policy_scene
         env = LocomotionEnv(cfg, args.asset, args.model, args.geometry, args.output/'native', reference_metadata=metadata)
         prepare_policy_scene(env); env.render = NativePolicyCamera(env)
         state['status'] = 'running'; save(args.output/'state.json', state)

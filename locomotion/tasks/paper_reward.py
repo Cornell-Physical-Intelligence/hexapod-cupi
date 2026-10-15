@@ -1,25 +1,25 @@
 """Liu et al. Table I task and penalty reward (arXiv:2511.03167, p. 3) on this robot's telemetry.
 
 A candidate beside ``task.measured_reward``; training still uses ``task.py``.
-It shares ``measured_reward``'s signature, so ``locomotion.reward_scorer`` and
-``locomotion.reward_viewer`` score it with ``--reward
-paper=locomotion.paper_reward:paper_reward``. ``ADAPTATIONS`` records every
+It shares ``measured_reward``'s signature, so ``locomotion.evaluation.reward_scorer`` and
+``locomotion.evaluation.reward_viewer`` score it with ``--reward
+paper=locomotion.tasks.paper_reward:paper_reward``. ``ADAPTATIONS`` records every
 departure from the printed table and ``OMITTED`` every term left out.
 
 ``paper_reward_calibrated`` keeps the paper's terms but rescales the continuous
 penalties by the rule in ``CALIBRATION``; reproduce its weights with
-``python -m locomotion.paper_reward <traces...>``.
+``python -m locomotion.tasks.paper_reward <traces...>``.
 
 ``variant`` builds any configuration from a spec, including the audit's
 command-scaled tracking kernels, for example
-``--reward c=locomotion.paper_reward:variant:kernel=stride,penalties=calibrated``.
+``--reward c=locomotion.tasks.paper_reward:variant:kernel=stride,penalties=calibrated``.
 The stride kernel averages each replica's velocity over a contiguous trace;
 ``task_v2.TrainingTaskV2`` keeps that window per replica during training.
 
 ``style_only``, ``paper_with_style`` and ``calibrated_with_style`` add the Eq. (2)
-style term from a frozen ``locomotion.amp_discriminator`` checkpoint, for example
-``--reward style=locomotion.paper_reward:paper_with_style:disc.pt``; train one with
-``python -m locomotion.paper_reward discriminator --prior ... --policy ... --output disc.pt``.
+style term from a frozen ``locomotion.learning.amp_discriminator`` checkpoint, for example
+``--reward style=locomotion.tasks.paper_reward:paper_with_style:disc.pt``; train one with
+``python -m locomotion.tasks.paper_reward discriminator --prior ... --policy ... --output disc.pt``.
 """
 from __future__ import annotations
 
@@ -167,8 +167,8 @@ TRACKING_TERMS = ("linear_tracking", "yaw_tracking")
 
 def calibrate(traces, *, ratio=.8, base=PAPER_CONFIG, com_local=None):
     """Weights giving the continuous penalties, in equal shares, ``ratio`` of the mean tracking reward."""
-    from .. import reward_scorer
-    from ..task import TaskConfig
+    from locomotion.evaluation import reward_scorer as reward_scorer
+    from locomotion.tasks.task import TaskConfig
     com_local = reward_scorer.root_com_local() if com_local is None else com_local
     sums = {name: 0. for name in (*TRACKING_TERMS, *CALIBRATED_TERMS)}
     rows = 0
@@ -244,7 +244,7 @@ def variant_config(spec):
 
 
 def variant(spec):
-    """Reward factory for ``--reward NAME=locomotion.paper_reward:variant:<spec>``."""
+    """Reward factory for ``--reward NAME=locomotion.tasks.paper_reward:variant:<spec>``."""
     config = variant_config(spec)
 
     def reward(telemetry, commands, previous_target, terminated, _config=None, nominal_height=None):
@@ -254,8 +254,8 @@ def variant(spec):
 
 
 def _with_style(base, path):
-    """``base`` plus Eq. (2) style from a frozen discriminator checkpoint (``locomotion.amp_discriminator``)."""
-    from .. import amp_discriminator
+    """``base`` plus Eq. (2) style from a frozen discriminator checkpoint (``locomotion.learning.amp_discriminator``)."""
+    from locomotion.learning import amp_discriminator as amp_discriminator
     discriminator, _ = amp_discriminator.load(path)
 
     def reward(telemetry, commands, previous_target, terminated, config=None, nominal_height=None):
@@ -285,10 +285,11 @@ def calibrated_with_style(path):
 
 
 def train_discriminator(argv=None):
-    """``python -m locomotion.paper_reward discriminator ...``: fit a frozen discriminator from traces."""
+    """``python -m locomotion.tasks.paper_reward discriminator ...``: fit a frozen discriminator from traces."""
     from pathlib import Path
-    from .. import amp_discriminator as amp, reward_scorer
-    parser = argparse.ArgumentParser(prog="python -m locomotion.paper_reward discriminator",
+    from locomotion.learning import amp_discriminator as amp
+    from locomotion.evaluation import reward_scorer as reward_scorer
+    parser = argparse.ArgumentParser(prog="python -m locomotion.tasks.paper_reward discriminator",
                                      description="Train a frozen AMP discriminator from recorded traces.")
     parser.add_argument("--prior", nargs="+", required=True, help="Motion-prior control_trace.npz files.")
     parser.add_argument("--policy", nargs="+", required=True, help="Policy control_trace.npz files (negatives).")
@@ -317,7 +318,7 @@ def main(argv=None):
     argv = sys.argv[1:] if argv is None else list(argv)
     if argv[:1] == ["discriminator"]:
         return train_discriminator(argv[1:])
-    from .. import reward_scorer
+    from locomotion.evaluation import reward_scorer as reward_scorer
     parser = argparse.ArgumentParser(description="Recompute the calibrated penalty weights from recorded traces.")
     parser.add_argument("traces", nargs="+", help="Evaluation control_trace.npz files.")
     parser.add_argument("--ratio", type=float, default=.8, help="Penalty-to-tracking magnitude ratio.")

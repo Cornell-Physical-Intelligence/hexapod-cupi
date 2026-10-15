@@ -1,6 +1,6 @@
 """Stdlib-only evaluation timeout recipe; no simulator or learner imports."""
 from dataclasses import asdict, dataclass
-from ..env_config import EnvConfig
+from locomotion.backends.isaac.config import EnvConfig
 
 
 @dataclass(frozen=True)

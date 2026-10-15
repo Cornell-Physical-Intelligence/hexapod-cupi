@@ -5,7 +5,7 @@ Each evaluation directory holds ``control_trace.npz`` and optionally
 top-down footprint view when no video exists, with the per-control reward and
 its motionless counterfactual, the reward components, commanded versus
 achieved velocity and a foot-contact gait diagram. Rewards and telemetry come
-from :mod:`locomotion.reward_scorer`, so the page shows exactly what it scores.
+from :mod:`locomotion.evaluation.reward_scorer`, so the page shows exactly what it scores.
 """
 from __future__ import annotations
 
@@ -17,9 +17,9 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from .. import reward_scorer
-from ..env_config import LEGS
-from ..task import TaskConfig
+from locomotion.evaluation import reward_scorer as reward_scorer
+from locomotion.backends.isaac.config import LEGS
+from locomotion.tasks.task import TaskConfig
 
 CONTROL_DT_S = .02
 # evaluate.py writes frame k after control 2k+1 at 25 fps, so frame time trails

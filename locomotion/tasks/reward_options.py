@@ -1,6 +1,6 @@
 """Check reward option keys, value types and word choices with the standard library.
 
-``locomotion.prepare`` runs on hosts without Torch, and each reward task module imports it. This
+``locomotion.runs.prepare`` runs on hosts without Torch, and each reward task module imports it. This
 module reads the selected task's reward configuration from its source instead: the annotated fields
 of the dataclass and of its bases, and each ``self.<field> not in (...)`` choice in ``validate``.
 A value converts with its field's type, as the task's ``reward_config`` does. Numeric bounds and

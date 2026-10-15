@@ -8,7 +8,7 @@ simulator is needed. Restore archived traces with ``tools/archive.py restore``.
 Candidate rewards share ``measured_reward``'s signature:
 ``fn(telemetry, commands, previous_target, terminated, config, nominal_height)``
 returning ``(reward, components)``. Coefficient edits exported by
-``locomotion.reward_workbench`` run through the unchanged ``measured_reward``.
+``locomotion.evaluation.reward_workbench`` run through the unchanged ``measured_reward``.
 """
 from __future__ import annotations
 
@@ -22,8 +22,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from ..env import LocomotionEnv, inverse_rotate, navigation, rotate
-from ..task import REWARD_VERSION, TaskConfig, measured_reward
+from locomotion.backends.isaac.env import LocomotionEnv, inverse_rotate, navigation, rotate
+from locomotion.tasks.task import REWARD_VERSION, TaskConfig, measured_reward
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = "offline_reward_score_v1"

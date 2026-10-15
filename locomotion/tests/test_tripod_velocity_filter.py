@@ -7,8 +7,8 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion.tripod_config import SWEEPS, TripodConfig
-from locomotion.tripod_evaluate import NativeController
+from locomotion.tasks.tripod_config import SWEEPS, TripodConfig
+from locomotion.evaluation.tripod_evaluate import NativeController
 from locomotion.tests.test_tripod import MODEL, STANCE, measured_fixture
 from locomotion.tests.test_tripod_geometry import make_geometry
 

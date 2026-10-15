@@ -31,7 +31,7 @@ def verify_weights(checkpoint):
 
 def replay():
     from contracts import release
-    from locomotion import train
+    from locomotion.runs import train as train
     args = sys.argv[1:]
     def option(name):
         if args.count(name) != 1:
@@ -43,6 +43,7 @@ def replay():
     checkpoint = Path(option('--checkpoint'))
     verify_weights(checkpoint)
     proof()
+    from locomotion.runs.compat import require_configuration
     keys = tuple(key for key in release.COMPATIBILITY_KEYS if key not in SOURCE_KEYS)
     def compare_weight_abi(record, identity):
         if any(record['identity'][key] != identity[key] for key in keys):
@@ -51,21 +52,22 @@ def replay():
     # Baseline main uses the contract tuple; candidate main calls the extracted helper.
     # Keep model, physics settings, inputs, seed, upstream code and embedded metadata checks.
     with patch.object(release, 'COMPATIBILITY_KEYS', keys), patch.object(
-            train, 'require_checkpoint_identity', compare_weight_abi, create=True):
+            train, 'require_checkpoint_identity', compare_weight_abi, create=True), patch.object(
+            train, 'require_learner_configuration', require_configuration):
         # The host supervisor verifies frozen sources and checkpoint inputs after Kit exits.
         return train.main(args)
 
 
 def launch():
-    from locomotion import launch as supervisor
+    from locomotion.runs import launch as supervisor
     proof()
     original = supervisor.command
     def command(binding, paths, name):
-        if binding['module'] != 'locomotion.train' or binding['mode'] != 'evaluate':
+        if binding['module'] != 'locomotion.runs.train' or binding['mode'] != 'evaluate':
             raise ValueError('The parity launcher accepts evaluation only')
         argv = original(binding, paths, name)
         index = argv.index('-m') + 1
-        if argv[index] != 'locomotion.train':
+        if argv[index] != 'locomotion.runs.train':
             raise ValueError('Unexpected parity entry point')
         argv[index] = 'locomotion.tests.native_parity'
         return argv

@@ -3,7 +3,7 @@
 `locomotion_spark.json` declares the target for a portable canonical input pack.
 The destination remains unpopulated until you transfer that pack. Use a fresh
 name and an explicit `--inputs` file if that destination exists.
-Use `locomotion.inputs pack` for a separate immutable input allocation.
+Use `locomotion.runs.inputs pack` for a separate immutable input allocation.
 For CUPI, select a fresh root under `/srv/cupi/hexapod/inputs/`, then pass
 that bundle's admitted declaration through `--inputs`. The default file
 retains its historical paths for compatibility.

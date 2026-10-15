@@ -117,11 +117,11 @@ def verify(binding, own):
     guard.require(profile in ALLOCATION_PROFILES, 'Unknown allocation profile')
     limit = 22000 if profile == 'flat_pilot_v1' else 7200
     guard.require(type(binding['max_seconds']) is int and 120<=binding['max_seconds']<=limit,'Unbounded allocation')
-    guard.require(binding.get('module') in ('locomotion.train', 'locomotion.priors.replay_native',
-                                          'locomotion.tripod_evaluate', 'locomotion.throughput'), 'Unsupported native entry point')
-    guard.require((binding['mode'] == 'tripod') == (binding['module'] == 'locomotion.tripod_evaluate'),
+    guard.require(binding.get('module') in ('locomotion.runs.train', 'locomotion.priors.replay_native',
+                                          'locomotion.evaluation.tripod_evaluate', 'locomotion.evaluation.throughput'), 'Unsupported native entry point')
+    guard.require((binding['mode'] == 'tripod') == (binding['module'] == 'locomotion.evaluation.tripod_evaluate'),
                   'Prescribed-controller mode and entry must match')
-    guard.require((binding['mode'] == 'throughput') == (binding['module'] == 'locomotion.throughput'),
+    guard.require((binding['mode'] == 'throughput') == (binding['module'] == 'locomotion.evaluation.throughput'),
                   'Throughput mode and entry must match')
     paths={k:guard.canonical_path(binding[k]) for k in ('source','asset','prior','geometry_source','output')}
     guard.require(paths['source']==own,'Launcher must belong to its bound source')
@@ -146,7 +146,7 @@ def verify(binding, own):
                       'The supervisor must retain the native cleanup margin')
         options = [('--max-wall-seconds', str(seconds))]
         if profile != 'standard':
-            guard.require(binding['module'] == 'locomotion.train', 'Pilot requires the training entry point')
+            guard.require(binding['module'] == 'locomotion.runs.train', 'Pilot requires the training entry point')
             options.append(('--allocation-profile', profile))
         for option, want in options:
             guard.require(argv.count(option) == 1 and not any(x.startswith(option+'=') for x in argv),
@@ -186,7 +186,7 @@ def command(binding, paths, name):
         args+=['-e','WANDB_API_KEY']
     for source,target in binding.get('extra_mounts',[]):
         guard.canonical_path(source)
-        guard.require(target in ('/standing_one','/standing_batch','/admission','/checkpoint','/realized_prior'),'Unexpected read-only input mount')
+        guard.require(target in ('/standing_one','/standing_batch','/admission','/checkpoint','/realized_prior','/compatibility'),'Unexpected read-only input mount')
         args+=['-v',source+':'+target+':ro']
     return args+['--entrypoint','/workspace/isaaclab/_isaac_sim/python.sh','isaac-lab-base',
                 '-m',binding['module'],'--output','/output/standing',*binding['command_args']]

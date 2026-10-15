@@ -8,11 +8,11 @@ from unittest.mock import patch
 
 import numpy as np
 
-from locomotion.amp import feature_contract
+from locomotion.core.features import feature_contract
 from locomotion.priors import dataset
 from locomotion.priors.commands import motion_cases
-from locomotion.env_config import JOINT_NAMES, MODEL_SHA256, USD_SHA256
-from locomotion.force_metrics import report_for
+from locomotion.backends.isaac.config import JOINT_NAMES, MODEL_SHA256, USD_SHA256
+from locomotion.evaluation.force_metrics import report_for
 from locomotion.tests.test_evaluation import fixture as scoring_fixture
 
 
@@ -77,6 +77,25 @@ def replay_fixture(root):
 
 
 class DatasetTests(unittest.TestCase):
+    def test_processing_layouts_keep_history_and_reject_missing_dependencies(self):
+        import tarfile
+        fixture = Path(__file__).resolve().parents[2]/'tests/fixtures/packages_02f551fd.tar.gz'
+        with tarfile.open(fixture) as archive:
+            names = ['locomotion/'+entry.name for entry in archive if entry.isfile()]
+        names += ['locomotion/priors/commands.py', 'locomotion/priors/dataset.py']
+        historical = {'schema': 'hexapod_processing_sources_v2', 'numpy_version': 'recorded',
+                      'source_files': {name: 'a'*64 for name in names}}
+        dataset.validate_processing_identity(historical)
+        dataset.validate_processing_identity(dataset.processing_identity())
+        missing = copy.deepcopy(historical)
+        del missing['source_files']['locomotion/core/motor.py']
+        with self.assertRaisesRegex(ValueError, 'processing source'):
+            dataset.validate_processing_identity(missing)
+        unknown = copy.deepcopy(historical)
+        unknown['schema'] = 'unreviewed'
+        with self.assertRaisesRegex(ValueError, 'processing source'):
+            dataset.validate_processing_identity(unknown)
+
     def test_file_audit_recomputes_features_motion_and_raw_load_hashes(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp); replay_fixture(root)

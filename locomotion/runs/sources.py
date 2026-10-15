@@ -27,7 +27,7 @@ def source_files(package):
 def physics_files(files, package=None):
     """Follow project imports from the native environment, including capture and scorer imports."""
     package = Path(package) if package is not None else Path(__file__).resolve().parents[1]
-    pending, seen = ['env.py', 'env_config.py'], set()
+    pending, seen = ['backends/isaac/env.py', 'backends/isaac/config.py'], set()
     while pending:
         name = pending.pop()
         if name in seen or name not in files:

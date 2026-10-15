@@ -1,4 +1,4 @@
-"""Train PPO on the MuJoCo surrogate through the training path of ``locomotion/train.py``.
+"""Train PPO on the MuJoCo surrogate through the training path of ``locomotion/runs/train.py``.
 
 The trainer uses the pieces of native training: ``ppo.ppo_config``, ``VanillaVecEnv``, RSL-RL
 ``OnPolicyRunner``, ``UpdateDiagnostics``, ``TrainingLoads``, one ``metrics.jsonl`` row per
@@ -36,7 +36,7 @@ def resolve(spec):
 
     Modules resolve from the Python path. The second form calls the
     factory with the text between the parentheses as one string, for example
-    ``locomotion.task_v4:variant(schedule_weight=0.0,height_weight=0.1)``.
+    ``locomotion.tasks.task_v4:variant(schedule_weight=0.0,height_weight=0.1)``.
     """
     module, separator, name = spec.partition(":")
     if not separator:
@@ -97,7 +97,7 @@ def wrapper_options(config):
 
 
 def build_wrapper(wrapper_class, task, options):
-    """Construct the RSL-RL wrapper with its recorded keywords, as ``locomotion/train.py`` does.
+    """Construct the RSL-RL wrapper with its recorded keywords, as ``locomotion/runs/train.py`` does.
 
     A constructor that lacks a recorded keyword is an error unless the keyword holds its default,
     so a substitute wrapper with the plain ``(task)`` constructor works at the default options.
@@ -120,12 +120,12 @@ def learner_configuration(vanilla, seed, options):
                 "action_smoothing": "none", "velocity_noise": 0.}
     missing = [key for key, value in options.items() if key not in accepted and value != defaults.get(key)]
     if missing:
-        raise ValueError(f"locomotion.ppo.ppo_config at this revision has no option {missing}")
+        raise ValueError(f"locomotion.learning.ppo.ppo_config at this revision has no option {missing}")
     return vanilla.ppo_config(seed, **{key: value for key, value in options.items() if key in accepted})
 
 
 def check_gait_schedule(task, config):
-    """The contact-schedule reward reads the phase that the gait clock shows the policy (``locomotion/train.py``)."""
+    """The contact-schedule reward reads the phase that the gait clock shows the policy (``locomotion/runs/train.py``)."""
     reward = getattr(task, "reward_config", None)
     if getattr(reward, "schedule_weight", 0) and (
             config.get("environment_wrapper", {}).get("gait_clock", 0) != getattr(reward, "schedule_period_controls", None)):
@@ -142,11 +142,11 @@ def check_command_bootstrap(options, config):
     if options.get("command_segments") != "bootstrap":
         return
     from rsl_rl.utils import resolve_callable
-    from locomotion.rate_schedule import CommandBootstrapPPO
+    from locomotion.learning.rate_schedule import CommandBootstrapPPO
     algorithm = resolve_callable(config["algorithm"]["class_name"])
     if not (inspect.isclass(algorithm) and issubclass(algorithm, CommandBootstrapPPO)):
         raise ValueError("The bootstrap wrapper option needs an algorithm class derived from "
-                         "locomotion.rate_schedule:CommandBootstrapPPO")
+                         "locomotion.learning.rate_schedule:CommandBootstrapPPO")
 
 
 def external_class_files(task_class, wrapper_class, config):
@@ -231,10 +231,10 @@ def resume_record(path, identity):
 def build_parser():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--output", type=Path, required=True, help="New run directory.")
-    parser.add_argument("--task", default="locomotion.task_v2:TrainingTaskV2",
+    parser.add_argument("--task", default="locomotion.tasks.task_v2:TrainingTaskV2",
                         help="module:Class or module:factory(text) that gives a class with the TrainingTask "
                              "interface: Class(env, TaskConfig, output_dir).")
-    parser.add_argument("--wrapper", default="locomotion.ppo:VanillaVecEnv", help="module:Class that wraps the task for RSL-RL.")
+    parser.add_argument("--wrapper", default="locomotion.learning.ppo:VanillaVecEnv", help="module:Class that wraps the task for RSL-RL.")
     parser.add_argument("--ppo-config-overrides", default="{}", help="JSON merged into ppo.ppo_config(...), or @file.json.")
     parser.add_argument("--distribution", help="Actor distribution class_name (RSL-RL name or module:Class); overrides --action-mean.")
     parser.add_argument("--action-mean", choices=["unbounded", "tanh"], default="unbounded")
@@ -291,9 +291,9 @@ def run(args, argv=None):
     import mujoco
     from locomotion.surrogate.env import (DEFAULT_GEOMETRY, DEFAULT_MODEL, DEFAULT_STANCE, ROOT, SurrogateConfig,
                                           SurrogateEnv, contact_overrides, repository_state, sha)
-    from locomotion import ppo as vanilla
-    from locomotion import task as task_module
-    from locomotion.train import save, scalars
+    from locomotion.learning import ppo as vanilla
+    from locomotion.tasks import task as task_module
+    from locomotion.runs.train import save, scalars
 
     version = importlib.metadata.version("rsl-rl-lib")
     if version != "5.0.1":

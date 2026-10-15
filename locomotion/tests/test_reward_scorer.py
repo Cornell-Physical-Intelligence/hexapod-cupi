@@ -10,9 +10,9 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion import reward_scorer
-from locomotion.env import LocomotionEnv
-from locomotion.task import TaskConfig, measured_reward
+from locomotion.evaluation import reward_scorer as reward_scorer
+from locomotion.backends.isaac.env import LocomotionEnv
+from locomotion.tasks.task import TaskConfig, measured_reward
 
 ROOT = Path(__file__).resolve().parents[2]
 TRACE = ROOT/'locomotion/tests/fixtures/control_trace.npz'
@@ -79,9 +79,9 @@ class RewardScorerTests(unittest.TestCase):
         self.assertEqual(set(result['ranking']), {'current', 'forward'})
 
     def test_reward_specification_requires_module_and_function(self):
-        self.assertIs(reward_scorer.load_reward('locomotion.task:measured_reward'), measured_reward)
+        self.assertIs(reward_scorer.load_reward('locomotion.tasks.task:measured_reward'), measured_reward)
         with self.assertRaisesRegex(ValueError, 'MODULE:FUNCTION'):
-            reward_scorer.load_reward('locomotion.task')
+            reward_scorer.load_reward('locomotion.tasks.task')
 
     def test_trace_without_a_required_field_is_rejected(self):
         with tempfile.TemporaryDirectory() as temporary:

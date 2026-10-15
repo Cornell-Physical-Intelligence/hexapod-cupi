@@ -99,7 +99,7 @@ allocation and supplies no native admission.
 | 3. Omni motion dataset | Use the [optimizer and dataset pipeline](../locomotion/priors/README.md) for eight bearings, both yaw directions and the arcs in `command_bank`. Require alternating tripod demonstrations on the approved URDF, with a consistent cycle across directions ([§III-A–B, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3)). Issue #36 uses optimized motions alone; native and human review determine admission. | None | No | [#36](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/36) | Done: #36 closed. |
 | 4. Native motion validation | Replay each motion with [`replay_native.py`](../locomotion/priors/replay_native.py) and require its matching screen before dataset admission. Construct AMP states from native replay. Match feature order, frames, units and the 20 ms interval; exclude terminal-to-reset pairs. | 3 | Yes | [#36](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/36) | Done: 18000 pairs admitted; #36 closed. |
 | 5. Flat AMP pilot | Resolve the gradient-penalty ambiguity below, then implement the least-squares discriminator and style reward from Eqs. (1)–(2) with the current [256, 256, 128] MLP actor and critic. Update PPO and the discriminator together ([§IV-B, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). The [AMP learner](../locomotion/README.md#amp-learner-and-paper-networks) implements this with CPU tests; no native pilot has run. Run on flat ground and compare with the tripod baseline through the same scorer and force metrics; defer the final reward comparison to Step 9. Use the 13 learning probes as diagnostics and the full gate for qualification. | 1, 4; 2 for full scale | Yes | [#37](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/37), [#50](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/50), [#51](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/51) | CPU done in #43. The native pilot runs under #50; #51 holds the reward v2 control record. The [flat pilot v2 protocol](#frozen-flat-pilot-v2-issue-50) moves new arms to reward v4 without its gait terms; the [10 October 128-robot standing admission](../site/assets/throughput_profile_20261010_001/admission_128.json) covers the physics source. |
-| 6. Network architecture | Implement Table III's velocity estimator, memory encoder over five proprioception frames, low-level actor, privileged encoder and critic. Train the estimator with supervised simulation velocity labels ([§IV-A–B; Table III, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). Supply the full 42-value privileged state, including base height and perturbations, plus collision states ([§III, p. 2](https://arxiv.org/pdf/2511.03167v1#page=2)). Test shapes and gradient paths; keep privileged inputs out of the actor. [`paper_networks.py`](../locomotion/paper_networks.py) implements these networks with CPU tests; friction and perturbation slots hold declared constants until Step 7. Add the terrain encoder with Step 8. Repeat the Step 5 pilot with these networks before Step 7. | None to build; 5 to compare | No | [#37](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/37), [#50](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/50) | CPU done in #43. The paper-network run follows the pilot under #50; #51 scores both. |
+| 6. Network architecture | Implement Table III's velocity estimator, memory encoder over five proprioception frames, low-level actor, privileged encoder and critic. Train the estimator with supervised simulation velocity labels ([§IV-A–B; Table III, p. 4](https://arxiv.org/pdf/2511.03167v1#page=4)). Supply the full 42-value privileged state, including base height and perturbations, plus collision states ([§III, p. 2](https://arxiv.org/pdf/2511.03167v1#page=2)). Test shapes and gradient paths; keep privileged inputs out of the actor. [`paper_networks.py`](../locomotion/learning/paper_networks.py) implements these networks with CPU tests; friction and perturbation slots hold declared constants until Step 7. Add the terrain encoder with Step 8. Repeat the Step 5 pilot with these networks before Step 7. | None to build; 5 to compare | No | [#37](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/37), [#50](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/50) | CPU done in #43. The paper-network run follows the pilot under #50; #51 scores both. |
 | 7. Domain randomization | Implement Table II with frozen model-specific values. Declare adaptations for the different robot and simulator before comparing runs. | 5, 6 | Yes | — | Not started; no issue. |
 | 8. Terrain curriculum | Add terrain levels, the critic height scan and terrain encoder. Both stay critic-only: the GPS-only robot carries no terrain sensor. Retain admitted flat behavior. | 7 | Yes | — | Not started; no issue. |
 | 9. Reward and robustness comparisons | After Steps 7–8, compare task plus penalty, task plus style, and task plus style plus penalty with matched transitions and five seeds. Assess flat tracking and terrain progression ([§V-A; Figs. 3–4, pp. 4–5](https://arxiv.org/pdf/2511.03167v1#page=4)). Test push disturbances and reproduce the baseline controllers as separate comparisons ([§V-B, p. 5](https://arxiv.org/pdf/2511.03167v1#page=5)). Keep RMA/MPC work separate from the reward ablation. | 7, 8 | Yes | — | Not started; no issue. |
@@ -331,7 +331,7 @@ your machine. W&B receives the PPO losses, the task reward components and each
 checkpoint; Git keeps the acceptance summary.
 
 ```sh
-uv run python -m locomotion.prepare --mode train ... --logger wandb --wandb-project <project>
+uv run python -m locomotion.runs.prepare --mode train ... --logger wandb --wandb-project <project>
 uv run --group tracking wandb sync <allocation>/run/standing/wandb/offline-run-*
 ```
 
@@ -352,7 +352,7 @@ The paper's 0.15 kernel and command range require a separate comparison.
 
 ### Step 2: throughput profile
 
-[`throughput.py`](../locomotion/throughput.py) profiles training at one
+[`throughput.py`](../locomotion/evaluation/throughput.py) profiles training at one
 admitted replica count per allocation. It runs `train.py`'s allocation: task
 version 1, stock PPO, 20-second episodes and the same per-update records. It
 accepts one, 32, 128, 512 or 1024 robots with matching one-robot and batch
@@ -369,10 +369,10 @@ robot and update, 2000 updates and the pilot deadline. Training and probes
 accept 128 and 512 robots; 1024 stays a profiling count.
 
 ```sh
-uv run python -m locomotion.prepare --mode throughput --num-envs 32 \
+uv run python -m locomotion.runs.prepare --mode throughput --num-envs 32 \
   --warmup-updates 2 --updates 5 --inputs <admitted inputs.json> \
   --output <fresh local pack> --remote-root <fresh remote root>
-uv run python -m locomotion.throughput summarize --run <allocation>/run/standing \
+uv run python -m locomotion.evaluation.throughput summarize --run <allocation>/run/standing \
   --run <other allocation>/run/standing --output <fresh summary.json>
 ```
 
@@ -441,7 +441,7 @@ The authors call the AMP state 61 values in
 [§III-A, p. 3](https://arxiv.org/pdf/2511.03167v1#page=3), but their foot-height description
 accounts for fewer values. The retained kernel uses six 3D foot positions.
 The program lead retained that 61-value interpretation for issue #36.
-[`amp.py`](../locomotion/amp.py) specifies the order, frames and units; the dataset
+[`amp.py`](../locomotion/core/features.py) specifies the order, frames and units; the dataset
 audit verifies the shared extractor against native telemetry before admission. The optimizer's point contacts omit
 mesh patches and impacts, so native replay remains a prerequisite.
 
@@ -458,11 +458,11 @@ force metrics give Step 5 a comparison through the same scorer.
 
 ```sh
 uv sync --locked
-uv run python -m locomotion.inputs check
+uv run python -m locomotion.runs.inputs check
 uv run python -m unittest discover -s locomotion/tests
 uv run python -m unittest discover -s locomotion/priors/tests
-uv run python -m locomotion.inputs pack --help
-uv run python -m locomotion.prepare --help
+uv run python -m locomotion.runs.inputs pack --help
+uv run python -m locomotion.runs.prepare --help
 ```
 
 `inputs pack` requires a fresh local output and an explicit remote input root
@@ -476,7 +476,7 @@ training. Historical admissions and checkpoints retain their original sources.
 ## Acceptance and measurements
 
 [`evaluation/scoring.py`](../locomotion/evaluation/scoring.py) owns the unchanged numerical
-gates. [`evaluate.py`](../locomotion/evaluate.py) records actual policy actions
+gates. [`evaluate.py`](../locomotion/evaluation/runner.py) records actual policy actions
 and native responses. The 13 learning probes are additional diagnostics. The
 full Stage 2 manifest has 96 cases, including signed directions, turns,
 transitions and quiet stops. Missing cases remain missing; an interrupted
@@ -496,7 +496,7 @@ checkpoint identities; a source move cannot admit a new runtime.
 
 ## Historical contracts
 
-Use `locomotion/env_config.py` for the approved joint order. Hardware mapping
+Use `locomotion/backends/isaac/config.py` for the approved joint order. Hardware mapping
 requires its own verification. Historical joint layouts remain in the pinned
 pre-cleanup reference below.
 

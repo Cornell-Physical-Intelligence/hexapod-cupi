@@ -8,8 +8,9 @@ import unittest
 
 import numpy as np
 
-from locomotion import reward_scorer, reward_viewer
-from locomotion.task import TaskConfig, measured_reward
+from locomotion.evaluation import reward_scorer as reward_scorer
+from locomotion.evaluation import reward_viewer as reward_viewer
+from locomotion.tasks.task import TaskConfig, measured_reward
 
 ROOT = Path(__file__).resolve().parents[2]
 TRACE = ROOT/'locomotion/tests/fixtures/control_trace.npz'

@@ -52,7 +52,7 @@ uv run python -m unittest discover -s locomotion/surrogate/tests
 uv run python -m unittest discover -s tests
 python3 tools/source_inventory.py check
 python3 tools/archive.py check
-uv run python -m locomotion.inputs check
+uv run python -m locomotion.runs.inputs check
 python3 tools/check_pipeline_lineages.py current
 python3 tools/project_site.py check --base <integration-base-SHA>
 python3 tools/project_site.py build

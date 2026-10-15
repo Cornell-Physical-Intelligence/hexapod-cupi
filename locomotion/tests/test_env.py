@@ -3,8 +3,8 @@ from pathlib import Path
 import unittest
 import numpy as np
 import torch
-from locomotion.env_config import EnvConfig, JOINT_NAMES, KD, verify_assets
-from locomotion.env import LocomotionEnv, emitted_target, executed_action_feature, motor_force, _diagnostic_servo, inverse_rotate, rotate
+from locomotion.backends.isaac.config import EnvConfig, JOINT_NAMES, KD, verify_assets
+from locomotion.backends.isaac.env import LocomotionEnv, emitted_target, executed_action_feature, motor_force, _diagnostic_servo, inverse_rotate, rotate
 
 
 class MotorTests(unittest.TestCase):

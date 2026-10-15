@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import shutil
 
-from ..env_config import sha, verify_assets
+from locomotion.backends.isaac.config import sha, verify_assets
 from .spark_paths import INPUT_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[2]

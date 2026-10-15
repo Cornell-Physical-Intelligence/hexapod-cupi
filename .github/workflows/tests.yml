@@ -11,6 +11,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Fetch pinned source evidence
+        run: git fetch --filter=blob:none --no-tags --depth=1 origin 02f551fd97c240d7ca1724618fa7f0429065f0e1
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
@@ -28,7 +30,7 @@ jobs:
         run: |
           uv run python tools/source_inventory.py check
           uv run python tools/archive.py check
-          uv run python -m locomotion.inputs check
+          uv run python -m locomotion.runs.inputs check
           uv run python tools/check_pipeline_lineages.py current
           uv run python -m locomotion.priors.dataset check --output locomotion/priors/datasets/amp_demonstrations_001
       - name: Generate this revision's source manifest

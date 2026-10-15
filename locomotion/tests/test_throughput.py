@@ -16,13 +16,16 @@ from unittest.mock import patch
 import numpy as np
 import torch
 
-from locomotion import train, launch, reservation, throughput
-from locomotion import task as task_module
-from locomotion.env import LocomotionEnv
-from locomotion.env_config import BODY_NAMES, EnvConfig, JOINT_NAMES, sha
-from locomotion.ppo import TrainingLoads, VanillaVecEnv, ppo_config
-from locomotion.prepare import ROOT, prepare
-from locomotion.task import TaskConfig, TrainingTask
+from locomotion.runs import train as train
+from locomotion.runs import launch as launch
+from locomotion.runs import reservation as reservation
+from locomotion.evaluation import throughput as throughput
+from locomotion.tasks import task as task_module
+from locomotion.backends.isaac.env import LocomotionEnv
+from locomotion.backends.isaac.config import BODY_NAMES, EnvConfig, JOINT_NAMES, sha
+from locomotion.learning.ppo import TrainingLoads, VanillaVecEnv, ppo_config
+from locomotion.runs.prepare import ROOT, prepare
+from locomotion.tasks.task import TaskConfig, TrainingTask
 
 MODEL = ROOT/'robot/hexapod_mkii_updated_v1'
 REMOTE = '/home/orionh/HEXAPOD_runs/restart_20260914/throughput_fixture'
@@ -501,7 +504,7 @@ class GuardTests(unittest.TestCase):
                 diagnostic = prepare(root/f'diag{index}', REMOTE, mode='diagnostic', num_envs=count)
                 self.assertEqual(diagnostic['command_args'][diagnostic['command_args'].index('--num-envs')+1], str(count))
                 profile = prepare(root/f'profile{index}', REMOTE, mode='throughput', num_envs=count, updates=5, warmup_updates=2)
-                self.assertEqual(profile['module'], 'locomotion.throughput')
+                self.assertEqual(profile['module'], 'locomotion.evaluation.throughput')
                 self.assertEqual(profile['command_args'][profile['command_args'].index('--num-envs')+1], str(count))
             training = prepare(root/'train512', REMOTE, mode='train', num_envs=512, updates=2000, reward_version='4', gait_clock=60,
                                allocation_profile='flat_pilot_v1', max_wall_seconds=21600)
@@ -526,13 +529,13 @@ class GuardTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             binding = prepare(Path(directory)/'pack', REMOTE, mode='throughput', num_envs=32,
                               updates=5, warmup_updates=3, seed=7)
-            self.assertEqual(binding['module'], 'locomotion.throughput')
+            self.assertEqual(binding['module'], 'locomotion.evaluation.throughput')
             args = binding['command_args']
             for option, value in (('--num-envs', '32'), ('--updates', '5'), ('--warmup-updates', '3'),
                                   ('--seed', '7'), ('--standing-admission', '/admission/admission.json')):
                 self.assertEqual(args[args.index(option)+1], value)
             source = Path(directory)/'pack/source/locomotion'
-            self.assertEqual(sha(source/'throughput.py'), sha(ROOT/'locomotion/throughput.py'))
+            self.assertEqual(sha(source/'evaluation/throughput.py'), sha(ROOT/'locomotion/evaluation/throughput.py'))
             for name, options in (('bad_updates', {'updates': 512, 'warmup_updates': 2}),
                                   ('bad_warmup', {'updates': 5, 'warmup_updates': 1}),
                                   ('bad_count', {'updates': 5, 'warmup_updates': 2, 'num_envs': 64}),
@@ -545,7 +548,7 @@ class GuardTests(unittest.TestCase):
     def test_launcher_accepts_the_profile_module_only_in_its_mode(self):
         root = '/home/orionh/HEXAPOD_runs/restart_20260914/launcher_fixture'
         binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': True,
-                   'mode': 'throughput', 'module': 'locomotion.throughput', 'max_seconds': 6600,
+                   'mode': 'throughput', 'module': 'locomotion.evaluation.throughput', 'max_seconds': 6600,
                    **{key: root+'/'+key for key in ('source', 'output', 'asset', 'prior', 'geometry_source')},
                    'source_freeze_sha256': 'a'*64, 'input_files': {}, 'stage2_complete': False,
                    'physical_admission': False,
@@ -560,7 +563,7 @@ class GuardTests(unittest.TestCase):
                     stack.enter_context(patch.object(reservation, name, return_value=None))
                 return launch.verify(value, Path(value['source']))
         verify(binding)
-        for mode, module in (('throughput', 'locomotion.train'), ('train', 'locomotion.throughput')):
+        for mode, module in (('throughput', 'locomotion.runs.train'), ('train', 'locomotion.evaluation.throughput')):
             changed = copy.deepcopy(binding)
             changed['mode'], changed['module'] = mode, module
             changed['command_args'][1] = mode
@@ -605,9 +608,9 @@ class IdentityTests(unittest.TestCase):
             directory = Path(directory)
             prepare(directory/'pack', REMOTE, mode='throughput', num_envs=32, updates=5, warmup_updates=2)
             source = directory/'pack/source'
-            training = self.run_module(source, 'locomotion.train', '--mode', 'diagnostic', '--num-envs', '32')
+            training = self.run_module(source, 'locomotion.runs.train', '--mode', 'diagnostic', '--num-envs', '32')
             admission = self.admission(directory, training)
-            result = self.run_module(source, 'locomotion.throughput', '--mode', 'throughput', '--num-envs', '32',
+            result = self.run_module(source, 'locomotion.evaluation.throughput', '--mode', 'throughput', '--num-envs', '32',
                                      '--standing-admission', str(admission))
             profile_identity = result['identity']
             for key in ('model_sha256', 'usd_sha256', 'physics_source_files', 'physics_config', 'stance_sha256',
@@ -640,7 +643,7 @@ class SummaryTests(unittest.TestCase):
         (directory/'profile.json').write_text(json.dumps(value)+'\n')
         (directory/'state.json').write_text(json.dumps({'status': 'completed',
             'profile_sha256': sha(directory/'profile.json')})+'\n')
-        launch = {'mode': 'throughput', 'module': 'locomotion.throughput', 'source_freeze_sha256': 'fixture',
+        launch = {'mode': 'throughput', 'module': 'locomotion.evaluation.throughput', 'source_freeze_sha256': 'fixture',
                   'command_args': ['--mode', 'throughput', '--num-envs', str(num_envs), '--updates', '2',
                                    '--warmup-updates', '2']}
         launch.update(binding or {})

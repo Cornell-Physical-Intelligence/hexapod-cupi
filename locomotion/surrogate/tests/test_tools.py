@@ -11,11 +11,11 @@ from unittest import mock
 import numpy as np
 import torch
 
-from locomotion.prepare import prepare
+from locomotion.runs.prepare import prepare
 from locomotion.surrogate import calibrate, replay, self_check
 from locomotion.surrogate.env import ROOT, make_env
-from locomotion.task import TaskConfig, TrainingTask
-from locomotion.task_v2 import TrainingTaskV2
+from locomotion.tasks.task import TaskConfig, TrainingTask
+from locomotion.tasks.task_v2 import TrainingTaskV2
 
 PACKAGE = ROOT / "locomotion/surrogate"
 REMOTE = Path("/home/orionh/HEXAPOD_runs/restart_20260914/test_surrogate_boundary")

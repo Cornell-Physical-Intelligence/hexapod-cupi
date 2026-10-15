@@ -6,10 +6,10 @@ import unittest
 
 import numpy as np
 
-from locomotion.env_config import JOINT_NAMES
-from locomotion.tripod import PHASE, TripodController, wave
-from locomotion.tripod_config import GEOMETRY_SWEEP
-from locomotion.tripod_kinematics import stance_geometry
+from locomotion.backends.isaac.config import JOINT_NAMES
+from locomotion.tasks.tripod import PHASE, TripodController, wave
+from locomotion.tasks.tripod_config import GEOMETRY_SWEEP
+from locomotion.core.tripod_kinematics import stance_geometry
 from locomotion.tests.test_tripod import JOINTS, MODEL, STANCE, feet, measured_fixture
 
 
@@ -73,7 +73,7 @@ class GeometryTripodTests(unittest.TestCase):
                 np.testing.assert_array_equal(replay, c.neutral.reshape(18))
 
     def test_geometry_input_and_finite_candidate_selection_are_required(self):
-        from locomotion.prepare import prepare
+        from locomotion.runs.prepare import prepare
         c = make_geometry()
         with self.assertRaises(ValueError):
             TripodController(c.neutral, c.lower, c.upper, GEOMETRY_SWEEP[0])
@@ -84,7 +84,7 @@ class GeometryTripodTests(unittest.TestCase):
             args = binding['command_args']
             self.assertEqual(args[args.index('--tripod-adaptation')+1], 'geometry')
             frozen = json.loads((path/'source/FREEZE_SHA256.json').read_text())
-            self.assertIn('locomotion/tripod_kinematics.py', frozen)
+            self.assertIn('locomotion/core/tripod_kinematics.py', frozen)
             with self.assertRaises(ValueError):
                 prepare(Path(temp)/'bad', '/home/orionh/HEXAPOD_runs/restart_20260914/geometry_cpu_fixture',
                     mode='tripod', tripod_adaptation='geometry', candidate=2)

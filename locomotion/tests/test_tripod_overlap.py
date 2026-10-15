@@ -4,8 +4,8 @@ import unittest
 
 import numpy as np
 
-from locomotion.tripod import overlap_sweep
-from locomotion.tripod_config import SWEEPS
+from locomotion.tasks.tripod import overlap_sweep
+from locomotion.tasks.tripod_config import SWEEPS
 from locomotion.tests.test_tripod import measured_fixture
 from locomotion.tests.test_tripod_geometry import make_geometry
 

@@ -5,9 +5,9 @@ import unittest
 
 import numpy as np
 
-from locomotion.tripod import PHASE
-from locomotion.tripod_config import SWEEPS
-from locomotion.tripod_evaluate import cases_for
+from locomotion.tasks.tripod import PHASE
+from locomotion.tasks.tripod_config import SWEEPS
+from locomotion.evaluation.tripod_evaluate import cases_for
 from locomotion.tests.test_tripod import measured_fixture
 from locomotion.tests.test_tripod_geometry import make_geometry
 
@@ -53,7 +53,7 @@ class TripodStartupTests(unittest.TestCase):
             if not any(requested):self.assertTrue(c.stopped)
 
     def test_full_commands_and_clearance_preserve_targets_and_canonical_case(self):
-        from locomotion.evaluate import case_manifest
+        from locomotion.evaluation.runner import case_manifest
         expected = next(c for c in case_manifest() if c['case_id'] == 'static:translate_0.10_0deg')
         self.assertEqual(cases_for('forward_high'), [expected])
         for touchdown in (.51, .7, .95):

@@ -6,7 +6,8 @@ import sys
 import tempfile
 import unittest
 
-from locomotion import inputs, prepare
+from locomotion.runs import inputs as inputs
+from locomotion.runs import prepare as prepare
 
 
 class PortableInputsTests(unittest.TestCase):
@@ -21,7 +22,7 @@ class PortableInputsTests(unittest.TestCase):
                 mode='diagnostic', inputs=packed/'inputs.json')
             source = root/'launch/source'
             self.assertIn(prepare.REMOTE_ROOT, Path(binding['prior']).parents)
-            result = subprocess.run([sys.executable, '-m', 'locomotion.train',
+            result = subprocess.run([sys.executable, '-m', 'locomotion.runs.train',
                 '--mode', 'diagnostic', '--asset', str(packed/'asset'),
                 '--model', str(packed/'asset/source/model.json'),
                 '--geometry', str(packed/'geometry_source/geometry/geometry.json'),

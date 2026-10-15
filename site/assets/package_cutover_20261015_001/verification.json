@@ -1,0 +1,135 @@
+{
+  "schema": "hexapod_package_cutover_verification_v1",
+  "baseline_commit": "02f551fd97c240d7ca1724618fa7f0429065f0e1",
+  "implementation_commit": "b5f95e45c5f45e4ed59bcba004fcafd914df0378",
+  "standing_source_commit": "3bc812de24c23caee3f7b4f79f869f1ed4627fd9",
+  "physics_dependencies_unchanged_between_standing_and_final_source": true,
+  "removed_flat_wrappers": 37,
+  "cpu": {
+    "unit_tests_passed": 669,
+    "fixture": "locomotion/tests/fixtures/packages_02f551fd.tar.gz",
+    "fixture_sha256": "5857bb0e60f1785e770b6c35dc01cdb1737fe24f70d029b6da61331f74bb16d2",
+    "exact_arithmetic_rng_optimizer_parity": true,
+    "surrogate_resume_checks_pass": true
+  },
+  "standing": [
+    {
+      "robots": 1,
+      "pass": true,
+      "controls": 1000,
+      "substeps": 8000,
+      "remote_attempt": "/srv/cupi/hexapod/runs/james/package_cutover_20261014_003/standing_1",
+      "files": {
+        "standing/state.json": "7a1a786cd39400758ce949b1994ee248e26a9d1167c270426eef5941ceed0120",
+        "standing/standing/standing_report.json": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33",
+        "jobs/standing.json": "7971eb18ca95dd4546b490a6dac9e3272b7b3370bef8900ecb244c8a8d972d09",
+        "cleanup.json": "6f0267aa0181a10a36394ded1556a56ad1b492377ca5916f6964b938ba063496"
+      }
+    },
+    {
+      "robots": 32,
+      "pass": true,
+      "controls": 1000,
+      "substeps": 8000,
+      "remote_attempt": "/srv/cupi/hexapod/runs/james/package_cutover_20261014_003/standing_32",
+      "files": {
+        "standing/state.json": "54989bbb6279d3815ceb880eb29c7b9a7ab1911936958a52de15e16fca619d15",
+        "standing/standing/standing_report.json": "ae2c8170bc3a16cb9ab54e7c11309bfe5bcf571632b8ddf420a44e16097b9ecf",
+        "jobs/standing.json": "e5fff3d94a2d740ff982af316cf7daf304f2c99247a7af6d8e93d7d487e19116",
+        "cleanup.json": "0576ce832eb091504398d1b8f090b45c05a08381634e5032866705b1442118e1"
+      }
+    },
+    {
+      "robots": 128,
+      "pass": true,
+      "controls": 1000,
+      "substeps": 8000,
+      "remote_attempt": "/srv/cupi/hexapod/runs/james/package_cutover_20261014_003/standing_128",
+      "files": {
+        "standing/state.json": "bd278cffa403dcff53e13a13c6fdf02be6e4ffcc3cdefe823c0b3c1305dc6555",
+        "standing/standing/standing_report.json": "89e371772efa0439868e6ac5252c97d29edee05902639a8c708624ff6155252d",
+        "jobs/standing.json": "48a62edb532f0349fda0169070aabb81309fc19ab96fdada2b406cbc957b44bd",
+        "cleanup.json": "66d8dd37896b463c12161ea194a0d36084f17116001a79f935c536e58cd261f5"
+      }
+    }
+  ],
+  "reduced_standing_scope": {
+    "authorization": "User instruction in this task: stop 512, skip 1024, finish c48_long checks",
+    "stopped_robots": 512,
+    "not_dispatched_robots": 1024,
+    "fresh_512_training_requires_new_admission": true
+  },
+  "native_evaluations": [
+    {
+      "attempt": "candidate_replay_3",
+      "remote_attempt": "/srv/cupi/hexapod/runs/james/package_cutover_20261014_003/candidate_replay_3",
+      "passed_probes": 13,
+      "declared_probes": 13,
+      "contact_and_torque_reports": 13,
+      "status": "completed",
+      "cleanup_checked": true,
+      "files": {
+        "binding.json": "050c366ca027f148a48a8167f8cdc9ff746586e1476a6fe73c2fef9041169f82",
+        "PACK.json": "ca3a236935a551782818a2e743bad6912b49f6ebc97532fca470ced9d88dfab4",
+        "source/FREEZE_SHA256.json": "3c2039c5217b3777a2f7ebe8809137d2021311e064597e46084dde5407bff937",
+        "source/RUNTIME_SOURCES.json": "32f6cb1584ad6935dd0d5de38c572c681bd3af51e118e0fe3259772c21adb83f",
+        "run/standing/state.json": "bb6f561b60498cf1e7e4de413338e463f5a6cd402d2c903052e45378921936fe",
+        "run/standing/evaluation/summary.json": "ee76b449aaf06bba250f71c88b654b2d72d694222347b5dc32958641c676f1f2",
+        "run/jobs/standing.json": "ebb979dd01c4c0017e1b9b75ec86ea7253ad9d83b2310af6e7661934515291b6",
+        "run/cleanup.json": "6fe0306b6ba226cb5bfaf50ab4370dc7efb3e82336d106fffd40d16811903c5b"
+      }
+    },
+    {
+      "attempt": "certified_evaluation_2",
+      "remote_attempt": "/srv/cupi/hexapod/runs/james/package_cutover_20261014_003/certified_evaluation_2",
+      "passed_probes": 13,
+      "declared_probes": 13,
+      "contact_and_torque_reports": 13,
+      "status": "completed",
+      "cleanup_checked": true,
+      "files": {
+        "binding.json": "4b2b2dcf4132b5fa5fad2efd12630645314ef0fed66fbd6bd4239c6411e3df1e",
+        "PACK.json": "9d37cbad60d3645184c77d51e8833ac5f3ec70da69ec36097c21f8f06301389a",
+        "source/FREEZE_SHA256.json": "40a117817d6e0ae2079e9783c6dc61619fc95473489d563c442effb3c06a90e8",
+        "source/RUNTIME_SOURCES.json": "67295d45dd550b5743452d8f23f2e150280bf167ce17a8298289e1bc0ab404e9",
+        "run/standing/state.json": "e3a19fec257d60860b0d3a3132c2694d96ef6c5cb9e1d9f438499e2b85d99759",
+        "run/standing/evaluation/summary.json": "fd998d4f3ebab11f2ba741f7970faf15d5b7eb22209bd7ea72ea6f22ffd16bcc",
+        "run/jobs/standing.json": "c427f59290cd0cd82653be9af5955b531417fb922e7a56eaa9e9f721e964847f",
+        "run/cleanup.json": "e3b45fbc7f1f1adbd80ad7e772818e17c9f88c6b036f71f8ae7c32c6c59829b2"
+      }
+    }
+  ],
+  "baseline_replays": 3,
+  "frozen_numeric_ranges": 8088,
+  "unchanged_gate_definitions": 210,
+  "checkpoint_sha256": "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9",
+  "declaration_sha256": "8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3",
+  "compatibility_receipt_sha256": "33304b3a49ce05f07d3f6e68614b143aaed1687dbe00169fcc488d05439c9fc6",
+  "comparison_scope": "Both native evaluations match the ranges frozen from three retained baseline replays. Contact and motor-torque measurements match. No acceptance gate changed.",
+  "preserved_failed_attempts": [
+    "/srv/cupi/hexapod/runs/james/package_cutover_20261014_001",
+    "/srv/cupi/hexapod/runs/james/package_cutover_20261014_002",
+    "/srv/cupi/hexapod/runs/james/package_cutover_20261014_003/candidate_replay_2"
+  ],
+  "exclusions": [
+    "stock-library migration",
+    "physics changes",
+    "native training resume",
+    "512/1024 standing renewal"
+  ],
+  "stage2_complete": false,
+  "physical_admission": false,
+  "files": {
+    "admission_128.json": "92b8be9f12b62a4e6786c8b999dc28fe5c070bbd9565fb8a5c0ab41c80127f04",
+    "admission_32.json": "0b27635eef17adbe1419068cf605ee6141e3d2aec9502e8d3228181abcf55e35",
+    "candidate_comparison.json": "7ce3a27de50ac1e21fcc81b1b440fe5b447dad8a484c9ac3e98c41b5a0965a10",
+    "certified_evaluation_comparison.json": "7ce3a27de50ac1e21fcc81b1b440fe5b447dad8a484c9ac3e98c41b5a0965a10",
+    "compatibility/ranges.json": "866dfd2a0f5bcdbf9d13cb94cf6198014ef32ffb4ca436a9d55bab9a28a4aab5",
+    "compatibility/receipt.json": "33304b3a49ce05f07d3f6e68614b143aaed1687dbe00169fcc488d05439c9fc6",
+    "compatibility/summary.json": "fd266f1fda0c8d77fff280909b893e7222b9e7fad74625def7bfc8be6236f5b9",
+    "gate_scope_change.json": "b36f28364c4baee728b769cb2724a436ec43ab06790fa2ee3d53551b8de48f14",
+    "stopped_512_cleanup.json": "cb69161408087444e303eba09dfc96a277970f75f32326b6c700c17909ad7018",
+    "stopped_512_job.json": "65e897b12371f02363fe73655bc5ea8540f8a2df450c86530d668abb175c5cbc"
+  },
+  "native_baseline_commit": "b2a6168c35156dfe0a8202201aa574b8d9e43fb1"
+}

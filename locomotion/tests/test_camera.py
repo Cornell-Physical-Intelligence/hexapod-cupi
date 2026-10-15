@@ -8,7 +8,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 import unittest
 import numpy as np
-from locomotion.camera import NativePolicyCamera, NATIVE_GETTERS, CAMERA_PRIM_PATH
+from locomotion.evaluation.camera import NativePolicyCamera, NATIVE_GETTERS, CAMERA_PRIM_PATH
 
 
 class FakeNative:
@@ -146,7 +146,7 @@ class NativeCameraTests(unittest.TestCase):
     def test_capture_watchdog_terminates_only_its_stalled_child_and_preserves_stage(self):
         script='''
 import sys,time
-from locomotion.camera import NativePolicyCamera
+from locomotion.evaluation.camera import NativePolicyCamera
 from locomotion.tests.test_camera import FakeNative
 def hang(camera,width,height):time.sleep(10)
 NativePolicyCamera._initialize=hang

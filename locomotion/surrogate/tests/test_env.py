@@ -6,9 +6,9 @@ from unittest import mock
 import numpy as np
 import torch
 
-from locomotion import noise_probe
-from locomotion.env import LocomotionEnv, emitted_target
-from locomotion.env_config import MASS_KG, EnvConfig
+from locomotion.evaluation import noise_probe as noise_probe
+from locomotion.backends.isaac.env import LocomotionEnv, emitted_target
+from locomotion.backends.isaac.config import MASS_KG, EnvConfig
 from locomotion.surrogate.env import (MAX_JOINT_SPEED, ContactModel, SurrogateConfig, SurrogateEnv, contact_overrides,
                                       make_env)
 

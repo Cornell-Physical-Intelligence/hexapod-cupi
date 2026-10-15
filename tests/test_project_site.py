@@ -143,6 +143,25 @@ class EvidenceCorrectionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'replacement file or SHA'):
             site.records()
 
+    def test_corrected_evidence_can_pin_its_original_git_bytes_after_source_moves(self):
+        _, _, receipt, correction = self.fixture()
+        original = receipt.read_bytes()
+        reference = correction['evidence_reference_corrections'][0]['replacement_reference']
+        digest = correction['evidence_reference_corrections'][0]['replacement_sha256']
+        commit = '1'*40
+        (self.root/'configs').mkdir(exist_ok=True)
+        inventory = {'baseline': commit, 'tools': [], 'source_archives': {
+            reference: {'source_commit': commit, 'sha256': digest}}}
+        (self.root/'configs/source_inventory.json').write_text(json.dumps(inventory))
+        receipt.write_text('Current source uses package imports.\n')
+        with patch.object(site.subprocess, 'check_output', return_value=original) as git:
+            rows = site.records()
+            self.assertTrue(any(commit in ref for row in rows for ref in row['evidence']))
+            git.assert_called_with(['git', 'show', commit+':'+reference], cwd=self.root)
+        with patch.object(site.subprocess, 'check_output', return_value=b'changed Git bytes'):
+            with self.assertRaisesRegex(ValueError, 'Archived source bytes'):
+                site.records()
+
     def test_malformed_unknown_stale_or_unmatched_correction_rejects(self):
         _, _, _, correction = self.fixture()
         cases = [

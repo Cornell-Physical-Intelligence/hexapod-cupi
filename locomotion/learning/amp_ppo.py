@@ -231,11 +231,11 @@ def amp_ppo_config(seed, *, networks='mlp', amp_config=None, action_mean='unboun
     amp_config = (AMPConfig() if amp_config is None else amp_config).resolve(seed)
     amp_config.validate()
     # Checkpoint records pass through JSON; a tuple here would never equal its saved list.
-    config['algorithm'].update(class_name='locomotion.amp_ppo:AMPPPO', amp_cfg=json_shape(asdict(amp_config)))
+    config['algorithm'].update(class_name='locomotion.learning.amp_ppo:AMPPPO', amp_cfg=json_shape(asdict(amp_config)))
     if networks == 'paper':
         config['obs_groups'] = {'actor': list(nets.ACTOR_GROUPS), 'critic': list(nets.CRITIC_GROUPS)}
-        config['actor'].update(class_name='locomotion.paper_networks:PaperActor', hidden_dims=list(nets.ACTOR_HIDDEN))
-        config['critic'].update(class_name='locomotion.paper_networks:PaperCritic', hidden_dims=list(nets.CRITIC_HIDDEN))
+        config['actor'].update(class_name='locomotion.learning.paper_networks:PaperActor', hidden_dims=list(nets.ACTOR_HIDDEN))
+        config['critic'].update(class_name='locomotion.learning.paper_networks:PaperCritic', hidden_dims=list(nets.CRITIC_HIDDEN))
     elif networks != 'mlp':
         raise ValueError("networks must be 'mlp' or 'paper'")
     config['networks'] = networks

@@ -16,7 +16,7 @@ def area(path):
     parts = Path(path).parts
     if '/tests/' in path:
         return 'tests'
-    return parts[1] if len(parts) > 2 and parts[1] in PACKAGES else 'entry points and experiments'
+    return parts[1] if len(parts) > 2 and parts[1] in PACKAGES else 'package'
 
 
 def module_name(path):
@@ -94,7 +94,7 @@ def generate(repo, ref="HEAD"):
         imports = [{"line": n.lineno, "text": ast.unparse(n)} for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom))]
         dynamic = sorted({n.value for n in ast.walk(tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)
                           and n.value.startswith("locomotion.") and len(n.value) < 160})
-        rows.append({"path": path, "area": area(path), "test": "/tests/" in path, "compatibility": (ast.get_docstring(tree) or "").startswith("Compatibility"),
+        rows.append({"path": path, "area": area(path), "test": "/tests/" in path,
                      "lines": len(text.splitlines()), "sha256": hashlib.sha256(raw).hexdigest(),
                      "owner": meta.get("owner", "Test module"), "classification": meta.get("classification", "test"),
                      "purpose": meta.get("purpose", (ast.get_docstring(tree) or "").split("\n\n")[0]),
@@ -140,7 +140,6 @@ PAGE = r'''<!doctype html>
 .map .arrow.active path {fill:var(--red)}
 .map .file rect {fill:white;stroke:var(--ink);stroke-width:1.5}
 .map .file.test rect {stroke-dasharray:6 4}
-.map .file.compatibility rect {stroke-dasharray:2 3}
 .map .file.selected rect {fill:var(--ink)}
 .map .file.selected text {fill:white}
 .map .file.hit rect {stroke:var(--red);stroke-width:4}
@@ -157,7 +156,7 @@ PAGE = r'''<!doctype html>
 <header class="masthead"><a class="brand" href="../"><span class="brand-mark" aria-hidden="true">H/6</span><span>Hexapod · Cornell Physical Intelligence</span></a><nav aria-label="Pages"><a href="../">Progress</a><a href="#code" aria-current="page">Code</a></nav><a class="repo-link" href="https://github.com/Cornell-Physical-Intelligence/hexapod-cupi">GitHub ↗</a></header>
 <main id="code">
 <section class="intro"><h1>Locomotion code map</h1><p>Each black square is a package, sized by its lines of code. An arrow points to a package it imports, so the packages others build on sit to the right. Select a square to see its files.</p></section>
-<div class="filters" role="search" aria-label="Code map filters"><input id="query" type="search" aria-label="Search code map" placeholder="Search a file, class or function"><label><input type="checkbox" id="tests"> Tests</label><label><input type="checkbox" id="compatibility"> Compatibility imports</label></div>
+<div class="filters" role="search" aria-label="Code map filters"><input id="query" type="search" aria-label="Search code map" placeholder="Search a file, class or function"><label><input type="checkbox" id="tests"> Tests</label></div>
 <p id="count" role="status"></p>
 <div id="results"></div>
 <svg id="packages" class="map" role="group" aria-label="Packages and the packages they import"></svg>
@@ -175,7 +174,7 @@ const PACKAGES=[
 ['runs','Runs','Validation, packaging and source identity.'],
 ['priors','Priors','Motion data and AMP datasets.'],
 ['surrogate','Surrogate','MuJoCo training and evaluation.'],
-['entry points and experiments','Entry points','Command entry points and compatibility imports.'],
+['package','Locomotion','Package initialization.'],
 ['tests','Tests','Unit and parity tests.']
 ];
 const TITLE=Object.fromEntries(PACKAGES.map(p=>[p[0],p[1]])), PURPOSE=Object.fromEntries(PACKAGES.map(p=>[p[0],p[2]]));
@@ -186,13 +185,12 @@ const num=n=>n.toLocaleString('en-US'), base=path=>path.split('/').pop(), clip=(
 const byPath=Object.fromEntries(DATA.modules.map(m=>[m.path,m]));
 el('revision').innerHTML=link(`https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/tree/${DATA.revision}`,`Source ${DATA.revision.slice(0,8)}`)+(DATA.working_tree_changed?' · Local preview includes uncommitted changes.':'');
 let selectedPackage=null, selectedFile=null;
-const visible=m=>(el('tests').checked||!m.test)&&(el('compatibility').checked||!m.compatibility);
+const visible=m=>el('tests').checked||!m.test;
 const query=()=>el('query').value.trim().toLowerCase();
 const matches=(m,q)=>[m.path,m.purpose,...m.symbols.map(s=>s.name+' '+s.doc)].join(' ').toLowerCase().includes(q);
 const hits=()=>{const q=query();return q?DATA.modules.filter(m=>visible(m)&&matches(m,q)).sort((a,b)=>a.path.localeCompare(b.path)):[];};
 const largest=list=>list.slice().sort((a,b)=>b.lines-a.lines)[0];
-// A hidden compatibility file only re-exports; follow it to the files it forwards to.
-const through=(path,seen=new Set())=>{const t=byPath[path];if(!t||seen.has(path))return [];if(visible(t))return [t];seen.add(path);return t.compatibility?t.depends_on.flatMap(p=>through(p,seen)):[];};
+const through=path=>byPath[path]&&visible(byPath[path])?[byPath[path]]:[];
 function graph(){
   const shown=DATA.modules.filter(visible), lines={}, files={}, edges={};
   for(const m of shown){lines[m.area]=(lines[m.area]||0)+m.lines;files[m.area]=(files[m.area]||0)+1;
@@ -241,7 +239,7 @@ function drawFiles(found){
   el('files-caption').textContent=`${PURPOSE[selectedPackage]||''} Each rectangle is one file, sized by its lines. Select a file to see its classes and functions.`;
   const W=1000, H=Math.max(260,Math.min(520,files.length*26));
   const tiles=squarify(files.map(m=>({value:Math.max(m.lines,1),m})),{x:0,y:0,w:W,h:H}).map(t=>{const m=t.m, on=m.path===selectedFile;
-    const cls=`file${m.test?' test':''}${m.compatibility?' compatibility':''}${on?' selected':''}${hitPaths.has(m.path)?' hit':''}`;
+    const cls=`file${m.test?' test':''}${on?' selected':''}${hitPaths.has(m.path)?' hit':''}`;
     const label=t.w>64&&t.h>24?`<text x="${t.x+8}" y="${t.y+20}" font-size="14" font-weight="700">${esc(clip(base(m.path),t.w-14,14))}</text>`:'';
     const size=t.w>64&&t.h>46?`<text x="${t.x+8}" y="${t.y+38}" font-size="13">${num(m.lines)} lines</text>`:'';
     return `<g class="${cls}" data-module="${esc(m.path)}" role="button" tabindex="0" aria-pressed="${on}" aria-label="${esc(m.path)}, ${m.lines} lines"><rect x="${t.x+2}" y="${t.y+2}" width="${Math.max(t.w-4,1)}" height="${Math.max(t.h-4,1)}"/>${label}${size}<title>${esc(m.path)} · ${num(m.lines)} lines</title></g>`;}).join('');
@@ -283,7 +281,7 @@ for(const id of ['packages','files','results','file']){
   el(id).addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&choose(e.target))e.preventDefault?.();});
 }
 el('query').addEventListener('input',()=>{const found=hits();if(found.length){selectedFile=found[0].path;selectedPackage=found[0].area;}render();});
-for(const id of ['tests','compatibility'])el(id).addEventListener('input',render);
+el('tests').addEventListener('input',render);
 render();
 </script>
 </body>

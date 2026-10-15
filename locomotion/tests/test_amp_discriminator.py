@@ -6,9 +6,11 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion import amp_discriminator as amp, paper_reward, reward_scorer
-from locomotion.env import inverse_rotate
-from locomotion.task import TaskConfig
+from locomotion.learning import amp_discriminator as amp
+from locomotion.tasks import paper_reward as paper_reward
+from locomotion.evaluation import reward_scorer as reward_scorer
+from locomotion.backends.isaac.env import inverse_rotate
+from locomotion.tasks.task import TaskConfig
 
 ROOT = Path(__file__).resolve().parents[2]
 TRACE = ROOT/'locomotion/tests/fixtures/control_trace.npz'
@@ -107,7 +109,7 @@ class RecordedTraceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary)/'disc.pt'
             amp.save(discriminator, path, {'config': {'hidden': list(SMALL.hidden)}})
-            combined = reward_scorer.load_reward(f'locomotion.paper_reward:calibrated_with_style:{path}')
+            combined = reward_scorer.load_reward(f'locomotion.tasks.paper_reward:calibrated_with_style:{path}')
             reward, components = reward_scorer.evaluate(self.trace, combined, TaskConfig(), None, self.com)
             base, base_components = reward_scorer.evaluate(self.trace, paper_reward.paper_reward_calibrated,
                                                            TaskConfig(), None, self.com)

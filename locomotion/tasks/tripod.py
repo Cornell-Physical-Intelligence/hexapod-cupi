@@ -6,8 +6,8 @@ locomotion/README.md declares the geometry, contact and transition adaptations.
 import math
 import numpy as np
 
-from ..env_config import JOINT_NAMES, KD, LEGS
-from ..tripod_config import TripodConfig
+from locomotion.backends.isaac.config import JOINT_NAMES, KD, LEGS
+from locomotion.tasks.tripod_config import TripodConfig
 
 TRIPOD_A = np.array([True, False, True, False, True, False])
 PHASE = np.where(TRIPOD_A, 0., math.pi)
@@ -116,7 +116,7 @@ class TripodController:
             raise ValueError('Invalid joint bounds')
         self.geometry = {}
         if self.cfg.geometry_sweep_gain:
-            from ..tripod_kinematics import stance_geometry
+            from locomotion.core.tripod_kinematics import stance_geometry
             if model is None or toe_local_points is None:
                 raise ValueError('Geometry variant requires the admitted model and toe points')
             for mode, height in zip(('low', 'raised'), self.cfg.geometry_lift_m):

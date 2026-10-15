@@ -9,7 +9,7 @@ This is not AMP training and supplies no native evidence. The online learner
 trains against the current policy's transitions, which this recorded trace
 cannot represent.
 
-    uv run python -m locomotion.amp_diagnostic \\
+    uv run python -m locomotion.evaluation.amp_diagnostic \\
         --policy-trace locomotion/tests/fixtures/control_trace.npz --output <fresh result.json>
 """
 from __future__ import annotations
@@ -24,7 +24,9 @@ import platform
 import numpy as np
 import torch
 
-from .. import amp, amp_discriminator as disc, amp_ppo
+from locomotion.core import features as amp
+from locomotion.learning import amp_discriminator as disc
+from locomotion.learning import amp_ppo as amp_ppo
 
 ROOT = Path(__file__).resolve().parents[2]
 SCHEMA = 'hexapod_amp_offline_diagnostic_v1'
@@ -164,7 +166,7 @@ def main(argv=None):
         raise ValueError('Choose a fresh output; existing evidence is never overwritten')
     if args.steps < 1 or args.seed < 0:
         raise ValueError('Steps must be positive and the seed nonnegative')
-    command = ('uv run python -m locomotion.amp_diagnostic --policy-trace ' + relative(args.policy_trace)
+    command = ('uv run python -m locomotion.evaluation.amp_diagnostic --policy-trace ' + relative(args.policy_trace)
                + ' --output ' + relative(args.output) + f' --steps {args.steps} --seed {args.seed}')
     result = report(args.policy_trace, DiagnosticConfig(seed=args.seed, steps=args.steps), command)
     args.output.parent.mkdir(parents=True, exist_ok=True)

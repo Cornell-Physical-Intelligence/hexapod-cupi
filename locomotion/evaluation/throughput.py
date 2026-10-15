@@ -514,8 +514,8 @@ def main(argv=None):
         return summarize_main(argv[1:])
     source = Path(__file__).resolve().parents[1]
     prefix = 'locomotion'
-    from .. import admission
-    configuration = importlib.import_module(prefix+'.env_config')
+    from locomotion.runs import admission as admission
+    configuration = importlib.import_module(prefix+'.backends.isaac.config')
     args = parser_for(argv).parse_args(argv)
     validate(args)
     configuration.verify_assets(args.asset, args.model)
@@ -530,7 +530,7 @@ def main(argv=None):
         'stance_sha256': sha(args.stance), 'geometry_sha256': sha(args.geometry),
         'geometry_extrema_sha256': sha(args.geometry_extrema), 'config': cfg.declaration(),
         'motion_prior': False, 'behavior_cloning': False, 'seed': args.seed,
-        'rsl_rl_required_version': '5.0.1', 'adapter_sha256': sha(source/'ppo.py'),
+        'rsl_rl_required_version': '5.0.1', 'adapter_sha256': sha(source/'learning/ppo.py'),
         'entry_sha256': sha(__file__), 'source_freeze_sha256': args.source_freeze_sha256, 'learner': LEARNER}
     identity['physics_source_files'] = physics_files(identity['source_files'])
     identity['physics_config'] = physics_config(cfg, metadata)
@@ -569,10 +569,10 @@ def run(args, identity, settings, cfg, metadata, prefix):
         print('REFERENCE_SCREEN_APP_READY', flush=True)
         import numpy as np
         import torch
-        vanilla = importlib.import_module(prefix+'.ppo')
-        native = importlib.import_module(prefix+'.env')
-        task_module = importlib.import_module(prefix+'.task')
-        train = importlib.import_module(prefix+'.train')
+        vanilla = importlib.import_module(prefix+'.learning.ppo')
+        native = importlib.import_module(prefix+'.backends.isaac.env')
+        task_module = importlib.import_module(prefix+'.tasks.task')
+        train = importlib.import_module(prefix+'.runs.train')
         from rsl_rl.runners import OnPolicyRunner
         version = importlib.metadata.version('rsl-rl-lib')
         if version != '5.0.1':
@@ -797,7 +797,7 @@ def allocation_files(directory, profile):
     arguments = binding.get('command_args', [])
     value = lambda option: arguments[arguments.index(option)+1] if arguments.count(option) == 1 else None
     settings = profile['settings']
-    if (binding.get('mode') != 'throughput' or binding.get('module') != 'locomotion.throughput'
+    if (binding.get('mode') != 'throughput' or binding.get('module') != 'locomotion.evaluation.throughput'
             or binding.get('source_freeze_sha256') != profile['identity']['source_freeze_sha256']
             or value('--num-envs') != str(settings['num_envs'])
             or value('--updates') != str(settings['measured_updates_per_pass'])
@@ -901,7 +901,7 @@ def table(summary):
 
 
 def summarize_main(argv):
-    parser = argparse.ArgumentParser(prog='python -m locomotion.throughput summarize',
+    parser = argparse.ArgumentParser(prog='python -m locomotion.evaluation.throughput summarize',
                                      description=summarize.__doc__, allow_abbrev=False)
     parser.add_argument('--run', type=Path, action='append', required=True,
                         help='Directory holding state.json and profile.json; repeat per replica count.')

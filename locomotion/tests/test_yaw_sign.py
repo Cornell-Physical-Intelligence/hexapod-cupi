@@ -10,11 +10,13 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion import evaluation, ppo, task_v4
-from locomotion.env import LocomotionEnv, _diagnostic_rotation, inverse_rotate, navigation
-from locomotion.evaluate import learning_probe_cases
-from locomotion.task import TaskConfig, command_bank
-from locomotion.task_v4 import REWARD_V4_CONFIG as CONFIG, TrainingTaskV4
+from locomotion import evaluation
+from locomotion.learning import ppo as ppo
+from locomotion.tasks import task_v4 as task_v4
+from locomotion.backends.isaac.env import LocomotionEnv, _diagnostic_rotation, inverse_rotate, navigation
+from locomotion.evaluation.runner import learning_probe_cases
+from locomotion.tasks.task import TaskConfig, command_bank
+from locomotion.tasks.task_v4 import REWARD_V4_CONFIG as CONFIG, TrainingTaskV4
 from locomotion.tests.test_evaluation import fixture, score
 from locomotion.tests.test_task_v4 import GaitDouble
 

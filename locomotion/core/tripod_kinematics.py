@@ -2,7 +2,7 @@
 import math
 import numpy as np
 
-from ..env_config import JOINT_NAMES, LEGS
+from locomotion.backends.isaac.config import JOINT_NAMES, LEGS
 
 
 def stance_geometry(model, toe_local_points, pose):

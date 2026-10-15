@@ -1,6 +1,6 @@
 """Build the unchanged RSL-RL learner configuration without importing Torch."""
-RATE_CLASS = 'locomotion.rate_schedule:CappedRatePPO'
-SEGMENT_CLASS = 'locomotion.rate_schedule:CommandBootstrapPPO'
+RATE_CLASS = 'locomotion.learning.rate_schedule:CappedRatePPO'
+SEGMENT_CLASS = 'locomotion.learning.rate_schedule:CommandBootstrapPPO'
 
 
 def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empirical',
@@ -34,7 +34,7 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
     if type(steps_per_env) is not int or not 12 <= steps_per_env <= 96 or steps_per_env % 6:
         raise ValueError('The rollout length is a multiple of 6 from 12 to 96 controls per robot')
     distribution = ('GaussianDistribution' if action_mean == 'unbounded'
-                    else 'locomotion.action_distribution:BoundedMeanGaussian')
+                    else 'locomotion.learning.action_distribution:BoundedMeanGaussian')
     config = {
         'seed': seed, 'num_steps_per_env': 24, 'save_interval': 50,
         'obs_groups': {'actor': ['policy'], 'critic': ['critic']},
@@ -53,7 +53,7 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
     # Options appear only when selected, so earlier checkpoints keep their recorded configuration.
     if action_noise_correlation:
         config['actor']['distribution_cfg'].update(noise_correlation=action_noise_correlation,
-            class_name='locomotion.action_distribution:CorrelatedBoundedMeanGaussian')
+            class_name='locomotion.learning.action_distribution:CorrelatedBoundedMeanGaussian')
     if command_segments == 'bootstrap':
         config['algorithm']['class_name'] = SEGMENT_CLASS
     if learning_rate_max is not None:

@@ -8,8 +8,8 @@ frozen discriminator offline from recorded traces so the style term can be
 inspected on existing rollouts; that is a diagnostic, not AMP training.
 
 The style-reward factories for the scorer and viewer and the command that trains
-a discriminator from traces live in ``locomotion.paper_reward``, for example
-``--reward style=locomotion.paper_reward:paper_with_style:disc.pt``.
+a discriminator from traces live in ``locomotion.tasks.paper_reward``, for example
+``--reward style=locomotion.tasks.paper_reward:paper_with_style:disc.pt``.
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ from torch import nn
 
 from ..core.features import feature_contract
 
-# The 61-value AMP state; locomotion.amp owns its layout.
+# The 61-value AMP state; locomotion.core.features owns its layout.
 AMP_WIDTH = feature_contract()["width"]
 DECISIONS = (
     "Gradient penalty: Eq. (1) prints the gradient with respect to discriminator parameters; this "

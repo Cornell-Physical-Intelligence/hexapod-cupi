@@ -70,6 +70,12 @@ Records are append-only. A later record may declare
 hash, and it names the original reference with its replacement path and hash. Evidence paths must match
 on-disk capitalization so macOS checks agree with Linux CI.
 
+For moved or edited source files, add the original path and its exact Git commit
+and hash to `source_archives` in the source inventory. The site resolves retired
+paths to that revision. A correction that pins earlier source bytes uses the
+matching archived revision. The validator checks the Git blob hash; the published
+record keeps its original bytes.
+
 ```sh
 python3 tools/project_site.py status
 python3 tools/project_site.py check --base <integration-base-SHA>

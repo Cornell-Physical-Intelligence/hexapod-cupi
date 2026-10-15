@@ -25,15 +25,15 @@ import time
 import numpy as np
 import torch
 
-from locomotion import task as task_v1
-from locomotion import task_v4
-from locomotion.env import executed_action_feature, rotate
+from locomotion.tasks import task as task_v1
+from locomotion.tasks import task_v4 as task_v4
+from locomotion.backends.isaac.env import executed_action_feature, rotate
 from locomotion.surrogate.env import Renderer, SurrogateConfig, SurrogateEnv, contact_overrides, make_env
 from locomotion.surrogate.train import resolve, thread_count
 
 
-REWARD_TASKS = {"v1": "locomotion.task:TrainingTask", "v2": "locomotion.task_v2:TrainingTaskV2",
-                "v3": "locomotion.task_v3:TrainingTaskV3", "v4": "locomotion.task_v4:TrainingTaskV4"}
+REWARD_TASKS = {"v1": "locomotion.tasks.task:TrainingTask", "v2": "locomotion.tasks.task_v2:TrainingTaskV2",
+                "v3": "locomotion.tasks.task_v3:TrainingTaskV3", "v4": "locomotion.tasks.task_v4:TrainingTaskV4"}
 # Fields that are flags or bookkeeping, not env.telemetry entries.
 NOT_TELEMETRY = ("terminated", "truncated", "reset_before", "time_s", "command")
 
