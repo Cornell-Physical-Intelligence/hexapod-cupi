@@ -71,7 +71,7 @@ You can inspect the prepared pilot at
 records source commit `620d9aa9b23e0c9547893c513b57f77335eb4ef3` for these packages.
 The input declaration is
 `/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/admission_128/inputs.json`.
-The learner arguments retain the [frozen pilot constraints](TRAINING.md#frozen-flat-pilot-issues-50-and-51).
+The learner arguments retain the [frozen pilot constraints](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/df551b9018505daef56f48e0078282b608d9db45/docs/TRAINING.md#frozen-flat-pilot-issues-50-and-51).
 
 You can read the inventory and file relocation map in
 `/srv/cupi/hexapod/maintenance/cleanup_20260930_001/`. Use `relocation.json` to
@@ -118,7 +118,7 @@ invoke `python3 -B -m locomotion.runs.launch` with the binding path and SHA-256.
 The `--preflight-only` flag checks the host without starting native simulation.
 Keep `PYTHONDONTWRITEBYTECODE=1` so imports cannot mutate the frozen tree.
 
-For the [frozen flat pilot](TRAINING.md#frozen-flat-pilot-issues-50-and-51),
+For the [frozen flat pilot](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/df551b9018505daef56f48e0078282b608d9db45/docs/TRAINING.md#frozen-flat-pilot-issues-50-and-51),
 prepare training and probe evaluation with `--allocation-profile flat_pilot_v1
 --max-wall-seconds 21600`. A standing diagnostic above 128 robots takes the
 same profile, since its capture grows at about 9 s per robot. Preparation binds that native deadline and the

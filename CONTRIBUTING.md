@@ -4,7 +4,7 @@ Use [README](README.md) to find the affected package and
 [ARCHITECTURE](ARCHITECTURE.md) for its requirements. The team also maintains
 [onboarding standards](https://wiki.cornellphysicalintelligence.com/#/page/software-onboarding-repo-standards)
 behind Cornell sign-in. Agent constraints live in [AGENTS](AGENTS.md).
-
+If available, use the graphify skill to become acquainted with the codebase/update.
 ## Environment and review
 
 Use `uv sync --locked` and run Python through `uv run`; do not create separate

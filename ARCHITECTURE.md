@@ -59,8 +59,8 @@ joint travel and [MASS_INERTIA](robot/hexapod_mkii_updated_v1/MASS_INERTIA.md) f
 link tensors. Combined-pose clearance and hardware calibration remain open.
 
 You train direct-position PPO in simulation with explicit actuator dynamics.
-[TRAINING](docs/TRAINING.md) defines the current simulation contract and proposed
-paper-reproduction order. A new source allocation needs matching one-robot and
+[TRAINING](docs/TRAINING.md) defines locomotion goals, the current simulation baseline and
+acceptance criteria. A new source allocation needs matching one-robot and
 intended-batch standing admission. A historical admission applies to its exact
 source and inputs. Retain the 0.040 rad / 20 ms comparison limiter and existing
 numerical gates. The program lead must accept gait appearance after the motion tests pass.

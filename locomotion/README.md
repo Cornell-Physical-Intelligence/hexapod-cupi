@@ -164,7 +164,7 @@ uv run python -m locomotion.evaluation.throughput --help
 
 Use `prepare` to create a fresh allocation. Diagnostic mode supports 1, 32, 128,
 512 and 1024 robots. Training accepts 128 or 512 robots with matching admission. Throughput mode
-profiles stock PPO at 1, 32, 128, 512 or 1024 robots; [TRAINING](../docs/TRAINING.md#step-2-throughput-profile)
+profiles stock PPO at 1, 32, 128, 512 or 1024 robots; [TRAINING](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/df551b9018505daef56f48e0078282b608d9db45/docs/TRAINING.md#step-2-throughput-profile)
 gives its commands and report. Evaluation uses
 one robot, with `--eval-scope focus` for the forward/quiet/stop subset, `probes`
 for all 13 learning probes, or `full` for the 96 required Stage 2 cases.
@@ -208,7 +208,7 @@ source packs; preserve their original identities.
 ## AMP learner and paper networks
 
 You select the online motion prior with `prepare --mode train --learner amp`
-and the Table III networks with `--networks paper` ([TRAINING Steps 5–6](../docs/TRAINING.md#proposed-reproduction-sequence)).
+and the Table III networks with `--networks paper` ([TRAINING Steps 5–6](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/df551b9018505daef56f48e0078282b608d9db45/docs/TRAINING.md#proposed-reproduction-sequence)).
 [`amp_ppo.py`](learning/amp_ppo.py) subclasses stock RSL-RL PPO. Each control pairs the
 AMP state before the action with the state after it, before any reset, scores
 the pair with the discriminator and adds the Eq. (2) style reward to the task
@@ -252,7 +252,7 @@ You can evaluate the Zhang et al. sinusoidal tripod controller with
 [`tripod_evaluate.py`](evaluation/tripod_evaluate.py). [`tripod.py`](tasks/tripod.py) owns
 the equations and contact state; [`tripod_config.py`](tasks/tripod_config.py) owns
 parameters. You use `prepare --mode tripod --tripod-adaptation stop_stride`
-with matching standing admission. [TRAINING](../docs/TRAINING.md#tripod-baseline)
+with matching standing admission. [TRAINING](../docs/TRAINING.md#method-and-comparisons)
 keeps this controller as a comparison baseline. Issue #36 uses optimized
 demonstrations for its motion bank.
 

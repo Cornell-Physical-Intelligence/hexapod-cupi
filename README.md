@@ -1,8 +1,7 @@
 # Hexapod
 
 We are building a six-legged robot that walks a planned route across a mapped
-area and stops at each survey point. It finds its way with GPS alone. GeoData
-collects the survey data; this repository covers the robot.
+area and stops at each survey point. It finds its way with GPS alone.
 
 **Where we are (12 October 2026):** in simulation, one training run of our
 learned walking controller passed all 13 movement tests: walking in eight
