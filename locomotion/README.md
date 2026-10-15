@@ -144,6 +144,13 @@ the original identity beside the new execution identity in `state.json`.
 Use an original frozen runtime for other historical checkpoints. This receipt
 covers evaluation; native optimizer resume remains outside this migration.
 
+The [package cutover verification](../site/assets/package_cutover_20261015_001/verification.json)
+records both 13/13 native passes and unchanged contact/torque ranges. Copy the
+[certified bundle](../site/assets/package_cutover_20261015_001/compatibility/) as one
+directory. Its `receipt.json` SHA-256 is
+`33304b3a49ce05f07d3f6e68614b143aaed1687dbe00169fcc488d05439c9fc6`.
+The receipt applies to its exact runtime manifest; source edits require new proof.
+
 From the repository root:
 
 ```sh

@@ -47,6 +47,8 @@ setfacl -m d:u:1000:rwx "$attempt"
 
 Check the image UID before use. Preserve the existing CUPI ACL entries. The
 launcher mounts source and inputs read-only; the output mount permits writes.
+Grant the same UID read access to new admission and compatibility bundles before
+you mount them. A CPU admission process can create files under your host UID.
 
 Use a fresh input bundle and attempt name. Pack a committed worktree, transfer
 the frozen source, then run its launcher. You can edit the worktree after that

@@ -131,13 +131,14 @@ worktree; it does not reject uncommitted edits or record a Git commit for you.
 The current admitted input declaration is:
 
 ```text
-/srv/cupi/hexapod/inputs/replicas_20261010_001/admission_128/inputs.json
+/srv/cupi/hexapod/runs/james/package_cutover_20261014_003/admissions/128/inputs.json
 ```
 
-It covers the recorded model and the physics source on `main` with one-robot
-and 128-robot standing admission. The earlier
-`flat_pilot_20260930_001/admission_128` declaration matches source `620d9aa9`
-and serves the prepared pilot packages alone. A physics or model change needs matching native admission before
+It covers the recorded model and the package implementation with one-robot
+and 128-robot standing admission. The admission pins the nested physics files. New 512-robot packs need a fresh
+512-robot standing admission; existing frozen packs retain their original admission.
+The `replicas_20261010_001` declaration and the earlier flat-pilot declaration
+retain their original source identities. A physics or model change needs matching native admission before
 training. Ask the run lead to review that change; do not reuse old admission
 by changing its paths or hashes. Pass `--inputs`: the default configuration
 retains historical paths that the cleanup relocated.
@@ -151,7 +152,7 @@ committed worktree and starts no training:
 ```sh
 umask 027
 attempt="/srv/cupi/hexapod/runs/$(id -un)/ppo_mlp_$(date -u +%Y%m%dT%H%M%SZ)"
-admitted_inputs=/srv/cupi/hexapod/inputs/replicas_20261010_001/admission_128/inputs.json
+admitted_inputs=/srv/cupi/hexapod/runs/james/package_cutover_20261014_003/admissions/128/inputs.json
 
 python3 -B -m locomotion.runs.prepare \
   --output "$attempt" --remote-root "$attempt" \

@@ -65,7 +65,9 @@ uv run python -m unittest discover -s locomotion/surrogate/tests
   `--ppo-config-overrides` value pairs that option with another algorithm: stock PPO would
   train the pre-action target under a bootstrap record.
 - The evaluator reads the checkpoint's JSON record, so a native checkpoint needs no learner
-  flag. It builds the policy input as the evaluation branch of `locomotion/runs/train.py` does:
+  flag. Use the original source checkout for checkpoints with retired module names.
+  The native compatibility receipt does not certify surrogate evaluation. The evaluator
+  builds the policy input as the evaluation branch of `locomotion/runs/train.py` does:
   fixed scales, gait clock, actor mean and the recorded two-control mean, with no velocity noise.
 - `--velocity-input-gain` multiplies the 90 joint-velocity inputs. `--action-mean2` applies the
   two-control mean to a checkpoint that trained without it. `--foot-load` writes the floor
