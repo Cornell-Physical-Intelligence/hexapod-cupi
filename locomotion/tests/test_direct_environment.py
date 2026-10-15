@@ -7,9 +7,10 @@ from types import SimpleNamespace
 import unittest
 from unittest import mock
 import torch
-from locomotion.omniwalk.env import reset_rows
+from locomotion.omniwalk.env import OmniEnv, reset_rows
 from locomotion.omniwalk.features import observations, proprio
 from locomotion.omniwalk.motor import emitted_target, executed_action_feature
+from locomotion.omniwalk.robot import BODY_NAMES, JOINT_NAMES, LEGS
 
 BACKEND = Path(__file__).resolve().parents[1] / "omniwalk"
 ISAAC_MODULES = ("warp", "pxr", "omni", "omni.physx", "isaaclab", "isaaclab.envs", "isaaclab.sim",
@@ -159,7 +160,6 @@ class DirectEnvironmentContractTests(unittest.TestCase):
         self.assertEqual(events, ["submit", "update"])
 
     def test_capture_hooks_receive_the_task_environment(self):
-        from locomotion.omniwalk.env import OmniEnv
         env = OmniEnv.__new__(OmniEnv)
         env.device, env.num_envs = "cpu", 1
         received = []
@@ -177,6 +177,98 @@ class DirectEnvironmentContractTests(unittest.TestCase):
         env.isaac.step = lambda action: ({"policy": "obs"}, None, None, None, None)
         env.step(torch.zeros(1, 18))
         self.assertIsNone(env.isaac.capture)
+
+    def test_control_writes_the_tensors_that_the_task_environment_aliases(self):
+        # Drive one control through the production hooks. A rebinding in _get_dones would leave
+        # OmniEnv.reset writing a history tensor that the observation builder no longer reads.
+        class StockLoop:
+            """DirectRLEnv.step order: pre-physics, eight write/physics/update substeps, dones, observations."""
+            def step(self, action):
+                self._pre_physics_step(action)
+                for _ in range(8):
+                    self._apply_action()
+                    self.robot.write_data_to_sim()
+                    self.sim.count += 1
+                    self.robot.update(.0025)
+                self.episode_length_buf += 1
+                terminated, truncated = self._get_dones()
+                rewards = self._get_rewards()
+                return self._get_observations(), rewards, terminated, truncated, {}
+            def _reset_idx(self, env_ids):
+                self.episode_length_buf[env_ids] = 0
+        class Articulation:
+            def write_data_to_sim(self): pass
+            def update(self, dt): pass
+            def __getattr__(self, name):
+                if name.startswith(("write_", "set_")):
+                    return lambda **kwargs: None
+                raise AttributeError(name)
+        module = load_isaac(direct_env=StockLoop, articulation=Articulation)
+        module.wp = SimpleNamespace(to_torch=lambda x: x, from_torch=lambda x: x, uint32=None,
+                                    array=lambda x, **kwargs: torch.as_tensor(x))
+        n, neutral = 2, torch.linspace(-.3, .3, 18)
+        rest = {"q": neutral.expand(n, -1).clone(), "dq": torch.zeros(n, 18),
+                "root": torch.tensor([[0., 0., .1, 0., 0., 0., 1.], [2., 0., .1, 0., 0., 0., 1.]]),
+                "linear": torch.zeros(n, 3), "angular": torch.zeros(n, 3),
+                "gravity": torch.tensor([[0., 0., -1.]]).repeat(n, 1),
+                "toe_world": torch.zeros(n, 6, 3), "toe_body": torch.zeros(n, 6, 3)}
+        moved = {**rest, "q": (neutral + .03).expand(n, -1).clone(), "dq": torch.full((n, 18), .5),
+                 "angular": torch.tensor([[.1, .2, .3], [.4, .5, .6]]), "linear": torch.tensor([[.01, -.02, 0.], [0., .03, 0.]])}
+        class Isaac(module.IsaacEnv):
+            def __init__(self, config, asset, model_path, geometry_path, output, *, reference_metadata=None):
+                self.config, self.device, self.num_envs = config, config.device, config.num_envs
+                self.torch = lambda x: torch.as_tensor(x, dtype=torch.float32)
+                self.neutral, self.lower, self.upper = neutral, neutral - 1., neutral + 1.
+                self.reset_height, self.origins = .1, torch.tensor([[0., 0., 0.], [2., 0., 0.]])
+                self.state = rest
+                self.read_state = lambda: {key: value.clone() for key, value in self.state.items()}
+                self.joint_index = self.inverse_joint_index = torch.arange(18)
+                self.native_body_names = list(BODY_NAMES)
+                self.toe_index = torch.tensor([self.native_body_names.index(leg + "_tibia") for leg in LEGS])
+                self.contact_index = torch.arange(19 * n)
+                self.contact = SimpleNamespace(get_contact_force_matrix=lambda dt: torch.zeros(19 * n, 1, 3))
+                self.motor = SimpleNamespace(joint_names=list(JOINT_NAMES), **{name: torch.zeros(n, 18) for name in
+                    ("pre_position", "pre_velocity", "computed_effort", "applied_effort", "ceiling")})
+                self.view = SimpleNamespace(get_dof_actuation_forces=lambda: torch.ones(n, 18),
+                                            set_dof_actuation_forces=lambda data, ids: None)
+                self.sim = SimpleNamespace(count=0)
+                self.sim.get_physics_step_count = lambda: self.sim.count
+                self.robot = module.CaptureArticulation()
+                self.robot.env = self
+                self.history, self.previous_action = torch.zeros(n, 5, 42), torch.zeros(n, 18)
+                self.held, self.commands = neutral.expand(n, -1).clone(), torch.zeros(n, 3)
+                self.episode_length_buf = torch.zeros(n, dtype=torch.long)
+                self.total_controls, self.telemetry, self.capture, self.control_active = 0, {}, None, False
+                self.native_errors, self.native_readback = [], {}
+                # OmniEnv aliases these; this control reads none of them.
+                for name in ("output", "model", "reference_metadata", "geometry_path", "geometry_meta", "sensor_map", "roots",
+                             "joint_names", "body_names", "native_joint_names", "body_index", "toe_local", "root_com_local"):
+                    setattr(self, name, None)
+        config = SimpleNamespace(num_envs=n, device="cpu", action_scale_rad=.35, target_slew_rad=.04, physics_dt=.0025,
+                                 episode_seconds=20., control_dt=.02, record_motion_features=False)
+        with mock.patch.dict(sys.modules, {"locomotion.omniwalk.isaac": SimpleNamespace(IsaacEnv=Isaac)}):
+            env = OmniEnv(config, None, None, None, None)
+        isaac = env.isaac
+        # A task-side write between controls must reach the tensors that IsaacEnv shifts.
+        env.history.copy_(torch.arange(n * 5 * 42, dtype=torch.float32).reshape(n, 5, 42) / 100)
+        env.commands[:] = torch.tensor([[.05, 0., 0.], [0., 0., .2]])
+        history, held = env.history.clone(), env.held.clone()
+        isaac.state = moved
+        action = torch.linspace(-1., 1., n * 18).reshape(n, 18)
+        result = env.step(action)
+        self.assertEqual((isaac.sim.count, isaac.total_controls, env.episode_steps.tolist()), (8, 1, [1, 1]))
+        for name in ("held", "previous_action", "history", "commands"):
+            self.assertIs(getattr(env, name), getattr(isaac, name), name)
+        target = emitted_target(action, held, neutral, neutral - 1., neutral + 1., .35, .04)
+        self.assertFalse(torch.equal(target, held))
+        torch.testing.assert_close(env.held, target, rtol=0, atol=0)
+        torch.testing.assert_close(env.previous_action, executed_action_feature(target, neutral, .35), rtol=0, atol=0)
+        shifted = torch.cat((history[:, 1:], proprio(moved, neutral)[:, None]), dim=1)
+        torch.testing.assert_close(env.history, shifted, rtol=0, atol=0)
+        expected = observations(shifted, env.commands, executed_action_feature(target, neutral, .35), moved, False)
+        for key in ("obs", "critic"):
+            torch.testing.assert_close(result[key], expected[key], rtol=0, atol=0)
+            torch.testing.assert_close(env.observations(env.current)[key], expected[key], rtol=0, atol=0)
 
     def test_slew_and_action_feature_share_current_arithmetic(self):
         q = torch.zeros((2, 18))
