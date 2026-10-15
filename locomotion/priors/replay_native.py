@@ -1,7 +1,7 @@
 """Replay an optimized target cycle through the locomotion kernel."""
 from __future__ import annotations
 
-from locomotion.tools.sources import source_files, physics_files
+from locomotion.spark.sources import source_files, physics_files
 
 import argparse
 import hashlib
@@ -67,10 +67,10 @@ def validate_trajectory(path, expected_sha, model_sha, *, read_arrays=True):
 
 
 def main(argv=None):
-    import locomotion.tools.admission as original
-    from locomotion.tools.camera import prepare_policy_scene
+    import locomotion.evaluation.admission as original
+    from locomotion.evaluation.camera import prepare_policy_scene
     prefix = 'locomotion'
-    env_config = importlib.import_module(prefix+'.gait_clock.config')
+    env_config = importlib.import_module(prefix+'.omni.config')
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--mode', choices=['replay'], required=True)
     for key in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance',
@@ -115,7 +115,7 @@ def main(argv=None):
         env_config.MODEL_SHA256, read_arrays=not args.preflight_only)
     if args.start_phase == .5 and round(declaration['config']['period_s']/.02) % 2:
         raise ValueError('Half-cycle replay requires an even number of controls')
-    from locomotion.priors.features import feature_contract
+    from locomotion.omni.features import feature_contract
     config = declaration['config']
     command = [config['forward_mps'], config.get('left_mps', 0.), config.get('yaw_rate_rad_s', 0.)]
     identity.update(controller_kind='optimized_periodic_motor_targets', learned_policy=False,
@@ -146,9 +146,9 @@ def main(argv=None):
         print('REFERENCE_SCREEN_APP_READY', flush=True)
         import numpy as np
         import torch
-        env_module = importlib.import_module(prefix+'.gait_clock.env')
-        capture_module = importlib.import_module('locomotion.tools.runner')
-        camera_module = importlib.import_module(prefix+'.tools.camera')
+        env_module = importlib.import_module(prefix+'.omni.env')
+        capture_module = importlib.import_module('locomotion.evaluation.runner')
+        camera_module = importlib.import_module(prefix+'.evaluation.camera')
         torch.manual_seed(cfg.seed)
         env = env_module.LocomotionEnv(cfg, args.asset, args.model, args.geometry,
             args.output/'native', reference_metadata=metadata)

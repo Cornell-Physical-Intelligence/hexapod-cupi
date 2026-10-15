@@ -8,10 +8,10 @@ from pathlib import Path
 
 import numpy as np
 
-from locomotion.priors.features import extract_features, feature_contract
-from locomotion.gait_clock.config import MODEL_SHA256, USD_SHA256
-from locomotion.tools import score_recording
-from locomotion.tools.sources import source_files
+from locomotion.omni.features import extract_features, feature_contract
+from locomotion.omni.config import MODEL_SHA256, USD_SHA256
+from locomotion.evaluation import score_recording
+from locomotion.spark.sources import source_files
 
 DATASET = Path(__file__).resolve().parent/'datasets/amp_demonstrations_001'
 SCHEMA = 'hexapod_amp_dataset_v1'
@@ -23,7 +23,7 @@ PROCESSING_SCHEMA = 'hexapod_processing_sources_v3'
 
 
 def motion_cases():
-    from locomotion.gait_clock.task import TaskConfig, command_bank
+    from locomotion.omni.task import TaskConfig, command_bank
     return [{'case_id': f'amp:command_{i:02d}', 'profile': 'omni_static',
              'command': command, 'controls': 1000}
             for i, command in enumerate(command_bank(TaskConfig()))]
@@ -52,7 +52,7 @@ def processing_identity():
     root = Path(__file__).resolve().parents[1]
     return {'schema': PROCESSING_SCHEMA, 'numpy_version': np.__version__, 'source_files': {
         **{'locomotion/'+name: digest for name, digest in source_files(root).items()},
-        **{'locomotion/'+name: sha(root/name) for name in ('priors/features.py', 'priors/dataset.py', 'priors/processing_sources_v2.json')}}}
+        **{'locomotion/'+name: sha(root/name) for name in ('omni/features.py', 'priors/dataset.py', 'priors/processing_sources_v2.json')}}}
 
 
 def validate_processing_identity(processing):
@@ -193,7 +193,7 @@ def audit_replay(directory):
     for name in ('control_trace.npz', 'force_metrics.json', 'rollout.mp4'):
         if name not in report['files']:
             raise ValueError('Missing bound native evidence: '+name)
-    from locomotion.tools.force_metrics import report_for
+    from locomotion.evaluation.force_metrics import report_for
     saved_loads = json.loads((report_path.parent/'force_metrics.json').read_text())
     computed_loads = report_for(report_path.parent)
     for key in ('cases', 'source_files', 'capture_failure', 'model_sha256'):

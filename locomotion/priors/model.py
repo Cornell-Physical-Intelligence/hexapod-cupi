@@ -8,7 +8,7 @@ from pathlib import Path
 import casadi as ca
 import numpy as np
 
-from locomotion.gait_clock.config import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256
+from locomotion.omni.config import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256
 
 ROOT = Path(__file__).resolve().parents[2]
 LEGS = ("lf", "lm", "lr", "rf", "rm", "rr")

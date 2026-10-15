@@ -8,11 +8,11 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from locomotion.gait_clock.algorithm import CappedRatePPO, CommandBootstrapPPO
+from locomotion.omni.algorithm import CappedRatePPO, CommandBootstrapPPO
 
-import locomotion.priors.features as amp
+import locomotion.omni.features as amp
 from . import discriminator as disc
-from locomotion.gait_clock.ppo import VanillaVecEnv, ppo_config, scale_observation, clock_features, smoothed_action
+from locomotion.omni.ppo import VanillaVecEnv, ppo_config, scale_observation, clock_features, smoothed_action
 from . import networks as nets
 
 ROOT = Path(__file__).resolve().parents[2]

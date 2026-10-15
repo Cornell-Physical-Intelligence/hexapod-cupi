@@ -6,8 +6,8 @@ those settings. [TRAINING](../docs/TRAINING.md) defines the goal and acceptance.
 
 | Package | Start here |
 | --- | --- |
-| `gait_clock/` | The omnidirectional PPO experiment that produced `c48_long`. Read `config.py`, `env.py` and `task.py`. |
-| `behavior_cloning/` | Shaurya's original Direct task, scripted BC and PPO fine-tuning. Read its three `hexapod_*.py` files. |
+| `omni/` | The omnidirectional PPO experiment that produced `c48_long`. Read `config.py`, `env.py` and `task.py`. |
+| `tripod/` | Shaurya's original Direct task, scripted BC and PPO fine-tuning. Read its three `hexapod_*.py` files. |
 | `priors/` | Generate and review demonstration trajectories; train the AMP discriminator and optional paper networks. |
 | `surrogate/` | Run CPU MuJoCo experiments, resume training and replay traces without Spark. |
 | `tools/` | Prepare and launch native jobs; capture and score motion. |
@@ -61,9 +61,9 @@ Run CPU checks with `uv run python -m unittest discover -s locomotion/tests`.
 For native job arguments, use:
 
 ```sh
-uv run python -m locomotion.tools.prepare --help
-uv run python -m locomotion.gait_clock.train --help
-uv run python -m locomotion.tools.admission --help
+uv run python -m locomotion.spark.prepare --help
+uv run python -m locomotion.omni.train --help
+uv run python -m locomotion.evaluation.admission --help
 ```
 
 PPO uses the gait-clock reward. AMP adds `--learner amp`; `--networks paper`
@@ -73,9 +73,9 @@ selects the paper actor/critic and disables the gait-clock inputs. Read
 
 For behavior cloning, put this repository on `PYTHONPATH` in the pinned Isaac
 Lab checkout. Use stock train/play scripts with callback
-`locomotion.behavior_cloning.register` and task IDs `Hexapod-Flat-Direct-v0` or
+`locomotion.tripod.register` and task IDs `Hexapod-Flat-Direct-v0` or
 `Hexapod-Rough-Direct-v0`. Use
-`./isaaclab.sh -p -m locomotion.behavior_cloning.tools.bc_clone` for BC.
+`./isaaclab.sh -p -m locomotion.tripod.tools.bc_clone` for BC.
 The [original recipe](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/969ea5bc942df3122b2662650f29acd11644a41c/hexapod/METHOD.md#3-how-to-reproduce-inside-the-container)
 defines its training overrides. Its speed diagnostic keeps the reset-time
 command direction; use the common evaluator for motion acceptance.

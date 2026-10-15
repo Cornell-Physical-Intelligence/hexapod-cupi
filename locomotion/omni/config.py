@@ -99,7 +99,7 @@ def make_config(cfg, asset, neutral, reset_height, output):
     from isaaclab.sim import SimulationCfg, UsdFileCfg, ArticulationRootPropertiesCfg
     from isaaclab.utils import configclass
     from isaaclab_physx.physics import PhysxCfg
-    from locomotion.gait_clock.actuator import MotorCfg
+    from locomotion.omni.actuator import MotorCfg
 
     @configclass
     class NativeConfig(DirectRLEnvCfg):
@@ -135,8 +135,8 @@ def make_config(cfg, asset, neutral, reset_height, output):
 
 
 """Build the unchanged RSL-RL learner configuration without importing Torch."""
-RATE_CLASS = 'locomotion.gait_clock.algorithm:CappedRatePPO'
-SEGMENT_CLASS = 'locomotion.gait_clock.algorithm:CommandBootstrapPPO'
+RATE_CLASS = 'locomotion.omni.algorithm:CappedRatePPO'
+SEGMENT_CLASS = 'locomotion.omni.algorithm:CommandBootstrapPPO'
 
 
 def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empirical',
@@ -170,7 +170,7 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
     if type(steps_per_env) is not int or not 12 <= steps_per_env <= 96 or steps_per_env % 6:
         raise ValueError('The rollout length is a multiple of 6 from 12 to 96 controls per robot')
     distribution = ('GaussianDistribution' if action_mean == 'unbounded'
-                    else 'locomotion.gait_clock.algorithm:BoundedMeanGaussian')
+                    else 'locomotion.omni.algorithm:BoundedMeanGaussian')
     config = {
         'seed': seed, 'num_steps_per_env': 24, 'save_interval': 50,
         'obs_groups': {'actor': ['policy'], 'critic': ['critic']},
@@ -189,7 +189,7 @@ def ppo_config(seed, *, action_mean='unbounded', observation_normalization='empi
     # Options appear only when selected, so earlier checkpoints keep their recorded configuration.
     if action_noise_correlation:
         config['actor']['distribution_cfg'].update(noise_correlation=action_noise_correlation,
-            class_name='locomotion.gait_clock.algorithm:CorrelatedBoundedMeanGaussian')
+            class_name='locomotion.omni.algorithm:CorrelatedBoundedMeanGaussian')
     if command_segments == 'bootstrap':
         config['algorithm']['class_name'] = SEGMENT_CLASS
     if learning_rate_max is not None:

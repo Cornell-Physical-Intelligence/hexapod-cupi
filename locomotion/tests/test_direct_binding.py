@@ -4,8 +4,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from locomotion.tools.prepare import prepare
-from locomotion.tools.sources import physics_files, source_files, verify_runtime
+from locomotion.spark.prepare import prepare
+from locomotion.spark.sources import physics_files, source_files, verify_runtime
 
 ROOT = Path(__file__).resolve().parents[2]
 REMOTE = '/srv/cupi/hexapod/runs/jcc463/direct_binding_fixture'
@@ -18,11 +18,11 @@ class DirectBindingTests(unittest.TestCase):
             binding = prepare(root/'pack', REMOTE, mode='diagnostic')
             self.assertNotIn('--backend', binding['command_args'])
             self.assertFalse(binding['root_review_complete'])
-            self.assertEqual(binding['module'], 'locomotion.gait_clock.train')
+            self.assertEqual(binding['module'], 'locomotion.omni.train')
             manifest = verify_runtime(root/'pack/source')
-            self.assertFalse(any('/behavior_cloning/' in name for name in manifest['files']))
-            self.assertFalse((root/'pack/source/locomotion/behavior_cloning').exists())
-            nested = root/'pack/source/locomotion/gait_clock/control.py'
+            self.assertFalse(any('/tripod/' in name for name in manifest['files']))
+            self.assertFalse((root/'pack/source/locomotion/tripod').exists())
+            nested = root/'pack/source/locomotion/omni/control.py'
             nested.write_text(nested.read_text()+'\n# tamper\n')
             with self.assertRaisesRegex(ValueError, 'manifest differs'):
                 verify_runtime(root/'pack/source')

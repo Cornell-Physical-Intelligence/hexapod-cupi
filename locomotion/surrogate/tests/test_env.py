@@ -6,9 +6,9 @@ from unittest import mock
 import numpy as np
 import torch
 
-import locomotion.tools.noise_probe as noise_probe
-from locomotion.gait_clock.env import LocomotionEnv, emitted_target
-from locomotion.gait_clock.config import MASS_KG, EnvConfig
+import locomotion.evaluation.noise_probe as noise_probe
+from locomotion.omni.env import LocomotionEnv, emitted_target
+from locomotion.omni.config import MASS_KG, EnvConfig
 from locomotion.surrogate.env import (MAX_JOINT_SPEED, ContactModel, SurrogateConfig, SurrogateEnv, contact_overrides,
                                       make_env)
 

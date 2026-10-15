@@ -11,7 +11,7 @@ import types
 import unittest
 
 import torch
-import locomotion.gait_clock.task as task
+import locomotion.omni.task as task
 from locomotion.tests.task_double import NativeDouble, GaitDouble, telemetry
 
 ROOT = Path(__file__).resolve().parents[2]

@@ -12,9 +12,9 @@ import unittest
 
 import torch
 
-import locomotion.gait_clock.ppo as ppo
+import locomotion.omni.ppo as ppo
 from locomotion.surrogate import evaluate, train
-from locomotion.gait_clock.task import REWARD_CONFIG as REWARD_V2_CONFIG, REWARD_CONFIG as REWARD_V4_CONFIG, TrainingTask as TrainingTaskV2
+from locomotion.omni.task import REWARD_CONFIG as REWARD_V2_CONFIG, REWARD_CONFIG as REWARD_V4_CONFIG, TrainingTask as TrainingTaskV2
 
 NATIVE_ROW_KEYS = {"update", "transitions", "collection_seconds", "learning_seconds", "loss", "learning_rate",
                    "mean_action_std", "actions", "task", "policy_update"}
@@ -89,7 +89,7 @@ class TrainerTests(unittest.TestCase):
     def test_newest_learner_options_reach_the_wrapper(self):
         clock = REWARD_V4_CONFIG.schedule_period_controls if REWARD_V4_CONFIG.schedule_weight else 60
         code, output, state = run(
-            self.temporary.name, "options", "--task", "locomotion.gait_clock.task:TrainingTask", "--gait-clock", str(clock),
+            self.temporary.name, "options", "--task", "locomotion.omni.task:TrainingTask", "--gait-clock", str(clock),
             "--action-mean", "tanh", "--observation-normalization", "none", "--observation-scaling", "fixed",
             "--command-segments", "bootstrap", "--learning-rate-max", "3e-4", "--action-std", "0.1",
             "--action-std-final", "0.05", "--action-smoothing", "mean2", "--velocity-noise", "0.5")
@@ -125,7 +125,7 @@ class TrainerTests(unittest.TestCase):
     def test_schedule_reward_requires_its_gait_clock(self):
         if not REWARD_V4_CONFIG.schedule_weight:
             self.skipTest("Reward version 4 holds no contact-schedule term at this revision")
-        code, _, state = run(self.temporary.name, "no_clock", "--task", "locomotion.gait_clock.task:TrainingTask", "--gait-clock", "0")
+        code, _, state = run(self.temporary.name, "no_clock", "--task", "locomotion.omni.task:TrainingTask", "--gait-clock", "0")
         self.assertEqual((code, state["status"]), (1, "failed"))
         self.assertIn("gait clock", state["errors"][0])
 
@@ -157,9 +157,9 @@ class TrainerTests(unittest.TestCase):
 
 
     def test_example_task_and_factory_resolve(self):
-        self.assertIs(train.resolve("locomotion.gait_clock.task:TrainingTask"), TrainingTaskV2)
+        self.assertIs(train.resolve("locomotion.omni.task:TrainingTask"), TrainingTaskV2)
         self.assertIs(train.resolve(f"{__name__}:task_factory(half)"), HalfActionRateTask)
-        for bad in ("locomotion.gait_clock.task_v2", f"{__name__}:task_factory(half", f"{__name__}:run"):
+        for bad in ("locomotion.omni.task_v2", f"{__name__}:task_factory(half", f"{__name__}:run"):
             with self.assertRaises(ValueError):
                 train.resolve(bad)
         code, _, state = run(self.temporary.name, "example", "--task", f"{__name__}:HalfActionRateTask")
@@ -263,7 +263,7 @@ class PolicyTests(unittest.TestCase):
         record = self.policy({"velocity_noise": .5}, velocity_input_gain=1.25, action_mean2=True).record({"velocity_noise": .5})
         self.assertEqual({key: record[key] for key in ("source", "velocity_input_gain", "action_mean2_forced",
                                                        "action_smoothing_applied", "velocity_noise_recorded", "velocity_noise_applied")},
-                         {"source": "evaluation branch of locomotion/gait_clock/train.py", "velocity_input_gain": 1.25,
+                         {"source": "evaluation branch of locomotion/omni/train.py", "velocity_input_gain": 1.25,
                           "action_mean2_forced": True, "action_smoothing_applied": "mean2",
                           "velocity_noise_recorded": .5, "velocity_noise_applied": 0.})
         recorded = self.policy({"action_smoothing": "mean2"}).record({"action_smoothing": "mean2"})

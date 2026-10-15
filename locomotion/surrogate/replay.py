@@ -10,13 +10,13 @@ import time
 import numpy as np
 import torch
 
-import locomotion.gait_clock.task as task_v1
-from locomotion.gait_clock.env import executed_action_feature, rotate
+import locomotion.omni.task as task_v1
+from locomotion.omni.env import executed_action_feature, rotate
 from locomotion.surrogate.env import Renderer, SurrogateConfig, SurrogateEnv, contact_overrides, make_env
 from locomotion.surrogate.train import resolve, thread_count
 
 
-REWARD_TASKS = {"c48_long": "locomotion.gait_clock.task:TrainingTask"}
+REWARD_TASKS = {"c48_long": "locomotion.omni.task:TrainingTask"}
 # Fields that are flags or bookkeeping, not env.telemetry entries.
 NOT_TELEMETRY = ("terminated", "truncated", "reset_before", "time_s", "command")
 

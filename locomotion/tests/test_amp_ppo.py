@@ -15,14 +15,14 @@ import torch
 
 from rsl_rl.algorithms import PPO
 
-import locomotion.priors.features as amp
+import locomotion.omni.features as amp
 from locomotion.priors import discriminator as disc
 from locomotion.priors import amp as amp_ppo
 from locomotion.priors import networks as nets
-import locomotion.gait_clock.train as train
+import locomotion.omni.train as train
 from locomotion.priors.amp import AMPConfig, AMPPPO, AMPVecEnv, CollisionCapture, amp_ppo_config, load_demonstrations
-from locomotion.gait_clock.ppo import VanillaVecEnv, ppo_config
-from locomotion.tools.prepare import prepare
+from locomotion.omni.ppo import VanillaVecEnv, ppo_config
+from locomotion.spark.prepare import prepare
 
 ROOT = Path(__file__).resolve().parents[2]
 REMOTE = Path('/home/orionh/HEXAPOD_runs/restart_20260914/test_amp_learner')
@@ -423,7 +423,7 @@ class EvaluationIdentityTests(unittest.TestCase):
                     'ppo_config': amp_ppo_config(seed, networks=networks) if learner == 'amp' else ppo_config(seed)}
         if learner == 'amp':
             identity['learner_source_files'] = {name: amp_ppo.sha(ROOT/'locomotion'/name) for name in (
-                'priors/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
+                'omni/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
             identity['amp_dataset'] = dict(BANK_IDENTITY)
         return identity
 
@@ -509,12 +509,12 @@ class LaunchTests(unittest.TestCase):
             self.assertEqual((pack['learner'], pack['networks']), ('amp', 'paper'))
             bank = Path(temporary)/'amp/source/locomotion/priors/datasets/amp_demonstrations_001'
             self.assertEqual(amp_ppo.sha(bank/'transitions.npz'), amp_ppo.sha(amp_ppo.DATASET/'transitions.npz'))
-            for name in ('priors/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py'):
+            for name in ('omni/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py'):
                 self.assertTrue((Path(temporary)/'amp/source/locomotion'/name).exists(), name)
             source = Path(temporary)/'amp/source'
             result = subprocess.run([sys.executable, '-c',
                 'from locomotion.priors.amp import load_demonstrations; '
-                'from locomotion.tools.sources import verify_runtime; '
+                'from locomotion.spark.sources import verify_runtime; '
                 'verify_runtime("."); print(tuple(load_demonstrations()[0].shape))'],
                 cwd=source, text=True, capture_output=True)
             self.assertEqual(result.returncode, 0, result.stderr)

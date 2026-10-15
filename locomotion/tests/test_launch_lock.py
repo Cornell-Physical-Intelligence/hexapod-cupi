@@ -5,7 +5,7 @@ import stat
 import tempfile
 import unittest
 
-import locomotion.tools.launch as launch
+import locomotion.spark.launch as launch
 
 
 class LockPermissionTests(unittest.TestCase):

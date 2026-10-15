@@ -10,13 +10,14 @@ import unittest
 import numpy as np
 import torch
 
-import locomotion.tools as evaluation
-import locomotion.gait_clock.ppo as ppo
-import locomotion.gait_clock.task as walking
-from locomotion.gait_clock.env import LocomotionEnv, _diagnostic_rotation, inverse_rotate, navigation
-from locomotion.tools.runner import learning_probe_cases
-from locomotion.gait_clock.task import TaskConfig, command_bank
-from locomotion.gait_clock.task import REWARD_CONFIG as CONFIG, TrainingTask as TrainingTaskV4
+import locomotion.evaluation as evaluation
+import locomotion.omni.ppo as ppo
+import locomotion.omni.task as walking
+from locomotion.omni.env import LocomotionEnv, inverse_rotate, navigation
+from locomotion.evaluation.capture import _diagnostic_rotation
+from locomotion.evaluation.runner import learning_probe_cases
+from locomotion.omni.task import TaskConfig, command_bank
+from locomotion.omni.task import REWARD_CONFIG as CONFIG, TrainingTask as TrainingTaskV4
 from locomotion.tests.test_evaluation import fixture, score
 from locomotion.tests.task_double import GaitDouble
 

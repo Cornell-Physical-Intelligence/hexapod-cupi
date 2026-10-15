@@ -9,7 +9,7 @@ import hashlib
 import json
 import math
 import torch
-from locomotion.gait_clock.control import inverse_rotate, navigation
+from locomotion.omni.control import inverse_rotate, navigation
 
 SCHEMA = "canonical_paper_walking_task_v1"
 REWARD_VERSION = "noise_sized_tripod_schedule_v4_yaw_gate_experimental"

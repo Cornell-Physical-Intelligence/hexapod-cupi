@@ -10,12 +10,12 @@ from unittest.mock import patch
 import numpy as np
 import torch
 
-import locomotion.tools.runner as evaluate
-from locomotion.tools.runner import run_batch
-from locomotion.gait_clock.config import JOINT_NAMES, MODEL_SHA256
-from locomotion.tools.force_metrics import report_for, sha, summarize, write_summary
+import locomotion.evaluation.runner as evaluate
+from locomotion.evaluation.runner import run_batch
+from locomotion.omni.config import JOINT_NAMES, MODEL_SHA256
+from locomotion.evaluation.force_metrics import report_for, sha, summarize, write_summary
 from locomotion.tests.test_evaluate import FakeCapture, FakeNative
-from locomotion.tools.prepare import prepare
+from locomotion.spark.prepare import prepare
 
 
 def fixture():
@@ -56,9 +56,9 @@ class ForceMetricsTests(unittest.TestCase):
             prepare(output, '/srv/cupi/hexapod/runs/test/force_metrics')
             source = output/'source'
             manifest = json.loads((source/'FREEZE_SHA256.json').read_text())
-            self.assertEqual(manifest['locomotion/tools/force_metrics.py'], sha(source/'locomotion/tools/force_metrics.py'))
+            self.assertEqual(manifest['locomotion/evaluation/force_metrics.py'], sha(source/'locomotion/evaluation/force_metrics.py'))
             result = subprocess.run([sys.executable, '-c',
-                'from locomotion.tools.force_metrics import MODEL_SHA256; print(MODEL_SHA256)'],
+                'from locomotion.evaluation.force_metrics import MODEL_SHA256; print(MODEL_SHA256)'],
                 cwd=source, text=True, capture_output=True, check=True)
             self.assertEqual(result.stdout.strip(), MODEL_SHA256)
 

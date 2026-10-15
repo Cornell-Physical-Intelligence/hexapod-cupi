@@ -32,7 +32,7 @@ jobs:
         run: |
           uv run python tools/source_inventory.py check
           uv run python tools/archive.py check
-          uv run python -m locomotion.tools.inputs check
+          uv run python -m locomotion.spark.inputs check
           uv run python tools/check_pipeline_lineages.py current
           uv run python -m locomotion.priors.dataset check
       - name: Generate this revision's source manifest

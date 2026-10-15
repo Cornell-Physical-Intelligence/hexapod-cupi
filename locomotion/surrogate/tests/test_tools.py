@@ -11,10 +11,10 @@ from unittest import mock
 import numpy as np
 import torch
 
-from locomotion.tools.prepare import prepare
+from locomotion.spark.prepare import prepare
 from locomotion.surrogate import replay
 from locomotion.surrogate.env import ROOT, make_env
-from locomotion.gait_clock.task import TaskConfig, TrainingTask
+from locomotion.omni.task import TaskConfig, TrainingTask
 
 PACKAGE = ROOT / "locomotion/surrogate"
 REMOTE = Path("/home/orionh/HEXAPOD_runs/restart_20260914/test_surrogate_boundary")

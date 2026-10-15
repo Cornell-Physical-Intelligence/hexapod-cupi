@@ -7,8 +7,8 @@ import numpy as np
 import torch
 
 from locomotion.priors import discriminator as amp
-from locomotion.gait_clock.env import inverse_rotate
-from locomotion.gait_clock.task import TaskConfig
+from locomotion.omni.env import inverse_rotate
+from locomotion.omni.task import TaskConfig
 
 ROOT = Path(__file__).resolve().parents[2]
 TRACE = ROOT/'locomotion/tests/fixtures/control_trace.npz'

@@ -3,8 +3,9 @@ from pathlib import Path
 import unittest
 import numpy as np
 import torch
-from locomotion.gait_clock.config import EnvConfig, JOINT_NAMES, KD, verify_assets
-from locomotion.gait_clock.env import LocomotionEnv, emitted_target, executed_action_feature, motor_force, _diagnostic_servo, inverse_rotate, rotate
+from locomotion.omni.config import EnvConfig, JOINT_NAMES, KD, verify_assets
+from locomotion.omni.env import LocomotionEnv, emitted_target, executed_action_feature, motor_force, inverse_rotate, rotate
+from locomotion.evaluation.capture import _diagnostic_servo
 
 
 class MotorTests(unittest.TestCase):

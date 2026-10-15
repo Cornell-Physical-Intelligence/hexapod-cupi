@@ -7,11 +7,11 @@ from pathlib import Path
 import re
 import shutil
 
-from locomotion.gait_clock.config import sha
-from locomotion.tools.sources import runtime_paths, write_runtime
-from locomotion.gait_clock.config import ppo_config
-from locomotion.tools.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline, LEARNER_OPTION_DEFAULTS
-from locomotion.tools.safety import LEGACY_ROOT, RUN_ROOTS, within_roots
+from locomotion.omni.config import sha
+from locomotion.spark.sources import runtime_paths, write_runtime
+from locomotion.omni.config import ppo_config
+from locomotion.spark.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline, LEARNER_OPTION_DEFAULTS
+from locomotion.spark.safety import LEGACY_ROOT, RUN_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[2]
 # Standing diagnostics accept each count; training and probes require admitted counts.
@@ -138,7 +138,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         for p in sorted(source.rglob('*')) if p.is_file()})
     freeze = sha(source/'FREEZE_SHA256.json')
     binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': False,
-        'module': 'locomotion.priors.replay_native' if mode == 'replay' else 'locomotion.gait_clock.train',
+        'module': 'locomotion.priors.replay_native' if mode == 'replay' else 'locomotion.omni.train',
         'mode': mode, 'source': str(remote_root/'source'), 'output': str(remote_root/'run'),
         'asset': declared['asset'], 'geometry_source': declared['geometry_source'],
         'prior': str(Path(declared['stance']).parent), 'input_files': declared['input_files'],

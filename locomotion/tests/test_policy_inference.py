@@ -7,8 +7,8 @@ import torch
 from rsl_rl.models import MLPModel
 from tensordict import TensorDict
 
-from locomotion.gait_clock.config import ppo_config
-import locomotion.gait_clock.ppo as ppo
+from locomotion.omni.config import ppo_config
+import locomotion.omni.ppo as ppo
 
 
 class ActorCheckpoint(dict):

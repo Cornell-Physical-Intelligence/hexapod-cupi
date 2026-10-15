@@ -8,7 +8,7 @@ from rsl_rl.runners import OnPolicyRunner
 
 from locomotion.priors.amp import AMPConfig, AMPVecEnv, amp_ppo_config
 from locomotion.surrogate.env import make_env
-from locomotion.gait_clock.task import TrainingTask, TaskConfig
+from locomotion.omni.task import TrainingTask, TaskConfig
 
 
 class AMPTests(unittest.TestCase):

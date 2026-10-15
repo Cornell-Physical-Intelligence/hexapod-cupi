@@ -25,7 +25,7 @@ def save(path, value):
     Path(path).write_text(json.dumps(value, indent=2, allow_nan=False)+'\n')
 
 
-from locomotion.tools.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, UPDATE_LIMIT, EXTENDED_UPDATE_LIMIT, update_limit, decay_updates, validate_decay, validate_deadline, finish_training_update, collected_transitions, LEARNER_OPTION_DEFAULTS
+from locomotion.spark.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, UPDATE_LIMIT, EXTENDED_UPDATE_LIMIT, update_limit, decay_updates, validate_decay, validate_deadline, finish_training_update, collected_transitions, LEARNER_OPTION_DEFAULTS
 
 
 def scalars(value, prefix):
@@ -40,9 +40,9 @@ def scalars(value, prefix):
     return {}
 
 
-from locomotion.tools.sources import source_files, physics_files, verify_runtime
-import locomotion.tools.checkpoint as compat
-from locomotion.tools.checkpoint import checkpoint_reward_version, LEARNER_DEFAULTS, LEARNER_KEYS, json_shape, require_learner_identity, require_learner_configuration, require_embedded_declaration, require_checkpoint_identity
+from locomotion.spark.sources import source_files, physics_files, verify_runtime
+import locomotion.evaluation.checkpoint as compat
+from locomotion.evaluation.checkpoint import checkpoint_reward_version, LEARNER_DEFAULTS, LEARNER_KEYS, json_shape, require_learner_identity, require_learner_configuration, require_embedded_declaration, require_checkpoint_identity
 
 
 class ConfigRecord(dict):
@@ -54,9 +54,9 @@ class ConfigRecord(dict):
 def main(argv=None):
     source = Path(__file__).resolve().parents[1]
     prefix = 'locomotion'
-    import locomotion.tools.admission as admission
-    from locomotion.tools.camera import prepare_policy_scene
-    configuration = importlib.import_module(prefix+'.gait_clock.config')
+    import locomotion.evaluation.admission as admission
+    from locomotion.evaluation.camera import prepare_policy_scene
+    configuration = importlib.import_module(prefix+'.omni.config')
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--mode', choices=['diagnostic', 'train', 'evaluate', 'probe'], required=True)
     for name in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance', 'output'):
@@ -173,7 +173,7 @@ def main(argv=None):
     if sha(source.parent/'FREEZE_SHA256.json') != args.source_freeze_sha256:
         raise ValueError('Frozen source identity differs')
     metadata = json.loads(args.stance.read_text())
-    from locomotion.tools.runner import EvaluationEnvConfig
+    from locomotion.evaluation.runner import EvaluationEnvConfig
     config_class = EvaluationEnvConfig if args.mode == 'evaluate' and args.eval_scope == 'full' else configuration.EnvConfig
     cfg = config_class(num_envs=args.num_envs, seed=args.seed,
         record_motion_features=args.mode == 'evaluate' or args.learner == 'amp', render=args.mode == 'evaluate', episode_seconds=(90. if args.eval_scope == 'full' else 60.) if args.mode == 'evaluate' else (60. if args.mode == 'diagnostic' else args.episode_seconds), device=args.device)
@@ -184,7 +184,7 @@ def main(argv=None):
         'geometry_sha256': sha(args.geometry), 'geometry_extrema_sha256': sha(args.geometry_extrema),
         'config': cfg.declaration(), 'motion_prior': args.learner == 'amp', 'behavior_cloning': False,
         'seed': args.seed, 'rsl_rl_required_version': '5.0.1',
-        'adapter_sha256': sha(source/'gait_clock/ppo.py'), 'entry_sha256': sha(__file__),
+        'adapter_sha256': sha(source/'omni/ppo.py'), 'entry_sha256': sha(__file__),
         'reward_version': '4', 'reward_task': 'v4_yaw_gate', 'learner': args.learner, 'networks': args.networks}
     if args.extended_updates:
         # The exploration decay length enters ppo_config; the opt-in records the requested run length beside it.
@@ -193,7 +193,7 @@ def main(argv=None):
     if args.learner == 'amp':
         amp_module = importlib.import_module(prefix+'.priors.amp')
         identity['learner_source_files'] = {name: sha(source/name) for name in (
-            'priors/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
+            'omni/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
         identity['amp_dataset'] = amp_module.load_demonstrations(source.parent/amp_module.AMPConfig().dataset)[1]
     identity['physics_source_files'] = physics_files(identity['source_files'])
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
@@ -255,10 +255,12 @@ def main(argv=None):
         print('REFERENCE_SCREEN_APP_READY', flush=True)
         import torch
         import numpy as np
-        vanilla = importlib.import_module(prefix+'.gait_clock.ppo')
-        native = importlib.import_module(prefix+'.gait_clock.env')
+        vanilla = importlib.import_module(prefix+'.omni.ppo')
+        native = importlib.import_module(prefix+'.omni.env')
+        from locomotion.evaluation.capture import DiagnosticCapture, score_diagnostic
+        from locomotion.evaluation.loads import TrainingLoads
         if args.mode in ('train', 'probe'):
-            task_module = importlib.import_module(prefix+'.gait_clock.task')
+            task_module = importlib.import_module(prefix+'.omni.task')
         torch.manual_seed(args.seed); np.random.seed(args.seed)
         env = native.LocomotionEnv(cfg, args.asset, args.model, args.geometry,
             args.output/'native', reference_metadata=metadata)
@@ -266,7 +268,7 @@ def main(argv=None):
             prepare_policy_scene(env)
         if args.mode == 'diagnostic':
             env.commands.zero_()
-            capture = native.DiagnosticCapture(env, args.output/'standing', args.geometry_extrema)
+            capture = DiagnosticCapture(env, args.output/'standing', args.geometry_extrema)
             try:
                 for control in range(1000):
                     env.step(torch.zeros((env.num_envs, 18), device=env.device))
@@ -276,14 +278,14 @@ def main(argv=None):
                         raise TimeoutError('Standing allocation exceeded its deadline')
             finally:
                 capture.close()
-            report = native.score_diagnostic(args.output/'standing')
+            report = score_diagnostic(args.output/'standing')
             save(args.output/'standing'/'standing_report.json', report)
             state['standing_gate_pass'] = report['all_pass']
             env.verify_native_recipe('after_controlled_steps')
             state['status'] = 'completed'
             return 0
         if args.mode == 'probe':
-            probe = importlib.import_module(prefix+'.tools.noise_probe')
+            probe = importlib.import_module(prefix+'.evaluation.noise_probe')
             summary = probe.run(env, args.output/'probe', seed=args.seed,
                 max_wall_seconds=max(.001, args.max_wall_seconds-(time.monotonic()-started)),
                 progress=lambda value: print(json.dumps(value), flush=True))
@@ -344,7 +346,7 @@ def main(argv=None):
                     'checkpoint_sha256': sha(path), 'transitions': collected_transitions(update, config, env.num_envs)})
                 state['checkpoint'] = str(path); state['checkpoint_sha256'] = sha(path)
                 save(args.output/'state.json', state)
-            loads = vanilla.TrainingLoads(env)
+            loads = TrainingLoads(env)
             if amp_module is not None:
                 wrapped.collision.inner = loads
                 env.capture = wrapped.collision
@@ -412,8 +414,8 @@ def main(argv=None):
                         previous_action[0] = action.clone()
                         action = vanilla.smoothed_action(action, last, env.episode_steps)
                     return action
-            evaluation = importlib.import_module(prefix+'.tools.runner')
-            camera = importlib.import_module(prefix+'.tools.camera')
+            evaluation = importlib.import_module(prefix+'.evaluation.runner')
+            camera = importlib.import_module(prefix+'.evaluation.camera')
             env.render = camera.NativePolicyCamera(env)
             remaining = max(.001, args.max_wall_seconds-(time.monotonic()-started))
             options = dict(progress=lambda value: print(json.dumps(value), flush=True), max_wall_seconds=remaining)

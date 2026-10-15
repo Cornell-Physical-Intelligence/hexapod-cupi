@@ -2,8 +2,8 @@
 import torch
 from isaaclab.actuators import ActuatorBase, ActuatorBaseCfg
 from isaaclab.utils import configclass
-from locomotion.gait_clock.config import JOINT_NAMES, motor_damping
-from locomotion.gait_clock.control import motor_force
+from locomotion.omni.config import JOINT_NAMES, motor_damping
+from locomotion.omni.control import motor_force
 
 
 class Motor(ActuatorBase):

@@ -6,8 +6,8 @@ import json
 from pathlib import Path
 import shutil
 
-from locomotion.gait_clock.config import sha, verify_assets
-from locomotion.tools.safety import INPUT_ROOTS, within_roots
+from locomotion.omni.config import sha, verify_assets
+from locomotion.spark.safety import INPUT_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[2]
 MODEL = 'robot/hexapod_mkii_updated_v1'

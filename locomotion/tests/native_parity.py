@@ -42,7 +42,7 @@ def require_comparison_physics(recorded, candidate):
 
 def replay():
     from contracts import release
-    import locomotion.gait_clock.train as train
+    import locomotion.omni.train as train
     args = sys.argv[1:]
     def option(name):
         if args.count(name) != 1:
@@ -54,7 +54,7 @@ def replay():
     checkpoint = Path(option('--checkpoint'))
     verify_weights(checkpoint)
     proof()
-    from locomotion.tools.checkpoint import require_configuration
+    from locomotion.evaluation.checkpoint import require_configuration
     keys = tuple(key for key in release.COMPATIBILITY_KEYS if key not in SOURCE_KEYS | {'physics_config'})
     def compare_weight_abi(record, identity):
         require_comparison_physics(record['identity']['physics_config'], identity['physics_config'])
@@ -71,15 +71,15 @@ def replay():
 
 
 def launch():
-    import locomotion.tools.launch as supervisor
+    import locomotion.spark.launch as supervisor
     proof()
     original = supervisor.command
     def command(binding, paths, name):
-        if binding['module'] != 'locomotion.gait_clock.train' or binding['mode'] != 'evaluate':
+        if binding['module'] != 'locomotion.omni.train' or binding['mode'] != 'evaluate':
             raise ValueError('The parity launcher accepts evaluation only')
         argv = original(binding, paths, name)
         index = argv.index('-m') + 1
-        if argv[index] != 'locomotion.gait_clock.train':
+        if argv[index] != 'locomotion.omni.train':
             raise ValueError('Unexpected parity entry point')
         argv[index] = 'locomotion.tests.native_parity'
         return argv

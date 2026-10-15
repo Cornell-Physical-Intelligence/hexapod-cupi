@@ -3,11 +3,11 @@ import ast
 from pathlib import Path
 import unittest
 import torch
-from locomotion.gait_clock.env import reset_rows
-from locomotion.gait_clock.env import LocomotionEnv
-from locomotion.gait_clock.control import emitted_target, executed_action_feature
+from locomotion.omni.env import reset_rows
+from locomotion.omni.env import LocomotionEnv
+from locomotion.omni.control import emitted_target, executed_action_feature
 
-BACKEND = Path(__file__).resolve().parents[1] / "gait_clock"
+BACKEND = Path(__file__).resolve().parents[1] / "omni"
 
 
 class DirectEnvironmentContractTests(unittest.TestCase):

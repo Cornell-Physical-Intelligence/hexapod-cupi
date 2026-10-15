@@ -40,7 +40,7 @@ def smoothed_action(action, previous, episode_steps):
     return .5 * (action + torch.where(fresh, torch.zeros_like(action), previous))
 
 
-from locomotion.gait_clock.config import ppo_config, RATE_CLASS, SEGMENT_CLASS
+from locomotion.omni.config import ppo_config, RATE_CLASS, SEGMENT_CLASS
 
 
 def load_actor(checkpoint, config, observations, device):
@@ -228,5 +228,3 @@ class VanillaVecEnv:
             done = done | switched
         return self.get_observations(), rewards, done.long(), extras
 
-
-from locomotion.tools.loads import TrainingLoads

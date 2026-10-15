@@ -4,8 +4,8 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion.priors.features import extract_features, feature_contract
-from locomotion.gait_clock.env import LocomotionEnv
+from locomotion.omni.features import extract_features, feature_contract
+from locomotion.omni.env import LocomotionEnv
 
 
 class AMPFeatureTests(unittest.TestCase):

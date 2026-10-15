@@ -2,13 +2,13 @@
 import math
 import unittest
 import torch
-from locomotion.gait_clock.config import JOINT_NAMES, KD
-from locomotion.gait_clock.config import motor_damping
+from locomotion.omni.config import JOINT_NAMES, KD
+from locomotion.omni.config import motor_damping
 
 
 def named_motor_force(names, q, dq, target):
     return motor_force(q, dq, target, q.new_tensor(motor_damping(names)))
-from locomotion.gait_clock.control import motor_force
+from locomotion.omni.control import motor_force
 
 
 class DirectMotorArithmeticTests(unittest.TestCase):

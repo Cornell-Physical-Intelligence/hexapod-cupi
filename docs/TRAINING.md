@@ -60,7 +60,7 @@ settings when comparing PPO with AMP. Use `priors/` for that workflow.
 ## Acceptance
 
 You qualify Stage 2 against the full 96-case manifest and the unchanged gates
-in [the scorer](../locomotion/tools/scoring.py). The 13 learning probes
+in [the scorer](../locomotion/evaluation/scoring.py). The 13 learning probes
 provide intermediate diagnostics; they do not replace full qualification.
 The program lead must also accept the gait's appearance.
 

@@ -31,8 +31,8 @@ app = AppLauncher(args).app
 import torch  # noqa: E402
 import torch.nn as nn  # noqa: E402
 
-from locomotion.behavior_cloning.hexapod_env import HexapodEnv  # noqa: E402
-from locomotion.behavior_cloning.hexapod_env_cfg import HexapodFlatEnvCfg  # noqa: E402
+from locomotion.tripod.hexapod_env import HexapodEnv  # noqa: E402
+from locomotion.tripod.hexapod_env_cfg import HexapodFlatEnvCfg  # noqa: E402
 
 
 class ScriptedTripod:

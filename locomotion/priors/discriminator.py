@@ -6,9 +6,9 @@ from dataclasses import dataclass
 import torch
 from torch import nn
 
-from locomotion.priors.features import feature_contract
+from locomotion.omni.features import feature_contract
 
-# The 61-value AMP state; locomotion.priors.features owns its layout.
+# The 61-value AMP state; locomotion.omni.features owns its layout.
 AMP_WIDTH = feature_contract()["width"]
 
 

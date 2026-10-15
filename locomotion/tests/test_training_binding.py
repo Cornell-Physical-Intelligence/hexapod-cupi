@@ -5,8 +5,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from locomotion.gait_clock.config import EnvConfig, MODEL_SHA256, USD_SHA256, sha
-from locomotion.tools.admission import require_admission
+from locomotion.omni.config import EnvConfig, MODEL_SHA256, USD_SHA256, sha
+from locomotion.evaluation.admission import require_admission
 
 
 class TrainingBindingTests(unittest.TestCase):

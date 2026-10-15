@@ -35,11 +35,11 @@ class DatasetTests(unittest.TestCase):
         current = dataset.processing_identity()
         dataset.validate_processing_identity(current)
         changed = copy.deepcopy(current)
-        del changed['source_files']['locomotion/priors/features.py']
+        del changed['source_files']['locomotion/omni/features.py']
         with self.assertRaisesRegex(ValueError, 'processing source'):
             dataset.validate_processing_identity(changed)
         changed = copy.deepcopy(current)
-        changed['source_files']['locomotion/priors/features.py'] = 'invalid'
+        changed['source_files']['locomotion/omni/features.py'] = 'invalid'
         with self.assertRaisesRegex(ValueError, 'processing source'):
             dataset.validate_processing_identity(changed)
         for schema in ('hexapod_processing_sources_v3', 'unreviewed'):

@@ -1,4 +1,4 @@
-"""Run the interface of ``locomotion.gait_clock.env.LocomotionEnv`` on CPU MuJoCo physics."""
+"""Run the interface of ``locomotion.omni.env.LocomotionEnv`` on CPU MuJoCo physics."""
 from __future__ import annotations
 
 import ast
@@ -14,9 +14,9 @@ import numpy as np
 from scipy.spatial import ConvexHull
 import torch
 
-from locomotion.priors.features import extract_features
-from locomotion.gait_clock.env import emitted_target, executed_action_feature, inverse_rotate, motor_force, navigation, rotate
-from locomotion.gait_clock.config import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, MODEL_SHA256
+from locomotion.omni.features import extract_features
+from locomotion.omni.env import emitted_target, executed_action_feature, inverse_rotate, motor_force, navigation, rotate
+from locomotion.omni.config import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, MODEL_SHA256
 
 # The package resolves repository data from its own location.
 ROOT = Path(__file__).resolve().parents[2]

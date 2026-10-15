@@ -59,10 +59,10 @@ SCHEMA = 'hexapod_checkpoint_compatibility_v1'
 CHECKPOINT_SHA = 'bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9'
 DECLARATION_SHA = '8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3'
 CLASS_NAMES = {
-    'locomotion.rate_schedule:CappedRatePPO': 'locomotion.gait_clock.algorithm:CappedRatePPO',
-    'locomotion.rate_schedule:CommandBootstrapPPO': 'locomotion.gait_clock.algorithm:CommandBootstrapPPO',
-    'locomotion.action_distribution:BoundedMeanGaussian': 'locomotion.gait_clock.algorithm:BoundedMeanGaussian',
-    'locomotion.action_distribution:CorrelatedBoundedMeanGaussian': 'locomotion.gait_clock.algorithm:CorrelatedBoundedMeanGaussian',
+    'locomotion.rate_schedule:CappedRatePPO': 'locomotion.omni.algorithm:CappedRatePPO',
+    'locomotion.rate_schedule:CommandBootstrapPPO': 'locomotion.omni.algorithm:CommandBootstrapPPO',
+    'locomotion.action_distribution:BoundedMeanGaussian': 'locomotion.omni.algorithm:BoundedMeanGaussian',
+    'locomotion.action_distribution:CorrelatedBoundedMeanGaussian': 'locomotion.omni.algorithm:CorrelatedBoundedMeanGaussian',
 }
 SOURCE_KEYS = {'schema', 'physics_source_files', 'adapter_sha256', 'entry_sha256'}
 
@@ -169,7 +169,7 @@ def read_receipt(path, digest):
     if (len(summary.get('loads', {})) != 13
             or any(row.get('status') != 'available' for row in summary['loads'].values())
             or len(evidence['ranges.json'].get('baseline_provenance', [])) != 3
-            or summary['allocation']['evaluator_sha256'] != receipt['candidate_runtime_sources']['files'].get('locomotion/tools/scoring.py')):
+            or summary['allocation']['evaluator_sha256'] != receipt['candidate_runtime_sources']['files'].get('locomotion/evaluation/scoring.py')):
         raise ValueError('Compatibility provenance or load evidence differs')
     if not compare(evidence['ranges.json'], evidence['summary.json'])['pass']:
         raise ValueError('Compatibility native parity failed')

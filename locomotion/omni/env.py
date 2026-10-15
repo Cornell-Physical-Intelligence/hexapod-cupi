@@ -7,10 +7,10 @@ import json
 import math
 import numpy as np
 import torch
-from locomotion.gait_clock.config import BODY_NAMES, JOINT_NAMES, LEGS, MASS_KG, verify_assets, make_config, ISAACLAB_REVISION
-from locomotion.gait_clock.control import motor_force, emitted_target, executed_action_feature
-from locomotion.gait_clock.control import rotate, inverse_rotate, navigation
-from locomotion.priors.features import extract_features
+from locomotion.omni.config import BODY_NAMES, JOINT_NAMES, LEGS, MASS_KG, verify_assets, make_config, ISAACLAB_REVISION
+from locomotion.omni.control import motor_force, emitted_target, executed_action_feature
+from locomotion.omni.control import rotate, inverse_rotate, navigation
+from locomotion.omni.features import extract_features
 
 
 def reset_rows(indices, num_envs, device):
@@ -30,7 +30,7 @@ class LocomotionEnv:
 
     def __init__(self, cfg, asset, model_path, geometry_path, output, *, reference_metadata=None):
         import warp as wp
-        from locomotion.gait_clock.native import NativeEnv
+        from locomotion.omni.native import NativeEnv
         self.cfg, self.device, self.num_envs = cfg, cfg.device, cfg.num_envs
         self.wp = wp
         self.output = Path(output)
@@ -342,7 +342,3 @@ class LocomotionEnv:
         if self.cfg.record_motion_features:
             result["amp"] = extract_features(state)
         return result
-
-# Exact contact/clearance mathematics carried into this fresh namespace from the
-# canonical source005 recipe; no frozen source module is imported at runtime.
-from locomotion.tools.capture import _diagnostic_rotation, _DiagnosticGeometry, _classify_patches, DiagnosticCapture, _diagnostic_servo, _quiet_metrics, score_diagnostic

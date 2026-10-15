@@ -17,8 +17,8 @@ def runtime_paths(package):
     """Select c48 runtime files; Shaurya uses the stock Isaac Lab entry points."""
     package = Path(package)
     return sorted(path for path in package.rglob('*.py')
-                  if not set(path.relative_to(package).parts) & {'tests', '__pycache__', 'behavior_cloning', 'surrogate'}
-                  and ('priors' not in path.relative_to(package).parts or path.name in {'__init__.py', 'features.py'}))
+                  if not set(path.relative_to(package).parts) & {'tests', '__pycache__', 'tripod', 'surrogate'}
+                  and ('priors' not in path.relative_to(package).parts or path.name in {'__init__.py'}))
 
 
 def source_files(package):
@@ -27,9 +27,9 @@ def source_files(package):
 
 
 def physics_files(files, package=None):
-    """Follow project imports from the native environment, including capture and scorer imports."""
+    """Follow project imports from the native environment, the standing capture and the scorer."""
     package = Path(package) if package is not None else Path(__file__).resolve().parents[1]
-    pending, seen = ['gait_clock/env.py', 'gait_clock/config.py'], set()
+    pending, seen = ['omni/env.py', 'omni/config.py', 'evaluation/capture.py', 'evaluation/scoring.py'], set()
     while pending:
         name = pending.pop()
         if name in seen or name not in files:

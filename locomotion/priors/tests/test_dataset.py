@@ -8,11 +8,11 @@ from unittest.mock import patch
 
 import numpy as np
 
-from locomotion.priors.features import feature_contract
+from locomotion.omni.features import feature_contract
 from locomotion.priors import dataset
 from locomotion.priors.dataset import motion_cases
-from locomotion.gait_clock.config import JOINT_NAMES, MODEL_SHA256, USD_SHA256
-from locomotion.tools.force_metrics import report_for
+from locomotion.omni.config import JOINT_NAMES, MODEL_SHA256, USD_SHA256
+from locomotion.evaluation.force_metrics import report_for
 from locomotion.tests.test_evaluation import fixture as scoring_fixture
 
 

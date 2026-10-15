@@ -1,7 +1,7 @@
 """Evaluate a checkpoint's no-noise policy on the learning probes, on the surrogate."""
 from __future__ import annotations
 
-from locomotion.tools.sources import runtime_paths, source_files
+from locomotion.spark.sources import runtime_paths, source_files
 
 import argparse
 from dataclasses import asdict, replace
@@ -13,11 +13,11 @@ import time
 import numpy as np
 import torch
 
-import locomotion.gait_clock.ppo as vanilla
+import locomotion.omni.ppo as vanilla
 from locomotion.surrogate.train import build_wrapper, process_threads, resolve, wrapper_options
 
 FOCUS = ["learning:translate_0.05_0deg", "learning:quiet_20s", "learning:forward_0.05_to_stop"]
-DEFAULT_TASK = "locomotion.gait_clock.task:TrainingTask"
+DEFAULT_TASK = "locomotion.omni.task:TrainingTask"
 # Profiles whose verdict rests on a static pose.
 STATIC_PROFILES = ("quiet_stand", "stage2_long_quiet", "stop_to_stand")
 CONSENSUS_VARIANTS = {"pyramidal_cone": {"cone": "pyramidal"}, "friction_0.9": {"friction": (.9, .005, .0001)}}
@@ -28,7 +28,7 @@ REST_CONTROLS = 300
 
 
 class DeterministicPolicy:
-    """The no-noise policy path of ``locomotion/gait_clock/train.py``: fixed scales, gait clock, actor mean, two-control mean."""
+    """The no-noise policy path of ``locomotion/omni/train.py``: fixed scales, gait clock, actor mean, two-control mean."""
 
     def __init__(self, actor, env, options, *, velocity_input_gain=1., action_mean2=False, adapter=None):
         self.actor, self.env, self.adapter = actor, env, adapter
@@ -49,12 +49,12 @@ class DeterministicPolicy:
                     "action_smoothing_applied": None, "velocity_noise_recorded": options.get("velocity_noise", 0.),
                     "velocity_noise_applied": None,
                     "scope": "The wrapper builds the policy input and the action; this module applies no option to them."}
-        return {"source": "evaluation branch of locomotion/gait_clock/train.py", "velocity_input_gain": self.gain,
+        return {"source": "evaluation branch of locomotion/omni/train.py", "velocity_input_gain": self.gain,
                 "action_mean2_forced": self.forced,
                 "action_smoothing_applied": "mean2" if self.mean2 else "none",
                 "velocity_noise_recorded": options.get("velocity_noise", 0.), "velocity_noise_applied": 0.,
                 "scope": "Scales, gait clock, actor mean and two-control mean as the evaluation branch of "
-                         "locomotion/gait_clock/train.py; the gain and the forced mean are stress options."}
+                         "locomotion/omni/train.py; the gain and the forced mean are stress options."}
 
     def inputs(self, observation):
         """The actor input for raw 231-value environment observations."""
@@ -253,8 +253,8 @@ def evaluate_checkpoint(args):
     import mujoco
     from locomotion.surrogate.env import (DEFAULT_GEOMETRY, DEFAULT_MODEL, DEFAULT_STANCE, LEGS, ROOT, Renderer,
                                           SurrogateConfig, SurrogateEnv, contact_overrides, repository_state, sha)
-    import locomotion.tools.runner as evaluation
-    import locomotion.gait_clock.task as task_module
+    import locomotion.evaluation.runner as evaluation
+    import locomotion.omni.task as task_module
 
     record_path = args.checkpoint.with_suffix(".json")
     record = json.loads(record_path.read_text()) if record_path.exists() else {"identity": {}}
@@ -267,7 +267,7 @@ def evaluate_checkpoint(args):
         raise ValueError("The checkpoint has no JSON record; pass --ppo-config")
     seed = args.seed if args.seed is not None else int(identity.get("seed", 20260917))
     task_spec = args.task or identity.get("task") or DEFAULT_TASK
-    wrapper_spec = args.wrapper or identity.get("wrapper") or "locomotion.gait_clock.ppo:VanillaVecEnv"
+    wrapper_spec = args.wrapper or identity.get("wrapper") or "locomotion.omni.ppo:VanillaVecEnv"
     profiles = {case["case_id"]: case["profile"] for case in evaluation.learning_probe_cases()}
     probes = list(profiles)
     selected = FOCUS if args.cases == "focus" else probes if args.cases == "all" else args.cases.split(",")

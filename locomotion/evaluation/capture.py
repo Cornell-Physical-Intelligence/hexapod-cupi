@@ -4,7 +4,7 @@ import json
 import math
 import numpy as np
 import torch
-from locomotion.gait_clock.config import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, verify_assets
+from locomotion.omni.config import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, verify_assets
 
 
 def _diagnostic_rotation(q):

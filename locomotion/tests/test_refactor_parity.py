@@ -44,7 +44,7 @@ class RefactorParityTests(unittest.TestCase):
     def module(self, name, baseline=False):
         if baseline:
             return importlib.import_module('_refactor_baseline.' + name)
-        path = 'gait_clock.ppo' if name == 'ppo' else 'gait_clock.' + name
+        path = 'omni.ppo' if name == 'ppo' else 'omni.' + name
         return importlib.import_module('locomotion.' + path)
 
     def exact(self, actual, expected):
@@ -117,63 +117,63 @@ class RefactorParityTests(unittest.TestCase):
         with tarfile.open(FIXTURE) as archive:
             # The immutable archive holds retired reward source bytes.
             self.assertEqual(hashlib.sha256(FIXTURE.read_bytes()).hexdigest(), FIXTURE_SHA)
-            self.assertEqual((root/'tools/scoring.py').read_bytes(), archive.extractfile('evaluation.py').read())
+            self.assertEqual((root/'evaluation/scoring.py').read_bytes(), archive.extractfile('evaluation.py').read())
 
 
 class RefactorBoundaryTests(unittest.TestCase):
     def test_implementations_replace_retired_import_paths(self):
         for old, new, name in (
-            ('env', 'gait_clock.env', 'LocomotionEnv'),
-            ('task', 'gait_clock.task', 'TrainingTask'),
-            ('ppo', 'gait_clock.ppo', 'VanillaVecEnv'),
-            ('evaluate', 'tools.runner', 'ExactEvaluationCapture'),
-            ('prepare', 'tools.prepare', 'prepare')):
+            ('env', 'omni.env', 'LocomotionEnv'),
+            ('task', 'omni.task', 'TrainingTask'),
+            ('ppo', 'omni.ppo', 'VanillaVecEnv'),
+            ('evaluate', 'evaluation.runner', 'ExactEvaluationCapture'),
+            ('prepare', 'spark.prepare', 'prepare')):
             with self.subTest(module=old):
                 self.assertIsNone(importlib.util.find_spec('locomotion.' + old))
                 self.assertTrue(hasattr(importlib.import_module('locomotion.' + new), name))
 
     def test_nested_pack_is_complete_and_detects_dependency_tampering(self):
-        from locomotion.tools.prepare import prepare
-        from locomotion.tools.sources import verify_runtime
+        from locomotion.spark.prepare import prepare
+        from locomotion.spark.sources import verify_runtime
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp)/'pack'
             prepare(output, '/srv/cupi/hexapod/runs/james/refactor_fixture', updates=2)
             source = output/'source'
             manifest = verify_runtime(source)
             self.assertEqual(manifest['schema'], 'hexapod_runtime_sources_v2')
-            for path in ('locomotion/gait_clock/control.py', 'locomotion/gait_clock/task.py',
-                         'locomotion/gait_clock/env.py', 'locomotion/gait_clock/ppo.py'):
+            for path in ('locomotion/omni/control.py', 'locomotion/omni/task.py',
+                         'locomotion/omni/env.py', 'locomotion/omni/ppo.py'):
                 self.assertIn(path, manifest['files'])
             self.assertFalse(any('/tests/' in name for name in manifest['files']))
-            path = source/'locomotion/gait_clock/control.py'
+            path = source/'locomotion/omni/control.py'
             path.write_text(path.read_text() + '\n# tampered\n')
             with self.assertRaisesRegex(ValueError, 'Runtime dependency'):
                 verify_runtime(source)
 
     def test_prepare_and_training_use_shared_validation(self):
-        import locomotion.tools.prepare as prepare
-        import locomotion.gait_clock.train as train
-        import locomotion.tools.validation as validation
+        import locomotion.spark.prepare as prepare
+        import locomotion.omni.train as train
+        import locomotion.spark.validation as validation
         for name in ('update_limit', 'validate_decay', 'validate_deadline'):
             self.assertIs(getattr(prepare, name), getattr(validation, name))
             self.assertIs(getattr(train, name), getattr(validation, name))
 
     def test_nested_physics_dependencies_cannot_reuse_standing_identity(self):
-        from locomotion.tools.sources import physics_files, source_files
+        from locomotion.spark.sources import physics_files, source_files
         root = Path(__file__).resolve().parents[1]
         files = source_files(root)
         physics = physics_files(files)
-        for name in ('gait_clock/control.py', 'gait_clock/control.py', 'gait_clock/native.py', 'gait_clock/actuator.py',
-                     'tools/capture.py', 'tools/scoring.py'):
+        for name in ('omni/control.py', 'omni/control.py', 'omni/native.py', 'omni/actuator.py',
+                     'evaluation/capture.py', 'evaluation/scoring.py'):
             self.assertIn(name, physics)
             changed = dict(files, **{name: '0'*64})
             self.assertNotEqual(physics, physics_files(changed))
-        self.assertNotIn('gait_clock/algorithm.py', physics)
+        self.assertNotIn('omni/algorithm.py', physics)
 
     def test_legacy_identity_checks_remain_strict(self):
         from copy import deepcopy
         from contracts.release import COMPATIBILITY_KEYS
-        from locomotion.tools.checkpoint import require_checkpoint_identity
+        from locomotion.evaluation.checkpoint import require_checkpoint_identity
         identity = dict.fromkeys(COMPATIBILITY_KEYS, 'same')
         identity['schema'] = 'hexapod_locomotion_ppo_v1'
         require_checkpoint_identity({'identity': deepcopy(identity)}, identity)
@@ -183,10 +183,10 @@ class RefactorBoundaryTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 require_checkpoint_identity(record, identity)
         identity.update(schema='hexapod_locomotion_ppo_v2', runtime_sources={'schema': 'hexapod_runtime_sources_v2',
-                        'files': {'locomotion/gait_clock/control.py': 'a'*64}})
+                        'files': {'locomotion/omni/control.py': 'a'*64}})
         record = {'identity': deepcopy(identity)}
         require_checkpoint_identity(record, identity)
-        record['identity']['runtime_sources']['files']['locomotion/gait_clock/control.py'] = 'b'*64
+        record['identity']['runtime_sources']['files']['locomotion/omni/control.py'] = 'b'*64
         with self.assertRaisesRegex(ValueError, 'runtime dependencies'):
             require_checkpoint_identity(record, identity)
 
