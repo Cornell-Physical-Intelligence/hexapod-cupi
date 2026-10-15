@@ -102,6 +102,32 @@ The pre-update values expose policy changes during collection, including
 normalization drift. The post-update values measure the net change from the
 stored behavior policy; they are not the optimizer's minibatch KL averages.
 
+## Manager-based environment style
+
+Use this style for the planned manager-based migration. The current runtime
+and its acceptance contracts remain in force until a replacement passes review.
+Follow Isaac Lab's [manager-based RL tutorial](https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_manager_rl_env.html).
+
+- Configure `ManagerBasedRLEnv` with `@configclass` and named manager terms.
+  Let Isaac Lab own scene cloning and the step/reset loop.
+- Keep the task configuration in `tasks/velocity/`, robot and actuator code in
+  `backends/isaac/`, and BC/PPO configuration in `learning/`. Keep root files sparse.
+- Reference stock MDP terms through `mdp`. Add a local term for a documented
+  difference in behavior; put its units and tensor shape in its docstring.
+- Use functions for stateless terms. Use `ManagerTermBase` or the matching
+  action/command base for state, with a reset that touches the selected rows.
+- Keep defaults in one config. Derive play settings from it. Add terrain or
+  learner variants when a named experiment needs them.
+- Apply the target limiter once per control through an action term. Apply the
+  motor curve each physics step through an explicit actuator. Preserve approved
+  arithmetic and separate changes to physical behavior from framework wiring.
+- Declare observation order and frames. Keep privileged velocity in the critic
+  for the current contract. Let the reward manager apply `dt` once; test history
+  updates and terminal observations at reset boundaries.
+- Use stock RSL-RL through the guarded run entry. Keep admission and source
+  identity in `runs/`, and retain the scorer and contact/torque capture in
+  `evaluation/`. Record the Isaac Lab revision and resolved task configuration.
+
 ## Run and verify
 
 For this migration, you compare CPU outputs against both frozen baselines:
