@@ -10,14 +10,14 @@ import numpy as np
 import torch
 
 import locomotion.evaluation as evaluation
-import locomotion.omniwalk.reward as walking
-import locomotion.omniwalk.wrapper as wrapper
-from locomotion.omniwalk.features import observations, proprio
-from locomotion.omniwalk.frames import inverse_rotate, navigation
+import locomotion.omniwalk.mdp.rewards as walking
+import locomotion.rl.wrapper as wrapper
+from locomotion.omniwalk.mdp.observations import observations, proprio
+from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation
 from locomotion.evaluation.capture import diagnostic_rotation
 from locomotion.evaluation.runner import learning_probe_cases
-from locomotion.omniwalk.commands import TaskConfig, command_bank
-from locomotion.omniwalk.reward import REWARD_CONFIG as CONFIG
+from locomotion.omniwalk.mdp.commands import TaskConfig, command_bank
+from locomotion.omniwalk.mdp.rewards import REWARD_CONFIG as CONFIG
 from locomotion.omniwalk.task import TrainingTask as TrainingTaskV4
 from locomotion.tests.test_evaluation import fixture, score
 from locomotion.tests.task_double import GaitDouble

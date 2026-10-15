@@ -2,7 +2,7 @@
 import math
 
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import recipe_options
-from locomotion.omniwalk.commands import default_gait_clock
+from locomotion.omniwalk.mdp.commands import default_gait_clock
 
 ALLOCATION_PROFILES = ('standard', 'flat_pilot_v1')
 CLEANUP_MARGIN_SECONDS = 400

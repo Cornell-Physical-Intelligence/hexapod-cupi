@@ -8,9 +8,9 @@ import unittest
 import torch
 
 from locomotion.spark.prepare import ROOT
-from locomotion.omniwalk.robot import sha as digest
+from locomotion.robots.hexapod import sha as digest
 from locomotion.spark.prepare import prepare
-from locomotion.omniwalk.wrapper import OmniVecEnv
+from locomotion.rl.wrapper import OmniVecEnv
 from locomotion.evaluation.loads import TrainingLoads
 
 
@@ -83,7 +83,7 @@ class WrapperTests(unittest.TestCase):
             manifest = json.loads((source/'FREEZE_SHA256.json').read_text())
             for name, expected in manifest.items():
                 self.assertEqual(digest(source/name), expected)
-            for name in ('omniwalk/env.py', 'omniwalk/env_cfg.py', 'omniwalk/task.py', 'evaluation/runner.py', 'spark/launch.py', 'spark/safety.py'):
+            for name in ('omniwalk/adapter.py', 'omniwalk/env_cfg.py', 'omniwalk/task.py', 'evaluation/runner.py', 'spark/launch.py', 'spark/safety.py'):
                 self.assertEqual(digest(source/'locomotion'/name), digest(ROOT/'locomotion'/name))
             self.assertEqual(binding['mode'], 'train')
             self.assertNotIn('--checkpoint', binding['command_args'])

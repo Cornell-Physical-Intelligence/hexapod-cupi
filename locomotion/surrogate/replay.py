@@ -10,9 +10,9 @@ import time
 import numpy as np
 import torch
 
-from locomotion.omniwalk.commands import TaskConfig
-from locomotion.omniwalk.frames import rotate
-from locomotion.omniwalk.motor import executed_action_feature
+from locomotion.omniwalk.mdp.commands import TaskConfig
+from locomotion.omniwalk.mdp.frames import rotate
+from locomotion.omniwalk.mdp.motor import executed_action_feature
 from locomotion.surrogate.env import Renderer, SurrogateConfig, SurrogateEnv, contact_overrides, make_env
 from locomotion.surrogate.train import resolve, thread_count
 

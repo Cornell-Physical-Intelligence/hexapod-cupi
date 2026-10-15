@@ -8,7 +8,7 @@ from rsl_rl.models import MLPModel
 from tensordict import TensorDict
 
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
-import locomotion.omniwalk.ppo as ppo
+import locomotion.rl.ppo as ppo
 
 
 class ActorCheckpoint(dict):

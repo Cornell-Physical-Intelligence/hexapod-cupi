@@ -9,7 +9,7 @@ import subprocess
 from urllib.parse import quote
 
 
-PACKAGES = {'omniwalk', 'tripod', 'priors', 'surrogate', 'evaluation', 'spark'}
+PACKAGES = {'omniwalk', 'tripod', 'priors', 'surrogate', 'evaluation', 'spark', 'robots', 'rl', 'scripts'}
 
 
 def area(path):
@@ -171,6 +171,9 @@ const PACKAGES=[
 ['priors','priors','Motion demonstrations and AMP learning.'],
 ['surrogate','surrogate','CPU MuJoCo training and trace replay.'],
 ['evaluation','evaluation','Native capture, checkpoint identity and motion scoring.'],
+['robots','robots','Robot identity and the explicit RS05 actuator.'],
+['rl','rl','RSL-RL wrapper, PPO subclasses and distributions.'],
+['scripts','scripts','Container entry points for training, evaluation and diagnostics.'],
 ['spark','spark','Prepare, launch and bind native allocations.'],
 ['package','Locomotion','Package initialization.'],
 ['tests','tests','CPU, parity and native replay tests.']

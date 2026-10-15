@@ -13,9 +13,9 @@ import unittest
 import torch
 
 import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
-import locomotion.omniwalk.wrapper as wrapper
+import locomotion.rl.wrapper as wrapper
 from locomotion.surrogate import evaluate, train
-from locomotion.omniwalk.reward import REWARD_CONFIG as REWARD_V2_CONFIG, REWARD_CONFIG as REWARD_V4_CONFIG
+from locomotion.omniwalk.mdp.rewards import REWARD_CONFIG as REWARD_V2_CONFIG, REWARD_CONFIG as REWARD_V4_CONFIG
 from locomotion.omniwalk.task import TrainingTask as TrainingTaskV2
 
 NATIVE_ROW_KEYS = {"update", "transitions", "collection_seconds", "learning_seconds", "loss", "learning_rate",
@@ -265,7 +265,7 @@ class PolicyTests(unittest.TestCase):
         record = self.policy({"velocity_noise": .5}, velocity_input_gain=1.25, action_mean2=True).record({"velocity_noise": .5})
         self.assertEqual({key: record[key] for key in ("source", "velocity_input_gain", "action_mean2_forced",
                                                        "action_smoothing_applied", "velocity_noise_recorded", "velocity_noise_applied")},
-                         {"source": "evaluation branch of locomotion/omniwalk/train.py", "velocity_input_gain": 1.25,
+                         {"source": "evaluation branch of locomotion/scripts/train.py", "velocity_input_gain": 1.25,
                           "action_mean2_forced": True, "action_smoothing_applied": "mean2",
                           "velocity_noise_recorded": .5, "velocity_noise_applied": 0.})
         recorded = self.policy({"action_smoothing": "mean2"}).record({"action_smoothing": "mean2"})

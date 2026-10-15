@@ -8,8 +8,8 @@ import re
 import shutil
 
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import RECIPES, ppo_config
-from locomotion.omniwalk.commands import GAIT_CLOCK_CONTROLS
-from locomotion.omniwalk.robot import sha
+from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS
+from locomotion.robots.hexapod import sha
 from locomotion.spark.sources import runtime_paths, write_runtime
 from locomotion.spark.validation import (ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, LEARNER_OPTION_DEFAULTS,
     resolve_learner_options, update_limit, validate_decay, validate_deadline)
@@ -145,7 +145,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         for p in sorted(source.rglob('*')) if p.is_file()})
     freeze = sha(source/'FREEZE_SHA256.json')
     binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': False,
-        'module': 'locomotion.priors.replay_native' if mode == 'replay' else 'locomotion.omniwalk.train',
+        'module': 'locomotion.priors.replay_native' if mode == 'replay' else 'locomotion.scripts.train',
         'mode': mode, 'source': str(remote_root/'source'), 'output': str(remote_root/'run'),
         'asset': declared['asset'], 'geometry_source': declared['geometry_source'],
         'prior': str(Path(declared['stance']).parent), 'input_files': declared['input_files'],

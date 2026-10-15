@@ -4,8 +4,8 @@ import copy
 import numpy as np
 import torch
 
-from locomotion.omniwalk.frames import navigation
-from locomotion.omniwalk.robot import JOINT_NAMES, LEGS
+from locomotion.omniwalk.mdp.frames import navigation
+from locomotion.robots.hexapod import JOINT_NAMES, LEGS
 
 CONTRACT = {
     'schema': 'hexapod_amp_features_v1', 'width': 61, 'control_dt_s': .02,

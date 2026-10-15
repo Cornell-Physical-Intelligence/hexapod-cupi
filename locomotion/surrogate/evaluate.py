@@ -13,8 +13,8 @@ import time
 import numpy as np
 import torch
 
-import locomotion.omniwalk.ppo as algorithms
-import locomotion.omniwalk.wrapper as omni_wrapper
+import locomotion.rl.ppo as algorithms
+import locomotion.rl.wrapper as omni_wrapper
 from locomotion.surrogate.train import build_wrapper, process_threads, resolve, wrapper_options
 
 FOCUS = ["learning:translate_0.05_0deg", "learning:quiet_20s", "learning:forward_0.05_to_stop"]
@@ -29,7 +29,7 @@ REST_CONTROLS = 300
 
 
 class DeterministicPolicy:
-    """The no-noise policy path of ``locomotion/omniwalk/train.py``: fixed scales, gait clock, actor mean, two-control mean."""
+    """The no-noise policy path of ``locomotion/scripts/train.py``: fixed scales, gait clock, actor mean, two-control mean."""
 
     def __init__(self, actor, env, options, *, velocity_input_gain=1., action_mean2=False, adapter=None):
         self.actor, self.env, self.adapter = actor, env, adapter
@@ -50,12 +50,12 @@ class DeterministicPolicy:
                     "action_smoothing_applied": None, "velocity_noise_recorded": options.get("velocity_noise", 0.),
                     "velocity_noise_applied": None,
                     "scope": "The wrapper builds the policy input and the action; this module applies no option to them."}
-        return {"source": "evaluation branch of locomotion/omniwalk/train.py", "velocity_input_gain": self.gain,
+        return {"source": "evaluation branch of locomotion/scripts/train.py", "velocity_input_gain": self.gain,
                 "action_mean2_forced": self.forced,
                 "action_smoothing_applied": "mean2" if self.mean2 else "none",
                 "velocity_noise_recorded": options.get("velocity_noise", 0.), "velocity_noise_applied": 0.,
                 "scope": "Scales, gait clock, actor mean and two-control mean as the evaluation branch of "
-                         "locomotion/omniwalk/train.py; the gain and the forced mean are stress options."}
+                         "locomotion/scripts/train.py; the gain and the forced mean are stress options."}
 
     def inputs(self, observation):
         """The actor input for raw 231-value environment observations."""
@@ -268,7 +268,7 @@ def evaluate_checkpoint(args):
         raise ValueError("The checkpoint has no JSON record; pass --ppo-config")
     seed = args.seed if args.seed is not None else int(identity.get("seed", 20260917))
     task_spec = args.task or identity.get("task") or DEFAULT_TASK
-    wrapper_spec = args.wrapper or identity.get("wrapper") or "locomotion.omniwalk.wrapper:OmniVecEnv"
+    wrapper_spec = args.wrapper or identity.get("wrapper") or "locomotion.rl.wrapper:OmniVecEnv"
     profiles = {case["case_id"]: case["profile"] for case in evaluation.learning_probe_cases()}
     probes = list(profiles)
     selected = FOCUS if args.cases == "focus" else probes if args.cases == "all" else args.cases.split(",")

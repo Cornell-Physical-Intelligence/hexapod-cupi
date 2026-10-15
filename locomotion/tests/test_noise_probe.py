@@ -120,7 +120,7 @@ class NoiseProbeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             binding = prepare(Path(directory)/'probe', REMOTE, mode='probe', seed=7)
             args = binding['command_args']
-            self.assertEqual((binding['mode'], binding['module']), ('probe', 'locomotion.omniwalk.train'))
+            self.assertEqual((binding['mode'], binding['module']), ('probe', 'locomotion.scripts.train'))
             self.assertEqual(args[args.index('--num-envs')+1], '128')
             self.assertEqual(args[args.index('--seed')+1], '7')
             self.assertNotIn('--updates', args)

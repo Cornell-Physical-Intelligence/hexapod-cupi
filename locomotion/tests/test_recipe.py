@@ -9,10 +9,10 @@ import torch
 
 from locomotion.evaluation.checkpoint import CLASS_NAMES
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import RECIPES, ppo_config
-from locomotion.omniwalk.commands import TaskConfig
-from locomotion.omniwalk.reward import RewardConfig
+from locomotion.omniwalk.mdp.commands import TaskConfig
+from locomotion.omniwalk.mdp.rewards import RewardConfig
 from locomotion.omniwalk.task import TrainingTask
-import locomotion.omniwalk.train as train
+import locomotion.scripts.train as train
 from locomotion.spark.prepare import prepare
 from locomotion.spark.validation import OPTION_DEFAULTS
 from locomotion.tests.task_double import GaitDouble

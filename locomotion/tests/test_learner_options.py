@@ -13,12 +13,12 @@ from tensordict import TensorDict
 from rsl_rl.algorithms import PPO
 
 from locomotion.evaluation.checkpoint import require_learner_configuration
-import locomotion.omniwalk.ppo as ppo
+import locomotion.rl.ppo as ppo
 import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
-import locomotion.omniwalk.wrapper as wrapper
+import locomotion.rl.wrapper as wrapper
 from locomotion.spark.prepare import prepare
-from locomotion.omniwalk.ppo import CappedRatePPO
-import locomotion.omniwalk.train as train
+from locomotion.rl.ppo import CappedRatePPO
+import locomotion.scripts.train as train
 from locomotion.spark.validation import collected_transitions
 
 REMOTE = '/srv/cupi/hexapod/runs/james/learner_options_fixture'
@@ -150,10 +150,10 @@ class LearnerOptionTests(unittest.TestCase):
         self.assertGreater(rates['stock'], 1e-3)
 
     def test_correlated_noise_keeps_the_gaussian_marginal_and_carries_noise_between_controls(self):
-        from locomotion.omniwalk.ppo import BoundedMeanGaussian, CorrelatedBoundedMeanGaussian
+        from locomotion.rl.ppo import BoundedMeanGaussian, CorrelatedBoundedMeanGaussian
         config = ppo_cfg.ppo_config(3, action_mean='tanh', action_noise_correlation=.9)
         self.assertEqual(config['actor']['distribution_cfg']['class_name'],
-                         'locomotion.omniwalk.ppo:CorrelatedBoundedMeanGaussian')
+                         'locomotion.rl.ppo:CorrelatedBoundedMeanGaussian')
         self.assertEqual(config['actor']['distribution_cfg']['noise_correlation'], .9)
         self.assertNotIn('noise_correlation', ppo_cfg.ppo_config(3, action_mean='tanh')['actor']['distribution_cfg'])
         for bad in (dict(action_noise_correlation=.9), dict(action_mean='tanh', action_noise_correlation=1.),
@@ -308,7 +308,7 @@ class LearnerOptionTests(unittest.TestCase):
                     self.assertEqual(args[args.index(flag)+1], value)
                 pack = json.loads((root/mode/'PACK.json').read_text())
                 self.assertEqual({key: pack[key] for key in OPTIONS}, OPTIONS)
-                self.assertIn('locomotion/omniwalk/ppo.py', json.loads((root/mode/'source/FREEZE_SHA256.json').read_text()))
+                self.assertIn('locomotion/rl/ppo.py', json.loads((root/mode/'source/FREEZE_SHA256.json').read_text()))
             defaults = prepare(root/'defaults', REMOTE, recipe='none')
             self.assertFalse({'--observation-scaling', '--command-segments', '--learning-rate-max', '--action-std',
                               '--action-noise-correlation', '--action-std-final', '--video-case'}

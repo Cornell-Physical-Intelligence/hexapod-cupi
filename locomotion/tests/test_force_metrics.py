@@ -12,7 +12,7 @@ import torch
 
 import locomotion.evaluation.runner as evaluate
 from locomotion.evaluation.runner import run_batch
-from locomotion.omniwalk.robot import JOINT_NAMES, MODEL_SHA256
+from locomotion.robots.hexapod import JOINT_NAMES, MODEL_SHA256
 from locomotion.evaluation.force_metrics import report_for, sha, summarize, write_summary
 from locomotion.tests.test_evaluate import FakeCapture, FakeNative
 from locomotion.spark.prepare import prepare

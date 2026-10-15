@@ -89,7 +89,7 @@ class OptimizationTests(unittest.TestCase):
             inputs.write_text(json.dumps(declared))
             binding = prepare(FIXTURE, output, '/home/orionh/HEXAPOD_runs/restart_20260914/test_trajectory', inputs=inputs)
             self.assertIn(['/recorded/batch', '/standing_batch'], binding['extra_mounts'])
-            for name in ('omniwalk/env.py', 'omniwalk/env_cfg.py', 'spark/safety.py', 'spark/launch.py', 'evaluation/runner.py'):
+            for name in ('omniwalk/adapter.py', 'omniwalk/env_cfg.py', 'spark/safety.py', 'spark/launch.py', 'evaluation/runner.py'):
                 self.assertEqual((output/'source/locomotion'/name).read_bytes(), (ROOT/'locomotion'/name).read_bytes())
             self.assertEqual((output/'source/locomotion/priors/replay_native.py').read_bytes(), (ROOT/'locomotion/priors/replay_native.py').read_bytes())
             with self.assertRaises(FileExistsError):

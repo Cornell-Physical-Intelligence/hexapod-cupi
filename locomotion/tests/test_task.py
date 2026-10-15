@@ -11,8 +11,8 @@ import types
 import unittest
 
 import torch
-from locomotion.omniwalk.commands import TaskConfig, command_bank
-import locomotion.omniwalk.reward as reward
+from locomotion.omniwalk.mdp.commands import TaskConfig, command_bank
+import locomotion.omniwalk.mdp.rewards as reward
 import locomotion.omniwalk.task as task
 from locomotion.tests.task_double import NativeDouble, GaitDouble, telemetry
 

@@ -23,7 +23,7 @@ uv run python -m unittest discover -s locomotion/surrogate/tests
 
 You keep output directories outside the source checkout. The trainer defaults to
 task `locomotion.omniwalk.task:TrainingTask` and wrapper
-`locomotion.omniwalk.wrapper:OmniVecEnv` with the 60-control gait clock. Its learner
+`locomotion.rl.wrapper:OmniVecEnv` with the 60-control gait clock. Its learner
 options include fixed observation scaling, command-boundary bootstrap and action
 smoothing.
 `--resume` checks checkpoint bytes, the paired record and source/configuration

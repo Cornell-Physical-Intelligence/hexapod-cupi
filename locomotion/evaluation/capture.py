@@ -4,8 +4,8 @@ import json
 import math
 import numpy as np
 import torch
-from locomotion.omniwalk.motor import STIFFNESS_NM_PER_RAD
-from locomotion.omniwalk.robot import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, verify_assets
+from locomotion.omniwalk.mdp.motor import STIFFNESS_NM_PER_RAD
+from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, verify_assets
 
 
 def diagnostic_rotation(q):

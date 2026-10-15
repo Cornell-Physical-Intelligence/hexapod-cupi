@@ -7,10 +7,10 @@ from types import SimpleNamespace
 import unittest
 from unittest import mock
 import torch
-from locomotion.omniwalk.env import OmniEnv, reset_rows
-from locomotion.omniwalk.features import observations, proprio
-from locomotion.omniwalk.motor import emitted_target, executed_action_feature
-from locomotion.omniwalk.robot import BODY_NAMES, JOINT_NAMES, LEGS
+from locomotion.omniwalk.adapter import OmniEnv, reset_rows
+from locomotion.omniwalk.mdp.observations import observations, proprio
+from locomotion.omniwalk.mdp.motor import emitted_target, executed_action_feature
+from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, LEGS
 
 BACKEND = Path(__file__).resolve().parents[1] / "omniwalk"
 ISAAC_MODULES = ("warp", "pxr", "omni", "omni.physx", "isaaclab", "isaaclab.envs", "isaaclab.sim",
@@ -25,12 +25,12 @@ def load_isaac(direct_env=object, articulation=object):
     stubs["isaaclab.envs"].DirectRLEnv = direct_env
     stubs["isaaclab_physx.assets.articulation"].Articulation = articulation
     package = importlib.import_module("locomotion.omniwalk")
-    saved = {name: sys.modules.get(name) for name in (*ISAAC_MODULES, "locomotion.omniwalk.isaac")}
+    saved = {name: sys.modules.get(name) for name in (*ISAAC_MODULES, "locomotion.omniwalk.env")}
     bound = package.__dict__.get("isaac")
     sys.modules.update(stubs)
-    sys.modules.pop("locomotion.omniwalk.isaac", None)
+    sys.modules.pop("locomotion.omniwalk.env", None)
     try:
-        return importlib.import_module("locomotion.omniwalk.isaac")
+        return importlib.import_module("locomotion.omniwalk.env")
     finally:
         for name, module in saved.items():
             if module is None:
@@ -81,16 +81,16 @@ class DirectEnvironmentContractTests(unittest.TestCase):
         self.assertTrue(torch.equal(frame[0, 24:], torch.full((18,), 2.)))
 
     def test_stock_loop_owns_steps_and_task_owns_resets(self):
-        isaac = class_node(BACKEND / "isaac.py", "IsaacEnv")
+        isaac = class_node(BACKEND / "env.py", "IsaacEnv")
         self.assertEqual(ast.unparse(isaac.bases[0]), "DirectRLEnv")
         self.assertNotIn("step", {n.name for n in isaac.body if isinstance(n, ast.FunctionDef)})
-        calls = [ast.unparse(n.func) for n in ast.walk(ast.parse((BACKEND / "isaac.py").read_text())) if isinstance(n, ast.Call)]
+        calls = [ast.unparse(n.func) for n in ast.walk(ast.parse((BACKEND / "env.py").read_text())) if isinstance(n, ast.Call)]
         self.assertNotIn("self.sim.step", calls)
         self.assertNotIn("self.scene.update", calls)
         self.assertIn("super()._reset_idx", calls)
         self.assertIn("self._reset_idx", calls)
         self.assertIn("self.robot.write_joint_position_to_sim_index", calls)
-        adapter = ast.parse((BACKEND / "env.py").read_text())
+        adapter = ast.parse((BACKEND / "adapter.py").read_text())
         adapter_calls = [ast.unparse(n.func) for n in ast.walk(adapter) if isinstance(n, ast.Call)]
         self.assertIn("self.isaac.step", adapter_calls)
         self.assertIn("self.isaac.reset_selected", adapter_calls)
@@ -99,13 +99,13 @@ class DirectEnvironmentContractTests(unittest.TestCase):
         def writes(name, target):
             return [n for n in ast.walk(ast.parse((BACKEND / name).read_text())) if isinstance(n, (ast.Assign, ast.AugAssign))
                     and target in {ast.unparse(t) for t in (n.targets if isinstance(n, ast.Assign) else [n.target])}]
-        bindings = writes("env.py", "self.episode_steps")
+        bindings = writes("adapter.py", "self.episode_steps")
         self.assertEqual(len(bindings), 1)
         self.assertEqual(ast.unparse(bindings[0].value), "isaac.episode_length_buf")
-        self.assertEqual(writes("isaac.py", "self.episode_length_buf"), [])
+        self.assertEqual(writes("env.py", "self.episode_length_buf"), [])
 
     def test_stock_collision_filter_keeps_the_shared_ground(self):
-        setup = next(n for n in class_node(BACKEND / "isaac.py", "IsaacEnv").body
+        setup = next(n for n in class_node(BACKEND / "env.py", "IsaacEnv").body
                      if isinstance(n, ast.FunctionDef) and n.name == "_setup_scene")
         filters = [n for n in ast.walk(setup) if isinstance(n, ast.Call)
                    and ast.unparse(n.func) == "self.scene.filter_collisions"]
@@ -246,7 +246,7 @@ class DirectEnvironmentContractTests(unittest.TestCase):
                     setattr(self, name, None)
         config = SimpleNamespace(num_envs=n, device="cpu", action_scale_rad=.35, target_slew_rad=.04, physics_dt=.0025,
                                  episode_seconds=20., control_dt=.02, record_motion_features=False)
-        with mock.patch.dict(sys.modules, {"locomotion.omniwalk.isaac": SimpleNamespace(IsaacEnv=Isaac)}):
+        with mock.patch.dict(sys.modules, {"locomotion.omniwalk.env": SimpleNamespace(IsaacEnv=Isaac)}):
             env = OmniEnv(config, None, None, None, None)
         isaac = env.isaac
         # A task-side write between controls must reach the tensors that IsaacEnv shifts.

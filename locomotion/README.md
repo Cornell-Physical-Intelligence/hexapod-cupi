@@ -75,7 +75,7 @@ failure.
 ```sh
 uv run python -m unittest discover -s locomotion/tests
 uv run python -m locomotion.spark.prepare --help
-uv run python -m locomotion.omniwalk.train --help
+uv run python -m locomotion.scripts.train --help
 uv run python -m locomotion.evaluation.admission --help
 ```
 
@@ -106,8 +106,8 @@ cover motors, transitions, packs and tripod sources.
 
 ## Native admission
 
-The physics identity hashes the import closure of `omniwalk/env.py`,
-`omniwalk/env_cfg.py`, `omniwalk/isaac.py`, `evaluation/capture.py` and
+The physics identity hashes the import closure of `omniwalk/adapter.py`,
+`omniwalk/env_cfg.py`, `omniwalk/env.py`, `evaluation/capture.py` and
 `evaluation/scoring.py`. The refactor changed that closure; no native run has
 used it. Any new result needs fresh standing admission at one robot and batch
 size. The unchanged `c48_long` checkpoint must then pass its 13 probes with

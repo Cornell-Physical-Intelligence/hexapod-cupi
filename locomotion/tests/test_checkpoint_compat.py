@@ -60,7 +60,7 @@ class CheckpointCompatibilityTests(unittest.TestCase):
         recorded = dict.fromkeys(COMPATIBILITY_KEYS, 'original')
         candidate = deepcopy(recorded)
         candidate.update(schema='hexapod_locomotion_ppo_v2', adapter_sha256='new', entry_sha256='new',
-                         runtime_sources={'files': {'locomotion/omniwalk/motor.py': 'a'*64}})
+                         runtime_sources={'files': {'locomotion/omniwalk/mdp/motor.py': 'a'*64}})
         record = {'identity': recorded, 'checkpoint_sha256': checkpoints.CHECKPOINT_SHA}
         receipt = {'original_identity': deepcopy(recorded),
                    'candidate_runtime_sources': deepcopy(candidate['runtime_sources'])}
@@ -70,7 +70,7 @@ class CheckpointCompatibilityTests(unittest.TestCase):
             changed[key] = 'different'
             with self.subTest(key=key), self.assertRaises(ValueError):
                 checkpoints.require_compatibility_identity(receipt, record, changed)
-        candidate['runtime_sources']['files']['locomotion/omniwalk/motor.py'] = 'b'*64
+        candidate['runtime_sources']['files']['locomotion/omniwalk/mdp/motor.py'] = 'b'*64
         with self.assertRaisesRegex(ValueError, 'candidate runtime'):
             checkpoints.require_compatibility_identity(receipt, record, candidate)
         record['identity']['entry_sha256'] = 'altered declaration'
@@ -100,14 +100,14 @@ class CheckpointCompatibilityTests(unittest.TestCase):
         snapshot = deepcopy(original)
         translated = checkpoints.configuration(original)
         self.assertEqual(original, snapshot)
-        self.assertEqual(translated['class_name'], 'locomotion.omniwalk.ppo:CappedRatePPO')
+        self.assertEqual(translated['class_name'], 'locomotion.rl.ppo:CappedRatePPO')
         self.assertEqual(translated['label'], original['label'])
         self.assertEqual(translated['nested'][0]['class_name'],
-                         'locomotion.omniwalk.ppo:BoundedMeanGaussian')
+                         'locomotion.rl.ppo:BoundedMeanGaussian')
 
     def test_translation_keeps_configuration_changes_visible(self):
         old = {'class_name': 'locomotion.rate_schedule:CappedRatePPO', 'gamma': .99}
-        candidate = {'class_name': 'locomotion.omniwalk.ppo:CappedRatePPO', 'gamma': .98}
+        candidate = {'class_name': 'locomotion.rl.ppo:CappedRatePPO', 'gamma': .98}
         self.assertNotEqual(checkpoints.configuration(old), candidate)
 
     def test_unknown_class_name_stays_unknown(self):

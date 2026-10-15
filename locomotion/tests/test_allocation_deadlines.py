@@ -7,7 +7,7 @@ import unittest
 
 import locomotion.spark.prepare as prepare
 import locomotion.spark.safety as reservation
-import locomotion.omniwalk.train as train
+import locomotion.scripts.train as train
 from locomotion.tests import test_launch
 
 
@@ -18,7 +18,7 @@ class AllocationDeadlineTests(unittest.TestCase):
             binding = prepare.prepare(pack, str(prepare.REMOTE_ROOT/'deadline_fixture'))
             source = pack/'source'
             reservation.verify_tree(source, binding['source_freeze_sha256'])
-            for name in ('omniwalk/motor.py', 'omniwalk/env_cfg.py', 'omniwalk/train.py'):
+            for name in ('omniwalk/mdp/motor.py', 'omniwalk/env_cfg.py', 'scripts/train.py'):
                 path = source/'locomotion'/name
                 before = path.read_bytes()
                 path.write_bytes(before+b'changed')

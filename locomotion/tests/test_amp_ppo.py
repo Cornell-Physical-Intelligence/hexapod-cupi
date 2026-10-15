@@ -15,16 +15,16 @@ import torch
 
 from rsl_rl.algorithms import PPO
 
-import locomotion.omniwalk.features as amp
+import locomotion.omniwalk.mdp.observations as amp
 from locomotion.priors import discriminator as disc
 from locomotion.priors import amp as amp_ppo
 from locomotion.priors import networks as nets
 from locomotion.evaluation.checkpoint import (json_shape, require_embedded_declaration,
     require_learner_configuration, require_learner_identity)
-import locomotion.omniwalk.train as train
+import locomotion.scripts.train as train
 from locomotion.priors.amp import AMPConfig, AMPPPO, AMPVecEnv, CollisionCapture, amp_ppo_config, load_demonstrations
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
-from locomotion.omniwalk.wrapper import OmniVecEnv
+from locomotion.rl.wrapper import OmniVecEnv
 from locomotion.spark.prepare import prepare
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -426,7 +426,7 @@ class EvaluationIdentityTests(unittest.TestCase):
                     'ppo_config': amp_ppo_config(seed, networks=networks) if learner == 'amp' else ppo_config(seed)}
         if learner == 'amp':
             identity['learner_source_files'] = {name: amp_ppo.sha(ROOT/'locomotion'/name) for name in (
-                'omniwalk/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
+                'omniwalk/mdp/observations.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
             identity['amp_dataset'] = dict(BANK_IDENTITY)
         return identity
 
@@ -512,7 +512,7 @@ class LaunchTests(unittest.TestCase):
             self.assertEqual((pack['learner'], pack['networks']), ('amp', 'paper'))
             bank = Path(temporary)/'amp/source/locomotion/priors/datasets/amp_demonstrations_001'
             self.assertEqual(amp_ppo.sha(bank/'transitions.npz'), amp_ppo.sha(amp_ppo.DATASET/'transitions.npz'))
-            for name in ('omniwalk/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py'):
+            for name in ('omniwalk/mdp/observations.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py'):
                 self.assertTrue((Path(temporary)/'amp/source/locomotion'/name).exists(), name)
             source = Path(temporary)/'amp/source'
             result = subprocess.run([sys.executable, '-c',

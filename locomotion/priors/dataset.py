@@ -8,8 +8,8 @@ from pathlib import Path
 
 import numpy as np
 
-from locomotion.omniwalk.features import extract_features, feature_contract
-from locomotion.omniwalk.robot import MODEL_SHA256, USD_SHA256
+from locomotion.omniwalk.mdp.observations import extract_features, feature_contract
+from locomotion.robots.hexapod import MODEL_SHA256, USD_SHA256
 from locomotion.evaluation import score_recording
 from locomotion.spark.sources import source_files
 
@@ -23,7 +23,7 @@ PROCESSING_SCHEMA = 'hexapod_processing_sources_v3'
 
 
 def motion_cases():
-    from locomotion.omniwalk.commands import TaskConfig, command_bank
+    from locomotion.omniwalk.mdp.commands import TaskConfig, command_bank
     return [{'case_id': f'amp:command_{i:02d}', 'profile': 'omni_static',
              'command': command, 'controls': 1000}
             for i, command in enumerate(command_bank(TaskConfig()))]
@@ -52,7 +52,7 @@ def processing_identity():
     root = Path(__file__).resolve().parents[1]
     return {'schema': PROCESSING_SCHEMA, 'numpy_version': np.__version__, 'source_files': {
         **{'locomotion/'+name: digest for name, digest in source_files(root).items()},
-        **{'locomotion/'+name: sha(root/name) for name in ('omniwalk/features.py', 'priors/dataset.py', 'priors/processing_sources_v2.json')}}}
+        **{'locomotion/'+name: sha(root/name) for name in ('omniwalk/mdp/observations.py', 'priors/dataset.py', 'priors/processing_sources_v2.json')}}}
 
 
 def validate_processing_identity(processing):

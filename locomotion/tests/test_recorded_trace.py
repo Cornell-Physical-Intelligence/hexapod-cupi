@@ -9,12 +9,12 @@ import unittest
 import numpy as np
 import torch
 
-import locomotion.omniwalk.commands as commands
-import locomotion.omniwalk.env as env
+import locomotion.omniwalk.mdp.commands as commands
+import locomotion.omniwalk.adapter as env
 import locomotion.omniwalk.env_cfg as env_config
-import locomotion.omniwalk.motor as motor
+import locomotion.omniwalk.mdp.motor as motor
 import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
-import locomotion.omniwalk.robot as robot
+import locomotion.robots.hexapod as robot
 
 ROOT = Path(__file__).resolve().parents[2]
 FROZEN = ROOT/'locomotion/tests/fixtures/baseline'

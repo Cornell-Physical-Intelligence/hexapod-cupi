@@ -23,11 +23,11 @@ class DependencyIdentityTests(unittest.TestCase):
             source = output/'source'
             manifest = verify_runtime(source)
             self.assertEqual(manifest['schema'], 'hexapod_runtime_sources_v2')
-            for path in ('locomotion/omniwalk/motor.py', 'locomotion/omniwalk/task.py',
-                         'locomotion/omniwalk/env.py', 'locomotion/omniwalk/ppo.py'):
+            for path in ('locomotion/omniwalk/mdp/motor.py', 'locomotion/omniwalk/task.py',
+                         'locomotion/omniwalk/adapter.py', 'locomotion/rl/ppo.py'):
                 self.assertIn(path, manifest['files'])
             self.assertFalse(any('/tests/' in name for name in manifest['files']))
-            path = source/'locomotion/omniwalk/motor.py'
+            path = source/'locomotion/omniwalk/mdp/motor.py'
             path.write_text(path.read_text() + '\n# tampered\n')
             with self.assertRaisesRegex(ValueError, 'Runtime dependency'):
                 verify_runtime(source)
@@ -35,16 +35,16 @@ class DependencyIdentityTests(unittest.TestCase):
     def test_nested_physics_dependencies_cannot_reuse_standing_identity(self):
         files = source_files(ROOT)
         physics = physics_files(files)
-        for name in ('omniwalk/motor.py', 'omniwalk/frames.py', 'omniwalk/isaac.py', 'omniwalk/actuator.py',
+        for name in ('omniwalk/mdp/motor.py', 'omniwalk/mdp/frames.py', 'omniwalk/env.py', 'robots/actuator.py',
                      'evaluation/capture.py', 'evaluation/scoring.py'):
             self.assertIn(name, physics)
             changed = dict(files, **{name: '0'*64})
             self.assertNotEqual(physics, physics_files(changed))
-        self.assertNotIn('omniwalk/ppo.py', physics)
+        self.assertNotIn('rl/ppo.py', physics)
 
     def test_physics_closure_starts_at_the_environment_and_its_configuration(self):
         paths = physics_files(source_files(ROOT))
-        self.assertIn('omniwalk/env.py', paths)
+        self.assertIn('omniwalk/adapter.py', paths)
         self.assertIn('omniwalk/env_cfg.py', paths)
 
     def test_identity_checks_reject_each_changed_key_and_runtime_source(self):
@@ -57,19 +57,19 @@ class DependencyIdentityTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 require_checkpoint_identity(record, identity)
         identity.update(schema='hexapod_locomotion_ppo_v2', runtime_sources={'schema': 'hexapod_runtime_sources_v2',
-                        'files': {'locomotion/omniwalk/motor.py': 'a'*64}})
+                        'files': {'locomotion/omniwalk/mdp/motor.py': 'a'*64}})
         record = {'identity': deepcopy(identity)}
         require_checkpoint_identity(record, identity)
-        record['identity']['runtime_sources']['files']['locomotion/omniwalk/motor.py'] = 'b'*64
+        record['identity']['runtime_sources']['files']['locomotion/omniwalk/mdp/motor.py'] = 'b'*64
         with self.assertRaisesRegex(ValueError, 'runtime dependencies'):
             require_checkpoint_identity(record, identity)
 
     def test_learner_configuration_uses_package_classes(self):
         config = ppo_config(17, action_mean='tanh', learning_rate_max=.0003)
         self.assertEqual(config['algorithm']['class_name'],
-                         'locomotion.omniwalk.ppo:CappedRatePPO')
+                         'locomotion.rl.ppo:CappedRatePPO')
         self.assertEqual(config['actor']['distribution_cfg']['class_name'],
-                         'locomotion.omniwalk.ppo:BoundedMeanGaussian')
+                         'locomotion.rl.ppo:BoundedMeanGaussian')
 
     def test_checkpoint_module_adds_no_global_import_hook(self):
         before = list(sys.meta_path)
@@ -84,7 +84,7 @@ if __name__ == '__main__':
 class SharedValidationTests(unittest.TestCase):
     def test_prepare_and_training_share_one_validation(self):
         """The host preparer and the container trainer accept the same packs only if they share one rule set."""
-        import locomotion.omniwalk.train as train
+        import locomotion.scripts.train as train
         import locomotion.spark.prepare as prepare_module
         import locomotion.spark.validation as validation
         for name in ('update_limit', 'validate_decay', 'validate_deadline'):

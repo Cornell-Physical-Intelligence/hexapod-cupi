@@ -44,7 +44,7 @@ class FrozenBaselineParityTests(unittest.TestCase):
     def module(self, name, baseline=False):
         if baseline:
             return importlib.import_module(BASELINE + '.' + name)
-        path = 'omniwalk.ppo' if name == 'ppo' else 'omniwalk.' + name
+        path = {'task': 'omniwalk.task', 'commands': 'omniwalk.mdp.commands', 'ppo': 'rl.ppo', 'wrapper': 'rl.wrapper', 'agents.rsl_rl_ppo_cfg': 'omniwalk.agents.rsl_rl_ppo_cfg'}[name]
         return importlib.import_module('locomotion.' + path)
 
     def exact(self, actual, expected):

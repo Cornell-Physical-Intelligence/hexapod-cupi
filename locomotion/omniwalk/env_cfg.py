@@ -3,7 +3,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 import math
 
-from locomotion.omniwalk.robot import JOINT_NAMES, LEGS
+from locomotion.robots.hexapod import JOINT_NAMES, LEGS
 
 
 @dataclass(frozen=True)
@@ -55,7 +55,7 @@ def make_config(cfg, asset, neutral, reset_height, output):
     from isaaclab.sim import SimulationCfg, UsdFileCfg, ArticulationRootPropertiesCfg
     from isaaclab.utils import configclass
     from isaaclab_physx.physics import PhysxCfg
-    from locomotion.omniwalk.actuator import MotorCfg
+    from locomotion.robots.actuator import MotorCfg
 
     @configclass
     class NativeConfig(DirectRLEnvCfg):

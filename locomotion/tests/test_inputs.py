@@ -22,7 +22,7 @@ class PortableInputsTests(unittest.TestCase):
                 mode='diagnostic', inputs=packed/'inputs.json')
             source = root/'launch/source'
             self.assertIn(prepare.REMOTE_ROOT, Path(binding['prior']).parents)
-            result = subprocess.run([sys.executable, '-m', 'locomotion.omniwalk.train',
+            result = subprocess.run([sys.executable, '-m', 'locomotion.scripts.train',
                 '--mode', 'diagnostic', '--asset', str(packed/'asset'),
                 '--model', str(packed/'asset/source/model.json'),
                 '--geometry', str(packed/'geometry_source/geometry/geometry.json'),

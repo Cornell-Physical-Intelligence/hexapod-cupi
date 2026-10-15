@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 from locomotion.omniwalk.env_cfg import EnvConfig
-from locomotion.omniwalk.robot import MODEL_SHA256, USD_SHA256, sha
+from locomotion.robots.hexapod import MODEL_SHA256, USD_SHA256, sha
 from locomotion.evaluation.admission import require_admission
 
 

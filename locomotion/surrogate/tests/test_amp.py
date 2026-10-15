@@ -8,7 +8,7 @@ from rsl_rl.runners import OnPolicyRunner
 
 from locomotion.priors.amp import AMPConfig, AMPVecEnv, amp_ppo_config
 from locomotion.surrogate.env import make_env
-from locomotion.omniwalk.commands import TaskConfig
+from locomotion.omniwalk.mdp.commands import TaskConfig
 from locomotion.omniwalk.task import TrainingTask
 
 

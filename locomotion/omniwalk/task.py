@@ -7,9 +7,9 @@ import math
 
 import torch
 
-from locomotion.omniwalk.commands import TaskConfig, command_bank
-from locomotion.omniwalk.frames import inverse_rotate, navigation
-from locomotion.omniwalk.reward import (CONTROL_DT_S, REWARD_CONFIG, REWARD_VERSION, SCHEMA, StrideWindow,
+from locomotion.omniwalk.mdp.commands import TaskConfig, command_bank
+from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation
+from locomotion.omniwalk.mdp.rewards import (CONTROL_DT_S, REWARD_CONFIG, REWARD_VERSION, SCHEMA, StrideWindow,
                                     displacement_velocity, measured_reward, scheduled_swing)
 
 METRIC_COMMAND_CLASSES = ("zero", "linear_0.025", "linear_0.05", "yaw", "arc", "other")
@@ -386,7 +386,7 @@ class TrainingTask:
                 "reward": {"version": REWARD_VERSION, "config": asdict(self.reward_config)},
                 "nonzero_command_bank": self.bank.cpu().tolist(),
                 "source_sha256": hashlib.sha256(b"".join((Path(__file__).parent / name).read_bytes()
-                    for name in ("task.py", "reward.py", "commands.py"))).hexdigest(),
+                    for name in ("task.py", "mdp/rewards.py", "mdp/commands.py"))).hexdigest(),
                 "physics_changed": True, "stage2_gates_changed": False, "stage2_complete": False}
 
     def __getattr__(self, name):

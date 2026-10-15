@@ -14,7 +14,7 @@ import torch
 from locomotion.spark.prepare import prepare
 from locomotion.surrogate import replay
 from locomotion.surrogate.env import ROOT, make_env
-from locomotion.omniwalk.commands import TaskConfig
+from locomotion.omniwalk.mdp.commands import TaskConfig
 from locomotion.omniwalk.task import TrainingTask
 
 PACKAGE = ROOT / "locomotion/surrogate"

@@ -32,7 +32,7 @@ const input = (id, value) => {
 const click = (id, data) => fire(id, 'click', {target:{closest:() => ({dataset:data})}});
 
 // Packages: one square each, sized and labelled, with arrows for imports between packages.
-for (const name of ['omniwalk', 'tripod', 'priors', 'surrogate', 'evaluation', 'spark']) {
+for (const name of ['omniwalk', 'tripod', 'priors', 'surrogate', 'evaluation', 'spark', 'robots', 'rl', 'scripts']) {
   assert.ok(html('packages').includes(`data-package="${name}"`), `Missing package ${name}`);
 }
 assert.ok(!html('packages').includes('data-package="tests"'), 'Tests stay hidden by default');
@@ -53,15 +53,15 @@ assert.ok(html('file').includes('Imported by:') && html('file').includes('Import
 // Search marks matches in red and opens the first matching file.
 input('query', 'StrideWindow');
 assert.ok(elements.get('count').textContent.startsWith('1 file matches'));
-assert.ok(html('results').includes('data-file="locomotion/omniwalk/reward.py"'));
+assert.ok(html('results').includes('data-file="locomotion/omniwalk/mdp/rewards.py"'));
 assert.ok(/class="pkg[^"]* hit" data-package="omniwalk"/.test(html('packages')));
-assert.ok(/class="file[^"]* hit" data-module="locomotion\/omniwalk\/reward.py"/.test(html('files')));
+assert.ok(/class="file[^"]* hit" data-module="locomotion\/omniwalk\/mdp\/rewards.py"/.test(html('files')));
 assert.ok(/class="sym class hit"/.test(html('strip')), 'The matching class block turns red');
 input('query', 'OmniVecEnv');
-assert.ok(html('results').includes('locomotion/omniwalk/wrapper.py'));
-assert.equal(elements.get('file-heading').textContent, 'omniwalk/wrapper.py');
-click('results', {file:'locomotion/omniwalk/motor.py'});
-assert.equal(elements.get('file-heading').textContent, 'omniwalk/motor.py');
+assert.ok(html('results').includes('locomotion/rl/wrapper.py'));
+assert.equal(elements.get('file-heading').textContent, 'rl/wrapper.py');
+click('results', {file:'locomotion/omniwalk/mdp/motor.py'});
+assert.equal(elements.get('file-heading').textContent, 'omniwalk/mdp/motor.py');
 
 // Retired wrappers have no filter; tests retain their toggle.
 assert.ok(!markup.includes('id="compatibility"'));
@@ -73,5 +73,5 @@ input('tests', true);
 assert.ok(html('results').includes('locomotion/tests/test_native_ranges.py'));
 assert.ok(html('packages').includes('data-package="tests"'));
 input('query', 'emitted_target');
-assert.ok(html('results').includes('locomotion/omniwalk/motor.py'));
+assert.ok(html('results').includes('locomotion/omniwalk/mdp/motor.py'));
 console.log('Code-map package squares, import arrows, file tiles, definition bar, search marking and toggles verified');

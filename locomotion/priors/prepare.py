@@ -9,7 +9,7 @@ import shutil
 from .model import ROOT, digest
 from locomotion.spark.prepare import prepare as prepare_kernel
 from .replay_native import validate_trajectory
-from locomotion.omniwalk.robot import MODEL_SHA256
+from locomotion.robots.hexapod import MODEL_SHA256
 from locomotion.spark.safety import RUN_ROOTS, within_roots
 from locomotion.spark.validation import CLEANUP_MARGIN_SECONDS
 

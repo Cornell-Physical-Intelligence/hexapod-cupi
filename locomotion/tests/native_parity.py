@@ -42,7 +42,7 @@ def require_comparison_physics(recorded, candidate):
 
 def replay():
     from contracts import release
-    import locomotion.omniwalk.train as train
+    import locomotion.scripts.train as train
     args = sys.argv[1:]
     def option(name):
         if args.count(name) != 1:
@@ -75,11 +75,11 @@ def launch():
     proof()
     original = supervisor.command
     def command(binding, paths, name):
-        if binding['module'] != 'locomotion.omniwalk.train' or binding['mode'] != 'evaluate':
+        if binding['module'] != 'locomotion.scripts.train' or binding['mode'] != 'evaluate':
             raise ValueError('The parity launcher accepts evaluation only')
         argv = original(binding, paths, name)
         index = argv.index('-m') + 1
-        if argv[index] != 'locomotion.omniwalk.train':
+        if argv[index] != 'locomotion.scripts.train':
             raise ValueError('Unexpected parity entry point')
         argv[index] = 'locomotion.tests.native_parity'
         return argv

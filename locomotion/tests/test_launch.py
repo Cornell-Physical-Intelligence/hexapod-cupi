@@ -23,7 +23,7 @@ class OwnedLaunchTests(unittest.TestCase):
     def binding(self):
         root = "/home/orionh/HEXAPOD_runs/restart_20260914/launcher_fixture"
         return {"schema": "hexapod_locomotion_launch_v1", "root_review_complete": True,
-                "mode": "diagnostic", "module": "locomotion.omniwalk.train", "max_seconds": 7200,
+                "mode": "diagnostic", "module": "locomotion.scripts.train", "max_seconds": 7200,
                 **{key: root+"/"+key for key in ("source", "output", "asset", "prior", "geometry_source")},
                 "source_freeze_sha256": "a"*64, "input_files": {}, "stage2_complete": False,
                 "physical_admission": False,
@@ -49,9 +49,9 @@ class OwnedLaunchTests(unittest.TestCase):
     def test_output_and_readonly_inputs_match_supervisor(self):
         paths = {k: Path("/home/orionh/HEXAPOD_runs/restart_20260914") / k
                  for k in ("source", "output", "asset", "prior", "geometry_source")}
-        binding = {"module": "locomotion.omniwalk.train", "command_args": ["--mode", "diagnostic", "--headless"], "extra_mounts": []}
+        binding = {"module": "locomotion.scripts.train", "command_args": ["--mode", "diagnostic", "--headless"], "extra_mounts": []}
         args = launch.command(binding, paths, "hexapod-reference-physics-" + "a"*32)
-        self.assertEqual(args[-7:], ["-m", "locomotion.omniwalk.train", "--output", "/output/standing", "--mode", "diagnostic", "--headless"])
+        self.assertEqual(args[-7:], ["-m", "locomotion.scripts.train", "--output", "/output/standing", "--mode", "diagnostic", "--headless"])
         mounts = [args[i+1] for i, value in enumerate(args) if value == "-v"]
         self.assertEqual(sum(x.endswith(":rw") for x in mounts), 1)
         self.assertIn(str(paths["output"])+":/output:rw", mounts)

@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion.omniwalk.features import extract_features, feature_contract, observations
+from locomotion.omniwalk.mdp.observations import extract_features, feature_contract, observations
 
 
 class AMPFeatureTests(unittest.TestCase):

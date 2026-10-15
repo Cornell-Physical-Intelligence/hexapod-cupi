@@ -9,7 +9,7 @@ import torch
 from rsl_rl.algorithms import PPO
 
 import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
-import locomotion.omniwalk.wrapper as wrapper
+import locomotion.rl.wrapper as wrapper
 
 
 class MixedTask:

@@ -14,8 +14,8 @@ import time
 import numpy as np
 import torch
 from locomotion.omniwalk.env_cfg import EnvConfig
-from locomotion.omniwalk.motor import STIFFNESS_NM_PER_RAD
-from locomotion.omniwalk.robot import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256
+from locomotion.omniwalk.mdp.motor import STIFFNESS_NM_PER_RAD
+from locomotion.robots.hexapod import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256
 from locomotion.evaluation.capture import DiagnosticGeometry, classify_patches, diagnostic_rotation, diagnostic_servo
 from locomotion.evaluation.force_metrics import write_summary
 import locomotion.evaluation.scoring as scoring

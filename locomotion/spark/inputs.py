@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 import shutil
 
-from locomotion.omniwalk.robot import sha, verify_assets
+from locomotion.robots.hexapod import sha, verify_assets
 from locomotion.spark.safety import INPUT_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[2]
