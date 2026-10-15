@@ -175,14 +175,14 @@
       "previous_path": "locomotion/gait_clock/env.py",
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Expose named observations and task resets around the stock Direct environment."
+      "purpose": "Expose OmniEnv, the task-facing surface over IsaacEnv that the MuJoCo surrogate also implements."
     },
     {
       "path": "locomotion/omni/isaac.py",
       "previous_path": "locomotion/omni/native.py",
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Run stock Direct stepping, check the native scene and capture contacts and submitted torque."
+      "purpose": "Subclass DirectRLEnv to own the scene, native views and checks, substep capture, telemetry and reset writes."
     },
     {
       "path": "locomotion/omni/ppo.py",
@@ -203,7 +203,7 @@
       "previous_path": "locomotion/gait_clock/train.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Train or evaluate standard PPO on the admitted canonical simulator."
+      "purpose": "Parse, validate and bind native diagnostic, training, probe and evaluation runs for PPO or AMP."
     },
     {
       "path": "locomotion/priors/__init__.py",
@@ -284,7 +284,7 @@
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Run the interface of the native locomotion environment on CPU MuJoCo physics for design work; native runs remain the acceptance evidence."
+      "purpose": "Run the OmniEnv interface on CPU MuJoCo physics for design work; native runs remain the acceptance evidence."
     },
     {
       "path": "locomotion/surrogate/evaluate.py",
@@ -347,7 +347,7 @@
       "previous_path": "locomotion/tools/checkpoint.py",
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Verify hash-pinned checkpoint evaluation receipts and native parity evidence."
+      "purpose": "Check checkpoint learner and model identity, and verify compatibility receipts against three frozen baseline ranges."
     },
     {
       "path": "locomotion/evaluation/force_metrics.py",
@@ -396,14 +396,14 @@
       "previous_path": "locomotion/tools/runner.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Stdlib-only evaluation timeout recipe; no simulator or learner imports."
+      "purpose": "Orchestrate native policy evaluation over the frozen case manifest and the learning probes."
     },
     {
       "path": "locomotion/spark/safety.py",
       "previous_path": "locomotion/tools/safety.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Bound CUPI allocations and retain the historical Spark path contract."
+      "purpose": "Check guarded run and input roots, pinned files and frozen trees; hold both GPU locks and clean up owned containers."
     },
     {
       "path": "locomotion/evaluation/scoring.py",
@@ -417,7 +417,7 @@
       "previous_path": "locomotion/tools/sources.py",
       "classification": "current",
       "owner": "Locomotion lead",
-      "purpose": "Hash the runtime closure, including nested implementation modules."
+      "purpose": "Hash the runtime sources and the physics import closure of the environment, standing capture and scorer."
     },
     {
       "path": "locomotion/spark/validation.py",

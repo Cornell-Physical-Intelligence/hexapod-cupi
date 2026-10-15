@@ -216,7 +216,7 @@ def build_parser():
     parser.add_argument("--action-mean", choices=["unbounded", "tanh"], default="unbounded")
     parser.add_argument("--observation-normalization", choices=["empirical", "none"], default="empirical")
     parser.add_argument("--observation-scaling", choices=["none", "fixed"], default="none",
-                        help="Pass raw observations or apply the fixed input scales declared in ppo.py.")
+                        help="Pass raw observations or apply the fixed input scales declared in omni/wrapper.py.")
     parser.add_argument("--command-segments", choices=["continuous", "bootstrap"], default="continuous",
                         help="Carry returns across command changes or bootstrap the return at each change.")
     parser.add_argument("--learning-rate-max", type=float,

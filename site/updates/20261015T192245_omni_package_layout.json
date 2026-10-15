@@ -1,0 +1,39 @@
+{
+  "id": "20261015T192245_omni_package_layout",
+  "date": "2026-10-15T19:22:45Z",
+  "title": "Reorganize the locomotion packages by experiment and concern",
+  "summary": "We renamed gait_clock to omni and behavior_cloning to tripod, and we split the shared tools into evaluation and spark. Each omni concern now has its own module: IsaacEnv is the omni task's one Direct environment class, and OmniEnv is the surface that the MuJoCo surrogate shares. The physics identity changed, so native standing admission and the 13-probe parity check remain pending.",
+  "areas": [
+    "locomotion",
+    "documentation",
+    "developer map"
+  ],
+  "next": "Run fresh native standing admission and the 13-probe parity of the unchanged c48_long checkpoint on Spark, then request full PR review.",
+  "changes": [
+    "locomotion/**",
+    "configs/source_inventory.json",
+    "tools/code_map.py",
+    "tools/check_pipeline_lineages.py",
+    "tests/test_code_map.py",
+    "site/test_code_map.mjs",
+    "site/updates/20261015T192245_omni_package_layout.json",
+    ".github/workflows/tests.yml",
+    "ARCHITECTURE.md",
+    "CONTRIBUTING.md",
+    "SPARK.md",
+    "docs/TRAINING.md",
+    "docs/OPERATIONS.md",
+    "docs/RS05_SPEC_REVIEW.md"
+  ],
+  "evidence": [
+    "locomotion/README.md",
+    "locomotion/priors/README.md",
+    "locomotion/surrogate/README.md",
+    "configs/source_inventory.json",
+    "locomotion/tests/test_frozen_baseline_parity.py",
+    "locomotion/tests/test_dependency_identity.py",
+    "locomotion/tests/test_direct_environment.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The refactor moves and splits locomotion modules and updates the guides. It adds no motion result and changes no gate; native admission of the changed physics identity stays pending."
+}

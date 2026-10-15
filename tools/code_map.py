@@ -166,14 +166,14 @@ PAGE = r'''<!doctype html>
 </main>
 <script>const DATA=__DATA__;
 const PACKAGES=[
-['omni','Omni','Omnidirectional PPO task and explicit motor control.'],
-['tripod','Tripod','Scripted tripod BC and stock PPO fine-tuning.'],
-['priors','Motion priors','Demonstrations and AMP learning.'],
-['surrogate','CPU surrogate','MuJoCo training and trace replay.'],
-['evaluation','Evaluation','Native capture, checkpoint identity and motion scoring.'],
-['spark','Spark','Prepare, launch and bind native allocations.'],
+['omni','omni','Omnidirectional walking task and PPO.'],
+['tripod','tripod','Original tripod task with BC and PPO fine-tuning.'],
+['priors','priors','Motion demonstrations and AMP learning.'],
+['surrogate','surrogate','CPU MuJoCo training and trace replay.'],
+['evaluation','evaluation','Native capture, checkpoint identity and motion scoring.'],
+['spark','spark','Prepare, launch and bind native allocations.'],
 ['package','Locomotion','Package initialization.'],
-['tests','Tests','Unit and parity tests.']
+['tests','tests','CPU, parity and native replay tests.']
 ];
 const TITLE=Object.fromEntries(PACKAGES.map(p=>[p[0],p[1]])), PURPOSE=Object.fromEntries(PACKAGES.map(p=>[p[0],p[2]]));
 const el=id=>document.getElementById(id), esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

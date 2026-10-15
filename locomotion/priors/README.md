@@ -8,7 +8,7 @@ to the approved model and reviewed native clips.
 | Module | Purpose |
 | --- | --- |
 | `model.py`, `optimize.py` | Full-body inverse dynamics and constrained periodic trajectory optimization through CasADi/Ipopt. |
-| `prepare.py`, `replay_native.py` | Pack and replay solved targets through the guarded native environment. |
+| `prepare.py`, `replay_native.py` | Pack and replay solved targets through the native `OmniEnv`. |
 | `dataset.py` | Audit the command bank, require motion review, export and verify raw transitions. |
 | `amp.py`, `discriminator.py` | Extend stock RSL-RL PPO with the style reward, discriminator and checkpoint state. |
 | `networks.py` | Retain the history encoder, supervised velocity estimator and privileged critic comparison. |
@@ -37,9 +37,10 @@ or export reset/terminal transitions.
 
 ## Feature and learner contracts
 
-Each raw state has 61 values: 18 joint positions, 18 joint velocities,
-body-frame root-origin linear velocity, angular velocity, root height and six
-body-frame toe positions. Adjacent states span 0.02 s. The discriminator reads
+[`omni/features.py`](../omni/features.py) gives each raw state 61 values: 18
+joint positions, 18 joint velocities, body-frame root-origin linear velocity,
+angular velocity, root height and six body-frame toe positions. Adjacent states
+span 0.02 s. The discriminator reads
 122-value pairs and standardizes them using the admitted bank. It learns
 least-squares prior/policy targets and a gradient penalty; its style reward lies
 in [0,1]. The online penalty differentiates standardized prior inputs.
