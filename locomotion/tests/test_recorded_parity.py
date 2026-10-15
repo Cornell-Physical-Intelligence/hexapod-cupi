@@ -9,11 +9,11 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion.backends.isaac import env as env
-from locomotion.backends.isaac import config as env_config
-from locomotion import evaluation
-from locomotion.learning import ppo as ppo
-from locomotion.tasks import task as task
+import locomotion.gait_clock.env as env
+import locomotion.gait_clock.config as env_config
+import locomotion.tools as evaluation
+import locomotion.gait_clock.ppo as ppo
+import locomotion.gait_clock.task as task
 
 ROOT = Path(__file__).resolve().parents[2]
 FROZEN = ROOT/'locomotion/tests/fixtures/baseline'
@@ -78,7 +78,7 @@ class RecordedParityTests(unittest.TestCase):
             torch.testing.assert_close(training[key], actual[key], atol=0, rtol=0)
 
     def test_command_bank_ppo_settings_and_numerical_gate_bytes_remain_frozen(self):
-        self.assertEqual((ROOT/'locomotion/evaluation/scoring.py').read_bytes(), (FROZEN/'evaluation.py').read_bytes())
+        self.assertEqual((ROOT/'locomotion/tools/scoring.py').read_bytes(), (FROZEN/'evaluation.py').read_bytes())
         self.assertEqual(ppo.ppo_config(20260914), self.old['vanilla'].ppo_config(20260914))
         self.assertEqual(task.command_bank(task.TaskConfig()),
                          self.old['task'].command_bank(self.old['task'].TaskConfig()))

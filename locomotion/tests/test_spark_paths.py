@@ -9,11 +9,11 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from locomotion.runs import inputs as inputs
-from locomotion.runs import launch as launch
-from locomotion.runs import prepare as prepare
-from locomotion.runs import reservation as reservation
-from locomotion.runs.spark_paths import CUPI_ROOT, LEGACY_ROOT, INPUT_ROOTS, RUN_ROOTS, within_roots
+import locomotion.tools.inputs as inputs
+import locomotion.tools.launch as launch
+import locomotion.tools.prepare as prepare
+import locomotion.tools.safety as reservation
+from locomotion.tools.safety import CUPI_ROOT, LEGACY_ROOT, INPUT_ROOTS, RUN_ROOTS, within_roots
 
 
 class SparkWorkspaceTests(unittest.TestCase):
@@ -31,7 +31,7 @@ class SparkWorkspaceTests(unittest.TestCase):
                             '--stance': packed / 'prior/stance.json'}
             for option, value in replacements.items():
                 args[args.index(option) + 1] = str(value)
-            result = subprocess.run([sys.executable, '-B', '-m', 'locomotion.runs.train',
+            result = subprocess.run([sys.executable, '-B', '-m', 'locomotion.gait_clock.train',
                                      '--output', str(root / 'unused'), '--preflight-only', *args],
                                     cwd=root / 'attempt/source', capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)

@@ -12,10 +12,10 @@ import torch
 from tensordict import TensorDict
 from rsl_rl.algorithms import PPO
 
-from locomotion.learning import ppo as ppo
-from locomotion.runs.prepare import prepare
-from locomotion.learning.rate_schedule import CappedRatePPO
-from locomotion.runs.train import require_learner_configuration
+import locomotion.gait_clock.ppo as ppo
+from locomotion.tools.prepare import prepare
+from locomotion.gait_clock.algorithm import CappedRatePPO
+from locomotion.gait_clock.train import require_learner_configuration
 
 REMOTE = '/srv/cupi/hexapod/runs/james/learner_options_fixture'
 OPTIONS = dict(observation_scaling='fixed', command_segments='bootstrap', learning_rate_max=3e-4, action_std=.1,
@@ -146,10 +146,10 @@ class LearnerOptionTests(unittest.TestCase):
         self.assertGreater(rates['stock'], 1e-3)
 
     def test_correlated_noise_keeps_the_gaussian_marginal_and_carries_noise_between_controls(self):
-        from locomotion.learning.action_distribution import BoundedMeanGaussian, CorrelatedBoundedMeanGaussian
+        from locomotion.gait_clock.algorithm import BoundedMeanGaussian, CorrelatedBoundedMeanGaussian
         config = ppo.ppo_config(3, action_mean='tanh', action_noise_correlation=.9)
         self.assertEqual(config['actor']['distribution_cfg']['class_name'],
-                         'locomotion.learning.action_distribution:CorrelatedBoundedMeanGaussian')
+                         'locomotion.gait_clock.algorithm:CorrelatedBoundedMeanGaussian')
         self.assertEqual(config['actor']['distribution_cfg']['noise_correlation'], .9)
         self.assertNotIn('noise_correlation', ppo.ppo_config(3, action_mean='tanh')['actor']['distribution_cfg'])
         for bad in (dict(action_noise_correlation=.9), dict(action_mean='tanh', action_noise_correlation=1.),
@@ -304,7 +304,7 @@ class LearnerOptionTests(unittest.TestCase):
                     self.assertEqual(args[args.index(flag)+1], value)
                 pack = json.loads((root/mode/'PACK.json').read_text())
                 self.assertEqual({key: pack[key] for key in OPTIONS}, OPTIONS)
-                self.assertIn('locomotion/learning/rate_schedule.py', json.loads((root/mode/'source/FREEZE_SHA256.json').read_text()))
+                self.assertIn('locomotion/gait_clock/algorithm.py', json.loads((root/mode/'source/FREEZE_SHA256.json').read_text()))
             legacy = prepare(root/'legacy', REMOTE)
             self.assertFalse({'--observation-scaling', '--command-segments', '--learning-rate-max', '--action-std',
                               '--action-noise-correlation', '--action-std-final', '--video-case'}
@@ -353,7 +353,7 @@ class LearnerOptionTests(unittest.TestCase):
                                          dict(mode='tripod', steps_per_env=36))):
                 with self.subTest(bad=bad), self.assertRaises(ValueError):
                     prepare(root/f'bad{index}', REMOTE, **bad)
-        from locomotion.runs import train as train
+        import locomotion.gait_clock.train as train
         # Metrics rows, state and checkpoint sidecars count the configured rollout, not a fixed 24 controls.
         for steps, updates, collected in ((24, 2000, 6_144_000), (36, 1333, 6_142_464), (48, 2500, 15_360_000)):
             self.assertEqual(train.collected_transitions(updates, ppo.ppo_config(7, steps_per_env=steps), 128), collected)

@@ -33,7 +33,7 @@ and qualification.
 | Package | Responsibility |
 | --- | --- |
 | [`robot/`](robot/active_model.json) | Select the approved model and its motor corrections. Keep model identity with simulation inputs and results. |
-| [`locomotion/`](locomotion/README.md) | Train and evaluate the walking controller. Separate control arithmetic, simulator backends, tasks, learning, evaluation and run packaging. |
+| [`locomotion/`](locomotion/README.md) | Train and evaluate the walking controller. Keep the gait-clock and behavior-cloning experiments separate; share evaluation tools and motion-prior data. |
 | [`contracts/`](contracts/README.md) | Define shared velocity commands and planar poses without simulator dependencies. Retain checkpoint identity checks. |
 | [`navigation/`](navigation/README.md) | Plan routes and turn poses into bounded velocity commands. The current implementation is a waypoint follower example. |
 | [`mission/`](mission/README.md) | Future operator controls and mission execution. Existing sensor prototypes remain separate from GPS navigation. |

@@ -12,24 +12,24 @@ class PackageCutoverTests(unittest.TestCase):
                          ['README.md', '__init__.py'])
 
     def test_learner_configuration_uses_package_classes(self):
-        from locomotion.learning.config import ppo_config
+        from locomotion.gait_clock.config import ppo_config
         config = ppo_config(17, action_mean='tanh', learning_rate_max=.0003)
         self.assertEqual(config['algorithm']['class_name'],
-                         'locomotion.learning.rate_schedule:CappedRatePPO')
+                         'locomotion.gait_clock.algorithm:CappedRatePPO')
         self.assertEqual(config['actor']['distribution_cfg']['class_name'],
-                         'locomotion.learning.action_distribution:BoundedMeanGaussian')
+                         'locomotion.gait_clock.algorithm:BoundedMeanGaussian')
 
     def test_dependency_roots_use_implementations(self):
-        from locomotion.runs.sources import physics_files, source_files
+        from locomotion.tools.sources import physics_files, source_files
         paths = physics_files(source_files(ROOT))
-        self.assertIn('backends/isaac/env.py', paths)
-        self.assertIn('backends/isaac/config.py', paths)
+        self.assertIn('gait_clock/env.py', paths)
+        self.assertIn('gait_clock/config.py', paths)
         self.assertNotIn('env.py', paths)
 
     def test_compatibility_has_no_global_import_hook(self):
         import sys
         before = list(sys.meta_path)
-        importlib.import_module('locomotion.runs.compat')
+        importlib.import_module('locomotion.tools.checkpoint')
         self.assertEqual(before, sys.meta_path)
 
 

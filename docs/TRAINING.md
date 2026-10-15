@@ -31,7 +31,7 @@ full-body hardware trials.
 | Actions | Joint-position offsets, baseline scale 0.35 rad; retain the 0.040 rad per 20 ms target-change limit for comparisons. |
 | Motors | Named damping and the approved speed-dependent effort curve; provisional 1.6 N·m software cap. |
 | Observations | Baseline actor: 231 values from five proprioception frames, velocity command and executed action. Critic: 234 values with measured velocity. Record optional inputs, including gait-clock values, in the task configuration. |
-| Learning | c48_long uses its recorded yaw-gated reward. Shaurya’s BC/PPO experiment retains its original reward and configuration; record each result under its own setup. |
+| Learning | c48_long uses its recorded yaw-gated reward. The behavior-cloning experiment retains its original reward and configuration; record each result under its own setup. |
 | Admission | Native standing passes at one robot and the intended batch size, matching the source and model/input identities. |
 
 You can change the implementation through reviewed experiments. Give changed
@@ -41,8 +41,8 @@ model. A package move alone cannot establish compatibility.
 
 ## Method and comparisons
 
-You preserve the c48_long PPO setup and Shaurya’s original BC/PPO setup. His
-scripted teacher covers forward/backward commands. His observation and actuator
+You preserve the c48_long PPO setup and the original BC/PPO setup. The
+scripted teacher covers forward/backward commands. Its observation and actuator
 contracts differ from c48; their results do not isolate the effect of BC. A
 controlled method comparison must hold those contracts fixed. Demonstrations or
 subsequent learning must cover lateral and yaw commands before you claim
@@ -51,13 +51,16 @@ omnidirectional BC.
 Freeze each comparison's configuration and budget before dispatch. Record the
 robot count and controls per update, reward terms and learner settings. Keep
 paper reproduction separate from adaptations for this robot. Use the
-[implementation guide](../locomotion/README.md) for supported commands. Historical
-AMP and prescribed-controller experiments remain in their recorded Git revisions.
+[implementation guide](../locomotion/README.md) for supported commands.
+
+AMP remains an active comparison: generate and review motion demonstrations, then
+train its discriminator alongside PPO. Preserve the same task and simulation
+settings when comparing PPO with AMP. Use `priors/` for that workflow.
 
 ## Acceptance
 
 You qualify Stage 2 against the full 96-case manifest and the unchanged gates
-in [the scorer](../locomotion/evaluation/scoring.py). The 13 learning probes
+in [the scorer](../locomotion/tools/scoring.py). The 13 learning probes
 provide intermediate diagnostics; they do not replace full qualification.
 The program lead must also accept the gait's appearance.
 

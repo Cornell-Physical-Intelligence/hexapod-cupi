@@ -14,6 +14,18 @@ class NativeRangeTests(unittest.TestCase):
                              'checks': {'drift': {'value': value, 'bound': 9, 'operator': '<=', 'status': 'pass'}}}
                             for i in range(13)]}
 
+    def test_replay_allows_stock_scene_but_rejects_other_physics_changes(self):
+        from locomotion.tests.native_parity import require_comparison_physics
+        original = {'floor': '80m_two_triangle_mesh_y_equals_x_seam',
+                    'physics_dt': .0025, 'decimation': 8, 'target_slew_rad': .040}
+        require_comparison_physics(original, original)
+        stock = {**original, 'floor': 'isaaclab_ground_plane', 'filter_collisions': True}
+        require_comparison_physics(original, stock)
+        for key, value in [('physics_dt', .005), ('decimation', 4),
+                           ('target_slew_rad', .08), ('filter_collisions', False)]:
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                require_comparison_physics(original, {**stock, key: value})
+
     def test_three_baselines_freeze_bounds_and_candidate_cannot_widen_them(self):
         from locomotion.tests.native_ranges import freeze, compare
         baseline = [self.suite(value) for value in (1., 2., 3.)]

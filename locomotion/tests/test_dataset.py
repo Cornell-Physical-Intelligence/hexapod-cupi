@@ -9,7 +9,7 @@ import unittest
 
 import numpy as np
 
-from locomotion.runs import dataset
+import locomotion.priors.dataset as dataset
 
 
 class DatasetTests(unittest.TestCase):
@@ -32,6 +32,16 @@ class DatasetTests(unittest.TestCase):
         del historical['source_files']['locomotion/core/motor.py']
         with self.assertRaisesRegex(ValueError, 'processing source'):
             dataset.validate_processing_identity(historical)
+        current = dataset.processing_identity()
+        dataset.validate_processing_identity(current)
+        changed = copy.deepcopy(current)
+        del changed['source_files']['locomotion/priors/features.py']
+        with self.assertRaisesRegex(ValueError, 'processing source'):
+            dataset.validate_processing_identity(changed)
+        changed = copy.deepcopy(current)
+        changed['source_files']['locomotion/priors/features.py'] = 'invalid'
+        with self.assertRaisesRegex(ValueError, 'processing source'):
+            dataset.validate_processing_identity(changed)
         for schema in ('hexapod_processing_sources_v3', 'unreviewed'):
             with self.assertRaisesRegex(ValueError, 'processing source'):
                 dataset.validate_processing_identity({'schema': schema})

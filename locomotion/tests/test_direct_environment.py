@@ -3,11 +3,11 @@ import ast
 from pathlib import Path
 import unittest
 import torch
-from locomotion.backends.isaac.env import reset_rows
-from locomotion.backends.isaac.env import LocomotionEnv
-from locomotion.core.motor import emitted_target, executed_action_feature
+from locomotion.gait_clock.env import reset_rows
+from locomotion.gait_clock.env import LocomotionEnv
+from locomotion.gait_clock.control import emitted_target, executed_action_feature
 
-BACKEND = Path(__file__).resolve().parents[1] / "backends" / "isaac"
+BACKEND = Path(__file__).resolve().parents[1] / "gait_clock"
 
 
 class DirectEnvironmentContractTests(unittest.TestCase):
@@ -53,6 +53,42 @@ class DirectEnvironmentContractTests(unittest.TestCase):
         adapter_calls = [ast.unparse(n.func) for n in ast.walk(adapter) if isinstance(n, ast.Call)]
         self.assertIn("self.native._reset_idx", adapter_calls)
         self.assertIn("self.robot.write_joint_position_to_sim_index", adapter_calls)
+
+    def test_episode_clock_reuses_the_stock_buffer(self):
+        tree = ast.parse((BACKEND / "env.py").read_text())
+        bindings = [n for n in ast.walk(tree) if isinstance(n, ast.Assign)
+                    and any(ast.unparse(t) == "self.episode_steps" for t in n.targets)]
+        self.assertEqual(len(bindings), 1)
+        self.assertEqual(ast.unparse(bindings[0].value), "self.native.episode_length_buf")
+        writes = [n for n in ast.walk(tree) if isinstance(n, ast.AugAssign)
+                  and ast.unparse(n.target) == "self.episode_steps"]
+        self.assertEqual(writes, [])
+
+    def test_stock_collision_filter_keeps_the_shared_ground(self):
+        tree = ast.parse((BACKEND / "native.py").read_text())
+        native = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "NativeEnv")
+        setup = next(n for n in native.body if isinstance(n, ast.FunctionDef) and n.name == "_setup_scene")
+        filters = [n for n in ast.walk(setup) if isinstance(n, ast.Call)
+                   and ast.unparse(n.func) == "self.scene.filter_collisions"]
+        self.assertEqual(len(filters), 1)
+        self.assertEqual(ast.literal_eval(filters[0].keywords[0].value), ["/Ground"])
+        ground = next(n for n in ast.walk(setup) if isinstance(n, ast.Call)
+                      and ast.unparse(n.func) == "GroundPlaneCfg")
+        self.assertEqual(ast.literal_eval(ground.keywords[0].value), (80., 80.))
+        self.assertLess(ground.lineno, filters[0].lineno)
+        material = next(n for n in ast.walk(setup) if isinstance(n, ast.Call)
+                        and ast.unparse(n.func) == "RigidBodyMaterialCfg")
+        self.assertEqual({k.arg: ast.literal_eval(k.value) for k in material.keywords},
+                         {"static_friction": 1., "dynamic_friction": 1., "restitution": 0.,
+                          "friction_combine_mode": "multiply", "restitution_combine_mode": "multiply"})
+        config = ast.parse((BACKEND / "config.py").read_text())
+        scenes = [n for n in ast.walk(config) if isinstance(n, ast.Call)
+                  and ast.unparse(n.func) == "InteractiveSceneCfg"]
+        self.assertEqual(len(scenes), 2)
+        for scene in scenes:
+            values = {k.arg: ast.literal_eval(k.value) for k in scene.keywords
+                      if k.arg in ("filter_collisions", "replicate_physics")}
+            self.assertEqual(values, {"replicate_physics": False, "filter_collisions": True})
 
     def test_force_readback_brackets_physics_at_articulation_hooks(self):
         # Execute the production hook methods against a call recorder. This

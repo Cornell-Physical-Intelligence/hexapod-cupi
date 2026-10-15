@@ -29,9 +29,20 @@ def verify_weights(checkpoint):
         raise ValueError('Parity requires the unchanged c48_long weights and declaration')
 
 
+def require_comparison_physics(recorded, candidate):
+    """Permit the stock ground/isolation experiment; keep other physics fixed."""
+    expected = dict(recorded)
+    if candidate.get('floor') == 'isaaclab_ground_plane':
+        if recorded.get('floor') != '80m_two_triangle_mesh_y_equals_x_seam':
+            raise ValueError('Unknown comparison baseline floor')
+        expected.update(floor='isaaclab_ground_plane', filter_collisions=True)
+    if candidate != expected:
+        raise ValueError('Parity physics settings differ beyond ground and isolation')
+
+
 def replay():
     from contracts import release
-    from locomotion.runs import train as train
+    import locomotion.gait_clock.train as train
     args = sys.argv[1:]
     def option(name):
         if args.count(name) != 1:
@@ -43,14 +54,15 @@ def replay():
     checkpoint = Path(option('--checkpoint'))
     verify_weights(checkpoint)
     proof()
-    from locomotion.runs.compat import require_configuration
-    keys = tuple(key for key in release.COMPATIBILITY_KEYS if key not in SOURCE_KEYS)
+    from locomotion.tools.checkpoint import require_configuration
+    keys = tuple(key for key in release.COMPATIBILITY_KEYS if key not in SOURCE_KEYS | {'physics_config'})
     def compare_weight_abi(record, identity):
+        require_comparison_physics(record['identity']['physics_config'], identity['physics_config'])
         if any(record['identity'][key] != identity[key] for key in keys):
             raise ValueError('Parity weight ABI differs')
         train.require_learner_identity(record, identity)
     # Baseline main uses the contract tuple; candidate main calls the extracted helper.
-    # Keep model, physics settings, inputs, seed, upstream code and embedded metadata checks.
+    # Keep model, servo settings, inputs, seed, upstream code and embedded metadata checks.
     with patch.object(release, 'COMPATIBILITY_KEYS', keys), patch.object(
             train, 'require_checkpoint_identity', compare_weight_abi, create=True), patch.object(
             train, 'require_learner_configuration', require_configuration):
@@ -59,15 +71,15 @@ def replay():
 
 
 def launch():
-    from locomotion.runs import launch as supervisor
+    import locomotion.tools.launch as supervisor
     proof()
     original = supervisor.command
     def command(binding, paths, name):
-        if binding['module'] != 'locomotion.runs.train' or binding['mode'] != 'evaluate':
+        if binding['module'] != 'locomotion.gait_clock.train' or binding['mode'] != 'evaluate':
             raise ValueError('The parity launcher accepts evaluation only')
         argv = original(binding, paths, name)
         index = argv.index('-m') + 1
-        if argv[index] != 'locomotion.runs.train':
+        if argv[index] != 'locomotion.gait_clock.train':
             raise ValueError('Unexpected parity entry point')
         argv[index] = 'locomotion.tests.native_parity'
         return argv

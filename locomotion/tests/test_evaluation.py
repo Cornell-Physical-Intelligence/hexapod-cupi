@@ -6,7 +6,7 @@ import unittest
 
 import numpy as np
 
-from locomotion import evaluation as ev
+import locomotion.tools as ev
 
 ROOT = Path(__file__).resolve().parents[2]
 

@@ -8,7 +8,7 @@ from unittest.mock import patch
 import torch
 from rsl_rl.algorithms import PPO
 
-from locomotion.learning import ppo as ppo
+import locomotion.gait_clock.ppo as ppo
 
 
 class MixedTask:

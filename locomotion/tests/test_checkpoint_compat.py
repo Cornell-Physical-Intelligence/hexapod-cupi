@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from locomotion.runs import compat
+import locomotion.tools.checkpoint as compat
 
 
 class CheckpointCompatibilityTests(unittest.TestCase):
@@ -20,7 +20,7 @@ class CheckpointCompatibilityTests(unittest.TestCase):
             (directory/name).write_text(json.dumps(value))
         receipt = {'schema': compat.SCHEMA, 'mode': 'evaluate', 'eval_scope': 'probes',
                    'checkpoint_sha256': compat.CHECKPOINT_SHA, 'declaration_sha256': compat.DECLARATION_SHA,
-                   'candidate_runtime_sources': {'files': {'locomotion/evaluation/scoring.py': 'a'*64}},
+                   'candidate_runtime_sources': {'files': {'locomotion/tools/scoring.py': 'a'*64}},
                    'files': {name: compat.sha(directory/name) for name in ('ranges.json', 'summary.json')}}
         path = directory/'receipt.json'
         path.write_text(json.dumps(receipt))
@@ -60,7 +60,7 @@ class CheckpointCompatibilityTests(unittest.TestCase):
         recorded = dict.fromkeys(COMPATIBILITY_KEYS, 'original')
         candidate = deepcopy(recorded)
         candidate.update(schema='hexapod_locomotion_ppo_v2', adapter_sha256='new', entry_sha256='new',
-                         runtime_sources={'files': {'locomotion/core/motor.py': 'a'*64}})
+                         runtime_sources={'files': {'locomotion/gait_clock/control.py': 'a'*64}})
         record = {'identity': recorded, 'checkpoint_sha256': compat.CHECKPOINT_SHA}
         receipt = {'original_identity': deepcopy(recorded),
                    'candidate_runtime_sources': deepcopy(candidate['runtime_sources'])}
@@ -70,7 +70,7 @@ class CheckpointCompatibilityTests(unittest.TestCase):
             changed[key] = 'different'
             with self.subTest(key=key), self.assertRaises(ValueError):
                 compat.require_identity(receipt, record, changed)
-        candidate['runtime_sources']['files']['locomotion/core/motor.py'] = 'b'*64
+        candidate['runtime_sources']['files']['locomotion/gait_clock/control.py'] = 'b'*64
         with self.assertRaisesRegex(ValueError, 'candidate runtime'):
             compat.require_identity(receipt, record, candidate)
         record['identity']['entry_sha256'] = 'altered declaration'
@@ -78,7 +78,7 @@ class CheckpointCompatibilityTests(unittest.TestCase):
             compat.require_identity(receipt, record, candidate)
 
     def test_prepare_binds_receipt_and_refuses_training_or_uncertified_scope(self):
-        from locomotion.runs.prepare import prepare
+        from locomotion.tools.prepare import prepare
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             checkpoint = '/srv/cupi/hexapod/runs/james/checkpoint.pt'
@@ -100,14 +100,14 @@ class CheckpointCompatibilityTests(unittest.TestCase):
         snapshot = deepcopy(original)
         translated = compat.configuration(original)
         self.assertEqual(original, snapshot)
-        self.assertEqual(translated['class_name'], 'locomotion.learning.rate_schedule:CappedRatePPO')
+        self.assertEqual(translated['class_name'], 'locomotion.gait_clock.algorithm:CappedRatePPO')
         self.assertEqual(translated['label'], original['label'])
         self.assertEqual(translated['nested'][0]['class_name'],
-                         'locomotion.learning.action_distribution:BoundedMeanGaussian')
+                         'locomotion.gait_clock.algorithm:BoundedMeanGaussian')
 
     def test_translation_keeps_configuration_changes_visible(self):
         old = {'class_name': 'locomotion.rate_schedule:CappedRatePPO', 'gamma': .99}
-        candidate = {'class_name': 'locomotion.learning.rate_schedule:CappedRatePPO', 'gamma': .98}
+        candidate = {'class_name': 'locomotion.gait_clock.algorithm:CappedRatePPO', 'gamma': .98}
         self.assertNotEqual(compat.configuration(old), candidate)
 
     def test_unknown_class_name_stays_unknown(self):

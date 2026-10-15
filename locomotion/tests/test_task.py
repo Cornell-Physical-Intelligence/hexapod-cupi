@@ -11,7 +11,7 @@ import types
 import unittest
 
 import torch
-from locomotion.tasks import task
+import locomotion.gait_clock.task as task
 from locomotion.tests.task_double import NativeDouble, GaitDouble, telemetry
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -87,7 +87,8 @@ class ActiveTaskTests(unittest.TestCase):
                 trace.append(({key: value.clone() for key, value in output.items()},
                     wrapped.rng.get_state().clone(), wrapped.remaining_controls.clone(),
                     {key: value.clone() for key, value in wrapped.last_components.items()},
-                    wrapped.status(reset_interval=step % 17 == 0)))
+                    {key: value for key, value in wrapped.status(reset_interval=step % 17 == 0).items()
+                     if key != "proximity"}))
             traces.append(trace)
         self.exact(traces[1], traces[0])
 

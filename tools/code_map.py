@@ -9,7 +9,7 @@ import subprocess
 from urllib.parse import quote
 
 
-PACKAGES = {'core', 'backends', 'tasks', 'learning', 'evaluation', 'runs', 'shaurya'}
+PACKAGES = {'gait_clock', 'behavior_cloning', 'priors', 'surrogate', 'tools'}
 
 
 def area(path):
@@ -166,13 +166,11 @@ PAGE = r'''<!doctype html>
 </main>
 <script>const DATA=__DATA__;
 const PACKAGES=[
-['core','Core','Motor arithmetic, transforms and features.'],
-['backends','Isaac backend','Scene construction and environment stepping.'],
-['tasks','Tasks','Episode handling and reward versions.'],
-['learning','Learning','Learner configuration and adapters.'],
-['shaurya','Shaurya BC/PPO','Original environment, reward and cloning workflow.'],
-['evaluation','Evaluation','Capture, scoring and diagnostics.'],
-['runs','Runs','Validation, packaging and source identity.'],
+['gait_clock','Gait clock','Omnidirectional PPO task and explicit motor control.'],
+['behavior_cloning','Behavior cloning','Scripted BC and stock PPO fine-tuning.'],
+['priors','Motion priors','Demonstrations and AMP learning.'],
+['surrogate','CPU surrogate','MuJoCo training and trace replay.'],
+['tools','Tools','Native jobs, capture and motion scoring.'],
 ['package','Locomotion','Package initialization.'],
 ['tests','Tests','Unit and parity tests.']
 ];

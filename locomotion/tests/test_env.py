@@ -3,8 +3,8 @@ from pathlib import Path
 import unittest
 import numpy as np
 import torch
-from locomotion.backends.isaac.config import EnvConfig, JOINT_NAMES, KD, verify_assets
-from locomotion.backends.isaac.env import LocomotionEnv, emitted_target, executed_action_feature, motor_force, _diagnostic_servo, inverse_rotate, rotate
+from locomotion.gait_clock.config import EnvConfig, JOINT_NAMES, KD, verify_assets
+from locomotion.gait_clock.env import LocomotionEnv, emitted_target, executed_action_feature, motor_force, _diagnostic_servo, inverse_rotate, rotate
 
 
 class MotorTests(unittest.TestCase):
@@ -101,7 +101,10 @@ class ResetTests(unittest.TestCase):
             def set_joint_effort_target_index(self, **kwargs): pass
         from types import SimpleNamespace
         env.robot = Robot()
-        env.native = SimpleNamespace(_reset_idx=env._write_reset)
+        def stock_reset(rows):
+            env.native.episode_length_buf[rows] = 0
+            env._write_reset(rows)
+        env.native = SimpleNamespace(_reset_idx=stock_reset, episode_length_buf=env.episode_steps)
 
         env._read = lambda: {"q": values["get_dof_positions"].clone(), "dq": values["get_dof_velocities"].clone(),
             "root": values["get_root_transforms"].clone(), "angular": torch.zeros(3, 3), "linear": torch.zeros(3, 3),

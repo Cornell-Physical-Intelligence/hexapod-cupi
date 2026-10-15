@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 
-from locomotion.runs import launch as launch
+import locomotion.tools.launch as launch
 
 
 class CleanupTests(unittest.TestCase):

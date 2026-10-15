@@ -7,10 +7,10 @@ import unittest
 
 import torch
 
-from locomotion.runs.prepare import ROOT
-from locomotion.backends.isaac.config import sha as digest
-from locomotion.runs.prepare import prepare
-from locomotion.learning.ppo import TrainingLoads, VanillaVecEnv
+from locomotion.tools.prepare import ROOT
+from locomotion.gait_clock.config import sha as digest
+from locomotion.tools.prepare import prepare
+from locomotion.gait_clock.ppo import TrainingLoads, VanillaVecEnv
 
 
 class Task:
@@ -82,7 +82,7 @@ class VanillaTests(unittest.TestCase):
             manifest = json.loads((source/'FREEZE_SHA256.json').read_text())
             for name, expected in manifest.items():
                 self.assertEqual(digest(source/name), expected)
-            for name in ('backends/isaac/env.py', 'backends/isaac/config.py', 'tasks/task.py', 'evaluation/runner.py', 'runs/launch.py', 'runs/reservation.py'):
+            for name in ('gait_clock/env.py', 'gait_clock/config.py', 'gait_clock/task.py', 'tools/runner.py', 'tools/launch.py', 'tools/safety.py'):
                 self.assertEqual(digest(source/'locomotion'/name), digest(ROOT/'locomotion'/name))
             self.assertEqual(binding['mode'], 'train')
             self.assertNotIn('--checkpoint', binding['command_args'])

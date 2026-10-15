@@ -5,9 +5,9 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from locomotion.runs import prepare as prepare
-from locomotion.runs import reservation as reservation
-from locomotion.runs import train as train
+import locomotion.tools.prepare as prepare
+import locomotion.tools.safety as reservation
+import locomotion.gait_clock.train as train
 from locomotion.tests import test_launch
 
 
@@ -18,7 +18,7 @@ class AllocationDeadlineTests(unittest.TestCase):
             binding = prepare.prepare(pack, str(prepare.REMOTE_ROOT/'deadline_fixture'))
             source = pack/'source'
             reservation.verify_tree(source, binding['source_freeze_sha256'])
-            for name in ('core/motor.py', 'learning/config.py', 'runs/train.py'):
+            for name in ('gait_clock/control.py', 'gait_clock/config.py', 'gait_clock/train.py'):
                 path = source/'locomotion'/name
                 before = path.read_bytes()
                 path.write_bytes(before+b'changed')

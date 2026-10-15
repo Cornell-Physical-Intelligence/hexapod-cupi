@@ -5,8 +5,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from locomotion.runs import train as train
-from locomotion.runs.prepare import prepare
+import locomotion.gait_clock.train as train
+from locomotion.tools.prepare import prepare
 
 ARGS = ['--asset', 'a', '--model', 'm', '--geometry', 'g', '--geometry-extrema', 'e', '--stance', 's',
         '--output', 'o', '--source-freeze-sha256', 'f'*64, '--num-envs', '128', '--preflight-only']

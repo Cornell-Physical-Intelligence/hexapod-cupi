@@ -12,9 +12,9 @@ import torch
 from tensordict import TensorDict
 from rsl_rl.algorithms import PPO
 
-from locomotion.learning.ppo import ppo_config, policy_change_metrics, UpdateDiagnostics
-from locomotion.runs.prepare import prepare
-from locomotion.runs.train import require_learner_configuration
+from locomotion.gait_clock.ppo import ppo_config, policy_change_metrics, UpdateDiagnostics
+from locomotion.tools.prepare import prepare
+from locomotion.gait_clock.train import require_learner_configuration
 
 
 def observation(value):
@@ -117,8 +117,9 @@ class ObservationDiagnosticsTests(unittest.TestCase):
             for extra in ({'mode': 'diagnostic'}, {'mode': 'probe'}):
                 with self.assertRaisesRegex(ValueError, 'Observation normalization'):
                     prepare(path / 'invalid', remote, observation_normalization='none', **extra)
-            with self.assertRaises(TypeError):
-                prepare(path / 'retired', remote, learner='amp')
+            binding = prepare(path / 'amp', remote, learner='amp')
+            self.assertIn('--learner', binding['command_args'])
+            self.assertEqual(binding['command_args'][binding['command_args'].index('--learner')+1], 'amp')
 
 
 if __name__ == '__main__':

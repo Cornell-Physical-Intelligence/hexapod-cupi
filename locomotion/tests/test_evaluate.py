@@ -7,9 +7,9 @@ from unittest.mock import patch
 import unittest
 import numpy as np
 import torch
-from locomotion.evaluation import runner as run
-from locomotion import evaluation as scoring
-from locomotion.backends.isaac.config import EnvConfig
+import locomotion.tools.runner as run
+import locomotion.tools as scoring
+from locomotion.gait_clock.config import EnvConfig
 
 
 class FakeNative:

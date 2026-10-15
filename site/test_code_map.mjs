@@ -32,36 +32,36 @@ const input = (id, value) => {
 const click = (id, data) => fire(id, 'click', {target:{closest:() => ({dataset:data})}});
 
 // Packages: one square each, sized and labelled, with arrows for imports between packages.
-for (const name of ['core', 'backends', 'tasks', 'learning', 'evaluation', 'runs', 'shaurya']) {
+for (const name of ['gait_clock', 'behavior_cloning', 'priors', 'surrogate', 'tools']) {
   assert.ok(html('packages').includes(`data-package="${name}"`), `Missing package ${name}`);
 }
 assert.ok(!html('packages').includes('data-package="tests"'), 'Tests stay hidden by default');
 assert.ok(/class="use[^"]*" data-edge="[^"]+&gt;[^"]+"/.test(html('packages')), 'Package arrows are drawn');
-assert.ok(html('packages').includes('data-edge="backends&gt;core"'), 'The Isaac backend imports core');
+assert.ok(html('packages').includes('data-edge="gait_clock&gt;priors"'), 'The gait-clock environment imports motion features');
 assert.ok(/<rect x="[\d.]+" y="[\d.]+" width="[\d.]+" height="[\d.]+"\/>/.test(html('packages')));
 
 // Selecting a package draws its files; selecting a file draws its definitions bar.
-click('packages', {package:'tasks'});
-assert.ok(html('packages').includes('class="pkg selected" data-package="tasks"'));
-assert.ok(html('files').includes('data-module="locomotion/tasks/task.py"'));
-click('files', {module:'locomotion/tasks/task.py'});
-assert.equal(elements.get('file-heading').textContent, 'tasks/task.py');
+click('packages', {package:'gait_clock'});
+assert.ok(html('packages').includes('class="pkg selected" data-package="gait_clock"'));
+assert.ok(html('files').includes('data-module="locomotion/gait_clock/task.py"'));
+click('files', {module:'locomotion/gait_clock/task.py'});
+assert.equal(elements.get('file-heading').textContent, 'gait_clock/task.py');
 assert.ok(/class="sym class[^"]*"/.test(html('strip')), 'Classes appear as blocks');
-assert.ok(/blob\/[a-f0-9]{40}\/locomotion\/tasks\/task.py#L\d+/.test(html('strip')), 'Blocks link to source lines');
+assert.ok(/blob\/[a-f0-9]{40}\/locomotion\/gait_clock\/task.py#L\d+/.test(html('strip')), 'Blocks link to source lines');
 assert.ok(html('file').includes('Imported by:') && html('file').includes('Imports:'));
 
 // Search marks matches in red and opens the first matching file.
-input('query', 'ProximityGuard');
+input('query', 'StrideWindow');
 assert.ok(elements.get('count').textContent.startsWith('1 file matches'));
-assert.ok(html('results').includes('data-file="locomotion/tasks/task.py"'));
-assert.ok(/class="pkg[^"]* hit" data-package="tasks"/.test(html('packages')));
-assert.ok(/class="file[^"]* hit" data-module="locomotion\/tasks\/task.py"/.test(html('files')));
+assert.ok(html('results').includes('data-file="locomotion/gait_clock/task.py"'));
+assert.ok(/class="pkg[^"]* hit" data-package="gait_clock"/.test(html('packages')));
+assert.ok(/class="file[^"]* hit" data-module="locomotion\/gait_clock\/task.py"/.test(html('files')));
 assert.ok(/class="sym class hit"/.test(html('strip')), 'The matching class block turns red');
 input('query', 'VanillaVecEnv');
-assert.ok(html('results').includes('locomotion/learning/ppo.py'));
-assert.equal(elements.get('file-heading').textContent, 'learning/ppo.py');
-click('results', {file:'locomotion/core/motor.py'});
-assert.equal(elements.get('file-heading').textContent, 'core/motor.py');
+assert.ok(html('results').includes('locomotion/gait_clock/ppo.py'));
+assert.equal(elements.get('file-heading').textContent, 'gait_clock/ppo.py');
+click('results', {file:'locomotion/gait_clock/control.py'});
+assert.equal(elements.get('file-heading').textContent, 'gait_clock/control.py');
 
 // Retired wrappers have no filter; tests retain their toggle.
 assert.ok(!markup.includes('id="compatibility"'));
@@ -73,5 +73,5 @@ input('tests', true);
 assert.ok(html('results').includes('locomotion/tests/test_native_ranges.py'));
 assert.ok(html('packages').includes('data-package="tests"'));
 input('query', 'emitted_target');
-assert.ok(html('results').includes('locomotion/core/motor.py'));
+assert.ok(html('results').includes('locomotion/gait_clock/control.py'));
 console.log('Code-map package squares, import arrows, file tiles, definition bar, search marking and toggles verified');

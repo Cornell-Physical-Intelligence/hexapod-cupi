@@ -10,11 +10,11 @@ def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-from locomotion.runs.compat import numbers, measurements, freeze, compare
+from locomotion.tools.checkpoint import numbers, measurements, freeze, compare
 
 
 def read_run(root, role):
-    from locomotion.runs.reservation import verify_tree
+    from locomotion.tools.safety import verify_tree
     from locomotion.tests.native_parity import CHECKPOINT_SHA, DECLARATION_SHA
     root = Path(root)
     pack = root.parents[1]
@@ -85,8 +85,8 @@ def main():
         value = compare(json.loads(args.ranges.read_text()), candidate)
         value.update(ranges_sha256=args.ranges_sha256, candidate_provenance=candidate['provenance'])
         if args.command == 'certify':
-            from locomotion.runs import compat
-            from locomotion.runs.sources import verify_runtime
+            import locomotion.tools.checkpoint as compat
+            from locomotion.tools.sources import verify_runtime
             from locomotion.tests.native_parity import verify_weights
             if not value['pass']:
                 raise ValueError('Cannot certify failed native parity')
