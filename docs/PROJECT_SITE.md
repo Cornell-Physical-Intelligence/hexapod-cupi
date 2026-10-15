@@ -19,6 +19,13 @@ The site, the README and the other pages we publish follow this standard.
   result tables, earlier work and change history. Evidence stays in
   `site/assets/` and in the update records.
 - Add each technical word the page uses to the terms list.
+- Show structure as a picture: a diagram, tiles or a chart in place of a list
+  or a paragraph.
+- Use black and white. Red (`#b31b1b`) is the one accent, for the logo,
+  section titles and the current or selected item. `site/poster.css` holds
+  these colours for each page.
+- Put text and pictures straight on the white page. Leave out cards: grey
+  boxes, coloured side tabs or bars, pill badges and drop shadows.
 
 `site/test_render.mjs` fails when a removed section returns or when the page
 shows more than 650 words.

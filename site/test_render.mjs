@@ -32,6 +32,11 @@ for (const removed of ['id="findings"', 'id="recordings"', 'id="notebook"', 'Cha
   'class="eyebrow"', 'diagram-note', 'class="subtle"', 'status-pill', 'major-stage', '<small', '<details']) {
   assert.ok(!html.includes(removed), `Removed content returned: ${removed}`);
 }
+// The stylesheet keeps the page free of cards: no shadows, side tabs, pill badges or grey panels.
+const css = await readFile(new URL('./poster.css', import.meta.url), 'utf8');
+for (const card of [/box-shadow/, /border-left\s*:/, /border-radius\s*:\s*999px/, /--panel/, /linear-gradient/]) {
+  assert.ok(!card.test(css), `Card style returned in poster.css: ${card}`);
+}
 const words = html.replace(/<svg[\s\S]*?<\/svg>/g, ' ').replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 assert.ok(words <= 650, `The page shows ${words} words; keep it short (docs/PROJECT_SITE.md)`);
 
