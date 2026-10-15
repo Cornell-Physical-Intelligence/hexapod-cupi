@@ -5,7 +5,7 @@ import {readFile} from 'node:fs/promises';
 const code = await readFile(new URL('./poster.js', import.meta.url), 'utf8');
 const data = JSON.parse(await readFile(new URL('./dist/project-data.json', import.meta.url), 'utf8'));
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-async function render(payload, failure=false, phone=false) {
+async function render(payload, failure=false, phone=false, pageWidth=0) {
   const elements = new Map();
   const document = {
     querySelector(selector) {
@@ -13,6 +13,15 @@ async function render(payload, failure=false, phone=false) {
         innerHTML:'', events:{}, attributes:{}, hidden:true,
         addEventListener(name, callback){this.events[name]=callback;},
         setAttribute(name, value){this.attributes[name]=value;}, focus(){},
+        // The diagram region reports the page width; the canvas reports the size the markup gave it.
+        clientWidth: selector === '.graph-scroll' ? pageWidth : undefined,
+        get style() {
+          if (!this._style) {
+            const size = /graph-canvas" style="width:(\d+)px;height:(\d+)px"/.exec(elements.get('#poster')?.innerHTML ?? '');
+            this._style = selector === '.graph-canvas' && size ? {width:`${size[1]}px`, height:`${size[2]}px`} : {};
+          }
+          return this._style;
+        },
       });
       return elements.get(selector);
     },
@@ -36,6 +45,19 @@ for (const removed of ['id="findings"', 'id="recordings"', 'id="notebook"', 'Cha
 const css = await readFile(new URL('./poster.css', import.meta.url), 'utf8');
 for (const card of [/box-shadow/, /border-left\s*:/, /border-radius\s*:\s*999px/, /--panel/, /linear-gradient/]) {
   assert.ok(!card.test(css), `Card style returned in poster.css: ${card}`);
+}
+// Laptop widths: the diagram scales to the page width and clips both axes; the full width leaves it unscaled.
+{
+  const {elements: laptop} = await render(data, false, false, 900);
+  const canvas = laptop.get('.graph-canvas').style, scroll = laptop.get('.graph-scroll').style;
+  const width = parseFloat(canvas.width), height = parseFloat(canvas.height);
+  assert.ok(width > 900, `The wide canvas (${width}px) must exceed the 900px test page`);
+  assert.equal(canvas.transform, `scale(${900 / width})`);
+  assert.equal(scroll.overflow, 'hidden');
+  assert.equal(scroll.height, `${Math.ceil(height * 900 / width)}px`);
+  const {elements: wide} = await render(data, false, false, 1400);
+  assert.equal(wide.get('.graph-canvas').style.transform, '');
+  assert.equal(wide.get('.graph-scroll').style.overflow, '');
 }
 const words = html.replace(/<svg[\s\S]*?<\/svg>/g, ' ').replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
 assert.ok(words <= 650, `The page shows ${words} words; keep it short (docs/PROJECT_SITE.md)`);
