@@ -76,7 +76,7 @@ The reward reads only what `env.py` exports after a control. A change to
 
 ## 4. Stationary-translation criterion
 
-[TRAINING](TRAINING.md#step-1-tracking-reward-criterion) asks for an under-10%
+[TRAINING](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/df551b9018505daef56f48e0078282b608d9db45/docs/TRAINING.md#step-1-tracking-reward-criterion) asks for an under-10%
 condition on the commanded translation component. Criterion: for every nonzero
 translation command in `command_bank`, a motionless robot earns under 10% of the
 translation tracking term's maximum. The audit applies the same condition to
@@ -832,7 +832,7 @@ You can use the retained runs as an adapted PPO baseline. The paper supplies gai
 structure through the AMP discriminator and demonstration transitions
 ([sections III-B and V-A](https://arxiv.org/html/2511.03167v1#S3.SS2)).
 These runs use a prescribed tripod contact schedule and swing-travel reward.
-The native AMP comparison remains pending in [TRAINING](TRAINING.md#proposed-reproduction-sequence).
+The native AMP comparison remains pending in [TRAINING](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/df551b9018505daef56f48e0078282b608d9db45/docs/TRAINING.md#proposed-reproduction-sequence).
 Forward and stop passes establish those probe results; they do not establish the
 necessity of each added reward or learner option.
 
