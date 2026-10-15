@@ -8,12 +8,13 @@ ALLOCATION_PROFILES = ('standard', 'flat_pilot_v1')
 CLEANUP_MARGIN_SECONDS = 400
 # Training stops at UPDATE_LIMIT; a training pack that opts in to extended updates may run to the larger limit.
 UPDATE_LIMIT, EXTENDED_UPDATE_LIMIT = 2000, 5000
-# The module that each native mode runs and the arguments that select the mode inside that module.
+# The module that each native mode runs and the arguments that select the mode inside that module: an option
+# and its value, or a flag alone.
 ENTRY_POINTS = {
     'train': ('locomotion.scripts.train', ()),
     'evaluate': ('locomotion.scripts.play', ()),
     'diagnostic': ('locomotion.scripts.diagnose', ()),
-    'probe': ('locomotion.scripts.diagnose', ('--probe', 'noise')),
+    'probe': ('locomotion.scripts.diagnose', ('--noise-probe',)),
     'replay': ('locomotion.priors.replay_native', ('--mode', 'replay')),
 }
 

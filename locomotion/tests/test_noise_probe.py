@@ -121,7 +121,8 @@ class NoiseProbeTests(unittest.TestCase):
             binding = prepare(Path(directory)/'probe', REMOTE, mode='probe', seed=7)
             args = binding['command_args']
             self.assertEqual((binding['mode'], binding['module']), ('probe', 'locomotion.scripts.diagnose'))
-            self.assertEqual(args[:2], ['--probe', 'noise'])
+            self.assertEqual(args[0], '--noise-probe')
+            self.assertEqual(args.count('--noise-probe'), 1)
             self.assertEqual(args[args.index('--num-envs')+1], '128')
             self.assertEqual(args[args.index('--seed')+1], '7')
             self.assertNotIn('--updates', args)

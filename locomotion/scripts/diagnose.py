@@ -7,21 +7,23 @@ import time
 from locomotion.scripts.cli import (add_app_arguments, add_common_arguments, add_learner_arguments, print_progress,
     resolve_options, run, save)
 
-# The mode that state.json records for each probe.
-MODES = {'standing': 'diagnostic', 'noise': 'probe'}
+
+def recorded_mode(args):
+    """Return the mode that state.json records: probe for the noise probe, diagnostic for the standing run."""
+    return 'probe' if args.noise_probe else 'diagnostic'
 
 
 def parse_args(argv=None):
-    """Parse the command line and resolve the learner defaults of the selected probe."""
+    """Parse the command line and resolve the learner defaults of the selected run."""
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
-    parser.add_argument('--probe', choices=tuple(MODES), default='standing',
-                        help='standing holds a zero command and scores the standing robot; noise holds fixed '
-                             'action means under graded exploration noise.')
+    parser.add_argument('--noise-probe', action='store_true',
+                        help='Hold fixed action means under graded exploration noise. Without this flag the script '
+                             'holds a zero command and scores the standing robot.')
     add_common_arguments(parser)
     add_learner_arguments(parser)
     add_app_arguments(parser, argv)
     args = parser.parse_args(argv)
-    return resolve_options(args, MODES[args.probe])
+    return resolve_options(args, recorded_mode(args))
 
 
 def run_diagnostic(env, session):
@@ -57,7 +59,7 @@ def run_probe(env, session):
 
 def main(argv=None):
     args = parse_args(argv)
-    return run(args, MODES[args.probe], run_probe if args.probe == 'noise' else run_diagnostic)
+    return run(args, recorded_mode(args), run_probe if args.noise_probe else run_diagnostic)
 
 
 if __name__ == '__main__':

@@ -51,12 +51,12 @@ class DeterministicPolicy:
                     "action_smoothing_applied": None, "velocity_noise_recorded": options.get("velocity_noise", 0.),
                     "velocity_noise_applied": None,
                     "scope": "The wrapper builds the policy input and the action; this module applies no option to them."}
-        return {"source": "evaluation branch of locomotion/scripts/train.py", "velocity_input_gain": self.gain,
+        return {"source": "policy path of locomotion/scripts/play.py", "velocity_input_gain": self.gain,
                 "action_mean2_forced": self.forced,
                 "action_smoothing_applied": "mean2" if self.mean2 else "none",
                 "velocity_noise_recorded": options.get("velocity_noise", 0.), "velocity_noise_applied": 0.,
-                "scope": "Scales, gait clock, actor mean and two-control mean as the evaluation branch of "
-                         "locomotion/scripts/train.py; the gain and the forced mean are stress options."}
+                "scope": "Scales, gait clock, actor mean and two-control mean as the policy path of "
+                         "locomotion/scripts/play.py; the gain and the forced mean are stress options."}
 
     def inputs(self, observation):
         """The actor input for raw 231-value environment observations."""

@@ -23,6 +23,10 @@ import traceback
 PACKAGE = Path(__file__).resolve().parent
 
 
+def save(path, value):
+    Path(path).write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")
+
+
 def resolve(spec):
     """``module:Attribute`` or ``module:factory(text)``; the result must be a class."""
     module, separator, name = spec.partition(":")
@@ -268,11 +272,10 @@ def run(args, argv=None):
     from locomotion.surrogate.env import (DEFAULT_GEOMETRY, DEFAULT_MODEL, DEFAULT_STANCE, ROOT, SurrogateConfig,
                                           SurrogateEnv, contact_overrides, repository_state, sha)
     import locomotion.evaluation.ppo_diagnostics as diagnostics_module
-    from locomotion.evaluation.task_metrics import TaskMetrics
+    from locomotion.evaluation.task_metrics import TaskMetrics, scalars
     import locomotion.rl.ppo as algorithms
     import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
     import locomotion.omniwalk.task as task_module
-    from locomotion.scripts.cli import save, scalars
 
     version = importlib.metadata.version("rsl-rl-lib")
     if version != "5.0.1":

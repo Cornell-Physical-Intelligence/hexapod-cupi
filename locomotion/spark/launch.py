@@ -154,12 +154,17 @@ def verify(binding, own):
                       'Standard allocation cannot override its profile')
     guard.require(not any(x=='--output' or x.startswith('--output=') for x in argv),'Output override rejected')
     # Only the selection that the entry point map names may choose a mode inside the module.
-    selected = [tuple(selection)] if selection else []
-    for option in ('--mode', '--probe'):
-        guard.require(any(option == name for name, _ in selected)
+    for option in ('--mode', '--noise-probe'):
+        guard.require(option in selection[:1]
                       or not any(x == option or x.startswith(option+'=') for x in argv),
                       'Native mode selection differs: '+option)
-    for option,want in (*selected,('--source-freeze-sha256',binding['source_freeze_sha256']),
+    if selection:
+        option, *values = selection
+        guard.require(argv.count(option)==1 and not any(x.startswith(option+'=') for x in argv),
+                      'Exact single native argument required: '+option)
+        index=argv.index(option)
+        guard.require(argv[index+1:index+1+len(values)]==values,'Native argument differs: '+option)
+    for option,want in (('--source-freeze-sha256',binding['source_freeze_sha256']),
                         ('--asset','/asset'),('--model','/asset/source/model.json'),('--device','cuda:0')):
         guard.require(argv.count(option)==1 and not any(x.startswith(option+'=') for x in argv),
                       'Exact single native argument required: '+option)

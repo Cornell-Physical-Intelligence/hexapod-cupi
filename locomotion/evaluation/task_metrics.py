@@ -10,6 +10,18 @@ METRIC_TERMINATION_REASONS = ("height", "tilt", "joint_limit", "timeout")
 METRIC_SLEW_TOLERANCE_RAD = 2e-6
 
 
+def scalars(value, prefix):
+    """Return finite numeric leaves of a task status; drop lists, text and missing values."""
+    if isinstance(value, dict):
+        result = {}
+        for key, item in value.items():
+            result.update(scalars(item, f'{prefix}/{key}'))
+        return result
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value):
+        return {prefix: value}
+    return {}
+
+
 class TaskMetrics:
     """Observe a TrainingTask and report its command, reward, termination, slew and gait metrics.
 

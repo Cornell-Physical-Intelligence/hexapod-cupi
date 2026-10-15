@@ -11,7 +11,6 @@ import torch
 
 import locomotion.omniwalk.mdp.commands as commands
 import locomotion.omniwalk.adapter as env
-import locomotion.omniwalk.env_cfg as env_config
 import locomotion.omniwalk.mdp.actions as actions
 import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
 from locomotion.priors.features import extract_features
@@ -63,7 +62,6 @@ class RecordedTraceTests(unittest.TestCase):
         native.history = trace['policy_observation'][:, :210].reshape(-1, 5, 42)
         native.commands = trace['policy_observation'][:, 210:213]
         native.previous_action = trace['policy_observation'][:, 213:]
-        native.cfg = env_config.EnvConfig(record_motion_features=True)
         amp = trace['amp_state_before']
         state = {'q': amp[:, :18], 'dq': amp[:, 18:36], 'linear': amp[:, 36:39],
                  'angular': amp[:, 39:42], 'root': torch.cat((torch.zeros(len(amp), 2), amp[:, 42:43]), -1),
@@ -76,12 +74,8 @@ class RecordedTraceTests(unittest.TestCase):
         torch.testing.assert_close(extract_features(state), baseline['amp'], atol=0, rtol=0)
         torch.testing.assert_close(actual['obs'], trace['policy_observation'], atol=0, rtol=0)
         torch.testing.assert_close(actual['critic'], trace['critic_observation'], atol=0, rtol=0)
-        native.cfg = env_config.EnvConfig(record_motion_features=False)
-        training = native.observations(state)
+        # The environment emits no motion features; callers pack them from the state with extract_features.
         self.assertEqual(set(actual), {'obs', 'critic'})
-        self.assertEqual(set(training), {'obs', 'critic'})
-        for key in training:
-            torch.testing.assert_close(training[key], actual[key], atol=0, rtol=0)
 
     def test_command_bank_ppo_settings_and_numerical_gate_bytes_remain_frozen(self):
         self.assertEqual((ROOT/'locomotion/evaluation/scoring.py').read_bytes(), (FROZEN/'evaluation.py').read_bytes())

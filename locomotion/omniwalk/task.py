@@ -54,7 +54,6 @@ class TrainingTask:
         self.zero_command_draws = 0
         self.controls_completed = 0
         self.last_components = {}
-        self.last_held_command = None
         self.output_dir = None if output_dir is None else Path(output_dir)
         self.nominal_height = float(env.reference_metadata.get("root_height_m", env.reset_height))
         if self.output_dir is not None:
@@ -94,7 +93,6 @@ class TrainingTask:
         reward, components, telemetry = self._reward(command, output["terminated"])
         metric_previous_target = self.previous_target
         self.previous_target = self.env.telemetry["joint_target_rad"].detach().clone()
-        self.last_held_command = command
         self.last_components = {key: value.detach().clone() for key, value in components.items()}
         self.remaining_controls -= 1
         done = output["terminated"] | output["truncated"]

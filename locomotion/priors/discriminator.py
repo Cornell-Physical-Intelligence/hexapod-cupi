@@ -8,7 +8,7 @@ from torch import nn
 
 from locomotion.priors.features import feature_contract
 
-# The 61-value AMP state; locomotion.omniwalk.mdp.observations owns its layout.
+# The 61-value AMP state; CONTRACT in locomotion.priors.features owns its layout.
 AMP_WIDTH = feature_contract()["width"]
 
 

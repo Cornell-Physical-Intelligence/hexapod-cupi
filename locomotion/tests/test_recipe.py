@@ -69,6 +69,10 @@ class RecipeTests(unittest.TestCase):
         self.assertEqual(parsed_options(train, ENTRY + ['--steps-per-env', '24']), {**recipe, 'steps_per_env': 24})
         self.assertEqual(parsed_options(train, ENTRY + ['--recipe', 'none']), {**OPTION_DEFAULTS, 'gait_clock': 60})
         self.assertEqual(parsed_options(diagnose, ENTRY), OPTION_DEFAULTS)
+        self.assertEqual(parsed_options(diagnose, ENTRY + ['--noise-probe']), OPTION_DEFAULTS)
+        # The flag selects the noise probe; without it the script runs the standing diagnostic.
+        self.assertEqual([diagnose.recorded_mode(diagnose.parse_args(argv)) for argv in (ENTRY, ENTRY + ['--noise-probe'])],
+                         ['diagnostic', 'probe'])
         with tempfile.TemporaryDirectory() as directory:
             for index, (options, expected) in enumerate((
                     ({}, recipe), ({'recipe': 'none'}, {**OPTION_DEFAULTS, 'gait_clock': 60}),

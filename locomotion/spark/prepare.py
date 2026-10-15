@@ -16,9 +16,9 @@ from locomotion.spark.validation import (ALLOCATION_PROFILES, CLEANUP_MARGIN_SEC
 from locomotion.spark.safety import HOME_ROOT, RUN_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[2]
-# Standing diagnostics accept each count; training and probes require admitted counts.
+# Standing diagnostics accept each count; training and the noise probe require admitted counts.
 REPLICA_COUNTS = (1, 32, 128, 512, 1024)
-# Counts with standing admission and a program-lead budget for training and probes.
+# Counts with standing admission and a program-lead budget for training and the noise probe.
 TRAINING_COUNTS = (128, 512)
 REMOTE_ROOT = HOME_ROOT
 
@@ -223,7 +223,9 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--remote-root', required=True)
     parser.add_argument('--inputs', type=Path)
-    parser.add_argument('--mode', choices=('diagnostic', 'train', 'evaluate', 'probe', 'replay'), required=True)
+    parser.add_argument('--mode', choices=('diagnostic', 'train', 'evaluate', 'probe', 'replay'), required=True,
+                        help='probe runs the noise probe (diagnose.py --noise-probe); diagnostic runs the standing '
+                             'diagnostic.')
     parser.add_argument('--num-envs', type=int)
     parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
     parser.add_argument('--updates', type=int, default=512)

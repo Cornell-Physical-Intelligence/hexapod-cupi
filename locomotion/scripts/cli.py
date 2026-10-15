@@ -13,7 +13,6 @@ import hashlib
 import importlib.metadata
 import importlib.util
 import json
-import math
 import os
 from pathlib import Path
 import re
@@ -27,6 +26,7 @@ from locomotion.evaluation.admission import require_admission, verify_native_rec
 from locomotion.evaluation.camera import prepare_policy_scene
 from locomotion.evaluation.checkpoint import (DECLARATION_SHA, checkpoint_reward_version, read_compatibility_receipt,
     require_checkpoint_identity, require_compatibility_identity)
+from locomotion.evaluation.task_metrics import scalars
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import RECIPES, ppo_config
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS
 from locomotion.omniwalk.env_cfg import EnvConfig
@@ -44,18 +44,6 @@ def sha(path):
 
 def save(path, value):
     Path(path).write_text(json.dumps(value, indent=2, allow_nan=False)+'\n')
-
-
-def scalars(value, prefix):
-    """Return finite numeric leaves of a task status; drop lists, text and missing values."""
-    if isinstance(value, dict):
-        result = {}
-        for key, item in value.items():
-            result.update(scalars(item, f'{prefix}/{key}'))
-        return result
-    if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value):
-        return {prefix: value}
-    return {}
 
 
 def print_progress(value):
@@ -336,8 +324,7 @@ def create_env(args, cfg, metadata):
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     env = OmniEnv(cfg, args.asset, args.model, args.geometry,
-        args.output/'native', reference_metadata=metadata)
-    verify_scene(env)
+        args.output/'native', reference_metadata=metadata, verify=verify_scene)
     if args.mode == 'evaluate':
         prepare_policy_scene(env)
     return env

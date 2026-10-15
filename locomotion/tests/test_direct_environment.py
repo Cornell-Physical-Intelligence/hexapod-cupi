@@ -20,7 +20,7 @@ ISAAC_MODULES = ("warp", "pxr", "omni", "omni.physx", "isaaclab", "isaaclab.envs
 
 
 def load_isaac(direct_env=object, articulation=object):
-    """Import isaac.py over stand-ins for Isaac Lab, PhysX, USD and Warp, which this CPU host lacks."""
+    """Import the Direct environment module (omniwalk/env.py) over stand-ins for Isaac Lab, PhysX, USD and Warp, which this CPU host lacks."""
     stubs = {name: mock.MagicMock(name=name) for name in ISAAC_MODULES}
     stubs["isaaclab.envs"].DirectRLEnv = direct_env
     stubs["isaaclab_physx.assets.articulation"].Articulation = articulation

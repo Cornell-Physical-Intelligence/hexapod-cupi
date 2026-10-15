@@ -1,8 +1,8 @@
 """Check the native scene and bind a run to its model and recorded native standing checks.
 
-Each entry point calls ``verify_scene`` as its first step after it constructs ``OmniEnv``. The
-``after_sdk_reset`` readback follows the first task reset, and ``OmniEnv.reset`` proves that this reset
-advanced no physics step.
+Each entry point passes ``verify_scene`` to ``OmniEnv`` as ``verify``. The constructor calls it after the
+Isaac Lab construction and before the first task reset, so the checks and the ``after_sdk_reset`` readback
+read the scene that the SDK reset left.
 """
 from pathlib import Path
 import argparse

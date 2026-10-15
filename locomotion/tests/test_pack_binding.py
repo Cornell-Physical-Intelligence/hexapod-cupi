@@ -19,6 +19,7 @@ class PackBindingTests(unittest.TestCase):
             self.assertNotIn('--backend', binding['command_args'])
             self.assertFalse(binding['root_review_complete'])
             self.assertEqual(binding['module'], 'locomotion.scripts.diagnose')
+            self.assertNotIn('--noise-probe', binding['command_args'])
             manifest = verify_runtime(root/'pack/source')
             self.assertFalse(any('/tripod/' in name for name in manifest['files']))
             self.assertFalse((root/'pack/source/locomotion/tripod').exists())

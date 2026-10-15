@@ -86,7 +86,7 @@ class OwnedLaunchTests(unittest.TestCase):
         base = self.binding()
         self.verify_without_filesystem(base)
         for suffix in (["--output", "/unreviewed"], ["--output=/unreviewed"],
-                       ["--mode", "train"], ["--mode=train"], ["--probe", "noise"], ["--probe=noise"],
+                       ["--mode", "train"], ["--mode=train"], ["--noise-probe"], ["--noise-probe=1"],
                        ["--source-freeze-sha256", "b"*64]):
             b = copy.deepcopy(base); b["command_args"] += suffix
             with self.subTest(suffix=suffix), self.assertRaises(ValueError):
@@ -97,11 +97,21 @@ class OwnedLaunchTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.verify_without_filesystem(wrong)
         probe = self.binding(); probe.update(mode="probe")
-        probe["command_args"] = ["--probe", "noise", *probe["command_args"]]
+        probe["command_args"] = ["--noise-probe", *probe["command_args"]]
         self.verify_without_filesystem(probe)
-        rest = probe["command_args"][2:]
-        for args in (rest, ["--probe", "standing", *rest], ["--probe=noise", *rest], ["--probe", "noise", "--probe", "noise", *rest]):
+        rest = probe["command_args"][1:]
+        for args in (rest, ["--noise-probe=1", *rest], ["--noise-probe", "--noise-probe", *rest],
+                     ["--mode", "replay", "--noise-probe", *rest]):
             b = copy.deepcopy(probe); b["command_args"] = args
+            with self.subTest(args=args[:4]), self.assertRaises(ValueError):
+                self.verify_without_filesystem(b)
+        replay = self.binding(); replay.update(mode="replay", module="locomotion.priors.replay_native")
+        replay["command_args"] = ["--mode", "replay", *replay["command_args"]]
+        self.verify_without_filesystem(replay)
+        rest = replay["command_args"][2:]
+        for args in (rest, ["--mode", "train", *rest], ["--mode=replay", *rest], ["--mode", *rest],
+                     ["--mode", "replay", "--mode", "replay", *rest], ["--mode", "replay", "--noise-probe", *rest]):
+            b = copy.deepcopy(replay); b["command_args"] = args
             with self.subTest(args=args[:4]), self.assertRaises(ValueError):
                 self.verify_without_filesystem(b)
 

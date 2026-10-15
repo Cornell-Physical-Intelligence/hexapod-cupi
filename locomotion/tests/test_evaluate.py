@@ -10,6 +10,7 @@ import torch
 import locomotion.evaluation.runner as run
 import locomotion.evaluation as scoring
 from locomotion.omniwalk.env_cfg import EnvConfig
+from locomotion.priors.features import extract_features
 
 
 class FakeNative:
@@ -25,7 +26,7 @@ class FakeNative:
 
     def observations(self, state):
         obs=torch.zeros(1,231);obs[:,210:213]=self.commands
-        return {"obs":obs,"critic":torch.cat((obs,torch.zeros(1,3)),-1),"amp":torch.zeros(1,61)}
+        return {"obs":obs,"critic":torch.cat((obs,torch.zeros(1,3)),-1)}
 
     def step(self, action):
         self.steps+=1;self.counter+=8
@@ -34,6 +35,18 @@ class FakeNative:
 
     def verify_native_recipe(self, phase):
         pass
+
+
+class MovingNative(FakeNative):
+    """Measure every motion-feature field and move the joints 0.01 rad each control."""
+    def __init__(self, terminate_at=None):
+        super().__init__(terminate_at)
+        self.current={"q":torch.zeros(1,18),"dq":torch.zeros(1,18),"linear":torch.zeros(1,3),"angular":torch.zeros(1,3),
+                      "root":torch.tensor([[0.,0.,.1,0.,0.,0.,1.]]),"toe_world":torch.zeros(1,6,3),"toe_body":torch.zeros(1,6,3)}
+
+    def step(self, action):
+        self.current={**self.current,"q":self.current["q"]+.01}
+        return super().step(action)
 
 
 class FakeCapture:
@@ -150,6 +163,31 @@ class EvaluationOrchestrationTests(unittest.TestCase):
                 self.assertEqual(raw["policy_observation"].shape,(2,1,231))
                 np.testing.assert_array_equal(raw["policy_observation"][:,:,210:213],raw["command"])
                 self.assertEqual(raw["toe_xyz_world_m"].shape,(2,1,6,3))
+
+    def trace(self, **keywords):
+        case={"case_id":"static:stand","profile":"omni_static","command":[0.,0.,0.],"controls":1000}
+        with TemporaryDirectory() as temporary:
+            geometry=Path(temporary)/"geometry.npz";geometry.write_bytes(b"CPU fixture")
+            with patch.object(run,"ExactEvaluationCapture",FakeCapture):
+                report=run.run_batch(MovingNative(terminate_at=2),lambda obs:torch.zeros(1,18),[case],Path(temporary)/"run",
+                                     geometry,checkpoint_sha256="CPU fixture",source_sha256="CPU fixture",**keywords)
+            self.assertEqual(report["controls"],2)
+            with np.load(Path(temporary)/"run/control_trace.npz") as raw:
+                return {key:raw[key] for key in raw.files}
+
+    def test_motion_features_record_the_state_before_and_after_each_control(self):
+        trace=self.trace(motion_features=extract_features)
+        for key in ("amp_state_before","amp_state_after"):
+            self.assertEqual(trace[key].shape,(2,1,61))
+        np.testing.assert_allclose(trace["amp_state_before"][:,0,0],[0.,.01],atol=1e-7)
+        np.testing.assert_allclose(trace["amp_state_after"][:,0,0],[.01,.02],atol=1e-7)
+        np.testing.assert_array_equal(trace["amp_state_after"][0],trace["amp_state_before"][1])
+        np.testing.assert_allclose(trace["amp_state_before"][:,0,42],[.1,.1],atol=1e-7)
+
+    def test_trace_without_motion_features_holds_no_motion_state(self):
+        trace=self.trace()
+        self.assertFalse({"amp_state_before","amp_state_after"}&set(trace))
+        self.assertEqual(trace["policy_observation"].shape,(2,1,231))
 
     def test_native_capture_retains_mid_hold_events_and_com_frame(self):
         native=FakeNative()

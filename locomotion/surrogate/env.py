@@ -99,7 +99,7 @@ def contact_overrides(items, base=None):
 
 @dataclass(frozen=True)
 class SurrogateConfig:
-    """Same fields as ``env_config.EnvConfig``; that class accepts cuda:0 alone."""
+    """Same fields as ``omniwalk.env_cfg.EnvConfig``; that class accepts cuda:0 alone."""
     num_envs: int = 128
     spacing_m: float = 2.0
     physics_dt: float = 0.0025

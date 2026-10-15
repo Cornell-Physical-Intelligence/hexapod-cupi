@@ -19,14 +19,16 @@ class OmniEnv:
 
     IsaacEnv owns ``commands``, ``history``, ``held`` and ``previous_action`` and writes them in place;
     the same names here alias those tensors, so task writes reach the observations. The task reads
-    terminal observations before selected resets.
+    terminal observations before selected resets. A ``verify`` callable receives this environment after
+    the Isaac Lab construction and before the first task reset, so its scene checks read the state of the
+    SDK reset.
     """
     num_actions = 18
     observation_width = 231
     critic_width = 234
     amp_width = 61
 
-    def __init__(self, cfg, asset, model_path, geometry_path, output, *, reference_metadata=None):
+    def __init__(self, cfg, asset, model_path, geometry_path, output, *, reference_metadata=None, verify=None):
         from locomotion.omniwalk.env import IsaacEnv
         self.cfg, self.device, self.num_envs = cfg, cfg.device, cfg.num_envs
         self.isaac = isaac = IsaacEnv(cfg, asset, model_path, geometry_path, output, reference_metadata=reference_metadata)
@@ -48,6 +50,8 @@ class OmniEnv:
         self.get, self.native_array, self.save = isaac.get, isaac.native_array, isaac.save
         self.telemetry, self.total_controls = isaac.telemetry, isaac.total_controls
         self.capture = None
+        if verify is not None:
+            verify(self)
         self.reset()
 
     def reset(self, indices=None):

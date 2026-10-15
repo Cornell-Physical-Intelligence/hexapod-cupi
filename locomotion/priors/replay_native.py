@@ -150,8 +150,7 @@ def main(argv=None):
         import locomotion.evaluation.camera as camera_module
         torch.manual_seed(cfg.seed)
         env = env_module.OmniEnv(cfg, args.asset, args.model, args.geometry,
-            args.output/'native', reference_metadata=metadata)
-        original.verify_scene(env)
+            args.output/'native', reference_metadata=metadata, verify=original.verify_scene)
         identity['root_com_local_m'] = env.root_com_local.detach().cpu().tolist()
         prepare_policy_scene(env)
         env.render = camera_module.NativePolicyCamera(env)
