@@ -1,4 +1,4 @@
-"""Run the interface of ``locomotion.omni.env.OmniEnv`` on CPU MuJoCo physics."""
+"""Run the interface of ``locomotion.omniwalk.env.OmniEnv`` on CPU MuJoCo physics."""
 from __future__ import annotations
 
 import ast
@@ -14,10 +14,10 @@ import numpy as np
 from scipy.spatial import ConvexHull
 import torch
 
-from locomotion.omni.features import extract_features
-from locomotion.omni.frames import inverse_rotate, navigation, rotate
-from locomotion.omni.motor import emitted_target, executed_action_feature, motor_force
-from locomotion.omni.robot import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, MODEL_SHA256
+from locomotion.omniwalk.features import extract_features
+from locomotion.omniwalk.frames import inverse_rotate, navigation, rotate
+from locomotion.omniwalk.motor import emitted_target, executed_action_feature, motor_force
+from locomotion.omniwalk.robot import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, MODEL_SHA256
 
 # The package resolves repository data from its own location.
 ROOT = Path(__file__).resolve().parents[2]

@@ -7,9 +7,9 @@ from pathlib import Path
 import re
 import shutil
 
-from locomotion.omni.commands import GAIT_CLOCK_CONTROLS
-from locomotion.omni.ppo_cfg import ppo_config
-from locomotion.omni.robot import sha
+from locomotion.omniwalk.commands import GAIT_CLOCK_CONTROLS, default_gait_clock
+from locomotion.omniwalk.ppo_cfg import ppo_config
+from locomotion.omniwalk.robot import sha
 from locomotion.spark.sources import runtime_paths, write_runtime
 from locomotion.spark.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline, LEARNER_OPTION_DEFAULTS
 from locomotion.spark.safety import HOME_ROOT, RUN_ROOTS, within_roots
@@ -41,7 +41,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
     if learner not in ('ppo', 'amp') or networks not in ('mlp', 'paper') or (networks == 'paper' and learner != 'amp') or (learner == 'amp' and mode not in ('train', 'evaluate')):
         raise ValueError('The paper networks need the AMP learner for training or evaluation')
     if gait_clock is None:
-        gait_clock = GAIT_CLOCK_CONTROLS if mode == 'train' and networks == 'mlp' else 0
+        gait_clock = default_gait_clock(mode, networks)
     if mode == 'train' and networks == 'mlp' and gait_clock != GAIT_CLOCK_CONTROLS:
         raise ValueError(f'The active reward requires the {GAIT_CLOCK_CONTROLS}-control gait clock')
     validate_deadline(mode, allocation_profile, max_wall_seconds)
@@ -139,7 +139,7 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         for p in sorted(source.rglob('*')) if p.is_file()})
     freeze = sha(source/'FREEZE_SHA256.json')
     binding = {'schema': 'hexapod_locomotion_launch_v1', 'root_review_complete': False,
-        'module': 'locomotion.priors.replay_native' if mode == 'replay' else 'locomotion.omni.train',
+        'module': 'locomotion.priors.replay_native' if mode == 'replay' else 'locomotion.omniwalk.train',
         'mode': mode, 'source': str(remote_root/'source'), 'output': str(remote_root/'run'),
         'asset': declared['asset'], 'geometry_source': declared['geometry_source'],
         'prior': str(Path(declared['stance']).parent), 'input_files': declared['input_files'],

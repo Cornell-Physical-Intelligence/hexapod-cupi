@@ -10,14 +10,14 @@ import time
 import numpy as np
 import torch
 
-from locomotion.omni.commands import TaskConfig
-from locomotion.omni.frames import rotate
-from locomotion.omni.motor import executed_action_feature
+from locomotion.omniwalk.commands import TaskConfig
+from locomotion.omniwalk.frames import rotate
+from locomotion.omniwalk.motor import executed_action_feature
 from locomotion.surrogate.env import Renderer, SurrogateConfig, SurrogateEnv, contact_overrides, make_env
 from locomotion.surrogate.train import resolve, thread_count
 
 
-REWARD_TASKS = {"c48_long": "locomotion.omni.task:TrainingTask"}
+REWARD_TASKS = {"v4_yaw_gate": "locomotion.omniwalk.task:TrainingTask"}
 # Fields that are flags or bookkeeping, not env.telemetry entries.
 NOT_TELEMETRY = ("terminated", "truncated", "reset_before", "time_s", "command")
 
@@ -274,7 +274,7 @@ def main(argv=None):
     common.add_argument("--output", type=Path, required=True)
     common.add_argument("--controls", type=int)
     common.add_argument("--command", type=float, nargs=3, metavar=("FORWARD", "LEFT", "YAW"))
-    common.add_argument("--rewards", nargs="*", default=["c48_long"], help="c48_long or module:Class/function.")
+    common.add_argument("--rewards", nargs="*", default=["v4_yaw_gate"], help="v4_yaw_gate or module:Class/function.")
     common.add_argument("--episode-seconds", type=float, default=60.)
     common.add_argument("--threads", type=int, default=2, help="Physics and torch threads for this process (1 to 6).")
     common.add_argument("--video", action="store_true", help="Render replica 0 to replay.mp4.")
@@ -290,7 +290,7 @@ def main(argv=None):
     scripted.add_argument("--seed", type=int, default=20260917)
     score = sub.add_parser("score")
     score.add_argument("--telemetry", type=Path, required=True)
-    score.add_argument("--rewards", nargs="+", default=["c48_long"])
+    score.add_argument("--rewards", nargs="+", default=["v4_yaw_gate"])
     score.add_argument("--output", type=Path, help="Optional new npz file for per-control components.")
     score.add_argument("--command", type=float, nargs=3, metavar=("FORWARD", "LEFT", "YAW"),
                        help="Score under this held command in place of the stored one (required meaning for a native probe record).")

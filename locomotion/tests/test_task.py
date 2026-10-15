@@ -11,9 +11,9 @@ import types
 import unittest
 
 import torch
-from locomotion.omni.commands import TaskConfig, command_bank
-import locomotion.omni.reward as reward
-import locomotion.omni.task as task
+from locomotion.omniwalk.commands import TaskConfig, command_bank
+import locomotion.omniwalk.reward as reward
+import locomotion.omniwalk.task as task
 from locomotion.tests.task_double import NativeDouble, GaitDouble, telemetry
 
 ROOT = Path(__file__).resolve().parents[2]

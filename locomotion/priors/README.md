@@ -37,7 +37,7 @@ or export reset/terminal transitions.
 
 ## Feature and learner contracts
 
-[`omni/features.py`](../omni/features.py) gives each raw state 61 values: 18
+[`omniwalk/features.py`](../omni/features.py) gives each raw state 61 values: 18
 joint positions, 18 joint velocities, body-frame root-origin linear velocity,
 angular velocity, root height and six body-frame toe positions. Adjacent states
 span 0.02 s. The discriminator reads

@@ -22,8 +22,8 @@ uv run python -m unittest discover -s locomotion/surrogate/tests
 ```
 
 You keep output directories outside the source checkout. The trainer defaults to
-task `locomotion.omni.task:TrainingTask` and wrapper
-`locomotion.omni.wrapper:OmniVecEnv` with the 60-control gait clock. Its learner
+task `locomotion.omniwalk.task:TrainingTask` and wrapper
+`locomotion.omniwalk.wrapper:OmniVecEnv` with the 60-control gait clock. Its learner
 options include fixed observation scaling, command-boundary bootstrap and action
 smoothing.
 `--resume` checks checkpoint bytes, the paired record and source/configuration
@@ -35,8 +35,8 @@ You can test joint-velocity input gains or force a two-control action mean. Stat
 probe consensus compares the default contact model with two sensitivity models;
 agreement grants no native acceptance.
 
-`replay score --telemetry ... --rewards c48_long --output ...` runs
-`locomotion.omni.task:TrainingTask` against recorded telemetry, including its
+`replay score --telemetry ... --rewards v4_yaw_gate --output ...` runs
+`locomotion.omniwalk.task:TrainingTask` against recorded telemetry, including its
 reward memory. You can supply a `module:Class` task or a `module:function` reward
 for a comparison. The replay command accepts recorded policy actions or motor
 targets.

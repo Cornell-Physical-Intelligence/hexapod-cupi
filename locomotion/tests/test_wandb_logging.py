@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-import locomotion.omni.train as train
+import locomotion.omniwalk.train as train
 from locomotion.spark.prepare import prepare
 
 ARGS = ['--asset', 'a', '--model', 'm', '--geometry', 'g', '--geometry-extrema', 'e', '--stance', 's',

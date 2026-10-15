@@ -8,7 +8,7 @@ shows definitions and imports.
 
 | Package | Purpose | Start here |
 | --- | --- | --- |
-| `omni/` | Omnidirectional walking task and PPO. | `env.py`, `task.py` |
+| `omniwalk/` | Omnidirectional walking task and PPO. | `env.py`, `task.py` |
 | `tripod/` | Original tripod task with BC and PPO fine-tuning. | `hexapod_env.py` |
 | `priors/` | Motion demonstrations and AMP learning. | [README](priors/README.md) |
 | `surrogate/` | CPU MuJoCo training and trace replay. | [README](surrogate/README.md) |
@@ -36,7 +36,7 @@ shows definitions and imports.
 
 ## Experiment contracts
 
-| Setting | `omni` | `tripod` |
+| Setting | `omniwalk` | `tripod` |
 | --- | --- | --- |
 | Actor input | 231 values plus two clock values | 66 values, or 68 with its clock |
 | Flat actor | 256/256/128 | 128/128/128 |
@@ -62,12 +62,12 @@ views until native parity on Spark admits `robot.data`. Keep the check in
 
 ## Import direction
 
-Reviewers enforce this rule: "`evaluation` → `omni`; `spark` → `omni`; `priors`
-→ `omni`, and `priors` → `evaluation`/`spark` from its command modules
-(`dataset.py`, `prepare.py`, `replay_native.py`); `surrogate` → `omni`,
-`evaluation`, `spark`, `priors`; `omni` imports the other packages only from
+Reviewers enforce this rule: "`evaluation` → `omniwalk`; `spark` → `omniwalk`; `priors`
+→ `omniwalk`, and `priors` → `evaluation`/`spark` from its command modules
+(`dataset.py`, `prepare.py`, `replay_native.py`); `surrogate` → `omniwalk`,
+`evaluation`, `spark`, `priors`; `omniwalk` imports the other packages only from
 `train.py`. No package imports `tripod`." A grep for `from locomotion.spark` or
-`from locomotion.evaluation` inside `omni/` other than `train.py` is a review
+`from locomotion.evaluation` inside `omniwalk/` other than `train.py` is a review
 failure.
 
 ## Commands
@@ -75,7 +75,7 @@ failure.
 ```sh
 uv run python -m unittest discover -s locomotion/tests
 uv run python -m locomotion.spark.prepare --help
-uv run python -m locomotion.omni.train --help
+uv run python -m locomotion.omniwalk.train --help
 uv run python -m locomotion.evaluation.admission --help
 ```
 
@@ -103,8 +103,8 @@ cover motors, transitions, packs and tripod sources.
 
 ## Native admission
 
-The physics identity hashes the import closure of `omni/env.py`,
-`omni/env_cfg.py`, `omni/isaac.py`, `evaluation/capture.py` and
+The physics identity hashes the import closure of `omniwalk/env.py`,
+`omniwalk/env_cfg.py`, `omniwalk/isaac.py`, `evaluation/capture.py` and
 `evaluation/scoring.py`. The refactor changed that closure; no native run has
 used it. Any new result needs fresh standing admission at one robot and batch
 size. The unchanged `c48_long` checkpoint must then pass its 13 probes with

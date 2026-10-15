@@ -4,9 +4,9 @@ from pathlib import Path
 import tempfile
 import unittest
 
-import locomotion.omni.ppo as ppo
-import locomotion.omni.ppo_cfg as ppo_cfg
-import locomotion.omni.train as train
+import locomotion.omniwalk.ppo as ppo
+import locomotion.omniwalk.ppo_cfg as ppo_cfg
+import locomotion.omniwalk.train as train
 import locomotion.spark.validation as validation
 from locomotion.spark.prepare import prepare
 from locomotion.tests.test_learner_options import construct

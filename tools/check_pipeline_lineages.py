@@ -33,7 +33,7 @@ CURRENT_HEADER = (
 )
 # Cover maintained source and tests, without recursively pinning old releases or results.
 CURRENT_TREES = ("tools", "contracts", "navigation", "mission", "tests", "robot/tests",
-                 "locomotion/omni", "locomotion/tripod", "locomotion/evaluation", "locomotion/spark",
+                 "locomotion/omniwalk", "locomotion/tripod", "locomotion/evaluation", "locomotion/spark",
                  "locomotion/priors", "locomotion/surrogate")
 CURRENT_TOP_LEVEL = ("locomotion", "locomotion/tests")
 CURRENT_FILES = ("robot/active_model.json", "configs/source_inventory.json", "configs/archive.json", "configs/locomotion_spark.json",

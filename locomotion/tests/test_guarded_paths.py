@@ -31,7 +31,7 @@ class GuardedPathTests(unittest.TestCase):
                             '--stance': packed / 'prior/stance.json'}
             for option, value in replacements.items():
                 args[args.index(option) + 1] = str(value)
-            result = subprocess.run([sys.executable, '-B', '-m', 'locomotion.omni.train',
+            result = subprocess.run([sys.executable, '-B', '-m', 'locomotion.omniwalk.train',
                                      '--output', str(root / 'unused'), '--preflight-only', *args],
                                     cwd=root / 'attempt/source', capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)

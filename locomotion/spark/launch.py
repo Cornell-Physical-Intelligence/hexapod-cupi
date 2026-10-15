@@ -117,7 +117,7 @@ def verify(binding, own):
     guard.require(profile in ALLOCATION_PROFILES, 'Unknown allocation profile')
     limit = 22000 if profile == 'flat_pilot_v1' else 7200
     guard.require(type(binding['max_seconds']) is int and 120<=binding['max_seconds']<=limit,'Unbounded allocation')
-    module = 'locomotion.priors.replay_native' if binding['mode'] == 'replay' else 'locomotion.omni.train'
+    module = 'locomotion.priors.replay_native' if binding['mode'] == 'replay' else 'locomotion.omniwalk.train'
     guard.require(binding.get('module') == module, 'Unsupported native entry point')
     paths={k:guard.canonical_path(binding[k]) for k in ('source','asset','prior','geometry_source','output')}
     guard.require(paths['source']==own,'Launcher must belong to its bound source')
@@ -142,7 +142,7 @@ def verify(binding, own):
                       'The supervisor must retain the native cleanup margin')
         options = [('--max-wall-seconds', str(seconds))]
         if profile != 'standard':
-            guard.require(binding['module'] == 'locomotion.omni.train', 'Pilot requires the training entry point')
+            guard.require(binding['module'] == 'locomotion.omniwalk.train', 'Pilot requires the training entry point')
             options.append(('--allocation-profile', profile))
         for option, want in options:
             guard.require(argv.count(option) == 1 and not any(x.startswith(option+'=') for x in argv),

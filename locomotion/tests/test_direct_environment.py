@@ -7,11 +7,11 @@ from types import SimpleNamespace
 import unittest
 from unittest import mock
 import torch
-from locomotion.omni.env import reset_rows
-from locomotion.omni.features import observations, proprio
-from locomotion.omni.motor import emitted_target, executed_action_feature
+from locomotion.omniwalk.env import reset_rows
+from locomotion.omniwalk.features import observations, proprio
+from locomotion.omniwalk.motor import emitted_target, executed_action_feature
 
-BACKEND = Path(__file__).resolve().parents[1] / "omni"
+BACKEND = Path(__file__).resolve().parents[1] / "omniwalk"
 ISAAC_MODULES = ("warp", "pxr", "omni", "omni.physx", "isaaclab", "isaaclab.envs", "isaaclab.sim",
                  "isaaclab.sim.utils", "isaaclab_physx", "isaaclab_physx.assets",
                  "isaaclab_physx.assets.articulation", "isaaclab_physx.sim", "isaaclab_physx.sim.spawners",
@@ -23,13 +23,13 @@ def load_isaac(direct_env=object, articulation=object):
     stubs = {name: mock.MagicMock(name=name) for name in ISAAC_MODULES}
     stubs["isaaclab.envs"].DirectRLEnv = direct_env
     stubs["isaaclab_physx.assets.articulation"].Articulation = articulation
-    package = importlib.import_module("locomotion.omni")
-    saved = {name: sys.modules.get(name) for name in (*ISAAC_MODULES, "locomotion.omni.isaac")}
+    package = importlib.import_module("locomotion.omniwalk")
+    saved = {name: sys.modules.get(name) for name in (*ISAAC_MODULES, "locomotion.omniwalk.isaac")}
     bound = package.__dict__.get("isaac")
     sys.modules.update(stubs)
-    sys.modules.pop("locomotion.omni.isaac", None)
+    sys.modules.pop("locomotion.omniwalk.isaac", None)
     try:
-        return importlib.import_module("locomotion.omni.isaac")
+        return importlib.import_module("locomotion.omniwalk.isaac")
     finally:
         for name, module in saved.items():
             if module is None:
@@ -159,7 +159,7 @@ class DirectEnvironmentContractTests(unittest.TestCase):
         self.assertEqual(events, ["submit", "update"])
 
     def test_capture_hooks_receive_the_task_environment(self):
-        from locomotion.omni.env import OmniEnv
+        from locomotion.omniwalk.env import OmniEnv
         env = OmniEnv.__new__(OmniEnv)
         env.device, env.num_envs = "cpu", 1
         received = []

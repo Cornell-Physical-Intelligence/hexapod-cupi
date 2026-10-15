@@ -101,105 +101,105 @@
       "purpose": "Run Shaurya’s original standing-start policy diagnostic."
     },
     {
-      "path": "locomotion/omni/__init__.py",
+      "path": "locomotion/omniwalk/__init__.py",
       "classification": "current",
       "owner": "Locomotion",
       "purpose": "Omnidirectional walking task on stock Isaac Lab Direct and RSL-RL PPO.",
       "previous_path": "locomotion/gait_clock/__init__.py"
     },
     {
-      "path": "locomotion/omni/actuator.py",
+      "path": "locomotion/omniwalk/actuator.py",
       "previous_path": "locomotion/gait_clock/actuator.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Apply the approved torque curve through the stock actuator interface."
     },
     {
-      "path": "locomotion/omni/robot.py",
+      "path": "locomotion/omniwalk/robot.py",
       "previous_path": "locomotion/omni/config.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Name the robot's joints and bodies, pin its asset hashes and resolve motor damping."
     },
     {
-      "path": "locomotion/omni/env_cfg.py",
+      "path": "locomotion/omniwalk/env_cfg.py",
       "previous_path": "locomotion/omni/config.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Declare the environment settings and build the Isaac Lab Direct and robot configurations."
     },
     {
-      "path": "locomotion/omni/ppo_cfg.py",
+      "path": "locomotion/omniwalk/ppo_cfg.py",
       "previous_path": "locomotion/omni/config.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Build the RSL-RL learner configuration without importing Torch."
     },
     {
-      "path": "locomotion/omni/motor.py",
+      "path": "locomotion/omniwalk/motor.py",
       "previous_path": "locomotion/omni/control.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Compute motor forces under the speed-dependent torque curve and the slew-limited held targets."
     },
     {
-      "path": "locomotion/omni/frames.py",
+      "path": "locomotion/omniwalk/frames.py",
       "previous_path": "locomotion/omni/control.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Use the canonical XYZW quaternion and navigation frames."
     },
     {
-      "path": "locomotion/omni/commands.py",
+      "path": "locomotion/omniwalk/commands.py",
       "previous_path": "locomotion/omni/task.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Declare the omnidirectional command bank, its hold times and the gait-clock period."
     },
     {
-      "path": "locomotion/omni/reward.py",
+      "path": "locomotion/omniwalk/reward.py",
       "previous_path": "locomotion/omni/task.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Compute the yaw-gated omnidirectional walking reward from one control's telemetry."
     },
     {
-      "path": "locomotion/omni/wrapper.py",
+      "path": "locomotion/omniwalk/wrapper.py",
       "previous_path": "locomotion/omni/ppo.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Wrap the walking task as an RSL-RL vector environment with input scales and a gait clock."
     },
     {
-      "path": "locomotion/omni/env.py",
+      "path": "locomotion/omniwalk/env.py",
       "previous_path": "locomotion/gait_clock/env.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Expose OmniEnv, the task-facing surface over IsaacEnv that the MuJoCo surrogate also implements."
     },
     {
-      "path": "locomotion/omni/isaac.py",
+      "path": "locomotion/omniwalk/isaac.py",
       "previous_path": "locomotion/omni/native.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Subclass DirectRLEnv to own the scene, native views and checks, substep capture, telemetry and reset writes."
     },
     {
-      "path": "locomotion/omni/ppo.py",
+      "path": "locomotion/omniwalk/ppo.py",
       "previous_path": "locomotion/gait_clock/ppo.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Extend stock RSL-RL PPO with command bootstraps, a rate cap, bounded means and update diagnostics."
     },
     {
-      "path": "locomotion/omni/task.py",
+      "path": "locomotion/omniwalk/task.py",
       "previous_path": "locomotion/gait_clock/task.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Sample commands, apply the walking reward and report metrics around selected episode resets."
     },
     {
-      "path": "locomotion/omni/train.py",
+      "path": "locomotion/omniwalk/train.py",
       "previous_path": "locomotion/gait_clock/train.py",
       "classification": "current",
       "owner": "Platform lead",
@@ -232,7 +232,7 @@
       "purpose": "Fit a least-squares discriminator and score paired 61-value motion states."
     },
     {
-      "path": "locomotion/omni/features.py",
+      "path": "locomotion/omniwalk/features.py",
       "previous_path": "locomotion/priors/features.py",
       "classification": "current",
       "owner": "Locomotion lead",

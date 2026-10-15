@@ -4,7 +4,8 @@ import json
 import math
 import numpy as np
 import torch
-from locomotion.omni.robot import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, verify_assets
+from locomotion.omniwalk.motor import STIFFNESS_NM_PER_RAD
+from locomotion.omniwalk.robot import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, verify_assets
 
 
 def diagnostic_rotation(q):
@@ -345,7 +346,7 @@ def score_diagnostic(directory):
     limits = np.asarray(native['limits'])
     maxvel = np.asarray(native['native_max_velocity'])
     order = [JOINT_NAMES.index(x) for x in names]
-    kp = np.full(18, 12., np.float32)[order]
+    kp = np.full(18, STIFFNESS_NM_PER_RAD, np.float32)[order]
     kd = np.asarray(KD, np.float32)[order]
     for f in s['substep_files']:
         with np.load(d / f) as z:

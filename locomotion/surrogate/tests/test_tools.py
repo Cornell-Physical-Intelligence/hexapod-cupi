@@ -14,8 +14,8 @@ import torch
 from locomotion.spark.prepare import prepare
 from locomotion.surrogate import replay
 from locomotion.surrogate.env import ROOT, make_env
-from locomotion.omni.commands import TaskConfig
-from locomotion.omni.task import TrainingTask
+from locomotion.omniwalk.commands import TaskConfig
+from locomotion.omniwalk.task import TrainingTask
 
 PACKAGE = ROOT / "locomotion/surrogate"
 REMOTE = Path("/home/orionh/HEXAPOD_runs/restart_20260914/test_surrogate_boundary")
@@ -59,7 +59,7 @@ class ReplayTests(unittest.TestCase):
         env.commands[:] = torch.tensor([.05, 0., 0.])
         generator = torch.Generator().manual_seed(3)
         cls.summary = replay.run(env, lambda control: .15 * torch.randn(2, 18, generator=generator), 10, cls.output,
-                                 rewards=("c48_long",))
+                                 rewards=("v4_yaw_gate",))
         env.close()
         with np.load(cls.output / "telemetry.npz") as file:
             cls.data = {key: file[key] for key in file.files}
@@ -71,21 +71,21 @@ class ReplayTests(unittest.TestCase):
     def test_scripted_run_records_telemetry_and_rewards(self):
         self.assertEqual((self.summary["controls"], self.summary["replicas"]), (10, 2))
         self.assertEqual(self.data["action"].shape, (10, 2, 18))
-        self.assertEqual(sorted(self.summary["reward_component_means"]), ["c48_long"])
+        self.assertEqual(sorted(self.summary["reward_component_means"]), ["v4_yaw_gate"])
         with np.load(self.output / "rewards.npz") as file:
-            self.assertEqual(file["c48_long/reward"].shape, (10, 2))
+            self.assertEqual(file["v4_yaw_gate/reward"].shape, (10, 2))
         self.assertTrue(json.loads((self.output / "summary.json").read_text())["surrogate"])
 
     def test_stored_record_scores_the_same_reward_again(self):
-        scores = replay.score_arrays(self.data, ["c48_long"])
+        scores = replay.score_arrays(self.data, ["v4_yaw_gate"])
         means = replay.reward_summary(scores)
-        for name in ("c48_long",):
+        for name in ("v4_yaw_gate",):
             self.assertEqual(scores[name]["reward"].shape, (10, 2))
             self.assertAlmostEqual(means[name]["reward"], self.summary["reward_component_means"][name]["reward"], places=6)
 
     def test_offline_scores_equal_the_live_task_rewards(self):
         # The live task steps the physics and the scorer replays its record; neither side reads the other.
-        for name, task_class in (("c48_long", TrainingTask),):
+        for name, task_class in (("v4_yaw_gate", TrainingTask),):
             env = make_env(4, threads=0, episode_seconds=60., substep_state=False)
             task = task_class(env, TaskConfig(seed=5))
             task.reset()
@@ -104,11 +104,11 @@ class ReplayTests(unittest.TestCase):
 
     def test_score_command_keeps_a_fresh_output_name(self):
         target = Path(self.temporary.name) / "scores"
-        arguments = ["score", "--telemetry", str(self.output / "telemetry.npz"), "--rewards", "c48_long", "--output", str(target)]
+        arguments = ["score", "--telemetry", str(self.output / "telemetry.npz"), "--rewards", "v4_yaw_gate", "--output", str(target)]
         with contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(replay.main(arguments), 0)
         with np.load(target.with_name("scores.npz")) as file:
-            self.assertEqual(file["c48_long/reward"].shape, (10, 2))
+            self.assertEqual(file["v4_yaw_gate/reward"].shape, (10, 2))
         with self.assertRaises(FileExistsError):
             replay.main(arguments)
 

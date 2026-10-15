@@ -3,7 +3,7 @@ from types import SimpleNamespace
 from pathlib import Path
 import json
 import torch
-from locomotion.omni.robot import JOINT_NAMES
+from locomotion.omniwalk.robot import JOINT_NAMES
 ROOT = Path(__file__).resolve().parents[2]
 GEOMETRY = ROOT/"robot/hexapod_mkii_updated_v1/geometry/geometry.json"
 MODEL = json.loads((ROOT/"robot/hexapod_mkii_updated_v1/model_rs05_mass_corrected.json").read_text())

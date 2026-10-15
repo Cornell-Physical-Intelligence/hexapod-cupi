@@ -6,6 +6,11 @@ import math
 GAIT_CLOCK_CONTROLS = 60
 
 
+def default_gait_clock(mode, networks):
+    """The clock period a run uses when the command line names none: MLP training needs it, other modes run without it."""
+    return GAIT_CLOCK_CONTROLS if mode == 'train' and networks == 'mlp' else 0
+
+
 @dataclass(frozen=True)
 class TaskConfig:
     seed: int = 20260914

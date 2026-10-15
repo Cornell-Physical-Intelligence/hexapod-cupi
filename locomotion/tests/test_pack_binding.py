@@ -18,11 +18,11 @@ class PackBindingTests(unittest.TestCase):
             binding = prepare(root/'pack', REMOTE, mode='diagnostic')
             self.assertNotIn('--backend', binding['command_args'])
             self.assertFalse(binding['root_review_complete'])
-            self.assertEqual(binding['module'], 'locomotion.omni.train')
+            self.assertEqual(binding['module'], 'locomotion.omniwalk.train')
             manifest = verify_runtime(root/'pack/source')
             self.assertFalse(any('/tripod/' in name for name in manifest['files']))
             self.assertFalse((root/'pack/source/locomotion/tripod').exists())
-            nested = root/'pack/source/locomotion/omni/motor.py'
+            nested = root/'pack/source/locomotion/omniwalk/motor.py'
             nested.write_text(nested.read_text()+'\n# tamper\n')
             with self.assertRaisesRegex(ValueError, 'manifest differs'):
                 verify_runtime(root/'pack/source')

@@ -38,7 +38,7 @@ The catalog's 48 V torque-speed points include 1.6 N·m at 450 rpm and 5.5 N·m 
 
 ## Current direct-drive implementation
 
-Use [`motor_force`](../locomotion/omni/motor.py) and [`EnvConfig`](../locomotion/omni/env_cfg.py)
+Use [`motor_force`](../locomotion/omniwalk/motor.py) and [`EnvConfig`](../locomotion/omniwalk/env_cfg.py)
 for the maintained implementation. At each 400 Hz physics step, the controller
 computes `12 * (target - position) - kd * velocity`, using the per-joint `KD`
 values in `robot.py`. It clips that demand against a provisional 48 V

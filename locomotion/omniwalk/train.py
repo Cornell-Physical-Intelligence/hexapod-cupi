@@ -25,10 +25,10 @@ from locomotion.evaluation.camera import NativePolicyCamera, prepare_policy_scen
 from locomotion.evaluation.checkpoint import (DECLARATION_SHA, checkpoint_reward_version, read_compatibility_receipt,
     require_checkpoint_identity, require_compatibility_configuration, require_compatibility_identity,
     require_embedded_declaration, require_learner_configuration, require_learner_identity)
-from locomotion.omni.commands import GAIT_CLOCK_CONTROLS, TaskConfig
-from locomotion.omni.env_cfg import EnvConfig
-from locomotion.omni.ppo_cfg import ppo_config
-from locomotion.omni.robot import MODEL_SHA256, USD_SHA256, verify_assets
+from locomotion.omniwalk.commands import GAIT_CLOCK_CONTROLS, TaskConfig, default_gait_clock
+from locomotion.omniwalk.env_cfg import EnvConfig
+from locomotion.omniwalk.ppo_cfg import ppo_config
+from locomotion.omniwalk.robot import MODEL_SHA256, USD_SHA256, verify_assets
 from locomotion.spark.sources import physics_files, source_files, verify_runtime
 from locomotion.spark.validation import (ALLOCATION_PROFILES, LEARNER_OPTION_DEFAULTS, collected_transitions,
     decay_updates, finish_training_update, update_limit, validate_deadline, validate_decay)
@@ -136,7 +136,7 @@ def parse_args(argv=None):
         AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args(argv)
     if args.gait_clock is None:
-        args.gait_clock = GAIT_CLOCK_CONTROLS if args.mode == 'train' and args.networks == 'mlp' else 0
+        args.gait_clock = default_gait_clock(args.mode, args.networks)
     return args
 
 
@@ -223,7 +223,7 @@ def build_identity(args, cfg, metadata):
         'geometry_sha256': sha(args.geometry), 'geometry_extrema_sha256': sha(args.geometry_extrema),
         'config': cfg.declaration(), 'motion_prior': args.learner == 'amp', 'behavior_cloning': False,
         'seed': args.seed, 'rsl_rl_required_version': '5.0.1',
-        'adapter_sha256': sha(SOURCE/'omni/wrapper.py'), 'entry_sha256': sha(__file__),
+        'adapter_sha256': sha(SOURCE/'omniwalk/wrapper.py'), 'entry_sha256': sha(__file__),
         'reward_version': '4', 'reward_task': 'v4_yaw_gate', 'learner': args.learner, 'networks': args.networks}
     if args.extended_updates:
         # The exploration decay length enters ppo_config; the opt-in records the requested run length beside it.
@@ -231,7 +231,7 @@ def build_identity(args, cfg, metadata):
     if args.learner == 'amp':
         from locomotion.priors.amp import AMPConfig, load_demonstrations
         identity['learner_source_files'] = {name: sha(SOURCE/name) for name in (
-            'omni/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
+            'omniwalk/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
         identity['amp_dataset'] = load_demonstrations(SOURCE.parent/AMPConfig().dataset)[1]
     identity['physics_source_files'] = physics_files(identity['source_files'])
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
@@ -305,7 +305,7 @@ def launch_app(args):
 def create_env(args, cfg, metadata):
     """Seed torch and NumPy, then build the native environment; evaluation adds the policy camera scene."""
     import torch
-    from locomotion.omni.env import OmniEnv
+    from locomotion.omniwalk.env import OmniEnv
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     env = OmniEnv(cfg, args.asset, args.model, args.geometry,
@@ -368,7 +368,7 @@ def learner_config(args, identity, state):
 
 def training_wrapper(env, args, task):
     """Wrap the task for RSL-RL; AMP adds collision capture and the discriminator configuration."""
-    from locomotion.omni.wrapper import OmniVecEnv
+    from locomotion.omniwalk.wrapper import OmniVecEnv
     wrapper, options = OmniVecEnv, {}
     if args.learner == 'amp':
         from locomotion.priors.amp import AMPConfig, AMPVecEnv, CollisionCapture
@@ -392,7 +392,7 @@ def write_checkpoint(runner, args, config, identity, state, num_envs, update):
 
 def metrics_row(values, runner, env, task, diagnostics, config):
     """Return the metrics.jsonl row for the values RSL-RL logs after one update."""
-    from locomotion.omni.ppo import action_metrics
+    from locomotion.omniwalk.ppo import action_metrics
     update = values['it']+1
     return {'update': update, 'transitions': collected_transitions(update, config, env.num_envs),
         'collection_seconds': values['collect_time'], 'learning_seconds': values['learn_time'],
@@ -416,8 +416,8 @@ def training_runner(env, args, config, identity, state, started):
     """
     from rsl_rl.runners import OnPolicyRunner
     from locomotion.evaluation.loads import TrainingLoads
-    from locomotion.omni.ppo import DeviationSchedule, UpdateDiagnostics
-    from locomotion.omni.task import TrainingTask
+    from locomotion.omniwalk.ppo import DeviationSchedule, UpdateDiagnostics
+    from locomotion.omniwalk.task import TrainingTask
     task = TrainingTask(env, TaskConfig(seed=args.seed), args.output/'task')
     wrapped = training_wrapper(env, args, task)
     if args.networks == 'mlp' and args.gait_clock != task.reward_config.schedule_period_controls:
@@ -470,7 +470,7 @@ def training_runner(env, args, config, identity, state, started):
 def actor_input(env, args, observation):
     """Scale the actor observation and append the gait clock, as the training wrapper does."""
     import torch
-    from locomotion.omni.wrapper import clock_features, scale_observation
+    from locomotion.omniwalk.wrapper import clock_features, scale_observation
     scaled = scale_observation(observation, args.observation_scaling)
     if args.gait_clock:
         clock = clock_features(env.episode_steps, args.gait_clock, observation[:, 210:213]).to(scaled)
@@ -482,8 +482,8 @@ def evaluation_policy(env, args, config, identity, checkpoint_record, compatibil
     """Check the checkpoint configuration, load its actor and return the policy that the evaluator calls."""
     import torch
     from tensordict import TensorDict
-    from locomotion.omni.ppo import load_actor
-    from locomotion.omni.wrapper import smoothed_action
+    from locomotion.omniwalk.ppo import load_actor
+    from locomotion.omniwalk.wrapper import smoothed_action
     check = require_compatibility_configuration if compatibility is not None else require_learner_configuration
     check(checkpoint_record, identity, config)
     observation = env.observations(env.current)['obs']

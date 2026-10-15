@@ -13,8 +13,9 @@ import math
 import time
 import numpy as np
 import torch
-from locomotion.omni.env_cfg import EnvConfig
-from locomotion.omni.robot import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256
+from locomotion.omniwalk.env_cfg import EnvConfig
+from locomotion.omniwalk.motor import STIFFNESS_NM_PER_RAD
+from locomotion.omniwalk.robot import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256
 from locomotion.evaluation.capture import DiagnosticGeometry, classify_patches, diagnostic_rotation, diagnostic_servo
 from locomotion.evaluation.force_metrics import write_summary
 import locomotion.evaluation.scoring as scoring
@@ -195,7 +196,7 @@ class ExactEvaluationCapture:
             if not np.array_equal(row["native_input_pre_nm"], row["applied_torque_nm"]):
                 raise RuntimeError("Actual native motor input differs")
             wanted = diagnostic_servo(row["pre_joint_position_rad"], row["pre_joint_velocity_rad_s"],
-                                      row["joint_target_rad"], np.full(18, 12., np.float32), np.asarray(KD, np.float32))
+                                      row["joint_target_rad"], np.full(18, STIFFNESS_NM_PER_RAD, np.float32), np.asarray(KD, np.float32))
             for name, expected in zip(("computed_torque_nm", "applied_torque_nm", "effort_ceiling_nm"), wanted):
                 if not np.array_equal(row[name], expected):
                     raise RuntimeError("Canonical motor recurrence differs: " + name)

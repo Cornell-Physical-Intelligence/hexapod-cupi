@@ -9,7 +9,7 @@ import subprocess
 from urllib.parse import quote
 
 
-PACKAGES = {'omni', 'tripod', 'priors', 'surrogate', 'evaluation', 'spark'}
+PACKAGES = {'omniwalk', 'tripod', 'priors', 'surrogate', 'evaluation', 'spark'}
 
 
 def area(path):
@@ -166,7 +166,7 @@ PAGE = r'''<!doctype html>
 </main>
 <script>const DATA=__DATA__;
 const PACKAGES=[
-['omni','omni','Omnidirectional walking task and PPO.'],
+['omniwalk','omniwalk','Omnidirectional walking task and PPO.'],
 ['tripod','tripod','Original tripod task with BC and PPO fine-tuning.'],
 ['priors','priors','Motion demonstrations and AMP learning.'],
 ['surrogate','surrogate','CPU MuJoCo training and trace replay.'],

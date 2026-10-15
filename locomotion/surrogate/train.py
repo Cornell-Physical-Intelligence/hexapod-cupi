@@ -1,7 +1,7 @@
-"""Train PPO on the MuJoCo surrogate through the training path of ``locomotion/omni/train.py``."""
+"""Train PPO on the MuJoCo surrogate through the training path of ``locomotion/omniwalk/train.py``."""
 from __future__ import annotations
 
-from locomotion.omni.commands import GAIT_CLOCK_CONTROLS
+from locomotion.omniwalk.commands import GAIT_CLOCK_CONTROLS
 from locomotion.spark.sources import runtime_paths, source_files
 
 import argparse
@@ -79,7 +79,7 @@ def wrapper_options(config):
 
 
 def build_wrapper(wrapper_class, task, options):
-    """Construct the RSL-RL wrapper with its recorded keywords, as ``locomotion/omni/train.py`` does.
+    """Construct the RSL-RL wrapper with its recorded keywords, as ``locomotion/omniwalk/train.py`` does.
 
     A constructor that lacks a recorded keyword is an error unless the keyword holds its default,
     so a substitute wrapper with the plain ``(task)`` constructor works at the default options.
@@ -102,12 +102,12 @@ def learner_configuration(config_module, seed, options):
                 "action_smoothing": "none", "velocity_noise": 0.}
     missing = [key for key, value in options.items() if key not in accepted and value != defaults.get(key)]
     if missing:
-        raise ValueError(f"locomotion.omni.ppo_cfg.ppo_config at this revision has no option {missing}")
+        raise ValueError(f"locomotion.omniwalk.ppo_cfg.ppo_config at this revision has no option {missing}")
     return config_module.ppo_config(seed, **{key: value for key, value in options.items() if key in accepted})
 
 
 def check_gait_schedule(task, config):
-    """The contact-schedule reward reads the phase that the gait clock shows the policy (``locomotion/omni/train.py``)."""
+    """The contact-schedule reward reads the phase that the gait clock shows the policy (``locomotion/omniwalk/train.py``)."""
     reward = getattr(task, "reward_config", None)
     if getattr(reward, "schedule_weight", 0) and (
             config.get("environment_wrapper", {}).get("gait_clock", 0) != getattr(reward, "schedule_period_controls", None)):
@@ -124,11 +124,11 @@ def check_command_bootstrap(options, config):
     if options.get("command_segments") != "bootstrap":
         return
     from rsl_rl.utils import resolve_callable
-    from locomotion.omni.ppo import CommandBootstrapPPO
+    from locomotion.omniwalk.ppo import CommandBootstrapPPO
     algorithm = resolve_callable(config["algorithm"]["class_name"])
     if not (inspect.isclass(algorithm) and issubclass(algorithm, CommandBootstrapPPO)):
         raise ValueError("The bootstrap wrapper option needs an algorithm class derived from "
-                         "locomotion.omni.ppo:CommandBootstrapPPO")
+                         "locomotion.omniwalk.ppo:CommandBootstrapPPO")
 
 
 def external_class_files(task_class, wrapper_class, config):
@@ -207,16 +207,16 @@ def resume_record(path, identity):
 def build_parser():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--output", type=Path, required=True, help="New run directory.")
-    parser.add_argument("--task", default="locomotion.omni.task:TrainingTask",
+    parser.add_argument("--task", default="locomotion.omniwalk.task:TrainingTask",
                         help="module:Class or module:factory(text) that gives a class with the TrainingTask "
                              "interface: Class(env, TaskConfig, output_dir).")
-    parser.add_argument("--wrapper", default="locomotion.omni.wrapper:OmniVecEnv", help="module:Class that wraps the task for RSL-RL.")
+    parser.add_argument("--wrapper", default="locomotion.omniwalk.wrapper:OmniVecEnv", help="module:Class that wraps the task for RSL-RL.")
     parser.add_argument("--ppo-config-overrides", default="{}", help="JSON merged into ppo_cfg.ppo_config(...), or @file.json.")
     parser.add_argument("--distribution", help="Actor distribution class_name (RSL-RL name or module:Class); overrides --action-mean.")
     parser.add_argument("--action-mean", choices=["unbounded", "tanh"], default="unbounded")
     parser.add_argument("--observation-normalization", choices=["empirical", "none"], default="empirical")
     parser.add_argument("--observation-scaling", choices=["none", "fixed"], default="none",
-                        help="Pass raw observations or apply the fixed input scales declared in omni/wrapper.py.")
+                        help="Pass raw observations or apply the fixed input scales declared in omniwalk/wrapper.py.")
     parser.add_argument("--command-segments", choices=["continuous", "bootstrap"], default="continuous",
                         help="Carry returns across command changes or bootstrap the return at each change.")
     parser.add_argument("--learning-rate-max", type=float,
@@ -267,10 +267,10 @@ def run(args, argv=None):
     import mujoco
     from locomotion.surrogate.env import (DEFAULT_GEOMETRY, DEFAULT_MODEL, DEFAULT_STANCE, ROOT, SurrogateConfig,
                                           SurrogateEnv, contact_overrides, repository_state, sha)
-    import locomotion.omni.ppo as algorithms
-    import locomotion.omni.ppo_cfg as ppo_cfg
-    import locomotion.omni.task as task_module
-    from locomotion.omni.train import save, scalars
+    import locomotion.omniwalk.ppo as algorithms
+    import locomotion.omniwalk.ppo_cfg as ppo_cfg
+    import locomotion.omniwalk.task as task_module
+    from locomotion.omniwalk.train import save, scalars
 
     version = importlib.metadata.version("rsl-rl-lib")
     if version != "5.0.1":

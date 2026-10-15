@@ -2,8 +2,8 @@
 import math
 import unittest
 import torch
-from locomotion.omni.motor import motor_force
-from locomotion.omni.robot import JOINT_NAMES, KD, motor_damping
+from locomotion.omniwalk.motor import motor_force
+from locomotion.omniwalk.robot import JOINT_NAMES, KD, motor_damping
 
 
 def named_motor_force(names, q, dq, target):

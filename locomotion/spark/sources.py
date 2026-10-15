@@ -33,7 +33,7 @@ def source_files(package):
 def physics_files(files, package=None):
     """Follow project imports from the native environment, the standing capture and the scorer."""
     package = Path(package) if package is not None else Path(__file__).resolve().parents[1]
-    pending, seen = ['omni/env.py', 'omni/env_cfg.py', 'omni/isaac.py', 'evaluation/capture.py', 'evaluation/scoring.py'], set()
+    pending, seen = ['omniwalk/env.py', 'omniwalk/env_cfg.py', 'omniwalk/isaac.py', 'evaluation/capture.py', 'evaluation/scoring.py'], set()
     while pending:
         name = pending.pop()
         if name in seen or name not in files:

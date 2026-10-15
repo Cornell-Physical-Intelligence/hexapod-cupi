@@ -7,10 +7,10 @@ import numpy as np
 import torch
 
 import locomotion.evaluation.noise_probe as noise_probe
-from locomotion.omni.env import OmniEnv
-from locomotion.omni.env_cfg import EnvConfig
-from locomotion.omni.motor import emitted_target
-from locomotion.omni.robot import MASS_KG
+from locomotion.omniwalk.env import OmniEnv
+from locomotion.omniwalk.env_cfg import EnvConfig
+from locomotion.omniwalk.motor import emitted_target
+from locomotion.omniwalk.robot import MASS_KG
 from locomotion.surrogate.env import (MAX_JOINT_SPEED, ContactModel, SurrogateConfig, SurrogateEnv, contact_overrides,
                                       make_env)
 

@@ -3,7 +3,7 @@ from functools import partial
 
 import torch
 
-from locomotion.omni import features
+from locomotion.omniwalk import features
 
 
 def reset_rows(indices, num_envs, device):
@@ -15,7 +15,7 @@ def reset_rows(indices, num_envs, device):
 
 
 class OmniEnv:
-    """Keep task-owned commands and selected resets around the stock Direct environment in ``isaac``.
+    """Expose the task-facing surface of the stock Direct environment in ``isaac``.
 
     IsaacEnv owns ``commands``, ``history``, ``held`` and ``previous_action`` and writes them in place;
     the same names here alias those tensors, so task writes reach the observations. The task reads
@@ -27,7 +27,7 @@ class OmniEnv:
     amp_width = 61
 
     def __init__(self, cfg, asset, model_path, geometry_path, output, *, reference_metadata=None):
-        from locomotion.omni.isaac import IsaacEnv
+        from locomotion.omniwalk.isaac import IsaacEnv
         self.cfg, self.device, self.num_envs = cfg, cfg.device, cfg.num_envs
         self.isaac = isaac = IsaacEnv(cfg, asset, model_path, geometry_path, output, reference_metadata=reference_metadata)
         self.commands, self.history = isaac.commands, isaac.history

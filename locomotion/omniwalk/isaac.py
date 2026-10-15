@@ -14,11 +14,11 @@ from isaaclab_physx.assets.articulation import Articulation
 from isaaclab_physx.sim.spawners.materials import RigidBodyMaterialCfg
 from pxr import PhysxSchema, UsdPhysics
 
-from locomotion.omni.env_cfg import make_config
-from locomotion.omni.features import observations, proprio
-from locomotion.omni.frames import inverse_rotate, navigation, rotate
-from locomotion.omni.motor import RATED_TORQUE_NM, emitted_target, executed_action_feature
-from locomotion.omni.robot import BODY_NAMES, ISAACLAB_REVISION, JOINT_NAMES, LEGS, MASS_KG, USD_SHA256, verify_assets
+from locomotion.omniwalk.env_cfg import make_config
+from locomotion.omniwalk.features import observations, proprio
+from locomotion.omniwalk.frames import inverse_rotate, navigation, rotate
+from locomotion.omniwalk.motor import RATED_TORQUE_NM, emitted_target, executed_action_feature
+from locomotion.omniwalk.robot import BODY_NAMES, ISAACLAB_REVISION, JOINT_NAMES, LEGS, MASS_KG, USD_SHA256, verify_assets
 
 
 class CaptureArticulation(Articulation):

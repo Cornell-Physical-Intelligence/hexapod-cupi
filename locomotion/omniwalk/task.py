@@ -7,9 +7,9 @@ import math
 
 import torch
 
-from locomotion.omni.commands import TaskConfig, command_bank
-from locomotion.omni.frames import inverse_rotate, navigation
-from locomotion.omni.reward import (CONTROL_DT_S, REWARD_CONFIG, REWARD_VERSION, SCHEMA, StrideWindow,
+from locomotion.omniwalk.commands import TaskConfig, command_bank
+from locomotion.omniwalk.frames import inverse_rotate, navigation
+from locomotion.omniwalk.reward import (CONTROL_DT_S, REWARD_CONFIG, REWARD_VERSION, SCHEMA, StrideWindow,
                                     displacement_velocity, measured_reward, scheduled_swing)
 
 METRIC_COMMAND_CLASSES = ("zero", "linear_0.025", "linear_0.05", "yaw", "arc", "other")

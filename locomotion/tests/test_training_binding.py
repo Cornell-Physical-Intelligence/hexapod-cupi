@@ -5,8 +5,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from locomotion.omni.env_cfg import EnvConfig
-from locomotion.omni.robot import MODEL_SHA256, USD_SHA256, sha
+from locomotion.omniwalk.env_cfg import EnvConfig
+from locomotion.omniwalk.robot import MODEL_SHA256, USD_SHA256, sha
 from locomotion.evaluation.admission import require_admission
 
 

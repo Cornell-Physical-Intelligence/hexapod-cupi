@@ -8,12 +8,12 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from locomotion.omni.ppo import CappedRatePPO, CommandBootstrapPPO
+from locomotion.omniwalk.ppo import CappedRatePPO, CommandBootstrapPPO
 
-import locomotion.omni.features as amp
+import locomotion.omniwalk.features as amp
 from . import discriminator as disc
-from locomotion.omni.ppo_cfg import ppo_config
-from locomotion.omni.wrapper import OmniVecEnv, scale_observation, clock_features, smoothed_action
+from locomotion.omniwalk.ppo_cfg import ppo_config
+from locomotion.omniwalk.wrapper import OmniVecEnv, scale_observation, clock_features, smoothed_action
 from . import networks as nets
 
 ROOT = Path(__file__).resolve().parents[2]

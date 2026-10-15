@@ -8,7 +8,7 @@ import unittest
 
 from contracts.release import COMPATIBILITY_KEYS
 from locomotion.evaluation.checkpoint import require_checkpoint_identity
-from locomotion.omni.ppo_cfg import ppo_config
+from locomotion.omniwalk.ppo_cfg import ppo_config
 from locomotion.spark.prepare import prepare
 from locomotion.spark.sources import physics_files, source_files, verify_runtime
 
@@ -23,11 +23,11 @@ class DependencyIdentityTests(unittest.TestCase):
             source = output/'source'
             manifest = verify_runtime(source)
             self.assertEqual(manifest['schema'], 'hexapod_runtime_sources_v2')
-            for path in ('locomotion/omni/motor.py', 'locomotion/omni/task.py',
-                         'locomotion/omni/env.py', 'locomotion/omni/ppo.py'):
+            for path in ('locomotion/omniwalk/motor.py', 'locomotion/omniwalk/task.py',
+                         'locomotion/omniwalk/env.py', 'locomotion/omniwalk/ppo.py'):
                 self.assertIn(path, manifest['files'])
             self.assertFalse(any('/tests/' in name for name in manifest['files']))
-            path = source/'locomotion/omni/motor.py'
+            path = source/'locomotion/omniwalk/motor.py'
             path.write_text(path.read_text() + '\n# tampered\n')
             with self.assertRaisesRegex(ValueError, 'Runtime dependency'):
                 verify_runtime(source)
@@ -35,17 +35,17 @@ class DependencyIdentityTests(unittest.TestCase):
     def test_nested_physics_dependencies_cannot_reuse_standing_identity(self):
         files = source_files(ROOT)
         physics = physics_files(files)
-        for name in ('omni/motor.py', 'omni/frames.py', 'omni/isaac.py', 'omni/actuator.py',
+        for name in ('omniwalk/motor.py', 'omniwalk/frames.py', 'omniwalk/isaac.py', 'omniwalk/actuator.py',
                      'evaluation/capture.py', 'evaluation/scoring.py'):
             self.assertIn(name, physics)
             changed = dict(files, **{name: '0'*64})
             self.assertNotEqual(physics, physics_files(changed))
-        self.assertNotIn('omni/ppo.py', physics)
+        self.assertNotIn('omniwalk/ppo.py', physics)
 
     def test_physics_closure_starts_at_the_environment_and_its_configuration(self):
         paths = physics_files(source_files(ROOT))
-        self.assertIn('omni/env.py', paths)
-        self.assertIn('omni/env_cfg.py', paths)
+        self.assertIn('omniwalk/env.py', paths)
+        self.assertIn('omniwalk/env_cfg.py', paths)
 
     def test_identity_checks_reject_each_changed_key_and_runtime_source(self):
         identity = dict.fromkeys(COMPATIBILITY_KEYS, 'same')
@@ -57,19 +57,19 @@ class DependencyIdentityTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 require_checkpoint_identity(record, identity)
         identity.update(schema='hexapod_locomotion_ppo_v2', runtime_sources={'schema': 'hexapod_runtime_sources_v2',
-                        'files': {'locomotion/omni/motor.py': 'a'*64}})
+                        'files': {'locomotion/omniwalk/motor.py': 'a'*64}})
         record = {'identity': deepcopy(identity)}
         require_checkpoint_identity(record, identity)
-        record['identity']['runtime_sources']['files']['locomotion/omni/motor.py'] = 'b'*64
+        record['identity']['runtime_sources']['files']['locomotion/omniwalk/motor.py'] = 'b'*64
         with self.assertRaisesRegex(ValueError, 'runtime dependencies'):
             require_checkpoint_identity(record, identity)
 
     def test_learner_configuration_uses_package_classes(self):
         config = ppo_config(17, action_mean='tanh', learning_rate_max=.0003)
         self.assertEqual(config['algorithm']['class_name'],
-                         'locomotion.omni.ppo:CappedRatePPO')
+                         'locomotion.omniwalk.ppo:CappedRatePPO')
         self.assertEqual(config['actor']['distribution_cfg']['class_name'],
-                         'locomotion.omni.ppo:BoundedMeanGaussian')
+                         'locomotion.omniwalk.ppo:BoundedMeanGaussian')
 
     def test_checkpoint_module_adds_no_global_import_hook(self):
         before = list(sys.meta_path)
@@ -79,3 +79,14 @@ class DependencyIdentityTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class SharedValidationTests(unittest.TestCase):
+    def test_prepare_and_training_share_one_validation(self):
+        """The host preparer and the container trainer accept the same packs only if they share one rule set."""
+        import locomotion.omniwalk.train as train
+        import locomotion.spark.prepare as prepare_module
+        import locomotion.spark.validation as validation
+        for name in ('update_limit', 'validate_decay', 'validate_deadline'):
+            self.assertIs(getattr(prepare_module, name), getattr(validation, name))
+            self.assertIs(getattr(train, name), getattr(validation, name))
