@@ -40,14 +40,10 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             action_noise_correlation=0., action_std_final=None, gait_clock=None, action_smoothing='none',
             velocity_noise=0., episode_seconds=20.,
             video_case=None, extended_updates=False, action_std_decay_updates=None, steps_per_env=24,
-            allocation_profile='standard', max_wall_seconds=6200, bc_warmstart=False, root=ROOT):
+            allocation_profile='standard', max_wall_seconds=6200, root=ROOT):
     output, remote_root, root = map(Path, (output, remote_root, root))
     if gait_clock is None:
         gait_clock = 60 if mode == 'train' else 0
-    if type(bc_warmstart) is not bool or (bc_warmstart and (
-            mode != 'train'
-            or gait_clock != 60)):
-        raise ValueError('BC warmstart requires PPO training and the 60-control gait clock')
     if mode == 'train' and gait_clock != 60:
         raise ValueError('The active reward requires the 60-control gait clock')
     validate_deadline(mode, allocation_profile, max_wall_seconds)
@@ -148,8 +144,6 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
             '--stance', '/prior/'+Path(declared['stance']).name,
             '--num-envs', str(num_envs), '--source-freeze-sha256', freeze,
             '--max-wall-seconds', str(max_wall_seconds), '--headless', '--device', 'cuda:0']}
-    if bc_warmstart:
-        binding['command_args'] += ['--bc-warmstart']
     if allocation_profile != 'standard':
         binding['command_args'] += ['--allocation-profile', allocation_profile]
     if mode != 'diagnostic':
@@ -197,7 +191,6 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         **({} if video_case is None else {'video_case': video_case}),
         **({} if episode_seconds == 20. else {'episode_seconds': episode_seconds}),
         **({'extended_updates': True} if extended_updates else {}),
-        **({'bc_warmstart': True} if bc_warmstart else {}),
         'allocation_profile': allocation_profile, 'max_wall_seconds': max_wall_seconds,
         'updates': updates, 'stage2_complete': False, 'files': {
             p.relative_to(output).as_posix(): sha(p) for p in sorted(output.rglob('*')) if p.is_file()}})
@@ -210,7 +203,6 @@ def main():
     parser.add_argument('--remote-root', required=True)
     parser.add_argument('--inputs', type=Path)
     parser.add_argument('--mode', choices=('diagnostic', 'train', 'evaluate', 'probe'), required=True)
-    parser.add_argument('--bc-warmstart', action='store_true', help='Clone the scripted teacher before PPO with the active walking task.')
     parser.add_argument('--num-envs', type=int)
     parser.add_argument('--eval-scope', choices=['focus', 'probes', 'full'], default='focus')
     parser.add_argument('--updates', type=int, default=512)

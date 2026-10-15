@@ -395,13 +395,6 @@
       "purpose": "Verify hash-pinned checkpoint evaluation receipts and native parity evidence."
     },
     {
-      "path": "locomotion/learning/bc.py",
-      "previous_path": null,
-      "classification": "current",
-      "owner": "Locomotion lead",
-      "purpose": "Clone the scripted teacher through the shared PPO actor before a new experiment."
-    },
-    {
       "path": "locomotion/backends/isaac/native.py",
       "previous_path": null,
       "classification": "current",
@@ -421,6 +414,62 @@
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Check the preserved demonstration dataset against its historical manifest."
+    },
+    {
+      "path": "locomotion/shaurya/__init__.py",
+      "previous_path": "hexapod/__init__.py",
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Register Shaurya\u2019s original flat and rough Direct tasks."
+    },
+    {
+      "path": "locomotion/shaurya/agents/__init__.py",
+      "previous_path": "hexapod/agents/__init__.py",
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Declare Shaurya\u2019s learner configuration package."
+    },
+    {
+      "path": "locomotion/shaurya/agents/rsl_rl_ppo_cfg.py",
+      "previous_path": "hexapod/agents/rsl_rl_ppo_cfg.py",
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Preserve Shaurya\u2019s flat and rough PPO configurations."
+    },
+    {
+      "path": "locomotion/shaurya/hexapod_env.py",
+      "previous_path": "hexapod/hexapod_env.py",
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Preserve Shaurya\u2019s observations, reward, resets and stock Direct environment."
+    },
+    {
+      "path": "locomotion/shaurya/hexapod_env_cfg.py",
+      "previous_path": "hexapod/hexapod_env_cfg.py",
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Preserve Shaurya\u2019s scene, randomization and task settings."
+    },
+    {
+      "path": "locomotion/shaurya/hexapod_robot_cfg.py",
+      "previous_path": "hexapod/hexapod_robot_cfg.py",
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Preserve Shaurya\u2019s implicit PD actuator and robot configuration."
+    },
+    {
+      "path": "locomotion/shaurya/tools/bc_clone.py",
+      "previous_path": "hexapod/tools/bc_clone.py",
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Run Shaurya\u2019s original teacher, BC, DAgger and checkpoint splice."
+    },
+    {
+      "path": "locomotion/shaurya/tools/diag_policy_rollout.py",
+      "previous_path": "hexapod/tools/diag_policy_rollout.py",
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Run Shaurya\u2019s original standing-start policy diagnostic."
     }
   ],
   "archived_documents": [],
@@ -662,8 +711,8 @@
       "sha256": "f3c7d92d7320e9d06217967b23fd8c429ae55eaeb05b9dbd14f496859f4acec2"
     },
     "locomotion/learning/bc.py": {
-      "source_commit": "077b98b1b6150e8cc54ad233c90198fdece0d7bb",
-      "sha256": "fe0a74cc7cc4ce29a450378d44c945618b210618e7135bb8c52b303a6bb53dcb"
+      "source_commit": "5dd66a09214848b7433c326125acad6263c893b7",
+      "sha256": "7dd41321bfcf26b0a8fd671f2ff86a0a36195d2a8450dbf99758a398d5d70838"
     },
     "locomotion/learning/paper_networks.py": {
       "source_commit": "077b98b1b6150e8cc54ad233c90198fdece0d7bb",
@@ -798,8 +847,8 @@
       "sha256": "1f55b82f3f465e7a5c9a53280cbdfa4b52e4336ffac49a220fea3a1fb739d31a"
     },
     "locomotion/tests/test_direct_bc.py": {
-      "source_commit": "077b98b1b6150e8cc54ad233c90198fdece0d7bb",
-      "sha256": "0ecdf41519ec7a8bd940a2f0ed563180e472cf025effc73485f3616e4183f8a8"
+      "source_commit": "5dd66a09214848b7433c326125acad6263c893b7",
+      "sha256": "ea90480384ab033cc9490ed330726d9c200eee997095afe0f51674e87aa1bf3a"
     },
     "locomotion/tests/test_direct_binding.py": {
       "source_commit": "077b98b1b6150e8cc54ad233c90198fdece0d7bb",
@@ -1004,6 +1053,38 @@
     "locomotion/runs/reservation.py": {
       "source_commit": "877b004b13538dfe98ee7be7f1296d0de8da84a3",
       "sha256": "8e3682cccb29cd3f3d53625de1276bdd56ca6643c54ada001b3bd1fb69b95c2e"
+    },
+    "hexapod/__init__.py": {
+      "source_commit": "969ea5bc942df3122b2662650f29acd11644a41c",
+      "sha256": "6b7b28b0491ff1abef576d5fb6c8f662333143d252195286fa80d1b33b3efa61"
+    },
+    "hexapod/agents/__init__.py": {
+      "source_commit": "969ea5bc942df3122b2662650f29acd11644a41c",
+      "sha256": "3be19bd191a2d8780967a91b0d6e6fe4c6d74ad8b54efef94c33f6c2ebd6078b"
+    },
+    "hexapod/agents/rsl_rl_ppo_cfg.py": {
+      "source_commit": "969ea5bc942df3122b2662650f29acd11644a41c",
+      "sha256": "6cc8751ff7cde95b957aa915a23894236a6f9ec14b6f2a021e85028390bd528e"
+    },
+    "hexapod/hexapod_env.py": {
+      "source_commit": "969ea5bc942df3122b2662650f29acd11644a41c",
+      "sha256": "6e68fa237f7a358df12bd1cb1afcef02dc9ee7ad0a3c21d51728d12f2cb9a227"
+    },
+    "hexapod/hexapod_env_cfg.py": {
+      "source_commit": "969ea5bc942df3122b2662650f29acd11644a41c",
+      "sha256": "252fd40b2788ab6b658bd0d3c354d397716ccca773b1479db8a4fc863507e154"
+    },
+    "hexapod/hexapod_robot_cfg.py": {
+      "source_commit": "969ea5bc942df3122b2662650f29acd11644a41c",
+      "sha256": "1d3ee917b0822bebc79f859d463686649d9ff41fc14765e6d5ebb8aec9401909"
+    },
+    "hexapod/tools/bc_clone.py": {
+      "source_commit": "969ea5bc942df3122b2662650f29acd11644a41c",
+      "sha256": "f93e6773548bcc56d76363d01cc446c7c4bc8ce31bf16a9157a41ac3f9571914"
+    },
+    "hexapod/tools/diag_policy_rollout.py": {
+      "source_commit": "969ea5bc942df3122b2662650f29acd11644a41c",
+      "sha256": "93999b38dfba36aa213e0fee27478e3cf16603bee4b29490df35690174f10197"
     }
   }
 }

@@ -65,7 +65,6 @@ def main(argv=None):
     parser.add_argument('--mode', choices=['diagnostic', 'train', 'evaluate', 'probe'], required=True)
     for name in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
-    parser.add_argument('--bc-warmstart', action='store_true', help='Clone the scripted teacher before PPO with the active walking task.')
     parser.add_argument('--standing-admission', type=Path)
     parser.add_argument('--source-freeze-sha256', required=True)
     parser.add_argument('--num-envs', type=int, choices=[1, 32, 128, 512, 1024], required=True,
@@ -125,9 +124,6 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.gait_clock is None:
         args.gait_clock = 60 if args.mode == 'train' else 0
-    if args.bc_warmstart and (args.mode != 'train'
-            or args.gait_clock != 60):
-        raise ValueError('BC warmstart requires PPO training and the 60-control gait clock')
     if args.mode == 'train' and args.gait_clock != 60:
         raise ValueError('The active reward requires the 60-control gait clock')
     compatibility = None
@@ -189,7 +185,7 @@ def main(argv=None):
         'model_sha256': configuration.MODEL_SHA256, 'usd_sha256': configuration.USD_SHA256,
         'stance_sha256': sha(args.stance),
         'geometry_sha256': sha(args.geometry), 'geometry_extrema_sha256': sha(args.geometry_extrema),
-        'config': cfg.declaration(), 'motion_prior': False, 'behavior_cloning': args.bc_warmstart,
+        'config': cfg.declaration(), 'motion_prior': False, 'behavior_cloning': False,
         'seed': args.seed, 'rsl_rl_required_version': '5.0.1',
         'adapter_sha256': sha(source/'learning/ppo.py'), 'entry_sha256': sha(__file__),
         'reward_version': '4', 'reward_task': 'v4_yaw_gate', 'learner': 'ppo', 'networks': 'mlp'}
@@ -340,16 +336,6 @@ def main(argv=None):
                 save(args.output/'state.json', state)
             loads = vanilla.TrainingLoads(env)
             env.capture = loads
-            if args.bc_warmstart:
-                from locomotion.learning.bc import run_bc
-                def bc_deadline():
-                    if time.monotonic()-started >= args.max_wall_seconds:
-                        raise TimeoutError('BC allocation exceeded its deadline')
-                state['bc'] = run_bc(runner, wrapped, check_deadline=bc_deadline)
-                identity['bc'] = state['bc']
-                save(args.output/'bc.json', state['bc'])
-                save(args.output/'bc_force_metrics.json', loads.report())
-                checkpoint(0)
             original_log = runner.logger.log
             def log(**values):
                 original_log(**values)

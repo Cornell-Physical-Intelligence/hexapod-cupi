@@ -9,7 +9,7 @@ import subprocess
 from urllib.parse import quote
 
 
-PACKAGES = {'core', 'backends', 'tasks', 'learning', 'evaluation', 'runs'}
+PACKAGES = {'core', 'backends', 'tasks', 'learning', 'evaluation', 'runs', 'shaurya'}
 
 
 def area(path):
@@ -170,6 +170,7 @@ const PACKAGES=[
 ['backends','Isaac backend','Scene construction and environment stepping.'],
 ['tasks','Tasks','Episode handling and reward versions.'],
 ['learning','Learning','Learner configuration and adapters.'],
+['shaurya','Shaurya BC/PPO','Original environment, reward and cloning workflow.'],
 ['evaluation','Evaluation','Capture, scoring and diagnostics.'],
 ['runs','Runs','Validation, packaging and source identity.'],
 ['package','Locomotion','Package initialization.'],

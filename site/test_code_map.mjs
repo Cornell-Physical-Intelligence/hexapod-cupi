@@ -32,7 +32,7 @@ const input = (id, value) => {
 const click = (id, data) => fire(id, 'click', {target:{closest:() => ({dataset:data})}});
 
 // Packages: one square each, sized and labelled, with arrows for imports between packages.
-for (const name of ['core', 'backends', 'tasks', 'learning', 'evaluation', 'runs']) {
+for (const name of ['core', 'backends', 'tasks', 'learning', 'evaluation', 'runs', 'shaurya']) {
   assert.ok(html('packages').includes(`data-package="${name}"`), `Missing package ${name}`);
 }
 assert.ok(!html('packages').includes('data-package="tests"'), 'Tests stay hidden by default');

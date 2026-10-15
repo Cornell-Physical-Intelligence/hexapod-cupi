@@ -14,9 +14,10 @@ def digest(path):
 
 
 def runtime_paths(package):
+    """Select c48 runtime files; Shaurya uses the stock Isaac Lab entry points."""
     package = Path(package)
     return sorted(path for path in package.rglob('*.py')
-                  if not set(path.relative_to(package).parts) & {'tests', '__pycache__'})
+                  if not set(path.relative_to(package).parts) & {'tests', '__pycache__', 'shaurya'})
 
 
 def source_files(package):

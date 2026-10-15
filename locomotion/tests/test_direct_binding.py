@@ -19,7 +19,9 @@ class DirectBindingTests(unittest.TestCase):
             self.assertNotIn('--backend', binding['command_args'])
             self.assertFalse(binding['root_review_complete'])
             self.assertEqual(binding['module'], 'locomotion.runs.train')
-            verify_runtime(root/'pack/source')
+            manifest = verify_runtime(root/'pack/source')
+            self.assertFalse(any('/shaurya/' in name for name in manifest['files']))
+            self.assertFalse((root/'pack/source/locomotion/shaurya').exists())
             nested = root/'pack/source/locomotion/core/motor.py'
             nested.write_text(nested.read_text()+'\n# tamper\n')
             with self.assertRaisesRegex(ValueError, 'manifest differs'):
@@ -48,24 +50,12 @@ class DirectBindingTests(unittest.TestCase):
             record = json.loads((output/'PACK.json').read_text())
             self.assertEqual((record['reward_version'], record['reward_task']), ('4', 'v4_yaw_gate'))
 
-    def test_bc_pack_binds_warmstart_and_keeps_review_gate(self):
+    def test_c48_pack_rejects_the_removed_hybrid_bc_option(self):
         with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory)/'bc'
-            binding = prepare(path, REMOTE, bc_warmstart=True, gait_clock=60)
-            self.assertIn('--bc-warmstart', binding['command_args'])
-            self.assertFalse(binding['root_review_complete'])
-            self.assertTrue(json.loads((path/'PACK.json').read_text())['bc_warmstart'])
-
-    def test_bc_rejects_unsupported_combinations_before_pack_creation(self):
-        with tempfile.TemporaryDirectory() as directory:
-            for overrides in ({'mode': 'diagnostic'},
-                              {'gait_clock': 0}, {'gait_clock': 40}):
-                options = dict(bc_warmstart=True, gait_clock=60)
-                options.update(overrides)
-                output = Path(directory)/'rejected'
-                with self.subTest(overrides=overrides), self.assertRaisesRegex(ValueError, 'BC warmstart'):
-                    prepare(output, REMOTE, **options)
-                self.assertFalse(output.exists())
+            output = Path(directory)/'rejected'
+            with self.assertRaises(TypeError):
+                prepare(output, REMOTE, bc_warmstart=True)
+            self.assertFalse(output.exists())
 
 
 if __name__ == '__main__':
