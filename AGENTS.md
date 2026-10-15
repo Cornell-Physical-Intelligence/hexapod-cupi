@@ -1,15 +1,14 @@
 # Agent instructions
 
-Keep replies under 200 words. Give no time estimates. Preserve other contributors'
-work. Claude Code and other coding agents read this file.
+Keep replies around 200-400 words. Give no time estimates. Preserve other contributors'
+work.
 
 ## Context and ownership
 
 Read [README](README.md), [CONTRIBUTING](CONTRIBUTING.md), then the affected
 package guide before creating a branch or changing files. Follow CONTRIBUTING
 for branch names, checks and publication. Use [ARCHITECTURE](ARCHITECTURE.md)
-for requirements. Follow the source boundaries in README; navigation and
-mission must not import simulation.
+for the high level context/requirements of this project. Follow the source boundaries in README; navigation and mission must not import simulation.
 
 Several contributors run agents in this repository. The program lead is GitHub
 user `palerdr`; the guides assign approvals to that role. Do not assume the user
@@ -35,8 +34,6 @@ model/source/input hashes. Retain historical labels and source revisions.
 Stage 2 requires direction, transition, stop, torque, contact and visual
 acceptance. Native evaluations must record ground-contact force and motor torque
 before another optimizer/PPO sequence; these measurements add no acceptance limits.
-
-The program lead removed the Fable review requirement. Do not start Fable consultations.
 Delegate bounded independent work only when the user authorizes delegation.
 
 ## Compute and publication
@@ -56,7 +53,7 @@ Run focused checks while editing and the required checks in CONTRIBUTING before
 publication. Pair dependency changes with `uv.lock`. Follow
 [PROJECT_SITE](docs/PROJECT_SITE.md) for each push and verify exact-revision CI
 and deployed Pages. CI generates the source manifest when a change merges;
-do not commit a manifest in a PR.
+do not commit a manifest in a PR. For large substantial changes that add new classes that are very important or directories also update the code map on the site.
 
 The standing publication authorization permits verified changes on a
 `[netid]/[task]` branch, a PR to `main`, review and merge after green CI.
