@@ -1,4 +1,5 @@
 """Offline reward scoring rebuilds training telemetry from a recorded native trace."""
+import argparse
 import contextlib
 import io
 import json
@@ -12,11 +13,50 @@ import torch
 
 from locomotion.evaluation import reward_scorer as reward_scorer
 from locomotion.backends.isaac.env import LocomotionEnv
-from locomotion.tasks.task import TaskConfig, measured_reward
+from locomotion.tasks.task import REWARD_VERSION, TaskConfig, measured_reward
 
 ROOT = Path(__file__).resolve().parents[2]
 TRACE = ROOT/'locomotion/tests/fixtures/control_trace.npz'
 NOMINAL_HEIGHT = 0.09780231400684256
+
+
+def edit_file(directory, overrides, *, version=REWARD_VERSION):
+    path = Path(directory)/'reward_edit.json'
+    path.write_text(json.dumps({'schema': reward_scorer.REWARD_CONFIG_SCHEMA, 'base_reward_version': version,
+                                'overrides': overrides}))
+    return path
+
+
+class RewardConfigTests(unittest.TestCase):
+    def test_exported_edit_scores_through_measured_reward(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            reward = reward_scorer.load_reward_config(edit_file(temporary, {'yaw_tracking_weight': .5}))
+        trace = reward_scorer.load_trace(TRACE)
+        com = reward_scorer.root_com_local()
+        edited, components = reward_scorer.evaluate(trace, reward, TaskConfig(), NOMINAL_HEIGHT, com)
+        current, current_components = reward_scorer.evaluate(trace, measured_reward, TaskConfig(), NOMINAL_HEIGHT, com)
+        torch.testing.assert_close(components['yaw_tracking'], current_components['yaw_tracking'] * (.5/.3))
+        torch.testing.assert_close(edited - current, components['yaw_tracking'] - current_components['yaw_tracking'])
+
+    def test_edits_that_training_would_reject_are_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            with self.assertRaisesRegex(ValueError, 'Positive finite'):
+                reward_scorer.load_reward_config(edit_file(temporary, {'tilt_weight': 0}))
+            with self.assertRaisesRegex(ValueError, 'Not reward coefficients'):
+                reward_scorer.load_reward_config(edit_file(temporary, {'seed': 1}))
+            with self.assertRaisesRegex(ValueError, 'not the current'):
+                reward_scorer.load_reward_config(edit_file(temporary, {}, version='older_reward'))
+
+    def test_command_line_names_each_reward_once(self):
+        parser = argparse.ArgumentParser()
+        reward_scorer.add_reward_arguments(parser)
+        with tempfile.TemporaryDirectory() as temporary:
+            path = edit_file(temporary, {'tilt_weight': .7})
+            args = parser.parse_args(['--reward-config', f'tilt={path}'])
+            self.assertEqual(list(reward_scorer.selected_rewards(parser, args)), [f'current ({REWARD_VERSION})', 'tilt'])
+            args = parser.parse_args(['--reward-config', f'x={path}', '--reward', 'x=locomotion.tasks.task:measured_reward'])
+            with self.assertRaises(SystemExit):
+                reward_scorer.selected_rewards(parser, args)
 
 
 class RewardScorerTests(unittest.TestCase):

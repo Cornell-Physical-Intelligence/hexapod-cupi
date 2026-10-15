@@ -3,7 +3,7 @@ import ast
 from pathlib import Path
 import unittest
 import torch
-from locomotion.backends.isaac.direct_control import reset_rows
+from locomotion.backends.isaac.env import reset_rows
 from locomotion.backends.isaac.env import LocomotionEnv
 from locomotion.core.motor import emitted_target, executed_action_feature
 
@@ -20,11 +20,10 @@ class DirectEnvironmentContractTests(unittest.TestCase):
                 reset_rows(rows, 4, "cpu")
 
     def test_candidate_reuses_current_frames_history_and_observation_order(self):
-        tree = ast.parse((BACKEND / "direct_env.py").read_text())
-        candidate = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "DirectLocomotionEnv")
-        self.assertEqual(ast.unparse(candidate.bases[0]), "LocomotionEnv")
-        methods = {n.name for n in candidate.body if isinstance(n, ast.FunctionDef)}
-        self.assertTrue({"_read", "_proprio", "_observations", "verify_native_recipe"}.isdisjoint(methods))
+        tree = ast.parse((BACKEND / "env.py").read_text())
+        candidate = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "LocomotionEnv")
+        self.assertEqual(candidate.bases, [])
+        self.assertFalse((BACKEND / "direct_env.py").exists())
         # Exercise the shared tensor path with distinct values in each field.
         env = LocomotionEnv.__new__(LocomotionEnv)
         env.neutral = torch.arange(18, dtype=torch.float32) / 100
@@ -43,15 +42,49 @@ class DirectEnvironmentContractTests(unittest.TestCase):
         self.assertTrue(torch.equal(obs["critic"][:, -3:], torch.tensor([[1., 2., 3.], [4., 5., 6.]])))
 
     def test_stock_loop_owns_steps_and_task_owns_resets(self):
-        tree = ast.parse((BACKEND / "direct_env.py").read_text())
-        native = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "_DirectPhysics")
+        tree = ast.parse((BACKEND / "native.py").read_text())
+        native = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "NativeEnv")
         self.assertEqual(ast.unparse(native.bases[0]), "DirectRLEnv")
         self.assertNotIn("step", {n.name for n in native.body if isinstance(n, ast.FunctionDef)})
         calls = [ast.unparse(n.func) for n in ast.walk(tree) if isinstance(n, ast.Call)]
         self.assertNotIn("self.sim.step", calls)
         self.assertNotIn("self.scene.update", calls)
-        self.assertIn("self.direct._reset_idx", calls)
-        self.assertIn("self.robot.write_joint_position_to_sim_index", calls)
+        adapter = ast.parse((BACKEND / "env.py").read_text())
+        adapter_calls = [ast.unparse(n.func) for n in ast.walk(adapter) if isinstance(n, ast.Call)]
+        self.assertIn("self.native._reset_idx", adapter_calls)
+        self.assertIn("self.robot.write_joint_position_to_sim_index", adapter_calls)
+
+    def test_force_readback_brackets_physics_at_articulation_hooks(self):
+        # Execute the production hook methods against a call recorder. This
+        # verifies hook order, not PhysX contact or torque behavior.
+        tree = ast.parse((BACKEND / "native.py").read_text())
+        hook = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "CaptureArticulation")
+        events = []
+        class Articulation:
+            def write_data_to_sim(self): events.append("submit")
+            def update(self, dt): events.append("update")
+        namespace = {"Articulation": Articulation}
+        exec(compile(ast.Module(body=[hook], type_ignores=[]), str(BACKEND / "native.py"), "exec"), namespace)
+        robot = namespace["CaptureArticulation"]()
+        from types import SimpleNamespace
+        def read_force(name):
+            self.assertEqual(name, "get_dof_actuation_forces")
+            events.append("read_submitted")
+            return torch.tensor([[.5, 1.]])
+        def capture():
+            events.append("capture")
+            self.assertTrue(torch.equal(robot.owner.native_pre, torch.tensor([[1., .5]])))
+        robot.owner = SimpleNamespace(_control_active=True, capture=object(), get=read_force,
+                                      joint_index=torch.tensor([1, 0]), _collect_substep=capture)
+        robot.write_data_to_sim()
+        events.append("physics")
+        robot.update(.0025)
+        self.assertEqual(events, ["submit", "read_submitted", "physics", "update", "capture"])
+        events.clear()
+        robot.owner._control_active = False
+        robot.write_data_to_sim()
+        robot.update(.0025)
+        self.assertEqual(events, ["submit", "update"])
 
     def test_slew_and_action_feature_share_current_arithmetic(self):
         q = torch.zeros((2, 18))

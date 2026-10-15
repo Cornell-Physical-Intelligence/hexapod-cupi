@@ -16,7 +16,7 @@ def digest(path):
 def runtime_paths(package):
     package = Path(package)
     return sorted(path for path in package.rglob('*.py')
-                  if not set(path.relative_to(package).parts) & {'tests', 'priors', 'surrogate', '__pycache__'})
+                  if not set(path.relative_to(package).parts) & {'tests', '__pycache__'})
 
 
 def source_files(package):
@@ -24,17 +24,10 @@ def source_files(package):
     return {path.relative_to(package).as_posix(): digest(path) for path in runtime_paths(package)}
 
 
-def physics_files(files, package=None, *, backend='legacy'):
+def physics_files(files, package=None):
     """Follow project imports from the native environment, including capture and scorer imports."""
     package = Path(package) if package is not None else Path(__file__).resolve().parents[1]
-    if backend not in ('legacy', 'direct'):
-        raise ValueError('Unknown native backend')
     pending, seen = ['backends/isaac/env.py', 'backends/isaac/config.py'], set()
-    if backend == 'direct':
-        pending.extend(('backends/isaac/direct_env.py', 'backends/isaac/direct_config.py',
-                        'backends/isaac/direct_motor.py'))
-        if any(name not in files for name in pending):
-            raise ValueError('Direct backend sources are incomplete')
     while pending:
         name = pending.pop()
         if name in seen or name not in files:

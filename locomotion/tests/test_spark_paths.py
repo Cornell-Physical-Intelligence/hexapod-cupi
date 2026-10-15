@@ -62,6 +62,9 @@ class SparkWorkspaceTests(unittest.TestCase):
                 stack.enter_context(patch.object(reservation, 'canonical_path', side_effect=Path))
                 stack.enter_context(patch.object(reservation, 'verify_tree'))
                 stack.enter_context(patch.object(reservation, 'pinned_file'))
+                with self.assertRaisesRegex(ValueError, 'Root review incomplete'):
+                    launch.verify(binding, Path(binding['source']))
+                binding['root_review_complete'] = True
                 launch.verify(binding, Path(binding['source']))
                 for key, value in (('output', str(CUPI_ROOT / 'inputs/overwrite')),
                                    ('prior', str(CUPI_ROOT / 'runs/julian/fixture/prior'))):

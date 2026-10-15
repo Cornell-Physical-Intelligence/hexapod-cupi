@@ -84,3 +84,55 @@ def verify_assets(asset, model_path):
     if abs(sum(x["mass"] for x in model["links"]) - MASS_KG) > 1e-9:
         raise ValueError("Canonical mass ledger differs")
     return model
+
+
+ISAACLAB_REVISION = "ffff603eafc6b74264a5261cc0183d6a65390d78"
+
+
+def motor_damping(joint_names):
+    """Resolve exact damping gains in the native joint order."""
+    if len(joint_names) != 18 or set(joint_names) != set(JOINT_NAMES):
+        raise ValueError("Motor requires the canonical 18 named joints")
+    return [KD[JOINT_NAMES.index(name)] for name in joint_names]
+
+
+def make_config(cfg, asset, neutral, reset_height, output):
+    from isaaclab.assets import ArticulationCfg
+    from isaaclab.envs import DirectRLEnvCfg
+    from isaaclab.scene import InteractiveSceneCfg
+    from isaaclab.sim import SimulationCfg, UsdFileCfg, ArticulationRootPropertiesCfg
+    from isaaclab.utils import configclass
+    from isaaclab_physx.physics import PhysxCfg
+    from .motor import MotorCfg
+
+    @configclass
+    class NativeConfig(DirectRLEnvCfg):
+        action_space = 18
+        observation_space = 231
+        state_space = 234
+        decimation = 8
+        episode_length_s = 20.0
+        scene = InteractiveSceneCfg(num_envs=32, env_spacing=2.0, replicate_physics=False,
+                                    filter_collisions=False)
+        sim = SimulationCfg(dt=.0025, render_interval=8,
+                            physics=PhysxCfg(enable_external_forces_every_iteration=True))
+
+    visualizers = []
+    if cfg.render:
+        from isaaclab_visualizers.kit import KitVisualizerCfg
+        visualizers = [KitVisualizerCfg()]
+    result = NativeConfig(seed=cfg.seed, episode_length_s=cfg.episode_seconds,
+        scene=InteractiveSceneCfg(num_envs=cfg.num_envs, env_spacing=cfg.spacing_m,
+                                  replicate_physics=False, filter_collisions=False),
+        sim=SimulationCfg(dt=cfg.physics_dt, device=cfg.device, render_interval=cfg.decimation,
+            physics=PhysxCfg(enable_external_forces_every_iteration=True),
+            visualizer_cfgs=visualizers, log_dir=str(Path(output) / "isaac_logs")))
+    robot = ArticulationCfg(prim_path="/World/envs/env_.*/Robot",
+        spawn=UsdFileCfg(usd_path=str((Path(asset) / "robot.usda").resolve()),
+            activate_contact_sensors=True,
+            articulation_props=ArticulationRootPropertiesCfg(enabled_self_collisions=True,
+                solver_position_iteration_count=32, solver_velocity_iteration_count=0)),
+        init_state=ArticulationCfg.InitialStateCfg(pos=(0., 0., reset_height),
+            joint_pos=dict(neutral), joint_vel={".*": 0.}),
+        actuators={"motor": MotorCfg()})
+    return result, robot

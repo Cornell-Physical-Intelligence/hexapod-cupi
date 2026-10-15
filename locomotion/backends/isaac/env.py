@@ -1,25 +1,30 @@
-"""Native GPU canonical hexapod environment for a separately qualified AMP pilot.
+"""Canonical locomotion API over the stock Isaac Lab DirectRLEnv lifecycle.
 
-No historical task, checkpoint, source snapshot or admission is imported. All
-physics uses the selected detailed USD; reference points do not replace meshes.
+The task wrapper owns rewards and selected episode resets. It checks proximity
+and terminal bootstrap state before a reset. The native lifecycle returns zero
+internal done flags; this API returns the canonical termination and timeout flags.
 """
 from pathlib import Path
 import json
 import math
 import numpy as np
 import torch
-from .config import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, verify_assets
+from .config import BODY_NAMES, JOINT_NAMES, LEGS, MASS_KG, verify_assets, make_config, ISAACLAB_REVISION
+from ...core.motor import motor_force, emitted_target, executed_action_feature
+from ...core.transforms import rotate, inverse_rotate, navigation
 from ...core.features import extract_features
 
 
-from ...core.transforms import rotate, inverse_rotate, navigation
-from ...core.motor import motor_force, emitted_target, executed_action_feature
-
-
-from .scene import build_scene
+def reset_rows(indices, num_envs, device):
+    """Validate selected rows before a reset writes state."""
+    rows = torch.arange(num_envs, device=device) if indices is None else torch.as_tensor(indices, dtype=torch.long, device=device)
+    if rows.ndim != 1 or bool(torch.any(rows < 0)) or bool(torch.any(rows >= num_envs)) or len(rows.unique()) != len(rows):
+        raise ValueError("Invalid selected reset rows")
+    return rows.to(torch.long)
 
 
 class LocomotionEnv:
+    """Keep task-owned commands and selected resets around stock DirectRLEnv."""
     num_actions = 18
     observation_width = 231
     critic_width = 234
@@ -27,8 +32,7 @@ class LocomotionEnv:
 
     def __init__(self, cfg, asset, model_path, geometry_path, output, *, reference_metadata=None):
         import warp as wp
-        from isaaclab.sim import SimulationContext, SimulationCfg
-        from isaaclab_physx.physics import PhysxCfg
+        from .native import NativeEnv
         self.cfg, self.device, self.num_envs = cfg, cfg.device, cfg.num_envs
         self.wp = wp
         self.output = Path(output)
@@ -40,34 +44,21 @@ class LocomotionEnv:
             raise ValueError("Diagnostic geometry belongs to another asset")
         self.reference_metadata = reference_metadata or {}
         self.torch = lambda x: torch.as_tensor(x, dtype=torch.float32, device=self.device)
-        self.joint_names = list(JOINT_NAMES)
-        self.body_names = list(BODY_NAMES)
+        self.joint_names, self.body_names = list(JOINT_NAMES), list(BODY_NAMES)
         self.neutral = self.torch(self.reference_metadata.get("nominal_joint_position_rad", [0.] * 18))
         self.reset_height = float(self.reference_metadata.get("reset_root_height_m", cfg.reset_height_m))
-        if self.neutral.shape != (18,) or not torch.isfinite(self.neutral).all():
+        if self.neutral.shape != (18,) or not torch.isfinite(self.neutral).all() or not math.isfinite(self.reset_height):
             raise ValueError("Invalid named neutral reference")
-        visualizers = []
-        if cfg.render:
-            from isaaclab_visualizers.kit import KitVisualizerCfg
-            visualizers = [KitVisualizerCfg()]
-        simulation_cfg = SimulationCfg(dt=cfg.physics_dt, gravity=(0., 0., -9.81), device=cfg.device,
-            render_interval=cfg.decimation, physics=PhysxCfg(enable_external_forces_every_iteration=True),
-            visualizer_cfgs=visualizers, log_dir=str(self.output / "isaac_logs"))
-        self.sim = SimulationContext(simulation_cfg)
-        self.scene_prim_path = simulation_cfg.physics_prim_path
-        stage = self.sim.stage
-        import omni.physx
-        self.native_errors = []
-        def native_error(event):
-            self.native_errors.append({"type": int(event.type), "payload": repr(event.payload)})
-            self.save("native_errors.json", self.native_errors)
-        self.save("native_errors.json", self.native_errors)
-        self._error_subscription = omni.physx.get_physx_interface().get_error_event_stream().create_subscription_to_pop(native_error)
-        self.origins, self.roots = build_scene(stage, asset, cfg, self.torch)
-        self.sim.reset()
-        if self.native_errors:
-            raise RuntimeError("Native physics error during initialization")
-        self.view = self.sim.physics_sim_view.create_articulation_view("/Robot_*/body")
+        direct_cfg, robot_cfg = make_config(cfg, asset, zip(JOINT_NAMES, self.neutral.cpu().tolist()), self.reset_height, output)
+        self._control_active = False
+        self.native = NativeEnv(direct_cfg, robot_cfg, self)
+        self.sim = self.native.sim
+        self.robot = self.native.robot
+        self.motor = self.robot.actuators["motor"]
+        self.scene_prim_path = direct_cfg.sim.physics_prim_path
+        self.origins = self.native.scene.env_origins.clone()
+        self.roots = [path + "/Robot" for path in self.native.scene.env_prim_paths]
+        self.view = self.robot.root_view
         self.native_joint_names = list(self.view.shared_metatype.dof_names)
         self.native_body_names = list(self.view.shared_metatype.link_names)
         if self.view.count != cfg.num_envs or self.view.shared_metatype.fixed_base:
@@ -97,12 +88,11 @@ class LocomotionEnv:
         for getter in ("get_dof_stiffnesses", "get_dof_dampings", "get_dof_armatures"):
             if torch.any(self.get(getter) != 0):
                 raise ValueError("Unexpected implicit drive or armature: " + getter)
-        sdf = self.sim.physics_sim_view.create_sdf_shape_view("/Robot_*/*/collisions/part_*", 1)
+        sdf = self.sim.physics_sim_view.create_sdf_shape_view("/World/envs/env_*/Robot/*/collisions/part_*", 1)
         if sdf.count != cfg.num_envs * 153 or not sdf.check():
             raise ValueError("Detailed collision shapes absent or changed")
         self.root_com_local = self.get("get_coms")[:, self.body_index, :3]
-        self.kd = self.torch(KD)
-        self.contact = self.sim.physics_sim_view.create_rigid_contact_view("/Robot_*/*", ["/Ground"], max_contact_data_count=1024 * cfg.num_envs)
+        self.contact = self.sim.physics_sim_view.create_rigid_contact_view("/World/envs/env_*/Robot/*", ["/Ground"], max_contact_data_count=1024 * cfg.num_envs)
         paths = list(self.contact.sensor_paths)
         if len(paths) != 19 * cfg.num_envs or self.contact.filter_count != 1:
             raise ValueError("Native contact matrix layout differs")
@@ -125,7 +115,6 @@ class LocomotionEnv:
         self.episode_steps = torch.zeros(cfg.num_envs, dtype=torch.long, device=self.device)
         self.total_controls = 0
         self.telemetry = {}
-        self._all_ids = wp.array(np.arange(cfg.num_envs), dtype=wp.uint32, device=self.device)
         self._rgb = None
         self._camera = None
         self.capture = None
@@ -136,7 +125,150 @@ class LocomotionEnv:
             "asset_mass_target_kg": MASS_KG, "config": cfg.declaration()}
         self.save("native_readback.json", self.native_readback)
         self.verify_native_recipe("after_sdk_reset")
+        self.native_readback["backend"] = "direct"
+        self.native_readback["isaaclab_revision_expected"] = ISAACLAB_REVISION
+        self.native_readback["episode_owner"] = "external RewardTask; stock done flags are zero"
+        self.native_readback["force_readback_phase"] = "native force after stock write before physics; state and contact after stock update"
+        self.save("native_readback.json", self.native_readback)
         self.reset()
+
+    def _subscribe_native_errors(self):
+        import omni.physx
+        self.native_errors = []
+        def native_error(event):
+            self.native_errors.append({"type": int(event.type), "payload": repr(event.payload)})
+            self.save("native_errors.json", self.native_errors)
+        self.save("native_errors.json", self.native_errors)
+        self._error_subscription = omni.physx.get_physx_interface().get_error_event_stream().create_subscription_to_pop(native_error)
+
+    def reset(self, indices=None):
+        rows = reset_rows(indices, self.num_envs, self.device)
+        if self.native_errors:
+            raise RuntimeError("Cannot reset across a native physics error")
+        before = self.sim.get_physics_step_count()
+        if len(rows):
+            self.native._reset_idx(rows.to(torch.int32))
+        self.current = self._read()
+        if self.sim.get_physics_step_count() != before:
+            raise RuntimeError("Reset unexpectedly advanced physics")
+        if len(rows):
+            expected = self.neutral.expand(len(rows), -1)
+            if not torch.allclose(self.current["q"][rows], expected, atol=2e-6, rtol=0):
+                raise RuntimeError("Selected joint reset readback differs")
+            expected_root = self.torch([0., 0., 0., 0., 0., 0., 1.]).expand(len(rows), -1).clone()
+            expected_root[:, :3] = self.origins[rows]
+            expected_root[:, 2] = self.reset_height
+            if not torch.allclose(self.current["root"][rows], expected_root, atol=2e-6, rtol=0):
+                raise RuntimeError("Selected root reset readback differs")
+            self.history[rows] = self._proprio(self.current)[rows, None].expand(-1, 5, -1)
+        return self._observations(self.current)
+
+    def _write_reset(self, rows):
+        rows = rows.to(torch.long)
+        q = self.neutral[self.inverse_joint_index].expand(len(rows), -1).clone()
+        zero = torch.zeros_like(q)
+        pose = self.torch([0., 0., 0., 0., 0., 0., 1.]).expand(len(rows), -1).clone()
+        pose[:, :3] = self.origins[rows]
+        pose[:, 2] = self.reset_height
+        ids = rows.to(torch.int32)
+        self.robot.write_root_link_pose_to_sim_index(root_pose=pose, env_ids=ids)
+        self.robot.write_root_com_velocity_to_sim_index(root_velocity=torch.zeros((len(rows), 6), device=self.device), env_ids=ids)
+        self.robot.write_joint_position_to_sim_index(position=q, env_ids=ids)
+        self.robot.write_joint_velocity_to_sim_index(velocity=zero, env_ids=ids)
+        self.robot.set_joint_position_target_index(target=q, env_ids=ids)
+        self.robot.set_joint_velocity_target_index(target=zero, env_ids=ids)
+        self.robot.set_joint_effort_target_index(target=zero, env_ids=ids)
+        # Clear the selected native force rows without invoking all-row actuator compute.
+        force = self.get("get_dof_actuation_forces")
+        force[rows] = 0
+        self.view.set_dof_actuation_forces(self.native_array(force), self.wp.array(rows.cpu().numpy(), dtype=self.wp.uint32, device=self.device))
+        self.held[rows] = self.neutral
+        self.previous_action[rows] = 0
+        self.episode_steps[rows] = 0
+
+    def _begin_control(self, action):
+        if self.native_errors:
+            raise RuntimeError("Native physics errors prevent stepping")
+        self._control_active = True
+        self.action = action.clone()
+        self.target = emitted_target(action, self.held, self.neutral, self.lower, self.upper,
+                                     self.cfg.action_scale_rad, self.cfg.target_slew_rad)
+        self.saturation = torch.zeros_like(self.target, dtype=torch.long)
+        self.torque_square = torch.zeros_like(self.target)
+        self.requested_max = torch.zeros_like(self.target)
+        self.applied_max = torch.zeros_like(self.target)
+        self.other_force_max = torch.zeros(self.num_envs, device=self.device)
+        self.tibia_min_force = torch.full((self.num_envs, 6), torch.inf, device=self.device)
+        self.substep = 0
+        self.before_counter = self.sim.get_physics_step_count()
+
+    def _collect_substep(self):
+        state = self._read()
+        native_pre = self.native_pre
+        names = self.motor.joint_names
+        order = [names.index(name) for name in JOINT_NAMES]
+        q, dq = self.motor.pre_position[:, order], self.motor.pre_velocity[:, order]
+        requested, applied = self.motor.computed_effort[:, order], self.motor.applied_effort[:, order]
+        ceiling = self.motor.ceiling[:, order]
+        forces = self.wp.to_torch(self.contact.get_contact_force_matrix(self.cfg.physics_dt)).clone()
+        if forces.shape != (19 * self.num_envs, 1, 3) or not bool(torch.isfinite(forces).all()):
+            raise FloatingPointError("Native floor-force shape/finite check failed")
+        forces = forces[self.contact_index, 0].reshape(self.num_envs, 19, 3)
+        norms = torch.linalg.vector_norm(forces, dim=-1)
+        other = [i for i, name in enumerate(self.native_body_names) if not name.endswith("_tibia")]
+        self.other_force_max = torch.maximum(self.other_force_max, norms[:, other].amax(-1))
+        self.tibia_min_force = torch.minimum(self.tibia_min_force, norms[:, self.toe_index])
+        self.saturation += requested.abs() > 1.6
+        self.torque_square += applied.square()
+        self.requested_max = torch.maximum(self.requested_max, requested.abs())
+        self.applied_max = torch.maximum(self.applied_max, applied.abs())
+        if self.capture is not None:
+            self.capture(self, state, q, dq, requested, applied, ceiling, self.target, forces, self.substep - 1, native_pre)
+        if self.native_errors:
+            raise RuntimeError("Native physics error during stepping")
+        self.requested, self.applied, self.forces = requested, applied, forces
+
+    def _finish_control(self):
+        if self.sim.get_physics_step_count() != self.before_counter + 8 or self.substep != 8:
+            raise RuntimeError("Control did not advance exactly eight physics steps")
+        self._control_active = False
+        target = self.target
+        requested, applied = self.requested, self.applied
+        forces = self.forces
+        saturation, torque_square = self.saturation, self.torque_square
+        requested_max, applied_max = self.requested_max, self.applied_max
+        other_force_max, tibia_min_force = self.other_force_max, self.tibia_min_force
+        action = self.action
+        state = self._read()
+        self.held = target
+        self.previous_action = executed_action_feature(target, self.neutral, self.cfg.action_scale_rad).clone()
+        self.history = torch.cat((self.history[:, 1:], self._proprio(state)[:, None]), dim=1)
+        self.episode_steps += 1
+        self.total_controls += 1
+        velocity_nav = navigation(state["linear"])
+        angular_nav = navigation(state["angular"])
+        joint_violation = ((state["q"] < self.lower - 2e-6) | (state["q"] > self.upper + 2e-6)).any(-1)
+        terminated = (state["root"][:, 2] < .045) | (state["gravity"][:, 2] > -math.cos(.85)) | joint_violation
+        truncated = self.episode_steps >= round(self.cfg.episode_seconds / self.cfg.control_dt)
+        self.current = state
+        self.telemetry = {"root_pose_xyzw": state["root"].clone(), "linear_velocity_body": state["linear"].clone(),
+            "linear_velocity_nav": velocity_nav.clone(), "angular_velocity_body": state["angular"].clone(),
+            "joint_position_rad": state["q"].clone(), "joint_velocity_rad_s": state["dq"].clone(),
+            "joint_target_rad": target.clone(), "computed_torque_nm": requested.clone(), "applied_torque_nm": applied.clone(),
+            "saturation_count_400hz": saturation, "torque_square_sum_400hz": torque_square,
+            "requested_torque_abs_max_400hz": requested_max, "applied_torque_abs_max_400hz": applied_max,
+            "tibia_floor_force_world_n": forces[:, self.toe_index].clone(), "tibia_floor_force_min_norm_400hz": tibia_min_force,
+            "other_body_force_max_400hz": other_force_max, "toe_xyz_world": state["toe_world"].clone(),
+            "toe_xyz_body": state["toe_body"].clone(), "command": self.commands.clone(), "action": action.clone(),
+            "terminated": terminated.clone(), "truncated": truncated.clone()}
+
+    def step(self, action):
+        action = torch.as_tensor(action, dtype=torch.float32, device=self.device)
+        if action.shape != (self.num_envs, 18) or not bool(torch.isfinite(action).all()):
+            raise ValueError("Policy action shape/finite check failed")
+        observations, _, _, _, _ = self.native.step(action)
+        return {"obs": observations.pop("policy"), **observations,
+                "terminated": self.telemetry["terminated"], "truncated": self.telemetry["truncated"]}
 
     def verify_native_recipe(self, phase):
         """Read actual scene/articulation/material values, not only authored intent."""
@@ -217,117 +349,6 @@ class LocomotionEnv:
         if self.cfg.record_motion_features:
             result["amp"] = extract_features(state)
         return result
-
-    def reset(self, indices=None):
-        if getattr(self, "native_errors", []):
-            raise RuntimeError("Cannot reset across a native physics error")
-        indices = torch.arange(self.num_envs, device=self.device) if indices is None else torch.as_tensor(indices, dtype=torch.long, device=self.device)
-        if indices.ndim != 1 or bool(torch.any(indices < 0)) or bool(torch.any(indices >= self.num_envs)) or len(indices.unique()) != len(indices):
-            raise ValueError("Invalid selected reset rows")
-        if len(indices):
-            before_counter = self.sim.get_physics_step_count()
-            ids = self.wp.array(indices.cpu().numpy(), dtype=self.wp.uint32, device=self.device)
-            root = self.get("get_root_transforms")
-            root[indices, :3] = self.origins[indices]
-            root[indices, 2] = self.reset_height
-            root[indices, 3:] = self.torch([0., 0., 0., 1.])
-            velocity = self.get("get_root_velocities")
-            velocity[indices] = 0
-            q = self.get("get_dof_positions")
-            dq = self.get("get_dof_velocities")
-            q[indices] = self.neutral[self.inverse_joint_index]
-            dq[indices] = 0
-            force = self.get("get_dof_actuation_forces")
-            force[indices] = 0
-            self.view.set_dof_actuation_forces(self.native_array(force), ids)
-            self.view.set_root_transforms(self.native_array(root), ids)
-            self.view.set_root_velocities(self.native_array(velocity), ids)
-            self.view.set_dof_positions(self.native_array(q), ids)
-            self.view.set_dof_velocities(self.native_array(dq), ids)
-            self.view.set_dof_position_targets(self.native_array(q), ids)
-            self.view.set_dof_velocity_targets(self.native_array(dq), ids)
-            self.held[indices] = self.neutral
-            self.previous_action[indices] = 0
-            self.episode_steps[indices] = 0
-            state = self._read()
-            if self.sim.get_physics_step_count() != before_counter:
-                raise RuntimeError("Reset unexpectedly advanced physics")
-            if not torch.allclose(state["q"][indices], self.neutral.expand(len(indices), -1), atol=2e-6, rtol=0):
-                raise RuntimeError("Selected joint reset readback differs")
-            if not torch.allclose(state["root"][indices], root[indices], atol=2e-6, rtol=0):
-                raise RuntimeError("Selected root reset readback differs")
-            self.history[indices] = self._proprio(state)[indices, None].expand(-1, 5, -1)
-        else:
-            state = self._read()
-        self.current = state
-        return self._observations(state)
-
-    def step(self, action):
-        action = torch.as_tensor(action, dtype=torch.float32, device=self.device)
-        if action.shape != (self.num_envs, 18) or not bool(torch.isfinite(action).all()):
-            raise ValueError("Policy action shape/finite check failed")
-        target = emitted_target(action, self.held, self.neutral, self.lower, self.upper, self.cfg.action_scale_rad, self.cfg.target_slew_rad)
-        saturation = torch.zeros_like(target, dtype=torch.long)
-        torque_square = torch.zeros_like(target)
-        requested_max = torch.zeros_like(target)
-        applied_max = torch.zeros_like(target)
-        other_force_max = torch.zeros(self.num_envs, device=self.device)
-        tibia_min_force = torch.full((self.num_envs, 6), torch.inf, device=self.device)
-        before_counter = self.sim.get_physics_step_count()
-        for substep in range(self.cfg.decimation):
-            q = self.get("get_dof_positions")[:, self.joint_index]
-            dq = self.get("get_dof_velocities")[:, self.joint_index]
-            if not bool(torch.isfinite(q).all() and torch.isfinite(dq).all()):
-                raise FloatingPointError("Nonfinite pre-servo state")
-            requested, applied, ceiling = motor_force(q, dq, target, self.kd)
-            self.view.set_dof_actuation_forces(self.native_array(applied[:, self.inverse_joint_index]), self._all_ids)
-            native_pre = self.get("get_dof_actuation_forces")[:, self.joint_index] if self.capture is not None else None
-            self.sim.step(render=False)
-            state = self._read()
-            forces = self.wp.to_torch(self.contact.get_contact_force_matrix(self.cfg.physics_dt)).clone()
-            if forces.shape != (19 * self.num_envs, 1, 3) or not bool(torch.isfinite(forces).all()):
-                raise FloatingPointError("Native floor-force shape/finite check failed")
-            forces = forces[self.contact_index, 0].reshape(self.num_envs, 19, 3)
-            norms = torch.linalg.vector_norm(forces, dim=-1)
-            other = [i for i, name in enumerate(self.native_body_names) if not name.endswith("_tibia")]
-            other_force_max = torch.maximum(other_force_max, norms[:, other].amax(-1))
-            tibia_min_force = torch.minimum(tibia_min_force, norms[:, self.toe_index])
-            saturation += requested.abs() > 1.6
-            torque_square += applied.square()
-            requested_max = torch.maximum(requested_max, requested.abs())
-            applied_max = torch.maximum(applied_max, applied.abs())
-            if self.capture is not None:
-                self.capture(self, state, q, dq, requested, applied, ceiling, target, forces, substep, native_pre)
-            if self.native_errors:
-                raise RuntimeError("Native physics error during stepping")
-        if self.sim.get_physics_step_count() != before_counter + 8:
-            raise RuntimeError("Control did not advance exactly eight physics steps")
-        self.held = target
-        self.previous_action = executed_action_feature(target, self.neutral, self.cfg.action_scale_rad).clone()
-        self.history = torch.cat((self.history[:, 1:], self._proprio(state)[:, None]), dim=1)
-        self.episode_steps += 1
-        self.total_controls += 1
-        velocity_nav = navigation(state["linear"])
-        angular_nav = navigation(state["angular"])
-        joint_violation = ((state["q"] < self.lower - 2e-6) | (state["q"] > self.upper + 2e-6)).any(-1)
-        terminated = (state["root"][:, 2] < .045) | (state["gravity"][:, 2] > -math.cos(.85)) | joint_violation
-        truncated = self.episode_steps >= round(self.cfg.episode_seconds / self.cfg.control_dt)
-        self.current = state
-        self.telemetry = {"root_pose_xyzw": state["root"].clone(), "linear_velocity_body": state["linear"].clone(),
-            "linear_velocity_nav": velocity_nav.clone(), "angular_velocity_body": state["angular"].clone(),
-            "joint_position_rad": state["q"].clone(), "joint_velocity_rad_s": state["dq"].clone(),
-            "joint_target_rad": target.clone(), "computed_torque_nm": requested.clone(), "applied_torque_nm": applied.clone(),
-            "saturation_count_400hz": saturation, "torque_square_sum_400hz": torque_square,
-            "requested_torque_abs_max_400hz": requested_max, "applied_torque_abs_max_400hz": applied_max,
-            "tibia_floor_force_world_n": forces[:, self.toe_index].clone(), "tibia_floor_force_min_norm_400hz": tibia_min_force,
-            "other_body_force_max_400hz": other_force_max, "toe_xyz_world": state["toe_world"].clone(),
-            "toe_xyz_body": state["toe_body"].clone(), "command": self.commands.clone(), "action": action.clone(),
-            "terminated": terminated.clone(), "truncated": truncated.clone()}
-        result = self._observations(state)
-        result.update(terminated=terminated, truncated=truncated)
-        return result
-
-
 
 # Exact contact/clearance mathematics carried into this fresh namespace from the
 # canonical source005 recipe; no frozen source module is imported at runtime.

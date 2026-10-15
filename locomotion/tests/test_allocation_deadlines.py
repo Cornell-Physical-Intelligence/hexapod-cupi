@@ -12,22 +12,19 @@ from locomotion.tests import test_launch
 
 
 class AllocationDeadlineTests(unittest.TestCase):
-    def test_frozen_amp_tree_binds_the_bank_and_rejects_changed_bytes(self):
+    def test_frozen_runtime_rejects_nested_source_changes(self):
         with tempfile.TemporaryDirectory() as directory:
-            for networks in ('mlp', 'paper'):
-                pack = Path(directory)/networks
-                binding = prepare.prepare(pack, str(prepare.REMOTE_ROOT/'deadline_fixture'),
-                    learner='amp', networks=networks, reward_version='2')
-                source = pack/'source'
-                reservation.verify_tree(source, binding['source_freeze_sha256'])
-                bank = source/'locomotion/priors/datasets/amp_demonstrations_001'
-                for name in ('manifest.json', 'review.json', 'transitions.npz'):
-                    path = bank/name
-                    before = path.read_bytes()
-                    path.write_bytes(before+b'changed')
-                    with self.subTest(networks=networks, name=name), self.assertRaisesRegex(ValueError, 'frozen tree'):
-                        reservation.verify_tree(source, binding['source_freeze_sha256'])
-                    path.write_bytes(before)
+            pack = Path(directory)/'ppo'
+            binding = prepare.prepare(pack, str(prepare.REMOTE_ROOT/'deadline_fixture'), reward_version='2')
+            source = pack/'source'
+            reservation.verify_tree(source, binding['source_freeze_sha256'])
+            for name in ('core/motor.py', 'learning/config.py', 'runs/train.py'):
+                path = source/'locomotion'/name
+                before = path.read_bytes()
+                path.write_bytes(before+b'changed')
+                with self.subTest(name=name), self.assertRaisesRegex(ValueError, 'frozen tree'):
+                    reservation.verify_tree(source, binding['source_freeze_sha256'])
+                path.write_bytes(before)
 
     def test_standing_diagnostics_accept_the_pilot_deadline_and_probes_do_not(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -50,10 +47,10 @@ class AllocationDeadlineTests(unittest.TestCase):
             remote = str(prepare.REMOTE_ROOT/'deadline_fixture')
             standard = prepare.prepare(root/'standard', remote)
             self.assertEqual(standard['max_seconds'], 6600)
-            for learner, networks in (('ppo', 'mlp'), ('amp', 'mlp'), ('amp', 'paper')):
-                pack = root/(learner+'_'+networks)
+            for name in ('ppo',):
+                pack = root/name
                 binding = prepare.prepare(pack, remote, updates=2000, reward_version='2',
-                    learner=learner, networks=networks, allocation_profile='flat_pilot_v1',
+                    allocation_profile='flat_pilot_v1',
                     max_wall_seconds=21600)
                 self.assertEqual(binding['max_seconds'], 22000)
                 args = binding['command_args']
@@ -62,7 +59,9 @@ class AllocationDeadlineTests(unittest.TestCase):
                 record = json.loads((pack/'PACK.json').read_text())
                 self.assertEqual(record['max_wall_seconds'], 21600)
                 self.assertEqual(record['allocation_profile'], 'flat_pilot_v1')
-                test_launch.OwnedLaunchTests().verify_without_filesystem(binding)
+                self.assertFalse(binding['root_review_complete'])
+                with self.assertRaisesRegex(ValueError, 'Root review incomplete'):
+                    test_launch.OwnedLaunchTests().verify_without_filesystem(binding)
 
     def test_profile_bounds_reject_invalid_deadlines_before_preparation(self):
         cases = [('standard', 'train', value) for value in (True, 0, -1, 6601, float('nan'), float('inf'))]

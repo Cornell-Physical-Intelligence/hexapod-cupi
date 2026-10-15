@@ -75,6 +75,8 @@ class DirectBCTests(unittest.TestCase):
                 keys = {key: value.shape for key, value in actor.state_dict().items()}
                 labels = torch.zeros(8, 18)
                 self.assertTrue(torch.isfinite(torch.tensor(fit(actor, obs, labels, 1, .001))))
+                if normalization == 'empirical':
+                    self.assertEqual(int(actor.obs_normalizer.count), len(labels))
                 self.assertEqual(keys, {key: value.shape for key, value in actor.state_dict().items()})
                 clone = MLPModel(obs, config['obs_groups'], 'actor', 18,
                                  **{k: copy.deepcopy(v) for k, v in config['actor'].items() if k != 'class_name'})

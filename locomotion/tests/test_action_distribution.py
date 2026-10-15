@@ -17,8 +17,6 @@ from rsl_rl.models import MLPModel
 from rsl_rl.utils import resolve_callable
 
 from locomotion.learning.action_distribution import BoundedMeanGaussian
-from locomotion.learning.amp_ppo import amp_ppo_config
-from locomotion.learning import paper_networks as paper_networks
 from locomotion.runs import train as train
 from locomotion.backends.isaac.config import JOINT_NAMES
 from locomotion.learning.ppo import action_metrics, ppo_config
@@ -27,8 +25,7 @@ from locomotion.runs.prepare import prepare
 
 def observations(count=8):
     policy = torch.randn(count, 231)
-    return TensorDict({'policy': policy, 'critic': torch.cat((policy, torch.randn(count, 3)), -1),
-        **paper_networks.actor_observation(policy)}, batch_size=[count])
+    return TensorDict({'policy': policy, 'critic': torch.cat((policy, torch.randn(count, 3)), -1)}, batch_size=[count])
 
 
 def actor_from_config(config, obs):
@@ -86,10 +83,9 @@ class DistributionTests(unittest.TestCase):
 
 
 class IntegrationTests(unittest.TestCase):
-    def test_ppo_and_both_amp_actors_use_the_selected_distribution(self):
+    def test_ppo_actor_uses_the_selected_distribution(self):
         obs = observations()
         configs = [ppo_config(3, action_mean='tanh')]
-        configs += [amp_ppo_config(3, networks=networks, action_mean='tanh') for networks in ('mlp', 'paper')]
         for config in configs:
             with self.subTest(actor=config['actor']['class_name'], algorithm=config['algorithm']['class_name']):
                 actor = actor_from_config(config, obs)
@@ -193,8 +189,7 @@ class IntegrationTests(unittest.TestCase):
                 self.assertIn('locomotion/learning/action_distribution.py', manifest)
             legacy = prepare(root / 'legacy', remote)
             self.assertNotIn('--action-mean', legacy['command_args'])
-            for options in ({'action_mean': 'other'}, {'mode': 'diagnostic', 'action_mean': 'tanh'},
-                            {'mode': 'tripod', 'action_mean': 'tanh'}):
+            for options in ({'action_mean': 'other'}, {'mode': 'diagnostic', 'action_mean': 'tanh'}):
                 with self.subTest(options=options), self.assertRaisesRegex(ValueError, 'Bounded action means'):
                     prepare(root / 'bad', remote, **options)
 

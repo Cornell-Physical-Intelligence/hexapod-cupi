@@ -41,17 +41,16 @@ model. A package move alone cannot establish compatibility.
 
 ## Method and comparisons
 
-You compare learned controllers against a PPO baseline and the prescribed
-[tripod controller](../locomotion/README.md#prescribed-tripod-controller).
-The AMP research path tests whether a motion prior improves the gait; the
-paper-network path tests its proposed architecture. Treat those as hypotheses
-that need matched comparisons and repeated seeds.
+You compare PPO with the same actor initialized through behavior cloning.
+The current scripted teacher covers forward/backward commands. Demonstrations
+or subsequent learning must cover lateral and yaw commands before you claim
+omnidirectional BC. Use the same environment and evaluator for both methods.
 
 Freeze each comparison's configuration and budget before dispatch. Record the
 robot count and controls per update, reward terms and learner settings. Keep
 paper reproduction separate from adaptations for this robot. Use the
-[implementation guide](../locomotion/README.md) for supported options and the
-[prior pipeline](../locomotion/priors/README.md) for demonstration admission.
+[implementation guide](../locomotion/README.md) for supported commands. Historical
+AMP and prescribed-controller experiments remain in their recorded Git revisions.
 
 ## Acceptance
 

@@ -65,6 +65,7 @@ def collect(env, actor, teacher, steps, noise, *, drive_actor=False, check_deadl
 def fit(actor, observations, labels, epochs, learning_rate, check_deadline=lambda: None):
     """Fit the configured deterministic mean; keep its normalization and action transform."""
     optimizer = torch.optim.Adam(actor.parameters(), lr=learning_rate)
+    actor.train()
     actor.update_normalization(observations)
     actor.eval()
     for _ in range(epochs):

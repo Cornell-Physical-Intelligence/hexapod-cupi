@@ -65,7 +65,6 @@ def main(argv=None):
     parser.add_argument('--mode', choices=['diagnostic', 'train', 'evaluate', 'probe'], required=True)
     for name in ('asset', 'model', 'geometry', 'geometry-extrema', 'stance', 'output'):
         parser.add_argument('--'+name, type=Path, required=True)
-    parser.add_argument('--backend', choices=('legacy', 'direct'), default='legacy')
     parser.add_argument('--bc-warmstart', action='store_true', help='Clone the scripted teacher before PPO on the Direct candidate.')
     parser.add_argument('--standing-admission', type=Path)
     parser.add_argument('--source-freeze-sha256', required=True)
@@ -92,10 +91,6 @@ def main(argv=None):
     parser.add_argument('--reward-task', choices=['v4', 'v4_yaw_gate'], default='v4',
                         help='Reward version 4 task: v4, or the experimental yaw-gated schedule with turn-heavy '
                              'sampling in task_v4_yaw_gate.py. Training only.')
-    parser.add_argument('--learner', choices=['ppo', 'amp'], default='ppo',
-                        help='Stock PPO in ppo.py or PPO with the online motion prior in amp_ppo.py.')
-    parser.add_argument('--networks', choices=['mlp', 'paper'], default='mlp',
-                        help='The existing [256, 256, 128] MLPs or the Table III networks in paper_networks.py.')
     parser.add_argument('--action-mean', choices=['unbounded', 'tanh'], default='unbounded',
                         help='Use the historical Gaussian mean or bound the mean with tanh.')
     parser.add_argument('--observation-normalization', choices=['empirical', 'none'], default='empirical',
@@ -137,7 +132,7 @@ def main(argv=None):
         from isaaclab.app import AppLauncher
         AppLauncher.add_app_launcher_args(parser)
     args = parser.parse_args(argv)
-    if args.bc_warmstart and (args.mode != 'train' or args.backend != 'direct' or args.learner != 'ppo'
+    if args.bc_warmstart and (args.mode != 'train'
             or args.reward_version not in ('1', '2', '3') or not 10 <= args.gait_clock <= 250):
         raise ValueError('BC warmstart requires Direct PPO training, reward 1-3 and a gait clock of 10-250 controls')
     compatibility = None
@@ -157,7 +152,7 @@ def main(argv=None):
         raise ValueError('Reward version selection applies to training only')
     if args.action_mean != 'unbounded' and args.mode not in ('train', 'evaluate'):
         raise ValueError('Bounded action means apply to training and evaluation')
-    if args.observation_normalization != 'empirical' and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate')):
+    if args.observation_normalization != 'empirical' and (args.mode not in ('train', 'evaluate')):
         raise ValueError('Observation normalization selection requires PPO training or evaluation')
     learner_options = dict(observation_scaling=args.observation_scaling, command_segments=args.command_segments,
                            learning_rate_max=args.learning_rate_max, action_std=args.action_std,
@@ -169,7 +164,7 @@ def main(argv=None):
                                 action_std=.15, action_noise_correlation=0., action_std_final=None, gait_clock=0,
                                 action_smoothing='none', velocity_noise=0., action_std_decay_updates=None,
                                 steps_per_env=24)
-            and (args.learner != 'ppo' or args.mode not in ('train', 'evaluate'))):
+            and (args.mode not in ('train', 'evaluate'))):
         raise ValueError('Observation scaling, command segments, the rate ceiling, the action deviation and '
                          'the noise correlation require PPO training or evaluation')
     if not 12 <= args.steps_per_env <= 96 or args.steps_per_env % 6:
@@ -185,8 +180,6 @@ def main(argv=None):
     if args.reward_options:
         # Rejects an unknown key or an invalid value before the GPU launch; the container preflight runs this.
         importlib.import_module(prefix+'.tasks.task_'+args.reward_task).reward_config(args.reward_options)
-    if (args.networks == 'paper' and args.learner != 'amp') or (args.learner == 'amp' and args.mode == 'diagnostic'):
-        raise ValueError('The paper networks need the AMP learner, and the AMP learner trains or evaluates only')
     if args.action_std_decay_updates is not None and args.action_std_final is None:
         raise ValueError('The deviation decay length needs a final action deviation')
     validate_decay(args.mode, args.updates, args.action_std_decay_updates)
@@ -204,16 +197,16 @@ def main(argv=None):
     from locomotion.evaluation.evaluation_config import EvaluationEnvConfig
     config_class = EvaluationEnvConfig if args.mode == 'evaluate' and args.eval_scope == 'full' else configuration.EnvConfig
     cfg = config_class(num_envs=args.num_envs, seed=args.seed,
-        record_motion_features=args.mode == 'evaluate' or args.learner == 'amp', render=args.mode == 'evaluate', episode_seconds=(90. if args.eval_scope == 'full' else 60.) if args.mode == 'evaluate' else (60. if args.mode == 'diagnostic' else args.episode_seconds), device=args.device)
+        record_motion_features=args.mode == 'evaluate', render=args.mode == 'evaluate', episode_seconds=(90. if args.eval_scope == 'full' else 60.) if args.mode == 'evaluate' else (60. if args.mode == 'diagnostic' else args.episode_seconds), device=args.device)
     identity = {'schema': 'hexapod_locomotion_ppo_v2', 'source_files': source_files(source),
         'runtime_sources': verify_runtime(source.parent),
         'model_sha256': configuration.MODEL_SHA256, 'usd_sha256': configuration.USD_SHA256,
         'stance_sha256': sha(args.stance),
         'geometry_sha256': sha(args.geometry), 'geometry_extrema_sha256': sha(args.geometry_extrema),
-        'config': cfg.declaration(), 'motion_prior': args.learner == 'amp', 'behavior_cloning': args.bc_warmstart,
+        'config': cfg.declaration(), 'motion_prior': False, 'behavior_cloning': args.bc_warmstart,
         'seed': args.seed, 'rsl_rl_required_version': '5.0.1',
         'adapter_sha256': sha(source/'learning/ppo.py'), 'entry_sha256': sha(__file__),
-        'reward_version': args.reward_version, 'learner': args.learner, 'networks': args.networks}
+        'reward_version': args.reward_version, 'learner': 'ppo', 'networks': 'mlp'}
     if args.reward_options:
         identity['reward_options'] = args.reward_options
     if args.reward_task != 'v4':
@@ -221,13 +214,7 @@ def main(argv=None):
     if args.extended_updates:
         # The exploration decay length enters ppo_config; the opt-in records the requested run length beside it.
         identity['training_updates'] = args.updates
-    if args.learner == 'amp':
-        amp_module = importlib.import_module(prefix+'.learning.amp_ppo')
-        identity['learner_source_files'] = {name: sha(source/name) for name in ('core/features.py', 'learning/amp_discriminator.py', 'learning/amp_ppo.py', 'learning/paper_networks.py')}
-        identity['amp_dataset'] = amp_module.load_demonstrations(source.parent/amp_module.AMPConfig().dataset)[1]
-    identity['physics_source_files'] = physics_files(identity['source_files'], backend=args.backend)
-    if args.backend != 'legacy':
-        identity['backend'] = args.backend
+    identity['physics_source_files'] = physics_files(identity['source_files'])
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
         'spacing_m': cfg.spacing_m, 'target_slew_rad': cfg.target_slew_rad, 'action_scale_rad': cfg.action_scale_rad,
         'solver_position_iterations': 32, 'solver_velocity_iterations': 0,
@@ -287,9 +274,7 @@ def main(argv=None):
         native = importlib.import_module(prefix+'.backends.isaac.env')
         task_module = importlib.import_module(prefix+'.tasks.task')
         torch.manual_seed(args.seed); np.random.seed(args.seed)
-        environment = (importlib.import_module(prefix+'.backends.isaac.direct_env').DirectLocomotionEnv
-                       if args.backend == 'direct' else native.LocomotionEnv)
-        env = environment(cfg, args.asset, args.model, args.geometry,
+        env = native.LocomotionEnv(cfg, args.asset, args.model, args.geometry,
             args.output/'native', reference_metadata=metadata)
         if args.mode == 'evaluate':
             prepare_policy_scene(env)
@@ -341,23 +326,15 @@ def main(argv=None):
             task = task_class(env, task_config, args.output/'task')
         else:
             task = task_module.TrainingTask(env, task_config, args.output/'task')
-        collision = None
-        if args.learner == 'amp':
-            collision = amp_module.CollisionCapture(env)
-            amp_config = amp_module.AMPConfig().resolve(args.seed)
-            wrapped = amp_module.AMPVecEnv(task, collision=collision, amp_config=amp_config)
-            config = amp_module.amp_ppo_config(args.seed, networks=args.networks, amp_config=amp_config,
-                                              action_mean=args.action_mean)
-        else:
-            wrapped = vanilla.VanillaVecEnv(task, observation_scaling=args.observation_scaling,
-                                            command_segments=args.command_segments, gait_clock=args.gait_clock,
-                                            action_smoothing=args.action_smoothing,
-                                            velocity_noise=args.velocity_noise)
-            schedule_period = getattr(getattr(task, 'reward_config', None), 'schedule_period_controls', None)
-            if getattr(getattr(task, 'reward_config', None), 'schedule_weight', 0) and args.gait_clock != schedule_period:
-                raise ValueError('The contact-schedule reward needs a gait clock of the same period')
-            config = vanilla.ppo_config(args.seed, action_mean=args.action_mean,
-                                        observation_normalization=args.observation_normalization, **learner_options)
+        wrapped = vanilla.VanillaVecEnv(task, observation_scaling=args.observation_scaling,
+                                        command_segments=args.command_segments, gait_clock=args.gait_clock,
+                                        action_smoothing=args.action_smoothing,
+                                        velocity_noise=args.velocity_noise)
+        schedule_period = getattr(getattr(task, 'reward_config', None), 'schedule_period_controls', None)
+        if getattr(getattr(task, 'reward_config', None), 'schedule_weight', 0) and args.gait_clock != schedule_period:
+            raise ValueError('The contact-schedule reward needs a gait clock of the same period')
+        config = vanilla.ppo_config(args.seed, action_mean=args.action_mean,
+                                    observation_normalization=args.observation_normalization, **learner_options)
         save(args.output/'ppo_config.json', config)
         runner_config = copy.deepcopy(config)
         # The wrapper consumes its own options; the runner receives the stock keys.
@@ -375,18 +352,14 @@ def main(argv=None):
         identity['upstream_source_files'] = {name: sha(upstream/name) for name in (
             'runners/on_policy_runner.py', 'algorithms/ppo.py', 'models/mlp_model.py', 'storage/rollout_storage.py')}
         identity['ppo_config'] = config
-        if args.learner == 'amp':
-            save(args.output/'amp_learner.json', runner.alg.declaration())
         state['status'] = 'running'; save(args.output/'state.json', state)
         if args.mode == 'train':
-            diagnostics = None
-            if args.learner == 'ppo':
-                diagnostics = vanilla.UpdateDiagnostics(runner.alg)
-                runner.alg.update = diagnostics.update
-                if args.action_std_final is not None:
-                    # The schedule wraps the diagnostic update, so each record reads the deviation it trained with.
-                    runner.alg.update = vanilla.DeviationSchedule(runner.alg, args.action_std, args.action_std_final,
-                        decay_updates(args.updates, args.action_std_decay_updates)).update
+            diagnostics = vanilla.UpdateDiagnostics(runner.alg)
+            runner.alg.update = diagnostics.update
+            if args.action_std_final is not None:
+                # The schedule wraps the diagnostic update, so each record reads the deviation it trained with.
+                runner.alg.update = vanilla.DeviationSchedule(runner.alg, args.action_std, args.action_std_final,
+                    decay_updates(args.updates, args.action_std_decay_updates)).update
             def checkpoint(update):
                 path = args.output/f'checkpoint_update{update:06d}.pt'
                 runner.save(str(path), infos={'identity': identity, 'updates': update})
@@ -395,9 +368,7 @@ def main(argv=None):
                 state['checkpoint'] = str(path); state['checkpoint_sha256'] = sha(path)
                 save(args.output/'state.json', state)
             loads = vanilla.TrainingLoads(env)
-            if collision is not None:
-                collision.inner = loads
-            env.capture = loads if collision is None else collision
+            env.capture = loads
             if args.bc_warmstart:
                 from locomotion.learning.bc import run_bc
                 def bc_deadline():
@@ -446,8 +417,6 @@ def main(argv=None):
             previous_action = [None]
             def policy(observation):
                 with torch.inference_mode():
-                    if args.networks == 'paper':
-                        return actor(importlib.import_module(prefix+'.learning.paper_networks').actor_observation(observation))
                     scaled = vanilla.scale_observation(observation, args.observation_scaling)
                     if args.gait_clock:
                         clock = vanilla.clock_features(env.episode_steps, args.gait_clock, observation[:, 210:213]).to(scaled)

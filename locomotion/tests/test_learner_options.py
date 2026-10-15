@@ -317,7 +317,7 @@ class LearnerOptionTests(unittest.TestCase):
             video = prepare(root/'video', REMOTE, mode='evaluate', video_case='learning:forward_0.05_to_stop', **checkpoint)
             position = video['command_args'].index('--video-case')
             self.assertEqual(video['command_args'][position+1], 'learning:forward_0.05_to_stop')
-            for index, bad in enumerate((dict(mode='diagnostic', observation_scaling='fixed'), dict(learner='amp', action_std=.1),
+            for index, bad in enumerate((dict(mode='diagnostic', observation_scaling='fixed'),
                     dict(mode='tripod', command_segments='bootstrap'), dict(learning_rate_max=1.),
                     dict(action_noise_correlation=.9), dict(gait_clock=5), dict(episode_seconds=2.), dict(episode_seconds=10),
                     dict(mode='evaluate', episode_seconds=10., **checkpoint),
@@ -347,7 +347,7 @@ class LearnerOptionTests(unittest.TestCase):
                 self.assertEqual(json.loads((root/mode/'PACK.json').read_text())['steps_per_env'], 36)
             self.assertNotIn('--steps-per-env', prepare(root/'plain', REMOTE, mode='train')['command_args'])
             self.assertNotIn('steps_per_env', json.loads((root/'plain/PACK.json').read_text()))
-            for index, bad in enumerate((dict(steps_per_env=32), dict(learner='amp', steps_per_env=36),
+            for index, bad in enumerate((dict(steps_per_env=32),
                                          dict(mode='tripod', steps_per_env=36))):
                 with self.subTest(bad=bad), self.assertRaises(ValueError):
                     prepare(root/f'bad{index}', REMOTE, **bad)
@@ -360,8 +360,6 @@ class LearnerOptionTests(unittest.TestCase):
                 '--output', 'o', '--source-freeze-sha256', 'f'*64, '--num-envs', '1', '--preflight-only', '--mode', 'train']
         with self.assertRaisesRegex(ValueError, 'rollout length'):
             train.main(base + ['--steps-per-env', '32'])
-        with self.assertRaisesRegex(ValueError, 'require PPO training or evaluation'):
-            train.main(base + ['--steps-per-env', '36', '--learner', 'amp', '--networks', 'mlp'])
 
 if __name__ == '__main__':
     unittest.main()

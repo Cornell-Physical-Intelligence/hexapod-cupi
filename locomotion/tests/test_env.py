@@ -57,6 +57,7 @@ class ResetTests(unittest.TestCase):
         # Exercise real reset against a backend double that enforces selected writes.
         env = LocomotionEnv.__new__(LocomotionEnv)
         env.device = "cpu"; env.num_envs = 3; env.cfg = EnvConfig(record_motion_features=True)
+        env.native_errors = []
         env.torch = lambda x: torch.as_tensor(x, dtype=torch.float32)
         env.neutral = torch.tensor([0., -.3, .4] * 6)
         env.reset_height = .1
@@ -86,6 +87,22 @@ class ResetTests(unittest.TestCase):
                     return lambda data, ids: values[getter].__setitem__(ids, data[ids])
                 return lambda data, ids: None
         env.view = View(); env.get = lambda name: values[name].clone()
+        class Robot:
+            def write_root_link_pose_to_sim_index(self, *, root_pose, env_ids):
+                values["get_root_transforms"][env_ids] = root_pose
+            def write_root_com_velocity_to_sim_index(self, *, root_velocity, env_ids):
+                values["get_root_velocities"][env_ids] = root_velocity
+            def write_joint_position_to_sim_index(self, *, position, env_ids):
+                values["get_dof_positions"][env_ids] = position
+            def write_joint_velocity_to_sim_index(self, *, velocity, env_ids):
+                values["get_dof_velocities"][env_ids] = velocity
+            def set_joint_position_target_index(self, **kwargs): pass
+            def set_joint_velocity_target_index(self, **kwargs): pass
+            def set_joint_effort_target_index(self, **kwargs): pass
+        from types import SimpleNamespace
+        env.robot = Robot()
+        env.native = SimpleNamespace(_reset_idx=env._write_reset)
+
         env._read = lambda: {"q": values["get_dof_positions"].clone(), "dq": values["get_dof_velocities"].clone(),
             "root": values["get_root_transforms"].clone(), "angular": torch.zeros(3, 3), "linear": torch.zeros(3, 3),
             "gravity": torch.tensor([[0., 0., -1.]]).repeat(3, 1), "toe_body": torch.zeros(3, 6, 3)}

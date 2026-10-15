@@ -15,8 +15,7 @@ from locomotion.evaluation.runner import run_batch
 from locomotion.backends.isaac.config import JOINT_NAMES, MODEL_SHA256
 from locomotion.evaluation.force_metrics import report_for, sha, summarize, write_summary
 from locomotion.tests.test_evaluate import FakeCapture, FakeNative
-from locomotion.priors.prepare import prepare
-from locomotion.priors.model import ROOT
+from locomotion.runs.prepare import prepare
 
 
 def fixture():
@@ -54,8 +53,7 @@ class ForceMetricsTests(unittest.TestCase):
     def test_fresh_pack_binds_and_imports_load_reporter_without_repository(self):
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp)/'pack'
-            prepare(ROOT/'locomotion/priors/tests/fixtures/solve', output,
-                    '/home/orionh/HEXAPOD_runs/restart_20260914/test_force_metrics')
+            prepare(output, '/srv/cupi/hexapod/runs/test/force_metrics')
             source = output/'source'
             manifest = json.loads((source/'FREEZE_SHA256.json').read_text())
             self.assertEqual(manifest['locomotion/evaluation/force_metrics.py'], sha(source/'locomotion/evaluation/force_metrics.py'))

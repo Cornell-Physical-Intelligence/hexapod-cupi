@@ -3,7 +3,11 @@ import math
 import unittest
 import torch
 from locomotion.backends.isaac.config import JOINT_NAMES, KD
-from locomotion.backends.isaac.direct_control import named_motor_force
+from locomotion.backends.isaac.config import motor_damping
+
+
+def named_motor_force(names, q, dq, target):
+    return motor_force(q, dq, target, q.new_tensor(motor_damping(names)))
 from locomotion.core.motor import motor_force
 
 

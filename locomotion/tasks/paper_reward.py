@@ -1,32 +1,7 @@
-"""Liu et al. Table I task and penalty reward (arXiv:2511.03167, p. 3) on this robot's telemetry.
-
-A candidate beside ``task.measured_reward``; training still uses ``task.py``.
-It shares ``measured_reward``'s signature, so ``locomotion.evaluation.reward_scorer`` and
-``locomotion.evaluation.reward_viewer`` score it with ``--reward
-paper=locomotion.tasks.paper_reward:paper_reward``. ``ADAPTATIONS`` records every
-departure from the printed table and ``OMITTED`` every term left out.
-
-``paper_reward_calibrated`` keeps the paper's terms but rescales the continuous
-penalties by the rule in ``CALIBRATION``; reproduce its weights with
-``python -m locomotion.tasks.paper_reward <traces...>``.
-
-``variant`` builds any configuration from a spec, including the audit's
-command-scaled tracking kernels, for example
-``--reward c=locomotion.tasks.paper_reward:variant:kernel=stride,penalties=calibrated``.
-The stride kernel averages each replica's velocity over a contiguous trace;
-``task_v2.TrainingTaskV2`` keeps that window per replica during training.
-
-``style_only``, ``paper_with_style`` and ``calibrated_with_style`` add the Eq. (2)
-style term from a frozen ``locomotion.learning.amp_discriminator`` checkpoint, for example
-``--reward style=locomotion.tasks.paper_reward:paper_with_style:disc.pt``; train one with
-``python -m locomotion.tasks.paper_reward discriminator --prior ... --policy ... --output disc.pt``.
-"""
+"""Retain the reward-v2 formula oracle and stride helper for frozen reward imports."""
 from __future__ import annotations
 
-import argparse
-from dataclasses import asdict, dataclass, fields, replace
-import json
-import sys
+from dataclasses import dataclass, fields, replace
 
 import torch
 
@@ -251,82 +226,3 @@ def variant(spec):
         return paper_reward(telemetry, commands, previous_target, terminated, paper_config=config)
     reward.config = config
     return reward
-
-
-def _with_style(base, path):
-    """``base`` plus Eq. (2) style from a frozen discriminator checkpoint (``locomotion.learning.amp_discriminator``)."""
-    from locomotion.learning import amp_discriminator as amp_discriminator
-    discriminator, _ = amp_discriminator.load(path)
-
-    def reward(telemetry, commands, previous_target, terminated, config=None, nominal_height=None):
-        components = {}
-        if base is not None:
-            _, components = base(telemetry, commands, previous_target, terminated, config, nominal_height)
-        with torch.no_grad():
-            scores = discriminator(amp_discriminator.transitions(telemetry["amp_state"], telemetry["next_amp_state"]))
-        components = {**components, "style": amp_discriminator.style_reward(scores)}
-        return sum(components.values()), components
-    return reward
-
-
-def style_only(path):
-    """The style term alone, for inspecting the discriminator."""
-    return _with_style(None, path)
-
-
-def paper_with_style(path):
-    """Table I task + style + printed penalties."""
-    return _with_style(paper_reward, path)
-
-
-def calibrated_with_style(path):
-    """Table I task + style + calibrated penalties."""
-    return _with_style(paper_reward_calibrated, path)
-
-
-def train_discriminator(argv=None):
-    """``python -m locomotion.tasks.paper_reward discriminator ...``: fit a frozen discriminator from traces."""
-    from pathlib import Path
-    from locomotion.learning import amp_discriminator as amp
-    from locomotion.evaluation import reward_scorer as reward_scorer
-    parser = argparse.ArgumentParser(prog="python -m locomotion.tasks.paper_reward discriminator",
-                                     description="Train a frozen AMP discriminator from recorded traces.")
-    parser.add_argument("--prior", nargs="+", required=True, help="Motion-prior control_trace.npz files.")
-    parser.add_argument("--policy", nargs="+", required=True, help="Policy control_trace.npz files (negatives).")
-    parser.add_argument("--output", type=Path, required=True, help="Discriminator checkpoint to write.")
-    parser.add_argument("--steps", type=int, default=amp.TrainConfig.steps)
-    args = parser.parse_args(argv)
-    config = amp.TrainConfig(steps=args.steps)
-    prior_traces = [reward_scorer.load_trace(path) for path in args.prior]
-    policy_traces = [reward_scorer.load_trace(path) for path in args.policy]
-    prior = torch.cat([amp.trace_transitions(trace) for trace in prior_traces])
-    policy = torch.cat([amp.trace_transitions(trace) for trace in policy_traces])
-    discriminator, history = amp.train(prior, policy, config)
-    metadata = {"config": asdict(config), "decisions": list(amp.DECISIONS), "history": history,
-                "prior": [{"path": str(t.path), "sha256": t.sha256} for t in prior_traces],
-                "policy": [{"path": str(t.path), "sha256": t.sha256} for t in policy_traces],
-                "scope": "Frozen offline discriminator for inspecting recorded rollouts; AMP trains it against "
-                         "the current policy during PPO."}
-    amp.save(discriminator, args.output, metadata)
-    with torch.no_grad():
-        summary = {"prior_style_mean": float(amp.style_reward(discriminator(prior)).mean()),
-                   "policy_style_mean": float(amp.style_reward(discriminator(policy)).mean())}
-    print(json.dumps({"output": str(args.output), **summary, "final": history[-1]}, indent=2))
-
-
-def main(argv=None):
-    argv = sys.argv[1:] if argv is None else list(argv)
-    if argv[:1] == ["discriminator"]:
-        return train_discriminator(argv[1:])
-    from locomotion.evaluation import reward_scorer as reward_scorer
-    parser = argparse.ArgumentParser(description="Recompute the calibrated penalty weights from recorded traces.")
-    parser.add_argument("traces", nargs="+", help="Evaluation control_trace.npz files.")
-    parser.add_argument("--ratio", type=float, default=.8, help="Penalty-to-tracking magnitude ratio.")
-    args = parser.parse_args(argv)
-    result = calibrate([reward_scorer.load_trace(path) for path in args.traces], ratio=args.ratio)
-    result["paper_weights"] = {field: asdict(PAPER_CONFIG)[field] for field in CALIBRATED_TERMS.values()}
-    print(json.dumps(result, indent=2))
-
-
-if __name__ == "__main__":
-    main()

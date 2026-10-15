@@ -112,17 +112,12 @@ def verify(binding, own):
     from .train import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, validate_deadline
     guard.require(binding['schema']=='hexapod_locomotion_launch_v1','Wrong launch schema')
     guard.require(binding['root_review_complete'] is True,'Root review incomplete')
-    guard.require(binding['mode'] in ('diagnostic','replay','train','video','evaluate','tripod','throughput','probe'),'Unsupported native mode')
+    guard.require(binding['mode'] in ('diagnostic','train','evaluate','probe'),'Unsupported native mode')
     profile = binding.get('allocation_profile', 'standard')
     guard.require(profile in ALLOCATION_PROFILES, 'Unknown allocation profile')
     limit = 22000 if profile == 'flat_pilot_v1' else 7200
     guard.require(type(binding['max_seconds']) is int and 120<=binding['max_seconds']<=limit,'Unbounded allocation')
-    guard.require(binding.get('module') in ('locomotion.runs.train', 'locomotion.priors.replay_native',
-                                          'locomotion.evaluation.tripod_evaluate', 'locomotion.evaluation.throughput'), 'Unsupported native entry point')
-    guard.require((binding['mode'] == 'tripod') == (binding['module'] == 'locomotion.evaluation.tripod_evaluate'),
-                  'Prescribed-controller mode and entry must match')
-    guard.require((binding['mode'] == 'throughput') == (binding['module'] == 'locomotion.evaluation.throughput'),
-                  'Throughput mode and entry must match')
+    guard.require(binding.get('module') == 'locomotion.runs.train', 'Unsupported native entry point')
     paths={k:guard.canonical_path(binding[k]) for k in ('source','asset','prior','geometry_source','output')}
     guard.require(paths['source']==own,'Launcher must belong to its bound source')
     for k in ('source','output'):
@@ -139,13 +134,6 @@ def verify(binding, own):
     guard.require(binding['command_args'] and all(isinstance(x,str) for x in binding['command_args']),
                   'Exact native arguments required')
     argv=binding['command_args']
-    guard.require(not any(x.startswith('--backend=') for x in argv), 'Use an explicit backend argument')
-    if '--backend' in argv:
-        guard.require(argv.count('--backend') == 1, 'One native backend argument required')
-        index = argv.index('--backend')
-        guard.require(index+1 < len(argv) and argv[index+1] in ('legacy', 'direct'), 'Unknown native backend')
-        guard.require(binding['module'] == 'locomotion.runs.train' and binding['mode'] in
-                      ('diagnostic', 'train', 'evaluate', 'probe'), 'Backend selection requires the training entry point')
     if profile != 'standard' or 'max_wall_seconds' in binding:
         seconds = binding.get('max_wall_seconds')
         validate_deadline(binding['mode'], profile, seconds)
@@ -218,7 +206,7 @@ def run_owned(binding, paths):
     locks, process, identity = [], None, None
     name = "hexapod-reference-physics-" + uuid.uuid4().hex
     report = dict(status="starting", phase=phase, container_name=name, started_unix=time.time(),
-                  deadline_seconds=binding["max_seconds"], app_ready_deadline_seconds=90, no_policy_loaded=binding["mode"] in ("diagnostic", "replay", "tripod"),
+                  deadline_seconds=binding["max_seconds"], app_ready_deadline_seconds=90, no_policy_loaded=binding["mode"] == "diagnostic",
                   native_mode=binding["mode"], source_freeze_sha256=binding["source_freeze_sha256"],
                   stage2_complete=False, physical_admission=False)
     report_path = args.output / "jobs" / (phase + ".json")

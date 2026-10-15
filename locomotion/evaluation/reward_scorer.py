@@ -7,8 +7,8 @@ simulator is needed. Restore archived traces with ``tools/archive.py restore``.
 
 Candidate rewards share ``measured_reward``'s signature:
 ``fn(telemetry, commands, previous_target, terminated, config, nominal_height)``
-returning ``(reward, components)``. Coefficient edits exported by
-``locomotion.evaluation.reward_workbench`` run through the unchanged ``measured_reward``.
+returning ``(reward, components)``. JSON coefficient edits run through the
+unchanged ``measured_reward``.
 """
 from __future__ import annotations
 
@@ -185,7 +185,7 @@ def add_reward_arguments(parser):
     parser.add_argument("--reward", action="append", default=[], metavar="NAME=MODULE:FUNCTION",
                         help="Candidate reward function beside the current one; repeatable.")
     parser.add_argument("--reward-config", action="append", default=[], metavar="NAME=PATH",
-                        help="Coefficient edits exported by locomotion.reward_workbench; repeatable.")
+                        help="JSON coefficient edits; repeatable.")
 
 
 def selected_rewards(parser, args):

@@ -1,184 +1,50 @@
-# Locomotion kernel
+# Locomotion
 
-You run canonical locomotion through this package. The package uses the approved
-19-body, 18-joint robot and stock RSL-RL 5.0.1 PPO. You can inspect its control
-loop without reading old experiment launchers or a second environment port.
+You train and evaluate the approved hexapod through Isaac Lab's stock
+`DirectRLEnv` and RSL-RL 5.0.1 PPO. BC trains the same actor before PPO.
+[TRAINING](../docs/TRAINING.md) defines the intended motion and acceptance gates.
 
-| Package | Responsibility |
+## Code to read
+
+| File or package | Responsibility |
 | --- | --- |
-| [`core/`](core/) | Compute motor forces, targets, frame transforms and motion features. |
-| [`backends/isaac/`](backends/isaac/) | Construct the scene and step the native environment. |
-| [`tasks/`](tasks/) | Sample commands, handle episodes and retain versioned rewards. |
-| [`learning/`](learning/) | Configure PPO and AMP, adapt observations and preserve learner state. |
-| [`evaluation/`](evaluation/) | Capture rollouts, summarize forces and apply the frozen scorer. |
-| [`runs/`](runs/) | Validate arguments, freeze inputs and sources, enforce identity and supervise runs. |
+| `backends/isaac/config.py` | CPU-safe control settings and the native scene configuration. |
+| `backends/isaac/native.py` | Stock Direct environment hooks and Articulation capture hooks. |
+| `backends/isaac/env.py` | Named state readback, observations and the interface used by frozen tasks. |
+| `backends/isaac/motor.py`, `core/` | Explicit actuator and shared control arithmetic. |
+| `tasks/` | Command sampling and versioned reward formulas. |
+| `learning/config.py`, `learning/ppo.py`, `learning/bc.py` | Shared actor configuration, learner adapter and scripted BC. |
+| `evaluation/` | Rollout capture, video and unchanged numerical gates. |
+| `runs/` | Input validation, source packs, checkpoint identity and guarded execution. |
 
-You can search classes and functions in the
-[developer code map](https://cornell-physical-intelligence.github.io/hexapod-cupi/code/).
-Pages rebuilds the map from the build revision. You can open source lines from the map
-and download its JSON index for imports and ownership.
-You run commands through their packages: `python -m locomotion.runs.prepare`,
-`locomotion.runs.launch`, `locomotion.runs.train` and `locomotion.runs.inputs`.
-Historical frozen packs retain their original commands and source. New checkouts
-use package imports. `tasks/env.py` preserves the imports inside frozen reward bytes. Frozen reward
-docstrings retain their historical commands; use `locomotion.tasks` in this checkout.
-The `priors/` and `surrogate/` packages retain their separate guides and runtime boundaries.
+The [developer map](https://cornell-physical-intelligence.github.io/hexapod-cupi/code/)
+shows definitions and imports. Pages generates it from the build revision.
+`priors/datasets/` and `surrogate/records/` retain historical data; they contain
+no maintained optimizer or simulator. Git retains the retired experiment code.
 
-You freeze nested runtime dependencies in `RUNTIME_SOURCES.json` with schema
-`hexapod_runtime_sources_v2`. The outer `FREEZE_SHA256.json` retains its file-hash
-format. New checkpoints use `hexapod_locomotion_ppo_v2` and require an exact runtime
-manifest match. Evaluation retains strict identity checks by default. An explicit
-compatibility receipt permits the certified `c48_long` checkpoint to run its 13
-probes on the exact candidate source named in that receipt. Historical packs keep
-their original source and commands.
+## Implementation rules
 
+Follow [Isaac Lab's Direct tutorial](https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_direct_rl_env.html)
+and Shaurya's task structure. The runtime pins Isaac Lab 3.0.0 at `ffff603e`
+with Isaac Sim 6. Keep one implementation of each behavior. Use stock scene
+cloning and physics stepping; add custom code for a named contract difference.
 
-The controller retains 400 Hz physics, 50 Hz policy actions, a 0.35 rad action
-scale, the 0.040 rad target-change limit per control and the provisional 1.6 N·m
-motor cap. [`tasks/task.py`](tasks/task.py) owns command sampling and reward version 1;
-[`tasks/task_v2.py`](tasks/task_v2.py) owns reward version 2, selected with `--reward-version 2`;
-[`evaluation/scoring.py`](evaluation/scoring.py) owns the numerical gates. Read
-[TRAINING](../docs/TRAINING.md) for the proposed paper-method extensions.
+Preserve 400 Hz physics, eight substeps per action, the 0.35 rad action scale
+and the 0.040 rad target-change limit per control. Apply the approved explicit
+motor curve at each physics step, with its provisional 1.6 N·m cap. Capture
+submitted torque before physics and ground contact after physics.
 
-You can select `prepare --action-mean tanh` to keep each Gaussian mean within
-the action range. Training, deterministic evaluation and policy export use
-the same mean transform. PPO stores the raw Gaussian sample and computes its
-Gaussian likelihood; the environment retains its action clipping and motor
-limits. Samples can exceed the action range. This option does not bound the
-sample or change the PPO loss. The default `unbounded` retains the frozen
-baseline. Match this option when you prepare evaluation for a checkpoint.
+Keep actor observations at 231 values and critic observations at 234, before
+optional gait-clock inputs. Preserve frame order and selected-row reset
+isolation. Frozen tasks own episode rewards and resets so the learner can read
+terminal observations before reset. Keep numerical gates and frozen reward
+bytes unchanged; `tasks/env.py` supports their retained imports.
 
-You can select `prepare --observation-normalization none` for a separate PPO
-diagnostic. This option disables running observation statistics in the actor
-and critic. The default `empirical` retains the baseline. Match the option in
-training and evaluation; the checkpoint configuration rejects a mismatch.
+Use one actor configuration for PPO and BC. Keep evaluators outside the training
+loop and source identity outside the environment. Geometry, collision filtering
+and randomization changes require separate experiments and fresh admission.
 
-You can select `prepare --reward-version 3` for the experimental immediate
-tracking comparison. Version 3 uses each control's endpoint velocity for
-translation and yaw tracking and keeps version 2's penalty coefficients.
-Version 2 retains its 60-control stride average. Use a fresh attempt and record
-the chosen version; evaluation reads the version from the checkpoint. Native
-walking evidence for version 3 remains pending. Read the
-[reward audit](../docs/REWARD_V2_TABLE1_AUDIT.md#13-experimental-immediate-tracking-reward-version-3)
-before dispatch.
-You can select `prepare --reward-version 4` with the learner options below.
-Each option keeps its baseline default and enters the pack and the checkpoint
-record. Each one except `--episode-seconds`, `--reward-options` and `--extended-updates` also enters the
-evaluation command, and evaluation rejects a mismatch. Read
-[reward audit section 15](../docs/REWARD_V2_TABLE1_AUDIT.md#15-vanilla-ppo-stability-and-reward-version-4)
-for the motivation and evidence limits of each option.
-
-| Option | Effect |
-| --- | --- |
-| `--observation-scaling fixed` | Multiply each observation by a declared constant. Without running normalization the 0.05 m/s command enters at its raw scale, and the retained actor and critic did not respond to it. |
-| `--command-segments bootstrap` | Cut the return at a command change and bootstrap the post-action state under the held command before any reset. |
-| `--learning-rate-max 0.0003` | Cap the stock adaptive schedule, which reached 0.01 once the tanh means saturated. |
-| `--action-std 0.15 --action-std-final 0.05` | Hold the action deviation on a linear schedule. PPO no longer learns it. |
-| `--action-std-decay-updates 2000` | Reach the final deviation after this many updates and hold it for the rest of the run. Without it the decay spans the run. The value enters `ppo_config` under `exploration`. |
-| `--extended-updates` | Accept up to 5000 training updates. Without it, `prepare` and the training entry reject more than 2000. Training alone accepts it, and the checkpoint identity records `training_updates`. |
-| `--gait-clock 60` | Append the sine and cosine of the episode phase to both observations; both are zero under a zero command. Reward version 4 requires the period of its contact schedule. |
-| `--action-smoothing mean2` | Send the mean of each action and the previous one to the environment, in training and in evaluation. That mean has no gain at half the control rate, where a rest oscillation sat. |
-| `--velocity-noise 0.5` | Add Gaussian noise in rad/s to the actor's joint-velocity inputs in training. The critic and evaluation read measured values. Retained runs combine this option with smoothing and reward changes; they do not isolate its effect. |
-| `--reward-options forward_draw_fraction=0` | Override reward v4 coefficients as `key=value` pairs. `forward_draw_fraction=0` restores version 1's 20-command bank; the default draws forward and zero commands alone. Training alone accepts it, and the container preflight rejects an unknown key. |
-| `--episode-seconds 10` | Shorten training episodes. A forward walker covers 1.0 m in a 20 s episode, toward a neighbour's reset origin 2.0 m away, and the proximity guard then stops the run. Training alone accepts it. |
-| `--video-case <probe id>` | Choose the probe that the evaluation camera records. |
-
-`prepare --mode probe` runs [`noise_probe.py`](evaluation/noise_probe.py) through the
-training entry with 128 robots and no learner.
-On a Python exception or interruption, the probe saves completed controls and
-the failure in `summary.json` before it propagates the error. It retains
-nonfinite samples in the raw archive and omits summary statistics for them.
-The record excludes any control for which the environment step did not return
-complete telemetry. A process kill can bypass this final write.
-
-Reward versions 2–4 share `task_v2.RewardTask.step` for command resampling and
-guard checks. Each version implements `_reward` for its formula and private
-history. Reward version 1 retains its frozen source.
-
-PPO training records `policy_update` in each metrics row: Gaussian divergence,
-action likelihood ratios and learning rate before and after the stock update.
-The measurements use the same collected rollout and draw no new actions.
-The pre-update values expose policy changes during collection, including
-normalization drift. The post-update values measure the net change from the
-stored behavior policy; they are not the optimizer's minibatch KL averages.
-
-## Direct environment candidate
-
-Use the stock `DirectRLEnv` workflow for this migration. Follow
-[Isaac Lab's Direct tutorial](https://isaac-sim.github.io/IsaacLab/main/source/tutorials/03_envs/create_direct_rl_env.html)
-and Shaurya's [source structure](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/tree/969ea5bc942df3122b2662650f29acd11644a41c/hexapod).
-The runtime pins Isaac Lab 3.0.0 at `ffff603e` with Isaac Sim 6.
-
-Keep scene configuration and the explicit motor in `backends/isaac/`. Use stock
-scene cloning and physics stepping. Retain the current task/reward interface
-and `learning/ppo.py`; keep BC in `learning/bc.py`. Reuse `evaluation/` for
-capture and scoring. Add custom code for a named behavior that stock code lacks.
-
-Preserve observation order, frame history and selected-row resets. Apply the
-0.040 rad target limiter at 50 Hz and the approved torque curve at 400 Hz.
-Keep terminal observations available until the task and learner finish their
-reward and timeout calculations. Change geometry and physics in separate work.
-
-Select the candidate with `prepare --backend direct`. The default retains the
-admitted backend. Candidate packs set `root_review_complete=False`; the launcher
-rejects them until you authorize full review and the review clears the binding.
-Use fresh standing admission and the existing unchanged-weight replay gates
-before replacing the admitted backend. CPU checks establish no native parity.
-
-For a separate BC experiment, add `--bc-warmstart --gait-clock 40` to Direct PPO
-training with reward version 1, 2 or 3. The shared actor clones a scripted
-forward/backward teacher, then PPO trains with the original command bank.
-The run saves its BC configuration and a checkpoint at update zero. Sideways
-motion and turning require their own evaluation; BC supplies no acceptance claim.
-
-## Run and verify
-
-For this migration, you compare CPU outputs against both frozen baselines:
-`tests/fixtures/refactor_b2a6168c.tar.gz` and
-`tests/fixtures/packages_02f551fd.tar.gz`. Run `tests/test_refactor_parity.py`
-and the recorded-control tests before native evaluation.
-
-You use `tests/native_parity.py` in a frozen test pack to replay the pinned
-`c48_long` weights. Include the pack's `PARITY.json` source declaration and
-renew standing admission for its physics sources. The harness retains model,
-learner and embedded checkpoint checks; it separates source provenance from
-weight compatibility. You must use the guarded launcher with `--launch`.
-You verify provenance from the frozen pack and the host's launch and cleanup
-records. Kit can exit inside `app.close()` before a Python footer runs.
-
-You freeze comparison ranges before the candidate replay with
-`python -m locomotion.tests.native_ranges freeze`, three `--baseline` run
-directories and a fresh `--output`. Use `compare` with `--candidate`, `--ranges`,
-the frozen `--ranges-sha256` and another fresh `--output`. Each replay must
-complete 13/13 probes with unchanged gates and contact/torque captures.
-Preserve a failed comparison and block merge; do not widen the frozen ranges.
-
-After a candidate passes, create a compatibility bundle with
-`python -m locomotion.tests.native_ranges certify`. Supply `--candidate` with its
-`run/standing` directory, `--ranges` and `--ranges-sha256` with the bounds frozen
-before replay, and `--checkpoint` with the unchanged checkpoint. Supply `--source`
-with a production pack's source directory and `--output` with a fresh bundle path.
-The command checks native completion and cleanup. It requires the production
-files to match the tested candidate, apart from the declared test harness.
-
-Copy that bundle outside frozen source. Prepare evaluation with
-`--eval-scope probes --checkpoint-compatibility` and the receipt's absolute Spark
-path, plus `--checkpoint-compatibility-sha256` and its SHA-256. Retain the existing
-checkpoint and declaration hash arguments. The launcher mounts the bundle read-only.
-The loader checks the native ranges and load reports, then checks the original
-checkpoint identity and exact candidate runtime. It translates the reviewed class
-names and compares the remaining learner configuration without changes. It records
-the original identity beside the new execution identity in `state.json`.
-
-Use an original frozen runtime for other historical checkpoints. This receipt
-covers evaluation; native optimizer resume remains outside this migration.
-
-The [package cutover verification](../site/assets/package_cutover_20261015_001/verification.json)
-records both 13/13 native passes and unchanged contact/torque ranges. Copy the
-[certified bundle](../site/assets/package_cutover_20261015_001/compatibility/) as one
-directory. Its `receipt.json` SHA-256 is
-`33304b3a49ce05f07d3f6e68614b143aaed1687dbe00169fcc488d05439c9fc6`.
-The receipt applies to its exact runtime manifest; source edits require new proof.
+## Commands
 
 From the repository root:
 
@@ -186,321 +52,45 @@ From the repository root:
 uv sync --locked
 uv run python -m unittest discover -s locomotion/tests
 uv run python -m locomotion.runs.prepare --help
-uv run python -m locomotion.runs.admission --help
 uv run python -m locomotion.runs.train --help
-uv run python -m locomotion.evaluation.throughput --help
+uv run python -m locomotion.runs.admission --help
+uv run python -m locomotion.runs.dataset
 ```
 
-Use `prepare` to create a fresh allocation. Diagnostic mode supports 1, 32, 128,
-512 and 1024 robots. Training accepts 128 or 512 robots with matching admission. Throughput mode
-profiles stock PPO at 1, 32, 128, 512 or 1024 robots; [TRAINING](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/df551b9018505daef56f48e0078282b608d9db45/docs/TRAINING.md#step-2-throughput-profile)
-gives its commands and report. Evaluation uses
-one robot, with `--eval-scope focus` for the forward/quiet/stop subset, `probes`
-for all 13 learning probes, or `full` for the 96 required Stage 2 cases.
+Use `prepare` with `--mode diagnostic|train|evaluate|probe`, explicit inputs and
+a fresh output directory. Training supports 128 or 512 robots with matching
+standing admission. Diagnostics support 1/32/128/512/1024 robots. Evaluation
+uses one robot; `--eval-scope probes` runs 13 learning probes and `full` runs
+the 96-case Stage 2 suite. Use `--help` for learner options and deadline limits.
 
-Start the frozen launcher on Spark from its `source` directory with
-`python3 -B -m locomotion.runs.launch`, the binding path and its SHA-256. Read
-[OPERATIONS](../docs/OPERATIONS.md) before dispatch. Each native result records
-its exact source and inputs. Use `admission` on complete one/batch results to
-produce the input declaration for a subsequent pack. Existing admissions cannot
-admit changed physics source. Checkpoint loads require matching model, physics,
-configuration and implementation. Use the certified receipt above for `c48_long`
-evaluation, or the original frozen runtime for other historical checkpoints.
+Add `--bc-warmstart --gait-clock 40` to PPO training with reward version 1, 2 or
+3 to clone the scripted forward/backward teacher before PPO. BC restores the
+original command bank, resets the optimizer and saves checkpoint update zero.
+The source and result identify this experiment. Sideways motion and turning
+still require evaluation; BC supplies no acceptance evidence.
 
-Use `/srv/cupi/hexapod/inputs/` for new CUPI input bundles and
-`/srv/cupi/hexapod/runs/<user>/` for attempts. Preparation also accepts the
-historical restart root. Keep the shared Isaac runtime at its recorded path;
-workspace cleanup changes no physics or container runtime.
+Read [SPARK](../SPARK.md) and [OPERATIONS](../docs/OPERATIONS.md) before dispatch.
+The launcher retains both GPU locks and the existing cleanup rules. New packs
+hold `root_review_complete=False` until you authorize full review and the
+review clears the binding. This branch has no native migration qualification.
 
-Each evaluation saves `control_trace.npz`, 400 Hz capture chunks, `report.json`
-and `force_metrics.json`. A selected video also saves `rollout.mp4`. The reports
-bind the checkpoint and file hashes. Training writes `metrics.jsonl` and load
-summaries; mean contact force includes swing zeros. Contact forces exclude
-unrecorded tangential friction. A completed recording does not accept walking.
+## Regression and evidence
 
-## Larger project boundary
+CPU tests compare control arithmetic, observations, rewards, RNG sequences and
+optimizer updates against the frozen fixtures. Native qualification requires
+fresh standing admission and unchanged `c48_long` weights passing all 13 probes.
+Use `tests/native_parity.py` and `tests/native_ranges.py`: freeze ranges from
+three baseline replays before the new runtime replay. Keep the gates and
+contact/torque comparisons unchanged. Retain failures and block merge on a
+failed comparison. CPU tests cannot establish simulator parity.
 
-You need this loop to establish walking and stopping before adding terrain.
-The model import and geometry tools remain under `robot/` and `tools/assets/`.
-Hardware execution needs a measured actuator profile and a canonical runtime
-binding. Navigation can then consume velocity commands and stopping status.
-The navigation example consumes shared commands. Historical runtime bindings
-remain in Git until a canonical replacement receives its own parity evidence.
+Historical checkpoints use their frozen packs. New packs hash nested runtime
+sources; production loading requires matching model, configuration and source
+identities. The existing compatibility receipt binds its original runtime and
+cannot authorize this migration. Create new proof through the test-only replay
+harness before issuing a receipt. Native optimizer resume remains out of scope.
 
-The [AMP demonstration pipeline](priors/README.md) supplies an optimizer and
-native replay with a reviewed dataset exporter. `core/features.py` preserves the
-61-value feature contract. Package
-canonical inputs with `python -m locomotion.runs.inputs pack --help`. Use the
-[archive guide](../docs/PIPELINE_LINEAGES.md) for historical checkpoints and
-source packs; preserve their original identities.
-
-## AMP learner and paper networks
-
-You select the online motion prior with `prepare --mode train --learner amp`
-and the Table III networks with `--networks paper` ([TRAINING Steps 5–6](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/df551b9018505daef56f48e0078282b608d9db45/docs/TRAINING.md#proposed-reproduction-sequence)).
-[`amp_ppo.py`](learning/amp_ppo.py) subclasses stock RSL-RL PPO. Each control pairs the
-AMP state before the action with the state after it, before any reset, scores
-the pair with the discriminator and adds the Eq. (2) style reward to the task
-reward with weight 1. Each PPO update first trains the discriminator with the
-Eq. (1) least-squares loss and a gradient penalty on the standardized
-transition the network consumes, against uniform samples
-from the [admitted demonstration bank](priors/datasets/amp_demonstrations_001/manifest.json),
-then runs the unchanged PPO update, then fits the velocity estimator by
-supervised regression on the stored rollout. The discriminator initializes on a
-forked generator, so `test_amp_ppo` checks exact action and parameter parity
-with stock PPO from one seed when the style weight and discriminator updates
-are zero. [`amp_discriminator.py`](learning/amp_discriminator.py) keeps its raw-input
-penalty for the offline scorer; the learner's loss lives in `amp_ppo.py`.
-
-[`paper_networks.py`](learning/paper_networks.py) implements the estimator [64, 32],
-memory encoder [512, 256, 128], low-level actor [256, 128, 64], privileged
-encoder [64, 32] and critic [512, 256, 128] over the existing 231-value
-observation. The critic reads a 42-value privileged state: body velocity,
-height, declared friction, six toe forces, zero perturbation slots and 13
-non-tibia collision indicators. Friction and perturbations become measured
-values with Step 7; the terrain latent belongs to Step 8. Privileged inputs and
-the velocity label never enter the actor's observation groups.
-
-Checkpoints add the discriminator, its optimizer and the bank identity, and a
-load with another bank fails. Evaluation compares learner, networks, bank and
-configuration with the checkpoint's JSON record; a record without learner
-fields means stock PPO. `amp_learner.json` in each run records the
-configuration and every declared decision. No native AMP run exists; the pilot
-needs reward version 2, matching standing admission and the program lead's
-approval. `DECISIONS` in each module lists the choices the paper leaves open.
-
-[`amp_diagnostic.py`](evaluation/amp_diagnostic.py) fits the discriminator offline to the
-bank against a recorded policy trace under both penalty forms and scores
-held-out transitions. Its [report](../site/assets/amp_learner_offline_20260929_001/result.json)
-binds each number to the bank, the trace and the source hashes. It measures
-fixed data; it does not measure the online learner or a standing policy.
-
-## Prescribed tripod controller
-
-You can evaluate the Zhang et al. sinusoidal tripod controller with
-[`tripod_evaluate.py`](evaluation/tripod_evaluate.py). [`tripod.py`](tasks/tripod.py) owns
-the equations and contact state; [`tripod_config.py`](tasks/tripod_config.py) owns
-parameters. You use `prepare --mode tripod --tripod-adaptation stop_stride`
-with matching standing admission. [TRAINING](../docs/TRAINING.md#method-and-comparisons)
-keeps this controller as a comparison baseline. Issue #36 uses optimized
-demonstrations for its motion bank.
-
-You reproduce the prescribed controller in [Zhang et al. (2024), §§3.3.1,
-4.1–4.2](https://www.frontiersin.org/journals/robotics-and-ai/articles/10.3389/frobt.2024.1426269/full).
-The authors state that the gait algorithm “stops when the force sensors detect
-that the leg has touched the ground” (§3.3.1). You interpret this as stopping
-the descending foot trajectory. The authors do not specify debounce or recovery.
-You retain RS05 torque control and the approved geometry. You make no claim
-about their hardware results or Stage 2 completion.
-
-The [supplement, Data Sheet 1, version 3](https://public-pages-files-2025.frontiersin.org/articles/1426269/file/Data_Sheet_1.docx/1426269_data-sheet_1/3)
-has SHA-256 `029f0d0c5edeaff94b75bdd9cac051704f5e7f0323cd79a111570eb24b4f3df1`.
-Its six figures show the prototype and Simscape blocks, including prescribed
-revolute-joint motion in Figure S6. It supplies no controller code or additional
-gait parameters. Its linked Google Drive video was inaccessible through the
-research tool on 21 September 2026; video inspection remains incomplete.
-
-### Current evaluated variant
-
-You select the current candidate with `--tripod-adaptation stop_stride
---candidate 0`. You retain the original equations under `paper` and the
-intermediate variants for replay of their frozen results. The passing screens
-and stop repeats use the adaptations below; they do not validate the original
-sinusoidal targets on this robot.
-
-| Component | Current declared behavior |
-| --- | --- |
-| Geometry | Compute joint sweep coefficients from the approved toe Jacobians, the command and a 1.2 s period. Use low stance `(0,-0.30,0.40)` rad and raised stance `(0,-0.45,0.50)` rad. |
-| Support motion | Use a linear support sweep. Return the swing feet between half-cycle fractions 0.15 and 0.80, with cosine speed ramps for forward motion and a cubic return for yaw. Retain measured touchdown and bounded recovery. |
-| Forward lift | Use pitch offsets `(+0.26,-0.20)` rad at commands through 0.05 m/s, interpolate to `(+0.25,0)` at 0.10 m/s, and use `(+0.28,-0.10)` in raised mode. Yaw retains the geometry-derived lift. |
-| Servo tracking | Add nominal damping compensation, position-error gain 0.5 and velocity-error gain 2 with a 5 Hz filter. Preserve the motor limits, action envelope and target limiter. |
-| Start and stop | For forward starts, hold the stance for one second, then grow stride over one cycle. For yaw starts, blend to the first sweep endpoint. At a stop, finish the current swing and reduce stride over one full cycle before the standing hold. Use this stop for command and mode changes. |
-
-The current variant computes each 20 ms target from half-cycle progress `p`,
-which advances by `2*0.02/1.2` per control:
-
-```text
-S_support(p) = 1 - 2p
-S_swing(p)   = -1 - 2p + 4*r(u),   u = clip((p - 0.15)/0.65, 0, 1)
-r(u)         = h(u) for forward motion; 3u^2 - 2u^3 for yaw
-h(s)         = v/2*(s - r0/pi*sin(pi*s/r0))      for s < r0
-             = v*(s - r0/2)                       for r0 <= s <= 1 - r0
-             = 1 - h(1 - s)                       for s > 1 - r0;  r0 = 0.10, v = 1/(1 - r0)
-J*a          = period/4 * ((0, -forward, 0) + yaw*(-y, x, 0))   for each toe at (x, y)
-q_ref        = stance + a*S + c_lift*g(phi)
-phi          = -pi/2 + half*pi + acos(1 - 2*h(p)) + leg_phase
-g(phi)       = (1 + cos(2*phi))/2 if cos(phi) > 0, else 0
-e_p          = clip(0.5*b*(q_ref - q), -0.070, 0.070)
-e_v          = clip(2*b*KD*(F(dq_ref) - F(dq))/12, -0.070, 0.070)
-target       = clip(q_ref + KD*dq_ref/12 + e_p + e_v, joint limits and neutral +/- 0.35)
-```
-
-`J` is the approved toe Jacobian at the mode stance, and `c_lift` is the lift
-row in the table above. The blend `b` is 0 at idle, 1 while walking and a
-one-second cosine ramp during start and settling. `q` and `dq` come from the
-preceding native control. `F` is a 5 Hz one-pole filter with
-`alpha = 1 - exp(-2*pi*5*0.02)`, and its states reset while `b` is 0. A forward
-start scales `a` by `(1 - cos(pi*min(t/T, 1)))/2`, and a stop scales it by
-`s0*(1 + cos(pi*t/T))/2`, where `T` is the 1.2 s period. The emitted target
-then changes by at most 0.040 rad per control. The controller log records
-`nominal_target_rad` and `target_rad` as separate channels.
-
-You can inspect the [three passing motion screens](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_native_20260922_001/native_result.json)
-and the [passing stop suite](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_native_20260922_001/native_result.json).
-The [registry of 13 October 2026](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/9d819c68f7311477fc5d1fd61b00026a146656a0/site/project.json) records the native result of each variant. The
-[closeout](../site/assets/tripod_reproduction_closeout_20260922_001/closeout.json)
-records four interrupted qualification attempts. Full qualification, raised
-clearance and terrain remain incomplete. You can inspect the
-[forward comparison](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.png)
-and its [source identities and measurements](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_qualification_recovery_20260922_001/forward_tracking_comparison.json).
-The [analysis provenance](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_review_corrections_20260922_001/analysis_provenance.json)
-binds that comparison and two diagnostic figures to their scripts and inputs.
-
-### Original equations and geometry adaptation
-
-You implement Eqs. (1)–(3) with phase `u = omega*t + phi`:
-
-```text
-hip   = hip0 + A*sin(u)
-knee  = knee0 + B*g(u)
-ankle = ankle0 + C*g(u)
-g(u)  = (1 + cos(2*u))/2 if cos(u) > 0, else 0
-```
-
-The authors print `2*t` and `4*t`; you expose `omega = 2*pi/period`
-as a parameter. You start at `u = -pi/2`, where the lift and its derivative
-are zero. You use joint order `lf,lm,lr,rf,rm,rr`, with each leg ordered
-`coxa_yaw,femur_pitch,tibia_pitch`. Tripod A (`lf,lr,rm`) has phase 0;
-tripod B (`lm,rf,rr`) has phase pi. The native joint axes define positive
-rotation. Forward means native -Y, left means +X, and left yaw means +Z.
-For forward swing, hip signs are `(-,-,-,+,+,+)`; left turns use positive
-hip amplitudes on both sides. You verify these signs against approved-model
-forward kinematics. The authors describe adjacent phase opposition and
-same-direction hip turning in §4.2; the named mapping is our adaptation.
-
-You use the existing low stance `(0,-0.30,0.40)` rad. The raised stance adds
-`(0,-0.15,+0.15)` rad. Approved-model kinematics predict an 11.0 mm increase
-in root height for fixed foot height, from 97.8 to 108.8 mm. You measure root
-height here; the authors report 60/180 mm chassis clearances (Figure 4).
-You require a measured raised-minus-low root height of at least 8 mm after
-settling. You report chassis clearance from mesh geometry. Low swing offsets
-are `(B,C)=(+0.35,-0.30)` rad; raised offsets are `(+0.45,-0.35)` rad.
-You target at least 12 mm and 16 mm toe lift above each mode's stance plane.
-You keep the 0.35 rad action envelope and 0.040 rad/20 ms limiter.
-
-Eqs. (4)–(5) describe the authors' link geometry and approximate inverse
-relations. You use the approved model transforms to check our offsets before
-dispatch; you solve no inverse kinematics in the control loop. Eqs. (6)–(8)
-hold hip angle and prescribe sinusoidal pitch changes. Their printed
-`delta/T * sin((t-t0)/(2*T))` does not specify a final angle or a hold rule.
-You use endpoint interpolation `h(s)=(1-cos(pi*s))/2`, `s in [0,1]`, over
-one second with six supporting feet and fixed hip targets. You label this
-endpoint rule as an adaptation. Clearance changes come from declared commands;
-you omit Figure 5's obstacle perception and detour logic.
-
-### Controller state and contact adaptation
-
-You retain phase, active command, clearance mode, transition time, per-foot
-contact debounce and touchdown pitch targets. You reset these values per trial.
-You require six contacts before startup and blend to the first sweep endpoint
-over one second. You run each half-cycle with one swing tripod. You accept
-touchdown on descent after measured liftoff, freeze that foot's pitch, and
-continue its hip sweep. You hold the next half-cycle until the landing tripod
-supports the robot. During that tripod's support half-cycle, you return its
-retained touchdown pitch to the mode stance with a cosine blend. This restores
-the zero-lift part of Eqs. (2)–(3) before its next swing and avoids an angle jump.
-
-You use distal contact-normal force from the preceding eight native samples,
-with mean magnitude at least 2 N for contact and at most 1 N for release.
-You require two controls for each change. These are controller thresholds;
-they do not replace the existing contact acceptance checks. At a missing
-touchdown you hold phase and lower the missing foot at 0.10 rad/s, at most
-0.04 rad, for 0.40 s. Failure to land, failure to lift, or sustained support
-loss latches a fault and holds the last target. An out-of-envelope target
-latches the `target_bounds` fault in the same way. You require a trial reset
-after a fault. You record the fault as a failed attempt.
-
-You support zero, forward commands in `(0,0.10]` m/s and pure yaw commands
-with magnitude at most 0.20 rad/s. You reject commands outside this envelope.
-You treat a command or clearance change as a stop, complete the current swing,
-return to the mode stance over one second, then start the new command or
-clearance transition. This startup/stop behavior is a project adaptation.
-You declare stopped after six-foot support and completion of the stance return;
-native stop acceptance still requires the unchanged velocity and contact gates.
-
-### Frozen experiment matrix and acceptance
-
-You declare a finite sweep before dispatch: periods 1.2 and 1.6 s crossed
-with hip amplitudes 0.12 and 0.18 rad, four candidates total. At 0.05 m/s
-or 0.20 rad/s you use that amplitude; forward amplitude scales with command
-and caps at 0.30 rad. You screen forward and both yaw signs for each candidate
-on flat ground. You select the first candidate that passes all three screens,
-in the declared order, then freeze it for qualification. You keep these four
-timing/hip choices for each source correction. Before a geometry revision,
-you record its native evidence and declare its offsets. You preserve motor/model limits.
-
-| Phase | Cases and unchanged checks |
-| --- | --- |
-| CPU | Named joint mapping, phase opposition, reset determinism, boundary continuity, contact debounce, missed/early touchdown, command changes, faults and geometric reach. |
-| Admission | Fresh one-robot and 32-robot standing runs with matching physics, model, stance and geometry, recomputed by `locomotion.runs.admission`. |
-| Flat screens | Forward 0.05 m/s and pure yaw ±0.20 rad/s; use existing static scorer and full native contact/motor checks. |
-| Flat qualification | Existing forward 0.10 m/s, yaw ±0.20 rad/s, quiet 20/32 s and stand/forward/both-yaw stop cases. Repeat from two independent resets. Report other commands as unsupported or outside this reproduction. |
-| Clearance | Repeat low/raised forward and yaw cases, plus low→raised→low commands while moving; no native joint violations or nonfoot contacts. Require the geometry targets above. Keep all stop checks. |
-| Terrain, after flat pass | One fixed bar, 10 mm high, 40 mm along travel, 0.80 m across, centered 0.60 m ahead. Command raised mode at 2 s and low mode after the full robot crosses. Require crossing within 30 s, 10 s stopped afterward, no nonfoot contact or joint violations, and two reset replicas. Freeze a terrain-specific contact capture before dispatch. |
-
-The reset writes a fixed pose and zero velocity, and the controller draws no
-random numbers. The recorded seed changes no state, so the second repeat of a
-case replays the first trace. Each repeat pair in the
-[stop suite](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_native_20260922_001/native_result.json)
-has identical trace hashes: the six passing trials hold three distinct
-trajectories. The [repeat identity record](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_review_corrections_20260922_001/repeat_identity.json)
-lists each pair. Identical replays do not meet the independent-reset requirement.
-A qualifying repeat needs a reset difference declared before dispatch.
-
-You record video and 400 Hz ground-contact force plus requested/applied torque
-through the existing evaluation pipeline. You bind source, model, input and
-configuration hashes, retain failures, and report each parameter change.
-For the 36-second clearance-switch capture, you apply the unchanged 20-second
-static scorer to controls 0–999 and 800–1799. The overlapping windows cover
-the scored interval after the initial two seconds. Both windows must pass;
-the native contact and motor checks retain the full 36-second capture.
-You do not infer physical success from CPU checks. Failed flat qualification
-blocks terrain; failed terrain leaves terrain reproduction incomplete.
-You may use accepted native transitions as future AMP demonstrations after
-separate dataset review. This work starts no AMP or learned-control work.
-
-You prepare each allocation with `python -m locomotion.runs.prepare --mode tripod`,
-the admitted `--inputs`, a fresh `--output` and `--remote-root`, plus
-`--tripod-adaptation stop_stride --candidate 0` for the current variant and
-`--suite screen|forward_high|stops|qualification|clearance`. The default
-`--tripod-adaptation paper` selects the four original candidates.
-You complete the declared screen order before qualification and require its
-two-reset pass before clearance testing. The launcher retains both GPU locks
-and the existing reservation checks. The runner enforces standing admission
-and records one actual video per trial. You must inspect prior suite results
-before dispatch; the runner does not select a candidate for you.
-
-### Declared variants
-
-`--tripod-adaptation` selects a frozen variant, so you can replay each recorded
-result. Each variant keeps the changes of its parent. The linked records hold
-the equations, CPU checks and frozen inputs; the [registry of 13 October 2026](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/9d819c68f7311477fc5d1fd61b00026a146656a0/site/project.json)
-holds each native result. Declare a new variant and its CPU checks before native dispatch.
-Keep changes to the paper equations separate from parameter calibration.
-
-| Variant | Parent | Declared change | Record |
-| --- | --- | --- | --- |
-| `paper` | none | Eqs. (1)–(3) with the four period and hip choices above. Touchdown pitch returns to stance during support; lift offsets `(+0.35,-0.30)` and `(+0.45,-0.35)` rad. | [CPU result](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_20260921/result.json), [native corrections](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_native_20260922_001/result.json) |
-| `geometry` | `paper` | Jacobian sweep coefficients with gains 1.0 and 1.1, 22/28 mm Jacobian lift and raised offset `(0,-0.15,+0.10)` rad. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_geometry_20260922_001/declaration.json) |
-| `damping` | `geometry` gain 1.0 | Motor target adds `KD*dq_ref/12`. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_damping_20260922_001/declaration.json) |
-| `retimed` | `damping` | Displacement clock `h` with 0.10 endpoint ramps. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_retimed_20260922_001/declaration.json) |
-| `feedback` | `retimed` | Position feedback with gains 0.5 and 1.0, each within ±0.070 rad. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_feedback_20260922_001/declaration.json) |
-| `liftoff` | `retimed` | Swing lift `g^0.75` with joint feedback off. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_liftoff_20260922_001/declaration.json) |
-| `velocity` | `retimed` | Velocity feedback with gain 2, within ±0.070 rad. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_velocity_20260922_001/declaration.json) |
-| `velocity_filtered` | `velocity` | 5 Hz one-pole filter on reference and measured velocity. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_velocity_filtered_20260922_001/declaration.json) |
-| `pd_filtered` | `velocity_filtered` | Adds position feedback with gain 0.5. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_pd_20260922_001/declaration.json) |
-| `overlap` | `pd_filtered` | Yaw support-overlap sweeps with the cubic return. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_overlap_20260922_001/declaration.json) |
-| `startup` | `overlap` | Forward one-second standing hold, then a one-cycle stride ramp. The yaw touchdown residual returns over the rest of its half-cycle. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_startup_20260922_001/declaration.json) |
-| `forward_overlap` | `startup` | Forward support-overlap sweeps with `h`; forward lift `(0.25,0)` rad and raised `(0.28,-0.10)` rad. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_forward_overlap_20260922_001/declaration.json) |
-| `speed_lift` | `forward_overlap` | Low-mode forward lift `(0.26,-0.20)` rad through 0.05 m/s, interpolated to `(0.25,0)` at 0.10 m/s. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_speed_lift_20260922_001/declaration.json) |
-| `stop_stride` | `speed_lift` | Stride decays over one cycle after the current swing, before the standing blend. | [declaration](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/05f706eb30ef98941b7f449228fc5b8f177d07b4/site/assets/tripod_stop_stride_20260922_001/declaration.json) |
+Each evaluation retains its control trace, 400 Hz capture chunks, report and
+force metrics. Selected video cases also save `rollout.mp4`. Keep checkpoint
+and evidence bytes intact. Use [the archive guide](../docs/PIPELINE_LINEAGES.md)
+to retrieve a historical implementation outside the source checkout.

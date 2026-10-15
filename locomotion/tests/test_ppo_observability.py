@@ -114,9 +114,11 @@ class ObservationDiagnosticsTests(unittest.TestCase):
                 args = binding['command_args']
                 self.assertEqual(args[args.index('--observation-normalization') + 1], 'none')
                 self.assertEqual(json.loads((path / mode / 'PACK.json').read_text())['observation_normalization'], 'none')
-            for extra in ({'mode': 'diagnostic'}, {'learner': 'amp'}):
+            for extra in ({'mode': 'diagnostic'}, {'mode': 'probe'}):
                 with self.assertRaisesRegex(ValueError, 'Observation normalization'):
                     prepare(path / 'invalid', remote, observation_normalization='none', **extra)
+            with self.assertRaises(TypeError):
+                prepare(path / 'retired', remote, learner='amp')
 
 
 if __name__ == '__main__':

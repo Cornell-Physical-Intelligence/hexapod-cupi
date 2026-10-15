@@ -165,7 +165,7 @@ class RefactorBoundaryTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         files = source_files(root)
         physics = physics_files(files)
-        for name in ('core/motor.py', 'core/transforms.py', 'backends/isaac/scene.py',
+        for name in ('core/motor.py', 'core/transforms.py', 'backends/isaac/native.py', 'backends/isaac/motor.py',
                      'evaluation/capture.py', 'evaluation/scoring.py'):
             self.assertIn(name, physics)
             changed = dict(files, **{name: '0'*64})
