@@ -16,6 +16,7 @@ import uuid
 
 import locomotion.spark.safety as guard
 from locomotion.spark.safety import INPUT_ROOTS, RUN_ROOTS, within_roots
+from locomotion.spark.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, validate_deadline
 
 _INCOMPLETE = re.compile(r"incomplete\s+(?:contact|friction)\s+data", re.IGNORECASE)
 
@@ -109,7 +110,6 @@ def audit_contact_log(path):
         scope="Required absence of reported contact/friction data truncation; raw physical gate must also pass")
 
 def verify(binding, own):
-    from locomotion.spark.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, validate_deadline
     guard.require(binding['schema']=='hexapod_locomotion_launch_v1','Wrong launch schema')
     guard.require(binding['root_review_complete'] is True,'Root review incomplete')
     guard.require(binding['mode'] in ('diagnostic','train','evaluate','probe','replay'),'Unsupported native mode')

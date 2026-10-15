@@ -54,7 +54,7 @@ def replay():
     checkpoint = Path(option('--checkpoint'))
     verify_weights(checkpoint)
     proof()
-    from locomotion.evaluation.checkpoint import require_configuration
+    from locomotion.evaluation.checkpoint import require_compatibility_configuration
     keys = tuple(key for key in release.COMPATIBILITY_KEYS if key not in SOURCE_KEYS | {'physics_config'})
     def compare_weight_abi(record, identity):
         require_comparison_physics(record['identity']['physics_config'], identity['physics_config'])
@@ -65,7 +65,7 @@ def replay():
     # Keep model, servo settings, inputs, seed, upstream code and embedded metadata checks.
     with patch.object(release, 'COMPATIBILITY_KEYS', keys), patch.object(
             train, 'require_checkpoint_identity', compare_weight_abi, create=True), patch.object(
-            train, 'require_learner_configuration', require_configuration):
+            train, 'require_learner_configuration', require_compatibility_configuration):
         # The host supervisor verifies frozen sources and checkpoint inputs after Kit exits.
         return train.main(args)
 

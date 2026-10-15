@@ -171,13 +171,13 @@ class EvaluationOrchestrationTests(unittest.TestCase):
                     "nonfoot_force_world":np.zeros((1,4,3)),"patches":[]}
         with TemporaryDirectory() as temporary:
             geometry=Path(temporary)/"geometry.npz";np.savez(geometry,cloud=np.zeros(1))
-            with patch.object(run,"_DiagnosticGeometry",return_value=fake_geometry),patch.object(run,"_classify_patches",side_effect=classify):
+            with patch.object(run,"DiagnosticGeometry",return_value=fake_geometry),patch.object(run,"classify_patches",side_effect=classify):
                 capture=run.ExactEvaluationCapture(native,Path(temporary)/"raw",geometry)
                 for substep in range(8):
                     native.counter+=1
                     q=np.zeros((1,18),np.float32);target=q.copy()
                     if substep==3:target[0,0]=.2
-                    requested,applied,ceiling=run._diagnostic_servo(q,q,target,np.full(18,12.,np.float32),np.asarray(run.KD,np.float32))
+                    requested,applied,ceiling=run.diagnostic_servo(q,q,target,np.full(18,12.,np.float32),np.asarray(run.KD,np.float32))
                     capture(native,state,q,q,requested,applied,ceiling,target,None,substep,applied)
                 result={"terminated":torch.zeros(1,dtype=torch.bool),"truncated":torch.zeros(1,dtype=torch.bool)}
                 row=capture.control_record(result,[[0.,0.,0.]],0)

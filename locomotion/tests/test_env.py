@@ -8,7 +8,7 @@ from locomotion.omni.env_cfg import EnvConfig
 from locomotion.omni.frames import inverse_rotate, rotate
 from locomotion.omni.motor import emitted_target, executed_action_feature, motor_force
 from locomotion.omni.robot import JOINT_NAMES, KD, verify_assets
-from locomotion.evaluation.capture import _diagnostic_servo
+from locomotion.evaluation.capture import diagnostic_servo
 from locomotion.tests.test_direct_environment import load_isaac
 
 
@@ -19,7 +19,7 @@ class MotorTests(unittest.TestCase):
         dq = rng.uniform(-60, 60, (64, 18)).astype(np.float32)
         dq[0, :7] = np.array([0, 70, 275, 340, 450, 477, 480]) * (2 * np.pi / 60)
         target = rng.uniform(-1, 1, (64, 18)).astype(np.float32)
-        expected = _diagnostic_servo(q, dq, target, np.full(18, 12, np.float32), np.asarray(KD, np.float32))
+        expected = diagnostic_servo(q, dq, target, np.full(18, 12, np.float32), np.asarray(KD, np.float32))
         actual = motor_force(torch.from_numpy(q), torch.from_numpy(dq), torch.from_numpy(target), torch.tensor(KD))
         for a, b in zip(actual, expected):
             np.testing.assert_array_equal(a.numpy(), b)

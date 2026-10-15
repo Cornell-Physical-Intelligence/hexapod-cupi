@@ -1,14 +1,19 @@
-"""Frozen-tree, pinned-input, GPU-lock and owned-container helpers kept from the Sept 14 launcher."""
-
+"""Guard Spark paths, frozen source trees, pinned inputs, GPU locks and owned containers."""
 from contextlib import contextmanager
-
+import fcntl
+import hashlib
+import json
+import os
 from pathlib import Path
+import re
+import subprocess
 
-
-LEGACY_ROOT = Path('/home/orionh/HEXAPOD_runs/restart_20260914')
+# The host account's run directory holds both runs and inputs; the shared CUPI tree separates them.
+HOME_ROOT = Path('/home/orionh/HEXAPOD_runs/restart_20260914')
 CUPI_ROOT = Path('/srv/cupi/hexapod')
-RUN_ROOTS = (LEGACY_ROOT, CUPI_ROOT / 'runs')
-INPUT_ROOTS = (LEGACY_ROOT, CUPI_ROOT / 'inputs')
+RUN_ROOTS = (HOME_ROOT, CUPI_ROOT / 'runs')
+INPUT_ROOTS = (HOME_ROOT, CUPI_ROOT / 'inputs')
+LOCKS = ("/opt/wx/gpu.lock", "/tmp/hexapod-isaac-gpu.lock")
 
 
 def within_roots(value, roots):
@@ -16,26 +21,15 @@ def within_roots(value, roots):
     path = Path(value)
     return path.is_absolute() and '..' not in path.parts and any(root in path.parents for root in roots)
 
-import fcntl
-
-import hashlib
-
-import json
-
-import os
-
-import re
-
-import subprocess
-
-LOCKS = ("/opt/wx/gpu.lock", "/tmp/hexapod-isaac-gpu.lock")
 
 def require(condition, message):
     if not condition:
         raise ValueError(message)
 
+
 def valid_hash(value):
     return isinstance(value, str) and re.fullmatch(r"[a-f0-9]{64}", value) is not None
+
 
 def sha(path):
     digest = hashlib.sha256()
@@ -44,14 +38,17 @@ def sha(path):
             digest.update(block)
     return digest.hexdigest()
 
+
 def read(path):
     return json.loads(Path(path).read_text())
+
 
 def save(path, data):
     path = Path(path)
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(json.dumps(data, indent=2, allow_nan=False) + "\n")
     temporary.replace(path)
+
 
 def canonical_path(value):
     require(isinstance(value, str) and value, "Missing absolute input/output path")
@@ -61,11 +58,13 @@ def canonical_path(value):
     require(not any(p.is_symlink() for p in (path, *path.parents)), "Symbolic input/output path")
     return path
 
+
 def pinned_file(path, expected):
     path = Path(path)
     require(valid_hash(expected), "Root-reviewed binding pending")
     require(path.is_file() and not path.is_symlink(), "Missing or symbolic pinned input: " + str(path))
     require(sha(path) == expected, "Pinned input changed: " + str(path))
+
 
 def verify_tree(root, manifest_hash):
     root = Path(root)
@@ -76,8 +75,10 @@ def verify_tree(root, manifest_hash):
     actual.pop("FREEZE_SHA256.json")
     require(actual == read(root / "FREEZE_SHA256.json"), "Changed or unlisted frozen tree: " + str(root))
 
+
 def call(command):
     return subprocess.check_output(command, text=True, timeout=30).strip()
+
 
 @contextmanager
 def both_locks():
@@ -91,6 +92,7 @@ def both_locks():
     finally:
         for descriptor in reversed(descriptors):
             os.close(descriptor)
+
 
 def cleanup_owned(output):
     """ExecStopPost fallback: signal only the identity recorded by this attempt."""

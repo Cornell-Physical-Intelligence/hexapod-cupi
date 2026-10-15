@@ -1,6 +1,30 @@
-"""Check checkpoint declarations without changing legacy acceptance rules."""
+"""Check checkpoint declarations, freeze native probe ranges and read the compatibility receipt.
+
+A compatibility receipt binds one recorded checkpoint to the current package class
+paths. Its native probe evidence must lie inside the ranges of three baseline replays.
+"""
+import hashlib
 import json
+import math
+from pathlib import Path
+
 from contracts.release import COMPATIBILITY_KEYS
+
+LEARNER_DEFAULTS = {'learner': 'ppo', 'networks': 'mlp', 'motion_prior': False}
+LEARNER_KEYS = ('learner', 'networks', 'motion_prior', 'learner_source_files', 'amp_dataset')
+# The receipt binds one recorded checkpoint and its declaration by hash.
+SCHEMA = 'hexapod_checkpoint_compatibility_v1'
+CHECKPOINT_SHA = 'bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9'
+DECLARATION_SHA = '8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3'
+# Class paths in the recorded learner configuration, mapped to the current package classes.
+CLASS_NAMES = {
+    'locomotion.rate_schedule:CappedRatePPO': 'locomotion.omni.ppo:CappedRatePPO',
+    'locomotion.rate_schedule:CommandBootstrapPPO': 'locomotion.omni.ppo:CommandBootstrapPPO',
+    'locomotion.action_distribution:BoundedMeanGaussian': 'locomotion.omni.ppo:BoundedMeanGaussian',
+    'locomotion.action_distribution:CorrelatedBoundedMeanGaussian': 'locomotion.omni.ppo:CorrelatedBoundedMeanGaussian',
+}
+SOURCE_KEYS = {'schema', 'physics_source_files', 'adapter_sha256', 'entry_sha256'}
+
 
 def checkpoint_reward_version(record):
     """The reward a checkpoint was trained with; checkpoints from before the flag trained version 1."""
@@ -8,10 +32,6 @@ def checkpoint_reward_version(record):
     if version not in ('1', '2', '3', '4'):
         raise ValueError('Unknown checkpoint reward version: '+str(version))
     return version
-
-
-LEARNER_DEFAULTS = {'learner': 'ppo', 'networks': 'mlp', 'motion_prior': False}
-LEARNER_KEYS = ('learner', 'networks', 'motion_prior', 'learner_source_files', 'amp_dataset')
 
 
 def json_shape(value):
@@ -49,22 +69,6 @@ def require_checkpoint_identity(record, identity):
         if recorded.get('runtime_sources') != identity.get('runtime_sources'):
             raise ValueError('Checkpoint runtime dependencies differ')
     require_learner_identity(record, identity)
-
-
-import hashlib
-import math
-from pathlib import Path
-
-SCHEMA = 'hexapod_checkpoint_compatibility_v1'
-CHECKPOINT_SHA = 'bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9'
-DECLARATION_SHA = '8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3'
-CLASS_NAMES = {
-    'locomotion.rate_schedule:CappedRatePPO': 'locomotion.omni.ppo:CappedRatePPO',
-    'locomotion.rate_schedule:CommandBootstrapPPO': 'locomotion.omni.ppo:CommandBootstrapPPO',
-    'locomotion.action_distribution:BoundedMeanGaussian': 'locomotion.omni.ppo:BoundedMeanGaussian',
-    'locomotion.action_distribution:CorrelatedBoundedMeanGaussian': 'locomotion.omni.ppo:CorrelatedBoundedMeanGaussian',
-}
-SOURCE_KEYS = {'schema', 'physics_source_files', 'adapter_sha256', 'entry_sha256'}
 
 
 def configuration(value):
@@ -146,7 +150,8 @@ def compare(limits, summary):
             'stage2_complete': False}
 
 
-def read_receipt(path, digest):
+def read_compatibility_receipt(path, digest):
+    """Verify the receipt bytes, its two evidence files and the native parity they record."""
     path = Path(path)
     if sha(path) != digest:
         raise ValueError('Compatibility receipt hash differs')
@@ -176,7 +181,8 @@ def read_receipt(path, digest):
     return receipt
 
 
-def require_identity(receipt, record, identity):
+def require_compatibility_identity(receipt, record, identity):
+    """Accept the candidate runtime of the receipt when the model, physics, inputs, seed and learner match."""
     if record['identity'] != receipt['original_identity']:
         raise ValueError('Compatibility original identity differs')
     if record.get('checkpoint_sha256') != CHECKPOINT_SHA:
@@ -188,7 +194,8 @@ def require_identity(receipt, record, identity):
     require_learner_identity(record, identity)
 
 
-def require_configuration(record, identity, config):
+def require_compatibility_configuration(record, identity, config):
+    """Compare the learner configuration after mapping recorded class paths to current classes."""
     recorded = record['identity']
     if (recorded['upstream_source_files'] != identity['upstream_source_files']
             or configuration(recorded['ppo_config']) != json_shape(config)):

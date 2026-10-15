@@ -12,14 +12,14 @@ from locomotion.omni.ppo_cfg import ppo_config
 from locomotion.omni.robot import sha
 from locomotion.spark.sources import runtime_paths, write_runtime
 from locomotion.spark.validation import ALLOCATION_PROFILES, CLEANUP_MARGIN_SECONDS, update_limit, validate_decay, validate_deadline, LEARNER_OPTION_DEFAULTS
-from locomotion.spark.safety import LEGACY_ROOT, RUN_ROOTS, within_roots
+from locomotion.spark.safety import HOME_ROOT, RUN_ROOTS, within_roots
 
 ROOT = Path(__file__).resolve().parents[2]
 # Standing diagnostics accept each count; training and probes require admitted counts.
 REPLICA_COUNTS = (1, 32, 128, 512, 1024)
-# Counts with standing admission and a program-lead budget for training and probes (512 opened 2026-10-11).
+# Counts with standing admission and a program-lead budget for training and probes.
 TRAINING_COUNTS = (128, 512)
-REMOTE_ROOT = LEGACY_ROOT
+REMOTE_ROOT = HOME_ROOT
 
 
 def save(path, value):

@@ -13,7 +13,7 @@ import locomotion.spark.inputs as inputs
 import locomotion.spark.launch as launch
 import locomotion.spark.prepare as prepare
 import locomotion.spark.safety as reservation
-from locomotion.spark.safety import CUPI_ROOT, LEGACY_ROOT, INPUT_ROOTS, RUN_ROOTS, within_roots
+from locomotion.spark.safety import CUPI_ROOT, HOME_ROOT, INPUT_ROOTS, RUN_ROOTS, within_roots
 
 
 class GuardedPathTests(unittest.TestCase):
@@ -49,7 +49,7 @@ class GuardedPathTests(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertFalse(within_roots(path, RUN_ROOTS))
         self.assertFalse(within_roots(CUPI_ROOT / 'runs/james/input', INPUT_ROOTS))
-        self.assertEqual(prepare.REMOTE_ROOT, LEGACY_ROOT)
+        self.assertEqual(prepare.REMOTE_ROOT, HOME_ROOT)
 
     def test_launcher_rejects_output_in_inputs_and_prior_in_runs(self):
         with tempfile.TemporaryDirectory() as directory:

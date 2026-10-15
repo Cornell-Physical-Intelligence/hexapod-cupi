@@ -109,7 +109,7 @@ def main():
                        'files': {name: sha(args.output/name) for name in ('ranges.json', 'summary.json')}}
             path = args.output/'receipt.json'
             path.write_text(json.dumps(receipt, indent=2, allow_nan=False)+'\n')
-            compat.read_receipt(path, sha(path))
+            compat.read_compatibility_receipt(path, sha(path))
             print(json.dumps({'receipt': str(path), 'sha256': sha(path)}))
             return 0
     with args.output.open('x') as stream:

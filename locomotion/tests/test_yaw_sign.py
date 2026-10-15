@@ -14,7 +14,7 @@ import locomotion.omni.reward as walking
 import locomotion.omni.wrapper as wrapper
 from locomotion.omni.features import observations, proprio
 from locomotion.omni.frames import inverse_rotate, navigation
-from locomotion.evaluation.capture import _diagnostic_rotation
+from locomotion.evaluation.capture import diagnostic_rotation
 from locomotion.evaluation.runner import learning_probe_cases
 from locomotion.omni.commands import TaskConfig, command_bank
 from locomotion.omni.reward import REWARD_CONFIG as CONFIG
@@ -138,7 +138,7 @@ class YawSignTests(unittest.TestCase):
             command = (0., 0., sign * RATE)
             with self.subTest(sign=sign):
                 # The evaluator's gyro is R^T times the world angular velocity, for any heading.
-                rotation = _diagnostic_rotation(yawed(2.9 * sign).numpy().astype(float))
+                rotation = diagnostic_rotation(yawed(2.9 * sign).numpy().astype(float))
                 gyro = np.einsum("ji,j->i", rotation, np.array([0., 0., sign * RATE]))
                 self.assertAlmostEqual(gyro[2], sign * RATE, places=6)
                 matched = score(fixture(command=command), "omni_static", command=list(command))

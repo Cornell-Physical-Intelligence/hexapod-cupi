@@ -14,7 +14,11 @@ def digest(path):
 
 
 def runtime_paths(package):
-    """Select c48 runtime files; Shaurya uses the stock Isaac Lab entry points."""
+    """Select the files a native allocation runs.
+
+    The tripod task runs through stock Isaac Lab entry points, and prepare copies
+    the prior modules it needs for AMP or replay.
+    """
     package = Path(package)
     return sorted(path for path in package.rglob('*.py')
                   if not set(path.relative_to(package).parts) & {'tests', '__pycache__', 'tripod', 'surrogate'}

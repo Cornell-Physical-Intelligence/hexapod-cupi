@@ -22,9 +22,9 @@ import numpy as np
 from locomotion.evaluation.admission import require_admission
 from locomotion.evaluation.camera import NativePolicyCamera, prepare_policy_scene
 # locomotion/tests/native_parity.py calls require_learner_identity through this module.
-from locomotion.evaluation.checkpoint import (DECLARATION_SHA, checkpoint_reward_version, read_receipt,
-    require_checkpoint_identity, require_configuration, require_embedded_declaration, require_identity,
-    require_learner_configuration, require_learner_identity)
+from locomotion.evaluation.checkpoint import (DECLARATION_SHA, checkpoint_reward_version, read_compatibility_receipt,
+    require_checkpoint_identity, require_compatibility_configuration, require_compatibility_identity,
+    require_embedded_declaration, require_learner_configuration, require_learner_identity)
 from locomotion.omni.commands import GAIT_CLOCK_CONTROLS, TaskConfig
 from locomotion.omni.env_cfg import EnvConfig
 from locomotion.omni.ppo_cfg import ppo_config
@@ -163,7 +163,7 @@ def validate(args):
     if args.checkpoint_compatibility is not None or args.checkpoint_compatibility_sha256 is not None:
         if args.mode != 'evaluate' or args.eval_scope != 'probes' or args.num_envs != 1 or args.checkpoint_compatibility is None or args.checkpoint_compatibility_sha256 is None:
             raise ValueError('Compatibility requires evaluation and both receipt arguments')
-        compatibility = read_receipt(args.checkpoint_compatibility, args.checkpoint_compatibility_sha256)
+        compatibility = read_compatibility_receipt(args.checkpoint_compatibility, args.checkpoint_compatibility_sha256)
     if args.logger == 'wandb':
         if (args.mode != 'train' or not re.fullmatch(r'[A-Za-z0-9_.-]{1,128}', args.wandb_project or '')
                 or importlib.util.find_spec('wandb') is None
@@ -261,7 +261,7 @@ def bind_checkpoint(args, identity, compatibility):
     else:
         if sha(args.checkpoint.with_suffix('.json')) != DECLARATION_SHA:
             raise ValueError('Compatibility checkpoint declaration differs')
-        require_identity(compatibility, record, identity)
+        require_compatibility_identity(compatibility, record, identity)
     # Evaluation computes no training reward; record the one the checkpoint learned from.
     identity['reward_version'] = checkpoint_reward_version(record)
     for key in ('reward_task', 'reward_options'):
@@ -484,7 +484,7 @@ def evaluation_policy(env, args, config, identity, checkpoint_record, compatibil
     from tensordict import TensorDict
     from locomotion.omni.ppo import load_actor
     from locomotion.omni.wrapper import smoothed_action
-    check = require_configuration if compatibility is not None else require_learner_configuration
+    check = require_compatibility_configuration if compatibility is not None else require_learner_configuration
     check(checkpoint_record, identity, config)
     observation = env.observations(env.current)['obs']
     scaled = actor_input(env, args, observation)
