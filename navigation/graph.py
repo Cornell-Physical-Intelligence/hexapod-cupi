@@ -10,41 +10,52 @@ from .grid import Cell, OccupancyGrid
 __all__ = ["CostGraph", "GridGraph", "STEPS"]
 
 #: Eight-connected steps as ``(d_east, d_north)``, orthogonals first so that a
-#: deterministic tie-break prefers a straight step over a diagonal of equal cost.
+#: deterministic tie-break prefers a straight step to a diagonal of equal cost.
 STEPS = ((1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
 
 
 @runtime_checkable
 class CostGraph(Protocol):
-    """Anything a route planner can search.
-
-    Three methods, deliberately. Nothing here tracks changes: under the GPS-only
-    architecture a new error bound or a revised polygon produces a new graph, so a
-    delta method would have no consumer. When D* Lite arrives it brings a
-    ``MutableCostGraph`` extending this one, which is why this stays narrow -- an
-    implementation satisfies a Protocol structurally, so a fourth method added here
-    later would break every implementation that lacks it.
-    """
+    """A weighted directed graph that a route planner can search."""
 
     def successors(self, node: Cell) -> Iterable[tuple[Cell, float]]:
-        """Yield ``(b, edge_cost(node, b))`` for each node ``b`` one step from ``node``.
+        """Yields the traversable steps out of a cell.
 
-        Exactly the nodes with a finite cost: nothing untraversable is yielded, and
-        nothing traversable is left out. The cost travels with the node so a search
-        never prices the same step twice.
+        Args:
+            node: The cell to step from.
+
+        Yields:
+            ``(successor, cost)`` for every cell one step from ``node`` with a
+            finite ``edge_cost(node, successor)``, where ``cost`` is that value.
         """
         ...
 
     def edge_cost(self, a: Cell, b: Cell) -> float:
-        """Cost of stepping from ``a`` to ``b``; ``math.inf`` when not traversable."""
+        """Returns the cost of the step from ``a`` to ``b``.
+
+        Args:
+            a: The cell stepped from.
+            b: The cell stepped to.
+
+        Returns:
+            The step cost, or ``math.inf`` if the step is not traversable.
+        """
         ...
 
     def heuristic(self, a: Cell, b: Cell) -> float:
-        """Admissible, consistent underestimate of the cost from ``a`` to ``b``.
+        """Returns a lower bound on the cost of a path from ``a`` to ``b``.
 
-        Admissible means it never exceeds the true remaining cost; consistent means
-        it never drops by more than the cost of the step taken. A\\* returns optimal
-        paths only while both hold.
+        The bound must be admissible, never exceeding the true cost, and
+        consistent: ``heuristic(a, b) <= edge_cost(a, n) + heuristic(n, b)`` for
+        every successor ``n`` of ``a``. A\\* returns optimal paths only if both
+        hold.
+
+        Args:
+            a: The cell to start from.
+            b: The goal cell.
+
+        Returns:
+            The lower bound, in the units of :meth:`edge_cost`.
         """
         ...
 
@@ -52,7 +63,14 @@ class CostGraph(Protocol):
 class GridGraph:
     """An eight-connected :class:`CostGraph` over an :class:`OccupancyGrid`.
 
-    Costs are distances in metres: every passable cell is equally good to cross.
+    Every passable cell costs the same to cross, so edge costs and the heuristic
+    are distances in metres.
+
+    Args:
+        grid: The occupancy grid to search, kept as ``self.grid``.
+
+    Raises:
+        TypeError: ``grid`` is not an :class:`OccupancyGrid`.
     """
 
     def __init__(self, grid: OccupancyGrid) -> None:
@@ -63,10 +81,16 @@ class GridGraph:
         self.grid = grid
 
     def successors(self, node: Cell) -> Iterable[tuple[Cell, float]]:
-        """Yield ``(cell, cost)`` for each finite step from ``node``, in :data:`STEPS` order.
+        """Yields the traversable steps out of a cell, in :data:`STEPS` order.
 
-        Traversability is decided only by :meth:`edge_cost`; this asks it, so
-        off-grid cells, blocked cells and corner-cutting diagonals are all dropped.
+        A step is traversable exactly when :meth:`edge_cost` is finite, so
+        off-grid cells, blocked cells and corner-cutting diagonals are skipped.
+
+        Args:
+            node: The cell to step from.
+
+        Yields:
+            ``(successor, cost)``, where ``cost`` is the step length in metres.
         """
 
         east, north = node
@@ -77,12 +101,20 @@ class GridGraph:
                 yield candidate, cost
 
     def edge_cost(self, a: Cell, b: Cell) -> float:
-        """Length in metres of the step ``a`` -> ``b``, or ``math.inf``.
+        """Returns the length in metres of the step from ``a`` to ``b``.
 
-        Infinite unless ``b`` is one of the eight steps from ``a`` and both cells are
-        passable. A diagonal step is also infinite if *either* shared orthogonal
-        neighbour is impassable: otherwise the robot would squeeze between two
-        diagonally touching blocked cells through a gap of zero width.
+        A diagonal step is blocked if either orthogonal neighbour it passes is
+        impassable. Otherwise the robot could pass between two blocked cells
+        that touch only at a corner.
+
+        Args:
+            a: The cell stepped from.
+            b: The cell stepped to.
+
+        Returns:
+            The step length, or ``math.inf`` if ``b`` is not one of the eight
+            steps from ``a``, either cell is impassable, or the step is a
+            blocked diagonal.
         """
 
         d_east, d_north = b[0] - a[0], b[1] - a[1]
@@ -102,7 +134,18 @@ class GridGraph:
         return math.hypot(d_east, d_north) * self.grid.cell_size_m
 
     def heuristic(self, a: Cell, b: Cell) -> float:
-        """Octile distance in metres: the shortest eight-connected path, ignoring walls."""
+        """Returns the octile distance in metres from ``a`` to ``b``.
+
+        Octile distance is the shortest eight-connected path length on an empty
+        grid, so it is admissible and consistent.
+
+        Args:
+            a: The cell to start from.
+            b: The goal cell.
+
+        Returns:
+            The octile distance in metres.
+        """
 
         d_east, d_north = abs(a[0] - b[0]), abs(a[1] - b[1])
         octile_cells = max(d_east, d_north) + (math.sqrt(2.0) - 1.0) * min(

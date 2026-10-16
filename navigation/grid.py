@@ -140,20 +140,19 @@ class OccupancyGrid:
         A cell is passable when its centre lies inside ``region.feasible(margin)``;
         when that is empty, every cell is impassable and``passable_cell_count`` is 0.
         """
-
-        # Create grid of points using bounds on region + cell size.
         cell_size = float(cell_size_m)
         if not math.isfinite(cell_size) or cell_size <= 0.0:
             raise ValueError(
                 f"cell_size_m must be finite and positive, got {cell_size_m!r}"
             )
+
         min_east, min_north, max_east, max_north = region.bounds_m
         width = math.ceil((max_east - min_east) / cell_size)
         height = math.ceil((max_north - min_north) / cell_size)
+
         easts = min_east + (np.arange(width) + 0.5) * cell_size
         norths = min_north + (np.arange(height) + 0.5) * cell_size
 
-        # meshgrid's (height, width) layout ravels north-major, matching ``passable``.
         east_grid, north_grid = np.meshgrid(easts, norths)
         inside = shapely.contains_xy(
             region.feasible(margin), east_grid.ravel(), north_grid.ravel()
