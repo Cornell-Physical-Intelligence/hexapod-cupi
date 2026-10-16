@@ -25,14 +25,15 @@ class OccupancyGrid:
     region.py).
 
     Attributes:
-        origin_m: World ``(east, north)`` position, in metres, of the south-west
-            corner of cell ``(0, 0)``.
+        origin_m: South-west corner of cell ``(0, 0)``, which is also the grid's
+            south-west corner. A `Point` in metres in the local east-north frame
+            (see `Point` in region.py). NOT the origin of the framed.
         cell_size_m: Side length of each square cell, in metres. Finite and positive.
         width_cells: Number of cells along east. Positive.
         height_cells: Number of cells along north. Positive.
-        passable: Whether a route may enter each cell, row-major over north: cell
-            ``(east, north)`` lives at index ``north * width_cells + east``, with
-            ``(0, 0)`` the south-western-most cell. Holds exactly
+        passable: Whether a route may enter each cell, row-major over north: the
+            value for cell ``(east, north)`` is at index ``north * width_cells + east``,
+            with ``(0, 0)`` the south-western-most cell. Holds exactly
             ``width_cells * height_cells`` values.
     """
 

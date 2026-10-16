@@ -12,6 +12,9 @@ from shapely.validation import explain_validity
 
 __all__ = ["PlanMargin", "Point", "SurveyRegion"]
 
+# TODO: Who decides the origin of the local frame? How is the frame represented?
+#   Both teams must agree (ARCHITECTURE.md section 3; Pose and Survey request
+#   contracts in section 4).
 #: An ``(east, north)`` pair in metres, in the open map's local east-north frame.
 Point = tuple[float, float]
 
@@ -68,9 +71,9 @@ class PlanMargin:
 class SurveyRegion:
     """An approved survey area: Region Boundary, optional exclusions and an entry corridor.
 
-    Every part is a :class:`shapely.Polygon` in the local east-north frame, and must be
-    valid (in particular, not self-intersecting); an invalid drawing is rejected here,
-    before approval, rather than after motion.
+    Every part is a :class:`shapely.Polygon` in the local east-north frame (see
+    `Point`), and must be valid (in particular, not self-intersecting); an invalid
+    drawing is rejected here, before approval, rather than after motion.
 
     Raises:
         TypeError: ``exclusions`` is not a sequence (a generator, say), or a part is
