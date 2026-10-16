@@ -116,4 +116,6 @@ used them. Any result first needs fresh standing admission at one robot and
 batch size. The unchanged `c48_long` checkpoint must then pass its 13 probes
 through its compatibility receipt, with torque and contact inside
 three-baseline ranges (`tests/native_parity.py`, `tests/native_ranges.py`).
-Stage 2 adds the 96-case suite and visual acceptance.
+`tests/native_parity_pack.py` writes the candidate replay pack with the
+harness and its pinned ranges, and `spark/pack.py` records the root review of
+any pack before launch. Stage 2 adds the 96-case suite and visual acceptance.
