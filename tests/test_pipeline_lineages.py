@@ -148,9 +148,9 @@ class PipelineLineageTests(unittest.TestCase):
     def test_current_covers_top_level_prototype_and_cpu_tests_without_nested_outputs(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            covered = ("locomotion/env.py", "locomotion/tests/test_env.py")
-            excluded = ("locomotion/results/copied_env.py",
-                        "locomotion/tests/fixtures/copied_env.py")
+            covered = ("src/locomotion/env.py", "src/locomotion/tests/test_env.py")
+            excluded = ("src/locomotion/results/copied_env.py",
+                        "src/locomotion/tests/fixtures/copied_env.py")
             for relative in covered+excluded:
                 path = root/relative
                 path.parent.mkdir(parents=True, exist_ok=True)
@@ -182,8 +182,8 @@ class PipelineLineageTests(unittest.TestCase):
     def test_current_reports_the_tree_digest_that_generation_writes(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root/"locomotion").mkdir()
-            (root/"locomotion/env.py").write_text("# Merge-time manifest fixture\n")
+            (root/"src/locomotion").mkdir(parents=True)
+            (root/"src/locomotion/env.py").write_text("# Merge-time manifest fixture\n")
             self.current_fixture(root)
             output = root/"generated.sha256"
             with patch.object(lineage, 'CURRENT_FILES', ('robot/active_model.json',)), \
@@ -194,7 +194,7 @@ class PipelineLineageTests(unittest.TestCase):
                 self.assertEqual(tree["tree_manifest_sha256"], generated["sha256"])
                 self.assertEqual(tree["files_verified"], generated["files"])
                 self.assertEqual(lineage.verify_current(root, output)["files_verified"], generated["files"])
-                (root/"locomotion/env.py").write_text("# Changed after generation\n")
+                (root/"src/locomotion/env.py").write_text("# Changed after generation\n")
                 self.assertNotEqual(lineage.verify_current(root)["tree_manifest_sha256"], generated["sha256"])
                 with self.assertRaisesRegex(ValueError, "hashes differ"):
                     lineage.verify_current(root, output)

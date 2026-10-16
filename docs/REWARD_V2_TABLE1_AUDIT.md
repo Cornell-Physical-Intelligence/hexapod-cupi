@@ -583,7 +583,7 @@ The other numbers come from the retained captures and metric files of the
 attempts that the run ledger names. Every native training run and noise probe
 uses 128 robots, each evaluation uses one, and all keep the approved robot,
 limiter and gates.
-A CPU MuJoCo surrogate, [`locomotion/surrogate`](../locomotion/surrogate/README.md),
+A CPU MuJoCo surrogate, [`locomotion/surrogate`](../src/locomotion/surrogate/README.md),
 guided the choices between native runs. Its numbers carry no acceptance weight
 and we label each one. Its forward probes match native on four checkpoints; its
 default contact model passes five of the eight quiet and stop probes that
@@ -878,8 +878,8 @@ for seed in 20260917 20260918; do
     --attempt ppo_v4_settle_seed${seed}_20261006_001 \
     --workspace "$HOME/hexapod-evidence/section-15/verification_$seed" --fetch
 done
-uv run python -m unittest discover -s locomotion/tests
-uv run python -m unittest discover -s locomotion/surrogate/tests
+uv run python -m unittest discover -s src/locomotion/tests
+uv run python -m unittest discover -s src/locomotion/surrogate/tests
 ```
 
 A native rerun uses `prepare --mode train --reward-version 4 --updates 2000

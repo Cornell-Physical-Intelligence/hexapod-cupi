@@ -23,9 +23,13 @@ tracking = [
     "wandb==0.28.2",
 ]
 
-[tool.uv]
-# Import maintained packages from the repository root.
-package = false
+[build-system]
+requires = ["uv_build>=0.11.29,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# The importable packages live under src/; uv sync installs them in editable mode.
+module-name = ["locomotion", "navigation", "mission", "contracts"]
 
 [tool.uv.sources]
 torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]

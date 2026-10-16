@@ -18,7 +18,6 @@ class SourceInventoryTests(unittest.TestCase):
     def fixture(self, root):
         (root / 'tools').mkdir()
         (root / 'configs').mkdir()
-        (root / 'packages').mkdir()
         (root / 'tools/example.py').write_text('x = 1\n')
         data = {'tools': [dict(path='tools/example.py', classification='current', owner='lead', purpose='fixture')]}
         (root / inventory.INVENTORY).write_text(json.dumps(data))
@@ -46,8 +45,11 @@ class SourceInventoryTests(unittest.TestCase):
     def test_production_cannot_import_a_frozen_evidence_module(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
-            self.fixture(root)
-            (root / 'packages/consumer.py').write_text('from artifacts.run import model\n')
+            data = self.fixture(root)
+            (root / 'src/locomotion').mkdir(parents=True)
+            (root / 'src/locomotion/consumer.py').write_text('from artifacts.run import model\n')
+            data['tools'].append(dict(path='src/locomotion/consumer.py', classification='current', owner='lead', purpose='fixture'))
+            (root / inventory.INVENTORY).write_text(json.dumps(data))
             with self.assertRaisesRegex(ValueError, 'imports evidence'):
                 inventory.check(root)
 

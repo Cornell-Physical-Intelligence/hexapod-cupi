@@ -51,7 +51,7 @@ omnidirectional BC.
 Freeze each comparison's configuration and budget before dispatch. Record the
 robot count and controls per update, reward terms and learner settings. Keep
 paper reproduction separate from adaptations for this robot. Use the
-[implementation guide](../locomotion/README.md) for supported commands.
+[implementation guide](../src/locomotion/README.md) for supported commands.
 
 AMP remains an active comparison: generate and review motion demonstrations, then
 train its discriminator alongside PPO. Preserve the same task and simulation
@@ -60,7 +60,7 @@ settings when comparing PPO with AMP. Use `amp/` for that workflow.
 ## Acceptance
 
 You qualify Stage 2 against the full 96-case manifest and the unchanged gates
-in [the scorer](../locomotion/evaluation/scoring.py). The 13 learning probes
+in [the scorer](../src/locomotion/evaluation/scoring.py). The 13 learning probes
 provide intermediate diagnostics; they do not replace full qualification.
 The program lead must also accept the gait's appearance.
 

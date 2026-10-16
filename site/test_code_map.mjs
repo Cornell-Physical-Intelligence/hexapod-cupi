@@ -43,24 +43,24 @@ assert.ok(/<rect x="[\d.]+" y="[\d.]+" width="[\d.]+" height="[\d.]+"\/>/.test(h
 // Selecting a package draws its files; selecting a file draws its definitions bar.
 click('packages', {package:'omniwalk'});
 assert.ok(html('packages').includes('class="pkg selected" data-package="omniwalk"'));
-assert.ok(html('files').includes('data-module="locomotion/omniwalk/task.py"'));
-click('files', {module:'locomotion/omniwalk/task.py'});
+assert.ok(html('files').includes('data-module="src/locomotion/omniwalk/task.py"'));
+click('files', {module:'src/locomotion/omniwalk/task.py'});
 assert.equal(elements.get('file-heading').textContent, 'omniwalk/task.py');
 assert.ok(/class="sym class[^"]*"/.test(html('strip')), 'Classes appear as blocks');
-assert.ok(/blob\/[a-f0-9]{40}\/locomotion\/omniwalk\/task.py#L\d+/.test(html('strip')), 'Blocks link to source lines');
+assert.ok(/blob\/[a-f0-9]{40}\/src\/locomotion\/omniwalk\/task.py#L\d+/.test(html('strip')), 'Blocks link to source lines');
 assert.ok(html('file').includes('Imported by:') && html('file').includes('Imports:'));
 
 // Search marks matches in red and opens the first matching file.
 input('query', 'StrideWindow');
 assert.ok(elements.get('count').textContent.startsWith('1 file matches'));
-assert.ok(html('results').includes('data-file="locomotion/omniwalk/mdp/rewards.py"'));
+assert.ok(html('results').includes('data-file="src/locomotion/omniwalk/mdp/rewards.py"'));
 assert.ok(/class="pkg[^"]* hit" data-package="omniwalk"/.test(html('packages')));
-assert.ok(/class="file[^"]* hit" data-module="locomotion\/omniwalk\/mdp\/rewards.py"/.test(html('files')));
+assert.ok(/class="file[^"]* hit" data-module="src\/locomotion\/omniwalk\/mdp\/rewards.py"/.test(html('files')));
 assert.ok(/class="sym class hit"/.test(html('strip')), 'The matching class block turns red');
 input('query', 'OmniVecEnv');
-assert.ok(html('results').includes('locomotion/rl/wrapper.py'));
+assert.ok(html('results').includes('src/locomotion/rl/wrapper.py'));
 assert.equal(elements.get('file-heading').textContent, 'rl/wrapper.py');
-click('results', {file:'locomotion/omniwalk/mdp/actions.py'});
+click('results', {file:'src/locomotion/omniwalk/mdp/actions.py'});
 assert.equal(elements.get('file-heading').textContent, 'omniwalk/mdp/actions.py');
 
 // Retired wrappers have no filter; tests retain their toggle.
@@ -70,8 +70,8 @@ assert.ok(html('results').includes('No matching files.'));
 input('query', 'test_native_ranges');
 assert.ok(html('results').includes('No matching files.'));
 input('tests', true);
-assert.ok(html('results').includes('locomotion/tests/test_native_ranges.py'));
+assert.ok(html('results').includes('src/locomotion/tests/test_native_ranges.py'));
 assert.ok(html('packages').includes('data-package="tests"'));
 input('query', 'emitted_target');
-assert.ok(html('results').includes('locomotion/omniwalk/mdp/actions.py'));
+assert.ok(html('results').includes('src/locomotion/omniwalk/mdp/actions.py'));
 console.log('Code-map package squares, import arrows, file tiles, definition bar, search marking and toggles verified');

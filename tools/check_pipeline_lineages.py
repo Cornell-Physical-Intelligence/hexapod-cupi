@@ -32,11 +32,11 @@ CURRENT_HEADER = (
     "# Current coverage is independent of historical model dependencies.\n"
 )
 # Cover maintained source and tests, without recursively pinning old releases or results.
-CURRENT_TREES = ("tools", "contracts", "navigation", "mission", "tests", "robot/tests",
-                 "locomotion/omniwalk", "locomotion/hexapod", "locomotion/evaluation", "locomotion/spark",
-                 "locomotion/robots", "locomotion/rl", "locomotion/scripts",
-                 "locomotion/amp", "locomotion/surrogate")
-CURRENT_TOP_LEVEL = ("locomotion", "locomotion/tests")
+CURRENT_TREES = ("tools", "src/contracts", "src/navigation", "src/mission", "tests", "robot/tests",
+                 "src/locomotion/omniwalk", "src/locomotion/hexapod", "src/locomotion/evaluation",
+                 "src/locomotion/spark", "src/locomotion/robots", "src/locomotion/rl", "src/locomotion/scripts",
+                 "src/locomotion/amp", "src/locomotion/surrogate")
+CURRENT_TOP_LEVEL = ("src/locomotion", "src/locomotion/tests")
 CURRENT_FILES = ("robot/active_model.json", "configs/source_inventory.json", "configs/archive.json", "configs/locomotion_spark.json",
                  "robot/hexapod_mkii_updated_v1/inputs.json",
                  ".github/workflows/tests.yml", "pyproject.toml", "uv.lock", ".python-version")

@@ -42,13 +42,13 @@ Run focused tests while editing, then these checks before publication:
 
 ```sh
 uv sync --locked
-uv run python -m unittest discover -s contracts/tests
-uv run python -m unittest discover -s navigation/tests
-uv run python -m unittest discover -s mission/tests
+uv run python -m unittest discover -s src/contracts/tests
+uv run python -m unittest discover -s src/navigation/tests
+uv run python -m unittest discover -s src/mission/tests
 uv run python -m unittest discover -s robot/tests
-uv run python -m unittest discover -s locomotion/tests
-uv run python -m unittest discover -s locomotion/amp/tests
-uv run python -m unittest discover -s locomotion/surrogate/tests
+uv run python -m unittest discover -s src/locomotion/tests
+uv run python -m unittest discover -s src/locomotion/amp/tests
+uv run python -m unittest discover -s src/locomotion/surrogate/tests
 uv run python -m unittest discover -s tests
 python3 tools/source_inventory.py check
 python3 tools/archive.py check

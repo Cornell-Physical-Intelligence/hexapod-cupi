@@ -33,10 +33,10 @@ and qualification.
 | Package | Responsibility |
 | --- | --- |
 | [`robot/`](robot/active_model.json) | Select the approved model and its motor corrections. Keep model identity with simulation inputs and results. |
-| [`locomotion/`](locomotion/README.md) | Train and evaluate the walking controller. Keep the omni and tripod experiments separate; share evaluation tools and motion-prior data. |
-| [`contracts/`](contracts/README.md) | Define shared velocity commands and planar poses without simulator dependencies. Retain checkpoint identity checks. |
-| [`navigation/`](navigation/README.md) | Plan routes and turn poses into bounded velocity commands. The current implementation is a waypoint follower example. |
-| [`mission/`](mission/README.md) | Future operator controls and mission execution. Existing sensor prototypes remain separate from GPS navigation. |
+| [`src/locomotion/`](src/locomotion/README.md) | Train and evaluate the walking controller. Keep the omniwalk and hexapod experiments separate; share evaluation tools and motion-prior data. |
+| [`src/contracts/`](src/contracts/README.md) | Define shared velocity commands and planar poses without simulator dependencies. Retain checkpoint identity checks. |
+| [`src/navigation/`](src/navigation/README.md) | Plan routes and turn poses into bounded velocity commands. The current implementation is a waypoint follower example. |
+| [`src/mission/`](src/mission/README.md) | Future operator controls and mission execution. Existing sensor prototypes remain separate from GPS navigation. |
 | `viewer/` and `site/` | Inspect the model and publish progress. Keep these tools outside robot control. |
 
 Navigation and mission code use the shared contracts and must not import

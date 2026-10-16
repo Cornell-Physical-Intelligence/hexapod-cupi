@@ -16,22 +16,24 @@ shows each part and joint of the approved robot.
 
 | Directory | Contents |
 | --- | --- |
+| `src/locomotion/` | Simulation, rewards, training, the movement tests and the guarded Spark launcher. |
+| `src/navigation/` | A waypoint follower example; the route planner and GPS position come later. |
+| `src/contracts/` | Shared message types, such as speed and direction commands and planar poses. |
+| `src/mission/` | Sensor-pattern and transport prototypes. |
 | `robot/` | The approved robot model (18 motors, 7.47 kg) and its hash-pinned simulation inputs. |
-| `locomotion/` | Simulation, rewards, training, the movement tests and the guarded Spark launcher. |
-| `navigation/` | A waypoint follower example; the route planner and GPS position come later. |
-| `contracts/` | Shared message types, such as speed and direction commands and planar poses. |
-| `mission/` | Sensor-pattern and transport prototypes. |
 | `viewer/` | The browser viewer for the robot's parts and joints. |
-| `site/`, `docs/`, `tools/`, `configs/` | The progress site, guides, checks and archive records. |
+| `site/`, `docs/`, `tools/`, `configs/`, `tests/` | The progress site, guides, checks, archive records and repository tests. |
 
-`navigation/` and `mission/` do not import `locomotion/`. The Mid-360 ray
-pattern in `mission/sensors/` needs the Isaac Lab runtime.
+`src/` holds the importable Python packages; `uv sync` installs them in editable
+mode, so `uv run python -m locomotion...` works from any directory inside the checkout.
+`navigation` and `mission` do not import `locomotion`. The Mid-360 ray
+pattern in `src/mission/sensors/` needs the Isaac Lab runtime.
 
 ## Guides
 
 - [Contributing](CONTRIBUTING.md): setup and the checks we run before each push.
 - [Architecture](ARCHITECTURE.md): requirements and system boundaries.
-- [Locomotion code map](locomotion/README.md) and [training](docs/TRAINING.md).
+- [Locomotion code map](src/locomotion/README.md) and [training](docs/TRAINING.md).
 - [Spark](SPARK.md) and [operations](docs/OPERATIONS.md): jobs on the shared GPU server.
 - [Progress site](docs/PROJECT_SITE.md): how we update the page.
 - [CAD import](docs/UPDATED_CAD_IMPORT.md) and [RS05 motors](docs/RS05_SPEC_REVIEW.md): the approved model and its motors.

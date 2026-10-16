@@ -22,7 +22,7 @@ Your reading of a log is not a result. These decide:
 
 - The CPU tests under each package and `tests/`, and the required checks in
   [CONTRIBUTING](CONTRIBUTING.md).
-- The scorer and the native parity and range tests under `locomotion/`, with
+- The scorer and the native parity and range tests under `src/locomotion/`, with
   unchanged gates. The 13 probes are diagnostics; the 96-case suite qualifies.
 - Green CI on the exact revision and the deployed Pages site.
 - The program lead's admission and visual acceptance.

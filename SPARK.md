@@ -61,7 +61,7 @@ uv sync --locked
 For an existing worktree, return to it. Commit your changes and run the checks
 in CONTRIBUTING before packaging. Agree on the experiment configuration and
 matching standing admission with the run lead. Use
-`python3 -m locomotion.spark.prepare --help` to prepare a fresh attempt; keep its
+`uv run python -m locomotion.spark.prepare --help` to prepare a fresh attempt; keep its
 source commit and reviewed binding hash with the run. Preparation starts no GPU job.
 Use [OPERATIONS](docs/OPERATIONS.md#before-a-run) for pack and preflight requirements.
 

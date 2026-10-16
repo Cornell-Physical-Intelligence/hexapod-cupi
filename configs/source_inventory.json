@@ -3,560 +3,560 @@
   "baseline": "5e65918020dc9ef2d72da8dad0a346016b98728d",
   "tools": [
     {
-      "path": "contracts/__init__.py",
+      "path": "src/contracts/__init__.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Package namespace."
     },
     {
-      "path": "contracts/command.py",
+      "path": "src/contracts/command.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Velocity commands with an explicit caller-supplied envelope."
     },
     {
-      "path": "contracts/frames.py",
+      "path": "src/contracts/frames.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Anatomical axes: forward -body Y, left +body X, up +body Z."
     },
     {
-      "path": "contracts/pose.py",
+      "path": "src/contracts/pose.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Finite planar poses in the named navigation frame."
     },
     {
-      "path": "contracts/release.py",
+      "path": "src/contracts/release.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Identity fields required to load an existing locomotion checkpoint."
     },
     {
-      "path": "locomotion/__init__.py",
+      "path": "src/locomotion/__init__.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Locomotion on the approved direct-drive hexapod."
     },
     {
-      "path": "locomotion/evaluation/__init__.py",
+      "path": "src/locomotion/evaluation/__init__.py",
       "previous_path": "locomotion/tools/__init__.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Describe the evaluation package and expose the scorer names at package level."
     },
     {
-      "path": "locomotion/evaluation/admission.py",
+      "path": "src/locomotion/evaluation/admission.py",
       "previous_path": "locomotion/tools/admission.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Check the native scene, recompute standing admission and bind a run to its model and recorded standing checks."
     },
     {
-      "path": "locomotion/evaluation/camera.py",
+      "path": "src/locomotion/evaluation/camera.py",
       "previous_path": "locomotion/tools/camera.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Native Kit perspective RGB capture with audited physics and a hard deadline."
     },
     {
-      "path": "locomotion/evaluation/capture.py",
+      "path": "src/locomotion/evaluation/capture.py",
       "previous_path": "locomotion/tools/capture.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Capture and score native standing evidence."
     },
     {
-      "path": "locomotion/evaluation/checkpoint.py",
+      "path": "src/locomotion/evaluation/checkpoint.py",
       "previous_path": "locomotion/tools/checkpoint.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Check checkpoint learner and model identity, and verify compatibility receipts against three frozen baseline ranges."
     },
     {
-      "path": "locomotion/evaluation/force_metrics.py",
+      "path": "src/locomotion/evaluation/force_metrics.py",
       "previous_path": "locomotion/tools/force_metrics.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Summarize recorded 400 Hz contact-normal loads and motor torque."
     },
     {
-      "path": "locomotion/evaluation/loads.py",
+      "path": "src/locomotion/evaluation/loads.py",
       "previous_path": "locomotion/tools/loads.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Accumulate force and torque measurements during training."
     },
     {
-      "path": "locomotion/evaluation/noise_probe.py",
+      "path": "src/locomotion/evaluation/noise_probe.py",
       "previous_path": "locomotion/tools/noise_probe.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Hold fixed action means under graded exploration noise and record the reward inputs."
     },
     {
-      "path": "locomotion/evaluation/ppo_diagnostics.py",
+      "path": "src/locomotion/evaluation/ppo_diagnostics.py",
       "previous_path": "locomotion/rl/ppo.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Measure PPO policy change, critic fit and action bounds around each update without changing the update."
     },
     {
-      "path": "locomotion/evaluation/runner.py",
+      "path": "src/locomotion/evaluation/runner.py",
       "previous_path": "locomotion/tools/runner.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Orchestrate native policy evaluation over the frozen case manifest and the learning probes."
     },
     {
-      "path": "locomotion/evaluation/scoring.py",
+      "path": "src/locomotion/evaluation/scoring.py",
       "previous_path": "locomotion/tools/scoring.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "CPU evaluation of the new robot against explicitly named, unchanged screens."
     },
     {
-      "path": "locomotion/evaluation/task_metrics.py",
+      "path": "src/locomotion/evaluation/task_metrics.py",
       "previous_path": "locomotion/omniwalk/task.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Accumulate the training task's reporting metrics; no value enters the learning objective."
     },
     {
-      "path": "locomotion/omniwalk/__init__.py",
+      "path": "src/locomotion/omniwalk/__init__.py",
       "classification": "current",
       "owner": "Locomotion",
       "purpose": "Omnidirectional walking task on stock Isaac Lab Direct and RSL-RL PPO.",
       "previous_path": "locomotion/gait_clock/__init__.py"
     },
     {
-      "path": "locomotion/omniwalk/adapter.py",
+      "path": "src/locomotion/omniwalk/adapter.py",
       "previous_path": "locomotion/gait_clock/env.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Expose OmniEnv, the task-facing surface over IsaacEnv that the MuJoCo surrogate also implements."
     },
     {
-      "path": "locomotion/omniwalk/agents/__init__.py",
+      "path": "src/locomotion/omniwalk/agents/__init__.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Hold the learner configuration and the named training recipes of the omni task."
     },
     {
-      "path": "locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+      "path": "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
       "previous_path": "locomotion/omniwalk/ppo_cfg.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Build the RSL-RL learner configuration without importing Torch and name the admitted c48_long recipe, the default of the native scripts."
     },
     {
-      "path": "locomotion/omniwalk/env.py",
+      "path": "src/locomotion/omniwalk/env.py",
       "previous_path": "locomotion/omni/native.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Subclass DirectRLEnv to own the scene, native views and their layout guards, substep capture, telemetry and reset writes."
     },
     {
-      "path": "locomotion/omniwalk/env_cfg.py",
+      "path": "src/locomotion/omniwalk/env_cfg.py",
       "previous_path": "locomotion/omni/config.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Declare the environment settings and build the Isaac Lab Direct and robot configurations."
     },
     {
-      "path": "locomotion/omniwalk/mdp/__init__.py",
+      "path": "src/locomotion/omniwalk/mdp/__init__.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Locomotion",
       "purpose": "Package namespace for the task mathematics."
     },
     {
-      "path": "locomotion/omniwalk/mdp/actions.py",
+      "path": "src/locomotion/omniwalk/mdp/actions.py",
       "previous_path": "locomotion/omniwalk/mdp/motor.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Turn policy actions into slew-limited held targets and the executed-action feature."
     },
     {
-      "path": "locomotion/omniwalk/mdp/commands.py",
+      "path": "src/locomotion/omniwalk/mdp/commands.py",
       "previous_path": "locomotion/omni/task.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Declare the omnidirectional command bank, its hold times and the gait-clock period."
     },
     {
-      "path": "locomotion/omniwalk/mdp/frames.py",
+      "path": "src/locomotion/omniwalk/mdp/frames.py",
       "previous_path": "locomotion/omni/control.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Use the canonical XYZW quaternion and navigation frames."
     },
     {
-      "path": "locomotion/omniwalk/mdp/observations.py",
+      "path": "src/locomotion/omniwalk/mdp/observations.py",
       "previous_path": "locomotion/priors/features.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Build the 42-value proprioception frame, the 231-value actor observation and the 234-value critic observation."
     },
     {
-      "path": "locomotion/omniwalk/mdp/rewards.py",
+      "path": "src/locomotion/omniwalk/mdp/rewards.py",
       "previous_path": "locomotion/omni/task.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Compute the yaw-gated omnidirectional walking reward from one control's telemetry."
     },
     {
-      "path": "locomotion/omniwalk/task.py",
+      "path": "src/locomotion/omniwalk/task.py",
       "previous_path": "locomotion/gait_clock/task.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Sample commands, apply the walking reward and notify an optional observer around selected episode resets."
     },
     {
-      "path": "locomotion/amp/__init__.py",
+      "path": "src/locomotion/amp/__init__.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Package namespace."
     },
     {
-      "path": "locomotion/amp/amp.py",
+      "path": "src/locomotion/amp/amp.py",
       "classification": "current",
       "owner": "Locomotion",
       "purpose": "Add an adversarial motion reward and discriminator update to stock RSL-RL PPO.",
       "previous_path": "locomotion/priors/amp.py"
     },
     {
-      "path": "locomotion/amp/dataset.py",
+      "path": "src/locomotion/amp/dataset.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Program lead",
       "purpose": "Audit native clips and export hash-bound transitions after the program lead reviews motion."
     },
     {
-      "path": "locomotion/amp/discriminator.py",
+      "path": "src/locomotion/amp/discriminator.py",
       "classification": "current",
       "owner": "Locomotion",
       "purpose": "Fit a least-squares discriminator and score paired 61-value motion states.",
       "previous_path": "locomotion/priors/discriminator.py"
     },
     {
-      "path": "locomotion/amp/features.py",
+      "path": "src/locomotion/amp/features.py",
       "previous_path": "locomotion/omniwalk/mdp/observations.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Pack the shared 61-value flat-ground motion features from measured state."
     },
     {
-      "path": "locomotion/amp/model.py",
+      "path": "src/locomotion/amp/model.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Floating-base Newton-Euler dynamics for the approved direct-drive robot."
     },
     {
-      "path": "locomotion/amp/networks.py",
+      "path": "src/locomotion/amp/networks.py",
       "classification": "current",
       "owner": "Locomotion",
       "purpose": "History and privileged encoders for the retained AMP network comparison.",
       "previous_path": "locomotion/priors/networks.py"
     },
     {
-      "path": "locomotion/amp/optimize.py",
+      "path": "src/locomotion/amp/optimize.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Program lead",
       "purpose": "Optimize a periodic tripod cycle for translation, yaw and arcs with full-body inverse dynamics."
     },
     {
-      "path": "locomotion/amp/prepare.py",
+      "path": "src/locomotion/amp/prepare.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Program lead",
       "purpose": "Pack a fresh native replay with unchanged physics and ownership controls."
     },
     {
-      "path": "locomotion/amp/replay_native.py",
+      "path": "src/locomotion/amp/replay_native.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Program lead",
       "purpose": "Replay an optimized target cycle through the locomotion kernel."
     },
     {
-      "path": "locomotion/rl/__init__.py",
+      "path": "src/locomotion/rl/__init__.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Locomotion",
       "purpose": "Package namespace for the RSL-RL extensions."
     },
     {
-      "path": "locomotion/rl/ppo.py",
+      "path": "src/locomotion/rl/ppo.py",
       "previous_path": "locomotion/gait_clock/ppo.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Extend stock RSL-RL PPO with command bootstraps, a rate cap, bounded means and a deviation schedule, and load a recorded actor."
     },
     {
-      "path": "locomotion/rl/wrapper.py",
+      "path": "src/locomotion/rl/wrapper.py",
       "previous_path": "locomotion/omni/ppo.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Wrap the walking task as an RSL-RL vector environment with fixed input scales, the gait clock, action smoothing, velocity noise and command segments."
     },
     {
-      "path": "locomotion/robots/__init__.py",
+      "path": "src/locomotion/robots/__init__.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Locomotion",
       "purpose": "Package namespace for the robot identity, motor model and actuator."
     },
     {
-      "path": "locomotion/robots/actuator.py",
+      "path": "src/locomotion/robots/actuator.py",
       "previous_path": "locomotion/gait_clock/actuator.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Apply the approved torque curve through the stock actuator interface."
     },
     {
-      "path": "locomotion/robots/hexapod.py",
+      "path": "src/locomotion/robots/hexapod.py",
       "previous_path": "locomotion/omni/config.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Name the robot's joints and bodies, pin its asset hashes and resolve motor damping."
     },
     {
-      "path": "locomotion/robots/rs05.py",
+      "path": "src/locomotion/robots/rs05.py",
       "previous_path": "locomotion/omniwalk/mdp/motor.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Hold the RS05 PD stiffness and rated torque and compute motor forces under the speed-dependent torque curve."
     },
     {
-      "path": "locomotion/scripts/__init__.py",
+      "path": "src/locomotion/scripts/__init__.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Locomotion",
       "purpose": "Package namespace for the container entry points."
     },
     {
-      "path": "locomotion/scripts/cli.py",
+      "path": "src/locomotion/scripts/cli.py",
       "previous_path": "locomotion/scripts/train.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Share the arguments, validation, identity binding, Isaac launch and run lifecycle of the native locomotion scripts."
     },
     {
-      "path": "locomotion/scripts/diagnose.py",
+      "path": "src/locomotion/scripts/diagnose.py",
       "previous_path": "locomotion/scripts/train.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Run the native standing diagnostic or the noise probe and record its report."
     },
     {
-      "path": "locomotion/scripts/play.py",
+      "path": "src/locomotion/scripts/play.py",
       "previous_path": "locomotion/scripts/train.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Evaluate a bound PPO or AMP checkpoint on the native simulator and record the evaluation."
     },
     {
-      "path": "locomotion/scripts/train.py",
+      "path": "src/locomotion/scripts/train.py",
       "previous_path": "locomotion/gait_clock/train.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Train PPO or AMP on the native simulator and record checkpoints and training metrics."
     },
     {
-      "path": "locomotion/spark/__init__.py",
+      "path": "src/locomotion/spark/__init__.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Package namespace for Spark allocation tools."
     },
     {
-      "path": "locomotion/spark/inputs.py",
+      "path": "src/locomotion/spark/inputs.py",
       "previous_path": "locomotion/tools/inputs.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Verify canonical inputs and package a fresh portable copy without launching compute."
     },
     {
-      "path": "locomotion/spark/launch.py",
+      "path": "src/locomotion/spark/launch.py",
       "previous_path": "locomotion/tools/launch.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Launch one native allocation with explicit ownership and bounded cleanup."
     },
     {
-      "path": "locomotion/spark/prepare.py",
+      "path": "src/locomotion/spark/prepare.py",
       "previous_path": "locomotion/tools/prepare.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Write a fresh native allocation pack with frozen sources, explicit inputs and a binding that names the script of its mode."
     },
     {
-      "path": "locomotion/spark/safety.py",
+      "path": "src/locomotion/spark/safety.py",
       "previous_path": "locomotion/tools/safety.py",
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Check guarded run and input roots, pinned files and frozen trees; hold both GPU locks and clean up owned containers."
     },
     {
-      "path": "locomotion/spark/sources.py",
+      "path": "src/locomotion/spark/sources.py",
       "previous_path": "locomotion/tools/sources.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Hash the runtime sources and the physics import closure of the environment, its scene checks, the standing capture and the scorer."
     },
     {
-      "path": "locomotion/spark/validation.py",
+      "path": "src/locomotion/spark/validation.py",
       "previous_path": "locomotion/tools/validation.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Share allocation bounds, completed-update behavior, the script of each mode and learner-option resolution across the scripts and pack preparation."
     },
     {
-      "path": "locomotion/surrogate/__init__.py",
+      "path": "src/locomotion/surrogate/__init__.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Package namespace."
     },
     {
-      "path": "locomotion/surrogate/env.py",
+      "path": "src/locomotion/surrogate/env.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Run the OmniEnv interface on CPU MuJoCo physics for design work; native runs remain the acceptance evidence."
     },
     {
-      "path": "locomotion/surrogate/evaluate.py",
+      "path": "src/locomotion/surrogate/evaluate.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Evaluate a checkpoint's no-noise policy on the learning probes, on the surrogate."
     },
     {
-      "path": "locomotion/surrogate/replay.py",
+      "path": "src/locomotion/surrogate/replay.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Replay actions open loop on the surrogate and score stored telemetry under any reward."
     },
     {
-      "path": "locomotion/surrogate/train.py",
+      "path": "src/locomotion/surrogate/train.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Train PPO on the MuJoCo surrogate through the training path of the native trainer."
     },
     {
-      "path": "locomotion/hexapod/__init__.py",
+      "path": "src/locomotion/hexapod/__init__.py",
       "previous_path": "locomotion/behavior_cloning/__init__.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Register Shaurya’s original flat and rough Direct tasks."
     },
     {
-      "path": "locomotion/hexapod/agents/__init__.py",
+      "path": "src/locomotion/hexapod/agents/__init__.py",
       "previous_path": "locomotion/behavior_cloning/agents/__init__.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Declare Shaurya’s learner configuration package."
     },
     {
-      "path": "locomotion/hexapod/agents/rsl_rl_ppo_cfg.py",
+      "path": "src/locomotion/hexapod/agents/rsl_rl_ppo_cfg.py",
       "previous_path": "locomotion/behavior_cloning/agents/rsl_rl_ppo_cfg.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Preserve Shaurya’s flat and rough PPO configurations."
     },
     {
-      "path": "locomotion/hexapod/hexapod_env.py",
+      "path": "src/locomotion/hexapod/hexapod_env.py",
       "previous_path": "locomotion/behavior_cloning/hexapod_env.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Preserve Shaurya’s observations, reward, resets and stock Direct environment."
     },
     {
-      "path": "locomotion/hexapod/hexapod_env_cfg.py",
+      "path": "src/locomotion/hexapod/hexapod_env_cfg.py",
       "previous_path": "locomotion/behavior_cloning/hexapod_env_cfg.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Preserve Shaurya’s scene, randomization and task settings."
     },
     {
-      "path": "locomotion/hexapod/hexapod_robot_cfg.py",
+      "path": "src/locomotion/hexapod/hexapod_robot_cfg.py",
       "previous_path": "locomotion/behavior_cloning/hexapod_robot_cfg.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Preserve Shaurya’s implicit PD actuator and robot configuration."
     },
     {
-      "path": "locomotion/hexapod/tools/bc_clone.py",
+      "path": "src/locomotion/hexapod/tools/bc_clone.py",
       "previous_path": "locomotion/behavior_cloning/tools/bc_clone.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Run Shaurya’s original teacher, BC, DAgger and checkpoint splice."
     },
     {
-      "path": "locomotion/hexapod/tools/diag_policy_rollout.py",
+      "path": "src/locomotion/hexapod/tools/diag_policy_rollout.py",
       "previous_path": "locomotion/behavior_cloning/tools/diag_policy_rollout.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Run Shaurya’s original standing-start policy diagnostic."
     },
     {
-      "path": "mission/__init__.py",
+      "path": "src/mission/__init__.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Package namespace."
     },
     {
-      "path": "mission/sensors/__init__.py",
+      "path": "src/mission/sensors/__init__.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Package namespace."
     },
     {
-      "path": "mission/sensors/mid360_pattern.py",
+      "path": "src/mission/sensors/mid360_pattern.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "A bounded Isaac Lab ray-pattern surrogate for the Livox Mid-360."
     },
     {
-      "path": "mission/sensors/sensor_model.py",
+      "path": "src/mission/sensors/sensor_model.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Latency, noise, bias, and dropout models for Phase 3 sensor observations."
     },
     {
-      "path": "navigation/__init__.py",
+      "path": "src/navigation/__init__.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Command producers: where path planning plugs into the locomotion stack."
     },
     {
-      "path": "navigation/producer.py",
+      "path": "src/navigation/producer.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "A non-blocking pose-to-command protocol."
     },
     {
-      "path": "navigation/waypoint.py",
+      "path": "src/navigation/waypoint.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
@@ -1461,6 +1461,26 @@
     "locomotion/tests/test_wandb_logging.py": {
       "source_commit": "467e7e101f0149d131b26ce84993347d8c77e233",
       "sha256": "ad821678aac970f1995a7140f3f8fd9ec676bfa58d9f8d9b873ec6e9478630af"
+    },
+    "contracts/command.py": {
+      "source_commit": "b92f14ec39a933a83615dd65e08e1479161b989d",
+      "sha256": "7bcc91c87716c4e77a85eb993356734452f7b8a4d0a6c8679138fdcbddfb365c"
+    },
+    "contracts/pose.py": {
+      "source_commit": "b92f14ec39a933a83615dd65e08e1479161b989d",
+      "sha256": "e2af1c7852b437035830c7c1a737f4d26393567c461574acd3337ec579c1c299"
+    },
+    "locomotion/priors/datasets/amp_demonstrations_001/manifest.json": {
+      "source_commit": "b92f14ec39a933a83615dd65e08e1479161b989d",
+      "sha256": "7501de7a6be975159ff5c7ede32bbe75aed90095826ff2dfd6106347976ed6a1"
+    },
+    "locomotion/tests/test_native_ranges.py": {
+      "source_commit": "b92f14ec39a933a83615dd65e08e1479161b989d",
+      "sha256": "22aadfab2a824dd685eaa3057f4cc8365a29f854efc4681dd19060c815acb78c"
+    },
+    "navigation/waypoint.py": {
+      "source_commit": "b92f14ec39a933a83615dd65e08e1479161b989d",
+      "sha256": "3a8f25c96e69946c5d35ca49ef1bf1a38253fd81a41dc719a2f007afe13946be"
     }
   }
 }
