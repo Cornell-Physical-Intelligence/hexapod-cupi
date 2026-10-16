@@ -62,7 +62,14 @@ user `palerdr`; the guides assign approvals to that role. Do not assume the
 user is the program lead, and do not address the user by a name from
 repository files.
 
-Search with explicit paths and exclude `.venv/`, `graphify-out/` and `tmp/`.
+For a question about where something lives or how modules relate, query the
+knowledge graph first: the graphify MCP tools when the session lists them, else
+`graphify query "<question>" --budget 1500`, `graphify path "A" "B"` or
+`graphify explain "X"`. Trust the graph only when `graphify-out/graph.json` is
+newer than HEAD; otherwise run `graphify update . --force` first (AST only, no
+model calls). After you change code, run `graphify update .` so the next query
+sees it; doc changes need `/graphify --update`. Use grep with explicit paths for
+exact strings, and exclude `.venv/`, `graphify-out/` and `tmp/`.
 Read old records to answer a named historical question. Keep procedures in
 existing guides, assignments in GitHub issues and design review in PRs. Do not
 add another plan, handoff, decision log or task queue. Edit `site/project.json`
