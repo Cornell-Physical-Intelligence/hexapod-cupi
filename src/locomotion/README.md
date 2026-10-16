@@ -111,17 +111,27 @@ cover motors, transitions, packs and hexapod sources.
 
 The physics identity hashes the import closure of `adapter.py`, `env_cfg.py`
 and `env.py` in `omniwalk/`, with `admission.py`, `capture.py` and `scoring.py`
-in `evaluation/`. On 16 October 2026 the layout passed standing admission at one and 128
-robots on the stock ground plane
-([evidence](../../site/assets/src_layout_native_20261016_001/verification.json)).
-The unchanged `c48_long` checkpoint then passed 12 of its 13 probes; the
-backward probe exceeds the joint speed limit for one 400 Hz substep during
-startup. A control replay of the pushed head b92f14ec reproduced every one of
-the 8,088 measurements and both standing reports byte for byte, so the layout
-changes no native behavior. The stock ground plane, which replaced the recorded
-mesh floor at b92f14ec, moves contact loads outside the three-baseline ranges
-and causes the failure. Loader certification (`tests/native_parity.py`,
-`tests/native_ranges.py`) waits on the floor decision.
-`tests/native_parity_pack.py` writes the candidate replay pack with the
-harness and its pinned ranges, and `spark/pack.py` records the root review of
-any pack before launch. Stage 2 adds the 96-case suite and visual acceptance.
+in `evaluation/`, and it names the floor. `EnvConfig.floor` selects a stock
+Isaac Lab floor: the recorded two-triangle mesh built by the terrain utility
+(the default), the grid ground plane or a cuboid. The recorded physics depends
+on the simulator's default collider offsets on that mesh, so the default keeps
+both offsets None and the recipe readback refuses a floor that carries authored
+offsets or a different material. The 16 October 2026 experiments
+([evidence](../../site/assets/floor_contact_20261016_001/floor_experiments.json))
+show why: with the robot's 153 SDF collision shapes, the stock ground plane
+fails the backward probe on one joint-speed substep whatever contact offset it
+carries, a cuboid fails another probe, and the mesh with authored offsets fails
+two; only the mesh with default offsets reproduces the recorded one-robot
+standing report byte for byte.
+
+On that floor the layout passed standing admission at one and 128 robots, and
+the unchanged `c48_long` checkpoint passed its 13 probes through the parity
+harness with all 8,088 measurements equal to the three recorded baselines, and
+again through the certified loader
+([verification](../../site/assets/floor_contact_20261016_001/verification.json)).
+The compatibility receipt in that directory binds the checkpoint to this
+source and floor; `scripts/play.py` accepts it through
+`--checkpoint-compatibility`. `tests/native_parity_pack.py` writes a candidate
+replay pack with the harness and its pinned ranges, and `spark/pack.py` records
+the root review of any pack before launch. Stage 2 adds the 96-case suite and
+visual acceptance.
