@@ -24,8 +24,16 @@ class OccupancyGrid:
     A grid is immutable and specific to a given margin (e.g. see `PlanMargin` in
     region.py).
 
-    ``passable`` is row-major over north: cell ``(east, north)`` lives at index
-    ``north * width_cells + east``, with ``(0,0)`` representing the southwestern most cell.
+    Attributes:
+        origin_m: World ``(east, north)`` position, in metres, of the south-west
+            corner of cell ``(0, 0)``.
+        cell_size_m: Side length of each square cell, in metres. Finite and positive.
+        width_cells: Number of cells along east. Positive.
+        height_cells: Number of cells along north. Positive.
+        passable: Whether a route may enter each cell, row-major over north: cell
+            ``(east, north)`` lives at index ``north * width_cells + east``, with
+            ``(0, 0)`` the south-western-most cell. Holds exactly
+            ``width_cells * height_cells`` values.
     """
 
     origin_m: Point
@@ -120,14 +128,19 @@ class OccupancyGrid:
         margin: PlanMargin,
         cell_size_m: float,
     ) -> "OccupancyGrid":
-        """Rasterise ``region`` at ``cell_size_m``, shrunk by ``margin``.
+        """Convert ``region`` to a grid with ``cell_size_m``, shrunk by ``margin``.
 
-        The grid covers ``region.bounds_m`` from its lower-left corner, rounding up so a
-        partial cell is still included. A cell is passable when its centre lies inside
-        ``region.feasible(margin)``; when that is empty, every cell is impassable and
-        ``passable_cell_count`` is 0.
+        The grid covers ``region.bounds_m`` from its lower-left corner, rounding up
+        so partial cells are included.
+
+        # TODO: This sucks. The issue doesn't specify to decline... If we rejected,
+        we need to decide when to notify + how to notify.
+
+        A cell is passable when its centre lies inside ``region.feasible(margin)``;
+        when that is empty, every cell is impassable and``passable_cell_count`` is 0.
         """
 
+        # Create grid of points using bounds on region + cell size.
         cell_size = float(cell_size_m)
         if not math.isfinite(cell_size) or cell_size <= 0.0:
             raise ValueError(
@@ -138,6 +151,7 @@ class OccupancyGrid:
         height = math.ceil((max_north - min_north) / cell_size)
         easts = min_east + (np.arange(width) + 0.5) * cell_size
         norths = min_north + (np.arange(height) + 0.5) * cell_size
+
         # meshgrid's (height, width) layout ravels north-major, matching ``passable``.
         east_grid, north_grid = np.meshgrid(easts, norths)
         inside = shapely.contains_xy(

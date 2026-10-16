@@ -106,7 +106,9 @@ class SurveyRegion:
                     f"{name} must be a shapely.Polygon, got {type(polygon).__name__}"
                 )
             if not polygon.is_valid:
-                raise ValueError(f"{name} is not valid: {explain_validity(polygon)}")
+                raise ValueError(
+                    f"{name} is not valid: {explain_validity(polygon)}"
+                )
         object.__setattr__(self, "exclusions", exclusions)
 
         area = self.boundary
@@ -131,4 +133,7 @@ class SurveyRegion:
         rather than raised.
         """
 
+        # TODO: Consider buffering this with the intersection (?) of buffer + region
+        # that ensures quadrature ensures that all points within margin are excluded.
+        # Currently: quadrature allows for slight violations.
         return self.free_space.buffer(-margin.total_m)
