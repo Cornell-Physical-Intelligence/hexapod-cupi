@@ -111,11 +111,17 @@ cover motors, transitions, packs and hexapod sources.
 
 The physics identity hashes the import closure of `adapter.py`, `env_cfg.py`
 and `env.py` in `omniwalk/`, with `admission.py`, `capture.py` and `scoring.py`
-in `evaluation/`. The new layout changed those identities; no native run has
-used them. Any result first needs fresh standing admission at one robot and
-batch size. The unchanged `c48_long` checkpoint must then pass its 13 probes
-through its compatibility receipt, with torque and contact inside
-three-baseline ranges (`tests/native_parity.py`, `tests/native_ranges.py`).
+in `evaluation/`. On 16 October 2026 the layout passed standing admission at one and 128
+robots on the stock ground plane
+([evidence](../../site/assets/src_layout_native_20261016_001/verification.json)).
+The unchanged `c48_long` checkpoint then passed 12 of its 13 probes; the
+backward probe exceeds the joint speed limit for one 400 Hz substep during
+startup. A control replay of the pushed head b92f14ec reproduced every one of
+the 8,088 measurements and both standing reports byte for byte, so the layout
+changes no native behavior. The stock ground plane, which replaced the recorded
+mesh floor at b92f14ec, moves contact loads outside the three-baseline ranges
+and causes the failure. Loader certification (`tests/native_parity.py`,
+`tests/native_ranges.py`) waits on the floor decision.
 `tests/native_parity_pack.py` writes the candidate replay pack with the
 harness and its pinned ranges, and `spark/pack.py` records the root review of
 any pack before launch. Stage 2 adds the 96-case suite and visual acceptance.
