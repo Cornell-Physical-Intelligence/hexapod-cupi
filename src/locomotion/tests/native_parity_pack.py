@@ -8,8 +8,8 @@ from locomotion.robots.hexapod import sha
 from locomotion.spark import pack
 from locomotion.spark.prepare import prepare
 from locomotion.spark.sources import physics_files, runtime_manifest, source_files
+from locomotion.tests.native_parity import BASELINE_COMMIT
 
-BASELINE_COMMIT = 'b2a6168c35156dfe0a8202201aa574b8d9e43fb1'
 HARNESS = ('native_parity.py',)
 
 

@@ -57,7 +57,7 @@ class NativeRangeTests(unittest.TestCase):
 
     def test_host_receipts_survive_native_process_exit_and_reject_tampering(self):
         from locomotion.tests.native_ranges import read_run, sha
-        from locomotion.tests.native_parity import CHECKPOINT_SHA, DECLARATION_SHA
+        from locomotion.tests.native_parity import BASELINE_COMMIT, CHECKPOINT_SHA, DECLARATION_SHA
         with tempfile.TemporaryDirectory() as tmp:
             pack = Path(tmp)
             root = pack/'run/standing'
@@ -66,7 +66,7 @@ class NativeRangeTests(unittest.TestCase):
                 path.write_text(json.dumps(value))
             proof = pack/'source/PARITY.json'
             save(proof, {'schema': 'hexapod_refactor_parity_v1', 'role': 'baseline',
-                         'baseline_commit': 'b2a6168c35156dfe0a8202201aa574b8d9e43fb1'})
+                         'baseline_commit': BASELINE_COMMIT})
             save(pack/'source/FREEZE_SHA256.json', {'PARITY.json': sha(proof)})
             freeze = sha(pack/'source/FREEZE_SHA256.json')
             binding = {'source_freeze_sha256': freeze, 'input_files': {

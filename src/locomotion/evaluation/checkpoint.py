@@ -162,6 +162,8 @@ def read_compatibility_receipt(path, digest):
         raise ValueError('Unsupported checkpoint compatibility receipt')
     if set(receipt.get('files', {})) != {'ranges.json', 'summary.json'}:
         raise ValueError('Compatibility evidence files differ')
+    if 'certified_physics_config' in receipt and not isinstance(receipt['certified_physics_config'], dict):
+        raise ValueError('Compatibility certified physics must be a configuration')
     evidence = {}
     for name, expected in receipt['files'].items():
         entry = path.parent/name
@@ -182,14 +184,21 @@ def read_compatibility_receipt(path, digest):
 
 
 def require_compatibility_identity(receipt, record, identity):
-    """Accept the candidate runtime of the receipt when the model, physics, inputs, seed and learner match."""
+    """Accept the candidate runtime of the receipt when the model, physics, inputs, seed and learner match.
+
+    A receipt that certifies a physics configuration binds its native parity evidence to that configuration;
+    the loader then requires that configuration instead of the checkpoint's recorded one.
+    """
     if record['identity'] != receipt['original_identity']:
         raise ValueError('Compatibility original identity differs')
     if record.get('checkpoint_sha256') != CHECKPOINT_SHA:
         raise ValueError('Compatibility checkpoint differs')
     if identity.get('runtime_sources') != receipt['candidate_runtime_sources']:
         raise ValueError('Compatibility candidate runtime differs')
-    if any(record['identity'][key] != identity[key] for key in COMPATIBILITY_KEYS if key not in SOURCE_KEYS):
+    certified = receipt.get('certified_physics_config', record['identity']['physics_config'])
+    if identity['physics_config'] != certified:
+        raise ValueError('Compatibility certified physics differs')
+    if any(record['identity'][key] != identity[key] for key in COMPATIBILITY_KEYS if key not in SOURCE_KEYS | {'physics_config'}):
         raise ValueError('Compatibility model, physics, input or seed differs')
     require_learner_identity(record, identity)
 

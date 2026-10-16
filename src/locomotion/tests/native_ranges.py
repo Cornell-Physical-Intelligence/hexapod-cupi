@@ -13,7 +13,7 @@ def sha(path):
 
 def read_run(root, role):
     from locomotion.spark.safety import verify_tree
-    from locomotion.tests.native_parity import CHECKPOINT_SHA, DECLARATION_SHA
+    from locomotion.tests.native_parity import BASELINE_COMMIT, CHECKPOINT_SHA, DECLARATION_SHA
     root = Path(root)
     pack = root.parents[1]
     read = lambda path: json.loads(path.read_text())
@@ -26,7 +26,7 @@ def read_run(root, role):
     freeze = binding['source_freeze_sha256']
     verify_tree(pack/'source', freeze)
     if (proof['schema'] != 'hexapod_refactor_parity_v1' or proof['role'] != role
-            or proof['baseline_commit'] != 'b2a6168c35156dfe0a8202201aa574b8d9e43fb1'
+            or proof['baseline_commit'] != BASELINE_COMMIT
             or packed.get('test_only_parity') is not True
             or packed['binding_sha256'] != sha(pack/'binding.json')
             or read(root.parent/'launch_binding.json') != binding
@@ -100,12 +100,14 @@ def main():
             if proof.get('ranges_sha256') != args.ranges_sha256:
                 raise ValueError('Candidate did not pin these baseline ranges before replay')
             record = json.loads(args.checkpoint.with_suffix('.json').read_text())
+            certified_physics = json.loads((args.candidate/'state.json').read_text())['identity']['physics_config']
             args.output.mkdir(exist_ok=False)
             (args.output/'ranges.json').write_bytes(args.ranges.read_bytes())
             (args.output/'summary.json').write_text(json.dumps(candidate, indent=2, allow_nan=False)+'\n')
             receipt = {'schema': compat.SCHEMA, 'mode': 'evaluate', 'eval_scope': 'probes',
                        'checkpoint_sha256': compat.CHECKPOINT_SHA, 'declaration_sha256': compat.DECLARATION_SHA,
                        'original_identity': record['identity'], 'candidate_runtime_sources': runtime,
+                       'certified_physics_config': certified_physics,
                        'files': {name: sha(args.output/name) for name in ('ranges.json', 'summary.json')}}
             path = args.output/'receipt.json'
             path.write_text(json.dumps(receipt, indent=2, allow_nan=False)+'\n')

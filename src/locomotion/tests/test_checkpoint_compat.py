@@ -54,6 +54,12 @@ class CheckpointCompatibilityTests(unittest.TestCase):
             path.write_text(json.dumps(receipt))
             with self.assertRaisesRegex(ValueError, 'load evidence'):
                 checkpoints.read_compatibility_receipt(path, checkpoints.sha(path))
+            path = self.bundle(directory)
+            receipt = json.loads(path.read_text())
+            receipt['certified_physics_config'] = 'isaaclab_mesh'
+            path.write_text(json.dumps(receipt))
+            with self.assertRaisesRegex(ValueError, 'certified physics'):
+                checkpoints.read_compatibility_receipt(path, checkpoints.sha(path))
 
     def test_candidate_dependency_changes_and_original_identity_changes_reject(self):
         from contracts.release import COMPATIBILITY_KEYS
@@ -76,6 +82,24 @@ class CheckpointCompatibilityTests(unittest.TestCase):
         record['identity']['entry_sha256'] = 'altered declaration'
         with self.assertRaisesRegex(ValueError, 'original identity'):
             checkpoints.require_compatibility_identity(receipt, record, candidate)
+
+    def test_certified_physics_replaces_the_recorded_physics_and_nothing_else(self):
+        from contracts.release import COMPATIBILITY_KEYS
+        recorded = dict.fromkeys(COMPATIBILITY_KEYS, 'original')
+        recorded['physics_config'] = {'floor': 'mesh', 'physics_dt': .0025}
+        candidate = deepcopy(recorded)
+        candidate.update(runtime_sources={'files': {}}, physics_config={'floor': 'isaaclab_mesh', 'physics_dt': .0025})
+        record = {'identity': recorded, 'checkpoint_sha256': checkpoints.CHECKPOINT_SHA}
+        receipt = {'original_identity': deepcopy(recorded), 'candidate_runtime_sources': {'files': {}}}
+        with self.assertRaisesRegex(ValueError, 'certified physics'):
+            checkpoints.require_compatibility_identity(receipt, record, candidate)
+        receipt['certified_physics_config'] = deepcopy(candidate['physics_config'])
+        checkpoints.require_compatibility_identity(receipt, record, candidate)
+        for physics in ({'floor': 'isaaclab_mesh', 'physics_dt': .005}, recorded['physics_config']):
+            with self.subTest(physics=physics), self.assertRaisesRegex(ValueError, 'certified physics'):
+                checkpoints.require_compatibility_identity(receipt, record, {**candidate, 'physics_config': physics})
+        with self.assertRaisesRegex(ValueError, 'model, physics, input or seed'):
+            checkpoints.require_compatibility_identity(receipt, record, {**candidate, 'seed': 'other'})
 
     def test_prepare_binds_receipt_and_refuses_training_or_uncertified_scope(self):
         from locomotion.spark.prepare import prepare

@@ -7,6 +7,8 @@ from unittest.mock import patch
 
 CHECKPOINT_SHA = 'bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9'
 DECLARATION_SHA = '8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3'
+# The source whose three replays froze the comparison ranges.
+BASELINE_COMMIT = 'b2a6168c35156dfe0a8202201aa574b8d9e43fb1'
 # Compare these provenance fields in the separate source receipt, not as weight ABI.
 SOURCE_KEYS = {'schema', 'physics_source_files', 'adapter_sha256', 'entry_sha256'}
 
@@ -18,7 +20,7 @@ def sha(path):
 def proof():
     value = json.loads((Path(__file__).resolve().parents[2]/'PARITY.json').read_text())
     if (value['schema'] != 'hexapod_refactor_parity_v1'
-            or value['baseline_commit'] != 'b2a6168c35156dfe0a8202201aa574b8d9e43fb1'
+            or value['baseline_commit'] != BASELINE_COMMIT
             or value['role'] not in ('baseline', 'candidate')):
         raise ValueError('Invalid test-only parity source declaration')
     return value
