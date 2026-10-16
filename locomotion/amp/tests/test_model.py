@@ -4,7 +4,7 @@ import unittest
 import casadi as ca
 import numpy as np
 
-from locomotion.priors.model import NEUTRAL, RobotModel
+from locomotion.amp.model import NEUTRAL, RobotModel
 
 
 class ModelTests(unittest.TestCase):

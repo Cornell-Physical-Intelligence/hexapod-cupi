@@ -15,15 +15,15 @@ import torch
 
 from rsl_rl.algorithms import PPO
 
-from locomotion.priors import discriminator as disc
-from locomotion.priors import features as amp
-from locomotion.priors import amp as amp_ppo
-from locomotion.priors import networks as nets
+from locomotion.amp import discriminator as disc
+from locomotion.amp import features as amp
+from locomotion.amp import amp as amp_ppo
+from locomotion.amp import networks as nets
 from locomotion.evaluation.checkpoint import (json_shape, require_embedded_declaration,
     require_learner_configuration, require_learner_identity)
 import locomotion.scripts.diagnose as diagnose
 import locomotion.scripts.train as train
-from locomotion.priors.amp import AMPConfig, AMPPPO, AMPVecEnv, CollisionCapture, amp_ppo_config, load_demonstrations
+from locomotion.amp.amp import AMPConfig, AMPPPO, AMPVecEnv, CollisionCapture, amp_ppo_config, load_demonstrations
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import ppo_config
 from locomotion.rl.wrapper import OmniVecEnv
 from locomotion.spark.prepare import prepare
@@ -366,8 +366,8 @@ class LearnerTests(unittest.TestCase):
 
     def test_config_and_declaration_bind_features_and_dataset(self):
         config = amp_ppo_config(0, networks='paper')
-        self.assertEqual(config['algorithm']['class_name'], 'locomotion.priors.amp:AMPPPO')
-        self.assertEqual(config['actor']['class_name'], 'locomotion.priors.networks:PaperActor')
+        self.assertEqual(config['algorithm']['class_name'], 'locomotion.amp.amp:AMPPPO')
+        self.assertEqual(config['actor']['class_name'], 'locomotion.amp.networks:PaperActor')
         self.assertEqual(config['obs_groups']['critic'][-1], 'privileged')
         self.assertEqual(config['networks'], 'paper')
         self.assertEqual(amp_ppo_config(0)['actor']['class_name'], 'MLPModel')
@@ -434,7 +434,7 @@ class EvaluationIdentityTests(unittest.TestCase):
                     'ppo_config': amp_ppo_config(seed, networks=networks) if learner == 'amp' else ppo_config(seed)}
         if learner == 'amp':
             identity['learner_source_files'] = {name: amp_ppo.sha(ROOT/'locomotion'/name) for name in (
-                'priors/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
+                'amp/features.py', 'amp/discriminator.py', 'amp/amp.py', 'amp/networks.py')}
             identity['amp_dataset'] = dict(BANK_IDENTITY)
         return identity
 
@@ -520,11 +520,11 @@ class LaunchTests(unittest.TestCase):
             self.assertEqual((pack['learner'], pack['networks']), ('amp', 'paper'))
             bank = Path(temporary)/'amp/source/locomotion/priors/datasets/amp_demonstrations_001'
             self.assertEqual(amp_ppo.sha(bank/'transitions.npz'), amp_ppo.sha(amp_ppo.DATASET/'transitions.npz'))
-            for name in ('priors/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py'):
+            for name in ('amp/features.py', 'amp/discriminator.py', 'amp/amp.py', 'amp/networks.py'):
                 self.assertTrue((Path(temporary)/'amp/source/locomotion'/name).exists(), name)
             source = Path(temporary)/'amp/source'
             result = subprocess.run([sys.executable, '-c',
-                'from locomotion.priors.amp import load_demonstrations; '
+                'from locomotion.amp.amp import load_demonstrations; '
                 'from locomotion.spark.sources import verify_runtime; '
                 'verify_runtime("."); print(tuple(load_demonstrations()[0].shape))'],
                 cwd=source, text=True, capture_output=True)

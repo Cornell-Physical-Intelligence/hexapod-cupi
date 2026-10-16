@@ -5,7 +5,7 @@ import unittest
 import torch
 from tensordict import TensorDict
 
-from locomotion.priors import networks as nets
+from locomotion.amp import networks as nets
 
 N = 5
 GROUPS = {'actor': list(nets.ACTOR_GROUPS), 'critic': list(nets.CRITIC_GROUPS)}

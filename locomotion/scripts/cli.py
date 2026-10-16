@@ -244,9 +244,9 @@ def build_identity(args, cfg, metadata):
         # The exploration decay length enters ppo_config; the opt-in records the requested run length beside it.
         identity['training_updates'] = args.updates
     if args.learner == 'amp':
-        from locomotion.priors.amp import AMPConfig, load_demonstrations
+        from locomotion.amp.amp import AMPConfig, load_demonstrations
         identity['learner_source_files'] = {name: sha(SOURCE/name) for name in (
-            'priors/features.py', 'priors/discriminator.py', 'priors/amp.py', 'priors/networks.py')}
+            'amp/features.py', 'amp/discriminator.py', 'amp/amp.py', 'amp/networks.py')}
         identity['amp_dataset'] = load_demonstrations(SOURCE.parent/AMPConfig().dataset)[1]
     identity['physics_source_files'] = physics_files(identity['source_files'])
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
@@ -338,7 +338,7 @@ def learner_config(args, identity, state):
         raise ValueError('RSL-RL version differs: '+version)
     factory, options = ppo_config, {}
     if args.learner == 'amp':
-        from locomotion.priors.amp import amp_ppo_config
+        from locomotion.amp.amp import amp_ppo_config
         factory, options = amp_ppo_config, {'networks': args.networks}
     config = factory(args.seed, **options, action_mean=args.action_mean,
                      observation_normalization=args.observation_normalization, **learner_options(args))

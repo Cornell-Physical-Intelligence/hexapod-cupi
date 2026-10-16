@@ -114,7 +114,7 @@ def main(argv=None):
         robot.MODEL_SHA256, read_arrays=not args.preflight_only)
     if args.start_phase == .5 and round(declaration['config']['period_s']/.02) % 2:
         raise ValueError('Half-cycle replay requires an even number of controls')
-    from locomotion.priors.features import extract_features, feature_contract
+    from locomotion.amp.features import extract_features, feature_contract
     config = declaration['config']
     command = [config['forward_mps'], config.get('left_mps', 0.), config.get('yaw_rate_rad_s', 0.)]
     identity.update(controller_kind='optimized_periodic_motor_targets', learned_policy=False,

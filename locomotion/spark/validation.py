@@ -15,7 +15,7 @@ ENTRY_POINTS = {
     'evaluate': ('locomotion.scripts.play', ()),
     'diagnostic': ('locomotion.scripts.diagnose', ()),
     'probe': ('locomotion.scripts.diagnose', ('--noise-probe',)),
-    'replay': ('locomotion.priors.replay_native', ('--mode', 'replay')),
+    'replay': ('locomotion.amp.replay_native', ('--mode', 'replay')),
 }
 
 

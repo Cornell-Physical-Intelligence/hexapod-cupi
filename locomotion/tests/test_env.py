@@ -7,7 +7,7 @@ from locomotion.omniwalk.adapter import OmniEnv
 from locomotion.omniwalk.env_cfg import EnvConfig
 from locomotion.omniwalk.mdp.frames import inverse_rotate, rotate
 from locomotion.omniwalk.mdp.actions import emitted_target, executed_action_feature
-from locomotion.priors.features import extract_features
+from locomotion.amp.features import extract_features
 from locomotion.robots.hexapod import JOINT_NAMES, KD, verify_assets
 from locomotion.robots.rs05 import motor_force
 from locomotion.evaluation.capture import diagnostic_servo

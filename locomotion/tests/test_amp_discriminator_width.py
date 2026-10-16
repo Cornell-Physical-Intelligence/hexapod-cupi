@@ -1,8 +1,8 @@
 """The discriminator reads its input width from the shared AMP feature contract."""
 import unittest
 
-from locomotion.priors import discriminator as amp_discriminator
-from locomotion.priors.features import feature_contract
+from locomotion.amp import discriminator as amp_discriminator
+from locomotion.amp.features import feature_contract
 
 
 class ContractWidthTests(unittest.TestCase):

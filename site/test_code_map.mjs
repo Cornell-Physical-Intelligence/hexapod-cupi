@@ -32,12 +32,12 @@ const input = (id, value) => {
 const click = (id, data) => fire(id, 'click', {target:{closest:() => ({dataset:data})}});
 
 // Packages: one square each, sized and labelled, with arrows for imports between packages.
-for (const name of ['omniwalk', 'tripod', 'priors', 'surrogate', 'evaluation', 'spark', 'robots', 'rl', 'scripts']) {
+for (const name of ['omniwalk', 'hexapod', 'amp', 'surrogate', 'evaluation', 'spark', 'robots', 'rl', 'scripts']) {
   assert.ok(html('packages').includes(`data-package="${name}"`), `Missing package ${name}`);
 }
 assert.ok(!html('packages').includes('data-package="tests"'), 'Tests stay hidden by default');
 assert.ok(/class="use[^"]*" data-edge="[^"]+&gt;[^"]+"/.test(html('packages')), 'Package arrows are drawn');
-assert.ok(html('packages').includes('data-edge="priors&gt;omniwalk"'), 'The motion priors import the omni task');
+assert.ok(html('packages').includes('data-edge="amp&gt;omniwalk"'), 'The motion priors import the omni task');
 assert.ok(/<rect x="[\d.]+" y="[\d.]+" width="[\d.]+" height="[\d.]+"\/>/.test(html('packages')));
 
 // Selecting a package draws its files; selecting a file draws its definitions bar.

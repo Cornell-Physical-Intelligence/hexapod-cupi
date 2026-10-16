@@ -43,7 +43,7 @@ def evaluation_policy(env, args, config, identity, checkpoint_record, compatibil
     observation = env.observations(env.current)['obs']
     scaled = actor_input(env, args, observation)
     if args.networks == 'paper':
-        from locomotion.priors.networks import actor_observation
+        from locomotion.amp.networks import actor_observation
         observations = actor_observation(observation)
     else:
         observations = TensorDict({'policy': scaled}, batch_size=[env.num_envs])
@@ -70,7 +70,7 @@ def evaluation_policy(env, args, config, identity, checkpoint_record, compatibil
 def run_evaluation(env, args, policy, state, started):
     """Score the policy on the selected cases, then require a complete set of load summaries."""
     from locomotion.evaluation.runner import evaluate_suite, run_learning_probe_suite
-    from locomotion.priors.features import extract_features
+    from locomotion.amp.features import extract_features
     env.render = NativePolicyCamera(env)
     remaining = max(.001, args.max_wall_seconds-(time.monotonic()-started))
     options = dict(progress=print_progress, max_wall_seconds=remaining, motion_features=extract_features)

@@ -4,7 +4,7 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion.priors.features import extract_features, feature_contract
+from locomotion.amp.features import extract_features, feature_contract
 
 
 class AMPFeatureTests(unittest.TestCase):

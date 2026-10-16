@@ -22,7 +22,7 @@ class PackBindingTests(unittest.TestCase):
             self.assertNotIn('--noise-probe', binding['command_args'])
             manifest = verify_runtime(root/'pack/source')
             self.assertFalse(any('/tripod/' in name for name in manifest['files']))
-            self.assertFalse((root/'pack/source/locomotion/tripod').exists())
+            self.assertFalse((root/'pack/source/locomotion/hexapod').exists())
             nested = root/'pack/source/locomotion/robots/rs05.py'
             nested.write_text(nested.read_text()+'\n# tamper\n')
             with self.assertRaisesRegex(ValueError, 'manifest differs'):

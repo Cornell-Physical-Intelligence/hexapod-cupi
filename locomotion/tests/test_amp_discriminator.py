@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion.priors import discriminator as amp
+from locomotion.amp import discriminator as amp
 from locomotion.omniwalk.mdp.commands import TaskConfig
 from locomotion.omniwalk.mdp.frames import inverse_rotate
 

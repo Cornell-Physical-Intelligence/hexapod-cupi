@@ -13,7 +13,7 @@ import locomotion.omniwalk.mdp.commands as commands
 import locomotion.omniwalk.adapter as env
 import locomotion.omniwalk.mdp.actions as actions
 import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
-from locomotion.priors.features import extract_features
+from locomotion.amp.features import extract_features
 import locomotion.robots.hexapod as robot
 import locomotion.robots.rs05 as rs05
 

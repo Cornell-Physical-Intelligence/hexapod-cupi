@@ -12,7 +12,7 @@ from unittest.mock import patch
 import torch
 
 ROOT = Path(__file__).resolve().parents[2]
-PACKAGE = ROOT/'locomotion/tripod'
+PACKAGE = ROOT/'locomotion/hexapod'
 SOURCE_REVISION = '969ea5bc942df3122b2662650f29acd11644a41c'
 SOURCE_HASHES = {
     '__init__.py': '6b7b28b0491ff1abef576d5fb6c8f662333143d252195286fa80d1b33b3efa61',
@@ -88,16 +88,16 @@ class ShauryaSourceTests(unittest.TestCase):
         calls = []
         tree = ast.parse(source('__init__.py'))
         tree.body = [node for node in tree.body if not isinstance(node, (ast.Import, ast.ImportFrom))]
-        scope = {'__name__': 'locomotion.tripod', 'gym': SimpleNamespace(register=lambda **kwargs: calls.append(kwargs)),
-                 'agents': SimpleNamespace(__name__='locomotion.tripod.agents')}
+        scope = {'__name__': 'locomotion.hexapod', 'gym': SimpleNamespace(register=lambda **kwargs: calls.append(kwargs)),
+                 'agents': SimpleNamespace(__name__='locomotion.hexapod.agents')}
         exec(compile(tree, str(PACKAGE/'__init__.py'), 'exec'), scope)
         self.assertEqual([entry['id'] for entry in calls], ['Hexapod-Flat-Direct-v0', 'Hexapod-Rough-Direct-v0'])
         for entry, terrain in zip(calls, ('Flat', 'Rough')):
-            self.assertEqual(entry['entry_point'], 'locomotion.tripod.hexapod_env:HexapodEnv')
+            self.assertEqual(entry['entry_point'], 'locomotion.hexapod.hexapod_env:HexapodEnv')
             self.assertEqual(entry['kwargs']['env_cfg_entry_point'],
-                             f'locomotion.tripod.hexapod_env_cfg:Hexapod{terrain}EnvCfg')
+                             f'locomotion.hexapod.hexapod_env_cfg:Hexapod{terrain}EnvCfg')
             self.assertEqual(entry['kwargs']['rsl_rl_cfg_entry_point'],
-                             f'locomotion.tripod.agents.rsl_rl_ppo_cfg:Hexapod{terrain}PPORunnerCfg')
+                             f'locomotion.hexapod.agents.rsl_rl_ppo_cfg:Hexapod{terrain}PPORunnerCfg')
             self.assertTrue(entry['disable_env_checker'])
 
     def test_asset_path_defaults_to_repo_robot_and_keeps_the_override(self):

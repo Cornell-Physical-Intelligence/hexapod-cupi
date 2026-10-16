@@ -34,7 +34,7 @@ def training_wrapper(env, args, task):
     from locomotion.rl.wrapper import OmniVecEnv
     wrapper, options = OmniVecEnv, {}
     if args.learner == 'amp':
-        from locomotion.priors.amp import AMPConfig, AMPVecEnv, CollisionCapture
+        from locomotion.amp.amp import AMPConfig, AMPVecEnv, CollisionCapture
         wrapper = AMPVecEnv
         options = {'collision': CollisionCapture(env), 'amp_config': AMPConfig().resolve(args.seed)}
     return wrapper(task, **options, observation_scaling=args.observation_scaling,

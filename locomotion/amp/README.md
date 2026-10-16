@@ -2,7 +2,7 @@
 
 You generate periodic motor targets, audit their native replay and compare
 PPO with an adversarial motion prior. The manifest of the admitted bank in
-`datasets/amp_demonstrations_001` binds 18,000 transitions to the approved
+`locomotion/priors/datasets/amp_demonstrations_001`, the path the admission records cite, binds 18,000 transitions to the approved
 model and reviewed native clips.
 
 | Module | Purpose |
@@ -17,10 +17,10 @@ model and reviewed native clips.
 ## Generate and admit demonstrations
 
 ```sh
-uv run python -m locomotion.priors.optimize --help
-uv run python -m locomotion.priors.prepare --help
-uv run python -m locomotion.priors.dataset --help
-uv run python -m unittest discover -s locomotion/priors/tests
+uv run python -m locomotion.amp.optimize --help
+uv run python -m locomotion.amp.prepare --help
+uv run python -m locomotion.amp.dataset --help
+uv run python -m unittest discover -s locomotion/amp/tests
 ```
 
 Give each attempt a fresh output directory. The optimizer retains failed

@@ -47,13 +47,13 @@ uv run python -m unittest discover -s navigation/tests
 uv run python -m unittest discover -s mission/tests
 uv run python -m unittest discover -s robot/tests
 uv run python -m unittest discover -s locomotion/tests
-uv run python -m unittest discover -s locomotion/priors/tests
+uv run python -m unittest discover -s locomotion/amp/tests
 uv run python -m unittest discover -s locomotion/surrogate/tests
 uv run python -m unittest discover -s tests
 python3 tools/source_inventory.py check
 python3 tools/archive.py check
 uv run python -m locomotion.spark.inputs check
-uv run python -m locomotion.priors.dataset check
+uv run python -m locomotion.amp.dataset check
 python3 tools/check_pipeline_lineages.py current
 python3 tools/project_site.py check --base <integration-base-SHA>
 python3 tools/project_site.py build

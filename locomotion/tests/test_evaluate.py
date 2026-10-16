@@ -10,7 +10,7 @@ import torch
 import locomotion.evaluation.runner as run
 import locomotion.evaluation as scoring
 from locomotion.omniwalk.env_cfg import EnvConfig
-from locomotion.priors.features import extract_features
+from locomotion.amp.features import extract_features
 
 
 class FakeNative:

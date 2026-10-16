@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 import numpy as np
 
-from locomotion.priors.features import feature_contract
-from locomotion.priors import dataset
-from locomotion.priors.dataset import motion_cases
+from locomotion.amp.features import feature_contract
+from locomotion.amp import dataset
+from locomotion.amp.dataset import motion_cases
 from locomotion.robots.hexapod import JOINT_NAMES, MODEL_SHA256, USD_SHA256
 from locomotion.evaluation.force_metrics import report_for
 from locomotion.tests.test_evaluation import fixture as scoring_fixture
@@ -174,7 +174,7 @@ class DatasetTests(unittest.TestCase):
             manifest = dataset.export(list(records), review, root/'complete')
             arrays, _ = dataset.load(root/'complete')
             self.assertEqual(manifest['transitions'], 18000)
-            self.assertEqual(manifest['processing_identity']['source_files']['locomotion/priors/dataset.py'],
+            self.assertEqual(manifest['processing_identity']['source_files']['locomotion/amp/dataset.py'],
                              dataset.sha(dataset.__file__))
             altered = copy.deepcopy(manifest); del altered['processing_identity']
             dataset.save(root/'complete/manifest.json', altered)

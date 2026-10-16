@@ -129,10 +129,10 @@ def prepare(output, remote_root, *, mode='train', updates=512, seed=20260917,
         shutil.copy2(path, destination)
     prior_sources = ('__init__.py', 'amp.py', 'discriminator.py', 'networks.py', 'dataset.py', 'processing_sources_v2.json') if learner == 'amp' else (('__init__.py', 'replay_native.py') if mode == 'replay' else ())
     if prior_sources:
-        prior_package = package/'priors'
+        prior_package = package/'amp'
         prior_package.mkdir(exist_ok=True)
         for name in prior_sources:
-            shutil.copy2(root/'locomotion/priors'/name, prior_package/name)
+            shutil.copy2(root/'locomotion/amp'/name, prior_package/name)
     if learner == 'amp':
         bank = Path('locomotion/priors/datasets/amp_demonstrations_001')
         shutil.copytree(root/bank, source/bank)

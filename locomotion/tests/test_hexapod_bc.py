@@ -15,7 +15,7 @@ from torch import nn
 
 REVISION = '969ea5bc942df3122b2662650f29acd11644a41c'
 ROOT = Path(__file__).resolve().parents[2]
-TOOLS = ROOT / 'locomotion/tripod/tools'
+TOOLS = ROOT / 'locomotion/hexapod/tools'
 
 
 def original(name):
@@ -26,8 +26,8 @@ def tree(source):
     parsed = ast.parse(source)
     parsed.body = parsed.body[1:]  # The module examples use the retained package's path.
     for node in ast.walk(parsed):
-        if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith('locomotion.tripod.'):
-            node.module = node.module.replace('locomotion.tripod.', 'hexapod.', 1)
+        if isinstance(node, ast.ImportFrom) and node.module and node.module.startswith('locomotion.hexapod.'):
+            node.module = node.module.replace('locomotion.hexapod.', 'hexapod.', 1)
         if isinstance(node, ast.Constant) and node.value == 'logs/bc':
             node.value = '/workspace/learning/logs/bc'
     return parsed

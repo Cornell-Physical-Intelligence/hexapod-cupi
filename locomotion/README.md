@@ -14,9 +14,9 @@ shows definitions and imports.
 | `scripts/` | Container entry points: train, play and diagnose. | `train.py` |
 | `evaluation/` | Native capture, scene checks, admission, scoring and training diagnostics. | `runner.py` |
 | `spark/` | Prepare, launch and bind native allocations. | `prepare.py` |
-| `priors/` | Motion demonstrations, motion features and AMP learning. | [README](priors/README.md) |
+| `amp/` | Motion demonstrations, motion features and AMP learning. | [README](amp/README.md) |
 | `surrogate/` | CPU MuJoCo training and trace replay. | [README](surrogate/README.md) |
-| `tripod/` | Original tripod task with BC and PPO fine-tuning. | `hexapod_env.py` |
+| `hexapod/` | Original tripod task with BC and PPO fine-tuning. | `hexapod_env.py` |
 | `tests/` | CPU, parity and native replay tests. | [Verification](#verification) |
 
 ## Omniwalk files
@@ -91,9 +91,9 @@ recipe against the checkpoint's compatibility receipt.
 
 For tripod, put this repository on `PYTHONPATH` in the pinned Isaac Lab
 checkout. Use stock train/play scripts with callback
-`locomotion.tripod.register` and task `Hexapod-Flat-Direct-v0` or
+`locomotion.hexapod.register` and task `Hexapod-Flat-Direct-v0` or
 `Hexapod-Rough-Direct-v0`. Run BC with
-`./isaaclab.sh -p -m locomotion.tripod.tools.bc_clone` and the
+`./isaaclab.sh -p -m locomotion.hexapod.tools.bc_clone` and the
 [original recipe](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/969ea5bc942df3122b2662650f29acd11644a41c/hexapod/METHOD.md#3-how-to-reproduce-inside-the-container)
 overrides. Use the common evaluator for acceptance.
 

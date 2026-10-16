@@ -7,12 +7,12 @@ import unittest
 
 import numpy as np
 
-from locomotion.priors.model import ROOT, RobotModel, digest
-from locomotion.priors.optimize import Config, audit
-from locomotion.priors.prepare import prepare
-from locomotion.priors.replay_native import validate_trajectory
+from locomotion.amp.model import ROOT, RobotModel, digest
+from locomotion.amp.optimize import Config, audit
+from locomotion.amp.prepare import prepare
+from locomotion.amp.replay_native import validate_trajectory
 
-FIXTURE = ROOT/'locomotion/priors/tests/fixtures/solve'
+FIXTURE = ROOT/'locomotion/amp/tests/fixtures/solve'
 TRAJECTORY_SHA = 'a76e093075ce471210a66bf4ae3835a1dca94406b930e4a791a028941a502ec1'
 
 
@@ -91,7 +91,7 @@ class OptimizationTests(unittest.TestCase):
             self.assertIn(['/recorded/batch', '/standing_batch'], binding['extra_mounts'])
             for name in ('omniwalk/adapter.py', 'omniwalk/env_cfg.py', 'spark/safety.py', 'spark/launch.py', 'evaluation/runner.py'):
                 self.assertEqual((output/'source/locomotion'/name).read_bytes(), (ROOT/'locomotion'/name).read_bytes())
-            self.assertEqual((output/'source/locomotion/priors/replay_native.py').read_bytes(), (ROOT/'locomotion/priors/replay_native.py').read_bytes())
+            self.assertEqual((output/'source/locomotion/amp/replay_native.py').read_bytes(), (ROOT/'locomotion/amp/replay_native.py').read_bytes())
             with self.assertRaises(FileExistsError):
                 prepare(FIXTURE, output, '/home/orionh/HEXAPOD_runs/restart_20260914/test_trajectory')
 

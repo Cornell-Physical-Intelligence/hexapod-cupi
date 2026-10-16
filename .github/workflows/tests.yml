@@ -25,7 +25,7 @@ jobs:
           for suite in contracts navigation mission robot locomotion; do
             uv run python -m unittest discover -s "$suite/tests"
           done
-          uv run python -m unittest discover -s locomotion/priors/tests
+          uv run python -m unittest discover -s locomotion/amp/tests
           uv run python -m unittest discover -s locomotion/surrogate/tests
           uv run python -m unittest discover -s tests
       - name: Verify source and canonical input identities
@@ -34,7 +34,7 @@ jobs:
           uv run python tools/archive.py check
           uv run python -m locomotion.spark.inputs check
           uv run python tools/check_pipeline_lineages.py current
-          uv run python -m locomotion.priors.dataset check
+          uv run python -m locomotion.amp.dataset check
       - name: Generate this revision's source manifest
         run: |
           ref=$(uv run python -c "from tools.check_pipeline_lineages import ARCHIVED_REF; print(ARCHIVED_REF)")

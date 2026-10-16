@@ -13,7 +13,7 @@ import time
 import numpy as np
 import torch
 
-from locomotion.priors.features import extract_features
+from locomotion.amp.features import extract_features
 import locomotion.rl.ppo as algorithms
 import locomotion.rl.wrapper as omni_wrapper
 from locomotion.surrogate.train import build_wrapper, process_threads, resolve, wrapper_options
@@ -78,7 +78,7 @@ class DeterministicPolicy:
             inputs = self.inputs(observation)
             groups = {'policy': inputs}
             if 'proprio_history' in getattr(self.actor, 'obs_groups', ()):
-                from locomotion.priors.networks import actor_observation
+                from locomotion.amp.networks import actor_observation
                 groups.update(actor_observation(inputs).items())
             action = self.actor(TensorDict(groups, batch_size=[self.env.num_envs]))
             if self.mean2:
@@ -297,7 +297,7 @@ def evaluate_checkpoint(args):
         wrapped = build_wrapper(resolve(wrapper_spec), task, options)
         observations = wrapped.get_observations()
         if 'proprio_history' in config['obs_groups']['actor']:
-            from locomotion.priors.networks import actor_observation
+            from locomotion.amp.networks import actor_observation
             observations.update(actor_observation(wrapped.current['obs']))
         actor, _ = algorithms.load_actor(checkpoint, config, observations, 'cpu')
         # A wrapper that changes the action or observation path can supply its own deterministic policy.

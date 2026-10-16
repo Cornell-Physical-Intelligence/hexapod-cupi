@@ -105,7 +105,7 @@ class OwnedLaunchTests(unittest.TestCase):
             b = copy.deepcopy(probe); b["command_args"] = args
             with self.subTest(args=args[:4]), self.assertRaises(ValueError):
                 self.verify_without_filesystem(b)
-        replay = self.binding(); replay.update(mode="replay", module="locomotion.priors.replay_native")
+        replay = self.binding(); replay.update(mode="replay", module="locomotion.amp.replay_native")
         replay["command_args"] = ["--mode", "replay", *replay["command_args"]]
         self.verify_without_filesystem(replay)
         rest = replay["command_args"][2:]

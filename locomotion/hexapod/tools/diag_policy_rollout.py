@@ -1,7 +1,7 @@
 """Run an exported policy in the hexapod env and report what pose it actually settles into.
 
 Run (Isaac Lab root in the container, repo root on PYTHONPATH):
-  PYTHONPATH=<repo>:$PYTHONPATH ./isaaclab.sh -p -m locomotion.tripod.tools.diag_policy_rollout --headless --policy <run>/exported/policy.pt --cmd_max 0.15
+  PYTHONPATH=<repo>:$PYTHONPATH ./isaaclab.sh -p -m locomotion.hexapod.tools.diag_policy_rollout --headless --policy <run>/exported/policy.pt --cmd_max 0.15
 """
 
 import argparse
@@ -27,8 +27,8 @@ app = AppLauncher(args).app
 
 import torch  # noqa: E402
 
-from locomotion.tripod.hexapod_env import HexapodEnv  # noqa: E402
-from locomotion.tripod.hexapod_env_cfg import HexapodFlatEnvCfg  # noqa: E402
+from locomotion.hexapod.hexapod_env import HexapodEnv  # noqa: E402
+from locomotion.hexapod.hexapod_env_cfg import HexapodFlatEnvCfg  # noqa: E402
 
 cfg = HexapodFlatEnvCfg()
 cfg.scene.num_envs = args.num_envs

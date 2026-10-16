@@ -10,11 +10,11 @@ from dataclasses import replace
 import numpy as np
 import casadi as ca
 
-from locomotion.priors.dataset import motion_cases, command_index
-from locomotion.priors.model import RobotModel
-from locomotion.priors.model import ROOT
-from locomotion.priors.optimize import Config, cycle_state, initial_trajectory, planar_pose, schedule, restart_values
-from locomotion.priors.replay_native import startup_target
+from locomotion.amp.dataset import motion_cases, command_index
+from locomotion.amp.model import RobotModel
+from locomotion.amp.model import ROOT
+from locomotion.amp.optimize import Config, cycle_state, initial_trajectory, planar_pose, schedule, restart_values
+from locomotion.amp.replay_native import startup_target
 
 
 class OmniTrajectoryTests(unittest.TestCase):
@@ -90,8 +90,8 @@ class OmniTrajectoryTests(unittest.TestCase):
     def test_cli_preserves_half_cycle_start_in_frozen_replay(self):
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp)/'replay'
-            subprocess.run([sys.executable, '-m', 'locomotion.priors.prepare',
-                '--trajectory-directory', str(ROOT/'locomotion/priors/tests/fixtures/solve'),
+            subprocess.run([sys.executable, '-m', 'locomotion.amp.prepare',
+                '--trajectory-directory', str(ROOT/'locomotion/amp/tests/fixtures/solve'),
                 '--output', str(output), '--remote-root',
                 '/home/orionh/HEXAPOD_runs/restart_20260914/test_amp_half_cycle',
                 '--inputs', str(ROOT/'configs/locomotion_spark.json'), '--start-phase', '0.5',
@@ -113,7 +113,7 @@ class OmniTrajectoryTests(unittest.TestCase):
         self.assertIs(startup_target(target, neutral, 100, 50), target)
 
     def test_restart_keeps_problem_and_model_identity(self):
-        fixture = ROOT/'locomotion/priors/tests/fixtures/solve/trajectory.npz'
+        fixture = ROOT/'locomotion/amp/tests/fixtures/solve/trajectory.npz'
         config = Config(max_iterations=1200)
         values = restart_values(fixture, config, self.model)
         with np.load(fixture) as original:

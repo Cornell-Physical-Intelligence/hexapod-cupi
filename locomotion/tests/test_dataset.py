@@ -9,7 +9,7 @@ import unittest
 
 import numpy as np
 
-import locomotion.priors.dataset as dataset
+import locomotion.amp.dataset as dataset
 
 
 class DatasetTests(unittest.TestCase):

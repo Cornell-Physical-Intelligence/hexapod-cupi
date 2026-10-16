@@ -218,13 +218,13 @@ def amp_ppo_config(seed, *, networks='mlp', amp_config=None, action_mean='unboun
     amp_config = (AMPConfig() if amp_config is None else amp_config).resolve(seed)
     amp_config.validate()
     # Checkpoint records pass through JSON; a tuple here would never equal its saved list.
-    config['algorithm'].update(class_name='locomotion.priors.amp:AMPPPO', amp_cfg=json_shape(asdict(amp_config)))
+    config['algorithm'].update(class_name='locomotion.amp.amp:AMPPPO', amp_cfg=json_shape(asdict(amp_config)))
     if networks == 'paper':
         if learner_options.get('gait_clock', 0) or learner_options.get('observation_scaling', 'none') != 'none' or learner_options.get('velocity_noise', 0.):
             raise ValueError('Paper networks require their recorded raw observation groups without gait-clock inputs')
         config['obs_groups'] = {'actor': list(nets.ACTOR_GROUPS), 'critic': list(nets.CRITIC_GROUPS)}
-        config['actor'].update(class_name='locomotion.priors.networks:PaperActor', hidden_dims=list(nets.ACTOR_HIDDEN))
-        config['critic'].update(class_name='locomotion.priors.networks:PaperCritic', hidden_dims=list(nets.CRITIC_HIDDEN))
+        config['actor'].update(class_name='locomotion.amp.networks:PaperActor', hidden_dims=list(nets.ACTOR_HIDDEN))
+        config['critic'].update(class_name='locomotion.amp.networks:PaperCritic', hidden_dims=list(nets.CRITIC_HIDDEN))
     elif networks != 'mlp':
         raise ValueError("networks must be 'mlp' or 'paper'")
     config['networks'] = networks

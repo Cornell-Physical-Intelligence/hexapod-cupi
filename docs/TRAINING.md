@@ -55,7 +55,7 @@ paper reproduction separate from adaptations for this robot. Use the
 
 AMP remains an active comparison: generate and review motion demonstrations, then
 train its discriminator alongside PPO. Preserve the same task and simulation
-settings when comparing PPO with AMP. Use `priors/` for that workflow.
+settings when comparing PPO with AMP. Use `amp/` for that workflow.
 
 ## Acceptance
 

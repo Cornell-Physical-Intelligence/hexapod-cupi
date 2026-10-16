@@ -220,67 +220,70 @@
       "purpose": "Sample commands, apply the walking reward and notify an optional observer around selected episode resets."
     },
     {
-      "path": "locomotion/priors/__init__.py",
+      "path": "locomotion/amp/__init__.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Package namespace."
     },
     {
-      "path": "locomotion/priors/amp.py",
+      "path": "locomotion/amp/amp.py",
       "classification": "current",
       "owner": "Locomotion",
-      "purpose": "Add an adversarial motion reward and discriminator update to stock RSL-RL PPO."
+      "purpose": "Add an adversarial motion reward and discriminator update to stock RSL-RL PPO.",
+      "previous_path": "locomotion/priors/amp.py"
     },
     {
-      "path": "locomotion/priors/dataset.py",
+      "path": "locomotion/amp/dataset.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Program lead",
       "purpose": "Audit native clips and export hash-bound transitions after the program lead reviews motion."
     },
     {
-      "path": "locomotion/priors/discriminator.py",
+      "path": "locomotion/amp/discriminator.py",
       "classification": "current",
       "owner": "Locomotion",
-      "purpose": "Fit a least-squares discriminator and score paired 61-value motion states."
+      "purpose": "Fit a least-squares discriminator and score paired 61-value motion states.",
+      "previous_path": "locomotion/priors/discriminator.py"
     },
     {
-      "path": "locomotion/priors/features.py",
+      "path": "locomotion/amp/features.py",
       "previous_path": "locomotion/omniwalk/mdp/observations.py",
       "classification": "current",
       "owner": "Locomotion lead",
       "purpose": "Pack the shared 61-value flat-ground motion features from measured state."
     },
     {
-      "path": "locomotion/priors/model.py",
+      "path": "locomotion/amp/model.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Floating-base Newton-Euler dynamics for the approved direct-drive robot."
     },
     {
-      "path": "locomotion/priors/networks.py",
+      "path": "locomotion/amp/networks.py",
       "classification": "current",
       "owner": "Locomotion",
-      "purpose": "History and privileged encoders for the retained AMP network comparison."
+      "purpose": "History and privileged encoders for the retained AMP network comparison.",
+      "previous_path": "locomotion/priors/networks.py"
     },
     {
-      "path": "locomotion/priors/optimize.py",
+      "path": "locomotion/amp/optimize.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Program lead",
       "purpose": "Optimize a periodic tripod cycle for translation, yaw and arcs with full-body inverse dynamics."
     },
     {
-      "path": "locomotion/priors/prepare.py",
+      "path": "locomotion/amp/prepare.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Program lead",
       "purpose": "Pack a fresh native replay with unchanged physics and ownership controls."
     },
     {
-      "path": "locomotion/priors/replay_native.py",
+      "path": "locomotion/amp/replay_native.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Program lead",
@@ -455,56 +458,56 @@
       "purpose": "Train PPO on the MuJoCo surrogate through the training path of the native trainer."
     },
     {
-      "path": "locomotion/tripod/__init__.py",
+      "path": "locomotion/hexapod/__init__.py",
       "previous_path": "locomotion/behavior_cloning/__init__.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Register Shaurya’s original flat and rough Direct tasks."
     },
     {
-      "path": "locomotion/tripod/agents/__init__.py",
+      "path": "locomotion/hexapod/agents/__init__.py",
       "previous_path": "locomotion/behavior_cloning/agents/__init__.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Declare Shaurya’s learner configuration package."
     },
     {
-      "path": "locomotion/tripod/agents/rsl_rl_ppo_cfg.py",
+      "path": "locomotion/hexapod/agents/rsl_rl_ppo_cfg.py",
       "previous_path": "locomotion/behavior_cloning/agents/rsl_rl_ppo_cfg.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Preserve Shaurya’s flat and rough PPO configurations."
     },
     {
-      "path": "locomotion/tripod/hexapod_env.py",
+      "path": "locomotion/hexapod/hexapod_env.py",
       "previous_path": "locomotion/behavior_cloning/hexapod_env.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Preserve Shaurya’s observations, reward, resets and stock Direct environment."
     },
     {
-      "path": "locomotion/tripod/hexapod_env_cfg.py",
+      "path": "locomotion/hexapod/hexapod_env_cfg.py",
       "previous_path": "locomotion/behavior_cloning/hexapod_env_cfg.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Preserve Shaurya’s scene, randomization and task settings."
     },
     {
-      "path": "locomotion/tripod/hexapod_robot_cfg.py",
+      "path": "locomotion/hexapod/hexapod_robot_cfg.py",
       "previous_path": "locomotion/behavior_cloning/hexapod_robot_cfg.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Preserve Shaurya’s implicit PD actuator and robot configuration."
     },
     {
-      "path": "locomotion/tripod/tools/bc_clone.py",
+      "path": "locomotion/hexapod/tools/bc_clone.py",
       "previous_path": "locomotion/behavior_cloning/tools/bc_clone.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Run Shaurya’s original teacher, BC, DAgger and checkpoint splice."
     },
     {
-      "path": "locomotion/tripod/tools/diag_policy_rollout.py",
+      "path": "locomotion/hexapod/tools/diag_policy_rollout.py",
       "previous_path": "locomotion/behavior_cloning/tools/diag_policy_rollout.py",
       "classification": "prototype",
       "owner": "Platform lead",
