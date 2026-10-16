@@ -10,7 +10,9 @@ plain MLP policy walking: behavior-clone the scripted tripod, then fine-tune wit
 | `agents/rsl_rl_ppo_cfg.py` | PPO settings (rsl_rl) |
 | `tools/bc_clone.py` | clone the scripted tripod into the PPO actor (BC + DAgger) and splice it into a checkpoint |
 | `tools/diag_policy_rollout.py` | evaluate a policy with exploration off from a standing start: speed along the command, heading error, falls |
+| `tools/make_simple_collision.py` | one primitive per link instead of 153 SDF meshes: 2.4-4.5x faster training, same walking (`COLLISION_EXPERIMENT.md`) |
 | `METHOD.md` | the method, every change vs. the ANYmal port, reproduce commands, measured results |
+| `COLLISION_EXPERIMENT.md` | the simplified collision asset: how it is built, fidelity checks, throughput sweep |
 | `RL_PROTOCOL.md` | the five questions to ask before/while training locomotion with RL, and why pure PPO stood still here |
 
 Result (measured, 32 robots, noise-free policy, standing start, commands 0.10-0.15 m/s forward/back):
