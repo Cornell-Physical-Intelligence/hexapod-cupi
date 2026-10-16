@@ -118,9 +118,9 @@ class SurrogateConfig:
     record_motion_features: bool = False
     render: bool = False
     device: str = "cpu"
-    floor: str = "isaaclab_ground_plane"
-    floor_contact_offset_m: float = 0.02
-    floor_rest_offset_m: float = 0.0
+    floor: str = "isaaclab_mesh"
+    floor_contact_offset_m: float | None = None
+    floor_rest_offset_m: float | None = None
 
     def __post_init__(self):
         if type(self.num_envs) is not int or self.num_envs < 1:

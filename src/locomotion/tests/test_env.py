@@ -159,9 +159,13 @@ class FloorDeclarationTests(unittest.TestCase):
         from locomotion.omniwalk.env_cfg import FLOORS, EnvConfig
         for floor in FLOORS:
             self.assertEqual(EnvConfig(floor=floor).declaration()['floor'], floor)
-        self.assertEqual(EnvConfig().declaration()['floor_contact_offset_m'], .02)
+        declared = EnvConfig().declaration()
+        self.assertEqual((declared['floor'], declared['floor_contact_offset_m'], declared['floor_rest_offset_m']),
+                         ('isaaclab_mesh', None, None))
+        self.assertFalse(EnvConfig().authors_floor_offsets)
+        self.assertTrue(EnvConfig(floor_contact_offset_m=.02, floor_rest_offset_m=0.).authors_floor_offsets)
         with self.assertRaises(ValueError):
             EnvConfig(floor='two_triangle_mesh')
-        for contact, rest in ((.02, .02), (.0, .0), (.2, .0), (.02, -.001)):
+        for contact, rest in ((.02, .02), (.0, .0), (.2, .0), (.02, -.001), (.02, None), (None, 0.)):
             with self.subTest(contact=contact, rest=rest), self.assertRaises(ValueError):
                 EnvConfig(floor_contact_offset_m=contact, floor_rest_offset_m=rest)

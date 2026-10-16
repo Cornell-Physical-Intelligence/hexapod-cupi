@@ -19,7 +19,8 @@ from locomotion.robots.hexapod import BODY_NAMES, ISAACLAB_REVISION, JOINT_NAMES
 ROOT = Path(__file__).resolve().parents[3]
 MODEL_PATH = ROOT/'robot/hexapod_mkii_updated_v1/model_rs05_mass_corrected.json'
 SCENE_PRIM = '/physicsScene'
-GROUND = '/Ground/GroundPlane/CollisionPlane'
+GROUND = '/Ground/mesh'
+GROUND_MATERIAL = '/Ground/physicsMaterial'
 N = 2
 
 
@@ -36,10 +37,16 @@ class Prim:
         return value(self.attributes[name])
 
     def HasAPI(self, api):
-        return api in self.apis
+        return getattr(api, 'schema', api) in self.apis
 
     def GetTypeName(self):
         return self.type_name
+
+    def GetPath(self):
+        return self.attributes.get('path')
+
+    def IsValid(self):
+        return True
 
 
 def articulation_api(prim):
@@ -52,8 +59,31 @@ def collision_api(prim):
                            GetRestOffsetAttr=lambda: value(prim.attributes.get('physxCollision:restOffset')))
 
 
-PXR = SimpleNamespace(PhysxSchema=SimpleNamespace(PhysxArticulationAPI=articulation_api, PhysxCollisionAPI=collision_api),
-                      UsdPhysics=SimpleNamespace(CollisionAPI='CollisionAPI', MeshCollisionAPI='MeshCollisionAPI'))
+def attribute_api(prefix, schema=None):
+    """A schema stand-in whose Get<Name>Attr readers map to ``prefix:camelName`` attributes."""
+    def api(prim):
+        class Reader:
+            def __getattr__(self, name):
+                field = name[3:-4]
+                key = prefix + ':' + field[0].lower() + field[1:]
+                return lambda: value(prim.attributes.get(key))
+        return Reader()
+    api.schema = schema
+    return api
+
+
+def material_binding_api(prim):
+    def bound(materialPurpose):
+        material = prim.attributes.get('material:binding:physics')
+        return (SimpleNamespace(GetPrim=lambda: material) if material else None), None
+    return SimpleNamespace(ComputeBoundMaterial=bound)
+
+
+PXR = SimpleNamespace(PhysxSchema=SimpleNamespace(PhysxArticulationAPI=articulation_api, PhysxCollisionAPI=collision_api,
+                                                  PhysxMaterialAPI=attribute_api('physxMaterial')),
+                      UsdPhysics=SimpleNamespace(CollisionAPI='CollisionAPI', MeshCollisionAPI=attribute_api('physics', 'MeshCollisionAPI'),
+                                                 MaterialAPI=attribute_api('physics')),
+                      UsdShade=SimpleNamespace(MaterialBindingAPI=material_binding_api))
 
 
 class Scene:
@@ -91,9 +121,11 @@ class Scene:
         self.prims = {root+'/body': Prim([32, 0], **{'physxArticulation:enabledSelfCollisions': True}) for root in self.roots}
         self.prims[SCENE_PRIM] = Prim(**{'physxScene:timeStepsPerSecond': 400,
                                          'physxScene:enableExternalForcesEveryIteration': True})
-        self.prims[GROUND] = Prim(apis=('CollisionAPI',), type_name='Plane',
-                                  **{'physxCollision:contactOffset': config.floor_contact_offset_m,
-                                     'physxCollision:restOffset': config.floor_rest_offset_m})
+        self.prims[GROUND_MATERIAL] = Prim(path=GROUND_MATERIAL, **{'physics:staticFriction': 1., 'physics:dynamicFriction': 1.,
+                                           'physics:restitution': 0., 'physxMaterial:frictionCombineMode': 'multiply',
+                                           'physxMaterial:restitutionCombineMode': 'multiply'})
+        self.prims[GROUND] = Prim(apis=('CollisionAPI', 'MeshCollisionAPI'), type_name='Mesh',
+                                  **{'physics:approximation': 'none', 'material:binding:physics': self.prims[GROUND_MATERIAL]})
         self.sdf_count, self.sdf_valid = N*153, True
         self.sim = SimpleNamespace(get_physics_step_count=lambda: 0,
             stage=SimpleNamespace(GetPrimAtPath=lambda path: self.prims[path]),
@@ -169,8 +201,11 @@ class SceneCheckTests(unittest.TestCase):
         self.assertEqual(readback['scene_attributes'], {'physxScene:timeStepsPerSecond': 400,
                                                         'physxScene:enableExternalForcesEveryIteration': True})
         self.assertEqual(readback['native_error_events'], [])
-        self.assertEqual(readback['floor_collider'], {'path': GROUND, 'type': 'Plane', 'kind': 'isaaclab_ground_plane',
-                                                      'contact_offset_m': .02, 'rest_offset_m': 0., 'approximation': None})
+        self.assertEqual(readback['floor_collider'], {'path': GROUND, 'type': 'Mesh', 'kind': 'isaaclab_mesh',
+                                                      'contact_offset_m': None, 'rest_offset_m': None, 'approximation': 'none',
+                                                      'material': {'path': GROUND_MATERIAL, 'static_friction': 1., 'dynamic_friction': 1.,
+                                                                   'restitution': 0., 'friction_combine_mode': 'multiply',
+                                                                   'restitution_combine_mode': 'multiply'}})
         self.assertFalse(readback['backend_iteration_introspection'])
         self.assertEqual(torch.tensor(readback['material_properties']).shape, (N, 153, 3))
         self.assertEqual(torch.tensor(readback['contact_offsets']).shape, (N, 153))
@@ -213,12 +248,18 @@ class SceneCheckTests(unittest.TestCase):
             ('materials', native('get_material_properties', (0, 7, 0), .8), ValueError, 'Actual native materials differ'),
             ('contact offsets', native('get_contact_offsets', (1, 9), .002), ValueError, 'Actual native contact/rest offsets differ'),
             ('rest offsets', native('get_rest_offsets', (0, 2), .001), ValueError, 'Actual native contact/rest offsets differ'),
-            ('floor contact offset', prim(GROUND, 'physxCollision:contactOffset', .05), ValueError,
+            ('authored floor contact offset', prim(GROUND, 'physxCollision:contactOffset', .02), ValueError,
              'Actual floor collider differs from the declared floor'),
-            ('floor rest offset', prim(GROUND, 'physxCollision:restOffset', .001), ValueError,
+            ('authored floor rest offset', prim(GROUND, 'physxCollision:restOffset', 0.), ValueError,
              'Actual floor collider differs from the declared floor'),
             ('floor collider', lambda scene: setattr(scene.prims[GROUND], 'apis', ()), ValueError,
              'Actual floor collider differs from the declared floor'),
+            ('floor material unbound', prim(GROUND, 'material:binding:physics', None), ValueError,
+             'Actual floor has no bound physics material'),
+            ('floor friction', prim(GROUND_MATERIAL, 'physics:dynamicFriction', .5), ValueError,
+             'Actual floor material differs from the canonical material'),
+            ('floor combine mode', prim(GROUND_MATERIAL, 'physxMaterial:frictionCombineMode', 'average'), ValueError,
+             'Actual floor material differs from the canonical material'),
             ('native error', lambda scene: scene.native_errors.append('contact buffer overflow'), RuntimeError,
              'Native physics errors prevent acceptance'),
         ]

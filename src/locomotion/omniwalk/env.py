@@ -121,13 +121,12 @@ class IsaacEnv(DirectRLEnv):
         stage = self.sim.stage
         material = RigidBodyMaterialCfg(static_friction=1., dynamic_friction=1., restitution=0.,
                                         friction_combine_mode="multiply", restitution_combine_mode="multiply")
-        offsets = CollisionPropertiesCfg(collision_enabled=True, contact_offset=self.config.floor_contact_offset_m,
-                                         rest_offset=self.config.floor_rest_offset_m)
         if self.config.floor == "isaaclab_ground_plane":
             floor = GroundPlaneCfg(size=(80., 80.), physics_material=material)
             floor.func("/Ground", floor)
         elif self.config.floor == "isaaclab_cuboid":
-            floor = CuboidCfg(size=(80., 80., .1), collision_props=offsets, physics_material=material)
+            floor = CuboidCfg(size=(80., 80., .1), collision_props=CollisionPropertiesCfg(collision_enabled=True),
+                              physics_material=material)
             floor.func("/Ground", floor, translation=(0., 0., -.05))
         else:
             import trimesh
@@ -135,13 +134,17 @@ class IsaacEnv(DirectRLEnv):
             mesh = trimesh.Trimesh(vertices=[(-40., -40., 0.), (40., -40., 0.), (40., 40., 0.), (-40., 40., 0.)],
                                    faces=[[0, 1, 2], [0, 2, 3]], process=False)
             create_prim_from_mesh("/Ground", mesh, physics_material=material)
+            UsdPhysics.MeshCollisionAPI.Apply(stage.GetPrimAtPath("/Ground/mesh")).CreateApproximationAttr("none")
         root = stage.GetPrimAtPath("/Ground")
         collider = (root if root.HasAPI(UsdPhysics.CollisionAPI) else
                     get_first_matching_child_prim("/Ground", lambda prim: prim.HasAPI(UsdPhysics.CollisionAPI), stage=stage))
         physics_material = get_first_matching_child_prim("/Ground", lambda prim: prim.HasAPI(UsdPhysics.MaterialAPI), stage=stage)
         if collider is None or physics_material is None:
             raise RuntimeError("Stock floor has no collider or physics material")
-        define_collision_properties(str(collider.GetPath()), offsets, stage=stage)
+        if self.config.authors_floor_offsets:
+            define_collision_properties(str(collider.GetPath()), CollisionPropertiesCfg(
+                collision_enabled=True, contact_offset=self.config.floor_contact_offset_m,
+                rest_offset=self.config.floor_rest_offset_m), stage=stage)
         self.ground_collision_path = str(collider.GetPath())
         self.scene.filter_collisions(global_prim_paths=["/Ground"])
         for prim in stage.Traverse():

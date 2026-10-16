@@ -63,7 +63,7 @@ def verify_native_recipe(env, phase):
     if hasattr(env, "verify_native_recipe"):
         return env.verify_native_recipe(phase)
     import torch
-    from pxr import PhysxSchema, UsdPhysics
+    from pxr import PhysxSchema, UsdPhysics, UsdShade
     solver = {}
     for root in env.roots:
         prim = env.sim.stage.GetPrimAtPath(root + "/body")
@@ -92,10 +92,27 @@ def verify_native_recipe(env, phase):
              "contact_offset_m": collision.GetContactOffsetAttr().Get(), "rest_offset_m": collision.GetRestOffsetAttr().Get(),
              "approximation": (UsdPhysics.MeshCollisionAPI(collider).GetApproximationAttr().Get()
                                if collider.HasAPI(UsdPhysics.MeshCollisionAPI) else None)}
-    if (not collider.HasAPI(UsdPhysics.CollisionAPI) or floor["contact_offset_m"] is None or floor["rest_offset_m"] is None
-            or abs(floor["contact_offset_m"] - env.cfg.floor_contact_offset_m) > 1e-9
-            or abs(floor["rest_offset_m"] - env.cfg.floor_rest_offset_m) > 1e-9):
+    declared = (env.cfg.floor_contact_offset_m, env.cfg.floor_rest_offset_m)
+    actual = (floor["contact_offset_m"], floor["rest_offset_m"])
+    if (not collider.HasAPI(UsdPhysics.CollisionAPI)
+            or (declared[0] is None and actual != (None, None))
+            or (declared[0] is not None and (None in actual or any(abs(a - d) > 1e-9 for a, d in zip(actual, declared))))):
         raise ValueError("Actual floor collider differs from the declared floor")
+    bound, _ = UsdShade.MaterialBindingAPI(collider).ComputeBoundMaterial(materialPurpose="physics")
+    material_prim = bound.GetPrim() if bound else None
+    if material_prim is None or not material_prim.IsValid():
+        raise ValueError("Actual floor has no bound physics material")
+    physics_api, physx_api = UsdPhysics.MaterialAPI(material_prim), PhysxSchema.PhysxMaterialAPI(material_prim)
+    floor["material"] = {"path": str(material_prim.GetPath()),
+                         "static_friction": physics_api.GetStaticFrictionAttr().Get(),
+                         "dynamic_friction": physics_api.GetDynamicFrictionAttr().Get(),
+                         "restitution": physics_api.GetRestitutionAttr().Get(),
+                         "friction_combine_mode": physx_api.GetFrictionCombineModeAttr().Get(),
+                         "restitution_combine_mode": physx_api.GetRestitutionCombineModeAttr().Get()}
+    expected_material = {"static_friction": 1., "dynamic_friction": 1., "restitution": 0.,
+                         "friction_combine_mode": "multiply", "restitution_combine_mode": "multiply"}
+    if any(floor["material"][key] is None or floor["material"][key] != value for key, value in expected_material.items()):
+        raise ValueError("Actual floor material differs from the canonical material")
     if env.native_errors:
         raise RuntimeError("Native physics errors prevent acceptance")
     env.native_readback.setdefault("recipe_readbacks", {})[phase] = {
