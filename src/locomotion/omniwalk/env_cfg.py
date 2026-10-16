@@ -5,6 +5,10 @@ import math
 
 from locomotion.robots.hexapod import JOINT_NAMES, LEGS
 
+# Stock Isaac Lab floors: the grid ground plane, a box spawned by CuboidCfg, or a two-triangle mesh built by
+# the terrain utilities. Each floor authors the declared collider offsets.
+FLOORS = ("isaaclab_ground_plane", "isaaclab_cuboid", "isaaclab_mesh")
+
 
 @dataclass(frozen=True)
 class EnvConfig:
@@ -28,8 +32,16 @@ class EnvConfig:
     record_motion_features: bool = False
     render: bool = False
     device: str = "cuda:0"
+    floor: str = "isaaclab_ground_plane"
+    floor_contact_offset_m: float = 0.02
+    floor_rest_offset_m: float = 0.0
 
     def __post_init__(self):
+        if self.floor not in FLOORS:
+            raise ValueError("Unknown stock floor")
+        if (not all(math.isfinite(x) for x in (self.floor_contact_offset_m, self.floor_rest_offset_m))
+                or not 0 <= self.floor_rest_offset_m < self.floor_contact_offset_m <= 0.1):
+            raise ValueError("Floor collider offsets need 0 <= rest < contact <= 0.1 m")
         if type(self.num_envs) is not int or not 1 <= self.num_envs <= 1024:
             raise ValueError("Pilot supports 1 through 1024 replicas")
         if self.physics_dt != 0.0025 or self.decimation != 8 or self.target_slew_rad != 0.040:

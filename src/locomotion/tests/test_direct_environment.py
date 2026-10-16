@@ -14,7 +14,7 @@ from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, LEGS
 
 BACKEND = Path(__file__).resolve().parents[1] / "omniwalk"
 ISAAC_MODULES = ("warp", "pxr", "omni", "omni.physx", "isaaclab", "isaaclab.envs", "isaaclab.sim",
-                 "isaaclab.sim.utils", "isaaclab_physx", "isaaclab_physx.assets",
+                 "isaaclab.sim.schemas", "isaaclab.sim.utils", "isaaclab_physx", "isaaclab_physx.assets",
                  "isaaclab_physx.assets.articulation", "isaaclab_physx.sim", "isaaclab_physx.sim.spawners",
                  "isaaclab_physx.sim.spawners.materials")
 

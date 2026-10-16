@@ -63,7 +63,7 @@ def verify_native_recipe(env, phase):
     if hasattr(env, "verify_native_recipe"):
         return env.verify_native_recipe(phase)
     import torch
-    from pxr import PhysxSchema
+    from pxr import PhysxSchema, UsdPhysics
     solver = {}
     for root in env.roots:
         prim = env.sim.stage.GetPrimAtPath(root + "/body")
@@ -86,10 +86,20 @@ def verify_native_recipe(env, phase):
         raise ValueError("Actual native materials differ")
     if offsets.shape != (env.num_envs, 153) or not torch.allclose(offsets, torch.full_like(offsets, .001), atol=1e-9, rtol=0) or torch.any(rests != 0):
         raise ValueError("Actual native contact/rest offsets differ")
+    collider = env.sim.stage.GetPrimAtPath(env.isaac.ground_collision_path)
+    collision = PhysxSchema.PhysxCollisionAPI(collider)
+    floor = {"path": env.isaac.ground_collision_path, "type": collider.GetTypeName(), "kind": env.cfg.floor,
+             "contact_offset_m": collision.GetContactOffsetAttr().Get(), "rest_offset_m": collision.GetRestOffsetAttr().Get(),
+             "approximation": (UsdPhysics.MeshCollisionAPI(collider).GetApproximationAttr().Get()
+                               if collider.HasAPI(UsdPhysics.MeshCollisionAPI) else None)}
+    if (not collider.HasAPI(UsdPhysics.CollisionAPI) or floor["contact_offset_m"] is None or floor["rest_offset_m"] is None
+            or abs(floor["contact_offset_m"] - env.cfg.floor_contact_offset_m) > 1e-9
+            or abs(floor["rest_offset_m"] - env.cfg.floor_rest_offset_m) > 1e-9):
+        raise ValueError("Actual floor collider differs from the declared floor")
     if env.native_errors:
         raise RuntimeError("Native physics errors prevent acceptance")
     env.native_readback.setdefault("recipe_readbacks", {})[phase] = {
-        "solver_attributes": solver, "scene_attributes": scene_values,
+        "solver_attributes": solver, "scene_attributes": scene_values, "floor_collider": floor,
         "material_properties": material.cpu().tolist(), "contact_offsets": offsets.cpu().tolist(),
         "rest_offsets": rests.cpu().tolist(), "backend_iteration_introspection": False,
         "native_error_events": list(env.native_errors)}

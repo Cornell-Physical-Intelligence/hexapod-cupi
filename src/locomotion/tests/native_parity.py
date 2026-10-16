@@ -29,13 +29,19 @@ def verify_weights(checkpoint):
         raise ValueError('Parity requires the unchanged c48_long weights and declaration')
 
 
+STOCK_FLOORS = ('isaaclab_ground_plane', 'isaaclab_cuboid', 'isaaclab_mesh')
+FLOOR_KEYS = ('floor', 'filter_collisions', 'floor_contact_offset_m', 'floor_rest_offset_m')
+
+
 def require_comparison_physics(recorded, candidate):
-    """Permit the stock ground/isolation experiment; keep other physics fixed."""
+    """Permit the declared stock floor with collision isolation; keep other physics fixed."""
     expected = dict(recorded)
-    if candidate.get('floor') == 'isaaclab_ground_plane':
+    if candidate.get('floor') in STOCK_FLOORS and recorded.get('floor') != candidate.get('floor'):
         if recorded.get('floor') != '80m_two_triangle_mesh_y_equals_x_seam':
             raise ValueError('Unknown comparison baseline floor')
-        expected.update(floor='isaaclab_ground_plane', filter_collisions=True)
+        if candidate.get('filter_collisions') is not True:
+            raise ValueError('The stock floor experiment keeps collision isolation')
+        expected.update({key: candidate[key] for key in FLOOR_KEYS if key in candidate})
     if candidate != expected:
         raise ValueError('Parity physics settings differ beyond ground and isolation')
 

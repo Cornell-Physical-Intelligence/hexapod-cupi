@@ -25,6 +25,13 @@ class NativeRangeTests(unittest.TestCase):
                            ('target_slew_rad', .08), ('filter_collisions', False)]:
             with self.subTest(key=key), self.assertRaises(ValueError):
                 require_comparison_physics(original, {**stock, key: value})
+        declared = {**stock, 'floor': 'isaaclab_mesh', 'floor_contact_offset_m': .02, 'floor_rest_offset_m': 0.}
+        require_comparison_physics(original, declared)
+        require_comparison_physics(declared, declared)
+        with self.assertRaises(ValueError):
+            require_comparison_physics(original, {**declared, 'floor': 'custom_floor'})
+        with self.assertRaises(ValueError):
+            require_comparison_physics(original, {**declared, 'material_friction': [.5, .5]})
 
     def test_three_baselines_freeze_bounds_and_candidate_cannot_widen_them(self):
         from locomotion.tests.native_ranges import freeze, compare

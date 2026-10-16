@@ -19,6 +19,7 @@ from locomotion.robots.hexapod import BODY_NAMES, ISAACLAB_REVISION, JOINT_NAMES
 ROOT = Path(__file__).resolve().parents[3]
 MODEL_PATH = ROOT/'robot/hexapod_mkii_updated_v1/model_rs05_mass_corrected.json'
 SCENE_PRIM = '/physicsScene'
+GROUND = '/Ground/GroundPlane/CollisionPlane'
 N = 2
 
 
@@ -27,12 +28,18 @@ def value(item):
 
 
 class Prim:
-    """A USD prim stand-in that holds its attributes and, for an articulation root, its solver counts."""
-    def __init__(self, solver=None, **attributes):
-        self.solver, self.attributes = solver, attributes
+    """A USD prim stand-in that holds its attributes, applied schemas and, for an articulation root, its solver counts."""
+    def __init__(self, solver=None, apis=(), type_name='Xform', **attributes):
+        self.solver, self.attributes, self.apis, self.type_name = solver, attributes, apis, type_name
 
     def GetAttribute(self, name):
         return value(self.attributes[name])
+
+    def HasAPI(self, api):
+        return api in self.apis
+
+    def GetTypeName(self):
+        return self.type_name
 
 
 def articulation_api(prim):
@@ -40,7 +47,13 @@ def articulation_api(prim):
                            GetSolverVelocityIterationCountAttr=lambda: value(prim.solver[1]))
 
 
-PXR = SimpleNamespace(PhysxSchema=SimpleNamespace(PhysxArticulationAPI=articulation_api))
+def collision_api(prim):
+    return SimpleNamespace(GetContactOffsetAttr=lambda: value(prim.attributes.get('physxCollision:contactOffset')),
+                           GetRestOffsetAttr=lambda: value(prim.attributes.get('physxCollision:restOffset')))
+
+
+PXR = SimpleNamespace(PhysxSchema=SimpleNamespace(PhysxArticulationAPI=articulation_api, PhysxCollisionAPI=collision_api),
+                      UsdPhysics=SimpleNamespace(CollisionAPI='CollisionAPI', MeshCollisionAPI='MeshCollisionAPI'))
 
 
 class Scene:
@@ -53,7 +66,9 @@ class Scene:
         model = json.loads(MODEL_PATH.read_text())
         joints = {joint['name']: joint for joint in model['joints']}
         links = {link['name']: link for link in model['links']}
-        self.cfg = SimpleNamespace(num_envs=N, device='cpu', declaration=lambda: EnvConfig(num_envs=N).declaration())
+        config = EnvConfig(num_envs=N)
+        self.cfg = SimpleNamespace(num_envs=N, device='cpu', declaration=config.declaration, floor=config.floor,
+                                   floor_contact_offset_m=config.floor_contact_offset_m, floor_rest_offset_m=config.floor_rest_offset_m)
         self.output, self.model, self.events = Path(output), model, []
         self.torch = lambda x: torch.as_tensor(x, dtype=torch.float32)
         self.joint_names, self.body_names = list(JOINT_NAMES), list(BODY_NAMES)
@@ -64,7 +79,7 @@ class Scene:
         self.neutral = self.torch([0., -.3, .4]*6)
         self.reset_height, self.origins = .12, self.torch([[0., 0., 0.], [2., 0., 0.]])
         self.roots = [f'/World/envs/env_{index}/Robot' for index in range(N)]
-        self.scene_prim_path, self.native_errors = SCENE_PRIM, []
+        self.scene_prim_path, self.ground_collision_path, self.native_errors = SCENE_PRIM, GROUND, []
         limits = self.torch([[joints[name]['lower'], joints[name]['upper']] for name in self.native_joint_names])
         self.native = {'get_dof_limits': limits.expand(N, -1, -1).clone(),
             'get_masses': self.torch([links[name]['mass'] for name in self.native_body_names]).expand(N, -1).clone(),
@@ -76,6 +91,9 @@ class Scene:
         self.prims = {root+'/body': Prim([32, 0], **{'physxArticulation:enabledSelfCollisions': True}) for root in self.roots}
         self.prims[SCENE_PRIM] = Prim(**{'physxScene:timeStepsPerSecond': 400,
                                          'physxScene:enableExternalForcesEveryIteration': True})
+        self.prims[GROUND] = Prim(apis=('CollisionAPI',), type_name='Plane',
+                                  **{'physxCollision:contactOffset': config.floor_contact_offset_m,
+                                     'physxCollision:restOffset': config.floor_rest_offset_m})
         self.sdf_count, self.sdf_valid = N*153, True
         self.sim = SimpleNamespace(get_physics_step_count=lambda: 0,
             stage=SimpleNamespace(GetPrimAtPath=lambda path: self.prims[path]),
@@ -151,6 +169,8 @@ class SceneCheckTests(unittest.TestCase):
         self.assertEqual(readback['scene_attributes'], {'physxScene:timeStepsPerSecond': 400,
                                                         'physxScene:enableExternalForcesEveryIteration': True})
         self.assertEqual(readback['native_error_events'], [])
+        self.assertEqual(readback['floor_collider'], {'path': GROUND, 'type': 'Plane', 'kind': 'isaaclab_ground_plane',
+                                                      'contact_offset_m': .02, 'rest_offset_m': 0., 'approximation': None})
         self.assertFalse(readback['backend_iteration_introspection'])
         self.assertEqual(torch.tensor(readback['material_properties']).shape, (N, 153, 3))
         self.assertEqual(torch.tensor(readback['contact_offsets']).shape, (N, 153))
@@ -193,6 +213,12 @@ class SceneCheckTests(unittest.TestCase):
             ('materials', native('get_material_properties', (0, 7, 0), .8), ValueError, 'Actual native materials differ'),
             ('contact offsets', native('get_contact_offsets', (1, 9), .002), ValueError, 'Actual native contact/rest offsets differ'),
             ('rest offsets', native('get_rest_offsets', (0, 2), .001), ValueError, 'Actual native contact/rest offsets differ'),
+            ('floor contact offset', prim(GROUND, 'physxCollision:contactOffset', .05), ValueError,
+             'Actual floor collider differs from the declared floor'),
+            ('floor rest offset', prim(GROUND, 'physxCollision:restOffset', .001), ValueError,
+             'Actual floor collider differs from the declared floor'),
+            ('floor collider', lambda scene: setattr(scene.prims[GROUND], 'apis', ()), ValueError,
+             'Actual floor collider differs from the declared floor'),
             ('native error', lambda scene: scene.native_errors.append('contact buffer overflow'), RuntimeError,
              'Native physics errors prevent acceptance'),
         ]

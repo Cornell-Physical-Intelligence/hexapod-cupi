@@ -252,7 +252,8 @@ def build_identity(args, cfg, metadata):
     identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
         'spacing_m': cfg.spacing_m, 'target_slew_rad': cfg.target_slew_rad, 'action_scale_rad': cfg.action_scale_rad,
         'solver_position_iterations': 32, 'solver_velocity_iterations': 0,
-        'floor': 'isaaclab_ground_plane', 'filter_collisions': True, 'material_friction': [1., 1.],
+        'floor': cfg.floor, 'floor_contact_offset_m': cfg.floor_contact_offset_m,
+        'floor_rest_offset_m': cfg.floor_rest_offset_m, 'filter_collisions': True, 'material_friction': [1., 1.],
         'restitution': 0., 'external_forces_every_iteration': True,
         'neutral_joint_position_rad': metadata['nominal_joint_position_rad'],
         'reset_root_height_m': metadata['reset_root_height_m']}

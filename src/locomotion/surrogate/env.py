@@ -99,7 +99,10 @@ def contact_overrides(items, base=None):
 
 @dataclass(frozen=True)
 class SurrogateConfig:
-    """Same fields as ``omniwalk.env_cfg.EnvConfig``; that class accepts cuda:0 alone."""
+    """Same fields as ``omniwalk.env_cfg.EnvConfig``; that class accepts cuda:0 alone.
+
+    The floor fields name the native floor this surrogate stands in for; MuJoCo uses its own flat plane.
+    """
     num_envs: int = 128
     spacing_m: float = 2.0
     physics_dt: float = 0.0025
@@ -115,6 +118,9 @@ class SurrogateConfig:
     record_motion_features: bool = False
     render: bool = False
     device: str = "cpu"
+    floor: str = "isaaclab_ground_plane"
+    floor_contact_offset_m: float = 0.02
+    floor_rest_offset_m: float = 0.0
 
     def __post_init__(self):
         if type(self.num_envs) is not int or self.num_envs < 1:

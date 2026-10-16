@@ -152,3 +152,16 @@ class ConfigTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FloorDeclarationTests(unittest.TestCase):
+    def test_declared_floor_and_offsets_are_bounded_and_recorded(self):
+        from locomotion.omniwalk.env_cfg import FLOORS, EnvConfig
+        for floor in FLOORS:
+            self.assertEqual(EnvConfig(floor=floor).declaration()['floor'], floor)
+        self.assertEqual(EnvConfig().declaration()['floor_contact_offset_m'], .02)
+        with self.assertRaises(ValueError):
+            EnvConfig(floor='two_triangle_mesh')
+        for contact, rest in ((.02, .02), (.0, .0), (.2, .0), (.02, -.001)):
+            with self.subTest(contact=contact, rest=rest), self.assertRaises(ValueError):
+                EnvConfig(floor_contact_offset_m=contact, floor_rest_offset_m=rest)

@@ -8,7 +8,8 @@ import omni.physx
 import torch
 import warp as wp
 from isaaclab.envs import DirectRLEnv
-from isaaclab.sim import GroundPlaneCfg
+from isaaclab.sim import CollisionPropertiesCfg, CuboidCfg, GroundPlaneCfg
+from isaaclab.sim.schemas import define_collision_properties
 from isaaclab.sim.utils import bind_physics_material, get_first_matching_child_prim
 from isaaclab_physx.assets.articulation import Articulation
 from isaaclab_physx.sim.spawners.materials import RigidBodyMaterialCfg
@@ -120,16 +121,32 @@ class IsaacEnv(DirectRLEnv):
         stage = self.sim.stage
         material = RigidBodyMaterialCfg(static_friction=1., dynamic_friction=1., restitution=0.,
                                         friction_combine_mode="multiply", restitution_combine_mode="multiply")
-        floor = GroundPlaneCfg(size=(80., 80.), physics_material=material)
-        floor.func("/Ground", floor)
-        ground = get_first_matching_child_prim("/Ground", lambda prim: prim.GetTypeName() == "Plane", stage=stage)
-        if ground is None:
-            raise RuntimeError("Stock ground has no collision plane")
-        self.ground_collision_path = str(ground.GetPath())
+        offsets = CollisionPropertiesCfg(collision_enabled=True, contact_offset=self.config.floor_contact_offset_m,
+                                         rest_offset=self.config.floor_rest_offset_m)
+        if self.config.floor == "isaaclab_ground_plane":
+            floor = GroundPlaneCfg(size=(80., 80.), physics_material=material)
+            floor.func("/Ground", floor)
+        elif self.config.floor == "isaaclab_cuboid":
+            floor = CuboidCfg(size=(80., 80., .1), collision_props=offsets, physics_material=material)
+            floor.func("/Ground", floor, translation=(0., 0., -.05))
+        else:
+            import trimesh
+            from isaaclab.terrains.utils import create_prim_from_mesh
+            mesh = trimesh.Trimesh(vertices=[(-40., -40., 0.), (40., -40., 0.), (40., 40., 0.), (-40., 40., 0.)],
+                                   faces=[[0, 1, 2], [0, 2, 3]], process=False)
+            create_prim_from_mesh("/Ground", mesh, physics_material=material)
+        root = stage.GetPrimAtPath("/Ground")
+        collider = (root if root.HasAPI(UsdPhysics.CollisionAPI) else
+                    get_first_matching_child_prim("/Ground", lambda prim: prim.HasAPI(UsdPhysics.CollisionAPI), stage=stage))
+        physics_material = get_first_matching_child_prim("/Ground", lambda prim: prim.HasAPI(UsdPhysics.MaterialAPI), stage=stage)
+        if collider is None or physics_material is None:
+            raise RuntimeError("Stock floor has no collider or physics material")
+        define_collision_properties(str(collider.GetPath()), offsets, stage=stage)
+        self.ground_collision_path = str(collider.GetPath())
         self.scene.filter_collisions(global_prim_paths=["/Ground"])
         for prim in stage.Traverse():
             if prim.HasAPI(UsdPhysics.CollisionAPI) and "/Robot/" in str(prim.GetPath()):
-                bind_physics_material(str(prim.GetPath()), "/Ground/physicsMaterial", stage=stage)
+                bind_physics_material(str(prim.GetPath()), str(physics_material.GetPath()), stage=stage)
             if prim.HasAPI(UsdPhysics.RigidBodyAPI) and "/Robot/" in str(prim.GetPath()):
                 PhysxSchema.PhysxContactReportAPI.Apply(prim).CreateThresholdAttr(0.)
         self._subscribe_native_errors()
