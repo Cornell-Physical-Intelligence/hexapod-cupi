@@ -17,7 +17,7 @@ suite checks both facts.
 | [`replay.py`](replay.py) | Open-loop trace replay, scripted noise and reward scoring of a stored surrogate or native record. |
 | [`calibrate.py`](calibrate.py), [`self_check.py`](self_check.py) | Comparisons with native reference copies that you supply, the writer of the two training extracts and a check of your machine. |
 | [`provenance.json`](provenance.json) | The scratch sources of this port with their hashes, the changes of the port, the origin of each native reference and the hash of each record. |
-| [`records/`](records) | The self-check record and the scratch-against-port equivalence record behind the tables below. |
+| [`records/`](records) | The self-check record and the scratch-against-port equivalence record behind the tables below, plus the Step 7 self check of 2026-10-17. |
 
 ## Train and evaluate
 
@@ -164,6 +164,12 @@ Three sources carry the numbers below.
   value. `provenance.json` holds the hash of the scratch README that states each one, and
   `records/equivalence.json` shows that the scratch and the ported environment step to equal
   states.
+- [`records/self_check_step7_20261017_001.json`](records/self_check_step7_20261017_001.json)
+  is the self check of 2026-10-17 at revision `232e19f0`, after the Step 7 randomization
+  code entered this package, without native references: the shaft classification, the five
+  training smokes and the evaluation smoke pass as in S. It adds no parity measurement.
+  [`tests/fixtures/step7_baseline_20261013_001.*`](tests/fixtures) hold the pre-change
+  trajectory of main `7478fca8` that `--randomization none` reproduces bit for bit.
 
 | Measurement | Native | Surrogate | Source |
 | --- | --- | --- | --- |
