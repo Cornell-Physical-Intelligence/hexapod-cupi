@@ -1,0 +1,27 @@
+{
+  "id": "20261017T012442_pr84_review_fixes",
+  "date": "2026-10-17T01:24:42.966444Z",
+  "title": "Fix native replay identity and paper policy evaluation",
+  "summary": "Native motion-prior replay now uses the same floor and collider-offset identity as standing diagnostics. Paper-network evaluation applies the same two-control action mean as training. All 471 CPU tests pass; native compatibility certification for the fixed runtime is in progress.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Complete the fixed runtime native replay, publish its compatibility receipt, and merge PR 84 after exact-revision CI passes.",
+  "changes": [
+    "src/locomotion/amp/replay_native.py",
+    "src/locomotion/evaluation/checkpoint.py",
+    "src/locomotion/scripts/cli.py",
+    "src/locomotion/scripts/play.py",
+    "src/locomotion/tests/test_dependency_identity.py",
+    "src/locomotion/tests/test_policy_inference.py",
+    "site/updates/20261017T012442_pr84_review_fixes.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_dependency_identity.py",
+    "src/locomotion/tests/test_policy_inference.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/84"
+  ],
+  "no_project_impact": true,
+  "reason": "The fixes align replay and evaluation with their declared contracts. The roadmap remains at Stage 2; no new policy qualification is claimed."
+}

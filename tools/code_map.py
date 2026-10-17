@@ -9,18 +9,18 @@ import subprocess
 from urllib.parse import quote
 
 
-PACKAGES = {'core', 'backends', 'tasks', 'learning', 'evaluation', 'runs', 'priors', 'surrogate'}
+PACKAGES = {'omniwalk', 'hexapod', 'amp', 'surrogate', 'evaluation', 'spark', 'robots', 'rl', 'scripts'}
 
 
 def area(path):
     parts = Path(path).parts
     if '/tests/' in path:
         return 'tests'
-    return parts[1] if len(parts) > 2 and parts[1] in PACKAGES else 'package'
+    return parts[2] if len(parts) > 3 and parts[2] in PACKAGES else 'package'
 
 
 def module_name(path):
-    name = path[:-3].replace('/', '.')
+    name = path.removeprefix('src/')[:-3].replace('/', '.')
     return name[:-len('.__init__')] if name.endswith('.__init__') else name
 
 
@@ -62,7 +62,7 @@ def generate(repo, ref="HEAD"):
     revision = git("rev-parse", ref + "^{commit}").decode().strip()
     read = lambda path: (repo/path).read_bytes()
     ownership = {r["path"]: r for r in json.loads(read("configs/source_inventory.json"))["tools"]}
-    paths = sorted(p.relative_to(repo).as_posix() for p in (repo/'locomotion').rglob('*.py')
+    paths = sorted(p.relative_to(repo).as_posix() for p in (repo/'src/locomotion').rglob('*.py')
                    if '__pycache__' not in p.parts and 'fixtures' not in p.parts)
     url = "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/" + revision + "/"
     known = {module_name(path): path for path in paths}
@@ -110,7 +110,7 @@ def generate(repo, ref="HEAD"):
         totals[label] = {"files": len(selected), "physical_lines": sum(r["lines"] for r in selected),
                          "classes": sum(s["kind"] == "class" for r in selected for s in r["symbols"]),
                          "functions_and_methods": sum(s["kind"] == "function" for r in selected for s in r["symbols"])}
-    return {"schema": "hexapod_code_map_v2", "revision": revision, "working_tree_changed": bool(git("status", "--porcelain", "--", "locomotion", "configs/source_inventory.json")), "totals": totals,
+    return {"schema": "hexapod_code_map_v2", "revision": revision, "working_tree_changed": bool(git("status", "--porcelain", "--", "src/locomotion", "configs/source_inventory.json")), "totals": totals,
             "scope": "Static definitions and imports, including nested definitions. Import strings and factory expressions can remain unresolved. This is not a runtime call graph or a test-coverage report.", "modules": rows}
 
 
@@ -166,16 +166,17 @@ PAGE = r'''<!doctype html>
 </main>
 <script>const DATA=__DATA__;
 const PACKAGES=[
-['core','Core','Motor arithmetic, transforms and features.'],
-['backends','Isaac backend','Scene construction and environment stepping.'],
-['tasks','Tasks','Episode handling, reward versions and prescribed control.'],
-['learning','Learning','Learner configuration and adapters.'],
-['evaluation','Evaluation','Capture, scoring and diagnostics.'],
-['runs','Runs','Validation, packaging and source identity.'],
-['priors','Priors','Motion data and AMP datasets.'],
-['surrogate','Surrogate','MuJoCo training and evaluation.'],
+['omniwalk','omniwalk','Omnidirectional walking task, Direct environment and learner recipe.'],
+['hexapod','hexapod','The stock Isaac Lab task on the hexapod with scripted-tripod BC and PPO fine-tuning.'],
+['amp','amp','Motion demonstrations, motion features and AMP learning.'],
+['surrogate','surrogate','CPU MuJoCo training and trace replay.'],
+['evaluation','evaluation','Native capture, scene checks, admission, scoring and training diagnostics.'],
+['robots','robots','Robot identity, RS05 motor model and Isaac actuator.'],
+['rl','rl','RSL-RL wrapper, PPO subclasses and action distributions.'],
+['scripts','scripts','Container entry points: train, play and diagnose.'],
+['spark','spark','Prepare, launch and bind native allocations.'],
 ['package','Locomotion','Package initialization.'],
-['tests','Tests','Unit and parity tests.']
+['tests','tests','CPU, parity and native replay tests.']
 ];
 const TITLE=Object.fromEntries(PACKAGES.map(p=>[p[0],p[1]])), PURPOSE=Object.fromEntries(PACKAGES.map(p=>[p[0],p[2]]));
 const el=id=>document.getElementById(id), esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -250,13 +251,13 @@ function drawFile(found){
   const m=byPath[selectedFile];
   if(!m){el('file-heading').textContent='File';el('strip').innerHTML='';el('file').innerHTML='';return;}
   const q=query(), W=1000, n=Math.max(m.lines,1), top=m.symbols.filter(s=>!s.name.includes('.'));
-  el('file-heading').textContent=m.path.replace('locomotion/','');
+  el('file-heading').textContent=m.path.replace('src/locomotion/','');
   const blocks=top.map(s=>{const x=10+980*(s.line-1)/n, w=Math.max(3,980*(s.end_line-s.line+1)/n), hit=q&&(s.name+' '+s.doc).toLowerCase().includes(q);
     const text=w>70?`<text x="${x+6}" y="37" font-size="14" class="${s.kind==='class'||hit?'on-dark':''}">${esc(clip(s.name,w-10,14))}</text>`:'';
     return `<a href="${esc(s.url)}" target="_blank" rel="noopener" aria-label="${esc(s.kind)} ${esc(s.name)}, lines ${s.line} to ${s.end_line}"><rect class="sym ${esc(s.kind)}${hit?' hit':''}" x="${x}" y="14" width="${w}" height="36"><title>${esc(s.name)} · lines ${s.line} to ${s.end_line}</title></rect>${text}</a>`;}).join('');
   el('strip').setAttribute?.('viewBox',`0 0 ${W} 74`);
   el('strip').innerHTML=`<rect class="frame" x="10" y="14" width="980" height="36"/>${blocks}<text x="10" y="70" font-size="14">Line 1</text><text x="990" y="70" font-size="14" text-anchor="end">Line ${num(m.lines)}</text>`;
-  const files=paths=>paths.length?paths.map(p=>pick(p,p.replace('locomotion/',''))).join(', '):'None';
+  const files=paths=>paths.length?paths.map(p=>pick(p,p.replace('src/locomotion/',''))).join(', '):'None';
   el('file').innerHTML=`<p>${esc(m.purpose||'')} ${link(m.url,'Open the file ↗')}</p><p><strong>Imports:</strong> ${files([...new Set(m.depends_on.flatMap(p=>through(p)).map(t=>t.path))])}</p><p><strong>Imported by:</strong> ${files(DATA.modules.filter(o=>visible(o)&&o.depends_on.flatMap(p=>through(p)).some(t=>t.path===m.path)).map(o=>o.path))}</p>${m.symbols.length?`<p><strong>Definitions:</strong> ${m.symbols.map(s=>link(s.url,s.name)).join(', ')}</p>`:''}`;
 }
 function render(){
@@ -266,7 +267,7 @@ function render(){
   if(!selectedFile||!byPath[selectedFile]||!visible(byPath[selectedFile])||byPath[selectedFile].area!==selectedPackage)selectedFile=largest(shown.filter(m=>m.area===selectedPackage)).path;
   el('count').textContent=q?`${found.length} ${found.length===1?'file matches':'files match'} “${el('query').value.trim()}”`:'';
   el('results').innerHTML=q?(found.length?found.map(m=>{const named=m.symbols.filter(s=>(s.name+' '+s.doc).toLowerCase().includes(q));
-    return `<p>${pick(m.path,m.path.replace('locomotion/',''))}${named.length?': '+named.map(s=>link(s.url,s.name)).join(', '):''}</p>`;}).join(''):'<p>No matching files.</p>'):'';
+    return `<p>${pick(m.path,m.path.replace('src/locomotion/',''))}${named.length?': '+named.map(s=>link(s.url,s.name)).join(', '):''}</p>`;}).join(''):'<p>No matching files.</p>'):'';
   drawPackages(found);drawFiles(found);drawFile(found);
 }
 function choose(target){

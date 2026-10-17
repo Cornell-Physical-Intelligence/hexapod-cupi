@@ -12,7 +12,7 @@ import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY = 'configs/source_inventory.json'
-SCOPES = ('tools', 'contracts', 'navigation', 'mission', 'locomotion')
+SCOPES = ('tools', 'src/contracts', 'src/navigation', 'src/mission', 'src/locomotion')
 
 
 def read_inventory(root=ROOT):
@@ -53,7 +53,7 @@ def check(root=ROOT):
         if hashlib.sha256(original).hexdigest() != expected:
             raise ValueError('Retired source bytes differ: '+name)
     # Production code must not import frozen evidence or historical runtimes.
-    for path in [p for scope in ('contracts', 'navigation', 'mission', 'locomotion', 'packages') for p in (root / scope).rglob('*.py')]:
+    for path in [p for scope in ('src/contracts', 'src/navigation', 'src/mission', 'src/locomotion') for p in (root / scope).rglob('*.py')]:
         if '__pycache__' in path.parts or 'tests' in path.parts:
             continue
         tree = ast.parse(path.read_text())

@@ -8,9 +8,9 @@ parts and 59 mesh byte streams. Keep the original meshes and corrected inertias.
 ## Simulation inputs
 
 [inputs.json](inputs.json) pins the approved URDF, model, USD, geometry and
-neutral stance. Run `uv run python -m locomotion.runs.inputs check` from the repository
+neutral stance. Run `uv run python -m locomotion.spark.inputs check` from the repository
 root. Use `inputs pack` to copy those inputs for a fresh native allocation.
-The [kernel guide](../../locomotion/README.md) describes admission and evaluation.
+The [kernel guide](../../src/locomotion/README.md) describes admission and evaluation.
 Historical standing results apply to their named source packs; the consolidated
 source needs fresh native admission. Hardware calibration remains pending.
 
@@ -37,7 +37,7 @@ shows joint travel; walking acceptance requires a native policy recording.
 
 Use CAD axes +X left, −Y forward and +Z up. Anatomical prefixes are
 lf/lm/lr/rf/rm/rr. The approved joint order lives in
-[env_config.py](../../locomotion/backends/isaac/config.py). Keep metres, kilograms and radians.
+[hexapod.py](../../src/locomotion/robots/hexapod.py). Keep metres, kilograms and radians.
 
 [UPDATED_CAD_IMPORT](../../docs/UPDATED_CAD_IMPORT.md) records the recovered
 articulation and joint limits. [MASS_INERTIA](MASS_INERTIA.md) and

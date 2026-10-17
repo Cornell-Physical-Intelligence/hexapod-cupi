@@ -1,0 +1,23 @@
+{
+  "id": "20261017T013919_pr84_runtime_certification",
+  "date": "2026-10-17T01:39:19.609941Z",
+  "title": "Certify the reviewed locomotion runtime",
+  "summary": "The fixed runtime passed all 13 native c48_long probes. All 8,088 measurements equal the three frozen baselines; raw trace rescoring and recomputed contact and motor torque reports pass. The new receipt matches the production runtime and passes its checkpoint identity and configuration checks.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Merge PR 84 after CI passes, then verify the merged revision and deployed Pages site.",
+  "changes": [
+    "src/locomotion/README.md",
+    "site/assets/pr84_review_20261017_001/*",
+    "site/updates/20261017T013919_pr84_runtime_certification.json"
+  ],
+  "evidence": [
+    "site/assets/pr84_review_20261017_001/verification.json",
+    "site/assets/pr84_review_20261017_001/comparison.json",
+    "site/assets/pr84_review_20261017_001/compatibility/receipt.json"
+  ],
+  "no_project_impact": true,
+  "reason": "This certifies one fixed-seed compatibility replay of the reviewed runtime. The 96-case Stage 2 qualification and visual acceptance remain open."
+}

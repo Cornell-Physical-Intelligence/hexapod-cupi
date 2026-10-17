@@ -14,10 +14,8 @@ dev = [
     "opencv-python-headless>=4.9",
     "usd-core==26.8",
     "scipy>=1.14",
-    "trimesh>=4.0",
-    "rtree>=1.3",
-    "casadi>=3.7,<3.8",
     "rsl-rl-lib==5.0.1",
+    "casadi==3.7.2",
     "mujoco==3.14.0",
 ]
 # Matches the Spark image, which writes W&B runs; use it to log in and sync offline runs.
@@ -25,9 +23,13 @@ tracking = [
     "wandb==0.28.2",
 ]
 
-[tool.uv]
-# Import maintained packages from the repository root.
-package = false
+[build-system]
+requires = ["uv_build>=0.11.29,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+# The importable packages live under src/; uv sync installs them in editable mode.
+module-name = ["locomotion", "navigation", "mission", "contracts"]
 
 [tool.uv.sources]
 torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]

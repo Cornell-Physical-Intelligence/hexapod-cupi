@@ -3,7 +3,7 @@
 Start with the [contributor workflow](../SPARK.md) for account access and
 personal worktrees. This guide owns the runtime and recovery details.
 
-You use [`locomotion.runs.launch`](../locomotion/runs/launch.py) for canonical allocations.
+You use [`locomotion.spark.launch`](../src/locomotion/spark/launch.py) for canonical allocations.
 It supervises one named module from a frozen package and cleans its exact
 container. Read [ownership](#ownership-and-cleanup) and the
 [retained reservation](#retained-reservation-and-recovery) first.
@@ -107,14 +107,14 @@ reservation or coordination file, so any account with access to the run tree
 and Docker can launch. Never alter an admitted source pack or reuse an
 attempt's output directory.
 
-Use `python -m locomotion.runs.inputs pack` with a fresh local output and explicit
+Use `uv run python -m locomotion.spark.inputs pack` with a fresh local output and explicit
 remote input root under `/srv/cupi/hexapod/inputs/`.
 Transfer that directory, then pass its `inputs.json` to
-[`prepare`](../locomotion/runs/prepare.py). The pack hashes canonical assets and
+[`prepare`](../src/locomotion/spark/prepare.py). The pack hashes canonical assets and
 starts no compute. The default binding declares `foundation_inputs_001` under the guarded restart
 root. It does not claim those remote files exist. Transport with Python `tarfile` or disable macOS copy metadata;
 extra files fail the frozen-tree check. From the frozen `source` directory,
-invoke `python3 -B -m locomotion.runs.launch` with the binding path and SHA-256.
+invoke `python3 -B -m locomotion.spark.launch` with the binding path and SHA-256.
 The `--preflight-only` flag checks the host without starting native simulation.
 Keep `PYTHONDONTWRITEBYTECODE=1` so imports cannot mutate the frozen tree.
 
@@ -129,7 +129,7 @@ locks or cleanup targets. A timeout retains its last complete training update
 and fails the allocation unless the requested update count has completed.
 
 Training and evaluation require matching one-robot and batch standing admission.
-Use [`admission`](../locomotion/runs/admission.py) to recompute the captures and create
+Use [`admission`](../src/locomotion/evaluation/admission.py) to recompute the captures and create
 the subsequent input declaration. A launcher success does not pass a physical
 gate or qualify a policy. A source manifest does not grant admission.
 

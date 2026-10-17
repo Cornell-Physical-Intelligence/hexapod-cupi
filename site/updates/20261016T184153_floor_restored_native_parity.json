@@ -1,0 +1,25 @@
+{
+  "id": "20261016T184153_floor_restored_native_parity",
+  "date": "2026-10-16T18:41:53Z",
+  "title": "Restore the recorded floor through Isaac Lab's terrain utility and certify c48_long on the src layout",
+  "summary": "The stock ground plane, a cuboid and a terrain mesh with authored collider offsets each change the walking contacts of the admitted policy, while the same terrain mesh with the simulator's default offsets reproduces the recorded one-robot standing report byte for byte; a zero drive max force and the collision filter change nothing. With that floor the src layout passes standing admission at one and 128 robots, the unchanged c48_long checkpoint passes its 13 probes through the parity harness with all 8,088 measurements equal to the three recorded baselines, and it passes them again through the production loader with the certified compatibility receipt. The floor and its collider offsets now sit in the physics identity, the recipe readback checks the floor collider and its bound material, and a compatibility receipt may certify the physics it was proven on.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Push the branch so CI runs on the exact revision, then review PR 84 for merge; training on the src layout can use the floor_20261016_002 admission.",
+  "changes": [
+    "site/assets/floor_contact_20261016_001/*",
+    "site/assets/floor_contact_20261016_001/compatibility/*",
+    "src/locomotion/**",
+    "site/updates/20261016T184153_floor_restored_native_parity.json"
+  ],
+  "evidence": [
+    "site/assets/floor_contact_20261016_001/verification.json",
+    "site/assets/floor_contact_20261016_001/floor_experiments.json",
+    "site/assets/floor_contact_20261016_001/compatibility/receipt.json",
+    "src/locomotion/tests/native_ranges.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The retained policy measurements are reproduced exactly and no qualification claim changes; the roadmap stays at Stage 2."
+}

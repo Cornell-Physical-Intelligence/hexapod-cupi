@@ -14,17 +14,16 @@ class CodeMapTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             value = code_map.build(ROOT, tmp)
             rows = {row['path']: row for row in value['modules']}
-            native = rows['locomotion/backends/isaac/env.py']
-            method = next(row for row in native['symbols'] if row['name'] == 'LocomotionEnv.step')
+            native = rows['src/locomotion/omniwalk/adapter.py']
+            method = next(row for row in native['symbols'] if row['name'] == 'OmniEnv.step')
             source = ROOT/native['path']
             self.assertIn('def step(', source.read_text().splitlines()[method['line']-1])
             self.assertIn('/'+value['revision']+'/', method['url'])
             self.assertEqual(native['sha256'], hashlib.sha256(source.read_bytes()).hexdigest())
-            self.assertEqual(native['area'], 'backends')
-            self.assertNotIn('locomotion/env.py', rows)
-            self.assertIn('locomotion/core/motor.py', native['depends_on'])
+            self.assertEqual(native['area'], 'omniwalk')
+            self.assertIn('src/locomotion/omniwalk/env.py', native['depends_on'])
             self.assertTrue(all(target in rows for row in rows.values() for target in row['depends_on']))
-            self.assertEqual(rows['locomotion/tests/test_native_ranges.py']['area'], 'tests')
+            self.assertEqual(rows['src/locomotion/tests/test_native_ranges.py']['area'], 'tests')
             self.assertFalse(any('/fixtures/' in path for path in rows))
             self.assertTrue((Path(tmp)/'code-map.json').is_file())
             html = (Path(tmp)/'index.html').read_text()

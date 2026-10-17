@@ -1,0 +1,78 @@
+{
+  "schema": "hexapod_locomotion_standing_admission_v1",
+  "num_envs": 128,
+  "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+  "usd_sha256": "3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c",
+  "physics_source_files": {
+    "__init__.py": "c82a5695bd2575afdaae01eb84bb3c06ddffe42529d201bbe43726ae8859e350",
+    "evaluation/__init__.py": "3318335432018ab7dbf7f7900d4f9a80a19b0dd3dfd47644eb73065f5233a49d",
+    "evaluation/admission.py": "e8213be75887792d5ae5a7b2f2f55256f576c6c79c38b9a53ba8267eab361df2",
+    "evaluation/capture.py": "216789ccc22abceaa500156813d8c7a2330b6c82eebe50293976cde6458c174f",
+    "evaluation/scoring.py": "6b6090705858182f5f322517ed907b5d4ad961ccf69081439c0dbe4fee9e05c8",
+    "omniwalk/__init__.py": "93656a153605e4dc2543dd764968260b8a692d51d7491277aeb66960ecc55bca",
+    "omniwalk/adapter.py": "508fb11b97c707a5aba9bd83d8cdfafa27a77b0b8d4fcd4e9814dc96148dd20c",
+    "omniwalk/env.py": "142726825106ebb8f55ee043b82478987cfef82eedcb092b7b7e7b08494edde2",
+    "omniwalk/env_cfg.py": "76f7468bf8bf417bfc696129aae36c2eef99fa30c218c5c7ea4bd27fd0e704e7",
+    "omniwalk/mdp/__init__.py": "512ddd45731678752dda1f755d71ccfebc53eb5eed3d66bf5c240bd57276e9ae",
+    "omniwalk/mdp/actions.py": "b9a0248fa2fbb956af30f07e6ebb6e68e5c8fa29dee8548473422b6473544d1e",
+    "omniwalk/mdp/frames.py": "60fab28ee99a677aad4e92d00b0eaf7a9d7fff553ec66971518a01251db7b8ac",
+    "omniwalk/mdp/observations.py": "e4a1a305ca396242844a25c6ad5a19c23a140822206317914360c5297bc4e3c3",
+    "robots/__init__.py": "6bcb4a3685a100854a6edce79b30417b96fc98d76f9979ae6e5efc285136ccff",
+    "robots/actuator.py": "37256260bfc0566b64170894584f046d620de3a13414f2287daf5d6c8e140371",
+    "robots/hexapod.py": "b8a95e2451c61532f9ad6199d1f7cd1f5105cce66c8f787510783275470b85d8",
+    "robots/rs05.py": "a2254f1c070d48619bac72d6bf3030423cab9baa84229b9ff74e5ac572a5462a"
+  },
+  "physics_config": {
+    "physics_dt": 0.0025,
+    "decimation": 8,
+    "spacing_m": 2.0,
+    "target_slew_rad": 0.04,
+    "action_scale_rad": 0.35,
+    "solver_position_iterations": 32,
+    "solver_velocity_iterations": 0,
+    "floor": "isaaclab_ground_plane",
+    "filter_collisions": true,
+    "material_friction": [
+      1.0,
+      1.0
+    ],
+    "restitution": 0.0,
+    "external_forces_every_iteration": true,
+    "neutral_joint_position_rad": [
+      0.0,
+      -0.3,
+      0.4,
+      0.0,
+      -0.3,
+      0.4,
+      0.0,
+      -0.3,
+      0.4,
+      0.0,
+      -0.3,
+      0.4,
+      0.0,
+      -0.3,
+      0.4,
+      0.0,
+      -0.3,
+      0.4
+    ],
+    "reset_root_height_m": 0.10280231400684256
+  },
+  "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+  "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+  "geometry_extrema_sha256": "268c7c072e3d84febed10000f31b4e99baf55bea461a713e42fb1137cda1e2ce",
+  "one": {
+    "report_path": "/standing_one/standing/standing_report.json",
+    "report_sha256": "0175d72d710040b1e03b86562ee55330232b4e0db21d62706bc9b2a4b78efcba",
+    "state_path": "/standing_one/state.json",
+    "state_sha256": "625a4cca360a3e4682ae1a03155a75969f552c959d7993f87b74d2513f695e5b"
+  },
+  "batch": {
+    "report_path": "/standing_batch/standing/standing_report.json",
+    "report_sha256": "1f49a64e78b5ba0022b16ce79d22305365d738751411da4446903d4699df9ac5",
+    "state_path": "/standing_batch/state.json",
+    "state_sha256": "9c2113eb9d23630306c82591d88b60f23f4f1fc4edaec9e7e46eaa190f732049"
+  }
+}
