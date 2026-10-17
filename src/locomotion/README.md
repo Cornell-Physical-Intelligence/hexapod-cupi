@@ -128,7 +128,7 @@ On that floor source `8cce83cc` passed standing admission at one and 128 robots,
 the unchanged `c48_long` checkpoint passed its 13 probes through the parity
 harness with all 8,088 measurements equal to the three recorded baselines, and
 again through the certified loader
-([verification](../../site/assets/floor_contact_20261016_001/verification.json)).
+([verification](../../site/assets/floor_contact_20261016_002/verification.json)).
 After the replay identity and policy smoothing fixes, source `717548d5` passed
 the 13 probes through the parity harness with all 8,088 measurements equal to
 the same three baselines. The [new verification](../../site/assets/pr84_review_20261017_001/verification.json)
