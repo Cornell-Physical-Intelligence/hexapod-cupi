@@ -401,11 +401,13 @@ def prepare(
             or set(initialize_from_sha) - set("0123456789abcdef")
         ):
             raise ValueError("Invalid starting checkpoint identity")
-        binding["extra_mounts"].append([str(initialize_from.parent), "/initialize"])
+        # Training mounts no evaluation checkpoint, so the starting checkpoint takes the launcher's
+        # read-only /checkpoint mount.
+        binding["extra_mounts"].append([str(initialize_from.parent), "/checkpoint"])
         binding["input_files"][str(initialize_from)] = initialize_from_sha
         binding["command_args"] += [
             "--initialize-from",
-            "/initialize/" + initialize_from.name,
+            "/checkpoint/" + initialize_from.name,
             "--initialize-from-sha256",
             initialize_from_sha,
         ]

@@ -324,11 +324,11 @@ class PackTests(unittest.TestCase):
             args = binding["command_args"]
             self.assertEqual(args[args.index("--experiment") + 1], "destination_v1")
             self.assertEqual(
-                args[args.index("--initialize-from") + 1], "/initialize/checkpoint_update002500.pt"
+                args[args.index("--initialize-from") + 1], "/checkpoint/checkpoint_update002500.pt"
             )
             self.assertEqual(args[args.index("--initialize-from-sha256") + 1], "c" * 64)
             self.assertNotIn("--initialize-rate", args)  # the configured rate is the default
-            self.assertIn([str(Path(start).parent), "/initialize"], binding["extra_mounts"])
+            self.assertIn([str(Path(start).parent), "/checkpoint"], binding["extra_mounts"])
             self.assertEqual(binding["input_files"][start], "c" * 64)
             pack = json.loads((root / "train/PACK.json").read_text())
             self.assertEqual(
@@ -355,3 +355,19 @@ class PackTests(unittest.TestCase):
             ):
                 with self.subTest(bad=bad), self.assertRaises(ValueError):
                     prepare(root / f"bad{index}", remote, **bad)
+
+
+class LaunchMountTests(unittest.TestCase):
+    def test_every_mount_a_training_pack_declares_is_one_the_launcher_accepts(self):
+        import ast
+        from pathlib import Path
+
+        source = Path(__file__).resolve().parents[1] / "spark/launch.py"
+        allowed = {
+            node.value
+            for node in ast.walk(ast.parse(source.read_text()))
+            if isinstance(node, ast.Constant)
+            and isinstance(node.value, str)
+            and node.value.startswith("/")
+        }
+        self.assertIn("/checkpoint", allowed)
