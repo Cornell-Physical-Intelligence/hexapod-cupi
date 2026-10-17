@@ -1,8 +1,8 @@
-"""Rasterisation, margin inflation, and when the feasible region is empty.
+"""Rasterization, margin inflation, and when the feasible region is empty.
 
 The arithmetic in ``EmptyFeasibleRegionTests`` is the reason this module exists as
 its own reviewable unit: issue #20 fixes the demonstration at 6 x 4 m while R-03
-sets a plain-GPS error bound of several metres, and those two facts are mutually
+sets a plain-GPS error bound of several meters, and those two facts are mutually
 exclusive. The planner's correct response is an empty feasible region, reported --
 not an exception, and not a route that quietly leaves the approved area.
 
@@ -27,7 +27,7 @@ FOOTPRINT_RADIUS_M = 0.40
 STOP_TOLERANCE_M = 0.15
 
 # Shapely approximates the rounded corners of an inflated exclusion with straight
-# segments, so a cell centre within this distance of the exact margin may go either
+# segments, so a cell center within this distance of the exact margin may go either
 # way. Well under a cell width at every margin used here.
 BUFFER_TOLERANCE_M = 0.02
 
@@ -48,13 +48,13 @@ def _demonstration_region(with_exclusion: bool = False) -> SurveyRegion:
     return SurveyRegion(boundary=DEMONSTRATION_AREA, exclusions=exclusions)
 
 
-def _clearance_m(region: SurveyRegion, centre) -> float:
-    """Exact distance from ``centre`` to the nearest edge, 0.0 outside free space.
+def _clearance_m(region: SurveyRegion, center) -> float:
+    """Exact distance from ``center`` to the nearest edge, 0.0 outside free space.
 
     This is the oracle: the slow, obvious definition, independent of ``buffer``.
     """
 
-    point = Point(centre)
+    point = Point(center)
     if not region.free_space.contains(point):
         return 0.0
     return region.free_space.boundary.distance(point)
@@ -102,13 +102,13 @@ class GridStructureTests(unittest.TestCase):
                     passable=(True,),
                 )
 
-    def test_cell_centres_round_trip_through_cell_of(self) -> None:
+    def test_cell_centers_round_trip_through_cell_of(self) -> None:
         grid = self._open_grid(6, 4)
         for east in range(6):
             for north in range(4):
                 with self.subTest(cell=(east, north)):
-                    centre = grid.cell_center_m((east, north))
-                    self.assertEqual(grid.cell_of(centre), (east, north))
+                    center = grid.cell_center_m((east, north))
+                    self.assertEqual(grid.cell_of(center), (east, north))
 
     def test_passable_is_row_major_over_north(self) -> None:
         grid = OccupancyGrid(
@@ -156,7 +156,7 @@ class EmptyFeasibleRegionTests(unittest.TestCase):
         self.assertEqual(
             grid.passable_cell_count,
             0,
-            "a several-metre GPS bound leaves no route inside a 6 x 4 m area",
+            "a several-meter GPS bound leaves no route inside a 6 x 4 m area",
         )
 
     def test_an_empty_region_is_reported_not_raised(self) -> None:
@@ -200,7 +200,7 @@ class EmptyFeasibleRegionTests(unittest.TestCase):
             previous = passable
 
 
-class RasterisationTests(unittest.TestCase):
+class RasterizationTests(unittest.TestCase):
     """``OccupancyGrid.from_region`` against its definition."""
 
     def test_grid_covers_the_region_bounds(self) -> None:
@@ -238,7 +238,7 @@ class RasterisationTests(unittest.TestCase):
     def test_a_drawn_exclusion_blocks_its_own_cells(self) -> None:
         region = _demonstration_region(with_exclusion=True)
         grid = OccupancyGrid.from_region(region, _margin(0.0), cell_size_m=0.25)
-        # The exclusion spans 2.5..3.5 m east, 1.5..2.5 m north; its centre must be
+        # The exclusion spans 2.5..3.5 m east, 1.5..2.5 m north; its center must be
         # impassable, and so must a ring of cells one footprint radius around it.
         self.assertFalse(grid.is_passable(grid.cell_of((3.0, 2.0))))
         self.assertFalse(

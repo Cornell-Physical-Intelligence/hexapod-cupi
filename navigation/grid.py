@@ -1,4 +1,4 @@
-"""A rasterised occupancy grid over an approved survey region."""
+"""A rasterized occupancy grid over an approved survey region."""
 
 from __future__ import annotations
 
@@ -26,9 +26,9 @@ class OccupancyGrid:
 
     Attributes:
         origin_m: South-west corner of cell ``(0, 0)``, which is also the grid's
-            south-west corner. A `Point` in metres in the local east-north frame
+            south-west corner. A `Point` in meters in the local east-north frame
             (see `Point` in region.py). NOT the origin of the framed.
-        cell_size_m: Side length of each square cell, in metres. Finite and positive.
+        cell_size_m: Side length of each square cell, in meters. Finite and positive.
         width_cells: Number of cells along east. Positive.
         height_cells: Number of cells along north. Positive.
         passable: Whether a route may enter each cell, row-major over north: the
@@ -103,7 +103,7 @@ class OccupancyGrid:
         return self.passable[north * self.width_cells + east]
 
     def cell_center_m(self, cell: Cell) -> Point:
-        """World position of the centre of ``cell``."""
+        """World position of the center of ``cell``."""
 
         east, north = cell
         return (
@@ -137,7 +137,7 @@ class OccupancyGrid:
         # TODO: This sucks. The issue doesn't specify to decline... If we rejected,
         we need to decide when to notify + how to notify.
 
-        A cell is passable when its centre lies inside ``region.feasible(margin)``;
+        A cell is passable when its center lies inside ``region.feasible(margin)``;
         when that is empty, every cell is impassable and``passable_cell_count`` is 0.
         """
         cell_size = float(cell_size_m)

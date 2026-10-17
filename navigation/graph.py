@@ -63,8 +63,7 @@ class CostGraph(Protocol):
 class GridGraph:
     """An eight-connected :class:`CostGraph` over an :class:`OccupancyGrid`.
 
-    Every passable cell costs the same to cross, so edge costs and the heuristic
-    are distances in metres.
+    Every passab    are distances in meters.
 
     Args:
         grid: The occupancy grid to search, kept as ``self.grid``.
@@ -90,7 +89,7 @@ class GridGraph:
             node: The cell to step from.
 
         Yields:
-            ``(successor, cost)``, where ``cost`` is the step length in metres.
+            ``(successor, cost)``, where ``cost`` is the step length in meters.
         """
 
         east, north = node
@@ -101,11 +100,13 @@ class GridGraph:
                 yield candidate, cost
 
     def edge_cost(self, a: Cell, b: Cell) -> float:
-        """Returns the length in metres of the step from ``a`` to ``b``.
+        """Returns the length in meters of the step from ``a`` to ``b``.
 
-        A diagonal step is blocked if either orthogonal neighbour it passes is
-        impassable. Otherwise the robot could pass between two blocked cells
-        that touch only at a corner.
+        A diagonal step is allowed only when both orthogonal cells it passes are
+        passable. Passability (in ``OccupancyGrid``) tests only cell centers,
+        and a diagonal passes through the shared corner; given a cell length of s,
+        this corner is s/sqrt(2) from each of those centers. If either center is infeasible,
+        the corner may be too.
 
         Args:
             a: The cell stepped from.
@@ -134,7 +135,7 @@ class GridGraph:
         return math.hypot(d_east, d_north) * self.grid.cell_size_m
 
     def heuristic(self, a: Cell, b: Cell) -> float:
-        """Returns the octile distance in metres from ``a`` to ``b``.
+        """Returns the octile distance in meters from ``a`` to ``b``.
 
         Octile distance is the shortest eight-connected path length on an empty
         grid, so it is admissible and consistent.

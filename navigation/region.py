@@ -15,7 +15,7 @@ __all__ = ["PlanMargin", "Point", "SurveyRegion"]
 # TODO: Who decides the origin of the local frame? How is the frame represented?
 #   Both teams must agree (ARCHITECTURE.md section 3; Pose and Survey request
 #   contracts in section 4).
-#: An ``(east, north)`` pair in metres, in the open map's local east-north frame.
+#: An ``(east, north)`` pair in meters, in the open map's local east-north frame.
 Point = tuple[float, float]
 
 
@@ -129,14 +129,14 @@ class SurveyRegion:
         return tuple(float(value) for value in bounds)
 
     def feasible(self, margin: PlanMargin) -> BaseGeometry:
-        """Where the robot's centre may go: free space shrunk by ``margin.total_m``.
+        """Where the robot's center may go: free space shrunk by ``margin.total_m``.
 
         Shrinking the free space and inflating every edge by the margin are the same
         operation. A margin too large for the area gives an empty geometry -- reported
         rather than raised.
         """
 
-        # TODO: Consider buffering this with the intersection (?) of buffer + region
-        # that ensures quadrature ensures that all points within margin are excluded.
-        # Currently: quadrature allows for slight violations.
+        # NOTE: Not exact. Buffer rounds corners with straight segments that cut
+        # slightly inside the true arc, up to about 1% of the margin.
+        # This is acknoledged and accepted; see README.
         return self.free_space.buffer(-margin.total_m)

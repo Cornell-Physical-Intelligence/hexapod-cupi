@@ -18,7 +18,7 @@ class Route:
 
     #: Cells from start to goal inclusive. A start-equals-goal route holds one cell.
     cells: tuple[Cell, ...]
-    #: Total ``edge_cost`` along :attr:`cells`, in metres.
+    #: Total ``edge_cost`` along :attr:`cells`, in meters.
     cost: float
     #: Nodes removed from the frontier and expanded. Reported so that the value of
     #: the heuristic is measurable rather than assumed; it is not part of the route.
@@ -44,7 +44,7 @@ class Route:
 
     # NOTE: Check this spec definition
     def waypoints_m(self, grid: OccupancyGrid) -> tuple[Point, ...]:
-        """Cell centres as (x, y) coordinates in the local frame, ready for ``WaypointFollower``.
+        """Cell centers as (x, y) coordinates in the local frame, ready for ``WaypointFollower``.
 
         The follower takes ``(x, y)`` pairs and this returns them in order, so the
         seam to execution needs no adapter. Thinning the list is the executor's
@@ -68,7 +68,7 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
       the goal, which also cuts expansions, and falling back to the node coordinate
       makes the order *total*. An insertion counter is wrong here: it encodes the
       order nodes were discovered, so the same request resolves a tie differently if
-      neighbours arrive in a different order. Likewise, when a neighbour is re-reached
+      neighbors arrive in a different order. Likewise, when a neighbor is re-reached
       at equal cost, decide which parent to keep by coordinate, not arrival order.
     * Count expansions: once per node popped and actually expanded, reported in
       :attr:`Route.expansions`.

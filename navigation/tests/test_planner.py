@@ -1,7 +1,7 @@
 """Search correctness, corner rules, determinism and the value of the heuristic.
 
 Grids here are built directly from ASCII art rather than from a ``SurveyRegion``, so
-that a failure points at the search or the graph and never at rasterisation. The
+that a failure points at the search or the graph and never at rasterization. The
 oracle is an independent Dijkstra in this module: A\\* is checked against a different
 algorithm rather than against a stored path, because the failure mode that matters --
 an inadmissible heuristic -- produces a plausible path with a wrong cost and no error.
@@ -56,7 +56,7 @@ def _dijkstra(graph, start, goal) -> tuple[float, int] | None:
     written for clarity rather than speed and shares no code with the planner.
 
     Assumes both endpoints are passable; every fixture that consults the oracle
-    chooses them so. Blocked-endpoint behaviour is checked against ``a_star``'s own
+    chooses them so. Blocked-endpoint behavior is checked against ``a_star``'s own
     contract in :class:`UnreachableTests` instead.
     """
 
@@ -72,13 +72,13 @@ def _dijkstra(graph, start, goal) -> tuple[float, int] | None:
         expansions += 1
         if node == goal:
             return cost, expansions
-        for neighbour, step in graph.successors(node):
-            if neighbour in closed:
+        for neighbor, step in graph.successors(node):
+            if neighbor in closed:
                 continue
             candidate = cost + step
-            if candidate < best.get(neighbour, math.inf):
-                best[neighbour] = candidate
-                heapq.heappush(frontier, (candidate, neighbour))
+            if candidate < best.get(neighbor, math.inf):
+                best[neighbor] = candidate
+                heapq.heappush(frontier, (candidate, neighbor))
     return None
 
 
@@ -163,7 +163,7 @@ class RouteTests(unittest.TestCase):
             with self.subTest(expansions=bad_count), self.assertRaises(ValueError):
                 Route(cells=((0, 0),), cost=0.0, expansions=bad_count)
 
-    def test_waypoints_are_cell_centres_in_order(self) -> None:
+    def test_waypoints_are_cell_centers_in_order(self) -> None:
         grid = _open_grid(3, 3)
         route = Route(cells=((0, 0), (1, 1)), cost=math.sqrt(2.0), expansions=2)
         self.assertEqual(route.waypoints_m(grid), ((0.5, 0.5), (1.5, 1.5)))
@@ -310,7 +310,7 @@ class DeterminismTests(unittest.TestCase):
         self.assertEqual(
             forward.cells,
             reversed_order.cells,
-            "the tie-break must not depend on the order neighbours are offered",
+            "the tie-break must not depend on the order neighbors are offered",
         )
 
     def test_repeated_planning_is_stable(self) -> None:

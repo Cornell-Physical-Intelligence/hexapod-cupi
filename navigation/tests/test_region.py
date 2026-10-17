@@ -164,7 +164,7 @@ class FeasibleRegionTests(unittest.TestCase):
         for actual, expected in zip((min_e, min_n, max_e, max_n), (0.55, 0.55, 5.45, 3.45)):
             self.assertAlmostEqual(actual, expected, places=9)
 
-    def test_a_several_metre_gps_bound_leaves_nothing(self) -> None:
+    def test_a_several_meter_gps_bound_leaves_nothing(self) -> None:
         # 0.40 + 0.15 + 3.00 = 3.55 m of clearance cannot fit inside 6 x 4 m.
         region = SurveyRegion(boundary=DEMONSTRATION_AREA)
         feasible = region.feasible(
