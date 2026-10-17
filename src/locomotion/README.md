@@ -124,19 +124,21 @@ carries, a cuboid fails another probe, and the mesh with authored offsets fails
 two; only the mesh with default offsets reproduces the recorded one-robot
 standing report byte for byte.
 
-On that floor source `8cce83cc` passed standing admission at one and 128 robots, and
-the unchanged `c48_long` checkpoint passed its 13 probes through the parity
-harness with all 8,088 measurements equal to the three recorded baselines, and
-again through the certified loader
+On that floor source `8cce83cc` passed standing admission at one and 128
+robots, and the unchanged `c48_long` checkpoint passed its 13 probes through
+the parity harness with all 8,088 measurements equal to the three recorded
+baselines, and again through the certified loader
+([verification](../../site/assets/floor_contact_20261016_001/verification.json)).
+The review fixes to the replay identity and the policy smoothing changed the
+runtime sources but not the physics closure, so source `717548d5` repeated the
+harness replay with the same 8,088 equal measurements. Two receipts certify
+that replay and bind the same runtime bytes:
+[pr84_review_20261017_001](../../site/assets/pr84_review_20261017_001/compatibility/receipt.json)
+adds raw trace rescoring and recomputed contact and torque reports, and
+[floor_contact_20261016_002](../../site/assets/floor_contact_20261016_002/compatibility/receipt.json)
+is the one the production loader ran natively, passing the 13 probes again
 ([verification](../../site/assets/floor_contact_20261016_002/verification.json)).
-After the replay identity and policy smoothing fixes, source `717548d5` passed
-the 13 probes through the parity harness with all 8,088 measurements equal to
-the same three baselines. The [new verification](../../site/assets/pr84_review_20261017_001/verification.json)
-includes raw trace rescoring, recomputed contact and torque reports, and the
-production loader's identity and configuration checks. The
-[current compatibility receipt](../../site/assets/pr84_review_20261017_001/compatibility/receipt.json)
-binds the checkpoint to this source and floor; `scripts/play.py` accepts it through
-`--checkpoint-compatibility`. `tests/native_parity_pack.py` writes a candidate
-replay pack with the harness and its pinned ranges, and `spark/pack.py` records
-the root review of any pack before launch. Stage 2 adds the 96-case suite and
-visual acceptance.
+`scripts/play.py` accepts either through `--checkpoint-compatibility`.
+`tests/native_parity_pack.py` writes a candidate replay pack with the harness
+and its pinned ranges, and `spark/pack.py` records the root review of any pack
+before launch. Stage 2 adds the 96-case suite and visual acceptance.
