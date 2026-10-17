@@ -1,18 +1,20 @@
 """Read-only checks of native ownership reuse; no remote or subprocess actions."""
+
 import ast
-from contextlib import ExitStack
 import copy
 import os
-from pathlib import Path
 import tempfile
 import unittest
+from contextlib import ExitStack
+from pathlib import Path
 from unittest.mock import patch
+
 import locomotion.spark.launch as launch
 import locomotion.spark.safety as reservation
 
 ROOT = Path(__file__).resolve().parents[3]
-NEW = ROOT / 'src/locomotion'
-GUARD_PARENT = ROOT / 'src/locomotion/tests/fixtures/launch_guarded_diagnostic.py'
+NEW = ROOT / "src/locomotion"
+GUARD_PARENT = ROOT / "src/locomotion/tests/fixtures/launch_guarded_diagnostic.py"
 
 
 def functions(path):
@@ -22,14 +24,32 @@ def functions(path):
 class OwnedLaunchTests(unittest.TestCase):
     def binding(self):
         root = "/home/orionh/HEXAPOD_runs/restart_20260914/launcher_fixture"
-        return {"schema": "hexapod_locomotion_launch_v1", "root_review_complete": True,
-                "mode": "diagnostic", "module": "locomotion.scripts.diagnose", "max_seconds": 7200,
-                **{key: root+"/"+key for key in ("source", "output", "asset", "prior", "geometry_source")},
-                "source_freeze_sha256": "a"*64, "input_files": {}, "stage2_complete": False,
-                "physical_admission": False,
-                "command_args": ["--source-freeze-sha256", "a"*64,
-                                 "--asset", "/asset", "--model", "/asset/source/model.json",
-                                 "--device", "cuda:0", "--headless"]}
+        return {
+            "schema": "hexapod_locomotion_launch_v1",
+            "root_review_complete": True,
+            "mode": "diagnostic",
+            "module": "locomotion.scripts.diagnose",
+            "max_seconds": 7200,
+            **{
+                key: root + "/" + key
+                for key in ("source", "output", "asset", "prior", "geometry_source")
+            },
+            "source_freeze_sha256": "a" * 64,
+            "input_files": {},
+            "stage2_complete": False,
+            "physical_admission": False,
+            "command_args": [
+                "--source-freeze-sha256",
+                "a" * 64,
+                "--asset",
+                "/asset",
+                "--model",
+                "/asset/source/model.json",
+                "--device",
+                "cuda:0",
+                "--headless",
+            ],
+        }
 
     def verify_without_filesystem(self, binding):
         with ExitStack() as stack:
@@ -41,110 +61,176 @@ class OwnedLaunchTests(unittest.TestCase):
 
     def test_current_reservation_helpers_preserved(self):
         old, new = functions(GUARD_PARENT), functions(NEW / "spark/safety.py")
-        for name in new.keys() - {'within_roots'}:
+        for name in new.keys() - {"within_roots"}:
             self.assertIn(name, old)
-            self.assertEqual(ast.dump(new[name], include_attributes=False),
-                             ast.dump(old[name], include_attributes=False), name)
+            self.assertEqual(
+                ast.dump(new[name], include_attributes=False),
+                ast.dump(old[name], include_attributes=False),
+                name,
+            )
 
     def test_output_and_readonly_inputs_match_supervisor(self):
-        paths = {k: Path("/home/orionh/HEXAPOD_runs/restart_20260914") / k
-                 for k in ("source", "output", "asset", "prior", "geometry_source")}
-        binding = {"module": "locomotion.scripts.diagnose", "command_args": ["--headless"], "extra_mounts": []}
-        args = launch.command(binding, paths, "hexapod-reference-physics-" + "a"*32)
-        self.assertEqual(args[-5:], ["-m", "locomotion.scripts.diagnose", "--output", "/output/standing", "--headless"])
-        mounts = [args[i+1] for i, value in enumerate(args) if value == "-v"]
+        paths = {
+            k: Path("/home/orionh/HEXAPOD_runs/restart_20260914") / k
+            for k in ("source", "output", "asset", "prior", "geometry_source")
+        }
+        binding = {
+            "module": "locomotion.scripts.diagnose",
+            "command_args": ["--headless"],
+            "extra_mounts": [],
+        }
+        args = launch.command(binding, paths, "hexapod-reference-physics-" + "a" * 32)
+        self.assertEqual(
+            args[-5:],
+            ["-m", "locomotion.scripts.diagnose", "--output", "/output/standing", "--headless"],
+        )
+        mounts = [args[i + 1] for i, value in enumerate(args) if value == "-v"]
         self.assertEqual(sum(x.endswith(":rw") for x in mounts), 1)
-        self.assertIn(str(paths["output"])+":/output:rw", mounts)
+        self.assertIn(str(paths["output"]) + ":/output:rw", mounts)
         self.assertTrue(all(x.endswith(":ro") for x in mounts if not x.endswith(":rw")))
 
     def test_online_wandb_passes_the_key_by_name_only(self):
-        paths = {k: Path("/home/orionh/HEXAPOD_runs/restart_20260914") / k
-                 for k in ("source", "output", "asset", "prior", "geometry_source")}
+        paths = {
+            k: Path("/home/orionh/HEXAPOD_runs/restart_20260914") / k
+            for k in ("source", "output", "asset", "prior", "geometry_source")
+        }
         online = self.binding()
-        online["command_args"] += ["--logger", "wandb", "--wandb-project", "hexapod", "--wandb-mode", "online"]
-        with patch.dict(os.environ, {"WANDB_API_KEY": "k"*40}):
+        online["command_args"] += [
+            "--logger",
+            "wandb",
+            "--wandb-project",
+            "hexapod",
+            "--wandb-mode",
+            "online",
+        ]
+        with patch.dict(os.environ, {"WANDB_API_KEY": "k" * 40}):
             self.verify_without_filesystem(online)
             args = launch.command(online, paths, "owned")
-        self.assertEqual(args[args.index("WANDB_API_KEY")-1], "-e")
-        self.assertFalse(any("k"*40 in value for value in args))
+        self.assertEqual(args[args.index("WANDB_API_KEY") - 1], "-e")
+        self.assertFalse(any("k" * 40 in value for value in args))
         with patch.dict(os.environ, {"WANDB_API_KEY": ""}):
             self.verify_without_filesystem(online)
             with self.assertRaises(ValueError):
                 launch.require_wandb_key(online["command_args"])
         offline = self.binding()
-        offline["command_args"] += ["--logger", "wandb", "--wandb-project", "hexapod", "--wandb-mode", "offline"]
+        offline["command_args"] += [
+            "--logger",
+            "wandb",
+            "--wandb-project",
+            "hexapod",
+            "--wandb-mode",
+            "offline",
+        ]
         self.assertNotIn("WANDB_API_KEY", launch.command(offline, paths, "owned"))
 
     def test_extra_mount_rejects_container_control_socket(self):
-        paths = {k: Path("/home/orionh/HEXAPOD_runs/restart_20260914") / k
-                 for k in ("source", "output", "asset", "prior", "geometry_source")}
+        paths = {
+            k: Path("/home/orionh/HEXAPOD_runs/restart_20260914") / k
+            for k in ("source", "output", "asset", "prior", "geometry_source")
+        }
         with self.assertRaises(ValueError):
-            launch.command({"command_args": ["--headless"],
-                            "extra_mounts": [["/var/run/docker.sock", "/var/run/docker.sock"]]}, paths, "owned")
+            launch.command(
+                {
+                    "command_args": ["--headless"],
+                    "extra_mounts": [["/var/run/docker.sock", "/var/run/docker.sock"]],
+                },
+                paths,
+                "owned",
+            )
 
     def test_exact_mode_source_and_output_arguments_are_bound(self):
         base = self.binding()
         self.verify_without_filesystem(base)
-        for suffix in (["--output", "/unreviewed"], ["--output=/unreviewed"],
-                       ["--mode", "train"], ["--mode=train"], ["--noise-probe"], ["--noise-probe=1"],
-                       ["--source-freeze-sha256", "b"*64]):
-            b = copy.deepcopy(base); b["command_args"] += suffix
+        for suffix in (
+            ["--output", "/unreviewed"],
+            ["--output=/unreviewed"],
+            ["--mode", "train"],
+            ["--mode=train"],
+            ["--noise-probe"],
+            ["--noise-probe=1"],
+            ["--source-freeze-sha256", "b" * 64],
+        ):
+            b = copy.deepcopy(base)
+            b["command_args"] += suffix
             with self.subTest(suffix=suffix), self.assertRaises(ValueError):
                 self.verify_without_filesystem(b)
 
     def test_each_mode_runs_its_script_and_probe_selection(self):
-        wrong = self.binding(); wrong["module"] = "locomotion.scripts.train"
+        wrong = self.binding()
+        wrong["module"] = "locomotion.scripts.train"
         with self.assertRaises(ValueError):
             self.verify_without_filesystem(wrong)
-        probe = self.binding(); probe.update(mode="probe")
+        probe = self.binding()
+        probe.update(mode="probe")
         probe["command_args"] = ["--noise-probe", *probe["command_args"]]
         self.verify_without_filesystem(probe)
         rest = probe["command_args"][1:]
-        for args in (rest, ["--noise-probe=1", *rest], ["--noise-probe", "--noise-probe", *rest],
-                     ["--mode", "replay", "--noise-probe", *rest]):
-            b = copy.deepcopy(probe); b["command_args"] = args
+        for args in (
+            rest,
+            ["--noise-probe=1", *rest],
+            ["--noise-probe", "--noise-probe", *rest],
+            ["--mode", "replay", "--noise-probe", *rest],
+        ):
+            b = copy.deepcopy(probe)
+            b["command_args"] = args
             with self.subTest(args=args[:4]), self.assertRaises(ValueError):
                 self.verify_without_filesystem(b)
-        replay = self.binding(); replay.update(mode="replay", module="locomotion.amp.replay_native")
+        replay = self.binding()
+        replay.update(mode="replay", module="locomotion.amp.replay_native")
         replay["command_args"] = ["--mode", "replay", *replay["command_args"]]
         self.verify_without_filesystem(replay)
         rest = replay["command_args"][2:]
-        for args in (rest, ["--mode", "train", *rest], ["--mode=replay", *rest], ["--mode", *rest],
-                     ["--mode", "replay", "--mode", "replay", *rest], ["--mode", "replay", "--noise-probe", *rest]):
-            b = copy.deepcopy(replay); b["command_args"] = args
+        for args in (
+            rest,
+            ["--mode", "train", *rest],
+            ["--mode=replay", *rest],
+            ["--mode", *rest],
+            ["--mode", "replay", "--mode", "replay", *rest],
+            ["--mode", "replay", "--noise-probe", *rest],
+        ):
+            b = copy.deepcopy(replay)
+            b["command_args"] = args
             with self.subTest(args=args[:4]), self.assertRaises(ValueError):
                 self.verify_without_filesystem(b)
 
     def test_missing_or_mismatched_native_freeze_rejected_before_launch(self):
         for action in ("remove", "change"):
-            b = self.binding(); i = b["command_args"].index("--source-freeze-sha256")
+            b = self.binding()
+            i = b["command_args"].index("--source-freeze-sha256")
             if action == "remove":
-                del b["command_args"][i:i+2]
+                del b["command_args"][i : i + 2]
             else:
-                b["command_args"][i+1] = "b"*64
+                b["command_args"][i + 1] = "b" * 64
             with self.subTest(action=action), self.assertRaises(ValueError):
                 self.verify_without_filesystem(b)
 
     def test_wall_bound_is_an_integer_at_most_two_hours(self):
         for seconds in (True, 119, 7201, float("inf")):
-            b = self.binding(); b["max_seconds"] = seconds
+            b = self.binding()
+            b["max_seconds"] = seconds
             with self.subTest(seconds=seconds), self.assertRaises(ValueError):
                 self.verify_without_filesystem(b)
 
-
     def test_preflight_records_other_gpu_work_and_keeps_the_memory_floor(self):
-        with patch.object(launch, "resources", return_value=("999, /app/llama-server", 32*1024**3)), \
-             patch.object(launch.guard, "call", return_value="abc qwen38-server llama:server"):
+        with (
+            patch.object(
+                launch, "resources", return_value=("999, /app/llama-server", 32 * 1024**3)
+            ),
+            patch.object(launch.guard, "call", return_value="abc qwen38-server llama:server"),
+        ):
             snapshot = launch.preflight()
         self.assertEqual(snapshot["gpu_processes"], ["999, /app/llama-server"])
         self.assertEqual(snapshot["containers"], ["abc qwen38-server llama:server"])
-        with patch.object(launch, "resources", return_value=("", 8*1024**3)), \
-             patch.object(launch.guard, "call", return_value=""), self.assertRaisesRegex(ValueError, "16 GiB"):
+        with (
+            patch.object(launch, "resources", return_value=("", 8 * 1024**3)),
+            patch.object(launch.guard, "call", return_value=""),
+            self.assertRaisesRegex(ValueError, "16 GiB"),
+        ):
             launch.preflight()
 
     def test_missing_lock_file_is_recreated_and_existing_bytes_stay(self):
         with tempfile.TemporaryDirectory() as directory:
-            existing, missing = Path(directory)/"held.lock", Path(directory)/"cleaned.lock"
+            existing, missing = Path(directory) / "held.lock", Path(directory) / "cleaned.lock"
             existing.write_text("kept")
             with patch.object(launch.guard, "LOCKS", (str(existing), str(missing))):
                 launch.lock_files()
@@ -163,16 +249,19 @@ class OwnedLaunchTests(unittest.TestCase):
             return real_open(path, flags, *args)
 
         with tempfile.TemporaryDirectory() as directory:
-            existing, missing = Path(directory)/"orionh.lock", Path(directory)/"cleaned.lock"
+            existing, missing = Path(directory) / "orionh.lock", Path(directory) / "cleaned.lock"
             existing.write_text("theirs")
-            with patch.object(launch.guard, "LOCKS", (str(existing), str(missing))), \
-                 patch.object(launch.os, "open", protected_open):
+            with (
+                patch.object(launch.guard, "LOCKS", (str(existing), str(missing))),
+                patch.object(launch.os, "open", protected_open),
+            ):
                 launch.lock_files()
                 os.close(launch.open_lock(str(existing)))
                 with launch.guard.both_locks():
                     pass
             self.assertEqual(existing.read_text(), "theirs")
             self.assertTrue(missing.is_file())
+
 
 if __name__ == "__main__":
     unittest.main()

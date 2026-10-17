@@ -1,39 +1,49 @@
 #!/usr/bin/env python3
 """Generate a source map from a Git revision without importing project code."""
+
 import argparse
 import ast
 import hashlib
 import json
-from pathlib import Path
 import subprocess
+from pathlib import Path
 from urllib.parse import quote
 
-
-PACKAGES = {'omniwalk', 'hexapod', 'amp', 'surrogate', 'evaluation', 'spark', 'robots', 'rl', 'scripts'}
+PACKAGES = {
+    "omniwalk",
+    "hexapod",
+    "amp",
+    "surrogate",
+    "evaluation",
+    "spark",
+    "robots",
+    "rl",
+    "scripts",
+}
 
 
 def area(path):
     parts = Path(path).parts
-    if '/tests/' in path:
-        return 'tests'
-    return parts[2] if len(parts) > 3 and parts[2] in PACKAGES else 'package'
+    if "/tests/" in path:
+        return "tests"
+    return parts[2] if len(parts) > 3 and parts[2] in PACKAGES else "package"
 
 
 def module_name(path):
-    name = path.removeprefix('src/')[:-3].replace('/', '.')
-    return name[:-len('.__init__')] if name.endswith('.__init__') else name
+    name = path.removeprefix("src/")[:-3].replace("/", ".")
+    return name[: -len(".__init__")] if name.endswith(".__init__") else name
 
 
 def dependencies(tree, path, known):
     """Repository files that this file imports, each resolved by its longest known module prefix."""
     here = module_name(path)
-    package = here if path.endswith('/__init__.py') else here.rpartition('.')[0]
+    package = here if path.endswith("/__init__.py") else here.rpartition(".")[0]
     found = set()
 
     def resolve(name):
-        parts = name.split('.')
+        parts = name.split(".")
         for end in range(len(parts), 0, -1):
-            target = known.get('.'.join(parts[:end]))
+            target = known.get(".".join(parts[:end]))
             if target:
                 if target != path:
                     found.add(target)
@@ -45,25 +55,33 @@ def dependencies(tree, path, known):
                 resolve(alias.name)
         elif isinstance(node, ast.ImportFrom):
             if node.level:
-                base = package.split('.')
-                base = base[:len(base) - node.level + 1]
-                prefix = '.'.join(base + ([node.module] if node.module else []))
+                base = package.split(".")
+                base = base[: len(base) - node.level + 1]
+                prefix = ".".join(base + ([node.module] if node.module else []))
             else:
-                prefix = node.module or ''
+                prefix = node.module or ""
             for alias in node.names:
-                resolve(prefix + '.' + alias.name if prefix else alias.name)
+                resolve(prefix + "." + alias.name if prefix else alias.name)
     return sorted(found)
 
 
 def generate(repo, ref="HEAD"):
     repo = Path(repo)
+
     def git(*args):
         return subprocess.check_output(["git", "-C", str(repo), *args])
+
     revision = git("rev-parse", ref + "^{commit}").decode().strip()
-    read = lambda path: (repo/path).read_bytes()
+
+    def read(path):
+        return (repo / path).read_bytes()
+
     ownership = {r["path"]: r for r in json.loads(read("configs/source_inventory.json"))["tools"]}
-    paths = sorted(p.relative_to(repo).as_posix() for p in (repo/'src/locomotion').rglob('*.py')
-                   if '__pycache__' not in p.parts and 'fixtures' not in p.parts)
+    paths = sorted(
+        p.relative_to(repo).as_posix()
+        for p in (repo / "src/locomotion").rglob("*.py")
+        if "__pycache__" not in p.parts and "fixtures" not in p.parts
+    )
     url = "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/" + revision + "/"
     known = {module_name(path): path for path in paths}
     rows = []
@@ -79,42 +97,85 @@ def generate(repo, ref="HEAD"):
                 if isinstance(child, (ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)):
                     names = (*parents, child.name)
                     is_class = isinstance(child, ast.ClassDef)
-                    symbols.append({
-                        "name": ".".join(names), "kind": "class" if is_class else "function",
-                        "line": child.lineno, "end_line": child.end_lineno,
-                        "signature": ", ".join(ast.unparse(v) for v in child.bases) if is_class else ast.unparse(child.args),
-                        "doc": (ast.get_docstring(child) or "").split("\n\n")[0].replace("\n", " "),
-                        "url": url + quote(path, safe="/") + "#L" + str(child.lineno),
-                    })
+                    symbols.append(
+                        {
+                            "name": ".".join(names),
+                            "kind": "class" if is_class else "function",
+                            "line": child.lineno,
+                            "end_line": child.end_lineno,
+                            "signature": ", ".join(ast.unparse(v) for v in child.bases)
+                            if is_class
+                            else ast.unparse(child.args),
+                            "doc": (ast.get_docstring(child) or "")
+                            .split("\n\n")[0]
+                            .replace("\n", " "),
+                            "url": url + quote(path, safe="/") + "#L" + str(child.lineno),
+                        }
+                    )
                     visit(child, names)
                 else:
                     visit(child, parents)
 
         visit(tree)
-        imports = [{"line": n.lineno, "text": ast.unparse(n)} for n in ast.walk(tree) if isinstance(n, (ast.Import, ast.ImportFrom))]
-        dynamic = sorted({n.value for n in ast.walk(tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)
-                          and n.value.startswith("locomotion.") and len(n.value) < 160})
-        rows.append({"path": path, "area": area(path), "test": "/tests/" in path,
-                     "lines": len(text.splitlines()), "sha256": hashlib.sha256(raw).hexdigest(),
-                     "owner": meta.get("owner", "Test module"), "classification": meta.get("classification", "test"),
-                     "purpose": meta.get("purpose", (ast.get_docstring(tree) or "").split("\n\n")[0]),
-                     "symbols": symbols, "imports": sorted(imports, key=lambda r: r["line"]),
-                     "dynamic_references": dynamic, "depends_on": dependencies(tree, path, known),
-                     "url": url + quote(path, safe="/")})
+        imports = [
+            {"line": n.lineno, "text": ast.unparse(n)}
+            for n in ast.walk(tree)
+            if isinstance(n, (ast.Import, ast.ImportFrom))
+        ]
+        dynamic = sorted(
+            {
+                n.value
+                for n in ast.walk(tree)
+                if isinstance(n, ast.Constant)
+                and isinstance(n.value, str)
+                and n.value.startswith("locomotion.")
+                and len(n.value) < 160
+            }
+        )
+        rows.append(
+            {
+                "path": path,
+                "area": area(path),
+                "test": "/tests/" in path,
+                "lines": len(text.splitlines()),
+                "sha256": hashlib.sha256(raw).hexdigest(),
+                "owner": meta.get("owner", "Test module"),
+                "classification": meta.get("classification", "test"),
+                "purpose": meta.get("purpose", (ast.get_docstring(tree) or "").split("\n\n")[0]),
+                "symbols": symbols,
+                "imports": sorted(imports, key=lambda r: r["line"]),
+                "dynamic_references": dynamic,
+                "depends_on": dependencies(tree, path, known),
+                "url": url + quote(path, safe="/"),
+            }
+        )
     missing = [r["path"] for r in rows if not r["test"] and r["path"] not in ownership]
     if missing:
         raise ValueError("Production modules need inventory entries: " + repr(missing))
     totals = {}
     for label, test in (("production", False), ("tests", True)):
         selected = [r for r in rows if r["test"] == test]
-        totals[label] = {"files": len(selected), "physical_lines": sum(r["lines"] for r in selected),
-                         "classes": sum(s["kind"] == "class" for r in selected for s in r["symbols"]),
-                         "functions_and_methods": sum(s["kind"] == "function" for r in selected for s in r["symbols"])}
-    return {"schema": "hexapod_code_map_v2", "revision": revision, "working_tree_changed": bool(git("status", "--porcelain", "--", "src/locomotion", "configs/source_inventory.json")), "totals": totals,
-            "scope": "Static definitions and imports, including nested definitions. Import strings and factory expressions can remain unresolved. This is not a runtime call graph or a test-coverage report.", "modules": rows}
+        totals[label] = {
+            "files": len(selected),
+            "physical_lines": sum(r["lines"] for r in selected),
+            "classes": sum(s["kind"] == "class" for r in selected for s in r["symbols"]),
+            "functions_and_methods": sum(
+                s["kind"] == "function" for r in selected for s in r["symbols"]
+            ),
+        }
+    return {
+        "schema": "hexapod_code_map_v2",
+        "revision": revision,
+        "working_tree_changed": bool(
+            git("status", "--porcelain", "--", "src/locomotion", "configs/source_inventory.json")
+        ),
+        "totals": totals,
+        "scope": "Static definitions and imports, including nested definitions. Import strings and factory expressions can remain unresolved. This is not a runtime call graph or a test-coverage report.",
+        "modules": rows,
+    }
 
 
-PAGE = r'''<!doctype html>
+PAGE = r"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -286,26 +347,28 @@ el('tests').addEventListener('input',render);
 render();
 </script>
 </body>
-</html>'''
+</html>"""
 
 
-def build(repo, output, ref='HEAD'):
+def build(repo, output, ref="HEAD"):
     data = generate(repo, ref)
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
-    (output/'code-map.json').write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
-    (output/'index.html').write_text(PAGE.replace('__DATA__', json.dumps(data, ensure_ascii=False).replace('<', '\\u003c')))
+    (output / "code-map.json").write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+    (output / "index.html").write_text(
+        PAGE.replace("__DATA__", json.dumps(data, ensure_ascii=False).replace("<", "\\u003c"))
+    )
     return data
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--repo', type=Path, default=Path(__file__).resolve().parents[1])
-    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument("--repo", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     data = build(args.repo, args.output)
-    print(json.dumps({'revision': data['revision'], 'totals': data['totals']}))
+    print(json.dumps({"revision": data["revision"], "totals": data["totals"]}))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

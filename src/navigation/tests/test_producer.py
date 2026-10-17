@@ -14,20 +14,18 @@ simulator, no randomness.
 from __future__ import annotations
 
 import math
-import sys
 import unittest
-from pathlib import Path
 
-
-POLICY_STEP_DT_S = .02
-
-from contracts.command import (  # noqa: E402
+from contracts.command import (
     CommandEnvelope,
     Frame,
     VelocityCommand,
 )
-from navigation.producer import CommandProducer, Pose2D, wrap_to_pi  # noqa: E402
-from navigation.waypoint import WaypointFollower, EXAMPLE_ENVELOPE as PHASE2_TARGET_ENVELOPE  # noqa: E402
+from navigation.producer import CommandProducer, Pose2D, wrap_to_pi
+from navigation.waypoint import EXAMPLE_ENVELOPE as PHASE2_TARGET_ENVELOPE
+from navigation.waypoint import WaypointFollower
+
+POLICY_STEP_DT_S = 0.02
 
 
 def _rollout(
@@ -122,9 +120,7 @@ class WaypointFollowerTests(unittest.TestCase):
         self.assertIs(command.frame, Frame.NAVIGATION)
 
     def test_forward_speed_is_distance_gated_then_clamped(self) -> None:
-        follower = WaypointFollower(
-            [(3.0, 0.0)], cruise_speed_mps=0.24, approach_gain_per_s=0.60
-        )
+        follower = WaypointFollower([(3.0, 0.0)], cruise_speed_mps=0.24, approach_gain_per_s=0.60)
         far = follower.update(Pose2D(0.0, 0.0, 0.0), 0.0)
         self.assertAlmostEqual(far.vx_mps, 0.24, places=12, msg="clamped to cruise")
         near = follower.update(Pose2D(2.70, 0.0, 0.0), 0.0)
@@ -189,9 +185,7 @@ class WaypointFollowerTests(unittest.TestCase):
         )
 
     def test_retires_several_satisfied_waypoints_in_one_tick(self) -> None:
-        follower = WaypointFollower(
-            [(0.02, 0.0), (0.0, 0.03), (1.0, 0.0)], stop_radius_m=0.12
-        )
+        follower = WaypointFollower([(0.02, 0.0), (0.0, 0.03), (1.0, 0.0)], stop_radius_m=0.12)
         command = follower.update(Pose2D(0.0, 0.0, 0.0), 0.0)
         self.assertEqual(follower.current_waypoint, (1.0, 0.0))
         self.assertGreater(command.vx_mps, 0.0)

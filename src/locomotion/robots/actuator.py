@@ -1,7 +1,9 @@
 """Explicit Isaac Lab actuator with the approved speed-dependent torque curve."""
+
 import torch
 from isaaclab.actuators import ActuatorBase, ActuatorBaseCfg
 from isaaclab.utils import configclass
+
 from locomotion.robots.hexapod import JOINT_NAMES, motor_damping
 from locomotion.robots.rs05 import RATED_TORQUE_NM, STIFFNESS_NM_PER_RAD, motor_force
 
@@ -19,7 +21,8 @@ class Motor(ActuatorBase):
         self.pre_position = joint_pos.clone()
         self.pre_velocity = joint_vel.clone()
         self.computed_effort, self.applied_effort, self.ceiling = motor_force(
-            joint_pos, joint_vel, control_action.joint_positions, self.damping)
+            joint_pos, joint_vel, control_action.joint_positions, self.damping
+        )
         control_action.joint_positions = None
         control_action.joint_velocities = None
         control_action.joint_efforts = self.applied_effort

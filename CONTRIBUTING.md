@@ -19,6 +19,32 @@ history. Link the issue when one applies and explain the changed behavior,
 validation and remaining limits in the [PR template](.github/pull_request_template.md).
 The author must understand submitted code, including agent output.
 
+## Python style
+
+Use the Ruff version pinned in `pyproject.toml` and `uv.lock`. Ruff formats
+maintained Python with four-space indentation, double quotes and a 100-column
+wrapping target. It sorts imports and checks syntax, undefined names, unused
+imports and variables, and ambiguous variable names. `.editorconfig` sets shared
+editor defaults.
+
+Before committing, run:
+
+```sh
+uv run ruff check . --fix
+uv run ruff format .
+```
+
+Review fixes and run the affected tests. CI runs both checks without modifying
+files and fails on violations. Do not use unsafe fixes without reviewing their
+behavior. Keep a rule suppression local and explain the required exception.
+
+Ruff excludes published evidence, frozen test fixtures, the retained original
+`src/locomotion/hexapod/` experiment and `src/locomotion/evaluation/scoring.py`.
+Tests bind the retained experiment to its pinned source and require the scorer
+to remain byte-identical to the archived oracle. Formatting other native runtime files
+changes their source hashes and requires fresh standing admission and checkpoint
+compatibility evidence before those files can run an admitted checkpoint.
+
 ## Results and publication
 
 Keep secrets and full run payloads outside the checkout. You commit an admitted
@@ -42,6 +68,8 @@ Run focused tests while editing, then these checks before publication:
 
 ```sh
 uv sync --locked
+uv run ruff check .
+uv run ruff format --check .
 uv run python -m unittest discover -s src/contracts/tests
 uv run python -m unittest discover -s src/navigation/tests
 uv run python -m unittest discover -s src/mission/tests

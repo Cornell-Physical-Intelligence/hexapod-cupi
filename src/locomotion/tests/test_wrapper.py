@@ -1,23 +1,23 @@
 """Check terminal transitions, load averaging and immutable baseline packaging."""
+
 import json
-from pathlib import Path
 import tempfile
-from types import SimpleNamespace
 import unittest
+from pathlib import Path
+from types import SimpleNamespace
 
 import torch
 
-from locomotion.spark.prepare import ROOT
-from locomotion.robots.hexapod import sha as digest
-from locomotion.spark.prepare import prepare
-from locomotion.rl.wrapper import OmniVecEnv
 from locomotion.evaluation.loads import TrainingLoads
+from locomotion.rl.wrapper import OmniVecEnv
+from locomotion.robots.hexapod import sha as digest
+from locomotion.spark.prepare import ROOT, prepare
 
 
 class Task:
     num_envs = 3
-    device = 'cpu'
-    cfg = SimpleNamespace(episode_seconds=20., control_dt=.02, declaration=lambda: {})
+    device = "cpu"
+    cfg = SimpleNamespace(episode_seconds=20.0, control_dt=0.02, declaration=lambda: {})
     episode_steps = torch.zeros(3, dtype=torch.long)
 
     def __init__(self):
@@ -28,7 +28,7 @@ class Task:
         return {}
 
     def output(self):
-        return {'obs': self.value.clone(), 'critic': self.value.clone()+10}
+        return {"obs": self.value.clone(), "critic": self.value.clone() + 10}
 
     def reset(self, selected=None):
         selected = torch.arange(3) if selected is None else selected
@@ -38,9 +38,12 @@ class Task:
 
     def step(self, action):
         self.value += 1
-        return {**self.output(), 'reward': torch.tensor([2., -7., 5.]),
-            'terminated': torch.tensor([False, True, False]),
-            'truncated': torch.tensor([False, True, True])}
+        return {
+            **self.output(),
+            "reward": torch.tensor([2.0, -7.0, 5.0]),
+            "terminated": torch.tensor([False, True, False]),
+            "truncated": torch.tensor([False, True, True]),
+        }
 
 
 class WrapperTests(unittest.TestCase):
@@ -49,49 +52,73 @@ class WrapperTests(unittest.TestCase):
         wrapped = OmniVecEnv(task, tensor_dict=lambda value, **kw: value)
         obs, reward, done, extras = wrapped.step(torch.zeros(3, 18))
         self.assertEqual(task.resets, [[0, 1, 2], [1, 2]])
-        self.assertEqual(obs['policy'].tolist(), [[1., 1.], [0., 0.], [0., 0.]])
-        self.assertEqual(reward.tolist(), [2., -7., 5.])
+        self.assertEqual(obs["policy"].tolist(), [[1.0, 1.0], [0.0, 0.0], [0.0, 0.0]])
+        self.assertEqual(reward.tolist(), [2.0, -7.0, 5.0])
         self.assertEqual(done.tolist(), [0, 1, 1])
-        self.assertEqual(extras['time_outs'].tolist(), [False, False, True])
+        self.assertEqual(extras["time_outs"].tolist(), [False, False, True])
 
     def test_substep_loads_keep_swing_zeros_torque_signs_and_episode_windows(self):
-        env = SimpleNamespace(device='cpu', native_body_names=['body', 'lf_tibia'],
-            joint_names=['joint'], commands=torch.tensor([[.05, 0, 0], [0, 0, 0.]]),
-            episode_steps=torch.tensor([99, 100]))
+        env = SimpleNamespace(
+            device="cpu",
+            native_body_names=["body", "lf_tibia"],
+            joint_names=["joint"],
+            commands=torch.tensor([[0.05, 0, 0], [0, 0, 0.0]]),
+            episode_steps=torch.tensor([99, 100]),
+        )
         loads = TrainingLoads(env)
-        forces = torch.tensor([[[0., 0, 0], [0., 0, 20]], [[0., 0, 0], [0., 0, 0]]])
+        forces = torch.tensor([[[0.0, 0, 0], [0.0, 0, 20]], [[0.0, 0, 0], [0.0, 0, 0]]])
         for sign in (-1, 1):
-            loads(env, None, None, None, torch.tensor([[4.], [0.]]), None, None, None,
-                  forces, 0, torch.tensor([[2.*sign], [0.]]))
+            loads(
+                env,
+                None,
+                None,
+                None,
+                torch.tensor([[4.0], [0.0]]),
+                None,
+                None,
+                None,
+                forces,
+                0,
+                torch.tensor([[2.0 * sign], [0.0]]),
+            )
             env.episode_steps += 1
         report = loads.report()
-        full = report['windows']['full_training']
-        motion = report['windows']['commanded_locomotion_after_settle']
-        self.assertEqual(full['samples_across_replicas'], 4)
-        self.assertEqual(full['metrics']['total_vertical_support_n']['mean'], 10.)
-        self.assertEqual(full['metrics']['applied_abs_torque_nm:joint']['mean'], 1.)
-        self.assertAlmostEqual(full['metrics']['applied_abs_torque_nm:joint']['rms'], 2**.5)
-        self.assertEqual(motion['samples_across_replicas'], 1)
-        self.assertEqual(motion['metrics']['total_vertical_support_n']['mean'], 20.)
+        full = report["windows"]["full_training"]
+        motion = report["windows"]["commanded_locomotion_after_settle"]
+        self.assertEqual(full["samples_across_replicas"], 4)
+        self.assertEqual(full["metrics"]["total_vertical_support_n"]["mean"], 10.0)
+        self.assertEqual(full["metrics"]["applied_abs_torque_nm:joint"]["mean"], 1.0)
+        self.assertAlmostEqual(full["metrics"]["applied_abs_torque_nm:joint"]["rms"], 2**0.5)
+        self.assertEqual(motion["samples_across_replicas"], 1)
+        self.assertEqual(motion["metrics"]["total_vertical_support_n"]["mean"], 20.0)
 
     def test_fresh_pack_keeps_admitted_physics_and_refuses_reuse(self):
         with tempfile.TemporaryDirectory() as tmp:
-            output = Path(tmp)/'pack'
-            remote = '/home/orionh/HEXAPOD_runs/restart_20260914/test_wrapper'
+            output = Path(tmp) / "pack"
+            remote = "/home/orionh/HEXAPOD_runs/restart_20260914/test_wrapper"
             binding = prepare(output, remote, updates=2)
-            source = output/'source'
-            manifest = json.loads((source/'FREEZE_SHA256.json').read_text())
+            source = output / "source"
+            manifest = json.loads((source / "FREEZE_SHA256.json").read_text())
             for name, expected in manifest.items():
-                self.assertEqual(digest(source/name), expected)
-            for name in ('omniwalk/adapter.py', 'omniwalk/env_cfg.py', 'omniwalk/task.py', 'evaluation/runner.py', 'spark/launch.py', 'spark/safety.py'):
-                self.assertEqual(digest(source/'locomotion'/name), digest(ROOT/'src/locomotion'/name))
-            self.assertEqual(binding['mode'], 'train')
-            self.assertNotIn('--checkpoint', binding['command_args'])
+                self.assertEqual(digest(source / name), expected)
+            for name in (
+                "omniwalk/adapter.py",
+                "omniwalk/env_cfg.py",
+                "omniwalk/task.py",
+                "evaluation/runner.py",
+                "spark/launch.py",
+                "spark/safety.py",
+            ):
+                self.assertEqual(
+                    digest(source / "locomotion" / name), digest(ROOT / "src/locomotion" / name)
+                )
+            self.assertEqual(binding["mode"], "train")
+            self.assertNotIn("--checkpoint", binding["command_args"])
             with self.assertRaises(FileExistsError):
                 prepare(output, remote)
             with self.assertRaises(ValueError):
-                prepare(Path(tmp)/'bad', remote, checkpoint_sha='a'*64)
+                prepare(Path(tmp) / "bad", remote, checkpoint_sha="a" * 64)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
