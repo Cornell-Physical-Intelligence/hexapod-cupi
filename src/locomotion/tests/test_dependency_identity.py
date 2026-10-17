@@ -118,6 +118,23 @@ class DependencyIdentityTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'implementation differs'):
                 preflight(play, evaluation)
 
+    def test_scripts_and_native_replay_declare_one_physics_identity(self):
+        import ast
+        from locomotion.evaluation.checkpoint import physics_config
+        from locomotion.omniwalk.env_cfg import EnvConfig
+        metadata = {'nominal_joint_position_rad': [0., -.3, .4] * 6, 'reset_root_height_m': .1028}
+        declared = physics_config(EnvConfig(num_envs=1), metadata)
+        self.assertEqual((declared['floor'], declared['floor_contact_offset_m'], declared['floor_rest_offset_m']),
+                         ('isaaclab_mesh', None, None))
+        self.assertEqual(declared['neutral_joint_position_rad'], metadata['nominal_joint_position_rad'])
+        for name in ('scripts/cli.py', 'amp/replay_native.py'):
+            tree = ast.parse((ROOT/name).read_text())
+            calls = [node for node in ast.walk(tree) if isinstance(node, ast.Call) and ast.unparse(node.func) == 'physics_config']
+            self.assertEqual(len(calls), 1, name)
+            literals = [node for node in ast.walk(tree) if isinstance(node, ast.Dict)
+                        and any(isinstance(key, ast.Constant) and key.value == 'floor' for key in node.keys)]
+            self.assertEqual(literals, [], name)
+
     def test_learner_configuration_uses_package_classes(self):
         config = ppo_config(17, action_mean='tanh', learning_rate_max=.0003)
         self.assertEqual(config['algorithm']['class_name'],

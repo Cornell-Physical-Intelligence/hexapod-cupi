@@ -49,6 +49,26 @@ class PolicyInferenceTests(unittest.TestCase):
             self.assertTrue(torch.equal(actor(self.observations), self.baseline(self.observations)))
         self.assertTrue(bool((actor(self.observations).abs() <= 1).all()))
 
+    def test_evaluation_smooths_either_actor_branch_like_the_training_wrapper(self):
+        import ast, inspect
+        from types import SimpleNamespace
+        from locomotion.scripts import play
+        from locomotion.rl.wrapper import smoothed_action
+        env = SimpleNamespace(episode_steps=torch.zeros(1, dtype=torch.long))
+        output = torch.full((1, 18), .1)
+        policy = play.smoothed_policy(lambda observation: output.clone(), env, 'mean2')
+        self.assertTrue(torch.equal(policy(None), smoothed_action(output, torch.zeros_like(output), env.episode_steps)))
+        env.episode_steps += 1
+        self.assertTrue(torch.equal(policy(None), output))
+        self.assertTrue(torch.equal(play.smoothed_policy(lambda observation: output.clone(), env, 'none')(None), output))
+        # Both actor branches flow through the one smoothing wrapper; neither returns an unsmoothed action.
+        tree = next(node for node in ast.parse(inspect.getsource(play)).body
+                    if isinstance(node, ast.FunctionDef) and node.name == 'evaluation_policy')
+        returns = [node for node in ast.walk(tree) if isinstance(node, ast.Return)]
+        self.assertEqual([ast.unparse(node.value.func) for node in returns if isinstance(node.value, ast.Call)
+                          and ast.unparse(node.value.func) == 'smoothed_policy'], ['smoothed_policy'])
+        self.assertTrue(all(ast.unparse(node.value).startswith(('smoothed_policy(', 'actor(')) for node in returns))
+
     def test_load_rejects_missing_and_extra_actor_parameters(self):
         for mutation in ('missing', 'extra'):
             with self.subTest(mutation=mutation):

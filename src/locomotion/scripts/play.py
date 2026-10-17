@@ -37,7 +37,6 @@ def evaluation_policy(env, args, config, identity, checkpoint_record, compatibil
     import torch
     from tensordict import TensorDict
     from locomotion.rl.ppo import load_actor
-    from locomotion.rl.wrapper import smoothed_action
     check = require_compatibility_configuration if compatibility is not None else require_learner_configuration
     check(checkpoint_record, identity, config)
     observation = env.observations(env.current)['obs']
@@ -50,16 +49,26 @@ def evaluation_policy(env, args, config, identity, checkpoint_record, compatibil
     payload = torch.load(args.checkpoint, map_location=args.device, weights_only=False)
     require_embedded_declaration(payload.get('infos'), checkpoint_record)
     actor, _ = load_actor(payload, config, observations, args.device)
+    if args.networks == 'paper':
+        def evaluate(observation):
+            return actor(actor_observation(observation))
+    else:
+        def evaluate(observation):
+            return actor(TensorDict({'policy': actor_input(env, args, observation)}, batch_size=[env.num_envs]))
+    return smoothed_policy(evaluate, env, args.action_smoothing)
+
+
+def smoothed_policy(evaluate, env, action_smoothing):
+    """Wrap the actor call with the training wrapper's two-control mean, restarted with each episode."""
+    import torch
+    from locomotion.rl.wrapper import smoothed_action
     previous = None
 
     def policy(observation):
         nonlocal previous
         with torch.inference_mode():
-            if args.networks == 'paper':
-                return actor(actor_observation(observation))
-            action = actor(TensorDict({'policy': actor_input(env, args, observation)}, batch_size=[env.num_envs]))
-            if args.action_smoothing == 'mean2':
-                # The same two-control mean as the training wrapper, restarted with each episode.
+            action = evaluate(observation)
+            if action_smoothing == 'mean2':
                 last = torch.zeros_like(action) if previous is None else previous
                 previous = action.clone()
                 action = smoothed_action(action, last, env.episode_steps)

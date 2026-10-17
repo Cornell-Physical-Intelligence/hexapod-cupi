@@ -1,6 +1,7 @@
 """Replay an optimized target cycle through the locomotion kernel."""
 from __future__ import annotations
 
+from locomotion.evaluation.checkpoint import physics_config
 from locomotion.spark.sources import source_files, physics_files
 
 import argparse
@@ -102,13 +103,7 @@ def main(argv=None):
         'stance_sha256': sha(args.stance), 'geometry_sha256': sha(args.geometry),
         'geometry_extrema_sha256': sha(args.geometry_extrema), 'config': cfg.declaration()}
     identity['physics_source_files'] = physics_files(identity['source_files'])
-    identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
-        'spacing_m': cfg.spacing_m, 'target_slew_rad': cfg.target_slew_rad, 'action_scale_rad': cfg.action_scale_rad,
-        'solver_position_iterations': 32, 'solver_velocity_iterations': 0,
-        'floor': 'isaaclab_ground_plane', 'filter_collisions': True, 'material_friction': [1., 1.],
-        'restitution': 0., 'external_forces_every_iteration': True,
-        'neutral_joint_position_rad': metadata['nominal_joint_position_rad'],
-        'reset_root_height_m': metadata['reset_root_height_m']}
+    identity['physics_config'] = physics_config(cfg, metadata)
     identity['standing_admission'] = original.require_admission(args.standing_admission, identity, cfg)
     declaration, targets = validate_trajectory(args.trajectory, args.trajectory_sha256,
         robot.MODEL_SHA256, read_arrays=not args.preflight_only)

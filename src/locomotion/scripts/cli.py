@@ -25,7 +25,7 @@ import numpy as np
 from locomotion.evaluation.admission import require_admission, verify_native_recipe, verify_scene
 from locomotion.evaluation.camera import prepare_policy_scene
 from locomotion.evaluation.checkpoint import (DECLARATION_SHA, checkpoint_reward_version, read_compatibility_receipt,
-    require_checkpoint_identity, require_compatibility_identity)
+    physics_config, require_checkpoint_identity, require_compatibility_identity)
 from locomotion.evaluation.task_metrics import scalars
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import RECIPES, ppo_config
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS
@@ -249,14 +249,7 @@ def build_identity(args, cfg, metadata):
             'amp/features.py', 'amp/discriminator.py', 'amp/amp.py', 'amp/networks.py')}
         identity['amp_dataset'] = load_demonstrations(SOURCE.parent/AMPConfig().dataset)[1]
     identity['physics_source_files'] = physics_files(identity['source_files'])
-    identity['physics_config'] = {'physics_dt': cfg.physics_dt, 'decimation': cfg.decimation,
-        'spacing_m': cfg.spacing_m, 'target_slew_rad': cfg.target_slew_rad, 'action_scale_rad': cfg.action_scale_rad,
-        'solver_position_iterations': 32, 'solver_velocity_iterations': 0,
-        'floor': cfg.floor, 'floor_contact_offset_m': cfg.floor_contact_offset_m,
-        'floor_rest_offset_m': cfg.floor_rest_offset_m, 'filter_collisions': True, 'material_friction': [1., 1.],
-        'restitution': 0., 'external_forces_every_iteration': True,
-        'neutral_joint_position_rad': metadata['nominal_joint_position_rad'],
-        'reset_root_height_m': metadata['reset_root_height_m']}
+    identity['physics_config'] = physics_config(cfg, metadata)
     if args.mode != 'diagnostic':
         identity['standing_admission'] = require_admission(args.standing_admission, identity, cfg)
     return identity
