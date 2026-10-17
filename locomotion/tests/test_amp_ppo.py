@@ -196,6 +196,19 @@ class AdapterTests(unittest.TestCase):
         velocity = env.get_observations()['velocity_label']
         torch.testing.assert_close(stepped[:, :3], torch.stack((velocity[:, 1], -velocity[:, 0], velocity[:, 2]), -1))
 
+    def test_privileged_layout_places_friction_and_push_where_the_paper_critic_reads_them(self):
+        offsets, start = {}, 0
+        for name, width, source in amp_ppo.PRIVILEGED_LAYOUT:
+            offsets[name] = (start, start + width, source)
+            start += width
+        self.assertEqual(start, amp_ppo.PRIVILEGED_WIDTH)
+        self.assertEqual(offsets['ground_friction'][:2], (4, 5))
+        self.assertEqual(offsets['external_perturbation'][:2], (23, 29))
+        for name in ('ground_friction', 'external_perturbation'):
+            self.assertTrue(offsets[name][2].startswith('environment '), offsets[name][2])
+        for name in ('base_linear_velocity_body', 'base_height', 'foot_contact_force'):
+            self.assertTrue(offsets[name][2].startswith('telemetry '), offsets[name][2])
+
     def test_privileged_friction_and_push_read_the_environment(self):
         task = TaskDouble()
         task.env.ground_friction = torch.tensor([.5, 1.5, 2.5])
