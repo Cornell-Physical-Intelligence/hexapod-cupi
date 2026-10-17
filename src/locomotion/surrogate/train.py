@@ -375,6 +375,18 @@ def build_parser():
         "--resume", type=Path, help="Checkpoint to continue from (same configuration)."
     )
     parser.add_argument(
+        "--initialize-from",
+        type=Path,
+        help="Checkpoint whose actor, critic and optimizer state start a new run; inputs that the "
+        "wrapper adds start at zero weight. The update count and configuration are this run's own.",
+    )
+    parser.add_argument(
+        "--initialize-rate",
+        choices=["configured", "checkpoint"],
+        default="configured",
+        help="Restart the adaptive learning rate at its configured value or continue the checkpoint's.",
+    )
+    parser.add_argument(
         "--no-loads", action="store_true", help="Skip the 400 Hz TrainingLoads accumulator."
     )
     parser.add_argument(
@@ -531,6 +543,10 @@ def run(args, argv=None):
         identity["external_class_files"] = external_class_files(task_class, wrapper_class, config)
         check_gait_schedule(task, config)
         check_command_bootstrap(options, config)
+        if args.initialize_from is not None and args.resume is not None:
+            raise ValueError(
+                "--initialize-from starts a new run; it cannot be combined with --resume"
+            )
         parent = resume_record(args.resume, identity) if args.resume is not None else None
         if parent is not None:
             identity["exploration_schedule_updates"] = parent["identity"].get(
@@ -563,6 +579,19 @@ def run(args, argv=None):
             runner.current_learning_iteration = int(infos["updates"])
             # RSL-RL restores optimizer groups but leaves the adaptive schedule's rate at its initial value.
             runner.alg.learning_rate = runner.alg.optimizer.param_groups[0]["lr"]
+        if args.initialize_from is not None:
+            from locomotion.rl.ppo import initialize_learner
+
+            loaded = torch.load(str(args.initialize_from), weights_only=False, map_location="cpu")
+            widened, rate = initialize_learner(
+                runner.alg, loaded, config["algorithm"]["learning_rate"], args.initialize_rate
+            )
+            identity["initialized_from"] = {
+                "checkpoint_sha256": sha(args.initialize_from),
+                "loaded": ["actor", "critic", "optimizer"],
+                "widened_inputs": widened,
+                "learning_rate": {"value": rate, "source": args.initialize_rate},
+            }
         first = runner.current_learning_iteration
         state.update(status="running", tensorboard=log_dir is not None)
         save(args.output / "state.json", state)

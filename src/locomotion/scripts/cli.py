@@ -34,7 +34,7 @@ from locomotion.evaluation.checkpoint import (
     require_compatibility_identity,
 )
 from locomotion.evaluation.task_metrics import scalars as scalars
-from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import RECIPES, ppo_config
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import EXPERIMENT_INPUTS, RECIPES, ppo_config
 from locomotion.omniwalk.env_cfg import EnvConfig
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS
 from locomotion.robots.hexapod import MODEL_SHA256, USD_SHA256, verify_assets
@@ -124,6 +124,12 @@ def add_common_arguments(parser):
     parser.add_argument(
         "--video-case",
         help="Learning probe to record on video; the first selected probe by default.",
+    )
+    parser.add_argument(
+        "--experiment",
+        choices=sorted(EXPERIMENT_INPUTS),
+        help="A reviewed experiment's task, reward and inputs (omniwalk/destination_task.py); "
+        "training and evaluation of its checkpoints name it.",
     )
 
 
@@ -304,6 +310,10 @@ def validate(args):
         )
     if not 12 <= args.steps_per_env <= 96 or args.steps_per_env % 6:
         raise ValueError("The rollout length is a multiple of 6 from 12 to 96 controls per robot")
+    if args.experiment is not None and (
+        args.mode not in ("train", "evaluate") or args.learner != "ppo"
+    ):
+        raise ValueError("An experiment applies to PPO training and evaluation")
     if args.video_case is not None and (args.mode != "evaluate" or args.eval_scope == "full"):
         raise ValueError("A video case applies to a learning-probe evaluation")
     if args.episode_seconds != 20.0 and (
@@ -382,6 +392,10 @@ def build_identity(args, cfg, metadata):
         "learner": args.learner,
         "networks": args.networks,
     }
+    if args.experiment is not None:
+        identity["experiment"] = args.experiment
+    if getattr(args, "initialize_from", None) is not None:
+        identity["initialized_from"] = {"checkpoint_sha256": args.initialize_from_sha256}
     if args.extended_updates:
         # The exploration decay length enters ppo_config; the opt-in records the requested run length beside it.
         identity["training_updates"] = args.updates
@@ -506,6 +520,8 @@ def learner_config(args, identity, state):
         from locomotion.amp.amp import amp_ppo_config
 
         factory, options = amp_ppo_config, {"networks": args.networks}
+    if args.experiment is not None:
+        options["destination_input"] = EXPERIMENT_INPUTS[args.experiment]
     config = factory(
         args.seed,
         **options,

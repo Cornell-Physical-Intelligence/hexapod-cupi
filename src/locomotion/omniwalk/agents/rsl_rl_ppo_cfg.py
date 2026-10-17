@@ -20,6 +20,7 @@ def ppo_config(
     velocity_noise=0.0,
     action_std_decay_updates=None,
     steps_per_env=24,
+    destination_input="none",
 ):
     if action_mean not in ("unbounded", "tanh"):
         raise ValueError("Action mean must be unbounded or tanh")
@@ -66,6 +67,8 @@ def ppo_config(
         )
     if type(steps_per_env) is not int or not 12 <= steps_per_env <= 96 or steps_per_env % 6:
         raise ValueError("The rollout length is a multiple of 6 from 12 to 96 controls per robot")
+    if destination_input not in ("none", "ghost"):
+        raise ValueError("The destination input is none or ghost")
     distribution = (
         "GaussianDistribution"
         if action_mean == "unbounded"
@@ -143,6 +146,7 @@ def ppo_config(
             ("gait_clock", gait_clock, 0),
             ("action_smoothing", action_smoothing, "none"),
             ("velocity_noise", velocity_noise, 0.0),
+            ("destination_input", destination_input, "none"),
         )
         if value != default
     }
@@ -170,6 +174,11 @@ RECIPES = {
         "steps_per_env": 48,
     },
 }
+
+
+# Named reviewed experiments and the destination input each adds to the PPO inputs; the reward
+# and task of each live in omniwalk/destination_task.py.
+EXPERIMENT_INPUTS = {"destination_v1": "ghost"}
 
 
 def recipe_options(name, **overrides):

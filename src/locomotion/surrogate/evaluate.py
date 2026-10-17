@@ -54,6 +54,12 @@ class DeterministicPolicy:
             self.forced or options.get("action_smoothing", "none") == "mean2"
         )
         self.previous = None
+        # The destination inputs follow each probe's command from the root pose, as play.py does.
+        self.tracker = None
+        if options.get("destination_input", "none") == "ghost":
+            from locomotion.omniwalk.mdp.destination import DestinationTracker
+
+            self.tracker = DestinationTracker(env.num_envs, "cpu")
 
     def record(self, options):
         """The ``policy_path`` entry of the summary: the path that ran and the options that acted on it."""
@@ -90,6 +96,11 @@ class DeterministicPolicy:
                 self.env.episode_steps, self.period, observation[:, 210:213]
             ).to(scaled)
             scaled = torch.cat((scaled, clock), -1)
+        if self.tracker is not None:
+            extra = self.tracker.inputs(
+                self.env.current["root"], observation[:, 210:213], self.env.episode_steps
+            )
+            scaled = torch.cat((scaled, extra.to(scaled)), -1)
         return scaled
 
     def __call__(self, observation):

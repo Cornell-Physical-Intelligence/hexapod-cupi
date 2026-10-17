@@ -124,3 +124,63 @@ class DeviationSchedule:
         self.completed += 1
         self.apply()
         return losses
+
+
+def widen_inputs(loaded, algorithm):
+    """Give a checkpoint's first layers zero weights and zero optimizer moments for inputs a wrapper added.
+
+    A weight whose input width grew keeps its columns and gains zero columns at the end, so the network
+    computes what it computed before the new inputs existed. Every other shape must match. Returns
+    ``[name, old inputs, new inputs]`` for each widened weight.
+    """
+    widened, grown = [], {}
+    for key, model in (
+        ("actor_state_dict", algorithm.actor),
+        ("critic_state_dict", algorithm.critic),
+    ):
+        target = model.state_dict()
+        for name, value in list(loaded[key].items()):
+            want = target[name].shape
+            if value.shape == want:
+                continue
+            if value.ndim != 2 or value.shape[0] != want[0] or value.shape[1] > want[1]:
+                raise ValueError(
+                    f"Checkpoint {key}.{name} {tuple(value.shape)} cannot start a {tuple(want)} weight"
+                )
+            extra = value.new_zeros(want[0], want[1] - value.shape[1])
+            loaded[key][name] = torch.cat((value, extra), 1)
+            widened.append([f"{key[: -len('_state_dict')]}.{name}", value.shape[1], want[1]])
+            grown[tuple(value.shape)] = want
+    params = [p for group in algorithm.optimizer.param_groups for p in group["params"]]
+    for index, state in loaded["optimizer_state_dict"]["state"].items():
+        for moment in ("exp_avg", "exp_avg_sq"):
+            value = state.get(moment)
+            if value is None or value.shape == params[index].shape:
+                continue
+            if grown.get(tuple(value.shape)) != params[index].shape:
+                raise ValueError(
+                    f"Optimizer state {index} {tuple(value.shape)} differs from its parameter"
+                )
+            extra = value.new_zeros(value.shape[0], params[index].shape[1] - value.shape[1])
+            state[moment] = torch.cat((value, extra), 1)
+    return widened
+
+
+def initialize_learner(algorithm, loaded, configured_rate, rate="configured"):
+    """Start a new run from a checkpoint's actor, critic and optimizer state, widened for added inputs.
+
+    ``rate="configured"`` restarts an adaptive schedule at the configured rate, as a new run does;
+    ``"checkpoint"`` continues from the rate the checkpoint's optimizer held. Returns the widened
+    weights and the starting rate.
+    """
+    if rate not in ("configured", "checkpoint"):
+        raise ValueError("The starting rate is configured or checkpoint")
+    widened = widen_inputs(loaded, algorithm)
+    algorithm.load(
+        loaded, {"actor": True, "critic": True, "optimizer": True, "iteration": False}, True
+    )
+    start = configured_rate if rate == "configured" else algorithm.optimizer.param_groups[0]["lr"]
+    algorithm.learning_rate = start
+    for group in algorithm.optimizer.param_groups:
+        group["lr"] = algorithm.learning_rate
+    return widened, algorithm.learning_rate

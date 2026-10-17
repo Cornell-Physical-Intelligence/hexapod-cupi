@@ -8,7 +8,7 @@ import re
 import shutil
 from pathlib import Path
 
-from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import RECIPES, ppo_config
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import EXPERIMENT_INPUTS, RECIPES, ppo_config
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS
 from locomotion.robots.hexapod import sha
 from locomotion.spark.safety import HOME_ROOT, RUN_ROOTS, within_roots
@@ -73,6 +73,10 @@ def prepare(
     extended_updates=False,
     action_std_decay_updates=None,
     steps_per_env=None,
+    experiment=None,
+    initialize_from=None,
+    initialize_from_sha=None,
+    initialize_rate="configured",
     allocation_profile="standard",
     max_wall_seconds=6200,
     root=ROOT,
@@ -90,6 +94,10 @@ def prepare(
         raise ValueError("The paper networks need the AMP learner for training or evaluation")
     if recipe not in (*RECIPES, "none"):
         raise ValueError("Unknown learner recipe")
+    if experiment is not None and (
+        experiment not in EXPERIMENT_INPUTS or mode not in ("train", "evaluate") or learner != "ppo"
+    ):
+        raise ValueError("A named experiment applies to PPO training and evaluation")
     learner_options = resolve_learner_options(
         recipe,
         mode,
@@ -172,6 +180,7 @@ def prepare(
             action_mean=action_mean,
             observation_normalization=observation_normalization,
             **learner_options,
+            **({} if experiment is None else {"destination_input": EXPERIMENT_INPUTS[experiment]}),
         )
     except ValueError as error:
         raise ValueError(
@@ -200,6 +209,15 @@ def prepare(
         episode_seconds != 20.0 and (mode != "train" or not 5.0 <= episode_seconds <= 20.0)
     ):
         raise ValueError("Episode length selection applies to training, between 5 and 20 seconds")
+    if initialize_from is not None and (mode != "train" or learner != "ppo"):
+        raise ValueError("A starting checkpoint applies to PPO training")
+    if (initialize_from is None) != (initialize_from_sha is None) or initialize_rate not in (
+        "configured",
+        "checkpoint",
+    ):
+        raise ValueError(
+            "A starting checkpoint needs its SHA-256 and a configured or checkpoint rate"
+        )
     supplied = (
         checkpoint is not None,
         checkpoint_sha is not None,
@@ -372,6 +390,27 @@ def prepare(
             "--checkpoint-sha256",
             checkpoint_sha,
         ]
+    if experiment is not None:
+        binding["command_args"] += ["--experiment", experiment]
+    if initialize_from is not None:
+        initialize_from = Path(initialize_from)
+        if (
+            not within_roots(initialize_from, RUN_ROOTS)
+            or ".." in initialize_from.parts
+            or len(initialize_from_sha) != 64
+            or set(initialize_from_sha) - set("0123456789abcdef")
+        ):
+            raise ValueError("Invalid starting checkpoint identity")
+        binding["extra_mounts"].append([str(initialize_from.parent), "/initialize"])
+        binding["input_files"][str(initialize_from)] = initialize_from_sha
+        binding["command_args"] += [
+            "--initialize-from",
+            "/initialize/" + initialize_from.name,
+            "--initialize-from-sha256",
+            initialize_from_sha,
+        ]
+        if initialize_rate != "configured":
+            binding["command_args"] += ["--initialize-rate", initialize_rate]
     if all(compatibility):
         binding["extra_mounts"].append([str(receipt.parent), "/compatibility"])
         binding["input_files"][str(receipt)] = checkpoint_compatibility_sha256
@@ -400,6 +439,16 @@ def prepare(
             **({} if video_case is None else {"video_case": video_case}),
             **({} if episode_seconds == 20.0 else {"episode_seconds": episode_seconds}),
             **({"extended_updates": True} if extended_updates else {}),
+            **({} if experiment is None else {"experiment": experiment}),
+            **(
+                {}
+                if initialize_from is None
+                else {
+                    "initialize_from": str(initialize_from),
+                    "initialize_from_sha256": initialize_from_sha,
+                    "initialize_rate": initialize_rate,
+                }
+            ),
             "allocation_profile": allocation_profile,
             "max_wall_seconds": max_wall_seconds,
             "updates": updates,
@@ -465,6 +514,12 @@ def main():
     parser.add_argument("--gait-clock", type=int)
     parser.add_argument("--action-smoothing", choices=["none", "mean2"])
     parser.add_argument("--velocity-noise", type=float)
+    parser.add_argument("--experiment", choices=sorted(EXPERIMENT_INPUTS))
+    parser.add_argument("--initialize-from", type=Path)
+    parser.add_argument("--initialize-from-sha")
+    parser.add_argument(
+        "--initialize-rate", choices=["configured", "checkpoint"], default="configured"
+    )
     parser.add_argument("--episode-seconds", type=float, default=20.0)
     parser.add_argument("--video-case")
     parser.add_argument("--allocation-profile", choices=ALLOCATION_PROFILES, default="standard")

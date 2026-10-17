@@ -32,10 +32,12 @@ def parse_args(argv=None):
     return resolve_options(parser.parse_args(argv), "evaluate")
 
 
-def actor_input(env, args, observation):
-    """Scale the actor observation and append the gait clock, as the training wrapper does."""
+def actor_input(env, args, observation, tracker=None):
+    """Scale the actor observation and append the gait clock and the destination inputs, as the training
+    wrapper does. ``tracker`` follows the destination once per control; None appends the neutral inputs."""
     import torch
 
+    from locomotion.omniwalk.mdp.destination import NEUTRAL_FEATURES
     from locomotion.rl.wrapper import clock_features, scale_observation
 
     scaled = scale_observation(observation, args.observation_scaling)
@@ -44,6 +46,13 @@ def actor_input(env, args, observation):
             scaled
         )
         scaled = torch.cat((scaled, clock), -1)
+    if args.experiment is not None:
+        extra = (
+            torch.tensor(NEUTRAL_FEATURES).expand(len(scaled), -1)
+            if tracker is None
+            else tracker.inputs(env.current["root"], observation[:, 210:213], env.episode_steps)
+        )
+        scaled = torch.cat((scaled, extra.to(scaled)), -1)
     return scaled
 
 
@@ -76,11 +85,17 @@ def evaluation_policy(env, args, config, identity, checkpoint_record, compatibil
         def evaluate(observation):
             return actor(actor_observation(observation))
     else:
+        from locomotion.omniwalk.mdp.destination import DestinationTracker
+
+        tracker = (
+            DestinationTracker(env.num_envs, args.device) if args.experiment is not None else None
+        )
 
         def evaluate(observation):
             return actor(
                 TensorDict(
-                    {"policy": actor_input(env, args, observation)}, batch_size=[env.num_envs]
+                    {"policy": actor_input(env, args, observation, tracker)},
+                    batch_size=[env.num_envs],
                 )
             )
 
