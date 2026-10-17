@@ -1,4 +1,5 @@
 """Build policy observations from measured state."""
+
 import torch
 
 from locomotion.omniwalk.mdp.frames import navigation
@@ -6,8 +7,15 @@ from locomotion.omniwalk.mdp.frames import navigation
 
 def proprio(state, neutral):
     """One 42-value frame: body rates and gravity in navigation axes, joint offsets from neutral, joint rates."""
-    return torch.cat((navigation(state["angular"]), navigation(state["gravity"]),
-                      state["q"] - neutral, state["dq"]), dim=-1)
+    return torch.cat(
+        (
+            navigation(state["angular"]),
+            navigation(state["gravity"]),
+            state["q"] - neutral,
+            state["dq"],
+        ),
+        dim=-1,
+    )
 
 
 def observations(history, commands, previous_action, state):

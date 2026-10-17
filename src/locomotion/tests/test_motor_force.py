@@ -1,9 +1,12 @@
 """Check motor force arithmetic on the CPU; these tests do not qualify native physics."""
+
 import math
 import unittest
+
 import torch
-from locomotion.robots.rs05 import motor_force
+
 from locomotion.robots.hexapod import JOINT_NAMES, KD, motor_damping
+from locomotion.robots.rs05 import motor_force
 
 
 def named_motor_force(names, q, dq, target):
@@ -18,23 +21,27 @@ class MotorForceTests(unittest.TestCase):
         permutation = torch.randperm(18, generator=generator)
         names = [JOINT_NAMES[i] for i in permutation]
         expected = motor_force(q, dq, target, torch.tensor(KD))
-        actual = named_motor_force(names, q[:, permutation], dq[:, permutation], target[:, permutation])
+        actual = named_motor_force(
+            names, q[:, permutation], dq[:, permutation], target[:, permutation]
+        )
         for canonical, native in zip(expected, actual):
             self.assertTrue(torch.equal(canonical[:, permutation], native))
 
     def test_curve_knots_and_both_speed_signs(self):
-        rpm = torch.tensor([0., 70., 275., 340., 450., 477., 480., 500., 479.] * 2)
+        rpm = torch.tensor([0.0, 70.0, 275.0, 340.0, 450.0, 477.0, 480.0, 500.0, 479.0] * 2)
         velocity = (rpm * (2 * math.pi / 60)).repeat(2, 1)
         velocity[1] *= -1
         q = torch.zeros_like(velocity)
-        requested, applied, ceiling = named_motor_force(JOINT_NAMES, q, velocity, torch.full_like(q, 100.))
-        expected = motor_force(q, velocity, torch.full_like(q, 100.), torch.tensor(KD))
+        requested, applied, ceiling = named_motor_force(
+            JOINT_NAMES, q, velocity, torch.full_like(q, 100.0)
+        )
+        expected = motor_force(q, velocity, torch.full_like(q, 100.0), torch.tensor(KD))
         for actual, value in zip((requested, applied, ceiling), expected):
             self.assertTrue(torch.equal(actual, value))
         self.assertTrue(torch.equal(ceiling[0], ceiling[1]))
         self.assertTrue(bool((applied.abs() <= 1.6).all()))
-        self.assertEqual(float(ceiling[0, 7]), 0.)
-        self.assertGreater(float(ceiling[0, 8]), 0.)
+        self.assertEqual(float(ceiling[0, 7]), 0.0)
+        self.assertGreater(float(ceiling[0, 8]), 0.0)
 
     def test_wrong_topology_fails_before_motor_output(self):
         q = torch.zeros((2, 18))

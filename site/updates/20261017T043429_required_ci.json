@@ -1,0 +1,21 @@
+{
+  "id": "20261017T043429_required_ci",
+  "date": "2026-10-17T04:34:29.040407Z",
+  "title": "Require passing CI before merges",
+  "summary": "GitHub branch protection now requires the unit and poster checks from GitHub Actions before merging to main. Branches must be up to date, and the checks apply to administrators. The unit check includes Python lint and formatting in PR 86.",
+  "areas": [
+    "verification"
+  ],
+  "next": "Complete native verification of the formatted runtime and merge PR 86 after its required checks pass.",
+  "changes": [
+    "CONTRIBUTING.md",
+    "site/updates/20261017T043429_required_ci.json"
+  ],
+  "evidence": [
+    "CONTRIBUTING.md",
+    ".github/workflows/tests.yml",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/settings/branches"
+  ],
+  "no_project_impact": true,
+  "reason": "The merge policy enforces existing review checks. It changes no physical acceptance gate or roadmap result."
+}

@@ -3,33 +3,33 @@
 Positive yaw is a left turn: counterclockwise about native +Z seen from above. Each fixture turns a
 level body at a known world rate, so a sign inversion anywhere in the chain fails one of these tests.
 """
+
 import math
 import unittest
 
 import numpy as np
 import torch
 
-import locomotion.evaluation as evaluation
 import locomotion.omniwalk.mdp.rewards as walking
 import locomotion.rl.wrapper as wrapper
-from locomotion.omniwalk.mdp.observations import observations, proprio
-from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation
 from locomotion.evaluation.capture import diagnostic_rotation
-from locomotion.evaluation.task_metrics import TaskMetrics
 from locomotion.evaluation.runner import learning_probe_cases
+from locomotion.evaluation.task_metrics import TaskMetrics
 from locomotion.omniwalk.mdp.commands import TaskConfig, command_bank
+from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation
+from locomotion.omniwalk.mdp.observations import observations, proprio
 from locomotion.omniwalk.mdp.rewards import REWARD_CONFIG as CONFIG
 from locomotion.omniwalk.task import TrainingTask as TrainingTaskV4
-from locomotion.tests.test_evaluation import fixture, score
 from locomotion.tests.task_double import GaitDouble
+from locomotion.tests.test_evaluation import fixture, score
 
-RATE = .2
-SIGNS = (-1., 1.)
+RATE = 0.2
+SIGNS = (-1.0, 1.0)
 
 
 def yawed(heading):
     """XYZW quaternion of a level body turned counterclockwise by ``heading`` about +Z."""
-    return torch.tensor([0., 0., math.sin(heading / 2), math.cos(heading / 2)])
+    return torch.tensor([0.0, 0.0, math.sin(heading / 2), math.cos(heading / 2)])
 
 
 class YawDouble(GaitDouble):
@@ -46,7 +46,9 @@ class YawDouble(GaitDouble):
         quaternion = torch.stack([yawed(float(h)) for h in self.heading])
         self.current["root"][:, 3:] = quaternion
         output = super().step(action)
-        world = torch.stack((torch.zeros_like(self.turn), torch.zeros_like(self.turn), self.turn), -1)
+        world = torch.stack(
+            (torch.zeros_like(self.turn), torch.zeros_like(self.turn), self.turn), -1
+        )
         self.telemetry["angular_velocity_body"] = inverse_rotate(quaternion, world)
         return output
 
@@ -55,47 +57,64 @@ class YawSignTests(unittest.TestCase):
     def test_command_bank_and_probes_hold_both_signs_in_the_navigation_frame(self):
         bank = command_bank(TaskConfig())
         for sign in SIGNS:
-            self.assertIn([0., 0., sign * TaskConfig().yaw_rate_rad_s], bank)
+            self.assertIn([0.0, 0.0, sign * TaskConfig().yaw_rate_rad_s], bank)
         probes = {case["case_id"]: case["command"] for case in learning_probe_cases()}
-        self.assertEqual(probes["learning:yaw_-1"], [0., 0., -RATE])
-        self.assertEqual(probes["learning:yaw_+1"], [0., 0., RATE])
+        self.assertEqual(probes["learning:yaw_-1"], [0.0, 0.0, -RATE])
+        self.assertEqual(probes["learning:yaw_+1"], [0.0, 0.0, RATE])
         # Navigation forward is native -Y and left is native +X; both frames share +Z, so yaw keeps its sign.
-        torch.testing.assert_close(navigation(torch.tensor([0., -1., 0.])), torch.tensor([1., 0., 0.]))
-        torch.testing.assert_close(navigation(torch.tensor([1., 0., 0.])), torch.tensor([0., 1., 0.]))
-        torch.testing.assert_close(navigation(torch.tensor([0., 0., RATE])), torch.tensor([0., 0., RATE]))
-        forward, left = torch.tensor([1., 0., 0.]), torch.tensor([0., 1., 0.])
-        self.assertEqual(float(torch.linalg.cross(forward, left)[2]), 1.)
+        torch.testing.assert_close(
+            navigation(torch.tensor([0.0, -1.0, 0.0])), torch.tensor([1.0, 0.0, 0.0])
+        )
+        torch.testing.assert_close(
+            navigation(torch.tensor([1.0, 0.0, 0.0])), torch.tensor([0.0, 1.0, 0.0])
+        )
+        torch.testing.assert_close(
+            navigation(torch.tensor([0.0, 0.0, RATE])), torch.tensor([0.0, 0.0, RATE])
+        )
+        forward, left = torch.tensor([1.0, 0.0, 0.0]), torch.tensor([0.0, 1.0, 0.0])
+        self.assertEqual(float(torch.linalg.cross(forward, left)[2]), 1.0)
 
     def test_observation_carries_the_signed_command_and_body_yaw_rate(self):
         for sign in SIGNS:
-            for heading in (0., 2.5, -2.5):
+            for heading in (0.0, 2.5, -2.5):
                 with self.subTest(sign=sign, heading=heading):
                     quaternion = yawed(heading)[None]
-                    world = torch.tensor([[0., 0., sign * RATE]])
-                    state = {"angular": inverse_rotate(quaternion, world), "gravity": torch.tensor([[0., 0., -1.]]),
-                             "q": torch.zeros(1, 18), "dq": torch.zeros(1, 18), "linear": torch.zeros(1, 3)}
-                    commands = torch.tensor([[0., 0., sign * RATE]])
+                    world = torch.tensor([[0.0, 0.0, sign * RATE]])
+                    state = {
+                        "angular": inverse_rotate(quaternion, world),
+                        "gravity": torch.tensor([[0.0, 0.0, -1.0]]),
+                        "q": torch.zeros(1, 18),
+                        "dq": torch.zeros(1, 18),
+                        "linear": torch.zeros(1, 3),
+                    }
+                    commands = torch.tensor([[0.0, 0.0, sign * RATE]])
                     frame = proprio(state, torch.zeros(18))
                     self.assertAlmostEqual(float(frame[0, 2]), sign * RATE, places=6)
                     history = frame[:, None].expand(-1, 5, -1).clone()
                     observation = observations(history, commands, torch.zeros(1, 18), state)["obs"]
                     self.assertEqual(observation.shape, (1, 231))
-                    torch.testing.assert_close(observation[0, 210:213], torch.tensor([0., 0., sign * RATE]))
+                    torch.testing.assert_close(
+                        observation[0, 210:213], torch.tensor([0.0, 0.0, sign * RATE])
+                    )
                     scaled = wrapper.scale_observation(observation, "fixed")
-                    self.assertAlmostEqual(float(scaled[0, 212]), sign * RATE * wrapper.COMMAND_SCALES[2], places=6)
-                    self.assertAlmostEqual(float(scaled[0, 168 + 2]), sign * RATE * wrapper.FRAME_SCALES[2], places=5)
+                    self.assertAlmostEqual(
+                        float(scaled[0, 212]), sign * RATE * wrapper.COMMAND_SCALES[2], places=6
+                    )
+                    self.assertAlmostEqual(
+                        float(scaled[0, 168 + 2]), sign * RATE * wrapper.FRAME_SCALES[2], places=5
+                    )
                     # A yaw command counts as motion, so the gait clock runs for both signs.
                     clock = wrapper.clock_features(torch.tensor([15]), 60, observation[:, 210:213])
-                    torch.testing.assert_close(clock, torch.tensor([[1., 0.]]), atol=1e-6, rtol=0)
+                    torch.testing.assert_close(clock, torch.tensor([[1.0, 0.0]]), atol=1e-6, rtol=0)
 
     def test_reward_pays_the_commanded_turn_and_charges_the_opposite_turn(self):
         for sign in SIGNS:
             # Start near +pi so that a left turn crosses the heading wrap; start near -pi for a right turn.
-            native = YawDouble(2, heading=sign * (math.pi - .002))
+            native = YawDouble(2, heading=sign * (math.pi - 0.002))
             task = TrainingTaskV4(native)
             metrics = TaskMetrics(task)
             task.reset()
-            native.commands[:] = torch.tensor([0., 0., sign * RATE])
+            native.commands[:] = torch.tensor([0.0, 0.0, sign * RATE])
             task.window.restart(torch.arange(2), native.commands)
             task.remaining_controls[:] = 1000
             native.turn = torch.tensor([sign * RATE, -sign * RATE])
@@ -103,14 +122,29 @@ class YawSignTests(unittest.TestCase):
                 task.step(torch.zeros(2, 18))
             parts = task.last_components
             with self.subTest(sign=sign):
-                self.assertLess(float(walking.heading(native.current["root"][:1, 3:])[0]) * sign, 0., "the turn crossed the wrap")
-                torch.testing.assert_close(task.window.values.mean(1)[:, 2], torch.tensor([sign * RATE, -sign * RATE]),
-                                           atol=1e-4, rtol=0)
-                self.assertAlmostEqual(float(parts["yaw_tracking"][0]), CONFIG.yaw_tracking_weight, places=3)
-                self.assertAlmostEqual(float(parts["yaw_tracking"][1]), -CONFIG.yaw_tracking_weight, places=3)
-                self.assertAlmostEqual(float(parts["yaw_rate"][0]), 0., places=4)
-                self.assertAlmostEqual(float(parts["yaw_rate"][1]),
-                                       -CONFIG.yaw_rate_weight * (2 * RATE / CONFIG.yaw_rate_scale_rad_s) ** 2, places=3)
+                self.assertLess(
+                    float(walking.heading(native.current["root"][:1, 3:])[0]) * sign,
+                    0.0,
+                    "the turn crossed the wrap",
+                )
+                torch.testing.assert_close(
+                    task.window.values.mean(1)[:, 2],
+                    torch.tensor([sign * RATE, -sign * RATE]),
+                    atol=1e-4,
+                    rtol=0,
+                )
+                self.assertAlmostEqual(
+                    float(parts["yaw_tracking"][0]), CONFIG.yaw_tracking_weight, places=3
+                )
+                self.assertAlmostEqual(
+                    float(parts["yaw_tracking"][1]), -CONFIG.yaw_tracking_weight, places=3
+                )
+                self.assertAlmostEqual(float(parts["yaw_rate"][0]), 0.0, places=4)
+                self.assertAlmostEqual(
+                    float(parts["yaw_rate"][1]),
+                    -CONFIG.yaw_rate_weight * (2 * RATE / CONFIG.yaw_rate_scale_rad_s) ** 2,
+                    places=3,
+                )
                 # The training record reads gyro minus command: zero for the commanded turn, twice the rate otherwise.
                 interval = metrics.status(reset_interval=True)["interval_metrics"]
                 self.assertGreater(interval["command_classes"]["yaw"]["environment_controls"], 0)
@@ -118,49 +152,79 @@ class YawSignTests(unittest.TestCase):
 
     def test_swing_travel_asks_each_toe_to_move_with_the_commanded_turn(self):
         # A left turn moves a toe ahead of the body (navigation +x) to the left, and a toe on the left to the rear.
-        toes = torch.tensor([[[.2, 0.], [0., .2], [-.2, 0.], [0., -.2], [.2, .2], [-.2, -.2]]])
+        toes = torch.tensor(
+            [[[0.2, 0.0], [0.0, 0.2], [-0.2, 0.0], [0.0, -0.2], [0.2, 0.2], [-0.2, -0.2]]]
+        )
         for sign in SIGNS:
-            commands = torch.tensor([[0., 0., sign * RATE]])
-            wanted = commands[:, None, :2] + commands[:, None, 2:] * torch.stack((-toes[..., 1], toes[..., 0]), -1)
+            commands = torch.tensor([[0.0, 0.0, sign * RATE]])
+            wanted = commands[:, None, :2] + commands[:, None, 2:] * torch.stack(
+                (-toes[..., 1], toes[..., 0]), -1
+            )
             lifted = torch.zeros(1, 6, 3)
             forward = walking.measured_reward(
-                {**_telemetry(commands), "toe_xyz_nav": toes, "toe_velocity_nav": wanted,
-                 "tibia_floor_force_world_n": lifted}, commands, torch.zeros(1, dtype=torch.bool), CONFIG, .1)[1]
+                {
+                    **_telemetry(commands),
+                    "toe_xyz_nav": toes,
+                    "toe_velocity_nav": wanted,
+                    "tibia_floor_force_world_n": lifted,
+                },
+                commands,
+                torch.zeros(1, dtype=torch.bool),
+                CONFIG,
+                0.1,
+            )[1]
             backward = walking.measured_reward(
-                {**_telemetry(commands), "toe_xyz_nav": toes, "toe_velocity_nav": -wanted,
-                 "tibia_floor_force_world_n": lifted}, commands, torch.zeros(1, dtype=torch.bool), CONFIG, .1)[1]
+                {
+                    **_telemetry(commands),
+                    "toe_xyz_nav": toes,
+                    "toe_velocity_nav": -wanted,
+                    "tibia_floor_force_world_n": lifted,
+                },
+                commands,
+                torch.zeros(1, dtype=torch.bool),
+                CONFIG,
+                0.1,
+            )[1]
             with self.subTest(sign=sign):
-                self.assertAlmostEqual(float(wanted[0, 0, 1]), sign * RATE * .2, places=6)
-                self.assertAlmostEqual(float(wanted[0, 1, 0]), -sign * RATE * .2, places=6)
-                self.assertGreater(float(forward["swing_travel"]), 0.)
-                self.assertLess(float(backward["swing_travel"]), 0.)
+                self.assertAlmostEqual(float(wanted[0, 0, 1]), sign * RATE * 0.2, places=6)
+                self.assertAlmostEqual(float(wanted[0, 1, 0]), -sign * RATE * 0.2, places=6)
+                self.assertGreater(float(forward["swing_travel"]), 0.0)
+                self.assertLess(float(backward["swing_travel"]), 0.0)
 
     def test_evaluation_scores_each_probe_against_its_signed_command(self):
         for sign in SIGNS:
-            command = (0., 0., sign * RATE)
+            command = (0.0, 0.0, sign * RATE)
             with self.subTest(sign=sign):
                 # The evaluator's gyro is R^T times the world angular velocity, for any heading.
                 rotation = diagnostic_rotation(yawed(2.9 * sign).numpy().astype(float))
-                gyro = np.einsum("ji,j->i", rotation, np.array([0., 0., sign * RATE]))
+                gyro = np.einsum("ji,j->i", rotation, np.array([0.0, 0.0, sign * RATE]))
                 self.assertAlmostEqual(gyro[2], sign * RATE, places=6)
                 matched = score(fixture(command=command), "omni_static", command=list(command))
                 self.assertTrue(matched["pass"], matched["failed_bounds"])
-                self.assertAlmostEqual(matched["metrics"]["mean_yaw_rate_rad_s"], sign * RATE, places=6)
-                self.assertAlmostEqual(matched["metrics"]["yaw_error_rad_s"], 0., places=6)
+                self.assertAlmostEqual(
+                    matched["metrics"]["mean_yaw_rate_rad_s"], sign * RATE, places=6
+                )
+                self.assertAlmostEqual(matched["metrics"]["yaw_error_rad_s"], 0.0, places=6)
                 opposite = fixture(command=command)
                 opposite["gyro_body_rad_s"][:, 2] = -sign * RATE
                 result = score(opposite, "omni_static", command=list(command))
                 self.assertIn("yaw_error_rad_s", result["failed_bounds"])
                 self.assertAlmostEqual(result["metrics"]["yaw_error_rad_s"], 2 * RATE, places=6)
-                self.assertAlmostEqual(result["metrics"]["mean_yaw_rate_rad_s"], -sign * RATE, places=6)
+                self.assertAlmostEqual(
+                    result["metrics"]["mean_yaw_rate_rad_s"], -sign * RATE, places=6
+                )
 
 
 def _telemetry(commands):
     from locomotion.tests.task_double import telemetry
-    return {**telemetry(commands), "gate_yaw_rate_rad_s": torch.zeros(len(commands)),
-            "stride_velocity_nav": torch.zeros(len(commands), 3),
-            "stride_touchdown": torch.zeros(len(commands), 6, dtype=torch.bool),
-            "stride_displacement_nav": torch.zeros(len(commands), 6, 2)}
+
+    return {
+        **telemetry(commands),
+        "gate_yaw_rate_rad_s": torch.zeros(len(commands)),
+        "stride_velocity_nav": torch.zeros(len(commands), 3),
+        "stride_touchdown": torch.zeros(len(commands), 6, dtype=torch.bool),
+        "stride_displacement_nav": torch.zeros(len(commands), 6, 2),
+    }
 
 
 if __name__ == "__main__":

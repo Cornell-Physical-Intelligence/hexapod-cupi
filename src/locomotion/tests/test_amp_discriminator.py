@@ -1,36 +1,42 @@
 """AMP discriminator, Eq. (1) loss, Eq. (2) style reward and their use in the paper_reward candidates."""
-from pathlib import Path
+
 import tempfile
 import unittest
+from pathlib import Path
 
-import numpy as np
 import torch
 
 from locomotion.amp import discriminator as amp
-from locomotion.omniwalk.mdp.commands import TaskConfig
-from locomotion.omniwalk.mdp.frames import inverse_rotate
 
 ROOT = Path(__file__).resolve().parents[3]
-TRACE = ROOT/'src/locomotion/tests/fixtures/control_trace.npz'
+TRACE = ROOT / "src/locomotion/tests/fixtures/control_trace.npz"
 SMALL = amp.TrainConfig(steps=150, batch_size=64, hidden=(16,), learning_rate=1e-2)
 
 
-def linear_discriminator(weight, mean=0., std=1.):
-    discriminator = amp.Discriminator(torch.full((2*amp.AMP_WIDTH,), mean), torch.full((2*amp.AMP_WIDTH,), std), hidden=())
+def linear_discriminator(weight, mean=0.0, std=1.0):
+    discriminator = amp.Discriminator(
+        torch.full((2 * amp.AMP_WIDTH,), mean), torch.full((2 * amp.AMP_WIDTH,), std), hidden=()
+    )
     with torch.no_grad():
-        discriminator.net[0].weight.copy_(torch.as_tensor(weight, dtype=torch.float32).reshape(1, -1))
+        discriminator.net[0].weight.copy_(
+            torch.as_tensor(weight, dtype=torch.float32).reshape(1, -1)
+        )
         discriminator.net[0].bias.zero_()
     return discriminator
 
 
 class StyleRewardTests(unittest.TestCase):
     def test_equation_two(self):
-        scores = torch.tensor([1., 0., 2., -1., 3., -5.])
-        torch.testing.assert_close(amp.style_reward(scores), torch.tensor([1., .75, .75, 0., 0., 0.]))
+        scores = torch.tensor([1.0, 0.0, 2.0, -1.0, 3.0, -5.0])
+        torch.testing.assert_close(
+            amp.style_reward(scores), torch.tensor([1.0, 0.75, 0.75, 0.0, 0.0, 0.0])
+        )
 
     def test_default_architecture_follows_table_three(self):
         discriminator = amp.Discriminator(torch.zeros(122), torch.ones(122))
-        sizes = [layer.out_features for layer in discriminator.net if isinstance(layer, torch.nn.Linear)]
+        sizes = [
+            layer.out_features for layer in discriminator.net if isinstance(layer, torch.nn.Linear)
+        ]
         self.assertEqual(sizes, [1024, 512, 1])
         self.assertEqual(discriminator.net[0].in_features, 2 * amp.AMP_WIDTH)
 
@@ -39,17 +45,21 @@ class LossTests(unittest.TestCase):
     def test_least_squares_targets(self):
         discriminator = linear_discriminator(torch.zeros(122))
         with torch.no_grad():
-            discriminator.net[0].bias.fill_(.5)
+            discriminator.net[0].bias.fill_(0.5)
         _, terms = amp.discriminator_loss(discriminator, torch.zeros(4, 122), torch.zeros(4, 122))
-        self.assertAlmostEqual(terms['prior'], .25, places=6)
-        self.assertAlmostEqual(terms['policy'], 2.25, places=6)
-        self.assertAlmostEqual(terms['gradient_penalty'], 0., places=9)
+        self.assertAlmostEqual(terms["prior"], 0.25, places=6)
+        self.assertAlmostEqual(terms["policy"], 2.25, places=6)
+        self.assertAlmostEqual(terms["gradient_penalty"], 0.0, places=9)
 
     def test_gradient_penalty_is_taken_with_respect_to_prior_inputs(self):
         weight = torch.linspace(-1, 1, 122)
-        discriminator = linear_discriminator(weight, std=2.)
-        _, terms = amp.discriminator_loss(discriminator, torch.randn(8, 122), torch.randn(8, 122), gradient_penalty=10.)
-        self.assertAlmostEqual(terms['gradient_penalty'], .5 * 10 * float((weight/2).square().sum()), places=4)
+        discriminator = linear_discriminator(weight, std=2.0)
+        _, terms = amp.discriminator_loss(
+            discriminator, torch.randn(8, 122), torch.randn(8, 122), gradient_penalty=10.0
+        )
+        self.assertAlmostEqual(
+            terms["gradient_penalty"], 0.5 * 10 * float((weight / 2).square().sum()), places=4
+        )
 
 
 class TrainingTests(unittest.TestCase):
@@ -63,9 +73,9 @@ class TrainingTests(unittest.TestCase):
         prior, policy = self.data()
         discriminator, history = amp.train(prior, policy, SMALL)
         with torch.no_grad():
-            self.assertGreater(float(amp.style_reward(discriminator(prior)).mean()), .8)
-            self.assertLess(float(amp.style_reward(discriminator(policy)).mean()), .2)
-        self.assertEqual(history[-1]['step'], SMALL.steps - 1)
+            self.assertGreater(float(amp.style_reward(discriminator(prior)).mean()), 0.8)
+            self.assertLess(float(amp.style_reward(discriminator(policy)).mean()), 0.2)
+        self.assertEqual(history[-1]["step"], SMALL.steps - 1)
 
     def test_training_is_deterministic(self):
         prior, policy = self.data()
@@ -78,14 +88,13 @@ class TrainingTests(unittest.TestCase):
         prior, policy = self.data()
         discriminator, _ = amp.train(prior, policy, SMALL)
         with tempfile.TemporaryDirectory() as temporary:
-            path = Path(temporary)/'disc.pt'
-            amp.save(discriminator, path, {'config': {'hidden': list(SMALL.hidden)}, 'note': 'x'})
+            path = Path(temporary) / "disc.pt"
+            amp.save(discriminator, path, {"config": {"hidden": list(SMALL.hidden)}, "note": "x"})
             loaded, metadata = amp.load(path)
         with torch.no_grad():
             torch.testing.assert_close(loaded(prior), discriminator(prior))
-        self.assertEqual(metadata['note'], 'x')
+        self.assertEqual(metadata["note"], "x")
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

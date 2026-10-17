@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Fetch pinned source evidence
-        run: git fetch --filter=blob:none --no-tags --depth=1 origin 02f551fd97c240d7ca1724618fa7f0429065f0e1 7d07566545d2bc9c6ebaa0e4dc3d49c626a1a258 077b98b1b6150e8cc54ad233c90198fdece0d7bb 969ea5bc942df3122b2662650f29acd11644a41c 5dd66a09214848b7433c326125acad6263c893b7 467e7e101f0149d131b26ce84993347d8c77e233 b92f14ec39a933a83615dd65e08e1479161b989d
+        run: git fetch --filter=blob:none --no-tags --depth=1 origin 02f551fd97c240d7ca1724618fa7f0429065f0e1 7d07566545d2bc9c6ebaa0e4dc3d49c626a1a258 077b98b1b6150e8cc54ad233c90198fdece0d7bb 969ea5bc942df3122b2662650f29acd11644a41c 5dd66a09214848b7433c326125acad6263c893b7 467e7e101f0149d131b26ce84993347d8c77e233 b92f14ec39a933a83615dd65e08e1479161b989d e16a5975c3c981595fba8274ec4a7ef1e391fdbd
       - name: Test the contributor and evidence checks
         run: python3 -m unittest discover -s tests -p 'test_project*.py'
       - name: Require a central update for every repository change

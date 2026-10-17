@@ -1,4 +1,5 @@
 """Example waypoint follower without obstacle avoidance or localization."""
+
 from __future__ import annotations
 
 import math
@@ -12,11 +13,10 @@ from contracts.command import (
 
 from .producer import Pose2D, wrap_to_pi
 
-
 __all__ = ["WaypointFollower"]
 
 # Demonstration limits preserve the original follower; they qualify no policy.
-EXAMPLE_ENVELOPE = CommandEnvelope((-.40, .60), (-.35, .35), (-.75, .75), name="example")
+EXAMPLE_ENVELOPE = CommandEnvelope((-0.40, 0.60), (-0.35, 0.35), (-0.75, 0.75), name="example")
 
 STAND = VelocityCommand(vx_mps=0.0, vy_mps=0.0, wz_rad_s=0.0, frame=Frame.NAVIGATION)
 
