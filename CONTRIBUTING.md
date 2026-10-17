@@ -19,6 +19,10 @@ history. Link the issue when one applies and explain the changed behavior,
 validation and remaining limits in the [PR template](.github/pull_request_template.md).
 The author must understand submitted code, including agent output.
 
+GitHub requires passing `unit` and `poster` checks from GitHub Actions before
+merging to `main`. Branches must be up to date. These requirements also apply
+to repository administrators.
+
 ## Python style
 
 Use the Ruff version pinned in `pyproject.toml` and `uv.lock`. Ruff formats
