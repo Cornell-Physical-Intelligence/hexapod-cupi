@@ -4,19 +4,59 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Sequence
+from typing import Sequence, Literal
 
 import shapely
 from shapely.geometry.base import BaseGeometry
 from shapely.validation import explain_validity
 
-__all__ = ["PlanMargin", "Point", "SurveyRegion"]
+__all__ = ["PlanMargin", "Point", "RegionRejected", "SurveyRegion"]
 
 # TODO: Who decides the origin of the local frame? How is the frame represented?
 #   Both teams must agree (ARCHITECTURE.md section 3; Pose and Survey request
 #   contracts in section 4).
 #: An ``(east, north)`` pair in meters, in the open map's local east-north frame.
 Point = tuple[float, float]
+
+
+class RegionRejected(ValueError):
+    """The operator's drawing cannot be accepted: ask them to redraw ``part``.
+
+    Raised only for problems that can be fixed by redrawing:
+        - A part is empty: nothing was drawn.
+        - A part is not valid, for example self-intersecting or with a non-finite
+          vertex.
+        - The corridor does not share an edge with the boundary: it is detached,
+          or touches it only at a corner.
+        - The exclusions together cover the whole boundary, so nothing is left to
+          survey.
+
+    Mistakes in the calling code, such as passing something that is not a
+    polygon, raise ``TypeError`` instead.
+
+    Attributes:
+        part: What to redraw: one of ``"boundary"``, ``"corridor"``, ``"exclusions"``.
+        reason: Why it was rejected, phrased to follow ``part``.
+        index: The index ``i`` indicating that ``exclusions[i]`` is at fault.
+            ``None`` when ``part`` is not ``"exclusions"``, or when the exclusions
+            are at fault only together.
+    """
+
+    def __init__(
+        self,
+        part: Literal["boundary", "corridor", "exclusions"],
+        reason: str,
+        index: int | None = None,
+    ) -> None:
+        assert index is None or part == "exclusions"
+        super().__init__(part, reason, index)
+        self.part = part
+        self.reason = reason
+        self.index = index
+
+    def __str__(self) -> str:
+        part = self.part if self.index is None else f"{self.part}[{self.index}]"
+        return f"{part} {self.reason}"
 
 
 @dataclass(frozen=True)
@@ -78,9 +118,8 @@ class SurveyRegion:
     Raises:
         TypeError: ``exclusions`` is not a sequence (a generator, say), or a part is
             not a ``shapely.Polygon``.
-        ValueError: A part is not valid, for example self-intersecting. The message
-            names the part (``boundary``, ``corridor`` or ``exclusions[i]``) and
-            gives shapely's reason.
+        RegionRejected: The operator must redraw ``part``. See
+            :class:`RegionRejected` for when this is raised.
     """
 
     boundary: shapely.Polygon
@@ -96,30 +135,46 @@ class SurveyRegion:
                 f"exclusions must be a sequence of shapely.Polygon, got {type(raw).__name__}"
             )
         exclusions = tuple(raw)
-        parts = {"boundary": self.boundary, "corridor": self.corridor}
-        parts.update(
-            (f"exclusions[{index}]", exclusion)
+        parts = [
+            ("boundary", None, self.boundary),
+            ("corridor", None, self.corridor),
+        ]
+        parts.extend(
+            ("exclusions", index, exclusion)
             for index, exclusion in enumerate(exclusions)
         )
-        for name, polygon in parts.items():
-            if polygon is None and name == "corridor":
+        for part, index, polygon in parts:
+            if polygon is None and part == "corridor":
                 continue
             if not isinstance(polygon, shapely.Polygon):
+                name = part if index is None else f"{part}[{index}]"
                 raise TypeError(
                     f"{name} must be a shapely.Polygon, got {type(polygon).__name__}"
                 )
+            if polygon.is_empty:
+                raise RegionRejected(part, "is empty: nothing was drawn", index)
             if not polygon.is_valid:
-                raise ValueError(
-                    f"{name} is not valid: {explain_validity(polygon)}"
+                raise RegionRejected(
+                    part, f"is not valid: {explain_validity(polygon)}", index
                 )
         object.__setattr__(self, "exclusions", exclusions)
 
         area = self.boundary
         if self.corridor is not None:
             area = area.union(self.corridor)
-        object.__setattr__(
-            self, "free_space", area.difference(shapely.union_all(exclusions))
-        )
+            # Disjoint, or touching at a single point, gives a MultiPolygon.
+            if not isinstance(area, shapely.Polygon):
+                raise RegionRejected(
+                    "corridor", "does not share an edge with the boundary"
+                )
+        blocked = shapely.union_all(exclusions)
+        # The corridor is only a way in, so the boundary is what must survive.
+        if self.boundary.difference(blocked).is_empty:
+            raise RegionRejected(
+                "exclusions",
+                "cover the whole boundary: nothing is left to survey",
+            )
+        object.__setattr__(self, "free_space", area.difference(blocked))
 
     @property
     def bounds_m(self) -> tuple[float, float, float, float]:
@@ -138,5 +193,4 @@ class SurveyRegion:
 
         # NOTE: Not exact. Buffer rounds corners with straight segments that cut
         # slightly inside the true arc, up to about 1% of the margin.
-        # This is acknoledged and accepted; see README.
         return self.free_space.buffer(-margin.total_m)

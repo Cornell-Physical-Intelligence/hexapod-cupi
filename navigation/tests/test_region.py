@@ -14,7 +14,7 @@ import warnings
 
 from shapely import Point, Polygon, box
 
-from navigation.region import PlanMargin, SurveyRegion
+from navigation.region import PlanMargin, RegionRejected, SurveyRegion
 
 
 # A 6 x 4 m rectangle: the demonstration area named in issue #20.
@@ -92,16 +92,66 @@ class SurveyRegionValidationTests(unittest.TestCase):
         spike = Polygon(((0.0, 0.0), (2.0, 0.0), (1.0, 0.0), (1.0, 2.0)))
         for bad in (bowtie, spike):
             with self.subTest(polygon=bad.wkt):
-                with self.assertRaises(ValueError):
+                with self.assertRaises(RegionRejected) as caught:
                     SurveyRegion(boundary=bad)
-                with self.assertRaises(ValueError):
+                self.assertEqual(caught.exception.part, "boundary")
+                with self.assertRaises(RegionRejected) as caught:
                     SurveyRegion(boundary=DEMONSTRATION_AREA, exclusions=(bad,))
-                with self.assertRaises(ValueError):
+                self.assertEqual(
+                    (caught.exception.part, caught.exception.index), ("exclusions", 0)
+                )
+                with self.assertRaises(RegionRejected) as caught:
                     SurveyRegion(boundary=DEMONSTRATION_AREA, corridor=bad)
+                self.assertEqual(caught.exception.part, "corridor")
+
+    def test_a_rejection_is_still_a_value_error(self) -> None:
+        # Callers that only know ValueError keep working.
+        with self.assertRaises(ValueError):
+            SurveyRegion(boundary=Polygon())
+
+    def test_empty_drawings_are_rejected(self) -> None:
+        # An empty polygon is valid to shapely; here it means nothing was drawn.
+        with self.assertRaises(RegionRejected) as caught:
+            SurveyRegion(boundary=Polygon())
+        self.assertEqual(caught.exception.part, "boundary")
+        with self.assertRaises(RegionRejected) as caught:
+            SurveyRegion(
+                boundary=DEMONSTRATION_AREA, exclusions=(box(1.0, 1.0, 2.0, 2.0), Polygon())
+            )
+        self.assertEqual(
+            (caught.exception.part, caught.exception.index), ("exclusions", 1)
+        )
+        self.assertEqual(str(caught.exception), "exclusions[1] is empty: nothing was drawn")
+        with self.assertRaises(RegionRejected) as caught:
+            SurveyRegion(boundary=DEMONSTRATION_AREA, corridor=Polygon())
+        self.assertEqual(caught.exception.part, "corridor")
+
+    def test_a_corridor_must_share_an_edge_with_the_boundary(self) -> None:
+        detached = box(-3.0, 1.5, -1.0, 2.5)
+        corner_only = box(-1.0, -1.0, 0.0, 0.0)
+        for bad in (detached, corner_only):
+            with self.subTest(corridor=bad.wkt):
+                with self.assertRaises(RegionRejected) as caught:
+                    SurveyRegion(boundary=DEMONSTRATION_AREA, corridor=bad)
+                self.assertEqual(caught.exception.part, "corridor")
+        # Abutting along an edge is enough; overlap is not required.
+        SurveyRegion(boundary=DEMONSTRATION_AREA, corridor=box(-2.0, 1.5, 0.0, 2.5))
+
+    def test_exclusions_covering_the_boundary_are_rejected(self) -> None:
+        halves = (box(0.0, 0.0, 3.0, 4.0), box(3.0, 0.0, 6.0, 4.0))
+        corridor = box(-2.0, 1.5, 0.5, 2.5)
+        # A surviving corridor does not help: it is a way in, not an area to survey.
+        for kwargs in ({}, {"corridor": corridor}):
+            with self.subTest(**kwargs):
+                with self.assertRaises(RegionRejected) as caught:
+                    SurveyRegion(boundary=DEMONSTRATION_AREA, exclusions=halves, **kwargs)
+                self.assertEqual(
+                    (caught.exception.part, caught.exception.index), ("exclusions", None)
+                )
 
     def test_nonfinite_vertices_are_rejected(self) -> None:
         for bad in (float("nan"), float("inf")):
-            with self.subTest(value=bad), self.assertRaises(ValueError):
+            with self.subTest(value=bad), self.assertRaises(RegionRejected):
                 with warnings.catch_warnings():
                     # Shapely warns while building the ring; the rejection is ours.
                     warnings.simplefilter("ignore", RuntimeWarning)

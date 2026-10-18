@@ -63,8 +63,6 @@ class CostGraph(Protocol):
 class GridGraph:
     """An eight-connected :class:`CostGraph` over an :class:`OccupancyGrid`.
 
-    Every passab    are distances in meters.
-
     Args:
         grid: The occupancy grid to search, kept as ``self.grid``.
 
