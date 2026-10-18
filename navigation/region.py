@@ -12,10 +12,11 @@ from shapely.validation import explain_validity
 
 __all__ = ["PlanMargin", "Point", "RegionRejected", "SurveyRegion"]
 
-# TODO: Who decides the origin of the local frame? How is the frame represented?
+# TODO: Who decides the origin of the map frame? How is the frame represented?
 #   Both teams must agree (ARCHITECTURE.md section 3; Pose and Survey request
 #   contracts in section 4).
-#: An ``(east, north)`` pair in meters, in the open map's local east-north frame.
+#: An ``(east, north)`` pair in meters, in the map frame: the open map's local
+#: east-north frame.
 Point = tuple[float, float]
 
 
@@ -111,7 +112,7 @@ class PlanMargin:
 class SurveyRegion:
     """An approved survey area: Region Boundary, optional exclusions and an entry corridor.
 
-    Every part is a :class:`shapely.Polygon` in the local east-north frame (see
+    Every part is a :class:`shapely.Polygon` in the map frame (see
     `Point`), and must be valid (in particular, not self-intersecting); an invalid
     drawing is rejected here, before approval, rather than after motion.
 

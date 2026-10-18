@@ -19,7 +19,7 @@ for assignments and [CONTRIBUTING](CONTRIBUTING.md) for the review workflow.
 | --- | --- |
 | R-01 | Accept an operator-drawn survey polygon and explicit exclusions, with a reviewed route before motion. |
 | R-02 | Work within a demonstrated ground, slope, load and operating-duration envelope. Retain flat-ground behavior when adding terrain. |
-| R-03 | Locate the robot with onboard GPS in the open map's local east-north frame and expose a position and heading error bound. Use plain GPS with no RTK base station or correction service; its error of several metres sets the R-05 margin. A dual-antenna receiver computes heading between its own antennas without external corrections. |
+| R-03 | Locate the robot with onboard GPS in the map frame (the open map's local east-north frame) and expose a position and heading error bound. Use plain GPS with no RTK base station or correction service; its error of several metres sets the R-05 margin. A dual-antenna receiver computes heading between its own antennas without external corrections. |
 | R-04 | Learn useful omnidirectional locomotion: signed translation, both yaw directions, combinations, transitions and quiet stops. Hold a steady payload deck at each stop. |
 | R-05 | Keep the full moving footprint inside the approved region or entry corridor and outside exclusions, including the GPS error bound and stopping uncertainty. |
 | R-06 | Support start, pause, resume, abort and hardware emergency stop. Expired control authority or critical sensing failure, including GPS fix loss or an error bound above its limit, must stop mission execution. |
@@ -110,11 +110,11 @@ missing-input behavior before dependent implementation.
 
 | Interface | Required meaning |
 | --- | --- |
-| Pose | Local east-north frame from the open map's origin, units, acquisition timestamp, map identity, GPS position and heading error bound, and fix-loss behavior. Anatomical forward is −body Y, left +body X, up +body Z; frame conversions must be explicit. |
+| Pose | Map frame from the open map's origin, units, acquisition timestamp, map identity, GPS position and heading error bound, and fix-loss behavior. Anatomical forward is −body Y, left +body X, up +body Z; frame conversions must be explicit. |
 | Velocity command | Forward/lateral/yaw rate in named coordinates; validity interval and allowed envelope; expired or invalid authority must not continue motion. |
 | Policy release | Exact robot, source, observation/action ordering, actuator assumptions, timing, weights and qualification evidence. Reject incompatible releases. |
 | Terrain estimate | Not produced: the GPS-only package builds no ground map. Preserve the existing 250 ms optical lease within its experimental lineage. |
-| Survey request | Polygon and exclusions in latitude/longitude from the open map, their conversion to the local east-north frame, approved entry corridor and request revision. Route clearance includes moving footprint, GPS error bound and stopping uncertainty. |
+| Survey request | Polygon and exclusions in latitude/longitude from the open map, their conversion to the map frame, approved entry corridor and request revision. Route clearance includes moving footprint, GPS error bound and stopping uncertainty. |
 | Operator authority | One controlling session, explicit acknowledgements and stopped transitions, stale/replayed request handling and an independent hardware stop. |
 | GeoData handoff | Undefined. GeoData owns measurement and export formats. Both teams must decide the stop status and pose that GeoData acquisition needs from this project. |
 

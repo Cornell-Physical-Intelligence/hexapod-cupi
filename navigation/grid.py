@@ -26,8 +26,8 @@ class OccupancyGrid:
 
     Attributes:
         origin_m: South-west corner of cell ``(0, 0)``, which is also the grid's
-            south-west corner. A `Point` in meters in the local east-north frame
-            (see `Point` in region.py). NOT the origin of the framed.
+            south-west corner. A `Point` in meters in the map frame (see `Point`
+            in region.py). NOT the origin of the frame.
         cell_size_m: Side length of each square cell, in meters. Finite and positive.
         width_cells: Number of cells along east. Positive.
         height_cells: Number of cells along north. Positive.
@@ -103,7 +103,7 @@ class OccupancyGrid:
         return self.passable[north * self.width_cells + east]
 
     def cell_center_m(self, cell: Cell) -> Point:
-        """World position of the center of ``cell``."""
+        """Center of ``cell`` as a `Point` in the map frame."""
 
         east, north = cell
         return (
@@ -146,17 +146,21 @@ class OccupancyGrid:
                 f"cell_size_m must be finite and positive, got {cell_size_m!r}"
             )
 
+        # Create grid width / height parameters based on bounding box
         min_east, min_north, max_east, max_north = region.bounds_m
         width = math.ceil((max_east - min_east) / cell_size)
         height = math.ceil((max_north - min_north) / cell_size)
 
+        # Create list of east / north coords of cell centers
         easts = min_east + (np.arange(width) + 0.5) * cell_size
         norths = min_north + (np.arange(height) + 0.5) * cell_size
 
+        # Determine which grid centers are within the feasible region
         east_grid, north_grid = np.meshgrid(easts, norths)
         inside = shapely.contains_xy(
             region.feasible(margin), east_grid.ravel(), north_grid.ravel()
         )
+
         return cls(
             origin_m=(min_east, min_north),
             cell_size_m=cell_size,

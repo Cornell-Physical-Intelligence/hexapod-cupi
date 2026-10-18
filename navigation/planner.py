@@ -44,7 +44,7 @@ class Route:
 
     # NOTE: Check this spec definition
     def waypoints_m(self, grid: OccupancyGrid) -> tuple[Point, ...]:
-        """Cell centers as (x, y) coordinates in the local frame, ready for ``WaypointFollower``.
+        """Cell centers as `Point`s in the map frame, ready for ``WaypointFollower``.
 
         The follower takes ``(x, y)`` pairs and this returns them in order, so the
         seam to execution needs no adapter. Thinning the list is the executor's
@@ -80,7 +80,40 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
       is passable, otherwise ``None``.
     * An impassable or off-grid ``start`` or ``goal`` is ``None``, not an exception.
     """
+    """
+    # if start == goal:
+        # if start is passable (see :class:`OccupancyGrid`)
+            # return 1 Cell Route
+        # else:
+            # return None
 
-    raise NotImplementedError(
-        "implement A* over the CostGraph"
-    )
+    # Initialize Frontier
+    # Add Start Node to Frontier (priority queue)
+
+    # Initialize Settled Nodes (Set? what datatype in python)
+    # Initialize expansions
+    # while not (goal is settled OR frontier is empty):
+        # Pop next node in frontier
+        # (LAZY DELETION): if popped node is in settled:
+        #   # continue
+        # Add popped node to settled
+        # expansions += 1
+        # for every (neighbor: Cell, cost: float) of in successors
+            # if in frontier and updated weight would be smaller
+                # Update weight
+                ### Commentary: This is A*, so be careful about the edge costs...
+                ### I think for (x,y) is should be new cost = c(x,y) - h(x) + h(y)
+                ### We have invariant: dist(node) = distFromDjikstra(node) + h(node)
+                ### Then, update : dist(y) = dist(x) + c(x,y) - h(x) + h(y)
+                ###              :         = (dist(x) - h(x)) + c(x,y) + h(y)
+                ###              :         = [distFromDjikstra(x) + c(x,y)] + h(y)
+                ###              :         = distFromDjikstra(y) + h(y)
+            # else if not settled:
+                # Add to frontier with appropriate weight (see above)
+    
+    # If goal is not settled:
+        # return None
+    # else:
+    #   return Route
+    """
+    raise NotImplementedError("implement A* over the CostGraph")
