@@ -1,0 +1,23 @@
+{
+  "id": "20261018T160000_collision_simplification_tool",
+  "date": "2026-10-18T16:00:00Z",
+  "title": "Add the simplified collision asset generator and its throughput study",
+  "summary": "A tool writes a variant of the approved USD with one primitive collider per link (19 shapes) in place of the 153 SDF meshes; the approved asset is unchanged and the variant is gitignored. On the Spark the hexapod Direct task trains 2.4x faster at 128 robots and 4.5x at 2048, and a policy trained on the SDF asset walks on the variant with the same speed and no falls. The variant has no standing admission and is not used by omniwalk.",
+  "areas": [
+    "locomotion",
+    "robot"
+  ],
+  "next": "Decide with the program lead whether the variant becomes a club asset with its own one-robot and batch standing admission; keep solver iterations at 32 until that check.",
+  "changes": [
+    "src/locomotion/hexapod/tools/make_simple_collision.py",
+    "site/assets/collision_simplification_20261015_001/*",
+    "configs/source_inventory.json",
+    ".gitignore",
+    "src/locomotion/README.md"
+  ],
+  "evidence": [
+    "site/assets/collision_simplification_20261015_001/README.md"
+  ],
+  "no_project_impact": true,
+  "reason": "The generated asset is an unadmitted throughput variant for the hexapod Direct task; the approved USD, omniwalk and every gate are unchanged."
+}

@@ -96,6 +96,10 @@ pinned Isaac Lab checkout. Use stock train/play scripts with callback
 `./isaaclab.sh -p -m locomotion.hexapod.tools.bc_clone` and the
 [original recipe](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/969ea5bc942df3122b2662650f29acd11644a41c/hexapod/METHOD.md#3-how-to-reproduce-inside-the-container)
 overrides. Use the common evaluator for acceptance.
+`locomotion.hexapod.tools.make_simple_collision` writes a gitignored variant of the
+approved USD with one primitive collider per link; `HEXAPOD_USD` selects it for this
+task alone. It has no standing admission. Read the
+[throughput study](../../site/assets/collision_simplification_20261015_001/README.md).
 
 ## Verification
 
