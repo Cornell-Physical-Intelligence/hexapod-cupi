@@ -13,7 +13,8 @@ draw of 100 to 250. The experiment also gives the actor and critic the gap to th
 
 ``EXPERIMENTS`` names the reviewed settings. ``destination_v1`` is the surrogate result of
 2026-10-17: started from the PR model, every command 20 s, the exponential kernel at 3 cm and weight
-1, termination 32 (ten times the 3.15 tracking ceiling).
+1, termination 32 (ten times the 3.15 tracking ceiling). ``destination_v2`` keeps all of it but
+halves the pay every centimetre, to train on from the native ``destination_v1`` checkpoint.
 """
 
 import hashlib
@@ -76,6 +77,14 @@ EXPERIMENTS = {
         "destination_input": "ghost",
         "episode_seconds": 20.0,
     },
+}
+# destination_v2 trains on from destination_v1 with the pay concentrated near the destination: it
+# halves every centimetre (1 at 0, 0.71 at 0.5 cm, 0.5 at 1 cm, 0.25 at 2 cm, 0.03 at 5 cm).
+EXPERIMENTS["destination_v2"] = {
+    **EXPERIMENTS["destination_v1"],
+    "reward": replace(
+        EXPERIMENTS["destination_v1"]["reward"], destination_distance_m=0.01 / math.log(2)
+    ),
 }
 
 

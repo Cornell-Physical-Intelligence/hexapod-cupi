@@ -178,7 +178,7 @@ RECIPES = {
 
 # Named reviewed experiments and the destination input each adds to the PPO inputs; the reward
 # and task of each live in omniwalk/destination_task.py.
-EXPERIMENT_INPUTS = {"destination_v1": "ghost"}
+EXPERIMENT_INPUTS = {"destination_v1": "ghost", "destination_v2": "ghost"}
 
 
 def recipe_options(name, **overrides):

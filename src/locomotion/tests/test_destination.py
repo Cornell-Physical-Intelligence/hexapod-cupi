@@ -134,6 +134,24 @@ class TaskTests(unittest.TestCase):
             (EXPERIMENT_INPUTS["destination_v1"], SETTINGS["episode_seconds"]), ("ghost", 20.0)
         )
 
+    def test_destination_v2_only_halves_the_pay_every_centimetre(self):
+        first, second = EXPERIMENTS["destination_v1"], EXPERIMENTS["destination_v2"]
+        changed = {
+            key: value
+            for key, value in asdict(second["reward"]).items()
+            if asdict(first["reward"])[key] != value
+        }
+        self.assertEqual(list(changed), ["destination_distance_m"])
+        self.assertEqual(
+            {key: value for key, value in second.items() if key != "reward"},
+            {key: value for key, value in first.items() if key != "reward"},
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v2"], "ghost")
+        scale = changed["destination_distance_m"]
+        for distance_m, pay in ((0.0, 1.0), (0.005, 0.7071), (0.01, 0.5), (0.02, 0.25)):
+            self.assertAlmostEqual(math.exp(-distance_m / scale), pay, places=4)
+        second["reward"].validate()
+
     def test_every_control_pays_the_exponential_of_the_distance_and_a_fall_pays_nothing(self):
         task, _ = moving_task(lambda k: forward(k, slide=0.02))
         for k in range(1, 301):
