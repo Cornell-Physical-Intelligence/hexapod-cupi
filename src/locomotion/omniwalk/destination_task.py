@@ -4,17 +4,22 @@ The canonical task and reward stay unchanged. ``DestinationRewardConfig`` adds f
 ``RewardConfig`` and ``DestinationTrainingTask`` follows each command's destination
 (``mdp/destination.py``):
 
-    destination = w * exp(-d / destination_distance_m)      (or w * max(0, 1 - d / scale), linear)
+    destination = w * exp(-d / destination_distance_m)        exponential
+                  w * 1 / (1 + (d / scale) ** power)         rational
+                  w * max(0, 1 - d / scale)                  linear
 
 every control, for the planar distance ``d`` from the destination; a fall forfeits it, so the fall-cost
 ceiling counts the weight. ``command_controls`` holds every command that many controls instead of the
 draw of 100 to 250. The experiment also gives the actor and critic the gap to the destination
 (``locomotion.rl.destination_wrapper``).
 
+``destination_power`` sets the rational kernel's exponent and stays None for the other kernels.
 ``EXPERIMENTS`` names the reviewed settings. ``destination_v1`` is the surrogate result of
 2026-10-17: started from the PR model, every command 20 s, the exponential kernel at 3 cm and weight
 1, termination 32 (ten times the 3.15 tracking ceiling). ``destination_v2`` keeps all of it but
 halves the pay every centimetre, to train on from the native ``destination_v1`` checkpoint.
+``destination_v3`` keeps v2 but concentrates the pay at the destination with the rational kernel,
+to train on from the native ``destination_v2`` checkpoint.
 """
 
 import hashlib
@@ -40,12 +45,18 @@ class DestinationRewardConfig(RewardConfig):
     destination_weight: float = 0.0
     destination_distance_m: float = 0.1
     destination_kernel: str = "linear"
+    destination_power: float | None = None
     command_controls: int = 0
 
     def validate(self):
         super().validate()
-        if self.destination_kernel not in ("linear", "exponential"):
-            raise ValueError("destination_kernel is linear or exponential")
+        if self.destination_kernel not in ("linear", "exponential", "rational"):
+            raise ValueError("destination_kernel is linear, exponential or rational")
+        if (self.destination_kernel == "rational") != (self.destination_power is not None) or (
+            self.destination_power is not None
+            and not (math.isfinite(self.destination_power) and self.destination_power > 0)
+        ):
+            raise ValueError("The rational kernel, and only it, needs a positive finite power")
         if not math.isfinite(self.destination_distance_m) or self.destination_distance_m <= 0:
             raise ValueError("destination_distance_m must be positive and finite")
         if type(self.command_controls) is not int or not (
@@ -84,6 +95,18 @@ EXPERIMENTS["destination_v2"] = {
     **EXPERIMENTS["destination_v1"],
     "reward": replace(
         EXPERIMENTS["destination_v1"]["reward"], destination_distance_m=0.01 / math.log(2)
+    ),
+}
+# destination_v3 trains on from destination_v2 with the pay concentrated at the destination: the
+# rational kernel at 3.7 mm and power 1.2 (1 at 0, 0.83 at 1 mm, 0.62 at 2.5 mm, 0.41 at 5 mm,
+# 0.23 at 1 cm, 0.12 at 2 cm, 0.04 at 5 cm).
+EXPERIMENTS["destination_v3"] = {
+    **EXPERIMENTS["destination_v2"],
+    "reward": replace(
+        EXPERIMENTS["destination_v2"]["reward"],
+        destination_kernel="rational",
+        destination_distance_m=0.0037,
+        destination_power=1.2,
     ),
 }
 
@@ -129,11 +152,12 @@ class DestinationTrainingTask(TrainingTask):
                 destination_distance(telemetry["root_pose_xyzw"], self.destination)
                 / config.destination_distance_m
             )
-            closeness = (
-                torch.exp(-scaled)
-                if config.destination_kernel == "exponential"
-                else (1 - scaled).clamp_min(0)
-            )
+            if config.destination_kernel == "exponential":
+                closeness = torch.exp(-scaled)
+            elif config.destination_kernel == "rational":
+                closeness = 1 / (1 + scaled.pow(config.destination_power))
+            else:
+                closeness = (1 - scaled).clamp_min(0)
             alive = (~terminated).to(closeness.device).to(closeness)
             components["destination"] = (config.destination_weight * alive * closeness).to(reward)
             reward = reward + components["destination"]

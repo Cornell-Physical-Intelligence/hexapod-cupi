@@ -152,6 +152,43 @@ class TaskTests(unittest.TestCase):
             self.assertAlmostEqual(math.exp(-distance_m / scale), pay, places=4)
         second["reward"].validate()
 
+    def test_destination_v3_only_concentrates_the_pay_with_the_rational_kernel(self):
+        second, third = EXPERIMENTS["destination_v2"], EXPERIMENTS["destination_v3"]
+        changed = {
+            key: value
+            for key, value in asdict(third["reward"]).items()
+            if asdict(second["reward"])[key] != value
+        }
+        self.assertEqual(
+            changed,
+            {
+                "destination_kernel": "rational",
+                "destination_distance_m": 0.0037,
+                "destination_power": 1.2,
+            },
+        )
+        self.assertEqual(
+            {key: value for key, value in third.items() if key != "reward"},
+            {key: value for key, value in second.items() if key != "reward"},
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v3"], "ghost")
+        task, _ = moving_task(lambda k: forward(k, slide=0.02), reward=third["reward"])
+        for k in range(1, 26):
+            task.step(torch.zeros(1, 18))
+            if k in (1, 5, 13, 25):  # 0.4, 2, 5.2 and 10 mm to the side of the destination
+                self.assertAlmostEqual(
+                    float(task.last_components["destination"][0]),
+                    1 / (1 + (0.02 * 0.02 * k / 0.0037) ** 1.2),
+                    places=4,
+                )
+        for bad in (
+            dict(destination_power=None),
+            dict(destination_power=0.0),
+            dict(destination_kernel="exponential"),
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                replace(third["reward"], **bad).validate()
+
     def test_every_control_pays_the_exponential_of_the_distance_and_a_fall_pays_nothing(self):
         task, _ = moving_task(lambda k: forward(k, slide=0.02))
         for k in range(1, 301):
