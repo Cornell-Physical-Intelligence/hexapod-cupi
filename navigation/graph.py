@@ -13,6 +13,9 @@ __all__ = ["CostGraph", "GridGraph", "STEPS"]
 #: deterministic tie-break prefers a straight step to a diagonal of equal cost.
 STEPS = ((1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
 
+# TODO: I don't see the point of having this as a Protocol... methods take in cells
+# which implies graph like structure... maybe if we want to incoporate risk weighting (?)
+
 
 @runtime_checkable
 class CostGraph(Protocol):

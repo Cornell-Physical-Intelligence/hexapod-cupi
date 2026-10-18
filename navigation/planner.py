@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import heapq  # TODO: Is there a cinvention for ordering of imports?
 from dataclasses import dataclass
 
 from .grid import Cell, OccupancyGrid
@@ -80,26 +81,41 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
       is passable, otherwise ``None``.
     * An impassable or off-grid ``start`` or ``goal`` is ``None``, not an exception.
     """
-    """
-    # if start == goal:
-        # if start is passable (see :class:`OccupancyGrid`)
-            # return 1 Cell Route
-        # else:
-            # return None
 
-    # Initialize Frontier
-    # Add Start Node to Frontier (priority queue)
+    if start == goal:
+        # TODO: Arbitrary CostGraph has no notion of passability (?)
+        # What should we do? see is passable (see :class:`OccupancyGrid`)
+        return Route((goal), 0.0, 0)
 
-    # Initialize Settled Nodes (Set? what datatype in python)
-    # Initialize expansions
-    # while not (goal is settled OR frontier is empty):
+        # else (if not passable? see question above):
+        #   return None
+
+    # Initialize Frontier, add start
+    frontier = []
+    g = 0.0
+    h = graph.heuristic(start, goal)
+    heapq.heappush(frontier, (g + h, h, start))
+
+    # Value: (cost (f), prev (None if start))
+    discovered = {start: (0.0, None)}
+
+    settled = set()
+    expansions = 0
+
+    while not (goal in settled or not frontier):
         # Pop next node in frontier
+        f, h, node = heapq.heappop(frontier)
         # (LAZY DELETION): if popped node is in settled:
         #   # continue
+        if node in settled:
+            continue
         # Add popped node to settled
-        # expansions += 1
-        # for every (neighbor: Cell, cost: float) of in successors
-            # if in frontier and updated weight would be smaller
+        settled.add(node)
+        expansions += 1
+
+        for neighbor, cost in graph.successors(node):
+            dist = f + cost - graph.heuristic(node) + graph.heuristic(neighbor)
+            if neighbor in frontier and dist < discovered[neighbor][0]:
                 # Update weight
                 ### Commentary: This is A*, so be careful about the edge costs...
                 ### I think for (x,y) is should be new cost = c(x,y) - h(x) + h(y)
@@ -108,12 +124,22 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
                 ###              :         = (dist(x) - h(x)) + c(x,y) + h(y)
                 ###              :         = [distFromDjikstra(x) + c(x,y)] + h(y)
                 ###              :         = distFromDjikstra(y) + h(y)
-            # else if not settled:
+                discovered[neighbor] = (dist, node)
+                heapq.heappush(
+                    frontier, (dist, graph.heuristic(neighbor), neighbor)
+                )
+
+            elif neighbor not in discovered:
                 # Add to frontier with appropriate weight (see above)
-    
+                heapq.heappush(
+                    frontier, (dist, graph.heuristic(neighbor), neighbor)
+                )
+
     # If goal is not settled:
-        # return None
+    # return None
+    if goal not in settled:
+        return None
     # else:
     #   return Route
-    """
-    raise NotImplementedError("implement A* over the CostGraph")
+    else:
+        return ...
