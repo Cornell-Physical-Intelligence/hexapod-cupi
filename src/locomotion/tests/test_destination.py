@@ -165,6 +165,12 @@ class TaskTests(unittest.TestCase):
                 "destination_kernel": "rational",
                 "destination_distance_m": 0.0037,
                 "destination_power": 1.2,
+                "destination_quiet": "flat",
+                "hold_weight": 2.0,
+                "hold_grace_controls": 100,
+                "hold_deadband_rad": 0.005,
+                "hold_span_rad": 0.045,
+                "hold_smoothing_controls": 50,
             },
         )
         self.assertEqual(
@@ -185,9 +191,54 @@ class TaskTests(unittest.TestCase):
             dict(destination_power=None),
             dict(destination_power=0.0),
             dict(destination_kernel="exponential"),
+            dict(destination_quiet="track"),
+            dict(hold_span_rad=None),
+            dict(hold_weight=0.0),
+            dict(hold_grace_controls=0),
+            dict(hold_deadband_rad=-0.001),
+            dict(hold_smoothing_controls=101),
         ):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 replace(third["reward"], **bad).validate()
+
+    def test_a_zero_command_pays_the_full_destination_and_charges_joint_drift_after_the_grace(self):
+        reward = EXPERIMENTS["destination_v3"]["reward"]
+        smoothing = reward.hold_smoothing_controls
+
+        def standing(position):
+            """Charges and running-mean drift while standing; joint 4 follows ``position(k)``."""
+            task, native = moving_task(
+                lambda k: (0.001 * k, 0.0, 0.0), command=torch.zeros(1, 3), reward=reward
+            )
+            start, out, mean, anchor = native.position.clone(), {}, 0.0, None
+            for k in range(1, 301):
+                native.position[:] = start
+                native.position[0, 4] += position(k)
+                mean = position(k) if k == 1 else mean + (position(k) - mean) / smoothing
+                anchor = mean if k == 100 else anchor
+                task.step(torch.zeros(1, 18))
+                # The body slides 1 mm per control, yet a zero command pays the full destination.
+                self.assertEqual(float(task.last_components["destination"][0]), 1.0)
+                out[k] = (float(task.last_components["hold"][0]), mean - (anchor or mean))
+            return out
+
+        # Exploration-sized jitter of +-20 mrad averages out and is never charged.
+        jitter = standing(lambda k: 0.02 * (-1) ** k)
+        self.assertTrue(all(charge == 0.0 for charge, _ in jitter.values()))
+        # A creep of 0.2 mrad per control is charged once its running mean leaves the deadband.
+        creep = standing(lambda k: 0.0002 * k)
+        self.assertTrue(all(creep[k][0] == 0.0 for k in range(1, 125)))
+        for k in (150, 200, 300):
+            expected = -2.0 * min(max((abs(creep[k][1]) - 0.005) / 0.045, 0), 1) / 18
+            self.assertAlmostEqual(creep[k][0], expected, places=5)
+        self.assertLess(creep[300][0], -0.07)
+        # A moving command pays by distance and charges nothing.
+        walking, native = moving_task(lambda k: forward(k, slide=0.02), reward=reward)
+        for _ in range(130):
+            native.position[0, 4] += 0.01
+            walking.step(torch.zeros(1, 18))
+        self.assertEqual(float(walking.last_components["hold"][0]), 0.0)
+        self.assertLess(float(walking.last_components["destination"][0]), 0.1)
 
     def test_every_control_pays_the_exponential_of_the_distance_and_a_fall_pays_nothing(self):
         task, _ = moving_task(lambda k: forward(k, slide=0.02))

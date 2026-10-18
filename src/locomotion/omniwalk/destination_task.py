@@ -1,6 +1,6 @@
 """Experiment ``destination_v1``: pay every control for staying near the pose the command would have reached.
 
-The canonical task and reward stay unchanged. ``DestinationRewardConfig`` adds four fields to
+The canonical task and reward stay unchanged. ``DestinationRewardConfig`` adds its fields to
 ``RewardConfig`` and ``DestinationTrainingTask`` follows each command's destination
 (``mdp/destination.py``):
 
@@ -14,6 +14,19 @@ draw of 100 to 250. The experiment also gives the actor and critic the gap to th
 (``locomotion.rl.destination_wrapper``).
 
 ``destination_power`` sets the rational kernel's exponent and stays None for the other kernels.
+
+Two zero-command fields leave moving commands alone. ``destination_quiet="flat"`` pays the full weight
+while the command is zero, so standing still never trades joint motion for millimetres of ghost
+distance. ``hold_weight`` follows each joint's running mean over ``hold_smoothing_controls`` (an
+exponential mean restarted when a command begins), which removes the zero-mean exploration jitter of
+training but keeps slow drift. The mean is anchored ``hold_grace_controls`` into a zero command and
+from then on the task charges
+
+    hold = -hold_weight * mean_j clamp((|mean_j - anchor_j| - hold_deadband_rad) / hold_span_rad, 0, 1)
+
+linear in the drift, like the evaluator's joint range check that opens 2 s into a zero command. A
+fall forfeits the destination pay and the hold charge. None leaves each field off.
+
 ``EXPERIMENTS`` names the reviewed settings. ``destination_v1`` is the surrogate result of
 2026-10-17: started from the PR model, every command 20 s, the exponential kernel at 3 cm and weight
 1, termination 32 (ten times the 3.15 tracking ceiling). ``destination_v2`` keeps all of it but
@@ -46,6 +59,12 @@ class DestinationRewardConfig(RewardConfig):
     destination_distance_m: float = 0.1
     destination_kernel: str = "linear"
     destination_power: float | None = None
+    destination_quiet: str | None = None
+    hold_weight: float | None = None
+    hold_grace_controls: int | None = None
+    hold_deadband_rad: float | None = None
+    hold_span_rad: float | None = None
+    hold_smoothing_controls: int | None = None
     command_controls: int = 0
 
     def validate(self):
@@ -57,6 +76,30 @@ class DestinationRewardConfig(RewardConfig):
             and not (math.isfinite(self.destination_power) and self.destination_power > 0)
         ):
             raise ValueError("The rational kernel, and only it, needs a positive finite power")
+        if self.destination_quiet not in (None, "flat"):
+            raise ValueError("destination_quiet is None (track the ghost) or flat")
+        hold = (
+            self.hold_weight,
+            self.hold_grace_controls,
+            self.hold_deadband_rad,
+            self.hold_span_rad,
+            self.hold_smoothing_controls,
+        )
+        if any(value is not None for value in hold) and (
+            any(value is None for value in hold)
+            or not all(math.isfinite(value) for value in hold)
+            or self.hold_weight <= 0
+            or type(self.hold_grace_controls) is not int
+            or not 1 <= self.hold_grace_controls <= 1000
+            or self.hold_deadband_rad < 0
+            or self.hold_span_rad <= 0
+            or type(self.hold_smoothing_controls) is not int
+            or not 1 <= self.hold_smoothing_controls <= self.hold_grace_controls
+        ):
+            raise ValueError(
+                "The hold charge needs a positive weight, 1 to 1000 grace controls, "
+                "a nonnegative deadband and a positive span and 1 to grace smoothing controls"
+            )
         if not math.isfinite(self.destination_distance_m) or self.destination_distance_m <= 0:
             raise ValueError("destination_distance_m must be positive and finite")
         if type(self.command_controls) is not int or not (
@@ -99,7 +142,9 @@ EXPERIMENTS["destination_v2"] = {
 }
 # destination_v3 trains on from destination_v2 with the pay concentrated at the destination: the
 # rational kernel at 3.7 mm and power 1.2 (1 at 0, 0.83 at 1 mm, 0.62 at 2.5 mm, 0.41 at 5 mm,
-# 0.23 at 1 cm, 0.12 at 2 cm, 0.04 at 5 cm).
+# 0.23 at 1 cm, 0.12 at 2 cm, 0.04 at 5 cm). A zero command pays the full destination weight and,
+# from 2 s in, charges up to 2 per control for joints whose 1 s running mean drifts 5 mrad to
+# 50 mrad from where it stood (exploration noise alone moves standing joints about 20 mrad).
 EXPERIMENTS["destination_v3"] = {
     **EXPERIMENTS["destination_v2"],
     "reward": replace(
@@ -107,6 +152,12 @@ EXPERIMENTS["destination_v3"] = {
         destination_kernel="rational",
         destination_distance_m=0.0037,
         destination_power=1.2,
+        destination_quiet="flat",
+        hold_weight=2.0,
+        hold_grace_controls=100,
+        hold_deadband_rad=0.005,
+        hold_span_rad=0.045,
+        hold_smoothing_controls=50,
     ),
 }
 
@@ -121,6 +172,8 @@ class DestinationTrainingTask(TrainingTask):
         self.destination = torch.zeros(env.num_envs, 3, device=env.device)
         self.command_started = torch.ones(env.num_envs, dtype=torch.bool, device=env.device)
         self.command_elapsed = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
+        self.hold_anchor = torch.zeros(env.num_envs, 18, device=env.device)
+        self.hold_mean = torch.zeros(env.num_envs, 18, device=env.device)
         super().__init__(env, config, output_dir, chosen)
 
     def _resample(self, indices):
@@ -158,10 +211,36 @@ class DestinationTrainingTask(TrainingTask):
                 closeness = 1 / (1 + scaled.pow(config.destination_power))
             else:
                 closeness = (1 - scaled).clamp_min(0)
+            quiet = (command == 0).all(-1).to(closeness.device)
+            if config.destination_quiet == "flat":
+                closeness = torch.where(quiet, torch.ones_like(closeness), closeness)
             alive = (~terminated).to(closeness.device).to(closeness)
             components["destination"] = (config.destination_weight * alive * closeness).to(reward)
             reward = reward + components["destination"]
+        if config.hold_weight is not None:
+            components["hold"] = self._hold(command, terminated).to(reward)
+            reward = reward + components["hold"]
         return reward, components, telemetry
+
+    def _hold(self, command, terminated):
+        """Anchor the joints' running mean a grace period into a zero command and charge its drift."""
+        config = self.reward_config
+        q = self.env.telemetry["joint_position_rad"].detach().to(self.hold_anchor)
+        age = self.command_age.to(q.device)
+        quiet = (command.to(q.device) == 0).all(-1)
+        self.hold_mean = torch.where(
+            (age <= 1)[:, None],
+            q,
+            self.hold_mean + (q - self.hold_mean) / config.hold_smoothing_controls,
+        )
+        anchor = quiet & (age == config.hold_grace_controls)
+        self.hold_anchor = torch.where(anchor[:, None], self.hold_mean, self.hold_anchor)
+        drift = (
+            ((self.hold_mean - self.hold_anchor).abs() - config.hold_deadband_rad)
+            / config.hold_span_rad
+        ).clamp(0, 1)
+        active = quiet & (age >= config.hold_grace_controls) & ~terminated.to(q.device)
+        return -config.hold_weight * active.to(q) * drift.mean(-1)
 
     def declaration(self):
         result = super().declaration()
