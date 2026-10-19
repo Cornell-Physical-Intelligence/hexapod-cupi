@@ -17,7 +17,7 @@ draw of 100 to 250. The experiment also gives the actor and critic the gap to th
 
 Two zero-command fields leave moving commands alone. ``destination_quiet="flat"`` pays the full weight
 while the command is zero, so standing still never trades joint motion for millimetres of ghost
-distance. ``hold_weight`` follows each joint's running mean over ``hold_smoothing_controls`` (an
+distance; ``destination_quiet="off"`` pays nothing while the command is zero. ``hold_weight`` follows each joint's running mean over ``hold_smoothing_controls`` (an
 exponential mean restarted when a command begins), which removes the zero-mean exploration jitter of
 training but keeps slow drift. The mean is anchored ``hold_grace_controls`` into a zero command and
 from then on the task charges
@@ -32,7 +32,9 @@ fall forfeits the destination pay and the hold charge. None leaves each field of
 1, termination 32 (ten times the 3.15 tracking ceiling). ``destination_v2`` keeps all of it but
 halves the pay every centimetre, to train on from the native ``destination_v1`` checkpoint.
 ``destination_v3`` keeps v2 but concentrates the pay at the destination with the rational kernel,
-to train on from the native ``destination_v2`` checkpoint.
+to train on from the native ``destination_v2`` checkpoint. ``destination_v4`` keeps v3's kernel
+without the hold charge and pays nothing for the destination under a zero command, also from the
+native ``destination_v2`` checkpoint.
 """
 
 import hashlib
@@ -76,8 +78,8 @@ class DestinationRewardConfig(RewardConfig):
             and not (math.isfinite(self.destination_power) and self.destination_power > 0)
         ):
             raise ValueError("The rational kernel, and only it, needs a positive finite power")
-        if self.destination_quiet not in (None, "flat"):
-            raise ValueError("destination_quiet is None (track the ghost) or flat")
+        if self.destination_quiet not in (None, "flat", "off"):
+            raise ValueError("destination_quiet is None (track the ghost), flat or off")
         hold = (
             self.hold_weight,
             self.hold_grace_controls,
@@ -160,6 +162,20 @@ EXPERIMENTS["destination_v3"] = {
         hold_smoothing_controls=50,
     ),
 }
+# destination_v4 keeps destination_v3's rational kernel without the hold charge and pays nothing for
+# the destination while the command is zero; it also trains on from destination_v2.
+EXPERIMENTS["destination_v4"] = {
+    **EXPERIMENTS["destination_v3"],
+    "reward": replace(
+        EXPERIMENTS["destination_v3"]["reward"],
+        destination_quiet="off",
+        hold_weight=None,
+        hold_grace_controls=None,
+        hold_deadband_rad=None,
+        hold_span_rad=None,
+        hold_smoothing_controls=None,
+    ),
+}
 
 
 class DestinationTrainingTask(TrainingTask):
@@ -214,6 +230,8 @@ class DestinationTrainingTask(TrainingTask):
             quiet = (command == 0).all(-1).to(closeness.device)
             if config.destination_quiet == "flat":
                 closeness = torch.where(quiet, torch.ones_like(closeness), closeness)
+            elif config.destination_quiet == "off":
+                closeness = torch.where(quiet, torch.zeros_like(closeness), closeness)
             alive = (~terminated).to(closeness.device).to(closeness)
             components["destination"] = (config.destination_weight * alive * closeness).to(reward)
             reward = reward + components["destination"]

@@ -240,6 +240,47 @@ class TaskTests(unittest.TestCase):
         self.assertEqual(float(walking.last_components["hold"][0]), 0.0)
         self.assertLess(float(walking.last_components["destination"][0]), 0.1)
 
+    def test_destination_v4_drops_the_hold_charge_and_pays_nothing_under_a_zero_command(self):
+        third, fourth = EXPERIMENTS["destination_v3"], EXPERIMENTS["destination_v4"]
+        changed = {
+            key: value
+            for key, value in asdict(fourth["reward"]).items()
+            if asdict(third["reward"])[key] != value
+        }
+        self.assertEqual(
+            changed,
+            {
+                "destination_quiet": "off",
+                "hold_weight": None,
+                "hold_grace_controls": None,
+                "hold_deadband_rad": None,
+                "hold_span_rad": None,
+                "hold_smoothing_controls": None,
+            },
+        )
+        self.assertEqual(
+            {key: value for key, value in fourth.items() if key != "reward"},
+            {key: value for key, value in third.items() if key != "reward"},
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v4"], "ghost")
+        # Standing exactly on the destination pays nothing and charges no hold.
+        standing, _ = moving_task(
+            lambda k: (0.0, 0.0, 0.0), command=torch.zeros(1, 3), reward=fourth["reward"]
+        )
+        for _ in range(150):
+            standing.step(torch.zeros(1, 18))
+            self.assertEqual(float(standing.last_components["destination"][0]), 0.0)
+            self.assertNotIn("hold", standing.last_components)
+        # A moving command still pays by the rational kernel.
+        walking, _ = moving_task(lambda k: forward(k, slide=0.02), reward=fourth["reward"])
+        for k in range(1, 6):
+            walking.step(torch.zeros(1, 18))
+        self.assertAlmostEqual(
+            float(walking.last_components["destination"][0]),
+            1 / (1 + (0.02 * 0.02 * 5 / 0.0037) ** 1.2),
+            places=4,
+        )
+
     def test_every_control_pays_the_exponential_of_the_distance_and_a_fall_pays_nothing(self):
         task, _ = moving_task(lambda k: forward(k, slide=0.02))
         for k in range(1, 301):
