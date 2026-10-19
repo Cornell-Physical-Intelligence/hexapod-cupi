@@ -281,6 +281,32 @@ class TaskTests(unittest.TestCase):
             places=4,
         )
 
+    def test_destination_v5_pays_the_destination_under_a_zero_command_too(self):
+        fourth, fifth = EXPERIMENTS["destination_v4"], EXPERIMENTS["destination_v5"]
+        changed = {
+            key: value
+            for key, value in asdict(fifth["reward"]).items()
+            if asdict(fourth["reward"])[key] != value
+        }
+        self.assertEqual(changed, {"destination_quiet": None})
+        self.assertEqual(
+            {key: value for key, value in fifth.items() if key != "reward"},
+            {key: value for key, value in fourth.items() if key != "reward"},
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v5"], "ghost")
+        # Standing 1 mm per control off the destination pays by the rational kernel.
+        standing, _ = moving_task(
+            lambda k: (0.001 * k, 0.0, 0.0), command=torch.zeros(1, 3), reward=fifth["reward"]
+        )
+        for _ in range(4):
+            standing.step(torch.zeros(1, 18))
+        self.assertAlmostEqual(
+            float(standing.last_components["destination"][0]),
+            1 / (1 + (0.004 / 0.0037) ** 1.2),
+            places=4,
+        )
+        self.assertNotIn("hold", standing.last_components)
+
     def test_every_control_pays_the_exponential_of_the_distance_and_a_fall_pays_nothing(self):
         task, _ = moving_task(lambda k: forward(k, slide=0.02))
         for k in range(1, 301):

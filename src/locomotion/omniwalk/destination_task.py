@@ -34,7 +34,8 @@ halves the pay every centimetre, to train on from the native ``destination_v1`` 
 ``destination_v3`` keeps v2 but concentrates the pay at the destination with the rational kernel,
 to train on from the native ``destination_v2`` checkpoint. ``destination_v4`` keeps v3's kernel
 without the hold charge and pays nothing for the destination under a zero command, also from the
-native ``destination_v2`` checkpoint.
+native ``destination_v2`` checkpoint. ``destination_v5`` is v4 that pays the destination under a zero
+command too: v3's kernel without either zero-command change.
 """
 
 import hashlib
@@ -175,6 +176,12 @@ EXPERIMENTS["destination_v4"] = {
         hold_span_rad=None,
         hold_smoothing_controls=None,
     ),
+}
+# destination_v5 is destination_v4 that pays the destination under a zero command as well: v3's
+# rational kernel with neither zero-command change, also from destination_v2.
+EXPERIMENTS["destination_v5"] = {
+    **EXPERIMENTS["destination_v4"],
+    "reward": replace(EXPERIMENTS["destination_v4"]["reward"], destination_quiet=None),
 }
 
 
