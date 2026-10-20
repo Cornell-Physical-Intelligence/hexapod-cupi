@@ -307,6 +307,59 @@ class TaskTests(unittest.TestCase):
         )
         self.assertNotIn("hold", standing.last_components)
 
+    def test_destination_v6_follows_a_share_of_walks_with_a_stop_for_the_rest_of_the_command(self):
+        fifth, sixth = EXPERIMENTS["destination_v5"], EXPERIMENTS["destination_v6"]
+        changed = {
+            key: value
+            for key, value in asdict(sixth["reward"]).items()
+            if asdict(fifth["reward"])[key] != value
+        }
+        self.assertEqual(
+            changed,
+            {"stop_fraction": 0.2, "stop_after_min_controls": 200, "stop_after_max_controls": 600},
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v6"], "ghost")
+        for bad in (
+            dict(stop_fraction=0.0),
+            dict(stop_after_max_controls=None),
+            dict(stop_after_min_controls=700),
+            dict(stop_after_max_controls=1000),
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                replace(sixth["reward"], **bad).validate()
+        # Every moving command stops: it walks 10 to 20 controls, then stands for the rest of 60.
+        reward = replace(
+            sixth["reward"],
+            stop_fraction=1.0,
+            stop_after_min_controls=10,
+            stop_after_max_controls=20,
+            command_controls=60,
+        )
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, reward)
+        task.reset()
+        moving = (native.commands != 0).any(-1)
+        self.assertTrue(bool(moving.any()) and bool((~moving).any()))
+        walked = task.remaining_controls.clone()
+        self.assertTrue(bool(((walked >= 10) & (walked <= 20))[moving].all()))
+        self.assertTrue(bool((walked[~moving] == 60).all()))
+        first = native.commands.clone()
+        # Training truncates the episode when the stop ends at control 60; check up to there.
+        for k in range(1, 60):
+            task.step(torch.zeros(64, 18))
+            stopped = moving & (walked <= k)
+            self.assertTrue(bool((native.commands[stopped] == 0).all()))
+            self.assertTrue(
+                torch.equal(native.commands[~stopped & moving], first[~stopped & moving])
+            )
+            self.assertTrue(bool((task.remaining_controls[stopped] == 60 - k).all()))
+        # A reset drops a stop that its episode no longer reaches.
+        task.reset()
+        task.stop_pending[:] = True
+        task.reset()
+        self.assertTrue(bool((task.remaining_controls[(native.commands == 0).all(-1)] == 60).all()))
+
     def test_every_control_pays_the_exponential_of_the_distance_and_a_fall_pays_nothing(self):
         task, _ = moving_task(lambda k: forward(k, slide=0.02))
         for k in range(1, 301):

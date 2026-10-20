@@ -35,7 +35,10 @@ halves the pay every centimetre, to train on from the native ``destination_v1`` 
 to train on from the native ``destination_v2`` checkpoint. ``destination_v4`` keeps v3's kernel
 without the hold charge and pays nothing for the destination under a zero command, also from the
 native ``destination_v2`` checkpoint. ``destination_v5`` is v4 that pays the destination under a zero
-command too: v3's kernel without either zero-command change.
+command too: v3's kernel without either zero-command change. ``destination_v6`` is v5 that also
+trains stopping: ``stop_fraction`` of the moving commands drawn last ``stop_after_min_controls`` to
+``stop_after_max_controls`` controls and give way to a zero command for the rest of the
+``command_controls``, so a walk is followed by a stop as in the evaluator's walk-then-stop probe.
 """
 
 import hashlib
@@ -68,6 +71,9 @@ class DestinationRewardConfig(RewardConfig):
     hold_deadband_rad: float | None = None
     hold_span_rad: float | None = None
     hold_smoothing_controls: int | None = None
+    stop_fraction: float | None = None
+    stop_after_min_controls: int | None = None
+    stop_after_max_controls: int | None = None
     command_controls: int = 0
 
     def validate(self):
@@ -79,6 +85,20 @@ class DestinationRewardConfig(RewardConfig):
             and not (math.isfinite(self.destination_power) and self.destination_power > 0)
         ):
             raise ValueError("The rational kernel, and only it, needs a positive finite power")
+        stop = (self.stop_fraction, self.stop_after_min_controls, self.stop_after_max_controls)
+        if any(value is not None for value in stop) and (
+            any(value is None for value in stop)
+            or not math.isfinite(self.stop_fraction)
+            or not 0 < self.stop_fraction <= 1
+            or type(self.stop_after_min_controls) is not int
+            or type(self.stop_after_max_controls) is not int
+            or not 10 <= self.stop_after_min_controls <= self.stop_after_max_controls
+            or self.stop_after_max_controls >= self.command_controls
+        ):
+            raise ValueError(
+                "Stops need a fraction in (0, 1] and 10 to fewer than command_controls controls "
+                "of walking first"
+            )
         if self.destination_quiet not in (None, "flat", "off"):
             raise ValueError("destination_quiet is None (track the ghost), flat or off")
         hold = (
@@ -183,6 +203,17 @@ EXPERIMENTS["destination_v5"] = {
     **EXPERIMENTS["destination_v4"],
     "reward": replace(EXPERIMENTS["destination_v4"]["reward"], destination_quiet=None),
 }
+# destination_v6 is destination_v5 that also trains stopping: a fifth of the moving commands last
+# 4 s to 12 s and then give way to a zero command for the rest of the 20 s.
+EXPERIMENTS["destination_v6"] = {
+    **EXPERIMENTS["destination_v5"],
+    "reward": replace(
+        EXPERIMENTS["destination_v5"]["reward"],
+        stop_fraction=0.2,
+        stop_after_min_controls=200,
+        stop_after_max_controls=600,
+    ),
+}
 
 
 class DestinationTrainingTask(TrainingTask):
@@ -197,7 +228,14 @@ class DestinationTrainingTask(TrainingTask):
         self.command_elapsed = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
         self.hold_anchor = torch.zeros(env.num_envs, 18, device=env.device)
         self.hold_mean = torch.zeros(env.num_envs, 18, device=env.device)
+        self.stop_pending = torch.zeros(env.num_envs, dtype=torch.bool, device=env.device)
+        self.stop_rest = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
         super().__init__(env, config, output_dir, chosen)
+
+    def reset(self, indices=None):
+        # A reset draws a fresh command; a stop scheduled for the ended episode lapses.
+        self.stop_pending[self._indices(indices)] = False
+        return super().reset(indices)
 
     def _resample(self, indices):
         super()._resample(indices)
@@ -205,6 +243,31 @@ class DestinationTrainingTask(TrainingTask):
             self.command_started[indices] = True
             if self.reward_config.command_controls:
                 self.remaining_controls[indices] = self.reward_config.command_controls
+            if self.reward_config.stop_fraction is not None:
+                self._schedule_stops(indices)
+
+    def _schedule_stops(self, indices):
+        """End a scheduled walk with a zero command; cut a share of fresh moving commands short."""
+        config = self.reward_config
+        indices = torch.as_tensor(indices, dtype=torch.long, device=self.stop_pending.device)
+        stopping = indices[self.stop_pending[indices]]
+        self.env.commands[stopping] = 0
+        self.remaining_controls[stopping] = self.stop_rest[stopping].to(self.remaining_controls)
+        self.stop_pending[stopping] = False
+        fresh = indices[~torch.isin(indices, stopping)]
+        moving = (self.env.commands[fresh] != 0).any(-1).to(fresh.device)
+        draw = torch.rand(len(fresh), generator=self.rng).to(fresh.device)
+        walking = torch.randint(
+            config.stop_after_min_controls,
+            config.stop_after_max_controls + 1,
+            (len(fresh),),
+            generator=self.rng,
+        ).to(fresh.device)
+        chosen = fresh[moving & (draw < config.stop_fraction)]
+        walking = walking[moving & (draw < config.stop_fraction)]
+        self.remaining_controls[chosen] = walking.to(self.remaining_controls)
+        self.stop_rest[chosen] = config.command_controls - walking
+        self.stop_pending[chosen] = True
 
     def _advance_destination(self, command):
         """Start a new command's destination at the pose before its first control, then move it one control."""
