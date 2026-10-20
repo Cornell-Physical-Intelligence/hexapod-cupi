@@ -46,6 +46,8 @@ trains stopping: ``stop_fraction`` of the moving commands drawn last ``stop_afte
 every control for the gap to the destination's heading, which starts at the body's heading and turns
 only with the commanded yaw rate; a fall forfeits it and the fall-cost ceiling counts its weight.
 ``destination_v8`` is v7 with every joint penalty of the canonical reward doubled (``JOINT_PENALTIES``).
+``destination_v9`` is v8 with v6's stops after a walk, for a short fine-tune from the native v8
+checkpoint at v8's learning rate and final action deviation.
 """
 
 import hashlib
@@ -268,6 +270,17 @@ EXPERIMENTS["destination_v8"] = {
             name: 2 * getattr(EXPERIMENTS["destination_v7"]["reward"], name)
             for name in JOINT_PENALTIES
         },
+    ),
+}
+# destination_v9 is destination_v8 with destination_v6's stops: a fifth of the moving commands last
+# 4 s to 12 s and then give way to a zero command for the rest of the 20 s.
+EXPERIMENTS["destination_v9"] = {
+    **EXPERIMENTS["destination_v8"],
+    "reward": replace(
+        EXPERIMENTS["destination_v8"]["reward"],
+        stop_fraction=0.2,
+        stop_after_min_controls=200,
+        stop_after_max_controls=600,
     ),
 }
 

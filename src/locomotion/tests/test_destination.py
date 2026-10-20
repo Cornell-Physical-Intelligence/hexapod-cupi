@@ -444,6 +444,24 @@ class TaskTests(unittest.TestCase):
         self.assertEqual(EXPERIMENT_INPUTS["destination_v8"], "ghost")
         eighth["reward"].validate()
 
+    def test_destination_v9_adds_destination_v6_stops_to_v8(self):
+        eighth, ninth = EXPERIMENTS["destination_v8"], EXPERIMENTS["destination_v9"]
+        changed = {
+            key: value
+            for key, value in asdict(ninth["reward"]).items()
+            if asdict(eighth["reward"])[key] != value
+        }
+        stops = ("stop_fraction", "stop_after_min_controls", "stop_after_max_controls")
+        self.assertEqual(
+            changed, {key: getattr(EXPERIMENTS["destination_v6"]["reward"], key) for key in stops}
+        )
+        self.assertEqual(
+            {key: value for key, value in ninth.items() if key != "reward"},
+            {key: value for key, value in eighth.items() if key != "reward"},
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v9"], "ghost")
+        ninth["reward"].validate()
+
     def test_every_control_pays_the_exponential_of_the_distance_and_a_fall_pays_nothing(self):
         task, _ = moving_task(lambda k: forward(k, slide=0.02))
         for k in range(1, 301):
