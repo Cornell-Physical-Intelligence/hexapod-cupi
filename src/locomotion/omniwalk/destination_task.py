@@ -39,6 +39,12 @@ command too: v3's kernel without either zero-command change. ``destination_v6`` 
 trains stopping: ``stop_fraction`` of the moving commands drawn last ``stop_after_min_controls`` to
 ``stop_after_max_controls`` controls and give way to a zero command for the rest of the
 ``command_controls``, so a walk is followed by a stop as in the evaluator's walk-then-stop probe.
+``destination_v7`` is v5 with a heading term of the same form as the rational destination pay,
+
+    heading = heading_weight / (1 + (|wrap(heading_d - heading)| / heading_width_rad) ** heading_power)
+
+every control for the gap to the destination's heading, which starts at the body's heading and turns
+only with the commanded yaw rate; a fall forfeits it and the fall-cost ceiling counts its weight.
 """
 
 import hashlib
@@ -74,6 +80,9 @@ class DestinationRewardConfig(RewardConfig):
     stop_fraction: float | None = None
     stop_after_min_controls: int | None = None
     stop_after_max_controls: int | None = None
+    heading_weight: float | None = None
+    heading_width_rad: float | None = None
+    heading_power: float | None = None
     command_controls: int = 0
 
     def validate(self):
@@ -99,6 +108,12 @@ class DestinationRewardConfig(RewardConfig):
                 "Stops need a fraction in (0, 1] and 10 to fewer than command_controls controls "
                 "of walking first"
             )
+        heading = (self.heading_weight, self.heading_width_rad, self.heading_power)
+        if any(value is not None for value in heading) and (
+            any(value is None for value in heading)
+            or not all(math.isfinite(value) and value > 0 for value in heading)
+        ):
+            raise ValueError("The heading pay needs a positive finite weight, width and power")
         if self.destination_quiet not in (None, "flat", "off"):
             raise ValueError("destination_quiet is None (track the ghost), flat or off")
         hold = (
@@ -134,6 +149,7 @@ class DestinationRewardConfig(RewardConfig):
             * (1 + self.stride_tracking_weight)
             + 6 * self.stride_length_weight / self.schedule_period_controls
             + self.destination_weight
+            + (self.heading_weight or 0.0)
         )
         if self.termination_weight < 10 * ceiling:
             raise ValueError(
@@ -212,6 +228,19 @@ EXPERIMENTS["destination_v6"] = {
         stop_fraction=0.2,
         stop_after_min_controls=200,
         stop_after_max_controls=600,
+    ),
+}
+# destination_v7 is destination_v5 with a heading pay shaped like its destination pay: 1 at the
+# destination's heading, 0.5 at 1 deg, 0.3 at 2 deg, 0.13 at 5 deg. Termination 42 keeps ten times
+# the 4.15 tracking ceiling.
+EXPERIMENTS["destination_v7"] = {
+    **EXPERIMENTS["destination_v5"],
+    "reward": replace(
+        EXPERIMENTS["destination_v5"]["reward"],
+        heading_weight=1.0,
+        heading_width_rad=math.radians(1.0),
+        heading_power=1.2,
+        termination_weight=42.0,
     ),
 }
 
@@ -308,6 +337,13 @@ class DestinationTrainingTask(TrainingTask):
         if config.hold_weight is not None:
             components["hold"] = self._hold(command, terminated).to(reward)
             reward = reward + components["hold"]
+        if config.heading_weight is not None:
+            actual = planar_pose(telemetry["root_pose_xyzw"]).to(self.destination)[:, 2]
+            gap = torch.remainder(self.destination[:, 2] - actual + math.pi, 2 * math.pi) - math.pi
+            closeness = 1 / (1 + (gap.abs() / config.heading_width_rad).pow(config.heading_power))
+            alive = (~terminated).to(closeness.device).to(closeness)
+            components["heading"] = (config.heading_weight * alive * closeness).to(reward)
+            reward = reward + components["heading"]
         return reward, components, telemetry
 
     def _hold(self, command, terminated):

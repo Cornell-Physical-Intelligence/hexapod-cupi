@@ -360,6 +360,61 @@ class TaskTests(unittest.TestCase):
         task.reset()
         self.assertTrue(bool((task.remaining_controls[(native.commands == 0).all(-1)] == 60).all()))
 
+    def test_destination_v7_pays_for_the_destination_heading_like_the_destination(self):
+        fifth, seventh = EXPERIMENTS["destination_v5"], EXPERIMENTS["destination_v7"]
+        changed = {
+            key: value
+            for key, value in asdict(seventh["reward"]).items()
+            if asdict(fifth["reward"])[key] != value
+        }
+        self.assertEqual(
+            changed,
+            {
+                "heading_weight": 1.0,
+                "heading_width_rad": math.radians(1.0),
+                "heading_power": 1.2,
+                "termination_weight": 42.0,
+            },
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v7"], "ghost")
+        reward = seventh["reward"]
+        with self.assertRaises(ValueError):
+            replace(reward, termination_weight=41.0).validate()
+        for bad in (dict(heading_power=None), dict(heading_width_rad=0.0)):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                replace(reward, **bad).validate()
+        width = math.radians(1.0)
+        # Walking forward, the body turns 0.1 deg per control while the destination keeps its heading.
+        walking, _ = moving_task(lambda k: (0.0, -0.001 * k, math.radians(0.1 * k)), reward=reward)
+        for k in range(1, 31):
+            walking.step(torch.zeros(1, 18))
+            if k in (5, 10, 30):
+                self.assertAlmostEqual(
+                    float(walking.last_components["heading"][0]),
+                    1 / (1 + (math.radians(0.1 * k) / width) ** 1.2),
+                    places=4,
+                )
+        # A turn command turns the destination: a body that turns with it is paid in full.
+        turning, _ = moving_task(
+            lambda k: (0.0, 0.0, 0.2 * 0.02 * k),
+            command=torch.tensor([[0.0, 0.0, 0.2]]),
+            reward=reward,
+        )
+        for _ in range(20):
+            turning.step(torch.zeros(1, 18))
+            self.assertAlmostEqual(float(turning.last_components["heading"][0]), 1.0, places=4)
+        # Standing pays too, and the heading gap wraps around +-180 deg.
+        standing, _ = moving_task(
+            lambda k: (0.0, 0.0, math.radians(359.5)), command=torch.zeros(1, 3), reward=reward
+        )
+        for _ in range(3):
+            standing.step(torch.zeros(1, 18))
+        self.assertAlmostEqual(
+            float(standing.last_components["heading"][0]),
+            1 / (1 + (math.radians(0.5) / width) ** 1.2),
+            places=4,
+        )
+
     def test_every_control_pays_the_exponential_of_the_distance_and_a_fall_pays_nothing(self):
         task, _ = moving_task(lambda k: forward(k, slide=0.02))
         for k in range(1, 301):
