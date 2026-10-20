@@ -415,6 +415,35 @@ class TaskTests(unittest.TestCase):
             places=4,
         )
 
+    def test_destination_v8_doubles_every_joint_penalty_of_v7(self):
+        seventh, eighth = EXPERIMENTS["destination_v7"], EXPERIMENTS["destination_v8"]
+        changed = {
+            key: value
+            for key, value in asdict(eighth["reward"]).items()
+            if asdict(seventh["reward"])[key] != value
+        }
+        self.assertEqual(
+            changed,
+            {
+                "torque_weight": 0.1,
+                "acceleration_weight": 0.1,
+                "target_rate_weight": 0.1,
+                "torque_limit_weight": 1.0,
+                "over_rating_weight": 20.0,
+                "joint_margin_weight": 2.0,
+                "action_limit_weight": 12.0,
+                "quiet_joint_rate_weight": 1.0,
+                "quiet_target_weight": 1.0,
+                "quiet_strain_weight": 20.0,
+            },
+        )
+        self.assertEqual(
+            {key: value for key, value in eighth.items() if key != "reward"},
+            {key: value for key, value in seventh.items() if key != "reward"},
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v8"], "ghost")
+        eighth["reward"].validate()
+
     def test_every_control_pays_the_exponential_of_the_distance_and_a_fall_pays_nothing(self):
         task, _ = moving_task(lambda k: forward(k, slide=0.02))
         for k in range(1, 301):

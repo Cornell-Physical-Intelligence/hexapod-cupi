@@ -45,6 +45,7 @@ trains stopping: ``stop_fraction`` of the moving commands drawn last ``stop_afte
 
 every control for the gap to the destination's heading, which starts at the body's heading and turns
 only with the commanded yaw rate; a fall forfeits it and the fall-cost ceiling counts its weight.
+``destination_v8`` is v7 with every joint penalty of the canonical reward doubled (``JOINT_PENALTIES``).
 """
 
 import hashlib
@@ -241,6 +242,32 @@ EXPERIMENTS["destination_v7"] = {
         heading_width_rad=math.radians(1.0),
         heading_power=1.2,
         termination_weight=42.0,
+    ),
+}
+# The canonical reward's joint penalties: torque, acceleration, target steps, torque requests over
+# the rating, demand near the rating, joint-limit margin, action range, and the zero-command joint
+# rate, target motion and coxa strain.
+JOINT_PENALTIES = (
+    "torque_weight",
+    "acceleration_weight",
+    "target_rate_weight",
+    "torque_limit_weight",
+    "over_rating_weight",
+    "joint_margin_weight",
+    "action_limit_weight",
+    "quiet_joint_rate_weight",
+    "quiet_target_weight",
+    "quiet_strain_weight",
+)
+# destination_v8 is destination_v7 with every joint penalty doubled, also from destination_v2.
+EXPERIMENTS["destination_v8"] = {
+    **EXPERIMENTS["destination_v7"],
+    "reward": replace(
+        EXPERIMENTS["destination_v7"]["reward"],
+        **{
+            name: 2 * getattr(EXPERIMENTS["destination_v7"]["reward"], name)
+            for name in JOINT_PENALTIES
+        },
     ),
 }
 
