@@ -48,6 +48,14 @@ only with the commanded yaw rate; a fall forfeits it and the fall-cost ceiling c
 ``destination_v8`` is v7 with every joint penalty of the canonical reward doubled (``JOINT_PENALTIES``).
 ``destination_v9`` is v8 with v6's stops after a walk, for a short fine-tune from the native v8
 checkpoint at v8's learning rate and final action deviation.
+
+``destination_v10`` is v9 with a walking-speed curriculum. Every fresh walk (a planar command without
+yaw) gets a uniform direction and, with ``speed_curriculum_new_share``, the current top speed, otherwise
+one of the slower levels (``speed_curriculum_step_mps`` apart, from one step up); turns, arcs, zero
+commands and the stops after a walk are v9's. The top speed starts one step above
+``speed_curriculum_start_mps`` and rises by one step whenever the destination pay, averaged over all
+rows for the last ``speed_curriculum_window_controls`` controls at that speed, exceeds
+``speed_curriculum_threshold``, up to ``speed_curriculum_final_mps``; the task's status reports the level.
 """
 
 import hashlib
@@ -86,6 +94,12 @@ class DestinationRewardConfig(RewardConfig):
     heading_weight: float | None = None
     heading_width_rad: float | None = None
     heading_power: float | None = None
+    speed_curriculum_start_mps: float | None = None
+    speed_curriculum_step_mps: float | None = None
+    speed_curriculum_final_mps: float | None = None
+    speed_curriculum_threshold: float | None = None
+    speed_curriculum_window_controls: int | None = None
+    speed_curriculum_new_share: float | None = None
     command_controls: int = 0
 
     def validate(self):
@@ -117,6 +131,38 @@ class DestinationRewardConfig(RewardConfig):
             or not all(math.isfinite(value) and value > 0 for value in heading)
         ):
             raise ValueError("The heading pay needs a positive finite weight, width and power")
+        curriculum = (
+            self.speed_curriculum_start_mps,
+            self.speed_curriculum_step_mps,
+            self.speed_curriculum_final_mps,
+            self.speed_curriculum_threshold,
+            self.speed_curriculum_window_controls,
+            self.speed_curriculum_new_share,
+        )
+        if any(value is not None for value in curriculum) and (
+            any(value is None for value in curriculum)
+            or not all(math.isfinite(value) for value in curriculum)
+            or not 0 < self.speed_curriculum_step_mps <= self.speed_curriculum_start_mps
+            or self.speed_curriculum_final_mps <= self.speed_curriculum_start_mps
+            or abs(
+                (self.speed_curriculum_final_mps - self.speed_curriculum_start_mps)
+                / self.speed_curriculum_step_mps
+                - round(
+                    (self.speed_curriculum_final_mps - self.speed_curriculum_start_mps)
+                    / self.speed_curriculum_step_mps
+                )
+            )
+            > 1e-6
+            or not 0 < self.speed_curriculum_threshold <= self.destination_weight
+            or type(self.speed_curriculum_window_controls) is not int
+            or self.speed_curriculum_window_controls < 1
+            or not 0 <= self.speed_curriculum_new_share <= 1
+        ):
+            raise ValueError(
+                "The speed curriculum needs a step up to its start, a final speed a whole number "
+                "of steps above it, a threshold within the destination weight, a positive window "
+                "and a share from 0 to 1"
+            )
         if self.destination_quiet not in (None, "flat", "off"):
             raise ValueError("destination_quiet is None (track the ghost), flat or off")
         hold = (
@@ -282,6 +328,22 @@ EXPERIMENTS["destination_v9"] = {
         stop_after_max_controls=600,
     ),
 }
+# destination_v10 is destination_v9 with a walking-speed curriculum from the native v9 checkpoint: the
+# top walking speed starts at 0.075 m/s and rises by 0.025 m/s to 0.15 m/s each time the destination pay
+# averages above 0.8 over the last 1800 controls (50 updates of 36 controls); half the walks go at the
+# top speed and half at the slower levels, in uniform directions.
+EXPERIMENTS["destination_v10"] = {
+    **EXPERIMENTS["destination_v9"],
+    "reward": replace(
+        EXPERIMENTS["destination_v9"]["reward"],
+        speed_curriculum_start_mps=0.05,
+        speed_curriculum_step_mps=0.025,
+        speed_curriculum_final_mps=0.15,
+        speed_curriculum_threshold=0.8,
+        speed_curriculum_window_controls=1800,
+        speed_curriculum_new_share=0.5,
+    ),
+}
 
 
 class DestinationTrainingTask(TrainingTask):
@@ -298,6 +360,16 @@ class DestinationTrainingTask(TrainingTask):
         self.hold_mean = torch.zeros(env.num_envs, 18, device=env.device)
         self.stop_pending = torch.zeros(env.num_envs, dtype=torch.bool, device=env.device)
         self.stop_rest = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
+        if chosen.speed_curriculum_start_mps is not None:
+            self.curriculum_level = round(
+                chosen.speed_curriculum_start_mps + chosen.speed_curriculum_step_mps, 6
+            )
+            self.curriculum_window = torch.zeros(
+                chosen.speed_curriculum_window_controls, dtype=torch.float64, device=env.device
+            )
+            self.curriculum_filled = 0
+            self.curriculum_complete = False
+            self.curriculum_advances = []
         super().__init__(env, config, output_dir, chosen)
 
     def reset(self, indices=None):
@@ -308,11 +380,75 @@ class DestinationTrainingTask(TrainingTask):
     def _resample(self, indices):
         super()._resample(indices)
         if len(indices):
+            if self.reward_config.speed_curriculum_start_mps is not None:
+                self._curriculum_walks(indices)
             self.command_started[indices] = True
             if self.reward_config.command_controls:
                 self.remaining_controls[indices] = self.reward_config.command_controls
             if self.reward_config.stop_fraction is not None:
                 self._schedule_stops(indices)
+
+    def _curriculum_walks(self, indices):
+        """Give each fresh walk a uniform direction and the top or a slower curriculum speed."""
+        config = self.reward_config
+        indices = torch.as_tensor(indices, dtype=torch.long, device=self.env.commands.device)
+        command = self.env.commands[indices]
+        walks = indices[(command[:, :2] != 0).any(-1) & (command[:, 2] == 0)]
+        if not len(walks):
+            return
+        step = config.speed_curriculum_step_mps
+        top = round(self.curriculum_level / step)
+        draws = torch.rand(len(walks), 3, generator=self.rng)
+        level = torch.full((len(walks),), top, dtype=torch.long)
+        if top > 1:
+            # The slower levels are 1 to top - 1 steps.
+            slower = 1 + (draws[:, 1] * (top - 1)).long().clamp(max=top - 2)
+            level = torch.where(draws[:, 0] < config.speed_curriculum_new_share, level, slower)
+        speed = (level * step).to(self.env.commands)
+        angle = (draws[:, 2] * 2 * math.pi).to(self.env.commands)
+        self.env.commands[walks, 0] = speed * torch.cos(angle)
+        self.env.commands[walks, 1] = speed * torch.sin(angle)
+
+    def _curriculum_step(self, pay):
+        """Record the mean destination pay of this control; raise the top speed past the threshold."""
+        config = self.reward_config
+        window = config.speed_curriculum_window_controls
+        self.curriculum_window[self.curriculum_filled % window] = (
+            pay.detach().mean().to(self.curriculum_window)
+        )
+        self.curriculum_filled += 1
+        # Read the window about once per update (50 updates per window) to avoid a host sync each control.
+        if self.curriculum_filled < window or self.curriculum_filled % max(1, window // 50):
+            return
+        mean = float(self.curriculum_window.mean())
+        if mean <= config.speed_curriculum_threshold:
+            return
+        record = {
+            "controls_completed": self.controls_completed,
+            "level_mps": round(self.curriculum_level, 6),
+            "window_mean": mean,
+        }
+        if self.curriculum_level + 1e-9 >= config.speed_curriculum_final_mps:
+            if not self.curriculum_complete:
+                self.curriculum_complete = True
+                self.curriculum_advances.append({**record, "complete": True})
+            return
+        self.curriculum_advances.append(record)
+        self.curriculum_level = round(self.curriculum_level + config.speed_curriculum_step_mps, 6)
+        self.curriculum_filled = 0
+
+    def curriculum_status(self):
+        if self.reward_config.speed_curriculum_start_mps is None:
+            return None
+        window = self.reward_config.speed_curriculum_window_controls
+        filled = min(self.curriculum_filled, window)
+        return {
+            "level_mps": round(self.curriculum_level, 6),
+            "window_controls": filled,
+            "window_mean": float(self.curriculum_window[:filled].mean()) if filled else None,
+            "complete": self.curriculum_complete,
+            "advances": self.curriculum_advances,
+        }
 
     def _schedule_stops(self, indices):
         """End a scheduled walk with a zero command; cut a share of fresh moving commands short."""
@@ -373,6 +509,8 @@ class DestinationTrainingTask(TrainingTask):
             alive = (~terminated).to(closeness.device).to(closeness)
             components["destination"] = (config.destination_weight * alive * closeness).to(reward)
             reward = reward + components["destination"]
+            if config.speed_curriculum_start_mps is not None:
+                self._curriculum_step(components["destination"])
         if config.hold_weight is not None:
             components["hold"] = self._hold(command, terminated).to(reward)
             reward = reward + components["hold"]

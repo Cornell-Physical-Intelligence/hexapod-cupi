@@ -493,6 +493,59 @@ class TaskTests(unittest.TestCase):
         self.assertIsInstance(SETTINGS["reward"], DestinationRewardConfig)
 
 
+class CurriculumTests(unittest.TestCase):
+    def test_destination_v10_is_v9_with_a_walking_speed_curriculum(self):
+        nine, ten = (
+            EXPERIMENTS["destination_v9"]["reward"],
+            EXPERIMENTS["destination_v10"]["reward"],
+        )
+        changed = {key for key, value in asdict(ten).items() if asdict(nine)[key] != value}
+        self.assertEqual(
+            changed, {key for key in asdict(ten) if key.startswith("speed_curriculum_")}
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v10"], "ghost")
+        for bad in (
+            dict(speed_curriculum_final_mps=0.16),
+            dict(speed_curriculum_threshold=1.5),
+            dict(speed_curriculum_window_controls=0),
+            dict(speed_curriculum_new_share=None),
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                replace(ten, **bad).validate()
+
+    def test_walks_take_the_top_or_a_slower_speed_and_the_top_rises_past_the_threshold(self):
+        native = GaitDouble(4096)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        reward = EXPERIMENTS["destination_v10"]["reward"]
+        task = DestinationTrainingTask(native, TaskConfig(), None, reward)
+        task.reset()
+        command = native.commands
+        speed = torch.linalg.vector_norm(command[:, :2], dim=-1)
+        walks = (speed > 0) & (command[:, 2] == 0)
+        levels = torch.round(speed[walks] / 0.025).long()
+        self.assertEqual(task.curriculum_level, 0.075)
+        self.assertEqual(set(levels.tolist()), {1, 2, 3})
+        self.assertAlmostEqual(float((levels == 3).double().mean()), 0.5, delta=0.05)
+        # Walks point every way; arcs keep v9's 0.04 m/s.
+        angle = torch.atan2(command[walks, 1], command[walks, 0])
+        self.assertEqual(int(torch.histc(angle, 4, -math.pi, math.pi).min() > 0), 1)
+        self.assertTrue(
+            torch.allclose(speed[(speed > 0) & (command[:, 2] != 0)], torch.tensor(0.04))
+        )
+        # A window below the threshold holds the level; one above it raises the level and refills.
+        window = reward.speed_curriculum_window_controls
+        for _ in range(window):
+            task._curriculum_step(torch.full((4096,), 0.79))
+        self.assertEqual(task.curriculum_status()["level_mps"], 0.075)
+        for level in (0.1, 0.125, 0.15, 0.15):
+            for _ in range(window):
+                task._curriculum_step(torch.full((4096,), 0.85))
+            self.assertEqual(task.curriculum_status()["level_mps"], level)
+        status = task.curriculum_status()
+        self.assertTrue(status["complete"])
+        self.assertEqual([a["level_mps"] for a in status["advances"]], [0.075, 0.1, 0.125, 0.15])
+
+
 class WrapperTests(unittest.TestCase):
     def wrapped(self, **options):
         task, native = moving_task(lambda k: (0.0, -0.03 * 0.02 * k, 0.0))  # 0.02 m/s short
