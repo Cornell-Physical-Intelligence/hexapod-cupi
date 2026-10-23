@@ -199,6 +199,13 @@
       "purpose": "Use the canonical XYZW quaternion and navigation frames."
     },
     {
+      "path": "src/locomotion/omniwalk/mdp/loads.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion",
+      "purpose": "Accumulate one control's 400 Hz motor torques and floor forces and pack the control telemetry."
+    },
+    {
       "path": "src/locomotion/omniwalk/mdp/observations.py",
       "previous_path": "locomotion/priors/features.py",
       "classification": "current",
@@ -225,6 +232,20 @@
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Compute the yaw-gated omnidirectional walking reward from one control's telemetry."
+    },
+    {
+      "path": "src/locomotion/omniwalk/mdp/state.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion",
+      "purpose": "Locate the toe points on each tibia and turn raw articulation readings into the measured state."
+    },
+    {
+      "path": "src/locomotion/omniwalk/mdp/terminations.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion",
+      "purpose": "End an episode on a fall, a tilt or a joint-limit violation, and time it out after its declared length."
     },
     {
       "path": "src/locomotion/omniwalk/task.py",
