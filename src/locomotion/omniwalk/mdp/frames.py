@@ -1,4 +1,5 @@
 """Use the canonical XYZW quaternion and navigation frames."""
+
 import torch
 
 

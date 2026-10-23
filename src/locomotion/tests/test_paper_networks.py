@@ -1,4 +1,5 @@
 """Table III network shapes, privileged-input isolation and the supervised velocity estimator."""
+
 import copy
 import unittest
 
@@ -8,24 +9,35 @@ from tensordict import TensorDict
 from locomotion.amp import networks as nets
 
 N = 5
-GROUPS = {'actor': list(nets.ACTOR_GROUPS), 'critic': list(nets.CRITIC_GROUPS)}
-DISTRIBUTION = {'class_name': 'GaussianDistribution', 'init_std': .15, 'std_type': 'log'}
+GROUPS = {"actor": list(nets.ACTOR_GROUPS), "critic": list(nets.CRITIC_GROUPS)}
+DISTRIBUTION = {"class_name": "GaussianDistribution", "init_std": 0.15, "std_type": "log"}
 
 
 def observations(seed=0, n=N):
     generator = torch.Generator().manual_seed(seed)
-    draw = lambda width: torch.randn(n, width, generator=generator)
+
+    def draw(width):
+        return torch.randn(n, width, generator=generator)
+
     policy = draw(231)
-    return TensorDict({'policy': policy, 'critic': torch.cat((policy, draw(3)), -1), 'amp': draw(61),
-                       'velocity_label': draw(3), 'privileged': draw(42), **nets.actor_observation(policy)},
-                      batch_size=[n])
+    return TensorDict(
+        {
+            "policy": policy,
+            "critic": torch.cat((policy, draw(3)), -1),
+            "amp": draw(61),
+            "velocity_label": draw(3),
+            "privileged": draw(42),
+            **nets.actor_observation(policy),
+        },
+        batch_size=[n],
+    )
 
 
 def models(seed=1):
     obs = observations()
     torch.manual_seed(seed)
-    actor = nets.PaperActor(obs, GROUPS, 'actor', 18, distribution_cfg=copy.deepcopy(DISTRIBUTION))
-    critic = nets.PaperCritic(obs, GROUPS, 'critic', 1)
+    actor = nets.PaperActor(obs, GROUPS, "actor", 18, distribution_cfg=copy.deepcopy(DISTRIBUTION))
+    critic = nets.PaperCritic(obs, GROUPS, "critic", 1)
     return obs, actor, critic
 
 
@@ -50,26 +62,29 @@ class ArchitectureTests(unittest.TestCase):
 
     def test_group_order_and_widths_are_validated(self):
         obs = observations()
-        wrong_order = {'actor': ['command', 'proprio_history', 'previous_action'], 'critic': GROUPS['critic']}
-        with self.assertRaisesRegex(ValueError, 'exactly'):
-            nets.PaperActor(obs, wrong_order, 'actor', 18)
-        with self.assertRaisesRegex(ValueError, 'exactly'):
-            nets.PaperCritic(obs, {'critic': GROUPS['actor']}, 'critic', 1)
+        wrong_order = {
+            "actor": ["command", "proprio_history", "previous_action"],
+            "critic": GROUPS["critic"],
+        }
+        with self.assertRaisesRegex(ValueError, "exactly"):
+            nets.PaperActor(obs, wrong_order, "actor", 18)
+        with self.assertRaisesRegex(ValueError, "exactly"):
+            nets.PaperCritic(obs, {"critic": GROUPS["actor"]}, "critic", 1)
         narrow = obs.clone()
-        narrow['proprio_history'] = narrow['proprio_history'][:, :200]
-        with self.assertRaisesRegex(ValueError, 'widths'):
-            nets.PaperActor(narrow, GROUPS, 'actor', 18)
-        with self.assertRaisesRegex(ValueError, 'deterministic'):
-            nets.PaperCritic(obs, GROUPS, 'critic', 1, distribution_cfg=copy.deepcopy(DISTRIBUTION))
+        narrow["proprio_history"] = narrow["proprio_history"][:, :200]
+        with self.assertRaisesRegex(ValueError, "widths"):
+            nets.PaperActor(narrow, GROUPS, "actor", 18)
+        with self.assertRaisesRegex(ValueError, "deterministic"):
+            nets.PaperCritic(obs, GROUPS, "critic", 1, distribution_cfg=copy.deepcopy(DISTRIBUTION))
         with self.assertRaises(ValueError):
-            nets.PaperActor(obs, GROUPS, 'actor', 18, memory_latent=0)
+            nets.PaperActor(obs, GROUPS, "actor", 18, memory_latent=0)
 
     def test_actor_observation_splits_the_policy_vector(self):
-        policy = torch.arange(231.).expand(2, -1)
+        policy = torch.arange(231.0).expand(2, -1)
         split = nets.actor_observation(policy)
-        torch.testing.assert_close(split['proprio_history'], policy[:, :210])
-        torch.testing.assert_close(split['command'], policy[:, 210:213])
-        torch.testing.assert_close(split['previous_action'], policy[:, 213:])
+        torch.testing.assert_close(split["proprio_history"], policy[:, :210])
+        torch.testing.assert_close(split["command"], policy[:, 210:213])
+        torch.testing.assert_close(split["previous_action"], policy[:, 213:])
         with self.assertRaises(ValueError):
             nets.actor_observation(torch.zeros(2, 230))
 
@@ -89,35 +104,43 @@ class IsolationTests(unittest.TestCase):
         with torch.no_grad():
             before = actor(obs).clone()
             leaked = obs.clone()
-            leaked['privileged'] = leaked['privileged'] + 100.
-            leaked['velocity_label'] = leaked['velocity_label'] + 100.
-            leaked['critic'] = leaked['critic'] + 100.
+            leaked["privileged"] = leaked["privileged"] + 100.0
+            leaked["velocity_label"] = leaked["velocity_label"] + 100.0
+            leaked["critic"] = leaked["critic"] + 100.0
             torch.testing.assert_close(actor(leaked), before, rtol=0, atol=0)
-        self.assertNotIn('privileged', actor.obs_groups)
-        self.assertNotIn('velocity_label', actor.obs_groups)
-        self.assertNotIn('critic', actor.obs_groups)
+        self.assertNotIn("privileged", actor.obs_groups)
+        self.assertNotIn("velocity_label", actor.obs_groups)
+        self.assertNotIn("critic", actor.obs_groups)
 
     def test_policy_gradient_does_not_reach_the_estimator(self):
         obs, actor, _ = models()
         actor(obs).sum().backward()
         self.assertTrue(all(p.grad is None for p in actor.estimator_parameters()))
-        self.assertTrue(any(p.grad is not None and p.grad.abs().sum() > 0 for p in actor.memory.parameters()))
-        self.assertTrue(any(p.grad is not None and p.grad.abs().sum() > 0 for p in actor.mlp.parameters()))
+        self.assertTrue(
+            any(p.grad is not None and p.grad.abs().sum() > 0 for p in actor.memory.parameters())
+        )
+        self.assertTrue(
+            any(p.grad is not None and p.grad.abs().sum() > 0 for p in actor.mlp.parameters())
+        )
 
     def test_critic_uses_privileged_state(self):
         obs, _, critic = models()
         with torch.no_grad():
             before = critic(obs).clone()
             changed = obs.clone()
-            changed['privileged'] = changed['privileged'] + 1.
-            self.assertGreater(float((critic(changed) - before).abs().max()), 0.)
+            changed["privileged"] = changed["privileged"] + 1.0
+            self.assertGreater(float((critic(changed) - before).abs().max()), 0.0)
 
 
 class EstimatorTests(unittest.TestCase):
     def test_supervised_loss_trains_only_the_estimator_and_decreases(self):
         obs, actor, _ = models()
-        obs['velocity_label'] = obs['proprio_history'][:, -42:-39]
-        frozen = {name: p.detach().clone() for name, p in actor.named_parameters() if not name.startswith('estimator')}
+        obs["velocity_label"] = obs["proprio_history"][:, -42:-39]
+        frozen = {
+            name: p.detach().clone()
+            for name, p in actor.named_parameters()
+            if not name.startswith("estimator")
+        }
         optimizer = torch.optim.Adam(actor.estimator_parameters(), lr=1e-2)
         first = float(actor.estimator_loss(obs).detach())
         for _ in range(60):
@@ -125,17 +148,17 @@ class EstimatorTests(unittest.TestCase):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-        self.assertLess(float(actor.estimator_loss(obs).detach()), .5 * first)
+        self.assertLess(float(actor.estimator_loss(obs).detach()), 0.5 * first)
         for name, p in actor.named_parameters():
-            if not name.startswith('estimator'):
+            if not name.startswith("estimator"):
                 torch.testing.assert_close(p, frozen[name], rtol=0, atol=0, msg=name)
 
     def test_label_shape_is_checked(self):
         obs, actor, _ = models()
-        obs['velocity_label'] = torch.zeros(N, 2)
-        with self.assertRaisesRegex(ValueError, 'label'):
+        obs["velocity_label"] = torch.zeros(N, 2)
+        with self.assertRaisesRegex(ValueError, "label"):
             actor.estimator_loss(obs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

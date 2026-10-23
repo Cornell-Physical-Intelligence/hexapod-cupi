@@ -1,10 +1,10 @@
 """Velocity commands with an explicit caller-supplied envelope."""
+
 from __future__ import annotations
 
 import math
 from dataclasses import dataclass
 from enum import Enum
-
 
 __all__ = ["CommandEnvelope", "Frame", "VelocityCommand", "SCHEMA_VERSION"]
 
@@ -86,10 +86,7 @@ class VelocityCommand:
         if envelope.allow_stand and self.is_stand():
             return True
         bounds = (envelope.forward_mps, envelope.lateral_mps, envelope.yaw_rate_rad_s)
-        return all(
-            float(low) <= value <= float(high)
-            for value, (low, high) in zip(values, bounds)
-        )
+        return all(float(low) <= value <= float(high) for value, (low, high) in zip(values, bounds))
 
     def validate(self, envelope: CommandEnvelope) -> None:
         """Raise ``ValueError`` unless this command is finite and in ``envelope``."""
@@ -109,8 +106,7 @@ class VelocityCommand:
         for name, value, (low, high) in axes:
             if not float(low) <= float(value) <= float(high):
                 raise ValueError(
-                    f"{name}={value!r} is outside the {envelope.name} envelope "
-                    f"[{low}, {high}]"
+                    f"{name}={value!r} is outside the {envelope.name} envelope [{low}, {high}]"
                 )
 
 

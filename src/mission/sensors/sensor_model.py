@@ -45,10 +45,16 @@ class TransportModelCfg:
     stale_after_s: float
 
     def __post_init__(self) -> None:
-        if not all(math.isfinite(value) for value in (
-            self.sample_period_s, self.latency_s, self.latency_jitter_s,
-            self.frame_dropout_probability, self.stale_after_s,
-        )):
+        if not all(
+            math.isfinite(value)
+            for value in (
+                self.sample_period_s,
+                self.latency_s,
+                self.latency_jitter_s,
+                self.frame_dropout_probability,
+                self.stale_after_s,
+            )
+        ):
             raise ValueError("Transport parameters must all be finite.")
         if self.sample_period_s <= 0.0:
             raise ValueError("sample_period_s must be positive.")
@@ -86,12 +92,8 @@ class CameraModelCfg:
     max_depth_m: float = 6.0
 
     def __post_init__(self) -> None:
-        _check_probability(
-            "rgb_pixel_dropout_probability", self.rgb_pixel_dropout_probability
-        )
-        _check_probability(
-            "depth_pixel_dropout_probability", self.depth_pixel_dropout_probability
-        )
+        _check_probability("rgb_pixel_dropout_probability", self.rgb_pixel_dropout_probability)
+        _check_probability("depth_pixel_dropout_probability", self.depth_pixel_dropout_probability)
         if self.rgb_noise_std < 0.0:
             raise ValueError("rgb_noise_std must be non-negative.")
         if self.depth_noise_base_m < 0.0 or self.depth_noise_per_m < 0.0:
@@ -286,7 +288,9 @@ class _DelayedStream:
             raise ValueError("Sensor values and validity must reside on the same device.")
         layout = {name: (value.shape, value.dtype, value.device) for name, value in values.items()}
         if self._payload_layout is not None and layout != self._payload_layout:
-            raise ValueError("A stream cannot change payload fields, shapes, dtypes or devices within an epoch.")
+            raise ValueError(
+                "A stream cannot change payload fields, shapes, dtypes or devices within an epoch."
+            )
 
         latency_s = self.cfg.latency_s + self._jitter_rng.uniform(
             -self.cfg.latency_jitter_s, self.cfg.latency_jitter_s
@@ -327,13 +331,20 @@ class _DelayedStream:
                     dtype=torch.float32,
                     device=queued.valid.device,
                 )
-                self._order_time_s = torch.full_like(self._capture_time_s, -torch.inf, dtype=torch.float64)
+                self._order_time_s = torch.full_like(
+                    self._capture_time_s, -torch.inf, dtype=torch.float64
+                )
                 self._order_sequence = torch.full_like(queued.valid, -1, dtype=torch.int64)
             if set(queued.values) != set(self._latest_values):
-                raise RuntimeError("A sensor stream changed its payload fields after initialization.")
+                raise RuntimeError(
+                    "A sensor stream changed its payload fields after initialization."
+                )
             take = queued.valid & (
                 (queued.capture_time_s > self._order_time_s)
-                | ((queued.capture_time_s == self._order_time_s) & (queued.sequence > self._order_sequence))
+                | (
+                    (queued.capture_time_s == self._order_time_s)
+                    & (queued.sequence > self._order_sequence)
+                )
             )
             for name, value in queued.values.items():
                 mask_shape = (value.shape[0],) + (1,) * (value.ndim - 1)
@@ -419,9 +430,7 @@ class Phase3SensorModel:
         self._accel_bias: torch.Tensor | None = None
         self._imu_bias_initialized: torch.Tensor | None = None
 
-    def _frame_valid(
-        self, reference: torch.Tensor, dropout_probability: float
-    ) -> torch.Tensor:
+    def _frame_valid(self, reference: torch.Tensor, dropout_probability: float) -> torch.Tensor:
         return self._random.uniform((reference.shape[0],), reference) >= dropout_probability
 
     @torch.inference_mode(False)
@@ -468,10 +477,7 @@ class Phase3SensorModel:
             depth_float,
             torch.full_like(depth_float, camera_cfg.max_depth_m),
         )
-        depth_sigma = (
-            camera_cfg.depth_noise_base_m
-            + camera_cfg.depth_noise_per_m * safe_depth
-        )
+        depth_sigma = camera_cfg.depth_noise_base_m + camera_cfg.depth_noise_per_m * safe_depth
         noisy_depth = torch.clamp(
             safe_depth + self._random.normal(safe_depth) * depth_sigma,
             camera_cfg.min_depth_m,
@@ -486,9 +492,7 @@ class Phase3SensorModel:
             noisy_depth,
             torch.full_like(noisy_depth, camera_cfg.max_depth_m),
         )
-        frame_valid = self._frame_valid(
-            rgb_float, camera_cfg.transport.frame_dropout_probability
-        )
+        frame_valid = self._frame_valid(rgb_float, camera_cfg.transport.frame_dropout_probability)
         self._camera_stream.enqueue(
             {
                 "rgb": rgb_float,
@@ -515,52 +519,39 @@ class Phase3SensorModel:
             raise ValueError("LiDAR position must have shape (N, 3).")
         lidar_cfg = self.cfg.lidar
         finite_hit = torch.isfinite(ray_hits_w).all(dim=-1)
-        safe_hits_w = torch.where(
-            finite_hit.unsqueeze(-1), ray_hits_w, sensor_pos_w.unsqueeze(1)
-        )
+        safe_hits_w = torch.where(finite_hit.unsqueeze(-1), ray_hits_w, sensor_pos_w.unsqueeze(1))
         ranges_m = torch.linalg.norm(safe_hits_w - sensor_pos_w.unsqueeze(1), dim=-1)
         ideal_hit_valid = (
-            finite_hit
-            & (ranges_m >= lidar_cfg.min_range_m)
-            & (ranges_m <= lidar_cfg.max_range_m)
+            finite_hit & (ranges_m >= lidar_cfg.min_range_m) & (ranges_m <= lidar_cfg.max_range_m)
         )
         safe_ranges_m = torch.where(
             ideal_hit_valid,
             ranges_m,
             torch.full_like(ranges_m, lidar_cfg.max_range_m),
         )
-        range_sigma = (
-            lidar_cfg.range_noise_base_m
-            + lidar_cfg.range_noise_per_m * safe_ranges_m
-        )
+        range_sigma = lidar_cfg.range_noise_base_m + lidar_cfg.range_noise_per_m * safe_ranges_m
         noisy_ranges_m = safe_ranges_m + self._random.normal(safe_ranges_m) * range_sigma
         noisy_ranges_m = (
             torch.round(noisy_ranges_m / lidar_cfg.range_quantization_m)
             * lidar_cfg.range_quantization_m
         )
         ray_valid = ideal_hit_valid & (
-            self._random.uniform(ranges_m.shape, ranges_m)
-            >= lidar_cfg.ray_dropout_probability
+            self._random.uniform(ranges_m.shape, ranges_m) >= lidar_cfg.ray_dropout_probability
         )
         false_return = (~ideal_hit_valid) & (
-            self._random.uniform(ranges_m.shape, ranges_m)
-            < lidar_cfg.false_return_probability
+            self._random.uniform(ranges_m.shape, ranges_m) < lidar_cfg.false_return_probability
         )
-        false_ranges_m = lidar_cfg.min_range_m + self._random.uniform(
-            ranges_m.shape, ranges_m
-        ) * (lidar_cfg.max_range_m - lidar_cfg.min_range_m)
+        false_ranges_m = lidar_cfg.min_range_m + self._random.uniform(ranges_m.shape, ranges_m) * (
+            lidar_cfg.max_range_m - lidar_cfg.min_range_m
+        )
         noisy_ranges_m = torch.where(false_return, false_ranges_m, noisy_ranges_m)
         ray_valid |= false_return
         noisy_ranges_m = torch.where(
             ray_valid,
-            torch.clamp(
-                noisy_ranges_m, lidar_cfg.min_range_m, lidar_cfg.max_range_m
-            ),
+            torch.clamp(noisy_ranges_m, lidar_cfg.min_range_m, lidar_cfg.max_range_m),
             torch.full_like(noisy_ranges_m, lidar_cfg.max_range_m),
         )
-        frame_valid = self._frame_valid(
-            ranges_m, lidar_cfg.transport.frame_dropout_probability
-        )
+        frame_valid = self._frame_valid(ranges_m, lidar_cfg.transport.frame_dropout_probability)
         self._lidar_stream.enqueue(
             {"ranges_m": noisy_ranges_m, "hit_valid": ray_valid},
             capture_time_s,
@@ -578,13 +569,9 @@ class Phase3SensorModel:
             )
         uninitialized = ~self._imu_bias_initialized
         if torch.any(uninitialized):
-            gyro_initial = (
-                self._random.normal(reference)
-                * self.cfg.imu.gyro_bias_initial_std_rad_s
-            )
+            gyro_initial = self._random.normal(reference) * self.cfg.imu.gyro_bias_initial_std_rad_s
             accel_initial = (
-                self._random.normal(reference)
-                * self.cfg.imu.accel_bias_initial_std_m_s2
+                self._random.normal(reference) * self.cfg.imu.accel_bias_initial_std_m_s2
             )
             self._gyro_bias = torch.where(
                 uninitialized.unsqueeze(-1), gyro_initial, self._gyro_bias
@@ -631,18 +618,12 @@ class Phase3SensorModel:
             * sqrt_dt
         )
         measured_gyro = (
-            gyro
-            + self._gyro_bias
-            + self._random.normal(gyro) * imu_cfg.gyro_noise_std_rad_s
+            gyro + self._gyro_bias + self._random.normal(gyro) * imu_cfg.gyro_noise_std_rad_s
         )
         measured_accel = (
-            accel
-            + self._accel_bias
-            + self._random.normal(accel) * imu_cfg.accel_noise_std_m_s2
+            accel + self._accel_bias + self._random.normal(accel) * imu_cfg.accel_noise_std_m_s2
         )
-        frame_valid = self._frame_valid(
-            gyro, imu_cfg.transport.frame_dropout_probability
-        )
+        frame_valid = self._frame_valid(gyro, imu_cfg.transport.frame_dropout_probability)
         self._imu_stream.enqueue(
             {
                 "angular_velocity_rad_s": measured_gyro,

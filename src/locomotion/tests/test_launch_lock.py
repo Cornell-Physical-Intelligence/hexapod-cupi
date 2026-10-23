@@ -1,9 +1,10 @@
 """The GPU lock files must stay readable by every account whatever the creator's umask."""
+
 import os
-from pathlib import Path
 import stat
 import tempfile
 import unittest
+from pathlib import Path
 
 import locomotion.spark.launch as launch
 
@@ -13,7 +14,7 @@ class LockPermissionTests(unittest.TestCase):
         previous = os.umask(0o027)
         try:
             with tempfile.TemporaryDirectory() as directory:
-                path = Path(directory)/'gpu.lock'
+                path = Path(directory) / "gpu.lock"
                 os.close(launch.open_lock(path))
                 self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o644)
                 # An existing file opens without O_CREAT and keeps its mode.
@@ -24,5 +25,5 @@ class LockPermissionTests(unittest.TestCase):
             os.umask(previous)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
