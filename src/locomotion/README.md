@@ -138,7 +138,10 @@ adds raw trace rescoring and recomputed contact and torque reports, and
 [floor_contact_20261016_002](../../site/assets/floor_contact_20261016_002/compatibility/receipt.json)
 is the one the production loader ran natively, passing the 13 probes again
 ([verification](../../site/assets/floor_contact_20261016_002/verification.json)).
-`scripts/play.py` accepts either through `--checkpoint-compatibility`.
+Both bind the runtime bytes of source `717548d5`. `scripts/play.py
+--checkpoint-compatibility` accepts a receipt only when the running runtime
+files match the ones it binds, so the 23 October 2026 Ruff reformat of the
+runtime (PR 86) needs its own receipt; that certification is pending.
 `tests/native_parity_pack.py` writes a candidate replay pack with the harness
 and its pinned ranges, and `spark/pack.py` records the root review of any pack
 before launch. Stage 2 adds the 96-case suite and visual acceptance.
