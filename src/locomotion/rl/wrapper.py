@@ -40,6 +40,51 @@ def smoothed_action(action, previous, episode_steps):
     return 0.5 * (action + torch.where(fresh, torch.zeros_like(action), previous))
 
 
+def check_options(observation_scaling, command_segments, action_smoothing):
+    if observation_scaling not in ("none", "fixed") or command_segments not in (
+        "continuous",
+        "bootstrap",
+    ):
+        raise ValueError("Unknown observation scaling or command segment option")
+    if action_smoothing not in ("none", "mean2"):
+        raise ValueError("Action smoothing must be none or mean2")
+
+
+def policy_inputs(obs, critic, episode_steps, *, scaling="none", velocity_noise=0.0, gait_clock=0):
+    """Scale the 231-value actor and 234-value critic inputs, add actor joint-velocity noise and append the gait clock."""
+    policy = scale_observation(obs, scaling)
+    critic = scale_observation(critic, scaling, critic=True)
+    if velocity_noise:
+        # The actor alone reads noisy joint velocities; evaluation and the critic read the measured values.
+        scale = FRAME_SCALES[-1] if scaling == "fixed" else 1.0
+        policy = policy.clone()
+        for frame in range(5):
+            block = policy[:, 42 * frame + 24 : 42 * frame + 42]
+            block += torch.randn_like(block) * velocity_noise * scale
+    if gait_clock:
+        # The phase restarts with each episode, so evaluation can rebuild it from the control count.
+        clock = clock_features(episode_steps, gait_clock, obs[:, 210:213]).to(policy)
+        policy, critic = torch.cat((policy, clock), -1), torch.cat((critic, clock), -1)
+    return policy, critic
+
+
+def command_switch(obs, critic, held, done, episode_steps, *, scaling, gait_clock, tensor_dict):
+    """Rows whose command hold ended without an episode end, and their critic input under the held command."""
+    switched = (obs[:, 210:213] != held).any(-1) & ~done
+    if not bool(switched.any()):
+        return switched, {}
+    critic = critic.clone()
+    critic[:, 210:213] = held
+    critic = scale_observation(critic, scaling, critic=True)
+    if gait_clock:
+        clock = clock_features(episode_steps, gait_clock, held).to(critic)
+        critic = torch.cat((critic, clock), -1)
+    return switched, {
+        "command_time_outs": switched,
+        "command_bootstrap_observation": tensor_dict({"critic": critic}, batch_size=[len(obs)]),
+    }
+
+
 class OmniVecEnv:
     """Preserve terminal rewards and reset selected replicas before the next action."""
 
@@ -56,13 +101,7 @@ class OmniVecEnv:
     ):
         if tensor_dict is None:
             tensor_dict = TensorDict
-        if observation_scaling not in ("none", "fixed") or command_segments not in (
-            "continuous",
-            "bootstrap",
-        ):
-            raise ValueError("Unknown observation scaling or command segment option")
-        if action_smoothing not in ("none", "mean2"):
-            raise ValueError("Action smoothing must be none or mean2")
+        check_options(observation_scaling, command_segments, action_smoothing)
         self.action_smoothing, self.velocity_noise = action_smoothing, velocity_noise
         self.previous_action = torch.zeros(task.num_envs, 18, device=task.device)
         self.task, self.tensor_dict = task, tensor_dict
@@ -83,21 +122,14 @@ class OmniVecEnv:
         return self.task.episode_steps
 
     def observations(self, output):
-        policy = scale_observation(output["obs"], self.observation_scaling)
-        critic = scale_observation(output["critic"], self.observation_scaling, critic=True)
-        if self.velocity_noise:
-            # The actor alone reads noisy joint velocities; evaluation and the critic read the measured values.
-            scale = FRAME_SCALES[-1] if self.observation_scaling == "fixed" else 1.0
-            policy = policy.clone()
-            for frame in range(5):
-                block = policy[:, 42 * frame + 24 : 42 * frame + 42]
-                block += torch.randn_like(block) * self.velocity_noise * scale
-        if self.gait_clock:
-            # The phase restarts with each episode, so evaluation can rebuild it from the control count.
-            clock = clock_features(
-                self.task.episode_steps, self.gait_clock, output["obs"][:, 210:213]
-            ).to(policy)
-            policy, critic = torch.cat((policy, clock), -1), torch.cat((critic, clock), -1)
+        policy, critic = policy_inputs(
+            output["obs"],
+            output["critic"],
+            self.task.episode_steps,
+            scaling=self.observation_scaling,
+            velocity_noise=self.velocity_noise,
+            gait_clock=self.gait_clock,
+        )
         return self.tensor_dict({"policy": policy, "critic": critic}, batch_size=[self.num_envs])
 
     def get_observations(self):
@@ -118,21 +150,18 @@ class OmniVecEnv:
         # A physical termination overrides a coincident episode timeout.
         extras = {"time_outs": output["truncated"] & ~output["terminated"]}
         if held is not None:
-            switched = (output["obs"][:, 210:213] != held).any(-1) & ~done
-            if bool(switched.any()):
-                # Capture the post-action state under the held command before any selected reset.
-                critic = output["critic"].clone()
-                critic[:, 210:213] = held
-                critic = scale_observation(critic, self.observation_scaling, critic=True)
-                if self.gait_clock:
-                    clock = clock_features(self.task.episode_steps, self.gait_clock, held).to(
-                        critic
-                    )
-                    critic = torch.cat((critic, clock), -1)
-                extras["command_time_outs"] = switched
-                extras["command_bootstrap_observation"] = self.tensor_dict(
-                    {"critic": critic}, batch_size=[self.num_envs]
-                )
+            # Capture the post-action state under the held command before any selected reset.
+            switched, bootstrap = command_switch(
+                output["obs"],
+                output["critic"],
+                held,
+                done,
+                self.task.episode_steps,
+                scaling=self.observation_scaling,
+                gait_clock=self.gait_clock,
+                tensor_dict=self.tensor_dict,
+            )
+            extras.update(bootstrap)
             extras["time_outs"] = extras["time_outs"] | switched
         selected = done.nonzero(as_tuple=False).flatten()
         self.current = self.task.reset(selected) if len(selected) else output
