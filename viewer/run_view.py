@@ -18,6 +18,7 @@ import argparse
 import base64
 import gzip
 import hashlib
+import io
 import json
 from pathlib import Path
 
@@ -183,6 +184,14 @@ def case(batch, joints):
     }
 
 
+def compress(data):
+    """Gzip with a fixed header: no file time and GzipFile's own operating-system byte, the same on any host."""
+    buffer = io.BytesIO()
+    with gzip.GzipFile(fileobj=buffer, mode="wb", compresslevel=9, mtime=0) as stream:
+        stream.write(data)
+    return buffer.getvalue()
+
+
 def build(folder, model=None):
     """The run file as a dict; cases without a control trace are listed but not drawn."""
     evaluation = evaluation_folder(folder)
@@ -218,9 +227,7 @@ def build(folder, model=None):
         "frame_seconds": STEP * CONTROL_SECONDS,
         "legs": list(LEGS),
         "contacts_base": len(blob),
-        "data": base64.b64encode(
-            gzip.compress(blob + b"".join(c.tobytes() for c in contacts), 9, mtime=0)
-        ).decode(),
+        "data": base64.b64encode(compress(blob + b"".join(c.tobytes() for c in contacts))).decode(),
         "cases": cases,
         "cases_without_trace": skipped,
     }

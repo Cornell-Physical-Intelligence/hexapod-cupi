@@ -1,10 +1,12 @@
 """Check the viewer's run files: leg points, the ghost, the run's source and the shared test fixture.
 
 The fixture viewer/test/fixtures/sample_run.json is the run file of the synthetic attempt below; the viewer's
-node test reads it. After a deliberate format change, rewrite it with
+node test reads it. The comparison decompresses the data block, since zlib versions may deflate differently. After a deliberate format change, rewrite it with
 ``uv run python -c "from tests.test_run_view import write_fixture; write_fixture()"``.
 """
 
+import base64
+import gzip
 import json
 import tempfile
 import unittest
@@ -71,6 +73,11 @@ def synthetic_attempt(root):
     return root / "attempt_fixture"
 
 
+def decoded(value):
+    """The run file with its data block as the uncompressed bytes in hexadecimal."""
+    return {**value, "data": gzip.decompress(base64.b64decode(value["data"])).hex()}
+
+
 def write_fixture():
     with tempfile.TemporaryDirectory() as directory:
         value = run_view.build(synthetic_attempt(Path(directory)))
@@ -87,7 +94,9 @@ class RunViewTests(unittest.TestCase):
         self.directory.cleanup()
 
     def test_the_run_file_matches_the_viewer_fixture(self):
-        self.assertEqual(json.loads(json.dumps(self.value)), json.loads(FIXTURE.read_text()))
+        self.assertEqual(
+            decoded(json.loads(json.dumps(self.value))), decoded(json.loads(FIXTURE.read_text()))
+        )
 
     def test_a_body_that_follows_its_command_stays_on_the_ghost_and_a_new_command_restarts_it(self):
         forward, stop = self.value["cases"]
