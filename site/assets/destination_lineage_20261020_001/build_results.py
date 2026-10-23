@@ -1,9 +1,9 @@
 """Build results.json in this folder from copies of the native evaluation folders.
 
 Pass/fail and check values copy each probe's report.json; the walk measures come from its control_trace.npz:
-the planar distance to the destination after the last control (the destination starts at the body and
-follows the command exactly, as training builds it), the body-heading change and the path angle from 2 s
-to the end, and the mean planar speed over the commanded 0.05 m/s.
+the planar distance to the destination after the last control (the destination starts at the reset pose
+and moves exactly along the command once per control, as training builds it), the body-heading change and
+the path angle from 2 s to the end, and the mean planar speed over the commanded 0.05 m/s.
 
 Usage: python3 build_results.py <folder holding the evaluation attempts' run/standing/evaluation copies>
 """
@@ -41,8 +41,10 @@ def yaw(p):
 def walk(trace):
     pose = trace["root_pose_xyzw"][:, 0].astype(float)
     cmd = trace["command"][:, 0].astype(float)
-    g = np.array([pose[0, 0], pose[0, 1], yaw(pose[0])])
-    for i in range(len(pose) - 1):
+    # Training starts the destination at the reset pose (the origin, heading zero) and moves it once per control;
+    # pose[i] is the body after control i, so the destination for pose[-1] has advanced len(pose) controls.
+    g = np.zeros(3)
+    for i in range(len(pose)):
         bx, by = cmd[i, 1], -cmd[i, 0]
         mid = g[2] + cmd[i, 2] * 0.01
         g[:2] += 0.02 * np.array([np.cos(mid) * bx - np.sin(mid) * by, np.sin(mid) * bx + np.cos(mid) * by])
